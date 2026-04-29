@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/stock.dart';
+import '../models/dividend.dart';
 import '../models/exceptions.dart';
 
 class StockService {
@@ -100,29 +101,57 @@ class StockService {
     }
   }
 
-  // Método específico para buscar o histórico de fundamentos de um ticker.
-  Future<List<StockFundamentals>> fetchStocksFundamentals(String ticker) async {
+  // Método específico para buscar fundamentos COMPLETOS de um ticker.
+  Future<StockFundamentals> fetchStockFundamentals(String ticker) async {
     try {
-      final data = await _getRequest('/fundamentals/$ticker/history?limit=2');
-      final indicadores = data['history'] as List<dynamic>?;
-      if (indicadores == null || indicadores.isEmpty) {
+      final data = await _getRequest('/fundamentals/$ticker');
+      
+      if (data == null) {
         throw ValidationException(
-          message: 'Nenhum dado de fundamentos disponível para $ticker',
+          message: 'Dados de fundamentos não disponíveis para $ticker',
         );
       }
 
-      return indicadores
-          .map((item) => StockFundamentals.fromJson(item as Map<String, dynamic>))
-          .toList();
+      return StockFundamentals.fromJson(data);
     } on AppException {
       rethrow;
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao processar dados: $e',
+        message: 'Erro ao processar fundamentos: $e',
         originalError: e,
       );
     }
   }
 
+  // Método para buscar dividendos históricos
+  Future<DividendHistory> fetchDividends(String ticker, {int limit = 12}) async {
+    try {
+      final data = await _getRequest('/dividends/$ticker?limit=$limit');
+      final dividendsList = data['dividends'] as List<dynamic>?;
+      
+      if (dividendsList == null || dividendsList.isEmpty) {
+        return DividendHistory(
+          dividends: [],
+          totalAnnualDividend: 0,
+          averageDividend: 0,
+        );
+      }
 
+      final dividends = dividendsList
+          .map((item) => Dividend.fromJson(item as Map<String, dynamic>))
+          .toList();
+
+      return DividendHistory.fromDividends(dividends);
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      // Se não conseguir buscar dividendos, retorna vazio ao invés de falhar
+      debugPrint('⚠️ Aviso ao buscar dividendos: $e');
+      return DividendHistory(
+        dividends: [],
+        totalAnnualDividend: 0,
+        averageDividend: 0,
+      );
+    }
+  }
 }
