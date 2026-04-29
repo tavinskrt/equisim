@@ -13,6 +13,7 @@ dependencies:
   flutter_dotenv: ^5.1.0    # Permite carregar variáveis de ambiente a partir de um arquivo .env
   http: ^0.13.6             # Permite fazer requisições HTTP e acessar APIs externas
   intl: ^0.19.0             # Formatação de datas e números internacionalizados
+  provider: ^6.0.0          # Gerenciamento de estado e injeção de dependências
 
 dev_dependencies:
   flutter_test:
