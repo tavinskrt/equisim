@@ -21,7 +21,7 @@ class StockPrice {
       open: (json['open'] as num?)?.toDouble() ?? 0.0,
       high: (json['high'] as num?)?.toDouble() ?? 0.0,
       low: (json['low'] as num?)?.toDouble() ?? 0.0,
-      close: (json['close'] as num).toDouble(),
+      close: (json['close'] as num?)?.toDouble() ?? 0.0,
       volume: (json['volume'] as num?)?.toInt() ?? 0,
     );
   }
