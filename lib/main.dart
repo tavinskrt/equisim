@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'controllers/stock_controller.dart';
-import 'views/stock_page.dart';
+import 'controllers/backtest_controller.dart';
+import 'views/backtest_input_page.dart';
 
 
 Future<void> main() async {
@@ -27,13 +28,15 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => StockController()),
+        ChangeNotifierProvider(create: (_) => BacktestController()),
       ],
       child: MaterialApp(
         title: 'Simulainvest',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         ),
-        home: const StockPage(),
+        home: const BacktestInputPage(),
       ),
     );
   }
