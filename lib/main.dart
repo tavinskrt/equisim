@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,6 +7,8 @@ import 'controllers/stock_controller.dart';
 import 'controllers/backtest_controller.dart';
 import 'controllers/login_controller.dart';
 import 'views/login_page.dart';
+import 'views/forgot_password_page.dart';
+import 'views/sign_up_page.dart';
 
 
 Future<void> main() async {
@@ -47,6 +49,10 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         ),
         home: const LoginPage(),
+        routes: {
+          '/forgot-password': (context) => const ForgotPasswordPage(),
+          '/sign-up': (context) => const SignUpPage(),
+        },
       ),
     );
   }

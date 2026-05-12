@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class LoginController extends ChangeNotifier {
-  String email = '';
+  String username = '';
   String password = '';
   bool showPassword = false;
 
-  void setEmail(String value) {
-    email = value;
+  void setUsername(String value) {
+    username = value;
     notifyListeners();
   }
 
@@ -21,7 +21,7 @@ class LoginController extends ChangeNotifier {
   }
 
   Future<void> login() async {
-    debugPrint('Tentativa de login com o e-mail: $email');
+    debugPrint('Tentativa de login com o usuário: $username');
   }
 
 }

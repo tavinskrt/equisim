@@ -1,27 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
-import '../controllers/login_controller.dart';
-import 'backtest_input_page.dart';
+import '../controllers/forgot_password_controller.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class ForgotPasswordPage extends StatelessWidget {
+  const ForgotPasswordPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => LoginController(),
-      child: const _LoginScreenContent(),
+      create: (_) => ForgotPasswordController(),
+      child: const _ForgotPasswordScreenContent(),
     );
   }
 }
 
-class _LoginScreenContent extends StatelessWidget {
-  const _LoginScreenContent();
+class _ForgotPasswordScreenContent extends StatelessWidget {
+  const _ForgotPasswordScreenContent();
+
+  void _submit(BuildContext context, ForgotPasswordController controller) async {
+    FocusScope.of(context).unfocus();
+    final success = await controller.sendRecoveryLink();
+    if (success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Link de recuperação enviado para o e-mail cadastrado do usuário ${controller.username}'),
+          backgroundColor: const Color(0xFF00B37E),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<LoginController>(context);
+    final controller = Provider.of<ForgotPasswordController>(context);
 
     return Scaffold(
       body: Container(
@@ -65,19 +78,7 @@ class _LoginScreenContent extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned(
-              top: MediaQuery.of(context).size.height * 0.38,
-              left: -50,
-              child: Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.03),
-                ),
-              ),
-            ),
-            
+
             /// Conteúdo principal
             SafeArea(
               child: Center(
@@ -86,6 +87,28 @@ class _LoginScreenContent extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      /// Botão de Voltar
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.arrow_back_ios, size: 14, color: Colors.white54),
+                          label: const Text(
+                            'Voltar ao login',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.centerLeft,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
                       ClipRRect(
                         borderRadius: BorderRadius.circular(24),
                         child: BackdropFilter(
@@ -108,56 +131,24 @@ class _LoginScreenContent extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                /// Logo
-                                Column(
-                                  children: [
-                                    Container(
-                                      width: 64,
-                                      height: 64,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(18),
-                                        gradient: const LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [Color(0xFF00B37E), Color(0xFF00CC8F)],
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: const Color(0xFF00B37E).withValues(alpha: 0.4),
-                                            blurRadius: 24,
-                                            offset: const Offset(0, 8),
-                                          ),
-                                        ],
-                                      ),
-                                      child: const Icon(Icons.show_chart, color: Colors.white, size: 32),
+                                /// Ícone
+                                Center(
+                                  child: Container(
+                                    width: 64,
+                                    height: 64,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(18),
+                                      color: const Color(0xFF00B37E).withValues(alpha: 0.15),
+                                      border: Border.all(color: const Color(0xFF00B37E).withValues(alpha: 0.3)),
                                     ),
-                                    const SizedBox(height: 14),
-                                    const Text(
-                                      'Equisim',
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        letterSpacing: -0.3,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Comparador de Carteiras',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.white.withValues(alpha: 0.45),
-                                        fontWeight: FontWeight.w500,
-                                        letterSpacing: 0.6,
-                                      ),
-                                    ),
-                                  ],
+                                    child: const Icon(Icons.lock_reset, color: Color(0xFF00B37E), size: 32),
+                                  ),
                                 ),
-                                const SizedBox(height: 32),
+                                const SizedBox(height: 24),
 
-                                /// Bem-vindo de volta
+                                /// Título
                                 const Text(
-                                  'Bem-vindo de volta!',
+                                  'Recuperar senha',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -165,13 +156,13 @@ class _LoginScreenContent extends StatelessWidget {
                                     height: 1.3,
                                   ),
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 8),
                                 Text(
-                                  'Acesse sua conta',
+                                  'Digite seu usuário cadastrado e enviaremos um link de recuperação para o e-mail associado.',
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: Colors.white.withValues(alpha: 0.5),
-                                    height: 1.5,
+                                    height: 1.6,
                                   ),
                                 ),
                                 const SizedBox(height: 24),
@@ -212,73 +203,9 @@ class _LoginScreenContent extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 14),
-
-                                /// Campo da senha
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Senha',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white.withValues(alpha: 0.6),
-                                        letterSpacing: 0.3,
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        Navigator.pushNamed(context, '/forgot-password');
-                                      },
-                                      child: const Text(
-                                        'Esqueci a senha',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: Color(0xFF00B37E),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 7),
-                                TextField(
-                                  onChanged: controller.setPassword,
-                                  obscureText: !controller.showPassword,
-                                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                                  decoration: InputDecoration(
-                                    hintText: '••••••••',
-                                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-                                    prefixIcon: Icon(Icons.lock_outline, color: Colors.white.withValues(alpha: 0.3), size: 20),
-                                    suffixIcon: IconButton(
-                                      icon: Icon(
-                                        controller.showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                        color: Colors.white.withValues(alpha: 0.35),
-                                        size: 20,
-                                      ),
-                                      onPressed: controller.toggleShowPassword,
-                                    ),
-                                    filled: true,
-                                    fillColor: Colors.white.withValues(alpha: 0.07),
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: const Color(0xFF00B37E).withValues(alpha: 0.6)),
-                                    ),
-                                  ),
-                                ),
                                 const SizedBox(height: 20),
 
-                                /// Botão de login
+                                /// Botão de envio
                                 Container(
                                   width: double.infinity,
                                   height: 50,
@@ -298,13 +225,7 @@ class _LoginScreenContent extends StatelessWidget {
                                     ],
                                   ),
                                   child: ElevatedButton(
-                                    onPressed: () {
-                                      controller.login();
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => const BacktestInputPage()),
-                                      );
-                                    },
+                                    onPressed: () => _submit(context, controller),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.transparent,
                                       shadowColor: Colors.transparent,
@@ -313,7 +234,7 @@ class _LoginScreenContent extends StatelessWidget {
                                       ),
                                     ),
                                     child: const Text(
-                                      'Entrar',
+                                      'Enviar link de recuperação',
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
@@ -323,34 +244,37 @@ class _LoginScreenContent extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 16),
 
-                                /// Criar conta
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'Não tem uma conta? ',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.white.withValues(alpha: 0.4),
+                                /// Info
+                                const SizedBox(height: 20),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF00B37E).withValues(alpha: 0.08),
+                                    border: Border.all(color: const Color(0xFF00B37E).withValues(alpha: 0.18)),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Padding(
+                                        padding: EdgeInsets.only(top: 2),
+                                        child: Icon(Icons.info_outline, color: Color(0xFF00B37E), size: 16),
                                       ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: () {
-                                        Navigator.pushNamed(context, '/sign-up');
-                                      },
-                                      child: const Text(
-                                        'Criar conta',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF00B37E),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          'O link de recuperação expira em 30 minutos e só pode ser usado uma vez.',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.white.withValues(alpha: 0.45),
+                                            height: 1.6,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                )
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -385,4 +309,3 @@ class _LoginScreenContent extends StatelessWidget {
     );
   }
 }
-
