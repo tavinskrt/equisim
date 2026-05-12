@@ -15,18 +15,12 @@ class FinancialCalculations {
   }
 
   /// Calcula o retorno total em percentual
-  /// 
-  /// Fórmula: Retorno = ((Valor Final - Inicial) / Inicial) * 100
-  /// 
-  /// Retorna: Retorno em percentual
   static double calculateTotalReturn(double initialValue, double finalValue) {
     if (initialValue <= 0) return 0;
     return ((finalValue - initialValue) / initialValue) * 100;
   }
 
-  /// Calcula o retorno ajustado por inflação (simplificado)
-  /// 
-  /// Fórmula: Retorno Real = ((1 + Retorno Nominal) / (1 + Inflação)) - 1
+  /// Calcula o retorno ajustado por inflação 
   static double calculateRealReturn(double nominalReturn, double inflationRate) {
     return ((1 + nominalReturn) / (1 + inflationRate) - 1) * 100;
   }
@@ -37,9 +31,7 @@ class FinancialCalculations {
     return daysDifference / 365.25; // 365.25 leva em conta anos bissextos
   }
 
-  /// Calcula a média geométrica (adequada para retornos)
-  /// 
-  /// Retorna: Média geométrica dos valores
+  /// Calcula a média geométrica 
   static double geometricMean(List<double> values) {
     if (values.isEmpty || values.any((v) => v <= 0)) return 0;
     
