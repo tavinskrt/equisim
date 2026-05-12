@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'controllers/stock_controller.dart';
 import 'controllers/backtest_controller.dart';
 import 'views/backtest_input_page.dart';
@@ -15,6 +17,12 @@ Future<void> main() async {
   } catch (e) {
     debugPrint('⚠️ Aviso ao carregar .env: $e');
   }
+
+  // Inicializa o Firebase com as opções geradas
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const MyApp());
 }
 
