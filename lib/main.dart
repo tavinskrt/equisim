@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'controllers/stock_controller.dart';
 import 'controllers/backtest_controller.dart';
-import 'views/backtest_input_page.dart';
+import 'controllers/login_controller.dart';
+import 'views/login_page.dart';
 
 
 Future<void> main() async {
@@ -37,14 +38,15 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => StockController()),
         ChangeNotifierProvider(create: (_) => BacktestController()),
+        ChangeNotifierProvider(create: (_) => LoginController()),
       ],
       child: MaterialApp(
-        title: 'Simulainvest',
+        title: 'Equisim',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         ),
-        home: const BacktestInputPage(),
+        home: const LoginPage(),
       ),
     );
   }
