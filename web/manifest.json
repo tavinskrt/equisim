@@ -1,6 +1,6 @@
-{
-    "name": "simulainvest",
-    "short_name": "simulainvest",
+﻿{
+    "name": "Equisim",
+    "short_name": "Equisim",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
@@ -33,3 +33,4 @@
         }
     ]
 }
+
