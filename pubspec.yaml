@@ -1,4 +1,4 @@
-name: simulainvest
+﻿name: equisim
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
@@ -11,9 +11,11 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   flutter_dotenv: ^5.1.0    # Permite carregar variáveis de ambiente a partir de um arquivo .env
-  http: ^0.13.6             # Permite fazer requisições HTTP e acessar APIs externas
+  http: ^1.2.0              # Permite fazer requisições HTTP e acessar APIs externas
   intl: ^0.19.0             # Formatação de datas e números internacionalizados
   provider: ^6.0.0          # Gerenciamento de estado e injeção de dependências
+  firebase_core: ^4.8.0
+  firebase_auth: ^6.5.0
 
 dev_dependencies:
   flutter_test:
@@ -24,3 +26,5 @@ flutter:
   uses-material-design: true
   assets:
     - .env
+
+

@@ -197,6 +197,31 @@ class BrazilianDateUtils {
     return "${date.day} de ${months[date.month - 1]} de ${date.year}";
   }
 
+  /// Retorna a data que representa 10 anos antes de [date].
+  ///
+  /// Preserva o melhor dia possível no mês quando a data original
+  /// não existe após subtrair 10 anos (por exemplo, 29 de fevereiro).
+  static DateTime tenYearsAgo(DateTime date) {
+    final year = date.year - 10;
+    final month = date.month;
+    final day = date.day;
+
+    final candidate = DateTime(year, month, day);
+    if (candidate.month == month) {
+      return candidate;
+    }
+
+    // Ajusta para o último dia válido do mês, se necessário.
+    final lastDayOfMonth = DateTime(year, month + 1, 0).day;
+    return DateTime(year, month, lastDayOfMonth);
+  }
+
+  /// Clamps a data para que não seja anterior a 10 anos atrás.
+  static DateTime clampToLastTenYears(DateTime date) {
+    final minDate = tenYearsAgo(DateTime.now());
+    return date.isBefore(minDate) ? minDate : date;
+  }
+
   /// Retorna o trimestre de uma data
   /// 
   /// Retorna: "Q1", "Q2", "Q3" ou "Q4"

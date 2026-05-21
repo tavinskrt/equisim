@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "372895962989",
+    "project_id": "equisim-d7128",
+    "storage_bucket": "equisim-d7128.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:372895962989:android:d3f1245fd50c954b4a2c64",
+        "android_client_info": {
+          "package_name": "com.example.equisim"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQbooj0A34as680Cl6ls9KQWltCCDVIxo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

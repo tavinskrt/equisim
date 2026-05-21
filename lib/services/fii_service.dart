@@ -2,12 +2,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import '../models/stock.dart';
+import '../models/fii.dart';
 import '../models/dividend.dart';
 import '../models/exceptions.dart';
 
-class StockService {
-  // Método padrão para fazer requisições GET à API.
+class FiiService {
   Future<dynamic> _getRequest(String endpoint) async {
     final apiKey = dotenv.env['BOLSAI_API_KEY'];
     final baseUrl = dotenv.env['BOLSAI_BASE_URL'] ?? 'https://api.usebolsai.com/api/v1';
@@ -17,10 +16,10 @@ class StockService {
         message: 'API KEY não configurada. Verifique o arquivo .env',
       );
     }
-    
+
     final url = Uri.parse('$baseUrl$endpoint');
-    debugPrint('🔗 URL requisição: $url');
-    
+    debugPrint('🔗 URL requisição FII: $url');
+
     try {
       final response = await http.get(
         url,
@@ -29,10 +28,10 @@ class StockService {
           'Content-Type': 'application/json',
         },
       ).timeout(const Duration(seconds: 30));
-      
+
       debugPrint('📊 Status code: ${response.statusCode}');
       debugPrint('📝 Response body: ${response.body}');
-      
+
       switch (response.statusCode) {
         case 200:
           return jsonDecode(response.body);
@@ -61,18 +60,18 @@ class StockService {
           );
       }
     } on http.ClientException catch (e) {
-      debugPrint('❌ Erro na requisição: $e');
+      debugPrint('❌ Erro na requisição FII: $e');
       throw NetworkException(
         message: 'Erro de conexão: ${e.message}',
         originalError: e,
       );
     } on TimeoutException catch (e) {
-      debugPrint('❌ Timeout: $e');
+      debugPrint('❌ Timeout FII: $e');
       throw TimeoutException(
         originalError: e,
       );
     } catch (e) {
-      debugPrint('❌ Erro genérico: $e');
+      debugPrint('❌ Erro genérico FII: $e');
       rethrow;
     }
   }
@@ -86,9 +85,9 @@ class StockService {
     return '$path?$query';
   }
 
-  int _calculateHistoryLimit(DateTime startDate, DateTime endDate) {
-    final days = endDate.difference(startDate).inDays + 1;
-    return days.clamp(1, 5000);
+  int _calculateMonthLimit(DateTime startDate, DateTime endDate) {
+    final months = (endDate.year - startDate.year) * 12 + endDate.month - startDate.month + 1;
+    return months.clamp(1, 120);
   }
 
   int _calculateYearsLimit(DateTime startDate, DateTime endDate) {
@@ -97,71 +96,59 @@ class StockService {
     return years.clamp(1, 10);
   }
 
-  // Método específico para buscar o histórico de preços de um ticker.
-  Future<List<StockPrice>> fetchStocksPrice(
+  Future<List<FiiPrice>> fetchFiiPriceHistory(
     String ticker, {
     DateTime? startDate,
     DateTime? endDate,
+    int limit = 120,
   }) async {
-    try {
-      final queryParams = <String, String>{'limit': '5000'};
+    final queryParams = <String, String>{'limit': limit.toString()};
 
-      if (startDate != null) {
-        queryParams['from'] = _formatDate(startDate);
-      }
-      if (endDate != null) {
-        queryParams['to'] = _formatDate(endDate);
-      }
-      if (startDate != null && endDate != null) {
-        queryParams['limit'] = _calculateHistoryLimit(startDate, endDate).toString();
-      }
+    if (startDate != null) {
+      queryParams['from'] = _formatDate(startDate);
+    }
+    if (endDate != null) {
+      queryParams['to'] = _formatDate(endDate);
+    }
+    if (startDate != null && endDate != null) {
+      queryParams['limit'] = _calculateMonthLimit(startDate, endDate).toString();
+    }
 
-      final endpoint = _buildEndpoint('/stocks/$ticker/history', queryParams);
-      final data = await _getRequest(endpoint);
-      final prices = data['prices'] as List<dynamic>?;
-      if (prices == null || prices.isEmpty) {
-        throw ValidationException(
-          message: 'Nenhum dado disponível para o ticker $ticker',
-        );
-      }
+    final endpoint = _buildEndpoint('/fiis/$ticker/history', queryParams);
+    final data = await _getRequest(endpoint);
+    final prices = _extractPriceEntries(data);
 
-      return prices
-          .map((item) => StockPrice.fromJson(item as Map<String, dynamic>))
-          .toList();
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(
-        message: 'Erro ao processar dados: $e',
-        originalError: e,
+    if (prices.isEmpty) {
+      throw ValidationException(
+        message: 'Nenhum dado de preço disponível para o FII $ticker',
       );
     }
+
+    return prices
+        .map((item) => FiiPrice.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
-  // Método específico para buscar fundamentos COMPLETOS de um ticker.
-  Future<StockFundamentals> fetchStockFundamentals(String ticker) async {
+  Future<FiiFundamentals> fetchFiiFundamentals(String ticker) async {
     try {
-      final data = await _getRequest('/fundamentals/$ticker/history?limit=40');
-      
+      final data = await _getRequest('/fiis/$ticker');
       if (data == null) {
         throw ValidationException(
           message: 'Dados de fundamentos não disponíveis para $ticker',
         );
       }
-
-      return StockFundamentals.fromJson(data);
+      return FiiFundamentals.fromJson(data);
     } on AppException {
       rethrow;
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao processar fundamentos: $e',
+        message: 'Erro ao processar fundamentos do FII: $e',
         originalError: e,
       );
     }
   }
 
-  // Método para buscar dividendos históricos
-  Future<DividendHistory> fetchDividends(
+  Future<DividendHistory> fetchFiiDividends(
     String ticker, {
     DateTime? startDate,
     DateTime? endDate,
@@ -171,14 +158,9 @@ class StockService {
       final effectiveLimit =
           startDate != null && endDate != null ? _calculateYearsLimit(startDate, endDate) : limit;
       final data = await _getRequest('/dividends/$ticker?years=$effectiveLimit');
-      final dividendsList = data['dividends'] as List<dynamic>?;
-      
-      if (dividendsList == null || dividendsList.isEmpty) {
-        return DividendHistory(
-          dividends: [],
-          totalAnnualDividend: 0,
-          averageDividend: 0,
-        );
+      final dividendsList = _extractDividendEntries(data);
+      if (dividendsList.isEmpty) {
+        return DividendHistory(dividends: [], totalAnnualDividend: 0, averageDividend: 0);
       }
 
       final dividends = dividendsList
@@ -189,13 +171,43 @@ class StockService {
     } on AppException {
       rethrow;
     } catch (e) {
-      // Se não conseguir buscar dividendos, retorna vazio ao invés de falhar
-      debugPrint('⚠️ Aviso ao buscar dividendos: $e');
-      return DividendHistory(
-        dividends: [],
-        totalAnnualDividend: 0,
-        averageDividend: 0,
-      );
+      debugPrint('⚠️ Aviso ao buscar dividendos FII: $e');
+      return DividendHistory(dividends: [], totalAnnualDividend: 0, averageDividend: 0);
     }
+  }
+
+  List<dynamic> _extractPriceEntries(dynamic data) {
+    if (data is List) return data;
+    if (data is Map<String, dynamic>) {
+      if (data['prices'] is List) return data['prices'] as List<dynamic>;
+      if (data['data'] is List) return data['data'] as List<dynamic>;
+      if (data['results'] is List) return data['results'] as List<dynamic>;
+      for (final value in data.values) {
+        if (value is List) return value;
+        if (value is Map<String, dynamic>) {
+          final nested = _extractPriceEntries(value);
+          if (nested.isNotEmpty) return nested;
+        }
+      }
+    }
+    return [];
+  }
+
+  List<dynamic> _extractDividendEntries(dynamic data) {
+    if (data is List) return data;
+    if (data is Map<String, dynamic>) {
+      if (data['dividends'] is List) return data['dividends'] as List<dynamic>;
+      if (data['data'] is List) return data['data'] as List<dynamic>;
+      if (data['items'] is List) return data['items'] as List<dynamic>;
+      if (data['results'] is List) return data['results'] as List<dynamic>;
+      for (final value in data.values) {
+        if (value is List) return value;
+        if (value is Map<String, dynamic>) {
+          final nested = _extractDividendEntries(value);
+          if (nested.isNotEmpty) return nested;
+        }
+      }
+    }
+    return [];
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/backtest.dart';
 import '../controllers/backtest_controller.dart';
+import '../utils/date_utils.dart';
 
 /// Widget para entrada de parâmetros do backtest
 class BacktestInputPage extends StatefulWidget {
@@ -18,7 +19,7 @@ class _BacktestInputPageState extends State<BacktestInputPage> {
   late TextEditingController _safetyMarginController;
   late TextEditingController _desiredRateController;
 
-  DateTime _startDate = DateTime(DateTime.now().year - 5);
+  DateTime _startDate = BrazilianDateUtils.tenYearsAgo(DateTime.now());
   DateTime _endDate = DateTime.now();
   ValuationMethod _selectedValuationMethod = ValuationMethod.graham;
 
@@ -40,6 +41,26 @@ class _BacktestInputPageState extends State<BacktestInputPage> {
     _safetyMarginController.dispose();
     _desiredRateController.dispose();
     super.dispose();
+  }
+
+  DateTime get _maxAllowedStartDate => BrazilianDateUtils.tenYearsAgo(DateTime.now());
+
+  void _applyDynamicDateBounds() {
+    final now = DateTime.now();
+    final maxStartDate = _maxAllowedStartDate;
+
+    if (_endDate.isAfter(now)) {
+      _endDate = now;
+    }
+    if (_endDate.isBefore(maxStartDate)) {
+      _endDate = maxStartDate;
+    }
+    if (_startDate.isBefore(maxStartDate)) {
+      _startDate = maxStartDate;
+    }
+    if (_startDate.isAfter(_endDate)) {
+      _startDate = _endDate;
+    }
   }
 
   /// Valida os inputs do usuário
@@ -64,6 +85,14 @@ class _BacktestInputPageState extends State<BacktestInputPage> {
       errors.add('Data inicial deve ser antes da data final');
     }
 
+    if (_startDate.isBefore(_maxAllowedStartDate)) {
+      errors.add('Data inicial não pode ser anterior a 10 anos atrás');
+    }
+
+    if (_endDate.isBefore(_maxAllowedStartDate)) {
+      errors.add('Data final deve estar dentro dos últimos 10 anos');
+    }
+
     if (errors.isNotEmpty) {
       _showErrorDialog(errors.join('\n'));
       return false;
@@ -74,6 +103,7 @@ class _BacktestInputPageState extends State<BacktestInputPage> {
 
   /// Inicia o backtest
   Future<void> _runBacktest() async {
+    _applyDynamicDateBounds();
     if (!_validateInputs()) return;
 
     final config = BacktestConfig(
@@ -121,10 +151,13 @@ class _BacktestInputPageState extends State<BacktestInputPage> {
 
   /// Abre seletor de data
   Future<void> _selectDate(bool isStartDate) async {
+    _applyDynamicDateBounds();
+    final maxStartDate = _maxAllowedStartDate;
+
     final picked = await showDatePicker(
       context: context,
       initialDate: isStartDate ? _startDate : _endDate,
-      firstDate: DateTime(2000),
+      firstDate: maxStartDate,
       lastDate: DateTime.now(),
     );
 
