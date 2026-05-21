@@ -20,15 +20,22 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
 
   void _submit(BuildContext context, ForgotPasswordController controller) async {
     FocusScope.of(context).unfocus();
-    final success = await controller.sendRecoveryLink();
-    if (success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Link de recuperação enviado para o e-mail cadastrado do usuário ${controller.username}'),
-          backgroundColor: const Color(0xFF00B37E),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    final error = await controller.sendRecoveryLink();
+    if (context.mounted) {
+      if (error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: const Color(0xFFEF4444)),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Link de recuperação enviado para o e-mail: ${controller.email}'),
+            backgroundColor: const Color(0xFF00B37E),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -158,7 +165,7 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Digite seu usuário cadastrado e enviaremos um link de recuperação para o e-mail associado.',
+                                  'Digite seu e-mail cadastrado e enviaremos um link de recuperação para ele.',
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: Colors.white.withValues(alpha: 0.5),
@@ -167,9 +174,8 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 24),
 
-                                /// Campo do usuário
                                 Text(
-                                  'Usuário',
+                                  'E-mail',
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
@@ -179,13 +185,13 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 7),
                                 TextField(
-                                  onChanged: controller.setUsername,
+                                  onChanged: controller.setEmail,
                                   style: const TextStyle(color: Colors.white, fontSize: 14),
-                                  keyboardType: TextInputType.text,
+                                  keyboardType: TextInputType.emailAddress,
                                   decoration: InputDecoration(
-                                    hintText: 'seu_usuario',
+                                    hintText: 'seu_email@exemplo.com',
                                     hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-                                    prefixIcon: Icon(Icons.person_outline, color: Colors.white.withValues(alpha: 0.3), size: 20),
+                                    prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withValues(alpha: 0.3), size: 20),
                                     filled: true,
                                     fillColor: Colors.white.withValues(alpha: 0.07),
                                     contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
@@ -225,23 +231,26 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                                     ],
                                   ),
                                   child: ElevatedButton(
-                                    onPressed: () => _submit(context, controller),
+                                    onPressed: controller.isLoading ? null : () => _submit(context, controller),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.transparent,
+                                      disabledBackgroundColor: Colors.transparent,
                                       shadowColor: Colors.transparent,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    child: const Text(
-                                      'Enviar link de recuperação',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        letterSpacing: 0.2,
-                                      ),
-                                    ),
+                                    child: controller.isLoading
+                                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                      : const Text(
+                                          'Enviar link de recuperação',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                            letterSpacing: 0.2,
+                                          ),
+                                        ),
                                   ),
                                 ),
 

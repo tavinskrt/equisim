@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignUpController extends ChangeNotifier {
   int step = 1;
@@ -9,6 +10,7 @@ class SignUpController extends ChangeNotifier {
   String confirm = '';
   bool showPassword = false;
   bool agreed = false;
+  bool isLoading = false;
 
   void setStep(int value) {
     step = value;
@@ -26,7 +28,7 @@ class SignUpController extends ChangeNotifier {
   }
 
   void setEmail(String value) {
-    email = value;
+    email = value.trim();
     notifyListeners();
   }
 
@@ -62,12 +64,39 @@ class SignUpController extends ChangeNotifier {
   bool get canProceedToStep2 => name.trim().isNotEmpty && username.trim().isNotEmpty && email.trim().isNotEmpty;
   bool get canSubmit => agreed && password.isNotEmpty && confirm == password;
 
-  Future<bool> createAccount() async {
-    if (!canSubmit) return false;
+  Future<String?> createAccount() async {
+    if (!canSubmit) return 'Preencha todos os campos corretamente.';
     
-    // Simula uma requisição de rede
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint('Conta criada com sucesso para: $username');
-    return true;
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      
+      // Salva o username no perfil do Firebase
+      await userCredential.user?.updateDisplayName(username);
+      
+      isLoading = false;
+      notifyListeners();
+      return null;
+    } on FirebaseAuthException catch (e) {
+      isLoading = false;
+      notifyListeners();
+      if (e.code == 'weak-password') {
+        return 'A senha fornecida é muito fraca.';
+      } else if (e.code == 'email-already-in-use') {
+        return 'Já existe uma conta com esse e-mail.';
+      } else if (e.code == 'invalid-email') {
+        return 'O e-mail fornecido é inválido.';
+      }
+      return 'Erro: ${e.message}';
+    } catch (e) {
+      isLoading = false;
+      notifyListeners();
+      return 'Erro inesperado: $e';
+    }
   }
 }

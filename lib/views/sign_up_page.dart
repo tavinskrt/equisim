@@ -20,16 +20,22 @@ class _SignUpScreenContent extends StatelessWidget {
 
   void _submit(BuildContext context, SignUpController controller) async {
     FocusScope.of(context).unfocus();
-    final success = await controller.createAccount();
-    if (success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Conta criada com sucesso!'),
-          backgroundColor: Color(0xFF00B37E),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      Navigator.pop(context); // Voltar ao login após sucesso
+    final error = await controller.createAccount();
+    if (context.mounted) {
+      if (error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: const Color(0xFFEF4444)),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Conta criada com sucesso!'),
+            backgroundColor: Color(0xFF00B37E),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pop(context); // Voltar ao login após sucesso
+      }
     }
   }
 
@@ -448,6 +454,7 @@ class _SignUpScreenContent extends StatelessWidget {
         ),
         const SizedBox(height: 7),
         TextField(
+          controller: TextEditingController(text: controller.password)..selection = TextSelection.collapsed(offset: controller.password.length),
           onChanged: controller.setPassword,
           obscureText: !controller.showPassword,
           style: const TextStyle(color: Colors.white, fontSize: 14),
@@ -524,6 +531,7 @@ class _SignUpScreenContent extends StatelessWidget {
         ),
         const SizedBox(height: 7),
         TextField(
+          controller: TextEditingController(text: controller.confirm)..selection = TextSelection.collapsed(offset: controller.confirm.length),
           onChanged: controller.setConfirm,
           obscureText: true,
           style: const TextStyle(color: Colors.white, fontSize: 14),
@@ -617,7 +625,7 @@ class _SignUpScreenContent extends StatelessWidget {
             ] : null,
           ),
           child: ElevatedButton(
-            onPressed: controller.canSubmit ? () => _submit(context, controller) : null,
+            onPressed: (controller.canSubmit && !controller.isLoading) ? () => _submit(context, controller) : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               disabledBackgroundColor: Colors.transparent,
@@ -626,15 +634,17 @@ class _SignUpScreenContent extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(
-              'Criar minha conta',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: controller.canSubmit ? Colors.white : Colors.white.withValues(alpha: 0.3),
-                letterSpacing: 0.2,
-              ),
-            ),
+            child: controller.isLoading
+              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              : Text(
+                  'Criar minha conta',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: controller.canSubmit ? Colors.white : Colors.white.withValues(alpha: 0.3),
+                    letterSpacing: 0.2,
+                  ),
+                ),
           ),
         ),
       ],

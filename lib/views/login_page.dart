@@ -178,7 +178,7 @@ class _LoginScreenContent extends StatelessWidget {
 
                                 /// Campo do usuário
                                 Text(
-                                  'Usuário',
+                                  'E-mail',
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
@@ -188,13 +188,13 @@ class _LoginScreenContent extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 7),
                                 TextField(
-                                  onChanged: controller.setUsername,
+                                  onChanged: controller.setEmail,
                                   style: const TextStyle(color: Colors.white, fontSize: 14),
-                                  keyboardType: TextInputType.text,
+                                  keyboardType: TextInputType.emailAddress,
                                   decoration: InputDecoration(
-                                    hintText: 'seu_usuario',
+                                    hintText: 'seu_email@exemplo.com',
                                     hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-                                    prefixIcon: Icon(Icons.person_outline, color: Colors.white.withValues(alpha: 0.3), size: 20),
+                                    prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withValues(alpha: 0.3), size: 20),
                                     filled: true,
                                     fillColor: Colors.white.withValues(alpha: 0.07),
                                     contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
@@ -298,29 +298,38 @@ class _LoginScreenContent extends StatelessWidget {
                                     ],
                                   ),
                                   child: ElevatedButton(
-                                    onPressed: () {
-                                      controller.login();
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => const HomePage()),
-                                      );
+                                    onPressed: controller.isLoading ? null : () async {
+                                      final error = await controller.login();
+                                      if (error != null && context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text(error), backgroundColor: const Color(0xFFEF4444)),
+                                        );
+                                      } else if (context.mounted) {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => const HomePage()),
+                                        );
+                                      }
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.transparent,
+                                      disabledBackgroundColor: Colors.transparent,
                                       shadowColor: Colors.transparent,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    child: const Text(
-                                      'Entrar',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        letterSpacing: 0.2,
-                                      ),
-                                    ),
+                                    child: controller.isLoading
+                                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                      : const Text(
+                                          'Entrar',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                            letterSpacing: 0.2,
+                                          ),
+                                        ),
                                   ),
                                 ),
                                 const SizedBox(height: 16),
