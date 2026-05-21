@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
 import '../controllers/login_controller.dart';
-import 'backtest_input_page.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -302,7 +302,7 @@ class _LoginScreenContent extends StatelessWidget {
                                       controller.login();
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (context) => const BacktestInputPage()),
+                                        MaterialPageRoute(builder: (context) => const HomePage()),
                                       );
                                     },
                                     style: ElevatedButton.styleFrom(
