@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'theme_controller.dart';
 
 class LoginController extends ChangeNotifier {
   String email = '';
@@ -22,7 +24,7 @@ class LoginController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<String?> login() async {
+  Future<String?> login(BuildContext context) async {
     if (email.isEmpty || password.isEmpty) {
       return 'Preencha todos os campos.';
     }
@@ -31,10 +33,18 @@ class LoginController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+      
+      // Sync theme se o widget ainda estiver montado
+      if (context.mounted && userCredential.user != null) {
+        // Obter ThemeController (sem dar throw)
+        final themeController = Provider.of<ThemeController>(context, listen: false);
+        await themeController.syncWithFirebase(userCredential.user!.uid);
+      }
+
       isLoading = false;
       notifyListeners();
       return null; // Sucesso

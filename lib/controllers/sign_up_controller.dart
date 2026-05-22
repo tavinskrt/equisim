@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'theme_controller.dart';
 
 class SignUpController extends ChangeNotifier {
   int step = 1;
@@ -64,7 +66,7 @@ class SignUpController extends ChangeNotifier {
   bool get canProceedToStep2 => name.trim().isNotEmpty && username.trim().isNotEmpty && email.trim().isNotEmpty;
   bool get canSubmit => agreed && password.isNotEmpty && confirm == password;
 
-  Future<String?> createAccount() async {
+  Future<String?> createAccount(BuildContext context) async {
     if (!canSubmit) return 'Preencha todos os campos corretamente.';
     
     isLoading = true;
@@ -79,6 +81,12 @@ class SignUpController extends ChangeNotifier {
       // Salva o username no perfil do Firebase
       await userCredential.user?.updateDisplayName(username);
       
+      if (context.mounted && userCredential.user != null) {
+        final themeController = Provider.of<ThemeController>(context, listen: false);
+        // Salva a preferência atual no Firestore logo no cadastro
+        await themeController.syncWithFirebase(userCredential.user!.uid);
+      }
+
       isLoading = false;
       notifyListeners();
       return null;

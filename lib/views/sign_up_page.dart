@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
+import '../utils/app_colors.dart';
+import '../controllers/theme_controller.dart';
 import '../controllers/sign_up_controller.dart';
 
 class SignUpPage extends StatelessWidget {
@@ -15,12 +17,49 @@ class SignUpPage extends StatelessWidget {
   }
 }
 
-class _SignUpScreenContent extends StatelessWidget {
+class _SignUpScreenContent extends StatefulWidget {
   const _SignUpScreenContent();
+
+  @override
+  State<_SignUpScreenContent> createState() => _SignUpScreenContentState();
+}
+
+class _SignUpScreenContentState extends State<_SignUpScreenContent> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _usernameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+  late final TextEditingController _confirmController;
+  late SignUpController _signUpController;
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _signUpController = Provider.of<SignUpController>(context, listen: false);
+      _nameController = TextEditingController(text: _signUpController.name);
+      _usernameController = TextEditingController(text: _signUpController.username);
+      _emailController = TextEditingController(text: _signUpController.email);
+      _passwordController = TextEditingController(text: _signUpController.password);
+      _confirmController = TextEditingController(text: _signUpController.confirm);
+      _initialized = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
 
   void _submit(BuildContext context, SignUpController controller) async {
     FocusScope.of(context).unfocus();
-    final error = await controller.createAccount();
+    final error = await controller.createAccount(context);
     if (context.mounted) {
       if (error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -42,21 +81,55 @@ class _SignUpScreenContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<SignUpController>(context);
+    final themeController = Provider.of<ThemeController>(context);
+    final isLight = themeController.isLightMode;
+
+    // Sincronizar de forma reativa os valores digitados no controller do Provider
+    final currentName = controller.name;
+    if (_nameController.text != currentName) {
+      _nameController.value = TextEditingValue(
+        text: currentName,
+        selection: TextSelection.collapsed(offset: currentName.length),
+      );
+    }
+
+    final currentUsername = controller.username;
+    if (_usernameController.text != currentUsername) {
+      _usernameController.value = TextEditingValue(
+        text: currentUsername,
+        selection: TextSelection.collapsed(offset: currentUsername.length),
+      );
+    }
+
+    final currentEmail = controller.email;
+    if (_emailController.text != currentEmail) {
+      _emailController.value = TextEditingValue(
+        text: currentEmail,
+        selection: TextSelection.collapsed(offset: currentEmail.length),
+      );
+    }
+
+    final currentPassword = controller.password;
+    if (_passwordController.text != currentPassword) {
+      _passwordController.value = TextEditingValue(
+        text: currentPassword,
+        selection: TextSelection.collapsed(offset: currentPassword.length),
+      );
+    }
+
+    final currentConfirm = controller.confirm;
+    if (_confirmController.text != currentConfirm) {
+      _confirmController.value = TextEditingValue(
+        text: currentConfirm,
+        selection: TextSelection.collapsed(offset: currentConfirm.length),
+      );
+    }
 
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0B1E4B),
-              Color(0xFF0F2C6A),
-              Color(0xFF0D3D2F),
-            ],
-            stops: [0.0, 0.55, 1.0],
-          ),
+        decoration: BoxDecoration(
+          gradient: AppColors.backgroundGradient(isLight),
         ),
         child: Stack(
           children: [
@@ -69,7 +142,7 @@ class _SignUpScreenContent extends StatelessWidget {
                 height: 320,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF00B37E).withValues(alpha: 0.08),
+                  color: AppColors.primary.withValues(alpha: 0.08),
                 ),
               ),
             ),
@@ -81,7 +154,7 @@ class _SignUpScreenContent extends StatelessWidget {
                 height: 260,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF00B37E).withValues(alpha: 0.06),
+                  color: AppColors.primary.withValues(alpha: 0.06),
                 ),
               ),
             ),
@@ -105,11 +178,11 @@ class _SignUpScreenContent extends StatelessWidget {
                               Navigator.pop(context);
                             }
                           },
-                          icon: const Icon(Icons.arrow_back_ios, size: 14, color: Colors.white54),
+                          icon: Icon(Icons.arrow_back_ios, size: 14, color: AppColors.textSecondary(isLight)),
                           label: Text(
                             controller.step > 1 ? 'Voltar' : 'Já tenho conta',
-                            style: const TextStyle(
-                              color: Colors.white54,
+                            style: TextStyle(
+                              color: AppColors.textSecondary(isLight),
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -130,12 +203,12 @@ class _SignUpScreenContent extends StatelessWidget {
                             width: double.infinity,
                             padding: const EdgeInsets.only(top: 32, left: 28, right: 28, bottom: 28),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.04),
+                              color: AppColors.surface(isLight),
                               borderRadius: BorderRadius.circular(24),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                              border: Border.all(color: AppColors.surfaceBorder(isLight)),
                               boxShadow: const [
                                 BoxShadow(
-                                  color: Colors.black45,
+                                  color: Colors.black12,
                                   blurRadius: 64,
                                   offset: Offset(0, 24),
                                 )
@@ -152,14 +225,10 @@ class _SignUpScreenContent extends StatelessWidget {
                                       height: 38,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(10),
-                                        gradient: const LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [Color(0xFF00B37E), Color(0xFF00CC8F)],
-                                        ),
+                                        gradient: AppColors.brandGradient,
                                         boxShadow: [
                                           BoxShadow(
-                                            color: const Color(0xFF00B37E).withValues(alpha: 0.35),
+                                            color: AppColors.primary.withValues(alpha: 0.35),
                                             blurRadius: 12,
                                             offset: const Offset(0, 4),
                                           ),
@@ -171,19 +240,19 @@ class _SignUpScreenContent extends StatelessWidget {
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text(
+                                        Text(
                                           'Equisim',
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                            color: AppColors.textPrimary(isLight),
                                           ),
                                         ),
                                         Text(
                                           'Criar nova conta',
                                           style: TextStyle(
                                             fontSize: 11,
-                                            color: Colors.white.withValues(alpha: 0.4),
+                                            color: AppColors.textSecondary(isLight),
                                           ),
                                         ),
                                       ],
@@ -195,24 +264,24 @@ class _SignUpScreenContent extends StatelessWidget {
                                 /// Indicador de Etapas
                                 Row(
                                   children: [
-                                    _buildStepIndicator(1, controller.step),
+                                    _buildStepIndicator(1, controller.step, isLight),
                                     Expanded(
                                       child: Container(
                                         height: 1.5,
                                         margin: const EdgeInsets.symmetric(horizontal: 8),
                                         color: controller.step > 1 
-                                            ? const Color(0xFF00B37E) 
-                                            : Colors.white.withValues(alpha: 0.1),
+                                            ? AppColors.primary 
+                                            : AppColors.surfaceBorder(isLight),
                                       ),
                                     ),
-                                    _buildStepIndicator(2, controller.step),
+                                    _buildStepIndicator(2, controller.step, isLight),
                                     const SizedBox(width: 8),
                                     Text(
                                       controller.step == 1 ? 'Dados pessoais' : 'Senha e segurança',
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w500,
-                                        color: Colors.white.withValues(alpha: 0.4),
+                                        color: AppColors.textSecondary(isLight),
                                       ),
                                     ),
                                   ],
@@ -221,8 +290,8 @@ class _SignUpScreenContent extends StatelessWidget {
 
                                 /// Conteúdo da Etapa
                                 controller.step == 1 
-                                    ? _buildStep1(context, controller) 
-                                    : _buildStep2(context, controller),
+                                    ? _buildStep1(context, controller, isLight) 
+                                    : _buildStep2(context, controller, isLight),
                               ],
                             ),
                           ),
@@ -234,14 +303,14 @@ class _SignUpScreenContent extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.shield_outlined, size: 12, color: Colors.white.withValues(alpha: 0.25)),
+                          Icon(Icons.shield_outlined, size: 12, color: AppColors.textMuted(isLight)),
                           const SizedBox(width: 6),
                           Text(
                             'Conexão segura · Dados criptografados',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
-                              color: Colors.white.withValues(alpha: 0.25),
+                              color: AppColors.textMuted(isLight),
                             ),
                           ),
                         ],
@@ -257,7 +326,7 @@ class _SignUpScreenContent extends StatelessWidget {
     );
   }
 
-  Widget _buildStepIndicator(int stepIndex, int currentStep) {
+  Widget _buildStepIndicator(int stepIndex, int currentStep, bool isLight) {
     bool isCompletedOrCurrent = currentStep >= stepIndex;
     bool isCompleted = currentStep > stepIndex;
 
@@ -267,14 +336,14 @@ class _SignUpScreenContent extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: isCompletedOrCurrent
-            ? const LinearGradient(colors: [Color(0xFF00B37E), Color(0xFF00CC8F)])
+            ? AppColors.brandGradient
             : null,
-        color: !isCompletedOrCurrent ? Colors.white.withValues(alpha: 0.08) : null,
+        color: !isCompletedOrCurrent ? AppColors.inputBackground(isLight) : null,
         border: Border.all(
-          color: isCompletedOrCurrent ? Colors.transparent : Colors.white.withValues(alpha: 0.2),
+          color: isCompletedOrCurrent ? Colors.transparent : AppColors.surfaceBorder(isLight),
         ),
         boxShadow: isCompletedOrCurrent
-            ? [BoxShadow(color: const Color(0xFF00B37E).withValues(alpha: 0.35), blurRadius: 10, offset: const Offset(0, 3))]
+            ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.35), blurRadius: 10, offset: const Offset(0, 3))]
             : null,
       ),
       child: Center(
@@ -285,23 +354,23 @@ class _SignUpScreenContent extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: isCompletedOrCurrent ? Colors.white : Colors.white.withValues(alpha: 0.4),
+                  color: isCompletedOrCurrent ? Colors.white : AppColors.textSecondary(isLight),
                 ),
               ),
       ),
     );
   }
 
-  Widget _buildStep1(BuildContext context, SignUpController controller) {
+  Widget _buildStep1(BuildContext context, SignUpController controller, bool isLight) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Seus dados',
           style: TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.textPrimary(isLight),
             height: 1.2,
           ),
         ),
@@ -310,7 +379,7 @@ class _SignUpScreenContent extends StatelessWidget {
           'Preencha as informações abaixo para criar sua conta.',
           style: TextStyle(
             fontSize: 13,
-            color: Colors.white.withValues(alpha: 0.5),
+            color: AppColors.textSecondary(isLight),
             height: 1.5,
           ),
         ),
@@ -322,16 +391,18 @@ class _SignUpScreenContent extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withValues(alpha: 0.6),
+            color: AppColors.textSecondary(isLight),
             letterSpacing: 0.3,
           ),
         ),
         const SizedBox(height: 7),
         _buildTextField(
+          key: const ValueKey('signup_name_field'),
+          controller: _nameController,
           onChanged: controller.setName,
           hintText: 'Seu nome',
           icon: Icons.badge_outlined,
-          initialValue: controller.name,
+          isLight: isLight,
         ),
         const SizedBox(height: 14),
 
@@ -341,16 +412,18 @@ class _SignUpScreenContent extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withValues(alpha: 0.6),
+            color: AppColors.textSecondary(isLight),
             letterSpacing: 0.3,
           ),
         ),
         const SizedBox(height: 7),
         _buildTextField(
+          key: const ValueKey('signup_username_field'),
+          controller: _usernameController,
           onChanged: controller.setUsername,
           hintText: 'seu_usuario',
           icon: Icons.person_outline,
-          initialValue: controller.username,
+          isLight: isLight,
         ),
         const SizedBox(height: 14),
 
@@ -360,17 +433,19 @@ class _SignUpScreenContent extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withValues(alpha: 0.6),
+            color: AppColors.textSecondary(isLight),
             letterSpacing: 0.3,
           ),
         ),
         const SizedBox(height: 7),
         _buildTextField(
+          key: const ValueKey('signup_email_field'),
+          controller: _emailController,
           onChanged: controller.setEmail,
           hintText: 'email@exemplo.com',
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
-          initialValue: controller.email,
+          isLight: isLight,
         ),
         const SizedBox(height: 22),
 
@@ -379,19 +454,16 @@ class _SignUpScreenContent extends StatelessWidget {
           width: double.infinity,
           height: 50,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF00B37E), Color(0xFF00CC8F)],
-            ),
+            gradient: controller.canProceedToStep2 ? AppColors.brandGradient : null,
+            color: !controller.canProceedToStep2 ? AppColors.inputBackground(isLight) : null,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
+            boxShadow: controller.canProceedToStep2 ? [
               BoxShadow(
-                color: const Color(0xFF00B37E).withValues(alpha: 0.4),
+                color: AppColors.primary.withValues(alpha: 0.4),
                 blurRadius: 20,
                 offset: const Offset(0, 6),
               ),
-            ],
+            ] : null,
           ),
           child: ElevatedButton(
             onPressed: controller.canProceedToStep2 ? () => controller.setStep(2) : null,
@@ -403,12 +475,12 @@ class _SignUpScreenContent extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
+            child: Text(
               'Continuar',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: controller.canProceedToStep2 ? Colors.white : AppColors.textMuted(isLight),
                 letterSpacing: 0.2,
               ),
             ),
@@ -418,16 +490,16 @@ class _SignUpScreenContent extends StatelessWidget {
     );
   }
 
-  Widget _buildStep2(BuildContext context, SignUpController controller) {
+  Widget _buildStep2(BuildContext context, SignUpController controller, bool isLight) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Crie sua senha',
           style: TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.textPrimary(isLight),
             height: 1.2,
           ),
         ),
@@ -436,7 +508,7 @@ class _SignUpScreenContent extends StatelessWidget {
           'Use uma senha forte para proteger sua conta.',
           style: TextStyle(
             fontSize: 13,
-            color: Colors.white.withValues(alpha: 0.5),
+            color: AppColors.textSecondary(isLight),
             height: 1.5,
           ),
         ),
@@ -448,42 +520,43 @@ class _SignUpScreenContent extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withValues(alpha: 0.6),
+            color: AppColors.textSecondary(isLight),
             letterSpacing: 0.3,
           ),
         ),
         const SizedBox(height: 7),
         TextField(
-          controller: TextEditingController(text: controller.password)..selection = TextSelection.collapsed(offset: controller.password.length),
+          key: const ValueKey('signup_password_field'),
+          controller: _passwordController,
           onChanged: controller.setPassword,
           obscureText: !controller.showPassword,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
+          style: TextStyle(color: AppColors.textPrimary(isLight), fontSize: 14),
           decoration: InputDecoration(
             hintText: 'Mínimo 8 caracteres',
-            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-            prefixIcon: Icon(Icons.lock_outline, color: Colors.white.withValues(alpha: 0.3), size: 20),
+            hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+            prefixIcon: Icon(Icons.lock_outline, color: AppColors.textMuted(isLight), size: 20),
             suffixIcon: IconButton(
               icon: Icon(
                 controller.showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                color: Colors.white.withValues(alpha: 0.35),
+                color: AppColors.textMuted(isLight),
                 size: 20,
               ),
               onPressed: controller.toggleShowPassword,
             ),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.07),
+            fillColor: AppColors.inputBackground(isLight),
             contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+              borderSide: BorderSide(color: AppColors.surfaceBorder(isLight)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+              borderSide: BorderSide(color: AppColors.surfaceBorder(isLight)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: const Color(0xFF00B37E).withValues(alpha: 0.6)),
+              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.6)),
             ),
           ),
         ),
@@ -501,7 +574,7 @@ class _SignUpScreenContent extends StatelessWidget {
                   margin: const EdgeInsets.symmetric(horizontal: 2),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(2),
-                    color: isActive ? strength['color'] : Colors.white.withValues(alpha: 0.1),
+                    color: isActive ? strength['color'] : AppColors.surfaceBorder(isLight),
                   ),
                 ),
               );
@@ -525,49 +598,50 @@ class _SignUpScreenContent extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withValues(alpha: 0.6),
+            color: AppColors.textSecondary(isLight),
             letterSpacing: 0.3,
           ),
         ),
         const SizedBox(height: 7),
         TextField(
-          controller: TextEditingController(text: controller.confirm)..selection = TextSelection.collapsed(offset: controller.confirm.length),
+          key: const ValueKey('signup_confirm_field'),
+          controller: _confirmController,
           onChanged: controller.setConfirm,
           obscureText: true,
-          style: const TextStyle(color: Colors.white, fontSize: 14),
+          style: TextStyle(color: AppColors.textPrimary(isLight), fontSize: 14),
           decoration: InputDecoration(
             hintText: 'Repita sua senha',
-            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-            prefixIcon: Icon(Icons.lock_outline, color: Colors.white.withValues(alpha: 0.3), size: 20),
+            hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+            prefixIcon: Icon(Icons.lock_outline, color: AppColors.textMuted(isLight), size: 20),
             suffixIcon: controller.confirm.isNotEmpty
                 ? Icon(
                     controller.confirm == controller.password ? Icons.check : Icons.close,
-                    color: controller.confirm == controller.password ? const Color(0xFF00B37E) : const Color(0xFFEF4444),
+                    color: controller.confirm == controller.password ? AppColors.primary : const Color(0xFFEF4444),
                     size: 20,
                   )
                 : null,
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.07),
+            fillColor: AppColors.inputBackground(isLight),
             contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
                 color: controller.confirm.isNotEmpty 
-                  ? (controller.confirm == controller.password ? const Color(0xFF00B37E).withValues(alpha: 0.5) : const Color(0xFFEF4444).withValues(alpha: 0.5)) 
-                  : Colors.white.withValues(alpha: 0.12)
+                  ? (controller.confirm == controller.password ? AppColors.primary.withValues(alpha: 0.5) : const Color(0xFFEF4444).withValues(alpha: 0.5)) 
+                  : AppColors.surfaceBorder(isLight)
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
                 color: controller.confirm.isNotEmpty 
-                  ? (controller.confirm == controller.password ? const Color(0xFF00B37E).withValues(alpha: 0.5) : const Color(0xFFEF4444).withValues(alpha: 0.5)) 
-                  : Colors.white.withValues(alpha: 0.12)
+                  ? (controller.confirm == controller.password ? AppColors.primary.withValues(alpha: 0.5) : const Color(0xFFEF4444).withValues(alpha: 0.5)) 
+                  : AppColors.surfaceBorder(isLight)
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: const Color(0xFF00B37E).withValues(alpha: 0.6)),
+              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.6)),
             ),
           ),
         ),
@@ -585,9 +659,9 @@ class _SignUpScreenContent extends StatelessWidget {
                 margin: const EdgeInsets.only(top: 1, right: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(5),
-                  border: controller.agreed ? null : Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1.5),
-                  gradient: controller.agreed ? const LinearGradient(colors: [Color(0xFF00B37E), Color(0xFF00CC8F)]) : null,
-                  boxShadow: controller.agreed ? [BoxShadow(color: const Color(0xFF00B37E).withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 2))] : null,
+                  border: controller.agreed ? null : Border.all(color: AppColors.surfaceBorder(isLight), width: 1.5),
+                  gradient: controller.agreed ? AppColors.brandGradient : null,
+                  boxShadow: controller.agreed ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 2))] : null,
                 ),
                 child: controller.agreed ? const Icon(Icons.check, color: Colors.white, size: 14) : null,
               ),
@@ -596,11 +670,11 @@ class _SignUpScreenContent extends StatelessWidget {
               child: Text.rich(
                 TextSpan(
                   text: 'Concordo com os ',
-                  style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.45), height: 1.6),
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary(isLight), height: 1.6),
                   children: const [
-                    TextSpan(text: 'Termos de Uso', style: TextStyle(color: Color(0xFF00B37E), fontWeight: FontWeight.w600)),
+                    TextSpan(text: 'Termos de Uso', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
                     TextSpan(text: ' e a '),
-                    TextSpan(text: 'Política de Privacidade', style: TextStyle(color: Color(0xFF00B37E), fontWeight: FontWeight.w600)),
+                    TextSpan(text: 'Política de Privacidade', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
                     TextSpan(text: ' do Equisim.'),
                   ],
                 ),
@@ -615,13 +689,11 @@ class _SignUpScreenContent extends StatelessWidget {
           width: double.infinity,
           height: 50,
           decoration: BoxDecoration(
-            gradient: controller.canSubmit 
-                ? const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF00B37E), Color(0xFF00CC8F)])
-                : null,
-            color: !controller.canSubmit ? Colors.white.withValues(alpha: 0.08) : null,
+            gradient: controller.canSubmit ? AppColors.brandGradient : null,
+            color: !controller.canSubmit ? AppColors.inputBackground(isLight) : null,
             borderRadius: BorderRadius.circular(12),
             boxShadow: controller.canSubmit ? [
-              BoxShadow(color: const Color(0xFF00B37E).withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 6)),
+              BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 6)),
             ] : null,
           ),
           child: ElevatedButton(
@@ -641,7 +713,7 @@ class _SignUpScreenContent extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: controller.canSubmit ? Colors.white : Colors.white.withValues(alpha: 0.3),
+                    color: controller.canSubmit ? Colors.white : AppColors.textMuted(isLight),
                     letterSpacing: 0.2,
                   ),
                 ),
@@ -652,42 +724,38 @@ class _SignUpScreenContent extends StatelessWidget {
   }
 
   Widget _buildTextField({
+    Key? key,
+    required TextEditingController controller,
     required Function(String) onChanged,
     required String hintText,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
-    String? initialValue,
+    required bool isLight,
   }) {
-    final textController = TextEditingController(text: initialValue);
-    
-    // Configura o cursor para o final quando inicializado
-    if (initialValue != null) {
-      textController.selection = TextSelection.fromPosition(TextPosition(offset: initialValue.length));
-    }
-    
     return TextField(
-      controller: textController,
+      key: key,
+      controller: controller,
       onChanged: onChanged,
-      style: const TextStyle(color: Colors.white, fontSize: 14),
+      style: TextStyle(color: AppColors.textPrimary(isLight), fontSize: 14),
       keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-        prefixIcon: Icon(icon, color: Colors.white.withValues(alpha: 0.3), size: 20),
+        hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+        prefixIcon: Icon(icon, color: AppColors.textMuted(isLight), size: 20),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.07),
+        fillColor: AppColors.inputBackground(isLight),
         contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+          borderSide: BorderSide(color: AppColors.surfaceBorder(isLight)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+          borderSide: BorderSide(color: AppColors.surfaceBorder(isLight)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: const Color(0xFF00B37E).withValues(alpha: 0.6)),
+          borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.6)),
         ),
       ),
     );

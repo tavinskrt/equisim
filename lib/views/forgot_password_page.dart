@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
+import '../utils/app_colors.dart';
+import '../controllers/theme_controller.dart';
 import '../controllers/forgot_password_controller.dart';
 
 class ForgotPasswordPage extends StatelessWidget {
@@ -15,8 +17,33 @@ class ForgotPasswordPage extends StatelessWidget {
   }
 }
 
-class _ForgotPasswordScreenContent extends StatelessWidget {
+class _ForgotPasswordScreenContent extends StatefulWidget {
   const _ForgotPasswordScreenContent();
+
+  @override
+  State<_ForgotPasswordScreenContent> createState() => _ForgotPasswordScreenContentState();
+}
+
+class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenContent> {
+  late final TextEditingController _emailController;
+  late ForgotPasswordController _forgotPasswordController;
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _forgotPasswordController = Provider.of<ForgotPasswordController>(context, listen: false);
+      _emailController = TextEditingController(text: _forgotPasswordController.email);
+      _initialized = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
 
   void _submit(BuildContext context, ForgotPasswordController controller) async {
     FocusScope.of(context).unfocus();
@@ -42,21 +69,23 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<ForgotPasswordController>(context);
+    final themeController = Provider.of<ThemeController>(context);
+    final isLight = themeController.isLightMode;
+
+    // Sincronizar de forma reativa os valores digitados no controller do Provider
+    final currentEmail = controller.email;
+    if (_emailController.text != currentEmail) {
+      _emailController.value = TextEditingValue(
+        text: currentEmail,
+        selection: TextSelection.collapsed(offset: currentEmail.length),
+      );
+    }
 
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0B1E4B),
-              Color(0xFF0F2C6A),
-              Color(0xFF0D3D2F),
-            ],
-            stops: [0.0, 0.55, 1.0],
-          ),
+        decoration: BoxDecoration(
+          gradient: AppColors.backgroundGradient(isLight),
         ),
         child: Stack(
           children: [
@@ -69,7 +98,7 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                 height: 320,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF00B37E).withValues(alpha: 0.08),
+                  color: AppColors.primary.withValues(alpha: 0.08),
                 ),
               ),
             ),
@@ -81,7 +110,7 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                 height: 260,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF00B37E).withValues(alpha: 0.06),
+                  color: AppColors.primary.withValues(alpha: 0.06),
                 ),
               ),
             ),
@@ -99,11 +128,11 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         child: TextButton.icon(
                           onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.arrow_back_ios, size: 14, color: Colors.white54),
-                          label: const Text(
+                          icon: Icon(Icons.arrow_back_ios, size: 14, color: AppColors.textSecondary(isLight)),
+                          label: Text(
                             'Voltar ao login',
                             style: TextStyle(
-                              color: Colors.white54,
+                              color: AppColors.textSecondary(isLight),
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -124,12 +153,12 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                             width: double.infinity,
                             padding: const EdgeInsets.only(top: 36, left: 28, right: 28, bottom: 32),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.04),
+                              color: AppColors.surface(isLight),
                               borderRadius: BorderRadius.circular(24),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                              border: Border.all(color: AppColors.surfaceBorder(isLight)),
                               boxShadow: const [
                                 BoxShadow(
-                                  color: Colors.black45,
+                                  color: Colors.black12,
                                   blurRadius: 64,
                                   offset: Offset(0, 24),
                                 )
@@ -145,21 +174,21 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                                     height: 64,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(18),
-                                      color: const Color(0xFF00B37E).withValues(alpha: 0.15),
-                                      border: Border.all(color: const Color(0xFF00B37E).withValues(alpha: 0.3)),
+                                      color: AppColors.primary.withValues(alpha: 0.15),
+                                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                                     ),
-                                    child: const Icon(Icons.lock_reset, color: Color(0xFF00B37E), size: 32),
+                                    child: const Icon(Icons.lock_reset, color: AppColors.primary, size: 32),
                                   ),
                                 ),
                                 const SizedBox(height: 24),
 
                                 /// Título
-                                const Text(
+                                Text(
                                   'Recuperar senha',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                    color: AppColors.textPrimary(isLight),
                                     height: 1.3,
                                   ),
                                 ),
@@ -168,7 +197,7 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                                   'Digite seu e-mail cadastrado e enviaremos um link de recuperação para ele.',
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.white.withValues(alpha: 0.5),
+                                    color: AppColors.textSecondary(isLight),
                                     height: 1.6,
                                   ),
                                 ),
@@ -179,33 +208,35 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.white.withValues(alpha: 0.6),
+                                    color: AppColors.textSecondary(isLight),
                                     letterSpacing: 0.3,
                                   ),
                                 ),
                                 const SizedBox(height: 7),
                                 TextField(
+                                  key: const ValueKey('forgot_password_email_field'),
+                                  controller: _emailController,
                                   onChanged: controller.setEmail,
-                                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                                  style: TextStyle(color: AppColors.textPrimary(isLight), fontSize: 14),
                                   keyboardType: TextInputType.emailAddress,
                                   decoration: InputDecoration(
                                     hintText: 'seu_email@exemplo.com',
-                                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-                                    prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withValues(alpha: 0.3), size: 20),
+                                    hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+                                    prefixIcon: Icon(Icons.email_outlined, color: AppColors.textMuted(isLight), size: 20),
                                     filled: true,
-                                    fillColor: Colors.white.withValues(alpha: 0.07),
+                                    fillColor: AppColors.inputBackground(isLight),
                                     contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+                                      borderSide: BorderSide(color: AppColors.surfaceBorder(isLight)),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+                                      borderSide: BorderSide(color: AppColors.surfaceBorder(isLight)),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: const Color(0xFF00B37E).withValues(alpha: 0.6)),
+                                      borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.6)),
                                     ),
                                   ),
                                 ),
@@ -216,15 +247,11 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                                   width: double.infinity,
                                   height: 50,
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [Color(0xFF00B37E), Color(0xFF00CC8F)],
-                                    ),
+                                    gradient: AppColors.brandGradient,
                                     borderRadius: BorderRadius.circular(12),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF00B37E).withValues(alpha: 0.4),
+                                        color: AppColors.primary.withValues(alpha: 0.4),
                                         blurRadius: 20,
                                         offset: const Offset(0, 6),
                                       ),
@@ -259,8 +286,8 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF00B37E).withValues(alpha: 0.08),
-                                    border: Border.all(color: const Color(0xFF00B37E).withValues(alpha: 0.18)),
+                                    color: AppColors.primary.withValues(alpha: 0.08),
+                                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Row(
@@ -268,7 +295,7 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                                     children: [
                                       const Padding(
                                         padding: EdgeInsets.only(top: 2),
-                                        child: Icon(Icons.info_outline, color: Color(0xFF00B37E), size: 16),
+                                        child: Icon(Icons.info_outline, color: AppColors.primary, size: 16),
                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(
@@ -276,7 +303,7 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                                           'O link de recuperação expira em 30 minutos e só pode ser usado uma vez.',
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: Colors.white.withValues(alpha: 0.45),
+                                            color: AppColors.textSecondary(isLight),
                                             height: 1.6,
                                           ),
                                         ),
@@ -295,14 +322,14 @@ class _ForgotPasswordScreenContent extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.shield_outlined, size: 12, color: Colors.white.withValues(alpha: 0.25)),
+                          Icon(Icons.shield_outlined, size: 12, color: AppColors.textMuted(isLight)),
                           const SizedBox(width: 6),
                           Text(
                             'Conexão segura · Dados criptografados',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
-                              color: Colors.white.withValues(alpha: 0.25),
+                              color: AppColors.textMuted(isLight),
                             ),
                           ),
                         ],

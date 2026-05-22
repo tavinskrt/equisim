@@ -9,6 +9,7 @@ import 'controllers/login_controller.dart';
 import 'views/login_page.dart';
 import 'views/forgot_password_page.dart';
 import 'views/sign_up_page.dart';
+import 'controllers/theme_controller.dart';
 
 
 Future<void> main() async {
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => StockController()),
         ChangeNotifierProvider(create: (_) => BacktestController()),
         ChangeNotifierProvider(create: (_) => LoginController()),
+        ChangeNotifierProvider(create: (_) => ThemeController()),
       ],
       child: MaterialApp(
         title: 'Equisim',
