@@ -19,6 +19,8 @@ class BacktestConfig {
   final ValuationMethod valuationMethod;
   final double safetyMargin; // percentual (ex: 20.0 para 20%)
   final double desiredRate; // para método Bazin (default 6%)
+  final int diaCompra;
+  final bool considerarReinvestimento;
 
   BacktestConfig({
     required this.stockTicker,
@@ -29,6 +31,8 @@ class BacktestConfig {
     required this.valuationMethod,
     required this.safetyMargin,
     this.desiredRate = 6.0,
+    required this.diaCompra,
+    required this.considerarReinvestimento,
   });
 
   @override
@@ -39,14 +43,16 @@ class BacktestConfig {
     period: $startDate - $endDate,
     monthly: R\$ $monthlyInvestment,
     valuation: ${valuationMethod.label},
-    safety margin: $safetyMargin%
+    safety margin: $safetyMargin%,
+    diaCompra: $diaCompra,
+    considerarReinvestimento: $considerarReinvestimento
   )''';
 }
 
 /// Posição em portfólio em um determinado momento
 class PortfolioPosition {
-  final int stockShares;
-  final int fiiShares;
+  final double stockShares;
+  final double fiiShares;
   final double cash;
   final DateTime date;
   final double stockPrice;
@@ -64,6 +70,11 @@ class PortfolioPosition {
   /// Calcula o valor total do portfólio
   double getTotalValue() {
     return (stockShares * stockPrice) + (fiiShares * fiiPrice) + cash;
+  }
+
+  /// Calcula o valor total alocado em ativos (tickers)
+  double getAssetValue() {
+    return (stockShares * stockPrice) + (fiiShares * fiiPrice);
   }
 
   /// Calcula a composição percentual
@@ -93,13 +104,15 @@ class MonthlyOperation {
   final DateTime operationDate;
   final double monthlyInvestment;
   final String? assetBought; // 'STOCK' ou 'FII'
-  final int quantityBought;
+  final double quantityBought;
   final double priceBought;
   final double stockDividends;
   final double fiiDividends;
   final double fairValue;
   final double stockPrice;
   final bool wasValuationMet; // true se preço <= justo com margem
+  final String? purchaseReason; // motivo/explicação da compra
+  final double? valuationFormulaValue; // valor da fórmula do valuation
 
   MonthlyOperation({
     required this.operationDate,
@@ -112,6 +125,8 @@ class MonthlyOperation {
     required this.fairValue,
     required this.stockPrice,
     required this.wasValuationMet,
+    this.purchaseReason,
+    this.valuationFormulaValue,
   });
 
   /// Retorna o total investido nesta operação
@@ -127,7 +142,9 @@ class MonthlyOperation {
   bought: $assetBought ($quantityBought @ R\$ $priceBought),
   fair value: R\$ $fairValue,
   current price: R\$ $stockPrice,
-  dividends: R\$ ${getTotalDividends()}
+  dividends: R\$ ${getTotalDividends()},
+  formula value: $valuationFormulaValue,
+  reason: $purchaseReason
 )''';
 }
 
@@ -135,8 +152,8 @@ class MonthlyOperation {
 class BacktestScenarioResult {
   final String scenarioName;
   final double finalValue;
-  final int finalStockShares;
-  final int finalFiiShares;
+  final double finalStockShares;
+  final double finalFiiShares;
   final double finalCash;
   final double totalDividends;
   final double totalInvested;

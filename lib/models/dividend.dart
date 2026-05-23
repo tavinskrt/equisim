@@ -1,19 +1,27 @@
 /// Modelo para dados de dividendos
 class Dividend {
-  final String date;
+  final String exDate;
+  final String paymentDate;
   final double value;
   final String type; // COM ou EX
 
+  String get date => paymentDate;
+
   Dividend({
-    required this.date,
+    required this.exDate,
+    required this.paymentDate,
     required this.value,
     required this.type,
   });
 
   factory Dividend.fromJson(Map<String, dynamic> json) {
+    final String ex = json['ex_date'] ?? json['date'] ?? json['payment_date'] ?? json['reference_date'] ?? '';
+    final String pay = json['payment_date'] ?? json['date'] ?? json['ex_date'] ?? json['reference_date'] ?? '';
     return Dividend(
-      date: json['date'] ?? json['ex_date'] ?? '',
-      value: (json['value'] as num?)?.toDouble() ?? 0.0,
+      exDate: ex,
+      paymentDate: pay,
+      value: (json['value_per_share'] as num?)?.toDouble() ?? 
+             (json['value'] as num?)?.toDouble() ?? 0.0,
       type: json['type'] ?? 'COM',
     );
   }

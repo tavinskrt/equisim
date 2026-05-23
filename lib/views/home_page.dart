@@ -4,9 +4,12 @@ import 'dart:ui';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../controllers/home_controller.dart';
+import '../controllers/backtest_controller.dart';
 import '../controllers/theme_controller.dart';
+import '../models/backtest.dart';
 import '../utils/app_colors.dart';
 import 'login_page.dart';
+import 'backtest_results_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -31,10 +34,25 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
   bool _dropdownOpen = false;
   late final TextEditingController _aporteController;
   late final TextEditingController _margemController;
-  final List<TextEditingController> _acoesControllers = [];
-  final List<TextEditingController> _fiisControllers = [];
+  late final TextEditingController _stockController;
+  late final TextEditingController _fiiController;
+  
   late HomeController _homeController;
   bool _initialized = false;
+
+  bool _showStockSuggestions = false;
+  bool _showFiiSuggestions = false;
+
+  // Lista estática dos ativos brasileiros mais populares para autocomplete local instantâneo
+  final List<String> _popularStocks = [
+    'PETR4', 'VALE3', 'ITUB4', 'BBDC4', 'BBAS3', 'ABEV3', 'WEGE3', 'ITSA4', 
+    'BOVA11', 'SANB11', 'MGLU3', 'ELET3', 'B3SA3', 'RENT3', 'EQTL3'
+  ];
+
+  final List<String> _popularFiis = [
+    'MXRF11', 'HGLG11', 'XPLG11', 'KNIP11', 'KNCR11', 'HGRU11', 'XPML11', 
+    'VISC11', 'BTLG11', 'JSRE11', 'IRDM11', 'CPTS11', 'HGBS11', 'VILG11', 'BCFF11'
+  ];
 
   @override
   void didChangeDependencies() {
@@ -43,13 +61,8 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
       _homeController = Provider.of<HomeController>(context, listen: false);
       _aporteController = TextEditingController(text: _homeController.aporte);
       _margemController = TextEditingController(text: _homeController.margem);
-      
-      for (var ticker in _homeController.acoes) {
-        _acoesControllers.add(TextEditingController(text: ticker));
-      }
-      for (var ticker in _homeController.fiis) {
-        _fiisControllers.add(TextEditingController(text: ticker));
-      }
+      _stockController = TextEditingController(text: _homeController.stockTicker);
+      _fiiController = TextEditingController(text: _homeController.fiiTicker);
       _initialized = true;
     }
   }
@@ -58,32 +71,15 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
   void dispose() {
     _aporteController.dispose();
     _margemController.dispose();
-    for (var c in _acoesControllers) {
-      c.dispose();
-    }
-    for (var c in _fiisControllers) {
-      c.dispose();
-    }
+    _stockController.dispose();
+    _fiiController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<HomeController>(context);
-
-    // Sincronizar tamanho das listas de controllers com o estado do HomeController
-    while (_acoesControllers.length < controller.acoes.length) {
-      _acoesControllers.add(TextEditingController(text: controller.acoes[_acoesControllers.length]));
-    }
-    while (_acoesControllers.length > controller.acoes.length) {
-      _acoesControllers.removeLast().dispose();
-    }
-    while (_fiisControllers.length < controller.fiis.length) {
-      _fiisControllers.add(TextEditingController(text: controller.fiis[_fiisControllers.length]));
-    }
-    while (_fiisControllers.length > controller.fiis.length) {
-      _fiisControllers.removeLast().dispose();
-    }
+    final backtestController = Provider.of<BacktestController>(context);
 
     // Sincronizar o conteúdo digitado e formatado
     final currentAporte = controller.aporte;
@@ -102,22 +98,20 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
       );
     }
 
-    for (int i = 0; i < controller.acoes.length; i++) {
-      if (_acoesControllers[i].text != controller.acoes[i]) {
-        _acoesControllers[i].value = TextEditingValue(
-          text: controller.acoes[i],
-          selection: TextSelection.collapsed(offset: controller.acoes[i].length),
-        );
-      }
+    final currentStock = controller.stockTicker;
+    if (_stockController.text != currentStock) {
+      _stockController.value = TextEditingValue(
+        text: currentStock,
+        selection: TextSelection.collapsed(offset: currentStock.length),
+      );
     }
 
-    for (int i = 0; i < controller.fiis.length; i++) {
-      if (_fiisControllers[i].text != controller.fiis[i]) {
-        _fiisControllers[i].value = TextEditingValue(
-          text: controller.fiis[i],
-          selection: TextSelection.collapsed(offset: controller.fiis[i].length),
-        );
-      }
+    final currentFii = controller.fiiTicker;
+    if (_fiiController.text != currentFii) {
+      _fiiController.value = TextEditingValue(
+        text: currentFii,
+        selection: TextSelection.collapsed(offset: currentFii.length),
+      );
     }
 
     final themeController = Provider.of<ThemeController>(context);
@@ -128,11 +122,11 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
     return Scaffold(
       body: GestureDetector(
         onTap: () {
-          if (_dropdownOpen) {
-            setState(() {
-              _dropdownOpen = false;
-            });
-          }
+          setState(() {
+            _dropdownOpen = false;
+            _showStockSuggestions = false;
+            _showFiiSuggestions = false;
+          });
         },
         behavior: HitTestBehavior.opaque,
         child: Container(
@@ -270,12 +264,12 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                           _SectionCard(
                             icon: Icons.ssid_chart,
                             title: 'Ativos',
-                            subtitle: 'Tickers para comparação',
+                            subtitle: 'Selecione uma Ação e um Fundo Imobiliário',
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'AÇÕES',
+                                  'AÇÃO',
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -284,31 +278,27 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                ...List.generate(controller.acoes.length, (index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 6),
-                                    child: _TickerInput(
-                                      controller: _acoesControllers[index],
-                                      placeholder: 'Ex.: PETR4',
-                                      onChange: (v) => controller.updateAcao(index, v),
-                                      onRemove: controller.acoes.length > 1 ? () {
-                                        _acoesControllers.removeAt(index).dispose();
-                                        controller.removeAcao(index);
-                                      } : null,
-                                    ),
-                                  );
-                                }),
-                                if (controller.acoes.length < 6)
-                                  _AddButton(label: 'Adicionar ação', onClick: controller.addAcao),
-                                
-                                Container(
-                                  height: 1,
-                                  color: AppColors.divider(isLight),
-                                  margin: const EdgeInsets.symmetric(vertical: 12),
+                                _buildAutocompleteField(
+                                  key: const ValueKey('stock_ticker_field'),
+                                  controller: _stockController,
+                                  placeholder: 'Ex.: PETR4',
+                                  onChange: controller.setStockTicker,
+                                  popularSuggestions: _popularStocks,
+                                  allSuggestions: controller.allStocks,
+                                  showSuggestions: _showStockSuggestions,
+                                  onFocus: () {
+                                    setState(() {
+                                      _showStockSuggestions = true;
+                                      _showFiiSuggestions = false;
+                                    });
+                                  },
+                                  isLight: isLight,
                                 ),
+                                
+                                const SizedBox(height: 16),
                                 
                                 Text(
-                                  'FUNDOS IMOBILIÁRIOS',
+                                  'FUNDO IMOBILIÁRIO',
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -317,22 +307,22 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                ...List.generate(controller.fiis.length, (index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 6),
-                                    child: _TickerInput(
-                                      controller: _fiisControllers[index],
-                                      placeholder: 'Ex.: HGLG11',
-                                      onChange: (v) => controller.updateFii(index, v),
-                                      onRemove: controller.fiis.length > 1 ? () {
-                                        _fiisControllers.removeAt(index).dispose();
-                                        controller.removeFii(index);
-                                      } : null,
-                                    ),
-                                  );
-                                }),
-                                if (controller.fiis.length < 6)
-                                  _AddButton(label: 'Adicionar FII', onClick: controller.addFii),
+                                _buildAutocompleteField(
+                                  key: const ValueKey('fii_ticker_field'),
+                                  controller: _fiiController,
+                                  placeholder: 'Ex.: HGLG11',
+                                  onChange: controller.setFiiTicker,
+                                  popularSuggestions: _popularFiis,
+                                  allSuggestions: controller.allFiis,
+                                  showSuggestions: _showFiiSuggestions,
+                                  onFocus: () {
+                                    setState(() {
+                                      _showFiiSuggestions = true;
+                                      _showStockSuggestions = false;
+                                    });
+                                  },
+                                  isLight: isLight,
+                                ),
                               ],
                             ),
                           ),
@@ -342,14 +332,14 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                           _SectionCard(
                             icon: Icons.calendar_month_outlined,
                             title: 'Período',
-                            subtitle: 'Janela histórica de análise',
+                            subtitle: 'Janela histórica de análise (máximo 10 anos)',
                             child: Row(
                               children: [
                                 Expanded(
                                   child: _DatePickerField(
                                     label: 'Data inicial',
                                     selectedDate: controller.startDate,
-                                    onSelect: (date) => controller.setStartDate(date),
+                                    onSelect: controller.setStartDate,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -357,7 +347,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                   child: _DatePickerField(
                                     label: 'Data final',
                                     selectedDate: controller.endDate,
-                                    onSelect: (date) => controller.setEndDate(date),
+                                    onSelect: controller.setEndDate,
                                   ),
                                 ),
                               ],
@@ -365,50 +355,163 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                           ),
                           const SizedBox(height: 10),
 
-                          /// 3. APORTE
+                          /// 3. APORTE E CONFIGURAÇÕES DE APORTE
                           _SectionCard(
                             icon: Icons.attach_money,
                             title: 'Aporte mensal',
-                            subtitle: 'Valor investido por mês',
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: AppColors.inputBackground(isLight),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: AppColors.surfaceBorder(isLight)),
-                              ),
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 14, right: 8),
-                                    child: Text(
-                                      'R\$',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textMuted(isLight),
+                            subtitle: 'Valor investido e dia de compra',
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'VALOR DO APORTE',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.textSecondary(isLight),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: AppColors.inputBackground(isLight),
+                                              borderRadius: BorderRadius.circular(10),
+                                              border: Border.all(color: AppColors.surfaceBorder(isLight)),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.only(left: 14, right: 8),
+                                                  child: Text(
+                                                    'R\$',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: AppColors.textMuted(isLight),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: TextField(
+                                                    keyboardType: TextInputType.number,
+                                                    onChanged: controller.setAporte,
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: AppColors.textPrimary(isLight),
+                                                    ),
+                                                    decoration: InputDecoration(
+                                                      hintText: '0,00',
+                                                      hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+                                                      border: InputBorder.none,
+                                                      contentPadding: const EdgeInsets.symmetric(vertical: 11),
+                                                    ),
+                                                    controller: _aporteController,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: TextField(
-                                      keyboardType: TextInputType.number,
-                                      onChanged: controller.setAporte,
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textPrimary(isLight),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'DIA DA COMPRA',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.textSecondary(isLight),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.inputBackground(isLight),
+                                              borderRadius: BorderRadius.circular(10),
+                                              border: Border.all(color: AppColors.surfaceBorder(isLight)),
+                                            ),
+                                            child: DropdownButtonHideUnderline(
+                                              child: DropdownButton<int>(
+                                                value: controller.diaCompra,
+                                                icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary(isLight)),
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: AppColors.textPrimary(isLight),
+                                                ),
+                                                dropdownColor: AppColors.surface(isLight),
+                                                onChanged: (int? value) {
+                                                  if (value != null) {
+                                                    controller.setDiaCompra(value);
+                                                  }
+                                                },
+                                                items: List.generate(28, (index) => index + 1)
+                                                    .map<DropdownMenuItem<int>>((int value) {
+                                                  return DropdownMenuItem<int>(
+                                                    value: value,
+                                                    child: Text('Dia $value'),
+                                                  );
+                                                }).toList(),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      decoration: InputDecoration(
-                                        hintText: '0,00',
-                                        hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
-                                        border: InputBorder.none,
-                                        contentPadding: const EdgeInsets.symmetric(vertical: 11),
-                                      ),
-                                      controller: _aporteController,
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                ),
+                                
+                                const SizedBox(height: 16),
+                                
+                                // Reinvestimento de Dividendos Switch
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Reinvestir dividendos',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.textPrimary(isLight),
+                                          ),
+                                        ),
+                                        Text(
+                                          'Utilizar proventos para novos aportes',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: AppColors.textSecondary(isLight),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Transform.scale(
+                                      scale: 0.85,
+                                      child: Switch(
+                                        value: controller.considerarReinvestimento,
+                                        activeThumbColor: AppColors.primary,
+                                        onChanged: controller.setConsiderarReinvestimento,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -441,149 +544,145 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                   selected: controller.valuation == 'lynch',
                                   onTap: () => controller.setValuation('lynch'),
                                 ),
-                                _ValuationButton(
-                                  id: 'dcf', label: 'DCF Simplificado', desc: 'Fluxo de Caixa',
-                                  selected: controller.valuation == 'dcf',
-                                  onTap: () => controller.setValuation('dcf'),
-                                ),
                               ],
                             ),
                           ),
                           const SizedBox(height: 10),
 
-                          /// 5. PARÂMETROS
-                          _SectionCard(
-                            icon: Icons.tune,
-                            title: 'Parâmetros',
-                            subtitle: 'Configurações da simulação',
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Margem de Segurança',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.textPrimary(isLight),
-                                      ),
-                                    ),
-                                    Text(
-                                      'Desconto mínimo',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: AppColors.textSecondary(isLight),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 5),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: AppColors.inputBackground(isLight),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: AppColors.surfaceBorder(isLight)),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextField(
-                                          keyboardType: TextInputType.number,
-                                          onChanged: controller.setMargem,
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textPrimary(isLight),
-                                          ),
-                                          decoration: InputDecoration(
-                                            hintText: 'Ex.: 25',
-                                            hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
-                                            border: InputBorder.none,
-                                            contentPadding: const EdgeInsets.symmetric(vertical: 11, horizontal: 14),
-                                          ),
-                                          controller: _margemController,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(right: 14),
-                                        child: Text(
-                                          '%',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textMuted(isLight),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                
-                                if (controller.margem.isNotEmpty) ...[
-                                  const SizedBox(height: 10),
-                                  Stack(
-                                    children: [
-                                      Container(
-                                        height: 4,
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.surfaceBorder(isLight),
-                                          borderRadius: BorderRadius.circular(2),
-                                        ),
-                                      ),
-                                      FractionallySizedBox(
-                                        widthFactor: (int.tryParse(controller.margem) ?? 0).clamp(0, 100) / 100.0,
-                                        child: Container(
-                                          height: 4,
-                                          decoration: BoxDecoration(
-                                            gradient: AppColors.brandGradient,
-                                            borderRadius: BorderRadius.circular(2),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
+                          /// 5. PARÂMETROS (Ocultar condicionalmente para Bazin/Lynch)
+                          if (controller.valuation == 'graham')
+                            _SectionCard(
+                              icon: Icons.tune,
+                              title: 'Parâmetros',
+                              subtitle: 'Configurações da simulação',
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text('0%', style: TextStyle(fontSize: 10, color: AppColors.textMuted(isLight))),
                                       Text(
-                                        '${controller.margem}% selecionado',
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          color: AppColors.primary,
+                                        'Margem de Segurança',
+                                        style: TextStyle(
+                                          fontSize: 12,
                                           fontWeight: FontWeight.w600,
+                                          color: AppColors.textPrimary(isLight),
                                         ),
                                       ),
-                                      Text('100%', style: TextStyle(fontSize: 10, color: AppColors.textMuted(isLight))),
+                                      Text(
+                                        'Desconto mínimo',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: AppColors.textSecondary(isLight),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.inputBackground(isLight),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: AppColors.surfaceBorder(isLight)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            keyboardType: TextInputType.number,
+                                            onChanged: controller.setMargem,
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textPrimary(isLight),
+                                            ),
+                                            decoration: InputDecoration(
+                                              hintText: 'Ex.: 25',
+                                              hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+                                              border: InputBorder.none,
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 11, horizontal: 14),
+                                            ),
+                                            controller: _margemController,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 14),
+                                          child: Text(
+                                            '%',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textMuted(isLight),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  
+                                  if (controller.margem.isNotEmpty) ...[
+                                    const SizedBox(height: 10),
+                                    Stack(
+                                      children: [
+                                        Container(
+                                          height: 4,
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.surfaceBorder(isLight),
+                                            borderRadius: BorderRadius.circular(2),
+                                          ),
+                                        ),
+                                        FractionallySizedBox(
+                                          widthFactor: (int.tryParse(controller.margem) ?? 0).clamp(0, 100) / 100.0,
+                                          child: Container(
+                                            height: 4,
+                                            decoration: BoxDecoration(
+                                              gradient: AppColors.brandGradient,
+                                              borderRadius: BorderRadius.circular(2),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('0%', style: TextStyle(fontSize: 10, color: AppColors.textMuted(isLight))),
+                                        Text(
+                                          '${controller.margem}% selecionado',
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        Text('100%', style: TextStyle(fontSize: 10, color: AppColors.textMuted(isLight))),
+                                      ],
+                                    ),
+                                  ],
+                                  
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(Icons.info_outline, color: AppColors.textMuted(isLight), size: 14),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          'A ação será comprada somente se seu preço atual estiver pelo menos este percentual abaixo do valor intrínseco calculado por Graham. Caso contrário, compra-se FII.',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: AppColors.textSecondary(isLight),
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ],
-                                
-                                const SizedBox(height: 10),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(Icons.info_outline, color: AppColors.textMuted(isLight), size: 14),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        'O ativo será considerado comprável somente se seu preço atual estiver pelo menos este percentual abaixo do valor intrínseco calculado.',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: AppColors.textSecondary(isLight),
-                                          height: 1.5,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
                           
                           /// EXECUTAR
                           Container(
@@ -601,27 +700,86 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                 ),
                               ],
                             ),
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                // Ação de Executar Simulação
+                            child: ElevatedButton(
+                              onPressed: backtestController.isLoading ? null : () async {
+                                final error = controller.getValidationError();
+                                if (error != null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(error),
+                                      backgroundColor: const Color(0xFFEF4444),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                // Mapear ValuationMethod
+                                ValuationMethod method = ValuationMethod.graham;
+                                if (controller.valuation == 'bazin') {
+                                  method = ValuationMethod.bazin;
+                                } else if (controller.valuation == 'lynch') {
+                                  method = ValuationMethod.peterLynch;
+                                }
+
+                                final config = BacktestConfig(
+                                  stockTicker: controller.stockTicker,
+                                  fiiTicker: controller.fiiTicker,
+                                  startDate: controller.startDate!,
+                                  endDate: controller.endDate!,
+                                  monthlyInvestment: controller.doubleAporte,
+                                  valuationMethod: method,
+                                  safetyMargin: controller.doubleMargem,
+                                  diaCompra: controller.diaCompra,
+                                  considerarReinvestimento: controller.considerarReinvestimento,
+                                );
+
+                                final success = await backtestController.executeBacktest(config);
+                                if (success && context.mounted) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const BacktestResultsPage()),
+                                  );
+                                } else if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Erro ao executar a simulação. Verifique as credenciais ou internet.'),
+                                      backgroundColor: Color(0xFFEF4444),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
+                                disabledBackgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                              icon: const Icon(Icons.play_arrow, color: Colors.white, size: 20),
-                              label: const Text(
-                                'Executar Simulação',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  letterSpacing: 0.2,
-                                ),
-                              ),
+                              child: backtestController.isLoading
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                    )
+                                  : const Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.play_arrow, color: Colors.white, size: 20),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Executar Simulação',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                            letterSpacing: 0.2,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                             ),
                           ),
                         ],
@@ -807,9 +965,139 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
       ),
     );
   }
+
+  /// Constrói um campo de Autocomplete com sugestões locais instantâneas e suporte à digitação direta.
+  Widget _buildAutocompleteField({
+    required Key key,
+    required TextEditingController controller,
+    required String placeholder,
+    required Function(String) onChange,
+    required List<String> popularSuggestions,
+    required List<String> allSuggestions,
+    required bool showSuggestions,
+    required VoidCallback onFocus,
+    required bool isLight,
+  }) {
+    final query = controller.text.toUpperCase().trim();
+    
+    // Se a lista completa ainda não carregou, faz o fallback pra popular
+    final searchList = allSuggestions.isNotEmpty ? allSuggestions : popularSuggestions;
+    
+    final List<String> filtered = query.isEmpty 
+        ? popularSuggestions.take(5).toList() 
+        : searchList.where((s) => s.startsWith(query)).take(8).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (hasFocus) {
+              onFocus();
+            }
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.inputBackground(isLight),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.surfaceBorder(isLight)),
+            ),
+            child: TextField(
+              key: key,
+              controller: controller,
+              onChanged: (v) {
+                onChange(v);
+                setState(() {});
+              },
+              textCapitalization: TextCapitalization.characters,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary(isLight),
+                letterSpacing: 0.5,
+              ),
+              decoration: InputDecoration(
+                hintText: placeholder,
+                hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+            ),
+          ),
+        ),
+        
+        // Exibição da caixa de autocomplete flutuante/dinâmica
+        if (showSuggestions && filtered.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Container(
+            constraints: const BoxConstraints(maxHeight: 180),
+            decoration: BoxDecoration(
+              color: isLight 
+                  ? Colors.white.withOpacity(0.96) 
+                  : const Color(0xDC1A2744),
+              border: Border.all(color: AppColors.surfaceBorder(isLight)),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                )
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: filtered.length,
+                itemBuilder: (context, idx) {
+                  final item = filtered[idx];
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        onChange(item);
+                        setState(() {
+                          _showStockSuggestions = false;
+                          _showFiiSuggestions = false;
+                        });
+                        FocusScope.of(context).unfocus();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              item,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary(isLight),
+                              ),
+                            ),
+                            Icon(
+                              Icons.north_west,
+                              size: 12,
+                              color: AppColors.textMuted(isLight),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 }
 
-/// Componentes Auxiliares
+/// Componentes Auxiliares do Home
 class _SectionCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -854,134 +1142,35 @@ class _SectionCard extends StatelessWidget {
                 child: Icon(icon, color: AppColors.primary, size: 16),
               ),
               const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary(isLight),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary(isLight),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary(isLight),
+                    const SizedBox(height: 1),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textSecondary(isLight),
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           child,
         ],
-      ),
-    );
-  }
-}
-
-class _TickerInput extends StatelessWidget {
-  final TextEditingController controller;
-  final String placeholder;
-  final Function(String) onChange;
-  final VoidCallback? onRemove;
-
-  const _TickerInput({required this.controller, required this.placeholder, required this.onChange, this.onRemove});
-
-  @override
-  Widget build(BuildContext context) {
-    final isLight = Provider.of<ThemeController>(context).isLightMode;
-
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.inputBackground(isLight),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.surfaceBorder(isLight)),
-            ),
-            child: TextField(
-              controller: controller,
-              onChanged: onChange,
-              textCapitalization: TextCapitalization.characters,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary(isLight),
-                letterSpacing: 0.5,
-              ),
-              decoration: InputDecoration(
-                hintText: placeholder,
-                hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              ),
-            ),
-          ),
-        ),
-        if (onRemove != null) ...[
-          const SizedBox(width: 6),
-          GestureDetector(
-            onTap: onRemove,
-            child: Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: AppColors.danger.withValues(alpha: 0.1),
-                border: Border.all(color: AppColors.danger.withValues(alpha: 0.2)),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: const Icon(Icons.close, color: AppColors.danger, size: 16),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _AddButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onClick;
-
-  const _AddButton({required this.label, required this.onClick});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onClick,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        margin: const EdgeInsets.only(top: 8),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            style: BorderStyle.solid,
-          ),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.add, color: AppColors.primary, size: 14),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -1015,9 +1204,9 @@ class _DatePickerField extends StatelessWidget {
           onTap: () async {
             final date = await showDatePicker(
               context: context,
-              initialDate: selectedDate ?? DateTime.now(),
+              initialDate: selectedDate ?? DateTime(2023, 1, 1),
               firstDate: DateTime(2000),
-              lastDate: DateTime(2100),
+              lastDate: DateTime.now(),
             );
             if (date != null) onSelect(date);
           },
