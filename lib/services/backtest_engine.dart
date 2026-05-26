@@ -231,19 +231,28 @@ class BacktestEngine {
               : (event.factor > 0 ? 1.0 / event.factor : 1.0);
 
           if (multiplier != 1.0) {
-            c1StockShares *= multiplier;
-            c2StockShares *= multiplier;
+            final double rawC1Shares = c1StockShares * multiplier;
+            final double flooredC1Shares = rawC1Shares.floorToDouble();
+            final double residueC1 = rawC1Shares - flooredC1Shares;
+            c1StockShares = flooredC1Shares;
+            c1Cash += residueC1 * stockPrice;
+
+            final double rawC2Shares = c2StockShares * multiplier;
+            final double flooredC2Shares = rawC2Shares.floorToDouble();
+            final double residueC2 = rawC2Shares - flooredC2Shares;
+            c2StockShares = flooredC2Shares;
+            c2Cash += residueC2 * stockPrice;
 
             // Ajustar todo o histórico de cotas passadas para que os dividendos sejam computados corretamente
             for (final key in c1SharesHistory.keys) {
-              c1SharesHistory[key] = (c1SharesHistory[key] ?? 0.0) * multiplier;
+              c1SharesHistory[key] = ((c1SharesHistory[key] ?? 0.0) * multiplier).floorToDouble();
             }
             for (final key in c2StockSharesHistory.keys) {
-              c2StockSharesHistory[key] = (c2StockSharesHistory[key] ?? 0.0) * multiplier;
+              c2StockSharesHistory[key] = ((c2StockSharesHistory[key] ?? 0.0) * multiplier).floorToDouble();
             }
 
             hasStockEventToday = true;
-            debugPrint('🔄 [SPLIT/INPLIT STOCK API] ${config.stockTicker} em ${currentStock.date}: Multiplicador $multiplier. Novas cotas: c1=$c1StockShares, c2=$c2StockShares');
+            debugPrint('🔄 [SPLIT/INPLIT STOCK API] ${config.stockTicker} em ${currentStock.date}: Multiplicador $multiplier. Novas cotas: c1=$c1StockShares, c2=$c2StockShares, resíduo c1=R\$ ${residueC1 * stockPrice}, c2=R\$ ${residueC2 * stockPrice}');
           }
         }
       }
@@ -256,15 +265,19 @@ class BacktestEngine {
               : (event.factor > 0 ? 1.0 / event.factor : 1.0);
 
           if (multiplier != 1.0) {
-            c2FiiShares *= multiplier;
+            final double rawC2FiiShares = c2FiiShares * multiplier;
+            final double flooredC2FiiShares = rawC2FiiShares.floorToDouble();
+            final double residueC2Fii = rawC2FiiShares - flooredC2FiiShares;
+            c2FiiShares = flooredC2FiiShares;
+            c2Cash += residueC2Fii * fiiPrice;
 
             // Ajustar todo o histórico de cotas passadas
             for (final key in c2FiiSharesHistory.keys) {
-              c2FiiSharesHistory[key] = (c2FiiSharesHistory[key] ?? 0.0) * multiplier;
+              c2FiiSharesHistory[key] = ((c2FiiSharesHistory[key] ?? 0.0) * multiplier).floorToDouble();
             }
 
             hasFiiEventToday = true;
-            debugPrint('🔄 [SPLIT/INPLIT FII API] ${config.fiiTicker} em ${currentStock.date}: Multiplicador $multiplier. Novas cotas: c2=$c2FiiShares');
+            debugPrint('🔄 [SPLIT/INPLIT FII API] ${config.fiiTicker} em ${currentStock.date}: Multiplicador $multiplier. Novas cotas: c2=$c2FiiShares, resíduo=R\$ ${residueC2Fii * fiiPrice}');
           }
         }
       }
@@ -273,30 +286,43 @@ class BacktestEngine {
       if (!hasStockEventToday && prevStockPrice != null && prevStockPrice > 0) {
         final double multiplier = _detectSplitMultiplier(prevStockPrice, stockPrice);
         if (multiplier != 1.0) {
-          c1StockShares *= multiplier;
-          c2StockShares *= multiplier;
+          final double rawC1Shares = c1StockShares * multiplier;
+          final double flooredC1Shares = rawC1Shares.floorToDouble();
+          final double residueC1 = rawC1Shares - flooredC1Shares;
+          c1StockShares = flooredC1Shares;
+          c1Cash += residueC1 * stockPrice;
+
+          final double rawC2Shares = c2StockShares * multiplier;
+          final double flooredC2Shares = rawC2Shares.floorToDouble();
+          final double residueC2 = rawC2Shares - flooredC2Shares;
+          c2StockShares = flooredC2Shares;
+          c2Cash += residueC2 * stockPrice;
 
           for (final key in c1SharesHistory.keys) {
-            c1SharesHistory[key] = (c1SharesHistory[key] ?? 0.0) * multiplier;
+            c1SharesHistory[key] = ((c1SharesHistory[key] ?? 0.0) * multiplier).floorToDouble();
           }
           for (final key in c2StockSharesHistory.keys) {
-            c2StockSharesHistory[key] = (c2StockSharesHistory[key] ?? 0.0) * multiplier;
+            c2StockSharesHistory[key] = ((c2StockSharesHistory[key] ?? 0.0) * multiplier).floorToDouble();
           }
 
-          debugPrint('🔄 [SPLIT/INPLIT STOCK AUTO-DETECT] ${config.stockTicker} em ${currentStock.date}: Preço de $prevStockPrice para $stockPrice (multiplicador auto $multiplier). Novas cotas: c1=$c1StockShares, c2=$c2StockShares');
+          debugPrint('🔄 [SPLIT/INPLIT STOCK AUTO-DETECT] ${config.stockTicker} em ${currentStock.date}: Preço de $prevStockPrice para $stockPrice (multiplicador auto $multiplier). Novas cotas: c1=$c1StockShares, c2=$c2StockShares, resíduo c1=R\$ ${residueC1 * stockPrice}, c2=R\$ ${residueC2 * stockPrice}');
         }
       }
 
       if (!hasFiiEventToday && prevFiiPrice != null && prevFiiPrice > 0) {
         final double multiplier = _detectSplitMultiplier(prevFiiPrice, fiiPrice);
         if (multiplier != 1.0) {
-          c2FiiShares *= multiplier;
+          final double rawC2FiiShares = c2FiiShares * multiplier;
+          final double flooredC2FiiShares = rawC2FiiShares.floorToDouble();
+          final double residueC2Fii = rawC2FiiShares - flooredC2FiiShares;
+          c2FiiShares = flooredC2FiiShares;
+          c2Cash += residueC2Fii * fiiPrice;
 
           for (final key in c2FiiSharesHistory.keys) {
-            c2FiiSharesHistory[key] = (c2FiiSharesHistory[key] ?? 0.0) * multiplier;
+            c2FiiSharesHistory[key] = ((c2FiiSharesHistory[key] ?? 0.0) * multiplier).floorToDouble();
           }
 
-          debugPrint('🔄 [SPLIT/INPLIT FII AUTO-DETECT] ${config.fiiTicker} em ${currentStock.date}: Preço de $prevFiiPrice para $fiiPrice (multiplicador auto $multiplier). Novas cotas: c2=$c2FiiShares');
+          debugPrint('🔄 [SPLIT/INPLIT FII AUTO-DETECT] ${config.fiiTicker} em ${currentStock.date}: Preço de $prevFiiPrice para $fiiPrice (multiplicador auto $multiplier). Novas cotas: c2=$c2FiiShares, resíduo=R\$ ${residueC2Fii * fiiPrice}');
         }
       }
 
@@ -467,7 +493,8 @@ class BacktestEngine {
           final double calculatedVpa = max(0.1, dynamicVpa);
           
           fairValue = sqrt(max(0.0, 22.5 * calculatedLpa * calculatedVpa));
-          final double safePrice = fairValue * (1.0 - (config.safetyMargin / 100.0));
+          // Salvaguarda adicional contra margens extremas (garante valor não-negativo)
+          final double safePrice = max(0.0, fairValue * (1.0 - (config.safetyMargin / 100.0)));
           isStockCheap = stockPrice <= safePrice;
           if (isStockCheap) {
             grahamMarginEverMet = true;
@@ -481,22 +508,25 @@ class BacktestEngine {
           }
         } else if (config.valuationMethod == ValuationMethod.bazin) {
           final double ttmDiv = _getTtmDividendsDaily(stockDividends.dividends, currentDate);
-          final double finalTtmDiv = ttmDiv > 0 ? ttmDiv : (stockPrice * (stockFundamentals.dyield > 0 ? stockFundamentals.dyield / 100 : 0.05));
-          fairValue = finalTtmDiv / (config.desiredRate / 100.0);
+          // Prevenir dividendos negativos e aplicar fallback seguro
+          final double finalTtmDiv = max(0.0, ttmDiv > 0 ? ttmDiv : (stockPrice * (stockFundamentals.dyield > 0 ? stockFundamentals.dyield / 100.0 : 0.05)));
+          // Prevenir divisão por zero na taxa desejada
+          final double desiredRate = max(0.1, config.desiredRate);
+          fairValue = finalTtmDiv / (desiredRate / 100.0);
           isStockCheap = stockPrice <= fairValue;
           valuationFormulaValue = fairValue;
           
           if (isStockCheap) {
-            purchaseReason = 'Comprado ${config.stockTicker}: preço atual (R\$ ${stockPrice.toStringAsFixed(2)}) é menor/igual ao Preço Teto de Bazin (R\$ ${fairValue.toStringAsFixed(2)}), baseado em dividendos acumulados de R\$ ${finalTtmDiv.toStringAsFixed(2)} e taxa de retorno desejada de ${config.desiredRate.toStringAsFixed(0)}%.';
+            purchaseReason = 'Comprado ${config.stockTicker}: preço atual (R\$ ${stockPrice.toStringAsFixed(2)}) é menor/igual ao Preço Teto de Bazin (R\$ ${fairValue.toStringAsFixed(2)}), baseado em dividendos acumulados de R\$ ${finalTtmDiv.toStringAsFixed(2)} e taxa de retorno desejada de ${desiredRate.toStringAsFixed(1)}%.';
           } else {
             purchaseReason = 'Comprado ${config.fiiTicker}: preço da ação (R\$ ${stockPrice.toStringAsFixed(2)}) está acima do Preço Teto de Bazin (R\$ ${fairValue.toStringAsFixed(2)}). Comprado FII como porto seguro.';
           }
         } else if (config.valuationMethod == ValuationMethod.peterLynch) {
           final double ttmDiv = _getTtmDividendsDaily(stockDividends.dividends, currentDate);
-          final double dy = stockPrice > 0 ? (ttmDiv / stockPrice) * 100.0 : 0.0;
+          final double dy = stockPrice > 0 ? max(0.0, (ttmDiv / stockPrice) * 100.0) : 0.0;
           final double roe = stockFundamentals.roe > 0 ? stockFundamentals.roe : 12.0;
           final double lpa = stockFundamentals.lpa > 0 ? stockFundamentals.lpa : 1.0;
-          final double pe = max(1.0, stockPrice / lpa);
+          final double pe = max(1.0, stockPrice / lpa); // P/L protegido
           final double lynchRate = (roe + dy) / pe;
           fairValue = 1.5;
           isStockCheap = lynchRate > 1.5;
@@ -693,14 +723,18 @@ class BacktestEngine {
                 : (event.factor > 0 ? 1.0 / event.factor : 1.0);
 
             if (multiplier != 1.0) {
-              c2FiiShares *= multiplier;
+              final double rawC2FiiShares = c2FiiShares * multiplier;
+              final double flooredC2FiiShares = rawC2FiiShares.floorToDouble();
+              final double residueC2Fii = rawC2FiiShares - flooredC2FiiShares;
+              c2FiiShares = flooredC2FiiShares;
+              c2Cash += residueC2Fii * fiiPrice;
 
               for (final key in c2FiiSharesHistoryGraham.keys) {
-                c2FiiSharesHistoryGraham[key] = (c2FiiSharesHistoryGraham[key] ?? 0.0) * multiplier;
+                c2FiiSharesHistoryGraham[key] = ((c2FiiSharesHistoryGraham[key] ?? 0.0) * multiplier).floorToDouble();
               }
 
               hasFiiEventTodayGraham = true;
-              debugPrint('🔄 [SPLIT/INPLIT FII FALLBACK GRAHAM API] ${config.fiiTicker} em ${currentStock.date}: Multiplicador $multiplier. Novas cotas: c2=$c2FiiShares');
+              debugPrint('🔄 [SPLIT/INPLIT FII FALLBACK GRAHAM API] ${config.fiiTicker} em ${currentStock.date}: Multiplicador $multiplier. Novas cotas: c2=$c2FiiShares, resíduo=R\$ ${residueC2Fii * fiiPrice}');
             }
           }
         }
@@ -709,13 +743,17 @@ class BacktestEngine {
         if (!hasFiiEventTodayGraham && prevFiiPriceGraham != null && prevFiiPriceGraham > 0) {
           final double multiplier = _detectSplitMultiplier(prevFiiPriceGraham, fiiPrice);
           if (multiplier != 1.0) {
-            c2FiiShares *= multiplier;
+            final double rawC2FiiShares = c2FiiShares * multiplier;
+            final double flooredC2FiiShares = rawC2FiiShares.floorToDouble();
+            final double residueC2Fii = rawC2FiiShares - flooredC2FiiShares;
+            c2FiiShares = flooredC2FiiShares;
+            c2Cash += residueC2Fii * fiiPrice;
 
             for (final key in c2FiiSharesHistoryGraham.keys) {
-              c2FiiSharesHistoryGraham[key] = (c2FiiSharesHistoryGraham[key] ?? 0.0) * multiplier;
+              c2FiiSharesHistoryGraham[key] = ((c2FiiSharesHistoryGraham[key] ?? 0.0) * multiplier).floorToDouble();
             }
 
-            debugPrint('🔄 [SPLIT/INPLIT FII FALLBACK GRAHAM AUTO-DETECT] ${config.fiiTicker} em ${currentStock.date}: Preço de $prevFiiPriceGraham para $fiiPrice (multiplicador auto $multiplier). Novas cotas: c2=$c2FiiShares');
+            debugPrint('🔄 [SPLIT/INPLIT FII FALLBACK GRAHAM AUTO-DETECT] ${config.fiiTicker} em ${currentStock.date}: Preço de $prevFiiPriceGraham para $fiiPrice (multiplicador auto $multiplier). Novas cotas: c2=$c2FiiShares, resíduo=R\$ ${residueC2Fii * fiiPrice}');
           }
         }
 
@@ -925,7 +963,7 @@ class BacktestEngine {
             return fraction;
           }
         }
-        return ratio;
+        return 1.0; // Evita assumir razões estranhas de ruído ou volatilidade (ex: 1.44)
       } 
       // Casos comuns de inplit (multiplicador fracionário)
       else {
@@ -939,7 +977,7 @@ class BacktestEngine {
             return 1.0 / fraction;
           }
         }
-        return ratio;
+        return 1.0; // Evita assumir razões estranhas de ruído ou volatilidade
       }
     }
     return 1.0;

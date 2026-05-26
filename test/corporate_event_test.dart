@@ -17,7 +17,7 @@ double testDetectSplitMultiplier(double yesterdayPrice, double todayPrice) {
           return fraction;
         }
       }
-      return ratio;
+      return 1.0; // Evita assumir razões estranhas de ruído ou volatilidade (ex: 1.44)
     } else {
       final double invRatio = 1.0 / ratio;
       final double roundedInv = invRatio.roundToDouble();
@@ -29,7 +29,7 @@ double testDetectSplitMultiplier(double yesterdayPrice, double todayPrice) {
           return 1.0 / fraction;
         }
       }
-      return ratio;
+      return 1.0; // Evita assumir razões estranhas de ruído ou volatilidade
     }
   }
   return 1.0;
@@ -106,6 +106,16 @@ void main() {
     test('Should ignore normal positive fluctuations (price 100.0 to 105.0)', () {
       final multiplier = testDetectSplitMultiplier(100.0, 105.0);
       expect(multiplier, 1.0); // No adjustment
+    });
+
+    test('Should ignore high daily volatility/crash without clean split ratio (price 14.4 to 10.0)', () {
+      final multiplier = testDetectSplitMultiplier(14.4, 10.0);
+      expect(multiplier, 1.0); // No adjustment (ratio is 1.44, not a clean split)
+    });
+
+    test('Should ignore high daily rise without clean inplit ratio (price 10.0 to 14.4)', () {
+      final multiplier = testDetectSplitMultiplier(10.0, 14.4);
+      expect(multiplier, 1.0); // No adjustment (invRatio is 1.44, not a clean inplit)
     });
   });
 }
