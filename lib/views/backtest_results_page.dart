@@ -151,6 +151,22 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                              if (_lockedIndex != null && isWide) ...[
+                                _buildLockedOperationCard(
+                                  s1,
+                                  s2,
+                                  _lockedIndex!,
+                                  config,
+                                  numberFormat,
+                                  isLight,
+                                  () {
+                                    setState(() {
+                                      _lockedIndex = null;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                              ],
                               _buildComparisonTable(s1, s2, activeIdx, config, numberFormat, isLight),
                               const SizedBox(height: 16),
                               _buildOperationsSummary(s1, s2, activeIdx, isLight),
@@ -212,6 +228,23 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
                                 ],
                               ),
                             ),
+                            if (_lockedIndex != null)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                child: _buildLockedOperationCard(
+                                  s1,
+                                  s2,
+                                  _lockedIndex!,
+                                  config,
+                                  numberFormat,
+                                  isLight,
+                                  () {
+                                    setState(() {
+                                      _lockedIndex = null;
+                                    });
+                                  },
+                                ),
+                              ),
                             ...content.sublist(1).map((w) => w is Expanded ? w.child : w),
                           ],
                         ),
@@ -828,6 +861,231 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     }
     return formatted;
   }
+
+  Widget _buildLockedOperationCard(
+    BacktestScenarioResult s1Result,
+    BacktestScenarioResult s2Result,
+    int lockedIdx,
+    BacktestConfig config,
+    NumberFormat nf,
+    bool isLight,
+    VoidCallback onClose,
+  ) {
+    if (lockedIdx >= s1Result.monthlyPositions.length) return const SizedBox.shrink();
+
+    final pos1 = s1Result.monthlyPositions[lockedIdx];
+    final pos2 = s2Result.monthlyPositions[lockedIdx];
+    final dateStr = DateFormat('dd/MM/yyyy').format(pos1.date);
+
+    // Localizar se houve compra neste dia no Cenário 2 (Valuation)
+    final currentDate = pos2.date;
+    MonthlyOperation? op;
+    for (final o in s2Result.operations) {
+      if (o.operationDate.year == currentDate.year &&
+          o.operationDate.month == currentDate.month &&
+          o.operationDate.day == currentDate.day) {
+        op = o;
+        break;
+      }
+    }
+
+    final hasBought = op != null && op.quantityBought > 0 && op.assetBought != null;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface(isLight),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header with Lock Icon and Close Button
+          Row(
+            children: [
+              const Icon(Icons.lock_open, color: AppColors.primary, size: 16),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'DETALHES DO PONTO SELECIONADO',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary(isLight),
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: onClose,
+                child: Icon(
+                  Icons.close,
+                  size: 18,
+                  color: AppColors.textSecondary(isLight),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Date and General Info
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Data Selecionada', style: TextStyle(fontSize: 12, color: AppColors.textSecondary(isLight))),
+              Text(
+                dateStr,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isLight)),
+              ),
+            ],
+          ),
+          const Divider(height: 16),
+
+          // Portfolio Values
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Patrimônio (Apenas Ações)', style: TextStyle(fontSize: 12, color: AppColors.textSecondary(isLight))),
+              Text(
+                nf.format(pos1.getAssetValue()),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary(isLight)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Patrimônio (Ações + FIIs)', style: TextStyle(fontSize: 12, color: AppColors.textSecondary(isLight))),
+              Text(
+                nf.format(pos2.getAssetValue()),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primaryLight),
+              ),
+            ],
+          ),
+          const Divider(height: 16),
+
+          // Prices
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Preço de ${config.stockTicker} no dia', style: TextStyle(fontSize: 11, color: AppColors.textSecondary(isLight))),
+              Text(
+                nf.format(pos1.stockPrice),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textPrimary(isLight)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Preço de ${config.fiiTicker} no dia', style: TextStyle(fontSize: 11, color: AppColors.textSecondary(isLight))),
+              Text(
+                nf.format(pos1.fiiPrice),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textPrimary(isLight)),
+              ),
+            ],
+          ),
+
+          // Purchase / Operation Info
+          if (op != null) ...[
+            const Divider(height: 16),
+            Text(
+              'OPERAÇÃO DO MÊS:',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.inputBackground(isLight),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.surfaceBorder(isLight)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Ativo comprado:',
+                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary(isLight)),
+                      ),
+                      Text(
+                        hasBought 
+                            ? '${op.assetBought == "STOCK" ? config.stockTicker : config.fiiTicker} (${op.quantityBought.toInt()} cotas)'
+                            : 'Nenhum (Saldo Insuficiente)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: !hasBought 
+                              ? AppColors.textSecondary(isLight)
+                              : (op.assetBought == 'STOCK' ? const Color(0xFF00B37E) : const Color(0xFFF59E0B)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (op.valuationFormulaValue != null && op.valuationFormulaValue! > 0) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          config.valuationMethod == ValuationMethod.peterLynch
+                              ? 'Indicador Peter Lynch:'
+                              : 'Preço Justo Calculado:',
+                          style: TextStyle(fontSize: 11, color: AppColors.textSecondary(isLight)),
+                        ),
+                        Text(
+                          config.valuationMethod == ValuationMethod.peterLynch
+                              ? op.valuationFormulaValue!.toStringAsFixed(2)
+                              : nf.format(op.valuationFormulaValue!),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryLight,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (op.purchaseReason != null && op.purchaseReason!.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    const Divider(height: 8),
+                    const SizedBox(height: 4),
+                    Text(
+                      op.purchaseReason!,
+                      style: TextStyle(
+                        fontSize: 10,
+                        height: 1.4,
+                        color: isLight ? Colors.black87 : Colors.white70,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 }
 
 /// Widget Interativo que envolve o Gráfico com Suporte a Hover e Gestos (Toques)
@@ -992,7 +1250,7 @@ class _GlassChartWithTooltip extends StatelessWidget {
           onLockedIndexChanged(idx);
         }
 
-        final int? displayIndex = selectedIndex ?? lockedIndex;
+
 
         return Stack(
           children: [
@@ -1022,10 +1280,10 @@ class _GlassChartWithTooltip extends StatelessWidget {
             ),
 
             // Tooltip Flutuante Inteligente (Lado Alternado baseada no cursor)
-            if (displayIndex != null && displayIndex < s1Result.monthlyPositions.length) ...[
+            if (selectedIndex != null && selectedIndex! < s1Result.monthlyPositions.length) ...[
               Builder(
                 builder: (context) {
-                  final idx = displayIndex;
+                  final idx = selectedIndex!;
                   final pos1 = s1Result.monthlyPositions[idx];
                   final pos2 = s2Result.monthlyPositions[idx];
                   final date = dates[idx];
