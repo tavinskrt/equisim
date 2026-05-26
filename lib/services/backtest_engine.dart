@@ -163,6 +163,47 @@ class BacktestEngine {
       }
     }
 
+    // Encontrar o dividendo real mais antigo de FII e seu valor para projetar os meses passados ausentes na API (gap pré-2021)
+    DateTime? oldestFiiDivDate;
+    double oldestKnownFiiDivValue = 0.0;
+    if (fiiDividends.dividends.isNotEmpty) {
+      DateTime? minDate;
+      for (final d in fiiDividends.dividends) {
+        final date = DateTime.tryParse(d.paymentDate);
+        if (date != null && (minDate == null || date.isBefore(minDate))) {
+          minDate = date;
+          oldestKnownFiiDivValue = d.value;
+        }
+      }
+      oldestFiiDivDate = minDate;
+      debugPrint('🔮 [FII BACKWARD PROJECTION CHECK] Oldest Real FII Dividend Date: $oldestFiiDivDate (Value: R\$ $oldestKnownFiiDivValue)');
+    }
+
+    // Projetar dividendos mensais de FII estimados para trás até a data de início caso a API não cubra o período inicial (gap pré-2021)
+    if (oldestFiiDivDate != null && oldestFiiDivDate.isAfter(config.startDate)) {
+      int monthsToSub = 1;
+      debugPrint('🔮 [FII BACKWARD PROJECTION START] Projecting monthly dividends backwards from $oldestFiiDivDate to ${config.startDate}');
+      while (true) {
+        final prevDivDate = DateTime(
+          oldestFiiDivDate.year,
+          oldestFiiDivDate.month - monthsToSub,
+          oldestFiiDivDate.day,
+        );
+        if (prevDivDate.isBefore(config.startDate)) {
+          break;
+        }
+        final String formattedDate = "${prevDivDate.year}-${prevDivDate.month.toString().padLeft(2, '0')}-${prevDivDate.day.toString().padLeft(2, '0')}";
+        unpaidFiiDividends.add(Dividend(
+          exDate: formattedDate,
+          paymentDate: formattedDate,
+          value: oldestKnownFiiDivValue,
+          type: 'COM',
+        ));
+        debugPrint('🔮 [FII BACKWARD PROJECTION ADDED] Projected FII Dividend Date: $formattedDate (Value: R\$ $oldestKnownFiiDivValue)');
+        monthsToSub++;
+      }
+    }
+
     double? prevStockPrice;
     double? prevFiiPrice;
 
@@ -601,6 +642,31 @@ class BacktestEngine {
           ));
           debugPrint('🔮 [GRAHAM FALLBACK FII PROJECTION ADDED] Projected FII Dividend Date: $formattedDate (Value: R\$ $lastKnownFiiDivValue)');
           monthsToAdd++;
+        }
+      }
+
+      // Projetar dividendos mensais de FII estimados para trás no fallback de Graham (gap pré-2021)
+      if (oldestFiiDivDate != null && oldestFiiDivDate.isAfter(config.startDate)) {
+        int monthsToSub = 1;
+        debugPrint('🔮 [GRAHAM FALLBACK FII BACKWARD PROJECTION START] Projecting monthly dividends backwards from $oldestFiiDivDate to ${config.startDate}');
+        while (true) {
+          final prevDivDate = DateTime(
+            oldestFiiDivDate.year,
+            oldestFiiDivDate.month - monthsToSub,
+            oldestFiiDivDate.day,
+          );
+          if (prevDivDate.isBefore(config.startDate)) {
+            break;
+          }
+          final String formattedDate = "${prevDivDate.year}-${prevDivDate.month.toString().padLeft(2, '0')}-${prevDivDate.day.toString().padLeft(2, '0')}";
+          unpaidFiiDividendsGraham.add(Dividend(
+            exDate: formattedDate,
+            paymentDate: formattedDate,
+            value: oldestKnownFiiDivValue,
+            type: 'COM',
+          ));
+          debugPrint('🔮 [GRAHAM FALLBACK FII BACKWARD PROJECTION ADDED] Projected FII Dividend Date: $formattedDate (Value: R\$ $oldestKnownFiiDivValue)');
+          monthsToSub++;
         }
       }
 

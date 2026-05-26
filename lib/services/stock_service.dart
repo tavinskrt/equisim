@@ -164,11 +164,20 @@ class StockService {
 
     if (dividendsList == null || dividendsList.isEmpty) {
       try {
-        final fiiLimit = (limit * 12).clamp(1, 120);
+        final fiiDistData = await _getRequest('/fiis/$ticker/distributions?years=$limit');
+        dividendsList = (fiiDistData['payments'] ?? fiiDistData['dividends'] ?? fiiDistData['distributions'] ?? fiiDistData['payments_history']) as List<dynamic>?;
+      } catch (e) {
+        debugPrint('⚠️ Não foi possível buscar do endpoint de distribuições de FII para $ticker: $e');
+      }
+    }
+
+    if (dividendsList == null || dividendsList.isEmpty) {
+      try {
+        final fiiLimit = (limit * 12).clamp(1, 240);
         final fiiData = await _getRequest('/fiis/$ticker/history?limit=$fiiLimit');
         dividendsList = fiiData['history'] as List<dynamic>?;
       } catch (e) {
-        debugPrint('⚠️ Não foi possível buscar do endpoint de FII para $ticker: $e');
+        debugPrint('⚠️ Não foi possível buscar do endpoint de histórico de FII para $ticker: $e');
       }
     }
 
