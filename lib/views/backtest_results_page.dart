@@ -17,6 +17,7 @@ class BacktestResultsPage extends StatefulWidget {
 
 class _BacktestResultsPageState extends State<BacktestResultsPage> {
   int? _selectedIndex;
+  int? _lockedIndex; // Locked selection index from clicking/tapping
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +45,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     final List<double> s2Values = s2.monthlyPositions.map((p) => p.getAssetValue()).toList();
     final List<String> dates = s1.monthlyPositions.map((p) => DateFormat('dd/MM/yy').format(p.date)).toList();
 
-    final int activeIdx = _selectedIndex ?? (dates.length - 1);
+    final int activeIdx = _selectedIndex ?? _lockedIndex ?? (dates.length - 1);
 
     return Scaffold(
       body: Container(
@@ -120,9 +121,19 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
                                   isLight,
                                   config,
                                   selectedIndex: _selectedIndex,
+                                  lockedIndex: _lockedIndex,
                                   onIndexChanged: (idx) {
                                     setState(() {
                                       _selectedIndex = idx;
+                                    });
+                                  },
+                                  onLockedIndexChanged: (idx) {
+                                    setState(() {
+                                      if (_lockedIndex == idx) {
+                                        _lockedIndex = null;
+                                      } else {
+                                        _lockedIndex = idx;
+                                      }
                                     });
                                   },
                                 ),
@@ -180,9 +191,19 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
                                         isLight,
                                         config,
                                         selectedIndex: _selectedIndex,
+                                        lockedIndex: _lockedIndex,
                                         onIndexChanged: (idx) {
                                           setState(() {
                                             _selectedIndex = idx;
+                                          });
+                                        },
+                                        onLockedIndexChanged: (idx) {
+                                          setState(() {
+                                            if (_lockedIndex == idx) {
+                                              _lockedIndex = null;
+                                            } else {
+                                              _lockedIndex = idx;
+                                            }
                                           });
                                         },
                                       ),
@@ -348,7 +369,9 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     bool isLight,
     BacktestConfig config, {
     required int? selectedIndex,
+    required int? lockedIndex,
     required ValueChanged<int?> onIndexChanged,
+    required ValueChanged<int?> onLockedIndexChanged,
   }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -386,7 +409,9 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
                   dates: dates,
                   isLight: isLight,
                   selectedIndex: selectedIndex,
+                  lockedIndex: lockedIndex,
                   onIndexChanged: onIndexChanged,
+                  onLockedIndexChanged: onLockedIndexChanged,
                 ),
               ),
             ],
@@ -806,7 +831,6 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
 }
 
 /// Widget Interativo que envolve o Gráfico com Suporte a Hover e Gestos (Toques)
-/// Widget Interativo que envolve o Gráfico com Suporte a Hover e Gestos (Toques)
 class _GlassChartWithTooltip extends StatelessWidget {
   final BacktestScenarioResult s1Result;
   final BacktestScenarioResult s2Result;
@@ -816,7 +840,9 @@ class _GlassChartWithTooltip extends StatelessWidget {
   final List<String> dates;
   final bool isLight;
   final int? selectedIndex;
+  final int? lockedIndex;
   final ValueChanged<int?> onIndexChanged;
+  final ValueChanged<int?> onLockedIndexChanged;
 
   const _GlassChartWithTooltip({
     required this.s1Result,
@@ -827,7 +853,9 @@ class _GlassChartWithTooltip extends StatelessWidget {
     required this.dates,
     required this.isLight,
     required this.selectedIndex,
+    required this.lockedIndex,
     required this.onIndexChanged,
+    required this.onLockedIndexChanged,
   });
 
   @override
@@ -835,31 +863,147 @@ class _GlassChartWithTooltip extends StatelessWidget {
     final nf = NumberFormat.currency(locale: 'pt_BR', symbol: r'R$');
     final isLight = this.isLight;
 
+    // Precalculate purchase indices for Scenario 1 and 2
+    final List<int> s1PurchaseIndices = [];
+    for (int i = 0; i < s1Result.operations.length; i++) {
+      final op = s1Result.operations[i];
+      if (op.quantityBought > 0 && op.assetBought != null) {
+        for (int j = 0; j < s1Result.monthlyPositions.length; j++) {
+          final pos = s1Result.monthlyPositions[j];
+          if (pos.date.year == op.operationDate.year &&
+              pos.date.month == op.operationDate.month &&
+              pos.date.day == op.operationDate.day) {
+            s1PurchaseIndices.add(j);
+            break;
+          }
+        }
+      }
+    }
+
+    final List<int> s2StockPurchaseIndices = [];
+    final List<int> s2FiiPurchaseIndices = [];
+    for (int i = 0; i < s2Result.operations.length; i++) {
+      final op = s2Result.operations[i];
+      if (op.quantityBought > 0 && op.assetBought != null) {
+        for (int j = 0; j < s2Result.monthlyPositions.length; j++) {
+          final pos = s2Result.monthlyPositions[j];
+          if (pos.date.year == op.operationDate.year &&
+              pos.date.month == op.operationDate.month &&
+              pos.date.day == op.operationDate.day) {
+            if (op.assetBought == 'STOCK') {
+              s2StockPurchaseIndices.add(j);
+            } else if (op.assetBought == 'FII') {
+              s2FiiPurchaseIndices.add(j);
+            }
+            break;
+          }
+        }
+      }
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         const double paddingLeft = 60.0;
         const double paddingRight = 10.0;
-        final double width = constraints.maxWidth - paddingLeft - paddingRight;
+        const double paddingTop = 10.0;
+        const double paddingBottom = 30.0;
 
-        void updateSelection(double localX) {
+        final double width = constraints.maxWidth - paddingLeft - paddingRight;
+        final double height = constraints.maxHeight - paddingTop - paddingBottom;
+
+        final double maxVal = s1.isEmpty ? 0 : s1.reduce(max);
+        final double minVal = s1.isEmpty ? 0 : s1.reduce(min);
+        final double globalMax = s2.isEmpty ? maxVal : max(maxVal, s2.reduce(max));
+        final double globalMin = s2.isEmpty ? minVal : min(minVal, s2.reduce(min));
+
+        final double valRange = (globalMax - globalMin) > 0 ? (globalMax - globalMin) : 1.0;
+        final double yScaler = height / (valRange * 1.1);
+
+        // Helper to find nearest purchase dot if click or hover is close to it
+        int? findNearestPurchaseIndex(Offset localPosition, double width) {
+          const double maxDistance = 25.0; // snapping radius in pixels
+          int? bestIndex;
+          double bestDistance = double.infinity;
+
+          // Helper to check Scenario 1 purchase dots
+          for (final idx in s1PurchaseIndices) {
+            if (idx >= s1.length) continue;
+            final double x = paddingLeft + (idx * (width / (dates.length - 1)));
+            final double y = paddingTop + height - ((s1[idx] - globalMin) * yScaler);
+            final double dist = (localPosition - Offset(x, y)).distance;
+            if (dist < maxDistance && dist < bestDistance) {
+              bestDistance = dist;
+              bestIndex = idx;
+            }
+          }
+
+          // Helper to check Scenario 2 stock purchase dots
+          for (final idx in s2StockPurchaseIndices) {
+            if (idx >= s2.length) continue;
+            final double x = paddingLeft + (idx * (width / (dates.length - 1)));
+            final double y = paddingTop + height - ((s2[idx] - globalMin) * yScaler);
+            final double dist = (localPosition - Offset(x, y)).distance;
+            if (dist < maxDistance && dist < bestDistance) {
+              bestDistance = dist;
+              bestIndex = idx;
+            }
+          }
+
+          // Helper to check Scenario 2 fii purchase dots
+          for (final idx in s2FiiPurchaseIndices) {
+            if (idx >= s2.length) continue;
+            final double x = paddingLeft + (idx * (width / (dates.length - 1)));
+            final double y = paddingTop + height - ((s2[idx] - globalMin) * yScaler);
+            final double dist = (localPosition - Offset(x, y)).distance;
+            if (dist < maxDistance && dist < bestDistance) {
+              bestDistance = dist;
+              bestIndex = idx;
+            }
+          }
+
+          return bestIndex;
+        }
+
+        void updateHoverSelection(Offset localPosition) {
           if (width <= 0 || dates.isEmpty) return;
-          final double pct = (localX - paddingLeft) / width;
-          final int idx = (pct * (dates.length - 1)).round().clamp(0, dates.length - 1);
+          final int? purchaseIdx = findNearestPurchaseIndex(localPosition, width);
+          int idx;
+          if (purchaseIdx != null) {
+            idx = purchaseIdx;
+          } else {
+            final double pct = (localPosition.dx - paddingLeft) / width;
+            idx = (pct * (dates.length - 1)).round().clamp(0, dates.length - 1);
+          }
           if (selectedIndex != idx) {
             onIndexChanged(idx);
           }
         }
 
+        void handleTap(Offset localPosition) {
+          if (width <= 0 || dates.isEmpty) return;
+          final int? purchaseIdx = findNearestPurchaseIndex(localPosition, width);
+          int idx;
+          if (purchaseIdx != null) {
+            idx = purchaseIdx;
+          } else {
+            final double pct = (localPosition.dx - paddingLeft) / width;
+            idx = (pct * (dates.length - 1)).round().clamp(0, dates.length - 1);
+          }
+          onLockedIndexChanged(idx);
+        }
+
+        final int? displayIndex = selectedIndex ?? lockedIndex;
+
         return Stack(
           children: [
             MouseRegion(
-              onHover: (event) => updateSelection(event.localPosition.dx),
+              onHover: (event) => updateHoverSelection(event.localPosition),
               onExit: (_) {
                 onIndexChanged(null);
               },
               child: GestureDetector(
-                onTapDown: (details) => updateSelection(details.localPosition.dx),
-                onPanUpdate: (details) => updateSelection(details.localPosition.dx),
+                onTapDown: (details) => handleTap(details.localPosition),
+                onPanUpdate: (details) => updateHoverSelection(details.localPosition),
                 child: CustomPaint(
                   size: Size(constraints.maxWidth, constraints.maxHeight),
                   painter: _PortfolioChartPainter(
@@ -868,16 +1012,20 @@ class _GlassChartWithTooltip extends StatelessWidget {
                     dates: dates,
                     isLight: isLight,
                     selectedIndex: selectedIndex,
+                    lockedIndex: lockedIndex,
+                    s1PurchaseIndices: s1PurchaseIndices,
+                    s2StockPurchaseIndices: s2StockPurchaseIndices,
+                    s2FiiPurchaseIndices: s2FiiPurchaseIndices,
                   ),
                 ),
               ),
             ),
 
             // Tooltip Flutuante Inteligente (Lado Alternado baseada no cursor)
-            if (selectedIndex != null && selectedIndex! < s1Result.monthlyPositions.length) ...[
+            if (displayIndex != null && displayIndex < s1Result.monthlyPositions.length) ...[
               Builder(
                 builder: (context) {
-                  final idx = selectedIndex!;
+                  final idx = displayIndex;
                   final pos1 = s1Result.monthlyPositions[idx];
                   final pos2 = s2Result.monthlyPositions[idx];
                   final date = dates[idx];
@@ -925,13 +1073,24 @@ class _GlassChartWithTooltip extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                'Data: $date',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary(isLight),
-                                ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Data: $date',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary(isLight),
+                                    ),
+                                  ),
+                                  if (lockedIndex == idx)
+                                    Icon(
+                                      Icons.lock,
+                                      size: 10,
+                                      color: AppColors.primary,
+                                    ),
+                                ],
                               ),
                               const Divider(height: 10),
                               
@@ -961,7 +1120,7 @@ class _GlassChartWithTooltip extends StatelessWidget {
                                       : 'Nenhum (Saldo Insuficiente)',
                                   isLight,
                                   fontSize: 9.5,
-                                  color: const Color(0xFF00B37E),
+                                  color: op.assetBought == 'STOCK' ? const Color(0xFF00B37E) : const Color(0xFFF59E0B),
                                   isBold: true,
                                 ),
                                 if (op.valuationFormulaValue != null && op.valuationFormulaValue! > 0)
@@ -1036,6 +1195,10 @@ class _PortfolioChartPainter extends CustomPainter {
   final List<String> dates;
   final bool isLight;
   final int? selectedIndex;
+  final int? lockedIndex;
+  final List<int> s1PurchaseIndices;
+  final List<int> s2StockPurchaseIndices;
+  final List<int> s2FiiPurchaseIndices;
 
   _PortfolioChartPainter({
     required this.s1,
@@ -1043,6 +1206,10 @@ class _PortfolioChartPainter extends CustomPainter {
     required this.dates,
     required this.isLight,
     this.selectedIndex,
+    this.lockedIndex,
+    required this.s1PurchaseIndices,
+    required this.s2StockPurchaseIndices,
+    required this.s2FiiPurchaseIndices,
   });
 
   @override
@@ -1177,10 +1344,79 @@ class _PortfolioChartPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     canvas.drawPath(path2, linePaint2);
 
+    // --- DESENHAR PONTOS DE COMPRA (INTERATIVOS) ---
+    final Paint markerBorderPaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    // 1. Cenário 1: Buy & Hold (Aportes Mensais regulares)
+    final Paint s1MarkerPaint = Paint()
+      ..color = isLight ? const Color(0xFF94A3B8) : const Color(0xFF64748B)
+      ..style = PaintingStyle.fill;
+    for (final idx in s1PurchaseIndices) {
+      if (idx < s1Points.length) {
+        final pt = s1Points[idx];
+        canvas.drawCircle(pt, 4.0, s1MarkerPaint);
+        canvas.drawCircle(pt, 4.0, markerBorderPaint);
+      }
+    }
+
+    // 2. Cenário 2: Compra de Ação (Valuation Batido)
+    final Paint s2StockMarkerPaint = Paint()
+      ..color = const Color(0xFF00CC8F) // Vibrant emerald green for stock buy
+      ..style = PaintingStyle.fill;
+    for (final idx in s2StockPurchaseIndices) {
+      if (idx < s2Points.length) {
+        final pt = s2Points[idx];
+        canvas.drawCircle(pt, 4.5, s2StockMarkerPaint);
+        canvas.drawCircle(pt, 4.5, markerBorderPaint);
+      }
+    }
+
+    // 3. Cenário 2: Compra de FII (Safe Haven)
+    final Paint s2FiiMarkerPaint = Paint()
+      ..color = const Color(0xFFF59E0B) // Vibrant gold/orange for FII buy
+      ..style = PaintingStyle.fill;
+    for (final idx in s2FiiPurchaseIndices) {
+      if (idx < s2Points.length) {
+        final pt = s2Points[idx];
+        canvas.drawCircle(pt, 4.5, s2FiiMarkerPaint);
+        canvas.drawCircle(pt, 4.5, markerBorderPaint);
+      }
+    }
+
+    // --- DESENHAR DESTAQUE DO PONTO BLOQUEADO/SELECIONADO (LOCKED INDEX) ---
+    if (lockedIndex != null && lockedIndex! < s1Points.length) {
+      final Offset pt1 = s1Points[lockedIndex!];
+      final Offset pt2 = s2Points[lockedIndex!];
+
+      // Cenário 1 Locked Glow Ring
+      canvas.drawCircle(
+        pt1,
+        8.0,
+        Paint()
+          ..color = (isLight ? Colors.black26 : Colors.white30).withValues(alpha: 0.3)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0,
+      );
+
+      // Cenário 2 Locked Glow Ring
+      canvas.drawCircle(
+        pt2,
+        9.0,
+        Paint()
+          ..color = AppColors.primary.withValues(alpha: 0.4)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0,
+      );
+    }
+
     // --- DESENHAR LINHAS E PONTOS DO HOVER/SELEÇÃO INTERATIVA ---
-    if (selectedIndex != null && selectedIndex! < s1Points.length) {
-      final Offset pt1 = s1Points[selectedIndex!];
-      final Offset pt2 = s2Points[selectedIndex!];
+    final int? activeHighlightIdx = selectedIndex ?? lockedIndex;
+    if (activeHighlightIdx != null && activeHighlightIdx < s1Points.length) {
+      final Offset pt1 = s1Points[activeHighlightIdx];
+      final Offset pt2 = s2Points[activeHighlightIdx];
 
       // Desenhar Linha Vertical Tracejada de Seleção
       final Paint dashedPaint = Paint()
@@ -1199,12 +1435,12 @@ class _PortfolioChartPainter extends CustomPainter {
 
       // Desenhar Pontos de Interseção
       // Cenário 1 (Apenas Ações)
-      canvas.drawCircle(pt1, 5.0, Paint()..color = isLight ? Colors.black45 : Colors.white60);
-      canvas.drawCircle(pt1, 3.0, Paint()..color = Colors.white);
+      canvas.drawCircle(pt1, 5.5, Paint()..color = isLight ? Colors.black45 : Colors.white60);
+      canvas.drawCircle(pt1, 3.5, Paint()..color = Colors.white);
 
       // Cenário 2 (Valuation)
-      canvas.drawCircle(pt2, 6.0, Paint()..color = AppColors.primary);
-      canvas.drawCircle(pt2, 3.0, Paint()..color = Colors.white);
+      canvas.drawCircle(pt2, 6.5, Paint()..color = AppColors.primary);
+      canvas.drawCircle(pt2, 3.5, Paint()..color = Colors.white);
     }
   }
 

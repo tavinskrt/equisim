@@ -1033,13 +1033,13 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
             constraints: const BoxConstraints(maxHeight: 180),
             decoration: BoxDecoration(
               color: isLight 
-                  ? Colors.white.withOpacity(0.96) 
+                  ? Colors.white.withValues(alpha: 0.96) 
                   : const Color(0xDC1A2744),
               border: Border.all(color: AppColors.surfaceBorder(isLight)),
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.12),
+                  color: Colors.black.withValues(alpha: 0.12),
                   blurRadius: 16,
                   offset: const Offset(0, 4),
                 )

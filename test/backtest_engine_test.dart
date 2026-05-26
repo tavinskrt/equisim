@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -393,6 +392,153 @@ BOLSAI_BASE_URL=https://api.usebolsai.com/api/v1
         final op = result.scenario2.operations.first;
         expect(op.valuationFormulaValue!.isFinite, true);
       }, () => mockClient);
+    });
+
+    group('Valuation Mathematical Precision Tests (Theoretical Equations)', () {
+      test('Graham Formula - should calculate exact value of sqrt(22.5 * LPA * VPA)', () async {
+        final mockClient = MockClient((request) async {
+          final path = request.url.path;
+          if (path.contains('/fundamentals/PETR4')) {
+            return http.Response(jsonEncode({
+              'eps': 2.0, 'lpa': 2.0, 'vpa': 10.0, 'pl': 5.0, 'pbv': 1.0, 
+              'roe': 20.0, 'roic': 15.0, 'dividend_yield': 0.0, 'market_cap': 1000000.0,
+              'liabilities': 500000.0, 'equity': 500000.0, 'revenue': 1000000.0, 'net_income': 100000.0
+            }), 200);
+          }
+          if (path.contains('/stocks/PETR4/history') || path.contains('/stocks/MXRF11/history')) {
+            return http.Response(jsonEncode({
+              'prices': [{'date': '2026-05-01', 'open': 10.0, 'high': 10.0, 'low': 10.0, 'close': 10.0, 'volume': 100}]
+            }), 200);
+          }
+          if (path.contains('/fiis/MXRF11')) {
+            return http.Response(jsonEncode({
+              'ticker': 'MXRF11', 'name': 'MXRF11', 'reference_date': '2026-05-01',
+              'close_price': 10.0, 'book_value_per_share': 10.0, 'pvp': 1.0, 'dividend_yield_ttm': 0.0,
+              'net_asset_value': 100000.0, 'shares_outstanding': 10000.0, 'segment': 'Papel', 'vacancy_pct': 0.0, 'delinquency_pct': 0.0
+            }), 200);
+          }
+          return http.Response(jsonEncode({'payments': [], 'events': []}), 200);
+        });
+
+        await http.runWithClient(() async {
+          final engine = BacktestEngine();
+          final config = BacktestConfig(
+            stockTicker: 'PETR4',
+            fiiTicker: 'MXRF11',
+            startDate: DateTime(2026, 5, 1),
+            endDate: DateTime(2026, 5, 1), // Mesma data -> yearsFromEnd = 0
+            monthlyInvestment: 100.0,
+            valuationMethod: ValuationMethod.graham,
+            safetyMargin: 0.0, // Sem margem de segurança para testar o valor cheio
+            diaCompra: 1,
+            considerarReinvestimento: false,
+          );
+
+          final result = await engine.runBacktest(config);
+          final op = result.scenario2.operations.first;
+
+          // Teoria de Graham: sqrt(22.5 * LPA * VPA) = sqrt(22.5 * 2.0 * 10.0) = sqrt(450.0) = 21.2132
+          expect(op.fairValue, closeTo(21.2132, 0.001));
+        }, () => mockClient);
+      });
+
+      test('Bazin Formula - should calculate exact value of Dividend / (desiredRate / 100)', () async {
+        final mockClient = MockClient((request) async {
+          final path = request.url.path;
+          if (path.contains('/fundamentals/PETR4')) {
+            return http.Response(jsonEncode({
+              'eps': 2.0, 'lpa': 2.0, 'vpa': 10.0, 'pl': 5.0, 'pbv': 1.0, 
+              'roe': 20.0, 'roic': 15.0, 
+              'dividend_yield': 8.0, // dyield = 8% -> Dividend = 10.0 * 0.08 = 0.8
+              'market_cap': 1000000.0, 'liabilities': 500000.0, 'equity': 500000.0, 'revenue': 1000000.0, 'net_income': 100000.0
+            }), 200);
+          }
+          if (path.contains('/stocks/PETR4/history') || path.contains('/stocks/MXRF11/history')) {
+            return http.Response(jsonEncode({
+              'prices': [{'date': '2026-05-01', 'open': 10.0, 'high': 10.0, 'low': 10.0, 'close': 10.0, 'volume': 100}]
+            }), 200);
+          }
+          if (path.contains('/fiis/MXRF11')) {
+            return http.Response(jsonEncode({
+              'ticker': 'MXRF11', 'name': 'MXRF11', 'reference_date': '2026-05-01',
+              'close_price': 10.0, 'book_value_per_share': 10.0, 'pvp': 1.0, 'dividend_yield_ttm': 0.0,
+              'net_asset_value': 100000.0, 'shares_outstanding': 10000.0, 'segment': 'Papel', 'vacancy_pct': 0.0, 'delinquency_pct': 0.0
+            }), 200);
+          }
+          return http.Response(jsonEncode({'payments': [], 'events': []}), 200);
+        });
+
+        await http.runWithClient(() async {
+          final engine = BacktestEngine();
+          final config = BacktestConfig(
+            stockTicker: 'PETR4',
+            fiiTicker: 'MXRF11',
+            startDate: DateTime(2026, 5, 1),
+            endDate: DateTime(2026, 5, 1),
+            monthlyInvestment: 100.0,
+            valuationMethod: ValuationMethod.bazin,
+            desiredRate: 6.0, // Taxa desejada de 6%
+            diaCompra: 1,
+            considerarReinvestimento: false,
+            safetyMargin: 0.0,
+          );
+
+          final result = await engine.runBacktest(config);
+          final op = result.scenario2.operations.first;
+
+          // Teoria de Bazin: Div / Taxa = 0.8 / 0.06 = 13.3333
+          expect(op.fairValue, closeTo(13.3333, 0.001));
+        }, () => mockClient);
+      });
+
+      test('Peter Lynch Formula - should calculate exact value of (ROE + DY) / PE', () async {
+        final mockClient = MockClient((request) async {
+          final path = request.url.path;
+          if (path.contains('/fundamentals/PETR4')) {
+            return http.Response(jsonEncode({
+              'eps': 2.0, 'lpa': 2.0, 'vpa': 10.0, 'pl': 5.0, 'pbv': 1.0, 
+              'roe': 15.0, // ROE = 15%
+              'roic': 15.0, 'dividend_yield': 0.0, 'market_cap': 1000000.0,
+              'liabilities': 500000.0, 'equity': 500000.0, 'revenue': 1000000.0, 'net_income': 100000.0
+            }), 200);
+          }
+          if (path.contains('/stocks/PETR4/history') || path.contains('/stocks/MXRF11/history')) {
+            // Preço da ação = 10.0 -> PE = Price/LPA = 10.0/2.0 = 5.0
+            return http.Response(jsonEncode({
+              'prices': [{'date': '2026-05-01', 'open': 10.0, 'high': 10.0, 'low': 10.0, 'close': 10.0, 'volume': 100}]
+            }), 200);
+          }
+          if (path.contains('/fiis/MXRF11')) {
+            return http.Response(jsonEncode({
+              'ticker': 'MXRF11', 'name': 'MXRF11', 'reference_date': '2026-05-01',
+              'close_price': 10.0, 'book_value_per_share': 10.0, 'pvp': 1.0, 'dividend_yield_ttm': 0.0,
+              'net_asset_value': 100000.0, 'shares_outstanding': 10000.0, 'segment': 'Papel', 'vacancy_pct': 0.0, 'delinquency_pct': 0.0
+            }), 200);
+          }
+          return http.Response(jsonEncode({'payments': [], 'events': []}), 200);
+        });
+
+        await http.runWithClient(() async {
+          final engine = BacktestEngine();
+          final config = BacktestConfig(
+            stockTicker: 'PETR4',
+            fiiTicker: 'MXRF11',
+            startDate: DateTime(2026, 5, 1),
+            endDate: DateTime(2026, 5, 1),
+            monthlyInvestment: 100.0,
+            valuationMethod: ValuationMethod.peterLynch,
+            diaCompra: 1,
+            considerarReinvestimento: false,
+            safetyMargin: 0.0,
+          );
+
+          final result = await engine.runBacktest(config);
+          final op = result.scenario2.operations.first;
+
+          // Teoria de Peter Lynch: (ROE + DY) / PE = (15.0 + 0.0) / 5.0 = 3.0
+          expect(op.valuationFormulaValue, closeTo(3.0, 0.001));
+        }, () => mockClient);
+      });
     });
   });
 }
