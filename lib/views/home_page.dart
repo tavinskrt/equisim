@@ -119,6 +119,35 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
     final user = FirebaseAuth.instance.currentUser;
     final userEmail = user?.email ?? 'usuario@email.com';
 
+    // Disparar SnackBar de conversão/renomeação de ticker de forma reativa
+    if (controller.renamedMessage != null) {
+      final msg = controller.renamedMessage!;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Colors.white, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      msg,
+                      style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: const Color(0xFF2563EB), // Azul elegante
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      });
+      controller.clearRenamedMessage();
+    }
+
     return Scaffold(
       body: GestureDetector(
         onTap: () {
@@ -293,6 +322,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                     });
                                   },
                                   isLight: isLight,
+                                  errorText: controller.stockError,
                                 ),
                                 
                                 const SizedBox(height: 16),
@@ -322,6 +352,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                     });
                                   },
                                   isLight: isLight,
+                                  errorText: controller.fiiError,
                                 ),
                               ],
                             ),
@@ -977,6 +1008,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
     required bool showSuggestions,
     required VoidCallback onFocus,
     required bool isLight,
+    String? errorText,
   }) {
     final query = controller.text.toUpperCase().trim();
     
@@ -1088,6 +1120,21 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                     ),
                   );
                 },
+              ),
+            ),
+          ),
+        ],
+
+        if (errorText != null) ...[
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Text(
+              errorText,
+              style: const TextStyle(
+                color: Color(0xFFEF4444),
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

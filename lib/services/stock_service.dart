@@ -222,6 +222,26 @@ class StockService {
     }
   }
 
+  static const List<String> _stockUnitsWhitelist = [
+    'ALUP11', 'BPAC11', 'CPLE11', 'ENGI11', 'JALL11', 'KLBN11', 'PPLA11',
+    'RNEW11', 'SANB11', 'SAPR11', 'TAEE11', 'UNIP11'
+  ];
+
+  // Método específico para buscar o histórico de tickers e renomeações.
+  Future<Map<String, dynamic>?> fetchTickerHistory(String ticker) async {
+    try {
+      final data = await _getRequest('/stocks/$ticker/ticker-history');
+      return data as Map<String, dynamic>?;
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw ServerException(
+        message: 'Erro ao buscar histórico do ticker $ticker: $e',
+        originalError: e,
+       );
+    }
+  }
+
   /// Busca todos os tickers de Ações da B3 com paginação e cache local.
   Future<List<String>> fetchAllStockTickers() async {
     if (_cachedStockTickers != null) {
@@ -245,10 +265,20 @@ class StockService {
         }
       }
 
-      // Remove tickers inválidos (ex: com espaço) e filtra pra manter consistência
+      final stockFormat = RegExp(r'^[A-Z]{4}(3|4|5|6|7|8|11)$');
+
+      // Filtra os tickers para manter apenas ativos válidos (excluindo BDRs, ETFs e FIIs)
       final cleanTickers = tickers
           .where((t) => t.isNotEmpty && !t.contains(' '))
           .map((t) => t.trim().toUpperCase())
+          .where((t) {
+            if (!stockFormat.hasMatch(t)) return false;
+            // Se terminar em 11, precisa ser uma das Units corporativas da whitelist
+            if (t.endsWith('11')) {
+              return _stockUnitsWhitelist.contains(t);
+            }
+            return true;
+          })
           .toList();
 
       cleanTickers.sort();
@@ -268,10 +298,14 @@ class StockService {
     try {
       final data = await _getRequest('/fiis/?limit=1000');
       final List<dynamic> fiisList = data['fiis'] ?? [];
+      
+      final fiiFormat = RegExp(r'^[A-Z]{4}11$');
+
       final tickers = fiisList
           .map((item) => item['ticker'] as String? ?? '')
           .where((t) => t.isNotEmpty && !t.contains(' '))
           .map((t) => t.trim().toUpperCase())
+          .where((t) => fiiFormat.hasMatch(t))
           .toList();
 
       tickers.sort();

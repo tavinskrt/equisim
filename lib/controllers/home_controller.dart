@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/stock_service.dart';
+import '../models/exceptions.dart';
 
 class HomeController extends ChangeNotifier {
   String stockTicker = '';
@@ -16,6 +17,14 @@ class HomeController extends ChangeNotifier {
   List<String> allStocks = [];
   List<String> allFiis = [];
   bool isLoadingTickers = false;
+
+  String? stockError;
+  String? fiiError;
+  String? renamedMessage;
+
+  void clearRenamedMessage() {
+    renamedMessage = null;
+  }
 
   HomeController() {
     loadTickers();
@@ -142,18 +151,65 @@ class HomeController extends ChangeNotifier {
 
     final currentStock = stockTicker;
     final currentFii = fiiTicker;
+    String resolvedStock = currentStock;
+    String resolvedFii = currentFii;
 
     _isFetchingDates = true;
+    stockError = null;
+    fiiError = null;
     notifyListeners();
 
     try {
       final stockService = StockService();
+
+      // 1. Validar histórico do Stock
+      try {
+        final history = await stockService.fetchTickerHistory(currentStock);
+        if (history != null) {
+          final currentTicker = history['current_ticker'] as String?;
+          if (currentTicker != null && currentTicker != currentStock) {
+            resolvedStock = currentTicker;
+            renamedMessage = "O ativo '$currentStock' foi renomeado para '$currentTicker' e atualizado automaticamente.";
+            stockTicker = currentTicker;
+            notifyListeners();
+          }
+        }
+      } on NotFoundException {
+        stockError = "Ação não encontrada ou inexistente.";
+        _isFetchingDates = false;
+        notifyListeners();
+        return;
+      } catch (e) {
+        debugPrint('Erro ao validar histórico de stock: $e');
+      }
+
+      // 2. Validar FII
+      try {
+        await stockService.fetchFiiFundamentals(currentFii);
+      } on NotFoundException {
+        fiiError = "FII não encontrado ou inexistente.";
+        _isFetchingDates = false;
+        notifyListeners();
+        return;
+      } catch (e) {
+        debugPrint('Erro ao validar FII: $e');
+      }
+
+      // Se o usuário mudou o ticker no meio do caminho para algo diferente do resolvido, ignora
+      if ((stockTicker != currentStock && stockTicker != resolvedStock) ||
+          (fiiTicker != currentFii && fiiTicker != resolvedFii)) {
+        return;
+      }
+
       final results = await Future.wait([
-        stockService.fetchStocksPrice(currentStock),
-        stockService.fetchStocksPrice(currentFii),
+        stockService.fetchStocksPrice(resolvedStock),
+        stockService.fetchStocksPrice(resolvedFii),
       ]);
 
-      if (stockTicker != currentStock || fiiTicker != currentFii) return;
+      if ((stockTicker != currentStock && stockTicker != resolvedStock) ||
+          (fiiTicker != currentFii && fiiTicker != resolvedFii)) {
+        return;
+      }
 
       final stockPrices = results[0];
       final fiiPrices = results[1];
@@ -179,8 +235,12 @@ class HomeController extends ChangeNotifier {
       endDate = today;
     } catch (e) {
       debugPrint('Error fetching ticker dates: $e');
+      if (e.toString().contains('NotFoundException') || e.toString().contains('não encontrado')) {
+        stockError = "Erro ao buscar dados históricos do ativo.";
+      }
     } finally {
-      if (stockTicker == currentStock && fiiTicker == currentFii) {
+      if ((stockTicker == currentStock || stockTicker == resolvedStock) &&
+          (fiiTicker == currentFii || fiiTicker == resolvedFii)) {
         _isFetchingDates = false;
         notifyListeners();
       }
