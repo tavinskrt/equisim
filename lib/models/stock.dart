@@ -1,3 +1,4 @@
+/// Representa a cotação diária de fechamento e volume de negociação de um ativo.
 class StockPrice {
   final String date;
   final double open;
@@ -15,6 +16,7 @@ class StockPrice {
     required this.volume,
   });
 
+  /// Instancia o histórico de preços diários a partir do JSON da API BolsaI.
   factory StockPrice.fromJson(Map<String, dynamic> json) {
     return StockPrice(
       date: json['trade_date'] ?? json['date'] ?? '',
@@ -27,21 +29,21 @@ class StockPrice {
   }
 }
 
-
+/// Modelo para armazenamento dos dados e indicadores fundamentalistas de Ações da B3.
 class StockFundamentals {
-  final double eps;
-  final double lpa;
-  final double vpa;
-  final double pl;
-  final double pbv;
-  final double roe;
-  final double roic;
-  final double dyield;
-  final double marketCap;
-  final double liabilities;
-  final double equity;
-  final double revenue;
-  final double netIncome;
+  final double eps; // LPA consolidado
+  final double lpa; // LPA do TTM consolidado (Lucro Por Ação)
+  final double vpa; // VPA consolidado (Valor Patrimonial por Ação)
+  final double pl; // P/L (Preço sobre Lucro)
+  final double pbv; // P/VP (Preço sobre Valor Patrimonial)
+  final double roe; // ROE % (Retorno sobre Patrimônio Líquido)
+  final double roic; // ROIC % (Retorno sobre Capital Investido)
+  final double dyield; // Dividend Yield anualizado (%)
+  final double marketCap; // Valor de mercado total da empresa
+  final double liabilities; // Passivo total
+  final double equity; // Patrimônio Líquido consolidado
+  final double revenue; // Receita líquida anualizada
+  final double netIncome; // Lucro líquido anualizado
 
   StockFundamentals({
     required this.eps,
@@ -59,6 +61,7 @@ class StockFundamentals {
     required this.netIncome,
   });
 
+  /// Instancia os fundamentos de ações a partir do JSON da API Bolsai.
   factory StockFundamentals.fromJson(Map<String, dynamic> json) {
     return StockFundamentals(
       eps: (json['eps'] as num?)?.toDouble() ?? 0.0,

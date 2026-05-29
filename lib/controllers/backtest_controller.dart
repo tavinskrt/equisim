@@ -2,18 +2,18 @@ import 'package:flutter/foundation.dart';
 import '../models/backtest.dart';
 import '../services/backtest_engine.dart';
 
-/// Controller para gerenciar o estado do backtest
+/// Controlador responsável pelo gerenciamento de estado das simulações de backtest.
 class BacktestController extends ChangeNotifier {
   bool _isLoading = false;
   BacktestResult? _lastResult;
 
-  /// Indica se um backtest está em execução
+  /// Retorna se há um backtest ativo sendo processado em segundo plano.
   bool get isLoading => _isLoading;
 
-  /// Último resultado de backtest executado
+  /// Retorna o último resultado de simulação gerado.
   BacktestResult? get lastResult => _lastResult;
 
-  /// Executa um backtest com a configuração fornecida
+  /// Executa o processamento do backtest histórico assincronamente.
   Future<bool> executeBacktest(BacktestConfig config) async {
     _isLoading = true;
     notifyListeners();
@@ -24,7 +24,7 @@ class BacktestController extends ChangeNotifier {
       _lastResult = result;
       return true;
     } catch (e) {
-      debugPrint('Erro ao executar backtest: $e');
+      debugPrint('Falha ao processar simulação de backtest: $e');
       return false;
     } finally {
       _isLoading = false;
@@ -32,7 +32,7 @@ class BacktestController extends ChangeNotifier {
     }
   }
 
-  /// Limpa o último resultado
+  /// Limpa o histórico do último resultado armazenado localmente.
   void clearResult() {
     _lastResult = null;
     notifyListeners();

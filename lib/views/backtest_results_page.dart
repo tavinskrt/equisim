@@ -8,6 +8,7 @@ import '../controllers/theme_controller.dart';
 import '../models/backtest.dart';
 import '../utils/app_colors.dart';
 
+/// Tela de exibição dos resultados comparativos consolidados das simulações.
 class BacktestResultsPage extends StatefulWidget {
   const BacktestResultsPage({super.key});
 
@@ -17,7 +18,7 @@ class BacktestResultsPage extends StatefulWidget {
 
 class _BacktestResultsPageState extends State<BacktestResultsPage> {
   int? _selectedIndex;
-  int? _lockedIndex; // Locked selection index from clicking/tapping
+  int? _lockedIndex; // Índice selecionado/fixado por clique na tela
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +41,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
 
     final numberFormat = NumberFormat.currency(locale: 'pt_BR', symbol: r'R$');
 
-    // Preparar dados do gráfico
+    // Mapeamento dos valores históricos para plotagem
     final List<double> s1Values = s1.monthlyPositions.map((p) => p.getAssetValue()).toList();
     final List<double> s2Values = s2.monthlyPositions.map((p) => p.getAssetValue()).toList();
     final List<String> dates = s1.monthlyPositions.map((p) => DateFormat('dd/MM/yy').format(p.date)).toList();
@@ -58,7 +59,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
+              // Barra de navegação superior (Header)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                 child: Row(
@@ -92,19 +93,19 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
                 ),
               ),
 
-              // Corpo Principal Responsivo
+              // Layout adaptável baseado no tamanho do dispositivo
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final isWide = constraints.maxWidth > 800;
 
                     final List<Widget> content = [
-                      // Esquerda: Gráfico
+                      // Seção esquerda: Visualização Gráfica
                       Expanded(
                         flex: isWide ? 3 : 0,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
+                           crossAxisAlignment: CrossAxisAlignment.stretch,
+                           children: [
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                               child: _buildWinnerCard(result, isLight),
@@ -143,7 +144,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
                         ),
                       ),
 
-                      // Direita: Painel Numérico
+                      // Seção direita: Métricas e Resumos Detalhados
                       Expanded(
                         flex: isWide ? 2 : 0,
                         child: SingleChildScrollView(
@@ -260,12 +261,13 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     );
   }
 
+  /// Constrói o card informativo com a identificação da melhor carteira
   Widget _buildWinnerCard(BacktestResult result, bool isLight) {
     final w = result.getWinner();
     final diff = result.getAbsoluteDifference();
     final diffPct = result.getPercentageDifference();
     
-    // Identificar equivalência/empate se a diferença patrimonial for menor que R$ 5,00
+    // Define o estado de empate técnico se a diferença for insignificante (menor que R$ 5,00)
     final bool isTie = diff < 5.0;
 
     if (isTie) {
@@ -305,7 +307,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
                     ),
                   ),
                   Text(
-                    'Ambos os Cenários Empatados',
+                    'Ambos os cenários empataram',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isLight)),
                   ),
                 ],
@@ -319,7 +321,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isLight)),
                 ),
                 Text(
-                  'Diferença irrelevante',
+                  'Diferença insignificante',
                   style: TextStyle(fontSize: 10, color: AppColors.textSecondary(isLight)),
                 ),
               ],
@@ -360,7 +362,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Cenário Vencedor',
+                  'CENÁRIO VENCEDOR',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -383,7 +385,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF00B37E)),
               ),
               Text(
-                '${diffPct.toStringAsFixed(4)}% a mais',
+                '${diffPct.toStringAsFixed(2)}% a mais',
                 style: TextStyle(fontSize: 10, color: AppColors.textSecondary(isLight)),
               ),
             ],
@@ -393,6 +395,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     );
   }
 
+  /// Constrói o container em vidro (Glassmorphism) para abrigar o gráfico
   Widget _buildGlassChartContainer(
     BacktestScenarioResult s1Result,
     BacktestScenarioResult s2Result,
@@ -420,7 +423,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Legenda do gráfico
+              // Legendas do gráfico
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -431,7 +434,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
               ),
               const SizedBox(height: 14),
               
-              // Canvas do gráfico Interativo com Hover e Toque
+              // Canvas do gráfico interativo
               Expanded(
                 child: _GlassChartWithTooltip(
                   s1Result: s1Result,
@@ -454,6 +457,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     );
   }
 
+  /// Constrói cada indicador de legenda
   Widget _buildLegendItem(String label, Color color, bool isGradient) {
     return Row(
       children: [
@@ -475,6 +479,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     );
   }
 
+  /// Tabela comparativa detalhada de rentabilidades
   Widget _buildComparisonTable(
     BacktestScenarioResult s1,
     BacktestScenarioResult s2,
@@ -483,39 +488,31 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     NumberFormat nf,
     bool isLight,
   ) {
-    // Current positions at activeIdx
     final pos1 = s1.monthlyPositions[activeIdx];
     final pos2 = s2.monthlyPositions[activeIdx];
     final DateTime currentDate = pos1.date;
 
-    // Current portfolio values
     final double val1 = pos1.getTotalValue();
     final double val2 = pos2.getTotalValue();
 
-    // Total invested up to activeIdx (filtered by operationDate)
     final double totalInvested1 = s1.operations.where((op) => !op.operationDate.isAfter(currentDate)).fold(0.0, (sum, op) => sum + op.monthlyInvestment);
     final double totalInvested2 = s2.operations.where((op) => !op.operationDate.isAfter(currentDate)).fold(0.0, (sum, op) => sum + op.monthlyInvestment);
 
-    // Total actually spent on purchasing shares up to activeIdx (filtered by operationDate)
     final double totalAllocated1 = s1.operations.where((op) => !op.operationDate.isAfter(currentDate)).fold(0.0, (sum, op) => sum + (op.quantityBought * op.priceBought));
     final double totalAllocated2 = s2.operations.where((op) => !op.operationDate.isAfter(currentDate)).fold(0.0, (sum, op) => sum + (op.quantityBought * op.priceBought));
 
-    // Total dividends received up to activeIdx (filtered by operationDate)
     final double totalDividends1 = s1.operations.where((op) => !op.operationDate.isAfter(currentDate)).fold(0.0, (sum, op) => sum + op.stockDividends + op.fiiDividends);
     final double totalDividends2 = s2.operations.where((op) => !op.operationDate.isAfter(currentDate)).fold(0.0, (sum, op) => sum + op.stockDividends + op.fiiDividends);
 
-    // Break down dividends by ticker (filtered by operationDate)
     final double stockDividends1 = s1.operations.where((op) => !op.operationDate.isAfter(currentDate)).fold(0.0, (sum, op) => sum + op.stockDividends);
     final double fiiDividends1 = s1.operations.where((op) => !op.operationDate.isAfter(currentDate)).fold(0.0, (sum, op) => sum + op.fiiDividends);
 
     final double stockDividends2 = s2.operations.where((op) => !op.operationDate.isAfter(currentDate)).fold(0.0, (sum, op) => sum + op.stockDividends);
     final double fiiDividends2 = s2.operations.where((op) => !op.operationDate.isAfter(currentDate)).fold(0.0, (sum, op) => sum + op.fiiDividends);
 
-    // Returns
     final double return1 = totalInvested1 > 0 ? ((val1 - totalInvested1) / totalInvested1) * 100.0 : 0.0;
     final double return2 = totalInvested2 > 0 ? ((val2 - totalInvested2) / totalInvested2) * 100.0 : 0.0;
 
-    // CAGR
     final double yearsDiff = max(0.1, (currentDate.difference(config.startDate).inDays) / 365.25);
     final double cagr1 = totalInvested1 > 0 && val1 > 0 ? (pow(val1 / totalInvested1, 1 / yearsDiff) - 1) * 100.0 : 0.0;
     final double cagr2 = totalInvested2 > 0 && val2 > 0 ? (pow(val2 / totalInvested2, 1 / yearsDiff) - 1) * 100.0 : 0.0;
@@ -546,23 +543,24 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
           
           _buildTableItem(labelPatrimonio, nf.format(val1), nf.format(val2), isLight, highlightRight: val2 > val1),
           _buildTableItem('Saldo em Caixa', nf.format(pos1.cash), nf.format(pos2.cash), isLight, isNeutral: true),
-          _buildTableItem('Dinheiro Separado para Aporte', nf.format(totalInvested1), nf.format(totalInvested2), isLight, isNeutral: true),
+          _buildTableItem('Capital Aportado Acumulado', nf.format(totalInvested1), nf.format(totalInvested2), isLight, isNeutral: true),
           
-          _buildTableItem('Dividendos Recebidos', nf.format(totalDividends1), nf.format(totalDividends2), isLight, highlightRight: totalDividends2 > totalDividends1, showDivider: false),
+          _buildTableItem('Proventos Recebidos', nf.format(totalDividends1), nf.format(totalDividends2), isLight, highlightRight: totalDividends2 > totalDividends1, showDivider: false),
           _buildSubTableItem('↳ Dividendos de ${config.stockTicker}', nf.format(stockDividends1), nf.format(stockDividends2), isLight, highlightRight: stockDividends2 > stockDividends1),
-          _buildSubTableItem('↳ Dividendos de ${config.fiiTicker}', nf.format(fiiDividends1), nf.format(fiiDividends2), isLight, highlightRight: fiiDividends2 > fiiDividends1),
+          _buildSubTableItem('↳ Rendimentos de ${config.fiiTicker}', nf.format(fiiDividends1), nf.format(fiiDividends2), isLight, highlightRight: fiiDividends2 > fiiDividends1),
           const Divider(height: 12),
 
           _buildTableItem('Dividendos Reinvestidos', nf.format(config.considerarReinvestimento ? totalDividends1 : 0.0), nf.format(config.considerarReinvestimento ? totalDividends2 : 0.0), isLight, highlightRight: totalDividends2 > totalDividends1 && config.considerarReinvestimento),
           _buildTableItem('Total Alocado em Ativos', nf.format(totalAllocated1), nf.format(totalAllocated2), isLight, highlightRight: totalAllocated2 > totalAllocated1),
           
-          _buildTableItem('Retorno Total', '${return1.toStringAsFixed(4)}%', '${return2.toStringAsFixed(4)}%', isLight, highlightRight: return2 > return1),
-          _buildTableItem('CAGR (Rentabilidade a.a.)', '${cagr1.toStringAsFixed(4)}%', '${cagr2.toStringAsFixed(4)}%', isLight, highlightRight: cagr2 > cagr1),
+          _buildTableItem('Retorno Total', '${return1.toStringAsFixed(2)}%', '${return2.toStringAsFixed(2)}%', isLight, highlightRight: return2 > return1),
+          _buildTableItem('CAGR (Rentabilidade a.a.)', '${cagr1.toStringAsFixed(2)}%', '${cagr2.toStringAsFixed(2)}%', isLight, highlightRight: cagr2 > cagr1),
         ],
       ),
     );
   }
 
+  /// Constrói linhas individuais de tabelas com cores dinâmicas de feedback
   Widget _buildTableItem(String label, String v1, String v2, bool isLight, {bool highlightRight = false, bool isNeutral = false, bool showDivider = true}) {
     final rightColor = isNeutral 
         ? AppColors.textPrimary(isLight)
@@ -594,6 +592,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     );
   }
 
+  /// Constrói linhas de sub-detalhamento da tabela
   Widget _buildSubTableItem(String label, String v1, String v2, bool isLight, {bool highlightRight = false, bool isNeutral = false}) {
     final rightColor = isNeutral 
         ? AppColors.textSecondary(isLight)
@@ -645,13 +644,13 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     );
   }
 
+  /// Exibe a composição consolidada da quantidade de ativos
   Widget _buildOperationsSummary(
     BacktestScenarioResult s1,
     BacktestScenarioResult s2,
     int activeIdx,
     bool isLight,
   ) {
-    // Current positions at activeIdx
     final pos1 = s1.monthlyPositions[activeIdx];
     final pos2 = s2.monthlyPositions[activeIdx];
 
@@ -772,6 +771,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     );
   }
 
+  /// Bloco informativo da composição de carteira
   Widget _buildCompositionTile({
     required IconData icon,
     required String label,
@@ -801,6 +801,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     );
   }
 
+  /// Card descritivo dos parâmetros gerais aplicados no backtest
   Widget _buildDetailsCard(BacktestConfig config, bool isLight) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -847,11 +848,11 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     );
   }
 
+  /// Formatação de decimais para exibição de cotas
   String _formatShares(double value) {
     if (value == value.toInt()) {
       return value.toInt().toString();
     }
-    // Remove trailing zeros after decimal point, keeping up to 4 decimal places
     String formatted = value.toStringAsFixed(4);
     while (formatted.endsWith('0')) {
       formatted = formatted.substring(0, formatted.length - 1);
@@ -862,6 +863,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     return formatted;
   }
 
+  /// Card detalhado exibido em caso de clique (ponto travado)
   Widget _buildLockedOperationCard(
     BacktestScenarioResult s1Result,
     BacktestScenarioResult s2Result,
@@ -877,7 +879,6 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
     final pos2 = s2Result.monthlyPositions[lockedIdx];
     final dateStr = DateFormat('dd/MM/yyyy').format(pos1.date);
 
-    // Localizar se houve compra neste dia no Cenário 2 (Valuation)
     final currentDate = pos2.date;
     MonthlyOperation? op;
     for (final o in s2Result.operations) {
@@ -908,7 +909,6 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header with Lock Icon and Close Button
           Row(
             children: [
               const Icon(Icons.lock_open, color: AppColors.primary, size: 16),
@@ -936,7 +936,6 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
           ),
           const SizedBox(height: 12),
 
-          // Date and General Info
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -949,7 +948,6 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
           ),
           const Divider(height: 16),
 
-          // Portfolio Values
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -973,7 +971,6 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
           ),
           const Divider(height: 16),
 
-          // Prices
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -996,7 +993,6 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
             ],
           ),
 
-          // Purchase / Operation Info
           if (op != null) ...[
             const Divider(height: 16),
             Text(
@@ -1088,7 +1084,7 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
   }
 }
 
-/// Widget Interativo que envolve o Gráfico com Suporte a Hover e Gestos (Toques)
+/// Widget interno para tratamento de eventos táteis e desenho dos elementos do gráfico
 class _GlassChartWithTooltip extends StatelessWidget {
   final BacktestScenarioResult s1Result;
   final BacktestScenarioResult s2Result;
@@ -1121,7 +1117,7 @@ class _GlassChartWithTooltip extends StatelessWidget {
     final nf = NumberFormat.currency(locale: 'pt_BR', symbol: r'R$');
     final isLight = this.isLight;
 
-    // Precalculate purchase indices for Scenario 1 and 2
+    // Mapeamento pré-calculado das posições de aporte dos cenários
     final List<int> s1PurchaseIndices = [];
     for (int i = 0; i < s1Result.operations.length; i++) {
       final op = s1Result.operations[i];
@@ -1177,13 +1173,12 @@ class _GlassChartWithTooltip extends StatelessWidget {
         final double valRange = (globalMax - globalMin) > 0 ? (globalMax - globalMin) : 1.0;
         final double yScaler = height / (valRange * 1.1);
 
-        // Helper to find nearest purchase dot if click or hover is close to it
+        // Identifica e snapa no marcador de compra mais próximo do mouse/toque
         int? findNearestPurchaseIndex(Offset localPosition, double width) {
-          const double maxDistance = 25.0; // snapping radius in pixels
+          const double maxDistance = 25.0; // Raio máximo de snapping
           int? bestIndex;
           double bestDistance = double.infinity;
 
-          // Helper to check Scenario 1 purchase dots
           for (final idx in s1PurchaseIndices) {
             if (idx >= s1.length) continue;
             final double x = paddingLeft + (idx * (width / (dates.length - 1)));
@@ -1195,7 +1190,6 @@ class _GlassChartWithTooltip extends StatelessWidget {
             }
           }
 
-          // Helper to check Scenario 2 stock purchase dots
           for (final idx in s2StockPurchaseIndices) {
             if (idx >= s2.length) continue;
             final double x = paddingLeft + (idx * (width / (dates.length - 1)));
@@ -1207,7 +1201,6 @@ class _GlassChartWithTooltip extends StatelessWidget {
             }
           }
 
-          // Helper to check Scenario 2 fii purchase dots
           for (final idx in s2FiiPurchaseIndices) {
             if (idx >= s2.length) continue;
             final double x = paddingLeft + (idx * (width / (dates.length - 1)));
@@ -1250,8 +1243,6 @@ class _GlassChartWithTooltip extends StatelessWidget {
           onLockedIndexChanged(idx);
         }
 
-
-
         return Stack(
           children: [
             MouseRegion(
@@ -1279,7 +1270,7 @@ class _GlassChartWithTooltip extends StatelessWidget {
               ),
             ),
 
-            // Tooltip Flutuante Inteligente (Lado Alternado baseada no cursor)
+            // Janela flutuante dinâmica de tooltip (hovering)
             if (selectedIndex != null && selectedIndex! < s1Result.monthlyPositions.length) ...[
               Builder(
                 builder: (context) {
@@ -1288,7 +1279,6 @@ class _GlassChartWithTooltip extends StatelessWidget {
                   final pos2 = s2Result.monthlyPositions[idx];
                   final date = dates[idx];
 
-                  // Localizar se houve compra neste dia no Cenário 2 (Valuation)
                   final currentDate = pos2.date;
                   MonthlyOperation? op;
                   for (final o in s2Result.operations) {
@@ -1300,7 +1290,6 @@ class _GlassChartWithTooltip extends StatelessWidget {
                     }
                   }
 
-                  // Verifica em qual metade do gráfico o cursor está para posicionar o card do lado oposto
                   final bool isOnRightHalf = idx >= dates.length / 2;
 
                   return Positioned(
@@ -1446,7 +1435,7 @@ class _GlassChartWithTooltip extends StatelessWidget {
   }
 }
 
-/// Painter de Gráfico com Suporte a Desenho de Indicadores de Seleção/Hover
+/// CustomPainter para traçar as curvas do gráfico, marcações de compra e grids
 class _PortfolioChartPainter extends CustomPainter {
   final List<double> s1;
   final List<double> s2;
@@ -1474,13 +1463,11 @@ class _PortfolioChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (s1.isEmpty || s2.isEmpty) return;
 
-    // Achar máximos e mínimos globais para escala
     double maxVal = s1.reduce(max);
     maxVal = max(maxVal, s2.reduce(max));
     double minVal = s1.reduce(min);
     minVal = min(minVal, s2.reduce(min));
 
-    // Margens e área útil
     const double paddingLeft = 60.0;
     const double paddingRight = 10.0;
     const double paddingTop = 10.0;
@@ -1490,9 +1477,8 @@ class _PortfolioChartPainter extends CustomPainter {
     final double height = size.height - paddingTop - paddingBottom;
 
     final double valRange = (maxVal - minVal) > 0 ? (maxVal - minVal) : 1.0;
-    final double yScaler = height / (valRange * 1.1); // 10% folga no topo
+    final double yScaler = height / (valRange * 1.1);
 
-    // Desenhar Grid e Eixo Y
     final Paint gridPaint = Paint()
       ..color = isLight ? Colors.black.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.05)
       ..strokeWidth = 1.0;
@@ -1504,7 +1490,6 @@ class _PortfolioChartPainter extends CustomPainter {
       final double y = paddingTop + height - (i * (height / gridRows));
       canvas.drawLine(Offset(paddingLeft, y), Offset(size.width - paddingRight, y), gridPaint);
 
-      // Label do Eixo Y
       final double val = minVal + (i * (valRange * 1.1 / gridRows));
       textPainter.text = TextSpan(
         text: _formatCompactCurrency(val),
@@ -1518,7 +1503,6 @@ class _PortfolioChartPainter extends CustomPainter {
       textPainter.paint(canvas, Offset(paddingLeft - textPainter.width - 6, y - textPainter.height / 2));
     }
 
-    // Desenhar Eixo X (Datas)
     final int xTicks = min(5, dates.length);
     if (xTicks > 1) {
       for (int i = 0; i < xTicks; i++) {
@@ -1538,7 +1522,6 @@ class _PortfolioChartPainter extends CustomPainter {
       }
     }
 
-    // Gerar pontos das duas curvas
     final List<Offset> s1Points = [];
     final List<Offset> s2Points = [];
 
@@ -1551,7 +1534,6 @@ class _PortfolioChartPainter extends CustomPainter {
       s2Points.add(Offset(x, y2));
     }
 
-    // Desenhar Área Preenchida Suave sob o Cenário 2 (Valuation)
     final Path fillPath = Path();
     fillPath.moveTo(s2Points.first.dx, size.height - paddingBottom);
     for (var pt in s2Points) {
@@ -1571,7 +1553,6 @@ class _PortfolioChartPainter extends CustomPainter {
       ).createShader(Rect.fromLTWH(paddingLeft, paddingTop, width, height));
     canvas.drawPath(fillPath, fillPaint);
 
-    // Desenhar Linha do Cenário 1 (Apenas Ações)
     final Path path1 = Path();
     path1.moveTo(s1Points.first.dx, s1Points.first.dy);
     for (int i = 1; i < s1Points.length; i++) {
@@ -1584,7 +1565,6 @@ class _PortfolioChartPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     canvas.drawPath(path1, linePaint1);
 
-    // Desenhar Linha do Cenário 2 (Valuation) com Gradiente
     final Path path2 = Path();
     path2.moveTo(s2Points.first.dx, s2Points.first.dy);
     for (int i = 1; i < s2Points.length; i++) {
@@ -1602,13 +1582,11 @@ class _PortfolioChartPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     canvas.drawPath(path2, linePaint2);
 
-    // --- DESENHAR PONTOS DE COMPRA (INTERATIVOS) ---
     final Paint markerBorderPaint = Paint()
       ..color = Colors.white
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
-    // 1. Cenário 1: Buy & Hold (Aportes Mensais regulares)
     final Paint s1MarkerPaint = Paint()
       ..color = isLight ? const Color(0xFF94A3B8) : const Color(0xFF64748B)
       ..style = PaintingStyle.fill;
@@ -1620,9 +1598,8 @@ class _PortfolioChartPainter extends CustomPainter {
       }
     }
 
-    // 2. Cenário 2: Compra de Ação (Valuation Batido)
     final Paint s2StockMarkerPaint = Paint()
-      ..color = const Color(0xFF00CC8F) // Vibrant emerald green for stock buy
+      ..color = const Color(0xFF00CC8F) // Verde esmeralda para compra de ações
       ..style = PaintingStyle.fill;
     for (final idx in s2StockPurchaseIndices) {
       if (idx < s2Points.length) {
@@ -1632,9 +1609,8 @@ class _PortfolioChartPainter extends CustomPainter {
       }
     }
 
-    // 3. Cenário 2: Compra de FII (Safe Haven)
     final Paint s2FiiMarkerPaint = Paint()
-      ..color = const Color(0xFFF59E0B) // Vibrant gold/orange for FII buy
+      ..color = const Color(0xFFF59E0B) // Cor dourada/laranja para compra de FIIs
       ..style = PaintingStyle.fill;
     for (final idx in s2FiiPurchaseIndices) {
       if (idx < s2Points.length) {
@@ -1644,12 +1620,10 @@ class _PortfolioChartPainter extends CustomPainter {
       }
     }
 
-    // --- DESENHAR DESTAQUE DO PONTO BLOQUEADO/SELECIONADO (LOCKED INDEX) ---
     if (lockedIndex != null && lockedIndex! < s1Points.length) {
       final Offset pt1 = s1Points[lockedIndex!];
       final Offset pt2 = s2Points[lockedIndex!];
 
-      // Cenário 1 Locked Glow Ring
       canvas.drawCircle(
         pt1,
         8.0,
@@ -1659,7 +1633,6 @@ class _PortfolioChartPainter extends CustomPainter {
           ..strokeWidth = 2.0,
       );
 
-      // Cenário 2 Locked Glow Ring
       canvas.drawCircle(
         pt2,
         9.0,
@@ -1670,13 +1643,11 @@ class _PortfolioChartPainter extends CustomPainter {
       );
     }
 
-    // --- DESENHAR LINHAS E PONTOS DO HOVER/SELEÇÃO INTERATIVA ---
     final int? activeHighlightIdx = selectedIndex ?? lockedIndex;
     if (activeHighlightIdx != null && activeHighlightIdx < s1Points.length) {
       final Offset pt1 = s1Points[activeHighlightIdx];
       final Offset pt2 = s2Points[activeHighlightIdx];
 
-      // Desenhar Linha Vertical Tracejada de Seleção
       final Paint dashedPaint = Paint()
         ..color = isLight ? Colors.black26 : Colors.white30
         ..strokeWidth = 1.0
@@ -1691,17 +1662,15 @@ class _PortfolioChartPainter extends CustomPainter {
         startY += dashHeight + dashSpace;
       }
 
-      // Desenhar Pontos de Interseção
-      // Cenário 1 (Apenas Ações)
       canvas.drawCircle(pt1, 5.5, Paint()..color = isLight ? Colors.black45 : Colors.white60);
       canvas.drawCircle(pt1, 3.5, Paint()..color = Colors.white);
 
-      // Cenário 2 (Valuation)
       canvas.drawCircle(pt2, 6.5, Paint()..color = AppColors.primary);
       canvas.drawCircle(pt2, 3.5, Paint()..color = Colors.white);
     }
   }
 
+  /// Compacta valores monetários longos no Eixo Y do gráfico
   String _formatCompactCurrency(double val) {
     if (val >= 1000000) {
       return 'R\$ ${(val / 1000000).toStringAsFixed(1)}M';

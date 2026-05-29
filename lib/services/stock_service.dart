@@ -8,18 +8,19 @@ import '../models/dividend.dart';
 import '../models/corporate_event.dart';
 import '../models/exceptions.dart';
 
+/// Serviço responsável por realizar as chamadas de rede à API Bolsai.
 class StockService {
   static List<String>? _cachedStockTickers;
   static List<String>? _cachedFiiTickers;
 
-  // Método padrão para fazer requisições GET à API.
+  /// Método padrão de requisição GET à API Bolsai com tratamento robusto de erros.
   Future<dynamic> _getRequest(String endpoint) async {
     final apiKey = dotenv.env['BOLSAI_API_KEY'];
     final baseUrl = dotenv.env['BOLSAI_BASE_URL'] ?? 'https://api.usebolsai.com/api/v1';
 
     if (apiKey == null || apiKey.isEmpty) {
       throw AuthenticationException(
-        message: 'API KEY não configurada. Verifique o arquivo .env',
+        message: 'Chave de API não configurada. Verifique o arquivo .env.',
       );
     }
     
@@ -27,7 +28,7 @@ class StockService {
     if (kIsWeb) {
       url = Uri.parse('https://corsproxy.io/?${Uri.encodeComponent('$baseUrl$endpoint')}');
     }
-    debugPrint('🔗 URL requisição: $url');
+    debugPrint('🔗 Requisitando URL: $url');
     
     try {
       final response = await http.get(
@@ -38,60 +39,60 @@ class StockService {
         },
       ).timeout(const Duration(seconds: 30));
       
-      debugPrint('📊 Status code: ${response.statusCode}');
+      debugPrint('📊 Código de Status HTTP: ${response.statusCode}');
       
       switch (response.statusCode) {
         case 200:
           return jsonDecode(response.body);
         case 401:
           throw AuthenticationException(
-            message: 'API KEY inválida ou expirada',
+            message: 'Chave de API inválida ou expirada.',
             originalError: response.body,
           );
         case 404:
         case 422:
           throw NotFoundException(
-            message: 'Ticker não encontrado',
+            message: 'Ativo não encontrado.',
             originalError: response.body,
           );
         case 500:
         case 502:
         case 503:
           throw ServerException(
-            message: 'Servidor indisponível. Tente novamente mais tarde',
+            message: 'Servidor indisponível no momento. Tente novamente mais tarde.',
             originalError: response.body,
           );
         default:
           throw ServerException(
-            message: 'Erro HTTP ${response.statusCode}: ${response.body}',
+            message: 'Erro HTTP inesperado ${response.statusCode}: ${response.body}',
             originalError: response.body,
           );
       }
     } on http.ClientException catch (e) {
-      debugPrint('❌ Erro na requisição: $e');
+      debugPrint('❌ Erro HTTP de rede: $e');
       throw NetworkException(
-        message: 'Erro de conexão: ${e.message}',
+        message: 'Erro de conexão com o servidor: ${e.message}',
         originalError: e,
       );
     } on TimeoutException catch (e) {
-      debugPrint('❌ Timeout: $e');
+      debugPrint('❌ Tempo limite de requisição esgotado: $e');
       throw TimeoutException(
         originalError: e,
       );
     } catch (e) {
-      debugPrint('❌ Erro genérico: $e');
+      debugPrint('❌ Erro inesperado ao realizar chamada HTTP: $e');
       rethrow;
     }
   }
 
-  // Método específico para buscar o histórico de preços de um ticker.
+  /// Busca o histórico de preços completo de um determinado ticker.
   Future<List<StockPrice>> fetchStocksPrice(String ticker, {int limit = 3000}) async {
     try {
       final data = await _getRequest('/stocks/$ticker/history?limit=$limit');
       final prices = data['prices'] as List<dynamic>?;
       if (prices == null || prices.isEmpty) {
         throw ValidationException(
-          message: 'Nenhum dado disponível para o ticker $ticker',
+          message: 'Nenhum dado de cotação disponível para o ativo $ticker.',
         );
       }
 
@@ -102,20 +103,20 @@ class StockService {
       rethrow;
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao processar dados: $e',
+        message: 'Erro ao processar cotações históricas de $ticker: $e',
         originalError: e,
       );
     }
   }
 
-  // Método específico para buscar fundamentos COMPLETOS de um ticker.
+  /// Busca os fundamentos completos de uma Ação corporativa da B3.
   Future<StockFundamentals> fetchStockFundamentals(String ticker) async {
     try {
       final data = await _getRequest('/fundamentals/$ticker');
       
       if (data == null) {
         throw ValidationException(
-          message: 'Dados de fundamentos não disponíveis para $ticker',
+          message: 'Fundamentos de ação indisponíveis para $ticker.',
         );
       }
 
@@ -124,20 +125,20 @@ class StockService {
       rethrow;
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao processar fundamentos: $e',
+        message: 'Erro ao processar fundamentos de $ticker: $e',
         originalError: e,
       );
     }
   }
 
-  // Método específico para buscar fundamentos de um Fundo Imobiliário (FII).
+  /// Busca os fundamentos completos de um Fundo Imobiliário (FII).
   Future<FiiFundamentals> fetchFiiFundamentals(String ticker) async {
     try {
       final data = await _getRequest('/fiis/$ticker');
       
       if (data == null) {
         throw ValidationException(
-          message: 'Dados de FII não disponíveis para $ticker',
+          message: 'Dados fundamentais do FII indisponíveis para $ticker.',
         );
       }
 
@@ -146,20 +147,20 @@ class StockService {
       rethrow;
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao processar fundamentos de FII: $e',
+        message: 'Erro ao processar fundamentos do FII $ticker: $e',
         originalError: e,
       );
     }
   }
 
-  // Método para buscar dividendos históricos
+  /// Busca o histórico completo de dividendos de um determinado ativo.
   Future<DividendHistory> fetchDividends(String ticker, {int limit = 10}) async {
     List<dynamic>? dividendsList;
     try {
       final data = await _getRequest('/dividends/$ticker?years=$limit');
       dividendsList = (data['payments'] ?? data['dividends'] ?? data['payments_history']) as List<dynamic>?;
     } catch (e) {
-      debugPrint('⚠️ Erro ao buscar dividendos padrão para $ticker: $e');
+      debugPrint('⚠️ Erro ao buscar dividendos corporativos para $ticker: $e');
     }
 
     if (dividendsList == null || dividendsList.isEmpty) {
@@ -167,7 +168,7 @@ class StockService {
         final fiiDistData = await _getRequest('/fiis/$ticker/distributions?years=$limit');
         dividendsList = (fiiDistData['payments'] ?? fiiDistData['dividends'] ?? fiiDistData['distributions'] ?? fiiDistData['payments_history']) as List<dynamic>?;
       } catch (e) {
-        debugPrint('⚠️ Não foi possível buscar do endpoint de distribuições de FII para $ticker: $e');
+        debugPrint('⚠️ Erro ao buscar distribuições de FII para $ticker: $e');
       }
     }
 
@@ -177,7 +178,7 @@ class StockService {
         final fiiData = await _getRequest('/fiis/$ticker/history?limit=$fiiLimit');
         dividendsList = fiiData['history'] as List<dynamic>?;
       } catch (e) {
-        debugPrint('⚠️ Não foi possível buscar do endpoint de histórico de FII para $ticker: $e');
+        debugPrint('⚠️ Erro ao buscar histórico de cotações FII para $ticker: $e');
       }
     }
 
@@ -196,7 +197,7 @@ class StockService {
 
       return DividendHistory.fromDividends(dividends);
     } catch (e) {
-      debugPrint('⚠️ Erro ao processar dividendos para $ticker: $e');
+      debugPrint('⚠️ Erro ao estruturar histórico de dividendos de $ticker: $e');
       return DividendHistory(
         dividends: [],
         totalAnnualDividend: 0,
@@ -205,7 +206,7 @@ class StockService {
     }
   }
 
-  // Método específico para buscar eventos corporativos (splits e inplits) de um ticker.
+  /// Busca a lista de eventos corporativos (splits e inplits) de um ticker.
   Future<List<CorporateEvent>> fetchCorporateEvents(String ticker) async {
     try {
       final data = await _getRequest('/stocks/$ticker/corporate-events');
@@ -217,7 +218,7 @@ class StockService {
           .map((item) => CorporateEvent.fromJson(item as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      debugPrint('⚠️ Erro ao buscar eventos corporativos para $ticker: $e');
+      debugPrint('⚠️ Erro ao buscar desdobramentos/grupamentos históricos de $ticker: $e');
       return [];
     }
   }
@@ -227,7 +228,7 @@ class StockService {
     'RNEW11', 'SANB11', 'SAPR11', 'TAEE11', 'UNIP11'
   ];
 
-  // Método específico para buscar o histórico de tickers e renomeações.
+  /// Busca o histórico de renomeações de tickers para correção de ativos migrados da B3.
   Future<Map<String, dynamic>?> fetchTickerHistory(String ticker) async {
     try {
       final data = await _getRequest('/stocks/$ticker/ticker-history');
@@ -236,25 +237,23 @@ class StockService {
       rethrow;
     } catch (e) {
       throw ServerException(
-        message: 'Erro ao buscar histórico do ticker $ticker: $e',
+        message: 'Erro ao buscar histórico de alteração de ticker para $ticker: $e',
         originalError: e,
        );
     }
   }
 
-  /// Busca todos os tickers de Ações da B3 com paginação e cache local.
+  /// Busca todos os tickers de Ações da B3 com paginação dinâmica e cache local.
   Future<List<String>> fetchAllStockTickers() async {
     if (_cachedStockTickers != null) {
       return _cachedStockTickers!;
     }
     try {
-      // Busca a primeira leva (limite máximo permitido é 5000)
       final data = await _getRequest('/stocks/?limit=5000');
       final tickers = List<String>.from(data['tickers'] ?? []);
       final total = data['total'] as int? ?? 0;
 
       if (total > tickers.length) {
-        // Busca o restante das levas com offset
         int offset = tickers.length;
         while (offset < total) {
           final nextData = await _getRequest('/stocks/?limit=5000&offset=$offset');
@@ -267,13 +266,11 @@ class StockService {
 
       final stockFormat = RegExp(r'^[A-Z]{4}(3|4|5|6|7|8|11)$');
 
-      // Filtra os tickers para manter apenas ativos válidos (excluindo BDRs, ETFs e FIIs)
       final cleanTickers = tickers
           .where((t) => t.isNotEmpty && !t.contains(' '))
           .map((t) => t.trim().toUpperCase())
           .where((t) {
             if (!stockFormat.hasMatch(t)) return false;
-            // Se terminar em 11, precisa ser uma das Units corporativas da whitelist
             if (t.endsWith('11')) {
               return _stockUnitsWhitelist.contains(t);
             }
@@ -285,12 +282,12 @@ class StockService {
       _cachedStockTickers = cleanTickers;
       return _cachedStockTickers!;
     } catch (e) {
-      debugPrint('⚠️ Erro ao carregar tickers de ações: $e');
+      debugPrint('⚠️ Falha crítica ao processar lista geral de ações: $e');
       return [];
     }
   }
 
-  /// Busca todos os tickers de FIIs da B3 com cache local.
+  /// Busca todos os tickers de Fundos Imobiliários da B3 com cache local.
   Future<List<String>> fetchAllFiiTickers() async {
     if (_cachedFiiTickers != null) {
       return _cachedFiiTickers!;
@@ -312,7 +309,7 @@ class StockService {
       _cachedFiiTickers = tickers;
       return _cachedFiiTickers!;
     } catch (e) {
-      debugPrint('⚠️ Erro ao carregar tickers de FIIs: $e');
+      debugPrint('⚠️ Falha crítica ao processar lista geral de FIIs: $e');
       return [];
     }
   }

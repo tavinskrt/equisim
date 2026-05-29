@@ -1,17 +1,17 @@
-/// Modelo para dados de Fundos Imobiliários (FIIs)
+/// Modelo para armazenamento dos dados e indicadores fundamentalistas de Fundos Imobiliários (FIIs).
 class FiiFundamentals {
   final String ticker;
   final String name;
   final String referenceDate;
   final double closePrice;
-  final double bookValuePerShare; // VPA
-  final double pvp; // P/VP
-  final double dyield; // Dividend Yield anualizado
-  final double netAssetValue; // Patrimônio Líquido
-  final double sharesOutstanding; // Quantidade de cotas
-  final String segment; // Segmento (ex: Logística, Shopping, etc.)
-  final double vacancyPct; // Taxa de vacância
-  final double delinquencyPct; // Taxa de inadimplência
+  final double bookValuePerShare; // VPA (Valor Patrimonial por Ação)
+  final double pvp; // P/VP (Preço sobre Valor Patrimonial)
+  final double dyield; // Dividend Yield anualizado acumulado nos últimos 12 meses
+  final double netAssetValue; // Patrimônio Líquido total do Fundo
+  final double sharesOutstanding; // Quantidade total de cotas emitidas
+  final String segment; // Segmento de atuação (ex: Logística, Shoppings, Híbrido, etc.)
+  final double vacancyPct; // Taxa de vacância do portfólio de imóveis
+  final double delinquencyPct; // Taxa de inadimplência média do Fundo
 
   FiiFundamentals({
     required this.ticker,
@@ -28,6 +28,7 @@ class FiiFundamentals {
     required this.delinquencyPct,
   });
 
+  /// Instancia os fundamentos de FII a partir do JSON da API Bolsai.
   factory FiiFundamentals.fromJson(Map<String, dynamic> json) {
     return FiiFundamentals(
       ticker: json['ticker'] ?? '',

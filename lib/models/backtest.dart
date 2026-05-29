@@ -1,4 +1,4 @@
-/// Define os métodos de valuation disponíveis
+/// Define os métodos de valuation disponíveis na plataforma.
 enum ValuationMethod {
   graham('Graham'),
   bazin('Bazin'),
@@ -9,7 +9,7 @@ enum ValuationMethod {
   const ValuationMethod(this.label);
 }
 
-/// Configuração inicial do backtest
+/// Configurações iniciais fornecidas pelo usuário para a execução do backtest.
 class BacktestConfig {
   final String stockTicker;
   final String fiiTicker;
@@ -17,8 +17,8 @@ class BacktestConfig {
   final DateTime endDate;
   final double monthlyInvestment;
   final ValuationMethod valuationMethod;
-  final double safetyMargin; // percentual (ex: 20.0 para 20%)
-  final double desiredRate; // para método Bazin (default 6%)
+  final double safetyMargin; // Percentual selecionado (ex: 20.0 para 20%)
+  final double desiredRate; // Taxa de retorno desejada para o método Bazin (padrão 6%)
   final int diaCompra;
   final bool considerarReinvestimento;
 
@@ -49,7 +49,7 @@ class BacktestConfig {
   )''';
 }
 
-/// Posição em portfólio em um determinado momento
+/// Posição financeira consolidada do portfólio em um determinado dia útil de simulação.
 class PortfolioPosition {
   final double stockShares;
   final double fiiShares;
@@ -67,17 +67,17 @@ class PortfolioPosition {
     required this.fiiPrice,
   });
 
-  /// Calcula o valor total do portfólio
+  /// Calcula o valor patrimonial total da carteira.
   double getTotalValue() {
     return (stockShares * stockPrice) + (fiiShares * fiiPrice) + cash;
   }
 
-  /// Calcula o valor total alocado em ativos (tickers)
+  /// Calcula o valor total alocado em ativos de risco (ações e fundos imobiliários).
   double getAssetValue() {
     return (stockShares * stockPrice) + (fiiShares * fiiPrice);
   }
 
-  /// Calcula a composição percentual
+  /// Calcula a alocação percentual corrente de cada classe de ativo na carteira.
   Map<String, double> getComposition() {
     final total = getTotalValue();
     if (total == 0) return {'stocks': 0, 'fiis': 0, 'cash': 0};
@@ -99,7 +99,7 @@ class PortfolioPosition {
 )''';
 }
 
-/// Operação executada em um mês específico
+/// Detalhes de uma operação financeira tática/mensal executada no simulador.
 class MonthlyOperation {
   final DateTime operationDate;
   final double monthlyInvestment;
@@ -110,9 +110,9 @@ class MonthlyOperation {
   final double fiiDividends;
   final double fairValue;
   final double stockPrice;
-  final bool wasValuationMet; // true se preço <= justo com margem
-  final String? purchaseReason; // motivo/explicação da compra
-  final double? valuationFormulaValue; // valor da fórmula do valuation
+  final bool wasValuationMet; // Define se o critério tático de valuation foi atendido
+  final String? purchaseReason; // Justificativa da decisão tomada pelo algoritmo
+  final double? valuationFormulaValue; // Valor exato de preço teto retornado pelo modelo
 
   MonthlyOperation({
     required this.operationDate,
@@ -129,10 +129,10 @@ class MonthlyOperation {
     this.valuationFormulaValue,
   });
 
-  /// Retorna o total investido nesta operação
+  /// Retorna o valor financeiro investido nesta operação específica.
   double getAmountInvested() => quantityBought * priceBought;
 
-  /// Retorna o total de dividendos recebidos
+  /// Retorna o montante total de proventos arrecadados nesta data.
   double getTotalDividends() => stockDividends + fiiDividends;
 
   @override
@@ -148,7 +148,7 @@ class MonthlyOperation {
 )''';
 }
 
-/// Resultado de um cenário específico
+/// Resultados consolidados de performance de um cenário específico de simulação.
 class BacktestScenarioResult {
   final String scenarioName;
   final double finalValue;
@@ -158,7 +158,7 @@ class BacktestScenarioResult {
   final double totalDividends;
   final double totalInvested;
   final double cagr;
-  final double totalReturn; // em percentual
+  final double totalReturn; // Rentabilidade total em base percentual
   final List<MonthlyOperation> operations;
   final List<PortfolioPosition> monthlyPositions;
 
@@ -176,7 +176,7 @@ class BacktestScenarioResult {
     required this.monthlyPositions,
   });
 
-  /// Calcula o ganho absoluto em reais
+  /// Calcula o ganho real de capital em reais (Valor final deduzido dos investimentos aportados).
   double getAbsoluteGain() => finalValue - totalInvested;
 
   @override
@@ -190,11 +190,11 @@ class BacktestScenarioResult {
 )''';
 }
 
-/// Resultado completo do backtest comparando dois cenários
+/// Resultado comparativo consolidado abrangendo ambos os cenários de simulação de backtest.
 class BacktestResult {
   final BacktestConfig config;
-  final BacktestScenarioResult scenario1; // Buy and Hold
-  final BacktestScenarioResult scenario2; // Valuation Inteligente
+  final BacktestScenarioResult scenario1; // Buy and Hold passivo (Apenas Ações)
+  final BacktestScenarioResult scenario2; // Valuation Dinâmico (Ações + FIIs)
   final DateTime executionDate;
 
   BacktestResult({
@@ -204,31 +204,31 @@ class BacktestResult {
     required this.executionDate,
   });
 
-  /// Retorna qual cenário foi melhor
+  /// Retorna o cenário de maior retorno patrimonial nominal.
   BacktestScenarioResult getWinner() {
     return scenario1.finalValue > scenario2.finalValue ? scenario1 : scenario2;
   }
 
-  /// Retorna qual cenário foi pior
+  /// Retorna o cenário de menor retorno patrimonial nominal.
   BacktestScenarioResult getLoser() {
     return scenario1.finalValue < scenario2.finalValue ? scenario1 : scenario2;
   }
 
-  /// Calcula a diferença absoluta entre os cenários
+  /// Retorna a diferença patrimonial nominal absoluta entre os cenários.
   double getAbsoluteDifference() =>
       (scenario1.finalValue - scenario2.finalValue).abs();
 
-  /// Calcula a diferença percentual entre os cenários
+  /// Retorna a diferença percentual de ganho em relação ao cenário de menor desempenho.
   double getPercentageDifference() {
     final loser = getLoser();
     if (loser.finalValue == 0) return 0;
     return ((getWinner().finalValue - loser.finalValue) / loser.finalValue * 100);
   }
 
-  /// Total patrimonial investido (igual para os dois cenários)
+  /// Retorna o montante consolidado total de capital aportado nas carteiras.
   double getTotalInvested() => scenario1.totalInvested;
 
-  /// Retorna estatísticas de risco/retorno
+  /// Retorna as estatísticas consolidadas e organizadas de análise de performance.
   Map<String, double> getComparisonStats() {
     final winner = getWinner();
     final loser = getLoser();
@@ -259,12 +259,12 @@ class BacktestResult {
 )''';
 }
 
-/// Valuation de um ativo em uma data específica
+/// Registro pontual de valuation calculado para um ativo em determinada data histórica.
 class ValuationSnapshot {
   final DateTime date;
   final double fairValue;
   final ValuationMethod method;
-  final Map<String, dynamic> details; // Detalhes do cálculo
+  final Map<String, dynamic> details; // Parâmetros matemáticos adicionais de suporte à fórmula
 
   ValuationSnapshot({
     required this.date,

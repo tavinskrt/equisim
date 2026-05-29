@@ -6,6 +6,7 @@ import '../controllers/theme_controller.dart';
 import '../controllers/login_controller.dart';
 import 'home_page.dart';
 
+/// Tela responsável pela autenticação e login de usuários na plataforma.
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
@@ -55,7 +56,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
     final themeController = Provider.of<ThemeController>(context);
     final isLight = themeController.isLightMode;
 
-    // Sincronizar de forma reativa os valores digitados no controller do Provider
+    // Sincroniza os controllers do formulário local com os estados do Provider
     final currentEmail = controller.email;
     if (_emailController.text != currentEmail) {
       _emailController.value = TextEditingValue(
@@ -80,7 +81,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
         ),
         child: Stack(
           children: [
-            /// Decorações geométricas de fundo
+            // Efeitos de círculos de fundo
             Positioned(
               top: -120,
               right: -80,
@@ -118,7 +119,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
               ),
             ),
             
-            /// Conteúdo principal
+            // Área de conteúdo principal
             SafeArea(
               child: Center(
                 child: SingleChildScrollView(
@@ -148,7 +149,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                /// Logo
+                                // Cabeçalho de Logotipo da Aplicação
                                 Column(
                                   children: [
                                     Container(
@@ -191,7 +192,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                                 ),
                                 const SizedBox(height: 32),
 
-                                /// Bem-vindo de volta
+                                // Boas-vindas e identificação de seção
                                 Text(
                                   'Bem-vindo de volta!',
                                   style: TextStyle(
@@ -203,7 +204,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'Acesse sua conta',
+                                  'Acesse sua conta para continuar',
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: AppColors.textSecondary(isLight),
@@ -212,7 +213,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                                 ),
                                 const SizedBox(height: 24),
 
-                                /// Campo do usuário
+                                // Campo de entrada do e-mail
                                 Text(
                                   'E-mail',
                                   style: TextStyle(
@@ -252,7 +253,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                                 ),
                                 const SizedBox(height: 14),
 
-                                /// Campo da senha
+                                // Campo de entrada da senha
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -318,7 +319,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                                 ),
                                 const SizedBox(height: 20),
 
-                                /// Botão de login
+                                // Botão para acionar a autenticação
                                 Container(
                                   width: double.infinity,
                                   height: 50,
@@ -370,7 +371,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                                 ),
                                 const SizedBox(height: 16),
 
-                                /// Criar conta
+                                // Link para redirecionamento ao cadastro
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -402,7 +403,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                         ),
                       ),
                       
-                      /// Rodapé
+                      // Rodapé institucional
                       const SizedBox(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -430,4 +431,3 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
     );
   }
 }
-

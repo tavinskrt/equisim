@@ -1,3 +1,4 @@
+/// Representa um evento corporativo ocorrido na B3 (Split ou Inplit).
 class CorporateEvent {
   final DateTime date;
   final String type; // 'SPLIT' ou 'INPLIT'
@@ -15,6 +16,7 @@ class CorporateEvent {
     required this.factor,
   });
 
+  /// Instancia o objeto a partir da resposta JSON da API Bolsai.
   factory CorporateEvent.fromJson(Map<String, dynamic> json) {
     return CorporateEvent(
       date: DateTime.parse(json['date'] ?? json['trade_date'] ?? ''),

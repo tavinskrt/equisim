@@ -1,8 +1,11 @@
 import 'dart:math';
 
+/// Biblioteca de funções matemáticas e cálculos de engenharia financeira.
 class FinancialCalculations {
-  FinancialCalculations._(); // Construtor privado para evitar instanciação
-  /// Calcula a Taxa de Crescimento Anual Composta (CAGR)
+  // Construtor privado para impedir instanciação da classe utilitária
+  FinancialCalculations._();
+
+  /// Calcula a Taxa de Crescimento Anual Composta (CAGR) da carteira.
   static double calculateCAGR(double initialValue, double finalValue, double years) {
     if (initialValue <= 0 || years <= 0) return 0;
     
@@ -14,32 +17,24 @@ class FinancialCalculations {
     }
   }
 
-  /// Calcula o retorno total em percentual
-  /// 
-  /// Fórmula: Retorno = ((Valor Final - Inicial) / Inicial) * 100
-  /// 
-  /// Retorna: Retorno em percentual
+  /// Calcula a rentabilidade histórica percentual total nominal.
   static double calculateTotalReturn(double initialValue, double finalValue) {
     if (initialValue <= 0) return 0;
     return ((finalValue - initialValue) / initialValue) * 100;
   }
 
-  /// Calcula o retorno ajustado por inflação (simplificado)
-  /// 
-  /// Fórmula: Retorno Real = ((1 + Retorno Nominal) / (1 + Inflação)) - 1
+  /// Calcula o retorno real ajustado pela taxa de inflação do período.
   static double calculateRealReturn(double nominalReturn, double inflationRate) {
     return ((1 + nominalReturn) / (1 + inflationRate) - 1) * 100;
   }
 
-  /// Calcula o número de anos decimais entre duas datas
+  /// Calcula a fração exata de anos entre duas datas (considerando anos bissextos).
   static double yearsBetweenDates(DateTime startDate, DateTime endDate) {
     final daysDifference = endDate.difference(startDate).inDays;
-    return daysDifference / 365.25; // 365.25 leva em conta anos bissextos
+    return daysDifference / 365.25;
   }
 
-  /// Calcula a média geométrica (adequada para retornos)
-  /// 
-  /// Retorna: Média geométrica dos valores
+  /// Calcula a média geométrica de uma série temporal de retornos.
   static double geometricMean(List<double> values) {
     if (values.isEmpty || values.any((v) => v <= 0)) return 0;
     
@@ -47,7 +42,7 @@ class FinancialCalculations {
     return pow(product, 1.0 / values.length).toDouble();
   }
 
-  /// Calcula a volatilidade (desvio padrão) de retornos
+  /// Calcula a volatilidade histórica (desvio padrão) de uma lista de retornos.
   static double calculateVolatility(List<double> returns) {
     if (returns.length < 2) return 0;
     
@@ -59,14 +54,7 @@ class FinancialCalculations {
     return sqrt(variance);
   }
 
-  /// Calcula o Sharpe Ratio
-  /// 
-  /// Fórmula: Sharpe = (Retorno Carteira - Taxa Livre Risco) / Volatilidade
-  /// 
-  /// Parâmetros:
-  /// - [portfolioReturn]: Retorno do portfólio em decimal (0.12 para 12%)
-  /// - [riskFreeRate]: Taxa livre de risco em decimal (default 0.06 para 6%)
-  /// - [volatility]: Volatilidade em decimal
+  /// Calcula o índice Sharpe (retorno excedente ponderado pelo risco).
   static double calculateSharpeRatio(
     double portfolioReturn,
     double volatility, {
@@ -76,9 +64,7 @@ class FinancialCalculations {
     return (portfolioReturn - riskFreeRate) / volatility;
   }
 
-  /// Calcula o Maximum Drawdown (maior queda do portfólio)
-  /// 
-  /// Retorna: Drawdown em percentual (ex: -30.5 para queda de 30.5%)
+  /// Calcula o Maximum Drawdown (a maior perda percentual registrada do pico ao vale).
   static double calculateMaxDrawdown(List<double> portfolioValues) {
     if (portfolioValues.isEmpty) return 0;
     
@@ -99,22 +85,13 @@ class FinancialCalculations {
     return maxDrawdown;
   }
 
-  /// Calcula o Benefit-Cost Ratio (relação ganho/custo)
-  /// 
-  /// Retorna: Razão ganho/custo
+  /// Calcula o índice de custo-benefício acumulado.
   static double calculateBenefitCostRatio(double totalDividends, double totalInvested) {
     if (totalInvested == 0) return 0;
     return totalDividends / totalInvested;
   }
 
-  /// Calcula o breakeven (ponto de equilíbrio)
-  /// 
-  /// Parâmetros:
-  /// - [fixedCost]: Custo fixo
-  /// - [unitPrice]: Preço por unidade
-  /// - [unitVariableCost]: Custo variável por unidade
-  /// 
-  /// Retorna: Quantidade de unidades para breakeven
+  /// Calcula o ponto de equilíbrio de vendas (Breakeven).
   static double calculateBreakeven(
     double fixedCost,
     double unitPrice,
@@ -124,9 +101,7 @@ class FinancialCalculations {
     return fixedCost / (unitPrice - unitVariableCost);
   }
 
-  /// Calcula o valor futuro com juros compostos
-  /// 
-  /// Fórmula: VF = VP × (1 + taxa)^períodos
+  /// Projeta o valor futuro capitalizado por juros compostos.
   static double calculateFutureValue(
     double presentValue,
     double rate,
@@ -135,9 +110,7 @@ class FinancialCalculations {
     return presentValue * pow(1 + rate, periods).toDouble();
   }
 
-  /// Calcula o valor presente (desconto)
-  /// 
-  /// Fórmula: VP = VF / (1 + taxa)^períodos
+  /// Desconta um montante futuro trazendo-o a valor presente.
   static double calculatePresentValue(
     double futureValue,
     double rate,
@@ -147,20 +120,18 @@ class FinancialCalculations {
     return futureValue / pow(1 + rate, periods).toDouble();
   }
 
-  /// Arredonda para cima a compra de cotas inteiras
-  /// 
-  /// Exemplo: com R$ 1.000 e preço R$ 25, retorna 40 cotas (R$ 1.000)
+  /// Calcula a quantidade inteira máxima de cotas compráveis com o caixa disponível.
   static int buyWholeShares(double cash, double price) {
     if (price <= 0) return 0;
     return (cash / price).toInt();
   }
 
-  /// Calcula o caixa restante após compra de cotas inteiras
+  /// Calcula o saldo de caixa residual após a aquisição de uma quantidade de ativos.
   static double calculateRemainingCash(double cash, double price, int sharesBought) {
     return cash - (sharesBought * price);
   }
 
-  /// Calcula o preço médio de aquisição
+  /// Calcula o preço médio ponderado de aquisição de um ativo.
   static double calculateAveragePrice(
     double totalInvested,
     int totalShares,
@@ -169,34 +140,30 @@ class FinancialCalculations {
     return totalInvested / totalShares;
   }
 
-  /// Calcula o dividendo yield (rendimento de dividendos)
-  /// 
-  /// Fórmula: DY = Dividendo Anual / Preço * 100
+  /// Calcula o Dividend Yield bruto em base percentual.
   static double calculateDividendYield(double annualDividend, double price) {
     if (price <= 0) return 0;
     return (annualDividend / price) * 100;
   }
 
-  /// Calcula o PEG Ratio (P/L sobre crescimento)
-  /// 
-  /// Fórmula: PEG = P/L / Crescimento
+  /// Calcula a relação de preço/lucro sobre a taxa de crescimento (Índice PEG).
   static double calculatePEGRatio(double pl, double growthRate) {
     if (growthRate <= 0 || pl <= 0) return 0;
     return pl / growthRate;
   }
 
-  /// Calcula o Price to Book (P/VPA)
+  /// Calcula a relação do Preço sobre o Valor Patrimonial por Ação (P/VPA).
   static double calculatePriceToBook(double price, double bvps) {
     if (bvps <= 0) return 0;
     return price / bvps;
   }
 
-  /// Converte taxa mensal para anual
+  /// Converte uma taxa equivalente de capitalização mensal para anual.
   static double monthlyToAnnualRate(double monthlyRate) {
     return (pow(1 + monthlyRate, 12) - 1) * 100;
   }
 
-  /// Converte taxa anual para mensal
+  /// Converte uma taxa equivalente de capitalização anual para mensal.
   static double annualToMonthlyRate(double annualRate) {
     return (pow(1 + annualRate, 1 / 12) - 1) * 100;
   }

@@ -5,6 +5,7 @@ import '../utils/app_colors.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/sign_up_controller.dart';
 
+/// Tela responsável pela criação de novas contas de usuário.
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
 
@@ -57,6 +58,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
     super.dispose();
   }
 
+  /// Submete os dados de cadastro e fornece retorno visual de sucesso ou erro.
   void _submit(BuildContext context, SignUpController controller) async {
     FocusScope.of(context).unfocus();
     final error = await controller.createAccount(context);
@@ -73,7 +75,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.pop(context); // Voltar ao login após sucesso
+        Navigator.pop(context);
       }
     }
   }
@@ -84,7 +86,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
     final themeController = Provider.of<ThemeController>(context);
     final isLight = themeController.isLightMode;
 
-    // Sincronizar de forma reativa os valores digitados no controller do Provider
+    // Sincroniza os dados de digitação locais com o estado centralizado do Provider
     final currentName = controller.name;
     if (_nameController.text != currentName) {
       _nameController.value = TextEditingValue(
@@ -133,7 +135,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
         ),
         child: Stack(
           children: [
-            /// Decorações geométricas de fundo
+            // Efeitos visuais geométricos no fundo
             Positioned(
               top: -120,
               right: -80,
@@ -159,7 +161,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
               ),
             ),
 
-            /// Conteúdo principal
+            // Conteúdo principal
             SafeArea(
               child: Center(
                 child: SingleChildScrollView(
@@ -167,7 +169,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      /// Botão de Voltar
+                      // Botão superior para retornar na navegação ou etapa
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton.icon(
@@ -195,6 +197,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                       ),
                       const SizedBox(height: 16),
 
+                      // Card principal translúcido
                       ClipRRect(
                         borderRadius: BorderRadius.circular(24),
                         child: BackdropFilter(
@@ -217,7 +220,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                /// Header: Logo + Título
+                                // Identidade visual e logotipo
                                 Row(
                                   children: [
                                     Container(
@@ -261,7 +264,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                                 ),
                                 const SizedBox(height: 24),
 
-                                /// Indicador de Etapas
+                                // Indicadores visuais de etapa do cadastro
                                 Row(
                                   children: [
                                     _buildStepIndicator(1, controller.step, isLight),
@@ -288,7 +291,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                                 ),
                                 const SizedBox(height: 24),
 
-                                /// Conteúdo da Etapa
+                                // Exibição condicional da etapa ativa do formulário
                                 controller.step == 1 
                                     ? _buildStep1(context, controller, isLight) 
                                     : _buildStep2(context, controller, isLight),
@@ -298,7 +301,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                         ),
                       ),
                       
-                      /// Rodapé
+                      // Rodapé
                       const SizedBox(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -326,6 +329,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
     );
   }
 
+  /// Constrói a bolha indicadora do status de cada etapa
   Widget _buildStepIndicator(int stepIndex, int currentStep, bool isLight) {
     bool isCompletedOrCurrent = currentStep >= stepIndex;
     bool isCompleted = currentStep > stepIndex;
@@ -361,6 +365,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
     );
   }
 
+  /// Formulário da Etapa 1: Dados Pessoais
   Widget _buildStep1(BuildContext context, SignUpController controller, bool isLight) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -385,7 +390,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
         ),
         const SizedBox(height: 22),
 
-        /// Nome completo
+        // Campo de entrada: Nome completo
         Text(
           'Nome completo',
           style: TextStyle(
@@ -406,7 +411,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
         ),
         const SizedBox(height: 14),
 
-        /// Usuário
+        // Campo de entrada: Usuário
         Text(
           'Usuário',
           style: TextStyle(
@@ -427,7 +432,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
         ),
         const SizedBox(height: 14),
 
-        /// E-mail
+        // Campo de entrada: E-mail
         Text(
           'E-mail',
           style: TextStyle(
@@ -449,7 +454,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
         ),
         const SizedBox(height: 22),
 
-        /// Continuar
+        // Botão para avançar de etapa
         Container(
           width: double.infinity,
           height: 50,
@@ -490,6 +495,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
     );
   }
 
+  /// Formulário da Etapa 2: Senha e Aceitação de Termos
   Widget _buildStep2(BuildContext context, SignUpController controller, bool isLight) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -514,7 +520,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
         ),
         const SizedBox(height: 22),
 
-        /// Senha
+        // Campo de entrada da senha
         Text(
           'Senha',
           style: TextStyle(
@@ -561,7 +567,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           ),
         ),
         
-        /// Força da senha
+        // Exibição do nível de segurança da senha
         if (controller.password.isNotEmpty) ...[
           const SizedBox(height: 8),
           Row(
@@ -592,7 +598,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
         ],
         const SizedBox(height: 14),
 
-        /// Confirmar senha
+        // Campo de confirmação de senha
         Text(
           'Confirmar senha',
           style: TextStyle(
@@ -647,7 +653,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
         ),
         const SizedBox(height: 18),
 
-        /// Termos
+        // Aceitação de termos e políticas de privacidade
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -684,7 +690,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
         ),
         const SizedBox(height: 24),
 
-        /// Botão Criar Conta
+        // Botão de submissão do cadastro final
         Container(
           width: double.infinity,
           height: 50,
@@ -723,6 +729,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
     );
   }
 
+  /// Helper genérico para estruturar campos de entrada TextField
   Widget _buildTextField({
     Key? key,
     required TextEditingController controller,

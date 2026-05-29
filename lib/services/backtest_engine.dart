@@ -7,17 +7,17 @@ import '../models/dividend.dart';
 import '../models/corporate_event.dart';
 import 'stock_service.dart';
 
-/// Engine responsável por executar a simulação de backtest histórica.
+/// Mecanismo responsável por executar a simulação histórica de backtest.
 class BacktestEngine {
   final StockService _stockService = StockService();
 
-  /// Executa o backtest histórico utilizando a configuração fornecida.
+  /// Executa o backtest histórico utilizando as configurações fornecidas.
   Future<BacktestResult> runBacktest(BacktestConfig config) async {
-    // Calcular a diferença de anos e adicionar um buffer de 2 anos para anos parciais/correntes
+    // Calcula a diferença de anos e adiciona uma margem de segurança de 2 anos
     final int yearsDifference = ((config.endDate.difference(config.startDate).inDays) / 365.25).ceil();
     final int limitYears = yearsDifference + 2;
 
-    // 1. Carregar dados da API de forma concorrente
+    // Busca dados de mercado concorrentemente para maximizar desempenho de rede
     final Future<List<StockPrice>> stockPricesFuture = _stockService.fetchStocksPrice(config.stockTicker);
     final Future<List<StockPrice>> fiiPricesFuture = _stockService.fetchStocksPrice(config.fiiTicker);
     final Future<StockFundamentals> stockFundamentalsFuture = _stockService.fetchStockFundamentals(config.stockTicker);
@@ -46,21 +46,22 @@ class BacktestEngine {
     final List<CorporateEvent> stockEvents = results[6] as List<CorporateEvent>;
     final List<CorporateEvent> fiiEvents = results[7] as List<CorporateEvent>;
 
-    debugPrint('📊 [BACKTEST START] Period: ${config.startDate} to ${config.endDate}');
-    debugPrint('📊 [LOADED DATA] Prices: Stock=${stockPrices.length}, FII=${fiiPrices.length} | Dividends: Stock=${stockDividends.dividends.length}, FII=${fiiDividends.dividends.length}');
+    debugPrint('📊 [INÍCIO DO BACKTEST] Período: ${config.startDate} até ${config.endDate}');
+    debugPrint('📊 [DADOS CARREGADOS] Preços: Ação=${stockPrices.length}, FII=${fiiPrices.length} | Dividendos: Ação=${stockDividends.dividends.length}, FII=${fiiDividends.dividends.length}');
+    
     if (fiiDividends.dividends.isNotEmpty) {
       final dates = fiiDividends.dividends.map((d) => d.paymentDate).toList();
       dates.sort();
-      debugPrint('📊 [FII REAL DIVIDENDS RANGE] Oldest: ${dates.first} | Newest: ${dates.last}');
+      debugPrint('📊 [INTERVALO DE DIVIDENDOS FII] Mais antigo: ${dates.first} | Mais recente: ${dates.last}');
     }
 
-    // Ordenar históricos cronologicamente
+    // Ordena os históricos cronologicamente para consistência
     stockPrices.sort((a, b) => a.date.compareTo(b.date));
     fiiPrices.sort((a, b) => a.date.compareTo(b.date));
     stockEvents.sort((a, b) => a.date.compareTo(b.date));
     fiiEvents.sort((a, b) => a.date.compareTo(b.date));
 
-    // Determinar a lista de dias úteis da simulação (baseado nas cotações da Ação)
+    // Define os dias úteis com base no histórico de preços da Ação
     final List<StockPrice> filteredStockPrices = stockPrices.where((p) {
       final date = DateTime.tryParse(p.date);
       if (date == null) return false;
@@ -68,22 +69,20 @@ class BacktestEngine {
     }).toList();
 
     if (filteredStockPrices.isEmpty) {
-      throw Exception('Sem dados de cotação para o período selecionado.');
+      throw Exception('Nenhum dado de cotação encontrado para o período selecionado.');
     }
 
-    // --- EXECUÇÃO DOS CENÁRIOS ---
-    
-    // Histórico de cotas mensais para pagamento de dividendos baseado na data EX
+    // Histórico de cotas mensais para processamento de dividendos com base na data ex
     final Map<String, double> c1SharesHistory = {};
     final Map<String, double> c2StockSharesHistory = {};
     final Map<String, double> c2FiiSharesHistory = {};
 
-    // Acumuladores de dividendos entre aportes
+    // Acumuladores temporários de dividendos entre cada aporte mensal
     double c1AccumulatedStockDiv = 0.0;
     double c2AccumulatedStockDiv = 0.0;
     double c2AccumulatedFiiDiv = 0.0;
 
-    // Estado do Cenário 1 (Apenas Ações - Buy & Hold)
+    // Estado do Cenário 1: Compras regulares da Ação (Estratégia Buy & Hold clássica)
     double c1StockShares = 0.0;
     double c1Cash = 0.0;
     double c1TotalInvested = 0.0;
@@ -91,7 +90,7 @@ class BacktestEngine {
     final List<MonthlyOperation> c1Operations = [];
     final List<PortfolioPosition> c1Positions = [];
 
-    // Estado do Cenário 2 (Valuation Inteligente - Ações + FIIs)
+    // Estado do Cenário 2: Alocação tática por Valuation (Ações + FIIs)
     double c2StockShares = 0.0;
     double c2FiiShares = 0.0;
     double c2Cash = 0.0;
@@ -106,10 +105,10 @@ class BacktestEngine {
     int c2LastPurchaseYear = 0;
     int c2LastPurchaseMonth = 0;
 
-    // Variável de controle para verificar se a margem de Graham foi batida alguma vez
+    // Determina se a margem mínima de segurança foi alcançada alguma vez na simulação
     bool grahamMarginEverMet = false;
 
-    // Listas de dividendos não pagos/pendentes (evita perda de proventos que caem em finais de semana ou feriados)
+    // Filtra proventos não liquidados a partir do início da simulação
     final List<Dividend> unpaidStockDividends = stockDividends.dividends.where((d) {
       final payDate = DateTime.tryParse(d.paymentDate);
       return payDate != null && !payDate.isBefore(config.startDate);
@@ -120,7 +119,7 @@ class BacktestEngine {
       return payDate != null && !payDate.isBefore(config.startDate);
     }).toList();
 
-    // Encontrar o último dividendo real de FII e seu valor para projetar os meses restantes ausentes na API
+    // Projeta proventos futuros caso a API possua gaps nos meses mais recentes
     DateTime? latestFiiDivDate;
     double lastKnownFiiDivValue = 0.0;
     if (fiiDividends.dividends.isNotEmpty) {
@@ -133,15 +132,10 @@ class BacktestEngine {
         }
       }
       latestFiiDivDate = maxDate;
-      debugPrint('🔮 [FII PROJECTION CHECK] Latest Real FII Dividend Date: $latestFiiDivDate (Value: R\$ $lastKnownFiiDivValue)');
-    } else {
-      debugPrint('⚠️ [FII PROJECTION CHECK] No real FII dividends found in the API response!');
     }
 
-    // Projetar dividendos mensais de FII estimados até a data de fim caso a API esteja defasada nos últimos meses
     if (latestFiiDivDate != null && latestFiiDivDate.isBefore(config.endDate)) {
       int monthsToAdd = 1;
-      debugPrint('🔮 [FII PROJECTION START] Projecting monthly dividends from $latestFiiDivDate to ${config.endDate}');
       while (true) {
         final nextDivDate = DateTime(
           latestFiiDivDate.year,
@@ -158,12 +152,11 @@ class BacktestEngine {
           value: lastKnownFiiDivValue,
           type: 'COM',
         ));
-        debugPrint('🔮 [FII PROJECTION ADDED] Projected FII Dividend Date: $formattedDate (Value: R\$ $lastKnownFiiDivValue)');
         monthsToAdd++;
       }
     }
 
-    // Encontrar o dividendo real mais antigo de FII e seu valor para projetar os meses passados ausentes na API (gap pré-2021)
+    // Projeta proventos passados para cobrir lacunas históricas (lacunas anteriores a 2021)
     DateTime? oldestFiiDivDate;
     double oldestKnownFiiDivValue = 0.0;
     if (fiiDividends.dividends.isNotEmpty) {
@@ -176,13 +169,10 @@ class BacktestEngine {
         }
       }
       oldestFiiDivDate = minDate;
-      debugPrint('🔮 [FII BACKWARD PROJECTION CHECK] Oldest Real FII Dividend Date: $oldestFiiDivDate (Value: R\$ $oldestKnownFiiDivValue)');
     }
 
-    // Projetar dividendos mensais de FII estimados para trás até a data de início caso a API não cubra o período inicial (gap pré-2021)
     if (oldestFiiDivDate != null && oldestFiiDivDate.isAfter(config.startDate)) {
       int monthsToSub = 1;
-      debugPrint('🔮 [FII BACKWARD PROJECTION START] Projecting monthly dividends backwards from $oldestFiiDivDate to ${config.startDate}');
       while (true) {
         final prevDivDate = DateTime(
           oldestFiiDivDate.year,
@@ -199,7 +189,6 @@ class BacktestEngine {
           value: oldestKnownFiiDivValue,
           type: 'COM',
         ));
-        debugPrint('🔮 [FII BACKWARD PROJECTION ADDED] Projected FII Dividend Date: $formattedDate (Value: R\$ $oldestKnownFiiDivValue)');
         monthsToSub++;
       }
     }
@@ -207,7 +196,10 @@ class BacktestEngine {
     double? prevStockPrice;
     double? prevFiiPrice;
 
-    // Loop diário de aportes e compras
+    // Ponteiros cronológicos otimizados para evitar buscas lineares O(N) diárias
+    int fiiPointer = 0;
+
+    // Executa a simulação diária histórica
     for (final currentStock in filteredStockPrices) {
       final DateTime currentDate = DateTime.parse(currentStock.date);
       final int year = currentDate.year;
@@ -215,15 +207,24 @@ class BacktestEngine {
       final int day = currentDate.day;
 
       final double stockPrice = currentStock.close;
-      final StockPrice? currentFii = _getPriceForDay(fiiPrices, currentDate);
+
+      // Otimização: Avança o ponteiro cronológico dos FIIs de forma linear O(N+M)
+      while (fiiPointer + 1 < fiiPrices.length) {
+        final nextDate = DateTime.tryParse(fiiPrices[fiiPointer + 1].date);
+        if (nextDate == null || nextDate.isAfter(currentDate)) {
+          break;
+        }
+        fiiPointer++;
+      }
+
+      final StockPrice? currentFii = fiiPrices.isNotEmpty ? fiiPrices[fiiPointer] : null;
       if (currentFii == null) continue;
       final double fiiPrice = currentFii.close;
 
       bool hasStockEventToday = false;
       bool hasFiiEventToday = false;
 
-      // --- AJUSTE DE SPLITS/INPLITS (EVENTOS CORPORATIVOS DA API) ---
-      // Ação
+      // Processa desdobramentos e agrupamentos cadastrados para as Ações
       for (final event in stockEvents) {
         if (event.date.year == year && event.date.month == month && event.date.day == day) {
           final double multiplier = (event.ratioFrom > 0)
@@ -243,7 +244,6 @@ class BacktestEngine {
             c2StockShares = flooredC2Shares;
             c2Cash += residueC2 * stockPrice;
 
-            // Ajustar todo o histórico de cotas passadas para que os dividendos sejam computados corretamente
             for (final key in c1SharesHistory.keys) {
               c1SharesHistory[key] = ((c1SharesHistory[key] ?? 0.0) * multiplier).floorToDouble();
             }
@@ -252,12 +252,11 @@ class BacktestEngine {
             }
 
             hasStockEventToday = true;
-            debugPrint('🔄 [SPLIT/INPLIT STOCK API] ${config.stockTicker} em ${currentStock.date}: Multiplicador $multiplier. Novas cotas: c1=$c1StockShares, c2=$c2StockShares, resíduo c1=R\$ ${residueC1 * stockPrice}, c2=R\$ ${residueC2 * stockPrice}');
           }
         }
       }
 
-      // FII
+      // Processa desdobramentos e agrupamentos cadastrados para os FIIs
       for (final event in fiiEvents) {
         if (event.date.year == year && event.date.month == month && event.date.day == day) {
           final double multiplier = (event.ratioFrom > 0)
@@ -271,18 +270,16 @@ class BacktestEngine {
             c2FiiShares = flooredC2FiiShares;
             c2Cash += residueC2Fii * fiiPrice;
 
-            // Ajustar todo o histórico de cotas passadas
             for (final key in c2FiiSharesHistory.keys) {
               c2FiiSharesHistory[key] = ((c2FiiSharesHistory[key] ?? 0.0) * multiplier).floorToDouble();
             }
 
             hasFiiEventToday = true;
-            debugPrint('🔄 [SPLIT/INPLIT FII API] ${config.fiiTicker} em ${currentStock.date}: Multiplicador $multiplier. Novas cotas: c2=$c2FiiShares, resíduo=R\$ ${residueC2Fii * fiiPrice}');
           }
         }
       }
 
-      // --- DETECÇÃO AUTOMÁTICA DE SPLITS/INPLITS (SAFEGUARD) ---
+      // Mecanismo automático de proteção para splits não listados nas APIs (Ações)
       if (!hasStockEventToday && prevStockPrice != null && prevStockPrice > 0) {
         final double multiplier = _detectSplitMultiplier(prevStockPrice, stockPrice);
         if (multiplier != 1.0) {
@@ -304,11 +301,10 @@ class BacktestEngine {
           for (final key in c2StockSharesHistory.keys) {
             c2StockSharesHistory[key] = ((c2StockSharesHistory[key] ?? 0.0) * multiplier).floorToDouble();
           }
-
-          debugPrint('🔄 [SPLIT/INPLIT STOCK AUTO-DETECT] ${config.stockTicker} em ${currentStock.date}: Preço de $prevStockPrice para $stockPrice (multiplicador auto $multiplier). Novas cotas: c1=$c1StockShares, c2=$c2StockShares, resíduo c1=R\$ ${residueC1 * stockPrice}, c2=R\$ ${residueC2 * stockPrice}');
         }
       }
 
+      // Mecanismo automático de proteção para splits não listados nas APIs (FIIs)
       if (!hasFiiEventToday && prevFiiPrice != null && prevFiiPrice > 0) {
         final double multiplier = _detectSplitMultiplier(prevFiiPrice, fiiPrice);
         if (multiplier != 1.0) {
@@ -321,23 +317,20 @@ class BacktestEngine {
           for (final key in c2FiiSharesHistory.keys) {
             c2FiiSharesHistory[key] = ((c2FiiSharesHistory[key] ?? 0.0) * multiplier).floorToDouble();
           }
-
-          debugPrint('🔄 [SPLIT/INPLIT FII AUTO-DETECT] ${config.fiiTicker} em ${currentStock.date}: Preço de $prevFiiPrice para $fiiPrice (multiplicador auto $multiplier). Novas cotas: c2=$c2FiiShares, resíduo=R\$ ${residueC2Fii * fiiPrice}');
         }
       }
 
-      // Registrar o saldo de cotas que iniciou este mês (antes dos aportes deste mês)
+      // Registra a quantidade de ativos que iniciaram este mês para cômputo dos proventos
       final String currentKey = '$year-$month';
       c1SharesHistory[currentKey] = c1StockShares;
       c2StockSharesHistory[currentKey] = c2StockShares;
       c2FiiSharesHistory[currentKey] = c2FiiShares;
 
-      // 1. Coletar dividendos distribuídos neste dia pelas cotas mantidas nas respectivas datas EX
       double c1StockDiv = 0.0;
       double c2StockDiv = 0.0;
       double c2FiiDiv = 0.0;
 
-      // Coletar dividendos de Ações que devem ser pagos até hoje (pendentes)
+      // Identifica e distribui proventos devidos das Ações no dia corrente
       final List<Dividend> dayStockPayments = [];
       unpaidStockDividends.removeWhere((d) {
         final payDate = DateTime.tryParse(d.paymentDate);
@@ -355,17 +348,13 @@ class BacktestEngine {
           final String exKey = '${exDate.year}-${exDate.month}';
           final c1Shares = c1SharesHistory[exKey] ?? 0.0;
           final c2Shares = c2StockSharesHistory[exKey] ?? 0.0;
-          final c1Paid = c1Shares * d.value;
-          final c2Paid = c2Shares * d.value;
-          c1StockDiv += c1Paid;
-          c2StockDiv += c2Paid;
-          
-          debugPrint('💰 [STOCK DIVIDEND PAID] Date: ${d.paymentDate} (Ex-Date: ${d.exDate}) | Value/Share: R\$ ${d.value.toStringAsFixed(4)} | c1Shares at Ex: $c1Shares (Paid: R\$ ${c1Paid.toStringAsFixed(2)}) | c2Shares at Ex: $c2Shares (Paid: R\$ ${c2Paid.toStringAsFixed(2)})');
+          c1StockDiv += c1Shares * d.value;
+          c2StockDiv += c2Shares * d.value;
         }
       }
       c1TotalDividends += c1StockDiv;
 
-      // Coletar dividendos de FIIs que devem ser pagos até hoje (pendentes)
+      // Identifica e distribui proventos devidos dos FIIs no dia corrente
       final List<Dividend> dayFiiPayments = [];
       unpaidFiiDividends.removeWhere((d) {
         final payDate = DateTime.tryParse(d.paymentDate);
@@ -382,38 +371,32 @@ class BacktestEngine {
         if (exDate != null) {
           final String exKey = '${exDate.year}-${exDate.month}';
           final c2Shares = c2FiiSharesHistory[exKey] ?? 0.0;
-          final c2Paid = c2Shares * d.value;
-          c2FiiDiv += c2Paid;
-          
-          debugPrint('💰 [FII DIVIDEND PAID] Date: ${d.paymentDate} (Ex-Date: ${d.exDate}) | Value/Share: R\$ ${d.value.toStringAsFixed(4)} | c2Shares at Ex: $c2Shares (Paid: R\$ ${c2Paid.toStringAsFixed(2)})');
+          c2FiiDiv += c2Shares * d.value;
         }
       }
       final double c2MonthDiv = c2StockDiv + c2FiiDiv;
       c2TotalDividends += c2MonthDiv;
 
-      // Reinvestimento se ativo (adiciona direto ao caixa da corretora)
+      // Adiciona rendimentos recebidos ao saldo de caixa se reinvestimento estiver ativo
       if (config.considerarReinvestimento) {
         c1Cash += c1StockDiv;
         c2Cash += c2MonthDiv;
       }
 
-      // Acumular dividendos para o relatório mensal
       c1AccumulatedStockDiv += c1StockDiv;
       c2AccumulatedStockDiv += c2StockDiv;
       c2AccumulatedFiiDiv += c2FiiDiv;
 
-      // 2. Acumular Aporte Mensal do Cenário 1 (se for dia do aporte)
+      // Executa o aporte regular para o Cenário 1 (Buy & Hold clássico)
       final bool c1IsNewMonth = year != c1LastPurchaseYear || month != c1LastPurchaseMonth;
       final bool c1IsAfterPurchaseDay = day >= config.diaCompra;
       if (c1IsNewMonth && c1IsAfterPurchaseDay) {
         c1LastPurchaseYear = year;
         c1LastPurchaseMonth = month;
         
-        // Efetua o aporte real direto para o caixa da corretora
         c1Cash += config.monthlyInvestment;
         c1TotalInvested += config.monthlyInvestment;
 
-        // Comprar o máximo de cotas que o caixa permitir
         final double c1Bought = (c1Cash / stockPrice).floorToDouble();
         if (c1Bought > 0) {
           c1StockShares += c1Bought;
@@ -439,38 +422,31 @@ class BacktestEngine {
         c1AccumulatedStockDiv = 0.0;
       }
 
-      // 3. Acumular Aporte Mensal do Cenário 2 (se for dia do aporte)
+      // Executa o aporte tático para o Cenário 2 (Alocação Dinâmica por Valuation)
       final bool c2IsNewMonth = year != c2LastPurchaseYear || month != c2LastPurchaseMonth;
       final bool c2IsAfterPurchaseDay = day >= config.diaCompra;
       if (c2IsNewMonth && c2IsAfterPurchaseDay) {
         c2LastPurchaseYear = year;
         c2LastPurchaseMonth = month;
 
-        // Efetua o aporte real direto para o caixa da corretora
         c2Cash += config.monthlyInvestment;
         c2TotalInvested += config.monthlyInvestment;
 
-        // Fórmulas de Valuation para escolher qual ativo comprar
         double fairValue = 0.0;
         bool isStockCheap = false;
         String purchaseReason = '';
         double valuationFormulaValue = 0.0;
 
+        // Executa a estratégia tática selecionada
         if (config.valuationMethod == ValuationMethod.graham) {
           final double currentLpa = stockFundamentals.lpa > 0 ? stockFundamentals.lpa : 1.0;
           final double currentVpa = stockFundamentals.vpa > 0 ? stockFundamentals.vpa : 1.0;
-
-          // Calcular a diferença de anos em relação à data final (fim da simulação)
           final double yearsFromEnd = (currentDate.difference(config.endDate).inDays) / 365.25;
           
-          // Projetar um crescimento histórico anual médio de 6% para reajustar VPA e LPA no passado (baseline)
           final double baselineVpa = currentVpa * pow(1.06, yearsFromEnd);
           final double baselineLpa = currentLpa * pow(1.06, yearsFromEnd);
 
-          // Tentar calcular via dividendos TTM históricos para dar dinamismo real aos lucros do mês
           final double historicalTtmDiv = _getTtmDividendsDaily(stockDividends.dividends, currentDate);
-          
-          // Pegar dividendos TTM atuais do fim da simulação para calcular o payout ratio atual
           final double currentTtmDiv = _getTtmDividendsDaily(stockDividends.dividends, config.endDate);
           double payoutRatio = currentTtmDiv > 0 && currentLpa > 0 ? (currentTtmDiv / currentLpa) : 0.5;
           payoutRatio = payoutRatio.clamp(0.2, 0.85);
@@ -480,12 +456,10 @@ class BacktestEngine {
             dynamicLpa = historicalTtmDiv / payoutRatio;
           }
 
-          // VPA dinâmico baseado no ROE atual e LPA dinâmico (ROE = LPA / VPA => VPA = LPA / ROE)
           double roe = stockFundamentals.roe > 0 ? stockFundamentals.roe : 12.0;
           roe = roe.clamp(5.0, 35.0);
           double dynamicVpa = dynamicLpa / (roe / 100.0);
           
-          // Safeguard: garantir que VPA e LPA dinâmicos não fiquem excessivamente distantes do baseline
           dynamicLpa = dynamicLpa.clamp(baselineLpa * 0.4, baselineLpa * 2.5);
           dynamicVpa = dynamicVpa.clamp(baselineVpa * 0.4, baselineVpa * 2.5);
 
@@ -493,7 +467,6 @@ class BacktestEngine {
           final double calculatedVpa = max(0.1, dynamicVpa);
           
           fairValue = sqrt(max(0.0, 22.5 * calculatedLpa * calculatedVpa));
-          // Salvaguarda adicional contra margens extremas (garante valor não-negativo)
           final double safePrice = max(0.0, fairValue * (1.0 - (config.safetyMargin / 100.0)));
           isStockCheap = stockPrice <= safePrice;
           if (isStockCheap) {
@@ -508,9 +481,7 @@ class BacktestEngine {
           }
         } else if (config.valuationMethod == ValuationMethod.bazin) {
           final double ttmDiv = _getTtmDividendsDaily(stockDividends.dividends, currentDate);
-          // Prevenir dividendos negativos e aplicar fallback seguro
           final double finalTtmDiv = max(0.0, ttmDiv > 0 ? ttmDiv : (stockPrice * (stockFundamentals.dyield > 0 ? stockFundamentals.dyield / 100.0 : 0.05)));
-          // Prevenir divisão por zero na taxa desejada
           final double desiredRate = max(0.1, config.desiredRate);
           fairValue = finalTtmDiv / (desiredRate / 100.0);
           isStockCheap = stockPrice <= fairValue;
@@ -526,7 +497,7 @@ class BacktestEngine {
           final double dy = stockPrice > 0 ? max(0.0, (ttmDiv / stockPrice) * 100.0) : 0.0;
           final double roe = stockFundamentals.roe > 0 ? stockFundamentals.roe : 12.0;
           final double lpa = stockFundamentals.lpa > 0 ? stockFundamentals.lpa : 1.0;
-          final double pe = max(1.0, stockPrice / lpa); // P/L protegido
+          final double pe = max(1.0, stockPrice / lpa);
           final double lynchRate = (roe + dy) / pe;
           fairValue = 1.5;
           isStockCheap = lynchRate > 1.5;
@@ -572,7 +543,7 @@ class BacktestEngine {
         c2AccumulatedFiiDiv = 0.0;
       }
 
-      // Adicionar posições diárias
+      // Adiciona as posições diárias da carteira
       c1Positions.add(PortfolioPosition(
         stockShares: c1StockShares,
         fiiShares: 0.0,
@@ -595,7 +566,7 @@ class BacktestEngine {
       prevFiiPrice = fiiPrice;
     }
 
-    // Flush any remaining accumulated dividends to the last operation
+    // Consolida proventos residuais acumulados no final da simulação
     if (c1Operations.isNotEmpty) {
       final lastOp = c1Operations.last;
       c1Operations[c1Operations.length - 1] = MonthlyOperation(
@@ -631,7 +602,7 @@ class BacktestEngine {
       );
     }
 
-    // Tratar o caso especial de Graham: se a margem NUNCA foi batida, o patrimônio final no Cenário 2 deve ser composto apenas de FIIs
+    // Processamento do caso especial de Graham: se a margem nunca foi atingida, reconstrói o portfólio composto apenas de FIIs
     if (config.valuationMethod == ValuationMethod.graham && !grahamMarginEverMet && c2Positions.isNotEmpty) {
       c2StockShares = 0.0;
       c2FiiShares = 0.0;
@@ -650,10 +621,8 @@ class BacktestEngine {
         return payDate != null && !payDate.isBefore(config.startDate);
       }).toList();
 
-      // Projetar dividendos mensais de FII estimados no fallback de Graham
       if (latestFiiDivDate != null && latestFiiDivDate.isBefore(config.endDate)) {
         int monthsToAdd = 1;
-        debugPrint('🔮 [GRAHAM FALLBACK FII PROJECTION START] Projecting monthly dividends from $latestFiiDivDate to ${config.endDate}');
         while (true) {
           final nextDivDate = DateTime(
             latestFiiDivDate.year,
@@ -670,15 +639,12 @@ class BacktestEngine {
             value: lastKnownFiiDivValue,
             type: 'COM',
           ));
-          debugPrint('🔮 [GRAHAM FALLBACK FII PROJECTION ADDED] Projected FII Dividend Date: $formattedDate (Value: R\$ $lastKnownFiiDivValue)');
           monthsToAdd++;
         }
       }
 
-      // Projetar dividendos mensais de FII estimados para trás no fallback de Graham (gap pré-2021)
       if (oldestFiiDivDate != null && oldestFiiDivDate.isAfter(config.startDate)) {
         int monthsToSub = 1;
-        debugPrint('🔮 [GRAHAM FALLBACK FII BACKWARD PROJECTION START] Projecting monthly dividends backwards from $oldestFiiDivDate to ${config.startDate}');
         while (true) {
           final prevDivDate = DateTime(
             oldestFiiDivDate.year,
@@ -695,12 +661,14 @@ class BacktestEngine {
             value: oldestKnownFiiDivValue,
             type: 'COM',
           ));
-          debugPrint('🔮 [GRAHAM FALLBACK FII BACKWARD PROJECTION ADDED] Projected FII Dividend Date: $formattedDate (Value: R\$ $oldestKnownFiiDivValue)');
           monthsToSub++;
         }
       }
 
       double? prevFiiPriceGraham;
+
+      // Ponteiro cronológico FII otimizado para o fallback de Graham O(N+M)
+      int fiiPointerGraham = 0;
 
       for (final currentStock in filteredStockPrices) {
         final DateTime currentDate = DateTime.parse(currentStock.date);
@@ -709,13 +677,23 @@ class BacktestEngine {
         final int day = currentDate.day;
 
         final double stockPrice = currentStock.close;
-        final StockPrice? currentFii = _getPriceForDay(fiiPrices, currentDate);
+
+        // Otimização: Avança o ponteiro cronológico dos FIIs de forma linear O(N+M) no fallback
+        while (fiiPointerGraham + 1 < fiiPrices.length) {
+          final nextDate = DateTime.tryParse(fiiPrices[fiiPointerGraham + 1].date);
+          if (nextDate == null || nextDate.isAfter(currentDate)) {
+            break;
+          }
+          fiiPointerGraham++;
+        }
+
+        final StockPrice? currentFii = fiiPrices.isNotEmpty ? fiiPrices[fiiPointerGraham] : null;
         if (currentFii == null) continue;
         final double fiiPrice = currentFii.close;
 
         bool hasFiiEventTodayGraham = false;
 
-        // --- AJUSTE DE SPLITS/INPLITS (EVENTOS CORPORATIVOS FII FALLBACK GRAHAM API) ---
+        // Processa desdobramentos de FII no fallback de Graham
         for (final event in fiiEvents) {
           if (event.date.year == year && event.date.month == month && event.date.day == day) {
             final double multiplier = (event.ratioFrom > 0)
@@ -734,12 +712,11 @@ class BacktestEngine {
               }
 
               hasFiiEventTodayGraham = true;
-              debugPrint('🔄 [SPLIT/INPLIT FII FALLBACK GRAHAM API] ${config.fiiTicker} em ${currentStock.date}: Multiplicador $multiplier. Novas cotas: c2=$c2FiiShares, resíduo=R\$ ${residueC2Fii * fiiPrice}');
             }
           }
         }
 
-        // --- DETECÇÃO AUTOMÁTICA DE SPLITS/INPLITS (FII FALLBACK GRAHAM SAFEGUARD) ---
+        // Detector automático de desdobramentos de FII no fallback de Graham
         if (!hasFiiEventTodayGraham && prevFiiPriceGraham != null && prevFiiPriceGraham > 0) {
           final double multiplier = _detectSplitMultiplier(prevFiiPriceGraham, fiiPrice);
           if (multiplier != 1.0) {
@@ -752,16 +729,13 @@ class BacktestEngine {
             for (final key in c2FiiSharesHistoryGraham.keys) {
               c2FiiSharesHistoryGraham[key] = ((c2FiiSharesHistoryGraham[key] ?? 0.0) * multiplier).floorToDouble();
             }
-
-            debugPrint('🔄 [SPLIT/INPLIT FII FALLBACK GRAHAM AUTO-DETECT] ${config.fiiTicker} em ${currentStock.date}: Preço de $prevFiiPriceGraham para $fiiPrice (multiplicador auto $multiplier). Novas cotas: c2=$c2FiiShares, resíduo=R\$ ${residueC2Fii * fiiPrice}');
           }
         }
 
-        // Registrar o saldo de cotas inicial do mês
         final String currentKey = '$year-$month';
         c2FiiSharesHistoryGraham[currentKey] = c2FiiShares;
 
-        // Apenas FII distribui (pendentes)
+        // Processa pagamentos de proventos de FII no fallback
         final List<Dividend> dayFiiPaymentsGraham = [];
         unpaidFiiDividendsGraham.removeWhere((d) {
           final payDate = DateTime.tryParse(d.paymentDate);
@@ -779,10 +753,7 @@ class BacktestEngine {
           if (exDate != null) {
             final String exKey = '${exDate.year}-${exDate.month}';
             final c2Shares = c2FiiSharesHistoryGraham[exKey] ?? 0.0;
-            final c2Paid = c2Shares * d.value;
-            c2FiiDiv += c2Paid;
-            
-            debugPrint('💰 [FII FALLBACK GRAHAM DIVIDEND PAID] Date: ${d.paymentDate} (Ex-Date: ${d.exDate}) | Value/Share: R\$ ${d.value.toStringAsFixed(4)} | c2Shares at Ex: $c2Shares (Paid: R\$ ${c2Paid.toStringAsFixed(2)})');
+            c2FiiDiv += c2Shares * d.value;
           }
         }
         c2TotalDividends += c2FiiDiv;
@@ -791,10 +762,9 @@ class BacktestEngine {
           c2Cash += c2FiiDiv;
         }
 
-        // Acumular dividendos para o relatório no fallback
         c2AccumulatedFiiDivGraham += c2FiiDiv;
 
-        // Acumular Aporte Mensal do Cenário 2 Graham Fallback (se for dia do aporte)
+        // Processa aporte mensal de FII no fallback
         final bool c2IsNewMonth = year != c2LastPurchaseYearGraham || month != c2LastPurchaseMonthGraham;
         final bool c2IsAfterPurchaseDay = day >= config.diaCompra;
         if (c2IsNewMonth && c2IsAfterPurchaseDay) {
@@ -847,7 +817,6 @@ class BacktestEngine {
         prevFiiPriceGraham = fiiPrice;
       }
 
-      // Flush remaining accumulated FII dividends in Graham fallback
       if (c2Operations.isNotEmpty) {
         final lastOp = c2Operations.last;
         c2Operations[c2Operations.length - 1] = MonthlyOperation(
@@ -867,7 +836,7 @@ class BacktestEngine {
       }
     }
 
-    // 4. Calcular Valores Finais e Estatísticas de Encerramento
+    // Calcula as métricas de performance finais da simulação
     final double c1FinalValue = c1Positions.last.getTotalValue();
     final double c2FinalValue = c2Positions.last.getTotalValue();
 
@@ -916,24 +885,7 @@ class BacktestEngine {
 
   // --- MÉTODOS AUXILIARES ---
 
-  StockPrice? _getPriceForDay(List<StockPrice> prices, DateTime targetDate) {
-    for (final p in prices) {
-      final date = DateTime.tryParse(p.date);
-      if (date != null && date.year == targetDate.year && date.month == targetDate.month && date.day == targetDate.day) {
-        return p;
-      }
-    }
-    // Fallback para o dia mais próximo anterior
-    StockPrice? closest;
-    for (final p in prices) {
-      final date = DateTime.tryParse(p.date);
-      if (date != null && !date.isAfter(targetDate)) {
-        closest = p;
-      }
-    }
-    return closest;
-  }
-
+  /// Calcula dividendos TTM (últimos 12 meses) a partir de uma data específica
   double _getTtmDividendsDaily(List<Dividend> dividends, DateTime currentDate) {
     final twelveMonthsAgo = currentDate.subtract(const Duration(days: 365));
     final ttmPayments = dividends.where((d) {
@@ -944,15 +896,13 @@ class BacktestEngine {
     return ttmPayments.fold(0.0, (sum, d) => sum + d.value);
   }
 
-  /// Detecta se houve desdobramento/grupamento com base na variação diária de preços.
-  /// Serve como safeguard caso os eventos corporativos não estejam cadastrados na API (ex: FIIs).
+  /// Detecta se houve desdobramento/grupamento com base na variação brusca diária de preços.
+  /// Serve como proteção caso eventos corporativos não estejam cadastrados na API.
   double _detectSplitMultiplier(double yesterdayPrice, double todayPrice) {
     if (yesterdayPrice <= 0 || todayPrice <= 0) return 1.0;
     final double ratio = yesterdayPrice / todayPrice;
     
-    // Se a variação diária for muito brusca (queda > 35% ou alta > 50%)
     if (ratio >= 1.35 || ratio <= 0.65) {
-      // Casos comuns de split (multiplicador inteiro ou frações comuns)
       if (ratio >= 1.35) {
         final double rounded = ratio.roundToDouble();
         if ((ratio - rounded).abs() < 0.1) {
@@ -963,10 +913,8 @@ class BacktestEngine {
             return fraction;
           }
         }
-        return 1.0; // Evita assumir razões estranhas de ruído ou volatilidade (ex: 1.44)
-      } 
-      // Casos comuns de inplit (multiplicador fracionário)
-      else {
+        return 1.0;
+      } else {
         final double invRatio = 1.0 / ratio;
         final double roundedInv = invRatio.roundToDouble();
         if ((invRatio - roundedInv).abs() < 0.1) {
@@ -977,7 +925,7 @@ class BacktestEngine {
             return 1.0 / fraction;
           }
         }
-        return 1.0; // Evita assumir razões estranhas de ruído ou volatilidade
+        return 1.0;
       }
     }
     return 1.0;

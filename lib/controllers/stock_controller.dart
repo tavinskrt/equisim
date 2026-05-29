@@ -3,7 +3,7 @@ import '../models/exceptions.dart';
 import '../services/stock_service.dart';
 import 'base_controller.dart';
 
-/// Controller responsável pela lógica de busca e gerenciamento de ações
+/// Controlador responsável pelo fluxo de pesquisa e dados das cotações.
 class StockController extends BaseController {
   final StockService _stockService = StockService();
   
@@ -11,12 +11,12 @@ class StockController extends BaseController {
   
   List<StockPrice> get stocks => _stocks;
 
-  /// Busca ações pelo ticker
+  /// Realiza a busca histórica de preços de um ativo pelo seu ticker correspondente.
   Future<void> fetchStocks(String ticker) async {
     final trimmedTicker = ticker.trim().toUpperCase();
     
     if (trimmedTicker.isEmpty) {
-      setError('Por favor, digite um ticker');
+      setError('Por favor, informe o ticker do ativo.');
       return;
     }
 
@@ -45,12 +45,12 @@ class StockController extends BaseController {
       setError('❌ ${e.message}');
       setLoading(false);
     } catch (e) {
-      setError('❌ Erro desconhecido: $e');
+      setError('❌ Ocorreu um erro inesperado: $e');
       setLoading(false);
     }
   }
 
-  /// Limpa a lista de ações
+  /// Limpa a lista de cotações de ativos carregada em cache.
   void clearStocks() {
     _stocks = [];
     notifyListeners();

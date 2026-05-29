@@ -11,26 +11,23 @@ import 'views/forgot_password_page.dart';
 import 'views/sign_up_page.dart';
 import 'controllers/theme_controller.dart';
 
-
 Future<void> main() async {
-  // Garante que o Flutter esteja pronto para carregar o .env
+  // Garante o binding correto das APIs nativas antes de inicializar o .env e o Firebase
   WidgetsFlutterBinding.ensureInitialized();    
   try {
     await dotenv.load(fileName: ".env");
-    debugPrint('✅ .env carregado com sucesso');
+    debugPrint('✅ Arquivo de variáveis de ambiente .env carregado com sucesso.');
   } catch (e) {
-    debugPrint('⚠️ Aviso ao carregar .env: $e');
+    debugPrint('⚠️ Erro ao carregar arquivo de variáveis de ambiente .env: $e');
   }
 
-  // Inicializa o Firebase com as opções geradas
+  // Inicializa o ecossistema Firebase com as configurações locais de plataforma
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
   runApp(const MyApp());
 }
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

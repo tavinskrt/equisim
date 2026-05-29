@@ -5,6 +5,7 @@ import '../utils/app_colors.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/forgot_password_controller.dart';
 
+/// Tela para solicitação de recuperação de senha da conta.
 class ForgotPasswordPage extends StatelessWidget {
   const ForgotPasswordPage({super.key});
 
@@ -45,6 +46,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
     super.dispose();
   }
 
+  /// Dispara a solicitação de redefinição de senha e exibe mensagens de feedback.
   void _submit(BuildContext context, ForgotPasswordController controller) async {
     FocusScope.of(context).unfocus();
     final error = await controller.sendRecoveryLink();
@@ -72,7 +74,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
     final themeController = Provider.of<ThemeController>(context);
     final isLight = themeController.isLightMode;
 
-    // Sincronizar de forma reativa os valores digitados no controller do Provider
+    // Sincroniza de forma reativa os valores do controller com o campo de texto
     final currentEmail = controller.email;
     if (_emailController.text != currentEmail) {
       _emailController.value = TextEditingValue(
@@ -89,7 +91,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
         ),
         child: Stack(
           children: [
-            /// Decorações geométricas de fundo
+            // Efeitos de esferas geométricas no plano de fundo
             Positioned(
               top: -120,
               right: -80,
@@ -115,7 +117,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
               ),
             ),
 
-            /// Conteúdo principal
+            // Corpo principal da tela
             SafeArea(
               child: Center(
                 child: SingleChildScrollView(
@@ -123,7 +125,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      /// Botão de Voltar
+                      // Botão superior de retorno à tela de login
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton.icon(
@@ -145,6 +147,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
                       ),
                       const SizedBox(height: 16),
 
+                      // Card central em efeito vidro (Glassmorphism)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(24),
                         child: BackdropFilter(
@@ -167,7 +170,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                /// Ícone
+                                // Ícone decorativo superior
                                 Center(
                                   child: Container(
                                     width: 64,
@@ -182,7 +185,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
                                 ),
                                 const SizedBox(height: 24),
 
-                                /// Título
+                                // Título e subtítulo da página
                                 Text(
                                   'Recuperar senha',
                                   style: TextStyle(
@@ -203,6 +206,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
                                 ),
                                 const SizedBox(height: 24),
 
+                                // Campo de entrada do e-mail do usuário
                                 Text(
                                   'E-mail',
                                   style: TextStyle(
@@ -242,7 +246,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
                                 ),
                                 const SizedBox(height: 20),
 
-                                /// Botão de envio
+                                // Botão de envio da recuperação de senha
                                 Container(
                                   width: double.infinity,
                                   height: 50,
@@ -281,7 +285,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
                                   ),
                                 ),
 
-                                /// Info
+                                // Bloco informativo de segurança
                                 const SizedBox(height: 20),
                                 Container(
                                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
@@ -317,7 +321,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
                         ),
                       ),
                       
-                      /// Rodapé
+                      // Rodapé informativo de segurança
                       const SizedBox(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,

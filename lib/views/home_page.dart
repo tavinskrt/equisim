@@ -11,6 +11,7 @@ import '../utils/app_colors.dart';
 import 'login_page.dart';
 import 'backtest_results_page.dart';
 
+/// Tela inicial que abriga o formulário de simulação de investimentos.
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -43,7 +44,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
   bool _showStockSuggestions = false;
   bool _showFiiSuggestions = false;
 
-  // Lista estática dos ativos brasileiros mais populares para autocomplete local instantâneo
+  // Lista dos ativos brasileiros mais populares para autocomplete local imediato
   final List<String> _popularStocks = [
     'PETR4', 'VALE3', 'ITUB4', 'BBDC4', 'BBAS3', 'ABEV3', 'WEGE3', 'ITSA4', 
     'BOVA11', 'SANB11', 'MGLU3', 'ELET3', 'B3SA3', 'RENT3', 'EQTL3'
@@ -81,7 +82,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
     final controller = Provider.of<HomeController>(context);
     final backtestController = Provider.of<BacktestController>(context);
 
-    // Sincronizar o conteúdo digitado e formatado
+    // Sincroniza dinamicamente as alterações de estado nos controllers locais
     final currentAporte = controller.aporte;
     if (_aporteController.text != currentAporte) {
       _aporteController.value = TextEditingValue(
@@ -119,7 +120,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
     final user = FirebaseAuth.instance.currentUser;
     final userEmail = user?.email ?? 'usuario@email.com';
 
-    // Disparar SnackBar de conversão/renomeação de ticker de forma reativa
+    // Exibe aviso reativo sobre renomeação automática de ativos (ex: VVAR3 para BHIA3)
     if (controller.renamedMessage != null) {
       final msg = controller.renamedMessage!;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -138,7 +139,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                   ),
                 ],
               ),
-              backgroundColor: const Color(0xFF2563EB), // Azul elegante
+              backgroundColor: const Color(0xFF2563EB),
               behavior: SnackBarBehavior.floating,
               duration: const Duration(seconds: 4),
             ),
@@ -165,7 +166,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
           ),
           child: Stack(
             children: [
-              /// Decorações geométricas de fundo
+              // Elementos decorativos no plano de fundo
               Positioned(
                 top: -100,
                 right: -60,
@@ -191,10 +192,10 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                 ),
               ),
 
-              /// Conteúdo Principal
+              // Layout principal da tela
               Column(
                 children: [
-                  /// Header Fixado
+                  // Barra de cabeçalho superior translúcida (Glassmorphism)
                   ClipRRect(
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
@@ -251,7 +252,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                               ],
                             ),
                             
-                            // Avatar
+                            // Avatar de perfil e controle de menu
                             GestureDetector(
                               onTap: () {
                                 setState(() {
@@ -282,14 +283,14 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                     ),
                   ),
 
-                  /// Corpo expansível
+                  // Área rolável de inputs do formulário
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 32),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          /// 1. ATIVOS
+                          // 1. Seleção de Ativos (Ações e FIIs)
                           _SectionCard(
                             icon: Icons.ssid_chart,
                             title: 'Ativos',
@@ -359,7 +360,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                           ),
                           const SizedBox(height: 10),
 
-                          /// 2. PERÍODO
+                          // 2. Seleção de Intervalo Histórico
                           _SectionCard(
                             icon: Icons.calendar_month_outlined,
                             title: 'Período',
@@ -386,7 +387,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                           ),
                           const SizedBox(height: 10),
 
-                          /// 3. APORTE E CONFIGURAÇÕES DE APORTE
+                          // 3. Seleção de Aporte e Dia de Compra
                           _SectionCard(
                             icon: Icons.attach_money,
                             title: 'Aporte mensal',
@@ -508,7 +509,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                 
                                 const SizedBox(height: 16),
                                 
-                                // Reinvestimento de Dividendos Switch
+                                // Controle de reinvestimento automático de dividendos
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -547,7 +548,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                           ),
                           const SizedBox(height: 10),
 
-                          /// 4. MÉTODO DE VALUATION
+                          // 4. Seleção da Estratégia de Valuation
                           _SectionCard(
                             icon: Icons.pie_chart_outline,
                             title: 'Método de Valuation',
@@ -580,7 +581,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                           ),
                           const SizedBox(height: 10),
 
-                          /// 5. PARÂMETROS (Ocultar condicionalmente para Bazin/Lynch)
+                          // 5. Parâmetros da Simulação (Margem de Segurança)
                           if (controller.valuation == 'graham')
                             _SectionCard(
                               icon: Icons.tune,
@@ -715,7 +716,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                               ),
                             ),
                           
-                          /// EXECUTAR
+                          // Botão de Execução do Backtest
                           Container(
                             width: double.infinity,
                             height: 54,
@@ -745,7 +746,6 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                   return;
                                 }
 
-                                // Mapear ValuationMethod
                                 ValuationMethod method = ValuationMethod.graham;
                                 if (controller.valuation == 'bazin') {
                                   method = ValuationMethod.bazin;
@@ -820,7 +820,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                 ],
               ),
 
-              // Dropdown Menu Overlay
+              // Menu suspenso de ações rápidas do perfil (Dropdown Overlay)
               if (_dropdownOpen)
                 Positioned(
                   top: 96,
@@ -843,7 +843,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // User Info
+                        // Identificação do Usuário
                         Padding(
                           padding: const EdgeInsets.only(top: 14, left: 16, right: 16, bottom: 12),
                           child: Column(
@@ -869,7 +869,8 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                           ),
                         ),
                         Container(height: 1, color: AppColors.divider(isLight)),
-                        // Meu perfil
+                        
+                        // Link: Meu perfil
                         InkWell(
                           onTap: () {
                             setState(() {
@@ -903,7 +904,8 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                           ),
                         ),
                         Container(height: 1, color: AppColors.divider(isLight)),
-                        // Modo claro
+                        
+                        // Switch do Tema Visual (Modo Claro)
                         Padding(
                           padding: const EdgeInsets.only(left: 16, right: 8, top: 4, bottom: 4),
                           child: Row(
@@ -923,81 +925,82 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: Text(
-                                  'Modo claro',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary(isLight),
+                                  child: Text(
+                                    'Modo claro',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary(isLight),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Transform.scale(
-                                scale: 0.8,
-                                child: Switch(
-                                  value: isLight,
-                                  activeThumbColor: AppColors.primary,
-                                  onChanged: (val) async {
-                                    await themeController.toggleTheme(user?.uid);
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(height: 1, color: AppColors.divider(isLight)),
-                        // Sair
-                        InkWell(
-                          onTap: () async {
-                            setState(() {
-                              _dropdownOpen = false;
-                            });
-                            await FirebaseAuth.instance.signOut();
-                            if (context.mounted) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (context) => const LoginPage()),
-                              );
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(7),
-                                    color: AppColors.danger.withValues(alpha: 0.08),
-                                  ),
-                                  child: const Icon(Icons.logout, size: 14, color: AppColors.danger),
-                                ),
-                                const SizedBox(width: 12),
-                                const Text(
-                                  'Sair',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.danger,
+                                Transform.scale(
+                                  scale: 0.8,
+                                  child: Switch(
+                                    value: isLight,
+                                    activeThumbColor: AppColors.primary,
+                                    onChanged: (val) async {
+                                      await themeController.toggleTheme(user?.uid);
+                                    },
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ],
+                          Container(height: 1, color: AppColors.divider(isLight)),
+                          
+                          // Opção de Logout
+                          InkWell(
+                            onTap: () async {
+                              setState(() {
+                                _dropdownOpen = false;
+                              });
+                              await FirebaseAuth.instance.signOut();
+                              if (context.mounted) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                                );
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(7),
+                                      color: AppColors.danger.withValues(alpha: 0.08),
+                                    ),
+                                    child: const Icon(Icons.logout, size: 14, color: AppColors.danger),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text(
+                                    'Sair',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.danger,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
     );
   }
 
-  /// Constrói um campo de Autocomplete com sugestões locais instantâneas e suporte à digitação direta.
+  /// Constrói o componente autocomplete do formulário
   Widget _buildAutocompleteField({
     required Key key,
     required TextEditingController controller,
@@ -1011,8 +1014,6 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
     String? errorText,
   }) {
     final query = controller.text.toUpperCase().trim();
-    
-    // Se a lista completa ainda não carregou, faz o fallback pra popular
     final searchList = allSuggestions.isNotEmpty ? allSuggestions : popularSuggestions;
     
     final List<String> filtered = query.isEmpty 
@@ -1058,7 +1059,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
           ),
         ),
         
-        // Exibição da caixa de autocomplete flutuante/dinâmica
+        // Caixa suspensa de listagem do autocomplete
         if (showSuggestions && filtered.isNotEmpty) ...[
           const SizedBox(height: 4),
           Container(
@@ -1144,7 +1145,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
   }
 }
 
-/// Componentes Auxiliares do Home
+/// Card de seção para agrupar inputs
 class _SectionCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -1223,6 +1224,7 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
+/// Campo seletor de data (DatePicker)
 class _DatePickerField extends StatelessWidget {
   final String label;
   final DateTime? selectedDate;
@@ -1279,6 +1281,7 @@ class _DatePickerField extends StatelessWidget {
   }
 }
 
+/// Botão seletor das estratégias de valuation
 class _ValuationButton extends StatelessWidget {
   final String id;
   final String label;
