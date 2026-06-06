@@ -19,6 +19,10 @@ class BacktestConfig {
   final ValuationMethod valuationMethod;
   final double safetyMargin; // Percentual selecionado (ex: 20.0 para 20%)
   final double desiredRate; // Taxa de retorno desejada para o método Bazin (padrão 6%)
+  final double dcfDiscountRate;
+  final double dcfGrowthRate;
+  final double dcfPerpetualGrowth;
+  final int dcfProjectionYears;
   final int diaCompra;
   final bool considerarReinvestimento;
 
@@ -31,6 +35,10 @@ class BacktestConfig {
     required this.valuationMethod,
     required this.safetyMargin,
     this.desiredRate = 6.0,
+    this.dcfDiscountRate = 12.0,
+    this.dcfGrowthRate = 8.0,
+    this.dcfPerpetualGrowth = 4.0,
+    this.dcfProjectionYears = 5,
     required this.diaCompra,
     required this.considerarReinvestimento,
   });
@@ -44,6 +52,10 @@ class BacktestConfig {
     monthly: R\$ $monthlyInvestment,
     valuation: ${valuationMethod.label},
     safety margin: $safetyMargin%,
+    dcfDiscountRate: $dcfDiscountRate%,
+    dcfGrowthRate: $dcfGrowthRate%,
+    dcfPerpetualGrowth: $dcfPerpetualGrowth%,
+    dcfProjectionYears: $dcfProjectionYears,
     diaCompra: $diaCompra,
     considerarReinvestimento: $considerarReinvestimento
   )''';

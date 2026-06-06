@@ -828,6 +828,13 @@ class _BacktestResultsPageState extends State<BacktestResultsPage> {
           _buildDetailRow('Valuation de Escolha', config.valuationMethod.label, isLight),
           if (config.valuationMethod == ValuationMethod.graham)
             _buildDetailRow('Margem de Segurança', '${config.safetyMargin}%', isLight),
+          if (config.valuationMethod == ValuationMethod.dcf) ...[
+            _buildDetailRow('Margem de Segurança', '${config.safetyMargin}%', isLight),
+            _buildDetailRow('Taxa de Desconto (Ke)', '${config.dcfDiscountRate}%', isLight),
+            _buildDetailRow('Crescimento (g)', '${config.dcfGrowthRate}%', isLight),
+            _buildDetailRow('Crescimento Perpétuo (gp)', '${config.dcfPerpetualGrowth}%', isLight),
+            _buildDetailRow('Anos Projetados', '${config.dcfProjectionYears} anos', isLight),
+          ],
           _buildDetailRow('Reinvestimento de Dividendos', config.considerarReinvestimento ? 'Ativo' : 'Inativo', isLight),
           _buildDetailRow('Dia do Aporte Mensal', 'Todo dia ${config.diaCompra}', isLight),
         ],

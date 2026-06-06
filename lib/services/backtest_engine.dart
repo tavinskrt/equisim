@@ -508,6 +508,55 @@ class BacktestEngine {
           } else {
             purchaseReason = 'Comprado ${config.fiiTicker}: indicador de Peter Lynch (${lynchRate.toStringAsFixed(2)}) é inferior/igual a 1.5 (ação cara/sobreavaliada). ROE: ${roe.toStringAsFixed(1)}%, DY: ${dy.toStringAsFixed(2)}%. Comprado FII.';
           }
+        } else if (config.valuationMethod == ValuationMethod.dcf) {
+          // 1. Obter LPA base no ponto do tempo (usando a mesma normalização histórica de Graham)
+          final double currentLpa = stockFundamentals.lpa > 0 ? stockFundamentals.lpa : 1.0;
+          final double yearsFromEnd = (currentDate.difference(config.endDate).inDays) / 365.25;
+          final double baselineLpa = currentLpa * pow(1.06, yearsFromEnd);
+          
+          final double historicalTtmDiv = _getTtmDividendsDaily(stockDividends.dividends, currentDate);
+          final double currentTtmDiv = _getTtmDividendsDaily(stockDividends.dividends, config.endDate);
+          double payoutRatio = currentTtmDiv > 0 && currentLpa > 0 ? (currentTtmDiv / currentLpa) : 0.5;
+          payoutRatio = payoutRatio.clamp(0.2, 0.85);
+
+          double dynamicLpa = baselineLpa;
+          if (historicalTtmDiv > 0) {
+            dynamicLpa = historicalTtmDiv / payoutRatio;
+          }
+          dynamicLpa = dynamicLpa.clamp(baselineLpa * 0.4, baselineLpa * 2.5);
+          final double lpa0 = max(0.1, dynamicLpa);
+
+          // 2. Extrair parâmetros informados pelo usuário
+          final double r = config.dcfDiscountRate / 100.0;
+          final double g = config.dcfGrowthRate / 100.0;
+          final double gp = config.dcfPerpetualGrowth / 100.0;
+          final int N = config.dcfProjectionYears;
+
+          // 3. Projetar e descontar os fluxos futuros de LPA
+          double sumDiscountedLpa = 0.0;
+          double lpaT = lpa0;
+          for (int t = 1; t <= N; t++) {
+            lpaT = lpaT * (1 + g);
+            sumDiscountedLpa += lpaT / pow(1 + r, t);
+          }
+
+          // 4. Calcular e descontar o Valor Terminal
+          // Salvaguarda: Evitar divisão por zero caso r <= gp
+          final double denominator = (r - gp) > 0 ? (r - gp) : 0.01;
+          final double terminalValue = (lpaT * (1 + gp)) / denominator;
+          final double discountedTerminalValue = terminalValue / pow(1 + r, N);
+
+          // 5. Preço Justo e Margem de Segurança
+          fairValue = sumDiscountedLpa + discountedTerminalValue;
+          final double safePrice = max(0.0, fairValue * (1.0 - (config.safetyMargin / 100.0)));
+          isStockCheap = stockPrice <= safePrice;
+          valuationFormulaValue = fairValue;
+
+          if (isStockCheap) {
+            purchaseReason = 'Comprado ${config.stockTicker}: preço (R\$ ${stockPrice.toStringAsFixed(2)}) é menor/igual ao Preço Justo do DCF com margem de segurança de ${config.safetyMargin.toStringAsFixed(0)}% (R\$ ${safePrice.toStringAsFixed(2)}). Preço Justo: R\$ ${fairValue.toStringAsFixed(2)} (LPA Inicial: R\$ ${lpa0.toStringAsFixed(2)}, Crescimento: ${(g*100).toStringAsFixed(1)}%, Desconto: ${(r*100).toStringAsFixed(1)}%).';
+          } else {
+            purchaseReason = 'Comprado ${config.fiiTicker}: preço da ação (R\$ ${stockPrice.toStringAsFixed(2)}) está acima do Preço Justo do DCF com margem (R\$ ${safePrice.toStringAsFixed(2)}). Preço Justo: R\$ ${fairValue.toStringAsFixed(2)}. FII comprado como porto seguro.';
+          }
         }
 
         final double targetPrice = isStockCheap ? stockPrice : fiiPrice;

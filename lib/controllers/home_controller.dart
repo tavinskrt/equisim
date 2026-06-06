@@ -10,8 +10,12 @@ class HomeController extends ChangeNotifier {
   DateTime? startDate;
   DateTime? endDate;
   String aporte = '';
-  String valuation = 'graham'; // Estratégias disponíveis: 'graham', 'bazin', 'lynch'
+  String valuation = 'graham'; // Estratégias disponíveis: 'graham', 'bazin', 'lynch', 'dcf'
   String margem = '20'; // Margem de segurança padrão para o cálculo de Graham (20%)
+  String dcfDiscountRate = '12'; // Taxa de desconto padrão (12% a.a.)
+  String dcfGrowthRate = '8'; // Taxa de crescimento do lucro curto prazo padrão (8% a.a.)
+  String dcfPerpetualGrowth = '4'; // Taxa de crescimento perpétuo padrão (4% a.a.)
+  int dcfProjectionYears = 5; // Anos de projeção padrão (5 anos)
   int diaCompra = 5; // Dia do aporte mensal padrão (dia 5)
   bool considerarReinvestimento = true; // Se ativado, os dividendos recebidos são reinvestidos
 
@@ -94,6 +98,53 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Define a taxa de desconto para o DCF.
+  void setDcfDiscountRate(String value) {
+    String raw = value.replaceAll(RegExp(r'\D'), '');
+    if (raw.isNotEmpty) {
+      int m = int.parse(raw);
+      if (m > 100) return;
+      dcfDiscountRate = m.toString();
+    } else {
+      dcfDiscountRate = '';
+    }
+    notifyListeners();
+  }
+
+  /// Define a taxa de crescimento de curto prazo do DCF.
+  void setDcfGrowthRate(String value) {
+    String raw = value.replaceAll(RegExp(r'\D'), '');
+    if (raw.isNotEmpty) {
+      int m = int.parse(raw);
+      if (m > 100) return;
+      dcfGrowthRate = m.toString();
+    } else {
+      dcfGrowthRate = '';
+    }
+    notifyListeners();
+  }
+
+  /// Define a taxa de crescimento perpétuo do DCF.
+  void setDcfPerpetualGrowth(String value) {
+    String raw = value.replaceAll(RegExp(r'\D'), '');
+    if (raw.isNotEmpty) {
+      int m = int.parse(raw);
+      if (m > 100) return;
+      dcfPerpetualGrowth = m.toString();
+    } else {
+      dcfPerpetualGrowth = '';
+    }
+    notifyListeners();
+  }
+
+  /// Define o número de anos de projeção do DCF.
+  void setDcfProjectionYears(int value) {
+    if (value >= 1 && value <= 20) {
+      dcfProjectionYears = value;
+      notifyListeners();
+    }
+  }
+
   /// Define o dia do mês selecionado para compras e aportes.
   void setDiaCompra(int day) {
     if (day >= 1 && day <= 28) {
@@ -119,6 +170,21 @@ class HomeController extends ChangeNotifier {
     return double.tryParse(margem) ?? 0.0;
   }
 
+  /// Retorna a taxa de desconto do DCF em formato numérico flutuante.
+  double get doubleDcfDiscountRate {
+    return double.tryParse(dcfDiscountRate) ?? 0.0;
+  }
+
+  /// Retorna a taxa de crescimento de curto prazo do DCF em formato numérico flutuante.
+  double get doubleDcfGrowthRate {
+    return double.tryParse(dcfGrowthRate) ?? 0.0;
+  }
+
+  /// Retorna a taxa de crescimento perpétuo do DCF em formato numérico flutuante.
+  double get doubleDcfPerpetualGrowth {
+    return double.tryParse(dcfPerpetualGrowth) ?? 0.0;
+  }
+
   /// Executa uma validação rápida de consistência dos dados do formulário.
   bool get isValid {
     if (stockTicker.isEmpty || fiiTicker.isEmpty) return false;
@@ -131,6 +197,12 @@ class HomeController extends ChangeNotifier {
     if (startDate!.isAfter(endDate!)) return false;
 
     if (valuation == 'graham' && doubleMargem <= 0) return false;
+    if (valuation == 'dcf') {
+      if (doubleDcfDiscountRate <= 0) return false;
+      if (doubleDcfGrowthRate < 0) return false;
+      if (doubleDcfPerpetualGrowth < 0) return false;
+      if (doubleDcfDiscountRate <= doubleDcfPerpetualGrowth) return false;
+    }
 
     return true;
   }
@@ -154,6 +226,14 @@ class HomeController extends ChangeNotifier {
 
     if (valuation == 'graham' && doubleMargem <= 0) {
       return 'Informe uma Margem de Segurança válida.';
+    }
+    if (valuation == 'dcf') {
+      if (doubleDcfDiscountRate <= 0) {
+        return 'Informe uma Taxa de Desconto válida.';
+      }
+      if (doubleDcfDiscountRate <= doubleDcfPerpetualGrowth) {
+        return 'A Taxa de Desconto deve ser maior que a Taxa de Crescimento Perpétuo.';
+      }
     }
     return null;
   }

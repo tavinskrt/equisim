@@ -132,7 +132,7 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
                           onPressed: () => Navigator.pop(context),
                           icon: Icon(Icons.arrow_back_ios, size: 14, color: AppColors.textSecondary(isLight)),
                           label: Text(
-                            'Voltar ao login',
+                            'Voltar',
                             style: TextStyle(
                               color: AppColors.textSecondary(isLight),
                               fontSize: 13,

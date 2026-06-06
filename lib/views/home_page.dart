@@ -10,6 +10,8 @@ import '../models/backtest.dart';
 import '../utils/app_colors.dart';
 import 'login_page.dart';
 import 'backtest_results_page.dart';
+import 'profile_page.dart';
+import 'backtest_history_page.dart';
 
 /// Tela inicial que abriga o formulário de simulação de investimentos.
 class HomePage extends StatelessWidget {
@@ -35,14 +37,18 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
   bool _dropdownOpen = false;
   late final TextEditingController _aporteController;
   late final TextEditingController _margemController;
+  late final TextEditingController _dcfDiscountRateController;
+  late final TextEditingController _dcfGrowthRateController;
+  late final TextEditingController _dcfPerpetualGrowthController;
   late final TextEditingController _stockController;
   late final TextEditingController _fiiController;
   
-  late HomeController _homeController;
   bool _initialized = false;
+  late HomeController _homeController;
 
   bool _showStockSuggestions = false;
   bool _showFiiSuggestions = false;
+  bool _isExecuting = false;
 
   // Lista dos ativos brasileiros mais populares para autocomplete local imediato
   final List<String> _popularStocks = [
@@ -62,6 +68,9 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
       _homeController = Provider.of<HomeController>(context, listen: false);
       _aporteController = TextEditingController(text: _homeController.aporte);
       _margemController = TextEditingController(text: _homeController.margem);
+      _dcfDiscountRateController = TextEditingController(text: _homeController.dcfDiscountRate);
+      _dcfGrowthRateController = TextEditingController(text: _homeController.dcfGrowthRate);
+      _dcfPerpetualGrowthController = TextEditingController(text: _homeController.dcfPerpetualGrowth);
       _stockController = TextEditingController(text: _homeController.stockTicker);
       _fiiController = TextEditingController(text: _homeController.fiiTicker);
       _initialized = true;
@@ -72,6 +81,9 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
   void dispose() {
     _aporteController.dispose();
     _margemController.dispose();
+    _dcfDiscountRateController.dispose();
+    _dcfGrowthRateController.dispose();
+    _dcfPerpetualGrowthController.dispose();
     _stockController.dispose();
     _fiiController.dispose();
     super.dispose();
@@ -99,6 +111,30 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
       );
     }
 
+    final currentDcfDiscountRate = controller.dcfDiscountRate;
+    if (_dcfDiscountRateController.text != currentDcfDiscountRate) {
+      _dcfDiscountRateController.value = TextEditingValue(
+        text: currentDcfDiscountRate,
+        selection: TextSelection.collapsed(offset: currentDcfDiscountRate.length),
+      );
+    }
+
+    final currentDcfGrowthRate = controller.dcfGrowthRate;
+    if (_dcfGrowthRateController.text != currentDcfGrowthRate) {
+      _dcfGrowthRateController.value = TextEditingValue(
+        text: currentDcfGrowthRate,
+        selection: TextSelection.collapsed(offset: currentDcfGrowthRate.length),
+      );
+    }
+
+    final currentDcfPerpetualGrowth = controller.dcfPerpetualGrowth;
+    if (_dcfPerpetualGrowthController.text != currentDcfPerpetualGrowth) {
+      _dcfPerpetualGrowthController.value = TextEditingValue(
+        text: currentDcfPerpetualGrowth,
+        selection: TextSelection.collapsed(offset: currentDcfPerpetualGrowth.length),
+      );
+    }
+
     final currentStock = controller.stockTicker;
     if (_stockController.text != currentStock) {
       _stockController.value = TextEditingValue(
@@ -119,6 +155,9 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
     final isLight = themeController.isLightMode;
     final user = FirebaseAuth.instance.currentUser;
     final userEmail = user?.email ?? 'usuario@email.com';
+    final userName = (user?.displayName != null && user!.displayName!.trim().isNotEmpty)
+        ? user.displayName!
+        : 'Usuário';
 
     // Exibe aviso reativo sobre renomeação automática de ativos (ex: VVAR3 para BHIA3)
     if (controller.renamedMessage != null) {
@@ -576,6 +615,11 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                   selected: controller.valuation == 'lynch',
                                   onTap: () => controller.setValuation('lynch'),
                                 ),
+                                _ValuationButton(
+                                  id: 'dcf', label: 'DCF Simplificado', desc: 'Fluxo Descontado',
+                                  selected: controller.valuation == 'dcf',
+                                  onTap: () => controller.setValuation('dcf'),
+                                ),
                               ],
                             ),
                           ),
@@ -715,6 +759,268 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                 ],
                               ),
                             ),
+
+                          if (controller.valuation == 'dcf')
+                            _SectionCard(
+                              icon: Icons.tune,
+                              title: 'Parâmetros do DCF',
+                              subtitle: 'Configurações de fluxo e desconto',
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Margem de Segurança
+                                  Text(
+                                    'MARGEM DE SEGURANÇA',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary(isLight),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.inputBackground(isLight),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: AppColors.surfaceBorder(isLight)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            keyboardType: TextInputType.number,
+                                            onChanged: controller.setMargem,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textPrimary(isLight),
+                                            ),
+                                            decoration: InputDecoration(
+                                              hintText: 'Ex.: 20',
+                                              hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+                                              border: InputBorder.none,
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
+                                            ),
+                                            controller: _margemController,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 12),
+                                          child: Text(
+                                            '%',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textMuted(isLight),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  // Taxa de Desconto (Ke)
+                                  Text(
+                                    'TAXA DE DESCONTO (Ke)',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary(isLight),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.inputBackground(isLight),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: AppColors.surfaceBorder(isLight)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            keyboardType: TextInputType.number,
+                                            onChanged: controller.setDcfDiscountRate,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textPrimary(isLight),
+                                            ),
+                                            decoration: InputDecoration(
+                                              hintText: 'Ex.: 12',
+                                              hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+                                              border: InputBorder.none,
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
+                                            ),
+                                            controller: _dcfDiscountRateController,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 12),
+                                          child: Text(
+                                            '%',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textMuted(isLight),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  // Crescimento de Curto Prazo (g)
+                                  Text(
+                                    'CRESCIMENTO CURTO PRAZO (g)',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary(isLight),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.inputBackground(isLight),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: AppColors.surfaceBorder(isLight)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            keyboardType: TextInputType.number,
+                                            onChanged: controller.setDcfGrowthRate,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textPrimary(isLight),
+                                            ),
+                                            decoration: InputDecoration(
+                                              hintText: 'Ex.: 8',
+                                              hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+                                              border: InputBorder.none,
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
+                                            ),
+                                            controller: _dcfGrowthRateController,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 12),
+                                          child: Text(
+                                            '%',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textMuted(isLight),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  // Crescimento na Perpetuidade (gp)
+                                  Text(
+                                    'CRESCIMENTO PERPÉTUO (gp)',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary(isLight),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.inputBackground(isLight),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: AppColors.surfaceBorder(isLight)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            keyboardType: TextInputType.number,
+                                            onChanged: controller.setDcfPerpetualGrowth,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textPrimary(isLight),
+                                            ),
+                                            decoration: InputDecoration(
+                                              hintText: 'Ex.: 4',
+                                              hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+                                              border: InputBorder.none,
+                                              contentPadding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
+                                            ),
+                                            controller: _dcfPerpetualGrowthController,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 12),
+                                          child: Text(
+                                            '%',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textMuted(isLight),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  // Anos de Projeção
+                                  Text(
+                                    'ANOS DE PROJEÇÃO (N)',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary(isLight),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.inputBackground(isLight),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: AppColors.surfaceBorder(isLight)),
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<int>(
+                                        value: controller.dcfProjectionYears,
+                                        icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary(isLight)),
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textPrimary(isLight),
+                                        ),
+                                        dropdownColor: AppColors.surface(isLight),
+                                        onChanged: (int? value) {
+                                          if (value != null) {
+                                            controller.setDcfProjectionYears(value);
+                                          }
+                                        },
+                                        items: [3, 5, 8, 10, 12, 15]
+                                            .map<DropdownMenuItem<int>>((int value) {
+                                          return DropdownMenuItem<int>(
+                                            value: value,
+                                            child: Text('$value anos'),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           
                           // Botão de Execução do Backtest
                           Container(
@@ -733,54 +1039,74 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                               ],
                             ),
                             child: ElevatedButton(
-                              onPressed: backtestController.isLoading ? null : () async {
-                                final error = controller.getValidationError();
-                                if (error != null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(error),
-                                      backgroundColor: const Color(0xFFEF4444),
-                                      behavior: SnackBarBehavior.floating,
-                                    ),
-                                  );
-                                  return;
-                                }
+                              onPressed: (backtestController.isLoading || _isExecuting)
+                                  ? null
+                                  : () async {
+                                      final error = controller.getValidationError();
+                                      if (error != null) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(error),
+                                            backgroundColor: const Color(0xFFEF4444),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                        return;
+                                      }
 
-                                ValuationMethod method = ValuationMethod.graham;
-                                if (controller.valuation == 'bazin') {
-                                  method = ValuationMethod.bazin;
-                                } else if (controller.valuation == 'lynch') {
-                                  method = ValuationMethod.peterLynch;
-                                }
+                                      setState(() {
+                                        _isExecuting = true;
+                                      });
 
-                                final config = BacktestConfig(
-                                  stockTicker: controller.stockTicker,
-                                  fiiTicker: controller.fiiTicker,
-                                  startDate: controller.startDate!,
-                                  endDate: controller.endDate!,
-                                  monthlyInvestment: controller.doubleAporte,
-                                  valuationMethod: method,
-                                  safetyMargin: controller.doubleMargem,
-                                  diaCompra: controller.diaCompra,
-                                  considerarReinvestimento: controller.considerarReinvestimento,
-                                );
+                                      try {
+                                        ValuationMethod method = ValuationMethod.graham;
+                                        if (controller.valuation == 'bazin') {
+                                          method = ValuationMethod.bazin;
+                                        } else if (controller.valuation == 'lynch') {
+                                          method = ValuationMethod.peterLynch;
+                                        } else if (controller.valuation == 'dcf') {
+                                          method = ValuationMethod.dcf;
+                                        }
 
-                                final success = await backtestController.executeBacktest(config);
-                                if (success && context.mounted) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const BacktestResultsPage()),
-                                  );
-                                } else if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Erro ao executar a simulação. Verifique as credenciais ou internet.'),
-                                      backgroundColor: Color(0xFFEF4444),
-                                      behavior: SnackBarBehavior.floating,
-                                    ),
-                                  );
-                                }
-                              },
+                                        final config = BacktestConfig(
+                                          stockTicker: controller.stockTicker,
+                                          fiiTicker: controller.fiiTicker,
+                                          startDate: controller.startDate!,
+                                          endDate: controller.endDate!,
+                                          monthlyInvestment: controller.doubleAporte,
+                                          valuationMethod: method,
+                                          safetyMargin: controller.doubleMargem,
+                                          dcfDiscountRate: controller.doubleDcfDiscountRate,
+                                          dcfGrowthRate: controller.doubleDcfGrowthRate,
+                                          dcfPerpetualGrowth: controller.doubleDcfPerpetualGrowth,
+                                          dcfProjectionYears: controller.dcfProjectionYears,
+                                          diaCompra: controller.diaCompra,
+                                          considerarReinvestimento: controller.considerarReinvestimento,
+                                        );
+
+                                        final success = await backtestController.executeBacktest(config);
+                                        if (success && context.mounted) {
+                                          await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => const BacktestResultsPage()),
+                                          );
+                                        } else if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Erro ao executar a simulação. Verifique as credenciais ou internet.'),
+                                              backgroundColor: Color(0xFFEF4444),
+                                              behavior: SnackBarBehavior.floating,
+                                            ),
+                                          );
+                                        }
+                                      } finally {
+                                        if (mounted) {
+                                          setState(() {
+                                            _isExecuting = false;
+                                          });
+                                        }
+                                      }
+                                    },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
                                 disabledBackgroundColor: Colors.transparent,
@@ -789,7 +1115,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                              child: backtestController.isLoading
+                              child: (backtestController.isLoading || _isExecuting)
                                   ? const SizedBox(
                                       width: 24,
                                       height: 24,
@@ -850,7 +1176,7 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Usuário',
+                                userName,
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -876,6 +1202,10 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                             setState(() {
                               _dropdownOpen = false;
                             });
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ProfilePage()),
+                            );
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -893,6 +1223,47 @@ class _HomeScreenContentState extends State<_HomeScreenContent> {
                                 const SizedBox(width: 12),
                                 Text(
                                   'Meu perfil',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary(isLight),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Container(height: 1, color: AppColors.divider(isLight)),
+
+                        // Link: Histórico
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              _dropdownOpen = false;
+                            });
+                            // Carrega o histórico antes de navegar
+                            Provider.of<BacktestController>(context, listen: false).fetchHistory();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => BacktestHistoryPage(homeController: controller)),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(7),
+                                    color: AppColors.inputBackground(isLight),
+                                  ),
+                                  child: Icon(Icons.history, size: 14, color: AppColors.textSecondary(isLight)),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Histórico',
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,

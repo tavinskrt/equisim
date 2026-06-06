@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Regras para a coleção de históricos de backtests
+    match /backtests/{backtestId} {
+      // Permite criação se o usuário estiver logado e o campo userId coincidir com o UID dele
+      allow create: if request.auth != null 
+                    && request.resource.data.userId == request.auth.uid;
+                    
+      // Permite leitura, atualização e exclusão apenas se o documento pertencer ao usuário logado
+      allow read, update, delete: if request.auth != null 
+                                  && resource.data.userId == request.auth.uid;
+    }
+    
+    // Regras para a coleção de usuários/preferências
+    match /users/{userId} {
+      allow read, write: if request.auth != null 
+                        && request.auth.uid == userId;
+    }
+  }
+}
