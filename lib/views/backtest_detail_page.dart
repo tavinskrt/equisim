@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:intl/intl.dart' hide TextDirection;
 import '../controllers/theme_controller.dart';
 import '../utils/app_colors.dart';
+import '../utils/audio_helper.dart';
 
 /// Tela de detalhamento de um backtest salvo no histórico do usuário.
 class BacktestDetailPage extends StatefulWidget {
@@ -18,6 +19,12 @@ class BacktestDetailPage extends StatefulWidget {
 
 class _BacktestDetailPageState extends State<BacktestDetailPage> {
   String _activeTab = 'resumo'; // 'resumo', 'params', 'metricas'
+
+  @override
+  void initState() {
+    super.initState();
+    AudioHelper.playSuccessSound();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,14 +62,14 @@ class _BacktestDetailPageState extends State<BacktestDetailPage> {
     final double cagrBh = (bt['cagrBuyHold'] ?? 0.0) as double;
     final double cagrVal = (bt['cagrValuation'] ?? 0.0) as double;
 
-    final double sharpeBh = (bt['sharpeBuyHold'] ?? 0.0) as double;
-    final double sharpeVal = (bt['sharpeValuation'] ?? 0.0) as double;
+    // final double sharpeBh = (bt['sharpeBuyHold'] ?? 0.0) as double;
+    // final double sharpeVal = (bt['sharpeValuation'] ?? 0.0) as double;
 
     final double ddBh = (bt['maxDrawdownBuyHold'] ?? 0.0) as double;
     final double ddVal = (bt['maxDrawdownValuation'] ?? 0.0) as double;
 
-    final double volBh = (bt['volatilidadeBuyHold'] ?? 0.0) as double;
-    final double volVal = (bt['volatilidadeValuation'] ?? 0.0) as double;
+    // final double volBh = (bt['volatilidadeBuyHold'] ?? 0.0) as double;
+    // final double volVal = (bt['volatilidadeValuation'] ?? 0.0) as double;
 
     // Define o vencedor
     final bool valuationWon = retVal > retBh;
@@ -74,9 +81,9 @@ class _BacktestDetailPageState extends State<BacktestDetailPage> {
     final double loserValue = valuationWon ? valBh : valVal;
 
     final double winnerCagr = valuationWon ? cagrVal : cagrBh;
-    final double winnerSharpe = valuationWon ? sharpeVal : sharpeBh;
+    // final double winnerSharpe = valuationWon ? sharpeVal : sharpeBh;
     final double winnerDd = valuationWon ? ddVal : ddBh;
-    final double winnerVol = valuationWon ? volVal : volBh;
+    // final double winnerVol = valuationWon ? volVal : volBh;
 
     final String loserLabel = valuationWon ? 'Buy & Hold' : 'Valuation Inteligente';
 
@@ -549,9 +556,9 @@ class _BacktestDetailPageState extends State<BacktestDetailPage> {
                             children: [
                               _buildMetricTile('Retorno Total', '${winnerReturn >= 0 ? '+' : ''}${winnerReturn.toStringAsFixed(1)}%', AppColors.primary, '↑', '$period meses', isLight),
                               _buildMetricTile('CAGR Anualizado', '${winnerCagr >= 0 ? '+' : ''}${winnerCagr.toStringAsFixed(1)}%', AppColors.primary, 'α', 'Retorno anual composto', isLight),
-                              _buildMetricTile('Índice Sharpe', winnerSharpe.toStringAsFixed(2), Colors.blue, 'S', 'Relação Retorno/Risco', isLight),
+                              // _buildMetricTile('Índice Sharpe', winnerSharpe.toStringAsFixed(2), Colors.blue, 'S', 'Relação Retorno/Risco', isLight),
                               _buildMetricTile('Max. Drawdown', '${winnerDd.toStringAsFixed(1)}%', AppColors.danger, '↓', 'Pior queda histórica', isLight),
-                              _buildMetricTile('Volatilidade', '${winnerVol.toStringAsFixed(1)}%', Colors.orange, 'σ', 'Volatilidade anual', isLight),
+                              // _buildMetricTile('Volatilidade', '${winnerVol.toStringAsFixed(1)}%', Colors.orange, 'σ', 'Volatilidade anual', isLight),
                               _buildMetricTile('Rentabilidade Mínima', '${loserReturn >= 0 ? '+' : ''}${loserReturn.toStringAsFixed(1)}%', Colors.grey, 'B', 'Cenário perdedor', isLight),
                             ],
                           ),

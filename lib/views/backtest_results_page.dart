@@ -7,6 +7,7 @@ import '../controllers/backtest_controller.dart';
 import '../controllers/theme_controller.dart';
 import '../models/backtest.dart';
 import '../utils/app_colors.dart';
+import '../utils/audio_helper.dart';
 
 /// Tela de exibição dos resultados comparativos consolidados das simulações.
 class BacktestResultsPage extends StatefulWidget {
@@ -19,6 +20,12 @@ class BacktestResultsPage extends StatefulWidget {
 class _BacktestResultsPageState extends State<BacktestResultsPage> {
   int? _selectedIndex;
   int? _lockedIndex; // Índice selecionado/fixado por clique na tela
+
+  @override
+  void initState() {
+    super.initState();
+    AudioHelper.playSuccessSound();
+  }
 
   @override
   Widget build(BuildContext context) {
