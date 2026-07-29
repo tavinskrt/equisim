@@ -100,7 +100,7 @@ class ServerException implements AppException {
   final dynamic originalError;
 
   ServerException({
-    this.message = 'Erro interno do servidor Bolsai. Tente novamente mais tarde.',
+    this.message = 'Erro interno do servidor da API de cotações. Tente novamente mais tarde.',
     this.code = 'SERVER_ERROR',
     this.originalError,
   });

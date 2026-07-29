@@ -16,10 +16,19 @@ class StockPrice {
     required this.volume,
   });
 
-  /// Instancia o histórico de preços diários a partir do JSON da API BolsaI.
+  /// Instancia o histórico de preços diários a partir do JSON da API brapi.dev ou legada.
   factory StockPrice.fromJson(Map<String, dynamic> json) {
+    String dateStr = '';
+    final rawDate = json['date'] ?? json['trade_date'];
+    if (rawDate is int) {
+      final dt = DateTime.fromMillisecondsSinceEpoch(rawDate * 1000, isUtc: true);
+      dateStr = dt.toIso8601String().split('T')[0];
+    } else if (rawDate is String) {
+      dateStr = rawDate;
+    }
+
     return StockPrice(
-      date: json['trade_date'] ?? json['date'] ?? '',
+      date: dateStr,
       open: (json['open'] as num?)?.toDouble() ?? 0.0,
       high: (json['high'] as num?)?.toDouble() ?? 0.0,
       low: (json['low'] as num?)?.toDouble() ?? 0.0,
@@ -61,22 +70,43 @@ class StockFundamentals {
     required this.netIncome,
   });
 
-  /// Instancia os fundamentos de ações a partir do JSON da API Bolsai.
+  /// Instancia os fundamentos de ações a partir do JSON da API brapi.dev ou legada.
   factory StockFundamentals.fromJson(Map<String, dynamic> json) {
+    double parsePct(dynamic val, dynamic fallback) {
+      if (val != null && val is num) {
+        final d = val.toDouble();
+        return (d.abs() <= 1.0 && d != 0.0) ? d * 100.0 : d;
+      }
+      if (fallback != null && fallback is num) {
+        return fallback.toDouble();
+      }
+      return 0.0;
+    }
+
+    final double epsVal = (json['earningsPerShare'] as num?)?.toDouble() ??
+        (json['trailingEps'] as num?)?.toDouble() ??
+        (json['eps'] as num?)?.toDouble() ?? 0.0;
+
+    final double vpaVal = (json['bookValue'] as num?)?.toDouble() ??
+        (json['vpa'] as num?)?.toDouble() ?? 0.0;
+
+    final double shares = (json['sharesOutstanding'] as num?)?.toDouble() ?? 0.0;
+    final double calculatedEquity = vpaVal > 0 && shares > 0 ? vpaVal * shares : 0.0;
+
     return StockFundamentals(
-      eps: (json['eps'] as num?)?.toDouble() ?? 0.0,
-      lpa: (json['lpa'] as num?)?.toDouble() ?? (json['eps'] as num?)?.toDouble() ?? 0.0,
-      vpa: (json['vpa'] as num?)?.toDouble() ?? 0.0,
-      pl: (json['pl'] as num?)?.toDouble() ?? 0.0,
-      pbv: (json['pbv'] as num?)?.toDouble() ?? 0.0,
-      roe: (json['roe'] as num?)?.toDouble() ?? 0.0,
-      roic: (json['roic'] as num?)?.toDouble() ?? 0.0,
-      dyield: (json['dividend_yield'] as num?)?.toDouble() ?? 0.0,
-      marketCap: (json['market_cap'] as num?)?.toDouble() ?? 0.0,
-      liabilities: (json['liabilities'] as num?)?.toDouble() ?? 0.0,
-      equity: (json['equity'] as num?)?.toDouble() ?? 0.0,
-      revenue: (json['revenue'] as num?)?.toDouble() ?? 0.0,
-      netIncome: (json['net_income'] as num?)?.toDouble() ?? 0.0,
+      eps: epsVal,
+      lpa: (json['lpa'] as num?)?.toDouble() ?? epsVal,
+      vpa: vpaVal,
+      pl: (json['trailingPE'] as num?)?.toDouble() ?? (json['pl'] as num?)?.toDouble() ?? 0.0,
+      pbv: (json['priceToBook'] as num?)?.toDouble() ?? (json['pbv'] as num?)?.toDouble() ?? 0.0,
+      roe: parsePct(json['returnOnEquity'], json['roe']),
+      roic: parsePct(json['returnOnAssets'], json['roic']),
+      dyield: parsePct(json['dividendYield'], json['dividend_yield']),
+      marketCap: (json['marketCap'] as num?)?.toDouble() ?? (json['market_cap'] as num?)?.toDouble() ?? 0.0,
+      liabilities: (json['totalDebt'] as num?)?.toDouble() ?? (json['liabilities'] as num?)?.toDouble() ?? 0.0,
+      equity: (json['equity'] as num?)?.toDouble() ?? calculatedEquity,
+      revenue: (json['totalRevenue'] as num?)?.toDouble() ?? (json['revenue'] as num?)?.toDouble() ?? 0.0,
+      netIncome: (json['netIncomeToCommon'] as num?)?.toDouble() ?? (json['net_income'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

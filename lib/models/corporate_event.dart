@@ -16,15 +16,23 @@ class CorporateEvent {
     required this.factor,
   });
 
-  /// Instancia o objeto a partir da resposta JSON da API Bolsai.
+  /// Instancia o objeto a partir da resposta JSON da API brapi.dev ou legada.
   factory CorporateEvent.fromJson(Map<String, dynamic> json) {
+    final rawDate = json['date'] ?? json['approvedOn'] ?? json['lastDatePrior'] ?? json['trade_date'];
+    DateTime parsedDate;
+    if (rawDate is String && rawDate.isNotEmpty) {
+      parsedDate = DateTime.tryParse(rawDate) ?? DateTime.now();
+    } else {
+      parsedDate = DateTime.now();
+    }
+
     return CorporateEvent(
-      date: DateTime.parse(json['date'] ?? json['trade_date'] ?? ''),
-      type: json['type'] ?? '',
-      ratioFrom: (json['ratio_from'] as num?)?.toInt() ?? 1,
-      ratioTo: (json['ratio_to'] as num?)?.toInt() ?? 1,
-      description: json['description'] ?? '',
-      factor: (json['factor'] as num?)?.toDouble() ?? 1.0,
+      date: parsedDate,
+      type: json['type'] ?? json['label'] ?? '',
+      ratioFrom: (json['ratioFrom'] as num?)?.toInt() ?? (json['ratio_from'] as num?)?.toInt() ?? 1,
+      ratioTo: (json['ratioTo'] as num?)?.toInt() ?? (json['ratio_to'] as num?)?.toInt() ?? 1,
+      description: json['description'] ?? json['remarks'] ?? '',
+      factor: (json['factor'] as num?)?.toDouble() ?? (json['factor_rate'] as num?)?.toDouble() ?? 1.0,
     );
   }
 }

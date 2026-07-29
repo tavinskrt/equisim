@@ -14,16 +14,31 @@ class Dividend {
     required this.type,
   });
 
-  /// Instancia o dividendo a partir do JSON retornado pela API Bolsai.
+  /// Instancia o dividendo a partir do JSON retornado pela API brapi.dev ou legada.
   factory Dividend.fromJson(Map<String, dynamic> json) {
-    final String ex = json['ex_date'] ?? json['date'] ?? json['payment_date'] ?? json['reference_date'] ?? '';
-    final String pay = json['payment_date'] ?? json['date'] ?? json['ex_date'] ?? json['reference_date'] ?? '';
+    String formatDate(dynamic raw) {
+      if (raw == null) return '';
+      if (raw is String) {
+        if (raw.contains('T')) {
+          return raw.split('T')[0];
+        }
+        return raw;
+      }
+      return raw.toString();
+    }
+
+    final String ex = formatDate(json['lastDatePrior'] ?? json['ex_date'] ?? json['date'] ?? json['payment_date'] ?? json['reference_date']);
+    final String pay = formatDate(json['paymentDate'] ?? json['payment_date'] ?? json['date'] ?? json['ex_date'] ?? json['reference_date']);
+    final double val = (json['rate'] as num?)?.toDouble() ??
+        (json['value_per_share'] as num?)?.toDouble() ??
+        (json['value'] as num?)?.toDouble() ?? 0.0;
+    final String t = json['label'] ?? json['type'] ?? 'COM';
+
     return Dividend(
       exDate: ex,
       paymentDate: pay,
-      value: (json['value_per_share'] as num?)?.toDouble() ?? 
-             (json['value'] as num?)?.toDouble() ?? 0.0,
-      type: json['type'] ?? 'COM',
+      value: val,
+      type: t,
     );
   }
 }
