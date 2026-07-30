@@ -343,7 +343,8 @@ class BacktestEngine {
       });
 
       for (final d in dayStockPayments) {
-        final exDate = DateTime.tryParse(d.exDate);
+        final String exDateStr = d.exDate.isNotEmpty ? d.exDate : d.paymentDate;
+        final exDate = DateTime.tryParse(exDateStr);
         if (exDate != null) {
           final String exKey = '${exDate.year}-${exDate.month}';
           final c1Shares = c1SharesHistory[exKey] ?? 0.0;
@@ -367,7 +368,8 @@ class BacktestEngine {
       });
 
       for (final d in dayFiiPayments) {
-        final exDate = DateTime.tryParse(d.exDate);
+        final String exDateStr = d.exDate.isNotEmpty ? d.exDate : d.paymentDate;
+        final exDate = DateTime.tryParse(exDateStr);
         if (exDate != null) {
           final String exKey = '${exDate.year}-${exDate.month}';
           final c2Shares = c2FiiSharesHistory[exKey] ?? 0.0;
@@ -400,6 +402,7 @@ class BacktestEngine {
         final double c1Bought = (c1Cash / stockPrice).floorToDouble();
         if (c1Bought > 0) {
           c1StockShares += c1Bought;
+          c1SharesHistory[currentKey] = c1StockShares;
           c1Cash -= c1Bought * stockPrice;
         }
 
@@ -565,9 +568,11 @@ class BacktestEngine {
         if (quantityBought > 0) {
           if (isStockCheap) {
             c2StockShares += quantityBought;
+            c2StockSharesHistory[currentKey] = c2StockShares;
             c2Cash -= quantityBought * stockPrice;
           } else {
             c2FiiShares += quantityBought;
+            c2FiiSharesHistory[currentKey] = c2FiiShares;
             c2Cash -= quantityBought * fiiPrice;
           }
         } else {
@@ -798,7 +803,8 @@ class BacktestEngine {
 
         double c2FiiDiv = 0.0;
         for (final d in dayFiiPaymentsGraham) {
-          final exDate = DateTime.tryParse(d.exDate);
+          final String exDateStr = d.exDate.isNotEmpty ? d.exDate : d.paymentDate;
+          final exDate = DateTime.tryParse(exDateStr);
           if (exDate != null) {
             final String exKey = '${exDate.year}-${exDate.month}';
             final c2Shares = c2FiiSharesHistoryGraham[exKey] ?? 0.0;
@@ -834,6 +840,7 @@ class BacktestEngine {
 
           if (quantityBought > 0) {
             c2FiiShares += quantityBought;
+            c2FiiSharesHistoryGraham[currentKey] = c2FiiShares;
             c2Cash -= quantityBought * fiiPrice;
           }
 

@@ -254,15 +254,31 @@ class StockService {
   Future<DividendHistory> fetchDividends(String ticker, {int limit = 10}) async {
     List<dynamic>? dividendsList;
 
+    List<dynamic>? extractDividendsList(dynamic data) {
+      if (data is! Map<String, dynamic>) return null;
+      List<dynamic>? found;
+      if (data.containsKey('results') && data['results'] is List) {
+        final results = data['results'] as List;
+        if (results.isNotEmpty && results.first is Map<String, dynamic>) {
+          final firstResult = results.first as Map<String, dynamic>;
+          final resultData = firstResult['data'] as Map<String, dynamic>? ?? firstResult;
+          found = (resultData['cashDividends'] ??
+              resultData['dividends'] ??
+              resultData['payments'] ??
+              resultData['earnings']) as List<dynamic>?;
+        }
+      }
+      found ??= (data['cashDividends'] ??
+          data['dividends'] ??
+          data['payments'] ??
+          data['earnings']) as List<dynamic>?;
+      return (found != null && found.isNotEmpty) ? found : null;
+    }
+
     // 1) Busca via endpoint de dividendos de ações /v2/stocks/dividends
     try {
       final data = await _getRequest('/v2/stocks/dividends?symbols=$ticker');
-      final results = _extractResults(data);
-      if (results.isNotEmpty) {
-        final firstResult = results.first as Map<String, dynamic>;
-        final resultData = firstResult['data'] as Map<String, dynamic>? ?? firstResult;
-        dividendsList = (resultData['cashDividends'] ?? resultData['dividends']) as List<dynamic>?;
-      }
+      dividendsList = extractDividendsList(data);
     } catch (e) {
       debugPrint('⚠️ Erro ao buscar /v2/stocks/dividends para $ticker: $e');
     }
@@ -271,12 +287,7 @@ class StockService {
     if (dividendsList == null || dividendsList.isEmpty) {
       try {
         final fiiData = await _getRequest('/v2/fii/dividends?symbols=$ticker');
-        final results = _extractResults(fiiData);
-        if (results.isNotEmpty) {
-          final firstResult = results.first as Map<String, dynamic>;
-          final resultData = firstResult['data'] as Map<String, dynamic>? ?? firstResult;
-          dividendsList = (resultData['cashDividends'] ?? resultData['dividends']) as List<dynamic>?;
-        }
+        dividendsList = extractDividendsList(fiiData);
       } catch (e) {
         debugPrint('⚠️ Erro ao buscar /v2/fii/dividends para $ticker: $e');
       }

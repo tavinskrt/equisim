@@ -27,15 +27,20 @@ class Dividend {
       return raw.toString();
     }
 
-    final String ex = formatDate(json['lastDatePrior'] ?? json['ex_date'] ?? json['date'] ?? json['payment_date'] ?? json['reference_date']);
+    final String ex = formatDate(json['lastDatePrior'] ?? json['ex_date'] ?? json['date'] ?? json['paymentDate'] ?? json['payment_date'] ?? json['reference_date']);
     final String pay = formatDate(json['paymentDate'] ?? json['payment_date'] ?? json['date'] ?? json['ex_date'] ?? json['reference_date']);
     final double val = (json['rate'] as num?)?.toDouble() ??
         (json['value_per_share'] as num?)?.toDouble() ??
-        (json['value'] as num?)?.toDouble() ?? 0.0;
+        (json['value'] as num?)?.toDouble() ??
+        (json['amount'] as num?)?.toDouble() ??
+        (json['declaredAmount'] as num?)?.toDouble() ??
+        (json['dividend'] as num?)?.toDouble() ??
+        (json['payment'] as num?)?.toDouble() ??
+        (json['earnings'] as num?)?.toDouble() ?? 0.0;
     final String t = json['label'] ?? json['type'] ?? 'COM';
 
     return Dividend(
-      exDate: ex,
+      exDate: ex.isNotEmpty ? ex : pay,
       paymentDate: pay,
       value: val,
       type: t,
