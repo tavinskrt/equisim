@@ -110,7 +110,12 @@ class ServerException implements AppException {
 }
 
 /// Exceção lançada quando a requisição excede o tempo limite estabelecido de resposta.
-class TimeoutException implements AppException {
+///
+/// Nomeada `RequestTimeoutException` de propósito: uma classe chamada
+/// `TimeoutException` sombrearia a homônima do `dart:async` — que é a
+/// efetivamente lançada por `Future.timeout()` — fazendo com que o timeout
+/// real de rede escapasse do `catch` e chegasse cru à interface.
+class RequestTimeoutException implements AppException {
   @override
   final String message;
   @override
@@ -118,7 +123,7 @@ class TimeoutException implements AppException {
   @override
   final dynamic originalError;
 
-  TimeoutException({
+  RequestTimeoutException({
     this.message = 'A requisição demorou muito tempo para responder. Tente novamente.',
     this.code = 'TIMEOUT_ERROR',
     this.originalError,

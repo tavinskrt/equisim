@@ -1,19 +1,24 @@
+import 'dart:async' as async;
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/stock.dart';
-import '../models/fii.dart';
 import '../models/dividend.dart';
-import '../models/corporate_event.dart';
 import '../models/exceptions.dart';
 
-/// Serviço responsável por realizar as chamadas de rede à API brapi.dev (v2).
+/// Serviço de acesso à API brapi.dev (v2).
+///
+/// ATENÇÃO — código de transição. Esta classe sobrevive apenas até a Fase 2,
+/// quando será substituída por `BrapiDatasource` (Dio + interceptors + DTOs +
+/// cache Drift), conforme `PLANO_ARQUITETURA.md` §6. Mantida aqui para que a
+/// aplicação continue com acesso a dados durante as Fases 0 e 1.
+///
+/// Universo restrito a AÇÕES: o Escopo B não envolve FIIs.
 class StockService {
   static List<String>? _cachedStockTickers;
-  static List<String>? _cachedFiiTickers;
 
-  /// Método padrão de requisição GET à API brapi.dev com tratamento de autenticação e erros.
+  /// Requisição GET padrão à brapi.dev, com autenticação e tratamento de erros.
   Future<dynamic> _getRequest(String endpoint) async {
     final token = dotenv.env['BRAPI_TOKEN'] ??
         dotenv.env['BOLSAI_API_KEY'] ??
@@ -79,18 +84,17 @@ class StockService {
         message: 'Erro de conexão com a brapi.dev: ${e.message}',
         originalError: e,
       );
-    } on TimeoutException catch (e) {
+    } on async.TimeoutException catch (e) {
+      // Precisa ser a exceção do dart:async — é ela que Future.timeout() lança.
       debugPrint('❌ Tempo limite de requisição esgotado: $e');
-      throw TimeoutException(
-        originalError: e,
-      );
+      throw RequestTimeoutException(originalError: e);
     } catch (e) {
       debugPrint('❌ Erro inesperado ao realizar chamada HTTP: $e');
       rethrow;
     }
   }
 
-  /// Extrai a lista de objetos 'results' da resposta padrão da brapi.dev.
+  /// Extrai a lista `results` da resposta padrão da brapi.dev.
   List<dynamic> _extractResults(dynamic data) {
     if (data is Map<String, dynamic> && data.containsKey('results')) {
       final res = data['results'];
@@ -99,10 +103,14 @@ class StockService {
     return [];
   }
 
-  /// Busca o histórico de preços completo de um determinado ticker via /v2/stocks/historical.
-  Future<List<StockPrice>> fetchStocksPrice(String ticker, {int limit = 3000}) async {
+  /// Busca o histórico de preços diários de um ticker.
+  ///
+  /// O campo `close` da brapi já vem ajustado por desdobramentos e grupamentos,
+  /// mas NÃO por proventos (verificado — ver `PLANO_ARQUITETURA.md` §0.3a).
+  /// É a série correta para combinar com o fluxo de dividendos.
+  Future<List<StockPrice>> fetchStocksPrice(String ticker, {String range = '10y'}) async {
     try {
-      final data = await _getRequest('/v2/stocks/historical?symbols=$ticker&range=10y&interval=1d');
+      final data = await _getRequest('/v2/stocks/historical?symbols=$ticker&range=$range&interval=1d');
       final results = _extractResults(data);
       if (results.isEmpty) {
         throw ValidationException(
@@ -133,12 +141,12 @@ class StockService {
     }
   }
 
-  /// Busca os fundamentos completos de uma Ação corporativa da B3 na brapi.dev.
+  /// Busca os fundamentos correntes de uma ação da B3.
   Future<StockFundamentals> fetchStockFundamentals(String ticker) async {
     try {
       final Map<String, dynamic> mergedData = {};
 
-      // Busca indicadores estatísticos
+      // Indicadores estatísticos
       try {
         final statsData = await _getRequest('/v2/stocks/statistics?symbols=$ticker&mode=current');
         final results = _extractResults(statsData);
@@ -151,7 +159,7 @@ class StockService {
         debugPrint('⚠️ Aviso: estatísticas de $ticker não retornadas: $e');
       }
 
-      // Busca dados financeiros (receita, lucro, dividas, margens)
+      // Dados financeiros (receita, lucro, dívidas, margens)
       try {
         final finData = await _getRequest('/v2/stocks/financial-data?symbols=$ticker&mode=current');
         final results = _extractResults(finData);
@@ -164,7 +172,7 @@ class StockService {
         debugPrint('⚠️ Aviso: dados financeiros de $ticker não retornados: $e');
       }
 
-      // Busca snapshot de cotação complementar
+      // Snapshot de cotação complementar
       try {
         final quoteData = await _getRequest('/v2/stocks/quote?symbols=$ticker');
         final results = _extractResults(quoteData);
@@ -179,7 +187,7 @@ class StockService {
 
       if (mergedData.isEmpty) {
         throw ValidationException(
-          message: 'Fundamentos de ação indisponíveis para $ticker.',
+          message: 'Fundamentos indisponíveis para $ticker.',
         );
       }
 
@@ -194,103 +202,25 @@ class StockService {
     }
   }
 
-  /// Busca os fundamentos completos de um Fundo Imobiliário (FII).
-  Future<FiiFundamentals> fetchFiiFundamentals(String ticker) async {
-    try {
-      final Map<String, dynamic> mergedData = {'ticker': ticker, 'symbol': ticker};
-
-      // Tenta buscar o endpoint especializado de indicadores de FIIs
-      try {
-        final fiiData = await _getRequest('/v2/fii/indicators?symbols=$ticker');
-        final results = _extractResults(fiiData);
-        if (results.isNotEmpty) {
-          final item = results.first as Map<String, dynamic>;
-          final itemData = item['data'] as Map<String, dynamic>? ?? item;
-          mergedData.addAll(itemData);
-        }
-      } catch (e) {
-        debugPrint('⚠️ Endpoint /v2/fii/indicators indisponível ou restrito para $ticker, usando fallback de stocks: $e');
-      }
-
-      // Fallback para cotação e estatísticas básicas de ativos da brapi
-      if (!mergedData.containsKey('closePrice') && !mergedData.containsKey('regularMarketPrice')) {
-        try {
-          final quoteData = await _getRequest('/v2/stocks/quote?symbols=$ticker');
-          final results = _extractResults(quoteData);
-          if (results.isNotEmpty) {
-            final item = results.first as Map<String, dynamic>;
-            final itemData = item['data'] as Map<String, dynamic>? ?? item;
-            mergedData.addAll(itemData);
-          }
-        } catch (e) {
-          debugPrint('⚠️ Falha ao buscar cotação de fallback do FII $ticker: $e');
-        }
-
-        try {
-          final statsData = await _getRequest('/v2/stocks/statistics?symbols=$ticker&mode=current');
-          final results = _extractResults(statsData);
-          if (results.isNotEmpty) {
-            final item = results.first as Map<String, dynamic>;
-            final itemData = item['data'] as Map<String, dynamic>? ?? item;
-            mergedData.addAll(itemData);
-          }
-        } catch (e) {
-          debugPrint('⚠️ Falha ao buscar estatísticas de fallback do FII $ticker: $e');
-        }
-      }
-
-      return FiiFundamentals.fromJson(mergedData);
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(
-        message: 'Erro ao processar fundamentos do FII $ticker: $e',
-        originalError: e,
-      );
-    }
-  }
-
-  /// Busca o histórico completo de dividendos de um determinado ativo via /v2/stocks/dividends ou /v2/fii/dividends.
-  Future<DividendHistory> fetchDividends(String ticker, {int limit = 10}) async {
+  /// Busca o histórico de proventos de uma ação.
+  ///
+  /// Cada evento carrega `label` (JCP / DIVIDENDO / RENDIMENTO), necessário para
+  /// a política fiscal — JCP sofre 15% de IRRF na fonte.
+  Future<DividendHistory> fetchDividends(String ticker) async {
     List<dynamic>? dividendsList;
 
-    List<dynamic>? extractDividendsList(dynamic data) {
-      if (data is! Map<String, dynamic>) return null;
-      List<dynamic>? found;
-      if (data.containsKey('results') && data['results'] is List) {
-        final results = data['results'] as List;
+    try {
+      final data = await _getRequest('/v2/stocks/dividends?symbols=$ticker');
+      if (data is Map<String, dynamic>) {
+        final results = _extractResults(data);
         if (results.isNotEmpty && results.first is Map<String, dynamic>) {
           final firstResult = results.first as Map<String, dynamic>;
           final resultData = firstResult['data'] as Map<String, dynamic>? ?? firstResult;
-          found = (resultData['cashDividends'] ??
-              resultData['dividends'] ??
-              resultData['payments'] ??
-              resultData['earnings']) as List<dynamic>?;
+          dividendsList = resultData['cashDividends'] as List<dynamic>?;
         }
       }
-      found ??= (data['cashDividends'] ??
-          data['dividends'] ??
-          data['payments'] ??
-          data['earnings']) as List<dynamic>?;
-      return (found != null && found.isNotEmpty) ? found : null;
-    }
-
-    // 1) Busca via endpoint de dividendos de ações /v2/stocks/dividends
-    try {
-      final data = await _getRequest('/v2/stocks/dividends?symbols=$ticker');
-      dividendsList = extractDividendsList(data);
     } catch (e) {
-      debugPrint('⚠️ Erro ao buscar /v2/stocks/dividends para $ticker: $e');
-    }
-
-    // 2) Caso não encontre dividendos em stocks, tenta via /v2/fii/dividends
-    if (dividendsList == null || dividendsList.isEmpty) {
-      try {
-        final fiiData = await _getRequest('/v2/fii/dividends?symbols=$ticker');
-        dividendsList = extractDividendsList(fiiData);
-      } catch (e) {
-        debugPrint('⚠️ Erro ao buscar /v2/fii/dividends para $ticker: $e');
-      }
+      debugPrint('⚠️ Erro ao buscar proventos de $ticker: $e');
     }
 
     if (dividendsList == null || dividendsList.isEmpty) {
@@ -309,7 +239,7 @@ class StockService {
 
       return DividendHistory.fromDividends(dividends);
     } catch (e) {
-      debugPrint('⚠️ Erro ao estruturar histórico de dividendos de $ticker: $e');
+      debugPrint('⚠️ Erro ao estruturar histórico de proventos de $ticker: $e');
       return DividendHistory(
         dividends: [],
         totalAnnualDividend: 0,
@@ -318,38 +248,13 @@ class StockService {
     }
   }
 
-  /// Busca a lista de eventos corporativos (desdobramentos e bonificações) de um ticker.
-  Future<List<CorporateEvent>> fetchCorporateEvents(String ticker) async {
-    try {
-      final data = await _getRequest('/v2/stocks/dividends?symbols=$ticker');
-      final results = _extractResults(data);
-      if (results.isEmpty) return [];
-
-      final firstResult = results.first as Map<String, dynamic>;
-      final resultData = firstResult['data'] as Map<String, dynamic>? ?? firstResult;
-      final stockDividends = resultData['stockDividends'] as List<dynamic>?;
-      if (stockDividends == null || stockDividends.isEmpty) {
-        return [];
-      }
-
-      return stockDividends
-          .map((item) => CorporateEvent.fromJson(item as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      debugPrint('⚠️ Erro ao buscar eventos corporativos de $ticker: $e');
-      return [];
-    }
-  }
-
-  static const List<String> _stockUnitsWhitelist = [
-    'ALUP11', 'BPAC11', 'CPLE11', 'ENGI11', 'JALL11', 'KLBN11', 'PPLA11',
-    'RNEW11', 'SANB11', 'SAPR11', 'TAEE11', 'UNIP11'
-  ];
-
-  /// Busca o histórico de renomeações de tickers para correção de ativos migrados da B3.
+  /// Resolve renomeações de ticker na B3 (ex.: VVAR3 → VIIA3 → BHIA3).
+  ///
+  /// O parâmetro é `symbols` (plural). A versão anterior usava `symbol`, o que
+  /// devolvia HTTP 400 silenciosamente e deixava a funcionalidade inoperante.
   Future<Map<String, dynamic>?> fetchTickerHistory(String ticker) async {
     try {
-      final data = await _getRequest('/v2/tickers/resolve?symbol=$ticker');
+      final data = await _getRequest('/v2/tickers/resolve?symbols=$ticker');
       final results = _extractResults(data);
       if (results.isNotEmpty) {
         final item = results.first as Map<String, dynamic>;
@@ -364,12 +269,17 @@ class StockService {
       }
       return null;
     } catch (e) {
-      debugPrint('⚠️ Erro ao buscar resolução de ticker para $ticker: $e');
+      debugPrint('⚠️ Erro ao resolver ticker $ticker: $e');
       return null;
     }
   }
 
-  /// Busca todos os tickers de Ações da B3 via /v2/tickers.
+  /// Busca todos os tickers de ações da B3.
+  ///
+  /// `type=stock` já exclui fundos: verificado em 19/08/2026, 781 ações contra
+  /// 332 FIIs, com interseção vazia. A whitelist manual de Units que existia
+  /// aqui foi removida — ela excluía indevidamente IGTI11, ONCO11 e BRBI11 e
+  /// mantinha 5 tickers que a API não lista mais.
   Future<List<String>> fetchAllStockTickers() async {
     if (_cachedStockTickers != null) {
       return _cachedStockTickers!;
@@ -378,64 +288,28 @@ class StockService {
       final data = await _getRequest('/v2/tickers?type=stock&limit=1000');
       final results = _extractResults(data);
 
-      final stockFormat = RegExp(r'^[A-Z]{4}(3|4|5|6|7|8|11)$');
-
       final tickers = results
-          .map((item) => (item['symbol'] as String? ?? ''))
+          .map((item) => item is String ? item : (item['symbol'] as String? ?? ''))
           .where((t) => t.isNotEmpty && !t.contains(' '))
           .map((t) => t.trim().toUpperCase())
-          .where((t) {
-            if (!stockFormat.hasMatch(t)) return false;
-            if (t.endsWith('11')) {
-              return _stockUnitsWhitelist.contains(t);
-            }
-            return true;
-          })
-          .toList();
+          .toSet()
+          .toList()
+        ..sort();
 
-      // Fallback para tickers principais em caso de ambiente sem token ou resposta vazia
       if (tickers.isEmpty) {
-        tickers.addAll(['PETR4', 'VALE3', 'MGLU3', 'ITUB4', 'BBAS3', 'BBDC4', 'WEGE3']);
+        return _fallbackTickers;
       }
 
-      tickers.sort();
-      _cachedStockTickers = tickers.toSet().toList();
+      _cachedStockTickers = tickers;
       return _cachedStockTickers!;
     } catch (e) {
       debugPrint('⚠️ Falha ao carregar lista de ações da brapi.dev: $e');
-      return ['PETR4', 'VALE3', 'MGLU3', 'ITUB4', 'BBAS3', 'BBDC4', 'WEGE3'];
+      return _fallbackTickers;
     }
   }
 
-  /// Busca todos os tickers de Fundos Imobiliários da B3 via /v2/tickers.
-  Future<List<String>> fetchAllFiiTickers() async {
-    if (_cachedFiiTickers != null) {
-      return _cachedFiiTickers!;
-    }
-    try {
-      final data = await _getRequest('/v2/tickers?type=fund&subType=fii&limit=1000');
-      final results = _extractResults(data);
-
-      final fiiFormat = RegExp(r'^[A-Z]{4}11$');
-
-      final tickers = results
-          .map((item) => (item['symbol'] as String? ?? ''))
-          .where((t) => t.isNotEmpty && !t.contains(' '))
-          .map((t) => t.trim().toUpperCase())
-          .where((t) => fiiFormat.hasMatch(t))
-          .toList();
-
-      // Fallback para FIIs principais no sandbox / sem token
-      if (tickers.isEmpty) {
-        tickers.addAll(['MXRF11', 'HGLG11', 'XPML11', 'KNCR11', 'BCSC11']);
-      }
-
-      tickers.sort();
-      _cachedFiiTickers = tickers.toSet().toList();
-      return _cachedFiiTickers!;
-    } catch (e) {
-      debugPrint('⚠️ Falha ao carregar lista de FIIs da brapi.dev: $e');
-      return ['MXRF11', 'HGLG11', 'XPML11', 'KNCR11', 'BCSC11'];
-    }
-  }
+  /// Conjunto mínimo para ambientes sem token ou sem rede.
+  static const List<String> _fallbackTickers = [
+    'PETR4', 'VALE3', 'ITUB4', 'BBAS3', 'BBDC4', 'WEGE3', 'ABEV3'
+  ];
 }
