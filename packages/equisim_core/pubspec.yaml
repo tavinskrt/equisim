@@ -1,0 +1,17 @@
+name: equisim_core
+description: >-
+  Núcleo de domínio do Equisim: valuation por DCF/CAPM, backtest de carteiras e
+  métricas de desempenho. Pacote Dart puro — sem Flutter, sem rede, sem I/O.
+version: 0.1.0
+publish_to: 'none'
+
+environment:
+  sdk: ^3.8.0
+
+# Sem dependências de runtime, por decisão de arquitetura.
+# A pureza é verificada automaticamente por test/purity_test.dart.
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^5.0.0
+  coverage: ^1.11.0

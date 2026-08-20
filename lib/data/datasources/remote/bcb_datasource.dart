@@ -1,0 +1,87 @@
+import 'package:equisim_core/equisim_core.dart';
+
+import '../../dtos/brapi_dtos.dart' show BrapiJson;
+import '../../network/api_client.dart';
+
+/// Séries do Sistema Gerenciador de Séries Temporais do Banco Central.
+///
+/// API aberta: sem token, sem cadastro, sem limite relevante. Preferida à
+/// brapi para dados macro por ser fonte oficial e citável na monografia.
+class BcbDatasource {
+  final ApiClient client;
+
+  BcbDatasource(this.client);
+
+  /// CDI diário — taxa livre de risco do CAPM e do índice de Sharpe.
+  static const int seriesCdiDaily = 12;
+
+  /// Selic diária, alternativa ao CDI.
+  static const int seriesSelicDaily = 11;
+
+  /// IPCA mensal — retorno real.
+  static const int seriesIpcaMonthly = 433;
+
+  /// Busca uma série no intervalo informado.
+  ///
+  /// A API devolve `{"data":"02/01/2024","valor":"0.043739"}`, com a data em
+  /// `dd/MM/yyyy` e o valor em **percentual do período**, como texto. Aqui vira
+  /// fração, que é a unidade usada em todo o domínio.
+  Future<Result<RateSeries>> series(int seriesId, DateRange range) async {
+    final response = await client.getJson(
+      '${client.config.bcbBaseUrl}/bcdata.sgs.$seriesId/dados',
+      query: {
+        'formato': 'json',
+        'dataInicial': _brDate(range.start),
+        'dataFinal': _brDate(range.end),
+      },
+      heavy: true, // dez anos de CDI diário passam de 2.500 pontos
+    );
+
+    return response.flatMap((body) {
+      if (body is! List) {
+        return Err(ComputationFailure(
+          'Resposta inesperada da série SGS $seriesId.',
+        ));
+      }
+
+      final dates = <DateTime>[];
+      final rates = <double>[];
+      for (final item in body) {
+        if (item is! Map<String, dynamic>) continue;
+        final date = _parseBrDate(BrapiJson.asString(item['data']));
+        final percent = BrapiJson.asDouble(item['valor']);
+        if (date == null || percent == null) continue;
+        dates.add(date);
+        rates.add(percent / 100.0);
+      }
+
+      if (rates.isEmpty) {
+        return Err(InsufficientData(
+          'Série SGS $seriesId sem dados no período solicitado.',
+        ));
+      }
+      return Ok(RateSeries(dates: dates, rates: rates));
+    });
+  }
+
+  Future<Result<RateSeries>> cdi(DateRange range) =>
+      series(seriesCdiDaily, range);
+
+  Future<Result<RateSeries>> ipca(DateRange range) =>
+      series(seriesIpcaMonthly, range);
+
+  static String _brDate(DateTime date) =>
+      '${date.day.toString().padLeft(2, '0')}/'
+      '${date.month.toString().padLeft(2, '0')}/${date.year}';
+
+  static DateTime? _parseBrDate(String? raw) {
+    if (raw == null) return null;
+    final parts = raw.split('/');
+    if (parts.length != 3) return null;
+    final day = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final year = int.tryParse(parts[2]);
+    if (day == null || month == null || year == null) return null;
+    return DateTime(year, month, day);
+  }
+}

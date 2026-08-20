@@ -926,50 +926,109 @@ Note que **a maior parte do antigo "estancamento" virou desperdício**: corrigir
 
 ---
 
-### Fase 1 — `equisim_core`: domínio puro
-> **Depende de: Fase 0. Peso: grande. É o caminho crítico — tudo mais depende daqui.**
+### ✅ Fase 1 — `equisim_core`: domínio puro — **CONCLUÍDA (19/08/2026)**
+> **125 testes passando sem rede · cobertura 85,3% (848/994 linhas) · `dart analyze` sem issues.**
+> App Flutter segue compilando (`flutter build web` ✓) com o pacote integrado por `path`.
 
-Zero rede, zero Flutter, 100% determinístico e testável.
+- [x] Pacote Dart puro **sem nenhuma dependência de runtime** + `purity_test.dart` que falha o build se `package:flutter`, `package:http`, `dart:js`, Firebase ou Drift aparecerem no core
+- [x] Value objects: `Ticker`, `Money` (centavos inteiros), `Weight` + `Weights` com absorção de resíduo, `DateRange`
+- [x] Entidades: `Asset`, `Sector`, `Portfolio`, `PortfolioEntry`, `FinancialGoal`, `ValuationResult`, `FundamentalsSnapshot`, `PriceSeries`, `DividendEvent`
+- [x] `PointInTimeView` com `publicationLag = 90 dias`
+- [x] Contratos de repositório + `Result<T>` selado com `Ok`/`Err` e falhas tipadas
+- [x] **CAPM** `Ke = Rf + β(Rm − Rf)`, prêmio parametrizado 5,5% com `BetaSource`/`MarketPremiumSource` registrados no resultado
+- [x] **`TotalReturnEngine`** (`close` + eventos de provento + `TaxPolicy`) — fonte única para backtest, DY, beta e correlação
+- [x] **Beta local** com pareamento por data e matriz de correlação
+- [x] **DCF por FCFF descontado ao WACC** + `CostOfCapital` completo (ver correção abaixo)
+- [x] Valor terminal: **Gordon e múltiplo de saída**, com guarda contra divergência quando `r → g`
+- [x] **`ScenarioEngine` unificado** — `DiscreteScenarios` e `StochasticScenarios` pelo mesmo caminho de código, com semente fixa para reprodutibilidade
+- [x] **`TaxPolicy`** parametrizada por rótulo **e vigência** — JCP 15%, dividendo isento
+- [x] **`PortfolioBacktest` sem rebalanceamento**: aporte inicial + mensais alocados pelos pesos estipulados, proventos apurados na data-ex e reinvestidos líquidos de IR na data de pagamento, desempenho individual por ativo e deriva de peso
+- [x] Métricas: **TWR e XIRR**, CAGR, volatilidade, max drawdown, Sharpe, Sortino, Calmar, DY líquido — todas sobre a série TWR
+- [x] **`RequiredReturnSolver`** por Newton-Raphson com bisseção de resguardo e casos-limite (`i → 0`, PMT = 0, meta já coberta pelos aportes)
+- [x] **`GoalFeasibility`** com limiares derivados de CDI/IBOV em runtime
+- [x] `ExpectedReturn` — anualização do upside por horizonte `H` + DY líquido
+- [x] `SectorConcentration` — alerta em ≥2, sem bloquear
 
-- [ ] Pacote Dart puro + **teste de CI que falha se `package:flutter` ou `package:http` aparecerem** no core
-- [ ] Value objects: `Ticker`, `Money`, `Weight` (com tratamento explícito de resíduo em Σ=100%), `DateRange`
-- [ ] Entidades: `Asset`, `Portfolio`, `PortfolioEntry`, `Sector`, `FinancialGoal`, `DcfValuation`, `CapmInputs`
-- [ ] `PointInTimeView` com `publicationLag = 90 dias` (papel reduzido — §4.2)
-- [ ] Contratos de repositório + `Result<T>` com falhas seladas
-- [ ] **CAPM:** `Ke = Rf + β(Rm − Rf)`, prêmio parametrizado 5–6% com o modo registrado no resultado
-- [ ] **Máquina de retorno total** (`close` + `cashDividends` + `TaxPolicy`) — fonte única para backtest, DY, beta e correlação (§0.4)
-- [ ] **Beta local** vs `^BVSP` sobre retorno total próprio, janela declarada (custo medido: 0,49 ms)
-- [ ] **DCF por FCFF** + derivações da §2.3 (D&A = `cleanEbitda − cleanEbit`; alíquota efetiva; dívida líquida)
-- [ ] Valor terminal: **Gordon e múltiplo de saída** (`enterpriseToEbitda`), lado a lado
-- [ ] **`ScenarioEngine` unificado** — discreto e Monte Carlo pelo mesmo caminho de código (§5.5b)
-- [ ] Cascata de degradação do valuation (FCFF → LPA → GGM → múltiplos), com o modelo usado **carregado no resultado**
-- [ ] **`TaxPolicy` parametrizada** por rótulo e vigência — JCP 15%, DIVIDENDO isento *(decisão nº 12)*
-- [ ] Motor de backtest **sem rebalanceamento** *(decisão nº 9)*: `close` split-ajustado + eventos de provento líquidos de IR, aporte inicial + aportes mensais alocados pelos pesos estipulados
-- [ ] Métricas: **TWR e XIRR**, retorno acumulado, CAGR, volatilidade, max drawdown, Sharpe, Sortino, Calmar, beta, DY líquido — todas sobre a série TWR
-- [ ] **`solveRequiredMonthlyRate`** por Newton-Raphson com bisseção de resguardo + casos-limite
-- [ ] **`AssessGoalFeasibility`** com limiares recalculados de CDI/IBOV em runtime (§4.6)
-- [ ] Anualização do upside por horizonte `H` + DY líquido, para comparabilidade com a meta
-- [ ] Regra de concentração setorial (alerta em ≥2, **sem bloquear**)
-- [ ] Fixtures determinísticas + fakes de repositório
+**Pendência assumida:** a cascata de degradação do valuation (FCFF → LPA → GGM → múltiplos) tem as **quatro peças implementadas e testadas isoladamente** (`DcfCalculator.fcff`, `.earningsPerShare`, `.gordonGrowth` e o múltiplo de saída), mas o **orquestrador que escolhe automaticamente** o modelo conforme os dados disponíveis foi deixado para a Fase 3 — ele depende do repositório de fundamentos real para decidir, e escrevê-lo agora contra fakes seria adivinhar a forma dos dados.
 
-**Critério de saída:** `dart test` verde **sem rede**, cobertura ≥ 80% no core, e `solveRequiredMonthlyRate` conferido contra `TAXA` do Excel.
+#### ⚠ Correção metodológica aplicada durante a implementação
+
+O plano previa descontar o FCFF ao **Ke** obtido pelo CAPM. **Isso está errado**: FCFF é o fluxo disponível a *todos* os provedores de capital e precisa ser descontado ao **WACC**; o Ke sozinho só é consistente com FCFE. Descontar FCFF ao Ke superestima a taxa e subavalia a empresa — erro clássico e facilmente cobrável em banca.
+
+A auditoria da API já garantia os insumos para fazer certo, e a correção foi implementada:
+
+```
+Kd  = interestExpense / totalDebt            (income-statement + balance-sheet)
+t   = incomeTaxExpense / incomeBeforeTax     (income-statement)
+WACC = E/(E+D)·Ke + D/(E+D)·Kd·(1 − t)
+EV  = Σ FCFF/(1+WACC)^t + VT/(1+WACC)^N   →   Equity = EV − dívida líquida
+```
+
+`CostOfCapital.unlevered` cobre o caso sem dívida, em que o WACC degenera para o Ke.
+
+#### Testes que ancoram a corretude
+
+| Verificação | Como é ancorada |
+|---|---|
+| TWR neutraliza aportes | Carteira parada que recebe R$ 10.000 tem retorno **zero**, não +9.900% |
+| TWR composto | `[100, 110, 231]` com fluxos `[100, 0, 100]` → exatamente **31%** |
+| XIRR | R$ 1.000 → R$ 1.100 em 365 dias → exatamente **10%** |
+| Taxa requerida | PMT 100, n 12, alvo 1.268,25 → **1% a.m.** (equivale a `TAXA(12; −100; 0; 1268,25)`) |
+| Taxa requerida (ida e volta) | Solução realimentada em `futureValue` reproduz a meta com erro < R$ 0,01 |
+| Fórmula ingênua | Teste prova que `(Vf/V0)^(1/n) − 1` daria **mais que o dobro** da taxa correta |
+| DCF FCFF | Valor por ação **144,6212** conferido contra cálculo manual passo a passo |
+| Camada fiscal | JCP de R$ 1,00 sobre ação de R$ 10 rende **+8,5%**; dividendo igual rende **+10%**; diferença de exatamente **1,5 p.p.** |
+| Sem rebalanceamento | 50/50 com um ativo dobrando → pesos derivam para **66,7% / 33,3%** |
+| Monte Carlo | Mesma semente reproduz mediana e P95 idênticos |
+| Money | Somar R$ 0,10 dez vezes dá **exatamente** R$ 1,00 |
+
+**Critério de saída atingido:** `dart test` verde sem rede ✓ · cobertura 85,3% ≥ 80% ✓ · solver conferido contra `TAXA` do Excel ✓
 
 ---
 
-### Fase 2 — Rede, API e cache
-> **Depende de: Fase 1 (contratos). Peso: grande. Paralelizável com a Fase 1 a partir dos contratos definidos.**
+### ✅ Fase 2 — Rede, API e cache — **CONCLUÍDA (19/08/2026)**
+> **42 testes no app + 125 no core, todos offline · `flutter analyze` sem issues · `flutter build web` ✓**
 
-- [ ] Dio + cadeia de interceptors: auth → throttle (4–6 concorrentes) → retry com backoff+jitter → cache → log sanitizado
-- [ ] `BrapiDatasource`: `historical` **em lote** (1,85× mais rápido, 1 requisição em vez de N), `statistics`, `income-statement`, `balance-sheet`, `cash-flow`, `profile`, `tickers?type=stock`, `tickers/resolve` *(com `symbols=`, plural)*
-- [ ] `BcbDatasource`: SGS 12 (Rf) e 433 (IPCA, opcional)
-- [ ] Drift: schema de séries temporais + TTL da §5.4 (histórico D-1 = **imutável**)
-- [ ] DTOs + mappers — JSON nunca atravessa para o domínio
-- [ ] `Isolate.run` no `jsonDecode` — **o gargalo real de CPU** (§5.2)
-- [ ] Cloud Function proxy + migração de `.env`-asset → `--dart-define-from-file`
-- [ ] Implementações dos repositórios
-- [ ] **Higienização do fluxo de proventos** (§0.4): remover duplicatas exatas `(data-ex, label, rate)`, preservar múltiplas tranches legítimas na mesma data-ex, propagar `remarks` até o domínio (marcar `payment_date_estimated`)
-- [ ] **Portão de qualidade em runtime**: DY calculado × `statistics.dividendYield`; fora da tolerância, sinalizar o ticker em vez de reportar número errado
-- [ ] **Fixtures gravadas**: capturar respostas reais uma vez, versionar, e rodar os testes de integração contra elas
+- [x] Dio + cadeia de interceptors: auth → throttle (4 concorrentes) → retry com backoff exponencial e *jitter* → log sanitizado
+- [x] `BrapiDatasource`: `historical` **em lote**, `statistics`, `income-statement`, `balance-sheet`, `cash-flow`, `profile`, `tickers?type=stock`, `tickers/resolve` *(com `symbols=`, plural)*, `^BVSP`
+- [x] `BcbDatasource`: SGS 12 (CDI) e 433 (IPCA), com conversão de `dd/MM/yyyy` e de percentual para fração
+- [x] Drift com 6 tabelas + TTL da §5.4 — histórico de pregão encerrado tratado como **imutável**
+- [x] DTOs + mapeadores — a irregularidade da API fica confinada em `BrapiJson`; nenhum JSON atravessa para o domínio
+- [x] `compute` no `jsonDecode` dos payloads grandes — o gargalo real de CPU (§5.2)
+- [x] Cloud Function de custódia do token + `--dart-define-from-file`, com `ApiConfig` resolvendo proxy → define → `.env`
+- [x] Cinco implementações de repositório (preços, proventos, fundamentos, benchmark, macro)
+- [x] **Higienização de proventos**: duplicata exata descartada por identidade `(data-ex, pagamento, valor, rótulo)`; múltiplas tranches na mesma data-ex preservadas; `payment_date_estimated` propagado até o domínio
+- [x] **Portão de qualidade em runtime**: DY calculado × `statistics.dividendYield`, com tolerância de 1 p.p. calibrada pelo arredondamento da fonte
+- [x] **11 fixtures** de respostas reais da brapi e do BCB, versionadas — a suíte roda offline e é determinística
+
+#### Achado adicional: a fonte mistura três provedores
+
+O campo `remarks` de ITUB4 (483 eventos) revela a origem de cada registro: **280 vêm de pipeline CSV** e o restante de importações manuais rotuladas `manual:digrin-*` e `manual:twelvedata-*`. Isso **explica a divergência de §0.4**: `cashDividends` é uma consolidação de múltiplas fontes, enquanto o `adjustedClose` vem só do Yahoo. Reforça a decisão de usar `cashDividends` como verdade e manter o portão de qualidade — e é um parágrafo pronto para a seção de limitações da monografia.
+
+#### Custódia do segredo — três modos, com honestidade sobre cada um
+
+| Modo | Onde vive o token | Proteção real |
+|---|---|---|
+| `.env` como asset *(legado)* | dentro do bundle | **nenhuma** — no alvo web é servido publicamente |
+| `--dart-define-from-file` | constante no binário | **parcial** — sai do git e do bundle web, mas é extraível com `strings` |
+| **Cloud Function** *(recomendado)* | só no servidor | **efetiva** — o cliente não carrega credencial |
+
+`ApiConfig.resolve()` tenta os três nessa ordem inversa de preferência e **emite alerta** quando cai no `.env`, para a transição não passar despercebida. A função também resolve o CORS do alvo web, eliminando o `corsproxy.io` — que recebia o header `Authorization` de um terceiro não controlado.
+
+#### Testes que ancoram a camada de dados
+
+| Verificação | Como é ancorada |
+|---|---|
+| Lote | Dois ativos em **uma** requisição, contada pelo adaptador de fixture |
+| Cache de preços | Segunda leitura **não** vai à rede; contador permanece em 1 |
+| Reprodutibilidade | Após `clearAll()`, a rede é consultada de novo — cache é a única diferença |
+| Tranches legítimas | BBAS3 em 11/03/2025: dois JCP distintos sobrevivem, duplicata exata some |
+| Fusão de demonstrativos | Um mesmo exercício reúne campos de DRE, DFC e Balanço |
+| Modo proxy | Nenhum header `Authorization` é emitido |
+| Log | Token em query string vira `token=****` |
+| Diagnóstico | Nunca contém o token completo |
+| Erros HTTP | 401 → credencial, 404 → dado insuficiente, 429 → limite |
+| *Jitter* | Vinte esperas consecutivas não são idênticas |
 
 ---
 

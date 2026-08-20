@@ -9,6 +9,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  # Núcleo de domínio: Dart puro, sem Flutter e sem rede.
+  # A pureza é garantida por teste em packages/equisim_core/test/purity_test.dart.
+  equisim_core:
+    path: packages/equisim_core
+
   cupertino_icons: ^1.0.8
   flutter_dotenv: ^5.1.0    # Permite carregar variáveis de ambiente a partir de um arquivo .env
   http: ^1.2.0              # Permite fazer requisições HTTP e acessar APIs externas
@@ -18,11 +24,17 @@ dependencies:
   firebase_auth: ^6.5.0
   cloud_firestore: ^6.4.1
   shared_preferences: ^2.5.5
+  dio: ^5.11.0
+  drift: ^2.34.3
+  drift_flutter: ^0.3.1
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  drift_dev: ^2.34.5
+  build_runner: ^2.15.1
 
 flutter:
   uses-material-design: true

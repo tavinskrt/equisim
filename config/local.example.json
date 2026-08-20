@@ -1,0 +1,21 @@
+{
+  "_comentario": [
+    "Copie para config/local.json (ignorado pelo git) e preencha.",
+    "Uso: flutter run --dart-define-from-file=config/local.json",
+    "",
+    "Escolha UM dos dois modos:",
+    "",
+    "MODO PROXY (recomendado para distribuicao) — preencha BRAPI_PROXY_URL e",
+    "deixe BRAPI_TOKEN vazio. O token vive apenas na Cloud Function; o cliente",
+    "nao carrega credencial alguma.",
+    "",
+    "MODO DIRETO (desenvolvimento) — preencha BRAPI_TOKEN e deixe o proxy vazio.",
+    "ATENCAO: --dart-define tira o segredo do controle de versao e do bundle web,",
+    "mas NAO protege contra engenharia reversa: a constante fica no binario e e",
+    "extraivel. Nao use este modo para distribuir o aplicativo."
+  ],
+
+  "BRAPI_PROXY_URL": "",
+  "BRAPI_TOKEN": "",
+  "BRAPI_BASE_URL": "https://brapi.dev/api"
+}
