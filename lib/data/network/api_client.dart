@@ -2,10 +2,18 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:equisim_core/equisim_core.dart';
-import 'package:flutter/foundation.dart';
 
 import '../config/api_config.dart';
 import 'interceptors.dart';
+
+/// Desserializador de respostas grandes.
+///
+/// Injetável porque a estratégia certa depende do hospedeiro: o aplicativo
+/// manda para outra isolate a fim de não derrubar quadros; o executor de
+/// validação, que não tem interface, decodifica em linha.
+typedef HeavyJsonDecoder = Future<dynamic> Function(String body);
+
+Future<dynamic> _decodeInline(String body) async => jsonDecode(body);
 
 /// Cliente HTTP das APIs externas.
 ///
@@ -17,10 +25,17 @@ import 'interceptors.dart';
 class ApiClient {
   final Dio _dio;
   final ApiConfig config;
+  final HeavyJsonDecoder _decodeHeavy;
 
-  ApiClient._(this._dio, this.config);
+  ApiClient._(this._dio, this.config, this._decodeHeavy);
 
-  factory ApiClient(ApiConfig config, {Dio? dio}) {
+  factory ApiClient(
+    ApiConfig config, {
+    Dio? dio,
+    HeavyJsonDecoder? heavyDecoder,
+    LogSink? logSink,
+    bool logRequests = false,
+  }) {
     final client = dio ??
         Dio(BaseOptions(
           connectTimeout: const Duration(seconds: 20),
@@ -34,10 +49,10 @@ class ApiClient {
       AuthInterceptor(config),
       ThrottleInterceptor(),
       RetryInterceptor(dio: client),
-      SanitizedLogInterceptor(),
+      SanitizedLogInterceptor(enabled: logRequests, sink: logSink),
     ]);
 
-    return ApiClient._(client, config);
+    return ApiClient._(client, config, heavyDecoder ?? _decodeInline);
   }
 
   Dio get raw => _dio;
@@ -64,8 +79,7 @@ class ApiClient {
         return const Err(InsufficientData('Resposta vazia da API.'));
       }
 
-      final decoded =
-          heavy ? await compute(_decode, body) : _decode(body);
+      final decoded = heavy ? await _decodeHeavy(body) : jsonDecode(body);
       return Ok(decoded);
     } on DioException catch (e) {
       return Err(_failureForDio(e));
@@ -73,8 +87,6 @@ class ApiClient {
       return Err(ComputationFailure('Resposta não é JSON válido: ${e.message}'));
     }
   }
-
-  static dynamic _decode(String body) => jsonDecode(body);
 
   Failure _failureFor(int status, String body) => switch (status) {
         401 || 403 => const InvalidInput(

@@ -148,7 +148,7 @@ Nenhum campo indica se `rate` é **bruto ou líquido**, e não há campo de alí
 - **da API:** `label` para classificação fiscal e `statistics.dividendYield` como portão de qualidade;
 - **parâmetro declarado:** a alíquota, porque a API não a carrega (`TaxPolicy`, §4.3).
 
-Assumo `rate` como **valor bruto declarado** — convenção de divulgação da B3/CVM. Fica como ponto em aberto nº 18 uma conferência manual de amostra contra o "Aviso aos Acionistas" de RI, que é a única fonte de verdade possível para isso.
+`rate` é tratado como **valor bruto declarado** — convenção de divulgação da B3/CVM. É **premissa declarada, não fato verificado**: a conferência documental contra o "Aviso aos Acionistas" de RI segue pendente, e é a única fonte de verdade possível. A premissa é explícita no código (`DividendBasis.gross`) e reversível por uma linha (§ ponto 18).
 
 > ⚠ **Achado adicional:** `remarks = "csv:payment_date_estimated"` aparece em 154 eventos de ITUB4, 21 de BBAS3 e 18 de PETR4. **A data de pagamento é estimada, não oficial**, em parte relevante da base. Como o motor credita provento na data de pagamento, isso desloca o caixa em alguns dias. Impacto pequeno no resultado final, mas precisa ser declarado — e o campo `remarks` deve ser preservado até a camada de domínio para permitir o filtro.
 
@@ -1032,50 +1032,205 @@ O campo `remarks` de ITUB4 (483 eventos) revela a origem de cada registro: **280
 
 ---
 
-### Fase 3 — Estado e orquestração
-> **Depende de: Fases 1 e 2. Peso: médio.**
+### ✅ Fase 3 — Estado e orquestração — **CONCLUÍDA (19/08/2026)**
+> **60 testes no app + 152 no core · cobertura do core 82,4% · `flutter analyze` sem issues · `flutter build web` ✓**
 
-- [ ] Riverpod + composition root (`ProviderContainer` utilizável também fora do Flutter)
-- [ ] UseCases da §4.5
-- [ ] Gestão da dupla carteira: criar, equiponderar, editar pesos, validar Σ=100% com absorção de resíduo, **teto de 15 ativos** *(decisão nº 11)*
-- [ ] `SwapAssetBetweenPortfolios` **síncrono** — recálculo por frame de arrasto
-- [ ] Valuation orquestrado + Monte Carlo em Isolate
-- [ ] Fluxo da meta: V0 + PMT + t + Vf → taxa requerida → veredito de viabilidade (info/aviso/bloqueio)
-- [ ] Aderência à meta (hurdle rate) e concentração setorial reativas
-- [ ] Migração `backtests` → **`portfolios`** com novo schema *(decisão nº 10)* + `firestore.indexes.json`
+- [x] Riverpod + raiz de composição com providers escritos à mão (sem geração), todos sobrescrevíveis
+- [x] Casos de uso: `ValuationCascade`, `PrepareValuationInputs`, `SwapAssetBetweenPortfolios`, `EvaluateGoalAlignment`, `ResolveMarketAnchors`, `BuildPortfolio`
+- [x] Gestão da dupla carteira: adicionar, remover, equiponderar, pesos customizados com Σ=100%, **teto de 15 ativos**
+- [x] `SwapAssetBetweenPortfolios` **síncrono** — sem `Future`, sem *debounce*, sem estado de carregamento
+- [x] `ValuationRunner` com limiar de isolate **decidido por medição** (ver abaixo)
+- [x] Fluxo da meta: V0 + PMT + t + Vf → taxa requerida → veredito com semáforo, exposto **enquanto o usuário digita**
+- [x] Concentração setorial e aderência à meta derivadas reativamente do estado
+- [x] Coleção **`portfolios`** com novo schema + `firestore.indexes.json` + regras atualizadas
+- [x] `main.dart` com `ProviderScope` e **tratamento da falha de inicialização do Firebase** — a tela cinza silenciosa virou mensagem explicando o que houve
+
+#### A cascata de valuation, pendência da Fase 1, foi implementada
+
+Escolhe o modelo mais exigente que os dados sustentam e **carrega no resultado qual foi usado**, com os avisos acumulados:
+
+```
+1. DCF por FCFF   → descontado ao WACC     (fluxo + dívida + ações)
+2. DCF sobre LPA  → descontado ao Ke       (só lucro por ação)
+3. Gordon         → sobre dividendos       (só proventos)
+4. Múltiplos      → EV/EBITDA, depois VPA  (último recurso)
+```
+
+Cair em silêncio para um modelo inferior e rotular o número como "preço justo" esconderia do usuário a qualidade real da estimativa — por isso a degradação é sempre visível.
+
+#### `GrowthEstimator`: regressão log-linear, não CAGR ponta a ponta
+
+O CAGR entre o primeiro e o último exercício depende inteiramente de dois pontos; sendo um deles atípico — comum em commodities — o resultado desanda. A inclinação de uma regressão log-linear usa todos os pontos. Somam-se duas salvaguardas: banda de sanidade de −5% a +20% (com o valor bruto registrado no aviso quando limitado) e perpetuidade travada no crescimento da economia, porque uma empresa crescendo acima do PIB para sempre acabaria maior que a economia inteira.
+
+#### Isolate por evidência, não por dogma
+
+O plano previa "Monte Carlo em Isolate". A medição da Fase 0 mostra que **10 mil cenários custam 2,6 ms** — muito abaixo do orçamento de 16,7 ms de um quadro. Abaixo do limiar, a troca de isolate custaria mais (0,18 ms de criação, ~2 ms de cópia) do que o cálculo. `ValuationRunner` roda em linha até 20 mil amostras e só então paga pela isolate. É a mesma disciplina que levou à rejeição do FFI em §1.3.
+
+#### Testes que ancoram a orquestração
+
+| Verificação | Como é ancorada |
+|---|---|
+| Escolha de modelo | Cada degrau da cascata tem teste que **remove** os dados do degrau acima |
+| WACC × Ke | FCFF desconta abaixo do Ke; LPA desconta exatamente ao Ke |
+| Barreira temporal | Exercício de 31/12/2025 é recusado em 30/01/2026 |
+| `GrowthEstimator` | Série geométrica de 10% devolve **exatamente** 10% |
+| Múltiplos | EV 2.400 − dívida líquida 400 ÷ 100 ações = **R$ 20,00** |
+| Concentração reativa | Alerta aparece ao promover o segundo ativo do setor e some ao rebaixá-lo |
+| Não bloqueio | Três ativos do mesmo setor entram sem erro — concentrar é decisão do investidor |
+| Ida e volta | Carteira e meta sobrevivem à serialização; meta em centavos, sem perda |
+| Documento corrompido | Entradas inválidas são descartadas sem derrubar a leitura |
+| Falha ao salvar | Estado editado é preservado
 
 ---
 
-### Fase 4 — UI, drag-and-drop e gráficos
-> **Depende de: Fase 3. Peso: grande.**
+### ✅ Fase 4 — UI, drag-and-drop e gráficos — **CONCLUÍDA (19/08/2026)**
+> **72 testes no app + 152 no core · `flutter analyze` sem issues · `flutter build web` ✓**
 
-- [ ] Adaptar `auth`/`theme` legados ao Riverpod (**sem reescrever**)
-- [ ] Tela de dupla carteira com `Draggable`/`DragTarget`, recálculo instantâneo de upside ponderado, meta e setor
-- [ ] Alerta visual de concentração setorial (não bloqueante)
-- [ ] Tela de valuation: preço justo × preço de mercado, upside, **tornado de sensibilidade**, alternador discreto ↔ Monte Carlo
-- [ ] Tela de metas: V0, PMT, prazo, Vf → taxa requerida mensal/anual, com semáforo de viabilidade (§4.6) e bloqueio no caso extraordinário
-- [ ] **Desempenho individual por ativo** dentro de cada carteira, além do consolidado *(decisão nº 9)*
-- [ ] Exibir **peso-alvo × peso-corrente** — a deriva é sinal de decisão, não defeito
-- [ ] Painel de proventos: bruto, IR retido sobre JCP e líquido, separados
-- [ ] Migrar `CustomPainter` → **`fl_chart`**: série 5Y, extremos 2Y destacados, comparação base 100, dispersão risco×retorno, heatmap de correlação
-- [ ] Exportação CSV/PDF
+- [x] Tema legado adaptado ao Riverpod **sem reescrever** as telas de autenticação (ver abaixo)
+- [x] Tela de dupla carteira com `Draggable`/`DragTarget` e recálculo instantâneo
+- [x] Alerta de concentração setorial, informativo e não bloqueante
+- [x] Tela de valuation: preço justo × mercado, upside, **tornado de sensibilidade**, alternador discreto ↔ Monte Carlo
+- [x] Tela de metas: V0, PMT, prazo, Vf → taxa mensal e anual, com **semáforo de quatro níveis** e limiares citando CDI e Ibovespa observados
+- [x] Desempenho individual por ativo, ordenado por retorno
+- [x] **Peso-alvo × peso-corrente** com barra de deriva
+- [x] Painel de proventos: bruto, IR retido e líquido reinvestido, separados
+- [x] **`fl_chart`**: comparação base 100, dispersão risco×retorno, mapa de calor de correlação; tornado em `CustomPaint` por ser forma específica
+- [x] Exportação CSV para a área de transferência
+
+#### Tema: instância única, duas árvores de estado
+
+O `ThemeController` legado continua `ChangeNotifier` e continua servindo às seis telas de autenticação em Provider. A **mesma instância** é injetada nas duas árvores em `main.dart`, e um `_ThemeSync` espelha seu estado no provider observado pelas telas novas.
+
+A alternativa seria converter ~3.200 linhas de telas legadas para `ConsumerWidget` só para ler um booleano. Preservá-las intactas mantém o risco onde ele deve estar: no código novo, não no que já funciona.
+
+#### Decisões de interface que carregam método
+
+| Decisão | Porquê |
+|---|---|
+| Arrastar-e-soltar **sem estado de carregamento** | O recálculo custa microssegundos; `Future` e *debounce* seriam cerimônia sem função |
+| Alerta setorial **não bloqueia** | Concentrar pode ser decisão consciente; o sistema torna visível, não decide |
+| Ressalvas do valuation exibidas na tela | A queda de modelo (FCFF → LPA → Gordon → múltiplos) é informação sobre a **qualidade** da estimativa |
+| Interruptor "aplicar IR sobre JCP" | Rodar com e sem torna o custo fiscal do período mensurável, em vez de diluído |
+| Deriva de peso com barra de progresso | O desvio do alvo é o sinal que motiva a troca de ativo — não um defeito a corrigir |
+| CSV com `;` e vírgula decimal | É o que o Excel em português abre sem diálogo de importação |
+| CSV para a área de transferência | Única via que funciona em todas as plataformas do projeto, web incluída |
+
+#### Renomeação feita durante a fase
+
+`ComparisonResult` colidia com o tipo homônimo do `flutter_test`, quebrando qualquer teste que importasse os dois. Renomeado para **`PortfolioComparison`** — nome que também descreve melhor o que a classe contém.
+
+#### Testes de interface
+
+| Verificação | Como é ancorada |
+|---|---|
+| Arrastar-e-soltar | Gesto real de arraste move o ativo entre as carteiras |
+| Equiponderação visível | Dois ativos exibem **50,00%** cada |
+| Alerta setorial | Aparece no segundo ativo do setor **e o ativo entra mesmo assim** |
+| Tema | Ambos os modos renderizam sem exceção |
+| CSV | Cabeçalho e separadores conferidos |
 
 ---
 
-### Fase 5 — Validação e evidência acadêmica *(reformulada)*
+### ✅ Fase 5 — Validação e evidência acadêmica — **CONCLUÍDA (20/08/2026)**
+> **224 testes · cobertura 82,6% no núcleo · 15 invariantes aprovadas · 80/80 na conferência em Python**
+
+#### A camada de dados ficou livre de Flutter
+
+Para o executor reusar **exatamente** o mesmo código do aplicativo — e não uma
+reimplementação que poderia divergir em silêncio —, três dependências de
+Flutter saíram de `lib/data`:
+
+| Antes | Depois |
+|---|---|
+| `compute` no `jsonDecode` | `HeavyJsonDecoder` injetável |
+| `debugPrint` / `kDebugMode` | `LogSink` injetável |
+| `drift_flutter` no schema | executor injetado por quem constrói |
+
+O aplicativo injeta as versões de Flutter; o executor injeta as de linha de
+comando. `dart run tool/validate.dart` carrega datasources, mapeadores e
+repositórios idênticos aos que rodam em produção.
+
+#### A conferência cruzada encontrou um defeito real
+
+Foi exatamente para isto que ela existe. Na primeira execução, **51 de 80**
+comparações passaram. As falhas se dividiam em duas causas distintas:
+
+**Defeito no motor — semidesvio de Sortino.** A implementação dividia a soma
+dos quadrados por `(negativos − 1)` e media desvios a partir da média dos
+negativos. A definição de Sortino e Satchell divide pelo **total** de
+observações e mede a partir do alvo. O erro chegava a **32%** e distorcia a
+ordenação entre ativos: penalizava demais séries que caem pouco e raramente.
+Corrigido em `risk_metrics.dart`.
+
+**Divergência de especificação — pareamento do beta.** O motor calcula retornos
+entre datas em que **ambas** as séries negociaram; o script conferia retornos
+calculados em calendários próprios e depois pareados. Quando um ativo não
+negocia num dia, seu retorno seguinte cobre dois dias enquanto o do mercado
+cobre um — o beta resultante mistura co-movimento com ruído de calendário. A
+convenção do motor é a correta; o script foi alinhado a ela.
+
+Após as duas correções: **80 de 80 dentro de 1e-4**.
+
+#### O oráculo previsto foi substituído por invariantes
+
+O plano original validaria o motor contra o `adjustedClose`. A auditoria já
+havia mostrado que aquela série é inconsistente; esta fase **mediu o fenômeno
+em escala**: desvio mediano de 9,1%, máximo de 38,5%, seis de onze ativos acima
+de 5%.
+
+No lugar entraram **15 invariantes matemáticas** que não dependem de fonte
+externa alguma. As mais fortes ligam caminhos de código independentes:
+
+- carteira de ativo único ≡ motor de retorno total (diferença < 1e-9)
+- aporte único ⇒ XIRR ≡ CAGR
+- Σ valores por ativo ≡ patrimônio da carteira
+- tributação reduz o resultado exatamente pelo IR retido
+- aporte não vira retorno
+- taxa requerida reproduz a meta na ida e volta
+
+Uma falha aqui é prova de defeito, não indício.
+
+#### Sobre a causa da divergência, os dados não fecham
+
+O grupo com maioria de JCP desvia mais na média (11,2% contra 7,7%), mas a
+correlação entre proporção de JCP e desvio é de apenas **0,19**, com
+contraexemplos nos dois sentidos: PETR4 tem 38% de JCP e desvia 2,1%; EGIE3 tem
+31% e desvia 21,0%.
+
+O relatório foi ajustado para relatar **a divergência como fato medido e a
+explicação por JCP como hipótese plausível não confirmada** — a versão inicial
+afirmava com mais confiança do que a amostra sustenta. A decisão de arquitetura
+não depende de resolver a causa.
+
+#### Entregas
+
+| Arquivo | Conteúdo |
+|---|---|
+| `tool/validate.dart` | Executor com cinco comandos e cache em arquivo |
+| `docs/validacao/invariantes.md` | 15 identidades verificadas |
+| `docs/validacao/qualidade_proventos.md` | 11/11 consistentes, desvio mediano 0,39 p.p. |
+| `docs/validacao/divergencia_adjusted_close.md` | Divergência medida com análise de causa |
+| `docs/validacao/sensibilidade.md` | Três eixos de premissa |
+| `docs/validacao/cross_validation.py` | Recálculo independente em `pandas`/`numpy` |
+| `docs/validacao/conferencia_python.md` | 80/80 dentro de 1e-4 |
+| `docs/validacao/limitacoes.md` | 20 limitações catalogadas com efeito e remédio |
+
+---
+
+### Escopo original da fase, para referência
 > **Depende de: Fases 1–2. Peso: médio.**
 
 Com o experimento empírico fora, **muda a natureza da evidência do TCC**. Antes, a contribuição seria um achado ("a estratégia supera/não supera o benchmark"). Agora é a **construção verificável**. Isso não é um downgrade — mas exige que a corretude seja *demonstrada*, não afirmada. Esta fase é o que substitui o capítulo de resultados.
 
 - [ ] `tools/validation_harness` reusando `equisim_core` (era `study_runner`)
 - [ ] **Portão de qualidade de proventos** (§0.4, Teste 2): varrer o universo comparando o DY calculado de `cashDividends` contra `statistics.dividendYield`; reportar distribuição do desvio e listar os tickers fora de tolerância. Substitui o oráculo `adjustedClose` descartado.
-- [ ] **Conferência manual de amostra** (~10 eventos) contra "Aviso aos Acionistas" de RI — única forma de resolver bruto × líquido (ponto nº 18)
+- [ ] **Conferência manual de amostra** (~10 eventos) contra "Aviso aos Acionistas" de RI — confirma ou reverte a premissa de base bruta (ponto nº 18, decidido como premissa declarada)
 - [ ] Quantificar o desvio `cashDividends` × `adjustedClose` no universo, para documentar a limitação do Yahoo com JCP
 - [ ] Validação de `solveRequiredMonthlyRate` contra `TAXA` (Excel) e `numpy_financial.rate`
 - [ ] **Validação cruzada em Python:** exportar séries em CSV e conferir beta, Sharpe, volatilidade e DCF contra `scipy` / `numpy_financial` em notebook anexo à monografia
 - [ ] Análise de sensibilidade do DCF (tornado) e do `publicationLag`
 - [ ] Relatório de cobertura de testes
-- [ ] Seção de limitações: viés de sobrevivência (`/v2/tickers` só lista ativos vivos), **granularidade anual dos fundamentos**, CapEx aproximado por `investmentCashFlow`, taxonomia setorial própria da brapi (não GICS/B3), **subajuste de proventos no `adjustedClose` do Yahoo** (§0.4), datas de pagamento estimadas em parte da base, bruto × líquido do `rate` (ponto nº 18)
+- [ ] Seção de limitações: viés de sobrevivência (`/v2/tickers` só lista ativos vivos), **granularidade anual dos fundamentos**, CapEx aproximado por `investmentCashFlow`, taxonomia setorial própria da brapi (não GICS/B3), **subajuste de proventos no `adjustedClose` do Yahoo** (§0.4), datas de pagamento estimadas em parte da base, base bruta do `rate` como premissa declarada (ponto nº 18)
 
 ---
 
@@ -1118,11 +1273,31 @@ Fase 0 ──► Fase 1 (core) ──┬──► Fase 3 ──► Fase 4
 | 16 | Tratamento fiscal de `RENDIMENTO` | **Isento**, como dividendo |
 | 17 | Regime tributário / métricas de provento | **Usar o que a API fornece**: `label` para classificação e `statistics.dividendYield` como portão de qualidade. Alíquota permanece parâmetro declarado (`TaxPolicy`), porque a API não a carrega — ver §0.4 |
 
-### Único ponto remanescente
+### Último ponto, agora decidido
 
 | # | Questão | Recomendação | Bloqueia |
 |---|---|---|---|
-| **18** | O campo `rate` é **bruto ou líquido**? A API não informa e não há campo que permita deduzir | Assumir **bruto declarado** (convenção B3/CVM) e **conferir ~10 eventos manualmente** contra o "Aviso aos Acionistas" de RI, na Fase 5. Se vier líquido, aplicar 15% sobre JCP tributaria em dobro e subestimaria proventos em ~15% | Fase 5 (não bloqueia a Fase 1) |
+### Ponto 18 — resolvido como premissa declarada (20/08/2026)
+
+| # | Questão | Decisão |
+|---|---|---|
+| **18** | O campo `rate` é bruto ou líquido? A API não informa e não há campo que permita deduzir | **Base bruta**, por ser a convenção de divulgação da B3/CVM |
+
+A decisão foi implementada como **parâmetro explícito**, não como aritmética
+implícita: `DividendBasis.gross` na `TaxPolicy`. Três consequências:
+
+1. A premissa aparece no tipo, e não escondida numa multiplicação — quem lê o
+   código sabe que existe uma escolha ali.
+2. Reverter é trocar `TaxPolicy.brasil` por `TaxPolicy.brasilBaseLiquida`. Em
+   base líquida o imposto passa a ser deduzido por reversão
+   (`valor × taxa / (1 − taxa)`), sem tocar em nenhum cálculo.
+3. O comportamento das duas bases está coberto por testes, então a reversão é
+   verificável e não um salto de fé.
+
+**A conferência documental continua pendente** — ~10 eventos contra o "Aviso
+aos Acionistas" de RI. Até lá, isto é premissa a declarar na monografia, não
+fato verificado. Sob base bruta, R$ 1,00 de JCP rende R$ 0,85; se a fonte já
+informasse líquido, os proventos estariam subestimados em 15%.
 
 **Todas as decisões estruturais estão fechadas.** O ponto 18 é conferência documental, não decisão de arquitetura — pode correr em paralelo ao desenvolvimento, e o `TaxPolicy` parametrizado absorve qualquer que seja o resultado sem retrabalho.
 

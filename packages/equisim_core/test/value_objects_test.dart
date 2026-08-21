@@ -51,6 +51,30 @@ void main() {
       expect(Ticker.parse('BRBI11').value, 'BRBI11');
     });
 
+    test('aceita dígito na raiz — B3SA3 é a própria bolsa', () {
+      // Um padrão de quatro letras excluiria B3SA3 da lista de ativos.
+      expect(Ticker.parse('B3SA3').value, 'B3SA3');
+      expect(Ticker.tryParse('B3SA3'), isNotNull);
+    });
+
+    test('rejeita ticker do mercado fracionário', () {
+      // PETR4F é o mesmo ativo que PETR4, negociado em lote fracionário.
+      // Admiti-lo permitiria montar carteira com os dois como se fossem
+      // empresas distintas. A fonte lista 403 deles em type=stock.
+      expect(Ticker.tryParse('PETR4F'), isNull);
+      expect(Ticker.tryParse('BBAS3F'), isNull);
+      expect(Ticker.tryParse('VALE3F'), isNull);
+    });
+
+    test('rejeita classes especiais com sufixo de letra', () {
+      expect(Ticker.tryParse('MRSA6B'), isNull);
+      expect(Ticker.tryParse('EQMA3B'), isNull);
+    });
+
+    test('primeiro caractere precisa ser letra', () {
+      expect(Ticker.tryParse('3PTR4'), isNull);
+    });
+
     test('igualdade por valor', () {
       expect(Ticker.parse('VALE3'), equals(Ticker.parse('vale3')));
     });

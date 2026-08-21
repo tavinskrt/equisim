@@ -1,6 +1,3 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 /// Como o cliente alcança a brapi.
 enum BrapiMode {
   /// Chamada direta com o token embarcado no binário.
@@ -19,17 +16,25 @@ enum BrapiMode {
 }
 
 /// Configuração de acesso às APIs externas.
+///
+/// Deliberadamente **livre de Flutter**: é o que permite ao executor de
+/// validação da Fase 5 usar exatamente a mesma camada de dados do aplicativo,
+/// em vez de uma reimplementação que poderia divergir em silêncio.
 class ApiConfig {
   final BrapiMode mode;
   final String brapiBaseUrl;
   final String? brapiToken;
   final String bcbBaseUrl;
 
+  /// Como a credencial foi obtida — para diagnóstico e alerta.
+  final String credentialSource;
+
   const ApiConfig({
     required this.mode,
     required this.brapiBaseUrl,
     required this.bcbBaseUrl,
     this.brapiToken,
+    this.credentialSource = 'não identificada',
   });
 
   // --- Valores de compilação (`--dart-define-from-file=config/local.json`) ---
@@ -41,24 +46,28 @@ class ApiConfig {
   );
 
   /// A API SGS do Banco Central é aberta: sem token, sem cadastro.
-  static const String bcbDefaultBaseUrl =
-      'https://api.bcb.gov.br/dados/serie';
+  static const String bcbDefaultBaseUrl = 'https://api.bcb.gov.br/dados/serie';
 
   /// Resolve a configuração na seguinte ordem de precedência:
   ///
   /// 1. `BRAPI_PROXY_URL` definido em compilação → modo proxy, sem token;
   /// 2. `BRAPI_TOKEN` definido em compilação → modo direto;
-  /// 3. `.env` carregado como asset → modo direto, **com aviso**.
+  /// 3. [fallbackToken] → modo direto, marcado como origem insegura.
   ///
-  /// O passo 3 existe para não quebrar o fluxo de desenvolvimento durante a
-  /// transição, mas emite alerta: o `.env` declarado como asset viaja dentro
-  /// do bundle e, no alvo web, é servido publicamente.
-  factory ApiConfig.resolve() {
+  /// O passo 3 recebe o que o chamador conseguir obter de um `.env` ou de
+  /// variável de ambiente. Existe para não quebrar o fluxo de desenvolvimento
+  /// durante a transição, e a origem fica registrada em [credentialSource]
+  /// para que a interface possa alertar.
+  factory ApiConfig.resolve({
+    String? fallbackToken,
+    String? fallbackBaseUrl,
+  }) {
     if (_definedProxy.isNotEmpty) {
       return ApiConfig(
         mode: BrapiMode.proxied,
         brapiBaseUrl: _definedProxy,
         bcbBaseUrl: bcbDefaultBaseUrl,
+        credentialSource: 'proxy de custódia',
       );
     }
 
@@ -68,52 +77,43 @@ class ApiConfig {
         brapiBaseUrl: _definedBase,
         brapiToken: _definedToken,
         bcbBaseUrl: bcbDefaultBaseUrl,
+        credentialSource: 'definição de compilação',
       );
     }
 
-    final envToken = _fromDotenv('BRAPI_TOKEN');
-    if (envToken != null) {
-      debugPrint(
-        '⚠️  Token da brapi lido de .env (asset embarcado no bundle). '
-        'Para build de distribuição use --dart-define-from-file=config/local.json '
-        'ou, preferencialmente, configure BRAPI_PROXY_URL.',
-      );
+    final token = fallbackToken?.trim();
+    if (token != null && token.isNotEmpty) {
       return ApiConfig(
         mode: BrapiMode.direct,
-        brapiBaseUrl: _fromDotenv('BRAPI_BASE_URL') ?? _definedBase,
-        brapiToken: envToken,
+        brapiBaseUrl: fallbackBaseUrl?.trim().isNotEmpty == true
+            ? fallbackBaseUrl!.trim()
+            : _definedBase,
+        brapiToken: token,
         bcbBaseUrl: bcbDefaultBaseUrl,
+        credentialSource: 'arquivo .env (embarcado no bundle)',
       );
     }
 
-    debugPrint(
-      '⚠️  Nenhuma credencial da brapi encontrada. As chamadas seguirão sem '
-      'autenticação e a maior parte dos endpoints responderá 401.',
-    );
     return const ApiConfig(
       mode: BrapiMode.direct,
       brapiBaseUrl: _definedBase,
       bcbBaseUrl: bcbDefaultBaseUrl,
+      credentialSource: 'ausente',
     );
   }
 
-  static String? _fromDotenv(String key) {
-    try {
-      final value = dotenv.env[key];
-      return (value != null && value.trim().isNotEmpty) ? value.trim() : null;
-    } catch (_) {
-      // dotenv não inicializado (testes, ou asset ausente).
-      return null;
-    }
-  }
-
   bool get hasCredential => mode == BrapiMode.proxied || brapiToken != null;
+
+  /// `true` quando a credencial veio por via que a expõe no bundle.
+  bool get credentialIsExposed =>
+      mode == BrapiMode.direct && credentialSource.contains('.env');
 
   /// Descrição segura para log e diagnóstico — nunca expõe o token.
   String get diagnostics => switch (mode) {
         BrapiMode.proxied => 'brapi via proxy ($brapiBaseUrl)',
         BrapiMode.direct => brapiToken == null
             ? 'brapi direta, SEM credencial'
-            : 'brapi direta, token ****${brapiToken!.length > 4 ? brapiToken!.substring(brapiToken!.length - 4) : ''}',
+            : 'brapi direta, token ****${brapiToken!.length > 4 ? brapiToken!.substring(brapiToken!.length - 4) : ''} '
+                '[$credentialSource]',
       };
 }

@@ -47,7 +47,13 @@ export 'src/services/portfolio/sector_concentration.dart';
 export 'src/services/total_return_engine.dart';
 export 'src/services/valuation/cost_of_capital.dart';
 export 'src/services/valuation/dcf.dart';
+export 'src/services/valuation/growth_estimator.dart';
 export 'src/services/valuation/scenario_engine.dart';
+
+// --- Casos de uso ---
+export 'src/usecases/compute_valuation.dart';
+export 'src/usecases/portfolio_usecases.dart';
+export 'src/usecases/prepare_valuation_inputs.dart';
 
 // --- Contratos de repositório ---
 export 'src/repositories/repositories.dart';

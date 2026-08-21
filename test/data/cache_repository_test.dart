@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:drift/drift.dart' show DatabaseConnection;
 import 'package:drift/native.dart';
 import 'package:equisim/data/config/api_config.dart';
 import 'package:equisim/data/datasources/local/cache_database.dart';
@@ -34,9 +33,7 @@ void main() {
   late CacheDatabase db;
 
   setUp(() {
-    db = CacheDatabase(
-      DatabaseConnection(NativeDatabase.memory()).executor,
-    );
+    db = CacheDatabase(NativeDatabase.memory());
   });
 
   tearDown(() async => db.close());

@@ -94,7 +94,20 @@ class RiskMetrics {
     return math.sqrt(variance) * math.sqrt(periodsPerYear.toDouble());
   }
 
-  /// Desvio apenas dos retornos abaixo de [target], anualizado.
+  /// Semidesvio abaixo de [target], anualizado.
+  ///
+  /// Segue a definição de Sortino e Satchell:
+  ///
+  ///     DD = √( (1/N) · Σ min(rᵢ − alvo, 0)² )
+  ///
+  /// O divisor é o número **total** de observações, não a contagem de retornos
+  /// negativos, e os desvios são medidos a partir do alvo, não da média dos
+  /// negativos. As duas escolhas importam: dividir pela contagem de negativos
+  /// infla o semidesvio de séries que caem pouco e raramente, invertendo a
+  /// ordenação entre ativos.
+  ///
+  /// A conferência cruzada em Python expôs esse defeito na implementação
+  /// anterior — que dividia por `(negativos − 1)` — com desvio de até 32%.
   static double annualizedDownsideDeviation(
     List<double> periodReturns, {
     double target = 0.0,
@@ -102,16 +115,12 @@ class RiskMetrics {
   }) {
     if (periodReturns.length < 2) return 0.0;
     var sumSquares = 0.0;
-    var count = 0;
     for (final r in periodReturns) {
-      if (r < target) {
-        final d = r - target;
-        sumSquares += d * d;
-        count++;
-      }
+      final shortfall = r - target;
+      if (shortfall < 0) sumSquares += shortfall * shortfall;
     }
-    if (count < 2) return 0.0;
-    final variance = sumSquares / (count - 1);
+    if (sumSquares <= 0) return 0.0;
+    final variance = sumSquares / periodReturns.length;
     return math.sqrt(variance) * math.sqrt(periodsPerYear.toDouble());
   }
 

@@ -4,7 +4,7 @@ import 'dart:ui';
 import '../utils/app_colors.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/login_controller.dart';
-import 'home_page.dart';
+import '../presentation/shell/app_shell.dart';
 
 /// Tela responsável pela autenticação e login de usuários na plataforma.
 class LoginPage extends StatelessWidget {
@@ -344,7 +344,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                                       } else if (context.mounted) {
                                         Navigator.pushReplacement(
                                           context,
-                                          MaterialPageRoute(builder: (context) => const HomePage()),
+                                          MaterialPageRoute(builder: (context) => const AppShell()),
                                         );
                                       }
                                     },

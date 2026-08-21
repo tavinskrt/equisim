@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
 
 part 'cache_database.g.dart';
 
@@ -121,8 +120,11 @@ class CacheEntries extends Table {
   ],
 )
 class CacheDatabase extends _$CacheDatabase {
-  CacheDatabase([QueryExecutor? executor])
-      : super(executor ?? driftDatabase(name: 'equisim_cache'));
+  /// O executor é injetado por quem constrói: o aplicativo usa o backend do
+  /// Flutter, o executor de validação usa SQLite nativo e os testes usam banco
+  /// em memória. Manter a escolha fora daqui é o que mantém esta camada livre
+  /// de Flutter.
+  CacheDatabase(super.executor);
 
   @override
   int get schemaVersion => 1;

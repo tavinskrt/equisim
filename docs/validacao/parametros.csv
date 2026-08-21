@@ -1,0 +1,7 @@
+parametro,valor
+taxa_livre_risco_anual,0.12483971
+pregoes_por_ano,252
+janela_inicio,2021-08-20
+janela_fim,2026-08-20
+aliquota_jcp,0.15
+desvio_padrao,amostral (n-1)

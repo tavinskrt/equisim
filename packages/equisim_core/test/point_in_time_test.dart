@@ -181,6 +181,68 @@ void main() {
       expect(DividendKind.fromLabel(null), DividendKind.desconhecido);
     });
 
+    test('base bruta é a premissa vigente do trabalho', () {
+      expect(TaxPolicy.brasil.basis, DividendBasis.gross);
+    });
+
+    test('em base bruta, R\$ 1,00 de JCP rende R\$ 0,85', () {
+      final jcp = DividendEvent(
+        ticker: Ticker.parse('ITUB4'),
+        exDate: DateTime(2025, 1, 1),
+        paymentDate: DateTime(2025, 2, 1),
+        amountPerShare: 1.0,
+        kind: DividendKind.jcp,
+      );
+      expect(TaxPolicy.brasil.netAmount(jcp), closeTo(0.85, 1e-12));
+      expect(TaxPolicy.brasil.withheldAmount(jcp), closeTo(0.15, 1e-12));
+      expect(TaxPolicy.brasil.grossAmount(jcp), closeTo(1.0, 1e-12));
+    });
+
+    test('em base líquida, R\$ 0,85 de JCP é o que entra no caixa', () {
+      // Mesmo evento visto sob a outra premissa: o informado já é o recebido,
+      // e o bruto é deduzido por reversão.
+      final jcp = DividendEvent(
+        ticker: Ticker.parse('ITUB4'),
+        exDate: DateTime(2025, 1, 1),
+        paymentDate: DateTime(2025, 2, 1),
+        amountPerShare: 0.85,
+        kind: DividendKind.jcp,
+      );
+      const policy = TaxPolicy.brasilBaseLiquida;
+      expect(policy.netAmount(jcp), closeTo(0.85, 1e-12));
+      expect(policy.withheldAmount(jcp), closeTo(0.15, 1e-12));
+      expect(policy.grossAmount(jcp), closeTo(1.0, 1e-12));
+    });
+
+    test('trocar a base é a única alteração necessária para reverter', () {
+      // Se a conferência documental indicar base líquida, aplicar 15% sobre um
+      // valor que já era líquido subestimaria o provento em 15%.
+      final jcp = DividendEvent(
+        ticker: Ticker.parse('ITUB4'),
+        exDate: DateTime(2025, 1, 1),
+        paymentDate: DateTime(2025, 2, 1),
+        amountPerShare: 1.0,
+        kind: DividendKind.jcp,
+      );
+      final comoBruto = TaxPolicy.brasil.netAmount(jcp);
+      final comoLiquido = TaxPolicy.brasilBaseLiquida.netAmount(jcp);
+      expect(comoLiquido - comoBruto, closeTo(0.15, 1e-12));
+      expect(comoBruto / comoLiquido, closeTo(0.85, 1e-12));
+    });
+
+    test('base não altera provento isento', () {
+      final dividendo = DividendEvent(
+        ticker: Ticker.parse('ITUB4'),
+        exDate: DateTime(2025, 1, 1),
+        paymentDate: DateTime(2025, 2, 1),
+        amountPerShare: 1.0,
+        kind: DividendKind.dividendo,
+      );
+      expect(TaxPolicy.brasil.netAmount(dividendo),
+          TaxPolicy.brasilBaseLiquida.netAmount(dividendo));
+      expect(TaxPolicy.brasilBaseLiquida.withheldAmount(dividendo), 0.0);
+    });
+
     test('política zero não retém nada', () {
       final jcp = DividendEvent(
         ticker: Ticker.parse('ITUB4'),

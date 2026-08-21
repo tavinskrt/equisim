@@ -123,3 +123,6 @@ config/local.json
 # Cloud Functions
 functions/node_modules/
 functions/.env*
+
+# Cache do executor de validacao
+docs/validacao/*.sqlite

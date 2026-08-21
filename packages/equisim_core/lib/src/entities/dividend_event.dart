@@ -35,9 +35,11 @@ class DividendEvent {
   final DateTime exDate;
   final DateTime paymentDate;
 
-  /// Valor por ação. Assumido **bruto declarado** — a fonte não informa se é
-  /// bruto ou líquido, e não há campo que permita deduzir (ponto em aberto
-  /// nº 18, sujeito a conferência documental contra RI).
+  /// Valor por ação, exatamente como a fonte informa.
+  ///
+  /// A interpretação — bruto ou líquido de retenção — não vive aqui: é
+  /// decidida pela `TaxPolicy` através de `DividendBasis`. A premissa vigente
+  /// do trabalho é **base bruta**, sujeita a conferência documental.
   final double amountPerShare;
 
   final DividendKind kind;

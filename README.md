@@ -8,7 +8,7 @@ Trabalho de Conclusão de Curso — aplicação Flutter/Dart.
 
 ---
 
-## ⚠ Estado atual: Fases 0, 1 e 2 concluídas (reconstrução em andamento)
+## Estado atual: reconstrução concluída (Fases 0 a 5)
 
 O projeto está em transição. O escopo anterior — simulação comparativa de
 **uma ação contra um FII** com valuation binário — foi **descontinuado**, e o
@@ -34,10 +34,43 @@ Documentos de referência:
   rebalanceamento, TWR/XIRR, métricas de risco, meta patrimonial e concentração
   setorial. 125 testes, 85% de cobertura, zero rede.
 - **`lib/data`** — camada de acesso a dados com Dio, cache Drift, proventos
-  higienizados e portão de qualidade. 42 testes rodando offline sobre fixtures
+  higienizados e portão de qualidade. Testes rodando offline sobre fixtures
   reais.
+- **`lib/di` e `lib/presentation`** — grafo de dependências em Riverpod,
+  estado da dupla carteira com edição síncrona, avaliação orquestrada e
+  persistência dos estudos no Firestore.
+- **Interface completa** em três frentes: dupla carteira com arrastar-e-soltar,
+  planejamento de metas com semáforo de viabilidade, e análise histórica com
+  gráficos e exportação em CSV.
 
-Falta ligar as duas pontas na interface — Fases 3 e 4.
+- **`tool/validate.dart`** — executor de validação que reusa exatamente a mesma
+  camada de dados e o mesmo motor do aplicativo, gerando os relatórios de
+  evidência em [`docs/validacao/`](docs/validacao/).
+
+Ao todo: **224 testes automatizados**, todos offline, com 82,6% de cobertura no
+núcleo de domínio.
+
+### Evidências de corretude
+
+| Verificação | Resultado |
+|---|---|
+| [Invariantes do motor](docs/validacao/invariantes.md) | 15 aprovadas |
+| [Conferência cruzada em Python](docs/validacao/conferencia_python.md) | 80/80 dentro de 1e-4 |
+| [Qualidade dos proventos](docs/validacao/qualidade_proventos.md) | 11/11 consistentes |
+| [Sensibilidade às premissas](docs/validacao/sensibilidade.md) | três eixos medidos |
+| [Limitações](docs/validacao/limitacoes.md) | 20 catalogadas |
+
+Para regerar:
+
+```bash
+dart run tool/validate.dart tudo
+```
+
+E a conferência independente em Python:
+
+```bash
+python docs/validacao/cross_validation.py
+```
 
 ---
 
@@ -174,9 +207,19 @@ lib/data/                  acesso a dados
 ├── quality/               portão de qualidade dos proventos
 └── repositories/          implementações dos contratos
 
-lib/                       aplicativo
-├── controllers/           Provider — migra para Riverpod na Fase 3
-├── utils/ · views/        design system e telas
+lib/di/                    raiz de composição (Riverpod)
+lib/presentation/          estado e telas por funcionalidade
+├── shell/                 navegação principal
+├── study/                 dupla carteira, arrastar-e-soltar, persistência
+├── goals/                 plano patrimonial e semáforo de viabilidade
+├── valuation/             preço justo, cenários e sensibilidade
+├── backtest/              comparação histórica e métricas
+├── export/                exportação em CSV
+└── shared/                design system, gráficos e ponte de tema
+
+lib/                       legado preservado
+├── controllers/           autenticação e tema em Provider
+└── views/                 telas de login, cadastro e perfil
 
 functions/                 proxy de custódia da credencial
 test/fixtures/             respostas reais versionadas

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 
 import '../config/api_config.dart';
 
@@ -131,13 +130,19 @@ class RetryInterceptor extends Interceptor {
   }
 }
 
+/// Destino das mensagens de diagnóstico.
+typedef LogSink = void Function(String message);
+
 /// Log de diagnóstico com credenciais mascaradas.
 ///
 /// Nenhum header de autorização e nenhum parâmetro de token chega ao console:
 /// logs vazam para relatórios de erro e capturas de tela.
 class SanitizedLogInterceptor extends Interceptor {
   final bool enabled;
-  SanitizedLogInterceptor({this.enabled = kDebugMode});
+  final LogSink sink;
+
+  SanitizedLogInterceptor({this.enabled = false, LogSink? sink})
+      : sink = sink ?? print;
 
   static final _tokenPattern = RegExp(r'([?&]token=)[^&]+', caseSensitive: false);
 
@@ -147,7 +152,7 @@ class SanitizedLogInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (enabled) {
-      debugPrint('→ ${options.method} ${sanitize(options.uri.toString())}');
+      sink('→ ${options.method} ${sanitize(options.uri.toString())}');
     }
     handler.next(options);
   }
@@ -155,7 +160,7 @@ class SanitizedLogInterceptor extends Interceptor {
   @override
   void onResponse(Response<dynamic> response, ResponseInterceptorHandler handler) {
     if (enabled) {
-      debugPrint(
+      sink(
         '← ${response.statusCode} ${sanitize(response.requestOptions.uri.toString())}',
       );
     }
@@ -165,7 +170,7 @@ class SanitizedLogInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (enabled) {
-      debugPrint(
+      sink(
         '✖ ${err.response?.statusCode ?? err.type.name} '
         '${sanitize(err.requestOptions.uri.toString())}',
       );

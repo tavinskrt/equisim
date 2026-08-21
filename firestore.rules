@@ -1,21 +1,31 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Regras para a coleção de históricos de backtests
-    match /backtests/{backtestId} {
-      // Permite criação se o usuário estiver logado e o campo userId coincidir com o UID dele
-      allow create: if request.auth != null 
+
+    // Estudos: as duas carteiras e a meta patrimonial.
+    match /portfolios/{studyId} {
+      allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid;
-                    
-      // Permite leitura, atualização e exclusão apenas se o documento pertencer ao usuário logado
-      allow read, update, delete: if request.auth != null 
+
+      allow read, update, delete: if request.auth != null
                                   && resource.data.userId == request.auth.uid;
     }
-    
-    // Regras para a coleção de usuários/preferências
+
+    // Coleção do escopo anterior (uma ação × um FII).
+    //
+    // Mantida somente leitura e exclusão: a aplicação não escreve mais aqui,
+    // mas os dados históricos dos usuários continuam protegidos e acessíveis
+    // até que eles decidam removê-los. Apagar a regra agora deixaria esses
+    // documentos órfãos e sem controle de acesso.
+    match /backtests/{backtestId} {
+      allow read, delete: if request.auth != null
+                          && resource.data.userId == request.auth.uid;
+      allow create, update: if false;
+    }
+
+    // Preferências do usuário (tema).
     match /users/{userId} {
-      allow read, write: if request.auth != null 
+      allow read, write: if request.auth != null
                         && request.auth.uid == userId;
     }
   }

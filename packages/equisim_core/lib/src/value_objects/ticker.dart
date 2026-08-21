@@ -8,7 +8,17 @@ class Ticker implements Comparable<Ticker> {
 
   const Ticker._(this.value);
 
-  static final RegExp _pattern = RegExp(r'^[A-Z]{4}\d{1,2}$');
+  /// Raiz de quatro caracteres iniciada por letra, seguida do código da classe.
+  ///
+  /// A raiz aceita dígitos porque a B3 os usa: **B3SA3**, a própria bolsa, tem
+  /// "3" na segunda posição. Um padrão de quatro letras a excluiria da lista de
+  /// ativos — foi o que aconteceu na primeira versão.
+  ///
+  /// Tickers do mercado fracionário (`PETR4F`) são rejeitados naturalmente,
+  /// porque o sufixo não é dígito. Isso é desejado: representam o mesmo ativo
+  /// e, admitidos, permitiriam montar uma carteira com PETR4 e PETR4F como se
+  /// fossem empresas distintas.
+  static final RegExp _pattern = RegExp(r'^[A-Z][A-Z0-9]{3}\d{1,2}$');
 
   /// Normaliza e valida. Lança [FormatException] em entrada inválida.
   factory Ticker.parse(String raw) {
