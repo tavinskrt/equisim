@@ -1,12 +1,15 @@
 import 'package:equisim/di/providers.dart';
+import 'package:equisim/presentation/backtest/backtest_page.dart';
 import 'package:equisim/presentation/backtest/backtest_providers.dart';
 import 'package:equisim/presentation/export/csv_export.dart';
+import 'package:equisim/presentation/shared/charts.dart';
 import 'package:equisim/presentation/shared/theme_bridge.dart';
 import 'package:equisim/presentation/shared/ui_kit.dart';
 import 'package:equisim/presentation/study/study_notifier.dart';
 import 'package:equisim/presentation/study/study_page.dart';
 import 'package:equisim/presentation/valuation/valuation_providers.dart';
 import 'package:equisim_core/equisim_core.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -182,6 +185,30 @@ void main() {
       expect(find.text('vs CDI'), findsOneWidget);
     });
 
+    testWidgets('HintIcon abre o glossário e explica cada indicador',
+        (tester) async {
+      await tester.pumpWidget(harness(
+        child: const HintIcon(
+          isLight: false,
+          title: 'Indicadores da Carteira Principal',
+          intro: 'Todos se referem à janela simulada.',
+          entries: [HintEntry('TWR', 'Neutraliza o cronograma de aportes.')],
+        ),
+      ));
+
+      expect(find.text('TWR'), findsNothing);
+
+      await tester.tap(find.byType(IconButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Todos se referem à janela simulada.'), findsOneWidget);
+      expect(find.text('TWR'), findsOneWidget);
+      expect(
+        find.text('Neutraliza o cronograma de aportes.'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('tema claro e escuro renderizam sem erro', (tester) async {
       for (final isLight in [true, false]) {
         await tester.pumpWidget(harness(
@@ -193,6 +220,122 @@ void main() {
       }
     });
   });
+
+  group('Gráficos', () {
+    testWidgets('dispersão com um único ponto não degenera os eixos',
+        (tester) async {
+      // Regressão: com um ponto só, o `fl_chart` fazia minX == maxX e
+      // minY == maxY, e a conversão de valor para pixel dividia por zero.
+      await tester.pumpWidget(harness(
+        child: const RiskReturnScatter(
+          isLight: false,
+          points: [
+            (
+              label: 'Principal',
+              risk: 18.4,
+              ret: 12.7,
+              color: Colors.green,
+              highlight: true,
+            ),
+          ],
+        ),
+      ));
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      final chart = tester.widget<ScatterChart>(find.byType(ScatterChart));
+      expect(chart.data.maxX, greaterThan(chart.data.minX));
+      expect(chart.data.maxY, greaterThan(chart.data.minY));
+      expect(chart.data.minX, greaterThanOrEqualTo(0));
+    });
+
+    testWidgets('dispersão desenha um ponto por ativo e rotula todos',
+        (tester) async {
+      await tester.pumpWidget(harness(
+        child: const RiskReturnScatter(
+          isLight: false,
+          points: [
+            (
+              label: 'PETR4',
+              risk: 32.0,
+              ret: 21.0,
+              color: Colors.grey,
+              highlight: false,
+            ),
+            (
+              label: 'ABEV3',
+              risk: 21.0,
+              ret: 4.0,
+              color: Colors.grey,
+              highlight: false,
+            ),
+            (
+              label: 'Principal',
+              risk: 18.0,
+              ret: 13.0,
+              color: Colors.green,
+              highlight: true,
+            ),
+          ],
+        ),
+      ));
+      await tester.pump();
+
+      final chart = tester.widget<ScatterChart>(find.byType(ScatterChart));
+      expect(chart.data.scatterSpots, hasLength(3));
+      expect(chart.data.scatterLabelSettings.showLabel, isTrue);
+      expect(
+        chart.data.scatterLabelSettings.getLabelFunction(
+          0,
+          chart.data.scatterSpots.first,
+        ),
+        'PETR4',
+      );
+    });
+
+    testWidgets('curvas de tamanhos diferentes alinham pela data',
+        (tester) async {
+      // A Principal começa um mês depois da Reserva. Desenhadas por índice,
+      // as duas ficavam encostadas na esquerda e a mais curta parecia acabar
+      // antes do fim do período.
+      final calendario = [
+        for (var i = 0; i < 6; i++) DateTime(2024, 1 + i, 1),
+      ];
+
+      await tester.pumpWidget(harness(
+        child: Base100Chart(
+          isLight: false,
+          dates: calendario,
+          series: [
+            ChartSeries(
+              label: 'Reserva',
+              values: const [100, 101, 102, 103, 104, 105],
+              dates: calendario,
+              color: Colors.blue,
+            ),
+            ChartSeries(
+              label: 'Principal',
+              values: const [100, 99, 98, 97, 96],
+              dates: calendario.skip(1).toList(),
+              color: Colors.green,
+            ),
+          ],
+        ),
+      ));
+      await tester.pump();
+
+      final chart = tester.widget<LineChart>(find.byType(LineChart));
+      final reserva = chart.data.lineBarsData[0].spots;
+      final principal = chart.data.lineBarsData[1].spots;
+
+      expect(reserva.first.x, 0);
+      expect(reserva.last.x, 5);
+      // A curva mais curta começa deslocada e termina na mesma borda.
+      expect(principal.first.x, 1);
+      expect(principal.last.x, 5);
+    });
+  });
+
 
   group('Formatação', () {
     test('percentual com sinal', () {
@@ -209,7 +352,10 @@ void main() {
 
   group('Exportação CSV', () {
     test('usa separador e decimal que o Excel brasileiro entende', () {
-      final result = PortfolioComparison(window: _emptyRange);
+      final result = PortfolioComparison(
+        window: _emptyRange,
+        requestedWindow: _emptyRange,
+      );
       final csv = CsvExport.metrics(result);
 
       expect(csv, contains(';'));
@@ -219,11 +365,223 @@ void main() {
     });
 
     test('cabeçalho da série temporal identifica as duas carteiras', () {
-      final result = PortfolioComparison(window: _emptyRange);
+      final result = PortfolioComparison(
+        window: _emptyRange,
+        requestedWindow: _emptyRange,
+      );
       expect(CsvExport.comparisonSeries(result), isEmpty,
           reason: 'sem simulação não há série a exportar');
     });
   });
+  group('Backtest — desempenho das duas carteiras', () {
+    /// Sobrescreve a comparação inteira: o alvo aqui é a montagem da tela,
+    /// não o motor de simulação, que tem os próprios testes no domínio.
+    List<Override> withComparison(PortfolioComparison comparison) => [
+          comparisonProvider.overrideWith((ref) async => comparison),
+          correlationProvider.overrideWith((ref) async => null),
+        ];
+
+    testWidgets('os ativos das duas carteiras aparecem no mesmo cartão',
+        (tester) async {
+      // A troca de ativo se decide comparando o pior detido com o melhor
+      // candidato: sem a Reserva no cartão, metade da decisão fica invisível.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+          reserva: outcomeOf('ITUB4', const [10, 18, 25]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('DESEMPENHO POR ATIVO'), findsOneWidget);
+      // Um selo por carteira, dentro do cartão.
+      expect(find.text('PRINCIPAL'), findsOneWidget);
+      expect(find.text('RESERVA'), findsOneWidget);
+      expect(find.text('PETR4'), findsOneWidget);
+      expect(find.text('ITUB4'), findsOneWidget);
+    });
+
+    testWidgets('sem Reserva, o cartão mostra só a Principal', (tester) async {
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('DESEMPENHO POR ATIVO'), findsOneWidget);
+      expect(find.text('PETR4'), findsOneWidget);
+      expect(find.text('RESERVA'), findsNothing);
+    });
+
+    testWidgets('cada carteira tem o próprio cartão de proventos',
+        (tester) async {
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+          reserva: outcomeOf('ITUB4', const [10, 18, 25]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('PROVENTOS NO PERÍODO — PRINCIPAL'), findsOneWidget);
+      expect(find.text('PROVENTOS NO PERÍODO — RESERVA'), findsOneWidget);
+    });
+
+    testWidgets('os cabeçalhos das carteiras trazem o ícone de ajuda',
+        (tester) async {
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+          reserva: outcomeOf('ITUB4', const [10, 18, 25]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      // Um em cada cartão de métricas, mais o de desempenho por ativo.
+      expect(find.byType(HintIcon), findsNWidgets(3));
+    });
+  });
+
+  group('Dispersão risco × retorno', () {
+    test('marca cada ativo pela carteira de origem', () async {
+      final today = DateTime.now();
+      final start = DateTime(today.year - 2, today.month, today.day);
+      final closes = List<double>.generate(300, (i) => 10 + i * 0.02);
+
+      final container = ProviderContainer(overrides: [
+        riskFreeRateProvider.overrideWith((ref) async => 0.10),
+        priceRepositoryProvider.overrideWithValue(FakePriceRepository({
+          for (final symbol in ['PETR4', 'VALE3', 'ITUB4'])
+            Ticker.parse(symbol): seriesOf(symbol, start, closes),
+        })),
+        dividendRepositoryProvider.overrideWithValue(FakeDividendRepository()),
+      ]);
+      addTearDown(container.dispose);
+
+      final notifier = container.read(studyProvider.notifier);
+      notifier.addAsset(assetOf('PETR4', 'energia'), toPrincipal: true);
+      notifier.addAsset(assetOf('VALE3', 'materiais'), toPrincipal: true);
+      notifier.addAsset(assetOf('ITUB4'), toPrincipal: false);
+      notifier.setGoal(const FinancialGoal(
+        initialContribution: Money(100000),
+        monthlyContribution: Money(50000),
+        months: 120,
+        targetWealth: Money(10000000),
+      ));
+
+      final result = await container.read(comparisonProvider.future);
+      final kinds = {
+        for (final point in result!.riskReturn) point.label: point.kind,
+      };
+
+      expect(kinds['PETR4'], RiskReturnKind.principalAsset);
+      expect(kinds['VALE3'], RiskReturnKind.principalAsset);
+      // Antes, o candidato da Reserva simplesmente não era desenhado.
+      expect(kinds['ITUB4'], RiskReturnKind.reservaAsset);
+      expect(kinds['Principal'], RiskReturnKind.principal);
+      expect(kinds['Reserva'], RiskReturnKind.reserva);
+    });
+  });
+
 }
 
 final _emptyRange = DateRange(DateTime(2024, 1, 1), DateTime(2024, 12, 31));
+
+/// Série diária sintética: um pregão por dia útil a partir de [start].
+PriceSeries seriesOf(String symbol, DateTime start, List<double> closes) {
+  final points = <PricePoint>[];
+  var date = start;
+  for (final close in closes) {
+    while (date.weekday == DateTime.saturday ||
+        date.weekday == DateTime.sunday) {
+      date = date.add(const Duration(days: 1));
+    }
+    points.add(PricePoint(date: date, close: close));
+    date = date.add(const Duration(days: 1));
+  }
+  return PriceSeries(ticker: Ticker.parse(symbol), points: points);
+}
+
+/// Backtest de uma carteira de um ativo só, para alimentar a tela.
+BacktestOutcome outcomeOf(String symbol, List<double> closes) {
+  final start = DateTime(2024, 1, 1);
+  final portfolio = Portfolio.equalWeighted(
+    id: symbol,
+    name: symbol,
+    kind: PortfolioKind.principal,
+    assets: [assetOf(symbol)],
+  ).unwrap();
+
+  return PortfolioBacktest.run(
+    portfolio: portfolio,
+    prices: {Ticker.parse(symbol): seriesOf(symbol, start, closes)},
+    dividends: const {},
+    plan: const ContributionPlan(initial: Money(100000), monthly: Money.zero),
+    range: DateRange(start, DateTime(2024, 12, 31)),
+  ).unwrap();
+}
+
+PortfolioComparison comparisonOf({
+  BacktestOutcome? principal,
+  BacktestOutcome? reserva,
+}) =>
+    PortfolioComparison(
+      window: _emptyRange,
+      requestedWindow: _emptyRange,
+      principal: principal,
+      reserva: reserva,
+    );
+
+/// Cotações servidas de memória, sem rede.
+class FakePriceRepository implements PriceRepository {
+  final Map<Ticker, PriceSeries> series;
+
+  FakePriceRepository(this.series);
+
+  @override
+  Future<Result<PriceSeries>> daily(Ticker ticker, DateRange range) async {
+    final found = series[ticker];
+    return found == null
+        ? Err(InsufficientData('Sem série para ${ticker.value}.'))
+        : Ok(found);
+  }
+
+  @override
+  Future<Result<Map<Ticker, PriceSeries>>> dailyBatch(
+    List<Ticker> tickers,
+    DateRange range,
+  ) async =>
+      Ok({
+        for (final ticker in tickers)
+          if (series[ticker] != null) ticker: series[ticker]!,
+      });
+
+  @override
+  Future<Result<PriceSeries>> adjustedCloseRaw(
+    Ticker ticker,
+    DateRange range,
+  ) =>
+      daily(ticker, range);
+}
+
+/// Carteira sem proventos: isola o efeito de preço na dispersão.
+class FakeDividendRepository implements DividendRepository {
+  @override
+  Future<Result<List<DividendEvent>>> history(Ticker ticker) async =>
+      const Ok([]);
+
+  @override
+  Future<Result<Map<Ticker, List<DividendEvent>>>> historyBatch(
+    List<Ticker> tickers,
+  ) async =>
+      const Ok({});
+
+  @override
+  Future<Result<double>> publishedTrailingYield(Ticker ticker) async =>
+      const Ok(0.0);
+}

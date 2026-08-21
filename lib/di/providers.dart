@@ -110,9 +110,21 @@ final authStateProvider = StreamProvider<User?>(
   (ref) => ref.watch(firebaseAuthProvider).authStateChanges(),
 );
 
-final currentUserIdProvider = Provider<String?>(
-  (ref) => ref.watch(authStateProvider).valueOrNull?.uid,
-);
+/// Identificador do usuário autenticado.
+///
+/// A leitura combina duas fontes de propósito. `authStateChanges()` é um
+/// `Stream` que só emite no microtask seguinte à assinatura: quem cria este
+/// provider e o lê no mesmo instante — o botão de salvar era exatamente esse
+/// caso — encontrava `AsyncLoading`, cujo `valueOrNull` é `null`, e concluía
+/// que não havia ninguém logado. `FirebaseAuth.currentUser` é **síncrono** e já
+/// reflete a sessão restaurada, então responde corretamente nesse intervalo.
+///
+/// Assim que o fluxo emite, ele passa a mandar: é ele quem carrega o logout.
+final currentUserIdProvider = Provider<String?>((ref) {
+  final streamed = ref.watch(authStateProvider);
+  if (streamed.hasValue) return streamed.value?.uid;
+  return ref.watch(firebaseAuthProvider).currentUser?.uid;
+});
 
 // -------------------------------------------------------------- Datasources --
 

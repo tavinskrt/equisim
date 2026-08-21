@@ -6,7 +6,11 @@ import '../study/study_notifier.dart';
 
 /// Parâmetros da simulação histórica.
 class BacktestSettings {
+  /// Quantos anos de histórico a simulação percorre, contados **para trás a
+  /// partir de hoje**. Dez anos é o teto porque é o que a fonte de cotações
+  /// entrega.
   final int windowYears;
+
   final int contributionDay;
 
   /// Alterna entre proventos brutos e líquidos de IR.
@@ -52,19 +56,69 @@ final backtestSettingsProvider =
   BacktestSettingsNotifier.new,
 );
 
+/// Papel de um ponto na dispersão risco × retorno.
+///
+/// Ativo e carteira são papéis distintos, e a carteira de origem também: o
+/// ponto de um candidato da Reserva precisa se distinguir de um ativo já
+/// detido, porque é justamente essa comparação que sustenta a troca.
+enum RiskReturnKind { principalAsset, reservaAsset, principal, reserva }
+
+/// Um ponto da dispersão: volatilidade e retorno anualizados, em **pontos
+/// percentuais** — a unidade em que os eixos são rotulados.
+class RiskReturnPoint {
+  final String label;
+  final double risk;
+  final double ret;
+  final RiskReturnKind kind;
+
+  const RiskReturnPoint({
+    required this.label,
+    required this.risk,
+    required this.ret,
+    required this.kind,
+  });
+
+  bool get isPortfolio =>
+      kind == RiskReturnKind.principal || kind == RiskReturnKind.reserva;
+}
+
 /// Resultado comparativo das duas carteiras sob o mesmo plano de aportes.
 class PortfolioComparison {
   final BacktestOutcome? principal;
   final BacktestOutcome? reserva;
+
+  /// Janela **efetivamente simulada**, idêntica nas duas carteiras.
   final DateRange window;
+
+  /// Janela pedida no parâmetro "Janela", antes de qualquer encurtamento.
+  final DateRange requestedWindow;
+
+  /// Ativo cujo histórico obrigou a encurtar a janela, quando houve.
+  final Ticker? limitingTicker;
+
+  /// Por que cada carteira não pôde ser simulada, quando não pôde.
+  final String? principalFailure;
+  final String? reservaFailure;
+
+  /// Dispersão risco × retorno: um ponto por ativo das duas carteiras, mais
+  /// as próprias carteiras.
+  final List<RiskReturnPoint> riskReturn;
 
   const PortfolioComparison({
     required this.window,
+    required this.requestedWindow,
     this.principal,
     this.reserva,
+    this.limitingTicker,
+    this.principalFailure,
+    this.reservaFailure,
+    this.riskReturn = const [],
   });
 
   bool get hasBoth => principal != null && reserva != null;
+
+  /// `true` quando a janela simulada ficou menor que a pedida.
+  bool get windowWasShortened => window.start.isAfter(requestedWindow.start);
 
   /// Diferença de retorno ponderado pelo tempo, em pontos percentuais.
   ///
@@ -79,6 +133,17 @@ class PortfolioComparison {
 }
 
 /// Executa o backtest das duas carteiras com o mesmo plano de aportes.
+///
+/// **As duas carteiras são simuladas na mesma janela**, e é isso que sustenta
+/// a comparação. O início comum é o primeiro pregão em que *todos* os ativos
+/// das duas carteiras já negociavam — SAPR11, por exemplo, só tem cotação
+/// desde 22/11/2017, de modo que uma janela de nove anos não pode começar
+/// antes disso sem deixar a Principal sem preço para alocar o aporte.
+///
+/// Sem esse alinhamento cada carteira começava no seu próprio primeiro pregão:
+/// os patrimônios aportados divergiam, o TWR comparava períodos diferentes e
+/// as duas curvas apareciam deslocadas no gráfico, dando a impressão de que
+/// uma delas parara de aportar antes do fim.
 final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
   final study = ref.watch(studyProvider).study;
   final settings = ref.watch(backtestSettingsProvider);
@@ -88,7 +153,7 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
   if (goal == null) return null;
 
   final today = DateTime.now();
-  final window = DateRange(
+  final requested = DateRange(
     DateTime(today.year - settings.windowYears, today.month, today.day),
     today,
   );
@@ -104,13 +169,34 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
   if (tickers.isEmpty) return null;
 
   // Um único lote para todos os ativos das duas carteiras.
-  final priceResult = await prices.dailyBatch(tickers, window);
-  if (priceResult.isErr) return PortfolioComparison(window: window);
+  final priceResult = await prices.dailyBatch(tickers, requested);
+  if (priceResult.isErr) {
+    final message = priceResult.failureOrNull?.message;
+    return PortfolioComparison(
+      window: requested,
+      requestedWindow: requested,
+      principalFailure: message,
+      reservaFailure: message,
+    );
+  }
   final priceMap = priceResult.unwrap();
 
   final dividendResult = await dividends.historyBatch(tickers);
   final dividendMap =
       dividendResult.getOrElse(const <Ticker, List<DividendEvent>>{});
+
+  // Início comum às duas carteiras: o mais tardio dos primeiros pregões.
+  var start = requested.start;
+  Ticker? limiting;
+  for (final ticker in tickers) {
+    final series = priceMap[ticker];
+    if (series == null || series.isEmpty) continue;
+    if (series.firstDate.isAfter(start)) {
+      start = series.firstDate;
+      limiting = ticker;
+    }
+  }
+  final window = DateRange(start, requested.end);
 
   final plan = ContributionPlan(
     initial: goal.initialContribution,
@@ -118,9 +204,9 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
     contributionDay: settings.contributionDay,
   );
 
-  BacktestOutcome? runFor(Portfolio portfolio) {
+  Result<BacktestOutcome>? runFor(Portfolio portfolio) {
     if (portfolio.isEmpty) return null;
-    final result = PortfolioBacktest.run(
+    return PortfolioBacktest.run(
       portfolio: portfolio,
       prices: priceMap,
       dividends: dividendMap,
@@ -129,15 +215,111 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
       taxPolicy: settings.taxPolicy,
       riskFreeRate: riskFree,
     );
-    return result.valueOrNull;
   }
+
+  final principalRun = runFor(study.principal);
+  final reservaRun = runFor(study.reserva);
+  final principal = principalRun?.valueOrNull;
+  final reserva = reservaRun?.valueOrNull;
 
   return PortfolioComparison(
     window: window,
-    principal: runFor(study.principal),
-    reserva: runFor(study.reserva),
+    requestedWindow: requested,
+    limitingTicker: limiting,
+    principal: principal,
+    reserva: reserva,
+    principalFailure: principalRun?.failureOrNull?.message,
+    reservaFailure: reservaRun?.failureOrNull?.message,
+    riskReturn: _riskReturnPoints(
+      principalPortfolio: study.principal,
+      reservaPortfolio: study.reserva,
+      prices: priceMap,
+      dividends: dividendMap,
+      taxPolicy: settings.taxPolicy,
+      window: window,
+      principal: principal,
+      reserva: reserva,
+    ),
   );
 });
+
+/// Monta a dispersão risco × retorno.
+///
+/// Cada ativo entra com a volatilidade e o CAGR da **sua própria** série de
+/// retorno total no período; as carteiras entram com as métricas já apuradas
+/// pelo backtest. É o contraste entre os dois grupos que torna o efeito da
+/// diversificação visível — a carteira costuma cair à esquerda da nuvem, com
+/// menos volatilidade que a maioria dos seus componentes.
+///
+/// **As duas carteiras contribuem com seus ativos**, marcados por carteira de
+/// origem. A Reserva existe para abastecer a Principal, e a troca se decide
+/// olhando onde o candidato cai em relação ao que já está em casa: um ativo
+/// que rende mais assumindo menos risco fica acima e à esquerda.
+List<RiskReturnPoint> _riskReturnPoints({
+  required Portfolio principalPortfolio,
+  required Portfolio reservaPortfolio,
+  required Map<Ticker, PriceSeries> prices,
+  required Map<Ticker, List<DividendEvent>> dividends,
+  required TaxPolicy taxPolicy,
+  required DateRange window,
+  required BacktestOutcome? principal,
+  required BacktestOutcome? reserva,
+}) {
+  final points = <RiskReturnPoint>[];
+  // Um ticker desenhado duas vezes empilharia rótulos no mesmo pixel; a
+  // carteira em que ele aparece primeiro é a que responde por ele.
+  final drawn = <Ticker>{};
+
+  void addAssets(Portfolio portfolio, RiskReturnKind kind) {
+    for (final ticker in portfolio.tickers) {
+      if (!drawn.add(ticker)) continue;
+
+      final series = prices[ticker];
+      if (series == null || series.isEmpty) continue;
+
+      final total = TotalReturnEngine.build(
+        prices: series,
+        dividends: dividends[ticker] ?? const [],
+        taxPolicy: taxPolicy,
+        range: window,
+      );
+      // Menos de um mês de pregões não sustenta desvio-padrão anualizado.
+      if (total.dates.length < 21) continue;
+
+      final years = DateRange(total.dates.first, total.dates.last).years;
+      if (years <= 0) continue;
+
+      points.add(RiskReturnPoint(
+        label: ticker.value,
+        risk: RiskMetrics.annualizedVolatility(total.dailyReturns) * 100,
+        ret: Returns.annualize(total.totalReturn, years) * 100,
+        kind: kind,
+      ));
+    }
+  }
+
+  addAssets(principalPortfolio, RiskReturnKind.principalAsset);
+  addAssets(reservaPortfolio, RiskReturnKind.reservaAsset);
+
+  void addPortfolio(
+    BacktestOutcome? outcome,
+    String label,
+    RiskReturnKind kind,
+  ) {
+    if (outcome == null) return;
+    points.add(RiskReturnPoint(
+      label: label,
+      risk: outcome.metrics.volatility * 100,
+      ret: outcome.metrics.cagr * 100,
+      kind: kind,
+    ));
+  }
+
+  addPortfolio(principal, 'Principal', RiskReturnKind.principal);
+  addPortfolio(reserva, 'Reserva', RiskReturnKind.reserva);
+
+  return points;
+}
 
 /// Matriz de correlação entre os ativos da carteira Principal.
 ///

@@ -2,6 +2,7 @@ import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/repositories/portfolio_repository.dart';
 import '../../utils/app_colors.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
@@ -129,6 +130,10 @@ class _StudyHeader extends ConsumerWidget {
             children: [
               Expanded(
                 child: TextFormField(
+                  // A chave amarra o campo ao estudo aberto: sem ela,
+                  // `initialValue` só vale na primeira construção e o nome de
+                  // um estudo carregado do Firestore nunca apareceria aqui.
+                  key: ValueKey(state.study.id ?? '__novo__'),
                   initialValue: state.study.name,
                   onChanged: ref.read(studyProvider.notifier).rename,
                   style: TextStyle(
@@ -145,18 +150,28 @@ class _StudyHeader extends ConsumerWidget {
                   ),
                 ),
               ),
+              IconButton(
+                tooltip: 'Estudos salvos',
+                icon: Icon(Icons.folder_open_outlined,
+                    size: 19, color: AppColors.textSecondary(isLight)),
+                onPressed: () => showSavedStudies(context, isLight: isLight),
+              ),
               state.isSaving
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14),
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                     )
                   : IconButton(
-                      tooltip: 'Salvar estudo',
+                      tooltip: state.study.id == null
+                          ? 'Salvar estudo'
+                          : 'Salvar alterações',
                       icon: Icon(Icons.save_outlined,
                           size: 19, color: AppColors.primary),
-                      onPressed: () =>
-                          ref.read(studyProvider.notifier).save(),
+                      onPressed: () => _save(context, ref),
                     ),
             ],
           ),
@@ -197,6 +212,180 @@ class _StudyHeader extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _save(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final saved = await ref.read(studyProvider.notifier).save();
+    // O erro já vira SnackBar no `ref.listen` da StudyPage; aqui só falta a
+    // confirmação do caminho feliz, que sem isto era silenciosa e deixava a
+    // dúvida de ter salvo ou não.
+    if (!saved) return;
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('Estudo salvo. Abra em "Estudos salvos" quando voltar.'),
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+}
+
+/// Folha dos estudos gravados no Firestore.
+///
+/// Salvar sem poder reabrir não resolveria o problema que motivou a
+/// funcionalidade — remontar carteiras de nove ativos a cada sessão.
+Future<void> showSavedStudies(
+  BuildContext context, {
+  required bool isLight,
+}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: isLight ? Colors.white : const Color(0xFF13224E),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+    ),
+    builder: (_) => _SavedStudiesSheet(isLight: isLight),
+  );
+}
+
+class _SavedStudiesSheet extends ConsumerWidget {
+  final bool isLight;
+
+  const _SavedStudiesSheet({required this.isLight});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final studies = ref.watch(savedStudiesProvider);
+
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.7,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SectionHeader(
+                isLight: isLight,
+                title: 'Estudos salvos',
+                subtitle: 'Abrir recarrega as duas carteiras e a meta',
+                trailing: TextButton.icon(
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('Novo'),
+                  onPressed: () {
+                    ref.read(studyProvider.notifier).startNew();
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+              Flexible(
+                child: studies.when(
+                  loading: () => const Padding(
+                    padding: EdgeInsets.all(28),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (error, _) => EmptyState(
+                    isLight: isLight,
+                    icon: Icons.error_outline,
+                    title: 'Não foi possível listar',
+                    message: '$error',
+                  ),
+                  data: (list) => list.isEmpty
+                      ? EmptyState(
+                          isLight: isLight,
+                          icon: Icons.folder_off_outlined,
+                          title: 'Nenhum estudo salvo',
+                          message: 'Monte as carteiras e toque no disquete '
+                              'para guardar este estudo.',
+                        )
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: list.length,
+                          separatorBuilder: (_, _) => Divider(
+                            height: 1,
+                            color: AppColors.divider(isLight),
+                          ),
+                          itemBuilder: (_, i) => _SavedStudyTile(
+                            study: list[i],
+                            isLight: isLight,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SavedStudyTile extends ConsumerWidget {
+  final PortfolioStudy study;
+  final bool isLight;
+
+  const _SavedStudyTile({required this.study, required this.isLight});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final updatedAt = study.updatedAt;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(
+        study.name,
+        style: TextStyle(
+          fontSize: 13.5,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary(isLight),
+        ),
+      ),
+      subtitle: Text(
+        '${study.principal.length} na Principal · '
+        '${study.reserva.length} na Reserva'
+        '${updatedAt == null ? '' : ' · ${Fmt.date.format(updatedAt)}'}',
+        style: TextStyle(fontSize: 10.5, color: AppColors.textMuted(isLight)),
+      ),
+      trailing: IconButton(
+        tooltip: 'Excluir',
+        icon: Icon(Icons.delete_outline, size: 18, color: AppColors.danger),
+        onPressed: () => _confirmDelete(context, ref),
+      ),
+      onTap: () {
+        ref.read(studyProvider.notifier).load(study);
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final id = study.id;
+    if (id == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Excluir estudo'),
+        content: Text('"${study.name}" será removido definitivamente.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('Excluir', style: TextStyle(color: AppColors.danger)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await ref.read(studyProvider.notifier).deleteSaved(id);
   }
 }
 

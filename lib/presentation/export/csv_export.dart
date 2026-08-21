@@ -81,7 +81,7 @@ abstract final class CsvExport {
     return buffer.toString();
   }
 
-  /// Desempenho individual dos ativos da carteira Principal.
+  /// Desempenho individual dos ativos de uma carteira.
   static String perAsset(BacktestOutcome outcome) {
     final buffer = StringBuffer()
       ..writeln([
@@ -136,10 +136,19 @@ Future<void> exportComparisonCsv({
     ..writeln('## Métricas')
     ..writeln(CsvExport.metrics(result));
 
+  // As duas carteiras exportam por ativo: o CSV é a via para conferir a
+  // decisão de troca fora do aplicativo, e ela compara os dois lados.
   if (result.principal != null) {
     buffer
       ..writeln('## Desempenho por ativo (Principal)')
       ..writeln(CsvExport.perAsset(result.principal!))
+      ..writeln();
+  }
+
+  if (result.reserva != null) {
+    buffer
+      ..writeln('## Desempenho por ativo (Reserva)')
+      ..writeln(CsvExport.perAsset(result.reserva!))
       ..writeln();
   }
 

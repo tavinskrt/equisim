@@ -323,6 +323,135 @@ class ScreenBackground extends StatelessWidget {
   }
 }
 
+/// Verbete de glossário: o rótulo tal como aparece no cartão e o que ele diz.
+class HintEntry {
+  final String term;
+  final String description;
+
+  const HintEntry(this.term, this.description);
+}
+
+/// Ícone de ajuda que abre o glossário dos indicadores de um cartão.
+///
+/// Os números destas telas decidem troca de ativo, e cada um responde a uma
+/// pergunta diferente: TWR compara composições, XIRR mede o que o investidor
+/// levou. Ler um pelo outro leva à decisão errada, e o verbete a um toque de
+/// distância custa menos que a nota de rodapé que ninguém lê.
+class HintIcon extends StatelessWidget {
+  final String title;
+
+  /// Frase de abertura, quando o conjunto de verbetes precisa de contexto.
+  final String? intro;
+
+  final List<HintEntry> entries;
+  final bool isLight;
+
+  const HintIcon({
+    super.key,
+    required this.title,
+    required this.entries,
+    required this.isLight,
+    this.intro,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: 'O que significa cada indicador',
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+      icon: Icon(
+        Icons.help_outline,
+        size: 17,
+        color: AppColors.textSecondary(isLight),
+      ),
+      onPressed: () => _openGlossary(context),
+    );
+  }
+
+  void _openGlossary(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: AlertDialog(
+          backgroundColor: isLight ? Colors.white : const Color(0xFF0D1E3A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: AppColors.surfaceBorder(isLight)),
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary(isLight),
+            ),
+          ),
+          content: SizedBox(
+            width: 420,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (intro != null) ...[
+                    Text(
+                      intro!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        height: 1.45,
+                        color: AppColors.textSecondary(isLight),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+                  for (final entry in entries)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            entry.term,
+                            style: const TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            entry.description,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              height: 1.45,
+                              color: AppColors.textSecondary(isLight),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text(
+                'Entendi',
+                style: TextStyle(color: AppColors.primary),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Verde para ganho, vermelho para perda, neutro para zero.
 Color signedColor(double value, bool isLight) {
   if (value > 0) return AppColors.primary;

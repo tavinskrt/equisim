@@ -1,13 +1,20 @@
 /// Validade de cada tipo de dado.
 ///
-/// A regra que mais importa é a primeira: **cotação de pregão encerrado é fato
-/// passado e não muda**. Guardá-la permanentemente derruba a segunda execução
-/// de uma simulação de ~3,5 s para praticamente zero e — o que vale mais para
-/// o trabalho — torna os resultados reprodutíveis, já que a mesma simulação
-/// deixa de depender do que a API devolve naquele instante.
+/// Cotação de pregão encerrado é fato passado e não muda: as linhas já
+/// guardadas nunca são descartadas, e é isso que derruba a segunda execução de
+/// uma simulação de ~3,5 s para praticamente zero.
+///
+/// O que envelhece não é a linha, é a **ponta da série** — a cada pregão
+/// existe um dia a mais para buscar. A validade abaixo governa só isso: quando
+/// expira, a série é rebuscada e as linhas novas são somadas às antigas.
 abstract final class CachePolicy {
-  /// Cotações de pregões já encerrados: imutáveis.
-  static const Duration historicalPrices = Duration(days: 365 * 10);
+  /// Ponta da série de cotações.
+  ///
+  /// Meio dia: recarrega no máximo uma vez por turno de trabalho e ainda assim
+  /// alcança o pregão do dia. Um prazo longo aqui congelava a simulação na
+  /// data em que o cache foi preenchido — os aportes paravam ali, meses antes
+  /// de hoje, sem nenhum aviso.
+  static const Duration historicalPrices = Duration(hours: 12);
 
   /// Fundamentos anuais: atualizam uma vez por ano, com folga.
   static const Duration fundamentals = Duration(days: 30);

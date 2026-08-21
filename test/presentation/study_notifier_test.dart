@@ -205,11 +205,14 @@ void main() {
   });
 
   group('StudyNotifier — persistência', () {
-    test('salvar exige usuário autenticado', () async {
+    test('sem sessão identificada, salvar recusa e explica', () async {
       final container = containerWith(userId: null);
       final ok = await container.read(studyProvider.notifier).save();
       expect(ok, isFalse);
-      expect(container.read(studyProvider).lastError, contains('login'));
+      expect(
+        container.read(studyProvider).lastError,
+        contains('Sessão não identificada'),
+      );
     });
 
     test('salvar guarda o identificador devolvido', () async {

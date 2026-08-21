@@ -64,11 +64,23 @@ class PortfolioRepository {
       return const Err(InvalidInput('Usuário não identificado.'));
     }
     try {
-      final snapshot = await _collection
-          .where('userId', isEqualTo: userId)
-          .orderBy('updatedAt', descending: true)
-          .get();
-      return Ok(snapshot.docs.map(_fromDoc).toList());
+      // Só o filtro por dono vai ao servidor. `orderBy` combinado com `where`
+      // exigiria um índice composto publicado — e, sem ele, a consulta falha
+      // inteira. A ordenação acontece aqui: são poucos estudos por usuário, e
+      // a lista deixa de depender de um passo de infraestrutura.
+      final snapshot =
+          await _collection.where('userId', isEqualTo: userId).get();
+
+      final studies = snapshot.docs.map(_fromDoc).toList()
+        ..sort((a, b) {
+          final left = a.updatedAt;
+          final right = b.updatedAt;
+          if (left == null && right == null) return 0;
+          if (left == null) return 1; // sem data vai para o fim
+          if (right == null) return -1;
+          return right.compareTo(left);
+        });
+      return Ok(studies);
     } on FirebaseException catch (e) {
       return Err(ComputationFailure(
         'Falha ao carregar os estudos salvos: ${e.message ?? e.code}',

@@ -178,7 +178,10 @@ class StudyNotifier extends Notifier<StudyState> {
   Future<bool> save() async {
     final userId = ref.read(currentUserIdProvider);
     if (userId == null) {
-      state = state.copyWith(lastError: 'Faça login para salvar o estudo.');
+      state = state.copyWith(
+        lastError: 'Sessão não identificada. Saia e entre novamente para '
+            'salvar o estudo.',
+      );
       return false;
     }
 
@@ -192,6 +195,9 @@ class StudyNotifier extends Notifier<StudyState> {
           study: state.study.copyWith(id: id),
           isSaving: false,
         );
+        // A lista de estudos salvos é derivada do Firestore; sem invalidar,
+        // o estudo recém-gravado só apareceria na próxima sessão.
+        ref.invalidate(savedStudiesProvider);
         return true;
       },
       (failure) {
@@ -200,6 +206,45 @@ class StudyNotifier extends Notifier<StudyState> {
       },
     );
   }
+
+  /// Cria um estudo novo, preservando a meta já definida.
+  ///
+  /// Zerar a meta junto obrigaria a redigitá-la a cada estudo — e é justamente
+  /// o mesmo plano de aportes que torna dois estudos comparáveis.
+  void startNew() {
+    state = StudyState(
+      study: _emptyStudy().copyWith(goal: state.study.goal),
+    );
+  }
+
+  Future<bool> deleteSaved(String id) async {
+    final userId = ref.read(currentUserIdProvider);
+    if (userId == null) return false;
+
+    final result = await ref.read(portfolioRepositoryProvider).delete(userId, id);
+    return result.fold(
+      (_) {
+        // Apagar o estudo aberto não apaga o que está na tela: só desfaz o
+        // vínculo, para que o próximo "salvar" crie um documento novo.
+        if (state.study.id == id) {
+          state = StudyState(study: _detach(state.study));
+        }
+        ref.invalidate(savedStudiesProvider);
+        return true;
+      },
+      (failure) {
+        state = state.copyWith(lastError: failure.message);
+        return false;
+      },
+    );
+  }
+
+  static PortfolioStudy _detach(PortfolioStudy study) => PortfolioStudy(
+        name: study.name,
+        principal: study.principal,
+        reserva: study.reserva,
+        goal: study.goal,
+      );
 
   void clearError() => state = state.copyWith(clearError: true);
 }
@@ -217,9 +262,17 @@ final concentrationProvider = Provider<ConcentrationReport>((ref) {
 });
 
 /// Estudos salvos pelo usuário.
+///
+/// A falha é **propagada**, não convertida em lista vazia: "nenhum estudo
+/// salvo" e "não consegui ler os estudos" são situações diferentes, e
+/// confundi-las esconderia justamente o erro que o usuário precisa ver.
 final savedStudiesProvider = FutureProvider<List<PortfolioStudy>>((ref) async {
   final userId = ref.watch(currentUserIdProvider);
   if (userId == null) return const [];
+
   final result = await ref.watch(portfolioRepositoryProvider).listFor(userId);
-  return result.getOrElse(const []);
+  return result.fold(
+    (studies) => studies,
+    (failure) => throw Exception(failure.message),
+  );
 });
