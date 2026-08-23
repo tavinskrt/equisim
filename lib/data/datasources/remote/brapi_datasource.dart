@@ -176,8 +176,9 @@ class BrapiDatasource {
       ));
     }
 
-    // `sharesOutstanding` e `enterpriseToEbitda` vivem só no snapshot corrente;
-    // sem eles não há valor por ação nem múltiplo de saída.
+    // `sharesOutstanding`, `marketCap` e `enterpriseToEbitda` descrevem o
+    // **hoje**, não o exercício; sem eles não há valor por ação nem múltiplo
+    // de saída.
     final current = await client.getJson(
       _url('/v2/stocks/statistics'),
       query: {'symbols': ticker.value, 'mode': 'current'},
@@ -188,13 +189,20 @@ class BrapiDatasource {
     for (final entry in merged.entries) {
       final date = BrapiJson.asDate(entry.key);
       if (date == null) continue;
+      // O snapshot corrente vem **depois** e prevalece. As linhas anuais também
+      // trazem esses três campos, e nelas o `marketCap` é calculado como
+      // `ações × preço da unit` — o que o infla pelo fator da unit: SAPR11
+      // aparecia com R$ 59,9 bi contra os R$ 10,1 bi reais, KLBN11 com R$ 117
+      // bi contra R$ 23,0 bi (medido em 21/08/2026). Deixá-las sobrescrever
+      // estragava o peso do equity no WACC e impedia identificar a unit.
       final fields = <String, dynamic>{
-        if (currentData != null) ...{
-          'sharesOutstanding': currentData['sharesOutstanding'],
-          'enterpriseToEbitda': currentData['enterpriseToEbitda'],
-          'marketCap': currentData['marketCap'],
-        },
         ...entry.value,
+        if (currentData?['sharesOutstanding'] != null)
+          'sharesOutstanding': currentData!['sharesOutstanding'],
+        if (currentData?['enterpriseToEbitda'] != null)
+          'enterpriseToEbitda': currentData!['enterpriseToEbitda'],
+        if (currentData?['marketCap'] != null)
+          'marketCap': currentData!['marketCap'],
       };
       snapshots.add(
         BrapiFundamentalsDto(fiscalPeriodEnd: date, fields: fields)

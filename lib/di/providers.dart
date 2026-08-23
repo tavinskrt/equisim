@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../audit/audit_network_interceptor.dart';
 import '../data/config/api_config.dart';
 import '../data/datasources/local/cache_database.dart';
 import '../data/datasources/remote/bcb_datasource.dart';
@@ -60,6 +61,10 @@ final apiClientProvider = Provider<ApiClient>((ref) {
     logRequests: kDebugMode,
     logSink: debugPrint,
   );
+  // O interceptador de auditoria fica sempre montado: ele próprio verifica se
+  // há alguém ouvindo e, quando não há, não chega a construir o evento. Montar
+  // condicionalmente exigiria recriar o cliente ao ligar o painel.
+  client.raw.interceptors.add(AuditNetworkInterceptor());
   ref.onDispose(client.close);
   return client;
 });

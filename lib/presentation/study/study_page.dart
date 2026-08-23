@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/portfolio_repository.dart';
+import '../../di/providers.dart';
 import '../../utils/app_colors.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
@@ -111,7 +112,10 @@ class _StudyHeader extends ConsumerWidget {
     final yields = ref.watch(netDividendYieldsProvider);
     final settings = ref.watch(valuationSettingsProvider);
 
+    final anchors = ref.watch(marketAnchorsProvider);
+
     double? weightedUpside;
+    var coverage = 0.0;
     if (expected.hasValue && expected.value!.isNotEmpty) {
       weightedUpside = ExpectedReturn.forPortfolio(
         portfolio: state.study.principal,
@@ -119,7 +123,19 @@ class _StudyHeader extends ConsumerWidget {
         netDividendYields: yields.valueOrNull ?? const {},
         horizonMonths: settings.convergenceHorizonMonths,
       );
+      coverage = ExpectedReturn.coverage(
+        portfolio: state.study.principal,
+        valuations: expected.value!,
+      );
     }
+
+    // Referência de plausibilidade: o retorno histórico do próprio mercado.
+    // Um "esperado" muito acima dele não é promessa de desempenho, é sinal de
+    // que alguma avaliação da carteira está esticada.
+    final marketCagr =
+        anchors.valueOrNull?.marketCagr ?? MarketAnchors.fallback2026.marketCagr;
+    final isImplausible =
+        weightedUpside != null && weightedUpside > marketCagr * 3;
 
     return GlassCard(
       isLight: isLight,
@@ -189,14 +205,28 @@ class _StudyHeader extends ConsumerWidget {
               Expanded(
                 child: MetricTile(
                   isLight: isLight,
-                  label: 'Retorno esperado',
+                  label: 'Esperado da carteira',
                   value: weightedUpside == null
                       ? '—'
                       : Fmt.percent(weightedUpside, decimals: 1, signed: true),
-                  hint: 'ao ano, em ${settings.convergenceHorizonMonths} meses',
+                  // O rótulo antigo dizia "ao ano, em 12 meses" e omitia a
+                  // premissa que sustenta o número: que o mercado fecha toda a
+                  // diferença até o preço justo dentro do horizonte. Com 12
+                  // meses a anualização não faz nada, e o valor é literalmente
+                  // o upside médio somado ao dividend yield.
+                  hint: weightedUpside == null
+                      ? null
+                      : 'se o preço justo for alcançado em '
+                          '${settings.convergenceHorizonMonths} meses · '
+                          '${Fmt.percent(coverage, decimals: 0)} da carteira '
+                          'avaliada',
                   valueColor: weightedUpside == null
                       ? null
-                      : signedColor(weightedUpside, isLight),
+                      : (isImplausible
+                          ? (isLight
+                              ? AppColors.warning
+                              : AppColors.warningDark)
+                          : signedColor(weightedUpside, isLight)),
                 ),
               ),
               Expanded(
@@ -209,6 +239,21 @@ class _StudyHeader extends ConsumerWidget {
               ),
             ],
           ),
+          if (isImplausible) ...[
+            const SizedBox(height: 12),
+            NoticeBanner(
+              isLight: isLight,
+              icon: Icons.warning_amber_rounded,
+              color: isLight ? AppColors.warning : AppColors.warningDark,
+              message: 'O esperado da carteira está em '
+                  '${Fmt.percent(weightedUpside, decimals: 0, signed: true)}, '
+                  'contra ${Fmt.percent(marketCagr, decimals: 1)} a.a. do '
+                  'Ibovespa no histórico. Não leia como projeção: é a média '
+                  'ponderada da distância até o preço justo, e basta um ativo '
+                  'com avaliação esticada para dominá-la. Os marcados com ⚠ '
+                  'na lista são os candidatos.',
+            ),
+          ],
         ],
       ),
     );
@@ -430,6 +475,37 @@ class _PortfolioColumn extends ConsumerWidget {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    HintIcon(
+                      isLight: isLight,
+                      title: 'Colunas desta lista',
+                      intro: 'O potencial vem do valuation de cada ativo, '
+                          'recalculado a cada abertura da tela.',
+                      entries: const [
+                        HintEntry(
+                          'Peso',
+                          'Fatia do aporte destinada ao ativo. Não há '
+                              'rebalanceamento: o peso define para onde vai '
+                              'cada aporte, e a partir daí a posição deriva '
+                              'com o mercado.',
+                        ),
+                        HintEntry(
+                          'Potencial',
+                          'Distância entre a cotação e o preço justo estimado '
+                              'pelo modelo, em percentual, com o preço justo '
+                              'logo abaixo. É a discordância entre o modelo e '
+                              'o mercado — não um retorno previsto, e sem '
+                              'prazo para se realizar.',
+                        ),
+                        HintEntry(
+                          'Marca ⚠',
+                          'Potencial acima de 100% em qualquer direção, ou '
+                              'avaliação com ressalvas. Costuma indicar '
+                              'exercício-base atípico, crescimento no teto da '
+                              'banda de sanidade ou demonstrativo incompleto. '
+                              'Toque no ativo para ver as premissas.',
+                        ),
+                      ],
+                    ),
                     if (portfolio.length > 1)
                       IconButton(
                         tooltip: 'Equiponderar',
@@ -468,7 +544,8 @@ class _PortfolioColumn extends ConsumerWidget {
                         : 'Guarde aqui os candidatos a entrar na Principal.',
                   ),
                 )
-              else
+              else ...[
+                _AssetColumnHeader(isLight: isLight),
                 ...portfolio.entries.values.map(
                   (entry) => _AssetRow(
                     entry: entry,
@@ -476,10 +553,58 @@ class _PortfolioColumn extends ConsumerWidget {
                     isLight: isLight,
                   ),
                 ),
+              ],
             ],
           ),
         );
       },
+    );
+  }
+}
+
+/// Larguras das colunas numéricas da lista de ativos.
+///
+/// Fixas de propósito: é o que mantém peso e potencial alinhados de uma linha
+/// para a outra, e o que impede um "+447%" de empurrar o resto da linha.
+const double _weightColumnWidth = 52;
+const double _upsideColumnWidth = 78;
+
+/// Cabeçalho das colunas numéricas.
+///
+/// Antes havia dois números empilhados no canto direito, sem rótulo nenhum:
+/// não dava para saber que o de cima era o peso e o de baixo a distância até o
+/// preço justo. Nomear a coluna uma vez custa uma linha e resolve.
+class _AssetColumnHeader extends StatelessWidget {
+  final bool isLight;
+
+  const _AssetColumnHeader({required this.isLight});
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TextStyle(
+      fontSize: 9,
+      letterSpacing: 0.4,
+      fontWeight: FontWeight.w600,
+      color: AppColors.textMuted(isLight),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, right: 4, bottom: 2),
+      child: Row(
+        children: [
+          const SizedBox(width: 22),
+          Expanded(child: Text('ATIVO', style: style)),
+          SizedBox(
+            width: _weightColumnWidth,
+            child: Text('PESO', style: style, textAlign: TextAlign.right),
+          ),
+          SizedBox(
+            width: _upsideColumnWidth,
+            child: Text('POTENCIAL', style: style, textAlign: TextAlign.right),
+          ),
+          const SizedBox(width: 32),
+        ],
+      ),
     );
   }
 }
@@ -495,6 +620,15 @@ class _AssetRow extends ConsumerWidget {
     required this.isPrincipal,
     required this.isLight,
   });
+
+  /// Acima disto o número deixa de ser estimativa e vira sintoma.
+  ///
+  /// Um preço justo ao dobro ou à metade do preço de mercado não sai de uma
+  /// discordância de premissas: sai de um fluxo-base atípico, de um
+  /// crescimento no teto da banda ou de um demonstrativo incompleto. A linha
+  /// continua mostrando o número medido — esconder seria pior —, mas marcado,
+  /// para não ser lido como precisão.
+  static const double _outlierThreshold = 1.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -539,6 +673,8 @@ class _AssetRow extends ConsumerWidget {
     required bool isLoading,
   }) {
     final upside = valuation?.upside;
+    final isOutlier = upside != null && upside.abs() >= _outlierThreshold;
+    final hasWarnings = valuation != null && valuation.warnings.isNotEmpty;
 
     return InkWell(
       onTap: valuation == null
@@ -583,40 +719,40 @@ class _AssetRow extends ConsumerWidget {
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  entry.weight.toString(),
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary(isLight),
-                  ),
+            SizedBox(
+              width: _weightColumnWidth,
+              child: Text(
+                entry.weight.toString(),
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary(isLight),
                 ),
-                if (isLoading)
-                  SizedBox(
-                    width: 9,
-                    height: 9,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1.4,
-                      color: AppColors.textMuted(isLight),
+              ),
+            ),
+            SizedBox(
+              width: _upsideColumnWidth,
+              child: isLoading
+                  ? Align(
+                      alignment: Alignment.centerRight,
+                      child: SizedBox(
+                        width: 9,
+                        height: 9,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.4,
+                          color: AppColors.textMuted(isLight),
+                        ),
+                      ),
+                    )
+                  : _UpsideCell(
+                      upside: upside,
+                      fairValue: valuation?.fairValue.reais,
+                      model: valuation?.model,
+                      isOutlier: isOutlier,
+                      hasWarnings: hasWarnings,
+                      isLight: isLight,
                     ),
-                  )
-                else
-                  Text(
-                    upside == null
-                        ? '—'
-                        : Fmt.percent(upside, decimals: 1, signed: true),
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w600,
-                      color: upside == null
-                          ? AppColors.textMuted(isLight)
-                          : signedColor(upside, isLight),
-                    ),
-                  ),
-              ],
             ),
             IconButton(
               tooltip: 'Remover',
@@ -633,3 +769,106 @@ class _AssetRow extends ConsumerWidget {
     );
   }
 }
+
+/// A célula de potencial: o número, o preço justo que o originou e a marca de
+/// ressalva.
+///
+/// Mostrar o preço justo embaixo é o que transforma "+447%" de número solto em
+/// afirmação verificável — o leitor compara com a cotação que já conhece e
+/// decide sozinho se acredita.
+class _UpsideCell extends StatelessWidget {
+  final double? upside;
+  final double? fairValue;
+  final ValuationModel? model;
+  final bool isOutlier;
+  final bool hasWarnings;
+  final bool isLight;
+
+  const _UpsideCell({
+    required this.upside,
+    required this.fairValue,
+    required this.model,
+    required this.isOutlier,
+    required this.hasWarnings,
+    required this.isLight,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final value = upside;
+    if (value == null) {
+      return Text(
+        '—',
+        textAlign: TextAlign.right,
+        style: TextStyle(
+          fontSize: 12.5,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textMuted(isLight),
+        ),
+      );
+    }
+
+    final color = isOutlier
+        ? (isLight ? AppColors.warning : AppColors.warningDark)
+        : signedColor(value, isLight);
+
+    return Tooltip(
+      message: _tooltip(value),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isOutlier || hasWarnings) ...[
+                Icon(Icons.warning_amber_rounded, size: 11, color: color),
+                const SizedBox(width: 2),
+              ],
+              Flexible(
+                child: Text(
+                  Fmt.percent(value, decimals: 0, signed: true),
+                  textAlign: TextAlign.right,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (fairValue != null)
+            Text(
+              'justo ${Fmt.money(fairValue!)}',
+              textAlign: TextAlign.right,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 9,
+                color: AppColors.textMuted(isLight),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  String _tooltip(double value) {
+    final buffer = StringBuffer()
+      ..write('Distância entre o preço de mercado e o preço justo estimado')
+      ..write(model == null ? '' : ' por ${model!.label}')
+      ..write('. Não é previsão de retorno: só se realiza se o mercado '
+          'convergir para essa estimativa, e não há prazo para isso.');
+    if (isOutlier) {
+      buffer.write('\n\nDiferença acima de 100%: quase sempre vem de um '
+          'exercício-base atípico ou de demonstrativo incompleto. Toque para '
+          'ver as premissas e os avisos.');
+    } else if (hasWarnings) {
+      buffer.write('\n\nEsta avaliação tem ressalvas. Toque para lê-las.');
+    }
+    return buffer.toString();
+  }
+}
+

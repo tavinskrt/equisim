@@ -333,6 +333,264 @@ void main() {
     });
   });
 
+  group('Unidade de negociação', () {
+    test('ação comum devolve razão 1', () {
+      expect(
+        ValuationCascade.quotedUnitRatio(
+          sharesOutstanding: 12888733000,
+          marketCap: 571228600000,
+          marketPrice: 44.32,
+        ),
+        1.0,
+      );
+    });
+
+    test('unit de cinco ações é reconhecida pelos números da fonte', () {
+      // SAPR11 em 21/08/2026: 1,511 bi de ações, valor de mercado de
+      // R$ 10,08 bi e unit a R$ 33,35.
+      expect(
+        ValuationCascade.quotedUnitRatio(
+          sharesOutstanding: 1511205500,
+          marketCap: 10079740685,
+          marketPrice: 33.35,
+        ),
+        5.0,
+      );
+    });
+
+    test('unit de três ações também', () {
+      // BPAC11 nas mesmas condições.
+      expect(
+        ValuationCascade.quotedUnitRatio(
+          sharesOutstanding: 11670063000,
+          marketCap: 202203291580,
+          marketPrice: 51.97,
+        ),
+        3.0,
+      );
+    });
+
+    test('razão longe de um inteiro é recusada em favor de 1', () {
+      expect(
+        ValuationCascade.quotedUnitRatio(
+          sharesOutstanding: 1000,
+          marketCap: 1000,
+          marketPrice: 2.4,
+        ),
+        1.0,
+        reason: 'nenhuma unit da B3 tem 2,4 ações; melhor não aplicar fator',
+      );
+    });
+
+    test('sem valor de mercado publicado, não se inventa fator', () {
+      expect(
+        ValuationCascade.quotedUnitRatio(
+          sharesOutstanding: 1000,
+          marketCap: null,
+          marketPrice: 10,
+        ),
+        1.0,
+      );
+    });
+
+    test('o preço justo sai por unit, não por ação', () {
+      // Mesma empresa, mesmos demonstrativos: só muda a forma de negociar.
+      final porAcao = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: asOf,
+        fundamentals: growingHistory(rate: 0.05),
+        dividends: const [],
+        marketPrice: 30,
+        capm: capm,
+      ));
+      // 100 ações a R$ 30 valem R$ 3.000 de mercado; em units de 5, são 20
+      // units a R$ 150.
+      final porUnit = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: asOf,
+        fundamentals: growingHistory(rate: 0.05),
+        dividends: const [],
+        marketPrice: 150,
+        capm: capm,
+      ));
+
+      expect(porAcao.isOk, isTrue);
+      expect(porUnit.isOk, isTrue);
+      expect(
+        porUnit.unwrap().fairValue.reais,
+        closeTo(porAcao.unwrap().fairValue.reais * 5, 0.05),
+        reason: 'o valor da firma é o mesmo; muda o número de papéis',
+      );
+      // E o que importa para a decisão — a distância até o preço justo — fica
+      // igual nos dois casos.
+      expect(
+        porUnit.unwrap().upside,
+        closeTo(porAcao.unwrap().upside, 0.01),
+      );
+    });
+  });
+
+  group('BaseFlowNormalizer', () {
+    test('série comportada passa intacta', () {
+      final base = BaseFlowNormalizer.normalize([10, 11, 12, 13, 14]);
+      expect(base.value, 14);
+      expect(base.winsorized, isFalse);
+      expect(base.median, 12);
+    });
+
+    test('exercício atípico é aparado para a borda da banda', () {
+      // SAPR11 em 21/08/2026: fluxo livre de R$ 4,44 bi contra mediana de
+      // R$ 0,47 bi em cinco exercícios.
+      final base =
+          BaseFlowNormalizer.normalize([0.380, 0.242, 0.468, 0.866, 4.445]);
+      expect(base.winsorized, isTrue);
+      expect(base.median, closeTo(0.468, 1e-9));
+      expect(base.value, closeTo(0.468 * 1.5, 1e-9),
+          reason: 'apara para a borda, não substitui pela mediana');
+      expect(base.observed, closeTo(4.445, 1e-9));
+      expect(base.deviationFactor, closeTo(9.5, 0.1));
+    });
+
+    test('exercício muito abaixo da mediana também é aparado', () {
+      final base = BaseFlowNormalizer.normalize([100, 90, 95, 88, 10]);
+      expect(base.winsorized, isTrue);
+      expect(base.value, closeTo(90 * 0.5, 1e-9));
+    });
+
+    test('preserva a direção da tendência dentro da banda', () {
+      // Queda consistente, sem exercício isolado: não há o que corrigir.
+      final base = BaseFlowNormalizer.normalize([20, 18, 16, 14, 12]);
+      expect(base.winsorized, isFalse);
+      expect(base.value, 12);
+    });
+
+    test('mediana não positiva não autoriza aparar nada', () {
+      final base = BaseFlowNormalizer.normalize([-5, -3, -4, 1, 8]);
+      expect(base.winsorized, isFalse);
+      expect(base.value, 8, reason: 'sem mediana positiva não há banda válida');
+      expect(base.median, lessThanOrEqualTo(0));
+    });
+
+    test('amostra curta demais não sustenta mediana', () {
+      final base = BaseFlowNormalizer.normalize([3, 40]);
+      expect(base.winsorized, isFalse);
+      expect(base.value, 40);
+      expect(base.median, isNull);
+    });
+
+    test('usa apenas os exercícios mais recentes da janela', () {
+      final base = BaseFlowNormalizer.normalize(
+        [1000, 1000, 1000, 10, 11, 12, 13, 14],
+      );
+      expect(base.periodsUsed, BaseFlowNormalizer.defaultWindow);
+      expect(base.median, 12, reason: 'os exercicios antigos de 1.000 ficam de fora');
+    });
+  });
+
+  group('MarketAnchors — unidades', () {
+    test('crescimento perpétuo composto real com inflação', () {
+      const anchors = MarketAnchors(
+        riskFreeCagr: 0.094,
+        marketCagr: 0.1126,
+        inflationCagr: 0.05,
+        observedYears: 10,
+      );
+      // (1 + 3%) × (1 + 5%) − 1
+      expect(anchors.nominalEconomyGrowth, closeTo(0.0815, 1e-6));
+      expect(
+        anchors.nominalEconomyGrowth,
+        greaterThan(GrowthEstimator.realEconomyGrowth),
+        reason: 'o teto nominal precisa superar o real, ou a unidade se mistura',
+      );
+    });
+
+    test('sem taxa corrente informada, cai para a média histórica', () {
+      const anchors = MarketAnchors(
+        riskFreeCagr: 0.094,
+        marketCagr: 0.1126,
+        observedYears: 10,
+      );
+      expect(anchors.currentRiskFreeRate, 0.094);
+    });
+
+    test('taxa de desconto e limiar da meta são números distintos', () {
+      const anchors = MarketAnchors(
+        riskFreeCagr: 0.094,
+        currentRiskFreeRate: 0.1415,
+        marketCagr: 0.1126,
+        observedYears: 10,
+      );
+      expect(anchors.riskFreeCagr, isNot(anchors.currentRiskFreeRate));
+      expect(anchors.currentRiskFreeRate, 0.1415);
+    });
+  });
+
+
+  group('CostOfCapital — banda de sanidade', () {
+    const rf = 0.125;
+    const capmRf = CapmInputs(
+      riskFreeRate: rf,
+      beta: 1.0,
+      marketPremium: CapmInputs.defaultMarketPremium,
+    );
+
+    test('custo da dívida abaixo do soberano sobe para ele', () {
+      // PETR4 em 21/08/2026: despesa financeira sobre dívida bruta deu
+      // 0,9% a.a., o que não é custo de dívida em lugar nenhum.
+      const coc = CostOfCapital(
+        capm: capmRf,
+        costOfDebt: 0.009,
+        taxRate: 0.266,
+        equityValue: 391,
+        debtValue: 384,
+      );
+      expect(coc.effectiveCostOfDebt, rf);
+      expect(coc.costOfDebtWasClamped, isTrue);
+    });
+
+    test('custo da dívida acima do teto de crédito desce para ele', () {
+      // WEGE3 na mesma medição: 47,3% a.a.
+      const coc = CostOfCapital(
+        capm: capmRf,
+        costOfDebt: 0.473,
+        taxRate: 0.168,
+        equityValue: 203,
+        debtValue: 4.6,
+      );
+      expect(coc.effectiveCostOfDebt, rf + CostOfCapital.maxCreditSpread);
+      expect(coc.costOfDebtWasClamped, isTrue);
+    });
+
+    test('custo da dívida plausível passa intacto', () {
+      const coc = CostOfCapital(
+        capm: capmRf,
+        costOfDebt: 0.16,
+        taxRate: 0.34,
+        equityValue: 100,
+        debtValue: 40,
+      );
+      expect(coc.effectiveCostOfDebt, 0.16);
+      expect(coc.costOfDebtWasClamped, isFalse);
+      expect(coc.waccWasFloored, isFalse);
+    });
+
+    test('WACC nunca desce abaixo da taxa livre de risco', () {
+      // Empresa muito alavancada: o benefício fiscal empurraria o desconto
+      // para baixo do soberano, e a perpetuidade explodiria.
+      const coc = CostOfCapital(
+        capm: capmRf,
+        costOfDebt: rf,
+        taxRate: 0.34,
+        equityValue: 10,
+        debtValue: 90,
+      );
+      expect(coc.rawWacc, lessThan(rf));
+      expect(coc.wacc, rf);
+      expect(coc.waccWasFloored, isTrue);
+    });
+  });
+
+
   group('SwapAssetBetweenPortfolios', () {
     Asset assetOf(String symbol, String sector) => Asset(
           ticker: Ticker.parse(symbol),

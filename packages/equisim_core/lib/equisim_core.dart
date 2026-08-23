@@ -10,6 +10,10 @@
 /// os números da monografia venham do mesmo código que roda em produção.
 library;
 
+// --- Auditoria de cálculo ---
+export 'src/audit/audit_recorder.dart';
+export 'src/audit/calculation_trace.dart';
+
 // --- Objetos de valor ---
 export 'src/value_objects/date_range.dart';
 export 'src/value_objects/money.dart';
@@ -45,6 +49,7 @@ export 'src/services/metrics/risk_metrics.dart';
 export 'src/services/portfolio/expected_return.dart';
 export 'src/services/portfolio/sector_concentration.dart';
 export 'src/services/total_return_engine.dart';
+export 'src/services/valuation/base_flow.dart';
 export 'src/services/valuation/cost_of_capital.dart';
 export 'src/services/valuation/dcf.dart';
 export 'src/services/valuation/growth_estimator.dart';

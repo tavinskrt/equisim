@@ -1,4 +1,5 @@
 import '../../entities/financial_goal.dart';
+import '../valuation/growth_estimator.dart';
 
 /// Referências de mercado usadas para julgar se uma meta é plausível.
 ///
@@ -7,10 +8,32 @@ import '../../entities/financial_goal.dart';
 /// mensagem ao usuário pode citar o número concreto em vez de um limite mágico.
 class MarketAnchors {
   /// CAGR do CDI na janela de referência, em fração.
+  ///
+  /// É uma média **histórica**, e serve para julgar a meta: "a rentabilidade
+  /// exigida está acima ou abaixo do que a renda fixa entregou na década?".
+  /// Não serve como taxa de desconto — para isso existe [currentRiskFreeRate].
   final double riskFreeCagr;
+
+  /// CDI **corrente** anualizado, em fração.
+  ///
+  /// Esta é a taxa livre de risco do CAPM. Desconto olha para frente: o custo
+  /// de oportunidade de hoje é o juro de hoje, não a média da década. Medido
+  /// em 21/08/2026 a distância era de 4,7 p.p. — CDI corrente a 14,15% a.a.
+  /// contra 9,40% de média decenal —, e usar a média no desconto inflava toda
+  /// perpetuidade, com efeito violento nos ativos de valor terminal alto.
+  final double currentRiskFreeRate;
 
   /// CAGR do índice de mercado na janela de referência, em fração.
   final double marketCagr;
+
+  /// Inflação anual observada na janela (IPCA, BCB SGS 433), em fração.
+  ///
+  /// Existe para manter **real e nominal na mesma unidade**. A taxa de
+  /// desconto do valuation é nominal — sai do CDI —, então o crescimento na
+  /// perpetuidade também precisa ser nominal. Descontar fluxo a 16% a.a. e
+  /// fazê-lo crescer a 3% *reais* infla o spread da perpetuidade e subavalia
+  /// toda empresa, de forma silenciosa.
+  final double inflationCagr;
 
   /// Janela observada, para exibição.
   final int observedYears;
@@ -19,18 +42,30 @@ class MarketAnchors {
     required this.riskFreeCagr,
     required this.marketCagr,
     required this.observedYears,
-  });
+    this.inflationCagr = 0.045,
+    double? currentRiskFreeRate,
+  }) : currentRiskFreeRate = currentRiskFreeRate ?? riskFreeCagr;
 
   /// Âncoras medidas em 19/08/2026 sobre janela de 10 anos:
-  /// CDI 9,40% a.a. (BCB SGS 12) e Ibovespa 11,26% a.a. (^BVSP).
+  /// CDI 9,40% a.a. (BCB SGS 12), Ibovespa 11,26% a.a. (^BVSP) e IPCA
+  /// 4,50% a.a. (BCB SGS 433).
   ///
   /// Servem apenas de fallback quando as séries não puderem ser carregadas —
   /// o caminho normal é calcular a partir dos dados.
   static const MarketAnchors fallback2026 = MarketAnchors(
     riskFreeCagr: 0.0940,
     marketCagr: 0.1126,
+    inflationCagr: 0.0450,
+    currentRiskFreeRate: 0.1415,
     observedYears: 10,
   );
+
+  /// Crescimento nominal de longo prazo da economia.
+  ///
+  /// `(1 + real) × (1 + inflação) − 1` — o teto correto para a perpetuidade
+  /// num fluxo descontado a taxa nominal.
+  double get nominalEconomyGrowth =>
+      (1 + GrowthEstimator.realEconomyGrowth) * (1 + inflationCagr) - 1;
 }
 
 /// Classificação de viabilidade da meta.

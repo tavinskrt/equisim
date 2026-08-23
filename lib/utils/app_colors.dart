@@ -26,6 +26,14 @@ class AppColors {
   static const Color primaryLight = Color(0xFF00CC8F);
   static const Color danger = Color(0xFFEF4444);
 
+  /// Ressalva: o número existe, mas não deve ser lido como precisão.
+  ///
+  /// Separada de [danger] de propósito. Vermelho já significa "perda" nesta
+  /// interface — pintar de vermelho um upside de +447% diria a coisa errada.
+  /// O âmbar diz "olhe as premissas antes de confiar".
+  static const Color warning = Color(0xFFD97706);
+  static const Color warningDark = Color(0xFFFBBF24);
+
   // Gradientes Visuais Utilitários da Marca
   static LinearGradient brandGradient = const LinearGradient(
     begin: Alignment.topLeft,

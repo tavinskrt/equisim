@@ -4,9 +4,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../audit/audit_bus.dart';
+import '../../audit/audit_routes.dart';
 import '../../utils/app_colors.dart';
 import '../../views/login_page.dart';
 import '../../views/profile_page.dart';
+import '../audit/logs_page.dart';
 import '../backtest/backtest_page.dart';
 import '../goals/goal_page.dart';
 import '../shared/theme_bridge.dart';
@@ -65,6 +68,20 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
+  /// Abre o painel de auditoria.
+  ///
+  /// No navegador vai para uma **guia nova**, que é o ponto do requisito: o
+  /// orientador acompanha a apuração numa tela enquanto o sistema é operado na
+  /// outra. Nas plataformas sem segunda janela o painel é empilhado sobre a
+  /// própria aplicação, pela rota registrada em `MaterialApp.routes`.
+  void _openAuditPanel() {
+    if (AuditRoutes.openInNewWindow()) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const LogsPage()),
+    );
+  }
+
   Widget _buildHeader(bool isLight) {
     return ClipRRect(
       child: BackdropFilter(
@@ -117,22 +134,31 @@ class _AppShellState extends ConsumerState<AppShell> {
                   ),
                 ],
               ),
-              GestureDetector(
-                onTap: () => setState(() => _menuOpen = !_menuOpen),
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                      width: 1.5,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (auditEnabled) ...[
+                    _AuditButton(isLight: isLight, onTap: _openAuditPanel),
+                    const SizedBox(width: 10),
+                  ],
+                  GestureDetector(
+                    onTap: () => setState(() => _menuOpen = !_menuOpen),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.primary.withValues(alpha: 0.15),
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: const Icon(Icons.person_outline,
+                          color: AppColors.primary, size: 16),
                     ),
                   ),
-                  child: const Icon(Icons.person_outline,
-                      color: AppColors.primary, size: 16),
-                ),
+                ],
               ),
             ],
           ),
@@ -244,6 +270,18 @@ class _AppShellState extends ConsumerState<AppShell> {
                       ref.read(themeControllerProvider).isLightMode;
                 },
               ),
+              if (auditEnabled) ...[
+                Divider(height: 1, color: AppColors.divider(isLight)),
+                _menuItem(
+                  icon: Icons.terminal,
+                  label: 'Abrir Painel de Logs de Cálculo',
+                  isLight: isLight,
+                  onTap: () {
+                    setState(() => _menuOpen = false);
+                    _openAuditPanel();
+                  },
+                ),
+              ],
               Divider(height: 1, color: AppColors.divider(isLight)),
               _menuItem(
                 icon: Icons.logout,
@@ -286,6 +324,59 @@ class _AppShellState extends ConsumerState<AppShell> {
             const SizedBox(width: 10),
             Text(label, style: TextStyle(fontSize: 13, color: color)),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Atalho para a janela paralela de auditoria.
+///
+/// Só aparece com a auditoria ligada — em depuração, por padrão. Não é um
+/// recurso do produto: é o instrumento de demonstração da apuração, e ficaria
+/// deslocado numa build entregue a um usuário final.
+class _AuditButton extends StatelessWidget {
+  const _AuditButton({required this.isLight, required this.onTap});
+
+  final bool isLight;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Abrir Painel de Logs de Cálculo',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: AppColors.warning.withValues(alpha: 0.14),
+            border: Border.all(
+              color: AppColors.warning.withValues(alpha: 0.4),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.terminal,
+                size: 14,
+                color: isLight ? AppColors.warning : AppColors.warningDark,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'LOGS',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.6,
+                  color: isLight ? AppColors.warning : AppColors.warningDark,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

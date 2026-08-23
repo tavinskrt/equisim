@@ -16,11 +16,23 @@ class GrowthEstimate {
   /// `true` quando o valor bruto foi limitado pela banda de sanidade.
   final bool clamped;
 
+  /// Taxa antes da banda de sanidade, quando houve regressão.
+  ///
+  /// Existe para a auditoria: a diferença entre o bruto e o aplicado é
+  /// exatamente o que a banda fez, e escondê-la tornaria o limite invisível
+  /// para quem confere a conta.
+  final double? rawRate;
+
+  /// Inclinação da regressão log-linear, `b` em `ln(v) = a + b·t`.
+  final double? slope;
+
   const GrowthEstimate({
     required this.rate,
     required this.periodsUsed,
     required this.basis,
     this.clamped = false,
+    this.rawRate,
+    this.slope,
   });
 }
 
@@ -114,6 +126,8 @@ abstract final class GrowthEstimator {
       rate: bounded,
       periodsUsed: n,
       clamped: wasClamped,
+      rawRate: raw,
+      slope: slope,
       basis: wasClamped
           ? 'regressão de $metricName sobre $n exercícios indicou '
               '${(raw * 100).toStringAsFixed(1)}% a.a., limitado a '
@@ -122,13 +136,26 @@ abstract final class GrowthEstimator {
     );
   }
 
+  /// Crescimento **real** de longo prazo da economia brasileira.
+  ///
+  /// Não é o teto da perpetuidade: é a parcela real dele. O teto que entra no
+  /// desconto precisa ser nominal — ver [perpetual] e
+  /// `MarketAnchors.nominalEconomyGrowth`.
+  static const double realEconomyGrowth = 0.03;
+
   /// Crescimento na perpetuidade.
   ///
   /// Nunca deve superar o crescimento de longo prazo da economia: uma empresa
   /// crescendo acima do PIB para sempre acabaria maior que a economia inteira.
+  ///
+  /// **[economyGrowth] precisa estar na mesma unidade da taxa de desconto.**
+  /// O desconto do valuation é nominal, porque sai do CDI; então o teto aqui
+  /// é o crescimento **nominal** — real mais inflação. O padrão preserva o
+  /// comportamento antigo para quem chama sem informar, mas a aplicação passa
+  /// o valor derivado do IPCA observado.
   static double perpetual({
     required double explicitGrowth,
-    double economyGrowth = 0.03,
+    double economyGrowth = realEconomyGrowth,
   }) =>
       math.min(explicitGrowth, economyGrowth).clamp(0.0, economyGrowth);
 }

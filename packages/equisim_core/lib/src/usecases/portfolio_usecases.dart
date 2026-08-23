@@ -160,6 +160,7 @@ abstract final class ResolveMarketAnchors {
 
     final cdi = await macro.riskFreeDaily(range);
     final ibov = await benchmark.ibovespa(range);
+    final ipca = await macro.inflationMonthly(range);
 
     if (cdi.isErr && ibov.isErr) {
       return const Err(InsufficientData(
@@ -175,11 +176,46 @@ abstract final class ResolveMarketAnchors {
         ? _cagrOf(ibov.unwrap(), range)
         : MarketAnchors.fallback2026.marketCagr;
 
+    // A série do IPCA é mensal, daí os 12 períodos por ano. Sem ela, a
+    // inflação de fallback mantém o crescimento perpétuo nominal — o que é
+    // menos errado que voltar a misturar real com nominal.
+    final inflation = ipca.isOk && ipca.unwrap().rates.isNotEmpty
+        ? ipca.unwrap().annualized(periodsPerYear: 12)
+        : MarketAnchors.fallback2026.inflationCagr;
+
+    final current = cdi.isOk
+        ? _currentRateOf(cdi.unwrap())
+        : MarketAnchors.fallback2026.currentRiskFreeRate;
+
     return Ok(MarketAnchors(
       riskFreeCagr: riskFree,
+      currentRiskFreeRate: current,
       marketCagr: market,
+      inflationCagr: inflation,
       observedYears: windowYears,
     ));
+  }
+
+  /// Trimestre mais recente do CDI, anualizado.
+  ///
+  /// É a taxa livre de risco que entra no desconto, e ela precisa ser a de
+  /// **hoje**: um DCF compara o fluxo futuro da empresa com o que o investidor
+  /// obteria agora sem risco, não com a média da década. Um trimestre é longo
+  /// o bastante para não repicar num único dia atípico e curto o bastante para
+  /// acompanhar o ciclo de juros.
+  static const int currentRateWindowDays = 63;
+
+  static double _currentRateOf(RateSeries series) {
+    if (series.rates.isEmpty) {
+      return MarketAnchors.fallback2026.currentRiskFreeRate;
+    }
+    final tail = series.rates.length <= currentRateWindowDays
+        ? series.rates
+        : series.rates.sublist(series.rates.length - currentRateWindowDays);
+    return RateSeries(
+      dates: series.dates.sublist(series.dates.length - tail.length),
+      rates: tail,
+    ).annualized();
   }
 
   static double _cagrOf(PriceSeries series, DateRange range) {

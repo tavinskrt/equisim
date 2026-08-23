@@ -6,6 +6,7 @@ import '../repositories/repositories.dart';
 import '../services/metrics/beta.dart';
 import '../services/total_return_engine.dart';
 import '../services/valuation/cost_of_capital.dart';
+import '../services/valuation/growth_estimator.dart';
 import '../tax/tax_policy.dart';
 import '../value_objects/date_range.dart';
 import '../value_objects/ticker.dart';
@@ -32,6 +33,7 @@ abstract final class PrepareValuationInputs {
     double marketPremium = CapmInputs.defaultMarketPremium,
     double marginOfSafety = 0.0,
     int projectionYears = 5,
+    double perpetualGrowthCap = GrowthEstimator.realEconomyGrowth,
     TaxPolicy taxPolicy = TaxPolicy.brasil,
   }) async {
     final today = asOf ?? DateTime.now();
@@ -80,6 +82,7 @@ abstract final class PrepareValuationInputs {
       ),
       marginOfSafety: marginOfSafety,
       projectionYears: projectionYears,
+      perpetualGrowthCap: perpetualGrowthCap,
     ));
   }
 

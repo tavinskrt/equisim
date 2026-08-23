@@ -31,6 +31,10 @@ dependencies:
   flutter_riverpod: ^2.6.1
   fl_chart: ^1.2.0
 
+  # Painel de auditoria de cálculo (rota /logs).
+  flutter_math_fork: ^0.7.4  # Renderização TeX das fórmulas, em Dart puro
+  web: ^1.1.0                # BroadcastChannel e window.open, via dart:js_interop
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

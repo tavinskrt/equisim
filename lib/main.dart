@@ -5,8 +5,11 @@ import 'package:provider/provider.dart' as legacy;
 import 'package:firebase_core/firebase_core.dart';
 
 import 'firebase_options.dart';
+import 'audit/audit_bus.dart';
+import 'audit/audit_routes.dart';
 import 'controllers/login_controller.dart';
 import 'controllers/theme_controller.dart';
+import 'presentation/audit/logs_page.dart';
 import 'presentation/shared/theme_bridge.dart';
 import 'views/login_page.dart';
 import 'views/forgot_password_page.dart';
@@ -14,6 +17,19 @@ import 'views/sign_up_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // A janela paralela de auditoria é uma segunda instância desta mesma
+  // aplicação, aberta em `#/logs`. Ela sobe aqui e para: sem Firebase, sem
+  // sessão, sem casca de navegação. Subir a aplicação inteira custaria segundos
+  // e, pior, faria a janela de inspeção disparar cálculos próprios que
+  // apareceriam na lista misturados aos da janela sob análise.
+  if (AuditRoutes.isLogsWindow(
+    WidgetsBinding.instance.platformDispatcher.defaultRouteName,
+  )) {
+    AuditBus.instance.start(AuditRole.inspector);
+    runApp(const AuditLogsApp());
+    return;
+  }
 
   // O .env é opcional: a credencial pode vir de --dart-define ou do proxy.
   try {
@@ -34,6 +50,12 @@ Future<void> main() async {
     initializationError = error;
     debugPrint('❌ Falha ao inicializar o Firebase: $error\n$stack');
   }
+
+  // Desta linha em diante, cada avaliação do núcleo e cada ida à API emitem
+  // rastro. Antes dela, `AuditRecorder.begin` devolve `null` e a instrumentação
+  // não monta objeto nenhum — é o que permite deixá-la no caminho do cálculo
+  // sem custo em produção.
+  if (auditEnabled) AuditBus.instance.start(AuditRole.emitter);
 
   // Instância única de tema, compartilhada pelas duas árvores de estado.
   // As telas de autenticação continuam lendo por Provider; as telas novas leem
@@ -124,6 +146,11 @@ class EquisimApp extends StatelessWidget {
         routes: {
           '/forgot-password': (context) => const ForgotPasswordPage(),
           '/sign-up': (context) => const SignUpPage(),
+          // Rota dedicada do painel de auditoria. No navegador ela é aberta em
+          // guia nova (`#/logs`) e atendida pelo desvio no arranque; aqui ela
+          // serve às plataformas sem segunda janela, onde o painel é empilhado
+          // sobre a própria aplicação.
+          AuditRoutes.logs: (context) => const LogsPage(),
         },
       ),
     );

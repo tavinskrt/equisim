@@ -79,7 +79,7 @@ final valuationSettingsProvider =
 final valuationProvider =
     FutureProvider.family<ValuationResult?, Ticker>((ref, ticker) async {
   final settings = ref.watch(valuationSettingsProvider);
-  final riskFree = await ref.watch(riskFreeRateProvider.future);
+  final anchors = await ref.watch(marketAnchorsProvider.future);
 
   final inputs = await PrepareValuationInputs.call(
     ticker: ticker,
@@ -87,10 +87,15 @@ final valuationProvider =
     dividends: ref.watch(dividendRepositoryProvider),
     fundamentals: ref.watch(fundamentalsRepositoryProvider),
     benchmark: ref.watch(benchmarkRepositoryProvider),
-    riskFreeRate: riskFree,
+    // CAPM olha para frente: a taxa livre de risco do desconto é a corrente,
+    // não a média decenal usada para julgar a viabilidade da meta.
+    riskFreeRate: anchors.currentRiskFreeRate,
     marketPremium: settings.marketPremium,
     marginOfSafety: settings.marginOfSafety,
     projectionYears: settings.projectionYears,
+    // Desconto nominal exige crescimento perpétuo nominal. O teto sai do IPCA
+    // observado, na mesma janela do CDI que forma a taxa livre de risco.
+    perpetualGrowthCap: anchors.nominalEconomyGrowth,
   );
   if (inputs.isErr) return null;
 
