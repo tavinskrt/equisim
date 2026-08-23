@@ -1,2 +1,8 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Scripts de instalacao: o fim de linha errado quebra o interpretador:
+# bash rejeita CRLF, e o prompt de comando do Windows precisa de CRLF.
+*.sh  text eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf

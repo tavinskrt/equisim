@@ -74,25 +74,65 @@ python docs/validacao/cross_validation.py
 
 ---
 
-## Pré-requisitos
+## Instalação numa máquina nova
 
-- Flutter **3.44+** (Dart 3.12+) — `flutter --version`
-- Conta e token da API [brapi.dev](https://brapi.dev)
-- Projeto Firebase configurado (Authentication + Cloud Firestore)
-- Node 20, apenas se for publicar a função de proxy
+Um clone recém-baixado **não compila direto**, e por um motivo simples: os
+arquivos que guardam credencial não são versionados, e um deles — o `.env` — está
+declarado como asset no `pubspec.yaml`. Sem ele a compilação para logo no início,
+com `No file or variants found for asset: .env`.
+
+O script de preparação resolve isso e o resto de uma vez só.
+
+### Pré-requisitos
+
+| | |
+|---|---|
+| **Flutter** | 3.44 ou mais recente (Dart 3.12+). O piso está declarado em `pubspec.yaml`, então um SDK antigo é recusado pelo próprio `pub get`. |
+| **Windows** | **Modo de Desenvolvedor ligado** — `start ms-settings:developers`. O `pub get` cria links simbólicos para os plugins nativos; sem esse privilégio ele falha com *"Building with plugins requires symlink support"*. |
+| **Alvo de execução** | Chrome (para o alvo web) **ou** Visual Studio com "Desenvolvimento para desktop com C++" (para o alvo Windows) **ou** Android SDK. Confira com `flutter doctor`. |
+| **Node 20** | Só para quem for publicar a função de proxy. |
+| **Credencial** | Token da API [brapi.dev](https://brapi.dev/dashboard) — gratuito. |
+
+### Um comando
+
+No Windows:
+
+```bash
+.\tool\setup.bat
+```
+
+No macOS ou Linux:
+
+```bash
+./tool/setup.sh
+```
+
+O script verifica o Flutter, confirma o suporte a links simbólicos, cria `.env` e
+`config/local.json` a partir dos arquivos de exemplo e baixa as dependências do
+aplicativo e do núcleo. É idempotente: rodar de novo não sobrescreve arquivo
+nenhum que já exista.
+
+| Opção | Efeito |
+|---|---|
+| `-Verificar` / `--verificar` | Roda análise estática e as duas suítes de teste ao final |
+| `-ComFunctions` / `--com-functions` | Instala também as dependências Node de `functions/` |
+| `-PularChecagens` | Ignora a verificação de links simbólicos (Windows) |
+
+### Versões travadas
+
+`pubspec.lock` **é versionado** — este repositório é uma aplicação, não uma
+biblioteca. É o que garante que a outra máquina resolva exatamente as mesmas
+versões de dependência, e não a resolução mais recente que o `pub` encontrar no
+dia. Para atualizar de propósito: `flutter pub upgrade` e commite o lock novo.
+
+---
 
 ## Configuração
 
-**1. Dependências**
-
-```bash
-flutter pub get
-```
-
-**2. Credencial da brapi**
-
-Escolha um dos modos abaixo. Os três são suportados; o `ApiConfig` resolve
-nesta ordem de preferência e avisa no console quando cai no último.
+O script acima já deixa o projeto compilável, mas **sem credencial**: o
+aplicativo sobe e as telas que consultam a brapi ficam sem dados. Escolha uma
+das três formas abaixo — o `ApiConfig` resolve nesta ordem de preferência e
+avisa no console quando cai na última.
 
 | Modo | Onde vive o token | Proteção |
 |---|---|---|
@@ -100,28 +140,29 @@ nesta ordem de preferência e avisa no console quando cai no último.
 | `--dart-define-from-file` | constante no binário | parcial — extraível com `strings` |
 | `.env` como asset *(legado)* | dentro do bundle | nenhuma — público no alvo web |
 
-Para o modo por definição de compilação:
+**Modo `.env`** — o mais rápido para desenvolvimento e demonstração. Preencha o
+token no `.env` que o script criou:
 
-```bash
-cp config/local.example.json config/local.json
+```
+BRAPI_TOKEN=seu_token_aqui
 ```
 
-E então execute passando o arquivo:
+E execute sem argumento nenhum: `flutter run`.
+
+**Modo definição de compilação** — preencha `BRAPI_TOKEN` em `config/local.json`
+(também criado pelo script) e execute passando o arquivo:
 
 ```bash
 flutter run --dart-define-from-file=config/local.json
 ```
 
-Para o modo legado, que continua funcionando sem argumentos extras:
+**Modo proxy** — preencha `BRAPI_PROXY_URL` em `config/local.json` com a URL da
+Cloud Function e deixe o token vazio. Ver a seção *Proxy de custódia* adiante.
 
-```bash
-cp .env.example .env
-```
-
-**3. Firebase**
-
-As credenciais em `lib/firebase_options.dart` já apontam para o projeto do TCC.
-Para usar outro projeto, regenere com `flutterfire configure`.
+**Firebase** — as credenciais em `lib/firebase_options.dart` e
+`android/app/google-services.json` já apontam para o projeto do TCC e são
+versionadas; nada a fazer na máquina nova. Para usar outro projeto, regenere com
+`flutterfire configure`.
 
 ## Execução
 

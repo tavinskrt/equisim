@@ -1,12 +1,17 @@
 # Miscellaneous
 *.class
-*.lock
 *.log
 *.pyc
 *.swp
 .buildlog/
 .history
 *.env
+
+# Os arquivos de trava sao versionados de proposito: este repositorio e uma
+# *aplicacao*, nao uma biblioteca. Versionar pubspec.lock e o que faz outra
+# maquina resolver exatamente as mesmas versoes de dependencia que esta.
+!pubspec.lock
+!**/pubspec.lock
 
 
 # Flutter repo-specific

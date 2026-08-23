@@ -5,6 +5,10 @@ version: 1.0.0+1
 
 environment:
   sdk: ^3.11.5
+  # Piso do SDK do Flutter: abaixo disto o 'pub get' recusa a resolucao com
+  # mensagem explicita, em vez de o projeto quebrar mais adiante na
+  # compilacao de algum plugin. Mantenha alinhado com o README.
+  flutter: '>=3.44.0'
 
 dependencies:
   flutter:
