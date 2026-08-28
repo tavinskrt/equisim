@@ -104,6 +104,48 @@ partir de build de release.
 Eventos de **rede** trazem `calculations` vazio — é o que os distingue dos
 eventos de **cálculo**, sem precisar de um campo de tipo à parte.
 
+### Amostra por trás de uma agregação
+
+Fórmulas que resumem vários períodos num único número trazem um campo `sample`
+adicional. Hoje é o caso da **normalização do fluxo-base**: a mediana decide a
+banda inteira, e uma mediana apresentada sozinha não permite discutir se algum
+exercício deveria ser expurgado da janela.
+
+```jsonc
+"sample": {
+  "title": "Exercícios da amostra (fluxo de caixa livre)",
+  "unit": "R$",
+  "summary": 468000000,        // a mediana
+  "summaryLabel": "mediana",
+  "lowerBound": 234000000,     // m·(1−τ)
+  "upperBound": 702000000,     // m·(1+τ)
+  "selected": 702000000,       // F₀ efetivamente adotado
+  "points": [
+    { "label": "2021", "value": 380000000, "definesResult": false, "isObserved": false },
+    { "label": "2023", "value": 468000000, "definesResult": true,  "isObserved": false },
+    { "label": "2025", "value": 4445000000, "definesResult": false, "isObserved": true  }
+  ]
+}
+```
+
+`definesResult` marca **exatamente** o exercício central da amostra ordenada —
+ou os dois centrais, quando a contagem é par. A marcação é feita pela posição
+na ordenação, não pelo valor, para que exercícios repetidos não apareçam todos
+como "a mediana". Ela é produzida pelo próprio normalizador, no ponto do
+cálculo: o painel desenha, não recalcula.
+
+Na seção **C** esse campo vira um gráfico de barras com a banda de aceitação ao
+fundo, o exercício central destacado, o exercício observado marcado e — quando
+houve winsorização — uma seta até onde o valor foi aparado. Abaixo do gráfico,
+os mesmos números em texto selecionável, porque é isso que se copia para a
+defesa. Um exercício muito fora de escala é desenhado **cortado**, com a marca
+de eixo interrompido e o valor escrito ao lado: deixar a escala alcançá-lo
+achataria a banda contra o eixo, que é justamente o que se precisa enxergar.
+
+A justificativa do τ e a análise da fórmula de crescimento estão em
+[validacao/normalizacao_fluxo_base.md](validacao/normalizacao_fluxo_base.md) e
+[validacao/crescimento_log_linear.md](validacao/crescimento_log_linear.md).
+
 ### Fórmulas instrumentadas
 
 Razão da unidade negociada · CAPM · WACC (ou sua degeneração no Ke) ·
@@ -129,6 +171,8 @@ flutter run -d chrome
    que acontece. Expanda um item para ver as três seções: **A** requisição e
    resposta, **B** fórmulas renderizadas em TeX, **C** substituição de variáveis
    e decomposição aritmética.
+5. Na seção **C**, a normalização do fluxo-base traz o gráfico dos exercícios
+   que formaram a mediana — é onde se discute expurgar ou manter um período.
 
 O painel aberto **depois** das primeiras consultas não abre vazio: ele pede um
 *replay* à janela emissora, que responde com o anel de histórico (200 eventos).

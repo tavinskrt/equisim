@@ -1,5 +1,111 @@
 import 'dart:math' as math;
 
+/// Um ponto da amostra que sustenta um cálculo agregado.
+class TraceSamplePoint {
+  /// Rótulo do período — o ano fiscal, tipicamente.
+  final String label;
+
+  final double value;
+
+  /// `true` quando o ponto é um dos que **definem** a estatística resumo:
+  /// o central numa mediana de amostra ímpar, os dois centrais numa par.
+  final bool definesResult;
+
+  /// `true` para o período observado, o que a fórmula trata.
+  final bool isObserved;
+
+  const TraceSamplePoint({
+    required this.label,
+    required this.value,
+    this.definesResult = false,
+    this.isObserved = false,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'label': label,
+        'value': value,
+        'definesResult': definesResult,
+        'isObserved': isObserved,
+      };
+
+  static TraceSamplePoint fromJson(Map<String, dynamic> json) =>
+      TraceSamplePoint(
+        label: json['label'] as String? ?? '—',
+        value: (json['value'] as num?)?.toDouble() ?? 0,
+        definesResult: json['definesResult'] as bool? ?? false,
+        isObserved: json['isObserved'] as bool? ?? false,
+      );
+}
+
+/// A amostra por trás de um cálculo que resume vários períodos num só número.
+///
+/// Uma mediana apresentada sozinha é indistinguível de um chute: quem confere
+/// a conta não consegue dizer quais exercícios entraram nela, qual ficou no
+/// meio, nem se a janela pegou os anos que deveria. Este é o material que o
+/// painel de auditoria desenha, e é o mesmo que o algoritmo usou — não uma
+/// reconstrução feita à parte.
+class TraceSample {
+  /// O que a amostra mede, para o cabeçalho do gráfico.
+  final String title;
+
+  /// Em ordem cronológica.
+  final List<TraceSamplePoint> points;
+
+  /// Estatística resumo da amostra — a mediana, no fluxo-base.
+  final double? summary;
+
+  /// Como chamar [summary] na legenda.
+  final String summaryLabel;
+
+  /// Bordas da banda de aceitação, quando o cálculo define uma.
+  final double? lowerBound;
+  final double? upperBound;
+
+  /// Valor efetivamente adotado depois do tratamento.
+  final double? selected;
+
+  final String unit;
+
+  const TraceSample({
+    required this.title,
+    required this.points,
+    this.summary,
+    this.summaryLabel = 'mediana',
+    this.lowerBound,
+    this.upperBound,
+    this.selected,
+    this.unit = '',
+  });
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'points': [for (final p in points) p.toJson()],
+        'summary': summary,
+        'summaryLabel': summaryLabel,
+        'lowerBound': lowerBound,
+        'upperBound': upperBound,
+        'selected': selected,
+        'unit': unit,
+      };
+
+  static TraceSample fromJson(Map<String, dynamic> json) => TraceSample(
+        title: json['title'] as String? ?? '',
+        points: [
+          for (final p in (json['points'] as List? ?? const []))
+            if (p is Map) TraceSamplePoint.fromJson(_stringKeyed(p)),
+        ],
+        summary: (json['summary'] as num?)?.toDouble(),
+        summaryLabel: json['summaryLabel'] as String? ?? 'mediana',
+        lowerBound: (json['lowerBound'] as num?)?.toDouble(),
+        upperBound: (json['upperBound'] as num?)?.toDouble(),
+        selected: (json['selected'] as num?)?.toDouble(),
+        unit: json['unit'] as String? ?? '',
+      );
+
+  static Map<String, dynamic> _stringKeyed(Map<dynamic, dynamic> source) =>
+      source.map((k, v) => MapEntry('$k', v));
+}
+
 /// Rastro de **um** cálculo: a fórmula, os valores que entraram nela e a
 /// aritmética passo a passo até o resultado.
 ///
@@ -30,6 +136,11 @@ class CalculationTrace {
   /// Unidade do resultado: `R$`, `%`, `×`, `anos`, ou vazio para adimensional.
   final String unit;
 
+  /// A amostra por trás do cálculo, quando ele resume vários períodos.
+  ///
+  /// Nula na maioria das fórmulas — só existe onde há agregação a auditar.
+  final TraceSample? sample;
+
   const CalculationTrace({
     required this.formulaName,
     required this.latexRepresentation,
@@ -37,6 +148,7 @@ class CalculationTrace {
     this.intermediateSteps = const [],
     this.finalValue,
     this.unit = '',
+    this.sample,
   });
 
   Map<String, dynamic> toJson() => {
@@ -46,6 +158,7 @@ class CalculationTrace {
         'intermediateSteps': intermediateSteps,
         'finalValue': finalValue,
         'unit': unit,
+        if (sample != null) 'sample': sample!.toJson(),
       };
 
   static CalculationTrace fromJson(Map<String, dynamic> json) =>
@@ -61,6 +174,10 @@ class CalculationTrace {
         ],
         finalValue: (json['finalValue'] as num?)?.toDouble(),
         unit: json['unit'] as String? ?? '',
+        sample: json['sample'] is Map
+            ? TraceSample.fromJson(
+                (json['sample'] as Map).map((k, v) => MapEntry('$k', v)))
+            : null,
       );
 }
 

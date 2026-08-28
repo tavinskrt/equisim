@@ -210,6 +210,19 @@ R11 -- ESTOURO EM LINHA
   e o estouro aparece em 320-375 dp como a listra amarela e preta.
   Idem "Row" de botoes/chips sem "Wrap" ou scroll horizontal.
 
+  NAO acuse "Flexible"/"Expanded" dentro de "Row" que e filho de "Wrap".
+  Um "Wrap" horizontal entrega ao filho "BoxConstraints(maxWidth:
+  constraints.maxWidth)" -- restricao LIMITADA, herdada da propria largura do
+  "Wrap" (Flutter SDK, "rendering/wrap.dart": o "childConstraints" do switch
+  por "direction"). Nao ha "unbounded width" ali, e portanto nao ha o assert
+  "RenderFlex children have non-zero flex but incoming width constraints are
+  unbounded". Nesse arranjo o "Flexible" e a CORRECAO do estouro, nao a causa:
+  sem ele, um rotulo mais largo que a faixa do "Wrap" estoura a linha.
+  Constricao ilimitada vem de "SingleChildScrollView", "ListView" e "Row"
+  aninhado no mesmo eixo -- e nesses casos que a regra se aplica.
+  (Verificado em 28/08/2026 contra o SDK instalado e renderizando o painel de
+  auditoria em 320 dp: zero excecoes vindas do "Flexible" da legenda.)
+
 R12 -- AUSENCIA DE ADAPTACAO POR BREAKPOINT
   Layout de multiplas colunas construido sem "LayoutBuilder" ou
   "MediaQuery.sizeOf(context)". O projeto ja tem o precedente em

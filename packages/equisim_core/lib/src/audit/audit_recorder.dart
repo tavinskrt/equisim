@@ -65,6 +65,7 @@ class AuditTransaction {
     List<String> steps = const [],
     double? result,
     String unit = '',
+    TraceSample? sample,
   }) =>
       _calculations.add(CalculationTrace(
         formulaName: formulaName,
@@ -73,6 +74,7 @@ class AuditTransaction {
         intermediateSteps: steps,
         finalValue: result,
         unit: unit,
+        sample: sample,
       ));
 
   void add(CalculationTrace trace) => _calculations.add(trace);

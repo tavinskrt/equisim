@@ -122,6 +122,53 @@ void main() {
       expect(restored.calculations.single.finalValue, 17.1);
     });
 
+    test('a amostra da mediana sobrevive à ida e volta em JSON', () {
+      // O painel roda em outra janela: o que não atravessar o BroadcastChannel
+      // simplesmente não existe para quem audita.
+      const trace = CalculationTrace(
+        formulaName: 'Normalização do fluxo-base',
+        latexRepresentation: r'F_0 = \min(\max(F_{obs}, m(1-\tau)), m(1+\tau))',
+        finalValue: 0.702,
+        unit: r'R$',
+        sample: TraceSample(
+          title: 'Exercícios da amostra',
+          unit: r'R$',
+          summary: 0.468,
+          lowerBound: 0.234,
+          upperBound: 0.702,
+          selected: 0.702,
+          points: [
+            TraceSamplePoint(label: '2021', value: 0.380),
+            TraceSamplePoint(label: '2022', value: 0.242),
+            TraceSamplePoint(label: '2023', value: 0.468, definesResult: true),
+            TraceSamplePoint(label: '2024', value: 0.866),
+            TraceSamplePoint(label: '2025', value: 4.445, isObserved: true),
+          ],
+        ),
+      );
+
+      final restored = CalculationTrace.fromJson(trace.toJson());
+      final sample = restored.sample!;
+
+      expect([for (final p in sample.points) p.label],
+          ['2021', '2022', '2023', '2024', '2025']);
+      expect(sample.points[2].definesResult, isTrue);
+      expect(sample.points.last.isObserved, isTrue);
+      expect(sample.summary, 0.468);
+      expect(sample.lowerBound, 0.234);
+      expect(sample.upperBound, 0.702);
+      expect(sample.selected, 0.702);
+    });
+
+    test('rastro sem amostra não carrega a chave no JSON', () {
+      const trace = CalculationTrace(
+        formulaName: 'CAPM',
+        latexRepresentation: r'K_e = R_f + \beta (R_m - R_f)',
+      );
+      expect(trace.toJson().containsKey('sample'), isFalse);
+      expect(CalculationTrace.fromJson(trace.toJson()).sample, isNull);
+    });
+
     test('uuid v4 tem o formato da RFC 4122', () {
       final pattern = RegExp(
         r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
@@ -200,6 +247,30 @@ void main() {
         expect(trace.finalValue, isNotNull,
             reason: '${trace.formulaName} sem resultado');
       }
+    });
+
+    test('a normalização do fluxo-base publica a amostra da mediana, por ano',
+        () {
+      final capturados = <AuditEvent>[];
+      AuditRecorder.attach(capturados.add);
+      ValuationCascade.evaluate(_inputs(ticker));
+
+      final base = capturados.single.calculations
+          .firstWhere((c) => c.formulaName.contains('Normalização'));
+      final sample = base.sample!;
+
+      // O histórico vai de 2019 a 2024 e a janela é de cinco: 2019 fica fora.
+      expect([for (final p in sample.points) p.label],
+          ['2020', '2021', '2022', '2023', '2024']);
+      expect(sample.points.last.isObserved, isTrue);
+      expect(sample.points.where((p) => p.definesResult), hasLength(1));
+
+      // A mediana publicada é a dos pontos publicados — não um número à parte.
+      final valores = [for (final p in sample.points) p.value]..sort();
+      expect(sample.summary, closeTo(valores[2], 1e-9));
+      expect(sample.lowerBound, closeTo(sample.summary! * 0.5, 1e-9));
+      expect(sample.upperBound, closeTo(sample.summary! * 1.5, 1e-9));
+      expect(sample.selected, closeTo(base.finalValue!, 1e-6));
     });
 
     test('o CAPM registrado reproduz o Ke usado no desconto', () {

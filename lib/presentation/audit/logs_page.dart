@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
@@ -130,23 +131,39 @@ class _LogsPageState extends State<LogsPage> {
       body: SafeArea(
         child: Column(
           children: [
-            _Header(
-              theme: theme,
-              bus: _bus,
-              total: _bus.history.length,
-              showing: events.length,
-              autoScroll: _autoScroll,
-              filter: _filter,
-              search: _search,
-              dark: _dark,
-              onToggleAutoScroll: () =>
-                  setState(() => _autoScroll = !_autoScroll),
-              onToggleTheme: () => setState(() => _dark = !_dark),
-              onFilter: (f) => setState(() => _filter = f),
-              onSearch: () => setState(() {}),
-              onClear: _bus.clear,
-              onExport: _export,
-              onReconnect: _bus.requestReplay,
+            // O cabeçalho fica com metade da tela, no máximo, e rola por
+            // dentro acima disso.
+            //
+            // Ele é uma faixa de rótulos longos que quebra em mais linhas
+            // conforme a tela estreita ou a fonte cresce. Medido numa tela de
+            // 320×568 com a Roboto real: 282 px em escala 1,0, mas 696 px em
+            // escala 2,0 — mais alto que a tela inteira. Sem o teto, esta
+            // `Column` estourava 128 px por baixo e a lista de eventos sumia,
+            // que é o oposto do que o painel existe para fazer.
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.5,
+              ),
+              child: SingleChildScrollView(
+                child: _Header(
+                  theme: theme,
+                  bus: _bus,
+                  total: _bus.history.length,
+                  showing: events.length,
+                  autoScroll: _autoScroll,
+                  filter: _filter,
+                  search: _search,
+                  dark: _dark,
+                  onToggleAutoScroll: () =>
+                      setState(() => _autoScroll = !_autoScroll),
+                  onToggleTheme: () => setState(() => _dark = !_dark),
+                  onFilter: (f) => setState(() => _filter = f),
+                  onSearch: () => setState(() {}),
+                  onClear: _bus.clear,
+                  onExport: _export,
+                  onReconnect: _bus.requestReplay,
+                ),
+              ),
             ),
             Expanded(
               child: events.isEmpty
@@ -267,12 +284,17 @@ class _Header extends StatelessWidget {
                 children: [
                   Icon(Icons.functions, color: theme.accent, size: 20),
                   const SizedBox(width: 8),
-                  Text(
-                    'Painel de Auditoria de Cálculos',
-                    style: TextStyle(
-                      color: theme.text,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  // Em 320 dp o título sozinho é mais largo que a faixa que o
+                  // Wrap tem para oferecer. Flexível, ele quebra em duas
+                  // linhas; sem isso, estoura a lateral em 244 px.
+                  Flexible(
+                    child: Text(
+                      'Painel de Auditoria de Cálculos',
+                      style: TextStyle(
+                        color: theme.text,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -397,34 +419,41 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.hourglass_empty, size: 36, color: theme.dim),
-            const SizedBox(height: 14),
-            Text(
-              'Aguardando execuções',
-              style: TextStyle(
-                color: theme.text,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+    // Rolável porque o parágrafo é longo e o espaço é o que sobra do
+    // cabeçalho: com a fonte do sistema ampliada numa tela de 568 px, o texto
+    // não cabe e a explicação de "o que o painel está esperando" some atrás
+    // da listra de estouro — justamente para quem abriu o painel sem saber o
+    // que fazer nele.
+    return SingleChildScrollView(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.hourglass_empty, size: 36, color: theme.dim),
+              const SizedBox(height: 14),
+              Text(
+                'Aguardando execuções',
+                style: TextStyle(
+                  color: theme.text,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              bus.crossWindow
-                  ? 'Volte à janela principal e abra um ativo, a meta ou o '
-                      'backtest. Cada requisição à API e cada fórmula avaliada '
-                      'aparece aqui no instante em que acontece.'
-                  : 'Use a aplicação normalmente: as execuções aparecem aqui '
-                      'assim que ocorrerem.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: theme.dim, fontSize: 13, height: 1.5),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                bus.crossWindow
+                    ? 'Volte à janela principal e abra um ativo, a meta ou o '
+                        'backtest. Cada requisição à API e cada fórmula '
+                        'avaliada aparece aqui no instante em que acontece.'
+                    : 'Use a aplicação normalmente: as execuções aparecem aqui '
+                        'assim que ocorrerem.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: theme.dim, fontSize: 13, height: 1.5),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -788,6 +817,10 @@ class _SubstitutionBlock extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+          if (trace.sample != null && trace.sample!.points.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _SampleChart(theme: theme, sample: trace.sample!),
+          ],
           if (trace.mappedVariables.isNotEmpty) ...[
             const SizedBox(height: 10),
             _label('Variáveis mapeadas'),
@@ -907,6 +940,513 @@ class _SubstitutionBlock extends StatelessWidget {
       ),
     );
   }
+}
+
+// ------------------------------------------------ Amostra por trás da mediana --
+
+/// Desenha a amostra que sustentou uma estatística resumo.
+///
+/// O orientador pediu isto por um motivo prático: uma mediana isolada não
+/// permite decidir se algum exercício deve ser expurgado. Com os pontos à
+/// vista — cada um com seu ano, a banda de aceitação desenhada por cima e o
+/// exercício central destacado — dá para ver de onde o número saiu e discutir
+/// a janela.
+///
+/// O gráfico não recalcula nada: a mediana, a banda e a marcação do exercício
+/// central vêm prontas do núcleo, do mesmo objeto que produziu o resultado.
+class _SampleChart extends StatelessWidget {
+  const _SampleChart({required this.theme, required this.sample});
+
+  final _ConsoleTheme theme;
+  final TraceSample sample;
+
+  bool get _winsorized {
+    final observed = sample.points.where((p) => p.isObserved).firstOrNull;
+    final selected = sample.selected;
+    if (observed == null || selected == null) return false;
+    return (observed.value - selected).abs() > 1e-9;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _caption(sample.title.isEmpty ? 'Amostra' : sample.title),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.fromLTRB(10, 14, 12, 8),
+          decoration: BoxDecoration(
+            border: Border.all(color: theme.border),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: 168,
+                child: CustomPaint(
+                  painter: _SampleChartPainter(theme: theme, sample: sample),
+                  size: Size.infinite,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _legend(),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        _table(),
+      ],
+    );
+  }
+
+  Widget _legend() {
+    return Wrap(
+      spacing: 14,
+      runSpacing: 6,
+      children: [
+        _legendItem(theme.accent, 'exercício central da amostra'),
+        _legendItem(theme.dim, 'demais exercícios da janela'),
+        _legendItem(
+          _winsorized ? theme.danger : theme.network,
+          _winsorized ? 'observado, fora da banda' : 'observado, dentro da banda',
+        ),
+        if (sample.lowerBound != null)
+          _legendItem(theme.accent.withValues(alpha: 0.18), 'banda de aceitação'),
+      ],
+    );
+  }
+
+  Widget _legendItem(Color color, String label) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 9,
+            height: 9,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 5),
+          // Flexível para que a legenda quebre em vez de estourar: numa janela
+          // de 320 px, "demais exercícios da janela" é mais largo que a faixa
+          // que o Wrap tem para oferecer.
+          Flexible(
+            child: Text(label, style: theme.mono(color: theme.dim, size: 10)),
+          ),
+        ],
+      );
+
+  /// Os mesmos números em texto selecionável.
+  ///
+  /// O gráfico responde "de onde saiu a mediana"; a tabela é o que se copia
+  /// para a defesa, e é o que resta quando o painel é lido numa impressão.
+  Widget _table() {
+    final points = sample.points;
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.border),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        children: [
+          for (var i = 0; i < points.length; i++)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                border: i == points.length - 1
+                    ? null
+                    : Border(bottom: BorderSide(color: theme.border)),
+              ),
+              child: _row(points[i]),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Uma linha da tabela.
+  ///
+  /// O painel também é aberto empilhado sobre a aplicação em telas estreitas,
+  /// e a etiqueta é o texto de comprimento variável da linha. Numa única
+  /// linha ela espremeria o valor até zero e estouraria a lateral, então
+  /// abaixo de 380 px ela desce para a segunda linha em vez de disputar
+  /// espaço com o número.
+  Widget _row(TraceSamplePoint point) {
+    final tag = _tagOf(point);
+    final valor = SelectableText(
+      _formatNumber(point.value),
+      style: theme.mono(
+        color: point.definesResult ? theme.accent : theme.text,
+        size: 11.5,
+        bold: point.definesResult,
+      ),
+    );
+    final rotulo = SizedBox(
+      width: 64,
+      child: SelectableText(
+        point.label,
+        style: theme.mono(color: theme.jsonKey, size: 11.5),
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 380) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [rotulo, Expanded(child: valor)]),
+              if (tag.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 64, top: 2),
+                  child: Text(
+                    tag,
+                    style: theme.mono(color: theme.dim, size: 10),
+                  ),
+                ),
+            ],
+          );
+        }
+        // O valor fica sem `Expanded` de propósito: é um número curto, e
+        // dando-lhe metade da linha a etiqueta seria cortada com espaço vazio
+        // sobrando ao lado dela. Quem recebe o resto da largura é a etiqueta,
+        // que é o texto de comprimento variável.
+        return Row(
+          children: [
+            rotulo,
+            valor,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                tag,
+                textAlign: TextAlign.right,
+                overflow: TextOverflow.ellipsis,
+                style: theme.mono(color: theme.dim, size: 10),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _tagOf(TraceSamplePoint point) {
+    final tags = [
+      if (point.definesResult) 'define a ${sample.summaryLabel}',
+      if (point.isObserved) _winsorized ? 'observado · aparado' : 'observado',
+    ];
+    return tags.join(' · ');
+  }
+
+  Widget _caption(String text) => Text(
+        text.toUpperCase(),
+        style: TextStyle(
+          color: theme.dim,
+          fontSize: 9.5,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.6,
+        ),
+      );
+}
+
+class _SampleChartPainter extends CustomPainter {
+  _SampleChartPainter({required this.theme, required this.sample});
+
+  final _ConsoleTheme theme;
+  final TraceSample sample;
+
+  /// Faixa reservada aos rótulos de ano, abaixo do eixo.
+  static const double _labelStrip = 18;
+
+  /// Folga entre a ponta de uma barra cortada e a borda do quadro, onde entram
+  /// a marca de corte e o valor real do exercício.
+  static const double _clipInset = 16;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final points = sample.points;
+    if (points.isEmpty || size.width <= 0) return;
+
+    final plotHeight = size.height - _labelStrip;
+    if (plotHeight <= 10) return;
+
+    final (bottom, top) = _scale();
+    double y(double value) =>
+        plotHeight - (value - bottom) / (top - bottom) * plotHeight;
+
+    final slot = size.width / points.length;
+    final barWidth = math.min(34.0, slot * 0.52);
+
+    // 1. Banda de aceitação, ao fundo.
+    final low = sample.lowerBound, high = sample.upperBound;
+    if (low != null && high != null) {
+      canvas.drawRect(
+        Rect.fromLTRB(0, y(high), size.width, y(low)),
+        Paint()..color = theme.accent.withValues(alpha: 0.12),
+      );
+      for (final edge in [low, high]) {
+        _dashedLine(canvas, y(edge), size.width,
+            theme.accent.withValues(alpha: 0.45));
+      }
+      _text(canvas, _compact(high), 0, y(high) - 12,
+          theme.mono(color: theme.dim, size: 9), alignLeft: true);
+      _text(canvas, _compact(low), 0, y(low) + 2,
+          theme.mono(color: theme.dim, size: 9), alignLeft: true);
+    }
+
+    // 2. Linha do zero, quando a série cruza o eixo.
+    if (bottom < 0 && top > 0) {
+      canvas.drawLine(
+        Offset(0, y(0)),
+        Offset(size.width, y(0)),
+        Paint()
+          ..color = theme.border
+          ..strokeWidth = 1,
+      );
+    }
+
+    // 3. Barras.
+    final zero = y(0).clamp(0.0, plotHeight);
+    for (var i = 0; i < points.length; i++) {
+      final p = points[i];
+      final center = slot * (i + 0.5);
+      // Exercício fora da escala: a barra é cortada e o valor vai por escrito.
+      // Deixar a escala ir até ele achataria os anos típicos e a banda contra
+      // o eixo, que é justamente o que se precisa enxergar para decidir sobre
+      // expurgo — e o valor cheio continua na tabela abaixo.
+      final above = p.value > top;
+      final below = p.value < bottom;
+      // A barra cortada para antes da borda: o valor real é escrito acima
+      // dela, e sem essa folga o texto sairia da moldura.
+      final valueY = above
+          ? _clipInset
+          : below
+              ? plotHeight - _clipInset
+              : y(p.value);
+      final rect = Rect.fromLTRB(
+        center - barWidth / 2,
+        math.min(valueY, zero),
+        center + barWidth / 2,
+        math.max(valueY, zero),
+      );
+
+      final winsorized = p.isObserved &&
+          sample.selected != null &&
+          (p.value - sample.selected!).abs() > 1e-9;
+      final color = winsorized
+          ? theme.danger
+          : p.isObserved
+              ? theme.network
+              : p.definesResult
+                  ? theme.accent
+                  : theme.dim;
+
+      canvas.drawRRect(
+        RRect.fromRectAndCorners(
+          rect.height < 2 ? Rect.fromLTRB(rect.left, rect.top, rect.right, rect.top + 2) : rect,
+          topLeft: const Radius.circular(2),
+          topRight: const Radius.circular(2),
+        ),
+        Paint()..color = color.withValues(alpha: p.definesResult ? 0.95 : 0.72),
+      );
+
+      // O exercício central ganha contorno: é ele que responde "de onde saiu
+      // a mediana", e cor sozinha não sobrevive a uma impressão em cinza.
+      if (p.definesResult) {
+        canvas.drawRect(
+          rect,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.4
+            ..color = theme.accent,
+        );
+      }
+
+      // 4. Marca de corte e o valor real, quando a barra não coube.
+      if (above || below) {
+        _breakMark(canvas, center, barWidth, above ? rect.top : rect.bottom,
+            above, color);
+        _text(
+          canvas,
+          _compact(p.value),
+          center,
+          above ? rect.top - 14 : rect.bottom + 3,
+          theme.mono(color: color, size: 9.5, bold: true),
+        );
+      }
+
+      // 5. Onde o valor observado foi parar depois de aparado.
+      if (winsorized) {
+        final target = y(sample.selected!.clamp(bottom, top));
+        canvas.drawLine(
+          Offset(center - barWidth / 2 - 4, target),
+          Offset(center + barWidth / 2 + 4, target),
+          Paint()
+            ..color = theme.accent
+            ..strokeWidth = 2,
+        );
+        _arrow(canvas, center, valueY, target, theme.accent);
+      }
+
+      _text(canvas, p.label, center, plotHeight + 4,
+          theme.mono(color: p.definesResult ? theme.accent : theme.dim, size: 10));
+    }
+
+    // 6. A mediana, por último, para ficar legível sobre as barras.
+    final summary = sample.summary;
+    if (summary != null) {
+      _dashedLine(canvas, y(summary), size.width, theme.accent);
+      _text(
+        canvas,
+        '${sample.summaryLabel} ${_compact(summary)}',
+        size.width,
+        y(summary) - 13,
+        theme.mono(color: theme.accent, size: 9.5, bold: true),
+        alignRight: true,
+      );
+    }
+  }
+
+  /// Limites verticais do gráfico.
+  ///
+  /// A escala é governada pela **banda**, não pelo maior valor: no caso que
+  /// motivou toda a normalização — SAPR11, exercício 9,5× a mediana — deixar
+  /// o eixo alcançar o atípico comprime os quatro anos típicos e a banda
+  /// inteira contra o zero, e o gráfico deixa de responder à única pergunta
+  /// que precisa responder. O exercício que estoura o quadro sai cortado, com
+  /// a marca de corte e o valor escrito ao lado.
+  (double, double) _scale() {
+    final values = [for (final p in sample.points) p.value];
+    final low = sample.lowerBound, high = sample.upperBound;
+
+    var bottom = math.min(0.0, values.reduce(math.min));
+    var top = values.reduce(math.max);
+
+    if (low != null && high != null) {
+      final folga = (high - low) * 0.55;
+      final limiteAlto = high + folga;
+      final limiteBaixo = math.min(0.0, low - folga);
+      // Só corta se houver o que cortar: com a série toda dentro da banda,
+      // apertar a escala inventaria um corte que não existe.
+      top = math.min(top, math.max(limiteAlto, _largestUpTo(values, limiteAlto)));
+      bottom =
+          math.max(bottom, math.min(limiteBaixo, _smallestFrom(values, limiteBaixo)));
+    }
+
+    if (sample.selected != null) {
+      top = math.max(top, sample.selected!);
+      bottom = math.min(bottom, math.min(0.0, sample.selected!));
+    }
+
+    if (top - bottom < 1e-12) {
+      // Série constante: sem folga artificial, a conversão de valor para pixel
+      // dividiria por zero e o gráfico sairia em branco.
+      final unidade = top.abs() < 1e-12 ? 1.0 : top.abs() * 0.1;
+      top += unidade;
+      bottom -= unidade;
+    }
+    final span = top - bottom;
+    return (bottom - span * 0.06, top + span * 0.14);
+  }
+
+  static double _largestUpTo(List<double> values, double limit) {
+    final dentro = values.where((v) => v <= limit);
+    return dentro.isEmpty ? limit : dentro.reduce(math.max);
+  }
+
+  static double _smallestFrom(List<double> values, double limit) {
+    final dentro = values.where((v) => v >= limit);
+    return dentro.isEmpty ? limit : dentro.reduce(math.min);
+  }
+
+  /// Zigue-zague na ponta da barra cortada — a convenção de eixo interrompido.
+  void _breakMark(
+    Canvas canvas,
+    double center,
+    double barWidth,
+    double edge,
+    bool atTop,
+    Color color,
+  ) {
+    final left = center - barWidth / 2;
+    final direction = atTop ? 1.0 : -1.0;
+    final path = Path()..moveTo(left, edge + 2 * direction);
+    for (var i = 0; i < 4; i++) {
+      path.lineTo(
+        left + barWidth * (i + 0.5) / 4,
+        edge + (i.isEven ? 5 : 2) * direction,
+      );
+    }
+    path.lineTo(left + barWidth, edge + 2 * direction);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.6
+        ..color = color,
+    );
+  }
+
+  void _dashedLine(Canvas canvas, double atY, double width, Color color) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1;
+    for (var x = 0.0; x < width; x += 8) {
+      canvas.drawLine(Offset(x, atY), Offset(math.min(x + 4, width), atY), paint);
+    }
+  }
+
+  void _arrow(Canvas canvas, double x, double from, double to, Color color) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.4;
+    canvas.drawLine(Offset(x, from), Offset(x, to), paint);
+    final direction = to > from ? 1.0 : -1.0;
+    canvas.drawLine(
+        Offset(x, to), Offset(x - 3, to - 4 * direction), paint);
+    canvas.drawLine(
+        Offset(x, to), Offset(x + 3, to - 4 * direction), paint);
+  }
+
+  void _text(
+    Canvas canvas,
+    String value,
+    double x,
+    double y,
+    TextStyle style, {
+    bool alignRight = false,
+    bool alignLeft = false,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(text: value, style: style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final left = alignRight
+        ? x - painter.width - 2
+        : alignLeft
+            ? x + 2
+            : x - painter.width / 2;
+    painter.paint(canvas, Offset(left, y));
+  }
+
+  /// Forma curta para caber no gráfico — a tabela abaixo carrega o valor cheio.
+  static String _compact(double value) {
+    // `toStringAsFixed` não lança em valor não finito (devolve "NaN"), mas
+    // "NaN" pendurado num eixo não informa nada a quem audita.
+    if (!value.isFinite) return '—';
+    final abs = value.abs();
+    if (abs >= 1e9) return '${(value / 1e9).toStringAsFixed(2)} bi';
+    if (abs >= 1e6) return '${(value / 1e6).toStringAsFixed(2)} mi';
+    if (abs >= 1e3) return '${(value / 1e3).toStringAsFixed(1)} mil';
+    return value.toStringAsFixed(2);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SampleChartPainter old) =>
+      old.sample != sample || old.theme.dark != theme.dark;
 }
 
 // ------------------------------------------------------------- Visualizador JSON --
@@ -1167,7 +1707,13 @@ class _StatusPill extends StatelessWidget {
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 6),
-          Text(label, style: TextStyle(color: color, fontSize: 11)),
+          // "Entrega local (mesma janela)" não cabe na faixa de um Wrap de
+          // 288 dp: flexível, o rótulo quebra dentro da pílula em vez de
+          // estourar. Sem elipse de propósito — um estado do canal cortado
+          // pela metade não informa nada.
+          Flexible(
+            child: Text(label, style: TextStyle(color: color, fontSize: 11)),
+          ),
         ],
       ),
     );
@@ -1234,7 +1780,11 @@ class _ConsoleButton extends StatelessWidget {
           children: [
             Icon(icon, size: 14, color: color),
             const SizedBox(width: 6),
-            Text(label, style: TextStyle(color: color, fontSize: 11.5)),
+            // "Exportar Auditoria (JSON)" estoura a faixa do Wrap em 320 dp.
+            // O rótulo é o nome da ação: quebra em duas linhas, não corta.
+            Flexible(
+              child: Text(label, style: TextStyle(color: color, fontSize: 11.5)),
+            ),
           ],
         ),
       ),

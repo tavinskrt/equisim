@@ -485,6 +485,115 @@ void main() {
       expect(base.periodsUsed, BaseFlowNormalizer.defaultWindow);
       expect(base.median, 12, reason: 'os exercicios antigos de 1.000 ficam de fora');
     });
+
+    test('a amostra exposta é a da janela, rotulada e em ordem cronológica', () {
+      final base = BaseFlowNormalizer.normalize(
+        [1000, 1000, 1000, 10, 11, 12, 13, 14],
+        labels: const [
+          '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025',
+        ],
+      );
+      expect([for (final p in base.sample) p.label],
+          ['2021', '2022', '2023', '2024', '2025']);
+      expect([for (final p in base.sample) p.value], [10, 11, 12, 13, 14]);
+      expect(base.sample.last.isObserved, isTrue);
+      expect([for (final p in base.sample) p.definesMedian],
+          [false, false, true, false, false]);
+    });
+
+    test('marca exatamente um exercício central em amostra ímpar, mesmo com '
+        'valores repetidos', () {
+      // Comparar por valor marcaria os quatro pontos iguais a 10 e sugeriria
+      // que todos entraram na conta da mediana.
+      final base = BaseFlowNormalizer.normalize([10, 10, 10, 10, 40]);
+      expect(base.median, 10);
+      expect(base.sample.where((p) => p.definesMedian).length, 1);
+    });
+
+    test('amostra par marca os dois exercícios centrais', () {
+      final base = BaseFlowNormalizer.normalize(
+        [10, 20, 30, 40],
+        window: 4,
+        labels: const ['2022', '2023', '2024', '2025'],
+      );
+      expect(base.median, 25);
+      expect([for (final p in base.sample) if (p.definesMedian) p.label],
+          ['2023', '2024']);
+    });
+
+    test('a banda exposta acompanha a tolerância aplicada', () {
+      final base = BaseFlowNormalizer.normalize(
+        [10, 11, 12, 13, 14],
+        tolerance: 0.25,
+      );
+      expect(base.tolerance, 0.25);
+      expect(base.lowerBound, closeTo(9, 1e-9));
+      expect(base.upperBound, closeTo(15, 1e-9));
+    });
+
+    test('sem banda válida não há bordas a exibir', () {
+      final base = BaseFlowNormalizer.normalize([-5, -3, -4, 1, 8]);
+      expect(base.lowerBound, isNull);
+      expect(base.upperBound, isNull);
+      expect(base.sample, hasLength(5),
+          reason: 'a amostra segue auditável mesmo sem winsorização');
+    });
+
+    test('mediana que é resíduo numérico não autoriza banda', () {
+      // `mediana > 0` sozinho deixaria passar: a banda sairia com largura
+      // desprezível e o fator de desvio explodiria para 1e18.
+      final base = BaseFlowNormalizer.normalize([-2e9, -1e9, 1e-9, 3e9, 4e9]);
+      expect(base.hasBand, isFalse);
+      expect(base.winsorized, isFalse);
+      expect(base.value, 4e9, reason: 'sem banda válida, adota o observado');
+      expect(base.lowerBound, isNull);
+      expect(base.upperBound, isNull);
+      expect(base.deviationFactor, isNull);
+    });
+
+    test('mediana pequena mas na escala da amostra continua valendo', () {
+      // O corte é relativo: em lucro por papel, uma mediana de R$ 0,02 é
+      // legítima e precisa produzir banda.
+      final base = BaseFlowNormalizer.normalize([0.018, 0.020, 0.022, 0.019, 0.9]);
+      expect(base.hasBand, isTrue);
+      expect(base.median, closeTo(0.020, 1e-12));
+      expect(base.value, closeTo(0.030, 1e-12));
+      expect(base.deviationFactor, closeTo(45, 1e-9));
+    });
+
+    test('valor não finito é descartado como exercício ausente', () {
+      // `NaN` derrota toda comparação: sem o descarte, a mediana saía
+      // positiva, a banda saía NaN e o fluxo-base chegava contaminado à
+      // projeção sem que nada acusasse.
+      final base = BaseFlowNormalizer.normalize(
+        [1.0, 2.0, 3.0, double.nan, 4.0],
+        labels: const ['2021', '2022', '2023', '2024', '2025'],
+      );
+      expect(base.value.isFinite, isTrue);
+      expect([for (final p in base.sample) p.label],
+          ['2021', '2022', '2023', '2025']);
+      expect(base.periodsUsed, 4);
+      expect(base.median, closeTo(2.5, 1e-12));
+    });
+
+    test('observado não finito não vira fluxo-base', () {
+      final base = BaseFlowNormalizer.normalize([1.0, 2.0, double.infinity]);
+      expect(base.observed, 2.0);
+      expect(base.value, 2.0);
+      expect(base.value.isFinite, isTrue);
+    });
+
+    test('série inteiramente não finita não produz base', () {
+      final base = BaseFlowNormalizer.normalize([double.nan, double.infinity]);
+      expect(base.value, 0);
+      expect(base.periodsUsed, 0);
+      expect(base.median, isNull);
+    });
+
+    test('rótulo ausente cai para a posição relativa do exercício', () {
+      final base = BaseFlowNormalizer.normalize([10, 11, 12]);
+      expect([for (final p in base.sample) p.label], ['T-2', 'T-1', 'T-0']);
+    });
   });
 
   group('MarketAnchors — unidades', () {

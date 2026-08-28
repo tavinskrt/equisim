@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../audit/audit_recorder.dart';
+import '../audit/calculation_trace.dart';
 import '../entities/dividend_event.dart';
 import '../entities/fundamentals.dart';
 import '../entities/valuation.dart';
@@ -236,8 +237,17 @@ abstract final class ValuationCascade {
       );
     }
 
+    // Os exercícios sem fluxo publicado saem da série, e com eles some a
+    // continuidade do eixo: a janela de cinco pode alcançar 2019 sem que isso
+    // apareça em lugar nenhum. Por isso o rótulo do ano viaja junto — é o que
+    // permite ao painel mostrar de quais exercícios a mediana saiu.
+    final flowSeries = [
+      for (final s in published)
+        if (flowOf(s) != null) (year: s.fiscalPeriodEnd.year, value: flowOf(s)!),
+    ];
     final baseline = BaseFlowNormalizer.normalize(
-      [for (final s in published) if (flowOf(s) != null) flowOf(s)!],
+      [for (final p in flowSeries) p.value],
+      labels: [for (final p in flowSeries) '${p.year}'],
     );
     final baseFcf = baseline.value;
     _describeBase(baseline, 'fluxo de caixa livre', local);
@@ -348,11 +358,18 @@ abstract final class ValuationCascade {
 
     // O lucro também sustenta uma perpetuidade, e sofre do mesmo problema:
     // um exercício com resultado extraordinário contamina o valor inteiro.
-    final baseline = BaseFlowNormalizer.normalize([
+    final epsSeries = [
       for (final s in published)
         if (_earningsPerQuotedUnit(s, sharesPerQuote) != null)
-          _earningsPerQuotedUnit(s, sharesPerQuote)!,
-    ]);
+          (
+            year: s.fiscalPeriodEnd.year,
+            value: _earningsPerQuotedUnit(s, sharesPerQuote)!,
+          ),
+    ];
+    final baseline = BaseFlowNormalizer.normalize(
+      [for (final p in epsSeries) p.value],
+      labels: [for (final p in epsSeries) '${p.year}'],
+    );
     final eps = baseline.value;
     _describeBase(baseline, 'lucro por papel', local);
     _auditBaseFlow(audit, baseline, 'lucro por papel');
@@ -1023,6 +1040,11 @@ abstract final class ValuationCascade {
   ) {
     if (audit == null) return;
     final median = baseline.median;
+    final sample = baseline.sample;
+    final central = [for (final p in sample) if (p.definesMedian) p];
+    final amostra = [
+      for (final p in sample) '${p.label} = ${_r(p.value)}',
+    ].join(' · ');
 
     audit.step(
       formulaName: 'Normalização do fluxo-base ($metricName)',
@@ -1030,10 +1052,23 @@ abstract final class ValuationCascade {
       variables: {
         'F_obs': _r(baseline.observed),
         'm (mediana)': median == null ? null : _r(median),
-        'tau': BaseFlowNormalizer.defaultTolerance,
+        'tau': baseline.tolerance,
         'exercícios na amostra': baseline.periodsUsed,
+        'exercícios': sample.isEmpty
+            ? null
+            : '${sample.first.label}–${sample.last.label}',
       },
       steps: [
+        if (sample.isNotEmpty) 'Amostra: $amostra',
+        if (central.isNotEmpty)
+          'Mediana definida por '
+              '${[for (final p in central) '${p.label} (${_r(p.value)})'].join(' e ')}'
+              '${central.length > 1 ? ', pela média dos dois centrais' : ', o exercício central da amostra ordenada'}',
+        if (_hasGap(sample))
+          'Atenção: a janela não é contígua — há exercício sem valor publicado '
+              'entre ${sample.first.label} e ${sample.last.label}, e a amostra '
+              'alcançou um ano mais antigo para completar '
+              '${baseline.periodsUsed} pontos.',
         if (median == null)
           'Passo único: amostra com ${baseline.periodsUsed} exercício(s), '
               'insuficiente para sustentar mediana; adotado o exercício '
@@ -1042,8 +1077,8 @@ abstract final class ValuationCascade {
           'Passo único: mediana não positiva (${_r(median)}); a winsorização '
               'não se aplica e o exercício observado é adotado como base.'
         else ...[
-          'Passo 1: banda em torno da mediana → [${_r(median * (1 - BaseFlowNormalizer.defaultTolerance))}, '
-              '${_r(median * (1 + BaseFlowNormalizer.defaultTolerance))}]',
+          'Passo 1: banda em torno da mediana → [${_r(baseline.lowerBound!)}, '
+              '${_r(baseline.upperBound!)}]',
           'Passo 2: exercício observado → ${_r(baseline.observed)}'
               '${baseline.deviationFactor == null ? '' : ' (${_r(baseline.deviationFactor!)}× a mediana)'}',
           baseline.winsorized
@@ -1053,7 +1088,36 @@ abstract final class ValuationCascade {
       ],
       result: baseline.value,
       unit: r'R$',
+      sample: sample.isEmpty
+          ? null
+          : TraceSample(
+              title: 'Exercícios da amostra ($metricName)',
+              points: [
+                for (final p in sample)
+                  TraceSamplePoint(
+                    label: p.label,
+                    value: p.value,
+                    definesResult: p.definesMedian,
+                    isObserved: p.isObserved,
+                  ),
+              ],
+              summary: median,
+              lowerBound: baseline.lowerBound,
+              upperBound: baseline.upperBound,
+              selected: baseline.value,
+              unit: r'R$',
+            ),
     );
+  }
+
+  /// `true` quando os rótulos são anos e falta algum entre o primeiro e o
+  /// último — sinal de que a janela de cinco alcançou um exercício mais antigo
+  /// do que aparenta.
+  static bool _hasGap(List<BaseFlowPeriod> sample) {
+    if (sample.length < 2) return false;
+    final years = [for (final p in sample) int.tryParse(p.label)];
+    if (years.any((y) => y == null)) return false;
+    return years.last! - years.first! != sample.length - 1;
   }
 
   static void _auditGrowth(
