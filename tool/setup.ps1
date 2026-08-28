@@ -160,7 +160,26 @@ if ($ComFunctions) {
     Exigir-Sucesso 'npm install'
 }
 
-# --- 6. Verificação (opcional) ---------------------------------------------
+# --- 6. Hooks de QA --------------------------------------------------------
+# `core.hooksPath` é configuração LOCAL do clone: não viaja no git. Sem este
+# passo, os hooks versionados em .githooks/ ficariam inertes numa máquina nova.
+Passo 'Ferramentas de QA e hooks'
+
+# As dependências do agente de QA vivem no package.json da RAIZ, separado do
+# de functions/. Sem elas o hook de pre-push não consegue rodar o auditor.
+if (Get-Command npm -ErrorAction SilentlyContinue) {
+    npm install
+    Exigir-Sucesso 'npm install (ferramentas de QA)'
+} else {
+    Write-Host '  npm nao encontrado: o auditor Gemini ficara indisponivel.'
+    Write-Host '  O hook de pre-push detecta isso e libera o push, sem travar o fluxo.'
+}
+
+git config core.hooksPath .githooks
+Write-Host '  pre-commit: verificacoes locais, sem rede (~0,3s)'
+Write-Host '  pre-push:   auditoria com o Gemini (requer GEMINI_API_KEY em .env.qa)'
+
+# --- 7. Verificação (opcional) ---------------------------------------------
 if ($Verificar) {
     Passo 'Análise estática'
     flutter analyze

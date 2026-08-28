@@ -1,0 +1,178 @@
+/**
+ * Coleta do material a ser auditado.
+ *
+ * Dois modos:
+ *   --diff            unified diff (staged, ou contra um ref base)
+ *   --file <caminho>  conteudo integral do arquivo, com numeracao de linha
+ *
+ * A numeracao de linha e deliberada: o modelo precisa citar `arquivo:linha`
+ * para que o achado seja verificavel. Sem ela, os numeros vem alucinados.
+ */
+import { execFileSync } from 'node:child_process';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { relative, resolve } from 'node:path';
+
+/** Extensoes que o auditor entende. O resto e ruido. */
+const AUDITABLE = [
+  '*.dart',
+  '*.ts',
+  '*.tsx',
+  '*.js',
+  '*.mjs',
+  '*.yaml',
+  '*.yml',
+  '*.json',
+  '*.css',
+  '*.html',
+];
+
+/**
+ * Artefatos gerados ou volumosos. Auditar `*.g.dart` (saida do build_runner)
+ * ou lockfiles so gasta token e produz achado falso -- ninguem edita isso a mao.
+ */
+const EXCLUDED = [
+  ':(exclude)**/*.g.dart',
+  ':(exclude)**/*.freezed.dart',
+  ':(exclude)**/*.mocks.dart',
+  ':(exclude)build/**',
+  ':(exclude)**/node_modules/**',
+  ':(exclude)pubspec.lock',
+  ':(exclude)package-lock.json',
+  ':(exclude).dart_tool/**',
+  ':(exclude)lib/firebase_options.dart',
+];
+
+/** Teto de payload. Acima disso o custo explode e a atencao do modelo dilui. */
+export const MAX_PAYLOAD_CHARS = 180_000;
+
+export interface AuditTarget {
+  /**
+   * `diff` muda a calibragem de severidade (ver rules.ts);
+   * `screenshot` indica auditoria visual sem codigo anexado.
+   */
+  mode: 'diff' | 'file' | 'screenshot';
+  /** Descricao legivel da origem, para o cabecalho do relatorio. */
+  label: string;
+  /** Texto enviado ao modelo. */
+  payload: string;
+  /** Arquivos efetivamente incluidos. */
+  files: string[];
+  truncated: boolean;
+}
+
+function git(args: string[], cwd: string): string {
+  return execFileSync('git', args, {
+    cwd,
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  });
+}
+
+export function repoRoot(startDir: string): string {
+  return git(['rev-parse', '--show-toplevel'], startDir).trim();
+}
+
+/** Ref base utilizavel: HEAD~1 quando existe, senao a arvore vazia. */
+function resolveBase(root: string, requested: string): string {
+  try {
+    git(['rev-parse', '--verify', `${requested}^{commit}`], root);
+    return requested;
+  } catch {
+    // Repositorio com um unico commit: compara contra a arvore vazia.
+    // Hash canonico do objeto tree vazio -- constante do git, valida em
+    // qualquer plataforma (evita depender de /dev/null no Windows).
+    return '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
+  }
+}
+
+export interface DiffOptions {
+  staged: boolean;
+  base: string;
+  contextLines: number;
+}
+
+export function collectDiff(root: string, opts: DiffOptions): AuditTarget {
+  const pathspec = ['--', ...AUDITABLE, ...EXCLUDED];
+  const common = [`--unified=${opts.contextLines}`, '--no-color', '--no-ext-diff'];
+
+  let args: string[];
+  let label: string;
+
+  if (opts.staged) {
+    args = ['diff', '--cached', ...common, ...pathspec];
+    label = 'alteracoes em staging (git diff --cached)';
+  } else {
+    const base = resolveBase(root, opts.base);
+    args = ['diff', ...common, base, ...pathspec];
+    label = `alteracoes desde ${opts.base} (git diff ${opts.base})`;
+  }
+
+  let payload = git(args, root);
+  const files = listChangedFiles(root, opts);
+
+  const truncated = payload.length > MAX_PAYLOAD_CHARS;
+  if (truncated) {
+    payload =
+      payload.slice(0, MAX_PAYLOAD_CHARS) +
+      '\n\n[TRUNCADO: o diff excedeu o teto de payload. Audite arquivos ' +
+      'individualmente com --file para cobertura completa.]\n';
+  }
+
+  return { mode: 'diff', label, payload, files, truncated };
+}
+
+function listChangedFiles(root: string, opts: DiffOptions): string[] {
+  const pathspec = ['--', ...AUDITABLE, ...EXCLUDED];
+  const args = opts.staged
+    ? ['diff', '--cached', '--name-only', ...pathspec]
+    : ['diff', '--name-only', resolveBase(root, opts.base), ...pathspec];
+  return git(args, root)
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l !== '');
+}
+
+/** Numera as linhas para que o modelo consiga citar `arquivo:linha`. */
+function numberLines(content: string): string {
+  const lines = content.split(/\r?\n/);
+  const width = String(lines.length).length;
+  return lines
+    .map((line, i) => `${String(i + 1).padStart(width, ' ')} | ${line}`)
+    .join('\n');
+}
+
+export function collectFiles(root: string, paths: string[]): AuditTarget {
+  const chunks: string[] = [];
+  const included: string[] = [];
+  let total = 0;
+  let truncated = false;
+
+  for (const p of paths) {
+    const abs = resolve(root, p);
+    if (!existsSync(abs) || !statSync(abs).isFile()) {
+      throw new Error(`Arquivo nao encontrado: ${p}`);
+    }
+    const rel = relative(root, abs).replace(/\\/g, '/');
+    const body = numberLines(readFileSync(abs, 'utf8'));
+    const chunk = `\n===== ARQUIVO: ${rel} =====\n${body}\n`;
+
+    if (total + chunk.length > MAX_PAYLOAD_CHARS) {
+      truncated = true;
+      break;
+    }
+    chunks.push(chunk);
+    included.push(rel);
+    total += chunk.length;
+  }
+
+  return {
+    mode: 'file',
+    label:
+      included.length === 1
+        ? `arquivo ${included[0]}`
+        : `${included.length} arquivos`,
+    payload: chunks.join(''),
+    files: included,
+    truncated,
+  };
+}

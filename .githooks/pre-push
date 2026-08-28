@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+# Auditoria completa com o Gemini antes do push.
+#
+# Aqui a espera de 30-120s e aceitavel: push e menos frequente que commit, e o
+# usuario ja espera que a operacao demore. Foi essa a decisao de arquitetura --
+# ver o cabecalho de .githooks/pre-commit.
+#
+# O git passa por stdin, uma linha por ref:
+#     <ref local> <sha local> <ref remoto> <sha remoto>
+#
+# Semantica de bloqueio, deliberada:
+#     saida 1  = o Gemini reprovou o codigo  -> BLOQUEIA o push
+#     saida 2  = falha de infraestrutura     -> AVISA e LIBERA o push
+#
+# Ficar sem internet, sem cota ou sem chave nao e defeito do codigo. Um gate
+# que impede o push quando a API do Google esta fora do ar seria arrancado na
+# primeira ocorrencia.
+#
+# Emergencia: crie o arquivo .qa-skip na raiz (e apague depois)
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT"
+
+if [ -f .qa-skip ]; then
+  echo "[pre-push] .qa-skip presente -- auditoria do Gemini pulada." >&2
+  exit 0
+fi
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "[pre-push] node nao encontrado; auditoria pulada." >&2
+  exit 0
+fi
+
+ZERO="0000000000000000000000000000000000000000"
+BASE=""
+
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  [ -z "$local_sha" ] && continue
+  # Branch sendo deletado: nada a auditar.
+  [ "$local_sha" = "$ZERO" ] && continue
+
+  if [ "$remote_sha" = "$ZERO" ]; then
+    # Branch nova no remoto: audita apenas o que ela adiciona sobre a base
+    # comum com a branch principal, e nao o repositorio inteiro.
+    BASE=$(git merge-base origin/main "$local_sha" 2>/dev/null || echo "")
+    [ -z "$BASE" ] && BASE="${local_sha}~1"
+  else
+    BASE="$remote_sha"
+  fi
+done
+
+if [ -z "$BASE" ]; then
+  echo "[pre-push] nada a auditar." >&2
+  exit 0
+fi
+
+echo "[pre-push] auditando $BASE..HEAD com o Gemini. Isso leva de 30s a 2min." >&2
+
+npx tsx scripts/gemini-qa.ts --diff --base "$BASE"
+STATUS=$?
+
+if [ "$STATUS" -eq 1 ]; then
+  echo "" >&2
+  echo "[pre-push] PUSH BLOQUEADO: o Gemini reprovou as alteracoes." >&2
+  echo "[pre-push] Corrija os achados FAIL acima e tente de novo." >&2
+  echo "[pre-push] Em emergencia: crie .qa-skip na raiz." >&2
+  exit 1
+fi
+
+if [ "$STATUS" -ne 0 ]; then
+  echo "" >&2
+  echo "[pre-push] A auditoria NAO pode ser executada (codigo $STATUS)." >&2
+  echo "[pre-push] Isso e falha de infraestrutura, nao do seu codigo." >&2
+  echo "[pre-push] O push foi LIBERADO. Rode 'npm run qa:gemini' quando puder." >&2
+  exit 0
+fi
+
+echo "[pre-push] auditoria aprovada." >&2
+exit 0

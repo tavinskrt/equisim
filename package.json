@@ -1,0 +1,36 @@
+{
+  "name": "equisim-devtools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cadeia de ferramentas de QA do Equisim (agente Gemini de auditoria financeira e de responsividade). NAO faz parte do runtime Flutter/Dart nem do deploy do Firebase Functions.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "qa:gemini": "tsx scripts/gemini-qa.ts --diff",
+    "qa:staged": "tsx scripts/gemini-qa.ts --staged",
+    "qa:file": "tsx scripts/gemini-qa.ts --file",
+    "qa:visual": "tsx scripts/gemini-qa.ts --screenshot",
+    "qa:deep": "tsx scripts/gemini-qa.ts --backend antigravity",
+    "qa:dry": "tsx scripts/gemini-qa.ts --diff --dry-run",
+    "qa:help": "tsx scripts/gemini-qa.ts --help",
+    "typecheck": "tsc --noEmit"
+  },
+  "scriptsComments": {
+    "$aviso": "npm nao suporta comentario em scripts; este bloco e ignorado pelo npm e serve de documentacao.",
+    "qa:gemini": "Auditoria do diff contra HEAD~1. E o comando canonico -- o que o CLAUDE.md exige antes de concluir tarefa, e o que o hook de pre-push executa.",
+    "qa:staged": "Auditoria do que esta em staging. Util para revisar antes de commitar pelo GitHub Desktop.",
+    "qa:file": "Exige argumento apos --. Ex.: npm run qa:file -- lib/presentation/shared/ui_kit.dart",
+    "qa:visual": "Auditoria visual multimodal. Exige argumento apos --. Ex.: npm run qa:visual -- docs/telas/backtest-320.png",
+    "qa:deep": "Auditoria profunda pelo plano Google AI Pro. SO funciona no terminal integrado do Antigravity. Exige alvo apos --. Ex.: npm run qa:deep -- --file packages/equisim_core/lib/src/usecases/compute_valuation.dart",
+    "qa:dry": "Monta o payload e imprime sem chamar o modelo. Custo zero -- use para conferir o que seria enviado.",
+    "typecheck": "Verificacao estatica dos scripts de QA. Nao toca no codigo Dart."
+  },
+  "devDependencies": {
+    "@google/genai": "^2.19.0",
+    "@types/node": "^26.4.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  }
+}

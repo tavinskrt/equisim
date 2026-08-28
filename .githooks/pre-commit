@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# Gate rapido de pre-commit. SEM REDE.
+#
+# Os commits deste projeto saem pelo GitHub Desktop, que congela a interface
+# enquanto o hook roda e nao expoe --no-verify na tela. Por isso aqui so entra
+# verificacao local e deterministica, na casa dos milissegundos.
+#
+# A auditoria com o Gemini (30-120s) roda no pre-push, onde a espera cabe.
+#
+# Instalacao:  git config core.hooksPath .githooks
+# Emergencia:  crie o arquivo .qa-skip na raiz (e apague depois)
+
+set -e
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT"
+
+# O GitHub Desktop pode nao herdar o PATH interativo do usuario. `node` esta no
+# PATH de maquina nesta instalacao, mas checamos para falhar com mensagem util
+# em vez de "command not found" dentro de um dialogo apertado.
+if ! command -v node >/dev/null 2>&1; then
+  echo "[pre-commit] node nao encontrado no PATH deste processo." >&2
+  echo "[pre-commit] O hook foi PULADO para nao travar o commit." >&2
+  echo "[pre-commit] Instale o Node ou rode 'npm run qa:gemini' manualmente." >&2
+  exit 0
+fi
+
+exec node scripts/qa-local.mjs

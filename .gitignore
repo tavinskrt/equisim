@@ -131,3 +131,12 @@ functions/.env*
 
 # Cache do executor de validacao
 docs/validacao/*.sqlite
+
+# Ferramentas de QA (Gemini) — dependencias Node da raiz
+/node_modules/
+
+# Credencial das ferramentas de QA (Gemini) — NUNCA versionar
+.env.qa
+
+# Valvula de emergencia dos hooks de QA (nunca versionar)
+.qa-skip

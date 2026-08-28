@@ -1,0 +1,238 @@
+{
+  "$comment": [
+    "Casos de estresse do dominio financeiro do Equisim.",
+    "",
+    "TODOS os valores de `expected` foram verificados executando Dart 3.12.2",
+    "neste repositorio -- nao foram calculados de cabeca. Onde o resultado do",
+    "double difere do decimal exato, o campo `expected` traz o valor QUE O DART",
+    "REALMENTE PRODUZ, porque o objetivo e documentar o comportamento real da",
+    "plataforma, nao o ideal matematico.",
+    "",
+    "Dois usos:",
+    "  1. referencia de dominio para revisao humana e para o rulebook do agente;",
+    "  2. base para testes Dart em packages/equisim_core/test/.",
+    "",
+    "Localizacao: a especificacao original pedia `tests/qa-fixtures/`. Ficou em",
+    "`test/qa_fixtures/` porque o repositorio ja usa `test/` (convencao do Dart,",
+    "e o unico diretorio que `flutter test` varre). Um `tests/` ao lado de",
+    "`test/`, com uma letra de diferenca, seria uma armadilha permanente."
+  ],
+  "meta": {
+    "verified_with": "Dart SDK 3.12.2 (stable)",
+    "verified_on": "2026-08-28",
+    "currency": "BRL",
+    "rounding_convention": "half-up (away from zero) em 2 casas decimais"
+  },
+
+  "cent_residue": {
+    "$rule": "R5 -- toda divisao de dinheiro entre N destinos distribui o resto",
+    "$algorithm": "opere na MAGNITUDE e reaplique o sinal: sign = total < 0 ? -1 : 1; mag = |total|; base = mag ~/ n; resto = mag % n; os primeiros `resto` destinos recebem sign*(base+1), o restante sign*base",
+    "cases": [
+      {
+        "id": "um-centavo-em-tres",
+        "description": "O caso canonico. R$ 0,01 dividido em 3 parcelas.",
+        "input": { "total_cents": 1, "n": 3 },
+        "expected": { "parts_cents": [1, 0, 0], "sum_cents": 1 },
+        "naive_double_result": { "each": 0.0033333333333333335, "sum_after_rounding_to_2dp": 0.0 },
+        "why_it_matters": "Arredondar cada parcela isoladamente faz R$ 0,01 desaparecer do total."
+      },
+      {
+        "id": "cinco-centavos-em-tres",
+        "input": { "total_cents": 5, "n": 3 },
+        "expected": { "parts_cents": [2, 2, 1], "sum_cents": 5 }
+      },
+      {
+        "id": "cem-reais-em-tres",
+        "input": { "total_cents": 10000, "n": 3 },
+        "expected": { "parts_cents": [3334, 3333, 3333], "sum_cents": 10000 },
+        "why_it_matters": "A soma das partes tem de ser exatamente o todo, sempre."
+      },
+      {
+        "id": "zero-em-tres",
+        "description": "Guarda de borda: nao pode lancar excecao nem produzir NaN.",
+        "input": { "total_cents": 0, "n": 3 },
+        "expected": { "parts_cents": [0, 0, 0], "sum_cents": 0 }
+      },
+      {
+        "id": "divisao-por-zero-destinos",
+        "description": "n = 0 deve ser rejeitado explicitamente, nao produzir Infinity.",
+        "input": { "total_cents": 100, "n": 0 },
+        "expected": { "throws": "ArgumentError" }
+      },
+      {
+        "id": "valor-negativo",
+        "description": "Estorno. O sinal precisa sobreviver a distribuicao.",
+        "input": { "total_cents": -1, "n": 3 },
+        "expected": { "parts_cents": [-1, 0, 0], "sum_cents": -1 }
+      },
+      {
+        "id": "estorno-grande",
+        "input": { "total_cents": -10000, "n": 3 },
+        "expected": { "parts_cents": [-3334, -3333, -3333], "sum_cents": -10000 }
+      },
+      {
+        "id": "modulo-negativo-do-dart",
+        "description": "ARMADILHA DE PLATAFORMA descoberta ao verificar estas fixtures.",
+        "input": ["(-1) % 3", "(-1) ~/ 3"],
+        "expected": [2, 0],
+        "why_it_matters": "O operador % do Dart e SEMPRE nao-negativo, ao contrario de C, Java e JavaScript. O algoritmo ingenuo de residuo (base = total ~/ n; resto = total % n) produz [-1,-1,0] para -1 centavo em 3 -- soma -2, ou seja, INVENTA um centavo de estorno. Por isso o algoritmo desta fixture opera na magnitude e reaplica o sinal no fim."
+      }
+    ]
+  },
+
+  "interest_rates": {
+    "$rule": "R3 -- conversao de taxa por composicao geometrica, nunca por divisao",
+    "cases": [
+      {
+        "id": "selic-anual-para-diaria-252",
+        "description": "Selic 15% a.a. na base 252 dias uteis.",
+        "input": { "annual_rate": 0.15, "business_days": 252 },
+        "expected": { "daily_rate": 0.000554764707 },
+        "naive_wrong": { "formula": "i / 252", "value": 0.000595238095 },
+        "why_it_matters": "A divisao simples superestima a taxa diaria em ~7,3%. Composta por 252 dias, vira juros inventado."
+      },
+      {
+        "id": "recomposicao-fecha-no-ano",
+        "description": "Sanidade: a taxa diaria composta por 252 dias volta a taxa anual.",
+        "input": { "daily_rate": 0.000554764707, "business_days": 252 },
+        "expected": { "annual_factor": 1.15 },
+        "why_it_matters": "Se a recomposicao nao fecha, a conversao esta errada."
+      },
+      {
+        "id": "taxa-real-por-fisher",
+        "description": "Selic 15% a.a. contra IPCA 4,5% a.a.",
+        "input": { "nominal": 0.15, "inflation": 0.045 },
+        "expected": { "real_rate": 0.1004784689, "formula": "(1+nominal)/(1+inflation)-1" },
+        "naive_wrong": { "formula": "nominal - inflation", "value": 0.105 },
+        "why_it_matters": "A subtracao erra 0,45 ponto percentual. Em projecao de 10 anos isso vira dezenas de pontos."
+      },
+      {
+        "id": "composicao-de-duas-taxas",
+        "description": "Taxas sucessivas se compoem, nao se somam.",
+        "input": { "rate_a": 0.10, "rate_b": 0.05 },
+        "expected": { "combined": 0.155, "formula": "(1+a)*(1+b)-1" },
+        "naive_wrong": { "formula": "a + b", "value": 0.15 }
+      }
+    ]
+  },
+
+  "daycount_and_calendar": {
+    "$rule": "R9 -- base de contagem explicita; ano bissexto nao e 365",
+    "cases": [
+      {
+        "id": "ano-bissexto-2024",
+        "description": "Taxa de 10% a.a. convertida com base 365, aplicada sobre 2024 (366 dias).",
+        "input": { "annual_rate": 0.10, "conversion_base": 365, "days_in_year": 366 },
+        "expected": { "realized_factor": 1.1002872737, "realized_rate": 0.1002872737 },
+        "error_vs_intent": 0.0002872737,
+        "why_it_matters": "O dia extra do bissexto injeta 0,0287 p.p. de juros nao pretendido. Em serie longa de backtest, o vies se acumula."
+      },
+      {
+        "id": "base-252-vs-365",
+        "description": "As duas bases coexistem no mercado brasileiro e nao sao intercambiaveis.",
+        "input": { "annual_rate": 0.15 },
+        "expected": {
+          "daily_252": 0.000554764707,
+          "daily_365": 0.000382982750,
+          "note": "Usar a taxa de uma base com a contagem da outra e defeito de dominio."
+        }
+      }
+    ]
+  },
+
+  "discounting_and_valuation": {
+    "$rule": "R4 -- expoente do desconto e guardas da perpetuidade",
+    "cases": [
+      {
+        "id": "expoente-do-primeiro-fluxo",
+        "description": "O fluxo do ano 1 desconta por (1+r)^1, nao por (1+r)^0.",
+        "input": { "cash_flow": 1000.0, "rate": 0.10, "year": 1 },
+        "expected": { "present_value": 909.090909090909 },
+        "naive_wrong": { "formula": "t comeca em 0", "value": 1000.0 },
+        "why_it_matters": "Um off-by-one no expoente infla o valuation em 10% logo no primeiro fluxo."
+      },
+      {
+        "id": "gordon-com-g-maior-que-r",
+        "description": "Crescimento perpetuo acima do custo de capital.",
+        "input": { "fcf": 100.0, "rate": 0.10, "growth": 0.12 },
+        "expected": { "throws": "ArgumentError", "reason": "g >= r torna a perpetuidade indefinida" },
+        "naive_wrong": { "value": -5600.000000000004, "note": "Valuation NEGATIVA entregue ao usuario como se fosse valida. O rastro decimal e o proprio erro do double." }
+      },
+      {
+        "id": "gordon-com-g-igual-r",
+        "input": { "fcf": 100.0, "rate": 0.10, "growth": 0.10 },
+        "expected": { "throws": "ArgumentError" },
+        "naive_wrong": { "value": "Infinity" }
+      }
+    ]
+  },
+
+  "float_representation": {
+    "$rule": "R1/R6/R7 -- limites reais do double IEEE-754 em Dart",
+    "$comment": "Todos verificados em Dart 3.12.2. Nao sao hipoteses.",
+    "cases": [
+      {
+        "id": "soma-classica",
+        "input": "0.1 + 0.2",
+        "expected": { "value": 0.30000000000000004, "equals_0_3": false },
+        "why_it_matters": "Justifica R6: comparar dinheiro com == e bug, nao preciosismo."
+      },
+      {
+        "id": "acumulo-em-laco-decimos",
+        "input": "somar 0.1 dez vezes",
+        "expected": { "value": 0.9999999999999999, "equals_1_0": false }
+      },
+      {
+        "id": "acumulo-em-laco-centavos",
+        "input": "somar 0.01 cem vezes",
+        "expected": { "value": 1.0000000000000007, "equals_1_0": false },
+        "why_it_matters": "E exatamente o padrao de um backtest somando aportes ou dividendos."
+      },
+      {
+        "id": "tostringasfixed-nao-e-half-up",
+        "description": "toStringAsFixed formata a representacao binaria, nao o decimal escrito.",
+        "input": ["(2.675).toStringAsFixed(2)", "(1.005).toStringAsFixed(2)"],
+        "expected": ["2.67", "1.00"],
+        "why_it_matters": "Quem espera half-up decimal recebe arredondamento para baixo. Meio centavo some, silenciosamente."
+      },
+      {
+        "id": "round-e-half-up-de-verdade",
+        "description": "Verificacao que corrige uma crenca comum: round() NAO e bankers rounding.",
+        "input": ["(2.5).round()", "(-2.5).round()", "(-0.5).round()"],
+        "expected": [3, -3, -1],
+        "note": "Meio para longe do zero == ROUND_HALF_UP. Este metodo esta correto para BRL; o defeito mora em (x*100).round()/100 quando x*100 ja perdeu precisao."
+      },
+      {
+        "id": "limite-de-inteiro-no-web",
+        "description": "RESTRICAO DE PLATAFORMA: em dart2js o `int` do Dart e um double JS.",
+        "input": "2^53",
+        "expected": { "max_safe_int": 9007199254740992, "as_brl": "R$ 90.071.992.547.409,92" },
+        "why_it_matters": "A estrategia de centavos inteiros e segura ate ~R$ 90 trilhoes no build web. Acima disso, o proprio int perde precisao. Irrelevante para carteira pessoal, decisivo se algum dia houver agregacao institucional."
+      }
+    ]
+  },
+
+  "domain_specific_brazil": {
+    "$rule": "Convencoes do mercado brasileiro que o agente deve assumir",
+    "cases": [
+      {
+        "id": "dividendo-vs-jcp",
+        "description": "Tributacao diferente para o mesmo tipo de provento.",
+        "input": { "gross": 1000.0 },
+        "expected": {
+          "dividendo_liquido": 1000.0,
+          "jcp_liquido": 850.0,
+          "jcp_withholding": 0.15
+        },
+        "why_it_matters": "Tratar JCP como dividendo superestima o rendimento liquido em 17,6%."
+      },
+      {
+        "id": "quantidade-e-inteira",
+        "description": "Acao e cota de FII nao fracionam.",
+        "input": { "capital_cents": 100000, "price_cents": 3333 },
+        "expected": { "shares": 30, "leftover_cents": 10 },
+        "why_it_matters": "Comprar 30,003 acoes e impossivel. O residuo fica em caixa e precisa ser rastreado."
+      }
+    ]
+  }
+}
