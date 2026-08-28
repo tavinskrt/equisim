@@ -226,7 +226,11 @@ class _AppShellState extends ConsumerState<AppShell> {
       child: Material(
         color: Colors.transparent,
         child: Container(
-          width: 208,
+          // Largura ditada pelo item mais longo ('Abrir Painel de Logs de
+          // Cálculo'): com 208 o texto media 213 px contra 178 disponíveis e
+          // o Row estourava em 35 px. O `Expanded` abaixo é a rede de
+          // segurança para métricas de fonte diferentes em outra plataforma.
+          width: 256,
           decoration: BoxDecoration(
             color: isLight ? Colors.white : const Color(0xFF13224E),
             borderRadius: BorderRadius.circular(12),
@@ -322,7 +326,14 @@ class _AppShellState extends ConsumerState<AppShell> {
           children: [
             Icon(icon, size: 16, color: color),
             const SizedBox(width: 10),
-            Text(label, style: TextStyle(fontSize: 13, color: color)),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 13, color: color),
+              ),
+            ),
           ],
         ),
       ),

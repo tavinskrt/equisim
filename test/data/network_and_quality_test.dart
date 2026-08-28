@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('AuthInterceptor', () {
-    RequestOptions runWith(ApiConfig config) {
-      final options = RequestOptions(path: '/v2/stocks/quote');
+    RequestOptions runWith(ApiConfig config, {String? path}) {
+      final options = RequestOptions(path: path ?? '/v2/stocks/quote');
       AuthInterceptor(config).onRequest(options, RequestInterceptorHandler());
       return options;
     }
@@ -34,6 +34,33 @@ void main() {
       ));
       expect(options.headers.containsKey('Authorization'), isFalse,
           reason: 'com proxy o token vive só no servidor');
+    });
+
+    test('não manda a credencial para host de terceiro', () {
+      final options = runWith(
+        const ApiConfig(
+          mode: BrapiMode.direct,
+          brapiBaseUrl: 'https://brapi.dev/api',
+          brapiToken: 'segredo',
+          bcbBaseUrl: 'https://api.bcb.gov.br/dados/serie',
+        ),
+        path: 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados',
+      );
+      expect(options.headers.containsKey('Authorization'), isFalse,
+          reason: 'o Banco Central não assina a brapi, e o cabeçalho extra '
+              'reprova a verificação prévia do CORS no alvo web');
+    });
+
+    test('GET sem corpo não declara Content-Type', () {
+      final options = runWith(const ApiConfig(
+        mode: BrapiMode.direct,
+        brapiBaseUrl: 'https://brapi.dev/api',
+        brapiToken: 'segredo',
+        bcbBaseUrl: '',
+      ));
+      expect(options.headers.containsKey('Content-Type'), isFalse,
+          reason: 'sem corpo o cabeçalho não descreve nada e ainda força o '
+              'OPTIONS de verificação');
     });
   });
 

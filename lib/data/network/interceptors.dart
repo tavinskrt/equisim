@@ -8,17 +8,41 @@ import '../config/api_config.dart';
 /// Injeta a credencial quando o cliente fala direto com a brapi.
 ///
 /// Em modo proxy nada é injetado: o token vive apenas no servidor.
+///
+/// A credencial vai **apenas para o host da brapi**. Mandá-la em toda
+/// requisição entregaria o token da assinatura ao Banco Central — que não
+/// pediu nada — e, no alvo web, quebraria a chamada: `Authorization` e
+/// `Content-Type: application/json` não estão na lista segura do CORS, então
+/// o navegador antecipa um `OPTIONS` de verificação. Verificado por `curl`:
+/// o `GET` do SGS responde `access-control-allow-origin: *`, mas o `OPTIONS`
+/// responde 200 **sem cabeçalho algum de CORS** — verificação reprovada, e o
+/// `GET` real nunca sai. Era a origem dos `connectionError` em série no
+/// console (três por chamada, uma por tentativa do [RetryInterceptor]).
 class AuthInterceptor extends Interceptor {
   final ApiConfig config;
-  AuthInterceptor(this.config);
+  final String _brapiHost;
+
+  AuthInterceptor(this.config)
+      : _brapiHost = Uri.parse(config.brapiBaseUrl).host;
+
+  /// `true` quando a requisição vai para a brapi (ou para o proxy que a
+  /// substitui). Caminho relativo só pode resolver contra a base configurada,
+  /// portanto conta como destino próprio.
+  bool _isOwnBackend(Uri uri) => uri.host.isEmpty || uri.host == _brapiHost;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     final token = config.brapiToken;
-    if (config.mode == BrapiMode.direct && token != null) {
+    if (config.mode == BrapiMode.direct &&
+        token != null &&
+        _isOwnBackend(options.uri)) {
       options.headers['Authorization'] = 'Bearer $token';
     }
-    options.headers['Content-Type'] = 'application/json';
+    // Só faz sentido declarar o tipo do corpo quando existe corpo. Num GET o
+    // cabeçalho não descreve nada e ainda força a verificação prévia do CORS.
+    if (options.data != null) {
+      options.headers['Content-Type'] = 'application/json';
+    }
     handler.next(options);
   }
 }
