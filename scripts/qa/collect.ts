@@ -110,6 +110,17 @@ export function collectDiff(root: string, opts: DiffOptions): AuditTarget {
   let payload = git(args, root);
   const files = listChangedFiles(root, opts);
 
+  // Arquivos novos entram apenas no modo working-tree. Em `--staged` seria
+  // errado: eles nao estao no indice e nao fazem parte do commit em preparo.
+  if (!opts.staged) {
+    const untracked = untrackedPatch(root);
+    if (untracked.files.length > 0) {
+      payload += untracked.patch;
+      files.push(...untracked.files);
+      label += ` + ${untracked.files.length} arquivo(s) novo(s)`;
+    }
+  }
+
   const truncated = payload.length > MAX_PAYLOAD_CHARS;
   if (truncated) {
     payload =
@@ -119,6 +130,55 @@ export function collectDiff(root: string, opts: DiffOptions): AuditTarget {
   }
 
   return { mode: 'diff', label, payload, files, truncated };
+}
+
+/**
+ * Arquivos novos ainda NAO rastreados pelo git.
+ *
+ * `git diff` nao os enxerga -- nem contra um ref, nem em staging. Sem este
+ * tratamento, criar um arquivo e rodar a auditoria devolvia "APROVADO: nada
+ * para auditar": um verde falso, o pior resultado possivel para um gate.
+ *
+ * Montamos o diff unificado a mao em vez de usar `git diff --no-index`, que
+ * sai com codigo 1 quando ha diferenca e depende de `/dev/null` -- fragil no
+ * Windows. O formato abaixo e o mesmo que o git emitiria para um arquivo novo,
+ * com TODAS as linhas marcadas como adicionadas, que e a semantica correta.
+ */
+function untrackedPatch(root: string): { patch: string; files: string[] } {
+  const pathspec = ['--', ...AUDITABLE, ...EXCLUDED];
+  const files = git(
+    ['ls-files', '--others', '--exclude-standard', ...pathspec],
+    root,
+  )
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l !== '');
+
+  const chunks: string[] = [];
+  for (const file of files) {
+    let content: string;
+    try {
+      content = readFileSync(resolve(root, file), 'utf8');
+    } catch {
+      continue; // Arquivo sumiu entre o listing e a leitura.
+    }
+    const lines = content.split(/\r?\n/);
+    // Um arquivo terminado em newline produz um ultimo elemento vazio que nao
+    // corresponde a linha alguma.
+    if (lines.length > 0 && lines[lines.length - 1] === '') lines.pop();
+    if (lines.length === 0) continue;
+
+    chunks.push(
+      `diff --git a/${file} b/${file}\n` +
+        'new file mode 100644\n' +
+        '--- /dev/null\n' +
+        `+++ b/${file}\n` +
+        `@@ -0,0 +1,${lines.length} @@\n` +
+        lines.map((l) => `+${l}`).join('\n') +
+        '\n',
+    );
+  }
+  return { patch: chunks.join(''), files };
 }
 
 function listChangedFiles(root: string, opts: DiffOptions): string[] {

@@ -32,6 +32,15 @@ if ! command -v node >/dev/null 2>&1; then
   exit 0
 fi
 
+# Sem node_modules, o `npx` abaixo tentaria BAIXAR o tsx do registro no meio do
+# push -- lento e surpreendente. Num clone recem-feito, antes do `npm install`,
+# o certo e sair liberando: a cadeia ainda nao esta instalada.
+if [ ! -d node_modules ]; then
+  echo "[pre-push] node_modules ausente; auditoria pulada." >&2
+  echo "[pre-push] Rode 'npm install' para ativar o gate de push." >&2
+  exit 0
+fi
+
 ZERO="0000000000000000000000000000000000000000"
 BASE=""
 

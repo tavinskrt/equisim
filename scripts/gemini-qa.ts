@@ -441,6 +441,15 @@ async function main(): Promise<number> {
     process.stdout.write(request.system + '\n');
     process.stdout.write(bold('\n=== INSTRUCOES ===\n\n'));
     process.stdout.write(request.instructions + '\n');
+    // O material E o ponto do dry-run: sem ele nao da para conferir o que
+    // seria enviado, nem se a coleta pegou os arquivos certos.
+    process.stdout.write(bold('\n=== MATERIAL ===\n\n'));
+    process.stdout.write(request.material + '\n');
+    if (request.screenshots && request.screenshots.length > 0) {
+      process.stdout.write(
+        dim(`[${request.screenshots.length} imagem(ns) anexada(s), nao exibida(s)]\n`),
+      );
+    }
     process.stdout.write(
       dim(
         `\n[dry-run] backend=${provider.name}, ` +
