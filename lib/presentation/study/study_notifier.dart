@@ -6,18 +6,28 @@ import '../../di/providers.dart';
 
 /// Estado editável do estudo, com o erro da última operação recusada.
 class StudyState {
+  /// O estudo em edição.
   final PortfolioStudy study;
+
+  /// `true` enquanto uma gravação está em curso — a interface bloqueia o botão.
   final bool isSaving;
 
   /// Mensagem da última operação rejeitada, para exibição transitória.
   final String? lastError;
 
+  /// Declara o estado.
   const StudyState({
     required this.study,
     this.isSaving = false,
     this.lastError,
   });
 
+  /// Cópia com os campos informados substituídos.
+  ///
+  /// - [clearError]: apaga [lastError]. **Necessário** porque passar `null` em
+  ///   [lastError] preserva o erro atual, como em todo `copyWith` de campo
+  ///   anulável; sem esta chave não haveria como limpar a mensagem. Quando
+  ///   `true`, tem precedência sobre [lastError].
   StudyState copyWith({
     PortfolioStudy? study,
     bool? isSaving,
@@ -57,10 +67,13 @@ class StudyNotifier extends Notifier<StudyState> {
         ),
       );
 
+  /// Substitui o estudo em edição pelo informado, descartando alterações não
+  /// salvas e qualquer erro pendente.
   void load(PortfolioStudy study) {
     state = StudyState(study: study);
   }
 
+  /// Renomeia o estudo. Não valida: nome vazio é aceito.
   void rename(String name) {
     state = state.copyWith(
       study: state.study.copyWith(name: name),
@@ -68,6 +81,7 @@ class StudyNotifier extends Notifier<StudyState> {
     );
   }
 
+  /// Define a meta patrimonial do estudo, substituindo a anterior.
   void setGoal(FinancialGoal goal) {
     state = state.copyWith(
       study: state.study.copyWith(goal: goal),
@@ -76,6 +90,15 @@ class StudyNotifier extends Notifier<StudyState> {
   }
 
   /// Move um ativo entre as carteiras — o gesto central da interface.
+  ///
+  /// - [ticker]: ativo a mover.
+  /// - [toPrincipal]: `true` promove da Reserva para a Principal; `false`
+  ///   rebaixa no sentido contrário.
+  ///
+  /// As **duas** carteiras são reequiponderadas, o que descarta pesos
+  /// customizados de ambas. Recusa — via [StudyState.lastError] — quando o
+  /// ativo não está na origem, já está no destino, ou o destino atingiu o teto
+  /// de 15 ativos.
   void swap({required Ticker ticker, required bool toPrincipal}) {
     final result = SwapAssetBetweenPortfolios.call(
       principal: state.study.principal,
@@ -96,6 +119,13 @@ class StudyNotifier extends Notifier<StudyState> {
     );
   }
 
+  /// Inclui um ativo na carteira indicada e reequipondera.
+  ///
+  /// - [asset]: ativo a incluir.
+  /// - [toPrincipal]: carteira de destino.
+  ///
+  /// Recusa via [StudyState.lastError] se o ativo já estiver presente ou se a
+  /// carteira estiver no teto. Descarta pesos customizados.
   void addAsset(Asset asset, {required bool toPrincipal}) {
     final target = toPrincipal ? state.study.principal : state.study.reserva;
     final result = target.add(asset);
@@ -111,6 +141,14 @@ class StudyNotifier extends Notifier<StudyState> {
     );
   }
 
+  /// Remove um ativo da carteira indicada e reequipondera o restante.
+  ///
+  /// - [ticker]: ativo a remover.
+  /// - [fromPrincipal]: carteira de origem.
+  ///
+  /// Recusa via [StudyState.lastError] se o ativo não estiver na carteira.
+  /// Remover o último ativo deixa a carteira **vazia**, não é erro. Descarta
+  /// pesos customizados.
   void removeAsset(Ticker ticker, {required bool fromPrincipal}) {
     final target = fromPrincipal ? state.study.principal : state.study.reserva;
     final result = target.remove(ticker);
@@ -127,6 +165,18 @@ class StudyNotifier extends Notifier<StudyState> {
   }
 
   /// Aplica pesos customizados, exigindo soma de 100%.
+  ///
+  /// - [weights]: peso em fração por ativo. Precisa cobrir **todos** os ativos
+  ///   da carteira alvo e somar 1,0 com folga de `1e-6`.
+  /// - [onPrincipal]: `true` para a Principal, `false` para a Reserva.
+  ///
+  /// **Não lança e não devolve nada**: a recusa vira mensagem em
+  /// [StudyState.lastError] e o estado permanece inalterado. É o contrato de
+  /// erro de todo este notifier — a interface reage ao campo, não a exceção.
+  ///
+  /// Recusa quando a soma foge da tolerância ou quando falta o peso de algum
+  /// ativo presente na carteira. Pesos de tickers que não estão na carteira são
+  /// **ignorados em silêncio**.
   void setWeights(Map<Ticker, double> weights, {required bool onPrincipal}) {
     final target = onPrincipal ? state.study.principal : state.study.reserva;
 
@@ -166,6 +216,11 @@ class StudyNotifier extends Notifier<StudyState> {
     );
   }
 
+  /// Redistribui os pesos igualmente na carteira indicada.
+  ///
+  /// - [onPrincipal]: `true` para a Principal, `false` para a Reserva.
+  ///
+  /// Nunca falha: uma carteira vazia continua vazia.
   void equalize({required bool onPrincipal}) {
     state = state.copyWith(
       study: onPrincipal
@@ -175,6 +230,17 @@ class StudyNotifier extends Notifier<StudyState> {
     );
   }
 
+  /// Grava o estudo no Firestore.
+  ///
+  /// Retorna `true` em sucesso. Em falha devolve `false` e publica a mensagem
+  /// em [StudyState.lastError] — **não lança**.
+  ///
+  /// Efeitos colaterais: marca [StudyState.isSaving] durante a operação, grava
+  /// o `id` devolvido no estudo em edição (o que converte a próxima gravação de
+  /// criação em atualização) e invalida a lista de estudos salvos, sem a qual o
+  /// recém-gravado só apareceria na sessão seguinte.
+  ///
+  /// Devolve `false` sem tocar no estado quando não há usuário autenticado.
   Future<bool> save() async {
     final userId = ref.read(currentUserIdProvider);
     if (userId == null) {
@@ -217,6 +283,17 @@ class StudyNotifier extends Notifier<StudyState> {
     );
   }
 
+  /// Remove um estudo salvo, pelo identificador.
+  ///
+  /// - [id]: documento a remover.
+  ///
+  /// Retorna `true` em sucesso; em falha devolve `false` e publica a mensagem
+  /// em [StudyState.lastError].
+  ///
+  /// **Apagar o estudo aberto não limpa a tela**: o conteúdo permanece e apenas
+  /// o vínculo com o documento é desfeito, de modo que a próxima gravação crie
+  /// um documento novo. Devolve `false` sem efeito se não houver usuário
+  /// autenticado.
   Future<bool> deleteSaved(String id) async {
     final userId = ref.read(currentUserIdProvider);
     if (userId == null) return false;
@@ -246,6 +323,7 @@ class StudyNotifier extends Notifier<StudyState> {
         goal: study.goal,
       );
 
+  /// Apaga a mensagem de erro pendente, depois que a interface a exibiu.
   void clearError() => state = state.copyWith(clearError: true);
 }
 

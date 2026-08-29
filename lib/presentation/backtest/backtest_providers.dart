@@ -11,6 +11,10 @@ class BacktestSettings {
   /// entrega.
   final int windowYears;
 
+  /// Dia do mês em que o aporte mensal entra.
+  ///
+  /// Limitado a 28 pelo domínio, para existir em todos os meses. Fixo no
+  /// padrão: não há controle na interface.
   final int contributionDay;
 
   /// Alterna entre proventos brutos e líquidos de IR.
@@ -20,12 +24,14 @@ class BacktestSettings {
   /// diluído num número só.
   final bool applyTaxes;
 
+  /// Declara os parâmetros.
   const BacktestSettings({
     this.windowYears = 5,
     this.contributionDay = 5,
     this.applyTaxes = true,
   });
 
+  /// Cópia com os campos informados substituídos.
   BacktestSettings copyWith({
     int? windowYears,
     int? contributionDay,
@@ -37,6 +43,8 @@ class BacktestSettings {
         applyTaxes: applyTaxes ?? this.applyTaxes,
       );
 
+  /// Política fiscal correspondente a [applyTaxes]: o regime brasileiro
+  /// vigente, ou nenhuma tributação.
   TaxPolicy get taxPolicy => applyTaxes ? TaxPolicy.brasil : TaxPolicy.zero;
 }
 
@@ -44,10 +52,16 @@ class BacktestSettingsNotifier extends Notifier<BacktestSettings> {
   @override
   BacktestSettings build() => const BacktestSettings();
 
+  /// Ajusta a janela do backtest, travada em 1 a 10 anos.
   void setWindowYears(int years) =>
       state = state.copyWith(windowYears: years.clamp(1, 10));
-  void setContributionDay(int day) =>
-      state = state.copyWith(contributionDay: day.clamp(1, 28));
+
+  /// Liga ou desliga a tributação de proventos, alternando entre
+  /// `TaxPolicy.brasil` e `TaxPolicy.zero`.
+  ///
+  /// O dia do aporte não tem mutador: é parâmetro declarado, fixo no padrão de
+  /// [BacktestSettings]. O `setContributionDay` que existia aqui nunca teve
+  /// chamador e foi removido na auditoria de código morto.
   void setApplyTaxes(bool value) => state = state.copyWith(applyTaxes: value);
 }
 
@@ -61,16 +75,36 @@ final backtestSettingsProvider =
 /// Ativo e carteira são papéis distintos, e a carteira de origem também: o
 /// ponto de um candidato da Reserva precisa se distinguir de um ativo já
 /// detido, porque é justamente essa comparação que sustenta a troca.
-enum RiskReturnKind { principalAsset, reservaAsset, principal, reserva }
+enum RiskReturnKind {
+  /// Ativo que já compõe a carteira Principal.
+  principalAsset,
+
+  /// Candidato da Reserva. Distinguir os dois é o que permite ler a troca.
+  reservaAsset,
+
+  /// A carteira Principal consolidada.
+  principal,
+
+  /// A carteira Reserva consolidada.
+  reserva,
+}
 
 /// Um ponto da dispersão: volatilidade e retorno anualizados, em **pontos
 /// percentuais** — a unidade em que os eixos são rotulados.
 class RiskReturnPoint {
+  /// Rótulo do ponto: o ticker, ou o nome da carteira.
   final String label;
+
+  /// Volatilidade anualizada em pontos percentuais — eixo horizontal.
   final double risk;
+
+  /// Retorno anualizado em pontos percentuais — eixo vertical.
   final double ret;
+
+  /// Papel do ponto, que decide cor e forma.
   final RiskReturnKind kind;
 
+  /// Declara o ponto.
   const RiskReturnPoint({
     required this.label,
     required this.risk,
@@ -78,13 +112,18 @@ class RiskReturnPoint {
     required this.kind,
   });
 
+  /// `true` para os pontos de carteira, `false` para os de ativo.
   bool get isPortfolio =>
       kind == RiskReturnKind.principal || kind == RiskReturnKind.reserva;
 }
 
 /// Resultado comparativo das duas carteiras sob o mesmo plano de aportes.
 class PortfolioComparison {
+  /// Resultado da Principal, ou `null` quando ela não pôde ser simulada —
+  /// nesse caso o motivo está em [principalFailure].
   final BacktestOutcome? principal;
+
+  /// Resultado da Reserva, com a mesma convenção de [principal].
   final BacktestOutcome? reserva;
 
   /// Janela **efetivamente simulada**, idêntica nas duas carteiras.
@@ -96,14 +135,17 @@ class PortfolioComparison {
   /// Ativo cujo histórico obrigou a encurtar a janela, quando houve.
   final Ticker? limitingTicker;
 
-  /// Por que cada carteira não pôde ser simulada, quando não pôde.
+  /// Por que a Principal não pôde ser simulada, quando não pôde.
   final String? principalFailure;
+
+  /// Por que a Reserva não pôde ser simulada, quando não pôde.
   final String? reservaFailure;
 
   /// Dispersão risco × retorno: um ponto por ativo das duas carteiras, mais
   /// as próprias carteiras.
   final List<RiskReturnPoint> riskReturn;
 
+  /// Agrupa o resultado comparativo já apurado.
   const PortfolioComparison({
     required this.window,
     required this.requestedWindow,
@@ -115,6 +157,8 @@ class PortfolioComparison {
     this.riskReturn = const [],
   });
 
+  /// `true` quando as duas carteiras foram simuladas — condição para que
+  /// [twrGap] exista.
   bool get hasBoth => principal != null && reserva != null;
 
   /// `true` quando a janela simulada ficou menor que a pedida.

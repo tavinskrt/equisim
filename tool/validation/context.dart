@@ -20,14 +20,32 @@ import 'package:equisim_core/equisim_core.dart';
 /// é SQLite em arquivo e o JSON é decodificado em linha, porque não há
 /// interface a proteger.
 class ValidationContext {
+  /// Cliente HTTP, com a mesma cadeia de interceptors do aplicativo.
   final ApiClient client;
+
+  /// Datasource da brapi — cotações, proventos, fundamentos e perfil.
   final BrapiDatasource brapi;
+
+  /// Datasource do Banco Central — CDI e IPCA.
   final BcbDatasource bcb;
+
+  /// Cache SQLite **em arquivo**, e não em memória: é o que torna os
+  /// relatórios reprodutíveis entre execuções.
   final CacheDatabase cache;
+
+  /// Repositório de cotações, sobre [brapi] e [cache].
   final PriceRepository prices;
+
+  /// Repositório de proventos.
   final DividendRepository dividends;
+
+  /// Repositório de fundamentos e perfil.
   final FundamentalsRepository fundamentals;
+
+  /// Repositório do Ibovespa.
   final BenchmarkRepository benchmark;
+
+  /// Repositório de séries macroeconômicas.
   final MacroRepository macro;
 
   ValidationContext._({
@@ -42,6 +60,10 @@ class ValidationContext {
     required this.macro,
   });
 
+  /// Nome do arquivo de cache dentro do diretório de saída.
+  ///
+  /// Apagá-lo força a rebusca completa na próxima execução — o caminho para
+  /// revalidar contra dados frescos da fonte.
   static const String cacheFileName = 'validation_cache.sqlite';
 
   /// Monta o contexto, resolvendo a credencial na mesma ordem do aplicativo.
@@ -50,6 +72,13 @@ class ValidationContext {
   /// são reaproveitados. Isso poupa a API e — o que importa mais para o
   /// trabalho — torna os relatórios **reprodutíveis**, já que deixam de
   /// depender do que a fonte devolve naquele instante.
+  /// - [outputDir]: diretório dos relatórios e do cache. Criado se não
+  ///   existir.
+  /// - [verbose]: liga o log sanitizado das requisições em `stdout`.
+  ///
+  /// **Encerra o processo com código 2** quando não encontra credencial da
+  /// brapi, em vez de lançar: é ferramenta de linha de comando, e uma exceção
+  /// com pilha esconderia a instrução de configuração.
   static ValidationContext create({
     required String outputDir,
     bool verbose = false,
@@ -94,6 +123,10 @@ class ValidationContext {
     );
   }
 
+  /// Fecha o cliente HTTP e o banco de cache.
+  ///
+  /// Chamar sempre ao fim da execução: sem fechar o banco, o arquivo SQLite
+  /// pode ficar com o journal pendente e a próxima execução o encontra sujo.
   Future<void> dispose() async {
     client.close();
     await cache.close();

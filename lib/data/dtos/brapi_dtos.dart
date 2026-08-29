@@ -36,18 +36,38 @@ abstract final class BrapiJson {
     return data is List ? data : const [];
   }
 
+  /// Extrai um número, aceitando `num` ou texto.
+  ///
+  /// Troca vírgula por ponto antes de converter, porque a fonte alterna entre
+  /// as duas convenções decimais. Devolve `null` para qualquer outra coisa —
+  /// **inclusive texto não numérico**, que não lança.
   static double? asDouble(dynamic value) {
     if (value is num) return value.toDouble();
     if (value is String) return double.tryParse(value.replaceAll(',', '.'));
     return null;
   }
 
+  /// Extrai um texto não vazio, já aparado.
+  ///
+  /// Devolve `null` para valor ausente, de outro tipo, ou composto só de
+  /// espaços — o que trata string vazia e ausência como a mesma coisa.
   static String? asString(dynamic value) {
     if (value is String && value.trim().isNotEmpty) return value.trim();
     return null;
   }
 
   /// Converte epoch em segundos ou string ISO para data sem horário.
+  ///
+  /// Aceita `int` (epoch em **segundos**, não milissegundos) e texto ISO, com
+  /// ou sem componente de hora. O resultado é sempre truncado para o dia, em
+  /// hora local.
+  ///
+  /// **O epoch é interpretado como UTC e a data resultante é local.** Um
+  /// instante logo após a meia-noite UTC vira o dia anterior em Brasília. É
+  /// aceitável porque a fonte publica datas de pregão e de provento ao meio-dia
+  /// UTC, longe da virada.
+  ///
+  /// Devolve `null` para valor ausente, de outro tipo ou não parseável.
   static DateTime? asDate(dynamic value) {
     if (value is int) {
       final dt = DateTime.fromMillisecondsSinceEpoch(value * 1000, isUtc: true);
@@ -62,6 +82,7 @@ abstract final class BrapiJson {
     return null;
   }
 
+  /// Formata a data como `AAAA-MM-DD`, para chave de cache e identidade.
   static String isoDay(DateTime date) =>
       '${date.year.toString().padLeft(4, '0')}-'
       '${date.month.toString().padLeft(2, '0')}-'
@@ -70,10 +91,17 @@ abstract final class BrapiJson {
 
 /// Cotação diária vinda de `/v2/stocks/historical`.
 class BrapiPriceDto {
+  /// Dia do pregão, truncado.
   final DateTime date;
+
+  /// Fechamento ajustado por desdobramento e grupamento.
   final double close;
+
+  /// Fechamento ajustado também por proventos. **Não usar em cálculo**:
+  /// subajusta proventos brasileiros, sobretudo JCP.
   final double? adjustedClose;
 
+  /// Declara o DTO.
   const BrapiPriceDto({
     required this.date,
     required this.close,
@@ -100,12 +128,22 @@ class BrapiPriceDto {
 
 /// Provento vindo de `/v2/stocks/dividends` → `cashDividends`.
 class BrapiDividendDto {
+  /// Data-ex — `lastDatePrior` na fonte. Define quem tem direito.
   final DateTime exDate;
+
+  /// Data de pagamento. Define quando o caixa entra.
   final DateTime paymentDate;
+
+  /// Valor por papel, na convenção bruta da fonte.
   final double rate;
+
+  /// Rótulo fiscal cru (`JCP`, `DIVIDENDO`, `RENDIMENTO`, …).
   final String label;
+
+  /// Observações da fonte. É onde vem a marca de data estimada.
   final String? remarks;
 
+  /// Declara o DTO.
   const BrapiDividendDto({
     required this.exDate,
     required this.paymentDate,
@@ -138,6 +176,12 @@ class BrapiDividendDto {
   bool get paymentDateEstimated =>
       (remarks ?? '').contains('payment_date_estimated');
 
+  /// Converte para a entidade de domínio.
+  ///
+  /// - [ticker]: ativo pagador, que o payload de proventos não repete.
+  ///
+  /// O rótulo cru vira [DividendKind] por `fromLabel`, que nunca falha: rótulo
+  /// desconhecido vira [DividendKind.desconhecido].
   DividendEvent toDomain(Ticker ticker) => DividendEvent(
         ticker: ticker,
         exDate: exDate,
@@ -160,9 +204,17 @@ class BrapiDividendDto {
 /// Fundamentos consolidados de um exercício, montados a partir de quatro
 /// endpoints distintos que compartilham a chave `endDate`.
 class BrapiFundamentalsDto {
+  /// Encerramento do exercício a que os números se referem.
   final DateTime fiscalPeriodEnd;
+
+  /// Campos crus do exercício, mesclados dos quatro endpoints da fonte.
+  ///
+  /// Mantidos como mapa de propósito: a fonte acrescenta e renomeia campos, e
+  /// tipar cada um aqui obrigaria a alterar o DTO a cada mudança dela. A
+  /// tipagem acontece na conversão para o domínio.
   final Map<String, dynamic> fields;
 
+  /// Declara o DTO.
   const BrapiFundamentalsDto({
     required this.fiscalPeriodEnd,
     required this.fields,
@@ -202,11 +254,19 @@ class BrapiFundamentalsDto {
 
 /// Perfil cadastral vindo de `/v2/stocks/profile`.
 class BrapiProfileDto {
+  /// Razão social ou nome de pregão. `null` quando a fonte não o traz.
   final String? name;
+
+  /// Chave estável do setor, para agrupar.
   final String? sectorKey;
+
+  /// Rótulo de exibição do setor.
   final String? sectorLabel;
+
+  /// Subsetor. Não participa de cálculo algum.
   final String? industry;
 
+  /// Declara o DTO.
   const BrapiProfileDto({
     this.name,
     this.sectorKey,

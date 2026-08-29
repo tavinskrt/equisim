@@ -22,22 +22,28 @@ class ContributionPlan {
   /// Dia do mês do aporte. Limitado a 28 para existir em todos os meses.
   final int contributionDay;
 
+  /// Declara o cronograma. **Não valida** [contributionDay]; dias acima de 28
+  /// simplesmente não ocorrem em fevereiro, e o aporte do mês é perdido.
   const ContributionPlan({
     required this.initial,
     required this.monthly,
     this.contributionDay = 5,
   });
 
+  /// Plano sem aporte algum. Usado para simular a evolução de uma posição já
+  /// constituída — recusado por [PortfolioBacktest.run], que exige capital.
   static const ContributionPlan none = ContributionPlan(
     initial: Money.zero,
     monthly: Money.zero,
   );
 
+  /// `true` quando há aporte mensal estritamente positivo.
   bool get hasMonthly => monthly.isPositive;
 }
 
 /// Desempenho individual de um ativo dentro da carteira.
 class AssetPerformance {
+  /// Ativo a que este desempenho se refere.
   final Ticker ticker;
 
   /// Peso estipulado na constituição da carteira.
@@ -53,11 +59,20 @@ class AssetPerformance {
   /// Capital alocado ao ativo ao longo do período.
   final Money invested;
 
+  /// Valor de mercado da posição no último pregão do período.
   final Money finalValue;
+
+  /// Proventos brutos recebidos no período, antes de retenção.
   final Money grossDividends;
+
+  /// Imposto retido na fonte sobre os proventos do período.
   final Money withheldTax;
+
+  /// Quantidade de papéis ao final. **Fracionária**: o modelo é de pesos, não
+  /// de lotes, e o reinvestimento de proventos produz frações.
   final double shares;
 
+  /// Agrupa o desempenho já apurado.
   const AssetPerformance({
     required this.ticker,
     required this.targetWeight,
@@ -75,30 +90,49 @@ class AssetPerformance {
 }
 
 /// Conjunto de métricas de desempenho de uma carteira.
+///
+/// Todas as métricas de risco são apuradas sobre a série **TWR em base 100**
+/// (`BacktestOutcome.base100`), nunca sobre a curva bruta de patrimônio — ver
+/// [RiskMetrics] para o motivo.
 class PerformanceMetrics {
-  /// Retorno acumulado da série TWR.
-  final double accumulatedReturn;
-
-  /// TWR — neutraliza aportes. Métrica correta para **comparar composições**.
+  /// Retorno acumulado do período, neutralizado de aportes (TWR).
+  ///
+  /// É **a** métrica para comparar duas composições de carteira: não premia
+  /// nem pune a carteira pelo cronograma de aportes. Para o retorno que o
+  /// investidor efetivamente obteve, use [moneyWeightedReturn].
   final double timeWeightedReturn;
 
   /// XIRR — retorno efetivo do investidor, o número a confrontar com a meta.
+  ///
+  /// `null` quando a taxa não pôde ser isolada: menos de dois fluxos, ausência
+  /// de fluxo positivo ou negativo, ou falha de convergência do solver.
   final double? moneyWeightedReturn;
 
-  /// CAGR derivado do TWR.
+  /// CAGR derivado do TWR, anualizado sobre o período efetivo em base 365,25.
   final double cagr;
 
+  /// Desvio-padrão amostral anualizado dos retornos diários, em fração.
   final double volatility;
+
+  /// Pior queda de pico a vale da série TWR, em fração **negativa**.
   final double maxDrawdown;
+
+  /// (CAGR − taxa livre de risco) / volatilidade. Zero quando a volatilidade
+  /// é nula.
   final double sharpe;
+
+  /// Como [sharpe], mas dividido apenas pelo semidesvio negativo.
   final double sortino;
+
+  /// CAGR / |máximo drawdown|. Zero quando não houve drawdown.
   final double calmar;
 
   /// Proventos líquidos de imposto sobre o patrimônio médio, ao ano.
   final double netDividendYield;
 
+  /// Agrupa as métricas já apuradas. Não calcula nada — o cálculo vive em
+  /// [PortfolioBacktest.run].
   const PerformanceMetrics({
-    required this.accumulatedReturn,
     required this.timeWeightedReturn,
     required this.moneyWeightedReturn,
     required this.cagr,
@@ -113,7 +147,13 @@ class PerformanceMetrics {
 
 /// Resultado da simulação de uma carteira.
 class BacktestOutcome {
+  /// Período **efetivamente** simulado, que pode ser mais curto que o pedido
+  /// quando algum ativo não tem histórico desde o início. O encurtamento é
+  /// registrado em [warnings].
   final DateRange effectivePeriod;
+
+  /// Calendário mestre: união dos pregões de todos os ativos, ordenado.
+  /// Alinhado posição a posição com [wealth] e [base100].
   final List<DateTime> dates;
 
   /// Patrimônio bruto dia a dia, incluindo os aportes.
@@ -123,17 +163,32 @@ class BacktestOutcome {
   /// curva de patrimônio salta no dia do aporte.
   final List<double> base100;
 
+  /// Fluxos datados na convenção da TIR: aportes negativos, e o valor final
+  /// da carteira como último fluxo positivo.
   final List<CashFlow> cashFlows;
+
+  /// Capital aportado no período, somando inicial e mensais.
   final Money totalContributed;
+
+  /// Patrimônio no último pregão.
   final Money finalValue;
+
+  /// Proventos brutos de toda a carteira no período.
   final Money grossDividends;
+
+  /// Imposto retido de toda a carteira no período.
   final Money withheldTax;
+
+  /// Métricas consolidadas de retorno e risco.
   final PerformanceMetrics metrics;
+
+  /// Desempenho por ativo, indexado por ticker.
   final Map<Ticker, AssetPerformance> perAsset;
 
   /// Avisos: séries encurtadas, ativos sem dados, datas de pagamento estimadas.
   final List<String> warnings;
 
+  /// Agrupa o resultado já simulado.
   const BacktestOutcome({
     required this.effectivePeriod,
     required this.dates,
@@ -160,6 +215,30 @@ class BacktestOutcome {
 /// imposto conforme a [TaxPolicy], e reinvestidos no próprio ativo pagador na
 /// data de pagamento.
 abstract final class PortfolioBacktest {
+  /// Simula a carteira no período e consolida retorno, risco e proventos.
+  ///
+  /// - [portfolio]: carteira com pesos que somem 100%.
+  /// - [prices]: cotações por ativo. **Todos** os ativos da carteira precisam
+  ///   estar presentes e não vazios.
+  /// - [dividends]: proventos por ativo. Ativos ausentes são tratados como sem
+  ///   proventos, não como erro.
+  /// - [plan]: cronograma de aportes. Exige inicial ou mensal positivo.
+  /// - [range]: janela desejada. Pode ser encurtada — ver
+  ///   [BacktestOutcome.effectivePeriod].
+  /// - [taxPolicy]: retenção aplicada aos proventos. Padrão [TaxPolicy.brasil].
+  /// - [riskFreeRate]: taxa livre de risco **anual** para Sharpe e Sortino.
+  ///   Padrão `0.0`, que produz Sharpe igual ao CAGR sobre a volatilidade.
+  ///
+  /// Devolve [InvalidInput] para carteira vazia, pesos que não somam 100% ou
+  /// plano sem aporte; [InsufficientData] quando falta cotação de algum ativo,
+  /// quando nenhum ativo tem histórico no período, ou quando sobram menos de
+  /// dois pregões.
+  ///
+  /// Complexidade **O(d · (a + e))**, com `d` pregões, `a` ativos e `e`
+  /// proventos elegíveis.
+  ///
+  /// **Não há rebalanceamento.** Os pesos definem a alocação de cada aporte e
+  /// nunca são restaurados depois.
   static Result<BacktestOutcome> run({
     required Portfolio portfolio,
     required Map<Ticker, PriceSeries> prices,
@@ -425,7 +504,6 @@ abstract final class PortfolioBacktest {
       grossDividends: Money.fromReais(totalGross),
       withheldTax: Money.fromReais(totalTax),
       metrics: PerformanceMetrics(
-        accumulatedReturn: twr,
         timeWeightedReturn: twr,
         moneyWeightedReturn: xirr,
         cagr: cagr,
@@ -445,6 +523,20 @@ abstract final class PortfolioBacktest {
   ///
   /// Deliberadamente ignora os pesos correntes: corrigir a deriva aqui seria
   /// rebalancear, e a estratégia não rebalanceia.
+  ///
+  /// Ativos sem cotação no dia são **pulados**: a fatia deles não é realocada
+  /// nem guardada, então um aporte em dia de suspensão aloca menos que o valor
+  /// cheio.
+  ///
+  /// **Defeito conhecido — o resto da divisão não é distribuído.** Cada fatia
+  /// é `amount * peso`, e [Money.operator *] arredonda isoladamente. A soma das
+  /// fatias não reconstitui [amount]: verificado, uma carteira de 15 ativos com
+  /// aporte de R$ 1.000,00 acumula **+5 centavos** em `investedCents`, e uma de
+  /// 3 ativos acumula −1 centavo. `totalContributedCents` usa o valor cheio,
+  /// então `Σ invested ≠ totalContributed` por construção, e
+  /// [AssetPerformance.totalReturn] divide por esse `invested` levemente
+  /// deslocado. O erro é de ordem de centavos por aporte e não afeta TWR, CAGR
+  /// nem as métricas de risco, que derivam do patrimônio marcado a mercado.
   static void _allocate({
     required Money amount,
     required Portfolio portfolio,
@@ -464,9 +556,22 @@ abstract final class PortfolioBacktest {
   }
 }
 
+/// Provento em trânsito dentro da simulação.
+///
+/// Mutável de propósito: a posição com direito é fixada na data-ex e o crédito
+/// acontece na data de pagamento, que pode ser semanas depois. Guardar os dois
+/// momentos num único objeto é o que evita recalcular a posição retroativamente
+/// — o que daria ao investidor o direito sobre ações compradas *depois* da
+/// data-ex.
 class _PendingDividend {
+  /// O provento em si.
   final DividendEvent event;
+
+  /// Posição apurada na data-ex. `null` enquanto a data-ex não chegou.
   double? entitlement;
+
+  /// `true` depois que o caixa entrou e foi reinvestido.
   bool paid = false;
+
   _PendingDividend(this.event);
 }

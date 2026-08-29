@@ -15,6 +15,20 @@ import 'views/login_page.dart';
 import 'views/forgot_password_page.dart';
 import 'views/sign_up_page.dart';
 
+/// Ponto de entrada da aplicação.
+///
+/// Tem **dois modos de partida**, decididos pela rota inicial da plataforma:
+///
+/// 1. `#/logs` — a janela paralela de auditoria. Sobe apenas o barramento no
+///    papel de inspetor e o aplicativo de logs, e **retorna**: sem Firebase,
+///    sem sessão, sem casca de navegação.
+/// 2. Qualquer outra — a aplicação completa.
+///
+/// Nenhuma falha de inicialização interrompe a partida. O `.env` ausente é
+/// esperado (a credencial pode vir de `--dart-define` ou do proxy), e uma falha
+/// do Firebase é capturada e repassada à interface em `initializationError`,
+/// que ao menos consegue explicá-la — sem isso, o aplicativo abriria numa tela
+/// cinza muda.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -117,10 +131,24 @@ class _ThemeSyncState extends ConsumerState<_ThemeSync> {
   Widget build(BuildContext context) => widget.child;
 }
 
+/// Raiz da aplicação: rotas, tema e as duas árvores de estado.
+///
+/// Convivem aqui **dois gerenciadores de estado**, de propósito. As telas de
+/// autenticação seguem em `provider` com `ChangeNotifier`; as telas de estudo,
+/// valuation e backtest usam Riverpod. Migrar as primeiras não traria ganho
+/// funcional e reabriria um fluxo já estável.
 class EquisimApp extends StatelessWidget {
+  /// Controlador de tema, compartilhado pelas duas árvores de estado.
+  ///
+  /// Injetado em vez de criado aqui: uma instância por árvore produziria dois
+  /// temas divergentes.
   final ThemeController themeController;
+
+  /// Erro da inicialização do Firebase, ou `null` se ela funcionou. Repassado
+  /// à interface para que a falha seja explicável em vez de silenciosa.
   final Object? initializationError;
 
+  /// Declara a raiz da aplicação.
   const EquisimApp({
     super.key,
     required this.themeController,

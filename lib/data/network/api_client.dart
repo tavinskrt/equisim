@@ -24,11 +24,30 @@ Future<dynamic> _decodeInline(String body) async => jsonDecode(body);
 /// financeiro roda em 0,14 ms, a rede leva 3,5 s e o parse fica no meio.
 class ApiClient {
   final Dio _dio;
+
+  /// Configuração de acesso — URLs base e credencial resolvida.
   final ApiConfig config;
+
   final HeavyJsonDecoder _decodeHeavy;
 
   ApiClient._(this._dio, this.config, this._decodeHeavy);
 
+  /// Monta o cliente com a cadeia de interceptors do projeto.
+  ///
+  /// A ordem dos interceptors importa e é fixa: autenticação, limitação de
+  /// taxa, repetição e, por último, log — de modo que o log registre a
+  /// requisição como ela de fato saiu.
+  ///
+  /// - [config]: URLs e credencial.
+  /// - [dio]: instância própria, para teste com adaptador de fixture. Sem ela,
+  ///   cria uma com 20 s de conexão e 40 s de recepção, em `ResponseType.plain`
+  ///   — o texto é desserializado por [HeavyJsonDecoder], não pelo Dio.
+  /// - [heavyDecoder]: estratégia para payloads grandes. Padrão em linha; o
+  ///   aplicativo injeta uma que usa outra isolate.
+  /// - [logSink], [logRequests]: destino e chave do log sanitizado.
+  ///
+  /// `validateStatus` aceita tudo abaixo de 500: erros de cliente viram
+  /// [Failure] tipada em [getJson] em vez de exceção.
   factory ApiClient(
     ApiConfig config, {
     Dio? dio,
@@ -55,6 +74,9 @@ class ApiClient {
     return ApiClient._(client, config, heavyDecoder ?? _decodeInline);
   }
 
+  /// A instância Dio subjacente, para quem precisa de acesso direto ao
+  /// transporte. Escape hatch: usar isto contorna o tratamento de falha de
+  /// [getJson].
   Dio get raw => _dio;
 
   /// GET que devolve JSON já desserializado.
@@ -62,6 +84,18 @@ class ApiClient {
   /// [heavy] indica payloads grandes, que vão para outra isolate. Em `compute`
   /// o alvo web executa em linha (não há threads), o que é aceitável: lá o
   /// gargalo é a rede, não o parse.
+  ///
+  /// - [url]: URL absoluta.
+  /// - [query]: parâmetros de consulta.
+  /// - [heavy]: encaminha a desserialização para [HeavyJsonDecoder].
+  ///
+  /// **Nunca lança** por falha de rede ou de protocolo: tudo vira [Failure].
+  /// `401`/`403` viram [InvalidInput]; `404`/`422` e resposta vazia viram
+  /// [InsufficientData]; `429` vira [DataQualityFailure] — a repetição
+  /// automática já se esgotou nesse ponto; JSON malformado e demais status
+  /// viram [ComputationFailure]. Tempo esgotado e ausência de conexão viram
+  /// [InsufficientData], porque são condições transitórias e não defeito do
+  /// dado.
   Future<Result<dynamic>> getJson(
     String url, {
     Map<String, dynamic>? query,
@@ -118,5 +152,6 @@ class ApiClient {
   static String _trim(String body) =>
       body.length > 200 ? '${body.substring(0, 200)}…' : body;
 
+  /// Fecha o transporte, cancelando requisições em voo.
   void close() => _dio.close(force: true);
 }

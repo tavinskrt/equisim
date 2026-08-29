@@ -22,14 +22,25 @@ enum PortfolioKind {
 /// base 100 e a alocação é percentual, de modo que contagem inteira de ações
 /// não faz parte do modelo.
 class PortfolioEntry {
+  /// Ativo posicionado.
   final Asset asset;
+
+  /// Peso **estipulado** na constituição, não o peso corrente de mercado. A
+  /// deriva entre os dois é apurada pelo backtest, não guardada aqui.
   final Weight weight;
 
+  /// Declara a posição.
   const PortfolioEntry({required this.asset, required this.weight});
 
+  /// Atalho para `asset.ticker` — é por ele que a carteira indexa.
   Ticker get ticker => asset.ticker;
+
+  /// Atalho para `asset.sector`, usado pela análise de concentração.
   Sector get sector => asset.sector;
 
+  /// Devolve uma cópia com outro peso, preservando o ativo.
+  ///
+  /// A entrada é imutável; reequiponderar é reconstruir, não mutar.
   PortfolioEntry withWeight(Weight w) =>
       PortfolioEntry(asset: asset, weight: w);
 }
@@ -40,15 +51,29 @@ class PortfolioEntry {
 /// nunca são restaurados depois. Os pesos correntes derivam com o mercado, e
 /// essa deriva é informação útil — não defeito a corrigir.
 class Portfolio {
+  /// Identificador estável, usado para persistir e correlacionar.
   final String id;
+
+  /// Nome de exibição, editável pelo usuário.
   final String name;
+
+  /// Papel na dupla gestão: Principal ou Reserva.
   final PortfolioKind kind;
+
+  /// Posições indexadas por ativo. **Imutável** — todo método de alteração
+  /// devolve uma carteira nova.
   final Map<Ticker, PortfolioEntry> entries;
 
   /// Teto de ativos por carteira. Acima disso a interface de arrastar e soltar
   /// degrada e o alerta de concentração setorial perde utilidade prática.
   static const int maxAssets = 15;
 
+  /// Constrói a carteira congelando o mapa de posições.
+  ///
+  /// **Não valida** teto de ativos nem soma de pesos — quem valida são as
+  /// fábricas [Portfolio.equalWeighted] e [Portfolio.weighted], que devolvem
+  /// [Result]. Este construtor é o caminho interno usado por elas e pelos
+  /// métodos de alteração, que já sabem que o estado é consistente.
   Portfolio({
     required this.id,
     required this.name,
@@ -56,14 +81,37 @@ class Portfolio {
     required Map<Ticker, PortfolioEntry> entries,
   }) : entries = Map.unmodifiable(entries);
 
+  /// `true` quando não há nenhum ativo.
   bool get isEmpty => entries.isEmpty;
+
+  /// Quantidade de ativos. Limitada a [maxAssets] pelas fábricas.
   int get length => entries.length;
+
+  /// Ativos em ordem alfabética.
+  ///
+  /// A ordenação é o que torna determinístico o resultado de [Weights.equal],
+  /// que absorve o resíduo no primeiro elemento — sem ordem estável, o ativo
+  /// que recebe o resíduo mudaria entre execuções.
+  ///
+  /// Constrói e ordena a cada chamada: O(n log n).
   List<Ticker> get tickers => entries.keys.toList()..sort();
+
+  /// Pesos estipulados, em ordem de iteração do mapa.
   Iterable<Weight> get weights => entries.values.map((e) => e.weight);
 
+  /// `true` quando os pesos somam 100% dentro da tolerância de
+  /// [Weights.sumsToOne]. Uma carteira vazia é inválida por este critério.
   bool get hasValidWeights => Weights.sumsToOne(weights);
 
   /// Cria uma carteira equiponderada, validando o teto de ativos.
+  ///
+  /// - [id], [name], [kind]: identidade da carteira.
+  /// - [assets]: ativos a incluir, sem duplicatas.
+  ///
+  /// Devolve [InvalidInput] para lista vazia, para mais de [maxAssets] ativos,
+  /// ou quando dois ativos compartilham o mesmo ticker — a duplicata é barrada
+  /// explicitamente porque o mapa a colapsaria em silêncio, produzindo uma
+  /// carteira menor do que a pedida.
   static Result<Portfolio> equalWeighted({
     required String id,
     required String name,
@@ -103,6 +151,18 @@ class Portfolio {
   }
 
   /// Cria com pesos customizados, exigindo soma igual a 100%.
+  ///
+  /// - [id], [name], [kind]: identidade da carteira.
+  /// - [allocation]: peso em fração por ativo. Deve somar 1,0 com folga de
+  ///   `1e-6`.
+  ///
+  /// Devolve [InvalidInput] para alocação vazia, acima de [maxAssets], ou com
+  /// soma fora da tolerância — neste caso com `field: 'weights'`, para a
+  /// interface destacar o campo certo.
+  ///
+  /// Ativos distintos com o mesmo ticker colapsam aqui **sem erro**, ao
+  /// contrário de [Portfolio.equalWeighted]: o mapa é indexado por [Asset], e
+  /// só a chave do resultado usa o ticker.
   static Result<Portfolio> weighted({
     required String id,
     required String name,
@@ -137,6 +197,9 @@ class Portfolio {
   }
 
   /// Redistribui os pesos igualmente entre os ativos atuais.
+  ///
+  /// Devolve uma carteira nova; a original permanece intacta. Sobre carteira
+  /// vazia devolve uma cópia vazia.
   Portfolio equalize() {
     final weights = Weights.equal(tickers);
     return Portfolio(
@@ -151,6 +214,15 @@ class Portfolio {
   }
 
   /// Remove um ativo e reequipondera o restante.
+  ///
+  /// - [ticker]: ativo a remover.
+  ///
+  /// Devolve [InvalidInput] se o ativo não estiver na carteira. Remover o
+  /// último ativo devolve uma carteira **vazia**, não uma falha — quem chama
+  /// decide se isso é aceitável no seu contexto.
+  ///
+  /// A reequiponderação **descarta os pesos customizados** dos ativos que
+  /// ficam: todos voltam a ser iguais.
   Result<Portfolio> remove(Ticker ticker) {
     if (!entries.containsKey(ticker)) {
       return Err(InvalidInput('Ativo $ticker não está na carteira.'));
@@ -172,6 +244,12 @@ class Portfolio {
   }
 
   /// Adiciona um ativo e reequipondera.
+  ///
+  /// - [asset]: ativo a incluir.
+  ///
+  /// Devolve [InvalidInput] se o ativo já estiver presente ou se a carteira já
+  /// tiver [maxAssets] ativos. Como [remove], **descarta pesos customizados**:
+  /// a carteira resultante é equiponderada.
   Result<Portfolio> add(Asset asset) {
     if (entries.containsKey(asset.ticker)) {
       return Err(InvalidInput('${asset.ticker} já está na carteira.'));

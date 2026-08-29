@@ -8,12 +8,24 @@ import 'context.dart';
 
 /// Linha do relatório de qualidade de proventos.
 class QualityRow {
+  /// Ativo conferido.
   final Ticker ticker;
+
+  /// Laudo do portão de qualidade.
   final DividendQualityReport report;
+
+  /// Total de proventos na janela de 12 meses.
   final int eventCount;
+
+  /// Quantos deles são JCP — os únicos com IRRF retido, e por isso a parcela
+  /// que mais afeta a diferença entre bruto e líquido.
   final int jcpCount;
+
+  /// Quantos têm data de pagamento marcada como estimada pela fonte, o que
+  /// desloca o reinvestimento em alguns dias.
   final int estimatedDateCount;
 
+  /// Declara a linha.
   const QualityRow({
     required this.ticker,
     required this.report,
@@ -25,13 +37,28 @@ class QualityRow {
 
 /// Linha do relatório de divergência contra `adjustedClose`.
 class DivergenceRow {
+  /// Ativo medido.
   final Ticker ticker;
+
+  /// Razão de retorno total observada no `adjustedClose` da fonte.
   final double observedRatio;
+
+  /// Razão que o fluxo de proventos do domínio implica.
   final double impliedRatio;
+
+  /// Diferença relativa entre as duas, em fração.
   final double deviation;
+
+  /// Proventos considerados no período.
   final int eventCount;
+
+  /// Participação de JCP, em pontos percentuais.
+  ///
+  /// É a variável que explica a divergência: o `adjustedClose` do Yahoo
+  /// subajusta JCP, então quanto maior esta fração, maior o desvio.
   final int jcpShare;
 
+  /// Declara a linha.
   const DivergenceRow({
     required this.ticker,
     required this.observedRatio,
@@ -42,6 +69,7 @@ class DivergenceRow {
   });
 }
 
+/// Relatórios de qualidade dos dados de proventos.
 abstract final class DataQualityReports {
   /// **Portão de qualidade de proventos.**
   ///
@@ -49,6 +77,11 @@ abstract final class DataQualityReports {
   /// a própria fonte publica. É a conferência que a auditoria mostrou
   /// funcionar (§0.4, Teste 2), depois que a reconciliação contra
   /// `adjustedClose` falhou.
+  ///
+  /// - [ctx]: contexto com a camada de dados.
+  ///
+  /// Ativos cujos dados não puderem ser carregados são **omitidos** do
+  /// resultado em vez de derrubar a varredura.
   static Future<List<QualityRow>> runQualityGate(
     ValidationContext ctx, {
     required List<String> symbols,
@@ -98,6 +131,15 @@ abstract final class DataQualityReports {
   /// compara com a razão `adjustedClose/close` observada no início da série.
   /// Serve para documentar, com números do universo e não de quatro exemplos,
   /// a limitação do Yahoo com proventos brasileiros — sobretudo JCP.
+  /// Mede a divergência entre o `adjustedClose` da fonte e o retorno total
+  /// construído pelo domínio.
+  ///
+  /// - [ctx]: contexto com a camada de dados.
+  ///
+  /// **Não é um teste que deva passar.** Documenta um defeito conhecido da
+  /// fonte, e o resultado esperado é divergência crescente com a participação
+  /// de JCP. É a evidência que sustenta a decisão de não usar
+  /// `adjustedClose` em cálculo.
   static Future<List<DivergenceRow>> runDivergenceScan(
     ValidationContext ctx, {
     required List<String> symbols,
@@ -172,6 +214,7 @@ abstract final class DataQualityReports {
 
   // ------------------------------------------------------------ Relatórios --
 
+  /// Formata o portão de qualidade como relatório Markdown.
   static String qualityReport(List<QualityRow> rows) {
     final consistent =
         rows.where((r) => r.report.status == DividendQuality.consistent).length;
@@ -242,6 +285,8 @@ abstract final class DataQualityReports {
     return buffer.toString();
   }
 
+  /// Formata a varredura de divergência como relatório Markdown, incluindo a
+  /// correlação entre desvio e participação de JCP.
   static String divergenceReport(List<DivergenceRow> rows) {
     final sorted = [...rows]
       ..sort((a, b) => a.deviation.abs().compareTo(b.deviation.abs()));

@@ -20,6 +20,8 @@ class FinancialGoal {
   /// V_f — patrimônio desejado ao final.
   final Money targetWealth;
 
+  /// Declara o plano. **Não valida** — quem valida é
+  /// `RequiredReturnSolver.solve`, que devolve [Result] em vez de lançar.
   const FinancialGoal({
     required this.initialContribution,
     required this.monthlyContribution,
@@ -27,6 +29,7 @@ class FinancialGoal {
     required this.targetWealth,
   });
 
+  /// Prazo em anos, derivado de [months]. Fração exata, sem arredondar.
   double get years => months / 12.0;
 
   /// Capital que o próprio investidor aporta ao longo do plano, sem
@@ -49,6 +52,7 @@ class RequiredReturn {
   /// `true` quando a raiz veio da bisseção de resguardo, não de Newton.
   final bool usedBisection;
 
+  /// Agrupa a taxa resolvida e o diagnóstico do solver.
   const RequiredReturn({
     required this.monthly,
     required this.iterations,
@@ -56,8 +60,15 @@ class RequiredReturn {
   });
 
   /// Taxa anual equivalente: `(1 + i)¹² − 1`.
+  ///
+  /// Conversão por **composição**, nunca por multiplicação: `i × 12` erra por
+  /// dezenas de pontos percentuais nas taxas que uma meta agressiva exige.
   double get annual => math.pow(1 + monthly, 12).toDouble() - 1;
 
-  /// Taxa semestral equivalente.
+  /// Taxa semestral equivalente: `(1 + anual)^(1/2) − 1`, ou seja
+  /// `(1 + mensal)⁶ − 1`.
+  ///
+  /// Também por composição. Existe para exibição em prazos intermediários;
+  /// nenhum cálculo do pacote a consome.
   double get semiAnnual => math.pow(1 + annual, 0.5).toDouble() - 1;
 }

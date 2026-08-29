@@ -4,10 +4,17 @@ import 'context.dart';
 
 /// Resultado de uma verificação de invariante.
 class InvariantCheck {
+  /// Nome da identidade verificada, como aparece no relatório.
   final String name;
+
+  /// `true` quando a identidade se sustentou dentro da tolerância.
   final bool passed;
+
+  /// Os números medidos e a tolerância aplicada. É o que permite conferir a
+  /// verificação em vez de acreditar nela.
   final String detail;
 
+  /// Declara o resultado.
   const InvariantCheck({
     required this.name,
     required this.passed,
@@ -26,6 +33,17 @@ class InvariantCheck {
 /// nenhuma fonte externa de verdade: são identidades matemáticas que o motor
 /// **precisa** satisfazer. Uma falha aqui é prova de defeito, não indício.
 abstract final class Invariants {
+  /// Executa todas as invariantes e devolve um resultado por identidade.
+  ///
+  /// - [ctx]: contexto com a camada de dados do aplicativo.
+  ///
+  /// **Nunca lança e nunca interrompe no primeiro erro**: uma identidade que
+  /// falha vira `InvariantCheck` com `passed` falso, e as demais continuam. Um
+  /// relatório parcial esconderia se o defeito é isolado ou generalizado.
+  ///
+  /// As três últimas verificações são puramente aritméticas e dispensam rede;
+  /// as demais consomem dados reais e dependem do que o cache ou a fonte
+  /// entregam.
   static Future<List<InvariantCheck>> runAll(
     ValidationContext ctx, {
     List<String> sample = const ['PETR4', 'ITUB4', 'WEGE3'],
@@ -351,6 +369,11 @@ abstract final class Invariants {
   }
 
   /// Relatório em markdown.
+  /// Formata os resultados como relatório Markdown.
+  ///
+  /// - [checks]: saída de [runAll].
+  ///
+  /// Não decide nada: quem interpreta reprovação é o chamador.
   static String report(List<InvariantCheck> checks) {
     final passed = checks.where((c) => c.passed).length;
     final buffer = StringBuffer()

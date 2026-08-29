@@ -11,10 +11,19 @@ import 'dcf.dart';
 /// apenas os três números que um analista sabe dizer, e não pressupõe
 /// simetria como a normal.
 class TriangularRange {
+  /// Piso da faixa.
   final double min;
+
+  /// Valor mais provável. Deve ficar em `[min, max]`.
   final double mode;
+
+  /// Teto da faixa.
   final double max;
 
+  /// Declara a faixa. **Não valida** `min ≤ mode ≤ max`: a violação não é
+  /// detectada aqui, e sim em [sample], onde produz `NaN` pela raiz de número
+  /// negativo. As faixas do pacote são construídas por
+  /// [StochasticScenarios.around], que respeita a ordem por construção.
   const TriangularRange({
     required this.min,
     required this.mode,
@@ -27,9 +36,22 @@ class TriangularRange {
         mode = value,
         max = value;
 
+  /// `true` quando a faixa colapsou num único ponto e [sample] é constante.
+  ///
+  /// Comparação exata de `double` é correta aqui: o interesse é saber se as
+  /// pontas são o **mesmo** valor — tipicamente por [TriangularRange.fixed] —,
+  /// não se estão próximas. Uma faixa estreitíssima porém não degenerada
+  /// continua sendo amostrada, e é isso que se quer.
   bool get isDegenerate => min == max;
 
   /// Amostragem por transformada inversa — determinística dado o gerador.
+  ///
+  /// - [rng]: gerador. Semeado por [ScenarioEngine.run], o que torna a
+  ///   distribuição inteira reproduzível.
+  ///
+  /// Devolve [mode] sem consumir sorteio algum quando a faixa é degenerada —
+  /// o que mantém o consumo de [rng] proporcional às faixas efetivamente
+  /// aleatórias.
   double sample(math.Random rng) {
     if (isDegenerate) return mode;
     final u = rng.nextDouble();
@@ -48,23 +70,46 @@ class TriangularRange {
 /// alternar entre cenários nomeados e Monte Carlo é troca de configuração, não
 /// refatoração.
 abstract class AssumptionSource {
+  /// Como esta fonte gera cenários.
+  ///
+  /// [ScenarioEngine.run] usa este valor para escolher o ramo de consolidação
+  /// e, no modo discreto, faz **cast** para [DiscreteScenarios]. Implementações
+  /// próprias que devolvam [ScenarioMode.discrete] sem estender aquela classe
+  /// provocam [TypeError] em tempo de execução.
   ScenarioMode get mode;
 
   /// Premissas do cenário central, usadas como resultado principal.
   DcfAssumptions get base;
 
-  /// Gera [samples] conjuntos de premissas.
+  /// Gera conjuntos de premissas a avaliar.
+  ///
+  /// - [samples]: quantidade desejada. Implementações discretas a ignoram e
+  ///   devolvem seu conjunto fixo.
+  /// - [rng]: gerador semeado, para que a rodada seja reproduzível.
   List<DcfAssumptions> draw(int samples, math.Random rng);
 }
 
 /// Três conjuntos fixos de premissas — Pessimista, Base e Otimista.
 class DiscreteScenarios implements AssumptionSource {
+  /// Premissas por faixa. **Precisa conter [ScenarioBand.base]** — [base]
+  /// desreferencia essa chave e lança se ela faltar.
   final Map<ScenarioBand, DcfAssumptions> scenarios;
 
+  /// Declara os cenários diretamente. Para derivá-los de um cenário central,
+  /// use [DiscreteScenarios.around].
   const DiscreteScenarios(this.scenarios);
 
   /// Constrói as três faixas a partir de um cenário central, deslocando
   /// crescimento e desconto em direções opostas.
+  ///
+  /// - [center]: premissas do cenário Base, repassadas sem alteração.
+  /// - [growthDelta]: deslocamento do crescimento explícito. Padrão 3 p.p.
+  /// - [discountDelta]: deslocamento da taxa de desconto. Padrão 2 p.p.
+  ///
+  /// No cenário otimista o desconto é limitado por baixo a
+  /// `perpetualGrowth + DcfCalculator.minimumSpread`: sem esse piso, o
+  /// deslocamento poderia aproximar `r` de `g` e fazer a perpetuidade divergir
+  /// justamente no cenário que deveria ser o mais favorável.
   factory DiscreteScenarios.around(
     DcfAssumptions center, {
     double growthDelta = 0.03,
@@ -88,9 +133,19 @@ class DiscreteScenarios implements AssumptionSource {
   @override
   ScenarioMode get mode => ScenarioMode.discrete;
 
+  /// Premissas da faixa Base.
+  ///
+  /// Lança [TypeError] se [scenarios] não contiver [ScenarioBand.base].
   @override
   DcfAssumptions get base => scenarios[ScenarioBand.base]!;
 
+  /// Devolve os três cenários fixos, **ignorando [samples] e [rng]**.
+  ///
+  /// Os dois parâmetros existem por imposição de [AssumptionSource.draw], que
+  /// [StochasticScenarios] implementa sorteando. Aqui não há o que sortear: o
+  /// conjunto é o que o chamador declarou. Consumir [rng] mesmo assim
+  /// adiantaria o estado do gerador e faria o resultado depender do modo, o que
+  /// quebraria a reprodutibilidade prometida por [ScenarioEngine.run].
   @override
   List<DcfAssumptions> draw(int samples, math.Random rng) =>
       scenarios.values.toList();
@@ -101,10 +156,18 @@ class StochasticScenarios implements AssumptionSource {
   @override
   final DcfAssumptions base;
 
+  /// Faixa do crescimento explícito, em fração ao ano.
   final TriangularRange growth;
+
+  /// Faixa da taxa de desconto, em fração ao ano.
   final TriangularRange discount;
+
+  /// Faixa do crescimento na perpetuidade, em fração ao ano. Cada sorteio é
+  /// truncado em [draw] para preservar a distância mínima até o desconto.
   final TriangularRange perpetual;
 
+  /// Declara as faixas diretamente. Para derivá-las de um cenário central,
+  /// use [StochasticScenarios.around].
   const StochasticScenarios({
     required this.base,
     required this.growth,
@@ -113,6 +176,14 @@ class StochasticScenarios implements AssumptionSource {
   });
 
   /// Faixas simétricas em torno do cenário central.
+  ///
+  /// - [center]: premissas do cenário Base.
+  /// - [growthSpread]: meia-largura da faixa de crescimento. Padrão 4 p.p.
+  /// - [discountSpread]: meia-largura da faixa de desconto. Padrão 2 p.p.
+  /// - [perpetualSpread]: meia-largura da perpetuidade. Padrão 1 p.p.
+  ///
+  /// O piso da faixa perpétua é travado em zero: crescimento perpétuo negativo
+  /// não é premissa defensável para uma empresa em continuidade.
   factory StochasticScenarios.around(
     DcfAssumptions center, {
     double growthSpread = 0.04,
@@ -161,6 +232,8 @@ class StochasticScenarios implements AssumptionSource {
 
 /// Resultado consolidado de uma rodada de cenários.
 class ScenarioOutcome {
+  /// Como os cenários foram gerados — determina qual de [discrete] e
+  /// [distribution] está preenchido.
   final ScenarioMode mode;
 
   /// Valor por ação do cenário central.
@@ -175,6 +248,7 @@ class ScenarioOutcome {
   /// Sorteios descartados por não produzirem valor válido.
   final int discarded;
 
+  /// Agrupa o resultado já consolidado. Não calcula nada.
   const ScenarioOutcome({
     required this.mode,
     required this.baseValue,
@@ -184,12 +258,31 @@ class ScenarioOutcome {
   });
 }
 
+/// Executa uma avaliação sobre um conjunto de cenários e consolida o resultado.
 abstract final class ScenarioEngine {
   /// Executa a avaliação sobre todos os cenários da fonte.
   ///
   /// [valuate] recebe um conjunto de premissas e devolve o valor por ação.
   /// [seed] fixa o gerador: a mesma entrada produz sempre o mesmo resultado,
   /// requisito de reprodutibilidade.
+  ///
+  /// - [source]: fonte das premissas. Define o modo e, com ele, o formato do
+  ///   resultado.
+  /// - [valuate]: avaliação de um conjunto de premissas. Chamada uma vez para
+  ///   o cenário central e depois uma vez por cenário sorteado.
+  /// - [samples]: sorteios no modo Monte Carlo. Ignorado no modo discreto.
+  ///   Padrão `10000`.
+  /// - [seed]: semente do gerador. Padrão `42`.
+  ///
+  /// Propaga a falha de [valuate] sobre o cenário central — sem valor base não
+  /// há resultado. Devolve [ComputationFailure] quando **nenhum** cenário
+  /// produz valor válido; cenários individuais que falham apenas incrementam
+  /// [ScenarioOutcome.discarded]. No modo Monte Carlo também são descartados os
+  /// valores não finitos ou não positivos.
+  ///
+  /// Lança [TypeError] se [source] declarar [ScenarioMode.discrete] sem ser um
+  /// [DiscreteScenarios] — o ramo discreto precisa do mapa de faixas, que não
+  /// está na interface.
   static Result<ScenarioOutcome> run({
     required AssumptionSource source,
     required Result<double> Function(DcfAssumptions) valuate,
@@ -201,7 +294,6 @@ abstract final class ScenarioEngine {
     final baseValue = baseResult.unwrap();
 
     final rng = math.Random(seed);
-    final assumptions = source.draw(samples, rng);
 
     if (source.mode == ScenarioMode.discrete) {
       final discreteSource = source as DiscreteScenarios;
@@ -230,7 +322,7 @@ abstract final class ScenarioEngine {
 
     final values = <double>[];
     var discarded = 0;
-    for (final a in assumptions) {
+    for (final a in source.draw(samples, rng)) {
       final r = valuate(a);
       if (r.isOk) {
         final v = r.unwrap();

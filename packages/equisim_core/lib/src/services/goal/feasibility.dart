@@ -38,6 +38,16 @@ class MarketAnchors {
   /// Janela observada, para exibição.
   final int observedYears;
 
+  /// Declara as âncoras.
+  ///
+  /// - [riskFreeCagr]: CAGR histórico do CDI na janela.
+  /// - [marketCagr]: CAGR histórico do índice na janela.
+  /// - [observedYears]: extensão da janela, para exibição.
+  /// - [inflationCagr]: IPCA anualizado. Padrão 4,5%.
+  /// - [currentRiskFreeRate]: CDI corrente. **Omiti-lo faz cair para
+  ///   [riskFreeCagr]**, ou seja, o desconto passa a usar a média da década —
+  ///   o comportamento antigo, preservado para não quebrar quem constrói as
+  ///   âncoras à mão. A aplicação informa o valor corrente.
   const MarketAnchors({
     required this.riskFreeCagr,
     required this.marketCagr,
@@ -85,11 +95,21 @@ enum FeasibilityLevel {
 
 /// Veredito sobre a meta, com a mensagem já formulada.
 class FeasibilityVerdict {
+  /// Classificação da meta. É o que [blocks] e [warns] traduzem para a
+  /// interface.
   final FeasibilityLevel level;
+
+  /// Taxa anual exigida pela meta, em fração.
   final double requiredAnnualRate;
+
+  /// Âncoras contra as quais a meta foi julgada. Viajam junto do veredito para
+  /// que a interface cite os números concretos sem consultá-los de novo.
   final MarketAnchors anchors;
+
+  /// Mensagem pronta para exibição, em português, já citando os percentuais.
   final String message;
 
+  /// Agrupa o veredito já formulado.
   const FeasibilityVerdict({
     required this.level,
     required this.requiredAnnualRate,
@@ -104,6 +124,11 @@ class FeasibilityVerdict {
   bool get warns => level == FeasibilityLevel.demanding;
 }
 
+/// Julga se uma meta patrimonial é plausível diante do que o mercado entregou.
+///
+/// Os limiares são **múltiplos do CAGR observado do Ibovespa**, não constantes
+/// absolutas: uma exigência de 15% a.a. é modesta numa década de juro alto e
+/// agressiva numa de juro baixo, e um limite fixo trataria as duas igual.
 abstract final class GoalFeasibility {
   /// Múltiplo do retorno de mercado acima do qual a meta é bloqueada.
   static const double blockingMultiple = 2.5;
@@ -111,6 +136,21 @@ abstract final class GoalFeasibility {
   /// Múltiplo acima do qual a meta recebe alerta.
   static const double warningMultiple = 2.0;
 
+  /// Classifica a meta e formula a mensagem correspondente.
+  ///
+  /// - [required]: taxa já resolvida por `RequiredReturnSolver`.
+  /// - [anchors]: referências de mercado da janela observada.
+  /// - [goal]: plano original. Opcional — quando informado, permite detectar o
+  ///   caso em que os aportes sozinhos já superam a meta, que antecede
+  ///   qualquer comparação com o mercado.
+  ///
+  /// A escala é: abaixo do CDI é [FeasibilityLevel.riskFreeSufficient]; até o
+  /// CAGR do mercado é [FeasibilityLevel.plausible]; até
+  /// [blockingMultiple] vezes esse CAGR é [FeasibilityLevel.demanding], em duas
+  /// faixas com mensagens distintas; acima disso é
+  /// [FeasibilityLevel.unrealistic].
+  ///
+  /// Nunca falha e nunca lança — toda meta recebe um veredito.
   static FeasibilityVerdict assess({
     required RequiredReturn required,
     required MarketAnchors anchors,

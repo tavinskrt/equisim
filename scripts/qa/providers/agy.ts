@@ -95,6 +95,17 @@ export function isAgyAvailable(): boolean {
   }
 }
 
+/**
+ * Backend pela CLI do Antigravity, autenticado pela assinatura Google AI Pro.
+ *
+ * E o padrao do projeto: alcanca a familia Pro sem API key nem billing, e a
+ * cota e a da assinatura. Em troca abre mao de parte do determinismo -- o
+ * schema nao e forcado pelo servidor, entao o JSON chega as vezes sujo e e
+ * saneado antes da validacao.
+ *
+ * Fala com o processo por NDJSON no stdout, o que permite medir consumo de
+ * tokens: sendo cota de assinatura, nao ha painel de billing a consultar.
+ */
 export class AgyProvider implements QaProvider {
   readonly name = 'agy' as const;
 
@@ -231,6 +242,13 @@ export class AgyProvider implements QaProvider {
 const QUOTA_PATTERNS =
   /quota|rate.?limit|exhaust|too many requests|\b429\b|limit reached|usage limit/i;
 
+/**
+ * Classifica a mensagem de erro como cota esgotada.
+ *
+ * @param message Texto do erro, como o CLI o reportou.
+ * @returns `true` quando repetir agora e inutil e o payload deve ir para a fila
+ *   de pendencias.
+ */
 export function isQuotaError(message: string): boolean {
   return QUOTA_PATTERNS.test(message);
 }
@@ -247,6 +265,12 @@ export function isQuotaError(message: string): boolean {
 const RETRYABLE_PATTERNS =
   /improperly formatted|malformed|function call|internal error|unavailable|timeout|temporar/i;
 
+/**
+ * Classifica a mensagem de erro como recuperavel por nova tentativa.
+ *
+ * @param message Texto do erro, como o CLI o reportou.
+ * @returns `true` quando vale repetir imediatamente.
+ */
 export function isRetryable(message: string): boolean {
   return RETRYABLE_PATTERNS.test(message);
 }
@@ -261,8 +285,11 @@ function agyExecutable(): string {
   return process.platform === 'win32' ? 'agy.exe' : 'agy';
 }
 
+/** O que a leitura do fluxo NDJSON extraiu de uma execucao do `agy`. */
 export interface AgyOutcome {
+  /** Relatorio como texto JSON, ainda nao validado. */
   text: string;
+  /** Consumo de tokens, quando o fluxo o reportou. */
   usage?: ProviderUsage;
 }
 

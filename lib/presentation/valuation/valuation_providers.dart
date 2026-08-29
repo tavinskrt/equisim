@@ -14,8 +14,15 @@ class ValuationSettings {
   /// depois de ver os dois funcionando.
   final bool monteCarlo;
 
+  /// Sorteios de Monte Carlo. Também decide se a avaliação migra para outra
+  /// isolate — ver `ValuationRunner.isolateThresholdSamples`.
   final int samples;
+
+  /// Margem de segurança sobre o preço justo, em fração. Zero por padrão: a
+  /// margem é decisão do investidor, não premissa do modelo.
   final double marginOfSafety;
+
+  /// Anos de projeção explícita do DCF, antes da perpetuidade.
   final int projectionYears;
 
   /// Prazo em que se assume a convergência do preço ao valor justo.
@@ -24,8 +31,12 @@ class ValuationSettings {
   /// unidade: um é total, o outro é por período.
   final int convergenceHorizonMonths;
 
+  /// Prêmio de risco de mercado do CAPM, em fração ao ano.
   final double marketPremium;
 
+  /// Declara os ajustes. **Só [monteCarlo] tem controle na interface**; os
+  /// demais ficam nos padrões — parâmetros declarados do modelo, não
+  /// configuráveis em tempo de execução.
   const ValuationSettings({
     this.monteCarlo = false,
     this.samples = 10000,
@@ -35,6 +46,7 @@ class ValuationSettings {
     this.marketPremium = CapmInputs.defaultMarketPremium,
   });
 
+  /// Cópia com os campos informados substituídos.
   ValuationSettings copyWith({
     bool? monteCarlo,
     int? samples,
@@ -58,16 +70,15 @@ class ValuationSettingsNotifier extends Notifier<ValuationSettings> {
   @override
   ValuationSettings build() => const ValuationSettings();
 
+  /// Alterna entre cenários discretos e Monte Carlo.
+  ///
+  /// É o **único** ajuste com controle na interface. Os demais campos de
+  /// [ValuationSettings] são parâmetros declarados do modelo e ficam fixos nos
+  /// respectivos padrões; os mutadores correspondentes existiam sem nenhum
+  /// chamador e foram removidos na auditoria de código morto. Reintroduza-os
+  /// junto do controle que os aciona.
   void setMonteCarlo(bool enabled) =>
       state = state.copyWith(monteCarlo: enabled);
-  void setMarginOfSafety(double margin) =>
-      state = state.copyWith(marginOfSafety: margin.clamp(0.0, 0.9));
-  void setProjectionYears(int years) =>
-      state = state.copyWith(projectionYears: years.clamp(1, 20));
-  void setConvergenceHorizon(int months) =>
-      state = state.copyWith(convergenceHorizonMonths: months.clamp(1, 120));
-  void setMarketPremium(double premium) =>
-      state = state.copyWith(marketPremium: premium.clamp(0.0, 0.20));
 }
 
 final valuationSettingsProvider =

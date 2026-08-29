@@ -274,6 +274,18 @@ de codigo, sem texto fora do JSON.
   INFO.
 `;
 
+/**
+ * Instrucao de sistema do auditor -- o rulebook.
+ *
+ * E **aqui** que o comportamento do agente se corrige. Achado que veio errado
+ * se conserta ajustando este texto, nunca desativando a regra para o commit
+ * passar nem alterando o runner.
+ *
+ * A calibragem de severidade e a parte que mais importa: `FAIL` exige que o
+ * defeito esteja em linha adicionada **e** seja erro de correcao real; codigo
+ * preexistente no maximo vira `WARN`. Afrouxar isso enche o gate de falso
+ * positivo, e um gate em que nao se confia e um gate que sera arrancado.
+ */
 export const SYSTEM_INSTRUCTION = [
   'Voce e um auditor de codigo senior, especializado em software financeiro e',
   'em interface responsiva. Voce atua como gate de qualidade automatizado: sua',

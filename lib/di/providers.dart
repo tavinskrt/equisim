@@ -99,10 +99,6 @@ final cacheDatabaseProvider = Provider<CacheDatabase?>((ref) {
   }
 });
 
-/// `true` quando o cache está ativo — para a interface poder informar.
-final cacheAvailableProvider =
-    Provider<bool>((ref) => ref.watch(cacheDatabaseProvider) != null);
-
 final firestoreProvider =
     Provider<FirebaseFirestore>((ref) => FirebaseFirestore.instance);
 

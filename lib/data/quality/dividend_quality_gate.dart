@@ -14,13 +14,27 @@ enum DividendQuality {
 
 /// Resultado da conferência.
 class DividendQualityReport {
+  /// Ativo conferido.
   final Ticker ticker;
+
+  /// Veredito da conferência.
   final DividendQuality status;
+
+  /// DY apurado a partir do fluxo de eventos, em fração. `null` quando não
+  /// houve como calcular.
   final double? computedYield;
+
+  /// DY publicado pela fonte, em fração. `null` quando a fonte não o informa.
   final double? publishedYield;
+
+  /// Diferença absoluta entre os dois, em fração. `null` quando não houve
+  /// comparação.
   final double? deviation;
+
+  /// Mensagem pronta para exibição, já com os percentuais.
   final String message;
 
+  /// Agrupa o laudo já apurado.
   const DividendQualityReport({
     required this.ticker,
     required this.status,
@@ -30,6 +44,11 @@ class DividendQualityReport {
     this.deviation,
   });
 
+  /// `true` quando o fluxo pode ser usado sem ressalva.
+  ///
+  /// **[DividendQuality.unverified] conta como confiável.** Não ter como
+  /// conferir não é o mesmo que ter conferido e reprovado: bloquear o ativo
+  /// porque a fonte não publicou o DY puniria o dado bom junto com o ruim.
   bool get isTrustworthy => status != DividendQuality.divergent;
 }
 
@@ -50,9 +69,18 @@ class DividendQualityReport {
 /// vem arredondado em duas casas decimais (0,03 · 0,06 · 0,08), então casar
 /// além disso é impossível por construção.
 abstract final class DividendQualityGate {
+  /// Divergência máxima admitida entre o DY calculado e o publicado, em fração
+  /// (`0.01` = 1 ponto percentual). Ver o motivo na doc da classe.
   static const double defaultToleranceInFraction = 0.01;
 
   /// Soma dos proventos com data-ex nos últimos 12 meses.
+  ///
+  /// - [events]: proventos do ativo, em qualquer ordem.
+  /// - [asOf]: data de referência; a janela é `(asOf − 1 ano, asOf]`.
+  ///
+  /// Soma o valor **bruto** informado pela fonte, sem aplicar tributação: é o
+  /// que torna o número comparável ao DY publicado, que também é bruto.
+  /// Complexidade O(n).
   static double trailingTwelveMonths(
     List<DividendEvent> events,
     DateTime asOf,
@@ -67,6 +95,22 @@ abstract final class DividendQualityGate {
     return total;
   }
 
+  /// Confere o fluxo de eventos contra o DY publicado.
+  ///
+  /// - [ticker]: ativo conferido.
+  /// - [events]: proventos do ativo.
+  /// - [currentPrice]: cotação para calcular o DY. Sem ela não há conferência.
+  /// - [publishedYield]: DY da fonte, em fração. Sem ele não há conferência.
+  /// - [asOf]: data de referência da janela de 12 meses.
+  /// - [tolerance]: divergência admitida. Padrão
+  ///   [defaultToleranceInFraction].
+  ///
+  /// **Nunca falha e nunca lança** — todo ativo recebe um laudo. Preço ou DY
+  /// ausentes produzem [DividendQuality.unverified], que é tratado como
+  /// confiável por [DividendQualityReport.isTrustworthy].
+  ///
+  /// O portão **sinaliza, não bloqueia**: quem decide o que fazer com um ativo
+  /// divergente é a camada de apresentação.
   static DividendQualityReport check({
     required Ticker ticker,
     required List<DividendEvent> events,

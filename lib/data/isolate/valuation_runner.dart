@@ -7,11 +7,20 @@ import 'package:flutter/foundation.dart';
 /// isolate, então a decisão de qual modelo aplicar acontece **dentro** dela,
 /// via [ValuationCascade], em vez de ser injetada de fora.
 class ValuationRequest {
+  /// Insumos já resolvidos. É o que domina o custo de cópia entre isolates.
   final ValuationInputs inputs;
+
+  /// `true` para sortear cenários; `false` para os três discretos.
   final bool monteCarlo;
+
+  /// Sorteios quando [monteCarlo] é `true`. Também decide se a execução vale
+  /// uma isolate — ver [ValuationRunner.isolateThresholdSamples].
   final int samples;
+
+  /// Semente do gerador. Fixa por reprodutibilidade.
   final int seed;
 
+  /// Declara o pedido.
   const ValuationRequest({
     required this.inputs,
     this.monteCarlo = false,
@@ -35,6 +44,21 @@ abstract final class ValuationRunner {
   /// Acima disto o cálculo passa a ameaçar o orçamento de um quadro.
   static const int isolateThresholdSamples = 20000;
 
+  /// Avalia um ativo, em isolate própria só quando o volume justifica.
+  ///
+  /// - [request]: pedido completo.
+  ///
+  /// A isolate só entra quando o modo é Monte Carlo **e** os sorteios atingem
+  /// [isolateThresholdSamples]. Abaixo disso resolve em linha, num `Future` já
+  /// completo.
+  ///
+  /// **No alvo web `compute` executa em linha**, porque não há isolates no
+  /// navegador. Aceitável: lá o gargalo é a rede. A consequência colateral é
+  /// que o coletor de auditoria, sendo estático e local à isolate, **não emite
+  /// rastro** quando a execução de fato migra — o que só ocorre fora do web e
+  /// acima do limiar.
+  ///
+  /// Propaga a falha de `ValuationCascade.evaluate` sem traduzir.
   static Future<Result<ValuationResult>> run(ValuationRequest request) {
     final needsIsolate =
         request.monteCarlo && request.samples >= isolateThresholdSamples;
@@ -61,6 +85,14 @@ abstract final class ValuationRunner {
   /// o total fica em dezenas de milissegundos. Paralelizar exigiria um pool de
   /// isolates e cópia de payload para cada uma, trocando simplicidade por um
   /// ganho que não existe nesta escala.
+  ///
+  /// - [requests]: pedidos, um por ativo.
+  /// - [onFailure]: notificado por ativo que falhou, com a falha. Sem ele, as
+  ///   falhas são **silenciosamente omitidas** do mapa.
+  ///
+  /// Retorna apenas os ativos avaliados com sucesso — o mapa pode ser menor
+  /// que [requests], e comparar os tamanhos é a forma de detectar omissões
+  /// quando [onFailure] não é informado.
   static Future<Map<Ticker, ValuationResult>> runAll(
     List<ValuationRequest> requests, {
     void Function(Ticker ticker, Failure failure)? onFailure,

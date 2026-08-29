@@ -15,8 +15,27 @@ import 'context.dart';
 /// Os arquivos gerados alimentam `cross_validation.py`, que recomputa
 /// volatilidade, beta, correlação, Sharpe, XIRR e o DCF, e reporta a diferença.
 abstract final class PythonExport {
+  /// Separador de campo dos CSV gerados.
+  ///
+  /// Vírgula, não ponto e vírgula: os arquivos são lidos por `pandas` com o
+  /// padrão dele, e os números são gravados com ponto decimal.
   static const String separator = ',';
 
+  /// Gera todos os arquivos de conferência no diretório de saída.
+  ///
+  /// - [ctx]: contexto com a camada de dados.
+  /// - [symbols]: tickers da amostra.
+  /// - [outputDir]: destino dos CSV. **Arquivos existentes são
+  ///   sobrescritos.**
+  /// - [windowYears]: janela histórica exportada. Padrão 5 anos.
+  ///
+  /// A janela termina em `DateTime.now()`, então **duas execuções em dias
+  /// diferentes produzem arquivos diferentes**. É deliberado — a conferência
+  /// vale sobre dados correntes —, mas significa que reproduzir um relatório
+  /// antigo exige o cache daquela data, não apenas o mesmo comando.
+  ///
+  /// Ativos sem dados utilizáveis são omitidos dos arquivos em vez de
+  /// interromper a exportação.
   static Future<void> run(
     ValidationContext ctx, {
     required List<String> symbols,

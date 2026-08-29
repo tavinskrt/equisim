@@ -7,33 +7,63 @@ import '../../utils/app_colors.dart';
 
 /// Formatadores compartilhados.
 abstract final class Fmt {
+  /// Moeda em pt-BR por extenso: `R$ 1.234,56`.
   static final currency =
       NumberFormat.currency(locale: 'pt_BR', symbol: r'R$');
+
+  /// Moeda abreviada: `R$ 1,2 mi`. Para eixo de gráfico e espaço estreito.
   static final compactCurrency =
       NumberFormat.compactCurrency(locale: 'pt_BR', symbol: r'R$');
+
+  /// Data por extenso: `31/12/2026`.
   static final date = DateFormat('dd/MM/yyyy');
+
+  /// Data curta para eixo temporal: `12/26`.
   static final shortDate = DateFormat('MM/yy');
 
+  /// Formata um valor **em reais** — não em centavos.
+  ///
+  /// Converta com `Money.reais` antes de chamar; passar centavos produz um
+  /// número cem vezes maior sem qualquer aviso.
   static String money(double value) => currency.format(value);
 
   /// Percentual a partir de fração, com sinal explícito quando pedido.
+  ///
+  /// - [fraction]: valor em fração (`0.155` vira `15,50%`).
+  /// - [decimals]: casas decimais. Padrão `2`.
+  /// - [signed]: prefixa `+` nos positivos. Negativos já trazem o próprio
+  ///   sinal; o zero nunca recebe prefixo.
   static String percent(double fraction, {int decimals = 2, bool signed = false}) {
     final value = fraction * 100;
     final sign = signed && value > 0 ? '+' : '';
     return '$sign${value.toStringAsFixed(decimals)}%';
   }
 
+  /// Número adimensional — múltiplo, beta, índice de Sharpe.
   static String ratio(double value, {int decimals = 2}) =>
       value.toStringAsFixed(decimals);
 }
 
 /// Cartão translúcido — a linguagem visual herdada do projeto anterior.
+///
+/// O efeito de vidro depende de o fundo atrás ser o gradiente de
+/// [ScreenBackground]: sobre cor chapada o desfoque não tem o que borrar.
 class GlassCard extends StatelessWidget {
+  /// Conteúdo do cartão.
   final Widget child;
+
+  /// Espaçamento interno.
   final EdgeInsetsGeometry padding;
+
+  /// Tema corrente. Recebido por parâmetro, não lido do contexto, para manter
+  /// o kit testável fora de uma árvore de tema completa.
   final bool isLight;
+
+  /// Contorno alternativo, para destacar estado. Sem ele, usa
+  /// `AppColors.surfaceBorder`.
   final Color? borderColor;
 
+  /// Declara o cartão.
   const GlassCard({
     super.key,
     required this.child,
@@ -66,11 +96,20 @@ class GlassCard extends StatelessWidget {
 
 /// Título de seção com ação opcional à direita.
 class SectionHeader extends StatelessWidget {
+  /// Título da seção. É renderizado em **caixa alta** pelo widget; passe-o na
+  /// grafia normal.
   final String title;
+
+  /// Linha de apoio sob o título.
   final String? subtitle;
+
+  /// Widget alinhado à direita — tipicamente um botão ou um [HintIcon].
   final Widget? trailing;
+
+  /// Tema corrente.
   final bool isLight;
 
+  /// Declara o cabeçalho.
   const SectionHeader({
     super.key,
     required this.title,
@@ -118,12 +157,24 @@ class SectionHeader extends StatelessWidget {
 
 /// Métrica destacada: rótulo, valor e explicação curta.
 class MetricTile extends StatelessWidget {
+  /// Nome da métrica.
   final String label;
+
+  /// Valor **já formatado**. Use [Fmt] — o widget não formata nada, o que
+  /// mantém a decisão de unidade e casas decimais no ponto de uso.
   final String value;
+
+  /// Nota de rodapé: base de cálculo, janela, ressalva.
   final String? hint;
+
+  /// Cor do valor, para codificar ganho, perda ou ressalva. Sem ela, usa a cor
+  /// de texto principal.
   final Color? valueColor;
+
+  /// Tema corrente.
   final bool isLight;
 
+  /// Declara o bloco de métrica.
   const MetricTile({
     super.key,
     required this.label,
@@ -176,11 +227,20 @@ class MetricTile extends StatelessWidget {
 /// informa sem impedir, porque as duas situações podem ser decisões
 /// conscientes do investidor.
 class NoticeBanner extends StatelessWidget {
+  /// Texto do aviso, já formulado para o usuário final.
   final String message;
+
+  /// Ícone à esquerda.
   final IconData icon;
+
+  /// Cor do ícone e do contorno. Segue a semântica de [AppColors]:
+  /// `danger` para falha, `warning` para número que pede ressalva.
   final Color color;
+
+  /// Tema corrente.
   final bool isLight;
 
+  /// Declara a faixa de aviso.
   const NoticeBanner({
     super.key,
     required this.message,
@@ -221,12 +281,22 @@ class NoticeBanner extends StatelessWidget {
 
 /// Estado vazio com orientação do próximo passo.
 class EmptyState extends StatelessWidget {
+  /// Ícone ilustrativo.
   final IconData icon;
+
+  /// Título curto do estado vazio.
   final String title;
+
+  /// Explicação do que falta e de como preencher.
   final String message;
+
+  /// Ação sugerida — o botão que resolve o vazio.
   final Widget? action;
+
+  /// Tema corrente.
   final bool isLight;
 
+  /// Declara o estado vazio.
   const EmptyState({
     super.key,
     required this.icon,
@@ -275,9 +345,14 @@ class EmptyState extends StatelessWidget {
 
 /// Fundo padrão das telas, com os círculos decorativos da identidade visual.
 class ScreenBackground extends StatelessWidget {
+  /// Conteúdo da tela.
   final Widget child;
+
+  /// Tema corrente.
   final bool isLight;
 
+  /// Declara o fundo. Envolva a tela inteira com ele: é o que dá a
+  /// [GlassCard] algo para desfocar.
   const ScreenBackground({
     super.key,
     required this.child,
@@ -325,9 +400,13 @@ class ScreenBackground extends StatelessWidget {
 
 /// Verbete de glossário: o rótulo tal como aparece no cartão e o que ele diz.
 class HintEntry {
+  /// Termo explicado — o jargão como aparece na tela.
   final String term;
+
+  /// Definição em linguagem corrente.
   final String description;
 
+  /// Declara o verbete.
   const HintEntry(this.term, this.description);
 }
 
@@ -338,14 +417,19 @@ class HintEntry {
 /// levou. Ler um pelo outro leva à decisão errada, e o verbete a um toque de
 /// distância custa menos que a nota de rodapé que ninguém lê.
 class HintIcon extends StatelessWidget {
+  /// Título do painel de ajuda.
   final String title;
 
   /// Frase de abertura, quando o conjunto de verbetes precisa de contexto.
   final String? intro;
 
+  /// Verbetes exibidos, na ordem em que aparecem.
   final List<HintEntry> entries;
+
+  /// Tema corrente.
   final bool isLight;
 
+  /// Declara o ícone de ajuda.
   const HintIcon({
     super.key,
     required this.title,

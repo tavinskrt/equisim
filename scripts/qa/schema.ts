@@ -10,9 +10,24 @@
  */
 import { Type, type Schema } from '@google/genai';
 
+/**
+ * Severidades, da mais grave para a mais leve.
+ *
+ * So `FAIL` bloqueia -- e o runner sai com codigo 1. `WARN` e divida em codigo
+ * preexistente e `INFO` e observacao; ambos saem com 0.
+ */
 export const SEVERITIES = ['FAIL', 'WARN', 'INFO'] as const;
+
+/** Severidade de um achado. */
 export type Severity = (typeof SEVERITIES)[number];
 
+/**
+ * Categorias de achado, em tres grupos.
+ *
+ * A lista e **fechada**: o modelo precisa encaixar todo achado em uma delas, e
+ * `OTHER` existe para que ele nao invente rotulo novo quando nao couber. Uma
+ * categoria acrescentada aqui entra sozinha no schema enviado ao modelo.
+ */
 export const CATEGORIES = [
   // --- Financeiro ---
   'MONETARY_PRECISION', // ponto flutuante binario em caminho monetario
@@ -33,24 +48,55 @@ export const CATEGORIES = [
   // --- Outros ---
   'OTHER',
 ] as const;
+/** Categoria de um achado. */
 export type Category = (typeof CATEGORIES)[number];
 
+/**
+ * Um achado da auditoria.
+ *
+ * A ordem dos campos aqui espelha `propertyOrdering` do schema, e ela e a ordem
+ * em que o modelo os gera -- ver o cabecalho do arquivo.
+ */
 export interface QaFinding {
+  /** Caminho relativo a raiz do repositorio. */
   file: string;
+  /** Linha citada. Vem da numeracao que `collectFiles` injeta. */
   line: number;
+  /** Classificacao do defeito. */
   category: Category;
+  /** Titulo curto, uma linha. */
   title: string;
+  /** Trecho do codigo que sustenta o achado. */
   evidence: string;
+  /**
+   * `true` quando o defeito esta em linha **adicionada** pelo diff.
+   *
+   * E o campo que governa a calibragem: em modo `diff`, so achado com este
+   * campo verdadeiro pode ser `FAIL`; o resto vira `WARN`.
+   */
   introduced_by_change: boolean;
+  /** Por que e defeito. */
   rationale: string;
+  /** Entrada concreta que produz saida errada ou excecao. */
   failure_scenario: string;
+  /** Correcao proposta. */
   suggested_fix: string;
+  /** Gravidade, decidida depois da evidencia. */
   severity: Severity;
 }
 
+/** O relatorio completo de uma auditoria. */
 export interface QaReport {
+  /** Achados, em qualquer ordem. Vazio significa nada a reportar. */
   findings: QaFinding[];
+  /**
+   * Veredito. `FAIL` sai com codigo 1 e bloqueia.
+   *
+   * Gerado **depois** de `findings`, para que o veredito decorra da evidencia
+   * em vez de anteceder e enviesa-la.
+   */
   status: 'PASS' | 'FAIL';
+  /** Resumo em uma frase, para o cabecalho. */
   summary: string;
 }
 
@@ -130,6 +176,16 @@ const findingSchema: Schema = {
   },
 };
 
+/**
+ * Schema completo da resposta, enviado ao modelo como Structured Output.
+ *
+ * `propertyOrdering` coloca `findings` antes de `status` e `summary` de
+ * proposito: o veredito precisa decorrer dos achados, e nao anteceder e
+ * enviesa-los. Ver o cabecalho do arquivo.
+ *
+ * O backend `api` forca este schema no servidor; o `agy` nao o forca, entao
+ * la ele serve de contrato a validar depois.
+ */
 export const QA_RESPONSE_SCHEMA: Schema = {
   type: Type.OBJECT,
   required: ['findings', 'status', 'summary'],

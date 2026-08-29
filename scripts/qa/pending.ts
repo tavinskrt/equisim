@@ -28,13 +28,23 @@ import { join } from 'node:path';
 /** Diretorio da fila, na raiz do repositorio. Ignorado pelo git. */
 export const PENDING_DIR = '.qa-pending';
 
+/**
+ * Metadados de uma auditoria enfileirada.
+ *
+ * A fila guarda o **instantaneo** do que foi liberado, nao o intervalo de
+ * commits: drenar tres commits depois audita o mesmo codigo que passou, e nao
+ * o `HEAD` atual.
+ */
 export interface PendingEntry {
   /** Hash do payload: dedupe natural, e nome do arquivo do instantaneo. */
   id: string;
+  /** Momento do enfileiramento, em ISO-8601. Ordena a fila. */
   queuedAt: string;
   /** Rotulo legivel do alvo, como aparecia no relatorio. */
   label: string;
+  /** Modo do alvo, que decide a calibragem quando a fila for drenada. */
   mode: 'diff' | 'file' | 'screenshot';
+  /** Arquivos que compunham o alvo. */
   files: string[];
   /** Commit em que a auditoria foi adiada -- so para diagnostico. */
   head: string;
@@ -83,6 +93,17 @@ export function enqueue(
   return { queued: true, id };
 }
 
+/**
+ * Lista a fila, do mais antigo para o mais recente.
+ *
+ * @param root Raiz do repositorio.
+ * @returns Apenas os metadados -- payload e instrucoes ficam de fora, para que
+ *   listar a fila nao carregue centenas de KB por entrada.
+ *
+ * **Nunca lanca.** Fila inexistente devolve vazio, e entrada corrompida e
+ * pulada em silencio: um JSON truncado nao pode derrubar a listagem inteira,
+ * que e justamente como o usuario descobre o que ficou pendente.
+ */
 export function listPending(root: string): PendingEntry[] {
   const d = dir(root);
   if (!existsSync(d)) return [];
@@ -102,6 +123,16 @@ export function listPending(root: string): PendingEntry[] {
   return out.sort((a, b) => a.queuedAt.localeCompare(b.queuedAt));
 }
 
+/**
+ * Carrega uma entrada completa da fila, com payload e instrucoes.
+ *
+ * @param root Raiz do repositorio.
+ * @param id Hash do payload, como aparece em `listPending`.
+ * @returns A entrada, ou `undefined` se o arquivo nao existir.
+ * @throws Se o arquivo existir mas nao for JSON valido. Ao contrario de
+ *   `listPending`, aqui a corrupcao **e** fatal: nao ha como auditar um
+ *   instantaneo ilegivel, e mascarar isso auditaria o alvo errado.
+ */
 export function loadPending(
   root: string,
   id: string,

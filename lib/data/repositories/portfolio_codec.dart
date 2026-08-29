@@ -6,6 +6,16 @@ import 'package:equisim_core/equisim_core.dart';
 /// teste próprio, sem precisar de um Firestore de mentira. É onde moram as
 /// decisões que preservam a integridade dos dados na ida e na volta.
 abstract final class PortfolioStudyCodec {
+  /// Serializa as posições de uma carteira.
+  ///
+  /// Grava apenas o que não é derivável: identidade, peso e rótulos. Setor e
+  /// subsetor são **omitidos** quando ausentes, em vez de gravados como nulo,
+  /// para que a volta os reconstrua como [Sector.unknown] sem ambiguidade.
+  ///
+  /// - [portfolio]: carteira a serializar.
+  ///
+  /// Retorna uma lista de documentos, um por posição. Identidade da carteira
+  /// (`id`, `name`, `kind`) fica fora — é do documento que a contém.
   static List<Map<String, dynamic>> encodePortfolio(Portfolio portfolio) => [
         for (final entry in portfolio.entries.values)
           {
@@ -20,6 +30,22 @@ abstract final class PortfolioStudyCodec {
           }
       ];
 
+  /// Reconstrói a carteira a partir do documento gravado.
+  ///
+  /// - [raw]: valor cru do campo de posições. Aceita qualquer coisa.
+  /// - [id], [name], [kind]: identidade, que vem do documento que as contém.
+  ///
+  /// **Tolerante e silencioso**: entradas que não sejam mapa, com ticker
+  /// inválido ou sem peso são **descartadas**, e um [raw] que não seja lista
+  /// devolve carteira vazia. Nunca lança.
+  ///
+  /// A consequência é que uma carteira gravada com dado corrompido volta menor
+  /// do que foi salva, sem pesos somando 100% — `Portfolio.hasValidWeights`
+  /// passa a ser `false`, e é por esse caminho que a inconsistência aparece,
+  /// não por exceção aqui.
+  ///
+  /// Pesos são travados em `[0, 1]` na volta, o que impede
+  /// [Weight.fraction] de lançar sobre valor corrompido.
   static Portfolio decodePortfolio(
     dynamic raw, {
     required String id,
@@ -64,6 +90,14 @@ abstract final class PortfolioStudyCodec {
         'targetCents': goal.targetWealth.cents,
       };
 
+  /// Reconstrói a meta a partir do documento gravado.
+  ///
+  /// - [raw]: valor cru do campo de meta.
+  ///
+  /// Devolve `null` quando [raw] não é mapa ou não traz `months` — o prazo é o
+  /// único campo sem padrão defensável. Valores monetários ausentes voltam como
+  /// zero, o que produz uma meta que `RequiredReturnSolver.solve` recusa com
+  /// [InvalidInput], em vez de uma meta silenciosamente errada.
   static FinancialGoal? decodeGoal(dynamic raw) {
     if (raw is! Map) return null;
     final months = (raw['months'] as num?)?.toInt();

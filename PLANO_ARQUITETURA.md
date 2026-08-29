@@ -1036,7 +1036,10 @@ O campo `remarks` de ITUB4 (483 eventos) revela a origem de cada registro: **280
 > **60 testes no app + 152 no core · cobertura do core 82,4% · `flutter analyze` sem issues · `flutter build web` ✓**
 
 - [x] Riverpod + raiz de composição com providers escritos à mão (sem geração), todos sobrescrevíveis
-- [x] Casos de uso: `ValuationCascade`, `PrepareValuationInputs`, `SwapAssetBetweenPortfolios`, `EvaluateGoalAlignment`, `ResolveMarketAnchors`, `BuildPortfolio`
+- [x] Casos de uso: `ValuationCascade`, `PrepareValuationInputs`, `SwapAssetBetweenPortfolios`, `EvaluateGoalAlignment`, `ResolveMarketAnchors`
+  - `BuildPortfolio` foi removido na auditoria de código morto: nunca teve
+    chamador. A montagem de carteira acontece por `Portfolio.equalWeighted`,
+    com a resolução de perfil feita na camada de dados.
 - [x] Gestão da dupla carteira: adicionar, remover, equiponderar, pesos customizados com Σ=100%, **teto de 15 ativos**
 - [x] `SwapAssetBetweenPortfolios` **síncrono** — sem `Future`, sem *debounce*, sem estado de carregamento
 - [x] `ValuationRunner` com limiar de isolate **decidido por medição** (ver abaixo)

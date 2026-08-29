@@ -21,14 +21,26 @@ enum BrapiMode {
 /// validação da Fase 5 usar exatamente a mesma camada de dados do aplicativo,
 /// em vez de uma reimplementação que poderia divergir em silêncio.
 class ApiConfig {
+  /// Como a brapi é alcançada — direta ou por proxy de custódia.
   final BrapiMode mode;
+
+  /// Raiz da API brapi, ou do proxy quando [mode] é [BrapiMode.proxied].
   final String brapiBaseUrl;
+
+  /// Token da brapi. `null` em modo proxy, onde o servidor o injeta, e também
+  /// quando nenhuma credencial foi encontrada.
+  ///
+  /// **Nunca inclua este valor em log.** Use [diagnostics], que o mascara.
   final String? brapiToken;
+
+  /// Raiz da API SGS do Banco Central.
   final String bcbBaseUrl;
 
   /// Como a credencial foi obtida — para diagnóstico e alerta.
   final String credentialSource;
 
+  /// Declara a configuração. Para resolvê-la a partir do ambiente, use
+  /// [ApiConfig.resolve].
   const ApiConfig({
     required this.mode,
     required this.brapiBaseUrl,
@@ -102,6 +114,10 @@ class ApiConfig {
     );
   }
 
+  /// `true` quando há como autenticar — token presente ou proxy que o injeta.
+  ///
+  /// Não garante que a credencial seja **válida**: só que existe. A validade
+  /// só se descobre na primeira resposta `401`.
   bool get hasCredential => mode == BrapiMode.proxied || brapiToken != null;
 
   /// `true` quando a credencial veio por via que a expõe no bundle.

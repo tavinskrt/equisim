@@ -5,8 +5,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// Controlador responsável pelo tema da aplicação (Modo Escuro / Modo Claro).
 class ThemeController extends ChangeNotifier {
   bool _isLightMode = false; // Padrão escuro
+
+  /// `true` para o tema claro. Padrão `false` — a aplicação abre no escuro.
   bool get isLightMode => _isLightMode;
 
+  /// Constrói o controlador e dispara a leitura das preferências locais.
+  ///
+  /// A leitura é **assíncrona e não aguardada**: o controlador nasce no tema
+  /// escuro e notifica os ouvintes quando a preferência salva chega. Uma tela
+  /// construída no mesmo quadro pode, portanto, pintar no escuro e trocar em
+  /// seguida.
   ThemeController() {
     _loadThemeFromPrefs();
   }

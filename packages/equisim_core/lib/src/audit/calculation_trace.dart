@@ -5,6 +5,7 @@ class TraceSamplePoint {
   /// Rótulo do período — o ano fiscal, tipicamente.
   final String label;
 
+  /// Valor do período, na unidade do cálculo que a amostra sustenta.
   final double value;
 
   /// `true` quando o ponto é um dos que **definem** a estatística resumo:
@@ -14,6 +15,7 @@ class TraceSamplePoint {
   /// `true` para o período observado, o que a fórmula trata.
   final bool isObserved;
 
+  /// Declara o ponto.
   const TraceSamplePoint({
     required this.label,
     required this.value,
@@ -21,6 +23,7 @@ class TraceSamplePoint {
     this.isObserved = false,
   });
 
+  /// Serializa para o formato consumido pela página de logs e pela exportação.
   Map<String, dynamic> toJson() => {
         'label': label,
         'value': value,
@@ -28,6 +31,14 @@ class TraceSamplePoint {
         'isObserved': isObserved,
       };
 
+  /// Reconstrói a partir de JSON, **tolerante a payload malformado**.
+  ///
+  /// Nenhum campo ausente ou de tipo inesperado lança: rótulo vira `'—'`,
+  /// valor vira `0` e os sinalizadores viram `false`. É deliberado — a
+  /// auditoria é ferramenta de diagnóstico, e derrubá-la por causa de um
+  /// registro corrompido tiraria do ar justamente o que se está diagnosticando.
+  ///
+  /// - [json]: mapa de chaves string.
   static TraceSamplePoint fromJson(Map<String, dynamic> json) =>
       TraceSamplePoint(
         label: json['label'] as String? ?? '—',
@@ -57,15 +68,19 @@ class TraceSample {
   /// Como chamar [summary] na legenda.
   final String summaryLabel;
 
-  /// Bordas da banda de aceitação, quando o cálculo define uma.
+  /// Borda inferior da banda de aceitação, quando o cálculo define uma.
   final double? lowerBound;
+
+  /// Borda superior da banda de aceitação, quando o cálculo define uma.
   final double? upperBound;
 
   /// Valor efetivamente adotado depois do tratamento.
   final double? selected;
 
+  /// Unidade dos valores, para o eixo do gráfico. Vazio para adimensional.
   final String unit;
 
+  /// Declara a amostra.
   const TraceSample({
     required this.title,
     required this.points,
@@ -77,6 +92,7 @@ class TraceSample {
     this.unit = '',
   });
 
+  /// Serializa a amostra e todos os seus pontos.
   Map<String, dynamic> toJson() => {
         'title': title,
         'points': [for (final p in points) p.toJson()],
@@ -88,6 +104,10 @@ class TraceSample {
         'unit': unit,
       };
 
+  /// Reconstrói a amostra, com a mesma tolerância de
+  /// [TraceSamplePoint.fromJson]. Entradas de `points` que não sejam mapas são
+  /// **descartadas em silêncio**, o que pode devolver uma amostra menor que a
+  /// serializada.
   static TraceSample fromJson(Map<String, dynamic> json) => TraceSample(
         title: json['title'] as String? ?? '',
         points: [
@@ -131,6 +151,8 @@ class CalculationTrace {
   /// Decomposição da aritmética, uma linha por etapa.
   final List<String> intermediateSteps;
 
+  /// Resultado do cálculo. `null` para rastros que só registram substituição
+  /// de variáveis sem produzir um número único.
   final double? finalValue;
 
   /// Unidade do resultado: `R$`, `%`, `×`, `anos`, ou vazio para adimensional.
@@ -141,6 +163,8 @@ class CalculationTrace {
   /// Nula na maioria das fórmulas — só existe onde há agregação a auditar.
   final TraceSample? sample;
 
+  /// Declara o rastro. Construído no ponto do cálculo, a partir dos mesmos
+  /// objetos que produzem o resultado apresentado.
   const CalculationTrace({
     required this.formulaName,
     required this.latexRepresentation,
@@ -151,6 +175,8 @@ class CalculationTrace {
     this.sample,
   });
 
+  /// Serializa o rastro. A chave `sample` é **omitida** quando não há amostra,
+  /// em vez de emitida como `null`.
   Map<String, dynamic> toJson() => {
         'formulaName': formulaName,
         'latexRepresentation': latexRepresentation,
@@ -161,6 +187,9 @@ class CalculationTrace {
         if (sample != null) 'sample': sample!.toJson(),
       };
 
+  /// Reconstrói o rastro, tolerante a payload malformado como as demais
+  /// `fromJson` deste arquivo. Passos de tipo inesperado são convertidos por
+  /// interpolação em vez de descartados.
   static CalculationTrace fromJson(Map<String, dynamic> json) =>
       CalculationTrace(
         formulaName: json['formulaName'] as String? ?? '—',
@@ -186,7 +215,11 @@ class CalculationTrace {
 /// O contrato de campos é fixo: é o que a página de logs consome e o que sai
 /// no arquivo de exportação da auditoria.
 class AuditEvent {
+  /// UUID v4 que correlaciona o evento com sua transação.
   final String transactionId;
+
+  /// Início da execução, em hora **local**. Serializa como UTC ISO-8601 e
+  /// volta convertido para local em [AuditEvent.fromJson].
   final DateTime timestamp;
 
   /// Origem da execução. Chamadas de rede trazem o caminho da API; cálculos do
@@ -194,11 +227,20 @@ class AuditEvent {
   /// exemplo. É o campo que separa os dois tipos de evento na interface.
   final String endpoint;
 
+  /// O que entrou na execução.
   final Map<String, dynamic> inputPayload;
+
+  /// O que saiu. Em falha traz `status: 'falha'` e `motivo`.
   final Map<String, dynamic> outputPayload;
+
+  /// Duração medida por [Stopwatch], em milissegundos.
   final int executionTimeMs;
+
+  /// Rastros de cálculo, na ordem em que foram registrados. Vazio nos eventos
+  /// de rede, que medem a requisição inteira e não têm conta a decompor.
   final List<CalculationTrace> calculations;
 
+  /// Declara o evento.
   const AuditEvent({
     required this.transactionId,
     required this.timestamp,
@@ -209,6 +251,7 @@ class AuditEvent {
     this.calculations = const [],
   });
 
+  /// Serializa o evento inteiro, com [timestamp] normalizado para UTC.
   Map<String, dynamic> toJson() => {
         'transactionId': transactionId,
         'timestamp': timestamp.toUtc().toIso8601String(),
@@ -219,6 +262,12 @@ class AuditEvent {
         'calculations': [for (final c in calculations) c.toJson()],
       };
 
+  /// Reconstrói o evento, tolerante a payload malformado.
+  ///
+  /// **Ressalva:** um `timestamp` ausente ou inválido cai para
+  /// `DateTime.now()`, ou seja, um evento corrompido aparece como se tivesse
+  /// ocorrido no instante da leitura. É aceitável na interface de diagnóstico,
+  /// mas não trate o campo como confiável em evento reidratado.
   static AuditEvent fromJson(Map<String, dynamic> json) => AuditEvent(
         transactionId: json['transactionId'] as String? ?? '—',
         timestamp:

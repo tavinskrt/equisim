@@ -3,6 +3,8 @@ import '../../entities/portfolio.dart';
 
 /// Concentração observada em um setor.
 class SectorExposure {
+  /// Setor observado. Nunca é [Sector.unknown] — não classificados são
+  /// somados em [ConcentrationReport.unclassifiedWeight].
   final Sector sector;
 
   /// Quantidade de ativos da carteira no setor.
@@ -20,6 +22,8 @@ class SectorExposure {
 
 /// Resultado da análise de concentração setorial.
 class ConcentrationReport {
+  /// Setores classificados, ordenados por quantidade de ativos e, no empate,
+  /// por peso — os dois em ordem decrescente.
   final List<SectorExposure> exposures;
 
   /// Setores que atingiram ou superaram o limiar de alerta.
@@ -34,9 +38,12 @@ class ConcentrationReport {
     required this.unclassifiedWeight,
   });
 
+  /// `true` quando ao menos um setor atingiu o limiar. **Informativo**: não
+  /// bloqueia operação alguma.
   bool get hasAlert => concentrated.isNotEmpty;
 }
 
+/// Analisa a distribuição setorial de uma carteira.
 abstract final class SectorConcentration {
   /// A partir de dois ativos no mesmo setor, dispara alerta.
   static const int defaultThreshold = 2;
@@ -46,6 +53,16 @@ abstract final class SectorConcentration {
   /// O alerta é **informativo e não bloqueia a operação**: concentrar em um
   /// setor pode ser uma decisão deliberada do investidor. O papel do sistema é
   /// tornar o fato visível, não decidir por ele.
+  ///
+  /// - [portfolio]: carteira a analisar.
+  /// - [threshold]: quantidade de ativos no mesmo setor a partir da qual o
+  ///   alerta dispara. Padrão [defaultThreshold].
+  ///
+  /// O critério é **contagem de ativos, não soma de pesos**: dois ativos de
+  /// 5% cada disparam, um único de 40% não. É deliberado — a concentração que
+  /// interessa aqui é a de exposição a um mesmo choque setorial.
+  ///
+  /// Complexidade O(n log n), dominada pela ordenação das exposições.
   static ConcentrationReport analyze(
     Portfolio portfolio, {
     int threshold = defaultThreshold,

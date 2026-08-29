@@ -7,8 +7,15 @@ import 'ui_kit.dart';
 
 /// Uma curva nomeada.
 class ChartSeries {
+  /// Nome da série, para a legenda.
   final String label;
+
+  /// Pontos da série, alinhados posição a posição com o eixo de datas do
+  /// gráfico que a recebe. Séries de comprimentos diferentes são desenhadas
+  /// até onde alcançam, sem erro.
   final List<double> values;
+
+  /// Cor da linha e do ponto de legenda.
   final Color color;
 
   /// Datas de [values], uma para uma.
@@ -20,6 +27,8 @@ class ChartSeries {
   /// carteiras.
   final List<DateTime>? dates;
 
+  /// Declara a série. Informe [dates] sempre que as séries do mesmo gráfico
+  /// puderem ter comprimentos diferentes.
   const ChartSeries({
     required this.label,
     required this.values,
@@ -33,11 +42,22 @@ class ChartSeries {
 /// Base 100 é o que torna carteiras de tamanhos diferentes comparáveis: o eixo
 /// deixa de medir dinheiro e passa a medir desempenho relativo.
 class Base100Chart extends StatelessWidget {
+  /// Séries a desenhar. Todas compartilham o mesmo eixo temporal.
   final List<ChartSeries> series;
+
+  /// Eixo temporal comum, em ordem cronológica.
   final List<DateTime> dates;
+
+  /// Tema corrente.
   final bool isLight;
+
+  /// Altura do gráfico em pixels lógicos.
   final double height;
 
+  /// Declara o gráfico.
+  ///
+  /// Espera séries **normalizadas em base 100** — o índice TWR, não a curva
+  /// bruta de patrimônio, que salta no dia do aporte.
   const Base100Chart({
     super.key,
     required this.series,
@@ -223,10 +243,21 @@ class Base100Chart extends StatelessWidget {
 /// Responde a pergunta que a banca costuma fazer sobre um DCF — "de que
 /// depende esse número?" — em vez de deixá-la implícita.
 class TornadoChart extends StatelessWidget {
+  /// Barras de sensibilidade: o rótulo da premissa e os valores resultantes
+  /// nos extremos dela.
   final List<({String label, double low, double high})> bars;
+
+  /// Valor do cenário central, onde fica a linha de referência vertical.
   final double baseValue;
+
+  /// Tema corrente.
   final bool isLight;
 
+  /// Declara o gráfico de tornado.
+  ///
+  /// A ordenação das barras é responsabilidade do chamador — o gráfico desenha
+  /// na ordem recebida, e a convenção do formato é da premissa mais sensível
+  /// para a menos.
   const TornadoChart({
     super.key,
     required this.bars,
@@ -373,6 +404,7 @@ typedef RiskReturnLegend = ({String label, Color color});
 /// entrava no gráfico — `minX == maxX` e `minY == maxY`, e a conversão de
 /// valor para pixel divide por zero. O resultado era um gráfico ilegível.
 class RiskReturnScatter extends StatelessWidget {
+  /// Pontos do gráfico: um por ativo e um por carteira.
   final List<RiskReturnDot> points;
 
   /// Legenda das nuvens de ativos, uma entrada por carteira representada.
@@ -381,8 +413,10 @@ class RiskReturnScatter extends StatelessWidget {
   /// entraram na dispersão e com que cor cada nuvem foi desenhada.
   final List<RiskReturnLegend> assetLegend;
 
+  /// Tema corrente.
   final bool isLight;
 
+  /// Declara a dispersão.
   const RiskReturnScatter({
     super.key,
     required this.points,
@@ -584,10 +618,19 @@ class RiskReturnScatter extends StatelessWidget {
 
 /// Mapa de calor da matriz de correlação.
 class CorrelationHeatmap extends StatelessWidget {
+  /// Ativos, na mesma ordem das linhas e colunas de [matrix].
   final List<Ticker> tickers;
+
+  /// Matriz de correlação `n × n`, simétrica, com valores em `[-1, 1]`.
   final List<List<double>> matrix;
+
+  /// Tema corrente.
   final bool isLight;
 
+  /// Declara o mapa de calor.
+  ///
+  /// [matrix] precisa ter a mesma dimensão de [tickers]; a construção fica com
+  /// `BetaCalculator.correlationMatrix`, que garante a simetria.
   const CorrelationHeatmap({
     super.key,
     required this.tickers,

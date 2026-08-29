@@ -9,13 +9,21 @@
  */
 import { execFileSync } from 'node:child_process';
 
+/** Familia do modelo. Flash e rapido e barato; Pro raciocina mais fundo. */
 export type Family = 'flash' | 'pro';
+
+/** Teto de raciocinio do modelo, como o `agy` o nomeia. */
 export type Effort = 'low' | 'medium' | 'high';
 
+/** Um modelo oferecido pela assinatura, ja decomposto a partir do id. */
 export interface AgyModel {
+  /** Identificador aceito por `agy --model`, ex.: `gemini-3.7-flash-high`. */
   id: string;
+  /** Rotulo legivel, para o menu. */
   label: string;
+  /** Familia extraida do id. */
   family: Family;
+  /** Esforco extraido do id. */
   effort: Effort;
   /** [major, minor] -- comparado numericamente, nao como texto. */
   version: [number, number];
@@ -33,6 +41,18 @@ function agyExecutable(): string {
   return process.platform === 'win32' ? 'agy.exe' : 'agy';
 }
 
+/**
+ * Consulta `agy models` e devolve os modelos Gemini reconhecidos.
+ *
+ * Modelos que nao casam com o padrao `gemini-<maior>.<menor>-<familia>-<esforco>`
+ * sao descartados em silencio: o catalogo do `agy` inclui modelos de outros
+ * fornecedores, e este seletor e do auditor Gemini.
+ *
+ * @returns Lista possivelmente vazia, quando nenhum modelo casa o padrao.
+ * @throws Se o binario `agy` nao estiver no PATH, falhar, ou exceder 30 s. A
+ *   mensagem inclui o erro original, porque a causa costuma ser autenticacao
+ *   pendente e nao ausencia do binario.
+ */
 export function listAgyModels(): AgyModel[] {
   let raw: string;
   try {
@@ -72,9 +92,13 @@ function byVersionDesc(a: AgyModel, b: AgyModel): number {
   return b.version[0] - a.version[0] || b.version[1] - a.version[1];
 }
 
+/** Uma entrada do menu de escolha de modelo. */
 export interface ModelChoice {
+  /** Identificador a passar para `agy --model`. */
   id: string;
+  /** Texto da opcao. */
   label: string;
+  /** Linha de apoio: o compromisso entre profundidade e tempo. */
   hint: string;
 }
 

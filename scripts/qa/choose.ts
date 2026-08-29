@@ -52,6 +52,7 @@ function describeTarget(target: AuditTarget): string {
   );
 }
 
+/** Como resolver a escolha de modelo. */
 export interface ChooseOptions {
   /** Terminal disponivel? Sem isso, nao ha o que perguntar. */
   interactive: boolean;

@@ -45,6 +45,7 @@ const EXCLUDED = [
 /** Teto de payload. Acima disso o custo explode e a atencao do modelo dilui. */
 export const MAX_PAYLOAD_CHARS = 180_000;
 
+/** O material a auditar, ja montado e pronto para o provider. */
 export interface AuditTarget {
   /**
    * `diff` muda a calibragem de severidade (ver rules.ts);
@@ -57,6 +58,12 @@ export interface AuditTarget {
   payload: string;
   /** Arquivos efetivamente incluidos. */
   files: string[];
+  /**
+   * `true` quando o payload bateu em `MAX_PAYLOAD_CHARS` e foi cortado.
+   *
+   * O corte e por arquivo inteiro, nunca no meio de um: um arquivo pela metade
+   * faria o modelo apontar defeito em codigo que ele nao viu terminar.
+   */
   truncated: boolean;
 }
 
@@ -68,6 +75,13 @@ function git(args: string[], cwd: string): string {
   });
 }
 
+/**
+ * Raiz do repositorio que contem `startDir`.
+ *
+ * @param startDir Diretorio de partida, tipicamente `process.cwd()`.
+ * @returns Caminho absoluto da raiz, sem quebra de linha.
+ * @throws Se `startDir` nao estiver dentro de um repositorio git.
+ */
 export function repoRoot(startDir: string): string {
   return git(['rev-parse', '--show-toplevel'], startDir).trim();
 }
@@ -85,12 +99,30 @@ function resolveBase(root: string, requested: string): string {
   }
 }
 
+/** Como recortar o diff a auditar. */
 export interface DiffOptions {
+  /** Audita apenas o que esta em staging. Ignora `base` quando `true`. */
   staged: boolean;
+  /** Ref base da comparacao. Cai para a arvore vazia se nao existir. */
   base: string;
+  /** Linhas de contexto por trecho. Mais contexto ajuda o modelo a julgar. */
   contextLines: number;
 }
 
+/**
+ * Monta o alvo a partir de um diff do git.
+ *
+ * Aplica a lista de caminhos auditaveis e a de exclusoes, de modo que arquivo
+ * gerado, lock e configuracao de plataforma nunca cheguem ao modelo.
+ *
+ * @param root Raiz do repositorio.
+ * @param opts Recorte desejado.
+ * @returns Alvo em modo `diff` -- o que ativa a calibragem de severidade mais
+ *   rigorosa do rulebook, em que so linha adicionada pode virar FAIL.
+ * @throws Se o `git` falhar. Um `base` inexistente **nao** e erro: cai para o
+ *   hash da arvore vazia, o que faz um repositorio de commit unico auditar
+ *   tudo em vez de quebrar.
+ */
 export function collectDiff(root: string, opts: DiffOptions): AuditTarget {
   const pathspec = ['--', ...AUDITABLE, ...EXCLUDED];
   const common = [`--unified=${opts.contextLines}`, '--no-color', '--no-ext-diff'];
@@ -201,6 +233,19 @@ function numberLines(content: string): string {
     .join('\n');
 }
 
+/**
+ * Monta o alvo a partir de arquivos integrais.
+ *
+ * As linhas sao numeradas antes do envio, para que o modelo consiga citar
+ * `arquivo:linha` -- sem isso os achados vem sem endereco.
+ *
+ * @param root Raiz do repositorio, base dos caminhos relativos.
+ * @param paths Arquivos a incluir, na ordem em que devem entrar.
+ * @returns Alvo em modo `file`, que usa a calibragem mais permissiva do
+ *   rulebook, ja que nao ha "linha adicionada" a distinguir.
+ * @throws Se algum caminho nao existir ou nao for arquivo. O teto de payload
+ *   **nao** lanca: corta a lista e marca `truncated`.
+ */
 export function collectFiles(root: string, paths: string[]): AuditTarget {
   const chunks: string[] = [];
   const included: string[] = [];

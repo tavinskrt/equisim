@@ -30,16 +30,33 @@ const MIME_BY_EXT: Record<string, string> = {
  */
 const MAX_BYTES = 7 * 1024 * 1024;
 
+/** Imagem no formato inline que a API do Gemini aceita. */
 export interface ScreenshotPart {
   inlineData: { mimeType: string; data: string };
 }
 
+/** Uma captura carregada, com o que o relatorio precisa exibir. */
 export interface LoadedScreenshot {
+  /** A imagem, pronta para entrar na requisicao. */
   part: ScreenshotPart;
+  /** Nome do arquivo, para o cabecalho do relatorio. */
   label: string;
+  /** Tamanho em bytes, ja em base64. */
   bytes: number;
 }
 
+/**
+ * Carrega capturas de tela e as codifica em base64 inline.
+ *
+ * @param paths Caminhos das imagens, na ordem em que devem ser enviadas.
+ * @returns Uma entrada por caminho, na mesma ordem.
+ * @throws Se a extensao nao for suportada (aceitos: PNG, JPEG, WebP, HEIC), se
+ *   o arquivo nao existir, ou se exceder o teto de 7 MB. O teto e deliberado:
+ *   captura de interface nao chega perto disso, e passar dele quase sempre
+ *   significa arquivo errado.
+ *
+ * So o backend `api` transmite imagem; com `agy` as capturas sao ignoradas.
+ */
 export function loadScreenshots(paths: string[]): LoadedScreenshot[] {
   return paths.map((path) => {
     const ext = extname(path).toLowerCase();

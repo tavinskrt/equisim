@@ -6,13 +6,29 @@ import 'context.dart';
 
 /// Avaliação de um ativo sob uma configuração de premissas.
 class SensitivityPoint {
+  /// Ativo avaliado.
   final Ticker ticker;
+
+  /// Configuração de premissas, em texto — o eixo e o valor variados.
   final String scenario;
+
+  /// Modelo que a cascata escolheu. `null` quando a avaliação falhou.
+  ///
+  /// Vale observar quando **muda** entre cenários: uma premissa que derruba o
+  /// ativo de FCFF para múltiplos altera a qualidade da estimativa, não apenas
+  /// o número.
   final ValuationModel? model;
+
+  /// Preço justo por papel. `null` quando a avaliação falhou.
   final double? fairValue;
+
+  /// Taxa de desconto efetivamente aplicada.
   final double? discountRate;
+
+  /// Motivo da falha, quando houve. Mutuamente exclusivo com [fairValue].
   final String? failure;
 
+  /// Declara o ponto.
   const SensitivityPoint({
     required this.ticker,
     required this.scenario,
@@ -23,6 +39,7 @@ class SensitivityPoint {
   });
 }
 
+/// Análise de sensibilidade do preço justo às premissas declaradas.
 abstract final class SensitivityReports {
   /// Varre a amostra medindo a sensibilidade do preço justo às premissas.
   ///
@@ -145,6 +162,8 @@ abstract final class SensitivityReports {
     );
   }
 
+  /// Formata a varredura como relatório Markdown, apontando qual eixo moveu
+  /// mais o preço justo de cada ativo.
   static String report(List<SensitivityPoint> points) {
     final byTicker = <Ticker, List<SensitivityPoint>>{};
     for (final point in points) {

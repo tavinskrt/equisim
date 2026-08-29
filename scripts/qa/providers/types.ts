@@ -17,6 +17,7 @@
 
 import type { ScreenshotPart } from '../screenshot.ts';
 
+/** Tudo o que um backend precisa para executar uma auditoria. */
 export interface ProviderRequest {
   /** Instrucao de sistema (rulebook). */
   system: string;
@@ -47,6 +48,10 @@ export interface ProviderUsage {
   totalTokens: number;
 }
 
+/**
+ * O que um backend devolve. Nao valida nada: a validacao do JSON contra o
+ * schema e do runner, para que os dois backends passem pelo mesmo crivo.
+ */
 export interface ProviderResult {
   /** Texto bruto retornado. Espera-se JSON, possivelmente sujo. */
   text: string;
@@ -56,16 +61,37 @@ export interface ProviderResult {
   usage?: ProviderUsage;
 }
 
+/**
+ * Backend de auditoria.
+ *
+ * A ordem de uso e fixa: `preflight()` antes de `run()`, para que a falta de
+ * credencial ou de binario apareca como mensagem acionavel antes de montar um
+ * payload de centenas de KB.
+ */
 export interface QaProvider {
+  /** Identificador do backend, para o cabecalho do relatorio. */
   readonly name: 'api' | 'agy';
   /** Descricao da autenticacao, exibida no cabecalho do relatorio. */
   describeAuth(): string;
   /** Falha com mensagem acionavel se o backend nao estiver utilizavel. */
   preflight(): void;
+  /**
+   * Executa a auditoria.
+   *
+   * Lanca `ProviderError` com `transient` para falha que vale repetir e com
+   * `quota` para cota esgotada, que alimenta a fila de pendencias.
+   */
   run(request: ProviderRequest): Promise<ProviderResult>;
 }
 
+/**
+ * Falha de backend, classificada pela acao que ela permite.
+ *
+ * Um erro sem `transient` nem `quota` e definitivo: nao adianta repetir agora
+ * nem depois, e o runner sai com codigo 2.
+ */
 export class ProviderError extends Error {
+  /** Vale repetir imediatamente -- rede instavel, 5xx, sobrecarga. */
   readonly transient: boolean;
   /**
    * Cota esgotada, especificamente.
@@ -77,6 +103,11 @@ export class ProviderError extends Error {
    */
   readonly quota: boolean;
 
+  /**
+   * @param message Mensagem acionavel, exibida ao usuario.
+   * @param transient Vale repetir agora. Padrao `false`.
+   * @param quota Cota esgotada. Padrao `false`.
+   */
   constructor(message: string, transient = false, quota = false) {
     super(message);
     this.name = 'ProviderError';

@@ -24,6 +24,8 @@ class RiskMetrics {
   /// CAGR / |máximo drawdown|.
   final double calmar;
 
+  /// Agrupa as estatísticas já apuradas. Para calculá-las a partir de uma
+  /// série, use [RiskMetrics.fromIndex].
   const RiskMetrics({
     required this.volatility,
     required this.maxDrawdown,

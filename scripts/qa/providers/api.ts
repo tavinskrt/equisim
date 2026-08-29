@@ -23,6 +23,13 @@ import {
 
 /** Flash roda no tier gratuito; Pro exige billing. Ver comentario do modulo. */
 export const API_DEFAULT_MODEL = 'gemini-3.5-flash';
+/**
+ * Modelo Pro, disponivel apenas por `--model`.
+ *
+ * No tier gratuito a cota da familia Pro e **zero**: usa-lo com API key sem
+ * billing falha na primeira chamada. Mantido porque quem tem billing ativo se
+ * beneficia, e porque o backend `agy` alcanca a familia Pro pela assinatura.
+ */
 export const API_PRO_MODEL = 'gemini-3.1-pro-preview';
 
 const TEMPERATURE = 0.0;
@@ -60,6 +67,13 @@ const DEFAULT_THINKING_BUDGET = -1;
  */
 const DEFAULT_TIMEOUT_MS = 240_000;
 
+/**
+ * Backend por API key, chamando `generativelanguage.googleapis.com` direto.
+ *
+ * E o caminho **reproduzivel**: o schema e forcado pelo servidor e a
+ * temperatura e zero, entao a mesma entrada tende a produzir o mesmo relatorio.
+ * Em troca, o tier gratuito da 20 requisicoes por dia.
+ */
 export class ApiProvider implements QaProvider {
   readonly name = 'api' as const;
 

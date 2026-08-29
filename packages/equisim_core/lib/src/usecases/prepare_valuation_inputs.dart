@@ -22,6 +22,26 @@ abstract final class PrepareValuationInputs {
   /// Janela usada para estimar o beta.
   static const int betaWindowYears = 5;
 
+  /// Busca fundamentos, cotações e proventos e monta os insumos da cascata.
+  ///
+  /// - [ticker]: ativo a preparar.
+  /// - [prices], [dividends], [fundamentals], [benchmark]: repositórios.
+  /// - [riskFreeRate]: taxa livre de risco **anual corrente**, não a média
+  ///   histórica — o desconto olha para frente.
+  /// - [asOf]: data de referência. Sem ela, usa o relógio do sistema; informe-a
+  ///   sempre que o resultado precisar ser reproduzível.
+  /// - [marketPremium], [marginOfSafety], [projectionYears],
+  ///   [perpetualGrowthCap]: parâmetros declarados do modelo.
+  /// - [taxPolicy]: política fiscal aplicada aos proventos na construção da
+  ///   série de retorno total que alimenta o beta.
+  ///
+  /// Propaga a falha do histórico de fundamentos e a de cotações; devolve
+  /// [InsufficientData] quando a série de preços vem vazia na janela.
+  ///
+  /// **Falha de proventos não interrompe**: a lista cai para vazia, porque um
+  /// ativo sem histórico de dividendos ainda é avaliável pelos modelos de
+  /// fluxo. Falha do índice também não: o beta cai para 1,0, registrado em
+  /// [BetaSource.manual].
   static Future<Result<ValuationInputs>> call({
     required Ticker ticker,
     required PriceRepository prices,
@@ -145,6 +165,17 @@ abstract final class PrepareValuationInputs {
   /// Entra no retorno esperado da carteira: o acionista ganha apreciação
   /// **mais** provento, e o provento entra líquido porque a política fiscal
   /// é modelada.
+  ///
+  /// - [events]: proventos do ativo. A janela é filtrada aqui.
+  /// - [currentPrice]: cotação corrente, denominador do *yield*.
+  /// - [asOf]: data de referência; a janela é `(asOf − 1 ano, asOf]`.
+  /// - [taxPolicy]: define quanto de cada provento chega ao acionista.
+  ///
+  /// Retorna fração ao ano, e `0.0` quando [currentPrice] não é positivo — a
+  /// guarda que evita divisão por zero.
+  ///
+  /// A janela é apurada por **data-ex**, não por data de pagamento: o direito
+  /// é o que define a competência do provento.
   static double netTrailingYield({
     required List<DividendEvent> events,
     required double currentPrice,

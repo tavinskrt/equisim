@@ -9,6 +9,8 @@ import '../../failures/result.dart';
 /// índice de referência não são documentados, o que é incompatível com
 /// reprodutibilidade acadêmica. Calcular custa menos de 1 ms.
 class BetaEstimate {
+  /// Coeficiente angular da regressão contra o mercado. `1.0` é neutro; acima
+  /// disso o ativo amplifica o movimento do índice.
   final double beta;
 
   /// Coeficiente de correlação de Pearson com o mercado.
@@ -28,10 +30,27 @@ class BetaEstimate {
       'β=${beta.toStringAsFixed(4)} (ρ=${correlation.toStringAsFixed(3)}, n=$observations)';
 }
 
+/// Estimação local de beta e correlação.
+///
+/// Todas as estatísticas usam divisor **amostral** (n−1), uniforme com
+/// [RiskMetrics]: a série observada é amostra do processo gerador, não a
+/// população.
 abstract final class BetaCalculator {
   /// β = Cov(R_ativo, R_mercado) / Var(R_mercado).
   ///
   /// As séries devem estar pareadas por data — use [alignReturns] antes.
+  ///
+  /// - [assetReturns]: retornos do ativo, já pareados.
+  /// - [marketReturns]: retornos do índice, mesma extensão.
+  /// - [minimumObservations]: mínimo de pares exigido. Padrão `30`, abaixo do
+  ///   qual a estimativa não é reportável.
+  ///
+  /// Devolve [InvalidInput] para séries de tamanhos diferentes;
+  /// [InsufficientData] abaixo do mínimo de observações; [ComputationFailure]
+  /// quando a variância do mercado é nula — série de referência constante, em
+  /// que beta não é definido.
+  ///
+  /// A correlação sai `0.0`, e não `NaN`, quando o denominador é nulo.
   static Result<BetaEstimate> estimate({
     required List<double> assetReturns,
     required List<double> marketReturns,
@@ -84,6 +103,18 @@ abstract final class BetaCalculator {
   }
 
   /// Pareia duas séries datadas pelas datas em comum e devolve os retornos.
+  ///
+  /// - [assetDates] / [assetIndex]: série do ativo, alinhadas entre si.
+  /// - [marketDates] / [marketIndex]: série do índice, alinhadas entre si.
+  ///
+  /// Retorna um registro com as duas listas de retornos, de mesmo comprimento.
+  ///
+  /// Datas presentes em apenas uma das séries são **descartadas**, e o retorno
+  /// é calculado entre pontos consecutivos *do pareamento* — não da série
+  /// original. Um buraco de uma semana no índice vira um retorno semanal em
+  /// ambas as pontas, o que preserva a correspondência temporal entre elas.
+  ///
+  /// Complexidade O(n + m).
   static ({List<double> asset, List<double> market}) alignReturns({
     required List<DateTime> assetDates,
     required List<double> assetIndex,
@@ -119,6 +150,16 @@ abstract final class BetaCalculator {
   }
 
   /// Matriz de correlação entre séries de retorno pareadas.
+  ///
+  /// - [returns]: uma lista de retornos por ativo. As séries devem já estar
+  ///   pareadas por data entre si; comprimentos diferentes são truncados ao
+  ///   menor par a par, o que compara posições que podem não ser a mesma data.
+  ///
+  /// Retorna matriz simétrica `k × k` com diagonal `1.0` (ou `0.0` para séries
+  /// de menos de dois pontos). Pares sem variância devolvem `0.0` em vez de
+  /// `NaN`.
+  ///
+  /// Complexidade O(k²·n).
   static List<List<double>> correlationMatrix(List<List<double>> returns) {
     final k = returns.length;
     final matrix = List.generate(k, (_) => List<double>.filled(k, 0.0));

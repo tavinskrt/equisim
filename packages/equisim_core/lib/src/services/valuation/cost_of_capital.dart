@@ -25,13 +25,20 @@ class CapmInputs {
   /// Taxa livre de risco anual, em fração. Deve vir do CDI observado.
   final double riskFreeRate;
 
+  /// Sensibilidade do ativo ao mercado. `1.0` significa neutro.
   final double beta;
+
+  /// Origem de [beta] — entra nos avisos do resultado, porque um beta
+  /// arbitrado e um calculado não sustentam a mesma conclusão.
   final BetaSource betaSource;
 
   /// Prêmio de risco de mercado (Rm − Rf) anual, em fração.
   final double marketPremium;
+  /// Origem de [marketPremium].
   final MarketPremiumSource premiumSource;
 
+  /// Declara os insumos. Não valida faixa — beta negativo e prêmio nulo são
+  /// entradas legítimas para análise de sensibilidade.
   const CapmInputs({
     required this.riskFreeRate,
     required this.beta,
@@ -77,6 +84,8 @@ class CostOfCapital {
   /// Dívida bruta.
   final double debtValue;
 
+  /// Declara a estrutura de capital. Todos os valores monetários devem estar
+  /// na **mesma escala** — misturar reais com milhares distorce os pesos.
   const CostOfCapital({
     required this.capm,
     required this.costOfDebt,
@@ -91,6 +100,7 @@ class CostOfCapital {
   /// alavancada; acima disso a empresa não estaria se financiando.
   static const double maxCreditSpread = 0.10;
 
+  /// Ke, repassado do CAPM. Atalho para `capm.costOfEquity`.
   double get costOfEquity => capm.costOfEquity;
 
   /// Custo da dívida efetivamente aplicado, dentro da banda de sanidade.
@@ -104,14 +114,23 @@ class CostOfCapital {
       );
 
   /// `true` quando a banda precisou corrigir o valor observado.
+  ///
+  /// Existe para que a interface declare a intervenção em vez de apresentar o
+  /// número corrigido como se fosse o medido.
   bool get costOfDebtWasClamped =>
       (effectiveCostOfDebt - costOfDebt).abs() > 1e-9;
 
+  /// Capital total: equity mais dívida. Denominador dos pesos do WACC.
   double get totalCapital => equityValue + debtValue;
 
+  /// Participação do capital próprio. **Degenera para `1.0`** quando o capital
+  /// total é não positivo — sem estrutura conhecida, o WACC vira Ke, que é a
+  /// hipótese conservadora.
   double get equityShare =>
       totalCapital > 0 ? equityValue / totalCapital : 1.0;
 
+  /// Participação da dívida. Degenera para `0.0` no mesmo caso, mantendo
+  /// `equityShare + debtShare == 1`.
   double get debtShare => totalCapital > 0 ? debtValue / totalCapital : 0.0;
 
   /// WACC bruto: `E/(E+D)·Ke + D/(E+D)·Kd·(1 − t)`.
@@ -129,6 +148,7 @@ class CostOfCapital {
   /// [waccWasFloored] existe para que a interface diga que isso aconteceu.
   double get wacc => rawWacc < capm.riskFreeRate ? capm.riskFreeRate : rawWacc;
 
+  /// `true` quando o piso de [wacc] precisou agir.
   bool get waccWasFloored => rawWacc < capm.riskFreeRate;
 
   /// Empresa sem dívida: WACC degenera para Ke.

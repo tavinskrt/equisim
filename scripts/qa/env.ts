@@ -15,9 +15,18 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+/** Credencial resolvida, com a origem para diagnostico. */
 export interface ApiKeyResolution {
+  /** A chave. Nunca a registre em log nem a inclua em mensagem de erro. */
   apiKey: string;
+  /** De onde veio, em texto legivel. Exibido no cabecalho do relatorio. */
   source: string;
+  /**
+   * Alerta de origem insegura, quando houver.
+   *
+   * Preenchido no caso do `.env`, que o `pubspec.yaml` declara como asset do
+   * Flutter e portanto vaza no bundle web.
+   */
   warning?: string;
 }
 
@@ -49,6 +58,15 @@ function parseDotEnv(path: string): Record<string, string> {
   return out;
 }
 
+/**
+ * Resolve a credencial pela ordem de precedencia descrita no topo do arquivo.
+ *
+ * @param repoRoot Raiz do repositorio, onde os arquivos `.env` sao procurados.
+ * @returns A chave e sua origem; `warning` preenchido quando a origem expoe a
+ *   credencial no bundle.
+ * @throws Se nenhuma das tres origens tiver a chave. A mensagem indica como
+ *   configurar o `.env.qa`, que e o caminho recomendado.
+ */
 export function resolveApiKey(repoRoot: string): ApiKeyResolution {
   const fromProcess = process.env.GEMINI_API_KEY?.trim();
   if (fromProcess) {

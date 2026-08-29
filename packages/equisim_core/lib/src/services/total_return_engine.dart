@@ -5,6 +5,7 @@ import '../value_objects/date_range.dart';
 
 /// Série de retorno total construída pelo próprio domínio.
 class TotalReturnSeries {
+  /// Datas dos pregões simulados, em ordem cronológica e alinhadas a [index].
   final List<DateTime> dates;
 
   /// Índice de retorno total, com base 1,0 na primeira data.
@@ -23,12 +24,25 @@ class TotalReturnSeries {
     required this.withheldTaxPerShare,
   });
 
+  /// `true` quando nenhum pregão entrou na simulação.
   bool get isEmpty => index.isEmpty;
 
   /// Retorno acumulado do período, em fração.
+  ///
+  /// Devolve `0.0` com menos de dois pontos. Como [index] parte de 1,0 e só
+  /// cresce por reinvestimento, o denominador nunca é zero em série construída
+  /// por [TotalReturnEngine.build].
   double get totalReturn => index.length < 2 ? 0.0 : index.last / index.first - 1.0;
 
-  /// Retornos diários simples.
+  /// Retornos diários simples entre pontos consecutivos de [index].
+  ///
+  /// Devolve `length − 1` elementos no caso normal — menos, se algum ponto
+  /// anterior for não positivo, porque esses pares são **descartados** em vez
+  /// de produzir divisão por zero. O resultado deixa então de estar alinhado a
+  /// [dates], o que só importa para quem parear séries por posição; para isso
+  /// use `BetaCalculator.alignReturns`, que pareia por data.
+  ///
+  /// Constrói a lista a cada chamada — O(n).
   List<double> get dailyReturns {
     final out = <double>[];
     for (var i = 1; i < index.length; i++) {
@@ -49,6 +63,24 @@ abstract final class TotalReturnEngine {
   ///
   /// O direito ao provento é apurado pela posição vigente na **data-ex**;
   /// o caixa entra e é reinvestido na **data de pagamento**.
+  ///
+  /// - [prices]: série de fechamentos do ativo.
+  /// - [dividends]: proventos do ativo. Só entram os de data-ex **dentro** do
+  ///   período simulado; os anteriores pertencem a quem detinha a ação antes.
+  /// - [taxPolicy]: define quanto de cada provento chega ao caixa.
+  /// - [range]: recorte opcional. Sem ele, usa a série inteira.
+  ///
+  /// Retorna série com [TotalReturnSeries.index] partindo de 1,0. Devolve série
+  /// vazia — não uma falha — quando nenhum pregão sobra após o recorte.
+  ///
+  /// **Precondição:** o fechamento do primeiro pregão do recorte deve ser
+  /// positivo. Ele é o denominador do índice, e um zero ali propagaria
+  /// `Infinity` por toda a série. Séries reais não têm fechamento zero, e não
+  /// há guarda para não mascarar dado corrompido da fonte.
+  ///
+  /// Complexidade **O(p · e)**: para cada pregão varre a lista de proventos
+  /// elegíveis duas vezes. Aceitável porque `e` é da ordem de dezenas — cinco
+  /// anos de proventos trimestrais dão ~20 eventos contra ~1250 pregões.
   static TotalReturnSeries build({
     required PriceSeries prices,
     required List<DividendEvent> dividends,

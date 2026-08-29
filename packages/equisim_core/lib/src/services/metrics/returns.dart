@@ -9,9 +9,14 @@ import '../../value_objects/money.dart';
 /// Convenção de sinal: aporte é **negativo** (saída do bolso do investidor),
 /// resgate e valor final são **positivos**. É a convenção da TIR.
 class CashFlow {
+  /// Dia da movimentação, truncado para meia-noite local.
   final DateTime date;
+
+  /// Valor movimentado. Negativo para aporte, positivo para resgate e para o
+  /// valor final da posição.
   final Money amount;
 
+  /// Constrói o fluxo, truncando [date] para o dia.
   CashFlow({required DateTime date, required this.amount})
       : date = DateTime(date.year, date.month, date.day);
 
@@ -20,8 +25,13 @@ class CashFlow {
 }
 
 /// Pregões por ano, base de anualização.
+///
+/// 252 é a base de dias úteis da B3 e do Banco Central — a mesma em que Selic e
+/// CDI são publicados. Conversão entre bases é sempre por composição
+/// (`(1+i)^(1/252) − 1`), nunca por divisão.
 const int tradingDaysPerYear = 252;
 
+/// Métricas de retorno de uma carteira.
 abstract final class Returns {
   /// **Retorno ponderado pelo tempo (TWR)**.
   ///
@@ -34,6 +44,17 @@ abstract final class Returns {
   ///
   /// Usar CAGR sobre capital aportado no lugar disto é o erro clássico: trata
   /// 120 aportes mensais como se fossem um único investimento no dia 1.
+  ///
+  /// - [values]: patrimônio ao final de cada período, em ordem cronológica.
+  /// - [externalFlows]: fluxo externo aportado em cada período, alinhado a
+  ///   [values] posição a posição. Aporte é positivo aqui — convenção oposta à
+  ///   de [CashFlow], porque a fórmula subtrai o fluxo do valor final.
+  ///
+  /// Devolve `0.0` para menos de dois períodos. Períodos abertos com patrimônio
+  /// não positivo são **pulados**, não zerados: uma carteira que zera e recebe
+  /// aporte novo não contamina o composto com um retorno infinito.
+  ///
+  /// Lança [ArgumentError] se as duas listas tiverem tamanhos diferentes.
   static double timeWeighted({
     required List<double> values,
     required List<double> externalFlows,
@@ -57,6 +78,15 @@ abstract final class Returns {
   /// carteira e dos fluxos externos. É a curva que deve alimentar volatilidade
   /// e drawdown — a curva bruta de patrimônio salta no dia do aporte e
   /// contaminaria as duas métricas.
+  ///
+  /// - [values]: patrimônio por período, em ordem cronológica.
+  /// - [externalFlows]: fluxo externo por período, alinhado a [values].
+  /// - [base]: nível inicial do índice. Padrão `100.0`.
+  ///
+  /// Devolve lista vazia para entrada vazia, e uma lista do mesmo comprimento
+  /// de [values] caso contrário. **Não valida o alinhamento** entre as duas
+  /// listas, ao contrário de [timeWeighted]: `externalFlows` mais curta lança
+  /// [RangeError] durante a iteração.
   static List<double> timeWeightedIndex({
     required List<double> values,
     required List<double> externalFlows,
@@ -77,6 +107,14 @@ abstract final class Returns {
   }
 
   /// Converte um retorno acumulado em taxa anual composta.
+  ///
+  /// - [totalReturn]: retorno do período inteiro, em fração.
+  /// - [years]: duração do período em anos, tipicamente `DateRange.years`.
+  ///
+  /// Devolve `0.0` para [years] não positivo, e `-1.0` (perda total) quando o
+  /// fator de crescimento `1 + totalReturn` é não positivo — a raiz de índice
+  /// fracionário de número negativo não existe no domínio real, e devolver
+  /// `NaN` propagaria em silêncio até a interface.
   static double annualize(double totalReturn, double years) {
     if (years <= 0) return 0.0;
     final growth = 1.0 + totalReturn;
@@ -92,6 +130,33 @@ abstract final class Returns {
   ///
   /// Resolve `Σ CF_i / (1+r)^(d_i/365) = 0` por Newton-Raphson com bisseção
   /// de resguardo.
+  ///
+  /// A base de contagem é **365 dias corridos**, não 252 úteis: os fluxos são
+  /// datados em calendário, e a TIR estendida é definida sobre tempo corrido.
+  ///
+  /// - [flows]: movimentações datadas. A ordem não importa — são ordenadas
+  ///   internamente. Aporte negativo, resgate e valor final positivos.
+  /// - [guess]: chute inicial de Newton, ao ano. Padrão `0.1`.
+  /// - [tolerance]: critério de parada sobre o VPL e sobre o passo. Padrão
+  ///   `1e-9`.
+  /// - [maxIterations]: teto por método. Padrão `200`.
+  ///
+  /// Retorna a taxa **anual** em fração.
+  ///
+  /// Devolve [InsufficientData] com menos de dois fluxos; [InvalidInput] se
+  /// faltar fluxo positivo ou negativo — sem troca de sinal não há raiz;
+  /// [ComputationFailure] quando a bisseção não consegue isolar a raiz no
+  /// intervalo `[-99,99%, 10000%]`.
+  ///
+  /// **Ressalva de convergência:** esgotado [maxIterations] na bisseção sem
+  /// atingir [tolerance], o ponto médio corrente é devolvido como [Ok]. Com o
+  /// intervalo padrão isso exigiria mais de 200 bisseções para uma faixa de
+  /// largura ~101, o que não ocorre na prática — mas o contrato não distingue
+  /// esse retorno de uma convergência plena.
+  ///
+  /// Fluxos com mais de uma troca de sinal admitem múltiplas raízes (regra de
+  /// Descartes); aqui devolve-se a primeira encontrada, sem sinalizar as
+  /// demais.
   static Result<double> extendedIrr(
     List<CashFlow> flows, {
     double guess = 0.1,
@@ -149,6 +214,11 @@ abstract final class Returns {
     return _bisect(npv, -0.9999, 100.0, tolerance, maxIterations);
   }
 
+  /// Bisseção sobre [f] no intervalo `[lo, hi]`.
+  ///
+  /// Exige troca de sinal entre as pontas — é o que garante a existência da
+  /// raiz. Esgotado [maxIterations], devolve o ponto médio corrente como [Ok]
+  /// sem sinalizar a não convergência; ver a ressalva em [extendedIrr].
   static Result<double> _bisect(
     double Function(double) f,
     double lo,

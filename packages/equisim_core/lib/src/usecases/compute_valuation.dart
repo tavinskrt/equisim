@@ -22,11 +22,23 @@ import '../value_objects/ticker.dart';
 /// modelo aplicar sem tocar em rede, o que permite testá-la exaustivamente e
 /// executá-la dentro de uma isolate.
 class ValuationInputs {
+  /// Ativo a avaliar.
   final Ticker ticker;
+
+  /// Data de referência. Define o corte *point-in-time* dos fundamentos.
   final DateTime asOf;
+
+  /// Série completa de exercícios, **sem** filtro de publicação — o filtro é
+  /// aplicado internamente por `PointInTimeView`.
   final List<FundamentalsSnapshot> fundamentals;
+
+  /// Histórico de proventos, usado pelo modelo de Gordon e pelo *yield*.
   final List<DividendEvent> dividends;
+
+  /// Cotação na data de referência, em reais **por unidade negociada**.
   final double marketPrice;
+
+  /// Insumos do CAPM já resolvidos, incluindo a origem do beta.
   final CapmInputs capm;
 
   /// Margem de segurança aplicada ao preço justo, em fração.
@@ -43,6 +55,8 @@ class ValuationInputs {
   /// `MarketAnchors.nominalEconomyGrowth`, derivado do IPCA observado.
   final double perpetualGrowthCap;
 
+  /// Agrupa os insumos. Não busca nada — quem busca é
+  /// [PrepareValuationInputs], e a separação é o que mantém a cascata pura.
   const ValuationInputs({
     required this.ticker,
     required this.asOf,
@@ -71,6 +85,24 @@ class ValuationInputs {
 /// justo" esconderia do usuário a qualidade real da estimativa.
 abstract final class ValuationCascade {
   /// Avalia usando o melhor modelo possível.
+  ///
+  /// - [inputs]: insumos já resolvidos.
+  /// - [scenarioBuilder]: constrói a fonte de cenários a partir das premissas
+  ///   centrais. Sem ele, os modelos de fluxo usam três cenários discretos.
+  /// - [monteCarloSamples]: sorteios quando a fonte é estocástica. Padrão
+  ///   `10000`.
+  /// - [seed]: semente do gerador. Padrão `42`, fixo por reprodutibilidade.
+  ///
+  /// Devolve [InvalidInput] sem preço de mercado; [InsufficientData] quando
+  /// nenhum exercício havia sido publicado na data de referência, ou quando
+  /// **nenhum** dos quatro modelos se aplica.
+  ///
+  /// **Síncrono e puro:** não toca rede nem relógio, e a mesma entrada produz
+  /// sempre a mesma saída. É o que permite executá-la dentro de uma isolate e
+  /// testar a decisão de modelo sem dependência externa.
+  ///
+  /// A instrumentação de auditoria abre transação **antes** da primeira
+  /// validação: um ativo recusado é tão auditável quanto um avaliado.
   static Result<ValuationResult> evaluate(
     ValuationInputs inputs, {
     AssumptionSource Function(DcfAssumptions base)? scenarioBuilder,
@@ -177,6 +209,15 @@ abstract final class ValuationCascade {
   /// sem depender de uma lista que envelhece a cada reorganização societária.
   /// Fora da faixa plausível ou longe de um inteiro, adota-se 1 — preferível
   /// a aplicar um fator inventado.
+  ///
+  /// - [sharesOutstanding]: papéis em circulação, por ação.
+  /// - [marketCap]: valor de mercado publicado.
+  /// - [marketPrice]: cotação da unidade negociada.
+  ///
+  /// Retorna a razão arredondada, sempre em `[1, maxSharesPerUnit]`. Devolve
+  /// `1.0` — nunca `null`, nunca zero — para qualquer entrada ausente, não
+  /// positiva, não finita, fora da faixa, ou a mais de 0,12 de um inteiro.
+  /// O valor é seguro como divisor.
   static double quotedUnitRatio({
     required double? sharesOutstanding,
     required double? marketCap,

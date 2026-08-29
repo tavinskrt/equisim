@@ -1,4 +1,3 @@
-import '../entities/asset.dart';
 import '../entities/financial_goal.dart';
 import '../entities/portfolio.dart';
 import '../entities/price_series.dart';
@@ -173,7 +172,7 @@ abstract final class ResolveMarketAnchors {
         : MarketAnchors.fallback2026.riskFreeCagr;
 
     final market = ibov.isOk
-        ? _cagrOf(ibov.unwrap(), range)
+        ? _cagrOf(ibov.unwrap())
         : MarketAnchors.fallback2026.marketCagr;
 
     // A série do IPCA é mensal, daí os 12 períodos por ano. Sem ela, a
@@ -218,7 +217,14 @@ abstract final class ResolveMarketAnchors {
     ).annualized();
   }
 
-  static double _cagrOf(PriceSeries series, DateRange range) {
+  /// CAGR do índice entre o primeiro e o último ponto **efetivamente
+  /// disponíveis** na série.
+  ///
+  /// A janela usada é a da própria série, não a solicitada: se o índice começa
+  /// depois do início pedido, anualizar sobre o prazo pedido subestimaria o
+  /// retorno. Devolve o CAGR de [MarketAnchors.fallback2026] quando a série é
+  /// curta demais, tem preço inicial não positivo ou colapsa num único dia.
+  static double _cagrOf(PriceSeries series) {
     if (series.points.length < 2) {
       return MarketAnchors.fallback2026.marketCagr;
     }
@@ -230,51 +236,5 @@ abstract final class ResolveMarketAnchors {
     if (years <= 0) return MarketAnchors.fallback2026.marketCagr;
 
     return Returns.annualize(last.close / first.close - 1, years);
-  }
-}
-
-/// Monta uma carteira a partir de tickers, buscando o perfil de cada ativo.
-///
-/// O perfil traz a classificação setorial, sem a qual o alerta de concentração
-/// — requisito funcional — não teria como operar.
-abstract final class BuildPortfolio {
-  static Future<Result<Portfolio>> equalWeighted({
-    required FundamentalsRepository repository,
-    required String id,
-    required String name,
-    required PortfolioKind kind,
-    required List<Ticker> tickers,
-  }) async {
-    if (tickers.isEmpty) {
-      return const Err(InvalidInput('Informe ao menos um ativo.'));
-    }
-    if (tickers.length > Portfolio.maxAssets) {
-      return Err(InvalidInput(
-        'Limite de ${Portfolio.maxAssets} ativos por carteira excedido.',
-      ));
-    }
-
-    final assets = <Asset>[];
-    final unresolved = <String>[];
-
-    for (final ticker in tickers) {
-      final profile = await repository.profile(ticker);
-      profile.fold(
-        assets.add,
-        (_) {
-          // Sem perfil o ativo entra sem setor: participa da carteira, mas não
-          // do alerta de concentração. É melhor que descartá-lo em silêncio.
-          unresolved.add(ticker.value);
-          assets.add(Asset(ticker: ticker, name: ticker.value));
-        },
-      );
-    }
-
-    return Portfolio.equalWeighted(
-      id: id,
-      name: name,
-      kind: kind,
-      assets: assets,
-    );
   }
 }

@@ -33,5 +33,9 @@ abstract class AuditChannel {
   /// ao próprio remetente — a entrega local é responsabilidade do barramento.
   Stream<String> get incoming;
 
+  /// Encerra o canal e libera o transporte.
+  ///
+  /// Depois disto [incoming] não emite mais e [post] não tem efeito. Chamar
+  /// duas vezes é inofensivo.
   void close();
 }

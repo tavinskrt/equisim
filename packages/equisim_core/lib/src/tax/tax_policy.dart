@@ -2,15 +2,24 @@ import '../entities/dividend_event.dart';
 
 /// Regra tributária aplicável a um tipo de provento em uma janela de vigência.
 class TaxRule {
+  /// Tipo de provento a que a regra se aplica.
   final DividendKind kind;
 
   /// Alíquota em fração (0.15 = 15%).
+  ///
+  /// Deve ficar em `[0, 1)`. O valor `1.0` — tributação integral — não é
+  /// representável: [TaxPolicy.withheldAmount] divide por `(1 − rate)` em base
+  /// líquida e devolveria `Infinity`.
   final double rate;
 
   /// Vigência. `null` significa sem limite naquela ponta.
   final DateTime? effectiveFrom;
+
+  /// Fim da vigência, inclusivo. `null` significa vigente indefinidamente.
   final DateTime? effectiveUntil;
 
+  /// Declara uma regra. Não valida [rate] — a política é parâmetro do
+  /// trabalho, e travar faixa aqui impediria simular cenários legislativos.
   const TaxRule({
     required this.kind,
     required this.rate,
@@ -18,6 +27,9 @@ class TaxRule {
     this.effectiveUntil,
   });
 
+  /// `true` se a regra está vigente em [date], com as duas pontas inclusivas.
+  ///
+  /// Uma regra sem [effectiveFrom] nem [effectiveUntil] vale sempre.
   bool appliesOn(DateTime date) {
     if (effectiveFrom != null && date.isBefore(effectiveFrom!)) return false;
     if (effectiveUntil != null && date.isAfter(effectiveUntil!)) return false;
@@ -60,7 +72,11 @@ enum DividendBasis {
 /// revisão legislativa. Fixar valores no motor tornaria o trabalho obsoleto
 /// por mudança de lei.
 class TaxPolicy {
+  /// Nome da política, para exibição e para constar na metodologia.
   final String name;
+
+  /// Regras avaliadas **em ordem**: a primeira que casa tipo e vigência vence.
+  /// Regras posteriores para o mesmo tipo e período são inalcançáveis.
   final List<TaxRule> rules;
 
   /// Como interpretar o valor que a fonte informa por ação.
@@ -104,6 +120,14 @@ class TaxPolicy {
   );
 
   /// Alíquota aplicável ao provento na data de pagamento.
+  ///
+  /// - [kind]: natureza fiscal do provento.
+  /// - [on]: data de apuração, normalmente a de pagamento.
+  ///
+  /// Devolve `0.0` quando nenhuma regra casa — **isento por omissão**. É a
+  /// escolha conservadora para o resultado bruto, e o motivo de
+  /// [DividendKind.desconhecido] existir com alíquota explícita em vez de
+  /// depender deste padrão.
   double rateFor(DividendKind kind, DateTime on) {
     for (final r in rules) {
       if (r.kind == kind && r.appliesOn(on)) return r.rate;
@@ -112,6 +136,12 @@ class TaxPolicy {
   }
 
   /// Valor efetivamente recebido por ação, após retenção na fonte.
+  ///
+  /// Em [DividendBasis.gross] deduz o imposto do valor informado; em
+  /// [DividendBasis.net] devolve o valor informado intacto, porque ele já é o
+  /// que entra no caixa.
+  ///
+  /// - [event]: provento. A alíquota é apurada em `event.paymentDate`.
   double netAmount(DividendEvent event) {
     final rate = rateFor(event.kind, event.paymentDate);
     return switch (basis) {
@@ -123,6 +153,18 @@ class TaxPolicy {
   }
 
   /// Imposto retido por ação.
+  ///
+  /// - [event]: provento. A alíquota é apurada em `event.paymentDate`.
+  ///
+  /// **Precondição em base líquida: `rate < 1`.** Com [DividendBasis.net] o
+  /// bruto é reconstruído por `valor · rate / (1 − rate)`, e uma alíquota de
+  /// 100% produz `Infinity` — verificado — que se propaga em silêncio até a
+  /// interface em vez de lançar. Não há guarda porque nenhuma política do
+  /// pacote chega perto disso (a máxima vigente é 0,15) e um `clamp` mudaria o
+  /// número em vez de expor o parâmetro inválido. Quem declarar política
+  /// própria precisa respeitar a faixa.
+  ///
+  /// Devolve `0.0` sempre que a alíquota é nula, em qualquer base.
   double withheldAmount(DividendEvent event) {
     final rate = rateFor(event.kind, event.paymentDate);
     if (rate <= 0) return 0.0;
@@ -135,6 +177,10 @@ class TaxPolicy {
   }
 
   /// Valor bruto declarado por ação, antes de qualquer retenção.
+  ///
+  /// Vale `netAmount + withheldAmount` nas duas bases, por construção: em base
+  /// bruta reconstitui o valor informado; em base líquida devolve o bruto
+  /// implícito. Herda a precondição `rate < 1` de [withheldAmount].
   double grossAmount(DividendEvent event) =>
       netAmount(event) + withheldAmount(event);
 }

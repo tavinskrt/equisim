@@ -132,6 +132,16 @@ class CacheDatabase extends _$CacheDatabase {
   // ------------------------------------------------------------------ TTL --
 
   /// Verdadeiro se o recurso está em cache e ainda dentro da validade.
+  ///
+  /// - [key]: chave do recurso, construída por `CachePolicy`.
+  /// - [ttl]: validade admitida desde a última busca.
+  ///
+  /// A validade governa a **ponta da série**, não as linhas já guardadas:
+  /// responder `false` provoca uma rebusca que soma dias novos aos antigos, e
+  /// nunca um descarte. Recurso nunca buscado devolve `false`.
+  ///
+  /// Lê o relógio do sistema — é controle de cache, não cálculo, e por isso não
+  /// viola o determinismo do domínio.
   Future<bool> isFresh(String key, Duration ttl) async {
     final entry = await (select(cacheEntries)..where((t) => t.key.equals(key)))
         .getSingleOrNull();
@@ -139,12 +149,24 @@ class CacheDatabase extends _$CacheDatabase {
     return DateTime.now().difference(entry.fetchedAt) < ttl;
   }
 
+  /// Marca o recurso como buscado agora, reiniciando sua validade.
+  ///
+  /// Chamar **depois** de gravar as linhas: entre a marcação e a gravação, uma
+  /// falha deixaria o cache com validade renovada e conteúdo velho.
   Future<void> touch(String key) => into(cacheEntries).insertOnConflictUpdate(
         CacheEntriesCompanion.insert(key: key, fetchedAt: DateTime.now()),
       );
 
   // --------------------------------------------------------------- Preços --
 
+  /// Cotações de um ativo no intervalo, em ordem cronológica.
+  ///
+  /// - [ticker]: código do ativo.
+  /// - [startIso], [endIso]: bordas inclusivas, em `AAAA-MM-DD`.
+  ///
+  /// As datas são texto ISO justamente para que a comparação lexicográfica do
+  /// SQLite coincida com a cronológica. Devolve lista vazia quando não há nada
+  /// em cache — o que é indistinguível de um intervalo realmente sem pregões.
   Future<List<CachedPrice>> pricesIn(
     String ticker,
     String startIso,
@@ -158,28 +180,39 @@ class CacheDatabase extends _$CacheDatabase {
             ..orderBy([(t) => OrderingTerm.asc(t.date)]))
           .get();
 
+  /// Insere ou atualiza cotações em lote, pela chave `(ticker, date)`.
   Future<void> upsertPrices(List<CachedPricesCompanion> rows) =>
       batch((b) => b.insertAllOnConflictUpdate(cachedPrices, rows));
 
   // ------------------------------------------------------------ Proventos --
 
+  /// Proventos de um ativo, em ordem de data-ex. Sem recorte: o histórico
+  /// inteiro é pequeno e o filtro é do consumidor.
   Future<List<CachedDividend>> dividendsOf(String ticker) =>
       (select(cachedDividends)
             ..where((t) => t.ticker.equals(ticker))
             ..orderBy([(t) => OrderingTerm.asc(t.exDate)]))
           .get();
 
+  /// Insere ou atualiza proventos em lote.
+  ///
+  /// A chave primária inclui **valor e rótulo**, não só as datas: duas tranches
+  /// legítimas de JCP na mesma data-ex são registros distintos, e uma chave
+  /// apenas por data as colapsaria em uma.
   Future<void> upsertDividends(List<CachedDividendsCompanion> rows) =>
       batch((b) => b.insertAllOnConflictUpdate(cachedDividends, rows));
 
   // ----------------------------------------------------------- Fundamentos --
 
+  /// Exercícios de um ativo, do mais antigo ao mais recente.
   Future<List<CachedFundamentals>> fundamentalsOf(String ticker) =>
       (select(cachedFundamentalsTable)
             ..where((t) => t.ticker.equals(ticker))
             ..orderBy([(t) => OrderingTerm.asc(t.fiscalPeriodEnd)]))
           .get();
 
+  /// Insere ou atualiza exercícios em lote, pela chave
+  /// `(ticker, fiscalPeriodEnd)`.
   Future<void> upsertFundamentals(
     List<CachedFundamentalsTableCompanion> rows,
   ) =>
@@ -187,15 +220,21 @@ class CacheDatabase extends _$CacheDatabase {
 
   // --------------------------------------------------------------- Perfil --
 
+  /// Perfil cadastral de um ativo, ou `null` se não estiver em cache.
   Future<CachedProfile?> profileOf(String ticker) =>
       (select(cachedProfiles)..where((t) => t.ticker.equals(ticker)))
           .getSingleOrNull();
 
+  /// Insere ou atualiza o perfil de um ativo.
   Future<void> upsertProfile(CachedProfilesCompanion row) =>
       into(cachedProfiles).insertOnConflictUpdate(row);
 
   // ---------------------------------------------------------------- Macro --
 
+  /// Taxas de uma série macro no intervalo, em ordem cronológica.
+  ///
+  /// - [seriesId]: código SGS do Banco Central (12 = CDI, 433 = IPCA).
+  /// - [startIso], [endIso]: bordas inclusivas, em `AAAA-MM-DD`.
   Future<List<CachedMacroRate>> macroIn(
     int seriesId,
     String startIso,
@@ -209,10 +248,14 @@ class CacheDatabase extends _$CacheDatabase {
             ..orderBy([(t) => OrderingTerm.asc(t.date)]))
           .get();
 
+  /// Insere ou atualiza taxas macro em lote, pela chave `(seriesId, date)`.
   Future<void> upsertMacro(List<CachedMacroRatesCompanion> rows) =>
       batch((b) => b.insertAllOnConflictUpdate(cachedMacroRates, rows));
 
   /// Limpa tudo. Usado em testes e na opção de reset do usuário.
+  ///
+  /// **Irreversível.** Apaga as linhas e as marcas de validade, de modo que a
+  /// próxima consulta de cada recurso vá à rede.
   Future<void> clearAll() async {
     await batch((b) {
       b.deleteWhere(cachedPrices, (_) => const Constant(true));

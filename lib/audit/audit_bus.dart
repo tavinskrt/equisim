@@ -62,8 +62,7 @@ class AuditBus extends ChangeNotifier {
   /// Eventos, do mais antigo ao mais recente.
   List<AuditEvent> get history => List.unmodifiable(_buffer);
 
-  bool get isRunning => _role != null;
-
+  /// Papel assumido pelo barramento, ou `null` enquanto ele não foi ligado.
   AuditRole? get role => _role;
 
   /// `true` quando existe canal real entre janelas (alvo web).

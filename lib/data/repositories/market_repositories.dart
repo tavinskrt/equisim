@@ -23,11 +23,14 @@ Future<T?> _tryCache<T>(Future<T> Function() operation) async {
 
 /// Cotações, com cache local opcional.
 class PriceRepositoryImpl implements PriceRepository {
+  /// Fonte remota das cotações.
   final BrapiDatasource remote;
 
   /// `null` quando o cache não pôde ser inicializado. Tudo passa a vir da rede.
   final CacheDatabase? cache;
 
+  /// Declara o repositório. Passar `cache: null` desliga o cache sem alterar
+  /// o comportamento observável, só o desempenho.
   PriceRepositoryImpl({required this.remote, required this.cache});
 
   @override
@@ -134,9 +137,13 @@ class PriceRepositoryImpl implements PriceRepository {
 
 /// Proventos, com cache e higienização de duplicatas exatas.
 class DividendRepositoryImpl implements DividendRepository {
+  /// Fonte remota dos proventos.
   final BrapiDatasource remote;
+
+  /// Cache local, ou `null` quando indisponível.
   final CacheDatabase? cache;
 
+  /// Declara o repositório.
   DividendRepositoryImpl({required this.remote, required this.cache});
 
   @override
@@ -226,9 +233,16 @@ class DividendRepositoryImpl implements DividendRepository {
 
 /// Fundamentos e perfil cadastral.
 class FundamentalsRepositoryImpl implements FundamentalsRepository {
+  /// Fonte remota dos fundamentos e do perfil.
   final BrapiDatasource remote;
+
+  /// Cache local, ou `null` quando indisponível.
+  ///
+  /// **O universo de tickers não passa por aqui**: `universe()` delega direto
+  /// ao remoto, sem cache.
   final CacheDatabase? cache;
 
+  /// Declara o repositório.
   FundamentalsRepositoryImpl({required this.remote, required this.cache});
 
   @override
@@ -364,8 +378,11 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
 
 /// Índice de mercado.
 class BenchmarkRepositoryImpl implements BenchmarkRepository {
+  /// Fonte remota do índice.
   final BrapiDatasource remote;
 
+  /// Declara o repositório. **Sem cache**, ao contrário dos demais: a série do
+  /// índice é buscada uma vez por sessão e não justifica a via local.
   BenchmarkRepositoryImpl(this.remote);
 
   @override
@@ -381,9 +398,13 @@ class BenchmarkRepositoryImpl implements BenchmarkRepository {
 
 /// Variáveis macroeconômicas do Banco Central.
 class MacroRepositoryImpl implements MacroRepository {
+  /// Fonte remota das séries do Banco Central.
   final BcbDatasource remote;
+
+  /// Cache local, ou `null` quando indisponível.
   final CacheDatabase? cache;
 
+  /// Declara o repositório.
   MacroRepositoryImpl({required this.remote, required this.cache});
 
   @override

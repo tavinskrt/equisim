@@ -4,6 +4,8 @@
 /// (verificado: 781 ações contra 332 FIIs, interseção vazia). Não há, portanto,
 /// inferência de classe a partir do sufixo — Units como `TAEE11` são ações.
 class Ticker implements Comparable<Ticker> {
+  /// Código normalizado, sempre em maiúsculas e sem espaços. Só construtores
+  /// validantes produzem instâncias, então esta invariante é garantida.
   final String value;
 
   const Ticker._(this.value);
@@ -21,6 +23,12 @@ class Ticker implements Comparable<Ticker> {
   static final RegExp _pattern = RegExp(r'^[A-Z][A-Z0-9]{3}\d{1,2}$');
 
   /// Normaliza e valida. Lança [FormatException] em entrada inválida.
+  ///
+  /// - [raw]: código bruto. Espaços nas pontas e caixa mista são aceitos e
+  ///   normalizados; qualquer outro desvio do padrão é recusado.
+  ///
+  /// Use em fronteira de dados confiável — resposta de API, valor persistido.
+  /// Para entrada digitada, prefira [Ticker.tryParse].
   factory Ticker.parse(String raw) {
     final normalized = raw.trim().toUpperCase();
     if (!_pattern.hasMatch(normalized)) {
@@ -30,6 +38,8 @@ class Ticker implements Comparable<Ticker> {
   }
 
   /// Retorna `null` em vez de lançar — para entrada de usuário.
+  ///
+  /// Só engole [FormatException]; qualquer outra exceção propaga.
   static Ticker? tryParse(String raw) {
     try {
       return Ticker.parse(raw);

@@ -28,13 +28,24 @@ abstract final class CachePolicy {
   /// CDI e IPCA: publicação diária.
   static const Duration macro = Duration(days: 1);
 
-  /// Universo de tickers: entram e saem poucas empresas por ano.
-  static const Duration universe = Duration(days: 7);
+  // O universo de tickers **não é cacheado**: `MarketFundamentalsRepository`
+  // delega direto ao remoto. A validade e a chave que existiam aqui nunca
+  // tiveram chamador e foram removidas na auditoria de código morto; quem for
+  // ligar o cache do universo precisa reintroduzi-las junto do caminho que as
+  // usa, e não antes.
 
+  /// Chave de cache da série de cotações de um ativo.
   static String pricesKey(String ticker) => 'prices:$ticker';
+
+  /// Chave de cache do histórico de proventos de um ativo.
   static String dividendsKey(String ticker) => 'dividends:$ticker';
+
+  /// Chave de cache dos exercícios de um ativo.
   static String fundamentalsKey(String ticker) => 'fundamentals:$ticker';
+
+  /// Chave de cache do perfil cadastral de um ativo.
   static String profileKey(String ticker) => 'profile:$ticker';
+
+  /// Chave de cache de uma série macroeconômica, pelo código SGS do BCB.
   static String macroKey(int seriesId) => 'macro:$seriesId';
-  static const String universeKey = 'universe';
 }

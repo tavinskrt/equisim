@@ -8,17 +8,17 @@ import '../../network/api_client.dart';
 /// API aberta: sem token, sem cadastro, sem limite relevante. Preferida à
 /// brapi para dados macro por ser fonte oficial e citável na monografia.
 class BcbDatasource {
+  /// Cliente HTTP compartilhado, já com interceptors de auditoria.
   final ApiClient client;
 
+  /// Declara o datasource sobre um [ApiClient] configurado.
   BcbDatasource(this.client);
 
-  /// CDI diário — taxa livre de risco do CAPM e do índice de Sharpe.
+  /// CDI diário (SGS 12) — taxa livre de risco do CAPM e do índice de Sharpe.
   static const int seriesCdiDaily = 12;
 
-  /// Selic diária, alternativa ao CDI.
-  static const int seriesSelicDaily = 11;
-
-  /// IPCA mensal — retorno real.
+  /// IPCA mensal (SGS 433) — usado para a taxa real e para o crescimento
+  /// nominal da perpetuidade.
   static const int seriesIpcaMonthly = 433;
 
   /// Busca uma série no intervalo informado.
@@ -64,9 +64,21 @@ class BcbDatasource {
     });
   }
 
+  /// Atalho para a série do CDI no intervalo.
+  ///
+  /// A taxa vem **diária em base 252 dias úteis**; anualizar exige composição
+  /// por `RateSeries.annualized()`, nunca multiplicação.
+  ///
+  /// Nenhum caminho de produção passa por aqui — `MarketMacroRepository` chama
+  /// [series] com [seriesCdiDaily] direto, para aplicar cache na mesma etapa.
+  /// Preservado como API legível do datasource e exercitado pelos testes.
   Future<Result<RateSeries>> cdi(DateRange range) =>
       series(seriesCdiDaily, range);
 
+  /// Atalho para a série do IPCA no intervalo.
+  ///
+  /// A taxa vem **mensal**: anualizar exige `annualized(periodsPerYear: 12)`.
+  /// Como [cdi], é contornado em produção pelo repositório.
   Future<Result<RateSeries>> ipca(DateRange range) =>
       series(seriesIpcaMonthly, range);
 

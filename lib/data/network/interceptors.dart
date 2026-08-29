@@ -19,9 +19,13 @@ import '../config/api_config.dart';
 /// `GET` real nunca sai. Era a origem dos `connectionError` em série no
 /// console (três por chamada, uma por tentativa do [RetryInterceptor]).
 class AuthInterceptor extends Interceptor {
+  /// Configuração de onde veio a credencial e para onde ela pode ir.
   final ApiConfig config;
+
   final String _brapiHost;
 
+  /// Declara o interceptor, memorizando o host da brapi a partir de
+  /// `config.brapiBaseUrl` — é a comparação que restringe o envio do token.
   AuthInterceptor(this.config)
       : _brapiHost = Uri.parse(config.brapiBaseUrl).host;
 
@@ -53,10 +57,20 @@ class AuthInterceptor extends Interceptor {
 /// `X-RateLimit-*` nem `Retry-After`. Como o limite é inobservável, a
 /// estratégia é conter a concorrência na origem em vez de reagir ao 429.
 class ThrottleInterceptor extends Interceptor {
+  /// Teto de requisições em voo. As excedentes esperam em fila FIFO.
   final int maxConcurrent;
+
   int _inFlight = 0;
   final _queue = <Completer<void>>[];
 
+  /// Declara o limitador.
+  ///
+  /// - [maxConcurrent]: teto de concorrência. Padrão `4`, escolhido por conter
+  ///   a rajada de montagem de carteira sem serializar tudo.
+  ///
+  /// **A fila não tem teto nem tempo limite**: requisições esperam
+  /// indefinidamente por uma vaga. Aceitável porque o número de chamadas por
+  /// interação é limitado pelo teto de 15 ativos da carteira.
   ThrottleInterceptor({this.maxConcurrent = 4});
 
   @override
@@ -99,11 +113,29 @@ class ThrottleInterceptor extends Interceptor {
 /// normal ao montar uma carteira — voltem a colidir todas no mesmo instante
 /// após a espera.
 class RetryInterceptor extends Interceptor {
+  /// Cliente usado para reemitir a requisição. É a mesma instância que hospeda
+  /// este interceptor, o que faz a repetição atravessar a cadeia inteira de
+  /// novo — inclusive o limitador de concorrência.
   final Dio dio;
+
+  /// Total de tentativas, contando a original. `3` significa duas repetições.
   final int maxAttempts;
+
+  /// Base da espera exponencial.
   final Duration baseDelay;
+
   final math.Random _random;
 
+  /// Declara o repetidor.
+  ///
+  /// - [dio]: cliente que reemite.
+  /// - [maxAttempts]: tentativas no total. Padrão `3`.
+  /// - [baseDelay]: base do teto exponencial. Padrão 500 ms.
+  /// - [random]: gerador injetável, para tornar o teste determinístico.
+  ///
+  /// Repete apenas o que pode melhorar sozinho: `429`, `5xx` e falhas de
+  /// conexão ou tempo esgotado. `4xx` de cliente não é repetido — repetir uma
+  /// credencial inválida só multiplica a falha.
   RetryInterceptor({
     required this.dio,
     this.maxAttempts = 3,
@@ -124,6 +156,12 @@ class RetryInterceptor extends Interceptor {
   }
 
   /// Espera exponencial com jitter completo: `random(0, base · 2^n)`.
+  ///
+  /// - [attempt]: número da tentativa já consumida, a partir de zero.
+  ///
+  /// O jitter é **completo**, não parcial: o sorteio vai de zero ao teto, e não
+  /// de metade do teto ao teto. É o que descorrelaciona por inteiro rajadas que
+  /// falharam juntas.
   Duration delayFor(int attempt) {
     final ceiling = baseDelay.inMilliseconds * math.pow(2, attempt).toInt();
     return Duration(milliseconds: _random.nextInt(ceiling + 1));
@@ -162,14 +200,30 @@ typedef LogSink = void Function(String message);
 /// Nenhum header de autorização e nenhum parâmetro de token chega ao console:
 /// logs vazam para relatórios de erro e capturas de tela.
 class SanitizedLogInterceptor extends Interceptor {
+  /// Chave geral do log. Desligado por padrão — em produção não se registra
+  /// tráfego.
   final bool enabled;
+
+  /// Destino das mensagens. Padrão `print`.
   final LogSink sink;
 
+  /// Declara o log sanitizado.
+  ///
+  /// - [enabled]: liga o registro. Padrão `false`.
+  /// - [sink]: destino. Sem ele, `print`.
   SanitizedLogInterceptor({this.enabled = false, LogSink? sink})
       : sink = sink ?? print;
 
   static final _tokenPattern = RegExp(r'([?&]token=)[^&]+', caseSensitive: false);
 
+  /// Mascara o valor de um parâmetro `token=` na URL.
+  ///
+  /// - [input]: texto a limpar, tipicamente uma URL.
+  ///
+  /// **Cobre apenas o token em parâmetro de consulta.** O header
+  /// `Authorization` nunca é registrado porque este interceptor não imprime
+  /// headers — não porque esta função o remova. Ao acrescentar registro de
+  /// headers, mascare-os aqui antes.
   static String sanitize(String input) =>
       input.replaceAllMapped(_tokenPattern, (m) => '${m[1]}****');
 
