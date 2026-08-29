@@ -8,20 +8,10 @@
  *   npx tsx scripts/gemini-qa.ts --diff --base HEAD~3
  *   npx tsx scripts/gemini-qa.ts --file lib/presentation/backtest/backtest_page.dart
  *   npx tsx scripts/gemini-qa.ts --diff --dry-run              (nao chama o modelo)
- *   npx tsx scripts/gemini-qa.ts --file X --backend antigravity (auditoria profunda)
  *
- * Dois backends, com papeis distintos:
- *
- *   api (padrao)  API key + Structured Output forcado + temperature 0.
- *                 Deterministico e rapido. E o UNICO que funciona fora da IDE,
- *                 portanto o unico que sustenta o hook de pre-commit -- os
- *                 commits deste projeto saem pelo GitHub Desktop.
- *
- *   antigravity   Assinatura Google AI Pro via agentapi do Antigravity, sem
- *                 API key. So roda no terminal integrado da IDE. Para auditoria
- *                 profunda sob demanda, onde o modelo Pro compensa o tempo.
- *
- * Ver `scripts/qa/providers/types.ts` para o racional completo.
+ * Autenticacao: API key do Gemini, resolvida por `qa/env.ts`. Structured
+ * Output com schema forcado pelo servidor e `temperature: 0`, o que torna o
+ * veredito reproduzivel e permite usar o codigo de saida como gate.
  *
  * Codigo de saida:
  *   0  PASS  -- nenhum achado com severidade FAIL
@@ -31,6 +21,7 @@
  * O codigo 2 e distinto do 1 de proposito: uma falha de infraestrutura nao deve
  * ser lida como reprovacao de codigo, nem o contrario.
  */
+import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 
 import {
@@ -42,11 +33,20 @@ import {
 import { validateReport, type QaFinding, type QaReport } from './qa/schema.ts';
 import { SYSTEM_INSTRUCTION, buildInstructions } from './qa/rules.ts';
 import { loadScreenshots, screenshotInstructions } from './qa/screenshot.ts';
+import { chooseModel } from './qa/choose.ts';
+import {
+  dequeue,
+  enqueue,
+  listPending,
+  loadPending,
+  pendingCount,
+} from './qa/pending.ts';
 import { ApiProvider } from './qa/providers/api.ts';
-import { AntigravityProvider } from './qa/providers/antigravity.ts';
+import { AgyProvider, isAgyAvailable } from './qa/providers/agy.ts';
 import {
   ProviderError,
   type ProviderRequest,
+  type ProviderUsage,
   type QaProvider,
 } from './qa/providers/types.ts';
 
@@ -57,7 +57,7 @@ const MAX_ATTEMPTS = 3;
 // CLI
 // ---------------------------------------------------------------------------
 
-type Backend = 'api' | 'antigravity';
+type Backend = 'api' | 'agy';
 
 interface Cli {
   backend: Backend;
@@ -71,12 +71,17 @@ interface Cli {
   context: number;
   quiet: boolean;
   thinking?: number;
+  timeout?: number;
+  noAsk: boolean;
+  /** --backend foi passado? Pedido explicito nao degrada em silencio. */
+  backendExplicit: boolean;
+  pending: boolean;
   screenshots: string[];
 }
 
 function parseArgs(argv: string[]): Cli {
   const cli: Cli = {
-    backend: 'api',
+    backend: 'agy',
     diff: false,
     staged: false,
     base: 'HEAD~1',
@@ -84,6 +89,9 @@ function parseArgs(argv: string[]): Cli {
     dryRun: false,
     context: 5,
     quiet: false,
+    noAsk: false,
+    backendExplicit: false,
+    pending: false,
     screenshots: [],
   };
 
@@ -92,10 +100,11 @@ function parseArgs(argv: string[]): Cli {
     switch (arg) {
       case '--backend': {
         const value = argv[++i];
-        if (value !== 'api' && value !== 'antigravity') {
-          throw new Error('--backend aceita apenas `api` ou `antigravity`.');
+        if (value !== 'api' && value !== 'agy') {
+          throw new Error('--backend aceita apenas `api` ou `agy`.');
         }
         cli.backend = value;
+        cli.backendExplicit = true;
         break;
       }
       case '--diff':
@@ -135,6 +144,12 @@ function parseArgs(argv: string[]): Cli {
         cli.screenshots.push(value);
         break;
       }
+      case '--timeout': {
+        const value = argv[++i];
+        if (!value) throw new Error('--timeout exige um numero de segundos');
+        cli.timeout = Number.parseInt(value, 10) * 1000;
+        break;
+      }
       case '--thinking': {
         const value = argv[++i];
         if (!value) throw new Error('--thinking exige um numero de tokens');
@@ -147,6 +162,12 @@ function parseArgs(argv: string[]): Cli {
         cli.context = Number.parseInt(value, 10);
         break;
       }
+      case '--pending':
+        cli.pending = true;
+        break;
+      case '--no-ask':
+        cli.noAsk = true;
+        break;
       case '--dry-run':
         cli.dryRun = true;
         break;
@@ -163,16 +184,15 @@ function parseArgs(argv: string[]): Cli {
     }
   }
 
-  if (!cli.diff && cli.files.length === 0 && cli.screenshots.length === 0) {
+  if (
+    !cli.pending &&
+    !cli.diff &&
+    cli.files.length === 0 &&
+    cli.screenshots.length === 0
+  ) {
     throw new Error(
       'Informe o alvo da auditoria: --diff (ou --staged), --file <caminho>\n' +
         'ou --screenshot <imagem>. Use --help para ver todas as opcoes.',
-    );
-  }
-  if (cli.screenshots.length > 0 && cli.backend !== 'api') {
-    throw new Error(
-      'Auditoria visual exige o backend multimodal: adicione --backend api.\n' +
-        'A agentapi do Antigravity nao tem canal para anexar imagem.',
     );
   }
   if (cli.diff && cli.files.length > 0) {
@@ -190,25 +210,28 @@ function printUsage(): void {
       '  --diff                 audita o diff contra o ref base (padrao HEAD~1)',
       '  --staged               audita apenas o que esta em staging',
       '  --file <caminho>       audita o arquivo integral (repetivel)',
+      '  --pending              audita o que ficou na fila por falta de cota',
       '  --screenshot <img>     auditoria visual multimodal (repetivel).',
       '                         Combina com --diff/--file, ou roda sozinha.',
-      '                         Requer backend api. PNG, JPEG, WebP, HEIC.',
+      '                         PNG, JPEG, WebP ou HEIC.',
       '',
       'Opcoes:',
-      '  --backend <api|antigravity>',
-      '                         api (padrao) = API key, schema forcado, rapido.',
-      '                           Unico que funciona em hook/CI/GitHub Desktop.',
-      '                         antigravity = plano Google AI Pro, sem API key.',
-      '                           So roda no terminal integrado da IDE.',
-      '  --model <nome>         sobrepoe o modelo padrao do backend.',
-      '                         api: gemini-3.5-flash, gemini-3.7-flash, ...',
-      '                         antigravity: pro | flash | flash_lite',
+      '  --backend <agy|api>    agy (padrao) = assinatura Google AI Pro, sem',
+      '                           API key, acesso a familia Pro e cota alta.',
+      '                         api = API key. Schema forcado pelo servidor e',
+      '                           temperature 0, mas 20 req/dia no gratuito.',
+      '  --model <nome>         modelo (padrao depende do backend).',
+      '                         Ex.: gemini-3.7-flash, gemini-3.1-pro-preview',
       '  --base <ref>           ref base do diff (padrao: HEAD~1)',
       '  --context <n>          linhas de contexto no diff (padrao: 5)',
       '  --thinking <n>         teto de raciocinio do modelo, em tokens.',
       '                         Menor = mais rapido, menos profundo.',
-      '                         0 desliga, -1 remove o teto. So no backend api.',
+      '                         0 desliga, -1 remove o teto (padrao).',
+      '  --timeout <s>          teto de tempo por chamada, em segundos.',
+      '                         Padrao 240. Diff grande pode precisar de mais.',
       '  --json <caminho>       grava o relatorio bruto em JSON',
+      '  --no-ask               nao pergunta o modelo; usa o padrao do backend.',
+      '                         Implicito quando nao ha terminal (hook, CI).',
       '  --dry-run              monta o payload e imprime, sem chamar o modelo',
       '  --quiet                imprime apenas o veredito final',
       '  -h, --help             esta ajuda',
@@ -288,6 +311,7 @@ function renderReport(
   provider: QaProvider,
   model: string,
   cli: Cli,
+  usage?: ProviderUsage,
 ): void {
   const fails = report.findings.filter((f) => f.severity === 'FAIL');
   const warns = report.findings.filter((f) => f.severity === 'WARN');
@@ -306,6 +330,15 @@ function renderReport(
       dim(`Modelo:  ${model} via ${provider.name} -- ${provider.describeAuth()}`) +
         '\n',
     );
+    if (usage) {
+      process.stdout.write(
+        dim(
+          `Consumo: ${usage.totalTokens} tokens ` +
+            `(${usage.inputTokens} entrada, ${usage.outputTokens} saida, ` +
+            `${usage.thinkingTokens} raciocinio)`,
+        ) + '\n',
+      );
+    }
 
     const ordered = [...fails, ...warns, ...infos];
     ordered.forEach((f, i) => process.stdout.write(renderFinding(f, i + 1) + '\n'));
@@ -336,32 +369,20 @@ const sleep = (ms: number): Promise<void> =>
 async function audit(
   provider: QaProvider,
   request: ProviderRequest,
-): Promise<{ report: QaReport; model: string }> {
+): Promise<{ report: QaReport; model: string; usage?: ProviderUsage }> {
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       const result = await provider.run(request);
-      try {
-        return { report: validateReport(JSON.parse(result.text)), model: result.model };
-      } catch (parseError) {
-        // Backends sem schema forcado pelo servidor (antigravity) podem devolver
-        // JSON sujo -- modo de falha esperado, recuperavel apontando o erro ao
-        // modelo. O backend `api` nao implementa `repair` de proposito: se o
-        // schema forcado falhou, insistir no mesmo prompt nao muda nada.
-        if (typeof provider.repair !== 'function') throw parseError;
-
-        const detail =
-          parseError instanceof Error ? parseError.message : String(parseError);
-        process.stderr.write(
-          dim(`  resposta invalida (${detail}); pedindo correcao do formato\n`),
-        );
-        const repaired = await provider.repair(request, result.text, detail);
-        return {
-          report: validateReport(JSON.parse(repaired.text)),
-          model: repaired.model,
-        };
-      }
+      // O schema e forcado pelo servidor, entao JSON invalido aqui significa
+      // resposta truncada ou filtrada -- nao formato mal pedido. Repetir o
+      // mesmo prompt nao mudaria nada; a falha sobe.
+      return {
+        report: validateReport(JSON.parse(result.text)),
+        model: result.model,
+        usage: result.usage,
+      };
     } catch (error) {
       lastError = error;
       const transient = error instanceof ProviderError && error.transient;
@@ -379,9 +400,139 @@ async function audit(
   throw lastError;
 }
 
+/**
+ * Drena a fila de auditorias adiadas por cota.
+ *
+ * Cada entrada e reauditada com o payload EXATO que foi liberado -- por isso a
+ * fila guarda o instantaneo, e nao o intervalo de commits.
+ *
+ * Uma entrada so sai da fila quando foi efetivamente auditada, aprovada ou
+ * reprovada. Se a cota acabar de novo no meio da drenagem, o restante fica para
+ * a proxima e a saida e 2, nao 1: nao auditar nao e reprovar.
+ */
+async function drainPending(root: string, cli: Cli): Promise<number> {
+  const queue = listPending(root);
+  if (queue.length === 0) {
+    process.stdout.write(
+      `\n${green(bold('NADA PENDENTE'))}  a fila esta vazia.\n\n`,
+    );
+    return 0;
+  }
+
+  process.stdout.write(
+    `\n${bold(`Fila de auditorias pendentes: ${queue.length}`)}\n`,
+  );
+
+  const provider = selectProvider(root, cli);
+  provider.preflight();
+
+  let failed = 0;
+  let blocked = 0;
+
+  for (const meta of queue) {
+    const loaded = loadPending(root, meta.id);
+    if (!loaded) continue;
+
+    process.stdout.write(
+      `\n${dim(`[${meta.id}] adiada em ${meta.queuedAt} -- ${meta.label}`)}\n`,
+    );
+
+    const request: ProviderRequest = {
+      system: SYSTEM_INSTRUCTION,
+      instructions: loaded.instructions,
+      material: loaded.payload,
+      model: cli.model,
+    };
+
+    try {
+      const { report, model, usage } = await audit(provider, request);
+      dequeue(root, meta.id);
+      const target: AuditTarget = {
+        mode: meta.mode,
+        label: meta.label,
+        payload: loaded.payload,
+        files: meta.files,
+        truncated: false,
+      };
+      renderReport(report, target, provider, model, cli, usage);
+      if (report.status === 'FAIL') failed++;
+    } catch (error) {
+      const quota = error instanceof ProviderError && error.quota;
+      const message = error instanceof Error ? error.message : String(error);
+      if (quota) {
+        process.stdout.write(
+          `${yellow('cota esgotada de novo; o restante da fila fica para depois')}\n`,
+        );
+        blocked++;
+        break;
+      }
+      process.stderr.write(`${red('falhou')}: ${message}\n`);
+      blocked++;
+    }
+  }
+
+  const left = pendingCount(root);
+  process.stdout.write(
+    `\n${dim('-'.repeat(72))}\n` +
+      `drenadas com veredito: ${queue.length - left}   ainda na fila: ${left}\n\n`,
+  );
+
+  if (failed > 0) return 1;
+  return blocked > 0 ? 2 : 0;
+}
+
+/** Commit corrente, so para diagnostico na entrada da fila. */
+function currentHead(root: string): string {
+  try {
+    return execFileSync('git', ['rev-parse', '--short', 'HEAD'], {
+      cwd: root,
+      encoding: 'utf8',
+    }).trim();
+  } catch {
+    return '(desconhecido)';
+  }
+}
+
+/**
+ * Escolhe o backend, degradando quando o `agy` nao esta disponivel.
+ *
+ * A assimetria e deliberada:
+ *
+ *   padrao implicito  -> avisa e cai para `api`. Um projeto instalado pelo
+ *                        toolkit numa maquina sem Antigravity precisa auditar,
+ *                        nao morrer na largada.
+ *   --backend agy     -> falha. Quem pediu explicitamente precisa saber que
+ *                        nao foi atendido; degradar caladamente entregaria um
+ *                        veredito de outro modelo sob o nome do pedido.
+ */
+function selectProvider(root: string, cli: Cli): QaProvider {
+  if (cli.backend !== 'agy') {
+    return new ApiProvider(root, cli.thinking, cli.timeout);
+  }
+  if (isAgyAvailable()) return new AgyProvider(cli.timeout);
+
+  if (cli.backendExplicit) {
+    throw new Error(
+      'O backend `agy` foi pedido, mas o CLI nao esta disponivel nesta maquina.\n' +
+        '  Confirme com: agy --version\n' +
+        '  Ele acompanha o Antigravity; aponte outro caminho com AGY_PATH.\n\n' +
+        '  Para auditar com API key: --backend api',
+    );
+  }
+
+  process.stderr.write(
+    `${yellow('agy indisponivel')}; usando o backend api (API key).\n` +
+      dim('  O tier gratuito da 20 requisicoes/dia. Instale o Antigravity\n') +
+      dim('  para auditar pela assinatura, sem esse teto.\n'),
+  );
+  return new ApiProvider(root, cli.thinking, cli.timeout);
+}
+
 async function main(): Promise<number> {
   const cli = parseArgs(process.argv.slice(2));
   const root = repoRoot(process.cwd());
+
+  if (cli.pending) return drainPending(root, cli);
 
   const visualOnly = !cli.diff && cli.files.length === 0;
 
@@ -411,20 +562,30 @@ async function main(): Promise<number> {
     return 0;
   }
 
-  const provider: QaProvider =
-    cli.backend === 'antigravity'
-      ? new AntigravityProvider()
-      : new ApiProvider(root, cli.thinking);
+  const provider = selectProvider(root, cli);
 
-  // So o backend antigravity precisa do schema em texto: o `api` recebe o
-  // schema forcado pelo servidor.
   const screenshots = loadScreenshots(cli.screenshots);
 
   const instructions =
-    buildInstructions(target, provider.name === 'antigravity') +
+    buildInstructions(target) +
     (screenshots.length > 0
       ? screenshotInstructions(screenshots.map((s) => s.label))
       : '');
+
+  // A escolha do modelo vem DEPOIS da coleta, para que a pergunta possa mostrar
+  // o tamanho real do alvo -- e antes do dry-run nao ser necessario, por isso o
+  // seletor e pulado quando so vamos imprimir o payload.
+  const chosenModel =
+    provider.name === 'agy' && !cli.dryRun
+      ? await chooseModel(target, {
+          interactive:
+            process.stdin.isTTY === true &&
+            process.stdout.isTTY === true &&
+            !cli.noAsk &&
+            !cli.quiet,
+          explicitModel: cli.model,
+        })
+      : cli.model;
 
   const request: ProviderRequest = {
     system: SYSTEM_INSTRUCTION,
@@ -432,7 +593,7 @@ async function main(): Promise<number> {
     material:
       `--- INICIO DO MATERIAL AUDITADO ---\n${target.payload}\n` +
       '--- FIM DO MATERIAL AUDITADO ---\n',
-    model: cli.model,
+    model: chosenModel,
     screenshots: screenshots.map((s) => s.part),
   };
 
@@ -452,7 +613,7 @@ async function main(): Promise<number> {
     }
     process.stdout.write(
       dim(
-        `\n[dry-run] backend=${provider.name}, ` +
+        `\n[dry-run] modelo=${cli.model ?? 'padrao'}, ` +
           `${target.payload.length} caracteres de material, ` +
           `${target.files.length} arquivo(s). Nenhuma chamada ao modelo foi feita.\n\n`,
       ),
@@ -468,14 +629,53 @@ async function main(): Promise<number> {
     );
   }
 
-  const { report, model } = await audit(provider, request);
+  let audited;
+  try {
+    audited = await audit(provider, request);
+  } catch (error) {
+    // Cota esgotada nao pode travar o trabalho -- mas tambem nao pode sumir.
+    // Guardamos o payload exato para reauditar depois com `--pending`.
+    if (error instanceof ProviderError && error.quota) {
+      const { queued, id } = enqueue(
+        root,
+        {
+          label: target.label,
+          mode: target.mode,
+          files: target.files,
+          head: currentHead(root),
+          reason: 'cota esgotada',
+        },
+        request.material,
+        request.instructions,
+      );
+      process.stderr.write(
+        `\n${yellow(bold('COTA ESGOTADA'))}\n${error.message}\n\n` +
+          (queued
+            ? `${dim(`Auditoria enfileirada [${id}]. Quando a cota voltar:`)}\n` +
+              '    npm run qa:pending\n\n'
+            : `${dim(`Este mesmo material ja estava na fila [${id}].`)}\n\n`),
+      );
+      return 2;
+    }
+    throw error;
+  }
+  const { report, model, usage } = audited;
 
   if (cli.json) {
     writeFileSync(cli.json, JSON.stringify(report, null, 2), 'utf8');
     process.stderr.write(dim(`relatorio bruto gravado em ${cli.json}\n`));
   }
 
-  renderReport(report, target, provider, model, cli);
+  renderReport(report, target, provider, model, cli, usage);
+
+  const waiting = pendingCount(root);
+  if (waiting > 0) {
+    process.stdout.write(
+      dim(
+        `${waiting} auditoria(s) aguardando cota. Rode: npm run qa:pending`,
+      ) + '\n\n',
+    );
+  }
   return report.status === 'FAIL' ? 1 : 0;
 }
 

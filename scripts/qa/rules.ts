@@ -5,7 +5,6 @@
  * errado, a correcao e aqui -- nao no codigo do runner.
  */
 import type { AuditTarget } from './collect.ts';
-import { schemaAsText } from './schema.ts';
 
 /**
  * Contexto de arquitetura. Sem isto o modelo sugere `decimal.js` / `BigDecimal`
@@ -292,17 +291,11 @@ export const SYSTEM_INSTRUCTION = [
 /**
  * Instrucoes da tarefa, SEM o material auditado.
  *
- * A separacao existe por causa do backend CLI: o material vai por stdin (um
- * diff passa de 100 KB e estouraria o limite de linha de comando do Windows),
- * enquanto as instrucoes vao pelo `--prompt`.
- *
- * `includeSchema` fica true apenas no backend CLI, que nao tem schema forcado
- * pelo servidor e precisa receber o contrato no texto.
+ * A separacao sobrevive a remocao do backend que a motivou porque continua
+ * util: `--dry-run` imprime as duas partes separadamente, e a auditoria
+ * visual anexa suas instrucoes proprias ao final destas.
  */
-export function buildInstructions(
-  target: AuditTarget,
-  includeSchema: boolean,
-): string {
+export function buildInstructions(target: AuditTarget): string {
   if (target.mode === 'screenshot') {
     // Auditoria puramente visual: nao ha codigo, entao as instrucoes de diff e
     // de arquivo nao se aplicam. O bloco visual e anexado pelo chamador.
@@ -340,19 +333,16 @@ export function buildInstructions(
     : '';
 
   const sourceNote =
-    '\n\nO material auditado chega logo abaixo, ou pela entrada padrao quando o' +
-    '\nbackend for o Gemini CLI. Ele esta delimitado por ' +
+    '\n\nO material auditado chega logo abaixo, delimitado por ' +
     '"--- INICIO DO MATERIAL AUDITADO ---".';
 
-  const schemaNote = includeSchema ? `\n\n${schemaAsText()}` : '';
-
-  return `${header}${truncationNote}${sourceNote}${schemaNote}\n`;
+  return `${header}${truncationNote}${sourceNote}\n`;
 }
 
-/** Prompt completo, com o material embutido. Usado pelo backend de API key. */
+/** Prompt completo, com o material embutido. */
 export function buildUserPrompt(target: AuditTarget): string {
   return (
-    `${buildInstructions(target, false)}\n` +
+    `${buildInstructions(target)}\n` +
     `--- INICIO DO MATERIAL AUDITADO ---\n${target.payload}\n` +
     '--- FIM DO MATERIAL AUDITADO ---\n'
   );

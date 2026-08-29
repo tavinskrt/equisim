@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Auditoria completa com o Gemini antes do push.
+# Auditoria completa com o Gemini antes do push, pela assinatura Pro (agy).
 #
 # Aqui a espera de 30-120s e aceitavel: push e menos frequente que commit, e o
 # usuario ja espera que a operacao demore. Foi essa a decisao de arquitetura --
@@ -66,7 +66,7 @@ fi
 
 echo "[pre-push] auditando $BASE..HEAD com o Gemini. Isso leva de 30s a 2min." >&2
 
-npx tsx scripts/gemini-qa.ts --diff --base "$BASE"
+npx tsx scripts/gemini-qa.ts --diff --base "$BASE" --no-ask
 STATUS=$?
 
 if [ "$STATUS" -eq 1 ]; then
@@ -81,7 +81,14 @@ if [ "$STATUS" -ne 0 ]; then
   echo "" >&2
   echo "[pre-push] A auditoria NAO pode ser executada (codigo $STATUS)." >&2
   echo "[pre-push] Isso e falha de infraestrutura, nao do seu codigo." >&2
-  echo "[pre-push] O push foi LIBERADO. Rode 'npm run qa:gemini' quando puder." >&2
+  echo "[pre-push] O push foi LIBERADO." >&2
+  # Sem cota, o runner guarda o payload em .qa-pending/ para reauditar depois.
+  if [ -d .qa-pending ]; then
+    echo "[pre-push] A auditoria ficou na fila. Quando a cota voltar:" >&2
+    echo "[pre-push]     npm run qa:pending" >&2
+  else
+    echo "[pre-push] Rode 'npm run qa:gemini' quando puder." >&2
+  fi
   exit 0
 fi
 

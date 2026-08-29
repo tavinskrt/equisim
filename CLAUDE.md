@@ -35,10 +35,29 @@ usuário e siga.
 npm run qa:gemini            # diff contra HEAD~1 — o padrão
 npm run qa:staged            # só o que está em staging
 npm run qa:file -- <arquivo> # arquivo integral
+npm run qa:pending           # audita o que ficou na fila por falta de cota
 npm run qa:visual -- <img>   # auditoria visual de captura de tela
+npm run qa:api               # mesma auditoria pela API key (reproduzível)
 npm run qa:dry               # monta o payload sem chamar o modelo (custo zero)
 npm run typecheck            # verificação estática dos scripts de QA
 ```
+
+### Quando a cota acabar
+
+Se a auditoria falhar por cota esgotada, o runner **não bloqueia o trabalho**:
+ele grava o payload exato em `.qa-pending/` e sai com código `2`. Isso libera o
+commit e o push.
+
+Nesse caso, **relate ao usuário que a auditoria ficou pendente** — não trate
+como aprovação. Quando a cota voltar:
+
+```bash
+npm run qa:pending
+```
+
+A fila guarda o **instantâneo** do que foi liberado, não o intervalo de
+commits. Drenar três commits depois audita o mesmo código que passou, não o
+`HEAD` atual.
 
 Se estiver alterando **apenas** os scripts de QA em `scripts/`, `npm run
 typecheck` basta — não gaste cota auditando a própria ferramenta.
@@ -54,7 +73,7 @@ enquanto um hook roda e não oferece `--no-verify` na tela.
 | Camada | Quando | Custo | O que verifica |
 |---|---|---|---|
 | `.githooks/pre-commit` | todo commit | ~250–500 ms, **sem rede** | Regras determinísticas locais ([scripts/qa-local.mjs](scripts/qa-local.mjs)) |
-| `.githooks/pre-push` | todo push | 30 s – 2 min | Auditoria completa com o Gemini |
+| `.githooks/pre-push` | todo push | 30 s – 4 min | Auditoria completa com o Gemini |
 
 Instalação dos hooks (uma vez por clone):
 
@@ -67,8 +86,22 @@ camadas. Existe porque o GitHub Desktop não expõe `--no-verify`. Apague depois
 de usar — ele está no `.gitignore` e não é versionado.
 
 O `pre-push` **libera** o push quando a auditoria não pôde ser executada
-(código 2). Ficar sem internet não é defeito do código, e um gate que trava o
-push quando a API do Google cai seria arrancado na primeira ocorrência.
+(código 2). Ficar sem internet ou sem cota não é defeito do código, e um gate
+que trava o push nessas horas seria arrancado na primeira ocorrência.
+
+### Qual modelo audita
+
+O padrão é o backend `agy` — a CLI do Antigravity, autenticada pela assinatura
+**Google AI Pro**. Sem API key, sem billing, com acesso à família Pro.
+
+Rodando em terminal, ele **pergunta qual modelo usar** e mostra o tamanho do
+alvo antes: Flash ou Pro, em `low` ou `high`, sempre na versão mais recente
+disponível — a lista vem de `agy models` a cada execução, nada é fixado por
+nome. Em hook ou CI não há terminal, então ele usa o padrão sem perguntar.
+
+O backend `api` (API key) continua disponível em `npm run qa:api`. Ele tem
+schema forçado pelo servidor e `temperature: 0`, portanto é o mais reproduzível
+— mas o tier gratuito dá **20 requisições/dia** e cota **zero** para modelos Pro.
 
 ---
 

@@ -158,61 +158,14 @@ export const QA_RESPONSE_SCHEMA: Schema = {
   },
 };
 
-// ---------------------------------------------------------------------------
-// Suporte ao backend CLI
-// ---------------------------------------------------------------------------
-
-/**
- * O mesmo contrato, em texto.
- *
- * O backend de API key envia `QA_RESPONSE_SCHEMA` e o servidor FORCA o formato.
- * O Gemini CLI nao aceita `responseSchema`, entao la o contrato precisa viajar
- * dentro do prompt. Manter as duas formas no mesmo arquivo e proposital: se uma
- * mudar sem a outra, os dois backends divergem silenciosamente.
- */
-export function schemaAsText(): string {
-  return [
-    'Responda com UM objeto JSON exatamente nesta forma:',
-    '',
-    '{',
-    '  "findings": [',
-    '    {',
-    '      "file": string,                      // caminho relativo a raiz',
-    '      "line": number,                      // inteiro; 0 se indeterminavel',
-    '      "category": string,                  // um dos valores da lista abaixo',
-    '      "title": string,',
-    '      "evidence": string,                  // trecho literal do material',
-    '      "introduced_by_change": boolean,     // true se em linha "+" do diff',
-    '      "rationale": string,                 // cite a regra (ex.: R3)',
-    '      "failure_scenario": string,          // entradas concretas -> saida errada',
-    '      "suggested_fix": string,',
-    '      "severity": string                   // "FAIL" | "WARN" | "INFO"',
-    '    }',
-    '  ],',
-    '  "status": string,                        // "PASS" | "FAIL"',
-    '  "summary": string',
-    '}',
-    '',
-    'Valores validos de "category":',
-    CATEGORIES.map((c) => `  ${c}`).join('\n'),
-    '',
-    'Ordem obrigatoria das chaves de cada achado: file, line, category, title,',
-    'evidence, introduced_by_change, rationale, failure_scenario, suggested_fix,',
-    'severity. Escreva os campos nessa ordem -- ela existe para que voce reuna a',
-    'evidencia e o cenario de falha ANTES de decidir a severidade.',
-    '',
-    'Todos os dez campos sao obrigatorios em todo achado. "findings" pode ser uma',
-    'lista vazia. Nao emita nenhum texto fora do objeto JSON, nem cerca de codigo.',
-  ].join('\n');
-}
-
 /**
  * Valida e normaliza a resposta.
  *
- * Necessario porque o backend CLI nao tem schema forcado pelo servidor: ali o
- * modelo pode omitir campo, trocar tipo ou inventar categoria. Preferimos
- * normalizar o recuperavel a rejeitar o relatorio inteiro -- um gate que quebra
- * por um campo ausente e um gate que sera desligado.
+ * O schema e forcado pelo servidor, mas a validacao local permanece por dois
+ * motivos: ela recalcula o veredito a partir dos achados, em vez de confiar no
+ * campo `status` autodeclarado; e normaliza o recuperavel em vez de rejeitar o
+ * relatorio inteiro -- um gate que quebra por um campo ausente e um gate que
+ * sera desligado.
  */
 export function validateReport(value: unknown): QaReport {
   if (typeof value !== 'object' || value === null) {
@@ -262,4 +215,50 @@ export function validateReport(value: unknown): QaReport {
     status: hasFail ? 'FAIL' : 'PASS',
     summary: typeof raw.summary === 'string' ? raw.summary : '(sem resumo)',
   };
+}
+
+// ---------------------------------------------------------------------------
+// Conversao para JSON Schema padrao (backend `agy`)
+// ---------------------------------------------------------------------------
+
+/**
+ * Converte o schema do formato do SDK do Gemini para JSON Schema padrao.
+ *
+ * NAO e cosmetico e nao da para pular: o SDK usa o enum `Type`, que serializa
+ * em MAIUSCULAS ("OBJECT", "STRING"), enquanto JSON Schema exige minusculas
+ * ("object", "string"). Passar o schema do SDK direto para `agy --json-schema`
+ * seria aceito na leitura e falharia na validacao, ou pior, seria ignorado em
+ * silencio -- e a saida voltaria sem estrutura.
+ *
+ * Tambem descarta `propertyOrdering`, que e extensao do Gemini e nao existe no
+ * JSON Schema. A ordem de raciocinio que ela garantia no backend `api` passa a
+ * depender da ordem em `required` e das descricoes de cada campo.
+ */
+export function toJsonSchema(schema: Schema): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+
+  if (schema.type) out.type = String(schema.type).toLowerCase();
+  if (schema.description) out.description = schema.description;
+  if (schema.enum) out.enum = schema.enum;
+  if (schema.required) out.required = schema.required;
+  // `minItems`/`maxItems` sao string no SDK e number no JSON Schema.
+  if (schema.minItems !== undefined) out.minItems = Number(schema.minItems);
+  if (schema.maxItems !== undefined) out.maxItems = Number(schema.maxItems);
+  if (schema.items) out.items = toJsonSchema(schema.items);
+
+  if (schema.properties) {
+    const props: Record<string, unknown> = {};
+    // Preserva a ordem de declaracao: e a unica pista de ordem que sobrevive
+    // a perda de `propertyOrdering`.
+    for (const [key, value] of Object.entries(schema.properties)) {
+      props[key] = toJsonSchema(value);
+    }
+    out.properties = props;
+  }
+  return out;
+}
+
+/** O contrato de saida em JSON Schema padrao, pronto para `agy --json-schema`. */
+export function qaJsonSchema(): Record<string, unknown> {
+  return toJsonSchema(QA_RESPONSE_SCHEMA);
 }

@@ -7,8 +7,8 @@
  * fl_chart, contraste insuficiente no tema escuro, texto cortado por fonte
  * escalada. Para esses, a captura de tela e a unica evidencia.
  *
- * Disponivel apenas no backend `api`: a agentapi do Antigravity recebe prompt
- * de texto, sem canal para anexar imagem.
+ * A API multimodal recebe a imagem como parte inline em base64, junto do
+ * texto -- ver o uso de `inlineData` em `providers/api.ts`.
  */
 import { readFileSync, statSync } from 'node:fs';
 import { basename, extname } from 'node:path';

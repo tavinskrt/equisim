@@ -1,18 +1,16 @@
 /**
  * Contrato entre o runner e o backend que fala com o Gemini.
  *
- * Existem dois backends porque eles resolvem problemas diferentes:
+ * Dois backends, com papeis distintos:
+ *
+ * - `agy`: CLI do Antigravity, autenticado pela ASSINATURA Google AI Pro.
+ *   Da acesso a familia Pro sem API key e sem billing, e roda em qualquer
+ *   shell -- inclusive hook e CI. E o caminho de cota alta.
  *
  * - `api`: chamada direta a `generativelanguage.googleapis.com` com API key.
- *   Suporta Structured Output com schema FORCADO pelo servidor e
- *   `temperature: 0`, entao o veredito e determinista. Roda em qualquer
- *   terminal -- inclusive no hook disparado pelo GitHub Desktop. E o padrao,
- *   e o unico que sustenta o gate de commit.
- *
- * - `antigravity`: usa a assinatura Google AI Pro pela agentapi do Antigravity,
- *   sem API key e sem billing. So funciona DENTRO do terminal integrado da IDE
- *   (ver o comentario em `antigravity.ts`), e nao tem schema forcado. Serve
- *   para auditoria profunda sob demanda, nao para o gate.
+ *   Schema forcado pelo servidor e `temperature: 0`, entao e o mais
+ *   deterministico. Porem no tier gratuito sao 20 requisicoes/dia e a
+ *   familia Pro tem cota ZERO. Fica como alternativa reproduzivel.
  *
  * O runner nao sabe qual esta em uso: recebe texto JSON e valida.
  */
@@ -35,39 +33,54 @@ export interface ProviderRequest {
   screenshots?: ScreenshotPart[];
 }
 
+/**
+ * Consumo de tokens de uma chamada.
+ *
+ * Existe porque a cota do backend `agy` e da assinatura, nao da API: nao ha
+ * painel de billing para consultar. Medir aqui e a unica forma de saber quanto
+ * cada auditoria custa e quantas cabem no dia.
+ */
+export interface ProviderUsage {
+  inputTokens: number;
+  outputTokens: number;
+  thinkingTokens: number;
+  totalTokens: number;
+}
+
 export interface ProviderResult {
   /** Texto bruto retornado. Espera-se JSON, possivelmente sujo. */
   text: string;
   /** Modelo efetivamente usado, para o cabecalho do relatorio. */
   model: string;
+  /** Consumo, quando o backend reporta. A API key nao reporta por chamada. */
+  usage?: ProviderUsage;
 }
 
 export interface QaProvider {
-  readonly name: 'api' | 'antigravity';
+  readonly name: 'api' | 'agy';
   /** Descricao da autenticacao, exibida no cabecalho do relatorio. */
   describeAuth(): string;
   /** Falha com mensagem acionavel se o backend nao estiver utilizavel. */
   preflight(): void;
   run(request: ProviderRequest): Promise<ProviderResult>;
-  /**
-   * Segunda tentativa quando o JSON volta invalido, apontando o erro ao modelo.
-   *
-   * Existe apenas em backends SEM schema forcado pelo servidor. No backend
-   * `api` o formato e garantido pela API, entao insistir no mesmo prompt nao
-   * mudaria nada -- por isso o metodo e opcional, e nao um no-op.
-   */
-  repair?(
-    request: ProviderRequest,
-    badOutput: string,
-    parseError: string,
-  ): Promise<ProviderResult>;
 }
 
 export class ProviderError extends Error {
   readonly transient: boolean;
-  constructor(message: string, transient = false) {
+  /**
+   * Cota esgotada, especificamente.
+   *
+   * Distinto de `transient` porque a acao e outra: erro transitorio se resolve
+   * repetindo agora; cota esgotada so se resolve com o tempo passando. E o
+   * segundo caso que alimenta a fila de pendencias -- repetir seria inutil, e
+   * desistir sem registrar perderia a auditoria.
+   */
+  readonly quota: boolean;
+
+  constructor(message: string, transient = false, quota = false) {
     super(message);
     this.name = 'ProviderError';
     this.transient = transient;
+    this.quota = quota;
   }
 }

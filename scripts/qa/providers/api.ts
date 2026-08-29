@@ -47,16 +47,35 @@ const TEMPERATURE = 0.0;
  */
 const DEFAULT_THINKING_BUDGET = -1;
 
+/**
+ * Teto de tempo por chamada.
+ *
+ * MEDIDO: um diff de 3 KB responde em ~32s; um de 102 KB passou de 10 minutos
+ * sem retornar. Sem teto, o hook de pre-push herda esse comportamento -- e um
+ * push disparado pelo GitHub Desktop ficaria com a interface travada, sem
+ * cancelamento e sem explicacao.
+ *
+ * O teto nao acelera nada: ele transforma "travou para sempre" em "falhou com
+ * instrucao de como reduzir o escopo".
+ */
+const DEFAULT_TIMEOUT_MS = 240_000;
+
 export class ApiProvider implements QaProvider {
   readonly name = 'api' as const;
 
   private readonly repoRoot: string;
   private readonly thinkingBudget: number;
+  private readonly timeoutMs: number;
   private key?: ApiKeyResolution;
 
-  constructor(repoRoot: string, thinkingBudget = DEFAULT_THINKING_BUDGET) {
+  constructor(
+    repoRoot: string,
+    thinkingBudget = DEFAULT_THINKING_BUDGET,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+  ) {
     this.repoRoot = repoRoot;
     this.thinkingBudget = thinkingBudget;
+    this.timeoutMs = timeoutMs;
   }
 
   describeAuth(): string {
@@ -74,6 +93,13 @@ export class ApiProvider implements QaProvider {
     if (!this.key) this.preflight();
     const model = request.model ?? API_DEFAULT_MODEL;
     const ai = new GoogleGenAI({ apiKey: this.key!.apiKey });
+
+    // O controller vive FORA do try porque o SDK lanca "This operation was
+    // aborted" de dentro do await -- o fluxo desvia para o catch antes de
+    // qualquer checagem posterior. Sem o escopo externo, a mensagem util seria
+    // substituida pelo texto cru do SDK.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
 
     try {
       // Quando ha capturas de tela, o conteudo vira multipart: o texto primeiro,
@@ -93,6 +119,7 @@ export class ApiProvider implements QaProvider {
           responseMimeType: 'application/json',
           responseSchema: QA_RESPONSE_SCHEMA,
           thinkingConfig: { thinkingBudget: this.thinkingBudget },
+          abortSignal: controller.signal,
         },
       });
 
@@ -105,10 +132,46 @@ export class ApiProvider implements QaProvider {
       }
       return { text, model };
     } catch (error) {
+      // O aborto e nosso, nao da API: traduzimos para a instrucao de escopo.
+      if (controller.signal.aborted) {
+        throw new ProviderError(timeoutMessage(this.timeoutMs, request));
+      }
       if (error instanceof ProviderError) throw error;
-      throw new ProviderError(explainApiError(error, model), isTransient(error));
+      const message = error instanceof Error ? error.message : String(error);
+      throw new ProviderError(
+        explainApiError(error, model),
+        isTransient(error),
+        // 429 por cota diaria ou por indisponibilidade do modelo: em ambos os
+        // casos repetir agora nao resolve, e a auditoria deve ficar pendente.
+        /\b429\b|RESOURCE_EXHAUSTED|quota/i.test(message),
+      );
+    } finally {
+      clearTimeout(timer);
     }
   }
+}
+
+/**
+ * Mensagem de estouro de tempo, com o caminho de saida concreto.
+ *
+ * O tamanho do material entra na mensagem porque e a variavel que o usuario
+ * controla: dizer "demorou demais" sem dizer "voce mandou 102 KB" nao ajuda
+ * ninguem a decidir o que fazer.
+ */
+function timeoutMessage(timeoutMs: number, request: ProviderRequest): string {
+  const kb = Math.round(request.material.length / 1024);
+  return (
+    `A auditoria excedeu ${timeoutMs / 1000}s e foi cancelada.\n` +
+    `Material enviado: ${kb} KB.\n\n` +
+    'Diffs grandes com raciocinio irrestrito nao terminam em tempo util.\n' +
+    'Opcoes, da melhor para a pior:\n' +
+    '  1. reduza o escopo:      --base HEAD~1  (em vez de varios commits)\n' +
+    '  2. audite por arquivo:   --file <caminho>\n' +
+    '  3. limite o raciocinio:  --thinking 4096\n' +
+    '     ATENCAO: isso rebaixa defeitos de FAIL para WARN. Ver o comentario\n' +
+    '     de DEFAULT_THINKING_BUDGET neste arquivo antes de usar no gate.\n' +
+    '  4. aumente o teto:       --timeout 600'
+  );
 }
 
 function isTransient(error: unknown): boolean {
@@ -130,9 +193,8 @@ export function explainApiError(error: unknown, model: string): string {
       `O modelo "${model}" tem cota ZERO para esta chave (tier gratuito).\n` +
       'Isso nao e limite de velocidade -- o modelo nao esta disponivel.\n' +
       'Opcoes:\n' +
-      '  1. use o backend da sua conta Google:  --backend antigravity\n' +
-      `  2. use um modelo Flash:                --model ${API_DEFAULT_MODEL}\n` +
-      '  3. habilite billing para liberar a familia Pro:\n' +
+      `  1. use um modelo Flash:  --model ${API_DEFAULT_MODEL}\n` +
+      '  2. habilite billing no projeto para liberar a familia Pro:\n' +
       '     https://aistudio.google.com/apikey\n\n' +
       message
     );
@@ -140,15 +202,15 @@ export function explainApiError(error: unknown, model: string): string {
   if (/no longer available to new users/.test(message)) {
     return (
       `O modelo "${model}" foi descontinuado para chaves novas.\n` +
-      `Use --model ${API_DEFAULT_MODEL}, ou --backend antigravity para usar sua conta.\n\n` +
+      `Use --model ${API_DEFAULT_MODEL} (Flash roda no tier gratuito).\n\n` +
       message
     );
   }
   if (/API[_ ]?key not valid|API_KEY_INVALID|\b401\b|\b403\b/.test(message)) {
     return (
       'A GEMINI_API_KEY foi rejeitada pela API.\n' +
-      'Gere uma nova em https://aistudio.google.com/apikey e atualize `.env.qa`,\n' +
-      'ou use --backend antigravity para autenticar com sua conta Google.\n\n' +
+      'Gere uma nova em https://aistudio.google.com/apikey e atualize `.env.qa`.\n' +
+      'A chave precisa vir de um projeto com a Generative Language API ativa.\n\n' +
       message
     );
   }

@@ -140,3 +140,6 @@ docs/validacao/*.sqlite
 
 # Valvula de emergencia dos hooks de QA (nunca versionar)
 .qa-skip
+
+# Fila de auditorias adiadas por cota (nunca versionar)
+.qa-pending/
