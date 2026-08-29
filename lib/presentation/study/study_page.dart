@@ -9,6 +9,7 @@ import '../components/fin_amount.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
 import '../theme/fin_colors.dart';
+import '../theme/fin_space.dart';
 import '../theme/fin_theme.dart';
 import '../valuation/valuation_page.dart';
 import '../valuation/valuation_providers.dart';
@@ -48,19 +49,40 @@ class StudyPage extends ConsumerWidget {
       builder: (context, constraints) {
         final isWide = constraints.maxWidth > 820;
 
+        // Largura util DENTRO de um cartao, descontando o padding da lista, o
+        // vao entre as duas colunas quando lado a lado, e o padding do proprio
+        // GlassCard.
+        //
+        // Calculada aqui, e nao com um `LayoutBuilder` dentro da coluna, por um
+        // motivo concreto: o layout largo envolve as duas em `IntrinsicHeight`,
+        // e `LayoutBuilder` nao sabe reportar dimensao intrinseca -- a arvore
+        // lanca em vez de renderizar.
+        // Derivados dos MESMOS tokens que a arvore aplica logo abaixo. Com
+        // literais, mudar `FinSpace.lg` moveria o padding real e deixaria esta
+        // conta para tras -- a coluna passaria a ser calculada com uma largura
+        // que nao existe mais.
+        const listPadding = FinSpace.lg * 2;
+        const cardPadding = FinSpace.lg * 2;
+        const columnGap = FinSpace.md;
+        final columnWidth = isWide
+            ? (constraints.maxWidth - listPadding - columnGap) / 2 - cardPadding
+            : constraints.maxWidth - listPadding - cardPadding;
+
         final principal = _PortfolioColumn(
           portfolio: state.study.principal,
           isPrincipal: true,
           isLight: isLight,
+          columnWidth: columnWidth,
         );
         final reserva = _PortfolioColumn(
           portfolio: state.study.reserva,
           isPrincipal: false,
           isLight: isLight,
+          columnWidth: columnWidth,
         );
 
         return ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(FinSpace.lg),
           children: [
             _StudyHeader(isLight: isLight),
             const SizedBox(height: 12),
@@ -78,7 +100,7 @@ class StudyPage extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Expanded(child: principal),
-                    const SizedBox(width: 12),
+                    const Gap.md(axis: Axis.horizontal),
                     Expanded(child: reserva),
                   ],
                 ),
@@ -96,8 +118,10 @@ class StudyPage extends ConsumerWidget {
 
   static String _concentrationMessage(ConcentrationReport report) {
     final parts = report.concentrated
-        .map((e) =>
-            '${e.sector.label} (${e.count} ativos, ${Fmt.percent(e.weight, decimals: 0)})')
+        .map(
+          (e) =>
+              '${e.sector.label} (${e.count} ativos, ${Fmt.percent(e.weight, decimals: 0)})',
+        )
         .join(' · ');
     return 'Concentração setorial na carteira Principal: $parts. '
         'É um aviso, não um impedimento.';
@@ -136,7 +160,8 @@ class _StudyHeader extends ConsumerWidget {
     // Um "esperado" muito acima dele não é promessa de desempenho, é sinal de
     // que alguma avaliação da carteira está esticada.
     final marketCagr =
-        anchors.valueOrNull?.marketCagr ?? MarketAnchors.fallback2026.marketCagr;
+        anchors.valueOrNull?.marketCagr ??
+        MarketAnchors.fallback2026.marketCagr;
     final isImplausible =
         weightedUpside != null && weightedUpside > marketCagr * 3;
 
@@ -164,15 +189,17 @@ class _StudyHeader extends ConsumerWidget {
                     isDense: true,
                     border: InputBorder.none,
                     hintText: 'Nome do estudo',
-                    hintStyle:
-                        TextStyle(color: AppColors.textMuted(isLight)),
+                    hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
                   ),
                 ),
               ),
               IconButton(
                 tooltip: 'Estudos salvos',
-                icon: Icon(Icons.folder_open_outlined,
-                    size: 19, color: AppColors.textSecondary(isLight)),
+                icon: Icon(
+                  Icons.folder_open_outlined,
+                  size: 19,
+                  color: AppColors.textSecondary(isLight),
+                ),
                 onPressed: () => showSavedStudies(context, isLight: isLight),
               ),
               state.isSaving
@@ -188,8 +215,11 @@ class _StudyHeader extends ConsumerWidget {
                       tooltip: state.study.id == null
                           ? 'Salvar estudo'
                           : 'Salvar alterações',
-                      icon: Icon(Icons.save_outlined,
-                          size: 19, color: AppColors.primary),
+                      icon: Icon(
+                        Icons.save_outlined,
+                        size: 19,
+                        color: AppColors.primary,
+                      ),
                       onPressed: () => _save(context, ref),
                     ),
             ],
@@ -201,7 +231,8 @@ class _StudyHeader extends ConsumerWidget {
                 child: MetricTile(
                   isLight: isLight,
                   label: 'Ativos na Principal',
-                  value: '${state.study.principal.length}'
+                  value:
+                      '${state.study.principal.length}'
                       ' / ${Portfolio.maxAssets}',
                 ),
               ),
@@ -220,9 +251,9 @@ class _StudyHeader extends ConsumerWidget {
                   hint: weightedUpside == null
                       ? null
                       : 'se o preço justo for alcançado em '
-                          '${settings.convergenceHorizonMonths} meses · '
-                          '${Fmt.percent(coverage, decimals: 0)} da carteira '
-                          'avaliada',
+                            '${settings.convergenceHorizonMonths} meses · '
+                            '${Fmt.percent(coverage, decimals: 0)} da carteira '
+                            'avaliada',
                   // Numero implausivel vira ressalva, nao perda: ambar diz
                   // "olhe as premissas", vermelho diria "caiu".
                   trend: isImplausible
@@ -246,7 +277,8 @@ class _StudyHeader extends ConsumerWidget {
               isLight: isLight,
               icon: Icons.warning_amber_rounded,
               color: isLight ? AppColors.warning : AppColors.warningDark,
-              message: 'O esperado da carteira está em '
+              message:
+                  'O esperado da carteira está em '
                   '${Fmt.percent(weightedUpside, decimals: 0, signed: true)}, '
                   'contra ${Fmt.percent(marketCagr, decimals: 1)} a.a. do '
                   'Ibovespa no histórico. Não leia como projeção: é a média '
@@ -281,10 +313,7 @@ class _StudyHeader extends ConsumerWidget {
 ///
 /// Salvar sem poder reabrir não resolveria o problema que motivou a
 /// funcionalidade — remontar carteiras de nove ativos a cada sessão.
-Future<void> showSavedStudies(
-  BuildContext context, {
-  required bool isLight,
-}) {
+Future<void> showSavedStudies(BuildContext context, {required bool isLight}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -347,7 +376,8 @@ class _SavedStudiesSheet extends ConsumerWidget {
                           isLight: isLight,
                           icon: Icons.folder_off_outlined,
                           title: 'Nenhum estudo salvo',
-                          message: 'Monte as carteiras e toque no disquete '
+                          message:
+                              'Monte as carteiras e toque no disquete '
                               'para guardar este estudo.',
                         )
                       : ListView.separated(
@@ -357,10 +387,8 @@ class _SavedStudiesSheet extends ConsumerWidget {
                             height: 1,
                             color: AppColors.divider(isLight),
                           ),
-                          itemBuilder: (_, i) => _SavedStudyTile(
-                            study: list[i],
-                            isLight: isLight,
-                          ),
+                          itemBuilder: (_, i) =>
+                              _SavedStudyTile(study: list[i], isLight: isLight),
                         ),
                 ),
               ),
@@ -448,10 +476,14 @@ class _PortfolioColumn extends ConsumerWidget {
   final bool isPrincipal;
   final bool isLight;
 
+  /// Largura util dentro do cartao, ja descontados os paddings.
+  final double columnWidth;
+
   const _PortfolioColumn({
     required this.portfolio,
     required this.isPrincipal,
     required this.isLight,
+    required this.columnWidth,
   });
 
   @override
@@ -464,13 +496,27 @@ class _PortfolioColumn extends ConsumerWidget {
           .swap(ticker: details.data, toPrincipal: isPrincipal),
       builder: (context, candidates, rejected) {
         final isHovered = candidates.isNotEmpty;
+        // Medidas uma vez por coluna, nao por linha: e o que garante que
+        // todas as linhas compartilhem a mesma grade.
+        final widths = _columnWidths(context);
+
+        // Largura minima util para o nome do ativo. Abaixo disto o ticker vira
+        // reticencias e a linha deixa de informar -- melhor descer os numeros
+        // para uma segunda linha.
+        const nomeMinimo = 96.0;
+        final fixo =
+            _dragColumnWidth +
+            widths.weight +
+            widths.upside +
+            _removeColumnWidth;
+        final compact = columnWidth - fixo < nomeMinimo;
         return GlassCard(
           isLight: isLight,
           borderColor: isHovered
               ? AppColors.primary
               : (isPrincipal
-                  ? AppColors.primary.withValues(alpha: 0.35)
-                  : null),
+                    ? AppColors.primary.withValues(alpha: 0.35)
+                    : null),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -486,7 +532,8 @@ class _PortfolioColumn extends ConsumerWidget {
                     HintIcon(
                       isLight: isLight,
                       title: 'Colunas desta lista',
-                      intro: 'O potencial vem do valuation de cada ativo, '
+                      intro:
+                          'O potencial vem do valuation de cada ativo, '
                           'recalculado a cada abertura da tela.',
                       entries: const [
                         HintEntry(
@@ -517,30 +564,53 @@ class _PortfolioColumn extends ConsumerWidget {
                     if (portfolio.length > 1)
                       IconButton(
                         tooltip: 'Equiponderar',
-                        visualDensity: VisualDensity.compact,
-                        icon: Icon(Icons.balance,
-                            size: 17, color: AppColors.textSecondary(isLight)),
+                        // 48 dp explicitos em vez de `VisualDensity.compact`,
+                        // que encolheria o alvo para 40x40. O padding zerado
+                        // impede que os 48 virem 48 + padding.
+                        constraints: const BoxConstraints(
+                          minWidth: 48,
+                          minHeight: 48,
+                        ),
+                        padding: EdgeInsets.zero,
+                        icon: Icon(
+                          Icons.balance,
+                          size: 17,
+                          color: AppColors.textSecondary(isLight),
+                        ),
                         onPressed: () => ref
                             .read(studyProvider.notifier)
                             .equalize(onPrincipal: isPrincipal),
                       ),
                     IconButton(
                       tooltip: 'Adicionar ativo',
-                      visualDensity: VisualDensity.compact,
-                      icon: Icon(Icons.add_circle_outline,
-                          size: 19, color: AppColors.primary),
-                      onPressed: () => showAssetPicker(
-                        context,
-                        toPrincipal: isPrincipal,
+                      // Mesmos 48 dp dos botoes Equiponderar e Remover: o
+                      // `VisualDensity.compact` sozinho encolheria o alvo
+                      // para 40x40.
+                      constraints: const BoxConstraints(
+                        minWidth: 48,
+                        minHeight: 48,
                       ),
+                      padding: EdgeInsets.zero,
+                      icon: Icon(
+                        Icons.add_circle_outline,
+                        size: 19,
+                        color: AppColors.primary,
+                      ),
+                      onPressed: () =>
+                          showAssetPicker(context, toPrincipal: isPrincipal),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 10),
               if (portfolio.isEmpty)
-                SizedBox(
-                  height: 150,
+                // `minHeight`, e nao `height`: com altura travada em 150 dp o
+                // `Column` do EmptyState estourava por 8 px assim que o texto
+                // crescia -- e estourava em 1024 dp na escala padrao, ou seja
+                // nao era questao de tela estreita. O minimo preserva a
+                // presenca visual da coluna vazia sem impor teto ao conteudo.
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 150),
                   child: EmptyState(
                     isLight: isLight,
                     icon: isHovered
@@ -553,12 +623,20 @@ class _PortfolioColumn extends ConsumerWidget {
                   ),
                 )
               else ...[
-                _AssetColumnHeader(isLight: isLight),
+                _AssetColumnHeader(
+                  isLight: isLight,
+                  weightWidth: widths.weight,
+                  upsideWidth: widths.upside,
+                  compact: compact,
+                ),
                 ...portfolio.entries.values.map(
                   (entry) => _AssetRow(
                     entry: entry,
                     isPrincipal: isPrincipal,
                     isLight: isLight,
+                    weightWidth: widths.weight,
+                    upsideWidth: widths.upside,
+                    compact: compact,
                   ),
                 ),
               ],
@@ -572,10 +650,29 @@ class _PortfolioColumn extends ConsumerWidget {
 
 /// Larguras das colunas numéricas da lista de ativos.
 ///
-/// Fixas de propósito: é o que mantém peso e potencial alinhados de uma linha
-/// para a outra, e o que impede um "+447%" de empurrar o resto da linha.
-const double _weightColumnWidth = 52;
-const double _upsideColumnWidth = 78;
+/// Medidas, não declaradas. O objetivo continua o mesmo — manter peso e
+/// potencial alinhados de uma linha para a outra, e impedir que um "+447%"
+/// empurre o resto da linha —, mas o instrumento mudou: constante em pixel
+/// lógico alinha em 1,0× e trunca em 1,3×, porque não acompanha a fonte que o
+/// usuário escolheu.
+///
+/// As amostras são o pior caso REAL de cada coluna, não o conteúdo corrente: o
+/// potencial chega de um provider assíncrono, então dimensionar pelo que já
+/// chegou faria a coluna saltar de largura conforme os valuations resolvessem.
+/// Alca de arraste: icone de 16 dp mais o vao de 8 ate o nome.
+const double _dragColumnWidth = 24;
+
+/// Alvo de toque do botao de remover. 48 dp por ser acao destrutiva -- um
+/// toque errado tira o ativo da carteira.
+const double _removeColumnWidth = 48;
+
+({double weight, double upside}) _columnWidths(BuildContext context) {
+  final t = context.finType;
+  return (
+    weight: FinAmount.measure(context, '100%', t.numSm) + FinSpace.xs,
+    upside: FinAmount.measure(context, '-1.000%', t.numSm) + FinSpace.sm,
+  );
+}
 
 /// Cabeçalho das colunas numéricas.
 ///
@@ -585,32 +682,67 @@ const double _upsideColumnWidth = 78;
 class _AssetColumnHeader extends StatelessWidget {
   final bool isLight;
 
-  const _AssetColumnHeader({required this.isLight});
+  /// Larguras medidas pela coluna, iguais as das linhas abaixo.
+  final double weightWidth;
+  final double upsideWidth;
+
+  /// No modo compacto nao ha colunas para rotular: os valores descem para uma
+  /// segunda linha dentro de cada item, com rotulo proprio.
+  final bool compact;
+
+  const _AssetColumnHeader({
+    required this.isLight,
+    required this.weightWidth,
+    required this.upsideWidth,
+    required this.compact,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final style = TextStyle(
-      fontSize: 9,
-      letterSpacing: 0.4,
+    if (compact) return const SizedBox.shrink();
+
+    final style = context.finType.caption.copyWith(
       fontWeight: FontWeight.w600,
-      color: AppColors.textMuted(isLight),
+      letterSpacing: 0.4,
+      color: context.fin.textTertiary,
     );
 
     return Padding(
-      padding: const EdgeInsets.only(left: 4, right: 4, bottom: 2),
+      // `xs`, nao `xxs`: aqui e espacamento de layout entre o cabecalho e a
+      // primeira linha, e o meio passo e reservado a ajuste optico dentro de
+      // pastilha. Usa-lo aqui seria contornar a escala de 4 dp.
+      padding: const EdgeInsets.only(
+        left: FinSpace.xs,
+        right: FinSpace.xs,
+        bottom: FinSpace.xs,
+      ),
       child: Row(
         children: [
-          const SizedBox(width: 22),
+          // As mesmas constantes que a linha usa, para que o rotulo caia
+          // exatamente sobre a coluna que ele nomeia.
+          const SizedBox(width: _dragColumnWidth),
           Expanded(child: Text('ATIVO', style: style)),
           SizedBox(
-            width: _weightColumnWidth,
-            child: Text('PESO', style: style, textAlign: TextAlign.right),
+            width: weightWidth,
+            child: Text(
+              'PESO',
+              style: style,
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           SizedBox(
-            width: _upsideColumnWidth,
-            child: Text('POTENCIAL', style: style, textAlign: TextAlign.right),
+            width: upsideWidth,
+            child: Text(
+              'POTENCIAL',
+              style: style,
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          const SizedBox(width: 32),
+          const SizedBox(width: _removeColumnWidth),
         ],
       ),
     );
@@ -623,10 +755,29 @@ class _AssetRow extends ConsumerWidget {
   final bool isPrincipal;
   final bool isLight;
 
+  /// Larguras medidas pela coluna, iguais para todas as linhas dela.
+  ///
+  /// Vem de fora justamente para que sejam iguais: medir por linha alinharia
+  /// cada uma consigo mesma e desalinharia a coluna inteira.
+  final double weightWidth;
+  final double upsideWidth;
+
+  /// Quando as colunas medidas nao cabem ao lado do nome, os numeros descem
+  /// para uma segunda linha.
+  ///
+  /// E o caso de 320 dp sob escala 2,0x: as colunas crescem com a fonte, como
+  /// devem, e simplesmente nao ha largura para nome e numeros lado a lado.
+  /// Antes isso nao aparecia porque a largura era constante e o texto truncava
+  /// em silencio -- o numero saia errado sem que ninguem soubesse.
+  final bool compact;
+
   const _AssetRow({
     required this.entry,
     required this.isPrincipal,
     required this.isLight,
+    required this.weightWidth,
+    required this.upsideWidth,
+    required this.compact,
   });
 
   /// Acima disto o número deixa de ser estimativa e vira sintoma.
@@ -642,8 +793,12 @@ class _AssetRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final valuation = ref.watch(valuationProvider(entry.ticker));
 
-    final content = _rowContent(context, ref, valuation.valueOrNull,
-        isLoading: valuation.isLoading);
+    final content = _rowContent(
+      context,
+      ref,
+      valuation.valueOrNull,
+      isLoading: valuation.isLoading,
+    );
 
     return Draggable<Ticker>(
       data: entry.ticker,
@@ -688,101 +843,292 @@ class _AssetRow extends ConsumerWidget {
       onTap: valuation == null
           ? null
           : () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ValuationPage(ticker: entry.ticker),
-                ),
+              context,
+              MaterialPageRoute(
+                builder: (_) => ValuationPage(ticker: entry.ticker),
               ),
+            ),
       borderRadius: BorderRadius.circular(10),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.drag_indicator,
-                size: 16, color: AppColors.textMuted(isLight)),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.ticker.value,
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary(isLight),
-                    ),
-                  ),
-                  Text(
-                    entry.sector.isUnknown
-                        ? 'Setor não classificado'
-                        : entry.sector.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      color: AppColors.textMuted(isLight),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              width: _weightColumnWidth,
-              child: Text(
-                entry.weight.toString(),
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary(isLight),
+            Row(
+              children: [
+                Icon(
+                  Icons.drag_indicator,
+                  size: 16,
+                  color: context.fin.textTertiary,
                 ),
-              ),
-            ),
-            SizedBox(
-              width: _upsideColumnWidth,
-              child: isLoading
-                  ? Align(
-                      alignment: Alignment.centerRight,
-                      child: SizedBox(
-                        width: 9,
-                        height: 9,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 1.4,
-                          color: AppColors.textMuted(isLight),
+                const Gap.sm(axis: Axis.horizontal),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        entry.ticker.value,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.finType.bodySm.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: context.fin.textPrimary,
                         ),
                       ),
-                    )
-                  : _UpsideCell(
-                      upside: upside,
-                      fairValue: valuation?.fairValue.reais,
-                      model: valuation?.model,
-                      isOutlier: isOutlier,
-                      hasWarnings: hasWarnings,
-                      isLight: isLight,
+                      Text(
+                        entry.sector.isUnknown
+                            ? 'Setor não classificado'
+                            : entry.sector.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.finType.caption.copyWith(
+                          color: context.fin.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (!compact) ...[
+                  SizedBox(
+                    width: weightWidth,
+                    child: Text(
+                      entry.weight.toString(),
+                      textAlign: TextAlign.right,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.finType.numSm.copyWith(
+                        color: AppColors.textPrimary(isLight),
+                      ),
                     ),
+                  ),
+                  SizedBox(
+                    width: upsideWidth,
+                    child: isLoading
+                        ? _UpsideSkeleton(width: upsideWidth)
+                        : _UpsideCell(
+                            upside: upside,
+                            fairValue: valuation?.fairValue.reais,
+                            model: valuation?.model,
+                            isOutlier: isOutlier,
+                            hasWarnings: hasWarnings,
+                            isLight: isLight,
+                          ),
+                  ),
+                ],
+                IconButton(
+                  tooltip: 'Remover',
+                  visualDensity: VisualDensity.compact,
+                  // `VisualDensity.compact` encolhe o alvo de toque de 48x48 para
+                  // 40x40. Aqui a restricao explicita devolve os 48 dp SEM crescer
+                  // o icone: a acao e destrutiva -- um toque errado remove o ativo
+                  // da carteira -- e errar por densidade visual sai caro demais.
+                  // O padding zerado impede que os 48 dp virem 48 + padding.
+                  constraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ),
+                  padding: EdgeInsets.zero,
+                  icon: Icon(
+                    Icons.close,
+                    size: 15,
+                    color: AppColors.textMuted(isLight),
+                  ),
+                  onPressed: () => ref
+                      .read(studyProvider.notifier)
+                      .removeAsset(entry.ticker, fromPrincipal: isPrincipal),
+                ),
+              ],
             ),
-            IconButton(
-              tooltip: 'Remover',
-              visualDensity: VisualDensity.compact,
-              // `VisualDensity.compact` encolhe o alvo de toque de 48x48 para
-              // 40x40. Aqui a restricao explicita devolve os 48 dp SEM crescer
-              // o icone: a acao e destrutiva -- um toque errado remove o ativo
-              // da carteira -- e errar por densidade visual sai caro demais.
-              // O padding zerado impede que os 48 dp virem 48 + padding.
-              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-              padding: EdgeInsets.zero,
-              icon: Icon(Icons.close,
-                  size: 15, color: AppColors.textMuted(isLight)),
-              onPressed: () => ref
-                  .read(studyProvider.notifier)
-                  .removeAsset(entry.ticker, fromPrincipal: isPrincipal),
-            ),
+            // Segunda linha do modo compacto. Os rotulos vem junto porque o
+            // cabecalho de colunas some aqui, e peso e potencial sao os dois
+            // percentuais -- sem rotulo, um passa pelo outro.
+            //
+            // `Wrap`, e nao `Row`: um `Text` de rotulo nao encolhe abaixo da
+            // largura intrinseca dentro de uma `Row`, entao a linha estourava
+            // em 320 dp. O `Wrap` quebra em duas linhas quando precisa, o que
+            // e o comportamento certo aqui -- e nao ha o que truncar.
+            if (compact)
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: _dragColumnWidth,
+                  top: FinSpace.xs,
+                ),
+                child: Wrap(
+                  spacing: FinSpace.md,
+                  runSpacing: FinSpace.xs,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'peso',
+                          style: context.finType.caption.copyWith(
+                            color: context.fin.textTertiary,
+                          ),
+                        ),
+                        const Gap.xs(axis: Axis.horizontal),
+                        // `Flexible` pelo mesmo motivo do grupo ao lado: um
+                        // `Text` nao encolhe abaixo da largura intrinseca
+                        // dentro de uma `Row`, e em 320 dp sob 2,0x nem o par
+                        // rotulo+valor cabe na faixa.
+                        Flexible(
+                          child: Text(
+                            entry.weight.toString(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.finType.numSm.copyWith(
+                              color: context.fin.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'potencial',
+                          style: context.finType.caption.copyWith(
+                            color: context.fin.textTertiary,
+                          ),
+                        ),
+                        const Gap.xs(axis: Axis.horizontal),
+                        // `Flexible`: dentro do `Wrap` esta `Row` recebe a
+                        // largura da faixa, e a celula precisa poder ceder --
+                        // sem isto ela impoe a largura intrinseca e estoura.
+                        Flexible(
+                          child: isLoading
+                              ? _UpsideSkeleton(width: upsideWidth)
+                              : _UpsideCell(
+                                  upside: upside,
+                                  fairValue: valuation?.fairValue.reais,
+                                  model: valuation?.model,
+                                  isOutlier: isOutlier,
+                                  hasWarnings: hasWarnings,
+                                  isLight: isLight,
+                                ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
     );
   }
+}
+
+/// Espaço reservado enquanto o valuation não chegou.
+///
+/// Substitui um `CircularProgressIndicator` de **9×9 px com traço de 1,4** que
+/// ocupava esta célula. Ele falhava nas duas pontas: um ponto cinza tremendo
+/// não diz o que está vindo, e ao sumir deslocava a linha, porque a altura
+/// dele não era a do conteúdo final.
+///
+/// A geometria aqui vem do estilo real sob a escala corrente, então a linha
+/// não salta quando o número chega.
+class _UpsideSkeleton extends StatefulWidget {
+  final double width;
+
+  const _UpsideSkeleton({required this.width});
+
+  @override
+  State<_UpsideSkeleton> createState() => _UpsideSkeletonState();
+}
+
+class _UpsideSkeletonState extends State<_UpsideSkeleton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    );
+    // Respeita "reduzir movimento" do sistema: sem esta guarda o esqueleto
+    // pulsa para quem pediu explicitamente que nada pulse.
+    final reduzido = WidgetsBinding
+        .instance
+        .platformDispatcher
+        .accessibilityFeatures
+        .disableAnimations;
+    if (!reduzido) _pulse.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fin;
+    final t = context.finType;
+    final scaler = MediaQuery.textScalerOf(context);
+
+    final alturaValor = scaler.scale(t.numSm.fontSize!) * t.numSm.height!;
+    final alturaNota = scaler.scale(t.caption.fontSize!) * t.caption.height!;
+
+    return Semantics(
+      label: 'Calculando o potencial',
+      child: ExcludeSemantics(
+        // Uma carteira com dez ativos por avaliar tem dez destes pulsando ao
+        // mesmo tempo dentro de uma lista rolavel. Sem a fronteira, cada
+        // oscilacao invalida a camada inteira e a rolagem perde quadros.
+        child: RepaintBoundary(
+          child: FadeTransition(
+            opacity: Tween<double>(begin: 0.35, end: 0.75).animate(_pulse),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _Barra(
+                  width: widget.width * 0.6,
+                  height: alturaValor,
+                  color: c.surfaceSunken,
+                ),
+                const Gap.xs(),
+                _Barra(
+                  width: widget.width * 0.85,
+                  height: alturaNota,
+                  color: c.surfaceSunken,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Barra extends StatelessWidget {
+  final double width;
+  final double height;
+  final Color color;
+
+  const _Barra({
+    required this.width,
+    required this.height,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: width,
+    height: height,
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(3),
+    ),
+  );
 }
 
 /// A célula de potencial: o número, o preço justo que o originou e a marca de
@@ -867,16 +1213,19 @@ class _UpsideCell extends StatelessWidget {
     final buffer = StringBuffer()
       ..write('Distância entre o preço de mercado e o preço justo estimado')
       ..write(model == null ? '' : ' por ${model!.label}')
-      ..write('. Não é previsão de retorno: só se realiza se o mercado '
-          'convergir para essa estimativa, e não há prazo para isso.');
+      ..write(
+        '. Não é previsão de retorno: só se realiza se o mercado '
+        'convergir para essa estimativa, e não há prazo para isso.',
+      );
     if (isOutlier) {
-      buffer.write('\n\nDiferença acima de 100%: quase sempre vem de um '
-          'exercício-base atípico ou de demonstrativo incompleto. Toque para '
-          'ver as premissas e os avisos.');
+      buffer.write(
+        '\n\nDiferença acima de 100%: quase sempre vem de um '
+        'exercício-base atípico ou de demonstrativo incompleto. Toque para '
+        'ver as premissas e os avisos.',
+      );
     } else if (hasWarnings) {
       buffer.write('\n\nEsta avaliação tem ressalvas. Toque para lê-las.');
     }
     return buffer.toString();
   }
 }
-

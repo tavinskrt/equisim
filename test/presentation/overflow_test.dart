@@ -39,17 +39,6 @@ const _escalas = <double>[1.0, 1.3, 2.0];
 /// so sai quando a combinacao passa; se sair antes, o teste volta a reprovar e
 /// o gate avisa.
 const _pendentes = <String, String>{
-  // Sete combinacoes, incluindo 1024 dp -- ou seja, NAO e so questao de tela
-  // estreita. O estouro observado e vertical, o que a largura de coluna
-  // sozinha nao explica: ha um `IntrinsicHeight` sobre `Row` de duas carteiras
-  // que e o suspeito. Diagnostico faz parte da UI-06.
-  'StudyPage|320|1.0': 'UI-06 — estouro vertical; colunas em constante',
-  'StudyPage|320|1.3': 'UI-06 — estouro vertical; colunas em constante',
-  'StudyPage|390|1.0': 'UI-06 — estouro vertical; colunas em constante',
-  'StudyPage|390|1.3': 'UI-06 — estouro vertical; colunas em constante',
-  'StudyPage|1024|1.0': 'UI-06 — estouro vertical mesmo em tela larga',
-  'StudyPage|1024|1.3': 'UI-06 — estouro vertical mesmo em tela larga',
-  'StudyPage|1024|2.0': 'UI-06 — estouro vertical mesmo em tela larga',
 
   // A GoalPage reprova em 320 dp JA NA ESCALA 1,0x: em iPhone SE a tela esta
   // quebrada hoje, sem ninguem tocar em acessibilidade. Isso e defeito de
