@@ -5,8 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/portfolio_repository.dart';
 import '../../di/providers.dart';
 import '../../utils/app_colors.dart';
+import '../components/fin_amount.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
+import '../theme/fin_colors.dart';
+import '../theme/fin_theme.dart';
 import '../valuation/valuation_page.dart';
 import '../valuation/valuation_providers.dart';
 import 'asset_picker.dart';
@@ -220,13 +223,11 @@ class _StudyHeader extends ConsumerWidget {
                           '${settings.convergenceHorizonMonths} meses · '
                           '${Fmt.percent(coverage, decimals: 0)} da carteira '
                           'avaliada',
-                  valueColor: weightedUpside == null
-                      ? null
-                      : (isImplausible
-                          ? (isLight
-                              ? AppColors.warning
-                              : AppColors.warningDark)
-                          : signedColor(weightedUpside, isLight)),
+                  // Numero implausivel vira ressalva, nao perda: ambar diz
+                  // "olhe as premissas", vermelho diria "caiu".
+                  trend: isImplausible
+                      ? FinTrend.caution
+                      : FinAmount.trendOf(weightedUpside),
                 ),
               ),
               Expanded(
@@ -811,20 +812,18 @@ class _UpsideCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final value = upside;
     if (value == null) {
-      return Text(
-        '—',
-        textAlign: TextAlign.right,
-        style: TextStyle(
-          fontSize: 12.5,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textMuted(isLight),
-        ),
+      return FinAmount(
+        text: '—',
+        style: context.finType.numSm,
+        trend: FinTrend.blocked,
       );
     }
 
-    final color = isOutlier
-        ? (isLight ? AppColors.warning : AppColors.warningDark)
-        : signedColor(value, isLight);
+    // Potencial fora da banda vira ressalva, não perda: âmbar diz "olhe as
+    // premissas antes de confiar", enquanto vermelho diria "caiu" — e um
+    // upside de +447% não caiu.
+    final trend = isOutlier ? FinTrend.caution : FinAmount.trendOf(value);
+    final color = context.fin.forTrend(trend);
 
     return Tooltip(
       message: _tooltip(value),
@@ -841,15 +840,10 @@ class _UpsideCell extends StatelessWidget {
                 const SizedBox(width: 2),
               ],
               Flexible(
-                child: Text(
-                  Fmt.percent(value, decimals: 0, signed: true),
-                  textAlign: TextAlign.right,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: color,
-                  ),
+                child: FinAmount(
+                  text: Fmt.percent(value, decimals: 0, signed: true),
+                  style: context.finType.numSm,
+                  trend: trend,
                 ),
               ),
             ],

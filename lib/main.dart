@@ -11,6 +11,7 @@ import 'controllers/login_controller.dart';
 import 'controllers/theme_controller.dart';
 import 'presentation/audit/logs_page.dart';
 import 'presentation/shared/theme_bridge.dart';
+import 'presentation/theme/fin_theme.dart';
 import 'views/login_page.dart';
 import 'views/forgot_password_page.dart';
 import 'views/sign_up_page.dart';
@@ -75,12 +76,20 @@ Future<void> main() async {
   // As telas de autenticação continuam lendo por Provider; as telas novas leem
   // por Riverpod. Criar uma instância em cada árvore produziria dois temas
   // divergentes — daí a injeção explícita nas duas.
-  final themeController = ThemeController();
+  //
+  // O `await` é o que elimina o flash: a preferência é lida antes do primeiro
+  // quadro, então o aplicativo já pinta no tema certo em vez de abrir no
+  // escuro e trocar.
+  final themeController = await ThemeController.load();
 
   runApp(
     ProviderScope(
       overrides: [
         themeControllerProvider.overrideWithValue(themeController),
+        // Semeia o provider observado pelas telas novas com o valor já
+        // conhecido. Sem isto, elas montariam no padrão do provider (escuro) e
+        // só acertariam no quadro seguinte — o mesmo flash, um nível abaixo.
+        isLightModeProvider.overrideWith((ref) => themeController.isLightMode),
       ],
       child: _ThemeSync(
         controller: themeController,
@@ -131,6 +140,16 @@ class _ThemeSyncState extends ConsumerState<_ThemeSync> {
   Widget build(BuildContext context) => widget.child;
 }
 
+/// Os dois temas, montados uma vez.
+///
+/// `buildFinTheme` é puro, mas devolve instâncias novas a cada chamada.
+/// Construí-las dentro do `build` faria o `MaterialApp` receber um
+/// `ThemeData` diferente a cada alternância e propagar rebuild para a árvore
+/// inteira — exatamente o que a igualdade por valor de `FinColors` existe para
+/// evitar.
+final ThemeData _lightTheme = buildFinTheme(isLight: true);
+final ThemeData _darkTheme = buildFinTheme(isLight: false);
+
 /// Raiz da aplicação: rotas, tema e as duas árvores de estado.
 ///
 /// Convivem aqui **dois gerenciadores de estado**, de propósito. As telas de
@@ -162,24 +181,30 @@ class EquisimApp extends StatelessWidget {
         legacy.ChangeNotifierProvider(create: (_) => LoginController()),
         legacy.ChangeNotifierProvider.value(value: themeController),
       ],
-      child: MaterialApp(
-        title: 'Equisim',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+      // O `MaterialApp` observa o controlador para que `themeMode` acompanhe a
+      // alternância. Antes o tema era estático aqui, e só as telas novas
+      // reagiam — os widgets do Material seguiam na paleta semeada.
+      child: legacy.Consumer<ThemeController>(
+        builder: (context, controller, _) => MaterialApp(
+          title: 'Equisim',
+          debugShowCheckedModeBanner: false,
+          theme: _lightTheme,
+          darkTheme: _darkTheme,
+          themeMode:
+              controller.isLightMode ? ThemeMode.light : ThemeMode.dark,
+          home: initializationError == null
+              ? const LoginPage()
+              : _StartupFailure(error: initializationError!),
+          routes: {
+            '/forgot-password': (context) => const ForgotPasswordPage(),
+            '/sign-up': (context) => const SignUpPage(),
+            // Rota dedicada do painel de auditoria. No navegador ela é aberta
+            // em guia nova (`#/logs`) e atendida pelo desvio no arranque; aqui
+            // ela serve às plataformas sem segunda janela, onde o painel é
+            // empilhado sobre a própria aplicação.
+            AuditRoutes.logs: (context) => const LogsPage(),
+          },
         ),
-        home: initializationError == null
-            ? const LoginPage()
-            : _StartupFailure(error: initializationError!),
-        routes: {
-          '/forgot-password': (context) => const ForgotPasswordPage(),
-          '/sign-up': (context) => const SignUpPage(),
-          // Rota dedicada do painel de auditoria. No navegador ela é aberta em
-          // guia nova (`#/logs`) e atendida pelo desvio no arranque; aqui ela
-          // serve às plataformas sem segunda janela, onde o painel é empilhado
-          // sobre a própria aplicação.
-          AuditRoutes.logs: (context) => const LogsPage(),
-        },
       ),
     );
   }

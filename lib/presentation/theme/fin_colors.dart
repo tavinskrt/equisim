@@ -188,13 +188,19 @@ class FinColors extends ThemeExtension<FinColors> {
       ];
 
   /// Cor de texto para uma direcao.
+  ///
+  /// [FinTrend.neutral] resolve para [textPrimary], e nao para uma cor
+  /// apagada: um valor sem direcao -- patrimonio final, quantidade de ativos,
+  /// ou uma variacao exatamente zero -- continua sendo uma MEDIDA, e medida se
+  /// le na tinta principal. A de-enfase pertence a [FinTrend.blocked], que
+  /// significa ausencia de dado.
   Color forTrend(FinTrend trend) => switch (trend) {
         FinTrend.positive => positive,
         FinTrend.negative => negative,
         FinTrend.caution => caution,
         FinTrend.pending => pending,
         FinTrend.blocked => blocked,
-        FinTrend.neutral => textSecondary,
+        FinTrend.neutral => textPrimary,
       };
 
   /// Fundo tonal para uma direcao.

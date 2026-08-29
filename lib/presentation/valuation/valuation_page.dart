@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../utils/app_colors.dart';
+import '../components/fin_amount.dart';
 import '../shared/charts.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
+import '../theme/fin_colors.dart';
 import 'valuation_providers.dart';
 
 /// Detalhe da avaliação de um ativo.
@@ -174,7 +176,7 @@ class _PriceCard extends StatelessWidget {
                   label: 'Upside',
                   value: Fmt.percent(result.upside, decimals: 1, signed: true),
                   hint: 'total, sem prazo',
-                  valueColor: signedColor(result.upside, isLight),
+                  trend: FinAmount.trendOf(result.upside),
                 ),
               ),
             ],
@@ -334,10 +336,10 @@ class _DiscreteView extends StatelessWidget {
                 isLight: isLight,
                 label: band.label,
                 value: Fmt.money(scenarios[band]!.reais),
-                valueColor: switch (band) {
-                  ScenarioBand.bear => AppColors.danger,
-                  ScenarioBand.base => AppColors.textPrimary(isLight),
-                  ScenarioBand.bull => AppColors.primary,
+                trend: switch (band) {
+                  ScenarioBand.bear => FinTrend.negative,
+                  ScenarioBand.base => FinTrend.neutral,
+                  ScenarioBand.bull => FinTrend.positive,
                 },
               ),
             ),
@@ -372,7 +374,7 @@ class _DistributionView extends StatelessWidget {
                 label: 'P5',
                 value: Fmt.money(distribution.p5),
                 hint: 'pessimista',
-                valueColor: AppColors.danger,
+                trend: FinTrend.negative,
               ),
             ),
             Expanded(
@@ -388,7 +390,7 @@ class _DistributionView extends StatelessWidget {
                 label: 'P95',
                 value: Fmt.money(distribution.p95),
                 hint: 'otimista',
-                valueColor: AppColors.primary,
+                trend: FinTrend.positive,
               ),
             ),
           ],

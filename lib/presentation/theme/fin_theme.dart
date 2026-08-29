@@ -36,9 +36,9 @@ enum FinBreakpoint {
 ///
 /// O `ColorScheme` e **derivado** da paleta, nao semeado numa cor arbitraria.
 /// E isto que faz um `CircularProgressIndicator` sem cor explicita nascer
-/// certo, em vez de girar em azul do Material no meio de uma tela verde -- o
-/// que acontecia com `ColorScheme.fromSeed(seedColor: Colors.blue)`, a linha
-/// que o `flutter create` escreve e que nunca havia sido tocada.
+/// certo, em vez de girar no azul padrao do Material no meio de uma tela
+/// verde -- o que acontecia enquanto o tema era semeado pela cor que o
+/// `flutter create` escreve e que nunca havia sido tocada.
 ThemeData buildFinTheme({required bool isLight}) {
   final fin = isLight ? FinColors.light : FinColors.dark;
   final type = FinTypography.standard();

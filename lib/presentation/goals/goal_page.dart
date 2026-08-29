@@ -1,15 +1,18 @@
-import 'dart:math' as math;
 
+
+import '../../utils/app_colors.dart';
+import '../components/fin_amount.dart';
+import '../shared/theme_bridge.dart';
+import '../shared/ui_kit.dart';
+import '../study/study_notifier.dart';
+import '../theme/fin_colors.dart';
+import '../theme/fin_theme.dart';
+import '../valuation/valuation_providers.dart';
+import 'dart:math' as math;
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../utils/app_colors.dart';
-import '../shared/theme_bridge.dart';
-import '../shared/ui_kit.dart';
-import '../study/study_notifier.dart';
-import '../valuation/valuation_providers.dart';
 
 /// Tela de planejamento patrimonial.
 ///
@@ -235,12 +238,19 @@ class _FeasibilityCard extends StatelessWidget {
 
   const _FeasibilityCard({required this.verdict, required this.isLight});
 
-  Color get _color => switch (verdict.level) {
-        FeasibilityLevel.riskFreeSufficient => const Color(0xFF3B82F6),
-        FeasibilityLevel.plausible => AppColors.primary,
-        FeasibilityLevel.demanding => const Color(0xFFF59E0B),
-        FeasibilityLevel.unrealistic => AppColors.danger,
+  /// Veredito traduzido em direcao semantica.
+  ///
+  /// Antes cada nivel carregava um literal de cor proprio -- inclusive um
+  /// ambar #F59E0B que nao existia na paleta e que, por isso, ninguem podia
+  /// corrigir de um lugar so.
+  FinTrend get _trend => switch (verdict.level) {
+        FeasibilityLevel.riskFreeSufficient => FinTrend.pending,
+        FeasibilityLevel.plausible => FinTrend.positive,
+        FeasibilityLevel.demanding => FinTrend.caution,
+        FeasibilityLevel.unrealistic => FinTrend.negative,
       };
+
+  Color _color(BuildContext context) => context.fin.forTrend(_trend);
 
   IconData get _icon => switch (verdict.level) {
         FeasibilityLevel.riskFreeSufficient => Icons.savings_outlined,
@@ -263,20 +273,20 @@ class _FeasibilityCard extends StatelessWidget {
 
     return GlassCard(
       isLight: isLight,
-      borderColor: _color.withValues(alpha: 0.5),
+      borderColor: _color(context).withValues(alpha: 0.5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(_icon, size: 20, color: _color),
+              Icon(_icon, size: 20, color: _color(context)),
               const SizedBox(width: 8),
               Text(
                 _title,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: _color,
+                  color: _color(context),
                 ),
               ),
             ],
@@ -291,7 +301,7 @@ class _FeasibilityCard extends StatelessWidget {
                     label: 'Rentabilidade exigida',
                     value: Fmt.percent(rate, decimals: 2),
                     hint: 'ao ano',
-                    valueColor: _color,
+                    trend: _trend,
                   ),
                 ),
                 Expanded(
@@ -380,8 +390,7 @@ class _AlignmentCard extends StatelessWidget {
                   label: 'Esperado da carteira',
                   value: Fmt.percent(alignment.expectedReturn),
                   hint: 'upside anualizado + DY líquido',
-                  valueColor:
-                      meets ? AppColors.primary : AppColors.danger,
+                  trend: meets ? FinTrend.positive : FinTrend.negative,
                 ),
               ),
               Expanded(
@@ -390,7 +399,7 @@ class _AlignmentCard extends StatelessWidget {
                   label: 'Folga',
                   value: '${alignment.gap >= 0 ? '+' : ''}'
                       '${alignment.gap.toStringAsFixed(1)} p.p.',
-                  valueColor: signedColor(alignment.gap, isLight),
+                  trend: FinAmount.trendOf(alignment.gap),
                 ),
               ),
             ],

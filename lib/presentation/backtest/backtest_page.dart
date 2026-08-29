@@ -3,11 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../utils/app_colors.dart';
+import '../components/balance_summary_card.dart';
+import '../components/fin_amount.dart';
 import '../export/csv_export.dart';
 import '../shared/charts.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
 import '../study/study_notifier.dart';
+import '../theme/fin_colors.dart';
+import '../theme/fin_space.dart';
+import '../theme/fin_theme.dart';
 import 'backtest_providers.dart';
 
 /// Azul da Reserva, o contraponto ao verde da Principal em toda a tela.
@@ -483,6 +488,12 @@ const List<HintEntry> _perAssetGlossary = [
   ),
 ];
 
+/// Indicadores de uma carteira na janela simulada.
+///
+/// O patrimônio final passou a ser a grandeza principal do cartão, em `numLg`,
+/// com o aportado logo abaixo; as nove métricas restantes ficam em `numMd`.
+/// Antes as dez dividiam o mesmo tamanho, o que obrigava o leitor a procurar
+/// qual delas era o número que importa.
 class _MetricsCard extends StatelessWidget {
   final String title;
   final BacktestOutcome outcome;
@@ -497,93 +508,60 @@ class _MetricsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final m = outcome.metrics;
+
     return GlassCard(
       isLight: isLight,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SectionHeader(
-            isLight: isLight,
-            title: title,
-            trailing: HintIcon(
-              isLight: isLight,
-              title: 'Indicadores da $title',
-              intro: 'Todos se referem à janela simulada. As duas carteiras '
-                  'recebem aportes idênticos nas mesmas datas — só a '
-                  'composição difere.',
-              entries: _metricsGlossary,
-            ),
+      child: BalanceSummaryCard(
+        label: title,
+        balance: Fmt.money(outcome.finalValue.reais),
+        balanceSemantics:
+            'Patrimônio final ${Fmt.money(outcome.finalValue.reais)}',
+        caption: 'aportado ${Fmt.money(outcome.totalContributed.reais)}',
+        changeLabel: Fmt.percent(m.timeWeightedReturn, signed: true),
+        changeTrend: FinAmount.trendOf(m.timeWeightedReturn),
+        trailing: HintIcon(
+          isLight: isLight,
+          title: 'Indicadores da $title',
+          intro: 'Todos se referem à janela simulada. As duas carteiras '
+              'recebem aportes idênticos nas mesmas datas — só a '
+              'composição difere.',
+          entries: _metricsGlossary,
+        ),
+        metrics: [
+          BalanceMetric(
+            label: 'XIRR',
+            value: m.moneyWeightedReturn == null
+                ? '—'
+                : Fmt.percent(m.moneyWeightedReturn!, signed: true),
+            hint: 'retorno do investidor',
+            trend: FinAmount.trendOf(m.moneyWeightedReturn),
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 24,
-            runSpacing: 14,
-            children: [
-              MetricTile(
-                isLight: isLight,
-                label: 'Patrimônio final',
-                value: Fmt.money(outcome.finalValue.reais),
-                hint: 'aportado ${Fmt.money(outcome.totalContributed.reais)}',
-              ),
-              MetricTile(
-                isLight: isLight,
-                label: 'TWR',
-                value: Fmt.percent(m.timeWeightedReturn, signed: true),
-                hint: 'neutraliza aportes',
-                valueColor: signedColor(m.timeWeightedReturn, isLight),
-              ),
-              MetricTile(
-                isLight: isLight,
-                label: 'XIRR',
-                value: m.moneyWeightedReturn == null
-                    ? '—'
-                    : Fmt.percent(m.moneyWeightedReturn!, signed: true),
-                hint: 'retorno do investidor',
-                valueColor: m.moneyWeightedReturn == null
-                    ? null
-                    : signedColor(m.moneyWeightedReturn!, isLight),
-              ),
-              MetricTile(
-                isLight: isLight,
-                label: 'CAGR',
-                value: Fmt.percent(m.cagr, signed: true),
-                valueColor: signedColor(m.cagr, isLight),
-              ),
-              MetricTile(
-                isLight: isLight,
-                label: 'Volatilidade',
-                value: Fmt.percent(m.volatility),
-                hint: 'anualizada',
-              ),
-              MetricTile(
-                isLight: isLight,
-                label: 'Máx. drawdown',
-                value: Fmt.percent(m.maxDrawdown),
-                valueColor: AppColors.danger,
-              ),
-              MetricTile(
-                isLight: isLight,
-                label: 'Sharpe',
-                value: Fmt.ratio(m.sharpe),
-                hint: 'vs CDI observado',
-              ),
-              MetricTile(
-                isLight: isLight,
-                label: 'Sortino',
-                value: Fmt.ratio(m.sortino),
-              ),
-              MetricTile(
-                isLight: isLight,
-                label: 'Calmar',
-                value: Fmt.ratio(m.calmar),
-              ),
-              MetricTile(
-                isLight: isLight,
-                label: 'DY líquido',
-                value: Fmt.percent(m.netDividendYield),
-                hint: 'após IR',
-              ),
-            ],
+          BalanceMetric(
+            label: 'CAGR',
+            value: Fmt.percent(m.cagr, signed: true),
+            trend: FinAmount.trendOf(m.cagr),
+          ),
+          BalanceMetric(
+            label: 'Volatilidade',
+            value: Fmt.percent(m.volatility),
+            hint: 'anualizada',
+          ),
+          BalanceMetric(
+            label: 'Máx. drawdown',
+            value: Fmt.percent(m.maxDrawdown),
+            trend: FinTrend.negative,
+          ),
+          BalanceMetric(
+            label: 'Sharpe',
+            value: Fmt.ratio(m.sharpe),
+            hint: 'vs CDI observado',
+          ),
+          BalanceMetric(label: 'Sortino', value: Fmt.ratio(m.sortino)),
+          BalanceMetric(label: 'Calmar', value: Fmt.ratio(m.calmar)),
+          BalanceMetric(
+            label: 'DY líquido',
+            value: Fmt.percent(m.netDividendYield),
+            hint: 'após IR',
           ),
         ],
       ),
@@ -639,7 +617,7 @@ class _DividendsCard extends StatelessWidget {
                   isLight: isLight,
                   label: 'IR retido',
                   value: Fmt.money(tax),
-                  valueColor: tax > 0 ? AppColors.danger : null,
+                  trend: tax > 0 ? FinTrend.negative : FinTrend.neutral,
                   hint: gross > 0
                       ? '${(tax / gross * 100).toStringAsFixed(1)}% do bruto'
                       : null,
@@ -650,7 +628,7 @@ class _DividendsCard extends StatelessWidget {
                   isLight: isLight,
                   label: 'Líquido reinvestido',
                   value: Fmt.money(net),
-                  valueColor: AppColors.primary,
+                  trend: FinTrend.positive,
                 ),
               ),
             ],
@@ -762,8 +740,55 @@ class _AssetGroup extends StatelessWidget {
     required this.isLight,
   });
 
+  /// Largura da coluna de ticker e da coluna de valor, medidas do conteudo
+  /// real deste grupo sob a escala de texto corrente.
+  ///
+  /// Substitui as constantes `width: 62` e `width: 74`. Largura em pixel
+  /// logico alinha em 1,0x e trunca em 1,3x: um `-1.234,5%` pede cerca de
+  /// 81 dp contra os 74 que havia, e o corte nao produz aviso nenhum -- dentro
+  /// de um `SizedBox` nao aparece a listra de overflow.
+  ///
+  /// Medir do conteudo, e nao de uma amostra chutada, e o que mantem a coluna
+  /// justa: ela cresce exatamente o quanto o maior valor da lista precisa.
+  ({double ticker, double value}) _columnWidths(BuildContext context) {
+    final tickerStyle = context.finType.bodySm.copyWith(
+      fontWeight: FontWeight.w600,
+    );
+    final valueStyle = context.finType.numSm;
+    final driftStyle = context.finType.caption;
+
+    var ticker = 0.0;
+    var value = 0.0;
+
+    for (final asset in assets) {
+      final t = FinAmount.measure(context, asset.ticker.value, tickerStyle);
+      if (t > ticker) ticker = t;
+
+      // A coluna carrega dois textos empilhados; ela precisa caber o mais
+      // largo dos dois, nao so o retorno.
+      final r = FinAmount.measure(
+        context,
+        Fmt.percent(asset.totalReturn, decimals: 1, signed: true),
+        valueStyle,
+      );
+      if (r > value) value = r;
+
+      final d = FinAmount.measure(
+        context,
+        '${asset.drift >= 0 ? '+' : ''}'
+        '${asset.drift.toStringAsFixed(1)} p.p.',
+        driftStyle,
+      );
+      if (d > value) value = d;
+    }
+
+    return (ticker: ticker + FinSpace.sm, value: value + FinSpace.xs);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final widths = _columnWidths(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -786,7 +811,13 @@ class _AssetGroup extends StatelessWidget {
             ),
           ],
         ),
-        for (final asset in assets) _AssetRow(asset: asset, isLight: isLight),
+        for (final asset in assets)
+          _AssetRow(
+            asset: asset,
+            isLight: isLight,
+            tickerWidth: widths.ticker,
+            valueWidth: widths.value,
+          ),
       ],
     );
   }
@@ -797,7 +828,19 @@ class _AssetRow extends StatelessWidget {
   final AssetPerformance asset;
   final bool isLight;
 
-  const _AssetRow({required this.asset, required this.isLight});
+  /// Larguras medidas pelo grupo, iguais para todas as linhas dele.
+  ///
+  /// Vem de fora justamente para que sejam iguais: medir por linha alinharia
+  /// cada uma consigo mesma e desalinharia a coluna.
+  final double tickerWidth;
+  final double valueWidth;
+
+  const _AssetRow({
+    required this.asset,
+    required this.isLight,
+    required this.tickerWidth,
+    required this.valueWidth,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -806,11 +849,12 @@ class _AssetRow extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-            width: 62,
+            width: tickerWidth,
             child: Text(
               asset.ticker.value,
-              style: TextStyle(
-                fontSize: 12.5,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.finType.bodySm.copyWith(
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary(isLight),
               ),
@@ -847,23 +891,27 @@ class _AssetRow extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           SizedBox(
-            width: 74,
+            width: valueWidth,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  Fmt.percent(asset.totalReturn, decimals: 1, signed: true),
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.bold,
-                    color: signedColor(asset.totalReturn, isLight),
+                FinAmount(
+                  text: Fmt.percent(
+                    asset.totalReturn,
+                    decimals: 1,
+                    signed: true,
                   ),
+                  style: context.finType.numSm,
+                  trend: FinAmount.trendOf(asset.totalReturn),
                 ),
                 Text(
                   '${asset.drift >= 0 ? '+' : ''}'
                   '${asset.drift.toStringAsFixed(1)} p.p.',
-                  style: TextStyle(
-                    fontSize: 9.5,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  // `caption` e o mesmo papel usado para medir a coluna em
+                  // `_columnWidths`; divergir aqui faria a medida mentir.
+                  style: context.finType.caption.copyWith(
                     color: AppColors.textMuted(isLight),
                   ),
                 ),

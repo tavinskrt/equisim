@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../utils/app_colors.dart';
+import '../components/fin_amount.dart';
+import '../theme/fin_colors.dart';
+import '../theme/fin_theme.dart';
 
 /// Formatadores compartilhados.
 abstract final class Fmt {
@@ -191,9 +194,12 @@ class MetricTile extends StatelessWidget {
   /// Nota de rodapé: base de cálculo, janela, ressalva.
   final String? hint;
 
-  /// Cor do valor, para codificar ganho, perda ou ressalva. Sem ela, usa a cor
-  /// de texto principal.
-  final Color? valueColor;
+  /// Direção da grandeza, que escolhe a cor do valor.
+  ///
+  /// Substituiu o antigo `valueColor: Color?`, que obrigava cada ponto de uso
+  /// a resolver a cor por conta própria — e era por onde `AppColors.primary`,
+  /// reprovado em contraste, chegava a todo número positivo da interface.
+  final FinTrend trend;
 
   /// Tema corrente.
   final bool isLight;
@@ -205,7 +211,7 @@ class MetricTile extends StatelessWidget {
     required this.value,
     required this.isLight,
     this.hint,
-    this.valueColor,
+    this.trend = FinTrend.neutral,
   });
 
   @override
@@ -222,13 +228,13 @@ class MetricTile extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: valueColor ?? AppColors.textPrimary(isLight),
-          ),
+        // O valor passa por `FinAmount`: é o que garante cifra tabular, de modo
+        // que a vírgula decimal não dança de uma métrica para a outra.
+        FinAmount(
+          text: value,
+          style: context.finType.numMd,
+          trend: trend,
+          align: TextAlign.left,
         ),
         if (hint != null) ...[
           const SizedBox(height: 1),
@@ -560,9 +566,3 @@ class HintIcon extends StatelessWidget {
   }
 }
 
-/// Verde para ganho, vermelho para perda, neutro para zero.
-Color signedColor(double value, bool isLight) {
-  if (value > 0) return AppColors.primary;
-  if (value < 0) return AppColors.danger;
-  return AppColors.textSecondary(isLight);
-}

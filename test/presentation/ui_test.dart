@@ -5,6 +5,7 @@ import 'package:equisim/presentation/export/csv_export.dart';
 import 'package:equisim/presentation/shared/charts.dart';
 import 'package:equisim/presentation/shared/theme_bridge.dart';
 import 'package:equisim/presentation/shared/ui_kit.dart';
+import 'package:equisim/presentation/theme/fin_theme.dart';
 import 'package:equisim/presentation/study/study_notifier.dart';
 import 'package:equisim/presentation/study/study_page.dart';
 import 'package:equisim/presentation/valuation/valuation_providers.dart';
@@ -22,9 +23,14 @@ Asset assetOf(String symbol, [String sector = 'financeiro']) => Asset(
 
 /// Monta a tela isolando a rede: avaliações e universo são fornecidos
 /// diretamente, de modo que o teste exercita a interface, não a API.
+/// [isLight] alimenta ao mesmo tempo o provider legado e o `ThemeData`.
+/// Manter os dois em sincronia importa: as extensões `FinColors`/
+/// `FinTypography` vêm do tema, e um harness sem elas faz `context.fin`
+/// estourar em qualquer widget que use `FinAmount`.
 Widget harness({
   required Widget child,
   List<Override> overrides = const [],
+  bool isLight = false,
 }) =>
     ProviderScope(
       overrides: [
@@ -38,9 +44,13 @@ Widget harness({
         portfolioValuationsProvider
             .overrideWith((ref) async => const <Ticker, ValuationResult>{}),
         valuationProvider.overrideWith((ref, ticker) async => null),
+        isLightModeProvider.overrideWith((ref) => isLight),
         ...overrides,
       ],
-      child: MaterialApp(home: Scaffold(body: child)),
+      child: MaterialApp(
+        theme: buildFinTheme(isLight: isLight),
+        home: Scaffold(body: child),
+      ),
     );
 
 void main() {
@@ -212,7 +222,7 @@ void main() {
     testWidgets('tema claro e escuro renderizam sem erro', (tester) async {
       for (final isLight in [true, false]) {
         await tester.pumpWidget(harness(
-          overrides: [isLightModeProvider.overrideWith((ref) => isLight)],
+          isLight: isLight,
           child: const StudyPage(),
         ));
         await tester.pump();
