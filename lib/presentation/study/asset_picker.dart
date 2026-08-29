@@ -72,7 +72,6 @@ class _AssetPickerSheetState extends ConsumerState<_AssetPickerSheet> {
             ),
             const SizedBox(height: 14),
             SectionHeader(
-              isLight: isLight,
               title: widget.toPrincipal
                   ? 'Adicionar à Principal'
                   : 'Adicionar à Reserva',
@@ -105,7 +104,6 @@ class _AssetPickerSheetState extends ConsumerState<_AssetPickerSheet> {
                 loading: () =>
                     const Center(child: CircularProgressIndicator()),
                 error: (error, _) => EmptyState(
-                  isLight: isLight,
                   icon: Icons.cloud_off,
                   title: 'Universo indisponível',
                   message: 'Não foi possível carregar a lista de ações da B3.',
@@ -119,7 +117,6 @@ class _AssetPickerSheetState extends ConsumerState<_AssetPickerSheet> {
 
                   if (filtered.isEmpty) {
                     return EmptyState(
-                      isLight: isLight,
                       icon: Icons.search_off,
                       title: 'Nada encontrado',
                       message: 'Nenhuma ação corresponde a "$_query".',

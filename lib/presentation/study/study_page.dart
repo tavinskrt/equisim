@@ -88,7 +88,6 @@ class StudyPage extends ConsumerWidget {
             const SizedBox(height: 12),
             if (concentration.hasAlert) ...[
               NoticeBanner(
-                isLight: isLight,
                 icon: Icons.account_balance_outlined,
                 message: _concentrationMessage(concentration),
               ),
@@ -166,7 +165,6 @@ class _StudyHeader extends ConsumerWidget {
         weightedUpside != null && weightedUpside > marketCagr * 3;
 
     return GlassCard(
-      isLight: isLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -229,7 +227,6 @@ class _StudyHeader extends ConsumerWidget {
             children: [
               Expanded(
                 child: MetricTile(
-                  isLight: isLight,
                   label: 'Ativos na Principal',
                   value:
                       '${state.study.principal.length}'
@@ -238,7 +235,6 @@ class _StudyHeader extends ConsumerWidget {
               ),
               Expanded(
                 child: MetricTile(
-                  isLight: isLight,
                   label: 'Esperado da carteira',
                   value: weightedUpside == null
                       ? '—'
@@ -263,7 +259,6 @@ class _StudyHeader extends ConsumerWidget {
               ),
               Expanded(
                 child: MetricTile(
-                  isLight: isLight,
                   label: 'Reserva',
                   value: '${state.study.reserva.length}',
                   hint: 'candidatos',
@@ -274,9 +269,8 @@ class _StudyHeader extends ConsumerWidget {
           if (isImplausible) ...[
             const SizedBox(height: 12),
             NoticeBanner(
-              isLight: isLight,
               icon: Icons.warning_amber_rounded,
-              color: isLight ? AppColors.warning : AppColors.warningDark,
+              trend: FinTrend.caution,
               message:
                   'O esperado da carteira está em '
                   '${Fmt.percent(weightedUpside, decimals: 0, signed: true)}, '
@@ -346,7 +340,6 @@ class _SavedStudiesSheet extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SectionHeader(
-                isLight: isLight,
                 title: 'Estudos salvos',
                 subtitle: 'Abrir recarrega as duas carteiras e a meta',
                 trailing: TextButton.icon(
@@ -366,14 +359,12 @@ class _SavedStudiesSheet extends ConsumerWidget {
                     child: Center(child: CircularProgressIndicator()),
                   ),
                   error: (error, _) => EmptyState(
-                    isLight: isLight,
                     icon: Icons.error_outline,
                     title: 'Não foi possível listar',
                     message: '$error',
                   ),
                   data: (list) => list.isEmpty
                       ? EmptyState(
-                          isLight: isLight,
                           icon: Icons.folder_off_outlined,
                           title: 'Nenhum estudo salvo',
                           message:
@@ -511,7 +502,6 @@ class _PortfolioColumn extends ConsumerWidget {
             _removeColumnWidth;
         final compact = columnWidth - fixo < nomeMinimo;
         return GlassCard(
-          isLight: isLight,
           borderColor: isHovered
               ? AppColors.primary
               : (isPrincipal
@@ -521,7 +511,6 @@ class _PortfolioColumn extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SectionHeader(
-                isLight: isLight,
                 title: isPrincipal ? 'Carteira Principal' : 'Carteira Reserva',
                 subtitle: isPrincipal
                     ? 'Portfólio vigente'
@@ -530,7 +519,6 @@ class _PortfolioColumn extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     HintIcon(
-                      isLight: isLight,
                       title: 'Colunas desta lista',
                       intro:
                           'O potencial vem do valuation de cada ativo, '
@@ -612,7 +600,6 @@ class _PortfolioColumn extends ConsumerWidget {
                 ConstrainedBox(
                   constraints: const BoxConstraints(minHeight: 150),
                   child: EmptyState(
-                    isLight: isLight,
                     icon: isHovered
                         ? Icons.download_outlined
                         : Icons.inbox_outlined,
@@ -631,9 +618,9 @@ class _PortfolioColumn extends ConsumerWidget {
                 ),
                 ...portfolio.entries.values.map(
                   (entry) => _AssetRow(
+                    isLight: isLight,
                     entry: entry,
                     isPrincipal: isPrincipal,
-                    isLight: isLight,
                     weightWidth: widths.weight,
                     upsideWidth: widths.upside,
                     compact: compact,

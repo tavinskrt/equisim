@@ -40,7 +40,6 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     return Scaffold(
       body: ScreenBackground(
-        isLight: isLight,
         child: SafeArea(
           child: Stack(
             children: [

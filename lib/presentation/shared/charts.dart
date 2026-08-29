@@ -84,10 +84,13 @@ class Base100Chart extends StatelessWidget {
   Widget build(BuildContext context) {
     final axis = _axis;
     if (series.isEmpty || axis.length < 2) {
-      return SizedBox(
-        height: height,
+      // `minHeight`, e nao `height`: a altura declarada e a do GRAFICO, e o
+      // estado vazio que ocupa o lugar dele carrega titulo mais mensagem.
+      // Travar o teto faz o texto estourar assim que a escala de fonte sobe --
+      // o mesmo defeito ja corrigido na coluna de carteira vazia.
+      return ConstrainedBox(
+        constraints: BoxConstraints(minHeight: height),
         child: EmptyState(
-          isLight: isLight,
           icon: Icons.show_chart,
           title: 'Sem série para exibir',
           message: 'Defina a carteira e o plano de aportes.',
@@ -447,10 +450,10 @@ class RiskReturnScatter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (points.isEmpty) {
-      return SizedBox(
-        height: 230,
+      // Ver a justificativa em `Base100Chart`: piso, nao teto.
+      return ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 230),
         child: EmptyState(
-          isLight: isLight,
           icon: Icons.scatter_plot_outlined,
           title: 'Sem dispersão para exibir',
           message: 'A simulação precisa de ao menos um ativo com histórico '

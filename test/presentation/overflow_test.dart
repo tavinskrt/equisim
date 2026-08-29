@@ -39,7 +39,6 @@ const _escalas = <double>[1.0, 1.3, 2.0];
 /// so sai quando a combinacao passa; se sair antes, o teste volta a reprovar e
 /// o gate avisa.
 const _pendentes = <String, String>{
-
   // A GoalPage reprova em 320 dp JA NA ESCALA 1,0x: em iPhone SE a tela esta
   // quebrada hoje, sem ninguem tocar em acessibilidade. Isso e defeito de
   // layout, nao de escala, e nao existia como item no backlog -- entrou como
@@ -62,10 +61,10 @@ String _chave(String tela, double largura, double escala) =>
     '$tela|${largura.toInt()}|$escala';
 
 Asset _asset(String symbol, String sector) => Asset(
-      ticker: Ticker.parse(symbol),
-      name: symbol,
-      sector: Sector.fromKey(sector, label: sector),
-    );
+  ticker: Ticker.parse(symbol),
+  name: symbol,
+  sector: Sector.fromKey(sector, label: sector),
+);
 
 /// Substitui tudo que tocaria rede, Firestore ou disco.
 ///
@@ -81,19 +80,21 @@ Asset _asset(String symbol, String sector) => Asset(
 /// `ValuationResult` de mentira. Fica como ampliacao da UI-07, e ate la nao
 /// trate esta suite como prova de que a tela cheia cabe.
 List<Override> _overrides() => <Override>[
-      currentUserIdProvider.overrideWithValue(null),
-      marketAnchorsProvider.overrideWith((ref) async => MarketAnchors.fallback2026),
-      savedStudiesProvider.overrideWith((ref) async => const <PortfolioStudy>[]),
-      valuationProvider.overrideWith((ref, ticker) async => null),
-      portfolioValuationsProvider
-          .overrideWith((ref) async => const <Ticker, ValuationResult>{}),
-      netDividendYieldsProvider
-          .overrideWith((ref) async => const <Ticker, double>{}),
-      comparisonProvider.overrideWith((ref) async => null),
-      correlationProvider.overrideWith((ref) async => null),
-      goalAlignmentProvider.overrideWith((ref) async => null),
-      goalFeasibilityProvider.overrideWith((ref) async => null),
-    ];
+  currentUserIdProvider.overrideWithValue(null),
+  marketAnchorsProvider.overrideWith((ref) async => MarketAnchors.fallback2026),
+  savedStudiesProvider.overrideWith((ref) async => const <PortfolioStudy>[]),
+  valuationProvider.overrideWith((ref, ticker) async => null),
+  portfolioValuationsProvider.overrideWith(
+    (ref) async => const <Ticker, ValuationResult>{},
+  ),
+  netDividendYieldsProvider.overrideWith(
+    (ref) async => const <Ticker, double>{},
+  ),
+  comparisonProvider.overrideWith((ref) async => null),
+  correlationProvider.overrideWith((ref) async => null),
+  goalAlignmentProvider.overrideWith((ref) async => null),
+  goalFeasibilityProvider.overrideWith((ref) async => null),
+];
 
 Future<void> _pump(
   WidgetTester tester,
@@ -175,7 +176,8 @@ void main() {
               expect(
                 tester.takeException(),
                 isNull,
-                reason: '${entry.key} estourou o layout em '
+                reason:
+                    '${entry.key} estourou o layout em '
                     '${largura.toInt()} dp sob escala ${escala}x.',
               );
             },

@@ -174,7 +174,6 @@ void main() {
     testWidgets('NoticeBanner exibe a mensagem', (tester) async {
       await tester.pumpWidget(harness(
         child: const NoticeBanner(
-          isLight: false,
           message: 'Aviso de teste',
         ),
       ));
@@ -184,7 +183,6 @@ void main() {
     testWidgets('MetricTile mostra rótulo, valor e dica', (tester) async {
       await tester.pumpWidget(harness(
         child: const MetricTile(
-          isLight: false,
           label: 'Sharpe',
           value: '1,25',
           hint: 'vs CDI',
@@ -199,7 +197,6 @@ void main() {
         (tester) async {
       await tester.pumpWidget(harness(
         child: const HintIcon(
-          isLight: false,
           title: 'Indicadores da Carteira Principal',
           intro: 'Todos se referem à janela simulada.',
           entries: [HintEntry('TWR', 'Neutraliza o cronograma de aportes.')],

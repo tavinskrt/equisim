@@ -1,5 +1,3 @@
-
-
 import '../../utils/app_colors.dart';
 import '../components/fin_amount.dart';
 import '../shared/theme_bridge.dart';
@@ -37,13 +35,19 @@ class _GoalPageState extends ConsumerState<GoalPage> {
     super.initState();
     final goal = ref.read(studyProvider).study.goal;
     _initial = TextEditingController(
-      text: goal == null ? '10000' : goal.initialContribution.reais.toStringAsFixed(0),
+      text: goal == null
+          ? '10000'
+          : goal.initialContribution.reais.toStringAsFixed(0),
     );
     _monthly = TextEditingController(
-      text: goal == null ? '1000' : goal.monthlyContribution.reais.toStringAsFixed(0),
+      text: goal == null
+          ? '1000'
+          : goal.monthlyContribution.reais.toStringAsFixed(0),
     );
     _target = TextEditingController(
-      text: goal == null ? '500000' : goal.targetWealth.reais.toStringAsFixed(0),
+      text: goal == null
+          ? '500000'
+          : goal.targetWealth.reais.toStringAsFixed(0),
     );
     if (goal != null) _months = goal.months;
     WidgetsBinding.instance.addPostFrameCallback((_) => _apply());
@@ -61,12 +65,16 @@ class _GoalPageState extends ConsumerState<GoalPage> {
       double.tryParse(controller.text.replaceAll(RegExp(r'[^\d]'), '')) ?? 0;
 
   void _apply() {
-    ref.read(studyProvider.notifier).setGoal(FinancialGoal(
-          initialContribution: Money.fromReais(_parse(_initial)),
-          monthlyContribution: Money.fromReais(_parse(_monthly)),
-          months: _months,
-          targetWealth: Money.fromReais(_parse(_target)),
-        ));
+    ref
+        .read(studyProvider.notifier)
+        .setGoal(
+          FinancialGoal(
+            initialContribution: Money.fromReais(_parse(_initial)),
+            monthlyContribution: Money.fromReais(_parse(_monthly)),
+            months: _months,
+            targetWealth: Money.fromReais(_parse(_target)),
+          ),
+        );
   }
 
   @override
@@ -80,34 +88,33 @@ class _GoalPageState extends ConsumerState<GoalPage> {
       padding: const EdgeInsets.all(16),
       children: [
         GlassCard(
-          isLight: isLight,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SectionHeader(
-                isLight: isLight,
                 title: 'Plano patrimonial',
-                subtitle: 'A rentabilidade necessária é derivada destes valores',
+                subtitle:
+                    'A rentabilidade necessária é derivada destes valores',
               ),
               const SizedBox(height: 14),
               _MoneyField(
+                isLight: isLight,
                 controller: _initial,
                 label: 'Aporte inicial',
-                isLight: isLight,
                 onChanged: _apply,
               ),
               const SizedBox(height: 10),
               _MoneyField(
+                isLight: isLight,
                 controller: _monthly,
                 label: 'Aporte mensal',
-                isLight: isLight,
                 onChanged: _apply,
               ),
               const SizedBox(height: 10),
               _MoneyField(
+                isLight: isLight,
                 controller: _target,
                 label: 'Valor desejado ao final',
-                isLight: isLight,
                 onChanged: _apply,
               ),
               const SizedBox(height: 16),
@@ -155,8 +162,7 @@ class _GoalPageState extends ConsumerState<GoalPage> {
             ),
           ),
           error: (error, _) => NoticeBanner(
-            isLight: isLight,
-            color: AppColors.danger,
+            trend: FinTrend.negative,
             icon: Icons.error_outline,
             message: 'Não foi possível avaliar a meta: $error',
           ),
@@ -170,12 +176,11 @@ class _GoalPageState extends ConsumerState<GoalPage> {
           error: (_, _) => const SizedBox.shrink(),
           data: (value) => value == null
               ? GlassCard(
-                  isLight: isLight,
                   child: EmptyState(
-                    isLight: isLight,
                     icon: Icons.donut_small_outlined,
                     title: 'Sem carteira para comparar',
-                    message: 'Monte a carteira Principal para confrontar o '
+                    message:
+                        'Monte a carteira Principal para confrontar o '
                         'retorno esperado com a rentabilidade exigida.',
                   ),
                 )
@@ -244,27 +249,27 @@ class _FeasibilityCard extends StatelessWidget {
   /// ambar #F59E0B que nao existia na paleta e que, por isso, ninguem podia
   /// corrigir de um lugar so.
   FinTrend get _trend => switch (verdict.level) {
-        FeasibilityLevel.riskFreeSufficient => FinTrend.pending,
-        FeasibilityLevel.plausible => FinTrend.positive,
-        FeasibilityLevel.demanding => FinTrend.caution,
-        FeasibilityLevel.unrealistic => FinTrend.negative,
-      };
+    FeasibilityLevel.riskFreeSufficient => FinTrend.pending,
+    FeasibilityLevel.plausible => FinTrend.positive,
+    FeasibilityLevel.demanding => FinTrend.caution,
+    FeasibilityLevel.unrealistic => FinTrend.negative,
+  };
 
   Color _color(BuildContext context) => context.fin.forTrend(_trend);
 
   IconData get _icon => switch (verdict.level) {
-        FeasibilityLevel.riskFreeSufficient => Icons.savings_outlined,
-        FeasibilityLevel.plausible => Icons.check_circle_outline,
-        FeasibilityLevel.demanding => Icons.warning_amber_outlined,
-        FeasibilityLevel.unrealistic => Icons.block,
-      };
+    FeasibilityLevel.riskFreeSufficient => Icons.savings_outlined,
+    FeasibilityLevel.plausible => Icons.check_circle_outline,
+    FeasibilityLevel.demanding => Icons.warning_amber_outlined,
+    FeasibilityLevel.unrealistic => Icons.block,
+  };
 
   String get _title => switch (verdict.level) {
-        FeasibilityLevel.riskFreeSufficient => 'Meta sem necessidade de risco',
-        FeasibilityLevel.plausible => 'Meta plausível',
-        FeasibilityLevel.demanding => 'Meta exigente',
-        FeasibilityLevel.unrealistic => 'Meta inviável',
-      };
+    FeasibilityLevel.riskFreeSufficient => 'Meta sem necessidade de risco',
+    FeasibilityLevel.plausible => 'Meta plausível',
+    FeasibilityLevel.demanding => 'Meta exigente',
+    FeasibilityLevel.unrealistic => 'Meta inviável',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -272,7 +277,6 @@ class _FeasibilityCard extends StatelessWidget {
     final showRates = rate.isFinite;
 
     return GlassCard(
-      isLight: isLight,
       borderColor: _color(context).withValues(alpha: 0.5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,7 +301,6 @@ class _FeasibilityCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: MetricTile(
-                    isLight: isLight,
                     label: 'Rentabilidade exigida',
                     value: Fmt.percent(rate, decimals: 2),
                     hint: 'ao ano',
@@ -306,12 +309,8 @@ class _FeasibilityCard extends StatelessWidget {
                 ),
                 Expanded(
                   child: MetricTile(
-                    isLight: isLight,
                     label: 'Equivalente mensal',
-                    value: Fmt.percent(
-                      _monthlyEquivalent(rate),
-                      decimals: 2,
-                    ),
+                    value: Fmt.percent(_monthlyEquivalent(rate), decimals: 2),
                     hint: 'juros compostos',
                   ),
                 ),
@@ -331,10 +330,7 @@ class _FeasibilityCard extends StatelessWidget {
             'Referências dos últimos ${verdict.anchors.observedYears} anos: '
             'CDI ${Fmt.percent(verdict.anchors.riskFreeCagr)} a.a. · '
             'Ibovespa ${Fmt.percent(verdict.anchors.marketCagr)} a.a.',
-            style: TextStyle(
-              fontSize: 10,
-              color: AppColors.textMuted(isLight),
-            ),
+            style: TextStyle(fontSize: 10, color: AppColors.textMuted(isLight)),
           ),
         ],
       ),
@@ -364,12 +360,10 @@ class _AlignmentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final meets = alignment.meetsGoal;
     return GlassCard(
-      isLight: isLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SectionHeader(
-            isLight: isLight,
             title: 'Carteira frente à meta',
             subtitle: 'Convergência assumida em $horizonMonths meses',
           ),
@@ -378,7 +372,6 @@ class _AlignmentCard extends StatelessWidget {
             children: [
               Expanded(
                 child: MetricTile(
-                  isLight: isLight,
                   label: 'Exigido',
                   value: Fmt.percent(alignment.required.annual),
                   hint: 'ao ano',
@@ -386,7 +379,6 @@ class _AlignmentCard extends StatelessWidget {
               ),
               Expanded(
                 child: MetricTile(
-                  isLight: isLight,
                   label: 'Esperado da carteira',
                   value: Fmt.percent(alignment.expectedReturn),
                   hint: 'upside anualizado + DY líquido',
@@ -395,9 +387,9 @@ class _AlignmentCard extends StatelessWidget {
               ),
               Expanded(
                 child: MetricTile(
-                  isLight: isLight,
                   label: 'Folga',
-                  value: '${alignment.gap >= 0 ? '+' : ''}'
+                  value:
+                      '${alignment.gap >= 0 ? '+' : ''}'
                       '${alignment.gap.toStringAsFixed(1)} p.p.',
                   trend: FinAmount.trendOf(alignment.gap),
                 ),
@@ -407,8 +399,8 @@ class _AlignmentCard extends StatelessWidget {
           if (alignment.coverageIsWeak) ...[
             const SizedBox(height: 12),
             NoticeBanner(
-              isLight: isLight,
-              message: 'Apenas '
+              message:
+                  'Apenas '
                   '${Fmt.percent(alignment.valuationCoverage, decimals: 0)} '
                   'do peso da carteira tem avaliação disponível. O retorno '
                   'esperado é pouco representativo.',

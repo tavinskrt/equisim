@@ -22,7 +22,6 @@ class ValuationPage extends ConsumerWidget {
 
     return Scaffold(
       body: ScreenBackground(
-        isLight: isLight,
         child: SafeArea(
           child: Column(
             children: [
@@ -32,14 +31,12 @@ class ValuationPage extends ConsumerWidget {
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
                   error: (error, _) => EmptyState(
-                    isLight: isLight,
                     icon: Icons.error_outline,
                     title: 'Falha na avaliação',
                     message: '$error',
                   ),
                   data: (result) => result == null
                       ? EmptyState(
-                          isLight: isLight,
                           icon: Icons.help_outline,
                           title: 'Não foi possível avaliar',
                           message:
@@ -69,8 +66,11 @@ class _Header extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back,
-                size: 20, color: AppColors.textPrimary(isLight)),
+            icon: Icon(
+              Icons.arrow_back,
+              size: 20,
+              color: AppColors.textPrimary(isLight),
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           Text(
@@ -104,22 +104,16 @@ class _ValuationBody extends ConsumerWidget {
         const SizedBox(height: 12),
         _ModelCard(result: result, isLight: isLight),
         const SizedBox(height: 12),
-        _ScenarioCard(
-          result: result,
-          settings: settings,
-          isLight: isLight,
-        ),
+        _ScenarioCard(result: result, settings: settings, isLight: isLight),
         const SizedBox(height: 12),
         _SensitivityCard(result: result, isLight: isLight),
         if (result.warnings.isNotEmpty) ...[
           const SizedBox(height: 12),
           GlassCard(
-            isLight: isLight,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SectionHeader(
-                  isLight: isLight,
                   title: 'Ressalvas',
                   subtitle: 'A qualidade da estimativa faz parte do resultado',
                 ),
@@ -127,10 +121,7 @@ class _ValuationBody extends ConsumerWidget {
                 for (final warning in result.warnings)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: NoticeBanner(
-                      isLight: isLight,
-                      message: warning,
-                    ),
+                    child: NoticeBanner(message: warning),
                   ),
               ],
             ),
@@ -149,7 +140,6 @@ class _PriceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      isLight: isLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -157,14 +147,12 @@ class _PriceCard extends StatelessWidget {
             children: [
               Expanded(
                 child: MetricTile(
-                  isLight: isLight,
                   label: 'Preço de mercado',
                   value: Fmt.money(result.marketPrice.reais),
                 ),
               ),
               Expanded(
                 child: MetricTile(
-                  isLight: isLight,
                   label: 'Preço justo',
                   value: Fmt.money(result.fairValue.reais),
                   hint: 'cenário base',
@@ -172,7 +160,6 @@ class _PriceCard extends StatelessWidget {
               ),
               Expanded(
                 child: MetricTile(
-                  isLight: isLight,
                   label: 'Upside',
                   value: Fmt.percent(result.upside, decimals: 1, signed: true),
                   hint: 'total, sem prazo',
@@ -208,12 +195,10 @@ class _ModelCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      isLight: isLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
-            isLight: isLight,
             title: 'Modelo aplicado',
             subtitle: 'Escolhido pelo que os dados sustentam',
           ),
@@ -221,15 +206,10 @@ class _ModelCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: MetricTile(
-                  isLight: isLight,
-                  label: 'Método',
-                  value: result.model.label,
-                ),
+                child: MetricTile(label: 'Método', value: result.model.label),
               ),
               Expanded(
                 child: MetricTile(
-                  isLight: isLight,
                   label: 'Taxa de desconto',
                   value: Fmt.percent(result.discountRate),
                   hint: result.model == ValuationModel.dcfFcff
@@ -263,12 +243,10 @@ class _ScenarioCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GlassCard(
-      isLight: isLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
-            isLight: isLight,
             title: 'Cenários',
             subtitle: settings.monteCarlo
                 ? '${settings.samples} sorteios de premissas'
@@ -296,14 +274,14 @@ class _ScenarioCard extends ConsumerWidget {
           const SizedBox(height: 12),
           if (result.distribution != null)
             _DistributionView(
+              isLight: isLight,
               distribution: result.distribution!,
               marketPrice: result.marketPrice.reais,
-              isLight: isLight,
             )
           else if (result.discreteScenarios != null)
             _DiscreteView(
-              scenarios: result.discreteScenarios!,
               isLight: isLight,
+              scenarios: result.discreteScenarios!,
             )
           else
             Text(
@@ -333,7 +311,6 @@ class _DiscreteView extends StatelessWidget {
           if (scenarios[band] != null)
             Expanded(
               child: MetricTile(
-                isLight: isLight,
                 label: band.label,
                 value: Fmt.money(scenarios[band]!.reais),
                 trend: switch (band) {
@@ -370,7 +347,6 @@ class _DistributionView extends StatelessWidget {
           children: [
             Expanded(
               child: MetricTile(
-                isLight: isLight,
                 label: 'P5',
                 value: Fmt.money(distribution.p5),
                 hint: 'pessimista',
@@ -379,14 +355,12 @@ class _DistributionView extends StatelessWidget {
             ),
             Expanded(
               child: MetricTile(
-                isLight: isLight,
                 label: 'Mediana',
                 value: Fmt.money(distribution.median),
               ),
             ),
             Expanded(
               child: MetricTile(
-                isLight: isLight,
                 label: 'P95',
                 value: Fmt.money(distribution.p95),
                 hint: 'otimista',
@@ -397,10 +371,10 @@ class _DistributionView extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         NoticeBanner(
-          isLight: isLight,
           icon: Icons.casino_outlined,
-          color: probability > 0.5 ? AppColors.primary : AppColors.danger,
-          message: 'Em ${Fmt.percent(probability, decimals: 0)} dos cenários '
+          trend: probability > 0.5 ? FinTrend.positive : FinTrend.negative,
+          message:
+              'Em ${Fmt.percent(probability, decimals: 0)} dos cenários '
               'o preço justo supera o preço de mercado atual '
               '(${Fmt.money(marketPrice)}).',
         ),
@@ -442,29 +416,24 @@ class _SensitivityCard extends StatelessWidget {
     if (bars.isEmpty) return const SizedBox.shrink();
 
     return GlassCard(
-      isLight: isLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
-            isLight: isLight,
             title: 'Sensibilidade',
             subtitle: 'Quanto o preço justo se move com as premissas',
           ),
           const SizedBox(height: 12),
           TornadoChart(
+            isLight: isLight,
             bars: bars,
             baseValue: result.fairValue.reais,
-            isLight: isLight,
           ),
           const SizedBox(height: 8),
           Text(
             'A linha central é o cenário base '
             '(${Fmt.money(result.fairValue.reais)}).',
-            style: TextStyle(
-              fontSize: 10,
-              color: AppColors.textMuted(isLight),
-            ),
+            style: TextStyle(fontSize: 10, color: AppColors.textMuted(isLight)),
           ),
         ],
       ),

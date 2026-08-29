@@ -44,9 +44,7 @@ class BacktestPage extends ConsumerWidget {
             child: Center(child: CircularProgressIndicator()),
           ),
           error: (error, _) => GlassCard(
-            isLight: isLight,
             child: EmptyState(
-              isLight: isLight,
               icon: Icons.error_outline,
               title: 'Falha na simulação',
               message: '$error',
@@ -55,12 +53,11 @@ class BacktestPage extends ConsumerWidget {
           data: (result) {
             if (result == null) {
               return GlassCard(
-                isLight: isLight,
                 child: EmptyState(
-                  isLight: isLight,
                   icon: Icons.timeline,
                   title: 'Nada a simular ainda',
-                  message: 'Monte a carteira Principal e defina o plano de '
+                  message:
+                      'Monte a carteira Principal e defina o plano de '
                       'aportes na aba Meta.',
                 ),
               );
@@ -93,12 +90,10 @@ class _SettingsCard extends ConsumerWidget {
     final notifier = ref.read(backtestSettingsProvider.notifier);
 
     return GlassCard(
-      isLight: isLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
-            isLight: isLight,
             title: 'Parâmetros da simulação',
             subtitle: 'Sem rebalanceamento: os pesos derivam com o mercado',
           ),
@@ -198,14 +193,13 @@ class _ComparisonBody extends ConsumerWidget {
 
     if (principal == null && reserva == null) {
       return GlassCard(
-        isLight: isLight,
         child: EmptyState(
-          isLight: isLight,
           icon: Icons.cloud_off,
           title: 'Sem dados de mercado',
           // Dizer o motivo poupa a caçada: quase sempre é um ativo sem
           // cotação no período, e o nome dele está na mensagem da falha.
-          message: result.principalFailure ??
+          message:
+              result.principalFailure ??
               result.reservaFailure ??
               'Não foi possível carregar as cotações do período.',
         ),
@@ -216,28 +210,26 @@ class _ComparisonBody extends ConsumerWidget {
     // As duas carteiras compartilham a janela, então qualquer uma serve de
     // eixo; cada curva ainda leva as próprias datas, para que nenhuma seja
     // desenhada fora de lugar caso um pregão falte a uma delas.
-    final axis = <DateTime>{
-      ...?principal?.dates,
-      ...?reserva?.dates,
-    }.toList()
+    final axis = <DateTime>{...?principal?.dates, ...?reserva?.dates}.toList()
       ..sort();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         GlassCard(
-          isLight: isLight,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SectionHeader(
-                isLight: isLight,
                 title: 'Evolução comparada',
                 subtitle: 'Base 100 · ${reference.effectivePeriod}',
                 trailing: IconButton(
                   tooltip: 'Exportar CSV',
-                  icon: Icon(Icons.download_outlined,
-                      size: 19, color: AppColors.primary),
+                  icon: Icon(
+                    Icons.download_outlined,
+                    size: 19,
+                    color: AppColors.primary,
+                  ),
                   onPressed: () => exportComparisonCsv(
                     context: context,
                     studyName: studyName,
@@ -269,17 +261,16 @@ class _ComparisonBody extends ConsumerWidget {
               if (result.twrGap != null) ...[
                 const SizedBox(height: 12),
                 NoticeBanner(
-                  isLight: isLight,
                   icon: Icons.compare_arrows,
-                  color: result.twrGap! >= 0
-                      ? AppColors.primary
-                      : AppColors.danger,
+                  trend: result.twrGap! >= 0
+                      ? FinTrend.positive
+                      : FinTrend.negative,
                   message: result.twrGap! >= 0
                       ? 'A Principal rendeu ${result.twrGap!.toStringAsFixed(1)} '
-                          'pontos percentuais a mais que a Reserva no período.'
+                            'pontos percentuais a mais que a Reserva no período.'
                       : 'A Reserva teria rendido '
-                          '${result.twrGap!.abs().toStringAsFixed(1)} pontos '
-                          'percentuais a mais que a Principal no período.',
+                            '${result.twrGap!.abs().toStringAsFixed(1)} pontos '
+                            'percentuais a mais que a Principal no período.',
                 ),
               ],
             ],
@@ -288,7 +279,6 @@ class _ComparisonBody extends ConsumerWidget {
         if (result.windowWasShortened) ...[
           const SizedBox(height: 12),
           NoticeBanner(
-            isLight: isLight,
             icon: Icons.event_busy_outlined,
             message: _shortenedWindowMessage(result),
           ),
@@ -296,8 +286,7 @@ class _ComparisonBody extends ConsumerWidget {
         if (principal == null && result.principalFailure != null) ...[
           const SizedBox(height: 12),
           NoticeBanner(
-            isLight: isLight,
-            color: AppColors.danger,
+            trend: FinTrend.negative,
             icon: Icons.error_outline,
             message: 'Principal não simulada — ${result.principalFailure}',
           ),
@@ -305,8 +294,7 @@ class _ComparisonBody extends ConsumerWidget {
         if (reserva == null && result.reservaFailure != null) ...[
           const SizedBox(height: 12),
           NoticeBanner(
-            isLight: isLight,
-            color: AppColors.danger,
+            trend: FinTrend.negative,
             icon: Icons.error_outline,
             message: 'Reserva não simulada — ${result.reservaFailure}',
           ),
@@ -316,7 +304,7 @@ class _ComparisonBody extends ConsumerWidget {
           for (final warning in reference.warnings)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: NoticeBanner(isLight: isLight, message: warning),
+              child: NoticeBanner(message: warning),
             ),
         ],
         if (principal != null) ...[
@@ -348,11 +336,7 @@ class _ComparisonBody extends ConsumerWidget {
           ),
         ],
         const SizedBox(height: 12),
-        _PerAssetCard(
-          principal: principal,
-          reserva: reserva,
-          isLight: isLight,
-        ),
+        _PerAssetCard(principal: principal, reserva: reserva, isLight: isLight),
         if (result.riskReturn.isNotEmpty) ...[
           const SizedBox(height: 12),
           _RiskReturnCard(result: result, isLight: isLight),
@@ -363,21 +347,19 @@ class _ComparisonBody extends ConsumerWidget {
               : Padding(
                   padding: const EdgeInsets.only(top: 12),
                   child: GlassCard(
-                    isLight: isLight,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         SectionHeader(
-                          isLight: isLight,
                           title: 'Correlação entre os ativos',
                           subtitle:
                               'Verde indica menor co-movimento — diversificação',
                         ),
                         const SizedBox(height: 12),
                         CorrelationHeatmap(
+                          isLight: isLight,
                           tickers: data.tickers,
                           matrix: data.matrix,
-                          isLight: isLight,
                         ),
                       ],
                     ),
@@ -510,7 +492,6 @@ class _MetricsCard extends StatelessWidget {
     final m = outcome.metrics;
 
     return GlassCard(
-      isLight: isLight,
       child: BalanceSummaryCard(
         label: title,
         balance: Fmt.money(outcome.finalValue.reais),
@@ -520,9 +501,9 @@ class _MetricsCard extends StatelessWidget {
         changeLabel: Fmt.percent(m.timeWeightedReturn, signed: true),
         changeTrend: FinAmount.trendOf(m.timeWeightedReturn),
         trailing: HintIcon(
-          isLight: isLight,
           title: 'Indicadores da $title',
-          intro: 'Todos se referem à janela simulada. As duas carteiras '
+          intro:
+              'Todos se referem à janela simulada. As duas carteiras '
               'recebem aportes idênticos nas mesmas datas — só a '
               'composição difere.',
           entries: _metricsGlossary,
@@ -593,12 +574,10 @@ class _DividendsCard extends StatelessWidget {
     final net = gross - tax;
 
     return GlassCard(
-      isLight: isLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
-            isLight: isLight,
             title: 'Proventos no período — $portfolioLabel',
             subtitle: 'JCP sofre 15% de IRRF; dividendo é isento',
           ),
@@ -606,15 +585,10 @@ class _DividendsCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: MetricTile(
-                  isLight: isLight,
-                  label: 'Bruto',
-                  value: Fmt.money(gross),
-                ),
+                child: MetricTile(label: 'Bruto', value: Fmt.money(gross)),
               ),
               Expanded(
                 child: MetricTile(
-                  isLight: isLight,
                   label: 'IR retido',
                   value: Fmt.money(tax),
                   trend: tax > 0 ? FinTrend.negative : FinTrend.neutral,
@@ -625,7 +599,6 @@ class _DividendsCard extends StatelessWidget {
               ),
               Expanded(
                 child: MetricTile(
-                  isLight: isLight,
                   label: 'Líquido reinvestido',
                   value: Fmt.money(net),
                   trend: FinTrend.positive,
@@ -679,20 +652,18 @@ class _PerAssetCard extends StatelessWidget {
     final hasBoth = principalAssets.isNotEmpty && reservaAssets.isNotEmpty;
 
     return GlassCard(
-      isLight: isLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
-            isLight: isLight,
             title: 'Desempenho por ativo',
             subtitle: hasBoth
                 ? 'Do melhor ao pior retorno em cada carteira'
                 : 'A deriva de peso é sinal de decisão, não defeito',
             trailing: HintIcon(
-              isLight: isLight,
               title: 'Desempenho por ativo',
-              intro: 'Cada linha é um ativo dentro da sua carteira, do melhor '
+              intro:
+                  'Cada linha é um ativo dentro da sua carteira, do melhor '
                   'ao pior retorno no período. A Reserva guarda candidatos a '
                   'entrar na Principal: com as duas listas ordenadas, o pior '
                   'ativo detido fica no fim da primeira e o melhor candidato '
@@ -703,10 +674,10 @@ class _PerAssetCard extends StatelessWidget {
           const SizedBox(height: 10),
           if (principalAssets.isNotEmpty)
             _AssetGroup(
+              isLight: isLight,
               label: 'Principal',
               color: AppColors.primary,
               assets: principalAssets,
-              isLight: isLight,
             ),
           if (hasBoth)
             Padding(
@@ -715,10 +686,10 @@ class _PerAssetCard extends StatelessWidget {
             ),
           if (reservaAssets.isNotEmpty)
             _AssetGroup(
+              isLight: isLight,
               label: 'Reserva',
               color: _reservaColor,
               assets: reservaAssets,
-              isLight: isLight,
             ),
         ],
       ),
@@ -944,8 +915,7 @@ class _RiskReturnCard extends StatelessWidget {
           color: switch (p.kind) {
             RiskReturnKind.principal => AppColors.primary,
             RiskReturnKind.reserva => _reservaColor,
-            RiskReturnKind.principalAsset =>
-              AppColors.textSecondary(isLight),
+            RiskReturnKind.principalAsset => AppColors.textSecondary(isLight),
             RiskReturnKind.reservaAsset => _reservaAssetColor,
           },
           highlight: p.isPortfolio,
@@ -953,25 +923,24 @@ class _RiskReturnCard extends StatelessWidget {
     ];
 
     return GlassCard(
-      isLight: isLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
-            isLight: isLight,
             title: 'Risco × retorno',
-            subtitle: 'Cada ativo das duas carteiras e as próprias '
+            subtitle:
+                'Cada ativo das duas carteiras e as próprias '
                 'carteiras, anualizados em ${result.window}',
           ),
           const SizedBox(height: 12),
           RiskReturnScatter(
-            points: points,
             isLight: isLight,
+            points: points,
             assetLegend: [
               if (_has(RiskReturnKind.principalAsset))
                 (
                   label: 'Ativos da Principal',
-                  color: AppColors.textSecondary(isLight)
+                  color: AppColors.textSecondary(isLight),
                 ),
               if (_has(RiskReturnKind.reservaAsset))
                 (label: 'Ativos da Reserva', color: _reservaAssetColor),

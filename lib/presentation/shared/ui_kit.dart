@@ -3,20 +3,21 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../utils/app_colors.dart';
 import '../components/fin_amount.dart';
 import '../theme/fin_colors.dart';
+import '../theme/fin_space.dart';
 import '../theme/fin_theme.dart';
 
 /// Formatadores compartilhados.
 abstract final class Fmt {
   /// Moeda em pt-BR por extenso: `R$ 1.234,56`.
-  static final currency =
-      NumberFormat.currency(locale: 'pt_BR', symbol: r'R$');
+  static final currency = NumberFormat.currency(locale: 'pt_BR', symbol: r'R$');
 
   /// Moeda abreviada: `R$ 1,2 mi`. Para eixo de gráfico e espaço estreito.
-  static final compactCurrency =
-      NumberFormat.compactCurrency(locale: 'pt_BR', symbol: r'R$');
+  static final compactCurrency = NumberFormat.compactCurrency(
+    locale: 'pt_BR',
+    symbol: r'R$',
+  );
 
   /// Data por extenso: `31/12/2026`.
   static final date = DateFormat('dd/MM/yyyy');
@@ -42,12 +43,12 @@ abstract final class Fmt {
   static final Map<int, NumberFormat> _decimals = {};
 
   static NumberFormat _decimalFormat(int digits) => _decimals.putIfAbsent(
-        digits,
-        () => NumberFormat.decimalPatternDigits(
-          locale: 'pt_BR',
-          decimalDigits: digits,
-        ),
-      );
+    digits,
+    () => NumberFormat.decimalPatternDigits(
+      locale: 'pt_BR',
+      decimalDigits: digits,
+    ),
+  );
 
   /// Percentual a partir de fração, com sinal explícito quando pedido.
   ///
@@ -59,7 +60,11 @@ abstract final class Fmt {
   /// Valor não finito vira `—`: `NumberFormat` não lança nesse caso, ele
   /// devolve `NaN` ou `∞`, e exibir isso ao investidor é pior que admitir a
   /// ausência do dado.
-  static String percent(double fraction, {int decimals = 2, bool signed = false}) {
+  static String percent(
+    double fraction, {
+    int decimals = 2,
+    bool signed = false,
+  }) {
     final value = fraction * 100;
     if (!value.isFinite) return '—';
     final sign = signed && value > 0 ? '+' : '';
@@ -73,8 +78,9 @@ abstract final class Fmt {
 
 /// Cartão translúcido — a linguagem visual herdada do projeto anterior.
 ///
-/// O efeito de vidro depende de o fundo atrás ser o gradiente de
-/// [ScreenBackground]: sobre cor chapada o desfoque não tem o que borrar.
+/// O efeito de vidro depende de haver variação atrás: sobre cor perfeitamente
+/// chapada o desfoque não tem o que borrar. É [ScreenBackground] que fornece
+/// essa variação.
 class GlassCard extends StatelessWidget {
   /// Conteúdo do cartão.
   final Widget child;
@@ -82,39 +88,45 @@ class GlassCard extends StatelessWidget {
   /// Espaçamento interno.
   final EdgeInsetsGeometry padding;
 
-  /// Tema corrente. Recebido por parâmetro, não lido do contexto, para manter
-  /// o kit testável fora de uma árvore de tema completa.
-  final bool isLight;
-
-  /// Contorno alternativo, para destacar estado. Sem ele, usa
-  /// `AppColors.surfaceBorder`.
+  /// Contorno alternativo, para destacar estado. Sem ele, usa a borda padrão
+  /// da paleta.
   final Color? borderColor;
 
   /// Declara o cartão.
   const GlassCard({
     super.key,
     required this.child,
-    required this.isLight,
-    this.padding = const EdgeInsets.all(16),
+    this.padding = FinSpace.cardPadding,
     this.borderColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: AppColors.surface(isLight),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: borderColor ?? AppColors.surfaceBorder(isLight),
+    final c = context.fin;
+
+    // `RepaintBoundary` aqui, e nao no ponto de uso, porque a garantia precisa
+    // ser LOCAL ao componente.
+    //
+    // `ListView` ja envolve os filhos DIRETOS em fronteira de repintura
+    // (`addRepaintBoundaries` e `true` por padrao), mas um cartao aninhado --
+    // como os de dentro de `_ComparisonBody`, na tela de backtest -- fica sob
+    // a fronteira do irmao mais externo e repinta junto com ele. Sem isto,
+    // rolar a tela reprocessa o desfoque de seis ou sete cartoes por quadro,
+    // e o alvo web deste projeto e onde mais custa.
+    return RepaintBoundary(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            padding: padding,
+            decoration: BoxDecoration(
+              color: c.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor ?? c.border),
             ),
+            child: child,
           ),
-          child: child,
         ),
       ),
     );
@@ -133,20 +145,19 @@ class SectionHeader extends StatelessWidget {
   /// Widget alinhado à direita — tipicamente um botão ou um [HintIcon].
   final Widget? trailing;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Declara o cabeçalho.
   const SectionHeader({
     super.key,
     required this.title,
-    required this.isLight,
     this.subtitle,
     this.trailing,
   });
 
   @override
   Widget build(BuildContext context) {
+    final c = context.fin;
+    final t = context.finType;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -156,21 +167,13 @@ class SectionHeader extends StatelessWidget {
             children: [
               Text(
                 title.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.6,
-                  color: AppColors.textSecondary(isLight),
-                ),
+                style: t.label.copyWith(color: c.textSecondary),
               ),
               if (subtitle != null) ...[
-                const SizedBox(height: 3),
+                const Gap.xs(),
                 Text(
                   subtitle!,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textMuted(isLight),
-                  ),
+                  style: t.caption.copyWith(color: c.textTertiary),
                 ),
               ],
             ],
@@ -201,50 +204,37 @@ class MetricTile extends StatelessWidget {
   /// reprovado em contraste, chegava a todo número positivo da interface.
   final FinTrend trend;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Declara o bloco de métrica.
   const MetricTile({
     super.key,
     required this.label,
     required this.value,
-    required this.isLight,
     this.hint,
     this.trend = FinTrend.neutral,
   });
 
   @override
   Widget build(BuildContext context) {
+    final c = context.fin;
+    final t = context.finType;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10.5,
-            color: AppColors.textSecondary(isLight),
-          ),
-        ),
-        const SizedBox(height: 2),
+        Text(label, style: t.caption.copyWith(color: c.textSecondary)),
+        const Gap.xs(),
         // O valor passa por `FinAmount`: é o que garante cifra tabular, de modo
         // que a vírgula decimal não dança de uma métrica para a outra.
         FinAmount(
           text: value,
-          style: context.finType.numMd,
+          style: t.numMd,
           trend: trend,
           align: TextAlign.left,
         ),
         if (hint != null) ...[
-          const SizedBox(height: 1),
-          Text(
-            hint!,
-            style: TextStyle(
-              fontSize: 9.5,
-              color: AppColors.textMuted(isLight),
-            ),
-          ),
+          const Gap.xs(),
+          Text(hint!, style: t.caption.copyWith(color: c.textTertiary)),
         ],
       ],
     );
@@ -263,44 +253,45 @@ class NoticeBanner extends StatelessWidget {
   /// Ícone à esquerda.
   final IconData icon;
 
-  /// Cor do ícone e do contorno. Segue a semântica de [AppColors]:
-  /// `danger` para falha, `warning` para número que pede ressalva.
-  final Color color;
-
-  /// Tema corrente.
-  final bool isLight;
+  /// Direção do aviso, que escolhe a cor e o fundo tonal.
+  ///
+  /// Substituiu o antigo `color: Color`, cujo valor-padrão era um âmbar
+  /// (`#F59E0B`) que a paleta não conhecia — nem `warning` nem `warningDark`.
+  /// Era um literal que ninguém podia corrigir de um lugar só.
+  final FinTrend trend;
 
   /// Declara a faixa de aviso.
   const NoticeBanner({
     super.key,
     required this.message,
-    required this.isLight,
     this.icon = Icons.info_outline,
-    this.color = const Color(0xFFF59E0B),
+    this.trend = FinTrend.caution,
   });
 
   @override
   Widget build(BuildContext context) {
+    final c = context.fin;
+    final accent = c.forTrend(trend);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: FinSpace.md,
+        vertical: FinSpace.sm,
+      ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: c.surfaceForTrend(trend),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
+        border: Border.all(color: accent.withValues(alpha: 0.35)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 15, color: color),
-          const SizedBox(width: 8),
+          Icon(icon, size: 15, color: accent),
+          const Gap.sm(axis: Axis.horizontal),
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                fontSize: 11.5,
-                height: 1.35,
-                color: AppColors.textPrimary(isLight),
-              ),
+              style: context.finType.bodySm.copyWith(color: c.textPrimary),
             ),
           ),
         ],
@@ -323,49 +314,40 @@ class EmptyState extends StatelessWidget {
   /// Ação sugerida — o botão que resolve o vazio.
   final Widget? action;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Declara o estado vazio.
   const EmptyState({
     super.key,
     required this.icon,
     required this.title,
     required this.message,
-    required this.isLight,
     this.action,
   });
 
   @override
   Widget build(BuildContext context) {
+    final c = context.fin;
+    final t = context.finType;
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(28),
+        padding: const EdgeInsets.all(FinSpace.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 30, color: AppColors.textMuted(isLight)),
-            const SizedBox(height: 12),
+            Icon(icon, size: 30, color: c.textTertiary),
+            const Gap.md(),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary(isLight),
-              ),
+              style: t.titleSm.copyWith(color: c.textPrimary),
             ),
-            const SizedBox(height: 6),
+            const Gap.sm(),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                height: 1.4,
-                color: AppColors.textSecondary(isLight),
-              ),
+              style: t.bodyMd.copyWith(color: c.textSecondary),
             ),
-            if (action != null) ...[const SizedBox(height: 16), action!],
+            if (action != null) ...[const Gap.lg(), action!],
           ],
         ),
       ),
@@ -374,50 +356,55 @@ class EmptyState extends StatelessWidget {
 }
 
 /// Fundo padrão das telas, com os círculos decorativos da identidade visual.
+///
+/// O degradê agora percorre `canvas -> surfaceSunken -> canvas`, e não mais o
+/// azul-marinho ao verde-petróleo da paleta anterior. É uma atenuação
+/// deliberada: os dois tons já passam pelo teste de contraste, o que o par
+/// antigo não garantia, e o resultado é a variação mínima de que o
+/// [GlassCard] precisa para ter o que desfocar — sem o degradê competir com os
+/// números.
 class ScreenBackground extends StatelessWidget {
   /// Conteúdo da tela.
   final Widget child;
 
-  /// Tema corrente.
-  final bool isLight;
-
-  /// Declara o fundo. Envolva a tela inteira com ele: é o que dá a
-  /// [GlassCard] algo para desfocar.
-  const ScreenBackground({
-    super.key,
-    required this.child,
-    required this.isLight,
-  });
+  /// Declara o fundo. Envolva a tela inteira com ele.
+  const ScreenBackground({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: BoxDecoration(gradient: AppColors.backgroundGradient(isLight)),
+    final c = context.fin;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [c.canvas, c.surfaceSunken, c.canvas],
+          stops: const [0.0, 0.55, 1.0],
+        ),
+      ),
       child: Stack(
         children: [
-          Positioned(
-            top: -100,
-            right: -60,
-            child: Container(
-              width: 260,
-              height: 260,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primary.withValues(alpha: 0.07),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -40,
-            left: -80,
-            child: Container(
-              width: 220,
-              height: 220,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primary.withValues(alpha: 0.05),
+          // Os dois círculos não mudam com a rolagem nem com o conteúdo. Sem a
+          // fronteira, eles repintam a cada quadro junto com a lista.
+          RepaintBoundary(
+            child: SizedBox.expand(
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: -100,
+                    right: -60,
+                    child: _Halo(color: c.brand.withValues(alpha: 0.07)),
+                  ),
+                  Positioned(
+                    bottom: -40,
+                    left: -80,
+                    child: _Halo(
+                      size: 220,
+                      color: c.brand.withValues(alpha: 0.05),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -426,6 +413,21 @@ class ScreenBackground extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Círculo decorativo do fundo.
+class _Halo extends StatelessWidget {
+  final double size;
+  final Color color;
+
+  const _Halo({this.size = 260, required this.color});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+  );
 }
 
 /// Verbete de glossário: o rótulo tal como aparece no cartão e o que ele diz.
@@ -456,15 +458,11 @@ class HintIcon extends StatelessWidget {
   /// Verbetes exibidos, na ordem em que aparecem.
   final List<HintEntry> entries;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Declara o ícone de ajuda.
   const HintIcon({
     super.key,
     required this.title,
     required this.entries,
-    required this.isLight,
     this.intro,
   });
 
@@ -472,37 +470,33 @@ class HintIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       tooltip: 'O que significa cada indicador',
-      visualDensity: VisualDensity.compact,
+      // 48 dp explícitos: `VisualDensity.compact` encolheria o alvo para 40.
+      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
       icon: Icon(
         Icons.help_outline,
         size: 17,
-        color: AppColors.textSecondary(isLight),
+        color: context.fin.textSecondary,
       ),
       onPressed: () => _openGlossary(context),
     );
   }
 
   void _openGlossary(BuildContext context) {
+    final c = context.fin;
+    final t = context.finType;
+
     showDialog<void>(
       context: context,
       builder: (dialogContext) => BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
         child: AlertDialog(
-          backgroundColor: isLight ? Colors.white : const Color(0xFF0D1E3A),
+          backgroundColor: c.surfaceRaised,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: AppColors.surfaceBorder(isLight)),
+            side: BorderSide(color: c.border),
           ),
-          title: Text(
-            title,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary(isLight),
-            ),
-          ),
+          title: Text(title, style: t.titleSm.copyWith(color: c.textPrimary)),
           content: SizedBox(
             width: 420,
             child: SingleChildScrollView(
@@ -513,36 +507,29 @@ class HintIcon extends StatelessWidget {
                   if (intro != null) ...[
                     Text(
                       intro!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        height: 1.45,
-                        color: AppColors.textSecondary(isLight),
-                      ),
+                      style: t.bodySm.copyWith(color: c.textSecondary),
                     ),
-                    const SizedBox(height: 14),
+                    const Gap.md(),
                   ],
                   for (final entry in entries)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.only(bottom: FinSpace.md),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             entry.term,
-                            style: const TextStyle(
-                              fontSize: 12.5,
+                            // `positive` e não `brand`: este é texto, e a cor
+                            // de marca não tem contraste garantido para texto.
+                            style: t.bodySm.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
+                              color: c.positive,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          const Gap.xs(),
                           Text(
                             entry.description,
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              height: 1.45,
-                              color: AppColors.textSecondary(isLight),
-                            ),
+                            style: t.caption.copyWith(color: c.textSecondary),
                           ),
                         ],
                       ),
@@ -554,9 +541,9 @@ class HintIcon extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text(
+              child: Text(
                 'Entendi',
-                style: TextStyle(color: AppColors.primary),
+                style: t.bodyMd.copyWith(color: c.positive),
               ),
             ),
           ],
@@ -565,4 +552,3 @@ class HintIcon extends StatelessWidget {
     );
   }
 }
-
