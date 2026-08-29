@@ -23,6 +23,51 @@ import { existsSync } from 'node:fs';
 const SKIP_FILE = '.qa-skip';
 
 /**
+ * Arquivo que declara os tokens de cor. Sua existencia LIGA as regras de
+ * sistema de design (L6-L11).
+ *
+ * POR QUE UM GATILHO E NAO UM INTERRUPTOR MANUAL: hoje a base tem 62 literais
+ * `Color(0x...)` e 209 espacadores magicos. Ligar essas regras antes de o
+ * sistema existir bloquearia todo commit de interface -- inclusive os da
+ * propria refatoracao, que precisa declarar cor literal em algum lugar. Seria
+ * repetir o defeito que a lista ENV_TEMPLATES abaixo documenta: um gate que
+ * impede trabalho legitimo e um gate que sera arrancado.
+ *
+ * Com o gatilho, as regras nascem dormentes e acordam sozinhas no commit que
+ * cria o sistema (tarefa UI-01 do plano de refatoracao). A partir dai, todo
+ * literal NOVO em codigo de tela e regressao -- porque passou a existir para
+ * onde apontar.
+ *
+ * LIMITACAO CONHECIDA: durante a migracao (tarefas UI-09/UI-10), mover uma
+ * linha legada de lugar faz o git registra-la como adicionada, e a regra
+ * dispara. Isso e desconforto, nao defeito: a ordem de trabalho pretendida e
+ * migrar o arquivo inteiro e so entao commitar, e nesse caso as linhas
+ * adicionadas ja usam token.
+ */
+const TOKEN_SYSTEM_ANCHOR = 'lib/presentation/theme/fin_colors.dart';
+
+/** Diretorio do sistema de tokens: e a casa dos literais, nao pode ser reu. */
+const THEME_DIR = 'lib/presentation/theme/';
+
+const TOKENS_ACTIVE = existsSync(TOKEN_SYSTEM_ANCHOR);
+
+/**
+ * Codigo de tela: Dart sob `lib/`, fora do diretorio de tokens e fora do que o
+ * `build_runner` gera.
+ *
+ * `packages/equisim_core` fica de fora por construcao -- e Dart puro, sem
+ * Flutter, entao nao ha cor nem widget la para julgar.
+ */
+function isScreenDart(file) {
+  return (
+    file.startsWith('lib/') &&
+    file.endsWith('.dart') &&
+    !file.endsWith('.g.dart') &&
+    !file.startsWith(THEME_DIR)
+  );
+}
+
+/**
  * Regras deterministicas de linha.
  *
  * Criterio de admissao: falso positivo proximo de zero. Uma regra que exige
@@ -79,6 +124,118 @@ const RULES = [
       'toStringAsFixed formata a representacao binaria, nao arredonda em half-up\n' +
       '  decimal: (2.675).toStringAsFixed(2) devolve "2.67". Converter de volta\n' +
       '  para double propaga o erro como se fosse valor arredondado.',
+  },
+
+  // --- Sistema de design ---------------------------------------------------
+  //
+  // Da L6 em diante as regras tem `requiresTokens: true` e so valem depois que
+  // `lib/presentation/theme/fin_colors.dart` existe. Ver TOKEN_SYSTEM_ANCHOR.
+  //
+  // Todas operam na forma de UMA LINHA. A forma multilinha (`EdgeInsets.only(`
+  // com os argumentos abaixo) escapa de proposito: um scanner de linha nao a
+  // reconhece sem virar parser, e chutar aqui produziria o falso positivo que
+  // este arquivo nao admite. Esse resto fica com a regra R17 do Gemini, que le
+  // a arvore inteira no pre-push.
+
+  {
+    id: 'L5',
+    category: 'DESIGN_TOKEN',
+    title: 'fontSize com valor fracionario',
+    // Sem gatilho: meio pixel nao e degrau de escala em regime nenhum. Os oito
+    // tamanhos fracionarios da base (9.5, 10.5, 11.5, 12.5, 13.5...) nasceram
+    // de empurrar o numero ate caber, e nao de uma decisao tipografica.
+    appliesTo: (file) => file.endsWith('.dart'),
+    test: (line) => /\bfontSize\s*:\s*\d+\.\d+/.test(stripStringsAndComments(line)),
+    explain:
+      'Meio pixel nao e um degrau perceptivel de hierarquia: 12 e 12.5 leem\n' +
+      '  igual, e o par so existe porque alguem ajustou ate caber. Use um passo\n' +
+      '  inteiro da escala tipografica.',
+  },
+  {
+    id: 'L6',
+    category: 'DESIGN_TOKEN',
+    title: 'Cor literal fora do arquivo de tokens',
+    requiresTokens: true,
+    appliesTo: isScreenDart,
+    test: (line) => /\bColor\(\s*0x[0-9a-fA-F]{6,8}\s*\)/.test(stripStringsAndComments(line)),
+    explain:
+      'Cor declarada no ponto de uso nao pode ser corrigida de um lugar so, e e\n' +
+      '  como o contraste reprovado se espalhou. Declare em FinColors e leia por\n' +
+      '  context.fin.<token>.',
+  },
+  {
+    id: 'L7',
+    category: 'DESIGN_TOKEN',
+    title: 'Cor do Material em vez de token semantico',
+    requiresTokens: true,
+    appliesTo: isScreenDart,
+    // `AppColors.` e `FinColors.` nao casam: nao ha limite de palavra entre a
+    // letra anterior e o "C". `Colors.transparent` fica de fora porque nao tem
+    // equivalente em token -- e legitimo em Material(color:) e no feedback de
+    // Draggable.
+    test: (line) => /\bColors\.(?!transparent\b)[a-z]/.test(stripStringsAndComments(line)),
+    explain:
+      'A paleta do Material nao conhece a semantica financeira desta interface.\n' +
+      '  Use context.fin: positive, negative, caution, pending, blocked ou os\n' +
+      '  tokens de superficie e texto.',
+  },
+  {
+    id: 'L8',
+    category: 'DESIGN_TOKEN',
+    title: 'Espacador com medida magica',
+    requiresTokens: true,
+    appliesTo: isScreenDart,
+    // Casa so a forma de espacador: uma dimensao e o parentese fechando na
+    // mesma linha. `SizedBox(height: 240, child: LineChart(...))` nao casa,
+    // porque ali o numero e altura de contrato, nao espacamento.
+    test: (line) =>
+      /\bSizedBox\(\s*(?:height|width)\s*:\s*[\d.]+\s*\)/.test(stripStringsAndComments(line)),
+    explain:
+      'Espacamento fora do grid produz ritmo irregular: dois cartoes vizinhos\n' +
+      '  respiram diferente sem razao de conteudo. Use Gap.xs/sm/md/lg/xl, que\n' +
+      '  nao tem construtor para numero solto.',
+  },
+  {
+    id: 'L9',
+    category: 'DESIGN_TOKEN',
+    title: 'EdgeInsets com numero solto',
+    requiresTokens: true,
+    appliesTo: isScreenDart,
+    test: (line) =>
+      /\bEdgeInsets\.(?:all|symmetric|only|fromLTRB)\([^)]*\d/.test(stripStringsAndComments(line)),
+    explain:
+      'Use os passos de FinSpace: xxs 2, xs 4, sm 8, md 12, lg 16, xl 24,\n' +
+      '  xxl 32, xxxl 48. O xxs e meio passo, reservado a ajuste optico dentro\n' +
+      '  de pastilha -- nao e degrau de layout. Se o valor de que voce precisa\n' +
+      '  nao esta na escala, acrescente-o a FinSpace com um nome: a escala\n' +
+      '  cresce por decisao, nao por acumulo.',
+  },
+  {
+    id: 'L10',
+    category: 'DESIGN_TOKEN',
+    title: 'fontSize literal fora do arquivo de tipografia',
+    requiresTokens: true,
+    appliesTo: isScreenDart,
+    // O lookahead impede que `fontSize: 10.5` case aqui: o `\d+` guloso pega
+    // "10", ve o ponto e falha; ao retroceder para "1" ve o "0" e falha de
+    // novo. O caso fracionario e da L5, que roda sempre.
+    test: (line) => /\bfontSize\s*:\s*\d+(?![\d.])/.test(stripStringsAndComments(line)),
+    explain:
+      'Tamanho declarado no ponto de uso e como a base chegou a 20 tamanhos\n' +
+      '  distintos. Use context.finType: caption, label, bodySm, bodyMd, titleSm,\n' +
+      '  titleLg -- ou a familia num* para dinheiro, percentual e razao.',
+  },
+  {
+    id: 'L11',
+    category: 'DESIGN_TOKEN',
+    title: 'Tema semeado por cor em vez dos tokens',
+    requiresTokens: true,
+    appliesTo: (file) => file.endsWith('.dart') && !file.startsWith(THEME_DIR),
+    test: (line) => /\bColorScheme\.fromSeed\s*\(/.test(stripStringsAndComments(line)),
+    explain:
+      'fromSeed gera uma paleta que nao conhece a marca nem a semantica de\n' +
+      '  ganho e perda -- e o que fazia o indicador de progresso girar em azul\n' +
+      '  sobre tela verde. Monte o ColorScheme a partir de FinColors.',
   },
 ];
 
@@ -233,8 +390,13 @@ function main() {
     }
   }
 
+  // `requiresTokens` e constante durante a execucao: filtrar uma vez, fora do
+  // laco por linha, evita reavaliar a condicao milhares de vezes num diff
+  // grande.
+  const activeRules = RULES.filter((rule) => !rule.requiresTokens || TOKENS_ACTIVE);
+
   for (const { file, line, text } of stagedAddedLines()) {
-    for (const rule of RULES) {
+    for (const rule of activeRules) {
       if (!rule.appliesTo(file)) continue;
       if (!rule.test(text)) continue;
       findings.push({

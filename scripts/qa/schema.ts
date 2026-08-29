@@ -45,6 +45,14 @@ export const CATEGORIES = [
   'FIXED_DIMENSION', // largura/altura fixa que quebra em telas estreitas
   'TEXT_TRUNCATION', // texto sem maxLines/overflow/escala
   'TOUCH_TARGET', // alvo de toque abaixo do minimo
+  // --- Sistema de design (ver RULES R17-R24 em rules.ts) ---
+  'DESIGN_TOKEN', // cor/tipografia/espacamento literal onde ha token
+  'TEXT_SCALE', // quebra sob MediaQuery.textScalerOf, nao sob largura
+  'NUMERIC_ALIGNMENT', // valor monetario sem cifra tabular em coluna
+  'COLOR_CONTRAST', // par cor/superficie sem contraste medido
+  'SEMANTIC_STATE', // estado so por cor, ou valor mascarado sem semantics
+  'LOADING_STATE', // indicador cuja geometria difere do conteudo final
+  'REPAINT_SCOPE', // camada cara sem RepaintBoundary
   // --- Outros ---
   'OTHER',
 ] as const;
