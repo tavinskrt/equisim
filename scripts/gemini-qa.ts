@@ -23,6 +23,7 @@
  */
 import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
+import { basename } from 'node:path';
 
 import {
   collectDiff,
@@ -32,7 +33,11 @@ import {
 } from './qa/collect.ts';
 import { validateReport, type QaFinding, type QaReport } from './qa/schema.ts';
 import { SYSTEM_INSTRUCTION, buildInstructions } from './qa/rules.ts';
-import { loadScreenshots, screenshotInstructions } from './qa/screenshot.ts';
+import {
+  expandScreenshotPaths,
+  loadScreenshots,
+  screenshotInstructions,
+} from './qa/screenshot.ts';
 import { chooseModel } from './qa/choose.ts';
 import {
   dequeue,
@@ -49,6 +54,20 @@ import {
   type ProviderUsage,
   type QaProvider,
 } from './qa/providers/types.ts';
+
+/**
+ * Imagens por chamada na varredura visual.
+ *
+ * A auditoria visual so roda no backend `api` -- o `agy` nao transmite imagem --
+ * e o tier gratuito da 20 requisicoes/DIA. Uma chamada por imagem tornaria
+ * impossivel varrer qualquer diretorio de tamanho util: 30 telas esgotariam a
+ * cota antes da metade.
+ *
+ * 4 e o meio-termo: agrupa o suficiente para caber na cota e mantem a atencao
+ * do modelo dividida entre poucas telas, para que ele consiga citar evidencia
+ * especifica de cada uma. Ajustavel por --batch.
+ */
+const DEFAULT_BATCH = 4;
 
 /** Tentativas para erros transitorios (429/503, modelo sobrecarregado). */
 const MAX_ATTEMPTS = 3;
@@ -73,6 +92,7 @@ interface Cli {
   thinking?: number;
   timeout?: number;
   noAsk: boolean;
+  batch: number;
   /** --backend foi passado? Pedido explicito nao degrada em silencio. */
   backendExplicit: boolean;
   pending: boolean;
@@ -90,6 +110,7 @@ function parseArgs(argv: string[]): Cli {
     context: 5,
     quiet: false,
     noAsk: false,
+    batch: DEFAULT_BATCH,
     backendExplicit: false,
     pending: false,
     screenshots: [],
@@ -165,6 +186,15 @@ function parseArgs(argv: string[]): Cli {
       case '--pending':
         cli.pending = true;
         break;
+      case '--batch': {
+        const value = argv[++i];
+        const parsed = Number.parseInt(value ?? '', 10);
+        if (!Number.isInteger(parsed) || parsed < 1) {
+          throw new Error('--batch exige um inteiro positivo');
+        }
+        cli.batch = parsed;
+        break;
+      }
       case '--no-ask':
         cli.noAsk = true;
         break;
@@ -211,7 +241,8 @@ function printUsage(): void {
       '  --staged               audita apenas o que esta em staging',
       '  --file <caminho>       audita o arquivo integral (repetivel)',
       '  --pending              audita o que ficou na fila por falta de cota',
-      '  --screenshot <img>     auditoria visual multimodal (repetivel).',
+      '  --screenshot <img|dir> auditoria visual multimodal (repetivel).',
+      '                         Diretorio e varrido recursivamente.',
       '                         Combina com --diff/--file, ou roda sozinha.',
       '                         PNG, JPEG, WebP ou HEIC.',
       '',
@@ -230,6 +261,8 @@ function printUsage(): void {
       '  --timeout <s>          teto de tempo por chamada, em segundos.',
       '                         Padrao 240. Diff grande pode precisar de mais.',
       '  --json <caminho>       grava o relatorio bruto em JSON',
+      '  --batch <n>            imagens por chamada na varredura (padrao 4).',
+      '                         Cada chamada consome 1 requisicao da cota.',
       '  --no-ask               nao pergunta o modelo; usa o padrao do backend.',
       '                         Implicito quando nao ha terminal (hook, CI).',
       '  --dry-run              monta o payload e imprime, sem chamar o modelo',
@@ -333,9 +366,11 @@ function renderReport(
     if (usage) {
       process.stdout.write(
         dim(
-          `Consumo: ${usage.totalTokens} tokens ` +
-            `(${usage.inputTokens} entrada, ${usage.outputTokens} saida, ` +
-            `${usage.thinkingTokens} raciocinio)`,
+          usage.inputTokens > 0
+            ? `Consumo: ${usage.totalTokens} tokens ` +
+              `(${usage.inputTokens} entrada, ${usage.outputTokens} saida, ` +
+              `${usage.thinkingTokens} raciocinio)`
+            : `Consumo: ${usage.totalTokens} tokens no total`,
         ) + '\n',
       );
     }
@@ -481,6 +516,165 @@ async function drainPending(root: string, cli: Cli): Promise<number> {
   return blocked > 0 ? 2 : 0;
 }
 
+/**
+ * Varredura visual de um diretorio, em lotes.
+ *
+ * Por que em lotes, e nao uma chamada por imagem: a auditoria visual so roda no
+ * backend `api` -- o `agy` nao transmite imagem -- e o tier gratuito da 20
+ * requisicoes por DIA. Um diretorio de 30 telas esgotaria a cota na metade.
+ *
+ * Por que nao tudo numa chamada so: a atencao do modelo se dilui, e o rulebook
+ * exige evidencia especifica por achado ("rotulo cortado no canto inferior
+ * esquerdo"). Com dezenas de imagens juntas, os achados viram genericos e
+ * deixam de ser acionaveis.
+ *
+ * Se a cota acabar no meio, os lotes restantes vao para a fila de pendencias e
+ * a saida e 2 -- nao auditar nao e reprovar. `npm run qa:pending` retoma.
+ */
+async function sweepScreenshots(
+  root: string,
+  cli: Cli,
+  provider: QaProvider,
+  target: AuditTarget,
+  imagePaths: string[],
+): Promise<number> {
+  provider.preflight();
+
+  const batches: string[][] = [];
+  for (let i = 0; i < imagePaths.length; i += cli.batch) {
+    batches.push(imagePaths.slice(i, i + cli.batch));
+  }
+
+  process.stdout.write(
+    `\n${bold('Varredura visual')}\n` +
+      dim(
+        `${imagePaths.length} imagem(ns) em ${batches.length} lote(s) de ` +
+          `ate ${cli.batch}. Cada lote consome 1 requisicao da cota.`,
+      ) +
+      '\n',
+  );
+
+  const all: QaFinding[] = [];
+  let totalTokens = 0;
+  let queued = 0;
+  let lastModel = '';
+
+  for (const [index, batch] of batches.entries()) {
+    const screenshots = loadScreenshots(batch);
+    const labels = screenshots.map((s) => s.label);
+
+    process.stdout.write(
+      dim(`\n[${index + 1}/${batches.length}] ${labels.join(', ')}`) + '\n',
+    );
+
+    const request: ProviderRequest = {
+      system: SYSTEM_INSTRUCTION,
+      instructions: buildInstructions(target) + screenshotInstructions(labels),
+      material:
+        `--- INICIO DO MATERIAL AUDITADO ---\n${target.payload}\n` +
+        '--- FIM DO MATERIAL AUDITADO ---\n',
+      model: cli.model,
+      screenshots: screenshots.map((s) => s.part),
+    };
+
+    try {
+      const { report, model, usage } = await audit(provider, request);
+      lastModel = model;
+      totalTokens += usage?.totalTokens ?? 0;
+      all.push(...report.findings);
+      process.stdout.write(
+        dim(
+          `      ${report.findings.length} achado(s)` +
+            (usage ? `, ${usage.totalTokens} tokens` : ''),
+        ) + '\n',
+      );
+    } catch (error) {
+      // QUALQUER falha aqui enfileira o restante -- nao so a de cota.
+      //
+      // Aprendido na pratica: um 503 no lote 3 de 4 derrubava a varredura por
+      // excecao, jogando fora os achados dos lotes 1 e 2 e as requisicoes de
+      // cota que eles ja tinham consumido. Preservar o trabalho feito importa
+      // mais do que distinguir a causa; a causa entra na mensagem.
+      {
+        const quota = error instanceof ProviderError && error.quota;
+        const detail = error instanceof Error ? error.message : String(error);
+
+        // Enfileira ESTE lote e todos os seguintes, um por vez, para que a
+        // drenagem retome exatamente de onde parou.
+        for (const remaining of batches.slice(index)) {
+          const shots = loadScreenshots(remaining);
+          const names = shots.map((s) => s.label);
+          const { queued: ok } = enqueue(
+            root,
+            {
+              label: `varredura visual: ${names.join(', ')}`,
+              mode: 'screenshot',
+              files: remaining,
+              head: currentHead(root),
+              reason: quota ? 'cota esgotada' : 'falha transitoria',
+            },
+            target.payload,
+            buildInstructions(target) + screenshotInstructions(names),
+          );
+          if (ok) queued++;
+        }
+
+        process.stdout.write(
+          `\n${yellow(bold(quota ? 'COTA ESGOTADA' : 'FALHA NO LOTE'))} ` +
+            `no lote ${index + 1} de ${batches.length}.\n` +
+            dim(`  ${detail.split('\n')[0]}\n`) +
+            dim(`  ${queued} lote(s) enfileirado(s); os anteriores foram preservados.\n`) +
+            dim('  Retome com: npm run qa:pending\n') +
+            '\n',
+        );
+        break;
+      }
+    }
+  }
+
+  const merged: QaReport = {
+    findings: all,
+    status: all.some((f) => f.severity === 'FAIL') ? 'FAIL' : 'PASS',
+    summary:
+      `Varredura de ${imagePaths.length} tela(s) em ${batches.length} lote(s). ` +
+      `${all.length} achado(s) no total.` +
+      (queued > 0 ? ` ${queued} lote(s) ficaram pendentes por cota.` : ''),
+  };
+
+  const sweepTarget: AuditTarget = {
+    ...target,
+    label: `varredura visual de ${imagePaths.length} imagem(ns)`,
+    // Nomes, nao caminhos absolutos: uma lista de 30 caminhos completos torna
+    // o cabecalho ilegivel, e o achado ja identifica o arquivo por nome.
+    files: imagePaths.map((p) => basename(p)),
+  };
+
+  // O backend `api` nao reporta consumo por chamada. Exibir "0 tokens" seria
+  // pior que omitir: parece medicao, e e ausencia de medicao.
+  // O `--json` tambem vale aqui. Ignorar a flag em silencio numa varredura e
+  // pior que noutro lugar: e justamente o modo em que mais achados se acumulam,
+  // e onde perder o relatorio custa varias requisicoes de cota para refazer.
+  if (cli.json) {
+    writeFileSync(cli.json, JSON.stringify(merged, null, 2), 'utf8');
+    process.stderr.write(dim(`relatorio bruto gravado em ${cli.json}
+`));
+  }
+
+  renderReport(
+    merged,
+    sweepTarget,
+    provider,
+    lastModel || '(nenhum)',
+    cli,
+    totalTokens > 0
+      ? { inputTokens: 0, outputTokens: 0, thinkingTokens: 0, totalTokens }
+      : undefined,
+  );
+
+  if (merged.status === 'FAIL') return 1;
+  return queued > 0 ? 2 : 0;
+}
+
 /** Commit corrente, so para diagnostico na entrada da fila. */
 function currentHead(root: string): string {
   try {
@@ -564,7 +758,15 @@ async function main(): Promise<number> {
 
   const provider = selectProvider(root, cli);
 
-  const screenshots = loadScreenshots(cli.screenshots);
+  const imagePaths = expandScreenshotPaths(cli.screenshots);
+
+  // Varredura de diretorio vira varias chamadas; uma so imagem segue o caminho
+  // normal, sem o cabecalho de lote.
+  if (imagePaths.length > cli.batch) {
+    return sweepScreenshots(root, cli, provider, target, imagePaths);
+  }
+
+  const screenshots = loadScreenshots(imagePaths);
 
   const instructions =
     buildInstructions(target) +

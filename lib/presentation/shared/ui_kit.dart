@@ -27,21 +27,45 @@ abstract final class Fmt {
   /// número cem vezes maior sem qualquer aviso.
   static String money(double value) => currency.format(value);
 
+  /// Formatadores decimais em pt-BR, um por número de casas.
+  ///
+  /// Existe porque `toStringAsFixed` **ignora locale**: ele sempre emite ponto
+  /// como separador decimal, mesmo com o `intl` configurado em pt_BR. Isso
+  /// produzia `14.41%` onde a convenção brasileira pede `14,41%` — defeito que
+  /// aparecia em todas as telas de métricas.
+  ///
+  /// O cache evita reconstruir o formatador a cada quadro: estes métodos são
+  /// chamados de dentro de `build`.
+  static final Map<int, NumberFormat> _decimals = {};
+
+  static NumberFormat _decimalFormat(int digits) => _decimals.putIfAbsent(
+        digits,
+        () => NumberFormat.decimalPatternDigits(
+          locale: 'pt_BR',
+          decimalDigits: digits,
+        ),
+      );
+
   /// Percentual a partir de fração, com sinal explícito quando pedido.
   ///
   /// - [fraction]: valor em fração (`0.155` vira `15,50%`).
   /// - [decimals]: casas decimais. Padrão `2`.
   /// - [signed]: prefixa `+` nos positivos. Negativos já trazem o próprio
   ///   sinal; o zero nunca recebe prefixo.
+  ///
+  /// Valor não finito vira `—`: `NumberFormat` não lança nesse caso, ele
+  /// devolve `NaN` ou `∞`, e exibir isso ao investidor é pior que admitir a
+  /// ausência do dado.
   static String percent(double fraction, {int decimals = 2, bool signed = false}) {
     final value = fraction * 100;
+    if (!value.isFinite) return '—';
     final sign = signed && value > 0 ? '+' : '';
-    return '$sign${value.toStringAsFixed(decimals)}%';
+    return '$sign${_decimalFormat(decimals).format(value)}%';
   }
 
   /// Número adimensional — múltiplo, beta, índice de Sharpe.
   static String ratio(double value, {int decimals = 2}) =>
-      value.toStringAsFixed(decimals);
+      value.isFinite ? _decimalFormat(decimals).format(value) : '—';
 }
 
 /// Cartão translúcido — a linguagem visual herdada do projeto anterior.

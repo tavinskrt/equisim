@@ -381,9 +381,14 @@ class _SavedStudyTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final updatedAt = study.updatedAt;
     return ListTile(
-      contentPadding: EdgeInsets.zero,
+      // Com padding zerado o nome encostava na borda do card e aparecia
+      // cortado. O nome do estudo e livre e pode ser longo, entao ele tambem
+      // precisa de elipse: sem `maxLines`, o texto estoura em vez de truncar.
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
       title: Text(
         study.name,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: 13.5,
           fontWeight: FontWeight.w600,
@@ -394,6 +399,8 @@ class _SavedStudyTile extends ConsumerWidget {
         '${study.principal.length} na Principal · '
         '${study.reserva.length} na Reserva'
         '${updatedAt == null ? '' : ' · ${Fmt.date.format(updatedAt)}'}',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(fontSize: 10.5, color: AppColors.textMuted(isLight)),
       ),
       trailing: IconButton(
@@ -757,6 +764,13 @@ class _AssetRow extends ConsumerWidget {
             IconButton(
               tooltip: 'Remover',
               visualDensity: VisualDensity.compact,
+              // `VisualDensity.compact` encolhe o alvo de toque de 48x48 para
+              // 40x40. Aqui a restricao explicita devolve os 48 dp SEM crescer
+              // o icone: a acao e destrutiva -- um toque errado remove o ativo
+              // da carteira -- e errar por densidade visual sai caro demais.
+              // O padding zerado impede que os 48 dp virem 48 + padding.
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              padding: EdgeInsets.zero,
               icon: Icon(Icons.close,
                   size: 15, color: AppColors.textMuted(isLight)),
               onPressed: () => ref

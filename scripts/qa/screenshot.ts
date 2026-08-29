@@ -10,8 +10,8 @@
  * A API multimodal recebe a imagem como parte inline em base64, junto do
  * texto -- ver o uso de `inlineData` em `providers/api.ts`.
  */
-import { readFileSync, statSync } from 'node:fs';
-import { basename, extname } from 'node:path';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { basename, extname, join } from 'node:path';
 
 /** Tipos aceitos pela API multimodal do Gemini. */
 const MIME_BY_EXT: Record<string, string> = {
@@ -57,6 +57,74 @@ export interface LoadedScreenshot {
  *
  * So o backend `api` transmite imagem; com `agy` as capturas sao ignoradas.
  */
+/**
+ * Teto de arquivos por varredura.
+ *
+ * Nao e limite tecnico: e defesa contra apontar para o diretorio errado. Varrer
+ * `~/Imagens` inteiro por engano consumiria a cota do dia antes de qualquer
+ * pessoa perceber. Estourar o teto falha com o numero encontrado, para que a
+ * pessoa veja que apontou para o lugar errado.
+ */
+const MAX_SWEEP = 200;
+
+/**
+ * Expande diretorios em arquivos de imagem, recursivamente.
+ *
+ * Caminhos de arquivo passam intactos. Diretorios viram a lista de imagens
+ * suportadas dentro deles, em ordem alfabetica -- ordem estavel importa porque
+ * o lote e formado por fatiamento, e ordem instavel mudaria a composicao dos
+ * lotes entre execucoes.
+ */
+export function expandScreenshotPaths(paths: string[]): string[] {
+  const out: string[] = [];
+
+  for (const path of paths) {
+    let stats;
+    try {
+      stats = statSync(path);
+    } catch {
+      throw new Error(`Caminho nao encontrado: ${path}`);
+    }
+
+    if (!stats.isDirectory()) {
+      out.push(path);
+      continue;
+    }
+
+    const found = sweep(path);
+    if (found.length === 0) {
+      throw new Error(
+        `Nenhuma imagem suportada em ${path}.
+` +
+          `Aceitos: ${Object.keys(MIME_BY_EXT).join(', ')}`,
+      );
+    }
+    out.push(...found);
+  }
+
+  if (out.length > MAX_SWEEP) {
+    throw new Error(
+      `A varredura encontrou ${out.length} imagens, acima do teto de ` +
+        `${MAX_SWEEP}.
+Confira se o caminho aponta para o diretorio certo.`,
+    );
+  }
+  return out;
+}
+
+function sweep(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...sweep(full));
+    } else if (MIME_BY_EXT[extname(entry.name).toLowerCase()]) {
+      out.push(full);
+    }
+  }
+  return out.sort();
+}
+
 export function loadScreenshots(paths: string[]): LoadedScreenshot[] {
   return paths.map((path) => {
     const ext = extname(path).toLowerCase();

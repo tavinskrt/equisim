@@ -338,11 +338,31 @@ void main() {
 
 
   group('Formatação', () {
-    test('percentual com sinal', () {
-      expect(Fmt.percent(0.1234), '12.34%');
-      expect(Fmt.percent(0.1234, signed: true), '+12.34%');
-      expect(Fmt.percent(-0.05, signed: true), '-5.00%');
-      expect(Fmt.percent(0.0, signed: true), '0.00%');
+    test('percentual com sinal usa virgula decimal, como manda o pt_BR', () {
+      // `toStringAsFixed` ignora locale e emitia ponto: `12.34%`. O teste
+      // antigo travava esse defeito, enquanto o de moeda logo abaixo ja exigia
+      // virgula -- as duas convencoes conviviam no mesmo arquivo.
+      expect(Fmt.percent(0.1234), '12,34%');
+      expect(Fmt.percent(0.1234, signed: true), '+12,34%');
+      expect(Fmt.percent(-0.05, signed: true), '-5,00%');
+      expect(Fmt.percent(0.0, signed: true), '0,00%');
+    });
+
+    test('percentual grande recebe separador de milhar', () {
+      expect(Fmt.percent(12.3456), '1.234,56%');
+    });
+
+    test('valor nao finito vira travessao em vez de NaN na tela', () {
+      // NumberFormat nao lanca: devolve 'NaN' e '∞'. Exibir isso ao
+      // investidor e pior que admitir a ausencia do dado.
+      expect(Fmt.percent(double.nan), '—');
+      expect(Fmt.percent(double.infinity), '—');
+      expect(Fmt.ratio(double.nan), '—');
+    });
+
+    test('numero adimensional tambem segue pt_BR', () {
+      expect(Fmt.ratio(0.43), '0,43');
+      expect(Fmt.ratio(1234.5, decimals: 1), '1.234,5');
     });
 
     test('moeda em português brasileiro', () {

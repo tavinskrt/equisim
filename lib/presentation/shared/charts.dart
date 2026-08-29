@@ -182,7 +182,7 @@ class Base100Chart extends StatelessWidget {
                   getTooltipItems: (spots) => spots.map((spot) {
                     final s = series[spot.barIndex];
                     return LineTooltipItem(
-                      '${s.label}: ${spot.y.toStringAsFixed(1)}',
+                      '${s.label}: ${Fmt.ratio(spot.y, decimals: 1)}',
                       TextStyle(
                         color: s.color,
                         fontSize: 11,
@@ -566,8 +566,8 @@ class RiskReturnScatter extends StatelessWidget {
                     final p = points[index];
                     return ScatterTooltipItem(
                       '${p.label}\n'
-                      'vol ${p.risk.toStringAsFixed(1)}% · '
-                      'ret ${p.ret.toStringAsFixed(1)}%',
+                      'vol ${Fmt.ratio(p.risk, decimals: 1)}% · '
+                      'ret ${Fmt.ratio(p.ret, decimals: 1)}%',
                       textStyle: TextStyle(
                         color: isLight ? Colors.white : Colors.black,
                         fontSize: 10.5,
@@ -617,7 +617,12 @@ class RiskReturnScatter extends StatelessWidget {
 
 
 /// Mapa de calor da matriz de correlação.
-class CorrelationHeatmap extends StatelessWidget {
+///
+/// É stateful apenas por causa do [ScrollController]: a rolagem horizontal
+/// sempre existiu, mas sem barra visível ninguém descobria que havia colunas
+/// além da borda — a auditoria visual flagrou a matriz como "cortada". Manter
+/// a barra sempre à mostra exige um controlador com ciclo de vida próprio.
+class CorrelationHeatmap extends StatefulWidget {
   /// Ativos, na mesma ordem das linhas e colunas de [matrix].
   final List<Ticker> tickers;
 
@@ -638,6 +643,23 @@ class CorrelationHeatmap extends StatelessWidget {
     required this.isLight,
   });
 
+  @override
+  State<CorrelationHeatmap> createState() => _CorrelationHeatmapState();
+}
+
+class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
+  final ScrollController _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  List<Ticker> get tickers => widget.tickers;
+  List<List<double>> get matrix => widget.matrix;
+  bool get isLight => widget.isLight;
+
   Color _cellColor(double rho) {
     // Verde para correlação baixa (diversificação) e vermelho para alta.
     final normalized = ((rho + 1) / 2).clamp(0.0, 1.0);
@@ -652,9 +674,17 @@ class CorrelationHeatmap extends StatelessWidget {
   Widget build(BuildContext context) {
     if (tickers.length < 2) return const SizedBox.shrink();
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Column(
+    return Scrollbar(
+      controller: _controller,
+      // Sempre visível: numa matriz que já chega cortada na borda, a barra é a
+      // única pista de que existem colunas adiante.
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        controller: _controller,
+        scrollDirection: Axis.horizontal,
+        // Espaço para a barra não cobrir a última linha da matriz.
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -699,7 +729,7 @@ class CorrelationHeatmap extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      matrix[i][j].toStringAsFixed(2),
+                      Fmt.ratio(matrix[i][j]),
                       style: const TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.w600,
@@ -709,7 +739,8 @@ class CorrelationHeatmap extends StatelessWidget {
                   ),
               ],
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
