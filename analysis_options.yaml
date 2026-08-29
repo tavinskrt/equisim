@@ -1,12 +1,8 @@
-# This file configures the analyzer, which statically analyzes Dart code to
-# check for errors, warnings, and lints.
+# Configuracao do analisador estatico.
 #
-# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
-# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
-# invoked from the command line by running `flutter analyze`.
+# Ver https://dart.dev/tools#ides-and-editors. Na linha de comando:
+# `flutter analyze`.
 
-# The following line activates a set of recommended lints for Flutter apps,
-# packages, and plugins designed to encourage good coding practices.
 analyzer:
   exclude:
     - build/**
@@ -16,22 +12,79 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+
 include: package:flutter_lints/flutter.yaml
 
 linter:
-  # The lint rules applied to this project can be customized in the
-  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
-  # included above or to enable additional rules. A list of all available lints
-  # and their documentation is published at https://dart.dev/lints.
+  # CRITERIO DE ADMISSAO DESTA LISTA: a regra tem ZERO violacoes no codigo
+  # atual no momento em que entra.
   #
-  # Instead of disabling a lint rule for the entire project in the
-  # section below, it can also be suppressed for a single line of code
-  # or a specific dart file by using the `// ignore: name_of_lint` and
-  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
-  # producing the lint.
+  # O motivo e o mesmo que governa o gate em scripts/qa-local.mjs: uma regra
+  # que reprova codigo legado quebra `flutter analyze` para todo mundo, e um
+  # gate que impede trabalho legitimo e um gate que sera arrancado. Estas
+  # regras nao pedem faxina -- elas travam um estado que o repositorio JA
+  # alcancou, para que ele nao se perca.
+  #
+  # Para acrescentar uma regra: habilite, rode `flutter analyze`, e so mantenha
+  # se o resultado for zero. Havendo violacoes, ou corrija-as no mesmo commit,
+  # ou registre a regra na lista de adiadas no fim do arquivo.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    # --- Construcao de widget ---
+    # `const` onde cabe: evita reconstruir subarvore a cada quadro.
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    # Container que so pinta cor ou decoracao carrega maquinaria que nao usa.
+    - use_colored_box
+    - avoid_unnecessary_containers
+    # Container vazio no papel de espacador. Reforca o `Gap` de FinSpace.
+    - sized_box_for_whitespace
+    - use_super_parameters
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+    # --- Correcao ---
+    # Future sem await nem unawaited(): a falha some sem rastro, e num caminho
+    # de rede ou de persistencia isso vira dado perdido em silencio.
+    - unawaited_futures
+    - unnecessary_await_in_return
+    # Chamada em `dynamic` escapa da verificacao de tipo -- inaceitavel em
+    # caminho que carrega dinheiro.
+    - avoid_dynamic_calls
+    - avoid_type_to_string
+    - throw_in_finally
+    - unnecessary_statements
+    - avoid_returning_null_for_void
+    - avoid_slow_async_io
+    - no_adjacent_strings_in_list
+
+    # --- Clareza ---
+    - always_declare_return_types
+    - prefer_single_quotes
+    - avoid_escaping_inner_quotes
+    - require_trailing_commas
+    - unnecessary_lambdas
+    - prefer_final_in_for_each
+    - use_string_buffers
+
+# --- Regras adiadas, com a contagem medida em 29/08/2026 --------------------
+#
+# Todas sao regras boas. Nenhuma entrou agora porque cada uma exige corrigir
+# codigo que as ondas 3 e 4 da refatoracao de UI vao reescrever de qualquer
+# forma -- arrumar antes seria trabalho jogado fora.
+#
+# Habilite cada uma no commit que terminar de limpar o que ela aponta:
+#
+#   sort_constructors_first                        95
+#   avoid_redundant_argument_values                64  (valor duvidoso; avalie
+#                                                       antes de adotar)
+#   prefer_int_literals                            38
+#   directives_ordering                            24
+#   cascade_invocations                            21
+#   avoid_positional_boolean_parameters            18  <- o `isLight` posicional
+#                                                       de `signedColor`; cai
+#                                                       com UI-04 e UI-08
+#   use_decorated_box                               9
+#   prefer_const_constructors                       7
+#   avoid_bool_literals_in_conditional_expressions  5
+#   unnecessary_raw_strings                         5
+#   prefer_final_locals                             2
+#   unnecessary_parenthesis                         2
