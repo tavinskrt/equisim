@@ -17,6 +17,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// Serie longa o bastante para as metricas sairem em ordem de grandeza real.
+///
+/// Tres pregoes NAO bastam, por dois motivos: `moneyWeightedReturn` devolve
+/// `null` quando os fluxos nao sustentam a taxa, e o CAGR anualizado sobre
+/// dois dias vira um numero de quarenta digitos -- que e legitimo, mas empurra
+/// qualquer tabela para o modo empilhado e mede o layout errado.
+List<double> serieLonga(double passo) =>
+    List<double>.generate(120, (i) => 10 + i * passo);
+
 Asset assetOf(String symbol, [String sector = 'financeiro']) => Asset(
       ticker: Ticker.parse(symbol),
       name: symbol,
@@ -438,9 +447,24 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('DESEMPENHO POR ATIVO'), findsOneWidget);
-      // Um selo por carteira, dentro do cartão.
-      expect(find.text('PRINCIPAL'), findsOneWidget);
-      expect(find.text('RESERVA'), findsOneWidget);
+      // Escopo pelo cartao, e nao pela tela: o selo de carteira passou a
+      // existir tambem nos cabecalhos das tabelas comparativas, entao contar
+      // ocorrencias na tela inteira deixou de dizer o que este teste quer
+      // saber -- que os DOIS grupos moram no MESMO cartao.
+      final cartao = find
+          .ancestor(
+            of: find.text('DESEMPENHO POR ATIVO'),
+            matching: find.byType(GlassCard),
+          )
+          .first;
+      expect(
+        find.descendant(of: cartao, matching: find.text('PRINCIPAL')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: cartao, matching: find.text('RESERVA')),
+        findsOneWidget,
+      );
       expect(find.text('PETR4'), findsOneWidget);
       expect(find.text('ITUB4'), findsOneWidget);
     });
@@ -460,9 +484,12 @@ void main() {
       expect(find.text('RESERVA'), findsNothing);
     });
 
-    testWidgets('cada carteira tem o próprio cartão de proventos',
+    testWidgets('os proventos das duas carteiras dividem um cartão',
         (tester) async {
       telaAlta(tester);
+      // Eram dois cartoes de estrutura identica, um sob o outro. A pergunta
+      // que eles respondem -- quanto de imposto cada composicao custou -- e
+      // comparativa por natureza.
       await tester.pumpWidget(harness(
         overrides: withComparison(comparisonOf(
           principal: outcomeOf('PETR4', const [10, 12, 14]),
@@ -472,8 +499,30 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('PROVENTOS NO PERÍODO — PRINCIPAL'), findsOneWidget);
-      expect(find.text('PROVENTOS NO PERÍODO — RESERVA'), findsOneWidget);
+      expect(find.text('PROVENTOS NO PERÍODO'), findsOneWidget);
+      final cartao = find
+          .ancestor(
+            of: find.text('PROVENTOS NO PERÍODO'),
+            matching: find.byType(GlassCard),
+          )
+          .first;
+      // As tres linhas aparecem UMA vez, com um valor por coluna.
+      for (final linha in ['Bruto', 'IR retido', 'Líquido reinvestido']) {
+        expect(
+          find.descendant(of: cartao, matching: find.text(linha)),
+          findsOneWidget,
+        );
+      }
+      // E o dono de cada coluna fica dito no proprio cartao: provento e
+      // exatamente o tipo de numero que se atribui a carteira errada.
+      expect(
+        find.descendant(of: cartao, matching: find.text('PRINCIPAL')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: cartao, matching: find.text('RESERVA')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('os cabeçalhos das carteiras trazem o ícone de ajuda',
@@ -488,8 +537,164 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Um em cada cartão de métricas, mais o de desempenho por ativo.
-      expect(find.byType(HintIcon), findsNWidgets(3));
+      // DOIS, e nao tres: os dois paineis de metricas viraram um cartao
+      // comparativo com um glossario so. O terceiro e o de desempenho por
+      // ativo.
+      expect(find.byType(HintIcon), findsNWidgets(2));
+    });
+  });
+
+  group('Backtest — as duas carteiras lado a lado', () {
+    List<Override> withComparison(PortfolioComparison comparison) => [
+          comparisonProvider.overrideWith((ref) async => comparison),
+          correlationProvider.overrideWith((ref) async => null),
+        ];
+
+    void telaAlta(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    Future<void> montar(
+      WidgetTester tester, {
+      required bool comReserva,
+    }) async {
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', serieLonga(0.05)),
+          reserva: comReserva ? outcomeOf('ITUB4', serieLonga(0.12)) : null,
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('cada indicador aparece uma vez, com um valor por coluna',
+        (tester) async {
+      telaAlta(tester);
+      // "Para comparar o Sharpe da Principal com o da Reserva, o usuario e
+      // forcado a rolar a tela repetidamente" -- lente `tela`. Em coluna, a
+      // mesma comparacao e um movimento de olho.
+      await montar(tester, comReserva: true);
+
+      expect(find.text('CARTEIRAS LADO A LADO'), findsOneWidget);
+      final cartao = find
+          .ancestor(
+            of: find.text('CARTEIRAS LADO A LADO'),
+            matching: find.byType(GlassCard),
+          )
+          .first;
+      for (final indicador in [
+        'Patrimônio final',
+        'Aportado',
+        'TWR',
+        'XIRR',
+        'CAGR',
+        'Volatilidade',
+        'Máx. drawdown',
+        'Sharpe',
+        'Sortino',
+        'Calmar',
+        'DY líquido',
+      ]) {
+        expect(
+          find.descendant(of: cartao, matching: find.text(indicador)),
+          findsOneWidget,
+          reason: '$indicador deveria ter uma linha só, com duas colunas',
+        );
+      }
+      // Os paineis separados de cada carteira sairam de cena.
+      expect(find.text('CARTEIRA PRINCIPAL'), findsNothing);
+      expect(find.text('CARTEIRA RESERVA'), findsNothing);
+    });
+
+    testWidgets('a Reserva declara que o patrimônio dela é hipotético',
+        (tester) async {
+      telaAlta(tester);
+      // Ler "Carteira Reserva - R\$ 1.193,66" como dinheiro que se teria e
+      // imediato, e e falso: ali ela e simulada como carteira inteira.
+      await montar(tester, comReserva: true);
+
+      expect(
+        find.textContaining('faz do patrimônio dela um valor hipotético'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('com uma carteira só, volta o painel de sempre',
+        (tester) async {
+      telaAlta(tester);
+      // Comparacao com uma coluna nao compara nada, e o painel de uma
+      // carteira ja resolve esse caso -- medido em contraste e em estouro.
+      await montar(tester, comReserva: false);
+
+      expect(find.text('CARTEIRAS LADO A LADO'), findsNothing);
+      expect(find.text('CARTEIRA PRINCIPAL'), findsOneWidget);
+      expect(find.text('PROVENTOS NO PERÍODO — PRINCIPAL'), findsOneWidget);
+    });
+
+    testWidgets('largura que não sustenta as colunas empilha sem truncar',
+        (tester) async {
+      // Uma tabela numerica densa nao cabe lado a lado em 320 dp sob escala de
+      // texto 2,0x -- dois valores sozinhos passam da largura da tela.
+      // Empilhar devolve o percurso antigo, que e ruim; truncar o numero seria
+      // pior. O teste fixa a escolha, para que ninguem a troque por engano.
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(320, 6000);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', serieLonga(0.05)),
+          reserva: outcomeOf('ITUB4', serieLonga(0.12)),
+        )),
+        child: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2.0)),
+          child: const BacktestPage(),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      final cartao = find
+          .ancestor(
+            of: find.text('CARTEIRAS LADO A LADO'),
+            matching: find.byType(GlassCard),
+          )
+          .first;
+      // Empilhado, cada indicador aparece uma vez POR CARTEIRA -- e as duas
+      // continuam no mesmo cartao, cada uma sob o proprio selo.
+      expect(
+        find.descendant(of: cartao, matching: find.text('Sharpe')),
+        findsNWidgets(2),
+      );
+      expect(
+        find.descendant(of: cartao, matching: find.text('PRINCIPAL')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: cartao, matching: find.text('RESERVA')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('só a Reserva simulada ainda traz a ressalva', (tester) async {
+      telaAlta(tester);
+      // O caminho de uma carteira so tambem precisa da ressalva: e o mesmo
+      // numero, sujeito a mesma leitura errada.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          reserva: outcomeOf('ITUB4', serieLonga(0.12)),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('CARTEIRA RESERVA'), findsOneWidget);
+      expect(
+        find.textContaining('faz do patrimônio dela um valor hipotético'),
+        findsOneWidget,
+      );
     });
   });
 
@@ -590,13 +795,6 @@ void main() {
           message: 'meta exigente',
         );
 
-    /// Serie longa o bastante para o XIRR existir.
-    ///
-    /// Tres pregoes NAO bastam: `moneyWeightedReturn` devolve `null` quando os
-    /// fluxos nao sustentam a taxa, e um cenario assim testaria o travessao em
-    /// vez do confronto.
-    List<double> serieLonga(double passo) =>
-        List<double>.generate(120, (i) => 10 + i * passo);
 
     List<Override> cenario({
       required PortfolioComparison comparison,

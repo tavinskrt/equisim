@@ -448,32 +448,49 @@ class _ComparisonBody extends ConsumerWidget {
         if (principal != null) ...[
           const Gap.md(),
           _GoalConfrontationCard(principal: principal, reserva: reserva),
-          const Gap.md(),
-          _MetricsCard(
-            title: 'Carteira Principal',
-            outcome: principal,
-            isLight: isLight,
-          ),
-          const Gap.md(),
-          _DividendsCard(
-            portfolioLabel: 'Principal',
-            outcome: principal,
-            isLight: isLight,
-          ),
         ],
-        if (reserva != null) ...[
+        // COM AS DUAS carteiras, um cartão comparativo; com uma só, o painel
+        // de sempre. A comparação lado a lado é o que a tela existe para
+        // fazer, mas ela não tem sentido com uma coluna — e o painel de uma
+        // carteira já resolve esse caso há tempo, medido em contraste e em
+        // estouro. Manter os dois caminhos custa menos que forçar um layout
+        // de comparação a fingir que compara.
+        if (principal != null && reserva != null) ...[
           const Gap.md(),
-          _MetricsCard(
-            title: 'Carteira Reserva',
-            outcome: reserva,
-            isLight: isLight,
-          ),
+          _CarteirasLadoALado(principal: principal, reserva: reserva),
           const Gap.md(),
-          _DividendsCard(
-            portfolioLabel: 'Reserva',
-            outcome: reserva,
-            isLight: isLight,
-          ),
+          _ProventosLadoALado(principal: principal, reserva: reserva),
+        ] else ...[
+          if (principal != null) ...[
+            const Gap.md(),
+            _MetricsCard(
+              title: 'Carteira Principal',
+              outcome: principal,
+              isLight: isLight,
+            ),
+            const Gap.md(),
+            _DividendsCard(
+              portfolioLabel: 'Principal',
+              outcome: principal,
+              isLight: isLight,
+            ),
+          ],
+          if (reserva != null) ...[
+            const Gap.md(),
+            _MetricsCard(
+              title: 'Carteira Reserva',
+              outcome: reserva,
+              isLight: isLight,
+            ),
+            const Gap.sm(),
+            const _ReservaHipotetica(),
+            const Gap.md(),
+            _DividendsCard(
+              portfolioLabel: 'Reserva',
+              outcome: reserva,
+              isLight: isLight,
+            ),
+          ],
         ],
         const Gap.md(),
         _PerAssetCard(principal: principal, reserva: reserva, isLight: isLight),
@@ -724,6 +741,542 @@ const List<HintEntry> _perAssetGlossary = [
         'entre Principal e Reserva.',
   ),
 ];
+
+/// Ressalva sobre o que o patrimônio da Reserva significa.
+///
+/// A palavra "Reserva" muda de sentido entre as telas, e é aqui que a troca
+/// machuca. Na tela de estudo ela é **banco de candidatos** — ativos que
+/// talvez entrem na Principal. Na simulação ela é **carteira paralela
+/// completa**, recebendo os mesmos aportes, porque é isso que mantém o
+/// cronograma idêntico e torna o TWR comparável.
+///
+/// Sem dizê-lo onde o número aparece, ler "Carteira Reserva · R$ 1.193,66"
+/// como dinheiro que se teria é imediato — e é falso.
+class _ReservaHipotetica extends StatelessWidget {
+  const _ReservaHipotetica();
+
+  @override
+  Widget build(BuildContext context) => Text(
+    'A Reserva é um banco de candidatos; aqui ela é simulada como carteira '
+    'inteira, sob os mesmos aportes da Principal. É o que torna a comparação '
+    'possível — e faz do patrimônio dela um valor hipotético.',
+    style: context.finType.caption.copyWith(color: context.fin.textTertiary),
+  );
+}
+
+/// Uma carteira na comparação: o nome que a identifica e a cor do selo.
+typedef _Coluna = ({String nome, Color cor});
+
+/// Nome da carteira sob o ponto colorido dela.
+///
+/// Um widget só para os dois lugares que o desenham — o cabeçalho das tabelas
+/// comparativas e o grupo do cartão de desempenho por ativo. Eram duas cópias
+/// do mesmo `Row`, e o ponto saía com diâmetro literal em cada uma.
+class _SeloCarteira extends StatelessWidget {
+  final String nome;
+
+  /// Cor do ponto **e do texto**. Pinta tinta, então vem do token medido em
+  /// contraste, nunca da variante de marca.
+  final Color cor;
+
+  /// Encosta o conteúdo na direita, para o selo alinhar com a coluna de
+  /// números que ele encabeça.
+  final bool aDireita;
+
+  const _SeloCarteira({
+    required this.nome,
+    required this.cor,
+    this.aDireita = false,
+  });
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    mainAxisAlignment: aDireita
+        ? MainAxisAlignment.end
+        : MainAxisAlignment.start,
+    children: [
+      Container(
+        // `FinSpace.sm`, e não um literal: o projeto anda numa grade de 4 dp,
+        // e diâmetro solto é a porta por onde a grade se perde.
+        width: FinSpace.sm,
+        height: FinSpace.sm,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: cor),
+      ),
+      const Gap.xs(axis: Axis.horizontal),
+      Flexible(
+        child: Text(
+          nome.toUpperCase(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.finType.caption.copyWith(
+            color: cor,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.6,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+/// O valor de uma carteira numa linha da comparação.
+typedef _Celula = ({String texto, FinTrend trend});
+
+/// Uma linha da comparação: o indicador, sua ressalva, e um valor por carteira.
+///
+/// [destaque] marca a grandeza principal do cartão. Sem ele todas as linhas
+/// dividiriam o mesmo peso tipográfico, e o patrimônio final se leria com a
+/// mesma voz do índice de Calmar — o defeito que o `BalanceSummaryCard` foi
+/// construído para resolver, reintroduzido pela porta da tabela.
+typedef _Linha = ({
+  String rotulo,
+  String? nota,
+  bool destaque,
+  List<_Celula> celulas,
+});
+
+/// Tabela de indicadores com uma coluna por carteira.
+///
+/// Existe porque comparar era rolar. Com um cartão por carteira, conferir o
+/// Sharpe da Principal contra o da Reserva obrigava a percorrer oito métricas,
+/// um cartão de proventos e um cabeçalho no caminho — a lente `tela` registrou
+/// o percurso como tensão. Em coluna, a mesma comparação é um movimento de
+/// olho.
+///
+/// **O cabeçalho de coluna não é decoração.** Sem o selo colorido repetindo o
+/// nome da carteira, o leitor precisa lembrar a ordem em que elas aparecem —
+/// e proventos e patrimônio são exatamente o tipo de número que se atribui à
+/// carteira errada.
+///
+/// Largura MEDIDA do conteúdo, e queda para blocos empilhados quando não cabe.
+/// Uma tabela numérica densa não sobrevive a 320 dp sob escala de texto 2,0x
+/// em nenhuma disposição lado a lado: dois valores de `R$ 1.300,62` sozinhos
+/// passam da largura da tela. Empilhar devolve o percurso antigo, que é ruim —
+/// mas truncar o número seria pior, e estourar o layout, inaceitável.
+class _TabelaComparativa extends StatelessWidget {
+  final List<_Coluna> colunas;
+  final List<_Linha> linhas;
+
+  const _TabelaComparativa({required this.colunas, required this.linhas});
+
+  static const double _gap = FinSpace.sm;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.finType;
+    final c = context.fin;
+
+    final rotuloStyle = t.caption.copyWith(color: c.textSecondary);
+    final notaStyle = t.caption.copyWith(color: c.textTertiary);
+    final valorStyle = t.numSm;
+    // A linha em destaque pinta em `numMd`, e a coluna precisa caber o mais
+    // largo dos DOIS papéis -- medir só o menor truncaria justamente o número
+    // que se quis destacar.
+    final destaqueStyle = t.numMd;
+    final seloStyle = t.caption.copyWith(
+      fontWeight: FontWeight.bold,
+      letterSpacing: 0.6,
+    );
+
+    // Largura do rótulo: o mais largo entre indicador e ressalva. É PISO, não
+    // teto -- a coluna recebe o que sobra e o texto quebra em duas linhas se
+    // precisar; o que a medida garante é que ela nunca comece apertada demais
+    // para caber uma palavra.
+    var rotuloW = 0.0;
+    for (final linha in linhas) {
+      final r = FinAmount.measure(context, linha.rotulo, rotuloStyle);
+      if (r > rotuloW) rotuloW = r;
+      final nota = linha.nota;
+      if (nota != null) {
+        final n = FinAmount.measure(context, nota, notaStyle);
+        if (n > rotuloW) rotuloW = n;
+      }
+    }
+
+    // Largura do valor: o mais largo da tabela inteira, e não da coluna. Medir
+    // por coluna daria larguras diferentes para grandezas iguais, e a
+    // comparação depende justamente de os dois números começarem no mesmo x.
+    var valorW = 0.0;
+    for (final linha in linhas) {
+      final estilo = linha.destaque ? destaqueStyle : valorStyle;
+      for (final celula in linha.celulas) {
+        final v = FinAmount.measure(context, celula.texto, estilo);
+        if (v > valorW) valorW = v;
+      }
+    }
+    for (final coluna in colunas) {
+      // O selo ocupa a coluna como qualquer valor: ponto, respiro e nome.
+      final w =
+          FinAmount.measure(context, coluna.nome.toUpperCase(), seloStyle) +
+          FinSpace.sm +
+          FinSpace.xs;
+      if (w > valorW) valorW = w;
+    }
+
+    return LayoutBuilder(
+      builder: (context, restricoes) {
+        final preciso = rotuloW + colunas.length * (valorW + _gap);
+        if (preciso > restricoes.maxWidth) {
+          return _empilhado(context, rotuloStyle, notaStyle);
+        }
+        return _ladoALado(
+          context,
+          rotuloW: rotuloW,
+          valorW: valorW,
+          rotuloStyle: rotuloStyle,
+          notaStyle: notaStyle,
+          valorStyle: valorStyle,
+          destaqueStyle: destaqueStyle,
+        );
+      },
+    );
+  }
+
+  Widget _ladoALado(
+    BuildContext context, {
+    required double rotuloW,
+    required double valorW,
+    required TextStyle rotuloStyle,
+    required TextStyle notaStyle,
+    required TextStyle valorStyle,
+    required TextStyle destaqueStyle,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            SizedBox(width: rotuloW),
+            for (final coluna in colunas) ...[
+              const Gap.sm(axis: Axis.horizontal),
+              SizedBox(
+                width: valorW,
+                child: _SeloCarteira(
+                  nome: coluna.nome,
+                  cor: coluna.cor,
+                  aDireita: true,
+                ),
+              ),
+            ],
+            // A sobra fica DEPOIS das colunas, não dentro do rótulo. Com o
+            // rótulo flexível, os 1024 dp da tela larga entravam todos entre o
+            // nome do indicador e o número dele, e a linha deixava de se ler
+            // como linha.
+            const Spacer(),
+          ],
+        ),
+        const Gap.sm(),
+        for (final linha in linhas)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: FinSpace.xs),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  // Medida, e não flexível: ver o `Spacer` do cabeçalho.
+                  width: rotuloW,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(linha.rotulo, style: rotuloStyle),
+                      if (linha.nota case final nota?)
+                        Text(nota, style: notaStyle),
+                    ],
+                  ),
+                ),
+                for (final celula in linha.celulas) ...[
+                  const Gap.sm(axis: Axis.horizontal),
+                  SizedBox(
+                    width: valorW,
+                    // O `Align` não é decorativo: `FinAmount` embrulha o texto
+                    // num `AnimatedSwitcher`, que CENTRALIZA o filho na caixa
+                    // recebida. Sem ele, "2,86" ficava centrado sob "14,68" e
+                    // a vírgula decimal dançava de uma linha para a outra --
+                    // que é exatamente o que a cifra tabular existe para
+                    // impedir.
+                    child: Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: FinAmount(
+                        text: celula.texto,
+                        style: linha.destaque ? destaqueStyle : valorStyle,
+                        trend: celula.trend,
+                      ),
+                    ),
+                  ),
+                ],
+                const Spacer(),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Uma carteira de cada vez, quando a largura não sustenta as colunas.
+  ///
+  /// `LabelValueRow` de propósito: ele não estoura em largura nenhuma, porque
+  /// o valor desce de linha em vez de disputar espaço com o rótulo.
+  Widget _empilhado(
+    BuildContext context,
+    TextStyle rotuloStyle,
+    TextStyle notaStyle,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < colunas.length; i++) ...[
+          if (i > 0) const Gap.md(),
+          _SeloCarteira(nome: colunas[i].nome, cor: colunas[i].cor),
+          const Gap.xs(),
+          for (final linha in linhas)
+            LabelValueRow(
+              label: linha.rotulo,
+              value: linha.celulas[i].texto,
+              trend: linha.celulas[i].trend,
+            ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Percentual de uma métrica como célula da comparação.
+_Celula _pct(double valor, {bool signed = false, FinTrend? trend}) => (
+  texto: Fmt.percent(valor, signed: signed),
+  trend: trend ?? (signed ? FinAmount.trendOf(valor) : FinTrend.neutral),
+);
+
+/// Razão adimensional como célula da comparação.
+_Celula _razao(double valor) => (texto: Fmt.ratio(valor), trend: FinTrend.neutral);
+
+/// Dinheiro como célula da comparação.
+_Celula _dinheiro(double reais, {FinTrend trend = FinTrend.neutral}) => (
+  texto: Fmt.money(reais),
+  trend: trend,
+);
+
+/// Indicadores das duas carteiras em colunas, no lugar de um cartão para cada.
+///
+/// Só entra em cena com as DUAS simuladas. Ver a justificativa no ponto de uso.
+class _CarteirasLadoALado extends StatelessWidget {
+  final BacktestOutcome principal;
+  final BacktestOutcome reserva;
+
+  const _CarteirasLadoALado({required this.principal, required this.reserva});
+
+  @override
+  Widget build(BuildContext context) {
+    final carteiras = [principal, reserva];
+
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SectionHeader(
+            title: 'Carteiras lado a lado',
+            subtitle:
+                'Mesma janela e mesmos aportes — só a composição difere',
+            trailing: HintIcon(
+              title: 'Indicadores das duas carteiras',
+              intro:
+                  'Todos se referem à janela simulada. As duas carteiras '
+                  'recebem aportes idênticos nas mesmas datas — só a '
+                  'composição difere, então o que sobra de diferença entre '
+                  'as colunas é a escolha dos ativos.',
+              entries: _metricsGlossary,
+            ),
+          ),
+          const Gap.md(),
+          _TabelaComparativa(
+            colunas: [
+              (nome: 'Principal', cor: context.fin.brand),
+              (nome: 'Reserva', cor: context.fin.reserva),
+            ],
+            linhas: [
+              (
+                rotulo: 'Patrimônio final',
+                destaque: true,
+                nota: 'proventos reinvestidos',
+                celulas: [
+                  for (final o in carteiras) _dinheiro(o.finalValue.reais),
+                ],
+              ),
+              (
+                rotulo: 'Aportado',
+                destaque: false,
+                nota: 'capital do investidor',
+                celulas: [
+                  for (final o in carteiras) _dinheiro(o.totalContributed.reais),
+                ],
+              ),
+              (
+                rotulo: 'TWR',
+                destaque: false,
+                nota: 'da composição',
+                celulas: [
+                  for (final o in carteiras)
+                    _pct(o.metrics.timeWeightedReturn, signed: true),
+                ],
+              ),
+              (
+                rotulo: 'XIRR',
+                destaque: false,
+                nota: 'retorno do investidor',
+                celulas: [
+                  for (final o in carteiras)
+                    o.metrics.moneyWeightedReturn == null
+                        ? (texto: '—', trend: FinTrend.blocked)
+                        : _pct(o.metrics.moneyWeightedReturn!, signed: true),
+                ],
+              ),
+              (
+                rotulo: 'CAGR',
+                destaque: false,
+                nota: null,
+                celulas: [
+                  for (final o in carteiras) _pct(o.metrics.cagr, signed: true),
+                ],
+              ),
+              (
+                rotulo: 'Volatilidade',
+                destaque: false,
+                nota: 'anualizada',
+                celulas: [for (final o in carteiras) _pct(o.metrics.volatility)],
+              ),
+              (
+                rotulo: 'Máx. drawdown',
+                destaque: false,
+                nota: null,
+                celulas: [
+                  for (final o in carteiras)
+                    _pct(o.metrics.maxDrawdown, trend: FinTrend.negative),
+                ],
+              ),
+              (
+                rotulo: 'Sharpe',
+                destaque: false,
+                nota: 'vs CDI observado',
+                celulas: [for (final o in carteiras) _razao(o.metrics.sharpe)],
+              ),
+              (
+                rotulo: 'Sortino',
+                destaque: false,
+                nota: null,
+                celulas: [for (final o in carteiras) _razao(o.metrics.sortino)],
+              ),
+              (
+                rotulo: 'Calmar',
+                destaque: false,
+                nota: null,
+                celulas: [for (final o in carteiras) _razao(o.metrics.calmar)],
+              ),
+              (
+                rotulo: 'DY líquido',
+                destaque: false,
+                nota: 'após IR',
+                celulas: [
+                  for (final o in carteiras) _pct(o.metrics.netDividendYield),
+                ],
+              ),
+            ],
+          ),
+          const Gap.md(),
+          const _ReservaHipotetica(),
+        ],
+      ),
+    );
+  }
+}
+
+/// Proventos das duas carteiras em colunas.
+///
+/// Antes eram dois cartões de estrutura idêntica, um sob o outro. A pergunta
+/// que eles respondem — quanto de imposto cada composição custou — é
+/// comparativa por natureza.
+class _ProventosLadoALado extends StatelessWidget {
+  final BacktestOutcome principal;
+  final BacktestOutcome reserva;
+
+  const _ProventosLadoALado({required this.principal, required this.reserva});
+
+  @override
+  Widget build(BuildContext context) {
+    final carteiras = [principal, reserva];
+
+    String? proporcao(BacktestOutcome o) {
+      final bruto = o.grossDividends.reais;
+      if (bruto <= 0) return null;
+      return Fmt.percent(o.withheldTax.reais / bruto, decimals: 1);
+    }
+
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SectionHeader(
+            title: 'Proventos no período',
+            subtitle: 'JCP sofre 15% de IRRF; dividendo é isento',
+          ),
+          const Gap.md(),
+          _TabelaComparativa(
+            colunas: [
+              (nome: 'Principal', cor: context.fin.brand),
+              (nome: 'Reserva', cor: context.fin.reserva),
+            ],
+            linhas: [
+              (
+                rotulo: 'Bruto',
+                destaque: false,
+                nota: null,
+                celulas: [
+                  for (final o in carteiras) _dinheiro(o.grossDividends.reais),
+                ],
+              ),
+              (
+                rotulo: 'IR retido',
+                destaque: false,
+                // A proporção só existe quando houve provento; sem ela a nota
+                // sai vazia em vez de anunciar "0,0% do bruto" sobre nada.
+                nota: [
+                  for (final o in carteiras) proporcao(o),
+                ].nonNulls.isEmpty
+                    ? null
+                    : 'sobre o bruto de cada uma',
+                celulas: [
+                  for (final o in carteiras)
+                    _dinheiro(
+                      o.withheldTax.reais,
+                      trend: o.withheldTax.reais > 0
+                          ? FinTrend.negative
+                          : FinTrend.neutral,
+                    ),
+                ],
+              ),
+              (
+                rotulo: 'Líquido reinvestido',
+                destaque: false,
+                nota: null,
+                celulas: [
+                  for (final o in carteiras)
+                    // A subtração acontece em `Money`, ou seja em centavos
+                    // INTEIROS, e só o resultado vira `double` para exibição.
+                    // Em reais, `1.14 - 0.15` dá `0.9899999999999999` e o
+                    // formatador esconde um centavo sem avisar ninguém.
+                    _dinheiro(
+                      (o.grossDividends - o.withheldTax).reais,
+                      trend: FinTrend.positive,
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 /// Indicadores de uma carteira na janela simulada.
 ///
@@ -1012,24 +1565,7 @@ class _AssetGroup extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 7,
-              height: 7,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-            ),
-            const Gap.xs(axis: Axis.horizontal),
-            Text(
-              label.toUpperCase(),
-              style: context.finType.caption.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.6,
-              ),
-            ),
-          ],
-        ),
+        _SeloCarteira(nome: label, cor: color),
         for (final asset in assets)
           _AssetRow(
             asset: asset,

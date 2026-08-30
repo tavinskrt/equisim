@@ -15,6 +15,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'populated_state.dart' show comparisonOf, outcomeOf;
+import 'ui_test.dart' show serieLonga;
+
 /// Regressao de layout: nenhuma tela pode estourar em largura suportada nem
 /// sob escala de texto ampliada.
 ///
@@ -38,6 +41,27 @@ const _escalas = <double>[1.0, 1.3, 2.0];
 /// aparecer, ela e regressao, nao heranca.
 const _pendentes = <String, String>{};
 
+/// Divida MEDIDA da BacktestPage populada, no mesmo formato de [_pendentes].
+///
+/// As duas entradas sao do `_AssetRow`, no cartao de desempenho por ativo, e
+/// sao HERANCA e nao regressao: a matriz nunca cobriu o estado populado, entao
+/// este estouro existia sem nunca ter sido medido. Foi a cobertura nova que o
+/// revelou.
+///
+/// O `_AssetRow` monta coluna de ticker e coluna de valor com largura MEDIDA e
+/// um `Expanded` no meio. Sob escala ampliada as duas colunas fixas somadas
+/// passam da largura disponivel, o `Expanded` colapsa a zero e o excedente
+/// vira listra. A correcao e daquele widget, nao da tabela comparativa -- que
+/// cobre as nove combinacoes sem estourar, porque cai para blocos empilhados
+/// quando as colunas nao cabem.
+const _pendentesPopulada = <String, String>{
+  'BacktestPage|320|1.3':
+      'P-extra: `_AssetRow` estoura 7 px -- as colunas medidas de ticker e '
+      'valor nao cedem espaco ao `Expanded` sob escala ampliada',
+  'BacktestPage|390|2.0':
+      'P-extra: mesmo defeito do `_AssetRow`, 65 px nesta combinacao',
+};
+
 String _chave(String tela, double largura, double escala) =>
     '$tela|${largura.toInt()}|$escala';
 
@@ -56,11 +80,18 @@ Asset _asset(String symbol, String sector) => Asset(
 /// e onde as colunas numericas densas vivem.
 ///
 /// O que ela cobre ja pegou defeito real (cinco combinacoes da GoalPage e uma
-/// da BacktestPage estouram so com formulario e estado vazio), mas cobrir o
-/// estado populado exige fabricar `PortfolioComparison`, `BacktestOutcome` e
-/// `ValuationResult` de mentira. Fica como ampliacao da UI-07, e ate la nao
-/// trate esta suite como prova de que a tela cheia cabe.
-List<Override> _overrides() => <Override>[
+/// da BacktestPage estouram so com formulario e estado vazio).
+///
+/// A BacktestPage POPULADA saiu desse limite: o grupo do fim do arquivo monta
+/// `PortfolioComparison` de verdade e cobre a mesma matriz. Foi o que a tabela
+/// comparativa das duas carteiras exigiu -- ela e a coluna numerica mais densa
+/// do aplicativo, e a suite nao podia ficar cega justamente ali. StudyPage,
+/// GoalPage e ValuationPage seguem cobertas so em estado vazio.
+/// [comparacao] entra pelo parametro, e nao por um override adicional na
+/// chamada: `comparisonProvider` ja e sobrescrito aqui, e o Riverpod recusa o
+/// mesmo provider duas vezes no mesmo container. `null` reproduz o estado
+/// vazio, que e o padrao da matriz.
+List<Override> _overrides({PortfolioComparison? comparacao}) => <Override>[
   currentUserIdProvider.overrideWithValue(null),
   marketAnchorsProvider.overrideWith((ref) async => MarketAnchors.fallback2026),
   savedStudiesProvider.overrideWith((ref) async => const <PortfolioStudy>[]),
@@ -71,7 +102,7 @@ List<Override> _overrides() => <Override>[
   netDividendYieldsProvider.overrideWith(
     (ref) async => const <Ticker, double>{},
   ),
-  comparisonProvider.overrideWith((ref) async => null),
+  comparisonProvider.overrideWith((ref) async => comparacao),
   correlationProvider.overrideWith((ref) async => null),
   goalAlignmentProvider.overrideWith((ref) async => null),
   goalFeasibilityProvider.overrideWith((ref) async => null),
@@ -83,12 +114,17 @@ Future<void> _pump(
   required double largura,
   required double escala,
   bool comAtivos = false,
+  PortfolioComparison? comparacao,
 }) async {
   tester.view.devicePixelRatio = 1.0;
-  tester.view.physicalSize = Size(largura, 900);
+  // Altura generosa quando a tela vem populada: o `SliverList` so infla os
+  // cartoes que entram na viewport, e um estouro fora dela nao seria visto.
+  tester.view.physicalSize = Size(largura, comparacao == null ? 900 : 6000);
   addTearDown(tester.view.reset);
 
-  final container = ProviderContainer(overrides: _overrides());
+  final container = ProviderContainer(
+    overrides: _overrides(comparacao: comparacao),
+  );
   addTearDown(container.dispose);
 
   // O provider de tema e um StateProvider comum; sem semear, a tela monta no
@@ -168,4 +204,50 @@ void main() {
       }
     });
   }
+
+  // ---------------------------------------------------------------------
+  // BacktestPage POPULADA
+  //
+  // A tela vazia nao constroi `_CarteirasLadoALado` nem `_ProventosLadoALado`,
+  // que sao onde vivem as colunas numericas. Sem este grupo, a tabela
+  // comparativa entraria no repositorio sem prova nenhuma de que cabe.
+  //
+  // Nao ha entrada esperada em `_pendentes`: a tabela CAI PARA BLOCOS
+  // EMPILHADOS quando a largura nao sustenta as colunas, entao nenhuma
+  // combinacao deve estourar. Se alguma estourar, o degrau nao esta
+  // funcionando -- e e defeito, nao heranca.
+  // ---------------------------------------------------------------------
+  group('BacktestPage populada', () {
+    for (final largura in _larguras) {
+      for (final escala in _escalas) {
+        final pendente =
+            _pendentesPopulada[_chave('BacktestPage', largura, escala)];
+
+        testWidgets('cabe em ${largura.toInt()} dp sob ${escala}x'
+            '${pendente == null ? '' : '  [PENDENTE: $pendente]'}', (
+          tester,
+        ) async {
+          await _pump(
+            tester,
+            const BacktestPage(),
+            largura: largura,
+            escala: escala,
+            comAtivos: true,
+            comparacao: comparisonOf(
+              principal: outcomeOf('PETR4', serieLonga(0.05)),
+              reserva: outcomeOf('ITUB4', serieLonga(0.12)),
+            ),
+          );
+
+          expect(
+            tester.takeException(),
+            isNull,
+            reason:
+                'BacktestPage populada estourou o layout em '
+                '${largura.toInt()} dp sob escala ${escala}x.',
+          );
+        }, skip: pendente != null);
+      }
+    }
+  });
 }
