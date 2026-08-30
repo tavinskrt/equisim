@@ -331,10 +331,13 @@ class _FeasibilityCard extends StatelessWidget {
           if (showRates)
             MetricTileRow(
               tiles: [
+                // `Lexico.exigido`, e nao "Rentabilidade exigida": e a
+                // mesma grandeza que a aba Analise confronta com o XIRR, e
+                // dois nomes faziam o leitor tratar como duas.
                 MetricTile(
-                  label: 'Rentabilidade exigida',
+                  label: Lexico.exigido,
                   value: Fmt.percent(rate, decimals: 2),
-                  hint: 'ao ano',
+                  hint: Lexico.exigidoAoAno,
                   trend: _trend,
                 ),
                 MetricTile(
@@ -396,25 +399,31 @@ class _AlignmentCard extends StatelessWidget {
             subtitle: 'Convergência assumida em $horizonMonths meses',
           ),
           const Gap.md(),
+          // DUAS colunas, e nao tres. A taxa exigida saiu daqui: ela ja
+          // aparece no cartao de viabilidade logo acima, que e onde ela
+          // nasce, e os dois blocos vinham de providers DIFERENTES --
+          // `goalFeasibilityProvider` aguarda um provider assincrono e
+          // `goalAlignmentProvider` aguarda quatro, entao enquanto o usuario
+          // digitava um deles exibia a taxa da meta anterior. Numero
+          // renderizado uma vez so nao pode divergir de si mesmo.
           MetricTileRow(
             tiles: [
               MetricTile(
-                label: 'Exigido',
-                value: Fmt.percent(alignment.required.annual),
-                hint: 'ao ano',
-              ),
-              MetricTile(
-                label: 'Esperado da carteira',
+                label: Lexico.esperado,
                 value: Fmt.percent(alignment.expectedReturn),
                 hint: 'upside anualizado + DY líquido',
                 trend: meets ? FinTrend.positive : FinTrend.negative,
               ),
               MetricTile(
-                label: 'Folga',
+                label: Lexico.folga,
                 // `Fmt.points`, e nao interpolacao a mao: a aba Analise exibe
                 // a MESMA grandeza no cartao de confronto, e duas escritas da
                 // mesma folga divergem na primeira vez que uma delas mudar.
                 value: Fmt.points(alignment.gap),
+                // A referencia da folga saiu da propria fila quando a coluna
+                // "Exigido" saiu; sem esta ressalva o numero fica sem contra
+                // o que ser lido.
+                hint: 'sobre o exigido acima',
                 trend: FinAmount.trendOf(alignment.gap),
               ),
             ],

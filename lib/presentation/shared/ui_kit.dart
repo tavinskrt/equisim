@@ -103,6 +103,45 @@ abstract final class Fmt {
   }
 }
 
+/// Vocabulário das grandezas que atravessam mais de uma tela.
+///
+/// Existe porque **rótulo é contrato com o leitor**. A mesma rentabilidade
+/// exigida se chamava "Rentabilidade exigida" na aba Meta e "Exigido" na de
+/// Análise; quem aprendeu um dos dois não reconhecia o outro como a mesma
+/// coisa, e passava a tratar como duas grandezas o que é uma só.
+///
+/// Cada constante é usada em pelo menos dois arquivos. As de um lugar só —
+/// "Volatilidade", "Sharpe", "Preço justo" — continuam escritas no ponto de
+/// uso: centralizar rótulo que não viaja só afasta o texto de quem o lê.
+///
+/// **A ressalva NÃO entra aqui, e é deliberado.** [esperado] aparece na tela
+/// de estudo com a premissa de convergência e a cobertura da carteira, e na
+/// tela da meta com a composição do número. As duas são verdadeiras, servem a
+/// perguntas diferentes, e a que está no estudo foi acrescentada de propósito
+/// para não omitir a premissa que sustenta o valor. Uniformizá-las apagaria
+/// informação em nome de uma simetria que ninguém pediu — o que precisa
+/// coincidir é o NOME da grandeza, não tudo que se diz sobre ela.
+abstract final class Lexico {
+  /// Rentabilidade que o plano patrimonial exige, ao ano.
+  static const String exigido = 'Exigido';
+
+  /// Ressalva de [exigido]. Viaja junto porque a taxa sem a base é ambígua.
+  static const String exigidoAoAno = 'ao ano';
+
+  /// Retorno que a avaliação implica — projeção, não evidência.
+  static const String esperado = 'Esperado da carteira';
+
+  /// Retorno que o histórico entregou — evidência, não projeção.
+  static const String realizado = 'Realizado';
+
+  /// Ressalva de [realizado]: nomeia o indicador para que o leitor o
+  /// reconheça no painel de indicadores, onde ele aparece sob a sigla.
+  static const String realizadoXirr = 'XIRR, ao ano';
+
+  /// Distância entre o que se espera (ou se obteve) e o que se exige.
+  static const String folga = 'Folga';
+}
+
 /// Cartão translúcido — a linguagem visual herdada do projeto anterior.
 ///
 /// O efeito de vidro depende de haver variação atrás: sobre cor perfeitamente

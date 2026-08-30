@@ -2,6 +2,7 @@ import 'package:equisim/di/providers.dart';
 import 'package:equisim/presentation/backtest/backtest_page.dart';
 import 'package:equisim/presentation/backtest/backtest_providers.dart';
 import 'package:equisim/presentation/export/csv_export.dart';
+import 'package:equisim/presentation/goals/goal_page.dart';
 import 'package:equisim/presentation/shared/charts.dart';
 import 'package:equisim/presentation/shared/theme_bridge.dart';
 import 'package:equisim/presentation/shared/ui_kit.dart';
@@ -733,6 +734,95 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('A CARTEIRA FRENTE À META'), findsNothing);
+    });
+  });
+
+  group('Meta — a rentabilidade exigida sai uma vez so', () {
+    void telaAlta(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    /// Os dois cartoes da tela, alimentados por providers DIFERENTES e com
+    /// taxas de proposito divergentes: 18,40% no veredito contra 18,44% no
+    /// alinhamento. E o cenario que a lente `tela` flagrou.
+    List<Override> doisCartoes() => [
+          goalFeasibilityProvider.overrideWith((ref) async => FeasibilityVerdict(
+                level: FeasibilityLevel.demanding,
+                requiredAnnualRate: 0.184,
+                anchors: MarketAnchors.fallback2026,
+                message: 'A meta exige 18,40% ao ano.',
+              )),
+          goalAlignmentProvider.overrideWith((ref) async => GoalAlignment(
+                required: const RequiredReturn(monthly: 0.0142, iterations: 24),
+                verdict: FeasibilityVerdict(
+                  level: FeasibilityLevel.demanding,
+                  requiredAnnualRate: 0.1844,
+                  anchors: MarketAnchors.fallback2026,
+                  message: 'meta exigente',
+                ),
+                expectedReturn: 0.1495,
+                valuationCoverage: 0.75,
+              )),
+        ];
+
+    testWidgets('a taxa aparece em um unico bloco numerico', (tester) async {
+      telaAlta(tester);
+      await tester.pumpWidget(
+        harness(overrides: doisCartoes(), child: const GoalPage()),
+      );
+      await tester.pumpAndSettle();
+
+      // O bloco do cartao de viabilidade, que e onde a taxa nasce.
+      expect(find.text('18,40%'), findsOneWidget);
+      // O do cartao de confronto saiu. Era ele que exibia 18,44% ao lado do
+      // outro -- dois providers resolvendo a mesma taxa por conta propria.
+      expect(find.text('18,44%'), findsNothing);
+    });
+
+    testWidgets('o confronto mantem esperado e folga', (tester) async {
+      telaAlta(tester);
+      await tester.pumpWidget(
+        harness(overrides: doisCartoes(), child: const GoalPage()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('CARTEIRA FRENTE À META'), findsOneWidget);
+      expect(find.text('Esperado da carteira'), findsOneWidget);
+      expect(find.text('Folga'), findsOneWidget);
+      // Sem a coluna "Exigido" na fila, a folga precisa dizer contra o que se
+      // mede -- senao o numero fica solto no cartao.
+      expect(find.text('sobre o exigido acima'), findsOneWidget);
+    });
+
+    testWidgets('o rotulo e o mesmo que a aba Analise usa', (tester) async {
+      telaAlta(tester);
+      // Literal de proposito, e nao `Lexico.exigido`: e a palavra que o
+      // usuario le, e trocar o valor da constante e mudanca de vocabulario --
+      // deve exigir tocar no teste, nao passar despercebida.
+      await tester.pumpWidget(
+        harness(overrides: doisCartoes(), child: const GoalPage()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Exigido'), findsOneWidget);
+      expect(find.text('Rentabilidade exigida'), findsNothing);
+    });
+
+    testWidgets('a prosa do veredito ainda cita a taxa -- residuo conhecido',
+        (tester) async {
+      telaAlta(tester);
+      // `FeasibilityVerdict.message` chega do nucleo com o percentual ja
+      // embutido na frase. Fechar essa segunda saida depende de uma decisao
+      // sobre o `equisim_core`, nao da interface. O teste registra o residuo
+      // para que ele nao seja descoberto de novo como se fosse novidade.
+      await tester.pumpWidget(
+        harness(overrides: doisCartoes(), child: const GoalPage()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('A meta exige 18,40% ao ano.'), findsOneWidget);
     });
   });
 

@@ -587,20 +587,20 @@ class _GoalConfrontationCard extends ConsumerWidget {
               MetricTileRow(
                 tiles: [
                   MetricTile(
-                    label: 'Exigido',
+                    label: Lexico.exigido,
                     value: Fmt.percent(exigido),
-                    hint: 'ao ano',
+                    hint: Lexico.exigidoAoAno,
                   ),
                   MetricTile(
-                    label: 'Realizado',
+                    label: Lexico.realizado,
                     value: realizado == null
                         ? '—'
                         : Fmt.percent(realizado, signed: true),
-                    hint: 'XIRR, ao ano',
+                    hint: Lexico.realizadoXirr,
                     trend: FinAmount.trendOf(realizado),
                   ),
                   MetricTile(
-                    label: 'Folga',
+                    label: Lexico.folga,
                     value: folga == null ? '—' : Fmt.points(folga),
                     trend: FinAmount.trendOf(folga),
                   ),

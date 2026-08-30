@@ -241,7 +241,7 @@ class _StudyHeader extends ConsumerWidget {
                     ' / ${Portfolio.maxAssets}',
               ),
               MetricTile(
-                label: 'Esperado da carteira',
+                label: Lexico.esperado,
                 value: weightedUpside == null
                     ? '—'
                     : Fmt.percent(weightedUpside, decimals: 1, signed: true),
