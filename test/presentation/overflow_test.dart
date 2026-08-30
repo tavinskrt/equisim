@@ -4,6 +4,7 @@ import 'package:equisim/presentation/backtest/backtest_page.dart';
 import 'package:equisim/presentation/backtest/backtest_providers.dart';
 import 'package:equisim/presentation/goals/goal_page.dart';
 import 'package:equisim/presentation/shared/theme_bridge.dart';
+import 'package:equisim/presentation/shell/app_shell.dart';
 import 'package:equisim/presentation/study/study_notifier.dart';
 import 'package:equisim/presentation/study/study_page.dart';
 import 'package:equisim/presentation/theme/fin_theme.dart';
@@ -160,6 +161,11 @@ Future<void> _pump(
 
 void main() {
   final telas = <String, ({Widget Function() build, bool comAtivos})>{
+    // A casca entrou na matriz quando o pacote UI-1 lhe deu uma QUARTA aba:
+    // cada rotulo passou a ter um quarto da largura, e "Simulacao" em 320 dp
+    // sob escala ampliada e o caso limite. Sem cobertura, a barra seria o
+    // unico componente da tela que ninguem mede.
+    'AppShell': (build: AppShell.new, comAtivos: true),
     'StudyPage': (build: StudyPage.new, comAtivos: true),
     'BacktestPage': (build: BacktestPage.new, comAtivos: true),
     'GoalPage': (build: GoalPage.new, comAtivos: false),

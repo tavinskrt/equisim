@@ -46,7 +46,6 @@ import 'package:equisim/presentation/study/study_notifier.dart';
 import 'package:equisim/presentation/study/study_page.dart';
 import 'package:equisim/presentation/theme/fin_theme.dart';
 import 'package:equisim/presentation/valuation/valuation_page.dart';
-import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -134,11 +133,10 @@ final _alvos = <Alvo>[
   (nome: 'estudo', build: StudyPage.new, comAtivos: true),
   (nome: 'backtest', build: BacktestPage.new, comAtivos: true),
   (nome: 'meta', build: GoalPage.new, comAtivos: false),
-  (
-    nome: 'valuation',
-    build: () => ValuationPage(ticker: Ticker.parse('PETR4')),
-    comAtivos: false,
-  ),
+  // A ABA, e nao a tela empilhada: e o caminho que o pacote UI-1 abriu, e e
+  // ele que a lente precisa examinar. `comAtivos` porque sem carteira montada
+  // a aba mostra so o estado vazio.
+  (nome: 'valuation', build: ValuationTab.new, comAtivos: true),
 ];
 
 Future<void> _montar(

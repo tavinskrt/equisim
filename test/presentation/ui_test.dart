@@ -5,10 +5,12 @@ import 'package:equisim/presentation/export/csv_export.dart';
 import 'package:equisim/presentation/goals/goal_page.dart';
 import 'package:equisim/presentation/shared/charts.dart';
 import 'package:equisim/presentation/shared/theme_bridge.dart';
+import 'package:equisim/presentation/shell/app_shell.dart';
 import 'package:equisim/presentation/shared/ui_kit.dart';
 import 'package:equisim/presentation/theme/fin_theme.dart';
 import 'package:equisim/presentation/study/study_notifier.dart';
 import 'package:equisim/presentation/study/study_page.dart';
+import 'package:equisim/presentation/valuation/valuation_page.dart';
 import 'package:equisim/presentation/valuation/valuation_providers.dart';
 import 'package:equisim_core/equisim_core.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -1021,6 +1023,175 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('A meta exige 18,40% ao ano.'), findsOneWidget);
+    });
+  });
+
+  group('Backtest — o par que a ordenação encosta', () {
+    List<Override> withComparison(PortfolioComparison comparison) => [
+          comparisonProvider.overrideWith((ref) async => comparison),
+          correlationProvider.overrideWith((ref) async => null),
+        ];
+
+    void telaAlta(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    testWidgets('nomeia o pior detido e o melhor candidato', (tester) async {
+      telaAlta(tester);
+      // O cartao ja ordenava as duas listas para encostar essas duas linhas.
+      // A adjacencia era intencional e ficava implicita: quem nao lesse o
+      // glossario via duas listas ordenadas, nao um par.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', serieLonga(0.02)),
+          reserva: outcomeOf('ITUB4', serieLonga(0.12)),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('No encontro das duas listas'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('PETR4 é o pior retorno da Principal'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('ITUB4 o melhor da Reserva'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('não promete resultado que a simulação não calculou',
+        (tester) async {
+      telaAlta(tester);
+      // A Principal roda como ela e; nenhuma carteira trocada foi calculada.
+      // Numero que parece conselho e pior que numero nenhum.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', serieLonga(0.02)),
+          reserva: outcomeOf('ITUB4', serieLonga(0.12)),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('não roda a carteira trocada'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('candidato que não supera ninguém também é dito',
+        (tester) async {
+      telaAlta(tester);
+      // Observacao que so fala a favor deixa de ser observacao.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', serieLonga(0.12)),
+          reserva: outcomeOf('ITUB4', serieLonga(0.02)),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('Nenhum candidato da Reserva superou'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('sem Reserva não há par a nomear', (tester) async {
+      telaAlta(tester);
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', serieLonga(0.05)),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('No encontro das duas listas'), findsNothing);
+      expect(find.textContaining('Nenhum candidato'), findsNothing);
+    });
+  });
+
+  group('Valuation — a aba que existe antes da escolha', () {
+    void telaAlta(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    testWidgets('sem ativo na carteira, diz onde montá-la', (tester) async {
+      telaAlta(tester);
+      // Como ABA ela precisa existir antes da escolha. Abrir em branco faria o
+      // rotulo prometer o que a tela nao entrega -- o defeito que UI-1 fecha.
+      await tester.pumpWidget(harness(child: const ValuationTab()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nenhum ativo para avaliar'), findsOneWidget);
+      expect(find.textContaining('aba Estudo'), findsOneWidget);
+    });
+
+    testWidgets('com ativos, oferece a escolha e avalia o primeiro',
+        (tester) async {
+      telaAlta(tester);
+      late WidgetRef capturado;
+      await tester.pumpWidget(harness(
+        child: Consumer(builder: (context, ref, _) {
+          capturado = ref;
+          return const ValuationTab();
+        }),
+      ));
+      final notifier = capturado.read(studyProvider.notifier);
+      notifier.addAsset(assetOf('PETR4', 'energia'), toPrincipal: true);
+      notifier.addAsset(assetOf('ITUB4'), toPrincipal: false);
+      await tester.pumpAndSettle();
+
+      expect(find.text('ATIVO AVALIADO'), findsOneWidget);
+      // A Reserva entra no seletor: e nela que moram os candidatos que se
+      // avalia antes de promover.
+      expect(find.widgetWithText(ChoiceChip, 'PETR4'), findsOneWidget);
+      expect(find.widgetWithText(ChoiceChip, 'ITUB4'), findsOneWidget);
+    });
+  });
+
+  group('Casca — cada aba abre a tela que seu rótulo nomeia', () {
+    testWidgets('quatro frentes, quatro rótulos', (tester) async {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 2000);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(harness(child: const AppShell()));
+      await tester.pump();
+
+      for (final rotulo in ['Estudo', 'Valuation', 'Meta', 'Simulação']) {
+        expect(find.text(rotulo), findsOneWidget, reason: 'aba $rotulo');
+      }
+      // Os dois rotulos que nao descreviam a tela sairam de cena.
+      expect(find.text('Carteiras'), findsNothing);
+      expect(find.text('Análise'), findsNothing);
+    });
+
+    testWidgets('a aba Valuation abre o valuation', (tester) async {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 2000);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(harness(child: const AppShell()));
+      await tester.pump();
+
+      await tester.tap(find.text('Valuation'));
+      await tester.pumpAndSettle();
+
+      // Sem carteira montada, a aba diz o que falta -- e ja e o valuation
+      // falando, nao outra tela.
+      expect(find.text('Nenhum ativo para avaliar'), findsOneWidget);
     });
   });
 

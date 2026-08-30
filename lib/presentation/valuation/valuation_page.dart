@@ -9,10 +9,60 @@ import '../components/fin_amount.dart';
 import '../shared/charts.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
+import '../study/study_notifier.dart';
 import '../theme/fin_colors.dart';
 import 'valuation_providers.dart';
 
-/// Detalhe da avaliação de um ativo.
+/// A avaliação de um ativo, **sem casca**.
+///
+/// Existe porque a mesma avaliação passou a ser alcançada por dois caminhos: a
+/// aba Valuation, que vive dentro da casca do aplicativo, e a tela empilhada
+/// que se abre ao tocar num ticker da carteira. Duplicar o corpo faria as duas
+/// divergirem na primeira alteração — e é o corpo, não a casca, que carrega a
+/// metodologia que a banca vai ler.
+class ValuationView extends ConsumerWidget {
+  /// Ativo avaliado.
+  final Ticker ticker;
+
+  /// Tema corrente.
+  final bool isLight;
+
+  /// Declara o corpo da avaliação.
+  const ValuationView({
+    super.key,
+    required this.ticker,
+    required this.isLight,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final valuation = ref.watch(valuationProvider(ticker));
+
+    return valuation.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => EmptyState(
+        icon: Icons.error_outline,
+        title: 'Falha na avaliação',
+        message: '$error',
+      ),
+      data: (result) => result == null
+          ? EmptyState(
+              icon: Icons.help_outline,
+              title: 'Não foi possível avaliar',
+              message:
+                  'Os dados disponíveis para ${ticker.value} não sustentam '
+                  'nenhum modelo de avaliação.',
+            )
+          : _ValuationBody(result: result, isLight: isLight),
+    );
+  }
+}
+
+/// Detalhe da avaliação de um ativo, empilhado sobre a tela que o chamou.
+///
+/// É o caminho de dentro da carteira: toca-se num ticker e a avaliação abre
+/// com o símbolo no topo e o botão de voltar. A aba Valuation usa
+/// [ValuationTab], que compartilha o corpo mas troca a casca por um seletor.
 class ValuationPage extends ConsumerWidget {
   final Ticker ticker;
   const ValuationPage({super.key, required this.ticker});
@@ -20,7 +70,6 @@ class ValuationPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLight = ref.watch(isLightModeProvider);
-    final valuation = ref.watch(valuationProvider(ticker));
 
     return Scaffold(
       body: ScreenBackground(
@@ -28,30 +77,119 @@ class ValuationPage extends ConsumerWidget {
           child: Column(
             children: [
               _Header(ticker: ticker, isLight: isLight),
-              Expanded(
-                child: valuation.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (error, _) => EmptyState(
-                    icon: Icons.error_outline,
-                    title: 'Falha na avaliação',
-                    message: '$error',
-                  ),
-                  data: (result) => result == null
-                      ? EmptyState(
-                          icon: Icons.help_outline,
-                          title: 'Não foi possível avaliar',
-                          message:
-                              'Os dados disponíveis para ${ticker.value} não '
-                              'sustentam nenhum modelo de avaliação.',
-                        )
-                      : _ValuationBody(result: result, isLight: isLight),
-                ),
-              ),
+              Expanded(child: ValuationView(ticker: ticker, isLight: isLight)),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Aba de valuation: escolhe o ativo e mostra a avaliação dele.
+///
+/// A `ValuationPage` exige um ticker já escolhido — é o caminho de dentro da
+/// carteira. Como ABA ela precisa existir antes da escolha, então o seletor
+/// vem junto: sem ele a aba abriria em branco e o rótulo prometeria algo que
+/// a tela não entrega, que é exatamente o defeito que o pacote UI-1 fecha.
+///
+/// O seletor lista a Principal e a Reserva porque as duas guardam ativos
+/// avaliáveis, e a Reserva é justamente onde moram os candidatos que se
+/// avalia antes de promover.
+class ValuationTab extends ConsumerStatefulWidget {
+  const ValuationTab({super.key});
+
+  @override
+  ConsumerState<ValuationTab> createState() => _ValuationTabState();
+}
+
+class _ValuationTabState extends ConsumerState<ValuationTab> {
+  /// Escolha explícita do usuário. `null` enquanto ele não escolheu — aí a
+  /// aba mostra o primeiro ativo da carteira, para não abrir vazia tendo o
+  /// que mostrar.
+  Ticker? _escolhido;
+
+  @override
+  Widget build(BuildContext context) {
+    final isLight = ref.watch(isLightModeProvider);
+    final study = ref.watch(studyProvider).study;
+
+    final disponiveis = <Ticker>[
+      ...study.principal.tickers,
+      ...study.reserva.tickers,
+    ];
+
+    if (disponiveis.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(FinSpace.lg),
+        child: GlassCard(
+          child: EmptyState(
+            icon: Icons.query_stats_outlined,
+            title: 'Nenhum ativo para avaliar',
+            message:
+                'Monte a carteira Principal na aba Estudo. Cada ativo dela '
+                'pode ser avaliado aqui, com as premissas à vista.',
+          ),
+        ),
+      );
+    }
+
+    // A escolha anterior pode ter saído da carteira enquanto a aba estava em
+    // outra tela. Cair para o primeiro ativo é melhor que avaliar um ticker
+    // que já não está no estudo.
+    final ticker = disponiveis.contains(_escolhido)
+        ? _escolhido!
+        : disponiveis.first;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            FinSpace.lg,
+            FinSpace.lg,
+            FinSpace.lg,
+            0,
+          ),
+          child: GlassCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SectionHeader(
+                  title: 'Ativo avaliado',
+                  subtitle: 'Escolha qual ativo das suas carteiras examinar',
+                ),
+                const Gap.md(),
+                // `Wrap`, e nao `Row`: a quantidade de ativos e do usuario, e
+                // uma fila fixa estouraria assim que ele passasse de meia
+                // duzia. Aqui os chips descem de linha.
+                Wrap(
+                  spacing: FinSpace.sm,
+                  runSpacing: FinSpace.sm,
+                  children: [
+                    for (final t in disponiveis)
+                      ChoiceChip(
+                        label: Text(t.value),
+                        selected: t == ticker,
+                        onSelected: (_) => setState(() => _escolhido = t),
+                        labelStyle: context.finType.bodySm.copyWith(
+                          color: t == ticker
+                              ? context.fin.textOnBrand
+                              : context.fin.textSecondary,
+                        ),
+                        selectedColor: context.fin.brand,
+                        backgroundColor: context.fin.surfaceSunken,
+                        side: BorderSide(color: context.fin.border),
+                        showCheckmark: false,
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(child: ValuationView(ticker: ticker, isLight: isLight)),
+      ],
     );
   }
 }

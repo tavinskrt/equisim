@@ -1481,11 +1481,20 @@ class _PerAssetCard extends StatelessWidget {
               color: context.fin.brand,
               assets: principalAssets,
             ),
-          if (hasBoth)
+          if (hasBoth) ...[
             Padding(
               padding: const EdgeInsets.symmetric(vertical: FinSpace.sm),
               child: Divider(height: 1, color: context.fin.divider),
             ),
+            // A frase mora ENTRE os grupos porque é a junção que ela descreve.
+            // Acima ou abaixo do cartão, ela viraria comentário geral; aqui,
+            // aponta para as duas linhas que o leitor tem diante dos olhos.
+            _ParEncostado(
+              piorDetido: principalAssets.last,
+              melhorCandidato: reservaAssets.first,
+            ),
+            const Gap.sm(),
+          ],
           if (reservaAssets.isNotEmpty)
             _AssetGroup(
               isLight: isLight,
@@ -1497,6 +1506,75 @@ class _PerAssetCard extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// Nomeia, em texto, o par que a ordenação das duas listas põe lado a lado.
+///
+/// O cartão ordena cada carteira do melhor ao pior retorno, e o comentário que
+/// justifica esse arranjo diz o motivo: assim o **pior ativo detido** fica no
+/// fim da primeira lista e o **melhor candidato** no topo da segunda, encostados
+/// um no outro. A adjacência era intencional e ficava implícita — quem não lesse
+/// o glossário via duas listas ordenadas, não um par.
+///
+/// **Não promete resultado.** A simulação roda a Principal como ela é; nenhuma
+/// carteira trocada foi calculada. O que se afirma é a distância entre dois
+/// retornos observados, e a ressalva diz isso com todas as letras — um número
+/// que parece conselho é pior que número nenhum.
+class _ParEncostado extends StatelessWidget {
+  /// Último da Principal na ordenação: o pior retorno entre os detidos.
+  final AssetPerformance piorDetido;
+
+  /// Primeiro da Reserva: o melhor retorno entre os candidatos.
+  final AssetPerformance melhorCandidato;
+
+  const _ParEncostado({
+    required this.piorDetido,
+    required this.melhorCandidato,
+  });
+
+  static String _pct(double v) => Fmt.percent(v, decimals: 1, signed: true);
+
+  @override
+  Widget build(BuildContext context) {
+    final diferenca =
+        (melhorCandidato.totalReturn - piorDetido.totalReturn) * 100;
+
+    // Candidato que não superou ninguém também é resposta, e das úteis: diz
+    // que não há troca sugerida pelo período. Silenciar aqui faria a frase
+    // aparecer só quando conveniente, e uma observação que só fala a favor
+    // deixa de ser observação.
+    final frase = diferenca > 0
+        ? 'No encontro das duas listas: ${piorDetido.ticker.value} é o pior '
+              'retorno da Principal (${_pct(piorDetido.totalReturn)}) e '
+              '${melhorCandidato.ticker.value} o melhor da Reserva '
+              '(${_pct(melhorCandidato.totalReturn)}) — '
+              '${Fmt.points(diferenca)} de diferença.'
+        : 'Nenhum candidato da Reserva superou o pior ativo da Principal no '
+              'período: ${piorDetido.ticker.value} rendeu '
+              '${_pct(piorDetido.totalReturn)} e '
+              '${melhorCandidato.ticker.value}, o melhor da Reserva, '
+              '${_pct(melhorCandidato.totalReturn)}.';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          frase,
+          style: context.finType.caption.copyWith(
+            color: context.fin.textSecondary,
+          ),
+        ),
+        const Gap.xs(),
+        Text(
+          'A simulação não roda a carteira trocada — a distância é o que os '
+          'retornos do período dizem, não recomendação de troca.',
+          style: context.finType.caption.copyWith(
+            color: context.fin.textTertiary,
+          ),
+        ),
+      ],
     );
   }
 }

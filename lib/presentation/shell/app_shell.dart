@@ -16,6 +16,7 @@ import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
 import '../theme/fin_theme.dart';
 import '../study/study_page.dart';
+import '../valuation/valuation_page.dart';
 
 /// Casca principal do aplicativo, com as três frentes de trabalho.
 class AppShell extends ConsumerStatefulWidget {
@@ -29,10 +30,23 @@ class _AppShellState extends ConsumerState<AppShell> {
   int _index = 0;
   bool _menuOpen = false;
 
+  /// Uma aba por frente de trabalho, nomeada pelo que ela abre.
+  ///
+  /// Antes eram três rótulos para seis frentes, e dois deles não descreviam a
+  /// tela: "Carteiras" abria `StudyPage`, cujo título era "Novo estudo", e
+  /// "Análise" abria o backtest — uma análise entre várias, enquanto a mais
+  /// estrita, o valuation, ficava escondida dentro de "Carteiras", alcançável
+  /// só ao entrar num ticker. As lentes `tela` e `rumo` convergiram nisso de
+  /// forma independente.
+  ///
+  /// A quarta aba é o valuation ganhando porta própria. O custo aceito está
+  /// registrado na decisão 22: quem já usa a aplicação vai procurar coisas
+  /// onde elas não estão mais.
   static const _tabs = [
-    (icon: Icons.dashboard_outlined, label: 'Carteiras'),
+    (icon: Icons.tune_outlined, label: 'Estudo'),
+    (icon: Icons.query_stats_outlined, label: 'Valuation'),
     (icon: Icons.flag_outlined, label: 'Meta'),
-    (icon: Icons.insights_outlined, label: 'Análise'),
+    (icon: Icons.insights_outlined, label: 'Simulação'),
   ];
 
   @override
@@ -50,7 +64,12 @@ class _AppShellState extends ConsumerState<AppShell> {
                   Expanded(
                     child: IndexedStack(
                       index: _index,
-                      children: const [StudyPage(), GoalPage(), BacktestPage()],
+                      children: const [
+                        StudyPage(),
+                        ValuationTab(),
+                        GoalPage(),
+                        BacktestPage(),
+                      ],
                     ),
                   ),
                 ],
@@ -96,44 +115,58 @@ class _AppShellState extends ConsumerState<AppShell> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(9),
-                      gradient: context.fin.brandGradient,
-                    ),
-                    child: Icon(
-                      Icons.show_chart,
-                      // Sobre o preenchimento de marca, e este o token que
-                      // garante leitura nos dois temas.
-                      color: context.fin.textOnBrand,
-                      size: 17,
-                    ),
-                  ),
-                  const Gap.sm(axis: Axis.horizontal),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Equisim',
-                        style: context.finType.bodyMd.copyWith(
-                          color: context.fin.textPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
+              // `Expanded`: os dois blocos deste `Row` eram rigidos, e com
+              // `spaceBetween` o excedente nao tinha para onde ir -- em 320 dp
+              // sob escala 1,3x o cabecalho estourava 17 px, sem que nada na
+              // tela dissesse que havia texto escondido. O bloco da marca cede
+              // primeiro porque o outro carrega ALVOS DE TOQUE, e botao que
+              // encolhe deixa de ser alcancavel.
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(9),
+                        gradient: context.fin.brandGradient,
                       ),
-                      Text(
-                        _tabs[_index].label.toUpperCase(),
-                        style: context.finType.caption.copyWith(
-                          color: context.fin.textSecondary,
-                          letterSpacing: 0.5,
-                        ),
+                      child: Icon(
+                        Icons.show_chart,
+                        // Sobre o preenchimento de marca, e este o token que
+                        // garante leitura nos dois temas.
+                        color: context.fin.textOnBrand,
+                        size: 17,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const Gap.sm(axis: Axis.horizontal),
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Equisim',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.finType.bodyMd.copyWith(
+                              color: context.fin.textPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            _tabs[_index].label.toUpperCase(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.finType.caption.copyWith(
+                              color: context.fin.textSecondary,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -203,6 +236,13 @@ class _AppShellState extends ConsumerState<AppShell> {
                         const Gap.xs(),
                         Text(
                           _tabs[i].label,
+                          // Com quatro abas cada rótulo tem um quarto da tela.
+                          // Em 320 dp sob escala ampliada, "Simulação" não
+                          // cabe — e um rótulo cortado com reticências diz que
+                          // falta letra, enquanto o estouro não diz nada.
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                           style: context.finType.caption.copyWith(
                             color: i == _index
                                 ? context.fin.brand
@@ -274,9 +314,9 @@ class _AppShellState extends ConsumerState<AppShell> {
                   await ref
                       .read(themeControllerProvider)
                       .toggleTheme(user?.uid);
-                  ref.read(isLightModeProvider.notifier).definir(ref
-                      .read(themeControllerProvider)
-                      .isLightMode);
+                  ref
+                      .read(isLightModeProvider.notifier)
+                      .definir(ref.read(themeControllerProvider).isLightMode);
                 },
               ),
               if (auditEnabled) ...[
