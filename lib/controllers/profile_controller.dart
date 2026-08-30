@@ -6,7 +6,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 /// 
 /// Corresponde ao estado gerenciado no componente `MyProfile.tsx`.
 class ProfileController extends ChangeNotifier {
-  final User? _currentUser = FirebaseAuth.instance.currentUser;
+  /// Usuário autenticado, resolvido sob demanda e com falha tolerada.
+  ///
+  /// `late final` e não inicializador de campo: como inicializador, tocar o
+  /// `FirebaseAuth.instance` acontecia na construção do controlador, e sem
+  /// Firebase no processo isso lança — o que tornava a tela impossível de
+  /// montar em teste. Preguiçoso e protegido, o controlador nasce em qualquer
+  /// ambiente e a tela fica testável, na mesma linha do que `main` já faz ao
+  /// tolerar a falha de inicialização.
+  late final User? _currentUser = _resolveUser();
+
+  static User? _resolveUser() {
+    try {
+      return FirebaseAuth.instance.currentUser;
+    } catch (_) {
+      return null;
+    }
+  }
 
   String _username = '';
   String _email = '';

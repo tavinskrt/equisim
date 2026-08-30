@@ -2,7 +2,6 @@ import 'package:equisim_core/equisim_core.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-import '../../utils/app_colors.dart';
 import '../components/fin_amount.dart';
 import '../theme/fin_space.dart';
 import '../theme/fin_theme.dart';
@@ -126,7 +125,7 @@ class Base100Chart extends StatelessWidget {
               _LegendDot(label: s.label, color: s.color, isLight: isLight),
           ],
         ),
-        const SizedBox(height: 10),
+        const Gap.sm(),
         SizedBox(
           height: height,
           child: // Curva de patrimônio: repinta só quando a série muda, não a
@@ -139,10 +138,8 @@ class Base100Chart extends StatelessWidget {
                     gridData: FlGridData(
                       show: true,
                       drawVerticalLine: false,
-                      getDrawingHorizontalLine: (_) => FlLine(
-                        color: AppColors.divider(isLight),
-                        strokeWidth: 1,
-                      ),
+                      getDrawingHorizontalLine: (_) =>
+                          FlLine(color: context.fin.divider, strokeWidth: 1),
                     ),
                     titlesData: FlTitlesData(
                       topTitles: const AxisTitles(
@@ -157,9 +154,8 @@ class Base100Chart extends StatelessWidget {
                           reservedSize: 42,
                           getTitlesWidget: (value, meta) => Text(
                             value.toStringAsFixed(0),
-                            style: TextStyle(
-                              fontSize: 9,
-                              color: AppColors.textMuted(isLight),
+                            style: context.finType.caption.copyWith(
+                              color: context.fin.textTertiary,
                             ),
                           ),
                         ),
@@ -175,12 +171,11 @@ class Base100Chart extends StatelessWidget {
                               return const SizedBox.shrink();
                             }
                             return Padding(
-                              padding: const EdgeInsets.only(top: 6),
+                              padding: const EdgeInsets.only(top: FinSpace.xs),
                               child: Text(
                                 Fmt.shortDate.format(axis[index]),
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: AppColors.textMuted(isLight),
+                                style: context.finType.caption.copyWith(
+                                  color: context.fin.textTertiary,
                                 ),
                               ),
                             );
@@ -195,9 +190,8 @@ class Base100Chart extends StatelessWidget {
                           final s = series[spot.barIndex];
                           return LineTooltipItem(
                             '${s.label}: ${Fmt.ratio(spot.y, decimals: 1)}',
-                            TextStyle(
+                            context.finType.caption.copyWith(
                               color: s.color,
-                              fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
                           );
@@ -294,21 +288,41 @@ class TornadoChart extends StatelessWidget {
     }
     if (maxSpan <= 0) return const SizedBox.shrink();
 
+    final tipo = context.finType;
+    var rotuloWidth = 0.0;
+    var faixaWidth = 0.0;
+    for (final bar in bars) {
+      final r = FinAmount.measure(context, bar.label, tipo.caption);
+      if (r > rotuloWidth) rotuloWidth = r;
+      final f = FinAmount.measure(
+        context,
+        '${Fmt.money(bar.low)} — ${Fmt.money(bar.high)}',
+        tipo.numSm,
+      );
+      if (f > faixaWidth) faixaWidth = f;
+    }
+    rotuloWidth += FinSpace.sm;
+    faixaWidth += FinSpace.xs;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Colunas medidas do conteudo real: a de rotulo pelo maior nome, a de
+        // faixa pelo maior par de valores. Constante em pixel alinhava em 1,0x
+        // e cortava em 2,0x.
         for (final bar in bars) ...[
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
+            padding: const EdgeInsets.symmetric(vertical: FinSpace.xs),
             child: Row(
               children: [
                 SizedBox(
-                  width: 96,
+                  width: rotuloWidth,
                   child: Text(
                     bar.label,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textSecondary(isLight),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.finType.caption.copyWith(
+                      color: context.fin.textSecondary,
                     ),
                   ),
                 ),
@@ -322,20 +336,27 @@ class TornadoChart extends StatelessWidget {
                           high: bar.high,
                           base: baseValue,
                           maxSpan: maxSpan,
-                          isLight: isLight,
+                          downColor: context.fin.negative.withValues(
+                            alpha: 0.7,
+                          ),
+                          upColor: context.fin.brand.withValues(alpha: 0.7),
+                          axisColor: context.fin.textSecondary,
                         ),
                       ),
                     ),
                   ),
                 ),
                 SizedBox(
-                  width: 96,
+                  width: faixaWidth,
                   child: Text(
                     '${Fmt.money(bar.low)} — ${Fmt.money(bar.high)}',
                     textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 9.5,
-                      color: AppColors.textMuted(isLight),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    // `numSm`: sao dois valores monetarios empilhados linha a
+                    // linha, e sem cifra tabular a virgula dança entre elas.
+                    style: context.finType.numSm.copyWith(
+                      color: context.fin.textTertiary,
                     ),
                   ),
                 ),
@@ -353,14 +374,25 @@ class _TornadoBarPainter extends CustomPainter {
   final double high;
   final double base;
   final double maxSpan;
-  final bool isLight;
+
+  /// Cores recebidas por parametro.
+  ///
+  /// Um `CustomPainter` nao tem `BuildContext` e por isso nao pode consultar o
+  /// tema. Receber a cor pronta e o certo de qualquer forma: mantem o pintor
+  /// ignorante de onde ela veio, e faz `shouldRepaint` conseguir detectar a
+  /// troca de tema -- que com `isLight` booleano ele detectava por acidente.
+  final Color downColor;
+  final Color upColor;
+  final Color axisColor;
 
   _TornadoBarPainter({
     required this.low,
     required this.high,
     required this.base,
     required this.maxSpan,
-    required this.isLight,
+    required this.downColor,
+    required this.upColor,
+    required this.axisColor,
   });
 
   @override
@@ -371,8 +403,8 @@ class _TornadoBarPainter extends CustomPainter {
     final leftWidth = ((base - low) * scale).clamp(0.0, center);
     final rightWidth = ((high - base) * scale).clamp(0.0, center);
 
-    final downPaint = Paint()..color = AppColors.danger.withValues(alpha: 0.7);
-    final upPaint = Paint()..color = AppColors.primary.withValues(alpha: 0.7);
+    final downPaint = Paint()..color = downColor;
+    final upPaint = Paint()..color = upColor;
 
     canvas.drawRect(
       Rect.fromLTWH(center - leftWidth, 3, leftWidth, size.height - 6),
@@ -387,14 +419,31 @@ class _TornadoBarPainter extends CustomPainter {
       Offset(center, 0),
       Offset(center, size.height),
       Paint()
-        ..color = AppColors.textSecondary(isLight)
+        ..color = axisColor
         ..strokeWidth = 1,
     );
   }
 
   @override
   bool shouldRepaint(covariant _TornadoBarPainter old) =>
-      old.low != low || old.high != high || old.base != base;
+      _mudou(old.low, low) ||
+      _mudou(old.high, high) ||
+      _mudou(old.base, base) ||
+      old.downColor != downColor ||
+      old.upColor != upColor ||
+      old.axisColor != axisColor;
+
+  /// Uma grandeza mudou o bastante para justificar repintura?
+  ///
+  /// Não é `!=` por dois motivos. O menor: diferença de um bit em `double` faz
+  /// repintar sem que um pixel mude. O maior: `NaN != NaN` é **verdadeiro**,
+  /// então um valor não-finito -- que esta tela produz quando o valuation
+  /// falha -- fazia o gráfico repintar a cada quadro, para sempre.
+  ///
+  /// A transição de/para `NaN` continua contando como mudança, porque aí o
+  /// desenho muda de fato; o que se elimina é o `NaN` estacionário.
+  static bool _mudou(double antes, double agora) =>
+      antes.isNaN != agora.isNaN || (antes - agora).abs() > 1e-9;
 }
 
 /// Um ponto da dispersão risco × retorno, em pontos percentuais.
@@ -532,9 +581,9 @@ class RiskReturnScatter extends StatelessWidget {
                   horizontalInterval: yInterval,
                   verticalInterval: xInterval,
                   getDrawingHorizontalLine: (_) =>
-                      FlLine(color: AppColors.divider(isLight), strokeWidth: 1),
+                      FlLine(color: context.fin.divider, strokeWidth: 1),
                   getDrawingVerticalLine: (_) =>
-                      FlLine(color: AppColors.divider(isLight), strokeWidth: 1),
+                      FlLine(color: context.fin.divider, strokeWidth: 1),
                 ),
                 borderData: FlBorderData(show: false),
                 titlesData: FlTitlesData(
@@ -547,9 +596,8 @@ class RiskReturnScatter extends StatelessWidget {
                   leftTitles: AxisTitles(
                     axisNameWidget: Text(
                       'Retorno a.a.',
-                      style: TextStyle(
-                        fontSize: 9.5,
-                        color: AppColors.textMuted(isLight),
+                      style: context.finType.caption.copyWith(
+                        color: context.fin.textTertiary,
                       ),
                     ),
                     sideTitles: SideTitles(
@@ -558,9 +606,8 @@ class RiskReturnScatter extends StatelessWidget {
                       interval: yInterval,
                       getTitlesWidget: (value, meta) => Text(
                         '${value.toStringAsFixed(0)}%',
-                        style: TextStyle(
-                          fontSize: 9,
-                          color: AppColors.textMuted(isLight),
+                        style: context.finType.caption.copyWith(
+                          color: context.fin.textTertiary,
                         ),
                       ),
                     ),
@@ -568,9 +615,8 @@ class RiskReturnScatter extends StatelessWidget {
                   bottomTitles: AxisTitles(
                     axisNameWidget: Text(
                       'Volatilidade a.a.',
-                      style: TextStyle(
-                        fontSize: 9.5,
-                        color: AppColors.textMuted(isLight),
+                      style: context.finType.caption.copyWith(
+                        color: context.fin.textTertiary,
                       ),
                     ),
                     sideTitles: SideTitles(
@@ -578,12 +624,11 @@ class RiskReturnScatter extends StatelessWidget {
                       reservedSize: 26,
                       interval: xInterval,
                       getTitlesWidget: (value, meta) => Padding(
-                        padding: const EdgeInsets.only(top: 4),
+                        padding: const EdgeInsets.only(top: FinSpace.xs),
                         child: Text(
                           '${value.toStringAsFixed(0)}%',
-                          style: TextStyle(
-                            fontSize: 9,
-                            color: AppColors.textMuted(isLight),
+                          style: context.finType.caption.copyWith(
+                            color: context.fin.textTertiary,
                           ),
                         ),
                       ),
@@ -593,15 +638,15 @@ class RiskReturnScatter extends StatelessWidget {
                 scatterLabelSettings: ScatterLabelSettings(
                   showLabel: true,
                   getLabelFunction: (index, _) => points[index].label,
-                  getLabelTextStyleFunction: (index, _) => TextStyle(
-                    fontSize: 8.5,
-                    fontWeight: points[index].highlight
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                    color: points[index].highlight
-                        ? points[index].color
-                        : AppColors.textMuted(isLight),
-                  ),
+                  getLabelTextStyleFunction: (index, _) =>
+                      context.finType.caption.copyWith(
+                        fontWeight: points[index].highlight
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: points[index].highlight
+                            ? points[index].color
+                            : context.fin.textTertiary,
+                      ),
                 ),
                 scatterTouchData: ScatterTouchData(
                   enabled: true,
@@ -618,9 +663,8 @@ class RiskReturnScatter extends StatelessWidget {
                         '${p.label}\n'
                         'vol ${Fmt.ratio(p.risk, decimals: 1)}% · '
                         'ret ${Fmt.ratio(p.ret, decimals: 1)}%',
-                        textStyle: TextStyle(
+                        textStyle: context.finType.caption.copyWith(
                           color: context.fin.surface,
-                          fontSize: 10.5,
                           fontWeight: FontWeight.w600,
                         ),
                       );
@@ -638,7 +682,7 @@ class RiskReturnScatter extends StatelessWidget {
                         radius: p.highlight ? 8 : 4.5,
                         color: p.color,
                         strokeWidth: p.highlight ? 2 : 0,
-                        strokeColor: AppColors.backgroundStart(isLight),
+                        strokeColor: context.fin.canvas,
                       ),
                     ),
                 ],
@@ -646,7 +690,7 @@ class RiskReturnScatter extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const Gap.sm(),
         Wrap(
           spacing: 14,
           runSpacing: 4,
@@ -714,8 +758,8 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
     // Verde para correlação baixa (diversificação) e vermelho para alta.
     final normalized = ((rho + 1) / 2).clamp(0.0, 1.0);
     return Color.lerp(
-      AppColors.primary.withValues(alpha: 0.65),
-      AppColors.danger.withValues(alpha: 0.65),
+      context.fin.brand.withValues(alpha: 0.65),
+      context.fin.negative.withValues(alpha: 0.65),
       normalized,
     )!;
   }
@@ -750,7 +794,7 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
         controller: _controller,
         scrollDirection: Axis.horizontal,
         // Espaço para a barra não cobrir a última linha da matriz.
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.only(bottom: FinSpace.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -770,7 +814,7 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
                   ),
               ],
             ),
-            const SizedBox(height: 3),
+            const Gap.xs(),
             for (var i = 0; i < tickers.length; i++)
               Row(
                 children: [
@@ -794,7 +838,7 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
                           padding: const EdgeInsets.symmetric(
                             vertical: FinSpace.xs,
                           ),
-                          margin: const EdgeInsets.all(1),
+                          margin: const EdgeInsets.all(FinSpace.xs),
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: fill,
@@ -842,12 +886,11 @@ class _LegendDot extends StatelessWidget {
           height: 9,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 5),
+        const Gap.xs(axis: Axis.horizontal),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 11,
-            color: AppColors.textSecondary(isLight),
+          style: context.finType.caption.copyWith(
+            color: context.fin.textSecondary,
           ),
         ),
       ],

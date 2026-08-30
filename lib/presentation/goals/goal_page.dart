@@ -1,4 +1,4 @@
-import '../../utils/app_colors.dart';
+import '../theme/fin_space.dart';
 import '../components/fin_amount.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
@@ -84,97 +84,144 @@ class _GoalPageState extends ConsumerState<GoalPage> {
     final alignment = ref.watch(goalAlignmentProvider);
     final settings = ref.watch(valuationSettingsProvider);
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        GlassCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    // `CustomScrollView`, e nao `ListView`: cada cartao vira um sliver proprio,
+    // entao o framework so infla os que entram na viewport -- e cada um ganha a
+    // fronteira de repintura que o `SliverList` adiciona.
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(FinSpace.lg),
+          sliver: SliverList.list(
             children: [
-              SectionHeader(
-                title: 'Plano patrimonial',
-                subtitle:
-                    'A rentabilidade necessária é derivada destes valores',
+              GlassCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SectionHeader(
+                      title: 'Plano patrimonial',
+                      subtitle:
+                          'A rentabilidade necessária é derivada destes valores',
+                    ),
+                    const Gap.md(),
+                    _MoneyField(
+                      isLight: isLight,
+                      controller: _initial,
+                      label: 'Aporte inicial',
+                      onChanged: _apply,
+                    ),
+                    const Gap.sm(),
+                    _MoneyField(
+                      isLight: isLight,
+                      controller: _monthly,
+                      label: 'Aporte mensal',
+                      onChanged: _apply,
+                    ),
+                    const Gap.sm(),
+                    _MoneyField(
+                      isLight: isLight,
+                      controller: _target,
+                      label: 'Valor desejado ao final',
+                      onChanged: _apply,
+                    ),
+                    const Gap.lg(),
+                    LabelValueRow(
+                      label: 'Prazo',
+                      value: '${_months ~/ 12} anos e ${_months % 12} meses',
+                    ),
+                    Slider(
+                      value: _months.toDouble(),
+                      min: 12,
+                      max: 360,
+                      divisions: 29,
+                      activeColor: context.fin.brand,
+                      label: '$_months meses',
+                      onChanged: (value) {
+                        setState(() => _months = value.round());
+                        _apply();
+                      },
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 14),
-              _MoneyField(
-                isLight: isLight,
-                controller: _initial,
-                label: 'Aporte inicial',
-                onChanged: _apply,
+              const Gap.md(),
+              feasibility.when(
+                loading: () => const _VerdictSkeleton(),
+                error: (error, _) => NoticeBanner(
+                  trend: FinTrend.negative,
+                  icon: Icons.error_outline,
+                  message: 'Não foi possível avaliar a meta: $error',
+                ),
+                data: (verdict) => verdict == null
+                    ? const SizedBox.shrink()
+                    : _FeasibilityCard(verdict: verdict, isLight: isLight),
               ),
-              const SizedBox(height: 10),
-              _MoneyField(
-                isLight: isLight,
-                controller: _monthly,
-                label: 'Aporte mensal',
-                onChanged: _apply,
-              ),
-              const SizedBox(height: 10),
-              _MoneyField(
-                isLight: isLight,
-                controller: _target,
-                label: 'Valor desejado ao final',
-                onChanged: _apply,
-              ),
-              const SizedBox(height: 16),
-              LabelValueRow(
-                label: 'Prazo',
-                value: '${_months ~/ 12} anos e ${_months % 12} meses',
-              ),
-              Slider(
-                value: _months.toDouble(),
-                min: 12,
-                max: 360,
-                divisions: 29,
-                activeColor: AppColors.primary,
-                label: '$_months meses',
-                onChanged: (value) {
-                  setState(() => _months = value.round());
-                  _apply();
-                },
+              const Gap.md(),
+              alignment.when(
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (value) => value == null
+                    ? GlassCard(
+                        child: EmptyState(
+                          icon: Icons.donut_small_outlined,
+                          title: 'Sem carteira para comparar',
+                          message:
+                              'Monte a carteira Principal para confrontar o '
+                              'retorno esperado com a rentabilidade exigida.',
+                        ),
+                      )
+                    : _AlignmentCard(
+                        alignment: value,
+                        horizonMonths: settings.convergenceHorizonMonths,
+                        isLight: isLight,
+                      ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        feasibility.when(
-          loading: () => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(24),
-              child: CircularProgressIndicator(),
-            ),
-          ),
-          error: (error, _) => NoticeBanner(
-            trend: FinTrend.negative,
-            icon: Icons.error_outline,
-            message: 'Não foi possível avaliar a meta: $error',
-          ),
-          data: (verdict) => verdict == null
-              ? const SizedBox.shrink()
-              : _FeasibilityCard(verdict: verdict, isLight: isLight),
-        ),
-        const SizedBox(height: 12),
-        alignment.when(
-          loading: () => const SizedBox.shrink(),
-          error: (_, _) => const SizedBox.shrink(),
-          data: (value) => value == null
-              ? GlassCard(
-                  child: EmptyState(
-                    icon: Icons.donut_small_outlined,
-                    title: 'Sem carteira para comparar',
-                    message:
-                        'Monte a carteira Principal para confrontar o '
-                        'retorno esperado com a rentabilidade exigida.',
-                  ),
-                )
-              : _AlignmentCard(
-                  alignment: value,
-                  horizonMonths: settings.convergenceHorizonMonths,
-                  isLight: isLight,
-                ),
-        ),
       ],
+    );
+  }
+}
+
+/// Espaço reservado enquanto o veredito de viabilidade é calculado.
+///
+/// Substitui um indicador centrado com 24 dp de padding, cuja altura era uma
+/// fração da do `_FeasibilityCard` que ocupa o lugar dele — então ao chegar o
+/// resultado tudo abaixo saltava de uma vez.
+class _VerdictSkeleton extends StatelessWidget {
+  const _VerdictSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fin;
+
+    Widget barra(double largura, double altura) => Container(
+      width: largura,
+      height: altura,
+      decoration: BoxDecoration(
+        color: c.surfaceSunken,
+        borderRadius: BorderRadius.circular(4),
+      ),
+    );
+
+    return Semantics(
+      label: 'Avaliando a meta',
+      child: ExcludeSemantics(
+        child: GlassCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              barra(140, 12),
+              const Gap.md(),
+              barra(double.infinity, 44),
+              const Gap.md(),
+              barra(double.infinity, 44),
+              const Gap.md(),
+              barra(200, 12),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -199,17 +246,16 @@ class _MoneyField extends StatelessWidget {
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       onChanged: (_) => onChanged(),
-      style: TextStyle(color: AppColors.textPrimary(isLight)),
+      style: TextStyle(color: context.fin.textPrimary),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(
-          fontSize: 12,
-          color: AppColors.textSecondary(isLight),
+        labelStyle: context.finType.bodySm.copyWith(
+          color: context.fin.textSecondary,
         ),
         prefixText: r'R$ ',
-        prefixStyle: TextStyle(color: AppColors.textSecondary(isLight)),
+        prefixStyle: TextStyle(color: context.fin.textSecondary),
         filled: true,
-        fillColor: AppColors.inputBackground(isLight),
+        fillColor: context.fin.surfaceSunken,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -268,18 +314,17 @@ class _FeasibilityCard extends StatelessWidget {
           Row(
             children: [
               Icon(_icon, size: 20, color: _color(context)),
-              const SizedBox(width: 8),
+              const Gap.sm(axis: Axis.horizontal),
               Text(
                 _title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+                style: context.finType.bodyMd.copyWith(
                   color: _color(context),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const Gap.sm(),
           if (showRates)
             Row(
               children: [
@@ -300,21 +345,21 @@ class _FeasibilityCard extends StatelessWidget {
                 ),
               ],
             ),
-          const SizedBox(height: 10),
+          const Gap.sm(),
           Text(
             verdict.message,
-            style: TextStyle(
-              fontSize: 11.5,
-              height: 1.4,
-              color: AppColors.textSecondary(isLight),
+            style: context.finType.caption.copyWith(
+              color: context.fin.textSecondary,
             ),
           ),
-          const SizedBox(height: 8),
+          const Gap.sm(),
           Text(
             'Referências dos últimos ${verdict.anchors.observedYears} anos: '
             'CDI ${Fmt.percent(verdict.anchors.riskFreeCagr)} a.a. · '
             'Ibovespa ${Fmt.percent(verdict.anchors.marketCagr)} a.a.',
-            style: TextStyle(fontSize: 10, color: AppColors.textMuted(isLight)),
+            style: context.finType.caption.copyWith(
+              color: context.fin.textTertiary,
+            ),
           ),
         ],
       ),
@@ -351,7 +396,7 @@ class _AlignmentCard extends StatelessWidget {
             title: 'Carteira frente à meta',
             subtitle: 'Convergência assumida em $horizonMonths meses',
           ),
-          const SizedBox(height: 12),
+          const Gap.md(),
           Row(
             children: [
               Expanded(
@@ -381,7 +426,7 @@ class _AlignmentCard extends StatelessWidget {
             ],
           ),
           if (alignment.coverageIsWeak) ...[
-            const SizedBox(height: 12),
+            const Gap.md(),
             NoticeBanner(
               message:
                   'Apenas '

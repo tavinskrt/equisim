@@ -1564,10 +1564,19 @@ class _JsonPanel extends StatelessWidget {
                       text: const JsonEncoder.withIndent('  ').convert(value),
                     ),
                   ),
-                  child: Icon(
-                    Icons.copy_all_outlined,
-                    size: 14,
-                    color: theme.dim,
+                  // 48x48 de área efetiva sem inflar o ícone: o `SizedBox`
+                  // conta como alvo e o glifo continua em 14 dp, que é a
+                  // densidade do console.
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: Icon(
+                        Icons.copy_all_outlined,
+                        size: 14,
+                        color: theme.dim,
+                      ),
+                    ),
                   ),
                 ),
               ],

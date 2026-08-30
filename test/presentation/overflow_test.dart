@@ -12,6 +12,7 @@ import 'package:equisim/presentation/valuation/valuation_providers.dart';
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Regressao de layout: nenhuma tela pode estourar em largura suportada nem
@@ -93,7 +94,7 @@ Future<void> _pump(
   // O provider de tema e um StateProvider comum; sem semear, a tela monta no
   // padrao e o teste ainda vale -- mas semear mantem o par tema/paleta
   // coerente com o que `buildFinTheme` entrega.
-  container.read(isLightModeProvider.notifier).state = true;
+  container.read(isLightModeProvider.notifier).definir(true);
 
   if (comAtivos) {
     final notifier = container.read(studyProvider.notifier);

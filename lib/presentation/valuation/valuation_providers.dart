@@ -54,16 +54,15 @@ class ValuationSettings {
     int? projectionYears,
     int? convergenceHorizonMonths,
     double? marketPremium,
-  }) =>
-      ValuationSettings(
-        monteCarlo: monteCarlo ?? this.monteCarlo,
-        samples: samples ?? this.samples,
-        marginOfSafety: marginOfSafety ?? this.marginOfSafety,
-        projectionYears: projectionYears ?? this.projectionYears,
-        convergenceHorizonMonths:
-            convergenceHorizonMonths ?? this.convergenceHorizonMonths,
-        marketPremium: marketPremium ?? this.marketPremium,
-      );
+  }) => ValuationSettings(
+    monteCarlo: monteCarlo ?? this.monteCarlo,
+    samples: samples ?? this.samples,
+    marginOfSafety: marginOfSafety ?? this.marginOfSafety,
+    projectionYears: projectionYears ?? this.projectionYears,
+    convergenceHorizonMonths:
+        convergenceHorizonMonths ?? this.convergenceHorizonMonths,
+    marketPremium: marketPremium ?? this.marketPremium,
+  );
 }
 
 class ValuationSettingsNotifier extends Notifier<ValuationSettings> {
@@ -83,12 +82,14 @@ class ValuationSettingsNotifier extends Notifier<ValuationSettings> {
 
 final valuationSettingsProvider =
     NotifierProvider<ValuationSettingsNotifier, ValuationSettings>(
-  ValuationSettingsNotifier.new,
-);
+      ValuationSettingsNotifier.new,
+    );
 
 /// Avaliação de um ativo isolado.
-final valuationProvider =
-    FutureProvider.family<ValuationResult?, Ticker>((ref, ticker) async {
+final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
+  ref,
+  ticker,
+) async {
   final settings = ref.watch(valuationSettingsProvider);
   final anchors = await ref.watch(marketAnchorsProvider.future);
 
@@ -110,11 +111,13 @@ final valuationProvider =
   );
   if (inputs.isErr) return null;
 
-  final result = await ValuationRunner.run(ValuationRequest(
-    inputs: inputs.unwrap(),
-    monteCarlo: settings.monteCarlo,
-    samples: settings.samples,
-  ));
+  final result = await ValuationRunner.run(
+    ValuationRequest(
+      inputs: inputs.unwrap(),
+      monteCarlo: settings.monteCarlo,
+      samples: settings.samples,
+    ),
+  );
   return result.valueOrNull;
 });
 
@@ -125,21 +128,22 @@ final valuationProvider =
 /// de payload por ativo — complexidade sem ganho nesta escala.
 final portfolioValuationsProvider =
     FutureProvider<Map<Ticker, ValuationResult>>((ref) async {
-  final study = ref.watch(studyProvider).study;
-  final tickers = study.principal.tickers;
-  if (tickers.isEmpty) return const {};
+      final study = ref.watch(studyProvider).study;
+      final tickers = study.principal.tickers;
+      if (tickers.isEmpty) return const {};
 
-  final out = <Ticker, ValuationResult>{};
-  for (final ticker in tickers) {
-    final valuation = await ref.watch(valuationProvider(ticker).future);
-    if (valuation != null) out[ticker] = valuation;
-  }
-  return out;
-});
+      final out = <Ticker, ValuationResult>{};
+      for (final ticker in tickers) {
+        final valuation = await ref.watch(valuationProvider(ticker).future);
+        if (valuation != null) out[ticker] = valuation;
+      }
+      return out;
+    });
 
 /// Dividend yield líquido de imposto, por ativo da carteira Principal.
-final netDividendYieldsProvider =
-    FutureProvider<Map<Ticker, double>>((ref) async {
+final netDividendYieldsProvider = FutureProvider<Map<Ticker, double>>((
+  ref,
+) async {
   final study = ref.watch(studyProvider).study;
   final dividendRepository = ref.watch(dividendRepositoryProvider);
   final priceRepository = ref.watch(priceRepositoryProvider);
@@ -192,8 +196,9 @@ final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
 ///
 /// Separado do alinhamento de propósito: o usuário precisa do aviso de meta
 /// irreal **enquanto digita** os parâmetros, antes de escolher qualquer ativo.
-final goalFeasibilityProvider =
-    FutureProvider<FeasibilityVerdict?>((ref) async {
+final goalFeasibilityProvider = FutureProvider<FeasibilityVerdict?>((
+  ref,
+) async {
   final goal = ref.watch(studyProvider).study.goal;
   if (goal == null) return null;
 

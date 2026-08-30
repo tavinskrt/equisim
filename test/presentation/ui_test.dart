@@ -13,6 +13,7 @@ import 'package:equisim_core/equisim_core.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Asset assetOf(String symbol, [String sector = 'financeiro']) => Asset(
@@ -44,7 +45,7 @@ Widget harness({
         portfolioValuationsProvider
             .overrideWith((ref) async => const <Ticker, ValuationResult>{}),
         valuationProvider.overrideWith((ref, ticker) async => null),
-        isLightModeProvider.overrideWith((ref) => isLight),
+        isLightModeProvider.overrideWith(() => IsLightMode(inicial: isLight)),
         ...overrides,
       ],
       child: MaterialApp(
@@ -408,8 +409,22 @@ void main() {
           correlationProvider.overrideWith((ref) async => null),
         ];
 
+    /// Viewport alto o bastante para conter a tela inteira.
+    ///
+    /// Necessario desde que a tela virou `CustomScrollView`: o `SliverList` so
+    /// infla os cartoes que entram na viewport, entao na altura padrao de teste
+    /// (600 px) os cartoes de baixo simplesmente nao existem na arvore. Isso e
+    /// o ganho da conversao, nao um defeito -- mas o teste precisa trazer o
+    /// alvo para a tela antes de procura-lo.
+    void telaAlta(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
     testWidgets('os ativos das duas carteiras aparecem no mesmo cartão',
         (tester) async {
+      telaAlta(tester);
       // A troca de ativo se decide comparando o pior detido com o melhor
       // candidato: sem a Reserva no cartão, metade da decisão fica invisível.
       await tester.pumpWidget(harness(
@@ -430,6 +445,7 @@ void main() {
     });
 
     testWidgets('sem Reserva, o cartão mostra só a Principal', (tester) async {
+      telaAlta(tester);
       await tester.pumpWidget(harness(
         overrides: withComparison(comparisonOf(
           principal: outcomeOf('PETR4', const [10, 12, 14]),
@@ -445,6 +461,7 @@ void main() {
 
     testWidgets('cada carteira tem o próprio cartão de proventos',
         (tester) async {
+      telaAlta(tester);
       await tester.pumpWidget(harness(
         overrides: withComparison(comparisonOf(
           principal: outcomeOf('PETR4', const [10, 12, 14]),
@@ -460,6 +477,7 @@ void main() {
 
     testWidgets('os cabeçalhos das carteiras trazem o ícone de ajuda',
         (tester) async {
+      telaAlta(tester);
       await tester.pumpWidget(harness(
         overrides: withComparison(comparisonOf(
           principal: outcomeOf('PETR4', const [10, 12, 14]),

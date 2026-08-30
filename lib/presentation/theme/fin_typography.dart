@@ -165,22 +165,22 @@ class FinTypography extends ThemeExtension<FinTypography> {
   /// [FontFeature.tabularFigures] falha aqui em vez de desalinhar uma coluna
   /// em producao meses depois.
   List<TextStyle> get numericStyles => <TextStyle>[
-        numHero,
-        numLg,
-        numMd,
-        numSm,
-      ];
+    numHero,
+    numLg,
+    numMd,
+    numSm,
+  ];
 
   /// Todos os papeis de texto corrente, na ordem da escala.
   List<TextStyle> get proseStyles => <TextStyle>[
-        displayLg,
-        titleLg,
-        titleSm,
-        bodyMd,
-        bodySm,
-        label,
-        caption,
-      ];
+    displayLg,
+    titleLg,
+    titleSm,
+    bodyMd,
+    bodySm,
+    label,
+    caption,
+  ];
 
   @override
   FinTypography copyWith({
@@ -250,16 +250,16 @@ class FinTypography extends ThemeExtension<FinTypography> {
 
   @override
   int get hashCode => Object.hashAll(<Object>[
-        displayLg,
-        titleLg,
-        titleSm,
-        bodyMd,
-        bodySm,
-        label,
-        caption,
-        numHero,
-        numLg,
-        numMd,
-        numSm,
-      ]);
+    displayLg,
+    titleLg,
+    titleSm,
+    bodyMd,
+    bodySm,
+    label,
+    caption,
+    numHero,
+    numLg,
+    numMd,
+    numSm,
+  ]);
 }

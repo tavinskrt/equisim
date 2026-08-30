@@ -2,8 +2,8 @@ import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../theme/fin_space.dart';
 import '../../di/providers.dart';
-import '../../utils/app_colors.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
 import '../theme/fin_theme.dart';
@@ -13,13 +13,12 @@ import 'study_notifier.dart';
 Future<void> showAssetPicker(
   BuildContext context, {
   required bool toPrincipal,
-}) =>
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _AssetPickerSheet(toPrincipal: toPrincipal),
-    );
+}) => showModalBottomSheet<void>(
+  context: context,
+  isScrollControlled: true,
+  backgroundColor: Colors.transparent,
+  builder: (_) => _AssetPickerSheet(toPrincipal: toPrincipal),
+);
 
 class _AssetPickerSheet extends ConsumerStatefulWidget {
   final bool toPrincipal;
@@ -60,50 +59,58 @@ class _AssetPickerSheetState extends ConsumerState<_AssetPickerSheet> {
           color: context.fin.surfaceRaised,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        padding: const EdgeInsets.fromLTRB(
+          FinSpace.lg,
+          FinSpace.md,
+          FinSpace.lg,
+          FinSpace.xs,
+        ),
         child: Column(
           children: [
             Container(
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.textMuted(isLight),
+                color: context.fin.textTertiary,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 14),
+            const Gap.md(),
             SectionHeader(
               title: widget.toPrincipal
                   ? 'Adicionar à Principal'
                   : 'Adicionar à Reserva',
-              subtitle: 'Ações da B3 — fundos imobiliários estão fora do escopo',
+              subtitle:
+                  'Ações da B3 — fundos imobiliários estão fora do escopo',
             ),
-            const SizedBox(height: 12),
+            const Gap.md(),
             TextField(
               controller: _controller,
               autofocus: true,
               textCapitalization: TextCapitalization.characters,
               onChanged: (value) =>
                   setState(() => _query = value.trim().toUpperCase()),
-              style: TextStyle(color: AppColors.textPrimary(isLight)),
+              style: TextStyle(color: context.fin.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Buscar ticker (ex.: PETR4)',
-                hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
-                prefixIcon: Icon(Icons.search,
-                    size: 19, color: AppColors.textSecondary(isLight)),
+                hintStyle: TextStyle(color: context.fin.textTertiary),
+                prefixIcon: Icon(
+                  Icons.search,
+                  size: 19,
+                  color: context.fin.textSecondary,
+                ),
                 filled: true,
-                fillColor: AppColors.inputBackground(isLight),
+                fillColor: context.fin.surfaceSunken,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const Gap.md(),
             Expanded(
               child: universe.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, _) => EmptyState(
                   icon: Icons.cloud_off,
                   title: 'Universo indisponível',
@@ -111,8 +118,9 @@ class _AssetPickerSheetState extends ConsumerState<_AssetPickerSheet> {
                 ),
                 data: (tickers) {
                   final filtered = tickers
-                      .where((t) =>
-                          _query.isEmpty || t.value.startsWith(_query))
+                      .where(
+                        (t) => _query.isEmpty || t.value.startsWith(_query),
+                      )
                       .take(200)
                       .toList();
 
@@ -153,7 +161,9 @@ class _AssetPickerSheetState extends ConsumerState<_AssetPickerSheet> {
     final asset = await ref.read(assetProfileProvider(ticker).future);
     if (!mounted) return;
 
-    ref.read(studyProvider.notifier).addAsset(
+    ref
+        .read(studyProvider.notifier)
+        .addAsset(
           asset ?? Asset(ticker: ticker, name: ticker.value),
           toPrincipal: widget.toPrincipal,
         );
@@ -182,27 +192,23 @@ class _AssetOption extends StatelessWidget {
       enabled: !isUsed,
       title: Text(
         ticker.value,
-        style: TextStyle(
-          fontSize: 13.5,
+        style: context.finType.bodySm.copyWith(
+          color: isUsed ? context.fin.textTertiary : context.fin.textPrimary,
           fontWeight: FontWeight.w600,
-          color: isUsed
-              ? AppColors.textMuted(isLight)
-              : AppColors.textPrimary(isLight),
         ),
       ),
       subtitle: isUsed
           ? Text(
               'Já está no estudo',
-              style: TextStyle(
-                fontSize: 10.5,
-                color: AppColors.textMuted(isLight),
+              style: context.finType.caption.copyWith(
+                color: context.fin.textTertiary,
               ),
             )
           : null,
       trailing: Icon(
         isUsed ? Icons.check : Icons.add,
         size: 17,
-        color: isUsed ? AppColors.textMuted(isLight) : AppColors.primary,
+        color: isUsed ? context.fin.textTertiary : context.fin.brand,
       ),
     );
   }

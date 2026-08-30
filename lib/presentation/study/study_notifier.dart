@@ -33,12 +33,11 @@ class StudyState {
     bool? isSaving,
     String? lastError,
     bool clearError = false,
-  }) =>
-      StudyState(
-        study: study ?? this.study,
-        isSaving: isSaving ?? this.isSaving,
-        lastError: clearError ? null : (lastError ?? this.lastError),
-      );
+  }) => StudyState(
+    study: study ?? this.study,
+    isSaving: isSaving ?? this.isSaving,
+    lastError: clearError ? null : (lastError ?? this.lastError),
+  );
 }
 
 /// Estado das duas carteiras e da meta.
@@ -52,20 +51,20 @@ class StudyNotifier extends Notifier<StudyState> {
   StudyState build() => StudyState(study: _emptyStudy());
 
   static PortfolioStudy _emptyStudy() => PortfolioStudy(
-        name: 'Novo estudo',
-        principal: Portfolio(
-          id: 'principal',
-          name: 'Principal',
-          kind: PortfolioKind.principal,
-          entries: const {},
-        ),
-        reserva: Portfolio(
-          id: 'reserva',
-          name: 'Reserva',
-          kind: PortfolioKind.reserva,
-          entries: const {},
-        ),
-      );
+    name: 'Novo estudo',
+    principal: Portfolio(
+      id: 'principal',
+      name: 'Principal',
+      kind: PortfolioKind.principal,
+      entries: const {},
+    ),
+    reserva: Portfolio(
+      id: 'reserva',
+      name: 'Reserva',
+      kind: PortfolioKind.reserva,
+      entries: const {},
+    ),
+  );
 
   /// Substitui o estudo em edição pelo informado, descartando alterações não
   /// salvas e qualquer erro pendente.
@@ -183,7 +182,8 @@ class StudyNotifier extends Notifier<StudyState> {
     final total = weights.values.fold<double>(0.0, (a, b) => a + b);
     if ((total - 1.0).abs() > 1e-6) {
       state = state.copyWith(
-        lastError: 'Os pesos devem somar 100%; somam '
+        lastError:
+            'Os pesos devem somar 100%; somam '
             '${(total * 100).toStringAsFixed(2)}%.',
       );
       return;
@@ -245,15 +245,17 @@ class StudyNotifier extends Notifier<StudyState> {
     final userId = ref.read(currentUserIdProvider);
     if (userId == null) {
       state = state.copyWith(
-        lastError: 'Sessão não identificada. Saia e entre novamente para '
+        lastError:
+            'Sessão não identificada. Saia e entre novamente para '
             'salvar o estudo.',
       );
       return false;
     }
 
     state = state.copyWith(isSaving: true, clearError: true);
-    final result =
-        await ref.read(portfolioRepositoryProvider).save(userId, state.study);
+    final result = await ref
+        .read(portfolioRepositoryProvider)
+        .save(userId, state.study);
 
     return result.fold(
       (id) {
@@ -278,9 +280,7 @@ class StudyNotifier extends Notifier<StudyState> {
   /// Zerar a meta junto obrigaria a redigitá-la a cada estudo — e é justamente
   /// o mesmo plano de aportes que torna dois estudos comparáveis.
   void startNew() {
-    state = StudyState(
-      study: _emptyStudy().copyWith(goal: state.study.goal),
-    );
+    state = StudyState(study: _emptyStudy().copyWith(goal: state.study.goal));
   }
 
   /// Remove um estudo salvo, pelo identificador.
@@ -298,7 +298,9 @@ class StudyNotifier extends Notifier<StudyState> {
     final userId = ref.read(currentUserIdProvider);
     if (userId == null) return false;
 
-    final result = await ref.read(portfolioRepositoryProvider).delete(userId, id);
+    final result = await ref
+        .read(portfolioRepositoryProvider)
+        .delete(userId, id);
     return result.fold(
       (_) {
         // Apagar o estudo aberto não apaga o que está na tela: só desfaz o
@@ -317,18 +319,19 @@ class StudyNotifier extends Notifier<StudyState> {
   }
 
   static PortfolioStudy _detach(PortfolioStudy study) => PortfolioStudy(
-        name: study.name,
-        principal: study.principal,
-        reserva: study.reserva,
-        goal: study.goal,
-      );
+    name: study.name,
+    principal: study.principal,
+    reserva: study.reserva,
+    goal: study.goal,
+  );
 
   /// Apaga a mensagem de erro pendente, depois que a interface a exibiu.
   void clearError() => state = state.copyWith(clearError: true);
 }
 
-final studyProvider =
-    NotifierProvider<StudyNotifier, StudyState>(StudyNotifier.new);
+final studyProvider = NotifierProvider<StudyNotifier, StudyState>(
+  StudyNotifier.new,
+);
 
 /// Concentração setorial da carteira Principal.
 ///

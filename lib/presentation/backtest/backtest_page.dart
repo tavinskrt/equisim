@@ -2,7 +2,6 @@ import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../utils/app_colors.dart';
 import '../components/balance_summary_card.dart';
 import '../components/fin_amount.dart';
 import '../export/csv_export.dart';
@@ -15,7 +14,6 @@ import '../theme/fin_space.dart';
 import '../theme/fin_theme.dart';
 import 'backtest_providers.dart';
 
-
 /// Tela de análise histórica: Principal contra Reserva sob o mesmo plano.
 class BacktestPage extends ConsumerWidget {
   const BacktestPage({super.key});
@@ -27,41 +25,51 @@ class BacktestPage extends ConsumerWidget {
     final settings = ref.watch(backtestSettingsProvider);
     final study = ref.watch(studyProvider).study;
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _SettingsCard(settings: settings, isLight: isLight),
-        const SizedBox(height: 12),
-        comparison.when(
-          loading: () => const Padding(
-            padding: EdgeInsets.all(48),
-            child: Center(child: CircularProgressIndicator()),
-          ),
-          error: (error, _) => GlassCard(
-            child: EmptyState(
-              icon: Icons.error_outline,
-              title: 'Falha na simulação',
-              message: '$error',
-            ),
-          ),
-          data: (result) {
-            if (result == null) {
-              return GlassCard(
-                child: EmptyState(
-                  icon: Icons.timeline,
-                  title: 'Nada a simular ainda',
-                  message:
-                      'Monte a carteira Principal e defina o plano de '
-                      'aportes na aba Meta.',
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(FinSpace.lg),
+          sliver: SliverMainAxisGroup(
+            slivers: [
+              SliverToBoxAdapter(
+                child: _SettingsCard(settings: settings, isLight: isLight),
+              ),
+              const SliverToBoxAdapter(child: Gap.md()),
+              comparison.when(
+                loading: () =>
+                    const SliverToBoxAdapter(child: _ComparisonSkeleton()),
+                error: (error, _) => SliverToBoxAdapter(
+                  child: GlassCard(
+                    child: EmptyState(
+                      icon: Icons.error_outline,
+                      title: 'Falha na simulação',
+                      message: '$error',
+                    ),
+                  ),
                 ),
-              );
-            }
-            return _ComparisonBody(
-              result: result,
-              studyName: study.name,
-              isLight: isLight,
-            );
-          },
+                data: (result) {
+                  if (result == null) {
+                    return SliverToBoxAdapter(
+                      child: GlassCard(
+                        child: EmptyState(
+                          icon: Icons.timeline,
+                          title: 'Nada a simular ainda',
+                          message:
+                              'Monte a carteira Principal e defina o plano de '
+                              'aportes na aba Meta.',
+                        ),
+                      ),
+                    );
+                  }
+                  return _ComparisonBody(
+                    result: result,
+                    studyName: study.name,
+                    isLight: isLight,
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -91,11 +99,8 @@ class _SettingsCard extends ConsumerWidget {
             title: 'Parâmetros da simulação',
             subtitle: 'Sem rebalanceamento: os pesos derivam com o mercado',
           ),
-          const SizedBox(height: 10),
-          LabelValueRow(
-            label: 'Janela',
-            value: '${settings.windowYears} anos',
-          ),
+          const Gap.sm(),
+          LabelValueRow(label: 'Janela', value: '${settings.windowYears} anos'),
           Text(
             'Quanto tempo de história a simulação percorre, contado de hoje '
             'para trás. Com ${settings.windowYears} anos, o plano de aportes '
@@ -104,10 +109,8 @@ class _SettingsCard extends ConsumerWidget {
             'em compensação, exigem que todos os ativos das duas carteiras já '
             'negociassem naquela data — quando algum não negociava, a janela '
             'é encurtada até o primeiro pregão dele.',
-            style: TextStyle(
-              fontSize: 10.5,
-              height: 1.35,
-              color: AppColors.textMuted(isLight),
+            style: context.finType.caption.copyWith(
+              color: context.fin.textTertiary,
             ),
           ),
           Slider(
@@ -115,7 +118,7 @@ class _SettingsCard extends ConsumerWidget {
             min: 1,
             max: 10,
             divisions: 9,
-            activeColor: AppColors.primary,
+            activeColor: context.fin.brand,
             onChanged: (value) => notifier.setWindowYears(value.round()),
           ),
           // O tile pinta fundo e respingo de tinta no `Material` mais
@@ -128,25 +131,103 @@ class _SettingsCard extends ConsumerWidget {
               contentPadding: EdgeInsets.zero,
               dense: true,
               value: settings.applyTaxes,
-              activeThumbColor: AppColors.primary,
+              activeThumbColor: context.fin.brand,
               title: Text(
                 'Aplicar IR sobre JCP',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  color: AppColors.textPrimary(isLight),
+                style: context.finType.bodySm.copyWith(
+                  color: context.fin.textPrimary,
                 ),
               ),
               subtitle: Text(
                 'Desligue para ver quanto a tributação custou no período',
-                style: TextStyle(
-                  fontSize: 10.5,
-                  color: AppColors.textMuted(isLight),
+                style: context.finType.caption.copyWith(
+                  color: context.fin.textTertiary,
                 ),
               ),
               onChanged: notifier.setApplyTaxes,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Espaço reservado enquanto a simulação roda.
+///
+/// Substitui um indicador solto com 48 dp de padding. O problema dele não era
+/// a aparência: a área ocupada era uma fração da tela final, então ao chegar o
+/// resultado o conteúdo abaixo saltava dezenas de pixels de uma vez.
+///
+/// A altura aqui aproxima a do primeiro bloco real — cabeçalho, gráfico e
+/// cartão de métricas —, de modo que a troca seja preenchimento, não empurrão.
+class _ComparisonSkeleton extends StatefulWidget {
+  const _ComparisonSkeleton();
+
+  @override
+  State<_ComparisonSkeleton> createState() => _ComparisonSkeletonState();
+}
+
+class _ComparisonSkeletonState extends State<_ComparisonSkeleton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    );
+    final reduzido = WidgetsBinding
+        .instance
+        .platformDispatcher
+        .accessibilityFeatures
+        .disableAnimations;
+    if (!reduzido) _pulse.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fin;
+
+    Widget barra(double largura, double altura) => Container(
+      width: largura,
+      height: altura,
+      decoration: BoxDecoration(
+        color: c.surfaceSunken,
+        borderRadius: BorderRadius.circular(4),
+      ),
+    );
+
+    return Semantics(
+      label: 'Simulando as carteiras',
+      child: ExcludeSemantics(
+        child: FadeTransition(
+          opacity: Tween<double>(begin: 0.45, end: 0.85).animate(_pulse),
+          child: GlassCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                barra(160, 12),
+                const Gap.md(),
+                // Mesma altura declarada do `Base100Chart`, que e o que ocupa
+                // este lugar quando o resultado chega.
+                barra(double.infinity, 240),
+                const Gap.lg(),
+                barra(120, 12),
+                const Gap.sm(),
+                barra(double.infinity, 64),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -170,16 +251,18 @@ class _ComparisonBody extends ConsumerWidget {
     final correlation = ref.watch(correlationProvider);
 
     if (principal == null && reserva == null) {
-      return GlassCard(
-        child: EmptyState(
-          icon: Icons.cloud_off,
-          title: 'Sem dados de mercado',
-          // Dizer o motivo poupa a caçada: quase sempre é um ativo sem
-          // cotação no período, e o nome dele está na mensagem da falha.
-          message:
-              result.principalFailure ??
-              result.reservaFailure ??
-              'Não foi possível carregar as cotações do período.',
+      return SliverToBoxAdapter(
+        child: GlassCard(
+          child: EmptyState(
+            icon: Icons.cloud_off,
+            title: 'Sem dados de mercado',
+            // Dizer o motivo poupa a caçada: quase sempre é um ativo sem
+            // cotação no período, e o nome dele está na mensagem da falha.
+            message:
+                result.principalFailure ??
+                result.reservaFailure ??
+                'Não foi possível carregar as cotações do período.',
+          ),
         ),
       );
     }
@@ -191,8 +274,11 @@ class _ComparisonBody extends ConsumerWidget {
     final axis = <DateTime>{...?principal?.dates, ...?reserva?.dates}.toList()
       ..sort();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    // `SliverList.list`, e nao `Column`: os oito cartoes abaixo carregam
+    // graficos e `BackdropFilter`, e como filho unico de um `ListView` eles
+    // inflavam todos de uma vez, visiveis ou nao. Como sliver, so os que
+    // entram na viewport viram elemento.
+    return SliverList.list(
       children: [
         GlassCard(
           child: Column(
@@ -206,7 +292,7 @@ class _ComparisonBody extends ConsumerWidget {
                   icon: Icon(
                     Icons.download_outlined,
                     size: 19,
-                    color: AppColors.primary,
+                    color: context.fin.brand,
                   ),
                   onPressed: () => exportComparisonCsv(
                     context: context,
@@ -215,7 +301,7 @@ class _ComparisonBody extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const Gap.md(),
               Base100Chart(
                 isLight: isLight,
                 dates: axis,
@@ -225,7 +311,7 @@ class _ComparisonBody extends ConsumerWidget {
                       label: 'Principal',
                       values: principal.base100,
                       dates: principal.dates,
-                      color: AppColors.primary,
+                      color: context.fin.brand,
                     ),
                   if (reserva != null)
                     ChartSeries(
@@ -237,7 +323,7 @@ class _ComparisonBody extends ConsumerWidget {
                 ],
               ),
               if (result.twrGap != null) ...[
-                const SizedBox(height: 12),
+                const Gap.md(),
                 NoticeBanner(
                   icon: Icons.compare_arrows,
                   trend: result.twrGap! >= 0
@@ -255,14 +341,14 @@ class _ComparisonBody extends ConsumerWidget {
           ),
         ),
         if (result.windowWasShortened) ...[
-          const SizedBox(height: 12),
+          const Gap.md(),
           NoticeBanner(
             icon: Icons.event_busy_outlined,
             message: _shortenedWindowMessage(result),
           ),
         ],
         if (principal == null && result.principalFailure != null) ...[
-          const SizedBox(height: 12),
+          const Gap.md(),
           NoticeBanner(
             trend: FinTrend.negative,
             icon: Icons.error_outline,
@@ -270,7 +356,7 @@ class _ComparisonBody extends ConsumerWidget {
           ),
         ],
         if (reserva == null && result.reservaFailure != null) ...[
-          const SizedBox(height: 12),
+          const Gap.md(),
           NoticeBanner(
             trend: FinTrend.negative,
             icon: Icons.error_outline,
@@ -278,21 +364,21 @@ class _ComparisonBody extends ConsumerWidget {
           ),
         ],
         if (reference.warnings.isNotEmpty) ...[
-          const SizedBox(height: 12),
+          const Gap.md(),
           for (final warning in reference.warnings)
             Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: FinSpace.sm),
               child: NoticeBanner(message: warning),
             ),
         ],
         if (principal != null) ...[
-          const SizedBox(height: 12),
+          const Gap.md(),
           _MetricsCard(
             title: 'Carteira Principal',
             outcome: principal,
             isLight: isLight,
           ),
-          const SizedBox(height: 12),
+          const Gap.md(),
           _DividendsCard(
             portfolioLabel: 'Principal',
             outcome: principal,
@@ -300,30 +386,30 @@ class _ComparisonBody extends ConsumerWidget {
           ),
         ],
         if (reserva != null) ...[
-          const SizedBox(height: 12),
+          const Gap.md(),
           _MetricsCard(
             title: 'Carteira Reserva',
             outcome: reserva,
             isLight: isLight,
           ),
-          const SizedBox(height: 12),
+          const Gap.md(),
           _DividendsCard(
             portfolioLabel: 'Reserva',
             outcome: reserva,
             isLight: isLight,
           ),
         ],
-        const SizedBox(height: 12),
+        const Gap.md(),
         _PerAssetCard(principal: principal, reserva: reserva, isLight: isLight),
         if (result.riskReturn.isNotEmpty) ...[
-          const SizedBox(height: 12),
+          const Gap.md(),
           _RiskReturnCard(result: result, isLight: isLight),
         ],
         correlation.maybeWhen(
           data: (data) => data == null
               ? const SizedBox.shrink()
               : Padding(
-                  padding: const EdgeInsets.only(top: 12),
+                  padding: const EdgeInsets.only(top: FinSpace.md),
                   child: GlassCard(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -333,7 +419,7 @@ class _ComparisonBody extends ConsumerWidget {
                           subtitle:
                               'Verde indica menor co-movimento — diversificação',
                         ),
-                        const SizedBox(height: 12),
+                        const Gap.md(),
                         CorrelationHeatmap(
                           isLight: isLight,
                           tickers: data.tickers,
@@ -559,7 +645,7 @@ class _DividendsCard extends StatelessWidget {
             title: 'Proventos no período — $portfolioLabel',
             subtitle: 'JCP sofre 15% de IRRF; dividendo é isento',
           ),
-          const SizedBox(height: 12),
+          const Gap.md(),
           Row(
             children: [
               Expanded(
@@ -649,18 +735,18 @@ class _PerAssetCard extends StatelessWidget {
               entries: _perAssetGlossary,
             ),
           ),
-          const SizedBox(height: 10),
+          const Gap.sm(),
           if (principalAssets.isNotEmpty)
             _AssetGroup(
               isLight: isLight,
               label: 'Principal',
-              color: AppColors.primary,
+              color: context.fin.brand,
               assets: principalAssets,
             ),
           if (hasBoth)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Divider(height: 1, color: AppColors.divider(isLight)),
+              padding: const EdgeInsets.symmetric(vertical: FinSpace.sm),
+              child: Divider(height: 1, color: context.fin.divider),
             ),
           if (reservaAssets.isNotEmpty)
             _AssetGroup(
@@ -706,7 +792,10 @@ class _AssetGroup extends StatelessWidget {
       fontWeight: FontWeight.w600,
     );
     final valueStyle = context.finType.numSm;
-    final driftStyle = context.finType.caption;
+    // `numSm`, e nao `caption`: a deriva e um numero, e numero nesta coluna
+    // precisa de cifra tabular como o retorno logo acima -- senao as duas
+    // linhas empilhadas desalinham a virgula entre si.
+    final driftStyle = context.finType.numSm;
 
     var ticker = 0.0;
     var value = 0.0;
@@ -750,14 +839,13 @@ class _AssetGroup extends StatelessWidget {
               height: 7,
               decoration: BoxDecoration(shape: BoxShape.circle, color: color),
             ),
-            const SizedBox(width: 6),
+            const Gap.xs(axis: Axis.horizontal),
             Text(
               label.toUpperCase(),
-              style: TextStyle(
-                fontSize: 10,
+              style: context.finType.caption.copyWith(
+                color: color,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.6,
-                color: color,
               ),
             ),
           ],
@@ -796,7 +884,7 @@ class _AssetRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
+      padding: const EdgeInsets.symmetric(vertical: FinSpace.sm),
       child: Row(
         children: [
           SizedBox(
@@ -807,7 +895,7 @@ class _AssetRow extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: context.finType.bodySm.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary(isLight),
+                color: context.fin.textPrimary,
               ),
             ),
           ),
@@ -818,21 +906,20 @@ class _AssetRow extends StatelessWidget {
                 Text(
                   'alvo ${asset.targetWeight} → '
                   'atual ${Fmt.percent(asset.currentWeight, decimals: 1)}',
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    color: AppColors.textSecondary(isLight),
+                  style: context.finType.caption.copyWith(
+                    color: context.fin.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 3),
+                const Gap.xs(),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(3),
                   child: LinearProgressIndicator(
                     value: asset.currentWeight.clamp(0.0, 1.0),
                     minHeight: 4,
-                    backgroundColor: AppColors.divider(isLight),
+                    backgroundColor: context.fin.divider,
                     valueColor: AlwaysStoppedAnimation(
                       asset.drift >= 0
-                          ? AppColors.primary
+                          ? context.fin.brand
                           : context.fin.caution,
                     ),
                   ),
@@ -840,7 +927,7 @@ class _AssetRow extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 10),
+          const Gap.sm(axis: Axis.horizontal),
           SizedBox(
             width: valueWidth,
             child: Column(
@@ -860,10 +947,10 @@ class _AssetRow extends StatelessWidget {
                   '${asset.drift.toStringAsFixed(1)} p.p.',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  // `caption` e o mesmo papel usado para medir a coluna em
+                  // `numSm` e o mesmo papel usado para medir a coluna em
                   // `_columnWidths`; divergir aqui faria a medida mentir.
-                  style: context.finType.caption.copyWith(
-                    color: AppColors.textMuted(isLight),
+                  style: context.finType.numSm.copyWith(
+                    color: context.fin.textTertiary,
                   ),
                 ),
               ],
@@ -893,9 +980,9 @@ class _RiskReturnCard extends StatelessWidget {
           risk: p.risk,
           ret: p.ret,
           color: switch (p.kind) {
-            RiskReturnKind.principal => AppColors.primary,
+            RiskReturnKind.principal => context.fin.brand,
             RiskReturnKind.reserva => context.fin.reserva,
-            RiskReturnKind.principalAsset => AppColors.textSecondary(isLight),
+            RiskReturnKind.principalAsset => context.fin.textSecondary,
             RiskReturnKind.reservaAsset => context.fin.reservaMuted,
           },
           highlight: p.isPortfolio,
@@ -912,7 +999,7 @@ class _RiskReturnCard extends StatelessWidget {
                 'Cada ativo das duas carteiras e as próprias '
                 'carteiras, anualizados em ${result.window}',
           ),
-          const SizedBox(height: 12),
+          const Gap.md(),
           RiskReturnScatter(
             isLight: isLight,
             points: points,
@@ -920,7 +1007,7 @@ class _RiskReturnCard extends StatelessWidget {
               if (_has(RiskReturnKind.principalAsset))
                 (
                   label: 'Ativos da Principal',
-                  color: AppColors.textSecondary(isLight),
+                  color: context.fin.textSecondary,
                 ),
               if (_has(RiskReturnKind.reservaAsset))
                 (label: 'Ativos da Reserva', color: context.fin.reservaMuted),

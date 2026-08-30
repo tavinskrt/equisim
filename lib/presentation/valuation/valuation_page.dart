@@ -1,8 +1,10 @@
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
+
+import '../theme/fin_space.dart';
+import '../../presentation/theme/fin_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../utils/app_colors.dart';
 import '../components/fin_amount.dart';
 import '../shared/charts.dart';
 import '../shared/theme_bridge.dart';
@@ -62,23 +64,26 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
+      padding: const EdgeInsets.fromLTRB(
+        FinSpace.sm,
+        FinSpace.sm,
+        FinSpace.lg,
+        FinSpace.sm,
+      ),
       child: Row(
         children: [
           IconButton(
             icon: Icon(
               Icons.arrow_back,
               size: 20,
-              color: AppColors.textPrimary(isLight),
+              color: context.fin.textPrimary,
             ),
             onPressed: () => Navigator.pop(context),
           ),
           Text(
             ticker.value,
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary(isLight),
+            style: context.finType.titleSm.copyWith(
+              color: context.fin.textPrimary,
             ),
           ),
         ],
@@ -97,36 +102,50 @@ class _ValuationBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(valuationSettingsProvider);
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _PriceCard(result: result, isLight: isLight),
-        const SizedBox(height: 12),
-        _ModelCard(result: result, isLight: isLight),
-        const SizedBox(height: 12),
-        _ScenarioCard(result: result, settings: settings, isLight: isLight),
-        const SizedBox(height: 12),
-        _SensitivityCard(result: result, isLight: isLight),
-        if (result.warnings.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          GlassCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SectionHeader(
-                  title: 'Ressalvas',
-                  subtitle: 'A qualidade da estimativa faz parte do resultado',
-                ),
-                const SizedBox(height: 10),
-                for (final warning in result.warnings)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: NoticeBanner(message: warning),
+    // `CustomScrollView`, e nao `ListView`: cada cartao vira um sliver proprio,
+    // entao o framework so infla os que entram na viewport -- e cada um ganha a
+    // fronteira de repintura que o `SliverList` adiciona.
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(FinSpace.lg),
+          sliver: SliverList.list(
+            children: [
+              _PriceCard(result: result, isLight: isLight),
+              const Gap.md(),
+              _ModelCard(result: result, isLight: isLight),
+              const Gap.md(),
+              _ScenarioCard(
+                result: result,
+                settings: settings,
+                isLight: isLight,
+              ),
+              const Gap.md(),
+              _SensitivityCard(result: result, isLight: isLight),
+              if (result.warnings.isNotEmpty) ...[
+                const Gap.md(),
+                GlassCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SectionHeader(
+                        title: 'Ressalvas',
+                        subtitle:
+                            'A qualidade da estimativa faz parte do resultado',
+                      ),
+                      const Gap.sm(),
+                      for (final warning in result.warnings)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: FinSpace.sm),
+                          child: NoticeBanner(message: warning),
+                        ),
+                    ],
                   ),
+                ),
               ],
-            ),
+            ],
           ),
-        ],
+        ),
       ],
     );
   }
@@ -175,9 +194,8 @@ class _PriceCard extends StatelessWidget {
               '${Fmt.percent(result.marginOfSafety, decimals: 0)}, o preço de '
               'compra seria ${Fmt.money(result.safetyPrice.reais)} — '
               '${result.isUndervalued ? 'já atingido' : 'ainda não atingido'}.',
-              style: TextStyle(
-                fontSize: 11.5,
-                color: AppColors.textSecondary(isLight),
+              style: context.finType.caption.copyWith(
+                color: context.fin.textSecondary,
               ),
             ),
           ],
@@ -202,7 +220,7 @@ class _ModelCard extends StatelessWidget {
             title: 'Modelo aplicado',
             subtitle: 'Escolhido pelo que os dados sustentam',
           ),
-          const SizedBox(height: 12),
+          const Gap.md(),
           Row(
             children: [
               Expanded(
@@ -256,14 +274,13 @@ class _ScenarioCard extends ConsumerWidget {
               children: [
                 Text(
                   'Monte Carlo',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondary(isLight),
+                  style: context.finType.caption.copyWith(
+                    color: context.fin.textSecondary,
                   ),
                 ),
                 Switch(
                   value: settings.monteCarlo,
-                  activeThumbColor: AppColors.primary,
+                  activeThumbColor: context.fin.brand,
                   onChanged: ref
                       .read(valuationSettingsProvider.notifier)
                       .setMonteCarlo,
@@ -271,7 +288,7 @@ class _ScenarioCard extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const Gap.md(),
           if (result.distribution != null)
             _DistributionView(
               isLight: isLight,
@@ -286,9 +303,8 @@ class _ScenarioCard extends ConsumerWidget {
           else
             Text(
               'Apenas o cenário base pôde ser calculado.',
-              style: TextStyle(
-                fontSize: 11.5,
-                color: AppColors.textSecondary(isLight),
+              style: context.finType.caption.copyWith(
+                color: context.fin.textSecondary,
               ),
             ),
         ],
@@ -369,7 +385,7 @@ class _DistributionView extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const Gap.md(),
         NoticeBanner(
           icon: Icons.casino_outlined,
           trend: probability > 0.5 ? FinTrend.positive : FinTrend.negative,
@@ -423,17 +439,19 @@ class _SensitivityCard extends StatelessWidget {
             title: 'Sensibilidade',
             subtitle: 'Quanto o preço justo se move com as premissas',
           ),
-          const SizedBox(height: 12),
+          const Gap.md(),
           TornadoChart(
             isLight: isLight,
             bars: bars,
             baseValue: result.fairValue.reais,
           ),
-          const SizedBox(height: 8),
+          const Gap.sm(),
           Text(
             'A linha central é o cenário base '
             '(${Fmt.money(result.fairValue.reais)}).',
-            style: TextStyle(fontSize: 10, color: AppColors.textMuted(isLight)),
+            style: context.finType.caption.copyWith(
+              color: context.fin.textTertiary,
+            ),
           ),
         ],
       ),

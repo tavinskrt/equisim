@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
 import '../presentation/theme/fin_theme.dart';
-import '../utils/app_colors.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/change_password_controller.dart';
 
@@ -77,7 +76,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(controller.errorMessage!),
-          backgroundColor: AppColors.danger,
+          backgroundColor: context.fin.negative,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -118,7 +117,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
         body: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            gradient: AppColors.backgroundGradient(isLight),
+            gradient: context.fin.canvasGradient,
           ),
           child: Center(
             child: SingleChildScrollView(
@@ -132,9 +131,9 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                     constraints: const BoxConstraints(maxWidth: 360),
                     padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 28),
                     decoration: BoxDecoration(
-                      color: AppColors.surface(isLight),
+                      color: context.fin.surface,
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: AppColors.surfaceBorder(isLight)),
+                      border: Border.all(color: context.fin.border),
                       boxShadow: [
                         BoxShadow(
                           color: context.fin.shadow,
@@ -152,7 +151,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                           height: 72,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: AppColors.brandGradient,
+                            gradient: context.fin.brandGradient,
                             boxShadow: [
                               BoxShadow(
                                 color: context.fin.brand.withValues(alpha: 0.4),
@@ -169,7 +168,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary(isLight),
+                            color: context.fin.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -178,7 +177,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 13,
-                            color: AppColors.textSecondary(isLight),
+                            color: context.fin.textSecondary,
                             height: 1.6,
                           ),
                         ),
@@ -192,7 +191,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                           constraints: const BoxConstraints(minHeight: 48),
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            gradient: AppColors.brandGradient,
+                            gradient: context.fin.brandGradient,
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
@@ -247,7 +246,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
       body: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          gradient: AppColors.backgroundGradient(isLight),
+          gradient: context.fin.canvasGradient,
         ),
         child: Stack(
           children: [
@@ -260,7 +259,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                 height: 260,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.primary.withValues(alpha: 0.07),
+                  color: context.fin.brand.withValues(alpha: 0.07),
                 ),
               ),
             ),
@@ -272,7 +271,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                 height: 220,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.primary.withValues(alpha: 0.05),
+                  color: context.fin.brand.withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -286,8 +285,8 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                     child: Container(
                       padding: const EdgeInsets.only(top: 52, left: 16, right: 20, bottom: 16),
                       decoration: BoxDecoration(
-                        color: AppColors.backgroundStart(isLight).withValues(alpha: 0.6),
-                        border: Border(bottom: BorderSide(color: AppColors.surfaceBorder(isLight))),
+                        color: context.fin.canvas.withValues(alpha: 0.6),
+                        border: Border(bottom: BorderSide(color: context.fin.border)),
                       ),
                       child: Row(
                         children: [
@@ -327,7 +326,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary(isLight),
+                                  color: context.fin.textPrimary,
                                   height: 1.2,
                                 ),
                               ),
@@ -335,7 +334,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                 'SEGURANÇA DA CONTA',
                                 style: TextStyle(
                                   fontSize: 10,
-                                  color: AppColors.textSecondary(isLight),
+                                  color: context.fin.textSecondary,
                                   letterSpacing: 0.4,
                                 ),
                               ),
@@ -362,10 +361,10 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                               height: 60,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(17),
-                                color: AppColors.primary.withValues(alpha: 0.12),
-                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+                                color: context.fin.brand.withValues(alpha: 0.12),
+                                border: Border.all(color: context.fin.brand.withValues(alpha: 0.25)),
                               ),
-                              child: const Icon(Icons.lock_outline, color: AppColors.primary, size: 26),
+                              child: Icon(Icons.lock_outline, color: context.fin.brand, size: 26),
                             ),
                             const SizedBox(height: 14),
                             Text(
@@ -373,7 +372,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary(isLight),
+                                color: context.fin.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -382,7 +381,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textSecondary(isLight),
+                                color: context.fin.textSecondary,
                                 height: 1.6,
                               ),
                             ),
@@ -394,8 +393,8 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                         Container(
                           padding: const EdgeInsets.all(18),
                           decoration: BoxDecoration(
-                            color: AppColors.surface(isLight),
-                            border: Border.all(color: AppColors.surfaceBorder(isLight)),
+                            color: context.fin.surface,
+                            border: Border.all(color: context.fin.border),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: isLight
                                 ? [
@@ -422,7 +421,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                 placeholder: '••••••••',
                               ),
                               const SizedBox(height: 14),
-                              Divider(color: AppColors.divider(isLight), height: 1),
+                              Divider(color: context.fin.divider, height: 1),
                               const SizedBox(height: 14),
 
                               // Nova senha
@@ -471,7 +470,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                       '${controller.newPassword.length} caracteres',
                                       style: TextStyle(
                                         fontSize: 10,
-                                        color: AppColors.textMuted(isLight),
+                                        color: context.fin.textTertiary,
                                       ),
                                     ),
                                   ],
@@ -479,7 +478,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                               ],
 
                               const SizedBox(height: 14),
-                              Divider(color: AppColors.divider(isLight), height: 1),
+                              Divider(color: context.fin.divider, height: 1),
                               const SizedBox(height: 14),
 
                               // Confirmar nova senha
@@ -501,7 +500,9 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                   children: [
                                     Icon(
                                       controller.passwordsMatch ? Icons.check : Icons.close,
-                                      color: controller.passwordsMatch ? AppColors.primary : AppColors.danger,
+                                      color: controller.passwordsMatch
+    ? context.fin.positive
+    : context.fin.negative,
                                       size: 13,
                                     ),
                                     const SizedBox(width: 6),
@@ -510,7 +511,9 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.bold,
-                                        color: controller.passwordsMatch ? AppColors.primary : AppColors.danger,
+                                        color: controller.passwordsMatch
+    ? context.fin.positive
+    : context.fin.negative,
                                       ),
                                     ),
                                   ],
@@ -525,8 +528,8 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                           decoration: BoxDecoration(
-                            color: AppColors.surface(isLight),
-                            border: Border.all(color: AppColors.surfaceBorder(isLight)),
+                            color: context.fin.surface,
+                            border: Border.all(color: context.fin.border),
                             borderRadius: BorderRadius.circular(14),
                             boxShadow: isLight
                                 ? [
@@ -546,7 +549,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textSecondary(isLight),
+                                  color: context.fin.textSecondary,
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -568,13 +571,13 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                           width: double.infinity,
                           height: 50,
                           decoration: BoxDecoration(
-                            gradient: controller.canSubmit ? AppColors.brandGradient : null,
-                            color: !controller.canSubmit ? AppColors.inputBackground(isLight) : null,
+                            gradient: controller.canSubmit ? context.fin.brandGradient : null,
+                            color: !controller.canSubmit ? context.fin.surfaceSunken : null,
                             borderRadius: BorderRadius.circular(13),
                             boxShadow: controller.canSubmit
                                 ? [
                                     BoxShadow(
-                                      color: AppColors.primary.withValues(alpha: 0.4),
+                                      color: context.fin.brand.withValues(alpha: 0.4),
                                       blurRadius: 20,
                                       offset: const Offset(0, 6),
                                     )
@@ -631,11 +634,11 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                           child: Text.rich(
                             TextSpan(
                               text: 'Esqueceu sua senha? ',
-                              style: TextStyle(fontSize: 12, color: AppColors.textSecondary(isLight)),
-                              children: const [
+                              style: TextStyle(fontSize: 12, color: context.fin.textSecondary),
+                              children: [
                                 TextSpan(
                                   text: 'Recuperar por e-mail',
-                                  style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+                                  style: TextStyle(color: context.fin.positive, fontWeight: FontWeight.w600),
                                 ),
                               ],
                             ),
@@ -681,7 +684,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary(isLight),
+                color: context.fin.textSecondary,
                 letterSpacing: 0.3,
               ),
             ),
@@ -690,7 +693,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                 sublabel,
                 style: TextStyle(
                   fontSize: 10,
-                  color: AppColors.textMuted(isLight),
+                  color: context.fin.textTertiary,
                 ),
               ),
           ],
@@ -698,10 +701,10 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
         const SizedBox(height: 7),
         Container(
           decoration: BoxDecoration(
-            color: hasFocus ? AppColors.primary.withValues(alpha: 0.07) : AppColors.inputBackground(isLight),
+            color: hasFocus ? context.fin.brand.withValues(alpha: 0.07) : context.fin.surfaceSunken,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: hasFocus ? AppColors.primary.withValues(alpha: 0.6) : AppColors.surfaceBorder(isLight),
+              color: hasFocus ? context.fin.brand.withValues(alpha: 0.6) : context.fin.border,
             ),
           ),
           child: TextField(
@@ -709,25 +712,25 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
             focusNode: focusNode,
             onChanged: onChanged,
             obscureText: isObscured,
-            style: TextStyle(color: AppColors.textPrimary(isLight), fontSize: 14),
+            style: TextStyle(color: context.fin.textPrimary, fontSize: 14),
             decoration: InputDecoration(
               hintText: placeholder,
-              hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+              hintStyle: TextStyle(color: context.fin.textTertiary),
               prefixIcon: Icon(
                 Icons.lock_outline,
-                color: hasFocus ? AppColors.primary.withValues(alpha: 0.8) : AppColors.textMuted(isLight),
+                color: hasFocus ? context.fin.positive : context.fin.textTertiary,
                 size: 15,
               ),
               suffixIcon: IconButton(
                 icon: Icon(
                   isObscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: AppColors.textMuted(isLight),
+                  color: context.fin.textTertiary,
                   size: 16,
                 ),
                 onPressed: onToggle,
               ),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
+              contentPadding: EdgeInsets.symmetric(vertical: 13, horizontal: 14),
             ),
           ),
         ),
@@ -737,7 +740,6 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
 
   /// Constrói uma linha do checklist de requisitos
   Widget _buildRequirementRow(String text, bool met) {
-    final isLight = Provider.of<ThemeController>(context, listen: false).isLightMode;
     return Row(
       children: [
         Container(
@@ -745,15 +747,15 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
           height: 16,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: met ? AppColors.primary.withValues(alpha: 0.15) : AppColors.inputBackground(isLight),
+            color: met ? context.fin.brand.withValues(alpha: 0.15) : context.fin.surfaceSunken,
             border: Border.all(
-              color: met ? AppColors.primary : AppColors.surfaceBorder(isLight),
+              color: met ? context.fin.brand : context.fin.border,
               width: 1.5,
             ),
           ),
           child: met
-              ? const Center(
-                  child: Icon(Icons.check, color: AppColors.primary, size: 8),
+              ? Center(
+                  child: Icon(Icons.check, color: context.fin.brand, size: 8),
                 )
               : null,
         ),
@@ -762,7 +764,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
           text,
           style: TextStyle(
             fontSize: 12,
-            color: met ? AppColors.textPrimary(isLight) : AppColors.textMuted(isLight),
+            color: met ? context.fin.textPrimary : context.fin.textTertiary,
           ),
         ),
       ],

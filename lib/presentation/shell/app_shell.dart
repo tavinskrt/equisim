@@ -4,9 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../theme/fin_space.dart';
 import '../../audit/audit_bus.dart';
 import '../../audit/audit_routes.dart';
-import '../../utils/app_colors.dart';
 import '../../views/login_page.dart';
 import '../../views/profile_page.dart';
 import '../audit/logs_page.dart';
@@ -50,11 +50,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                   Expanded(
                     child: IndexedStack(
                       index: _index,
-                      children: const [
-                        StudyPage(),
-                        GoalPage(),
-                        BacktestPage(),
-                      ],
+                      children: const [StudyPage(), GoalPage(), BacktestPage()],
                     ),
                   ),
                 ],
@@ -87,12 +83,15 @@ class _AppShellState extends ConsumerState<AppShell> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+          padding: const EdgeInsets.fromLTRB(
+            FinSpace.lg,
+            FinSpace.md,
+            FinSpace.lg,
+            FinSpace.md,
+          ),
           decoration: BoxDecoration(
-            color: AppColors.backgroundStart(isLight).withValues(alpha: 0.6),
-            border: Border(
-              bottom: BorderSide(color: AppColors.surfaceBorder(isLight)),
-            ),
+            color: context.fin.canvas.withValues(alpha: 0.6),
+            border: Border(bottom: BorderSide(color: context.fin.border)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -104,36 +103,32 @@ class _AppShellState extends ConsumerState<AppShell> {
                     height: 32,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(9),
-                      gradient: AppColors.brandGradient,
+                      gradient: context.fin.brandGradient,
                     ),
-                    child:
-                        Icon(
-                          Icons.show_chart,
-                          // Sobre o preenchimento de marca, e este o token que
-                          // garante leitura nos dois temas.
-                          color: context.fin.textOnBrand,
-                          size: 17,
-                        ),
+                    child: Icon(
+                      Icons.show_chart,
+                      // Sobre o preenchimento de marca, e este o token que
+                      // garante leitura nos dois temas.
+                      color: context.fin.textOnBrand,
+                      size: 17,
+                    ),
                   ),
-                  const SizedBox(width: 10),
+                  const Gap.sm(axis: Axis.horizontal),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Equisim',
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: context.finType.bodyMd.copyWith(
+                          color: context.fin.textPrimary,
                           fontWeight: FontWeight.bold,
-                          height: 1.1,
-                          color: AppColors.textPrimary(isLight),
                         ),
                       ),
                       Text(
                         _tabs[_index].label.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 9.5,
+                        style: context.finType.caption.copyWith(
+                          color: context.fin.textSecondary,
                           letterSpacing: 0.5,
-                          color: AppColors.textSecondary(isLight),
                         ),
                       ),
                     ],
@@ -145,7 +140,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                 children: [
                   if (auditEnabled) ...[
                     _AuditButton(isLight: isLight, onTap: _openAuditPanel),
-                    const SizedBox(width: 10),
+                    const Gap.sm(axis: Axis.horizontal),
                   ],
                   GestureDetector(
                     onTap: () => setState(() => _menuOpen = !_menuOpen),
@@ -154,14 +149,17 @@ class _AppShellState extends ConsumerState<AppShell> {
                       height: 32,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primary.withValues(alpha: 0.15),
+                        color: context.fin.brand.withValues(alpha: 0.15),
                         border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.3),
+                          color: context.fin.brand.withValues(alpha: 0.3),
                           width: 1.5,
                         ),
                       ),
-                      child: const Icon(Icons.person_outline,
-                          color: AppColors.primary, size: 16),
+                      child: Icon(
+                        Icons.person_outline,
+                        color: context.fin.brand,
+                        size: 16,
+                      ),
                     ),
                   ),
                 ],
@@ -177,7 +175,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     return Container(
       decoration: BoxDecoration(
         color: context.fin.surfaceRaised,
-        border: Border(top: BorderSide(color: AppColors.surfaceBorder(isLight))),
+        border: Border(top: BorderSide(color: context.fin.border)),
       ),
       child: SafeArea(
         top: false,
@@ -191,7 +189,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                     _menuOpen = false;
                   }),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: FinSpace.sm),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -199,19 +197,19 @@ class _AppShellState extends ConsumerState<AppShell> {
                           _tabs[i].icon,
                           size: 20,
                           color: i == _index
-                              ? AppColors.primary
-                              : AppColors.textMuted(isLight),
+                              ? context.fin.brand
+                              : context.fin.textTertiary,
                         ),
-                        const SizedBox(height: 3),
+                        const Gap.xs(),
                         Text(
                           _tabs[i].label,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight:
-                                i == _index ? FontWeight.bold : FontWeight.normal,
+                          style: context.finType.caption.copyWith(
                             color: i == _index
-                                ? AppColors.primary
-                                : AppColors.textMuted(isLight),
+                                ? context.fin.brand
+                                : context.fin.textTertiary,
+                            fontWeight: i == _index
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                         ),
                       ],
@@ -240,7 +238,7 @@ class _AppShellState extends ConsumerState<AppShell> {
           decoration: BoxDecoration(
             color: context.fin.surfaceRaised,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.surfaceBorder(isLight)),
+            border: Border.all(color: context.fin.border),
             boxShadow: [
               BoxShadow(
                 color: context.fin.shadow,
@@ -264,7 +262,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                   );
                 },
               ),
-              Divider(height: 1, color: AppColors.divider(isLight)),
+              Divider(height: 1, color: context.fin.divider),
               _menuItem(
                 icon: isLight
                     ? Icons.dark_mode_outlined
@@ -276,12 +274,13 @@ class _AppShellState extends ConsumerState<AppShell> {
                   await ref
                       .read(themeControllerProvider)
                       .toggleTheme(user?.uid);
-                  ref.read(isLightModeProvider.notifier).state =
-                      ref.read(themeControllerProvider).isLightMode;
+                  ref.read(isLightModeProvider.notifier).definir(ref
+                      .read(themeControllerProvider)
+                      .isLightMode);
                 },
               ),
               if (auditEnabled) ...[
-                Divider(height: 1, color: AppColors.divider(isLight)),
+                Divider(height: 1, color: context.fin.divider),
                 _menuItem(
                   icon: Icons.terminal,
                   label: 'Abrir Painel de Logs de Cálculo',
@@ -292,7 +291,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                   },
                 ),
               ],
-              Divider(height: 1, color: AppColors.divider(isLight)),
+              Divider(height: 1, color: context.fin.divider),
               _menuItem(
                 icon: Icons.logout,
                 label: 'Sair',
@@ -323,21 +322,24 @@ class _AppShellState extends ConsumerState<AppShell> {
     required VoidCallback onTap,
     bool danger = false,
   }) {
-    final color = danger ? AppColors.danger : AppColors.textPrimary(isLight);
+    final color = danger ? context.fin.negative : context.fin.textPrimary;
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: FinSpace.md,
+          vertical: FinSpace.md,
+        ),
         child: Row(
           children: [
             Icon(icon, size: 16, color: color),
-            const SizedBox(width: 10),
+            const Gap.sm(axis: Axis.horizontal),
             Expanded(
               child: Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 13, color: color),
+                style: context.finType.bodySm.copyWith(color: color),
               ),
             ),
           ],
@@ -366,12 +368,15 @@ class _AuditButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+          padding: const EdgeInsets.symmetric(
+            horizontal: FinSpace.sm,
+            vertical: FinSpace.xs,
+          ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: AppColors.warning.withValues(alpha: 0.14),
+            color: context.fin.caution.withValues(alpha: 0.14),
             border: Border.all(
-              color: AppColors.warning.withValues(alpha: 0.4),
+              color: context.fin.caution.withValues(alpha: 0.4),
             ),
           ),
           child: Row(
@@ -380,16 +385,15 @@ class _AuditButton extends StatelessWidget {
               Icon(
                 Icons.terminal,
                 size: 14,
-                color: isLight ? AppColors.warning : AppColors.warningDark,
+                color: isLight ? context.fin.caution : context.fin.caution,
               ),
-              const SizedBox(width: 6),
+              const Gap.xs(axis: Axis.horizontal),
               Text(
                 'LOGS',
-                style: TextStyle(
-                  fontSize: 10,
+                style: context.finType.caption.copyWith(
+                  color: isLight ? context.fin.caution : context.fin.caution,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.6,
-                  color: isLight ? AppColors.warning : AppColors.warningDark,
                 ),
               ),
             ],

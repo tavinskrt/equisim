@@ -25,8 +25,7 @@ class ConsoleTheme {
   Color get background =>
       dark ? const Color(0xFF0B1020) : const Color(0xFFF4F6FB);
   Color get panel => dark ? const Color(0xFF121A33) : Colors.white;
-  Color get border =>
-      dark ? const Color(0xFF25314F) : const Color(0xFFDDE3F0);
+  Color get border => dark ? const Color(0xFF25314F) : const Color(0xFFDDE3F0);
   Color get text => dark ? const Color(0xFFE6ECFA) : const Color(0xFF0B1E4B);
   Color get dim => dark ? const Color(0xFF8494B8) : const Color(0xFF7A88A6);
 
@@ -48,11 +47,7 @@ class ConsoleTheme {
   /// O alvo web não embarca fonte monoespaçada; a lista cobre Windows, macOS e
   /// Linux para que o alinhamento das colunas de números não dependa de qual
   /// máquina abrir o painel na apresentação.
-  TextStyle mono({
-    required Color color,
-    double size = 12,
-    bool bold = false,
-  }) =>
+  TextStyle mono({required Color color, double size = 12, bool bold = false}) =>
       TextStyle(
         color: color,
         fontSize: size,

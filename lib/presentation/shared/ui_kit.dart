@@ -200,7 +200,7 @@ class MetricTile extends StatelessWidget {
   /// Direção da grandeza, que escolhe a cor do valor.
   ///
   /// Substituiu o antigo `valueColor: Color?`, que obrigava cada ponto de uso
-  /// a resolver a cor por conta própria — e era por onde `AppColors.primary`,
+  /// a resolver a cor por conta própria — e era por onde `context.fin.brand`,
   /// reprovado em contraste, chegava a todo número positivo da interface.
   final FinTrend trend;
 
@@ -484,6 +484,91 @@ class _Halo extends StatelessWidget {
     height: size,
     decoration: BoxDecoration(shape: BoxShape.circle, color: color),
   );
+}
+
+/// Cabeçalho translúcido das telas.
+///
+/// Extraído porque `app_shell` e `profile_page` mantinham cópias do mesmo
+/// `BackdropFilter` com a mesma borda e a mesma opacidade — e qualquer ajuste
+/// precisava ser feito duas vezes, com a segunda sendo esquecida.
+///
+/// O título e a linha de apoio são `Flexible` com reticências: sem isso a
+/// `Row` estourava em 320 dp sob fonte ampliada, que é como o cabeçalho do
+/// perfil quebrava.
+class AppHeader extends StatelessWidget {
+  /// Elemento à esquerda — botão de voltar, marca, avatar.
+  final Widget leading;
+
+  /// Título, na grafia normal.
+  final String title;
+
+  /// Linha de apoio. Renderizada em **caixa alta** pelo widget.
+  final String? subtitle;
+
+  /// Ações à direita.
+  final List<Widget> actions;
+
+  /// Declara o cabeçalho.
+  const AppHeader({
+    super.key,
+    required this.leading,
+    required this.title,
+    this.subtitle,
+    this.actions = const [],
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fin;
+    final t = context.finType;
+
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: FinSpace.lg,
+            vertical: FinSpace.md,
+          ),
+          decoration: BoxDecoration(
+            color: c.canvas.withValues(alpha: 0.6),
+            border: Border(bottom: BorderSide(color: c.border)),
+          ),
+          child: SafeArea(
+            bottom: false,
+            child: Row(
+              children: [
+                leading,
+                const Gap.md(axis: Axis.horizontal),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: t.titleSm.copyWith(color: c.textPrimary),
+                      ),
+                      if (subtitle != null)
+                        Text(
+                          subtitle!.toUpperCase(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: t.caption.copyWith(color: c.textSecondary),
+                        ),
+                    ],
+                  ),
+                ),
+                ...actions,
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Verbete de glossário: o rótulo tal como aparece no cartão e o que ele diz.

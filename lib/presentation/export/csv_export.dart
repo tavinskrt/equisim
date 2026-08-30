@@ -22,24 +22,28 @@ abstract final class CsvExport {
     if (reference == null) return '';
 
     final buffer = StringBuffer()
-      ..writeln([
-        'data',
-        'principal_base100',
-        'principal_patrimonio',
-        'reserva_base100',
-        'reserva_patrimonio',
-      ].join(separator));
+      ..writeln(
+        [
+          'data',
+          'principal_base100',
+          'principal_patrimonio',
+          'reserva_base100',
+          'reserva_patrimonio',
+        ].join(separator),
+      );
 
     for (var i = 0; i < reference.dates.length; i++) {
       final principal = result.principal;
       final reserva = result.reserva;
-      buffer.writeln([
-        Fmt.date.format(reference.dates[i]),
-        _valueAt(principal?.base100, i),
-        _valueAt(principal?.wealth, i),
-        _valueAt(reserva?.base100, i),
-        _valueAt(reserva?.wealth, i),
-      ].join(separator));
+      buffer.writeln(
+        [
+          Fmt.date.format(reference.dates[i]),
+          _valueAt(principal?.base100, i),
+          _valueAt(principal?.wealth, i),
+          _valueAt(reserva?.base100, i),
+          _valueAt(reserva?.wealth, i),
+        ].join(separator),
+      );
     }
     return buffer.toString();
   }
@@ -50,18 +54,28 @@ abstract final class CsvExport {
       ..writeln(['metrica', 'principal', 'reserva'].join(separator));
 
     void row(String label, double? a, double? b, {int decimals = 6}) {
-      buffer.writeln([
-        label,
-        a == null ? '' : _n(a, decimals: decimals),
-        b == null ? '' : _n(b, decimals: decimals),
-      ].join(separator));
+      buffer.writeln(
+        [
+          label,
+          a == null ? '' : _n(a, decimals: decimals),
+          b == null ? '' : _n(b, decimals: decimals),
+        ].join(separator),
+      );
     }
 
     final p = result.principal?.metrics;
     final r = result.reserva?.metrics;
 
-    row('retorno_ponderado_tempo_twr', p?.timeWeightedReturn, r?.timeWeightedReturn);
-    row('retorno_ponderado_dinheiro_xirr', p?.moneyWeightedReturn, r?.moneyWeightedReturn);
+    row(
+      'retorno_ponderado_tempo_twr',
+      p?.timeWeightedReturn,
+      r?.timeWeightedReturn,
+    );
+    row(
+      'retorno_ponderado_dinheiro_xirr',
+      p?.moneyWeightedReturn,
+      r?.moneyWeightedReturn,
+    );
     row('cagr', p?.cagr, r?.cagr);
     row('volatilidade_anualizada', p?.volatility, r?.volatility);
     row('max_drawdown', p?.maxDrawdown, r?.maxDrawdown);
@@ -69,14 +83,30 @@ abstract final class CsvExport {
     row('sortino', p?.sortino, r?.sortino);
     row('calmar', p?.calmar, r?.calmar);
     row('dividend_yield_liquido', p?.netDividendYield, r?.netDividendYield);
-    row('patrimonio_final', result.principal?.finalValue.reais,
-        result.reserva?.finalValue.reais, decimals: 2);
-    row('capital_aportado', result.principal?.totalContributed.reais,
-        result.reserva?.totalContributed.reais, decimals: 2);
-    row('proventos_brutos', result.principal?.grossDividends.reais,
-        result.reserva?.grossDividends.reais, decimals: 2);
-    row('imposto_retido', result.principal?.withheldTax.reais,
-        result.reserva?.withheldTax.reais, decimals: 2);
+    row(
+      'patrimonio_final',
+      result.principal?.finalValue.reais,
+      result.reserva?.finalValue.reais,
+      decimals: 2,
+    );
+    row(
+      'capital_aportado',
+      result.principal?.totalContributed.reais,
+      result.reserva?.totalContributed.reais,
+      decimals: 2,
+    );
+    row(
+      'proventos_brutos',
+      result.principal?.grossDividends.reais,
+      result.reserva?.grossDividends.reais,
+      decimals: 2,
+    );
+    row(
+      'imposto_retido',
+      result.principal?.withheldTax.reais,
+      result.reserva?.withheldTax.reais,
+      decimals: 2,
+    );
 
     return buffer.toString();
   }
@@ -84,30 +114,34 @@ abstract final class CsvExport {
   /// Desempenho individual dos ativos de uma carteira.
   static String perAsset(BacktestOutcome outcome) {
     final buffer = StringBuffer()
-      ..writeln([
-        'ticker',
-        'peso_alvo',
-        'peso_atual',
-        'deriva_pp',
-        'retorno_total',
-        'capital_alocado',
-        'valor_final',
-        'proventos_brutos',
-        'imposto_retido',
-      ].join(separator));
+      ..writeln(
+        [
+          'ticker',
+          'peso_alvo',
+          'peso_atual',
+          'deriva_pp',
+          'retorno_total',
+          'capital_alocado',
+          'valor_final',
+          'proventos_brutos',
+          'imposto_retido',
+        ].join(separator),
+      );
 
     for (final asset in outcome.perAsset.values) {
-      buffer.writeln([
-        asset.ticker.value,
-        _n(asset.targetWeight.value),
-        _n(asset.currentWeight),
-        _n(asset.drift, decimals: 2),
-        _n(asset.totalReturn),
-        _n(asset.invested.reais, decimals: 2),
-        _n(asset.finalValue.reais, decimals: 2),
-        _n(asset.grossDividends.reais, decimals: 2),
-        _n(asset.withheldTax.reais, decimals: 2),
-      ].join(separator));
+      buffer.writeln(
+        [
+          asset.ticker.value,
+          _n(asset.targetWeight.value),
+          _n(asset.currentWeight),
+          _n(asset.drift, decimals: 2),
+          _n(asset.totalReturn),
+          _n(asset.invested.reais, decimals: 2),
+          _n(asset.finalValue.reais, decimals: 2),
+          _n(asset.grossDividends.reais, decimals: 2),
+          _n(asset.withheldTax.reais, decimals: 2),
+        ].join(separator),
+      );
     }
     return buffer.toString();
   }

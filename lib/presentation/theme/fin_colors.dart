@@ -196,16 +196,16 @@ class FinColors extends ThemeExtension<FinColors> {
   /// O `switch` e exaustivo: token novo em [FinInkToken] nao compila ate ser
   /// resolvido aqui.
   Color ink(FinInkToken token) => switch (token) {
-        FinInkToken.textPrimary => textPrimary,
-        FinInkToken.textSecondary => textSecondary,
-        FinInkToken.textTertiary => textTertiary,
-        FinInkToken.positive => positive,
-        FinInkToken.negative => negative,
-        FinInkToken.caution => caution,
-        FinInkToken.pending => pending,
-        FinInkToken.blocked => blocked,
-        FinInkToken.reserva => reserva,
-      };
+    FinInkToken.textPrimary => textPrimary,
+    FinInkToken.textSecondary => textSecondary,
+    FinInkToken.textTertiary => textTertiary,
+    FinInkToken.positive => positive,
+    FinInkToken.negative => negative,
+    FinInkToken.caution => caution,
+    FinInkToken.pending => pending,
+    FinInkToken.blocked => blocked,
+    FinInkToken.reserva => reserva,
+  };
 
   /// Toda superficie sobre a qual [token] pode ser pintado.
   ///
@@ -214,20 +214,20 @@ class FinColors extends ThemeExtension<FinColors> {
   /// cerca de 12%, e foi assim que a paleta anterior passou a impressao de
   /// estar em AAA quando nao estava.
   List<Color> surfacesFor(FinInkToken token) => <Color>[
-        canvas,
-        surface,
-        surfaceSunken,
-        // Estado tambem aparece sobre a propria pastilha tonal, que e o par
-        // mais apertado da paleta: fundo e tinta compartilham o matiz.
-        switch (token) {
-          FinInkToken.positive => positiveSurface,
-          FinInkToken.negative => negativeSurface,
-          FinInkToken.caution => cautionSurface,
-          FinInkToken.pending => pendingSurface,
-          FinInkToken.reserva => reservaSurface,
-          _ => surface,
-        },
-      ];
+    canvas,
+    surface,
+    surfaceSunken,
+    // Estado tambem aparece sobre a propria pastilha tonal, que e o par
+    // mais apertado da paleta: fundo e tinta compartilham o matiz.
+    switch (token) {
+      FinInkToken.positive => positiveSurface,
+      FinInkToken.negative => negativeSurface,
+      FinInkToken.caution => cautionSurface,
+      FinInkToken.pending => pendingSurface,
+      FinInkToken.reserva => reservaSurface,
+      _ => surface,
+    },
+  ];
 
   /// Tinta legivel sobre um preenchimento ARBITRARIO, gerado por dado.
   ///
@@ -243,6 +243,30 @@ class FinColors extends ThemeExtension<FinColors> {
   Color inkOn(Color fill) =>
       fill.computeLuminance() > 0.28 ? onFillDark : onFillLight;
 
+  /// Gradiente da marca, do canto superior esquerdo ao inferior direito.
+  ///
+  /// Usado em elemento de destaque -- botao primario, avatar --, nunca como
+  /// fundo de tela. As duas paradas sao da familia da marca, entao ele nao
+  /// carrega texto por si: quem escreve por cima usa [textOnBrand].
+  LinearGradient get brandGradient => LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [brand, brandSurface],
+  );
+
+  /// Gradiente de fundo de tela.
+  ///
+  /// Percorre `canvas -> surfaceSunken -> canvas`. As tres paradas ja passam
+  /// pelo teste de contraste, o que o par azul-marinho/verde-petroleo anterior
+  /// nao garantia -- e a variacao minima e o suficiente para dar ao
+  /// `GlassCard` o que desfocar.
+  LinearGradient get canvasGradient => LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [canvas, surfaceSunken, canvas],
+    stops: const [0.0, 0.55, 1.0],
+  );
+
   /// Cor de texto para uma direcao.
   ///
   /// [FinTrend.neutral] resolve para [textPrimary], e nao para uma cor
@@ -251,22 +275,22 @@ class FinColors extends ThemeExtension<FinColors> {
   /// le na tinta principal. A de-enfase pertence a [FinTrend.blocked], que
   /// significa ausencia de dado.
   Color forTrend(FinTrend trend) => switch (trend) {
-        FinTrend.positive => positive,
-        FinTrend.negative => negative,
-        FinTrend.caution => caution,
-        FinTrend.pending => pending,
-        FinTrend.blocked => blocked,
-        FinTrend.neutral => textPrimary,
-      };
+    FinTrend.positive => positive,
+    FinTrend.negative => negative,
+    FinTrend.caution => caution,
+    FinTrend.pending => pending,
+    FinTrend.blocked => blocked,
+    FinTrend.neutral => textPrimary,
+  };
 
   /// Fundo tonal para uma direcao.
   Color surfaceForTrend(FinTrend trend) => switch (trend) {
-        FinTrend.positive => positiveSurface,
-        FinTrend.negative => negativeSurface,
-        FinTrend.caution => cautionSurface,
-        FinTrend.pending => pendingSurface,
-        FinTrend.neutral || FinTrend.blocked => surfaceSunken,
-      };
+    FinTrend.positive => positiveSurface,
+    FinTrend.negative => negativeSurface,
+    FinTrend.caution => cautionSurface,
+    FinTrend.pending => pendingSurface,
+    FinTrend.neutral || FinTrend.blocked => surfaceSunken,
+  };
 
   /// Paleta clara.
   ///
@@ -397,33 +421,33 @@ class FinColors extends ThemeExtension<FinColors> {
 
   @override
   int get hashCode => Object.hashAll(<Object>[
-        canvas,
-        surface,
-        surfaceRaised,
-        surfaceSunken,
-        border,
-        borderStrong,
-        divider,
-        shadow,
-        textPrimary,
-        textSecondary,
-        textTertiary,
-        textOnBrand,
-        onFillDark,
-        onFillLight,
-        positive,
-        negative,
-        caution,
-        pending,
-        blocked,
-        reserva,
-        reservaSurface,
-        reservaMuted,
-        positiveSurface,
-        negativeSurface,
-        cautionSurface,
-        pendingSurface,
-        brand,
-        brandSurface,
-      ]);
+    canvas,
+    surface,
+    surfaceRaised,
+    surfaceSunken,
+    border,
+    borderStrong,
+    divider,
+    shadow,
+    textPrimary,
+    textSecondary,
+    textTertiary,
+    textOnBrand,
+    onFillDark,
+    onFillLight,
+    positive,
+    negative,
+    caution,
+    pending,
+    blocked,
+    reserva,
+    reservaSurface,
+    reservaMuted,
+    positiveSurface,
+    negativeSurface,
+    cautionSurface,
+    pendingSurface,
+    brand,
+    brandSurface,
+  ]);
 }

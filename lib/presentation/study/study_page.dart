@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/portfolio_repository.dart';
 import '../../di/providers.dart';
-import '../../utils/app_colors.dart';
 import '../components/fin_amount.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
@@ -36,7 +35,7 @@ class StudyPage extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(error),
-            backgroundColor: AppColors.danger,
+            backgroundColor: context.fin.negative,
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 3),
           ),
@@ -81,34 +80,43 @@ class StudyPage extends ConsumerWidget {
           columnWidth: columnWidth,
         );
 
-        return ListView(
-          padding: const EdgeInsets.all(FinSpace.lg),
-          children: [
-            _StudyHeader(isLight: isLight),
-            const SizedBox(height: 12),
-            if (concentration.hasAlert) ...[
-              NoticeBanner(
-                icon: Icons.account_balance_outlined,
-                message: _concentrationMessage(concentration),
-              ),
-              const SizedBox(height: 12),
-            ],
-            if (isWide)
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(child: principal),
-                    const Gap.md(axis: Axis.horizontal),
-                    Expanded(child: reserva),
+        // `CustomScrollView`, e nao `ListView`: cada cartao vira um sliver proprio,
+        // entao o framework so infla os que entram na viewport -- e cada um ganha a
+        // fronteira de repintura que o `SliverList` adiciona.
+        return CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.all(FinSpace.lg),
+              sliver: SliverList.list(
+                children: [
+                  _StudyHeader(isLight: isLight),
+                  const Gap.md(),
+                  if (concentration.hasAlert) ...[
+                    NoticeBanner(
+                      icon: Icons.account_balance_outlined,
+                      message: _concentrationMessage(concentration),
+                    ),
+                    const Gap.md(),
                   ],
-                ),
-              )
-            else ...[
-              principal,
-              const SizedBox(height: 12),
-              reserva,
-            ],
+                  if (isWide)
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(child: principal),
+                          const Gap.md(axis: Axis.horizontal),
+                          Expanded(child: reserva),
+                        ],
+                      ),
+                    )
+                  else ...[
+                    principal,
+                    const Gap.md(),
+                    reserva,
+                  ],
+                ],
+              ),
+            ),
           ],
         );
       },
@@ -146,7 +154,7 @@ class _StudyHeader extends ConsumerWidget {
       weightedUpside = ExpectedReturn.forPortfolio(
         portfolio: state.study.principal,
         valuations: expected.value!,
-        netDividendYields: yields.valueOrNull ?? const {},
+        netDividendYields: yields.value ?? const {},
         horizonMonths: settings.convergenceHorizonMonths,
       );
       coverage = ExpectedReturn.coverage(
@@ -159,7 +167,7 @@ class _StudyHeader extends ConsumerWidget {
     // Um "esperado" muito acima dele não é promessa de desempenho, é sinal de
     // que alguma avaliação da carteira está esticada.
     final marketCagr =
-        anchors.valueOrNull?.marketCagr ??
+        anchors.value?.marketCagr ??
         MarketAnchors.fallback2026.marketCagr;
     final isImplausible =
         weightedUpside != null && weightedUpside > marketCagr * 3;
@@ -178,16 +186,15 @@ class _StudyHeader extends ConsumerWidget {
                   key: ValueKey(state.study.id ?? '__novo__'),
                   initialValue: state.study.name,
                   onChanged: ref.read(studyProvider.notifier).rename,
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: context.finType.titleSm.copyWith(
+                    color: context.fin.textPrimary,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary(isLight),
                   ),
                   decoration: InputDecoration(
                     isDense: true,
                     border: InputBorder.none,
                     hintText: 'Nome do estudo',
-                    hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
+                    hintStyle: TextStyle(color: context.fin.textTertiary),
                   ),
                 ),
               ),
@@ -196,13 +203,13 @@ class _StudyHeader extends ConsumerWidget {
                 icon: Icon(
                   Icons.folder_open_outlined,
                   size: 19,
-                  color: AppColors.textSecondary(isLight),
+                  color: context.fin.textSecondary,
                 ),
                 onPressed: () => showSavedStudies(context, isLight: isLight),
               ),
               state.isSaving
                   ? const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 14),
+                      padding: EdgeInsets.symmetric(horizontal: FinSpace.md),
                       child: SizedBox(
                         width: 16,
                         height: 16,
@@ -216,7 +223,7 @@ class _StudyHeader extends ConsumerWidget {
                       icon: Icon(
                         Icons.save_outlined,
                         size: 19,
-                        color: AppColors.primary,
+                        color: context.fin.brand,
                       ),
                       onPressed: () => _save(context, ref),
                     ),
@@ -267,7 +274,7 @@ class _StudyHeader extends ConsumerWidget {
             ],
           ),
           if (isImplausible) ...[
-            const SizedBox(height: 12),
+            const Gap.md(),
             NoticeBanner(
               icon: Icons.warning_amber_rounded,
               trend: FinTrend.caution,
@@ -334,7 +341,12 @@ class _SavedStudiesSheet extends ConsumerWidget {
           maxHeight: MediaQuery.of(context).size.height * 0.7,
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+          padding: const EdgeInsets.fromLTRB(
+            FinSpace.lg,
+            FinSpace.lg,
+            FinSpace.lg,
+            FinSpace.lg,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -351,11 +363,11 @@ class _SavedStudiesSheet extends ConsumerWidget {
                   },
                 ),
               ),
-              const SizedBox(height: 8),
+              const Gap.sm(),
               Flexible(
                 child: studies.when(
                   loading: () => const Padding(
-                    padding: EdgeInsets.all(28),
+                    padding: EdgeInsets.all(FinSpace.xl),
                     child: Center(child: CircularProgressIndicator()),
                   ),
                   error: (error, _) => EmptyState(
@@ -374,10 +386,8 @@ class _SavedStudiesSheet extends ConsumerWidget {
                       : ListView.separated(
                           shrinkWrap: true,
                           itemCount: list.length,
-                          separatorBuilder: (_, _) => Divider(
-                            height: 1,
-                            color: AppColors.divider(isLight),
-                          ),
+                          separatorBuilder: (_, _) =>
+                              Divider(height: 1, color: context.fin.divider),
                           itemBuilder: (_, i) =>
                               _SavedStudyTile(study: list[i], isLight: isLight),
                         ),
@@ -404,15 +414,14 @@ class _SavedStudyTile extends ConsumerWidget {
       // Com padding zerado o nome encostava na borda do card e aparecia
       // cortado. O nome do estudo e livre e pode ser longo, entao ele tambem
       // precisa de elipse: sem `maxLines`, o texto estoura em vez de truncar.
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: FinSpace.sm),
       title: Text(
         study.name,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontSize: 13.5,
+        style: context.finType.bodySm.copyWith(
+          color: context.fin.textPrimary,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary(isLight),
         ),
       ),
       subtitle: Text(
@@ -421,11 +430,13 @@ class _SavedStudyTile extends ConsumerWidget {
         '${updatedAt == null ? '' : ' · ${Fmt.date.format(updatedAt)}'}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: 10.5, color: AppColors.textMuted(isLight)),
+        style: context.finType.caption.copyWith(
+          color: context.fin.textTertiary,
+        ),
       ),
       trailing: IconButton(
         tooltip: 'Excluir',
-        icon: Icon(Icons.delete_outline, size: 18, color: AppColors.danger),
+        icon: Icon(Icons.delete_outline, size: 18, color: context.fin.negative),
         onPressed: () => _confirmDelete(context, ref),
       ),
       onTap: () {
@@ -451,7 +462,10 @@ class _SavedStudyTile extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('Excluir', style: TextStyle(color: AppColors.danger)),
+            child: Text(
+              'Excluir',
+              style: TextStyle(color: context.fin.negative),
+            ),
           ),
         ],
       ),
@@ -503,9 +517,9 @@ class _PortfolioColumn extends ConsumerWidget {
         final compact = columnWidth - fixo < nomeMinimo;
         return GlassCard(
           borderColor: isHovered
-              ? AppColors.primary
+              ? context.fin.brand
               : (isPrincipal
-                    ? AppColors.primary.withValues(alpha: 0.35)
+                    ? context.fin.brand.withValues(alpha: 0.35)
                     : null),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -563,7 +577,7 @@ class _PortfolioColumn extends ConsumerWidget {
                         icon: Icon(
                           Icons.balance,
                           size: 17,
-                          color: AppColors.textSecondary(isLight),
+                          color: context.fin.textSecondary,
                         ),
                         onPressed: () => ref
                             .read(studyProvider.notifier)
@@ -582,7 +596,7 @@ class _PortfolioColumn extends ConsumerWidget {
                       icon: Icon(
                         Icons.add_circle_outline,
                         size: 19,
-                        color: AppColors.primary,
+                        color: context.fin.brand,
                       ),
                       onPressed: () =>
                           showAssetPicker(context, toPrincipal: isPrincipal),
@@ -590,7 +604,7 @@ class _PortfolioColumn extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 10),
+              const Gap.sm(),
               if (portfolio.isEmpty)
                 // `minHeight`, e nao `height`: com altura travada em 150 dp o
                 // `Column` do EmptyState estourava por 8 px assim que o texto
@@ -783,7 +797,7 @@ class _AssetRow extends ConsumerWidget {
     final content = _rowContent(
       context,
       ref,
-      valuation.valueOrNull,
+      valuation.value,
       isLoading: valuation.isLoading,
     );
 
@@ -795,17 +809,17 @@ class _AssetRow extends ConsumerWidget {
           opacity: 0.9,
           child: Container(
             width: 220,
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(FinSpace.md),
             decoration: BoxDecoration(
               color: context.fin.surfaceRaised,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.primary),
+              border: Border.all(color: context.fin.brand),
             ),
             child: Text(
               entry.ticker.value,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary(isLight),
+                color: context.fin.textPrimary,
               ),
             ),
           ),
@@ -837,7 +851,10 @@ class _AssetRow extends ConsumerWidget {
             ),
       borderRadius: BorderRadius.circular(10),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
+        padding: const EdgeInsets.symmetric(
+          vertical: FinSpace.sm,
+          horizontal: FinSpace.xs,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
@@ -885,7 +902,7 @@ class _AssetRow extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: context.finType.numSm.copyWith(
-                        color: AppColors.textPrimary(isLight),
+                        color: context.fin.textPrimary,
                       ),
                     ),
                   ),
@@ -919,7 +936,7 @@ class _AssetRow extends ConsumerWidget {
                   icon: Icon(
                     Icons.close,
                     size: 15,
-                    color: AppColors.textMuted(isLight),
+                    color: context.fin.textTertiary,
                   ),
                   onPressed: () => ref
                       .read(studyProvider.notifier)
@@ -1170,7 +1187,7 @@ class _UpsideCell extends StatelessWidget {
             children: [
               if (isOutlier || hasWarnings) ...[
                 Icon(Icons.warning_amber_rounded, size: 11, color: color),
-                const SizedBox(width: 2),
+                const Gap.xs(axis: Axis.horizontal),
               ],
               Flexible(
                 child: FinAmount(
@@ -1186,9 +1203,8 @@ class _UpsideCell extends StatelessWidget {
               'justo ${Fmt.money(fairValue!)}',
               textAlign: TextAlign.right,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 9,
-                color: AppColors.textMuted(isLight),
+              style: context.finType.caption.copyWith(
+                color: context.fin.textTertiary,
               ),
             ),
         ],

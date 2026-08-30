@@ -127,10 +127,7 @@ class BalanceSummaryCard extends StatelessWidget {
 
         if (caption != null) ...[
           const Gap.sm(),
-          Text(
-            caption!,
-            style: t.caption.copyWith(color: c.textTertiary),
-          ),
+          Text(caption!, style: t.caption.copyWith(color: c.textTertiary)),
         ],
 
         if (metrics.isNotEmpty) ...[
@@ -178,7 +175,9 @@ class _Header extends StatelessWidget {
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             padding: EdgeInsets.zero,
             icon: Icon(
-              masked ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+              masked
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
               size: 18,
               color: c.textSecondary,
             ),
@@ -217,7 +216,7 @@ class _ChangePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: FinSpace.sm,
-        // `xxs` e nao `xs`: com 4 dp a pastilha fica alta demais em relacao ao
+        // `xxs` e nao `xs`: com FinSpace.xs dp a pastilha fica alta demais em relacao ao
         // texto que ela envolve. E o caso de ajuste optico para o qual o meio
         // passo existe.
         vertical: FinSpace.xxs,
@@ -272,11 +271,7 @@ class _MetricGrid extends StatelessWidget {
       final value = FinAmount.measure(context, m.value, t.numMd);
       if (value > largest) largest = value;
 
-      final label = FinAmount.measure(
-        context,
-        m.label.toUpperCase(),
-        t.label,
-      );
+      final label = FinAmount.measure(context, m.label.toUpperCase(), t.label);
       if (label > largest) largest = label;
     }
 
@@ -298,8 +293,7 @@ class _MetricGrid extends StatelessWidget {
             .floor()
             .clamp(1, 4);
 
-        final itemWidth =
-            (available - FinSpace.xl * (columns - 1)) / columns;
+        final itemWidth = (available - FinSpace.xl * (columns - 1)) / columns;
 
         return Wrap(
           spacing: FinSpace.xl,

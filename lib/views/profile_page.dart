@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
+import '../presentation/shared/ui_kit.dart';
+import '../presentation/theme/fin_space.dart';
 import '../presentation/theme/fin_theme.dart';
-import '../utils/app_colors.dart';
-import '../controllers/theme_controller.dart';
 import '../controllers/profile_controller.dart';
 import 'change_password_page.dart';
 import 'login_page.dart';
 
 /// Tela de exibição e edição de dados cadastrais do perfil do usuário.
-/// 
+///
 /// Transcreve o visual e o comportamento do componente React `MyProfile.tsx`,
 /// implementando edição in-line, exclusão de conta e removendo e-mail verificado e 2FA.
 class ProfilePage extends StatelessWidget {
@@ -41,8 +41,13 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      _profileController = Provider.of<ProfileController>(context, listen: false);
-      _usernameController = TextEditingController(text: _profileController.username);
+      _profileController = Provider.of<ProfileController>(
+        context,
+        listen: false,
+      );
+      _usernameController = TextEditingController(
+        text: _profileController.username,
+      );
       _emailController = TextEditingController(text: _profileController.email);
       _initialized = true;
     }
@@ -72,7 +77,7 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(controller.errorMessage!),
-          backgroundColor: AppColors.danger,
+          backgroundColor: context.fin.negative,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -80,9 +85,10 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
   }
 
   /// Exibe um diálogo de confirmação antes de excluir a conta definitivamente
-  void _confirmDeleteAccount(BuildContext context, ProfileController controller) {
-    final isLight = Provider.of<ThemeController>(context, listen: false).isLightMode;
-
+  void _confirmDeleteAccount(
+    BuildContext context,
+    ProfileController controller,
+  ) {
     showDialog(
       context: context,
       builder: (context) {
@@ -96,18 +102,24 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
             ),
             title: Text(
               'Excluir Conta',
-              style: TextStyle(color: AppColors.textPrimary(isLight), fontWeight: FontWeight.bold),
+              style: context.finType.titleSm.copyWith(
+                color: context.fin.textPrimary,
+              ),
             ),
             content: Text(
               'Esta ação é definitiva e removerá todos os seus dados de simulações. Deseja mesmo prosseguir?',
-              style: TextStyle(color: AppColors.textSecondary(isLight), fontSize: 14, height: 1.5),
+              style: context.finType.bodyMd.copyWith(
+                color: context.fin.textSecondary,
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
                   'Cancelar',
-                  style: TextStyle(color: context.fin.textTertiary),
+                  style: context.finType.bodyMd.copyWith(
+                    color: context.fin.textTertiary,
+                  ),
                 ),
               ),
               ElevatedButton(
@@ -119,31 +131,41 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(error),
-                          backgroundColor: AppColors.danger,
+                          backgroundColor: context.fin.negative,
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('Sua conta foi excluída com sucesso.'),
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: context.fin.brand,
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
                         (route) => false,
                       );
                     }
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.danger,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  backgroundColor: context.fin.negative,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                child: Text('Excluir', style: TextStyle(color: context.fin.textOnBrand, fontWeight: FontWeight.bold)),
+                child: Text(
+                  'Excluir',
+                  style: context.finType.bodyMd.copyWith(
+                    color: context.fin.textOnBrand,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),
@@ -155,8 +177,6 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<ProfileController>(context);
-    final themeController = Provider.of<ThemeController>(context);
-    final isLight = themeController.isLightMode;
 
     // Sincroniza estados do Provider com os text controllers locais
     if (_usernameController.text != controller.username) {
@@ -176,721 +196,906 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
     final initials = _getInitials(controller.username);
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: AppColors.backgroundGradient(isLight),
-        ),
-        child: Stack(
+      // `ScreenBackground` no lugar do gradiente com os dois círculos
+      // reconstruídos aqui: eram cópia literal do componente compartilhado, e
+      // qualquer ajuste no fundo precisava ser feito nos dois lugares.
+      body: ScreenBackground(
+        child: Column(
           children: [
-            // Efeitos de círculos de fundo
-            Positioned(
-              top: -100,
-              right: -60,
-              child: Container(
-                width: 260,
-                height: 260,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary.withValues(alpha: 0.07),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -40,
-              left: -80,
-              child: Container(
-                width: 220,
-                height: 220,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary.withValues(alpha: 0.05),
-                ),
-              ),
-            ),
-
-            Column(
-              children: [
-                // Header (fiel ao React)
-                ClipRRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            AppHeader(
+              title: 'Meu Perfil',
+              subtitle: 'Informações da conta',
+              leading: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                behavior: HitTestBehavior.opaque,
+                child: SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Center(
                     child: Container(
-                      padding: const EdgeInsets.only(top: 52, left: 16, right: 20, bottom: 16),
+                      width: 34,
+                      height: 34,
                       decoration: BoxDecoration(
-                        color: AppColors.backgroundStart(isLight).withValues(alpha: 0.6),
-                        border: Border(bottom: BorderSide(color: AppColors.surfaceBorder(isLight))),
+                        shape: BoxShape.circle,
+                        color: context.fin.surfaceSunken,
+                        border: Border.all(color: context.fin.border),
                       ),
-                      child: Row(
-                        children: [
-                          // Botão voltar redondo
-                          GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: Container(
-                              width: 34,
-                              height: 34,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: context.fin.surfaceSunken,
-                                border: Border.all(color: context.fin.border),
-                              ),
-                              child: Icon(Icons.arrow_back_ios_new, color: context.fin.textSecondary, size: 14),
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Meu Perfil',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary(isLight),
-                                  height: 1.2,
-                                ),
-                              ),
-                              Text(
-                                'INFORMAÇÕES DA CONTA',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: AppColors.textSecondary(isLight),
-                                  letterSpacing: 0.4,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
+                        color: context.fin.textSecondary,
+                        size: 14,
                       ),
                     ),
                   ),
                 ),
+              ),
+            ),
+            // Body rolável
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(
+                  top: 24,
+                  left: 16,
+                  right: 16,
+                  bottom: 40,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Avatar Section
+                    _AvatarSection(controller: controller, initials: initials),
+                    const SizedBox(height: 24),
 
-                // Body rolável
+                    // Dados pessoais Card (Nome de usuário e E-mail in-line)
+                    _PersonalDataCard(
+                      controller: controller,
+                      usernameController: _usernameController,
+                      emailController: _emailController,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Save changes button (apenas visível ao editar)
+                    _SaveButton(controller: controller, onSave: _save),
+
+                    // Success Toast temporário
+                    _SuccessToast(controller: controller),
+
+                    // Segurança Card (Trocar Senha, sem 2FA)
+                    _SecurityCard(controller: controller),
+                    const SizedBox(height: 12),
+
+                    // Sessão Atual Card
+                    _SessionCard(controller: controller),
+                    const SizedBox(height: 16),
+
+                    // Excluir conta Button
+                    _DeleteAccountButton(
+                      controller: controller,
+                      onConfirm: _confirmDeleteAccount,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AvatarSection extends StatelessWidget {
+  final ProfileController controller;
+
+  /// Iniciais exibidas no avatar, derivadas do nome.
+  final String initials;
+
+  const _AvatarSection({required this.controller, required this.initials});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Stack(
+          children: [
+            Container(
+              width: 84,
+              height: 84,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                // As paradas são tokens já tematizados: o ternário por `isLight`
+                // que havia aqui escolhia entre duas listas que variam
+                // sozinhas, então era redundante.
+                gradient: LinearGradient(
+                  colors: [
+                    context.fin.brandSurface,
+                    context.fin.positiveSurface,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                border: Border.all(
+                  color: context.fin.brand.withValues(alpha: 0.5),
+                  width: 3,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: context.fin.shadow,
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  initials,
+                  style: context.finType.displayLg.copyWith(
+                    color: context.fin.positive,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1,
+                  ),
+                ),
+              ),
+            ),
+            // Câmera Edit button
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'A alteração de foto de perfil estará disponível em breve!',
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: context.fin.brandGradient,
+                    border: Border.all(color: context.fin.canvas, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: context.fin.brand.withValues(alpha: 0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.camera_alt_outlined,
+                    color: context.fin.textOnBrand,
+                    size: 12,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Text(
+          controller.username,
+          style: context.finType.titleLg.copyWith(
+            color: context.fin.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          controller.email,
+          style: context.finType.bodySm.copyWith(
+            color: context.fin.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Member badge
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+          decoration: BoxDecoration(
+            color: context.fin.brand.withValues(alpha: 0.1),
+            border: Border.all(
+              color: context.fin.brand.withValues(alpha: 0.25),
+            ),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: context.fin.positive,
+                ),
+              ),
+              const SizedBox(width: 6),
+              // `Expanded`: o rotulo em caixa alta nao encolhe, e sob
+              // escala 2,0x a linha do cabecalho estourava em 320 dp.
+              Expanded(
+                child: Text(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  'Membro ativo',
+                  style: context.finType.caption.copyWith(
+                    color: context.fin.positive,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PersonalDataCard extends StatelessWidget {
+  final ProfileController controller;
+
+  /// Controladores de texto locais, mantidos pelo State da tela.
+  final TextEditingController usernameController;
+  final TextEditingController emailController;
+
+  const _PersonalDataCard({
+    required this.controller,
+    required this.usernameController,
+    required this.emailController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: context.fin.surface,
+        border: Border.all(color: context.fin.border),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: context.fin.shadow,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header do cartão
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+            child: Row(
+              children: [
+                Icon(Icons.person_outline, color: context.fin.brand, size: 13),
+                const SizedBox(width: 8),
+                // `Expanded`: o rotulo em caixa alta nao encolhe, e sob
+                // escala 2,0x a linha do cabecalho estourava em 320 dp.
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(top: 24, left: 16, right: 16, bottom: 40),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Avatar Section
-                        Column(
-                          children: [
-                            Stack(
-                              children: [
-                                Container(
-                                  width: 84,
-                                  height: 84,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: isLight
-                                        ? LinearGradient(
-                                            colors: [context.fin.brandSurface, context.fin.positiveSurface],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          )
-                                        : LinearGradient(
-                                            colors: [context.fin.reservaSurface, context.fin.brandSurface],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
-                                    border: Border.all(
-                                      color: AppColors.primary.withValues(alpha: 0.5),
-                                      width: 3,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: context.fin.shadow,
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 8),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      initials,
-                                      style: TextStyle(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.w800,
-                                        color: context.fin.positive,
-                                        letterSpacing: -1,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                // Câmera Edit button
-                                Positioned(
-                                  bottom: 0,
-                                  right: 0,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('A alteração de foto de perfil estará disponível em breve!'),
-                                          behavior: SnackBarBehavior.floating,
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      width: 28,
-                                      height: 28,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: AppColors.brandGradient,
-                                        border: Border.all(color: AppColors.backgroundStart(isLight), width: 2),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: AppColors.primary.withValues(alpha: 0.4),
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Icon(Icons.camera_alt_outlined, color: context.fin.textOnBrand, size: 12),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 14),
-                            Text(
-                              controller.username,
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary(isLight),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              controller.email,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary(isLight),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            // Member badge
-                            Container(
-                              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
-                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: context.fin.positive,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Membro ativo',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: context.fin.positive,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Dados pessoais Card (Nome de usuário e E-mail in-line)
-                        Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.surface(isLight),
-                            border: Border.all(color: AppColors.surfaceBorder(isLight)),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: isLight
-                                ? [
-                                    BoxShadow(
-                                      color: context.fin.surfaceSunken,
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 2),
-                                    )
-                                  ]
-                                : null,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Header do cartão
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.person_outline, color: AppColors.primary, size: 13),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'DADOS PESSOAIS',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textSecondary(isLight),
-                                        letterSpacing: 0.6,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Divider(color: AppColors.divider(isLight), height: 1),
-
-                              // Nome de usuário row
-                              Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: controller.editingName
-                                    ? Row(
-                                        children: [
-                                          Expanded(
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: AppColors.inputBackground(isLight),
-                                                borderRadius: BorderRadius.circular(10),
-                                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
-                                              ),
-                                              child: TextField(
-                                                controller: _usernameController,
-                                                onChanged: controller.setUsername,
-                                                autofocus: true,
-                                                style: TextStyle(color: AppColors.textPrimary(isLight), fontSize: 14, fontWeight: FontWeight.bold),
-                                                decoration: const InputDecoration(
-                                                  border: InputBorder.none,
-                                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          GestureDetector(
-                                            onTap: () => controller.setEditingName(false),
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.inputBackground(isLight),
-                                                border: Border.all(color: AppColors.surfaceBorder(isLight)),
-                                                borderRadius: BorderRadius.circular(9),
-                                              ),
-                                              child: Text('✕', style: TextStyle(color: AppColors.textSecondary(isLight), fontSize: 12)),
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'NOME DE USUÁRIO',
-                                                style: TextStyle(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: AppColors.textSecondary(isLight),
-                                                  letterSpacing: 0.3,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 3),
-                                              Text(
-                                                controller.username,
-                                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isLight)),
-                                              ),
-                                            ],
-                                          ),
-                                          GestureDetector(
-                                            onTap: () => controller.setEditingName(true),
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.primary.withValues(alpha: 0.1),
-                                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: const Text(
-                                                'Editar',
-                                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                              ),
-                              Divider(color: AppColors.divider(isLight), height: 1),
-
-                              // Email row (sem selo verificado)
-                              Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: controller.editingEmail
-                                    ? Row(
-                                        children: [
-                                          Expanded(
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: AppColors.inputBackground(isLight),
-                                                borderRadius: BorderRadius.circular(10),
-                                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
-                                              ),
-                                              child: TextField(
-                                                controller: _emailController,
-                                                onChanged: controller.setEmail,
-                                                autofocus: true,
-                                                style: TextStyle(color: AppColors.textPrimary(isLight), fontSize: 14, fontWeight: FontWeight.bold),
-                                                decoration: const InputDecoration(
-                                                  border: InputBorder.none,
-                                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          GestureDetector(
-                                            onTap: () => controller.setEditingEmail(false),
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.inputBackground(isLight),
-                                                border: Border.all(color: AppColors.surfaceBorder(isLight)),
-                                                borderRadius: BorderRadius.circular(9),
-                                              ),
-                                              child: Text('✕', style: TextStyle(color: AppColors.textSecondary(isLight), fontSize: 12)),
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'E-MAIL',
-                                                style: TextStyle(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: AppColors.textSecondary(isLight),
-                                                  letterSpacing: 0.3,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 3),
-                                              Text(
-                                                controller.email,
-                                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isLight)),
-                                              ),
-                                            ],
-                                          ),
-                                          GestureDetector(
-                                            onTap: () => controller.setEditingEmail(true),
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.primary.withValues(alpha: 0.1),
-                                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: const Text(
-                                                'Editar',
-                                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Save changes button (apenas visível ao editar)
-                        if (controller.editingName || controller.editingEmail) ...[
-                          Container(
-                            height: 48,
-                            decoration: BoxDecoration(
-                              gradient: AppColors.brandGradient,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary.withValues(alpha: 0.4),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 6),
-                                )
-                              ],
-                            ),
-                            child: ElevatedButton(
-                              onPressed: controller.isLoading ? null : () => _save(context, controller),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                disabledBackgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: controller.isLoading
-                                  ? SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(color: context.fin.textOnBrand, strokeWidth: 2),
-                                    )
-                                  : Text(
-                                      'Salvar alterações',
-                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: context.fin.textOnBrand),
-                                    ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-
-                        // Success Toast temporário
-                        if (controller.savedSuccess) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.12),
-                              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.check_circle_outline, color: context.fin.positive, size: 16),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Informações salvas com sucesso!',
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: context.fin.positive),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-
-                        // Segurança Card (Trocar Senha, sem 2FA)
-                        Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.surface(isLight),
-                            border: Border.all(color: AppColors.surfaceBorder(isLight)),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: isLight
-                                ? [
-                                    BoxShadow(
-                                      color: context.fin.surfaceSunken,
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 2),
-                                    )
-                                  ]
-                                : null,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.security_outlined, color: AppColors.primary, size: 13),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'SEGURANÇA',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textSecondary(isLight),
-                                        letterSpacing: 0.6,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Divider(color: AppColors.divider(isLight), height: 1),
-                              
-                              // Trocar senha row
-                              Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
-                                    );
-                                  },
-                                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 36,
-                                          height: 36,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(10),
-                                            color: AppColors.primary.withValues(alpha: 0.12),
-                                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
-                                          ),
-                                          child: const Icon(Icons.lock_outline, color: AppColors.primary, size: 15),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Trocar senha',
-                                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isLight)),
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                'Altere sua senha de acesso',
-                                                style: TextStyle(fontSize: 11, color: AppColors.textSecondary(isLight)),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Icon(Icons.arrow_forward_ios_outlined, size: 12, color: AppColors.textSecondary(isLight)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Sessão Atual Card
-                        Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.surface(isLight),
-                            border: Border.all(color: AppColors.surfaceBorder(isLight)),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: isLight
-                                ? [
-                                    BoxShadow(
-                                      color: context.fin.surfaceSunken,
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 2),
-                                    )
-                                  ]
-                                : null,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.access_time_outlined, color: AppColors.primary, size: 13),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'SESSÃO ATUAL',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textSecondary(isLight),
-                                        letterSpacing: 0.6,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Divider(color: AppColors.divider(isLight), height: 1),
-                              Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 36,
-                                      height: 36,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: AppColors.inputBackground(isLight),
-                                      ),
-                                      child: Icon(
-                                        Theme.of(context).platform == TargetPlatform.iOS
-                                            ? Icons.phone_iphone
-                                            : Icons.phone_android,
-                                        color: AppColors.textSecondary(isLight),
-                                        size: 15,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            Theme.of(context).platform == TargetPlatform.iOS
-                                                ? 'iPhone · iOS'
-                                                : 'Smartphone · Android',
-                                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isLight)),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            'São Paulo, BR · Agora',
-                                            style: TextStyle(fontSize: 11, color: AppColors.textSecondary(isLight)),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: context.fin.positive,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: context.fin.positive,
-                                            blurRadius: 6,
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Excluir conta Button
-                        OutlinedButton.icon(
-                          onPressed: () => _confirmDeleteAccount(context, controller),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            side: BorderSide(color: context.fin.negative.withValues(alpha: 0.18)),
-                            backgroundColor: context.fin.negative.withValues(alpha: 0.06),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          icon: const Icon(Icons.delete_outline, color: AppColors.danger, size: 14),
-                          label: const Text(
-                            'Excluir conta',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.danger),
-                          ),
-                        ),
-                      ],
+                  child: Text(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    'DADOS PESSOAIS',
+                    style: context.finType.caption.copyWith(
+                      color: context.fin.textSecondary,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.6,
                     ),
                   ),
                 ),
               ],
             ),
-          ],
+          ),
+          Divider(color: context.fin.divider, height: 1),
+
+          // Nome de usuário row
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: controller.editingName
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: context.fin.surfaceSunken,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: context.fin.brand.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: TextField(
+                            controller: usernameController,
+                            onChanged: controller.setUsername,
+                            autofocus: true,
+                            style: context.finType.bodyMd.copyWith(
+                              color: context.fin.textPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 9,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => controller.setEditingName(false),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.fin.surfaceSunken,
+                            border: Border.all(color: context.fin.border),
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          child: Text(
+                            '✕',
+                            style: context.finType.bodySm.copyWith(
+                              color: context.fin.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // `Expanded`: sem ele a coluna impõe a largura
+                      // intrínseca e a linha estoura em 320 dp já em 1,3x.
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'NOME DE USUÁRIO',
+                              style: context.finType.caption.copyWith(
+                                color: context.fin.textSecondary,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              controller.username,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.finType.bodyMd.copyWith(
+                                color: context.fin.textPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => controller.setEditingName(true),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 5,
+                            horizontal: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.fin.brand.withValues(alpha: 0.1),
+                            border: Border.all(
+                              color: context.fin.brand.withValues(alpha: 0.25),
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Editar',
+                            style: context.finType.caption.copyWith(
+                              color: context.fin.positive,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+          Divider(color: context.fin.divider, height: 1),
+
+          // Email row (sem selo verificado)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: controller.editingEmail
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: context.fin.surfaceSunken,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: context.fin.brand.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: TextField(
+                            controller: emailController,
+                            onChanged: controller.setEmail,
+                            autofocus: true,
+                            style: context.finType.bodyMd.copyWith(
+                              color: context.fin.textPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 9,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => controller.setEditingEmail(false),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.fin.surfaceSunken,
+                            border: Border.all(color: context.fin.border),
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          child: Text(
+                            '✕',
+                            style: context.finType.bodySm.copyWith(
+                              color: context.fin.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // `Expanded`: sem ele a coluna impõe a largura
+                      // intrínseca e a linha estoura em 320 dp já em 1,3x.
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'E-MAIL',
+                              style: context.finType.caption.copyWith(
+                                color: context.fin.textSecondary,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              controller.email,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.finType.bodyMd.copyWith(
+                                color: context.fin.textPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => controller.setEditingEmail(true),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 5,
+                            horizontal: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.fin.brand.withValues(alpha: 0.1),
+                            border: Border.all(
+                              color: context.fin.brand.withValues(alpha: 0.25),
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Editar',
+                            style: context.finType.caption.copyWith(
+                              color: context.fin.positive,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SecurityCard extends StatelessWidget {
+  final ProfileController controller;
+
+  const _SecurityCard({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: context.fin.surface,
+        border: Border.all(color: context.fin.border),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: context.fin.shadow,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.security_outlined,
+                  color: context.fin.brand,
+                  size: 13,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'SEGURANÇA',
+                  style: context.finType.caption.copyWith(
+                    color: context.fin.textSecondary,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(color: context.fin.divider, height: 1),
+
+          // Trocar senha row
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChangePasswordPage(),
+                  ),
+                );
+              },
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: context.fin.brand.withValues(alpha: 0.12),
+                        border: Border.all(
+                          color: context.fin.brand.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.lock_outline,
+                        color: context.fin.brand,
+                        size: 15,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Trocar senha',
+                            style: context.finType.bodyMd.copyWith(
+                              color: context.fin.textPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Altere sua senha de acesso',
+                            style: context.finType.caption.copyWith(
+                              color: context.fin.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios_outlined,
+                      size: 12,
+                      color: context.fin.textSecondary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SessionCard extends StatelessWidget {
+  final ProfileController controller;
+
+  const _SessionCard({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: context.fin.surface,
+        border: Border.all(color: context.fin.border),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: context.fin.shadow,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.access_time_outlined,
+                  color: context.fin.brand,
+                  size: 13,
+                ),
+                const SizedBox(width: 8),
+                // `Expanded`: o rotulo em caixa alta nao encolhe, e sob
+                // escala 2,0x a linha do cabecalho estourava em 320 dp.
+                Expanded(
+                  child: Text(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    'SESSÃO ATUAL',
+                    style: context.finType.caption.copyWith(
+                      color: context.fin.textSecondary,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(color: context.fin.divider, height: 1),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: context.fin.surfaceSunken,
+                  ),
+                  child: Icon(
+                    Theme.of(context).platform == TargetPlatform.iOS
+                        ? Icons.phone_iphone
+                        : Icons.phone_android,
+                    color: context.fin.textSecondary,
+                    size: 15,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        Theme.of(context).platform == TargetPlatform.iOS
+                            ? 'iPhone · iOS'
+                            : 'Smartphone · Android',
+                        style: context.finType.bodySm.copyWith(
+                          color: context.fin.textPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'São Paulo, BR · Agora',
+                        style: context.finType.caption.copyWith(
+                          color: context.fin.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: context.fin.positive,
+                    boxShadow: [
+                      BoxShadow(color: context.fin.positive, blurRadius: 6),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DeleteAccountButton extends StatelessWidget {
+  final ProfileController controller;
+
+  /// Confirmação de exclusão, que mora no State por abrir diálogo.
+  final void Function(BuildContext, ProfileController) onConfirm;
+
+  const _DeleteAccountButton({
+    required this.controller,
+    required this.onConfirm,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: () => onConfirm(context, controller),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        side: BorderSide(color: context.fin.negative.withValues(alpha: 0.18)),
+        backgroundColor: context.fin.negative.withValues(alpha: 0.06),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      icon: Icon(Icons.delete_outline, color: context.fin.negative, size: 14),
+      label: Text(
+        'Excluir conta',
+        style: context.finType.bodySm.copyWith(
+          color: context.fin.negative,
+          fontWeight: FontWeight.bold,
         ),
       ),
+    );
+  }
+}
+
+class _SaveButton extends StatelessWidget {
+  final ProfileController controller;
+
+  /// Persistência, que mora no State por depender dos campos de texto locais.
+  final void Function(BuildContext, ProfileController) onSave;
+
+  const _SaveButton({required this.controller, required this.onSave});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(controller.editingName || controller.editingEmail)) {
+      return const SizedBox.shrink();
+    } {
+        
+      }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          height: 48,
+          decoration: BoxDecoration(
+            gradient: context.fin.brandGradient,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: context.fin.brand.withValues(alpha: 0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: controller.isLoading
+                ? null
+                : () => onSave(context, controller),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              disabledBackgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: controller.isLoading
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: context.fin.textOnBrand,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    'Salvar alterações',
+                    style: context.finType.bodyMd.copyWith(
+                      color: context.fin.textOnBrand,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+          ),
+        ),
+        const Gap.md(),
+      ],
+    );
+  }
+}
+
+class _SuccessToast extends StatelessWidget {
+  final ProfileController controller;
+
+  const _SuccessToast({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(controller.savedSuccess)) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: context.fin.brand.withValues(alpha: 0.12),
+            border: Border.all(color: context.fin.brand.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                color: context.fin.positive,
+                size: 16,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Informações salvas com sucesso!',
+                style: context.finType.bodySm.copyWith(
+                  color: context.fin.positive,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Gap.md(),
+      ],
     );
   }
 }

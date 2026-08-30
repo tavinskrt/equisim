@@ -36,12 +36,11 @@ class BacktestSettings {
     int? windowYears,
     int? contributionDay,
     bool? applyTaxes,
-  }) =>
-      BacktestSettings(
-        windowYears: windowYears ?? this.windowYears,
-        contributionDay: contributionDay ?? this.contributionDay,
-        applyTaxes: applyTaxes ?? this.applyTaxes,
-      );
+  }) => BacktestSettings(
+    windowYears: windowYears ?? this.windowYears,
+    contributionDay: contributionDay ?? this.contributionDay,
+    applyTaxes: applyTaxes ?? this.applyTaxes,
+  );
 
   /// Política fiscal correspondente a [applyTaxes]: o regime brasileiro
   /// vigente, ou nenhuma tributação.
@@ -67,8 +66,8 @@ class BacktestSettingsNotifier extends Notifier<BacktestSettings> {
 
 final backtestSettingsProvider =
     NotifierProvider<BacktestSettingsNotifier, BacktestSettings>(
-  BacktestSettingsNotifier.new,
-);
+      BacktestSettingsNotifier.new,
+    );
 
 /// Papel de um ponto na dispersão risco × retorno.
 ///
@@ -171,8 +170,8 @@ class PortfolioComparison {
   /// — a composição.
   double? get twrGap => hasBoth
       ? (principal!.metrics.timeWeightedReturn -
-              reserva!.metrics.timeWeightedReturn) *
-          100
+                reserva!.metrics.timeWeightedReturn) *
+            100
       : null;
 }
 
@@ -226,8 +225,9 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
   final priceMap = priceResult.unwrap();
 
   final dividendResult = await dividends.historyBatch(tickers);
-  final dividendMap =
-      dividendResult.getOrElse(const <Ticker, List<DividendEvent>>{});
+  final dividendMap = dividendResult.getOrElse(
+    const <Ticker, List<DividendEvent>>{},
+  );
 
   // Início comum às duas carteiras: o mais tardio dos primeiros pregões.
   var start = requested.start;
@@ -333,12 +333,14 @@ List<RiskReturnPoint> _riskReturnPoints({
       final years = DateRange(total.dates.first, total.dates.last).years;
       if (years <= 0) continue;
 
-      points.add(RiskReturnPoint(
-        label: ticker.value,
-        risk: RiskMetrics.annualizedVolatility(total.dailyReturns) * 100,
-        ret: Returns.annualize(total.totalReturn, years) * 100,
-        kind: kind,
-      ));
+      points.add(
+        RiskReturnPoint(
+          label: ticker.value,
+          risk: RiskMetrics.annualizedVolatility(total.dailyReturns) * 100,
+          ret: Returns.annualize(total.totalReturn, years) * 100,
+          kind: kind,
+        ),
+      );
     }
   }
 
@@ -351,12 +353,14 @@ List<RiskReturnPoint> _riskReturnPoints({
     RiskReturnKind kind,
   ) {
     if (outcome == null) return;
-    points.add(RiskReturnPoint(
-      label: label,
-      risk: outcome.metrics.volatility * 100,
-      ret: outcome.metrics.cagr * 100,
-      kind: kind,
-    ));
+    points.add(
+      RiskReturnPoint(
+        label: label,
+        risk: outcome.metrics.volatility * 100,
+        ret: outcome.metrics.cagr * 100,
+        kind: kind,
+      ),
+    );
   }
 
   addPortfolio(principal, 'Principal', RiskReturnKind.principal);
@@ -369,67 +373,74 @@ List<RiskReturnPoint> _riskReturnPoints({
 ///
 /// Construída sobre a série de retorno total do próprio domínio, não sobre o
 /// `adjustedClose` da fonte — que subajusta proventos brasileiros.
-final correlationProvider = FutureProvider<
-    ({List<Ticker> tickers, List<List<double>> matrix})?>((ref) async {
-  final study = ref.watch(studyProvider).study;
-  final tickers = study.principal.tickers;
-  if (tickers.length < 2) return null;
+final correlationProvider =
+    FutureProvider<({List<Ticker> tickers, List<List<double>> matrix})?>((
+      ref,
+    ) async {
+      final study = ref.watch(studyProvider).study;
+      final tickers = study.principal.tickers;
+      if (tickers.length < 2) return null;
 
-  final settings = ref.watch(backtestSettingsProvider);
-  final today = DateTime.now();
-  final window = DateRange(
-    DateTime(today.year - settings.windowYears, today.month, today.day),
-    today,
-  );
+      final settings = ref.watch(backtestSettingsProvider);
+      final today = DateTime.now();
+      final window = DateRange(
+        DateTime(today.year - settings.windowYears, today.month, today.day),
+        today,
+      );
 
-  final priceResult =
-      await ref.watch(priceRepositoryProvider).dailyBatch(tickers, window);
-  if (priceResult.isErr) return null;
-  final priceMap = priceResult.unwrap();
+      final priceResult = await ref
+          .watch(priceRepositoryProvider)
+          .dailyBatch(tickers, window);
+      if (priceResult.isErr) return null;
+      final priceMap = priceResult.unwrap();
 
-  final dividendResult =
-      await ref.watch(dividendRepositoryProvider).historyBatch(tickers);
-  final dividendMap =
-      dividendResult.getOrElse(const <Ticker, List<DividendEvent>>{});
+      final dividendResult = await ref
+          .watch(dividendRepositoryProvider)
+          .historyBatch(tickers);
+      final dividendMap = dividendResult.getOrElse(
+        const <Ticker, List<DividendEvent>>{},
+      );
 
-  final available = tickers.where(priceMap.containsKey).toList();
-  if (available.length < 2) return null;
+      final available = tickers.where(priceMap.containsKey).toList();
+      if (available.length < 2) return null;
 
-  // Todas as séries pareadas pelo calendário comum: correlação sobre datas
-  // desencontradas mediria ruído de calendário, não co-movimento.
-  final common = <DateTime>{...priceMap[available.first]!.dates};
-  for (final ticker in available.skip(1)) {
-    common.retainAll(priceMap[ticker]!.dates);
-  }
-  final calendar = common.toList()..sort();
-  if (calendar.length < 30) return null;
+      // Todas as séries pareadas pelo calendário comum: correlação sobre datas
+      // desencontradas mediria ruído de calendário, não co-movimento.
+      final common = <DateTime>{...priceMap[available.first]!.dates};
+      for (final ticker in available.skip(1)) {
+        common.retainAll(priceMap[ticker]!.dates);
+      }
+      final calendar = common.toList()..sort();
+      if (calendar.length < 30) return null;
 
-  final returns = <List<double>>[];
-  for (final ticker in available) {
-    final total = TotalReturnEngine.build(
-      prices: priceMap[ticker]!,
-      dividends: dividendMap[ticker] ?? const [],
-      taxPolicy: settings.taxPolicy,
-      range: window,
-    );
-    final byDate = <DateTime, double>{
-      for (var i = 0; i < total.dates.length; i++)
-        total.dates[i]: total.index[i],
-    };
+      final returns = <List<double>>[];
+      for (final ticker in available) {
+        final total = TotalReturnEngine.build(
+          prices: priceMap[ticker]!,
+          dividends: dividendMap[ticker] ?? const [],
+          taxPolicy: settings.taxPolicy,
+          range: window,
+        );
+        final byDate = <DateTime, double>{
+          for (var i = 0; i < total.dates.length; i++)
+            total.dates[i]: total.index[i],
+        };
 
-    final series = <double>[];
-    double? previous;
-    for (final date in calendar) {
-      final value = byDate[date];
-      if (value == null || value <= 0) continue;
-      if (previous != null && previous > 0) series.add(value / previous - 1);
-      previous = value;
-    }
-    returns.add(series);
-  }
+        final series = <double>[];
+        double? previous;
+        for (final date in calendar) {
+          final value = byDate[date];
+          if (value == null || value <= 0) continue;
+          if (previous != null && previous > 0) {
+            series.add(value / previous - 1);
+          }
+          previous = value;
+        }
+        returns.add(series);
+      }
 
-  return (
-    tickers: available,
-    matrix: BetaCalculator.correlationMatrix(returns),
-  );
-});
+      return (
+        tickers: available,
+        matrix: BetaCalculator.correlationMatrix(returns),
+      );
+    });

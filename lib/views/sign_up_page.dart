@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
 import '../presentation/theme/fin_theme.dart';
-import '../utils/app_colors.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/sign_up_controller.dart';
 
@@ -132,7 +131,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
       body: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          gradient: AppColors.backgroundGradient(isLight),
+          gradient: context.fin.canvasGradient,
         ),
         child: Stack(
           children: [
@@ -145,7 +144,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                 height: 320,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.primary.withValues(alpha: 0.08),
+                  color: context.fin.brand.withValues(alpha: 0.08),
                 ),
               ),
             ),
@@ -157,7 +156,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                 height: 260,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.primary.withValues(alpha: 0.06),
+                  color: context.fin.brand.withValues(alpha: 0.06),
                 ),
               ),
             ),
@@ -181,11 +180,11 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                               Navigator.pop(context);
                             }
                           },
-                          icon: Icon(Icons.arrow_back_ios, size: 14, color: AppColors.textSecondary(isLight)),
+                          icon: Icon(Icons.arrow_back_ios, size: 14, color: context.fin.textSecondary),
                           label: Text(
                             controller.step > 1 ? 'Voltar' : 'Já tenho conta',
                             style: TextStyle(
-                              color: AppColors.textSecondary(isLight),
+                              color: context.fin.textSecondary,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -207,9 +206,9 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                             width: double.infinity,
                             padding: const EdgeInsets.only(top: 32, left: 28, right: 28, bottom: 28),
                             decoration: BoxDecoration(
-                              color: AppColors.surface(isLight),
+                              color: context.fin.surface,
                               borderRadius: BorderRadius.circular(24),
-                              border: Border.all(color: AppColors.surfaceBorder(isLight)),
+                              border: Border.all(color: context.fin.border),
                               boxShadow: [
                                 BoxShadow(
                                   color: context.fin.shadow,
@@ -229,10 +228,10 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                                       height: 38,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(10),
-                                        gradient: AppColors.brandGradient,
+                                        gradient: context.fin.brandGradient,
                                         boxShadow: [
                                           BoxShadow(
-                                            color: AppColors.primary.withValues(alpha: 0.35),
+                                            color: context.fin.brand.withValues(alpha: 0.35),
                                             blurRadius: 12,
                                             offset: const Offset(0, 4),
                                           ),
@@ -249,14 +248,14 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
-                                            color: AppColors.textPrimary(isLight),
+                                            color: context.fin.textPrimary,
                                           ),
                                         ),
                                         Text(
                                           'Criar nova conta',
                                           style: TextStyle(
                                             fontSize: 11,
-                                            color: AppColors.textSecondary(isLight),
+                                            color: context.fin.textSecondary,
                                           ),
                                         ),
                                       ],
@@ -274,8 +273,8 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                                         height: 1.5,
                                         margin: const EdgeInsets.symmetric(horizontal: 8),
                                         color: controller.step > 1 
-                                            ? AppColors.primary 
-                                            : AppColors.surfaceBorder(isLight),
+                                            ? context.fin.brand 
+                                            : context.fin.border,
                                       ),
                                     ),
                                     _buildStepIndicator(2, controller.step, isLight),
@@ -285,7 +284,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w500,
-                                        color: AppColors.textSecondary(isLight),
+                                        color: context.fin.textSecondary,
                                       ),
                                     ),
                                   ],
@@ -307,14 +306,14 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.shield_outlined, size: 12, color: AppColors.textMuted(isLight)),
+                          Icon(Icons.shield_outlined, size: 12, color: context.fin.textTertiary),
                           const SizedBox(width: 6),
                           Text(
                             'Conexão segura · Dados criptografados',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.textMuted(isLight),
+                              color: context.fin.textTertiary,
                             ),
                           ),
                         ],
@@ -341,14 +340,14 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: isCompletedOrCurrent
-            ? AppColors.brandGradient
+            ? context.fin.brandGradient
             : null,
-        color: !isCompletedOrCurrent ? AppColors.inputBackground(isLight) : null,
+        color: !isCompletedOrCurrent ? context.fin.surfaceSunken : null,
         border: Border.all(
-          color: isCompletedOrCurrent ? Colors.transparent : AppColors.surfaceBorder(isLight),
+          color: isCompletedOrCurrent ? Colors.transparent : context.fin.border,
         ),
         boxShadow: isCompletedOrCurrent
-            ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.35), blurRadius: 10, offset: const Offset(0, 3))]
+            ? [BoxShadow(color: context.fin.brand.withValues(alpha: 0.35), blurRadius: 10, offset: const Offset(0, 3))]
             : null,
       ),
       child: Center(
@@ -378,7 +377,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           style: TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary(isLight),
+            color: context.fin.textPrimary,
             height: 1.2,
           ),
         ),
@@ -387,7 +386,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           'Preencha as informações abaixo para criar sua conta.',
           style: TextStyle(
             fontSize: 13,
-            color: AppColors.textSecondary(isLight),
+            color: context.fin.textSecondary,
             height: 1.5,
           ),
         ),
@@ -399,7 +398,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary(isLight),
+            color: context.fin.textSecondary,
             letterSpacing: 0.3,
           ),
         ),
@@ -420,7 +419,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary(isLight),
+            color: context.fin.textSecondary,
             letterSpacing: 0.3,
           ),
         ),
@@ -441,7 +440,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary(isLight),
+            color: context.fin.textSecondary,
             letterSpacing: 0.3,
           ),
         ),
@@ -462,12 +461,12 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           width: double.infinity,
           height: 50,
           decoration: BoxDecoration(
-            gradient: controller.canProceedToStep2 ? AppColors.brandGradient : null,
-            color: !controller.canProceedToStep2 ? AppColors.inputBackground(isLight) : null,
+            gradient: controller.canProceedToStep2 ? context.fin.brandGradient : null,
+            color: !controller.canProceedToStep2 ? context.fin.surfaceSunken : null,
             borderRadius: BorderRadius.circular(12),
             boxShadow: controller.canProceedToStep2 ? [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.4),
+                color: context.fin.brand.withValues(alpha: 0.4),
                 blurRadius: 20,
                 offset: const Offset(0, 6),
               ),
@@ -510,7 +509,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           style: TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary(isLight),
+            color: context.fin.textPrimary,
             height: 1.2,
           ),
         ),
@@ -519,7 +518,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           'Use uma senha forte para proteger sua conta.',
           style: TextStyle(
             fontSize: 13,
-            color: AppColors.textSecondary(isLight),
+            color: context.fin.textSecondary,
             height: 1.5,
           ),
         ),
@@ -531,7 +530,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary(isLight),
+            color: context.fin.textSecondary,
             letterSpacing: 0.3,
           ),
         ),
@@ -541,33 +540,33 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           controller: _passwordController,
           onChanged: controller.setPassword,
           obscureText: !controller.showPassword,
-          style: TextStyle(color: AppColors.textPrimary(isLight), fontSize: 14),
+          style: TextStyle(color: context.fin.textPrimary, fontSize: 14),
           decoration: InputDecoration(
             hintText: 'Mínimo 8 caracteres',
-            hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
-            prefixIcon: Icon(Icons.lock_outline, color: AppColors.textMuted(isLight), size: 20),
+            hintStyle: TextStyle(color: context.fin.textTertiary),
+            prefixIcon: Icon(Icons.lock_outline, color: context.fin.textTertiary, size: 20),
             suffixIcon: IconButton(
               icon: Icon(
                 controller.showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                color: AppColors.textMuted(isLight),
+                color: context.fin.textTertiary,
                 size: 20,
               ),
               onPressed: controller.toggleShowPassword,
             ),
             filled: true,
-            fillColor: AppColors.inputBackground(isLight),
+            fillColor: context.fin.surfaceSunken,
             contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.surfaceBorder(isLight)),
+              borderSide: BorderSide(color: context.fin.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.surfaceBorder(isLight)),
+              borderSide: BorderSide(color: context.fin.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.6)),
+              borderSide: BorderSide(color: context.fin.brand.withValues(alpha: 0.6)),
             ),
           ),
         ),
@@ -613,7 +612,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary(isLight),
+            color: context.fin.textSecondary,
             letterSpacing: 0.3,
           ),
         ),
@@ -623,40 +622,40 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           controller: _confirmController,
           onChanged: controller.setConfirm,
           obscureText: true,
-          style: TextStyle(color: AppColors.textPrimary(isLight), fontSize: 14),
+          style: TextStyle(color: context.fin.textPrimary, fontSize: 14),
           decoration: InputDecoration(
             hintText: 'Repita sua senha',
-            hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
-            prefixIcon: Icon(Icons.lock_outline, color: AppColors.textMuted(isLight), size: 20),
+            hintStyle: TextStyle(color: context.fin.textTertiary),
+            prefixIcon: Icon(Icons.lock_outline, color: context.fin.textTertiary, size: 20),
             suffixIcon: controller.confirm.isNotEmpty
                 ? Icon(
                     controller.confirm == controller.password ? Icons.check : Icons.close,
-                    color: controller.confirm == controller.password ? AppColors.primary : context.fin.negative,
+                    color: controller.confirm == controller.password ? context.fin.brand : context.fin.negative,
                     size: 20,
                   )
                 : null,
             filled: true,
-            fillColor: AppColors.inputBackground(isLight),
+            fillColor: context.fin.surfaceSunken,
             contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
                 color: controller.confirm.isNotEmpty 
-                  ? (controller.confirm == controller.password ? AppColors.primary.withValues(alpha: 0.5) : context.fin.negative.withValues(alpha: 0.5)) 
-                  : AppColors.surfaceBorder(isLight)
+                  ? (controller.confirm == controller.password ? context.fin.brand.withValues(alpha: 0.5) : context.fin.negative.withValues(alpha: 0.5)) 
+                  : context.fin.border
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
                 color: controller.confirm.isNotEmpty 
-                  ? (controller.confirm == controller.password ? AppColors.primary.withValues(alpha: 0.5) : context.fin.negative.withValues(alpha: 0.5)) 
-                  : AppColors.surfaceBorder(isLight)
+                  ? (controller.confirm == controller.password ? context.fin.brand.withValues(alpha: 0.5) : context.fin.negative.withValues(alpha: 0.5)) 
+                  : context.fin.border
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.6)),
+              borderSide: BorderSide(color: context.fin.brand.withValues(alpha: 0.6)),
             ),
           ),
         ),
@@ -674,9 +673,9 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                 margin: const EdgeInsets.only(top: 1, right: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(5),
-                  border: controller.agreed ? null : Border.all(color: AppColors.surfaceBorder(isLight), width: 1.5),
-                  gradient: controller.agreed ? AppColors.brandGradient : null,
-                  boxShadow: controller.agreed ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 2))] : null,
+                  border: controller.agreed ? null : Border.all(color: context.fin.border, width: 1.5),
+                  gradient: controller.agreed ? context.fin.brandGradient : null,
+                  boxShadow: controller.agreed ? [BoxShadow(color: context.fin.brand.withValues(alpha: 0.4), blurRadius: 8, offset: Offset(0, 2))] : null,
                 ),
                 child: controller.agreed ? Icon(Icons.check, color: context.fin.textOnBrand, size: 14) : null,
               ),
@@ -685,11 +684,11 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
               child: Text.rich(
                 TextSpan(
                   text: 'Concordo com os ',
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary(isLight), height: 1.6),
-                  children: const [
-                    TextSpan(text: 'Termos de Uso', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                  style: TextStyle(fontSize: 12, color: context.fin.textSecondary, height: 1.6),
+                  children: [
+                    TextSpan(text: 'Termos de Uso', style: TextStyle(color: context.fin.positive, fontWeight: FontWeight.w600)),
                     TextSpan(text: ' e a '),
-                    TextSpan(text: 'Política de Privacidade', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                    TextSpan(text: 'Política de Privacidade', style: TextStyle(color: context.fin.positive, fontWeight: FontWeight.w600)),
                     TextSpan(text: ' do Equisim.'),
                   ],
                 ),
@@ -704,11 +703,11 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           width: double.infinity,
           height: 50,
           decoration: BoxDecoration(
-            gradient: controller.canSubmit ? AppColors.brandGradient : null,
-            color: !controller.canSubmit ? AppColors.inputBackground(isLight) : null,
+            gradient: controller.canSubmit ? context.fin.brandGradient : null,
+            color: !controller.canSubmit ? context.fin.surfaceSunken : null,
             borderRadius: BorderRadius.circular(12),
             boxShadow: controller.canSubmit ? [
-              BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 6)),
+              BoxShadow(color: context.fin.brand.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 6)),
             ] : null,
           ),
           child: ElevatedButton(
@@ -752,26 +751,26 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
       key: key,
       controller: controller,
       onChanged: onChanged,
-      style: TextStyle(color: AppColors.textPrimary(isLight), fontSize: 14),
+      style: TextStyle(color: context.fin.textPrimary, fontSize: 14),
       keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: TextStyle(color: AppColors.textMuted(isLight)),
-        prefixIcon: Icon(icon, color: AppColors.textMuted(isLight), size: 20),
+        hintStyle: TextStyle(color: context.fin.textTertiary),
+        prefixIcon: Icon(icon, color: context.fin.textTertiary, size: 20),
         filled: true,
-        fillColor: AppColors.inputBackground(isLight),
+        fillColor: context.fin.surfaceSunken,
         contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.surfaceBorder(isLight)),
+          borderSide: BorderSide(color: context.fin.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.surfaceBorder(isLight)),
+          borderSide: BorderSide(color: context.fin.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.6)),
+          borderSide: BorderSide(color: context.fin.brand.withValues(alpha: 0.6)),
         ),
       ),
     );

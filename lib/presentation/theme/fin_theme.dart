@@ -22,8 +22,8 @@ enum FinBreakpoint {
   static FinBreakpoint of(double width) => width < 600
       ? FinBreakpoint.compact
       : width < 900
-          ? FinBreakpoint.medium
-          : FinBreakpoint.expanded;
+      ? FinBreakpoint.medium
+      : FinBreakpoint.expanded;
 
   /// `true` na faixa estreita.
   bool get isCompact => this == FinBreakpoint.compact;
@@ -78,17 +78,13 @@ ThemeData buildFinTheme({required bool isLight}) {
         side: BorderSide(color: fin.border),
       ),
     ),
-    dividerTheme: DividerThemeData(
-      color: fin.divider,
-      thickness: 1,
-      space: 1,
-    ),
+    dividerTheme: DividerThemeData(color: fin.divider, thickness: 1, space: 1),
   );
 }
 
 /// Acesso aos tokens a partir do contexto.
 ///
-/// `context.fin.positive` no lugar de `AppColors.primary`, e
+/// `context.fin.positive` no lugar de um literal de cor, e
 /// `context.finType.numSm` no lugar de um `TextStyle` montado a mao.
 ///
 /// Ler do contexto, em vez de receber `isLight` por parametro em cada widget,
