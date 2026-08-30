@@ -232,46 +232,40 @@ class _StudyHeader extends ConsumerWidget {
             ],
           ),
           const Divider(height: 18),
-          Row(
-            children: [
-              Expanded(
-                child: MetricTile(
-                  label: 'Ativos na Principal',
-                  value:
-                      '${state.study.principal.length}'
-                      ' / ${Portfolio.maxAssets}',
-                ),
+          MetricTileRow(
+            tiles: [
+              MetricTile(
+                label: 'Ativos na Principal',
+                value:
+                    '${state.study.principal.length}'
+                    ' / ${Portfolio.maxAssets}',
               ),
-              Expanded(
-                child: MetricTile(
-                  label: 'Esperado da carteira',
-                  value: weightedUpside == null
-                      ? '—'
-                      : Fmt.percent(weightedUpside, decimals: 1, signed: true),
-                  // O rótulo antigo dizia "ao ano, em 12 meses" e omitia a
-                  // premissa que sustenta o número: que o mercado fecha toda a
-                  // diferença até o preço justo dentro do horizonte. Com 12
-                  // meses a anualização não faz nada, e o valor é literalmente
-                  // o upside médio somado ao dividend yield.
-                  hint: weightedUpside == null
-                      ? null
-                      : 'se o preço justo for alcançado em '
-                            '${settings.convergenceHorizonMonths} meses · '
-                            '${Fmt.percent(coverage, decimals: 0)} da carteira '
-                            'avaliada',
-                  // Numero implausivel vira ressalva, nao perda: ambar diz
-                  // "olhe as premissas", vermelho diria "caiu".
-                  trend: isImplausible
-                      ? FinTrend.caution
-                      : FinAmount.trendOf(weightedUpside),
-                ),
+              MetricTile(
+                label: 'Esperado da carteira',
+                value: weightedUpside == null
+                    ? '—'
+                    : Fmt.percent(weightedUpside, decimals: 1, signed: true),
+                // O rótulo antigo dizia "ao ano, em 12 meses" e omitia a
+                // premissa que sustenta o número: que o mercado fecha toda a
+                // diferença até o preço justo dentro do horizonte. Com 12
+                // meses a anualização não faz nada, e o valor é literalmente
+                // o upside médio somado ao dividend yield.
+                hint: weightedUpside == null
+                    ? null
+                    : 'se o preço justo for alcançado em '
+                          '${settings.convergenceHorizonMonths} meses · '
+                          '${Fmt.percent(coverage, decimals: 0)} da carteira '
+                          'avaliada',
+                // Numero implausivel vira ressalva, nao perda: ambar diz
+                // "olhe as premissas", vermelho diria "caiu".
+                trend: isImplausible
+                    ? FinTrend.caution
+                    : FinAmount.trendOf(weightedUpside),
               ),
-              Expanded(
-                child: MetricTile(
-                  label: 'Reserva',
-                  value: '${state.study.reserva.length}',
-                  hint: 'candidatos',
-                ),
+              MetricTile(
+                label: 'Reserva',
+                value: '${state.study.reserva.length}',
+                hint: 'candidatos',
               ),
             ],
           ),

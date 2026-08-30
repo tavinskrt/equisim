@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:equisim_core/equisim_core.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,37 @@ import '../components/fin_amount.dart';
 import '../theme/fin_space.dart';
 import '../theme/fin_theme.dart';
 import 'ui_kit.dart';
+
+/// Passo de eixo em número redondo: 1, 2, 5 ou 10 vezes uma potência de dez.
+///
+/// Substitui o passo cru `(max − min) / 4`. Com ele um intervalo de 101 pontos
+/// virava 25,25, e o eixo saía rotulado 25%, 51%, 76% — números que ninguém
+/// escolheria e que o arredondamento para inteiro ainda deixava irregulares.
+///
+/// A escada NÃO inclui 2,5, embora ele seja o degrau clássico entre 2 e 5: os
+/// rótulos deste eixo são impressos sem casa decimal, e um passo de 2,5 sairia
+/// como 0, 3, 5, 8, 10 — progressão que parece defeito de arredondamento
+/// porque é exatamente isso.
+///
+/// [alvo] é quantas divisões se quer, não quantas se obtém: o passo redondo
+/// mais próximo pode render uma a mais ou a menos, e é essa folga que compra a
+/// legibilidade do rótulo.
+double _passoRedondo(double amplitude, {int alvo = 4}) {
+  if (!amplitude.isFinite || amplitude <= 0) return 1;
+  final cru = amplitude / alvo;
+  final magnitude = math
+      .pow(10, (math.log(cru) / math.ln10).floor())
+      .toDouble();
+  final normalizado = cru / magnitude;
+  final passo = normalizado < 1.5
+      ? 1.0
+      : normalizado < 3
+      ? 2.0
+      : normalizado < 7
+      ? 5.0
+      : 10.0;
+  return passo * magnitude;
+}
 
 /// Uma curva nomeada.
 class ChartSeries {
@@ -152,9 +185,24 @@ class Base100Chart extends StatelessWidget {
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 42,
+                          // O `fl_chart` rotula as PONTAS do eixo além dos
+                          // passos regulares, e a ponta cai onde calhar: com
+                          // a série entre 69 e 250 ele escrevia "69" colado
+                          // em "100" e "250" colado em "200". Os dois pares
+                          // se sobrepunham e nenhum dos quatro ficava legível.
+                          // O mínimo e o máximo já estão no desenho da curva;
+                          // é a grade regular que serve de referência.
+                          minIncluded: false,
+                          maxIncluded: false,
+                          // `captionNum`, e nao `caption`: rotulo de eixo e
+                          // coluna de numero lida na vertical, e sem cifra
+                          // tabular o "1" estreito desalinha a casa das
+                          // dezenas de um rotulo para o outro. O papel existe
+                          // no sistema exatamente para este caso -- mesma
+                          // escala de `caption`, com as cifras tabulares.
                           getTitlesWidget: (value, meta) => Text(
-                            value.toStringAsFixed(0),
-                            style: context.finType.caption.copyWith(
+                            Fmt.ratio(value, decimals: 0),
+                            style: context.finType.captionNum.copyWith(
                               color: context.fin.textTertiary,
                             ),
                           ),
@@ -561,8 +609,15 @@ class RiskReturnScatter extends StatelessWidget {
     // Volatilidade negativa não existe; cortar em zero evita um eixo que
     // sugere o contrário.
     final minX = rawMinX < 0 ? 0.0 : rawMinX;
-    final xInterval = ((maxX - minX) / 4).clamp(0.5, double.infinity);
-    final yInterval = ((maxY - minY) / 4).clamp(0.5, double.infinity);
+    final xInterval = _passoRedondo(maxX - minX).clamp(0.5, double.infinity);
+    // Seis divisões no eixo vertical contra quatro no horizontal: a folga
+    // vertical é de 28% contra 18%, porque o rótulo do ativo é desenhado
+    // acima do ponto. Pedir quatro sobre um intervalo já inflado devolvia três
+    // linhas de grade para 250 dp de altura.
+    final yInterval = _passoRedondo(
+      maxY - minY,
+      alvo: 6,
+    ).clamp(0.5, double.infinity);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -604,9 +659,15 @@ class RiskReturnScatter extends StatelessWidget {
                       showTitles: true,
                       reservedSize: 42,
                       interval: yInterval,
+                      // Ver a justificativa em `Base100Chart`: a ponta do eixo
+                      // cai onde calhar, e aqui ela escrevia "55%" por cima do
+                      // "51%" do passo regular.
+                      minIncluded: false,
+                      maxIncluded: false,
+                      // Ver `Base100Chart`: cifra tabular no rotulo de eixo.
                       getTitlesWidget: (value, meta) => Text(
-                        '${value.toStringAsFixed(0)}%',
-                        style: context.finType.caption.copyWith(
+                        '${Fmt.ratio(value, decimals: 0)}%',
+                        style: context.finType.captionNum.copyWith(
                           color: context.fin.textTertiary,
                         ),
                       ),
@@ -623,11 +684,15 @@ class RiskReturnScatter extends StatelessWidget {
                       showTitles: true,
                       reservedSize: 26,
                       interval: xInterval,
+                      // A ponta esquerda deste eixo caía sobre o rótulo do
+                      // eixo vertical: "9%" e "-46%" disputavam o mesmo canto.
+                      minIncluded: false,
+                      maxIncluded: false,
                       getTitlesWidget: (value, meta) => Padding(
                         padding: const EdgeInsets.only(top: FinSpace.xs),
                         child: Text(
-                          '${value.toStringAsFixed(0)}%',
-                          style: context.finType.caption.copyWith(
+                          '${Fmt.ratio(value, decimals: 0)}%',
+                          style: context.finType.captionNum.copyWith(
                             color: context.fin.textTertiary,
                           ),
                         ),
@@ -784,6 +849,12 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
     // Medida no papel NUMERICO, que e o que a celula realmente pinta.
     final celulaWidth =
         FinAmount.measure(context, '-0,00', tipo.numSm) + FinSpace.sm;
+    // Passo real de uma coluna: a celula pinta `celulaWidth`, mas ocupa a
+    // margem dos dois lados. O cabecalho reservava `celulaWidth + 2` e por
+    // isso andava mais devagar que a matriz -- seis pixels por coluna, que na
+    // nona ja eram meia celula de defasagem e faziam o ultimo ticker parecer
+    // cortado quando o que estava fora de lugar era o rotulo.
+    final colunaWidth = celulaWidth + FinSpace.xs * 2;
 
     return Scrollbar(
       controller: _controller,
@@ -803,7 +874,7 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
                 SizedBox(width: nomeWidth + FinSpace.md),
                 for (final t in tickers)
                   SizedBox(
-                    width: celulaWidth + 2,
+                    width: colunaWidth,
                     child: Text(
                       t.value,
                       textAlign: TextAlign.center,

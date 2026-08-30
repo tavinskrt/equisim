@@ -329,12 +329,17 @@ class _ComparisonBody extends ConsumerWidget {
                   trend: result.twrGap! >= 0
                       ? FinTrend.positive
                       : FinTrend.negative,
+                  // `Fmt.ratio`, e nao `toStringAsFixed`: este ultimo ignora
+                  // locale e emite ponto decimal, entao a frase saia com
+                  // "76.2 pontos percentuais" ao lado de metricas em "76,2".
                   message: result.twrGap! >= 0
-                      ? 'A Principal rendeu ${result.twrGap!.toStringAsFixed(1)} '
+                      ? 'A Principal rendeu '
+                            '${Fmt.ratio(result.twrGap!, decimals: 1)} '
                             'pontos percentuais a mais que a Reserva no período.'
                       : 'A Reserva teria rendido '
-                            '${result.twrGap!.abs().toStringAsFixed(1)} pontos '
-                            'percentuais a mais que a Principal no período.',
+                            '${Fmt.ratio(result.twrGap!.abs(), decimals: 1)} '
+                            'pontos percentuais a mais que a Principal no '
+                            'período.',
                 ),
               ],
             ],
@@ -451,6 +456,17 @@ String _shortenedWindowMessage(PortfolioComparison result) {
       'é o que mantém o cronograma de aportes idêntico e torna o TWR '
       'comparável. Reduza a janela para descartar o ativo como restrição.';
 }
+
+/// Deriva de peso em pontos percentuais, com sinal explícito.
+///
+/// Existe como função porque o texto é escrito num lugar e **medido** em
+/// outro: `_AssetGroup._columnWidths` dimensiona a coluna por ele. Duplicar a
+/// formatação faria a medida mentir na primeira divergência.
+///
+/// `Fmt.ratio`, e não `toStringAsFixed` — este ignora locale e emitia
+/// `+31.6 p.p.` sob a convenção brasileira.
+String _drift(double drift) =>
+    '${drift >= 0 ? '+' : ''}${Fmt.ratio(drift, decimals: 1)} p.p.';
 
 /// Glossário dos indicadores do cartão de métricas.
 ///
@@ -646,27 +662,21 @@ class _DividendsCard extends StatelessWidget {
             subtitle: 'JCP sofre 15% de IRRF; dividendo é isento',
           ),
           const Gap.md(),
-          Row(
-            children: [
-              Expanded(
-                child: MetricTile(label: 'Bruto', value: Fmt.money(gross)),
+          MetricTileRow(
+            tiles: [
+              MetricTile(label: 'Bruto', value: Fmt.money(gross)),
+              MetricTile(
+                label: 'IR retido',
+                value: Fmt.money(tax),
+                trend: tax > 0 ? FinTrend.negative : FinTrend.neutral,
+                hint: gross > 0
+                    ? '${Fmt.percent(tax / gross, decimals: 1)} do bruto'
+                    : null,
               ),
-              Expanded(
-                child: MetricTile(
-                  label: 'IR retido',
-                  value: Fmt.money(tax),
-                  trend: tax > 0 ? FinTrend.negative : FinTrend.neutral,
-                  hint: gross > 0
-                      ? '${(tax / gross * 100).toStringAsFixed(1)}% do bruto'
-                      : null,
-                ),
-              ),
-              Expanded(
-                child: MetricTile(
-                  label: 'Líquido reinvestido',
-                  value: Fmt.money(net),
-                  trend: FinTrend.positive,
-                ),
+              MetricTile(
+                label: 'Líquido reinvestido',
+                value: Fmt.money(net),
+                trend: FinTrend.positive,
               ),
             ],
           ),
@@ -813,12 +823,7 @@ class _AssetGroup extends StatelessWidget {
       );
       if (r > value) value = r;
 
-      final d = FinAmount.measure(
-        context,
-        '${asset.drift >= 0 ? '+' : ''}'
-        '${asset.drift.toStringAsFixed(1)} p.p.',
-        driftStyle,
-      );
+      final d = FinAmount.measure(context, _drift(asset.drift), driftStyle);
       if (d > value) value = d;
     }
 
@@ -943,8 +948,7 @@ class _AssetRow extends StatelessWidget {
                   trend: FinAmount.trendOf(asset.totalReturn),
                 ),
                 Text(
-                  '${asset.drift >= 0 ? '+' : ''}'
-                  '${asset.drift.toStringAsFixed(1)} p.p.',
+                  _drift(asset.drift),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   // `numSm` e o mesmo papel usado para medir a coluna em

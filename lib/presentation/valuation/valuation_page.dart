@@ -285,12 +285,20 @@ class _ScenarioCard extends ConsumerWidget {
                     color: context.fin.textSecondary,
                   ),
                 ),
-                Switch(
-                  value: settings.monteCarlo,
-                  activeThumbColor: context.fin.brand,
-                  onChanged: ref
-                      .read(valuationSettingsProvider.notifier)
-                      .setMonteCarlo,
+                // Mesmo motivo do alternador de IR na tela de análise: o
+                // `Switch` pinta o respingo de tinta no `Material` mais
+                // próximo, e o `GlassCard` interpõe um fundo próprio entre os
+                // dois. Sem este `Material` transparente o toque não devolve
+                // retorno visual e o framework acusa em tempo de execução.
+                Material(
+                  type: MaterialType.transparency,
+                  child: Switch(
+                    value: settings.monteCarlo,
+                    activeThumbColor: context.fin.brand,
+                    onChanged: ref
+                        .read(valuationSettingsProvider.notifier)
+                        .setMonteCarlo,
+                  ),
                 ),
               ],
             ),

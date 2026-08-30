@@ -130,7 +130,9 @@ void main() {
         {Ticker.parse('PETR4'): 0.6, Ticker.parse('VALE3'): 0.3},
         onPrincipal: true,
       );
-      expect(container.read(studyProvider).lastError, contains('90.00%'));
+      // Virgula, e nao ponto: a mensagem passou a sair por `Fmt.percent`, que
+      // respeita o locale pt-BR. A expectativa antiga fixava o defeito.
+      expect(container.read(studyProvider).lastError, contains('90,00%'));
 
       notifier.setWeights(
         {Ticker.parse('PETR4'): 0.7, Ticker.parse('VALE3'): 0.3},

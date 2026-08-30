@@ -163,3 +163,5 @@ docs/telas/
 # dominio -- e o repositorio perderia arquivos de origem em silencio, que e a
 # pior forma de perder.
 test/**/failures/
+
+.obsidian/

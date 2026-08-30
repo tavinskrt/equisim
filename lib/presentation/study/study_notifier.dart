@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/portfolio_repository.dart';
 import '../../di/providers.dart';
+import '../shared/ui_kit.dart';
 
 /// Estado editável do estudo, com o erro da última operação recusada.
 class StudyState {
@@ -182,9 +183,7 @@ class StudyNotifier extends Notifier<StudyState> {
     final total = weights.values.fold<double>(0.0, (a, b) => a + b);
     if ((total - 1.0).abs() > 1e-6) {
       state = state.copyWith(
-        lastError:
-            'Os pesos devem somar 100%; somam '
-            '${(total * 100).toStringAsFixed(2)}%.',
+        lastError: 'Os pesos devem somar 100%; somam ${Fmt.percent(total)}.',
       );
       return;
     }

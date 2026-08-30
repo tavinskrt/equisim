@@ -250,6 +250,118 @@ class MetricTile extends StatelessWidget {
   }
 }
 
+/// Uma fila de [MetricTile] com as três faixas alinhadas entre si.
+///
+/// Existe porque a forma ingênua — `Row(children: [Expanded(child:
+/// MetricTile(...)), ...])` — empilha cada bloco por conta própria. Um rótulo
+/// que quebra em duas linhas empurra o número dele para baixo, e a fila perde
+/// a linha de base comum: no cartão "Carteira frente à meta" isso punha
+/// "Exigido", "Esperado da carteira" e "Folga" em três alturas diferentes, com
+/// o rótulo de um deles na altura do valor do vizinho.
+///
+/// A `Table` resolve por construção. Rótulos, valores e ressalvas viram três
+/// faixas horizontais, cada uma com a altura do seu conteúdo mais alto — então
+/// todos os números começam na mesma linha, quaisquer que sejam os rótulos.
+/// Alinhar por `IntrinsicHeight` não resolveria: ele iguala a altura das
+/// colunas, não a posição das faixas dentro delas.
+///
+/// Os blocos chegam como [MetricTile] e não como parâmetros soltos para que o
+/// ponto de uso não mude de vocabulário ao entrar numa fila — e para que um
+/// bloco solto continue sendo o mesmo widget de sempre.
+class MetricTileRow extends StatelessWidget {
+  /// Blocos da fila, da esquerda para a direita. Todos recebem largura igual.
+  final List<MetricTile> tiles;
+
+  /// Declara a fila.
+  const MetricTileRow({super.key, required this.tiles});
+
+  @override
+  Widget build(BuildContext context) {
+    if (tiles.isEmpty) return const SizedBox.shrink();
+
+    final c = context.fin;
+    final t = context.finType;
+    // Sem nenhuma ressalva a terceira faixa não existe; com uma só, as demais
+    // colunas cedem a altura dela e nada desalinha.
+    final hasHint = tiles.any((tile) => tile.hint != null);
+
+    TableCell band(Widget child, TableCellVerticalAlignment alignment) =>
+        TableCell(
+          verticalAlignment: alignment,
+          child: Padding(
+            padding: const EdgeInsets.only(right: FinSpace.sm),
+            child: child,
+          ),
+        );
+
+    return Table(
+      defaultColumnWidth: const FlexColumnWidth(),
+      children: [
+        TableRow(
+          children: [
+            for (final tile in tiles)
+              // Rótulo colado na FAIXA DE BAIXO: é o número que ele nomeia, e
+              // um rótulo de uma linha flutuando no topo de uma faixa de duas
+              // parece pertencer ao bloco de cima.
+              band(
+                Text(
+                  tile.label,
+                  style: t.caption.copyWith(color: c.textSecondary),
+                ),
+                TableCellVerticalAlignment.bottom,
+              ),
+          ],
+        ),
+        TableRow(
+          children: [
+            for (final tile in tiles)
+              band(
+                Padding(
+                  padding: const EdgeInsets.only(top: FinSpace.xs),
+                  // O `Align` não é decorativo. `FinAmount` embrulha o texto
+                  // num `AnimatedSwitcher`, que centraliza o filho na caixa
+                  // recebida; dentro de uma `Column` com alinhamento à
+                  // esquerda a caixa aperta no conteúdo e ninguém nota, mas a
+                  // célula de tabela é larga — sem isto o número flutuava no
+                  // meio da coluna, longe do rótulo que o nomeia.
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: FinAmount(
+                      text: tile.value,
+                      style: t.numMd,
+                      trend: tile.trend,
+                      align: TextAlign.left,
+                      maxLines: tile.valueMaxLines,
+                    ),
+                  ),
+                ),
+                TableCellVerticalAlignment.top,
+              ),
+          ],
+        ),
+        if (hasHint)
+          TableRow(
+            children: [
+              for (final tile in tiles)
+                band(
+                  tile.hint == null
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.only(top: FinSpace.xs),
+                          child: Text(
+                            tile.hint!,
+                            style: t.caption.copyWith(color: c.textTertiary),
+                          ),
+                        ),
+                  TableCellVerticalAlignment.top,
+                ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
 /// Linha de rótulo à esquerda e valor à direita.
 ///
 /// Existe porque a forma ingênua — `Row(Text, Spacer, Text)` — **estoura**.

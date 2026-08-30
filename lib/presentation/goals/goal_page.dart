@@ -326,22 +326,18 @@ class _FeasibilityCard extends StatelessWidget {
           ),
           const Gap.sm(),
           if (showRates)
-            Row(
-              children: [
-                Expanded(
-                  child: MetricTile(
-                    label: 'Rentabilidade exigida',
-                    value: Fmt.percent(rate, decimals: 2),
-                    hint: 'ao ano',
-                    trend: _trend,
-                  ),
+            MetricTileRow(
+              tiles: [
+                MetricTile(
+                  label: 'Rentabilidade exigida',
+                  value: Fmt.percent(rate, decimals: 2),
+                  hint: 'ao ano',
+                  trend: _trend,
                 ),
-                Expanded(
-                  child: MetricTile(
-                    label: 'Equivalente mensal',
-                    value: Fmt.percent(_monthlyEquivalent(rate), decimals: 2),
-                    hint: 'juros compostos',
-                  ),
+                MetricTile(
+                  label: 'Equivalente mensal',
+                  value: Fmt.percent(_monthlyEquivalent(rate), decimals: 2),
+                  hint: 'juros compostos',
                 ),
               ],
             ),
@@ -397,31 +393,28 @@ class _AlignmentCard extends StatelessWidget {
             subtitle: 'Convergência assumida em $horizonMonths meses',
           ),
           const Gap.md(),
-          Row(
-            children: [
-              Expanded(
-                child: MetricTile(
-                  label: 'Exigido',
-                  value: Fmt.percent(alignment.required.annual),
-                  hint: 'ao ano',
-                ),
+          MetricTileRow(
+            tiles: [
+              MetricTile(
+                label: 'Exigido',
+                value: Fmt.percent(alignment.required.annual),
+                hint: 'ao ano',
               ),
-              Expanded(
-                child: MetricTile(
-                  label: 'Esperado da carteira',
-                  value: Fmt.percent(alignment.expectedReturn),
-                  hint: 'upside anualizado + DY líquido',
-                  trend: meets ? FinTrend.positive : FinTrend.negative,
-                ),
+              MetricTile(
+                label: 'Esperado da carteira',
+                value: Fmt.percent(alignment.expectedReturn),
+                hint: 'upside anualizado + DY líquido',
+                trend: meets ? FinTrend.positive : FinTrend.negative,
               ),
-              Expanded(
-                child: MetricTile(
-                  label: 'Folga',
-                  value:
-                      '${alignment.gap >= 0 ? '+' : ''}'
-                      '${alignment.gap.toStringAsFixed(1)} p.p.',
-                  trend: FinAmount.trendOf(alignment.gap),
-                ),
+              MetricTile(
+                label: 'Folga',
+                // `Fmt.ratio`, e nao `toStringAsFixed`: o segundo ignora
+                // locale e punha "-3.5 p.p." ao lado de "18,44%" no mesmo
+                // cartao.
+                value:
+                    '${alignment.gap >= 0 ? '+' : ''}'
+                    '${Fmt.ratio(alignment.gap, decimals: 1)} p.p.',
+                trend: FinAmount.trendOf(alignment.gap),
               ),
             ],
           ),
