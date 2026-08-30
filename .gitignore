@@ -153,3 +153,13 @@ docs/validacao/*.sqlite
 # ao historico. Marcos que valem arquivar vao para docs/telas/marcos/.
 docs/telas/
 !docs/telas/marcos/
+
+# Diferencas de golden que o flutter_test grava quando uma comparacao falha:
+# *_masterImage, *_testImage, *_isolatedDiff, *_maskedDiff. Sao artefato de
+# diagnostico, regravado a cada execucao.
+#
+# O caminho e ANCORADO EM `test/` de proposito. Um padrao solto `failures/`
+# tambem casaria com `packages/equisim_core/lib/src/failures`, que e CODIGO do
+# dominio -- e o repositorio perderia arquivos de origem em silencio, que e a
+# pior forma de perder.
+test/**/failures/

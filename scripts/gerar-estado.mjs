@@ -114,7 +114,14 @@ function contarLinhas(caminhos, excluirSufixos = []) {
   if (existentes.length === 0) return { arquivos: 0, linhas: 0 };
   const lista = git(['ls-files', '--', ...existentes])
     .split('\n')
-    .filter((f) => f !== '' && !excluirSufixos.some((s) => f.endsWith(s)));
+    .filter((f) => f !== '' && !excluirSufixos.some((s) => f.endsWith(s)))
+    // `git ls-files` lista o INDICE, que nem sempre bate com o disco: um
+    // arquivo renomeado no diretorio de trabalho e ainda nao encenado aparece
+    // aqui com o nome antigo. Ler sem conferir derrubava o gerador inteiro por
+    // um estado de trabalho perfeitamente normal -- aconteceu ao separar o
+    // `golden_capture` da suite. Contar so o que existe e o comportamento
+    // certo: este arquivo mede o repositorio, nao valida o indice.
+    .filter((f) => existsSync(join(ROOT, f)));
   let linhas = 0;
   for (const f of lista) {
     linhas += readFileSync(join(ROOT, f), 'utf8').split('\n').length;

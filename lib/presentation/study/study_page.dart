@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -667,11 +669,59 @@ const double _dragColumnWidth = 24;
 /// toque errado tira o ativo da carteira.
 const double _removeColumnWidth = 48;
 
+/// Estilo do rótulo de coluna.
+///
+/// Vive aqui, e não dentro do cabeçalho, porque [_columnWidths] precisa medir
+/// exatamente o que [_AssetColumnHeader] desenha. Enquanto o estilo era local
+/// ao `build`, a medida usava `numSm` e o desenho usava `caption` — e o
+/// cabeçalho saía como "POTENCI…" numa largura de celular comum.
+TextStyle _columnLabelStyle(BuildContext context) =>
+    context.finType.caption.copyWith(
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.4,
+      color: context.fin.textTertiary,
+    );
+
+/// Larguras das colunas numéricas.
+///
+/// A regra é medir **o mais largo que a coluna pode chegar a desenhar**, e não
+/// uma amostra representativa. Medir amostra que não corresponde ao conteúdo
+/// real foi a origem de três truncamentos simultâneos em 390 dp:
+///
+///   - peso media `100%` (4 caracteres) e desenhava `25.00%` (6), porque
+///     `Weight.toString` usa duas casas decimais;
+///   - potencial media `-1.000%` em `numSm` e desenhava `POTENCIAL` em
+///     `caption` com espaçamento entre letras, que é mais largo;
+///   - a mesma coluna ainda abriga `justo R$ …`, que nunca entrou na conta.
+///
+/// Os três cortavam justamente o número que a tela existe para mostrar. A
+/// suíte de estouro não pegava nada disso porque exercita a tela vazia, onde
+/// nenhuma dessas células chega a ser construída.
 ({double weight, double upside}) _columnWidths(BuildContext context) {
   final t = context.finType;
+  final rotulo = _columnLabelStyle(context);
+
+  double maiorDe(List<(String, TextStyle)> amostras) => amostras
+      .map((a) => FinAmount.measure(context, a.$1, a.$2))
+      .reduce(math.max);
+
   return (
-    weight: FinAmount.measure(context, '100%', t.numSm) + FinSpace.xs,
-    upside: FinAmount.measure(context, '-1.000%', t.numSm) + FinSpace.sm,
+    // `100.00%` é o teto real de `Weight.toString()`: duas casas, sempre.
+    weight: maiorDe([('100.00%', t.numSm), ('PESO', rotulo)]) + FinSpace.xs,
+    // A coluna empilha três conteúdos de larguras diferentes. O preço justo
+    // usa uma amostra folgada para a B3 — acima disso a elipse volta, e é o
+    // comportamento aceito: o percentual acima continua legível.
+    upside:
+        maiorDe([
+          ('-1.000%', t.numSm),
+          ('POTENCIAL', rotulo),
+          // `captionNum`, o mesmo estilo que a celula desenha. Cifra tabular
+          // muda a largura do digito, entao medir com `caption` erraria a
+          // conta -- que e a divergencia entre medida e desenho que esta
+          // funcao inteira existe para nao repetir.
+          ('justo R\$ 9.999,99', t.captionNum),
+        ]) +
+        FinSpace.sm,
   );
 }
 
@@ -702,11 +752,9 @@ class _AssetColumnHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     if (compact) return const SizedBox.shrink();
 
-    final style = context.finType.caption.copyWith(
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.4,
-      color: context.fin.textTertiary,
-    );
+    // O mesmo estilo que `_columnWidths` mediu. Declará-lo aqui de novo faria
+    // medida e desenho divergirem outra vez.
+    final style = _columnLabelStyle(context);
 
     return Padding(
       // `xs`, nao `xxs`: aqui e espacamento de layout entre o cabecalho e a
@@ -1203,7 +1251,10 @@ class _UpsideCell extends StatelessWidget {
               'justo ${Fmt.money(fairValue!)}',
               textAlign: TextAlign.right,
               overflow: TextOverflow.ellipsis,
-              style: context.finType.caption.copyWith(
+              // `captionNum`, nao `caption`: e dinheiro numa coluna alinhada a
+              // direita, e sem cifra tabular a virgula decimal anda de uma
+              // linha para a outra. Regra R18.
+              style: context.finType.captionNum.copyWith(
                 color: context.fin.textTertiary,
               ),
             ),

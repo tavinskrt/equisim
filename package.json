@@ -19,7 +19,7 @@
     "conselho": "tsx scripts/advisor.ts",
     "conselho:dry": "tsx scripts/advisor.ts --dry-run",
     "estado": "node scripts/gerar-estado.mjs",
-    "ui:capturar": "flutter test test/presentation/golden_capture_test.dart --update-goldens",
+    "ui:capturar": "flutter test test/presentation/golden_capture.dart --update-goldens",
     "typecheck": "tsc --noEmit"
   },
   "scriptsComments": {

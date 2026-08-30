@@ -224,7 +224,14 @@ class _ModelCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: MetricTile(label: 'Método', value: result.model.label),
+                child: MetricTile(
+                  label: 'Método',
+                  value: result.model.label,
+                  // O "valor" aqui e nome, nao numero: `DCF simplificado (LPA)`
+                  // nao cabe em uma linha ao lado da taxa de desconto, e a
+                  // sigla cortada e o que distingue um modelo do outro.
+                  valueMaxLines: 2,
+                ),
               ),
               Expanded(
                 child: MetricTile(

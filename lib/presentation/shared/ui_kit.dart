@@ -204,6 +204,13 @@ class MetricTile extends StatelessWidget {
   /// reprovado em contraste, chegava a todo número positivo da interface.
   final FinTrend trend;
 
+  /// Quantas linhas o valor pode ocupar. Padrão 1.
+  ///
+  /// Passe 2 quando o "valor" for um NOME e não um número. O caso que motivou
+  /// isto: o método de valuation aparecia como `DCF simplificado (L…`, e a
+  /// sigla cortada é justamente o que distingue um modelo do outro.
+  final int valueMaxLines;
+
   /// Declara o bloco de métrica.
   const MetricTile({
     super.key,
@@ -211,6 +218,7 @@ class MetricTile extends StatelessWidget {
     required this.value,
     this.hint,
     this.trend = FinTrend.neutral,
+    this.valueMaxLines = 1,
   });
 
   @override
@@ -231,6 +239,7 @@ class MetricTile extends StatelessWidget {
           style: t.numMd,
           trend: trend,
           align: TextAlign.left,
+          maxLines: valueMaxLines,
         ),
         if (hint != null) ...[
           const Gap.xs(),

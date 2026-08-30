@@ -47,8 +47,11 @@ export interface Lente {
   disciplina: string[];
   materiais: Material[];
   /**
-   * Depende de capturas de tela, que so existem a partir da fase 03 e so
-   * trafegam pelo backend `api`. O runner recusa com mensagem acionavel.
+   * Depende de capturas de tela.
+   *
+   * Duas consequencias no runner: ele exige que `docs/telas/` exista (gere com
+   * `npm run ui:capturar`) e FORCA o backend `api`, porque o `agy` recusa
+   * imagem explicitamente -- ver `agy.ts`.
    */
   precisaDeCapturas?: boolean;
 }

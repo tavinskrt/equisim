@@ -20,6 +20,7 @@
 import { PROJECT_CONTEXT } from '../rules.ts';
 import type { AdvisorTarget } from './collect.ts';
 import type { Lente } from './lentes.ts';
+import { blocoDePostura, type Fronteira } from './postura.ts';
 
 const PAPEL = `
 ## Seu papel
@@ -78,34 +79,34 @@ const DISCIPLINA = `
    NAO EXISTE. Acusar de brecha um projeto que o proprio material documenta e
    o falso positivo mais caro deste agente, porque parece bem fundamentado.
 
-4. VAZIO E RESPOSTA. \`tensions: []\` e legitimo e frequente. Um dominio que
+5. VAZIO E RESPOSTA. \`tensions: []\` e legitimo e frequente. Um dominio que
    cumpre seu proposito esta pronto, e dize-lo e resultado util. NAO invente
    tensao para parecer produtivo -- e o unico jeito garantido de tornar este
    agente inutil.
 
-5. SEM PACOTE DE TERCEIROS. Nao proponha biblioteca nova em lugar nenhum. As
+6. SEM PACOTE DE TERCEIROS. Nao proponha biblioteca nova em lugar nenhum. As
    restricoes de arquitetura acima nao estao em negociacao, e no nucleo a
    pureza e travada por teste.
 
-6. SEM CONTRARIAR DECISAO EM SILENCIO. Se o material traz decisoes registradas
+7. SEM CONTRARIAR DECISAO EM SILENCIO. Se o material traz decisoes registradas
    e sua proposta contradiz uma delas, diga isso e proponha SUBSTITUI-LA
    explicitamente, com o motivo. Proposta que ignora decisao registrada e
    descartada sem leitura.
 
-7. CAMINHOS, NAO DECRETO. \`options\` tem dois ou tres itens, com o custo de
+8. CAMINHOS, NAO DECRETO. \`options\` tem dois ou tres itens, com o custo de
    cada um. Um item so significa que voce decidiu no lugar de quem decide.
 
-8. SEQUENCIA EXECUTAVEL. Cada passo de \`sequence\` toca caminhos que existem no
+9. SEQUENCIA EXECUTAVEL. Cada passo de \`sequence\` toca caminhos que existem no
    material e tem \`done_when\` VERIFICAVEL. "Melhorar a navegacao" nao e
    verificavel; "cada aba abre a tela que seu rotulo nomeia" e.
 
-9. AGREGUE. Um mesmo problema repetido em N lugares e UMA tensao que cita os
+10. AGREGUE. Um mesmo problema repetido em N lugares e UMA tensao que cita os
    lugares, nao N tensoes.
 
-10. NAO COMENTE ESTILO. Formatacao, nome de variavel, ausencia de comentario e
+11. NAO COMENTE ESTILO. Formatacao, nome de variavel, ausencia de comentario e
     preferencia de escrita tem linter e revisao humana. Nao sao seu assunto.
 
-11. ESCREVA CHAO. Frase curta, voz ativa, palavra comum. Diga "a data e a taxa
+12. ESCREVA CHAO. Frase curta, voz ativa, palavra comum. Diga "a data e a taxa
     podem sair de sincronia" e nao "fere as raizes seguras de um objeto
     encapsulado"; diga "quem consome e obrigado a usar !" e nao "os
     consumidores sao seduzidos a injetar operantes nao nulos forcados".
@@ -154,7 +155,10 @@ de codigo, sem texto fora do JSON.
 `;
 
 /** Instrucao de sistema, montada para uma lente. */
-export function buildAdvisorSystem(lente: Lente): string {
+export function buildAdvisorSystem(
+  lente: Lente,
+  fronteiras: Fronteira[] = [],
+): string {
   return [
     'Voce e um consultor tecnico senior. Voce e conservador na afirmacao e',
     'implacavel na evidencia: prefere dizer "nao ha tensao aqui" a produzir uma',
@@ -166,6 +170,10 @@ export function buildAdvisorSystem(lente: Lente): string {
       lente.disciplina.map((d) => `- ${d}`).join('\n') +
       '\n',
     GRAVIDADE,
+    // Vem DEPOIS da gravidade de proposito: a postura modifica como julgar o
+    // que ja existe, entao precisa ser lida com a escala de gravidade fresca.
+    // Vazio quando nao ha reconstrucao aberta, que e o caso normal.
+    blocoDePostura(fronteiras),
     CONTRATO,
   ].join('\n');
 }
@@ -186,6 +194,70 @@ export function buildAdvisorInstructions(target: AdvisorTarget): string {
       : '',
     'O material chega logo abaixo, delimitado por "--- INICIO DO MATERIAL ---".',
     'Cada arquivo vem marcado por "===== ARQUIVO: caminho =====".',
+    '',
+  ].join('\n');
+}
+
+/**
+ * Instrucoes anexas quando ha capturas de tela.
+ *
+ * NAO reaproveita `screenshotInstructions` do auditor: aquela manda preencher
+ * `file` com o nome da imagem e `line` com zero, campos que o contrato do
+ * conselheiro nao tem. Aqui a ancora e outra -- `subject` nomeia a tela e
+ * `evidence` descreve o que se ve e ONDE.
+ */
+export function instrucoesVisuais(rotulos: string[]): string {
+  return [
+    '',
+    '## As capturas',
+    '',
+    `Voce recebeu ${rotulos.length} captura(s): ${rotulos.join(', ')}.`,
+    'Sao as telas reais do aplicativo, renderizadas com dados de exemplo.',
+    '',
+    'ANCORA NESTA LENTE. Nao ha trecho de codigo a copiar. Em `evidence`,',
+    'escreva o que esta VISIVEL e ONDE, de forma que outra pessoa consiga',
+    'apontar para o mesmo lugar: "cabecalho da tabela no terco superior, texto',
+    'cortado em PESO POTENCI...", "quatro cartoes de mesma altura e mesmo peso',
+    'visual empilhados sem hierarquia entre eles". Descricao que nao localiza',
+    'nao e ancora.',
+    '',
+    'O QUE ESTA LENTE PROCURA -- disposicao, nao acabamento:',
+    '- Qual e a tarefa primaria desta tela, e ela esta visualmente em primeiro',
+    '  lugar? Se tudo tem o mesmo peso, nada tem.',
+    '- O que ocupa espaco sem servir a essa tarefa.',
+    '- Elementos que se repetem entre telas com tratamento diferente, ou que',
+    '  deveriam se parecer e nao se parecem.',
+    '- Agrupamento: o que esta junto deveria estar junto? O que esta separado',
+    '  pertence ao mesmo assunto?',
+    '- O rotulo de navegacao descreve o que a tela faz?',
+    '',
+    'O QUE NAO E ASSUNTO DESTA LENTE: sombra, gradiente, arredondamento,',
+    'escolha de icone, microanimacao. Se a tensao e sobre um deles, ela nasce',
+    'POLIMENTO -- e provavelmente nao deveria ser reportada.',
+    '',
+    'LIMITE CONHECIDO DA CAPTURA -- leia antes de reportar caractere quebrado.',
+    'As capturas sao geradas em `flutter test`, que carrega apenas duas fontes:',
+    'Roboto e MaterialIcons. O aplicativo real usa a fonte da plataforma, com a',
+    'cadeia de fallback do sistema. Simbolo fora do Roboto -- U+26A0 e outros',
+    'de Miscellaneous Symbols -- sai como CAIXA VAZIA na captura e renderiza',
+    'normalmente no dispositivo.',
+    '',
+    'Portanto: caixa vazia numa captura NAO e defeito da interface, e sim',
+    'limite deste equipamento. Nao a reporte como tensao. Se quiser registrar',
+    'que depender de um simbolo assim e fragil, isso e observacao de',
+    'inventario, nao tensao -- e nasce POLIMENTO se virar tensao.',
+    '',
+    'SEGUNDO LIMITE -- a ALTURA da captura nao e a altura da janela. A tela e',
+    'capturada com 1600 px de altura de proposito, para pegar o conteudo',
+    'inteiro em vez de cortar na dobra. Numa tela de conteudo curto isso deixa',
+    'MUITA area vazia embaixo que nao existe no aplicativo real, onde a janela',
+    'e mais baixa e o conteudo simplesmente termina.',
+    '',
+    'Nao reporte "espaco vazio no rodape" nem "a tela parece vazia" com base',
+    'nisso. O que VALE julgar e a distribuicao HORIZONTAL do espaco e a ordem',
+    'vertical dos blocos -- essas sao reais. Quanto sobra embaixo, nao.',
+    '',
+    'Uma tela bem resolvida e o caso comum e desejavel. Nao invente tensao.',
     '',
   ].join('\n');
 }

@@ -165,13 +165,118 @@ Consulte-o antes de escrever cálculo financeiro novo.
 
 ---
 
-## 5. Onde ficam as regras do auditor
+## 5. Onde ficam as regras dos agentes
 
-O comportamento do agente de QA é definido em
-[scripts/qa/rules.ts](scripts/qa/rules.ts). Se um achado veio errado, a
-correção é **nesse arquivo** — não no código do runner, e nunca desativando a
-regra para o commit passar.
+O comportamento do **auditor** é definido em
+[scripts/qa/rules.ts](scripts/qa/rules.ts); o do **conselheiro**, em
+[scripts/qa/advisor/rules.ts](scripts/qa/advisor/rules.ts) mais a disciplina de
+cada lente em [scripts/qa/advisor/lentes.ts](scripts/qa/advisor/lentes.ts). Se
+um achado veio errado, a correção é **nesses arquivos** — não no código do
+runner, e nunca desativando a regra para o commit passar.
 
-A calibragem de severidade vale a leitura antes de discordar de um achado:
-`FAIL` exige que o defeito esteja em linha adicionada **e** seja erro de
+A calibragem de severidade do auditor vale a leitura antes de discordar de um
+achado: `FAIL` exige que o defeito esteja em linha adicionada **e** seja erro de
 correção real; código preexistente no máximo vira `WARN`.
+
+---
+
+## 6. O conselheiro
+
+Segundo agente, de papel **oposto** ao do auditor. Aquele caça defeito de
+correção ancorado em arquivo e linha, e **bloqueia**. Este examina relação entre
+coisas — decisão contra código, rótulo contra tela, propósito contra
+implementação — e **nunca bloqueia**: sai com código 0 mesmo em falha de rede,
+cota ou JSON inválido, e nenhum hook o chama.
+
+A regra que sustenta o arranjo: **quem propõe não bloqueia; quem bloqueia não
+propõe.** Ampliar o auditor para "proponha melhorias" destruiria a calibragem
+que o torna confiável.
+
+```bash
+npm run conselho                      # lista as lentes
+npm run conselho -- --lente <id>      # executa uma
+npm run conselho:dry -- --lente <id>  # monta o payload sem chamar o modelo
+```
+
+| Lente | Pergunta |
+|---|---|
+| `registro` | Onde o registro diverge da realidade do repositório? |
+| `nucleo` | As entidades são coesas? Que regra de negócio vazou para a UI? |
+| `dados` | O que acontece quando a API cai, estoura cota ou devolve série incompleta? |
+| `metodo` | A metodologia de DCF e CAPM é defensável? Que premissa está implícita? |
+| `risco` | Que caminho de cálculo ou de erro não tem teste? |
+| `rumo` | O que foi decidido e não foi entregue? |
+| `tela` | O que compete por atenção? O rótulo descreve o que a tela faz? |
+
+Seis são texto puro e rodam pelo `agy`, na cota da assinatura. Só `tela` precisa
+de imagem, e o `agy` não transmite imagem — ela força o backend `api` e avisa no
+stderr quando troca.
+
+### A lente `tela` exige capturas
+
+```bash
+npm run ui:capturar   # 30 PNGs em docs/telas/, ignorado pelo git
+npm run conselho -- --lente tela --largura 1024 --tema escuro
+```
+
+O arquivo de captura é [test/presentation/golden_capture.dart](test/presentation/golden_capture.dart)
+— **sem** sufixo `_test`, de propósito: assim ele fica fora do `flutter test` e
+uma alteração intencional de UI não deixa a suíte vermelha.
+
+**Três limites do equipamento**, já registrados no prompt da lente. Não os
+reintroduza ao mexer ali:
+
+1. Só Roboto e MaterialIcons são carregados. Símbolo fora do Roboto (U+26A0 e
+   afins) sai como caixa vazia na captura e renderiza bem no aplicativo real.
+2. A captura tem 1600 px de altura para pegar a tela inteira. Sobra vertical
+   não é defeito da interface.
+3. Material parcial produz ausência falsa. Onde a pergunta é "o que existe", a
+   listagem tem de ser completa no escopo declarado — e dizer que é.
+
+### No tier gratuito o limite diário é POR MODELO
+
+Por isso o backend `api` cascateia quando o conselheiro o usa:
+`3.7-flash` → `3.6-flash` → `3.5-flash` → `3.5-flash-lite` (este com 500/dia
+contra 20 dos outros). O relatório avisa quando houve rebaixamento.
+
+**O auditor NÃO cascateia**, e não deve passar a: ele existe para ser
+reproduzível, e trocar de modelo em silêncio destruiria isso.
+
+Lista vazia vinda do último degrau é mais provavelmente "não enxerguei" do que
+"não há". Para direção visual, espere o topo liberar.
+
+---
+
+## 7. O registro de decisões
+
+**Decisão mora em arquivo próprio**, em [docs/decisoes/](docs/decisoes/), e não
+se edita depois de aceita — substitui-se por outra, que a cita. O formato está
+no [README de lá](docs/decisoes/README.md).
+
+| Onde | O quê |
+|---|---|
+| `docs/decisoes/` | Decisões 19+. Imutáveis, com `origem`, `data` e `afeta` |
+| `docs/apontamentos/` | O que orientador e devs apontam fora do git |
+| `docs/estado.md` | **Gerado** por `npm run estado`. Nunca edite à mão |
+| `docs/eap/` | Pacotes da reconstrução da UI em curso |
+| `PLANO_ARQUITETURA.md` | **Congelado.** Plano de transição já cumprido; decisões 0–18 estão nele |
+
+O gate local bloqueia **referência quebrada** — `afeta` apontando para caminho
+inexistente, `substitui` citando decisão que não existe. **Defasagem nunca
+bloqueia**: um gate que trava o push porque um documento envelheceu é um gate
+arrancado na primeira semana. Defasagem é assunto da lente `registro`.
+
+### Postura: como tratar o que já existe
+
+A **preservação** é o padrão: divergência é dívida a inventariar, e só regressão
+vira tarefa. A **reconstrução** é declarada por uma decisão com
+`postura: reconstrucao` e `status: aceita` — dentro do `afeta` dela, tudo é
+acionável.
+
+A fronteira não é configuração, é o próprio registro:
+[scripts/qa/advisor/postura.ts](scripts/qa/advisor/postura.ts) lê
+`docs/decisoes/` a cada execução. Cumprida a EAP, a decisão vira
+`status: cumprida` e a superfície volta à preservação.
+
+**Há uma reconstrução aberta hoje:** a [decisão 22](docs/decisoes/022-reconstrucao-da-ui.md),
+sobre as telas de operação. `lib/presentation/{audit,theme,export}` estão fora.

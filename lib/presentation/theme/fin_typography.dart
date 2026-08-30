@@ -48,6 +48,16 @@ class FinTypography extends ThemeExtension<FinTypography> {
   /// Celula de tabela: peso, potencial, retorno. Tabular.
   final TextStyle numSm;
 
+  /// Numero em papel de metadado: o valor que acompanha uma metrica sem
+  /// disputar destaque com ela. Mesma escala de [caption], mas TABULAR.
+  ///
+  /// Existe porque a alternativa era pior nos dois lados. Usar [caption] cru
+  /// desalinha a virgula decimal de uma linha para a outra -- foi o que a
+  /// regra R18 apontou no "justo R$ ..." sob a coluna de potencial. Usar
+  /// [numSm] alinha, mas e 13px semibold contra 11px regular: promove ao mesmo
+  /// peso do numero principal um valor que existe para ficar abaixo dele.
+  final TextStyle captionNum;
+
   /// Declara a escala.
   const FinTypography({
     required this.displayLg,
@@ -61,6 +71,7 @@ class FinTypography extends ThemeExtension<FinTypography> {
     required this.numLg,
     required this.numMd,
     required this.numSm,
+    required this.captionNum,
   });
 
   /// Algarismos de largura fixa.
@@ -156,6 +167,16 @@ class FinTypography extends ThemeExtension<FinTypography> {
         fontWeight: FontWeight.w600,
         fontFeatures: _tabular,
       ),
+      // Espelha `caption` em tudo menos nas cifras tabulares. Se um dia a
+      // escala de `caption` mudar, esta precisa acompanhar -- o teste de
+      // tipografia cobre a parte tabular, nao a paridade de tamanho.
+      captionNum: TextStyle(
+        fontFamily: _family,
+        fontSize: 11,
+        height: 1.35,
+        fontWeight: FontWeight.w400,
+        fontFeatures: _tabular,
+      ),
     );
   }
 
@@ -169,6 +190,7 @@ class FinTypography extends ThemeExtension<FinTypography> {
     numLg,
     numMd,
     numSm,
+    captionNum,
   ];
 
   /// Todos os papeis de texto corrente, na ordem da escala.
@@ -195,6 +217,7 @@ class FinTypography extends ThemeExtension<FinTypography> {
     TextStyle? numLg,
     TextStyle? numMd,
     TextStyle? numSm,
+    TextStyle? captionNum,
   }) {
     return FinTypography(
       displayLg: displayLg ?? this.displayLg,
@@ -208,6 +231,7 @@ class FinTypography extends ThemeExtension<FinTypography> {
       numLg: numLg ?? this.numLg,
       numMd: numMd ?? this.numMd,
       numSm: numSm ?? this.numSm,
+      captionNum: captionNum ?? this.captionNum,
     );
   }
 
@@ -226,6 +250,7 @@ class FinTypography extends ThemeExtension<FinTypography> {
       numLg: TextStyle.lerp(numLg, other.numLg, t)!,
       numMd: TextStyle.lerp(numMd, other.numMd, t)!,
       numSm: TextStyle.lerp(numSm, other.numSm, t)!,
+      captionNum: TextStyle.lerp(captionNum, other.captionNum, t)!,
     );
   }
 

@@ -32,8 +32,8 @@ só, e foi assim que contraste reprovado se espalhou pela base.
 
 ## Decisão
 
-Construir um sistema de design próprio, sem pacote de terceiros, e migrar a
-camada de apresentação para ele em quatro ondas:
+Migrar a camada de apresentação para um sistema de design próprio, em quatro
+ondas, e adequá-la à WCAG. O que ficou construído:
 
 - **Tokens** em [lib/presentation/theme/](../../lib/presentation/theme/) —
   `fin_colors.dart`, `fin_typography.dart`, `fin_space.dart`, `fin_theme.dart`.
@@ -43,24 +43,32 @@ camada de apresentação para ele em quatro ondas:
 - **Verificação de estouro por largura e escala de texto** em
   `test/presentation/overflow_test.dart`: quatro telas × 320/390/1024 dp ×
   escala 1.0/1.3/2.0.
-- **Regras R17 a R25** no rulebook do auditor, dormentes até
-  `fin_colors.dart` existir e despertas a partir dele.
+- **Regras R17 a R25** no rulebook do auditor, dormentes até `fin_colors.dart`
+  existir e despertas a partir dele.
 
 ## Consequências aceitas
 
-- **Nenhum pacote de UI de terceiros.** `google_fonts`, `flutter_screenutil`,
-  `responsive_framework`, `gap` e `shimmer` ficam proibidos por regra explícita
-  no rulebook. O custo é escrever o que eles dariam pronto; o ganho é que a
-  correção de contraste tem um lugar só.
-- **Literal novo em arquivo já migrado é regressão, não dívida.** É a única
-  situação em que uma regra de design reprova o commit — o sistema existe
-  naquele arquivo e foi contornado deliberadamente.
+- **Isto resolveu a base do código, não a direção visual.** Tokens, contraste e
+  ausência de estouro são condições necessárias e não suficientes: a disposição
+  dos elementos, a hierarquia e a arquitetura de informação continuam abertas.
+
+  São objeto da lente `tela` do conselheiro, e a **redisposição da UI começa
+  quando as fases da integração terminarem** — como trabalho declarado, com
+  fronteira escrita e decisão própria, sob a postura de reconstrução.
+
 - **A migração torna desconfortável mover linha legada.** O git registra linha
   movida como adicionada, e a regra dispara. A ordem de trabalho pretendida é
   migrar o arquivo inteiro e só então commitar.
-- **Isto resolveu a base do código, não a direção visual.** Tokens, contraste e
-  ausência de estouro são condições necessárias e não suficientes: a disposição
-  dos elementos, a hierarquia e a arquitetura de informação continuam abertas, e
-  são objeto da lente `tela` do conselheiro. A reconstrução visual pós-ondas é
-  trabalho declarado para depois desta integração terminar — ver a postura de
-  reconstrução, que abrirá decisão própria com fronteira escrita.
+
+## Restrições sob as quais isto foi feito
+
+Estas valiam no repositório e moldaram o resultado, mas **não foram decididas
+nesta ocasião** e sua origem não está registrada em lugar nenhum. Ficam aqui
+como contexto, não como decisão — quem quiser mudá-las precisa primeiro
+descobrir de onde vieram:
+
+- **Nenhum pacote de UI de terceiros.** `google_fonts`, `flutter_screenutil`,
+  `responsive_framework`, `gap` e `shimmer` são proibidos por regra explícita no
+  rulebook do auditor.
+- **Literal novo em arquivo já migrado é tratado como regressão**, e é a única
+  situação em que uma regra de design reprova o commit.

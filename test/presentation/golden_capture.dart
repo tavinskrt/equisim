@@ -8,6 +8,22 @@
 /// `overflow_test.dart` -- aquela e suite que passa, e nao deve quebrar porque
 /// um carregamento de fonte mudou.
 ///
+/// POR QUE O NOME NAO TERMINA EM `_test.dart`: e o que o mantem FORA do
+/// `flutter test`. A descoberta padrao procura `test/**_test.dart`, entao este
+/// arquivo so roda quando chamado pelo caminho, como faz o `ui:capturar`.
+///
+/// A razao e concreta, nao teorica. Enquanto ele se chamava `_test.dart`,
+/// qualquer alteracao INTENCIONAL de interface deixava `flutter test`
+/// vermelho: a comparacao de golden acusava diferenca contra as capturas
+/// antigas. Aconteceu na correcao do truncamento das colunas -- oito falhas,
+/// nenhuma real, todas resolvidas por regerar as imagens. Um portao que fica
+/// vermelho por trabalho legitimo e um portao que sera arrancado, e a
+/// reconstrucao da UI que vem pela frente mexeria nessas telas a cada rodada.
+///
+/// O que se abre mao: deteccao automatica de regressao visual. Ela tem valor,
+/// mas nao estava sendo usada como tal -- e o conselheiro olha as capturas de
+/// qualquer forma, com julgamento que a comparacao de pixels nao tem.
+///
 /// DUAS COISAS SEM AS QUAIS ESTE ARQUIVO NAO SERVE PARA NADA:
 ///
 /// 1. FONTE REAL. `FinTypography._family` e `null`, ou seja, o aplicativo usa a

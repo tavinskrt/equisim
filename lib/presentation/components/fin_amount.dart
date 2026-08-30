@@ -45,6 +45,19 @@ class FinAmount extends StatelessWidget {
   /// Alinhamento. Padrao a direita, que e como coluna de numero se le.
   final TextAlign align;
 
+  /// Quantas linhas o valor pode ocupar. Padrao 1.
+  ///
+  /// Um permanece o padrao porque este widget existe para NUMERO, e numero em
+  /// duas linhas nao se le. Mas ele acabou servindo tambem a valores que sao
+  /// NOME -- `MetricTile` exibe por aqui o metodo de valuation, e
+  /// "DCF simplificado (LPA)" saia como "DCF simplificado (L...", escondendo
+  /// justamente a sigla que distingue um modelo do outro.
+  ///
+  /// Cortar nome nao tem a defesa que cortar numero tem: as reticencias de um
+  /// numero avisam que falta digito, e quem le procura o valor inteiro em
+  /// outro lugar. Num nome, o que some e o sentido.
+  final int maxLines;
+
   /// Declara o valor.
   const FinAmount({
     super.key,
@@ -54,6 +67,7 @@ class FinAmount extends StatelessWidget {
     this.masked = false,
     this.semanticsLabel,
     this.align = TextAlign.right,
+    this.maxLines = 1,
   });
 
   /// Escolhe a direcao a partir do numero, com zero em neutro.
@@ -143,7 +157,7 @@ class FinAmount extends StatelessWidget {
           masked ? maskedText : text,
           key: ValueKey<String>(masked ? '#masked' : text),
           textAlign: align,
-          maxLines: 1,
+          maxLines: maxLines,
           // Reticencias como REDE DE SEGURANCA, nao como solucao.
           //
           // A solucao e medir a coluna com `measure`, e onde isso e feito o

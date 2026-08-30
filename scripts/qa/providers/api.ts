@@ -21,8 +21,27 @@ import {
   type QaProvider,
 } from './types.ts';
 
-/** Flash roda no tier gratuito; Pro exige billing. Ver comentario do modulo. */
-export const API_DEFAULT_MODEL = 'gemini-3.5-flash';
+/**
+ * Modelo padrao: o APELIDO da familia Flash, nao uma versao.
+ *
+ * Flash roda no tier gratuito; Pro exige billing (ver comentario do modulo).
+ *
+ * POR QUE APELIDO E NAO VERSAO FIXA: enquanto isto era `gemini-3.5-flash`, o
+ * gate envelhecia preso a uma versao -- a API ja oferecia `3.6` e `3.7`
+ * enquanto o codigo continuava pedindo `3.5`. E o modelo mais apontado por
+ * todo mundo tambem e o mais sujeito a 503, que foi como o problema apareceu.
+ *
+ * E o mesmo principio que o backend `agy` ja segue: o `CLAUDE.md` registra que
+ * a lista dele "vem de `agy models` a cada execucao, nada e fixado por nome".
+ * O backend `api` era a excecao, sem que ninguem tivesse decidido isso.
+ *
+ * O QUE SE PERDE, E COMO SE RECUPERA: um apelido pode resolver para versoes
+ * diferentes em execucoes diferentes, o que atrapalharia a reproducao -- e
+ * reproduzir e a razao de este backend existir. Por isso a resposta e lida por
+ * `modelVersion` e o relatorio informa a versao CONCRETA que atendeu. Para
+ * repetir uma auditoria exatamente, passe essa versao em `--model`.
+ */
+export const API_DEFAULT_MODEL = 'gemini-flash-latest';
 /**
  * Modelo Pro, disponivel apenas por `--model`.
  *
@@ -31,6 +50,37 @@ export const API_DEFAULT_MODEL = 'gemini-3.5-flash';
  * beneficia, e porque o backend `agy` alcanca a familia Pro pela assinatura.
  */
 export const API_PRO_MODEL = 'gemini-3.1-pro-preview';
+
+/**
+ * Cascata de modelos: do mais capaz ao de maior cota.
+ *
+ * O DADO QUE JUSTIFICA ISTO: no tier gratuito o limite diario e POR MODELO,
+ * nao por chave. Medido no painel em 30/08/2026:
+ *
+ *     gemini-3.7-flash        19 / 20  requisicoes/dia
+ *     gemini-3.6-flash         7 / 20
+ *     gemini-3.5-flash        31 / 20  <- estourado
+ *     gemini-3.5-flash-lite    2 / 500 <- vinte e cinco vezes mais folga
+ *
+ * Um apelido como `gemini-flash-latest` aponta para um modelo so, entao esgota
+ * as 20 daquele e para -- foi assim que as consultas da lente `tela` passaram o
+ * dia devolvendo 503. Descer a cascata usa a cota de cada um em vez da de um.
+ *
+ * TROCA ACEITA: `flash-lite` e mais fraco. Para critica de direcao visual isso
+ * custa profundidade. Por isso o relatorio informa qual modelo respondeu, e o
+ * runner avisa quando houve rebaixamento -- um parecer vindo do ultimo degrau
+ * nao merece a mesma confianca do primeiro.
+ *
+ * Ordem fixa de proposito. Consultar o painel a cada execucao para escolher o
+ * menos usado seria mais eficiente e menos previsivel; o custo de comecar pelo
+ * topo e uma tentativa perdida quando ele ja esta cheio.
+ */
+export const API_CASCATA_FLASH: readonly string[] = [
+  'gemini-3.7-flash',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
+];
 
 const TEMPERATURE = 0.0;
 
@@ -82,14 +132,31 @@ export class ApiProvider implements QaProvider {
   private readonly timeoutMs: number;
   private key?: ApiKeyResolution;
 
+  /** O que sugerir a quem estourou o teto. Ver `timeoutMessage`. */
+  private readonly saidasDeTimeout: readonly string[];
+
+  /**
+   * Modelos a tentar, em ordem, quando o primeiro nao responde.
+   *
+   * Vazia por padrao -- o auditor NAO cascateia. Ele existe para ser
+   * reproduzivel, e trocar de modelo no meio em silencio destruiria isso: dois
+   * relatorios do mesmo diff poderiam vir de modelos diferentes sem que a
+   * diferenca fosse escolha de ninguem. Quem quiser a cascata pede por ela.
+   */
+  private readonly cascata: readonly string[];
+
   constructor(
     repoRoot: string,
     thinkingBudget = DEFAULT_THINKING_BUDGET,
     timeoutMs = DEFAULT_TIMEOUT_MS,
+    saidasDeTimeout: readonly string[] = SAIDAS_TIMEOUT_AUDITOR,
+    cascata: readonly string[] = [],
   ) {
     this.repoRoot = repoRoot;
     this.thinkingBudget = thinkingBudget;
     this.timeoutMs = timeoutMs;
+    this.saidasDeTimeout = saidasDeTimeout;
+    this.cascata = cascata;
   }
 
   describeAuth(): string {
@@ -103,9 +170,53 @@ export class ApiProvider implements QaProvider {
     }
   }
 
+  /**
+   * Executa, descendo a cascata quando o modelo do topo nao responde.
+   *
+   * `--model` explicito VENCE a cascata: quem fixou um modelo quer aquele, e
+   * trocar por baixo dos panos e o oposto do que o pedido significa. E ao
+   * esgotar a cascata o erro sobe como DEFINITIVO, nao transitorio -- repetir
+   * a mesma sequencia agora daria a mesma coisa, e o laco de fora so gastaria
+   * cota de novo.
+   */
   async run(request: ProviderRequest): Promise<ProviderResult> {
     if (!this.key) this.preflight();
-    const model = request.model ?? API_DEFAULT_MODEL;
+
+    const degraus =
+      request.model !== undefined || this.cascata.length === 0
+        ? [request.model ?? API_DEFAULT_MODEL]
+        : this.cascata;
+
+    let ultimo: unknown;
+    for (const [i, modelo] of degraus.entries()) {
+      try {
+        return await this.chamar(request, modelo);
+      } catch (erro) {
+        ultimo = erro;
+        const vale = erro instanceof ProviderError && (erro.transient || erro.quota);
+        if (!vale || i === degraus.length - 1) break;
+        process.stderr.write(
+          `  ${modelo} indisponivel; descendo para ${degraus[i + 1]}\n`,
+        );
+        // O tier limita tambem por MINUTO (5 rpm nos Flash). Descer a cascata
+        // em rajada esbarraria nesse teto e o degrau seguinte falharia por um
+        // motivo que nao e o dele.
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+    }
+    if (ultimo instanceof ProviderError && degraus.length > 1) {
+      throw new ProviderError(
+        `Nenhum modelo da cascata respondeu (${degraus.join(' -> ')}).\n` +
+          `  Ultimo erro: ${ultimo.message}`,
+      );
+    }
+    throw ultimo;
+  }
+
+  private async chamar(
+    request: ProviderRequest,
+    model: string,
+  ): Promise<ProviderResult> {
     const ai = new GoogleGenAI({ apiKey: this.key!.apiKey });
 
     // O controller vive FORA do try porque o SDK lanca "This operation was
@@ -144,11 +255,17 @@ export class ApiProvider implements QaProvider {
             'ou estouro do limite de tokens de saida.',
         );
       }
-      return { text, model };
+      // A versao CONCRETA que atendeu, nao o apelido que foi pedido. Sem isto,
+      // um relatorio de `gemini-flash-latest` nao diz o que de fato auditou, e
+      // nao ha como repetir a auditoria depois -- que e justamente o que este
+      // backend existe para permitir.
+      return { text, model: response.modelVersion ?? model };
     } catch (error) {
       // O aborto e nosso, nao da API: traduzimos para a instrucao de escopo.
       if (controller.signal.aborted) {
-        throw new ProviderError(timeoutMessage(this.timeoutMs, request));
+        throw new ProviderError(
+          timeoutMessage(this.timeoutMs, request, this.saidasDeTimeout),
+        );
       }
       if (error instanceof ProviderError) throw error;
       const message = error instanceof Error ? error.message : String(error);
@@ -172,21 +289,44 @@ export class ApiProvider implements QaProvider {
  * controla: dizer "demorou demais" sem dizer "voce mandou 102 KB" nao ajuda
  * ninguem a decidir o que fazer.
  */
-function timeoutMessage(timeoutMs: number, request: ProviderRequest): string {
+/**
+ * Mensagem de estouro de tempo.
+ *
+ * As SAIDAS vem de quem chamou, nao daqui. Enquanto este texto trazia
+ * `--base HEAD~1`, `--file` e `--thinking` fixos, o conselheiro estourava o
+ * teto e recebia como conselho tres flags que a CLI dele nao tem -- o
+ * transporte dava instrucao de um agente para o outro. Aqui se sabe QUANTO
+ * tempo passou e QUANTO material foi; o que fazer a respeito e do chamador.
+ */
+function timeoutMessage(
+  timeoutMs: number,
+  request: ProviderRequest,
+  saidas: readonly string[],
+): string {
   const kb = Math.round(request.material.length / 1024);
+  const imagens = request.screenshots?.length ?? 0;
   return (
-    `A auditoria excedeu ${timeoutMs / 1000}s e foi cancelada.\n` +
-    `Material enviado: ${kb} KB.\n\n` +
-    'Diffs grandes com raciocinio irrestrito nao terminam em tempo util.\n' +
+    `A consulta excedeu ${timeoutMs / 1000}s e foi cancelada.\n` +
+    `Material enviado: ${kb} KB` +
+    (imagens > 0 ? `, mais ${imagens} imagem(ns).` : '.') +
+    '\n\n' +
+    (imagens > 0
+      ? 'Requisicao multimodal custa bem mais tempo que a mesma em texto.\n'
+      : 'Material grande com raciocinio irrestrito nao termina em tempo util.\n') +
     'Opcoes, da melhor para a pior:\n' +
-    '  1. reduza o escopo:      --base HEAD~1  (em vez de varios commits)\n' +
-    '  2. audite por arquivo:   --file <caminho>\n' +
-    '  3. limite o raciocinio:  --thinking 4096\n' +
-    '     ATENCAO: isso rebaixa defeitos de FAIL para WARN. Ver o comentario\n' +
-    '     de DEFAULT_THINKING_BUDGET neste arquivo antes de usar no gate.\n' +
-    '  4. aumente o teto:       --timeout 600'
+    saidas.map((s, i) => `  ${i + 1}. ${s}`).join('\n')
   );
 }
+
+/** Saidas do auditor. Outro agente passa as suas ao construir o provider. */
+export const SAIDAS_TIMEOUT_AUDITOR: readonly string[] = [
+  'reduza o escopo:      --base HEAD~1  (em vez de varios commits)',
+  'audite por arquivo:   --file <caminho>',
+  'limite o raciocinio:  --thinking 4096\n' +
+    '     ATENCAO: isso rebaixa defeitos de FAIL para WARN. Ver o comentario\n' +
+    '     de DEFAULT_THINKING_BUDGET neste arquivo antes de usar no gate.',
+  'aumente o teto:       --timeout 600',
+];
 
 function isTransient(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);

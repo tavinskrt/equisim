@@ -18,13 +18,13 @@
  * `models.ts` e `env.ts` entram sem alteracao. O que muda e o schema (via
  * `ProviderRequest.schema`), o rulebook e o coletor.
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { repoRoot } from './qa/collect.ts';
 import { chooseModel } from './qa/choose.ts';
 import { AgyProvider, isAgyAvailable } from './qa/providers/agy.ts';
-import { ApiProvider } from './qa/providers/api.ts';
+import { API_CASCATA_FLASH, ApiProvider } from './qa/providers/api.ts';
 import {
   ProviderError,
   type ProviderRequest,
@@ -32,11 +32,14 @@ import {
   type QaProvider,
 } from './qa/providers/types.ts';
 import { collectLente, type AdvisorTarget } from './qa/advisor/collect.ts';
+import { fronteirasAbertas } from './qa/advisor/postura.ts';
 import { LENTES, ORDEM_SUGERIDA, resolverLente } from './qa/advisor/lentes.ts';
 import {
   buildAdvisorInstructions,
   buildAdvisorSystem,
+  instrucoesVisuais,
 } from './qa/advisor/rules.ts';
+import { loadScreenshots } from './qa/screenshot.ts';
 import {
   ADVISOR_RESPONSE_SCHEMA,
   validateAdvisorReport,
@@ -99,6 +102,31 @@ function renderReport(
   out.write('\n' + bold(`Conselheiro -- lente ${report.lente}`) + '\n');
   out.write(dim(`Alvo:    ${target.label}`) + '\n');
   out.write(dim(`Modelo:  ${model} via ${provider.name} -- ${provider.describeAuth()}`) + '\n');
+  // Um parecer do ultimo degrau da cascata nao merece a mesma confianca do
+  // primeiro, e quem le precisa saber disso ANTES de agir sobre o conteudo.
+  // O degrau e deduzido do nome porque e o que a resposta informa: o campo
+  // `modelVersion` traz a versao concreta que atendeu, nao o que foi pedido.
+  const topo = API_CASCATA_FLASH[0] ?? '';
+  if (provider.name === 'api' && topo !== '' && !model.startsWith(topo)) {
+    // Prefixo MAIS LONGO, nao o primeiro que casa: `gemini-3.5-flash-lite`
+    // comeca com `gemini-3.5-flash`, entao `findIndex` acusava o degrau 3
+    // quando quem respondeu era o 4. Errar o degrau subestima o rebaixamento,
+    // que e justamente o que este aviso existe para nao deixar passar.
+    let degrau = -1;
+    let maior = 0;
+    for (const [i, m] of API_CASCATA_FLASH.entries()) {
+      if (model.startsWith(m) && m.length > maior) {
+        maior = m.length;
+        degrau = i;
+      }
+    }
+    out.write(
+      yellow(
+        `AVISO:   modelo rebaixado (degrau ${degrau < 0 ? '?' : degrau + 1} de ` +
+          `${API_CASCATA_FLASH.length}). O topo da cascata nao respondeu.\n`,
+      ) + dim('         Leia este parecer com menos confianca que o usual.\n'),
+    );
+  }
   if (usage) out.write(dim(`Tokens:  ${usage.totalTokens}`) + '\n');
   if (target.truncated) {
     out.write(yellow('AVISO:   material cortado por tamanho\n'));
@@ -191,6 +219,10 @@ interface Cli {
   noAsk: boolean;
   timeout?: number;
   help: boolean;
+  /** Tema das capturas, para a lente `tela`. */
+  tema: 'claro' | 'escuro';
+  /** Largura das capturas, em dp. */
+  largura: number;
 }
 
 const USO = `
@@ -207,6 +239,8 @@ ${ORDEM_SUGERIDA.map((id) => {
 
 Opcoes:
   --lente <id>      qual lente executar (obrigatorio)
+  --tema <t>        capturas: claro (padrao) ou escuro   [lente tela]
+  --largura <dp>    capturas: 320, 390 (padrao) ou 1024  [lente tela]
   --backend <b>     agy (padrao, assinatura) ou api (API key)
   --model <nome>    modelo especifico; sem isso, pergunta em terminal
   --timeout <s>     teto local, em segundos
@@ -225,6 +259,11 @@ function parseArgs(argv: string[]): Cli {
     dryRun: false,
     noAsk: false,
     help: false,
+    // 390 dp e o padrao porque e onde a interface aperta -- foi la que o
+    // cabecalho da tabela saiu como "PESO POTENCI..." na primeira captura.
+    // Tela folgada esconde problema de hierarquia; tela apertada o expoe.
+    tema: 'claro',
+    largura: 390,
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i] ?? '';
@@ -252,6 +291,17 @@ function parseArgs(argv: string[]): Cli {
       case '--timeout':
         cli.timeout = Number(proximo()) * 1000;
         break;
+      case '--tema': {
+        const v = proximo();
+        if (v !== 'claro' && v !== 'escuro') {
+          throw new Error(`Tema desconhecido: "${v}". Use claro ou escuro.`);
+        }
+        cli.tema = v;
+        break;
+      }
+      case '--largura':
+        cli.largura = Number(proximo());
+        break;
       case '--dry-run':
         cli.dryRun = true;
         break;
@@ -271,9 +321,40 @@ function parseArgs(argv: string[]): Cli {
   return cli;
 }
 
+/**
+ * Saidas oferecidas quando a consulta estoura o teto.
+ *
+ * Sao as flags DESTE programa. O provider trazia as do auditor fixas, e o
+ * conselheiro acabava recebendo `--base HEAD~1` e `--file` como conselho --
+ * opcoes que a CLI dele nao tem.
+ */
+const SAIDAS_TIMEOUT: readonly string[] = [
+  'estreite o recorte:   --largura 390  (uma largura por vez)',
+  'troque o tema:        --tema claro   (metade das imagens)',
+  'aumente o teto:       --timeout 900',
+];
+
+/**
+ * Teto de tempo do conselheiro, maior que o do auditor.
+ *
+ * O auditor usa 240s porque roda no `pre-push`, onde alguem espera com a
+ * interface travada. Aqui ninguem espera: a consulta e sob demanda e fora de
+ * hook. E a lente `tela` manda cinco imagens, que custam bem mais tempo que a
+ * mesma pergunta em texto -- 240s a derrubava antes de responder.
+ */
+const TIMEOUT_PADRAO_MS = 900_000;
+
 function selectProvider(root: string, cli: Cli): QaProvider {
-  if (cli.backend !== 'agy') return new ApiProvider(root, undefined, cli.timeout);
-  if (isAgyAvailable()) return new AgyProvider(cli.timeout);
+  if (cli.backend !== 'agy') {
+    return new ApiProvider(
+      root,
+      undefined,
+      cli.timeout ?? TIMEOUT_PADRAO_MS,
+      SAIDAS_TIMEOUT,
+      API_CASCATA_FLASH,
+    );
+  }
+  if (isAgyAvailable()) return new AgyProvider(cli.timeout ?? TIMEOUT_PADRAO_MS);
 
   if (cli.backendExplicit) {
     throw new Error(
@@ -284,7 +365,13 @@ function selectProvider(root: string, cli: Cli): QaProvider {
   process.stderr.write(
     `${yellow('agy indisponivel')}; usando o backend api (API key).\n`,
   );
-  return new ApiProvider(root, undefined, cli.timeout);
+  return new ApiProvider(
+    root,
+    undefined,
+    cli.timeout ?? TIMEOUT_PADRAO_MS,
+    SAIDAS_TIMEOUT,
+    API_CASCATA_FLASH,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -299,18 +386,37 @@ async function run(): Promise<void> {
   const root = repoRoot(process.cwd());
   const lente = resolverLente(cli.lente);
 
-  if (lente.precisaDeCapturas) {
-    process.stdout.write(
-      `\n${yellow('Lente indisponivel')}  "${lente.id}" depende de capturas de tela.\n` +
-        dim('  Elas sao geradas na fase 03 (npm run ui:capturar), e so trafegam\n') +
-        dim('  pelo backend api -- o agy nao transmite imagem.\n\n'),
+  // Capturas, quando a lente as exige. Feito ANTES de montar o material para
+  // que a ausencia apareca como mensagem acionavel, e nao como uma consulta de
+  // minutos sobre imagem nenhuma.
+  const capturas = lente.precisaDeCapturas ? selecionarCapturas(root, cli) : [];
+  if (lente.precisaDeCapturas && cli.backend !== 'api') {
+    if (cli.backendExplicit) {
+      throw new Error(
+        `A lente "${lente.id}" precisa de imagem, e o backend "${cli.backend}" nao a transmite.\n` +
+          '  Use: --backend api',
+      );
+    }
+    // Sem pedido explicito, trocar em silencio seria pior que trocar avisando:
+    // o cabecalho do relatorio diz qual backend rodou, e a cota da API e
+    // escassa o suficiente para o usuario querer saber que a gastou.
+    process.stderr.write(
+      dim('  lente visual: usando o backend api (o agy nao transmite imagem)\n'),
     );
-    return;
+    cli.backend = 'api';
   }
 
   const target = collectLente(root, lente);
-  const system = buildAdvisorSystem(lente);
-  const instructions = buildAdvisorInstructions(target);
+  const imagens = capturas.length > 0 ? loadScreenshots(capturas) : [];
+  // A fronteira de reconstrucao vem do REGISTRO, nao de configuracao: e uma
+  // decisao aceita com `postura: reconstrucao`. Sem isso nao haveria como
+  // saber depois por que meio repositorio virou acionavel, nem quando aquilo
+  // deveria ter fechado.
+  const fronteiras = fronteirasAbertas(root);
+  const system = buildAdvisorSystem(lente, fronteiras);
+  const instructions =
+    buildAdvisorInstructions(target) +
+    (imagens.length > 0 ? instrucoesVisuais(imagens.map((i) => i.label)) : '');
 
   if (cli.dryRun) {
     process.stdout.write(bold('\n=== SYSTEM INSTRUCTION ===\n\n') + system + '\n');
@@ -324,6 +430,9 @@ async function run(): Promise<void> {
         ),
     );
     for (const f of target.files) process.stdout.write(dim(`  ${f}\n`));
+    for (const i of imagens) {
+      process.stdout.write(dim(`  [imagem] ${i.label}  ${Math.round(i.bytes / 1024)} KB\n`));
+    }
     return;
   }
 
@@ -347,10 +456,15 @@ async function run(): Promise<void> {
     material: `--- INICIO DO MATERIAL ---\n${target.payload}\n--- FIM DO MATERIAL ---\n`,
     model,
     schema: ADVISOR_RESPONSE_SCHEMA,
+    screenshots: imagens.map((i) => i.part),
   };
 
   process.stdout.write(
-    dim(`\nConsultando (${target.payload.length} caracteres). Pode levar minutos.\n`),
+    dim(
+      `\nConsultando (${target.payload.length} caracteres` +
+        (imagens.length > 0 ? `, ${imagens.length} imagem(ns)` : '') +
+        '). Pode levar minutos.\n',
+    ),
   );
 
   const { report, result } = await consultar(provider, request, lente.id);
@@ -375,6 +489,41 @@ function salvarBruto(root: string, lente: string, texto: string): string {
   const caminho = join(dir, `${lente}-${carimbo}.json`);
   writeFileSync(caminho, texto, 'utf8');
   return caminho;
+}
+
+/**
+ * Escolhe quais capturas enviar.
+ *
+ * NAO manda as trinta. O objeto desta lente e a RELACAO entre as telas -- se um
+ * rotulo descreve o que abre, se a hierarquia e a mesma de tela para tela --, e
+ * isso se ve comparando os cinco alvos lado a lado numa mesma largura e num
+ * mesmo tema. Trinta imagens misturando larguras e temas gastariam cota para
+ * dificultar exatamente a comparacao que interessa.
+ *
+ * Largura e tema viram parametro em vez de constante porque a pergunta muda com
+ * eles: 390 mostra o aperto, 1024 mostra a distribuicao do espaco.
+ */
+function selecionarCapturas(root: string, cli: Cli): string[] {
+  const dir = join(root, 'docs', 'telas', cli.tema);
+  if (!existsSync(dir)) {
+    throw new Error(
+      `Nao ha capturas em docs/telas/${cli.tema}/.\n` +
+        '  Gere com: npm run ui:capturar\n' +
+        '  Elas nao sao versionadas -- todo clone comeca sem elas.',
+    );
+  }
+  const escolhidas = readdirSync(dir)
+    .filter((f) => f.endsWith(`@${cli.largura}.png`))
+    .sort()
+    .map((f) => join(dir, f));
+
+  if (escolhidas.length === 0) {
+    throw new Error(
+      `Ha capturas em docs/telas/${cli.tema}/, mas nenhuma em ${cli.largura}dp.\n` +
+        `  Disponiveis: ${[...new Set(readdirSync(dir).map((f) => f.replace(/^.*@/, '').replace('.png', '')))].join(', ')}dp`,
+    );
+  }
+  return escolhidas;
 }
 
 /** Quantas vezes insistir numa falha classificada como transitoria. */
