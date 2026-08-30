@@ -32,7 +32,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { qaJsonSchema } from '../schema.ts';
+import { QA_RESPONSE_SCHEMA, toJsonSchema } from '../schema.ts';
 import {
   ProviderError,
   type ProviderRequest,
@@ -135,7 +135,10 @@ export class AgyProvider implements QaProvider {
     const model = request.model ?? AGY_DEFAULT_MODEL;
     const dir = mkdtempSync(join(tmpdir(), 'equisim-agy-'));
     const schemaPath = join(dir, 'schema.json');
-    writeFileSync(schemaPath, JSON.stringify(qaJsonSchema(), null, 2), 'utf8');
+    // `--json-schema` exige JSON Schema padrao, nao o formato do SDK: a
+    // conversao trata o enum `Type`, que serializa em MAIUSCULAS.
+    const schema = toJsonSchema(request.schema ?? QA_RESPONSE_SCHEMA);
+    writeFileSync(schemaPath, JSON.stringify(schema, null, 2), 'utf8');
 
     // `agy` nao tem canal separado de instrucao de sistema: tudo vai numa unica
     // mensagem de usuario.
@@ -169,6 +172,13 @@ export class AgyProvider implements QaProvider {
         '--model',
         model,
         '--sandbox',
+        // Sem isto vale o padrao da CLI, de 5 minutos -- e o teto local abaixo
+        // nunca chega a disparar, porque o processo ja foi morto. Passa a ser o
+        // MESMO valor, para que exista um teto so e ele seja o nosso. Sem esse
+        // alinhamento, um alvo grande em `-high` morre num limite que ninguem
+        // escolheu, com mensagem de timeout generica.
+        '--print-timeout',
+        `${Math.round(this.timeoutMs / 1000)}s`,
         // Precisa ser `-p=` colado: solto, o CLI toma a proxima flag como prompt.
         '-p=',
       ];

@@ -10,7 +10,7 @@ import type { AuditTarget } from './collect.ts';
  * Contexto de arquitetura. Sem isto o modelo sugere `decimal.js` / `BigDecimal`
  * em todo achado monetario, o que e inaplicavel neste repositorio.
  */
-const PROJECT_CONTEXT = `
+export const PROJECT_CONTEXT = `
 ## Contexto do projeto auditado
 
 Equisim -- simulador de valuation (DCF/CAPM), backtest de carteira e metricas de
@@ -116,8 +116,14 @@ para INFO ou omita. Nao acuse um arquivo de nao usar um token que o repositorio
 ainda nao tem.
 
 DISCIPLINA ANTI-FALSO-POSITIVO (obrigatoria):
-  - Se voce nao consegue COPIAR o trecho literal do material auditado para o
-    campo "evidence", o achado NAO EXISTE. Nao o reporte.
+  - "evidence" precisa estar ANCORADO no material que voce recebeu, e a forma
+    da ancora depende do que chegou:
+      * material em CODIGO (diff ou arquivo) -- o trecho literal, COPIADO. Se
+        voce nao consegue copia-lo, o achado NAO EXISTE. Nao o reporte.
+      * material em IMAGEM (captura de tela) -- a descricao do que esta
+        VISIVEL e ONDE. Nao ha trecho a copiar, e exigir um aqui eliminaria
+        todo achado visual; a ancora e a localizacao na tela.
+    Sem ancora de um dos dois tipos, o achado NAO EXISTE.
   - Se voce nao consegue escrever "failure_scenario" com NUMEROS CONCRETOS
     (entrada -> saida errada), rebaixe para INFO ou descarte.
   - Um diff pode estar correto. "findings: []" com "status: PASS" e uma
@@ -438,6 +444,8 @@ de codigo, sem texto fora do JSON.
   e "c". Linhas com prefixo "-" nao existem no arquivo novo e nao contam.
 - "file" deve ser o caminho relativo a raiz, exatamente como aparece no
   cabecalho "+++ b/..." do diff ou no marcador "===== ARQUIVO: ... =====".
+  Em achado vindo de CAPTURA DE TELA nao ha caminho de codigo: use o nome do
+  arquivo de imagem, e "line" = 0.
 - Escreva todos os campos de texto em portugues do Brasil.
 - Ordene "findings" por severidade: todos os FAIL primeiro, depois WARN, depois
   INFO.

@@ -11,8 +11,24 @@
  */
 import { createInterface } from 'node:readline';
 
-import type { AuditTarget } from './collect.ts';
 import { latestChoices, listAgyModels, type ModelChoice } from './models.ts';
+
+/**
+ * O minimo que a escolha de modelo precisa saber do alvo.
+ *
+ * Era `AuditTarget`, o que amarrava a escolha ao auditor sem necessidade: as
+ * unicas coisas lidas aqui sao o tamanho do payload e o rotulo. Estruturalmente
+ * o alvo do conselheiro tambem satisfaz isto, e a pergunta "Flash ou Pro?" e a
+ * mesma para os dois agentes.
+ */
+export interface AlvoMensuravel {
+  /** Descricao legivel da origem, exibida na pergunta. */
+  label: string;
+  /** Texto que sera enviado; so o tamanho e consultado. */
+  payload: string;
+  /** Blocos incluidos; so a contagem e consultada. */
+  files: string[];
+}
 
 /**
  * Estimativa de tokens de entrada, calibrada com medicao real deste repositorio.
@@ -40,7 +56,7 @@ function estimateTokens(chars: number): number {
   return Math.round(chars / CHARS_PER_TOKEN);
 }
 
-function describeTarget(target: AuditTarget): string {
+function describeTarget(target: AlvoMensuravel): string {
   const material = estimateTokens(target.payload.length);
   const total = material + FIXED_OVERHEAD_TOKENS;
   const k = (n: number): string => `${Math.round(n / 1000)}k`;
@@ -65,7 +81,7 @@ export interface ChooseOptions {
  * o padrao dele.
  */
 export async function chooseModel(
-  target: AuditTarget,
+  target: AlvoMensuravel,
   opts: ChooseOptions,
 ): Promise<string | undefined> {
   if (opts.explicitModel) return opts.explicitModel;

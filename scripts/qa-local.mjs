@@ -18,7 +18,7 @@
  * Saida: 0 = liberado, 1 = bloqueado.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 
 const SKIP_FILE = '.qa-skip';
 
@@ -356,6 +356,164 @@ function stagedFiles() {
     .filter((l) => l !== '');
 }
 
+// ---------------------------------------------------------------------------
+// Integridade do registro de decisoes
+// ---------------------------------------------------------------------------
+
+/**
+ * Verificacoes de referencia quebrada em `docs/decisoes/`.
+ *
+ * SO REFERENCIA QUEBRADA BLOQUEIA. Defasagem -- decisao que o codigo deixou de
+ * respeitar, promessa nao cumprida, medicao vencida -- NAO entra aqui, e a
+ * distincao e deliberada: um gate que trava o push porque um documento
+ * envelheceu e um gate arrancado na primeira semana. Defasagem e semantica e
+ * cabe a lente `registro` do conselheiro, que aconselha e nao bloqueia.
+ *
+ * O escopo tambem e estreito de proposito: so decisao citando decisao, dentro
+ * de `docs/decisoes/`. Conferir citacao em prosa pelo repositorio inteiro
+ * bloquearia o parecer historico, que cita numeros cuja extracao ainda nao
+ * aconteceu -- exatamente o falso positivo que o criterio de admissao deste
+ * arquivo proibe.
+ */
+const DECISOES_DIR = 'docs/decisoes/';
+
+/** Le a versao EM STAGING do arquivo, nao a do disco. */
+function conteudoEmStaging(file) {
+  try {
+    return git(['show', `:${file}`]);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Extrator de lista do frontmatter, por leitura linha a linha.
+ *
+ * Foi regex antes, e a regex errava justamente no caso mais comum: a lista que
+ * fecha o bloco. O terminador exigia uma linha seguinte que nao existe no fim,
+ * entao o ultimo campo passava sem ser conferido -- um gate que so verifica os
+ * campos do meio e pior que nenhum, porque da confianca falsa.
+ */
+function listaDe(bloco) {
+  const linhas = bloco.split(/\r?\n/);
+  return (chave) => {
+    const out = [];
+    let dentro = false;
+    for (const linha of linhas) {
+      if (new RegExp(`^${chave}:\\s*$`).test(linha)) {
+        dentro = true;
+        continue;
+      }
+      if (dentro) {
+        const item = /^\s+-\s+(.+?)\s*$/.exec(linha);
+        if (item) {
+          out.push(item[1]);
+          continue;
+        }
+        // Qualquer coisa que nao seja item encerra a lista.
+        dentro = false;
+      }
+    }
+    return out;
+  };
+}
+
+/** Numeros de decisao que ja tem arquivo, vindos do disco e do staging. */
+function decisoesConhecidas(staged) {
+  const numeros = new Set();
+  const registrar = (nome) => {
+    const m = /(?:^|\/)(\d{3})-[^/]*\.md$/.exec(nome);
+    if (m) numeros.add(Number.parseInt(m[1], 10));
+  };
+  if (existsSync(DECISOES_DIR)) {
+    for (const f of readdirSync(DECISOES_DIR)) registrar(f);
+  }
+  for (const f of staged) registrar(f);
+  return numeros;
+}
+
+function verificarRegistro(staged) {
+  const alvos = staged.filter(
+    (f) => f.startsWith(DECISOES_DIR) && f.endsWith('.md') && !f.endsWith('README.md'),
+  );
+  if (alvos.length === 0) return [];
+
+  const conhecidas = decisoesConhecidas(staged);
+  const findings = [];
+
+  for (const file of alvos) {
+    const texto = conteudoEmStaging(file);
+    if (texto === null) continue;
+    const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(texto);
+    if (!fm) {
+      findings.push({
+        id: 'L12',
+        category: 'DECISION_MALFORMED',
+        file,
+        line: 0,
+        title: 'Decisao sem frontmatter',
+        evidence: texto.split(/\r?\n/)[0] ?? '(vazio)',
+        explain:
+          'Toda decisao abre com bloco `---` contendo numero, titulo, status,\n' +
+          '  origem, data e afeta. Sem ele a decisao nao e enderecavel, que e a\n' +
+          '  unica coisa que este registro existe para garantir. Ver\n' +
+          '  docs/decisoes/README.md.',
+      });
+      continue;
+    }
+    const bloco = fm[1];
+    const itens = listaDe(bloco);
+
+    // (a) `afeta` apontando para caminho que nao existe.
+    {
+      for (const bruto of itens('afeta')) {
+        const caminho = bruto.replace(/^["']|["']$/g, '');
+        if (!existsSync(caminho)) {
+          findings.push({
+            id: 'L13',
+            category: 'DECISION_BROKEN_PATH',
+            file,
+            line: 0,
+            title: `Decisao governa caminho inexistente: ${caminho}`,
+            evidence: bruto,
+            explain:
+              'O campo `afeta` lista os caminhos que a decisao governa, e este\n' +
+              '  nao existe no repositorio. Ou o caminho esta errado, ou a decisao\n' +
+              '  perdeu objeto e precisa ser revogada explicitamente.',
+          });
+        }
+      }
+    }
+
+    // (b) `status: substituida-por-NNN` e `substitui:` apontando para o vazio.
+    const citados = new Set();
+    const sub = /^status:\s*substituida-por-(\d+)/m.exec(bloco);
+    if (sub) citados.add(Number.parseInt(sub[1], 10));
+    for (const bruto of itens('substitui')) {
+      const n = /^(\d+)/.exec(bruto);
+      if (n) citados.add(Number.parseInt(n[1], 10));
+    }
+    for (const numero of citados) {
+      if (!conhecidas.has(numero)) {
+        findings.push({
+          id: 'L14',
+          category: 'DECISION_DANGLING_REF',
+          file,
+          line: 0,
+          title: `Referencia a decisao inexistente: no ${numero}`,
+          evidence: `decisao no ${numero}`,
+          explain:
+            `Nao ha docs/decisoes/${String(numero).padStart(3, '0')}-*.md. Uma\n` +
+            '  decisao que substitui ou revoga outra precisa que a outra exista --\n' +
+            '  senao a cadeia de substituicao fica sem inicio e ninguem consegue\n' +
+            '  reconstruir por que o rumo mudou.',
+        });
+      }
+    }
+  }
+  return findings;
+}
+
 function main() {
   // Escape hatch: o GitHub Desktop nao expoe --no-verify na interface, entao a
   // valvula precisa existir no sistema de arquivos.
@@ -368,8 +526,9 @@ function main() {
   }
 
   const findings = [];
+  const staged = stagedFiles();
 
-  for (const file of stagedFiles()) {
+  for (const file of staged) {
     const base = file.split('/').pop() ?? file;
     for (const { pattern, exempt, why } of FORBIDDEN_FILES) {
       if (exempt?.test(base)) continue;
@@ -389,6 +548,8 @@ function main() {
       }
     }
   }
+
+  findings.push(...verificarRegistro(staged));
 
   // `requiresTokens` e constante durante a execucao: filtrar uma vez, fora do
   // laco por linha, evita reavaliar a condicao milhares de vezes num diff

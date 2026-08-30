@@ -131,7 +131,7 @@ export class ApiProvider implements QaProvider {
           systemInstruction: request.system,
           temperature: TEMPERATURE,
           responseMimeType: 'application/json',
-          responseSchema: QA_RESPONSE_SCHEMA,
+          responseSchema: request.schema ?? QA_RESPONSE_SCHEMA,
           thinkingConfig: { thinkingBudget: this.thinkingBudget },
           abortSignal: controller.signal,
         },

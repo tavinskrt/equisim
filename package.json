@@ -16,6 +16,9 @@
     "qa:api": "tsx scripts/gemini-qa.ts --diff --backend api",
     "qa:dry": "tsx scripts/gemini-qa.ts --diff --dry-run",
     "qa:help": "tsx scripts/gemini-qa.ts --help",
+    "conselho": "tsx scripts/advisor.ts",
+    "conselho:dry": "tsx scripts/advisor.ts --dry-run",
+    "estado": "node scripts/gerar-estado.mjs",
     "typecheck": "tsc --noEmit"
   },
   "scriptsComments": {
@@ -27,6 +30,9 @@
     "qa:visual": "Auditoria visual multimodal. Exige argumento apos --. Ex.: npm run qa:visual -- docs/telas/backtest-320.png",
     "qa:api": "Mesma auditoria pela API key. Schema forcado pelo servidor e temperature 0, portanto o mais reproduzivel -- mas 20 requisicoes/dia no tier gratuito.",
     "qa:dry": "Monta o payload e imprime sem chamar o modelo. Custo zero -- use para conferir o que seria enviado.",
+    "conselho": "CONSELHEIRO -- o segundo agente. Le o projeto por lente e propoe; nao bloqueia nada e sai SEMPRE com codigo 0. Exige --lente. Ex.: npm run conselho -- --lente registro. Sem argumento, lista as lentes.",
+    "conselho:dry": "Monta o payload de uma lente e imprime, sem chamar o modelo. Ex.: npm run conselho:dry -- --lente nucleo",
+    "estado": "Regenera docs/estado.md a partir do repositorio. O arquivo e DERIVADO: nao edite a mao -- se um numero sair errado, o conserto e em scripts/gerar-estado.mjs.",
     "typecheck": "Verificacao estatica dos scripts de QA. Nao toca no codigo Dart."
   },
   "devDependencies": {

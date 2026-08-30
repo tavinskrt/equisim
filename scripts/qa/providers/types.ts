@@ -15,6 +15,8 @@
  * O runner nao sabe qual esta em uso: recebe texto JSON e valida.
  */
 
+import type { Schema } from '@google/genai';
+
 import type { ScreenshotPart } from '../screenshot.ts';
 
 /** Tudo o que um backend precisa para executar uma auditoria. */
@@ -32,6 +34,17 @@ export interface ProviderRequest {
    * So o backend `api` consegue transmitir imagem.
    */
   screenshots?: ScreenshotPart[];
+  /**
+   * Contrato de saida a exigir do modelo. Omitido, vale `QA_RESPONSE_SCHEMA`
+   * -- o do auditor.
+   *
+   * Existe porque o schema estava soldado ao transporte: os dois backends
+   * importavam o do auditor diretamente, e nenhum outro agente cabia sem
+   * duplicar o provider. O tipo aqui e o do SDK (`Schema`), nao JSON Schema
+   * padrao: e `api` que o consome direto, enquanto `agy` converte com
+   * `toJsonSchema` na hora de gravar o arquivo do `--json-schema`.
+   */
+  schema?: Schema;
 }
 
 /**

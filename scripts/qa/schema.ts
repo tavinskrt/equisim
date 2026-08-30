@@ -321,8 +321,3 @@ export function toJsonSchema(schema: Schema): Record<string, unknown> {
   }
   return out;
 }
-
-/** O contrato de saida em JSON Schema padrao, pronto para `agy --json-schema`. */
-export function qaJsonSchema(): Record<string, unknown> {
-  return toJsonSchema(QA_RESPONSE_SCHEMA);
-}

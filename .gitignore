@@ -143,3 +143,7 @@ docs/validacao/*.sqlite
 
 # Fila de auditorias adiadas por cota (nunca versionar)
 .qa-pending/
+
+# Respostas cruas do conselheiro. Auditavel localmente, nao versionado:
+# muda a cada execucao e nao e registro, e insumo para virar registro.
+.conselho/

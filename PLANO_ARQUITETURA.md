@@ -2,7 +2,41 @@
 ### Auditoria de stack, viabilidade de dados e proposta de arquitetura para o TCC
 
 **Data:** 19/08/2026 · **Base:** commit `99343e5` · Flutter 3.44.8 / Dart 3.12.2
-**Documento anterior:** [`RELATORIO_ANALISE.md`](RELATORIO_ANALISE.md) (auditoria de defeitos)
+**Documento anterior:** `RELATORIO_ANALISE.md` (auditoria de defeitos) — *não está mais no repositório*
+
+---
+
+> ## ⏸ DOCUMENTO CONGELADO
+>
+> **Este parecer não é mais mantido.** Ele é o registro do que se concluiu em
+> **agosto de 2026**, e envelhece a partir daí — de propósito. Um documento
+> datado que se sabe datado engana menos que um documento vivo que ninguém
+> atualiza. Ver [decisão 19](docs/decisoes/019-registro-por-arquivo.md).
+>
+> **Onde procurar o que vale hoje:**
+>
+> | O que você quer | Onde está |
+> |---|---|
+> | Decisões **0 a 18** | Aqui mesmo — tabelas na §0 (linha 7) e na §7 (linha ~1264). Continuam válidas. |
+> | Decisões **19 em diante** | [`docs/decisoes/`](docs/decisoes/), uma por arquivo |
+> | O que está feito e o que não está | [`docs/estado.md`](docs/estado.md) — **gerado**, nunca escrito à mão |
+> | Apontamento de orientador ou de dev | [`docs/apontamentos/`](docs/apontamentos/) |
+>
+> **O que sabidamente envelheceu neste texto:**
+>
+> - O roadmap da §6 marca as Fases 0 a 5 como concluídas em 19–20/08/2026. Nove
+>   commits posteriores — as Ondas 1 a 4 de refatoração da UI — não têm lugar
+>   nele. Ver [decisão 21](docs/decisoes/021-ondas-de-refatoracao-da-ui.md).
+> - A cadeia de QA por agente e o barramento `lib/audit/` não existiam quando
+>   isto foi escrito. Ver [decisão 20](docs/decisoes/020-cadeia-de-qa-por-agente.md).
+> - As medições da §1 e o estudo de qualidade de dados da §0.4 têm data. Confira
+>   a data antes de usar o número.
+>
+> **Não edite este arquivo para corrigi-lo.** Se uma decisão daqui deixou de
+> valer, escreva uma nova em `docs/decisoes/` que a substitua — é assim que a
+> mudança de rumo fica rastreável em vez de sumir num `git diff` de markdown.
+
+---
 
 > ### ✅ DECISÕES CONSOLIDADAS (19/08/2026)
 >
