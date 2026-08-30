@@ -19,6 +19,7 @@
     "conselho": "tsx scripts/advisor.ts",
     "conselho:dry": "tsx scripts/advisor.ts --dry-run",
     "estado": "node scripts/gerar-estado.mjs",
+    "ui:capturar": "flutter test test/presentation/golden_capture_test.dart --update-goldens",
     "typecheck": "tsc --noEmit"
   },
   "scriptsComments": {
@@ -33,6 +34,7 @@
     "conselho": "CONSELHEIRO -- o segundo agente. Le o projeto por lente e propoe; nao bloqueia nada e sai SEMPRE com codigo 0. Exige --lente. Ex.: npm run conselho -- --lente registro. Sem argumento, lista as lentes.",
     "conselho:dry": "Monta o payload de uma lente e imprime, sem chamar o modelo. Ex.: npm run conselho:dry -- --lente nucleo",
     "estado": "Regenera docs/estado.md a partir do repositorio. O arquivo e DERIVADO: nao edite a mao -- se um numero sair errado, o conserto e em scripts/gerar-estado.mjs.",
+    "ui:capturar": "Gera as 30 capturas em docs/telas/ (5 telas x 3 larguras x 2 temas) para a lente `tela`. NAO e teste de regressao visual: nada aqui reprova, o objetivo e produzir as imagens. Carrega Roboto e MaterialIcons do SDK -- sem elas o texto sai em caixas e a analise fica enganosa.",
     "typecheck": "Verificacao estatica dos scripts de QA. Nao toca no codigo Dart."
   },
   "devDependencies": {

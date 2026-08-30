@@ -147,3 +147,9 @@ docs/validacao/*.sqlite
 # Respostas cruas do conselheiro. Auditavel localmente, nao versionado:
 # muda a cada execucao e nao e registro, e insumo para virar registro.
 .conselho/
+
+# Capturas de tela para a lente `tela` do conselheiro. Regeneradas a cada
+# execucao de `npm run ui:capturar` -- binario que muda sempre nao pertence
+# ao historico. Marcos que valem arquivar vao para docs/telas/marcos/.
+docs/telas/
+!docs/telas/marcos/
