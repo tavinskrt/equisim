@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
+import '../presentation/theme/fin_theme.dart';
 import '../utils/app_colors.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/profile_controller.dart';
@@ -88,10 +89,10 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
           child: AlertDialog(
-            backgroundColor: isLight ? Colors.white : const Color(0xFF0D1E3A),
+            backgroundColor: context.fin.surfaceRaised,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(color: isLight ? AppColors.surfaceBorder(true) : Colors.white10),
+              side: BorderSide(color: context.fin.border),
             ),
             title: Text(
               'Excluir Conta',
@@ -106,7 +107,7 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                 onPressed: () => Navigator.pop(context),
                 child: Text(
                   'Cancelar',
-                  style: TextStyle(color: isLight ? AppColors.textSecondary(true) : Colors.white38),
+                  style: TextStyle(color: context.fin.textTertiary),
                 ),
               ),
               ElevatedButton(
@@ -142,7 +143,7 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                   backgroundColor: AppColors.danger,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
-                child: const Text('Excluir', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text('Excluir', style: TextStyle(color: context.fin.textOnBrand, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -230,10 +231,10 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                               height: 34,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isLight ? Colors.black.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.06),
-                                border: Border.all(color: isLight ? Colors.black.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.1)),
+                                color: context.fin.surfaceSunken,
+                                border: Border.all(color: context.fin.border),
                               ),
-                              child: Icon(Icons.arrow_back_ios_new, color: isLight ? AppColors.textPrimary(true) : Colors.white60, size: 14),
+                              child: Icon(Icons.arrow_back_ios_new, color: context.fin.textSecondary, size: 14),
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -283,13 +284,13 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     gradient: isLight
-                                        ? const LinearGradient(
-                                            colors: [Color(0xFFE6F7F3), Color(0xFFC2F0E5)],
+                                        ? LinearGradient(
+                                            colors: [context.fin.brandSurface, context.fin.positiveSurface],
                                             begin: Alignment.topLeft,
                                             end: Alignment.bottomRight,
                                           )
-                                        : const LinearGradient(
-                                            colors: [Color(0xFF0B3D6B), Color(0xFF0D3D2F)],
+                                        : LinearGradient(
+                                            colors: [context.fin.reservaSurface, context.fin.brandSurface],
                                             begin: Alignment.topLeft,
                                             end: Alignment.bottomRight,
                                           ),
@@ -299,7 +300,7 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: isLight ? const Color(0xFF0B1E4B).withValues(alpha: 0.08) : Colors.black38,
+                                        color: context.fin.shadow,
                                         blurRadius: 20,
                                         offset: const Offset(0, 8),
                                       ),
@@ -311,7 +312,7 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                                       style: TextStyle(
                                         fontSize: 28,
                                         fontWeight: FontWeight.w800,
-                                        color: isLight ? AppColors.primary : const Color(0xFF00CC8F),
+                                        color: context.fin.positive,
                                         letterSpacing: -1,
                                       ),
                                     ),
@@ -345,7 +346,7 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                                           ),
                                         ],
                                       ),
-                                      child: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 12),
+                                      child: Icon(Icons.camera_alt_outlined, color: context.fin.textOnBrand, size: 12),
                                     ),
                                   ),
                                 ),
@@ -385,7 +386,7 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                                     height: 6,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: isLight ? AppColors.primary : const Color(0xFF00CC8F),
+                                      color: context.fin.positive,
                                     ),
                                   ),
                                   const SizedBox(width: 6),
@@ -394,7 +395,7 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
-                                      color: isLight ? AppColors.primary : const Color(0xFF00CC8F),
+                                      color: context.fin.positive,
                                     ),
                                   ),
                                 ],
@@ -413,7 +414,7 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                             boxShadow: isLight
                                 ? [
                                     BoxShadow(
-                                      color: const Color(0xFF0B1E4B).withValues(alpha: 0.04),
+                                      color: context.fin.surfaceSunken,
                                       blurRadius: 10,
                                       offset: const Offset(0, 2),
                                     )
@@ -637,14 +638,14 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                                 ),
                               ),
                               child: controller.isLoading
-                                  ? const SizedBox(
+                                  ? SizedBox(
                                       width: 20,
                                       height: 20,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                      child: CircularProgressIndicator(color: context.fin.textOnBrand, strokeWidth: 2),
                                     )
-                                  : const Text(
+                                  : Text(
                                       'Salvar alterações',
-                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: context.fin.textOnBrand),
                                     ),
                             ),
                           ),
@@ -662,11 +663,11 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.check_circle_outline, color: isLight ? AppColors.primary : const Color(0xFF00CC8F), size: 16),
+                                Icon(Icons.check_circle_outline, color: context.fin.positive, size: 16),
                                 const SizedBox(width: 10),
                                 Text(
                                   'Informações salvas com sucesso!',
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: isLight ? AppColors.primary : const Color(0xFF00CC8F)),
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: context.fin.positive),
                                 ),
                               ],
                             ),
@@ -683,7 +684,7 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                             boxShadow: isLight
                                 ? [
                                     BoxShadow(
-                                      color: const Color(0xFF0B1E4B).withValues(alpha: 0.04),
+                                      color: context.fin.surfaceSunken,
                                       blurRadius: 10,
                                       offset: const Offset(0, 2),
                                     )
@@ -775,7 +776,7 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                             boxShadow: isLight
                                 ? [
                                     BoxShadow(
-                                      color: const Color(0xFF0B1E4B).withValues(alpha: 0.04),
+                                      color: context.fin.surfaceSunken,
                                       blurRadius: 10,
                                       offset: const Offset(0, 2),
                                     )
@@ -847,10 +848,10 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                                       height: 8,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: isLight ? AppColors.primary : const Color(0xFF00CC8F),
+                                        color: context.fin.positive,
                                         boxShadow: [
                                           BoxShadow(
-                                            color: isLight ? AppColors.primary : const Color(0xFF00CC8F),
+                                            color: context.fin.positive,
                                             blurRadius: 6,
                                           )
                                         ],
@@ -869,8 +870,8 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                           onPressed: () => _confirmDeleteAccount(context, controller),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            side: const BorderSide(color: Color(0x2EEF4444)),
-                            backgroundColor: const Color(0x0FEF4444),
+                            side: BorderSide(color: context.fin.negative.withValues(alpha: 0.18)),
+                            backgroundColor: context.fin.negative.withValues(alpha: 0.06),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),

@@ -311,7 +311,7 @@ Future<void> showSavedStudies(BuildContext context, {required bool isLight}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: isLight ? Colors.white : const Color(0xFF13224E),
+    backgroundColor: context.fin.surfaceRaised,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
     ),
@@ -797,7 +797,7 @@ class _AssetRow extends ConsumerWidget {
             width: 220,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isLight ? Colors.white : const Color(0xFF13224E),
+              color: context.fin.surfaceRaised,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.primary),
             ),

@@ -3,12 +3,15 @@ import 'dart:math' as math;
 
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
+
+import 'console_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 
 import '../../audit/audit_bus.dart';
 import '../../audit/audit_export_stub.dart'
-    if (dart.library.js_interop) '../../audit/audit_export_web.dart' as export_impl;
+    if (dart.library.js_interop) '../../audit/audit_export_web.dart'
+    as export_impl;
 
 /// Aplicação mínima da janela paralela de auditoria.
 ///
@@ -106,24 +109,25 @@ class _LogsPageState extends State<LogsPage> {
   }
 
   bool _matchesFilter(AuditEvent event) => switch (_filter) {
-        _Filter.todos => true,
-        // A separação é estrutural, não um rótulo à parte: evento sem fórmula
-        // decomposta é ida à rede; com fórmula, é cálculo do núcleo.
-        _Filter.calculos => event.calculations.isNotEmpty,
-        _Filter.rede => event.calculations.isEmpty,
-      };
+    _Filter.todos => true,
+    // A separação é estrutural, não um rótulo à parte: evento sem fórmula
+    // decomposta é ida à rede; com fórmula, é cálculo do núcleo.
+    _Filter.calculos => event.calculations.isNotEmpty,
+    _Filter.rede => event.calculations.isEmpty,
+  };
 
   bool _matchesQuery(AuditEvent event, String query) {
     if (query.isEmpty) return true;
     if (event.endpoint.toLowerCase().contains(query)) return true;
     if (event.transactionId.toLowerCase().contains(query)) return true;
-    return event.calculations
-        .any((c) => c.formulaName.toLowerCase().contains(query));
+    return event.calculations.any(
+      (c) => c.formulaName.toLowerCase().contains(query),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = _ConsoleTheme(_dark);
+    final theme = ConsoleTheme(_dark);
     final events = _visible;
 
     return Scaffold(
@@ -194,8 +198,10 @@ class _LogsPageState extends State<LogsPage> {
       'documento': 'Auditoria de cálculos',
       'exportadoEm': DateTime.now().toIso8601String(),
       'totalDeEventos': events.length,
-      'totalDeCalculos':
-          events.fold<int>(0, (sum, e) => sum + e.calculations.length),
+      'totalDeCalculos': events.fold<int>(
+        0,
+        (sum, e) => sum + e.calculations.length,
+      ),
       'filtroAplicado': _filter.name,
       'eventos': [for (final e in events) e.toJson()],
     });
@@ -205,8 +211,10 @@ class _LogsPageState extends State<LogsPage> {
         .replaceAll(':', '-')
         .split('.')
         .first;
-    final saved =
-        export_impl.downloadJson('equisim-auditoria-$stamp.json', document);
+    final saved = export_impl.downloadJson(
+      'equisim-auditoria-$stamp.json',
+      document,
+    );
 
     if (!saved) {
       // Fora do navegador não há download; a área de transferência entrega o
@@ -214,13 +222,17 @@ class _LogsPageState extends State<LogsPage> {
       Clipboard.setData(ClipboardData(text: document));
     }
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(saved
-          ? 'Auditoria exportada: ${events.length} eventos.'
-          : 'Auditoria copiada para a área de transferência '
-              '(${events.length} eventos).'),
-      behavior: SnackBarBehavior.floating,
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          saved
+              ? 'Auditoria exportada: ${events.length} eventos.'
+              : 'Auditoria copiada para a área de transferência '
+                    '(${events.length} eventos).',
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 }
 
@@ -245,7 +257,7 @@ class _Header extends StatelessWidget {
     required this.onReconnect,
   });
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final AuditBus bus;
   final int total;
   final int showing;
@@ -337,7 +349,9 @@ class _Header extends StatelessWidget {
               _ConsoleButton(
                 theme: theme,
                 icon: autoScroll ? Icons.pause : Icons.play_arrow,
-                label: autoScroll ? 'Pausar Auto-scroll' : 'Retomar Auto-scroll',
+                label: autoScroll
+                    ? 'Pausar Auto-scroll'
+                    : 'Retomar Auto-scroll',
                 active: !autoScroll,
                 onTap: onToggleAutoScroll,
               ),
@@ -356,7 +370,9 @@ class _Header extends StatelessWidget {
                 ),
               _ConsoleButton(
                 theme: theme,
-                icon: dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                icon: dark
+                    ? Icons.light_mode_outlined
+                    : Icons.dark_mode_outlined,
                 label: dark ? 'Modo claro' : 'Modo escuro',
                 onTap: onToggleTheme,
               ),
@@ -386,8 +402,10 @@ class _Header extends StatelessWidget {
                     hintText: 'Filtrar por ativo ou fórmula…',
                     hintStyle: TextStyle(color: theme.dim, fontSize: 12),
                     prefixIcon: Icon(Icons.search, size: 16, color: theme.dim),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(color: theme.border),
@@ -414,7 +432,7 @@ class _Header extends StatelessWidget {
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.theme, required this.bus});
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final AuditBus bus;
 
   @override
@@ -445,10 +463,10 @@ class _EmptyState extends StatelessWidget {
               Text(
                 bus.crossWindow
                     ? 'Volte à janela principal e abra um ativo, a meta ou o '
-                        'backtest. Cada requisição à API e cada fórmula '
-                        'avaliada aparece aqui no instante em que acontece.'
+                          'backtest. Cada requisição à API e cada fórmula '
+                          'avaliada aparece aqui no instante em que acontece.'
                     : 'Use a aplicação normalmente: as execuções aparecem aqui '
-                        'assim que ocorrerem.',
+                          'assim que ocorrerem.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: theme.dim, fontSize: 13, height: 1.5),
               ),
@@ -472,7 +490,7 @@ class _EventCard extends StatelessWidget {
 
   final AuditEvent event;
   final int ordinal;
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
 
   bool get _isNetwork => event.calculations.isEmpty;
 
@@ -480,8 +498,9 @@ class _EventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final status = event.outputPayload['status'];
     final failed = status == 'falha';
-    final accent =
-        failed ? theme.danger : (_isNetwork ? theme.network : theme.accent);
+    final accent = failed
+        ? theme.danger
+        : (_isNetwork ? theme.network : theme.accent);
 
     // Material, e não um contêiner decorado: o `ExpansionTile` pinta fundo e
     // tinta de toque no Material mais próximo, e uma caixa colorida entre os
@@ -522,7 +541,7 @@ class _EventCard extends StatelessWidget {
               subtitle: _isNetwork
                   ? 'Payload bruto trocado com a fonte de dados.'
                   : 'Insumos resolvidos que entraram no motor e o resultado '
-                      'que saiu dele.',
+                        'que saiu dele.',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -651,7 +670,7 @@ class _Section extends StatelessWidget {
     required this.child,
   });
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final String letter;
   final String title;
   final String subtitle;
@@ -714,7 +733,7 @@ class _FormulaBlock extends StatelessWidget {
     required this.trace,
   });
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final int ordinal;
   final CalculationTrace trace;
 
@@ -792,7 +811,7 @@ class _SubstitutionBlock extends StatelessWidget {
     required this.trace,
   });
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final int ordinal;
   final CalculationTrace trace;
 
@@ -832,9 +851,7 @@ class _SubstitutionBlock extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  for (var i = 0;
-                      i < trace.mappedVariables.length;
-                      i++)
+                  for (var i = 0; i < trace.mappedVariables.length; i++)
                     _variableRow(
                       trace.mappedVariables.keys.elementAt(i),
                       trace.mappedVariables.values.elementAt(i),
@@ -869,7 +886,8 @@ class _SubstitutionBlock extends StatelessWidget {
                     Expanded(
                       child: SelectableText(
                         step,
-                        style: theme.mono(color: theme.text, size: 11.5)
+                        style: theme
+                            .mono(color: theme.text, size: 11.5)
                             .copyWith(height: 1.55),
                       ),
                     ),
@@ -898,22 +916,20 @@ class _SubstitutionBlock extends StatelessWidget {
   }
 
   Widget _label(String text) => Text(
-        text.toUpperCase(),
-        style: TextStyle(
-          color: theme.dim,
-          fontSize: 9.5,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.6,
-        ),
-      );
+    text.toUpperCase(),
+    style: TextStyle(
+      color: theme.dim,
+      fontSize: 9.5,
+      fontWeight: FontWeight.bold,
+      letterSpacing: 0.6,
+    ),
+  );
 
   Widget _variableRow(String symbol, Object? value, {required bool last}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
-        border: last
-            ? null
-            : Border(bottom: BorderSide(color: theme.border)),
+        border: last ? null : Border(bottom: BorderSide(color: theme.border)),
       ),
       child: Row(
         children: [
@@ -954,10 +970,15 @@ class _SubstitutionBlock extends StatelessWidget {
 ///
 /// O gráfico não recalcula nada: a mediana, a banda e a marcação do exercício
 /// central vêm prontas do núcleo, do mesmo objeto que produziu o resultado.
+/// Gráfico de amostra do console.
+///
+/// Envolvido em `RepaintBoundary` no próprio `build`: ele vive dentro de uma
+/// lista longa e rolável, e sem a fronteira o `CustomPaint` recompõe os pixels
+/// a cada quadro de rolagem.
 class _SampleChart extends StatelessWidget {
   const _SampleChart({required this.theme, required this.sample});
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final TraceSample sample;
 
   bool get _winsorized {
@@ -969,35 +990,37 @@ class _SampleChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _caption(sample.title.isEmpty ? 'Amostra' : sample.title),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.fromLTRB(10, 14, 12, 8),
-          decoration: BoxDecoration(
-            border: Border.all(color: theme.border),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(
-                height: 168,
-                child: CustomPaint(
-                  painter: _SampleChartPainter(theme: theme, sample: sample),
-                  size: Size.infinite,
+    return RepaintBoundary(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _caption(sample.title.isEmpty ? 'Amostra' : sample.title),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.fromLTRB(10, 14, 12, 8),
+            decoration: BoxDecoration(
+              border: Border.all(color: theme.border),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: 168,
+                  child: CustomPaint(
+                    painter: _SampleChartPainter(theme: theme, sample: sample),
+                    size: Size.infinite,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              _legend(),
-            ],
+                const SizedBox(height: 12),
+                _legend(),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        _table(),
-      ],
+          const SizedBox(height: 8),
+          _table(),
+        ],
+      ),
     );
   }
 
@@ -1010,34 +1033,39 @@ class _SampleChart extends StatelessWidget {
         _legendItem(theme.dim, 'demais exercícios da janela'),
         _legendItem(
           _winsorized ? theme.danger : theme.network,
-          _winsorized ? 'observado, fora da banda' : 'observado, dentro da banda',
+          _winsorized
+              ? 'observado, fora da banda'
+              : 'observado, dentro da banda',
         ),
         if (sample.lowerBound != null)
-          _legendItem(theme.accent.withValues(alpha: 0.18), 'banda de aceitação'),
+          _legendItem(
+            theme.accent.withValues(alpha: 0.18),
+            'banda de aceitação',
+          ),
       ],
     );
   }
 
   Widget _legendItem(Color color, String label) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 9,
-            height: 9,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 5),
-          // Flexível para que a legenda quebre em vez de estourar: numa janela
-          // de 320 px, "demais exercícios da janela" é mais largo que a faixa
-          // que o Wrap tem para oferecer.
-          Flexible(
-            child: Text(label, style: theme.mono(color: theme.dim, size: 10)),
-          ),
-        ],
-      );
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 9,
+        height: 9,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+      const SizedBox(width: 5),
+      // Flexível para que a legenda quebre em vez de estourar: numa janela
+      // de 320 px, "demais exercícios da janela" é mais largo que a faixa
+      // que o Wrap tem para oferecer.
+      Flexible(
+        child: Text(label, style: theme.mono(color: theme.dim, size: 10)),
+      ),
+    ],
+  );
 
   /// Os mesmos números em texto selecionável.
   ///
@@ -1098,7 +1126,12 @@ class _SampleChart extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(children: [rotulo, Expanded(child: valor)]),
+              Row(
+                children: [
+                  rotulo,
+                  Expanded(child: valor),
+                ],
+              ),
               if (tag.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(left: 64, top: 2),
@@ -1142,20 +1175,20 @@ class _SampleChart extends StatelessWidget {
   }
 
   Widget _caption(String text) => Text(
-        text.toUpperCase(),
-        style: TextStyle(
-          color: theme.dim,
-          fontSize: 9.5,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.6,
-        ),
-      );
+    text.toUpperCase(),
+    style: TextStyle(
+      color: theme.dim,
+      fontSize: 9.5,
+      fontWeight: FontWeight.bold,
+      letterSpacing: 0.6,
+    ),
+  );
 }
 
 class _SampleChartPainter extends CustomPainter {
   _SampleChartPainter({required this.theme, required this.sample});
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final TraceSample sample;
 
   /// Faixa reservada aos rótulos de ano, abaixo do eixo.
@@ -1188,13 +1221,29 @@ class _SampleChartPainter extends CustomPainter {
         Paint()..color = theme.accent.withValues(alpha: 0.12),
       );
       for (final edge in [low, high]) {
-        _dashedLine(canvas, y(edge), size.width,
-            theme.accent.withValues(alpha: 0.45));
+        _dashedLine(
+          canvas,
+          y(edge),
+          size.width,
+          theme.accent.withValues(alpha: 0.45),
+        );
       }
-      _text(canvas, _compact(high), 0, y(high) - 12,
-          theme.mono(color: theme.dim, size: 9), alignLeft: true);
-      _text(canvas, _compact(low), 0, y(low) + 2,
-          theme.mono(color: theme.dim, size: 9), alignLeft: true);
+      _text(
+        canvas,
+        _compact(high),
+        0,
+        y(high) - 12,
+        theme.mono(color: theme.dim, size: 9),
+        alignLeft: true,
+      );
+      _text(
+        canvas,
+        _compact(low),
+        0,
+        y(low) + 2,
+        theme.mono(color: theme.dim, size: 9),
+        alignLeft: true,
+      );
     }
 
     // 2. Linha do zero, quando a série cruza o eixo.
@@ -1224,8 +1273,8 @@ class _SampleChartPainter extends CustomPainter {
       final valueY = above
           ? _clipInset
           : below
-              ? plotHeight - _clipInset
-              : y(p.value);
+          ? plotHeight - _clipInset
+          : y(p.value);
       final rect = Rect.fromLTRB(
         center - barWidth / 2,
         math.min(valueY, zero),
@@ -1233,20 +1282,23 @@ class _SampleChartPainter extends CustomPainter {
         math.max(valueY, zero),
       );
 
-      final winsorized = p.isObserved &&
+      final winsorized =
+          p.isObserved &&
           sample.selected != null &&
           (p.value - sample.selected!).abs() > 1e-9;
       final color = winsorized
           ? theme.danger
           : p.isObserved
-              ? theme.network
-              : p.definesResult
-                  ? theme.accent
-                  : theme.dim;
+          ? theme.network
+          : p.definesResult
+          ? theme.accent
+          : theme.dim;
 
       canvas.drawRRect(
         RRect.fromRectAndCorners(
-          rect.height < 2 ? Rect.fromLTRB(rect.left, rect.top, rect.right, rect.top + 2) : rect,
+          rect.height < 2
+              ? Rect.fromLTRB(rect.left, rect.top, rect.right, rect.top + 2)
+              : rect,
           topLeft: const Radius.circular(2),
           topRight: const Radius.circular(2),
         ),
@@ -1267,8 +1319,14 @@ class _SampleChartPainter extends CustomPainter {
 
       // 4. Marca de corte e o valor real, quando a barra não coube.
       if (above || below) {
-        _breakMark(canvas, center, barWidth, above ? rect.top : rect.bottom,
-            above, color);
+        _breakMark(
+          canvas,
+          center,
+          barWidth,
+          above ? rect.top : rect.bottom,
+          above,
+          color,
+        );
         _text(
           canvas,
           _compact(p.value),
@@ -1291,8 +1349,13 @@ class _SampleChartPainter extends CustomPainter {
         _arrow(canvas, center, valueY, target, theme.accent);
       }
 
-      _text(canvas, p.label, center, plotHeight + 4,
-          theme.mono(color: p.definesResult ? theme.accent : theme.dim, size: 10));
+      _text(
+        canvas,
+        p.label,
+        center,
+        plotHeight + 4,
+        theme.mono(color: p.definesResult ? theme.accent : theme.dim, size: 10),
+      );
     }
 
     // 6. A mediana, por último, para ficar legível sobre as barras.
@@ -1331,9 +1394,14 @@ class _SampleChartPainter extends CustomPainter {
       final limiteBaixo = math.min(0.0, low - folga);
       // Só corta se houver o que cortar: com a série toda dentro da banda,
       // apertar a escala inventaria um corte que não existe.
-      top = math.min(top, math.max(limiteAlto, _largestUpTo(values, limiteAlto)));
-      bottom =
-          math.max(bottom, math.min(limiteBaixo, _smallestFrom(values, limiteBaixo)));
+      top = math.min(
+        top,
+        math.max(limiteAlto, _largestUpTo(values, limiteAlto)),
+      );
+      bottom = math.max(
+        bottom,
+        math.min(limiteBaixo, _smallestFrom(values, limiteBaixo)),
+      );
     }
 
     if (sample.selected != null) {
@@ -1395,7 +1463,11 @@ class _SampleChartPainter extends CustomPainter {
       ..color = color
       ..strokeWidth = 1;
     for (var x = 0.0; x < width; x += 8) {
-      canvas.drawLine(Offset(x, atY), Offset(math.min(x + 4, width), atY), paint);
+      canvas.drawLine(
+        Offset(x, atY),
+        Offset(math.min(x + 4, width), atY),
+        paint,
+      );
     }
   }
 
@@ -1405,10 +1477,8 @@ class _SampleChartPainter extends CustomPainter {
       ..strokeWidth = 1.4;
     canvas.drawLine(Offset(x, from), Offset(x, to), paint);
     final direction = to > from ? 1.0 : -1.0;
-    canvas.drawLine(
-        Offset(x, to), Offset(x - 3, to - 4 * direction), paint);
-    canvas.drawLine(
-        Offset(x, to), Offset(x + 3, to - 4 * direction), paint);
+    canvas.drawLine(Offset(x, to), Offset(x - 3, to - 4 * direction), paint);
+    canvas.drawLine(Offset(x, to), Offset(x + 3, to - 4 * direction), paint);
   }
 
   void _text(
@@ -1427,8 +1497,8 @@ class _SampleChartPainter extends CustomPainter {
     final left = alignRight
         ? x - painter.width - 2
         : alignLeft
-            ? x + 2
-            : x - painter.width / 2;
+        ? x + 2
+        : x - painter.width / 2;
     painter.paint(canvas, Offset(left, y));
   }
 
@@ -1458,7 +1528,7 @@ class _JsonPanel extends StatelessWidget {
     required this.value,
   });
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final String label;
   final Map<String, dynamic> value;
 
@@ -1489,11 +1559,16 @@ class _JsonPanel extends StatelessWidget {
                   ),
                 ),
                 InkWell(
-                  onTap: () => Clipboard.setData(ClipboardData(
-                    text: const JsonEncoder.withIndent('  ').convert(value),
-                  )),
-                  child: Icon(Icons.copy_all_outlined,
-                      size: 14, color: theme.dim),
+                  onTap: () => Clipboard.setData(
+                    ClipboardData(
+                      text: const JsonEncoder.withIndent('  ').convert(value),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.copy_all_outlined,
+                    size: 14,
+                    color: theme.dim,
+                  ),
                 ),
               ],
             ),
@@ -1526,7 +1601,7 @@ class _JsonNode extends StatefulWidget {
     this.name,
   });
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final Object? value;
   final int depth;
   final String? name;
@@ -1582,23 +1657,25 @@ class _JsonNodeState extends State<_JsonNode> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 1.5),
       child: SelectableText.rich(
-        TextSpan(children: [
-          if (widget.name != null)
+        TextSpan(
+          children: [
+            if (widget.name != null)
+              TextSpan(
+                text: '${widget.name}: ',
+                style: theme.mono(color: theme.jsonKey, size: 11.5),
+              ),
             TextSpan(
-              text: '${widget.name}: ',
-              style: theme.mono(color: theme.jsonKey, size: 11.5),
+              text: _scalarText(value),
+              style: theme.mono(color: _scalarColor(theme, value), size: 11.5),
             ),
-          TextSpan(
-            text: _scalarText(value),
-            style: theme.mono(color: _scalarColor(theme, value), size: 11.5),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }
 
   Widget _branch({
-    required _ConsoleTheme theme,
+    required ConsoleTheme theme,
     required String open,
     required String close,
     required String summary,
@@ -1629,10 +1706,7 @@ class _JsonNodeState extends State<_JsonNode> {
                   style: theme.mono(color: theme.dim, size: 11.5),
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  summary,
-                  style: theme.mono(color: theme.dim, size: 10),
-                ),
+                Text(summary, style: theme.mono(color: theme.dim, size: 10)),
               ],
             ),
           ),
@@ -1648,10 +1722,7 @@ class _JsonNodeState extends State<_JsonNode> {
         if (_expanded)
           Padding(
             padding: const EdgeInsets.only(left: 14),
-            child: Text(
-              close,
-              style: theme.mono(color: theme.dim, size: 11.5),
-            ),
+            child: Text(close, style: theme.mono(color: theme.dim, size: 11.5)),
           ),
       ],
     );
@@ -1664,7 +1735,7 @@ class _JsonNodeState extends State<_JsonNode> {
     return '$value';
   }
 
-  static Color _scalarColor(_ConsoleTheme theme, Object? value) {
+  static Color _scalarColor(ConsoleTheme theme, Object? value) {
     if (value == null) return theme.warning;
     if (value is String) return theme.jsonString;
     if (value is num) return theme.jsonNumber;
@@ -1683,7 +1754,7 @@ class _StatusPill extends StatelessWidget {
     this.neutral = false,
   });
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final bool ok;
   final bool neutral;
   final String label;
@@ -1723,7 +1794,7 @@ class _StatusPill extends StatelessWidget {
 class _Tag extends StatelessWidget {
   const _Tag({required this.theme, required this.color, required this.label});
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final Color color;
   final String label;
 
@@ -1752,7 +1823,7 @@ class _ConsoleButton extends StatelessWidget {
     this.active = false,
   });
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -1783,7 +1854,10 @@ class _ConsoleButton extends StatelessWidget {
             // "Exportar Auditoria (JSON)" estoura a faixa do Wrap em 320 dp.
             // O rótulo é o nome da ação: quebra em duas linhas, não corta.
             Flexible(
-              child: Text(label, style: TextStyle(color: color, fontSize: 11.5)),
+              child: Text(
+                label,
+                style: TextStyle(color: color, fontSize: 11.5),
+              ),
             ),
           ],
         ),
@@ -1800,7 +1874,7 @@ class _FilterChip extends StatelessWidget {
     required this.onTap,
   });
 
-  final _ConsoleTheme theme;
+  final ConsoleTheme theme;
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -1817,9 +1891,7 @@ class _FilterChip extends StatelessWidget {
               ? theme.accent.withValues(alpha: 0.16)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? theme.accent : theme.border,
-          ),
+          border: Border.all(color: selected ? theme.accent : theme.border),
         ),
         child: Text(
           label,
@@ -1836,68 +1908,14 @@ class _FilterChip extends StatelessWidget {
 
 // ---------------------------------------------------------------------- Tema --
 
-/// Paleta do console.
-///
-/// Independente do tema da aplicação de propósito: a janela de auditoria é uma
-/// instância separada, sem sessão e sem preferências carregadas, e o painel
-/// costuma ser projetado num telão — onde ora o escuro, ora o claro é o
-/// legível. O alternador local resolve isso sem arrastar o controlador de tema
-/// e sua dependência de Firebase para dentro do painel.
-class _ConsoleTheme {
-  const _ConsoleTheme(this.dark);
-
-  final bool dark;
-
-  Color get background =>
-      dark ? const Color(0xFF0B1020) : const Color(0xFFF4F6FB);
-  Color get panel => dark ? const Color(0xFF121A33) : Colors.white;
-  Color get border =>
-      dark ? const Color(0xFF25314F) : const Color(0xFFDDE3F0);
-  Color get text => dark ? const Color(0xFFE6ECFA) : const Color(0xFF0B1E4B);
-  Color get dim => dark ? const Color(0xFF8494B8) : const Color(0xFF7A88A6);
-
-  Color get accent => const Color(0xFF00B37E);
-  Color get network => const Color(0xFF4C8DFF);
-  Color get warning => dark ? const Color(0xFFFBBF24) : const Color(0xFFD97706);
-  Color get danger => const Color(0xFFEF4444);
-
-  Color get jsonKey => dark ? const Color(0xFF7FD1FF) : const Color(0xFF0A6C9E);
-  Color get jsonString =>
-      dark ? const Color(0xFFB6E3A8) : const Color(0xFF2E7D32);
-  Color get jsonNumber =>
-      dark ? const Color(0xFFFFC48A) : const Color(0xFFB45309);
-  Color get jsonBool =>
-      dark ? const Color(0xFFD8A6FF) : const Color(0xFF7B1FA2);
-
-  /// Estilo monoespaçado com cadeia de reserva.
-  ///
-  /// O alvo web não embarca fonte monoespaçada; a lista cobre Windows, macOS e
-  /// Linux para que o alinhamento das colunas de números não dependa de qual
-  /// máquina abrir o painel na apresentação.
-  TextStyle mono({
-    required Color color,
-    double size = 12,
-    bool bold = false,
-  }) =>
-      TextStyle(
-        color: color,
-        fontSize: size,
-        fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-        fontFamily: 'monospace',
-        fontFamilyFallback: const [
-          'Consolas',
-          'Menlo',
-          'DejaVu Sans Mono',
-          'Courier New',
-          'monospace',
-        ],
-      );
-}
-
 /// Formata número para leitura, sem notação científica em valores grandes.
 String _formatNumber(double value) {
   if (!value.isFinite) return '$value';
-  if (value == value.roundToDouble() && value.abs() < 1e15) {
+  // Epsilon, e nao `==`: um valor que deveria ser inteiro mas passou por
+  // aritmetica binaria chega como 1.0000000000000002, escapa do caminho limpo
+  // e o console mostra a sujeira decimal. Com tolerancia, ele formata como o
+  // inteiro que de fato representa.
+  if ((value - value.roundToDouble()).abs() < 1e-9 && value.abs() < 1e15) {
     return _groupThousands(value.round().toString());
   }
   final text = value.toStringAsFixed(value.abs() < 1 ? 6 : 2);

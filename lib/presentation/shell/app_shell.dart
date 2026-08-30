@@ -14,6 +14,7 @@ import '../backtest/backtest_page.dart';
 import '../goals/goal_page.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
+import '../theme/fin_theme.dart';
 import '../study/study_page.dart';
 
 /// Casca principal do aplicativo, com as três frentes de trabalho.
@@ -106,7 +107,13 @@ class _AppShellState extends ConsumerState<AppShell> {
                       gradient: AppColors.brandGradient,
                     ),
                     child:
-                        const Icon(Icons.show_chart, color: Colors.white, size: 17),
+                        Icon(
+                          Icons.show_chart,
+                          // Sobre o preenchimento de marca, e este o token que
+                          // garante leitura nos dois temas.
+                          color: context.fin.textOnBrand,
+                          size: 17,
+                        ),
                   ),
                   const SizedBox(width: 10),
                   Column(
@@ -169,7 +176,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   Widget _buildNavBar(bool isLight) {
     return Container(
       decoration: BoxDecoration(
-        color: isLight ? Colors.white : const Color(0xFF0D1E45),
+        color: context.fin.surfaceRaised,
         border: Border(top: BorderSide(color: AppColors.surfaceBorder(isLight))),
       ),
       child: SafeArea(
@@ -231,12 +238,12 @@ class _AppShellState extends ConsumerState<AppShell> {
           // segurança para métricas de fonte diferentes em outra plataforma.
           width: 256,
           decoration: BoxDecoration(
-            color: isLight ? Colors.white : const Color(0xFF13224E),
+            color: context.fin.surfaceRaised,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.surfaceBorder(isLight)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.18),
+                color: context.fin.shadow,
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),

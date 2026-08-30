@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
+import '../presentation/theme/fin_theme.dart';
 import '../utils/app_colors.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/forgot_password_controller.dart';
@@ -53,13 +54,13 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
     if (context.mounted) {
       if (error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error), backgroundColor: const Color(0xFFEF4444)),
+          SnackBar(content: Text(error), backgroundColor: context.fin.negative),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Link de recuperação enviado para o e-mail: ${controller.email}'),
-            backgroundColor: const Color(0xFF00B37E),
+            backgroundColor: context.fin.positive,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -159,9 +160,9 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
                               color: AppColors.surface(isLight),
                               borderRadius: BorderRadius.circular(24),
                               border: Border.all(color: AppColors.surfaceBorder(isLight)),
-                              boxShadow: const [
+                              boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black12,
+                                  color: context.fin.shadow,
                                   blurRadius: 64,
                                   offset: Offset(0, 24),
                                 )
@@ -272,13 +273,13 @@ class _ForgotPasswordScreenContentState extends State<_ForgotPasswordScreenConte
                                       ),
                                     ),
                                     child: controller.isLoading
-                                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                      : const Text(
+                                      ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: context.fin.textOnBrand, strokeWidth: 2))
+                                      : Text(
                                           'Enviar link de recuperação',
                                           style: TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                            color: context.fin.textOnBrand,
                                             letterSpacing: 0.2,
                                           ),
                                         ),

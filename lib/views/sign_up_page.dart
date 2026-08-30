@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
+import '../presentation/theme/fin_theme.dart';
 import '../utils/app_colors.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/sign_up_controller.dart';
@@ -65,13 +66,13 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
     if (context.mounted) {
       if (error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error), backgroundColor: const Color(0xFFEF4444)),
+          SnackBar(content: Text(error), backgroundColor: context.fin.negative),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Conta criada com sucesso!'),
-            backgroundColor: Color(0xFF00B37E),
+            backgroundColor: context.fin.positive,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -209,9 +210,9 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                               color: AppColors.surface(isLight),
                               borderRadius: BorderRadius.circular(24),
                               border: Border.all(color: AppColors.surfaceBorder(isLight)),
-                              boxShadow: const [
+                              boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black12,
+                                  color: context.fin.shadow,
                                   blurRadius: 64,
                                   offset: Offset(0, 24),
                                 )
@@ -237,7 +238,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                                           ),
                                         ],
                                       ),
-                                      child: const Icon(Icons.show_chart, color: Colors.white, size: 20),
+                                      child: Icon(Icons.show_chart, color: context.fin.textOnBrand, size: 20),
                                     ),
                                     const SizedBox(width: 10),
                                     Column(
@@ -352,13 +353,15 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
       ),
       child: Center(
         child: isCompleted
-            ? const Icon(Icons.check, color: Colors.white, size: 14)
+            ? Icon(Icons.check, color: context.fin.textOnBrand, size: 14)
             : Text(
                 '$stepIndex',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: isCompletedOrCurrent ? Colors.white : AppColors.textSecondary(isLight),
+                  color: isCompletedOrCurrent
+                      ? context.fin.textOnBrand
+                      : context.fin.textSecondary,
                 ),
               ),
       ),
@@ -485,7 +488,9 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
-                color: controller.canProceedToStep2 ? Colors.white : AppColors.textMuted(isLight),
+                color: controller.canProceedToStep2
+                    ? context.fin.textOnBrand
+                    : context.fin.textTertiary,
                 letterSpacing: 0.2,
               ),
             ),
@@ -573,14 +578,16 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           Row(
             children: List.generate(3, (index) {
               final strength = controller.passwordStrength;
-              final isActive = index < strength['level'];
+              final isActive = index < strength.level;
               return Expanded(
                 child: Container(
                   height: 3,
                   margin: const EdgeInsets.symmetric(horizontal: 2),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(2),
-                    color: isActive ? strength['color'] : AppColors.surfaceBorder(isLight),
+                    color: isActive
+                        ? context.fin.forTrend(strength.trend)
+                        : context.fin.border,
                   ),
                 ),
               );
@@ -588,11 +595,13 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           ),
           const SizedBox(height: 5),
           Text(
-            'Senha ${controller.passwordStrength['label']}',
+            'Senha ${controller.passwordStrength.label}',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: controller.passwordStrength['color'],
+              color: context.fin.forTrend(
+                controller.passwordStrength.trend,
+              ),
             ),
           ),
         ],
@@ -622,7 +631,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
             suffixIcon: controller.confirm.isNotEmpty
                 ? Icon(
                     controller.confirm == controller.password ? Icons.check : Icons.close,
-                    color: controller.confirm == controller.password ? AppColors.primary : const Color(0xFFEF4444),
+                    color: controller.confirm == controller.password ? AppColors.primary : context.fin.negative,
                     size: 20,
                   )
                 : null,
@@ -633,7 +642,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
                 color: controller.confirm.isNotEmpty 
-                  ? (controller.confirm == controller.password ? AppColors.primary.withValues(alpha: 0.5) : const Color(0xFFEF4444).withValues(alpha: 0.5)) 
+                  ? (controller.confirm == controller.password ? AppColors.primary.withValues(alpha: 0.5) : context.fin.negative.withValues(alpha: 0.5)) 
                   : AppColors.surfaceBorder(isLight)
               ),
             ),
@@ -641,7 +650,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
                 color: controller.confirm.isNotEmpty 
-                  ? (controller.confirm == controller.password ? AppColors.primary.withValues(alpha: 0.5) : const Color(0xFFEF4444).withValues(alpha: 0.5)) 
+                  ? (controller.confirm == controller.password ? AppColors.primary.withValues(alpha: 0.5) : context.fin.negative.withValues(alpha: 0.5)) 
                   : AppColors.surfaceBorder(isLight)
               ),
             ),
@@ -669,7 +678,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                   gradient: controller.agreed ? AppColors.brandGradient : null,
                   boxShadow: controller.agreed ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 2))] : null,
                 ),
-                child: controller.agreed ? const Icon(Icons.check, color: Colors.white, size: 14) : null,
+                child: controller.agreed ? Icon(Icons.check, color: context.fin.textOnBrand, size: 14) : null,
               ),
             ),
             Expanded(
@@ -713,13 +722,13 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
               ),
             ),
             child: controller.isLoading
-              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: context.fin.textOnBrand, strokeWidth: 2))
               : Text(
                   'Criar minha conta',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: controller.canSubmit ? Colors.white : AppColors.textMuted(isLight),
+                    color: controller.canSubmit ? context.fin.textOnBrand : context.fin.textTertiary,
                     letterSpacing: 0.2,
                   ),
                 ),

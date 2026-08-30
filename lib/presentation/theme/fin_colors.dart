@@ -26,6 +26,7 @@ enum FinInkToken {
   caution,
   pending,
   blocked,
+  reserva,
 }
 
 /// Paleta do produto, exposta como extensao de tema.
@@ -63,6 +64,15 @@ class FinColors extends ThemeExtension<FinColors> {
   /// Linha divisoria. O menor contraste da paleta: separa sem competir.
   final Color divider;
 
+  /// Sombra de superficie elevada -- menu, dialogo.
+  ///
+  /// Sombra e SEMPRE escura, nos dois temas: ela simula ausencia de luz. O que
+  /// muda e a opacidade, porque sobre fundo escuro um preto a 18% nao se
+  /// distingue do proprio fundo e o menu perde o relevo.
+  ///
+  /// Nao entra em [FinInkToken]: nao carrega texto.
+  final Color shadow;
+
   // --- Texto ---
 
   /// Leitura principal: titulos e valores.
@@ -81,6 +91,12 @@ class FinColors extends ThemeExtension<FinColors> {
 
   /// Texto sobre preenchimento de marca.
   final Color textOnBrand;
+
+  /// Tinta escura para preenchimento CLARO gerado por dado.
+  final Color onFillDark;
+
+  /// Tinta clara para preenchimento ESCURO gerado por dado.
+  final Color onFillLight;
 
   // --- Estado financeiro ---
 
@@ -101,6 +117,24 @@ class FinColors extends ThemeExtension<FinColors> {
 
   /// Bloqueado, ou dado ausente.
   final Color blocked;
+
+  /// Identidade da carteira Reserva -- o contraponto ao verde da Principal.
+  ///
+  /// Entra em [FinInkToken] porque é usada como COR DE TEXTO no rótulo do
+  /// grupo de ativos, e não apenas como marca de gráfico. Antes era um literal
+  /// `#3B82F6` no ponto de uso, que sobre superfície clara dá 3,25:1 --
+  /// reprovado em AA. Era o mesmo defeito da paleta anterior, num token que
+  /// nunca havia sido medido porque não existia.
+  final Color reserva;
+
+  /// Fundo tonal da Reserva.
+  final Color reservaSurface;
+
+  /// Variante para MARCA de gráfico -- ponto de dispersão, traço de série.
+  ///
+  /// Não carrega texto, então responde ao piso de 3:1 de elemento gráfico e
+  /// não ao de 4,5:1 de texto. Por isso fica fora de [FinInkToken].
+  final Color reservaMuted;
 
   /// Fundo tonal de [positive]. Da um segundo canal alem do matiz.
   final Color positiveSurface;
@@ -134,15 +168,21 @@ class FinColors extends ThemeExtension<FinColors> {
     required this.border,
     required this.borderStrong,
     required this.divider,
+    required this.shadow,
     required this.textPrimary,
     required this.textSecondary,
     required this.textTertiary,
     required this.textOnBrand,
+    required this.onFillDark,
+    required this.onFillLight,
     required this.positive,
     required this.negative,
     required this.caution,
     required this.pending,
     required this.blocked,
+    required this.reserva,
+    required this.reservaSurface,
+    required this.reservaMuted,
     required this.positiveSurface,
     required this.negativeSurface,
     required this.cautionSurface,
@@ -164,6 +204,7 @@ class FinColors extends ThemeExtension<FinColors> {
         FinInkToken.caution => caution,
         FinInkToken.pending => pending,
         FinInkToken.blocked => blocked,
+        FinInkToken.reserva => reserva,
       };
 
   /// Toda superficie sobre a qual [token] pode ser pintado.
@@ -183,9 +224,24 @@ class FinColors extends ThemeExtension<FinColors> {
           FinInkToken.negative => negativeSurface,
           FinInkToken.caution => cautionSurface,
           FinInkToken.pending => pendingSurface,
+          FinInkToken.reserva => reservaSurface,
           _ => surface,
         },
       ];
+
+  /// Tinta legivel sobre um preenchimento ARBITRARIO, gerado por dado.
+  ///
+  /// Existe para o caso em que o fundo nao e um token e portanto nao pode ser
+  /// medido de antemao -- a celula do mapa de correlacao, cuja cor vem do
+  /// valor da correlacao. Ali nao ha escolha fixa que sirva: a versao anterior
+  /// pintava branco sempre, e no tema CLARO a celula e verde-claro, o que dava
+  /// **1,94:1**. O numero estava praticamente invisivel.
+  ///
+  /// O limiar de 0,28 foi calibrado varrendo a interpolacao inteira do mapa nos
+  /// dois temas: com ele, o pior par medido e 7,31:1 no claro e 5,12:1 no
+  /// escuro -- ambos acima de AA.
+  Color inkOn(Color fill) =>
+      fill.computeLuminance() > 0.28 ? onFillDark : onFillLight;
 
   /// Cor de texto para uma direcao.
   ///
@@ -226,15 +282,21 @@ class FinColors extends ThemeExtension<FinColors> {
     border: Color(0xFFDCE3E9),
     borderStrong: Color(0xFFC3CDD6),
     divider: Color(0xFFE8ECF1),
+    shadow: Color(0x2E000000), // preto a 18%
     textPrimary: Color(0xFF0E1621), // 16,04:1  AAA
     textSecondary: Color(0xFF435261), //  7,08:1  AAA
     textTertiary: Color(0xFF55636F), //  5,45:1  AA  -- so metadado
     textOnBrand: Color(0xFFFFFFFF),
+    onFillDark: Color(0xFF0E1621), //  7,31:1 no pior preenchimento claro
+    onFillLight: Color(0xFFFFFFFF), //  5,12:1 no pior preenchimento escuro
     positive: Color(0xFF0A6E52), //  5,38:1  AA
     negative: Color(0xFF98201A), //  7,01:1  AAA
     caution: Color(0xFF6F4800), //  7,12:1  AAA
     pending: Color(0xFF3E5AA8), //  5,59:1  AA
     blocked: Color(0xFF5A5F6B), //  5,64:1  AA
+    reserva: Color(0xFF0B62EF), //  4,54:1  AA (pior caso: sobre reservaSurface)
+    reservaSurface: Color(0xFFE8EFFD),
+    reservaMuted: Color(0xFF4A86F0),
     positiveSurface: Color(0xFFE4F1EC),
     negativeSurface: Color(0xFFFBE9E7),
     cautionSurface: Color(0xFFFBF0DC),
@@ -252,15 +314,21 @@ class FinColors extends ThemeExtension<FinColors> {
     border: Color(0xFF26313A),
     borderStrong: Color(0xFF36434D),
     divider: Color(0xFF1D262E),
+    shadow: Color(0x73000000), // preto a 45%: sobre fundo escuro, 18% some
     textPrimary: Color(0xFFE8EEF4), // 15,02:1  AAA
     textSecondary: Color(0xFFA6B4C2), //  8,30:1  AAA
     textTertiary: Color(0xFF7C8C9C), //  5,09:1  AA  -- so metadado
     textOnBrand: Color(0xFF04231A),
+    onFillDark: Color(0xFF0E1621), //  7,31:1 no pior preenchimento claro
+    onFillLight: Color(0xFFFFFFFF), //  5,12:1 no pior preenchimento escuro
     positive: Color(0xFF3DD8A4), //  8,36:1  AAA
     negative: Color(0xFFFF8B7E), //  7,51:1  AAA
     caution: Color(0xFFF2B544), //  8,73:1  AAA
     pending: Color(0xFF8FB4FF), //  8,15:1  AAA
     blocked: Color(0xFF9AA5B1), //  7,01:1  AAA
+    reserva: Color(0xFF3B82F6), //  4,84:1  AA (pior caso: sobre reservaSurface)
+    reservaSurface: Color(0xFF0F1826),
+    reservaMuted: Color(0xFF60A5FA),
     positiveSurface: Color(0xFF122A24),
     negativeSurface: Color(0xFF2C1614),
     cautionSurface: Color(0xFF2A2011),
@@ -304,15 +372,21 @@ class FinColors extends ThemeExtension<FinColors> {
         other.border == border &&
         other.borderStrong == borderStrong &&
         other.divider == divider &&
+        other.shadow == shadow &&
         other.textPrimary == textPrimary &&
         other.textSecondary == textSecondary &&
         other.textTertiary == textTertiary &&
         other.textOnBrand == textOnBrand &&
+        other.onFillDark == onFillDark &&
+        other.onFillLight == onFillLight &&
         other.positive == positive &&
         other.negative == negative &&
         other.caution == caution &&
         other.pending == pending &&
         other.blocked == blocked &&
+        other.reserva == reserva &&
+        other.reservaSurface == reservaSurface &&
+        other.reservaMuted == reservaMuted &&
         other.positiveSurface == positiveSurface &&
         other.negativeSurface == negativeSurface &&
         other.cautionSurface == cautionSurface &&
@@ -330,15 +404,21 @@ class FinColors extends ThemeExtension<FinColors> {
         border,
         borderStrong,
         divider,
+        shadow,
         textPrimary,
         textSecondary,
         textTertiary,
         textOnBrand,
+        onFillDark,
+        onFillLight,
         positive,
         negative,
         caution,
         pending,
         blocked,
+        reserva,
+        reservaSurface,
+        reservaMuted,
         positiveSurface,
         negativeSurface,
         cautionSurface,

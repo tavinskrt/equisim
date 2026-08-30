@@ -27,6 +27,11 @@ double _minimumRatio(FinInkToken token) => switch (token) {
       FinInkToken.positive => 4.5,
       FinInkToken.pending => 4.5,
       FinInkToken.blocked => 4.5,
+      // A identidade da Reserva vira token porque e usada como TEXTO no rotulo
+      // do grupo de ativos. Como literal no ponto de uso, `#3B82F6` dava
+      // 3,25:1 sobre superficie clara -- reprovado. O valor claro foi
+      // escurecido para #0B62EF ate cruzar o piso.
+      FinInkToken.reserva => 4.5,
     };
 
 /// Razao de contraste WCAG 2.1 entre duas cores opacas.
@@ -85,7 +90,7 @@ void main() {
           expect(FinInkToken.values, isNotEmpty);
           expect(
             FinInkToken.values.length,
-            8,
+            9,
             reason: 'A contagem de tokens mudou. Confirme que o piso do token '
                 'novo foi declarado em _minimumRatio e que o comentario de '
                 'razao em fin_colors.dart traz a medida do pior caso.',

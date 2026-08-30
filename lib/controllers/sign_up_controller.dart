@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'password_strength.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'theme_controller.dart';
@@ -64,14 +66,15 @@ class SignUpController extends ChangeNotifier {
   }
 
   /// Avalia dinamicamente o nível de segurança da senha digitada.
-  Map<String, dynamic> get passwordStrength {
-    if (password.isEmpty) return {'level': 0, 'label': '', 'color': Colors.transparent};
-    if (password.length < 6) return {'level': 1, 'label': 'Fraca', 'color': const Color(0xFFEF4444)};
+  PasswordStrength get passwordStrength {
+    if (password.isEmpty) return PasswordStrength.vazia;
+    if (password.length < 6) return PasswordStrength.fraca;
     if (password.length < 10 || !password.contains(RegExp(r'[0-9]'))) {
-      return {'level': 2, 'label': 'Média', 'color': const Color(0xFFF59E0B)};
+      return PasswordStrength.media;
     }
-    return {'level': 3, 'label': 'Forte', 'color': const Color(0xFF00B37E)};
+    return PasswordStrength.forte;
   }
+
 
   /// Verifica se os campos da primeira etapa estão devidamente preenchidos.
   bool get canProceedToStep2 => name.trim().isNotEmpty && username.trim().isNotEmpty && email.trim().isNotEmpty;

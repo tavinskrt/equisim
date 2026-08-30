@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
+import '../presentation/theme/fin_theme.dart';
 import '../utils/app_colors.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/change_password_controller.dart';
@@ -136,7 +137,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                       border: Border.all(color: AppColors.surfaceBorder(isLight)),
                       boxShadow: [
                         BoxShadow(
-                          color: isLight ? const Color(0xFF0B1E4B).withValues(alpha: 0.08) : Colors.black26,
+                          color: context.fin.shadow,
                           blurRadius: 64,
                           offset: const Offset(0, 24),
                         )
@@ -152,15 +153,15 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: AppColors.brandGradient,
-                            boxShadow: const [
+                            boxShadow: [
                               BoxShadow(
-                                color: Color(0x6600B37E),
+                                color: context.fin.brand.withValues(alpha: 0.4),
                                 blurRadius: 24,
                                 offset: Offset(0, 8),
                               ),
                             ],
                           ),
-                          child: const Icon(Icons.check, color: Colors.white, size: 32),
+                          child: Icon(Icons.check, color: context.fin.textOnBrand, size: 32),
                         ),
                         const SizedBox(height: 20),
                         Text(
@@ -185,13 +186,17 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                         // Botão voltar
                         Container(
                           width: double.infinity,
-                          height: 48,
+                          // `minHeight`, e nao `height`: sob escala 2,0x o
+                          // rótulo do botão passa dos 48 dp e seria cortado.
+                          // O mínimo preserva o alvo de toque sem impor teto.
+                          constraints: const BoxConstraints(minHeight: 48),
+                          alignment: Alignment.center,
                           decoration: BoxDecoration(
                             gradient: AppColors.brandGradient,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: const [
+                            boxShadow: [
                               BoxShadow(
-                                color: Color(0x6600B37E),
+                                color: context.fin.brand.withValues(alpha: 0.4),
                                 blurRadius: 20,
                                 offset: Offset(0, 6),
                               ),
@@ -210,12 +215,12 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Voltar ao perfil',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: context.fin.textOnBrand,
                               ),
                             ),
                           ),
@@ -232,9 +237,11 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
     }
 
     final strength = controller.passwordStrength;
-    final level = strength['level'] as int;
-    final color = strength['color'] as Color;
-    final label = strength['label'] as String;
+    final level = strength.level;
+    // A cor vem do token semântico, não mais de um literal embrulhado no
+    // controlador: força de senha é um estado, e estado tem token.
+    final color = context.fin.forTrend(strength.trend);
+    final label = strength.label;
 
     return Scaffold(
       body: Container(
@@ -287,20 +294,29 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                           // Botão voltar redondo
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
+                            // 48 dp de área efetiva sem inflar o círculo: o
+                            // `behavior` faz o padding transparente contar
+                            // como alvo, então o visual continua em 34 dp.
+                            behavior: HitTestBehavior.opaque,
                             child: Container(
+                              width: 48,
+                              height: 48,
+                              alignment: Alignment.center,
+                              child: Container(
                               width: 34,
                               height: 34,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isLight ? Colors.black.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.06),
-                                border: Border.all(color: isLight ? Colors.black.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.1)),
+                                color: context.fin.surfaceSunken,
+                                border: Border.all(color: context.fin.border),
                               ),
                               child: Icon(
                                 Icons.arrow_back_ios_new,
-                                color: isLight ? AppColors.textPrimary(true) : Colors.white60,
+                                color: context.fin.textSecondary,
                                 size: 14,
                               ),
                             ),
+                          ),
                           ),
                           const SizedBox(width: 14),
                           Column(
@@ -384,7 +400,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                             boxShadow: isLight
                                 ? [
                                     BoxShadow(
-                                      color: const Color(0xFF0B1E4B).withValues(alpha: 0.04),
+                                      color: context.fin.surfaceSunken,
                                       blurRadius: 10,
                                       offset: const Offset(0, 2),
                                     )
@@ -433,7 +449,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                         margin: const EdgeInsets.symmetric(horizontal: 2.5),
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(2),
-                                          color: isActive ? color : (isLight ? const Color(0xFFDDE3F0) : Colors.white.withValues(alpha: 0.1)),
+                                          color: isActive ? color : context.fin.border,
                                         ),
                                       ),
                                     );
@@ -515,7 +531,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                             boxShadow: isLight
                                 ? [
                                     BoxShadow(
-                                      color: const Color(0xFF0B1E4B).withValues(alpha: 0.04),
+                                      color: context.fin.surfaceSunken,
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     )
@@ -578,10 +594,10 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                               ),
                             ),
                             child: controller.isLoading
-                                ? const SizedBox(
+                                ? SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                    child: CircularProgressIndicator(color: context.fin.textOnBrand, strokeWidth: 2),
                                   )
                                 : Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -589,7 +605,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                       Icon(
                                         Icons.shield_outlined,
                                         size: 15,
-                                        color: controller.canSubmit ? Colors.white : AppColors.textMuted(isLight),
+                                        color: controller.canSubmit ? context.fin.textOnBrand : context.fin.textTertiary,
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
@@ -597,7 +613,7 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                         style: TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.bold,
-                                          color: controller.canSubmit ? Colors.white : AppColors.textMuted(isLight),
+                                          color: controller.canSubmit ? context.fin.textOnBrand : context.fin.textTertiary,
                                         ),
                                       ),
                                     ],

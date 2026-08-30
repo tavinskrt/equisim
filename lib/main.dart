@@ -225,7 +225,7 @@ class _StartupFailure extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.cloud_off, size: 40, color: Colors.redAccent),
+              Icon(Icons.cloud_off, size: 40, color: context.fin.negative),
               const SizedBox(height: 16),
               const Text(
                 'Não foi possível iniciar',
@@ -241,7 +241,7 @@ class _StartupFailure extends StatelessWidget {
               Text(
                 '$error',
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                style: TextStyle(fontSize: 11, color: context.fin.textTertiary),
               ),
             ],
           ),

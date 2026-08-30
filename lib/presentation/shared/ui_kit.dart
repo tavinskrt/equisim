@@ -241,6 +241,62 @@ class MetricTile extends StatelessWidget {
   }
 }
 
+/// Linha de rótulo à esquerda e valor à direita.
+///
+/// Existe porque a forma ingênua — `Row(Text, Spacer, Text)` — **estoura**.
+/// Nenhum dos dois textos é flexível, então quando a soma deles passa da
+/// largura disponível o `Spacer` colapsa a zero e o excedente vira listra
+/// amarela. Não é caso extremo: acontecia em 320 dp na escala padrão, e a
+/// mesma linha aparecia em duas telas com o defeito idêntico.
+///
+/// O `Wrap` resolve por construção. Cabendo os dois, ele os separa como o
+/// `Spacer` fazia; não cabendo, o valor desce para a segunda linha. Não há
+/// largura em que ele possa estourar, e nada é truncado — o que importa num
+/// par em que o valor é um número.
+class LabelValueRow extends StatelessWidget {
+  /// Rótulo, na grafia normal.
+  final String label;
+
+  /// Valor **já formatado**.
+  final String value;
+
+  /// Direção do valor, quando ele carrega sinal financeiro.
+  final FinTrend trend;
+
+  /// Declara a linha.
+  const LabelValueRow({
+    super.key,
+    required this.label,
+    required this.value,
+    this.trend = FinTrend.neutral,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fin;
+    final t = context.finType;
+
+    return SizedBox(
+      width: double.infinity,
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: FinSpace.sm,
+        runSpacing: FinSpace.xs,
+        children: [
+          Text(label, style: t.bodySm.copyWith(color: c.textSecondary)),
+          FinAmount(
+            text: value,
+            style: t.numSm,
+            trend: trend,
+            align: TextAlign.left,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Faixa de aviso não bloqueante.
 ///
 /// Usada para concentração setorial e para a queda de modelo de avaliação:
@@ -497,8 +553,11 @@ class HintIcon extends StatelessWidget {
             side: BorderSide(color: c.border),
           ),
           title: Text(title, style: t.titleSm.copyWith(color: c.textPrimary)),
-          content: SizedBox(
-            width: 420,
+          content: ConstrainedBox(
+            // `maxWidth`, e nao `width`: em 320 dp uma largura exata de 420
+            // estoura o diálogo. Com teto, ele ocupa 420 onde couber e a
+            // largura disponível onde não couber.
+            constraints: const BoxConstraints(maxWidth: 420),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

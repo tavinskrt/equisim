@@ -6,6 +6,7 @@ import '../../di/providers.dart';
 import '../../utils/app_colors.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
+import '../theme/fin_theme.dart';
 import 'study_notifier.dart';
 
 /// Abre o seletor de ativos.
@@ -56,7 +57,7 @@ class _AssetPickerSheetState extends ConsumerState<_AssetPickerSheet> {
       expand: false,
       builder: (context, scrollController) => Container(
         decoration: BoxDecoration(
-          color: isLight ? Colors.white : const Color(0xFF0F2148),
+          color: context.fin.surfaceRaised,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),

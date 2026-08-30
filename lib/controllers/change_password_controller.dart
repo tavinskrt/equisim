@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'password_strength.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 /// Controlador responsável pelo fluxo de alteração de senha do usuário.
@@ -86,27 +88,20 @@ class ChangePasswordController extends ChangeNotifier {
   /// - Menor que 10 caracteres ou sem números: nível 2, "Média", laranja `#F59E0B`
   /// - Sem caracteres especiais: nível 3, "Boa", azul `#3B82F6`
   /// - Tudo atendido: nível 4, "Forte", verde `#00B37E`
-  Map<String, dynamic> get passwordStrength {
+  PasswordStrength get passwordStrength {
     final pass = _newPassword;
-    if (pass.isEmpty) {
-      return {'level': 0, 'label': '', 'color': Colors.transparent};
-    }
-    if (pass.length < 6) {
-      return {'level': 1, 'label': 'Fraca', 'color': const Color(0xFFEF4444)};
-    }
+    if (pass.isEmpty) return PasswordStrength.vazia;
+    if (pass.length < 6) return PasswordStrength.fraca;
 
     final hasDigit = pass.contains(RegExp(r'[0-9]'));
-    if (pass.length < 10 || !hasDigit) {
-      return {'level': 2, 'label': 'Média', 'color': const Color(0xFFF59E0B)};
-    }
+    if (pass.length < 10 || !hasDigit) return PasswordStrength.media;
 
     final hasSpecial = pass.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
-    if (!hasSpecial) {
-      return {'level': 3, 'label': 'Boa', 'color': const Color(0xFF3B82F6)};
-    }
+    if (!hasSpecial) return PasswordStrength.boa;
 
-    return {'level': 4, 'label': 'Forte', 'color': const Color(0xFF00B37E)};
+    return PasswordStrength.forte;
   }
+
 
   // Métodos de checagem do checklist de requisitos
   bool get metLength => _newPassword.length >= 8;
@@ -119,9 +114,9 @@ class ChangePasswordController extends ChangeNotifier {
 
   /// Retorna se o formulário está preenchido e atende aos critérios mínimos de envio.
   bool get canSubmit {
-    final str = passwordStrength;
-    final level = str['level'] as int;
-    return _currentPassword.length >= 6 && level >= 2 && passwordsMatch;
+    return _currentPassword.length >= 6 &&
+        passwordStrength.level >= PasswordStrength.media.level &&
+        passwordsMatch;
   }
 
   /// Processa a reautenticação do usuário e altera sua senha no Firebase Auth.

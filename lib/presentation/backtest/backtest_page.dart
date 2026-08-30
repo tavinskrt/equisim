@@ -15,12 +15,6 @@ import '../theme/fin_space.dart';
 import '../theme/fin_theme.dart';
 import 'backtest_providers.dart';
 
-/// Azul da Reserva, o contraponto ao verde da Principal em toda a tela.
-const Color _reservaColor = Color(0xFF3B82F6);
-
-/// Tom mais claro para os **ativos** da Reserva na dispersão: mantém a família
-/// de cor da carteira sem competir com o ponto da própria carteira.
-const Color _reservaAssetColor = Color(0xFF60A5FA);
 
 /// Tela de análise histórica: Principal contra Reserva sob o mesmo plano.
 class BacktestPage extends ConsumerWidget {
@@ -98,25 +92,9 @@ class _SettingsCard extends ConsumerWidget {
             subtitle: 'Sem rebalanceamento: os pesos derivam com o mercado',
           ),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              Text(
-                'Janela',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary(isLight),
-                ),
-              ),
-              const Spacer(),
-              Text(
-                '${settings.windowYears} anos',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary(isLight),
-                ),
-              ),
-            ],
+          LabelValueRow(
+            label: 'Janela',
+            value: '${settings.windowYears} anos',
           ),
           Text(
             'Quanto tempo de história a simulação percorre, contado de hoje '
@@ -254,7 +232,7 @@ class _ComparisonBody extends ConsumerWidget {
                       label: 'Reserva',
                       values: reserva.base100,
                       dates: reserva.dates,
-                      color: _reservaColor,
+                      color: context.fin.reserva,
                     ),
                 ],
               ),
@@ -688,7 +666,9 @@ class _PerAssetCard extends StatelessWidget {
             _AssetGroup(
               isLight: isLight,
               label: 'Reserva',
-              color: _reservaColor,
+              // Este `color` pinta TEXTO -- o rotulo do grupo. Por isso vem do
+              // token medido em contraste, e nao da variante de marca.
+              color: context.fin.reserva,
               assets: reservaAssets,
             ),
         ],
@@ -853,7 +833,7 @@ class _AssetRow extends StatelessWidget {
                     valueColor: AlwaysStoppedAnimation(
                       asset.drift >= 0
                           ? AppColors.primary
-                          : const Color(0xFFF59E0B),
+                          : context.fin.caution,
                     ),
                   ),
                 ),
@@ -914,9 +894,9 @@ class _RiskReturnCard extends StatelessWidget {
           ret: p.ret,
           color: switch (p.kind) {
             RiskReturnKind.principal => AppColors.primary,
-            RiskReturnKind.reserva => _reservaColor,
+            RiskReturnKind.reserva => context.fin.reserva,
             RiskReturnKind.principalAsset => AppColors.textSecondary(isLight),
-            RiskReturnKind.reservaAsset => _reservaAssetColor,
+            RiskReturnKind.reservaAsset => context.fin.reservaMuted,
           },
           highlight: p.isPortfolio,
         ),
@@ -943,7 +923,7 @@ class _RiskReturnCard extends StatelessWidget {
                   color: AppColors.textSecondary(isLight),
                 ),
               if (_has(RiskReturnKind.reservaAsset))
-                (label: 'Ativos da Reserva', color: _reservaAssetColor),
+                (label: 'Ativos da Reserva', color: context.fin.reservaMuted),
             ],
           ),
         ],

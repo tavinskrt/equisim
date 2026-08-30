@@ -26,36 +26,16 @@ import 'package:flutter_test/flutter_test.dart';
 const _larguras = <double>[320, 390, 1024];
 const _escalas = <double>[1.0, 1.3, 2.0];
 
-/// Combinacoes que o codigo atual ainda nao sustenta.
+/// Combinacoes que o codigo ainda nao sustenta.
 ///
-/// Sao divida CONHECIDA e MEDIDA, nao suposicao: cada uma reprovou na execucao
-/// de 29/08/2026, e o texto diz o sintoma OBSERVADO -- nao um diagnostico que
-/// eu ainda nao fiz.
+/// **Vazio, e essa e a meta.** Cada entrada aqui e divida MEDIDA -- uma
+/// combinacao que reprovou de fato -- com a tarefa que a remove escrita ao
+/// lado, e apagar a linha e o criterio de aceite dessa tarefa.
 ///
-/// Ficam em `skip` em vez de falhar para que a suite continue utilizavel
-/// enquanto a Onda 3 avanca. Gate vermelho por dias e gate que alguem desliga.
-///
-/// **Apagar uma linha daqui e o criterio de aceite da tarefa citada.** A linha
-/// so sai quando a combinacao passa; se sair antes, o teste volta a reprovar e
-/// o gate avisa.
-const _pendentes = <String, String>{
-  // A GoalPage reprova em 320 dp JA NA ESCALA 1,0x: em iPhone SE a tela esta
-  // quebrada hoje, sem ninguem tocar em acessibilidade. Isso e defeito de
-  // layout, nao de escala, e nao existia como item no backlog -- entrou como
-  // UI-16.
-  'GoalPage|320|1.0': 'UI-16 — estouro vertical na escala padrao',
-  'GoalPage|320|1.3': 'UI-16 — estouro vertical na escala padrao',
-  'GoalPage|320|2.0': 'UI-16 — estouro vertical na escala padrao',
-  'GoalPage|390|1.3': 'UI-16 — estouro vertical sob fonte ampliada',
-  'GoalPage|390|2.0': 'UI-16 — estouro vertical sob fonte ampliada',
-
-  // ATRIBUICAO CORRIGIDA. Estava anotada como UI-05, o que estava errado: com
-  // `comparisonProvider` devolvendo null neste harness, o cartao de metricas
-  // nem chega a ser construido. O que estoura e o `_SettingsCard` -- texto
-  // explicativo longo, `Slider` e `SwitchListTile` numa `Column` sem rolagem.
-  // Verificado apagando esta linha depois da UI-05: continuou reprovando.
-  'BacktestPage|320|2.0': 'UI-16 — _SettingsCard, nao o cartao de metricas',
-};
+/// Historico: nasceu com 13 das 36 combinacoes reprovando. A UI-06 zerou as
+/// sete da StudyPage; a UI-16 zerou as seis restantes. Se uma entrada voltar a
+/// aparecer, ela e regressao, nao heranca.
+const _pendentes = <String, String>{};
 
 String _chave(String tela, double largura, double escala) =>
     '$tela|${largura.toInt()}|$escala';

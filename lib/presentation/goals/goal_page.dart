@@ -118,25 +118,9 @@ class _GoalPageState extends ConsumerState<GoalPage> {
                 onChanged: _apply,
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Text(
-                    'Prazo',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary(isLight),
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${_months ~/ 12} anos e ${_months % 12} meses',
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary(isLight),
-                    ),
-                  ),
-                ],
+              LabelValueRow(
+                label: 'Prazo',
+                value: '${_months ~/ 12} anos e ${_months % 12} meses',
               ),
               Slider(
                 value: _months.toDouble(),

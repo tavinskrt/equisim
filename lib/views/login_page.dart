@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
+import '../presentation/theme/fin_theme.dart';
 import '../utils/app_colors.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/login_controller.dart';
@@ -138,9 +139,9 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                               color: AppColors.surface(isLight),
                               borderRadius: BorderRadius.circular(24),
                               border: Border.all(color: AppColors.surfaceBorder(isLight)),
-                              boxShadow: const [
+                              boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black12,
+                                  color: context.fin.shadow,
                                   blurRadius: 64,
                                   offset: Offset(0, 24),
                                 )
@@ -166,7 +167,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                                           ),
                                         ],
                                       ),
-                                      child: const Icon(Icons.show_chart, color: Colors.white, size: 32),
+                                      child: Icon(Icons.show_chart, color: context.fin.textOnBrand, size: 32),
                                     ),
                                     const SizedBox(height: 14),
                                     Text(
@@ -339,7 +340,7 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                                       final error = await controller.login(context);
                                       if (error != null && context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(error), backgroundColor: const Color(0xFFEF4444)),
+                                          SnackBar(content: Text(error), backgroundColor: context.fin.negative),
                                         );
                                       } else if (context.mounted) {
                                         Navigator.pushReplacement(
@@ -357,13 +358,13 @@ class _LoginScreenContentState extends State<_LoginScreenContent> {
                                       ),
                                     ),
                                     child: controller.isLoading
-                                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                      : const Text(
+                                      ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: context.fin.textOnBrand, strokeWidth: 2))
+                                      : Text(
                                           'Entrar',
                                           style: TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                            color: context.fin.textOnBrand,
                                             letterSpacing: 0.2,
                                           ),
                                         ),

@@ -3,6 +3,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/app_colors.dart';
+import '../components/fin_amount.dart';
+import '../theme/fin_space.dart';
+import '../theme/fin_theme.dart';
 import 'ui_kit.dart';
 
 /// Uma curva nomeada.
@@ -119,98 +122,105 @@ class Base100Chart extends StatelessWidget {
           spacing: 14,
           runSpacing: 4,
           children: [
-            for (final s in series) _LegendDot(label: s.label, color: s.color, isLight: isLight),
+            for (final s in series)
+              _LegendDot(label: s.label, color: s.color, isLight: isLight),
           ],
         ),
         const SizedBox(height: 10),
         SizedBox(
           height: height,
-          child: LineChart(
-            LineChartData(
-              minY: minY - padding,
-              maxY: maxY + padding,
-              gridData: FlGridData(
-                show: true,
-                drawVerticalLine: false,
-                getDrawingHorizontalLine: (_) => FlLine(
-                  color: AppColors.divider(isLight),
-                  strokeWidth: 1,
-                ),
-              ),
-              titlesData: FlTitlesData(
-                topTitles:
-                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles:
-                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 42,
-                    getTitlesWidget: (value, meta) => Text(
-                      value.toStringAsFixed(0),
-                      style: TextStyle(
-                        fontSize: 9,
-                        color: AppColors.textMuted(isLight),
+          child: // Curva de patrimônio: repinta só quando a série muda, não a
+              // cada quadro de rolagem da lista que a contém.
+              RepaintBoundary(
+                child: LineChart(
+                  LineChartData(
+                    minY: minY - padding,
+                    maxY: maxY + padding,
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      getDrawingHorizontalLine: (_) => FlLine(
+                        color: AppColors.divider(isLight),
+                        strokeWidth: 1,
                       ),
                     ),
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 26,
-                    interval: (axis.length / 4).clamp(1, double.infinity),
-                    getTitlesWidget: (value, meta) {
-                      final index = value.round();
-                      if (index < 0 || index >= axis.length) {
-                        return const SizedBox.shrink();
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 6),
-                        child: Text(
-                          Fmt.shortDate.format(axis[index]),
-                          style: TextStyle(
-                            fontSize: 9,
-                            color: AppColors.textMuted(isLight),
+                    titlesData: FlTitlesData(
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 42,
+                          getTitlesWidget: (value, meta) => Text(
+                            value.toStringAsFixed(0),
+                            style: TextStyle(
+                              fontSize: 9,
+                              color: AppColors.textMuted(isLight),
+                            ),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              borderData: FlBorderData(show: false),
-              lineTouchData: LineTouchData(
-                touchTooltipData: LineTouchTooltipData(
-                  getTooltipItems: (spots) => spots.map((spot) {
-                    final s = series[spot.barIndex];
-                    return LineTooltipItem(
-                      '${s.label}: ${Fmt.ratio(spot.y, decimals: 1)}',
-                      TextStyle(
-                        color: s.color,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
                       ),
-                    );
-                  }).toList(),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 26,
+                          interval: (axis.length / 4).clamp(1, double.infinity),
+                          getTitlesWidget: (value, meta) {
+                            final index = value.round();
+                            if (index < 0 || index >= axis.length) {
+                              return const SizedBox.shrink();
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text(
+                                Fmt.shortDate.format(axis[index]),
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: AppColors.textMuted(isLight),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    borderData: FlBorderData(show: false),
+                    lineTouchData: LineTouchData(
+                      touchTooltipData: LineTouchTooltipData(
+                        getTooltipItems: (spots) => spots.map((spot) {
+                          final s = series[spot.barIndex];
+                          return LineTooltipItem(
+                            '${s.label}: ${Fmt.ratio(spot.y, decimals: 1)}',
+                            TextStyle(
+                              color: s.color,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    lineBarsData: [
+                      for (final s in series)
+                        LineChartBarData(
+                          spots: _spotsOf(s, position),
+                          isCurved: false,
+                          barWidth: 2,
+                          color: s.color,
+                          dotData: const FlDotData(show: false),
+                          belowBarData: BarAreaData(
+                            show: true,
+                            color: s.color.withValues(alpha: 0.08),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-              lineBarsData: [
-                for (final s in series)
-                  LineChartBarData(
-                    spots: _spotsOf(s, position),
-                    isCurved: false,
-                    barWidth: 2,
-                    color: s.color,
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: s.color.withValues(alpha: 0.08),
-                    ),
-                  ),
-              ],
-            ),
-          ),
         ),
       ],
     );
@@ -231,7 +241,9 @@ class Base100Chart extends StatelessWidget {
     }
 
     final spots = <FlSpot>[];
-    final count = dates.length < s.values.length ? dates.length : s.values.length;
+    final count = dates.length < s.values.length
+        ? dates.length
+        : s.values.length;
     for (var i = 0; i < count; i++) {
       final x = position[dates[i]];
       if (x == null) continue;
@@ -303,13 +315,15 @@ class TornadoChart extends StatelessWidget {
                 Expanded(
                   child: SizedBox(
                     height: 18,
-                    child: CustomPaint(
-                      painter: _TornadoBarPainter(
-                        low: bar.low,
-                        high: bar.high,
-                        base: baseValue,
-                        maxSpan: maxSpan,
-                        isLight: isLight,
+                    child: RepaintBoundary(
+                      child: CustomPaint(
+                        painter: _TornadoBarPainter(
+                          low: bar.low,
+                          high: bar.high,
+                          base: baseValue,
+                          maxSpan: maxSpan,
+                          isLight: isLight,
+                        ),
                       ),
                     ),
                   ),
@@ -406,6 +420,35 @@ typedef RiskReturnLegend = ({String label, Color color});
 /// dos pontos: com um único ponto — que era o caso, porque só a carteira
 /// entrava no gráfico — `minX == maxX` e `minY == maxY`, e a conversão de
 /// valor para pixel divide por zero. O resultado era um gráfico ilegível.
+/// O ponto mais próximo de uma coordenada tocada.
+///
+/// Existe para NÃO comparar `double` por igualdade. O ponto tocado é sempre um
+/// dos que desenhamos, então a igualdade exata "funciona" quase sempre — e é
+/// justamente esse quase que a torna traiçoeira: basta o `fl_chart` devolver a
+/// coordenada com um bit de diferença (`12.345000000000001` contra `12.345`)
+/// para o `indexWhere` não achar nada e a legenda não abrir, sem erro nenhum.
+///
+/// Distância quadrática dispensa escolher um epsilon, que teria de ser
+/// calibrado para duas grandezas de escalas diferentes — volatilidade e
+/// retorno. O mínimo é sempre bem definido.
+RiskReturnDot? _nearest(List<RiskReturnDot> points, double x, double y) {
+  if (points.isEmpty) return null;
+
+  var melhor = points.first;
+  var menor = double.infinity;
+
+  for (final p in points) {
+    final dx = p.risk - x;
+    final dy = p.ret - y;
+    final d = dx * dx + dy * dy;
+    if (d < menor) {
+      menor = d;
+      melhor = p;
+    }
+  }
+  return melhor;
+}
+
 class RiskReturnScatter extends StatelessWidget {
   /// Pontos do gráfico: um por ativo e um por carteira.
   final List<RiskReturnDot> points;
@@ -456,7 +499,8 @@ class RiskReturnScatter extends StatelessWidget {
         child: EmptyState(
           icon: Icons.scatter_plot_outlined,
           title: 'Sem dispersão para exibir',
-          message: 'A simulação precisa de ao menos um ativo com histórico '
+          message:
+              'A simulação precisa de ao menos um ativo com histórico '
               'suficiente no período.',
         ),
       );
@@ -476,63 +520,43 @@ class RiskReturnScatter extends StatelessWidget {
       children: [
         SizedBox(
           height: 250,
-          child: ScatterChart(
-            ScatterChartData(
-              minX: minX,
-              maxX: maxX,
-              minY: minY,
-              maxY: maxY,
-              gridData: FlGridData(
-                show: true,
-                horizontalInterval: yInterval,
-                verticalInterval: xInterval,
-                getDrawingHorizontalLine: (_) =>
-                    FlLine(color: AppColors.divider(isLight), strokeWidth: 1),
-                getDrawingVerticalLine: (_) =>
-                    FlLine(color: AppColors.divider(isLight), strokeWidth: 1),
-              ),
-              borderData: FlBorderData(show: false),
-              titlesData: FlTitlesData(
-                topTitles:
-                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles:
-                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                leftTitles: AxisTitles(
-                  axisNameWidget: Text(
-                    'Retorno a.a.',
-                    style: TextStyle(
-                      fontSize: 9.5,
-                      color: AppColors.textMuted(isLight),
-                    ),
+          child: RepaintBoundary(
+            child: ScatterChart(
+              ScatterChartData(
+                minX: minX,
+                maxX: maxX,
+                minY: minY,
+                maxY: maxY,
+                gridData: FlGridData(
+                  show: true,
+                  horizontalInterval: yInterval,
+                  verticalInterval: xInterval,
+                  getDrawingHorizontalLine: (_) =>
+                      FlLine(color: AppColors.divider(isLight), strokeWidth: 1),
+                  getDrawingVerticalLine: (_) =>
+                      FlLine(color: AppColors.divider(isLight), strokeWidth: 1),
+                ),
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
                   ),
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 42,
-                    interval: yInterval,
-                    getTitlesWidget: (value, meta) => Text(
-                      '${value.toStringAsFixed(0)}%',
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  leftTitles: AxisTitles(
+                    axisNameWidget: Text(
+                      'Retorno a.a.',
                       style: TextStyle(
-                        fontSize: 9,
+                        fontSize: 9.5,
                         color: AppColors.textMuted(isLight),
                       ),
                     ),
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  axisNameWidget: Text(
-                    'Volatilidade a.a.',
-                    style: TextStyle(
-                      fontSize: 9.5,
-                      color: AppColors.textMuted(isLight),
-                    ),
-                  ),
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 26,
-                    interval: xInterval,
-                    getTitlesWidget: (value, meta) => Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 42,
+                      interval: yInterval,
+                      getTitlesWidget: (value, meta) => Text(
                         '${value.toStringAsFixed(0)}%',
                         style: TextStyle(
                           fontSize: 9,
@@ -541,60 +565,84 @@ class RiskReturnScatter extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
-              ),
-              scatterLabelSettings: ScatterLabelSettings(
-                showLabel: true,
-                getLabelFunction: (index, _) => points[index].label,
-                getLabelTextStyleFunction: (index, _) => TextStyle(
-                  fontSize: 8.5,
-                  fontWeight: points[index].highlight
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  color: points[index].highlight
-                      ? points[index].color
-                      : AppColors.textMuted(isLight),
-                ),
-              ),
-              scatterTouchData: ScatterTouchData(
-                enabled: true,
-                touchTooltipData: ScatterTouchTooltipData(
-                  getTooltipColor: (_) => (isLight ? Colors.black : Colors.white)
-                      .withValues(alpha: 0.82),
-                  getTooltipItems: (spot) {
-                    final index = points.indexWhere(
-                      (p) => p.risk == spot.x && p.ret == spot.y,
-                    );
-                    if (index < 0) return null;
-                    final p = points[index];
-                    return ScatterTooltipItem(
-                      '${p.label}\n'
-                      'vol ${Fmt.ratio(p.risk, decimals: 1)}% · '
-                      'ret ${Fmt.ratio(p.ret, decimals: 1)}%',
-                      textStyle: TextStyle(
-                        color: isLight ? Colors.white : Colors.black,
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w600,
+                  bottomTitles: AxisTitles(
+                    axisNameWidget: Text(
+                      'Volatilidade a.a.',
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        color: AppColors.textMuted(isLight),
                       ),
-                    );
-                  },
-                ),
-              ),
-              scatterSpots: [
-                for (final p in points)
-                  ScatterSpot(
-                    p.risk,
-                    p.ret,
-                    // As carteiras desenham por cima da nuvem de ativos.
-                    renderPriority: p.highlight ? 1 : 0,
-                    dotPainter: FlDotCirclePainter(
-                      radius: p.highlight ? 8 : 4.5,
-                      color: p.color,
-                      strokeWidth: p.highlight ? 2 : 0,
-                      strokeColor: AppColors.backgroundStart(isLight),
+                    ),
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 26,
+                      interval: xInterval,
+                      getTitlesWidget: (value, meta) => Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          '${value.toStringAsFixed(0)}%',
+                          style: TextStyle(
+                            fontSize: 9,
+                            color: AppColors.textMuted(isLight),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-              ],
+                ),
+                scatterLabelSettings: ScatterLabelSettings(
+                  showLabel: true,
+                  getLabelFunction: (index, _) => points[index].label,
+                  getLabelTextStyleFunction: (index, _) => TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: points[index].highlight
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: points[index].highlight
+                        ? points[index].color
+                        : AppColors.textMuted(isLight),
+                  ),
+                ),
+                scatterTouchData: ScatterTouchData(
+                  enabled: true,
+                  touchTooltipData: ScatterTouchTooltipData(
+                    getTooltipColor: (_) =>
+                        // A dica inverte em relacao ao fundo: escura no tema
+                        // claro e clara no escuro. `textPrimary` ja carrega
+                        // exatamente essa inversao.
+                        context.fin.textPrimary.withValues(alpha: 0.82),
+                    getTooltipItems: (spot) {
+                      final p = _nearest(points, spot.x, spot.y);
+                      if (p == null) return null;
+                      return ScatterTooltipItem(
+                        '${p.label}\n'
+                        'vol ${Fmt.ratio(p.risk, decimals: 1)}% · '
+                        'ret ${Fmt.ratio(p.ret, decimals: 1)}%',
+                        textStyle: TextStyle(
+                          color: context.fin.surface,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                scatterSpots: [
+                  for (final p in points)
+                    ScatterSpot(
+                      p.risk,
+                      p.ret,
+                      // As carteiras desenham por cima da nuvem de ativos.
+                      renderPriority: p.highlight ? 1 : 0,
+                      dotPainter: FlDotCirclePainter(
+                        radius: p.highlight ? 8 : 4.5,
+                        color: p.color,
+                        strokeWidth: p.highlight ? 2 : 0,
+                        strokeColor: AppColors.backgroundStart(isLight),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -617,7 +665,6 @@ class RiskReturnScatter extends StatelessWidget {
     );
   }
 }
-
 
 /// Mapa de calor da matriz de correlação.
 ///
@@ -677,6 +724,23 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
   Widget build(BuildContext context) {
     if (tickers.length < 2) return const SizedBox.shrink();
 
+    // Grade medida, nao declarada. O container ROLA na horizontal, entao
+    // largura maior nao estoura nada -- so exige mais rolagem. Com constante,
+    // o ticker de seis letras sob fonte ampliada era cortado dentro da propria
+    // celula, e o usuario nao tinha como saber que faltava letra.
+    // `tipo`, e nao `t`: o laco de cabecalho abaixo declara `for (final t in
+    // tickers)` e sombrearia a tipografia com um Ticker.
+    final tipo = context.finType;
+    final rotulo = tipo.caption;
+    var nomeWidth = 0.0;
+    for (final ticker in tickers) {
+      final w = FinAmount.measure(context, ticker.value, rotulo);
+      if (w > nomeWidth) nomeWidth = w;
+    }
+    // Medida no papel NUMERICO, que e o que a celula realmente pinta.
+    final celulaWidth =
+        FinAmount.measure(context, '-0,00', tipo.numSm) + FinSpace.sm;
+
     return Scrollbar(
       controller: _controller,
       // Sempre visível: numa matriz que já chega cortada na borda, a barra é a
@@ -688,60 +752,68 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
         // Espaço para a barra não cobrir a última linha da matriz.
         padding: const EdgeInsets.only(bottom: 12),
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const SizedBox(width: 58),
-              for (final t in tickers)
-                SizedBox(
-                  width: 46,
-                  child: Text(
-                    t.value,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 8.5,
-                      color: AppColors.textMuted(isLight),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 3),
-          for (var i = 0; i < tickers.length; i++)
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Row(
               children: [
-                SizedBox(
-                  width: 58,
-                  child: Text(
-                    tickers[i].value,
-                    style: TextStyle(
-                      fontSize: 8.5,
-                      color: AppColors.textMuted(isLight),
-                    ),
-                  ),
-                ),
-                for (var j = 0; j < tickers.length; j++)
-                  Container(
-                    width: 44,
-                    height: 26,
-                    margin: const EdgeInsets.all(1),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: _cellColor(matrix[i][j]),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                SizedBox(width: nomeWidth + FinSpace.md),
+                for (final t in tickers)
+                  SizedBox(
+                    width: celulaWidth + 2,
                     child: Text(
-                      Fmt.ratio(matrix[i][j]),
-                      style: const TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
+                      t.value,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: rotulo.copyWith(color: context.fin.textTertiary),
                     ),
                   ),
               ],
             ),
+            const SizedBox(height: 3),
+            for (var i = 0; i < tickers.length; i++)
+              Row(
+                children: [
+                  SizedBox(
+                    width: nomeWidth + FinSpace.md,
+                    child: Text(
+                      tickers[i].value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: rotulo.copyWith(color: context.fin.textTertiary),
+                    ),
+                  ),
+                  for (var j = 0; j < tickers.length; j++)
+                    Builder(
+                      builder: (context) {
+                        final fill = _cellColor(matrix[i][j]);
+                        return Container(
+                          width: celulaWidth,
+                          // Padding, e nao altura fixa: a celula cresce com a fonte
+                          // do usuario em vez de cortar o numero.
+                          padding: const EdgeInsets.symmetric(
+                            vertical: FinSpace.xs,
+                          ),
+                          margin: const EdgeInsets.all(1),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: fill,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            Fmt.ratio(matrix[i][j]),
+                            // A tinta e escolhida pela luminancia do PROPRIO
+                            // preenchimento: no tema claro a celula e clara e pede
+                            // tinta escura. Branco fixo dava 1,94:1 ali.
+                            style: tipo.numSm.copyWith(
+                              color: context.fin.inkOn(fill),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                ],
+              ),
           ],
         ),
       ),
