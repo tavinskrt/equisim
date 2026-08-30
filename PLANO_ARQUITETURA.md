@@ -6,12 +6,14 @@
 
 ---
 
-> ## ⏸ DOCUMENTO CONGELADO
+> ## ⏸ DOCUMENTO CONGELADO — PLANO DE TRANSIÇÃO CUMPRIDO
 >
-> **Este parecer não é mais mantido.** Ele é o registro do que se concluiu em
-> **agosto de 2026**, e envelhece a partir daí — de propósito. Um documento
-> datado que se sabe datado engana menos que um documento vivo que ninguém
-> atualiza. Ver [decisão 19](docs/decisoes/019-registro-por-arquivo.md).
+> **Este parecer não é mais mantido, e já não era antes de ser congelado.** Ele
+> foi o plano de **transição do Equisim antigo para esta versão**, escrito em
+> 19/08/2026. Cumprido esse papel, ele virou registro histórico: envelhece a
+> partir daqui, de propósito. Um documento datado que se sabe datado engana
+> menos que um documento vivo que ninguém atualiza.
+> Ver [decisão 19](docs/decisoes/019-registro-por-arquivo.md).
 >
 > **Onde procurar o que vale hoje:**
 >
@@ -24,9 +26,10 @@
 >
 > **O que sabidamente envelheceu neste texto:**
 >
-> - O roadmap da §6 marca as Fases 0 a 5 como concluídas em 19–20/08/2026. Nove
->   commits posteriores — as Ondas 1 a 4 de refatoração da UI — não têm lugar
->   nele. Ver [decisão 21](docs/decisoes/021-ondas-de-refatoracao-da-ui.md).
+> - O roadmap da §6 termina na Fase 5, em 20/08/2026, e **termina ali de fato** —
+>   a transição que ele planejava foi concluída. As Ondas 1 a 4 de refatoração da
+>   UI, de 29/08/2026, são trabalho posterior e **não pertencem a este roadmap**;
+>   não as procure aqui. Ver [decisão 21](docs/decisoes/021-ondas-de-refatoracao-da-ui.md).
 > - A cadeia de QA por agente e o barramento `lib/audit/` não existiam quando
 >   isto foi escrito. Ver [decisão 20](docs/decisoes/020-cadeia-de-qa-por-agente.md).
 > - As medições da §1 e o estudo de qualidade de dados da §0.4 têm data. Confira

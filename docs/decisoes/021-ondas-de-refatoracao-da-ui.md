@@ -14,10 +14,16 @@ substitui: []
 
 ## Contexto
 
-Segunda tensão ESTRUTURAL reportada pela lente `registro`, ancorada no commit
-`85fd0c1`: o parecer declara as Fases 0 a 5 concluídas e "o plano completo e
-validado", e nove commits posteriores — as Ondas 1 a 4 — reconstruíram a
-camada de apresentação sem que nada disso tenha lugar no roadmap.
+A lente `registro` reportou as Ondas 1 a 4 como ESTRUTURA SEM REGISTRO, por
+correrem fora do roadmap do parecer. **A leitura estava incompleta, e o registro
+corrige isso aqui:** o `PLANO_ARQUITETURA.md` é um plano de *transição* do
+Equisim antigo para esta versão, escrito por volta de 15/08/2026 e já
+descontinuado quando as Ondas aconteceram — todas em 29/08/2026. Elas não
+pertencem àquele roadmap e não devem ser retroencaixadas nele.
+
+O que o agente enxergou como lacuna era, na verdade, um documento que já tinha
+cumprido seu papel. Isso reforça a decisão 19 em vez de contrariá-la: o parecer
+estava descontinuado de fato antes de ser congelado de direito.
 
 A interface anterior declarava cor, tipografia e espaçamento no ponto de uso.
 O efeito medido antes da migração: 62 literais `Color(0x...)` e 209 espaçadores
@@ -55,4 +61,6 @@ camada de apresentação para ele em quatro ondas:
 - **Isto resolveu a base do código, não a direção visual.** Tokens, contraste e
   ausência de estouro são condições necessárias e não suficientes: a disposição
   dos elementos, a hierarquia e a arquitetura de informação continuam abertas, e
-  são objeto da lente `tela` do conselheiro.
+  são objeto da lente `tela` do conselheiro. A reconstrução visual pós-ondas é
+  trabalho declarado para depois desta integração terminar — ver a postura de
+  reconstrução, que abrirá decisão própria com fronteira escrita.

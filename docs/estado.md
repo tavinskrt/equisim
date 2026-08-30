@@ -7,7 +7,7 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-08-30, a partir de `85fd0c1`.
+Gerado em 2026-08-30, a partir de `f77fb8a`.
 
 ## Decisões registradas
 
@@ -34,11 +34,12 @@ Linhas versionadas, excluindo artefatos gerados.
 | Camada de dados | 13 | 2.652 |
 | Testes do app | 27 | 3.421 |
 | Testes do nucleo | 11 | 3.107 |
-| Ferramentas de QA | 13 | 4.149 |
+| Ferramentas de QA | 19 | 5.939 |
 
 ## Histórico recente
 
 ```
+2026-08-30  f77fb8a  Iniciando integração do advisor
 2026-08-29  85fd0c1  Onda 4 finalizada e dependências completamente atualizadas
 2026-08-29  f62b336  Parcial da Onda 4
 2026-08-29  31cf931  Onda 3 finalizada
@@ -53,5 +54,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-08-28  4518b16  Criada auditoria de cálculos e correção de estouro no painel de visualização de logs
 2026-08-28  cbf29d7  Correção de exceção na interface e destravando BCB
 2026-08-28  b0a2d6d  Continuação da integração com o Gemini
-2026-08-28  dfd6a0a  Removido arquivo de teste contra commits não funcionais
 ```

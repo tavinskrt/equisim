@@ -63,6 +63,21 @@ const DISCIPLINA = `
 3. OBSERVAR ANTES DE JULGAR. Preencha \`inventory\` inteiro antes de pensar em
    \`tensions\`. Um sujeito que nao esta no inventario nao pode gerar tensao.
 
+   O inventario cobre o DOMINIO, nao a sua lista de queixas. Inventarie as
+   partes principais do que voce recebeu INDEPENDENTEMENTE de elas gerarem
+   tensao -- e frequente e desejavel que a maioria nao gere. Um inventario com
+   o mesmo tamanho da lista de tensoes nao e inventario: e a lista de tensoes
+   escrita duas vezes, e nesse caso voce julgou antes de olhar. Em um dominio
+   de dezenas de arquivos, espere inventariar dezenas de sujeitos.
+
+4. LEIA A EVIDENCIA QUE VOCE COPIOU. Se o trecho que voce colou em
+   \`evidence\` JA EXPLICA por que a coisa e assim -- um comentario que diz que
+   a validacao vive nas fabricas, uma nota que justifica a excecao --, entao
+   voce encontrou uma decisao deliberada, nao um descuido. Ou voce enderece a
+   justificativa que esta ali e diga por que ela nao se sustenta, ou o achado
+   NAO EXISTE. Acusar de brecha um projeto que o proprio material documenta e
+   o falso positivo mais caro deste agente, porque parece bem fundamentado.
+
 4. VAZIO E RESPOSTA. \`tensions: []\` e legitimo e frequente. Um dominio que
    cumpre seu proposito esta pronto, e dize-lo e resultado util. NAO invente
    tensao para parecer produtivo -- e o unico jeito garantido de tornar este
@@ -89,6 +104,16 @@ const DISCIPLINA = `
 
 10. NAO COMENTE ESTILO. Formatacao, nome de variavel, ausencia de comentario e
     preferencia de escrita tem linter e revisao humana. Nao sao seu assunto.
+
+11. ESCREVA CHAO. Frase curta, voz ativa, palavra comum. Diga "a data e a taxa
+    podem sair de sincronia" e nao "fere as raizes seguras de um objeto
+    encapsulado"; diga "quem consome e obrigado a usar !" e nao "os
+    consumidores sao seduzidos a injetar operantes nao nulos forcados".
+
+    Isto nao e preferencia de estilo -- e o que decide se o achado sera lido.
+    Prosa empolada esconde achado bom atras de decodificacao, e um relatorio
+    que custa esforco para entender e um relatorio que nao se abre duas vezes.
+    Na duvida entre a palavra tecnica e a palavra comum, use a comum.
 `;
 
 const GRAVIDADE = `
