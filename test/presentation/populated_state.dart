@@ -157,6 +157,19 @@ GoalAlignment alinhamento() => GoalAlignment(
 // O conjunto completo
 // ---------------------------------------------------------------------------
 
+/// Meta de demonstracao: prazo de dez anos contra a janela padrao de cinco.
+///
+/// O descasamento e DELIBERADO. A aba Analise so declara a relacao entre os
+/// dois horizontes quando eles diferem, e uma meta de cinco anos deixaria essa
+/// declaracao fora da captura -- que e justamente onde ela precisa ser
+/// conferida.
+const metaDemo = FinancialGoal(
+  initialContribution: Money(1000000),
+  monthlyContribution: Money(100000),
+  months: 120,
+  targetWealth: Money(50000000),
+);
+
 /// Tickers da carteira de demonstracao, com setores distintos para que a
 /// dispersao e a barra de concentracao tenham mais de uma cor.
 const carteiraDemo = <(String, String)>[

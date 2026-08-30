@@ -6,6 +6,18 @@ import '../study/study_notifier.dart';
 
 /// Parâmetros da simulação histórica.
 class BacktestSettings {
+  /// Piso da janela, em anos.
+  static const int minWindowYears = 1;
+
+  /// Teto da janela, em anos — o que a fonte de cotações entrega.
+  ///
+  /// Nomeado porque o número é citado em três lugares: o mutador que trava a
+  /// faixa, o controle deslizante que a desenha e o aviso que explica ao
+  /// usuário por que uma meta de vinte anos não cabe na simulação. Escrito
+  /// como literal nos três, bastaria a fonte passar a entregar quinze para
+  /// que a interface passasse a mentir em dois deles.
+  static const int maxWindowYears = 10;
+
   /// Quantos anos de histórico a simulação percorre, contados **para trás a
   /// partir de hoje**. Dez anos é o teto porque é o que a fonte de cotações
   /// entrega.
@@ -51,9 +63,14 @@ class BacktestSettingsNotifier extends Notifier<BacktestSettings> {
   @override
   BacktestSettings build() => const BacktestSettings();
 
-  /// Ajusta a janela do backtest, travada em 1 a 10 anos.
-  void setWindowYears(int years) =>
-      state = state.copyWith(windowYears: years.clamp(1, 10));
+  /// Ajusta a janela do backtest, travada na faixa declarada por
+  /// [BacktestSettings.minWindowYears] e [BacktestSettings.maxWindowYears].
+  void setWindowYears(int years) => state = state.copyWith(
+    windowYears: years.clamp(
+      BacktestSettings.minWindowYears,
+      BacktestSettings.maxWindowYears,
+    ),
+  );
 
   /// Liga ou desliga a tributação de proventos, alternando entre
   /// `TaxPolicy.brasil` e `TaxPolicy.zero`.

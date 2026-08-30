@@ -74,6 +74,33 @@ abstract final class Fmt {
   /// Número adimensional — múltiplo, beta, índice de Sharpe.
   static String ratio(double value, {int decimals = 2}) =>
       value.isFinite ? _decimalFormat(decimals).format(value) : '—';
+
+  /// Diferença entre duas taxas, em **pontos percentuais**, com sinal.
+  ///
+  /// [points] já chega na unidade final: `3.5` vira `+3,5 p.p.`. Não é
+  /// fração — `Fmt.percent` é que multiplica por cem.
+  ///
+  /// Existe porque a mesma expressão estava escrita em três lugares — a
+  /// deriva de peso, a folga da meta e a coluna que MEDE a largura da deriva.
+  /// Duas cópias que precisam concordar entre si já são uma a mais: se a
+  /// medida e o texto divergirem, a coluna trunca sem aviso.
+  static String points(double points, {int decimals = 1}) {
+    if (!points.isFinite) return '—';
+    final sign = points >= 0 ? '+' : '';
+    return '$sign${ratio(points, decimals: decimals)} p.p.';
+  }
+
+  /// Prazo em meses, por extenso: `120` vira `10 anos e 0 meses`.
+  ///
+  /// A forma é a que a tela da Meta já usava. Mora aqui para que a aba
+  /// Análise possa citar o prazo da meta **com as mesmas palavras** — dois
+  /// horizontes escritos em formatos diferentes na mesma sessão de uso é
+  /// exatamente o que impede o leitor de compará-los.
+  static String months(int months) {
+    final anos = months ~/ 12;
+    final resto = months % 12;
+    return '$anos anos e $resto meses';
+  }
 }
 
 /// Cartão translúcido — a linguagem visual herdada do projeto anterior.

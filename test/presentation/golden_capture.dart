@@ -160,6 +160,11 @@ Future<void> _montar(
     for (final (simbolo, setor) in carteiraDemo) {
       notifier.addAsset(assetOf(simbolo, setor), toPrincipal: true);
     }
+    // A meta tambem, e nao so os ativos: sem ela a aba Analise nao tem prazo
+    // com que confrontar a janela, e a captura mostraria a tela com o
+    // confronto de horizontes ausente -- exatamente o estado que a lente
+    // leria como "a interface nao declara a relacao".
+    notifier.setGoal(metaDemo);
   }
 
   await tester.pumpWidget(

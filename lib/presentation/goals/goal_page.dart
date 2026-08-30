@@ -124,9 +124,12 @@ class _GoalPageState extends ConsumerState<GoalPage> {
                       onChanged: _apply,
                     ),
                     const Gap.lg(),
+                    // `Fmt.months`: a aba Analise cita este mesmo prazo ao
+                    // declarar a janela da simulacao, e os dois precisam sair
+                    // com as mesmas palavras para serem comparaveis.
                     LabelValueRow(
                       label: 'Prazo',
-                      value: '${_months ~/ 12} anos e ${_months % 12} meses',
+                      value: Fmt.months(_months),
                     ),
                     Slider(
                       value: _months.toDouble(),
@@ -408,12 +411,10 @@ class _AlignmentCard extends StatelessWidget {
               ),
               MetricTile(
                 label: 'Folga',
-                // `Fmt.ratio`, e nao `toStringAsFixed`: o segundo ignora
-                // locale e punha "-3.5 p.p." ao lado de "18,44%" no mesmo
-                // cartao.
-                value:
-                    '${alignment.gap >= 0 ? '+' : ''}'
-                    '${Fmt.ratio(alignment.gap, decimals: 1)} p.p.',
+                // `Fmt.points`, e nao interpolacao a mao: a aba Analise exibe
+                // a MESMA grandeza no cartao de confronto, e duas escritas da
+                // mesma folga divergem na primeira vez que uma delas mudar.
+                value: Fmt.points(alignment.gap),
                 trend: FinAmount.trendOf(alignment.gap),
               ),
             ],

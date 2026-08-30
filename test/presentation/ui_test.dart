@@ -492,6 +492,250 @@ void main() {
     });
   });
 
+  group('Backtest — a janela declarada contra o prazo da meta', () {
+    void telaAlta(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    /// Monta a tela com uma meta ja definida, pelo mesmo caminho que o usuario
+    /// usaria: o notifier, e nao um override do estado.
+    Future<void> comMeta(WidgetTester tester, int months) async {
+      late WidgetRef capturado;
+      await tester.pumpWidget(harness(
+        overrides: [
+          comparisonProvider.overrideWith((ref) async => null),
+          correlationProvider.overrideWith((ref) async => null),
+        ],
+        child: Consumer(builder: (context, ref, _) {
+          capturado = ref;
+          return const BacktestPage();
+        }),
+      ));
+      capturado.read(studyProvider.notifier).setGoal(FinancialGoal(
+            initialContribution: const Money(1000000),
+            monthlyContribution: const Money(100000),
+            months: months,
+            targetWealth: const Money(50000000),
+          ));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('os dois horizontes aparecem empilhados', (tester) async {
+      telaAlta(tester);
+      // Sem a segunda linha, "5 anos" nao tem com o que ser comparado: o
+      // leitor supoe que a simulacao percorre o plano inteiro.
+      await comMeta(tester, 120);
+
+      expect(find.text('Janela'), findsOneWidget);
+      expect(find.text('Prazo da meta'), findsOneWidget);
+      expect(find.text('10 anos e 0 meses'), findsOneWidget);
+    });
+
+    testWidgets('janela menor que o prazo avisa qual fracao cobre',
+        (tester) async {
+      telaAlta(tester);
+      await comMeta(tester, 120);
+
+      expect(
+        find.textContaining('cobre 5 dos 10 anos da meta'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('prazo acima do teto da fonte diz que nenhuma janela alcanca',
+        (tester) async {
+      telaAlta(tester);
+      await comMeta(tester, 240);
+
+      expect(
+        find.textContaining('nenhuma posição do controle alcança o prazo'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('janela que cobre o prazo inteiro nao avisa nada',
+        (tester) async {
+      telaAlta(tester);
+      // Aviso que aparece sempre deixa de ser aviso.
+      await comMeta(tester, 48);
+
+      expect(find.textContaining('anos da meta'), findsNothing);
+    });
+
+    testWidgets('prazo nao multiplo de doze arredonda para cima',
+        (tester) async {
+      telaAlta(tester);
+      // 66 meses sao 5,5 anos: uma janela de cinco NAO os cobre, e truncar
+      // para 5 diria exatamente que cobre.
+      await comMeta(tester, 66);
+
+      expect(find.textContaining('cobre 5 dos 6 anos da meta'), findsOneWidget);
+    });
+  });
+
+  group('Backtest — confronto com a meta no período simulado', () {
+    void telaAlta(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    FeasibilityVerdict veredito(double annual) => FeasibilityVerdict(
+          level: FeasibilityLevel.demanding,
+          requiredAnnualRate: annual,
+          anchors: MarketAnchors.fallback2026,
+          message: 'meta exigente',
+        );
+
+    /// Serie longa o bastante para o XIRR existir.
+    ///
+    /// Tres pregoes NAO bastam: `moneyWeightedReturn` devolve `null` quando os
+    /// fluxos nao sustentam a taxa, e um cenario assim testaria o travessao em
+    /// vez do confronto.
+    List<double> serieLonga(double passo) =>
+        List<double>.generate(120, (i) => 10 + i * passo);
+
+    List<Override> cenario({
+      required PortfolioComparison comparison,
+      FeasibilityVerdict? verdict,
+    }) =>
+        [
+          comparisonProvider.overrideWith((ref) async => comparison),
+          correlationProvider.overrideWith((ref) async => null),
+          goalFeasibilityProvider.overrideWith((ref) async => verdict),
+        ];
+
+    testWidgets('o exigido e o realizado aparecem no mesmo cartao',
+        (tester) async {
+      telaAlta(tester);
+      // O glossario do XIRR sempre disse que "e este o numero a confrontar
+      // com a meta". Este e o cartao em que o confronto acontece.
+      await tester.pumpWidget(harness(
+        overrides: cenario(
+          comparison: comparisonOf(
+            principal: outcomeOf('PETR4', serieLonga(0.05)),
+          ),
+          verdict: veredito(0.184),
+        ),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('A CARTEIRA FRENTE À META'), findsOneWidget);
+      // Os mesmos tres rotulos da aba Meta -- e a mesma grandeza medida de
+      // outro jeito, e vocabulario divergente esconderia isso.
+      expect(find.text('Exigido'), findsOneWidget);
+      expect(find.text('Realizado'), findsOneWidget);
+      expect(find.text('Folga'), findsOneWidget);
+      // Os tres numeros vem da serie deterministica acima: exigido de 18,40%
+      // contra um XIRR de 180,89% deixa 162,5 pontos de folga.
+      expect(find.text('18,40%'), findsOneWidget);
+      expect(find.text('+162,5 p.p.'), findsOneWidget);
+      // DUAS ocorrencias, e e assim que tem de ser: o mesmo XIRR aparece no
+      // confronto e no painel de indicadores logo abaixo. Os dois leem
+      // `principal.metrics.moneyWeightedReturn`, entao nao ha como divergirem
+      // -- que e a propriedade que faltava aos dois "exigido" da aba Meta.
+      expect(find.text('+180,89%'), findsNWidgets(2));
+    });
+
+    testWidgets('XIRR ausente vira travessao, nao numero inventado',
+        (tester) async {
+      telaAlta(tester);
+      // Tres pregoes nao sustentam a taxa. Admitir a ausencia do dado e a
+      // convencao do projeto -- exibir NaN colorido de verde seria pior.
+      await tester.pumpWidget(harness(
+        overrides: cenario(
+          comparison: comparisonOf(
+            principal: outcomeOf('PETR4', const [10, 12, 14]),
+          ),
+          verdict: veredito(0.184),
+        ),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('A CARTEIRA FRENTE À META'), findsOneWidget);
+      expect(find.text('18,40%'), findsOneWidget);
+      // Realizado, a Folga que dele deriva, e o XIRR do painel abaixo.
+      expect(find.text('—'), findsNWidgets(3));
+    });
+
+    testWidgets('sem veredito de viabilidade o cartao nao aparece',
+        (tester) async {
+      telaAlta(tester);
+      await tester.pumpWidget(harness(
+        overrides: cenario(
+          comparison: comparisonOf(
+            principal: outcomeOf('PETR4', const [10, 12, 14]),
+          ),
+        ),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('A CARTEIRA FRENTE À META'), findsNothing);
+    });
+
+    testWidgets('taxa exigida nao finita nao rende cartao', (tester) async {
+      telaAlta(tester);
+      // Meta que o solver nao resolveu ja e explicada na aba Meta; repetir um
+      // travessao sem contexto aqui so ocuparia espaco.
+      await tester.pumpWidget(harness(
+        overrides: cenario(
+          comparison: comparisonOf(
+            principal: outcomeOf('PETR4', const [10, 12, 14]),
+          ),
+          verdict: veredito(double.infinity),
+        ),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('A CARTEIRA FRENTE À META'), findsNothing);
+    });
+
+    testWidgets('com Reserva simulada, a alternativa ganha a propria linha',
+        (tester) async {
+      telaAlta(tester);
+      // "E se eu tivesse montado a outra?" e a pergunta que faz a aba existir.
+      await tester.pumpWidget(harness(
+        overrides: cenario(
+          comparison: comparisonOf(
+            principal: outcomeOf('PETR4', serieLonga(0.05)),
+            reserva: outcomeOf('ITUB4', serieLonga(0.12)),
+          ),
+          verdict: veredito(0.184),
+        ),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('A Reserva, sob os mesmos aportes'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('sem Principal simulada nao ha o que confrontar',
+        (tester) async {
+      telaAlta(tester);
+      await tester.pumpWidget(harness(
+        overrides: cenario(
+          comparison: comparisonOf(
+            reserva: outcomeOf('ITUB4', const [10, 18, 25]),
+          ),
+          verdict: veredito(0.184),
+        ),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('A CARTEIRA FRENTE À META'), findsNothing);
+    });
+  });
+
   group('Dispersão risco × retorno', () {
     test('marca cada ativo pela carteira de origem', () async {
       final today = DateTime.now();

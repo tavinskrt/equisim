@@ -9,10 +9,42 @@ import '../shared/charts.dart';
 import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
 import '../study/study_notifier.dart';
+import '../valuation/valuation_providers.dart';
 import '../theme/fin_colors.dart';
 import '../theme/fin_space.dart';
 import '../theme/fin_theme.dart';
 import 'backtest_providers.dart';
+
+/// Diz, quando é o caso, que a janela simulada não cobre o prazo da meta.
+///
+/// Devolve `null` quando não há o que dizer — sem meta, ou com janela que já
+/// alcança o prazo inteiro. Aviso que aparece sempre deixa de ser aviso: o
+/// leitor aprende a saltá-lo antes de chegar ao caso em que ele importa.
+///
+/// O prazo é arredondado **para cima**. Uma meta de 66 meses não é coberta
+/// por uma janela de cinco anos, e truncar para 5 diria exatamente que é.
+String? _horizonNotice(BacktestSettings settings, FinancialGoal? goal) {
+  if (goal == null) return null;
+
+  final janela = settings.windowYears;
+  final prazo = (goal.months / 12).ceil();
+  if (janela >= prazo) return null;
+
+  // "A janela", e nao "a janela simulada": a simulada pode ser MENOR que a
+  // pedida quando algum ativo não tem histórico desde o início, e aí dizer que
+  // ela cobre cinco anos exageraria a cobertura. O encurtamento tem faixa
+  // própria; esta aqui fala do parâmetro, que é o que o leitor acabou de ver.
+  final aviso =
+      'A janela cobre $janela dos $prazo anos da meta. Compare a '
+      'RENTABILIDADE, não o patrimônio: o valor final abaixo acumula só parte '
+      'do plano de aportes, não o prazo inteiro.';
+
+  if (prazo <= BacktestSettings.maxWindowYears) return aviso;
+
+  return '$aviso A fonte de cotações entrega no máximo '
+      '${BacktestSettings.maxWindowYears} anos, então nenhuma posição do '
+      'controle alcança o prazo da meta.';
+}
 
 /// Tela de análise histórica: Principal contra Reserva sob o mesmo plano.
 class BacktestPage extends ConsumerWidget {
@@ -32,9 +64,25 @@ class BacktestPage extends ConsumerWidget {
           sliver: SliverMainAxisGroup(
             slivers: [
               SliverToBoxAdapter(
-                child: _SettingsCard(settings: settings, isLight: isLight),
+                child: _SettingsCard(
+                  settings: settings,
+                  goal: study.goal,
+                  isLight: isLight,
+                ),
               ),
               const SliverToBoxAdapter(child: Gap.md()),
+              // O descasamento de horizonte é ressalva do PARÂMETRO, não do
+              // resultado: aparece mesmo enquanto a simulação roda, porque é
+              // ele que decide como o número que vem abaixo deve ser lido.
+              if (_horizonNotice(settings, study.goal) case final aviso?) ...[
+                SliverToBoxAdapter(
+                  child: NoticeBanner(
+                    icon: Icons.straighten,
+                    message: aviso,
+                  ),
+                ),
+                const SliverToBoxAdapter(child: Gap.md()),
+              ],
               comparison.when(
                 loading: () =>
                     const SliverToBoxAdapter(child: _ComparisonSkeleton()),
@@ -78,9 +126,20 @@ class BacktestPage extends ConsumerWidget {
 
 class _SettingsCard extends ConsumerWidget {
   final BacktestSettings settings;
+
+  /// Plano da aba Meta, quando já existe. Entra aqui para que a janela seja
+  /// declarada **contra o prazo da meta** em vez de sozinha: sem a segunda
+  /// linha, "5 anos" não tem com o que ser comparado e o leitor supõe que a
+  /// simulação percorre o plano inteiro.
+  final FinancialGoal? goal;
+
   final bool isLight;
 
-  const _SettingsCard({required this.settings, required this.isLight});
+  const _SettingsCard({
+    required this.settings,
+    required this.goal,
+    required this.isLight,
+  });
 
   static DateTime _windowStart(int years) {
     final today = DateTime.now();
@@ -101,6 +160,14 @@ class _SettingsCard extends ConsumerWidget {
           ),
           const Gap.sm(),
           LabelValueRow(label: 'Janela', value: '${settings.windowYears} anos'),
+          // O prazo da meta, logo abaixo e no MESMO formato em que a aba Meta
+          // o escreve. Empilhados, os dois horizontes se comparam sem que o
+          // leitor precise guardar um deles na cabeça ao trocar de aba.
+          if (goal != null)
+            LabelValueRow(
+              label: 'Prazo da meta',
+              value: Fmt.months(goal!.months),
+            ),
           Text(
             'Quanto tempo de história a simulação percorre, contado de hoje '
             'para trás. Com ${settings.windowYears} anos, o plano de aportes '
@@ -115,9 +182,11 @@ class _SettingsCard extends ConsumerWidget {
           ),
           Slider(
             value: settings.windowYears.toDouble(),
-            min: 1,
-            max: 10,
-            divisions: 9,
+            min: BacktestSettings.minWindowYears.toDouble(),
+            max: BacktestSettings.maxWindowYears.toDouble(),
+            divisions:
+                BacktestSettings.maxWindowYears -
+                BacktestSettings.minWindowYears,
             activeColor: context.fin.brand,
             onChanged: (value) => notifier.setWindowYears(value.round()),
           ),
@@ -378,6 +447,8 @@ class _ComparisonBody extends ConsumerWidget {
         ],
         if (principal != null) ...[
           const Gap.md(),
+          _GoalConfrontationCard(principal: principal, reserva: reserva),
+          const Gap.md(),
           _MetricsCard(
             title: 'Carteira Principal',
             outcome: principal,
@@ -457,16 +528,120 @@ String _shortenedWindowMessage(PortfolioComparison result) {
       'comparável. Reduza a janela para descartar o ativo como restrição.';
 }
 
-/// Deriva de peso em pontos percentuais, com sinal explícito.
+/// Confronto entre a rentabilidade que a meta EXIGE e a que a janela simulada
+/// de fato ENTREGOU.
 ///
-/// Existe como função porque o texto é escrito num lugar e **medido** em
-/// outro: `_AssetGroup._columnWidths` dimensiona a coluna por ele. Duplicar a
-/// formatação faria a medida mentir na primeira divergência.
+/// É o cartão que faltava para a aba fechar sobre a Meta. O glossário do XIRR,
+/// logo abaixo, sempre disse que "é este o número a confrontar com a meta" — e
+/// o confronto não existia em tela alguma: quem confrontava era a aba Meta, e
+/// não com o XIRR, e sim com o retorno esperado derivado do valuation.
 ///
-/// `Fmt.ratio`, e não `toStringAsFixed` — este ignora locale e emitia
-/// `+31.6 p.p.` sob a convenção brasileira.
-String _drift(double drift) =>
-    '${drift >= 0 ? '+' : ''}${Fmt.ratio(drift, decimals: 1)} p.p.';
+/// **Projeção e evidência respondem à mesma pergunta com autoridades
+/// diferentes**, e as duas importam. Lá, o que a avaliação implica; aqui, o
+/// que a composição entregou. Por isso este cartão repete os rótulos daquele
+/// — `Exigido`, `Realizado`, `Folga` — em vez de inventar vocabulário: é a
+/// mesma grandeza, medida de outro jeito.
+///
+/// **Confronta TAXAS, nunca patrimônios.** A janela simulada quase sempre é
+/// mais curta que o prazo da meta, e taxas anualizadas se comparam entre
+/// períodos de durações diferentes enquanto patrimônios não. Projetar o alvo
+/// sobre a janela seria aritmética nova, e aritmética nova mora no núcleo.
+class _GoalConfrontationCard extends ConsumerWidget {
+  /// Resultado da carteira **Principal**. É contra ela que a meta é avaliada,
+  /// como já faz `goalAlignmentProvider` na aba Meta.
+  final BacktestOutcome principal;
+
+  /// Resultado da Reserva, quando houve. Rende uma linha subordinada: a
+  /// pergunta "e se eu tivesse montado a outra?" é a razão de a aba existir.
+  final BacktestOutcome? reserva;
+
+  const _GoalConfrontationCard({required this.principal, required this.reserva});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final verdict = ref.watch(goalFeasibilityProvider);
+
+    return verdict.maybeWhen(
+      orElse: () => const SizedBox.shrink(),
+      data: (v) {
+        // Taxa não finita é meta que o solver não resolveu. A aba Meta já
+        // explica o porquê; repetir aqui um travessão sem contexto só ocuparia
+        // espaço.
+        if (v == null || !v.requiredAnnualRate.isFinite) {
+          return const SizedBox.shrink();
+        }
+
+        final exigido = v.requiredAnnualRate;
+        final realizado = principal.metrics.moneyWeightedReturn;
+        final folga = realizado == null ? null : (realizado - exigido) * 100;
+
+        return GlassCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SectionHeader(
+                title: 'A carteira frente à meta',
+                subtitle: 'No período simulado · ${principal.effectivePeriod}',
+              ),
+              const Gap.md(),
+              MetricTileRow(
+                tiles: [
+                  MetricTile(
+                    label: 'Exigido',
+                    value: Fmt.percent(exigido),
+                    hint: 'ao ano',
+                  ),
+                  MetricTile(
+                    label: 'Realizado',
+                    value: realizado == null
+                        ? '—'
+                        : Fmt.percent(realizado, signed: true),
+                    hint: 'XIRR, ao ano',
+                    trend: FinAmount.trendOf(realizado),
+                  ),
+                  MetricTile(
+                    label: 'Folga',
+                    value: folga == null ? '—' : Fmt.points(folga),
+                    trend: FinAmount.trendOf(folga),
+                  ),
+                ],
+              ),
+              const Gap.sm(),
+              Text(
+                'O exigido vem do plano da aba Meta. O realizado é o XIRR da '
+                'janela simulada — o que esta composição entregou no passado, '
+                'não o que ela promete para o prazo da meta.',
+                style: context.finType.caption.copyWith(
+                  color: context.fin.textTertiary,
+                ),
+              ),
+              if (reserva != null) ...[
+                const Gap.sm(),
+                Builder(
+                  builder: (context) {
+                    final alternativa = reserva!.metrics.moneyWeightedReturn;
+                    if (alternativa == null) return const SizedBox.shrink();
+                    final folgaAlternativa = (alternativa - exigido) * 100;
+                    // Sem ponto final: `Fmt.points` termina em "p.p.", e a
+                    // abreviação já carrega o ponto que fecha a frase.
+                    return Text(
+                      'A Reserva, sob os mesmos aportes, teria rendido '
+                      '${Fmt.percent(alternativa, signed: true)} ao ano — '
+                      'folga de ${Fmt.points(folgaAlternativa)}',
+                      style: context.finType.caption.copyWith(
+                        color: context.fin.textSecondary,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
 
 /// Glossário dos indicadores do cartão de métricas.
 ///
@@ -823,7 +998,7 @@ class _AssetGroup extends StatelessWidget {
       );
       if (r > value) value = r;
 
-      final d = FinAmount.measure(context, _drift(asset.drift), driftStyle);
+      final d = FinAmount.measure(context, Fmt.points(asset.drift), driftStyle);
       if (d > value) value = d;
     }
 
@@ -948,7 +1123,7 @@ class _AssetRow extends StatelessWidget {
                   trend: FinAmount.trendOf(asset.totalReturn),
                 ),
                 Text(
-                  _drift(asset.drift),
+                  Fmt.points(asset.drift),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   // `numSm` e o mesmo papel usado para medir a coluna em
