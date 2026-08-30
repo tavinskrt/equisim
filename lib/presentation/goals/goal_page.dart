@@ -229,6 +229,29 @@ class _VerdictSkeleton extends StatelessWidget {
   }
 }
 
+/// Um dos três valores que o investidor digita no plano patrimonial.
+///
+/// **A afordância é o ponto deste widget**, não a aparência. Ele nasceu com
+/// `borderSide: BorderSide.none` sobre um preenchimento `surfaceSunken`, e a
+/// lente `tela` leu o resultado exatamente como ele se apresentava: *"os
+/// blocos contendo 'R$ 10000', 'R$ 1000' e 'R$ 500000' são retângulos
+/// cinza-claros uniformes sem qualquer indicação visual de que aceitam
+/// digitação"*.
+///
+/// O custo era grande e silencioso: quem usa conclui que os valores são
+/// calculados pelo sistema, mexe só no controle de prazo, e nunca personaliza
+/// o plano. A funcionalidade existia e ficava invisível.
+///
+/// **Borda E marca de edição, não uma ou outra.** A borda sozinha não bastaria
+/// aqui: `GlassCard` desenha a dele com o MESMO token `border`, então um
+/// retângulo preenchido com contorno continuaria se lendo como contêiner —
+/// haveria três deles dentro de um quarto. O lápis é o que remove a ambiguidade
+/// de uma vez, e por isso o peso visual que ele acrescenta está pago.
+///
+/// A borda de foco vem de `brand` porque é a única cor da paleta que significa
+/// "ativo" nesta interface. Nenhum token novo foi criado: `lib/presentation/
+/// theme/` está fora do escopo do pacote UI-2, e precisar de um token seria
+/// sinal de que a correção cresceu além dele.
 class _MoneyField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -242,27 +265,45 @@ class _MoneyField extends StatelessWidget {
     required this.onChanged,
   });
 
+  /// Contorno do campo, na cor e espessura pedidas.
+  ///
+  /// Sai de uma função porque `InputDecoration` exige o contorno em três
+  /// estados — padrão, habilitado e focado — e três literais divergiriam no
+  /// primeiro ajuste de raio.
+  static OutlineInputBorder _contorno(Color cor, {double espessura = 1}) =>
+      OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cor, width: espessura),
+      );
+
   @override
   Widget build(BuildContext context) {
+    final c = context.fin;
+
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       onChanged: (_) => onChanged(),
-      style: TextStyle(color: context.fin.textPrimary),
+      style: TextStyle(color: c.textPrimary),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: context.finType.bodySm.copyWith(
-          color: context.fin.textSecondary,
-        ),
+        labelStyle: context.finType.bodySm.copyWith(color: c.textSecondary),
         prefixText: r'R$ ',
-        prefixStyle: TextStyle(color: context.fin.textSecondary),
+        prefixStyle: TextStyle(color: c.textSecondary),
         filled: true,
-        fillColor: context.fin.surfaceSunken,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+        fillColor: c.surfaceSunken,
+        // O lápis é a marca de edição, e é decoração no sentido estrito: não
+        // recebe toque, porque o campo inteiro já é o alvo. Um ícone tocável
+        // ali prometeria uma ação que não existe.
+        suffixIcon: Icon(Icons.edit_outlined, size: 16, color: c.textTertiary),
+        suffixIconConstraints: const BoxConstraints(
+          minWidth: 40,
+          minHeight: 40,
         ),
+        border: _contorno(c.border),
+        enabledBorder: _contorno(c.border),
+        focusedBorder: _contorno(c.brand, espessura: 2),
       ),
     );
   }

@@ -1,7 +1,7 @@
 ---
 numero: 22
 titulo: Reconstrução da disposição da UI, com fronteira declarada
-status: aceita
+status: cumprida
 postura: reconstrucao
 origem: voce
 data: 2026-08-30
@@ -71,6 +71,32 @@ reconstrução sem fim é indistinguível de não ter fronteira nenhuma.
 Cumprida, a superfície volta à preservação e a linha de base da lente `tela` é
 redesenhada a partir do estado novo — senão a execução seguinte reportaria
 contra um alvo que já não existe.
+
+## Encerramento verificado — 2026-08-30
+
+Os dois pacotes da EAP tiveram o `criterio_de_pronto` conferido nas capturas
+regeradas:
+
+- **[UI-1](../eap/UI-1-rotulos-de-navegacao.md)** — a barra passou a
+  `Estudo · Valuation · Meta · Simulação`, e o título no topo de cada tela não
+  contradiz o rótulo que a abriu. O caminho seguido foi o **terceiro** dos que
+  o pacote registrava — "repensar a divisão em três abas" —, escolhido por
+  quem decide: são quatro frentes com porta própria, e o valuation deixou de
+  ser alcançável só de dentro de outra aba.
+- **[UI-2](../eap/UI-2-campos-editaveis-da-meta.md)** — em `meta@390.png` os
+  três campos monetários trazem contorno e marca de edição, e já não se leem
+  como bloco de exibição.
+
+Com isso a superfície volta à **preservação**: `postura.ts` só conta decisão
+`status: aceita`, então a fronteira fecha sozinha na próxima execução do
+conselheiro. As capturas em `docs/telas/` foram regeradas e são a linha de
+base nova.
+
+**Uma ressalva sobre a linha de base.** A execução da lente `tela` que
+acompanhou este encerramento caiu para o último degrau da cascata e devolveu
+lista vazia. Pelo critério do próprio projeto, isso se lê como "não enxerguei",
+não como "não há" — a verificação acima é das capturas, feita à mão, e não
+substitui uma passagem da lente com o topo liberado.
 
 ## Consequências aceitas
 

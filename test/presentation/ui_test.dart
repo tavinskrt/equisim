@@ -486,6 +486,36 @@ void main() {
       expect(find.text('RESERVA'), findsNothing);
     });
 
+    testWidgets('a linha de ativo empilha em vez de estourar', (tester) async {
+      // Em tres colunas as duas laterais tem largura MEDIDA e o miolo e
+      // `Expanded`: quando as laterais somadas passam da largura, o miolo
+      // colapsa a zero e a linha estoura. Empilhar preserva os dois numeros
+      // inteiros -- encolher a coluna truncaria digito sem aviso.
+      tester.view.devicePixelRatio = 1.0;
+      // Viewport alta: em 2,0x a tela inteira cresce, e o `SliverList` so
+      // infla o que entra nela -- com 6000 px o cartao por ativo nem existia
+      // na arvore, e o teste passaria sem ter olhado para ele.
+      tester.view.physicalSize = const Size(320, 14000);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', serieLonga(0.05)),
+          reserva: outcomeOf('ITUB4', serieLonga(0.12)),
+        )),
+        child: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2.0)),
+          child: const BacktestPage(),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      // Empilhada ou nao, a linha continua nomeando o ativo e a deriva dele.
+      expect(find.text('PETR4'), findsOneWidget);
+      expect(find.textContaining('p.p.'), findsWidgets);
+    });
+
     testWidgets('os proventos das duas carteiras dividem um cartão',
         (tester) async {
       telaAlta(tester);
@@ -1008,6 +1038,33 @@ void main() {
 
       expect(find.text('Exigido'), findsOneWidget);
       expect(find.text('Rentabilidade exigida'), findsNothing);
+    });
+
+    testWidgets('os campos de valor se declaram editáveis', (tester) async {
+      telaAlta(tester);
+      // Pacote UI-2. Os tres campos nasceram como retangulos cinza sem
+      // contorno, e a lente `tela` os leu como blocos de EXIBICAO -- quem usa
+      // concluia que o sistema calculava os valores, mexia so no prazo, e
+      // nunca personalizava o plano. A funcionalidade existia e ficava
+      // invisivel.
+      await tester.pumpWidget(
+        harness(overrides: doisCartoes(), child: const GoalPage()),
+      );
+      await tester.pumpAndSettle();
+
+      // Uma marca de edicao por campo monetario: aporte inicial, aporte
+      // mensal e valor desejado.
+      expect(find.byIcon(Icons.edit_outlined), findsNWidgets(3));
+
+      // E o contorno, que e a outra metade do sinal. `BorderSide.none` era
+      // exatamente o que fazia o campo parecer contêiner.
+      final campos = tester.widgetList<TextField>(find.byType(TextField));
+      expect(campos.length, 3);
+      for (final campo in campos) {
+        final borda = campo.decoration!.enabledBorder;
+        expect(borda, isA<OutlineInputBorder>());
+        expect(borda!.borderSide.style, BorderStyle.solid);
+      }
     });
 
     testWidgets('a prosa do veredito ainda cita a taxa -- residuo conhecido',

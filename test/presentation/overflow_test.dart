@@ -44,24 +44,15 @@ const _pendentes = <String, String>{};
 
 /// Divida MEDIDA da BacktestPage populada, no mesmo formato de [_pendentes].
 ///
-/// As duas entradas sao do `_AssetRow`, no cartao de desempenho por ativo, e
-/// sao HERANCA e nao regressao: a matriz nunca cobriu o estado populado, entao
-/// este estouro existia sem nunca ter sido medido. Foi a cobertura nova que o
-/// revelou.
+/// **Vazio, e essa e a meta -- mesmo criterio de [_pendentes].**
 ///
-/// O `_AssetRow` monta coluna de ticker e coluna de valor com largura MEDIDA e
-/// um `Expanded` no meio. Sob escala ampliada as duas colunas fixas somadas
-/// passam da largura disponivel, o `Expanded` colapsa a zero e o excedente
-/// vira listra. A correcao e daquele widget, nao da tabela comparativa -- que
-/// cobre as nove combinacoes sem estourar, porque cai para blocos empilhados
-/// quando as colunas nao cabem.
-const _pendentesPopulada = <String, String>{
-  'BacktestPage|320|1.3':
-      'P-extra: `_AssetRow` estoura 7 px -- as colunas medidas de ticker e '
-      'valor nao cedem espaco ao `Expanded` sob escala ampliada',
-  'BacktestPage|390|2.0':
-      'P-extra: mesmo defeito do `_AssetRow`, 65 px nesta combinacao',
-};
+/// Historico: nasceu com duas entradas, as duas do `_AssetRow` no cartao de
+/// desempenho por ativo -- 7 px em 320 dp @ 1,3x e 65 px em 390 dp @ 2,0x.
+/// Eram HERANCA, nao regressao: a matriz nunca cobrira o estado populado,
+/// entao o estouro existia sem nunca ter sido medido. Foram removidas quando
+/// `_AssetRow` ganhou a disposicao empilhada, que preserva os dois numeros
+/// inteiros onde as tres colunas nao cabem.
+const _pendentesPopulada = <String, String>{};
 
 String _chave(String tela, double largura, double escala) =>
     '$tela|${largura.toInt()}|$escala';

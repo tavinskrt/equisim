@@ -1636,27 +1636,56 @@ class _AssetGroup extends StatelessWidget {
     return (ticker: ticker + FinSpace.sm, value: value + FinSpace.xs);
   }
 
+  /// Largura mínima para a coluna do meio significar alguma coisa.
+  ///
+  /// Ela carrega os pesos e a barra de deriva. Abaixo disto a barra deixa de
+  /// comunicar proporção e vira um risco colorido — melhor empilhar.
+  static const double _minimoDoMeio = FinSpace.xxxl;
+
   @override
   Widget build(BuildContext context) {
     final widths = _columnWidths(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _SeloCarteira(nome: label, cor: color),
-        for (final asset in assets)
-          _AssetRow(
-            asset: asset,
-            isLight: isLight,
-            tickerWidth: widths.ticker,
-            valueWidth: widths.value,
-          ),
-      ],
+    // A disposição é decidida UMA VEZ, no grupo, e não por linha: linhas
+    // vizinhas em disposições diferentes destruiriam a coluna que as larguras
+    // medidas existem para manter.
+    return LayoutBuilder(
+      builder: (context, restricoes) {
+        final preciso =
+            widths.ticker + FinSpace.sm + widths.value + _minimoDoMeio;
+        final empilhado = preciso > restricoes.maxWidth;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _SeloCarteira(nome: label, cor: color),
+            for (final asset in assets)
+              _AssetRow(
+                asset: asset,
+                isLight: isLight,
+                tickerWidth: widths.ticker,
+                valueWidth: widths.value,
+                empilhado: empilhado,
+              ),
+          ],
+        );
+      },
     );
   }
 }
 
 /// Uma linha de ativo: peso-alvo contra peso-corrente e o retorno do período.
+///
+/// **Duas disposições, e a segunda existe por defeito medido.** Em três
+/// colunas, as duas laterais têm largura medida e o miolo é `Expanded` — então
+/// quando as laterais somadas passam da largura disponível o miolo colapsa a
+/// zero e a linha estoura, sem que nada na tela diga que há conteúdo escondido.
+/// Acontecia em 320 dp @ 1,3x (7 px) e em 390 dp @ 2,0x (65 px), e ficou
+/// invisível até a matriz de estouro passar a montar esta tela POPULADA.
+///
+/// Encolher as laterais não era saída: as duas carregam número, e número
+/// truncado que parece completo é pior que número nenhum. Empilhar é o que
+/// preserva os dois dígitos e a barra ao mesmo tempo.
 class _AssetRow extends StatelessWidget {
   final AssetPerformance asset;
   final bool isLight;
@@ -1668,91 +1697,122 @@ class _AssetRow extends StatelessWidget {
   final double tickerWidth;
   final double valueWidth;
 
+  /// Disposição escolhida pelo grupo. Ver a justificativa na classe.
+  final bool empilhado;
+
   const _AssetRow({
     required this.asset,
     required this.isLight,
     required this.tickerWidth,
     required this.valueWidth,
+    required this.empilhado,
   });
 
+  // As peças saem de métodos porque as DUAS disposições usam as mesmas. Se
+  // cada uma montasse as suas, a primeira divergência entre elas passaria sem
+  // ninguém notar — e a coluna medida deixaria de bater com o texto pintado.
+
+  Widget _ticker(BuildContext context) => Text(
+    asset.ticker.value,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: context.finType.bodySm.copyWith(
+      fontWeight: FontWeight.w600,
+      color: context.fin.textPrimary,
+    ),
+  );
+
+  Widget _pesos(BuildContext context) => Text(
+    'alvo ${asset.targetWeight} → '
+    'atual ${Fmt.percent(asset.currentWeight, decimals: 1)}',
+    style: context.finType.caption.copyWith(color: context.fin.textSecondary),
+  );
+
+  Widget _barra(BuildContext context) => ClipRRect(
+    borderRadius: BorderRadius.circular(3),
+    child: LinearProgressIndicator(
+      value: asset.currentWeight.clamp(0.0, 1.0),
+      minHeight: 4,
+      backgroundColor: context.fin.divider,
+      valueColor: AlwaysStoppedAnimation(
+        asset.drift >= 0 ? context.fin.brand : context.fin.caution,
+      ),
+    ),
+  );
+
+  Widget _retorno(BuildContext context) => FinAmount(
+    text: Fmt.percent(asset.totalReturn, decimals: 1, signed: true),
+    style: context.finType.numSm,
+    trend: FinAmount.trendOf(asset.totalReturn),
+  );
+
+  Widget _deriva(BuildContext context) => Text(
+    Fmt.points(asset.drift),
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    // `numSm` e o mesmo papel usado para medir a coluna em `_columnWidths`;
+    // divergir aqui faria a medida mentir.
+    style: context.finType.numSm.copyWith(color: context.fin.textTertiary),
+  );
+
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: FinSpace.sm),
-      child: Row(
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: FinSpace.sm),
+    child: empilhado ? _emPilha(context) : _emColunas(context),
+  );
+
+  /// Três colunas: ticker, pesos com a barra, e os dois números à direita.
+  Widget _emColunas(BuildContext context) => Row(
+    children: [
+      SizedBox(width: tickerWidth, child: _ticker(context)),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _pesos(context),
+            const Gap.xs(),
+            _barra(context),
+          ],
+        ),
+      ),
+      const Gap.sm(axis: Axis.horizontal),
+      SizedBox(
+        width: valueWidth,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [_retorno(context), _deriva(context)],
+        ),
+      ),
+    ],
+  );
+
+  /// O mesmo conteúdo em três faixas, quando a largura não sustenta colunas.
+  ///
+  /// Cada faixa põe o texto num `Expanded` e o número na largura natural dele:
+  /// assim é sempre o TEXTO que cede, e o número — que é o dado — sai inteiro
+  /// em qualquer largura.
+  Widget _emPilha(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Row(
         children: [
-          SizedBox(
-            width: tickerWidth,
-            child: Text(
-              asset.ticker.value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.finType.bodySm.copyWith(
-                fontWeight: FontWeight.w600,
-                color: context.fin.textPrimary,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'alvo ${asset.targetWeight} → '
-                  'atual ${Fmt.percent(asset.currentWeight, decimals: 1)}',
-                  style: context.finType.caption.copyWith(
-                    color: context.fin.textSecondary,
-                  ),
-                ),
-                const Gap.xs(),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: asset.currentWeight.clamp(0.0, 1.0),
-                    minHeight: 4,
-                    backgroundColor: context.fin.divider,
-                    valueColor: AlwaysStoppedAnimation(
-                      asset.drift >= 0
-                          ? context.fin.brand
-                          : context.fin.caution,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          Expanded(child: _ticker(context)),
           const Gap.sm(axis: Axis.horizontal),
-          SizedBox(
-            width: valueWidth,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                FinAmount(
-                  text: Fmt.percent(
-                    asset.totalReturn,
-                    decimals: 1,
-                    signed: true,
-                  ),
-                  style: context.finType.numSm,
-                  trend: FinAmount.trendOf(asset.totalReturn),
-                ),
-                Text(
-                  Fmt.points(asset.drift),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  // `numSm` e o mesmo papel usado para medir a coluna em
-                  // `_columnWidths`; divergir aqui faria a medida mentir.
-                  style: context.finType.numSm.copyWith(
-                    color: context.fin.textTertiary,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _retorno(context),
         ],
       ),
-    );
-  }
+      const Gap.xs(),
+      Row(
+        children: [
+          Expanded(child: _pesos(context)),
+          const Gap.sm(axis: Axis.horizontal),
+          _deriva(context),
+        ],
+      ),
+      const Gap.xs(),
+      _barra(context),
+    ],
+  );
 }
 
 class _RiskReturnCard extends StatelessWidget {
