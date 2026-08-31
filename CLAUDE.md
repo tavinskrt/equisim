@@ -278,5 +278,11 @@ A fronteira não é configuração, é o próprio registro:
 `docs/decisoes/` a cada execução. Cumprida a EAP, a decisão vira
 `status: cumprida` e a superfície volta à preservação.
 
-**Há uma reconstrução aberta hoje:** a [decisão 22](docs/decisoes/022-reconstrucao-da-ui.md),
-sobre as telas de operação. `lib/presentation/{audit,theme,export}` estão fora.
+**Não há reconstrução aberta hoje.** A [decisão 22](docs/decisoes/022-reconstrucao-da-ui.md),
+sobre as telas de operação, está `cumprida`: a EAP dela foi entregue e a
+superfície voltou à preservação. Enquanto nenhuma decisão nova declarar
+`postura: reconstrucao` com `status: aceita`, divergência na interface é dívida
+a inventariar — não tarefa.
+
+Confira antes de agir, em vez de confiar nesta frase: quem responde é
+`docs/decisoes/`, e este parágrafo é cópia que envelhece.

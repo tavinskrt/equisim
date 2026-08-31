@@ -682,8 +682,8 @@ TextStyle _columnLabelStyle(BuildContext context) =>
 /// uma amostra representativa. Medir amostra que não corresponde ao conteúdo
 /// real foi a origem de três truncamentos simultâneos em 390 dp:
 ///
-///   - peso media `100%` (4 caracteres) e desenhava `25.00%` (6), porque
-///     `Weight.toString` usa duas casas decimais;
+///   - peso media `100%` (4 caracteres) e desenhava `25,00%` (6), porque o
+///     peso sai com duas casas decimais;
 ///   - potencial media `-1.000%` em `numSm` e desenhava `POTENCIAL` em
 ///     `caption` com espaçamento entre letras, que é mais largo;
 ///   - a mesma coluna ainda abriga `justo R$ …`, que nunca entrou na conta.
@@ -700,8 +700,11 @@ TextStyle _columnLabelStyle(BuildContext context) =>
       .reduce(math.max);
 
   return (
-    // `100.00%` é o teto real de `Weight.toString()`: duas casas, sempre.
-    weight: maiorDe([('100.00%', t.numSm), ('PESO', rotulo)]) + FinSpace.xs,
+    // A amostra vem do PRÓPRIO formatador que a célula usa, e não de um
+    // literal: assim a medida não pode divergir do texto desenhado.
+    weight:
+        maiorDe([(Fmt.weightCeiling, t.numSm), ('PESO', rotulo)]) +
+        FinSpace.xs,
     // A coluna empilha três conteúdos de larguras diferentes. O preço justo
     // usa uma amostra folgada para a B3 — acima disso a elipse volta, e é o
     // comportamento aceito: o percentual acima continua legível.
@@ -939,7 +942,7 @@ class _AssetRow extends ConsumerWidget {
                   SizedBox(
                     width: weightWidth,
                     child: Text(
-                      entry.weight.toString(),
+                      Fmt.weight(entry.weight.value),
                       textAlign: TextAlign.right,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1021,7 +1024,7 @@ class _AssetRow extends ConsumerWidget {
                         // rotulo+valor cabe na faixa.
                         Flexible(
                           child: Text(
-                            entry.weight.toString(),
+                            Fmt.weight(entry.weight.value),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: context.finType.numSm.copyWith(

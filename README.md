@@ -10,8 +10,8 @@ Trabalho de Conclusão de Curso — aplicação Flutter/Dart.
 
 ## Estado atual: reconstrução concluída (Fases 0 a 5)
 
-O projeto está em transição. O escopo anterior — simulação comparativa de
-**uma ação contra um FII** com valuation binário — foi **descontinuado**, e o
+A transição de escopo está cumprida. O escopo anterior — simulação comparativa
+de **uma ação contra um FII** com valuation binário — foi **descontinuado**, e o
 motor correspondente foi removido.
 
 | | |
@@ -24,7 +24,13 @@ Documentos de referência:
 
 - **[`PLANO_ARQUITETURA.md`](PLANO_ARQUITETURA.md)** — parecer de stack com benchmark
   medido, auditoria da API, arquitetura, modelo de domínio e roadmap por fases.
-- **[`RELATORIO_ANALISE.md`](RELATORIO_ANALISE.md)** — auditoria de defeitos do código legado.
+  **Congelado**: cumpriu o que planejava, e guarda as decisões 0 a 18.
+- **[`docs/decisoes/`](docs/decisoes/)** — as decisões 19 em diante, uma por arquivo,
+  imutáveis depois de aceitas. A
+  [decisão 19](docs/decisoes/019-registro-por-arquivo.md) instituiu esse formato
+  e aposentou o relatório de análise avulso que vivia na raiz.
+- **[`docs/estado.md`](docs/estado.md)** — retrato do repositório: decisões, superfície
+  medida e histórico. **Gerado** por `npm run estado`; não se edita à mão.
 
 ### O que funciona hoje
 
@@ -32,23 +38,24 @@ Documentos de referência:
 - **`packages/equisim_core`** — motor financeiro completo em Dart puro: DCF por
   FCFF descontado ao WACC, CAPM, cenários discretos e Monte Carlo, backtest sem
   rebalanceamento, TWR/XIRR, métricas de risco, meta patrimonial e concentração
-  setorial. 125 testes, 85% de cobertura, zero rede.
+  setorial. 207 testes, 83,9% de cobertura de linhas, zero rede.
 - **`lib/data`** — camada de acesso a dados com Dio, cache Drift, proventos
   higienizados e portão de qualidade. Testes rodando offline sobre fixtures
   reais.
 - **`lib/di` e `lib/presentation`** — grafo de dependências em Riverpod,
   estado da dupla carteira com edição síncrona, avaliação orquestrada e
   persistência dos estudos no Firestore.
-- **Interface completa** em três frentes: dupla carteira com arrastar-e-soltar,
-  planejamento de metas com semáforo de viabilidade, e análise histórica com
-  gráficos e exportação em CSV.
+- **Interface completa** em quatro frentes, uma por aba: dupla carteira com
+  arrastar-e-soltar (*Estudo*), preço justo com cenários e sensibilidade
+  (*Valuation*), planejamento patrimonial com semáforo de viabilidade (*Meta*),
+  e comparação histórica com gráficos e exportação em CSV (*Simulação*).
 
 - **`tool/validate.dart`** — executor de validação que reusa exatamente a mesma
   camada de dados e o mesmo motor do aplicativo, gerando os relatórios de
   evidência em [`docs/validacao/`](docs/validacao/).
 
-Ao todo: **224 testes automatizados**, todos offline, com 82,6% de cobertura no
-núcleo de domínio.
+Ao todo: **458 testes automatizados** — 251 do aplicativo e 207 do núcleo —,
+todos offline, com 83,9% de cobertura de linhas no núcleo de domínio.
 
 ### Evidências de corretude
 
@@ -71,6 +78,44 @@ E a conferência independente em Python:
 ```bash
 python docs/validacao/cross_validation.py
 ```
+
+### Cadeia de QA por agente
+
+Além das suítes, o repositório roda uma cadeia de revisão por modelo de
+linguagem, registrada na
+[decisão 20](docs/decisoes/020-cadeia-de-qa-por-agente.md). A regra que sustenta
+o arranjo: **quem propõe não bloqueia; quem bloqueia não propõe.** Ampliar o
+auditor para "proponha melhorias" destruiria a calibragem que o torna confiável.
+
+| Camada | Comando | Papel | Bloqueia? |
+|---|---|---|---|
+| Portão local | `.githooks/pre-commit` | regras determinísticas, sem rede, em ~250–500 ms | sim, todo commit |
+| **Auditor** | `npm run qa:gemini` | caça defeito de correção ancorado em arquivo e linha | sim, todo push |
+| **Conselheiro** | `npm run conselho -- --lente <id>` | examina relação entre coisas em sete lentes — registro, núcleo, dados, método, risco, rumo, tela | não, nunca |
+
+Os dois hooks não vêm ligados num clone novo; o git precisa ser apontado para
+eles, uma vez:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+O auditor libera o push quando a auditoria **não pôde ser executada** — sem rede
+ou sem cota não é defeito do código, e um gate que trava nessas horas seria
+arrancado na primeira ocorrência. O payload liberado vai para a fila, e
+`npm run qa:pending` audita exatamente aquele instantâneo quando a cota volta.
+
+O conselheiro nunca bloqueia: sai com código 0 mesmo em falha de rede, de cota
+ou de JSON inválido, e nenhum hook o chama.
+
+### Barramento de auditoria em tempo de execução
+
+[`lib/audit/`](lib/audit/) liga o coletor do núcleo, o interceptador de rede e um
+canal entre janelas a um painel de inspeção, aberto em `/#/logs`. É o que permite
+mostrar, durante a defesa, que um número da tela veio de uma requisição
+identificada e de um caminho de cálculo registrado — e não de um atalho.
+Desligado fora do modo de depuração, com sobrescrita por
+`--dart-define=EQUISIM_AUDIT=true`.
 
 ---
 
@@ -256,12 +301,20 @@ lib/presentation/          estado e telas por funcionalidade
 ├── valuation/             preço justo, cenários e sensibilidade
 ├── backtest/              comparação histórica e métricas
 ├── export/                exportação em CSV
-└── shared/                design system, gráficos e ponte de tema
+├── audit/                 painel de logs em janela paralela
+├── theme/                 tokens de cor, tipografia e espaçamento
+├── components/            número financeiro e cartão de saldo
+└── shared/                formatadores, cartões, gráficos e ponte de tema
 
+lib/audit/                 barramento de auditoria em tempo de execução
 lib/                       legado preservado
 ├── controllers/           autenticação e tema em Provider
 └── views/                 telas de login, cadastro e perfil
 
+scripts/                   cadeia de QA — auditor, conselheiro e lentes
+.githooks/                 pre-commit determinístico · pre-push com o auditor
+docs/decisoes/             registro de decisões, uma por arquivo
+docs/validacao/            evidências de corretude e o conferidor em Python
 functions/                 proxy de custódia da credencial
 test/fixtures/             respostas reais versionadas
 ```

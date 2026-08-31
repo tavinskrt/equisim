@@ -7,7 +7,7 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-08-30, a partir de `eacbcd9`.
+Gerado em 2026-08-31, a partir de `afb785e`.
 
 ## Decisões registradas
 
@@ -30,16 +30,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 36 | 7.543 |
-| Apresentacao | 33 | 15.779 |
+| Nucleo de dominio | 36 | 7.579 |
+| Apresentacao | 33 | 15.867 |
 | Camada de dados | 13 | 2.652 |
-| Testes do app | 29 | 4.710 |
-| Testes do nucleo | 11 | 3.107 |
+| Testes do app | 29 | 4.807 |
+| Testes do nucleo | 11 | 3.178 |
 | Ferramentas de QA | 20 | 6.479 |
 
 ## Histórico recente
 
 ```
+2026-08-30  afb785e  Garantindo estabilidade dos testes
 2026-08-30  eacbcd9  Aprimorando UI/UX (4/4)
 2026-08-30  f14989e  Aprimorando UI/UX (3/4)
 2026-08-30  55d61d1  Aprimorando UI/UX (2/4)
@@ -54,5 +55,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-08-29  31cf931  Onda 3 finalizada
 2026-08-29  857af77  Segunda parcial da Onda 3
 2026-08-29  c653ed4  Onda 3 de refatoração da UI parcial
-2026-08-29  723fe42  Fase 1 da migração de UI implementada
 ```

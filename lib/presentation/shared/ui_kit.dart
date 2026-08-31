@@ -71,6 +71,26 @@ abstract final class Fmt {
     return '$sign${_decimalFormat(decimals).format(value)}%';
   }
 
+  /// Peso de carteira: percentual em pt-BR, com duas casas.
+  ///
+  /// Existe porque `Weight.toString()` formata por `toStringAsFixed`, que
+  /// **ignora locale** e emite `100.00%`, com ponto — na mesma linha em que a
+  /// interface escreve `atual 100,0%` com vírgula. O núcleo é Dart puro e não
+  /// pode depender de `intl`, então a conversão para a convenção brasileira só
+  /// cabe aqui, na fronteira de apresentação. E cabe num lugar só: três telas
+  /// desenham essa mesma grandeza.
+  ///
+  /// - [fraction]: peso em fração (`0.25` vira `25,00%`).
+  static String weight(double fraction) => percent(fraction, decimals: 2);
+
+  /// A maior largura que [weight] chega a desenhar: `100,00%`.
+  ///
+  /// Mora colado ao formatador de propósito. A amostra que MEDE a coluna e o
+  /// texto que ela DESENHA precisam sair da mesma expressão — enquanto a
+  /// amostra era um literal escrito longe daqui, a coluna media `100%` e
+  /// desenhava `25.00%`, e o número saía truncado sem aviso nenhum.
+  static String get weightCeiling => weight(1.0);
+
   /// Número adimensional — múltiplo, beta, índice de Sharpe.
   static String ratio(double value, {int decimals = 2}) =>
       value.isFinite ? _decimalFormat(decimals).format(value) : '—';

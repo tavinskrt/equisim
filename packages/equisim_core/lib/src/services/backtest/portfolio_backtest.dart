@@ -168,7 +168,20 @@ class BacktestOutcome {
   final List<CashFlow> cashFlows;
 
   /// Capital aportado no período, somando inicial e mensais.
+  ///
+  /// É o dinheiro que o investidor disponibilizou, não o que virou posição —
+  /// para esse, ver [totalAllocated].
   final Money totalContributed;
+
+  /// Capital que efetivamente virou posição: a soma do que cada ativo recebeu
+  /// dos aportes, e portanto exatamente `Σ AssetPerformance.invested`.
+  ///
+  /// **Não coincide com [totalContributed] por construção.** As duas causas
+  /// estão no ponto da divisão, em [PortfolioBacktest._allocate]: cada fatia
+  /// `aporte × peso` arredonda isoladamente, e a fatia de um ativo sem cotação
+  /// no dia do aporte é descartada — não é realocada nem guardada em caixa. A
+  /// diferença fica em [unallocated].
+  final Money totalAllocated;
 
   /// Patrimônio no último pregão.
   final Money finalValue;
@@ -196,6 +209,7 @@ class BacktestOutcome {
     required this.base100,
     required this.cashFlows,
     required this.totalContributed,
+    required this.totalAllocated,
     required this.finalValue,
     required this.grossDividends,
     required this.withheldTax,
@@ -203,6 +217,20 @@ class BacktestOutcome {
     required this.perAsset,
     this.warnings = const [],
   });
+
+  /// Parcela do aportado que **não** virou posição: [totalContributed] menos
+  /// [totalAllocated].
+  ///
+  /// Pode ser **negativa em alguns centavos**, e isso não é defeito: o
+  /// arredondamento de cada fatia é meio afastado de zero, então tanto sobra
+  /// quanto falta. Verificado no arranjo descrito em
+  /// [PortfolioBacktest._allocate] — 15 ativos com aporte de R$ 1.000,00
+  /// alocam 5 centavos a mais que o aporte, e 3 ativos alocam 1 centavo a
+  /// menos.
+  ///
+  /// Um valor da ordem de reais, e não de centavos, significa fatia perdida
+  /// por falta de cotação no dia do aporte.
+  Money get unallocated => totalContributed - totalAllocated;
 }
 
 /// Simula a evolução de uma carteira com pesos estipulados.
@@ -470,11 +498,17 @@ abstract final class PortfolioBacktest {
         : 0.0;
 
     final perAsset = <Ticker, AssetPerformance>{};
+    // Somado aqui, e não com um acumulador paralelo ao lado de
+    // `totalContributedCents`, para que `totalAllocated` seja por construção a
+    // soma dos `invested` exibidos por ativo. Dois acumuladores independentes
+    // poderiam divergir sem que nada apontasse qual dos dois errou.
+    var totalAllocatedCents = 0;
     for (final entry in portfolio.entries.values) {
       final ticker = entry.ticker;
       final price = prices[ticker]!.closeAsOf(dates.last) ?? 0.0;
       final endValue = shares[ticker]! * price;
       final invested = Money(investedCents[ticker]!);
+      totalAllocatedCents += invested.cents;
       final assetGross = grossByTicker[ticker]!;
       final assetTax = taxByTicker[ticker]!;
 
@@ -500,6 +534,7 @@ abstract final class PortfolioBacktest {
       base100: base100,
       cashFlows: cashFlows,
       totalContributed: totalContributed,
+      totalAllocated: Money(totalAllocatedCents),
       finalValue: finalValue,
       grossDividends: Money.fromReais(totalGross),
       withheldTax: Money.fromReais(totalTax),
@@ -533,7 +568,8 @@ abstract final class PortfolioBacktest {
   /// fatias não reconstitui [amount]: verificado, uma carteira de 15 ativos com
   /// aporte de R$ 1.000,00 acumula **+5 centavos** em `investedCents`, e uma de
   /// 3 ativos acumula −1 centavo. `totalContributedCents` usa o valor cheio,
-  /// então `Σ invested ≠ totalContributed` por construção, e
+  /// então `Σ invested ≠ totalContributed` por construção — a diferença é
+  /// exposta como [BacktestOutcome.unallocated], em vez de ficar implícita —, e
   /// [AssetPerformance.totalReturn] divide por esse `invested` levemente
   /// deslocado. O erro é de ordem de centavos por aporte e não afeta TWR, CAGR
   /// nem as métricas de risco, que derivam do patrimônio marcado a mercado.

@@ -95,7 +95,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('PETR4'), findsOneWidget);
-      expect(find.text('100.00%'), findsOneWidget);
+      expect(find.text('100,00%'), findsOneWidget);
     });
 
     testWidgets('dois ativos dividem o peso igualmente', (tester) async {
@@ -115,7 +115,7 @@ void main() {
       notifier.addAsset(assetOf('VALE3', 'materiais'), toPrincipal: true);
       await tester.pump();
 
-      expect(find.text('50.00%'), findsNWidgets(2));
+      expect(find.text('50,00%'), findsNWidgets(2));
     });
 
     testWidgets('alerta de concentração aparece e não bloqueia', (tester) async {
@@ -573,6 +573,103 @@ void main() {
       // comparativo com um glossario so. O terceiro e o de desempenho por
       // ativo.
       expect(find.byType(HintIcon), findsNWidgets(2));
+    });
+  });
+
+  group('Backtest — o capital que virou posição', () {
+    List<Override> withComparison(PortfolioComparison comparison) => [
+          comparisonProvider.overrideWith((ref) async => comparison),
+          correlationProvider.overrideWith((ref) async => null),
+        ];
+
+    void telaAlta(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    testWidgets('o cartão de uma carteira diz o aportado E o alocado',
+        (tester) async {
+      telaAlta(tester);
+      // O aportado sozinho e o valor que o proprio investidor estipulou na
+      // aba Meta -- ele ja o conhece antes de abrir a tela. O que a simulacao
+      // acrescenta e quanto desse dinheiro virou posicao.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('aportado R\$'), findsOneWidget);
+      expect(find.textContaining('alocado R\$'), findsOneWidget);
+    });
+
+    testWidgets('a tabela comparativa ganha a linha do alocado',
+        (tester) async {
+      telaAlta(tester);
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+          reserva: outcomeOf('ITUB4', const [10, 18, 25]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      final cartao = find
+          .ancestor(
+            of: find.text('CARTEIRAS LADO A LADO'),
+            matching: find.byType(GlassCard),
+          )
+          .first;
+      final aportado =
+          find.descendant(of: cartao, matching: find.text('Aportado'));
+      final alocado =
+          find.descendant(of: cartao, matching: find.text('Alocado'));
+
+      expect(aportado, findsWidgets);
+      // Contagem CASADA, e nao `findsOneWidget`: quando a largura nao sustenta
+      // a tabela lado a lado, ela cai para um bloco por carteira e repete cada
+      // rotulo. Fixar o numero prenderia o teste a uma disposicao; o que
+      // precisa valer nas duas e que o alocado acompanhe o aportado.
+      expect(alocado.evaluate().length, aportado.evaluate().length);
+    });
+
+    testWidgets('cada ativo mostra quantas cotas e quanto capital recebeu',
+        (tester) async {
+      telaAlta(tester);
+      // Peso responde "que fatia da carteira"; sozinho ele nao diz se sao
+      // trinta cotas ou tres mil.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      final cartao = find
+          .ancestor(
+            of: find.text('DESEMPENHO POR ATIVO'),
+            matching: find.byType(GlassCard),
+          )
+          .first;
+      // R\$ 1.000,00 aportados num ativo a R\$ 10,00: 100 cotas exatas. O
+      // numero e conferido, e nao so a presenca do rotulo -- "cotas" na tela
+      // com a quantidade errada passaria por um `textContaining('cotas')`.
+      //
+      // O valor sai de `Fmt.money`, e nao de um literal: o `R\$` do intl vem
+      // seguido de espaco INSEPARAVEL (U+00A0), que um literal digitado a mao
+      // nao reproduz -- e a falha resultante parece ausencia do widget.
+      expect(
+        find.descendant(
+          of: cartao,
+          matching: find.text('100,00 cotas · ${Fmt.money(1000)} alocados'),
+        ),
+        findsOneWidget,
+      );
     });
   });
 

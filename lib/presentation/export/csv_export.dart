@@ -96,6 +96,12 @@ abstract final class CsvExport {
       decimals: 2,
     );
     row(
+      'capital_alocado',
+      result.principal?.totalAllocated.reais,
+      result.reserva?.totalAllocated.reais,
+      decimals: 2,
+    );
+    row(
       'proventos_brutos',
       result.principal?.grossDividends.reais,
       result.reserva?.grossDividends.reais,
@@ -121,6 +127,7 @@ abstract final class CsvExport {
           'peso_atual',
           'deriva_pp',
           'retorno_total',
+          'cotas',
           'capital_alocado',
           'valor_final',
           'proventos_brutos',
@@ -136,6 +143,10 @@ abstract final class CsvExport {
           _n(asset.currentWeight),
           _n(asset.drift, decimals: 2),
           _n(asset.totalReturn),
+          // Seis casas, e não as duas da tela: a quantidade é fracionária, e
+          // uma planilha que reconstrua `cotas × preço` com duas casas erraria
+          // o valor da posição em ativo de cotação alta.
+          _n(asset.shares, decimals: 6),
           _n(asset.invested.reais, decimals: 2),
           _n(asset.finalValue.reais, decimals: 2),
           _n(asset.grossDividends.reais, decimals: 2),

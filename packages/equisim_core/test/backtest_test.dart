@@ -235,6 +235,77 @@ void main() {
       expect(result.cashFlows.length, greaterThan(2));
     });
 
+    test('o alocado é a soma exata do que cada ativo recebeu', () {
+      // Três ativos: os pesos de `equalWeighted` são 1/3, e cada fatia
+      // arredonda isoladamente. É o caso em que aportado e alocado divergem.
+      final closes = List<double>.filled(120, 10.0);
+      final portfolio = Portfolio.equalWeighted(
+        id: 'p',
+        name: 'Principal',
+        kind: PortfolioKind.principal,
+        assets: [assetOf('PETR4'), assetOf('VALE3'), assetOf('ITUB4')],
+      ).unwrap();
+
+      final result = PortfolioBacktest.run(
+        portfolio: portfolio,
+        prices: {
+          for (final symbol in ['PETR4', 'VALE3', 'ITUB4'])
+            Ticker.parse(symbol): seriesOf(symbol, start, closes),
+        },
+        dividends: const {},
+        plan: const ContributionPlan(
+          initial: Money(100000), // R$ 1.000
+          monthly: Money(50000), // R$ 500
+          contributionDay: 5,
+        ),
+        range: DateRange(start, DateTime(2024, 12, 31)),
+      ).unwrap();
+
+      // Em CENTAVOS e com `==`: o contrato é identidade, não aproximação.
+      // `Money` é inteiro, então comparar por igualdade aqui é exato.
+      final somaPorAtivo = result.perAsset.values
+          .fold(0, (total, asset) => total + asset.invested.cents);
+      expect(result.totalAllocated.cents, somaPorAtivo);
+
+      // Aportado e alocado DIVERGEM — é o motivo de os dois existirem.
+      expect(result.totalAllocated, isNot(result.totalContributed));
+
+      // E divergem por centavos, não por reais. Executado: −4 centavos em 12
+      // aportes, ou seja alocado a MAIS que o aportado, porque `Weights.equal`
+      // absorve o resíduo de 1/3 no primeiro ativo e a fatia dele arredonda
+      // para cima. O teto de um centavo por aporte cobre o sinal contrário
+      // sem deixar passar fatia perdida, que seria da ordem de reais.
+      expect(result.unallocated.cents.abs(), lessThanOrEqualTo(12));
+    });
+
+    test('com um ativo só, o aportado vira posição integralmente', () {
+      // Peso 1,0 não arredonda: `aporte * 1.0` devolve o aporte cheio, e a
+      // sobra tem de ser exatamente zero. É a contraprova do teste acima —
+      // sem ela, um `totalAllocated` sistematicamente truncado passaria.
+      final closes = List<double>.filled(120, 10.0);
+      final portfolio = Portfolio.equalWeighted(
+        id: 'p',
+        name: 'Principal',
+        kind: PortfolioKind.principal,
+        assets: [assetOf('PETR4')],
+      ).unwrap();
+
+      final result = PortfolioBacktest.run(
+        portfolio: portfolio,
+        prices: {Ticker.parse('PETR4'): seriesOf('PETR4', start, closes)},
+        dividends: const {},
+        plan: const ContributionPlan(
+          initial: Money(100000),
+          monthly: Money(50000),
+          contributionDay: 5,
+        ),
+        range: DateRange(start, DateTime(2024, 12, 31)),
+      ).unwrap();
+
+      expect(result.totalAllocated, result.totalContributed);
+      expect(result.unallocated, Money.zero);
+    });
+
     test('JCP reduz o patrimônio final em relação a dividendo equivalente', () {
       final prices = seriesOf('ITUB4', start, [10, 10, 10, 10]);
       final portfolio = Portfolio.equalWeighted(

@@ -668,8 +668,16 @@ const List<HintEntry> _metricsGlossary = [
   HintEntry(
     'Patrimônio final',
     'Quanto a carteira valeria ao fim do período, com os proventos já '
-        'reinvestidos. Abaixo do valor vem o total aportado — a diferença '
-        'entre os dois é o ganho.',
+        'reinvestidos. Abaixo do valor vêm o aportado e o alocado — a '
+        'diferença entre o patrimônio e o aportado é o ganho.',
+  ),
+  HintEntry(
+    'Aportado × alocado',
+    'O aportado é o dinheiro que o investidor disponibilizou, e é o número '
+        'que ele já conhece. O alocado é quanto disso virou posição, depois '
+        'de cada aporte ser dividido pelos pesos da carteira. Os dois diferem '
+        'por centavos, do arredondamento das fatias; uma diferença em reais '
+        'significa aporte que não encontrou cotação no dia e se perdeu.',
   ),
   HintEntry(
     'TWR — retorno ponderado pelo tempo',
@@ -732,6 +740,14 @@ const List<HintEntry> _perAssetGlossary = [
     'Deriva (p.p.)',
     'A distância entre os dois pesos, em pontos percentuais. Positiva quando o '
         'ativo ganhou espaço na carteira, negativa quando perdeu.',
+  ),
+  HintEntry(
+    'Cotas · alocado',
+    'Quantas cotas a simulação acumulou no ativo — ações ou cotas de fundo — '
+        'e quanto capital ele recebeu dos aportes. A quantidade é '
+        'FRACIONÁRIA: o modelo aloca por peso, não por lote, e o '
+        'reinvestimento de proventos produz frações que uma corretora '
+        'arredondaria.',
   ),
   HintEntry(
     'Retorno total',
@@ -1112,6 +1128,14 @@ class _CarteirasLadoALado extends StatelessWidget {
                 ],
               ),
               (
+                rotulo: 'Alocado',
+                destaque: false,
+                nota: 'do aportado, o que virou posição',
+                celulas: [
+                  for (final o in carteiras) _dinheiro(o.totalAllocated.reais),
+                ],
+              ),
+              (
                 rotulo: 'TWR',
                 destaque: false,
                 nota: 'da composição',
@@ -1278,12 +1302,42 @@ class _ProventosLadoALado extends StatelessWidget {
   }
 }
 
+/// Legenda de capital sob o patrimônio: o que entrou e o que virou posição.
+///
+/// Os dois juntos porque o aportado sozinho não responde nada — é o valor que
+/// o próprio investidor estipulou na aba Meta, e ele já o conhece antes de
+/// abrir a tela. O que a simulação acrescenta é quanto desse dinheiro o motor
+/// conseguiu transformar em posição depois de dividir cada aporte pelos pesos
+/// da carteira.
+///
+/// **A sobra só é nomeada acima de um real.** Abaixo disso ela é resíduo de
+/// arredondamento das fatias — ver `BacktestOutcome.unallocated`, que documenta
+/// os dois sinais possíveis —, e escrever "R$ 0,04 sem alocar" ao lado de um
+/// patrimônio de seis dígitos transformaria ruído de divisão em fato
+/// econômico. Acima de um real a causa deixa de ser arredondamento e passa a
+/// ser fatia perdida, que o leitor precisa ver.
+String _legendaDeCapital(BacktestOutcome outcome) {
+  final base =
+      'aportado ${Fmt.money(outcome.totalContributed.reais)} · '
+      'alocado ${Fmt.money(outcome.totalAllocated.reais)}';
+
+  final sobra = outcome.unallocated;
+  if (sobra.cents.abs() < 100) return base;
+
+  // O sinal negativo é possível e tem leitura própria: as fatias arredondaram
+  // para cima e a carteira alocou mais que o aporte cheio. Escrever "sem
+  // alocar" nesse caso inverteria o sentido do número.
+  return sobra.cents > 0
+      ? '$base — ${Fmt.money(sobra.reais)} não viraram posição'
+      : '$base — ${Fmt.money(-sobra.reais)} a mais que o aportado';
+}
+
 /// Indicadores de uma carteira na janela simulada.
 ///
 /// O patrimônio final passou a ser a grandeza principal do cartão, em `numLg`,
-/// com o aportado logo abaixo; as nove métricas restantes ficam em `numMd`.
-/// Antes as dez dividiam o mesmo tamanho, o que obrigava o leitor a procurar
-/// qual delas era o número que importa.
+/// com o aportado e o alocado logo abaixo; as nove métricas restantes ficam em
+/// `numMd`. Antes as dez dividiam o mesmo tamanho, o que obrigava o leitor a
+/// procurar qual delas era o número que importa.
 class _MetricsCard extends StatelessWidget {
   final String title;
   final BacktestOutcome outcome;
@@ -1305,7 +1359,7 @@ class _MetricsCard extends StatelessWidget {
         balance: Fmt.money(outcome.finalValue.reais),
         balanceSemantics:
             'Patrimônio final ${Fmt.money(outcome.finalValue.reais)}',
-        caption: 'aportado ${Fmt.money(outcome.totalContributed.reais)}',
+        caption: _legendaDeCapital(outcome),
         changeLabel: Fmt.percent(m.timeWeightedReturn, signed: true),
         changeTrend: FinAmount.trendOf(m.timeWeightedReturn),
         trailing: HintIcon(
@@ -1723,7 +1777,12 @@ class _AssetRow extends StatelessWidget {
   );
 
   Widget _pesos(BuildContext context) => Text(
-    'alvo ${asset.targetWeight} → '
+    // O alvo passa pelo formatador em vez de sair do `toString()` do
+    // domínio: aquele usa `toStringAsFixed`, que ignora locale e escrevia
+    // `100.00%` com PONTO ao lado de um `100,0%` com vírgula, na mesma frase.
+    // Mesmo número de casas nos dois, também: dois pesos que se comparam
+    // escritos em precisões diferentes convidam a ler deriva onde não há.
+    'alvo ${Fmt.percent(asset.targetWeight.value, decimals: 1)} → '
     'atual ${Fmt.percent(asset.currentWeight, decimals: 1)}',
     style: context.finType.caption.copyWith(color: context.fin.textSecondary),
   );
@@ -1738,6 +1797,25 @@ class _AssetRow extends StatelessWidget {
         asset.drift >= 0 ? context.fin.brand : context.fin.caution,
       ),
     ),
+  );
+
+  /// Quantas cotas a posição tem e quanto capital ela recebeu dos aportes.
+  ///
+  /// Peso responde "que fatia da carteira", e é o que a linha já dizia; esta
+  /// responde "quanto disso existe" — quantidade e dinheiro, as duas grandezas
+  /// que o investidor confere contra o extrato da corretora. Sem elas, um peso
+  /// de 27% não diz se são trinta cotas ou três mil.
+  ///
+  /// **A quantidade é fracionária** e sai com duas casas de propósito: o motor
+  /// aloca por peso, não por lote, e o reinvestimento de proventos produz
+  /// frações. Exibir inteiro aqui esconderia a premissa do modelo justamente
+  /// no número em que ela aparece.
+  Widget _posicao(BuildContext context) => Text(
+    '${Fmt.ratio(asset.shares)} cotas · '
+    '${Fmt.money(asset.invested.reais)} alocados',
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: context.finType.caption.copyWith(color: context.fin.textTertiary),
   );
 
   Widget _retorno(BuildContext context) => FinAmount(
@@ -1772,6 +1850,8 @@ class _AssetRow extends StatelessWidget {
             _pesos(context),
             const Gap.xs(),
             _barra(context),
+            const Gap.xs(),
+            _posicao(context),
           ],
         ),
       ),
@@ -1811,6 +1891,8 @@ class _AssetRow extends StatelessWidget {
       ),
       const Gap.xs(),
       _barra(context),
+      const Gap.xs(),
+      _posicao(context),
     ],
   );
 }
