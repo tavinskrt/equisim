@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../../failures/failure.dart';
 import '../../failures/result.dart';
+import '../../value_objects/paired_series.dart';
 
 /// Beta estimado localmente, com a janela declarada junto do valor.
 ///
@@ -38,30 +39,24 @@ class BetaEstimate {
 abstract final class BetaCalculator {
   /// β = Cov(R_ativo, R_mercado) / Var(R_mercado).
   ///
-  /// As séries devem estar pareadas por data — use [alignReturns] antes.
-  ///
-  /// - [assetReturns]: retornos do ativo, já pareados.
-  /// - [marketReturns]: retornos do índice, mesma extensão.
+  /// - [returns]: par já alinhado por data. O tipo garante o casamento de
+  ///   comprimento, então **não há validação de dimensão aqui** — construa o
+  ///   par com [alignReturns] ou com `PairedReturns.of`.
   /// - [minimumObservations]: mínimo de pares exigido. Padrão `30`, abaixo do
   ///   qual a estimativa não é reportável.
   ///
-  /// Devolve [InvalidInput] para séries de tamanhos diferentes;
-  /// [InsufficientData] abaixo do mínimo de observações; [ComputationFailure]
-  /// quando a variância do mercado é nula — série de referência constante, em
-  /// que beta não é definido.
+  /// Devolve [InsufficientData] abaixo do mínimo de observações;
+  /// [ComputationFailure] quando a variância do mercado é nula — série de
+  /// referência constante, em que beta não é definido.
   ///
   /// A correlação sai `0.0`, e não `NaN`, quando o denominador é nulo.
   static Result<BetaEstimate> estimate({
-    required List<double> assetReturns,
-    required List<double> marketReturns,
+    required PairedReturns returns,
     int minimumObservations = 30,
   }) {
-    if (assetReturns.length != marketReturns.length) {
-      return const Err(InvalidInput(
-        'Séries de retorno com tamanhos diferentes; pareie por data antes.',
-      ));
-    }
-    final n = assetReturns.length;
+    final assetReturns = returns.asset;
+    final marketReturns = returns.market;
+    final n = returns.length;
     if (n < minimumObservations) {
       return Err(InsufficientData(
         'Beta exige ao menos $minimumObservations observações; recebidas $n.',
@@ -107,7 +102,8 @@ abstract final class BetaCalculator {
   /// - [assetDates] / [assetIndex]: série do ativo, alinhadas entre si.
   /// - [marketDates] / [marketIndex]: série do índice, alinhadas entre si.
   ///
-  /// Retorna um registro com as duas listas de retornos, de mesmo comprimento.
+  /// Retorna um [PairedReturns] — o par sai casado por construção, porque as
+  /// duas pontas são acrescentadas na mesma chamada.
   ///
   /// Datas presentes em apenas uma das séries são **descartadas**, e o retorno
   /// é calculado entre pontos consecutivos *do pareamento* — não da série
@@ -115,7 +111,7 @@ abstract final class BetaCalculator {
   /// ambas as pontas, o que preserva a correspondência temporal entre elas.
   ///
   /// Complexidade O(n + m).
-  static ({List<double> asset, List<double> market}) alignReturns({
+  static PairedReturns alignReturns({
     required List<DateTime> assetDates,
     required List<double> assetIndex,
     required List<DateTime> marketDates,
@@ -126,8 +122,7 @@ abstract final class BetaCalculator {
       marketByDate[marketDates[i]] = marketIndex[i];
     }
 
-    final pairedAsset = <double>[];
-    final pairedMarket = <double>[];
+    final paired = PairedReturnsBuilder();
     double? previousAsset;
     double? previousMarket;
 
@@ -139,14 +134,16 @@ abstract final class BetaCalculator {
           previousMarket != null &&
           previousAsset > 0 &&
           previousMarket > 0) {
-        pairedAsset.add(assetValue / previousAsset - 1.0);
-        pairedMarket.add(marketValue / previousMarket - 1.0);
+        paired.add(
+          asset: assetValue / previousAsset - 1.0,
+          market: marketValue / previousMarket - 1.0,
+        );
       }
       previousAsset = assetValue;
       previousMarket = marketValue;
     }
 
-    return (asset: pairedAsset, market: pairedMarket);
+    return paired.build();
   }
 
   /// Matriz de correlação entre séries de retorno pareadas.

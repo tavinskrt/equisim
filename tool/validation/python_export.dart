@@ -61,24 +61,19 @@ abstract final class PythonExport {
     }
     final priceMap = priceResult.unwrap();
 
-    final dividendResult = await ctx.dividends.historyBatch(tickers);
-    final dividendMap =
-        dividendResult.getOrElse(const <Ticker, List<DividendEvent>>{});
-
     final benchmarkResult = await ctx.benchmark.ibovespa(window);
 
     // 1. Preços de fechamento, um ativo por coluna.
     _exportPrices(priceMap, benchmarkResult.valueOrNull, outputDir);
 
-    // 2. Eventos de provento com rótulo fiscal.
-    _exportDividends(dividendMap, outputDir);
-
-    // 3. Séries de retorno total construídas pelo domínio.
-    _exportTotalReturns(priceMap, dividendMap, window, outputDir);
-
-    // 4. Métricas calculadas pelo motor, para o Python conferir.
-    await _exportMetrics(ctx, priceMap, dividendMap, benchmarkResult.valueOrNull,
-        window, outputDir);
+    // 2. Métricas calculadas pelo motor, para o Python conferir.
+    await _exportMetrics(
+      ctx,
+      priceMap,
+      benchmarkResult.valueOrNull,
+      window,
+      outputDir,
+    );
   }
 
   static void _exportPrices(
@@ -115,86 +110,9 @@ abstract final class PythonExport {
     writeReport('$outputDir/precos.csv', buffer.toString());
   }
 
-  static void _exportDividends(
-    Map<Ticker, List<DividendEvent>> dividends,
-    String outputDir,
-  ) {
-    final buffer = StringBuffer()
-      ..writeln([
-        'ticker',
-        'ex_date',
-        'payment_date',
-        'amount',
-        'kind',
-        'payment_date_estimated',
-      ].join(separator));
-
-    for (final entry in dividends.entries) {
-      for (final event in entry.value) {
-        buffer.writeln([
-          entry.key.value,
-          _iso(event.exDate),
-          _iso(event.paymentDate),
-          event.amountPerShare.toStringAsFixed(8),
-          event.kind.label,
-          event.paymentDateEstimated ? '1' : '0',
-        ].join(separator));
-      }
-    }
-
-    writeReport('$outputDir/proventos.csv', buffer.toString());
-  }
-
-  static void _exportTotalReturns(
-    Map<Ticker, PriceSeries> prices,
-    Map<Ticker, List<DividendEvent>> dividends,
-    DateRange window,
-    String outputDir,
-  ) {
-    final tickers = prices.keys.toList()..sort();
-    final series = <Ticker, TotalReturnSeries>{};
-    for (final ticker in tickers) {
-      series[ticker] = TotalReturnEngine.build(
-        prices: prices[ticker]!,
-        dividends: dividends[ticker] ?? const [],
-        taxPolicy: TaxPolicy.brasil,
-        range: window,
-      );
-    }
-
-    final calendar = <DateTime>{};
-    for (final s in series.values) {
-      calendar.addAll(s.dates);
-    }
-    final dates = calendar.toList()..sort();
-
-    final index = <Ticker, Map<DateTime, double>>{
-      for (final ticker in tickers)
-        ticker: {
-          for (var i = 0; i < series[ticker]!.dates.length; i++)
-            series[ticker]!.dates[i]: series[ticker]!.index[i],
-        },
-    };
-
-    final buffer = StringBuffer()
-      ..writeln(['date', ...tickers.map((t) => t.value)].join(separator));
-
-    for (final date in dates) {
-      final row = <String>[_iso(date)];
-      for (final ticker in tickers) {
-        final value = index[ticker]![date];
-        row.add(value?.toStringAsFixed(8) ?? '');
-      }
-      buffer.writeln(row.join(separator));
-    }
-
-    writeReport('$outputDir/retorno_total.csv', buffer.toString());
-  }
-
   static Future<void> _exportMetrics(
     ValidationContext ctx,
     Map<Ticker, PriceSeries> prices,
-    Map<Ticker, List<DividendEvent>> dividends,
     PriceSeries? benchmark,
     DateRange window,
     String outputDir,
@@ -219,18 +137,25 @@ abstract final class PythonExport {
       ].join(separator));
 
     for (final ticker in prices.keys.toList()..sort()) {
-      final total = TotalReturnEngine.build(
-        prices: prices[ticker]!,
-        dividends: dividends[ticker] ?? const [],
-        taxPolicy: TaxPolicy.brasil,
-        range: window,
-      );
-      if (total.isEmpty) continue;
+      // Índice de preço em base 1,0 no primeiro pregão da janela: é sobre ele
+      // que retorno, risco e beta são apurados, na mesma convenção que o
+      // aplicativo usa desde a remoção dos proventos.
+      final points = prices[ticker]!
+          .points
+          .where((point) => window.contains(point.date))
+          .toList();
+      if (points.length < 2 || points.first.close <= 0) continue;
 
-      final years = DateRange(total.dates.first, total.dates.last).years;
-      final cagr = Returns.annualize(total.totalReturn, years);
+      final dates = [for (final point in points) point.date];
+      final index = [
+        for (final point in points) point.close / points.first.close,
+      ];
+      final totalReturn = index.last / index.first - 1.0;
+
+      final years = DateRange(dates.first, dates.last).years;
+      final cagr = Returns.annualize(totalReturn, years);
       final risk = RiskMetrics.fromIndex(
-        twrIndex: total.index,
+        twrIndex: index,
         cagr: cagr,
         riskFreeRate: riskFree,
       );
@@ -240,15 +165,12 @@ abstract final class PythonExport {
       var observations = '';
       if (benchmark != null) {
         final aligned = BetaCalculator.alignReturns(
-          assetDates: total.dates,
-          assetIndex: total.index,
+          assetDates: dates,
+          assetIndex: index,
           marketDates: benchmark.dates,
           marketIndex: benchmark.points.map((p) => p.close).toList(),
         );
-        final estimate = BetaCalculator.estimate(
-          assetReturns: aligned.asset,
-          marketReturns: aligned.market,
-        );
+        final estimate = BetaCalculator.estimate(returns: aligned);
         if (estimate.isOk) {
           beta = estimate.unwrap().beta.toStringAsFixed(8);
           correlation = estimate.unwrap().correlation.toStringAsFixed(8);
@@ -258,7 +180,7 @@ abstract final class PythonExport {
 
       buffer.writeln([
         ticker.value,
-        total.totalReturn.toStringAsFixed(8),
+        totalReturn.toStringAsFixed(8),
         cagr.toStringAsFixed(8),
         risk.volatility.toStringAsFixed(8),
         risk.maxDrawdown.toStringAsFixed(8),
@@ -279,7 +201,6 @@ abstract final class PythonExport {
       ..writeln(['pregoes_por_ano', '$tradingDaysPerYear'].join(separator))
       ..writeln(['janela_inicio', _iso(window.start)].join(separator))
       ..writeln(['janela_fim', _iso(window.end)].join(separator))
-      ..writeln(['aliquota_jcp', '0.15'].join(separator))
       ..writeln(['desvio_padrao', 'amostral (n-1)'].join(separator));
 
     writeReport('$outputDir/parametros.csv', parameters.toString());

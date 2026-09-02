@@ -2,7 +2,7 @@
 ///
 /// Ambas as pontas são **truncadas para o dia** na construção: hora, minuto e
 /// fuso são descartados. É o que torna a comparação com datas de pregão e de
-/// pagamento de provento estável, sem depender de o chamador ter normalizado.
+/// divulgação estável, sem depender de o chamador ter normalizado.
 class DateRange {
   /// Primeiro dia do intervalo, à meia-noite local.
   final DateTime start;

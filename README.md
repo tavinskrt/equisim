@@ -37,11 +37,11 @@ Documentos de referência:
 - **Autenticação, sessão, tema e perfil** — preservados do projeto anterior.
 - **`packages/equisim_core`** — motor financeiro completo em Dart puro: DCF por
   FCFF descontado ao WACC, CAPM, cenários discretos e Monte Carlo, backtest sem
-  rebalanceamento, TWR/XIRR, métricas de risco, meta patrimonial e concentração
-  setorial. 207 testes, 83,9% de cobertura de linhas, zero rede.
-- **`lib/data`** — camada de acesso a dados com Dio, cache Drift, proventos
-  higienizados e portão de qualidade. Testes rodando offline sobre fixtures
-  reais.
+  rebalanceamento em ações inteiras, TWR/XIRR, métricas de risco, meta
+  patrimonial e concentração setorial. 202 testes, 84,2% de cobertura de
+  linhas, zero rede.
+- **`lib/data`** — camada de acesso a dados com Dio e cache Drift. Testes
+  rodando offline sobre fixtures reais.
 - **`lib/di` e `lib/presentation`** — grafo de dependências em Riverpod,
   estado da dupla carteira com edição síncrona, avaliação orquestrada e
   persistência dos estudos no Firestore.
@@ -54,16 +54,15 @@ Documentos de referência:
   camada de dados e o mesmo motor do aplicativo, gerando os relatórios de
   evidência em [`docs/validacao/`](docs/validacao/).
 
-Ao todo: **458 testes automatizados** — 251 do aplicativo e 207 do núcleo —,
-todos offline, com 83,9% de cobertura de linhas no núcleo de domínio.
+Ao todo: **457 testes automatizados** — 255 do aplicativo e 202 do núcleo —,
+todos offline, com 84,2% de cobertura de linhas no núcleo de domínio.
 
 ### Evidências de corretude
 
 | Verificação | Resultado |
 |---|---|
-| [Invariantes do motor](docs/validacao/invariantes.md) | 15 aprovadas |
+| [Invariantes do motor](docs/validacao/invariantes.md) | 12 de 12 aprovadas |
 | [Conferência cruzada em Python](docs/validacao/conferencia_python.md) | 80/80 dentro de 1e-4 |
-| [Qualidade dos proventos](docs/validacao/qualidade_proventos.md) | 11/11 consistentes |
 | [Sensibilidade às premissas](docs/validacao/sensibilidade.md) | três eixos medidos |
 | [Limitações](docs/validacao/limitacoes.md) | 20 catalogadas |
 
@@ -264,8 +263,7 @@ Depois, preencha `BRAPI_PROXY_URL` em `config/local.json` com a URL retornada.
 
 | Dado | Fonte | Observação |
 |---|---|---|
-| Cotações diárias | brapi `/v2/stocks/historical` | `close` já ajustado por split, **não** por proventos |
-| Proventos | brapi `/v2/stocks/dividends` | campo `label` distingue JCP (IRRF 15%) de dividendo |
+| Cotações diárias | brapi `/v2/stocks/historical` | `close` já ajustado por split, **não** por proventos — que o domínio não modela |
 | Fundamentos históricos | brapi `statistics`, `income-statement`, `balance-sheet`, `cash-flow` (`mode=history`) | granularidade **anual**, 2010–2025 |
 | Setor / indústria | brapi `/v2/stocks/profile` | taxonomia própria da brapi, não GICS nem B3 |
 | Taxa livre de risco | Banco Central, série SGS 12 (CDI) | API aberta, sem chave |
@@ -282,7 +280,7 @@ packages/equisim_core/     domínio puro — sem Flutter, sem rede, sem I/O
 ├── value_objects/         ticker, dinheiro em centavos, peso, intervalo
 ├── services/              valuation, backtest, métricas, meta, carteira
 ├── repositories/          contratos (interfaces)
-└── tax/ · time/ · failures/
+└── time/ · failures/ · audit/
 
 lib/data/                  acesso a dados
 ├── config/                resolução de credencial (proxy · define · .env)
@@ -290,7 +288,6 @@ lib/data/                  acesso a dados
 ├── datasources/remote/    brapi · Banco Central
 ├── datasources/local/     cache Drift + políticas de validade
 ├── dtos/                  espelham o JSON; não vazam para o domínio
-├── quality/               portão de qualidade dos proventos
 └── repositories/          implementações dos contratos
 
 lib/di/                    raiz de composição (Riverpod)

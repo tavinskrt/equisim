@@ -22,9 +22,6 @@ abstract final class CachePolicy {
   /// Perfil e setor: praticamente estáticos.
   static const Duration profile = Duration(days: 90);
 
-  /// Proventos: novos eventos são anunciados ao longo do mês.
-  static const Duration dividends = Duration(days: 1);
-
   /// CDI e IPCA: publicação diária.
   static const Duration macro = Duration(days: 1);
 
@@ -36,9 +33,6 @@ abstract final class CachePolicy {
 
   /// Chave de cache da série de cotações de um ativo.
   static String pricesKey(String ticker) => 'prices:$ticker';
-
-  /// Chave de cache do histórico de proventos de um ativo.
-  static String dividendsKey(String ticker) => 'dividends:$ticker';
 
   /// Chave de cache dos exercícios de um ativo.
   static String fundamentalsKey(String ticker) => 'fundamentals:$ticker';

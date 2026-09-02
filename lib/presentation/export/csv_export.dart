@@ -82,7 +82,6 @@ abstract final class CsvExport {
     row('sharpe', p?.sharpe, r?.sharpe);
     row('sortino', p?.sortino, r?.sortino);
     row('calmar', p?.calmar, r?.calmar);
-    row('dividend_yield_liquido', p?.netDividendYield, r?.netDividendYield);
     row(
       'patrimonio_final',
       result.principal?.finalValue.reais,
@@ -102,15 +101,9 @@ abstract final class CsvExport {
       decimals: 2,
     );
     row(
-      'proventos_brutos',
-      result.principal?.grossDividends.reais,
-      result.reserva?.grossDividends.reais,
-      decimals: 2,
-    );
-    row(
-      'imposto_retido',
-      result.principal?.withheldTax.reais,
-      result.reserva?.withheldTax.reais,
+      'caixa_residual',
+      result.principal?.residualCash.reais,
+      result.reserva?.residualCash.reais,
       decimals: 2,
     );
 
@@ -126,12 +119,11 @@ abstract final class CsvExport {
           'peso_alvo',
           'peso_atual',
           'deriva_pp',
-          'retorno_total',
+          'retorno',
           'cotas',
-          'capital_alocado',
+          'capital_destinado',
           'valor_final',
-          'proventos_brutos',
-          'imposto_retido',
+          'caixa',
         ].join(separator),
       );
 
@@ -143,14 +135,12 @@ abstract final class CsvExport {
           _n(asset.currentWeight),
           _n(asset.drift, decimals: 2),
           _n(asset.totalReturn),
-          // Seis casas, e não as duas da tela: a quantidade é fracionária, e
-          // uma planilha que reconstrua `cotas × preço` com duas casas erraria
-          // o valor da posição em ativo de cotação alta.
-          _n(asset.shares, decimals: 6),
+          // Sem casa decimal: a quantidade é inteira, e escrever "12,000000"
+          // sugeriria uma precisão que o modelo não tem mais.
+          '${asset.shares}',
           _n(asset.invested.reais, decimals: 2),
           _n(asset.finalValue.reais, decimals: 2),
-          _n(asset.grossDividends.reais, decimals: 2),
-          _n(asset.withheldTax.reais, decimals: 2),
+          _n(asset.cash.reais, decimals: 2),
         ].join(separator),
       );
     }

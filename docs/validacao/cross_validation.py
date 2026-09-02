@@ -131,7 +131,6 @@ def main() -> None:
     parametros = carregar_parametros()
     taxa_livre = float(parametros["taxa_livre_risco_anual"])
 
-    retorno_total = pd.read_csv(BASE / "retorno_total.csv", parse_dates=["date"]).set_index("date")
     precos = pd.read_csv(BASE / "precos.csv", parse_dates=["date"]).set_index("date")
     metricas_dart = pd.read_csv(BASE / "metricas_equisim.csv").set_index("ticker")
 
@@ -143,13 +142,18 @@ def main() -> None:
     total = 0
     aprovados = 0
 
-    for ticker in retorno_total.columns:
+    for ticker in precos.columns:
         if ticker not in metricas_dart.index:
             continue
 
-        indice = retorno_total[ticker].dropna()
-        if len(indice) < 30:
+        # Indice de preco em base 1,0 no primeiro pregao da janela. Era o
+        # `retorno_total.csv` que entrava aqui, construido pelo motor de
+        # retorno total; ele saiu com a decisao 023, e a trajetoria de um
+        # ativo passou a ser a propria serie de fechamentos.
+        serie = precos[ticker].dropna()
+        if len(serie) < 30 or serie.iloc[0] <= 0:
             continue
+        indice = serie / serie.iloc[0]
 
         retornos = retornos_diarios(indice)
         dias = (indice.index[-1] - indice.index[0]).days

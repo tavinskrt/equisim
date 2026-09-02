@@ -96,7 +96,6 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
   final inputs = await PrepareValuationInputs.call(
     ticker: ticker,
     prices: ref.watch(priceRepositoryProvider),
-    dividends: ref.watch(dividendRepositoryProvider),
     fundamentals: ref.watch(fundamentalsRepositoryProvider),
     benchmark: ref.watch(benchmarkRepositoryProvider),
     // CAPM olha para frente: a taxa livre de risco do desconto é a corrente,
@@ -140,36 +139,6 @@ final portfolioValuationsProvider =
       return out;
     });
 
-/// Dividend yield líquido de imposto, por ativo da carteira Principal.
-final netDividendYieldsProvider = FutureProvider<Map<Ticker, double>>((
-  ref,
-) async {
-  final study = ref.watch(studyProvider).study;
-  final dividendRepository = ref.watch(dividendRepositoryProvider);
-  final priceRepository = ref.watch(priceRepositoryProvider);
-  final today = DateTime.now();
-  final window = DateRange(
-    DateTime(today.year - 1, today.month, today.day),
-    today,
-  );
-
-  final out = <Ticker, double>{};
-  for (final ticker in study.principal.tickers) {
-    final events = await dividendRepository.history(ticker);
-    final prices = await priceRepository.daily(ticker, window);
-    if (events.isErr || prices.isErr) continue;
-    final series = prices.unwrap();
-    if (series.isEmpty) continue;
-
-    out[ticker] = PrepareValuationInputs.netTrailingYield(
-      events: events.unwrap(),
-      currentPrice: series.points.last.close,
-      asOf: today,
-    );
-  }
-  return out;
-});
-
 /// Situação da carteira frente à meta patrimonial.
 final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
   final study = ref.watch(studyProvider).study;
@@ -179,13 +148,11 @@ final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
   final settings = ref.watch(valuationSettingsProvider);
   final anchors = await ref.watch(marketAnchorsProvider.future);
   final valuations = await ref.watch(portfolioValuationsProvider.future);
-  final yields = await ref.watch(netDividendYieldsProvider.future);
 
   final result = EvaluateGoalAlignment.call(
     portfolio: study.principal,
     goal: goal,
     valuations: valuations,
-    netDividendYields: yields,
     anchors: anchors,
     horizonMonths: settings.convergenceHorizonMonths,
   );
@@ -204,14 +171,7 @@ final goalFeasibilityProvider = FutureProvider<FeasibilityVerdict?>((
 
   final anchors = await ref.watch(marketAnchorsProvider.future);
   final required = RequiredReturnSolver.solve(goal);
-  if (required.isErr) {
-    return FeasibilityVerdict(
-      level: FeasibilityLevel.unrealistic,
-      requiredAnnualRate: double.infinity,
-      anchors: anchors,
-      message: required.failureOrNull!.message,
-    );
-  }
+  if (required.isErr) return GoalFeasibility.unsolvable(anchors: anchors);
 
   return GoalFeasibility.assess(
     required: required.unwrap(),

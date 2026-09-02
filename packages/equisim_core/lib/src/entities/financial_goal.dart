@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import '../failures/failure.dart';
+import '../failures/result.dart';
 import '../value_objects/money.dart';
 
 /// Plano patrimonial declarado pelo usuário.
@@ -20,14 +22,72 @@ class FinancialGoal {
   /// V_f — patrimônio desejado ao final.
   final Money targetWealth;
 
-  /// Declara o plano. **Não valida** — quem valida é
-  /// `RequiredReturnSolver.solve`, que devolve [Result] em vez de lançar.
-  const FinancialGoal({
+  /// Declara o plano **sem conferir invariante alguma**.
+  ///
+  /// O nome é o aviso: quem chama isto assume a conferência. Existe para dois
+  /// casos legítimos — desserializar documento gravado antes desta validação
+  /// existir, e montar caso de teste deliberadamente inválido — e é `const`,
+  /// o que [create] não pode ser.
+  ///
+  /// **No caminho normal, use [create].**
+  const FinancialGoal.unvalidated({
     required this.initialContribution,
     required this.monthlyContribution,
     required this.months,
     required this.targetWealth,
   });
+
+  /// Constrói o plano conferindo as invariantes que o tornam resolvível.
+  ///
+  /// - [initialContribution], [monthlyContribution]: aportes. Não podem ser
+  ///   negativos, e não podem ser ambos zero — sem capital não há o que render.
+  /// - [months]: prazo. Precisa de ao menos um mês.
+  /// - [targetWealth]: patrimônio desejado. Precisa ser positivo.
+  ///
+  /// Devolve [InvalidInput] com o campo apontado em `field`, para a interface
+  /// destacá-lo sem interpretar a mensagem.
+  ///
+  /// **Por que aqui e não só no solver.** A entidade circula por toda a
+  /// aplicação — persistência, telas, alinhamento de meta —, e quem a recebe
+  /// não tem como saber se ela passou por validação em algum ponto. Fechar a
+  /// invariante na construção é o que dispensa cada consumidor de reconferir.
+  static Result<FinancialGoal> create({
+    required Money initialContribution,
+    required Money monthlyContribution,
+    required int months,
+    required Money targetWealth,
+  }) {
+    if (months <= 0) {
+      return const Err(InvalidInput(
+        'O prazo deve ser de ao menos um mês.',
+        field: 'months',
+      ));
+    }
+    if (initialContribution.cents < 0 || monthlyContribution.cents < 0) {
+      return const Err(InvalidInput(
+        'Os aportes não podem ser negativos.',
+        field: 'contribution',
+      ));
+    }
+    if (targetWealth.cents <= 0) {
+      return const Err(InvalidInput(
+        'O valor desejado deve ser positivo.',
+        field: 'targetWealth',
+      ));
+    }
+    if (initialContribution.isZero && monthlyContribution.isZero) {
+      return const Err(InvalidInput(
+        'Sem aporte inicial nem mensal, não há capital para render.',
+        field: 'contribution',
+      ));
+    }
+    return Ok(FinancialGoal.unvalidated(
+      initialContribution: initialContribution,
+      monthlyContribution: monthlyContribution,
+      months: months,
+      targetWealth: targetWealth,
+    ));
+  }
 
   /// Prazo em anos, derivado de [months]. Fração exata, sem arredondar.
   double get years => months / 12.0;

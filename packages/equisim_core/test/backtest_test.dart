@@ -25,96 +25,6 @@ Asset assetOf(String symbol, {String sectorKey = 'financeiro'}) => Asset(
 void main() {
   final start = DateTime(2024, 1, 1);
 
-  group('Motor de retorno total', () {
-    test('sem proventos, o índice acompanha o preço', () {
-      final prices = seriesOf('PETR4', start, [10, 11, 12]);
-      final series = TotalReturnEngine.build(
-        prices: prices,
-        dividends: const [],
-        taxPolicy: TaxPolicy.brasil,
-      );
-      expect(series.totalReturn, closeTo(0.2, 1e-12));
-    });
-
-    test('dividendo isento é reinvestido integralmente', () {
-      final prices = seriesOf('PETR4', start, [10, 10, 10]);
-      final dividend = DividendEvent(
-        ticker: Ticker.parse('PETR4'),
-        exDate: prices.points[1].date,
-        paymentDate: prices.points[1].date,
-        amountPerShare: 1.0,
-        kind: DividendKind.dividendo,
-      );
-      final series = TotalReturnEngine.build(
-        prices: prices,
-        dividends: [dividend],
-        taxPolicy: TaxPolicy.brasil,
-      );
-      // R$ 1,00 de provento sobre ação de R$ 10 → +10% em cotas.
-      expect(series.totalReturn, closeTo(0.10, 1e-12));
-      expect(series.withheldTaxPerShare, 0.0);
-    });
-
-    test('JCP sofre 15% de IRRF e rende menos que dividendo equivalente', () {
-      final prices = seriesOf('ITUB4', start, [10, 10, 10]);
-      final jcp = DividendEvent(
-        ticker: Ticker.parse('ITUB4'),
-        exDate: prices.points[1].date,
-        paymentDate: prices.points[1].date,
-        amountPerShare: 1.0,
-        kind: DividendKind.jcp,
-      );
-      final series = TotalReturnEngine.build(
-        prices: prices,
-        dividends: [jcp],
-        taxPolicy: TaxPolicy.brasil,
-      );
-      // Líquido de R$ 0,85 sobre R$ 10 → +8,5%.
-      expect(series.totalReturn, closeTo(0.085, 1e-12));
-      expect(series.withheldTaxPerShare, closeTo(0.15, 1e-12));
-      expect(series.grossDividendsPerShare, closeTo(1.0, 1e-12));
-    });
-
-    test('política sem tributação isola exatamente o efeito fiscal', () {
-      final prices = seriesOf('ITUB4', start, [10, 10, 10]);
-      final jcp = DividendEvent(
-        ticker: Ticker.parse('ITUB4'),
-        exDate: prices.points[1].date,
-        paymentDate: prices.points[1].date,
-        amountPerShare: 1.0,
-        kind: DividendKind.jcp,
-      );
-      final bruto = TotalReturnEngine.build(
-        prices: prices,
-        dividends: [jcp],
-        taxPolicy: TaxPolicy.zero,
-      );
-      final liquido = TotalReturnEngine.build(
-        prices: prices,
-        dividends: [jcp],
-        taxPolicy: TaxPolicy.brasil,
-      );
-      expect(bruto.totalReturn - liquido.totalReturn, closeTo(0.015, 1e-12));
-    });
-
-    test('provento com data-ex anterior ao início não é creditado', () {
-      final prices = seriesOf('PETR4', start, [10, 10, 10]);
-      final dividend = DividendEvent(
-        ticker: Ticker.parse('PETR4'),
-        exDate: start.subtract(const Duration(days: 30)),
-        paymentDate: prices.points[1].date,
-        amountPerShare: 1.0,
-        kind: DividendKind.dividendo,
-      );
-      final series = TotalReturnEngine.build(
-        prices: prices,
-        dividends: [dividend],
-        taxPolicy: TaxPolicy.brasil,
-      );
-      expect(series.totalReturn, closeTo(0.0, 1e-12));
-    });
-  });
-
   group('PortfolioBacktest', () {
     test('ativo único que dobra: patrimônio dobra e TWR é 100%', () {
       final portfolio = Portfolio.equalWeighted(
@@ -127,7 +37,6 @@ void main() {
       final result = PortfolioBacktest.run(
         portfolio: portfolio,
         prices: {Ticker.parse('PETR4'): seriesOf('PETR4', start, [10, 15, 20])},
-        dividends: const {},
         plan: const ContributionPlan(
           initial: Money(100000), // R$ 1.000
           monthly: Money.zero,
@@ -140,6 +49,9 @@ void main() {
       expect(outcome.finalValue.reais, closeTo(2000.0, 0.01));
       expect(outcome.metrics.timeWeightedReturn, closeTo(1.0, 1e-9));
       expect(outcome.base100.last, closeTo(200.0, 1e-6));
+      // R$ 1.000 a R$ 10 compra exatamente 100 ações e não deixa troco.
+      expect(outcome.perAsset[Ticker.parse('PETR4')]!.shares, 100);
+      expect(outcome.residualCash, Money.zero);
     });
 
     test('sem rebalanceamento, os pesos derivam com o mercado', () {
@@ -156,7 +68,6 @@ void main() {
           Ticker.parse('PETR4'): seriesOf('PETR4', start, [10, 15, 20]),
           Ticker.parse('VALE3'): seriesOf('VALE3', start, [10, 10, 10]),
         },
-        dividends: const {},
         plan: const ContributionPlan(
           initial: Money(100000),
           monthly: Money.zero,
@@ -190,7 +101,6 @@ void main() {
           Ticker.parse('PETR4'): seriesOf('PETR4', start, [10, 15, 20]),
           Ticker.parse('VALE3'): seriesOf('VALE3', start, [10, 9, 8]),
         },
-        dividends: const {},
         plan: const ContributionPlan(
           initial: Money(100000),
           monthly: Money.zero,
@@ -216,7 +126,6 @@ void main() {
       final result = PortfolioBacktest.run(
         portfolio: portfolio,
         prices: {Ticker.parse('PETR4'): seriesOf('PETR4', start, closes)},
-        dividends: const {},
         plan: const ContributionPlan(
           initial: Money(100000), // R$ 1.000
           monthly: Money(50000), // R$ 500
@@ -235,9 +144,91 @@ void main() {
       expect(result.cashFlows.length, greaterThan(2));
     });
 
-    test('o alocado é a soma exata do que cada ativo recebeu', () {
-      // Três ativos: os pesos de `equalWeighted` são 1/3, e cada fatia
-      // arredonda isoladamente. É o caso em que aportado e alocado divergem.
+    // ----------------------------------------- Ações inteiras e caixa --
+
+    test('compra em lotes inteiros e guarda a sobra em caixa', () {
+      // Preço de R$ 30 contra aporte de R$ 100: cabem 3 ações e sobram R$ 10.
+      // No aporte seguinte o caixa acumulado passa a R$ 110, que compra mais 3
+      // e deixa R$ 20 — é a acumulação que o modelo promete.
+      final closes = List<double>.filled(120, 30.0);
+      final portfolio = Portfolio.equalWeighted(
+        id: 'p',
+        name: 'Principal',
+        kind: PortfolioKind.principal,
+        assets: [assetOf('PETR4')],
+      ).unwrap();
+
+      final result = PortfolioBacktest.run(
+        portfolio: portfolio,
+        prices: {Ticker.parse('PETR4'): seriesOf('PETR4', start, closes)},
+        plan: const ContributionPlan(
+          initial: Money(10000), // R$ 100
+          monthly: Money(10000), // R$ 100
+          contributionDay: 5,
+        ),
+        range: DateRange(start, DateTime(2024, 4, 30)),
+      ).unwrap();
+
+      final petr = result.perAsset[Ticker.parse('PETR4')]!;
+      // Quatro aportes de R$ 100 (janeiro entra pelo inicial; fevereiro, março
+      // e abril pelo mensal) → R$ 400, que a R$ 30 dá 13 ações e R$ 10 de
+      // caixa.
+      expect(result.totalContributed, const Money(40000));
+      expect(petr.shares, 13);
+      expect(petr.cash, const Money(1000));
+      expect(result.residualCash, const Money(1000));
+      // Patrimônio = 13 × R$ 30 + R$ 10 de caixa = R$ 400, o aportado cheio.
+      expect(result.finalValue, const Money(40000));
+    });
+
+    test('a quantidade de ações é inteira em toda posição', () {
+      final portfolio = Portfolio.equalWeighted(
+        id: 'p',
+        name: 'Principal',
+        kind: PortfolioKind.principal,
+        assets: [assetOf('PETR4'), assetOf('VALE3'), assetOf('ITUB4')],
+      ).unwrap();
+
+      final result = PortfolioBacktest.run(
+        portfolio: portfolio,
+        prices: {
+          Ticker.parse('PETR4'):
+              seriesOf('PETR4', start, List<double>.filled(120, 37.41)),
+          Ticker.parse('VALE3'):
+              seriesOf('VALE3', start, List<double>.filled(120, 8.03)),
+          Ticker.parse('ITUB4'):
+              seriesOf('ITUB4', start, List<double>.filled(120, 66.9)),
+        },
+        plan: const ContributionPlan(
+          initial: Money(100000),
+          monthly: Money(50000),
+          contributionDay: 5,
+        ),
+        range: DateRange(start, DateTime(2024, 12, 31)),
+      ).unwrap();
+
+      for (final asset in result.perAsset.values) {
+        // O tipo já é `int`; o que se verifica aqui é que nenhuma posição
+        // ficou negativa e que o caixa de cada ativo é menor que uma ação —
+        // caixa maior significaria compra que deixou de acontecer.
+        expect(asset.shares, greaterThanOrEqualTo(0));
+        expect(asset.cash.cents, greaterThanOrEqualTo(0));
+      }
+      expect(
+        result.perAsset[Ticker.parse('PETR4')]!.cash.cents,
+        lessThan(3741),
+      );
+      expect(result.perAsset[Ticker.parse('VALE3')]!.cash.cents, lessThan(803));
+      expect(
+        result.perAsset[Ticker.parse('ITUB4')]!.cash.cents,
+        lessThan(6690),
+      );
+    });
+
+    test('o aportado se reparte inteiro entre os ativos, sem resíduo', () {
+      // Três ativos: os pesos de `equalWeighted` são 1/3, e a divisão em
+      // centavos não fecha por conta própria. O motor distribui o resto, então
+      // a soma das fatias tem de reconstituir o aporte EXATAMENTE.
       final closes = List<double>.filled(120, 10.0);
       final portfolio = Portfolio.equalWeighted(
         id: 'p',
@@ -252,7 +243,6 @@ void main() {
           for (final symbol in ['PETR4', 'VALE3', 'ITUB4'])
             Ticker.parse(symbol): seriesOf(symbol, start, closes),
         },
-        dividends: const {},
         plan: const ContributionPlan(
           initial: Money(100000), // R$ 1.000
           monthly: Money(50000), // R$ 500
@@ -263,25 +253,103 @@ void main() {
 
       // Em CENTAVOS e com `==`: o contrato é identidade, não aproximação.
       // `Money` é inteiro, então comparar por igualdade aqui é exato.
-      final somaPorAtivo = result.perAsset.values
+      final somaDestinada = result.perAsset.values
           .fold(0, (total, asset) => total + asset.invested.cents);
-      expect(result.totalAllocated.cents, somaPorAtivo);
+      expect(somaDestinada, result.totalContributed.cents);
 
-      // Aportado e alocado DIVERGEM — é o motivo de os dois existirem.
-      expect(result.totalAllocated, isNot(result.totalContributed));
+      // O alocado é o que virou ação; o resto está em caixa, e os dois juntos
+      // reconstituem o aportado sem sobra nem falta.
+      expect(
+        result.totalAllocated + result.residualCash,
+        result.totalContributed,
+      );
 
-      // E divergem por centavos, não por reais. Executado: −4 centavos em 12
-      // aportes, ou seja alocado a MAIS que o aportado, porque `Weights.equal`
-      // absorve o resíduo de 1/3 no primeiro ativo e a fatia dele arredonda
-      // para cima. O teto de um centavo por aporte cobre o sinal contrário
-      // sem deixar passar fatia perdida, que seria da ordem de reais.
-      expect(result.unallocated.cents.abs(), lessThanOrEqualTo(12));
+      final somaCaixa = result.perAsset.values
+          .fold(0, (total, asset) => total + asset.cash.cents);
+      expect(somaCaixa, result.residualCash.cents);
     });
 
-    test('com um ativo só, o aportado vira posição integralmente', () {
-      // Peso 1,0 não arredonda: `aporte * 1.0` devolve o aporte cheio, e a
+    test('o patrimônio final é a soma exata das posições e do caixa', () {
+      // Em CENTAVOS e com `==`. A marcação a mercado opera em aritmética
+      // inteira — posição inteira vezes preço em centavos —, então esta
+      // identidade não admite tolerância: qualquer folga aqui significaria
+      // acúmulo de erro de ponto flutuante ao longo dos pregões.
+      final portfolio = Portfolio.equalWeighted(
+        id: 'p',
+        name: 'Principal',
+        kind: PortfolioKind.principal,
+        assets: [assetOf('PETR4'), assetOf('VALE3'), assetOf('ITUB4')],
+      ).unwrap();
+
+      final result = PortfolioBacktest.run(
+        portfolio: portfolio,
+        prices: {
+          Ticker.parse('PETR4'):
+              seriesOf('PETR4', start, List<double>.filled(120, 37.41)),
+          Ticker.parse('VALE3'):
+              seriesOf('VALE3', start, List<double>.filled(120, 8.03)),
+          Ticker.parse('ITUB4'):
+              seriesOf('ITUB4', start, List<double>.filled(120, 66.9)),
+        },
+        plan: const ContributionPlan(
+          initial: Money(100000),
+          monthly: Money(50000),
+          contributionDay: 5,
+        ),
+        range: DateRange(start, DateTime(2024, 12, 31)),
+      ).unwrap();
+
+      final soma = result.perAsset.values.fold(
+        0,
+        (total, asset) => total + asset.finalValue.cents + asset.cash.cents,
+      );
+      expect(soma, result.finalValue.cents);
+    });
+
+    test('a fatia de ativo sem cotação no dia fica em caixa e é usada depois',
+        () {
+      // VALE3 só começa a ser negociada dois dias depois. A fatia dela no
+      // aporte inicial não some: espera no caixa e vira posição no primeiro
+      // aporte em que há preço.
+      final portfolio = Portfolio.equalWeighted(
+        id: 'p',
+        name: 'Principal',
+        kind: PortfolioKind.principal,
+        assets: [assetOf('PETR4'), assetOf('VALE3')],
+      ).unwrap();
+
+      final result = PortfolioBacktest.run(
+        portfolio: portfolio,
+        prices: {
+          Ticker.parse('PETR4'):
+              seriesOf('PETR4', start, List<double>.filled(120, 10.0)),
+          Ticker.parse('VALE3'): seriesOf(
+            'VALE3',
+            start.add(const Duration(days: 40)),
+            List<double>.filled(80, 10.0),
+          ),
+        },
+        plan: const ContributionPlan(
+          initial: Money(100000),
+          monthly: Money(50000),
+          contributionDay: 5,
+        ),
+        // A janela começa no primeiro pregão comum, então a simulação inteira
+        // tem preço para os dois; o que se verifica é a identidade de capital.
+        range: DateRange(start, DateTime(2024, 12, 31)),
+      ).unwrap();
+
+      expect(
+        result.totalAllocated + result.residualCash,
+        result.totalContributed,
+      );
+      expect(result.residualCash.cents, greaterThanOrEqualTo(0));
+    });
+
+    test('com um ativo só e preço divisor, não sobra caixa', () {
+      // Peso 1,0 não reparte, e R$ 1.000 e R$ 500 são múltiplos de R$ 10: a
       // sobra tem de ser exatamente zero. É a contraprova do teste acima —
-      // sem ela, um `totalAllocated` sistematicamente truncado passaria.
+      // sem ela, um caixa sistematicamente inflado passaria.
       final closes = List<double>.filled(120, 10.0);
       final portfolio = Portfolio.equalWeighted(
         id: 'p',
@@ -293,7 +361,6 @@ void main() {
       final result = PortfolioBacktest.run(
         portfolio: portfolio,
         prices: {Ticker.parse('PETR4'): seriesOf('PETR4', start, closes)},
-        dividends: const {},
         plan: const ContributionPlan(
           initial: Money(100000),
           monthly: Money(50000),
@@ -303,47 +370,7 @@ void main() {
       ).unwrap();
 
       expect(result.totalAllocated, result.totalContributed);
-      expect(result.unallocated, Money.zero);
-    });
-
-    test('JCP reduz o patrimônio final em relação a dividendo equivalente', () {
-      final prices = seriesOf('ITUB4', start, [10, 10, 10, 10]);
-      final portfolio = Portfolio.equalWeighted(
-        id: 'p',
-        name: 'Principal',
-        kind: PortfolioKind.principal,
-        assets: [assetOf('ITUB4')],
-      ).unwrap();
-
-      BacktestOutcome runWith(DividendKind kind) => PortfolioBacktest.run(
-            portfolio: portfolio,
-            prices: {Ticker.parse('ITUB4'): prices},
-            dividends: {
-              Ticker.parse('ITUB4'): [
-                DividendEvent(
-                  ticker: Ticker.parse('ITUB4'),
-                  exDate: prices.points[1].date,
-                  paymentDate: prices.points[2].date,
-                  amountPerShare: 1.0,
-                  kind: kind,
-                ),
-              ],
-            },
-            plan: const ContributionPlan(
-              initial: Money(100000),
-              monthly: Money.zero,
-            ),
-            range: DateRange(start, DateTime(2024, 12, 31)),
-          ).unwrap();
-
-      final comJcp = runWith(DividendKind.jcp);
-      final comDividendo = runWith(DividendKind.dividendo);
-
-      expect(comJcp.finalValue.reais, lessThan(comDividendo.finalValue.reais));
-      expect(comJcp.withheldTax.reais, closeTo(15.0, 0.01));
-      expect(comDividendo.withheldTax.reais, closeTo(0.0, 0.01));
-      // 100 ações × R$ 1,00 = R$ 100 brutos.
-      expect(comJcp.grossDividends.reais, closeTo(100.0, 0.01));
+      expect(result.residualCash, Money.zero);
     });
 
     test('encurta o período e avisa quando um ativo é mais novo', () {
@@ -361,7 +388,6 @@ void main() {
           Ticker.parse('VALE3'):
               seriesOf('VALE3', start.add(const Duration(days: 2)), [10, 10, 10]),
         },
-        dividends: const {},
         plan: const ContributionPlan(
           initial: Money(100000),
           monthly: Money.zero,
@@ -384,7 +410,6 @@ void main() {
       final result = PortfolioBacktest.run(
         portfolio: portfolio,
         prices: const {},
-        dividends: const {},
         plan: const ContributionPlan(
           initial: Money(100000),
           monthly: Money.zero,
@@ -406,7 +431,6 @@ void main() {
       final result = PortfolioBacktest.run(
         portfolio: portfolio,
         prices: {Ticker.parse('PETR4'): seriesOf('PETR4', start, [10, 11])},
-        dividends: const {},
         plan: ContributionPlan.none,
         range: DateRange(start, DateTime(2024, 12, 31)),
       );

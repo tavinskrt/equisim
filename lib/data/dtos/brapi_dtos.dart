@@ -64,8 +64,8 @@ abstract final class BrapiJson {
   ///
   /// **O epoch é interpretado como UTC e a data resultante é local.** Um
   /// instante logo após a meia-noite UTC vira o dia anterior em Brasília. É
-  /// aceitável porque a fonte publica datas de pregão e de provento ao meio-dia
-  /// UTC, longe da virada.
+  /// aceitável porque a fonte publica as datas ao meio-dia UTC, longe da
+  /// virada.
   ///
   /// Devolve `null` para valor ausente, de outro tipo ou não parseável.
   static DateTime? asDate(dynamic value) {
@@ -97,8 +97,8 @@ class BrapiPriceDto {
   /// Fechamento ajustado por desdobramento e grupamento.
   final double close;
 
-  /// Fechamento ajustado também por proventos. **Não usar em cálculo**:
-  /// subajusta proventos brasileiros, sobretudo JCP.
+  /// Fechamento ajustado também por proventos, como a fonte o publica.
+  /// **Não usar em cálculo** — o domínio calcula sobre `close`.
   final double? adjustedClose;
 
   /// Declara o DTO.
@@ -124,81 +124,6 @@ class BrapiPriceDto {
         close: close,
         adjustedClose: adjustedClose,
       );
-}
-
-/// Provento vindo de `/v2/stocks/dividends` → `cashDividends`.
-class BrapiDividendDto {
-  /// Data-ex — `lastDatePrior` na fonte. Define quem tem direito.
-  final DateTime exDate;
-
-  /// Data de pagamento. Define quando o caixa entra.
-  final DateTime paymentDate;
-
-  /// Valor por papel, na convenção bruta da fonte.
-  final double rate;
-
-  /// Rótulo fiscal cru (`JCP`, `DIVIDENDO`, `RENDIMENTO`, …).
-  final String label;
-
-  /// Observações da fonte. É onde vem a marca de data estimada.
-  final String? remarks;
-
-  /// Declara o DTO.
-  const BrapiDividendDto({
-    required this.exDate,
-    required this.paymentDate,
-    required this.rate,
-    required this.label,
-    this.remarks,
-  });
-
-  /// `lastDatePrior` é a data-ex (quem detém tem direito); `paymentDate` é
-  /// quando o caixa entra. Quando falta a data-ex, o pagamento é usado como
-  /// aproximação conservadora.
-  static BrapiDividendDto? fromJson(Map<String, dynamic> json) {
-    final payment = BrapiJson.asDate(json['paymentDate']);
-    final ex = BrapiJson.asDate(json['lastDatePrior']) ?? payment;
-    final rate = BrapiJson.asDouble(json['rate']);
-    if (payment == null || ex == null || rate == null || rate <= 0) return null;
-    return BrapiDividendDto(
-      exDate: ex,
-      paymentDate: payment,
-      rate: rate,
-      label: BrapiJson.asString(json['label']) ?? '',
-      remarks: BrapiJson.asString(json['remarks']),
-    );
-  }
-
-  /// A fonte marca parte das datas de pagamento como estimadas
-  /// (`csv:payment_date_estimated`) — 154 ocorrências só em ITUB4. O motor
-  /// credita o provento na data de pagamento, então isso desloca o
-  /// reinvestimento em alguns dias e precisa chegar ao domínio.
-  bool get paymentDateEstimated =>
-      (remarks ?? '').contains('payment_date_estimated');
-
-  /// Converte para a entidade de domínio.
-  ///
-  /// - [ticker]: ativo pagador, que o payload de proventos não repete.
-  ///
-  /// O rótulo cru vira [DividendKind] por `fromLabel`, que nunca falha: rótulo
-  /// desconhecido vira [DividendKind.desconhecido].
-  DividendEvent toDomain(Ticker ticker) => DividendEvent(
-        ticker: ticker,
-        exDate: exDate,
-        paymentDate: paymentDate,
-        amountPerShare: rate,
-        kind: DividendKind.fromLabel(label),
-        paymentDateEstimated: paymentDateEstimated,
-      );
-
-  /// Identidade para eliminar duplicatas **exatas**.
-  ///
-  /// Não colapsa múltiplas tranches legítimas na mesma data-ex: BBAS3 em
-  /// 11/03/2025 tem dois JCP de valores diferentes mais um dividendo, e todos
-  /// são reais. Só some o registro repetido idêntico, que a fonte produz
-  /// ocasionalmente (ex.: PETR4 em 01/06/2026).
-  String get identity =>
-      '${BrapiJson.isoDay(exDate)}|${BrapiJson.isoDay(paymentDate)}|$rate|$label';
 }
 
 /// Fundamentos consolidados de um exercício, montados a partir de quatro

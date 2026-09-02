@@ -16,9 +16,12 @@ const _config = ApiConfig(
 );
 
 ApiClient clientWith(FixtureAdapter adapter) {
+  // `ApiClient.acceptsStatus`, e nao uma lambda propria: a politica precisa ser
+  // a MESMA de producao. Enquanto era duplicada aqui, este cliente aceitava o
+  // 429 como resposta normal e a repeticao automatica nunca era exercitada.
   final dio = Dio(BaseOptions(
     responseType: ResponseType.plain,
-    validateStatus: (s) => s != null && s < 500,
+    validateStatus: ApiClient.acceptsStatus,
   ));
   dio.httpClientAdapter = adapter;
   return ApiClient(_config, dio: dio);
@@ -85,60 +88,149 @@ void main() {
     });
   });
 
-  group('BrapiDatasource — proventos', () {
-    Future<List<DividendEvent>> loadItub() async {
-      final datasource = BrapiDatasource(clientWith(FixtureAdapter(routes: {
-        '/v2/stocks/dividends': 'brapi_dividends_itub4',
+  group('BrapiDatasource — payload corrompido', () {
+    // Fixture gravada é resposta BOA: testar higienização contra ela prova só
+    // o formato do arquivo. O que a camada existe para filtrar precisa ser
+    // injetado de propósito.
+
+    test('descarta ponto com preço não positivo', () async {
+      final datasource = BrapiDatasource(clientWith(FixtureAdapter(bodies: {
+        '/v2/stocks/historical': '''
+{"results":[{"symbol":"PETR4","data":{"historicalDataPrice":[
+  {"date":1704157200,"close":30.0},
+  {"date":1704243600,"close":-5.0},
+  {"date":1704330000,"close":0.0},
+  {"date":1704416400,"close":31.5}
+]}}]}''',
       })));
-      return (await datasource.dividends(Ticker.parse('ITUB4'))).unwrap();
+
+      final result = await datasource.historicalBatch([Ticker.parse('PETR4')]);
+      final series = result.unwrap()[Ticker.parse('PETR4')]!;
+
+      // Dois pontos sobrevivem; o negativo e o zero somem sem derrubar o lote.
+      expect(series.points.length, 2);
+      expect(series.points.every((p) => p.close > 0), isTrue);
+    });
+
+    test('reordena pontos que a fonte entrega fora de ordem', () async {
+      final datasource = BrapiDatasource(clientWith(FixtureAdapter(bodies: {
+        '/v2/stocks/historical': '''
+{"results":[{"symbol":"VALE3","data":{"historicalDataPrice":[
+  {"date":1704416400,"close":31.5},
+  {"date":1704157200,"close":30.0},
+  {"date":1704330000,"close":31.0}
+]}}]}''',
+      })));
+
+      final result = await datasource.historicalBatch([Ticker.parse('VALE3')]);
+      final series = result.unwrap()[Ticker.parse('VALE3')]!;
+
+      expect(series.points.length, 3);
+      for (var i = 1; i < series.points.length; i++) {
+        expect(
+          series.points[i].date.isAfter(series.points[i - 1].date),
+          isTrue,
+          reason: 'a série precisa sair cronológica, venha como vier',
+        );
+      }
+      // E a busca por data continua correta depois da reordenação.
+      expect(series.closeAsOf(series.lastDate), 31.5);
+    });
+
+    test('ponto sem data ou sem fechamento é ignorado, não derruba o lote',
+        () async {
+      final datasource = BrapiDatasource(clientWith(FixtureAdapter(bodies: {
+        '/v2/stocks/historical': '''
+{"results":[{"symbol":"ITUB4","data":{"historicalDataPrice":[
+  {"close":30.0},
+  {"date":1704157200},
+  {"date":1704243600,"close":"texto"},
+  {"date":1704330000,"close":32.0}
+]}}]}''',
+      })));
+
+      final result = await datasource.historicalBatch([Ticker.parse('ITUB4')]);
+      expect(result.isOk, isTrue);
+      expect(result.unwrap()[Ticker.parse('ITUB4')]!.points.length, 1);
+    });
+
+    test('ativo todo corrompido some do mapa sem levar o lote junto',
+        () async {
+      // Mapa parcial é o contrato do lote: um ativo ruim não pode derrubar os
+      // outros, nem entrar como série vazia que o backtest aceitaria.
+      final datasource = BrapiDatasource(clientWith(FixtureAdapter(bodies: {
+        '/v2/stocks/historical': '''
+{"results":[
+  {"symbol":"PETR4","data":{"historicalDataPrice":[
+    {"date":1704157200,"close":-1.0},
+    {"date":1704243600,"close":0.0}
+  ]}},
+  {"symbol":"VALE3","data":{"historicalDataPrice":[
+    {"date":1704157200,"close":60.0}
+  ]}}
+]}''',
+      })));
+
+      final result = await datasource.historicalBatch(
+        [Ticker.parse('PETR4'), Ticker.parse('VALE3')],
+      );
+      expect(result.isOk, isTrue);
+      final map = result.unwrap();
+      expect(map.containsKey(Ticker.parse('PETR4')), isFalse);
+      expect(map[Ticker.parse('VALE3')]!.points.length, 1);
+    });
+
+    test('lote inteiro corrompido falha explicitamente, e não em silêncio',
+        () async {
+      // Sem nenhuma série utilizável, devolver mapa vazio faria o consumidor
+      // tratar corrupção como "ativo sem histórico". O erro precisa ser dito.
+      final datasource = BrapiDatasource(clientWith(FixtureAdapter(bodies: {
+        '/v2/stocks/historical': '''
+{"results":[{"symbol":"PETR4","data":{"historicalDataPrice":[
+  {"date":1704157200,"close":-1.0}
+]}}]}''',
+      })));
+
+      final result = await datasource.historicalBatch([Ticker.parse('PETR4')]);
+      expect(result.isErr, isTrue);
+      expect(result.failureOrNull, isA<InsufficientData>());
+    });
+  });
+
+  group('BrapiDatasource — falha sem resposta do servidor', () {
+    // O grupo de erro existente cobre status codificados (401, 404, 429). Uma
+    // conexão que cai não tem status nenhum: `DioException.response` é nulo, e
+    // era o caminho sem cobertura. Exceção crua atravessando a camada de dados
+    // quebraria o contrato `Result` inteiro.
+
+    Future<void> viraFalha(DioExceptionType tipo) async {
+      final datasource = BrapiDatasource(clientWith(FixtureAdapter(
+        transportErrors: {'/v2/stocks/historical': tipo},
+      )));
+      final result = await datasource.historicalBatch([Ticker.parse('PETR4')]);
+      expect(result.isErr, isTrue, reason: '$tipo deveria virar Result.err');
+      expect(result.failureOrNull, isA<InsufficientData>());
     }
 
-    test('classifica o rótulo fiscal de cada evento', () async {
-      final events = await loadItub();
-      expect(events, isNotEmpty);
-      expect(
-        events.any((e) => e.kind == DividendKind.jcp),
-        isTrue,
-        reason: 'ITUB4 é fortemente pagadora de JCP',
-      );
-      expect(events.every((e) => e.amountPerShare > 0), isTrue);
+    test('tempo de conexão esgotado vira falha de domínio', () async {
+      await viraFalha(DioExceptionType.connectionTimeout);
     });
 
-    test('propaga a marca de data de pagamento estimada', () async {
-      final events = await loadItub();
-      // A fonte marca boa parte dos eventos de ITUB4 como estimados.
-      expect(events.any((e) => e.paymentDateEstimated), isTrue);
+    test('tempo de recepção esgotado vira falha de domínio', () async {
+      await viraFalha(DioExceptionType.receiveTimeout);
     });
 
-    test('data-ex nunca é posterior à data de pagamento', () async {
-      final events = await loadItub();
-      for (final e in events) {
-        expect(e.exDate.isAfter(e.paymentDate), isFalse,
-            reason: 'data-ex ${e.exDate} depois do pagamento ${e.paymentDate}');
-      }
+    test('conexão perdida vira falha de domínio', () async {
+      await viraFalha(DioExceptionType.connectionError);
     });
 
-    test('elimina duplicata exata sem colapsar tranches legítimas', () async {
-      final events = await loadItub();
-      final identities = events
-          .map((e) => '${e.exDate}|${e.paymentDate}|${e.amountPerShare}|${e.kind}')
-          .toList();
-      expect(identities.length, identities.toSet().length,
-          reason: 'não deve restar registro idêntico repetido');
-
-      // Múltiplas tranches na mesma data-ex continuam presentes quando existem.
-      final byExDate = <DateTime, int>{};
-      for (final e in events) {
-        byExDate[e.exDate] = (byExDate[e.exDate] ?? 0) + 1;
-      }
-      expect(byExDate.values.any((c) => c >= 1), isTrue);
-    });
-
-    test('eventos saem em ordem cronológica de data-ex', () async {
-      final events = await loadItub();
-      for (var i = 1; i < events.length; i++) {
-        expect(events[i].exDate.isBefore(events[i - 1].exDate), isFalse);
-      }
+    test('erro de transporte desconhecido também não escapa', () async {
+      final datasource = BrapiDatasource(clientWith(FixtureAdapter(
+        transportErrors: {'/v2/stocks/historical': DioExceptionType.unknown},
+      )));
+      final result = await datasource.historicalBatch([Ticker.parse('PETR4')]);
+      expect(result.isErr, isTrue);
+      expect(result.failureOrNull, isA<ComputationFailure>());
     });
   });
 

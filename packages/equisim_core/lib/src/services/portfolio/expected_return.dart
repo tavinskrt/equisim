@@ -14,18 +14,18 @@ class ExpectedAssetReturn {
   /// Parcela anualizada da convergência de preço.
   final double priceConvergence;
 
-  /// Dividend yield líquido de imposto, em fração ao ano.
-  final double netDividendYield;
-
   const ExpectedAssetReturn({
     required this.ticker,
     required this.upside,
     required this.priceConvergence,
-    required this.netDividendYield,
   });
 
-  /// Retorno total esperado ao ano.
-  double get annual => priceConvergence + netDividendYield;
+  /// Retorno esperado ao ano.
+  ///
+  /// É a convergência de preço e nada mais: o modelo não distribui provento
+  /// (ver `docs/decisoes/023-remocao-de-proventos.md`), então somar um *yield*
+  /// aqui embutiria um retorno que nenhuma outra tela do trabalho apura.
+  double get annual => priceConvergence;
 }
 
 /// Converte *upside* de valuation em taxa anual comparável à meta.
@@ -36,11 +36,11 @@ class ExpectedAssetReturn {
 /// significa nada — é preciso declarar em quanto tempo o preço converge para o
 /// valor justo.
 ///
-///     r_esperado = (1 + upside)^(1/H) − 1  +  DY_líquido
+///     r_esperado = (1 + upside)^(1/H) − 1
 ///
-/// Somar o dividend yield líquido é essencial: o retorno total do acionista é
-/// apreciação **mais** provento, e o provento já entra líquido porque a
-/// política fiscal é modelada.
+/// **O retorno é só de preço.** O trabalho não modela provento, e a estimativa
+/// é portanto conservadora: um acionista que receba dividendo obtém mais que
+/// isto. Ver `docs/decisoes/023-remocao-de-proventos.md`.
 abstract final class ExpectedReturn {
   /// Horizonte de convergência padrão, em meses.
   ///
@@ -64,7 +64,6 @@ abstract final class ExpectedReturn {
   static ExpectedAssetReturn forAsset({
     required Ticker ticker,
     required double upside,
-    required double netDividendYield,
     int horizonMonths = defaultHorizonMonths,
   }) =>
       ExpectedAssetReturn(
@@ -72,7 +71,6 @@ abstract final class ExpectedReturn {
         upside: upside,
         priceConvergence:
             annualizedFromUpside(upside, horizonMonths: horizonMonths),
-        netDividendYield: netDividendYield,
       );
 
   /// Retorno esperado da carteira: média dos ativos ponderada pelos pesos.
@@ -82,7 +80,6 @@ abstract final class ExpectedReturn {
   static double forPortfolio({
     required Portfolio portfolio,
     required Map<Ticker, ValuationResult> valuations,
-    required Map<Ticker, double> netDividendYields,
     int horizonMonths = defaultHorizonMonths,
   }) {
     var weighted = 0.0;
@@ -94,7 +91,6 @@ abstract final class ExpectedReturn {
       final expected = forAsset(
         ticker: entry.ticker,
         upside: valuation.upside,
-        netDividendYield: netDividendYields[entry.ticker] ?? 0.0,
         horizonMonths: horizonMonths,
       );
       weighted += entry.weight.value * expected.annual;

@@ -69,7 +69,6 @@ abstract final class SensitivityReports {
       final base = await PrepareValuationInputs.call(
         ticker: ticker,
         prices: ctx.prices,
-        dividends: ctx.dividends,
         fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: riskFree,
@@ -96,7 +95,6 @@ abstract final class SensitivityReports {
             ticker: ticker,
             asOf: today,
             fundamentals: visible,
-            dividends: inputs.dividends,
             marketPrice: inputs.marketPrice,
             capm: inputs.capm,
           ),
@@ -111,7 +109,6 @@ abstract final class SensitivityReports {
             ticker: ticker,
             asOf: today,
             fundamentals: inputs.fundamentals,
-            dividends: inputs.dividends,
             marketPrice: inputs.marketPrice,
             capm: CapmInputs(
               riskFreeRate: inputs.capm.riskFreeRate,
@@ -131,7 +128,6 @@ abstract final class SensitivityReports {
             ticker: ticker,
             asOf: today,
             fundamentals: inputs.fundamentals,
-            dividends: inputs.dividends,
             marketPrice: inputs.marketPrice,
             capm: inputs.capm,
             projectionYears: years,

@@ -190,32 +190,6 @@ class _SettingsCard extends ConsumerWidget {
             activeColor: context.fin.brand,
             onChanged: (value) => notifier.setWindowYears(value.round()),
           ),
-          // O tile pinta fundo e respingo de tinta no `Material` mais
-          // próximo, e o `GlassCard` interpõe um fundo próprio entre os dois:
-          // sem este `Material` transparente o respingo fica invisível e o
-          // framework acusa em tempo de execução.
-          Material(
-            type: MaterialType.transparency,
-            child: SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-              value: settings.applyTaxes,
-              activeThumbColor: context.fin.brand,
-              title: Text(
-                'Aplicar IR sobre JCP',
-                style: context.finType.bodySm.copyWith(
-                  color: context.fin.textPrimary,
-                ),
-              ),
-              subtitle: Text(
-                'Desligue para ver quanto a tributação custou no período',
-                style: context.finType.caption.copyWith(
-                  color: context.fin.textTertiary,
-                ),
-              ),
-              onChanged: notifier.setApplyTaxes,
-            ),
-          ),
         ],
       ),
     );
@@ -458,19 +432,11 @@ class _ComparisonBody extends ConsumerWidget {
         if (principal != null && reserva != null) ...[
           const Gap.md(),
           _CarteirasLadoALado(principal: principal, reserva: reserva),
-          const Gap.md(),
-          _ProventosLadoALado(principal: principal, reserva: reserva),
         ] else ...[
           if (principal != null) ...[
             const Gap.md(),
             _MetricsCard(
               title: 'Carteira Principal',
-              outcome: principal,
-              isLight: isLight,
-            ),
-            const Gap.md(),
-            _DividendsCard(
-              portfolioLabel: 'Principal',
               outcome: principal,
               isLight: isLight,
             ),
@@ -484,12 +450,6 @@ class _ComparisonBody extends ConsumerWidget {
             ),
             const Gap.sm(),
             const _ReservaHipotetica(),
-            const Gap.md(),
-            _DividendsCard(
-              portfolioLabel: 'Reserva',
-              outcome: reserva,
-              isLight: isLight,
-            ),
           ],
         ],
         const Gap.md(),
@@ -667,17 +627,17 @@ class _GoalConfrontationCard extends ConsumerWidget {
 const List<HintEntry> _metricsGlossary = [
   HintEntry(
     'Patrimônio final',
-    'Quanto a carteira valeria ao fim do período, com os proventos já '
-        'reinvestidos. Abaixo do valor vêm o aportado e o alocado — a '
-        'diferença entre o patrimônio e o aportado é o ganho.',
+    'Quanto a carteira valeria ao fim do período: as posições a preço de '
+        'mercado mais o caixa que sobrou. Abaixo do valor vêm o aportado e o '
+        'alocado — a diferença entre o patrimônio e o aportado é o ganho.',
   ),
   HintEntry(
     'Aportado × alocado',
     'O aportado é o dinheiro que o investidor disponibilizou, e é o número '
-        'que ele já conhece. O alocado é quanto disso virou posição, depois '
-        'de cada aporte ser dividido pelos pesos da carteira. Os dois diferem '
-        'por centavos, do arredondamento das fatias; uma diferença em reais '
-        'significa aporte que não encontrou cotação no dia e se perdeu.',
+        'que ele já conhece. O alocado é quanto disso virou ação, depois de '
+        'cada aporte ser dividido pelos pesos da carteira. A diferença é o '
+        'caixa: a sobra que não completou mais uma ação inteira e espera o '
+        'aporte seguinte — nada se perde, e ela conta no patrimônio.',
   ),
   HintEntry(
     'TWR — retorno ponderado pelo tempo',
@@ -721,11 +681,6 @@ const List<HintEntry> _metricsGlossary = [
     'Retorno anualizado dividido pelo máximo drawdown — prêmio por unidade da '
         'pior queda enfrentada.',
   ),
-  HintEntry(
-    'DY líquido',
-    'Proventos já descontados de IR sobre o patrimônio médio, ao ano. É o '
-        'fluxo de caixa gerado pela carteira, separado da valorização.',
-  ),
 ];
 
 /// Glossário das colunas do cartão de desempenho por ativo.
@@ -742,17 +697,17 @@ const List<HintEntry> _perAssetGlossary = [
         'ativo ganhou espaço na carteira, negativa quando perdeu.',
   ),
   HintEntry(
-    'Cotas · alocado',
+    'Cotas · destinado',
     'Quantas cotas a simulação acumulou no ativo — ações ou cotas de fundo — '
-        'e quanto capital ele recebeu dos aportes. A quantidade é '
-        'FRACIONÁRIA: o modelo aloca por peso, não por lote, e o '
-        'reinvestimento de proventos produz frações que uma corretora '
-        'arredondaria.',
+        'e quanto capital ele recebeu dos aportes. A quantidade é INTEIRA: '
+        'cada aporte compra o que couber em lotes de uma, ao preço do dia, e a '
+        'sobra fica no caixa do ativo esperando o aporte seguinte.',
   ),
   HintEntry(
-    'Retorno total',
-    'Quanto o capital alocado naquele ativo rendeu no período — preço mais '
-        'proventos reinvestidos. Como as duas carteiras rodam na mesma janela '
+    'Retorno',
+    'Quanto o capital destinado àquele ativo rendeu no período, contando a '
+        'posição a mercado mais o caixa dela. É retorno de PREÇO: a simulação '
+        'não distribui provento. Como as duas carteiras rodam na mesma janela '
         'e sob o mesmo cronograma de aportes, os retornos são comparáveis '
         'entre Principal e Reserva.',
   ),
@@ -855,15 +810,14 @@ typedef _Linha = ({
 /// Tabela de indicadores com uma coluna por carteira.
 ///
 /// Existe porque comparar era rolar. Com um cartão por carteira, conferir o
-/// Sharpe da Principal contra o da Reserva obrigava a percorrer oito métricas,
-/// um cartão de proventos e um cabeçalho no caminho — a lente `tela` registrou
-/// o percurso como tensão. Em coluna, a mesma comparação é um movimento de
-/// olho.
+/// Sharpe da Principal contra o da Reserva obrigava a percorrer oito métricas
+/// e um cabeçalho no caminho — a lente `tela` registrou o percurso como
+/// tensão. Em coluna, a mesma comparação é um movimento de olho.
 ///
 /// **O cabeçalho de coluna não é decoração.** Sem o selo colorido repetindo o
 /// nome da carteira, o leitor precisa lembrar a ordem em que elas aparecem —
-/// e proventos e patrimônio são exatamente o tipo de número que se atribui à
-/// carteira errada.
+/// e patrimônio é exatamente o tipo de número que se atribui à carteira
+/// errada.
 ///
 /// Largura MEDIDA do conteúdo, e queda para blocos empilhados quando não cabe.
 /// Uma tabela numérica densa não sobrevive a 320 dp sob escala de texto 2,0x
@@ -1114,7 +1068,7 @@ class _CarteirasLadoALado extends StatelessWidget {
               (
                 rotulo: 'Patrimônio final',
                 destaque: true,
-                nota: 'proventos reinvestidos',
+                nota: 'posições mais caixa',
                 celulas: [
                   for (final o in carteiras) _dinheiro(o.finalValue.reais),
                 ],
@@ -1130,9 +1084,17 @@ class _CarteirasLadoALado extends StatelessWidget {
               (
                 rotulo: 'Alocado',
                 destaque: false,
-                nota: 'do aportado, o que virou posição',
+                nota: 'do aportado, o que virou ação',
                 celulas: [
                   for (final o in carteiras) _dinheiro(o.totalAllocated.reais),
+                ],
+              ),
+              (
+                rotulo: 'Em caixa',
+                destaque: false,
+                nota: 'sobra à espera do próximo aporte',
+                celulas: [
+                  for (final o in carteiras) _dinheiro(o.residualCash.reais),
                 ],
               ),
               (
@@ -1196,14 +1158,6 @@ class _CarteirasLadoALado extends StatelessWidget {
                 nota: null,
                 celulas: [for (final o in carteiras) _razao(o.metrics.calmar)],
               ),
-              (
-                rotulo: 'DY líquido',
-                destaque: false,
-                nota: 'após IR',
-                celulas: [
-                  for (final o in carteiras) _pct(o.metrics.netDividendYield),
-                ],
-              ),
             ],
           ),
           const Gap.md(),
@@ -1214,122 +1168,32 @@ class _CarteirasLadoALado extends StatelessWidget {
   }
 }
 
-/// Proventos das duas carteiras em colunas.
-///
-/// Antes eram dois cartões de estrutura idêntica, um sob o outro. A pergunta
-/// que eles respondem — quanto de imposto cada composição custou — é
-/// comparativa por natureza.
-class _ProventosLadoALado extends StatelessWidget {
-  final BacktestOutcome principal;
-  final BacktestOutcome reserva;
-
-  const _ProventosLadoALado({required this.principal, required this.reserva});
-
-  @override
-  Widget build(BuildContext context) {
-    final carteiras = [principal, reserva];
-
-    String? proporcao(BacktestOutcome o) {
-      final bruto = o.grossDividends.reais;
-      if (bruto <= 0) return null;
-      return Fmt.percent(o.withheldTax.reais / bruto, decimals: 1);
-    }
-
-    return GlassCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SectionHeader(
-            title: 'Proventos no período',
-            subtitle: 'JCP sofre 15% de IRRF; dividendo é isento',
-          ),
-          const Gap.md(),
-          _TabelaComparativa(
-            colunas: [
-              (nome: 'Principal', cor: context.fin.brand),
-              (nome: 'Reserva', cor: context.fin.reserva),
-            ],
-            linhas: [
-              (
-                rotulo: 'Bruto',
-                destaque: false,
-                nota: null,
-                celulas: [
-                  for (final o in carteiras) _dinheiro(o.grossDividends.reais),
-                ],
-              ),
-              (
-                rotulo: 'IR retido',
-                destaque: false,
-                // A proporção só existe quando houve provento; sem ela a nota
-                // sai vazia em vez de anunciar "0,0% do bruto" sobre nada.
-                nota: [
-                  for (final o in carteiras) proporcao(o),
-                ].nonNulls.isEmpty
-                    ? null
-                    : 'sobre o bruto de cada uma',
-                celulas: [
-                  for (final o in carteiras)
-                    _dinheiro(
-                      o.withheldTax.reais,
-                      trend: o.withheldTax.reais > 0
-                          ? FinTrend.negative
-                          : FinTrend.neutral,
-                    ),
-                ],
-              ),
-              (
-                rotulo: 'Líquido reinvestido',
-                destaque: false,
-                nota: null,
-                celulas: [
-                  for (final o in carteiras)
-                    // A subtração acontece em `Money`, ou seja em centavos
-                    // INTEIROS, e só o resultado vira `double` para exibição.
-                    // Em reais, `1.14 - 0.15` dá `0.9899999999999999` e o
-                    // formatador esconde um centavo sem avisar ninguém.
-                    _dinheiro(
-                      (o.grossDividends - o.withheldTax).reais,
-                      trend: FinTrend.positive,
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Legenda de capital sob o patrimônio: o que entrou e o que virou posição.
+/// Legenda de capital sob o patrimônio: o que entrou e o que virou ação.
 ///
 /// Os dois juntos porque o aportado sozinho não responde nada — é o valor que
 /// o próprio investidor estipulou na aba Meta, e ele já o conhece antes de
 /// abrir a tela. O que a simulação acrescenta é quanto desse dinheiro o motor
-/// conseguiu transformar em posição depois de dividir cada aporte pelos pesos
-/// da carteira.
+/// conseguiu transformar em ação depois de dividir cada aporte pelos pesos da
+/// carteira e comprar em lotes inteiros.
 ///
-/// **A sobra só é nomeada acima de um real.** Abaixo disso ela é resíduo de
-/// arredondamento das fatias — ver `BacktestOutcome.unallocated`, que documenta
-/// os dois sinais possíveis —, e escrever "R$ 0,04 sem alocar" ao lado de um
-/// patrimônio de seis dígitos transformaria ruído de divisão em fato
-/// econômico. Acima de um real a causa deixa de ser arredondamento e passa a
-/// ser fatia perdida, que o leitor precisa ver.
+/// **O caixa só é nomeado acima de um real.** Ele é a sobra que não completou
+/// mais uma ação e espera o aporte seguinte, e escrever "R$ 0,40 em caixa" ao
+/// lado de um patrimônio de seis dígitos transformaria troco em fato
+/// econômico. Acima de um real o número passa a dizer algo — que a carteira
+/// tem papel caro diante do aporte — e o leitor precisa vê-lo.
+///
+/// **Nunca é negativo, e nunca some.** A divisão de cada aporte distribui o
+/// resto e a fatia de um ativo sem cotação no dia fica no caixa dele, de modo
+/// que aportado = alocado + caixa exatamente.
 String _legendaDeCapital(BacktestOutcome outcome) {
   final base =
       'aportado ${Fmt.money(outcome.totalContributed.reais)} · '
       'alocado ${Fmt.money(outcome.totalAllocated.reais)}';
 
-  final sobra = outcome.unallocated;
-  if (sobra.cents.abs() < 100) return base;
+  final caixa = outcome.residualCash;
+  if (caixa.cents < 100) return base;
 
-  // O sinal negativo é possível e tem leitura própria: as fatias arredondaram
-  // para cima e a carteira alocou mais que o aporte cheio. Escrever "sem
-  // alocar" nesse caso inverteria o sentido do número.
-  return sobra.cents > 0
-      ? '$base — ${Fmt.money(sobra.reais)} não viraram posição'
-      : '$base — ${Fmt.money(-sobra.reais)} a mais que o aportado';
+  return '$base — ${Fmt.money(caixa.reais)} em caixa';
 }
 
 /// Indicadores de uma carteira na janela simulada.
@@ -1401,67 +1265,6 @@ class _MetricsCard extends StatelessWidget {
           ),
           BalanceMetric(label: 'Sortino', value: Fmt.ratio(m.sortino)),
           BalanceMetric(label: 'Calmar', value: Fmt.ratio(m.calmar)),
-          BalanceMetric(
-            label: 'DY líquido',
-            value: Fmt.percent(m.netDividendYield),
-            hint: 'após IR',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Proventos separados em bruto, imposto retido e líquido.
-class _DividendsCard extends StatelessWidget {
-  /// Nome curto da carteira a que estes proventos pertencem.
-  ///
-  /// Com as duas carteiras na tela, um cartão sem dono é ambíguo — e proventos
-  /// são exatamente o tipo de número que o leitor atribui à carteira errada.
-  final String portfolioLabel;
-
-  final BacktestOutcome outcome;
-  final bool isLight;
-
-  const _DividendsCard({
-    required this.portfolioLabel,
-    required this.outcome,
-    required this.isLight,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final gross = outcome.grossDividends.reais;
-    final tax = outcome.withheldTax.reais;
-    final net = gross - tax;
-
-    return GlassCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SectionHeader(
-            title: 'Proventos no período — $portfolioLabel',
-            subtitle: 'JCP sofre 15% de IRRF; dividendo é isento',
-          ),
-          const Gap.md(),
-          MetricTileRow(
-            tiles: [
-              MetricTile(label: 'Bruto', value: Fmt.money(gross)),
-              MetricTile(
-                label: 'IR retido',
-                value: Fmt.money(tax),
-                trend: tax > 0 ? FinTrend.negative : FinTrend.neutral,
-                hint: gross > 0
-                    ? '${Fmt.percent(tax / gross, decimals: 1)} do bruto'
-                    : null,
-              ),
-              MetricTile(
-                label: 'Líquido reinvestido',
-                value: Fmt.money(net),
-                trend: FinTrend.positive,
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -1806,13 +1609,13 @@ class _AssetRow extends StatelessWidget {
   /// que o investidor confere contra o extrato da corretora. Sem elas, um peso
   /// de 27% não diz se são trinta cotas ou três mil.
   ///
-  /// **A quantidade é fracionária** e sai com duas casas de propósito: o motor
-  /// aloca por peso, não por lote, e o reinvestimento de proventos produz
-  /// frações. Exibir inteiro aqui esconderia a premissa do modelo justamente
-  /// no número em que ela aparece.
+  /// **A quantidade é inteira**, como no extrato: cada aporte compra o que
+  /// couber em lotes de uma ao preço do dia. O dinheiro ao lado é o que foi
+  /// DESTINADO ao ativo, e não o que virou posição — a diferença está no caixa
+  /// dele, esperando o aporte seguinte.
   Widget _posicao(BuildContext context) => Text(
-    '${Fmt.ratio(asset.shares)} cotas · '
-    '${Fmt.money(asset.invested.reais)} alocados',
+    '${asset.shares} cotas · '
+    '${Fmt.money(asset.invested.reais)} destinados',
     maxLines: 1,
     overflow: TextOverflow.ellipsis,
     style: context.finType.caption.copyWith(color: context.fin.textTertiary),

@@ -146,13 +146,6 @@ final priceRepositoryProvider = Provider<PriceRepository>(
   ),
 );
 
-final dividendRepositoryProvider = Provider<DividendRepository>(
-  (ref) => DividendRepositoryImpl(
-    remote: ref.watch(brapiDatasourceProvider),
-    cache: ref.watch(cacheDatabaseProvider),
-  ),
-);
-
 final fundamentalsRepositoryProvider = Provider<FundamentalsRepository>(
   (ref) => FundamentalsRepositoryImpl(
     remote: ref.watch(brapiDatasourceProvider),

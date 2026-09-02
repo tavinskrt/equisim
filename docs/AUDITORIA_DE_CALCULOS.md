@@ -151,9 +151,9 @@ A justificativa do τ e a análise da fórmula de crescimento estão em
 Razão da unidade negociada · CAPM · WACC (ou sua degeneração no Ke) ·
 normalização do fluxo-base (winsorização) · crescimento por regressão log-linear
 · crescimento na perpetuidade · projeção e desconto do período explícito ·
-valor terminal de Gordon · ponte do valor da firma ao valor por papel · modelo
-de Gordon sobre dividendos · múltiplo EV/EBITDA · valor patrimonial ·
-margem de segurança e potencial de valorização.
+valor terminal de Gordon · ponte do valor da firma ao valor por papel ·
+múltiplo EV/EBITDA · valor patrimonial · margem de segurança e potencial de
+valorização.
 
 ---
 

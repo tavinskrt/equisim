@@ -21,7 +21,7 @@ const _config = ApiConfig(
 ApiClient clientWith(FixtureAdapter adapter) {
   final dio = Dio(BaseOptions(
     responseType: ResponseType.plain,
-    validateStatus: (s) => s != null && s < 500,
+    validateStatus: ApiClient.acceptsStatus,
   ));
   dio.httpClientAdapter = adapter;
   return ApiClient(_config, dio: dio);
@@ -111,67 +111,94 @@ void main() {
       expect(narrow.points.length, lessThan(wide.points.length));
       expect(narrow.points.length, 1);
     });
-  });
 
-  group('Cache de proventos', () {
-    test('segunda leitura vem do cache e preserva o rótulo fiscal', () async {
+    test('janela mais larga que o cache não devolve série truncada em '
+        'silêncio', () async {
+      // O risco concreto: pedir 10 anos, o cache ter 1 mês, e o backtest rodar
+      // sobre o mês achando que rodou sobre a década. O recorte por data é
+      // lexicográfico no SQLite, então uma janela maior lê TUDO que existe —
+      // e a série sai com as datas que de fato tem, não com as pedidas.
       final adapter = FixtureAdapter(routes: {
-        '/v2/stocks/dividends': 'brapi_dividends_itub4',
+        '/v2/stocks/historical': 'brapi_historical_batch',
       });
-      final repository = DividendRepositoryImpl(
+      final repository = PriceRepositoryImpl(
         remote: BrapiDatasource(clientWith(adapter)),
         cache: db,
       );
-      final ticker = Ticker.parse('ITUB4');
+      final ticker = Ticker.parse('PETR4');
 
-      final first = (await repository.history(ticker)).unwrap();
-      expect(adapter.callCount['/v2/stocks/dividends'], 1);
+      final gravada = (await repository.dailyBatch(
+        [ticker],
+        DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1)),
+      ))
+          .unwrap()[ticker]!;
 
-      final second = (await repository.history(ticker)).unwrap();
-      expect(adapter.callCount['/v2/stocks/dividends'], 1);
+      // Segunda leitura, agora pedindo uma janela que começa DÉCADAS antes do
+      // que existe em disco. O cache está fresco, então não há ida à rede.
+      final larga = (await repository.dailyBatch(
+        [ticker],
+        DateRange(DateTime(1990, 1, 1), DateTime(2030, 1, 1)),
+      ))
+          .unwrap()[ticker]!;
 
-      expect(second.length, first.length);
-      expect(
-        second.where((e) => e.kind == DividendKind.jcp).length,
-        first.where((e) => e.kind == DividendKind.jcp).length,
-      );
-      expect(
-        second.where((e) => e.paymentDateEstimated).length,
-        first.where((e) => e.paymentDateEstimated).length,
-      );
+      expect(adapter.callCount['/v2/stocks/historical'], 1);
+      expect(larga.points.length, gravada.points.length);
+      // A borda da série é a do DADO, e não a da janela pedida: é o que
+      // permite ao backtest encurtar o período e avisar, em vez de simular
+      // uma década sobre um mês.
+      expect(larga.firstDate, gravada.firstDate);
+      expect(larga.firstDate.isAfter(DateTime(1990, 1, 1)), isTrue);
     });
 
-    test('chave composta não colapsa tranches da mesma data-ex', () async {
-      final ticker = Ticker.parse('BBAS3');
-      // Caso real: BBAS3 em 11/03/2025 teve dois JCP de valores distintos.
-      await db.upsertDividends([
-        CachedDividendsCompanion.insert(
-          ticker: ticker.value,
-          exDate: '2025-03-11',
-          paymentDate: '2025-04-01',
-          amount: 0.14935148,
-          label: 'JCP',
-        ),
-        CachedDividendsCompanion.insert(
-          ticker: ticker.value,
-          exDate: '2025-03-11',
-          paymentDate: '2025-04-01',
-          amount: 0.3425925,
-          label: 'JCP',
-        ),
-        // Repetição idêntica da primeira: deve ser absorvida pela chave.
-        CachedDividendsCompanion.insert(
-          ticker: ticker.value,
-          exDate: '2025-03-11',
-          paymentDate: '2025-04-01',
-          amount: 0.14935148,
-          label: 'JCP',
-        ),
-      ]);
+    test('rede fora recorre ao cache VENCIDO em vez de falhar', () async {
+      // O cache é contingência: descartá-lo por estar vencido justo quando a
+      // rede caiu é jogar fora o dado no momento em que ele mais serve. A
+      // gravação é aditiva, então vencido aqui significa "sem os pregões mais
+      // recentes", não "errado".
+      final ticker = Ticker.parse('PETR4');
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
 
-      final rows = await db.dividendsOf(ticker.value);
-      expect(rows.length, 2,
-          reason: 'duas tranches legítimas preservadas, duplicata exata removida');
+      final ok = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: db,
+      );
+      final gravada = (await ok.dailyBatch([ticker], range)).unwrap()[ticker]!;
+
+      // Marca de validade apagada: o cache passa a estar vencido, e a rede
+      // devolve erro de servidor.
+      await db.customStatement('DELETE FROM cache_entries');
+
+      final offline = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(
+          failures: {'/v2/stocks/historical': 503},
+        ))),
+        cache: db,
+      );
+
+      final result = await offline.dailyBatch([ticker], range);
+      expect(result.isOk, isTrue,
+          reason: 'havia dado em disco: falhar aqui desperdiça a contingência');
+      expect(result.unwrap()[ticker]!.points.length, gravada.points.length);
+    });
+
+    test('sem cache algum, a falha de rede é reportada', () async {
+      // A contraprova: o fallback não pode transformar ausência de dado em
+      // sucesso vazio. `cache: null` é o caminho real de quem roda onde o
+      // banco não abre — alvo web sem asset, permissão negada, disco cheio.
+      final repository = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(
+          failures: {'/v2/stocks/historical': 503},
+        ))),
+        cache: null,
+      );
+
+      final result = await repository.dailyBatch(
+        [Ticker.parse('PETR4')],
+        DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1)),
+      );
+      expect(result.isErr, isTrue);
     });
   });
 

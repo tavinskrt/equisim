@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/portfolio_repository.dart';
 import '../../di/providers.dart';
+import '../shared/failure_copy.dart';
 import '../shared/ui_kit.dart';
 
 /// Estado editável do estudo, com o erro da última operação recusada.
@@ -115,7 +116,7 @@ class StudyNotifier extends Notifier<StudyState> {
         ),
         clearError: true,
       ),
-      (failure) => state = state.copyWith(lastError: failure.message),
+      (failure) => state = state.copyWith(lastError: FailureCopy.of(failure)),
     );
   }
 
@@ -137,7 +138,7 @@ class StudyNotifier extends Notifier<StudyState> {
             : state.study.copyWith(reserva: updated),
         clearError: true,
       ),
-      (failure) => state = state.copyWith(lastError: failure.message),
+      (failure) => state = state.copyWith(lastError: FailureCopy.of(failure)),
     );
   }
 
@@ -160,7 +161,7 @@ class StudyNotifier extends Notifier<StudyState> {
             : state.study.copyWith(reserva: updated),
         clearError: true,
       ),
-      (failure) => state = state.copyWith(lastError: failure.message),
+      (failure) => state = state.copyWith(lastError: FailureCopy.of(failure)),
     );
   }
 
@@ -268,7 +269,7 @@ class StudyNotifier extends Notifier<StudyState> {
         return true;
       },
       (failure) {
-        state = state.copyWith(isSaving: false, lastError: failure.message);
+        state = state.copyWith(isSaving: false, lastError: FailureCopy.of(failure));
         return false;
       },
     );
@@ -311,7 +312,7 @@ class StudyNotifier extends Notifier<StudyState> {
         return true;
       },
       (failure) {
-        state = state.copyWith(lastError: failure.message);
+        state = state.copyWith(lastError: FailureCopy.of(failure));
         return false;
       },
     );

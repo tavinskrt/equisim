@@ -8,26 +8,26 @@ void main() {
       // Dia 1: sobe para R$ 110 → +10%.
       // Dia 2: aporta R$ 100 e fecha em R$ 231 → (231−100)/110 − 1 = +19,0909%.
       // TWR = 1,10 × 1,190909… − 1 = 31% exatos.
-      final twr = Returns.timeWeighted(
+      final twr = Returns.timeWeighted(WealthPath.of(
         values: [100, 110, 231],
         externalFlows: [100, 0, 100],
-      );
+      ).unwrap());
       expect(twr, closeTo(0.31, 1e-12));
     });
 
     test('sem aportes, TWR coincide com a variação simples', () {
-      final twr = Returns.timeWeighted(
+      final twr = Returns.timeWeighted(WealthPath.of(
         values: [100, 120, 150],
         externalFlows: [100, 0, 0],
-      );
+      ).unwrap());
       expect(twr, closeTo(0.5, 1e-12));
     });
 
     test('índice base 100 acompanha o TWR', () {
-      final index = Returns.timeWeightedIndex(
+      final index = Returns.timeWeightedIndex(WealthPath.of(
         values: [100, 110, 231],
         externalFlows: [100, 0, 100],
-      );
+      ).unwrap());
       expect(index.first, 100.0);
       expect(index.last, closeTo(131.0, 1e-10));
     });
@@ -35,10 +35,10 @@ void main() {
     test('um aporte gigante não distorce o retorno medido', () {
       // Carteira parada em R$ 100 recebe R$ 10.000 e continua parada:
       // o retorno tem de ser zero, não +9.900%.
-      final twr = Returns.timeWeighted(
+      final twr = Returns.timeWeighted(WealthPath.of(
         values: [100, 10100, 10100],
         externalFlows: [100, 10000, 0],
-      );
+      ).unwrap());
       expect(twr, closeTo(0.0, 1e-12));
     });
   });
@@ -131,8 +131,7 @@ void main() {
     test('ativo idêntico ao mercado tem beta 1 e correlação 1', () {
       final market = List.generate(60, (i) => (i % 5 - 2) * 0.01);
       final result = BetaCalculator.estimate(
-        assetReturns: market,
-        marketReturns: market,
+        returns: PairedReturns.of(asset: market, market: market).unwrap(),
       );
       expect(result.isOk, isTrue);
       expect(result.unwrap().beta, closeTo(1.0, 1e-12));
@@ -143,19 +142,44 @@ void main() {
       final market = List.generate(60, (i) => (i % 5 - 2) * 0.01);
       final asset = market.map((r) => r * 2).toList();
       final result = BetaCalculator.estimate(
-        assetReturns: asset,
-        marketReturns: market,
+        returns: PairedReturns.of(asset: asset, market: market).unwrap(),
       );
       expect(result.unwrap().beta, closeTo(2.0, 1e-12));
     });
 
     test('exige observações suficientes', () {
       final result = BetaCalculator.estimate(
-        assetReturns: [0.01, 0.02],
-        marketReturns: [0.01, 0.02],
+        returns: PairedReturns.of(
+          asset: [0.01, 0.02],
+          market: [0.01, 0.02],
+        ).unwrap(),
       );
       expect(result.isErr, isTrue);
       expect(result.failureOrNull, isA<InsufficientData>());
+    });
+
+    test('par de tamanhos diferentes é recusado na CONSTRUÇÃO, não no cálculo',
+        () {
+      // A conferência de dimensão saiu de dentro de `estimate` e virou
+      // invariante do tipo: quem tem um `PairedReturns` em mãos já sabe que as
+      // duas pontas casam, e o cálculo não abre com um `if` de estrutura.
+      final par = PairedReturns.of(
+        asset: [0.01, 0.02, 0.03],
+        market: [0.01, 0.02],
+      );
+      expect(par.isErr, isTrue);
+      expect(par.failureOrNull, isA<InvalidInput>());
+    });
+
+    test('trajetória de patrimônio desalinhada também não é construtível', () {
+      // O `ArgumentError` que `Returns.timeWeighted` lançava — único `throw`
+      // de validação num pacote que devolve `Result` — deixou de existir.
+      final path = WealthPath.of(
+        values: [100, 110, 120],
+        externalFlows: [100, 0],
+      );
+      expect(path.isErr, isTrue);
+      expect(path.failureOrNull, isA<InvalidInput>());
     });
 
     test('pareia séries com pregões desencontrados', () {

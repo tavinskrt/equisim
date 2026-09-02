@@ -1,13 +1,10 @@
-import '../entities/dividend_event.dart';
 import '../entities/price_series.dart';
 import '../failures/failure.dart';
 import '../failures/result.dart';
 import '../repositories/repositories.dart';
 import '../services/metrics/beta.dart';
-import '../services/total_return_engine.dart';
 import '../services/valuation/cost_of_capital.dart';
 import '../services/valuation/growth_estimator.dart';
-import '../tax/tax_policy.dart';
 import '../value_objects/date_range.dart';
 import '../value_objects/ticker.dart';
 import 'compute_valuation.dart';
@@ -22,30 +19,25 @@ abstract final class PrepareValuationInputs {
   /// Janela usada para estimar o beta.
   static const int betaWindowYears = 5;
 
-  /// Busca fundamentos, cotações e proventos e monta os insumos da cascata.
+  /// Busca fundamentos e cotações e monta os insumos da cascata.
   ///
   /// - [ticker]: ativo a preparar.
-  /// - [prices], [dividends], [fundamentals], [benchmark]: repositórios.
+  /// - [prices], [fundamentals], [benchmark]: repositórios.
   /// - [riskFreeRate]: taxa livre de risco **anual corrente**, não a média
   ///   histórica — o desconto olha para frente.
   /// - [asOf]: data de referência. Sem ela, usa o relógio do sistema; informe-a
   ///   sempre que o resultado precisar ser reproduzível.
   /// - [marketPremium], [marginOfSafety], [projectionYears],
   ///   [perpetualGrowthCap]: parâmetros declarados do modelo.
-  /// - [taxPolicy]: política fiscal aplicada aos proventos na construção da
-  ///   série de retorno total que alimenta o beta.
   ///
   /// Propaga a falha do histórico de fundamentos e a de cotações; devolve
   /// [InsufficientData] quando a série de preços vem vazia na janela.
   ///
-  /// **Falha de proventos não interrompe**: a lista cai para vazia, porque um
-  /// ativo sem histórico de dividendos ainda é avaliável pelos modelos de
-  /// fluxo. Falha do índice também não: o beta cai para 1,0, registrado em
+  /// **Falha do índice não interrompe**: o beta cai para 1,0, registrado em
   /// [BetaSource.manual].
   static Future<Result<ValuationInputs>> call({
     required Ticker ticker,
     required PriceRepository prices,
-    required DividendRepository dividends,
     required FundamentalsRepository fundamentals,
     required BenchmarkRepository benchmark,
     required double riskFreeRate,
@@ -54,7 +46,6 @@ abstract final class PrepareValuationInputs {
     double marginOfSafety = 0.0,
     int projectionYears = 5,
     double perpetualGrowthCap = GrowthEstimator.realEconomyGrowth,
-    TaxPolicy taxPolicy = TaxPolicy.brasil,
   }) async {
     final today = asOf ?? DateTime.now();
     final window = DateRange(
@@ -76,23 +67,16 @@ abstract final class PrepareValuationInputs {
       ));
     }
 
-    final dividendResult = await dividends.history(ticker);
-    final events = dividendResult.getOrElse(const <DividendEvent>[]);
-
     final beta = await _estimateBeta(
-      ticker: ticker,
       series: series,
-      events: events,
       benchmark: benchmark,
       window: window,
-      taxPolicy: taxPolicy,
     );
 
     return Ok(ValuationInputs(
       ticker: ticker,
       asOf: today,
       fundamentals: historyResult.unwrap(),
-      dividends: events,
       marketPrice: series.points.last.close,
       capm: CapmInputs(
         riskFreeRate: riskFreeRate,
@@ -108,21 +92,23 @@ abstract final class PrepareValuationInputs {
 
   /// Estima o beta contra o Ibovespa.
   ///
-  /// O retorno do ativo é construído pelo motor de retorno total do próprio
-  /// domínio — `close` mais proventos líquidos —, não pelo `adjustedClose` da
-  /// fonte, que subajusta proventos brasileiros (ver auditoria §0.4). O índice
-  /// dispensa esse tratamento: já é de retorno total por construção.
+  /// Os dois lados da regressão são séries de **preço de fechamento**: o ativo
+  /// pelo `close` — que o domínio não ajusta por provento —, o índice pela
+  /// própria cotação. O `adjustedClose` da fonte segue fora de cálculo, por
+  /// subajustar proventos brasileiros (ver auditoria §0.4).
+  ///
+  /// A convenção não é simétrica: o Ibovespa é índice de retorno total por
+  /// construção, e o `close` do ativo não. O efeito sobre o beta é de segunda
+  /// ordem — ele mede covariância de variações, não nível —, e a assimetria
+  /// fica declarada aqui em vez de escondida.
   ///
   /// Sem série de mercado utilizável, adota-se β = 1: a alternativa seria
   /// recusar a avaliação inteira por causa de um único parâmetro, e um beta
   /// neutro é premissa transparente — que fica registrada em [BetaSource].
   static Future<({double beta, BetaSource source})> _estimateBeta({
-    required Ticker ticker,
     required PriceSeries series,
-    required List<DividendEvent> events,
     required BenchmarkRepository benchmark,
     required DateRange window,
-    required TaxPolicy taxPolicy,
   }) async {
     final marketResult = await benchmark.ibovespa(window);
     if (marketResult.isErr) return (beta: 1.0, source: BetaSource.manual);
@@ -132,64 +118,24 @@ abstract final class PrepareValuationInputs {
       return (beta: 1.0, source: BetaSource.manual);
     }
 
-    final assetTotalReturn = TotalReturnEngine.build(
-      prices: series,
-      dividends: events,
-      taxPolicy: taxPolicy,
-      range: window,
-    );
-    if (assetTotalReturn.isEmpty) {
+    final assetPoints =
+        series.points.where((p) => window.contains(p.date)).toList();
+    if (assetPoints.length < 2) {
       return (beta: 1.0, source: BetaSource.manual);
     }
 
     final aligned = BetaCalculator.alignReturns(
-      assetDates: assetTotalReturn.dates,
-      assetIndex: assetTotalReturn.index,
+      assetDates: [for (final p in assetPoints) p.date],
+      assetIndex: [for (final p in assetPoints) p.close],
       marketDates: market.dates,
       marketIndex: market.points.map((p) => p.close).toList(),
     );
 
-    final estimate = BetaCalculator.estimate(
-      assetReturns: aligned.asset,
-      marketReturns: aligned.market,
-    );
+    final estimate = BetaCalculator.estimate(returns: aligned);
 
     return estimate.fold(
       (value) => (beta: value.beta, source: BetaSource.computed),
       (_) => (beta: 1.0, source: BetaSource.manual),
     );
-  }
-
-  /// Dividend yield líquido de imposto dos últimos doze meses.
-  ///
-  /// Entra no retorno esperado da carteira: o acionista ganha apreciação
-  /// **mais** provento, e o provento entra líquido porque a política fiscal
-  /// é modelada.
-  ///
-  /// - [events]: proventos do ativo. A janela é filtrada aqui.
-  /// - [currentPrice]: cotação corrente, denominador do *yield*.
-  /// - [asOf]: data de referência; a janela é `(asOf − 1 ano, asOf]`.
-  /// - [taxPolicy]: define quanto de cada provento chega ao acionista.
-  ///
-  /// Retorna fração ao ano, e `0.0` quando [currentPrice] não é positivo — a
-  /// guarda que evita divisão por zero.
-  ///
-  /// A janela é apurada por **data-ex**, não por data de pagamento: o direito
-  /// é o que define a competência do provento.
-  static double netTrailingYield({
-    required List<DividendEvent> events,
-    required double currentPrice,
-    required DateTime asOf,
-    TaxPolicy taxPolicy = TaxPolicy.brasil,
-  }) {
-    if (currentPrice <= 0) return 0.0;
-    final floor = DateTime(asOf.year - 1, asOf.month, asOf.day);
-    var net = 0.0;
-    for (final event in events) {
-      if (event.exDate.isAfter(floor) && !event.exDate.isAfter(asOf)) {
-        net += taxPolicy.netAmount(event);
-      }
-    }
-    return net / currentPrice;
   }
 }

@@ -1,6 +1,7 @@
 import '../theme/fin_space.dart';
 import '../components/fin_amount.dart';
 import '../shared/theme_bridge.dart';
+import 'feasibility_copy.dart';
 import '../shared/ui_kit.dart';
 import '../study/study_notifier.dart';
 import '../theme/fin_colors.dart';
@@ -68,7 +69,11 @@ class _GoalPageState extends ConsumerState<GoalPage> {
     ref
         .read(studyProvider.notifier)
         .setGoal(
-          FinancialGoal(
+          // `unvalidated`, e não `create`: os campos estão sendo digitados, e
+          // um plano ainda incompleto precisa chegar ao estado para que o
+          // cartão de viabilidade explique o que falta. Quem recusa o plano
+          // inválido é `RequiredReturnSolver`, cujo veredito a tela já mostra.
+          FinancialGoal.unvalidated(
             initialContribution: Money.fromReais(_parse(_initial)),
             monthlyContribution: Money.fromReais(_parse(_monthly)),
             months: _months,
@@ -390,7 +395,7 @@ class _FeasibilityCard extends StatelessWidget {
             ),
           const Gap.sm(),
           Text(
-            verdict.message,
+            FeasibilityCopy.of(verdict),
             style: context.finType.caption.copyWith(
               color: context.fin.textSecondary,
             ),
@@ -431,6 +436,7 @@ class _AlignmentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final meets = alignment.meetsGoal;
+    final yieldToClose = alignment.yieldToCloseGap;
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -469,6 +475,24 @@ class _AlignmentCard extends StatelessWidget {
               ),
             ],
           ),
+          // A lacuna precisa ser lida sabendo o que ela NÃO contém. O
+          // esperado é retorno de preço, e só; a carteira que paga provento
+          // entrega mais do que este cartão mostra, e sem esta linha o
+          // investidor lê um déficit maior que o real e vai buscar risco que
+          // não precisa correr. O número é a própria lacuna invertida — nada
+          // aqui estima yield nem soma coisa alguma ao esperado.
+          if (yieldToClose != null) ...[
+            const Gap.sm(),
+            Text(
+              'O esperado conta apenas valorização: a simulação não distribui '
+              'provento. Um dividend yield de '
+              '${Fmt.percent(yieldToClose, decimals: 2)} ao ano fecharia esta '
+              'lacuna.',
+              style: context.finType.caption.copyWith(
+                color: context.fin.textSecondary,
+              ),
+            ),
+          ],
           if (alignment.coverageIsWeak) ...[
             const Gap.md(),
             NoticeBanner(

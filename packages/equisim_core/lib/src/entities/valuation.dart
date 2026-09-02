@@ -13,9 +13,6 @@ enum ValuationModel {
   /// DCF simplificado sobre lucro por ação, descontado ao Ke.
   dcfEarnings('DCF simplificado (LPA)'),
 
-  /// Modelo de crescimento de Gordon sobre dividendos.
-  gordonGrowth('Gordon (dividendos)'),
-
   /// Múltiplo setorial — último recurso.
   multiples('Múltiplos');
 

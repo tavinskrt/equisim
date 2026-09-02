@@ -18,9 +18,10 @@ enum PortfolioKind {
 
 /// Posição de um ativo dentro da carteira.
 ///
-/// A carteira é definida por **pesos**, não por lotes: o backtest normaliza em
-/// base 100 e a alocação é percentual, de modo que contagem inteira de ações
-/// não faz parte do modelo.
+/// A carteira é definida por **pesos**, não por lotes: o peso é o que o
+/// usuário estipula, e a contagem de ações é resultado da simulação, não
+/// entrada dela — `PortfolioBacktest` converte cada fatia de aporte em ações
+/// inteiras ao preço do dia.
 class PortfolioEntry {
   /// Ativo posicionado.
   final Asset asset;

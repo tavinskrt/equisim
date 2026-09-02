@@ -2,12 +2,23 @@ import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
 import 'package:equisim/data/config/api_config.dart';
+import 'package:equisim/data/network/api_client.dart';
 import 'package:equisim/data/network/interceptors.dart';
-import 'package:equisim/data/quality/dividend_quality_gate.dart';
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'fixture_adapter.dart';
+
+const _config = ApiConfig(
+  mode: BrapiMode.direct,
+  brapiBaseUrl: 'https://brapi.dev/api',
+  brapiToken: 'token-de-teste',
+  bcbBaseUrl: 'https://api.bcb.gov.br/dados/serie',
+);
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('AuthInterceptor', () {
     RequestOptions runWith(ApiConfig config, {String? path}) {
       final options = RequestOptions(path: path ?? '/v2/stocks/quote');
@@ -95,6 +106,83 @@ void main() {
     });
   });
 
+  group('RetryInterceptor — a repetição de verdade', () {
+    // O grupo acima prova a MATEMÁTICA da espera. Nada ali força uma
+    // requisição bloqueada a ser reemitida — e falha de cálculo de atraso não
+    // derruba o usuário, falha de não reenviar derruba. Estes testes exercitam
+    // o caminho inteiro: status 429, exceção, `onError`, refetch.
+
+    ApiClient clienteCom(FixtureAdapter adapter) {
+      final dio = Dio(BaseOptions(
+        responseType: ResponseType.plain,
+        validateStatus: ApiClient.acceptsStatus,
+      ));
+      dio.httpClientAdapter = adapter;
+      return ApiClient(_config, dio: dio);
+    }
+
+    test('429 seguido de 200 é reemitido e devolve o corpo bom', () async {
+      final adapter = FixtureAdapter(
+        statusSequence: {'/teste': [429, 200]},
+        bodies: {'/teste': '{"results":[{"ok":true}]}'},
+      );
+
+      final result =
+          await clienteCom(adapter).getJson('https://brapi.dev/api/teste');
+
+      expect(result.isOk, isTrue,
+          reason: 'sem reemissão, o 429 viraria falha e o corpo bom se '
+              'perderia');
+      expect(adapter.callCount['/teste'], 2,
+          reason: 'exatamente uma repetição: a primeira falhou, a segunda não');
+    });
+
+    test('429 insistente esgota as tentativas e vira falha de limite',
+        () async {
+      final adapter = FixtureAdapter(
+        statusSequence: {'/teste': [429]},
+        bodies: {'/teste': '{"results":[]}'},
+      );
+
+      final result =
+          await clienteCom(adapter).getJson('https://brapi.dev/api/teste');
+
+      expect(result.isErr, isTrue);
+      expect(result.failureOrNull, isA<DataQualityFailure>(),
+          reason: 'esgotada a repetição, o 429 tem mapeamento próprio');
+      // `maxAttempts` é 3 no padrão do cliente: a original mais duas repetições.
+      expect(adapter.callCount['/teste'], 3);
+    });
+
+    test('erro de cliente NÃO é repetido — repetir credencial má multiplica '
+        'a falha', () async {
+      final adapter = FixtureAdapter(
+        statusSequence: {'/teste': [401, 200]},
+        bodies: {'/teste': '{"results":[]}'},
+      );
+
+      final result =
+          await clienteCom(adapter).getJson('https://brapi.dev/api/teste');
+
+      expect(result.isErr, isTrue);
+      expect(result.failureOrNull, isA<InvalidInput>());
+      expect(adapter.callCount['/teste'], 1);
+    });
+
+    test('falha de transporte é repetida como o 429', () async {
+      // Sem status, mas transitória: é a outra metade de `_isRetryable`.
+      final adapter = FixtureAdapter(
+        transportErrors: {'/teste': DioExceptionType.connectionTimeout},
+      );
+
+      final result =
+          await clienteCom(adapter).getJson('https://brapi.dev/api/teste');
+
+      expect(result.isErr, isTrue);
+      expect(adapter.callCount['/teste'], 3);
+    });
+  });
+
   group('SanitizedLogInterceptor', () {
     test('mascara token que apareça na query string', () {
       const url = 'https://brapi.dev/api/v2/quote?token=abc123XYZ&range=1d';
@@ -129,95 +217,6 @@ void main() {
       );
       expect(config.hasCredential, isTrue);
       expect(config.brapiToken, isNull);
-    });
-  });
-
-  group('Portão de qualidade de proventos', () {
-    final asOf = DateTime(2026, 8, 19);
-    final ticker = Ticker.parse('BBAS3');
-
-    List<DividendEvent> eventsTotalling(double total) => [
-          DividendEvent(
-            ticker: ticker,
-            exDate: DateTime(2026, 3, 1),
-            paymentDate: DateTime(2026, 3, 15),
-            amountPerShare: total,
-            kind: DividendKind.jcp,
-          ),
-        ];
-
-    test('aprova quando o DY calculado bate com o publicado', () {
-      // R$ 0,551 sobre R$ 18,08 = 3,05%; a fonte publica 3,00%.
-      final report = DividendQualityGate.check(
-        ticker: ticker,
-        events: eventsTotalling(0.551),
-        currentPrice: 18.08,
-        publishedYield: 0.03,
-        asOf: asOf,
-      );
-      expect(report.status, DividendQuality.consistent);
-      expect(report.isTrustworthy, isTrue);
-      expect(report.computedYield, closeTo(0.0305, 1e-3));
-    });
-
-    test('sinaliza divergência em vez de reportar número errado', () {
-      final report = DividendQualityGate.check(
-        ticker: ticker,
-        events: eventsTotalling(2.0), // muito acima do real
-        currentPrice: 18.08,
-        publishedYield: 0.03,
-        asOf: asOf,
-      );
-      expect(report.status, DividendQuality.divergent);
-      expect(report.isTrustworthy, isFalse);
-      expect(report.message, contains('diverge'));
-    });
-
-    test('sem DY publicado, o resultado é não verificado — não aprovado', () {
-      final report = DividendQualityGate.check(
-        ticker: ticker,
-        events: eventsTotalling(0.551),
-        currentPrice: 18.08,
-        publishedYield: null,
-        asOf: asOf,
-      );
-      expect(report.status, DividendQuality.unverified);
-    });
-
-    test('a janela de 12 meses ignora eventos antigos', () {
-      final events = [
-        DividendEvent(
-          ticker: ticker,
-          exDate: DateTime(2026, 3, 1),
-          paymentDate: DateTime(2026, 3, 15),
-          amountPerShare: 0.5,
-          kind: DividendKind.jcp,
-        ),
-        DividendEvent(
-          ticker: ticker,
-          exDate: DateTime(2020, 3, 1),
-          paymentDate: DateTime(2020, 3, 15),
-          amountPerShare: 9.0,
-          kind: DividendKind.jcp,
-        ),
-      ];
-      expect(
-        DividendQualityGate.trailingTwelveMonths(events, asOf),
-        closeTo(0.5, 1e-9),
-      );
-    });
-
-    test('a tolerância acomoda o arredondamento da fonte', () {
-      // A fonte publica dividendYield com duas casas (0,03 · 0,06 · 0,08),
-      // então casar além de ~1 p.p. é impossível por construção.
-      final report = DividendQualityGate.check(
-        ticker: ticker,
-        events: eventsTotalling(0.72), // 3,98%
-        currentPrice: 18.08,
-        publishedYield: 0.03,
-        asOf: asOf,
-      );
-      expect(report.status, DividendQuality.consistent);
     });
   });
 }

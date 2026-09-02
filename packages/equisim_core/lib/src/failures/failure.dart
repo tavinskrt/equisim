@@ -3,10 +3,19 @@
 /// `sealed` permite ao compilador exigir tratamento exaustivo em `switch`,
 /// o que impede o padrão clássico de esquecer um caso de erro.
 sealed class Failure {
-  /// Mensagem já formulada **para o usuário final**, em português.
+  /// **Diagnóstico técnico**, não texto de tela.
   ///
-  /// Não é log técnico: chega à interface como está. Deve dizer o que faltou e,
-  /// quando possível, o que fazer a respeito.
+  /// Diz o que falhou com a precisão que a auditoria e o log precisam — quais
+  /// tickers ficaram sem cotação, qual pesos somaram, quantos pregões
+  /// sobraram. É a única forma de a falha carregar essa especificidade, e por
+  /// isso segue em português e legível.
+  ///
+  /// **Quem compõe a frase da interface é a camada de apresentação**, a partir
+  /// do tipo selado e dos campos estruturados de cada variante — ver
+  /// `FailureCopy`, em `lib/presentation/shared/`. O núcleo não decide
+  /// hierarquia de texto, tom nem formatação de número: isso é decisão de
+  /// tela, e mantê-la aqui prendia a UI a uma frase pronta que ela não podia
+  /// fragmentar.
   final String message;
 
   const Failure(this.message);

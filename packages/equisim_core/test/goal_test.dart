@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 void main() {
   group('RequiredReturnSolver — sem aporte mensal (forma fechada conhecida)', () {
     test('dobrar o capital em 12 meses exige 2^(1/12) − 1', () {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(1000),
         monthlyContribution: Money.zero,
         months: 12,
@@ -22,7 +22,7 @@ void main() {
       // Valor futuro de série uniforme a 1% a.m.:
       // 100 × ((1,01¹² − 1)/0,01) = 1268,2503...
       // Equivale a TAXA(12; -100; 0; 1268,25) no Excel.
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.zero,
         monthlyContribution: Money.fromReais(100),
         months: 12,
@@ -35,7 +35,7 @@ void main() {
 
     test('a forma fechada ingênua superestimaria grosseiramente a taxa', () {
       // Erro que o solver evita: tratar (Vf/V0)^(1/n) − 1 como resposta.
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(10000),
         monthlyContribution: Money.fromReais(1000),
         months: 120,
@@ -52,7 +52,7 @@ void main() {
     });
 
     test('solução satisfaz a equação de valor futuro (ida e volta)', () {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(5000),
         monthlyContribution: Money.fromReais(750),
         months: 84,
@@ -87,7 +87,7 @@ void main() {
 
   group('RequiredReturnSolver — casos-limite', () {
     test('meta já coberta pelos próprios aportes', () {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(1000),
         monthlyContribution: Money.fromReais(1000),
         months: 12,
@@ -100,7 +100,7 @@ void main() {
     });
 
     test('meta impossível é reportada como falha, não como número absurdo', () {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(1),
         monthlyContribution: Money.zero,
         months: 12,
@@ -112,7 +112,7 @@ void main() {
     });
 
     test('rejeita plano sem capital algum', () {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.zero,
         monthlyContribution: Money.zero,
         months: 12,
@@ -122,7 +122,7 @@ void main() {
     });
 
     test('rejeita prazo não positivo', () {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(1000),
         monthlyContribution: Money.zero,
         months: 0,
@@ -147,7 +147,9 @@ void main() {
       final verdict = verdictFor(0.06);
       expect(verdict.level, FeasibilityLevel.riskFreeSufficient);
       expect(verdict.blocks, isFalse);
-      expect(verdict.message, contains('renda fixa'));
+      // O motivo, e não a frase: o texto é composto na apresentação desde que
+      // o núcleo parou de montar prosa (ver `FeasibilityCopy`).
+      expect(verdict.reason, FeasibilityReason.belowRiskFree);
     });
 
     test('entre CDI e Ibovespa: plausível', () {
@@ -165,11 +167,13 @@ void main() {
       final verdict = verdictFor(0.40);
       expect(verdict.level, FeasibilityLevel.unrealistic);
       expect(verdict.blocks, isTrue);
-      expect(verdict.message, contains('Ibovespa'));
+      expect(verdict.reason, FeasibilityReason.beyondAnyReference);
+      // O múltiplo viaja apurado, para a tela citá-lo sem recalcular.
+      expect(verdict.marketMultiple, closeTo(0.40 / 0.1126, 1e-9));
     });
 
     test('aportes que já bastam dispensam rentabilidade', () {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(1000),
         monthlyContribution: Money.fromReais(1000),
         months: 12,

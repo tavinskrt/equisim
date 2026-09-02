@@ -17,6 +17,7 @@ export 'src/audit/calculation_trace.dart';
 // --- Objetos de valor ---
 export 'src/value_objects/date_range.dart';
 export 'src/value_objects/money.dart';
+export 'src/value_objects/paired_series.dart';
 export 'src/value_objects/ticker.dart';
 export 'src/value_objects/weight.dart';
 
@@ -26,7 +27,6 @@ export 'src/failures/result.dart';
 
 // --- Entidades ---
 export 'src/entities/asset.dart';
-export 'src/entities/dividend_event.dart';
 export 'src/entities/financial_goal.dart';
 export 'src/entities/fundamentals.dart';
 export 'src/entities/portfolio.dart';
@@ -35,9 +35,6 @@ export 'src/entities/valuation.dart';
 
 // --- Recorte temporal ---
 export 'src/time/point_in_time_view.dart';
-
-// --- Tributação ---
-export 'src/tax/tax_policy.dart';
 
 // --- Serviços de domínio ---
 export 'src/services/backtest/portfolio_backtest.dart';
@@ -48,7 +45,6 @@ export 'src/services/metrics/returns.dart';
 export 'src/services/metrics/risk_metrics.dart';
 export 'src/services/portfolio/expected_return.dart';
 export 'src/services/portfolio/sector_concentration.dart';
-export 'src/services/total_return_engine.dart';
 export 'src/services/valuation/base_flow.dart';
 export 'src/services/valuation/cost_of_capital.dart';
 export 'src/services/valuation/dcf.dart';

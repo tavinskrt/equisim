@@ -51,7 +51,6 @@ void main() {
             enterpriseToEbitda: 6.0,
           ),
       ],
-      dividends: const [],
       marketPrice: 20.0,
       capm: const CapmInputs(
         riskFreeRate: 0.105,
@@ -172,7 +171,6 @@ void main() {
             enterpriseToEbitda: 6.0,
           ),
       ],
-      dividends: const [],
       marketPrice: 20.0,
       capm: const CapmInputs(
         riskFreeRate: 0.105,

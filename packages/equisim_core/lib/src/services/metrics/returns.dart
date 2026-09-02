@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import '../../failures/failure.dart';
 import '../../failures/result.dart';
 import '../../value_objects/money.dart';
+import '../../value_objects/paired_series.dart';
 
 /// Movimentação externa de capital, datada.
 ///
@@ -46,23 +47,21 @@ abstract final class Returns {
   /// 120 aportes mensais como se fossem um único investimento no dia 1.
   ///
   /// - [values]: patrimônio ao final de cada período, em ordem cronológica.
-  /// - [externalFlows]: fluxo externo aportado em cada período, alinhado a
-  ///   [values] posição a posição. Aporte é positivo aqui — convenção oposta à
-  ///   de [CashFlow], porque a fórmula subtrai o fluxo do valor final.
+  /// - [path]: patrimônio e fluxo externo de cada período, casados pelo tipo.
+  ///   Aporte é positivo em [WealthPath.externalFlows] — convenção oposta à de
+  ///   [CashFlow], porque a fórmula subtrai o fluxo do valor final.
   ///
   /// Devolve `0.0` para menos de dois períodos. Períodos abertos com patrimônio
   /// não positivo são **pulados**, não zerados: uma carteira que zera e recebe
   /// aporte novo não contamina o composto com um retorno infinito.
   ///
-  /// Lança [ArgumentError] se as duas listas tiverem tamanhos diferentes.
-  static double timeWeighted({
-    required List<double> values,
-    required List<double> externalFlows,
-  }) {
+  /// **Não valida dimensão e não lança.** O `ArgumentError` que abria este
+  /// método deixou de existir junto com o par de listas soltas: [WealthPath]
+  /// não é construtível desalinhado.
+  static double timeWeighted(WealthPath path) {
+    final values = path.values;
+    final externalFlows = path.externalFlows;
     if (values.length < 2) return 0.0;
-    if (values.length != externalFlows.length) {
-      throw ArgumentError('values e externalFlows devem ter o mesmo tamanho.');
-    }
 
     var compounded = 1.0;
     for (var i = 1; i < values.length; i++) {
@@ -79,19 +78,18 @@ abstract final class Returns {
   /// e drawdown — a curva bruta de patrimônio salta no dia do aporte e
   /// contaminaria as duas métricas.
   ///
-  /// - [values]: patrimônio por período, em ordem cronológica.
-  /// - [externalFlows]: fluxo externo por período, alinhado a [values].
+  /// - [path]: patrimônio e fluxo externo de cada período, casados pelo tipo.
   /// - [base]: nível inicial do índice. Padrão `100.0`.
   ///
   /// Devolve lista vazia para entrada vazia, e uma lista do mesmo comprimento
-  /// de [values] caso contrário. **Não valida o alinhamento** entre as duas
-  /// listas, ao contrário de [timeWeighted]: `externalFlows` mais curta lança
-  /// [RangeError] durante a iteração.
-  static List<double> timeWeightedIndex({
-    required List<double> values,
-    required List<double> externalFlows,
+  /// de `path.values` caso contrário. O [RangeError] que uma lista de fluxos
+  /// mais curta provocava aqui deixou de ser representável.
+  static List<double> timeWeightedIndex(
+    WealthPath path, {
     double base = 100.0,
   }) {
+    final values = path.values;
+    final externalFlows = path.externalFlows;
     if (values.isEmpty) return const [];
     final out = <double>[base];
     var level = base;

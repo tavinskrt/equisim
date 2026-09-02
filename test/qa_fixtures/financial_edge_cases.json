@@ -186,7 +186,7 @@
         "id": "acumulo-em-laco-centavos",
         "input": "somar 0.01 cem vezes",
         "expected": { "value": 1.0000000000000007, "equals_1_0": false },
-        "why_it_matters": "E exatamente o padrao de um backtest somando aportes ou dividendos."
+        "why_it_matters": "E exatamente o padrao de um backtest somando aporte apos aporte."
       },
       {
         "id": "tostringasfixed-nao-e-half-up",
@@ -216,22 +216,11 @@
     "$rule": "Convencoes do mercado brasileiro que o agente deve assumir",
     "cases": [
       {
-        "id": "dividendo-vs-jcp",
-        "description": "Tributacao diferente para o mesmo tipo de provento.",
-        "input": { "gross": 1000.0 },
-        "expected": {
-          "dividendo_liquido": 1000.0,
-          "jcp_liquido": 850.0,
-          "jcp_withholding": 0.15
-        },
-        "why_it_matters": "Tratar JCP como dividendo superestima o rendimento liquido em 17,6%."
-      },
-      {
         "id": "quantidade-e-inteira",
         "description": "Acao e cota de FII nao fracionam.",
         "input": { "capital_cents": 100000, "price_cents": 3333 },
         "expected": { "shares": 30, "leftover_cents": 10 },
-        "why_it_matters": "Comprar 30,003 acoes e impossivel. O residuo fica em caixa e precisa ser rastreado."
+        "why_it_matters": "Comprar 30,003 acoes e impossivel. O residuo fica em caixa e precisa ser rastreado -- e o que PortfolioBacktest faz desde a decisao 023."
       }
     ]
   }

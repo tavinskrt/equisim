@@ -68,25 +68,12 @@ class PriceRepositoryImpl implements PriceRepository {
         missing.add(ticker);
         continue;
       }
-      final rows = await _tryCache(() => db.pricesIn(
-            ticker.value,
-            BrapiJson.isoDay(range.start),
-            BrapiJson.isoDay(range.end),
-          ));
-      if (rows == null || rows.isEmpty) {
+      final cached = await _seriesFromCache(ticker, range);
+      if (cached == null) {
         missing.add(ticker);
         continue;
       }
-      out[ticker] = PriceSeries(
-        ticker: ticker,
-        points: rows
-            .map((r) => PricePoint(
-                  date: DateTime.parse(r.date),
-                  close: r.close,
-                  adjustedClose: r.adjustedClose,
-                ))
-            .toList(),
-      );
+      out[ticker] = cached;
     }
 
     if (missing.isEmpty) return Ok(out);
@@ -94,7 +81,15 @@ class PriceRepositoryImpl implements PriceRepository {
     // Um único lote para tudo que faltou.
     final fetched = await remote.historicalBatch(missing);
     if (fetched.isErr) {
-      // Havendo cache parcial, entrega o que existe em vez de falhar inteiro.
+      // Rede fora: recorre ao cache VENCIDO antes de desistir. Ele é o motivo
+      // de o cache existir — e vencido aqui não significa errado, significa
+      // sem os pregões mais recentes, porque a gravação é aditiva (ver
+      // `CacheDatabase.isFresh`). A série chega mais curta, e o encurtamento
+      // já é anunciado pelo backtest.
+      for (final ticker in missing) {
+        final stale = await _seriesFromCache(ticker, range);
+        if (stale != null) out[ticker] = stale;
+      }
       return out.isEmpty ? Err(fetched.failureOrNull!) : Ok(out);
     }
 
@@ -111,6 +106,33 @@ class PriceRepositoryImpl implements PriceRepository {
     DateRange range,
   ) =>
       daily(ticker, range);
+
+  /// Série guardada em disco no recorte pedido, **sem olhar a validade**.
+  ///
+  /// Separado da checagem de frescor de propósito: o caminho normal só entra
+  /// aqui com cache válido, e o caminho degradado — rede fora — entra com ele
+  /// vencido. Devolve `null` quando não há cache, ele não abre, ou não há
+  /// linha alguma no intervalo.
+  Future<PriceSeries?> _seriesFromCache(Ticker ticker, DateRange range) async {
+    final db = cache;
+    if (db == null) return null;
+    final rows = await _tryCache(() => db.pricesIn(
+          ticker.value,
+          BrapiJson.isoDay(range.start),
+          BrapiJson.isoDay(range.end),
+        ));
+    if (rows == null || rows.isEmpty) return null;
+    return PriceSeries(
+      ticker: ticker,
+      points: rows
+          .map((r) => PricePoint(
+                date: DateTime.parse(r.date),
+                close: r.close,
+                adjustedClose: r.adjustedClose,
+              ))
+          .toList(),
+    );
+  }
 
   Future<void> _persist(Ticker ticker, PriceSeries series) async {
     final db = cache;
@@ -133,102 +155,6 @@ class PriceRepositoryImpl implements PriceRepository {
         ticker: series.ticker,
         points: series.points.where((p) => range.contains(p.date)).toList(),
       );
-}
-
-/// Proventos, com cache e higienização de duplicatas exatas.
-class DividendRepositoryImpl implements DividendRepository {
-  /// Fonte remota dos proventos.
-  final BrapiDatasource remote;
-
-  /// Cache local, ou `null` quando indisponível.
-  final CacheDatabase? cache;
-
-  /// Declara o repositório.
-  DividendRepositoryImpl({required this.remote, required this.cache});
-
-  @override
-  Future<Result<List<DividendEvent>>> history(Ticker ticker) async {
-    final db = cache;
-    final fresh = db == null
-        ? false
-        : await _tryCache(() => db.isFresh(
-                  CachePolicy.dividendsKey(ticker.value),
-                  CachePolicy.dividends,
-                )) ??
-            false;
-    if (fresh) {
-      final rows = await _tryCache(() => db.dividendsOf(ticker.value));
-      if (rows != null && rows.isNotEmpty) {
-        return Ok(rows
-            .map((r) => DividendEvent(
-                  ticker: ticker,
-                  exDate: DateTime.parse(r.exDate),
-                  paymentDate: DateTime.parse(r.paymentDate),
-                  amountPerShare: r.amount,
-                  kind: DividendKind.fromLabel(r.label),
-                  paymentDateEstimated: r.paymentDateEstimated,
-                ))
-            .toList());
-      }
-    }
-
-    final fetched = await remote.dividends(ticker);
-    if (fetched.isErr) return fetched;
-
-    final events = fetched.unwrap();
-    if (db != null) {
-      await _tryCache(() async {
-        await db.upsertDividends([
-          for (final e in events)
-            CachedDividendsCompanion.insert(
-              ticker: ticker.value,
-              exDate: BrapiJson.isoDay(e.exDate),
-              paymentDate: BrapiJson.isoDay(e.paymentDate),
-              amount: e.amountPerShare,
-              label: e.kind.label,
-              paymentDateEstimated: Value(e.paymentDateEstimated),
-            ),
-        ]);
-        await db.touch(CachePolicy.dividendsKey(ticker.value));
-      });
-    }
-    return Ok(events);
-  }
-
-  @override
-  Future<Result<Map<Ticker, List<DividendEvent>>>> historyBatch(
-    List<Ticker> tickers,
-  ) async {
-    final out = <Ticker, List<DividendEvent>>{};
-    final failures = <String>[];
-    // A brapi não aceita lote em dividends; a concorrência é contida pelo
-    // ThrottleInterceptor.
-    for (final ticker in tickers) {
-      final result = await history(ticker);
-      result.fold(
-        (events) => out[ticker] = events,
-        (failure) => failures.add('${ticker.value}: ${failure.message}'),
-      );
-    }
-    if (out.isEmpty && failures.isNotEmpty) {
-      return Err(InsufficientData(
-        'Nenhum histórico de proventos obtido. ${failures.join('; ')}',
-      ));
-    }
-    return Ok(out);
-  }
-
-  @override
-  Future<Result<double>> publishedTrailingYield(Ticker ticker) async {
-    final db = cache;
-    if (db != null) {
-      final cached = await _tryCache(() => db.profileOf(ticker.value));
-      if (cached?.publishedDividendYield != null) {
-        return Ok(cached!.publishedDividendYield!);
-      }
-    }
-    return remote.publishedDividendYield(ticker);
-  }
 }
 
 /// Fundamentos e perfil cadastral.
@@ -263,7 +189,19 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
     }
 
     final fetched = await remote.fundamentalsHistory(ticker);
-    if (fetched.isErr) return fetched;
+    if (fetched.isErr) {
+      // Rede fora: exercício antigo em disco é melhor que avaliação nenhuma.
+      // O recorte *point-in-time* é aplicado adiante por `PointInTimeView`,
+      // então um exercício defasado não vira número novo — vira, no máximo,
+      // o aviso de avaliação desatualizada que a cascata já emite.
+      final stale = db == null
+          ? null
+          : await _tryCache(() => db.fundamentalsOf(ticker.value));
+      if (stale != null && stale.isNotEmpty) {
+        return Ok(stale.map((r) => _toDomain(ticker, r)).toList());
+      }
+      return fetched;
+    }
 
     final snapshots = fetched.unwrap();
     if (db == null) return Ok(snapshots);
@@ -312,26 +250,22 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
             false;
     if (fresh) {
       final row = await _tryCache(() => db.profileOf(ticker.value));
-      if (row != null) {
-        return Ok(Asset(
-          ticker: ticker,
-          name: row.name,
-          sector: row.sectorKey == null
-              ? Sector.unknown
-              : Sector.fromKey(row.sectorKey!,
-                  label: row.sectorLabel ?? row.sectorKey!),
-          industry: row.industry,
-        ));
-      }
+      if (row != null) return Ok(_assetFrom(ticker, row));
     }
 
     final fetched = await remote.profile(ticker);
-    if (fetched.isErr) return fetched;
+    if (fetched.isErr) {
+      // Nome e setor mudam de ano em ano, não de hora em hora: o perfil
+      // vencido é o dado degradado mais barato de aceitar.
+      final stale =
+          db == null ? null : await _tryCache(() => db.profileOf(ticker.value));
+      if (stale != null) return Ok(_assetFrom(ticker, stale));
+      return fetched;
+    }
 
     final asset = fetched.unwrap();
     if (db == null) return Ok(asset);
 
-    final yieldResult = await remote.publishedDividendYield(ticker);
     await _tryCache(() async {
       await db.upsertProfile(CachedProfilesCompanion.insert(
         ticker: ticker.value,
@@ -339,7 +273,6 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
         sectorKey: Value(asset.sector.isUnknown ? null : asset.sector.key),
         sectorLabel: Value(asset.sector.isUnknown ? null : asset.sector.label),
         industry: Value(asset.industry),
-        publishedDividendYield: Value(yieldResult.valueOrNull),
       ));
       await db.touch(CachePolicy.profileKey(ticker.value));
     });
@@ -348,6 +281,16 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
 
   @override
   Future<Result<List<Ticker>>> universe() => remote.universe();
+
+  Asset _assetFrom(Ticker ticker, CachedProfile row) => Asset(
+        ticker: ticker,
+        name: row.name,
+        sector: row.sectorKey == null
+            ? Sector.unknown
+            : Sector.fromKey(row.sectorKey!,
+                label: row.sectorLabel ?? row.sectorKey!),
+        industry: row.industry,
+      );
 
   FundamentalsSnapshot _toDomain(Ticker ticker, CachedFundamentals r) =>
       FundamentalsSnapshot(

@@ -26,8 +26,10 @@ class InvariantCheck {
 ///
 /// **Por que estas e não um oráculo externo.** O plano original previa validar
 /// o motor contra o `adjustedClose` da fonte. A auditoria mostrou que aquela
-/// série subajusta proventos brasileiros em até 38,5%, o que a inviabiliza
-/// como referência (ver `PLANO_ARQUITETURA.md` §0.4).
+/// série ajusta proventos por um critério que diverge do fluxo publicado em
+/// até 38,5%, o que a inviabiliza como referência (ver `PLANO_ARQUITETURA.md`
+/// §0.4). O domínio não modela provento algum desde a decisão 023, e a
+/// comparação deixou de fazer sentido também por esse lado.
 ///
 /// As invariantes abaixo substituem o oráculo descartado. Não dependem de
 /// nenhuma fonte externa de verdade: são identidades matemáticas que o motor
@@ -61,14 +63,10 @@ abstract final class Invariants {
       if (priceResult.isErr) continue;
       final series = priceResult.unwrap();
 
-      final dividendResult = await ctx.dividends.history(ticker);
-      final events = dividendResult.getOrElse(const <DividendEvent>[]);
-
       checks
-        ..add(_singleAssetMatchesTotalReturn(ticker, series, events, window))
+        ..add(_capitalIsConserved(ticker, series, window))
         ..add(_lumpSumXirrMatchesCagr(ticker, series, window))
-        ..add(_perAssetSumsToPortfolio(ticker, series, events, window))
-        ..add(_taxReducesReturn(ticker, series, events, window));
+        ..add(_perAssetSumsToPortfolio(ticker, series, window));
     }
 
     checks
@@ -79,15 +77,17 @@ abstract final class Invariants {
     return checks;
   }
 
-  /// Uma carteira de ativo único, peso 100%, sem aportes mensais, tem de render
-  /// exatamente o que o motor de retorno total calcula para aquele ativo.
+  /// Nenhum centavo aportado desaparece: o que cada ativo recebeu soma o
+  /// aportado, e o que virou ação mais o caixa reconstitui o mesmo total.
   ///
-  /// É a identidade mais forte disponível: liga o backtest de carteira ao
-  /// motor de retorno total, que são caminhos de código independentes.
-  static InvariantCheck _singleAssetMatchesTotalReturn(
+  /// É a identidade mais forte disponível desde que a simulação passou a
+  /// comprar em lotes inteiros. Ela cobre de uma vez as duas formas de perder
+  /// dinheiro na alocação — resto de divisão não distribuído e fatia de ativo
+  /// sem cotação no dia — e é exata: opera em centavos inteiros, sem
+  /// tolerância.
+  static InvariantCheck _capitalIsConserved(
     Ticker ticker,
     PriceSeries series,
-    List<DividendEvent> events,
     DateRange window,
   ) {
     final portfolio = Portfolio.equalWeighted(
@@ -100,39 +100,34 @@ abstract final class Invariants {
     final backtest = PortfolioBacktest.run(
       portfolio: portfolio,
       prices: {ticker: series},
-      dividends: {ticker: events},
       plan: const ContributionPlan(
         initial: Money(1000000), // R$ 10.000
-        monthly: Money.zero,
+        monthly: Money(50000), // R$ 500
       ),
       range: window,
-      taxPolicy: TaxPolicy.brasil,
     );
 
     if (backtest.isErr) {
       return InvariantCheck(
-        name: '${ticker.value}: carteira de ativo único ≡ retorno total',
+        name: '${ticker.value}: aportado ≡ alocado + caixa',
         passed: false,
         detail: 'backtest falhou: ${backtest.failureOrNull!.message}',
       );
     }
 
-    final totalReturn = TotalReturnEngine.build(
-      prices: series,
-      dividends: events,
-      taxPolicy: TaxPolicy.brasil,
-      range: window,
-    );
-
-    final fromBacktest = backtest.unwrap().metrics.timeWeightedReturn;
-    final fromEngine = totalReturn.totalReturn;
-    final gap = (fromBacktest - fromEngine).abs();
+    final outcome = backtest.unwrap();
+    final destinado = outcome.perAsset.values
+        .fold<int>(0, (total, asset) => total + asset.invested.cents);
+    final aportado = outcome.totalContributed.cents;
+    final reconstituido =
+        outcome.totalAllocated.cents + outcome.residualCash.cents;
 
     return InvariantCheck(
-      name: '${ticker.value}: carteira de ativo único ≡ retorno total',
-      passed: gap < 1e-6,
-      detail: 'backtest ${pct(fromBacktest)} · motor ${pct(fromEngine)} · '
-          'diferença ${num2(gap, decimals: 9)}',
+      name: '${ticker.value}: aportado ≡ alocado + caixa',
+      passed: destinado == aportado && reconstituido == aportado,
+      detail: 'aportado $aportado¢ · destinado $destinado¢ · '
+          'alocado ${outcome.totalAllocated.cents}¢ + '
+          'caixa ${outcome.residualCash.cents}¢ = $reconstituido¢',
     );
   }
 
@@ -154,7 +149,6 @@ abstract final class Invariants {
     final result = PortfolioBacktest.run(
       portfolio: portfolio,
       prices: {ticker: series},
-      dividends: const {},
       plan: const ContributionPlan(
         initial: Money(1000000),
         monthly: Money.zero,
@@ -194,7 +188,6 @@ abstract final class Invariants {
   static InvariantCheck _perAssetSumsToPortfolio(
     Ticker ticker,
     PriceSeries series,
-    List<DividendEvent> events,
     DateRange window,
   ) {
     final portfolio = Portfolio.equalWeighted(
@@ -207,7 +200,6 @@ abstract final class Invariants {
     final result = PortfolioBacktest.run(
       portfolio: portfolio,
       prices: {ticker: series},
-      dividends: {ticker: events},
       plan: const ContributionPlan(
         initial: Money(500000),
         monthly: Money(50000),
@@ -224,8 +216,12 @@ abstract final class Invariants {
     }
 
     final outcome = result.unwrap();
-    final sum = outcome.perAsset.values
-        .fold<double>(0, (a, b) => a + b.finalValue.reais);
+    // O caixa entra na soma: ele é patrimônio da carteira tanto quanto a
+    // posição, e deixá-lo de fora faria a identidade falhar por construção.
+    final sum = outcome.perAsset.values.fold<double>(
+      0,
+      (total, asset) => total + asset.finalValue.reais + asset.cash.reais,
+    );
     final gap = (sum - outcome.finalValue.reais).abs();
 
     return InvariantCheck(
@@ -237,70 +233,15 @@ abstract final class Invariants {
     );
   }
 
-  /// Com tributação ligada, o resultado tem de ficar **abaixo** do bruto, e a
-  /// diferença tem de ser exatamente o imposto retido reinvestido a menos.
-  static InvariantCheck _taxReducesReturn(
-    Ticker ticker,
-    PriceSeries series,
-    List<DividendEvent> events,
-    DateRange window,
-  ) {
-    final portfolio = Portfolio.equalWeighted(
-      id: 'p',
-      name: 'P',
-      kind: PortfolioKind.principal,
-      assets: [Asset(ticker: ticker, name: ticker.value)],
-    ).unwrap();
-
-    BacktestOutcome? run(TaxPolicy policy) => PortfolioBacktest.run(
-          portfolio: portfolio,
-          prices: {ticker: series},
-          dividends: {ticker: events},
-          plan: const ContributionPlan(
-            initial: Money(1000000),
-            monthly: Money.zero,
-          ),
-          range: window,
-          taxPolicy: policy,
-        ).valueOrNull;
-
-    final gross = run(TaxPolicy.zero);
-    final net = run(TaxPolicy.brasil);
-
-    if (gross == null || net == null) {
-      return InvariantCheck(
-        name: '${ticker.value}: tributação reduz o resultado',
-        passed: false,
-        detail: 'backtest falhou',
-      );
-    }
-
-    final hasJcp = events.any((e) => e.kind == DividendKind.jcp);
-    final passed = hasJcp
-        ? net.finalValue.reais < gross.finalValue.reais &&
-            net.withheldTax.isPositive
-        : (net.finalValue.reais - gross.finalValue.reais).abs() < 0.05;
-
-    return InvariantCheck(
-      name: '${ticker.value}: tributação reduz o resultado',
-      passed: passed,
-      detail: hasJcp
-          ? 'bruto ${num2(gross.finalValue.reais, decimals: 2)} · '
-              'líquido ${num2(net.finalValue.reais, decimals: 2)} · '
-              'IR retido ${num2(net.withheldTax.reais, decimals: 2)}'
-          : 'sem JCP no período — resultados devem coincidir',
-    );
-  }
-
   /// Aporte que entra e não é investido não pode virar retorno.
   ///
   /// É a defesa contra o defeito mais comum em simuladores de carteira, e o
   /// que motivou trocar CAGR sobre capital aportado por TWR.
   static InvariantCheck _contributionsDoNotInflateTwr() {
-    final twr = Returns.timeWeighted(
+    final twr = Returns.timeWeighted(WealthPath.of(
       values: [100, 10100, 10100],
       externalFlows: [100, 10000, 0],
-    );
+    ).unwrap());
     return InvariantCheck(
       name: 'Aporte não é confundido com retorno',
       passed: twr.abs() < 1e-12,
@@ -338,7 +279,7 @@ abstract final class Invariants {
 
     final errors = <String>[];
     for (final c in cases) {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(c.initial),
         monthlyContribution: Money.fromReais(c.monthly),
         months: c.months,
@@ -384,7 +325,8 @@ abstract final class Invariants {
       ..writeln('Estas verificações não dependem de fonte externa de verdade: '
           'são identidades que o motor precisa satisfazer. Substituem o '
           'oráculo `adjustedClose` descartado na auditoria (§0.4), que se '
-          'mostrou inconsistente com o fluxo de proventos em até 38,5%.')
+          'mostrou inconsistente com o fluxo de proventos publicado em até '
+          '38,5%. O domínio não modela provento desde a decisão 023.')
       ..writeln()
       ..writeln('**Resultado: $passed de ${checks.length} aprovadas.**')
       ..writeln()

@@ -323,489 +323,6 @@ class CachedPricesCompanion extends UpdateCompanion<CachedPrice> {
   }
 }
 
-class $CachedDividendsTable extends CachedDividends
-    with TableInfo<$CachedDividendsTable, CachedDividend> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $CachedDividendsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _tickerMeta = const VerificationMeta('ticker');
-  @override
-  late final GeneratedColumn<String> ticker = GeneratedColumn<String>(
-    'ticker',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _exDateMeta = const VerificationMeta('exDate');
-  @override
-  late final GeneratedColumn<String> exDate = GeneratedColumn<String>(
-    'ex_date',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _paymentDateMeta = const VerificationMeta(
-    'paymentDate',
-  );
-  @override
-  late final GeneratedColumn<String> paymentDate = GeneratedColumn<String>(
-    'payment_date',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
-  @override
-  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
-    'amount',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _labelMeta = const VerificationMeta('label');
-  @override
-  late final GeneratedColumn<String> label = GeneratedColumn<String>(
-    'label',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _paymentDateEstimatedMeta =
-      const VerificationMeta('paymentDateEstimated');
-  @override
-  late final GeneratedColumn<bool> paymentDateEstimated = GeneratedColumn<bool>(
-    'payment_date_estimated',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("payment_date_estimated" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _remarksMeta = const VerificationMeta(
-    'remarks',
-  );
-  @override
-  late final GeneratedColumn<String> remarks = GeneratedColumn<String>(
-    'remarks',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    ticker,
-    exDate,
-    paymentDate,
-    amount,
-    label,
-    paymentDateEstimated,
-    remarks,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'cached_dividends';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<CachedDividend> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('ticker')) {
-      context.handle(
-        _tickerMeta,
-        ticker.isAcceptableOrUnknown(data['ticker']!, _tickerMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_tickerMeta);
-    }
-    if (data.containsKey('ex_date')) {
-      context.handle(
-        _exDateMeta,
-        exDate.isAcceptableOrUnknown(data['ex_date']!, _exDateMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_exDateMeta);
-    }
-    if (data.containsKey('payment_date')) {
-      context.handle(
-        _paymentDateMeta,
-        paymentDate.isAcceptableOrUnknown(
-          data['payment_date']!,
-          _paymentDateMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_paymentDateMeta);
-    }
-    if (data.containsKey('amount')) {
-      context.handle(
-        _amountMeta,
-        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_amountMeta);
-    }
-    if (data.containsKey('label')) {
-      context.handle(
-        _labelMeta,
-        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_labelMeta);
-    }
-    if (data.containsKey('payment_date_estimated')) {
-      context.handle(
-        _paymentDateEstimatedMeta,
-        paymentDateEstimated.isAcceptableOrUnknown(
-          data['payment_date_estimated']!,
-          _paymentDateEstimatedMeta,
-        ),
-      );
-    }
-    if (data.containsKey('remarks')) {
-      context.handle(
-        _remarksMeta,
-        remarks.isAcceptableOrUnknown(data['remarks']!, _remarksMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {
-    ticker,
-    exDate,
-    paymentDate,
-    amount,
-    label,
-  };
-  @override
-  CachedDividend map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return CachedDividend(
-      ticker: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}ticker'],
-      )!,
-      exDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}ex_date'],
-      )!,
-      paymentDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}payment_date'],
-      )!,
-      amount: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}amount'],
-      )!,
-      label: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}label'],
-      )!,
-      paymentDateEstimated: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}payment_date_estimated'],
-      )!,
-      remarks: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}remarks'],
-      ),
-    );
-  }
-
-  @override
-  $CachedDividendsTable createAlias(String alias) {
-    return $CachedDividendsTable(attachedDatabase, alias);
-  }
-}
-
-class CachedDividend extends DataClass implements Insertable<CachedDividend> {
-  final String ticker;
-  final String exDate;
-  final String paymentDate;
-  final double amount;
-  final String label;
-  final bool paymentDateEstimated;
-  final String? remarks;
-  const CachedDividend({
-    required this.ticker,
-    required this.exDate,
-    required this.paymentDate,
-    required this.amount,
-    required this.label,
-    required this.paymentDateEstimated,
-    this.remarks,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['ticker'] = Variable<String>(ticker);
-    map['ex_date'] = Variable<String>(exDate);
-    map['payment_date'] = Variable<String>(paymentDate);
-    map['amount'] = Variable<double>(amount);
-    map['label'] = Variable<String>(label);
-    map['payment_date_estimated'] = Variable<bool>(paymentDateEstimated);
-    if (!nullToAbsent || remarks != null) {
-      map['remarks'] = Variable<String>(remarks);
-    }
-    return map;
-  }
-
-  CachedDividendsCompanion toCompanion(bool nullToAbsent) {
-    return CachedDividendsCompanion(
-      ticker: Value(ticker),
-      exDate: Value(exDate),
-      paymentDate: Value(paymentDate),
-      amount: Value(amount),
-      label: Value(label),
-      paymentDateEstimated: Value(paymentDateEstimated),
-      remarks: remarks == null && nullToAbsent
-          ? const Value.absent()
-          : Value(remarks),
-    );
-  }
-
-  factory CachedDividend.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return CachedDividend(
-      ticker: serializer.fromJson<String>(json['ticker']),
-      exDate: serializer.fromJson<String>(json['exDate']),
-      paymentDate: serializer.fromJson<String>(json['paymentDate']),
-      amount: serializer.fromJson<double>(json['amount']),
-      label: serializer.fromJson<String>(json['label']),
-      paymentDateEstimated: serializer.fromJson<bool>(
-        json['paymentDateEstimated'],
-      ),
-      remarks: serializer.fromJson<String?>(json['remarks']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'ticker': serializer.toJson<String>(ticker),
-      'exDate': serializer.toJson<String>(exDate),
-      'paymentDate': serializer.toJson<String>(paymentDate),
-      'amount': serializer.toJson<double>(amount),
-      'label': serializer.toJson<String>(label),
-      'paymentDateEstimated': serializer.toJson<bool>(paymentDateEstimated),
-      'remarks': serializer.toJson<String?>(remarks),
-    };
-  }
-
-  CachedDividend copyWith({
-    String? ticker,
-    String? exDate,
-    String? paymentDate,
-    double? amount,
-    String? label,
-    bool? paymentDateEstimated,
-    Value<String?> remarks = const Value.absent(),
-  }) => CachedDividend(
-    ticker: ticker ?? this.ticker,
-    exDate: exDate ?? this.exDate,
-    paymentDate: paymentDate ?? this.paymentDate,
-    amount: amount ?? this.amount,
-    label: label ?? this.label,
-    paymentDateEstimated: paymentDateEstimated ?? this.paymentDateEstimated,
-    remarks: remarks.present ? remarks.value : this.remarks,
-  );
-  CachedDividend copyWithCompanion(CachedDividendsCompanion data) {
-    return CachedDividend(
-      ticker: data.ticker.present ? data.ticker.value : this.ticker,
-      exDate: data.exDate.present ? data.exDate.value : this.exDate,
-      paymentDate: data.paymentDate.present
-          ? data.paymentDate.value
-          : this.paymentDate,
-      amount: data.amount.present ? data.amount.value : this.amount,
-      label: data.label.present ? data.label.value : this.label,
-      paymentDateEstimated: data.paymentDateEstimated.present
-          ? data.paymentDateEstimated.value
-          : this.paymentDateEstimated,
-      remarks: data.remarks.present ? data.remarks.value : this.remarks,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CachedDividend(')
-          ..write('ticker: $ticker, ')
-          ..write('exDate: $exDate, ')
-          ..write('paymentDate: $paymentDate, ')
-          ..write('amount: $amount, ')
-          ..write('label: $label, ')
-          ..write('paymentDateEstimated: $paymentDateEstimated, ')
-          ..write('remarks: $remarks')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    ticker,
-    exDate,
-    paymentDate,
-    amount,
-    label,
-    paymentDateEstimated,
-    remarks,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is CachedDividend &&
-          other.ticker == this.ticker &&
-          other.exDate == this.exDate &&
-          other.paymentDate == this.paymentDate &&
-          other.amount == this.amount &&
-          other.label == this.label &&
-          other.paymentDateEstimated == this.paymentDateEstimated &&
-          other.remarks == this.remarks);
-}
-
-class CachedDividendsCompanion extends UpdateCompanion<CachedDividend> {
-  final Value<String> ticker;
-  final Value<String> exDate;
-  final Value<String> paymentDate;
-  final Value<double> amount;
-  final Value<String> label;
-  final Value<bool> paymentDateEstimated;
-  final Value<String?> remarks;
-  final Value<int> rowid;
-  const CachedDividendsCompanion({
-    this.ticker = const Value.absent(),
-    this.exDate = const Value.absent(),
-    this.paymentDate = const Value.absent(),
-    this.amount = const Value.absent(),
-    this.label = const Value.absent(),
-    this.paymentDateEstimated = const Value.absent(),
-    this.remarks = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  CachedDividendsCompanion.insert({
-    required String ticker,
-    required String exDate,
-    required String paymentDate,
-    required double amount,
-    required String label,
-    this.paymentDateEstimated = const Value.absent(),
-    this.remarks = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : ticker = Value(ticker),
-       exDate = Value(exDate),
-       paymentDate = Value(paymentDate),
-       amount = Value(amount),
-       label = Value(label);
-  static Insertable<CachedDividend> custom({
-    Expression<String>? ticker,
-    Expression<String>? exDate,
-    Expression<String>? paymentDate,
-    Expression<double>? amount,
-    Expression<String>? label,
-    Expression<bool>? paymentDateEstimated,
-    Expression<String>? remarks,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (ticker != null) 'ticker': ticker,
-      if (exDate != null) 'ex_date': exDate,
-      if (paymentDate != null) 'payment_date': paymentDate,
-      if (amount != null) 'amount': amount,
-      if (label != null) 'label': label,
-      if (paymentDateEstimated != null)
-        'payment_date_estimated': paymentDateEstimated,
-      if (remarks != null) 'remarks': remarks,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  CachedDividendsCompanion copyWith({
-    Value<String>? ticker,
-    Value<String>? exDate,
-    Value<String>? paymentDate,
-    Value<double>? amount,
-    Value<String>? label,
-    Value<bool>? paymentDateEstimated,
-    Value<String?>? remarks,
-    Value<int>? rowid,
-  }) {
-    return CachedDividendsCompanion(
-      ticker: ticker ?? this.ticker,
-      exDate: exDate ?? this.exDate,
-      paymentDate: paymentDate ?? this.paymentDate,
-      amount: amount ?? this.amount,
-      label: label ?? this.label,
-      paymentDateEstimated: paymentDateEstimated ?? this.paymentDateEstimated,
-      remarks: remarks ?? this.remarks,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (ticker.present) {
-      map['ticker'] = Variable<String>(ticker.value);
-    }
-    if (exDate.present) {
-      map['ex_date'] = Variable<String>(exDate.value);
-    }
-    if (paymentDate.present) {
-      map['payment_date'] = Variable<String>(paymentDate.value);
-    }
-    if (amount.present) {
-      map['amount'] = Variable<double>(amount.value);
-    }
-    if (label.present) {
-      map['label'] = Variable<String>(label.value);
-    }
-    if (paymentDateEstimated.present) {
-      map['payment_date_estimated'] = Variable<bool>(
-        paymentDateEstimated.value,
-      );
-    }
-    if (remarks.present) {
-      map['remarks'] = Variable<String>(remarks.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CachedDividendsCompanion(')
-          ..write('ticker: $ticker, ')
-          ..write('exDate: $exDate, ')
-          ..write('paymentDate: $paymentDate, ')
-          ..write('amount: $amount, ')
-          ..write('label: $label, ')
-          ..write('paymentDateEstimated: $paymentDateEstimated, ')
-          ..write('remarks: $remarks, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $CachedFundamentalsTableTable extends CachedFundamentalsTable
     with TableInfo<$CachedFundamentalsTableTable, CachedFundamentals> {
   @override
@@ -2196,17 +1713,6 @@ class $CachedProfilesTable extends CachedProfiles
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _publishedDividendYieldMeta =
-      const VerificationMeta('publishedDividendYield');
-  @override
-  late final GeneratedColumn<double> publishedDividendYield =
-      GeneratedColumn<double>(
-        'published_dividend_yield',
-        aliasedName,
-        true,
-        type: DriftSqlType.double,
-        requiredDuringInsert: false,
-      );
   @override
   List<GeneratedColumn> get $columns => [
     ticker,
@@ -2214,7 +1720,6 @@ class $CachedProfilesTable extends CachedProfiles
     sectorKey,
     sectorLabel,
     industry,
-    publishedDividendYield,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2265,15 +1770,6 @@ class $CachedProfilesTable extends CachedProfiles
         industry.isAcceptableOrUnknown(data['industry']!, _industryMeta),
       );
     }
-    if (data.containsKey('published_dividend_yield')) {
-      context.handle(
-        _publishedDividendYieldMeta,
-        publishedDividendYield.isAcceptableOrUnknown(
-          data['published_dividend_yield']!,
-          _publishedDividendYieldMeta,
-        ),
-      );
-    }
     return context;
   }
 
@@ -2303,10 +1799,6 @@ class $CachedProfilesTable extends CachedProfiles
         DriftSqlType.string,
         data['${effectivePrefix}industry'],
       ),
-      publishedDividendYield: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}published_dividend_yield'],
-      ),
     );
   }
 
@@ -2322,16 +1814,12 @@ class CachedProfile extends DataClass implements Insertable<CachedProfile> {
   final String? sectorKey;
   final String? sectorLabel;
   final String? industry;
-
-  /// Dividend yield 12m publicado pela fonte — insumo do portão de qualidade.
-  final double? publishedDividendYield;
   const CachedProfile({
     required this.ticker,
     required this.name,
     this.sectorKey,
     this.sectorLabel,
     this.industry,
-    this.publishedDividendYield,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2346,11 +1834,6 @@ class CachedProfile extends DataClass implements Insertable<CachedProfile> {
     }
     if (!nullToAbsent || industry != null) {
       map['industry'] = Variable<String>(industry);
-    }
-    if (!nullToAbsent || publishedDividendYield != null) {
-      map['published_dividend_yield'] = Variable<double>(
-        publishedDividendYield,
-      );
     }
     return map;
   }
@@ -2368,9 +1851,6 @@ class CachedProfile extends DataClass implements Insertable<CachedProfile> {
       industry: industry == null && nullToAbsent
           ? const Value.absent()
           : Value(industry),
-      publishedDividendYield: publishedDividendYield == null && nullToAbsent
-          ? const Value.absent()
-          : Value(publishedDividendYield),
     );
   }
 
@@ -2385,9 +1865,6 @@ class CachedProfile extends DataClass implements Insertable<CachedProfile> {
       sectorKey: serializer.fromJson<String?>(json['sectorKey']),
       sectorLabel: serializer.fromJson<String?>(json['sectorLabel']),
       industry: serializer.fromJson<String?>(json['industry']),
-      publishedDividendYield: serializer.fromJson<double?>(
-        json['publishedDividendYield'],
-      ),
     );
   }
   @override
@@ -2399,9 +1876,6 @@ class CachedProfile extends DataClass implements Insertable<CachedProfile> {
       'sectorKey': serializer.toJson<String?>(sectorKey),
       'sectorLabel': serializer.toJson<String?>(sectorLabel),
       'industry': serializer.toJson<String?>(industry),
-      'publishedDividendYield': serializer.toJson<double?>(
-        publishedDividendYield,
-      ),
     };
   }
 
@@ -2411,16 +1885,12 @@ class CachedProfile extends DataClass implements Insertable<CachedProfile> {
     Value<String?> sectorKey = const Value.absent(),
     Value<String?> sectorLabel = const Value.absent(),
     Value<String?> industry = const Value.absent(),
-    Value<double?> publishedDividendYield = const Value.absent(),
   }) => CachedProfile(
     ticker: ticker ?? this.ticker,
     name: name ?? this.name,
     sectorKey: sectorKey.present ? sectorKey.value : this.sectorKey,
     sectorLabel: sectorLabel.present ? sectorLabel.value : this.sectorLabel,
     industry: industry.present ? industry.value : this.industry,
-    publishedDividendYield: publishedDividendYield.present
-        ? publishedDividendYield.value
-        : this.publishedDividendYield,
   );
   CachedProfile copyWithCompanion(CachedProfilesCompanion data) {
     return CachedProfile(
@@ -2431,9 +1901,6 @@ class CachedProfile extends DataClass implements Insertable<CachedProfile> {
           ? data.sectorLabel.value
           : this.sectorLabel,
       industry: data.industry.present ? data.industry.value : this.industry,
-      publishedDividendYield: data.publishedDividendYield.present
-          ? data.publishedDividendYield.value
-          : this.publishedDividendYield,
     );
   }
 
@@ -2444,21 +1911,14 @@ class CachedProfile extends DataClass implements Insertable<CachedProfile> {
           ..write('name: $name, ')
           ..write('sectorKey: $sectorKey, ')
           ..write('sectorLabel: $sectorLabel, ')
-          ..write('industry: $industry, ')
-          ..write('publishedDividendYield: $publishedDividendYield')
+          ..write('industry: $industry')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-    ticker,
-    name,
-    sectorKey,
-    sectorLabel,
-    industry,
-    publishedDividendYield,
-  );
+  int get hashCode =>
+      Object.hash(ticker, name, sectorKey, sectorLabel, industry);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2467,8 +1927,7 @@ class CachedProfile extends DataClass implements Insertable<CachedProfile> {
           other.name == this.name &&
           other.sectorKey == this.sectorKey &&
           other.sectorLabel == this.sectorLabel &&
-          other.industry == this.industry &&
-          other.publishedDividendYield == this.publishedDividendYield);
+          other.industry == this.industry);
 }
 
 class CachedProfilesCompanion extends UpdateCompanion<CachedProfile> {
@@ -2477,7 +1936,6 @@ class CachedProfilesCompanion extends UpdateCompanion<CachedProfile> {
   final Value<String?> sectorKey;
   final Value<String?> sectorLabel;
   final Value<String?> industry;
-  final Value<double?> publishedDividendYield;
   final Value<int> rowid;
   const CachedProfilesCompanion({
     this.ticker = const Value.absent(),
@@ -2485,7 +1943,6 @@ class CachedProfilesCompanion extends UpdateCompanion<CachedProfile> {
     this.sectorKey = const Value.absent(),
     this.sectorLabel = const Value.absent(),
     this.industry = const Value.absent(),
-    this.publishedDividendYield = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CachedProfilesCompanion.insert({
@@ -2494,7 +1951,6 @@ class CachedProfilesCompanion extends UpdateCompanion<CachedProfile> {
     this.sectorKey = const Value.absent(),
     this.sectorLabel = const Value.absent(),
     this.industry = const Value.absent(),
-    this.publishedDividendYield = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : ticker = Value(ticker),
        name = Value(name);
@@ -2504,7 +1960,6 @@ class CachedProfilesCompanion extends UpdateCompanion<CachedProfile> {
     Expression<String>? sectorKey,
     Expression<String>? sectorLabel,
     Expression<String>? industry,
-    Expression<double>? publishedDividendYield,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2513,8 +1968,6 @@ class CachedProfilesCompanion extends UpdateCompanion<CachedProfile> {
       if (sectorKey != null) 'sector_key': sectorKey,
       if (sectorLabel != null) 'sector_label': sectorLabel,
       if (industry != null) 'industry': industry,
-      if (publishedDividendYield != null)
-        'published_dividend_yield': publishedDividendYield,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2525,7 +1978,6 @@ class CachedProfilesCompanion extends UpdateCompanion<CachedProfile> {
     Value<String?>? sectorKey,
     Value<String?>? sectorLabel,
     Value<String?>? industry,
-    Value<double?>? publishedDividendYield,
     Value<int>? rowid,
   }) {
     return CachedProfilesCompanion(
@@ -2534,8 +1986,6 @@ class CachedProfilesCompanion extends UpdateCompanion<CachedProfile> {
       sectorKey: sectorKey ?? this.sectorKey,
       sectorLabel: sectorLabel ?? this.sectorLabel,
       industry: industry ?? this.industry,
-      publishedDividendYield:
-          publishedDividendYield ?? this.publishedDividendYield,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2558,11 +2008,6 @@ class CachedProfilesCompanion extends UpdateCompanion<CachedProfile> {
     if (industry.present) {
       map['industry'] = Variable<String>(industry.value);
     }
-    if (publishedDividendYield.present) {
-      map['published_dividend_yield'] = Variable<double>(
-        publishedDividendYield.value,
-      );
-    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2577,7 +2022,6 @@ class CachedProfilesCompanion extends UpdateCompanion<CachedProfile> {
           ..write('sectorKey: $sectorKey, ')
           ..write('sectorLabel: $sectorLabel, ')
           ..write('industry: $industry, ')
-          ..write('publishedDividendYield: $publishedDividendYield, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3064,9 +2508,6 @@ abstract class _$CacheDatabase extends GeneratedDatabase {
   _$CacheDatabase(QueryExecutor e) : super(e);
   $CacheDatabaseManager get managers => $CacheDatabaseManager(this);
   late final $CachedPricesTable cachedPrices = $CachedPricesTable(this);
-  late final $CachedDividendsTable cachedDividends = $CachedDividendsTable(
-    this,
-  );
   late final $CachedFundamentalsTableTable cachedFundamentalsTable =
       $CachedFundamentalsTableTable(this);
   late final $CachedProfilesTable cachedProfiles = $CachedProfilesTable(this);
@@ -3080,7 +2521,6 @@ abstract class _$CacheDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     cachedPrices,
-    cachedDividends,
     cachedFundamentalsTable,
     cachedProfiles,
     cachedMacroRates,
@@ -3269,254 +2709,6 @@ typedef $$CachedPricesTableProcessedTableManager =
         BaseReferences<_$CacheDatabase, $CachedPricesTable, CachedPrice>,
       ),
       CachedPrice,
-      PrefetchHooks Function()
-    >;
-typedef $$CachedDividendsTableCreateCompanionBuilder =
-    CachedDividendsCompanion Function({
-      required String ticker,
-      required String exDate,
-      required String paymentDate,
-      required double amount,
-      required String label,
-      Value<bool> paymentDateEstimated,
-      Value<String?> remarks,
-      Value<int> rowid,
-    });
-typedef $$CachedDividendsTableUpdateCompanionBuilder =
-    CachedDividendsCompanion Function({
-      Value<String> ticker,
-      Value<String> exDate,
-      Value<String> paymentDate,
-      Value<double> amount,
-      Value<String> label,
-      Value<bool> paymentDateEstimated,
-      Value<String?> remarks,
-      Value<int> rowid,
-    });
-
-class $$CachedDividendsTableFilterComposer
-    extends Composer<_$CacheDatabase, $CachedDividendsTable> {
-  $$CachedDividendsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get ticker => $composableBuilder(
-    column: $table.ticker,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get exDate => $composableBuilder(
-    column: $table.exDate,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get paymentDate => $composableBuilder(
-    column: $table.paymentDate,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get amount => $composableBuilder(
-    column: $table.amount,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get label => $composableBuilder(
-    column: $table.label,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get paymentDateEstimated => $composableBuilder(
-    column: $table.paymentDateEstimated,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get remarks => $composableBuilder(
-    column: $table.remarks,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$CachedDividendsTableOrderingComposer
-    extends Composer<_$CacheDatabase, $CachedDividendsTable> {
-  $$CachedDividendsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get ticker => $composableBuilder(
-    column: $table.ticker,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get exDate => $composableBuilder(
-    column: $table.exDate,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get paymentDate => $composableBuilder(
-    column: $table.paymentDate,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get amount => $composableBuilder(
-    column: $table.amount,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get label => $composableBuilder(
-    column: $table.label,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get paymentDateEstimated => $composableBuilder(
-    column: $table.paymentDateEstimated,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get remarks => $composableBuilder(
-    column: $table.remarks,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$CachedDividendsTableAnnotationComposer
-    extends Composer<_$CacheDatabase, $CachedDividendsTable> {
-  $$CachedDividendsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get ticker =>
-      $composableBuilder(column: $table.ticker, builder: (column) => column);
-
-  GeneratedColumn<String> get exDate =>
-      $composableBuilder(column: $table.exDate, builder: (column) => column);
-
-  GeneratedColumn<String> get paymentDate => $composableBuilder(
-    column: $table.paymentDate,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get amount =>
-      $composableBuilder(column: $table.amount, builder: (column) => column);
-
-  GeneratedColumn<String> get label =>
-      $composableBuilder(column: $table.label, builder: (column) => column);
-
-  GeneratedColumn<bool> get paymentDateEstimated => $composableBuilder(
-    column: $table.paymentDateEstimated,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get remarks =>
-      $composableBuilder(column: $table.remarks, builder: (column) => column);
-}
-
-class $$CachedDividendsTableTableManager
-    extends
-        RootTableManager<
-          _$CacheDatabase,
-          $CachedDividendsTable,
-          CachedDividend,
-          $$CachedDividendsTableFilterComposer,
-          $$CachedDividendsTableOrderingComposer,
-          $$CachedDividendsTableAnnotationComposer,
-          $$CachedDividendsTableCreateCompanionBuilder,
-          $$CachedDividendsTableUpdateCompanionBuilder,
-          (
-            CachedDividend,
-            BaseReferences<
-              _$CacheDatabase,
-              $CachedDividendsTable,
-              CachedDividend
-            >,
-          ),
-          CachedDividend,
-          PrefetchHooks Function()
-        > {
-  $$CachedDividendsTableTableManager(
-    _$CacheDatabase db,
-    $CachedDividendsTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$CachedDividendsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$CachedDividendsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$CachedDividendsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> ticker = const Value.absent(),
-                Value<String> exDate = const Value.absent(),
-                Value<String> paymentDate = const Value.absent(),
-                Value<double> amount = const Value.absent(),
-                Value<String> label = const Value.absent(),
-                Value<bool> paymentDateEstimated = const Value.absent(),
-                Value<String?> remarks = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => CachedDividendsCompanion(
-                ticker: ticker,
-                exDate: exDate,
-                paymentDate: paymentDate,
-                amount: amount,
-                label: label,
-                paymentDateEstimated: paymentDateEstimated,
-                remarks: remarks,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String ticker,
-                required String exDate,
-                required String paymentDate,
-                required double amount,
-                required String label,
-                Value<bool> paymentDateEstimated = const Value.absent(),
-                Value<String?> remarks = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => CachedDividendsCompanion.insert(
-                ticker: ticker,
-                exDate: exDate,
-                paymentDate: paymentDate,
-                amount: amount,
-                label: label,
-                paymentDateEstimated: paymentDateEstimated,
-                remarks: remarks,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$CachedDividendsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$CacheDatabase,
-      $CachedDividendsTable,
-      CachedDividend,
-      $$CachedDividendsTableFilterComposer,
-      $$CachedDividendsTableOrderingComposer,
-      $$CachedDividendsTableAnnotationComposer,
-      $$CachedDividendsTableCreateCompanionBuilder,
-      $$CachedDividendsTableUpdateCompanionBuilder,
-      (
-        CachedDividend,
-        BaseReferences<_$CacheDatabase, $CachedDividendsTable, CachedDividend>,
-      ),
-      CachedDividend,
       PrefetchHooks Function()
     >;
 typedef $$CachedFundamentalsTableTableCreateCompanionBuilder =
@@ -4100,7 +3292,6 @@ typedef $$CachedProfilesTableCreateCompanionBuilder =
       Value<String?> sectorKey,
       Value<String?> sectorLabel,
       Value<String?> industry,
-      Value<double?> publishedDividendYield,
       Value<int> rowid,
     });
 typedef $$CachedProfilesTableUpdateCompanionBuilder =
@@ -4110,7 +3301,6 @@ typedef $$CachedProfilesTableUpdateCompanionBuilder =
       Value<String?> sectorKey,
       Value<String?> sectorLabel,
       Value<String?> industry,
-      Value<double?> publishedDividendYield,
       Value<int> rowid,
     });
 
@@ -4145,11 +3335,6 @@ class $$CachedProfilesTableFilterComposer
 
   ColumnFilters<String> get industry => $composableBuilder(
     column: $table.industry,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get publishedDividendYield => $composableBuilder(
-    column: $table.publishedDividendYield,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4187,11 +3372,6 @@ class $$CachedProfilesTableOrderingComposer
     column: $table.industry,
     builder: (column) => ColumnOrderings(column),
   );
-
-  ColumnOrderings<double> get publishedDividendYield => $composableBuilder(
-    column: $table.publishedDividendYield,
-    builder: (column) => ColumnOrderings(column),
-  );
 }
 
 class $$CachedProfilesTableAnnotationComposer
@@ -4219,11 +3399,6 @@ class $$CachedProfilesTableAnnotationComposer
 
   GeneratedColumn<String> get industry =>
       $composableBuilder(column: $table.industry, builder: (column) => column);
-
-  GeneratedColumn<double> get publishedDividendYield => $composableBuilder(
-    column: $table.publishedDividendYield,
-    builder: (column) => column,
-  );
 }
 
 class $$CachedProfilesTableTableManager
@@ -4268,7 +3443,6 @@ class $$CachedProfilesTableTableManager
                 Value<String?> sectorKey = const Value.absent(),
                 Value<String?> sectorLabel = const Value.absent(),
                 Value<String?> industry = const Value.absent(),
-                Value<double?> publishedDividendYield = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CachedProfilesCompanion(
                 ticker: ticker,
@@ -4276,7 +3450,6 @@ class $$CachedProfilesTableTableManager
                 sectorKey: sectorKey,
                 sectorLabel: sectorLabel,
                 industry: industry,
-                publishedDividendYield: publishedDividendYield,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4286,7 +3459,6 @@ class $$CachedProfilesTableTableManager
                 Value<String?> sectorKey = const Value.absent(),
                 Value<String?> sectorLabel = const Value.absent(),
                 Value<String?> industry = const Value.absent(),
-                Value<double?> publishedDividendYield = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CachedProfilesCompanion.insert(
                 ticker: ticker,
@@ -4294,7 +3466,6 @@ class $$CachedProfilesTableTableManager
                 sectorKey: sectorKey,
                 sectorLabel: sectorLabel,
                 industry: industry,
-                publishedDividendYield: publishedDividendYield,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -4643,8 +3814,6 @@ class $CacheDatabaseManager {
   $CacheDatabaseManager(this._db);
   $$CachedPricesTableTableManager get cachedPrices =>
       $$CachedPricesTableTableManager(_db, _db.cachedPrices);
-  $$CachedDividendsTableTableManager get cachedDividends =>
-      $$CachedDividendsTableTableManager(_db, _db.cachedDividends);
   $$CachedFundamentalsTableTableTableManager get cachedFundamentalsTable =>
       $$CachedFundamentalsTableTableTableManager(
         _db,

@@ -49,22 +49,21 @@ abstract final class RequiredReturnSolver {
   /// iterações no caso típico, mas pode divergir com aportes grandes em
   /// relação ao inicial; a bisseção garante a resposta porque a função é
   /// monotônica crescente em `i`.
+  ///
+  /// **As guardas de entrada continuam aqui de propósito**, mesmo depois de
+  /// `FinancialGoal.create` fechar as mesmas invariantes na construção:
+  /// `FinancialGoal.unvalidated` existe e é o caminho da desserialização, de
+  /// modo que uma meta gravada antes daquela fábrica pode chegar aqui
+  /// inconsistente. Elas são a segunda linha, não a única — e são a razão de
+  /// este método devolver [Result].
   static Result<RequiredReturn> solve(FinancialGoal goal) {
-    if (goal.months <= 0) {
-      return const Err(InvalidInput('O prazo deve ser de ao menos um mês.'));
-    }
-    if (goal.initialContribution.cents < 0 ||
-        goal.monthlyContribution.cents < 0) {
-      return const Err(InvalidInput('Os aportes não podem ser negativos.'));
-    }
-    if (goal.targetWealth.cents <= 0) {
-      return const Err(InvalidInput('O valor desejado deve ser positivo.'));
-    }
-    if (goal.initialContribution.isZero && goal.monthlyContribution.isZero) {
-      return const Err(InvalidInput(
-        'Sem aporte inicial nem mensal, não há capital para render.',
-      ));
-    }
+    final valid = FinancialGoal.create(
+      initialContribution: goal.initialContribution,
+      monthlyContribution: goal.monthlyContribution,
+      months: goal.months,
+      targetWealth: goal.targetWealth,
+    );
+    if (valid.isErr) return Err(valid.failureOrNull!);
 
     final v0 = goal.initialContribution.reais;
     final pmt = goal.monthlyContribution.reais;

@@ -214,6 +214,33 @@ abstract final class DcfCalculator {
     ));
   }
 
+  /// Taxa de retenção implícita num crescimento, pela relação de crescimento
+  /// sustentável `g = ROE × b`.
+  ///
+  /// - [growth]: crescimento pretendido, em fração.
+  /// - [returnOnEquity]: retorno sobre o patrimônio líquido, em fração.
+  ///
+  /// **Por que isto existe.** Um lucro que cresce exige reinvestimento: parte
+  /// dele fica na empresa para financiar o capital de giro e o imobilizado que
+  /// sustentam o crescimento. Descontar o lucro **inteiro** como se todo ele
+  /// chegasse ao acionista *e* fazê-lo crescer conta o mesmo dinheiro duas
+  /// vezes, e infla o preço justo.
+  ///
+  /// Devolve a fração retida em `[0, 1)`, ou `null` quando a relação não se
+  /// sustenta: sem ROE utilizável, ou com um crescimento que exigiria reter
+  /// **todo** o lucro (`b ≥ 1`) — caso em que o crescimento não é financiável
+  /// pelo próprio resultado e a premissa está errada, não apertada.
+  static double? retentionFor({
+    required double growth,
+    required double? returnOnEquity,
+  }) {
+    if (returnOnEquity == null || returnOnEquity <= 0) return null;
+    if (!returnOnEquity.isFinite) return null;
+    if (growth <= 0) return 0.0;
+    final retention = growth / returnOnEquity;
+    return retention >= 1.0 ? null : retention;
+  }
+
   /// DCF simplificado sobre lucro por ação, descontado ao **Ke**.
   ///
   /// Usado quando não há demonstrativos suficientes para montar o FCFF.
@@ -222,9 +249,22 @@ abstract final class DcfCalculator {
   /// - [baseEps]: lucro por ação do exercício-base. Deve ser positivo.
   /// - [assumptions]: o desconto aqui **precisa ser Ke**, não WACC — o fluxo já
   ///   é do acionista.
+  /// - [returnOnEquity]: ROE observado, em fração. É o que permite descontar
+  ///   apenas a parte **distribuível** do lucro; ver abaixo.
   ///
   /// Devolve [InsufficientData] para LPA não positivo e [InvalidInput] para
   /// desconto não positivo.
+  ///
+  /// **O fluxo descontado é `LPA × (1 − b)`, não o LPA inteiro.** A retenção
+  /// `b` sai de [retentionFor] sobre o ROE informado, uma para o período
+  /// explícito e outra para a perpetuidade. Sem isso o modelo distribuía todo
+  /// o lucro e ainda o fazia crescer — dupla contagem que inflava o preço
+  /// justo de toda empresa em crescimento.
+  ///
+  /// **Sem ROE utilizável, o crescimento é zerado** e o modelo vira *earnings
+  /// power value*: lucro estacionário, valor `LPA / Ke`. É a leitura honesta
+  /// quando não há como saber quanto do lucro precisa ficar na empresa —
+  /// conservadora por construção, e declarada no resultado.
   ///
   /// **Difere de [fcff] no tratamento do spread:** em vez de recusar quando
   /// `r − g_∞` fica abaixo de [minimumSpread], aplica o mínimo como piso e
@@ -234,6 +274,7 @@ abstract final class DcfCalculator {
   static Result<DcfOutcome> earningsPerShare({
     required double baseEps,
     required DcfAssumptions assumptions,
+    double? returnOnEquity,
   }) {
     if (baseEps <= 0) {
       return const Err(InsufficientData(
@@ -245,8 +286,25 @@ abstract final class DcfCalculator {
     }
 
     final r = assumptions.discountRate;
-    final g = assumptions.growthRate;
     final n = assumptions.projectionYears;
+
+    // As duas retenções precisam existir juntas: crescer no explícito e não no
+    // terminal (ou o inverso) misturaria os dois regimes na mesma conta.
+    final explicitRetention = retentionFor(
+      growth: assumptions.growthRate,
+      returnOnEquity: returnOnEquity,
+    );
+    final perpetualRetention = retentionFor(
+      growth: assumptions.perpetualGrowth,
+      returnOnEquity: returnOnEquity,
+    );
+    final financiable =
+        explicitRetention != null && perpetualRetention != null;
+
+    final g = financiable ? assumptions.growthRate : 0.0;
+    final gPerpetual = financiable ? assumptions.perpetualGrowth : 0.0;
+    final payout = financiable ? 1.0 - explicitRetention : 1.0;
+    final terminalPayout = financiable ? 1.0 - perpetualRetention : 1.0;
 
     final projected = <double>[];
     final discounted = <double>[];
@@ -255,14 +313,15 @@ abstract final class DcfCalculator {
 
     for (var t = 1; t <= n; t++) {
       eps = eps * (1.0 + g);
-      final pv = eps / math.pow(1.0 + r, t);
-      projected.add(eps);
+      final distributable = eps * payout;
+      final pv = distributable / math.pow(1.0 + r, t);
+      projected.add(distributable);
       discounted.add(pv);
       sumDiscounted += pv;
     }
 
-    final spread = math.max(r - assumptions.perpetualGrowth, minimumSpread);
-    final terminalValue = eps * (1.0 + assumptions.perpetualGrowth) / spread;
+    final spread = math.max(r - gPerpetual, minimumSpread);
+    final terminalValue = eps * (1.0 + gPerpetual) * terminalPayout / spread;
     final discountedTerminal = terminalValue / math.pow(1.0 + r, n);
     final perShare = sumDiscounted + discountedTerminal;
 
@@ -276,39 +335,6 @@ abstract final class DcfCalculator {
       fairValuePerShare: perShare,
       terminalShare: perShare > 0 ? discountedTerminal / perShare : 0.0,
     ));
-  }
-
-  /// Modelo de crescimento de Gordon sobre dividendos: `P = D₁ / (Ke − g)`.
-  ///
-  /// - [lastDividendPerShare]: proventos dos últimos doze meses por papel.
-  ///   Deve ser positivo.
-  /// - [costOfEquity]: Ke anual em fração.
-  /// - [growthRate]: crescimento perpétuo dos dividendos, em fração.
-  ///
-  /// Retorna o preço justo por papel.
-  ///
-  /// Devolve [InsufficientData] sem histórico de dividendos e
-  /// [ComputationFailure] quando `Ke − g` fica abaixo de [minimumSpread] — aqui
-  /// a divergência **é** recusada, ao contrário de [earningsPerShare], porque
-  /// não há período explícito para amortecer a perpetuidade.
-  static Result<double> gordonGrowth({
-    required double lastDividendPerShare,
-    required double costOfEquity,
-    required double growthRate,
-  }) {
-    if (lastDividendPerShare <= 0) {
-      return const Err(InsufficientData(
-        'Sem histórico de dividendos: modelo de Gordon não é aplicável.',
-      ));
-    }
-    final spread = costOfEquity - growthRate;
-    if (spread < minimumSpread) {
-      return const Err(ComputationFailure(
-        'Custo de capital não supera o crescimento perpétuo por margem '
-        'suficiente: a perpetuidade diverge.',
-      ));
-    }
-    return Ok(lastDividendPerShare * (1.0 + growthRate) / spread);
   }
 
   static Result<double> _terminalValue({

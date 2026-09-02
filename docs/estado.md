@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-08-31, a partir de `afb785e`.
+Gerado em 2026-09-02, a partir de `feb211e`.
 
 ## Decisões registradas
 
-**3** aceita · **1** cumprida
+**5** aceita · **1** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -19,6 +19,8 @@ Gerado em 2026-08-31, a partir de `afb785e`.
 | 20 | Cadeia de QA por agente, com auditor que bloqueia e conselheiro que não | aceita | voce | 2026-08-30 |
 | 21 | Sistema de design próprio e adequação à WCAG, em quatro ondas | aceita | voce | 2026-08-29 |
 | 22 | Reconstrução da disposição da UI, com fronteira declarada | cumprida | voce | 2026-08-30 |
+| 23 | Backtest sem proventos, com ação inteira e caixa residual | aceita | voce | 2026-09-02 |
+| 24 | Lucro retido sai do fluxo descontado; a lacuna da meta é lida como yield | aceita | parecer | 2026-09-02 |
 
 ## Caixa de entrada
 
@@ -30,16 +32,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 36 | 7.579 |
-| Apresentacao | 33 | 15.867 |
-| Camada de dados | 13 | 2.652 |
-| Testes do app | 29 | 4.807 |
-| Testes do nucleo | 11 | 3.178 |
-| Ferramentas de QA | 20 | 6.479 |
+| Nucleo de dominio | 33 | 7.186 |
+| Apresentacao | 33 | 15.670 |
+| Camada de dados | 12 | 2.324 |
+| Testes do app | 28 | 4.973 |
+| Testes do nucleo | 11 | 3.188 |
+| Ferramentas de QA | 20 | 6.484 |
 
 ## Histórico recente
 
 ```
+2026-08-30  feb211e  Garantindo estabilidade da UI
 2026-08-30  afb785e  Garantindo estabilidade dos testes
 2026-08-30  eacbcd9  Aprimorando UI/UX (4/4)
 2026-08-30  f14989e  Aprimorando UI/UX (3/4)
@@ -54,5 +57,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-08-29  f62b336  Parcial da Onda 4
 2026-08-29  31cf931  Onda 3 finalizada
 2026-08-29  857af77  Segunda parcial da Onda 3
-2026-08-29  c653ed4  Onda 3 de refatoração da UI parcial
 ```

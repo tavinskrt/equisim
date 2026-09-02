@@ -179,24 +179,80 @@ void main() {
     });
   });
 
-  group('Gordon sobre dividendos', () {
-    test('P = D₁ / (Ke − g)', () {
-      final result = DcfCalculator.gordonGrowth(
-        lastDividendPerShare: 2.0,
-        costOfEquity: 0.12,
-        growthRate: 0.04,
+  group('DCF por LPA — retenção para financiar o crescimento', () {
+    const base = DcfAssumptions(
+      projectionYears: 5,
+      growthRate: 0.05,
+      perpetualGrowth: 0.03,
+      discountRate: 0.10,
+    );
+
+    test('sem ROE, o crescimento é zerado e o valor vira LPA ÷ Ke', () {
+      // *Earnings power value*: sem saber quanto do lucro precisa ficar na
+      // empresa, crescer seria contar o mesmo dinheiro duas vezes. O modelo
+      // colapsa no lucro estacionário, e a identidade é exata — a soma do
+      // período explícito com o terminal descontado reconstitui LPA/r.
+      final result = DcfCalculator.earningsPerShare(
+        baseEps: 10,
+        assumptions: base,
       );
-      // 2 × 1,04 / 0,08 = 26
-      expect(result.unwrap(), closeTo(26.0, 1e-12));
+      expect(result.unwrap().fairValuePerShare, closeTo(100.0, 1e-9));
     });
 
-    test('diverge quando o crescimento se aproxima do custo de capital', () {
-      final result = DcfCalculator.gordonGrowth(
-        lastDividendPerShare: 2.0,
-        costOfEquity: 0.10,
-        growthRate: 0.0999,
+    test('com ROE, desconta só a parcela distribuível do lucro', () {
+      // ROE de 20% e crescimento de 5% implicam reter 25% (b = g/ROE); na
+      // perpetuidade, 3%/20% = 15%. O fluxo descontado é o lucro menos isso.
+      final result = DcfCalculator.earningsPerShare(
+        baseEps: 10,
+        assumptions: base,
+        returnOnEquity: 0.20,
       );
-      expect(result.isErr, isTrue);
+      final outcome = result.unwrap();
+      // Primeiro fluxo: 10 × 1,05 × (1 − 0,25) = 7,875.
+      expect(outcome.projectedFlows.first, closeTo(7.875, 1e-12));
+    });
+
+    test('a retenção derruba o preço justo diante da dupla contagem', () {
+      // O modelo antigo distribuía o lucro inteiro E o fazia crescer. É o
+      // defeito que a lente `metodo` apontou, e a diferença não é marginal.
+      final comRetencao = DcfCalculator.earningsPerShare(
+        baseEps: 10,
+        assumptions: base,
+        returnOnEquity: 0.20,
+      ).unwrap().fairValuePerShare;
+
+      // ROE altíssimo ⇒ retenção próxima de zero ⇒ o valor tende ao do modelo
+      // que distribuía tudo. É a forma de reproduzir o comportamento antigo
+      // sem manter o código antigo por perto.
+      final semRetencao = DcfCalculator.earningsPerShare(
+        baseEps: 10,
+        assumptions: base,
+        returnOnEquity: 1e6,
+      ).unwrap().fairValuePerShare;
+
+      expect(comRetencao, lessThan(semRetencao));
+      expect(semRetencao / comRetencao, greaterThan(1.15));
+    });
+
+    test('crescimento que exigiria reter todo o lucro não é financiável', () {
+      // g = 12% com ROE de 8% pediria b = 1,5: mais lucro do que existe. A
+      // premissa está errada, não apertada — o modelo cai para estacionário.
+      expect(
+        DcfCalculator.retentionFor(growth: 0.12, returnOnEquity: 0.08),
+        isNull,
+      );
+      expect(
+        DcfCalculator.retentionFor(growth: 0.05, returnOnEquity: 0.20),
+        closeTo(0.25, 1e-12),
+      );
+      // Crescimento nulo não retém nada, e ROE ausente não sustenta a relação.
+      expect(DcfCalculator.retentionFor(growth: 0.0, returnOnEquity: 0.2), 0.0);
+      expect(DcfCalculator.retentionFor(growth: 0.05, returnOnEquity: null),
+          isNull);
+      expect(
+        DcfCalculator.retentionFor(growth: 0.05, returnOnEquity: -0.1),
+        isNull,
+      );
     });
   });
 

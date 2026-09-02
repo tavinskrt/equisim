@@ -2,6 +2,7 @@ import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../di/providers.dart';
+import '../shared/failure_copy.dart';
 import '../study/study_notifier.dart';
 
 /// Parâmetros da simulação histórica.
@@ -29,34 +30,20 @@ class BacktestSettings {
   /// padrão: não há controle na interface.
   final int contributionDay;
 
-  /// Alterna entre proventos brutos e líquidos de IR.
-  ///
-  /// Existe para tornar o efeito fiscal **visível**: rodar os dois e comparar
-  /// mostra quanto o IRRF sobre JCP custou no período, em vez de deixá-lo
-  /// diluído num número só.
-  final bool applyTaxes;
-
   /// Declara os parâmetros.
   const BacktestSettings({
     this.windowYears = 5,
     this.contributionDay = 5,
-    this.applyTaxes = true,
   });
 
   /// Cópia com os campos informados substituídos.
   BacktestSettings copyWith({
     int? windowYears,
     int? contributionDay,
-    bool? applyTaxes,
   }) => BacktestSettings(
     windowYears: windowYears ?? this.windowYears,
     contributionDay: contributionDay ?? this.contributionDay,
-    applyTaxes: applyTaxes ?? this.applyTaxes,
   );
-
-  /// Política fiscal correspondente a [applyTaxes]: o regime brasileiro
-  /// vigente, ou nenhuma tributação.
-  TaxPolicy get taxPolicy => applyTaxes ? TaxPolicy.brasil : TaxPolicy.zero;
 }
 
 class BacktestSettingsNotifier extends Notifier<BacktestSettings> {
@@ -72,13 +59,9 @@ class BacktestSettingsNotifier extends Notifier<BacktestSettings> {
     ),
   );
 
-  /// Liga ou desliga a tributação de proventos, alternando entre
-  /// `TaxPolicy.brasil` e `TaxPolicy.zero`.
-  ///
-  /// O dia do aporte não tem mutador: é parâmetro declarado, fixo no padrão de
-  /// [BacktestSettings]. O `setContributionDay` que existia aqui nunca teve
-  /// chamador e foi removido na auditoria de código morto.
-  void setApplyTaxes(bool value) => state = state.copyWith(applyTaxes: value);
+  // O dia do aporte não tem mutador: é parâmetro declarado, fixo no padrão de
+  // [BacktestSettings]. O `setContributionDay` que existia aqui nunca teve
+  // chamador e foi removido na auditoria de código morto.
 }
 
 final backtestSettingsProvider =
@@ -219,7 +202,6 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
   );
 
   final prices = ref.watch(priceRepositoryProvider);
-  final dividends = ref.watch(dividendRepositoryProvider);
   final riskFree = await ref.watch(riskFreeRateProvider.future);
 
   final tickers = <Ticker>{
@@ -231,7 +213,7 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
   // Um único lote para todos os ativos das duas carteiras.
   final priceResult = await prices.dailyBatch(tickers, requested);
   if (priceResult.isErr) {
-    final message = priceResult.failureOrNull?.message;
+    final message = FailureCopy.of(priceResult.failureOrNull!);
     return PortfolioComparison(
       window: requested,
       requestedWindow: requested,
@@ -240,11 +222,6 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
     );
   }
   final priceMap = priceResult.unwrap();
-
-  final dividendResult = await dividends.historyBatch(tickers);
-  final dividendMap = dividendResult.getOrElse(
-    const <Ticker, List<DividendEvent>>{},
-  );
 
   // Início comum às duas carteiras: o mais tardio dos primeiros pregões.
   var start = requested.start;
@@ -270,10 +247,8 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
     return PortfolioBacktest.run(
       portfolio: portfolio,
       prices: priceMap,
-      dividends: dividendMap,
       plan: plan,
       range: window,
-      taxPolicy: settings.taxPolicy,
       riskFreeRate: riskFree,
     );
   }
@@ -289,14 +264,12 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
     limitingTicker: limiting,
     principal: principal,
     reserva: reserva,
-    principalFailure: principalRun?.failureOrNull?.message,
-    reservaFailure: reservaRun?.failureOrNull?.message,
+    principalFailure: _copyOf(principalRun),
+    reservaFailure: _copyOf(reservaRun),
     riskReturn: _riskReturnPoints(
       principalPortfolio: study.principal,
       reservaPortfolio: study.reserva,
       prices: priceMap,
-      dividends: dividendMap,
-      taxPolicy: settings.taxPolicy,
       window: window,
       principal: principal,
       reserva: reserva,
@@ -307,7 +280,7 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
 /// Monta a dispersão risco × retorno.
 ///
 /// Cada ativo entra com a volatilidade e o CAGR da **sua própria** série de
-/// retorno total no período; as carteiras entram com as métricas já apuradas
+/// fechamentos no período; as carteiras entram com as métricas já apuradas
 /// pelo backtest. É o contraste entre os dois grupos que torna o efeito da
 /// diversificação visível — a carteira costuma cair à esquerda da nuvem, com
 /// menos volatilidade que a maioria dos seus componentes.
@@ -320,8 +293,6 @@ List<RiskReturnPoint> _riskReturnPoints({
   required Portfolio principalPortfolio,
   required Portfolio reservaPortfolio,
   required Map<Ticker, PriceSeries> prices,
-  required Map<Ticker, List<DividendEvent>> dividends,
-  required TaxPolicy taxPolicy,
   required DateRange window,
   required BacktestOutcome? principal,
   required BacktestOutcome? reserva,
@@ -338,23 +309,23 @@ List<RiskReturnPoint> _riskReturnPoints({
       final series = prices[ticker];
       if (series == null || series.isEmpty) continue;
 
-      final total = TotalReturnEngine.build(
-        prices: series,
-        dividends: dividends[ticker] ?? const [],
-        taxPolicy: taxPolicy,
-        range: window,
-      );
+      final path = _closesIn(series, window);
       // Menos de um mês de pregões não sustenta desvio-padrão anualizado.
-      if (total.dates.length < 21) continue;
+      if (path.dates.length < 21) continue;
 
-      final years = DateRange(total.dates.first, total.dates.last).years;
+      final years = DateRange(path.dates.first, path.dates.last).years;
       if (years <= 0) continue;
+
+      final first = path.closes.first;
+      if (first <= 0) continue;
+      final totalReturn = path.closes.last / first - 1;
 
       points.add(
         RiskReturnPoint(
           label: ticker.value,
-          risk: RiskMetrics.annualizedVolatility(total.dailyReturns) * 100,
-          ret: Returns.annualize(total.totalReturn, years) * 100,
+          risk: RiskMetrics.annualizedVolatility(_dailyReturns(path.closes)) *
+              100,
+          ret: Returns.annualize(totalReturn, years) * 100,
           kind: kind,
         ),
       );
@@ -388,8 +359,8 @@ List<RiskReturnPoint> _riskReturnPoints({
 
 /// Matriz de correlação entre os ativos da carteira Principal.
 ///
-/// Construída sobre a série de retorno total do próprio domínio, não sobre o
-/// `adjustedClose` da fonte — que subajusta proventos brasileiros.
+/// Construída sobre o `close` de cada ativo, nunca sobre o `adjustedClose` da
+/// fonte — que embute provento com ajuste que a auditoria reprovou (§0.4).
 final correlationProvider =
     FutureProvider<({List<Ticker> tickers, List<List<double>> matrix})?>((
       ref,
@@ -411,13 +382,6 @@ final correlationProvider =
       if (priceResult.isErr) return null;
       final priceMap = priceResult.unwrap();
 
-      final dividendResult = await ref
-          .watch(dividendRepositoryProvider)
-          .historyBatch(tickers);
-      final dividendMap = dividendResult.getOrElse(
-        const <Ticker, List<DividendEvent>>{},
-      );
-
       final available = tickers.where(priceMap.containsKey).toList();
       if (available.length < 2) return null;
 
@@ -432,15 +396,10 @@ final correlationProvider =
 
       final returns = <List<double>>[];
       for (final ticker in available) {
-        final total = TotalReturnEngine.build(
-          prices: priceMap[ticker]!,
-          dividends: dividendMap[ticker] ?? const [],
-          taxPolicy: settings.taxPolicy,
-          range: window,
-        );
+        final path = _closesIn(priceMap[ticker]!, window);
         final byDate = <DateTime, double>{
-          for (var i = 0; i < total.dates.length; i++)
-            total.dates[i]: total.index[i],
+          for (var i = 0; i < path.dates.length; i++)
+            path.dates[i]: path.closes[i],
         };
 
         final series = <double>[];
@@ -461,3 +420,43 @@ final correlationProvider =
         matrix: BetaCalculator.correlationMatrix(returns),
       );
     });
+
+/// Fechamentos de uma série dentro da janela, com as datas alinhadas.
+///
+/// É o substituto do antigo motor de retorno total: sem provento no modelo, a
+/// trajetória de um ativo **é** a série de `close`, e não há mais o que somar
+/// a ela.
+({List<DateTime> dates, List<double> closes}) _closesIn(
+  PriceSeries series,
+  DateRange window,
+) {
+  final dates = <DateTime>[];
+  final closes = <double>[];
+  for (final point in series.points) {
+    if (!window.contains(point.date)) continue;
+    dates.add(point.date);
+    closes.add(point.close);
+  }
+  return (dates: dates, closes: closes);
+}
+
+/// Retornos simples entre fechamentos consecutivos.
+///
+/// Pares cujo fechamento anterior não é positivo são **descartados** em vez de
+/// virarem divisão por zero, então o resultado pode ter menos de `n − 1`
+/// elementos e deixa de estar alinhado às datas.
+List<double> _dailyReturns(List<double> closes) {
+  final out = <double>[];
+  for (var i = 1; i < closes.length; i++) {
+    if (closes[i - 1] > 0) out.add(closes[i] / closes[i - 1] - 1.0);
+  }
+  return out;
+}
+
+/// Diagnóstico de uma simulação que não produziu resultado, já em texto de
+/// tela. `null` quando a carteira nem chegou a ser simulada — carteira vazia
+/// não é falha, é ausência.
+String? _copyOf(Result<BacktestOutcome>? run) {
+  final failure = run?.failureOrNull;
+  return failure == null ? null : FailureCopy.of(failure);
+}

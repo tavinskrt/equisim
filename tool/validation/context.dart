@@ -23,7 +23,7 @@ class ValidationContext {
   /// Cliente HTTP, com a mesma cadeia de interceptors do aplicativo.
   final ApiClient client;
 
-  /// Datasource da brapi — cotações, proventos, fundamentos e perfil.
+  /// Datasource da brapi — cotações, fundamentos e perfil.
   final BrapiDatasource brapi;
 
   /// Datasource do Banco Central — CDI e IPCA.
@@ -35,9 +35,6 @@ class ValidationContext {
 
   /// Repositório de cotações, sobre [brapi] e [cache].
   final PriceRepository prices;
-
-  /// Repositório de proventos.
-  final DividendRepository dividends;
 
   /// Repositório de fundamentos e perfil.
   final FundamentalsRepository fundamentals;
@@ -54,7 +51,6 @@ class ValidationContext {
     required this.bcb,
     required this.cache,
     required this.prices,
-    required this.dividends,
     required this.fundamentals,
     required this.benchmark,
     required this.macro,
@@ -116,7 +112,6 @@ class ValidationContext {
       bcb: bcb,
       cache: cache,
       prices: PriceRepositoryImpl(remote: brapi, cache: cache),
-      dividends: DividendRepositoryImpl(remote: brapi, cache: cache),
       fundamentals: FundamentalsRepositoryImpl(remote: brapi, cache: cache),
       benchmark: BenchmarkRepositoryImpl(brapi),
       macro: MacroRepositoryImpl(remote: bcb, cache: cache),
@@ -152,9 +147,9 @@ class ValidationContext {
 
 /// Amostra padrão para as varreduras.
 ///
-/// Cobre perfis distintos de propósito: forte pagadora de JCP (ITUB4, BBAS3),
-/// commodity cíclica (PETR4, VALE3), crescimento com pouco provento (WEGE3),
-/// utilidade pública com dividendo alto (TAEE11, EGIE3) e varejo em
+/// Cobre perfis distintos de propósito: banco de balanço grande (ITUB4,
+/// BBAS3), commodity cíclica (PETR4, VALE3), crescimento a múltiplo alto
+/// (WEGE3), utilidade pública de fluxo estável (TAEE11, EGIE3) e varejo em
 /// dificuldade (MGLU3) — para que os relatórios não descrevam só o caso fácil.
 const List<String> defaultSample = [
   'PETR4', 'VALE3', 'ITUB4', 'BBAS3', 'BBDC4', 'WEGE3', 'ABEV3',

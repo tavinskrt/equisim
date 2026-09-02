@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import '../audit/audit_recorder.dart';
 import '../audit/calculation_trace.dart';
-import '../entities/dividend_event.dart';
 import '../entities/fundamentals.dart';
 import '../entities/valuation.dart';
 import '../failures/failure.dart';
@@ -32,9 +31,6 @@ class ValuationInputs {
   /// aplicado internamente por `PointInTimeView`.
   final List<FundamentalsSnapshot> fundamentals;
 
-  /// Histórico de proventos, usado pelo modelo de Gordon e pelo *yield*.
-  final List<DividendEvent> dividends;
-
   /// Cotação na data de referência, em reais **por unidade negociada**.
   final double marketPrice;
 
@@ -61,7 +57,6 @@ class ValuationInputs {
     required this.ticker,
     required this.asOf,
     required this.fundamentals,
-    required this.dividends,
     required this.marketPrice,
     required this.capm,
     this.marginOfSafety = 0.0,
@@ -77,8 +72,7 @@ class ValuationInputs {
 /// 1. **DCF por FCFF**, descontado ao WACC — exige fluxo de caixa, dívida e
 ///    ações em circulação;
 /// 2. **DCF sobre LPA**, descontado ao Ke — exige apenas lucro por ação;
-/// 3. **Gordon** sobre dividendos — exige apenas histórico de proventos;
-/// 4. **Múltiplos** — último recurso.
+/// 3. **Múltiplos** — último recurso.
 ///
 /// O modelo aplicado **vai no resultado**, junto dos avisos. Cair
 /// silenciosamente para um modelo inferior e rotular o número como "preço
@@ -95,7 +89,7 @@ abstract final class ValuationCascade {
   ///
   /// Devolve [InvalidInput] sem preço de mercado; [InsufficientData] quando
   /// nenhum exercício havia sido publicado na data de referência, ou quando
-  /// **nenhum** dos quatro modelos se aplica.
+  /// **nenhum** dos três modelos se aplica.
   ///
   /// **Síncrono e puro:** não toca rede nem relógio, e a mesma entrada produz
   /// sempre a mesma saída. É o que permite executá-la dentro de uma isolate e
@@ -168,7 +162,6 @@ abstract final class ValuationCascade {
           monteCarloSamples, seed, sharesPerQuote, audit),
       () => _tryEarnings(inputs, published, latest, warnings, scenarioBuilder,
           monteCarloSamples, seed, sharesPerQuote, audit),
-      () => _tryGordon(inputs, published, warnings, audit),
       () => _tryMultiples(inputs, latest, warnings, sharesPerQuote, audit),
     ]) {
       final result = attempt();
@@ -186,7 +179,6 @@ abstract final class ValuationCascade {
       'modelosTentados': [
         'DCF por FCFF',
         'DCF simplificado (LPA)',
-        'Gordon (dividendos)',
         'Múltiplos',
       ],
     });
@@ -199,7 +191,7 @@ abstract final class ValuationCascade {
   ///
   /// Existe porque a fonte mistura duas convenções no mesmo ativo: as
   /// demonstrações e o `sharesOutstanding` vêm por **ação**, enquanto a
-  /// cotação, o `marketCap` e os proventos vêm por **unit**. Dividir um valor
+  /// cotação e o `marketCap` vêm por **unit**. Dividir um valor
   /// de firma pelo número de ações produz preço justo por ação, que era então
   /// comparado ao preço da unit — erro de 5× em SAPR11 e KLBN11 e de 3× em
   /// BPAC11 (medido em 21/08/2026).
@@ -445,9 +437,40 @@ abstract final class ValuationCascade {
       marginOfSafety: inputs.marginOfSafety,
     );
 
-    Result<double> valuate(DcfAssumptions a) =>
-        DcfCalculator.earningsPerShare(baseEps: eps, assumptions: a)
-            .map((o) => o.fairValuePerShare);
+    // ROE observado: é o que separa a parte distribuível do lucro da que fica
+    // na empresa financiando o crescimento. Sem ele, `earningsPerShare` zera o
+    // crescimento em vez de contar o mesmo dinheiro duas vezes.
+    final roe = _returnOnEquity(latest, sharesPerQuote);
+    final retention = DcfCalculator.retentionFor(
+      growth: assumptions.growthRate,
+      returnOnEquity: roe,
+    );
+    final perpetualRetention = DcfCalculator.retentionFor(
+      growth: assumptions.perpetualGrowth,
+      returnOnEquity: roe,
+    );
+
+    if (retention == null || perpetualRetention == null) {
+      local.add(
+        'Sem retorno sobre o patrimônio utilizável, o crescimento não pôde ser '
+        'financiado pelo próprio lucro: o modelo foi reduzido a lucro '
+        'estacionário (valor da capacidade de gerar lucro). A estimativa é '
+        'conservadora.',
+      );
+    } else {
+      local.add(
+        'Do lucro projetado, ${_pct(retention)} ficam retidos para financiar o '
+        'crescimento de ${_pct(assumptions.growthRate)} a.a. (ROE observado de '
+        '${_pct(roe!)}); só o restante é descontado.',
+      );
+    }
+    _auditRetention(audit, roe, retention, assumptions.growthRate);
+
+    Result<double> valuate(DcfAssumptions a) => DcfCalculator.earningsPerShare(
+          baseEps: eps,
+          assumptions: a,
+          returnOnEquity: roe,
+        ).map((o) => o.fairValuePerShare);
 
     // O cenário base sai do resultado **completo**, não do atalho `valuate`:
     // a auditoria precisa dos fluxos projetados e do valor terminal, e obtê-los
@@ -455,6 +478,7 @@ abstract final class ValuationCascade {
     final base = DcfCalculator.earningsPerShare(
       baseEps: eps,
       assumptions: assumptions,
+      returnOnEquity: roe,
     );
     if (base.isErr || base.unwrap().fairValuePerShare <= 0) return null;
 
@@ -482,78 +506,7 @@ abstract final class ValuationCascade {
     );
   }
 
-  // ----------------------------------------------------------- 3. Gordon --
-
-  static ValuationResult? _tryGordon(
-    ValuationInputs inputs,
-    List<FundamentalsSnapshot> published,
-    List<String> warnings,
-    AuditTransaction? audit,
-  ) {
-    final ttm = _trailingDividends(inputs.dividends, inputs.asOf);
-    if (ttm <= 0) return null;
-
-    final growth = GrowthEstimator.fromHistory(
-      published,
-      (s) => s.earningsPerShare,
-      metricName: 'lucro por ação',
-    );
-    final perpetual = GrowthEstimator.perpetual(
-      explicitGrowth: growth.rate,
-      economyGrowth: inputs.perpetualGrowthCap,
-    );
-    _auditGrowth(audit, growth, 'lucro por ação');
-    _auditPerpetualGrowth(
-        audit, growth.rate, inputs.perpetualGrowthCap, perpetual);
-
-    final result = DcfCalculator.gordonGrowth(
-      lastDividendPerShare: ttm,
-      costOfEquity: inputs.capm.costOfEquity,
-      growthRate: perpetual,
-    );
-    if (result.isErr || result.unwrap() <= 0) return null;
-
-    final ke = inputs.capm.costOfEquity;
-    final projected = ttm * (1 + perpetual);
-    audit?.step(
-      formulaName: 'Modelo de Gordon sobre dividendos',
-      latex: r'P_0 = \frac{D_0 \cdot (1 + g_\infty)}{K_e - g_\infty}',
-      variables: {
-        'D_0 (R\$)': _r(ttm),
-        'g_∞ (% a.a.)': _r(perpetual * 100),
-        'K_e (% a.a.)': _r(ke * 100),
-      },
-      steps: [
-        'Passo 1: dividendo dos últimos 12 meses projetado um período → '
-            'R\$ ${_r(ttm)} × (1 + ${_r(perpetual, 4)}) = R\$ ${_r(projected)}',
-        'Passo 2: spread entre custo do capital próprio e crescimento '
-            'perpétuo → ${_pct(ke)} − ${_pct(perpetual)} = ${_pct(ke - perpetual)}',
-        'Passo 3: divisão do dividendo projetado pelo spread → '
-            'R\$ ${_r(projected)} ÷ ${_r(ke - perpetual, 4)} = '
-            'R\$ ${_r(result.unwrap())}',
-      ],
-      result: result.unwrap(),
-      unit: r'R$ por papel',
-    );
-
-    return ValuationResult(
-      ticker: inputs.ticker,
-      asOf: inputs.asOf,
-      model: ValuationModel.gordonGrowth,
-      fairValue: Money.fromReais(result.unwrap()),
-      marketPrice: Money.fromReais(inputs.marketPrice),
-      discountRate: inputs.capm.costOfEquity,
-      marginOfSafety: inputs.marginOfSafety,
-      mode: ScenarioMode.discrete,
-      warnings: [
-        ...warnings,
-        'Sem fluxo de caixa nem lucro por ação utilizáveis; aplicado o modelo '
-            'de Gordon sobre dividendos, que ignora crescimento não distribuído.',
-      ],
-    );
-  }
-
-  // -------------------------------------------------------- 4. Múltiplos --
+  // -------------------------------------------------------- 3. Múltiplos --
 
   static ValuationResult? _tryMultiples(
     ValuationInputs inputs,
@@ -703,6 +656,28 @@ abstract final class ValuationCascade {
     return published == null ? null : published * sharesPerQuote;
   }
 
+  /// Retorno sobre o patrimônio líquido do exercício, em fração.
+  ///
+  /// `LPA ÷ VPA`, ambos na **mesma unidade negociada** — a razão é adimensional,
+  /// então o fator de unit se cancela; ele é aplicado nos dois lados só para
+  /// que a conta seja a mesma que o resto da cascata faz.
+  ///
+  /// É o insumo que permite separar a parte distribuível do lucro da parte que
+  /// precisa ficar na empresa para financiar o crescimento — ver
+  /// `DcfCalculator.retentionFor`. Devolve `null` quando o patrimônio por
+  /// papel é ausente ou não positivo: patrimônio líquido negativo não sustenta
+  /// a relação `g = ROE × b`.
+  static double? _returnOnEquity(
+    FundamentalsSnapshot snapshot,
+    double sharesPerQuote,
+  ) {
+    final eps = _earningsPerQuotedUnit(snapshot, sharesPerQuote);
+    final book = snapshot.bookValuePerShare;
+    if (eps == null || book == null || book <= 0) return null;
+    final roe = eps / (book * sharesPerQuote);
+    return roe.isFinite ? roe : null;
+  }
+
   /// Monta o WACC com o que houver; sem estrutura de capital, degenera no Ke.
   static double _wacc(
     ValuationInputs inputs,
@@ -780,18 +755,47 @@ abstract final class ValuationCascade {
   static String _pct(double fraction) =>
       '${(fraction * 100).toStringAsFixed(1)}%';
 
-  static double _trailingDividends(
-    List<DividendEvent> events,
-    DateTime asOf,
+  /// Registra a separação entre lucro retido e lucro distribuível.
+  ///
+  /// É o passo que torna auditável a correção da dupla contagem: sem ele, o
+  /// leitor do log veria o fluxo descontado menor que o LPA sem saber por quê.
+  static void _auditRetention(
+    AuditTransaction? audit,
+    double? roe,
+    double? retention,
+    double growth,
   ) {
-    final floor = DateTime(asOf.year - 1, asOf.month, asOf.day);
-    var total = 0.0;
-    for (final event in events) {
-      if (event.exDate.isAfter(floor) && !event.exDate.isAfter(asOf)) {
-        total += event.amountPerShare;
-      }
+    if (audit == null) return;
+    if (roe == null || retention == null) {
+      audit.step(
+        formulaName: 'Retenção de lucro (não apurável)',
+        latex: r'g = ROE \cdot b',
+        variables: {'ROE (% a.a.)': roe == null ? 0 : _r(roe * 100)},
+        steps: [
+          'Sem ROE utilizável, ou crescimento que exigiria reter todo o lucro: '
+              'crescimento zerado e lucro tratado como estacionário.',
+        ],
+        result: 0,
+        unit: 'fração retida',
+      );
+      return;
     }
-    return total;
+    audit.step(
+      formulaName: 'Retenção de lucro para financiar o crescimento',
+      latex: r'b = \frac{g}{ROE} \quad ; \quad FCFE = LPA \cdot (1 - b)',
+      variables: {
+        'g (% a.a.)': _r(growth * 100),
+        'ROE (% a.a.)': _r(roe * 100),
+      },
+      steps: [
+        'Passo 1: retenção implícita → ${_pct(growth)} ÷ ${_pct(roe)} = '
+            '${_pct(retention)}',
+        'Passo 2: parcela distribuível do lucro → '
+            '1 − ${_pct(retention)} = ${_pct(1 - retention)}',
+      ],
+      result: retention,
+      unit: 'fração retida',
+    );
   }
 
   static ValuationResult _withScenarios({
@@ -905,7 +909,6 @@ abstract final class ValuationCascade {
       'marginOfSafety': _r(inputs.marginOfSafety, 4),
       'projectionYears': inputs.projectionYears,
       'perpetualGrowthCap': _r(inputs.perpetualGrowthCap, 6),
-      'dividendEvents': inputs.dividends.length,
       'fundamentalsPeriods': inputs.fundamentals.length,
       'fundamentals': [
         for (final f in recent)

@@ -274,7 +274,7 @@ void main() {
     });
 
     test('meta viaja em centavos e não perde precisão', () {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(10000.55),
         monthlyContribution: Money.fromReais(1500.33),
         months: 120,

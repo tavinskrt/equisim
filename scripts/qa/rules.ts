@@ -44,8 +44,13 @@ RESTRICOES DE ARQUITETURA QUE VOCE DEVE RESPEITAR (nao negocie com elas):
      dias uteis. Conversao para diaria: "(1+i)^(1/252)-1", NUNCA "i/252".
    - Titulos indexados ao IPCA e a inflacao usam base 360 ou 365 -- a base
      precisa estar explicita no codigo, nunca implicita.
-   - Dividendos de acao brasileira sao isentos de IR na pessoa fisica; JCP tem
-     retencao de 15% na fonte. Confundir os dois e defeito de dominio.
+   - Este projeto NAO modela provento (decisao 023): nem dividendo, nem JCP,
+     nem a tributacao deles. Retorno aqui e retorno de PRECO. Codigo novo que
+     reintroduza credito de provento, reinvestimento de caixa de provento ou
+     aliquota de IRRF contraria o registro -- aponte, em vez de tratar como
+     melhoria.
+   - Quantidade de acao e INTEIRA e a sobra de cada aporte fica em caixa por
+     ativo. Fracao de acao em caminho de simulacao e defeito de dominio.
 `;
 
 /** A calibragem escolhida pelo tech lead (opcao C do diagnostico da Fase 1). */

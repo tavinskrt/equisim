@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'validation/context.dart';
-import 'validation/data_quality.dart';
 import 'validation/invariants.dart';
 import 'validation/python_export.dart';
 import 'validation/sensitivity.dart';
@@ -18,8 +17,6 @@ import 'validation/sensitivity.dart';
 ///
 /// Comandos:
 ///   invariantes   Identidades que o motor precisa satisfazer
-///   qualidade     Portão de qualidade dos proventos
-///   divergencia   Fluxo de proventos × adjustedClose da fonte
 ///   sensibilidade Impacto das premissas no preço justo
 ///   exportar      Séries e métricas para conferência em Python
 ///   tudo          Todos os anteriores
@@ -43,11 +40,9 @@ Future<void> main(List<String> args) async {
 
   const known = {
     'invariantes',
-    'qualidade',
-    'divergencia',
     'sensibilidade',
     'exportar',
-    'tudo'
+    'tudo',
   };
   if (!known.contains(command)) {
     stderr.writeln('Comando desconhecido: $command\n');
@@ -78,28 +73,6 @@ Future<void> main(List<String> args) async {
           stdout.writeln('     ✗ ${check.name} — ${check.detail}');
         }
       }
-      stdout.writeln('');
-    }
-
-    if (command == 'qualidade' || command == 'tudo') {
-      stdout.writeln('▸ Portão de qualidade dos proventos');
-      final rows =
-          await DataQualityReports.runQualityGate(ctx, symbols: sample);
-      writeReport(
-        '$outputDir/qualidade_proventos.md',
-        DataQualityReports.qualityReport(rows),
-      );
-      stdout.writeln('');
-    }
-
-    if (command == 'divergencia' || command == 'tudo') {
-      stdout.writeln('▸ Divergência contra o adjustedClose');
-      final rows =
-          await DataQualityReports.runDivergenceScan(ctx, symbols: sample);
-      writeReport(
-        '$outputDir/divergencia_adjusted_close.md',
-        DataQualityReports.divergenceReport(rows),
-      );
       stdout.writeln('');
     }
 
@@ -155,8 +128,6 @@ Executor de validação do Equisim
 
 Comandos:
   invariantes     Identidades que o motor precisa satisfazer
-  qualidade       Portão de qualidade dos proventos
-  divergencia     Fluxo de proventos × adjustedClose da fonte
   sensibilidade   Impacto das premissas no preço justo
   exportar        Séries e métricas para conferência em Python
   tudo            Todos os anteriores (padrão)

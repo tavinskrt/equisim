@@ -77,8 +77,7 @@ class BrapiDatasource {
     });
   }
 
-  /// Série do Ibovespa. O índice já é de retorno total por construção, então
-  /// `close` basta — não há proventos a somar.
+  /// Série do Ibovespa, pelo `close` — a mesma convenção usada nos ativos.
   Future<Result<PriceSeries>> ibovespa({String range = '10y'}) async {
     final response = await client.getJson(
       _url('/v2/stocks/historical'),
@@ -100,36 +99,6 @@ class BrapiDatasource {
       }
       // ^BVSP não passa no formato de ticker da B3; usa-se um rótulo interno.
       return Ok(PriceSeries(ticker: Ticker.parse('IBOV11'), points: points));
-    });
-  }
-
-  // ------------------------------------------------------------ Proventos --
-
-  /// Histórico de proventos com higienização de duplicatas exatas.
-  Future<Result<List<DividendEvent>>> dividends(Ticker ticker) async {
-    final response = await client.getJson(
-      _url('/v2/stocks/dividends'),
-      query: {'symbols': ticker.value},
-    );
-
-    return response.map((body) {
-      final data = BrapiJson.firstData(body);
-      final raw = data?['cashDividends'];
-      if (raw is! List) return const <DividendEvent>[];
-
-      final seen = <String>{};
-      final events = <DividendEvent>[];
-      for (final item in raw) {
-        if (item is! Map<String, dynamic>) continue;
-        final dto = BrapiDividendDto.fromJson(item);
-        if (dto == null) continue;
-        // Descarta apenas o registro idêntico repetido; tranches distintas na
-        // mesma data-ex são preservadas.
-        if (!seen.add(dto.identity)) continue;
-        events.add(dto.toDomain(ticker));
-      }
-      events.sort((a, b) => a.exDate.compareTo(b.exDate));
-      return events;
     });
   }
 
@@ -212,23 +181,6 @@ class BrapiDatasource {
 
     snapshots.sort((a, b) => a.fiscalPeriodEnd.compareTo(b.fiscalPeriodEnd));
     return Ok(snapshots);
-  }
-
-  /// Dividend yield 12m publicado — insumo do portão de qualidade.
-  Future<Result<double>> publishedDividendYield(Ticker ticker) async {
-    final response = await client.getJson(
-      _url('/v2/stocks/statistics'),
-      query: {'symbols': ticker.value, 'mode': 'current'},
-    );
-    return response.flatMap((body) {
-      final value = BrapiJson.asDouble(BrapiJson.firstData(body)?['dividendYield']);
-      if (value == null) {
-        return Err(InsufficientData(
-          'Dividend yield não publicado para ${ticker.value}.',
-        ));
-      }
-      return Ok(value);
-    });
   }
 
   // --------------------------------------------------------------- Perfil --

@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import '../entities/asset.dart';
-import '../entities/dividend_event.dart';
 import '../entities/fundamentals.dart';
 import '../entities/price_series.dart';
 import '../failures/result.dart';
@@ -80,30 +79,9 @@ abstract interface class PriceRepository {
   );
 
   /// `adjustedClose` bruto da fonte — **apenas conferência**, nunca cálculo.
-  /// A série subajusta proventos brasileiros; o retorno total de verdade é
-  /// construído no domínio por `TotalReturnEngine`.
+  /// A série embute proventos, que o domínio não modela; o cálculo usa
+  /// `close`.
   Future<Result<PriceSeries>> adjustedCloseRaw(Ticker ticker, DateRange range);
-}
-
-/// Acesso a proventos.
-abstract interface class DividendRepository {
-  /// Histórico completo de proventos do ativo, sem recorte temporal.
-  ///
-  /// O recorte é do consumidor: `TotalReturnEngine` e `PortfolioBacktest`
-  /// filtram por data-ex dentro do período simulado.
-  Future<Result<List<DividendEvent>>> history(Ticker ticker);
-
-  /// Histórico em lote. Como no [PriceRepository], o mapa pode ser parcial.
-  Future<Result<Map<Ticker, List<DividendEvent>>>> historyBatch(
-    List<Ticker> tickers,
-  );
-
-  /// Dividend yield dos últimos 12 meses publicado pela fonte.
-  ///
-  /// Usado como **portão de qualidade**: se divergir do DY calculado a partir
-  /// do fluxo de eventos além da tolerância, o ativo é sinalizado em vez de
-  /// reportar número errado em silêncio.
-  Future<Result<double>> publishedTrailingYield(Ticker ticker);
 }
 
 /// Acesso a fundamentos. Devolve a série completa; o recorte temporal é
@@ -136,7 +114,7 @@ abstract interface class MacroRepository {
 abstract interface class BenchmarkRepository {
   /// Série do Ibovespa (^BVSP) na janela pedida.
   ///
-  /// É índice de **retorno total por construção**, então dispensa o tratamento
-  /// de proventos que `TotalReturnEngine` aplica aos ativos individuais.
+  /// É índice de **retorno total por construção** — diferença de convenção
+  /// diante do `close` dos ativos, que não embute provento.
   Future<Result<PriceSeries>> ibovespa(DateRange range);
 }

@@ -67,7 +67,7 @@ Asset _asset(String symbol, String sector) => Asset(
 ///
 /// LIMITE CONHECIDO E IMPORTANTE: os providers remotos devolvem `null` ou
 /// vazio, entao as telas montam em estado VAZIO. `_ComparisonBody`,
-/// `_MetricsCard`, `_DividendsCard`, `_PerAssetCard` e os graficos nao chegam
+/// `_MetricsCard`, `_PerAssetCard` e os graficos nao chegam
 /// a ser construidos -- ou seja, esta matriz NAO cobre as telas populadas, que
 /// e onde as colunas numericas densas vivem.
 ///
@@ -90,9 +90,6 @@ List<Override> _overrides({PortfolioComparison? comparacao}) => <Override>[
   valuationProvider.overrideWith((ref, ticker) async => null),
   portfolioValuationsProvider.overrideWith(
     (ref) async => const <Ticker, ValuationResult>{},
-  ),
-  netDividendYieldsProvider.overrideWith(
-    (ref) async => const <Ticker, double>{},
   ),
   comparisonProvider.overrideWith((ref) async => comparacao),
   correlationProvider.overrideWith((ref) async => null),
@@ -205,7 +202,7 @@ void main() {
   // ---------------------------------------------------------------------
   // BacktestPage POPULADA
   //
-  // A tela vazia nao constroi `_CarteirasLadoALado` nem `_ProventosLadoALado`,
+  // A tela vazia nao constroi `_CarteirasLadoALado` nem `_PerAssetCard`,
   // que sao onde vivem as colunas numericas. Sem este grupo, a tabela
   // comparativa entraria no repositorio sem prova nenhuma de que cabe.
   //

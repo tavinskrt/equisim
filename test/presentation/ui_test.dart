@@ -52,8 +52,6 @@ Widget harness({
         riskFreeRateProvider.overrideWith((ref) async => 0.094),
         marketAnchorsProvider
             .overrideWith((ref) async => MarketAnchors.fallback2026),
-        netDividendYieldsProvider
-            .overrideWith((ref) async => const <Ticker, double>{}),
         portfolioValuationsProvider
             .overrideWith((ref) async => const <Ticker, ValuationResult>{}),
         valuationProvider.overrideWith((ref, ticker) async => null),
@@ -516,12 +514,13 @@ void main() {
       expect(find.textContaining('p.p.'), findsWidgets);
     });
 
-    testWidgets('os proventos das duas carteiras dividem um cartão',
+    testWidgets('a sobra de cada aporte aparece como caixa, não some',
         (tester) async {
       telaAlta(tester);
-      // Eram dois cartoes de estrutura identica, um sob o outro. A pergunta
-      // que eles respondem -- quanto de imposto cada composicao custou -- e
-      // comparativa por natureza.
+      // O cartao de proventos que ficava aqui saiu com a decisao 023. O que
+      // ocupou o lugar dele na tabela e a linha do caixa: com compra em lotes
+      // inteiros, parte do aporte espera o proximo em vez de virar acao, e sem
+      // essa linha esse dinheiro sumiria da leitura.
       await tester.pumpWidget(harness(
         overrides: withComparison(comparisonOf(
           principal: outcomeOf('PETR4', const [10, 12, 14]),
@@ -531,29 +530,25 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('PROVENTOS NO PERÍODO'), findsOneWidget);
+      expect(find.text('PROVENTOS NO PERÍODO'), findsNothing);
+
       final cartao = find
           .ancestor(
-            of: find.text('PROVENTOS NO PERÍODO'),
+            of: find.text('CARTEIRAS LADO A LADO'),
             matching: find.byType(GlassCard),
           )
           .first;
-      // As tres linhas aparecem UMA vez, com um valor por coluna.
-      for (final linha in ['Bruto', 'IR retido', 'Líquido reinvestido']) {
-        expect(
-          find.descendant(of: cartao, matching: find.text(linha)),
-          findsOneWidget,
-        );
-      }
-      // E o dono de cada coluna fica dito no proprio cartao: provento e
-      // exatamente o tipo de numero que se atribui a carteira errada.
+      // `findsWidgets`, e nao contagem fixa: nesta largura a tabela cai para
+      // um bloco por carteira e repete cada rotulo. O que precisa valer nas
+      // duas disposicoes e que a linha exista.
       expect(
-        find.descendant(of: cartao, matching: find.text('PRINCIPAL')),
-        findsOneWidget,
+        find.descendant(of: cartao, matching: find.text('Em caixa')),
+        findsWidgets,
       );
+      // E o indicador que dependia de provento saiu junto.
       expect(
-        find.descendant(of: cartao, matching: find.text('RESERVA')),
-        findsOneWidget,
+        find.descendant(of: cartao, matching: find.text('DY líquido')),
+        findsNothing,
       );
     });
 
@@ -656,9 +651,10 @@ void main() {
             matching: find.byType(GlassCard),
           )
           .first;
-      // R\$ 1.000,00 aportados num ativo a R\$ 10,00: 100 cotas exatas. O
-      // numero e conferido, e nao so a presenca do rotulo -- "cotas" na tela
-      // com a quantidade errada passaria por um `textContaining('cotas')`.
+      // R\$ 1.000,00 aportados num ativo a R\$ 10,00: 100 cotas exatas, SEM
+      // casa decimal -- a quantidade e inteira desde a decisao 023. O numero e
+      // conferido, e nao so a presenca do rotulo: "cotas" na tela com a
+      // quantidade errada passaria por um `textContaining('cotas')`.
       //
       // O valor sai de `Fmt.money`, e nao de um literal: o `R\$` do intl vem
       // seguido de espaco INSEPARAVEL (U+00A0), que um literal digitado a mao
@@ -666,7 +662,7 @@ void main() {
       expect(
         find.descendant(
           of: cartao,
-          matching: find.text('100,00 cotas · ${Fmt.money(1000)} alocados'),
+          matching: find.text('100 cotas · ${Fmt.money(1000)} destinados'),
         ),
         findsOneWidget,
       );
@@ -717,6 +713,8 @@ void main() {
       for (final indicador in [
         'Patrimônio final',
         'Aportado',
+        'Alocado',
+        'Em caixa',
         'TWR',
         'XIRR',
         'CAGR',
@@ -725,7 +723,6 @@ void main() {
         'Sharpe',
         'Sortino',
         'Calmar',
-        'DY líquido',
       ]) {
         expect(
           find.descendant(of: cartao, matching: find.text(indicador)),
@@ -760,7 +757,8 @@ void main() {
 
       expect(find.text('CARTEIRAS LADO A LADO'), findsNothing);
       expect(find.text('CARTEIRA PRINCIPAL'), findsOneWidget);
-      expect(find.text('PROVENTOS NO PERÍODO — PRINCIPAL'), findsOneWidget);
+      // E nada de provento junto: o cartao que acompanhava este painel saiu.
+      expect(find.textContaining('PROVENTOS'), findsNothing);
     });
 
     testWidgets('largura que não sustenta as colunas empilha sem truncar',
@@ -848,7 +846,7 @@ void main() {
           return const BacktestPage();
         }),
       ));
-      capturado.read(studyProvider.notifier).setGoal(FinancialGoal(
+      capturado.read(studyProvider.notifier).setGoal(FinancialGoal.unvalidated(
             initialContribution: const Money(1000000),
             monthlyContribution: const Money(100000),
             months: months,
@@ -919,9 +917,9 @@ void main() {
 
     FeasibilityVerdict veredito(double annual) => FeasibilityVerdict(
           level: FeasibilityLevel.demanding,
+          reason: FeasibilityReason.aboveMarket,
           requiredAnnualRate: annual,
           anchors: MarketAnchors.fallback2026,
-          message: 'meta exigente',
         );
 
 
@@ -1077,17 +1075,17 @@ void main() {
     List<Override> doisCartoes() => [
           goalFeasibilityProvider.overrideWith((ref) async => FeasibilityVerdict(
                 level: FeasibilityLevel.demanding,
+                reason: FeasibilityReason.aboveMarket,
                 requiredAnnualRate: 0.184,
                 anchors: MarketAnchors.fallback2026,
-                message: 'A meta exige 18,40% ao ano.',
               )),
           goalAlignmentProvider.overrideWith((ref) async => GoalAlignment(
                 required: const RequiredReturn(monthly: 0.0142, iterations: 24),
                 verdict: FeasibilityVerdict(
                   level: FeasibilityLevel.demanding,
+                  reason: FeasibilityReason.aboveMarket,
                   requiredAnnualRate: 0.1844,
                   anchors: MarketAnchors.fallback2026,
-                  message: 'meta exigente',
                 ),
                 expectedReturn: 0.1495,
                 valuationCoverage: 0.75,
@@ -1164,19 +1162,32 @@ void main() {
       }
     });
 
-    testWidgets('a prosa do veredito ainda cita a taxa -- residuo conhecido',
+    testWidgets('a prosa do veredito e composta na interface, em pt-BR',
         (tester) async {
       telaAlta(tester);
-      // `FeasibilityVerdict.message` chega do nucleo com o percentual ja
-      // embutido na frase. Fechar essa segunda saida depende de uma decisao
-      // sobre o `equisim_core`, nao da interface. O teste registra o residuo
-      // para que ele nao seja descoberto de novo como se fosse novidade.
+      // Era um residuo conhecido: `FeasibilityVerdict.message` chegava do
+      // nucleo com o percentual ja embutido, formatado por `toStringAsFixed`
+      // -- ou seja, com PONTO decimal, na mesma tela em que o cartao acima
+      // escrevia virgula. O nucleo passou a devolver `FeasibilityReason` mais
+      // os numeros, e quem compoe a frase e `FeasibilityCopy`, com a mesma
+      // `Fmt` do resto da interface.
       await tester.pumpWidget(
         harness(overrides: doisCartoes(), child: const GoalPage()),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('A meta exige 18,40% ao ano.'), findsOneWidget);
+      final prosa = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((t) => t.data ?? '')
+          .firstWhere((t) => t.startsWith('A meta exige'), orElse: () => '');
+
+      expect(prosa, isNotEmpty, reason: 'o cartao precisa explicar o veredito');
+      // Virgula decimal, nao ponto: e o sinal de que o texto passou pela
+      // formatacao da interface e nao veio pronto do nucleo.
+      expect(prosa, contains('18,40%'));
+      expect(prosa, isNot(contains('18.40')));
+      // E o veredito citado e o do `reason`, nao uma frase colada no objeto.
+      expect(prosa, contains('acima do retorno histórico do Ibovespa'));
     });
   });
 
@@ -1361,7 +1372,6 @@ void main() {
           for (final symbol in ['PETR4', 'VALE3', 'ITUB4'])
             Ticker.parse(symbol): seriesOf(symbol, start, closes),
         })),
-        dividendRepositoryProvider.overrideWithValue(FakeDividendRepository()),
       ]);
       addTearDown(container.dispose);
 
@@ -1369,7 +1379,7 @@ void main() {
       notifier.addAsset(assetOf('PETR4', 'energia'), toPrincipal: true);
       notifier.addAsset(assetOf('VALE3', 'materiais'), toPrincipal: true);
       notifier.addAsset(assetOf('ITUB4'), toPrincipal: false);
-      notifier.setGoal(const FinancialGoal(
+      notifier.setGoal(const FinancialGoal.unvalidated(
         initialContribution: Money(100000),
         monthlyContribution: Money(50000),
         months: 120,
@@ -1422,7 +1432,6 @@ BacktestOutcome outcomeOf(String symbol, List<double> closes) {
   return PortfolioBacktest.run(
     portfolio: portfolio,
     prices: {Ticker.parse(symbol): seriesOf(symbol, start, closes)},
-    dividends: const {},
     plan: const ContributionPlan(initial: Money(100000), monthly: Money.zero),
     range: DateRange(start, DateTime(2024, 12, 31)),
   ).unwrap();
@@ -1469,21 +1478,4 @@ class FakePriceRepository implements PriceRepository {
     DateRange range,
   ) =>
       daily(ticker, range);
-}
-
-/// Carteira sem proventos: isola o efeito de preço na dispersão.
-class FakeDividendRepository implements DividendRepository {
-  @override
-  Future<Result<List<DividendEvent>>> history(Ticker ticker) async =>
-      const Ok([]);
-
-  @override
-  Future<Result<Map<Ticker, List<DividendEvent>>>> historyBatch(
-    List<Ticker> tickers,
-  ) async =>
-      const Ok({});
-
-  @override
-  Future<Result<double>> publishedTrailingYield(Ticker ticker) async =>
-      const Ok(0.0);
 }

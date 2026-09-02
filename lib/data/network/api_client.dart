@@ -46,8 +46,12 @@ class ApiClient {
   ///   aplicativo injeta uma que usa outra isolate.
   /// - [logSink], [logRequests]: destino e chave do log sanitizado.
   ///
-  /// `validateStatus` aceita tudo abaixo de 500: erros de cliente viram
-  /// [Failure] tipada em [getJson] em vez de exceção.
+  /// `validateStatus` aceita tudo abaixo de 500 **menos o 429**: erros de
+  /// cliente viram [Failure] tipada em [getJson] em vez de exceção, mas o
+  /// limite de requisições precisa virar `DioException` para que
+  /// [RetryInterceptor] o veja — `onError` é o único gancho que ele tem.
+  /// Aceitar o 429 como resposta normal tornava a repetição inalcançável e o
+  /// `_isRetryable` dele, código morto.
   factory ApiClient(
     ApiConfig config, {
     Dio? dio,
@@ -61,7 +65,8 @@ class ApiClient {
           receiveTimeout: const Duration(seconds: 40),
           // Texto puro: a desserialização é nossa, em outra isolate.
           responseType: ResponseType.plain,
-          validateStatus: (status) => status != null && status < 500,
+          // O 429 é deliberadamente reprovado: ver [acceptsStatus].
+          validateStatus: acceptsStatus,
         ));
 
     client.interceptors.addAll([
@@ -73,6 +78,20 @@ class ApiClient {
 
     return ApiClient._(client, config, heavyDecoder ?? _decodeInline);
   }
+
+  /// Política de aceitação de status do cliente.
+  ///
+  /// Pública e nomeada porque o teste precisa montar um `Dio` com **a mesma**
+  /// política. Enquanto ela era uma lambda escrita duas vezes, o cliente de
+  /// teste aceitava o 429 enquanto o de produção passou a reprová-lo, e o
+  /// caminho de repetição ficava sem cobertura sem que nada apontasse.
+  ///
+  /// - [status]: código HTTP da resposta.
+  ///
+  /// Aceita `[200, 500)` **exceto 429**, que precisa virar `DioException` para
+  /// chegar ao [RetryInterceptor].
+  static bool acceptsStatus(int? status) =>
+      status != null && status < 500 && status != 429;
 
   /// A instância Dio subjacente, para quem precisa de acesso direto ao
   /// transporte. Escape hatch: usar isto contorna o tratamento de falha de
@@ -96,6 +115,11 @@ class ApiClient {
   /// viram [ComputationFailure]. Tempo esgotado e ausência de conexão viram
   /// [InsufficientData], porque são condições transitórias e não defeito do
   /// dado.
+  ///
+  /// O `429` chega aqui por dois caminhos — como resposta, se alguém injetar
+  /// um `validateStatus` próprio, e como [DioException], que é o caminho do
+  /// cliente padrão. Os dois desembocam em [_failureFor], de modo que o status
+  /// tem **um** mapeamento só.
   Future<Result<dynamic>> getJson(
     String url, {
     Map<String, dynamic>? query,
@@ -136,7 +160,18 @@ class ApiClient {
         _ => ComputationFailure('HTTP $status: ${_trim(body)}'),
       };
 
-  Failure _failureForDio(DioException e) => switch (e.type) {
+  Failure _failureForDio(DioException e) {
+    // Exceção que carrega resposta é status HTTP reprovado por
+    // `validateStatus` — o 429, no cliente padrão. Cai na mesma tabela dos
+    // status que chegam como resposta, em vez de virar "falha de rede".
+    final status = e.response?.statusCode;
+    if (status != null) {
+      return _failureFor(status, e.response?.data?.toString() ?? '');
+    }
+    return _failureForDioType(e);
+  }
+
+  Failure _failureForDioType(DioException e) => switch (e.type) {
         DioExceptionType.connectionTimeout ||
         DioExceptionType.sendTimeout ||
         DioExceptionType.receiveTimeout =>

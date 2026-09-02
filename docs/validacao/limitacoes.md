@@ -20,37 +20,17 @@ não por revisão de fundamento.
 
 **Para resolver.** Fonte com dados trimestrais (CVM, B3 ou provedor pago).
 
-### 1.2. Datas de pagamento estimadas
-
-O campo `remarks` marca parte dos eventos como `csv:payment_date_estimated`.
-Medido na amostra: **280 de 483** eventos de ITUB4, **226 de 457** de BBDC4,
-**90 de 255** de BBAS3.
-
-**Efeito.** O motor credita o provento na data de pagamento; uma data estimada
-desloca o reinvestimento em alguns dias. O impacto no resultado final é
-pequeno, mas não nulo.
-
-**Mitigação adotada.** A marca é propagada até o domínio e exibida na
-interface, para que o usuário saiba quando está olhando data estimada.
-
-### 1.3. A fonte consolida três provedores
-
-O campo `remarks` de ITUB4 revela a origem: **280 registros de pipeline CSV** e
-o restante de importações `manual:digrin-*` e `manual:twelvedata-*`.
-
-**Efeito.** O fluxo de proventos não vem de uma fonte única auditável. Registros
-duplicados existem e precisam ser higienizados — o motor descarta duplicatas
-exatas por identidade `(data-ex, pagamento, valor, rótulo)`.
-
-### 1.4. `adjustedClose` diverge de forma material
+### 1.2. `adjustedClose` diverge de forma material
 
 Medido sobre 11 ativos em janela de 10 anos: **desvio mediano de 9,1%** entre o
-fator de ajuste implícito no fluxo de proventos e a razão `adjustedClose/close`
-observada. Máximo de 38,5% (BBAS3). Seis dos onze ativos acima de 5%.
+fator de ajuste implícito no fluxo de proventos publicado pela fonte e a razão
+`adjustedClose/close` observada. Máximo de 38,5% (BBAS3). Seis dos onze ativos
+acima de 5%. A medição é de 20/08/2026, quando o fluxo de proventos ainda
+estava no projeto.
 
 **Efeito.** A série de retorno total da fonte é inutilizável para cálculo. Todo
-retorno total do sistema é construído internamente, a partir de `close` mais
-eventos de provento.
+cálculo do sistema parte de `close`, que a fonte ajusta apenas por
+desdobramento e grupamento.
 
 **Sobre a causa.** Ativos com maioria de JCP desviam mais na média (11,2%
 contra 7,7%), mas a correlação entre proporção de JCP e desvio é de apenas
@@ -58,35 +38,7 @@ contra 7,7%), mas a correlação entre proporção de JCP e desvio é de apenas
 2,1%; EGIE3 tem 31% e desvia 21,0%. **A divergência é fato medido; a explicação
 pelo tratamento de JCP é hipótese plausível não confirmada.**
 
-Relatório completo: [`divergencia_adjusted_close.md`](divergencia_adjusted_close.md).
-
-### 1.5. `rate` bruto ou líquido — premissa declarada
-
-O payload de proventos traz `assetIssued, paymentDate, rate, relatedTo,
-approvedOn, isinCode, label, lastDatePrior, remarks`. **Nenhum campo indica se
-o valor é bruto ou líquido**, e nenhum campo permite deduzir.
-
-**Premissa adotada: base bruta.** `rate` é tratado como o valor bruto
-declarado, por ser a convenção de divulgação da B3 e da CVM nos avisos aos
-acionistas. A premissa é explícita no código (`DividendBasis.gross`), não
-implícita na aritmética.
-
-**Efeito prático.** Sob base bruta, R$ 1,00 de JCP rende R$ 0,85 ao investidor.
-Se a fonte informasse valores já líquidos, aplicar 15% de novo subestimaria os
-proventos em 15%.
-
-**Reversibilidade.** A base é parâmetro da `TaxPolicy`, não constante espalhada
-pelos cálculos. Reverter a premissa é trocar `TaxPolicy.brasil` por
-`TaxPolicy.brasilBaseLiquida` — uma linha de configuração. Em base líquida, o
-imposto passa a ser deduzido por reversão (`valor × taxa / (1 − taxa)`), e o
-comportamento das duas bases está coberto por testes.
-
-**Conferência pendente.** ~10 eventos contra o "Aviso aos Acionistas" de
-relações com investidores. É a única forma de confirmar, e não depende de
-código. Enquanto não for feita, a premissa deve ser **declarada como tal na
-monografia** — não apresentada como fato verificado.
-
-### 1.6. Viés de sobrevivência
+### 1.3. Viés de sobrevivência
 
 `/v2/tickers?type=stock` lista **781 ações vivas**. Empresas deslistadas não
 aparecem.
@@ -95,7 +47,7 @@ aparecem.
 sobrevivência. O sistema mitiga parcialmente resolvendo renomeações
 (`/v2/tickers/resolve`), mas não recupera deslistagens.
 
-### 1.7. Limite de requisições inobservável
+### 1.4. Limite de requisições inobservável
 
 A API **não expõe nenhum cabeçalho de rate limit** — verificado: nenhum
 `X-RateLimit-*`, nenhum `Retry-After`.
@@ -104,7 +56,7 @@ A API **não expõe nenhum cabeçalho de rate limit** — verificado: nenhum
 lote sempre que possível, espera exponencial com ruído em caso de `429`, e
 cache agressivo.
 
-### 1.8. Taxonomia setorial própria
+### 1.5. Taxonomia setorial própria
 
 O campo `sector` usa taxonomia da brapi em português (`energia`,
 `petroleo-e-gas-integrado`). **Não é GICS nem a classificação setorial oficial
@@ -113,7 +65,7 @@ da B3.**
 **Efeito.** O alerta de concentração setorial depende dessa classificação. Uma
 taxonomia diferente produziria agrupamentos diferentes.
 
-### 1.9. IFIX indisponível
+### 1.6. IFIX indisponível
 
 `historical?symbols=IFIX` devolve **um único ponto**. Sem consequência para
 este trabalho, já que fundos imobiliários estão fora do escopo — mas registrado
@@ -162,26 +114,39 @@ O motor não modela corretagem, emolumentos nem *spread* de compra e venda.
 obteria. Como o modelo **não rebalanceia**, o número de operações é baixo — o
 aporte inicial mais um por mês —, o que limita a distorção.
 
-### 2.6. Cotas fracionárias
+### 2.6. Caixa parado entre aportes
 
-A carteira é definida por pesos, e o backtest aloca frações de ação. O mercado
-negocia unidades inteiras (ou lotes).
+Desde a [decisão 23](../decisoes/023-remocao-de-proventos.md), a simulação
+compra **ações inteiras**: a fatia de cada aporte que não completa mais uma
+ação fica em caixa, sem render, até o aporte seguinte.
 
-**Efeito.** Superestima levemente a aderência aos pesos-alvo, sobretudo em
-carteiras pequenas com ações de preço alto.
+**Efeito.** É o comportamento da corretora, e não uma aproximação — mas o caixa
+real ficaria em conta remunerada ou no CDI, e aqui não rende nada. Numa carteira
+de papel caro diante de um aporte pequeno, isso subestima levemente o
+patrimônio. O saldo é exibido na tela, e não fica implícito.
 
-### 2.7. Sem imposto sobre ganho de capital
+### 2.7. Nenhum provento é modelado
 
-Modela-se apenas o IRRF de 15% sobre JCP. Ganho de capital na venda não é
-modelado — coerente com uma estratégia sem rebalanceamento, em que não há
-venda, mas a limitação existe se o usuário interpretar o resultado como
-líquido de todos os tributos.
+O retorno apurado é de **preço**. Dividendo, JCP e a tributação deles saíram do
+projeto pela [decisão 23](../decisoes/023-remocao-de-proventos.md), depois de a
+premissa de base bruta do campo `rate` permanecer sem conferência documental.
 
-### 2.8. Regime tributário sujeito a mudança
+**Efeito.** O resultado é conservador por construção: o acionista que recebe
+provento obtém mais que o simulado. Um papel de *dividend yield* alto é
+sistematicamente subestimado em relação a um de yield baixo com a mesma
+valorização — o que importa quando duas carteiras são comparadas.
 
-A tributação de proventos no Brasil está em revisão legislativa. As alíquotas
-são **parâmetro declarado com vigência** (`TaxPolicy`), não constante de
-código, justamente para que uma mudança de lei não invalide o trabalho.
+**Efeito colateral na comparação com o índice.** O Ibovespa é de retorno total
+por construção; o `close` dos ativos não. Beta e correlação misturam as duas
+convenções. O efeito é de segunda ordem, porque essas medidas olham
+covariância de variações e não nível.
+
+### 2.8. Sem imposto de espécie alguma
+
+Não há IRRF sobre provento — não há provento —, e ganho de capital na venda
+também não é modelado. O segundo é coerente com uma estratégia sem
+rebalanceamento, em que não há venda, mas a limitação existe se o usuário
+interpretar o resultado como líquido de tributos.
 
 ---
 
@@ -221,13 +186,12 @@ As 80 comparações atuais estão dentro de 1e-4.
 
 | Evidência | Método | Resultado |
 |---|---|---|
-| Corretude do motor | 15 invariantes matemáticas sem fonte externa | [aprovadas](invariantes.md) |
+| Corretude do motor | invariantes matemáticas sem fonte externa | [aprovadas](invariantes.md) |
 | Estatística | Recálculo independente em `pandas`/`numpy` | [80/80 dentro de 1e-4](conferencia_python.md) |
-| Fluxo de proventos | DY calculado × publicado pela fonte | [11/11 consistentes](qualidade_proventos.md) |
 | Robustez às premissas | Varredura em três eixos | [medida](sensibilidade.md) |
-| Cobertura de testes | 224 testes automatizados, 82,6% no núcleo | — |
+| Cobertura de testes | 457 testes automatizados, 84,2% no núcleo | — |
 
 > O oráculo `adjustedClose` previsto no plano original **não pôde ser usado**:
 > a própria auditoria mostrou que aquela série é inconsistente com o fluxo de
-> proventos. As invariantes matemáticas o substituíram, e são evidência mais
-> forte — não dependem de nenhuma fonte externa de verdade.
+> proventos publicado. As invariantes matemáticas o substituíram, e são
+> evidência mais forte — não dependem de nenhuma fonte externa de verdade.

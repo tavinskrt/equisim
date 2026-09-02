@@ -2,7 +2,7 @@
 ///
 /// POR QUE ESTE ARQUIVO EXISTE. A matriz de `overflow_test.dart` monta as telas
 /// com os providers remotos devolvendo `null` ou vazio, e o proprio arquivo
-/// documenta o limite: `_ComparisonBody`, `_MetricsCard`, `_DividendsCard`,
+/// documenta o limite: `_ComparisonBody`, `_MetricsCard`,
 /// `_PerAssetCard` e os graficos nao chegam a ser construidos. A suite verifica
 /// o esqueleto, nao a tela cheia -- que e justamente onde vivem as colunas
 /// numericas densas.
@@ -65,7 +65,6 @@ BacktestOutcome outcomeOf(String symbol, List<double> closes) {
   return PortfolioBacktest.run(
     portfolio: portfolio,
     prices: {Ticker.parse(symbol): seriesOf(symbol, start, closes)},
-    dividends: const {},
     plan: const ContributionPlan(initial: Money(100000), monthly: Money.zero),
     range: DateRange(start, DateTime(2024, 12, 31)),
   ).unwrap();
@@ -135,11 +134,9 @@ ValuationResult valuationOf(
 /// o alerta na interface e a exibicao dos numeros, sem bloquear a tela.
 FeasibilityVerdict feasibilidade() => FeasibilityVerdict(
       level: FeasibilityLevel.demanding,
+      reason: FeasibilityReason.aboveMarket,
       requiredAnnualRate: 0.1840,
       anchors: MarketAnchors.fallback2026,
-      message: 'A meta exige 18,40% ao ano — acima do retorno historico do '
-          'IBOV na janela de 10 anos. E possivel, mas depende de superar o '
-          'mercado de forma consistente.',
     );
 
 GoalAlignment alinhamento() => GoalAlignment(
@@ -163,7 +160,7 @@ GoalAlignment alinhamento() => GoalAlignment(
 /// dois horizontes quando eles diferem, e uma meta de cinco anos deixaria essa
 /// declaracao fora da captura -- que e justamente onde ela precisa ser
 /// conferida.
-const metaDemo = FinancialGoal(
+const metaDemo = FinancialGoal.unvalidated(
   initialContribution: Money(1000000),
   monthlyContribution: Money(100000),
   months: 120,
@@ -199,11 +196,6 @@ List<Override> populatedOverrides() {
     ),
     portfolioValuationsProvider.overrideWith(
       (ref) async => {for (final t in tickers) t: valuationOf(t.value)},
-    ),
-    netDividendYieldsProvider.overrideWith(
-      (ref) async => {
-        for (final (i, t) in tickers.indexed) t: 0.037 + i * 0.011,
-      },
     ),
 
     comparisonProvider.overrideWith(

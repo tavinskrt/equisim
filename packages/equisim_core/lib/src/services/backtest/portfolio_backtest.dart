@@ -1,11 +1,10 @@
-import '../../entities/dividend_event.dart';
 import '../../entities/portfolio.dart';
 import '../../entities/price_series.dart';
 import '../../failures/failure.dart';
 import '../../failures/result.dart';
-import '../../tax/tax_policy.dart';
 import '../../value_objects/date_range.dart';
 import '../../value_objects/money.dart';
+import '../../value_objects/paired_series.dart';
 import '../../value_objects/ticker.dart';
 import '../../value_objects/weight.dart';
 import '../metrics/returns.dart';
@@ -53,24 +52,28 @@ class AssetPerformance {
   /// rebalanceamento**, e essa deriva é sinal de decisão, não defeito.
   final double currentWeight;
 
-  /// Retorno total do ativo no período (preço + proventos líquidos).
+  /// Retorno do ativo no período, apurado sobre [invested] contra o valor de
+  /// mercado da posição **mais** o caixa que sobrou dela.
+  ///
+  /// Deixar o caixa de fora puniria o ativo por dinheiro que continua sendo
+  /// dele e vale exatamente o que custou.
   final double totalReturn;
 
-  /// Capital alocado ao ativo ao longo do período.
+  /// Capital destinado ao ativo ao longo do período, tenha ele virado posição
+  /// ou ficado em caixa. A soma sobre os ativos reconstitui
+  /// [BacktestOutcome.totalContributed] exatamente.
   final Money invested;
 
   /// Valor de mercado da posição no último pregão do período.
   final Money finalValue;
 
-  /// Proventos brutos recebidos no período, antes de retenção.
-  final Money grossDividends;
+  /// Caixa do ativo ao final: o que sobrou de cada aporte por não completar
+  /// mais uma ação inteira, acumulado e reaplicado nos aportes seguintes.
+  final Money cash;
 
-  /// Imposto retido na fonte sobre os proventos do período.
-  final Money withheldTax;
-
-  /// Quantidade de papéis ao final. **Fracionária**: o modelo é de pesos, não
-  /// de lotes, e o reinvestimento de proventos produz frações.
-  final double shares;
+  /// Quantidade de papéis ao final. **Inteira**: a simulação compra lotes de
+  /// uma ação, como a corretora faz, e nunca fraciona.
+  final int shares;
 
   /// Agrupa o desempenho já apurado.
   const AssetPerformance({
@@ -80,8 +83,7 @@ class AssetPerformance {
     required this.totalReturn,
     required this.invested,
     required this.finalValue,
-    required this.grossDividends,
-    required this.withheldTax,
+    required this.cash,
     required this.shares,
   });
 
@@ -127,9 +129,6 @@ class PerformanceMetrics {
   /// CAGR / |máximo drawdown|. Zero quando não houve drawdown.
   final double calmar;
 
-  /// Proventos líquidos de imposto sobre o patrimônio médio, ao ano.
-  final double netDividendYield;
-
   /// Agrupa as métricas já apuradas. Não calcula nada — o cálculo vive em
   /// [PortfolioBacktest.run].
   const PerformanceMetrics({
@@ -141,7 +140,6 @@ class PerformanceMetrics {
     required this.sharpe,
     required this.sortino,
     required this.calmar,
-    required this.netDividendYield,
   });
 }
 
@@ -156,7 +154,11 @@ class BacktestOutcome {
   /// Alinhado posição a posição com [wealth] e [base100].
   final List<DateTime> dates;
 
-  /// Patrimônio bruto dia a dia, incluindo os aportes.
+  /// Patrimônio dia a dia — posições marcadas a mercado **mais** o caixa —,
+  /// incluindo os aportes.
+  ///
+  /// Somar o caixa é o que garante que nenhum centavo aportado desapareça da
+  /// curva enquanto espera para completar uma ação inteira.
   final List<double> wealth;
 
   /// Índice TWR em base 100 — é esta a curva que alimenta risco, porque a
@@ -168,29 +170,22 @@ class BacktestOutcome {
   final List<CashFlow> cashFlows;
 
   /// Capital aportado no período, somando inicial e mensais.
-  ///
-  /// É o dinheiro que o investidor disponibilizou, não o que virou posição —
-  /// para esse, ver [totalAllocated].
   final Money totalContributed;
 
-  /// Capital que efetivamente virou posição: a soma do que cada ativo recebeu
-  /// dos aportes, e portanto exatamente `Σ AssetPerformance.invested`.
-  ///
-  /// **Não coincide com [totalContributed] por construção.** As duas causas
-  /// estão no ponto da divisão, em [PortfolioBacktest._allocate]: cada fatia
-  /// `aporte × peso` arredonda isoladamente, e a fatia de um ativo sem cotação
-  /// no dia do aporte é descartada — não é realocada nem guardada em caixa. A
-  /// diferença fica em [unallocated].
+  /// Capital que virou posição: o custo de aquisição das ações efetivamente
+  /// compradas, e portanto `totalContributed − residualCash` por construção.
   final Money totalAllocated;
 
-  /// Patrimônio no último pregão.
+  /// Patrimônio no último pregão: posições a mercado mais [residualCash].
   final Money finalValue;
 
-  /// Proventos brutos de toda a carteira no período.
-  final Money grossDividends;
-
-  /// Imposto retido de toda a carteira no período.
-  final Money withheldTax;
+  /// Caixa parado ao final da simulação, somado sobre os ativos.
+  ///
+  /// É a fração de cada aporte que não completou mais uma ação inteira. Ela
+  /// fica disponível para o aporte seguinte, então o saldo ao final é sempre
+  /// menor que a soma dos preços unitários da carteira — um valor alto
+  /// significa papel caro diante do aporte, não capital perdido.
+  final Money residualCash;
 
   /// Métricas consolidadas de retorno e risco.
   final PerformanceMetrics metrics;
@@ -198,7 +193,7 @@ class BacktestOutcome {
   /// Desempenho por ativo, indexado por ticker.
   final Map<Ticker, AssetPerformance> perAsset;
 
-  /// Avisos: séries encurtadas, ativos sem dados, datas de pagamento estimadas.
+  /// Avisos: séries encurtadas ou ativos sem dados no período.
   final List<String> warnings;
 
   /// Agrupa o resultado já simulado.
@@ -211,26 +206,11 @@ class BacktestOutcome {
     required this.totalContributed,
     required this.totalAllocated,
     required this.finalValue,
-    required this.grossDividends,
-    required this.withheldTax,
+    required this.residualCash,
     required this.metrics,
     required this.perAsset,
     this.warnings = const [],
   });
-
-  /// Parcela do aportado que **não** virou posição: [totalContributed] menos
-  /// [totalAllocated].
-  ///
-  /// Pode ser **negativa em alguns centavos**, e isso não é defeito: o
-  /// arredondamento de cada fatia é meio afastado de zero, então tanto sobra
-  /// quanto falta. Verificado no arranjo descrito em
-  /// [PortfolioBacktest._allocate] — 15 ativos com aporte de R$ 1.000,00
-  /// alocam 5 centavos a mais que o aporte, e 3 ativos alocam 1 centavo a
-  /// menos.
-  ///
-  /// Um valor da ordem de reais, e não de centavos, significa fatia perdida
-  /// por falta de cotação no dia do aporte.
-  Money get unallocated => totalContributed - totalAllocated;
 }
 
 /// Simula a evolução de uma carteira com pesos estipulados.
@@ -239,21 +219,19 @@ class BacktestOutcome {
 /// mensal são distribuídos segundo os percentuais estipulados; a partir daí
 /// cada posição segue sua própria variação e os pesos derivam com o mercado.
 ///
-/// Proventos são creditados pela posição vigente na data-ex, líquidos de
-/// imposto conforme a [TaxPolicy], e reinvestidos no próprio ativo pagador na
-/// data de pagamento.
+/// **Não há proventos.** A simulação responde a uma pergunta só — como a
+/// carteira montada teria se comportado no passado —, e a resposta é o preço
+/// de fechamento. Dividendo, JCP e a tributação deles saíram do modelo junto
+/// com a fração de ação; ver `docs/decisoes/023-remocao-de-proventos.md`.
 abstract final class PortfolioBacktest {
-  /// Simula a carteira no período e consolida retorno, risco e proventos.
+  /// Simula a carteira no período e consolida retorno e risco.
   ///
   /// - [portfolio]: carteira com pesos que somem 100%.
   /// - [prices]: cotações por ativo. **Todos** os ativos da carteira precisam
   ///   estar presentes e não vazios.
-  /// - [dividends]: proventos por ativo. Ativos ausentes são tratados como sem
-  ///   proventos, não como erro.
   /// - [plan]: cronograma de aportes. Exige inicial ou mensal positivo.
   /// - [range]: janela desejada. Pode ser encurtada — ver
   ///   [BacktestOutcome.effectivePeriod].
-  /// - [taxPolicy]: retenção aplicada aos proventos. Padrão [TaxPolicy.brasil].
   /// - [riskFreeRate]: taxa livre de risco **anual** para Sharpe e Sortino.
   ///   Padrão `0.0`, que produz Sharpe igual ao CAGR sobre a volatilidade.
   ///
@@ -262,18 +240,12 @@ abstract final class PortfolioBacktest {
   /// quando nenhum ativo tem histórico no período, ou quando sobram menos de
   /// dois pregões.
   ///
-  /// Complexidade **O(d · (a + e))**, com `d` pregões, `a` ativos e `e`
-  /// proventos elegíveis.
-  ///
-  /// **Não há rebalanceamento.** Os pesos definem a alocação de cada aporte e
-  /// nunca são restaurados depois.
+  /// Complexidade **O(d · a)**, com `d` pregões e `a` ativos.
   static Result<BacktestOutcome> run({
     required Portfolio portfolio,
     required Map<Ticker, PriceSeries> prices,
-    required Map<Ticker, List<DividendEvent>> dividends,
     required ContributionPlan plan,
     required DateRange range,
-    TaxPolicy taxPolicy = TaxPolicy.brasil,
     double riskFreeRate = 0.0,
   }) {
     if (portfolio.isEmpty) {
@@ -341,38 +313,16 @@ abstract final class PortfolioBacktest {
     }
 
     // --- Estado ------------------------------------------------------------
-    final shares = <Ticker, double>{for (final t in portfolio.tickers) t: 0.0};
+    // Posição inteira, capital destinado e caixa em espera, todos por ativo.
+    final shares = <Ticker, int>{for (final t in portfolio.tickers) t: 0};
     final investedCents = <Ticker, int>{
       for (final t in portfolio.tickers) t: 0
     };
-    final grossByTicker = <Ticker, double>{
-      for (final t in portfolio.tickers) t: 0.0
-    };
-    final taxByTicker = <Ticker, double>{
-      for (final t in portfolio.tickers) t: 0.0
-    };
+    final cashCents = <Ticker, int>{for (final t in portfolio.tickers) t: 0};
 
-    // Proventos elegíveis, com a posição apurada na data-ex.
-    final events = <_PendingDividend>[];
-    var estimatedPaymentDates = 0;
-    for (final ticker in portfolio.tickers) {
-      for (final event in dividends[ticker] ?? const <DividendEvent>[]) {
-        if (event.exDate.isBefore(effectiveStart)) continue;
-        if (event.exDate.isAfter(range.end)) continue;
-        events.add(_PendingDividend(event));
-        if (event.paymentDateEstimated) estimatedPaymentDates++;
-      }
-    }
-    events.sort((a, b) => a.event.exDate.compareTo(b.event.exDate));
-    if (estimatedPaymentDates > 0) {
-      warnings.add(
-        '$estimatedPaymentDates provento(s) com data de pagamento estimada '
-        'pela fonte: o momento do reinvestimento pode variar alguns dias.',
-      );
-    }
-
-    final wealth = <double>[];
-    final flows = <double>[];
+    // Acumulador, e não duas listas paralelas: patrimônio e fluxo do dia
+    // entram numa chamada só, então não há como desalinhá-los.
+    final path = WealthPathBuilder();
     final cashFlows = <CashFlow>[];
 
     var lastContributionKey = '';
@@ -392,6 +342,7 @@ abstract final class PortfolioBacktest {
           date: today,
           shares: shares,
           investedCents: investedCents,
+          cashCents: cashCents,
         );
         flowToday += plan.initial.cents;
         totalContributedCents += plan.initial.cents;
@@ -410,6 +361,7 @@ abstract final class PortfolioBacktest {
             date: today,
             shares: shares,
             investedCents: investedCents,
+            cashCents: cashCents,
           );
           flowToday += plan.monthly.cents;
           totalContributedCents += plan.monthly.cents;
@@ -418,57 +370,39 @@ abstract final class PortfolioBacktest {
         }
       }
 
-      // 3) Direito a provento apurado na data-ex.
-      for (final pending in events) {
-        if (pending.entitlement != null) continue;
-        if (!pending.event.exDate.isAfter(today)) {
-          pending.entitlement = shares[pending.event.ticker] ?? 0.0;
-        }
-      }
-
-      // 4) Crédito e reinvestimento na data de pagamento.
-      for (final pending in events) {
-        if (pending.paid) continue;
-        final held = pending.entitlement;
-        if (held == null) continue;
-        if (pending.event.paymentDate.isAfter(today)) continue;
-
-        final ticker = pending.event.ticker;
-        final price = prices[ticker]!.closeAsOf(today);
-        final netPerShare = taxPolicy.netAmount(pending.event);
-
-        grossByTicker[ticker] =
-            grossByTicker[ticker]! + pending.event.amountPerShare * held;
-        taxByTicker[ticker] =
-            taxByTicker[ticker]! + taxPolicy.withheldAmount(pending.event) * held;
-
-        if (price != null && price > 0 && netPerShare > 0 && held > 0) {
-          shares[ticker] = shares[ticker]! + (netPerShare * held) / price;
-        }
-        pending.paid = true;
-      }
-
-      // 5) Marcação a mercado.
-      var value = 0.0;
+      // 3) Marcação a mercado, somando o caixa que ainda não virou posição.
+      //
+      // Tudo em **centavos inteiros**, e não em reais: com posição inteira e
+      // preço em centavos, `quantidade × preço` é exato, e a soma sobre os
+      // ativos não acumula erro de representação dia após dia. Só o total do
+      // dia vira `double`, uma vez, na fronteira da série.
+      var positionCents = 0;
+      var cashCentsToday = 0;
       for (final ticker in portfolio.tickers) {
         final price = prices[ticker]!.closeAsOf(today);
-        if (price != null) value += shares[ticker]! * price;
+        if (price != null) {
+          positionCents += shares[ticker]! * _priceInCents(price);
+        }
+        cashCentsToday += cashCents[ticker]!;
       }
 
-      wealth.add(value);
-      flows.add(flowToday / 100.0);
+      path.add(
+        value: (positionCents + cashCentsToday) / 100.0,
+        externalFlow: flowToday / 100.0,
+      );
     }
 
     // --- Consolidação ------------------------------------------------------
+    final wealthPath = path.build();
+    final wealth = wealthPath.values;
     final finalValue = Money.fromReais(wealth.last);
     final totalContributed = Money(totalContributedCents);
     if (finalValue.isPositive) {
       cashFlows.add(CashFlow(date: dates.last, amount: finalValue));
     }
 
-    final base100 =
-        Returns.timeWeightedIndex(values: wealth, externalFlows: flows);
-    final twr = Returns.timeWeighted(values: wealth, externalFlows: flows);
+    final base100 = Returns.timeWeightedIndex(wealthPath);
+    final twr = Returns.timeWeighted(wealthPath);
 
     final effectiveRange = DateRange(dates.first, dates.last);
     final years = effectiveRange.years;
@@ -482,50 +416,36 @@ abstract final class PortfolioBacktest {
       riskFreeRate: riskFreeRate,
     );
 
-    var totalGross = 0.0;
-    var totalTax = 0.0;
-    for (final ticker in portfolio.tickers) {
-      totalGross += grossByTicker[ticker]!;
-      totalTax += taxByTicker[ticker]!;
-    }
-
-    final averageWealth = wealth.isEmpty
-        ? 0.0
-        : wealth.reduce((a, b) => a + b) / wealth.length;
-    final netDividends = totalGross - totalTax;
-    final netDy = (averageWealth > 0 && years > 0)
-        ? (netDividends / averageWealth) / years
-        : 0.0;
-
     final perAsset = <Ticker, AssetPerformance>{};
-    // Somado aqui, e não com um acumulador paralelo ao lado de
-    // `totalContributedCents`, para que `totalAllocated` seja por construção a
-    // soma dos `invested` exibidos por ativo. Dois acumuladores independentes
-    // poderiam divergir sem que nada apontasse qual dos dois errou.
-    var totalAllocatedCents = 0;
+    var residualCashCents = 0;
+    final finalWealthCents = finalValue.cents;
     for (final entry in portfolio.entries.values) {
       final ticker = entry.ticker;
       final price = prices[ticker]!.closeAsOf(dates.last) ?? 0.0;
-      final endValue = shares[ticker]! * price;
+      // Mesma aritmética inteira da marcação diária: `Σ finalValue + Σ cash`
+      // reconstitui o patrimônio final ao centavo, sem tolerância.
+      final endValue = Money(shares[ticker]! * _priceInCents(price));
       final invested = Money(investedCents[ticker]!);
-      totalAllocatedCents += invested.cents;
-      final assetGross = grossByTicker[ticker]!;
-      final assetTax = taxByTicker[ticker]!;
+      final cash = Money(cashCents[ticker]!);
+      residualCashCents += cash.cents;
 
       perAsset[ticker] = AssetPerformance(
         ticker: ticker,
         targetWeight: entry.weight,
-        currentWeight: wealth.last > 0 ? endValue / wealth.last : 0.0,
+        currentWeight: finalWealthCents > 0
+            ? endValue.cents / finalWealthCents
+            : 0.0,
         totalReturn: invested.isPositive
-            ? (endValue - invested.reais) / invested.reais
+            ? (endValue.cents + cash.cents - invested.cents) / invested.cents
             : 0.0,
         invested: invested,
-        finalValue: Money.fromReais(endValue),
-        grossDividends: Money.fromReais(assetGross),
-        withheldTax: Money.fromReais(assetTax),
+        finalValue: endValue,
+        cash: cash,
         shares: shares[ticker]!,
       );
     }
+
+    final residualCash = Money(residualCashCents);
 
     return Ok(BacktestOutcome(
       effectivePeriod: effectiveRange,
@@ -534,10 +454,9 @@ abstract final class PortfolioBacktest {
       base100: base100,
       cashFlows: cashFlows,
       totalContributed: totalContributed,
-      totalAllocated: Money(totalAllocatedCents),
+      totalAllocated: totalContributed - residualCash,
       finalValue: finalValue,
-      grossDividends: Money.fromReais(totalGross),
-      withheldTax: Money.fromReais(totalTax),
+      residualCash: residualCash,
       metrics: PerformanceMetrics(
         timeWeightedReturn: twr,
         moneyWeightedReturn: xirr,
@@ -547,67 +466,118 @@ abstract final class PortfolioBacktest {
         sharpe: risk.sharpe,
         sortino: risk.sortino,
         calmar: risk.calmar,
-        netDividendYield: netDy,
       ),
       perAsset: perAsset,
       warnings: warnings,
     ));
   }
 
-  /// Distribui [amount] entre os ativos segundo os **pesos estipulados**.
+  /// Distribui [amount] entre os ativos segundo os **pesos estipulados** e
+  /// compra o que couber em ações inteiras.
   ///
   /// Deliberadamente ignora os pesos correntes: corrigir a deriva aqui seria
   /// rebalancear, e a estratégia não rebalanceia.
   ///
-  /// Ativos sem cotação no dia são **pulados**: a fatia deles não é realocada
-  /// nem guardada, então um aporte em dia de suspensão aloca menos que o valor
-  /// cheio.
-  ///
-  /// **Defeito conhecido — o resto da divisão não é distribuído.** Cada fatia
-  /// é `amount * peso`, e [Money.operator *] arredonda isoladamente. A soma das
-  /// fatias não reconstitui [amount]: verificado, uma carteira de 15 ativos com
-  /// aporte de R$ 1.000,00 acumula **+5 centavos** em `investedCents`, e uma de
-  /// 3 ativos acumula −1 centavo. `totalContributedCents` usa o valor cheio,
-  /// então `Σ invested ≠ totalContributed` por construção — a diferença é
-  /// exposta como [BacktestOutcome.unallocated], em vez de ficar implícita —, e
-  /// [AssetPerformance.totalReturn] divide por esse `invested` levemente
-  /// deslocado. O erro é de ordem de centavos por aporte e não afeta TWR, CAGR
-  /// nem as métricas de risco, que derivam do patrimônio marcado a mercado.
+  /// A fatia de cada ativo entra no **caixa dele**, e a compra consome desse
+  /// caixa o maior múltiplo inteiro do preço do dia. O que sobra fica lá e
+  /// participa do aporte seguinte — inclusive a fatia inteira de um ativo sem
+  /// cotação no dia, que assim não se perde. É essa acumulação que faz
+  /// `Σ AssetPerformance.invested` reconstituir o aportado sem perda.
   static void _allocate({
     required Money amount,
     required Portfolio portfolio,
     required Map<Ticker, PriceSeries> prices,
     required DateTime date,
-    required Map<Ticker, double> shares,
+    required Map<Ticker, int> shares,
     required Map<Ticker, int> investedCents,
+    required Map<Ticker, int> cashCents,
   }) {
-    for (final entry in portfolio.entries.values) {
-      final ticker = entry.ticker;
+    if (amount.cents == 0) return;
+
+    final entries = portfolio.entries.values.toList();
+    final slices = _splitCents(
+      amount.cents,
+      [for (final e in entries) e.weight.value],
+    );
+
+    for (var i = 0; i < entries.length; i++) {
+      final ticker = entries[i].ticker;
+      investedCents[ticker] = investedCents[ticker]! + slices[i];
+      cashCents[ticker] = cashCents[ticker]! + slices[i];
+
       final price = prices[ticker]!.closeAsOf(date);
       if (price == null || price <= 0) continue;
-      final slice = amount * entry.weight.value;
-      shares[ticker] = shares[ticker]! + slice.reais / price;
-      investedCents[ticker] = investedCents[ticker]! + slice.cents;
+      final priceCents = _priceInCents(price);
+      if (priceCents <= 0) continue;
+
+      final available = cashCents[ticker]!;
+      if (available <= 0) continue;
+      final quantity = available ~/ priceCents;
+      if (quantity <= 0) continue;
+      shares[ticker] = shares[ticker]! + quantity;
+      cashCents[ticker] = available - quantity * priceCents;
     }
   }
-}
 
-/// Provento em trânsito dentro da simulação.
-///
-/// Mutável de propósito: a posição com direito é fixada na data-ex e o crédito
-/// acontece na data de pagamento, que pode ser semanas depois. Guardar os dois
-/// momentos num único objeto é o que evita recalcular a posição retroativamente
-/// — o que daria ao investidor o direito sobre ações compradas *depois* da
-/// data-ex.
-class _PendingDividend {
-  /// O provento em si.
-  final DividendEvent event;
+  /// Cotação em centavos inteiros.
+  ///
+  /// **É a única forma do preço dentro do motor.** Comprar, marcar a mercado e
+  /// consolidar usam este valor, nunca o `double` original: com posição
+  /// inteira, `quantidade × centavos` é exato, e o patrimônio deixa de
+  /// acumular erro de representação ao longo de milhares de pregões.
+  ///
+  /// O arredondamento para o centavo é a convenção do BRL e da própria fonte,
+  /// que publica cotação com duas casas. Uma série que traga mais casas — como
+  /// um índice — é arredondada aqui, e o desvio fica abaixo de meio centavo
+  /// por papel.
+  static int _priceInCents(double price) => Money.fromReais(price).cents;
 
-  /// Posição apurada na data-ex. `null` enquanto a data-ex não chegou.
-  double? entitlement;
+  /// Reparte [totalCents] entre [weights] **distribuindo o resto**.
+  ///
+  /// Cada destino recebe o piso de `magnitude × peso`, e os centavos que
+  /// sobram vão um a um aos maiores restos fracionários — empate resolvido
+  /// pela ordem da carteira, para que a mesma entrada produza sempre a mesma
+  /// saída. A soma do resultado é exatamente [totalCents], o que `Money.operator *`
+  /// aplicado peso a peso não garante.
+  ///
+  /// Opera na **magnitude** e reaplica o sinal ao final: a divisão truncada e o
+  /// módulo de Dart são assimétricos em torno de zero, e repartir um valor
+  /// negativo diretamente inventaria um centavo.
+  static List<int> _splitCents(int totalCents, List<double> weights) {
+    final n = weights.length;
+    final out = List<int>.filled(n, 0);
+    if (n == 0 || totalCents == 0) return out;
 
-  /// `true` depois que o caixa entrou e foi reinvestido.
-  bool paid = false;
+    final sign = totalCents.isNegative ? -1 : 1;
+    final magnitude = totalCents.abs();
 
-  _PendingDividend(this.event);
+    final fractions = List<double>.filled(n, 0.0);
+    var distributed = 0;
+    for (var i = 0; i < n; i++) {
+      final exact = magnitude * weights[i];
+      final floor = exact.floor();
+      out[i] = floor;
+      fractions[i] = exact - floor;
+      distributed += floor;
+    }
+
+    final order = List<int>.generate(n, (i) => i)
+      ..sort((a, b) {
+        final byFraction = fractions[b].compareTo(fractions[a]);
+        return byFraction != 0 ? byFraction : a.compareTo(b);
+      });
+
+    var leftover = magnitude - distributed;
+    for (var k = 0; leftover > 0; k++) {
+      out[order[k % n]] += 1;
+      leftover--;
+    }
+
+    if (sign < 0) {
+      for (var i = 0; i < n; i++) {
+        out[i] = -out[i];
+      }
+    }
+    return out;
+  }
 }

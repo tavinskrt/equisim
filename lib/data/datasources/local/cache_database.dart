@@ -18,25 +18,6 @@ class CachedPrices extends Table {
   Set<Column> get primaryKey => {ticker, date};
 }
 
-/// Proventos. A chave composta inclui valor e rótulo porque uma mesma data-ex
-/// pode legitimamente ter várias tranches (ex.: BBAS3 em 11/03/2025 com dois
-/// JCP e um dividendo). A chave elimina apenas duplicatas **exatas**, que a
-/// fonte de fato produz.
-@DataClassName('CachedDividend')
-class CachedDividends extends Table {
-  TextColumn get ticker => text()();
-  TextColumn get exDate => text()();
-  TextColumn get paymentDate => text()();
-  RealColumn get amount => real()();
-  TextColumn get label => text()();
-  BoolColumn get paymentDateEstimated =>
-      boolean().withDefault(const Constant(false))();
-  TextColumn get remarks => text().nullable()();
-
-  @override
-  Set<Column> get primaryKey => {ticker, exDate, paymentDate, amount, label};
-}
-
 /// Fundamentos anuais consolidados de todos os demonstrativos.
 @DataClassName('CachedFundamentals')
 class CachedFundamentalsTable extends Table {
@@ -77,9 +58,6 @@ class CachedProfiles extends Table {
   TextColumn get sectorLabel => text().nullable()();
   TextColumn get industry => text().nullable()();
 
-  /// Dividend yield 12m publicado pela fonte — insumo do portão de qualidade.
-  RealColumn get publishedDividendYield => real().nullable()();
-
   @override
   Set<Column> get primaryKey => {ticker};
 }
@@ -112,7 +90,6 @@ class CacheEntries extends Table {
 @DriftDatabase(
   tables: [
     CachedPrices,
-    CachedDividends,
     CachedFundamentalsTable,
     CachedProfiles,
     CachedMacroRates,
@@ -127,7 +104,35 @@ class CacheDatabase extends _$CacheDatabase {
   CacheDatabase(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  /// Migrações do cache.
+  ///
+  /// **Descartar o cache seria alternativa legítima** — ele é reconstruível a
+  /// partir da rede. A migração existe porque descartar obrigaria cada usuário
+  /// a rebaixar anos de cotação por causa de uma tabela que saiu, e porque a
+  /// versão 2 apaga dado que não se quer manter no disco de ninguém.
+  ///
+  /// v1 → v2: remoção dos proventos. Some a tabela `cached_dividends` inteira
+  /// e a coluna `published_dividend_yield` do perfil — ver
+  /// `docs/decisoes/023-remocao-de-proventos.md`. A coluna sai por
+  /// [TableMigration], que recria a tabela copiando o que resta: `ALTER TABLE
+  /// … DROP COLUMN` só existe a partir do SQLite 3.35 e o executor embarcado
+  /// varia com o aparelho.
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) => m.createAll(),
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.database
+                .customStatement('DROP TABLE IF EXISTS cached_dividends');
+            await m.alterTable(TableMigration(cachedProfiles));
+            await m.database.customStatement(
+              "DELETE FROM cache_entries WHERE key LIKE 'dividends:%'",
+            );
+          }
+        },
+      );
 
   // ------------------------------------------------------------------ TTL --
 
@@ -183,24 +188,6 @@ class CacheDatabase extends _$CacheDatabase {
   /// Insere ou atualiza cotações em lote, pela chave `(ticker, date)`.
   Future<void> upsertPrices(List<CachedPricesCompanion> rows) =>
       batch((b) => b.insertAllOnConflictUpdate(cachedPrices, rows));
-
-  // ------------------------------------------------------------ Proventos --
-
-  /// Proventos de um ativo, em ordem de data-ex. Sem recorte: o histórico
-  /// inteiro é pequeno e o filtro é do consumidor.
-  Future<List<CachedDividend>> dividendsOf(String ticker) =>
-      (select(cachedDividends)
-            ..where((t) => t.ticker.equals(ticker))
-            ..orderBy([(t) => OrderingTerm.asc(t.exDate)]))
-          .get();
-
-  /// Insere ou atualiza proventos em lote.
-  ///
-  /// A chave primária inclui **valor e rótulo**, não só as datas: duas tranches
-  /// legítimas de JCP na mesma data-ex são registros distintos, e uma chave
-  /// apenas por data as colapsaria em uma.
-  Future<void> upsertDividends(List<CachedDividendsCompanion> rows) =>
-      batch((b) => b.insertAllOnConflictUpdate(cachedDividends, rows));
 
   // ----------------------------------------------------------- Fundamentos --
 
@@ -259,7 +246,6 @@ class CacheDatabase extends _$CacheDatabase {
   Future<void> clearAll() async {
     await batch((b) {
       b.deleteWhere(cachedPrices, (_) => const Constant(true));
-      b.deleteWhere(cachedDividends, (_) => const Constant(true));
       b.deleteWhere(cachedFundamentalsTable, (_) => const Constant(true));
       b.deleteWhere(cachedProfiles, (_) => const Constant(true));
       b.deleteWhere(cachedMacroRates, (_) => const Constant(true));

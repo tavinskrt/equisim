@@ -152,8 +152,13 @@ Moeda é BRL: 2 casas, arredondamento half-up. Quantidade de ação e cota de FI
   por composição — `(1+i)^(1/252)-1` —, **nunca** por `i/252`.
 - Taxa real usa Fisher: `(1+nominal)/(1+inflação)-1`. A subtração simples erra
   quase meio ponto percentual com a inflação brasileira.
-- Dividendo de ação é isento de IR na pessoa física; **JCP tem 15% retido na
-  fonte**. Confundir os dois superestima o rendimento líquido em 17,6%.
+- **O projeto não modela provento.** Dividendo, JCP e a tributação deles saíram
+  pela [decisão 23](docs/decisoes/023-remocao-de-proventos.md); o retorno
+  apurado é de preço. Não reintroduza crédito de provento sem uma decisão nova
+  que substitua aquela.
+- A simulação compra **ação inteira**, e a sobra de cada aporte fica em caixa
+  por ativo, acumula e entra no aporte seguinte. Fração de ação em caminho de
+  cálculo é defeito.
 - Toda divisão de dinheiro entre N destinos **distribui o resto**. Opere na
   magnitude em centavos inteiros e reaplique o sinal: o operador `%` do Dart é
   sempre não-negativo (`(-1) % 3 == 2`), e o algoritmo ingênuo inventa um

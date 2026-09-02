@@ -179,15 +179,16 @@ void main() {
       expect(annual, closeTo(0.40, 1e-12));
     });
 
-    test('retorno esperado soma convergência de preço e DY líquido', () {
+    test('retorno esperado é a convergência de preço, e nada além dela', () {
+      // Sem provento no modelo, o anual não pode divergir da convergência: um
+      // segundo termo aqui seria retorno que nenhuma outra tela apura.
       final expected = ExpectedReturn.forAsset(
         ticker: Ticker.parse('ITUB4'),
         upside: 0.20,
-        netDividendYield: 0.06,
         horizonMonths: 12,
       );
       expect(expected.priceConvergence, closeTo(0.20, 1e-12));
-      expect(expected.annual, closeTo(0.26, 1e-12));
+      expect(expected.annual, closeTo(0.20, 1e-12));
     });
 
     test('carteira pondera pelos pesos e reporta cobertura parcial', () {
@@ -218,10 +219,10 @@ void main() {
       final expected = ExpectedReturn.forPortfolio(
         portfolio: portfolio,
         valuations: valuations,
-        netDividendYields: {Ticker.parse('PETR4'): 0.05},
       );
-      // Apenas PETR4 tem valuation: 20% de upside + 5% de DY.
-      expect(expected, closeTo(0.25, 1e-9));
+      // Apenas PETR4 tem valuation, com 20% de upside; o peso da outra metade
+      // é reescalado, não zerado.
+      expect(expected, closeTo(0.20, 1e-9));
     });
   });
 

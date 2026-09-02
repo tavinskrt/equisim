@@ -29,7 +29,6 @@ ValuationInputs _inputs(Ticker ticker) => ValuationInputs(
       ticker: ticker,
       asOf: DateTime(2026, 8, 20),
       fundamentals: _history(ticker),
-      dividends: const [],
       marketPrice: 20.0,
       capm: const CapmInputs(
         riskFreeRate: 0.105,
@@ -299,8 +298,7 @@ void main() {
         ticker: ticker,
         asOf: DateTime(2026, 8, 20),
         fundamentals: const [],
-        dividends: const [],
-        marketPrice: 20.0,
+          marketPrice: 20.0,
         capm: const CapmInputs(
           riskFreeRate: 0.105,
           beta: 1.0,

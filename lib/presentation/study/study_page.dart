@@ -145,7 +145,6 @@ class _StudyHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(studyProvider);
     final expected = ref.watch(portfolioValuationsProvider);
-    final yields = ref.watch(netDividendYieldsProvider);
     final settings = ref.watch(valuationSettingsProvider);
 
     final anchors = ref.watch(marketAnchorsProvider);
@@ -156,7 +155,6 @@ class _StudyHeader extends ConsumerWidget {
       weightedUpside = ExpectedReturn.forPortfolio(
         portfolio: state.study.principal,
         valuations: expected.value!,
-        netDividendYields: yields.value ?? const {},
         horizonMonths: settings.convergenceHorizonMonths,
       );
       coverage = ExpectedReturn.coverage(
@@ -249,7 +247,7 @@ class _StudyHeader extends ConsumerWidget {
                 // premissa que sustenta o número: que o mercado fecha toda a
                 // diferença até o preço justo dentro do horizonte. Com 12
                 // meses a anualização não faz nada, e o valor é literalmente
-                // o upside médio somado ao dividend yield.
+                // o upside médio da carteira.
                 hint: weightedUpside == null
                     ? null
                     : 'se o preço justo for alcançado em '

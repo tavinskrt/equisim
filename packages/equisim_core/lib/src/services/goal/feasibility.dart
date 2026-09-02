@@ -93,28 +93,75 @@ enum FeasibilityLevel {
   unrealistic,
 }
 
-/// Veredito sobre a meta, com a mensagem já formulada.
+/// Por que a meta recebeu o veredito que recebeu.
+///
+/// Mais fino que [FeasibilityLevel] de propósito: dois casos podem partilhar o
+/// nível e merecer frases diferentes na tela — "acima do mercado" e "mais que
+/// o dobro do mercado" são ambos [FeasibilityLevel.demanding], e dizer a mesma
+/// coisa nos dois seria perder a gradação. É **este** enum que a apresentação
+/// consome para escolher o texto.
+enum FeasibilityReason {
+  /// O plano nem chegou a ter taxa: o solver o recusou. Não há o que comparar
+  /// com o mercado, e o veredito existe só para a interface ter o que dizer.
+  unsolvable,
+
+  /// Os aportes sozinhos já superam o valor desejado.
+  contributionsAlreadySuffice,
+
+  /// A taxa exigida fica abaixo do CDI histórico.
+  belowRiskFree,
+
+  /// A taxa exigida cabe dentro do retorno histórico do índice.
+  withinMarket,
+
+  /// Acima do índice, mas até o múltiplo de alerta.
+  aboveMarket,
+
+  /// Acima do múltiplo de alerta, até o de bloqueio.
+  farAboveMarket,
+
+  /// Além de qualquer referência histórica.
+  beyondAnyReference,
+}
+
+/// Veredito sobre a meta.
+///
+/// **Carrega dados, não prosa.** A frase que o usuário lê é composta na
+/// apresentação, a partir de [reason] e dos números que viajam aqui — ver
+/// `FeasibilityCopy`, em `lib/presentation/goals/`. Montá-la neste pacote
+/// prendia um núcleo sem interface à formatação da tela: `toStringAsFixed(2)`
+/// é decisão de apresentação, não de domínio.
 class FeasibilityVerdict {
   /// Classificação da meta. É o que [blocks] e [warns] traduzem para a
   /// interface.
   final FeasibilityLevel level;
 
+  /// Caso concreto que produziu [level]. Mais fino que ele, e é o que a
+  /// apresentação usa para escolher a frase.
+  final FeasibilityReason reason;
+
   /// Taxa anual exigida pela meta, em fração.
   final double requiredAnnualRate;
+
+  /// Quantas vezes a taxa exigida supera o CAGR histórico do índice.
+  ///
+  /// `null` quando não há comparação a fazer — âncora de mercado não positiva,
+  /// ou meta atingida só com aportes. A apresentação cita o múltiplo no caso
+  /// [FeasibilityReason.beyondAnyReference], em que dizer "3,2 vezes" informa
+  /// mais que "muito acima".
+  final double? marketMultiple;
 
   /// Âncoras contra as quais a meta foi julgada. Viajam junto do veredito para
   /// que a interface cite os números concretos sem consultá-los de novo.
   final MarketAnchors anchors;
 
-  /// Mensagem pronta para exibição, em português, já citando os percentuais.
-  final String message;
-
-  /// Agrupa o veredito já formulado.
+  /// Agrupa o veredito já apurado.
   const FeasibilityVerdict({
     required this.level,
+    required this.reason,
     required this.requiredAnnualRate,
     required this.anchors,
-    required this.message,
+    this.marketMultiple,
   });
 
   /// A interface deve impedir o prosseguimento.
@@ -136,7 +183,7 @@ abstract final class GoalFeasibility {
   /// Múltiplo acima do qual a meta recebe alerta.
   static const double warningMultiple = 2.0;
 
-  /// Classifica a meta e formula a mensagem correspondente.
+  /// Classifica a meta.
   ///
   /// - [required]: taxa já resolvida por `RequiredReturnSolver`.
   /// - [anchors]: referências de mercado da janela observada.
@@ -157,72 +204,78 @@ abstract final class GoalFeasibility {
     FinancialGoal? goal,
   }) {
     final annual = required.annual;
-    final pct = (annual * 100).toStringAsFixed(2);
-    final cdiPct = (anchors.riskFreeCagr * 100).toStringAsFixed(2);
-    final marketPct = (anchors.marketCagr * 100).toStringAsFixed(2);
+    // Guarda de divisão: âncora não positiva viria de série vazia ou de
+    // mercado que perdeu valor na janela, e dividir por ela produziria
+    // `Infinity` propagado em silêncio até a tela.
+    final multiple = anchors.marketCagr > 0 ? annual / anchors.marketCagr : null;
+
+    FeasibilityVerdict verdict(FeasibilityLevel level, FeasibilityReason why) =>
+        FeasibilityVerdict(
+          level: level,
+          reason: why,
+          requiredAnnualRate: annual,
+          anchors: anchors,
+          marketMultiple: multiple,
+        );
 
     if (goal != null && goal.reachableWithoutReturn) {
       return FeasibilityVerdict(
         level: FeasibilityLevel.riskFreeSufficient,
+        reason: FeasibilityReason.contributionsAlreadySuffice,
         requiredAnnualRate: annual,
         anchors: anchors,
-        message: 'Os aportes sozinhos já superam a meta: não é necessária '
-            'rentabilidade alguma.',
       );
     }
 
     if (annual < anchors.riskFreeCagr) {
-      return FeasibilityVerdict(
-        level: FeasibilityLevel.riskFreeSufficient,
-        requiredAnnualRate: annual,
-        anchors: anchors,
-        message: 'A meta exige $pct% a.a., abaixo do CDI ($cdiPct% a.a. nos '
-            'últimos ${anchors.observedYears} anos). Ela é atingível em renda '
-            'fixa, sem correr risco de mercado.',
+      return verdict(
+        FeasibilityLevel.riskFreeSufficient,
+        FeasibilityReason.belowRiskFree,
       );
     }
 
     if (annual <= anchors.marketCagr) {
-      return FeasibilityVerdict(
-        level: FeasibilityLevel.plausible,
-        requiredAnnualRate: annual,
-        anchors: anchors,
-        message: 'A meta exige $pct% a.a., dentro do retorno histórico do '
-            'Ibovespa ($marketPct% a.a.).',
+      return verdict(
+        FeasibilityLevel.plausible,
+        FeasibilityReason.withinMarket,
       );
     }
 
     if (annual <= anchors.marketCagr * warningMultiple) {
-      return FeasibilityVerdict(
-        level: FeasibilityLevel.demanding,
-        requiredAnnualRate: annual,
-        anchors: anchors,
-        message: 'A meta exige $pct% a.a., acima do retorno histórico do '
-            'Ibovespa ($marketPct% a.a.). Depende de superar o mercado de '
-            'forma consistente, o que é historicamente pouco frequente.',
+      return verdict(
+        FeasibilityLevel.demanding,
+        FeasibilityReason.aboveMarket,
       );
     }
 
     if (annual <= anchors.marketCagr * blockingMultiple) {
-      return FeasibilityVerdict(
-        level: FeasibilityLevel.demanding,
-        requiredAnnualRate: annual,
-        anchors: anchors,
-        message: 'A meta exige $pct% a.a., mais que o dobro do retorno '
-            'histórico do Ibovespa ($marketPct% a.a.). Revise prazo, aporte '
-            'ou valor desejado.',
+      return verdict(
+        FeasibilityLevel.demanding,
+        FeasibilityReason.farAboveMarket,
       );
     }
 
-    final multiple = (annual / anchors.marketCagr).toStringAsFixed(1);
-    return FeasibilityVerdict(
-      level: FeasibilityLevel.unrealistic,
-      requiredAnnualRate: annual,
-      anchors: anchors,
-      message: 'A meta exige $pct% a.a. — $multiple vezes o retorno histórico '
-          'do Ibovespa ($marketPct% a.a.). Nenhuma carteira diversificada '
-          'sustentou esse patamar na janela observada. Ajuste prazo, aporte '
-          'mensal ou valor desejado.',
+    return verdict(
+      FeasibilityLevel.unrealistic,
+      FeasibilityReason.beyondAnyReference,
     );
   }
+
+  /// Veredito para o plano que `RequiredReturnSolver` recusou.
+  ///
+  /// - [anchors]: âncoras da janela, que o cartão exibe de qualquer forma.
+  ///
+  /// Existe para que a **classificação** continue inteira no domínio: a
+  /// interface montava este caso à mão, e era o único ponto em que ela
+  /// decidia um `FeasibilityLevel` por conta própria.
+  ///
+  /// A taxa sai como `double.infinity` — não há taxa —, e a interface já trata
+  /// valor não finito escondendo os cartões numéricos.
+  static FeasibilityVerdict unsolvable({required MarketAnchors anchors}) =>
+      FeasibilityVerdict(
+        level: FeasibilityLevel.unrealistic,
+        reason: FeasibilityReason.unsolvable,
+        requiredAnnualRate: double.infinity,
+        anchors: anchors,
+      );
 }

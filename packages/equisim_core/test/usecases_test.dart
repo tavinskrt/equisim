@@ -120,14 +120,12 @@ void main() {
   group('ValuationCascade — escolha do modelo', () {
     ValuationInputs inputsWith(
       List<FundamentalsSnapshot> fundamentals, {
-      List<DividendEvent> dividends = const [],
       double price = 30.0,
     }) =>
         ValuationInputs(
           ticker: ticker,
           asOf: asOf,
           fundamentals: fundamentals,
-          dividends: dividends,
           marketPrice: price,
           capm: capm,
         );
@@ -170,7 +168,11 @@ void main() {
       );
     });
 
-    test('cai para Gordon quando só há dividendos', () {
+    test('só com patrimônio, cai para o piso contábil e o declara', () {
+      // Este ativo caía em Gordon sobre dividendos, que era o terceiro degrau
+      // da cascata. Sem provento no domínio ele desce mais um: o valor
+      // patrimonial por ação, que o resultado precisa rotular como piso — e
+      // não como valor intrínseco.
       final history = [
         for (var y = 2020; y <= 2025; y++)
           FundamentalsSnapshot(
@@ -179,23 +181,16 @@ void main() {
             bookValuePerShare: 15,
           ),
       ];
-      final dividends = [
-        DividendEvent(
-          ticker: ticker,
-          exDate: DateTime(2026, 3, 1),
-          paymentDate: DateTime(2026, 3, 15),
-          amountPerShare: 2.0,
-          kind: DividendKind.dividendo,
-        ),
-      ];
 
-      final result =
-          ValuationCascade.evaluate(inputsWith(history, dividends: dividends));
+      final result = ValuationCascade.evaluate(inputsWith(history));
       expect(result.isOk, isTrue);
-      expect(result.unwrap().model, ValuationModel.gordonGrowth);
+      final valuation = result.unwrap();
+      expect(valuation.model, ValuationModel.multiples);
+      expect(valuation.fairValue.reais, closeTo(15.0, 0.01));
       expect(
-        result.unwrap().warnings.any((w) => w.contains('Gordon')),
+        valuation.warnings.any((w) => w.contains('piso contábil')),
         isTrue,
+        reason: 'o piso não pode ser apresentado como valor intrínseco',
       );
     });
 
@@ -255,7 +250,6 @@ void main() {
         ticker: ticker,
         asOf: DateTime(2026, 1, 30),
         fundamentals: [complete(2025)],
-        dividends: const [],
         marketPrice: 30,
         capm: capm,
       ));
@@ -268,7 +262,6 @@ void main() {
         ticker: ticker,
         asOf: asOf,
         fundamentals: growingHistory(rate: 0.05, endYear: 2021),
-        dividends: const [],
         marketPrice: 30,
         capm: capm,
       ));
@@ -286,7 +279,6 @@ void main() {
         ticker: ticker,
         asOf: asOf,
         fundamentals: growingHistory(rate: 0.08),
-        dividends: const [],
         marketPrice: 30,
         capm: capm,
       ));
@@ -301,7 +293,6 @@ void main() {
           ticker: ticker,
           asOf: asOf,
           fundamentals: growingHistory(rate: 0.08),
-          dividends: const [],
           marketPrice: 30,
           capm: capm,
         ),
@@ -319,7 +310,6 @@ void main() {
         ticker: ticker,
         asOf: asOf,
         fundamentals: growingHistory(rate: 0.08),
-        dividends: const [],
         marketPrice: 30,
         capm: capm,
       );
@@ -399,7 +389,6 @@ void main() {
         ticker: ticker,
         asOf: asOf,
         fundamentals: growingHistory(rate: 0.05),
-        dividends: const [],
         marketPrice: 30,
         capm: capm,
       ));
@@ -409,7 +398,6 @@ void main() {
         ticker: ticker,
         asOf: asOf,
         fundamentals: growingHistory(rate: 0.05),
-        dividends: const [],
         marketPrice: 150,
         capm: capm,
       ));
@@ -816,7 +804,7 @@ void main() {
         );
 
     test('carteira que supera a exigência é aprovada', () {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(10000),
         monthlyContribution: Money.fromReais(1000),
         months: 120,
@@ -830,24 +818,71 @@ void main() {
           Ticker.parse('PETR4'): valuationWith('PETR4', 60, 40),
           Ticker.parse('VALE3'): valuationWith('VALE3', 60, 40),
         },
-        netDividendYields: {
-          Ticker.parse('PETR4'): 0.05,
-          Ticker.parse('VALE3'): 0.05,
-        },
         anchors: MarketAnchors.fallback2026,
       );
 
       expect(result.isOk, isTrue);
       final alignment = result.unwrap();
-      // 50% de upside em 12 meses + 5% de DY = 55% esperado ao ano.
-      expect(alignment.expectedReturn, closeTo(0.55, 1e-6));
+      // 50% de upside em 12 meses, sem parcela de provento: 50% ao ano.
+      expect(alignment.expectedReturn, closeTo(0.50, 1e-6));
       expect(alignment.meetsGoal, isTrue);
       expect(alignment.gap, greaterThan(0));
       expect(alignment.valuationCoverage, closeTo(1.0, 1e-9));
     });
 
+    test('a lacuna vira o yield que a fecharia, sem premissa de provento', () {
+      // O esperado é retorno de PREÇO desde a decisão 023. Uma carteira que
+      // paga bem aparece em déficit permanente, e o número que desfaz essa
+      // leitura é a própria lacuna invertida — não uma estimativa de yield.
+      final goal = FinancialGoal.unvalidated(
+        initialContribution: Money.fromReais(10000),
+        monthlyContribution: Money.fromReais(1000),
+        months: 120,
+        targetWealth: Money.fromReais(400000),
+      );
+
+      final alignment = EvaluateGoalAlignment.call(
+        portfolio: portfolio,
+        goal: goal,
+        valuations: {
+          Ticker.parse('PETR4'): valuationWith('PETR4', 44, 40),
+          Ticker.parse('VALE3'): valuationWith('VALE3', 44, 40),
+        },
+        anchors: MarketAnchors.fallback2026,
+      ).unwrap();
+
+      expect(alignment.meetsGoal, isFalse);
+      final yieldToClose = alignment.yieldToCloseGap;
+      expect(yieldToClose, isNotNull);
+      // Identidade exata: o yield que fecha é a lacuna com o sinal trocado.
+      expect(yieldToClose!, closeTo(-alignment.gap / 100, 1e-12));
+      expect(yieldToClose, greaterThan(0));
+    });
+
+    test('meta atingida não tem lacuna a fechar', () {
+      final goal = FinancialGoal.unvalidated(
+        initialContribution: Money.fromReais(10000),
+        monthlyContribution: Money.fromReais(1000),
+        months: 120,
+        targetWealth: Money.fromReais(200000),
+      );
+
+      final alignment = EvaluateGoalAlignment.call(
+        portfolio: portfolio,
+        goal: goal,
+        valuations: {
+          Ticker.parse('PETR4'): valuationWith('PETR4', 60, 40),
+          Ticker.parse('VALE3'): valuationWith('VALE3', 60, 40),
+        },
+        anchors: MarketAnchors.fallback2026,
+      ).unwrap();
+
+      expect(alignment.meetsGoal, isTrue);
+      expect(alignment.yieldToCloseGap, isNull);
+    });
+
     test('sinaliza cobertura fraca de avaliação', () {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(10000),
         monthlyContribution: Money.fromReais(1000),
         months: 120,
@@ -858,7 +893,6 @@ void main() {
         portfolio: portfolio,
         goal: goal,
         valuations: {Ticker.parse('PETR4'): valuationWith('PETR4', 50, 40)},
-        netDividendYields: const {},
         anchors: MarketAnchors.fallback2026,
       ).unwrap();
 
@@ -867,7 +901,7 @@ void main() {
     });
 
     test('meta impossível propaga a falha do solver', () {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(1),
         monthlyContribution: Money.zero,
         months: 12,
@@ -877,14 +911,13 @@ void main() {
         portfolio: portfolio,
         goal: goal,
         valuations: const {},
-        netDividendYields: const {},
         anchors: MarketAnchors.fallback2026,
       );
       expect(result.isErr, isTrue);
     });
 
     test('veredito de viabilidade acompanha o alinhamento', () {
-      final goal = FinancialGoal(
+      final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(1000),
         monthlyContribution: Money.fromReais(100),
         months: 24,
@@ -894,7 +927,6 @@ void main() {
         portfolio: portfolio,
         goal: goal,
         valuations: const {},
-        netDividendYields: const {},
         anchors: MarketAnchors.fallback2026,
       ).unwrap();
       expect(alignment.verdict.blocks, isTrue);

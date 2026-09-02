@@ -78,8 +78,9 @@ class GoalAlignment {
   final RequiredReturn required;
   final FeasibilityVerdict verdict;
 
-  /// Retorno anual esperado da carteira, já anualizado pelo horizonte de
-  /// convergência e somado ao dividend yield líquido.
+  /// Retorno anual esperado da carteira: a convergência de preço até o valor
+  /// justo, anualizada pelo horizonte. Não há parcela de provento — o modelo
+  /// não distribui.
   final double expectedReturn;
 
   /// Fração do peso da carteira que possui avaliação disponível.
@@ -99,6 +100,27 @@ class GoalAlignment {
 
   /// Cobertura baixa torna o retorno esperado pouco representativo.
   bool get coverageIsWeak => valuationCoverage < 0.6;
+
+  /// *Dividend yield* que fecharia a lacuna, em fração ao ano. `null` quando a
+  /// meta já é atingida.
+  ///
+  /// **Por que este número existe.** [expectedReturn] é retorno de preço e nada
+  /// mais — o trabalho não modela provento desde a
+  /// `docs/decisoes/023-remocao-de-proventos.md`. Uma carteira que paga bem e
+  /// valoriza pouco aparece aqui em déficit permanente, e o usuário, lendo um
+  /// abismo que não existe, é empurrado para ativos mais arriscados do que
+  /// precisa.
+  ///
+  /// Este getter fecha a leitura **sem premissa nenhuma**: ele não estima
+  /// yield, não adota média de mercado e não soma nada ao esperado. Ele apenas
+  /// inverte a lacuna — se faltam 2,3 p.p. ao ano, um yield de 2,3% cobriria.
+  /// Quem sabe quanto a carteira efetivamente paga é o investidor, e é ele
+  /// quem compara.
+  ///
+  /// É exatamente `−gap` em fração, e existe como nome próprio para que a
+  /// interface não precise reinterpretar o sinal do outro.
+  double? get yieldToCloseGap =>
+      meetsGoal ? null : required.annual - expectedReturn;
 }
 
 /// Confronta o retorno esperado da carteira com a rentabilidade exigida.
@@ -107,7 +129,6 @@ abstract final class EvaluateGoalAlignment {
     required Portfolio portfolio,
     required FinancialGoal goal,
     required Map<Ticker, ValuationResult> valuations,
-    required Map<Ticker, double> netDividendYields,
     required MarketAnchors anchors,
     int horizonMonths = ExpectedReturn.defaultHorizonMonths,
   }) {
@@ -125,7 +146,6 @@ abstract final class EvaluateGoalAlignment {
       expectedReturn: ExpectedReturn.forPortfolio(
         portfolio: portfolio,
         valuations: valuations,
-        netDividendYields: netDividendYields,
         horizonMonths: horizonMonths,
       ),
       valuationCoverage: ExpectedReturn.coverage(

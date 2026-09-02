@@ -54,9 +54,9 @@ sealed class Result<T> {
   /// Valor, ou [fallback] se for falha.
   ///
   /// **Descarta a falha em silêncio.** É a escolha certa quando a ausência do
-  /// dado tem um padrão defensável e o motivo não interessa ao usuário — a
-  /// lista vazia de proventos de um ativo que nunca pagou, por exemplo. Quando
-  /// o motivo importa, use [fold] e reporte.
+  /// dado tem um padrão defensável e o motivo não interessa ao usuário — o
+  /// mapa parcial de um lote em que um ativo não respondeu, por exemplo.
+  /// Quando o motivo importa, use [fold] e reporte.
   T getOrElse(T fallback) => valueOrNull ?? fallback;
 
   /// Transforma o valor de sucesso, preservando a falha.

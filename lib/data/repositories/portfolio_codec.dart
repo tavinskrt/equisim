@@ -98,11 +98,16 @@ abstract final class PortfolioStudyCodec {
   /// único campo sem padrão defensável. Valores monetários ausentes voltam como
   /// zero, o que produz uma meta que `RequiredReturnSolver.solve` recusa com
   /// [InvalidInput], em vez de uma meta silenciosamente errada.
+  ///
+  /// **Usa `FinancialGoal.unvalidated` de propósito.** O documento pode ter
+  /// sido gravado antes de `FinancialGoal.create` existir, e recusar a leitura
+  /// aqui apagaria da tela um estudo que o usuário salvou. O plano defeituoso
+  /// atravessa e é recusado no ponto em que vira número, com o motivo à vista.
   static FinancialGoal? decodeGoal(dynamic raw) {
     if (raw is! Map) return null;
     final months = (raw['months'] as num?)?.toInt();
     if (months == null) return null;
-    return FinancialGoal(
+    return FinancialGoal.unvalidated(
       initialContribution: Money((raw['initialCents'] as num?)?.toInt() ?? 0),
       monthlyContribution: Money((raw['monthlyCents'] as num?)?.toInt() ?? 0),
       months: months,
