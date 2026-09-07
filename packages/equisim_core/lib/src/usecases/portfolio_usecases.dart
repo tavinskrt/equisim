@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../entities/financial_goal.dart';
 import '../entities/portfolio.dart';
 import '../entities/price_series.dart';
@@ -180,6 +182,7 @@ abstract final class ResolveMarketAnchors {
     final cdi = await macro.riskFreeDaily(range);
     final ibov = await benchmark.ibovespa(range);
     final ipca = await macro.inflationMonthly(range);
+    final ibc = await macro.activityIndexMonthly(range);
 
     if (cdi.isErr && ibov.isErr) {
       return const Err(InsufficientData(
@@ -206,11 +209,19 @@ abstract final class ResolveMarketAnchors {
         ? _currentRateOf(cdi.unwrap())
         : MarketAnchors.fallback2026.currentRiskFreeRate;
 
+    // Parcela real do teto da perpetuidade, medida em vez de arbitrada. Sem a
+    // série, cai no valor observado em 10 anos, declarado como fallback.
+    final realGrowth = ibc.isOk
+        ? _activityCagrOf(ibc.unwrap(), windowYears) ??
+            MarketAnchors.fallback2026.realEconomyGrowth
+        : MarketAnchors.fallback2026.realEconomyGrowth;
+
     return Ok(MarketAnchors(
       riskFreeCagr: riskFree,
       currentRiskFreeRate: current,
       marketCagr: market,
       inflationCagr: inflation,
+      realEconomyGrowth: realGrowth,
       observedYears: windowYears,
     ));
   }
@@ -256,5 +267,45 @@ abstract final class ResolveMarketAnchors {
     if (years <= 0) return MarketAnchors.fallback2026.marketCagr;
 
     return Returns.annualize(last.close / first.close - 1, years);
+  }
+
+  /// Crescimento real anual a partir do índice de atividade.
+  ///
+  /// O IBC-Br é **índice de nível**, não taxa: [RateSeries.annualized]
+  /// compõe-o como se cada ponto fosse um retorno e devolveria absurdo. Aqui se
+  /// tomam razões entre pontas, o que também torna irrelevante o fato de o
+  /// datasource dividir tudo por 100.
+  ///
+  /// **Média móvel de 12 meses nas duas pontas.** Mesmo dessazonalizado, o
+  /// índice tem ruído mensal, e um CAGR entre dois pontos isolados herdaria
+  /// inteiramente o ruído deles — o mesmo defeito que a regressão sobre CAGR
+  /// ponta a ponta tem no crescimento de fundamentos.
+  ///
+  /// Devolve `null` quando não há 12 meses em cada ponta ou quando a janela
+  /// efetiva é curta demais, para que o chamador decida o fallback.
+  static double? _activityCagrOf(RateSeries series, int windowYears) {
+    const janela = 12;
+    final v = series.rates;
+    if (v.length < janela * 2) return null;
+
+    double media(int fim) {
+      var soma = 0.0;
+      for (var i = fim - janela + 1; i <= fim; i++) {
+        soma += v[i];
+      }
+      return soma / janela;
+    }
+
+    final inicio = media(janela - 1);
+    final fim = media(v.length - 1);
+    if (inicio <= 0 || fim <= 0) return null;
+
+    // Anos entre os centros das duas médias móveis, não entre as pontas cruas.
+    final meses = v.length - janela;
+    final anos = meses / 12.0;
+    if (anos < 1) return null;
+
+    final g = math.pow(fim / inicio, 1 / anos).toDouble() - 1;
+    return g.isFinite ? g : null;
   }
 }

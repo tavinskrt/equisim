@@ -69,7 +69,11 @@ void main() {
     });
 
     test('dart:math é permitido — é biblioteca do núcleo da linguagem', () {
-      final file = File('lib/src/services/valuation/dcf.dart');
+      // O exemplo é `inference.dart`, que precisa de `dart:math` para a t de
+      // Student e a beta incompleta. Antes era `dcf.dart`, que deixou de
+      // importar a biblioteca quando o desconto passou a acumular fator ano a
+      // ano em vez de elevar uma taxa única a t.
+      final file = File('lib/src/services/valuation/inference.dart');
       expect(file.readAsStringSync(), contains("import 'dart:math'"));
     });
   });

@@ -107,6 +107,15 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     // Desconto nominal exige crescimento perpétuo nominal. O teto sai do IPCA
     // observado, na mesma janela do CDI que forma a taxa livre de risco.
     perpetualGrowthCap: anchors.nominalEconomyGrowth,
+    // Âncora top-down da Saída 2, adotada quando o crescimento fundamental não
+    // é identificável e a retenção observada a financia (decisão 25).
+    inflation: anchors.inflationCagr,
+    // Destino do decaimento do desconto e taxa da perpetuidade. É a média
+    // decenal do CDI: o modelo não tem curva de juros, e descontar fluxo
+    // perpétuo pela taxa de um dia casa durações incompatíveis.
+    terminalRiskFreeRate: anchors.riskFreeCagr,
+    isDistressed: (await ref.watch(distressedRegistryProvider.future))
+        .contains(ticker.value),
   );
   if (inputs.isErr) return null;
 

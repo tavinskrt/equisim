@@ -21,6 +21,20 @@ class BcbDatasource {
   /// nominal da perpetuidade.
   static const int seriesIpcaMonthly = 433;
 
+  /// IBC-Br **dessazonalizado** (SGS 24364) — proxy mensal do produto real.
+  ///
+  /// É a parcela real do teto da perpetuidade, que até a decisão 25 era a
+  /// constante de 3% em `GrowthEstimator`. Medido sobre 10 anos, o índice dá
+  /// 1,45% ao ano.
+  ///
+  /// **Dessazonalizado, e não a série bruta (24363):** aquela oscila entre 103 e
+  /// 118 dentro do mesmo ano, e a razão entre duas pontas mediria sazonalidade,
+  /// não crescimento.
+  ///
+  /// É **índice**, não taxa. [series] divide por 100 como faz com as demais, o
+  /// que não atrapalha: só razões entre pontos são usadas, e o fator cancela.
+  static const int seriesIbcBrMonthly = 24364;
+
   /// Busca uma série no intervalo informado.
   ///
   /// A API devolve `{"data":"02/01/2024","valor":"0.043739"}`, com a data em

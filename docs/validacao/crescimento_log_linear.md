@@ -1,5 +1,18 @@
 # Fórmula 4 do painel — como o crescimento é calculado
 
+> **⚠ Superado pela [decisão 25](../decisoes/025-reconstrucao-do-motor-de-avaliacao.md).**
+> A regressão log-linear descrita aqui **não é mais o método** de estimar crescimento. Ela foi
+> rebaixada a *estimador secundário*: hoje serve só como segunda opinião dentro do teste de
+> discordância da Porta 2, contra o crescimento fundamental `g = retorno × retenção`. Um
+> desacordo entre os dois manda o ativo para a âncora *top-down*, em vez de a regressão decidir
+> sozinha.
+>
+> O documento fica no lugar porque a medição que ele traz continua correta e é o que sustenta a
+> decisão de rebaixá-la — em particular o `R² ≥ 0,35` fixo, que a §6.1 do
+> [refinamento](../refinamento-do-valuation.md) substituiu por `R²_crit(n, α)`. Leia-o como
+> registro do método antigo, não como descrição do motor atual.
+
+
 Medições feitas em 28/08/2026 sobre os 18 ativos das carteiras de teste,
 exercícios de 2010 a 2025 (fonte: brapi.dev, `/v2/stocks/cash-flow`,
 `mode=history`). Código:

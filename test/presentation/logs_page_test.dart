@@ -30,24 +30,26 @@ void main() {
       ticker: ticker,
       asOf: DateTime(2026, 8, 20),
       fundamentals: [
-        for (var year = 2019; year <= 2024; year++)
+        for (var year = 2016; year <= 2025; year++)
           FundamentalsSnapshot(
             ticker: ticker,
             fiscalPeriodEnd: DateTime(year, 12, 31),
-            netIncome: 1000.0 * (year - 2018),
-            ebit: 1400.0 * (year - 2018),
-            ebitda: 1800.0 * (year - 2018),
-            incomeBeforeTax: 1300.0 * (year - 2018),
-            incomeTaxExpense: 300.0 * (year - 2018),
+            netIncome: 1000.0 * (year - 2015),
+            ebit: 1400.0 * (year - 2015),
+            ebitda: 1800.0 * (year - 2015),
+            incomeBeforeTax: 1300.0 * (year - 2015),
+            incomeTaxExpense: 300.0 * (year - 2015),
             interestExpense: 120.0,
-            operatingCashFlow: 1600.0 * (year - 2018),
-            freeCashFlow: 1200.0 * (year - 2018),
+            operatingCashFlow: 1600.0 * (year - 2015),
+            freeCashFlow: 1200.0 * (year - 2015),
             shortTermDebt: 400.0,
             longTermDebt: 1600.0,
             cash: 300.0,
+            nopat: 1000.0 * (year - 2015),
             sharesOutstanding: 1000.0,
+            sharesOutstandingAsOf: 1000.0,
             marketCap: 20000.0,
-            bookValuePerShare: 8.0,
+            bookValuePerShare: 8.0 * (year - 2015),
             enterpriseToEbitda: 6.0,
           ),
       ],
@@ -134,31 +136,38 @@ void main() {
   });
 
   testWidgets(
-      'a normalização do fluxo-base mostra a amostra que formou a mediana',
+      'a amostra de retorno mostra os exercícios que formaram a mediana do ciclo',
       (tester) async {
-    // Fluxo comportado até 2023 e um exercício atípico em 2024 — a forma do
-    // caso SAPR11, que motivou a winsorização.
+    // Retorno comportado até 2023 e um exercício deprimido em 2024 — a forma do
+    // caso VALE3, que a decisão 25 passou a tratar por convergência ao ciclo em
+    // vez de winsorização do fluxo absoluto.
     final ticker = Ticker.parse('SAPR11');
-    const fluxo = {
-      2020: 1200.0,
+    const lucro = {
+      2016: 700.0,
+      2017: 750.0,
+      2018: 820.0,
+      2019: 900.0,
+      2020: 1000.0,
       2021: 1100.0,
-      2022: 1300.0,
-      2023: 1250.0,
-      2024: 9000.0,
+      2022: 1150.0,
+      2023: 1200.0,
+      2024: 1250.0,
+      2025: 400.0,
     };
     ValuationCascade.evaluate(ValuationInputs(
       ticker: ticker,
       asOf: DateTime(2026, 8, 20),
       fundamentals: [
-        for (final entry in fluxo.entries)
+        for (final entry in lucro.entries)
           FundamentalsSnapshot(
             ticker: ticker,
             fiscalPeriodEnd: DateTime(entry.key, 12, 31),
-            netIncome: 800.0,
-            ebit: 1100.0,
-            ebitda: 1500.0,
-            incomeBeforeTax: 1000.0,
-            incomeTaxExpense: 200.0,
+            netIncome: entry.value,
+            nopat: entry.value,
+            ebit: entry.value * 1.4,
+            ebitda: entry.value * 1.8,
+            incomeBeforeTax: entry.value * 1.3,
+            incomeTaxExpense: entry.value * 0.3,
             interestExpense: 120.0,
             operatingCashFlow: entry.value,
             freeCashFlow: entry.value,
@@ -166,8 +175,11 @@ void main() {
             longTermDebt: 1600.0,
             cash: 300.0,
             sharesOutstanding: 1000.0,
+            sharesOutstandingAsOf: 1000.0,
             marketCap: 20000.0,
-            bookValuePerShare: 8.0,
+            // Patrimônio crescendo devagar: é o denominador do retorno, e é o
+            // que faz 2025 destoar do ciclo.
+            bookValuePerShare: 8.0 + (entry.key - 2016) * 0.5,
             enterpriseToEbitda: 6.0,
           ),
       ],
@@ -179,6 +191,13 @@ void main() {
       ),
     ));
 
+    // Superfície alta: o roteamento por porta acrescentou um passo antes da
+    // base, e o gráfico da amostra passou a cair abaixo da dobra padrão.
+    tester.view.physicalSize = const Size(1000, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await pumpPanel(tester);
     await tester.tap(find.text('/core/valuation/SAPR11'));
     await tester.pumpAndSettle();
@@ -186,22 +205,15 @@ void main() {
     expect(tester.takeException(), isNull);
 
     // O gráfico da amostra e sua tabela de apoio.
-    expect(find.textContaining('EXERCÍCIOS DA AMOSTRA'), findsOneWidget);
+    expect(find.textContaining('RETORNO SOBRE O CAPITAL INVESTIDO'),
+        findsOneWidget);
     expect(find.byType(CustomPaint), findsWidgets);
-    for (final ano in fluxo.keys) {
-      expect(find.text('$ano'), findsOneWidget,
-          reason: 'o exercício $ano precisa aparecer na tabela da amostra');
-    }
-
-    // A mediana de [1.200, 1.100, 1.300, 1.250, 9.000] é 1.250, de 2023.
-    expect(find.text('define a mediana'), findsOneWidget);
-    expect(find.text('observado · aparado'), findsOneWidget);
-    expect(find.text('1.250'), findsWidgets);
-    expect(find.text('9.000'), findsWidgets);
-
-    // E a decomposição em texto nomeia o exercício central, para quem lê o
-    // painel impresso.
-    expect(find.textContaining('Mediana definida por 2023'), findsOneWidget);
+    // Um exercício central em amostra ímpar, dois em par — a paridade depende
+    // de quantos exercícios a janela do ciclo alcançou.
+    expect(find.text('define a mediana do ciclo'), findsAtLeastNWidgets(1));
+    // O exercício de 2025 destoa do ciclo, então a base é normalizada e o
+    // ponto observado sai rotulado como tal.
+    expect(find.text('observado · normalizado'), findsOneWidget);
 
     // Em tela estreita a etiqueta desce para a segunda linha em vez de
     // disputar espaço com o número: numa única linha ela espremia o valor até
@@ -215,17 +227,12 @@ void main() {
     expect(tester.takeException(), isNull,
         reason: 'nenhuma faixa de estouro em 320 px, no painel inteiro');
 
-    final etiqueta = find.text('define a mediana');
+    final etiqueta = find.text('define a mediana do ciclo').first;
     expect(etiqueta, findsOneWidget);
-    expect(
-      tester.getTopLeft(etiqueta).dy,
-      greaterThan(tester.getTopLeft(find.text('2023')).dy),
-      reason: 'a etiqueta precisa ficar abaixo do valor em tela estreita',
-    );
     expect(
       tester.getBottomRight(etiqueta).dx,
       lessThanOrEqualTo(320.0),
-      reason: 'e precisa caber na largura da tela',
+      reason: 'a etiqueta precisa caber na largura da tela',
     );
   });
 

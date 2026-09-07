@@ -220,9 +220,11 @@ void main() {
         portfolio: portfolio,
         valuations: valuations,
       );
-      // Apenas PETR4 tem valuation, com 20% de upside; o peso da outra metade
-      // é reescalado, não zerado.
-      expect(expected, closeTo(0.20, 1e-9));
+      // Apenas PETR4 tem valuation, com 20% de potencial; o peso da outra
+      // metade é reescalado, não zerado. Convergindo em 36 meses,
+      // (1,20)^(1/3) − 1 = 6,27% ao ano — e não os 20% que o horizonte de doze
+      // meses devolvia por identidade.
+      expect(expected, closeTo(0.0627, 1e-4));
     });
   });
 

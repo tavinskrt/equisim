@@ -129,6 +129,7 @@ class PriceRepositoryImpl implements PriceRepository {
                 date: DateTime.parse(r.date),
                 close: r.close,
                 adjustedClose: r.adjustedClose,
+                volume: r.volume,
               ))
           .toList(),
     );
@@ -145,6 +146,7 @@ class PriceRepositoryImpl implements PriceRepository {
             date: BrapiJson.isoDay(p.date),
             close: p.close,
             adjustedClose: Value(p.adjustedClose),
+            volume: Value(p.volume),
           ),
       ]);
       await db.touch(CachePolicy.pricesKey(ticker.value));
@@ -229,6 +231,14 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
           investmentCashFlow: Value(s.investmentCashFlow),
           freeCashFlow: Value(s.freeCashFlow),
           sharesOutstanding: Value(s.sharesOutstanding),
+          sharesOutstandingAsOf: Value(s.sharesOutstandingAsOf),
+          nopat: Value(s.nopat),
+          propertyPlantEquipment: Value(s.propertyPlantEquipment),
+          intangibleAssets: Value(s.intangibleAssets),
+          totalCurrentAssets: Value(s.totalCurrentAssets),
+          currentLiabilities: Value(s.currentLiabilities),
+          realizedShareCapital: Value(s.realizedShareCapital),
+          profitReserves: Value(s.profitReserves),
           marketCap: Value(s.marketCap),
           enterpriseToEbitda: Value(s.enterpriseToEbitda),
         ),
@@ -314,6 +324,14 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
         investmentCashFlow: r.investmentCashFlow,
         freeCashFlow: r.freeCashFlow,
         sharesOutstanding: r.sharesOutstanding,
+        sharesOutstandingAsOf: r.sharesOutstandingAsOf,
+        nopat: r.nopat,
+        propertyPlantEquipment: r.propertyPlantEquipment,
+        intangibleAssets: r.intangibleAssets,
+        totalCurrentAssets: r.totalCurrentAssets,
+        currentLiabilities: r.currentLiabilities,
+        realizedShareCapital: r.realizedShareCapital,
+        profitReserves: r.profitReserves,
         marketCap: r.marketCap,
         enterpriseToEbitda: r.enterpriseToEbitda,
       );
@@ -358,6 +376,30 @@ class MacroRepositoryImpl implements MacroRepository {
   Future<Result<RateSeries>> inflationMonthly(DateRange range) =>
       _series(BcbDatasource.seriesIpcaMonthly, range);
 
+  @override
+  Future<Result<RateSeries>> activityIndexMonthly(DateRange range) =>
+      _series(BcbDatasource.seriesIbcBrMonthly, range);
+
+  /// Série macro guardada em disco no recorte pedido, **sem olhar a validade**.
+  ///
+  /// Serve aos dois caminhos: o normal, que só chega aqui com cache válido, e o
+  /// degradado, que chega com ele vencido porque a fonte falhou. Devolve `null`
+  /// quando não há cache, ele não abre, ou não há linha no intervalo.
+  Future<RateSeries?> _macroFromCache(int seriesId, DateRange range) async {
+    final db = cache;
+    if (db == null) return null;
+    final rows = await _tryCache(() => db.macroIn(
+          seriesId,
+          BrapiJson.isoDay(range.start),
+          BrapiJson.isoDay(range.end),
+        ));
+    if (rows == null || rows.isEmpty) return null;
+    return RateSeries(
+      dates: rows.map((r) => DateTime.parse(r.date)).toList(),
+      rates: rows.map((r) => r.value).toList(),
+    );
+  }
+
   Future<Result<RateSeries>> _series(int seriesId, DateRange range) async {
     final db = cache;
     final fresh = db == null
@@ -368,21 +410,25 @@ class MacroRepositoryImpl implements MacroRepository {
                 )) ??
             false;
     if (fresh) {
-      final rows = await _tryCache(() => db.macroIn(
-            seriesId,
-            BrapiJson.isoDay(range.start),
-            BrapiJson.isoDay(range.end),
-          ));
-      if (rows != null && rows.isNotEmpty) {
-        return Ok(RateSeries(
-          dates: rows.map((r) => DateTime.parse(r.date)).toList(),
-          rates: rows.map((r) => r.value).toList(),
-        ));
-      }
+      final vigente = await _macroFromCache(seriesId, range);
+      if (vigente != null) return Ok(vigente);
     }
 
     final fetched = await remote.series(seriesId, range);
-    if (fetched.isErr) return fetched;
+    if (fetched.isErr) {
+      // SGS fora do ar, lento ou devolvendo erro: recorre ao cache **vencido**
+      // antes de desistir, como já fazia a série de preços. A diretriz é a
+      // mesma — dado velho em disco é melhor que avaliação nenhuma —, e sem
+      // ela a indisponibilidade transitória do Banco Central derrubava
+      // simulação inteira por falta de um CDI que estava salvo no dia anterior.
+      //
+      // Vencido aqui não significa errado: significa sem os pontos mais
+      // recentes. O CDI e o IPCA são séries de publicação lenta, e a diferença
+      // de um dia é de um ponto na ponta.
+      final stale = await _macroFromCache(seriesId, range);
+      if (stale != null) return Ok(stale);
+      return fetched;
+    }
 
     final series = fetched.unwrap();
     if (db == null) return Ok(series);

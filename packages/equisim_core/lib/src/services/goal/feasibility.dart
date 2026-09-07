@@ -1,5 +1,4 @@
 import '../../entities/financial_goal.dart';
-import '../valuation/growth_estimator.dart';
 
 /// Referências de mercado usadas para julgar se uma meta é plausível.
 ///
@@ -35,6 +34,17 @@ class MarketAnchors {
   /// toda empresa, de forma silenciosa.
   final double inflationCagr;
 
+  /// Crescimento **real** da economia na janela, em fração.
+  ///
+  /// Medido do IBC-Br dessazonalizado por média móvel de 12 meses nas duas
+  /// pontas, e não mais a constante de 3% que vivia em `GrowthEstimator`
+  /// (decisão 25). Sobre 10 anos, o índice dá 1,45% ao ano — pouco mais da
+  /// metade do que se supunha.
+  ///
+  /// É a parcela real do teto da perpetuidade; a nominal está em
+  /// [nominalEconomyGrowth].
+  final double realEconomyGrowth;
+
   /// Janela observada, para exibição.
   final int observedYears;
 
@@ -48,11 +58,15 @@ class MarketAnchors {
   ///   [riskFreeCagr]**, ou seja, o desconto passa a usar a média da década —
   ///   o comportamento antigo, preservado para não quebrar quem constrói as
   ///   âncoras à mão. A aplicação informa o valor corrente.
+  /// - [realEconomyGrowth]: crescimento real medido do IBC-Br. Padrão de 1,45%,
+  ///   que é o valor observado em 10 anos até 09/2026 — declarado como fallback,
+  ///   não como premissa: o caminho normal é medir.
   const MarketAnchors({
     required this.riskFreeCagr,
     required this.marketCagr,
     required this.observedYears,
     this.inflationCagr = 0.045,
+    this.realEconomyGrowth = 0.0145,
     double? currentRiskFreeRate,
   }) : currentRiskFreeRate = currentRiskFreeRate ?? riskFreeCagr;
 
@@ -66,6 +80,7 @@ class MarketAnchors {
     riskFreeCagr: 0.0940,
     marketCagr: 0.1126,
     inflationCagr: 0.0450,
+    realEconomyGrowth: 0.0145,
     currentRiskFreeRate: 0.1415,
     observedYears: 10,
   );
@@ -73,9 +88,16 @@ class MarketAnchors {
   /// Crescimento nominal de longo prazo da economia.
   ///
   /// `(1 + real) × (1 + inflação) − 1` — o teto correto para a perpetuidade
-  /// num fluxo descontado a taxa nominal.
+  /// num fluxo descontado a taxa nominal. Com 1,45% real e 5,0% de IPCA, dá
+  /// **6,52%**, contra os 8,15% que a constante de 3% produzia.
+  ///
+  /// **É composição, não PIB nominal medido.** As duas coisas não coincidem: o
+  /// PIB nominal observado na mesma janela cresce 7,83% ao ano, porque o
+  /// deflator do produto não é o IPCA. A composição é a escolha da decisão 25,
+  /// por manter a mesma inflação usada na taxa real; a diferença de 1,31 p.p.
+  /// fica declarada aqui em vez de escondida no nome.
   double get nominalEconomyGrowth =>
-      (1 + GrowthEstimator.realEconomyGrowth) * (1 + inflationCagr) - 1;
+      (1 + realEconomyGrowth) * (1 + inflationCagr) - 1;
 }
 
 /// Classificação de viabilidade da meta.

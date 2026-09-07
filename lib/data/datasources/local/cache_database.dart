@@ -14,6 +14,13 @@ class CachedPrices extends Table {
   RealColumn get close => real()();
   RealColumn get adjustedClose => real().nullable()();
 
+  /// Volume negociado no pregão, em quantidade de papéis.
+  ///
+  /// Entra com a decisão 25: a Porta 0 filtra por volume financeiro médio, e
+  /// sem ele o corte de liquidez não é computável. Nulo em série cacheada antes
+  /// da versão 3 do esquema.
+  RealColumn get volume => real().nullable()();
+
   @override
   Set<Column> get primaryKey => {ticker, date};
 }
@@ -42,8 +49,23 @@ class CachedFundamentalsTable extends Table {
   RealColumn get investmentCashFlow => real().nullable()();
   RealColumn get freeCashFlow => real().nullable()();
   RealColumn get sharesOutstanding => real().nullable()();
+
+  /// Contagem de ações **do exercício**, antes da sobrescrita pela corrente.
+  /// Sem ela não há patrimônio nem capital investido reconstituíveis.
+  RealColumn get sharesOutstandingAsOf => real().nullable()();
+
   RealColumn get marketCap => real().nullable()();
   RealColumn get enterpriseToEbitda => real().nullable()();
+
+  // Linhas que a decisão 25 passou a exigir: NOPAT publicado, o lado
+  // operacional do capital investido e o que distingue emissão de bonificação.
+  RealColumn get nopat => real().nullable()();
+  RealColumn get propertyPlantEquipment => real().nullable()();
+  RealColumn get intangibleAssets => real().nullable()();
+  RealColumn get totalCurrentAssets => real().nullable()();
+  RealColumn get currentLiabilities => real().nullable()();
+  RealColumn get realizedShareCapital => real().nullable()();
+  RealColumn get profitReserves => real().nullable()();
 
   @override
   Set<Column> get primaryKey => {ticker, fiscalPeriodEnd};
@@ -104,7 +126,7 @@ class CacheDatabase extends _$CacheDatabase {
   CacheDatabase(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// Migrações do cache.
   ///
@@ -130,6 +152,24 @@ class CacheDatabase extends _$CacheDatabase {
             await m.database.customStatement(
               "DELETE FROM cache_entries WHERE key LIKE 'dividends:%'",
             );
+          }
+          if (from < 3) {
+            // v2 → v3: colunas novas da decisão 25. Todas nuláveis, então a
+            // adição é aditiva e nenhuma linha existente precisa ser reescrita
+            // — o cache repovoa sozinho na próxima busca.
+            await m.addColumn(cachedPrices, cachedPrices.volume);
+            for (final c in [
+              cachedFundamentalsTable.sharesOutstandingAsOf,
+              cachedFundamentalsTable.nopat,
+              cachedFundamentalsTable.propertyPlantEquipment,
+              cachedFundamentalsTable.intangibleAssets,
+              cachedFundamentalsTable.totalCurrentAssets,
+              cachedFundamentalsTable.currentLiabilities,
+              cachedFundamentalsTable.realizedShareCapital,
+              cachedFundamentalsTable.profitReserves,
+            ]) {
+              await m.addColumn(cachedFundamentalsTable, c);
+            }
           }
         },
       );

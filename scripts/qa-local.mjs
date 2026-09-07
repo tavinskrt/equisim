@@ -18,7 +18,7 @@
  * Saida: 0 = liberado, 1 = bloqueado.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 
 const SKIP_FILE = '.qa-skip';
 
@@ -419,8 +419,32 @@ function listaDe(bloco) {
 }
 
 /** Numeros de decisao que ja tem arquivo, vindos do disco e do staging. */
-function decisoesConhecidas(staged) {
+// As decisoes 0 a 18 nao tem arquivo: moram na tabela congelada do
+// PLANO_ARQUITETURA.md, de onde o registro por arquivo so comeca em 19. Sem
+// le-las, `substitui: - 14` era acusado de referencia quebrada, e uma decisao
+// nova ficava impedida de derrubar formalmente uma antiga -- que e exatamente o
+// mecanismo que o registro existe para garantir.
+const PLANO_CONGELADO = 'PLANO_ARQUITETURA.md';
+
+function decisoesDoPlanoCongelado() {
   const numeros = new Set();
+  if (!existsSync(PLANO_CONGELADO)) return numeros;
+  let texto;
+  try {
+    texto = readFileSync(PLANO_CONGELADO, 'utf8');
+  } catch {
+    return numeros;
+  }
+  // Linhas de tabela markdown que abrem com o numero da decisao.
+  const linhaDeDecisao = /^\|\s*(\d{1,2})\s*\|/gm;
+  for (const m of texto.matchAll(linhaDeDecisao)) {
+    numeros.add(Number.parseInt(m[1], 10));
+  }
+  return numeros;
+}
+
+function decisoesConhecidas(staged) {
+  const numeros = decisoesDoPlanoCongelado();
   const registrar = (nome) => {
     const m = /(?:^|\/)(\d{3})-[^/]*\.md$/.exec(nome);
     if (m) numeros.add(Number.parseInt(m[1], 10));

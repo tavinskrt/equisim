@@ -981,7 +981,12 @@ class _SampleChart extends StatelessWidget {
   final ConsoleTheme theme;
   final TraceSample sample;
 
-  bool get _winsorized {
+  /// `true` quando o exercício observado difere do valor adotado.
+  ///
+  /// Até a decisão 25 isso significava aparo — winsorização do fluxo contra a
+  /// mediana. Agora significa **convergência**: o valor adotado é o retorno do
+  /// ciclo, ao qual a base converge ao longo da projeção.
+  bool get _normalized {
     final observed = sample.points.where((p) => p.isObserved).firstOrNull;
     final selected = sample.selected;
     if (observed == null || selected == null) return false;
@@ -1032,10 +1037,10 @@ class _SampleChart extends StatelessWidget {
         _legendItem(theme.accent, 'exercício central da amostra'),
         _legendItem(theme.dim, 'demais exercícios da janela'),
         _legendItem(
-          _winsorized ? theme.danger : theme.network,
-          _winsorized
-              ? 'observado, fora da banda'
-              : 'observado, dentro da banda',
+          _normalized ? theme.danger : theme.network,
+          _normalized
+              ? 'observado, destoa do ciclo'
+              : 'observado, em linha com o ciclo',
         ),
         if (sample.lowerBound != null)
           _legendItem(
@@ -1169,7 +1174,8 @@ class _SampleChart extends StatelessWidget {
   String _tagOf(TraceSamplePoint point) {
     final tags = [
       if (point.definesResult) 'define a ${sample.summaryLabel}',
-      if (point.isObserved) _winsorized ? 'observado · aparado' : 'observado',
+      if (point.isObserved)
+        _normalized ? 'observado · normalizado' : 'observado',
     ];
     return tags.join(' · ');
   }

@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-02, a partir de `feb211e`.
+Gerado em 2026-09-07, a partir de `fc52eee`.
 
 ## Decisões registradas
 
-**5** aceita · **1** cumprida
+**7** aceita · **1** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -21,6 +21,8 @@ Gerado em 2026-09-02, a partir de `feb211e`.
 | 22 | Reconstrução da disposição da UI, com fronteira declarada | cumprida | voce | 2026-08-30 |
 | 23 | Backtest sem proventos, com ação inteira e caixa residual | aceita | voce | 2026-09-02 |
 | 24 | Lucro retido sai do fluxo descontado; a lacuna da meta é lida como yield | aceita | parecer | 2026-09-02 |
+| 25 | Reconstrução do motor de avaliação por portas, vias e crescimento fundamental | aceita | orientador | 2026-09-04 |
+| 26 | O horizonte de convergência do upside passa de 12 para 36 meses | aceita | orientador | 2026-09-07 |
 
 ## Caixa de entrada
 
@@ -32,16 +34,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 33 | 7.186 |
-| Apresentacao | 33 | 15.670 |
-| Camada de dados | 12 | 2.324 |
-| Testes do app | 28 | 4.973 |
-| Testes do nucleo | 11 | 3.188 |
-| Ferramentas de QA | 20 | 6.484 |
+| Nucleo de dominio | 37 | 8.751 |
+| Apresentacao | 35 | 15.819 |
+| Camada de dados | 13 | 2.523 |
+| Testes do app | 28 | 4.980 |
+| Testes do nucleo | 12 | 3.588 |
+| Ferramentas de QA | 20 | 6.508 |
 
 ## Histórico recente
 
 ```
+2026-09-02  fc52eee  Remoção dos proventos na parte de backtest e estabilização de estrutura interna
 2026-08-30  feb211e  Garantindo estabilidade da UI
 2026-08-30  afb785e  Garantindo estabilidade dos testes
 2026-08-30  eacbcd9  Aprimorando UI/UX (4/4)
@@ -56,5 +59,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-08-29  85fd0c1  Onda 4 finalizada e dependências completamente atualizadas
 2026-08-29  f62b336  Parcial da Onda 4
 2026-08-29  31cf931  Onda 3 finalizada
-2026-08-29  857af77  Segunda parcial da Onda 3
 ```

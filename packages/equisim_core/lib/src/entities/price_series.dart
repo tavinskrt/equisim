@@ -15,6 +15,13 @@ class PricePoint {
   /// Fechamento ajustado por desdobramento e grupamento, em reais.
   final double close;
 
+  /// Volume negociado no pregão, em quantidade de papéis.
+  ///
+  /// `null` quando a fonte não informa. Serve à Porta 0: multiplicado pelo
+  /// fechamento dá o volume financeiro, cuja mediana em 90 pregões é o corte de
+  /// liquidez da decisão 25. **Não entra em cálculo de retorno.**
+  final double? volume;
+
   /// Fechamento ajustado também por proventos, como a fonte o publica.
   ///
   /// `null` quando a fonte não o informa. **Não use em cálculo** — ver a doc
@@ -30,6 +37,7 @@ class PricePoint {
     required DateTime date,
     required this.close,
     this.adjustedClose,
+    this.volume,
   }) : date = DateTime(date.year, date.month, date.day);
 }
 

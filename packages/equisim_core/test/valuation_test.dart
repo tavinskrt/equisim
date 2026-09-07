@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:equisim_core/equisim_core.dart';
 import 'package:test/test.dart';
 
@@ -41,218 +42,222 @@ void main() {
     });
   });
 
-  group('DCF por FCFF', () {
-    const assumptions = DcfAssumptions(
-      projectionYears: 5,
+  group('DCF pela via da firma', () {
+    // Sem decaimento e sem freio, para que o valor confira com conta manual.
+    const flat = DcfAssumptions(
+      projectionYears: 3,
       growthRate: 0.05,
-      perpetualGrowth: 0.02,
+      perpetualGrowth: 0.05,
       discountRate: 0.10,
+      returnOnCapital: 0.0,
     );
 
-    test('valor por ação confere com o cálculo manual', () {
-      final result = DcfCalculator.fcff(
-        baseFreeCashFlow: 100,
-        assumptions: assumptions,
+    test('valor por papel confere com o cálculo manual', () {
+      final r = DcfCalculator.firm(
+        baseProfit: 100,
+        assumptions: flat,
         netDebt: 0,
         sharesOutstanding: 10,
       );
-      expect(result.isOk, isTrue);
-      final outcome = result.unwrap();
+      expect(r.isOk, isTrue);
+      final o = r.unwrap();
 
-      // Fluxos: 105 · 110,25 · 115,7625 · 121,550625 · 127,62815625
-      expect(outcome.projectedFlows.length, 5);
-      expect(outcome.projectedFlows.first, closeTo(105.0, 1e-9));
-      expect(outcome.projectedFlows.last, closeTo(127.62815625, 1e-9));
+      // Fluxos: 105, 110,25, 115,7625.
+      expect(o.projectedFlows[0], closeTo(105.0, 1e-9));
+      expect(o.projectedFlows[2], closeTo(115.7625, 1e-6));
 
-      // Σ dos fluxos descontados a 10% ≈ 435,8121
-      final sumDiscounted =
-          outcome.discountedFlows.reduce((a, b) => a + b);
-      expect(sumDiscounted, closeTo(435.812086, 1e-5));
+      // Terminal neutro: VT = fluxo_{N+1}/r = 115,7625 × 1,05 / 0,10.
+      expect(o.terminalValue, closeTo(115.7625 * 1.05 / 0.10, 1e-6));
 
-      // VT de Gordon = 127,62815625 × 1,02 / 0,08 = 1627,258992
-      expect(outcome.terminalValue, closeTo(1627.2589922, 1e-5));
-      expect(outcome.enterpriseValue, closeTo(1446.211893, 1e-4));
-      expect(outcome.fairValuePerShare, closeTo(144.6211893, 1e-5));
+      var vp = 0.0;
+      for (var t = 1; t <= 3; t++) {
+        vp += 100 * math.pow(1.05, t) / math.pow(1.10, t);
+      }
+      vp += o.terminalValue / math.pow(1.10, 3);
+      expect(o.fairValuePerShare, closeTo(vp / 10, 1e-6));
+    });
+
+    test('o terminal neutro não depende do crescimento perpétuo', () {
+      // É a consequência algébrica de ROIC_∞ = WACC, e o que blinda o resultado
+      // da premissa que carregava até 80% do valor.
+      double terminal(double gInf) => DcfCalculator
+          .firm(
+            baseProfit: 100,
+            assumptions: flat.copyWith(perpetualGrowth: gInf),
+            netDebt: 0,
+            sharesOutstanding: 10,
+          )
+          .unwrap()
+          .terminalValue;
+
+      // A identidade que sustenta a afirmação: VT = lucro_{N+1}/r, sem nenhuma
+      // divisão por (r − g) para amplificar a premissa. Com g_∞ a 0,02 ou a
+      // 0,06 o denominador é o mesmo — 0,10 —, e só o numerador muda.
+      for (final gInf in [0.02, 0.06, 0.09]) {
+        final o = DcfCalculator.firm(
+          baseProfit: 100,
+          assumptions: flat.copyWith(perpetualGrowth: gInf),
+          netDebt: 0,
+          sharesOutstanding: 10,
+        ).unwrap();
+        final lucroFinal = o.projectedFlows.last; // retenção nula: fluxo = lucro
+        expect(o.terminalValue, closeTo(lucroFinal * (1 + gInf) / 0.10, 1e-6),
+            reason: 'o denominador é o desconto, não o spread');
+      }
+      // E o valor terminal continua finito quando g_∞ se aproxima de r, que é
+      // onde a perpetuidade de Gordon explodiria.
+      final quaseNoDesconto = terminal(0.0999);
+      expect(quaseNoDesconto.isFinite, isTrue);
+    });
+
+    test('o freio de reinvestimento reduz o fluxo distribuído', () {
+      final semFreio = DcfCalculator.firm(
+        baseProfit: 100,
+        assumptions: flat,
+        netDebt: 0,
+        sharesOutstanding: 10,
+      ).unwrap();
+      final comFreio = DcfCalculator.firm(
+        baseProfit: 100,
+        assumptions: flat.copyWith(returnOnCapital: 0.125),
+        netDebt: 0,
+        sharesOutstanding: 10,
+      ).unwrap();
+
+      // g₁ = 5% e retorno de 12,5% → b₁ = 40%.
+      expect(comFreio.projectedFlows[0], closeTo(105.0 * 0.60, 1e-9));
+      expect(comFreio.fairValuePerShare, lessThan(semFreio.fairValuePerShare),
+          reason: 'crescer exige reinvestir; descontar o lucro inteiro e '
+              'fazê-lo crescer conta o mesmo dinheiro duas vezes');
+    });
+
+    test('o crescimento decai linearmente até a perpetuidade', () {
+      const a = DcfAssumptions(
+        projectionYears: 5,
+        growthRate: 0.20,
+        perpetualGrowth: 0.04,
+        discountRate: 0.12,
+      );
+      expect(a.growthAt(1), closeTo(0.20, 1e-12));
+      expect(a.growthAt(5), closeTo(0.04, 1e-12));
+      expect(a.growthAt(3), closeTo(0.12, 1e-12),
+          reason: 'no meio do horizonte, o ponto médio entre as duas taxas');
     });
 
     test('dívida líquida reduz o valor do equity', () {
-      final semDivida = DcfCalculator.fcff(
-        baseFreeCashFlow: 100,
-        assumptions: assumptions,
+      final semDivida = DcfCalculator.firm(
+        baseProfit: 100,
+        assumptions: flat,
         netDebt: 0,
         sharesOutstanding: 10,
       ).unwrap();
-      final comDivida = DcfCalculator.fcff(
-        baseFreeCashFlow: 100,
-        assumptions: assumptions,
-        netDebt: 446.211893,
+      final comDivida = DcfCalculator.firm(
+        baseProfit: 100,
+        assumptions: flat,
+        netDebt: 500,
         sharesOutstanding: 10,
       ).unwrap();
-      expect(comDivida.enterpriseValue,
-          closeTo(semDivida.enterpriseValue, 1e-9));
-      expect(comDivida.fairValuePerShare, closeTo(100.0, 1e-4));
+      expect(comDivida.equityValue,
+          closeTo(semDivida.equityValue - 500, 1e-6));
+      expect(comDivida.equityShare, lessThan(semDivida.equityShare));
     });
 
-    test('reporta a parcela explicada pelo valor terminal', () {
-      final outcome = DcfCalculator.fcff(
-        baseFreeCashFlow: 100,
-        assumptions: assumptions,
+    test('a participação do equity expõe a ponte fina', () {
+      final o = DcfCalculator.firm(
+        baseProfit: 100,
+        assumptions: flat,
         netDebt: 0,
         sharesOutstanding: 10,
       ).unwrap();
-      // ~70% do valor vem da perpetuidade — informação que o usuário precisa ver.
-      expect(outcome.terminalShare, closeTo(0.6986, 1e-3));
+      // Dívida a 95% do valor da firma deixa 5% de equity — abaixo do mínimo
+      // de 20%, é o caso RENT3, em que o preço por papel vira resíduo.
+      final fino = DcfCalculator.firm(
+        baseProfit: 100,
+        assumptions: flat,
+        netDebt: o.enterpriseValue * 0.95,
+        sharesOutstanding: 10,
+      ).unwrap();
+      expect(fino.equityShare, closeTo(0.05, 1e-6));
+      expect(fino.equityShare, lessThan(ValuationParameters.minEquityShare));
     });
 
-    test('protege contra a explosão de Gordon quando r se aproxima de g', () {
-      final result = DcfCalculator.fcff(
-        baseFreeCashFlow: 100,
-        assumptions: const DcfAssumptions(
-          growthRate: 0.05,
-          perpetualGrowth: 0.099,
-          discountRate: 0.10,
-        ),
+    test('lucro operacional negativo não é avaliável pela via da firma', () {
+      final r = DcfCalculator.firm(
+        baseProfit: -50,
+        assumptions: flat,
         netDebt: 0,
         sharesOutstanding: 10,
       );
-      expect(result.isErr, isTrue);
-      expect(result.failureOrNull, isA<ComputationFailure>());
+      expect(r.isErr, isTrue);
+      expect(r.failureOrNull, isA<InsufficientData>());
     });
 
-    test('fluxo de caixa negativo não é avaliável por FCFF', () {
-      final result = DcfCalculator.fcff(
-        baseFreeCashFlow: -50,
-        assumptions: assumptions,
-        netDebt: 0,
-        sharesOutstanding: 10,
-      );
-      expect(result.isErr, isTrue);
-      expect(result.failureOrNull, isA<InsufficientData>());
-    });
-
-    test('exige quantidade de ações válida', () {
-      final result = DcfCalculator.fcff(
-        baseFreeCashFlow: 100,
-        assumptions: assumptions,
+    test('exige quantidade de papéis válida', () {
+      final r = DcfCalculator.firm(
+        baseProfit: 100,
+        assumptions: flat,
         netDebt: 0,
         sharesOutstanding: 0,
       );
-      expect(result.isErr, isTrue);
+      expect(r.isErr, isTrue);
+      expect(r.failureOrNull, isA<InsufficientData>());
     });
   });
 
-  group('Valor terminal por múltiplo de saída', () {
-    test('aplica EV/EBITDA sobre o EBITDA terminal', () {
-      final result = DcfCalculator.fcff(
-        baseFreeCashFlow: 100,
-        assumptions: const DcfAssumptions(
-          projectionYears: 5,
-          growthRate: 0.05,
-          perpetualGrowth: 0.02,
-          discountRate: 0.10,
-          terminalMethod: TerminalValueMethod.exitMultiple,
-          exitMultiple: 6.0,
-        ),
-        netDebt: 0,
-        sharesOutstanding: 10,
-        terminalEbitda: 200,
-      );
-      expect(result.isOk, isTrue);
-      expect(result.unwrap().terminalValue, closeTo(1200.0, 1e-9));
-    });
-
-    test('falha explicitamente sem EBITDA terminal', () {
-      final result = DcfCalculator.fcff(
-        baseFreeCashFlow: 100,
-        assumptions: const DcfAssumptions(
-          growthRate: 0.05,
-          perpetualGrowth: 0.02,
-          discountRate: 0.10,
-          terminalMethod: TerminalValueMethod.exitMultiple,
-          exitMultiple: 6.0,
-        ),
-        netDebt: 0,
-        sharesOutstanding: 10,
-      );
-      expect(result.isErr, isTrue);
-      expect(result.failureOrNull, isA<InsufficientData>());
-    });
-  });
-
-  group('DCF por LPA — retenção para financiar o crescimento', () {
-    const base = DcfAssumptions(
-      projectionYears: 5,
-      growthRate: 0.05,
-      perpetualGrowth: 0.03,
-      discountRate: 0.10,
+  group('DCF pela via do acionista', () {
+    const a = DcfAssumptions(
+      projectionYears: 3,
+      growthRate: 0.06,
+      perpetualGrowth: 0.06,
+      discountRate: 0.12,
+      returnOnCapital: 0.12,
     );
 
-    test('sem ROE, o crescimento é zerado e o valor vira LPA ÷ Ke', () {
-      // *Earnings power value*: sem saber quanto do lucro precisa ficar na
-      // empresa, crescer seria contar o mesmo dinheiro duas vezes. O modelo
-      // colapsa no lucro estacionário, e a identidade é exata — a soma do
-      // período explícito com o terminal descontado reconstitui LPA/r.
-      final result = DcfCalculator.earningsPerShare(
-        baseEps: 10,
-        assumptions: base,
-      );
-      expect(result.unwrap().fairValuePerShare, closeTo(100.0, 1e-9));
+    test('desconta apenas a parcela distribuível do lucro', () {
+      final o = DcfCalculator.shareholder(baseProfit: 10, assumptions: a)
+          .unwrap();
+      // g = 6% e ROE de 12% → b = 50%, e o payout é o complemento.
+      expect(o.projectedFlows[0], closeTo(10 * 1.06 * 0.50, 1e-9),
+          reason: 'LPA × (1 − b) é literalmente o dividendo');
     });
 
-    test('com ROE, desconta só a parcela distribuível do lucro', () {
-      // ROE de 20% e crescimento de 5% implicam reter 25% (b = g/ROE); na
-      // perpetuidade, 3%/20% = 15%. O fluxo descontado é o lucro menos isso.
-      final result = DcfCalculator.earningsPerShare(
-        baseEps: 10,
-        assumptions: base,
-        returnOnEquity: 0.20,
+    test('sem retenção, o terminal é LPA ÷ Ke', () {
+      const semCrescimento = DcfAssumptions(
+        projectionYears: 1,
+        growthRate: 0.0,
+        perpetualGrowth: 0.0,
+        discountRate: 0.10,
       );
-      final outcome = result.unwrap();
-      // Primeiro fluxo: 10 × 1,05 × (1 − 0,25) = 7,875.
-      expect(outcome.projectedFlows.first, closeTo(7.875, 1e-12));
+      final o =
+          DcfCalculator.shareholder(baseProfit: 10, assumptions: semCrescimento)
+              .unwrap();
+      expect(o.terminalValue, closeTo(100.0, 1e-9));
     });
 
-    test('a retenção derruba o preço justo diante da dupla contagem', () {
-      // O modelo antigo distribuía o lucro inteiro E o fazia crescer. É o
-      // defeito que a lente `metodo` apontou, e a diferença não é marginal.
-      final comRetencao = DcfCalculator.earningsPerShare(
-        baseEps: 10,
-        assumptions: base,
-        returnOnEquity: 0.20,
-      ).unwrap().fairValuePerShare;
+    test('não há ponte de dívida: o fluxo já é do acionista', () {
+      final o =
+          DcfCalculator.shareholder(baseProfit: 10, assumptions: a).unwrap();
+      expect(o.equityValue, closeTo(o.enterpriseValue, 1e-12));
+      expect(o.equityShare, 1.0);
+    });
 
-      // ROE altíssimo ⇒ retenção próxima de zero ⇒ o valor tende ao do modelo
-      // que distribuía tudo. É a forma de reproduzir o comportamento antigo
-      // sem manter o código antigo por perto.
-      final semRetencao = DcfCalculator.earningsPerShare(
-        baseEps: 10,
-        assumptions: base,
-        returnOnEquity: 1e6,
-      ).unwrap().fairValuePerShare;
+    test('lucro base não positivo não é avaliável', () {
+      final r = DcfCalculator.shareholder(baseProfit: 0, assumptions: a);
+      expect(r.isErr, isTrue);
+      expect(r.failureOrNull, isA<InsufficientData>());
+    });
 
-      expect(comRetencao, lessThan(semRetencao));
-      expect(semRetencao / comRetencao, greaterThan(1.15));
+    test('retentionFor devolve a retenção que gerou o crescimento', () {
+      // O laço da decisão 25: alimentada com g = retorno × b, devolve b.
+      const roe = 0.15, b = 0.40;
+      final g = roe * b;
+      expect(DcfCalculator.retentionFor(growth: g, returnOnCapital: roe),
+          closeTo(b, 1e-12));
     });
 
     test('crescimento que exigiria reter todo o lucro não é financiável', () {
-      // g = 12% com ROE de 8% pediria b = 1,5: mais lucro do que existe. A
-      // premissa está errada, não apertada — o modelo cai para estacionário.
-      expect(
-        DcfCalculator.retentionFor(growth: 0.12, returnOnEquity: 0.08),
-        isNull,
-      );
-      expect(
-        DcfCalculator.retentionFor(growth: 0.05, returnOnEquity: 0.20),
-        closeTo(0.25, 1e-12),
-      );
-      // Crescimento nulo não retém nada, e ROE ausente não sustenta a relação.
-      expect(DcfCalculator.retentionFor(growth: 0.0, returnOnEquity: 0.2), 0.0);
-      expect(DcfCalculator.retentionFor(growth: 0.05, returnOnEquity: null),
+      expect(DcfCalculator.retentionFor(growth: 0.30, returnOnCapital: 0.20),
           isNull);
-      expect(
-        DcfCalculator.retentionFor(growth: 0.05, returnOnEquity: -0.1),
-        isNull,
-      );
     });
   });
 
@@ -264,8 +269,8 @@ void main() {
       discountRate: 0.10,
     );
 
-    Result<double> valuate(DcfAssumptions a) => DcfCalculator.fcff(
-          baseFreeCashFlow: 100,
+    Result<double> valuate(DcfAssumptions a) => DcfCalculator.firm(
+          baseProfit: 100,
           assumptions: a,
           netDebt: 0,
           sharesOutstanding: 10,

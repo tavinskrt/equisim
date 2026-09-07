@@ -101,11 +101,16 @@ class BrapiPriceDto {
   /// **Não usar em cálculo** — o domínio calcula sobre `close`.
   final double? adjustedClose;
 
+  /// Volume negociado, em quantidade de papéis. Alimenta o corte de liquidez
+  /// da Porta 0 (decisão 25).
+  final double? volume;
+
   /// Declara o DTO.
   const BrapiPriceDto({
     required this.date,
     required this.close,
     this.adjustedClose,
+    this.volume,
   });
 
   static BrapiPriceDto? fromJson(Map<String, dynamic> json) {
@@ -116,6 +121,7 @@ class BrapiPriceDto {
       date: date,
       close: close,
       adjustedClose: BrapiJson.asDouble(json['adjustedClose']),
+      volume: BrapiJson.asDouble(json['volume']),
     );
   }
 
@@ -123,6 +129,7 @@ class BrapiPriceDto {
         date: date,
         close: close,
         adjustedClose: adjustedClose,
+        volume: volume,
       );
 }
 
@@ -171,7 +178,20 @@ class BrapiFundamentalsDto {
         operatingCashFlow: _num('operatingCashFlow'),
         investmentCashFlow: _num('investmentCashFlow'),
         freeCashFlow: _num('freeCashFlow'),
+        // A fonte publica NOPAT pronto em 16 dos 18 ativos medidos; ausente só
+        // em banco, que não tem EBIT publicado e não chega à via da firma.
+        nopat: _num('cleanNopat'),
+        propertyPlantEquipment: _num('propertyPlantEquipment'),
+        intangibleAssets: _num('intangibleAsset') ?? _num('intangibleAssets'),
+        // `totalCurrentLiabilities` vem nulo na fonte; o campo preenchido é
+        // `currentLiabilities`. Verificado em 16 de 16 exercícios.
+        totalCurrentAssets: _num('totalCurrentAssets'),
+        currentLiabilities: _num('currentLiabilities'),
+        realizedShareCapital:
+            _num('realizedShareCapital') ?? _num('commonStock'),
+        profitReserves: _num('profitReserves'),
         sharesOutstanding: _num('sharesOutstanding'),
+        sharesOutstandingAsOf: _num('sharesOutstandingAsOf'),
         marketCap: _num('marketCap'),
         enterpriseToEbitda: _num('enterpriseToEbitda'),
       );

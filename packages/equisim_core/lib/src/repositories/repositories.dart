@@ -108,6 +108,12 @@ abstract interface class MacroRepository {
 
   /// IPCA mensal (BCB SGS 433) — retorno real.
   Future<Result<RateSeries>> inflationMonthly(DateRange range);
+
+  /// IBC-Br dessazonalizado (BCB SGS 24364) — proxy mensal do produto real.
+  ///
+  /// Alimenta a parcela **real** do teto da perpetuidade. É índice, não taxa:
+  /// só razões entre pontos têm sentido.
+  Future<Result<RateSeries>> activityIndexMonthly(DateRange range);
 }
 
 /// Índice de mercado, para Rm e para o cálculo local de beta.

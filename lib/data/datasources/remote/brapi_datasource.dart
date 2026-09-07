@@ -164,8 +164,18 @@ class BrapiDatasource {
       // aparecia com R$ 59,9 bi contra os R$ 10,1 bi reais, KLBN11 com R$ 117
       // bi contra R$ 23,0 bi (medido em 21/08/2026). Deixá-las sobrescrever
       // estragava o peso do equity no WACC e impedia identificar a unit.
+      //
+      // **A contagem do exercício é preservada em campo próprio.** A
+      // sobrescrita acima é correta para o valor por papel de hoje, mas destrói
+      // a única base comparável do patrimônio: `bookValue` é publicado por ação
+      // **do ano**, e multiplicá-lo pela contagem corrente mistura duas escalas.
+      // O BBAS3 bonificou em 2024 e a contagem dobrou, de 2,865 bi para
+      // 5,731 bi; sem `sharesOutstandingAsOf` não há patrimônio líquido nem
+      // capital investido reconstituíveis (decisão 25).
       final fields = <String, dynamic>{
         ...entry.value,
+        if (entry.value['sharesOutstanding'] != null)
+          'sharesOutstandingAsOf': entry.value['sharesOutstanding'],
         if (currentData?['sharesOutstanding'] != null)
           'sharesOutstanding': currentData!['sharesOutstanding'],
         if (currentData?['enterpriseToEbitda'] != null)

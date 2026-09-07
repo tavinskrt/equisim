@@ -71,6 +71,36 @@ taxonomia diferente produziria agrupamentos diferentes.
 este trabalho, já que fundos imobiliários estão fora do escopo — mas registrado
 porque foi levantado na auditoria.
 
+### 1.7. Duas contagens de ações, que divergem em 14% dos ativos
+
+A fonte publica uma contagem **corrente** e uma **do exercício**. Medido em
+07/09/2026 sobre 334 ativos com as duas preenchidas: **47 divergem** além de
+1,5×, e a divergência chega a **4.868×** — o MILS3 vem com 48.172 ações
+correntes contra 234.178.210 do exercício.
+
+**Efeito.** A ponte de equity divide o valor da firma pela contagem. Com a
+corrente crua, o MILS3 saía com preço justo de R$ 37.708,72 contra R$ 15,79 de
+mercado. O mesmo campo alimenta o lucro por unidade negociada e o peso do equity
+no WACC.
+
+**Mitigação implementada.** A contagem é conciliada com o lucro por ação
+publicado, por `N = lucro ÷ LPA`. Nos 38 divergentes com LPA utilizável, o
+árbitro confirmou a contagem do exercício em 34 e a corrente em nenhum.
+
+**O que sobra.** A contagem do exercício tem a idade do último encerramento.
+Grupamento ou desdobramento posterior a ele não aparece nela, e o preço já o
+reflete.
+
+### 1.8. O universo devolvido é parcial
+
+`/v2/tickers?type=stock&limit=1000` devolveu **373 ações** em 07/09/2026, contra
+as 781 registradas em medição anterior. A causa não foi isolada — teto do plano
+ou mudança da fonte.
+
+**Efeito.** A cobertura da validação fora da amostra é do que a fonte devolve no
+dia, e não do universo da B3. Números de cobertura entre execuções só são
+comparáveis se o tamanho do universo for igual.
+
 ---
 
 ## 2. Modelagem
@@ -81,8 +111,12 @@ A fonte não entrega CapEx isolado. O sistema usa `investmentCashFlow` como
 aproximação, que **inclui fusões, aquisições e aplicações financeiras**, não só
 imobilizado.
 
-**Mitigação.** O `freeCashFlow` publicado é usado como base primária quando
-disponível; a derivação entra apenas como alternativa.
+**Mitigação.** O reinvestimento **não passa mais por aqui.** A soma que ele pede
+— `CapEx − Depreciação + ΔNKG` — é, por identidade de balanço, a variação do
+capital investido, que se obtém do próprio balanço sem o CapEx isolado. Medido,
+as duas rotas concordam dentro de 3 p.p. em 7 de 9 ativos. O `investmentCashFlow`
+segue impróprio para conta de reinvestimento: contra `Δ(imobilizado) + D&A` ele
+erra por fatores de 0,25× a 2,42×, e para os dois lados.
 
 ### 2.2. Prêmio de risco de mercado é parâmetro, não observação
 
@@ -141,7 +175,80 @@ por construção; o `close` dos ativos não. Beta e correlação misturam as dua
 convenções. O efeito é de segunda ordem, porque essas medidas olham
 covariância de variações e não nível.
 
-### 2.8. Sem imposto de espécie alguma
+### 2.8. O terminal neutro desloca o nível do potencial
+
+A [decisão 25](../decisoes/025-reconstrucao-do-motor-de-avaliacao.md) adotou
+`ROIC_∞ = WACC` e `ROE_∞ = Ke`: nenhuma empresa preserva retorno excedente na
+perpetuidade. O terminal vira `NOPAT/WACC`, imune a `g_∞` — que era o defeito
+que motivou a decisão.
+
+**Efeito, medido.** O múltiplo terminal passa de `1/(r − g_∞)` para `1/r`. A um
+desconto ilustrativo de 15% com `g_∞ = 6,86%`, isso é **6,7× contra 12,3×**, e o
+terminal carrega a maior parte do valor.
+
+**Parcialmente compensado em 07/09/2026** pela estrutura a termo do desconto
+(ver [2.9](#29-a-estrutura-a-termo-é-linear-e-de-dois-pontos-não-uma-curva-observada))
+e pela exceção de vantagem competitiva residual. A mediana do potencial passou de
+**−55,1% para −39,4%**, e a fração com potencial positivo de 10,9% para **15,8%**.
+
+**A compressão não desapareceu.** Se o deslocamento remanescente é comum a todos
+os ativos, a **ordenação** relativa continua informativa e o **nível** não deve
+ser lido como preço-alvo. A meta da carteira usa o nível, e é por ali que o viés
+se propaga. A escolha entre tratar o nível como informativo ou apenas a ordem
+segue em aberto — §12 do [refinamento](../refinamento-do-valuation.md).
+
+**A exceção de *moat* ativou em 2 dos 120 avaliados** (BBSE3 e SAUD3). Se o
+critério está calibrado ou está restritivo demais é questão aberta, registrada na
+§12.4.
+
+### 2.9. A estrutura a termo é linear e de dois pontos, não uma curva observada
+
+Até 07/09/2026 a taxa livre de risco do CAPM era o **CDI corrente** para todos os
+períodos, inclusive a perpetuidade — um indexador *overnight* precificando fluxo
+perpétuo. Num pico de ciclo monetário isso esmagava o valor terminal; num vale, o
+inflava.
+
+**O que passou a valer.** A taxa decai linearmente do CDI corrente ao CDI médio
+decenal ao longo dos dez anos de projeção, e a perpetuidade é descontada à taxa
+de equilíbrio. Como `Ke` e `WACC` são afins na taxa livre de risco, decair o
+custo de capital equivale a decair a taxa e remontar o custo a cada ano. O fator
+de desconto **acumula** as taxas ano a ano.
+
+**A limitação que sobra, e não é pequena.** Isto não é uma curva de juros: é uma
+interpolação entre dois pontos, ambos medidos do CDI. Não vem da estrutura a
+termo negociada, não tem vértices, e a forma do decaimento — linear — é escolha,
+não observação. O CDI médio decenal é uma média histórica usada como **proxy** de
+taxa de equilíbrio, e ela não é uma previsão.
+
+**Para resolver.** Curva da ANBIMA ou do Tesouro (NTN-B), com desconto por
+vértice.
+
+### 2.10. As primitivas estatísticas do núcleo, e sua conferência externa
+
+O [`cross_validation.py`](cross_validation.py) existe porque o Dart não tem NumPy
+nem SciPy: ele recalcula as métricas em Python e reporta a diferença. Ele cobre
+volatilidade, *drawdown*, CAGR, beta, correlação, semidesvio e Sortino.
+
+**Não cobre `inference.dart`**, introduzido pela decisão 25 — OLS, erro-padrão
+Newey-West com núcleo de Bartlett, quantil da t de Student e R² crítico, todos
+escritos à mão.
+
+**Resolvido em 07/09/2026.** `tool/validation/inference_export.dart` gera séries
+sintéticas determinísticas, roda as primitivas e grava os dados **junto** dos
+resultados; `inference_cross_validation.py` recalcula com `statsmodels` e
+`scipy.stats` sobre os mesmos números. Nenhum gerador pseudoaleatório é
+compartilhado entre os dois lados — se cada um gerasse a própria amostra, a
+comparação dependeria de duas sequências coincidirem.
+
+**Resultado: 99 de 99 comparações dentro da tolerância**, incluindo as seis do
+erro-padrão HAC, que concordam com o `statsmodels` na ordem de `1e-14` relativo.
+Ver [conferencia_inferencia.md](conferencia_inferencia.md).
+
+**O que sobra.** A tolerância dos quantis da t é de `1e-5`, não de igualdade em
+ponto flutuante: o núcleo os obtém por bisseção sobre a beta incompleta, e o que
+se confere é concordância dentro do erro do método.
+
+### 2.11. Sem imposto de espécie alguma
 
 Não há IRRF sobre provento — não há provento —, e ganho de capital na venda
 também não é modelado. O segundo é coerente com uma estratégia sem
@@ -161,15 +268,25 @@ mercado, e nada aqui deve ser lido como recomendação de investimento.
 ### 3.2. O *upside* precisa de horizonte declarado
 
 O DCF produz valorização **total** até o preço justo, sem prazo. A meta exige
-taxa **por período**. A conversão assume convergência em horizonte declarado
-(padrão 12 meses) — premissa forte: nada garante que o preço convirja, nem
+taxa **por período**. A conversão assume convergência em horizonte declarado —
+**36 meses** desde a [decisão 25](../decisoes/025-reconstrucao-do-motor-de-avaliacao.md),
+antes 12. Continua sendo premissa forte: nada garante que o preço convirja, nem
 nesse prazo nem em outro.
+
+Com 12 meses a anualização era a identidade, e o retorno esperado da carteira
+era o *upside* cru — o que fazia um potencial de −55% virar retorno esperado de
+−55% ao ano. Com 36 a conversão é `(1+u)^{1/3}−1`, e a premissa fica explícita
+em vez de embutida.
 
 ### 3.3. Amostra de validação reduzida
 
-Os relatórios cobrem **11 a 20 ativos**, não as 781 ações do universo. A
-limitação é de quota de API, não de capacidade: `--limit` aceita qualquer
-valor, e o cache torna reexecuções baratas.
+Os relatórios de invariantes, sensibilidade e conferência cobrem **11 a 20
+ativos**. A limitação é de quota de API, não de capacidade: `--limit` aceita
+qualquer valor, e o cache torna reexecuções baratas.
+
+A **validação fora da amostra** é a exceção: cobre as 373 ações que a fonte
+devolveu, das quais 119 chegam a ser avaliadas. Ver a [1.8](#18-o-universo-devolvido-é-parcial)
+sobre por que 373 e não 781.
 
 ### 3.4. Dart sem ecossistema científico
 

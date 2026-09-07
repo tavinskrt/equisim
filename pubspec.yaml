@@ -48,5 +48,8 @@ flutter:
   uses-material-design: true
   assets:
     - .env
+    # Lista de ativos sem continuidade operacional, lida pela Porta 0. A fonte
+    # de dados não publica recuperação judicial; ver decisão 25.
+    - config/distressed_tickers.json
 
 

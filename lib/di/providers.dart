@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../audit/audit_network_interceptor.dart';
 import '../data/config/api_config.dart';
+import '../data/config/distressed_registry.dart';
 import '../data/datasources/local/cache_database.dart';
 import '../data/datasources/remote/bcb_datasource.dart';
 import '../data/datasources/remote/brapi_datasource.dart';
@@ -188,6 +189,14 @@ final riskFreeRateProvider = FutureProvider<double>((ref) async {
   final anchors = await ref.watch(marketAnchorsProvider.future);
   return anchors.riskFreeCagr;
 });
+
+/// Registro de ativos em recuperação judicial, lido do bundle.
+///
+/// A Porta 0 os recusa. Vem de arquivo porque a fonte de dados não publica a
+/// informação — ver `DistressedRegistry` e a decisão 25.
+final distressedRegistryProvider = FutureProvider<DistressedRegistry>(
+  (ref) => DistressedRegistry.load(),
+);
 
 /// Universo de ações da B3, para o seletor de ativos.
 final universeProvider = FutureProvider<List<Ticker>>((ref) async {

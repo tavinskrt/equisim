@@ -53,6 +53,19 @@ class CapmInputs {
 
   /// Ke = Rf + β · (Rm − Rf)
   double get costOfEquity => riskFreeRate + beta * marketPremium;
+
+  /// Os mesmos insumos com outra taxa livre de risco.
+  ///
+  /// Existe para montar o custo de capital **de equilíbrio**: o mesmo beta e o
+  /// mesmo prêmio, sobre a taxa estrutural em vez da corrente. É o que sustenta
+  /// a estrutura a termo do desconto sem duplicar a montagem do WACC.
+  CapmInputs withRiskFree(double rate) => CapmInputs(
+        riskFreeRate: rate,
+        beta: beta,
+        marketPremium: marketPremium,
+        betaSource: betaSource,
+        premiumSource: premiumSource,
+      );
 }
 
 /// Custo de capital da empresa.

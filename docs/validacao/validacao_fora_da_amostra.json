@@ -1,0 +1,3461 @@
+[
+  {
+    "ticker": "AALR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "saude",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ABCB10",
+    "saida": "insumos indisponíveis",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Sem cotações de ABCB10 na janela de análise."
+  },
+  {
+    "ticker": "ABCB4",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos-financeiros",
+    "crescimento": "fundamental",
+    "justo": 26.33,
+    "preco": 24.58,
+    "potencial": 0.07119609438567942,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "ABEV3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-nao-ciclico",
+    "crescimento": "fundamental",
+    "justo": 9.11,
+    "preco": 15.74,
+    "potencial": -0.4212198221092758,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "AERI3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "AFLT3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "AGRO3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "consumo-nao-ciclico",
+    "crescimento": "g = 0",
+    "justo": 8.96,
+    "preco": 19.27,
+    "potencial": -0.5350285417747794,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "AGXY3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ALLD3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ALOS3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "construcao-e-imobiliario",
+    "crescimento": "âncora",
+    "justo": 15.56,
+    "preco": 28.81,
+    "potencial": -0.4599097535577924,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "ALPA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ALPA4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "",
+    "crescimento": "âncora",
+    "justo": 2.04,
+    "preco": 13.57,
+    "potencial": -0.8496683861459101,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "ALPK3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ALUP11",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "",
+    "crescimento": "âncora",
+    "justo": 26.75,
+    "preco": 33.64,
+    "potencial": -0.20481569560047563,
+    "avisos": 5,
+    "moat": false
+  },
+  {
+    "ticker": "ALUP3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ALUP4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "AMAR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "AMBP3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "saneamento",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "AMER3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-ciclico",
+    "crescimento": "fundamental",
+    "justo": 3.51,
+    "preco": 5.55,
+    "potencial": -0.3675675675675676,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "AMOB3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ANIM3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "educacao",
+    "crescimento": "g = 0",
+    "justo": 2.69,
+    "preco": 2.93,
+    "potencial": -0.08191126279863488,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "ARML3",
+    "saida": "Porta 0 · histórico",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "ARND3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "emp-adm-part-intermediacao-financeira",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "ASAI3",
+    "saida": "Porta 0 · histórico",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ATED3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "educacao",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "AUAU3",
+    "saida": "Porta 0 · histórico",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "AURE3",
+    "saida": "Porta 0 · histórico",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "AVLL3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "AXIA3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "emp-adm-part-energia-eletrica",
+    "crescimento": "fundamental",
+    "justo": 19.27,
+    "preco": 55.28,
+    "potencial": -0.651410998552822,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "AXIA7",
+    "saida": "outra recusa",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Nenhum exercício de AXIA7 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "AZEV3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "AZEV4",
+    "saida": "sem via aplicável",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de AZEV4 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "AZTE3",
+    "saida": "outra recusa",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Nenhum exercício de AZTE3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "AZUL3",
+    "saida": "Porta 0 · solvência",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "AZUL97",
+    "saida": "insumos indisponíveis",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo não encontrado na fonte."
+  },
+  {
+    "ticker": "AZUL98",
+    "saida": "insumos indisponíveis",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo não encontrado na fonte."
+  },
+  {
+    "ticker": "AZUL99",
+    "saida": "insumos indisponíveis",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo não encontrado na fonte."
+  },
+  {
+    "ticker": "AZZA3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-ciclico",
+    "crescimento": "âncora",
+    "justo": 16.11,
+    "preco": 17.69,
+    "potencial": -0.0893159977388356,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "B1003",
+    "saida": "outra recusa",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Nenhum exercício de B1003 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "B3SA3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "servicos-financeiros",
+    "crescimento": "fundamental",
+    "justo": 3.26,
+    "preco": 17.37,
+    "potencial": -0.8123200921128383,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "BALM3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BALM4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BAUH4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BAZA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BBAS3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos-financeiros",
+    "crescimento": "fundamental",
+    "justo": 31.52,
+    "preco": 22.52,
+    "potencial": 0.3996447602131439,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "BBDC3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos-financeiros",
+    "crescimento": "fundamental",
+    "justo": 12.73,
+    "preco": 15.81,
+    "potencial": -0.19481340923466162,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "BBDC4",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos-financeiros",
+    "crescimento": "fundamental",
+    "justo": 12.48,
+    "preco": 17.9,
+    "potencial": -0.3027932960893854,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "BBSE3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos-financeiros",
+    "crescimento": "âncora",
+    "justo": 50.04,
+    "preco": 42.16,
+    "potencial": 0.18690702087286534,
+    "avisos": 4,
+    "moat": true
+  },
+  {
+    "ticker": "BDLL3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "BDLL4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "BEEF3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-nao-ciclico",
+    "crescimento": "fundamental",
+    "justo": 9.75,
+    "preco": 3.95,
+    "potencial": 1.4683544303797467,
+    "avisos": 1,
+    "moat": false
+  },
+  {
+    "ticker": "BEES3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BEES4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BGIP3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BGIP4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BHIA3",
+    "saida": "sem via aplicável",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de BHIA3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "BIED3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "educacao",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BIOM3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BLAU3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BMEB3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BMEB4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BMGB4",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos-financeiros",
+    "crescimento": "fundamental",
+    "justo": 7.43,
+    "preco": 5.98,
+    "potencial": 0.24247491638795973,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "BMIN4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BMKS3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BMOB3",
+    "saida": "Porta 0 · histórico",
+    "setor": "tecnologia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "BNBR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BOBR4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "BPAC11",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos-financeiros",
+    "crescimento": "fundamental",
+    "justo": 46.0,
+    "preco": 59.24,
+    "potencial": -0.2234976367319379,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "BPAC3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BPAC5",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BRAP3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BRAP4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "",
+    "crescimento": "fundamental",
+    "justo": 16.28,
+    "preco": 22.48,
+    "potencial": -0.2758007117437722,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "BRAV3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "energia",
+    "crescimento": "âncora",
+    "justo": 14.35,
+    "preco": 17.88,
+    "potencial": -0.19742729306487694,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "BRBI11",
+    "saida": "Porta 0 · histórico",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "BRKM3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "BRKM5",
+    "saida": "Porta 0 · solvência",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "BRKM6",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "BRSR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BRSR5",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BRSR6",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "",
+    "crescimento": "fundamental",
+    "justo": 13.76,
+    "preco": 14.88,
+    "potencial": -0.07526881720430113,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "BRST3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "telecomunicacoes",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "BSLI3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BSLI4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CAMB3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CAML3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "consumo-nao-ciclico",
+    "crescimento": "âncora",
+    "justo": 2.58,
+    "preco": 4.94,
+    "potencial": -0.4777327935222672,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "CASH3",
+    "saida": "Porta 0 · histórico",
+    "setor": "tecnologia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "CBAV3",
+    "saida": "Porta 0 · histórico",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "CBEE3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CEAB3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-ciclico",
+    "crescimento": "âncora",
+    "justo": 3.55,
+    "preco": 9.21,
+    "potencial": -0.6145494028230185,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "CEBR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CEBR5",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CEBR6",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CEDO4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CEEB3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CEED3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "CEGR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CGAS3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CGAS5",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CGRA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CGRA4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CLSC3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CLSC4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CMIG3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CMIG4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "energia",
+    "crescimento": "fundamental",
+    "justo": 5.62,
+    "preco": 11.26,
+    "potencial": -0.5008880994671403,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "CMIN3",
+    "saida": "Porta 0 · histórico",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "COCE3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "COCE5",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "COGN3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "educacao",
+    "crescimento": "âncora",
+    "justo": 2.72,
+    "preco": 2.44,
+    "potencial": 0.11475409836065584,
+    "avisos": 5,
+    "moat": false
+  },
+  {
+    "ticker": "CPFE3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "energia",
+    "crescimento": "fundamental",
+    "justo": 26.51,
+    "preco": 46.83,
+    "potencial": -0.43390988682468495,
+    "avisos": 1,
+    "moat": false
+  },
+  {
+    "ticker": "CPLE3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "energia",
+    "crescimento": "fundamental",
+    "justo": 1.75,
+    "preco": 15.85,
+    "potencial": -0.889589905362776,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "CRPG5",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CRPG6",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CSAN3",
+    "saida": "sem via aplicável",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de CSAN3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "CSED3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "educacao",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "CSMG3",
+    "saida": "Porta 0 · solvência",
+    "setor": "saneamento",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "CSNA3",
+    "saida": "sem via aplicável",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de CSNA3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "CSUD3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CTAX3",
+    "saida": "outra recusa",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Nenhum exercício de CTAX3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "CTKA4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CURY3",
+    "saida": "Porta 0 · histórico",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "CVCB3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-ciclico",
+    "crescimento": "âncora",
+    "justo": 1.52,
+    "preco": 1.88,
+    "potencial": -0.1914893617021276,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "CXSE3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "servicos-financeiros",
+    "crescimento": "âncora",
+    "justo": 8.26,
+    "preco": 19.98,
+    "potencial": -0.5865865865865866,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "CYRE3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "construcao-e-imobiliario",
+    "crescimento": "âncora",
+    "justo": 8.52,
+    "preco": 25.6,
+    "potencial": -0.6671875,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "CYRE4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "",
+    "crescimento": "âncora",
+    "justo": 7.48,
+    "preco": 24.11,
+    "potencial": -0.6897552882621318,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "DASA3",
+    "saida": "sem via aplicável",
+    "setor": "saude",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de DASA3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "DESK3",
+    "saida": "Porta 0 · histórico",
+    "setor": "telecomunicacoes",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "DEXP3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "DEXP4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "DIRR3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "construcao-e-imobiliario",
+    "crescimento": "fundamental",
+    "justo": 1.81,
+    "preco": 11.46,
+    "potencial": -0.8420593368237347,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "DMVF3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "DOHL4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "DOTZ3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "DTCY3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "DXCO3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "materiais-basicos",
+    "crescimento": "fundamental",
+    "justo": 3.42,
+    "preco": 5.64,
+    "potencial": -0.3936170212765957,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "EALT3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EALT4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ECOM3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "comunicacao-e-informatica",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ECOR3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "infraestrutura",
+    "crescimento": "fundamental",
+    "justo": 17.62,
+    "preco": 7.92,
+    "potencial": 1.224747474747475,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "EGIE3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "energia",
+    "crescimento": "fundamental",
+    "justo": 42.59,
+    "preco": 30.14,
+    "potencial": 0.4130723291307234,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "EKTR4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EMAE4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EMBJ3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "maquinas-equipamentos-veiculos-e-pecas",
+    "crescimento": "fundamental",
+    "justo": 18.24,
+    "preco": 94.98,
+    "potencial": -0.8079595704358813,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "ENEV3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "energia",
+    "crescimento": "âncora",
+    "justo": 4.4,
+    "preco": 27.59,
+    "potencial": -0.8405219282348676,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "ENGI11",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "energia",
+    "crescimento": "fundamental",
+    "justo": 79.0,
+    "preco": 51.43,
+    "potencial": 0.5360684425432627,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "ENGI3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ENGI4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ENJU3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "tecnologia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ENMT3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ENMT4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EPAR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EQPA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EQPA5",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EQTL3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "energia",
+    "crescimento": "âncora",
+    "justo": 13.53,
+    "preco": 39.16,
+    "potencial": -0.6544943820224719,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "ESPA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ESTR4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "ETER3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EUCA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EUCA4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EVEN3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "construcao-e-imobiliario",
+    "crescimento": "âncora",
+    "justo": 3.64,
+    "preco": 4.23,
+    "potencial": -0.1394799054373523,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "EZTC3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "construcao-e-imobiliario",
+    "crescimento": "âncora",
+    "justo": 4.55,
+    "preco": 13.0,
+    "potencial": -0.6499999999999999,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "FASA3",
+    "saida": "outra recusa",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Nenhum exercício de FASA3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "FESA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "FESA4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "",
+    "crescimento": "fundamental",
+    "justo": 6.93,
+    "preco": 5.61,
+    "potencial": 0.2352941176470587,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "FHER3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "FICT3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "outros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "FIEI3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "FIQE3",
+    "saida": "Porta 0 · histórico",
+    "setor": "telecomunicacoes",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "FLRY3",
+    "saida": "Porta 0 · solvência",
+    "setor": "saude",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "FRAS3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-ciclico",
+    "crescimento": "âncora",
+    "justo": 5.54,
+    "preco": 22.65,
+    "potencial": -0.7554083885209714,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "GEPA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "GEPA4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "GFSA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "GGBR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "GGBR4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "materiais-basicos",
+    "crescimento": "âncora",
+    "justo": 6.68,
+    "preco": 25.34,
+    "potencial": -0.7363851617995264,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "GGPS3",
+    "saida": "Porta 0 · histórico",
+    "setor": "servicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "GMAT3",
+    "saida": "Porta 0 · histórico",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "GOAU3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "GOAU4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "materiais-basicos",
+    "crescimento": "âncora",
+    "justo": 25.39,
+    "preco": 11.17,
+    "potencial": 1.2730528200537155,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "GRND3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-ciclico",
+    "crescimento": "fundamental",
+    "justo": 2.46,
+    "preco": 3.68,
+    "potencial": -0.3315217391304348,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "GSHP3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "HAGA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "HAGA4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "HAPV3",
+    "saida": "sem via aplicável",
+    "setor": "saude",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de HAPV3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "HBOR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "HBRE3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "HBSA3",
+    "saida": "sem via aplicável",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de HBSA3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "HOOT4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "HYPE3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "consumo-nao-ciclico",
+    "crescimento": "fundamental",
+    "justo": 10.16,
+    "preco": 23.16,
+    "potencial": -0.5613126079447323,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "IFCM3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "tecnologia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "IGTI11",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "construcao-e-imobiliario",
+    "crescimento": "fundamental",
+    "justo": 4.46,
+    "preco": 26.43,
+    "potencial": -0.8312523647370412,
+    "avisos": 5,
+    "moat": false
+  },
+  {
+    "ticker": "IGTI3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "IGTI4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "INEP3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "INEP4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "INTB3",
+    "saida": "Porta 0 · histórico",
+    "setor": "tecnologia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "IRBR3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos-financeiros",
+    "crescimento": "âncora",
+    "justo": 108.44,
+    "preco": 62.21,
+    "potencial": 0.7431281144510529,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "ISAE3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ISAE4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "energia",
+    "crescimento": "fundamental",
+    "justo": 27.56,
+    "preco": 27.7,
+    "potencial": -0.005054151624548757,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "ITSA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "holdings",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ITSA4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "",
+    "crescimento": "fundamental",
+    "justo": 4.59,
+    "preco": 13.95,
+    "potencial": -0.6709677419354839,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "ITUB3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos-financeiros",
+    "crescimento": "fundamental",
+    "justo": 41.67,
+    "preco": 45.72,
+    "potencial": -0.08858267716535427,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "ITUB4",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos-financeiros",
+    "crescimento": "fundamental",
+    "justo": 40.23,
+    "preco": 41.92,
+    "potencial": -0.04031488549618332,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "JALL3",
+    "saida": "Porta 0 · histórico",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "JFEN3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "JHSF3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "construcao-e-imobiliario",
+    "crescimento": "âncora",
+    "justo": 7.1,
+    "preco": 11.45,
+    "potencial": -0.3799126637554585,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "JSLG3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "bens-industriais",
+    "crescimento": "fundamental",
+    "justo": 4.71,
+    "preco": 5.82,
+    "potencial": -0.19072164948453613,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "KEPL3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "bens-industriais",
+    "crescimento": "âncora",
+    "justo": 4.61,
+    "preco": 6.68,
+    "potencial": -0.309880239520958,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "KLBN11",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "materiais-basicos",
+    "crescimento": "âncora",
+    "justo": 10.75,
+    "preco": 19.47,
+    "potencial": -0.4478685156651258,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "KLBN3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "materiais-basicos",
+    "crescimento": "âncora",
+    "justo": 2.14,
+    "preco": 4.03,
+    "potencial": -0.46898263027295284,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "KLBN4",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "",
+    "crescimento": "âncora",
+    "justo": 2.16,
+    "preco": 3.85,
+    "potencial": -0.43896103896103894,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "LAND3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "LAVV3",
+    "saida": "Porta 0 · histórico",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "LEVE3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-ciclico",
+    "crescimento": "fundamental",
+    "justo": 20.34,
+    "preco": 32.81,
+    "potencial": -0.3800670527278269,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "LIGT3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "energia",
+    "crescimento": "fundamental",
+    "justo": 1.85,
+    "preco": 3.57,
+    "potencial": -0.4817927170868347,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "LJQQ3",
+    "saida": "Porta 0 · histórico",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "LOGG3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "construcao-e-imobiliario",
+    "crescimento": "âncora",
+    "justo": 9.35,
+    "preco": 24.71,
+    "potencial": -0.6216106839336302,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "LOGN3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "LPSB3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "LREN3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-ciclico",
+    "crescimento": "fundamental",
+    "justo": 6.88,
+    "preco": 11.35,
+    "potencial": -0.3938325991189427,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "LUPA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "LUXM4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "LWSA3",
+    "saida": "sem via aplicável",
+    "setor": "tecnologia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de LWSA3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "MAPT3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "outros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "MATD3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "saude",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "MBRF3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "emp-adm-part-alimentos",
+    "crescimento": "âncora",
+    "justo": 4.19,
+    "preco": 17.69,
+    "potencial": -0.7631430186546071,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "MDIA3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-nao-ciclico",
+    "crescimento": "fundamental",
+    "justo": 8.46,
+    "preco": 17.78,
+    "potencial": -0.5241844769403824,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "MDNE3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "construcao-e-imobiliario",
+    "crescimento": "âncora",
+    "justo": 1.15,
+    "preco": 25.81,
+    "potencial": -0.9554436265013562,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "MEAL3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MELK3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "MGEL4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MGLU3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-ciclico",
+    "crescimento": "âncora",
+    "justo": 3.68,
+    "preco": 5.79,
+    "potencial": -0.3644214162348877,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "MILS3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "bens-industriais",
+    "crescimento": "âncora",
+    "justo": 7.8,
+    "preco": 15.79,
+    "potencial": -0.506016466117796,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "MLAS3",
+    "saida": "Porta 0 · histórico",
+    "setor": "tecnologia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "MNDL3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MNPR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MOTV3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "infraestrutura",
+    "crescimento": "fundamental",
+    "justo": 11.48,
+    "preco": 16.78,
+    "potencial": -0.3158522050059595,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "MOVI3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-ciclico",
+    "crescimento": "fundamental",
+    "justo": 35.39,
+    "preco": 8.11,
+    "potencial": 3.3637484586929722,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "MRVE3",
+    "saida": "sem via aplicável",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de MRVE3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "MSPA4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MTRE3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MTSA4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MULT3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "construcao-e-imobiliario",
+    "crescimento": "fundamental",
+    "justo": 6.25,
+    "preco": 30.18,
+    "potencial": -0.792909211398277,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "MWET3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MWET4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MYPK3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "consumo-ciclico",
+    "crescimento": "fundamental",
+    "justo": 8.84,
+    "preco": 9.81,
+    "potencial": -0.0988786952089705,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "NATU3",
+    "saida": "Porta 0 · histórico",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "NEXP3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "NORD3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "NUTR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "OBTC3",
+    "saida": "outra recusa",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Nenhum exercício de OBTC3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "OFSA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ONCO11",
+    "saida": "insumos indisponíveis",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Sem cotações de ONCO11 na janela de análise."
+  },
+  {
+    "ticker": "ONCO3",
+    "saida": "Porta 0 · histórico",
+    "setor": "saude",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "OPCT3",
+    "saida": "Porta 0 · histórico",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ORVR3",
+    "saida": "Porta 0 · histórico",
+    "setor": "saneamento",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "OSXB3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "PASS3",
+    "saida": "Porta 0 · histórico",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "PATI3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PATI4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PCAR3",
+    "saida": "sem via aplicável",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de PCAR3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "PDGR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "PDTC3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "tecnologia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PEAB3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PEAB4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PETR3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "energia",
+    "crescimento": "fundamental",
+    "justo": 32.96,
+    "preco": 52.01,
+    "potencial": -0.3662757162084214,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "PETR4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "energia",
+    "crescimento": "fundamental",
+    "justo": 34.79,
+    "preco": 47.11,
+    "potencial": -0.26151560178306094,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "PFRM3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PGMN3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-nao-ciclico",
+    "crescimento": "fundamental",
+    "justo": 12.37,
+    "preco": 3.84,
+    "potencial": 2.2213541666666665,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "PINE3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PINE4",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "",
+    "crescimento": "fundamental",
+    "justo": 12.44,
+    "preco": 11.14,
+    "potencial": 0.11669658886894065,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "PLAS3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "PLPL3",
+    "saida": "Porta 0 · histórico",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "PMAM3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "PNVL3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "consumo-nao-ciclico",
+    "crescimento": "âncora",
+    "justo": 4.53,
+    "preco": 13.16,
+    "potencial": -0.6557750759878419,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "POMO3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "consumo-ciclico",
+    "crescimento": "fundamental",
+    "justo": 2.58,
+    "preco": 4.26,
+    "potencial": -0.39436619718309857,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "POMO4",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "",
+    "crescimento": "fundamental",
+    "justo": 2.53,
+    "preco": 4.58,
+    "potencial": -0.4475982532751092,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "POSI3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "tecnologia",
+    "crescimento": "âncora",
+    "justo": 2.66,
+    "preco": 3.42,
+    "potencial": -0.22222222222222215,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "PRIO3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "energia",
+    "crescimento": "âncora",
+    "justo": 19.0,
+    "preco": 60.19,
+    "potencial": -0.6843329456720385,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "PRNR3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos",
+    "crescimento": "âncora",
+    "justo": 0.87,
+    "preco": 18.15,
+    "potencial": -0.9520661157024792,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "PSSA3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos-financeiros",
+    "crescimento": "fundamental",
+    "justo": 29.71,
+    "preco": 51.66,
+    "potencial": -0.42489353464963214,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "PTBL3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "QUAL3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "saude",
+    "crescimento": "fundamental",
+    "justo": 8.66,
+    "preco": 1.5,
+    "potencial": 4.773333333333333,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "RADL3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-nao-ciclico",
+    "crescimento": "fundamental",
+    "justo": 5.41,
+    "preco": 19.99,
+    "potencial": -0.7293646823411706,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "RAIL3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "bens-industriais",
+    "crescimento": "g = 0",
+    "justo": 1.61,
+    "preco": 14.55,
+    "potencial": -0.8893470790378007,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "RAIZ4",
+    "saida": "Porta 0 · histórico",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "RANI3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "materiais",
+    "crescimento": "fundamental",
+    "justo": 5.59,
+    "preco": 7.66,
+    "potencial": -0.27023498694516973,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "RAPT3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "RAPT4",
+    "saida": "sem via aplicável",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de RAPT4 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "RCSL3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "RCSL4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "RDOR3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "saude",
+    "crescimento": "g = 0",
+    "justo": 13.02,
+    "preco": 37.13,
+    "potencial": -0.6493401562079182,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "RECV3",
+    "saida": "Porta 0 · histórico",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "REDE3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "RENT3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "consumo-ciclico",
+    "crescimento": "âncora",
+    "justo": 5.2,
+    "preco": 36.64,
+    "potencial": -0.8580786026200874,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "RENT4",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "",
+    "crescimento": "âncora",
+    "justo": 4.65,
+    "preco": 35.29,
+    "potencial": -0.8682346273731936,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "RIAA3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "textil-e-vestuario",
+    "crescimento": "fundamental",
+    "justo": 3.02,
+    "preco": 7.16,
+    "potencial": -0.5782122905027933,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "RNEW3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "RNEW4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ROMI3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "RPAD3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "RSUL4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "RVEE3",
+    "saida": "outra recusa",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Nenhum exercício de RVEE3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "SANB11",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "servicos-financeiros",
+    "crescimento": "fundamental",
+    "justo": 20.78,
+    "preco": 30.43,
+    "potencial": -0.3171212619125862,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "SANB3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "servicos-financeiros",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "SANB4",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "",
+    "crescimento": "fundamental",
+    "justo": 10.87,
+    "preco": 15.03,
+    "potencial": -0.27677977378576185,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "SAPR11",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "",
+    "crescimento": "fundamental",
+    "justo": 26.08,
+    "preco": 34.95,
+    "potencial": -0.2537911301859801,
+    "avisos": 5,
+    "moat": false
+  },
+  {
+    "ticker": "SAPR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "saneamento",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "SAPR4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "",
+    "crescimento": "fundamental",
+    "justo": 5.25,
+    "preco": 6.84,
+    "potencial": -0.23245614035087717,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "SAUD3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "servicos-medicos",
+    "crescimento": "g = 0",
+    "justo": 6.88,
+    "preco": 14.69,
+    "potencial": -0.5316541865214431,
+    "avisos": 5,
+    "moat": true
+  },
+  {
+    "ticker": "SBFG3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "consumo-ciclico",
+    "crescimento": "âncora",
+    "justo": 8.6,
+    "preco": 9.04,
+    "potencial": -0.04867256637168137,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "SBSP3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "saneamento",
+    "crescimento": "fundamental",
+    "justo": 10.2,
+    "preco": 26.53,
+    "potencial": -0.615529589144365,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "SCAR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "SEER3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "educacao",
+    "crescimento": "âncora",
+    "justo": 8.2,
+    "preco": 13.52,
+    "potencial": -0.39349112426035504,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "SEQL3",
+    "saida": "outra recusa",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Nenhum exercício de SEQL3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "SHOW3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "SHUL4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "",
+    "crescimento": "âncora",
+    "justo": 2.85,
+    "preco": 4.47,
+    "potencial": -0.36241610738255026,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "SIMH3",
+    "saida": "Porta 0 · histórico",
+    "setor": "holdings",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "SLCE3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-nao-ciclico",
+    "crescimento": "fundamental",
+    "justo": 6.02,
+    "preco": 16.41,
+    "potencial": -0.6331505179768434,
+    "avisos": 1,
+    "moat": false
+  },
+  {
+    "ticker": "SMFT3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-ciclico",
+    "crescimento": "âncora",
+    "justo": 2.81,
+    "preco": 17.97,
+    "potencial": -0.8436282693377851,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "SMTO3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-nao-ciclico",
+    "crescimento": "fundamental",
+    "justo": 33.39,
+    "preco": 20.6,
+    "potencial": 0.6208737864077669,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "SNSY5",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "SOJA3",
+    "saida": "Porta 0 · histórico",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "SOND5",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "SOND6",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "SUZB3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "materiais-basicos",
+    "crescimento": "fundamental",
+    "justo": 168.36,
+    "preco": 46.89,
+    "potencial": 2.5905310300703777,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "SYNE3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TAEE11",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "energia",
+    "crescimento": "fundamental",
+    "justo": 15.69,
+    "preco": 41.53,
+    "potencial": -0.6222008186852878,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "TAEE3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "energia",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TAEE4",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "",
+    "crescimento": "fundamental",
+    "justo": 5.57,
+    "preco": 14.05,
+    "potencial": -0.6035587188612099,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "TASA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "bens-industriais",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TASA4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TCSA3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TECN3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TELB3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "telecomunicacoes",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TELB4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TEND3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "construcao-e-imobiliario",
+    "crescimento": "g = 0",
+    "justo": 6.03,
+    "preco": 34.63,
+    "potencial": -0.825873520069304,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "TFCO4",
+    "saida": "Porta 0 · histórico",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "TGMA3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "bens-industriais",
+    "crescimento": "âncora",
+    "justo": 14.45,
+    "preco": 33.66,
+    "potencial": -0.5707070707070707,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "TIMS3",
+    "saida": "sem via aplicável",
+    "setor": "telecomunicacoes",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de TIMS3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "TOKY3",
+    "saida": "Porta 0 · histórico",
+    "setor": "comercio-atacado-e-varejo",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "TOTS3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "tecnologia",
+    "crescimento": "âncora",
+    "justo": 7.18,
+    "preco": 34.5,
+    "potencial": -0.7918840579710145,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "TPIS3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "infraestrutura",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TRIS3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TTEN3",
+    "saida": "Porta 0 · histórico",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "TUPY3",
+    "saida": "outra recusa",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Nenhum exercício de TUPY3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "UCAS3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "UGPA3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "energia",
+    "crescimento": "fundamental",
+    "justo": 12.64,
+    "preco": 37.42,
+    "potencial": -0.6622127204703367,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "UNIP3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "UNIP5",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "UNIP6",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "",
+    "crescimento": "âncora",
+    "justo": 54.27,
+    "preco": 56.97,
+    "potencial": -0.04739336492890988,
+    "avisos": 4,
+    "moat": false
+  },
+  {
+    "ticker": "USIM3",
+    "saida": "sem via aplicável",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de USIM3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "USIM5",
+    "saida": "sem via aplicável",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Os dados de USIM5 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "USIM6",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "VALE3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "materiais-basicos",
+    "crescimento": "fundamental",
+    "justo": 67.24,
+    "preco": 78.62,
+    "potencial": -0.14474688374459438,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "VAMO3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "consumo-ciclico",
+    "crescimento": "âncora",
+    "justo": 1.5,
+    "preco": 3.5,
+    "potencial": -0.5714285714285714,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "VBBR3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "energia",
+    "crescimento": "fundamental",
+    "justo": 34.23,
+    "preco": 36.99,
+    "potencial": -0.07461476074614774,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "VITT3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "materiais-basicos",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "VIVA3",
+    "saida": "Porta 0 · histórico",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "VIVR3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "construcao-e-imobiliario",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "VIVT3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "telecomunicacoes",
+    "crescimento": "g = 0",
+    "justo": 6.32,
+    "preco": 30.06,
+    "potencial": -0.7897538256819694,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "VLID3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "servicos",
+    "crescimento": "fundamental",
+    "justo": 5.77,
+    "preco": 17.88,
+    "potencial": -0.6772930648769575,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "VSTE3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "VTRU3",
+    "saida": "Porta 0 · histórico",
+    "setor": "educacao",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "VULC3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "consumo-ciclico",
+    "crescimento": "fundamental",
+    "justo": 8.91,
+    "preco": 13.01,
+    "potencial": -0.31514219830899304,
+    "avisos": 1,
+    "moat": false
+  },
+  {
+    "ticker": "VVEO3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-nao-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "WDCN3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "comercio-atacado-e-varejo",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "WEGE3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "bens-industriais",
+    "crescimento": "fundamental",
+    "justo": 11.16,
+    "preco": 51.74,
+    "potencial": -0.7843061461151912,
+    "avisos": 2,
+    "moat": false
+  },
+  {
+    "ticker": "WEST3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "WHRL3",
+    "saida": "Porta 0 · liquidez",
+    "setor": "consumo-ciclico",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "WHRL4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "WIZC3",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
+    "setor": "servicos-financeiros",
+    "crescimento": "âncora",
+    "justo": 19.53,
+    "preco": 8.1,
+    "potencial": 1.4111111111111114,
+    "avisos": 3,
+    "moat": false
+  },
+  {
+    "ticker": "WLMM4",
+    "saida": "Porta 0 · liquidez",
+    "setor": "",
+    "avisos": 0,
+    "moat": false,
+    "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "YDUQ3",
+    "saida": "avaliado",
+    "via": "DCF sobre lucro distribuível",
+    "setor": "educacao",
+    "crescimento": "âncora",
+    "justo": 3.03,
+    "preco": 9.64,
+    "potencial": -0.6856846473029047,
+    "avisos": 3,
+    "moat": false
+  }
+]

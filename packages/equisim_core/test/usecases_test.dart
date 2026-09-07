@@ -27,19 +27,27 @@ FundamentalsSnapshot complete(int year, {double scale = 1.0}) =>
       shortTermInvestments: 50,
       shortTermDebt: 100,
       longTermDebt: 400,
-      totalStockholderEquity: 1500,
-      bookValuePerShare: 15,
+      totalStockholderEquity: 1500 * scale,
+      bookValuePerShare: 15 * scale,
       operatingCashFlow: 320 * scale,
       freeCashFlow: 250 * scale,
+      // NOPAT publicado e patrimônio crescendo com o lucro retido: é o que a
+      // decisão 25 exige para reconstituir base de capital e retorno.
+      nopat: 200 * scale,
       sharesOutstanding: 100,
+      sharesOutstandingAsOf: 100,
       marketCap: 3000,
       enterpriseToEbitda: 6.0,
     );
 
 /// Série de exercícios crescendo à taxa informada.
+///
+/// Dez exercícios por padrão: a Porta 0 exige ao menos oito publicados, que é o
+/// mínimo em que a janela de ciclo existe e os testes das guardas têm graus de
+/// liberdade (decisão 25).
 List<FundamentalsSnapshot> growingHistory({
   required double rate,
-  int years = 6,
+  int years = 10,
   int endYear = 2025,
 }) {
   final out = <FundamentalsSnapshot>[];
@@ -61,7 +69,7 @@ void main() {
         metricName: 'FCF',
       );
       expect(estimate.rate, closeTo(0.10, 1e-9));
-      expect(estimate.periodsUsed, 6);
+      expect(estimate.periodsUsed, 10);
       expect(estimate.clamped, isFalse);
     });
 
@@ -111,9 +119,18 @@ void main() {
     });
 
     test('perpetuidade nunca supera o crescimento da economia', () {
-      expect(GrowthEstimator.perpetual(explicitGrowth: 0.15), 0.03);
-      expect(GrowthEstimator.perpetual(explicitGrowth: 0.01), 0.01);
-      expect(GrowthEstimator.perpetual(explicitGrowth: -0.05), 0.0);
+      // O teto passa a ser informado, não constante: 6,52% é a composição do
+      // crescimento real medido do IBC-Br com o IPCA observado (decisão 25).
+      const teto = 0.0652;
+      expect(
+          GrowthEstimator.perpetual(explicitGrowth: 0.15, economyGrowth: teto),
+          teto);
+      expect(
+          GrowthEstimator.perpetual(explicitGrowth: 0.01, economyGrowth: teto),
+          0.01);
+      expect(
+          GrowthEstimator.perpetual(explicitGrowth: -0.05, economyGrowth: teto),
+          0.0);
     });
   });
 
@@ -145,13 +162,21 @@ void main() {
           reason: 'com dívida e benefício fiscal, o WACC fica abaixo do Ke');
     });
 
-    test('cai para LPA quando falta fluxo de caixa', () {
+    test('sem lucro operacional recorrente, a Porta 3 manda para a via do '
+        'acionista', () {
+      // Antes da decisão 25 a via caía pelo sinal do fluxo de caixa de um
+      // exercício. Agora quem decide é o lucro operacional recorrente, que é o
+      // fluxo de manutenção sob a aproximação de capex de manutenção igual à
+      // depreciação — o que não penaliza quem está em ciclo de investimento.
       final history = growingHistory(rate: 0.08)
           .map((s) => FundamentalsSnapshot(
                 ticker: s.ticker,
                 fiscalPeriodEnd: s.fiscalPeriodEnd,
                 earningsPerShare: s.earningsPerShare,
+                netIncome: s.netIncome,
+                bookValuePerShare: s.bookValuePerShare,
                 sharesOutstanding: s.sharesOutstanding,
+                sharesOutstandingAsOf: s.sharesOutstandingAsOf,
               ))
           .toList();
 
@@ -162,17 +187,19 @@ void main() {
       expect(valuation.discountRate, closeTo(capm.costOfEquity, 1e-12),
           reason: 'fluxo do acionista se desconta ao Ke, não ao WACC');
       expect(
-        valuation.warnings.any((w) => w.contains('lucro por ação')),
+        valuation.warnings.any((w) => w.contains('lucro operacional')),
         isTrue,
-        reason: 'a queda de modelo precisa ficar visível',
+        reason: 'a escolha de via precisa ficar visível',
       );
     });
 
-    test('só com patrimônio, cai para o piso contábil e o declara', () {
-      // Este ativo caía em Gordon sobre dividendos, que era o terceiro degrau
-      // da cascata. Sem provento no domínio ele desce mais um: o valor
-      // patrimonial por ação, que o resultado precisa rotular como piso — e
-      // não como valor intrínseco.
+    test('sem base de capital reconstituível, recusa em vez de inventar piso',
+        () {
+      // Até a decisão 25 este ativo caía para múltiplos e devolvia o valor
+      // patrimonial rotulado como piso contábil. O degrau saiu: ele reconstruía
+      // o valor da firma a partir do múltiplo que o mercado já atribui ao
+      // próprio ativo, devolvendo o preço de mercado por construção — e um
+      // potencial de valorização nulo por aritmética, não por análise.
       final history = [
         for (var y = 2020; y <= 2025; y++)
           FundamentalsSnapshot(
@@ -183,18 +210,15 @@ void main() {
       ];
 
       final result = ValuationCascade.evaluate(inputsWith(history));
-      expect(result.isOk, isTrue);
-      final valuation = result.unwrap();
-      expect(valuation.model, ValuationModel.multiples);
-      expect(valuation.fairValue.reais, closeTo(15.0, 0.01));
-      expect(
-        valuation.warnings.any((w) => w.contains('piso contábil')),
-        isTrue,
-        reason: 'o piso não pode ser apresentado como valor intrínseco',
-      );
+      expect(result.isErr, isTrue,
+          reason: 'sem contagem de ações do exercício não há patrimônio nem '
+              'capital investido, e nenhuma das duas vias se sustenta');
+      expect(result.failureOrNull, isA<InsufficientData>());
     });
 
-    test('cai para múltiplos como último recurso', () {
+    test('múltiplo próprio não é mais degrau de cascata', () {
+      // O EV/EBITDA da própria empresa reconstrói o próprio preço. Com dado
+      // suficiente só para ele, a resposta correta é recusar.
       final history = [
         for (var y = 2020; y <= 2025; y++)
           FundamentalsSnapshot(
@@ -209,15 +233,8 @@ void main() {
           ),
       ];
       final result = ValuationCascade.evaluate(inputsWith(history));
-      expect(result.isOk, isTrue);
-      final valuation = result.unwrap();
-      expect(valuation.model, ValuationModel.multiples);
-      // EV = 400 × 6 = 2.400; dívida líquida = 500 − 100 = 400; equity = 2.000.
-      expect(valuation.fairValue.reais, closeTo(20.0, 0.01));
-      expect(
-        valuation.warnings.any((w) => w.contains('referência grosseira')),
-        isTrue,
-      );
+      expect(result.isErr, isTrue);
+      expect(result.failureOrNull, isA<InsufficientData>());
     });
 
     test('falha explicitamente quando nada é aplicável', () {
@@ -418,172 +435,6 @@ void main() {
     });
   });
 
-  group('BaseFlowNormalizer', () {
-    test('série comportada passa intacta', () {
-      final base = BaseFlowNormalizer.normalize([10, 11, 12, 13, 14]);
-      expect(base.value, 14);
-      expect(base.winsorized, isFalse);
-      expect(base.median, 12);
-    });
-
-    test('exercício atípico é aparado para a borda da banda', () {
-      // SAPR11 em 21/08/2026: fluxo livre de R$ 4,44 bi contra mediana de
-      // R$ 0,47 bi em cinco exercícios.
-      final base =
-          BaseFlowNormalizer.normalize([0.380, 0.242, 0.468, 0.866, 4.445]);
-      expect(base.winsorized, isTrue);
-      expect(base.median, closeTo(0.468, 1e-9));
-      expect(base.value, closeTo(0.468 * 1.5, 1e-9),
-          reason: 'apara para a borda, não substitui pela mediana');
-      expect(base.observed, closeTo(4.445, 1e-9));
-      expect(base.deviationFactor, closeTo(9.5, 0.1));
-    });
-
-    test('exercício muito abaixo da mediana também é aparado', () {
-      final base = BaseFlowNormalizer.normalize([100, 90, 95, 88, 10]);
-      expect(base.winsorized, isTrue);
-      expect(base.value, closeTo(90 * 0.5, 1e-9));
-    });
-
-    test('preserva a direção da tendência dentro da banda', () {
-      // Queda consistente, sem exercício isolado: não há o que corrigir.
-      final base = BaseFlowNormalizer.normalize([20, 18, 16, 14, 12]);
-      expect(base.winsorized, isFalse);
-      expect(base.value, 12);
-    });
-
-    test('mediana não positiva não autoriza aparar nada', () {
-      final base = BaseFlowNormalizer.normalize([-5, -3, -4, 1, 8]);
-      expect(base.winsorized, isFalse);
-      expect(base.value, 8, reason: 'sem mediana positiva não há banda válida');
-      expect(base.median, lessThanOrEqualTo(0));
-    });
-
-    test('amostra curta demais não sustenta mediana', () {
-      final base = BaseFlowNormalizer.normalize([3, 40]);
-      expect(base.winsorized, isFalse);
-      expect(base.value, 40);
-      expect(base.median, isNull);
-    });
-
-    test('usa apenas os exercícios mais recentes da janela', () {
-      final base = BaseFlowNormalizer.normalize(
-        [1000, 1000, 1000, 10, 11, 12, 13, 14],
-      );
-      expect(base.periodsUsed, BaseFlowNormalizer.defaultWindow);
-      expect(base.median, 12, reason: 'os exercicios antigos de 1.000 ficam de fora');
-    });
-
-    test('a amostra exposta é a da janela, rotulada e em ordem cronológica', () {
-      final base = BaseFlowNormalizer.normalize(
-        [1000, 1000, 1000, 10, 11, 12, 13, 14],
-        labels: const [
-          '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025',
-        ],
-      );
-      expect([for (final p in base.sample) p.label],
-          ['2021', '2022', '2023', '2024', '2025']);
-      expect([for (final p in base.sample) p.value], [10, 11, 12, 13, 14]);
-      expect(base.sample.last.isObserved, isTrue);
-      expect([for (final p in base.sample) p.definesMedian],
-          [false, false, true, false, false]);
-    });
-
-    test('marca exatamente um exercício central em amostra ímpar, mesmo com '
-        'valores repetidos', () {
-      // Comparar por valor marcaria os quatro pontos iguais a 10 e sugeriria
-      // que todos entraram na conta da mediana.
-      final base = BaseFlowNormalizer.normalize([10, 10, 10, 10, 40]);
-      expect(base.median, 10);
-      expect(base.sample.where((p) => p.definesMedian).length, 1);
-    });
-
-    test('amostra par marca os dois exercícios centrais', () {
-      final base = BaseFlowNormalizer.normalize(
-        [10, 20, 30, 40],
-        window: 4,
-        labels: const ['2022', '2023', '2024', '2025'],
-      );
-      expect(base.median, 25);
-      expect([for (final p in base.sample) if (p.definesMedian) p.label],
-          ['2023', '2024']);
-    });
-
-    test('a banda exposta acompanha a tolerância aplicada', () {
-      final base = BaseFlowNormalizer.normalize(
-        [10, 11, 12, 13, 14],
-        tolerance: 0.25,
-      );
-      expect(base.tolerance, 0.25);
-      expect(base.lowerBound, closeTo(9, 1e-9));
-      expect(base.upperBound, closeTo(15, 1e-9));
-    });
-
-    test('sem banda válida não há bordas a exibir', () {
-      final base = BaseFlowNormalizer.normalize([-5, -3, -4, 1, 8]);
-      expect(base.lowerBound, isNull);
-      expect(base.upperBound, isNull);
-      expect(base.sample, hasLength(5),
-          reason: 'a amostra segue auditável mesmo sem winsorização');
-    });
-
-    test('mediana que é resíduo numérico não autoriza banda', () {
-      // `mediana > 0` sozinho deixaria passar: a banda sairia com largura
-      // desprezível e o fator de desvio explodiria para 1e18.
-      final base = BaseFlowNormalizer.normalize([-2e9, -1e9, 1e-9, 3e9, 4e9]);
-      expect(base.hasBand, isFalse);
-      expect(base.winsorized, isFalse);
-      expect(base.value, 4e9, reason: 'sem banda válida, adota o observado');
-      expect(base.lowerBound, isNull);
-      expect(base.upperBound, isNull);
-      expect(base.deviationFactor, isNull);
-    });
-
-    test('mediana pequena mas na escala da amostra continua valendo', () {
-      // O corte é relativo: em lucro por papel, uma mediana de R$ 0,02 é
-      // legítima e precisa produzir banda.
-      final base = BaseFlowNormalizer.normalize([0.018, 0.020, 0.022, 0.019, 0.9]);
-      expect(base.hasBand, isTrue);
-      expect(base.median, closeTo(0.020, 1e-12));
-      expect(base.value, closeTo(0.030, 1e-12));
-      expect(base.deviationFactor, closeTo(45, 1e-9));
-    });
-
-    test('valor não finito é descartado como exercício ausente', () {
-      // `NaN` derrota toda comparação: sem o descarte, a mediana saía
-      // positiva, a banda saía NaN e o fluxo-base chegava contaminado à
-      // projeção sem que nada acusasse.
-      final base = BaseFlowNormalizer.normalize(
-        [1.0, 2.0, 3.0, double.nan, 4.0],
-        labels: const ['2021', '2022', '2023', '2024', '2025'],
-      );
-      expect(base.value.isFinite, isTrue);
-      expect([for (final p in base.sample) p.label],
-          ['2021', '2022', '2023', '2025']);
-      expect(base.periodsUsed, 4);
-      expect(base.median, closeTo(2.5, 1e-12));
-    });
-
-    test('observado não finito não vira fluxo-base', () {
-      final base = BaseFlowNormalizer.normalize([1.0, 2.0, double.infinity]);
-      expect(base.observed, 2.0);
-      expect(base.value, 2.0);
-      expect(base.value.isFinite, isTrue);
-    });
-
-    test('série inteiramente não finita não produz base', () {
-      final base = BaseFlowNormalizer.normalize([double.nan, double.infinity]);
-      expect(base.value, 0);
-      expect(base.periodsUsed, 0);
-      expect(base.median, isNull);
-    });
-
-    test('rótulo ausente cai para a posição relativa do exercício', () {
-      final base = BaseFlowNormalizer.normalize([10, 11, 12]);
-      expect([for (final p in base.sample) p.label], ['T-2', 'T-1', 'T-0']);
-    });
-  });
-
   group('MarketAnchors — unidades', () {
     test('crescimento perpétuo composto real com inflação', () {
       const anchors = MarketAnchors(
@@ -592,11 +443,12 @@ void main() {
         inflationCagr: 0.05,
         observedYears: 10,
       );
-      // (1 + 3%) × (1 + 5%) − 1
-      expect(anchors.nominalEconomyGrowth, closeTo(0.0815, 1e-6));
+      // (1 + 1,45%) × (1 + 5%) − 1. A parcela real deixou de ser a constante
+      // de 3% e passou a ser medida do IBC-Br (decisão 25).
+      expect(anchors.nominalEconomyGrowth, closeTo(0.0652, 1e-4));
       expect(
         anchors.nominalEconomyGrowth,
-        greaterThan(GrowthEstimator.realEconomyGrowth),
+        greaterThan(anchors.realEconomyGrowth),
         reason: 'o teto nominal precisa superar o real, ou a unidade se mistura',
       );
     });
@@ -823,8 +675,11 @@ void main() {
 
       expect(result.isOk, isTrue);
       final alignment = result.unwrap();
-      // 50% de upside em 12 meses, sem parcela de provento: 50% ao ano.
-      expect(alignment.expectedReturn, closeTo(0.50, 1e-6));
+      // 50% de potencial, convergindo em 36 meses e sem parcela de provento:
+      // (1,50)^(1/3) − 1 = 14,47% ao ano. Com os 12 meses anteriores a
+      // anualização era a identidade e o potencial bruto virava retorno anual
+      // — o defeito D1 que a decisão 25 corrigiu.
+      expect(alignment.expectedReturn, closeTo(0.1447, 1e-4));
       expect(alignment.meetsGoal, isTrue);
       expect(alignment.gap, greaterThan(0));
       expect(alignment.valuationCoverage, closeTo(1.0, 1e-9));

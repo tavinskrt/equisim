@@ -44,9 +44,15 @@ class ExpectedAssetReturn {
 abstract final class ExpectedReturn {
   /// Horizonte de convergência padrão, em meses.
   ///
-  /// 12 meses acompanha a convenção de mercado para preço-alvo. É parâmetro
-  /// declarado, não constante escondida: deve aparecer junto do resultado.
-  static const int defaultHorizonMonths = 12;
+  /// **36 meses, por decisão 25.** Os 12 meses anteriores acompanhavam a
+  /// convenção de mercado para preço-alvo, mas tornavam a anualização a
+  /// identidade — `(1 + u)^(1/1) − 1 = u` —, de modo que o *upside* bruto virava
+  /// retorno esperado sem nenhuma transformação. A PETR4, com +209,2% de
+  /// *upside*, entrava na média ponderada da carteira como 209,2% ao ano.
+  ///
+  /// É parâmetro declarado, não constante escondida: deve aparecer junto do
+  /// resultado.
+  static const int defaultHorizonMonths = 36;
 
   /// Anualiza um upside total sobre o horizonte [horizonMonths].
   static double annualizedFromUpside(

@@ -17,6 +17,16 @@ Uso
     pip install pandas numpy
     python docs/validacao/cross_validation.py
 
+Escopo — e o que fica de fora
+-----------------------------
+Este arquivo cobre as **métricas de risco**: volatilidade, drawdown, CAGR, beta,
+correlação, semidesvio e Sortino.
+
+As primitivas estatísticas de `inference.dart` — OLS, Newey-West HAC, quantil da
+t de Student, R² crítico e MAD escalado, todas introduzidas pela decisão 25 —
+são conferidas por `inference_cross_validation.py`, que roda contra `statsmodels`
+e `scipy.stats`. Os dois juntos é que fecham o argumento; nenhum deles sozinho.
+
 Saída
 -----
     conferencia_python.md   — relatório comparativo

@@ -283,11 +283,15 @@ A fronteira não é configuração, é o próprio registro:
 `docs/decisoes/` a cada execução. Cumprida a EAP, a decisão vira
 `status: cumprida` e a superfície volta à preservação.
 
-**Não há reconstrução aberta hoje.** A [decisão 22](docs/decisoes/022-reconstrucao-da-ui.md),
-sobre as telas de operação, está `cumprida`: a EAP dela foi entregue e a
-superfície voltou à preservação. Enquanto nenhuma decisão nova declarar
-`postura: reconstrucao` com `status: aceita`, divergência na interface é dívida
-a inventariar — não tarefa.
+**Há uma reconstrução aberta: a [decisão 25](docs/decisoes/025-reconstrucao-do-motor-de-avaliacao.md)**,
+sobre o motor de avaliação. Dentro do `afeta` dela — a cascata de valuation, o
+estimador de crescimento, o DCF e os DTOs contábeis que os alimentam —
+divergência é acionável, não dívida a inventariar.
+
+Fora desse recorte a postura continua sendo preservação. A
+[decisão 22](docs/decisoes/022-reconstrucao-da-ui.md), sobre as telas de
+operação, está `cumprida`: a EAP dela foi entregue e a superfície voltou à
+preservação, então divergência na interface segue sendo dívida a inventariar.
 
 Confira antes de agir, em vez de confiar nesta frase: quem responde é
 `docs/decisoes/`, e este parágrafo é cópia que envelhece.

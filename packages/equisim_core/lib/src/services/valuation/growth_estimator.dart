@@ -141,7 +141,8 @@ abstract final class GrowthEstimator {
   /// Não é o teto da perpetuidade: é a parcela real dele. O teto que entra no
   /// desconto precisa ser nominal — ver [perpetual] e
   /// `MarketAnchors.nominalEconomyGrowth`.
-  static const double realEconomyGrowth = 0.03;
+  @Deprecated("Substituída por MarketAnchors.realEconomyGrowth, medido do IBC-Br (decisão 25). Mantida só como padrão de quem constrói premissas à mão.")
+  static const double realEconomyGrowth = 0.0145;
 
   /// Crescimento na perpetuidade.
   ///

@@ -3,24 +3,28 @@ import 'package:test/test.dart';
 
 /// Fixtures mínimas para uma cascata que chega ao DCF por FCFF.
 List<FundamentalsSnapshot> _history(Ticker ticker) => [
-      for (var year = 2019; year <= 2024; year++)
+      for (var year = 2016; year <= 2025; year++)
         FundamentalsSnapshot(
           ticker: ticker,
           fiscalPeriodEnd: DateTime(year, 12, 31),
-          netIncome: 1000.0 * (year - 2018),
-          ebit: 1400.0 * (year - 2018),
-          ebitda: 1800.0 * (year - 2018),
-          incomeBeforeTax: 1300.0 * (year - 2018),
-          incomeTaxExpense: 300.0 * (year - 2018),
+          netIncome: 1000.0 * (year - 2015),
+          ebit: 1400.0 * (year - 2015),
+          ebitda: 1800.0 * (year - 2015),
+          incomeBeforeTax: 1300.0 * (year - 2015),
+          incomeTaxExpense: 300.0 * (year - 2015),
           interestExpense: 120.0,
-          operatingCashFlow: 1600.0 * (year - 2018),
-          freeCashFlow: 1200.0 * (year - 2018),
+          operatingCashFlow: 1600.0 * (year - 2015),
+          freeCashFlow: 1200.0 * (year - 2015),
           shortTermDebt: 400.0,
           longTermDebt: 1600.0,
           cash: 300.0,
+          nopat: 1000.0 * (year - 2015),
           sharesOutstanding: 1000.0,
+          sharesOutstandingAsOf: 1000.0,
           marketCap: 20000.0,
-          bookValuePerShare: 8.0,
+          // Patrimônio acompanhando o lucro retido: é o que reconstitui base de
+          // capital e retorno, sem os quais nenhuma via se sustenta.
+          bookValuePerShare: 8.0 * (year - 2015),
           enterpriseToEbitda: 6.0,
         ),
     ];
@@ -248,28 +252,43 @@ void main() {
       }
     });
 
-    test('a normalização do fluxo-base publica a amostra da mediana, por ano',
-        () {
+    test('a convergência ao ciclo publica a amostra de retorno, por ano', () {
       final capturados = <AuditEvent>[];
       AuditRecorder.attach(capturados.add);
       ValuationCascade.evaluate(_inputs(ticker));
 
       final base = capturados.single.calculations
-          .firstWhere((c) => c.formulaName.contains('Normalização'));
+          .firstWhere((c) => c.formulaName.contains('Base do fluxo'));
       final sample = base.sample!;
 
-      // O histórico vai de 2019 a 2024 e a janela é de cinco: 2019 fica fora.
-      expect([for (final p in sample.points) p.label],
-          ['2020', '2021', '2022', '2023', '2024']);
-      expect(sample.points.last.isObserved, isTrue);
-      expect(sample.points.where((p) => p.definesResult), hasLength(1));
+      // A amostra é do **retorno** sobre a base de capital, não do fluxo
+      // absoluto: é sobre ele que a decisão 25 passou a normalizar, e é a série
+      // que precisa ficar visível para quem confere a conta.
+      expect(sample.title, contains('Retorno'));
+      expect(sample.summaryLabel, 'mediana do ciclo');
+      expect(sample.unit, '%');
 
-      // A mediana publicada é a dos pontos publicados — não um número à parte.
-      final valores = [for (final p in sample.points) p.value]..sort();
-      expect(sample.summary, closeTo(valores[2], 1e-9));
-      expect(sample.lowerBound, closeTo(sample.summary! * 0.5, 1e-9));
-      expect(sample.upperBound, closeTo(sample.summary! * 1.5, 1e-9));
-      expect(sample.selected, closeTo(base.finalValue!, 1e-6));
+      // Um retorno por exercício, a partir do segundo — o primeiro só fornece a
+      // base de abertura.
+      expect(sample.points, isNotEmpty);
+      expect(sample.points.last.isObserved, isTrue);
+      expect(
+        sample.points.where((p) => p.definesResult).length,
+        inInclusiveRange(1, 2),
+        reason: 'um ponto central em amostra ímpar, dois em par',
+      );
+
+      // A mediana publicada é a dos pontos publicados, exceto o observado —
+      // que é justamente o que se compara contra o ciclo.
+      final janela = [
+        for (final p in sample.points)
+          if (!p.isObserved) p.value
+      ]..sort();
+      final meio = janela.length ~/ 2;
+      final mediana = janela.length.isOdd
+          ? janela[meio]
+          : (janela[meio - 1] + janela[meio]) / 2;
+      expect(sample.summary, closeTo(mediana, 0.02));
     });
 
     test('o CAPM registrado reproduz o Ke usado no desconto', () {

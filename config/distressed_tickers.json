@@ -1,0 +1,19 @@
+{
+  "_comentario": [
+    "Ativos com continuidade operacional formalmente suspensa — recuperação",
+    "judicial ou extrajudicial deferida. A Porta 0 os recusa, porque o DCF e o",
+    "valor da capacidade de gerar lucro pressupõem going concern.",
+    "",
+    "Mantido À MÃO por necessidade, não por escolha: a brapi não publica a",
+    "informação, e o campo `isActive` marca negociabilidade, não continuidade —",
+    "os 786 tickers do universo vêm todos com isActive = true. É a única",
+    "exclusão da Porta 0 que não se automatiza com o que a fonte oferece",
+    "(decisão 25).",
+    "",
+    "Formato: ticker em maiúsculas, sem sufixo fracionário, com a data de",
+    "deferimento e a fonte da informação. Remover quando a recuperação for",
+    "encerrada — e registrar a data de encerramento no histórico do arquivo."
+  ],
+  "atualizadoEm": "2026-09-04",
+  "emRecuperacao": []
+}

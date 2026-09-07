@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'validation/context.dart';
+import 'validation/inference_export.dart';
 import 'validation/invariants.dart';
+import 'validation/out_of_sample.dart';
 import 'validation/python_export.dart';
 import 'validation/sensitivity.dart';
 
@@ -19,6 +21,7 @@ import 'validation/sensitivity.dart';
 ///   invariantes   Identidades que o motor precisa satisfazer
 ///   sensibilidade Impacto das premissas no preço justo
 ///   exportar      Séries e métricas para conferência em Python
+///   inferencia    Primitivas estatísticas do núcleo, para conferência externa
 ///   tudo          Todos os anteriores
 ///
 /// Opções:
@@ -42,6 +45,8 @@ Future<void> main(List<String> args) async {
     'invariantes',
     'sensibilidade',
     'exportar',
+    'fora-da-amostra',
+    'inferencia',
     'tudo',
   };
   if (!known.contains(command)) {
@@ -97,6 +102,18 @@ Future<void> main(List<String> args) async {
         symbols: sample.take(10).toList(),
         outputDir: outputDir,
       );
+      stdout.writeln('');
+    }
+
+    if (command == 'inferencia' || command == 'tudo') {
+      stdout.writeln('> Primitivas estatisticas — exportacao para conferencia');
+      InferenceExport.run(outputDir: outputDir);
+      stdout.writeln('');
+    }
+
+    if (command == 'fora-da-amostra') {
+      stdout.writeln('▸ Validação fora da amostra — árvore de portas');
+      await OutOfSampleValidation.run(ctx, outputDir: outputDir, limit: limit);
       stdout.writeln('');
     }
 

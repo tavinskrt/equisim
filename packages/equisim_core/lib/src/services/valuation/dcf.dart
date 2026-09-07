@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import '../../entities/valuation.dart';
 import '../../failures/failure.dart';
 import '../../failures/result.dart';
@@ -7,51 +5,188 @@ import '../../failures/result.dart';
 /// Premissas de uma rodada de DCF.
 class DcfAssumptions {
   /// Anos de projeção explícita.
+  ///
+  /// Dez por decisão 25. Com cinco, o valor terminal carregava de 63,5% a 80,0%
+  /// do preço justo, e a parte da conta apoiada em dado observado decidia pouco.
   final int projectionYears;
 
-  /// Crescimento anual do fluxo no período explícito, em fração.
+  /// Crescimento do **primeiro** ano projetado, em fração.
+  ///
+  /// Não é constante ao longo da projeção: decai linearmente até
+  /// [perpetualGrowth]. Ver [growthAt].
   final double growthRate;
 
   /// Crescimento na perpetuidade, em fração.
+  ///
+  /// **Com [neutralTerminalReturn] ligado, ele não afeta o valor terminal** —
+  /// ver [DcfCalculator.terminalValue]. Continua governando o decaimento do
+  /// período explícito e permanece como banda de sanidade.
   final double perpetualGrowth;
 
-  /// Taxa de desconto anual, em fração. Para FCFF deve ser o **WACC**.
+  /// Taxa de desconto do **primeiro** ano, em fração. WACC na via da firma, Ke
+  /// na do acionista, montados sobre a taxa livre de risco **corrente**.
+  ///
+  /// Não é constante ao longo da projeção: decai até [terminalDiscountRate].
+  /// Ver [discountRateAt].
   final double discountRate;
 
-  /// Como calcular o valor terminal. Padrão [TerminalValueMethod.gordon].
-  final TerminalValueMethod terminalMethod;
+  /// Taxa de desconto de **equilíbrio**, usada na perpetuidade e como destino do
+  /// decaimento, em fração.
+  ///
+  /// É o mesmo custo de capital montado sobre a taxa livre de risco estrutural —
+  /// a média decenal do CDI — em vez da corrente. Existe porque o modelo não tem
+  /// curva de juros: sem ela, um indexador *overnight* precificava fluxo
+  /// perpétuo, e no topo do ciclo monetário isso esmagava todo valor terminal.
+  ///
+  /// Como `K_e = R_f + β·prêmio` e `WACC = w_E K_e + w_D K_d(1−T)` são afins em
+  /// `R_f`, decair o custo de capital linearmente é **idêntico** a decair a taxa
+  /// livre de risco e remontar o custo a cada ano — e dispensa carregar a
+  /// estrutura de capital até aqui.
+  final double terminalDiscountRate;
 
-  /// Múltiplo EV/EBITDA de saída — usado quando [terminalMethod] é
-  /// [TerminalValueMethod.exitMultiple].
-  final double? exitMultiple;
+  /// Retorno sobre a base de capital: ROIC na via da firma, ROE na do
+  /// acionista.
+  ///
+  /// **É dele que sai a retenção, ano a ano.** O fluxo descontado é
+  /// `lucro × (1 − b_t)` com `b_t = g_t / retorno`: crescer exige reinvestir, e
+  /// descontar o lucro inteiro **e** fazê-lo crescer conta o mesmo dinheiro duas
+  /// vezes. A decisão 24 corrigiu isso do lado do acionista; a 25 estendeu ao da
+  /// firma, onde o fluxo crescia sem que nada fosse retido.
+  ///
+  /// **A retenção acompanha o decaimento do crescimento.** Fixá-la no valor do
+  /// primeiro ano faria a empresa continuar retendo para um crescimento que já
+  /// caiu, deprimindo o fluxo justamente nos anos em que ele deveria se abrir —
+  /// erro que a validação fora da amostra expôs como queda sistemática do preço
+  /// justo. Zero desliga o freio.
+  final double returnOnCapital;
+
+  /// Retorno terminal igual ao custo de capital.
+  ///
+  /// Quando `true` — o padrão, por decisão 25 —, impõe `ROIC_∞ = WACC` e
+  /// `ROE_∞ = Ke`, o que faz o valor terminal virar `fluxo_{N+1} / desconto` e
+  /// **deixar de depender do crescimento perpétuo**. É a afirmação de que não há
+  /// lucro econômico em perpetuidade: crescimento sem retorno excedente não cria
+  /// valor.
+  ///
+  /// [terminalReturnOnCapital] tem precedência sobre este campo.
+  final bool neutralTerminalReturn;
+
+  /// Retorno preservado na perpetuidade, quando a vantagem competitiva é
+  /// comprovada. `null` mantém o estado estacionário.
+  ///
+  /// Existe porque colapsar **toda** empresa em `ROIC_∞ = WACC` trata franquia
+  /// duradoura e negócio comoditizado da mesma forma. Quando preenchido, o valor
+  /// terminal volta à forma de Gordon com reinvestimento:
+  ///
+  /// ```
+  /// VT = lucro_{N+1}·(1 − g_∞/ROIC_∞) / (r_∞ − g_∞)
+  /// ```
+  ///
+  /// **O preço disso é declarado**: o terminal volta a depender de `g_∞`, que o
+  /// retorno neutro havia eliminado. Por isso a ativação é restrita e cumulativa
+  /// — ver `ValuationParameters.moatRetainedSpread` e as três condições que a
+  /// cascata exige.
+  final double? terminalReturnOnCapital;
 
   /// Margem de segurança sobre o preço justo, em fração.
   final double marginOfSafety;
 
   /// Declara as premissas. **Não valida** — a consistência entre desconto e
-  /// crescimento perpétuo é conferida em [DcfCalculator], que devolve [Result].
+  /// crescimento é conferida em [DcfCalculator], que devolve [Result].
   const DcfAssumptions({
-    this.projectionYears = 5,
+    this.projectionYears = 10,
     required this.growthRate,
     required this.perpetualGrowth,
     required this.discountRate,
-    this.terminalMethod = TerminalValueMethod.gordon,
-    this.exitMultiple,
+    double? terminalDiscountRate,
+    this.returnOnCapital = 0.0,
+    this.neutralTerminalReturn = true,
+    this.terminalReturnOnCapital,
     this.marginOfSafety = 0.0,
-  });
+  }) : terminalDiscountRate = terminalDiscountRate ?? discountRate;
+
+  /// Fração percorrida da janela explícita no ano [t]: 0 no ano 1, 1 no ano N.
+  double _step(int t) =>
+      projectionYears <= 1 ? 1.0 : (t - 1) / (projectionYears - 1);
+
+  /// Taxa de desconto do ano [t], decaindo de [discountRate] até
+  /// [terminalDiscountRate].
+  ///
+  /// ```
+  /// r_t = r_spot − (r_spot − r_∞) · (t − 1)/(N − 1)
+  /// ```
+  ///
+  /// É a estrutura a termo que o modelo não tinha. Note que `r_t` é taxa **do
+  /// período**, não taxa à vista de vértice: o desconto composto acumula os
+  /// fatores ano a ano, e não eleva `r_t` a `t`.
+  double discountRateAt(int t) =>
+      discountRate - (discountRate - terminalDiscountRate) * _step(t);
+
+  /// Retorno sobre o capital no ano [t], convergindo do observado ao custo de
+  /// capital do próprio ano.
+  ///
+  /// ```
+  /// ROIC_t = ROIC_base − (ROIC_base − r_t) · (t − 1)/(N − 1)
+  /// ```
+  ///
+  /// **Por que converge.** Manter o retorno no pico histórico enquanto o
+  /// crescimento já decai faz a retenção `b_t = g_t/ROIC` cair duas vezes, e o
+  /// fluxo livre dos anos finais sobe sem que nada na economia justifique. Pior:
+  /// o retorno saltava do nível histórico direto para o custo de capital na
+  /// perpetuidade, uma descontinuidade sem conteúdo econômico. Convergindo, o
+  /// último ano explícito **encontra** o estado estacionário — `b_N = g_∞/r_∞` é
+  /// exatamente a retenção que o terminal supõe.
+  ///
+  /// Devolve zero quando não há retorno utilizável, o que desliga o freio.
+  double returnOnCapitalAt(int t) {
+    if (returnOnCapital <= 0) return 0.0;
+    final destino = discountRateAt(t);
+    return returnOnCapital - (returnOnCapital - destino) * _step(t);
+  }
+
+  /// Retenção aplicada ao ano [t], pela relação `b_t = g_t / ROIC_t`.
+  ///
+  /// Confinada a `[0, 0,95]`: retenção de 100% significaria não distribuir nada
+  /// para sempre, e o valor do fluxo seria zero por construção. Devolve zero sem
+  /// retorno utilizável, o que desliga o freio e é a leitura conservadora na
+  /// direção oposta — declarada no resultado.
+  double retentionAt(int t) {
+    final roic = returnOnCapitalAt(t);
+    if (roic <= 0) return 0.0;
+    final g = growthAt(t);
+    if (g <= 0) return 0.0;
+    final b = g / roic;
+    return b.clamp(0.0, 0.95);
+  }
+
+  /// Crescimento aplicado ao ano [t], contado a partir de 1.
+  ///
+  /// Decai linearmente de [growthRate] até [perpetualGrowth] ao longo da
+  /// projeção:
+  ///
+  /// ```
+  /// g_t = g − (g − g_∞) · (t − 1)/(N − 1)
+  /// ```
+  ///
+  /// A queda em degrau que existia antes — crescimento constante por cinco anos
+  /// e corte no sexto — não tem conteúdo econômico: vantagem competitiva se
+  /// desgasta conforme a concorrência entra, não termina numa data.
+  double growthAt(int t) {
+    if (projectionYears <= 1) return perpetualGrowth;
+    final passo = (t - 1) / (projectionYears - 1);
+    return growthRate - (growthRate - perpetualGrowth) * passo;
+  }
 
   /// Cópia com os campos informados substituídos.
-  ///
-  /// **Não permite anular [exitMultiple]**: passar `null` preserva o valor
-  /// atual, como em todo `copyWith` de argumento anulável. É o suficiente aqui
-  /// porque o motor de cenários só desloca crescimento e desconto.
   DcfAssumptions copyWith({
     int? projectionYears,
     double? growthRate,
     double? perpetualGrowth,
     double? discountRate,
-    TerminalValueMethod? terminalMethod,
-    double? exitMultiple,
+    double? terminalDiscountRate,
+    double? returnOnCapital,
+    bool? neutralTerminalReturn,
+    double? terminalReturnOnCapital,
     double? marginOfSafety,
   }) =>
       DcfAssumptions(
@@ -59,19 +194,23 @@ class DcfAssumptions {
         growthRate: growthRate ?? this.growthRate,
         perpetualGrowth: perpetualGrowth ?? this.perpetualGrowth,
         discountRate: discountRate ?? this.discountRate,
-        terminalMethod: terminalMethod ?? this.terminalMethod,
-        exitMultiple: exitMultiple ?? this.exitMultiple,
+        terminalDiscountRate:
+            terminalDiscountRate ?? this.terminalDiscountRate,
+        returnOnCapital: returnOnCapital ?? this.returnOnCapital,
+        neutralTerminalReturn:
+            neutralTerminalReturn ?? this.neutralTerminalReturn,
+        terminalReturnOnCapital:
+            terminalReturnOnCapital ?? this.terminalReturnOnCapital,
         marginOfSafety: marginOfSafety ?? this.marginOfSafety,
       );
 }
 
 /// Saída bruta de um DCF, antes de virar [ValuationResult].
 class DcfOutcome {
-  /// Fluxos projetados do ano 1 ao ano N, **antes** de descontar.
+  /// Fluxos distribuíveis do ano 1 ao ano N, **antes** de descontar.
   final List<double> projectedFlows;
 
-  /// Os mesmos fluxos trazidos a valor presente, alinhados posição a posição
-  /// com [projectedFlows].
+  /// Os mesmos fluxos a valor presente, alinhados posição a posição.
   final List<double> discountedFlows;
 
   /// Valor terminal no ano N, em valor futuro.
@@ -80,24 +219,27 @@ class DcfOutcome {
   /// Valor terminal trazido a presente.
   final double discountedTerminalValue;
 
-  /// Valor da firma: soma dos fluxos descontados mais o terminal descontado.
-  ///
-  /// No modelo por LPA não há EV de verdade — o campo repete
-  /// [fairValuePerShare], porque o cálculo já parte do acionista.
+  /// Valor da firma, ou o valor por papel quando o fluxo já é do acionista.
   final double enterpriseValue;
 
   /// Valor do equity: [enterpriseValue] menos a dívida líquida.
   final double equityValue;
 
-  /// Preço justo por papel. É o número que vira `ValuationResult.fairValue`,
-  /// depois de convertido para a unidade de negociação quando o ativo é unit.
+  /// Preço justo por papel.
   final double fairValuePerShare;
 
   /// Parcela do valor total explicada pelo valor terminal.
-  ///
-  /// Acima de ~75% é sinal de alerta: o resultado passa a depender mais da
-  /// premissa de perpetuidade do que da projeção explícita.
   final double terminalShare;
+
+  /// Participação do equity no valor da firma.
+  ///
+  /// É a **pós-condição** da via da firma: quando a dívida líquida quase consome
+  /// o valor da firma, o que sobra é resíduo de subtração, não avaliação. O erro
+  /// relativo do preço por papel é o do valor da firma amplificado por
+  /// `EV/(EV − D)` — medido na RENT3, um fator de 138 vezes.
+  ///
+  /// Vale `1.0` na via do acionista, que não tem ponte.
+  final double equityShare;
 
   /// Agrupa a saída já calculada.
   const DcfOutcome({
@@ -109,265 +251,262 @@ class DcfOutcome {
     required this.equityValue,
     required this.fairValuePerShare,
     required this.terminalShare,
+    this.equityShare = 1.0,
   });
 }
 
-/// Os três modelos de fluxo descontado do pacote.
+/// Os dois modelos de fluxo descontado do pacote.
+///
+/// A simetria entre eles é deliberada e é o que a decisão 25 introduziu: nas
+/// duas vias o fluxo é `lucro × (1 − retenção)`, o crescimento decai até a
+/// perpetuidade, e o terminal supõe retorno igual ao custo de capital.
 abstract final class DcfCalculator {
   /// Distância mínima entre taxa de desconto e crescimento perpétuo.
   ///
-  /// A perpetuidade de Gordon explode quando `r → g`; sem um piso, um erro de
-  /// 1 p.p. na premissa produz valores absurdos em vez de um erro visível.
+  /// Só age quando [DcfAssumptions.neutralTerminalReturn] está desligado: com
+  /// retorno terminal neutro, o crescimento sai da fórmula e a perpetuidade não
+  /// diverge.
   static const double minimumSpread = 0.005;
 
-  /// DCF por FCFF, descontado ao WACC.
+  /// Valor terminal no ano N.
   ///
-  /// `EV = Σ FCFF_t/(1+WACC)^t + VT/(1+WACC)^N`
-  /// `Equity = EV − dívida líquida`
+  /// **Com retorno terminal neutro** — `ROIC_∞ = WACC` ou `ROE_∞ = Ke` — a
+  /// álgebra colapsa e o crescimento desaparece:
   ///
-  /// - [baseFreeCashFlow]: fluxo de caixa livre do exercício-base, já
-  ///   normalizado por `BaseFlowNormalizer`. Deve ser positivo.
-  /// - [assumptions]: crescimento, desconto e método terminal. O desconto
-  ///   **precisa ser o WACC** — Ke aqui subavalia a empresa.
-  /// - [netDebt]: dívida líquida a descontar do EV. Negativa em empresa com
-  ///   caixa líquido.
-  /// - [sharesOutstanding]: papéis em circulação. Deve ser positivo.
-  /// - [terminalEbitda]: EBITDA do ano terminal. Obrigatório apenas quando
-  ///   [assumptions] pede múltiplo de saída.
+  /// ```
+  /// VT = fluxo_{N+1}/(r − g)       com  fluxo_{N+1} = lucro_{N+1}(1 − g/ROIC)
+  /// com ROIC = r:  fluxo_{N+1} = lucro_{N+1}(r − g)/r
+  /// ⟹ VT = lucro_{N+1}(r − g) / [r(r − g)] = lucro_{N+1} / r
+  /// ```
   ///
-  /// Devolve [InsufficientData] para ações em circulação ausentes ou fluxo-base
-  /// não positivo; [InvalidInput] para menos de um ano de projeção ou desconto
-  /// não positivo; [ComputationFailure] quando a perpetuidade diverge (spread
-  /// menor que [minimumSpread]) ou o valor por ação não é finito.
-  static Result<DcfOutcome> fcff({
-    required double baseFreeCashFlow,
+  /// É o que blinda o resultado da premissa de crescimento perpétuo — a parte da
+  /// avaliação que carregava de 63% a 80% do valor deixa de depender dela.
+  ///
+  /// - [finalProfit]: lucro do ano N, **antes** da retenção.
+  static Result<double> terminalValue({
+    required double finalProfit,
+    required DcfAssumptions assumptions,
+  }) {
+    final r = assumptions.terminalDiscountRate;
+    final g = assumptions.perpetualGrowth;
+    final proximo = finalProfit * (1 + g);
+
+    if (r <= 0) {
+      return const Err(InvalidInput('Taxa de desconto deve ser positiva.'));
+    }
+
+    // Vantagem competitiva residual: parte do retorno excedente sobrevive à
+    // perpetuidade, e o terminal volta à forma de Gordon com reinvestimento.
+    final moat = assumptions.terminalReturnOnCapital;
+    if (moat != null) {
+      if (moat <= 0) {
+        return const Err(InvalidInput(
+          'Retorno terminal deve ser positivo quando declarado.',
+        ));
+      }
+      final spread = r - g;
+      if (spread < minimumSpread) {
+        return const Err(ComputationFailure(
+          'Taxa de desconto de equilíbrio não supera o crescimento perpétuo '
+          'por margem suficiente: o valor terminal diverge.',
+        ));
+      }
+      final reinvestimento = (g / moat).clamp(0.0, 0.95);
+      return Ok(proximo * (1 - reinvestimento) / spread);
+    }
+
+    if (assumptions.neutralTerminalReturn) return Ok(proximo / r);
+
+    final spread = r - g;
+    if (spread < minimumSpread) {
+      return const Err(ComputationFailure(
+        'Taxa de desconto não supera o crescimento perpétuo por margem '
+        'suficiente: o valor terminal diverge. Reduza o crescimento perpétuo '
+        'ou adote retorno terminal neutro.',
+      ));
+    }
+    final retencaoPerpetua =
+        assumptions.retentionAt(assumptions.projectionYears);
+    return Ok(proximo * (1 - retencaoPerpetua) / spread);
+  }
+
+  /// DCF sobre o fluxo da firma, descontado ao WACC.
+  ///
+  /// `FCFF_t = NOPAT_t × (1 − RI)`, com `NOPAT` crescendo pelo decaimento de
+  /// [DcfAssumptions.growthAt]. O freio de reinvestimento é a novidade da
+  /// decisão 25: antes o fluxo livre crescia sem que nada fosse retido para
+  /// financiar o crescimento, o que contava o mesmo dinheiro duas vezes.
+  ///
+  /// - [baseProfit]: NOPAT do exercício-base, já normalizado. Deve ser positivo.
+  /// - [netDebt]: dívida líquida a descontar do valor da firma.
+  /// - [sharesOutstanding]: papéis na unidade negociada. Deve ser positivo.
+  static Result<DcfOutcome> firm({
+    required double baseProfit,
     required DcfAssumptions assumptions,
     required double netDebt,
     required double sharesOutstanding,
-    double? terminalEbitda,
   }) {
     if (sharesOutstanding <= 0) {
       return const Err(InsufficientData(
-        'Quantidade de ações em circulação indisponível ou inválida.',
+        'Quantidade de papéis em circulação indisponível ou inválida.',
       ));
     }
-    if (assumptions.projectionYears < 1) {
-      return const Err(InvalidInput('Anos de projeção deve ser ao menos 1.'));
-    }
-    if (assumptions.discountRate <= 0) {
-      return const Err(InvalidInput('Taxa de desconto deve ser positiva.'));
-    }
-    if (baseFreeCashFlow <= 0) {
+    if (baseProfit <= 0) {
       return const Err(InsufficientData(
-        'Fluxo de caixa livre base não positivo: DCF não é aplicável. '
-        'Considere um modelo alternativo.',
+        'Lucro operacional base não positivo: a via da firma não é aplicável.',
       ));
     }
 
-    final r = assumptions.discountRate;
-    final g = assumptions.growthRate;
-    final n = assumptions.projectionYears;
+    final projetado = _project(baseProfit, assumptions);
+    if (projetado.isErr) return Err(projetado.failureOrNull!);
+    final p = projetado.unwrap();
 
-    final projected = <double>[];
-    final discounted = <double>[];
-    var flow = baseFreeCashFlow;
-    var sumDiscounted = 0.0;
+    final ev = p.somaDescontada + p.terminalDescontado;
+    final equity = ev - netDebt;
+    final porPapel = equity / sharesOutstanding;
 
-    for (var t = 1; t <= n; t++) {
-      flow = flow * (1.0 + g);
-      final pv = flow / math.pow(1.0 + r, t);
-      projected.add(flow);
-      discounted.add(pv);
-      sumDiscounted += pv;
-    }
-
-    final terminal = _terminalValue(
-      finalFlow: flow,
-      assumptions: assumptions,
-      terminalEbitda: terminalEbitda,
-    );
-    if (terminal.isErr) return Err(terminal.failureOrNull!);
-
-    final terminalValue = terminal.unwrap();
-    final discountedTerminal = terminalValue / math.pow(1.0 + r, n);
-
-    final enterpriseValue = sumDiscounted + discountedTerminal;
-    final equityValue = enterpriseValue - netDebt;
-    final perShare = equityValue / sharesOutstanding;
-
-    if (!perShare.isFinite) {
+    if (!porPapel.isFinite) {
       return const Err(ComputationFailure(
-        'Valor por ação não finito: verifique as premissas.',
+        'Valor por papel não finito: verifique as premissas.',
       ));
     }
 
     return Ok(DcfOutcome(
-      projectedFlows: projected,
-      discountedFlows: discounted,
-      terminalValue: terminalValue,
-      discountedTerminalValue: discountedTerminal,
-      enterpriseValue: enterpriseValue,
-      equityValue: equityValue,
-      fairValuePerShare: perShare,
-      terminalShare:
-          enterpriseValue > 0 ? discountedTerminal / enterpriseValue : 0.0,
+      projectedFlows: p.fluxos,
+      discountedFlows: p.descontados,
+      terminalValue: p.terminal,
+      discountedTerminalValue: p.terminalDescontado,
+      enterpriseValue: ev,
+      equityValue: equity,
+      fairValuePerShare: porPapel,
+      terminalShare: ev > 0 ? p.terminalDescontado / ev : 0.0,
+      equityShare: ev > 0 ? equity / ev : 0.0,
     ));
   }
 
-  /// Taxa de retenção implícita num crescimento, pela relação de crescimento
-  /// sustentável `g = ROE × b`.
+  /// DCF sobre o fluxo do acionista, descontado ao Ke.
   ///
-  /// - [growth]: crescimento pretendido, em fração.
-  /// - [returnOnEquity]: retorno sobre o patrimônio líquido, em fração.
+  /// `Dividendo_t = LPA_t × (1 − b)`, o que **é** um modelo de desconto de
+  /// dividendos — mas com o dividendo obtido pela identidade da retenção, e não
+  /// por dado publicado de provento. É o que o mantém compatível com a decisão
+  /// 23: nada da cadeia removida por ela é reaberto.
   ///
-  /// **Por que isto existe.** Um lucro que cresce exige reinvestimento: parte
-  /// dele fica na empresa para financiar o capital de giro e o imobilizado que
-  /// sustentam o crescimento. Descontar o lucro **inteiro** como se todo ele
-  /// chegasse ao acionista *e* fazê-lo crescer conta o mesmo dinheiro duas
-  /// vezes, e infla o preço justo.
+  /// Não há ponte de dívida líquida: o fluxo já é do acionista, e subtraí-la
+  /// aqui a contaria duas vezes.
   ///
-  /// Devolve a fração retida em `[0, 1)`, ou `null` quando a relação não se
-  /// sustenta: sem ROE utilizável, ou com um crescimento que exigiria reter
-  /// **todo** o lucro (`b ≥ 1`) — caso em que o crescimento não é financiável
-  /// pelo próprio resultado e a premissa está errada, não apertada.
+  /// - [baseProfit]: lucro por papel do exercício-base, já normalizado.
+  static Result<DcfOutcome> shareholder({
+    required double baseProfit,
+    required DcfAssumptions assumptions,
+  }) {
+    if (baseProfit <= 0) {
+      return const Err(InsufficientData(
+        'Lucro base não positivo: a via do acionista não é aplicável.',
+      ));
+    }
+
+    final projetado = _project(baseProfit, assumptions);
+    if (projetado.isErr) return Err(projetado.failureOrNull!);
+    final p = projetado.unwrap();
+
+    final porPapel = p.somaDescontada + p.terminalDescontado;
+    if (!porPapel.isFinite) {
+      return const Err(ComputationFailure(
+        'Valor por papel não finito: verifique as premissas.',
+      ));
+    }
+
+    return Ok(DcfOutcome(
+      projectedFlows: p.fluxos,
+      discountedFlows: p.descontados,
+      terminalValue: p.terminal,
+      discountedTerminalValue: p.terminalDescontado,
+      enterpriseValue: porPapel,
+      equityValue: porPapel,
+      fairValuePerShare: porPapel,
+      terminalShare: porPapel > 0 ? p.terminalDescontado / porPapel : 0.0,
+    ));
+  }
+
+  /// Taxa de retenção implícita num crescimento, pela relação `g = retorno × b`.
+  ///
+  /// Continua existindo, mas o sentido de uso se inverteu com a decisão 25:
+  /// antes derivava a retenção de um crescimento estimado por regressão; agora
+  /// serve de conferência, porque o crescimento já **sai** da retenção
+  /// observada. Alimentado com `g = retorno × b`, devolve exatamente o `b` que
+  /// entrou — é o laço se fechando.
+  ///
+  /// Devolve `null` quando a relação não se sustenta: sem retorno utilizável, ou
+  /// com crescimento que exigiria reter todo o lucro.
   static double? retentionFor({
     required double growth,
-    required double? returnOnEquity,
+    required double? returnOnCapital,
   }) {
-    if (returnOnEquity == null || returnOnEquity <= 0) return null;
-    if (!returnOnEquity.isFinite) return null;
+    if (returnOnCapital == null || returnOnCapital <= 0) return null;
+    if (!returnOnCapital.isFinite) return null;
     if (growth <= 0) return 0.0;
-    final retention = growth / returnOnEquity;
-    return retention >= 1.0 ? null : retention;
+    final b = growth / returnOnCapital;
+    return b >= 1.0 ? null : b;
   }
 
-  /// DCF simplificado sobre lucro por ação, descontado ao **Ke**.
-  ///
-  /// Usado quando não há demonstrativos suficientes para montar o FCFF.
-  /// Produz diretamente o valor do equity por ação, sem passar por EV.
-  ///
-  /// - [baseEps]: lucro por ação do exercício-base. Deve ser positivo.
-  /// - [assumptions]: o desconto aqui **precisa ser Ke**, não WACC — o fluxo já
-  ///   é do acionista.
-  /// - [returnOnEquity]: ROE observado, em fração. É o que permite descontar
-  ///   apenas a parte **distribuível** do lucro; ver abaixo.
-  ///
-  /// Devolve [InsufficientData] para LPA não positivo e [InvalidInput] para
-  /// desconto não positivo.
-  ///
-  /// **O fluxo descontado é `LPA × (1 − b)`, não o LPA inteiro.** A retenção
-  /// `b` sai de [retentionFor] sobre o ROE informado, uma para o período
-  /// explícito e outra para a perpetuidade. Sem isso o modelo distribuía todo
-  /// o lucro e ainda o fazia crescer — dupla contagem que inflava o preço
-  /// justo de toda empresa em crescimento.
-  ///
-  /// **Sem ROE utilizável, o crescimento é zerado** e o modelo vira *earnings
-  /// power value*: lucro estacionário, valor `LPA / Ke`. É a leitura honesta
-  /// quando não há como saber quanto do lucro precisa ficar na empresa —
-  /// conservadora por construção, e declarada no resultado.
-  ///
-  /// **Difere de [fcff] no tratamento do spread:** em vez de recusar quando
-  /// `r − g_∞` fica abaixo de [minimumSpread], aplica o mínimo como piso e
-  /// segue. O resultado é limitado em vez de ausente, o que é aceitável num
-  /// modelo já declarado como simplificado — mas significa que este método
-  /// **nunca** falha por divergência de perpetuidade.
-  static Result<DcfOutcome> earningsPerShare({
-    required double baseEps,
-    required DcfAssumptions assumptions,
-    double? returnOnEquity,
-  }) {
-    if (baseEps <= 0) {
-      return const Err(InsufficientData(
-        'LPA base não positivo: modelo por lucro não é aplicável.',
-      ));
+  static Result<_Projection> _project(
+    double baseProfit,
+    DcfAssumptions a,
+  ) {
+    if (a.projectionYears < 1) {
+      return const Err(InvalidInput('Anos de projeção deve ser ao menos 1.'));
     }
-    if (assumptions.discountRate <= 0) {
+    if (a.discountRate <= 0 || a.terminalDiscountRate <= 0) {
       return const Err(InvalidInput('Taxa de desconto deve ser positiva.'));
     }
 
-    final r = assumptions.discountRate;
-    final n = assumptions.projectionYears;
+    final fluxos = <double>[];
+    final descontados = <double>[];
+    var lucro = baseProfit;
+    var soma = 0.0;
 
-    // As duas retenções precisam existir juntas: crescer no explícito e não no
-    // terminal (ou o inverso) misturaria os dois regimes na mesma conta.
-    final explicitRetention = retentionFor(
-      growth: assumptions.growthRate,
-      returnOnEquity: returnOnEquity,
-    );
-    final perpetualRetention = retentionFor(
-      growth: assumptions.perpetualGrowth,
-      returnOnEquity: returnOnEquity,
-    );
-    final financiable =
-        explicitRetention != null && perpetualRetention != null;
+    // O fator de desconto **acumula** as taxas de cada ano, porque `r_t` é taxa
+    // do período e não taxa à vista de vértice. Elevar `r_t` a `t` trataria a
+    // curva como se cada ano fosse descontado do zero à sua própria taxa, o que
+    // é outra coisa — e desconta o ano 10 a uma taxa que só vale no ano 10.
+    var fator = 1.0;
 
-    final g = financiable ? assumptions.growthRate : 0.0;
-    final gPerpetual = financiable ? assumptions.perpetualGrowth : 0.0;
-    final payout = financiable ? 1.0 - explicitRetention : 1.0;
-    final terminalPayout = financiable ? 1.0 - perpetualRetention : 1.0;
-
-    final projected = <double>[];
-    final discounted = <double>[];
-    var eps = baseEps;
-    var sumDiscounted = 0.0;
-
-    for (var t = 1; t <= n; t++) {
-      eps = eps * (1.0 + g);
-      final distributable = eps * payout;
-      final pv = distributable / math.pow(1.0 + r, t);
-      projected.add(distributable);
-      discounted.add(pv);
-      sumDiscounted += pv;
+    for (var t = 1; t <= a.projectionYears; t++) {
+      fator *= 1 + a.discountRateAt(t);
+      lucro *= 1 + a.growthAt(t);
+      final distribuivel = lucro * (1 - a.retentionAt(t));
+      final vp = distribuivel / fator;
+      fluxos.add(distribuivel);
+      descontados.add(vp);
+      soma += vp;
     }
 
-    final spread = math.max(r - gPerpetual, minimumSpread);
-    final terminalValue = eps * (1.0 + gPerpetual) * terminalPayout / spread;
-    final discountedTerminal = terminalValue / math.pow(1.0 + r, n);
-    final perShare = sumDiscounted + discountedTerminal;
+    final terminal = terminalValue(finalProfit: lucro, assumptions: a);
+    if (terminal.isErr) return Err(terminal.failureOrNull!);
+    final vt = terminal.unwrap();
 
-    return Ok(DcfOutcome(
-      projectedFlows: projected,
-      discountedFlows: discounted,
-      terminalValue: terminalValue,
-      discountedTerminalValue: discountedTerminal,
-      enterpriseValue: perShare,
-      equityValue: perShare,
-      fairValuePerShare: perShare,
-      terminalShare: perShare > 0 ? discountedTerminal / perShare : 0.0,
+    return Ok(_Projection(
+      fluxos: fluxos,
+      descontados: descontados,
+      somaDescontada: soma,
+      terminal: vt,
+      terminalDescontado: vt / fator,
     ));
   }
+}
 
-  static Result<double> _terminalValue({
-    required double finalFlow,
-    required DcfAssumptions assumptions,
-    double? terminalEbitda,
-  }) {
-    switch (assumptions.terminalMethod) {
-      case TerminalValueMethod.gordon:
-        final spread =
-            assumptions.discountRate - assumptions.perpetualGrowth;
-        if (spread < minimumSpread) {
-          return const Err(ComputationFailure(
-            'Taxa de desconto não supera o crescimento perpétuo por margem '
-            'suficiente: o valor terminal de Gordon diverge. Reduza o '
-            'crescimento perpétuo ou use múltiplo de saída.',
-          ));
-        }
-        return Ok(finalFlow * (1.0 + assumptions.perpetualGrowth) / spread);
+class _Projection {
+  final List<double> fluxos;
+  final List<double> descontados;
+  final double somaDescontada;
+  final double terminal;
+  final double terminalDescontado;
 
-      case TerminalValueMethod.exitMultiple:
-        final multiple = assumptions.exitMultiple;
-        if (multiple == null || multiple <= 0) {
-          return const Err(InsufficientData(
-            'Múltiplo de saída não informado.',
-          ));
-        }
-        if (terminalEbitda == null || terminalEbitda <= 0) {
-          return const Err(InsufficientData(
-            'EBITDA terminal indisponível para aplicar múltiplo de saída.',
-          ));
-        }
-        return Ok(terminalEbitda * multiple);
-    }
-  }
+  const _Projection({
+    required this.fluxos,
+    required this.descontados,
+    required this.somaDescontada,
+    required this.terminal,
+    required this.terminalDescontado,
+  });
 }

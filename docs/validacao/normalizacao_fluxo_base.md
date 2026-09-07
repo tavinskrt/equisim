@@ -1,8 +1,19 @@
 # Por que τ = 0,5 na normalização do fluxo-base
 
+> **⚠ Superado pela [decisão 25](../decisoes/025-reconstrucao-do-motor-de-avaliacao.md).**
+> A winsorização descrita aqui **não existe mais**: `base_flow.dart` foi removido em
+> 07/09/2026 e a banda `τ` não é mais aplicada. O que a substituiu é a convergência de
+> retorno — o fluxo-base deixa de ser aparado contra uma mediana e passa a ser derivado do
+> retorno sobre a base de capital, com o reinvestimento amarrado ao crescimento por
+> `b_t = g_t / retorno`. Ver a §5 do [refinamento](../refinamento-do-valuation.md).
+>
+> A medição que justificou `τ = 0,5` continua válida como registro do problema que motivou a
+> troca, e é por isso que o documento fica. O código que ele cita não existe mais — o link
+> abaixo está morto de propósito, e não deve ser restaurado.
+
 Medições feitas em 28/08/2026 sobre os 18 ativos das carteiras de teste,
 exercícios de 2010 a 2025 (fonte: brapi.dev, `/v2/stocks/cash-flow`,
-`mode=history`). Código: [`base_flow.dart`](../../packages/equisim_core/lib/src/services/valuation/base_flow.dart).
+`mode=history`). Código: `base_flow.dart`, removido.
 
 ```
 F₀ = min( max( F_obs , m·(1−τ) ) , m·(1+τ) )

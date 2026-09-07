@@ -47,8 +47,23 @@ class $CachedPricesTable extends CachedPrices
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _volumeMeta = const VerificationMeta('volume');
   @override
-  List<GeneratedColumn> get $columns => [ticker, date, close, adjustedClose];
+  late final GeneratedColumn<double> volume = GeneratedColumn<double>(
+    'volume',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    ticker,
+    date,
+    close,
+    adjustedClose,
+    volume,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -94,6 +109,12 @@ class $CachedPricesTable extends CachedPrices
         ),
       );
     }
+    if (data.containsKey('volume')) {
+      context.handle(
+        _volumeMeta,
+        volume.isAcceptableOrUnknown(data['volume']!, _volumeMeta),
+      );
+    }
     return context;
   }
 
@@ -119,6 +140,10 @@ class $CachedPricesTable extends CachedPrices
         DriftSqlType.double,
         data['${effectivePrefix}adjusted_close'],
       ),
+      volume: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}volume'],
+      ),
     );
   }
 
@@ -136,11 +161,19 @@ class CachedPrice extends DataClass implements Insertable<CachedPrice> {
   final String date;
   final double close;
   final double? adjustedClose;
+
+  /// Volume negociado no pregão, em quantidade de papéis.
+  ///
+  /// Entra com a decisão 25: a Porta 0 filtra por volume financeiro médio, e
+  /// sem ele o corte de liquidez não é computável. Nulo em série cacheada antes
+  /// da versão 3 do esquema.
+  final double? volume;
   const CachedPrice({
     required this.ticker,
     required this.date,
     required this.close,
     this.adjustedClose,
+    this.volume,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -150,6 +183,9 @@ class CachedPrice extends DataClass implements Insertable<CachedPrice> {
     map['close'] = Variable<double>(close);
     if (!nullToAbsent || adjustedClose != null) {
       map['adjusted_close'] = Variable<double>(adjustedClose);
+    }
+    if (!nullToAbsent || volume != null) {
+      map['volume'] = Variable<double>(volume);
     }
     return map;
   }
@@ -162,6 +198,9 @@ class CachedPrice extends DataClass implements Insertable<CachedPrice> {
       adjustedClose: adjustedClose == null && nullToAbsent
           ? const Value.absent()
           : Value(adjustedClose),
+      volume: volume == null && nullToAbsent
+          ? const Value.absent()
+          : Value(volume),
     );
   }
 
@@ -175,6 +214,7 @@ class CachedPrice extends DataClass implements Insertable<CachedPrice> {
       date: serializer.fromJson<String>(json['date']),
       close: serializer.fromJson<double>(json['close']),
       adjustedClose: serializer.fromJson<double?>(json['adjustedClose']),
+      volume: serializer.fromJson<double?>(json['volume']),
     );
   }
   @override
@@ -185,6 +225,7 @@ class CachedPrice extends DataClass implements Insertable<CachedPrice> {
       'date': serializer.toJson<String>(date),
       'close': serializer.toJson<double>(close),
       'adjustedClose': serializer.toJson<double?>(adjustedClose),
+      'volume': serializer.toJson<double?>(volume),
     };
   }
 
@@ -193,6 +234,7 @@ class CachedPrice extends DataClass implements Insertable<CachedPrice> {
     String? date,
     double? close,
     Value<double?> adjustedClose = const Value.absent(),
+    Value<double?> volume = const Value.absent(),
   }) => CachedPrice(
     ticker: ticker ?? this.ticker,
     date: date ?? this.date,
@@ -200,6 +242,7 @@ class CachedPrice extends DataClass implements Insertable<CachedPrice> {
     adjustedClose: adjustedClose.present
         ? adjustedClose.value
         : this.adjustedClose,
+    volume: volume.present ? volume.value : this.volume,
   );
   CachedPrice copyWithCompanion(CachedPricesCompanion data) {
     return CachedPrice(
@@ -209,6 +252,7 @@ class CachedPrice extends DataClass implements Insertable<CachedPrice> {
       adjustedClose: data.adjustedClose.present
           ? data.adjustedClose.value
           : this.adjustedClose,
+      volume: data.volume.present ? data.volume.value : this.volume,
     );
   }
 
@@ -218,13 +262,14 @@ class CachedPrice extends DataClass implements Insertable<CachedPrice> {
           ..write('ticker: $ticker, ')
           ..write('date: $date, ')
           ..write('close: $close, ')
-          ..write('adjustedClose: $adjustedClose')
+          ..write('adjustedClose: $adjustedClose, ')
+          ..write('volume: $volume')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(ticker, date, close, adjustedClose);
+  int get hashCode => Object.hash(ticker, date, close, adjustedClose, volume);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -232,7 +277,8 @@ class CachedPrice extends DataClass implements Insertable<CachedPrice> {
           other.ticker == this.ticker &&
           other.date == this.date &&
           other.close == this.close &&
-          other.adjustedClose == this.adjustedClose);
+          other.adjustedClose == this.adjustedClose &&
+          other.volume == this.volume);
 }
 
 class CachedPricesCompanion extends UpdateCompanion<CachedPrice> {
@@ -240,12 +286,14 @@ class CachedPricesCompanion extends UpdateCompanion<CachedPrice> {
   final Value<String> date;
   final Value<double> close;
   final Value<double?> adjustedClose;
+  final Value<double?> volume;
   final Value<int> rowid;
   const CachedPricesCompanion({
     this.ticker = const Value.absent(),
     this.date = const Value.absent(),
     this.close = const Value.absent(),
     this.adjustedClose = const Value.absent(),
+    this.volume = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CachedPricesCompanion.insert({
@@ -253,6 +301,7 @@ class CachedPricesCompanion extends UpdateCompanion<CachedPrice> {
     required String date,
     required double close,
     this.adjustedClose = const Value.absent(),
+    this.volume = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : ticker = Value(ticker),
        date = Value(date),
@@ -262,6 +311,7 @@ class CachedPricesCompanion extends UpdateCompanion<CachedPrice> {
     Expression<String>? date,
     Expression<double>? close,
     Expression<double>? adjustedClose,
+    Expression<double>? volume,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -269,6 +319,7 @@ class CachedPricesCompanion extends UpdateCompanion<CachedPrice> {
       if (date != null) 'date': date,
       if (close != null) 'close': close,
       if (adjustedClose != null) 'adjusted_close': adjustedClose,
+      if (volume != null) 'volume': volume,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -278,6 +329,7 @@ class CachedPricesCompanion extends UpdateCompanion<CachedPrice> {
     Value<String>? date,
     Value<double>? close,
     Value<double?>? adjustedClose,
+    Value<double?>? volume,
     Value<int>? rowid,
   }) {
     return CachedPricesCompanion(
@@ -285,6 +337,7 @@ class CachedPricesCompanion extends UpdateCompanion<CachedPrice> {
       date: date ?? this.date,
       close: close ?? this.close,
       adjustedClose: adjustedClose ?? this.adjustedClose,
+      volume: volume ?? this.volume,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -304,6 +357,9 @@ class CachedPricesCompanion extends UpdateCompanion<CachedPrice> {
     if (adjustedClose.present) {
       map['adjusted_close'] = Variable<double>(adjustedClose.value);
     }
+    if (volume.present) {
+      map['volume'] = Variable<double>(volume.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -317,6 +373,7 @@ class CachedPricesCompanion extends UpdateCompanion<CachedPrice> {
           ..write('date: $date, ')
           ..write('close: $close, ')
           ..write('adjustedClose: $adjustedClose, ')
+          ..write('volume: $volume, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -544,6 +601,17 @@ class $CachedFundamentalsTableTable extends CachedFundamentalsTable
         type: DriftSqlType.double,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _sharesOutstandingAsOfMeta =
+      const VerificationMeta('sharesOutstandingAsOf');
+  @override
+  late final GeneratedColumn<double> sharesOutstandingAsOf =
+      GeneratedColumn<double>(
+        'shares_outstanding_as_of',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _marketCapMeta = const VerificationMeta(
     'marketCap',
   );
@@ -566,6 +634,81 @@ class $CachedFundamentalsTableTable extends CachedFundamentalsTable
         type: DriftSqlType.double,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _nopatMeta = const VerificationMeta('nopat');
+  @override
+  late final GeneratedColumn<double> nopat = GeneratedColumn<double>(
+    'nopat',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _propertyPlantEquipmentMeta =
+      const VerificationMeta('propertyPlantEquipment');
+  @override
+  late final GeneratedColumn<double> propertyPlantEquipment =
+      GeneratedColumn<double>(
+        'property_plant_equipment',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _intangibleAssetsMeta = const VerificationMeta(
+    'intangibleAssets',
+  );
+  @override
+  late final GeneratedColumn<double> intangibleAssets = GeneratedColumn<double>(
+    'intangible_assets',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _totalCurrentAssetsMeta =
+      const VerificationMeta('totalCurrentAssets');
+  @override
+  late final GeneratedColumn<double> totalCurrentAssets =
+      GeneratedColumn<double>(
+        'total_current_assets',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _currentLiabilitiesMeta =
+      const VerificationMeta('currentLiabilities');
+  @override
+  late final GeneratedColumn<double> currentLiabilities =
+      GeneratedColumn<double>(
+        'current_liabilities',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _realizedShareCapitalMeta =
+      const VerificationMeta('realizedShareCapital');
+  @override
+  late final GeneratedColumn<double> realizedShareCapital =
+      GeneratedColumn<double>(
+        'realized_share_capital',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _profitReservesMeta = const VerificationMeta(
+    'profitReserves',
+  );
+  @override
+  late final GeneratedColumn<double> profitReserves = GeneratedColumn<double>(
+    'profit_reserves',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     ticker,
@@ -588,8 +731,16 @@ class $CachedFundamentalsTableTable extends CachedFundamentalsTable
     investmentCashFlow,
     freeCashFlow,
     sharesOutstanding,
+    sharesOutstandingAsOf,
     marketCap,
     enterpriseToEbitda,
+    nopat,
+    propertyPlantEquipment,
+    intangibleAssets,
+    totalCurrentAssets,
+    currentLiabilities,
+    realizedShareCapital,
+    profitReserves,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -772,6 +923,15 @@ class $CachedFundamentalsTableTable extends CachedFundamentalsTable
         ),
       );
     }
+    if (data.containsKey('shares_outstanding_as_of')) {
+      context.handle(
+        _sharesOutstandingAsOfMeta,
+        sharesOutstandingAsOf.isAcceptableOrUnknown(
+          data['shares_outstanding_as_of']!,
+          _sharesOutstandingAsOfMeta,
+        ),
+      );
+    }
     if (data.containsKey('market_cap')) {
       context.handle(
         _marketCapMeta,
@@ -784,6 +944,66 @@ class $CachedFundamentalsTableTable extends CachedFundamentalsTable
         enterpriseToEbitda.isAcceptableOrUnknown(
           data['enterprise_to_ebitda']!,
           _enterpriseToEbitdaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('nopat')) {
+      context.handle(
+        _nopatMeta,
+        nopat.isAcceptableOrUnknown(data['nopat']!, _nopatMeta),
+      );
+    }
+    if (data.containsKey('property_plant_equipment')) {
+      context.handle(
+        _propertyPlantEquipmentMeta,
+        propertyPlantEquipment.isAcceptableOrUnknown(
+          data['property_plant_equipment']!,
+          _propertyPlantEquipmentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('intangible_assets')) {
+      context.handle(
+        _intangibleAssetsMeta,
+        intangibleAssets.isAcceptableOrUnknown(
+          data['intangible_assets']!,
+          _intangibleAssetsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('total_current_assets')) {
+      context.handle(
+        _totalCurrentAssetsMeta,
+        totalCurrentAssets.isAcceptableOrUnknown(
+          data['total_current_assets']!,
+          _totalCurrentAssetsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('current_liabilities')) {
+      context.handle(
+        _currentLiabilitiesMeta,
+        currentLiabilities.isAcceptableOrUnknown(
+          data['current_liabilities']!,
+          _currentLiabilitiesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('realized_share_capital')) {
+      context.handle(
+        _realizedShareCapitalMeta,
+        realizedShareCapital.isAcceptableOrUnknown(
+          data['realized_share_capital']!,
+          _realizedShareCapitalMeta,
+        ),
+      );
+    }
+    if (data.containsKey('profit_reserves')) {
+      context.handle(
+        _profitReservesMeta,
+        profitReserves.isAcceptableOrUnknown(
+          data['profit_reserves']!,
+          _profitReservesMeta,
         ),
       );
     }
@@ -876,6 +1096,10 @@ class $CachedFundamentalsTableTable extends CachedFundamentalsTable
         DriftSqlType.double,
         data['${effectivePrefix}shares_outstanding'],
       ),
+      sharesOutstandingAsOf: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}shares_outstanding_as_of'],
+      ),
       marketCap: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}market_cap'],
@@ -883,6 +1107,34 @@ class $CachedFundamentalsTableTable extends CachedFundamentalsTable
       enterpriseToEbitda: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}enterprise_to_ebitda'],
+      ),
+      nopat: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}nopat'],
+      ),
+      propertyPlantEquipment: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}property_plant_equipment'],
+      ),
+      intangibleAssets: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}intangible_assets'],
+      ),
+      totalCurrentAssets: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}total_current_assets'],
+      ),
+      currentLiabilities: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}current_liabilities'],
+      ),
+      realizedShareCapital: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}realized_share_capital'],
+      ),
+      profitReserves: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}profit_reserves'],
       ),
     );
   }
@@ -915,8 +1167,19 @@ class CachedFundamentals extends DataClass
   final double? investmentCashFlow;
   final double? freeCashFlow;
   final double? sharesOutstanding;
+
+  /// Contagem de ações **do exercício**, antes da sobrescrita pela corrente.
+  /// Sem ela não há patrimônio nem capital investido reconstituíveis.
+  final double? sharesOutstandingAsOf;
   final double? marketCap;
   final double? enterpriseToEbitda;
+  final double? nopat;
+  final double? propertyPlantEquipment;
+  final double? intangibleAssets;
+  final double? totalCurrentAssets;
+  final double? currentLiabilities;
+  final double? realizedShareCapital;
+  final double? profitReserves;
   const CachedFundamentals({
     required this.ticker,
     required this.fiscalPeriodEnd,
@@ -938,8 +1201,16 @@ class CachedFundamentals extends DataClass
     this.investmentCashFlow,
     this.freeCashFlow,
     this.sharesOutstanding,
+    this.sharesOutstandingAsOf,
     this.marketCap,
     this.enterpriseToEbitda,
+    this.nopat,
+    this.propertyPlantEquipment,
+    this.intangibleAssets,
+    this.totalCurrentAssets,
+    this.currentLiabilities,
+    this.realizedShareCapital,
+    this.profitReserves,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1002,11 +1273,37 @@ class CachedFundamentals extends DataClass
     if (!nullToAbsent || sharesOutstanding != null) {
       map['shares_outstanding'] = Variable<double>(sharesOutstanding);
     }
+    if (!nullToAbsent || sharesOutstandingAsOf != null) {
+      map['shares_outstanding_as_of'] = Variable<double>(sharesOutstandingAsOf);
+    }
     if (!nullToAbsent || marketCap != null) {
       map['market_cap'] = Variable<double>(marketCap);
     }
     if (!nullToAbsent || enterpriseToEbitda != null) {
       map['enterprise_to_ebitda'] = Variable<double>(enterpriseToEbitda);
+    }
+    if (!nullToAbsent || nopat != null) {
+      map['nopat'] = Variable<double>(nopat);
+    }
+    if (!nullToAbsent || propertyPlantEquipment != null) {
+      map['property_plant_equipment'] = Variable<double>(
+        propertyPlantEquipment,
+      );
+    }
+    if (!nullToAbsent || intangibleAssets != null) {
+      map['intangible_assets'] = Variable<double>(intangibleAssets);
+    }
+    if (!nullToAbsent || totalCurrentAssets != null) {
+      map['total_current_assets'] = Variable<double>(totalCurrentAssets);
+    }
+    if (!nullToAbsent || currentLiabilities != null) {
+      map['current_liabilities'] = Variable<double>(currentLiabilities);
+    }
+    if (!nullToAbsent || realizedShareCapital != null) {
+      map['realized_share_capital'] = Variable<double>(realizedShareCapital);
+    }
+    if (!nullToAbsent || profitReserves != null) {
+      map['profit_reserves'] = Variable<double>(profitReserves);
     }
     return map;
   }
@@ -1065,12 +1362,36 @@ class CachedFundamentals extends DataClass
       sharesOutstanding: sharesOutstanding == null && nullToAbsent
           ? const Value.absent()
           : Value(sharesOutstanding),
+      sharesOutstandingAsOf: sharesOutstandingAsOf == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sharesOutstandingAsOf),
       marketCap: marketCap == null && nullToAbsent
           ? const Value.absent()
           : Value(marketCap),
       enterpriseToEbitda: enterpriseToEbitda == null && nullToAbsent
           ? const Value.absent()
           : Value(enterpriseToEbitda),
+      nopat: nopat == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nopat),
+      propertyPlantEquipment: propertyPlantEquipment == null && nullToAbsent
+          ? const Value.absent()
+          : Value(propertyPlantEquipment),
+      intangibleAssets: intangibleAssets == null && nullToAbsent
+          ? const Value.absent()
+          : Value(intangibleAssets),
+      totalCurrentAssets: totalCurrentAssets == null && nullToAbsent
+          ? const Value.absent()
+          : Value(totalCurrentAssets),
+      currentLiabilities: currentLiabilities == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentLiabilities),
+      realizedShareCapital: realizedShareCapital == null && nullToAbsent
+          ? const Value.absent()
+          : Value(realizedShareCapital),
+      profitReserves: profitReserves == null && nullToAbsent
+          ? const Value.absent()
+          : Value(profitReserves),
     );
   }
 
@@ -1112,10 +1433,28 @@ class CachedFundamentals extends DataClass
       sharesOutstanding: serializer.fromJson<double?>(
         json['sharesOutstanding'],
       ),
+      sharesOutstandingAsOf: serializer.fromJson<double?>(
+        json['sharesOutstandingAsOf'],
+      ),
       marketCap: serializer.fromJson<double?>(json['marketCap']),
       enterpriseToEbitda: serializer.fromJson<double?>(
         json['enterpriseToEbitda'],
       ),
+      nopat: serializer.fromJson<double?>(json['nopat']),
+      propertyPlantEquipment: serializer.fromJson<double?>(
+        json['propertyPlantEquipment'],
+      ),
+      intangibleAssets: serializer.fromJson<double?>(json['intangibleAssets']),
+      totalCurrentAssets: serializer.fromJson<double?>(
+        json['totalCurrentAssets'],
+      ),
+      currentLiabilities: serializer.fromJson<double?>(
+        json['currentLiabilities'],
+      ),
+      realizedShareCapital: serializer.fromJson<double?>(
+        json['realizedShareCapital'],
+      ),
+      profitReserves: serializer.fromJson<double?>(json['profitReserves']),
     );
   }
   @override
@@ -1144,8 +1483,20 @@ class CachedFundamentals extends DataClass
       'investmentCashFlow': serializer.toJson<double?>(investmentCashFlow),
       'freeCashFlow': serializer.toJson<double?>(freeCashFlow),
       'sharesOutstanding': serializer.toJson<double?>(sharesOutstanding),
+      'sharesOutstandingAsOf': serializer.toJson<double?>(
+        sharesOutstandingAsOf,
+      ),
       'marketCap': serializer.toJson<double?>(marketCap),
       'enterpriseToEbitda': serializer.toJson<double?>(enterpriseToEbitda),
+      'nopat': serializer.toJson<double?>(nopat),
+      'propertyPlantEquipment': serializer.toJson<double?>(
+        propertyPlantEquipment,
+      ),
+      'intangibleAssets': serializer.toJson<double?>(intangibleAssets),
+      'totalCurrentAssets': serializer.toJson<double?>(totalCurrentAssets),
+      'currentLiabilities': serializer.toJson<double?>(currentLiabilities),
+      'realizedShareCapital': serializer.toJson<double?>(realizedShareCapital),
+      'profitReserves': serializer.toJson<double?>(profitReserves),
     };
   }
 
@@ -1170,8 +1521,16 @@ class CachedFundamentals extends DataClass
     Value<double?> investmentCashFlow = const Value.absent(),
     Value<double?> freeCashFlow = const Value.absent(),
     Value<double?> sharesOutstanding = const Value.absent(),
+    Value<double?> sharesOutstandingAsOf = const Value.absent(),
     Value<double?> marketCap = const Value.absent(),
     Value<double?> enterpriseToEbitda = const Value.absent(),
+    Value<double?> nopat = const Value.absent(),
+    Value<double?> propertyPlantEquipment = const Value.absent(),
+    Value<double?> intangibleAssets = const Value.absent(),
+    Value<double?> totalCurrentAssets = const Value.absent(),
+    Value<double?> currentLiabilities = const Value.absent(),
+    Value<double?> realizedShareCapital = const Value.absent(),
+    Value<double?> profitReserves = const Value.absent(),
   }) => CachedFundamentals(
     ticker: ticker ?? this.ticker,
     fiscalPeriodEnd: fiscalPeriodEnd ?? this.fiscalPeriodEnd,
@@ -1215,10 +1574,32 @@ class CachedFundamentals extends DataClass
     sharesOutstanding: sharesOutstanding.present
         ? sharesOutstanding.value
         : this.sharesOutstanding,
+    sharesOutstandingAsOf: sharesOutstandingAsOf.present
+        ? sharesOutstandingAsOf.value
+        : this.sharesOutstandingAsOf,
     marketCap: marketCap.present ? marketCap.value : this.marketCap,
     enterpriseToEbitda: enterpriseToEbitda.present
         ? enterpriseToEbitda.value
         : this.enterpriseToEbitda,
+    nopat: nopat.present ? nopat.value : this.nopat,
+    propertyPlantEquipment: propertyPlantEquipment.present
+        ? propertyPlantEquipment.value
+        : this.propertyPlantEquipment,
+    intangibleAssets: intangibleAssets.present
+        ? intangibleAssets.value
+        : this.intangibleAssets,
+    totalCurrentAssets: totalCurrentAssets.present
+        ? totalCurrentAssets.value
+        : this.totalCurrentAssets,
+    currentLiabilities: currentLiabilities.present
+        ? currentLiabilities.value
+        : this.currentLiabilities,
+    realizedShareCapital: realizedShareCapital.present
+        ? realizedShareCapital.value
+        : this.realizedShareCapital,
+    profitReserves: profitReserves.present
+        ? profitReserves.value
+        : this.profitReserves,
   );
   CachedFundamentals copyWithCompanion(CachedFundamentalsTableCompanion data) {
     return CachedFundamentals(
@@ -1272,10 +1653,32 @@ class CachedFundamentals extends DataClass
       sharesOutstanding: data.sharesOutstanding.present
           ? data.sharesOutstanding.value
           : this.sharesOutstanding,
+      sharesOutstandingAsOf: data.sharesOutstandingAsOf.present
+          ? data.sharesOutstandingAsOf.value
+          : this.sharesOutstandingAsOf,
       marketCap: data.marketCap.present ? data.marketCap.value : this.marketCap,
       enterpriseToEbitda: data.enterpriseToEbitda.present
           ? data.enterpriseToEbitda.value
           : this.enterpriseToEbitda,
+      nopat: data.nopat.present ? data.nopat.value : this.nopat,
+      propertyPlantEquipment: data.propertyPlantEquipment.present
+          ? data.propertyPlantEquipment.value
+          : this.propertyPlantEquipment,
+      intangibleAssets: data.intangibleAssets.present
+          ? data.intangibleAssets.value
+          : this.intangibleAssets,
+      totalCurrentAssets: data.totalCurrentAssets.present
+          ? data.totalCurrentAssets.value
+          : this.totalCurrentAssets,
+      currentLiabilities: data.currentLiabilities.present
+          ? data.currentLiabilities.value
+          : this.currentLiabilities,
+      realizedShareCapital: data.realizedShareCapital.present
+          ? data.realizedShareCapital.value
+          : this.realizedShareCapital,
+      profitReserves: data.profitReserves.present
+          ? data.profitReserves.value
+          : this.profitReserves,
     );
   }
 
@@ -1302,8 +1705,16 @@ class CachedFundamentals extends DataClass
           ..write('investmentCashFlow: $investmentCashFlow, ')
           ..write('freeCashFlow: $freeCashFlow, ')
           ..write('sharesOutstanding: $sharesOutstanding, ')
+          ..write('sharesOutstandingAsOf: $sharesOutstandingAsOf, ')
           ..write('marketCap: $marketCap, ')
-          ..write('enterpriseToEbitda: $enterpriseToEbitda')
+          ..write('enterpriseToEbitda: $enterpriseToEbitda, ')
+          ..write('nopat: $nopat, ')
+          ..write('propertyPlantEquipment: $propertyPlantEquipment, ')
+          ..write('intangibleAssets: $intangibleAssets, ')
+          ..write('totalCurrentAssets: $totalCurrentAssets, ')
+          ..write('currentLiabilities: $currentLiabilities, ')
+          ..write('realizedShareCapital: $realizedShareCapital, ')
+          ..write('profitReserves: $profitReserves')
           ..write(')'))
         .toString();
   }
@@ -1330,8 +1741,16 @@ class CachedFundamentals extends DataClass
     investmentCashFlow,
     freeCashFlow,
     sharesOutstanding,
+    sharesOutstandingAsOf,
     marketCap,
     enterpriseToEbitda,
+    nopat,
+    propertyPlantEquipment,
+    intangibleAssets,
+    totalCurrentAssets,
+    currentLiabilities,
+    realizedShareCapital,
+    profitReserves,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1357,8 +1776,16 @@ class CachedFundamentals extends DataClass
           other.investmentCashFlow == this.investmentCashFlow &&
           other.freeCashFlow == this.freeCashFlow &&
           other.sharesOutstanding == this.sharesOutstanding &&
+          other.sharesOutstandingAsOf == this.sharesOutstandingAsOf &&
           other.marketCap == this.marketCap &&
-          other.enterpriseToEbitda == this.enterpriseToEbitda);
+          other.enterpriseToEbitda == this.enterpriseToEbitda &&
+          other.nopat == this.nopat &&
+          other.propertyPlantEquipment == this.propertyPlantEquipment &&
+          other.intangibleAssets == this.intangibleAssets &&
+          other.totalCurrentAssets == this.totalCurrentAssets &&
+          other.currentLiabilities == this.currentLiabilities &&
+          other.realizedShareCapital == this.realizedShareCapital &&
+          other.profitReserves == this.profitReserves);
 }
 
 class CachedFundamentalsTableCompanion
@@ -1383,8 +1810,16 @@ class CachedFundamentalsTableCompanion
   final Value<double?> investmentCashFlow;
   final Value<double?> freeCashFlow;
   final Value<double?> sharesOutstanding;
+  final Value<double?> sharesOutstandingAsOf;
   final Value<double?> marketCap;
   final Value<double?> enterpriseToEbitda;
+  final Value<double?> nopat;
+  final Value<double?> propertyPlantEquipment;
+  final Value<double?> intangibleAssets;
+  final Value<double?> totalCurrentAssets;
+  final Value<double?> currentLiabilities;
+  final Value<double?> realizedShareCapital;
+  final Value<double?> profitReserves;
   final Value<int> rowid;
   const CachedFundamentalsTableCompanion({
     this.ticker = const Value.absent(),
@@ -1407,8 +1842,16 @@ class CachedFundamentalsTableCompanion
     this.investmentCashFlow = const Value.absent(),
     this.freeCashFlow = const Value.absent(),
     this.sharesOutstanding = const Value.absent(),
+    this.sharesOutstandingAsOf = const Value.absent(),
     this.marketCap = const Value.absent(),
     this.enterpriseToEbitda = const Value.absent(),
+    this.nopat = const Value.absent(),
+    this.propertyPlantEquipment = const Value.absent(),
+    this.intangibleAssets = const Value.absent(),
+    this.totalCurrentAssets = const Value.absent(),
+    this.currentLiabilities = const Value.absent(),
+    this.realizedShareCapital = const Value.absent(),
+    this.profitReserves = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CachedFundamentalsTableCompanion.insert({
@@ -1432,8 +1875,16 @@ class CachedFundamentalsTableCompanion
     this.investmentCashFlow = const Value.absent(),
     this.freeCashFlow = const Value.absent(),
     this.sharesOutstanding = const Value.absent(),
+    this.sharesOutstandingAsOf = const Value.absent(),
     this.marketCap = const Value.absent(),
     this.enterpriseToEbitda = const Value.absent(),
+    this.nopat = const Value.absent(),
+    this.propertyPlantEquipment = const Value.absent(),
+    this.intangibleAssets = const Value.absent(),
+    this.totalCurrentAssets = const Value.absent(),
+    this.currentLiabilities = const Value.absent(),
+    this.realizedShareCapital = const Value.absent(),
+    this.profitReserves = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : ticker = Value(ticker),
        fiscalPeriodEnd = Value(fiscalPeriodEnd);
@@ -1458,8 +1909,16 @@ class CachedFundamentalsTableCompanion
     Expression<double>? investmentCashFlow,
     Expression<double>? freeCashFlow,
     Expression<double>? sharesOutstanding,
+    Expression<double>? sharesOutstandingAsOf,
     Expression<double>? marketCap,
     Expression<double>? enterpriseToEbitda,
+    Expression<double>? nopat,
+    Expression<double>? propertyPlantEquipment,
+    Expression<double>? intangibleAssets,
+    Expression<double>? totalCurrentAssets,
+    Expression<double>? currentLiabilities,
+    Expression<double>? realizedShareCapital,
+    Expression<double>? profitReserves,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1486,9 +1945,21 @@ class CachedFundamentalsTableCompanion
         'investment_cash_flow': investmentCashFlow,
       if (freeCashFlow != null) 'free_cash_flow': freeCashFlow,
       if (sharesOutstanding != null) 'shares_outstanding': sharesOutstanding,
+      if (sharesOutstandingAsOf != null)
+        'shares_outstanding_as_of': sharesOutstandingAsOf,
       if (marketCap != null) 'market_cap': marketCap,
       if (enterpriseToEbitda != null)
         'enterprise_to_ebitda': enterpriseToEbitda,
+      if (nopat != null) 'nopat': nopat,
+      if (propertyPlantEquipment != null)
+        'property_plant_equipment': propertyPlantEquipment,
+      if (intangibleAssets != null) 'intangible_assets': intangibleAssets,
+      if (totalCurrentAssets != null)
+        'total_current_assets': totalCurrentAssets,
+      if (currentLiabilities != null) 'current_liabilities': currentLiabilities,
+      if (realizedShareCapital != null)
+        'realized_share_capital': realizedShareCapital,
+      if (profitReserves != null) 'profit_reserves': profitReserves,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1514,8 +1985,16 @@ class CachedFundamentalsTableCompanion
     Value<double?>? investmentCashFlow,
     Value<double?>? freeCashFlow,
     Value<double?>? sharesOutstanding,
+    Value<double?>? sharesOutstandingAsOf,
     Value<double?>? marketCap,
     Value<double?>? enterpriseToEbitda,
+    Value<double?>? nopat,
+    Value<double?>? propertyPlantEquipment,
+    Value<double?>? intangibleAssets,
+    Value<double?>? totalCurrentAssets,
+    Value<double?>? currentLiabilities,
+    Value<double?>? realizedShareCapital,
+    Value<double?>? profitReserves,
     Value<int>? rowid,
   }) {
     return CachedFundamentalsTableCompanion(
@@ -1540,8 +2019,18 @@ class CachedFundamentalsTableCompanion
       investmentCashFlow: investmentCashFlow ?? this.investmentCashFlow,
       freeCashFlow: freeCashFlow ?? this.freeCashFlow,
       sharesOutstanding: sharesOutstanding ?? this.sharesOutstanding,
+      sharesOutstandingAsOf:
+          sharesOutstandingAsOf ?? this.sharesOutstandingAsOf,
       marketCap: marketCap ?? this.marketCap,
       enterpriseToEbitda: enterpriseToEbitda ?? this.enterpriseToEbitda,
+      nopat: nopat ?? this.nopat,
+      propertyPlantEquipment:
+          propertyPlantEquipment ?? this.propertyPlantEquipment,
+      intangibleAssets: intangibleAssets ?? this.intangibleAssets,
+      totalCurrentAssets: totalCurrentAssets ?? this.totalCurrentAssets,
+      currentLiabilities: currentLiabilities ?? this.currentLiabilities,
+      realizedShareCapital: realizedShareCapital ?? this.realizedShareCapital,
+      profitReserves: profitReserves ?? this.profitReserves,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1613,11 +2102,41 @@ class CachedFundamentalsTableCompanion
     if (sharesOutstanding.present) {
       map['shares_outstanding'] = Variable<double>(sharesOutstanding.value);
     }
+    if (sharesOutstandingAsOf.present) {
+      map['shares_outstanding_as_of'] = Variable<double>(
+        sharesOutstandingAsOf.value,
+      );
+    }
     if (marketCap.present) {
       map['market_cap'] = Variable<double>(marketCap.value);
     }
     if (enterpriseToEbitda.present) {
       map['enterprise_to_ebitda'] = Variable<double>(enterpriseToEbitda.value);
+    }
+    if (nopat.present) {
+      map['nopat'] = Variable<double>(nopat.value);
+    }
+    if (propertyPlantEquipment.present) {
+      map['property_plant_equipment'] = Variable<double>(
+        propertyPlantEquipment.value,
+      );
+    }
+    if (intangibleAssets.present) {
+      map['intangible_assets'] = Variable<double>(intangibleAssets.value);
+    }
+    if (totalCurrentAssets.present) {
+      map['total_current_assets'] = Variable<double>(totalCurrentAssets.value);
+    }
+    if (currentLiabilities.present) {
+      map['current_liabilities'] = Variable<double>(currentLiabilities.value);
+    }
+    if (realizedShareCapital.present) {
+      map['realized_share_capital'] = Variable<double>(
+        realizedShareCapital.value,
+      );
+    }
+    if (profitReserves.present) {
+      map['profit_reserves'] = Variable<double>(profitReserves.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1648,8 +2167,16 @@ class CachedFundamentalsTableCompanion
           ..write('investmentCashFlow: $investmentCashFlow, ')
           ..write('freeCashFlow: $freeCashFlow, ')
           ..write('sharesOutstanding: $sharesOutstanding, ')
+          ..write('sharesOutstandingAsOf: $sharesOutstandingAsOf, ')
           ..write('marketCap: $marketCap, ')
           ..write('enterpriseToEbitda: $enterpriseToEbitda, ')
+          ..write('nopat: $nopat, ')
+          ..write('propertyPlantEquipment: $propertyPlantEquipment, ')
+          ..write('intangibleAssets: $intangibleAssets, ')
+          ..write('totalCurrentAssets: $totalCurrentAssets, ')
+          ..write('currentLiabilities: $currentLiabilities, ')
+          ..write('realizedShareCapital: $realizedShareCapital, ')
+          ..write('profitReserves: $profitReserves, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2534,6 +3061,7 @@ typedef $$CachedPricesTableCreateCompanionBuilder =
       required String date,
       required double close,
       Value<double?> adjustedClose,
+      Value<double?> volume,
       Value<int> rowid,
     });
 typedef $$CachedPricesTableUpdateCompanionBuilder =
@@ -2542,6 +3070,7 @@ typedef $$CachedPricesTableUpdateCompanionBuilder =
       Value<String> date,
       Value<double> close,
       Value<double?> adjustedClose,
+      Value<double?> volume,
       Value<int> rowid,
     });
 
@@ -2571,6 +3100,11 @@ class $$CachedPricesTableFilterComposer
 
   ColumnFilters<double> get adjustedClose => $composableBuilder(
     column: $table.adjustedClose,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get volume => $composableBuilder(
+    column: $table.volume,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2603,6 +3137,11 @@ class $$CachedPricesTableOrderingComposer
     column: $table.adjustedClose,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get volume => $composableBuilder(
+    column: $table.volume,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CachedPricesTableAnnotationComposer
@@ -2627,6 +3166,9 @@ class $$CachedPricesTableAnnotationComposer
     column: $table.adjustedClose,
     builder: (column) => column,
   );
+
+  GeneratedColumn<double> get volume =>
+      $composableBuilder(column: $table.volume, builder: (column) => column);
 }
 
 class $$CachedPricesTableTableManager
@@ -2664,12 +3206,14 @@ class $$CachedPricesTableTableManager
                 Value<String> date = const Value.absent(),
                 Value<double> close = const Value.absent(),
                 Value<double?> adjustedClose = const Value.absent(),
+                Value<double?> volume = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CachedPricesCompanion(
                 ticker: ticker,
                 date: date,
                 close: close,
                 adjustedClose: adjustedClose,
+                volume: volume,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2678,12 +3222,14 @@ class $$CachedPricesTableTableManager
                 required String date,
                 required double close,
                 Value<double?> adjustedClose = const Value.absent(),
+                Value<double?> volume = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CachedPricesCompanion.insert(
                 ticker: ticker,
                 date: date,
                 close: close,
                 adjustedClose: adjustedClose,
+                volume: volume,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2733,8 +3279,16 @@ typedef $$CachedFundamentalsTableTableCreateCompanionBuilder =
       Value<double?> investmentCashFlow,
       Value<double?> freeCashFlow,
       Value<double?> sharesOutstanding,
+      Value<double?> sharesOutstandingAsOf,
       Value<double?> marketCap,
       Value<double?> enterpriseToEbitda,
+      Value<double?> nopat,
+      Value<double?> propertyPlantEquipment,
+      Value<double?> intangibleAssets,
+      Value<double?> totalCurrentAssets,
+      Value<double?> currentLiabilities,
+      Value<double?> realizedShareCapital,
+      Value<double?> profitReserves,
       Value<int> rowid,
     });
 typedef $$CachedFundamentalsTableTableUpdateCompanionBuilder =
@@ -2759,8 +3313,16 @@ typedef $$CachedFundamentalsTableTableUpdateCompanionBuilder =
       Value<double?> investmentCashFlow,
       Value<double?> freeCashFlow,
       Value<double?> sharesOutstanding,
+      Value<double?> sharesOutstandingAsOf,
       Value<double?> marketCap,
       Value<double?> enterpriseToEbitda,
+      Value<double?> nopat,
+      Value<double?> propertyPlantEquipment,
+      Value<double?> intangibleAssets,
+      Value<double?> totalCurrentAssets,
+      Value<double?> currentLiabilities,
+      Value<double?> realizedShareCapital,
+      Value<double?> profitReserves,
       Value<int> rowid,
     });
 
@@ -2873,6 +3435,11 @@ class $$CachedFundamentalsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get sharesOutstandingAsOf => $composableBuilder(
+    column: $table.sharesOutstandingAsOf,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<double> get marketCap => $composableBuilder(
     column: $table.marketCap,
     builder: (column) => ColumnFilters(column),
@@ -2880,6 +3447,41 @@ class $$CachedFundamentalsTableTableFilterComposer
 
   ColumnFilters<double> get enterpriseToEbitda => $composableBuilder(
     column: $table.enterpriseToEbitda,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get nopat => $composableBuilder(
+    column: $table.nopat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get propertyPlantEquipment => $composableBuilder(
+    column: $table.propertyPlantEquipment,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get intangibleAssets => $composableBuilder(
+    column: $table.intangibleAssets,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get totalCurrentAssets => $composableBuilder(
+    column: $table.totalCurrentAssets,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get currentLiabilities => $composableBuilder(
+    column: $table.currentLiabilities,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get realizedShareCapital => $composableBuilder(
+    column: $table.realizedShareCapital,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get profitReserves => $composableBuilder(
+    column: $table.profitReserves,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2993,6 +3595,11 @@ class $$CachedFundamentalsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get sharesOutstandingAsOf => $composableBuilder(
+    column: $table.sharesOutstandingAsOf,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get marketCap => $composableBuilder(
     column: $table.marketCap,
     builder: (column) => ColumnOrderings(column),
@@ -3000,6 +3607,41 @@ class $$CachedFundamentalsTableTableOrderingComposer
 
   ColumnOrderings<double> get enterpriseToEbitda => $composableBuilder(
     column: $table.enterpriseToEbitda,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get nopat => $composableBuilder(
+    column: $table.nopat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get propertyPlantEquipment => $composableBuilder(
+    column: $table.propertyPlantEquipment,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get intangibleAssets => $composableBuilder(
+    column: $table.intangibleAssets,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get totalCurrentAssets => $composableBuilder(
+    column: $table.totalCurrentAssets,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get currentLiabilities => $composableBuilder(
+    column: $table.currentLiabilities,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get realizedShareCapital => $composableBuilder(
+    column: $table.realizedShareCapital,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get profitReserves => $composableBuilder(
+    column: $table.profitReserves,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -3103,11 +3745,49 @@ class $$CachedFundamentalsTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<double> get sharesOutstandingAsOf => $composableBuilder(
+    column: $table.sharesOutstandingAsOf,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<double> get marketCap =>
       $composableBuilder(column: $table.marketCap, builder: (column) => column);
 
   GeneratedColumn<double> get enterpriseToEbitda => $composableBuilder(
     column: $table.enterpriseToEbitda,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get nopat =>
+      $composableBuilder(column: $table.nopat, builder: (column) => column);
+
+  GeneratedColumn<double> get propertyPlantEquipment => $composableBuilder(
+    column: $table.propertyPlantEquipment,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get intangibleAssets => $composableBuilder(
+    column: $table.intangibleAssets,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get totalCurrentAssets => $composableBuilder(
+    column: $table.totalCurrentAssets,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get currentLiabilities => $composableBuilder(
+    column: $table.currentLiabilities,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get realizedShareCapital => $composableBuilder(
+    column: $table.realizedShareCapital,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get profitReserves => $composableBuilder(
+    column: $table.profitReserves,
     builder: (column) => column,
   );
 }
@@ -3178,8 +3858,16 @@ class $$CachedFundamentalsTableTableTableManager
                 Value<double?> investmentCashFlow = const Value.absent(),
                 Value<double?> freeCashFlow = const Value.absent(),
                 Value<double?> sharesOutstanding = const Value.absent(),
+                Value<double?> sharesOutstandingAsOf = const Value.absent(),
                 Value<double?> marketCap = const Value.absent(),
                 Value<double?> enterpriseToEbitda = const Value.absent(),
+                Value<double?> nopat = const Value.absent(),
+                Value<double?> propertyPlantEquipment = const Value.absent(),
+                Value<double?> intangibleAssets = const Value.absent(),
+                Value<double?> totalCurrentAssets = const Value.absent(),
+                Value<double?> currentLiabilities = const Value.absent(),
+                Value<double?> realizedShareCapital = const Value.absent(),
+                Value<double?> profitReserves = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CachedFundamentalsTableCompanion(
                 ticker: ticker,
@@ -3202,8 +3890,16 @@ class $$CachedFundamentalsTableTableTableManager
                 investmentCashFlow: investmentCashFlow,
                 freeCashFlow: freeCashFlow,
                 sharesOutstanding: sharesOutstanding,
+                sharesOutstandingAsOf: sharesOutstandingAsOf,
                 marketCap: marketCap,
                 enterpriseToEbitda: enterpriseToEbitda,
+                nopat: nopat,
+                propertyPlantEquipment: propertyPlantEquipment,
+                intangibleAssets: intangibleAssets,
+                totalCurrentAssets: totalCurrentAssets,
+                currentLiabilities: currentLiabilities,
+                realizedShareCapital: realizedShareCapital,
+                profitReserves: profitReserves,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3228,8 +3924,16 @@ class $$CachedFundamentalsTableTableTableManager
                 Value<double?> investmentCashFlow = const Value.absent(),
                 Value<double?> freeCashFlow = const Value.absent(),
                 Value<double?> sharesOutstanding = const Value.absent(),
+                Value<double?> sharesOutstandingAsOf = const Value.absent(),
                 Value<double?> marketCap = const Value.absent(),
                 Value<double?> enterpriseToEbitda = const Value.absent(),
+                Value<double?> nopat = const Value.absent(),
+                Value<double?> propertyPlantEquipment = const Value.absent(),
+                Value<double?> intangibleAssets = const Value.absent(),
+                Value<double?> totalCurrentAssets = const Value.absent(),
+                Value<double?> currentLiabilities = const Value.absent(),
+                Value<double?> realizedShareCapital = const Value.absent(),
+                Value<double?> profitReserves = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CachedFundamentalsTableCompanion.insert(
                 ticker: ticker,
@@ -3252,8 +3956,16 @@ class $$CachedFundamentalsTableTableTableManager
                 investmentCashFlow: investmentCashFlow,
                 freeCashFlow: freeCashFlow,
                 sharesOutstanding: sharesOutstanding,
+                sharesOutstandingAsOf: sharesOutstandingAsOf,
                 marketCap: marketCap,
                 enterpriseToEbitda: enterpriseToEbitda,
+                nopat: nopat,
+                propertyPlantEquipment: propertyPlantEquipment,
+                intangibleAssets: intangibleAssets,
+                totalCurrentAssets: totalCurrentAssets,
+                currentLiabilities: currentLiabilities,
+                realizedShareCapital: realizedShareCapital,
+                profitReserves: profitReserves,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

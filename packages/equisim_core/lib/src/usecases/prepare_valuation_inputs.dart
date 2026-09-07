@@ -4,7 +4,6 @@ import '../failures/result.dart';
 import '../repositories/repositories.dart';
 import '../services/metrics/beta.dart';
 import '../services/valuation/cost_of_capital.dart';
-import '../services/valuation/growth_estimator.dart';
 import '../value_objects/date_range.dart';
 import '../value_objects/ticker.dart';
 import 'compute_valuation.dart';
@@ -23,6 +22,9 @@ abstract final class PrepareValuationInputs {
   ///
   /// - [ticker]: ativo a preparar.
   /// - [prices], [fundamentals], [benchmark]: repositórios.
+  /// - [terminalRiskFreeRate]: taxa livre de risco **estrutural**, destino do
+  ///   decaimento do desconto e taxa da perpetuidade. Omiti-la faz cair para a
+  ///   corrente, o que reproduz o modelo sem estrutura a termo.
   /// - [riskFreeRate]: taxa livre de risco **anual corrente**, não a média
   ///   histórica — o desconto olha para frente.
   /// - [asOf]: data de referência. Sem ela, usa o relógio do sistema; informe-a
@@ -44,8 +46,11 @@ abstract final class PrepareValuationInputs {
     DateTime? asOf,
     double marketPremium = CapmInputs.defaultMarketPremium,
     double marginOfSafety = 0.0,
-    int projectionYears = 5,
-    double perpetualGrowthCap = GrowthEstimator.realEconomyGrowth,
+    int projectionYears = 10,
+    double perpetualGrowthCap = 0.0652,
+    double inflation = 0.05,
+    double? terminalRiskFreeRate,
+    bool isDistressed = false,
   }) async {
     final today = asOf ?? DateTime.now();
     final window = DateRange(
@@ -55,6 +60,13 @@ abstract final class PrepareValuationInputs {
 
     final historyResult = await fundamentals.history(ticker);
     if (historyResult.isErr) return Err(historyResult.failureOrNull!);
+
+    // O perfil alimenta a Porta 1. Falha dele **não** interrompe: sem setor a
+    // porta não dispara e o roteamento cai na Porta 3, que já barra instituição
+    // financeira por outro caminho — banco não tem NOPAT publicado.
+    final profile = await fundamentals.profile(ticker);
+    final sectorKey =
+        profile.isOk ? profile.unwrap().sector.key.toLowerCase() : null;
 
     final priceResult = await prices.daily(ticker, window);
     if (priceResult.isErr) return Err(priceResult.failureOrNull!);
@@ -87,6 +99,13 @@ abstract final class PrepareValuationInputs {
       marginOfSafety: marginOfSafety,
       projectionYears: projectionYears,
       perpetualGrowthCap: perpetualGrowthCap,
+      sectorKey: sectorKey,
+      inflation: inflation,
+      declaredTerminalRiskFreeRate: terminalRiskFreeRate,
+      // A mesma série que estima o beta alimenta o corte de liquidez da
+      // Porta 0 — não há segunda busca.
+      prices: series,
+      isDistressed: isDistressed,
     ));
   }
 

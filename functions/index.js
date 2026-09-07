@@ -24,10 +24,17 @@ const BRAPI_TOKEN = defineSecret("BRAPI_TOKEN");
 
 const BRAPI_BASE = "https://brapi.dev/api";
 
-/** Só estes caminhos são repassados. */
+/**
+ * Só estes caminhos são repassados.
+ *
+ * `/v2/stocks/dividends` saiu em 07/09/2026. A decisão 23 removeu provento do
+ * domínio e a 25 manteve a remoção, mas o endpoint seguia liberado aqui: uma
+ * superfície aberta para dado que o projeto decidiu não modelar é convite a
+ * reintroduzi-lo por acidente, e consome cota da fonte sem contrapartida.
+ * Reabri-lo exige decisão nova que substitua a 23.
+ */
 const ALLOWED_PATHS = [
   "/v2/stocks/historical",
-  "/v2/stocks/dividends",
   "/v2/stocks/statistics",
   "/v2/stocks/financial-data",
   "/v2/stocks/income-statement",

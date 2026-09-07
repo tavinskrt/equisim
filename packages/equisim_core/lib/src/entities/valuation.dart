@@ -7,14 +7,19 @@ import '../value_objects/ticker.dart';
 /// silenciosamente para um modelo inferior e apresentar o número como "preço
 /// justo" esconde do usuário a qualidade da estimativa.
 enum ValuationModel {
-  /// Fluxo de caixa livre para a firma, descontado ao WACC.
-  dcfFcff('DCF por FCFF'),
+  /// Fluxo da firma, descontado ao WACC.
+  ///
+  /// `NOPAT × (1 − RI)`, com freio de reinvestimento — a decisão 25 estendeu à
+  /// firma a correção que a 24 fizera só do lado do acionista.
+  dcfFcff('DCF por fluxo da firma'),
 
-  /// DCF simplificado sobre lucro por ação, descontado ao Ke.
-  dcfEarnings('DCF simplificado (LPA)'),
-
-  /// Múltiplo setorial — último recurso.
-  multiples('Múltiplos');
+  /// DCF sobre lucro distribuível, descontado ao Ke.
+  ///
+  /// É o modelo de desconto de dividendos da via do acionista: o fluxo é
+  /// `LPA × (1 − b)`, e `1 − b` é o *payout*. O dividendo vem da identidade da
+  /// retenção, não de dado publicado de provento — o que o mantém compatível com
+  /// a decisão 23.
+  dcfEarnings('DCF sobre lucro distribuível');
 
   final String label;
   const ValuationModel(this.label);
