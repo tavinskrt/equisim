@@ -145,17 +145,20 @@ class _StudyHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(studyProvider);
     final expected = ref.watch(portfolioValuationsProvider);
-    final settings = ref.watch(valuationSettingsProvider);
-
     final anchors = ref.watch(marketAnchorsProvider);
 
+    // Estimador transversal, o mesmo do cartao de meta: `CDI_spot + z x premio`.
+    // Duas telas que dizem "Esperado da carteira" nao podem mostrar numeros de
+    // definicoes diferentes, e a anualizacao do potencial saiu das duas ao mesmo
+    // tempo -- ver `ExpectedReturn.crossSection`.
     double? weightedUpside;
     var coverage = 0.0;
     if (expected.hasValue && expected.value!.isNotEmpty) {
-      weightedUpside = ExpectedReturn.forPortfolio(
+      weightedUpside = ExpectedReturn.forPortfolioCrossSectional(
         portfolio: state.study.principal,
         valuations: expected.value!,
-        horizonMonths: settings.convergenceHorizonMonths,
+        spotRiskFree:
+            (anchors.value ?? MarketAnchors.fallback2026).currentRiskFreeRate,
       );
       coverage = ExpectedReturn.coverage(
         portfolio: state.study.principal,
@@ -163,14 +166,14 @@ class _StudyHeader extends ConsumerWidget {
       );
     }
 
-    // Referência de plausibilidade: o retorno histórico do próprio mercado.
-    // Um "esperado" muito acima dele não é promessa de desempenho, é sinal de
-    // que alguma avaliação da carteira está esticada.
-    final marketCagr =
-        anchors.value?.marketCagr ??
-        MarketAnchors.fallback2026.marketCagr;
-    final isImplausible =
-        weightedUpside != null && weightedUpside > marketCagr * 3;
+    // Referência de leitura: o próprio CDI à vista, que é a âncora do
+    // estimador. Acima dele a carteira está descontada em relação aos pares
+    // avaliados; abaixo, esticada. A antiga referência era o triplo do CAGR do
+    // Ibovespa, e existia porque o número podia ser um upside cru de +209% —
+    // com o escore confinado a dois desvios robustos isso não acontece mais, e
+    // o aviso que descrevia aquela conta saiu junto com ela.
+    final cdi =
+        (anchors.value ?? MarketAnchors.fallback2026).currentRiskFreeRate;
 
     return GlassCard(
       child: Column(
@@ -243,22 +246,21 @@ class _StudyHeader extends ConsumerWidget {
                 value: weightedUpside == null
                     ? '—'
                     : Fmt.percent(weightedUpside, decimals: 1, signed: true),
-                // O rótulo antigo dizia "ao ano, em 12 meses" e omitia a
-                // premissa que sustenta o número: que o mercado fecha toda a
-                // diferença até o preço justo dentro do horizonte. Com 12
-                // meses a anualização não faz nada, e o valor é literalmente
-                // o upside médio da carteira.
+                // A premissa que sustenta o número precisa vir junto dele. Não
+                // é mais "se o preço justo for alcançado em N meses": é o CDI
+                // à vista mais o prêmio proporcional ao quanto a carteira está
+                // descontada em relação aos pares avaliados.
                 hint: weightedUpside == null
                     ? null
-                    : 'se o preço justo for alcançado em '
-                          '${settings.convergenceHorizonMonths} meses · '
+                    : 'CDI à vista + prêmio pelo desconto relativo · '
                           '${Fmt.percent(coverage, decimals: 0)} da carteira '
                           'avaliada',
-                // Numero implausivel vira ressalva, nao perda: ambar diz
-                // "olhe as premissas", vermelho diria "caiu".
-                trend: isImplausible
-                    ? FinTrend.caution
-                    : FinAmount.trendOf(weightedUpside),
+                // O sinal é contra o CDI, não contra zero: o estimador é
+                // sempre não negativo, e pintar de verde uma carteira que
+                // espera menos que a renda fixa inverteria a leitura.
+                trend: weightedUpside == null
+                    ? FinTrend.neutral
+                    : FinAmount.trendOf(weightedUpside - cdi),
               ),
               MetricTile(
                 label: 'Reserva',
@@ -267,21 +269,6 @@ class _StudyHeader extends ConsumerWidget {
               ),
             ],
           ),
-          if (isImplausible) ...[
-            const Gap.md(),
-            NoticeBanner(
-              icon: Icons.warning_amber_rounded,
-              trend: FinTrend.caution,
-              message:
-                  'O esperado da carteira está em '
-                  '${Fmt.percent(weightedUpside, decimals: 0, signed: true)}, '
-                  'contra ${Fmt.percent(marketCagr, decimals: 1)} a.a. do '
-                  'Ibovespa no histórico. Não leia como projeção: é a média '
-                  'ponderada da distância até o preço justo, e basta um ativo '
-                  'com avaliação esticada para dominá-la. Os marcados com ⚠ '
-                  'na lista são os candidatos.',
-            ),
-          ],
         ],
       ),
     );

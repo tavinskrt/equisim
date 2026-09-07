@@ -1221,6 +1221,174 @@ anterior a esta rodada, e não algo que a curva de desconto introduziu.
 
 ---
 
+## 13. Terceira rodada — a recalibragem da [decisão 27](decisoes/027-recalibragem-apos-a-primeira-validacao.md)
+
+Medições de 07/09/2026, sobre os mesmos 373 papéis. **121 avaliados**, contra 120
+da rodada anterior.
+
+O que entrou: a rentabilidade do *moat* passou a aprovar por união de
+`ROIC_ciclo ≥ 1,5·WACC_∞` **ou** `ROIC_ciclo − WACC_∞ ≥ 5 p.p.`; o histórico
+mínimo do *moat* caiu de 12 para 8 exercícios; a Guarda 2 deixou de barrar a
+normalização; e o retorno esperado da carteira passou a ser o estimador
+transversal. Cada uma respondia a uma pergunta deixada aberta na §12.
+
+### 13.1 O *moat* passou de 2 para 8, e a instrumentação diz por que os outros não
+
+| | Antes | Agora |
+|---|---:|---:|
+| Com vantagem residual | 2 | **8** |
+| Estado estacionário | 118 | **113** |
+
+Os oito: ABEV3, BBSE3, KEPL3, LEVE3, QUAL3, SAUD3, VBBR3 e WEGE3.
+
+**Das cinco franquias que a §12.4 esperava destravar, só a WEGE3 passou.** E
+agora se sabe o motivo de cada uma, porque o passo é instrumentado:
+
+| Ativo | Barrado por | Número que decide |
+|---|---|---|
+| WEGE3 | — | passou: ROIC 25,1% contra WACC_∞ 13,4% |
+| RADL3 | rentabilidade | excedente de 3,2 p.p., contra 5,0 exigidos |
+| EGIE3 | crescimento inorgânico | Φ = 0,58, contra 0,35 |
+| ITUB4 | retorno do ciclo não medido, crescimento inorgânico | Φ = 0,50 |
+| TOTS3 | crescimento inorgânico, rentabilidade | Φ = 1,13 e ROIC 14,9% < WACC_∞ 15,5% |
+
+**O parâmetro que efetivamente prende as franquias não é o que foi recalibrado.**
+Três das quatro reprovadas caem em `Φ ≤ 0,35`, que a homologação mandou manter.
+A distribuição inteira das reprovações, contando todas as condições de cada
+ativo:
+
+| Condição | Barrou | Foi a primeira |
+|---|---:|---:|
+| rentabilidade insuficiente | 90 | 44 |
+| crescimento inorgânico | 64 | 60 |
+| retorno do ciclo não medido | 5 | 5 |
+| capital externo não medido | 4 | 2 |
+| histórico curto | 2 | 2 |
+
+O histórico curto barra **dois** ativos. Baixar o mínimo de 12 para 8 foi
+correção de coerência interna — exigir mais anos que a própria janela do ciclo —,
+e não o que abriu a exceção; quem abriu foi o critério de rentabilidade.
+
+**Os 44 que reprovam só pela rentabilidade estão longe do corte, não perto.** O
+excedente do ciclo sobre o custo de capital nesses casos tem mediana de
+**−2,3 p.p.** e máximo de **4,7 p.p.** — ou seja, nenhum deles passaria com o
+corte em 4,5 p.p., e um único passaria com o corte em 4,0. Afrouxar mais a
+rentabilidade não destrava franquia nenhuma; o que está prendendo é Φ.
+
+### 13.2 A §12.5 atribuiu o bloqueio da SUZB3 à guarda errada
+
+Este é o achado que contraria a premissa da determinação 3.
+
+| Ativo | Φ | Guarda 1 | Guarda 3 | Base | Potencial |
+|---|---:|---|---|---|---:|
+| SUZB3 | **0,77** | domina | destoa | mantida | **+259,1%** |
+| QUAL3 | **0,01** | não domina | destoa | **já normalizada, 2,097x** | **+490,7%** |
+
+A SUZB3 nunca foi um caso de Φ: 0,77 está **abaixo** do limiar de 1,0. Quem
+segura a base dela é a **Guarda 1** — retorno corrente de 41,5% contra ciclo de
+18,4%, com tendência que domina a reversão à média, de modo que o modelo lê o
+nível corrente como estrutural em vez de cíclico. A QUAL3, com `Φ = 0,01`,
+**já era normalizada** antes desta rodada; o potencial dela não vem da base, e
+subiu, não caiu.
+
+**A correção de precedência continua certa pelo argumento de unidade** — Φ mede
+tamanho, o retorno é intensivo —, mas não é o remédio para os dois casos que a
+motivaram. Os dois seguem em aberto, e o parâmetro a examinar é o
+`minTrendDominance` da Guarda 1, não o P6.
+
+**Dezessete ativos destoam do ciclo e ficam como observados por decisão da
+Guarda 1.** É a classe da SUZB3, e os de maior potencial são justamente os que
+mais dependem dela:
+
+| Ativo | Retorno corrente | Ciclo | Φ | Potencial |
+|---|---:|---:|---:|---:|
+| SUZB3 | 41,5% | 18,4% | 0,77 | +259,1% |
+| PGMN3 | 14,2% | 8,9% | 0,76 | +222,1% |
+| WIZC3 | 33,2% | 170,8% | 10,93 | +141,2% |
+
+### 13.3 O que a correção de precedência de fato mudou
+
+**53 dos 121 avaliados** têm a base convergindo ao ciclo; **13 deles** só passaram
+a ser normalizados por causa desta mudança. Nos 68 restantes, quem decidiu manter
+a base foi a Guarda 3 em 51 casos e a Guarda 1 em 17.
+
+E ela expôs um limite que já existia: **o fator de normalização não tem teto.**
+`f = ciclo / atual` explode quando o exercício corrente tem retorno próximo de
+zero, e o DCF é **homogêneo de grau 1 no fluxo-base** — um fator de 21x
+multiplica o preço justo por 21.
+
+| Ativo | Fator | Φ | Potencial |
+|---|---:|---:|---:|
+| MBRF3 | 21,37 | 18,25 | **+406,1%** |
+| FESA4 | 10,80 | 0,80 | +23,5% |
+| PRIO3 | 10,49 | 86,10 | −1,1% |
+| DXCO3 | 10,47 | 0,11 | −39,4% |
+
+**A ausência de teto é anterior a esta rodada** — FESA4 e DXCO3 já recebiam
+fatores de dez vezes com `Φ < 1` e passavam pela guarda antiga. O que mudou é que
+Φ vinha barrando *parte* desses casos por efeito colateral, e a MBRF3 entrou na
+lista. A pergunta que a §1 do [documento da normalização](validacao/normalizacao_fluxo_base.md)
+fazia sobre `τ` volta inteira, agora sem banda nenhuma para respondê-la:
+
+> Quanto se autoriza um único exercício a mover a avaliação inteira da empresa?
+
+**Não foi posto teto nenhum nesta rodada.** É decisão de método, não de código, e
+a medição acima é o que ela precisa.
+
+### 13.4 O retorno esperado deixou de propagar negativo
+
+O nível do potencial não foi tocado — a mediana continua deprimida, em −38,0%
+contra −39,4% da rodada anterior, com o movimento vindo da normalização e do
+*moat*, não de afrouxamento de premissa. O que mudou é o número que a carteira
+usa.
+
+| Percentil | Transversal | Anualização do potencial |
+|---|---:|---:|
+| mínimo | 6,2% | −64,5% |
+| p25 | 10,8% | −27,7% |
+| mediana | **14,1%** | −14,7% |
+| p75 | 18,3% | −2,6% |
+| máximo | 25,1% | +80,8% |
+
+**97 dos 121** avaliados entrariam num otimizador de média-variância com retorno
+esperado negativo pelo caminho antigo. Pelo transversal, nenhum: a mediana é
+exatamente o CDI à vista de 14,09%, por construção, e a banda vai de
+CDI − 7,9 p.p. a CDI + 11,0 p.p. Nenhum ativo tocou o piso de zero, e a ordenação
+por potencial é preservada em toda a faixa.
+
+O preço justo por ativo **não muda por causa disto**: o estimador transversal vive
+em `expected_return.dart` e não toca a cascata.
+
+### 13.5 Dispersão do potencial, antes e depois
+
+| Percentil | 2ª rodada | 3ª rodada |
+|---|---:|---:|
+| mínimo | −95,5% | −95,5% |
+| p25 | −65,4% | −62,2% |
+| mediana | −39,4% | **−38,0%** |
+| p75 | −14,5% | **−7,5%** |
+| p90 | +40,0% | **+62,1%** |
+| máximo | +477,3% | **+490,7%** |
+
+O deslocamento é pequeno na mediana e maior na cauda direita, que é onde a
+normalização de base inorgânica e o *moat* atuam. **A compressão de nível
+continua**, e a §2.8 das [limitações](validacao/limitacoes.md) segue valendo.
+
+### 13.6 O que fica em aberto
+
+1. **Φ ≤ 0,35 é o que prende as franquias**, e a homologação mandou mantê-lo. Se
+   a intenção era destravar EGIE3, ITUB4 e TOTS3, é esse o parâmetro a discutir —
+   com a ressalva de que ele é o que separa franquia de aporte, e afrouxá-lo tem
+   custo diferente do de afrouxar rentabilidade.
+2. **O `minTrendDominance` da Guarda 1** é o que segura a SUZB3, e não foi tocado.
+3. **O fator de normalização não tem teto**, e a MBRF3 mostra o que isso custa.
+4. **A união das duas pernas de rentabilidade** foi a leitura adotada para o "ou"
+   da homologação. As duas pernas são registradas em separado no log, então
+   trocar para a leitura estrita é imediato se a intenção era outra.
+
+---
+
 *Documento gerado a partir de medições executadas contra a cascata real do Equisim e dados de
-produção da brapi. As seções 1 a 9 têm data de referência em 02/09/2026; as seções 10 a 12
-registram a homologação de 05/09, a implementação de 06–07/09 e a segunda rodada de 07/09.*
+produção da brapi. As seções 1 a 9 têm data de referência em 02/09/2026; as seções 10 a 13
+registram a homologação de 05/09, a implementação de 06–07/09, a segunda rodada de 07/09 e a
+terceira rodada do mesmo dia.*

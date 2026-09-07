@@ -80,9 +80,19 @@ class GoalAlignment {
   final RequiredReturn required;
   final FeasibilityVerdict verdict;
 
-  /// Retorno anual esperado da carteira: a convergência de preço até o valor
-  /// justo, anualizada pelo horizonte. Não há parcela de provento — o modelo
-  /// não distribui.
+  /// Retorno anual esperado da carteira, pelo **estimador transversal**:
+  /// `CDI_spot + z(potencial) · prêmio`, ponderado pelos pesos.
+  ///
+  /// **Não é mais a anualização do potencial.** Aquela leitura era uma
+  /// afirmação de nível, e o nível do potencial carrega todo o conservadorismo
+  /// que a estrutura a termo e o terminal neutro impõem ao custo de capital
+  /// brasileiro: com potencial mediano de −39,4% no universo elegível, ela
+  /// devolvia retorno esperado negativo para a carteira mediana e nenhuma meta
+  /// era alcançável, por construção. O que a avaliação sustenta com firmeza é a
+  /// **ordenação** entre ativos, e é só ela que este número usa — ver
+  /// `ExpectedReturn.crossSection`.
+  ///
+  /// Não há parcela de provento: o modelo não distribui.
   final double expectedReturn;
 
   /// Fração do peso da carteira que possui avaliação disponível.
@@ -127,12 +137,16 @@ class GoalAlignment {
 
 /// Confronta o retorno esperado da carteira com a rentabilidade exigida.
 abstract final class EvaluateGoalAlignment {
+  /// - [crossSection]: potenciais que definem mediana e escala do escore. Passe
+  ///   o universo avaliado sempre que ele estiver à mão; omitido, a seção é a
+  ///   própria carteira, o que a centra no CDI por construção — limitação
+  ///   declarada em `ExpectedReturn.crossSection`, não escondida.
   static Result<GoalAlignment> call({
     required Portfolio portfolio,
     required FinancialGoal goal,
     required Map<Ticker, ValuationResult> valuations,
     required MarketAnchors anchors,
-    int horizonMonths = ExpectedReturn.defaultHorizonMonths,
+    Iterable<double>? crossSection,
   }) {
     final solved = RequiredReturnSolver.solve(goal);
     if (solved.isErr) return Err(solved.failureOrNull!);
@@ -145,10 +159,11 @@ abstract final class EvaluateGoalAlignment {
         anchors: anchors,
         goal: goal,
       ),
-      expectedReturn: ExpectedReturn.forPortfolio(
+      expectedReturn: ExpectedReturn.forPortfolioCrossSectional(
         portfolio: portfolio,
         valuations: valuations,
-        horizonMonths: horizonMonths,
+        spotRiskFree: anchors.currentRiskFreeRate,
+        reference: crossSection,
       ),
       valuationCoverage: ExpectedReturn.coverage(
         portfolio: portfolio,

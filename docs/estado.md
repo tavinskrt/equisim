@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-07, a partir de `fc52eee`.
+Gerado em 2026-09-07, a partir de `68b156f`.
 
 ## Decisões registradas
 
-**7** aceita · **1** cumprida
+**8** aceita · **1** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -23,6 +23,7 @@ Gerado em 2026-09-07, a partir de `fc52eee`.
 | 24 | Lucro retido sai do fluxo descontado; a lacuna da meta é lida como yield | aceita | parecer | 2026-09-02 |
 | 25 | Reconstrução do motor de avaliação por portas, vias e crescimento fundamental | aceita | orientador | 2026-09-04 |
 | 26 | O horizonte de convergência do upside passa de 12 para 36 meses | aceita | orientador | 2026-09-07 |
+| 27 | Recalibragem do motor de avaliação após a primeira validação fora da amostra | aceita | orientador | 2026-09-07 |
 
 ## Caixa de entrada
 
@@ -34,16 +35,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 37 | 8.751 |
-| Apresentacao | 35 | 15.819 |
+| Nucleo de dominio | 37 | 9.178 |
+| Apresentacao | 35 | 15.802 |
 | Camada de dados | 13 | 2.523 |
 | Testes do app | 28 | 4.980 |
-| Testes do nucleo | 12 | 3.588 |
+| Testes do nucleo | 12 | 3.868 |
 | Ferramentas de QA | 20 | 6.508 |
 
 ## Histórico recente
 
 ```
+2026-09-07  68b156f  Refino do motor de valuation (parte 1)
 2026-09-02  fc52eee  Remoção dos proventos na parte de backtest e estabilização de estrutura interna
 2026-08-30  feb211e  Garantindo estabilidade da UI
 2026-08-30  afb785e  Garantindo estabilidade dos testes
@@ -58,5 +60,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-08-30  f77fb8a  Iniciando integração do advisor
 2026-08-29  85fd0c1  Onda 4 finalizada e dependências completamente atualizadas
 2026-08-29  f62b336  Parcial da Onda 4
-2026-08-29  31cf931  Onda 3 finalizada
 ```

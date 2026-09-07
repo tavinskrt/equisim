@@ -191,15 +191,40 @@ terminal carrega a maior parte do valor.
 e pela exceção de vantagem competitiva residual. A mediana do potencial passou de
 **−55,1% para −39,4%**, e a fração com potencial positivo de 10,9% para **15,8%**.
 
-**A compressão não desapareceu.** Se o deslocamento remanescente é comum a todos
+**A compressão não desapareceu.** Em 07/09/2026 a mediana estava em −38,0% e o
+p75 em −7,5%, sobre 121 avaliados. Se o deslocamento remanescente é comum a todos
 os ativos, a **ordenação** relativa continua informativa e o **nível** não deve
-ser lido como preço-alvo. A meta da carteira usa o nível, e é por ali que o viés
-se propaga. A escolha entre tratar o nível como informativo ou apenas a ordem
-segue em aberto — §12 do [refinamento](../refinamento-do-valuation.md).
+ser lido como preço-alvo.
 
-**A exceção de *moat* ativou em 2 dos 120 avaliados** (BBSE3 e SAUD3). Se o
-critério está calibrado ou está restritivo demais é questão aberta, registrada na
-§12.4.
+**A escolha entre nível e ordem foi feita, e é assimétrica.** Pela
+[decisão 27](../decisoes/027-recalibragem-apos-a-primeira-validacao.md), o preço
+justo do ativo individual continua sendo o do DCF, com o nível intacto; o que
+deixou de usar o nível é o retorno esperado **da carteira**, que passou a ser
+`E[R_i] = CDI_spot + z(potencial) · prêmio`. Pelo caminho antigo, 97 dos 121
+avaliados entravam numa otimização de média-variância com retorno esperado
+negativo. **A limitação continua existindo onde sempre esteve** — no nível do
+potencial —; o que mudou é que ela não se propaga mais para a meta.
+
+**Isso troca uma limitação por outra, e a nova precisa ser lida junto.** O
+retorno esperado da carteira deixou de ser uma previsão de rentabilidade e virou
+uma afirmação de posição relativa: o ativo mediano da seção recebe o CDI por
+construção. Uma seção estreita — a carteira medida contra ela mesma — centra tudo
+no CDI e não informa nada. O resultado carrega o tamanho da seção junto, e é
+contra a seção dos avaliados que a leitura faz sentido.
+
+**A exceção de *moat* ativou em 8 dos 121 avaliados** (ABEV3, BBSE3, KEPL3,
+LEVE3, QUAL3, SAUD3, VBBR3 e WEGE3), contra 2 antes da recalibragem. O passo é
+instrumentado desde 07/09/2026: **o que barra as franquias restantes é
+`Φ ≤ 0,35`**, e não o critério de rentabilidade que foi afrouxado — EGIE3
+(Φ = 0,58), ITUB4 (0,50) e TOTS3 (1,13) caem por ali. Ver §13.1 do
+[refinamento](../refinamento-do-valuation.md).
+
+**O fator de normalização da base não tem teto.** `f = ciclo / atual` explode
+quando o exercício corrente tem retorno próximo de zero, e o DCF é homogêneo de
+grau 1 no fluxo-base: a MBRF3 recebeu fator de 21,4x e saiu a +406,1% de
+potencial. É limitação **anterior** à decisão 27 — FESA4 e DXCO3 já apareciam com
+fatores de dez vezes —, mas a guarda de comparabilidade barrava parte desses
+casos por efeito colateral, e deixou de barrar. Ver §13.3.
 
 ### 2.9. A estrutura a termo é linear e de dois pontos, não uma curva observada
 

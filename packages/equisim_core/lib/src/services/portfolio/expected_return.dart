@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import '../../entities/portfolio.dart';
 import '../../entities/valuation.dart';
 import '../../value_objects/ticker.dart';
+import '../valuation/cost_of_capital.dart';
+import '../valuation/inference.dart';
 
 /// Retorno anual esperado de um ativo, decomposto.
 class ExpectedAssetReturn {
@@ -107,6 +109,126 @@ abstract final class ExpectedReturn {
     return weighted / covered;
   }
 
+  // ------------------------------------------ Retorno esperado transversal --
+
+  /// Teto do escore, em desvios robustos.
+  ///
+  /// **Confina a cauda, não a ordenação.** A distribuição de potencial dos 120
+  /// avaliados vai de −95,5% a +477,3%: sem teto, um único ativo de cauda
+  /// direita levaria o escore a mais de dez desvios e sozinho definiria o
+  /// retorno esperado da carteira inteira. Com dois desvios e prêmio de 5,5%, a
+  /// banda de retorno esperado é de CDI ± 11 p.p. — o suficiente para separar o
+  /// muito descontado do muito esticado sem que a ponta decida a conta.
+  static const double defaultZCap = 2.0;
+
+  /// Retorno esperado transversal de um conjunto de ativos avaliados.
+  ///
+  /// **Por que não é a anualização do potencial.** `(1 + u)^(1/H) − 1` é uma
+  /// afirmação de nível: com potencial mediano de −39,4% no universo elegível,
+  /// ela devolve −15,4% ao ano para o ativo *mediano* — e num otimizador de
+  /// média-variância isso não ordena mal, ele simplesmente não aloca. O nível do
+  /// potencial carrega tudo o que a estrutura a termo e o terminal neutro
+  /// impõem de conservadorismo ao custo de capital brasileiro; a **ordenação**
+  /// entre ativos, não.
+  ///
+  /// Este estimador usa só a ordenação:
+  ///
+  ///     E[R_i] = CDI_spot + z_i · prêmio,    z_i = (u_i − mediana(u)) / MAD*(u)
+  ///
+  /// O ativo mediano da seção recebe o CDI à vista; quem está descontado em
+  /// relação aos pares recebe o CDI mais um prêmio proporcional à distância, e
+  /// quem está esticado recebe menos. **O preço justo do ativo individual não é
+  /// tocado** — ele continua saindo do DCF, e é ele que a tela de avaliação
+  /// mostra. Esta é a projeção de otimização, e só ela.
+  ///
+  /// Escala robusta e não desvio-padrão pelo mesmo motivo da Guarda 3: com
+  /// ponto de ruptura de 50%, a cauda de potencial não infla o denominador e
+  /// achata todo mundo no centro.
+  ///
+  /// - [upsides]: potenciais dos ativos a estimar.
+  /// - [spotRiskFree]: CDI corrente, em fração ao ano. É a âncora.
+  /// - [riskPremium]: prêmio de risco de mercado. O padrão é o mesmo parâmetro
+  ///   do CAPM que desconta o fluxo, para que as duas pontas do trabalho não
+  ///   adotem prêmios diferentes.
+  /// - [reference]: seção transversal que define mediana e escala. **Quanto mais
+  ///   larga, mais significativo o escore** — medir uma carteira de cinco ativos
+  ///   contra ela mesma centra a carteira no CDI por construção. Omitida, cai
+  ///   para os próprios [upsides], e o resultado declara isso em
+  ///   [CrossSectionalReturn.referenceSize].
+  /// - [zCap]: teto do escore em desvios robustos.
+  static Map<Ticker, CrossSectionalReturn> crossSection({
+    required Map<Ticker, double> upsides,
+    required double spotRiskFree,
+    double riskPremium = CapmInputs.defaultMarketPremium,
+    Iterable<double>? reference,
+    double zCap = defaultZCap,
+  }) {
+    final secao = [...(reference ?? upsides.values)];
+    final centro = Inference.median(secao);
+    final escala = Inference.scaledMad(secao);
+
+    final saida = <Ticker, CrossSectionalReturn>{};
+    for (final e in upsides.entries) {
+      // Sem escala estimável — seção curta demais ou colapsada num ponto — não
+      // há distância a medir, e todo mundo recebe a âncora. É a leitura neutra:
+      // afirmar ordenação onde a seção não a sustenta seria inventar prêmio.
+      final z = (centro == null || escala == null)
+          ? 0.0
+          : ((e.value - centro) / escala).clamp(-zCap, zCap);
+      final bruto = spotRiskFree + z * riskPremium;
+      saida[e.key] = CrossSectionalReturn(
+        ticker: e.key,
+        upside: e.value,
+        z: z,
+        expected: bruto < 0 ? 0.0 : bruto,
+        floored: bruto < 0,
+        referenceSize: secao.length,
+      );
+    }
+    return saida;
+  }
+
+  /// Retorno esperado da carteira pelo estimador transversal.
+  ///
+  /// Média dos ativos ponderada pelos pesos, com os pesos sem avaliação
+  /// descartados e os remanescentes reescalados — a mesma convenção de
+  /// [forPortfolio], para que a cobertura continue significando o mesmo.
+  ///
+  /// - [reference]: seção transversal de referência. Ver [crossSection].
+  static double forPortfolioCrossSectional({
+    required Portfolio portfolio,
+    required Map<Ticker, ValuationResult> valuations,
+    required double spotRiskFree,
+    double riskPremium = CapmInputs.defaultMarketPremium,
+    Iterable<double>? reference,
+    double zCap = defaultZCap,
+  }) {
+    final upsides = <Ticker, double>{};
+    for (final entry in portfolio.entries.values) {
+      final v = valuations[entry.ticker];
+      if (v != null) upsides[entry.ticker] = v.upside;
+    }
+    if (upsides.isEmpty) return 0.0;
+
+    final estimado = crossSection(
+      upsides: upsides,
+      spotRiskFree: spotRiskFree,
+      riskPremium: riskPremium,
+      reference: reference ?? [for (final v in valuations.values) v.upside],
+      zCap: zCap,
+    );
+
+    var weighted = 0.0;
+    var covered = 0.0;
+    for (final entry in portfolio.entries.values) {
+      final r = estimado[entry.ticker];
+      if (r == null) continue;
+      weighted += entry.weight.value * r.expected;
+      covered += entry.weight.value;
+    }
+    return covered <= 0 ? 0.0 : weighted / covered;
+  }
+
   /// Fração do peso da carteira que possui valuation disponível.
   static double coverage({
     required Portfolio portfolio,
@@ -120,4 +242,41 @@ abstract final class ExpectedReturn {
     }
     return covered;
   }
+}
+
+/// Retorno esperado de um ativo pelo estimador transversal.
+class CrossSectionalReturn {
+  final Ticker ticker;
+
+  /// Potencial de valorização que entrou na conta, em fração.
+  final double upside;
+
+  /// Escore robusto do potencial contra a seção, já confinado ao teto.
+  final double z;
+
+  /// Retorno esperado ao ano, em fração.
+  final double expected;
+
+  /// `true` quando o piso de zero foi aplicado.
+  ///
+  /// Só acontece se `z_cap · prêmio > CDI` — com o CDI brasileiro na casa de
+  /// dois dígitos e prêmio de 5,5%, não acontece. Fica declarado porque, se
+  /// acontecer, a ordenação entre os ativos do piso se perde, e quem lê o
+  /// resultado precisa saber disso em vez de deduzir de empates suspeitos.
+  final bool floored;
+
+  /// Tamanho da seção transversal que definiu mediana e escala.
+  ///
+  /// Faz parte do resultado: um escore medido contra cinco ativos e outro
+  /// contra cento e vinte não sustentam a mesma conclusão.
+  final int referenceSize;
+
+  const CrossSectionalReturn({
+    required this.ticker,
+    required this.upside,
+    required this.z,
+    required this.expected,
+    required this.floored,
+    required this.referenceSize,
+  });
 }

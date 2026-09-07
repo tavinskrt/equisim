@@ -51,10 +51,18 @@ abstract final class OutOfSampleValidation {
         'PIB real ${pct(anchors.realEconomyGrowth)} · '
         'teto nominal ${pct(anchors.nominalEconomyGrowth)}\n');
 
+    // O log de avaliação é a fonte do diagnóstico por ativo. Sem ele, a única
+    // leitura possível de "dois passaram no critério de vantagem" seria análise
+    // de texto dos avisos — e a pergunta aqui é metodológica: qual condição
+    // barrou cada um, e quantos estavam a que distância dela.
+    AuditEvent? ultimo;
+    AuditRecorder.attach((e) => ultimo = e);
+
     final linhas = <_Row>[];
     var i = 0;
     for (final ticker in tickers) {
       i++;
+      ultimo = null;
       if (i % 10 == 0) stdout.write('  $i/${tickers.length}\r');
 
       final prepared = await PrepareValuationInputs.call(
@@ -101,11 +109,13 @@ abstract final class OutOfSampleValidation {
         warnings: v.warnings.length,
         growthOrigin: _growthOriginOf(v.warnings),
         moat: _hasMoat(v.warnings),
+        diagnostics: _Diagnostics.from(ultimo),
       ));
     }
+    AuditRecorder.detach();
     stdout.writeln('\n');
 
-    _report(linhas, outputDir);
+    _report(linhas, anchors, outputDir);
   }
 
   /// Classifica a recusa pela mensagem, para agrupar no relatório.
@@ -134,7 +144,11 @@ abstract final class OutOfSampleValidation {
     return 'fundamental';
   }
 
-  static void _report(List<_Row> linhas, String outputDir) {
+  static void _report(
+    List<_Row> linhas,
+    MarketAnchors anchors,
+    String outputDir,
+  ) {
     final buf = StringBuffer()
       ..writeln('# Validação fora da amostra — arquitetura de portas')
       ..writeln()
@@ -199,6 +213,9 @@ abstract final class OutOfSampleValidation {
               '${(comMoat.map((l) => l.ticker).toList()..sort()).join(", ")}.');
       }
 
+      _moatSection(buf, avaliados);
+      _normalizationSection(buf, avaliados);
+
       final upsides = [for (final l in avaliados) l.upside!]..sort();
       double q(double p) => upsides[(p * (upsides.length - 1)).round()];
       buf
@@ -214,6 +231,8 @@ abstract final class OutOfSampleValidation {
         ..writeln('| p75 | ${pct(q(0.75), decimals: 1)} |')
         ..writeln('| p90 | ${pct(q(0.90), decimals: 1)} |')
         ..writeln('| máximo | ${pct(upsides.last, decimals: 1)} |');
+
+      _expectedReturnSection(buf, avaliados, anchors);
     }
 
     buf
@@ -240,6 +259,392 @@ abstract final class OutOfSampleValidation {
   }
 }
 
+/// Distribuição das condições que barraram a vantagem competitiva residual.
+///
+/// **É o instrumento de calibragem.** Saber que dois de cento e vinte passaram
+/// não diz se o critério está apertado ou se o universo é comum; saber quantos
+/// reprovaram só pela rentabilidade, e a que distância do corte, diz — e é o
+/// que permite mover o parâmetro por medição em vez de por impressão.
+void _moatSection(StringBuffer buf, List<_Row> avaliados) {
+  final comDiagnostico =
+      avaliados.where((l) => l.diagnostics.moatBlocks != null).toList();
+  if (comDiagnostico.isEmpty) return;
+
+  final porCondicao = <String, int>{};
+  final primeira = <String, int>{};
+  for (final l in comDiagnostico) {
+    final blocos = l.diagnostics.moatBlocks!;
+    if (blocos.isEmpty) continue;
+    primeira[blocos.first] = (primeira[blocos.first] ?? 0) + 1;
+    for (final b in blocos) {
+      porCondicao[b] = (porCondicao[b] ?? 0) + 1;
+    }
+  }
+
+  buf
+    ..writeln()
+    ..writeln('### Por que a vantagem residual foi barrada')
+    ..writeln()
+    ..writeln('Uma linha por condição, contando **todas** as que barraram cada '
+        'ativo — os totais somam mais que o número de reprovados, e é essa a '
+        'informação: quem reprova por duas condições continuaria reprovado se '
+        'só uma fosse afrouxada.')
+    ..writeln()
+    ..writeln('| Condição | Barrou | Foi a primeira |')
+    ..writeln('|---|---:|---:|');
+  final ordenado = porCondicao.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
+  for (final e in ordenado) {
+    buf.writeln(
+        '| ${_moatLabel(e.key)} | ${e.value} | ${primeira[e.key] ?? 0} |');
+  }
+
+  final soRentabilidade = comDiagnostico
+      .where((l) => l.diagnostics.moatBlockedOnlyByReturn)
+      .toList();
+  if (soRentabilidade.isEmpty) return;
+
+  final distancias = <double>[
+    for (final l in soRentabilidade)
+      if (l.diagnostics.cycleReturn != null &&
+          l.diagnostics.terminalDiscount != null)
+        l.diagnostics.cycleReturn! - l.diagnostics.terminalDiscount!,
+  ]..sort();
+  if (distancias.isEmpty) return;
+
+  double q(double p) => distancias[(p * (distancias.length - 1)).round()];
+  buf
+    ..writeln()
+    ..writeln('Dos reprovados, ${soRentabilidade.length} '
+        '${soRentabilidade.length == 1 ? "falhou" : "falharam"} **apenas** na '
+        'rentabilidade — cumprem crescimento orgânico e histórico. O excedente '
+        'do ciclo sobre o custo de capital de equilíbrio nesses casos, contra o '
+        'corte de ${pct(ValuationParameters.moatMinSpread, decimals: 1)}:')
+    ..writeln()
+    ..writeln('| Percentil | Excedente |')
+    ..writeln('|---|---:|')
+    ..writeln('| p25 | ${pct(q(0.25), decimals: 1)} |')
+    ..writeln('| mediana | ${pct(q(0.50), decimals: 1)} |')
+    ..writeln('| p75 | ${pct(q(0.75), decimals: 1)} |')
+    ..writeln('| p90 | ${pct(q(0.90), decimals: 1)} |')
+    ..writeln('| máximo | ${pct(distancias.last, decimals: 1)} |');
+}
+
+/// Rótulo legível para o nome do `MoatBlock`.
+String _moatLabel(String name) => switch (name) {
+      'semRetornoDoCiclo' => 'retorno do ciclo não medido',
+      'semCustoDeCapital' => 'custo de capital não positivo',
+      'historicoCurto' => 'histórico curto',
+      'capitalExternoNaoMedido' => 'capital externo não medido',
+      'crescimentoInorganico' => 'crescimento inorgânico',
+      'rentabilidadeInsuficiente' => 'rentabilidade insuficiente',
+      'excedenteDegenerado' => 'excedente degenerado',
+      _ => name,
+    };
+
+/// Efeito da correção de precedência da Guarda 2.
+///
+/// Conta quantos ativos tiveram a base normalizada **apesar** de Φ acima do
+/// limiar — o conjunto que, sob a precedência anterior, levava o exercício de
+/// pico à perpetuidade como se fosse patamar.
+void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
+  bool normalizou(_Row l) =>
+      l.diagnostics.normalizationFactor != null &&
+      (l.diagnostics.normalizationFactor! - 1.0).abs() > 1e-6;
+
+  final destravados =
+      avaliados.where((l) => l.diagnostics.normalizedInorganicBase).toList()
+        ..sort((a, b) => a.ticker.compareTo(b.ticker));
+  final normalizados = avaliados.where(normalizou).length;
+
+  buf
+    ..writeln()
+    ..writeln('### Normalização da base')
+    ..writeln()
+    ..writeln('| Base | Ativos |')
+    ..writeln('|---|---:|')
+    ..writeln('| mantida como observada | ${avaliados.length - normalizados} |')
+    ..writeln('| convergindo ao ciclo | $normalizados |')
+    ..writeln('| das quais, com Φ acima do limiar | ${destravados.length} |');
+  final naoNormalizados = avaliados.where((l) => !normalizou(l)).toList();
+  final porGuarda = <String, int>{};
+  for (final l in naoNormalizados) {
+    final g1 = l.diagnostics.trendVerdict;
+    final g3 = l.diagnostics.deviationVerdict;
+    if (g1 == null || g3 == null) continue;
+    final motivo = g3 != 'destoa'
+        ? 'Guarda 3: o exercício não destoa do ciclo'
+        : (g1 == 'domina'
+            ? 'Guarda 1: a tendência domina a reversão'
+            : 'outro impedimento (retorno corrente não positivo ou não medido)');
+    porGuarda[motivo] = (porGuarda[motivo] ?? 0) + 1;
+  }
+  if (porGuarda.isNotEmpty) {
+    buf
+      ..writeln()
+      ..writeln('Por que a base **não** foi normalizada, nos que ficaram como '
+          'observados:')
+      ..writeln()
+      ..writeln('| Guarda que decidiu | Ativos |')
+      ..writeln('|---|---:|');
+    final ordem = porGuarda.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    for (final e in ordem) {
+      buf.writeln('| ${e.key} | ${e.value} |');
+    }
+  }
+
+  // A classe da SUZB3: destoa do ciclo, mas a tendência domina e a base fica
+  // como observada. É a guarda que efetivamente decide esses casos — e não a de
+  // comparabilidade, que a §12.5 do refinamento apontava como suspeita.
+  final seguradosPelaTendencia = naoNormalizados
+      .where((l) =>
+          l.diagnostics.deviationVerdict == 'destoa' &&
+          l.diagnostics.trendVerdict == 'domina' &&
+          l.diagnostics.latestReturn != null &&
+          l.diagnostics.cycleReturnOfBase != null)
+      .toList()
+    ..sort((a, b) => (b.upside ?? 0).compareTo(a.upside ?? 0));
+  if (seguradosPelaTendencia.isNotEmpty) {
+    buf
+      ..writeln()
+      ..writeln('Os ${seguradosPelaTendencia.length} que **destoam do ciclo e '
+          'ainda assim ficam como observados** são segurados pela Guarda 1: a '
+          'tendência do retorno domina a reversão à média, e o modelo lê o '
+          'nível corrente como estrutural em vez de cíclico. Os dez de maior '
+          'potencial:')
+      ..writeln()
+      ..writeln('| Ativo | Retorno corrente | Ciclo | Φ | Potencial |')
+      ..writeln('|---|---:|---:|---:|---:|');
+    for (final l in seguradosPelaTendencia.take(10)) {
+      buf.writeln('| ${l.ticker} | '
+          '${pct(l.diagnostics.latestReturn!, decimals: 1)} | '
+          '${pct(l.diagnostics.cycleReturnOfBase!, decimals: 1)} | '
+          '${l.diagnostics.phi == null ? "—" : num2(l.diagnostics.phi!, decimals: 2)} | '
+          '${pct(l.upside!, decimals: 1)} |');
+    }
+  }
+
+  // Os maiores fatores, porque é neles que o risco do método mora: o DCF é
+  // homogêneo de grau 1 no fluxo-base, e um fator de 20x multiplica o preço
+  // justo por 20. Nada limita o fator hoje — `f = ciclo / atual` explode
+  // quando o exercício corrente tem retorno próximo de zero.
+  final porFator = avaliados.where(normalizou).toList()
+    ..sort((a, b) => b.diagnostics.normalizationFactor!
+        .compareTo(a.diagnostics.normalizationFactor!));
+  final extremos = porFator.take(10).toList();
+  if (extremos.isNotEmpty) {
+    buf
+      ..writeln()
+      ..writeln('Os dez maiores fatores. **O DCF é homogêneo de grau 1 no '
+          'fluxo-base**: um fator de 20x multiplica o preço justo por 20, e '
+          'nada limita `f = ciclo / atual` quando o exercício corrente tem '
+          'retorno próximo de zero.')
+      ..writeln()
+      ..writeln('| Ativo | Fator | Φ | Potencial |')
+      ..writeln('|---|---:|---:|---:|');
+    for (final l in extremos) {
+      buf.writeln('| ${l.ticker} | '
+          '${num2(l.diagnostics.normalizationFactor!, decimals: 2)} | '
+          '${l.diagnostics.phi == null ? "—" : num2(l.diagnostics.phi!, decimals: 2)} | '
+          '${pct(l.upside!, decimals: 1)} |');
+    }
+  }
+
+  if (destravados.isEmpty) return;
+
+  buf
+    ..writeln()
+    ..writeln(destravados.length == 1
+        ? 'O único de base inorgânica normalizada é o que a precedência '
+            'anterior deixava passar com o exercício corrente como patamar '
+            'perene. Fator aplicado sobre o lucro observado:'
+        : 'Os ${destravados.length} de base inorgânica normalizada são os que '
+            'a precedência anterior deixava passar com o exercício corrente '
+            'como patamar perene. Fator aplicado sobre o lucro observado:')
+    ..writeln()
+    ..writeln('| Ativo | Φ | Fator |')
+    ..writeln('|---|---:|---:|');
+  for (final l in destravados) {
+    buf.writeln('| ${l.ticker} | ${num2(l.diagnostics.phi!, decimals: 2)} | '
+        '${num2(l.diagnostics.normalizationFactor!, decimals: 3)} |');
+  }
+}
+
+/// Retorno esperado transversal sobre o universo avaliado.
+///
+/// **A seção mais larga que o trabalho tem.** É aqui que o estimador faz
+/// sentido: medir uma carteira de cinco ativos contra ela mesma a centra no CDI
+/// por construção, e a distribuição sobre os avaliados é a referência contra a
+/// qual qualquer carteira passa a ser lida.
+void _expectedReturnSection(
+  StringBuffer buf,
+  List<_Row> avaliados,
+  MarketAnchors anchors,
+) {
+  final upsides = <Ticker, double>{
+    for (final l in avaliados) Ticker.parse(l.ticker): l.upside!,
+  };
+  final estimado = ExpectedReturn.crossSection(
+    upsides: upsides,
+    spotRiskFree: anchors.currentRiskFreeRate,
+  );
+
+  final taxas = [for (final r in estimado.values) r.expected]..sort();
+  double q(double p) => taxas[(p * (taxas.length - 1)).round()];
+  final noPiso = estimado.values.where((r) => r.floored).length;
+
+  // A comparação que justifica a troca: o mesmo conjunto, pelo caminho antigo.
+  final anuais = [
+    for (final l in avaliados) ExpectedReturn.annualizedFromUpside(l.upside!),
+  ]..sort();
+  double qa(double p) => anuais[(p * (anuais.length - 1)).round()];
+  final negativos = anuais.where((r) => r < 0).length;
+
+  buf
+    ..writeln()
+    ..writeln('## Retorno esperado para otimização')
+    ..writeln()
+    ..writeln('`E[R_i] = CDI_spot + z(potencial) x prêmio`, com CDI à vista de '
+        '${pct(anchors.currentRiskFreeRate)}, prêmio de '
+        '${pct(CapmInputs.defaultMarketPremium)} e escore robusto confinado a '
+        '${num2(ExpectedReturn.defaultZCap, decimals: 1)} desvios sobre a '
+        'seção dos ${avaliados.length} avaliados.')
+    ..writeln()
+    ..writeln('| Percentil | Transversal | Anualização do potencial |')
+    ..writeln('|---|---:|---:|')
+    ..writeln('| mínimo | ${pct(taxas.first, decimals: 1)} | '
+        '${pct(anuais.first, decimals: 1)} |')
+    ..writeln('| p10 | ${pct(q(0.10), decimals: 1)} | '
+        '${pct(qa(0.10), decimals: 1)} |')
+    ..writeln('| p25 | ${pct(q(0.25), decimals: 1)} | '
+        '${pct(qa(0.25), decimals: 1)} |')
+    ..writeln('| mediana | ${pct(q(0.50), decimals: 1)} | '
+        '${pct(qa(0.50), decimals: 1)} |')
+    ..writeln('| p75 | ${pct(q(0.75), decimals: 1)} | '
+        '${pct(qa(0.75), decimals: 1)} |')
+    ..writeln('| p90 | ${pct(q(0.90), decimals: 1)} | '
+        '${pct(qa(0.90), decimals: 1)} |')
+    ..writeln('| máximo | ${pct(taxas.last, decimals: 1)} | '
+        '${pct(anuais.last, decimals: 1)} |')
+    ..writeln()
+    ..writeln('Pela anualização do potencial, $negativos dos ${anuais.length} '
+        'avaliados entrariam num otimizador de média-variância com retorno '
+        'esperado **negativo** — o que não é ordenação ruim, é ausência de '
+        'alocação. Pelo estimador transversal, '
+        '${noPiso == 0 ? "nenhum tocou" : "$noPiso tocaram"} o piso de zero, e '
+        'a ordenação por potencial é preservada em toda a faixa.');
+}
+
+/// O que o log de avaliação registrou sobre as guardas de um ativo.
+///
+/// Lido do rastro de cálculo, não dos avisos: as chaves são estáveis, e os
+/// avisos são texto para o usuário — mudam de redação sem aviso, e um relatório
+/// que dependesse deles mediria a redação.
+class _Diagnostics {
+  /// Condições que barraram a vantagem competitiva residual, pelo nome do
+  /// `MoatBlock`. Vazia quando comprovada; nula quando o passo não rodou.
+  final List<String>? moatBlocks;
+
+  /// ROIC ou ROE mediano do ciclo, em fração.
+  final double? cycleReturn;
+
+  /// Custo de capital de equilíbrio, em fração.
+  final double? terminalDiscount;
+
+  /// Φ — capital externo em múltiplos da base inicial da janela.
+  final double? phi;
+
+  /// Fator aplicado ao lucro-base: 1,0 quando a base ficou como observada.
+  final double? normalizationFactor;
+
+  /// Veredito da Guarda 1: `domina`, `não domina` ou `não avaliável`.
+  final String? trendVerdict;
+
+  /// Veredito da Guarda 3: `destoa` ou `dentro da banda e do desvio robusto`.
+  final String? deviationVerdict;
+
+  /// Retorno do exercício corrente, em fração.
+  final double? latestReturn;
+
+  /// Mediana do ciclo na série da via escolhida, em fração.
+  final double? cycleReturnOfBase;
+
+  const _Diagnostics({
+    this.moatBlocks,
+    this.cycleReturn,
+    this.terminalDiscount,
+    this.phi,
+    this.normalizationFactor,
+    this.trendVerdict,
+    this.deviationVerdict,
+    this.latestReturn,
+    this.cycleReturnOfBase,
+  });
+
+  static const _Diagnostics empty = _Diagnostics();
+
+  /// `true` quando a base foi normalizada apesar de inorgânica — o caso que a
+  /// correção de precedência da Guarda 2 destravou.
+  bool get normalizedInorganicBase =>
+      phi != null &&
+      phi! > 1.0 &&
+      normalizationFactor != null &&
+      (normalizationFactor! - 1.0).abs() > 1e-6;
+
+  /// `true` quando só a rentabilidade barrou a vantagem residual.
+  bool get moatBlockedOnlyByReturn =>
+      moatBlocks != null &&
+      moatBlocks!.length == 1 &&
+      moatBlocks!.first == 'rentabilidadeInsuficiente';
+
+  /// Extrai os campos do evento de auditoria da avaliação.
+  static _Diagnostics from(AuditEvent? event) {
+    if (event == null) return empty;
+
+    // A **última** ocorrência, não a primeira: quando a via da firma reprova na
+    // pós-condição da ponte de equity, a cascata reavalia pela via do
+    // acionista e o mesmo passo aparece duas vezes. Quem produziu o preço
+    // justo é o segundo, e ler o primeiro descreveria uma avaliação
+    // descartada.
+    CalculationTrace? trace(String name) {
+      CalculationTrace? achado;
+      for (final c in event.calculations) {
+        if (c.formulaName == name) achado = c;
+      }
+      return achado;
+    }
+
+    /// Percentual gravado no rastro, de volta a fração. `null` para 'n/d'.
+    double? fracao(Object? v) {
+      final n = v is num ? v.toDouble() : null;
+      return n == null ? null : n / 100.0;
+    }
+
+    final moat = trace('Vantagem competitiva residual na perpetuidade');
+    final base = trace('Base do fluxo: convergência ao ciclo');
+    final bloqueios = moat?.mappedVariables['condições que barraram'];
+
+    return _Diagnostics(
+      moatBlocks: bloqueios is List ? [for (final b in bloqueios) '$b'] : null,
+      cycleReturn: fracao(moat?.mappedVariables['ROIC do ciclo (% a.a.)']),
+      terminalDiscount:
+          fracao(moat?.mappedVariables['WACC de equilíbrio (% a.a.)']),
+      phi: () {
+        final v = base?.mappedVariables['capital externo / base (Φ)'];
+        return v is num ? v.toDouble() : null;
+      }(),
+      normalizationFactor: base?.finalValue,
+      trendVerdict: base?.mappedVariables['guarda 1 — tendência'] as String?,
+      deviationVerdict:
+          base?.mappedVariables['guarda 3 — desvio do ciclo'] as String?,
+      latestReturn: fracao(base?.mappedVariables['retorno atual (% a.a.)']),
+      cycleReturnOfBase:
+          fracao(base?.mappedVariables['mediana do ciclo (% a.a.)']),
+    );
+  }
+}
+
 class _Row {
   final String ticker;
   final String outcome;
@@ -255,6 +660,9 @@ class _Row {
   /// Vantagem competitiva residual preservada na perpetuidade.
   final bool moat;
 
+  /// O que as guardas registraram no log de avaliação.
+  final _Diagnostics diagnostics;
+
   const _Row({
     required this.ticker,
     required this.outcome,
@@ -267,6 +675,7 @@ class _Row {
     this.upside,
     this.warnings = 0,
     this.moat = false,
+    this.diagnostics = _Diagnostics.empty,
   });
 
   Map<String, dynamic> toJson() => {
@@ -280,6 +689,23 @@ class _Row {
         if (upside != null) 'potencial': upside,
         'avisos': warnings,
         'moat': moat,
+        if (diagnostics.moatBlocks != null)
+          'moatBarradoPor': diagnostics.moatBlocks,
+        if (diagnostics.cycleReturn != null)
+          'retornoDoCiclo': diagnostics.cycleReturn,
+        if (diagnostics.terminalDiscount != null)
+          'custoDeCapitalTerminal': diagnostics.terminalDiscount,
+        if (diagnostics.phi != null) 'phi': diagnostics.phi,
+        if (diagnostics.normalizationFactor != null)
+          'fatorDeNormalizacao': diagnostics.normalizationFactor,
+        if (diagnostics.trendVerdict != null)
+          'guarda1': diagnostics.trendVerdict,
+        if (diagnostics.deviationVerdict != null)
+          'guarda3': diagnostics.deviationVerdict,
+        if (diagnostics.latestReturn != null)
+          'retornoCorrente': diagnostics.latestReturn,
+        if (diagnostics.cycleReturnOfBase != null)
+          'retornoDoCicloDaBase': diagnostics.cycleReturnOfBase,
         if (detail != null) 'detalhe': detail,
       };
 }

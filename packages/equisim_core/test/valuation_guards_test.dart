@@ -202,6 +202,107 @@ void main() {
     });
   });
 
+  group('Precedência da Guarda 2 — Φ declara, não barra', () {
+    // Forma da SUZB3 e da QUAL3: base de capital que salta por incorporação —
+    // Φ muito acima de 1,0 — e um exercício corrente de rentabilidade em pico.
+    // Sob a precedência anterior, Φ travava a normalização e o pico virava
+    // patamar perene: a SUZB3 saía a +259,1% e a QUAL3 a +477,3% de potencial.
+    List<FundamentalsSnapshot> incorporacaoComPico({
+      required double roeDoCiclo,
+      required double roeCorrente,
+    }) {
+      final pontos = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var ano = 2012; ano <= 2025; ano++) {
+        // O retorno do ano é medido sobre a base de **abertura**, que é a
+        // convenção de `CapitalSeries.returns`.
+        final lucro = ano == 2025 ? roeCorrente * pl : roeDoCiclo * pl;
+        pl += lucro;
+        // A incorporação: em 2020 a base salta seis vezes o lucro do ano.
+        if (ano == 2020) pl += 6000;
+        pontos.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(ano, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          netIncome: ano == 2012 ? null : lucro,
+          marketCap: 20000,
+        ));
+      }
+      return pontos;
+    }
+
+    ValuationInputs entradas(List<FundamentalsSnapshot> historico) =>
+        ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 6, 30),
+          fundamentals: historico,
+          marketPrice: 20.0,
+          capm: const CapmInputs(
+            riskFreeRate: 0.105,
+            beta: 1.0,
+            marketPremium: 0.055,
+          ),
+        );
+
+    /// Fator de normalização registrado no log de avaliação.
+    double fatorRegistrado(ValuationInputs inputs) {
+      final capturados = <AuditEvent>[];
+      AuditRecorder.attach(capturados.add);
+      ValuationCascade.evaluate(inputs);
+      AuditRecorder.detach();
+      final base = capturados.single.calculations.firstWhere(
+        (c) => c.formulaName == 'Base do fluxo: convergência ao ciclo',
+      );
+      return base.finalValue!;
+    }
+
+    tearDown(AuditRecorder.detach);
+
+    test('Φ acima do limiar não impede a normalização do retorno', () {
+      final historico =
+          incorporacaoComPico(roeDoCiclo: 0.10, roeCorrente: 0.30);
+      final serie =
+          CapitalSeries.build(historico, ValuationLane.shareholder);
+
+      // A base é mesmo inorgânica, e por larga margem.
+      final phi = GrowthGuards.externalCapitalRatio(serie);
+      expect(phi, isNotNull);
+      expect(phi!, greaterThan(ValuationParameters.maxExternalCapital));
+
+      // E o exercício corrente destoa do ciclo.
+      expect(GrowthGuards.deviatesFromCycle(serie), isTrue);
+
+      // Logo o retorno é normalizado, sobre a base de capital corrente: o
+      // fator é a razão entre o ciclo e o exercício de pico.
+      expect(fatorRegistrado(entradas(historico)), closeTo(0.10 / 0.30, 1e-3),
+          reason: 'ROIC e ROE são grandezas intensivas: mudança de tamanho '
+              'por evento societário não torna o pico um patamar perene');
+    });
+
+    test('sem desvio do ciclo, Φ alto sozinho não normaliza nada', () {
+      // A Guarda 3 continua sendo quem decide **se** normaliza. Φ nunca
+      // normalizou nada, e continua não normalizando.
+      final historico =
+          incorporacaoComPico(roeDoCiclo: 0.10, roeCorrente: 0.10);
+      expect(fatorRegistrado(entradas(historico)), closeTo(1.0, 1e-9));
+    });
+
+    test('a base inorgânica é declarada nos avisos, não silenciada', () {
+      final historico =
+          incorporacaoComPico(roeDoCiclo: 0.10, roeCorrente: 0.30);
+      final resultado = ValuationCascade.evaluate(entradas(historico));
+      expect(resultado.isOk, isTrue);
+      expect(
+        resultado.unwrap().warnings.any((w) => w.contains('grandeza intensiva')),
+        isTrue,
+        reason: 'trocar bloqueio por permissão silenciosa seria pior que o '
+            'defeito que se está corrigindo',
+      );
+    });
+  });
+
   group('Saída 2 — identificação do crescimento', () {
     List<FundamentalsSnapshot> comCrescimento(double g, {double ruido = 0}) {
       var pl = 1000.0;
@@ -428,18 +529,67 @@ void main() {
       expect(moat(phi: null), isNull);
     });
 
-    test('retorno abaixo de duas vezes o custo de capital reprova', () {
-      expect(moat(retorno: 0.23), isNull);
-      expect(moat(retorno: 0.24), isNotNull);
+    test('a rentabilidade aprova pela união das duas pernas', () {
+      // Com WACC_inf de 12%, o múltiplo pede 18% e o excedente pede 17%. Quem
+      // decide é o menos exigente dos dois, que aqui é o excedente.
+      expect(moat(retorno: 0.169), isNull);
+      expect(moat(retorno: 0.17), isNotNull);
+      // A recalibragem moveu a fronteira: sob o critério anterior — dobro do
+      // custo de capital — 17% reprovava e só 24% passava.
+      expect(0.17, lessThan(2.0 * 0.12));
     });
 
-    test('histórico curto reprova', () {
-      expect(moat(exercicios: 11), isNull);
-      expect(moat(exercicios: 12), isNotNull);
+    test('abaixo de 10% de custo de capital quem decide é o múltiplo', () {
+      // O múltiplo e o excedente se cruzam em WACC_inf = 10%: com 8%, o
+      // múltiplo pede 12% e o excedente pediria só 13% — a perna mais frouxa
+      // passa a ser a do múltiplo, e é ela que impede que custo de capital
+      // baixo transforme 5 p.p. de spread em vantagem declarada.
+      expect(moat(retorno: 0.119, desconto: 0.08), isNull);
+      expect(moat(retorno: 0.12, desconto: 0.08), isNotNull);
+    });
+
+    test('histórico curto reprova, no piso da Porta 0', () {
+      expect(moat(exercicios: 7), isNull);
+      expect(moat(exercicios: 8), isNotNull);
     });
 
     test('sem retorno do ciclo não há vantagem a preservar', () {
       expect(moat(retorno: null), isNull);
+    });
+
+    test('o veredito nomeia todas as condições que barraram', () {
+      final v = GrowthGuards.residualMoat(
+        cycleReturn: 0.10,
+        terminalDiscountRate: 0.12,
+        externalCapitalRatio: 0.90,
+        periods: 5,
+      );
+      expect(v.isProven, isFalse);
+      expect(
+        v.blocks,
+        containsAll(<MoatBlock>[
+          MoatBlock.historicoCurto,
+          MoatBlock.crescimentoInorganico,
+          MoatBlock.rentabilidadeInsuficiente,
+        ]),
+        reason: 'avaliar em curto-circuito esconderia duas das três recusas',
+      );
+      expect(v.primaryBlock, MoatBlock.historicoCurto);
+      expect(v.blockedOnlyByReturn, isFalse);
+    });
+
+    test('barrado só pela rentabilidade é a fronteira que a calibragem move',
+        () {
+      final v = GrowthGuards.residualMoat(
+        cycleReturn: 0.15,
+        terminalDiscountRate: 0.12,
+        externalCapitalRatio: 0.10,
+        periods: 14,
+      );
+      expect(v.blockedOnlyByReturn, isTrue);
+      expect(v.passesByMultiple, isFalse);
+      expect(v.passesBySpread, isFalse);
+      expect(v.spread, closeTo(0.03, 1e-12));
     });
 
     test('o terminal com moat supera o do estado estacionário', () {

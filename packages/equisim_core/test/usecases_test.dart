@@ -675,14 +675,55 @@ void main() {
 
       expect(result.isOk, isTrue);
       final alignment = result.unwrap();
-      // 50% de potencial, convergindo em 36 meses e sem parcela de provento:
-      // (1,50)^(1/3) − 1 = 14,47% ao ano. Com os 12 meses anteriores a
-      // anualização era a identidade e o potencial bruto virava retorno anual
-      // — o defeito D1 que a decisão 25 corrigiu.
-      expect(alignment.expectedReturn, closeTo(0.1447, 1e-4));
+      // Os dois ativos têm o mesmo potencial, então a seção transversal colapsa
+      // num ponto: não há escala robusta a estimar, o escore é zero e cada um
+      // recebe a âncora — o CDI corrente de 14,15%. É a leitura neutra, e é o
+      // que se quer: com dois pontos iguais não há ordenação a premiar.
+      expect(
+        alignment.expectedReturn,
+        closeTo(MarketAnchors.fallback2026.currentRiskFreeRate, 1e-9),
+      );
       expect(alignment.meetsGoal, isTrue);
       expect(alignment.gap, greaterThan(0));
       expect(alignment.valuationCoverage, closeTo(1.0, 1e-9));
+    });
+
+    test('o esperado ordena pelo desconto relativo, ancorado no CDI', () {
+      final goal = FinancialGoal.unvalidated(
+        initialContribution: Money.fromReais(10000),
+        monthlyContribution: Money.fromReais(1000),
+        months: 120,
+        targetWealth: Money.fromReais(200000),
+      );
+
+      // Seção larga o bastante para ter escala: potenciais de −50% a +100%,
+      // mediana em 0%. A carteira fica acima da mediana e recebe prêmio.
+      const secao = [-0.5, -0.25, 0.0, 0.25, 1.0];
+
+      GoalAlignment run(double fair) => EvaluateGoalAlignment.call(
+            portfolio: portfolio,
+            goal: goal,
+            valuations: {
+              Ticker.parse('PETR4'): valuationWith('PETR4', fair, 40),
+              Ticker.parse('VALE3'): valuationWith('VALE3', fair, 40),
+            },
+            anchors: MarketAnchors.fallback2026,
+            crossSection: secao,
+          ).unwrap();
+
+      const cdi = 0.1415;
+      // Preço justo igual ao de mercado: potencial nulo, que é a mediana da
+      // seção. Recebe exatamente a âncora.
+      expect(run(40).expectedReturn, closeTo(cdi, 1e-9));
+      // Descontada em relação aos pares: acima do CDI.
+      expect(run(60).expectedReturn, greaterThan(cdi));
+      // Esticada: abaixo do CDI, e ainda assim **não negativa** — que é o
+      // ponto do estimador. Pelo caminho antigo, um preço justo de R$ 4,00
+      // contra R$ 40,00 dava (0,10)^(1/3) − 1 = −53,6% ao ano, e nenhuma meta
+      // era alcançável por construção.
+      final esticada = run(4).expectedReturn;
+      expect(esticada, lessThan(cdi));
+      expect(esticada, greaterThan(0));
     });
 
     test('a lacuna vira o yield que a fecharia, sem premissa de provento', () {

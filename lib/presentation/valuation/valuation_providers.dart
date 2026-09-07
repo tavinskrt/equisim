@@ -154,16 +154,18 @@ final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
   final goal = study.goal;
   if (goal == null || study.principal.isEmpty) return null;
 
-  final settings = ref.watch(valuationSettingsProvider);
   final anchors = await ref.watch(marketAnchorsProvider.future);
   final valuations = await ref.watch(portfolioValuationsProvider.future);
 
+  // A seção transversal é a das avaliações carregadas, que aqui são as da
+  // carteira. É estreita, e o resultado declara o tamanho — ver
+  // `ExpectedReturn.crossSection`: quanto mais larga a seção, mais significativo
+  // o escore, e medir uma carteira contra ela mesma a centra no CDI.
   final result = EvaluateGoalAlignment.call(
     portfolio: study.principal,
     goal: goal,
     valuations: valuations,
     anchors: anchors,
-    horizonMonths: settings.convergenceHorizonMonths,
   );
   return result.valueOrNull;
 });

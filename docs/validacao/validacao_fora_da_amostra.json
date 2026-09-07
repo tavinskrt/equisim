@@ -24,7 +24,18 @@
     "preco": 24.58,
     "potencial": 0.07119609438567942,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.15289999999999998,
+    "custoDeCapitalTerminal": 0.1396,
+    "phi": 0.2,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.15689999999999998,
+    "retornoDoCicloDaBase": 0.15289999999999998
   },
   {
     "ticker": "ABEV3",
@@ -32,11 +43,20 @@
     "via": "DCF por fluxo da firma",
     "setor": "consumo-nao-ciclico",
     "crescimento": "fundamental",
-    "justo": 9.11,
+    "justo": 9.87,
     "preco": 15.74,
-    "potencial": -0.4212198221092758,
-    "avisos": 2,
-    "moat": false
+    "potencial": -0.3729351969504448,
+    "avisos": 3,
+    "moat": true,
+    "moatBarradoPor": [],
+    "retornoDoCiclo": 0.2048,
+    "custoDeCapitalTerminal": 0.12789999999999999,
+    "phi": 0.0,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.2112,
+    "retornoDoCicloDaBase": 0.2048
   },
   {
     "ticker": "AERI3",
@@ -60,11 +80,23 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "consumo-nao-ciclico",
     "crescimento": "g = 0",
-    "justo": 8.96,
+    "justo": 23.0,
     "preco": 19.27,
-    "potencial": -0.5350285417747794,
-    "avisos": 3,
-    "moat": false
+    "potencial": 0.19356512714063315,
+    "avisos": 5,
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1625,
+    "custoDeCapitalTerminal": 0.12890000000000001,
+    "phi": 1.3,
+    "fatorDeNormalizacao": 2.567,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0633,
+    "retornoDoCicloDaBase": 0.1625
   },
   {
     "ticker": "AGXY3",
@@ -92,7 +124,19 @@
     "preco": 28.81,
     "potencial": -0.4599097535577924,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.09449999999999999,
+    "custoDeCapitalTerminal": 0.1547,
+    "phi": 1.62,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.0944,
+    "retornoDoCicloDaBase": 0.09449999999999999
   },
   {
     "ticker": "ALPA3",
@@ -108,11 +152,23 @@
     "via": "DCF por fluxo da firma",
     "setor": "",
     "crescimento": "âncora",
-    "justo": 2.04,
+    "justo": 2.05,
     "preco": 13.57,
-    "potencial": -0.8496683861459101,
+    "potencial": -0.8489314664701547,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.11380000000000001,
+    "custoDeCapitalTerminal": 0.1634,
+    "phi": 1.43,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.09880000000000001,
+    "retornoDoCicloDaBase": 0.11380000000000001
   },
   {
     "ticker": "ALPK3",
@@ -128,11 +184,23 @@
     "via": "DCF por fluxo da firma",
     "setor": "",
     "crescimento": "âncora",
-    "justo": 26.75,
+    "justo": 26.76,
     "preco": 33.64,
-    "potencial": -0.20481569560047563,
+    "potencial": -0.2045184304399524,
     "avisos": 5,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1007,
+    "custoDeCapitalTerminal": 0.1038,
+    "phi": 0.36,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.0983,
+    "retornoDoCicloDaBase": 0.1007
   },
   {
     "ticker": "ALUP3",
@@ -176,7 +244,19 @@
     "preco": 5.55,
     "potencial": -0.3675675675675676,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.06570000000000001,
+    "custoDeCapitalTerminal": 0.11,
+    "phi": 3.74,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.039,
+    "retornoDoCicloDaBase": 0.06570000000000001
   },
   {
     "ticker": "AMOB3",
@@ -196,7 +276,19 @@
     "preco": 2.93,
     "potencial": -0.08191126279863488,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0716,
+    "custoDeCapitalTerminal": 0.2089,
+    "phi": 3.86,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.09230000000000001,
+    "retornoDoCicloDaBase": 0.0716
   },
   {
     "ticker": "ARML3",
@@ -260,11 +352,23 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "emp-adm-part-energia-eletrica",
     "crescimento": "fundamental",
-    "justo": 19.27,
+    "justo": 19.28,
     "preco": 55.28,
-    "potencial": -0.651410998552822,
+    "potencial": -0.6512301013024602,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0868,
+    "custoDeCapitalTerminal": 0.1565,
+    "phi": 0.83,
+    "fatorDeNormalizacao": 1.615,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0538,
+    "retornoDoCicloDaBase": 0.0868
   },
   {
     "ticker": "AXIA7",
@@ -337,7 +441,18 @@
     "preco": 17.69,
     "potencial": -0.0893159977388356,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.1955,
+    "custoDeCapitalTerminal": 0.1359,
+    "phi": 12.67,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0782,
+    "retornoDoCicloDaBase": 0.1955
   },
   {
     "ticker": "B1003",
@@ -357,7 +472,18 @@
     "preco": 17.37,
     "potencial": -0.8123200921128383,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.19010000000000002,
+    "custoDeCapitalTerminal": 0.16260000000000002,
+    "phi": 0.0,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.23920000000000002,
+    "retornoDoCicloDaBase": 0.19010000000000002
   },
   {
     "ticker": "BALM3",
@@ -397,11 +523,22 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "servicos-financeiros",
     "crescimento": "fundamental",
-    "justo": 31.52,
+    "justo": 31.53,
     "preco": 22.52,
-    "potencial": 0.3996447602131439,
+    "potencial": 0.4000888099467141,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1543,
+    "custoDeCapitalTerminal": 0.1479,
+    "phi": 0.27,
+    "fatorDeNormalizacao": 1.693,
+    "guarda1": "não avaliável",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0911,
+    "retornoDoCicloDaBase": 0.1543
   },
   {
     "ticker": "BBDC3",
@@ -413,7 +550,18 @@
     "preco": 15.81,
     "potencial": -0.19481340923466162,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1183,
+    "custoDeCapitalTerminal": 0.1523,
+    "phi": 0.15,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1416,
+    "retornoDoCicloDaBase": 0.1183
   },
   {
     "ticker": "BBDC4",
@@ -425,7 +573,18 @@
     "preco": 17.9,
     "potencial": -0.3027932960893854,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1183,
+    "custoDeCapitalTerminal": 0.1547,
+    "phi": 0.15,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1416,
+    "retornoDoCicloDaBase": 0.1183
   },
   {
     "ticker": "BBSE3",
@@ -433,11 +592,20 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "servicos-financeiros",
     "crescimento": "âncora",
-    "justo": 50.04,
+    "justo": 50.05,
     "preco": 42.16,
-    "potencial": 0.18690702087286534,
+    "potencial": 0.18714421252371918,
     "avisos": 4,
-    "moat": true
+    "moat": true,
+    "moatBarradoPor": [],
+    "retornoDoCiclo": 0.7818999999999999,
+    "custoDeCapitalTerminal": 0.1201,
+    "phi": 0.0,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.9301,
+    "retornoDoCicloDaBase": 0.7818999999999999
   },
   {
     "ticker": "BDLL3",
@@ -465,7 +633,19 @@
     "preco": 3.95,
     "potencial": 1.4683544303797467,
     "avisos": 1,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.16879999999999998,
+    "custoDeCapitalTerminal": 0.1355,
+    "phi": 1.88,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1617,
+    "retornoDoCicloDaBase": 0.16879999999999998
   },
   {
     "ticker": "BEES3",
@@ -553,11 +733,22 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "servicos-financeiros",
     "crescimento": "fundamental",
-    "justo": 7.43,
+    "justo": 7.44,
     "preco": 5.98,
-    "potencial": 0.24247491638795973,
+    "potencial": 0.24414715719063543,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "semRetornoDoCiclo",
+      "crescimentoInorganico"
+    ],
+    "custoDeCapitalTerminal": 0.141,
+    "phi": 0.84,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não avaliável",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.0,
+    "retornoDoCicloDaBase": 0.0
   },
   {
     "ticker": "BMIN4",
@@ -605,11 +796,22 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "servicos-financeiros",
     "crescimento": "fundamental",
-    "justo": 46.0,
+    "justo": 46.01,
     "preco": 59.24,
-    "potencial": -0.2234976367319379,
+    "potencial": -0.22332883187035793,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "semRetornoDoCiclo",
+      "crescimentoInorganico"
+    ],
+    "custoDeCapitalTerminal": 0.17379999999999998,
+    "phi": 3.25,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não avaliável",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.0,
+    "retornoDoCicloDaBase": 0.0
   },
   {
     "ticker": "BPAC3",
@@ -645,7 +847,18 @@
     "preco": 22.48,
     "potencial": -0.2758007117437722,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.13570000000000002,
+    "custoDeCapitalTerminal": 0.1438,
+    "phi": 0.1,
+    "fatorDeNormalizacao": 3.57,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.038,
+    "retornoDoCicloDaBase": 0.13570000000000002
   },
   {
     "ticker": "BRAV3",
@@ -653,11 +866,23 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "energia",
     "crescimento": "âncora",
-    "justo": 14.35,
+    "justo": 6.73,
     "preco": 17.88,
-    "potencial": -0.19742729306487694,
-    "avisos": 3,
-    "moat": false
+    "potencial": -0.6236017897091722,
+    "avisos": 5,
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0629,
+    "custoDeCapitalTerminal": 0.1559,
+    "phi": 3.52,
+    "fatorDeNormalizacao": 0.469,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1341,
+    "retornoDoCicloDaBase": 0.0629
   },
   {
     "ticker": "BRBI11",
@@ -717,7 +942,18 @@
     "preco": 14.88,
     "potencial": -0.07526881720430113,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.09269999999999999,
+    "custoDeCapitalTerminal": 0.1413,
+    "phi": 0.06,
+    "fatorDeNormalizacao": 0.563,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1646,
+    "retornoDoCicloDaBase": 0.09269999999999999
   },
   {
     "ticker": "BRST3",
@@ -761,7 +997,18 @@
     "preco": 4.94,
     "potencial": -0.4777327935222672,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.14980000000000002,
+    "custoDeCapitalTerminal": 0.1494,
+    "phi": 0.08,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0429,
+    "retornoDoCicloDaBase": 0.14980000000000002
   },
   {
     "ticker": "CASH3",
@@ -797,7 +1044,18 @@
     "preco": 9.21,
     "potencial": -0.6145494028230185,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "capitalExternoNaoMedido",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0751,
+    "custoDeCapitalTerminal": 0.1827,
+    "fatorDeNormalizacao": 0.352,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.2132,
+    "retornoDoCicloDaBase": 0.0751
   },
   {
     "ticker": "CEBR3",
@@ -917,11 +1175,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "energia",
     "crescimento": "fundamental",
-    "justo": 5.62,
+    "justo": 5.63,
     "preco": 11.26,
-    "potencial": -0.5008880994671403,
+    "potencial": -0.5,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1192,
+    "custoDeCapitalTerminal": 0.12369999999999999,
+    "phi": 0.16,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1191,
+    "retornoDoCicloDaBase": 0.1192
   },
   {
     "ticker": "CMIN3",
@@ -957,7 +1226,18 @@
     "preco": 2.44,
     "potencial": 0.11475409836065584,
     "avisos": 5,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.12890000000000001,
+    "custoDeCapitalTerminal": 0.1844,
+    "phi": 0.28,
+    "fatorDeNormalizacao": 2.98,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0433,
+    "retornoDoCicloDaBase": 0.12890000000000001
   },
   {
     "ticker": "CPFE3",
@@ -965,11 +1245,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "energia",
     "crescimento": "fundamental",
-    "justo": 26.51,
+    "justo": 26.52,
     "preco": 46.83,
-    "potencial": -0.43390988682468495,
+    "potencial": -0.43369634849455474,
     "avisos": 1,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1448,
+    "custoDeCapitalTerminal": 0.1283,
+    "phi": 0.16,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1551,
+    "retornoDoCicloDaBase": 0.1448
   },
   {
     "ticker": "CPLE3",
@@ -981,7 +1272,18 @@
     "preco": 15.85,
     "potencial": -0.889589905362776,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0795,
+    "custoDeCapitalTerminal": 0.1308,
+    "phi": 0.11,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.086,
+    "retornoDoCicloDaBase": 0.0795
   },
   {
     "ticker": "CRPG5",
@@ -1073,7 +1375,18 @@
     "preco": 1.88,
     "potencial": -0.1914893617021276,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.33799999999999997,
+    "custoDeCapitalTerminal": 0.2005,
+    "phi": 0.74,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.3221,
+    "retornoDoCicloDaBase": 0.33799999999999997
   },
   {
     "ticker": "CXSE3",
@@ -1085,7 +1398,18 @@
     "preco": 19.98,
     "potencial": -0.5865865865865866,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.26030000000000003,
+    "custoDeCapitalTerminal": 0.132,
+    "phi": 0.73,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.2626,
+    "retornoDoCicloDaBase": 0.26030000000000003
   },
   {
     "ticker": "CYRE3",
@@ -1093,11 +1417,23 @@
     "via": "DCF por fluxo da firma",
     "setor": "construcao-e-imobiliario",
     "crescimento": "âncora",
-    "justo": 8.52,
+    "justo": 8.53,
     "preco": 25.6,
-    "potencial": -0.6671875,
+    "potencial": -0.666796875,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0762,
+    "custoDeCapitalTerminal": 0.14,
+    "phi": 0.61,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1177,
+    "retornoDoCicloDaBase": 0.0762
   },
   {
     "ticker": "CYRE4",
@@ -1109,7 +1445,19 @@
     "preco": 24.11,
     "potencial": -0.6897552882621318,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0762,
+    "custoDeCapitalTerminal": 0.1469,
+    "phi": 0.61,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1177,
+    "retornoDoCicloDaBase": 0.0762
   },
   {
     "ticker": "DASA3",
@@ -1153,7 +1501,18 @@
     "preco": 11.46,
     "potencial": -0.8420593368237347,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1201,
+    "custoDeCapitalTerminal": 0.1503,
+    "phi": 0.12,
+    "fatorDeNormalizacao": 0.407,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.2953,
+    "retornoDoCicloDaBase": 0.1201
   },
   {
     "ticker": "DMVF3",
@@ -1197,7 +1556,18 @@
     "preco": 5.64,
     "potencial": -0.3936170212765957,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.09179999999999999,
+    "custoDeCapitalTerminal": 0.1679,
+    "phi": 0.11,
+    "fatorDeNormalizacao": 10.473,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0088,
+    "retornoDoCicloDaBase": 0.09179999999999999
   },
   {
     "ticker": "EALT3",
@@ -1233,7 +1603,18 @@
     "preco": 7.92,
     "potencial": 1.224747474747475,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.142,
+    "custoDeCapitalTerminal": 0.094,
+    "phi": 2.16,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1423,
+    "retornoDoCicloDaBase": 0.142
   },
   {
     "ticker": "EGIE3",
@@ -1241,11 +1622,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "energia",
     "crescimento": "fundamental",
-    "justo": 42.59,
+    "justo": 42.6,
     "preco": 30.14,
-    "potencial": 0.4130723291307234,
+    "potencial": 0.41340411413404116,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.20550000000000002,
+    "custoDeCapitalTerminal": 0.1121,
+    "phi": 0.58,
+    "fatorDeNormalizacao": 1.588,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1294,
+    "retornoDoCicloDaBase": 0.20550000000000002
   },
   {
     "ticker": "EKTR4",
@@ -1269,11 +1661,23 @@
     "via": "DCF por fluxo da firma",
     "setor": "maquinas-equipamentos-veiculos-e-pecas",
     "crescimento": "fundamental",
-    "justo": 18.24,
+    "justo": 9.19,
     "preco": 94.98,
-    "potencial": -0.8079595704358813,
-    "avisos": 2,
-    "moat": false
+    "potencial": -0.9032427879553591,
+    "avisos": 4,
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.048799999999999996,
+    "custoDeCapitalTerminal": 0.1335,
+    "phi": 1.23,
+    "fatorDeNormalizacao": 0.497,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.09820000000000001,
+    "retornoDoCicloDaBase": 0.048799999999999996
   },
   {
     "ticker": "ENEV3",
@@ -1285,7 +1689,19 @@
     "preco": 27.59,
     "potencial": -0.8405219282348676,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.06860000000000001,
+    "custoDeCapitalTerminal": 0.1505,
+    "phi": 1.87,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.0837,
+    "retornoDoCicloDaBase": 0.06860000000000001
   },
   {
     "ticker": "ENGI11",
@@ -1293,11 +1709,22 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "energia",
     "crescimento": "fundamental",
-    "justo": 79.0,
+    "justo": 79.02,
     "preco": 51.43,
-    "potencial": 0.5360684425432627,
+    "potencial": 0.5364573206299824,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.2477,
+    "custoDeCapitalTerminal": 0.1458,
+    "phi": 0.73,
+    "fatorDeNormalizacao": 1.746,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1418,
+    "retornoDoCicloDaBase": 0.2477
   },
   {
     "ticker": "ENGI3",
@@ -1366,14 +1793,26 @@
   {
     "ticker": "EQTL3",
     "saida": "avaliado",
-    "via": "DCF sobre lucro distribuível",
+    "via": "DCF por fluxo da firma",
     "setor": "energia",
     "crescimento": "âncora",
-    "justo": 13.53,
+    "justo": 18.18,
     "preco": 39.16,
-    "potencial": -0.6544943820224719,
-    "avisos": 3,
-    "moat": false
+    "potencial": -0.5357507660878447,
+    "avisos": 4,
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1433,
+    "custoDeCapitalTerminal": 0.15109999999999998,
+    "phi": 4.76,
+    "fatorDeNormalizacao": 1.94,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0739,
+    "retornoDoCicloDaBase": 0.1433
   },
   {
     "ticker": "ESPA3",
@@ -1425,7 +1864,19 @@
     "preco": 4.23,
     "potencial": -0.1394799054373523,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.07629999999999999,
+    "custoDeCapitalTerminal": 0.11230000000000001,
+    "phi": 0.41,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.067,
+    "retornoDoCicloDaBase": 0.07629999999999999
   },
   {
     "ticker": "EZTC3",
@@ -1437,7 +1888,19 @@
     "preco": 13.0,
     "potencial": -0.6499999999999999,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0555,
+    "custoDeCapitalTerminal": 0.1469,
+    "phi": 0.89,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.0556,
+    "retornoDoCicloDaBase": 0.0555
   },
   {
     "ticker": "FASA3",
@@ -1465,7 +1928,19 @@
     "preco": 5.61,
     "potencial": 0.2352941176470587,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1151,
+    "custoDeCapitalTerminal": 0.1536,
+    "phi": 0.8,
+    "fatorDeNormalizacao": 10.796,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.010700000000000001,
+    "retornoDoCicloDaBase": 0.1151
   },
   {
     "ticker": "FHER3",
@@ -1517,7 +1992,19 @@
     "preco": 22.65,
     "potencial": -0.7554083885209714,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.14679999999999999,
+    "custoDeCapitalTerminal": 0.1465,
+    "phi": 4.12,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1909,
+    "retornoDoCicloDaBase": 0.14679999999999999
   },
   {
     "ticker": "GEPA3",
@@ -1561,7 +2048,18 @@
     "preco": 25.34,
     "potencial": -0.7363851617995264,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0915,
+    "custoDeCapitalTerminal": 0.1328,
+    "phi": 0.12,
+    "fatorDeNormalizacao": 2.356,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0388,
+    "retornoDoCicloDaBase": 0.0915
   },
   {
     "ticker": "GGPS3",
@@ -1593,11 +2091,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "materiais-basicos",
     "crescimento": "âncora",
-    "justo": 25.39,
+    "justo": 25.4,
     "preco": 11.17,
-    "potencial": 1.2730528200537155,
+    "potencial": 1.2739480752014323,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0913,
+    "custoDeCapitalTerminal": 0.11630000000000001,
+    "phi": 0.12,
+    "fatorDeNormalizacao": 2.356,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0387,
+    "retornoDoCicloDaBase": 0.0913
   },
   {
     "ticker": "GRND3",
@@ -1605,11 +2114,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "consumo-ciclico",
     "crescimento": "fundamental",
-    "justo": 2.46,
+    "justo": 2.47,
     "preco": 3.68,
-    "potencial": -0.3315217391304348,
+    "potencial": -0.3288043478260869,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.10279999999999999,
+    "custoDeCapitalTerminal": 0.1426,
+    "phi": 0.31,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0723,
+    "retornoDoCicloDaBase": 0.10279999999999999
   },
   {
     "ticker": "GSHP3",
@@ -1685,7 +2205,18 @@
     "preco": 23.16,
     "potencial": -0.5613126079447323,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1094,
+    "custoDeCapitalTerminal": 0.1426,
+    "phi": 0.0,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1155,
+    "retornoDoCicloDaBase": 0.1094
   },
   {
     "ticker": "IFCM3",
@@ -1705,7 +2236,18 @@
     "preco": 26.43,
     "potencial": -0.8312523647370412,
     "avisos": 5,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0801,
+    "custoDeCapitalTerminal": 0.1629,
+    "phi": 0.23,
+    "fatorDeNormalizacao": 0.593,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1352,
+    "retornoDoCicloDaBase": 0.0801
   },
   {
     "ticker": "IGTI3",
@@ -1753,11 +2295,22 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "servicos-financeiros",
     "crescimento": "âncora",
-    "justo": 108.44,
+    "justo": 108.46,
     "preco": 62.21,
-    "potencial": 0.7431281144510529,
+    "potencial": 0.7434496061726409,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.2902,
+    "custoDeCapitalTerminal": 0.159,
+    "phi": 0.91,
+    "fatorDeNormalizacao": 3.657,
+    "guarda1": "não avaliável",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0794,
+    "retornoDoCicloDaBase": 0.2902
   },
   {
     "ticker": "ISAE3",
@@ -1773,11 +2326,23 @@
     "via": "DCF por fluxo da firma",
     "setor": "energia",
     "crescimento": "fundamental",
-    "justo": 27.56,
+    "justo": 27.57,
     "preco": 27.7,
-    "potencial": -0.005054151624548757,
+    "potencial": -0.004693140794223791,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1264,
+    "custoDeCapitalTerminal": 0.11599999999999999,
+    "phi": 0.47,
+    "fatorDeNormalizacao": 1.388,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0911,
+    "retornoDoCicloDaBase": 0.1264
   },
   {
     "ticker": "ITSA3",
@@ -1797,7 +2362,18 @@
     "preco": 13.95,
     "potencial": -0.6709677419354839,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1167,
+    "custoDeCapitalTerminal": 0.1506,
+    "phi": 0.04,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1206,
+    "retornoDoCicloDaBase": 0.1167
   },
   {
     "ticker": "ITUB3",
@@ -1805,11 +2381,22 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "servicos-financeiros",
     "crescimento": "fundamental",
-    "justo": 41.67,
+    "justo": 41.68,
     "preco": 45.72,
-    "potencial": -0.08858267716535427,
+    "potencial": -0.08836395450568678,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "semRetornoDoCiclo",
+      "crescimentoInorganico"
+    ],
+    "custoDeCapitalTerminal": 0.1435,
+    "phi": 0.5,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não avaliável",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.0,
+    "retornoDoCicloDaBase": 0.0
   },
   {
     "ticker": "ITUB4",
@@ -1817,11 +2404,22 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "servicos-financeiros",
     "crescimento": "fundamental",
-    "justo": 40.23,
+    "justo": 40.24,
     "preco": 41.92,
-    "potencial": -0.04031488549618332,
+    "potencial": -0.040076335877862586,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "semRetornoDoCiclo",
+      "crescimentoInorganico"
+    ],
+    "custoDeCapitalTerminal": 0.1479,
+    "phi": 0.5,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não avaliável",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.0,
+    "retornoDoCicloDaBase": 0.0
   },
   {
     "ticker": "JALL3",
@@ -1849,7 +2447,19 @@
     "preco": 11.45,
     "potencial": -0.3799126637554585,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1036,
+    "custoDeCapitalTerminal": 0.136,
+    "phi": 0.57,
+    "fatorDeNormalizacao": 0.561,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.18460000000000001,
+    "retornoDoCicloDaBase": 0.1036
   },
   {
     "ticker": "JSLG3",
@@ -1861,7 +2471,19 @@
     "preco": 5.82,
     "potencial": -0.19072164948453613,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1525,
+    "custoDeCapitalTerminal": 0.1796,
+    "phi": 0.68,
+    "fatorDeNormalizacao": 3.305,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0462,
+    "retornoDoCicloDaBase": 0.1525
   },
   {
     "ticker": "KEPL3",
@@ -1869,11 +2491,20 @@
     "via": "DCF por fluxo da firma",
     "setor": "bens-industriais",
     "crescimento": "âncora",
-    "justo": 4.61,
+    "justo": 4.74,
     "preco": 6.68,
-    "potencial": -0.309880239520958,
-    "avisos": 3,
-    "moat": false
+    "potencial": -0.29041916167664666,
+    "avisos": 4,
+    "moat": true,
+    "moatBarradoPor": [],
+    "retornoDoCiclo": 0.2296,
+    "custoDeCapitalTerminal": 0.1472,
+    "phi": 0.1,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1974,
+    "retornoDoCicloDaBase": 0.2296
   },
   {
     "ticker": "KLBN11",
@@ -1885,7 +2516,18 @@
     "preco": 19.47,
     "potencial": -0.4478685156651258,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.19760000000000003,
+    "custoDeCapitalTerminal": 0.12119999999999999,
+    "phi": 0.6,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1943,
+    "retornoDoCicloDaBase": 0.19760000000000003
   },
   {
     "ticker": "KLBN3",
@@ -1897,7 +2539,18 @@
     "preco": 4.03,
     "potencial": -0.46898263027295284,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.19760000000000003,
+    "custoDeCapitalTerminal": 0.12179999999999999,
+    "phi": 0.6,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1943,
+    "retornoDoCicloDaBase": 0.19760000000000003
   },
   {
     "ticker": "KLBN4",
@@ -1909,7 +2562,18 @@
     "preco": 3.85,
     "potencial": -0.43896103896103894,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.19760000000000003,
+    "custoDeCapitalTerminal": 0.1207,
+    "phi": 0.6,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1943,
+    "retornoDoCicloDaBase": 0.19760000000000003
   },
   {
     "ticker": "LAND3",
@@ -1933,11 +2597,20 @@
     "via": "DCF por fluxo da firma",
     "setor": "consumo-ciclico",
     "crescimento": "fundamental",
-    "justo": 20.34,
+    "justo": 20.35,
     "preco": 32.81,
-    "potencial": -0.3800670527278269,
-    "avisos": 2,
-    "moat": false
+    "potencial": -0.3797622676013411,
+    "avisos": 3,
+    "moat": true,
+    "moatBarradoPor": [],
+    "retornoDoCiclo": 0.23829999999999998,
+    "custoDeCapitalTerminal": 0.14029999999999998,
+    "phi": 0.0,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.4083,
+    "retornoDoCicloDaBase": 0.23829999999999998
   },
   {
     "ticker": "LIGT3",
@@ -1949,7 +2622,19 @@
     "preco": 3.57,
     "potencial": -0.4817927170868347,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.073,
+    "custoDeCapitalTerminal": 0.1041,
+    "phi": 1.0,
+    "fatorDeNormalizacao": 1.787,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0408,
+    "retornoDoCicloDaBase": 0.073
   },
   {
     "ticker": "LJQQ3",
@@ -1969,7 +2654,19 @@
     "preco": 24.71,
     "potencial": -0.6216106839336302,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0507,
+    "custoDeCapitalTerminal": 0.1537,
+    "phi": 0.39,
+    "fatorDeNormalizacao": 0.503,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1008,
+    "retornoDoCicloDaBase": 0.0507
   },
   {
     "ticker": "LOGN3",
@@ -1997,7 +2694,19 @@
     "preco": 11.35,
     "potencial": -0.3938325991189427,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1202,
+    "custoDeCapitalTerminal": 0.1802,
+    "phi": 0.5,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1326,
+    "retornoDoCicloDaBase": 0.1202
   },
   {
     "ticker": "LUPA3",
@@ -2045,11 +2754,22 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "emp-adm-part-alimentos",
     "crescimento": "âncora",
-    "justo": 4.19,
+    "justo": 89.53,
     "preco": 17.69,
-    "potencial": -0.7631430186546071,
-    "avisos": 3,
-    "moat": false
+    "potencial": 4.061051441492369,
+    "avisos": 5,
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.8175,
+    "custoDeCapitalTerminal": 0.1406,
+    "phi": 18.25,
+    "fatorDeNormalizacao": 21.372,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0383,
+    "retornoDoCicloDaBase": 0.8175
   },
   {
     "ticker": "MDIA3",
@@ -2061,7 +2781,19 @@
     "preco": 17.78,
     "potencial": -0.5241844769403824,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.07200000000000001,
+    "custoDeCapitalTerminal": 0.1411,
+    "phi": 0.52,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.0555,
+    "retornoDoCicloDaBase": 0.07200000000000001
   },
   {
     "ticker": "MDNE3",
@@ -2073,7 +2805,18 @@
     "preco": 25.81,
     "potencial": -0.9554436265013562,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0592,
+    "custoDeCapitalTerminal": 0.1606,
+    "phi": 0.19,
+    "fatorDeNormalizacao": 0.33,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1794,
+    "retornoDoCicloDaBase": 0.0592
   },
   {
     "ticker": "MEAL3",
@@ -2105,11 +2848,23 @@
     "via": "DCF por fluxo da firma",
     "setor": "consumo-ciclico",
     "crescimento": "âncora",
-    "justo": 3.68,
+    "justo": 14.28,
     "preco": 5.79,
-    "potencial": -0.3644214162348877,
-    "avisos": 4,
-    "moat": false
+    "potencial": 1.4663212435233157,
+    "avisos": 6,
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.2237,
+    "custoDeCapitalTerminal": 0.2051,
+    "phi": 8.69,
+    "fatorDeNormalizacao": 2.426,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0922,
+    "retornoDoCicloDaBase": 0.2237
   },
   {
     "ticker": "MILS3",
@@ -2121,7 +2876,19 @@
     "preco": 15.79,
     "potencial": -0.506016466117796,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1465,
+    "custoDeCapitalTerminal": 0.1394,
+    "phi": 0.95,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1611,
+    "retornoDoCicloDaBase": 0.1465
   },
   {
     "ticker": "MLAS3",
@@ -2153,11 +2920,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "infraestrutura",
     "crescimento": "fundamental",
-    "justo": 11.48,
+    "justo": 11.49,
     "preco": 16.78,
-    "potencial": -0.3158522050059595,
+    "potencial": -0.3152562574493445,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.10769999999999999,
+    "custoDeCapitalTerminal": 0.10980000000000001,
+    "phi": 0.33,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1165,
+    "retornoDoCicloDaBase": 0.10769999999999999
   },
   {
     "ticker": "MOVI3",
@@ -2169,7 +2947,19 @@
     "preco": 8.11,
     "potencial": 3.3637484586929722,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1038,
+    "custoDeCapitalTerminal": 0.15689999999999998,
+    "phi": 4.37,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.115,
+    "retornoDoCicloDaBase": 0.1038
   },
   {
     "ticker": "MRVE3",
@@ -2213,7 +3003,18 @@
     "preco": 30.18,
     "potencial": -0.792909211398277,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1057,
+    "custoDeCapitalTerminal": 0.1565,
+    "phi": 0.0,
+    "fatorDeNormalizacao": 0.523,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.2021,
+    "retornoDoCicloDaBase": 0.1057
   },
   {
     "ticker": "MWET3",
@@ -2241,7 +3042,19 @@
     "preco": 9.81,
     "potencial": -0.0988786952089705,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0925,
+    "custoDeCapitalTerminal": 0.1411,
+    "phi": 0.61,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.042800000000000005,
+    "retornoDoCicloDaBase": 0.0925
   },
   {
     "ticker": "NATU3",
@@ -2400,11 +3213,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "energia",
     "crescimento": "fundamental",
-    "justo": 32.96,
+    "justo": 32.97,
     "preco": 52.01,
-    "potencial": -0.3662757162084214,
+    "potencial": -0.36608344549125166,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.12300000000000001,
+    "custoDeCapitalTerminal": 0.1151,
+    "phi": 0.02,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1384,
+    "retornoDoCicloDaBase": 0.12300000000000001
   },
   {
     "ticker": "PETR4",
@@ -2416,7 +3240,18 @@
     "preco": 47.11,
     "potencial": -0.26151560178306094,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.12300000000000001,
+    "custoDeCapitalTerminal": 0.1121,
+    "phi": 0.02,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1384,
+    "retornoDoCicloDaBase": 0.12300000000000001
   },
   {
     "ticker": "PFRM3",
@@ -2436,7 +3271,19 @@
     "preco": 3.84,
     "potencial": 2.2213541666666665,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0895,
+    "custoDeCapitalTerminal": 0.1432,
+    "phi": 0.76,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1425,
+    "retornoDoCicloDaBase": 0.0895
   },
   {
     "ticker": "PINE3",
@@ -2456,7 +3303,17 @@
     "preco": 11.14,
     "potencial": 0.11669658886894065,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "semRetornoDoCiclo"
+    ],
+    "custoDeCapitalTerminal": 0.1379,
+    "phi": 0.29,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não avaliável",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.40380000000000005,
+    "retornoDoCicloDaBase": 0.0
   },
   {
     "ticker": "PLAS3",
@@ -2492,7 +3349,19 @@
     "preco": 13.16,
     "potencial": -0.6557750759878419,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.09849999999999999,
+    "custoDeCapitalTerminal": 0.1524,
+    "phi": 1.01,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1009,
+    "retornoDoCicloDaBase": 0.09849999999999999
   },
   {
     "ticker": "POMO3",
@@ -2504,7 +3373,18 @@
     "preco": 4.26,
     "potencial": -0.39436619718309857,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1184,
+    "custoDeCapitalTerminal": 0.1414,
+    "phi": 0.1,
+    "fatorDeNormalizacao": 0.391,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.30260000000000004,
+    "retornoDoCicloDaBase": 0.1184
   },
   {
     "ticker": "POMO4",
@@ -2516,7 +3396,18 @@
     "preco": 4.58,
     "potencial": -0.4475982532751092,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1184,
+    "custoDeCapitalTerminal": 0.1438,
+    "phi": 0.1,
+    "fatorDeNormalizacao": 0.391,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.30260000000000004,
+    "retornoDoCicloDaBase": 0.1184
   },
   {
     "ticker": "POSI3",
@@ -2524,23 +3415,46 @@
     "via": "DCF por fluxo da firma",
     "setor": "tecnologia",
     "crescimento": "âncora",
-    "justo": 2.66,
+    "justo": 8.04,
     "preco": 3.42,
-    "potencial": -0.22222222222222215,
-    "avisos": 3,
-    "moat": false
+    "potencial": 1.350877192982456,
+    "avisos": 5,
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1117,
+    "custoDeCapitalTerminal": 0.1338,
+    "phi": 1.47,
+    "fatorDeNormalizacao": 1.738,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0643,
+    "retornoDoCicloDaBase": 0.1117
   },
   {
     "ticker": "PRIO3",
     "saida": "avaliado",
-    "via": "DCF sobre lucro distribuível",
+    "via": "DCF por fluxo da firma",
     "setor": "energia",
     "crescimento": "âncora",
-    "justo": 19.0,
+    "justo": 59.5,
     "preco": 60.19,
-    "potencial": -0.6843329456720385,
-    "avisos": 3,
-    "moat": false
+    "potencial": -0.011463698288752247,
+    "avisos": 6,
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.2823,
+    "custoDeCapitalTerminal": 0.16010000000000002,
+    "phi": 86.1,
+    "fatorDeNormalizacao": 10.489,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0269,
+    "retornoDoCicloDaBase": 0.2823
   },
   {
     "ticker": "PRNR3",
@@ -2548,11 +3462,23 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "servicos",
     "crescimento": "âncora",
-    "justo": 0.87,
+    "justo": 4.16,
     "preco": 18.15,
-    "potencial": -0.9520661157024792,
-    "avisos": 3,
-    "moat": false
+    "potencial": -0.7707988980716253,
+    "avisos": 5,
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1131,
+    "custoDeCapitalTerminal": 0.14679999999999999,
+    "phi": 8.53,
+    "fatorDeNormalizacao": 4.773,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.023700000000000002,
+    "retornoDoCicloDaBase": 0.1131
   },
   {
     "ticker": "PSSA3",
@@ -2560,11 +3486,22 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "servicos-financeiros",
     "crescimento": "fundamental",
-    "justo": 29.71,
+    "justo": 29.72,
     "preco": 51.66,
-    "potencial": -0.42489353464963214,
+    "potencial": -0.4246999612853271,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.17629999999999998,
+    "custoDeCapitalTerminal": 0.1297,
+    "phi": 0.02,
+    "fatorDeNormalizacao": 0.728,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.2421,
+    "retornoDoCicloDaBase": 0.17629999999999998
   },
   {
     "ticker": "PTBL3",
@@ -2580,11 +3517,20 @@
     "via": "DCF por fluxo da firma",
     "setor": "saude",
     "crescimento": "fundamental",
-    "justo": 8.66,
+    "justo": 8.86,
     "preco": 1.5,
-    "potencial": 4.773333333333333,
-    "avisos": 3,
-    "moat": false
+    "potencial": 4.906666666666666,
+    "avisos": 4,
+    "moat": true,
+    "moatBarradoPor": [],
+    "retornoDoCiclo": 0.16920000000000002,
+    "custoDeCapitalTerminal": 0.1115,
+    "phi": 0.01,
+    "fatorDeNormalizacao": 2.097,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.08070000000000001,
+    "retornoDoCicloDaBase": 0.16920000000000002
   },
   {
     "ticker": "RADL3",
@@ -2596,7 +3542,18 @@
     "preco": 19.99,
     "potencial": -0.7293646823411706,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.17550000000000002,
+    "custoDeCapitalTerminal": 0.1436,
+    "phi": 0.11,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.19690000000000002,
+    "retornoDoCicloDaBase": 0.17550000000000002
   },
   {
     "ticker": "RAIL3",
@@ -2608,7 +3565,19 @@
     "preco": 14.55,
     "potencial": -0.8893470790378007,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.0348,
+    "custoDeCapitalTerminal": 0.1501,
+    "phi": 0.8,
+    "fatorDeNormalizacao": 0.601,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0579,
+    "retornoDoCicloDaBase": 0.0348
   },
   {
     "ticker": "RAIZ4",
@@ -2624,11 +3593,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "materiais",
     "crescimento": "fundamental",
-    "justo": 5.59,
+    "justo": 5.6,
     "preco": 7.66,
-    "potencial": -0.27023498694516973,
+    "potencial": -0.26892950391644915,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1189,
+    "custoDeCapitalTerminal": 0.1216,
+    "phi": 0.24,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1207,
+    "retornoDoCicloDaBase": 0.1189
   },
   {
     "ticker": "RAPT3",
@@ -2640,11 +3620,27 @@
   },
   {
     "ticker": "RAPT4",
-    "saida": "sem via aplicável",
+    "saida": "avaliado",
+    "via": "DCF por fluxo da firma",
     "setor": "",
-    "avisos": 0,
+    "crescimento": "âncora",
+    "justo": 5.73,
+    "preco": 4.8,
+    "potencial": 0.19375000000000014,
+    "avisos": 5,
     "moat": false,
-    "detalhe": "Os dados de RAPT4 não sustentam nenhuma das duas vias de avaliação."
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.13570000000000002,
+    "custoDeCapitalTerminal": 0.1611,
+    "phi": 1.52,
+    "fatorDeNormalizacao": 2.155,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.063,
+    "retornoDoCicloDaBase": 0.13570000000000002
   },
   {
     "ticker": "RCSL3",
@@ -2672,7 +3668,18 @@
     "preco": 37.13,
     "potencial": -0.6493401562079182,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "capitalExternoNaoMedido",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.12619999999999998,
+    "custoDeCapitalTerminal": 0.16149999999999998,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.2422,
+    "retornoDoCicloDaBase": 0.12619999999999998
   },
   {
     "ticker": "RECV3",
@@ -2696,11 +3703,22 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "consumo-ciclico",
     "crescimento": "âncora",
-    "justo": 5.2,
+    "justo": 17.28,
     "preco": 36.64,
-    "potencial": -0.8580786026200874,
-    "avisos": 4,
-    "moat": false
+    "potencial": -0.5283842794759825,
+    "avisos": 6,
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.2359,
+    "custoDeCapitalTerminal": 0.17190000000000003,
+    "phi": 6.02,
+    "fatorDeNormalizacao": 3.323,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.071,
+    "retornoDoCicloDaBase": 0.2359
   },
   {
     "ticker": "RENT4",
@@ -2708,11 +3726,23 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "",
     "crescimento": "âncora",
-    "justo": 4.65,
+    "justo": 15.45,
     "preco": 35.29,
-    "potencial": -0.8682346273731936,
-    "avisos": 4,
-    "moat": false
+    "potencial": -0.5621989232077076,
+    "avisos": 6,
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.2359,
+    "custoDeCapitalTerminal": 0.19039999999999999,
+    "phi": 6.02,
+    "fatorDeNormalizacao": 3.323,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.071,
+    "retornoDoCicloDaBase": 0.2359
   },
   {
     "ticker": "RIAA3",
@@ -2724,7 +3754,18 @@
     "preco": 7.16,
     "potencial": -0.5782122905027933,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.07200000000000001,
+    "custoDeCapitalTerminal": 0.179,
+    "phi": 0.27,
+    "fatorDeNormalizacao": 0.271,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.2657,
+    "retornoDoCicloDaBase": 0.07200000000000001
   },
   {
     "ticker": "RNEW3",
@@ -2784,7 +3825,18 @@
     "preco": 30.43,
     "potencial": -0.3171212619125862,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1353,
+    "custoDeCapitalTerminal": 0.1481,
+    "phi": 0.12,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1082,
+    "retornoDoCicloDaBase": 0.1353
   },
   {
     "ticker": "SANB3",
@@ -2804,7 +3856,18 @@
     "preco": 15.03,
     "potencial": -0.27677977378576185,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1353,
+    "custoDeCapitalTerminal": 0.1421,
+    "phi": 0.12,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1082,
+    "retornoDoCicloDaBase": 0.1353
   },
   {
     "ticker": "SAPR11",
@@ -2812,11 +3875,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "",
     "crescimento": "fundamental",
-    "justo": 26.08,
+    "justo": 26.09,
     "preco": 34.95,
-    "potencial": -0.2537911301859801,
+    "potencial": -0.2535050071530759,
     "avisos": 5,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1189,
+    "custoDeCapitalTerminal": 0.16079999999999997,
+    "phi": 0.08,
+    "fatorDeNormalizacao": 1.207,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.09849999999999999,
+    "retornoDoCicloDaBase": 0.1189
   },
   {
     "ticker": "SAPR3",
@@ -2836,7 +3910,18 @@
     "preco": 6.84,
     "potencial": -0.23245614035087717,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1189,
+    "custoDeCapitalTerminal": 0.16010000000000002,
+    "phi": 0.08,
+    "fatorDeNormalizacao": 1.207,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.09849999999999999,
+    "retornoDoCicloDaBase": 0.1189
   },
   {
     "ticker": "SAUD3",
@@ -2848,7 +3933,16 @@
     "preco": 14.69,
     "potencial": -0.5316541865214431,
     "avisos": 5,
-    "moat": true
+    "moat": true,
+    "moatBarradoPor": [],
+    "retornoDoCiclo": 0.5478999999999999,
+    "custoDeCapitalTerminal": 0.1266,
+    "phi": 0.12,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.5975,
+    "retornoDoCicloDaBase": 0.5478999999999999
   },
   {
     "ticker": "SBFG3",
@@ -2856,11 +3950,23 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "consumo-ciclico",
     "crescimento": "âncora",
-    "justo": 8.6,
+    "justo": 8.61,
     "preco": 9.04,
-    "potencial": -0.04867256637168137,
+    "potencial": -0.0475663716814159,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "historicoCurto",
+      "capitalExternoNaoMedido",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1514,
+    "custoDeCapitalTerminal": 0.19149999999999998,
+    "fatorDeNormalizacao": 1.391,
+    "guarda1": "não avaliável",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.10890000000000001,
+    "retornoDoCicloDaBase": 0.1514
   },
   {
     "ticker": "SBSP3",
@@ -2872,7 +3978,18 @@
     "preco": 26.53,
     "potencial": -0.615529589144365,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1,
+    "custoDeCapitalTerminal": 0.1232,
+    "phi": 0.34,
+    "fatorDeNormalizacao": 0.683,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1464,
+    "retornoDoCicloDaBase": 0.1
   },
   {
     "ticker": "SCAR3",
@@ -2892,7 +4009,19 @@
     "preco": 13.52,
     "potencial": -0.39349112426035504,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1726,
+    "custoDeCapitalTerminal": 0.1775,
+    "phi": 0.53,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1629,
+    "retornoDoCicloDaBase": 0.1726
   },
   {
     "ticker": "SEQL3",
@@ -2920,7 +4049,19 @@
     "preco": 4.47,
     "potencial": -0.36241610738255026,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.13369999999999999,
+    "custoDeCapitalTerminal": 0.1572,
+    "phi": 0.74,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1152,
+    "retornoDoCicloDaBase": 0.13369999999999999
   },
   {
     "ticker": "SIMH3",
@@ -2940,19 +4081,42 @@
     "preco": 16.41,
     "potencial": -0.6331505179768434,
     "avisos": 1,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1273,
+    "custoDeCapitalTerminal": 0.1376,
+    "phi": 0.79,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1549,
+    "retornoDoCicloDaBase": 0.1273
   },
   {
     "ticker": "SMFT3",
     "saida": "avaliado",
-    "via": "DCF por fluxo da firma",
+    "via": "DCF sobre lucro distribuível",
     "setor": "consumo-ciclico",
-    "crescimento": "âncora",
-    "justo": 2.81,
+    "crescimento": "g = 0",
+    "justo": 11.24,
     "preco": 17.97,
-    "potencial": -0.8436282693377851,
-    "avisos": 2,
-    "moat": false
+    "potencial": -0.37451307735114076,
+    "avisos": 5,
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.2481,
+    "custoDeCapitalTerminal": 0.17129999999999998,
+    "phi": 12.71,
+    "fatorDeNormalizacao": 2.12,
+    "guarda1": "não avaliável",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.11710000000000001,
+    "retornoDoCicloDaBase": 0.2481
   },
   {
     "ticker": "SMTO3",
@@ -2964,7 +4128,19 @@
     "preco": 20.6,
     "potencial": 0.6208737864077669,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.12560000000000002,
+    "custoDeCapitalTerminal": 0.094,
+    "phi": 0.48,
+    "fatorDeNormalizacao": 1.984,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0633,
+    "retornoDoCicloDaBase": 0.12560000000000002
   },
   {
     "ticker": "SNSY5",
@@ -3004,11 +4180,22 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "materiais-basicos",
     "crescimento": "fundamental",
-    "justo": 168.36,
+    "justo": 168.38,
     "preco": 46.89,
-    "potencial": 2.5905310300703777,
+    "potencial": 2.5909575602473875,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.1841,
+    "custoDeCapitalTerminal": 0.1124,
+    "phi": 0.77,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.41450000000000004,
+    "retornoDoCicloDaBase": 0.1841
   },
   {
     "ticker": "SYNE3",
@@ -3024,11 +4211,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "energia",
     "crescimento": "fundamental",
-    "justo": 15.69,
+    "justo": 15.7,
     "preco": 41.53,
-    "potencial": -0.6222008186852878,
+    "potencial": -0.6219600288947749,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1242,
+    "custoDeCapitalTerminal": 0.11230000000000001,
+    "phi": 0.2,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.113,
+    "retornoDoCicloDaBase": 0.1242
   },
   {
     "ticker": "TAEE3",
@@ -3048,7 +4246,18 @@
     "preco": 14.05,
     "potencial": -0.6035587188612099,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1242,
+    "custoDeCapitalTerminal": 0.1105,
+    "phi": 0.2,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.113,
+    "retornoDoCicloDaBase": 0.1242
   },
   {
     "ticker": "TASA3",
@@ -3108,7 +4317,19 @@
     "preco": 34.63,
     "potencial": -0.825873520069304,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.11130000000000001,
+    "custoDeCapitalTerminal": 0.1772,
+    "phi": 0.6,
+    "fatorDeNormalizacao": 0.429,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.2593,
+    "retornoDoCicloDaBase": 0.11130000000000001
   },
   {
     "ticker": "TFCO4",
@@ -3124,11 +4345,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "bens-industriais",
     "crescimento": "âncora",
-    "justo": 14.45,
+    "justo": 14.46,
     "preco": 33.66,
-    "potencial": -0.5707070707070707,
+    "potencial": -0.570409982174688,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.18739999999999998,
+    "custoDeCapitalTerminal": 0.1469,
+    "phi": 0.06,
+    "fatorDeNormalizacao": 0.745,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.25170000000000003,
+    "retornoDoCicloDaBase": 0.18739999999999998
   },
   {
     "ticker": "TIMS3",
@@ -3156,7 +4388,19 @@
     "preco": 34.5,
     "potencial": -0.7918840579710145,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1487,
+    "custoDeCapitalTerminal": 0.1553,
+    "phi": 1.13,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1574,
+    "retornoDoCicloDaBase": 0.1487
   },
   {
     "ticker": "TPIS3",
@@ -3208,7 +4452,18 @@
     "preco": 37.42,
     "potencial": -0.6622127204703367,
     "avisos": 2,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1461,
+    "custoDeCapitalTerminal": 0.1624,
+    "phi": 0.0,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "não domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.1606,
+    "retornoDoCicloDaBase": 0.1461
   },
   {
     "ticker": "UNIP3",
@@ -3232,11 +4487,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "",
     "crescimento": "âncora",
-    "justo": 54.27,
+    "justo": 54.28,
     "preco": 56.97,
-    "potencial": -0.04739336492890988,
+    "potencial": -0.04721783394769173,
     "avisos": 4,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 0.28859999999999997,
+    "custoDeCapitalTerminal": 0.1267,
+    "phi": 0.64,
+    "fatorDeNormalizacao": 1.955,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1476,
+    "retornoDoCicloDaBase": 0.28859999999999997
   },
   {
     "ticker": "USIM3",
@@ -3268,11 +4534,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "materiais-basicos",
     "crescimento": "fundamental",
-    "justo": 67.24,
+    "justo": 67.25,
     "preco": 78.62,
-    "potencial": -0.14474688374459438,
+    "potencial": -0.14461968964640046,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.165,
+    "custoDeCapitalTerminal": 0.1188,
+    "phi": 0.0,
+    "fatorDeNormalizacao": 2.18,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0757,
+    "retornoDoCicloDaBase": 0.165
   },
   {
     "ticker": "VAMO3",
@@ -3284,7 +4561,18 @@
     "preco": 3.5,
     "potencial": -0.5714285714285714,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "historicoCurto",
+      "capitalExternoNaoMedido"
+    ],
+    "retornoDoCiclo": 0.25329999999999997,
+    "custoDeCapitalTerminal": 0.1932,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.1346,
+    "retornoDoCicloDaBase": 0.25329999999999997
   },
   {
     "ticker": "VBBR3",
@@ -3292,11 +4580,20 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "energia",
     "crescimento": "fundamental",
-    "justo": 34.23,
+    "justo": 36.35,
     "preco": 36.99,
-    "potencial": -0.07461476074614774,
-    "avisos": 3,
-    "moat": false
+    "potencial": -0.017301973506353083,
+    "avisos": 4,
+    "moat": true,
+    "moatBarradoPor": [],
+    "retornoDoCiclo": 0.295,
+    "custoDeCapitalTerminal": 0.1597,
+    "phi": 0.0,
+    "fatorDeNormalizacao": 3.039,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0971,
+    "retornoDoCicloDaBase": 0.295
   },
   {
     "ticker": "VITT3",
@@ -3328,11 +4625,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "telecomunicacoes",
     "crescimento": "g = 0",
-    "justo": 6.32,
+    "justo": 6.33,
     "preco": 30.06,
-    "potencial": -0.7897538256819694,
+    "potencial": -0.7894211576846306,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.060899999999999996,
+    "custoDeCapitalTerminal": 0.13269999999999998,
+    "phi": 0.03,
+    "fatorDeNormalizacao": 0.785,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0776,
+    "retornoDoCicloDaBase": 0.060899999999999996
   },
   {
     "ticker": "VLID3",
@@ -3340,11 +4648,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "servicos",
     "crescimento": "fundamental",
-    "justo": 5.77,
+    "justo": 5.78,
     "preco": 17.88,
-    "potencial": -0.6772930648769575,
+    "potencial": -0.6767337807606263,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.060700000000000004,
+    "custoDeCapitalTerminal": 0.1547,
+    "phi": 0.3,
+    "fatorDeNormalizacao": 0.558,
+    "guarda1": "não domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.10890000000000001,
+    "retornoDoCicloDaBase": 0.060700000000000004
   },
   {
     "ticker": "VSTE3",
@@ -3372,7 +4691,19 @@
     "preco": 13.01,
     "potencial": -0.31514219830899304,
     "avisos": 1,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.18100000000000002,
+    "custoDeCapitalTerminal": 0.139,
+    "phi": 1.27,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.2323,
+    "retornoDoCicloDaBase": 0.18100000000000002
   },
   {
     "ticker": "VVEO3",
@@ -3396,11 +4727,20 @@
     "via": "DCF por fluxo da firma",
     "setor": "bens-industriais",
     "crescimento": "fundamental",
-    "justo": 11.16,
+    "justo": 12.37,
     "preco": 51.74,
-    "potencial": -0.7843061461151912,
-    "avisos": 2,
-    "moat": false
+    "potencial": -0.7609199845380751,
+    "avisos": 3,
+    "moat": true,
+    "moatBarradoPor": [],
+    "retornoDoCiclo": 0.25129999999999997,
+    "custoDeCapitalTerminal": 0.1336,
+    "phi": 0.24,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "dentro da banda e do desvio robusto",
+    "retornoCorrente": 0.28190000000000004,
+    "retornoDoCicloDaBase": 0.25129999999999997
   },
   {
     "ticker": "WEST3",
@@ -3432,11 +4772,22 @@
     "via": "DCF por fluxo da firma",
     "setor": "servicos-financeiros",
     "crescimento": "âncora",
-    "justo": 19.53,
+    "justo": 19.54,
     "preco": 8.1,
-    "potencial": 1.4111111111111114,
+    "potencial": 1.4123456790123456,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "crescimentoInorganico"
+    ],
+    "retornoDoCiclo": 1.7084000000000001,
+    "custoDeCapitalTerminal": 0.1483,
+    "phi": 10.93,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.3319,
+    "retornoDoCicloDaBase": 1.7084000000000001
   },
   {
     "ticker": "WLMM4",
@@ -3456,6 +4807,17 @@
     "preco": 9.64,
     "potencial": -0.6856846473029047,
     "avisos": 3,
-    "moat": false
+    "moat": false,
+    "moatBarradoPor": [
+      "rentabilidadeInsuficiente"
+    ],
+    "retornoDoCiclo": 0.1245,
+    "custoDeCapitalTerminal": 0.1855,
+    "phi": 0.0,
+    "fatorDeNormalizacao": 1.0,
+    "guarda1": "domina",
+    "guarda3": "destoa",
+    "retornoCorrente": 0.0574,
+    "retornoDoCicloDaBase": 0.1245
   }
 ]

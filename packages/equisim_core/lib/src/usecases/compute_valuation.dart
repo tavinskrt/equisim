@@ -427,8 +427,20 @@ abstract final class ValuationCascade {
 
     final comparavel =
         phi == null || phi <= ValuationParameters.maxExternalCapital;
+
+    // **A comparabilidade não trava a normalização.** Φ mede quanto da expansão
+    // da base veio de fora, e é uma grandeza de *tamanho*; o que se normaliza
+    // aqui é o **retorno percentual**, que é intensivo. Que a base tenha mudado
+    // de escala por evento societário não torna o ROIC de um exercício de pico
+    // um patamar perene: a rentabilidade percentual reverte à mediana do ciclo
+    // independentemente do tamanho que a empresa passou a ter.
+    //
+    // Sob a precedência anterior, Φ > 1,0 impedia a normalização e o pico virava
+    // base perene: SUZB3 saía a +259,1% e QUAL3 a +477,3% de potencial na
+    // validação fora da amostra. A guarda passa a **declarar** a base inorgânica
+    // em vez de barrar a correção do nível, e o fator continua sendo aplicado
+    // sobre a base de capital corrente — a da empresa de hoje, já incorporada.
     final normaliza = (tendencia?.dominates != true) &&
-        comparavel &&
         destoa == true &&
         retornoAtual != null &&
         retornoCiclo != null &&
@@ -446,6 +458,16 @@ abstract final class ValuationCascade {
         'a base converge para o ciclo ao longo da projeção, fator de '
         '${fatorBase.toStringAsFixed(2)}x.',
       );
+      if (!comparavel) {
+        local.add(
+          'A base de capital cresceu ${_r(phi, 2)}x além do que o lucro '
+          'retido financiaria, o que indica evento societário ou aquisição. '
+          'A normalização foi aplicada mesmo assim: o retorno percentual é '
+          'grandeza intensiva, e reverte à mediana do ciclo qualquer que tenha '
+          'sido a mudança de tamanho. O que a série não sustenta é comparar '
+          '**níveis absolutos** de lucro entre as pontas da janela.',
+        );
+      }
     }
 
     // --- Saída 2: a taxa ---------------------------------------------------
@@ -504,15 +526,19 @@ abstract final class ValuationCascade {
     _auditPerpetualGrowth(audit, g, inputs.perpetualGrowthCap, perpetuo);
 
     // Vantagem competitiva residual: três condições cumulativas e restritivas.
-    final moat = GrowthGuards.residualMoatReturn(
+    // O veredito carrega o motivo da recusa, não só o número — sem isso, um
+    // universo em que quase ninguém passa é indistinguível de um universo em
+    // que quase ninguém merece passar.
+    final moatVeredito = GrowthGuards.residualMoat(
       cycleReturn: retornoCiclo,
       terminalDiscountRate: descontoTerminal,
       externalCapitalRatio: phi,
       periods: series.length,
     );
+    final moat = moatVeredito.terminalReturn;
 
     _auditDiscountTerm(audit, inputs, desconto, descontoTerminal);
-    _auditMoat(audit, retornoCiclo, descontoTerminal, phi, series.length, moat);
+    _auditMoat(audit, moatVeredito);
 
     if (desconto != descontoTerminal) {
       local.add(
@@ -1069,12 +1095,20 @@ abstract final class ValuationCascade {
             tendencia == null ? 'n/d' : _r(tendencia.slope * 100, 2),
         't de Newey-West': tendencia == null ? 'n/d' : _r(tendencia.tStatistic, 2),
         'capital externo / base (Φ)': phi == null ? 'n/d' : _r(phi, 2),
+        // Chaves de leitura por máquina, pelo mesmo motivo das do passo da
+        // vantagem residual: sem elas, "a base não foi normalizada" não diz
+        // qual guarda decidiu, e a calibragem vira suposição.
+        'guarda 1 — tendência': tendencia == null
+            ? 'não avaliável'
+            : (tendencia.dominates ? 'domina' : 'não domina'),
+        'guarda 3 — desvio do ciclo':
+            destoa ? 'destoa' : 'dentro da banda e do desvio robusto',
       },
       steps: [
         'Guarda 1 — tendência: '
             '${tendencia == null ? "não avaliável" : (tendencia.dominates ? "domina a reversão, base mantida" : (tendencia.isSignificant ? "significante, mas a reversão é maior" : "sem tendência"))}',
-        'Guarda 2 — comparabilidade: '
-            '${phi == null ? "não avaliável" : (phi <= ValuationParameters.maxExternalCapital ? "expansão orgânica, base comparável" : "capital externo de ${_r(phi, 2)}x a base inicial, série incomparável")}',
+        'Guarda 2 — comparabilidade (declara, não barra): '
+            '${phi == null ? "não avaliável" : (phi <= ValuationParameters.maxExternalCapital ? "expansão orgânica, base comparável" : "capital externo de ${_r(phi, 2)}x a base inicial, base inorgânica")}',
         'Guarda 3 — desvio do ciclo: '
             '${destoa ? "o exercício destoa" : "dentro da banda e do desvio robusto"}',
         normaliza
@@ -1263,50 +1297,58 @@ abstract final class ValuationCascade {
     );
   }
 
-  static void _auditMoat(
-    AuditTransaction? audit,
-    double? cycleReturn,
-    double terminalDiscount,
-    double? phi,
-    int periods,
-    double? moat,
-  ) {
+  static void _auditMoat(AuditTransaction? audit, MoatVerdict v) {
     if (audit == null) return;
-    final exigido = ValuationParameters.moatReturnMultiple * terminalDiscount;
+    final ciclo = v.cycleReturn;
+    final excedente = v.spread;
     audit.step(
       formulaName: 'Vantagem competitiva residual na perpetuidade',
       latex:
           r'ROIC_\infty = WACC_\infty + \lambda\,(ROIC_{ciclo} - WACC_\infty)',
       variables: {
-        'ROIC do ciclo (% a.a.)':
-            cycleReturn == null ? null : _r(cycleReturn * 100),
-        'WACC de equilíbrio (% a.a.)': _r(terminalDiscount * 100),
-        'exigido = 2x WACC (% a.a.)': _r(exigido * 100),
-        'Phi': phi == null ? null : _r(phi, 2),
-        'exercícios': periods,
+        'ROIC do ciclo (% a.a.)': ciclo == null ? null : _r(ciclo * 100),
+        'WACC de equilíbrio (% a.a.)': _r(v.terminalDiscountRate * 100),
+        'exigido pelo múltiplo (% a.a.)': _r(v.requiredByMultiple * 100),
+        'exigido pelo excedente (% a.a.)': _r(v.requiredBySpread * 100),
+        'excedente do ciclo (p.p.)':
+            excedente == null ? null : _r(excedente * 100),
+        'Phi': v.externalCapitalRatio == null
+            ? null
+            : _r(v.externalCapitalRatio!, 2),
+        'exercícios': v.periods,
         'lambda': ValuationParameters.moatRetainedSpread,
+        // Chaves de leitura por máquina: é por elas que o relatório de
+        // validação agrupa os reprovados sem depender de análise de texto.
+        'condição que barrou': v.primaryBlock?.name ?? 'nenhuma',
+        'condições que barraram': [for (final b in v.blocks) b.name],
       },
       steps: [
         'Passo 1: crescimento orgânico? Phi = '
-            '${phi == null ? "não medido" : _r(phi, 2)} '
-            '${phi != null && phi <= ValuationParameters.moatMaxExternalCapital ? "<=" : ">"} '
+            '${v.externalCapitalRatio == null ? "não medido" : _r(v.externalCapitalRatio!, 2)} '
+            '${v.externalCapitalRatio != null && v.externalCapitalRatio! <= ValuationParameters.moatMaxExternalCapital ? "<=" : ">"} '
             '${ValuationParameters.moatMaxExternalCapital}',
-        'Passo 2: rentabilidade estrutural? ROIC do ciclo '
-            '${cycleReturn == null ? "não medido" : _pct(cycleReturn)} contra '
-            '${_pct(exigido)} exigidos',
-        'Passo 3: histórico longo? $periods exercícios contra '
+        'Passo 2: rentabilidade estrutural, por união de duas pernas — '
+            'múltiplo de ${ValuationParameters.moatReturnMultiple}x o WACC '
+            '(${_pct(v.requiredByMultiple)}): '
+            '${v.passesByMultiple ? "passa" : "reprova"}; excedente de '
+            '${_pct(ValuationParameters.moatMinSpread)} sobre o WACC '
+            '(${_pct(v.requiredBySpread)}): '
+            '${v.passesBySpread ? "passa" : "reprova"}. ROIC do ciclo: '
+            '${ciclo == null ? "não medido" : _pct(ciclo)}',
+        'Passo 3: histórico longo? ${v.periods} exercícios contra '
             '${ValuationParameters.moatMinPeriods} exigidos',
-        moat == null
-            ? 'Passo 4: alguma condição falhou — vale o estado estacionário, '
-                'ROIC_inf = WACC_inf, e o valor terminal não depende de g_inf'
-            : 'Passo 4: as três condições valem — ROIC_inf = ${_pct(moat)}, e o '
-                'valor terminal volta a depender de g_inf, que é o preço '
-                'declarado da exceção',
+        v.isProven
+            ? 'Passo 4: as três condições valem — ROIC_inf = '
+                '${_pct(v.terminalReturn!)}, e o valor terminal volta a depender '
+                'de g_inf, que é o preço declarado da exceção'
+            : 'Passo 4: barrado por ${v.blocks.map((b) => b.label).join(", ")} — '
+                'vale o estado estacionário, ROIC_inf = WACC_inf, e o valor '
+                'terminal não depende de g_inf',
       ],
       // O resultado é o retorno terminal **efetivamente adotado**: o do moat
       // quando as três condições valem, o próprio custo de capital quando não.
       // Nunca nulo — a etapa decidiu algo em qualquer dos dois caminhos.
-      result: _r((moat ?? terminalDiscount) * 100).toDouble(),
+      result: _r((v.terminalReturn ?? v.terminalDiscountRate) * 100).toDouble(),
       unit: '% a.a.',
     );
   }

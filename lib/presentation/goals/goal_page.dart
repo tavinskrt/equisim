@@ -87,7 +87,6 @@ class _GoalPageState extends ConsumerState<GoalPage> {
     final isLight = ref.watch(isLightModeProvider);
     final feasibility = ref.watch(goalFeasibilityProvider);
     final alignment = ref.watch(goalAlignmentProvider);
-    final settings = ref.watch(valuationSettingsProvider);
 
     // `CustomScrollView`, e nao `ListView`: cada cartao vira um sliver proprio,
     // entao o framework so infla os que entram na viewport -- e cada um ganha a
@@ -177,11 +176,7 @@ class _GoalPageState extends ConsumerState<GoalPage> {
                               'retorno esperado com a rentabilidade exigida.',
                         ),
                       )
-                    : _AlignmentCard(
-                        alignment: value,
-                        horizonMonths: settings.convergenceHorizonMonths,
-                        isLight: isLight,
-                      ),
+                    : _AlignmentCard(alignment: value, isLight: isLight),
               ),
             ],
           ),
@@ -424,14 +419,9 @@ class _FeasibilityCard extends StatelessWidget {
 /// Confronto entre o exigido e o esperado.
 class _AlignmentCard extends StatelessWidget {
   final GoalAlignment alignment;
-  final int horizonMonths;
   final bool isLight;
 
-  const _AlignmentCard({
-    required this.alignment,
-    required this.horizonMonths,
-    required this.isLight,
-  });
+  const _AlignmentCard({required this.alignment, required this.isLight});
 
   @override
   Widget build(BuildContext context) {
@@ -441,9 +431,9 @@ class _AlignmentCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SectionHeader(
+          const SectionHeader(
             title: 'Carteira frente à meta',
-            subtitle: 'Convergência assumida em $horizonMonths meses',
+            subtitle: 'CDI à vista mais prêmio pelo desconto relativo',
           ),
           const Gap.md(),
           // DUAS colunas, e nao tres. A taxa exigida saiu daqui: ela ja
@@ -458,7 +448,11 @@ class _AlignmentCard extends StatelessWidget {
               MetricTile(
                 label: Lexico.esperado,
                 value: Fmt.percent(alignment.expectedReturn),
-                hint: 'upside anualizado + DY líquido',
+                // O rótulo dizia "upside anualizado + DY líquido" e estava
+                // errado nas duas metades: o DY saiu pela decisão 23, e a
+                // anualização do upside saiu quando o esperado passou a ser o
+                // estimador transversal.
+                hint: 'CDI + prêmio pelo desconto relativo',
                 trend: meets ? FinTrend.positive : FinTrend.negative,
               ),
               MetricTile(

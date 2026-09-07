@@ -228,6 +228,95 @@ void main() {
     });
   });
 
+  group('Retorno esperado transversal — projeção para otimização', () {
+    Map<Ticker, double> upsidesOf(Map<String, double> m) =>
+        {for (final e in m.entries) Ticker.parse(e.key): e.value};
+
+    const cdi = 0.1415;
+    const premio = 0.055;
+
+    test('o ativo mediano da seção recebe a âncora, e nada além dela', () {
+      final r = ExpectedReturn.crossSection(
+        upsides: upsidesOf({'AAAA3': 0.0}),
+        spotRiskFree: cdi,
+        reference: const [-0.6, -0.3, 0.0, 0.3, 0.6],
+      );
+      expect(r[Ticker.parse('AAAA3')]!.z, closeTo(0.0, 1e-12));
+      expect(r[Ticker.parse('AAAA3')]!.expected, closeTo(cdi, 1e-12));
+    });
+
+    test('preserva a ordenação do potencial', () {
+      final r = ExpectedReturn.crossSection(
+        upsides: upsidesOf({'AAAA3': -0.8, 'BBBB3': -0.4, 'CCCC3': 0.0, 'DDDD3': 0.5}),
+        spotRiskFree: cdi,
+      );
+      final ordenado = [
+        r[Ticker.parse('AAAA3')]!.expected,
+        r[Ticker.parse('BBBB3')]!.expected,
+        r[Ticker.parse('CCCC3')]!.expected,
+        r[Ticker.parse('DDDD3')]!.expected,
+      ];
+      for (var i = 1; i < ordenado.length; i++) {
+        expect(ordenado[i], greaterThan(ordenado[i - 1]));
+      }
+    });
+
+    test('não propaga retorno negativo, que é o ponto do estimador', () {
+      // Pela anualização, −95% de potencial em 36 meses dá −63,2% ao ano — e um
+      // otimizador de média-variância alimentado com isso não aloca no ativo,
+      // ele foge dele. A ordenação é o que a avaliação sustenta; o nível, não.
+      expect(ExpectedReturn.annualizedFromUpside(-0.95), lessThan(-0.6));
+
+      final r = ExpectedReturn.crossSection(
+        upsides: upsidesOf({'RUIM3': -0.95}),
+        spotRiskFree: cdi,
+        reference: const [-0.95, -0.8, -0.65, -0.4, -0.15, 0.4, 4.8],
+      );
+      final ruim = r[Ticker.parse('RUIM3')]!;
+      expect(ruim.expected, greaterThan(0));
+      expect(ruim.floored, isFalse);
+      expect(ruim.expected, lessThan(cdi));
+    });
+
+    test('a cauda é confinada, e o teto é o do escore', () {
+      // Distribuição dos 120 avaliados: a cauda direita vai a +477,3%. Sem
+      // teto, um ativo sozinho definiria o retorno esperado da carteira.
+      final r = ExpectedReturn.crossSection(
+        upsides: upsidesOf({'CAUD3': 4.773}),
+        spotRiskFree: cdi,
+        reference: const [-0.95, -0.8, -0.65, -0.4, -0.15, 0.4, 4.773],
+      );
+      final cauda = r[Ticker.parse('CAUD3')]!;
+      expect(cauda.z, closeTo(ExpectedReturn.defaultZCap, 1e-12));
+      expect(cauda.expected,
+          closeTo(cdi + ExpectedReturn.defaultZCap * premio, 1e-12));
+    });
+
+    test('seção sem escala estimável devolve a âncora a todos', () {
+      // Dois ativos, ou uma seção colapsada num ponto: não há distância a
+      // medir, e inventar prêmio onde a seção não o sustenta seria pior que
+      // devolver o CDI.
+      final r = ExpectedReturn.crossSection(
+        upsides: upsidesOf({'AAAA3': -0.5, 'BBBB3': 0.9}),
+        spotRiskFree: cdi,
+      );
+      for (final v in r.values) {
+        expect(v.z, 0.0);
+        expect(v.expected, closeTo(cdi, 1e-12));
+        expect(v.referenceSize, 2);
+      }
+    });
+
+    test('o tamanho da seção viaja junto do resultado', () {
+      final r = ExpectedReturn.crossSection(
+        upsides: upsidesOf({'AAAA3': 0.1}),
+        spotRiskFree: cdi,
+        reference: List<double>.filled(120, 0.0),
+      );
+      expect(r[Ticker.parse('AAAA3')]!.referenceSize, 120);
+    });
+  });
+
   group('ValuationResult', () {
     test('upside e margem de segurança', () {
       final valuation = ValuationResult(
