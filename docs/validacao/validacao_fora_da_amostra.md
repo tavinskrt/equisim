@@ -77,16 +77,28 @@ Dos reprovados, 47 falharam **apenas** na rentabilidade — cumprem crescimento 
 
 | Base | Ativos |
 |---|---:|
-| mantida como observada | 80 |
-| convergindo ao ciclo | 40 |
+| mantida como observada | 76 |
+| convergindo ao ciclo | 44 |
 | das quais, com Φ acima do limiar | 9 |
 
 | Trava | Ativos |
 |---|---:|
 | em setor cíclico (Guarda 3 com precedência) | 13 |
 | normalizados **por** essa precedência | 2 |
-| com o fator saturado em [0,33; 3,00] | 8 |
-| com o teto travado em 1,00 pela saúde operacional | 13 |
+| com o fator saturado em [0,33; 3,00] | 9 |
+| com o teto travado em 1,00 pela saúde operacional | 9 |
+| reprovados na saúde mas isentos por setor cíclico | 6 |
+
+Isentos da trava por serem de setor cíclico. A queda entre o pico e o vale é oscilação do preço do insumo, e a convergência ao ciclo opera nos dois sentidos — limitada pela saturação, que vale igual. **A vantagem residual segue barrada para eles**, sem isenção.
+
+| Ativo | Setor | Queda no triênio | Fator | Potencial |
+|---|---|---:|---:|---:|
+| DXCO3 | materiais-basicos | 91,8% | 3,00 | -82,6% |
+| GGBR4 | materiais-basicos | 87,6% | 2,36 | -73,6% |
+| GOAU4 | materiais-basicos | 87,7% | 2,36 | 127,4% |
+| KLBN11 | materiais-basicos | 64,2% | 1,00 | -44,8% |
+| KLBN3 | materiais-basicos | 64,2% | 1,00 | -46,9% |
+| VALE3 | materiais-basicos | 87,7% | 2,18 | -14,5% |
 
 Onde a saúde operacional proibiu normalizar para cima. **Não é a mesma coisa que a saturação**: ali o limite é de política sobre quanta autoridade um exercício tem; aqui a afirmação é que a mediana de 8 exercícios deixou de descrever a empresa.
 
@@ -94,14 +106,10 @@ Onde a saúde operacional proibiu normalizar para cima. **Não é a mesma coisa 
 |---|---:|---:|---:|---:|
 | MBRF3 | 72,4% | 21,37 | 1,00 | -76,3% |
 | FESA4 | 82,2% | 10,80 | 1,00 | -59,9% |
-| DXCO3 | 91,8% | 10,47 | 1,00 | -94,1% |
 | PRNR3 | 87,1% | 4,77 | 1,00 | -95,2% |
 | BRAP4 | 87,1% | 3,57 | 1,00 | -79,6% |
 | JSLG3 | 57,9% | 3,31 | 1,00 | -75,6% |
 | AGRO3 | 73,5% | 2,57 | 1,00 | -53,5% |
-| GGBR4 | 87,6% | 2,36 | 1,00 | -92,7% |
-| GOAU4 | 87,7% | 2,36 | 1,00 | -30,3% |
-| VALE3 | 87,7% | 2,18 | 1,00 | -70,3% |
 | QUAL3 | 83,2% | 2,10 | 1,00 | 68,0% |
 | UNIP6 | 63,9% | 1,96 | 1,00 | -69,8% |
 | POSI3 | 96,0% | 1,74 | 1,00 | -22,2% |
@@ -117,6 +125,7 @@ Onde a saturação prendeu, com o fator que teria sido aplicado sem ela. **O pre
 
 | Ativo | Fator bruto | Aplicado | Potencial |
 |---|---:|---:|---:|
+| DXCO3 | 10,47 | 3,00 | -82,6% |
 | PRIO3 | 5,42 | 3,00 | -5,3% |
 | IRBR3 | 3,66 | 3,00 | 43,0% |
 | RENT3 | 3,32 | 3,00 | -57,4% |
@@ -132,7 +141,7 @@ Por que a base **não** foi normalizada, nos que ficaram como observados:
 |---|---:|
 | Guarda 3: o exercício não destoa do ciclo | 51 |
 | Guarda 1: a tendência domina a reversão | 16 |
-| outro impedimento (retorno corrente não positivo ou não medido) | 13 |
+| outro impedimento (retorno corrente não positivo ou não medido) | 9 |
 
 Os 16 que **destoam do ciclo e ainda assim ficam como observados** são segurados pela Guarda 1: a tendência do retorno domina a reversão à média, e o modelo lê o nível corrente como estrutural em vez de cíclico. Os dez de maior potencial:
 
@@ -168,11 +177,11 @@ Os 9 de base inorgânica normalizada são os que a precedência anterior deixava
 | Percentil | Potencial |
 |---|---:|
 | mínimo | -95,5% |
-| p10 | -83,1% |
-| p25 | -66,7% |
-| mediana | -46,0% |
-| p75 | -19,5% |
-| p90 | 24,4% |
+| p10 | -82,6% |
+| p25 | -66,2% |
+| mediana | -44,8% |
+| p75 | -14,5% |
+| p90 | 40,0% |
 | máximo | 336,4% |
 
 ## Retorno esperado para otimização
@@ -181,15 +190,15 @@ Os 9 de base inorgânica normalizada são os que a precedência anterior deixava
 
 | Percentil | Transversal | Anualização do potencial |
 |---|---:|---:|
-| mínimo | 6,3% | -64,5% |
-| p10 | 8,2% | -44,7% |
-| p25 | 10,9% | -30,7% |
-| mediana | 14,2% | -18,6% |
-| p75 | 18,4% | -7,0% |
-| p90 | 25,1% | 7,6% |
+| mínimo | 6,1% | -64,5% |
+| p10 | 8,2% | -44,2% |
+| p25 | 10,8% | -30,4% |
+| mediana | 14,2% | -18,0% |
+| p75 | 19,0% | -5,1% |
+| p90 | 25,1% | 11,9% |
 | máximo | 25,1% | 63,4% |
 
-Pela anualização do potencial, 102 dos 120 avaliados entrariam num otimizador de média-variância com retorno esperado **negativo** — o que não é ordenação ruim, é ausência de alocação. Pelo estimador transversal, nenhum tocou o piso de zero, e a ordenação por potencial é preservada em toda a faixa.
+Pela anualização do potencial, 101 dos 120 avaliados entrariam num otimizador de média-variância com retorno esperado **negativo** — o que não é ordenação ruim, é ausência de alocação. Pelo estimador transversal, nenhum tocou o piso de zero, e a ordenação por potencial é preservada em toda a faixa.
 
 ## Ativo a ativo
 
@@ -328,7 +337,7 @@ Pela anualização do potencial, 102 dos 120 avaliados entrariam num otimizador 
 | DOHL4 |  | Porta 0 · liquidez | — | — | — | — | — |
 | DOTZ3 | servicos | Porta 0 · liquidez | — | — | — | — | — |
 | DTCY3 | servicos | Porta 0 · liquidez | — | — | — | — | — |
-| DXCO3 | materiais-basicos | avaliado | DCF sobre lucro distribuível | fundamental | 0,33 | 5,64 | -94,1% |
+| DXCO3 | materiais-basicos | avaliado | DCF sobre lucro distribuível | fundamental | 0,98 | 5,64 | -82,6% |
 | EALT3 | bens-industriais | Porta 0 · liquidez | — | — | — | — | — |
 | EALT4 |  | Porta 0 · liquidez | — | — | — | — | — |
 | ECOM3 | comunicacao-e-informatica | Porta 0 · liquidez | — | — | — | — | — |
@@ -368,11 +377,11 @@ Pela anualização do potencial, 102 dos 120 avaliados entrariam num otimizador 
 | GEPA4 |  | Porta 0 · liquidez | — | — | — | — | — |
 | GFSA3 | construcao-e-imobiliario | Porta 0 · liquidez | — | — | — | — | — |
 | GGBR3 | materiais-basicos | Porta 0 · liquidez | — | — | — | — | — |
-| GGBR4 | materiais-basicos | avaliado | DCF por fluxo da firma | âncora | 1,84 | 25,34 | -92,7% |
+| GGBR4 | materiais-basicos | avaliado | DCF por fluxo da firma | âncora | 6,68 | 25,34 | -73,6% |
 | GGPS3 | servicos | Porta 0 · histórico | — | — | — | — | — |
 | GMAT3 | consumo-nao-ciclico | Porta 0 · histórico | — | — | — | — | — |
 | GOAU3 | materiais-basicos | Porta 0 · liquidez | — | — | — | — | — |
-| GOAU4 | materiais-basicos | avaliado | DCF por fluxo da firma | âncora | 7,79 | 11,17 | -30,3% |
+| GOAU4 | materiais-basicos | avaliado | DCF por fluxo da firma | âncora | 25,40 | 11,17 | 127,4% |
 | GRND3 | consumo-ciclico | avaliado | DCF por fluxo da firma | fundamental | 2,47 | 3,68 | -32,9% |
 | GSHP3 | construcao-e-imobiliario | Porta 0 · liquidez | — | — | — | — | — |
 | HAGA3 | construcao-e-imobiliario | Porta 0 · liquidez | — | — | — | — | — |
@@ -548,7 +557,7 @@ Pela anualização do potencial, 102 dos 120 avaliados entrariam num otimizador 
 | USIM3 | materiais-basicos | sem via aplicável | — | — | — | — | — |
 | USIM5 | materiais-basicos | sem via aplicável | — | — | — | — | — |
 | USIM6 |  | Porta 0 · liquidez | — | — | — | — | — |
-| VALE3 | materiais-basicos | avaliado | DCF por fluxo da firma | fundamental | 23,32 | 78,62 | -70,3% |
+| VALE3 | materiais-basicos | avaliado | DCF por fluxo da firma | fundamental | 67,25 | 78,62 | -14,5% |
 | VAMO3 | consumo-ciclico | avaliado | DCF sobre lucro distribuível | âncora | 1,50 | 3,50 | -57,1% |
 | VBBR3 | energia | avaliado | DCF sobre lucro distribuível | fundamental | 35,88 | 36,99 | -3,0% |
 | VITT3 | materiais-basicos | Porta 0 · liquidez | — | — | — | — | — |

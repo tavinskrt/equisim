@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-07, a partir de `1515d78`.
+Gerado em 2026-09-08, a partir de `3749211`.
 
 ## Decisões registradas
 
-**9** aceita · **2** cumprida
+**10** aceita · **2** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -26,6 +26,7 @@ Gerado em 2026-09-07, a partir de `1515d78`.
 | 27 | Recalibragem do motor de avaliação após a primeira validação fora da amostra | aceita | orientador | 2026-09-07 |
 | 28 | Precedência do ciclo em commodity, saturação do fator de base e filtro de saúde no moat | aceita | orientador | 2026-09-07 |
 | 29 | A saúde operacional proíbe normalizar a base para cima, e a decisão 25 se encerra | aceita | orientador | 2026-09-07 |
+| 30 | Setor cíclico é isento da trava de saúde na Porta 2a, e não no moat | aceita | orientador | 2026-09-07 |
 
 ## Caixa de entrada
 
@@ -37,16 +38,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 37 | 9.432 |
+| Nucleo de dominio | 38 | 9.590 |
 | Apresentacao | 35 | 15.802 |
 | Camada de dados | 13 | 2.523 |
 | Testes do app | 28 | 4.980 |
-| Testes do nucleo | 12 | 4.232 |
+| Testes do nucleo | 12 | 4.289 |
 | Ferramentas de QA | 20 | 6.514 |
 
 ## Histórico recente
 
 ```
+2026-09-07  3749211  Refino do motor de valuation (parte 3)
 2026-09-07  1515d78  Refino do motor de valuation (parte 2)
 2026-09-07  68b156f  Refino do motor de valuation (parte 1)
 2026-09-02  fc52eee  Remoção dos proventos na parte de backtest e estabilização de estrutura interna
@@ -61,5 +63,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-08-30  7d26afd  Fase 03 da integração do advisor
 2026-08-30  9c5a041  Implantação da Fase 02 de integração do advisor
 2026-08-30  f77fb8a  Iniciando integração do advisor
-2026-08-29  85fd0c1  Onda 4 finalizada e dependências completamente atualizadas
 ```

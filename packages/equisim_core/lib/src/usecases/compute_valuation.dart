@@ -484,7 +484,18 @@ abstract final class ValuationCascade {
     final queda = GrowthGuards.recentOperationalDecline(published);
     final saudeReprovada =
         queda != null && queda > ValuationParameters.maxOperationalDecline;
-    final teto = saudeReprovada ? 1.0 : ValuationParameters.baseFactorCeiling;
+
+    // **Setor cíclico é isento da trava, aqui e só aqui.** Em commodity a queda
+    // de resultado entre pico e vale é oscilação do preço do insumo, e a trava
+    // desfazia no vale exatamente a precedência que a decisão 28 estabeleceu:
+    // VALE3 e GGBR4 acusavam quedas de 87% e iam a −70,3% e −92,7% de potencial.
+    // O que limita a normalização em commodity é a saturação, que vale igual.
+    //
+    // A isenção **não alcança o *moat***: lá a pergunta é sobre o futuro do
+    // retorno excedente, e um vale de ciclo não o sustenta melhor que uma
+    // deterioração estrutural. `moatVeredito` recebe a queda sem filtro.
+    final travaDeSaude = saudeReprovada && !precedenciaDoCiclo;
+    final teto = travaDeSaude ? 1.0 : ValuationParameters.baseFactorCeiling;
 
     // O fator é saturado em razão, `1/3` a `3`. Sem teto ele explode quando o
     // exercício corrente tem retorno próximo de zero, e o DCF é homogêneo de
@@ -496,7 +507,7 @@ abstract final class ValuationCascade {
     // Os dois confinamentos são reportados em separado: um é a banda de
     // política, o outro é a trava de saúde, e atribuir um ao outro faria a
     // calibragem seguinte olhar para o parâmetro errado.
-    final travadoPelaSaude = normaliza && saudeReprovada && fatorBruto > 1.0;
+    final travadoPelaSaude = normaliza && travaDeSaude && fatorBruto > 1.0;
     final saturou = normaliza &&
         (fatorBruto > ValuationParameters.baseFactorCeiling ||
             fatorBruto < ValuationParameters.baseFactorFloor);
@@ -507,7 +518,8 @@ abstract final class ValuationCascade {
         rawFactor: fatorBruto,
         saturated: saturou,
         operationalDecline: queda,
-        healthCapped: travadoPelaSaude);
+        healthCapped: travadoPelaSaude,
+        healthExempt: saudeReprovada && precedenciaDoCiclo);
 
     if (normaliza) {
       local.add(
@@ -524,6 +536,17 @@ abstract final class ValuationCascade {
           'de alta do ciclo tem a forma de uma tendência, e lê-la como patamar '
           'estrutural é o erro que se quer evitar. A reversão ao ciclo tem '
           'precedência, e a base foi normalizada.',
+        );
+      }
+      if (saudeReprovada && precedenciaDoCiclo && fatorBruto > 1.0) {
+        local.add(
+          'O lucro ou o EBITDA recuou ${_pct(queda)} no triênio, acima do '
+          'máximo de ${_pct(ValuationParameters.maxOperationalDecline)}, mas o '
+          'ativo é de setor de commodity: ali a queda entre pico e vale é '
+          'oscilação do preço do insumo, não quebra de modelo de negócio. A '
+          'trava de saúde não se aplica à base, e a convergência ao ciclo opera '
+          'nos dois sentidos. A vantagem competitiva residual segue barrada por '
+          'ela, sem isenção.',
         );
       }
       if (travadoPelaSaude) {
@@ -1184,6 +1207,7 @@ abstract final class ValuationCascade {
     required bool saturated,
     required double? operationalDecline,
     required bool healthCapped,
+    required bool healthExempt,
   }) {
     if (audit == null) return;
     audit.step(
@@ -1211,6 +1235,7 @@ abstract final class ValuationCascade {
         'queda no triênio (%)':
             operationalDecline == null ? null : _r(operationalDecline * 100),
         'teto travado pela saúde': healthCapped,
+        'isento da trava por setor cíclico': healthExempt,
       },
       steps: [
         'Guarda 1 — tendência: '
@@ -1227,6 +1252,11 @@ abstract final class ValuationCascade {
               '${operationalDecline == null ? "n/d" : _pct(operationalDecline)} '
               'no triênio; o teto do fator cai para 1,00x e a base não é '
               'normalizada para cima',
+        if (healthExempt)
+          'Saúde operacional: queda de '
+              '${operationalDecline == null ? "n/d" : _pct(operationalDecline)} '
+              'no triênio, mas o setor é cíclico — isento da trava na Porta 2a. '
+              'A vantagem residual segue barrada por ela',
         if (saturated)
           'Saturação: o fator bruto de ${rawFactor.toStringAsFixed(2)}x saiu da '
               'banda de [${ValuationParameters.baseFactorFloor}, '

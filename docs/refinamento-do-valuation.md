@@ -1653,7 +1653,124 @@ dívida a inventariar**, e mudança de método ali passa a exigir decisão nova.
 
 ---
 
+## 16. Sexta rodada — a isenção cíclica da [decisão 30](decisoes/030-isencao-ciclica-da-trava-de-saude.md)
+
+Medições de 07/09/2026. **120 avaliados** dos mesmos 373 papéis.
+
+A §15.2 mediu a colisão entre a trava de saúde e o regime cíclico e nomeou as
+duas saídas. Foi adotada a primeira: isentar o recorte de `CyclicalSectors` da
+trava **na Porta 2a**, mantendo-a integral no *moat*.
+
+### 16.1 Os quatro casos de commodity foram restaurados
+
+| Ativo | 4ª rodada | 5ª rodada (com trava) | 6ª rodada (com isenção) |
+|---|---:|---:|---:|
+| **VALE3** | −14,5% | −70,3% | **−14,5%** |
+| **GGBR4** | −92,7% | −92,7% | **−73,6%** |
+| **GOAU4** | −30,3% | −30,3% | **+127,4%** |
+| DXCO3 | −39,4% | −94,1% | **−82,6%** |
+
+Preços justos, para conferência: VALE3 a **R$ 67,25** contra R$ 78,62 de
+mercado; GGBR4 a **R$ 6,68** contra R$ 25,34; GOAU4 a **R$ 25,40** contra
+R$ 11,17.
+
+**A GOAU4 é o caso de maior efeito**, com fator de 2,36x sobre um exercício de
+vale. É o comportamento pretendido levado ao limite: a *holding* da Gerdau tem a
+mesma rentabilidade de ciclo da controlada e um preço bem mais deprimido. Fica
+declarada como tal.
+
+**Seis ativos ficaram isentos ao todo** — os quatro acima mais KLBN11 e KLBN3, em
+que a isenção não mudou nada porque o fator bruto já era 1,00.
+
+### 16.2 A isenção não vazou para o *moat*
+
+| | 5ª rodada | 6ª rodada |
+|---|---:|---:|
+| Com vantagem residual | 7 | **7** |
+
+Os mesmos sete: ABEV3, BBSE3, EGIE3, LEVE3, SAUD3, VBBR3 e WEGE3. Nenhuma
+commodity em vale entrou, que é a verificação de que a determinação foi aplicada
+onde devia e só ali.
+
+### 16.3 Nove ativos continuam travados, e é deliberado
+
+| Ativo | Setor | Queda no triênio | Fator bruto | Potencial |
+|---|---|---:|---:|---:|
+| MBRF3 | alimentos | 72,4% | 21,37 | −76,3% |
+| PRNR3 | serviços | 87,1% | 4,77 | −95,2% |
+| JSLG3 | bens industriais | 57,9% | 3,31 | −75,6% |
+| AGRO3 | consumo não cíclico | 73,5% | 2,57 | −53,5% |
+| **QUAL3** | saúde | 83,2% | 2,10 | **+68,0%** |
+| POSI3 | tecnologia | 96,0% | 1,74 | −22,2% |
+
+A QUAL3 continua onde a decisão 29 a deixou. É o que separa as duas regras: em
+serviço médico, perder 83% do resultado em três anos não é preço de insumo.
+
+### 16.4 Três nomes de commodity ficaram de fora, e não por método
+
+**BRAP4, FESA4 e UNIP6 seguem travados porque a fonte não devolve perfil para
+elas.** `sectorKey` e `industry` vêm nulos, e a isenção é setorial: o que a
+regra não enxerga, ela não isenta.
+
+| Ticker | Perfil na fonte |
+|---|---|
+| BRAP3 | `materiais-basicos` · Minerais Metálicos |
+| **BRAP4** | **nulo** |
+| FESA3 | `materiais-basicos` · Siderurgia |
+| **FESA4** | **nulo** |
+| UNIP3 | `materiais-basicos` · Químicos Diversos |
+| **UNIP6** | **nulo** |
+
+**O padrão é sistemático:** a brapi classifica a classe ON e deixa a PN sem
+perfil. São **17 dos 120 avaliados** sem setor — ALPA4, ALUP11, BRAP4, BRSR6,
+CYRE4, FESA4, ITSA4, KLBN4, PINE4, POMO4, RENT4, SANB4, SAPR11, SAPR4, SHUL4,
+TAEE4 e UNIP6 — e 90 dos 373 perfis do cache.
+
+**O efeito passa desta determinação.** `sectorKey` alimenta também a Porta 1, de
+modo que ITSA4, SANB4, BRSR6 e PINE4 **nunca podem acionar** a porta de
+instituição financeira, por mais que a classe ON da mesma empresa a acionasse.
+
+Resolver o perfil pela raiz alfabética do ticker — `BRAP4 → BRAP3` — é o remédio
+evidente e barato. **Não foi feito nesta rodada**: é mudança na camada de dados
+que altera roteamento de via, e não a aplicação da determinação em pauta.
+
+### 16.5 A dispersão consolidada
+
+| Percentil | 4ª rodada | 5ª rodada | 6ª rodada |
+|---|---:|---:|---:|
+| mínimo | −95,5% | −95,5% | −95,5% |
+| p10 | −83,1% | −83,1% | −82,6% |
+| p25 | −64,9% | −66,7% | **−66,2%** |
+| mediana | −39,3% | −46,0% | **−44,8%** |
+| p75 | −8,8% | −19,5% | **−14,5%** |
+| p90 | +43,0% | +24,4% | **+40,0%** |
+| máximo | +477,3% | +336,4% | **+336,4%** |
+
+A isenção recuperou parte do deslocamento que a trava tinha imposto, sem voltar
+ao ponto anterior: **1,2 p.p. na mediana e 5,0 no p75.** O que sobra de
+conservadorismo é o dos nove não cíclicos que continuam travados, e é
+deliberado. O máximo segue sendo a MOVI3, que não é caso de normalização.
+
+O estimador transversal não se move com isso — mediana em 14,2%, o CDI à vista —,
+porque mede posição relativa e não nível. Pelo caminho antigo, **101 dos 120**
+entrariam num otimizador com retorno esperado negativo.
+
+### 16.6 O que fica em aberto
+
+1. **O perfil ausente das classes PN** (§16.4). É a pendência de maior alcance:
+   afeta a isenção cíclica, a Porta 1 e o relatório de concentração setorial.
+2. **`CyclicalSectors` decide mais coisa agora** — além da precedência da
+   Guarda 3, decide quem escapa da trava de saúde. Um setor que deveria estar na
+   lista e não está passa a ser penalizado duas vezes.
+3. **A queda medida contra o exercício de três anos antes**, e não contra a
+   mediana do ciclo, continua sendo a definição em uso. A alternativa distinguiria
+   "caiu do pico" de "caiu do normal" sem recorte setorial, mas mudaria o
+   significado do corte de 50%.
+4. **O `minTrendDominance` fora de commodity** segue intocado.
+
+---
+
 *Documento gerado a partir de medições executadas contra a cascata real do Equisim e dados de
-produção da brapi. As seções 1 a 9 têm data de referência em 02/09/2026; as seções 10 a 15
-registram a homologação de 05/09, a implementação de 06–07/09 e as cinco rodadas de validação de
+produção da brapi. As seções 1 a 9 têm data de referência em 02/09/2026; as seções 10 a 16
+registram a homologação de 05/09, a implementação de 06–07/09 e as seis rodadas de validação de
 07/09.*

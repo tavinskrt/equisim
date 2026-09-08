@@ -430,6 +430,63 @@ void main() {
       );
     });
 
+    test('commodity em vale de ciclo é isenta da trava de saúde', () {
+      // VALE3 e GGBR4: queda de ~87% entre o pico de 2022 e o vale de 2025, com
+      // o retorno corrente abaixo do ciclo. Fora de commodity a base fica
+      // travada em 1,00; em materiais básicos a convergência opera.
+      final pontos = deterioracaoEstrutural();
+      expect(GrowthGuards.recentOperationalDecline(pontos),
+          greaterThan(ValuationParameters.maxOperationalDecline));
+
+      expect(fatorRegistrado(entradas(pontos, setor: 'saude')),
+          closeTo(1.0, 1e-9),
+          reason: 'fora de commodity a trava continua valendo integralmente');
+      expect(
+        fatorRegistrado(entradas(pontos,
+            setor: 'materiais-basicos', subsetor: 'Siderurgia')),
+        greaterThan(1.0),
+        reason: 'em commodity a queda entre pico e vale é preço do insumo, e a '
+            'reversão ao ciclo precisa operar nos dois sentidos',
+      );
+    });
+
+    test('a isenção não alcança o moat: commodity em vale não ganha vantagem',
+        () {
+      // A decisão 28 fica intacta aqui. A pergunta do moat é sobre o futuro do
+      // excedente, e um vale de ciclo não o sustenta melhor que uma quebra.
+      final v = GrowthGuards.residualMoat(
+        cycleReturn: 0.30,
+        terminalDiscountRate: 0.12,
+        externalCapitalRatio: 0.10,
+        periods: 14,
+        operationalDecline: 0.87,
+      );
+      expect(v.isProven, isFalse);
+      expect(v.blocks, contains(MoatBlock.saudeOperacional));
+    });
+
+    test('a isenção em commodity continua limitada pela saturação', () {
+      // O que limita a normalização em setor cíclico é a banda, e ela vale
+      // igual: isentar da trava de saúde não abre o teto de 3,00x.
+      final pontos = emissaoComLucroPreservado();
+      expect(
+        fatorRegistrado(entradas(pontos,
+            setor: 'materiais-basicos', subsetor: 'Papel e Celulose')),
+        closeTo(ValuationParameters.baseFactorCeiling, 1e-9),
+      );
+    });
+
+    test('a isenção é declarada nos avisos', () {
+      final r = ValuationCascade.evaluate(entradas(deterioracaoEstrutural(),
+          setor: 'materiais-basicos', subsetor: 'Siderurgia'));
+      expect(r.isOk, isTrue);
+      expect(
+        r.unwrap().warnings.any((w) => w.contains('setor de commodity')),
+        isTrue,
+        reason: 'uma isenção silenciosa é pior que a trava que ela remove',
+      );
+    });
+
     test('o piso continua valendo para quem reprovou na saúde', () {
       // Deterioração no lucro **com** o exercício corrente acima do ciclo: a
       // trava é só de teto, e normalizar para baixo é a direção conservadora.

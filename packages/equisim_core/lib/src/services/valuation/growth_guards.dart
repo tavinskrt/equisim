@@ -88,12 +88,12 @@ abstract final class ValuationParameters {
   /// **Não é detecção de atípico**, é política: acima de 3x a normalização
   /// deixa de corrigir um exercício e passa a inventar uma empresa.
   ///
-  /// **O teto cai para 1,00 quando a saúde operacional reprova.** Empresa que
-  /// perdeu mais da metade do resultado no triênio não recebe base normalizada
-  /// para cima, qualquer que seja a mediana do ciclo — ver
-  /// [maxOperationalDecline]. O piso continua valendo nos dois casos: quem
-  /// deteriorou e ainda assim teve um exercício acima do ciclo é normalizado
-  /// para baixo normalmente.
+  /// **O teto cai para 1,00 quando a saúde operacional reprova**, exceto em setor
+  /// cíclico. Empresa não cíclica que perdeu mais da metade do resultado no
+  /// triênio não recebe base normalizada para cima, qualquer que seja a mediana
+  /// do ciclo — ver [maxOperationalDecline]. O piso continua valendo em todos os
+  /// casos: quem deteriorou e ainda assim teve um exercício acima do ciclo é
+  /// normalizado para baixo normalmente.
   static const double baseFactorFloor = 0.33;
   static const double baseFactorCeiling = 3.00;
 
@@ -174,6 +174,20 @@ abstract final class ValuationParameters {
   /// ROIC de oito anos aplicada à base corrente. Puxar a base de uma empresa
   /// que mudou de patamar de volta à mediana histórica produz um retorno que ela
   /// não vai repetir.
+  ///
+  /// **Setor cíclico é isento na Porta 2a, e só nela.** Em commodity, uma queda
+  /// de mais de 50% entre o pico de 2022 e o vale de 2025 é oscilação do preço
+  /// internacional do insumo, não quebra de modelo de negócio: a VALE3 acusava
+  /// 87,7% e a GGBR4 87,6%, e a trava as empurrava para −70,3% e −92,7% de
+  /// potencial. A precedência da Guarda 3 estabelecida pela decisão 28 existe
+  /// justamente para deixar a reversão operar nos dois sentidos ali, e uma trava
+  /// que morde só na subida a desfazia no vale — que é onde ela importa. O
+  /// limite que continua valendo em commodity é a saturação.
+  ///
+  /// **No *moat* não há isenção.** Nem commodity em vale, nem empresa em
+  /// contração recebe retorno excedente na perpetuidade: ali a pergunta é sobre
+  /// o futuro do excedente, e um vale de ciclo não o sustenta melhor que uma
+  /// deterioração estrutural. Ver [CyclicalSectors].
   static const double maxOperationalDecline = 0.50;
 
   /// Exercícios do triênio de saúde operacional.

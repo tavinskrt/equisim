@@ -415,6 +415,8 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
     ..sort((a, b) => (b.diagnostics.rawFactor ?? 0)
         .compareTo(a.diagnostics.rawFactor ?? 0));
 
+  final isentos = avaliados.where((l) => l.diagnostics.healthExempt).toList()
+    ..sort((a, b) => a.ticker.compareTo(b.ticker));
   final travadosPelaSaude = avaliados
       .where((l) => l.diagnostics.healthCapped)
       .toList()
@@ -431,7 +433,27 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
         '${destravadosPeloCiclo.length} |')
     ..writeln('| com o fator saturado em [0,33; 3,00] | ${saturados.length} |')
     ..writeln('| com o teto travado em 1,00 pela saúde operacional | '
-        '${travadosPelaSaude.length} |');
+        '${travadosPelaSaude.length} |')
+    ..writeln('| reprovados na saúde mas isentos por setor cíclico | '
+        '${isentos.length} |');
+
+  if (isentos.isNotEmpty) {
+    buf
+      ..writeln()
+      ..writeln('Isentos da trava por serem de setor cíclico. A queda entre o '
+          'pico e o vale é oscilação do preço do insumo, e a convergência ao '
+          'ciclo opera nos dois sentidos — limitada pela saturação, que vale '
+          'igual. **A vantagem residual segue barrada para eles**, sem isenção.')
+      ..writeln()
+      ..writeln('| Ativo | Setor | Queda no triênio | Fator | Potencial |')
+      ..writeln('|---|---|---:|---:|---:|');
+    for (final l in isentos) {
+      buf.writeln('| ${l.ticker} | ${l.sector ?? "—"} | '
+          '${l.diagnostics.operationalDecline == null ? "—" : pct(l.diagnostics.operationalDecline!, decimals: 1)} | '
+          '${num2(l.diagnostics.normalizationFactor!, decimals: 2)} | '
+          '${pct(l.upside!, decimals: 1)} |');
+    }
+  }
 
   if (travadosPelaSaude.isNotEmpty) {
     buf
@@ -685,6 +707,10 @@ class _Diagnostics {
   /// operacional, impedindo normalizar a base para cima.
   final bool healthCapped;
 
+  /// `true` quando o ativo reprovou na saúde operacional mas é de setor cíclico,
+  /// e por isso ficou isento da trava na Porta 2a.
+  final bool healthExempt;
+
   /// Queda de lucro ou EBITDA no triênio recente, em fração.
   final double? operationalDecline;
 
@@ -702,6 +728,7 @@ class _Diagnostics {
     this.rawFactor,
     this.saturated = false,
     this.healthCapped = false,
+    this.healthExempt = false,
     this.operationalDecline,
   });
 
@@ -772,6 +799,8 @@ class _Diagnostics {
       }(),
       saturated: base?.mappedVariables['fator saturado'] == true,
       healthCapped: base?.mappedVariables['teto travado pela saúde'] == true,
+      healthExempt:
+          base?.mappedVariables['isento da trava por setor cíclico'] == true,
       operationalDecline: fracao(base?.mappedVariables['queda no triênio (%)']) ??
           fracao(moat?.mappedVariables['queda no triênio (%)']),
     );
@@ -843,6 +872,7 @@ class _Row {
         if (diagnostics.rawFactor != null) 'fatorBruto': diagnostics.rawFactor,
         'fatorSaturado': diagnostics.saturated,
         'tetoTravadoPelaSaude': diagnostics.healthCapped,
+        'isentoPorSetorCiclico': diagnostics.healthExempt,
         if (diagnostics.operationalDecline != null)
           'quedaNoTrienio': diagnostics.operationalDecline,
         if (detail != null) 'detalhe': detail,
