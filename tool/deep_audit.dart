@@ -90,6 +90,7 @@ Map<String, dynamic> diagnose(ValuationInputs inputs) {
           equityValue: equityMkt,
           debtValue: latest.totalDebt,
           interestCoverage: latest.interestCoverage,
+          netDebtToEbitda: latest.netDebtToEbitda,
         )
       : null;
 
@@ -124,6 +125,7 @@ Map<String, dynamic> diagnose(ValuationInputs inputs) {
     'divergenciaPonte': divisor?.divergence,
     'adtv': adtv,
     'coberturaJuros': latest.interestCoverage,
+    'alavancagem': latest.netDebtToEbitda,
     'discordam': latest.sharesDisagree,
     'marketCap': latest.marketCap,
     // Séries

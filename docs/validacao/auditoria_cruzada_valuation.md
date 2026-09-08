@@ -387,3 +387,114 @@ pesada empurrava o desconto para baixo do soberano.
    pelas decisões 25 e 27. Mexer ali é decisão nova, e é a discussão que o
    relatório externo levantou sob o rótulo de "extermínio das empresas
    excelentes".
+
+---
+
+## 7. Segunda auditoria: o rastro exportado pelo aplicativo
+
+Executada em 08/09/2026 sobre o JSON de auditoria que o próprio aplicativo
+exporta — 18 avaliações, 267 cálculos, com o motor já sob as decisões 31 e 32.
+Nove apontamentos. **Dois se confirmaram e viraram a
+[decisão 33](../decisoes/033-rating-arbitrado-e-consistencia-da-base-acionaria.md);
+cinco não se confirmaram contra o dado; dois já estavam implementados.**
+
+### 7.1 O que se confirmou
+
+**O prêmio de crédito estava errado contra as empresas mais sólidas.** A
+classificação por cobertura de juros, adotada pela decisão 31, herdou a
+contaminação que veio consertar: a despesa financeira está no denominador dela.
+
+| Ativo | Cobertura | Dív. líq./EBITDA | Prêmio antes | Prêmio depois |
+|---|---:|---:|---:|---:|
+| ABEV3 | 3,77x | −0,57x (caixa líquido) | 2,4 p.p. | 1,0 p.p. |
+| WEGE3 | 3,68x | −0,30x (caixa líquido) | 2,4 p.p. | 1,0 p.p. |
+| RADL3 | 1,50x | 0,70x | 7,5 p.p. | 1,3 p.p. |
+| SAPR11 | 0,76x | 0,60x | **10,0 p.p.** | 1,3 p.p. |
+| AZZA3 | 1,26x | 1,17x | 7,5 p.p. | 1,8 p.p. |
+
+Na AZZA3, o custo de dívida de 21,6% e o WACC inicial de 18,20% que o
+apontamento nomeia caíram para 15,9% e 16,44%.
+
+**A contagem de ações de um exercício pode vir quebrada sem que nada denuncie.**
+A EQTL3 traz 246.152 ações em 2024 contra 1,50 bilhão em 2023 — fator de cinco
+mil —, com VPA de R$ 121.419,23. O patrimônio sai certo porque o erro se cancela
+em `VPA × N`; o divisor da ponte, que usa `N` sozinho, sairia cinco mil vezes
+errado numa análise datada entre as duas divulgações.
+
+### 7.2 O que já estava implementado
+
+| Apontamento | Situação |
+|---|---|
+| Travar instituição financeira no modelo de lucro distribuível | **Feito pela decisão 31.** No rastro, BBAS3, BBSE3 e BPAC11 saem os três em `DCF sobre lucro distribuível`, descontados ao Ke e sem ponte de dívida |
+| Aplicar o multiplicador da cesta nas *units* | **Já medido e aplicado.** A razão sai de `ações × preço ÷ valor de mercado`: 5,005 na KLBN11, 5,005 na SAPR11, 2,995 na BPAC11 — arredondadas para 5, 5 e 3. O divisor da ponte já está em unidades negociadas |
+
+### 7.3 O que não se confirmou
+
+**A base acionária da VIVT3 não está duplicada.** A contagem do exercício vai de
+1,69 bilhão (2019–2023) a 3,26 bilhões (2024) e 3,23 bilhões (2025), e o VPA
+acompanha na direção oposta — R$ 41,67 para R$ 21,40. O produto `VPA × N` fica
+**estável em R$ 69 a 70 bilhões em toda a série**. Foi desdobramento, e a fonte o
+refletiu corretamente. A contagem corrente de 3.226.546.700 bate com o exercício
+de 2025 e com `valor de mercado ÷ preço` (3,20 bilhões).
+
+**As *units* não estão fracionadas.** KLBN11 e BPAC11 reconciliam exatamente
+entre demonstrações e mercado (1,248 contra 1,247 bilhão de units; 3,890 contra
+3,896 bilhões). Só a SAPR11 diverge — 302,2 milhões de units pelas demonstrações
+contra 100,7 milhões pelo mercado —, e essa divergência já é tratada pela regra
+da maior contagem da decisão 31, com a ressalva `escalaIncerta` no resultado.
+
+**O motor não usa CapEx em lugar nenhum**, de modo que não há como ele tratar
+aquisição de reserva como queima perpétua de caixa. O que prende a PRIO3 é outra
+coisa, e está no rastro: Φ de 86,1 barra a vantagem residual por crescimento
+inorgânico, e o erro-padrão de 9,9 p.p. no estimador de crescimento derruba a
+taxa para a âncora de inflação.
+
+**Indexar o crescimento terminal à inflação não muda nada.** Com retorno terminal
+neutro — `ROIC_∞ = WACC_∞`, que é o padrão desde a decisão 25 — a álgebra colapsa
+para `VT = fluxo_{N+1} ÷ r` e **o crescimento perpétuo sai da fórmula**. Ele só
+volta a pesar onde a vantagem residual é comprovada, e ali já está no teto de
+6,86% do crescimento nominal da economia. Dos ativos regulados no rastro, EQTL3 e
+SAPR11 usam o terminal neutro; a EGIE3 tem a vantagem e já está no teto.
+
+**As premissas de WEGE3, RADL3 e TOTS3 não estão estáticas**, e cada uma tem
+motivo próprio e medido:
+
+| Ativo | Crescimento | Vantagem residual |
+|---|---|---|
+| WEGE3 | 10,84% identificado no próprio histórico | **Comprovada** — ROIC de ciclo de 25,1% contra custo de equilíbrio de 13,2% |
+| RADL3 | 14,37% identificado | Barrada por rentabilidade: ROIC de ciclo de 17,55% contra os 18,2 p.p. que o excedente exige. Erra por 0,7 ponto, e o corte é o da decisão 27 |
+| TOTS3 | Cai para a âncora de inflação: os dois estimadores discordam em 7,6 p.p., 5,5 erros-padrão | Barrada por Φ de 1,13 contra o teto de 0,60 da decisão 28 — a base cresceu por aquisição |
+
+### 7.4 O que foi recusado com medição: arrendamento na ponte de equity
+
+O apontamento pede expurgar o passivo de arrendamento da dívida líquida "caso
+essas despesas continuem dentro do fluxo operacional". **A condição não se
+verifica**, e removê-lo seria um erro no sentido perigoso.
+
+Sob IFRS 16 / CPC 06 R2, obrigatório no Brasil desde 2019, o passivo de
+arrendamento e o ativo de direito de uso entram **juntos** no balanço, e o
+aluguel se parte em depreciação do direito de uso — dentro do EBIT — e juro —
+abaixo dele. Conferido pela concordância das duas rotas do capital investido, que
+é o teste de qualidade que a própria entidade declara:
+
+| Ativo | Capital investido pelo financiamento | Pelo operacional | Razão |
+|---|---:|---:|---:|
+| PETR4 | R$ 751,0 bi | R$ 896,8 bi | 1,19 |
+| VIVT3 | R$ 82,2 bi | R$ 93,5 bi | 1,14 |
+| RENT3 | R$ 58,5 bi | R$ 59,9 bi | 1,02 |
+| AZZA3 | R$ 10,1 bi | R$ 8,7 bi | 0,86 |
+
+Se o passivo estivesse na dívida sem o ativo correspondente no imobilizado, a
+rota do financiamento seria sistematicamente maior. Ela não é. A depreciação
+sobre o imobilizado confirma pelo outro lado: 0,32 na VIVT3 e 0,28 na RADL3,
+contra 0,09 na PETR4 e na WEGE3, que não têm loja alugada.
+
+Como o NOPAT é anterior ao juro do arrendamento, o fluxo descontado é devido
+também ao arrendador — e deduzir o passivo na ponte é o tratamento consistente,
+que é o de Damodaran depois do IFRS 16. Removê-lo subtrairia obrigação real e
+inflaria o capital próprio.
+
+**Isolar o juro bancário do arrendamento e do câmbio, como o apontamento pede
+para a AZZA3, a fonte não permite:** ela publica uma única despesa financeira. A
+alavancagem responde à mesma pergunta com dado que existe, e é o que a decisão 33
+adota.

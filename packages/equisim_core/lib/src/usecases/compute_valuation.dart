@@ -316,6 +316,7 @@ abstract final class ValuationCascade {
       latest: latest,
       marketPrice: inputs.marketPrice,
       sharesPerQuote: sharesPerQuote,
+      published: published,
     );
     if (divisor == null) {
       const message = 'Nenhuma contagem de papéis utilizável: a ponte por papel '
@@ -324,6 +325,19 @@ abstract final class ValuationCascade {
       return const Err(InsufficientData(message));
     }
     _auditQuotedShares(audit, latest, inputs.marketPrice, divisor);
+
+    if (!shareBaseIsConsistent(published, latest)) {
+      warnings.add(
+        'A contagem de ações do exercício de ${latest.fiscalPeriodEnd.year} '
+        '(${_r(latest.sharesOutstandingAsOf ?? 0, 0)}) destoa por mais de '
+        '${CapitalSeries.neighbourFactor.toStringAsFixed(0)}x da dos exercícios '
+        'vizinhos, o que é falha de escala da fonte e não ação societária. Ela '
+        'foi descartada do divisor da ponte por papel, que passou a usar a '
+        'contagem implícita no valor de mercado. As bases contábeis não são '
+        'afetadas: nelas o erro se cancela contra o valor por ação publicado na '
+        'mesma escala.',
+      );
+    }
 
     if (divisor.diverge) {
       warnings.add(
@@ -414,6 +428,62 @@ abstract final class ValuationCascade {
     return rounded;
   }
 
+  /// A contagem de ações do exercício mais recente é coerente com a série?
+  ///
+  /// **Por que a pergunta existe.** A fonte publica a contagem do exercício e as
+  /// métricas por ação na mesma base, de modo que um erro de escala nas duas se
+  /// cancela em `VPA × N` e passa despercebido no patrimônio. Ele **não** se
+  /// cancela no divisor da ponte por papel, que usa `N` sozinho.
+  ///
+  /// O caso medido é a EQTL3, cujo exercício de 2024 vem com **246.152** ações
+  /// contra 1,50 bilhão em 2023 e 1,26 bilhão em 2025 — um fator de cinco mil.
+  /// O VPA acompanha, em R$ 121.419,23, e o patrimônio sai correto em R$ 29,9
+  /// bilhões; o lucro por ação sai em R$ 11.422,52. Hoje isso não muda número
+  /// nenhum, porque o exercício de 2025 já é público. Numa análise datada entre
+  /// as duas divulgações — e é o que a validação *point-in-time* faz —, aquele
+  /// exercício seria o mais recente, e o preço justo por papel sairia cinco mil
+  /// vezes errado.
+  ///
+  /// **O teste é de vizinhança, e o fator é o mesmo de [CapitalSeries].** Lá o
+  /// raciocínio já está escrito: falha de fonte é de ordem de grandeza, salto
+  /// societário real fica entre duas e nove vezes e **precisa passar**. A VIVT3
+  /// dobrou a base em 2024 — 1,65 para 3,26 bilhões, com o VPA caindo de R$
+  /// 42,13 para R$ 21,40 — e passa, que é o certo: foi ação societária, não
+  /// erro.
+  ///
+  /// - [published]: exercícios publicados, em ordem cronológica. Lista vazia
+  ///   **aprova**: sem série não há vizinhança contra a qual julgar, e ausência
+  ///   de dado não é evidência de defeito.
+  /// - [latest]: exercício cuja contagem se quer julgar.
+  static bool shareBaseIsConsistent(
+    List<FundamentalsSnapshot> published,
+    FundamentalsSnapshot latest,
+  ) {
+    final alvo = latest.sharesOutstandingAsOf;
+    if (alvo == null || alvo <= 0) return true;
+
+    final vizinhos = <double>[];
+    for (final s in published) {
+      if (identical(s, latest)) continue;
+      final n = s.sharesOutstandingAsOf;
+      if (n != null && n > 0) vizinhos.add(n);
+    }
+    if (vizinhos.length < 2) return true;
+
+    final recentes = vizinhos.length <= CapitalSeries.neighbourRadius
+        ? vizinhos
+        : vizinhos.sublist(vizinhos.length - CapitalSeries.neighbourRadius);
+    recentes.sort();
+    final m = recentes.length ~/ 2;
+    final referencia = recentes.length.isOdd
+        ? recentes[m]
+        : (recentes[m - 1] + recentes[m]) / 2;
+    if (referencia <= 0) return true;
+
+    final razao = alvo >= referencia ? alvo / referencia : referencia / alvo;
+    return razao <= CapitalSeries.neighbourFactor;
+  }
+
   /// Teto de ações por unit. As units da B3 vão até 5 (1 ON + 4 PN).
   static const double maxSharesPerUnit = 10;
 
@@ -470,9 +540,11 @@ abstract final class ValuationCascade {
     required FundamentalsSnapshot latest,
     required double marketPrice,
     required double sharesPerQuote,
+    List<FundamentalsSnapshot> published = const [],
   }) {
     final pelaFonte = latest.sharesFromMarketCap(marketPrice);
-    final conciliada = latest.reconciledShares;
+    final conciliada =
+        shareBaseIsConsistent(published, latest) ? latest.reconciledShares : null;
     final peloBalanco = (conciliada != null && conciliada > 0)
         ? conciliada / sharesPerQuote
         : null;
@@ -1226,10 +1298,11 @@ abstract final class ValuationCascade {
       equityValue: equity,
       debtValue: debt,
       interestCoverage: latest.interestCoverage,
+      netDebtToEbitda: latest.netDebtToEbitda,
     );
 
     if (coc.costOfDebtWasClamped) {
-      final cobertura = latest.interestCoverage;
+      final alavancagem = latest.netDebtToEbitda;
       warnings.add(
         'O custo da dívida implícito nos demonstrativos deu '
         '${_pct(kd)} a.a., fora da faixa defensável de '
@@ -1237,8 +1310,8 @@ abstract final class ValuationCascade {
         '${_pct(capm.riskFreeRate + CostOfCapital.maxCreditSpread)}. A despesa '
         'financeira publicada inclui arrendamento e variação cambial, que não '
         'são captação. Adotado ${_pct(coc.effectiveCostOfDebt)} a.a., da '
-        'classificação sintética por cobertura de juros'
-        '${cobertura == null ? ' (cobertura não medível)' : ' de ${cobertura.toStringAsFixed(1)}x'}.',
+        'classificação sintética por alavancagem'
+        '${alavancagem == null ? ' (dívida líquida sobre EBITDA não medível)' : ' de ${alavancagem.toStringAsFixed(2)}x'}.',
       );
     }
     if (coc.waccWasFloored) {

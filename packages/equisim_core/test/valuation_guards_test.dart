@@ -1444,6 +1444,87 @@ void main() {
     });
   });
 
+  group('Consistência da base acionária entre exercícios', () {
+    FundamentalsSnapshot ex(int ano, double acoes, double vpa) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(ano, 12, 31),
+          sharesOutstandingAsOf: acoes,
+          sharesOutstanding: 1259387000,
+          bookValuePerShare: vpa,
+          marketCap: 49317593000,
+        );
+
+    test('falha de escala da fonte é descartada do divisor', () {
+      // Forma da EQTL3: o exercício de 2024 vem com 246.152 ações contra 1,50
+      // bilhão em 2023 e 1,26 bilhão em 2025, e o VPA acompanha em
+      // R$ 121.419,23. O patrimônio sai certo porque o erro se cancela em
+      // `VPA × N`; o divisor da ponte, que usa `N` sozinho, sairia cinco mil
+      // vezes errado.
+      final serie = [
+        ex(2021, 1128934500, 12.94),
+        ex(2022, 1129315500, 16.44),
+        ex(2023, 1500000000, 16.86),
+        ex(2024, 246152, 121419.23),
+      ];
+      expect(
+        ValuationCascade.shareBaseIsConsistent(serie, serie.last),
+        isFalse,
+      );
+
+      final d = ValuationCascade.quotedShares(
+        latest: serie.last,
+        marketPrice: 39.36,
+        sharesPerQuote: 1.0,
+        published: serie,
+      );
+      expect(d, isNotNull);
+      expect(d!.fromStatements, isNull,
+          reason: 'a contagem quebrada não pode entrar como candidata');
+      expect(d.source, QuotedSharesSource.onlyAvailable);
+      expect(d.count, closeTo(49317593000 / 39.36, 1));
+    });
+
+    test('ação societária real passa, e é o ponto do fator ser largo', () {
+      // Forma da VIVT3: a base dobra em 2024 — 1,65 para 3,26 bilhões — com o
+      // VPA caindo de R$ 42,13 para R$ 21,40. `VPA × N` fica estável em
+      // R$ 69 bilhões o tempo todo: foi desdobramento, não erro.
+      final serie = [
+        ex(2021, 1690985000, 41.40),
+        ex(2022, 1676938200, 40.82),
+        ex(2023, 1652588400, 42.13),
+        ex(2024, 3261287400, 21.40),
+      ];
+      expect(
+        ValuationCascade.shareBaseIsConsistent(serie, serie.last),
+        isTrue,
+        reason: 'dobrar a base é ação societária; o corte é de ordem de '
+            'grandeza, não de fator dois',
+      );
+    });
+
+    test('série curta demais aprova em vez de reprovar', () {
+      // Mesmo critério da Porta 0 com a liquidez: sem vizinhança contra a qual
+      // julgar, ausência de informação não é evidência de defeito.
+      final serie = [ex(2024, 246152, 121419.23)];
+      expect(
+        ValuationCascade.shareBaseIsConsistent(serie, serie.last),
+        isTrue,
+      );
+      expect(
+        ValuationCascade.shareBaseIsConsistent(const [], serie.last),
+        isTrue,
+      );
+    });
+
+    test('o corte é o mesmo que a série de capital já usa', () {
+      // Duas cópias do mesmo limiar divergiriam na primeira recalibragem, e o
+      // raciocínio é idêntico: falha de fonte é de ordem de grandeza, salto
+      // societário fica entre duas e nove vezes.
+      expect(CapitalSeries.neighbourFactor, 8.0);
+    });
+  });
+
   group('Escudo fiscal e custo da dívida', () {
     test('o escudo do WACC é a alíquota estatutária', () {
       // A fonte publica `nopat` como `EBIT × 0,66` em 4.572 de 4.572
@@ -1453,13 +1534,54 @@ void main() {
       expect(ValuationParameters.statutoryTaxRate, 0.34);
     });
 
-    test('a cobertura ordena o prêmio de crédito', () {
-      double spread(double? c) => CostOfCapital.syntheticSpread(c);
-      expect(spread(10.0), lessThan(spread(3.0)));
-      expect(spread(3.0), lessThan(spread(1.0)));
-      expect(spread(0.5), CostOfCapital.maxCreditSpread);
+    test('a alavancagem ordena o prêmio, e é monótona', () {
+      double spread(double? l) => CostOfCapital.leverageSpread(l);
+      expect(spread(-0.5), lessThan(spread(1.5)));
+      expect(spread(1.5), lessThan(spread(2.8)));
+      expect(spread(2.8), lessThan(spread(4.5)));
+      expect(spread(6.0), CostOfCapital.maxCreditSpread);
       expect(spread(null), CostOfCapital.maxCreditSpread,
-          reason: 'sem cobertura medível vale o pior caso');
+          reason: 'sem EBITDA positivo vale o pior caso');
+      var anterior = 0.0;
+      for (var l = -2.0; l <= 8.0; l += 0.1) {
+        final atual = spread(l);
+        expect(atual, greaterThanOrEqualTo(anterior),
+            reason: 'prêmio caiu ao subir a alavancagem em $l');
+        anterior = atual;
+      }
+    });
+
+    test('a despesa financeira arbitra se a cobertura pode falar', () {
+      const rf = 0.1409;
+      double s({required double obs, double? cob, double? alav}) =>
+          CostOfCapital.syntheticSpread(
+            leverage: alav,
+            coverage: cob,
+            observedCostOfDebt: obs,
+            riskFreeRate: rf,
+          );
+
+      // Forma da SAPR11: despesa observada de 41,7% ao ano é contaminada por
+      // arrendamento e variação cambial. A cobertura de 0,76x que sai dela não
+      // pode decidir o crédito de quem tem 0,60x de alavancagem.
+      expect(s(obs: 0.417, cob: 0.76, alav: 0.60),
+          CostOfCapital.leverageSpread(0.60));
+
+      // Forma da MOVI3: despesa de 16,4% ao ano é juro de dívida de verdade.
+      // A cobertura de 0,91x é informação, e ela é mais exigente que a
+      // alavancagem de 3,13x — vale a pior das duas.
+      final movi = s(obs: 0.164, cob: 0.91, alav: 3.13);
+      expect(movi, CostOfCapital.coverageSpread(0.91));
+      expect(movi, greaterThan(CostOfCapital.leverageSpread(3.13)));
+
+      // Dentro da banda, mas com cobertura folgada: quem manda é a alavancagem.
+      expect(s(obs: 0.16, cob: 9.0, alav: 4.5),
+          CostOfCapital.leverageSpread(4.5));
+
+      // Abaixo do piso a despesa também não serve: dívida subsidiada não
+      // descreve o custo marginal de captar.
+      expect(s(obs: 0.02, cob: 44.0, alav: 1.45),
+          CostOfCapital.leverageSpread(1.45));
     });
   });
 }

@@ -165,12 +165,14 @@ class FundamentalsSnapshot {
 
   /// Cobertura de juros: `EBIT ÷ despesa financeira`.
   ///
-  /// Decide duas coisas no custo de capital, e as duas pela mesma razão
-  /// econômica — quanto do serviço da dívida o resultado operacional sustenta:
-  /// o **prêmio de crédito** da classificação sintética
-  /// (`CostOfCapital.syntheticSpread`) e a **alíquota do escudo fiscal**
-  /// (`CostOfCapital.effectiveTaxShield`), que não vale cheia quando a dedução
-  /// de juros excede o lucro que a absorveria.
+  /// **Serve ao escudo fiscal, e só a ele** — ver
+  /// `CostOfCapital.effectiveTaxShield`. Ali a contaminação por arrendamento e
+  /// variação cambial não atrapalha, e até ajuda: a pergunta é se há lucro
+  /// tributável que absorva a dedução, e juro de arrendamento e perda cambial
+  /// **também são dedutíveis**. O total é a grandeza certa para essa conta.
+  ///
+  /// O prêmio de crédito passou a vir da alavancagem — ver [netDebtToEbitda] —,
+  /// porque ali a contaminação distorce.
   ///
   /// Devolve `null` sem EBIT ou sem despesa financeira, e **zero** quando o
   /// EBIT é negativo: quem não gera resultado operacional não cobre juro
@@ -184,6 +186,32 @@ class FundamentalsSnapshot {
     if (op <= 0) return 0.0;
     final c = op / d;
     return c.isFinite ? c : null;
+  }
+
+  /// Alavancagem: dívida líquida sobre EBITDA.
+  ///
+  /// **É o direcionador da classificação sintética de crédito**, no lugar da
+  /// cobertura de juros. O motivo é de qualidade de insumo: a cobertura tem no
+  /// denominador a mesma despesa financeira que carrega arrendamento e variação
+  /// cambial, e usar um número contaminado para consertar um problema causado
+  /// por essa contaminação é circular. Medido em 08/09/2026 sobre os avaliados:
+  /// a ABEV3 e a WEGE3, ambas de **caixa líquido**, apareciam com cobertura de
+  /// 3,8x e 3,7x e recebiam prêmio de 2,4 p.p.; a SAPR11, com 0,60x de
+  /// alavancagem, recebia o **teto** de 10 p.p. porque a cobertura dela dava
+  /// 0,76x.
+  ///
+  /// Dívida líquida e EBITDA são os mesmos campos que a ponte e a base já usam,
+  /// e nenhum dos dois passa pela despesa financeira. A distribuição no universo
+  /// avaliado é bem-comportada — mediana de 1,64x, p90 de 3,55x, apenas três
+  /// ativos acima de 4x e dezoito com caixa líquido.
+  ///
+  /// Devolve `null` sem EBITDA positivo: ali a razão não tem leitura, e quem
+  /// consome trata como o pior caso.
+  double? get netDebtToEbitda {
+    final e = ebitda;
+    if (e == null || e <= 0) return null;
+    final r = netDebt / e;
+    return r.isFinite ? r : null;
   }
 
   /// Custo da dívida implícito: despesa financeira sobre dívida bruta.

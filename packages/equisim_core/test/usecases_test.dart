@@ -483,67 +483,69 @@ void main() {
       marketPremium: CapmInputs.defaultMarketPremium,
     );
 
-    test('fora da banda, entra a classificação sintética por cobertura', () {
-      // PETR4 em 21/08/2026: despesa financeira sobre dívida bruta deu
-      // 0,9% a.a., o que não é custo de dívida em lugar nenhum. Abaixo do
-      // soberano a razão observada não mede captação, e o que entra no lugar é
-      // o prêmio da faixa de cobertura — não o piso cru, que atribuiria à
-      // empresa o custo do próprio Tesouro.
-      const coc = CostOfCapital(
-        capm: capmRf,
-        costOfDebt: 0.009,
-        taxRate: 0.34,
-        equityValue: 391,
-        debtValue: 384,
-        interestCoverage: 9.0,
-      );
-      expect(coc.effectiveCostOfDebt, closeTo(rf + 0.010, 1e-12));
-      expect(coc.costOfDebtWasClamped, isTrue);
-    });
-
-    test('acima do teto, a cobertura separa quem é sólido de quem não é', () {
-      // WEGE3 na mesma medição: 47,3% a.a., porque a despesa financeira
-      // publicada carrega arrendamento e variação cambial numa empresa de
-      // caixa líquido. Antes, ela recebia o teto — o custo de dívida de uma
-      // empresa em pré-falência.
-      const solida = CostOfCapital(
+    test('o prêmio de crédito vem da alavancagem, não da despesa financeira', () {
+      // A cobertura de juros foi o primeiro substituto da razão observada e
+      // herdava o defeito dela: a despesa contaminada por arrendamento e
+      // variação cambial está no denominador. Medido, ela punia justamente as
+      // sólidas — ABEV3 e WEGE3, de caixa líquido, pagavam 2,4 p.p.; a SAPR11,
+      // com 0,60x de alavancagem, pagava o teto de 10 p.p.
+      const caixaLiquido = CostOfCapital(
         capm: capmRf,
         costOfDebt: 0.473,
         taxRate: 0.34,
         equityValue: 203,
         debtValue: 4.6,
-        interestCoverage: 3.7,
+        interestCoverage: 3.68,
+        netDebtToEbitda: -0.30,
       );
-      expect(solida.effectiveCostOfDebt, closeTo(rf + 0.024, 1e-12));
-      expect(solida.costOfDebtWasClamped, isTrue);
+      expect(caixaLiquido.effectiveCostOfDebt, closeTo(rf + 0.010, 1e-12));
+      expect(caixaLiquido.costOfDebtWasClamped, isTrue);
+
+      const moderada = CostOfCapital(
+        capm: capmRf,
+        costOfDebt: 0.279,
+        taxRate: 0.34,
+        equityValue: 3.6,
+        debtValue: 3.2,
+        interestCoverage: 1.26,
+        netDebtToEbitda: 1.17,
+      );
+      expect(moderada.effectiveCostOfDebt, closeTo(rf + 0.018, 1e-12),
+          reason: 'alavancagem de 1,17x não é crédito de pré-falência');
 
       const alavancada = CostOfCapital(
         capm: capmRf,
-        costOfDebt: 0.473,
+        costOfDebt: 0.20,
         taxRate: 0.34,
         equityValue: 20,
         debtValue: 80,
-        interestCoverage: 0.5,
+        interestCoverage: 2.0,
+        netDebtToEbitda: 6.0,
       );
       expect(alavancada.effectiveCostOfDebt,
           closeTo(rf + CostOfCapital.maxCreditSpread, 1e-12));
 
-      expect(solida.effectiveCostOfDebt,
+      expect(caixaLiquido.effectiveCostOfDebt,
+          lessThan(moderada.effectiveCostOfDebt));
+      expect(moderada.effectiveCostOfDebt,
           lessThan(alavancada.effectiveCostOfDebt),
-          reason: 'a ordenação de risco de crédito precisa sobreviver ao corte');
+          reason: 'a ordenação de risco de crédito precisa ser monótona na '
+              'alavancagem');
     });
 
-    test('sem cobertura medível, o prêmio é o do pior caso', () {
+    test('sem EBITDA positivo, o prêmio é o do pior caso', () {
       const coc = CostOfCapital(
         capm: capmRf,
         costOfDebt: 0.90,
         taxRate: 0.34,
         equityValue: 100,
         debtValue: 50,
+        interestCoverage: 3.0,
       );
       expect(coc.effectiveCostOfDebt, rf + CostOfCapital.maxCreditSpread);
       expect(coc.costOfDebtWasClamped, isTrue);
     });
+
 
     test('observado próximo do estimado não é declarado como substituição', () {
       // Cobertura de 3,7x pede Rf + 2,4 p.p. = 14,9%. O observado de 14,5%
@@ -551,11 +553,12 @@ void main() {
       // e portanto não é divergência a declarar.
       const coc = CostOfCapital(
         capm: capmRf,
-        costOfDebt: 0.145,
+        costOfDebt: 0.149,
         taxRate: 0.34,
         equityValue: 100,
         debtValue: 40,
-        interestCoverage: 3.7,
+        netDebtToEbitda: 2.4,
+        interestCoverage: 9.0,
       );
       expect(coc.effectiveCostOfDebt, closeTo(rf + 0.024, 1e-12));
       expect(coc.costOfDebtWasClamped, isFalse);
@@ -572,6 +575,7 @@ void main() {
         equityValue: 10,
         debtValue: 90,
         interestCoverage: 0.5,
+        netDebtToEbitda: 2.0,
       );
       expect(semFolga.effectiveTaxShield, closeTo(0.34 * 0.5, 1e-12));
 
@@ -582,6 +586,7 @@ void main() {
         equityValue: 10,
         debtValue: 90,
         interestCoverage: 4.0,
+        netDebtToEbitda: 2.0,
       );
       expect(comFolga.effectiveTaxShield, 0.34);
       expect(semFolga.rawWacc, greaterThan(comFolga.rawWacc),
@@ -599,6 +604,7 @@ void main() {
         equityValue: 10,
         debtValue: 90,
         interestCoverage: 20.0,
+        netDebtToEbitda: -1.0,
       );
       expect(coc.effectiveCostOfDebt, closeTo(rf + 0.010, 1e-12));
       expect(coc.rawWacc, lessThan(rf));
