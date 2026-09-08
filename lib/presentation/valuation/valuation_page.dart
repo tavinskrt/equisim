@@ -260,7 +260,8 @@ class _ValuationBody extends ConsumerWidget {
               ),
               const Gap.md(),
               _SensitivityCard(result: result, isLight: isLight),
-              if (result.warnings.isNotEmpty) ...[
+              if (result.warnings.isNotEmpty ||
+                  (result.diagnostics?.caveats.isNotEmpty ?? false)) ...[
                 const Gap.md(),
                 GlassCard(
                   child: Column(
@@ -272,6 +273,24 @@ class _ValuationBody extends ConsumerWidget {
                             'A qualidade da estimativa faz parte do resultado',
                       ),
                       const Gap.sm(),
+                      // As ressalvas estruturadas vêm primeiro e em uma linha
+                      // cada: elas são o resumo do que os avisos detalham, e
+                      // quem só olha o topo do cartão precisa levar delas o
+                      // essencial.
+                      if (result.diagnostics != null)
+                        for (final c in result.diagnostics!.caveats)
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: FinSpace.xs),
+                            child: Text(
+                              '• ${c.label}',
+                              style: context.finType.bodySm.copyWith(
+                                color: context.fin.textSecondary,
+                              ),
+                            ),
+                          ),
+                      if (result.diagnostics?.caveats.isNotEmpty ?? false)
+                        const Gap.sm(),
                       for (final warning in result.warnings)
                         Padding(
                           padding: const EdgeInsets.only(bottom: FinSpace.sm),
@@ -348,6 +367,8 @@ class _ModelCard extends StatelessWidget {
   final bool isLight;
   const _ModelCard({required this.result, required this.isLight});
 
+  ValuationDiagnostics? get diagnostics => result.diagnostics;
+
   @override
   Widget build(BuildContext context) {
     return GlassCard(
@@ -380,6 +401,20 @@ class _ModelCard extends StatelessWidget {
                       : 'custo do capital próprio',
                 ),
               ),
+              // O peso do terminal fica ao lado do método porque é da mesma
+              // natureza: não é o preço justo, é quanto dele veio de premissa
+              // em vez de exercício observado. **Não há nota de confiança** —
+              // a decisão 32 mediu que a contagem de ressalvas ordenava ao
+              // contrário do retorno realizado, e uma nota assim é falsa
+              // precisão num número destinado a decisão patrimonial.
+              if (diagnostics != null)
+                Expanded(
+                  child: MetricTile(
+                    label: 'Peso do terminal',
+                    value: Fmt.percent(diagnostics!.terminalShare, decimals: 0),
+                    hint: 'do preço justo vem da perpetuidade',
+                  ),
+                ),
             ],
           ),
         ],

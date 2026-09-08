@@ -156,13 +156,26 @@ class CapitalSeries {
   ///
   /// Abertura e não fecho: o lucro do ano foi produzido pelo capital que existia
   /// no começo dele. Usar o fecho subestima o retorno de quem cresceu.
+  ///
+  /// **Exercício de prejuízo entra, com o sinal que tem.** Descartá-lo era viés
+  /// de sobrevivência dentro da própria empresa: a mediana do ciclo passava a
+  /// descrever apenas os anos bons dela, e o ciclo é justamente o que alterna
+  /// bons e maus. Medido em 07/09/2026 sobre o universo elegível, 52 dos 120
+  /// avaliados tinham ao menos um exercício descartado, e a mediana do ciclo
+  /// saía inflada em até 33 pontos percentuais — a CVCB3 acusava 33,8% de ROIC
+  /// mediano contra 0,55% com os quatro anos de prejuízo no lugar, e a MGLU3
+  /// 22,4% contra 11,2%. Como o fator de normalização é `ciclo / atual` e o DCF
+  /// é homogêneo de grau 1 no fluxo-base, o viés ia inteiro para o preço justo.
+  ///
+  /// Exercício **sem lucro publicado** continua fora: ausência de dado não é
+  /// retorno nulo, e incluí-la como zero inventaria observação.
   List<({int year, double value})> get returns {
     final r = <({int year, double value})>[];
     for (var i = 1; i < points.length; i++) {
       final a = points[i - 1], b = points[i];
       if (b.year - a.year != 1 || a.base <= 0) continue;
       final l = b.profit;
-      if (l == null || l <= 0) continue;
+      if (l == null) continue;
       r.add((year: b.year, value: l / a.base));
     }
     return r;

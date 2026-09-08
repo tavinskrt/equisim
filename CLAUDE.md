@@ -283,15 +283,18 @@ A fronteira não é configuração, é o próprio registro:
 `docs/decisoes/` a cada execução. Cumprida a EAP, a decisão vira
 `status: cumprida` e a superfície volta à preservação.
 
-**Há uma reconstrução aberta: a [decisão 25](docs/decisoes/025-reconstrucao-do-motor-de-avaliacao.md)**,
-sobre o motor de avaliação. Dentro do `afeta` dela — a cascata de valuation, o
-estimador de crescimento, o DCF e os DTOs contábeis que os alimentam —
-divergência é acionável, não dívida a inventariar.
-
-Fora desse recorte a postura continua sendo preservação. A
+**Não há reconstrução aberta.** As duas que existiram estão fechadas: a
 [decisão 22](docs/decisoes/022-reconstrucao-da-ui.md), sobre as telas de
-operação, está `cumprida`: a EAP dela foi entregue e a superfície voltou à
-preservação, então divergência na interface segue sendo dívida a inventariar.
+operação, e a [decisão 25](docs/decisoes/025-reconstrucao-do-motor-de-avaliacao.md),
+sobre o motor de avaliação — esta marcada como `cumprida` em 07/09/2026 pela
+[decisão 29](docs/decisoes/029-saude-operacional-na-porta-2a.md), que confere as
+quatro condições de encerramento uma a uma.
+
+**Tudo está sob preservação**, portanto: divergência é dívida a inventariar, e
+mudança de método — na cascata de avaliação inclusive — exige decisão nova que a
+declare. Foi o que fizeram as decisões
+[31](docs/decisoes/031-escala-do-preco-tributo-e-invariancia-das-guardas.md) e
+[32](docs/decisoes/032-validacao-preditiva-e-diagnosticos-do-resultado.md).
 
 Confira antes de agir, em vez de confiar nesta frase: quem responde é
 `docs/decisoes/`, e este parágrafo é cópia que envelhece.

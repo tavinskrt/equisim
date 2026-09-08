@@ -35,9 +35,13 @@ void main() {
         taxRate: 0.34,
         equityValue: 600,
         debtValue: 400,
+        interestCoverage: 9.0,
       );
-      // 0,6 × 0,145 + 0,4 × 0,11 × 0,66 = 0,087 + 0,02904 = 0,11604
-      expect(levered.wacc, closeTo(0.11604, 1e-9));
+      // O custo da dívida aplicado é o sintético: Rf + 1,0 p.p. na faixa de
+      // cobertura acima de 8,5x. Daí 0,6 × 0,145 + 0,4 × 0,10 × 0,66
+      // = 0,087 + 0,0264 = 0,1134.
+      expect(levered.effectiveCostOfDebt, closeTo(0.10, 1e-12));
+      expect(levered.wacc, closeTo(0.1134, 1e-9));
       expect(levered.wacc, lessThan(levered.costOfEquity));
     });
   });

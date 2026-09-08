@@ -128,6 +128,136 @@ class ValueDistribution {
   }
 }
 
+/// Por que a estimativa perdeu confiança.
+///
+/// Cada item é um **fato medido** no caminho do cálculo, não um julgamento: a
+/// cascata já os apura para decidir a conta, e antes eles só existiam diluídos
+/// no texto dos avisos. Estruturá-los é o que permite ao consumidor ponderar o
+/// preço justo em vez de tratar todos como igualmente firmes.
+enum ValuationCaveat {
+  /// O valor terminal responde por mais que
+  /// [ValuationDiagnostics.terminalShareLimit] do total: o número é sobretudo
+  /// premissa, e a parte apoiada em exercício observado decide pouco.
+  terminalPesado('o valor terminal domina o preço justo'),
+
+  /// A taxa de crescimento não veio do próprio ativo — foi a âncora de
+  /// inflação ou a ausência de crescimento.
+  crescimentoNaoIdentificado('o crescimento não é identificável no histórico'),
+
+  /// As duas contagens de papéis publicadas divergem além de uma ação
+  /// societária plausível, e a escolha do divisor foi por conservadorismo.
+  escalaIncerta('a base societária publicada é ambígua'),
+
+  /// Um único exercício foi multiplicado por mais de
+  /// [ValuationDiagnostics.baseFactorLimit] para virar o fluxo-base.
+  baseNormalizadaForte('a base depende de forte correção de um só exercício'),
+
+  /// A avaliação começou na via da firma e migrou para a do acionista.
+  viaMigrada('a via de avaliação mudou no meio do cálculo'),
+
+  /// O capital próprio responde por pouco do valor da firma, e o preço por
+  /// papel é resíduo de subtração entre números próximos.
+  ///
+  /// **A ressalva de custo da dívida estimado saiu deste conjunto**, e a
+  /// medição é o motivo: ela disparava em 469 das 821 avaliações do backtest —
+  /// 57% —, porque a classificação sintética passou a ser o **método** pela
+  /// decisão 31, e não mais um recuo. Ressalva que vale para a maioria não
+  /// distingue nada; a substituição continua declarada nos avisos, que é onde
+  /// ela informa.
+  ponteFragil('o preço por papel é resíduo de uma subtração frágil');
+
+  final String label;
+  const ValuationCaveat(this.label);
+}
+
+/// Fatos medidos que qualificam o preço justo.
+///
+/// **Por que existe.** Um preço justo cujo valor terminal responde por 85% do
+/// total, cuja taxa veio da inflação e cujo divisor é ambíguo não é o mesmo
+/// objeto que um apoiado em crescimento identificado e escala conciliada — e,
+/// até aqui, os dois chegavam à tela como um número só, com a diferença
+/// espalhada em texto corrido. Para decisão patrimonial isso não basta: a
+/// carteira precisa poder ponderar pela firmeza da estimativa.
+///
+/// Tudo aqui já era apurado pela cascata. O que muda é que passa a sair com o
+/// resultado, em forma que a máquina lê.
+class ValuationDiagnostics {
+  /// Parcela do preço justo explicada pelo valor terminal, em fração.
+  final double terminalShare;
+
+  /// Participação do capital próprio no valor da firma. `1.0` na via do
+  /// acionista, que não tem ponte.
+  final double equityShare;
+
+  /// Fator de normalização aplicado ao exercício-base.
+  final double baseFactor;
+
+  /// `true` quando a taxa de crescimento saiu do próprio histórico.
+  final bool growthIdentified;
+
+  /// `true` quando a perpetuidade preserva excedente de retorno.
+  final bool moatApplied;
+
+  /// Ressalvas medidas, na ordem em que a cascata as apura.
+  final List<ValuationCaveat> caveats;
+
+  const ValuationDiagnostics({
+    required this.terminalShare,
+    required this.equityShare,
+    required this.baseFactor,
+    required this.growthIdentified,
+    required this.moatApplied,
+    this.caveats = const [],
+  });
+
+  /// Acima disto, o valor terminal domina e a estimativa é rebaixada.
+  ///
+  /// **80%, e o corte tem origem.** A decisão 25 fixou a projeção explícita em
+  /// dez anos justamente porque, com cinco, o terminal carregava de 63,5% a
+  /// 80,0% do preço justo e "a parte da conta apoiada em dado observado decidia
+  /// pouco". O limiar é o topo daquela faixa: acima dele, o horizonte de dez
+  /// anos não conseguiu o que foi escolhido para conseguir.
+  static const double terminalShareLimit = 0.80;
+
+  /// Acima disto, um único exercício move demais a avaliação inteira.
+  ///
+  /// **2,0x, e é metade da autoridade que a saturação permite.** A decisão 28
+  /// confinou o fator em `[0,33; 3,00]` dizendo que acima de 3x "a normalização
+  /// deixaria de corrigir um exercício para inventar uma empresa". O corte aqui
+  /// não proíbe nada — apenas marca que, passando de 2x, o preço justo passou a
+  /// depender mais da mediana do ciclo que do exercício observado.
+  static const double baseFactorLimit = 2.0;
+
+  /// Abaixo disto a ponte é frágil, embora ainda acima do corte que faz migrar.
+  ///
+  /// **35%, contra os 20% que reprovam.** A pós-condição da via da firma migra
+  /// abaixo de 20%; entre 20% e 35% ela não migra e o preço por papel já é
+  /// resíduo de uma subtração com amplificação de três a cinco vezes. A faixa
+  /// entre os dois cortes é onde o número sai sem aviso nenhum, e é ela que
+  /// esta ressalva cobre.
+  static const double fragileEquityShare = 0.35;
+
+  /// **Não existe nota de confiança aqui, e a ausência é medida.**
+  ///
+  /// A primeira versão destes diagnósticos trazia uma nota ordinal — alta,
+  /// média, baixa — derivada da contagem de ressalvas. A validação preditiva da
+  /// decisão 32 a desmentiu: no horizonte de 36 meses, o grupo **sem ressalva
+  /// alguma** teve coeficiente de informação de **−0,007**, positivo em 2 de 5
+  /// coortes, enquanto o grupo com uma ou duas ressalvas teve **0,206**,
+  /// positivo em 5 de 5. A nota ordenava ao contrário do que prometia.
+  ///
+  /// A explicação plausível — não medida — é que o ativo sem ressalva é o
+  /// estável e previsível, que é justamente o que o mercado já precifica bem;
+  /// a discordância informativa aparece onde o modelo faz algo que o preço não
+  /// fez. Seja qual for a causa, apresentar uma nota que ordena ao contrário
+  /// seria falsa precisão num número destinado a decisão patrimonial.
+  ///
+  /// O que fica são os **fatos**: eles descrevem o que a conta fez, e isso
+  /// continua verdadeiro e continua útil. O que saiu foi a promessa de que eles
+  /// medem confiabilidade.
+  bool get hasCaveats => caveats.isNotEmpty;
+}
+
 /// Resultado de uma avaliação de valor intrínseco.
 class ValuationResult {
   /// Ativo avaliado.
@@ -167,6 +297,10 @@ class ValuationResult {
   /// Avisos acumulados (dados faltantes, aproximações, quedas de modelo).
   final List<String> warnings;
 
+  /// Fatos medidos que qualificam o preço justo. `null` só quando o resultado
+  /// é montado à mão, fora da cascata.
+  final ValuationDiagnostics? diagnostics;
+
   /// Agrupa o resultado já apurado. Não calcula nada — o cálculo vive em
   /// `ValuationCascade.evaluate`.
   const ValuationResult({
@@ -181,7 +315,12 @@ class ValuationResult {
     this.discreteScenarios,
     this.distribution,
     this.warnings = const [],
+    this.diagnostics,
   });
+
+  /// Ressalvas estruturadas do cálculo, vazias quando não há diagnóstico.
+  List<ValuationCaveat> get caveats =>
+      diagnostics?.caveats ?? const <ValuationCaveat>[];
 
   /// Preço justo já descontado da margem de segurança.
   ///

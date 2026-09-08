@@ -130,6 +130,67 @@ class ValuationInputs {
   });
 }
 
+/// De onde veio a contagem de papéis da ponte.
+enum QuotedSharesSource {
+  /// Implícita no valor de mercado: `VM ÷ preço`. É a que forma a cotação, e é
+  /// a adotada sempre que as duas contagens publicadas concordam.
+  market('implícita no valor de mercado'),
+
+  /// Conciliada pelas demonstrações, adotada quando é a **maior** das duas e as
+  /// duas divergem além de uma ação societária plausível.
+  reconciled('conciliada pelas demonstrações'),
+
+  /// Única disponível: o valor de mercado não pôde ser usado.
+  onlyAvailable('única contagem disponível');
+
+  final String label;
+  const QuotedSharesSource(this.label);
+}
+
+/// Contagem de papéis da ponte, com a origem e as duas candidatas.
+class QuotedShares {
+  /// Papéis na unidade negociada. Sempre positiva.
+  final double count;
+
+  /// De onde ela veio.
+  final QuotedSharesSource source;
+
+  /// Contagem implícita no valor de mercado, na unidade negociada. `null`
+  /// quando o valor de mercado não está publicado.
+  final double? fromMarketCap;
+
+  /// Contagem conciliada pelas demonstrações, na unidade negociada. `null`
+  /// quando nenhuma das duas contagens societárias é utilizável.
+  final double? fromStatements;
+
+  /// Razão de unidade medida, para o aviso de *unit*.
+  final double sharesPerQuote;
+
+  const QuotedShares({
+    required this.count,
+    required this.source,
+    required this.fromMarketCap,
+    required this.fromStatements,
+    required this.sharesPerQuote,
+  });
+
+  /// `true` quando as duas candidatas divergem além da banda de conciliação.
+  bool get diverge {
+    final a = fromMarketCap, b = fromStatements;
+    if (a == null || b == null) return false;
+    final d = a >= b ? a / b : b / a;
+    return d > FundamentalsSnapshot.reconciliationBand;
+  }
+
+  /// Razão entre a maior e a menor candidata, sempre `>= 1`. `null` quando só
+  /// uma existe.
+  double? get divergence {
+    final a = fromMarketCap, b = fromStatements;
+    if (a == null || b == null) return null;
+    return a >= b ? a / b : b / a;
+  }
+}
+
 /// Roteia o ativo por portas e aplica a via correspondente.
 ///
 /// A arquitetura é a da decisão 25, e substituiu a cascata de três degraus que
@@ -251,28 +312,56 @@ abstract final class ValuationCascade {
       );
     }
 
-    if (latest.sharesDisagree) {
+    final divisor = quotedShares(
+      latest: latest,
+      marketPrice: inputs.marketPrice,
+      sharesPerQuote: sharesPerQuote,
+    );
+    if (divisor == null) {
+      const message = 'Nenhuma contagem de papéis utilizável: a ponte por papel '
+          'não pode ser feita.';
+      audit?.abort(message);
+      return const Err(InsufficientData(message));
+    }
+    _auditQuotedShares(audit, latest, inputs.marketPrice, divisor);
+
+    if (divisor.diverge) {
+      warnings.add(
+        'As contagens de papéis da fonte divergem por '
+        '${divisor.divergence!.toStringAsFixed(2)}x: '
+        '${_r(divisor.fromMarketCap!, 0)} implícitas no valor de mercado '
+        'contra ${_r(divisor.fromStatements!, 0)} conciliadas pelas '
+        'demonstrações. Nada no dado arbitra qual descreve a base societária '
+        'de hoje, e foi adotada a **maior** — ${divisor.source.label} —, '
+        'porque divisor pequeno demais infla o preço justo e produz sinal '
+        'falso de desconto. O preço justo é, nesta medida, conservador.',
+      );
+    } else if (latest.sharesDisagree) {
       warnings.add(
         'As duas contagens de ações publicadas pela fonte discordam: '
         '${_r(latest.sharesOutstanding ?? 0, 0)} correntes contra '
-        '${_r(latest.sharesOutstandingAsOf ?? 0, 0)} do exercício. Foi adotada '
-        'a contagem que o lucro por ação publicado confirma; o preço por papel '
-        'depende dela e deve ser lido com essa ressalva.',
+        '${_r(latest.sharesOutstandingAsOf ?? 0, 0)} do exercício. As bases '
+        'contábeis usam a do exercício, que reconstrói o patrimônio publicado; '
+        'a ponte por papel usa a implícita no valor de mercado, que é a que '
+        'forma o preço comparado.',
       );
     }
 
     final lane = _route(inputs, published, latest, warnings, audit);
+    final refusals = <String>[];
     final result = _evaluateLane(inputs, published, latest, lane, warnings,
-        scenarioBuilder, monteCarloSamples, seed, sharesPerQuote, audit);
+        scenarioBuilder, monteCarloSamples, seed, divisor, audit,
+        refusals: refusals);
     if (result != null) {
       _auditVerdict(audit, result);
       audit?.complete(_outputPayload(result));
       return Ok(result);
     }
 
-    final message =
-        'Os dados de ${inputs.ticker.value} não sustentam nenhuma das duas vias '
-        'de avaliação.';
+    final message = refusals.isNotEmpty
+        ? refusals.first
+        : 'Os dados de ${inputs.ticker.value} não sustentam nenhuma das duas '
+            'vias de avaliação.';
     audit?.abort(message, extra: {
       'viaTentada': lane.label,
       'exerciciosPublicados': published.length,
@@ -328,6 +417,104 @@ abstract final class ValuationCascade {
   /// Teto de ações por unit. As units da B3 vão até 5 (1 ON + 4 PN).
   static const double maxSharesPerUnit = 10;
 
+  /// Papéis na **unidade negociada** para a ponte por papel.
+  ///
+  /// **A ponte compara duas coisas que precisam estar na mesma escala:** o
+  /// valor do capital próprio que o modelo apura, em reais absolutos, e a
+  /// cotação de uma unidade negociada. O divisor correto é, por definição, a
+  /// contagem de unidades que forma essa cotação — `VM ÷ P_mkt`. Adotá-la faz o
+  /// potencial virar `E ÷ VM − 1`, e nenhuma contagem de ação sobra na conta:
+  /// desdobramento, grupamento, *unit* e registro corrompido saem por
+  /// construção.
+  ///
+  /// **A contagem do exercício continua certa onde sempre esteve.** Ela
+  /// reconstrói o patrimônio publicado — `VPA × N_exercício = PL` em 4.461 de
+  /// 4.462 exercícios do cache — e é ela que [CapitalSeries] usa para medir
+  /// ROIC, Φ e crescimento. O que ela não descreve é a escala do preço de hoje:
+  /// medido em 07/09/2026, o divisor saía errado por mais de 5% em **30 dos
+  /// 120 avaliados**, com 2,65x na MOVI3 e 1,49x na B3SA3.
+  ///
+  /// **Quando as duas contagens divergem, a fonte não tem árbitro, e a escolha
+  /// é por consequência.** Isso foi medido, não suposto:
+  ///
+  /// - `N = lucro ÷ LPA` é **tautológico** para esta pergunta. Os dois campos
+  ///   vêm das mesmas demonstrações, então ele só pode confirmar a contagem do
+  ///   exercício — e confirma, em todos os divergentes.
+  /// - O valor de mercado da fonte é, quase sempre, `contagem corrente ×
+  ///   preço`, e herda o defeito dessa contagem: o MILS3 chega com R$ 760 mil
+  ///   de capitalização contra R$ 9,6 milhões de volume mediano por pregão.
+  /// - O `enterpriseToEbitda` publicado seria independente, mas erra por mais
+  ///   de 2x em 12% dos ativos cujas duas contagens **concordam** — o piso de
+  ///   ruído dele — e chega a discordar entre classes da mesma empresa: SAPR4
+  ///   acusa 3,01 e SAPR11, 1,47.
+  /// - A série de preços não denuncia desdobramento: o `close` da fonte já vem
+  ///   ajustado por ação societária, e não há salto nenhum em dez anos.
+  ///
+  /// Sem árbitro, decide o sentido do erro. **Divisor pequeno demais infla o
+  /// preço justo** e produz sinal falso de "barato", que é o pior sentido
+  /// possível — o mesmo argumento que a Porta 0 usa para o corte de liquidez.
+  /// Divisor grande demais deprime o preço justo, e o erro que sobra é o
+  /// conservador. Por isso, na divergência, **adota-se a maior das duas**, e a
+  /// divergência é declarada no resultado.
+  ///
+  /// Dentro da banda de conciliação as duas concordam e vale a do mercado, que
+  /// é a que zera a contagem da comparação.
+  ///
+  /// - [latest]: exercício mais recente publicado.
+  /// - [marketPrice]: cotação da unidade negociada.
+  /// - [sharesPerQuote]: razão de unidade, de [quotedUnitRatio]. Converte a
+  ///   contagem por ação das demonstrações para a unidade negociada.
+  ///
+  /// Devolve `null` quando nenhuma das duas contagens é utilizável.
+  static QuotedShares? quotedShares({
+    required FundamentalsSnapshot latest,
+    required double marketPrice,
+    required double sharesPerQuote,
+  }) {
+    final pelaFonte = latest.sharesFromMarketCap(marketPrice);
+    final conciliada = latest.reconciledShares;
+    final peloBalanco = (conciliada != null && conciliada > 0)
+        ? conciliada / sharesPerQuote
+        : null;
+
+    if (pelaFonte == null && peloBalanco == null) return null;
+    if (pelaFonte == null) {
+      return QuotedShares(
+        count: peloBalanco!,
+        source: QuotedSharesSource.onlyAvailable,
+        fromMarketCap: null,
+        fromStatements: peloBalanco,
+        sharesPerQuote: sharesPerQuote,
+      );
+    }
+    if (peloBalanco == null) {
+      return QuotedShares(
+        count: pelaFonte,
+        source: QuotedSharesSource.onlyAvailable,
+        fromMarketCap: pelaFonte,
+        fromStatements: null,
+        sharesPerQuote: sharesPerQuote,
+      );
+    }
+
+    final candidata = QuotedShares(
+      count: pelaFonte,
+      source: QuotedSharesSource.market,
+      fromMarketCap: pelaFonte,
+      fromStatements: peloBalanco,
+      sharesPerQuote: sharesPerQuote,
+    );
+    if (!candidata.diverge || pelaFonte >= peloBalanco) return candidata;
+
+    return QuotedShares(
+      count: peloBalanco,
+      source: QuotedSharesSource.reconciled,
+      fromMarketCap: pelaFonte,
+      fromStatements: peloBalanco,
+      sharesPerQuote: sharesPerQuote,
+    );
+  }
+
   // -------------------------------------------- Porta 1 e Porta 3: a via --
 
   /// Chave do setor financeiro na taxonomia do **perfil** da fonte.
@@ -341,11 +528,24 @@ abstract final class ValuationCascade {
 
   /// Decide de quem é o fluxo.
   ///
-  /// **Porta 1** — instituição financeira sai da via da firma. Exige os dois
-  /// sinais juntos, e o motivo está na amostra: a fonte classifica a RENT3 como
-  /// `Finance`, subsetor "Aluguel de Carros", e só o setor a rotearia errado. A
-  /// dívida bruta de R$ 43,6 bi é o que a desqualifica. Confirmação
-  /// independente: BBAS3 e BPAC11 não têm EBIT em nenhum dos 16 exercícios.
+  /// **Porta 1** — instituição financeira sai da via da firma, **pelo setor**.
+  ///
+  /// A exigência de dívida bruta nula que acompanhava o setor foi removida em
+  /// 07/09/2026, e o motivo é que a justificativa dela não valia na taxonomia
+  /// que o código compara. Ela citava a RENT3 chegando classificada como
+  /// `Finance` — mas isso é a taxonomia da **listagem**, e a porta compara
+  /// contra a do **perfil**, onde a RENT3 e a MOVI3 vêm como `consumo-ciclico`.
+  /// Conferido por execução sobre o cache de produção: os 28 ativos com
+  /// `servicos-financeiros` no perfil são bancos, seguradoras, resseguradora,
+  /// corretora, bolsa e serviços financeiros diversos — não há locadora nem
+  /// nada de outra natureza a barrar.
+  ///
+  /// O que a exigência fazia, na prática, era barrar quem tem passivo oneroso —
+  /// isto é, **a própria definição do negócio bancário**. Cinco dos 28 caíam
+  /// por ela para a via da firma, e a B3SA3 é o caso de maior efeito: as
+  /// debêntures viravam dívida líquida subtraída do valor da firma, o que não
+  /// tem sentido econômico numa bolsa, onde captação e tesouraria são
+  /// engrenagem operacional.
   ///
   /// **Porta 3** — o fluxo da firma precisa se sustentar. Mede sobre NOPAT, que
   /// é o fluxo de manutenção sob a aproximação `CapEx_manutenção ≈ D&A`, e não
@@ -359,9 +559,7 @@ abstract final class ValuationCascade {
     List<String> warnings,
     AuditTransaction? audit,
   ) {
-    final setorFinanceiro = inputs.sectorKey == _financeSectorKey;
-    final semDivida = latest.totalDebt <= 0;
-    final porta1 = setorFinanceiro && semDivida;
+    final porta1 = inputs.sectorKey == _financeSectorKey;
 
     final fluxoSustentado =
         porta1 ? false : GrowthGuards.firmFlowIsSustained(published);
@@ -371,9 +569,11 @@ abstract final class ValuationCascade {
 
     if (porta1) {
       warnings.add(
-        'Instituição financeira: depósito e captação são insumo do negócio, '
-        'não financiamento. A avaliação é do fluxo do acionista, descontada ao '
-        'custo do capital próprio e sem ponte de dívida líquida.',
+        'Instituição financeira: depósito, captação e passivo oneroso são '
+        'insumo do negócio, não financiamento. A avaliação é do fluxo do '
+        'acionista, descontada ao custo do capital próprio e sem ponte de '
+        'dívida líquida — subtrair a captação do valor da firma trataria a '
+        'matéria-prima do negócio como estrutura de capital.',
       );
     } else if (!fluxoSustentado) {
       warnings.add(
@@ -392,7 +592,7 @@ abstract final class ValuationCascade {
         'Porta 3 (fluxo sustentado)': fluxoSustentado ? 'sim' : 'não',
       },
       steps: [
-        'Porta 1: setor financeiro E dívida bruta nula → '
+        'Porta 1: setor financeiro → '
             '${porta1 ? "via do acionista" : "segue para a Porta 3"}',
         if (!porta1)
           'Porta 3: NOPAT positivo em ao menos '
@@ -420,9 +620,10 @@ abstract final class ValuationCascade {
     AssumptionSource Function(DcfAssumptions)? scenarioBuilder,
     int samples,
     int seed,
-    double sharesPerQuote,
+    QuotedShares divisor,
     AuditTransaction? audit, {
     bool allowLaneMigration = true,
+    List<String>? refusals,
   }) {
     final series = CapitalSeries.build(published, lane);
     if (series.isTooShort) return null;
@@ -433,8 +634,11 @@ abstract final class ValuationCascade {
     final retornoAtual = series.latestReturn;
     final retornoCiclo =
         series.cycleReturn(window: ValuationParameters.cycleWindow);
-    final tendencia =
-        GrowthGuards.trend(series, horizonYears: inputs.projectionYears);
+    // A deriva da tendência é medida na janela do ciclo, e **não** no horizonte
+    // de projeção: um veredito estatístico sobre a série não pode mudar porque
+    // o usuário trocou a projeção de 5 para 10 anos. Ver
+    // [ValuationParameters.trendDriftWindow].
+    final tendencia = GrowthGuards.trend(series);
     final phi = GrowthGuards.externalCapitalRatio(series);
     final destoa = GrowthGuards.deviatesFromCycle(series);
 
@@ -618,9 +822,10 @@ abstract final class ValuationCascade {
         audit, dispersao, origem, g, retencao, retornoCiclo, inputs.inflation);
 
     // --- Premissas ---------------------------------------------------------
-    final desconto = lane == ValuationLane.firm
-        ? _wacc(inputs, latest, local, sharesPerQuote, audit)
-        : inputs.capm.costOfEquity;
+    final custoCorrente = lane == ValuationLane.firm
+        ? _wacc(inputs, latest, local, divisor, audit)
+        : (rate: inputs.capm.costOfEquity, costOfDebtEstimated: false);
+    final desconto = custoCorrente.rate;
 
     // Custo de capital de **equilíbrio**: o mesmo beta, o mesmo prêmio e a mesma
     // estrutura de capital, sobre a taxa livre de risco estrutural em vez da
@@ -628,8 +833,9 @@ abstract final class ValuationCascade {
     // a auditoria saem só da montagem corrente — esta repetiria os mesmos.
     final capmTerminal = inputs.capm.withRiskFree(inputs.terminalRiskFreeRate);
     final descontoTerminal = lane == ValuationLane.firm
-        ? _wacc(inputs, latest, <String>[], sharesPerQuote, null,
-            capmOverride: capmTerminal)
+        ? _wacc(inputs, latest, <String>[], divisor, null,
+                capmOverride: capmTerminal)
+            .rate
         : capmTerminal.costOfEquity;
 
     final perpetuo = GrowthEstimator.perpetual(
@@ -684,30 +890,49 @@ abstract final class ValuationCascade {
       );
     }
 
-    // O retorno do ciclo é o que converte crescimento em retenção, ano a ano:
-    // `b_t = g_t / ROIC_t`. Alimentado com o crescimento fundamental — que já é
-    // `retorno × retenção` —, devolve a própria retenção observada no primeiro
-    // ano e a faz decair junto com o crescimento. É o laço da decisão 25 se
-    // fechando.
+    // O retorno que converte crescimento em retenção, ano a ano — `b_t = g_t /
+    // ROIC_t` —, precisa ser o retorno **do fluxo-base que se está
+    // descontando**, e não o do ciclo por princípio.
+    //
+    // Como o fluxo-base é `NOPAT_atual × fator` sobre a mesma base de capital,
+    // o retorno implícito nele é `retorno_atual × fator`. A identidade fecha os
+    // três casos de uma vez: normalizado sem saturar, dá exatamente o retorno do
+    // ciclo; normalizado com saturação, dá o retorno que a saturação de fato
+    // impôs; não normalizado, dá o retorno corrente.
+    //
+    // Usar o ciclo quando a base **não** foi normalizada misturava o fluxo de um
+    // ano com o retorno de outro, e sempre na direção de exigir menos
+    // reinvestimento do que a empresa precisa: medido na AZZA3, um retorno de
+    // ciclo de 19,55% sobre um fluxo-base de retorno corrente de 7,82% inflava
+    // o valor da firma em 17%.
+    //
+    // Sem retorno corrente utilizável — série curta, exercício de prejuízo ou
+    // buraco na ponta —, o do ciclo continua sendo a melhor estimativa
+    // disponível e é o que entra. Zerar ali **desligaria** o freio, que é a
+    // direção agressiva: o fluxo cresceria sem nada retido para financiá-lo.
+    final retornoDaBase = (retornoAtual != null && retornoAtual > 0)
+        ? retornoAtual * fatorBase
+        : (retornoCiclo ?? 0.0);
+
     final assumptions = DcfAssumptions(
       projectionYears: inputs.projectionYears,
       growthRate: g,
       perpetualGrowth: perpetuo,
       discountRate: desconto,
       terminalDiscountRate: descontoTerminal,
-      returnOnCapital: retornoCiclo ?? 0.0,
+      returnOnCapital: retornoDaBase,
       terminalReturnOnCapital: moat,
       marginOfSafety: inputs.marginOfSafety,
     );
 
     // --- Fluxo-base --------------------------------------------------------
-    final base = _baseProfitFor(lane, latest, sharesPerQuote, fatorBase);
+    final base = _baseProfitFor(lane, latest, divisor, fatorBase);
     if (base == null || base <= 0) return null;
 
-    // A contagem vem conciliada entre as duas que a fonte publica, arbitrada
-    // pelo lucro por ação. Usar a corrente crua dava preço justo de
-    // R$ 37.708,72 no MILS3 — ver [FundamentalsSnapshot.reconciledShares].
-    final shares = (latest.reconciledShares ?? 0) / sharesPerQuote;
+    // O divisor é a contagem de unidades que forma a cotação — ver
+    // [ValuationCascade.quotedShares]. Com ela, o potencial é `E ÷ VM − 1` e
+    // nenhuma contagem de ação sobra na comparação com o preço de tela.
+    final shares = divisor.count;
     Result<double> valuate(DcfAssumptions a) => lane == ValuationLane.firm
         ? DcfCalculator.firm(
             baseProfit: base,
@@ -741,24 +966,62 @@ abstract final class ValuationCascade {
         allowLaneMigration &&
         outcome.equityShare < ValuationParameters.minEquityShare) {
       _auditEquityBridgeFailure(audit, outcome.equityShare);
-      warnings.add(
-        'O capital próprio responde por apenas ${_pct(outcome.equityShare)} do '
-        'valor da firma: o preço por papel seria resíduo de uma subtração entre '
-        'números próximos. A avaliação migra para o fluxo do acionista.',
-      );
-      return _evaluateLane(
+      final migrada = _evaluateLane(
         inputs,
         published,
         latest,
         ValuationLane.shareholder,
-        warnings,
+        [
+          ...warnings,
+          'O capital próprio responde por apenas ${_pct(outcome.equityShare)} '
+              'do valor da firma: o preço por papel seria resíduo de uma '
+              'subtração entre números próximos. A avaliação migra para o fluxo '
+              'do acionista.',
+        ],
         scenarioBuilder,
         samples,
         seed,
-        sharesPerQuote,
+        divisor,
         audit,
         allowLaneMigration: false,
+        refusals: refusals,
       );
+      if (migrada != null) return migrada;
+      // **Migração impossível vira recusa nomeada, não número sem conteúdo.**
+      // A própria pós-condição afirma que, com a dívida líquida consumindo o
+      // valor da firma, o que sobra é resíduo de subtração e não avaliação —
+      // publicar esse resíduo contradiria a afirmação que o motivou. O erro
+      // relativo do valor da firma chega ao preço por papel amplificado por
+      // `1/participação`, e num ativo de 3% de participação isso é trinta
+      // vezes: a AMER3 saía a R$ 0,20 em dez anos e R$ 1,47 em cinco, um fator
+      // de 7,35 vindo só da forma da curva de desconto.
+      //
+      // O efeito colateral é aceito: um ativo deixa de ser avaliado num
+      // horizonte e continua sendo em outro, conforme a pós-condição dispare ou
+      // não. Entre um número sem conteúdo e uma recusa que diz por quê, a
+      // recusa é a saída que a decisão 25 exige.
+      //
+      // A recusa é **nomeada**, que é o que a decisão 25 exige de toda saída.
+      //
+      // A participação **não** é positiva por construção: com a dívida líquida
+      // maior que o valor da firma ela fica negativa, e foi medida em −142,6%
+      // na CSNA3 e −558,3% na MRVE3. A amplificação `1/participação` só tem
+      // sentido no ramo positivo, e nem `Infinity` nem número negativo passam
+      // por `toStringAsFixed`.
+      final share = outcome.equityShare;
+      final amplificacao = share > 0
+          ? 'com o erro do valor da firma amplificado '
+              '${(1 / share).toStringAsFixed(0)} vezes'
+          : 'e a dívida líquida supera o próprio valor da firma, de modo que '
+              'não sobra capital próprio a repartir';
+      refusals?.add(
+        'O capital próprio responde por apenas ${_pct(share)} do valor da '
+        'firma de ${inputs.ticker.value}, e a via do acionista não se aplica: '
+        'o preço por papel seria resíduo de uma subtração entre números '
+        'próximos, $amplificacao. O ativo não é avaliável por fluxo descontado '
+        'nesta estrutura de capital.',
+      );
+      return null;
     }
 
     if (outcome.fairValuePerShare <= 0) return null;
@@ -794,6 +1057,57 @@ abstract final class ValuationCascade {
       samples: samples,
       seed: seed,
       warnings: local,
+      diagnostics: _diagnose(
+        outcome: outcome,
+        divisor: divisor,
+        baseFactor: fatorBase,
+        growthOrigin: origem,
+        moatApplied: moat != null,
+        migrated: !allowLaneMigration,
+      ),
+    );
+  }
+
+  /// Reúne os fatos que qualificam o preço justo.
+  ///
+  /// **Não julga nada de novo.** Cada ressalva corresponde a uma decisão que a
+  /// cascata já tomou e já declarou em texto; o que muda é que sai também em
+  /// forma estruturada, para que a carteira possa ponderar por firmeza em vez
+  /// de tratar todo preço justo como igualmente apoiado.
+  ///
+  /// - [migrated]: `true` no passe que veio de migração de via, que é
+  ///   justamente quando `allowLaneMigration` chega desligado.
+  static ValuationDiagnostics _diagnose({
+    required DcfOutcome outcome,
+    required QuotedShares divisor,
+    required double baseFactor,
+    required GrowthOrigin growthOrigin,
+    required bool moatApplied,
+    required bool migrated,
+  }) {
+    final caveats = <ValuationCaveat>[];
+    if (outcome.terminalShare > ValuationDiagnostics.terminalShareLimit) {
+      caveats.add(ValuationCaveat.terminalPesado);
+    }
+    if (growthOrigin != GrowthOrigin.fundamental) {
+      caveats.add(ValuationCaveat.crescimentoNaoIdentificado);
+    }
+    if (divisor.diverge) caveats.add(ValuationCaveat.escalaIncerta);
+    if (baseFactor > ValuationDiagnostics.baseFactorLimit ||
+        baseFactor < 1 / ValuationDiagnostics.baseFactorLimit) {
+      caveats.add(ValuationCaveat.baseNormalizadaForte);
+    }
+    if (migrated) caveats.add(ValuationCaveat.viaMigrada);
+    if (outcome.equityShare < ValuationDiagnostics.fragileEquityShare) {
+      caveats.add(ValuationCaveat.ponteFragil);
+    }
+    return ValuationDiagnostics(
+      terminalShare: outcome.terminalShare,
+      equityShare: outcome.equityShare,
+      baseFactor: baseFactor,
+      growthIdentified: growthOrigin == GrowthOrigin.fundamental,
+      moatApplied: moatApplied,
+      caveats: List.unmodifiable(caveats),
     );
   }
 
@@ -807,51 +1121,71 @@ abstract final class ValuationCascade {
   static double? _baseProfitFor(
     ValuationLane lane,
     FundamentalsSnapshot latest,
-    double sharesPerQuote,
+    QuotedShares divisor,
     double fatorBase,
   ) {
     if (lane == ValuationLane.firm) {
       final n = latest.nopatOrDerived;
       return n == null ? null : n * fatorBase;
     }
-    final lpa = _earningsPerQuotedUnit(latest, sharesPerQuote);
+    final lpa = _earningsPerQuotedUnit(latest, divisor);
     return lpa == null ? null : lpa * fatorBase;
   }
 
+  /// Lucro por **unidade negociada**, na mesma escala do preço de tela.
+  ///
+  /// Divide o lucro agregado pela contagem que forma a cotação, e não pela do
+  /// exercício: o resultado é comparado com o preço de hoje, e um LPA na escala
+  /// societária de outro momento não o é. O recuo para o LPA publicado só age
+  /// quando o lucro agregado falta, e converte pela razão de unidade.
   static double? _earningsPerQuotedUnit(
     FundamentalsSnapshot snapshot,
-    double sharesPerQuote,
+    QuotedShares divisor,
   ) {
     final netIncome = snapshot.netIncome;
-    final shares = snapshot.reconciledShares;
-    if (netIncome != null && shares != null && shares > 0) {
-      return netIncome / (shares / sharesPerQuote);
+    if (netIncome != null && divisor.count > 0) {
+      return netIncome / divisor.count;
     }
     final published = snapshot.earningsPerShare;
-    return published == null ? null : published * sharesPerQuote;
+    return published == null ? null : published * divisor.sharesPerQuote;
   }
   /// Monta o WACC, ou o Ke quando a estrutura de capital não é observável.
   ///
   /// - [capmOverride]: substitui o CAPM dos insumos. Serve para montar o custo
   ///   de capital **de equilíbrio**, com a taxa livre de risco estrutural no
   ///   lugar da corrente, sem duplicar esta função.
-  static double _wacc(
+  /// Devolve a taxa **e** se o custo da dívida usado foi estimado.
+  ///
+  /// O segundo campo não é detalhe de log: ele entra nos diagnósticos do
+  /// resultado, e recalculá-lo fora daqui duplicaria a regra de
+  /// `CostOfCapital`.
+  static ({double rate, bool costOfDebtEstimated}) _wacc(
     ValuationInputs inputs,
     FundamentalsSnapshot latest,
     List<String> warnings,
-    double sharesPerQuote,
+    QuotedShares divisor,
     AuditTransaction? audit, {
     CapmInputs? capmOverride,
   }) {
     final capm = capmOverride ?? inputs.capm;
     final debt = latest.totalDebt;
-    final shares = latest.reconciledShares;
-    final equity = latest.marketCap ??
-        (shares != null ? shares / sharesPerQuote * inputs.marketPrice : null);
+    final equity = latest.marketCap ?? (divisor.count * inputs.marketPrice);
+    // O observado entra apenas como **conferência**: desde a decisão 31 o Kd
+    // aplicado é `Rf + spread(cobertura)`, e como `capm` aqui pode ser o de
+    // equilíbrio, o custo da dívida do terminal decai junto com a taxa livre de
+    // risco, preservando o prêmio de crédito. Medido numa empresa de cobertura
+    // 3,7x: 16,49% no corrente contra 11,80% no terminal, com os mesmos 2,40
+    // p.p. de spread. Ver `CostOfCapital.effectiveCostOfDebt`.
     final kd = latest.costOfDebt;
-    final tax = latest.effectiveTaxRate;
+    // O escudo fiscal usa a alíquota **marginal estatutária**, não a efetiva do
+    // exercício: o benefício do endividamento é o valor presente dos escudos
+    // futuros, que se realizam à alíquota legal. A efetiva continua sendo
+    // medida e declarada quando destoa — ver
+    // [ValuationParameters.statutoryTaxRate].
+    const tax = ValuationParameters.statutoryTaxRate;
+    final efetiva = latest.effectiveTaxRate;
 
-    if (debt <= 0 || equity == null || equity <= 0 || kd == null) {
+    if (debt <= 0 || equity <= 0 || kd == null) {
       warnings.add(
         'Estrutura de capital indisponível; desconto feito ao custo do capital '
         'próprio em vez do WACC.',
@@ -861,7 +1195,7 @@ abstract final class ValuationCascade {
         latex: r'r = K_e \quad (\text{sem estrutura de capital observável})',
         variables: {
           'D (R\$)': _r(debt),
-          'E (R\$)': equity == null ? null : _r(equity),
+          'E (R\$)': _r(equity),
           'K_d (% a.a.)': kd == null ? null : _r(kd * 100),
         },
         steps: const [
@@ -872,30 +1206,39 @@ abstract final class ValuationCascade {
         result: capm.costOfEquity * 100,
         unit: '% a.a.',
       );
-      return capm.costOfEquity;
+      return (rate: capm.costOfEquity, costOfDebtEstimated: false);
     }
 
-    if (tax == null) {
+    if (efetiva != null && (efetiva - tax).abs() > 0.10) {
       warnings.add(
-        'Alíquota efetiva indisponível; WACC calculado sem benefício fiscal '
-        'da dívida, o que o torna conservador.',
+        'A alíquota efetiva do exercício foi de ${_pct(efetiva)}, distante da '
+        'alíquota marginal estatutária de ${_pct(tax)} usada no escudo fiscal '
+        'do WACC. O escudo desconta despesa financeira **futura**, que se '
+        'realiza à alíquota legal; a efetiva de um exercício carrega '
+        'incentivo, JCP, prejuízo compensado e diferimento.',
       );
     }
 
     final coc = CostOfCapital(
       capm: capm,
       costOfDebt: kd,
-      taxRate: tax ?? 0.0,
+      taxRate: tax,
       equityValue: equity,
       debtValue: debt,
+      interestCoverage: latest.interestCoverage,
     );
 
     if (coc.costOfDebtWasClamped) {
+      final cobertura = latest.interestCoverage;
       warnings.add(
         'O custo da dívida implícito nos demonstrativos deu '
-        '${_pct(kd)} a.a., fora da faixa defensável; usado '
-        '${_pct(coc.effectiveCostOfDebt)} a.a., limitado entre a taxa livre '
-        'de risco e ela mais ${_pct(CostOfCapital.maxCreditSpread)}.',
+        '${_pct(kd)} a.a., fora da faixa defensável de '
+        '${_pct(capm.riskFreeRate)} a '
+        '${_pct(capm.riskFreeRate + CostOfCapital.maxCreditSpread)}. A despesa '
+        'financeira publicada inclui arrendamento e variação cambial, que não '
+        'são captação. Adotado ${_pct(coc.effectiveCostOfDebt)} a.a., da '
+        'classificação sintética por cobertura de juros'
+        '${cobertura == null ? ' (cobertura não medível)' : ' de ${cobertura.toStringAsFixed(1)}x'}.',
       );
     }
     if (coc.waccWasFloored) {
@@ -907,7 +1250,7 @@ abstract final class ValuationCascade {
     }
 
     _auditWacc(audit, coc);
-    return coc.wacc;
+    return (rate: coc.wacc, costOfDebtEstimated: coc.costOfDebtWasClamped);
   }
 
   static String _pct(double fraction) =>
@@ -922,6 +1265,7 @@ abstract final class ValuationCascade {
     required int samples,
     required int seed,
     required List<String> warnings,
+    required ValuationDiagnostics diagnostics,
   }) {
     final source = (scenarioBuilder ?? DiscreteScenarios.around)(assumptions);
     final outcome = ScenarioEngine.run(
@@ -944,6 +1288,7 @@ abstract final class ValuationCascade {
           ...warnings,
           'Cenários não puderam ser gerados; apresentado apenas o cenário base.',
         ],
+        diagnostics: diagnostics,
       );
     }
 
@@ -973,6 +1318,7 @@ abstract final class ValuationCascade {
       ),
       distribution: scenarios.distribution,
       warnings: local,
+      diagnostics: diagnostics,
     );
   }
 
@@ -1083,6 +1429,17 @@ abstract final class ValuationCascade {
               4,
             ),
           },
+        if (result.diagnostics != null)
+          'diagnostics': {
+            'terminalShare': _r(result.diagnostics!.terminalShare, 4),
+            'equityShare': _r(result.diagnostics!.equityShare, 4),
+            'baseFactor': _r(result.diagnostics!.baseFactor, 4),
+            'growthIdentified': result.diagnostics!.growthIdentified,
+            'moatApplied': result.diagnostics!.moatApplied,
+            'caveats': [
+              for (final c in result.diagnostics!.caveats) c.name,
+            ],
+          },
         'warnings': result.warnings,
       };
 
@@ -1124,6 +1481,44 @@ abstract final class ValuationCascade {
     );
   }
 
+  static void _auditQuotedShares(
+    AuditTransaction? audit,
+    FundamentalsSnapshot latest,
+    double marketPrice,
+    QuotedShares divisor,
+  ) {
+    if (audit == null) return;
+    final vm = latest.marketCap;
+    audit.step(
+      formulaName: 'Contagem de papéis da ponte',
+      latex: r'N_{ponte} = \max\!\left(\frac{VM}{P_{mkt}},\; '
+          r'\frac{N_{conciliado}}{u}\right)'
+          r'\;\;\text{na divergência};\;\; \frac{VM}{P_{mkt}}\;\;\text{fora dela}',
+      variables: {
+        'VM (R\$)': vm == null ? null : _r(vm),
+        'P_mkt (R\$)': _r(marketPrice),
+        'N pelo mercado': divisor.fromMarketCap == null
+            ? null
+            : _r(divisor.fromMarketCap!, 0),
+        'N pelas demonstrações': divisor.fromStatements == null
+            ? null
+            : _r(divisor.fromStatements!, 0),
+        'divergência (x)':
+            divisor.divergence == null ? null : _r(divisor.divergence!, 3),
+      },
+      steps: [
+        'Passo 1: contagem implícita no valor de mercado → '
+            '${vm == null ? 'valor de mercado ausente' : '${_r(vm)} ÷ ${_r(marketPrice)} = ${_r(divisor.fromMarketCap ?? 0, 0)}'}',
+        'Passo 2: contagem conciliada pelas demonstrações, na unidade '
+            'negociada → ${_r(divisor.fromStatements ?? 0, 0)}',
+        'Passo 3: as duas ${divisor.diverge ? 'divergem além da banda de ${FundamentalsSnapshot.reconciliationBand}x; adotada a maior, que é o sentido conservador do erro' : 'concordam dentro da banda de ${FundamentalsSnapshot.reconciliationBand}x; adotada a do mercado'} → '
+            '${divisor.source.label}',
+      ],
+      result: _r(divisor.count, 0).toDouble(),
+      unit: 'papéis na unidade negociada',
+    );
+  }
+
   static void _auditCapm(AuditTransaction? audit, CapmInputs capm) {
     if (audit == null) return;
     final risk = capm.beta * capm.marketPremium;
@@ -1150,7 +1545,7 @@ abstract final class ValuationCascade {
   static void _auditWacc(AuditTransaction? audit, CostOfCapital coc) {
     if (audit == null) return;
     final kd = coc.effectiveCostOfDebt;
-    final afterTax = kd * (1 - coc.taxRate);
+    final afterTax = kd * (1 - coc.effectiveTaxShield);
     final equityLeg = coc.equityShare * coc.costOfEquity;
     final debtLeg = coc.debtShare * afterTax;
 
@@ -1162,7 +1557,7 @@ abstract final class ValuationCascade {
         'D (R\$)': _r(coc.debtValue),
         'K_e (% a.a.)': _r(coc.costOfEquity * 100),
         'K_d (% a.a.)': _r(kd * 100),
-        't (%)': _r(coc.taxRate * 100),
+        't (%)': _r(coc.effectiveTaxShield * 100),
       },
       steps: [
         'Passo 1: participação do capital próprio → ${_r(coc.equityValue)} ÷ '
@@ -1175,7 +1570,7 @@ abstract final class ValuationCascade {
         else
           'Passo 3: custo da dívida observado dentro da banda → ${_pct(kd)}',
         'Passo 4: benefício fiscal da dívida → ${_pct(kd)} × (1 − '
-            '${_r(coc.taxRate, 4)}) = ${_pct(afterTax)}',
+            '${_r(coc.effectiveTaxShield, 4)}) = ${_pct(afterTax)}',
         'Passo 5: soma ponderada → ${_r(coc.equityShare, 4)} × '
             '${_pct(coc.costOfEquity)} + ${_r(coc.debtShare, 4)} × '
             '${_pct(afterTax)} = ${_pct(equityLeg)} + ${_pct(debtLeg)} = '
@@ -1519,25 +1914,50 @@ abstract final class ValuationCascade {
   }) {
     if (audit == null) return;
     final r = assumptions.discountRate;
+    final rInf = assumptions.terminalDiscountRate;
     final g = assumptions.growthRate;
+    final gInf = assumptions.perpetualGrowth;
     final n = outcome.projectedFlows.length;
     final sumPv = outcome.enterpriseValue - outcome.discountedTerminalValue;
 
+    // O rastro precisa reproduzir a conta que foi feita, e a conta usa taxa,
+    // crescimento e retenção **variáveis** ano a ano. Descrevê-la com g e r
+    // constantes escrevia números que não fecham com o resultado ao lado: num
+    // ativo típico, o fluxo do ano 10 aparecia 2,45x maior que o efetivamente
+    // usado, e o fator de desconto 1,21x maior. O fator abaixo é o mesmo
+    // acumulado que `DcfCalculator._project` monta.
+    var fator = 1.0;
+    final fatores = <double>[];
+    for (var t = 1; t <= n; t++) {
+      fator *= 1 + assumptions.discountRateAt(t);
+      fatores.add(fator);
+    }
+
     audit.step(
       formulaName: 'Projeção e desconto do período explícito ($flowSymbol)',
-      latex: r'VP_{explícito} = \sum_{t=1}^{N} \frac{F_0\,(1+g)^{t}}{(1+r)^{t}}',
+      latex: r'VP_{explícito} = \sum_{t=1}^{N} '
+          r'\frac{L_t\,(1 - b_t)}{\prod_{s=1}^{t}(1 + r_s)}'
+          r'\quad;\quad L_t = L_{t-1}(1 + g_t),\; b_t = g_t / ROIC_t',
       variables: {
         'F_0': _r(baseFlow),
-        'g (% a.a.)': _r(g * 100),
-        'r = $discountSymbol (% a.a.)': _r(r * 100),
+        'g_1 (% a.a.)': _r(g * 100),
+        'g_N (% a.a.)': _r(assumptions.growthAt(n) * 100),
+        'r_1 = $discountSymbol (% a.a.)': _r(r * 100),
+        'r_N (% a.a.)': _r(assumptions.discountRateAt(n) * 100),
+        'ROIC_1 (% a.a.)': _r(assumptions.returnOnCapitalAt(1) * 100),
         'N (anos)': assumptions.projectionYears,
       },
       steps: [
+        'Passo 0: as taxas decaem linearmente ao longo da janela. O fator de '
+            'desconto **acumula** a taxa de cada ano em vez de elevar uma só a '
+            't, e o fluxo do ano é o lucro menos a retenção que financia o '
+            'crescimento daquele mesmo ano.',
         for (var t = 1; t <= n; t++)
-          'Passo $t: ano $t → fluxo ${_r(outcome.projectedFlows[t - 1])} '
-              '(= ${_r(baseFlow)} × ${_r(math.pow(1 + g, t).toDouble(), 6)}); '
-              'descontado por (1 + ${_r(r, 4)})^$t = '
-              '${_r(math.pow(1 + r, t).toDouble(), 6)} → valor presente '
+          'Passo $t: ano $t → g = ${_pct(assumptions.growthAt(t))}, '
+              'retenção = ${_pct(assumptions.retentionAt(t))}, '
+              'r = ${_pct(assumptions.discountRateAt(t))}; fluxo '
+              '${_r(outcome.projectedFlows[t - 1])} ÷ fator acumulado '
+              '${_r(fatores[t - 1], 6)} → valor presente '
               '${_r(outcome.discountedFlows[t - 1])}',
         'Passo ${n + 1}: soma dos valores presentes do período explícito → '
             '${_r(sumPv)}',
@@ -1546,25 +1966,52 @@ abstract final class ValuationCascade {
       unit: perShareAlready ? r'R$ por papel' : r'R$',
     );
 
+    // Duas formas de terminal, e o rastro precisa dizer qual foi aplicada: com
+    // retorno neutro o crescimento perpétuo **sai** da fórmula, e exibir o
+    // spread de Gordon ali descreveria uma conta que não foi feita. A taxa é a
+    // de equilíbrio, não a corrente.
+    // Três formas de terminal, e o rastro precisa dizer qual foi aplicada. Com
+    // retorno neutro o crescimento perpétuo **sai** da fórmula, e exibir o
+    // spread de Gordon ali descreveria uma conta que não foi feita. A taxa é
+    // sempre a de equilíbrio, nunca a corrente.
+    //
+    // O ramo de retenção só existe quando não há retorno terminal declarado
+    // **e** o retorno neutro está desligado — caminho que a cascata não usa,
+    // mas que a classe permite a quem monta premissas à mão.
+    final moat = assumptions.terminalReturnOnCapital;
+    final neutro = moat == null && assumptions.neutralTerminalReturn;
+    final reinvestimento = moat != null
+        ? (gInf / moat).clamp(0.0, 0.95)
+        : assumptions.retentionAt(assumptions.projectionYears);
+    final fatorFinal = n == 0 ? 1.0 : fatores[n - 1];
     audit.step(
-      formulaName: 'Valor terminal (perpetuidade de Gordon)',
-      latex: r'VT = \frac{F_N\,(1 + g_\infty)}{r - g_\infty}'
-          r'\quad;\quad VP(VT) = \frac{VT}{(1+r)^{N}}',
+      formulaName: neutro
+          ? 'Valor terminal (retorno neutro, ROIC_inf = r_inf)'
+          : 'Valor terminal (Gordon com reinvestimento)',
+      latex: neutro
+          ? r'VT = \frac{L_{N+1}}{r_\infty}'
+              r'\quad;\quad VP(VT) = \frac{VT}{\prod_{s=1}^{N}(1+r_s)}'
+          : r'VT = \frac{L_{N+1}\,(1 - b_\infty)}{r_\infty - g_\infty}'
+              r'\quad;\quad VP(VT) = \frac{VT}{\prod_{s=1}^{N}(1+r_s)}',
       variables: {
-        'F_N': n == 0 ? null : _r(outcome.projectedFlows[n - 1]),
-        'g_∞ (% a.a.)': _r(assumptions.perpetualGrowth * 100),
-        'r (% a.a.)': _r(r * 100),
+        'L_N': n == 0 ? null : _r(outcome.projectedFlows[n - 1]),
+        'g_inf (% a.a.)': _r(gInf * 100),
+        'r_inf (% a.a.)': _r(rInf * 100),
+        'ROIC_inf (% a.a.)': moat == null ? null : _r(moat * 100),
         'N (anos)': assumptions.projectionYears,
       },
       steps: [
-        'Passo 1: spread da perpetuidade → ${_pct(r)} − '
-            '${_pct(assumptions.perpetualGrowth)} = '
-            '${_pct(r - assumptions.perpetualGrowth)}'
-            '${(r - assumptions.perpetualGrowth) < DcfCalculator.minimumSpread ? ' (abaixo do mínimo de ${_pct(DcfCalculator.minimumSpread)}; adotado o mínimo)' : ''}',
-        'Passo 2: valor terminal → ${_r(outcome.terminalValue)}',
-        'Passo 3: trazido a valor presente por (1 + ${_r(r, 4)})^'
-            '${assumptions.projectionYears} → '
-            '${_r(outcome.discountedTerminalValue)}',
+        if (neutro)
+          'Passo 1: com ROIC_inf = r_inf a álgebra colapsa e o crescimento '
+              'perpétuo sai da perpetuidade — VT = L_(N+1) ÷ r_inf, sem spread'
+        else
+          'Passo 1: spread da perpetuidade → ${_pct(rInf)} − ${_pct(gInf)} = '
+              '${_pct(rInf - gInf)}; retenção perpétua = '
+              '${_pct(reinvestimento)}',
+        'Passo 2: valor terminal no ano ${assumptions.projectionYears} → '
+            '${_r(outcome.terminalValue)}',
+        'Passo 3: trazido a presente pelo fator acumulado '
+            '${_r(fatorFinal, 6)} → ${_r(outcome.discountedTerminalValue)}',
         'Passo 4: participação do valor terminal no total → '
             '${_pct(outcome.terminalShare)}',
       ],

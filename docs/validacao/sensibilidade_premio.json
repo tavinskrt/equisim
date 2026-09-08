@@ -1,0 +1,2954 @@
+[
+ {
+  "ticker": "AALR3",
+  "beta": 0.4566027684090479,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ABCB4",
+  "beta": 0.8293821107400863,
+  "usado_5.50": 0.08096013018714411,
+  "medido": 0.3588283157038243,
+  "meio_4.00": 0.22294548413344187,
+  "damodaran_7.00": -0.03417412530512612
+ },
+ {
+  "ticker": "ABEV3",
+  "beta": 0.609164668432745,
+  "usado_5.50": -0.349428208386277,
+  "medido": -0.181702668360864,
+  "meio_4.00": -0.2674714104193139,
+  "damodaran_7.00": -0.4110546378653113
+ },
+ {
+  "ticker": "AERI3",
+  "beta": 1.0961299075081534,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AFLT3",
+  "beta": 0.13304966064393187,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AGRO3",
+  "beta": 0.6349387373480088,
+  "usado_5.50": -0.5334717176959003,
+  "medido": -0.46652828230409965,
+  "meio_4.00": -0.49818370524130773,
+  "damodaran_7.00": -0.5640892579138557
+ },
+ {
+  "ticker": "AGXY3",
+  "beta": 0.4474771233806504,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AHEB3",
+  "beta": 0.3755494299527374,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ALLD3",
+  "beta": 0.8919953605990865,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ALOS3",
+  "beta": 1.102959272849438,
+  "usado_5.50": -0.4599097535577924,
+  "medido": -0.35682054842068717,
+  "meio_4.00": -0.40819160013884065,
+  "damodaran_7.00": -0.5012148559527941
+ },
+ {
+  "ticker": "ALPA3",
+  "beta": 0.8257130772523543,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ALPA4",
+  "beta": 1.3348598089133268,
+  "usado_5.50": -0.847457627118644,
+  "medido": -0.7811348563006631,
+  "meio_4.00": -0.8142962417096536,
+  "damodaran_7.00": -0.8739867354458364
+ },
+ {
+  "ticker": "ALPK3",
+  "beta": 1.1251709041742282,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ALUP11",
+  "beta": 0.6394552263395653,
+  "usado_5.50": -0.28448275862068967,
+  "medido": -0.1539833531510107,
+  "meio_4.00": -0.20481569560047563,
+  "damodaran_7.00": -0.3576099881093936
+ },
+ {
+  "ticker": "ALUP3",
+  "beta": 0.6044774348530366,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ALUP4",
+  "beta": 0.6329094332382229,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AMAR3",
+  "beta": 1.265522044868753,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AMBP3",
+  "beta": 1.204679413238727,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AMER3",
+  "beta": 0.163559851262815,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AMOB3",
+  "beta": 1.405170826145336,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ANIM3",
+  "beta": 2.0886459947213494,
+  "usado_5.50": -0.08191126279863488,
+  "medido": 0.22866894197952214,
+  "meio_4.00": 0.06825938566552892,
+  "damodaran_7.00": -0.19453924914675777
+ },
+ {
+  "ticker": "ARML3",
+  "beta": 1.6491730044113881,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ARND3",
+  "beta": 0.6248921680803767,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ASAI3",
+  "beta": 1.2088377596858062,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ATED3",
+  "beta": 0.37939138931350974,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AUAU3",
+  "beta": 1.487389714521026,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AURE3",
+  "beta": 0.6714235756844077,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AVLL3",
+  "beta": 0.5360408025329181,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AXIA3",
+  "beta": 1.1361339344942432,
+  "usado_5.50": -0.8020984081041969,
+  "medido": -0.748371924746744,
+  "meio_4.00": -0.7749638205499277,
+  "damodaran_7.00": -0.8234442836468886
+ },
+ {
+  "ticker": "AXIA7",
+  "beta": 1.477405565002784,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AZEV3",
+  "beta": 1.0463072417149442,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AZEV4",
+  "beta": 1.1570244780576984,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AZTE3",
+  "beta": 0.6638991233378895,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AZUL3",
+  "beta": 109108.81091271117,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "AZZA3",
+  "beta": 1.3854221566622595,
+  "usado_5.50": -0.41209723007348786,
+  "medido": -0.18598078010175245,
+  "meio_4.00": -0.29451667608818544,
+  "damodaran_7.00": -0.5110231769361221
+ },
+ {
+  "ticker": "B1003",
+  "beta": -0.02032475035916768,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "B3SA3",
+  "beta": 1.4909803018123147,
+  "usado_5.50": -0.747265400115141,
+  "medido": -0.6781807714450202,
+  "meio_4.00": -0.7127230857800806,
+  "damodaran_7.00": -0.7737478411053541
+ },
+ {
+  "ticker": "BALM3",
+  "beta": 0.14770789165705894,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BALM4",
+  "beta": 0.22658342882526325,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BAUH4",
+  "beta": -0.026059485858108584,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BAZA3",
+  "beta": 0.3228301641270849,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BBAS3",
+  "beta": 0.9799481147407962,
+  "usado_5.50": 0.4000888099467141,
+  "medido": 0.8059502664298402,
+  "meio_4.00": 0.6047957371225577,
+  "damodaran_7.00": 0.23712255772646537
+ },
+ {
+  "ticker": "BBDC3",
+  "beta": 1.059546744434161,
+  "usado_5.50": -0.1492726122707148,
+  "medido": 0.09677419354838705,
+  "meio_4.00": -0.025300442757748284,
+  "damodaran_7.00": -0.24731182795698925
+ },
+ {
+  "ticker": "BBDC4",
+  "beta": 1.1041686727095872,
+  "usado_5.50": -0.26368715083798877,
+  "medido": -0.043016759776536295,
+  "meio_4.00": -0.15307262569832394,
+  "damodaran_7.00": -0.34972067039106136
+ },
+ {
+  "ticker": "BBSE3",
+  "beta": 0.47384827401582086,
+  "usado_5.50": 0.19592030360531323,
+  "medido": 0.4354838709677421,
+  "meio_4.00": 0.31854838709677435,
+  "damodaran_7.00": 0.09558823529411768
+ },
+ {
+  "ticker": "BDLL3",
+  "beta": 0.13642250886136442,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BDLL4",
+  "beta": -0.03769199055589193,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BEEF3",
+  "beta": 0.8228197334990804,
+  "usado_5.50": 0.9164556962025316,
+  "medido": 1.078481012658228,
+  "meio_4.00": 1.0050632911392403,
+  "damodaran_7.00": 0.8278481012658226
+ },
+ {
+  "ticker": "BEES3",
+  "beta": 0.23675523173271834,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BEES4",
+  "beta": 0.16208041980652726,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BGIP3",
+  "beta": 0.08199771407382078,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BGIP4",
+  "beta": 0.21818047059842838,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BHIA3",
+  "beta": 1.7873385642398125,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BIED3",
+  "beta": 0.1537157621711676,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BIOM3",
+  "beta": 0.5377409051421829,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BLAU3",
+  "beta": 0.9752294010029248,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BMEB3",
+  "beta": 0.2300280812038087,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BMEB4",
+  "beta": 0.3851461677145962,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BMGB4",
+  "beta": 0.8540523442361202,
+  "usado_5.50": 0.24414715719063543,
+  "medido": 0.4966555183946486,
+  "meio_4.00": 0.37458193979933113,
+  "damodaran_7.00": 0.13545150501672235
+ },
+ {
+  "ticker": "BMIN4",
+  "beta": 0.1485183757770829,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BMKS3",
+  "beta": 0.09829070337192915,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BMOB3",
+  "beta": 1.1592636442356226,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BNBR3",
+  "beta": 0.157253495092017,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BOBR4",
+  "beta": 0.740235409554447,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BPAC11",
+  "beta": 1.450610498880568,
+  "usado_5.50": -0.22332883187035793,
+  "medido": 0.061444969615124925,
+  "meio_4.00": -0.08305199189736667,
+  "damodaran_7.00": -0.32967589466576636
+ },
+ {
+  "ticker": "BPAC3",
+  "beta": 1.2948441827362531,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BPAC5",
+  "beta": 1.339622308474234,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BRAP3",
+  "beta": 0.8070210385191633,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BRAP4",
+  "beta": 0.9062062499153767,
+  "usado_5.50": -0.7958185053380783,
+  "medido": -0.7575622775800712,
+  "meio_4.00": -0.7762455516014234,
+  "damodaran_7.00": -0.8118327402135231
+ },
+ {
+  "ticker": "BRAV3",
+  "beta": 1.125332869768564,
+  "usado_5.50": -0.3512304250559284,
+  "medido": -0.1991051454138702,
+  "meio_4.00": -0.2684563758389261,
+  "damodaran_7.00": -0.42729306487695745
+ },
+ {
+  "ticker": "BRBI11",
+  "beta": 0.8850206576427689,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BRKM3",
+  "beta": 0.9743948102203616,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BRKM5",
+  "beta": 1.1641853626289094,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BRKM6",
+  "beta": -0.004899821860190299,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BRSR3",
+  "beta": 0.5251294953774913,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BRSR5",
+  "beta": 0.19993883473568666,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BRSR6",
+  "beta": 0.8601282863722263,
+  "usado_5.50": -0.07526881720430113,
+  "medido": 0.14717741935483866,
+  "meio_4.00": 0.03830645161290312,
+  "damodaran_7.00": -0.16733870967741937
+ },
+ {
+  "ticker": "BRST3",
+  "beta": 1.1039575258830763,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BSLI3",
+  "beta": 0.3474486474230689,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "BSLI4",
+  "beta": 0.3822641659654562,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CAMB3",
+  "beta": 0.6617036961919475,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CAML3",
+  "beta": 1.0067117836620751,
+  "usado_5.50": -0.6133603238866396,
+  "medido": -0.5060728744939271,
+  "meio_4.00": -0.5587044534412956,
+  "damodaran_7.00": -0.6558704453441295
+ },
+ {
+  "ticker": "CASH3",
+  "beta": 1.469981465536228,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CBAV3",
+  "beta": 1.2318032518883781,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CBEE3",
+  "beta": 0.1338126636425132,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CEAB3",
+  "beta": 1.7731150751942457,
+  "usado_5.50": -0.5494028230184582,
+  "medido": -0.4440825190010858,
+  "meio_4.00": -0.49619978284473404,
+  "damodaran_7.00": -0.5917480998914224
+ },
+ {
+  "ticker": "CEBR3",
+  "beta": 0.21247138259648393,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CEBR5",
+  "beta": 0.18108551391809224,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CEBR6",
+  "beta": 0.1887714159665296,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CEDO4",
+  "beta": 0.3655221289732143,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CEEB3",
+  "beta": 0.15090520340252586,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CEED3",
+  "beta": 0.15235665882731472,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CEGR3",
+  "beta": -0.5019458796736116,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CGAS3",
+  "beta": 0.23240610461558908,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CGAS5",
+  "beta": 0.1712616272269398,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CGRA3",
+  "beta": 0.2946084885408351,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CGRA4",
+  "beta": 0.437565668129388,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CLSC3",
+  "beta": 0.22743072731688838,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CLSC4",
+  "beta": 0.32845121324006815,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CMIG3",
+  "beta": 0.7875805850981437,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CMIG4",
+  "beta": 0.8945895437544745,
+  "usado_5.50": -0.45026642984014204,
+  "medido": -0.2690941385435168,
+  "meio_4.00": -0.3552397868561279,
+  "damodaran_7.00": -0.5310834813499111
+ },
+ {
+  "ticker": "CMIN3",
+  "beta": 1.2430451704469838,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "COCE3",
+  "beta": -0.3423905867155676,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "COCE5",
+  "beta": 0.3906211663227778,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "COGN3",
+  "beta": 1.6429105464349434,
+  "usado_5.50": -0.6188524590163934,
+  "medido": -0.5081967213114754,
+  "meio_4.00": -0.5655737704918032,
+  "damodaran_7.00": -0.6598360655737705
+ },
+ {
+  "ticker": "CPFE3",
+  "beta": 0.6980077121449335,
+  "usado_5.50": -0.3316250266922912,
+  "medido": -0.1674140508221225,
+  "meio_4.00": -0.24450138799914575,
+  "damodaran_7.00": -0.4080717488789238
+ },
+ {
+  "ticker": "CPLE3",
+  "beta": 0.8191740748546219,
+  "usado_5.50": -0.7652996845425867,
+  "medido": -0.7425867507886436,
+  "meio_4.00": -0.7526813880126183,
+  "damodaran_7.00": -0.7791798107255521
+ },
+ {
+  "ticker": "CRPG5",
+  "beta": 0.7264972843465816,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CRPG6",
+  "beta": 0.5036662305798933,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CSAN3",
+  "beta": 1.493870652787231,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CSED3",
+  "beta": 1.4367809600889343,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CSMG3",
+  "beta": 0.7929224657704278,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CSNA3",
+  "beta": 1.6215589940311383,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CSUD3",
+  "beta": 0.8164899926968179,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CTAX3",
+  "beta": 1.0,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CTKA4",
+  "beta": 0.597571299581658,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CURY3",
+  "beta": 1.2882213383481889,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "CVCB3",
+  "beta": 1.9845626210715361,
+  "usado_5.50": -0.18617021276595738,
+  "medido": 0.04255319148936174,
+  "meio_4.00": -0.07446808510638293,
+  "damodaran_7.00": -0.27659574468085096
+ },
+ {
+  "ticker": "CXSE3",
+  "beta": 0.6901448738676822,
+  "usado_5.50": -0.4054054054054054,
+  "medido": -0.2612612612612613,
+  "meio_4.00": -0.3333333333333333,
+  "damodaran_7.00": -0.4624624624624625
+ },
+ {
+  "ticker": "CYRE3",
+  "beta": 1.5385246762290707,
+  "usado_5.50": -0.43554687500000006,
+  "medido": -0.7695312500000001,
+  "meio_4.00": -0.833203125,
+  "damodaran_7.00": -0.50703125
+ },
+ {
+  "ticker": "CYRE4",
+  "beta": 1.7583761779272151,
+  "usado_5.50": -0.47532144338448773,
+  "medido": -0.79303193695562,
+  "meio_4.00": -0.8602239734549979,
+  "damodaran_7.00": -0.5454168394856905
+ },
+ {
+  "ticker": "DASA3",
+  "beta": 1.3865473031385351,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "DESK3",
+  "beta": 1.217229271229101,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "DEXP3",
+  "beta": 0.8845892754925405,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "DEXP4",
+  "beta": 0.7166258880449812,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "DIRR3",
+  "beta": 1.3665776974262842,
+  "usado_5.50": -0.8263525305410122,
+  "medido": -0.7565445026178012,
+  "meio_4.00": -0.7905759162303665,
+  "damodaran_7.00": -0.8551483420593369
+ },
+ {
+  "ticker": "DMVF3",
+  "beta": 0.7044614086881039,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "DOHL4",
+  "beta": 0.18478325636254367,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "DOTZ3",
+  "beta": 0.5873244906487554,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "DTCY3",
+  "beta": -0.012262674890436686,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "DXCO3",
+  "beta": 1.343813904562146,
+  "usado_5.50": -0.8687943262411347,
+  "medido": -0.8209219858156028,
+  "meio_4.00": -0.8457446808510638,
+  "damodaran_7.00": -0.8865248226950355
+ },
+ {
+  "ticker": "EALT3",
+  "beta": 0.28110475303992755,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "EALT4",
+  "beta": 0.38536020180455455,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ECOM3",
+  "beta": 1.1502168343061845,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ECOR3",
+  "beta": 1.6813625659436298,
+  "usado_5.50": -0.4532828282828283,
+  "medido": -0.25757575757575757,
+  "meio_4.00": -0.35858585858585856,
+  "damodaran_7.00": -0.523989898989899
+ },
+ {
+  "ticker": "EGIE3",
+  "beta": 0.5645681752735371,
+  "usado_5.50": 0.4054412740544127,
+  "medido": 0.8417385534173855,
+  "meio_4.00": 0.6274054412740543,
+  "damodaran_7.00": 0.22561380225613792
+ },
+ {
+  "ticker": "EKTR4",
+  "beta": 0.07546960974604601,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "EMAE4",
+  "beta": 0.5428024995159658,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "EMBJ3",
+  "beta": 0.7596876098539329,
+  "usado_5.50": -0.9366182354179827,
+  "medido": -0.921773004843125,
+  "meio_4.00": -0.9289324068224889,
+  "damodaran_7.00": -0.9427247841650874
+ },
+ {
+  "ticker": "ENEV3",
+  "beta": 1.02814936559949,
+  "usado_5.50": -0.831823124320406,
+  "medido": -0.7868793040956868,
+  "meio_4.00": -0.8089887640449438,
+  "damodaran_7.00": -0.849583182312432
+ },
+ {
+  "ticker": "ENGI11",
+  "beta": 0.9415546353269233,
+  "usado_5.50": 0.8302547151468014,
+  "medido": 1.421543846004278,
+  "meio_4.00": 1.1285242076608983,
+  "damodaran_7.00": 0.5944001555512347
+ },
+ {
+  "ticker": "ENGI3",
+  "beta": 0.7999891187435213,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ENGI4",
+  "beta": 0.9551521211724623,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ENJU3",
+  "beta": 1.3933680427088526,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ENMT3",
+  "beta": 0.1161768589319304,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ENMT4",
+  "beta": 0.07805695836910258,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "EPAR3",
+  "beta": 0.32427194674811666,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "EQPA3",
+  "beta": 0.2482126457678729,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "EQPA5",
+  "beta": 0.13156949434677334,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "EQTL3",
+  "beta": 0.8779618930792771,
+  "usado_5.50": -0.52170582226762,
+  "medido": -0.3889172625127681,
+  "meio_4.00": -0.45020429009193047,
+  "damodaran_7.00": -0.5868232890704801
+ },
+ {
+  "ticker": "ESPA3",
+  "beta": 1.4530635462404178,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ESTR4",
+  "beta": 0.10685110886385944,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ETER3",
+  "beta": 1.1319833315796577,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "EUCA3",
+  "beta": 0.5667347353175531,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "EUCA4",
+  "beta": 0.7963968090854063,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "EVEN3",
+  "beta": 1.3693350751594267,
+  "usado_5.50": -0.574468085106383,
+  "medido": -0.475177304964539,
+  "meio_4.00": -0.5153664302600474,
+  "damodaran_7.00": -0.6382978723404256
+ },
+ {
+  "ticker": "EZTC3",
+  "beta": 1.49070187330481,
+  "usado_5.50": -0.6300000000000001,
+  "medido": -0.5092307692307693,
+  "meio_4.00": -0.5692307692307692,
+  "damodaran_7.00": -0.6776923076923076
+ },
+ {
+  "ticker": "FASA3",
+  "beta": 1.0,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "FESA3",
+  "beta": 0.31137862585394066,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "FESA4",
+  "beta": 1.0077667876569976,
+  "usado_5.50": -0.6167557932263815,
+  "medido": -0.5971479500891266,
+  "meio_4.00": -0.6060606060606061,
+  "damodaran_7.00": -0.6238859180035651
+ },
+ {
+  "ticker": "FHER3",
+  "beta": 0.730154159595394,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "FICT3",
+  "beta": 0.6685141566042839,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "FIEI3",
+  "beta": 0.15739660727976612,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "FIQE3",
+  "beta": 1.038359818475041,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "FLRY3",
+  "beta": 0.9167114617540278,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "FRAS3",
+  "beta": 0.7603889938091264,
+  "usado_5.50": -0.6675496688741721,
+  "medido": -0.5916114790286976,
+  "meio_4.00": -0.627373068432671,
+  "damodaran_7.00": -0.7028697571743929
+ },
+ {
+  "ticker": "GEPA3",
+  "beta": 0.0757161093267323,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "GEPA4",
+  "beta": 0.1999253504896507,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "GFSA3",
+  "beta": 1.4459000802661703,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "GGBR3",
+  "beta": 0.8483879279847648,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "GGBR4",
+  "beta": 0.9572755792631833,
+  "usado_5.50": -0.7521704814522494,
+  "medido": -0.6878453038674033,
+  "meio_4.00": -0.7186266771902131,
+  "damodaran_7.00": -0.7797947908445145
+ },
+ {
+  "ticker": "GGPS3",
+  "beta": 1.089740175085284,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "GMAT3",
+  "beta": 1.2631028928590935,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "GOAU3",
+  "beta": 0.8709383677493217,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "GOAU4",
+  "beta": 0.9722667305670972,
+  "usado_5.50": 1.2363473589973142,
+  "medido": 1.630259623992838,
+  "meio_4.00": 1.4449418084153984,
+  "damodaran_7.00": 1.052820053715309
+ },
+ {
+  "ticker": "GRND3",
+  "beta": 0.867908046774235,
+  "usado_5.50": -0.36141304347826086,
+  "medido": -0.2663043478260869,
+  "meio_4.00": -0.31250000000000006,
+  "damodaran_7.00": -0.3994565217391305
+ },
+ {
+  "ticker": "HAGA3",
+  "beta": 0.48293343594079585,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "HAGA4",
+  "beta": 0.6890734915418111,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "HAPV3",
+  "beta": 1.6745467511638457,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "HBOR3",
+  "beta": 1.7250890291242407,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "HBRE3",
+  "beta": 1.203188520905365,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "HBSA3",
+  "beta": 1.0976060475596574,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "HOOT4",
+  "beta": 0.09989743724313897,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "HYPE3",
+  "beta": 0.8842678871376457,
+  "usado_5.50": -0.5544041450777202,
+  "medido": -0.442573402417962,
+  "meio_4.00": -0.49740932642487046,
+  "damodaran_7.00": -0.6001727115716753
+ },
+ {
+  "ticker": "IFCM3",
+  "beta": 1.5089166171530424,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "IGTI11",
+  "beta": 1.2522559505902386,
+  "usado_5.50": -0.9292470677260688,
+  "medido": -0.9061672342035565,
+  "meio_4.00": -0.9167612561483164,
+  "damodaran_7.00": -0.9405978055240257
+ },
+ {
+  "ticker": "IGTI3",
+  "beta": 1.0044219840600497,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "IGTI4",
+  "beta": 1.062112387168205,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "INEP3",
+  "beta": 0.9291197726271209,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "INEP4",
+  "beta": 0.956276884263197,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "INTB3",
+  "beta": 1.1050081277023696,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "IRBR3",
+  "beta": 1.1812401340939251,
+  "usado_5.50": -0.579810319884263,
+  "medido": -0.4820768365214596,
+  "meio_4.00": -0.5303005947596849,
+  "damodaran_7.00": -0.6196752933611959
+ },
+ {
+  "ticker": "ISAE3",
+  "beta": 0.17264926633583325,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ISAE4",
+  "beta": 0.5848148554964676,
+  "usado_5.50": -0.12310469314079424,
+  "medido": 0.06823104693140797,
+  "meio_4.00": -0.020577617328519867,
+  "damodaran_7.00": -0.21480144404332127
+ },
+ {
+  "ticker": "ITSA3",
+  "beta": 0.8222185614568287,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ITSA4",
+  "beta": 0.9770679790595078,
+  "usado_5.50": -0.5648745519713261,
+  "medido": -0.432258064516129,
+  "meio_4.00": -0.4974910394265233,
+  "damodaran_7.00": -0.6186379928315412
+ },
+ {
+  "ticker": "ITUB3",
+  "beta": 0.9007813690495987,
+  "usado_5.50": -0.08836395450568678,
+  "medido": 0.12773403324584434,
+  "meio_4.00": 0.022309711286089308,
+  "damodaran_7.00": -0.178915135608049
+ },
+ {
+  "ticker": "ITUB4",
+  "beta": 0.9809759108651549,
+  "usado_5.50": -0.040076335877862586,
+  "medido": 0.20348282442748095,
+  "meio_4.00": 0.08396946564885487,
+  "damodaran_7.00": -0.14026717557251914
+ },
+ {
+  "ticker": "JALL3",
+  "beta": 0.9285662956977794,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "JFEN3",
+  "beta": 0.543033915377564,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "JHSF3",
+  "beta": 1.339234612805028,
+  "usado_5.50": -0.27248908296943225,
+  "medido": -0.09606986899563316,
+  "meio_4.00": -0.18165938864628822,
+  "damodaran_7.00": -0.3475982532751091
+ },
+ {
+  "ticker": "JOPA3",
+  "beta": 0.4505904289051955,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "JSLG3",
+  "beta": 1.556900725350532,
+  "usado_5.50": -0.8281786941580757,
+  "medido": -0.7560137457044673,
+  "meio_4.00": -0.7938144329896907,
+  "damodaran_7.00": -0.852233676975945
+ },
+ {
+  "ticker": "KEPL3",
+  "beta": 0.8983091907571962,
+  "usado_5.50": -0.22604790419161674,
+  "medido": -0.07784431137724544,
+  "meio_4.00": -0.14970059880239522,
+  "damodaran_7.00": -0.29191616766467055
+ },
+ {
+  "ticker": "KLBN11",
+  "beta": 0.4947372338746117,
+  "usado_5.50": -0.655367231638418,
+  "medido": -0.6070878274268104,
+  "meio_4.00": -0.6296866974833076,
+  "damodaran_7.00": -0.6779661016949152
+ },
+ {
+  "ticker": "KLBN3",
+  "beta": 0.505898775400603,
+  "usado_5.50": -0.6699751861042184,
+  "medido": -0.6203473945409429,
+  "meio_4.00": -0.6426799007444169,
+  "damodaran_7.00": -0.6898263027295286
+ },
+ {
+  "ticker": "KLBN4",
+  "beta": 0.48502190338038015,
+  "usado_5.50": -0.6649350649350649,
+  "medido": -0.6181818181818182,
+  "meio_4.00": -0.6415584415584416,
+  "damodaran_7.00": -0.6883116883116884
+ },
+ {
+  "ticker": "LAND3",
+  "beta": 0.24696831078122544,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "LAVV3",
+  "beta": 1.3064882134994789,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "LEVE3",
+  "beta": 0.7828770060858705,
+  "usado_5.50": -0.2883267296555928,
+  "medido": -0.16641267906126184,
+  "meio_4.00": -0.22371228284059747,
+  "damodaran_7.00": -0.34471197805547094
+ },
+ {
+  "ticker": "LIGT3",
+  "beta": 0.18336554627741117,
+  "usado_5.50": -0.47058823529411764,
+  "medido": -0.43977591036414565,
+  "meio_4.00": -0.453781512605042,
+  "damodaran_7.00": -0.48459383753501395
+ },
+ {
+  "ticker": "LJQQ3",
+  "beta": 1.8867068034224055,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "LOGG3",
+  "beta": 1.0853013616459763,
+  "usado_5.50": -0.6216106839336302,
+  "medido": -0.509915014164306,
+  "meio_4.00": -0.565762849048968,
+  "damodaran_7.00": -0.6657223796033995
+ },
+ {
+  "ticker": "LOGN3",
+  "beta": 0.7442176865882716,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "LPSB3",
+  "beta": 1.1487192343783446,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "LREN3",
+  "beta": 1.5760735049195516,
+  "usado_5.50": -0.37180616740088107,
+  "medido": -0.12422907488986785,
+  "meio_4.00": -0.2519823788546255,
+  "damodaran_7.00": -0.4572687224669603
+ },
+ {
+  "ticker": "LUPA3",
+  "beta": 0.9664157161450507,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "LUXM4",
+  "beta": 0.2995635393737968,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "LWSA3",
+  "beta": 1.7083275654273018,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MAPT3",
+  "beta": 0.27759853674159907,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MATD3",
+  "beta": 1.2493786398469755,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MBRF3",
+  "beta": 0.8480013897356468,
+  "usado_5.50": -0.8518937252685133,
+  "medido": -0.8151498021481063,
+  "meio_4.00": -0.8332391181458452,
+  "damodaran_7.00": -0.8665912945166762
+ },
+ {
+  "ticker": "MDIA3",
+  "beta": 0.6862518079552822,
+  "usado_5.50": -0.4915635545556806,
+  "medido": -0.4122609673790777,
+  "meio_4.00": -0.44994375703037126,
+  "damodaran_7.00": -0.5281214848143982
+ },
+ {
+  "ticker": "MDNE3",
+  "beta": 1.5336254008710792,
+  "usado_5.50": -0.9139868268113135,
+  "medido": -0.8647810925997675,
+  "meio_4.00": -0.8888027896164277,
+  "damodaran_7.00": -0.9337466098411468
+ },
+ {
+  "ticker": "MEAL3",
+  "beta": 1.10302304305949,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MELK3",
+  "beta": 0.8683681843721262,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MGEL4",
+  "beta": 0.3061981445143415,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MGLU3",
+  "beta": 2.24413390405613,
+  "usado_5.50": -0.385146804835924,
+  "medido": -0.11053540587219338,
+  "meio_4.00": -0.2435233160621762,
+  "damodaran_7.00": -0.5025906735751295
+ },
+ {
+  "ticker": "MILS3",
+  "beta": 1.1717238654180084,
+  "usado_5.50": -0.8682710576314123,
+  "medido": -0.830905636478784,
+  "meio_4.00": -0.849905003166561,
+  "damodaran_7.00": -0.883470550981634
+ },
+ {
+  "ticker": "MLAS3",
+  "beta": 1.6763841933259676,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MNDL3",
+  "beta": 0.5948208368794876,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MNPR3",
+  "beta": 0.44852309519720673,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MOTV3",
+  "beta": 1.0555993273364268,
+  "usado_5.50": -0.6954707985697259,
+  "medido": -0.630512514898689,
+  "meio_4.00": -0.6620977353992848,
+  "damodaran_7.00": -0.7228843861740167
+ },
+ {
+  "ticker": "MOVI3",
+  "beta": 1.9917201809971188,
+  "usado_5.50": 1.7016029593094946,
+  "medido": 2.489519112207152,
+  "meio_4.00": 2.1307028360049323,
+  "damodaran_7.00": 1.3008631319358819
+ },
+ {
+  "ticker": "MRVE3",
+  "beta": 1.6641068812242474,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MSPA4",
+  "beta": 0.08674891671911072,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MTRE3",
+  "beta": 1.513632115371703,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MTSA4",
+  "beta": 0.2585843812311773,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MULT3",
+  "beta": 1.1369568847126854,
+  "usado_5.50": -0.792909211398277,
+  "medido": -0.7335984095427436,
+  "meio_4.00": -0.7630881378396289,
+  "damodaran_7.00": -0.8161033797216699
+ },
+ {
+  "ticker": "MWET3",
+  "beta": 0.9405097446590873,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MWET4",
+  "beta": 0.528182927303841,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "MYPK3",
+  "beta": 0.8567213884614994,
+  "usado_5.50": -0.1335372069317024,
+  "medido": 0.15800203873598356,
+  "meio_4.00": 0.014271151885830662,
+  "damodaran_7.00": -0.2507645259938839
+ },
+ {
+  "ticker": "NATU3",
+  "beta": 1.2583615361906413,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "NEXP3",
+  "beta": -0.48985557007712355,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "NORD3",
+  "beta": 0.16287686367658583,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "NUTR3",
+  "beta": 0.4454825488712675,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "OBTC3",
+  "beta": 0.29507670215386994,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "OFSA3",
+  "beta": 0.5061803193750046,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ONCO3",
+  "beta": 1.1054582611470964,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "OPCT3",
+  "beta": 1.100030915556082,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ORVR3",
+  "beta": 0.9556355690074789,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "OSXB3",
+  "beta": 0.38192872161278196,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PASS3",
+  "beta": 1.1034727800470197,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PATI3",
+  "beta": -0.024267537859160252,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PATI4",
+  "beta": 0.35571461304446156,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PCAR3",
+  "beta": 1.2622945930407605,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PDGR3",
+  "beta": 1.327484030467059,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PDTC3",
+  "beta": 0.7613281302473284,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PEAB3",
+  "beta": 0.13489357304178598,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PEAB4",
+  "beta": 0.07481834864825958,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PETR3",
+  "beta": 0.8642721922918479,
+  "usado_5.50": -0.34243414727936927,
+  "medido": -0.15554701019034795,
+  "meio_4.00": -0.24437608152278412,
+  "damodaran_7.00": -0.4268409921169006
+ },
+ {
+  "ticker": "PETR4",
+  "beta": 0.8235280516693709,
+  "usado_5.50": -0.23413288049246447,
+  "medido": -0.044151984716620636,
+  "meio_4.00": -0.12927191679049027,
+  "damodaran_7.00": -0.3251963489704946
+ },
+ {
+  "ticker": "PFRM3",
+  "beta": 0.8677920049515152,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PGMN3",
+  "beta": 1.4002822158934198,
+  "usado_5.50": -0.2942708333333333,
+  "medido": 0.06510416666666667,
+  "meio_4.00": -0.10937499999999999,
+  "damodaran_7.00": -0.44270833333333326
+ },
+ {
+  "ticker": "PINE3",
+  "beta": -0.5914068830859388,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PINE4",
+  "beta": 0.7987364744654013,
+  "usado_5.50": -0.008078994614003578,
+  "medido": 0.17145421903052066,
+  "meio_4.00": 0.08527827648114894,
+  "damodaran_7.00": -0.0861759425493717
+ },
+ {
+  "ticker": "PLAS3",
+  "beta": 0.38401110680872874,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PLPL3",
+  "beta": 1.417370502841606,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PMAM3",
+  "beta": 0.3699664875143955,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "PNVL3",
+  "beta": 1.0617997146771838,
+  "usado_5.50": -0.6534954407294834,
+  "medido": -0.7849544072948328,
+  "meio_4.00": -0.8533434650455928,
+  "damodaran_7.00": -0.6907294832826748
+ },
+ {
+  "ticker": "POMO3",
+  "beta": 0.8615366368253262,
+  "usado_5.50": -0.8544600938967136,
+  "medido": -0.8028169014084507,
+  "meio_4.00": -0.8262910798122065,
+  "damodaran_7.00": -0.8802816901408451
+ },
+ {
+  "ticker": "POMO4",
+  "beta": 0.904640527407054,
+  "usado_5.50": -0.8733624454148472,
+  "medido": -0.8209606986899564,
+  "meio_4.00": -0.8449781659388647,
+  "damodaran_7.00": -0.8973799126637555
+ },
+ {
+  "ticker": "POSI3",
+  "beta": 1.5037247829438039,
+  "usado_5.50": -0.9210526315789473,
+  "medido": -0.8859649122807017,
+  "meio_4.00": -0.9035087719298245,
+  "damodaran_7.00": -0.9298245614035087
+ },
+ {
+  "ticker": "PRIO3",
+  "beta": 0.867178576379989,
+  "usado_5.50": -0.10483469014786502,
+  "medido": 0.09071274298056169,
+  "meio_4.00": -0.004485794982555176,
+  "damodaran_7.00": -0.18724040538295392
+ },
+ {
+  "ticker": "PRNR3",
+  "beta": 0.9594394628009627,
+  "usado_5.50": -0.9652892561983472,
+  "medido": -0.9559228650137741,
+  "meio_4.00": -0.9603305785123968,
+  "damodaran_7.00": -0.9691460055096419
+ },
+ {
+  "ticker": "PSSA3",
+  "beta": 0.6485370348196273,
+  "usado_5.50": -0.4246999612853271,
+  "medido": -0.2187379016647309,
+  "meio_4.00": -0.3070073557878436,
+  "damodaran_7.00": -0.4736740224545102
+ },
+ {
+  "ticker": "PTBL3",
+  "beta": 1.4438989152975525,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "QUAL3",
+  "beta": 1.8024772316139042,
+  "usado_5.50": -0.4066666666666667,
+  "medido": -0.2066666666666667,
+  "meio_4.00": -0.3,
+  "damodaran_7.00": -0.9
+ },
+ {
+  "ticker": "RADL3",
+  "beta": 0.8409525325853677,
+  "usado_5.50": -0.6863431715857929,
+  "medido": -0.5222611305652826,
+  "meio_4.00": -0.6348174087043521,
+  "damodaran_7.00": -0.7283641820910455
+ },
+ {
+  "ticker": "RAIL3",
+  "beta": 1.0204873173736113,
+  "usado_5.50": -0.8914089347079038,
+  "medido": -0.8687285223367698,
+  "meio_4.00": -0.8797250859106529,
+  "damodaran_7.00": -0.9003436426116839
+ },
+ {
+  "ticker": "RAIZ4",
+  "beta": 1.2221124996260242,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "RANI3",
+  "beta": 0.7684915697908485,
+  "usado_5.50": -0.2558746736292428,
+  "medido": -0.10443864229765011,
+  "meio_4.00": -0.17493472584856395,
+  "damodaran_7.00": -0.32898172323759794
+ },
+ {
+  "ticker": "RAPT3",
+  "beta": 0.7658075500891804,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "RAPT4",
+  "beta": 1.1576398894872093,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "RCSL3",
+  "beta": 0.7177809946275888,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "RCSL4",
+  "beta": 0.6134895658113014,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "RDOR3",
+  "beta": 1.2606667007967862,
+  "usado_5.50": -0.6345273363856719,
+  "medido": -0.5698895771613252,
+  "meio_4.00": -0.6005925127928899,
+  "damodaran_7.00": -0.663614328036628
+ },
+ {
+  "ticker": "RECV3",
+  "beta": 1.0897789359456636,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "REDE3",
+  "beta": 0.17739845397270523,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "RENT3",
+  "beta": 1.4170520454251163,
+  "usado_5.50": -0.579967248908297,
+  "medido": -0.44705240174672484,
+  "meio_4.00": -0.5141921397379913,
+  "damodaran_7.00": -0.6304585152838428
+ },
+ {
+  "ticker": "RENT4",
+  "beta": 1.7530856312467782,
+  "usado_5.50": -0.6100878435817513,
+  "medido": -0.4678379144233493,
+  "meio_4.00": -0.5412298101445168,
+  "damodaran_7.00": -0.6613771606687447
+ },
+ {
+  "ticker": "RIAA3",
+  "beta": 1.8766763367448942,
+  "usado_5.50": -0.26256983240223464,
+  "medido": -0.005586592178770954,
+  "meio_4.00": -0.13547486033519548,
+  "damodaran_7.00": -0.36033519553072624
+ },
+ {
+  "ticker": "RNEW3",
+  "beta": 0.5396621047847311,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "RNEW4",
+  "beta": 0.596088070720316,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "ROMI3",
+  "beta": 0.908167659449378,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "RPAD3",
+  "beta": 0.05929627041016796,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "RSUL4",
+  "beta": 0.2809483606994672,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "RVEE3",
+  "beta": -0.7193060181259738,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "SANB11",
+  "beta": 0.9828843775267285,
+  "usado_5.50": -0.3424252382517252,
+  "medido": -0.18139993427538612,
+  "meio_4.00": -0.2605980939861978,
+  "damodaran_7.00": -0.40847847518895825
+ },
+ {
+  "ticker": "SANB3",
+  "beta": 0.9361286555768259,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "SANB4",
+  "beta": 0.8748973587809258,
+  "usado_5.50": -0.3107119095143047,
+  "medido": -0.15635395874916833,
+  "meio_4.00": -0.23153692614770452,
+  "damodaran_7.00": -0.3752495009980039
+ },
+ {
+  "ticker": "SAPR11",
+  "beta": 0.6671160425249809,
+  "usado_5.50": -0.04434907010014318,
+  "medido": 0.02145922746781116,
+  "meio_4.00": -0.008297567954220493,
+  "damodaran_7.00": -0.07839771101573682
+ },
+ {
+  "ticker": "SAPR3",
+  "beta": 0.6109094772076497,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "SAPR4",
+  "beta": 0.6156421411031073,
+  "usado_5.50": -0.013157894736842085,
+  "medido": 0.04824561403508773,
+  "meio_4.00": 0.020467836257310024,
+  "damodaran_7.00": -0.04532163742690053
+ },
+ {
+  "ticker": "SAUD3",
+  "beta": 0.5932476123329634,
+  "usado_5.50": -0.9128658951667802,
+  "medido": -0.9019741320626277,
+  "meio_4.00": -0.9067392784206944,
+  "damodaran_7.00": -0.9176310415248469
+ },
+ {
+  "ticker": "SBFG3",
+  "beta": 1.7733721039514991,
+  "usado_5.50": -0.32079646017699115,
+  "medido": -0.061946902654867124,
+  "meio_4.00": -0.19579646017699112,
+  "damodaran_7.00": -0.41261061946902655
+ },
+ {
+  "ticker": "SBSP3",
+  "beta": 0.9619676966924783,
+  "usado_5.50": -0.579721070486242,
+  "medido": -0.8695816057293629,
+  "meio_4.00": -0.9031285337353939,
+  "damodaran_7.00": -0.6283452695062194
+ },
+ {
+  "ticker": "SCAR3",
+  "beta": 0.45856795169665593,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "SEER3",
+  "beta": 1.4986050376205153,
+  "usado_5.50": -0.268491124260355,
+  "medido": -0.019970414201183402,
+  "meio_4.00": -0.14201183431952663,
+  "damodaran_7.00": -0.3698224852071006
+ },
+ {
+  "ticker": "SEQL3",
+  "beta": 1.156719523259675,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "SHOW3",
+  "beta": 0.7827928592337198,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "SHUL4",
+  "beta": 0.7372185068410637,
+  "usado_5.50": -0.28187919463087246,
+  "medido": -0.21252796420581652,
+  "meio_4.00": -0.24384787472035793,
+  "damodaran_7.00": -0.3154362416107382
+ },
+ {
+  "ticker": "SIMH3",
+  "beta": 1.9935563223353012,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "SLCE3",
+  "beta": 0.5181071276541407,
+  "usado_5.50": -0.4082876294942108,
+  "medido": -0.31200487507617314,
+  "meio_4.00": -0.3558805606337599,
+  "damodaran_7.00": -0.4564290067032297
+ },
+ {
+  "ticker": "SMFT3",
+  "beta": 1.4052467235434065,
+  "usado_5.50": -0.7050639955481357,
+  "medido": -0.6271563717306622,
+  "meio_4.00": -0.666110183639399,
+  "damodaran_7.00": -0.7356705620478575
+ },
+ {
+  "ticker": "SMTO3",
+  "beta": 0.9011348356145271,
+  "usado_5.50": -0.14223300970873784,
+  "medido": 0.05679611650485428,
+  "meio_4.00": -0.034951456310679724,
+  "damodaran_7.00": -0.23980582524271848
+ },
+ {
+  "ticker": "SNSY5",
+  "beta": 0.13681208282700266,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "SOJA3",
+  "beta": 0.7424190219721697,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "SOND5",
+  "beta": -0.11290920960302503,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "SOND6",
+  "beta": -0.32208984483766356,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "SUZB3",
+  "beta": 0.33444292398655856,
+  "usado_5.50": -0.42802303262955854,
+  "medido": -0.37897206227340585,
+  "meio_4.00": -0.40093836638942204,
+  "damodaran_7.00": -0.46491789294092556
+ },
+ {
+  "ticker": "SYNE3",
+  "beta": 0.8339089575907651,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TAEE11",
+  "beta": 0.514871537962003,
+  "usado_5.50": -0.5954731519383578,
+  "medido": -0.4789308933301228,
+  "meio_4.00": -0.5302191187093667,
+  "damodaran_7.00": -0.6551890199855526
+ },
+ {
+  "ticker": "TAEE3",
+  "beta": 0.4574104168292794,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TAEE4",
+  "beta": 0.45385680857743177,
+  "usado_5.50": -0.5758007117437722,
+  "medido": -0.4754448398576513,
+  "meio_4.00": -0.5167259786476869,
+  "damodaran_7.00": -0.6306049822064056
+ },
+ {
+  "ticker": "TASA3",
+  "beta": 0.7006714845002244,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TASA4",
+  "beta": 0.8686740323843825,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TCSA3",
+  "beta": 1.3884911544580008,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TECN3",
+  "beta": 0.884359017982433,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TELB3",
+  "beta": 0.5204424156042452,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TELB4",
+  "beta": 0.5115143356473015,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TEND3",
+  "beta": 1.5875207997234957,
+  "usado_5.50": -0.8714987005486573,
+  "medido": -0.825584753104245,
+  "meio_4.00": -0.8483973433439215,
+  "damodaran_7.00": -0.8902685532775051
+ },
+ {
+  "ticker": "TFCO4",
+  "beta": 1.1077105478133902,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TGMA3",
+  "beta": 0.9981216451838498,
+  "usado_5.50": -0.5573380867498514,
+  "medido": -0.41235888294711814,
+  "meio_4.00": -0.481283422459893,
+  "damodaran_7.00": -0.6042780748663101
+ },
+ {
+  "ticker": "TIMS3",
+  "beta": 0.6109090014080811,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TOKY3",
+  "beta": 0.48724403913578873,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TOTS3",
+  "beta": 1.1161343537790378,
+  "usado_5.50": -0.7736231884057971,
+  "medido": -0.715072463768116,
+  "meio_4.00": -0.7440579710144928,
+  "damodaran_7.00": -0.797391304347826
+ },
+ {
+  "ticker": "TPIS3",
+  "beta": 1.0201395311319748,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TRIS3",
+  "beta": 1.4003907027455447,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TTEN3",
+  "beta": 0.9397662945086017,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "TUPY3",
+  "beta": 0.913269804879648,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "UCAS3",
+  "beta": 0.5547584833155155,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "UGPA3",
+  "beta": 1.2444201518032727,
+  "usado_5.50": -0.6533939070016035,
+  "medido": -0.5414216996258685,
+  "meio_4.00": -0.5978086584714056,
+  "damodaran_7.00": -0.696151790486371
+ },
+ {
+  "ticker": "UNIP3",
+  "beta": 0.6507041396693672,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "UNIP5",
+  "beta": 0.39704919001439776,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "UNIP6",
+  "beta": 0.8312609518866886,
+  "usado_5.50": -0.7681235738107776,
+  "medido": -0.6770229945585396,
+  "meio_4.00": -0.7200280849569949,
+  "damodaran_7.00": -0.8100754783219238
+ },
+ {
+  "ticker": "USIM3",
+  "beta": 1.2183242735720499,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "USIM5",
+  "beta": 1.2556282527572185,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "USIM6",
+  "beta": -0.001084422768215317,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "VALE3",
+  "beta": 0.8386188607883607,
+  "usado_5.50": -0.21177817349275,
+  "medido": -0.0468074281353346,
+  "meio_4.00": -0.1255405749173239,
+  "damodaran_7.00": -0.285041974052404
+ },
+ {
+  "ticker": "VAMO3",
+  "beta": 1.8033463491288766,
+  "usado_5.50": -0.6571428571428571,
+  "medido": -0.5257142857142857,
+  "meio_4.00": -0.5942857142857143,
+  "damodaran_7.00": -0.7028571428571428
+ },
+ {
+  "ticker": "VBBR3",
+  "beta": 1.1951614870119294,
+  "usado_5.50": -0.03244120032441208,
+  "medido": -0.8740200054068666,
+  "meio_4.00": 0.16409840497431738,
+  "damodaran_7.00": -0.16896458502297926
+ },
+ {
+  "ticker": "VITT3",
+  "beta": 0.8636592971119227,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "VIVA3",
+  "beta": 1.29605004853882,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "VIVR3",
+  "beta": 1.0524786807619328,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "VIVT3",
+  "beta": 0.5814619784086374,
+  "usado_5.50": -0.7554890219560879,
+  "medido": -0.7119095143047238,
+  "meio_4.00": -0.7322022621423818,
+  "damodaran_7.00": -0.7761144377910845
+ },
+ {
+  "ticker": "VLID3",
+  "beta": 0.9964996580985624,
+  "usado_5.50": -0.6107382550335569,
+  "medido": -0.5279642058165548,
+  "meio_4.00": -0.5671140939597316,
+  "damodaran_7.00": -0.6465324384787472
+ },
+ {
+  "ticker": "VSTE3",
+  "beta": 0.7352709639572347,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "VTRU3",
+  "beta": 1.4802704420269284,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "VULC3",
+  "beta": 1.0174662098893938,
+  "usado_5.50": -0.26287471176018445,
+  "medido": -0.04611837048424287,
+  "meio_4.00": -0.15219062259800156,
+  "damodaran_7.00": -0.3528055342044581
+ },
+ {
+  "ticker": "VVEO3",
+  "beta": 1.0549082321192202,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "WDCN3",
+  "beta": 0.9147503191127371,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "WEGE3",
+  "beta": 0.7094316146998653,
+  "usado_5.50": -0.7502899110939312,
+  "medido": -0.6704677232315422,
+  "meio_4.00": -0.7120216466950136,
+  "damodaran_7.00": -0.7785079242365675
+ },
+ {
+  "ticker": "WEST3",
+  "beta": 0.7161572432018478,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "WHRL3",
+  "beta": 0.2933315956566496,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "WHRL4",
+  "beta": 0.3315449180871353,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "WIZC3",
+  "beta": 1.0984522188029655,
+  "usado_5.50": 0.8370370370370372,
+  "medido": 1.3160493827160498,
+  "meio_4.00": 1.0790123456790124,
+  "damodaran_7.00": 0.6444444444444446
+ },
+ {
+  "ticker": "WLMM4",
+  "beta": 0.2519337029102103,
+  "usado_5.50": null,
+  "medido": null,
+  "meio_4.00": null,
+  "damodaran_7.00": null
+ },
+ {
+  "ticker": "YDUQ3",
+  "beta": 1.6641091520425566,
+  "usado_5.50": -0.7468879668049793,
+  "medido": -0.6473029045643154,
+  "meio_4.00": -0.6981327800829875,
+  "damodaran_7.00": -0.7821576763485477
+ }
+]

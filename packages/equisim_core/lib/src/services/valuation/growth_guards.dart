@@ -113,9 +113,26 @@ abstract final class ValuationParameters {
   /// medido da amostra receberia o maior crescimento.
   static const double maxGrowthStdError = 0.03;
 
-  /// Inclinação mínima relativa: a deriva da tendência no horizonte precisa
+  /// Inclinação mínima relativa: a deriva da tendência na janela precisa
   /// superar a correção que a reversão à média faria.
   static const double minTrendDominance = 1.0;
+
+  /// Janela, em anos, sobre a qual a deriva da tendência é medida.
+  ///
+  /// **É [cycleWindow], e não o horizonte de projeção.** A Guarda 1 responde a
+  /// uma pergunta sobre a série — o nível corrente é patamar novo ou desvio a
+  /// corrigir? —, e a resposta não pode depender de quantos anos o usuário pediu
+  /// para ver projetados. Com `deriva = |inclinação| · N`, dependia: medido em
+  /// 07/09/2026 sobre o universo elegível, **13 dos 120 avaliados trocavam de
+  /// veredito entre `N = 5` e `N = 10`**, e o preço justo ia junto — a AZZA3 de
+  /// R$ 16,11 para R$ 57,48 (3,57x), a CYRE3 de R$ 8,53 para R$ 3,40 (0,40x).
+  /// O horizonte sozinho, com a guarda estável, move o valor em cerca de 2%.
+  ///
+  /// A janela do ciclo é a escolha coerente porque é **a mesma** sobre a qual a
+  /// correção por reversão é medida: os dois lados da razão passam a falar do
+  /// mesmo intervalo, e a dominância vira uma comparação entre grandezas
+  /// homogêneas em vez de uma comparação entre a série e a tela.
+  static const int trendDriftWindow = cycleWindow;
 
   // ------------------------------------- Vantagem competitiva residual --
   //
@@ -225,6 +242,34 @@ abstract final class ValuationParameters {
   /// que a própria janela sobre a qual o retorno do ciclo é medido reprovava por
   /// falta de dado, não por falta de vantagem.
   static const int moatMinPeriods = 8;
+
+  // ---------------------------------------------- Alíquota do escudo fiscal --
+
+  /// Alíquota marginal estatutária brasileira: IRPJ 15% + adicional 10% +
+  /// CSLL 9% = **34%**.
+  ///
+  /// **É a alíquota do escudo fiscal do WACC, e não a efetiva do exercício.**
+  /// O benefício fiscal do endividamento é o valor presente dos escudos das
+  /// despesas financeiras **futuras**, que se realizam à alíquota marginal da
+  /// jurisdição — a razão contábil `imposto ÷ lucro antes do imposto` de um
+  /// exercício mede outra coisa: incentivos, JCP, prejuízo fiscal compensado,
+  /// equivalência patrimonial e diferimento. É a orientação de Damodaran e da
+  /// McKinsey, e a que este projeto passou a adotar.
+  ///
+  /// **A troca também elimina uma incoerência interna medida.** A fonte publica
+  /// `nopat` e ele é, em 4.572 de 4.572 exercícios do cache de produção,
+  /// exatamente `EBIT × 0,66` — ou seja, o fluxo da firma **já vinha** apurado
+  /// à alíquota estatutária. O escudo do WACC, não: a efetiva tinha mediana de
+  /// 19,2% entre os avaliados, ficava nula em 9 deles (escudo desligado) e
+  /// batia no teto de 50% em outros 9. O numerador e o denominador do mesmo
+  /// desconto usavam convenções tributárias diferentes.
+  ///
+  /// **Limite declarado:** instituição financeira paga 45% (CSLL de 20%), e
+  /// esta constante não a distingue. Não há efeito prático porque a Porta 1
+  /// roteia o setor para a via do acionista, que desconta ao Ke e não monta
+  /// WACC — mas quem levar o WACC para lá precisa tratar o caso.
+  static const double statutoryTaxRate = 0.34;
+
 }
 
 /// Como o crescimento foi obtido.
@@ -430,9 +475,17 @@ abstract final class GrowthGuards {
   /// tendência com `t = −2,84` e ainda assim a correção por reversão é 2,5 vezes
   /// maior que a deriva no horizonte.
   ///
+  /// **A deriva é medida na janela do ciclo, não no horizonte de projeção.**
+  /// Ver [ValuationParameters.trendDriftWindow]: um veredito estatístico sobre a
+  /// série não pode mudar porque o usuário trocou a projeção de 5 para 10 anos.
+  ///
   /// - [series]: série de capital da via escolhida.
-  /// - [horizonYears]: horizonte explícito de projeção.
-  static TrendVerdict? trend(CapitalSeries series, {required int horizonYears}) {
+  /// - [driftWindow]: janela sobre a qual a deriva é acumulada. O padrão é a
+  ///   janela do ciclo, e o parâmetro existe para a análise de sensibilidade.
+  static TrendVerdict? trend(
+    CapitalSeries series, {
+    int driftWindow = ValuationParameters.trendDriftWindow,
+  }) {
     final r = series.returns;
     if (r.length < 6) return null;
 
@@ -453,7 +506,7 @@ abstract final class GrowthGuards {
     if (atual == null || ciclo == null) return null;
 
     final correcao = (atual - ciclo).abs();
-    final deriva = fit.slope.abs() * horizonYears;
+    final deriva = fit.slope.abs() * driftWindow;
     final rho = correcao > 1e-12 ? deriva / correcao : double.infinity;
 
     final significante = t.abs() >= tc;

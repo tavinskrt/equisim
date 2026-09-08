@@ -40,9 +40,19 @@ class FundamentalsSnapshot {
   final double? totalStockholderEquity;
   final double? bookValuePerShare;
 
-  /// Lucro operacional líquido de imposto, quando a fonte o publica.
+  /// Lucro operacional líquido de imposto, como a fonte o publica.
   ///
-  /// Derivado por `ebit × (1 − alíquota efetiva)` quando ausente — ver [nopatOf].
+  /// **Ele não é um dado independente do EBIT.** Conferido em 08/09/2026 sobre
+  /// o cache de produção: `nopat = EBIT × 0,66` em **4.572 de 4.572**
+  /// exercícios, e os dois campos estão preenchidos exatamente nos mesmos
+  /// 4.580. A fonte aplica a alíquota estatutária brasileira de 34% e publica
+  /// o resultado — de modo que o fluxo da firma já chega apurado a ela, e o
+  /// recuo de [nopatOrDerived] para `EBIT × (1 − alíquota efetiva)` nunca é
+  /// alcançado com este cache.
+  ///
+  /// É por isso que o escudo fiscal do WACC usa a mesma alíquota estatutária:
+  /// ver `ValuationParameters.statutoryTaxRate`.
+  ///
   /// Não existe para instituição financeira, que não tem EBIT publicado; é uma
   /// das confirmações numéricas da Porta 1 (decisão 25).
   final double? nopat;
@@ -153,6 +163,29 @@ class FundamentalsSnapshot {
   /// caixa maior que a dívida, e é assim que entra no *bridge* do DCF.
   double get netDebt => totalDebt - totalCash;
 
+  /// Cobertura de juros: `EBIT ÷ despesa financeira`.
+  ///
+  /// Decide duas coisas no custo de capital, e as duas pela mesma razão
+  /// econômica — quanto do serviço da dívida o resultado operacional sustenta:
+  /// o **prêmio de crédito** da classificação sintética
+  /// (`CostOfCapital.syntheticSpread`) e a **alíquota do escudo fiscal**
+  /// (`CostOfCapital.effectiveTaxShield`), que não vale cheia quando a dedução
+  /// de juros excede o lucro que a absorveria.
+  ///
+  /// Devolve `null` sem EBIT ou sem despesa financeira, e **zero** quando o
+  /// EBIT é negativo: quem não gera resultado operacional não cobre juro
+  /// nenhum, e é a leitura que a tabela de prêmios espera.
+  double? get interestCoverage {
+    final op = ebit;
+    final juros = interestExpense;
+    if (op == null || juros == null) return null;
+    final d = juros.abs();
+    if (d <= 0) return null;
+    if (op <= 0) return 0.0;
+    final c = op / d;
+    return c.isFinite ? c : null;
+  }
+
   /// Custo da dívida implícito: despesa financeira sobre dívida bruta.
   double? get costOfDebt {
     if (interestExpense == null || totalDebt <= 0) return null;
@@ -258,9 +291,44 @@ class FundamentalsSnapshot {
       final pelaCorrente = _logDistance(corrente, arbitro);
       final melhor = peloExercicio <= pelaCorrente ? doExercicio : corrente;
       final distancia = peloExercicio <= pelaCorrente ? peloExercicio : pelaCorrente;
-      if (distancia <= _reconciliationBand) return melhor;
+      if (distancia <= reconciliationBand) return melhor;
     }
     return doExercicio;
+  }
+
+  /// Unidades negociadas implícitas no valor de mercado: `VM ÷ preço`.
+  ///
+  /// **É a contagem que forma o preço com que o preço justo é comparado**, e
+  /// por isso é a única defensável no divisor da ponte por papel. Já vem na
+  /// unidade negociada: a fonte publica [marketCap] e a cotação na mesma
+  /// convenção — por *unit* onde a *unit* é o que se negocia —, de modo que o
+  /// quociente dispensa a razão de unidade que a contagem por ação exige.
+  ///
+  /// **O que isso faz com o potencial.** Sendo `P_0 = E ÷ (VM ÷ P_mkt)`, o
+  /// potencial vira `E ÷ VM − 1`: a comparação entre o valor do capital próprio
+  /// que o modelo apura e o que o mercado atribui, **sem contagem de ação
+  /// nenhuma no caminho**. Desdobramento, grupamento, *unit* e registro
+  /// corrompido saem da conta por construção.
+  ///
+  /// **Por que [reconciledShares] não serve aqui, e continua servindo lá.** O
+  /// árbitro `N = lucro ÷ LPA` compara duas contagens usando dois campos das
+  /// **mesmas demonstrações**, e por isso só pode confirmar a contagem do
+  /// exercício — o que é o certo para reconstituir patrimônio e capital
+  /// investido, e foi verificado: `VPA × N_exercício` reproduz o patrimônio
+  /// publicado em 4.461 de 4.462 exercícios do cache, e a contagem corrente o
+  /// reproduz em **nenhum**. Mas o preço de tela não se forma na escala das
+  /// demonstrações, e adotar a do exercício no divisor errava por mais de 5% em
+  /// **30 dos 120 avaliados** — a MOVI3 por 2,65x e a B3SA3 por 1,49x.
+  ///
+  /// - [marketPrice]: cotação da unidade negociada, na mesma data de [marketCap].
+  ///
+  /// Devolve `null` sem valor de mercado ou sem preço utilizável.
+  double? sharesFromMarketCap(double marketPrice) {
+    final vm = marketCap;
+    if (vm == null || !vm.isFinite || vm <= 0) return null;
+    if (!marketPrice.isFinite || marketPrice <= 0) return null;
+    final n = vm / marketPrice;
+    return n.isFinite && n > 0 ? n : null;
   }
 
   /// `true` quando as duas contagens discordam além de uma ação societária
@@ -269,7 +337,7 @@ class FundamentalsSnapshot {
     final a = _positive(sharesOutstandingAsOf);
     final b = _positive(sharesOutstanding);
     if (a == null || b == null) return false;
-    return _logDistance(a, b) > _reconciliationBand;
+    return _logDistance(a, b) > reconciliationBand;
   }
 
   /// Contagem implícita no lucro por ação publicado: `N = lucro ÷ LPA`.
@@ -283,7 +351,11 @@ class FundamentalsSnapshot {
   }
 
   /// Tolerância da conciliação, em razão: aceita de 1/1,5 a 1,5.
-  static const double _reconciliationBand = 1.5;
+  ///
+  /// Pública porque a ponte por papel usa a **mesma** banda para decidir se as
+  /// duas candidatas a divisor concordam — ver `ValuationCascade.quotedShares`.
+  /// Duas cópias do mesmo limiar divergiriam na primeira recalibragem.
+  static const double reconciliationBand = 1.5;
 
   /// Distância multiplicativa entre duas contagens, sempre `>= 1`.
   ///
@@ -307,6 +379,11 @@ class FundamentalsSnapshot {
   ///
   /// O teste é de **magnitude**, nunca de igualdade: dinheiro em ponto flutuante
   /// não se compara com `==`.
+  ///
+  /// **O ramo derivado não é alcançado com o cache atual** — ver [nopat]. Ele
+  /// fica como caminho de degradação para fonte que publique EBIT sem NOPAT, e
+  /// quem o exercitar precisa saber que ali a convenção tributária muda: a
+  /// efetiva do exercício no lugar da estatutária.
   double? get nopatOrDerived {
     final publicado = nopat;
     if (publicado != null && publicado.abs() > _residuo) return publicado;

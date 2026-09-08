@@ -211,9 +211,20 @@ void main() {
     // Um exercício central em amostra ímpar, dois em par — a paridade depende
     // de quantos exercícios a janela do ciclo alcançou.
     expect(find.text('define a mediana do ciclo'), findsAtLeastNWidgets(1));
-    // O exercício de 2025 destoa do ciclo, então a base é normalizada e o
-    // ponto observado sai rotulado como tal.
-    expect(find.text('observado · normalizado'), findsOneWidget);
+
+    // **Duas amostras, porque duas vias foram percorridas.** O ativo tem
+    // dívida líquida consumindo quase todo o valor da firma, a pós-condição da
+    // ponte dispara e a avaliação migra para o fluxo do acionista — e o painel
+    // mostra a base de cada uma, com o retorno sobre o capital investido na
+    // primeira e sobre o patrimônio na segunda. É o que o rastro deve mostrar:
+    // a via descartada é parte de como o número foi obtido.
+    expect(find.textContaining('RETORNO SOBRE O PATRIMÔNIO'), findsOneWidget);
+    expect(find.text('observado · normalizado'), findsNWidgets(2));
+    expect(
+      find.textContaining('migra para o fluxo do acionista'),
+      findsAtLeastNWidgets(1),
+      reason: 'a migração precisa estar declarada junto das duas amostras',
+    );
 
     // Em tela estreita a etiqueta desce para a segunda linha em vez de
     // disputar espaço com o número: numa única linha ela espremia o valor até

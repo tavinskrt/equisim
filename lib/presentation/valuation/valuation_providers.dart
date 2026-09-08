@@ -23,6 +23,18 @@ class ValuationSettings {
   final double marginOfSafety;
 
   /// Anos de projeção explícita do DCF, antes da perpetuidade.
+  ///
+  /// **Dez, como o núcleo e como a decisão 25.** Estava em cinco aqui, contra
+  /// dez em `ValuationInputs`, em `DcfAssumptions` e em todas as rodadas de
+  /// validação fora da amostra — de modo que o número da tela nunca foi o
+  /// número validado. Com cinco, o valor terminal carregava de 63,5% a 80,0%
+  /// do preço justo, que é a razão registrada para a escolha de dez.
+  ///
+  /// A divergência não era só de peso terminal: até 07/09/2026 a Guarda 1 media
+  /// a deriva da tendência **no horizonte**, e trocar 10 por 5 virava o veredito
+  /// em 13 dos 120 avaliados — a AZZA3 saía de R$ 16,11 para R$ 57,48 na tela.
+  /// A guarda foi corrigida para medir na janela do ciclo, e este campo voltou
+  /// ao valor da decisão: as duas coisas eram necessárias.
   final int projectionYears;
 
   /// Prazo em que se assume a convergência do preço ao valor justo.
@@ -41,7 +53,7 @@ class ValuationSettings {
     this.monteCarlo = false,
     this.samples = 10000,
     this.marginOfSafety = 0.0,
-    this.projectionYears = 5,
+    this.projectionYears = 10,
     this.convergenceHorizonMonths = ExpectedReturn.defaultHorizonMonths,
     this.marketPremium = CapmInputs.defaultMarketPremium,
   });

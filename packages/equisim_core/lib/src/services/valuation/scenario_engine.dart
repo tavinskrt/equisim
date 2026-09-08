@@ -102,14 +102,21 @@ class DiscreteScenarios implements AssumptionSource {
   /// Constrói as três faixas a partir de um cenário central, deslocando
   /// crescimento e desconto em direções opostas.
   ///
+  /// **O deslocamento alcança as duas taxas de desconto.** Deslocar só a
+  /// corrente deixava o valor terminal praticamente imóvel — ele desconta pela
+  /// taxa de equilíbrio —, e o terminal responde por metade a quatro quintos do
+  /// valor. Medido: com a taxa terminal congelada, a banda de um ativo típico
+  /// ficava em −11,2% / +12,9%; deslocando as duas, ela vai a −19,8% / +30,9%.
+  /// A banda apresentada afirmava uma precisão que o modelo não tem.
+  ///
   /// - [center]: premissas do cenário Base, repassadas sem alteração.
   /// - [growthDelta]: deslocamento do crescimento explícito. Padrão 3 p.p.
-  /// - [discountDelta]: deslocamento da taxa de desconto. Padrão 2 p.p.
+  /// - [discountDelta]: deslocamento das taxas de desconto. Padrão 2 p.p.
   ///
-  /// No cenário otimista o desconto é limitado por baixo a
-  /// `perpetualGrowth + DcfCalculator.minimumSpread`: sem esse piso, o
-  /// deslocamento poderia aproximar `r` de `g` e fazer a perpetuidade divergir
-  /// justamente no cenário que deveria ser o mais favorável.
+  /// No cenário otimista a taxa **terminal** é limitada por baixo a
+  /// `perpetualGrowth + DcfCalculator.minimumSpread`: é ela que entra no spread
+  /// da perpetuidade, e o piso antes protegia a corrente — a taxa errada, que
+  /// não participa daquele quociente.
   factory DiscreteScenarios.around(
     DcfAssumptions center, {
     double growthDelta = 0.03,
@@ -119,12 +126,22 @@ class DiscreteScenarios implements AssumptionSource {
         ScenarioBand.bear: center.copyWith(
           growthRate: center.growthRate - growthDelta,
           discountRate: center.discountRate + discountDelta,
+          terminalDiscountRate: center.terminalDiscountRate + discountDelta,
         ),
         ScenarioBand.base: center,
         ScenarioBand.bull: center.copyWith(
           growthRate: center.growthRate + growthDelta,
+          // A taxa corrente desconta o período explícito e **não** participa do
+          // quociente da perpetuidade: o piso que a prendia ao crescimento
+          // perpétuo era restrição sem conteúdo, e travava o desconto do
+          // cenário otimista acima do que o deslocamento pedia. Aqui basta
+          // garantir que ela continue positiva, que é o que `_project` exige.
           discountRate: math.max(
             center.discountRate - discountDelta,
+            DcfCalculator.minimumSpread,
+          ),
+          terminalDiscountRate: math.max(
+            center.terminalDiscountRate - discountDelta,
             center.perpetualGrowth + DcfCalculator.minimumSpread,
           ),
         ),
@@ -217,13 +234,21 @@ class StochasticScenarios implements AssumptionSource {
     final out = <DcfAssumptions>[];
     for (var i = 0; i < samples; i++) {
       final r = discount.sample(rng);
+      // O sorteio desloca as duas taxas pelo mesmo tanto: a de equilíbrio é a
+      // que desconta a perpetuidade, e congelá-la deixaria de fora a parcela
+      // que mais pesa no valor. O deslocamento é paralelo — a estrutura a termo
+      // é premissa do modelo, não fonte de incerteza sorteada aqui.
+      final deslocamento = r - base.discountRate;
+      final rInf = base.terminalDiscountRate + deslocamento;
       final gp = perpetual.sample(rng);
       out.add(base.copyWith(
         growthRate: growth.sample(rng),
         discountRate: r,
-        // Mantém a distância mínima: sorteios com r ≤ gp seriam descartados
+        terminalDiscountRate: rInf,
+        // Mantém a distância mínima contra a taxa **terminal**, que é a do
+        // spread da perpetuidade: sorteios com r_inf ≤ g seriam descartados
         // pelo cálculo e enviesariam a distribuição para cima.
-        perpetualGrowth: math.min(gp, r - DcfCalculator.minimumSpread),
+        perpetualGrowth: math.min(gp, rInf - DcfCalculator.minimumSpread),
       ));
     }
     return out;

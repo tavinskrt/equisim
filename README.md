@@ -35,11 +35,16 @@ Documentos de referência:
 ### O que funciona hoje
 
 - **Autenticação, sessão, tema e perfil** — preservados do projeto anterior.
-- **`packages/equisim_core`** — motor financeiro completo em Dart puro: DCF por
-  FCFF descontado ao WACC, CAPM, cenários discretos e Monte Carlo, backtest sem
-  rebalanceamento em ações inteiras, TWR/XIRR, métricas de risco, meta
-  patrimonial e concentração setorial. 202 testes, 84,2% de cobertura de
-  linhas, zero rede.
+- **`packages/equisim_core`** — motor financeiro completo em Dart puro:
+  avaliação por **portas e vias** (decisão 25), com o fluxo da firma sobre NOPAT
+  descontado ao WACC e o fluxo do acionista sobre LPA descontado ao Ke, estrutura
+  a termo do desconto, terminal de retorno neutro, CAPM, cenários discretos e
+  Monte Carlo, backtest sem rebalanceamento em ações inteiras, TWR/XIRR, métricas
+  de risco, meta patrimonial e concentração setorial. Zero rede.
+
+  A ordenação do potencial foi validada fora da amostra em oito coortes
+  *point-in-time* — ver
+  [`docs/validacao/validacao_preditiva.md`](docs/validacao/validacao_preditiva.md).
 - **`lib/data`** — camada de acesso a dados com Dio e cache Drift. Testes
   rodando offline sobre fixtures reais.
 - **`lib/di` e `lib/presentation`** — grafo de dependências em Riverpod,

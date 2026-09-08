@@ -483,56 +483,124 @@ void main() {
       marketPremium: CapmInputs.defaultMarketPremium,
     );
 
-    test('custo da dívida abaixo do soberano sobe para ele', () {
+    test('fora da banda, entra a classificação sintética por cobertura', () {
       // PETR4 em 21/08/2026: despesa financeira sobre dívida bruta deu
-      // 0,9% a.a., o que não é custo de dívida em lugar nenhum.
+      // 0,9% a.a., o que não é custo de dívida em lugar nenhum. Abaixo do
+      // soberano a razão observada não mede captação, e o que entra no lugar é
+      // o prêmio da faixa de cobertura — não o piso cru, que atribuiria à
+      // empresa o custo do próprio Tesouro.
       const coc = CostOfCapital(
         capm: capmRf,
         costOfDebt: 0.009,
-        taxRate: 0.266,
+        taxRate: 0.34,
         equityValue: 391,
         debtValue: 384,
+        interestCoverage: 9.0,
       );
-      expect(coc.effectiveCostOfDebt, rf);
+      expect(coc.effectiveCostOfDebt, closeTo(rf + 0.010, 1e-12));
       expect(coc.costOfDebtWasClamped, isTrue);
     });
 
-    test('custo da dívida acima do teto de crédito desce para ele', () {
-      // WEGE3 na mesma medição: 47,3% a.a.
-      const coc = CostOfCapital(
+    test('acima do teto, a cobertura separa quem é sólido de quem não é', () {
+      // WEGE3 na mesma medição: 47,3% a.a., porque a despesa financeira
+      // publicada carrega arrendamento e variação cambial numa empresa de
+      // caixa líquido. Antes, ela recebia o teto — o custo de dívida de uma
+      // empresa em pré-falência.
+      const solida = CostOfCapital(
         capm: capmRf,
         costOfDebt: 0.473,
-        taxRate: 0.168,
+        taxRate: 0.34,
         equityValue: 203,
         debtValue: 4.6,
+        interestCoverage: 3.7,
+      );
+      expect(solida.effectiveCostOfDebt, closeTo(rf + 0.024, 1e-12));
+      expect(solida.costOfDebtWasClamped, isTrue);
+
+      const alavancada = CostOfCapital(
+        capm: capmRf,
+        costOfDebt: 0.473,
+        taxRate: 0.34,
+        equityValue: 20,
+        debtValue: 80,
+        interestCoverage: 0.5,
+      );
+      expect(alavancada.effectiveCostOfDebt,
+          closeTo(rf + CostOfCapital.maxCreditSpread, 1e-12));
+
+      expect(solida.effectiveCostOfDebt,
+          lessThan(alavancada.effectiveCostOfDebt),
+          reason: 'a ordenação de risco de crédito precisa sobreviver ao corte');
+    });
+
+    test('sem cobertura medível, o prêmio é o do pior caso', () {
+      const coc = CostOfCapital(
+        capm: capmRf,
+        costOfDebt: 0.90,
+        taxRate: 0.34,
+        equityValue: 100,
+        debtValue: 50,
       );
       expect(coc.effectiveCostOfDebt, rf + CostOfCapital.maxCreditSpread);
       expect(coc.costOfDebtWasClamped, isTrue);
     });
 
-    test('custo da dívida plausível passa intacto', () {
+    test('observado próximo do estimado não é declarado como substituição', () {
+      // Cobertura de 3,7x pede Rf + 2,4 p.p. = 14,9%. O observado de 14,5%
+      // está a 0,4 p.p. disso — dentro do passo da própria tabela de prêmios,
+      // e portanto não é divergência a declarar.
       const coc = CostOfCapital(
         capm: capmRf,
-        costOfDebt: 0.16,
+        costOfDebt: 0.145,
         taxRate: 0.34,
         equityValue: 100,
         debtValue: 40,
+        interestCoverage: 3.7,
       );
-      expect(coc.effectiveCostOfDebt, 0.16);
+      expect(coc.effectiveCostOfDebt, closeTo(rf + 0.024, 1e-12));
       expect(coc.costOfDebtWasClamped, isFalse);
       expect(coc.waccWasFloored, isFalse);
     });
 
+    test('o escudo fiscal é limitado pela capacidade de usá-lo', () {
+      // Com EBIT abaixo da despesa financeira, a dedução excedente não abate
+      // imposto no exercício: o escudo vale 34% × cobertura, não 34%.
+      const semFolga = CostOfCapital(
+        capm: capmRf,
+        costOfDebt: 0.18,
+        taxRate: 0.34,
+        equityValue: 10,
+        debtValue: 90,
+        interestCoverage: 0.5,
+      );
+      expect(semFolga.effectiveTaxShield, closeTo(0.34 * 0.5, 1e-12));
+
+      const comFolga = CostOfCapital(
+        capm: capmRf,
+        costOfDebt: 0.18,
+        taxRate: 0.34,
+        equityValue: 10,
+        debtValue: 90,
+        interestCoverage: 4.0,
+      );
+      expect(comFolga.effectiveTaxShield, 0.34);
+      expect(semFolga.rawWacc, greaterThan(comFolga.rawWacc),
+          reason: 'menos escudo é mais custo de capital');
+    });
+
     test('WACC nunca desce abaixo da taxa livre de risco', () {
-      // Empresa muito alavancada: o benefício fiscal empurraria o desconto
-      // para baixo do soberano, e a perpetuidade explodiria.
+      // Empresa muito alavancada, com custo de dívida no piso da tabela: o
+      // benefício fiscal empurraria o desconto para baixo do soberano, e a
+      // perpetuidade explodiria.
       const coc = CostOfCapital(
         capm: capmRf,
         costOfDebt: rf,
         taxRate: 0.34,
         equityValue: 10,
         debtValue: 90,
+        interestCoverage: 20.0,
       );
+      expect(coc.effectiveCostOfDebt, closeTo(rf + 0.010, 1e-12));
       expect(coc.rawWacc, lessThan(rf));
       expect(coc.wacc, rf);
       expect(coc.waccWasFloored, isTrue);
