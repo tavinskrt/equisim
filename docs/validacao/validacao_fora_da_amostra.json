@@ -5,13 +5,19 @@
     "setor": "saude",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
     "ticker": "ABCB10",
-    "saida": "insumos indisponíveis",
+    "saida": "sem cotação na janela",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Sem cotações de ABCB10 na janela de análise."
   },
   {
@@ -35,7 +41,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.15689999999999998,
-    "retornoDoCicloDaBase": 0.15289999999999998
+    "retornoDoCicloDaBase": 0.15289999999999998,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.2688
   },
   {
     "ticker": "ABEV3",
@@ -56,7 +67,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.2112,
-    "retornoDoCicloDaBase": 0.2048
+    "retornoDoCicloDaBase": 0.2048,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.0737
   },
   {
     "ticker": "AERI3",
@@ -64,6 +80,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -72,6 +91,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -80,23 +102,29 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "consumo-nao-ciclico",
     "crescimento": "g = 0",
-    "justo": 23.0,
+    "justo": 8.96,
     "preco": 19.27,
-    "potencial": 0.19356512714063315,
-    "avisos": 5,
+    "potencial": -0.5350285417747794,
+    "avisos": 6,
     "moat": false,
     "moatBarradoPor": [
       "crescimentoInorganico",
-      "rentabilidadeInsuficiente"
+      "rentabilidadeInsuficiente",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.1625,
     "custoDeCapitalTerminal": 0.12890000000000001,
     "phi": 1.3,
-    "fatorDeNormalizacao": 2.567,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0633,
-    "retornoDoCicloDaBase": 0.1625
+    "retornoDoCicloDaBase": 0.1625,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 2.567,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.7345999999999999
   },
   {
     "ticker": "AGXY3",
@@ -104,6 +132,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -112,6 +143,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -136,7 +170,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.0944,
-    "retornoDoCicloDaBase": 0.09449999999999999
+    "retornoDoCicloDaBase": 0.09449999999999999,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -3.2552999999999996
   },
   {
     "ticker": "ALPA3",
@@ -144,6 +183,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -168,7 +210,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.09880000000000001,
-    "retornoDoCicloDaBase": 0.11380000000000001
+    "retornoDoCicloDaBase": 0.11380000000000001,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -3.2542
   },
   {
     "ticker": "ALPK3",
@@ -176,6 +223,9 @@
     "setor": "servicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -190,7 +240,6 @@
     "avisos": 5,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico",
       "rentabilidadeInsuficiente"
     ],
     "retornoDoCiclo": 0.1007,
@@ -200,7 +249,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.0983,
-    "retornoDoCicloDaBase": 0.1007
+    "retornoDoCicloDaBase": 0.1007,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.0417
   },
   {
     "ticker": "ALUP3",
@@ -208,6 +262,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -216,6 +273,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -224,6 +284,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -232,6 +295,9 @@
     "setor": "saneamento",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -256,7 +322,11 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.039,
-    "retornoDoCicloDaBase": 0.06570000000000001
+    "retornoDoCicloDaBase": 0.06570000000000001,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false
   },
   {
     "ticker": "AMOB3",
@@ -264,6 +334,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -288,7 +361,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.09230000000000001,
-    "retornoDoCicloDaBase": 0.0716
+    "retornoDoCicloDaBase": 0.0716,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -2.7807
   },
   {
     "ticker": "ARML3",
@@ -296,6 +374,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -304,6 +385,9 @@
     "setor": "emp-adm-part-intermediacao-financeira",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -312,6 +396,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -320,6 +407,9 @@
     "setor": "educacao",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -328,6 +418,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -336,6 +429,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -344,6 +440,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -368,14 +467,22 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0538,
-    "retornoDoCicloDaBase": 0.0868
+    "retornoDoCicloDaBase": 0.0868,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.615,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.10369999999999999
   },
   {
     "ticker": "AXIA7",
-    "saida": "outra recusa",
+    "saida": "sem exercício",
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Nenhum exercício de AXIA7 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
   },
   {
@@ -384,6 +491,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -392,14 +502,20 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de AZEV4 não sustentam nenhuma das duas vias de avaliação."
   },
   {
     "ticker": "AZTE3",
-    "saida": "outra recusa",
+    "saida": "sem exercício",
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Nenhum exercício de AZTE3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
   },
   {
@@ -408,27 +524,39 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
     "ticker": "AZUL97",
-    "saida": "insumos indisponíveis",
+    "saida": "ativo inexistente",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo não encontrado na fonte."
   },
   {
     "ticker": "AZUL98",
-    "saida": "insumos indisponíveis",
+    "saida": "ativo inexistente",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo não encontrado na fonte."
   },
   {
     "ticker": "AZUL99",
-    "saida": "insumos indisponíveis",
+    "saida": "ativo inexistente",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo não encontrado na fonte."
   },
   {
@@ -452,14 +580,22 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0782,
-    "retornoDoCicloDaBase": 0.1955
+    "retornoDoCicloDaBase": 0.1955,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.1566
   },
   {
     "ticker": "B1003",
-    "saida": "outra recusa",
+    "saida": "sem exercício",
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Nenhum exercício de B1003 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
   },
   {
@@ -483,7 +619,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.23920000000000002,
-    "retornoDoCicloDaBase": 0.19010000000000002
+    "retornoDoCicloDaBase": 0.19010000000000002,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.0852
   },
   {
     "ticker": "BALM3",
@@ -491,6 +632,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -499,6 +643,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -507,6 +654,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -515,6 +665,9 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -538,7 +691,12 @@
     "guarda1": "não avaliável",
     "guarda3": "destoa",
     "retornoCorrente": 0.0911,
-    "retornoDoCicloDaBase": 0.1543
+    "retornoDoCicloDaBase": 0.1543,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.693,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.4378
   },
   {
     "ticker": "BBDC3",
@@ -561,7 +719,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1416,
-    "retornoDoCicloDaBase": 0.1183
+    "retornoDoCicloDaBase": 0.1183,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.1276
   },
   {
     "ticker": "BBDC4",
@@ -584,7 +747,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1416,
-    "retornoDoCicloDaBase": 0.1183
+    "retornoDoCicloDaBase": 0.1183,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.1276
   },
   {
     "ticker": "BBSE3",
@@ -605,7 +773,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.9301,
-    "retornoDoCicloDaBase": 0.7818999999999999
+    "retornoDoCicloDaBase": 0.7818999999999999,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.4918
   },
   {
     "ticker": "BDLL3",
@@ -613,6 +786,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -621,6 +797,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -645,7 +824,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1617,
-    "retornoDoCicloDaBase": 0.16879999999999998
+    "retornoDoCicloDaBase": 0.16879999999999998,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.2949
   },
   {
     "ticker": "BEES3",
@@ -653,6 +837,9 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -661,6 +848,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -669,6 +859,9 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -677,6 +870,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -685,6 +881,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de BHIA3 não sustentam nenhuma das duas vias de avaliação."
   },
   {
@@ -693,6 +892,9 @@
     "setor": "educacao",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -701,6 +903,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -709,6 +914,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -717,6 +925,9 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -725,6 +936,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -748,7 +962,11 @@
     "guarda1": "não avaliável",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.0,
-    "retornoDoCicloDaBase": 0.0
+    "retornoDoCicloDaBase": 0.0,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false
   },
   {
     "ticker": "BMIN4",
@@ -756,6 +974,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -764,6 +985,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -772,6 +996,9 @@
     "setor": "tecnologia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -780,6 +1007,9 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -788,6 +1018,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -811,7 +1044,11 @@
     "guarda1": "não avaliável",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.0,
-    "retornoDoCicloDaBase": 0.0
+    "retornoDoCicloDaBase": 0.0,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false
   },
   {
     "ticker": "BPAC3",
@@ -819,6 +1056,9 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -827,6 +1067,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -835,6 +1078,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -843,46 +1089,57 @@
     "via": "DCF por fluxo da firma",
     "setor": "",
     "crescimento": "fundamental",
-    "justo": 16.28,
+    "justo": 4.59,
     "preco": 22.48,
-    "potencial": -0.2758007117437722,
-    "avisos": 3,
+    "potencial": -0.7958185053380783,
+    "avisos": 4,
     "moat": false,
     "moatBarradoPor": [
-      "rentabilidadeInsuficiente"
+      "rentabilidadeInsuficiente",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.13570000000000002,
     "custoDeCapitalTerminal": 0.1438,
     "phi": 0.1,
-    "fatorDeNormalizacao": 3.57,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.038,
-    "retornoDoCicloDaBase": 0.13570000000000002
+    "retornoDoCicloDaBase": 0.13570000000000002,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 3.57,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.8706
   },
   {
     "ticker": "BRAV3",
     "saida": "avaliado",
-    "via": "DCF sobre lucro distribuível",
+    "via": "DCF por fluxo da firma",
     "setor": "energia",
     "crescimento": "âncora",
-    "justo": 6.73,
+    "justo": 6.99,
     "preco": 17.88,
-    "potencial": -0.6236017897091722,
-    "avisos": 5,
+    "potencial": -0.6090604026845637,
+    "avisos": 6,
     "moat": false,
     "moatBarradoPor": [
       "crescimentoInorganico",
       "rentabilidadeInsuficiente"
     ],
-    "retornoDoCiclo": 0.0629,
-    "custoDeCapitalTerminal": 0.1559,
-    "phi": 3.52,
-    "fatorDeNormalizacao": 0.469,
-    "guarda1": "não domina",
+    "retornoDoCiclo": 0.1223,
+    "custoDeCapitalTerminal": 0.1775,
+    "phi": 10.3,
+    "fatorDeNormalizacao": 1.992,
+    "guarda1": "domina",
     "guarda3": "destoa",
-    "retornoCorrente": 0.1341,
-    "retornoDoCicloDaBase": 0.0629
+    "retornoCorrente": 0.061399999999999996,
+    "retornoDoCicloDaBase": 0.1223,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 1.992,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -10.0497
   },
   {
     "ticker": "BRBI11",
@@ -890,6 +1147,9 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -898,6 +1158,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -906,6 +1169,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -914,6 +1180,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -922,6 +1191,9 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -930,6 +1202,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -953,7 +1228,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1646,
-    "retornoDoCicloDaBase": 0.09269999999999999
+    "retornoDoCicloDaBase": 0.09269999999999999,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.563,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.0356999999999998
   },
   {
     "ticker": "BRST3",
@@ -961,6 +1241,9 @@
     "setor": "telecomunicacoes",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -969,6 +1252,9 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -977,6 +1263,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -985,6 +1274,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -999,7 +1291,8 @@
     "avisos": 3,
     "moat": false,
     "moatBarradoPor": [
-      "rentabilidadeInsuficiente"
+      "rentabilidadeInsuficiente",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.14980000000000002,
     "custoDeCapitalTerminal": 0.1494,
@@ -1008,7 +1301,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0429,
-    "retornoDoCicloDaBase": 0.14980000000000002
+    "retornoDoCicloDaBase": 0.14980000000000002,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.5802
   },
   {
     "ticker": "CASH3",
@@ -1016,6 +1314,9 @@
     "setor": "tecnologia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -1024,6 +1325,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -1032,6 +1336,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1055,7 +1362,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.2132,
-    "retornoDoCicloDaBase": 0.0751
+    "retornoDoCicloDaBase": 0.0751,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.352,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -4.18
   },
   {
     "ticker": "CEBR3",
@@ -1063,6 +1375,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1071,6 +1386,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1079,6 +1397,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1087,6 +1408,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1095,6 +1419,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1103,6 +1430,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -1111,6 +1441,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1119,6 +1452,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1127,6 +1463,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1135,6 +1474,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1143,6 +1485,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1151,6 +1496,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1159,6 +1507,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1167,6 +1518,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1190,7 +1544,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1191,
-    "retornoDoCicloDaBase": 0.1192
+    "retornoDoCicloDaBase": 0.1192,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.1967
   },
   {
     "ticker": "CMIN3",
@@ -1198,6 +1557,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -1206,6 +1568,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1214,6 +1579,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1237,7 +1605,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0433,
-    "retornoDoCicloDaBase": 0.12890000000000001
+    "retornoDoCicloDaBase": 0.12890000000000001,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 2.98,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -5.5488
   },
   {
     "ticker": "CPFE3",
@@ -1260,7 +1633,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1551,
-    "retornoDoCicloDaBase": 0.1448
+    "retornoDoCicloDaBase": 0.1448,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.10039999999999999
   },
   {
     "ticker": "CPLE3",
@@ -1283,7 +1661,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.086,
-    "retornoDoCicloDaBase": 0.0795
+    "retornoDoCicloDaBase": 0.0795,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.2381
   },
   {
     "ticker": "CRPG5",
@@ -1291,6 +1674,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1299,6 +1685,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1307,6 +1696,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de CSAN3 não sustentam nenhuma das duas vias de avaliação."
   },
   {
@@ -1315,6 +1707,9 @@
     "setor": "educacao",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -1323,6 +1718,9 @@
     "setor": "saneamento",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -1331,6 +1729,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de CSNA3 não sustentam nenhuma das duas vias de avaliação."
   },
   {
@@ -1339,14 +1740,20 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
     "ticker": "CTAX3",
-    "saida": "outra recusa",
+    "saida": "sem exercício",
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Nenhum exercício de CTAX3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
   },
   {
@@ -1355,6 +1762,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1363,6 +1773,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -1386,7 +1799,11 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.3221,
-    "retornoDoCicloDaBase": 0.33799999999999997
+    "retornoDoCicloDaBase": 0.33799999999999997,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false
   },
   {
     "ticker": "CXSE3",
@@ -1409,7 +1826,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.2626,
-    "retornoDoCicloDaBase": 0.26030000000000003
+    "retornoDoCicloDaBase": 0.26030000000000003,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.3996
   },
   {
     "ticker": "CYRE3",
@@ -1433,7 +1855,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1177,
-    "retornoDoCicloDaBase": 0.0762
+    "retornoDoCicloDaBase": 0.0762,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.6419
   },
   {
     "ticker": "CYRE4",
@@ -1457,7 +1884,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1177,
-    "retornoDoCicloDaBase": 0.0762
+    "retornoDoCicloDaBase": 0.0762,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.6419
   },
   {
     "ticker": "DASA3",
@@ -1465,6 +1897,9 @@
     "setor": "saude",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de DASA3 não sustentam nenhuma das duas vias de avaliação."
   },
   {
@@ -1473,6 +1908,9 @@
     "setor": "telecomunicacoes",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -1481,6 +1919,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1489,6 +1930,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1512,7 +1956,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.2953,
-    "retornoDoCicloDaBase": 0.1201
+    "retornoDoCicloDaBase": 0.1201,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.407,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.8872
   },
   {
     "ticker": "DMVF3",
@@ -1520,6 +1969,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -1528,6 +1980,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1536,6 +1991,9 @@
     "setor": "servicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -1544,6 +2002,9 @@
     "setor": "servicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1552,22 +2013,28 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "materiais-basicos",
     "crescimento": "fundamental",
-    "justo": 3.42,
+    "justo": 0.33,
     "preco": 5.64,
-    "potencial": -0.3936170212765957,
-    "avisos": 3,
+    "potencial": -0.9414893617021276,
+    "avisos": 4,
     "moat": false,
     "moatBarradoPor": [
-      "rentabilidadeInsuficiente"
+      "rentabilidadeInsuficiente",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.09179999999999999,
     "custoDeCapitalTerminal": 0.1679,
     "phi": 0.11,
-    "fatorDeNormalizacao": 10.473,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0088,
-    "retornoDoCicloDaBase": 0.09179999999999999
+    "retornoDoCicloDaBase": 0.09179999999999999,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 10.473,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.9176000000000001
   },
   {
     "ticker": "EALT3",
@@ -1575,6 +2042,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1583,6 +2053,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1591,6 +2064,9 @@
     "setor": "comunicacao-e-informatica",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -1614,7 +2090,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1423,
-    "retornoDoCicloDaBase": 0.142
+    "retornoDoCicloDaBase": 0.142,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -2.6566
   },
   {
     "ticker": "EGIE3",
@@ -1622,14 +2103,12 @@
     "via": "DCF por fluxo da firma",
     "setor": "energia",
     "crescimento": "fundamental",
-    "justo": 42.6,
+    "justo": 57.5,
     "preco": 30.14,
-    "potencial": 0.41340411413404116,
-    "avisos": 3,
-    "moat": false,
-    "moatBarradoPor": [
-      "crescimentoInorganico"
-    ],
+    "potencial": 0.9077637690776377,
+    "avisos": 4,
+    "moat": true,
+    "moatBarradoPor": [],
     "retornoDoCiclo": 0.20550000000000002,
     "custoDeCapitalTerminal": 0.1121,
     "phi": 0.58,
@@ -1637,7 +2116,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1294,
-    "retornoDoCicloDaBase": 0.20550000000000002
+    "retornoDoCicloDaBase": 0.20550000000000002,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.588,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.0726
   },
   {
     "ticker": "EKTR4",
@@ -1645,6 +2129,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1653,6 +2140,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1677,7 +2167,11 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.09820000000000001,
-    "retornoDoCicloDaBase": 0.048799999999999996
+    "retornoDoCicloDaBase": 0.048799999999999996,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.497,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false
   },
   {
     "ticker": "ENEV3",
@@ -1701,7 +2195,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.0837,
-    "retornoDoCicloDaBase": 0.06860000000000001
+    "retornoDoCicloDaBase": 0.06860000000000001,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -3.5017
   },
   {
     "ticker": "ENGI11",
@@ -1724,7 +2223,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1418,
-    "retornoDoCicloDaBase": 0.2477
+    "retornoDoCicloDaBase": 0.2477,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.746,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.2933
   },
   {
     "ticker": "ENGI3",
@@ -1732,6 +2236,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1740,6 +2247,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1748,6 +2258,9 @@
     "setor": "tecnologia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -1756,6 +2269,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1764,6 +2280,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1772,6 +2291,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1780,6 +2302,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1788,6 +2313,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1812,7 +2340,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0739,
-    "retornoDoCicloDaBase": 0.1433
+    "retornoDoCicloDaBase": 0.1433,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.94,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.3028
   },
   {
     "ticker": "ESPA3",
@@ -1820,6 +2353,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -1828,6 +2364,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -1836,6 +2375,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1844,6 +2386,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1852,6 +2397,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1866,7 +2414,6 @@
     "avisos": 3,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico",
       "rentabilidadeInsuficiente"
     ],
     "retornoDoCiclo": 0.07629999999999999,
@@ -1876,7 +2423,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.067,
-    "retornoDoCicloDaBase": 0.07629999999999999
+    "retornoDoCicloDaBase": 0.07629999999999999,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.5333
   },
   {
     "ticker": "EZTC3",
@@ -1900,14 +2452,22 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.0556,
-    "retornoDoCicloDaBase": 0.0555
+    "retornoDoCicloDaBase": 0.0555,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.6007
   },
   {
     "ticker": "FASA3",
-    "saida": "outra recusa",
+    "saida": "sem exercício",
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Nenhum exercício de FASA3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
   },
   {
@@ -1916,6 +2476,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1924,23 +2487,29 @@
     "via": "DCF por fluxo da firma",
     "setor": "",
     "crescimento": "fundamental",
-    "justo": 6.93,
+    "justo": 2.25,
     "preco": 5.61,
-    "potencial": 0.2352941176470587,
-    "avisos": 3,
+    "potencial": -0.5989304812834225,
+    "avisos": 4,
     "moat": false,
     "moatBarradoPor": [
       "crescimentoInorganico",
-      "rentabilidadeInsuficiente"
+      "rentabilidadeInsuficiente",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.1151,
     "custoDeCapitalTerminal": 0.1536,
     "phi": 0.8,
-    "fatorDeNormalizacao": 10.796,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.010700000000000001,
-    "retornoDoCicloDaBase": 0.1151
+    "retornoDoCicloDaBase": 0.1151,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 10.796,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.8223999999999999
   },
   {
     "ticker": "FHER3",
@@ -1948,6 +2517,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -1956,6 +2528,9 @@
     "setor": "outros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -1964,6 +2539,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -1972,6 +2550,9 @@
     "setor": "telecomunicacoes",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -1980,6 +2561,9 @@
     "setor": "saude",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -2004,7 +2588,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1909,
-    "retornoDoCicloDaBase": 0.14679999999999999
+    "retornoDoCicloDaBase": 0.14679999999999999,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.3926
   },
   {
     "ticker": "GEPA3",
@@ -2012,6 +2601,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2020,6 +2612,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2028,6 +2623,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2036,6 +2634,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2044,22 +2645,28 @@
     "via": "DCF por fluxo da firma",
     "setor": "materiais-basicos",
     "crescimento": "âncora",
-    "justo": 6.68,
+    "justo": 1.84,
     "preco": 25.34,
-    "potencial": -0.7363851617995264,
-    "avisos": 4,
+    "potencial": -0.9273875295974744,
+    "avisos": 5,
     "moat": false,
     "moatBarradoPor": [
-      "rentabilidadeInsuficiente"
+      "rentabilidadeInsuficiente",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.0915,
     "custoDeCapitalTerminal": 0.1328,
     "phi": 0.12,
-    "fatorDeNormalizacao": 2.356,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0388,
-    "retornoDoCicloDaBase": 0.0915
+    "retornoDoCicloDaBase": 0.0915,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 2.356,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.8764
   },
   {
     "ticker": "GGPS3",
@@ -2067,6 +2674,9 @@
     "setor": "servicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -2075,6 +2685,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -2083,6 +2696,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2091,22 +2707,28 @@
     "via": "DCF por fluxo da firma",
     "setor": "materiais-basicos",
     "crescimento": "âncora",
-    "justo": 25.4,
+    "justo": 7.79,
     "preco": 11.17,
-    "potencial": 1.2739480752014323,
-    "avisos": 4,
+    "potencial": -0.3025962399283796,
+    "avisos": 5,
     "moat": false,
     "moatBarradoPor": [
-      "rentabilidadeInsuficiente"
+      "rentabilidadeInsuficiente",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.0913,
     "custoDeCapitalTerminal": 0.11630000000000001,
     "phi": 0.12,
-    "fatorDeNormalizacao": 2.356,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0387,
-    "retornoDoCicloDaBase": 0.0913
+    "retornoDoCicloDaBase": 0.0913,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 2.356,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.8767
   },
   {
     "ticker": "GRND3",
@@ -2129,7 +2751,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0723,
-    "retornoDoCicloDaBase": 0.10279999999999999
+    "retornoDoCicloDaBase": 0.10279999999999999,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.1352
   },
   {
     "ticker": "GSHP3",
@@ -2137,6 +2764,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -2145,6 +2775,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -2153,6 +2786,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -2161,6 +2797,9 @@
     "setor": "saude",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de HAPV3 não sustentam nenhuma das duas vias de avaliação."
   },
   {
@@ -2169,6 +2808,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2177,6 +2819,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -2185,6 +2830,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de HBSA3 não sustentam nenhuma das duas vias de avaliação."
   },
   {
@@ -2193,6 +2841,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -2216,7 +2867,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1155,
-    "retornoDoCicloDaBase": 0.1094
+    "retornoDoCicloDaBase": 0.1094,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.2993
   },
   {
     "ticker": "IFCM3",
@@ -2224,6 +2880,9 @@
     "setor": "tecnologia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -2247,7 +2906,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1352,
-    "retornoDoCicloDaBase": 0.0801
+    "retornoDoCicloDaBase": 0.0801,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.593,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.5267
   },
   {
     "ticker": "IGTI3",
@@ -2255,6 +2919,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2263,6 +2930,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2271,6 +2941,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -2279,6 +2952,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -2287,6 +2963,9 @@
     "setor": "tecnologia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -2295,10 +2974,10 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "servicos-financeiros",
     "crescimento": "âncora",
-    "justo": 108.46,
+    "justo": 88.98,
     "preco": 62.21,
-    "potencial": 0.7434496061726409,
-    "avisos": 4,
+    "potencial": 0.4303166693457644,
+    "avisos": 5,
     "moat": false,
     "moatBarradoPor": [
       "crescimentoInorganico"
@@ -2306,11 +2985,16 @@
     "retornoDoCiclo": 0.2902,
     "custoDeCapitalTerminal": 0.159,
     "phi": 0.91,
-    "fatorDeNormalizacao": 3.657,
+    "fatorDeNormalizacao": 3.0,
     "guarda1": "não avaliável",
     "guarda3": "destoa",
     "retornoCorrente": 0.0794,
-    "retornoDoCicloDaBase": 0.2902
+    "retornoDoCicloDaBase": 0.2902,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 3.657,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -8.8971
   },
   {
     "ticker": "ISAE3",
@@ -2318,6 +3002,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2332,7 +3019,6 @@
     "avisos": 3,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico",
       "rentabilidadeInsuficiente"
     ],
     "retornoDoCiclo": 0.1264,
@@ -2342,7 +3028,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0911,
-    "retornoDoCicloDaBase": 0.1264
+    "retornoDoCicloDaBase": 0.1264,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.388,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.0824
   },
   {
     "ticker": "ITSA3",
@@ -2350,6 +3041,9 @@
     "setor": "holdings",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2373,7 +3067,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1206,
-    "retornoDoCicloDaBase": 0.1167
+    "retornoDoCicloDaBase": 0.1167,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.1693
   },
   {
     "ticker": "ITUB3",
@@ -2387,8 +3086,7 @@
     "avisos": 2,
     "moat": false,
     "moatBarradoPor": [
-      "semRetornoDoCiclo",
-      "crescimentoInorganico"
+      "semRetornoDoCiclo"
     ],
     "custoDeCapitalTerminal": 0.1435,
     "phi": 0.5,
@@ -2396,7 +3094,11 @@
     "guarda1": "não avaliável",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.0,
-    "retornoDoCicloDaBase": 0.0
+    "retornoDoCicloDaBase": 0.0,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false
   },
   {
     "ticker": "ITUB4",
@@ -2410,8 +3112,7 @@
     "avisos": 2,
     "moat": false,
     "moatBarradoPor": [
-      "semRetornoDoCiclo",
-      "crescimentoInorganico"
+      "semRetornoDoCiclo"
     ],
     "custoDeCapitalTerminal": 0.1479,
     "phi": 0.5,
@@ -2419,7 +3120,11 @@
     "guarda1": "não avaliável",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.0,
-    "retornoDoCicloDaBase": 0.0
+    "retornoDoCicloDaBase": 0.0,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false
   },
   {
     "ticker": "JALL3",
@@ -2427,6 +3132,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -2435,6 +3143,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -2449,7 +3160,6 @@
     "avisos": 4,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico",
       "rentabilidadeInsuficiente"
     ],
     "retornoDoCiclo": 0.1036,
@@ -2459,7 +3169,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.18460000000000001,
-    "retornoDoCicloDaBase": 0.1036
+    "retornoDoCicloDaBase": 0.1036,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.561,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.83
   },
   {
     "ticker": "JSLG3",
@@ -2467,23 +3182,29 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "bens-industriais",
     "crescimento": "fundamental",
-    "justo": 4.71,
+    "justo": 1.42,
     "preco": 5.82,
-    "potencial": -0.19072164948453613,
-    "avisos": 3,
+    "potencial": -0.7560137457044673,
+    "avisos": 4,
     "moat": false,
     "moatBarradoPor": [
       "crescimentoInorganico",
-      "rentabilidadeInsuficiente"
+      "rentabilidadeInsuficiente",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.1525,
     "custoDeCapitalTerminal": 0.1796,
     "phi": 0.68,
-    "fatorDeNormalizacao": 3.305,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0462,
-    "retornoDoCicloDaBase": 0.1525
+    "retornoDoCicloDaBase": 0.1525,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 3.305,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.5792
   },
   {
     "ticker": "KEPL3",
@@ -2491,12 +3212,14 @@
     "via": "DCF por fluxo da firma",
     "setor": "bens-industriais",
     "crescimento": "âncora",
-    "justo": 4.74,
+    "justo": 4.61,
     "preco": 6.68,
-    "potencial": -0.29041916167664666,
-    "avisos": 4,
-    "moat": true,
-    "moatBarradoPor": [],
+    "potencial": -0.309880239520958,
+    "avisos": 3,
+    "moat": false,
+    "moatBarradoPor": [
+      "saudeOperacional"
+    ],
     "retornoDoCiclo": 0.2296,
     "custoDeCapitalTerminal": 0.1472,
     "phi": 0.1,
@@ -2504,7 +3227,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1974,
-    "retornoDoCicloDaBase": 0.2296
+    "retornoDoCicloDaBase": 0.2296,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.5914
   },
   {
     "ticker": "KLBN11",
@@ -2518,7 +3246,8 @@
     "avisos": 4,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico"
+      "crescimentoInorganico",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.19760000000000003,
     "custoDeCapitalTerminal": 0.12119999999999999,
@@ -2527,7 +3256,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1943,
-    "retornoDoCicloDaBase": 0.19760000000000003
+    "retornoDoCicloDaBase": 0.19760000000000003,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.6420999999999999
   },
   {
     "ticker": "KLBN3",
@@ -2541,7 +3275,8 @@
     "avisos": 3,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico"
+      "crescimentoInorganico",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.19760000000000003,
     "custoDeCapitalTerminal": 0.12179999999999999,
@@ -2550,7 +3285,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1943,
-    "retornoDoCicloDaBase": 0.19760000000000003
+    "retornoDoCicloDaBase": 0.19760000000000003,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.6420999999999999
   },
   {
     "ticker": "KLBN4",
@@ -2564,7 +3304,8 @@
     "avisos": 3,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico"
+      "crescimentoInorganico",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.19760000000000003,
     "custoDeCapitalTerminal": 0.1207,
@@ -2573,7 +3314,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1943,
-    "retornoDoCicloDaBase": 0.19760000000000003
+    "retornoDoCicloDaBase": 0.19760000000000003,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.6420999999999999
   },
   {
     "ticker": "LAND3",
@@ -2581,6 +3327,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -2589,6 +3338,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -2610,7 +3362,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.4083,
-    "retornoDoCicloDaBase": 0.23829999999999998
+    "retornoDoCicloDaBase": 0.23829999999999998,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.0825
   },
   {
     "ticker": "LIGT3",
@@ -2634,7 +3391,11 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0408,
-    "retornoDoCicloDaBase": 0.073
+    "retornoDoCicloDaBase": 0.073,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.787,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false
   },
   {
     "ticker": "LJQQ3",
@@ -2642,6 +3403,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -2656,7 +3420,6 @@
     "avisos": 4,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico",
       "rentabilidadeInsuficiente"
     ],
     "retornoDoCiclo": 0.0507,
@@ -2666,7 +3429,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1008,
-    "retornoDoCicloDaBase": 0.0507
+    "retornoDoCicloDaBase": 0.0507,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.503,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.0929
   },
   {
     "ticker": "LOGN3",
@@ -2674,6 +3442,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2682,6 +3453,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2696,7 +3470,6 @@
     "avisos": 2,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico",
       "rentabilidadeInsuficiente"
     ],
     "retornoDoCiclo": 0.1202,
@@ -2706,7 +3479,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1326,
-    "retornoDoCicloDaBase": 0.1202
+    "retornoDoCicloDaBase": 0.1202,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.1284
   },
   {
     "ticker": "LUPA3",
@@ -2714,6 +3492,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2722,6 +3503,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2730,6 +3514,9 @@
     "setor": "tecnologia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de LWSA3 não sustentam nenhuma das duas vias de avaliação."
   },
   {
@@ -2738,6 +3525,9 @@
     "setor": "outros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -2746,6 +3536,9 @@
     "setor": "saude",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -2754,22 +3547,28 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "emp-adm-part-alimentos",
     "crescimento": "âncora",
-    "justo": 89.53,
+    "justo": 4.19,
     "preco": 17.69,
-    "potencial": 4.061051441492369,
-    "avisos": 5,
+    "potencial": -0.7631430186546071,
+    "avisos": 6,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico"
+      "crescimentoInorganico",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.8175,
     "custoDeCapitalTerminal": 0.1406,
     "phi": 18.25,
-    "fatorDeNormalizacao": 21.372,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0383,
-    "retornoDoCicloDaBase": 0.8175
+    "retornoDoCicloDaBase": 0.8175,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 21.372,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.7240000000000001
   },
   {
     "ticker": "MDIA3",
@@ -2783,7 +3582,6 @@
     "avisos": 2,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico",
       "rentabilidadeInsuficiente"
     ],
     "retornoDoCiclo": 0.07200000000000001,
@@ -2793,7 +3591,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.0555,
-    "retornoDoCicloDaBase": 0.07200000000000001
+    "retornoDoCicloDaBase": 0.07200000000000001,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.36939999999999995
   },
   {
     "ticker": "MDNE3",
@@ -2816,7 +3619,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1794,
-    "retornoDoCicloDaBase": 0.0592
+    "retornoDoCicloDaBase": 0.0592,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.33,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -2.9995
   },
   {
     "ticker": "MEAL3",
@@ -2824,6 +3632,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2832,6 +3643,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -2840,6 +3654,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2864,7 +3681,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0922,
-    "retornoDoCicloDaBase": 0.2237
+    "retornoDoCicloDaBase": 0.2237,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 2.426,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -3.1515
   },
   {
     "ticker": "MILS3",
@@ -2888,7 +3710,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1611,
-    "retornoDoCicloDaBase": 0.1465
+    "retornoDoCicloDaBase": 0.1465,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.3918
   },
   {
     "ticker": "MLAS3",
@@ -2896,6 +3723,9 @@
     "setor": "tecnologia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -2904,6 +3734,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2912,6 +3745,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2935,7 +3771,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1165,
-    "retornoDoCicloDaBase": 0.10769999999999999
+    "retornoDoCicloDaBase": 0.10769999999999999,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.16820000000000002
   },
   {
     "ticker": "MOVI3",
@@ -2959,7 +3800,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.115,
-    "retornoDoCicloDaBase": 0.1038
+    "retornoDoCicloDaBase": 0.1038,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.4278
   },
   {
     "ticker": "MRVE3",
@@ -2967,6 +3813,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de MRVE3 não sustentam nenhuma das duas vias de avaliação."
   },
   {
@@ -2975,6 +3824,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2983,6 +3835,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -2991,6 +3846,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3014,7 +3872,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.2021,
-    "retornoDoCicloDaBase": 0.1057
+    "retornoDoCicloDaBase": 0.1057,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.523,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.4833
   },
   {
     "ticker": "MWET3",
@@ -3022,6 +3885,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3030,6 +3896,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3054,7 +3923,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.042800000000000005,
-    "retornoDoCicloDaBase": 0.0925
+    "retornoDoCicloDaBase": 0.0925,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.4628
   },
   {
     "ticker": "NATU3",
@@ -3062,6 +3936,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -3070,6 +3947,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -3078,6 +3958,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -3086,14 +3969,20 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
     "ticker": "OBTC3",
-    "saida": "outra recusa",
+    "saida": "sem exercício",
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Nenhum exercício de OBTC3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
   },
   {
@@ -3102,13 +3991,19 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
     "ticker": "ONCO11",
-    "saida": "insumos indisponíveis",
+    "saida": "sem cotação na janela",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Sem cotações de ONCO11 na janela de análise."
   },
   {
@@ -3117,6 +4012,9 @@
     "setor": "saude",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -3125,6 +4023,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -3133,6 +4034,9 @@
     "setor": "saneamento",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -3141,6 +4045,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -3149,6 +4056,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -3157,6 +4067,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3165,6 +4078,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3173,6 +4089,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de PCAR3 não sustentam nenhuma das duas vias de avaliação."
   },
   {
@@ -3181,6 +4100,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -3189,6 +4111,9 @@
     "setor": "tecnologia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3197,6 +4122,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3205,6 +4133,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3228,7 +4159,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1384,
-    "retornoDoCicloDaBase": 0.12300000000000001
+    "retornoDoCicloDaBase": 0.12300000000000001,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.41479999999999995
   },
   {
     "ticker": "PETR4",
@@ -3251,7 +4187,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1384,
-    "retornoDoCicloDaBase": 0.12300000000000001
+    "retornoDoCicloDaBase": 0.12300000000000001,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.41479999999999995
   },
   {
     "ticker": "PFRM3",
@@ -3259,6 +4200,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3283,7 +4227,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1425,
-    "retornoDoCicloDaBase": 0.0895
+    "retornoDoCicloDaBase": 0.0895,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.008100000000000001
   },
   {
     "ticker": "PINE3",
@@ -3291,6 +4240,9 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3313,7 +4265,11 @@
     "guarda1": "não avaliável",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.40380000000000005,
-    "retornoDoCicloDaBase": 0.0
+    "retornoDoCicloDaBase": 0.0,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false
   },
   {
     "ticker": "PLAS3",
@@ -3321,6 +4277,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -3329,6 +4288,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -3337,6 +4299,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -3361,53 +4326,68 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1009,
-    "retornoDoCicloDaBase": 0.09849999999999999
+    "retornoDoCicloDaBase": 0.09849999999999999,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.44310000000000005
   },
   {
     "ticker": "POMO3",
     "saida": "avaliado",
-    "via": "DCF sobre lucro distribuível",
+    "via": "DCF por fluxo da firma",
     "setor": "consumo-ciclico",
-    "crescimento": "fundamental",
-    "justo": 2.58,
+    "crescimento": "g = 0",
+    "justo": 0.41,
     "preco": 4.26,
-    "potencial": -0.39436619718309857,
-    "avisos": 3,
+    "potencial": -0.9037558685446009,
+    "avisos": 4,
     "moat": false,
     "moatBarradoPor": [
       "rentabilidadeInsuficiente"
     ],
-    "retornoDoCiclo": 0.1184,
-    "custoDeCapitalTerminal": 0.1414,
-    "phi": 0.1,
-    "fatorDeNormalizacao": 0.391,
+    "retornoDoCiclo": 0.048799999999999996,
+    "custoDeCapitalTerminal": 0.1393,
+    "phi": 0.43,
+    "fatorDeNormalizacao": 0.33,
     "guarda1": "não domina",
     "guarda3": "destoa",
-    "retornoCorrente": 0.30260000000000004,
-    "retornoDoCicloDaBase": 0.1184
+    "retornoCorrente": 0.17,
+    "retornoDoCicloDaBase": 0.048799999999999996,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.287,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.8285
   },
   {
     "ticker": "POMO4",
     "saida": "avaliado",
-    "via": "DCF sobre lucro distribuível",
+    "via": "DCF por fluxo da firma",
     "setor": "",
-    "crescimento": "fundamental",
-    "justo": 2.53,
+    "crescimento": "g = 0",
+    "justo": 0.39,
     "preco": 4.58,
-    "potencial": -0.4475982532751092,
-    "avisos": 3,
+    "potencial": -0.9148471615720525,
+    "avisos": 4,
     "moat": false,
     "moatBarradoPor": [
       "rentabilidadeInsuficiente"
     ],
-    "retornoDoCiclo": 0.1184,
-    "custoDeCapitalTerminal": 0.1438,
-    "phi": 0.1,
-    "fatorDeNormalizacao": 0.391,
+    "retornoDoCiclo": 0.048799999999999996,
+    "custoDeCapitalTerminal": 0.1408,
+    "phi": 0.43,
+    "fatorDeNormalizacao": 0.33,
     "guarda1": "não domina",
     "guarda3": "destoa",
-    "retornoCorrente": 0.30260000000000004,
-    "retornoDoCicloDaBase": 0.1184
+    "retornoCorrente": 0.17,
+    "retornoDoCicloDaBase": 0.048799999999999996,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.287,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.8285
   },
   {
     "ticker": "POSI3",
@@ -3415,46 +4395,57 @@
     "via": "DCF por fluxo da firma",
     "setor": "tecnologia",
     "crescimento": "âncora",
-    "justo": 8.04,
+    "justo": 2.66,
     "preco": 3.42,
-    "potencial": 1.350877192982456,
-    "avisos": 5,
+    "potencial": -0.22222222222222215,
+    "avisos": 6,
     "moat": false,
     "moatBarradoPor": [
       "crescimentoInorganico",
-      "rentabilidadeInsuficiente"
+      "rentabilidadeInsuficiente",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.1117,
     "custoDeCapitalTerminal": 0.1338,
     "phi": 1.47,
-    "fatorDeNormalizacao": 1.738,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0643,
-    "retornoDoCicloDaBase": 0.1117
+    "retornoDoCicloDaBase": 0.1117,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.738,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.9601000000000001
   },
   {
     "ticker": "PRIO3",
     "saida": "avaliado",
-    "via": "DCF por fluxo da firma",
+    "via": "DCF sobre lucro distribuível",
     "setor": "energia",
     "crescimento": "âncora",
-    "justo": 59.5,
+    "justo": 57.02,
     "preco": 60.19,
-    "potencial": -0.011463698288752247,
+    "potencial": -0.05266655590629664,
     "avisos": 6,
     "moat": false,
     "moatBarradoPor": [
       "crescimentoInorganico"
     ],
-    "retornoDoCiclo": 0.2823,
-    "custoDeCapitalTerminal": 0.16010000000000002,
-    "phi": 86.1,
-    "fatorDeNormalizacao": 10.489,
+    "retornoDoCiclo": 0.4703,
+    "custoDeCapitalTerminal": 0.1417,
+    "phi": 5.5,
+    "fatorDeNormalizacao": 3.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
-    "retornoCorrente": 0.0269,
-    "retornoDoCicloDaBase": 0.2823
+    "retornoCorrente": 0.0868,
+    "retornoDoCicloDaBase": 0.4703,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 5.416,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.34299999999999997
   },
   {
     "ticker": "PRNR3",
@@ -3462,23 +4453,29 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "servicos",
     "crescimento": "âncora",
-    "justo": 4.16,
+    "justo": 0.87,
     "preco": 18.15,
-    "potencial": -0.7707988980716253,
-    "avisos": 5,
+    "potencial": -0.9520661157024792,
+    "avisos": 6,
     "moat": false,
     "moatBarradoPor": [
       "crescimentoInorganico",
-      "rentabilidadeInsuficiente"
+      "rentabilidadeInsuficiente",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.1131,
     "custoDeCapitalTerminal": 0.14679999999999999,
     "phi": 8.53,
-    "fatorDeNormalizacao": 4.773,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.023700000000000002,
-    "retornoDoCicloDaBase": 0.1131
+    "retornoDoCicloDaBase": 0.1131,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 4.773,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.8706
   },
   {
     "ticker": "PSSA3",
@@ -3501,7 +4498,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.2421,
-    "retornoDoCicloDaBase": 0.17629999999999998
+    "retornoDoCicloDaBase": 0.17629999999999998,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.728,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.9715
   },
   {
     "ticker": "PTBL3",
@@ -3509,6 +4511,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3517,20 +4522,27 @@
     "via": "DCF por fluxo da firma",
     "setor": "saude",
     "crescimento": "fundamental",
-    "justo": 8.86,
+    "justo": 2.52,
     "preco": 1.5,
-    "potencial": 4.906666666666666,
+    "potencial": 0.68,
     "avisos": 4,
-    "moat": true,
-    "moatBarradoPor": [],
+    "moat": false,
+    "moatBarradoPor": [
+      "saudeOperacional"
+    ],
     "retornoDoCiclo": 0.16920000000000002,
     "custoDeCapitalTerminal": 0.1115,
     "phi": 0.01,
-    "fatorDeNormalizacao": 2.097,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.08070000000000001,
-    "retornoDoCicloDaBase": 0.16920000000000002
+    "retornoDoCicloDaBase": 0.16920000000000002,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 2.097,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.8320000000000001
   },
   {
     "ticker": "RADL3",
@@ -3553,7 +4565,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.19690000000000002,
-    "retornoDoCicloDaBase": 0.17550000000000002
+    "retornoDoCicloDaBase": 0.17550000000000002,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.2811
   },
   {
     "ticker": "RAIL3",
@@ -3577,7 +4594,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0579,
-    "retornoDoCicloDaBase": 0.0348
+    "retornoDoCicloDaBase": 0.0348,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.601,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.6831
   },
   {
     "ticker": "RAIZ4",
@@ -3585,6 +4607,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -3608,7 +4633,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1207,
-    "retornoDoCicloDaBase": 0.1189
+    "retornoDoCicloDaBase": 0.1189,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.36
   },
   {
     "ticker": "RAPT3",
@@ -3616,31 +4646,21 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
     "ticker": "RAPT4",
-    "saida": "avaliado",
-    "via": "DCF por fluxo da firma",
+    "saida": "sem via aplicável",
     "setor": "",
-    "crescimento": "âncora",
-    "justo": 5.73,
-    "preco": 4.8,
-    "potencial": 0.19375000000000014,
-    "avisos": 5,
+    "avisos": 0,
     "moat": false,
-    "moatBarradoPor": [
-      "crescimentoInorganico",
-      "rentabilidadeInsuficiente"
-    ],
-    "retornoDoCiclo": 0.13570000000000002,
-    "custoDeCapitalTerminal": 0.1611,
-    "phi": 1.52,
-    "fatorDeNormalizacao": 2.155,
-    "guarda1": "não domina",
-    "guarda3": "destoa",
-    "retornoCorrente": 0.063,
-    "retornoDoCicloDaBase": 0.13570000000000002
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "detalhe": "Os dados de RAPT4 não sustentam nenhuma das duas vias de avaliação."
   },
   {
     "ticker": "RCSL3",
@@ -3648,6 +4668,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -3656,6 +4679,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -3679,7 +4705,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.2422,
-    "retornoDoCicloDaBase": 0.12619999999999998
+    "retornoDoCicloDaBase": 0.12619999999999998,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -2.0055
   },
   {
     "ticker": "RECV3",
@@ -3687,6 +4718,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -3695,6 +4729,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3703,10 +4740,10 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "consumo-ciclico",
     "crescimento": "âncora",
-    "justo": 17.28,
+    "justo": 15.6,
     "preco": 36.64,
-    "potencial": -0.5283842794759825,
-    "avisos": 6,
+    "potencial": -0.574235807860262,
+    "avisos": 7,
     "moat": false,
     "moatBarradoPor": [
       "crescimentoInorganico"
@@ -3714,11 +4751,16 @@
     "retornoDoCiclo": 0.2359,
     "custoDeCapitalTerminal": 0.17190000000000003,
     "phi": 6.02,
-    "fatorDeNormalizacao": 3.323,
+    "fatorDeNormalizacao": 3.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.071,
-    "retornoDoCicloDaBase": 0.2359
+    "retornoDoCicloDaBase": 0.2359,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 3.323,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.0159
   },
   {
     "ticker": "RENT4",
@@ -3726,10 +4768,10 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "",
     "crescimento": "âncora",
-    "justo": 15.45,
+    "justo": 13.95,
     "preco": 35.29,
-    "potencial": -0.5621989232077076,
-    "avisos": 6,
+    "potencial": -0.6047038821195806,
+    "avisos": 7,
     "moat": false,
     "moatBarradoPor": [
       "crescimentoInorganico",
@@ -3738,11 +4780,16 @@
     "retornoDoCiclo": 0.2359,
     "custoDeCapitalTerminal": 0.19039999999999999,
     "phi": 6.02,
-    "fatorDeNormalizacao": 3.323,
+    "fatorDeNormalizacao": 3.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.071,
-    "retornoDoCicloDaBase": 0.2359
+    "retornoDoCicloDaBase": 0.2359,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 3.323,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.0159
   },
   {
     "ticker": "RIAA3",
@@ -3750,10 +4797,10 @@
     "via": "DCF por fluxo da firma",
     "setor": "textil-e-vestuario",
     "crescimento": "fundamental",
-    "justo": 3.02,
+    "justo": 3.74,
     "preco": 7.16,
-    "potencial": -0.5782122905027933,
-    "avisos": 3,
+    "potencial": -0.47765363128491617,
+    "avisos": 4,
     "moat": false,
     "moatBarradoPor": [
       "rentabilidadeInsuficiente"
@@ -3761,11 +4808,16 @@
     "retornoDoCiclo": 0.07200000000000001,
     "custoDeCapitalTerminal": 0.179,
     "phi": 0.27,
-    "fatorDeNormalizacao": 0.271,
+    "fatorDeNormalizacao": 0.33,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.2657,
-    "retornoDoCicloDaBase": 0.07200000000000001
+    "retornoDoCicloDaBase": 0.07200000000000001,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.271,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -7.6451
   },
   {
     "ticker": "RNEW3",
@@ -3773,6 +4825,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3781,6 +4836,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3789,6 +4847,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3797,6 +4858,9 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3805,14 +4869,20 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
     "ticker": "RVEE3",
-    "saida": "outra recusa",
+    "saida": "sem exercício",
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Nenhum exercício de RVEE3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
   },
   {
@@ -3836,7 +4906,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1082,
-    "retornoDoCicloDaBase": 0.1353
+    "retornoDoCicloDaBase": 0.1353,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.0958
   },
   {
     "ticker": "SANB3",
@@ -3844,6 +4919,9 @@
     "setor": "servicos-financeiros",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3867,7 +4945,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1082,
-    "retornoDoCicloDaBase": 0.1353
+    "retornoDoCicloDaBase": 0.1353,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.0958
   },
   {
     "ticker": "SAPR11",
@@ -3890,7 +4973,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.09849999999999999,
-    "retornoDoCicloDaBase": 0.1189
+    "retornoDoCicloDaBase": 0.1189,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.207,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.6570999999999999
   },
   {
     "ticker": "SAPR3",
@@ -3898,6 +4986,9 @@
     "setor": "saneamento",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -3921,7 +5012,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.09849999999999999,
-    "retornoDoCicloDaBase": 0.1189
+    "retornoDoCicloDaBase": 0.1189,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.207,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.6570999999999999
   },
   {
     "ticker": "SAUD3",
@@ -3942,7 +5038,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.5975,
-    "retornoDoCicloDaBase": 0.5478999999999999
+    "retornoDoCicloDaBase": 0.5478999999999999,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.29059999999999997
   },
   {
     "ticker": "SBFG3",
@@ -3966,7 +5067,12 @@
     "guarda1": "não avaliável",
     "guarda3": "destoa",
     "retornoCorrente": 0.10890000000000001,
-    "retornoDoCicloDaBase": 0.1514
+    "retornoDoCicloDaBase": 0.1514,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.391,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.603
   },
   {
     "ticker": "SBSP3",
@@ -3989,7 +5095,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1464,
-    "retornoDoCicloDaBase": 0.1
+    "retornoDoCicloDaBase": 0.1,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.683,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.7111
   },
   {
     "ticker": "SCAR3",
@@ -3997,6 +5108,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4011,7 +5125,6 @@
     "avisos": 3,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico",
       "rentabilidadeInsuficiente"
     ],
     "retornoDoCiclo": 0.1726,
@@ -4021,14 +5134,21 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1629,
-    "retornoDoCicloDaBase": 0.1726
+    "retornoDoCicloDaBase": 0.1726,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false
   },
   {
     "ticker": "SEQL3",
-    "saida": "outra recusa",
+    "saida": "sem exercício",
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Nenhum exercício de SEQL3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
   },
   {
@@ -4037,6 +5157,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4061,7 +5184,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1152,
-    "retornoDoCicloDaBase": 0.13369999999999999
+    "retornoDoCicloDaBase": 0.13369999999999999,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.1386
   },
   {
     "ticker": "SIMH3",
@@ -4069,6 +5197,9 @@
     "setor": "holdings",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -4084,7 +5215,8 @@
     "moat": false,
     "moatBarradoPor": [
       "crescimentoInorganico",
-      "rentabilidadeInsuficiente"
+      "rentabilidadeInsuficiente",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.1273,
     "custoDeCapitalTerminal": 0.1376,
@@ -4093,7 +5225,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1549,
-    "retornoDoCicloDaBase": 0.1273
+    "retornoDoCicloDaBase": 0.1273,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.5771999999999999
   },
   {
     "ticker": "SMFT3",
@@ -4116,7 +5253,12 @@
     "guarda1": "não avaliável",
     "guarda3": "destoa",
     "retornoCorrente": 0.11710000000000001,
-    "retornoDoCicloDaBase": 0.2481
+    "retornoDoCicloDaBase": 0.2481,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 2.12,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -12.0175
   },
   {
     "ticker": "SMTO3",
@@ -4130,7 +5272,6 @@
     "avisos": 4,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico",
       "rentabilidadeInsuficiente"
     ],
     "retornoDoCiclo": 0.12560000000000002,
@@ -4140,7 +5281,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0633,
-    "retornoDoCicloDaBase": 0.12560000000000002
+    "retornoDoCicloDaBase": 0.12560000000000002,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.984,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.17679999999999998
   },
   {
     "ticker": "SNSY5",
@@ -4148,6 +5294,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
   },
   {
@@ -4156,6 +5305,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -4164,6 +5316,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4172,30 +5327,39 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
     "ticker": "SUZB3",
     "saida": "avaliado",
-    "via": "DCF sobre lucro distribuível",
+    "via": "DCF por fluxo da firma",
     "setor": "materiais-basicos",
-    "crescimento": "fundamental",
-    "justo": 168.38,
+    "crescimento": "âncora",
+    "justo": 54.73,
     "preco": 46.89,
-    "potencial": 2.5909575602473875,
-    "avisos": 3,
+    "potencial": 0.16719982938792913,
+    "avisos": 8,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico"
+      "crescimentoInorganico",
+      "rentabilidadeInsuficiente"
     ],
-    "retornoDoCiclo": 0.1841,
-    "custoDeCapitalTerminal": 0.1124,
-    "phi": 0.77,
-    "fatorDeNormalizacao": 1.0,
+    "retornoDoCiclo": 0.1039,
+    "custoDeCapitalTerminal": 0.094,
+    "phi": 2.53,
+    "fatorDeNormalizacao": 1.654,
     "guarda1": "domina",
     "guarda3": "destoa",
-    "retornoCorrente": 0.41450000000000004,
-    "retornoDoCicloDaBase": 0.1841
+    "retornoCorrente": 0.06280000000000001,
+    "retornoDoCicloDaBase": 0.1039,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 1.654,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.42560000000000003
   },
   {
     "ticker": "SYNE3",
@@ -4203,6 +5367,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4226,7 +5393,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.113,
-    "retornoDoCicloDaBase": 0.1242
+    "retornoDoCicloDaBase": 0.1242,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.0902
   },
   {
     "ticker": "TAEE3",
@@ -4234,6 +5406,9 @@
     "setor": "energia",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4257,7 +5432,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.113,
-    "retornoDoCicloDaBase": 0.1242
+    "retornoDoCicloDaBase": 0.1242,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.0902
   },
   {
     "ticker": "TASA3",
@@ -4265,6 +5445,9 @@
     "setor": "bens-industriais",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4273,6 +5456,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4281,6 +5467,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4289,6 +5478,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4297,6 +5489,9 @@
     "setor": "telecomunicacoes",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4305,6 +5500,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4329,7 +5527,11 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.2593,
-    "retornoDoCicloDaBase": 0.11130000000000001
+    "retornoDoCicloDaBase": 0.11130000000000001,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.429,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false
   },
   {
     "ticker": "TFCO4",
@@ -4337,6 +5539,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -4360,7 +5565,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.25170000000000003,
-    "retornoDoCicloDaBase": 0.18739999999999998
+    "retornoDoCicloDaBase": 0.18739999999999998,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.745,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.5217
   },
   {
     "ticker": "TIMS3",
@@ -4368,6 +5578,9 @@
     "setor": "telecomunicacoes",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de TIMS3 não sustentam nenhuma das duas vias de avaliação."
   },
   {
@@ -4376,6 +5589,9 @@
     "setor": "comercio-atacado-e-varejo",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -4400,7 +5616,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1574,
-    "retornoDoCicloDaBase": 0.1487
+    "retornoDoCicloDaBase": 0.1487,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.7595000000000001
   },
   {
     "ticker": "TPIS3",
@@ -4408,6 +5629,9 @@
     "setor": "infraestrutura",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4416,6 +5640,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4424,14 +5651,20 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
     "ticker": "TUPY3",
-    "saida": "outra recusa",
+    "saida": "sem exercício",
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Nenhum exercício de TUPY3 havia sido divulgado em 04/09/2026 (defasagem de 90 dias)."
   },
   {
@@ -4440,6 +5673,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4463,7 +5699,12 @@
     "guarda1": "não domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.1606,
-    "retornoDoCicloDaBase": 0.1461
+    "retornoDoCicloDaBase": 0.1461,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.3814
   },
   {
     "ticker": "UNIP3",
@@ -4471,6 +5712,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4479,6 +5723,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4487,22 +5734,28 @@
     "via": "DCF por fluxo da firma",
     "setor": "",
     "crescimento": "âncora",
-    "justo": 54.28,
+    "justo": 17.18,
     "preco": 56.97,
-    "potencial": -0.04721783394769173,
-    "avisos": 4,
+    "potencial": -0.6984377742671581,
+    "avisos": 5,
     "moat": false,
     "moatBarradoPor": [
-      "crescimentoInorganico"
+      "crescimentoInorganico",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.28859999999999997,
     "custoDeCapitalTerminal": 0.1267,
     "phi": 0.64,
-    "fatorDeNormalizacao": 1.955,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1476,
-    "retornoDoCicloDaBase": 0.28859999999999997
+    "retornoDoCicloDaBase": 0.28859999999999997,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.955,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.639
   },
   {
     "ticker": "USIM3",
@@ -4510,6 +5763,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de USIM3 não sustentam nenhuma das duas vias de avaliação."
   },
   {
@@ -4518,6 +5774,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Os dados de USIM5 não sustentam nenhuma das duas vias de avaliação."
   },
   {
@@ -4526,6 +5785,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4534,22 +5796,28 @@
     "via": "DCF por fluxo da firma",
     "setor": "materiais-basicos",
     "crescimento": "fundamental",
-    "justo": 67.25,
+    "justo": 23.32,
     "preco": 78.62,
-    "potencial": -0.14461968964640046,
-    "avisos": 3,
+    "potencial": -0.7033833630119563,
+    "avisos": 4,
     "moat": false,
     "moatBarradoPor": [
-      "rentabilidadeInsuficiente"
+      "rentabilidadeInsuficiente",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.165,
     "custoDeCapitalTerminal": 0.1188,
     "phi": 0.0,
-    "fatorDeNormalizacao": 2.18,
+    "fatorDeNormalizacao": 1.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0757,
-    "retornoDoCicloDaBase": 0.165
+    "retornoDoCicloDaBase": 0.165,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 2.18,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": true,
+    "quedaNoTrienio": 0.8774
   },
   {
     "ticker": "VAMO3",
@@ -4564,7 +5832,8 @@
     "moat": false,
     "moatBarradoPor": [
       "historicoCurto",
-      "capitalExternoNaoMedido"
+      "capitalExternoNaoMedido",
+      "saudeOperacional"
     ],
     "retornoDoCiclo": 0.25329999999999997,
     "custoDeCapitalTerminal": 0.1932,
@@ -4572,7 +5841,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.1346,
-    "retornoDoCicloDaBase": 0.25329999999999997
+    "retornoDoCicloDaBase": 0.25329999999999997,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": 0.5084000000000001
   },
   {
     "ticker": "VBBR3",
@@ -4580,20 +5854,25 @@
     "via": "DCF sobre lucro distribuível",
     "setor": "energia",
     "crescimento": "fundamental",
-    "justo": 36.35,
+    "justo": 35.88,
     "preco": 36.99,
-    "potencial": -0.017301973506353083,
-    "avisos": 4,
+    "potencial": -0.030008110300081086,
+    "avisos": 5,
     "moat": true,
     "moatBarradoPor": [],
     "retornoDoCiclo": 0.295,
     "custoDeCapitalTerminal": 0.1597,
     "phi": 0.0,
-    "fatorDeNormalizacao": 3.039,
+    "fatorDeNormalizacao": 3.0,
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0971,
-    "retornoDoCicloDaBase": 0.295
+    "retornoDoCicloDaBase": 0.295,
+    "precedenciaDoCiclo": true,
+    "fatorBruto": 3.039,
+    "fatorSaturado": true,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.2876
   },
   {
     "ticker": "VITT3",
@@ -4601,6 +5880,9 @@
     "setor": "materiais-basicos",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -4609,6 +5891,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -4617,6 +5902,9 @@
     "setor": "construcao-e-imobiliario",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4640,7 +5928,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0776,
-    "retornoDoCicloDaBase": 0.060899999999999996
+    "retornoDoCicloDaBase": 0.060899999999999996,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.785,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.5223
   },
   {
     "ticker": "VLID3",
@@ -4663,7 +5956,12 @@
     "guarda1": "não domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.10890000000000001,
-    "retornoDoCicloDaBase": 0.060700000000000004
+    "retornoDoCicloDaBase": 0.060700000000000004,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 0.558,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.37579999999999997
   },
   {
     "ticker": "VSTE3",
@@ -4671,6 +5969,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4679,6 +5980,9 @@
     "setor": "educacao",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
   },
   {
@@ -4703,7 +6007,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.2323,
-    "retornoDoCicloDaBase": 0.18100000000000002
+    "retornoDoCicloDaBase": 0.18100000000000002,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.993
   },
   {
     "ticker": "VVEO3",
@@ -4711,6 +6020,9 @@
     "setor": "consumo-nao-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -4719,6 +6031,9 @@
     "setor": "comercio-atacado-e-varejo",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -4740,7 +6055,12 @@
     "guarda1": "domina",
     "guarda3": "dentro da banda e do desvio robusto",
     "retornoCorrente": 0.28190000000000004,
-    "retornoDoCicloDaBase": 0.25129999999999997
+    "retornoDoCicloDaBase": 0.25129999999999997,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.5858
   },
   {
     "ticker": "WEST3",
@@ -4748,6 +6068,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
   },
   {
@@ -4756,6 +6079,9 @@
     "setor": "consumo-ciclico",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4764,6 +6090,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4787,7 +6116,12 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.3319,
-    "retornoDoCicloDaBase": 1.7084000000000001
+    "retornoDoCicloDaBase": 1.7084000000000001,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -0.7254999999999999
   },
   {
     "ticker": "WLMM4",
@@ -4795,6 +6129,9 @@
     "setor": "",
     "avisos": 0,
     "moat": false,
+    "precedenciaDoCiclo": false,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
     "detalhe": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
   },
   {
@@ -4818,6 +6155,11 @@
     "guarda1": "domina",
     "guarda3": "destoa",
     "retornoCorrente": 0.0574,
-    "retornoDoCicloDaBase": 0.1245
+    "retornoDoCicloDaBase": 0.1245,
+    "precedenciaDoCiclo": false,
+    "fatorBruto": 1.0,
+    "fatorSaturado": false,
+    "tetoTravadoPelaSaude": false,
+    "quedaNoTrienio": -1.7582
   }
 ]

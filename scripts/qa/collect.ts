@@ -40,6 +40,12 @@ const EXCLUDED = [
   ':(exclude)package-lock.json',
   ':(exclude).dart_tool/**',
   ':(exclude)lib/firebase_options.dart',
+  // Dumps do executor de validacao. O `validacao_fora_da_amostra.json` tem
+  // 162 KB e entrava no escopo por `*.json`: numa auditoria de diff ele
+  // consumia a atencao do modelo inteira, e o veredito saiu descrevendo o dump
+  // sem tocar no codigo que mudou junto. Nao e codigo de producao -- e saida
+  // gerada por `dart run tool/validate.dart`.
+  ':(exclude)docs/validacao/**',
 ];
 
 /** Teto de payload. Acima disso o custo explode e a atencao do modelo dilui. */

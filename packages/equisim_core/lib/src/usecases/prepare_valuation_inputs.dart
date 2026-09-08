@@ -67,6 +67,10 @@ abstract final class PrepareValuationInputs {
     final profile = await fundamentals.profile(ticker);
     final sectorKey =
         profile.isOk ? profile.unwrap().sector.key.toLowerCase() : null;
+    // O subsetor alimenta a precedência da Guarda 3 sobre a Guarda 1: a chave
+    // setorial sozinha não separa exploração de petróleo de energia elétrica,
+    // que a fonte publica sob a mesma `energia`. Ver `CyclicalSectors`.
+    final industry = profile.isOk ? profile.unwrap().industry : null;
 
     final priceResult = await prices.daily(ticker, window);
     if (priceResult.isErr) return Err(priceResult.failureOrNull!);
@@ -100,6 +104,7 @@ abstract final class PrepareValuationInputs {
       projectionYears: projectionYears,
       perpetualGrowthCap: perpetualGrowthCap,
       sectorKey: sectorKey,
+      industry: industry,
       inflation: inflation,
       declaredTerminalRiskFreeRate: terminalRiskFreeRate,
       // A mesma série que estima o beta alimenta o corte de liquidez da

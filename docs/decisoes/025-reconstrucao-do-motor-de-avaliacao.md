@@ -1,7 +1,7 @@
 ---
 numero: 25
 titulo: Reconstrução do motor de avaliação por portas, vias e crescimento fundamental
-status: aceita
+status: cumprida
 origem: orientador
 data: 2026-09-04
 postura: reconstrucao
@@ -139,3 +139,8 @@ A postura `reconstrucao` desta decisão se fecha — `status: aceita` passa a
 
 Enquanto as quatro não valerem, a superfície do `afeta` segue acionável.
 Alcançá-las é registrar um fato, e a marcação de `status` não reabre a decisão.
+
+**As quatro passaram a valer em 07/09/2026**, e o `status` foi marcado como
+`cumprida` pela [decisão 29](029-saude-operacional-na-porta-2a.md), que registra
+a conferência condição por condição. A superfície do `afeta` volta à
+preservação.

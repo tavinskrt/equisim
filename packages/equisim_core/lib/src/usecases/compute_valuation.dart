@@ -9,6 +9,7 @@ import '../failures/failure.dart';
 import '../failures/result.dart';
 import '../services/valuation/capital_base.dart';
 import '../services/valuation/cost_of_capital.dart';
+import '../services/valuation/cyclical_sectors.dart';
 import '../services/valuation/dcf.dart';
 import '../services/valuation/eligibility.dart';
 import '../services/valuation/growth_estimator.dart';
@@ -54,6 +55,17 @@ class ValuationInputs {
   /// sozinho já barra instituição financeira: BBAS3 e BPAC11 não têm NOPAT em
   /// exercício nenhum.
   final String? sectorKey;
+
+  /// Subsetor na taxonomia da fonte, como publicado — com acento e pontuação.
+  ///
+  /// Entra na precedência da Guarda 3 sobre a Guarda 1, e existe porque a chave
+  /// setorial sozinha não separa o que precisa ser separado: `energia` reúne
+  /// exploração de petróleo, que é commodity pura, e 28 elétricas, que são
+  /// concessão regulada. Ver [CyclicalSectors].
+  ///
+  /// `null` quando o perfil não pôde ser carregado, caso em que a precedência
+  /// recai apenas sobre a chave setorial.
+  final String? industry;
 
   /// Série de cotações da janela, para o corte de liquidez da Porta 0.
   ///
@@ -110,6 +122,7 @@ class ValuationInputs {
     this.projectionYears = 10,
     this.perpetualGrowthCap = 0.0652,
     this.sectorKey,
+    this.industry,
     this.inflation = 0.05,
     this.declaredTerminalRiskFreeRate,
     this.prices,
@@ -436,19 +449,65 @@ abstract final class ValuationCascade {
     // independentemente do tamanho que a empresa passou a ter.
     //
     // Sob a precedência anterior, Φ > 1,0 impedia a normalização e o pico virava
-    // base perene: SUZB3 saía a +259,1% e QUAL3 a +477,3% de potencial na
-    // validação fora da amostra. A guarda passa a **declarar** a base inorgânica
-    // em vez de barrar a correção do nível, e o fator continua sendo aplicado
-    // sobre a base de capital corrente — a da empresa de hoje, já incorporada.
-    final normaliza = (tendencia?.dominates != true) &&
+    // base perene. A guarda passa a **declarar** a base inorgânica em vez de
+    // barrar a correção do nível, e o fator continua sendo aplicado sobre a base
+    // de capital corrente — a da empresa de hoje, já incorporada.
+    //
+    // **Em commodity, a Guarda 3 tem precedência sobre a Guarda 1.** A perna de
+    // alta do ciclo tem exatamente a forma de uma tendência, e o teste a lê como
+    // estrutural: a SUZB3 travou 41,5% de retorno corrente contra 18,4% de ciclo
+    // e saiu a +259,1%. Em setor de commodity o preço reverte à média por
+    // definição do produto, e nenhuma sequência de anos de alta muda isso — ver
+    // [CyclicalSectors].
+    final precedenciaDoCiclo = CyclicalSectors.hasCyclePrecedence(
+      sectorKey: inputs.sectorKey,
+      industry: inputs.industry,
+    );
+    final tendenciaTrava = tendencia?.dominates == true && !precedenciaDoCiclo;
+
+    final normaliza = !tendenciaTrava &&
         destoa == true &&
         retornoAtual != null &&
         retornoCiclo != null &&
         retornoAtual > 0;
 
-    final fatorBase = normaliza ? retornoCiclo / retornoAtual : 1.0;
+    // **Saúde operacional trava a normalização para cima.** A mesma medida que
+    // barra o *moat*: empresa que perdeu mais da metade do resultado no triênio
+    // mudou de patamar, e puxar a base dela de volta à mediana de oito anos
+    // produz um retorno que ela não vai repetir. A QUAL3 perdeu a vantagem
+    // residual na quarta rodada e continuou a +477,3% justamente por aqui — o
+    // número não vinha da perpetuidade, vinha da base normalizada por 2,1x.
+    //
+    // Só o teto cai; o piso continua valendo. Quem deteriorou e ainda assim teve
+    // um exercício acima do ciclo é normalizado para baixo normalmente, que é a
+    // direção conservadora.
+    final queda = GrowthGuards.recentOperationalDecline(published);
+    final saudeReprovada =
+        queda != null && queda > ValuationParameters.maxOperationalDecline;
+    final teto = saudeReprovada ? 1.0 : ValuationParameters.baseFactorCeiling;
+
+    // O fator é saturado em razão, `1/3` a `3`. Sem teto ele explode quando o
+    // exercício corrente tem retorno próximo de zero, e o DCF é homogêneo de
+    // grau 1 no fluxo-base: a MBRF3 recebeu 21,4x e saiu a +406,1%.
+    final fatorBruto = normaliza ? retornoCiclo / retornoAtual : 1.0;
+    final fatorBase =
+        normaliza ? fatorBruto.clamp(ValuationParameters.baseFactorFloor, teto) : 1.0;
+
+    // Os dois confinamentos são reportados em separado: um é a banda de
+    // política, o outro é a trava de saúde, e atribuir um ao outro faria a
+    // calibragem seguinte olhar para o parâmetro errado.
+    final travadoPelaSaude = normaliza && saudeReprovada && fatorBruto > 1.0;
+    final saturou = normaliza &&
+        (fatorBruto > ValuationParameters.baseFactorCeiling ||
+            fatorBruto < ValuationParameters.baseFactorFloor);
+
     _auditBaseGuards(audit, retornoAtual, retornoCiclo, tendencia, phi,
-        destoa == true, normaliza, fatorBase, series);
+        destoa == true, normaliza, fatorBase, series,
+        precedenciaDoCiclo: precedenciaDoCiclo,
+        rawFactor: fatorBruto,
+        saturated: saturou,
+        operationalDecline: queda,
+        healthCapped: travadoPelaSaude);
 
     if (normaliza) {
       local.add(
@@ -458,6 +517,37 @@ abstract final class ValuationCascade {
         'a base converge para o ciclo ao longo da projeção, fator de '
         '${fatorBase.toStringAsFixed(2)}x.',
       );
+      if (precedenciaDoCiclo && tendencia?.dominates == true) {
+        local.add(
+          'A tendência do retorno é significante e domina a reversão à média, '
+          'mas o ativo é de setor de commodity ou cíclico pesado: ali a perna '
+          'de alta do ciclo tem a forma de uma tendência, e lê-la como patamar '
+          'estrutural é o erro que se quer evitar. A reversão ao ciclo tem '
+          'precedência, e a base foi normalizada.',
+        );
+      }
+      if (travadoPelaSaude) {
+        local.add(
+          'O lucro ou o EBITDA recuou ${_pct(queda)} no triênio recente, acima '
+          'do máximo de ${_pct(ValuationParameters.maxOperationalDecline)}. A '
+          'base **não foi normalizada para cima**: o fator seria de '
+          '${fatorBruto.toStringAsFixed(2)}x e ficou em 1,00x. Uma empresa que '
+          'perdeu mais da metade do resultado mudou de patamar, e trazer a base '
+          'de volta à mediana de ${ValuationParameters.cycleWindow} exercícios '
+          'atribuiria a ela um retorno que não vai se repetir.',
+        );
+      }
+      if (saturou && !travadoPelaSaude) {
+        local.add(
+          'O fator bruto de normalização seria de '
+          '${fatorBruto.toStringAsFixed(2)}x e foi saturado em '
+          '${fatorBase.toStringAsFixed(2)}x. O limite é de política, não de '
+          'estatística: o preço justo é proporcional ao fluxo-base, e acima de '
+          '${ValuationParameters.baseFactorCeiling.toStringAsFixed(2)}x a '
+          'normalização deixaria de corrigir um exercício para inventar uma '
+          'empresa. O preço justo abaixo é, nesta medida, conservador.',
+        );
+      }
       if (!comparavel) {
         local.add(
           'A base de capital cresceu ${_r(phi, 2)}x além do que o lucro '
@@ -534,13 +624,20 @@ abstract final class ValuationCascade {
       terminalDiscountRate: descontoTerminal,
       externalCapitalRatio: phi,
       periods: series.length,
+      operationalDecline: queda,
     );
     final moat = moatVeredito.terminalReturn;
 
     _auditDiscountTerm(audit, inputs, desconto, descontoTerminal);
     _auditMoat(audit, moatVeredito);
 
-    if (desconto != descontoTerminal) {
+    // Tolerância, e não igualdade estrita: os dois vêm de `_wacc` sobre os
+    // mesmos insumos com taxas livres de risco diferentes, e quando as duas
+    // coincidem o resultado é bit a bit idêntico — mas depender disso é depender
+    // de determinismo de ponto flutuante para decidir se um aviso aparece. A
+    // banda de 1e-7 é muito menor que qualquer diferença de taxa que valha ser
+    // declarada (0,00001 p.p.) e maior que qualquer ruído de IEEE-754.
+    if ((desconto - descontoTerminal).abs() > 1e-7) {
       local.add(
         'O desconto parte de ${_pct(desconto)} a.a. no primeiro ano e converge '
         'linearmente para ${_pct(descontoTerminal)} a.a. no ano '
@@ -1081,8 +1178,13 @@ abstract final class ValuationCascade {
     bool destoa,
     bool normaliza,
     double fator,
-    CapitalSeries series,
-  ) {
+    CapitalSeries series, {
+    required bool precedenciaDoCiclo,
+    required double rawFactor,
+    required bool saturated,
+    required double? operationalDecline,
+    required bool healthCapped,
+  }) {
     if (audit == null) return;
     audit.step(
       sample: _returnSample(series, retornoCiclo, retornoAtual, normaliza),
@@ -1103,10 +1205,16 @@ abstract final class ValuationCascade {
             : (tendencia.dominates ? 'domina' : 'não domina'),
         'guarda 3 — desvio do ciclo':
             destoa ? 'destoa' : 'dentro da banda e do desvio robusto',
+        'precedência do ciclo (setor cíclico)': precedenciaDoCiclo,
+        'fator bruto': _r(rawFactor, 3),
+        'fator saturado': saturated,
+        'queda no triênio (%)':
+            operationalDecline == null ? null : _r(operationalDecline * 100),
+        'teto travado pela saúde': healthCapped,
       },
       steps: [
         'Guarda 1 — tendência: '
-            '${tendencia == null ? "não avaliável" : (tendencia.dominates ? "domina a reversão, base mantida" : (tendencia.isSignificant ? "significante, mas a reversão é maior" : "sem tendência"))}',
+            '${tendencia == null ? "não avaliável" : (tendencia.dominates ? (precedenciaDoCiclo ? "domina a reversão, mas o setor é cíclico: a Guarda 3 tem precedência" : "domina a reversão, base mantida") : (tendencia.isSignificant ? "significante, mas a reversão é maior" : "sem tendência"))}',
         'Guarda 2 — comparabilidade (declara, não barra): '
             '${phi == null ? "não avaliável" : (phi <= ValuationParameters.maxExternalCapital ? "expansão orgânica, base comparável" : "capital externo de ${_r(phi, 2)}x a base inicial, base inorgânica")}',
         'Guarda 3 — desvio do ciclo: '
@@ -1114,6 +1222,16 @@ abstract final class ValuationCascade {
         normaliza
             ? 'Base normalizada por ${fator.toStringAsFixed(2)}x, convergindo ao longo da projeção'
             : 'Base mantida como observada',
+        if (healthCapped)
+          'Saúde operacional: queda de '
+              '${operationalDecline == null ? "n/d" : _pct(operationalDecline)} '
+              'no triênio; o teto do fator cai para 1,00x e a base não é '
+              'normalizada para cima',
+        if (saturated)
+          'Saturação: o fator bruto de ${rawFactor.toStringAsFixed(2)}x saiu da '
+              'banda de [${ValuationParameters.baseFactorFloor}, '
+              '${ValuationParameters.baseFactorCeiling}] e foi confinado a '
+              '${fator.toStringAsFixed(2)}x',
       ],
       result: _r(fator, 3).toDouble(),
       unit: 'fator sobre o lucro observado',
@@ -1317,6 +1435,9 @@ abstract final class ValuationCascade {
             : _r(v.externalCapitalRatio!, 2),
         'exercícios': v.periods,
         'lambda': ValuationParameters.moatRetainedSpread,
+        'queda no triênio (%)': v.operationalDecline == null
+            ? null
+            : _r(v.operationalDecline! * 100),
         // Chaves de leitura por máquina: é por elas que o relatório de
         // validação agrupa os reprovados sem depender de análise de texto.
         'condição que barrou': v.primaryBlock?.name ?? 'nenhuma',
@@ -1337,11 +1458,15 @@ abstract final class ValuationCascade {
             '${ciclo == null ? "não medido" : _pct(ciclo)}',
         'Passo 3: histórico longo? ${v.periods} exercícios contra '
             '${ValuationParameters.moatMinPeriods} exigidos',
+        'Passo 4: saúde operacional? queda de lucro ou EBITDA no triênio de '
+            '${v.operationalDecline == null ? "não medida" : _pct(v.operationalDecline!)} '
+            'contra o máximo de '
+            '${_pct(ValuationParameters.maxOperationalDecline)}',
         v.isProven
-            ? 'Passo 4: as três condições valem — ROIC_inf = '
+            ? 'Passo 5: todas as condições valem — ROIC_inf = '
                 '${_pct(v.terminalReturn!)}, e o valor terminal volta a depender '
                 'de g_inf, que é o preço declarado da exceção'
-            : 'Passo 4: barrado por ${v.blocks.map((b) => b.label).join(", ")} — '
+            : 'Passo 5: barrado por ${v.blocks.map((b) => b.label).join(", ")} — '
                 'vale o estado estacionário, ROIC_inf = WACC_inf, e o valor '
                 'terminal não depende de g_inf',
       ],

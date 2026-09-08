@@ -70,6 +70,33 @@ abstract final class ValuationParameters {
   /// desconto. Ver `ValuationCascade`.
   static const double minEquityShare = 0.20;
 
+  /// Teto e piso do fator de normalização da base.
+  ///
+  /// **O fator é `f = retorno_ciclo / retorno_atual`, e ele explode.** Quando o
+  /// exercício corrente tem retorno próximo de zero o denominador some, e como o
+  /// DCF é **homogêneo de grau 1 no fluxo-base**, o fator multiplica o preço
+  /// justo inteiro: a MBRF3 recebeu 21,4x e saiu a +406,1% de potencial na
+  /// terceira rodada, e FESA4 e DXCO3 já vinham recebendo dez vezes.
+  ///
+  /// A saturação é **simétrica em razão**, `1/3` contra `3`, e não em diferença:
+  /// normalizar para cima e para baixo precisa custar o mesmo, senão o teto vira
+  /// um viés de direção. Ela responde à pergunta que a
+  /// `docs/validacao/normalizacao_fluxo_base.md` fazia sobre `τ` — quanto se
+  /// autoriza um único exercício a mover a avaliação inteira da empresa — com um
+  /// limite explícito em vez de nenhum.
+  ///
+  /// **Não é detecção de atípico**, é política: acima de 3x a normalização
+  /// deixa de corrigir um exercício e passa a inventar uma empresa.
+  ///
+  /// **O teto cai para 1,00 quando a saúde operacional reprova.** Empresa que
+  /// perdeu mais da metade do resultado no triênio não recebe base normalizada
+  /// para cima, qualquer que seja a mediana do ciclo — ver
+  /// [maxOperationalDecline]. O piso continua valendo nos dois casos: quem
+  /// deteriorou e ainda assim teve um exercício acima do ciclo é normalizado
+  /// para baixo normalmente.
+  static const double baseFactorFloor = 0.33;
+  static const double baseFactorCeiling = 3.00;
+
   /// P11 — janela do ciclo, em exercícios.
   ///
   /// **O parâmetro mais sensível de todos.** Com 5 anos a PETR4 aparece a 0,65
@@ -112,10 +139,45 @@ abstract final class ValuationParameters {
 
   /// Teto de capital externo para o crescimento ser considerado orgânico.
   ///
-  /// Mais restritivo que [maxExternalCapital], que vale para a normalização da
-  /// base: uma vantagem competitiva que precisa de emissão para se sustentar não
-  /// é vantagem, é aporte.
-  static const double moatMaxExternalCapital = 0.35;
+  /// Mais restritivo que [maxExternalCapital]: uma vantagem competitiva que
+  /// precisa de emissão para se sustentar não é vantagem, é aporte.
+  ///
+  /// **0,60 e não mais 0,35**, por determinação de 07/09/2026. A instrumentação
+  /// da terceira rodada mostrou que era este — e não o critério de rentabilidade
+  /// recalibrado — o parâmetro que prendia as franquias: EGIE3 caía com
+  /// `Φ = 0,58` e ITUB4 com `Φ = 0,50`. O corte de 0,35 confundia duas coisas
+  /// diferentes. Concessionária que financia outorga com dívida e banco que
+  /// capta por definição do negócio acusam Φ alto **sem** que isso signifique
+  /// que a rentabilidade depende de aporte de sócio.
+  ///
+  /// O que o corte continua barrando, agora com folga calibrada, é a empresa
+  /// cuja base cresceu por emissão em múltiplos da própria base — a SUZB3, com
+  /// `Φ = 0,77`, segue reprovada.
+  static const double moatMaxExternalCapital = 0.60;
+
+  /// Queda máxima tolerada de lucro ou de EBITDA no triênio recente.
+  ///
+  /// **Filtro de saúde operacional, e vale em dois lugares.**
+  ///
+  /// No *moat*, sem ele `Φ` premiava quem está encolhendo: a QUAL3 passou na
+  /// terceira rodada com `Φ = 0,01` — não porque financia o crescimento por
+  /// dentro, mas porque **não há crescimento nenhum a financiar**. O lucro dela
+  /// caiu de R$ 0,10 bi em 2022 para R$ 0,02 bi em 2025, e a mediana do ciclo de
+  /// oito anos ainda carregava os exercícios bons de antes. Vantagem competitiva
+  /// é afirmação sobre o **futuro** do retorno excedente, e quem caiu pela
+  /// metade no triênio não a sustenta.
+  ///
+  /// Na **Porta 2a** ele proíbe normalizar a base *para cima* — ver
+  /// [baseFactorCeiling]. Barrar só o *moat* resolvia metade do problema: a
+  /// QUAL3 perdeu a vantagem residual na quarta rodada e continuou a +477,3% de
+  /// potencial, porque o número não vinha da perpetuidade, vinha da mediana de
+  /// ROIC de oito anos aplicada à base corrente. Puxar a base de uma empresa
+  /// que mudou de patamar de volta à mediana histórica produz um retorno que ela
+  /// não vai repetir.
+  static const double maxOperationalDecline = 0.50;
+
+  /// Exercícios do triênio de saúde operacional.
+  static const int operationalHealthWindow = 3;
 
   /// Múltiplo do custo de capital que o retorno do ciclo precisa alcançar.
   ///
@@ -255,6 +317,11 @@ enum MoatBlock {
   /// capital, nem o excedente absoluto.
   rentabilidadeInsuficiente('rentabilidade insuficiente'),
 
+  /// Lucro ou EBITDA recuou mais de [ValuationParameters.maxOperationalDecline]
+  /// no triênio recente. Vantagem competitiva é afirmação sobre o futuro do
+  /// retorno excedente, e quem encolheu pela metade não a sustenta.
+  saudeOperacional('resultado em queda no triênio'),
+
   /// Passou nas três condições, mas o retorno terminal resultante não supera o
   /// próprio custo de capital — excedente que não sobrevive à preservação
   /// parcial. Sem conteúdo econômico, e por isso tratado como reprovação.
@@ -302,6 +369,10 @@ class MoatVerdict {
   /// `true` quando a perna do excedente aprova, isoladamente.
   final bool passesBySpread;
 
+  /// Queda de lucro ou EBITDA no triênio recente, em fração. `null` quando não
+  /// há referência positiva a comparar.
+  final double? operationalDecline;
+
   const MoatVerdict({
     required this.terminalReturn,
     required this.blocks,
@@ -313,6 +384,7 @@ class MoatVerdict {
     required this.requiredBySpread,
     required this.passesByMultiple,
     required this.passesBySpread,
+    required this.operationalDecline,
   });
 
   /// `true` quando a vantagem foi comprovada.
@@ -547,6 +619,46 @@ abstract final class GrowthGuards {
     return positivos / v.length >= ValuationParameters.minPositiveFlow;
   }
 
+  /// Queda de lucro ou de EBITDA no triênio recente, em fração.
+  ///
+  /// Compara o exercício mais recente com o de três antes, e devolve a **pior**
+  /// das duas quedas — a que primeiro denuncia deterioração. Lucro cai antes de
+  /// EBITDA quando o problema é financeiro; EBITDA cai antes quando o problema é
+  /// operacional, e o filtro precisa pegar os dois casos.
+  ///
+  /// Devolve `null` quando não há referência positiva a comparar: a série é curta
+  /// demais, tem buraco no triênio, ou o exercício de referência já era prejuízo.
+  /// **Ausência aqui não reprova** — quem não tem lucro publicado já não tem
+  /// retorno de ciclo medível, e é por ali que a vantagem residual cai.
+  ///
+  /// - [snapshots]: exercícios publicados, em ordem cronológica.
+  static double? recentOperationalDecline(
+    List<FundamentalsSnapshot> snapshots,
+  ) {
+    const w = ValuationParameters.operationalHealthWindow;
+    if (snapshots.length < w + 1) return null;
+
+    final atual = snapshots.last;
+    final referencia = snapshots[snapshots.length - 1 - w];
+    // O triênio precisa ser mesmo de três anos: buraco na série compararia
+    // pontas de distâncias diferentes e o limiar deixaria de significar o mesmo.
+    if (atual.fiscalPeriodEnd.year - referencia.fiscalPeriodEnd.year != w) {
+      return null;
+    }
+
+    double? queda(double? recente, double? base) {
+      if (recente == null || base == null || base <= 0) return null;
+      final q = 1 - recente / base;
+      return q.isFinite ? q : null;
+    }
+
+    final porLucro = queda(atual.netIncome, referencia.netIncome);
+    final porEbitda = queda(atual.ebitda, referencia.ebitda);
+    if (porLucro == null) return porEbitda;
+    if (porEbitda == null) return porLucro;
+    return porLucro > porEbitda ? porLucro : porEbitda;
+  }
+
   /// Retorno terminal quando a vantagem competitiva é comprovada, com o
   /// registro de qual condição barrou quando não é.
   ///
@@ -561,6 +673,9 @@ abstract final class GrowthGuards {
   /// A rentabilidade aprova por **união** de duas pernas: `ROIC_ciclo ≥ k·WACC_∞`
   /// ou `ROIC_ciclo − WACC_∞ ≥ 5 p.p.` — ver [ValuationParameters.moatMinSpread].
   ///
+  /// - [operationalDecline]: queda de lucro ou EBITDA no triênio, de
+  ///   [recentOperationalDecline]. `null` não reprova.
+  ///
   /// - [cycleReturn]: ROIC ou ROE mediano do ciclo.
   /// - [terminalDiscountRate]: custo de capital de equilíbrio.
   /// - [externalCapitalRatio]: Φ, ou `null` quando não medido.
@@ -570,6 +685,7 @@ abstract final class GrowthGuards {
     required double terminalDiscountRate,
     required double? externalCapitalRatio,
     required int periods,
+    double? operationalDecline,
   }) {
     final exigidoPorMultiplo =
         ValuationParameters.moatReturnMultiple * terminalDiscountRate;
@@ -596,6 +712,10 @@ abstract final class GrowthGuards {
     if (retorno != null && !porMultiplo && !porExcedente) {
       blocks.add(MoatBlock.rentabilidadeInsuficiente);
     }
+    if (operationalDecline != null &&
+        operationalDecline > ValuationParameters.maxOperationalDecline) {
+      blocks.add(MoatBlock.saudeOperacional);
+    }
 
     double? terminal;
     if (blocks.isEmpty) {
@@ -620,6 +740,7 @@ abstract final class GrowthGuards {
       requiredBySpread: exigidoPorExcedente,
       passesByMultiple: porMultiplo,
       passesBySpread: porExcedente,
+      operationalDecline: operationalDecline,
     );
   }
 
@@ -629,11 +750,13 @@ abstract final class GrowthGuards {
     required double terminalDiscountRate,
     required double? externalCapitalRatio,
     required int periods,
+    double? operationalDecline,
   }) =>
       residualMoat(
         cycleReturn: cycleReturn,
         terminalDiscountRate: terminalDiscountRate,
         externalCapitalRatio: externalCapitalRatio,
         periods: periods,
+        operationalDecline: operationalDecline,
       ).terminalReturn;
 }

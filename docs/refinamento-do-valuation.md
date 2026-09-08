@@ -1388,7 +1388,272 @@ continua**, e a §2.8 das [limitações](validacao/limitacoes.md) segue valendo.
 
 ---
 
+## 14. Quarta rodada — as três travas da [decisão 28](decisoes/028-travas-de-ciclo-saturacao-e-saude.md)
+
+Medições de 07/09/2026, sobre os mesmos 373 papéis e os mesmos 121 avaliados. A
+§13 deixou três pendências nomeadas; esta rodada aplica a determinação sobre as
+três e mede o efeito.
+
+### 14.1 Precedência do ciclo em commodity — a SUZB3 caiu de +259,1% para +16,7%
+
+Em setor de commodity a Guarda 3 passou a ter precedência sobre a Guarda 1.
+
+| | 3ª rodada | 4ª rodada |
+|---|---:|---:|
+| SUZB3 — preço justo | R$ 168,38 | **R$ 54,73** |
+| SUZB3 — potencial | +259,1% | **+16,7%** |
+
+**A correção mudou a via, não só a base.** Na terceira rodada a SUZB3 era
+avaliada pelo fluxo do acionista, para onde tinha migrado por reprovar na
+pós-condição da ponte de equity. Com a base do fluxo da firma normalizada por
+1,65x, o valor da firma sobe, a participação do capital próprio supera os 20%
+exigidos e a avaliação **fica** na via da firma — que é onde ela deveria estar.
+O preço justo de R$ 168,38 vinha do patrimônio por ação de R$ 57,44, inflado pela
+queda de 1,36 bi para 780 mi na contagem de ações entre 2022 e 2023.
+
+**Treze ativos estão no recorte cíclico; em dois deles a precedência mudou o
+resultado** — SUZB3 e BRAV3. Nos outros onze a Guarda 1 já não segurava a base, e
+a trava não teve o que fazer. É pouco por desenho: o recorte não afrouxa nada,
+apenas retira uma leitura que estava errada para uma classe específica.
+
+**A chave `energia` não entrou inteira, e isso é o ponto.** Ela reúne exploração
+de petróleo — commodity pura — e 28 concessionárias de energia elétrica, cuja
+natureza é o oposto. Classificar a chave inteira jogaria EGIE3, EQTL3 e as demais
+na regra de reversão. A separação exigiu carregar o **subsetor** até a cascata,
+com normalização de acento e de pontuação, porque a fonte publica
+`Exploração, Refino e Distribuição` e `Exploração. Refino e Distribuição` como
+rótulos distintos do mesmo negócio.
+
+### 14.2 Saturação do fator — a MBRF3 caiu de +406,1% para −28,9%
+
+`f = clip(ciclo / atual, 0,33, 3,00)`.
+
+| Ativo | Fator bruto | Aplicado | Potencial antes | Potencial agora |
+|---|---:|---:|---:|---:|
+| MBRF3 | 21,37 | 3,00 | +406,1% | **−28,9%** |
+| FESA4 | 10,80 | 3,00 | +23,5% | **−43,0%** |
+| DXCO3 | 10,47 | 3,00 | −39,4% | **−82,6%** |
+| PRNR3 | 4,77 | 3,00 | −77,1% | **−85,6%** |
+
+**Quatorze ativos foram confinados**: onze no teto e três no piso — POMO3, POMO4
+e RIAA3, que teriam a base reduzida a menos de 0,29x. A banda é simétrica em
+razão justamente para que o corte não vire viés de direção, e os três casos de
+piso mostram que ela morde nos dois sentidos.
+
+O aviso do resultado traz o **fator bruto** que teria sido aplicado, para que o
+corte não seja invisível: o preço justo desses quatorze é conservador por
+política, e quem lê precisa saber disso.
+
+### 14.3 Saneamento do *moat* — 8 passaram a 7, e são outros sete
+
+| | 3ª rodada | 4ª rodada |
+|---|---:|---:|
+| Com vantagem residual | 8 | **7** |
+
+Antes: ABEV3, BBSE3, KEPL3, LEVE3, **QUAL3**, SAUD3, VBBR3, WEGE3.
+Agora: ABEV3, BBSE3, **EGIE3**, LEVE3, SAUD3, VBBR3, WEGE3.
+
+**A EGIE3 entrou** com `Φ = 0,58`, que o corte anterior de 0,35 barrava. O preço
+justo dela foi de R$ 42,56 para R$ 57,50, e o potencial de +41,2% para +90,8% —
+o valor terminal voltou a depender de `g_∞`, que é o preço declarado da exceção.
+
+**A QUAL3 saiu**, com queda medida de **83,2%** no triênio. E não saiu sozinha: o
+filtro barra 21 ativos, dos quais 19 já reprovavam por outra condição.
+
+| Ativo | Queda no triênio | ROIC do ciclo |
+|---|---:|---:|
+| RAPT4 | 109,0% | 13,6% |
+| POSI3 | 96,0% | 11,2% |
+| DXCO3 | 91,8% | 9,2% |
+| VALE3 | 87,7% | 16,5% |
+| QUAL3 | 83,2% | 16,9% |
+| KEPL3 | 59,1% | 22,4% |
+
+A **KEPL3** perdeu a vantagem por aqui, e é o caso que mostra o filtro fazendo o
+que devia: ROIC de ciclo de 22,4% com o resultado caindo 59,1% em três anos é
+exatamente a mediana carregando exercícios que a empresa não repete.
+
+### 14.4 O ITUB4 continua fora, e não é calibragem
+
+Elevar `Φ` para 0,60 removeu um dos dois impedimentos do ITUB4. O que restou é
+outra coisa:
+
+> **A fonte não publica `netIncome` para o ITUB4 em nenhum dos dezesseis
+> exercícios.**
+
+Sem lucro publicado não há série de retorno; sem série de retorno não há mediana
+de ciclo; e sem mediana de ciclo o *moat* não tem excedente a preservar. A
+avaliação do ITUB4 sai por caminho alternativo — LPA publicado para o fluxo-base,
+crescimento pela variação do patrimônio — e roda com o freio de reinvestimento
+desligado, o que o resultado já declarava.
+
+**É lacuna de cobertura de dado, não de método**, e nenhum ajuste de parâmetro a
+resolve. Fica registrada como tal.
+
+### 14.5 O que o conjunto mudou
+
+| Percentil | 3ª rodada | 4ª rodada |
+|---|---:|---:|
+| mínimo | −95,5% | −95,5% |
+| p25 | −62,2% | −64,9% |
+| mediana | −38,0% | **−39,3%** |
+| p75 | −7,5% | −8,8% |
+| p90 | +62,1% | **+43,0%** |
+| máximo | +490,7% | **+477,3%** |
+
+**A cauda direita encolheu, que era o alvo.** O p90 caiu 19 pontos e o máximo 13,
+e os dois casos que a §13 nomeava saíram da cauda. A mediana praticamente não se
+moveu: as travas não deslocam o nível do universo, elas cortam extremo — que é o
+comportamento pretendido.
+
+**O maior potencial do universo continua sendo o da QUAL3, em +477,3%.** O filtro
+de saúde tirou dela a vantagem residual, que é o que a determinação pediu, e não
+tocou na avaliação: o número sai da mediana de ROIC de oito anos, que ainda
+carrega os exercícios bons de antes da queda. Se o mesmo sinal de deterioração
+deve alimentar também a Porta 0 ou a janela do ciclo é pergunta em aberto.
+
+### 14.6 O que fica em aberto
+
+1. **A deterioração operacional só barra o *moat*.** A QUAL3 mostra que ela
+   também descreve uma avaliação em que a janela do ciclo não representa mais a
+   empresa. Levar o sinal para a Porta 0 ou para a janela é decisão nova.
+2. **O `minTrendDominance` continua intocado fora de commodity**, e os 16 ativos
+   que destoam do ciclo e ficam como observados pela Guarda 1 seguem lá — PGMN3
+   (+222,1%) e WIZC3 (+141,2%) à frente.
+3. **O recorte cíclico é lista mantida à mão**, e envelhece com a taxonomia da
+   fonte.
+4. **A cobertura de `netIncome` da fonte** decide se um banco pode ou não ter
+   vantagem residual, e isso não é escolha de método.
+
+---
+
+## 15. Quinta rodada — a saúde operacional na Porta 2a ([decisão 29](decisoes/029-saude-operacional-na-porta-2a.md))
+
+Medições de 07/09/2026. **120 avaliados** dos mesmos 373 papéis.
+
+A §14.5 fechou com a QUAL3 em +477,3%, o maior potencial do universo, e nomeou a
+causa: o número não vinha da perpetuidade, vinha da **base**, normalizada por
+2,10x na direção de uma mediana de oito anos que já não descrevia a empresa.
+Barrar só o *moat* tratava metade do sintoma.
+
+### 15.1 A anomalia da QUAL3 foi resolvida
+
+| | 4ª rodada | 5ª rodada |
+|---|---:|---:|
+| QUAL3 — preço justo | R$ 8,66 | **R$ 2,52** |
+| QUAL3 — potencial | +477,3% | **+68,0%** |
+| Máximo do universo | +477,3% | **+336,4%** |
+
+O novo máximo é a MOVI3, e **não é caso de normalização**: fator 1,00, exercício
+dentro da banda do ciclo. É o DCF sobre uma empresa de preço deprimido, que é o
+modelo funcionando, não um artefato de guarda.
+
+### 15.2 A trava alcança 13 ativos, e quatro deles são vale de ciclo
+
+Este é o resultado que contraria a expectativa da determinação.
+
+| Ativo | Queda no triênio | Fator bruto | Aplicado | Potencial |
+|---|---:|---:|---:|---:|
+| MBRF3 | 72,4% | 21,37 | 1,00 | −76,3% |
+| DXCO3 | 91,8% | 10,47 | 1,00 | −94,1% |
+| **VALE3** | 87,7% | 2,18 | 1,00 | **−70,3%** |
+| **GGBR4** | 87,6% | 2,36 | 1,00 | **−92,7%** |
+| **GOAU4** | 87,7% | 2,36 | 1,00 | −30,3% |
+| QUAL3 | 83,2% | 2,10 | 1,00 | +68,0% |
+
+**Quatro dos treze são setores cíclicos pesados** — VALE3, GGBR4, GOAU4 e DXCO3 —,
+e um quinto, a BRAP4, é *holding* de mineração sem setor classificado na fonte. A
+queda de mais de 80% que eles acusam é do pico de 2022 para 2025: **é vale de
+ciclo de commodity, não deterioração de modelo de negócio.**
+
+A determinação previa resolver a QUAL3 "sem penalizar empresas cíclicas normais",
+e nessa medida ela penaliza. A VALE3 saiu de −14,5% para −70,3%.
+
+**As duas regras se cruzam exatamente onde a decisão 28 tinha atuado.** A
+precedência do ciclo em commodity (§14.1) existe para *forçar* a convergência à
+mediana; a trava de saúde a *proíbe* na direção de cima, que é justamente a que
+importa num vale. Um ativo cíclico em trough dispara as duas, e a segunda vence.
+
+Duas saídas possíveis, e nenhuma foi adotada por conta própria:
+
+1. **Isentar o recorte cíclico da trava.** Ele já tem regime próprio de
+   normalização, e a queda de resultado ali é o sinal que o regime existe para
+   corrigir.
+2. **Medir a queda contra a mediana do ciclo**, e não contra o exercício de três
+   anos antes. `lucro_atual / mediana(lucro_ciclo)` distingue "caiu do pico" de
+   "caiu do normal"; o corte de 50% passaria a significar outra coisa e exigiria
+   recalibragem.
+
+### 15.3 A distribuição inteira desceu
+
+| Percentil | 4ª rodada | 5ª rodada |
+|---|---:|---:|
+| mínimo | −95,5% | −95,5% |
+| p25 | −64,9% | −66,7% |
+| mediana | −39,3% | **−46,0%** |
+| p75 | −8,8% | **−19,5%** |
+| p90 | +43,0% | +24,4% |
+| máximo | +477,3% | **+336,4%** |
+
+**A trava não é cirúrgica sobre a QUAL3.** Ela move o nível de treze ativos ao
+mesmo tempo, e o efeito agregado é conservador: 7 p.p. na mediana e 11 no p75.
+Quem lê a distribuição precisa saber que parte disso é escolha de método, não
+avaliação de mercado.
+
+O estimador transversal absorve o deslocamento sem propagá-lo: a mediana continua
+em 14,2%, que é o CDI à vista, porque ele mede posição relativa e não nível. Pelo
+caminho antigo, **102 dos 120** entrariam num otimizador com retorno negativo.
+
+### 15.4 Toda saída do universo passou a ser nomeada
+
+| Saída | Ativos |
+|---|---:|
+| Porta 0 · liquidez | 187 |
+| avaliado | 120 |
+| Porta 0 · histórico | 34 |
+| sem via aplicável | 14 |
+| sem exercício | 9 |
+| Porta 0 · solvência | 4 |
+| ativo inexistente | 3 |
+| sem cotação na janela | 2 |
+
+**O balde `outra recusa` desapareceu**, e com ele o `insumos indisponíveis`
+genérico. Dois defeitos do relatório o sustentavam: o teste da mensagem procurava
+`não havia sido divulgado` numa frase que diz `Nenhum exercício de X havia sido
+divulgado`, e a falha de preparação de insumos nem passava pelo classificador. É
+a condição 3 de encerramento da decisão 25 verificável no próprio relatório, e
+não só linha a linha no JSON.
+
+### 15.5 A decisão 25 está cumprida
+
+As quatro condições foram conferidas, não presumidas:
+
+| Condição | Estado |
+|---|---|
+| Roteamento coberto por teste | **Faltava a Porta 1.** Portas 0, 2 e 3 tinham grupo próprio; o da Porta 1 foi escrito nesta rodada, com NOPAT positivo em todos os exercícios para que a via da firma seja a alternativa real e o teste isole mesmo a decisão dela |
+| Base acionária conciliada | `reconciledShares` arbitra por `N = lucro ÷ LPA`, com teste sobre o caso MILS3 |
+| Validação sem exceção não tratada | §15.4 |
+| Curva de desconto homologada | Homologada pelo orientador |
+
+`postura.ts` só conta `status: aceita`, então a marcação devolve a superfície do
+`afeta` à preservação sozinha. **Divergência na cascata de avaliação volta a ser
+dívida a inventariar**, e mudança de método ali passa a exigir decisão nova.
+
+### 15.6 O que fica em aberto
+
+1. **A colisão entre a trava de saúde e o regime cíclico** (§15.2). É a pendência
+   de maior efeito medido: cinco ativos de commodity com o preço justo deslocado
+   por uma regra escrita para deterioração estrutural.
+2. **O `minTrendDominance` fora de commodity** continua intocado — PGMN3 e WIZC3
+   seguem com a base travada pela tendência.
+3. **A cobertura de `netIncome` da fonte para bancos**, registrada como §2.12 das
+   [limitações](validacao/limitacoes.md).
+4. **O recorte cíclico é lista mantida à mão**, e envelhece com a taxonomia da
+   fonte.
+
+---
+
 *Documento gerado a partir de medições executadas contra a cascata real do Equisim e dados de
-produção da brapi. As seções 1 a 9 têm data de referência em 02/09/2026; as seções 10 a 13
-registram a homologação de 05/09, a implementação de 06–07/09, a segunda rodada de 07/09 e a
-terceira rodada do mesmo dia.*
+produção da brapi. As seções 1 a 9 têm data de referência em 02/09/2026; as seções 10 a 15
+registram a homologação de 05/09, a implementação de 06–07/09 e as cinco rodadas de validação de
+07/09.*

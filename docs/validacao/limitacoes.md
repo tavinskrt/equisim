@@ -212,19 +212,38 @@ construção. Uma seção estreita — a carteira medida contra ela mesma — ce
 no CDI e não informa nada. O resultado carrega o tamanho da seção junto, e é
 contra a seção dos avaliados que a leitura faz sentido.
 
-**A exceção de *moat* ativou em 8 dos 121 avaliados** (ABEV3, BBSE3, KEPL3,
-LEVE3, QUAL3, SAUD3, VBBR3 e WEGE3), contra 2 antes da recalibragem. O passo é
-instrumentado desde 07/09/2026: **o que barra as franquias restantes é
-`Φ ≤ 0,35`**, e não o critério de rentabilidade que foi afrouxado — EGIE3
-(Φ = 0,58), ITUB4 (0,50) e TOTS3 (1,13) caem por ali. Ver §13.1 do
-[refinamento](../refinamento-do-valuation.md).
+**A exceção de *moat* ativa em 7 dos 121 avaliados** (ABEV3, BBSE3, EGIE3,
+LEVE3, SAUD3, VBBR3 e WEGE3), contra 2 antes da recalibragem. O passo é
+instrumentado desde 07/09/2026, e a
+[decisão 28](../decisoes/028-travas-de-ciclo-saturacao-e-saude.md) usou a medição
+para elevar o corte de capital externo a `Φ ≤ 0,60` — que admitiu a EGIE3 — e
+para acrescentar um filtro de saúde operacional, que reprova quem teve lucro ou
+EBITDA caindo mais de 50% no triênio. Foi ele que tirou a QUAL3 (queda de 83,2%)
+e a KEPL3 (59,1%). Ver §14.3 do [refinamento](../refinamento-do-valuation.md).
 
-**O fator de normalização da base não tem teto.** `f = ciclo / atual` explode
-quando o exercício corrente tem retorno próximo de zero, e o DCF é homogêneo de
-grau 1 no fluxo-base: a MBRF3 recebeu fator de 21,4x e saiu a +406,1% de
-potencial. É limitação **anterior** à decisão 27 — FESA4 e DXCO3 já apareciam com
-fatores de dez vezes —, mas a guarda de comparabilidade barrava parte desses
-casos por efeito colateral, e deixou de barrar. Ver §13.3.
+**O ITUB4 não entra na exceção por falta de dado, não por calibragem.** A fonte
+não publica `netIncome` para ele em nenhum dos dezesseis exercícios; sem lucro
+não há série de retorno, sem retorno não há mediana de ciclo, e sem ela o *moat*
+não tem excedente a preservar. A avaliação sai pelo LPA publicado, com o freio de
+reinvestimento desligado — o que o resultado declara. É lacuna de cobertura, e
+nenhum parâmetro a resolve.
+
+**O fator de normalização da base é saturado em `[0,33; 3,00]`, e o limite é de
+política.** Sem teto, `f = ciclo / atual` explode quando o exercício corrente tem
+retorno próximo de zero, e o DCF é homogêneo de grau 1 no fluxo-base: a MBRF3
+chegou a receber 21,4x e sair a +406,1% de potencial. Não há teste que diga onde
+um exercício deixa de ser atípico — a §2 da
+[normalizacao_fluxo_base.md](normalizacao_fluxo_base.md) já mostrava isso para
+`τ`. O que a banda afirma é **quanta autoridade um único exercício tem sobre a
+avaliação inteira**. Quatorze ativos foram confinados na consolidação de
+07/09/2026, onze no teto e três no piso; o preço justo deles é conservador por
+essa escolha, e o aviso traz o fator bruto que teria sido aplicado.
+
+**O maior potencial do universo continua sendo o da QUAL3, em +477,3%.** O filtro
+de saúde retirou dela a vantagem residual e **não** tocou na avaliação: o número
+sai da mediana de ROIC de oito anos, que ainda carrega os exercícios anteriores à
+queda. Levar o sinal de deterioração também para a Porta 0 ou para a janela do
+ciclo é pergunta aberta, registrada na §14.6.
 
 ### 2.9. A estrutura a termo é linear e de dois pontos, não uma curva observada
 
@@ -279,6 +298,47 @@ Não há IRRF sobre provento — não há provento —, e ganho de capital na ve
 também não é modelado. O segundo é coerente com uma estratégia sem
 rebalanceamento, em que não há venda, mas a limitação existe se o usuário
 interpretar o resultado como líquido de tributos.
+
+### 2.12. A fonte não publica lucro líquido de instituição financeira
+
+**Registro formal de uma lacuna de cobertura, não de método.**
+
+O `/v2/stocks/financial-data` da brapi devolve `netIncome` nulo para bancos ao
+longo de **toda** a série. Verificado no ITUB4 em 07/09/2026: dezesseis
+exercícios, de 2010 a 2025, com `netIncome` ausente em todos, enquanto
+`bookValuePerShare` e `earningsPerShare` vêm preenchidos.
+
+**O que isso faz na cascata.** A série de capital mede o retorno por
+`lucro_t ÷ base_{t−1}`, e o lucro que ela usa é o `netIncome`. Sem ele:
+
+| O que depende | O que acontece |
+|---|---|
+| Série de retorno (ROE) | fica **vazia** |
+| Mediana do ciclo | não é medível |
+| Guardas 1 e 3 | não avaliáveis; a base fica como observada |
+| Freio de reinvestimento `b_t = g_t/ROE` | **desligado** — `returnOnCapital = 0` |
+| Vantagem competitiva residual | barrada por `retorno do ciclo não medido` |
+| Filtro de saúde operacional | não medível; não reprova |
+
+**O ativo continua sendo avaliado, por caminho alternativo declarado.** O
+fluxo-base sai do `earningsPerShare` publicado — é a via B, sobre o LPA — e o
+crescimento sai da variação do patrimônio, que não depende de lucro. O ITUB4 sai
+a R$ 40,24 contra R$ 41,92 de mercado.
+
+**A leitura que isso exige.** Com o freio desligado, o fluxo descontado é o lucro
+inteiro, sem retenção — o que é conservador na direção oposta à usual: subestima
+o crescimento financiável e superestima o fluxo distribuível do mesmo exercício.
+O resultado declara a degradação nos avisos, mas quem compara um banco com uma
+empresa não financeira está comparando duas montagens diferentes.
+
+**Nenhum parâmetro resolve isso**, e não é candidato a calibragem: a
+[decisão 28](../decisoes/028-travas-de-ciclo-saturacao-e-saude.md) elevou o corte
+de capital externo a `Φ ≤ 0,60` justamente pensando em bancos, e o ITUB4
+continuou fora da exceção — porque o que o barra é a ausência do dado, não o
+limiar. Sanar exigiria segunda fonte para a demonstração de resultado de
+instituição financeira, ou preencher `netIncome` por `LPA × ações
+reconciliadas`, que é identidade contábil mas introduz um valor derivado onde a
+série espera um publicado.
 
 ---
 

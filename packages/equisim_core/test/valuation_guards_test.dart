@@ -233,7 +233,11 @@ void main() {
       return pontos;
     }
 
-    ValuationInputs entradas(List<FundamentalsSnapshot> historico) =>
+    ValuationInputs entradas(
+      List<FundamentalsSnapshot> historico, {
+      String? setor,
+      String? subsetor,
+    }) =>
         ValuationInputs(
           ticker: ticker,
           asOf: DateTime(2026, 6, 30),
@@ -244,6 +248,8 @@ void main() {
             beta: 1.0,
             marketPremium: 0.055,
           ),
+          sectorKey: setor,
+          industry: subsetor,
         );
 
     /// Fator de normalização registrado no log de avaliação.
@@ -289,6 +295,170 @@ void main() {
       expect(fatorRegistrado(entradas(historico)), closeTo(1.0, 1e-9));
     });
 
+    test('em commodity, a tendência não segura a base', () {
+      // Forma da SUZB3: retorno corrente muito acima do ciclo, subindo ano a
+      // ano, de modo que a Guarda 1 lê a perna de alta como tendência
+      // estrutural. Fora de setor cíclico a base fica; em papel e celulose,
+      // não.
+      final pontos = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var ano = 2012; ano <= 2025; ano++) {
+        // Retorno subindo de 8% a 34%: tendência significante e dominante.
+        final roe = 0.08 + (ano - 2012) * 0.02;
+        final lucro = roe * pl;
+        pl += lucro;
+        pontos.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(ano, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          netIncome: ano == 2012 ? null : lucro,
+          marketCap: 20000,
+        ));
+      }
+      final serie = CapitalSeries.build(pontos, ValuationLane.shareholder);
+      final t = GrowthGuards.trend(serie, horizonYears: 10);
+      expect(t?.dominates, isTrue,
+          reason: 'a fixture precisa mesmo acionar a Guarda 1');
+      expect(GrowthGuards.deviatesFromCycle(serie), isTrue);
+
+      expect(fatorRegistrado(entradas(pontos, setor: 'tecnologia')),
+          closeTo(1.0, 1e-9),
+          reason: 'fora de commodity a tendência continua segurando a base');
+      expect(
+        fatorRegistrado(entradas(pontos,
+            setor: 'materiais-basicos', subsetor: 'Papel e Celulose')),
+        lessThan(1.0),
+        reason: 'em commodity a reversão ao ciclo tem precedência',
+      );
+    });
+
+    /// Base que salta por emissão no penúltimo exercício, com o lucro
+    /// **preservado**: o retorno corrente desaba sem que a empresa tenha
+    /// encolhido, que é a única forma de estourar o fator sem cair no filtro de
+    /// saúde. O salto é de 7x porque acima de 8x a limpeza por vizinhança
+    /// descartaria o próprio exercício.
+    List<FundamentalsSnapshot> emissaoComLucroPreservado() {
+      final pontos = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      var lucroCongelado = 0.0;
+      for (var ano = 2012; ano <= 2025; ano++) {
+        final lucro = ano >= 2024 ? lucroCongelado : 0.10 * pl;
+        if (ano == 2023) lucroCongelado = 0.10 * pl;
+        pl += lucro;
+        if (ano == 2024) pl *= 7;
+        pontos.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(ano, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          netIncome: ano == 2012 ? null : lucro,
+          marketCap: 20000,
+        ));
+      }
+      return pontos;
+    }
+
+    /// Forma da QUAL3: lucro desabando no triênio e retorno corrente **abaixo**
+    /// do ciclo, de modo que a normalização puxaria a base para cima.
+    List<FundamentalsSnapshot> deterioracaoEstrutural() {
+      final pontos = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var ano = 2012; ano <= 2025; ano++) {
+        // 15% de retorno até 2022, 1,5% depois: queda de 90% no triênio.
+        final roe = ano >= 2023 ? 0.015 : 0.15;
+        final lucro = roe * pl;
+        pl += lucro;
+        pontos.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(ano, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          netIncome: ano == 2012 ? null : lucro,
+          marketCap: 20000,
+        ));
+      }
+      return pontos;
+    }
+
+    test('o fator de normalização é saturado em [0,33; 3,00]', () {
+      final pontos = emissaoComLucroPreservado();
+      final serie = CapitalSeries.build(pontos, ValuationLane.shareholder);
+      final bruto = serie.cycleReturn(window: ValuationParameters.cycleWindow)! /
+          serie.latestReturn!;
+      expect(bruto, greaterThan(ValuationParameters.baseFactorCeiling),
+          reason: 'a fixture precisa mesmo estourar a banda');
+      expect(GrowthGuards.recentOperationalDecline(pontos),
+          lessThan(ValuationParameters.maxOperationalDecline),
+          reason: 'e precisa passar na saúde, senão quem trava é a outra regra');
+
+      expect(fatorRegistrado(entradas(pontos)),
+          closeTo(ValuationParameters.baseFactorCeiling, 1e-9));
+    });
+
+    test('a saturação é declarada nos avisos', () {
+      final r = ValuationCascade.evaluate(entradas(emissaoComLucroPreservado()));
+      expect(r.isOk, isTrue);
+      expect(r.unwrap().warnings.any((w) => w.contains('saturado em')), isTrue,
+          reason: 'um preço justo confinado por política precisa dizer que foi');
+    });
+
+    test('deterioração estrutural proíbe normalizar a base para cima', () {
+      final pontos = deterioracaoEstrutural();
+      final serie = CapitalSeries.build(pontos, ValuationLane.shareholder);
+
+      // A fixture é mesmo o caso: destoa do ciclo, e para cima.
+      expect(GrowthGuards.deviatesFromCycle(serie), isTrue);
+      final bruto = serie.cycleReturn(window: ValuationParameters.cycleWindow)! /
+          serie.latestReturn!;
+      expect(bruto, greaterThan(1.0));
+      expect(GrowthGuards.recentOperationalDecline(pontos),
+          greaterThan(ValuationParameters.maxOperationalDecline));
+
+      expect(fatorRegistrado(entradas(pontos)), closeTo(1.0, 1e-9),
+          reason: 'trazer a base de uma empresa que mudou de patamar de volta à '
+              'mediana de oito anos lhe atribui um retorno que não repetirá');
+
+      final r = ValuationCascade.evaluate(entradas(pontos));
+      expect(r.isOk, isTrue);
+      expect(
+        r.unwrap().warnings.any((w) => w.contains('não foi normalizada para cima')),
+        isTrue,
+      );
+    });
+
+    test('o piso continua valendo para quem reprovou na saúde', () {
+      // Deterioração no lucro **com** o exercício corrente acima do ciclo: a
+      // trava é só de teto, e normalizar para baixo é a direção conservadora.
+      final pontos = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var ano = 2012; ano <= 2025; ano++) {
+        // Retorno cai de 20% para 2% e o exercício corrente volta a 30%: o
+        // lucro do triênio despencou, mas o ano é de pico contra o ciclo.
+        final roe = ano == 2025 ? 0.30 : (ano >= 2023 ? 0.02 : 0.20);
+        final lucro = roe * pl;
+        pl += lucro;
+        pontos.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(ano, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          netIncome: ano == 2012 ? null : lucro,
+          marketCap: 20000,
+        ));
+      }
+      final serie = CapitalSeries.build(pontos, ValuationLane.shareholder);
+      final bruto = serie.cycleReturn(window: ValuationParameters.cycleWindow)! /
+          serie.latestReturn!;
+      expect(bruto, lessThan(1.0), reason: 'a fixture precisa normalizar para baixo');
+
+      expect(fatorRegistrado(entradas(pontos)), lessThan(1.0));
+    });
+
     test('a base inorgânica é declarada nos avisos, não silenciada', () {
       final historico =
           incorporacaoComPico(roeDoCiclo: 0.10, roeCorrente: 0.30);
@@ -300,6 +470,138 @@ void main() {
         reason: 'trocar bloqueio por permissão silenciosa seria pior que o '
             'defeito que se está corrigindo',
       );
+    });
+  });
+
+  group('Porta 1 — instituição financeira sem dívida bruta', () {
+    /// Empresa com NOPAT positivo em todos os exercícios: pela Porta 3, ela
+    /// **iria** para a via da firma. É o que torna o teste capaz de isolar a
+    /// decisão da Porta 1 — sem isso, a via do acionista seria escolhida pela
+    /// porta seguinte e o teste não provaria nada.
+    List<FundamentalsSnapshot> comFluxoDeFirma({required double divida}) {
+      final pontos = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var ano = 2012; ano <= 2025; ano++) {
+        final lucro = 0.12 * pl;
+        pl += lucro;
+        pontos.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(ano, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          netIncome: ano == 2012 ? null : lucro,
+          nopat: lucro,
+          ebit: lucro * 1.4,
+          longTermDebt: divida,
+          marketCap: 20000,
+        ));
+      }
+      return pontos;
+    }
+
+    ValuationResult? avaliar({required String? setor, required double divida}) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 6, 30),
+        fundamentals: comFluxoDeFirma(divida: divida),
+        marketPrice: 20.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.105,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        sectorKey: setor,
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('setor financeiro E dívida bruta nula mandam para a via do acionista',
+        () {
+      final v = avaliar(setor: 'servicos-financeiros', divida: 0);
+      expect(v, isNotNull);
+      expect(v!.model, ValuationModel.dcfEarnings);
+      expect(
+        v.warnings.any((w) => w.contains('Instituição financeira')),
+        isTrue,
+        reason: 'a porta que decidiu precisa aparecer no resultado',
+      );
+    });
+
+    test('setor financeiro COM dívida bruta segue para a Porta 3', () {
+      // Depósito e captação são insumo do negócio de um banco; dívida bruta
+      // registrada indica que a estrutura de capital é observável, e aí a
+      // Porta 1 não é o caminho.
+      final v = avaliar(setor: 'servicos-financeiros', divida: 500);
+      expect(v, isNotNull);
+      expect(v!.model, ValuationModel.dcfFcff);
+      expect(v.warnings.any((w) => w.contains('Instituição financeira')), isFalse);
+    });
+
+    test('fora do setor financeiro, dívida nula não aciona a Porta 1', () {
+      final v = avaliar(setor: 'bens-industriais', divida: 0);
+      expect(v, isNotNull);
+      expect(v!.model, ValuationModel.dcfFcff);
+      expect(v.warnings.any((w) => w.contains('Instituição financeira')), isFalse);
+    });
+
+    test('sem setor informado, o roteamento cai na Porta 3', () {
+      // Degradação segura declarada na decisão 25: perfil que não carrega não
+      // pode ligar uma exceção de via.
+      final v = avaliar(setor: null, divida: 0);
+      expect(v, isNotNull);
+      expect(v!.model, ValuationModel.dcfFcff);
+    });
+  });
+
+  group('Precedência do ciclo em commodity — Guarda 3 sobre Guarda 1', () {
+    test('a taxonomia separa petróleo de energia elétrica', () {
+      // A chave `energia` reúne exploração de petróleo, que é commodity pura, e
+      // 28 elétricas, que são concessão regulada. Tratar a chave inteira como
+      // cíclica inverteria a natureza das segundas.
+      bool ciclico(String? setor, String? sub) =>
+          CyclicalSectors.hasCyclePrecedence(sectorKey: setor, industry: sub);
+
+      expect(ciclico('energia', 'Exploração e Produção de Petróleo'), isTrue);
+      expect(ciclico('energia', 'Exploração, Refino e Distribuição'), isTrue);
+      expect(ciclico('energia', 'Petróleo e Gás Integrado'), isTrue);
+      expect(ciclico('energia', 'Energia Elétrica'), isFalse);
+      expect(ciclico('energia', 'Gás'), isFalse,
+          reason: 'distribuição de gás é concessão, não exploração');
+      expect(ciclico('saneamento', 'Água e Saneamento'), isFalse);
+      expect(ciclico('servicos-financeiros', 'Bancos'), isFalse);
+    });
+
+    test('materiais básicos é cíclico por inteiro', () {
+      for (final sub in [
+        'Papel e Celulose',
+        'Siderurgia',
+        'Minerais Metálicos',
+        'Petroquímicos',
+        'Fertilizantes e Defensivos',
+      ]) {
+        expect(
+          CyclicalSectors.hasCyclePrecedence(
+              sectorKey: 'materiais-basicos', industry: sub),
+          isTrue,
+          reason: sub,
+        );
+      }
+    });
+
+    test('a variante de pontuação da fonte não muda a classificação', () {
+      // A fonte publica os dois: com vírgula e com ponto.
+      expect(
+        CyclicalSectors.hasCyclePrecedence(
+            sectorKey: 'energia', industry: 'Exploração, Refino e Distribuição'),
+        CyclicalSectors.hasCyclePrecedence(
+            sectorKey: 'energia', industry: 'Exploração. Refino e Distribuição'),
+      );
+    });
+
+    test('sem setor nem subsetor, não há precedência', () {
+      expect(CyclicalSectors.hasCyclePrecedence(), isFalse,
+          reason: 'ausência de classificação não pode ligar uma exceção');
     });
   });
 
@@ -508,12 +810,14 @@ void main() {
       double desconto = 0.12,
       double? phi = 0.10,
       int exercicios = 14,
+      double? queda,
     }) =>
         GrowthGuards.residualMoatReturn(
           cycleReturn: retorno,
           terminalDiscountRate: desconto,
           externalCapitalRatio: phi,
           periods: exercicios,
+          operationalDecline: queda,
         );
 
     test('as três condições cumpridas preservam 30% do excedente', () {
@@ -521,8 +825,68 @@ void main() {
       expect(moat(), closeTo(0.174, 1e-12));
     });
 
-    test('crescimento inorgânico reprova', () {
-      expect(moat(phi: 0.40), isNull);
+    test('crescimento inorgânico reprova, no limiar de 0,60', () {
+      expect(moat(phi: 0.61), isNull);
+      expect(moat(phi: 0.60), isNotNull);
+      // Sob o corte anterior de 0,35, a EGIE3 (0,58) e o ITUB4 (0,50) caíam
+      // aqui — concessão e banco acusam Φ alto por definição do negócio, não
+      // por dependerem de aporte de sócio.
+      expect(moat(phi: 0.58), isNotNull);
+    });
+
+    test('resultado em queda no triênio reprova, por mais rentável que seja',
+        () {
+      // Forma da QUAL3: Φ de 0,01 não por financiar crescimento por dentro, mas
+      // por não haver crescimento nenhum a financiar. A mediana de oito anos
+      // ainda carrega os exercícios bons de antes da queda.
+      expect(moat(queda: 0.49), isNotNull);
+      expect(moat(queda: 0.51), isNull);
+      expect(moat(queda: null), isNotNull,
+          reason: 'queda não medida não reprova: quem não publica lucro já cai '
+              'pelo retorno do ciclo, e reprovar duas vezes esconderia a causa');
+    });
+
+    test('a queda no triênio é a pior entre lucro e EBITDA', () {
+      FundamentalsSnapshot exercicioCom(int ano, double lucro, double ebitda) =>
+          FundamentalsSnapshot(
+            ticker: ticker,
+            fiscalPeriodEnd: DateTime(ano, 12, 31),
+            netIncome: lucro,
+            ebitda: ebitda,
+          );
+
+      // Lucro despenca, EBITDA cresce — a forma da QUAL3 entre 2022 e 2025.
+      final lucroCai = [
+        exercicioCom(2022, 100, 360),
+        exercicioCom(2023, 80, 120),
+        exercicioCom(2024, 20, 190),
+        exercicioCom(2025, 20, 580),
+      ];
+      expect(GrowthGuards.recentOperationalDecline(lucroCai),
+          closeTo(0.80, 1e-12));
+
+      // E o caminho inverso: lucro sustentado por resultado financeiro
+      // enquanto a operação encolhe.
+      final ebitdaCai = [
+        exercicioCom(2022, 100, 400),
+        exercicioCom(2023, 100, 300),
+        exercicioCom(2024, 100, 220),
+        exercicioCom(2025, 110, 120),
+      ];
+      expect(GrowthGuards.recentOperationalDecline(ebitdaCai),
+          closeTo(0.70, 1e-12));
+    });
+
+    test('buraco no triênio não é queda: a medida devolve nulo', () {
+      // Comparar 2020 com 2025 como se fossem três anos mediria cinco, e o
+      // limiar deixaria de significar o mesmo em ativos diferentes.
+      final comBuraco = [
+        exercicio(2019, vpa: 10, acoes: 1000, lucro: 100),
+        exercicio(2020, vpa: 11, acoes: 1000, lucro: 100),
+        exercicio(2024, vpa: 12, acoes: 1000, lucro: 100),
+        exercicio(2025, vpa: 13, acoes: 1000, lucro: 10),
+      ];
+      expect(GrowthGuards.recentOperationalDecline(comBuraco), isNull);
     });
 
     test('Phi não medido reprova — ausência não é aprovação', () {

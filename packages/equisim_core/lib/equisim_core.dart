@@ -46,6 +46,7 @@ export 'src/services/metrics/risk_metrics.dart';
 export 'src/services/portfolio/expected_return.dart';
 export 'src/services/portfolio/sector_concentration.dart';
 export 'src/services/valuation/capital_base.dart';
+export 'src/services/valuation/cyclical_sectors.dart';
 export 'src/services/valuation/eligibility.dart';
 export 'src/services/valuation/growth_guards.dart';
 export 'src/services/valuation/inference.dart';

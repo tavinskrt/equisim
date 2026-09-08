@@ -77,10 +77,15 @@ abstract final class OutOfSampleValidation {
         terminalRiskFreeRate: anchors.riskFreeCagr,
       );
       if (prepared.isErr) {
+        // Classificado pelo mesmo caminho das recusas da cascata: sem isso, os
+        // motivos de "ativo inexistente" e "sem cotação na janela" existiam no
+        // classificador sem que nada os alcançasse, e cinco ativos ficavam num
+        // balde genérico tendo motivo perfeitamente nomeável.
+        final motivo = prepared.failureOrNull!.message;
         linhas.add(_Row(
           ticker: ticker.value,
-          outcome: 'insumos indisponíveis',
-          detail: prepared.failureOrNull!.message,
+          outcome: _classifyRefusal(motivo),
+          detail: motivo,
         ));
         continue;
       }
@@ -119,6 +124,10 @@ abstract final class OutOfSampleValidation {
   }
 
   /// Classifica a recusa pela mensagem, para agrupar no relatório.
+  ///
+  /// Vale tanto para a recusa da cascata quanto para a falha de preparação dos
+  /// insumos: a condição de encerramento da decisão 25 exige que **toda** saída
+  /// seja nomeada, e um balde genérico não é um nome.
   static String _classifyRefusal(String message) {
     if (message.contains('liquidez insuficiente')) return 'Porta 0 · liquidez';
     if (message.contains('histórico curto')) return 'Porta 0 · histórico';
@@ -126,9 +135,14 @@ abstract final class OutOfSampleValidation {
       return 'Porta 0 · solvência';
     }
     if (message.contains('recuperação judicial')) return 'Porta 0 · continuidade';
-    if (message.contains('não havia sido divulgado')) return 'sem exercício';
+    // A mensagem é "Nenhum exercício de X havia sido divulgado" — sem o "não"
+    // que este teste procurava. O balde nunca disparava, e nove ativos caíam em
+    // "outra recusa" tendo motivo perfeitamente nomeável.
+    if (message.contains('havia sido divulgado')) return 'sem exercício';
     if (message.contains('não sustentam nenhuma')) return 'sem via aplicável';
-    return 'outra recusa';
+    if (message.contains('não encontrado na fonte')) return 'ativo inexistente';
+    if (message.contains('Sem cotações')) return 'sem cotação na janela';
+    return 'insumos indisponíveis';
   }
 
   /// `true` quando a cascata declarou vantagem competitiva residual.
@@ -299,6 +313,29 @@ void _moatSection(StringBuffer buf, List<_Row> avaliados) {
         '| ${_moatLabel(e.key)} | ${e.value} | ${primeira[e.key] ?? 0} |');
   }
 
+  final porSaude = comDiagnostico
+      .where((l) =>
+          l.diagnostics.moatBlocks!.contains('saudeOperacional') &&
+          l.diagnostics.operationalDecline != null)
+      .toList()
+    ..sort((a, b) => b.diagnostics.operationalDecline!
+        .compareTo(a.diagnostics.operationalDecline!));
+  if (porSaude.isNotEmpty) {
+    buf
+      ..writeln()
+      ..writeln('Os ${porSaude.length} barrados pelo filtro de saúde '
+          'operacional — resultado em queda no triênio, por mais alta que a '
+          'mediana do ciclo ainda esteja:')
+      ..writeln()
+      ..writeln('| Ativo | Queda no triênio | ROIC do ciclo |')
+      ..writeln('|---|---:|---:|');
+    for (final l in porSaude.take(10)) {
+      buf.writeln('| ${l.ticker} | '
+          '${pct(l.diagnostics.operationalDecline!, decimals: 1)} | '
+          '${l.diagnostics.cycleReturn == null ? "—" : pct(l.diagnostics.cycleReturn!, decimals: 1)} |');
+    }
+  }
+
   final soRentabilidade = comDiagnostico
       .where((l) => l.diagnostics.moatBlockedOnlyByReturn)
       .toList();
@@ -338,6 +375,7 @@ String _moatLabel(String name) => switch (name) {
       'capitalExternoNaoMedido' => 'capital externo não medido',
       'crescimentoInorganico' => 'crescimento inorgânico',
       'rentabilidadeInsuficiente' => 'rentabilidade insuficiente',
+      'saudeOperacional' => 'resultado em queda no triênio',
       'excedenteDegenerado' => 'excedente degenerado',
       _ => name,
     };
@@ -366,6 +404,90 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
     ..writeln('| mantida como observada | ${avaliados.length - normalizados} |')
     ..writeln('| convergindo ao ciclo | $normalizados |')
     ..writeln('| das quais, com Φ acima do limiar | ${destravados.length} |');
+  final ciclicos = avaliados.where((l) => l.diagnostics.cyclePrecedence).toList();
+  final destravadosPeloCiclo = ciclicos
+      .where((l) => normalizou(l) && l.diagnostics.trendVerdict == 'domina')
+      .toList()
+    ..sort((a, b) => a.ticker.compareTo(b.ticker));
+  final saturados = avaliados
+      .where((l) => l.diagnostics.saturated && !l.diagnostics.healthCapped)
+      .toList()
+    ..sort((a, b) => (b.diagnostics.rawFactor ?? 0)
+        .compareTo(a.diagnostics.rawFactor ?? 0));
+
+  final travadosPelaSaude = avaliados
+      .where((l) => l.diagnostics.healthCapped)
+      .toList()
+    ..sort((a, b) => (b.diagnostics.rawFactor ?? 0)
+        .compareTo(a.diagnostics.rawFactor ?? 0));
+
+  buf
+    ..writeln()
+    ..writeln('| Trava | Ativos |')
+    ..writeln('|---|---:|')
+    ..writeln('| em setor cíclico (Guarda 3 com precedência) | '
+        '${ciclicos.length} |')
+    ..writeln('| normalizados **por** essa precedência | '
+        '${destravadosPeloCiclo.length} |')
+    ..writeln('| com o fator saturado em [0,33; 3,00] | ${saturados.length} |')
+    ..writeln('| com o teto travado em 1,00 pela saúde operacional | '
+        '${travadosPelaSaude.length} |');
+
+  if (travadosPelaSaude.isNotEmpty) {
+    buf
+      ..writeln()
+      ..writeln('Onde a saúde operacional proibiu normalizar para cima. **Não é '
+          'a mesma coisa que a saturação**: ali o limite é de política sobre '
+          'quanta autoridade um exercício tem; aqui a afirmação é que a mediana '
+          'de ${ValuationParameters.cycleWindow} exercícios deixou de descrever '
+          'a empresa.')
+      ..writeln()
+      ..writeln('| Ativo | Queda no triênio | Fator bruto | Aplicado | Potencial |')
+      ..writeln('|---|---:|---:|---:|---:|');
+    for (final l in travadosPelaSaude) {
+      buf.writeln('| ${l.ticker} | '
+          '${l.diagnostics.operationalDecline == null ? "—" : pct(l.diagnostics.operationalDecline!, decimals: 1)} | '
+          '${num2(l.diagnostics.rawFactor!, decimals: 2)} | '
+          '${num2(l.diagnostics.normalizationFactor!, decimals: 2)} | '
+          '${pct(l.upside!, decimals: 1)} |');
+    }
+  }
+
+  if (destravadosPeloCiclo.isNotEmpty) {
+    buf
+      ..writeln()
+      ..writeln('Em setor cíclico, a tendência deixou de segurar a base nestes '
+          '— a perna de alta do ciclo tem a forma de uma tendência, e lê-la '
+          'como patamar estrutural era o erro:')
+      ..writeln()
+      ..writeln('| Ativo | Setor | Retorno corrente | Ciclo | Fator | Potencial |')
+      ..writeln('|---|---|---:|---:|---:|---:|');
+    for (final l in destravadosPeloCiclo) {
+      buf.writeln('| ${l.ticker} | ${l.sector ?? "—"} | '
+          '${l.diagnostics.latestReturn == null ? "—" : pct(l.diagnostics.latestReturn!, decimals: 1)} | '
+          '${l.diagnostics.cycleReturnOfBase == null ? "—" : pct(l.diagnostics.cycleReturnOfBase!, decimals: 1)} | '
+          '${num2(l.diagnostics.normalizationFactor!, decimals: 2)} | '
+          '${pct(l.upside!, decimals: 1)} |');
+    }
+  }
+
+  if (saturados.isNotEmpty) {
+    buf
+      ..writeln()
+      ..writeln('Onde a saturação prendeu, com o fator que teria sido aplicado '
+          'sem ela. **O preço justo destes é conservador por política**, e o '
+          'resultado o declara:')
+      ..writeln()
+      ..writeln('| Ativo | Fator bruto | Aplicado | Potencial |')
+      ..writeln('|---|---:|---:|---:|');
+    for (final l in saturados) {
+      buf.writeln('| ${l.ticker} | '
+          '${num2(l.diagnostics.rawFactor!, decimals: 2)} | '
+          '${num2(l.diagnostics.normalizationFactor!, decimals: 2)} | '
+          '${pct(l.upside!, decimals: 1)} |');
+    }
+  }
+
   final naoNormalizados = avaliados.where((l) => !normalizou(l)).toList();
   final porGuarda = <String, int>{};
   for (final l in naoNormalizados) {
@@ -425,31 +547,10 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
     }
   }
 
-  // Os maiores fatores, porque é neles que o risco do método mora: o DCF é
-  // homogêneo de grau 1 no fluxo-base, e um fator de 20x multiplica o preço
-  // justo por 20. Nada limita o fator hoje — `f = ciclo / atual` explode
-  // quando o exercício corrente tem retorno próximo de zero.
-  final porFator = avaliados.where(normalizou).toList()
-    ..sort((a, b) => b.diagnostics.normalizationFactor!
-        .compareTo(a.diagnostics.normalizationFactor!));
-  final extremos = porFator.take(10).toList();
-  if (extremos.isNotEmpty) {
-    buf
-      ..writeln()
-      ..writeln('Os dez maiores fatores. **O DCF é homogêneo de grau 1 no '
-          'fluxo-base**: um fator de 20x multiplica o preço justo por 20, e '
-          'nada limita `f = ciclo / atual` quando o exercício corrente tem '
-          'retorno próximo de zero.')
-      ..writeln()
-      ..writeln('| Ativo | Fator | Φ | Potencial |')
-      ..writeln('|---|---:|---:|---:|');
-    for (final l in extremos) {
-      buf.writeln('| ${l.ticker} | '
-          '${num2(l.diagnostics.normalizationFactor!, decimals: 2)} | '
-          '${l.diagnostics.phi == null ? "—" : num2(l.diagnostics.phi!, decimals: 2)} | '
-          '${pct(l.upside!, decimals: 1)} |');
-    }
-  }
+  // A tabela dos maiores fatores saiu daqui: com a saturação em [0,33; 3,00],
+  // o topo é o próprio teto por construção, e listar dez linhas de "3,00" não
+  // informa nada. Quem carrega a informação agora é a tabela de saturação
+  // acima, que mostra o fator **bruto** que teria sido aplicado sem o limite.
 
   if (destravados.isEmpty) return;
 
@@ -570,6 +671,23 @@ class _Diagnostics {
   /// Mediana do ciclo na série da via escolhida, em fração.
   final double? cycleReturnOfBase;
 
+  /// `true` quando o ativo é de setor cíclico pesado e a Guarda 3 teve
+  /// precedência sobre a Guarda 1.
+  final bool cyclePrecedence;
+
+  /// Fator antes da saturação em `[0,33; 3,00]`.
+  final double? rawFactor;
+
+  /// `true` quando a saturação do fator foi acionada.
+  final bool saturated;
+
+  /// `true` quando o teto do fator caiu para 1,00 por reprovação na saúde
+  /// operacional, impedindo normalizar a base para cima.
+  final bool healthCapped;
+
+  /// Queda de lucro ou EBITDA no triênio recente, em fração.
+  final double? operationalDecline;
+
   const _Diagnostics({
     this.moatBlocks,
     this.cycleReturn,
@@ -580,6 +698,11 @@ class _Diagnostics {
     this.deviationVerdict,
     this.latestReturn,
     this.cycleReturnOfBase,
+    this.cyclePrecedence = false,
+    this.rawFactor,
+    this.saturated = false,
+    this.healthCapped = false,
+    this.operationalDecline,
   });
 
   static const _Diagnostics empty = _Diagnostics();
@@ -641,6 +764,16 @@ class _Diagnostics {
       latestReturn: fracao(base?.mappedVariables['retorno atual (% a.a.)']),
       cycleReturnOfBase:
           fracao(base?.mappedVariables['mediana do ciclo (% a.a.)']),
+      cyclePrecedence:
+          base?.mappedVariables['precedência do ciclo (setor cíclico)'] == true,
+      rawFactor: () {
+        final v = base?.mappedVariables['fator bruto'];
+        return v is num ? v.toDouble() : null;
+      }(),
+      saturated: base?.mappedVariables['fator saturado'] == true,
+      healthCapped: base?.mappedVariables['teto travado pela saúde'] == true,
+      operationalDecline: fracao(base?.mappedVariables['queda no triênio (%)']) ??
+          fracao(moat?.mappedVariables['queda no triênio (%)']),
     );
   }
 }
@@ -706,6 +839,12 @@ class _Row {
           'retornoCorrente': diagnostics.latestReturn,
         if (diagnostics.cycleReturnOfBase != null)
           'retornoDoCicloDaBase': diagnostics.cycleReturnOfBase,
+        'precedenciaDoCiclo': diagnostics.cyclePrecedence,
+        if (diagnostics.rawFactor != null) 'fatorBruto': diagnostics.rawFactor,
+        'fatorSaturado': diagnostics.saturated,
+        'tetoTravadoPelaSaude': diagnostics.healthCapped,
+        if (diagnostics.operationalDecline != null)
+          'quedaNoTrienio': diagnostics.operationalDecline,
         if (detail != null) 'detalhe': detail,
       };
 }
