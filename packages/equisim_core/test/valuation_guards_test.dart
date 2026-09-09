@@ -1584,4 +1584,95 @@ void main() {
           CostOfCapital.leverageSpread(1.45));
     });
   });
+
+  group('Fronteira das vias e monotonia na taxa', () {
+    // A pós-condição da ponte de equity é um degrau entre dois estimadores
+    // diferentes. Medi-la na taxa do dia fazia o degrau andar com o ciclo
+    // monetário: na KLBN11, baixar a taxa livre de risco de 9,00% para 8,75%
+    // levava o preço justo de R$ 7,98 para R$ 5,36 — capital mais barato
+    // produzindo empresa menos valiosa, que contradiz a definição de fluxo
+    // descontado. Passou a ser medida na taxa estrutural, que não acompanha a
+    // Selic.
+    FundamentalsSnapshot alavancado(int ano, double escala) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(ano, 12, 31),
+          totalRevenue: 10000 * escala,
+          ebit: 1400 * escala,
+          ebitda: 1900 * escala,
+          netIncome: 500 * escala,
+          incomeBeforeTax: 800 * escala,
+          incomeTaxExpense: 300 * escala,
+          interestExpense: 600,
+          earningsPerShare: 0.5 * escala,
+          cash: 500,
+          shortTermInvestments: 200,
+          shortTermDebt: 3200,
+          longTermDebt: 12800,
+          totalStockholderEquity: 4000 * escala,
+          bookValuePerShare: 4.0 * escala,
+          operatingCashFlow: 1500 * escala,
+          freeCashFlow: 900 * escala,
+          nopat: 924 * escala,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 9000,
+          enterpriseToEbitda: 8.0,
+        );
+
+    List<FundamentalsSnapshot> serie() {
+      final out = <FundamentalsSnapshot>[];
+      var escala = 1.0;
+      for (var i = 15; i >= 0; i--) {
+        out.add(alavancado(2025 - i, escala));
+        escala *= 1.06;
+      }
+      return out;
+    }
+
+    ValuationResult? com(double rf) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: serie(),
+        marketPrice: 9.0,
+        capm: CapmInputs(riskFreeRate: rf, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('baratear o capital nunca derruba o preço justo', () {
+      double? anterior;
+      var avaliados = 0;
+      for (var passo = 0; passo <= 32; passo++) {
+        final rf = 0.1600 - passo * 0.0025;
+        final v = com(rf);
+        if (v == null) continue;
+        final justo = v.fairValue.reais;
+        avaliados++;
+        if (anterior != null) {
+          // A tolerância de um centavo é ruído de arredondamento em `Money`,
+          // não folga de regra: a quebra medida era de 33%.
+          expect(justo, greaterThanOrEqualTo(anterior - 0.01),
+              reason: 'em Rf de ${(rf * 100).toStringAsFixed(2)}% o preço justo '
+                  'caiu de $anterior para $justo ao baratear o capital');
+        }
+        anterior = justo;
+      }
+      expect(avaliados, greaterThan(20),
+          reason: 'a varredura precisa cobrir a faixa para ter conteúdo');
+    });
+
+    test('a via não muda com a taxa livre de risco corrente', () {
+      final vias = <ValuationModel>{};
+      for (var passo = 0; passo <= 16; passo++) {
+        final v = com(0.1600 - passo * 0.0050);
+        if (v != null) vias.add(v.model);
+      }
+      expect(vias.length, 1,
+          reason: 'a estrutura de capital é fato de longo prazo; qual via a '
+              'descreve não pode depender de onde a Selic está hoje');
+    });
+  });
 }

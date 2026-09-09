@@ -1,0 +1,3601 @@
+[
+  {
+    "ticker": "AALR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ABCB10",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "shareholder",
+    "preco": 25.19,
+    "precoJusto": 25.0,
+    "potencial": -0.007542675664946458,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.15687265003029854,
+    "retornoCiclo": 0.15293649134036258,
+    "quedaTrienio": -0.26880734641986126,
+    "lucroAtual": 1002000000.0,
+    "lucroAnterior": 971274000.0,
+    "baseDenominador": 6387346677.74448,
+    "baseDenominadorAnterior": 5889900683.2044,
+    "exercicios": 16
+  },
+  {
+    "ticker": "ABCB4",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Bancos",
+    "via": "shareholder",
+    "preco": 24.63,
+    "precoJusto": 26.68,
+    "potencial": 0.08323183110028425,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.15687265003029854,
+    "retornoCiclo": 0.15293649134036258,
+    "quedaTrienio": -0.26880734641986126,
+    "lucroAtual": 1002000000.0,
+    "lucroAnterior": 971274000.0,
+    "baseDenominador": 6387346677.74448,
+    "baseDenominadorAnterior": 5889900683.2044,
+    "exercicios": 16
+  },
+  {
+    "ticker": "ABEV3",
+    "estado": "ok",
+    "setor": "consumo-nao-ciclico",
+    "industria": "Cervejas e Refrigerantes",
+    "via": "firm",
+    "preco": 15.56,
+    "precoJusto": 10.19,
+    "potencial": -0.3451156812339332,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.21120724172933225,
+    "retornoCiclo": 0.20478851579310584,
+    "quedaTrienio": -0.07367675509128113,
+    "lucroAtual": 15459434000.0,
+    "lucroAnterior": 14391680000.0,
+    "baseDenominador": 73195567885.933,
+    "baseDenominadorAnterior": 67308704928.11099,
+    "exercicios": 13
+  },
+  {
+    "ticker": "AERI3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "AFLT3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "AGRO3",
+    "estado": "ok",
+    "setor": "consumo-nao-ciclico",
+    "industria": "Agricultura",
+    "via": "shareholder",
+    "preco": 19.13,
+    "precoJusto": 8.94,
+    "potencial": -0.5326711970726608,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.06332080105244275,
+    "retornoCiclo": 0.16252702559339827,
+    "quedaTrienio": 0.7346298596423765,
+    "lucroAtual": 138019010.0,
+    "lucroAnterior": 226867010.0,
+    "baseDenominador": 2179678837.0648003,
+    "baseDenominadorAnterior": 2197142004.3387203,
+    "exercicios": 10
+  },
+  {
+    "ticker": "AGXY3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "AHEB3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ALLD3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ALOS3",
+    "estado": "ok",
+    "setor": "construcao-e-imobiliario",
+    "industria": "Exploração de Imóveis",
+    "via": "firm",
+    "preco": 28.48,
+    "precoJusto": 15.37,
+    "potencial": -0.4603230337078652,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.09437421034545307,
+    "retornoCiclo": 0.09448926809777414,
+    "quedaTrienio": -3.25531637136272,
+    "lucroAtual": 1015977600.0,
+    "lucroAnterior": 959048640.0,
+    "baseDenominador": 10765415639.304998,
+    "baseDenominadorAnterior": 12971501867.5333,
+    "exercicios": 11
+  },
+  {
+    "ticker": "ALPA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ALPA4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "firm",
+    "preco": 13.39,
+    "precoJusto": 2.05,
+    "potencial": -0.8469006721433906,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.0988403223974353,
+    "retornoCiclo": 0.09269110600982211,
+    "quedaTrienio": -3.2541719707216163,
+    "lucroAtual": 392533660.0,
+    "lucroAnterior": 33815760.0,
+    "baseDenominador": 3971391942.87154,
+    "baseDenominadorAnterior": 4290547110.0890007,
+    "exercicios": 16
+  },
+  {
+    "ticker": "ALPK3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ALUP11",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "firm",
+    "preco": 33.42,
+    "precoJusto": 24.55,
+    "potencial": -0.265409934171155,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.09831151143493752,
+    "retornoCiclo": 0.10071998340638091,
+    "quedaTrienio": -0.04166183356542241,
+    "lucroAtual": 2055582600.0,
+    "lucroAnterior": 1909139700.0,
+    "baseDenominador": 20908869876.9562,
+    "baseDenominadorAnterior": 19617754763.2679,
+    "exercicios": 16
+  },
+  {
+    "ticker": "ALUP3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ALUP4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "AMAR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "AMBP3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "AMER3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Produtos Diversos",
+    "via": "firm",
+    "preco": 5.31,
+    "precoJusto": 4.05,
+    "potencial": -0.23728813559322032,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.038996785856203045,
+    "retornoCiclo": 0.04267367860117365,
+    "quedaTrienio": null,
+    "lucroAtual": 218460000.0,
+    "lucroAnterior": 429000000.0,
+    "baseDenominador": 5602000144.46192,
+    "baseDenominadorAnterior": 21320658564.704002,
+    "exercicios": 14
+  },
+  {
+    "ticker": "AMOB3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ANIM3",
+    "estado": "ok",
+    "setor": "educacao",
+    "industria": "Serviços Educacionais",
+    "via": "shareholder",
+    "preco": 2.98,
+    "precoJusto": 2.69,
+    "potencial": -0.09731543624161075,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.09231776833939222,
+    "retornoCiclo": -0.005594008222474477,
+    "quedaTrienio": -2.78069616319449,
+    "lucroAtual": 256664990.0,
+    "lucroAnterior": 204444000.0,
+    "baseDenominador": 2780233909.64576,
+    "baseDenominadorAnterior": 2857343004.54144,
+    "exercicios": 13
+  },
+  {
+    "ticker": "ARML3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "ARND3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "ASAI3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ATED3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "AUAU3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "AURE3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "AVLL3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "AXIA3",
+    "estado": "ok",
+    "setor": "emp-adm-part-energia-eletrica",
+    "industria": "Emp. Adm. Part. - Energia Elétrica",
+    "via": "shareholder",
+    "preco": 55.26,
+    "precoJusto": 11.01,
+    "potencial": -0.8007600434310532,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.05376779275750688,
+    "retornoCiclo": 0.08346855543232666,
+    "quedaTrienio": -0.10372321279970165,
+    "lucroAtual": 6559659000.0,
+    "lucroAnterior": 10380753000.0,
+    "baseDenominador": 121999782092.304,
+    "baseDenominadorAnterior": 112464642049.00002,
+    "exercicios": 16
+  },
+  {
+    "ticker": "AXIA7",
+    "estado": "recusado",
+    "motivo": "Nenhum exercício de AXIA7 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "AZEV3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "AZEV4",
+    "estado": "recusado",
+    "motivo": "Os dados de AZEV4 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "AZTE3",
+    "estado": "recusado",
+    "motivo": "Nenhum exercício de AZTE3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "AZUL3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "AZUL97",
+    "estado": "sem insumos"
+  },
+  {
+    "ticker": "AZUL98",
+    "estado": "sem insumos"
+  },
+  {
+    "ticker": "AZUL99",
+    "estado": "sem insumos"
+  },
+  {
+    "ticker": "AZZA3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Tecidos, Vestuário e Calçados",
+    "via": "firm",
+    "preco": 16.35,
+    "precoJusto": 12.86,
+    "potencial": -0.21345565749235484,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.07823681855503835,
+    "retornoCiclo": 0.19548425642388584,
+    "quedaTrienio": -1.1566085017966907,
+    "lucroAtual": 751206700.0,
+    "lucroAnterior": 253201740.0,
+    "baseDenominador": 9601703058.4077,
+    "baseDenominadorAnterior": 3260508936.79324,
+    "exercicios": 15
+  },
+  {
+    "ticker": "B1003",
+    "estado": "recusado",
+    "motivo": "Nenhum exercício de B1003 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "B3SA3",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Dados Financeiros e Bolsas de Valores",
+    "via": "shareholder",
+    "preco": 17.27,
+    "precoJusto": 4.38,
+    "potencial": -0.7463810075275044,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.2495109020748484,
+    "retornoCiclo": 0.17596520997718487,
+    "quedaTrienio": -0.08523971288492538,
+    "lucroAtual": 4586872000.0,
+    "lucroAnterior": 4576691000.0,
+    "baseDenominador": 18383453235.3381,
+    "baseDenominadorAnterior": 20286099811.44396,
+    "exercicios": 16
+  },
+  {
+    "ticker": "BALM3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BALM4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BAUH4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BAZA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BBAS3",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Bancos Diversificados",
+    "via": "shareholder",
+    "preco": 22.16,
+    "precoJusto": 31.05,
+    "potencial": 0.401173285198556,
+    "fatorBase": 1.6934182130167612,
+    "retornoAtual": 0.09108918396895177,
+    "retornoCiclo": 0.15425208314185732,
+    "quedaTrienio": 0.4377785154081819,
+    "lucroAtual": 16781938000.0,
+    "lucroAnterior": 29171565000.0,
+    "baseDenominador": 184236341448.84,
+    "baseDenominadorAnterior": 163077128079.06,
+    "exercicios": 15
+  },
+  {
+    "ticker": "BBDC3",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Bancos",
+    "via": "shareholder",
+    "preco": 15.87,
+    "precoJusto": 13.53,
+    "potencial": -0.14744801512287334,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.14161408796634092,
+    "retornoCiclo": 0.11829377868690047,
+    "quedaTrienio": -0.12760592870047494,
+    "lucroAtual": 23924636000.0,
+    "lucroAnterior": 17542152000.0,
+    "baseDenominador": 168942485479.88,
+    "baseDenominadorAnterior": 167014115662.944,
+    "exercicios": 16
+  },
+  {
+    "ticker": "BBDC4",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Bancos Diversificados",
+    "via": "shareholder",
+    "preco": 17.92,
+    "precoJusto": 13.21,
+    "potencial": -0.26283482142857145,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.14161408796634092,
+    "retornoCiclo": 0.11829377868690047,
+    "quedaTrienio": -0.12760592870047494,
+    "lucroAtual": 23924636000.0,
+    "lucroAnterior": 17542152000.0,
+    "baseDenominador": 168942485479.88,
+    "baseDenominadorAnterior": 167014115662.944,
+    "exercicios": 16
+  },
+  {
+    "ticker": "BBSE3",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Seguradoras",
+    "via": "shareholder",
+    "preco": 41.47,
+    "precoJusto": 49.89,
+    "potencial": 0.2030383409693755,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.9300605733353802,
+    "retornoCiclo": 0.7818955296131853,
+    "quedaTrienio": -0.49180628368828816,
+    "lucroAtual": 9017329000.0,
+    "lucroAnterior": 8703353000.0,
+    "baseDenominador": 9695421200.0,
+    "baseDenominadorAnterior": 9816482000.0,
+    "exercicios": 14
+  },
+  {
+    "ticker": "BDLL3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "BDLL4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "BEEF3",
+    "estado": "ok",
+    "setor": "consumo-nao-ciclico",
+    "industria": "Carnes e Derivados",
+    "via": "firm",
+    "preco": 3.97,
+    "precoJusto": 7.61,
+    "potencial": 0.9168765743073047,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.1616913258399499,
+    "retornoCiclo": 0.1688307008414731,
+    "quedaTrienio": -0.2949268621081298,
+    "lucroAtual": 2539911700.0,
+    "lucroAnterior": 1602397400.0,
+    "baseDenominador": 15708398003.453384,
+    "baseDenominadorAnterior": 9537842974.56108,
+    "exercicios": 13
+  },
+  {
+    "ticker": "BEES3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BEES4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BGIP3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BGIP4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BHIA3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Eletrodomésticos",
+    "via": "firm",
+    "preco": 0.65,
+    "precoJusto": 2.11,
+    "potencial": 2.246153846153846,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.09321484598409072,
+    "retornoCiclo": 0.045958153709776586,
+    "quedaTrienio": -1.0499571102460905,
+    "lucroAtual": 886379970.0,
+    "lucroAnterior": 336600000.0,
+    "baseDenominador": 9508999995.036,
+    "baseDenominadorAnterior": 9840000007.5808,
+    "exercicios": 16
+  },
+  {
+    "ticker": "BIED3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BIOM3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BLAU3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BMEB3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BMEB4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BMGB4",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Bancos",
+    "via": "shareholder",
+    "preco": 5.85,
+    "precoJusto": 7.46,
+    "potencial": 0.2752136752136753,
+    "fatorBase": 1.0,
+    "retornoAtual": null,
+    "retornoCiclo": null,
+    "quedaTrienio": null,
+    "lucroAtual": null,
+    "lucroAnterior": null,
+    "baseDenominador": 4406592976.56108,
+    "baseDenominadorAnterior": 4180259028.9114,
+    "exercicios": 9
+  },
+  {
+    "ticker": "BMIN4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BMKS3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BMOB3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "BNBR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BOBR4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "BPAC11",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Bancos",
+    "via": "shareholder",
+    "preco": 59.01,
+    "precoJusto": 46.02,
+    "potencial": -0.22013218098627343,
+    "fatorBase": 1.0,
+    "retornoAtual": null,
+    "retornoCiclo": null,
+    "quedaTrienio": null,
+    "lucroAtual": null,
+    "lucroAnterior": null,
+    "baseDenominador": 65871806361.380005,
+    "baseDenominadorAnterior": 56388164248.872,
+    "exercicios": 15
+  },
+  {
+    "ticker": "BPAC3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BPAC5",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BRAP3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BRAP4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "firm",
+    "preco": 22.69,
+    "precoJusto": 4.63,
+    "potencial": -0.7959453503746144,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.038004075356443755,
+    "retornoCiclo": 0.13568263862514307,
+    "quedaTrienio": 0.8705817469879022,
+    "lucroAtual": 311459260.0,
+    "lucroAnterior": 748815550.0,
+    "baseDenominador": 8195417388.2352,
+    "baseDenominadorAnterior": 7587814603.5306,
+    "exercicios": 16
+  },
+  {
+    "ticker": "BRAV3",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Exploração e Produção de Petróleo",
+    "via": "firm",
+    "preco": 18.59,
+    "precoJusto": 27.23,
+    "potencial": 0.46476600322754175,
+    "fatorBase": 1.9921961251426057,
+    "retornoAtual": 0.061413195607299235,
+    "retornoCiclo": 0.12234713032148643,
+    "quedaTrienio": -10.049711860690907,
+    "lucroAtual": 1462680800.0,
+    "lucroAnterior": 1648196900.0,
+    "baseDenominador": 23817044293.7536,
+    "baseDenominadorAnterior": 12918592283.50192,
+    "exercicios": 15
+  },
+  {
+    "ticker": "BRBI11",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "BRKM3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "BRKM5",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "BRKM6",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "BRSR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BRSR5",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BRSR6",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "shareholder",
+    "preco": 14.99,
+    "precoJusto": 13.88,
+    "potencial": -0.07404936624416274,
+    "fatorBase": 0.5631257107194007,
+    "retornoAtual": 0.16456393273121775,
+    "retornoCiclo": 0.09267018157804663,
+    "quedaTrienio": -1.0356987659128847,
+    "lucroAtual": 1714551000.0,
+    "lucroAnterior": 727798000.0,
+    "baseDenominador": 10418753195.454899,
+    "baseDenominadorAnterior": 9865773102.44646,
+    "exercicios": 16
+  },
+  {
+    "ticker": "BRST3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "BSLI3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "BSLI4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CAMB3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CAML3",
+    "estado": "ok",
+    "setor": "consumo-nao-ciclico",
+    "industria": "Alimentos Diversos",
+    "via": "shareholder",
+    "preco": 5.02,
+    "precoJusto": 1.94,
+    "potencial": -0.6135458167330677,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.042940604166170473,
+    "retornoCiclo": 0.1497918175194756,
+    "quedaTrienio": 0.580215644473598,
+    "lucroAtual": 148471010.0,
+    "lucroAnterior": 217000990.0,
+    "baseDenominador": 3457590150.0,
+    "baseDenominadorAnterior": 3087346150.0000005,
+    "exercicios": 10
+  },
+  {
+    "ticker": "CASH3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "CBAV3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "CBEE3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CEAB3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Tecidos. Vestuário e Calçados",
+    "via": "firm",
+    "preco": 9.05,
+    "precoJusto": 4.24,
+    "potencial": -0.5314917127071823,
+    "fatorBase": 0.33,
+    "retornoAtual": 0.21317552001303036,
+    "retornoCiclo": 0.06419157771025977,
+    "quedaTrienio": -4.179957491237229,
+    "lucroAtual": 689402370.0,
+    "lucroAnterior": 534101700.0,
+    "baseDenominador": 3233965935.47824,
+    "baseDenominadorAnterior": 3353398084.28174,
+    "exercicios": 8
+  },
+  {
+    "ticker": "CEBR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CEBR5",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CEBR6",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CEDO4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CEEB3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CEED3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "CEGR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CGAS3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CGAS5",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CGRA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CGRA4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CLSC3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CLSC4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CMIG3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CMIG4",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Energia Elétrica",
+    "via": "firm",
+    "preco": 11.35,
+    "precoJusto": 6.21,
+    "potencial": -0.452863436123348,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.11910319755208629,
+    "retornoCiclo": 0.11921448885397957,
+    "quedaTrienio": -0.19667264805524276,
+    "lucroAtual": 4455203300.0,
+    "lucroAnterior": 6519435300.0,
+    "baseDenominador": 37406244261.844,
+    "baseDenominadorAnterior": 32174868456.278,
+    "exercicios": 16
+  },
+  {
+    "ticker": "CMIN3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "COCE3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "COCE5",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "COGN3",
+    "estado": "ok",
+    "setor": "educacao",
+    "industria": "Serviços Educacionais",
+    "via": "shareholder",
+    "preco": 2.37,
+    "precoJusto": 0.93,
+    "potencial": -0.6075949367088607,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.04326534951478889,
+    "retornoCiclo": -0.010377527309217099,
+    "quedaTrienio": -5.548776145385488,
+    "lucroAtual": 586035000.0,
+    "lucroAnterior": 991631000.0,
+    "baseDenominador": 13545135000.0,
+    "baseDenominadorAnterior": 12706279200.0,
+    "exercicios": 16
+  },
+  {
+    "ticker": "CPFE3",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Energia Elétrica",
+    "via": "firm",
+    "preco": 46.41,
+    "precoJusto": 31.02,
+    "potencial": -0.33160956690368454,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.155113157985793,
+    "retornoCiclo": 0.14476165208898598,
+    "quedaTrienio": -0.10035615378439511,
+    "lucroAtual": 7295951000.0,
+    "lucroAnterior": 7147950600.0,
+    "baseDenominador": 47036312681.2765,
+    "baseDenominadorAnterior": 40903232639.373,
+    "exercicios": 16
+  },
+  {
+    "ticker": "CPLE3",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Energia Elétrica",
+    "via": "firm",
+    "preco": 15.81,
+    "precoJusto": 3.72,
+    "potencial": -0.7647058823529411,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.08599334195180378,
+    "retornoCiclo": 0.07946795497398937,
+    "quedaTrienio": -1.2381237320984995,
+    "lucroAtual": 3329707300.0,
+    "lucroAnterior": 2682403600.0,
+    "baseDenominador": 38720524454.860504,
+    "baseDenominadorAnterior": 33514592795.0054,
+    "exercicios": 16
+  },
+  {
+    "ticker": "CRPG5",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CRPG6",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CSAN3",
+    "estado": "recusado",
+    "motivo": "Os dados de CSAN3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "CSED3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "CSMG3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "CSNA3",
+    "estado": "recusado",
+    "motivo": "O capital próprio responde por apenas -142.6% do valor da firma de CSNA3, e a via do acionista não se aplica: o preço por papel seria resíduo de uma subtração entre números próximos, e a dívida líquida supera o próprio valor da firma, de modo que não sobra capital próprio a repartir. O ativo não é avaliável por fluxo descontado nesta estrutura de capital."
+  },
+  {
+    "ticker": "CSUD3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CTAX3",
+    "estado": "recusado",
+    "motivo": "Nenhum exercício de CTAX3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "CTKA4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "CURY3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "CVCB3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Viagens e Turismo",
+    "via": "firm",
+    "preco": 1.73,
+    "precoJusto": 1.54,
+    "potencial": -0.1098265895953757,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.32213208222279177,
+    "retornoCiclo": 0.005455165829742939,
+    "quedaTrienio": null,
+    "lucroAtual": 181669620.0,
+    "lucroAnterior": 59937900.0,
+    "baseDenominador": 563960033.86696,
+    "baseDenominadorAnterior": 784619974.1182799,
+    "exercicios": 13
+  },
+  {
+    "ticker": "CXSE3",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Seguradoras",
+    "via": "shareholder",
+    "preco": 19.85,
+    "precoJusto": 11.82,
+    "potencial": -0.4045340050377834,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.33295460131472526,
+    "retornoCiclo": 0.33131602730695614,
+    "quedaTrienio": -0.39962142709400594,
+    "lucroAtual": 4291560000.0,
+    "lucroAnterior": 3765184000.0,
+    "baseDenominador": 12889324799.999998,
+    "baseDenominadorAnterior": 12585880200.0,
+    "exercicios": 11
+  },
+  {
+    "ticker": "CYRE3",
+    "estado": "ok",
+    "setor": "construcao-e-imobiliario",
+    "industria": "Incorporações",
+    "via": "firm",
+    "preco": 25.24,
+    "precoJusto": 2.75,
+    "potencial": -0.8910459587955626,
+    "fatorBase": 0.6469030145754915,
+    "retornoAtual": 0.117741342496822,
+    "retornoCiclo": 0.07616722940135957,
+    "quedaTrienio": -1.6419282395824322,
+    "lucroAtual": 1515479400.0,
+    "lucroAnterior": 1315246100.0,
+    "baseDenominador": 12871259728.0,
+    "baseDenominadorAnterior": 10954337369.66442,
+    "exercicios": 16
+  },
+  {
+    "ticker": "CYRE4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "shareholder",
+    "preco": 23.74,
+    "precoJusto": 12.5,
+    "potencial": -0.4734625105307498,
+    "fatorBase": 0.5602836173612028,
+    "retornoAtual": 0.2408044110051447,
+    "retornoCiclo": 0.1349187664744963,
+    "quedaTrienio": -1.6419282395824322,
+    "lucroAtual": 2395829000.0,
+    "lucroAnterior": 1921052000.0,
+    "baseDenominador": 9949273728.0,
+    "baseDenominadorAnterior": 8499826269.664419,
+    "exercicios": 16
+  },
+  {
+    "ticker": "DASA3",
+    "estado": "recusado",
+    "motivo": "O capital próprio responde por apenas -16.7% do valor da firma de DASA3, e a via do acionista não se aplica: o preço por papel seria resíduo de uma subtração entre números próximos, e a dívida líquida supera o próprio valor da firma, de modo que não sobra capital próprio a repartir. O ativo não é avaliável por fluxo descontado nesta estrutura de capital."
+  },
+  {
+    "ticker": "DESK3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "DEXP3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "DEXP4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "DIRR3",
+    "estado": "ok",
+    "setor": "construcao-e-imobiliario",
+    "industria": "Incorporações",
+    "via": "firm",
+    "preco": 11.04,
+    "precoJusto": 1.95,
+    "potencial": -0.8233695652173914,
+    "fatorBase": 0.40664590457403743,
+    "retornoAtual": 0.2953140753596446,
+    "retornoCiclo": 0.12008825930806813,
+    "quedaTrienio": -1.8871616060179055,
+    "lucroAtual": 662069100.0,
+    "lucroAnterior": 498286140.0,
+    "baseDenominador": 2241915151.5,
+    "baseDenominadorAnterior": 2127563023.5,
+    "exercicios": 16
+  },
+  {
+    "ticker": "DMVF3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "DOHL4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "DOTZ3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "DTCY3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "DXCO3",
+    "estado": "ok",
+    "setor": "materiais-basicos",
+    "industria": "Madeira",
+    "via": "shareholder",
+    "preco": 5.53,
+    "precoJusto": 0.73,
+    "potencial": -0.867992766726944,
+    "fatorBase": 3.0,
+    "retornoAtual": 0.008764998453575971,
+    "retornoCiclo": 0.09179946417861265,
+    "quedaTrienio": 0.9175536852123485,
+    "lucroAtual": 63065000.0,
+    "lucroAnterior": 174375010.0,
+    "baseDenominador": 7195095393.801301,
+    "baseDenominadorAnterior": 6522078074.24298,
+    "exercicios": 16
+  },
+  {
+    "ticker": "EALT3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EALT4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ECOM3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ECOR3",
+    "estado": "ok",
+    "setor": "infraestrutura",
+    "industria": "Exploração de Rodovias",
+    "via": "shareholder",
+    "preco": 7.91,
+    "precoJusto": 4.31,
+    "potencial": -0.4551201011378003,
+    "fatorBase": 0.7181166637245716,
+    "retornoAtual": 0.23487526098069986,
+    "retornoCiclo": 0.16866783880689823,
+    "quedaTrienio": -2.656633274614671,
+    "lucroAtual": 866818000.0,
+    "lucroAnterior": 913451000.0,
+    "baseDenominador": 3690546191.9688,
+    "baseDenominadorAnterior": 2986259855.4048,
+    "exercicios": 15
+  },
+  {
+    "ticker": "EGIE3",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Energia Elétrica",
+    "via": "firm",
+    "preco": 30.71,
+    "precoJusto": 44.22,
+    "potencial": 0.4399218495604037,
+    "fatorBase": 1.5879994626282325,
+    "retornoAtual": 0.12940839215702615,
+    "retornoCiclo": 0.20550045720494112,
+    "quedaTrienio": -0.07256373265760163,
+    "lucroAtual": 4137094400.0,
+    "lucroAnterior": 5070153700.0,
+    "baseDenominador": 31969289866.301605,
+    "baseDenominadorAnterior": 24666699603.161163,
+    "exercicios": 11
+  },
+  {
+    "ticker": "EKTR4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EMAE4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EMBJ3",
+    "estado": "ok",
+    "setor": "maquinas-equipamentos-veiculos-e-pecas",
+    "industria": "Máquinas, Equipamentos, Veículos e Peças",
+    "via": "firm",
+    "preco": 95.49,
+    "precoJusto": 6.79,
+    "potencial": -0.9288930778091946,
+    "fatorBase": 0.33,
+    "retornoAtual": 0.09822820257947215,
+    "retornoCiclo": 0.016459756428348578,
+    "quedaTrienio": null,
+    "lucroAtual": 2209755100.0,
+    "lucroAnterior": 2489599700.0,
+    "baseDenominador": 22496136974.634995,
+    "baseDenominadorAnterior": 18274669477.255,
+    "exercicios": 16
+  },
+  {
+    "ticker": "ENEV3",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Energia Elétrica",
+    "via": "shareholder",
+    "preco": 27.35,
+    "precoJusto": 4.6,
+    "potencial": -0.8318098720292504,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.08368287933835829,
+    "retornoCiclo": 0.0685521723070359,
+    "quedaTrienio": -3.5017215399829933,
+    "lucroAtual": 1691630000.0,
+    "lucroAnterior": 549472000.0,
+    "baseDenominador": 20214768102.8059,
+    "baseDenominadorAnterior": 14937635314.982399,
+    "exercicios": 16
+  },
+  {
+    "ticker": "ENGI11",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Energia Elétrica",
+    "via": "shareholder",
+    "preco": 50.98,
+    "precoJusto": 93.34,
+    "potencial": 0.8309140839544922,
+    "fatorBase": 1.7464170001738177,
+    "retornoAtual": 0.14180735921464713,
+    "retornoCiclo": 0.24765478288221504,
+    "quedaTrienio": -0.2932644706386274,
+    "lucroAtual": 3140072000.0,
+    "lucroAnterior": 4636282000.0,
+    "baseDenominador": 22143223154.216,
+    "baseDenominadorAnterior": 15715696328.487782,
+    "exercicios": 16
+  },
+  {
+    "ticker": "ENGI3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ENGI4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ENJU3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ENMT3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ENMT4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EPAR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EQPA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EQPA5",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EQTL3",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Energia Elétrica",
+    "via": "firm",
+    "preco": 38.88,
+    "precoJusto": 18.6,
+    "potencial": -0.5216049382716049,
+    "fatorBase": 1.939550091045428,
+    "retornoAtual": 0.073893634401847,
+    "retornoCiclo": 0.14332040533177992,
+    "quedaTrienio": -0.3027716397945268,
+    "lucroAtual": 5370362000.0,
+    "lucroAnterior": 5700066000.0,
+    "baseDenominador": 72676923302.95999,
+    "baseDenominadorAnterior": 59498119000.0,
+    "exercicios": 16
+  },
+  {
+    "ticker": "ESPA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ESTR4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "ETER3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EUCA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EUCA4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "EVEN3",
+    "estado": "ok",
+    "setor": "construcao-e-imobiliario",
+    "industria": "Incorporações",
+    "via": "firm",
+    "preco": 4.2,
+    "precoJusto": 1.66,
+    "potencial": -0.6047619047619047,
+    "fatorBase": 0.641794102653599,
+    "retornoAtual": 0.06700904468009901,
+    "retornoCiclo": 0.04300600970013907,
+    "quedaTrienio": -0.5333483736002298,
+    "lucroAtual": 166257950.0,
+    "lucroAnterior": 69375896.0,
+    "baseDenominador": 2481127000.0,
+    "baseDenominadorAnterior": 3274326000.0,
+    "exercicios": 14
+  },
+  {
+    "ticker": "EZTC3",
+    "estado": "ok",
+    "setor": "construcao-e-imobiliario",
+    "industria": "Incorporações",
+    "via": "firm",
+    "preco": 12.76,
+    "precoJusto": 4.8,
+    "potencial": -0.6238244514106583,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.055557513887996325,
+    "retornoCiclo": 0.05550974110868967,
+    "quedaTrienio": -0.6006541812941566,
+    "lucroAtual": 291625630.0,
+    "lucroAnterior": 220698060.0,
+    "baseDenominador": 5249076310.1444,
+    "baseDenominadorAnterior": 4798958880.8412,
+    "exercicios": 16
+  },
+  {
+    "ticker": "FASA3",
+    "estado": "recusado",
+    "motivo": "Nenhum exercício de FASA3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "FESA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "FESA4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "firm",
+    "preco": 5.82,
+    "precoJusto": 2.28,
+    "potencial": -0.6082474226804124,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.010663185520254668,
+    "retornoCiclo": 0.11512084519802235,
+    "quedaTrienio": 0.8224182427052332,
+    "lucroAtual": 31078740.0,
+    "lucroAnterior": 113473136.0,
+    "baseDenominador": 2914583070.975,
+    "baseDenominadorAnterior": 2657785830.08,
+    "exercicios": 16
+  },
+  {
+    "ticker": "FHER3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "FICT3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "FIEI3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "FIQE3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "FLRY3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "FRAS3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Material Rodoviário",
+    "via": "firm",
+    "preco": 22.98,
+    "precoJusto": 9.42,
+    "potencial": -0.5900783289817233,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.19087469857836675,
+    "retornoCiclo": 0.14675076554422783,
+    "quedaTrienio": -0.3926495183987291,
+    "lucroAtual": 477909950.0,
+    "lucroAnterior": 342652860.0,
+    "baseDenominador": 2503788891.6628003,
+    "baseDenominadorAnterior": 1688791853.96095,
+    "exercicios": 16
+  },
+  {
+    "ticker": "GEPA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "GEPA4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "GFSA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "GGBR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "GGBR4",
+    "estado": "ok",
+    "setor": "materiais-basicos",
+    "industria": "Siderurgia",
+    "via": "firm",
+    "preco": 25.36,
+    "precoJusto": 6.27,
+    "potencial": -0.7527602523659306,
+    "fatorBase": 2.356060019239245,
+    "retornoAtual": 0.038842311290377914,
+    "retornoCiclo": 0.09151481668610453,
+    "quedaTrienio": 0.8764378609896971,
+    "lucroAtual": 2467785000.0,
+    "lucroAnterior": 4941553000.0,
+    "baseDenominador": 63533423167.104996,
+    "baseDenominadorAnterior": 54788430382.94601,
+    "exercicios": 16
+  },
+  {
+    "ticker": "GGPS3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "GMAT3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "GOAU3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "GOAU4",
+    "estado": "ok",
+    "setor": "materiais-basicos",
+    "industria": "Siderurgia",
+    "via": "firm",
+    "preco": 11.14,
+    "precoJusto": 24.89,
+    "potencial": 1.234290843806104,
+    "fatorBase": 2.356197171822534,
+    "retornoAtual": 0.038734644458260734,
+    "retornoCiclo": 0.09126645972410533,
+    "quedaTrienio": 0.8766629757210692,
+    "lucroAtual": 2460399400.0,
+    "lucroAnterior": 4933052400.0,
+    "baseDenominador": 63519349006.83679,
+    "baseDenominadorAnterior": 54826020071.481,
+    "exercicios": 16
+  },
+  {
+    "ticker": "GRND3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Calçados",
+    "via": "firm",
+    "preco": 3.75,
+    "precoJusto": 2.4,
+    "potencial": -0.36000000000000004,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.07229642698288906,
+    "retornoCiclo": 0.10275918374047918,
+    "quedaTrienio": -0.1351713915007562,
+    "lucroAtual": 214430700.0,
+    "lucroAnterior": 367992220.0,
+    "baseDenominador": 2965993050.4,
+    "baseDenominadorAnterior": 2892139975.216,
+    "exercicios": 16
+  },
+  {
+    "ticker": "HAGA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "HAGA4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "HAPV3",
+    "estado": "ok",
+    "setor": "saude",
+    "industria": "Serviços Médicos Hospitalares",
+    "via": "firm",
+    "preco": 7.03,
+    "precoJusto": 3.83,
+    "potencial": -0.45519203413940257,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.018257191368595518,
+    "retornoCiclo": 0.031046108114062294,
+    "quedaTrienio": null,
+    "lucroAtual": 961373200.0,
+    "lucroAnterior": 489054050.0,
+    "baseDenominador": 52657234105.223495,
+    "baseDenominadorAnterior": 53777929371.351,
+    "exercicios": 8
+  },
+  {
+    "ticker": "HBOR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "HBRE3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "HBSA3",
+    "estado": "recusado",
+    "motivo": "Os dados de HBSA3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "HETA4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "HOOT4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "HYPE3",
+    "estado": "ok",
+    "setor": "consumo-nao-ciclico",
+    "industria": "Medicamentos e Outros Produtos",
+    "via": "shareholder",
+    "preco": 22.61,
+    "precoJusto": 10.09,
+    "potencial": -0.5537372843874392,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.11554868455749187,
+    "retornoCiclo": 0.10942543928230897,
+    "quedaTrienio": 0.29926242302309414,
+    "lucroAtual": 1330875000.0,
+    "lucroAnterior": 1650550000.0,
+    "baseDenominador": 11517872359.1424,
+    "baseDenominadorAnterior": 10655441436.0064,
+    "exercicios": 12
+  },
+  {
+    "ticker": "IFCM3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "IGTI11",
+    "estado": "ok",
+    "setor": "construcao-e-imobiliario",
+    "industria": "Exploração de Imóveis",
+    "via": "firm",
+    "preco": 26.0,
+    "precoJusto": 1.87,
+    "potencial": -0.928076923076923,
+    "fatorBase": 0.5237337959030841,
+    "retornoAtual": 0.12480584555483187,
+    "retornoCiclo": 0.06536503924332615,
+    "quedaTrienio": -1.526687249699345,
+    "lucroAtual": 741067140.0,
+    "lucroAnterior": 475770240.0,
+    "baseDenominador": 5937759859.76892,
+    "baseDenominadorAnterior": 5946339062.02239,
+    "exercicios": 16
+  },
+  {
+    "ticker": "IGTI3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "IGTI4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "INEP3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "INEP4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "INTB3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "IRBR3",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Resseguradoras",
+    "via": "shareholder",
+    "preco": 60.47,
+    "precoJusto": 25.33,
+    "potencial": -0.5811146022821234,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.07936262821634635,
+    "retornoCiclo": 0.07942605052889133,
+    "quedaTrienio": -8.89706762417714,
+    "lucroAtual": 390945000.0,
+    "lucroAnterior": 805740030.0,
+    "baseDenominador": 4926059138.74557,
+    "baseDenominadorAnterior": 4257394994.18504,
+    "exercicios": 10
+  },
+  {
+    "ticker": "ISAE3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ISAE4",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Energia Elétrica",
+    "via": "firm",
+    "preco": 27.54,
+    "precoJusto": 24.24,
+    "potencial": -0.1198257080610022,
+    "fatorBase": 1.3877551776199994,
+    "retornoAtual": 0.09107088621583154,
+    "retornoCiclo": 0.12638409387646204,
+    "quedaTrienio": -0.0824315638779527,
+    "lucroAtual": 2727058000.0,
+    "lucroAnterior": 3386643500.0,
+    "baseDenominador": 29944344601.3808,
+    "baseDenominadorAnterior": 25288349753.0891,
+    "exercicios": 16
+  },
+  {
+    "ticker": "ITSA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ITSA4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "firm",
+    "preco": 14.02,
+    "precoJusto": 6.11,
+    "potencial": -0.5641940085592011,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.1206142401925277,
+    "retornoCiclo": 0.11671485425118225,
+    "quedaTrienio": -0.1692807686872968,
+    "lucroAtual": 11958540000.0,
+    "lucroAnterior": 10816080000.0,
+    "baseDenominador": 99146999400.0,
+    "baseDenominadorAnterior": 90128999100.0,
+    "exercicios": 13
+  },
+  {
+    "ticker": "ITUB3",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Bancos",
+    "via": "shareholder",
+    "preco": 45.9,
+    "precoJusto": 41.78,
+    "potencial": -0.08976034858387794,
+    "fatorBase": 1.0,
+    "retornoAtual": null,
+    "retornoCiclo": null,
+    "quedaTrienio": null,
+    "lucroAtual": null,
+    "lucroAnterior": null,
+    "baseDenominador": 221283998095.086,
+    "baseDenominadorAnterior": 199049999890.83002,
+    "exercicios": 16
+  },
+  {
+    "ticker": "ITUB4",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Bancos Diversificados",
+    "via": "shareholder",
+    "preco": 41.82,
+    "precoJusto": 40.28,
+    "potencial": -0.036824485891917724,
+    "fatorBase": 1.0,
+    "retornoAtual": null,
+    "retornoCiclo": null,
+    "quedaTrienio": null,
+    "lucroAtual": null,
+    "lucroAnterior": null,
+    "baseDenominador": 221283998095.086,
+    "baseDenominadorAnterior": 199049999890.83002,
+    "exercicios": 16
+  },
+  {
+    "ticker": "JALL3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "JFEN3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "JHSF3",
+    "estado": "ok",
+    "setor": "construcao-e-imobiliario",
+    "industria": "Incorporações",
+    "via": "firm",
+    "preco": 11.5,
+    "precoJusto": 8.46,
+    "potencial": -0.26434782608695645,
+    "fatorBase": 0.5614643744621232,
+    "retornoAtual": 0.1845915208078693,
+    "retornoCiclo": 0.10364156276140234,
+    "quedaTrienio": -1.8299988120347601,
+    "lucroAtual": 1624213800.0,
+    "lucroAnterior": 807683600.0,
+    "baseDenominador": 8798962124.0,
+    "baseDenominadorAnterior": 7843313861.6976,
+    "exercicios": 16
+  },
+  {
+    "ticker": "JOPA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "JOPA4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "JSLG3",
+    "estado": "ok",
+    "setor": "bens-industriais",
+    "industria": "Transporte Rodoviário",
+    "via": "shareholder",
+    "preco": 5.87,
+    "precoJusto": 1.01,
+    "potencial": -0.8279386712095401,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.046151065799014714,
+    "retornoCiclo": 0.15253757305040705,
+    "quedaTrienio": 0.5792400943444809,
+    "lucroAtual": 81704000.0,
+    "lucroAnterior": 207312000.0,
+    "baseDenominador": 1770359981.62678,
+    "baseDenominadorAnterior": 1663442996.83467,
+    "exercicios": 16
+  },
+  {
+    "ticker": "KEPL3",
+    "estado": "ok",
+    "setor": "bens-industriais",
+    "industria": "Máq. e Equip. Industriais",
+    "via": "firm",
+    "preco": 6.7,
+    "precoJusto": 5.36,
+    "potencial": -0.19999999999999998,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.19735792924665685,
+    "retornoCiclo": 0.22964905362225244,
+    "quedaTrienio": 0.5914167982680905,
+    "lucroAtual": 127987200.0,
+    "lucroAnterior": 190861440.0,
+    "baseDenominador": 648502953.4336181,
+    "baseDenominadorAnterior": 567742036.97672,
+    "exercicios": 16
+  },
+  {
+    "ticker": "KLBN11",
+    "estado": "ok",
+    "setor": "materiais-basicos",
+    "industria": "Papel e Celulose",
+    "via": "shareholder",
+    "preco": 19.55,
+    "precoJusto": 6.73,
+    "potencial": -0.6557544757033248,
+    "fatorBase": 0.6650531930342816,
+    "retornoAtual": 0.19430035196591489,
+    "retornoCiclo": 0.12922006948261644,
+    "quedaTrienio": 0.6420887785479887,
+    "lucroAtual": 1678211000.0,
+    "lucroAnterior": 2046945000.0,
+    "baseDenominador": 8637200000.0,
+    "baseDenominadorAnterior": 13732531200.0,
+    "exercicios": 16
+  },
+  {
+    "ticker": "KLBN3",
+    "estado": "ok",
+    "setor": "materiais-basicos",
+    "industria": "Papel e Celulose",
+    "via": "shareholder",
+    "preco": 4.14,
+    "precoJusto": 1.37,
+    "potencial": -0.6690821256038647,
+    "fatorBase": 0.6650531930342816,
+    "retornoAtual": 0.19430035196591489,
+    "retornoCiclo": 0.12922006948261644,
+    "quedaTrienio": 0.6420887785479887,
+    "lucroAtual": 1678211000.0,
+    "lucroAnterior": 2046945000.0,
+    "baseDenominador": 8637200000.0,
+    "baseDenominadorAnterior": 13732531200.0,
+    "exercicios": 16
+  },
+  {
+    "ticker": "KLBN4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "shareholder",
+    "preco": 3.86,
+    "precoJusto": 1.29,
+    "potencial": -0.6658031088082902,
+    "fatorBase": 0.6650531930342816,
+    "retornoAtual": 0.19430035196591489,
+    "retornoCiclo": 0.12922006948261644,
+    "quedaTrienio": 0.6420887785479887,
+    "lucroAtual": 1678211000.0,
+    "lucroAnterior": 2046945000.0,
+    "baseDenominador": 8637200000.0,
+    "baseDenominadorAnterior": 13732531200.0,
+    "exercicios": 16
+  },
+  {
+    "ticker": "LAND3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "LAVV3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "LEVE3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Automóveis e Motocicletas",
+    "via": "firm",
+    "preco": 32.74,
+    "precoJusto": 25.23,
+    "potencial": -0.22938301771533295,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.4083424705746076,
+    "retornoCiclo": 0.23833665394635845,
+    "quedaTrienio": -0.08250225833985358,
+    "lucroAtual": 604716400.0,
+    "lucroAnterior": 574365000.0,
+    "baseDenominador": 1480904984.360458,
+    "baseDenominadorAnterior": 1453499971.994573,
+    "exercicios": 16
+  },
+  {
+    "ticker": "LIGT3",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Energia Elétrica",
+    "via": "shareholder",
+    "preco": 3.51,
+    "precoJusto": 1.87,
+    "potencial": -0.46723646723646717,
+    "fatorBase": 1.7868618310097404,
+    "retornoAtual": 0.04083487027810727,
+    "retornoCiclo": 0.07296627107418398,
+    "quedaTrienio": null,
+    "lucroAtual": 213095010.0,
+    "lucroAnterior": 1643779000.0,
+    "baseDenominador": 5218456886.20312,
+    "baseDenominadorAnterior": 3095688160.6715403,
+    "exercicios": 16
+  },
+  {
+    "ticker": "LJQQ3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "LOGG3",
+    "estado": "ok",
+    "setor": "construcao-e-imobiliario",
+    "industria": "Exploração de Imóveis",
+    "via": "shareholder",
+    "preco": 23.97,
+    "precoJusto": 9.07,
+    "potencial": -0.621610346266166,
+    "fatorBase": 0.5032462192723975,
+    "retornoAtual": 0.10081781507571337,
+    "retornoCiclo": 0.05073618427215648,
+    "quedaTrienio": 0.09287242325929623,
+    "lucroAtual": 363486020.0,
+    "lucroAnterior": 344377980.0,
+    "baseDenominador": 3605374900.5275,
+    "baseDenominadorAnterior": 3732220886.2917,
+    "exercicios": 14
+  },
+  {
+    "ticker": "LOGN3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "LPSB3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "LREN3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Tecidos, Vestuário e Calçados",
+    "via": "firm",
+    "preco": 11.28,
+    "precoJusto": 7.09,
+    "potencial": -0.37145390070921985,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.1325703131296043,
+    "retornoCiclo": 0.12020600651031038,
+    "quedaTrienio": -0.1284054916292361,
+    "lucroAtual": 1186125600.0,
+    "lucroAnterior": 831166400.0,
+    "baseDenominador": 8947143383.755999,
+    "baseDenominadorAnterior": 8870279449.011,
+    "exercicios": 16
+  },
+  {
+    "ticker": "LUPA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "LUXM4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "LWSA3",
+    "estado": "recusado",
+    "motivo": "Os dados de LWSA3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "MAPT3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "MATD3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "MBRF3",
+    "estado": "ok",
+    "setor": "emp-adm-part-alimentos",
+    "industria": "Emp. Adm. Part. - Alimentos",
+    "via": "shareholder",
+    "preco": 17.2,
+    "precoJusto": 2.54,
+    "potencial": -0.8523255813953489,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.03825211778263897,
+    "retornoCiclo": 0.44515627698676563,
+    "quedaTrienio": 0.7239660148933668,
+    "lucroAtual": 762675000.0,
+    "lucroAnterior": 3880870000.0,
+    "baseDenominador": 19938111775.504,
+    "baseDenominadorAnterior": 26449608978.1287,
+    "exercicios": 15
+  },
+  {
+    "ticker": "MDIA3",
+    "estado": "ok",
+    "setor": "consumo-nao-ciclico",
+    "industria": "Alimentos Diversos",
+    "via": "firm",
+    "preco": 17.31,
+    "precoJusto": 9.73,
+    "potencial": -0.43789716926632,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.05551457611143987,
+    "retornoCiclo": 0.07198712535376178,
+    "quedaTrienio": -0.36937234221389303,
+    "lucroAtual": 456213120.0,
+    "lucroAnterior": 547370370.0,
+    "baseDenominador": 8217897928.0,
+    "baseDenominadorAnterior": 7492709114.0,
+    "exercicios": 16
+  },
+  {
+    "ticker": "MDNE3",
+    "estado": "ok",
+    "setor": "construcao-e-imobiliario",
+    "industria": "Incorporações",
+    "via": "firm",
+    "preco": 25.25,
+    "precoJusto": 2.2,
+    "potencial": -0.9128712871287129,
+    "fatorBase": 0.33,
+    "retornoAtual": 0.17943046857439326,
+    "retornoCiclo": 0.0409171905127486,
+    "quedaTrienio": -2.999476474675652,
+    "lucroAtual": 294781100.0,
+    "lucroAnterior": 163646340.0,
+    "baseDenominador": 1642870925.6688,
+    "baseDenominadorAnterior": 1374158986.3217921,
+    "exercicios": 16
+  },
+  {
+    "ticker": "MEAL3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MELK3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "MGEL4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MGLU3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Varejo Especializado",
+    "via": "firm",
+    "preco": 5.75,
+    "precoJusto": 5.54,
+    "potencial": -0.03652173913043478,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.0921884297381534,
+    "retornoCiclo": 0.1122813719357326,
+    "quedaTrienio": -3.1515353761817444,
+    "lucroAtual": 1266330800.0,
+    "lucroAnterior": 1031205100.0,
+    "baseDenominador": 13736331159.96022,
+    "baseDenominadorAnterior": 13592971200.8865,
+    "exercicios": 16
+  },
+  {
+    "ticker": "MILS3",
+    "estado": "ok",
+    "setor": "bens-industriais",
+    "industria": "Máq. e Equip. Industriais",
+    "via": "shareholder",
+    "preco": 15.77,
+    "precoJusto": 2.08,
+    "potencial": -0.8681039949270767,
+    "fatorBase": 0.33,
+    "retornoAtual": 0.20805011277787677,
+    "retornoCiclo": 0.04444881435468005,
+    "quedaTrienio": -0.3918172255324355,
+    "lucroAtual": 301263000.0,
+    "lucroAnterior": 285188000.0,
+    "baseDenominador": 1448030938.20786,
+    "baseDenominadorAnterior": 1461620026.796384,
+    "exercicios": 16
+  },
+  {
+    "ticker": "MLAS3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "MNDL3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MNPR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MOTV3",
+    "estado": "ok",
+    "setor": "infraestrutura",
+    "industria": "Exploração de Rodovias",
+    "via": "firm",
+    "preco": 16.24,
+    "precoJusto": 4.1,
+    "potencial": -0.7475369458128078,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.11651161508768529,
+    "retornoCiclo": 0.10773918813675573,
+    "quedaTrienio": 0.1682461338309379,
+    "lucroAtual": 4797011500.0,
+    "lucroAnterior": 3583066600.0,
+    "baseDenominador": 41171959520.0,
+    "baseDenominadorAnterior": 36554860510.0,
+    "exercicios": 16
+  },
+  {
+    "ticker": "MOVI3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Aluguel de carros",
+    "via": "firm",
+    "preco": 7.76,
+    "precoJusto": 20.89,
+    "potencial": 1.6920103092783507,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.11496743386860195,
+    "retornoCiclo": 0.10382372385680441,
+    "quedaTrienio": 0.427820692084557,
+    "lucroAtual": 2149045200.0,
+    "lucroAnterior": 1729247500.0,
+    "baseDenominador": 18692643017.9887,
+    "baseDenominadorAnterior": 14822830945.753601,
+    "exercicios": 11
+  },
+  {
+    "ticker": "MRVE3",
+    "estado": "recusado",
+    "motivo": "O capital próprio responde por apenas -558.3% do valor da firma de MRVE3, e a via do acionista não se aplica: o preço por papel seria resíduo de uma subtração entre números próximos, e a dívida líquida supera o próprio valor da firma, de modo que não sobra capital próprio a repartir. O ativo não é avaliável por fluxo descontado nesta estrutura de capital."
+  },
+  {
+    "ticker": "MSPA4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MTRE3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MTSA4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MULT3",
+    "estado": "ok",
+    "setor": "construcao-e-imobiliario",
+    "industria": "Exploração de Imóveis",
+    "via": "shareholder",
+    "preco": 29.76,
+    "precoJusto": 6.17,
+    "potencial": -0.7926747311827957,
+    "fatorBase": 0.5229101833791983,
+    "retornoAtual": 0.20213951224965976,
+    "retornoCiclo": 0.10570080941865129,
+    "quedaTrienio": -0.483299655701688,
+    "lucroAtual": 1141233000.0,
+    "lucroAnterior": 1340986000.0,
+    "baseDenominador": 5645769039.9019,
+    "baseDenominadorAnterior": 6933998227.96385,
+    "exercicios": 16
+  },
+  {
+    "ticker": "MWET3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MWET4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "MYPK3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Automóveis e Motocicletas",
+    "via": "shareholder",
+    "preco": 9.68,
+    "precoJusto": 8.45,
+    "potencial": -0.1270661157024794,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.042818927167457006,
+    "retornoCiclo": 0.09246985658652554,
+    "quedaTrienio": 0.46276832635610576,
+    "lucroAtual": 217134000.0,
+    "lucroAnterior": 380084000.0,
+    "baseDenominador": 5070981791.5528,
+    "baseDenominadorAnterior": 4085029042.4604,
+    "exercicios": 16
+  },
+  {
+    "ticker": "NATU3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "NEXP3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "NORD3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "NUTR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "OBTC3",
+    "estado": "recusado",
+    "motivo": "Nenhum exercício de OBTC3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "OFSA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ONCO11",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ONCO3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "OPCT3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "ORVR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "OSXB3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "PASS3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "PATI3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PATI4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PCAR3",
+    "estado": "recusado",
+    "motivo": "Os dados de PCAR3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "PDGR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "PDTC3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PEAB3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PEAB4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PETR3",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Exploração. Refino e Distribuição",
+    "via": "firm",
+    "preco": 53.56,
+    "precoJusto": 34.22,
+    "potencial": -0.3610903659447349,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.13842766438141357,
+    "retornoCiclo": 0.1230171196554729,
+    "quedaTrienio": 0.4148038411682231,
+    "lucroAtual": 96114480000.0,
+    "lucroAnterior": 90552660000.0,
+    "baseDenominador": 694329998483.346,
+    "baseDenominadorAnterior": 610138998826.668,
+    "exercicios": 16
+  },
+  {
+    "ticker": "PETR4",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Petróleo e Gás Integrado",
+    "via": "firm",
+    "preco": 48.48,
+    "precoJusto": 36.04,
+    "potencial": -0.25660066006600657,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.13842766438141357,
+    "retornoCiclo": 0.1230171196554729,
+    "quedaTrienio": 0.4148038411682231,
+    "lucroAtual": 96114480000.0,
+    "lucroAnterior": 90552660000.0,
+    "baseDenominador": 694329998483.346,
+    "baseDenominadorAnterior": 610138998826.668,
+    "exercicios": 16
+  },
+  {
+    "ticker": "PFRM3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PGMN3",
+    "estado": "ok",
+    "setor": "consumo-nao-ciclico",
+    "industria": "Medicamentos e Outros Produtos",
+    "via": "firm",
+    "preco": 3.76,
+    "precoJusto": 3.72,
+    "potencial": -0.010638297872340318,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.14247113055196708,
+    "retornoCiclo": 0.0894894572378234,
+    "quedaTrienio": 0.008055495670217128,
+    "lucroAtual": 568374200.0,
+    "lucroAnterior": 379019520.0,
+    "baseDenominador": 3989399100.0,
+    "baseDenominadorAnterior": 3852622920.0,
+    "exercicios": 16
+  },
+  {
+    "ticker": "PINE3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "PINE4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "shareholder",
+    "preco": 11.3,
+    "precoJusto": 11.22,
+    "potencial": -0.007079646017699121,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.40383538238084166,
+    "retornoCiclo": null,
+    "quedaTrienio": null,
+    "lucroAtual": 432878020.0,
+    "lucroAnterior": null,
+    "baseDenominador": 1071917020.8611621,
+    "baseDenominadorAnterior": 981898991.34426,
+    "exercicios": 16
+  },
+  {
+    "ticker": "PLAS3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "PLPL3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "PMAM3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "PNVL3",
+    "estado": "ok",
+    "setor": "consumo-nao-ciclico",
+    "industria": "Medicamentos e Outros Produtos",
+    "via": "shareholder",
+    "preco": 12.59,
+    "precoJusto": 4.37,
+    "potencial": -0.6528991262907068,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.10091810070600986,
+    "retornoCiclo": 0.0985192655941454,
+    "quedaTrienio": -0.44310614395738024,
+    "lucroAtual": 124605000.0,
+    "lucroAnterior": 105509000.0,
+    "baseDenominador": 1234714081.3023598,
+    "baseDenominadorAnterior": 1173415915.5821462,
+    "exercicios": 16
+  },
+  {
+    "ticker": "POMO3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Material Rodoviário",
+    "via": "firm",
+    "preco": 4.17,
+    "precoJusto": 0.61,
+    "potencial": -0.8537170263788969,
+    "fatorBase": 0.33,
+    "retornoAtual": 0.1699982854390214,
+    "retornoCiclo": 0.048840193384696744,
+    "quedaTrienio": -1.828531134405572,
+    "lucroAtual": 890749200.0,
+    "lucroAnterior": 961997500.0,
+    "baseDenominador": 5239754022.8105,
+    "baseDenominadorAnterior": 4471109084.959999,
+    "exercicios": 16
+  },
+  {
+    "ticker": "POMO4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "firm",
+    "preco": 4.43,
+    "precoJusto": 0.56,
+    "potencial": -0.873589164785553,
+    "fatorBase": 0.33,
+    "retornoAtual": 0.1699982854390214,
+    "retornoCiclo": 0.048840193384696744,
+    "quedaTrienio": -1.828531134405572,
+    "lucroAtual": 890749200.0,
+    "lucroAnterior": 961997500.0,
+    "baseDenominador": 5239754022.8105,
+    "baseDenominadorAnterior": 4471109084.959999,
+    "exercicios": 16
+  },
+  {
+    "ticker": "POSI3",
+    "estado": "ok",
+    "setor": "tecnologia",
+    "industria": "Computadores e Equipamentos",
+    "via": "firm",
+    "preco": 3.41,
+    "precoJusto": 2.94,
+    "potencial": -0.13782991202346045,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.06426769207057204,
+    "retornoCiclo": 0.11170362179719955,
+    "quedaTrienio": 0.9600661972796444,
+    "lucroAtual": 151801310.0,
+    "lucroAnterior": 204276590.0,
+    "baseDenominador": 2362015891.8,
+    "baseDenominadorAnterior": 2390785002.0,
+    "exercicios": 16
+  },
+  {
+    "ticker": "PRIO3",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Exploração e Produção de Petróleo",
+    "via": "shareholder",
+    "preco": 62.57,
+    "precoJusto": 56.09,
+    "potencial": -0.10356400831069197,
+    "fatorBase": 3.0,
+    "retornoAtual": 0.08684856978599881,
+    "retornoCiclo": 0.4703423589478999,
+    "quedaTrienio": 0.3430313106932098,
+    "lucroAtual": 2251479000.0,
+    "lucroAnterior": 10301606000.0,
+    "baseDenominador": 25924192022.364998,
+    "baseDenominadorAnterior": 13878279878.1435,
+    "exercicios": 16
+  },
+  {
+    "ticker": "PRNR3",
+    "estado": "ok",
+    "setor": "servicos",
+    "industria": "Serviços Diversos",
+    "via": "shareholder",
+    "preco": 17.96,
+    "precoJusto": 0.62,
+    "potencial": -0.965478841870824,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.02369660426452341,
+    "retornoCiclo": 0.07905637103935154,
+    "quedaTrienio": 0.8705762774509502,
+    "lucroAtual": 8404000.0,
+    "lucroAnterior": 27817000.0,
+    "baseDenominador": 354649970.358064,
+    "baseDenominadorAnterior": 238703995.2638328,
+    "exercicios": 10
+  },
+  {
+    "ticker": "PSSA3",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Seguradoras",
+    "via": "shareholder",
+    "preco": 50.5,
+    "precoJusto": 29.12,
+    "potencial": -0.42336633663366335,
+    "fatorBase": 0.7284001703344035,
+    "retornoAtual": 0.2420630382108808,
+    "retornoCiclo": 0.1763187582644688,
+    "quedaTrienio": -1.9715418861571306,
+    "lucroAtual": 3424078000.0,
+    "lucroAnterior": 2690782000.0,
+    "baseDenominador": 14145397931.4967,
+    "baseDenominadorAnterior": 12497797748.43105,
+    "exercicios": 16
+  },
+  {
+    "ticker": "PTBL3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "QUAL3",
+    "estado": "ok",
+    "setor": "saude",
+    "industria": "Serv.Méd.Hospit..Análises e Diagnósticos",
+    "via": "firm",
+    "preco": 1.5,
+    "precoJusto": 0.88,
+    "potencial": -0.41333333333333333,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.08067474753117268,
+    "retornoCiclo": 0.16917027398512047,
+    "quedaTrienio": 0.8319931413705434,
+    "lucroAtual": 184783500.0,
+    "lucroAnterior": 122329680.0,
+    "baseDenominador": 2290475094.8070803,
+    "baseDenominadorAnterior": 2535977971.08464,
+    "exercicios": 16
+  },
+  {
+    "ticker": "RADL3",
+    "estado": "ok",
+    "setor": "consumo-nao-ciclico",
+    "industria": "Medicamentos e Outros Produtos",
+    "via": "firm",
+    "preco": 19.8,
+    "precoJusto": 6.55,
+    "potencial": -0.6691919191919191,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.19688298116546477,
+    "retornoCiclo": 0.17548143454671136,
+    "quedaTrienio": -0.2810679745568334,
+    "lucroAtual": 1810754200.0,
+    "lucroAnterior": 1552390000.0,
+    "baseDenominador": 9197108806.87144,
+    "baseDenominadorAnterior": 8746683032.819519,
+    "exercicios": 16
+  },
+  {
+    "ticker": "RAIL3",
+    "estado": "ok",
+    "setor": "bens-industriais",
+    "industria": "Transporte Ferroviário",
+    "via": "shareholder",
+    "preco": 14.42,
+    "precoJusto": 1.57,
+    "potencial": -0.8911234396671289,
+    "fatorBase": 0.5892416468307007,
+    "retornoAtual": 0.05792540521071738,
+    "retornoCiclo": 0.03413206115969876,
+    "quedaTrienio": -0.6830538051947295,
+    "lucroAtual": 865125000.0,
+    "lucroAnterior": -949242000.0,
+    "baseDenominador": 14935156635.554,
+    "baseDenominadorAnterior": 15871054902.800999,
+    "exercicios": 16
+  },
+  {
+    "ticker": "RAIZ4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "RANI3",
+    "estado": "ok",
+    "setor": "materiais",
+    "industria": "Embalagens",
+    "via": "firm",
+    "preco": 7.85,
+    "precoJusto": 6.32,
+    "potencial": -0.19490445859872604,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.12071130739546619,
+    "retornoCiclo": 0.11885617344504704,
+    "quedaTrienio": 0.3600115999054282,
+    "lucroAtual": 295551970.0,
+    "lucroAnterior": 209836430.0,
+    "baseDenominador": 2448419923.3443203,
+    "baseDenominadorAnterior": 2304876081.240464,
+    "exercicios": 16
+  },
+  {
+    "ticker": "RAPT3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "RAPT4",
+    "estado": "recusado",
+    "motivo": "O capital próprio responde por apenas -105.2% do valor da firma de RAPT4, e a via do acionista não se aplica: o preço por papel seria resíduo de uma subtração entre números próximos, e a dívida líquida supera o próprio valor da firma, de modo que não sobra capital próprio a repartir. O ativo não é avaliável por fluxo descontado nesta estrutura de capital."
+  },
+  {
+    "ticker": "RCSL3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "RCSL4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "RDOR3",
+    "estado": "ok",
+    "setor": "saude",
+    "industria": "Serviços Médicos Hospitalares",
+    "via": "firm",
+    "preco": 36.82,
+    "precoJusto": 16.13,
+    "potencial": -0.5619228680065183,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.2422484678935703,
+    "retornoCiclo": 0.1261980402792959,
+    "quedaTrienio": -2.0055175385499275,
+    "lucroAtual": 6524893000.0,
+    "lucroAnterior": 4910683600.0,
+    "baseDenominador": 26934713175.839996,
+    "baseDenominadorAnterior": 26690304594.33,
+    "exercicios": 8
+  },
+  {
+    "ticker": "RECV3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "REDE3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "RENT3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Aluguel de Carros",
+    "via": "shareholder",
+    "preco": 35.89,
+    "precoJusto": 15.2,
+    "potencial": -0.5764837001950405,
+    "fatorBase": 3.0,
+    "retornoAtual": 0.07100521768601502,
+    "retornoCiclo": 0.23594408563646996,
+    "quedaTrienio": -0.015893378636948396,
+    "lucroAtual": 1870470000.0,
+    "lucroAnterior": 1813310000.0,
+    "baseDenominador": 26342712000.0,
+    "baseDenominadorAnterior": 25397816000.0,
+    "exercicios": 16
+  },
+  {
+    "ticker": "RENT4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "shareholder",
+    "preco": 35.19,
+    "precoJusto": 13.75,
+    "potencial": -0.6092639954532537,
+    "fatorBase": 3.0,
+    "retornoAtual": 0.07100521768601502,
+    "retornoCiclo": 0.23594408563646996,
+    "quedaTrienio": -0.015893378636948396,
+    "lucroAtual": 1870470000.0,
+    "lucroAnterior": 1813310000.0,
+    "baseDenominador": 26342712000.0,
+    "baseDenominadorAnterior": 25397816000.0,
+    "exercicios": 16
+  },
+  {
+    "ticker": "RIAA3",
+    "estado": "ok",
+    "setor": "textil-e-vestuario",
+    "industria": "Têxtil e Vestuário",
+    "via": "firm",
+    "preco": 7.13,
+    "precoJusto": 5.38,
+    "potencial": -0.24544179523141654,
+    "fatorBase": 0.33,
+    "retornoAtual": 0.26565132950464565,
+    "retornoCiclo": 0.06366279703707721,
+    "quedaTrienio": -7.645135810739951,
+    "lucroAtual": 1567980400.0,
+    "lucroAnterior": 502811100.0,
+    "baseDenominador": 5902399972.639999,
+    "baseDenominadorAnterior": 6288650798.639999,
+    "exercicios": 16
+  },
+  {
+    "ticker": "RNEW3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "RNEW4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "ROMI3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "RPAD3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "RSUL4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "RVEE3",
+    "estado": "recusado",
+    "motivo": "Nenhum exercício de RVEE3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "SANB11",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Bancos",
+    "via": "shareholder",
+    "preco": 29.8,
+    "precoJusto": 19.62,
+    "potencial": -0.3416107382550335,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.10819855821684614,
+    "retornoCiclo": 0.13531061199190192,
+    "quedaTrienio": 0.09584395523546019,
+    "lucroAtual": 12965123000.0,
+    "lucroAnterior": 13413763000.0,
+    "baseDenominador": 119827132761.011,
+    "baseDenominadorAnterior": 114856349062.58,
+    "exercicios": 16
+  },
+  {
+    "ticker": "SANB3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "SANB4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "shareholder",
+    "preco": 14.85,
+    "precoJusto": 10.25,
+    "potencial": -0.30976430976430974,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.10819855821684614,
+    "retornoCiclo": 0.13531061199190192,
+    "quedaTrienio": 0.09584395523546019,
+    "lucroAtual": 12965123000.0,
+    "lucroAnterior": 13413763000.0,
+    "baseDenominador": 119827132761.011,
+    "baseDenominadorAnterior": 114856349062.58,
+    "exercicios": 16
+  },
+  {
+    "ticker": "SAPR11",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "firm",
+    "preco": 35.15,
+    "precoJusto": 57.86,
+    "potencial": 0.6460881934566146,
+    "fatorBase": 1.206730489981894,
+    "retornoAtual": 0.0985200740166798,
+    "retornoCiclo": 0.11888717719120047,
+    "quedaTrienio": -0.6570771213472404,
+    "lucroAtual": 1542753900.0,
+    "lucroAnterior": 1568564600.0,
+    "baseDenominador": 15659284824.9262,
+    "baseDenominadorAnterior": 14236701718.44585,
+    "exercicios": 16
+  },
+  {
+    "ticker": "SAPR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "SAPR4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "firm",
+    "preco": 6.87,
+    "precoJusto": 11.72,
+    "potencial": 0.7059679767103348,
+    "fatorBase": 1.206730489981894,
+    "retornoAtual": 0.0985200740166798,
+    "retornoCiclo": 0.11888717719120047,
+    "quedaTrienio": -0.6570771213472404,
+    "lucroAtual": 1542753900.0,
+    "lucroAnterior": 1568564600.0,
+    "baseDenominador": 15659284824.9262,
+    "baseDenominadorAnterior": 14236701718.44585,
+    "exercicios": 16
+  },
+  {
+    "ticker": "SAUD3",
+    "estado": "ok",
+    "setor": "servicos-medicos",
+    "industria": "Serviços Médicos",
+    "via": "firm",
+    "preco": 14.69,
+    "precoJusto": 1.28,
+    "potencial": -0.9128658951667802,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.5974897777873098,
+    "retornoCiclo": 0.4965884133812725,
+    "quedaTrienio": -0.29062324835331355,
+    "lucroAtual": 510203100.0,
+    "lucroAnterior": 453573800.0,
+    "baseDenominador": 853911010.6443,
+    "baseDenominadorAnterior": 1015650001.6691899,
+    "exercicios": 16
+  },
+  {
+    "ticker": "SBFG3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Produtos Diversos",
+    "via": "shareholder",
+    "preco": 8.77,
+    "precoJusto": 5.95,
+    "potencial": -0.3215507411630558,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.10887533578708261,
+    "retornoCiclo": 0.09197104383815563,
+    "quedaTrienio": -0.6029656601597246,
+    "lucroAtual": 327969980.0,
+    "lucroAnterior": 535833980.0,
+    "baseDenominador": 3012344142.3076797,
+    "baseDenominadorAnterior": 2541600782.26993,
+    "exercicios": 7
+  },
+  {
+    "ticker": "SBSP3",
+    "estado": "ok",
+    "setor": "saneamento",
+    "industria": "Água e Saneamento",
+    "via": "firm",
+    "preco": 26.65,
+    "precoJusto": 3.3,
+    "potencial": -0.8761726078799249,
+    "fatorBase": 0.6828424928485592,
+    "retornoAtual": 0.14639360620333253,
+    "retornoCiclo": 0.0999637749969739,
+    "quedaTrienio": -1.7110974485681614,
+    "lucroAtual": 8315750000.0,
+    "lucroAnterior": 10236903000.0,
+    "baseDenominador": 56804051868.5624,
+    "baseDenominadorAnterior": 29675294277.3863,
+    "exercicios": 11
+  },
+  {
+    "ticker": "SCAR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "SEER3",
+    "estado": "ok",
+    "setor": "educacao",
+    "industria": "Serviços Educacionais",
+    "via": "firm",
+    "preco": 13.62,
+    "precoJusto": 11.18,
+    "potencial": -0.1791483113069016,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.16285517305624497,
+    "retornoCiclo": 0.12984019962890953,
+    "quedaTrienio": null,
+    "lucroAtual": 293476260.0,
+    "lucroAnterior": 157693140.0,
+    "baseDenominador": 1802069007.03512,
+    "baseDenominadorAnterior": 1771191075.994,
+    "exercicios": 16
+  },
+  {
+    "ticker": "SEQL3",
+    "estado": "recusado",
+    "motivo": "Nenhum exercício de SEQL3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "SHOW3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "SHUL4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "firm",
+    "preco": 4.45,
+    "precoJusto": 3.96,
+    "potencial": -0.11011235955056184,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.11517242105105972,
+    "retornoCiclo": 0.13372595176270619,
+    "quedaTrienio": 0.13856996973383184,
+    "lucroAtual": 157264140.0,
+    "lucroAnterior": 191578190.0,
+    "baseDenominador": 1365466997.7830858,
+    "baseDenominadorAnterior": 1145616974.090046,
+    "exercicios": 16
+  },
+  {
+    "ticker": "SIMH3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "SLCE3",
+    "estado": "ok",
+    "setor": "consumo-nao-ciclico",
+    "industria": "Agricultura",
+    "via": "firm",
+    "preco": 17.81,
+    "precoJusto": 14.55,
+    "potencial": -0.18304323413812454,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.15489062913613932,
+    "retornoCiclo": 0.12733684041451684,
+    "quedaTrienio": 0.5771683649614396,
+    "lucroAtual": 1196277800.0,
+    "lucroAnterior": 998678340.0,
+    "baseDenominador": 7723371043.63199,
+    "baseDenominadorAnterior": 8021541807.3566,
+    "exercicios": 16
+  },
+  {
+    "ticker": "SMFT3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Atividades Esportivas",
+    "via": "shareholder",
+    "preco": 17.6,
+    "precoJusto": 5.19,
+    "potencial": -0.7051136363636363,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.11706140118245548,
+    "retornoCiclo": -0.022785109271960743,
+    "quedaTrienio": -12.017474455194863,
+    "lucroAtual": 640534000.0,
+    "lucroAnterior": 440576000.0,
+    "baseDenominador": 5471778003.080999,
+    "baseDenominadorAnterior": 5095633900.142099,
+    "exercicios": 10
+  },
+  {
+    "ticker": "SMTO3",
+    "estado": "ok",
+    "setor": "consumo-nao-ciclico",
+    "industria": "Açúcar e Álcool",
+    "via": "firm",
+    "preco": 20.22,
+    "precoJusto": 20.83,
+    "potencial": 0.03016815034619186,
+    "fatorBase": 1.9838633353053838,
+    "retornoAtual": 0.06332919243212846,
+    "retornoCiclo": 0.12563646292059885,
+    "quedaTrienio": 0.17678371715707897,
+    "lucroAtual": 920568640.0,
+    "lucroAnterior": 1001485950.0,
+    "baseDenominador": 14536244734.0,
+    "baseDenominadorAnterior": 13123171110.08762,
+    "exercicios": 16
+  },
+  {
+    "ticker": "SNSY5",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+  },
+  {
+    "ticker": "SOJA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "SOND5",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "SOND6",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "SUZB3",
+    "estado": "ok",
+    "setor": "materiais-basicos",
+    "industria": "Papel e Celulose",
+    "via": "firm",
+    "preco": 47.11,
+    "precoJusto": 31.04,
+    "potencial": -0.341116535767353,
+    "fatorBase": 1.6537526055603498,
+    "retornoAtual": 0.06283121609918509,
+    "retornoCiclo": 0.10390728733455273,
+    "quedaTrienio": 0.42561439063097883,
+    "lucroAtual": 7028346000.0,
+    "lucroAnterior": 10356121000.0,
+    "baseDenominador": 111860734780.38501,
+    "baseDenominadorAnterior": 100813237802.713,
+    "exercicios": 16
+  },
+  {
+    "ticker": "SYNE3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TAEE11",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Energia Elétrica",
+    "via": "firm",
+    "preco": 41.11,
+    "precoJusto": 14.24,
+    "potencial": -0.6536122597908051,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.11295361416510487,
+    "retornoCiclo": 0.12415261434439905,
+    "quedaTrienio": -0.0901508747839348,
+    "lucroAtual": 1805946800.0,
+    "lucroAnterior": 1889819500.0,
+    "baseDenominador": 15988393229.810589,
+    "baseDenominadorAnterior": 15075829067.121891,
+    "exercicios": 16
+  },
+  {
+    "ticker": "TAEE3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TAEE4",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "firm",
+    "preco": 13.83,
+    "precoJusto": 5.06,
+    "potencial": -0.6341287057122198,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.11295361416510487,
+    "retornoCiclo": 0.12415261434439905,
+    "quedaTrienio": -0.0901508747839348,
+    "lucroAtual": 1805946800.0,
+    "lucroAnterior": 1889819500.0,
+    "baseDenominador": 15988393229.810589,
+    "baseDenominadorAnterior": 15075829067.121891,
+    "exercicios": 16
+  },
+  {
+    "ticker": "TASA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TASA4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TCSA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TECN3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TELB3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TELB4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TEND3",
+    "estado": "ok",
+    "setor": "construcao-e-imobiliario",
+    "industria": "Incorporações",
+    "via": "firm",
+    "preco": 33.06,
+    "precoJusto": 4.23,
+    "potencial": -0.8720508166969146,
+    "fatorBase": 0.42925285428539556,
+    "retornoAtual": 0.2593311322610214,
+    "retornoCiclo": 0.11131862872810686,
+    "quedaTrienio": null,
+    "lucroAtual": 342341980.0,
+    "lucroAnterior": 194784480.0,
+    "baseDenominador": 1320095960.0,
+    "baseDenominadorAnterior": 1390591030.0,
+    "exercicios": 17
+  },
+  {
+    "ticker": "TFCO4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "TGMA3",
+    "estado": "ok",
+    "setor": "bens-industriais",
+    "industria": "Transporte Rodoviário",
+    "via": "firm",
+    "preco": 33.78,
+    "precoJusto": 14.89,
+    "potencial": -0.559206631142688,
+    "fatorBase": 0.7445817292257043,
+    "retornoAtual": 0.25169945942156574,
+    "retornoCiclo": 0.1874108187412844,
+    "quedaTrienio": -0.5217144127668103,
+    "lucroAtual": 215743440.0,
+    "lucroAnterior": 243337380.0,
+    "baseDenominador": 857147013.727416,
+    "baseDenominadorAnterior": 776274972.4454241,
+    "exercicios": 16
+  },
+  {
+    "ticker": "TIMS3",
+    "estado": "recusado",
+    "motivo": "Os dados de TIMS3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "TOKY3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "TOTS3",
+    "estado": "ok",
+    "setor": "tecnologia",
+    "industria": "Programas e Serviços",
+    "via": "firm",
+    "preco": 33.69,
+    "precoJusto": 7.63,
+    "potencial": -0.7735233006826951,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.15744164997137158,
+    "retornoCiclo": 0.14868121364945655,
+    "quedaTrienio": -0.7594883250748614,
+    "lucroAtual": 741000450.0,
+    "lucroAnterior": 578997570.0,
+    "baseDenominador": 4706508412.0672,
+    "baseDenominadorAnterior": 3627575970.8140097,
+    "exercicios": 15
+  },
+  {
+    "ticker": "TPIS3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TRIS3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "TTEN3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "TUPY3",
+    "estado": "recusado",
+    "motivo": "Nenhum exercício de TUPY3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+  },
+  {
+    "ticker": "UCAS3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "UGPA3",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Exploração, Refino e Distribuição",
+    "via": "shareholder",
+    "preco": 37.75,
+    "precoJusto": 13.11,
+    "potencial": -0.6527152317880794,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.16064189338062743,
+    "retornoCiclo": 0.1461217045440666,
+    "quedaTrienio": -0.3814199358828392,
+    "lucroAtual": 2541908000.0,
+    "lucroAnterior": 2525900000.0,
+    "baseDenominador": 15823443975.3344,
+    "baseDenominadorAnterior": 14029825213.240599,
+    "exercicios": 16
+  },
+  {
+    "ticker": "UNIP3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "UNIP5",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "UNIP6",
+    "estado": "ok",
+    "setor": "",
+    "industria": null,
+    "via": "firm",
+    "preco": 56.68,
+    "precoJusto": 14.02,
+    "potencial": -0.7526464361326746,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.14764836333656503,
+    "retornoCiclo": 0.2886212798020014,
+    "quedaTrienio": 0.6389545702887576,
+    "lucroAtual": 523727800.0,
+    "lucroAnterior": 412512540.0,
+    "baseDenominador": 3547129058.2893925,
+    "baseDenominadorAnterior": 2371197962.9769917,
+    "exercicios": 16
+  },
+  {
+    "ticker": "USIM3",
+    "estado": "recusado",
+    "motivo": "Os dados de USIM3 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "USIM5",
+    "estado": "recusado",
+    "motivo": "Os dados de USIM5 não sustentam nenhuma das duas vias de avaliação."
+  },
+  {
+    "ticker": "USIM6",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "VALE3",
+    "estado": "ok",
+    "setor": "materiais-basicos",
+    "industria": "Mineração de Minerais Metálicos",
+    "via": "firm",
+    "preco": 78.82,
+    "precoJusto": 62.63,
+    "potencial": -0.20540471961431098,
+    "fatorBase": 2.1795621917032193,
+    "retornoAtual": 0.07569884991304378,
+    "retornoCiclo": 0.16499035122588676,
+    "quedaTrienio": 0.8773991301369152,
+    "lucroAtual": 21099540000.0,
+    "lucroAnterior": 36602940000.0,
+    "baseDenominador": 278729994236.865,
+    "baseDenominadorAnterior": 248005006487.05502,
+    "exercicios": 16
+  },
+  {
+    "ticker": "VAMO3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Aluguel de Carros",
+    "via": "shareholder",
+    "preco": 3.4,
+    "precoJusto": 1.16,
+    "potencial": -0.6588235294117648,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.1345830516993802,
+    "retornoCiclo": 0.25325072643542546,
+    "quedaTrienio": 0.5083940122250157,
+    "lucroAtual": 328702020.0,
+    "lucroAnterior": 380974020.0,
+    "baseDenominador": 2442373061.4626403,
+    "baseDenominadorAnterior": 4735295073.652679,
+    "exercicios": 7
+  },
+  {
+    "ticker": "VBBR3",
+    "estado": "ok",
+    "setor": "energia",
+    "industria": "Exploração, Refino e Distribuição",
+    "via": "shareholder",
+    "preco": 37.29,
+    "precoJusto": 36.09,
+    "potencial": -0.0321802091713595,
+    "fatorBase": 3.0,
+    "retornoAtual": 0.09708118964933035,
+    "retornoCiclo": 0.29501981523402354,
+    "quedaTrienio": -0.2875733433684673,
+    "lucroAtual": 1979000100.0,
+    "lucroAnterior": 6367000000.0,
+    "baseDenominador": 20385000504.715702,
+    "baseDenominadorAnterior": 15730999639.8086,
+    "exercicios": 10
+  },
+  {
+    "ticker": "VITT3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "VIVA3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "VIVR3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "VIVT3",
+    "estado": "ok",
+    "setor": "telecomunicacoes",
+    "industria": "Telecomunicações",
+    "via": "firm",
+    "preco": 30.05,
+    "precoJusto": 7.55,
+    "potencial": -0.7487520798668885,
+    "fatorBase": 0.785077868563293,
+    "retornoAtual": 0.07759978091974606,
+    "retornoCiclo": 0.06092187060545273,
+    "quedaTrienio": -0.5223489872352758,
+    "lucroAtual": 6507123700.0,
+    "lucroAnterior": 5724518000.0,
+    "baseDenominador": 83854923594.819,
+    "baseDenominadorAnterior": 84005123498.72879,
+    "exercicios": 16
+  },
+  {
+    "ticker": "VLID3",
+    "estado": "ok",
+    "setor": "servicos",
+    "industria": "Serviços Diversos",
+    "via": "firm",
+    "preco": 17.78,
+    "precoJusto": 8.54,
+    "potencial": -0.5196850393700788,
+    "fatorBase": 0.557890046445415,
+    "retornoAtual": 0.10886717522706271,
+    "retornoCiclo": 0.06073591344380714,
+    "quedaTrienio": -0.3758222507112152,
+    "lucroAtual": 196582980.0,
+    "lucroAnterior": 315617950.0,
+    "baseDenominador": 1805713977.514248,
+    "baseDenominadorAnterior": 1603051981.088448,
+    "exercicios": 16
+  },
+  {
+    "ticker": "VSTE3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "VTRU3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "VULC3",
+    "estado": "ok",
+    "setor": "consumo-ciclico",
+    "industria": "Calçados",
+    "via": "firm",
+    "preco": 13.02,
+    "precoJusto": 9.66,
+    "potencial": -0.2580645161290322,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.232301824606314,
+    "retornoCiclo": 0.18104813429164612,
+    "quedaTrienio": -0.9929525866441822,
+    "lucroAtual": 497016960.0,
+    "lucroAnterior": 383122750.0,
+    "baseDenominador": 2139531021.0856218,
+    "baseDenominadorAnterior": 2072022943.7313976,
+    "exercicios": 16
+  },
+  {
+    "ticker": "VVEO3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "WDCN3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "WEGE3",
+    "estado": "ok",
+    "setor": "bens-industriais",
+    "industria": "Máquinas e Equipamentos",
+    "via": "firm",
+    "preco": 51.64,
+    "precoJusto": 12.9,
+    "potencial": -0.7501936483346243,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.2819409460486005,
+    "retornoCiclo": 0.2512621074394133,
+    "quedaTrienio": -0.5858087955829241,
+    "lucroAtual": 5279169000.0,
+    "lucroAnterior": 5075748400.0,
+    "baseDenominador": 18724378540.9232,
+    "baseDenominadorAnterior": 13608612025.449402,
+    "exercicios": 16
+  },
+  {
+    "ticker": "WEST3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; histórico curto demais para os testes das guardas."
+  },
+  {
+    "ticker": "WHRL3",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "WHRL4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "WIZC3",
+    "estado": "ok",
+    "setor": "servicos-financeiros",
+    "industria": "Corretoras de Seguros e Resseguros",
+    "via": "shareholder",
+    "preco": 7.87,
+    "precoJusto": 14.53,
+    "potencial": 0.846251588310038,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.3177070631143661,
+    "retornoCiclo": 0.8524883299198424,
+    "quedaTrienio": -0.7255280150164243,
+    "lucroAtual": 367710020.0,
+    "lucroAnterior": 296766020.0,
+    "baseDenominador": 1157386985.34264,
+    "baseDenominadorAnterior": 1155578961.6998641,
+    "exercicios": 12
+  },
+  {
+    "ticker": "WLMM4",
+    "estado": "recusado",
+    "motivo": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+  },
+  {
+    "ticker": "YDUQ3",
+    "estado": "ok",
+    "setor": "educacao",
+    "industria": "Serviços Educacionais",
+    "via": "shareholder",
+    "preco": 10.12,
+    "precoJusto": 2.56,
+    "potencial": -0.7470355731225296,
+    "fatorBase": 1.0,
+    "retornoAtual": 0.05740022223738709,
+    "retornoCiclo": 0.08192906171693146,
+    "quedaTrienio": -1.758228284794781,
+    "lucroAtual": 180176990.0,
+    "lucroAnterior": 341208000.0,
+    "baseDenominador": 3138959798.0100403,
+    "baseDenominadorAnterior": 3057085096.8261,
+    "exercicios": 16
+  }
+]

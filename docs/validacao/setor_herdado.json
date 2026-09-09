@@ -1,0 +1,1178 @@
+[
+  {
+    "ticker": "ABCB10",
+    "on": "ABCB3",
+    "setorHerdado": "",
+    "industriaHerdada": null,
+    "antes": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 25.0,
+      "potencial": -0.007542675664946458,
+      "fator": 1.0
+    },
+    "depois": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 25.0,
+      "potencial": -0.007542675664946458,
+      "fator": 1.0
+    }
+  },
+  {
+    "ticker": "ALPA4",
+    "on": "ALPA3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Calçados",
+    "antes": {
+      "via": "DCF por fluxo da firma",
+      "justo": 2.05,
+      "potencial": -0.8469006721433906,
+      "fator": 1.0
+    },
+    "depois": {
+      "via": "DCF por fluxo da firma",
+      "justo": 2.05,
+      "potencial": -0.8469006721433906,
+      "fator": 1.0
+    }
+  },
+  {
+    "ticker": "ALUP11",
+    "on": "ALUP3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "via": "DCF por fluxo da firma",
+      "justo": 24.55,
+      "potencial": -0.265409934171155,
+      "fator": 1.0
+    },
+    "depois": {
+      "via": "DCF por fluxo da firma",
+      "justo": 24.55,
+      "potencial": -0.265409934171155,
+      "fator": 1.0
+    }
+  },
+  {
+    "ticker": "ALUP4",
+    "on": "ALUP3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "AXIA7",
+    "on": "AXIA73",
+    "setorHerdado": null,
+    "industriaHerdada": null,
+    "antes": {
+      "recusa": "Nenhum exercício de AXIA7 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    },
+    "depois": {
+      "recusa": "Nenhum exercício de AXIA7 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    }
+  },
+  {
+    "ticker": "AZEV4",
+    "on": "AZEV3",
+    "setorHerdado": "construcao-e-imobiliario",
+    "industriaHerdada": "Construção Pesada",
+    "antes": {
+      "recusa": "Os dados de AZEV4 não sustentam nenhuma das duas vias de avaliação."
+    },
+    "depois": {
+      "recusa": "Os dados de AZEV4 não sustentam nenhuma das duas vias de avaliação."
+    }
+  },
+  {
+    "ticker": "AZTE3",
+    "on": "AZTE3",
+    "setorHerdado": "",
+    "industriaHerdada": null,
+    "antes": {
+      "recusa": "Nenhum exercício de AZTE3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    },
+    "depois": {
+      "recusa": "Nenhum exercício de AZTE3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    }
+  },
+  {
+    "ticker": "AZUL3",
+    "on": "AZUL3",
+    "setorHerdado": "",
+    "industriaHerdada": null,
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: patrimônio líquido não positivo em exercícios consecutivos."
+    }
+  },
+  {
+    "ticker": "B1003",
+    "on": "B1003",
+    "setorHerdado": "",
+    "industriaHerdada": null,
+    "antes": {
+      "recusa": "Nenhum exercício de B1003 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    },
+    "depois": {
+      "recusa": "Nenhum exercício de B1003 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    }
+  },
+  {
+    "ticker": "BALM4",
+    "on": "BALM3",
+    "setorHerdado": "bens-industriais",
+    "industriaHerdada": "Equipamentos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "BAUH4",
+    "on": "BAUH3",
+    "setorHerdado": "consumo-nao-ciclico",
+    "industriaHerdada": "Carnes e Derivados",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "BDLL4",
+    "on": "BDLL3",
+    "setorHerdado": "bens-industriais",
+    "industriaHerdada": "Máq. e Equip. Industriais",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    }
+  },
+  {
+    "ticker": "BEES4",
+    "on": "BEES3",
+    "setorHerdado": "servicos-financeiros",
+    "industriaHerdada": "Bancos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "BGIP4",
+    "on": "BGIP3",
+    "setorHerdado": "servicos-financeiros",
+    "industriaHerdada": "Bancos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "BMEB4",
+    "on": "BMEB3",
+    "setorHerdado": "servicos-financeiros",
+    "industriaHerdada": "Bancos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "BMIN4",
+    "on": "BMIN3",
+    "setorHerdado": "servicos-financeiros",
+    "industriaHerdada": "Bancos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "BOBR4",
+    "on": "BOBR3",
+    "setorHerdado": "consumo-nao-ciclico",
+    "industriaHerdada": "Produtos de Limpeza",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    }
+  },
+  {
+    "ticker": "BPAC5",
+    "on": "BPAC3",
+    "setorHerdado": "servicos-financeiros",
+    "industriaHerdada": "Bancos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "BRAP4",
+    "on": "BRAP3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Minerais Metálicos",
+    "antes": {
+      "via": "DCF por fluxo da firma",
+      "justo": 4.63,
+      "potencial": -0.7959453503746144,
+      "fator": 1.0
+    },
+    "depois": {
+      "via": "DCF por fluxo da firma",
+      "justo": 13.8,
+      "potencial": -0.39180255619215515,
+      "fator": 3.0
+    }
+  },
+  {
+    "ticker": "BRKM6",
+    "on": "BRKM3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Petroquímicos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    }
+  },
+  {
+    "ticker": "BRSR5",
+    "on": "BRSR3",
+    "setorHerdado": "servicos-financeiros",
+    "industriaHerdada": "Bancos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "BRSR6",
+    "on": "BRSR3",
+    "setorHerdado": "servicos-financeiros",
+    "industriaHerdada": "Bancos",
+    "antes": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 13.88,
+      "potencial": -0.07404936624416274,
+      "fator": 0.5631257107194007
+    },
+    "depois": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 13.88,
+      "potencial": -0.07404936624416274,
+      "fator": 0.5631257107194007
+    }
+  },
+  {
+    "ticker": "BSLI4",
+    "on": "BSLI3",
+    "setorHerdado": "servicos-financeiros",
+    "industriaHerdada": "Bancos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "CEBR5",
+    "on": "CEBR3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "CEBR6",
+    "on": "CEBR3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "CEDO4",
+    "on": "CEDO3",
+    "setorHerdado": "outros",
+    "industriaHerdada": "Fios e Tecidos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "CGAS5",
+    "on": "CGAS3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Gás",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "CGRA4",
+    "on": "CGRA3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Tecidos. Vestuário e Calçados",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "CLSC4",
+    "on": "CLSC3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "COCE5",
+    "on": "COCE3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "CRPG5",
+    "on": "CRPG3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Químicos Diversos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "CRPG6",
+    "on": "CRPG3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Químicos Diversos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "CTAX3",
+    "on": "CTAX3",
+    "setorHerdado": "",
+    "industriaHerdada": null,
+    "antes": {
+      "recusa": "Nenhum exercício de CTAX3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    },
+    "depois": {
+      "recusa": "Nenhum exercício de CTAX3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    }
+  },
+  {
+    "ticker": "CTKA4",
+    "on": "CTKA3",
+    "setorHerdado": "outros",
+    "industriaHerdada": "Fios e Tecidos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "CYRE4",
+    "on": "CYRE3",
+    "setorHerdado": "construcao-e-imobiliario",
+    "industriaHerdada": "Incorporações",
+    "antes": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 12.51,
+      "potencial": -0.4730412805391744,
+      "fator": 0.5602836173612028
+    },
+    "depois": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 12.51,
+      "potencial": -0.4730412805391744,
+      "fator": 0.5602836173612028
+    }
+  },
+  {
+    "ticker": "DEXP4",
+    "on": "DEXP3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Petroquímicos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "DOHL4",
+    "on": "DOHL3",
+    "setorHerdado": "outros",
+    "industriaHerdada": "Fios e Tecidos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "EALT4",
+    "on": "EALT3",
+    "setorHerdado": "bens-industriais",
+    "industriaHerdada": "Máq. e Equip. Industriais",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "EKTR4",
+    "on": "EKTR3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "EMAE4",
+    "on": "EMAE3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "ENGI4",
+    "on": "ENGI3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "ENMT4",
+    "on": "ENMT3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "EQPA5",
+    "on": "EQPA3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "ESTR4",
+    "on": "ESTR3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Brinquedos e Jogos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    }
+  },
+  {
+    "ticker": "EUCA4",
+    "on": "EUCA3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Madeira",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "FASA3",
+    "on": "FASA3",
+    "setorHerdado": "",
+    "industriaHerdada": null,
+    "antes": {
+      "recusa": "Nenhum exercício de FASA3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    },
+    "depois": {
+      "recusa": "Nenhum exercício de FASA3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    }
+  },
+  {
+    "ticker": "FESA4",
+    "on": "FESA3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Siderurgia",
+    "antes": {
+      "via": "DCF por fluxo da firma",
+      "justo": 2.28,
+      "potencial": -0.6082474226804124,
+      "fator": 1.0
+    },
+    "depois": {
+      "via": "DCF por fluxo da firma",
+      "justo": 3.2,
+      "potencial": -0.45017182130584193,
+      "fator": 3.0
+    }
+  },
+  {
+    "ticker": "GEPA4",
+    "on": "GEPA3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "HAGA4",
+    "on": "HAGA3",
+    "setorHerdado": "construcao-e-imobiliario",
+    "industriaHerdada": "Produtos para Construção",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    }
+  },
+  {
+    "ticker": "HETA4",
+    "on": "HETA3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Utensílios Domésticos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    }
+  },
+  {
+    "ticker": "HOOT4",
+    "on": "HOOT3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Hotelaria",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    }
+  },
+  {
+    "ticker": "IGTI4",
+    "on": "IGTI3",
+    "setorHerdado": "construcao-e-imobiliario",
+    "industriaHerdada": "Exploração de Imóveis",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "INEP4",
+    "on": "INEP3",
+    "setorHerdado": "bens-industriais",
+    "industriaHerdada": "Máq. e Equip. Industriais",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    }
+  },
+  {
+    "ticker": "ITSA4",
+    "on": "ITSA3",
+    "setorHerdado": "holdings",
+    "industriaHerdada": "Holdings Diversificadas",
+    "antes": {
+      "via": "DCF por fluxo da firma",
+      "justo": 6.11,
+      "potencial": -0.5641940085592011,
+      "fator": 1.0
+    },
+    "depois": {
+      "via": "DCF por fluxo da firma",
+      "justo": 6.11,
+      "potencial": -0.5641940085592011,
+      "fator": 1.0
+    }
+  },
+  {
+    "ticker": "JOPA4",
+    "on": "JOPA3",
+    "setorHerdado": "consumo-nao-ciclico",
+    "industriaHerdada": "Alimentos Diversos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "KLBN4",
+    "on": "KLBN3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Papel e Celulose",
+    "antes": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 1.29,
+      "potencial": -0.6658031088082902,
+      "fator": 0.6650531930342816
+    },
+    "depois": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 1.29,
+      "potencial": -0.6658031088082902,
+      "fator": 0.6650531930342816
+    }
+  },
+  {
+    "ticker": "LUXM4",
+    "on": "LUXM3",
+    "setorHerdado": "bens-industriais",
+    "industriaHerdada": "Transporte Hidroviário",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "MGEL4",
+    "on": "MGEL3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Artefatos de Ferro e Aço",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "MSPA4",
+    "on": "MSPA3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Papel e Celulose",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "MTSA4",
+    "on": "MTSA3",
+    "setorHerdado": "bens-industriais",
+    "industriaHerdada": "Máq. e Equip. Construção e Agrícolas",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "MWET4",
+    "on": "MWET3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Material Rodoviário",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "OBTC3",
+    "on": "OBTC3",
+    "setorHerdado": "",
+    "industriaHerdada": null,
+    "antes": {
+      "recusa": "Nenhum exercício de OBTC3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    },
+    "depois": {
+      "recusa": "Nenhum exercício de OBTC3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    }
+  },
+  {
+    "ticker": "ONCO11",
+    "on": "ONCO3",
+    "setorHerdado": "saude",
+    "industriaHerdada": "Serv.Méd.Hospit..Análises e Diagnósticos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: histórico curto demais para os testes das guardas."
+    }
+  },
+  {
+    "ticker": "PATI4",
+    "on": "PATI3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Artefatos de Ferro e Aço",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "PEAB4",
+    "on": "PEAB3",
+    "setorHerdado": "construcao-e-imobiliario",
+    "industriaHerdada": "Exploração de Imóveis",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "PINE4",
+    "on": "PINE3",
+    "setorHerdado": "servicos-financeiros",
+    "industriaHerdada": "Bancos",
+    "antes": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 11.22,
+      "potencial": -0.007079646017699121,
+      "fator": 1.0
+    },
+    "depois": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 11.22,
+      "potencial": -0.007079646017699121,
+      "fator": 1.0
+    }
+  },
+  {
+    "ticker": "POMO4",
+    "on": "POMO3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Material Rodoviário",
+    "antes": {
+      "via": "DCF por fluxo da firma",
+      "justo": 0.56,
+      "potencial": -0.873589164785553,
+      "fator": 0.33
+    },
+    "depois": {
+      "via": "DCF por fluxo da firma",
+      "justo": 0.56,
+      "potencial": -0.873589164785553,
+      "fator": 0.33
+    }
+  },
+  {
+    "ticker": "RAPT4",
+    "on": "RAPT3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Material Rodoviário",
+    "antes": {
+      "recusa": "O capital próprio responde por apenas -105.1% do valor da firma de RAPT4, e a via do acionista não se aplica: o preço por papel seria resíduo de uma subtração entre números próximos, e a dívida líquida supera o próprio valor da firma, de modo que não sobra capital próprio a repartir. O ativo não é avaliável por fluxo descontado nesta estrutura de capital."
+    },
+    "depois": {
+      "recusa": "O capital próprio responde por apenas -105.1% do valor da firma de RAPT4, e a via do acionista não se aplica: o preço por papel seria resíduo de uma subtração entre números próximos, e a dívida líquida supera o próprio valor da firma, de modo que não sobra capital próprio a repartir. O ativo não é avaliável por fluxo descontado nesta estrutura de capital."
+    }
+  },
+  {
+    "ticker": "RCSL4",
+    "on": "RCSL3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Material Rodoviário",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    }
+  },
+  {
+    "ticker": "RENT4",
+    "on": "RENT3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Aluguel de Carros",
+    "antes": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 13.75,
+      "potencial": -0.6092639954532537,
+      "fator": 3.0
+    },
+    "depois": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 13.75,
+      "potencial": -0.6092639954532537,
+      "fator": 3.0
+    }
+  },
+  {
+    "ticker": "RNEW4",
+    "on": "RNEW3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "RSUL4",
+    "on": "RSUL3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Material Rodoviário",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "RVEE3",
+    "on": "RVEE3",
+    "setorHerdado": "",
+    "industriaHerdada": null,
+    "antes": {
+      "recusa": "Nenhum exercício de RVEE3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    },
+    "depois": {
+      "recusa": "Nenhum exercício de RVEE3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    }
+  },
+  {
+    "ticker": "SANB4",
+    "on": "SANB3",
+    "setorHerdado": "servicos-financeiros",
+    "industriaHerdada": "Bancos",
+    "antes": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 10.25,
+      "potencial": -0.30976430976430974,
+      "fator": 1.0
+    },
+    "depois": {
+      "via": "DCF sobre lucro distribuível",
+      "justo": 10.25,
+      "potencial": -0.30976430976430974,
+      "fator": 1.0
+    }
+  },
+  {
+    "ticker": "SAPR11",
+    "on": "SAPR3",
+    "setorHerdado": "saneamento",
+    "industriaHerdada": "Água e Saneamento",
+    "antes": {
+      "via": "DCF por fluxo da firma",
+      "justo": 57.86,
+      "potencial": 0.6460881934566146,
+      "fator": 1.206730489981894
+    },
+    "depois": {
+      "via": "DCF por fluxo da firma",
+      "justo": 57.86,
+      "potencial": 0.6460881934566146,
+      "fator": 1.206730489981894
+    }
+  },
+  {
+    "ticker": "SAPR4",
+    "on": "SAPR3",
+    "setorHerdado": "saneamento",
+    "industriaHerdada": "Água e Saneamento",
+    "antes": {
+      "via": "DCF por fluxo da firma",
+      "justo": 11.72,
+      "potencial": 0.7059679767103348,
+      "fator": 1.206730489981894
+    },
+    "depois": {
+      "via": "DCF por fluxo da firma",
+      "justo": 11.72,
+      "potencial": 0.7059679767103348,
+      "fator": 1.206730489981894
+    }
+  },
+  {
+    "ticker": "SEQL3",
+    "on": "SEQL3",
+    "setorHerdado": "",
+    "industriaHerdada": null,
+    "antes": {
+      "recusa": "Nenhum exercício de SEQL3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    },
+    "depois": {
+      "recusa": "Nenhum exercício de SEQL3 havia sido divulgado em 09/09/2026 (defasagem de 90 dias)."
+    }
+  },
+  {
+    "ticker": "SHUL4",
+    "on": "SHUL3",
+    "setorHerdado": "bens-industriais",
+    "industriaHerdada": "Motores . Compressores e Outros",
+    "antes": {
+      "via": "DCF por fluxo da firma",
+      "justo": 3.96,
+      "potencial": -0.11011235955056184,
+      "fator": 1.0
+    },
+    "depois": {
+      "via": "DCF por fluxo da firma",
+      "justo": 3.96,
+      "potencial": -0.11011235955056184,
+      "fator": 1.0
+    }
+  },
+  {
+    "ticker": "SNSY5",
+    "on": "SNSY3",
+    "setorHerdado": "materiais",
+    "industriaHerdada": "Materiais Diversos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável; patrimônio líquido não positivo em exercícios consecutivos."
+    }
+  },
+  {
+    "ticker": "SOND5",
+    "on": "SOND3",
+    "setorHerdado": "bens-industriais",
+    "industriaHerdada": "Engenharia Consultiva",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "SOND6",
+    "on": "SOND3",
+    "setorHerdado": "bens-industriais",
+    "industriaHerdada": "Engenharia Consultiva",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "TAEE4",
+    "on": "TAEE3",
+    "setorHerdado": "energia",
+    "industriaHerdada": "Energia Elétrica",
+    "antes": {
+      "via": "DCF por fluxo da firma",
+      "justo": 5.05,
+      "potencial": -0.6348517715112076,
+      "fator": 1.0
+    },
+    "depois": {
+      "via": "DCF por fluxo da firma",
+      "justo": 5.05,
+      "potencial": -0.6348517715112076,
+      "fator": 1.0
+    }
+  },
+  {
+    "ticker": "TASA4",
+    "on": "TASA3",
+    "setorHerdado": "bens-industriais",
+    "industriaHerdada": "Armas e Munições",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "TELB4",
+    "on": "TELB3",
+    "setorHerdado": "telecomunicacoes",
+    "industriaHerdada": "Telecomunicações",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "UNIP5",
+    "on": "UNIP3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Químicos Diversos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "UNIP6",
+    "on": "UNIP3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Químicos Diversos",
+    "antes": {
+      "via": "DCF por fluxo da firma",
+      "justo": 14.02,
+      "potencial": -0.7526464361326746,
+      "fator": 1.0
+    },
+    "depois": {
+      "via": "DCF por fluxo da firma",
+      "justo": 54.41,
+      "potencial": -0.04004940014114332,
+      "fator": 1.9547882094980495
+    }
+  },
+  {
+    "ticker": "USIM6",
+    "on": "USIM3",
+    "setorHerdado": "materiais-basicos",
+    "industriaHerdada": "Siderurgia",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "WHRL4",
+    "on": "WHRL3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Eletrodomésticos",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  },
+  {
+    "ticker": "WLMM4",
+    "on": "WLMM3",
+    "setorHerdado": "consumo-ciclico",
+    "industriaHerdada": "Material de Transporte",
+    "antes": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    },
+    "depois": {
+      "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+    }
+  }
+]

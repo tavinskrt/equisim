@@ -1034,10 +1034,55 @@ abstract final class ValuationCascade {
     // mercado e ainda assim saía com preço justo de R$ 0,12, porque o valor da
     // firma do modelo era metade do de mercado. A migração agora é declarada,
     // e não silenciosa como no antigo `fairValuePerShare <= 0`.
+    // **A participação que decide a via é medida na taxa estrutural, não na
+    // corrente.** A pós-condição é um degrau entre dois estimadores diferentes,
+    // e medi-la na taxa do dia fazia o degrau andar com o ciclo monetário: o
+    // preço justo deixava de ser monótono na taxa de desconto. Medido na
+    // KLBN11, antes desta correção — baixando a taxa livre de risco de 9,00%
+    // para 8,75%, o valor da firma sobe, a participação cruza os 20%, a
+    // migração deixa de disparar, e o preço justo **cai** de R$ 7,98 para
+    // R$ 5,36. Capital mais barato produzindo empresa menos valiosa contradiz a
+    // definição de fluxo descontado, e com a Selic em queda os 33 ativos que
+    // hoje migram atravessariam essa fronteira.
+    //
+    // A taxa estrutural é a mesma que a decisão 31 já usa para a perpetuidade, e
+    // pela mesma razão: a estrutura de capital de um ativo é fato de longo
+    // prazo, e qual das duas vias o descreve não pode depender de onde a Selic
+    // está hoje. Dentro de cada via o preço justo continua monótono na taxa; o
+    // que esta medida remove é a travessia induzida pelo ciclo.
+    //
+    // **Isto não concilia as duas vias**, que seguem discordando por medirem
+    // crescimento e base em séries de capital diferentes — na KLBN11, 5,0%
+    // contra 10,16% de crescimento e fator de base 0,665 contra 1,000. Essa
+    // divergência é assunto de outra decisão; aqui só se impede que o ciclo
+    // monetário escolha entre elas.
+    final participacaoEstrutural = lane == ValuationLane.firm
+        ? DcfCalculator.firm(
+            baseProfit: base,
+            assumptions: DcfAssumptions(
+              projectionYears: inputs.projectionYears,
+              growthRate: g,
+              perpetualGrowth: perpetuo,
+              discountRate: descontoTerminal,
+              terminalDiscountRate: descontoTerminal,
+              returnOnCapital: retornoDaBase,
+              terminalReturnOnCapital: moat,
+              marginOfSafety: inputs.marginOfSafety,
+            ),
+            netDebt: latest.netDebt,
+            sharesOutstanding: shares,
+          ).valueOrNull?.equityShare
+        : null;
+
+    // Sem a medida estrutural — projeção degenerada, valor terminal divergente
+    // na taxa de equilíbrio —, vale a da taxa corrente. Ausência de medida não
+    // é motivo para deixar de aplicar a pós-condição.
+    final participacaoQueDecide = participacaoEstrutural ?? outcome.equityShare;
+
     if (lane == ValuationLane.firm &&
         allowLaneMigration &&
-        outcome.equityShare < ValuationParameters.minEquityShare) {
-      _auditEquityBridgeFailure(audit, outcome.equityShare);
+        participacaoQueDecide < ValuationParameters.minEquityShare) {
+      _auditEquityBridgeFailure(audit, participacaoQueDecide);
       final migrada = _evaluateLane(
         inputs,
         published,
@@ -1045,7 +1090,7 @@ abstract final class ValuationCascade {
         ValuationLane.shareholder,
         [
           ...warnings,
-          'O capital próprio responde por apenas ${_pct(outcome.equityShare)} '
+          'O capital próprio responde por apenas ${_pct(participacaoQueDecide)} '
               'do valor da firma: o preço por papel seria resíduo de uma '
               'subtração entre números próximos. A avaliação migra para o fluxo '
               'do acionista.',
@@ -1080,7 +1125,7 @@ abstract final class ValuationCascade {
       // na CSNA3 e −558,3% na MRVE3. A amplificação `1/participação` só tem
       // sentido no ramo positivo, e nem `Infinity` nem número negativo passam
       // por `toStringAsFixed`.
-      final share = outcome.equityShare;
+      final share = participacaoQueDecide;
       final amplificacao = share > 0
           ? 'com o erro do valor da firma amplificado '
               '${(1 / share).toStringAsFixed(0)} vezes'

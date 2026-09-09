@@ -1,0 +1,1718 @@
+[
+  {
+    "ticker": "ABCB10",
+    "razao": 0.9924573243350535,
+    "potencial": -0.007542675664946458,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.5446234219109545,
+    "fatorBase": 1.0,
+    "desconto": 0.19586384141758156,
+    "beta": 1.0,
+    "moat": false
+  },
+  {
+    "ticker": "ABCB4",
+    "razao": 1.0832318311002842,
+    "potencial": 0.08323183110028425,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.578538355677429,
+    "fatorBase": 1.0,
+    "desconto": 0.18632076898945552,
+    "beta": 0.82648959221589,
+    "moat": false
+  },
+  {
+    "ticker": "ABEV3",
+    "razao": 0.6548843187660668,
+    "potencial": -0.3451156812339332,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.5820843867588346,
+    "fatorBase": 1.0,
+    "desconto": 0.17293595984449678,
+    "beta": 0.6016660233368232,
+    "moat": true
+  },
+  {
+    "ticker": "AGRO3",
+    "razao": 0.46732880292733925,
+    "potencial": -0.5326711970726608,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.2828059721377304,
+    "fatorBase": 1.0,
+    "desconto": 0.17550933040595537,
+    "beta": 0.6299179816067966,
+    "moat": false
+  },
+  {
+    "ticker": "ALOS3",
+    "razao": 0.5396769662921348,
+    "potencial": -0.4603230337078652,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.4030298482199655,
+    "fatorBase": 1.0,
+    "desconto": 0.20164787904014567,
+    "beta": 1.1051643204102564,
+    "moat": false
+  },
+  {
+    "ticker": "ALPA4",
+    "razao": 0.1530993278566094,
+    "potencial": -0.8469006721433906,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.39461023609833945,
+    "fatorBase": 1.0,
+    "desconto": 0.20075934177420027,
+    "beta": 1.329447336188693,
+    "moat": false
+  },
+  {
+    "ticker": "ALUP11",
+    "razao": 0.734590065828845,
+    "potencial": -0.265409934171155,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.5758067523892485,
+    "fatorBase": 1.0,
+    "desconto": 0.14260115124882283,
+    "beta": 0.6348061304292297,
+    "moat": false
+  },
+  {
+    "ticker": "AMER3",
+    "razao": 0.7627118644067797,
+    "potencial": -0.23728813559322032,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "terminalPesado"
+    ],
+    "pesoTerminal": 0.8824557942949429,
+    "fatorBase": 1.0,
+    "desconto": 0.14230086907739045,
+    "beta": 0.15020369610204237,
+    "moat": false
+  },
+  {
+    "ticker": "ANIM3",
+    "razao": 0.9026845637583892,
+    "potencial": -0.09731543624161075,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "escalaIncerta",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.13987237195987492,
+    "fatorBase": 1.0,
+    "desconto": 0.2560276536165666,
+    "beta": 2.0938874945270007,
+    "moat": false
+  },
+  {
+    "ticker": "AXIA3",
+    "razao": 0.1992399565689468,
+    "potencial": -0.8007600434310532,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.3620977440402859,
+    "fatorBase": 1.0,
+    "desconto": 0.20243769753246785,
+    "beta": 1.1195246566342958,
+    "moat": false
+  },
+  {
+    "ticker": "AZZA3",
+    "razao": 0.7865443425076452,
+    "potencial": -0.21345565749235484,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.5300422844700416,
+    "fatorBase": 1.0,
+    "desconto": 0.16446070553920372,
+    "beta": 1.3863907570377587,
+    "moat": false
+  },
+  {
+    "ticker": "B3SA3",
+    "razao": 0.25361899247249564,
+    "potencial": -0.7463810075275044,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.18382539919423307,
+    "fatorBase": 1.0,
+    "desconto": 0.22242542489935033,
+    "beta": 1.4829378814867047,
+    "moat": false
+  },
+  {
+    "ticker": "BBAS3",
+    "razao": 1.4011732851985559,
+    "potencial": 0.401173285198556,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.5373272564977467,
+    "fatorBase": 1.6934182130167612,
+    "desconto": 0.1946874438720558,
+    "beta": 0.9786109537177133,
+    "moat": false
+  },
+  {
+    "ticker": "BBDC3",
+    "razao": 0.8525519848771267,
+    "potencial": -0.14744801512287334,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.47517054374349876,
+    "fatorBase": 1.0,
+    "desconto": 0.19889189911463398,
+    "beta": 1.055055594491862,
+    "moat": false
+  },
+  {
+    "ticker": "BBDC4",
+    "razao": 0.7371651785714286,
+    "potencial": -0.26283482142857145,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.46655880330866184,
+    "fatorBase": 1.0,
+    "desconto": 0.20150589927904297,
+    "beta": 1.1025828702083893,
+    "moat": false
+  },
+  {
+    "ticker": "BBSE3",
+    "razao": 1.2030383409693755,
+    "potencial": 0.2030383409693755,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.49844553610693487,
+    "fatorBase": 1.0,
+    "desconto": 0.1665098616716696,
+    "beta": 0.4662912773470547,
+    "moat": true
+  },
+  {
+    "ticker": "BEEF3",
+    "razao": 1.9168765743073048,
+    "potencial": 0.9168765743073047,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.7388769726200791,
+    "fatorBase": 1.0,
+    "desconto": 0.1699303645134345,
+    "beta": 0.8237351779299502,
+    "moat": false
+  },
+  {
+    "ticker": "BHIA3",
+    "razao": 3.2461538461538457,
+    "potencial": 2.246153846153846,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.34022345521407626,
+    "fatorBase": 1.0,
+    "desconto": 0.1513799148404658,
+    "beta": 1.7760617303398856,
+    "moat": false
+  },
+  {
+    "ticker": "BMGB4",
+    "razao": 1.2752136752136753,
+    "potencial": 0.2752136752136753,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.30144838025770393,
+    "fatorBase": 1.0,
+    "desconto": 0.18749416921913914,
+    "beta": 0.8478241418465016,
+    "moat": false
+  },
+  {
+    "ticker": "BPAC11",
+    "razao": 0.7798678190137266,
+    "potencial": -0.22013218098627343,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.3032800443779877,
+    "fatorBase": 1.0,
+    "desconto": 0.22064690977756166,
+    "beta": 1.4506012429087287,
+    "moat": false
+  },
+  {
+    "ticker": "BRAP4",
+    "razao": 0.2040546496253856,
+    "potencial": -0.7959453503746144,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.2412607897570434,
+    "fatorBase": 1.0,
+    "desconto": 0.1909735371754321,
+    "beta": 0.9110853774154645,
+    "moat": false
+  },
+  {
+    "ticker": "BRAV3",
+    "razao": 1.4653039268423884,
+    "potencial": 0.4653039268423883,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.5121903778709882,
+    "fatorBase": 1.9921961251426057,
+    "desconto": 0.15812861434072867,
+    "beta": 1.1204557665503307,
+    "moat": false
+  },
+  {
+    "ticker": "BRSR6",
+    "razao": 0.9259506337558373,
+    "potencial": -0.07404936624416274,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.5014164544450742,
+    "fatorBase": 0.5631257107194007,
+    "desconto": 0.18807248383783023,
+    "beta": 0.8583389530954302,
+    "moat": false
+  },
+  {
+    "ticker": "CAML3",
+    "razao": 0.3864541832669323,
+    "potencial": -0.6135458167330677,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.5160689788473046,
+    "fatorBase": 1.0,
+    "desconto": 0.19639340242908754,
+    "beta": 1.0096283820273815,
+    "moat": false
+  },
+  {
+    "ticker": "CEAB3",
+    "razao": 0.4685082872928177,
+    "potencial": -0.5314917127071823,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "baseNormalizadaForte"
+    ],
+    "pesoTerminal": 0.21340911387943198,
+    "fatorBase": 0.33,
+    "desconto": 0.20350348873814622,
+    "beta": 1.7782269473433057,
+    "moat": false
+  },
+  {
+    "ticker": "CMIG4",
+    "razao": 0.547136563876652,
+    "potencial": -0.452863436123348,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.5189153545833209,
+    "fatorBase": 1.0,
+    "desconto": 0.15975007530438662,
+    "beta": 0.9028635184287302,
+    "moat": false
+  },
+  {
+    "ticker": "COGN3",
+    "razao": 0.3924050632911392,
+    "potencial": -0.6075949367088607,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "escalaIncerta",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.17281602592311185,
+    "fatorBase": 1.0,
+    "desconto": 0.23116161553614548,
+    "beta": 1.6417777112466165,
+    "moat": false
+  },
+  {
+    "ticker": "CPFE3",
+    "razao": 0.6683904330963155,
+    "potencial": -0.33160956690368454,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.5783307516882619,
+    "fatorBase": 1.0,
+    "desconto": 0.15833321859622446,
+    "beta": 0.6990857626306881,
+    "moat": false
+  },
+  {
+    "ticker": "CPLE3",
+    "razao": 0.23529411764705882,
+    "potencial": -0.7647058823529411,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "escalaIncerta"
+    ],
+    "pesoTerminal": 0.788215161726804,
+    "fatorBase": 1.0,
+    "desconto": 0.14086384141758157,
+    "beta": 0.8137568141725228,
+    "moat": false
+  },
+  {
+    "ticker": "CVCB3",
+    "razao": 0.8901734104046243,
+    "potencial": -0.1098265895953757,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.20487166157123424,
+    "fatorBase": 1.0,
+    "desconto": 0.20772091379222196,
+    "beta": 1.9869126880289745,
+    "moat": false
+  },
+  {
+    "ticker": "CXSE3",
+    "razao": 0.5954659949622166,
+    "potencial": -0.4045340050377834,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.4389944815722427,
+    "fatorBase": 1.0,
+    "desconto": 0.17871368055496947,
+    "beta": 0.688178893407053,
+    "moat": true
+  },
+  {
+    "ticker": "CYRE3",
+    "razao": 0.10895404120443741,
+    "potencial": -0.8910459587955626,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.5010111447784045,
+    "fatorBase": 0.6469030145754915,
+    "desconto": 0.1736799872438067,
+    "beta": 1.5364423701245957,
+    "moat": false
+  },
+  {
+    "ticker": "CYRE4",
+    "razao": 0.5265374894692503,
+    "potencial": -0.4734625105307498,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.2854084403178677,
+    "fatorBase": 0.5602836173612028,
+    "desconto": 0.23699241799373774,
+    "beta": 1.7477923013846577,
+    "moat": false
+  },
+  {
+    "ticker": "DIRR3",
+    "razao": 0.1766304347826087,
+    "potencial": -0.8233695652173914,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "baseNormalizadaForte"
+    ],
+    "pesoTerminal": 0.4183313828601857,
+    "fatorBase": 0.40664590457403743,
+    "desconto": 0.17915821423217898,
+    "beta": 1.3698203004470515,
+    "moat": false
+  },
+  {
+    "ticker": "DXCO3",
+    "razao": 0.13200723327305605,
+    "potencial": -0.867992766726944,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "baseNormalizadaForte",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.5213835602405111,
+    "fatorBase": 3.0,
+    "desconto": 0.21504168884087205,
+    "beta": 1.348688134968918,
+    "moat": false
+  },
+  {
+    "ticker": "ECOR3",
+    "razao": 0.5448798988621997,
+    "potencial": -0.4551201011378003,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.2813096603663132,
+    "fatorBase": 0.7181166637245716,
+    "desconto": 0.23368150833224127,
+    "beta": 1.6875939439029037,
+    "moat": false
+  },
+  {
+    "ticker": "EGIE3",
+    "razao": 1.4399218495604038,
+    "potencial": 0.4399218495604037,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.768684044804348,
+    "fatorBase": 1.5879994626282325,
+    "desconto": 0.1507229839587374,
+    "beta": 0.5619560677757159,
+    "moat": true
+  },
+  {
+    "ticker": "EMBJ3",
+    "razao": 0.07110692219080532,
+    "potencial": -0.9288930778091946,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "terminalPesado",
+      "baseNormalizadaForte"
+    ],
+    "pesoTerminal": 0.8322272388344772,
+    "fatorBase": 0.33,
+    "desconto": 0.16930357579446875,
+    "beta": 0.7570247307478772,
+    "moat": false
+  },
+  {
+    "ticker": "ENEV3",
+    "razao": 0.16819012797074953,
+    "potencial": -0.8318098720292504,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.42785401779788196,
+    "fatorBase": 1.0,
+    "desconto": 0.19755738710558932,
+    "beta": 1.030791739781959,
+    "moat": false
+  },
+  {
+    "ticker": "ENGI11",
+    "razao": 1.8309140839544922,
+    "potencial": 0.8309140839544922,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.646642748172809,
+    "fatorBase": 1.7464170001738177,
+    "desconto": 0.19265028871572035,
+    "beta": 0.9415717690570687,
+    "moat": false
+  },
+  {
+    "ticker": "EQTL3",
+    "razao": 0.4783950617283951,
+    "potencial": -0.5216049382716049,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.4101029404478412,
+    "fatorBase": 1.939550091045428,
+    "desconto": 0.18286745525662507,
+    "beta": 0.8785064559552169,
+    "moat": false
+  },
+  {
+    "ticker": "EVEN3",
+    "razao": 0.3952380952380952,
+    "potencial": -0.6047619047619047,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.33616408445613255,
+    "fatorBase": 0.641794102653599,
+    "desconto": 0.1477008780989178,
+    "beta": 1.3704433768678879,
+    "moat": false
+  },
+  {
+    "ticker": "EZTC3",
+    "razao": 0.3761755485893417,
+    "potencial": -0.6238244514106583,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.5167792106148594,
+    "fatorBase": 1.0,
+    "desconto": 0.18380571166610732,
+    "beta": 1.4883683799626155,
+    "moat": false
+  },
+  {
+    "ticker": "FESA4",
+    "razao": 0.39175257731958757,
+    "potencial": -0.6082474226804124,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.7656197674742481,
+    "fatorBase": 1.0,
+    "desconto": 0.1858066135692494,
+    "beta": 1.0175939009914394,
+    "moat": false
+  },
+  {
+    "ticker": "FRAS3",
+    "razao": 0.40992167101827676,
+    "potencial": -0.5900783289817233,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.47693178295935323,
+    "fatorBase": 1.0,
+    "desconto": 0.15908365941989527,
+    "beta": 0.7581462602444666,
+    "moat": false
+  },
+  {
+    "ticker": "GGBR4",
+    "razao": 0.2472397476340694,
+    "potencial": -0.7527602523659306,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "escalaIncerta",
+      "baseNormalizadaForte"
+    ],
+    "pesoTerminal": 0.46853376798149887,
+    "fatorBase": 2.356060019239245,
+    "desconto": 0.1795222793683539,
+    "beta": 0.961402479784398,
+    "moat": false
+  },
+  {
+    "ticker": "GOAU4",
+    "razao": 2.234290843806104,
+    "potencial": 1.234290843806104,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "baseNormalizadaForte"
+    ],
+    "pesoTerminal": 0.5174882631331895,
+    "fatorBase": 2.356197171822534,
+    "desconto": 0.1625591620073512,
+    "beta": 0.9754520701159498,
+    "moat": false
+  },
+  {
+    "ticker": "GRND3",
+    "razao": 0.64,
+    "potencial": -0.36000000000000004,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.6733236056348839,
+    "fatorBase": 1.0,
+    "desconto": 0.1866898954347025,
+    "beta": 0.8668695194871617,
+    "moat": false
+  },
+  {
+    "ticker": "HAPV3",
+    "razao": 0.5448079658605974,
+    "potencial": -0.45519203413940257,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.30842911887780217,
+    "fatorBase": 1.0,
+    "desconto": 0.16137911794975002,
+    "beta": 1.6802049360079867,
+    "moat": false
+  },
+  {
+    "ticker": "HYPE3",
+    "razao": 0.4462627156125608,
+    "potencial": -0.5537372843874392,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.5149699263063849,
+    "fatorBase": 1.0,
+    "desconto": 0.18936002947592365,
+    "beta": 0.8817488737880379,
+    "moat": false
+  },
+  {
+    "ticker": "IGTI11",
+    "razao": 0.07192307692307692,
+    "potencial": -0.928076923076923,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "escalaIncerta",
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.34197754744554903,
+    "fatorBase": 0.5237337959030841,
+    "desconto": 0.15084898408251377,
+    "beta": 1.251471149596424,
+    "moat": false
+  },
+  {
+    "ticker": "IRBR3",
+    "razao": 0.41888539771787664,
+    "potencial": -0.5811146022821234,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.21441505075019837,
+    "fatorBase": 1.0,
+    "desconto": 0.2064049758915746,
+    "beta": 1.191656990436237,
+    "moat": false
+  },
+  {
+    "ticker": "ISAE4",
+    "razao": 0.8801742919389978,
+    "potencial": -0.1198257080610022,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.7810162989071924,
+    "fatorBase": 1.3877551776199994,
+    "desconto": 0.15084187425129503,
+    "beta": 0.5809052932030065,
+    "moat": false
+  },
+  {
+    "ticker": "ITSA4",
+    "razao": 0.4358059914407989,
+    "potencial": -0.5641940085592011,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.5929195957380436,
+    "fatorBase": 1.0,
+    "desconto": 0.18848228370687609,
+    "beta": 0.9747619409874367,
+    "moat": false
+  },
+  {
+    "ticker": "ITUB3",
+    "razao": 0.9102396514161221,
+    "potencial": -0.08976034858387794,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.3459193018664052,
+    "fatorBase": 1.0,
+    "desconto": 0.1901517685510643,
+    "beta": 0.8961441296996862,
+    "moat": false
+  },
+  {
+    "ticker": "ITUB4",
+    "razao": 0.9631755141080823,
+    "potencial": -0.036824485891917724,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.3343621117453457,
+    "fatorBase": 1.0,
+    "desconto": 0.19471489486132665,
+    "beta": 0.9791100626135472,
+    "moat": false
+  },
+  {
+    "ticker": "JHSF3",
+    "razao": 0.7356521739130436,
+    "potencial": -0.26434782608695645,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.48420684472294123,
+    "fatorBase": 0.5614643744621232,
+    "desconto": 0.16608110299125614,
+    "beta": 1.33633255426886,
+    "moat": false
+  },
+  {
+    "ticker": "JSLG3",
+    "razao": 0.17206132879045996,
+    "potencial": -0.8279386712095401,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.48855473448583275,
+    "fatorBase": 1.0,
+    "desconto": 0.22646377960090705,
+    "beta": 1.5563625124240996,
+    "moat": false
+  },
+  {
+    "ticker": "KEPL3",
+    "razao": 0.8,
+    "potencial": -0.19999999999999998,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.43699983217895777,
+    "fatorBase": 1.0,
+    "desconto": 0.17096612867524721,
+    "beta": 0.8975651477759311,
+    "moat": false
+  },
+  {
+    "ticker": "KLBN11",
+    "razao": 0.3442455242966752,
+    "potencial": -0.6557544757033248,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.48759121417456325,
+    "fatorBase": 0.6650531930342816,
+    "desconto": 0.16811205960584277,
+    "beta": 0.49542214887747643,
+    "moat": false
+  },
+  {
+    "ticker": "KLBN3",
+    "razao": 0.3309178743961353,
+    "potencial": -0.6690821256038647,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.4848443173182316,
+    "fatorBase": 0.6650531930342816,
+    "desconto": 0.16885571868393326,
+    "beta": 0.5089432230245761,
+    "moat": false
+  },
+  {
+    "ticker": "KLBN4",
+    "razao": 0.33419689119170987,
+    "potencial": -0.6658031088082902,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.48951533960846605,
+    "fatorBase": 0.6650531930342816,
+    "desconto": 0.16759345570300588,
+    "beta": 0.48599298700771465,
+    "moat": false
+  },
+  {
+    "ticker": "LEVE3",
+    "razao": 0.770616982284667,
+    "potencial": -0.22938301771533295,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.31164871592390997,
+    "fatorBase": 1.0,
+    "desconto": 0.16125851459815077,
+    "beta": 0.7754574905364661,
+    "moat": true
+  },
+  {
+    "ticker": "LIGT3",
+    "razao": 0.5327635327635328,
+    "potencial": -0.46723646723646717,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.5797423882245304,
+    "fatorBase": 1.7868618310097404,
+    "desconto": 0.150586906909189,
+    "beta": 0.1767830089383167,
+    "moat": false
+  },
+  {
+    "ticker": "LOGG3",
+    "razao": 0.378389653733834,
+    "potencial": -0.621610346266166,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.4856194687760347,
+    "fatorBase": 0.5032462192723975,
+    "desconto": 0.20056976539471846,
+    "beta": 1.0855622541297618,
+    "moat": false
+  },
+  {
+    "ticker": "LREN3",
+    "razao": 0.6285460992907802,
+    "potencial": -0.37145390070921985,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.6196970080732018,
+    "fatorBase": 1.0,
+    "desconto": 0.22366073357386748,
+    "beta": 1.580397540425982,
+    "moat": false
+  },
+  {
+    "ticker": "MBRF3",
+    "razao": 0.14767441860465116,
+    "potencial": -0.8523255813953489,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.5601150033411374,
+    "fatorBase": 1.0,
+    "desconto": 0.18783237100210065,
+    "beta": 0.8539732651730739,
+    "moat": false
+  },
+  {
+    "ticker": "MDIA3",
+    "razao": 0.562680531484691,
+    "potencial": -0.437319468515309,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.7754187513084704,
+    "fatorBase": 1.0,
+    "desconto": 0.16308273008908664,
+    "beta": 0.6760264245897227,
+    "moat": false
+  },
+  {
+    "ticker": "MDNE3",
+    "razao": 0.08712871287128714,
+    "potencial": -0.9128712871287129,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "baseNormalizadaForte"
+    ],
+    "pesoTerminal": 0.22726272112046714,
+    "fatorBase": 0.33,
+    "desconto": 0.19494694242541588,
+    "beta": 1.5363643609846784,
+    "moat": false
+  },
+  {
+    "ticker": "MGLU3",
+    "razao": 0.9634782608695652,
+    "potencial": -0.03652173913043478,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.4326350124471897,
+    "fatorBase": 1.0,
+    "desconto": 0.18817089184821353,
+    "beta": 2.258848207193155,
+    "moat": false
+  },
+  {
+    "ticker": "MILS3",
+    "razao": 0.1318960050729233,
+    "potencial": -0.8681039949270767,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "escalaIncerta",
+      "baseNormalizadaForte",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.38384655476517104,
+    "fatorBase": 0.33,
+    "desconto": 0.20495626577072784,
+    "beta": 1.1653168064208415,
+    "moat": false
+  },
+  {
+    "ticker": "MOTV3",
+    "razao": 0.2524630541871921,
+    "potencial": -0.7475369458128078,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "escalaIncerta",
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.7438296514333943,
+    "fatorBase": 1.0,
+    "desconto": 0.15728127896786967,
+    "beta": 1.055817404985915,
+    "moat": false
+  },
+  {
+    "ticker": "MOVI3",
+    "razao": 2.6920103092783507,
+    "potencial": 1.6920103092783507,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "terminalPesado",
+      "escalaIncerta",
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.8575400031566806,
+    "fatorBase": 1.0,
+    "desconto": 0.1715143033038664,
+    "beta": 2.007825527909617,
+    "moat": false
+  },
+  {
+    "ticker": "MULT3",
+    "razao": 0.20732526881720428,
+    "potencial": -0.7926747311827957,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.40341705288156315,
+    "fatorBase": 0.5229101833791983,
+    "desconto": 0.20323673901523737,
+    "beta": 1.134052683593742,
+    "moat": false
+  },
+  {
+    "ticker": "MYPK3",
+    "razao": 0.8729338842975206,
+    "potencial": -0.1270661157024794,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.797604918524398,
+    "fatorBase": 1.0,
+    "desconto": 0.18736897221608384,
+    "beta": 0.845547832700041,
+    "moat": false
+  },
+  {
+    "ticker": "PETR3",
+    "razao": 0.6389096340552651,
+    "potencial": -0.3610903659447349,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.45228644328319795,
+    "fatorBase": 1.0,
+    "desconto": 0.1577904624613295,
+    "beta": 0.8591816171934202,
+    "moat": false
+  },
+  {
+    "ticker": "PETR4",
+    "razao": 0.7433993399339934,
+    "potencial": -0.25660066006600657,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.4634643019433198,
+    "fatorBase": 1.0,
+    "desconto": 0.15440948740618535,
+    "beta": 0.8161850607458087,
+    "moat": false
+  },
+  {
+    "ticker": "PGMN3",
+    "razao": 0.9893617021276597,
+    "potencial": -0.010638297872340318,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "escalaIncerta"
+    ],
+    "pesoTerminal": 0.7604116337505483,
+    "fatorBase": 1.0,
+    "desconto": 0.1767781331607941,
+    "beta": 1.4072543855915522,
+    "moat": false
+  },
+  {
+    "ticker": "PINE4",
+    "razao": 0.9929203539823008,
+    "potencial": -0.007079646017699121,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.28959401033078985,
+    "fatorBase": 1.0,
+    "desconto": 0.1846704124886126,
+    "beta": 0.7964831103823822,
+    "moat": false
+  },
+  {
+    "ticker": "PNVL3",
+    "razao": 0.3471008737092931,
+    "potencial": -0.6528991262907068,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.40432825002444783,
+    "fatorBase": 1.0,
+    "desconto": 0.1991981473113204,
+    "beta": 1.0606237435225243,
+    "moat": false
+  },
+  {
+    "ticker": "POMO3",
+    "razao": 0.14628297362110312,
+    "potencial": -0.8537170263788969,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "baseNormalizadaForte",
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.31320656473925174,
+    "fatorBase": 0.33,
+    "desconto": 0.15828574034028947,
+    "beta": 0.8565133483360476,
+    "moat": false
+  },
+  {
+    "ticker": "POMO4",
+    "razao": 0.12641083521444696,
+    "potencial": -0.873589164785553,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "baseNormalizadaForte",
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.3064454890465425,
+    "fatorBase": 0.33,
+    "desconto": 0.16091687146142783,
+    "beta": 0.9005836930439904,
+    "moat": false
+  },
+  {
+    "ticker": "POSI3",
+    "razao": 0.8621700879765395,
+    "potencial": -0.13782991202346045,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.6016377902380359,
+    "fatorBase": 1.0,
+    "desconto": 0.15357277200915495,
+    "beta": 1.4887819070990125,
+    "moat": false
+  },
+  {
+    "ticker": "PRIO3",
+    "razao": 0.896435991689308,
+    "potencial": -0.10356400831069197,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "baseNormalizadaForte",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.3769975850185603,
+    "fatorBase": 3.0,
+    "desconto": 0.18841033213042901,
+    "beta": 0.8644816493244988,
+    "moat": false
+  },
+  {
+    "ticker": "PRNR3",
+    "razao": 0.034521158129175944,
+    "potencial": -0.965478841870824,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.5656392647564134,
+    "fatorBase": 1.0,
+    "desconto": 0.19378452742412566,
+    "beta": 0.9621942910280744,
+    "moat": false
+  },
+  {
+    "ticker": "PSSA3",
+    "razao": 0.5766336633663367,
+    "potencial": -0.42336633663366335,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.5372527569656067,
+    "fatorBase": 0.7284001703344035,
+    "desconto": 0.1763064524306205,
+    "beta": 0.6444111093279807,
+    "moat": false
+  },
+  {
+    "ticker": "QUAL3",
+    "razao": 0.5866666666666667,
+    "potencial": -0.41333333333333333,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.3447287182246251,
+    "fatorBase": 1.0,
+    "desconto": 0.17814856129250586,
+    "beta": 1.824606724673224,
+    "moat": false
+  },
+  {
+    "ticker": "RADL3",
+    "razao": 0.3308080808080808,
+    "potencial": -0.6691919191919191,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.6242657438155373,
+    "fatorBase": 1.0,
+    "desconto": 0.17872996118617632,
+    "beta": 0.8434143934614364,
+    "moat": false
+  },
+  {
+    "ticker": "RAIL3",
+    "razao": 0.10887656033287102,
+    "potencial": -0.8911234396671289,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.23314954173823746,
+    "fatorBase": 0.5892416468307007,
+    "desconto": 0.1969527244597586,
+    "beta": 1.0197978734941273,
+    "moat": false
+  },
+  {
+    "ticker": "RANI3",
+    "razao": 0.8050955414012739,
+    "potencial": -0.19490445859872604,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.5782832622229804,
+    "fatorBase": 1.0,
+    "desconto": 0.14227861993960278,
+    "beta": 0.7617696869020654,
+    "moat": false
+  },
+  {
+    "ticker": "RDOR3",
+    "razao": 0.43807713199348175,
+    "potencial": -0.5619228680065183,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.2679321450938671,
+    "fatorBase": 1.0,
+    "desconto": 0.17825281315628383,
+    "beta": 1.2690784910621637,
+    "moat": false
+  },
+  {
+    "ticker": "RENT3",
+    "razao": 0.4235162998049596,
+    "potencial": -0.5764837001950405,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "escalaIncerta",
+      "baseNormalizadaForte",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.3001131773611535,
+    "fatorBase": 3.0,
+    "desconto": 0.22078803655126847,
+    "beta": 1.4531671842488527,
+    "moat": false
+  },
+  {
+    "ticker": "RENT4",
+    "razao": 0.3907360045467463,
+    "potencial": -0.6092639954532537,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "escalaIncerta",
+      "baseNormalizadaForte",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.2637448902733284,
+    "fatorBase": 3.0,
+    "desconto": 0.23740743187181473,
+    "beta": 1.7553380082587846,
+    "moat": false
+  },
+  {
+    "ticker": "RIAA3",
+    "razao": 0.7545582047685835,
+    "potencial": -0.24544179523141654,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "baseNormalizadaForte"
+    ],
+    "pesoTerminal": 0.5459443701694533,
+    "fatorBase": 0.33,
+    "desconto": 0.1866810834240516,
+    "beta": 1.8936589917301885,
+    "moat": false
+  },
+  {
+    "ticker": "SANB11",
+    "razao": 0.6583892617449665,
+    "potencial": -0.3416107382550335,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.3875153963344774,
+    "fatorBase": 1.0,
+    "desconto": 0.194806703640459,
+    "beta": 0.9807793131432261,
+    "moat": false
+  },
+  {
+    "ticker": "SANB3",
+    "razao": 0.6713615023474179,
+    "potencial": -0.3286384976525822,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.3946413137194618,
+    "fatorBase": 1.0,
+    "desconto": 0.19245588845002945,
+    "beta": 0.9380372187717797,
+    "moat": false
+  },
+  {
+    "ticker": "SANB4",
+    "razao": 0.6902356902356902,
+    "potencial": -0.30976430976430974,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.4058778648564058,
+    "fatorBase": 1.0,
+    "desconto": 0.18883297079530886,
+    "beta": 0.8721659886859511,
+    "moat": false
+  },
+  {
+    "ticker": "SAPR11",
+    "razao": 1.6460881934566145,
+    "potencial": 0.6460881934566146,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "escalaIncerta"
+    ],
+    "pesoTerminal": 0.7910620394156588,
+    "fatorBase": 1.206730489981894,
+    "desconto": 0.14086384141758157,
+    "beta": 0.6674360343004578,
+    "moat": false
+  },
+  {
+    "ticker": "SAPR4",
+    "razao": 1.7059679767103348,
+    "potencial": 0.7059679767103348,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "escalaIncerta"
+    ],
+    "pesoTerminal": 0.7950724749517891,
+    "fatorBase": 1.206730489981894,
+    "desconto": 0.14086384141758157,
+    "beta": 0.6171580428432596,
+    "moat": false
+  },
+  {
+    "ticker": "SAUD3",
+    "razao": 0.08713410483321989,
+    "potencial": -0.9128658951667802,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "escalaIncerta"
+    ],
+    "pesoTerminal": 0.2863127817174561,
+    "fatorBase": 1.0,
+    "desconto": 0.17415689011163796,
+    "beta": 0.6053281580737525,
+    "moat": true
+  },
+  {
+    "ticker": "SBFG3",
+    "razao": 0.6784492588369442,
+    "potencial": -0.3215507411630558,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.29488120490001785,
+    "fatorBase": 1.0,
+    "desconto": 0.23861096898021575,
+    "beta": 1.7772205011388031,
+    "moat": false
+  },
+  {
+    "ticker": "SBSP3",
+    "razao": 0.12382739212007504,
+    "potencial": -0.8761726078799249,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "escalaIncerta",
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.6674252388107005,
+    "fatorBase": 0.6828424928485592,
+    "desconto": 0.166861161204192,
+    "beta": 0.956706009835984,
+    "moat": false
+  },
+  {
+    "ticker": "SEER3",
+    "razao": 0.8208516886930984,
+    "potencial": -0.1791483113069016,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.3905636190246912,
+    "fatorBase": 1.0,
+    "desconto": 0.18806150354606363,
+    "beta": 1.5056683943956768,
+    "moat": false
+  },
+  {
+    "ticker": "SHUL4",
+    "razao": 0.8898876404494381,
+    "potencial": -0.11011235955056184,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.5362750260166105,
+    "fatorBase": 1.0,
+    "desconto": 0.15406250495973922,
+    "beta": 0.7334041908415659,
+    "moat": false
+  },
+  {
+    "ticker": "SLCE3",
+    "razao": 0.8169567658618755,
+    "potencial": -0.18304323413812454,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.6769162130540866,
+    "fatorBase": 1.0,
+    "desconto": 0.16093567310968582,
+    "beta": 0.5119998641166802,
+    "moat": false
+  },
+  {
+    "ticker": "SMFT3",
+    "razao": 0.2948863636363636,
+    "potencial": -0.7051136363636363,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.19300027843169268,
+    "fatorBase": 1.0,
+    "desconto": 0.2184069231977372,
+    "beta": 1.4098742141846474,
+    "moat": false
+  },
+  {
+    "ticker": "SMTO3",
+    "razao": 1.030168150346192,
+    "potencial": 0.03016815034619186,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.6846557228346786,
+    "fatorBase": 1.9838633353053838,
+    "desconto": 0.14086384141758157,
+    "beta": 0.8948039942797881,
+    "moat": false
+  },
+  {
+    "ticker": "SUZB3",
+    "razao": 0.658883464232647,
+    "potencial": -0.341116535767353,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "escalaIncerta"
+    ],
+    "pesoTerminal": 0.6058246505264359,
+    "fatorBase": 1.6537526055603498,
+    "desconto": 0.14086384141758157,
+    "beta": 0.3430173938665053,
+    "moat": false
+  },
+  {
+    "ticker": "TAEE11",
+    "razao": 0.3463877402091948,
+    "potencial": -0.6536122597908051,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.7566313062742694,
+    "fatorBase": 1.0,
+    "desconto": 0.15184891906954473,
+    "beta": 0.514627140608694,
+    "moat": false
+  },
+  {
+    "ticker": "TAEE4",
+    "razao": 0.36514822848879247,
+    "potencial": -0.6348517715112076,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "ponteFragil"
+    ],
+    "pesoTerminal": 0.7643662921675705,
+    "fatorBase": 1.0,
+    "desconto": 0.15004291051582752,
+    "beta": 0.45234139780171523,
+    "moat": false
+  },
+  {
+    "ticker": "TEND3",
+    "razao": 0.1279491833030853,
+    "potencial": -0.8720508166969146,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "escalaIncerta",
+      "baseNormalizadaForte"
+    ],
+    "pesoTerminal": 0.215007881375702,
+    "fatorBase": 0.42925285428539556,
+    "desconto": 0.20288016086675875,
+    "beta": 1.5972095416886225,
+    "moat": false
+  },
+  {
+    "ticker": "TGMA3",
+    "razao": 0.440793368857312,
+    "potencial": -0.559206631142688,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.3902889828247013,
+    "fatorBase": 0.7445817292257043,
+    "desconto": 0.18826221410729038,
+    "beta": 1.0051484717539199,
+    "moat": false
+  },
+  {
+    "ticker": "TOTS3",
+    "razao": 0.22647669931730485,
+    "potencial": -0.7735233006826951,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.38218248921902065,
+    "fatorBase": 1.0,
+    "desconto": 0.19438442712521997,
+    "beta": 1.1160308501973277,
+    "moat": false
+  },
+  {
+    "ticker": "UGPA3",
+    "razao": 0.3472847682119205,
+    "potencial": -0.6527152317880794,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.4282851774893579,
+    "fatorBase": 1.0,
+    "desconto": 0.20911576884620525,
+    "beta": 1.2409441350658847,
+    "moat": false
+  },
+  {
+    "ticker": "UNIP6",
+    "razao": 0.24735356386732532,
+    "potencial": -0.7526464361326746,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.46992052279996493,
+    "fatorBase": 1.0,
+    "desconto": 0.15897069504094796,
+    "beta": 0.8280560741187342,
+    "moat": false
+  },
+  {
+    "ticker": "VALE3",
+    "razao": 0.794595280385689,
+    "potencial": -0.20540471961431098,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "baseNormalizadaForte"
+    ],
+    "pesoTerminal": 0.3951475039126392,
+    "fatorBase": 2.1795621917032193,
+    "desconto": 0.16837829021370737,
+    "beta": 0.842659424119398,
+    "moat": false
+  },
+  {
+    "ticker": "VAMO3",
+    "razao": 0.3411764705882353,
+    "potencial": -0.6588235294117648,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.277700970469143,
+    "fatorBase": 1.0,
+    "desconto": 0.24063389167875643,
+    "beta": 1.8140009138395432,
+    "moat": false
+  },
+  {
+    "ticker": "VBBR3",
+    "razao": 0.9678197908286404,
+    "potencial": -0.0321802091713595,
+    "crescimentoIdentificado": true,
+    "ressalvas": [
+      "baseNormalizadaForte",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.4408826660092463,
+    "fatorBase": 3.0,
+    "desconto": 0.20661070351881672,
+    "beta": 1.1953974927497302,
+    "moat": true
+  },
+  {
+    "ticker": "VIVT3",
+    "razao": 0.2512479201331115,
+    "potencial": -0.7487520798668885,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.31705761540231614,
+    "fatorBase": 0.785077868563293,
+    "desconto": 0.16332306606598218,
+    "beta": 0.575994995798439,
+    "moat": false
+  },
+  {
+    "ticker": "VLID3",
+    "razao": 0.4803149606299212,
+    "potencial": -0.5196850393700788,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.7701914438369427,
+    "fatorBase": 0.557890046445415,
+    "desconto": 0.16177146023526312,
+    "beta": 0.9819552504617088,
+    "moat": false
+  },
+  {
+    "ticker": "VULC3",
+    "razao": 0.7419354838709677,
+    "potencial": -0.2580645161290322,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.4711507442223706,
+    "fatorBase": 1.0,
+    "desconto": 0.1789562243983933,
+    "beta": 1.0048910364546322,
+    "moat": false
+  },
+  {
+    "ticker": "WEGE3",
+    "razao": 0.24980635166537568,
+    "potencial": -0.7501936483346243,
+    "crescimentoIdentificado": true,
+    "ressalvas": [],
+    "pesoTerminal": 0.5645446782906742,
+    "fatorBase": 1.0,
+    "desconto": 0.17839383356046992,
+    "beta": 0.7126595622429801,
+    "moat": true
+  },
+  {
+    "ticker": "WIZC3",
+    "razao": 1.846251588310038,
+    "potencial": 0.846251588310038,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado"
+    ],
+    "pesoTerminal": 0.33494864812478337,
+    "fatorBase": 1.0,
+    "desconto": 0.20066501942116044,
+    "beta": 1.087294145519616,
+    "moat": false
+  },
+  {
+    "ticker": "YDUQ3",
+    "razao": 0.2529644268774704,
+    "potencial": -0.7470355731225296,
+    "crescimentoIdentificado": false,
+    "ressalvas": [
+      "crescimentoNaoIdentificado",
+      "viaMigrada"
+    ],
+    "pesoTerminal": 0.37266983067701526,
+    "fatorBase": 1.0,
+    "desconto": 0.23236103333138802,
+    "beta": 1.6635853075237539,
+    "moat": false
+  }
+]
