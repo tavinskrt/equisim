@@ -102,6 +102,21 @@ class ValuationInputs {
   double get terminalRiskFreeRate =>
       declaredTerminalRiskFreeRate ?? capm.riskFreeRate;
 
+  /// Retorno terminal imposto de fora, no lugar do que o veredito de vantagem
+  /// competitiva decidiria.
+  ///
+  /// **Existe para o DCF reverso e não é usado pelo aplicativo.** A pergunta
+  /// que ele responde — qual `RONIC_∞` iguala o preço justo ao preço de
+  /// mercado — exige varrer o retorno terminal pela cascata inteira, com o
+  /// roteamento, as guardas e a ponte no lugar. Reimplementar o desconto no
+  /// utilitário mediria outro motor.
+  ///
+  /// Nulo é o comportamento de produção: quem decide é
+  /// [GrowthGuards.residualMoat]. Preenchido, ele **substitui** o veredito
+  /// sem simular sua aprovação — a narrativa de vantagem competitiva continua
+  /// atrelada ao veredito real, e o resultado declara a imposição.
+  final double? terminalReturnOverride;
+
   /// Teto **nominal** do crescimento na perpetuidade, em fração.
   ///
   /// Precisa estar na mesma unidade do desconto, que é nominal por vir do CDI.
@@ -127,6 +142,7 @@ class ValuationInputs {
     this.declaredTerminalRiskFreeRate,
     this.prices,
     this.isDistressed = false,
+    this.terminalReturnOverride,
   });
 }
 
@@ -927,7 +943,12 @@ abstract final class ValuationCascade {
       periods: series.length,
       operationalDecline: queda,
     );
-    final moat = moatVeredito.terminalReturn;
+    // O veredito e o retorno terminal efetivamente aplicado são grandezas
+    // distintas: o segundo pode vir imposto pelo DCF reverso. Manter os dois
+    // separados é o que impede a narrativa de vantagem competitiva de afirmar
+    // um veredito que não houve.
+    final moatVerificado = moatVeredito.terminalReturn;
+    final moat = inputs.terminalReturnOverride ?? moatVerificado;
 
     _auditDiscountTerm(audit, inputs, desconto, descontoTerminal);
     _auditMoat(audit, moatVeredito);
@@ -950,14 +971,24 @@ abstract final class ValuationCascade {
       );
     }
 
-    if (moat != null) {
+    if (inputs.terminalReturnOverride != null) {
+      local.add(
+        'Retorno terminal imposto em '
+        '${_pct(inputs.terminalReturnOverride!)} por varredura externa. '
+        'Este resultado é instrumento de diagnóstico, não avaliação: o '
+        'veredito de vantagem competitiva foi ignorado.',
+      );
+    }
+
+    if (moatVerificado != null && inputs.terminalReturnOverride == null) {
       local.add(
         'Vantagem competitiva comprovada: retorno do ciclo de '
         '${_pct(retornoCiclo!)} contra custo de capital de equilíbrio de '
         '${_pct(descontoTerminal)}, crescimento orgânico e '
         '${series.length} exercícios. A perpetuidade preserva '
         '${_pct(ValuationParameters.moatRetainedSpread)} do excedente, com '
-        'retorno terminal de ${_pct(moat)} em vez do estado estacionário. '
+        'retorno terminal de ${_pct(moatVerificado)} em vez do estado '
+        'estacionário. '
         'O valor terminal volta a depender do crescimento perpétuo.',
       );
     }
@@ -1179,8 +1210,12 @@ abstract final class ValuationCascade {
         divisor: divisor,
         baseFactor: fatorBase,
         growthOrigin: origem,
-        moatApplied: moat != null,
+        // O veredito, e não o retorno imposto: `moatApplied` alimenta relatório
+        // de cobertura, e uma varredura de diagnóstico não é vantagem
+        // competitiva reconhecida.
+        moatApplied: moatVerificado != null,
         migrated: !allowLaneMigration,
+        terminalDiscountRate: descontoTerminal,
       ),
     );
   }
@@ -1201,6 +1236,7 @@ abstract final class ValuationCascade {
     required GrowthOrigin growthOrigin,
     required bool moatApplied,
     required bool migrated,
+    required double terminalDiscountRate,
   }) {
     final caveats = <ValuationCaveat>[];
     if (outcome.terminalShare > ValuationDiagnostics.terminalShareLimit) {
@@ -1224,6 +1260,7 @@ abstract final class ValuationCascade {
       baseFactor: baseFactor,
       growthIdentified: growthOrigin == GrowthOrigin.fundamental,
       moatApplied: moatApplied,
+      terminalDiscountRate: terminalDiscountRate,
       caveats: List.unmodifiable(caveats),
     );
   }

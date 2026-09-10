@@ -175,7 +175,18 @@ por construção; o `close` dos ativos não. Beta e correlação misturam as dua
 convenções. O efeito é de segunda ordem, porque essas medidas olham
 covariância de variações e não nível.
 
-### 2.8. O terminal neutro desloca o nível do potencial
+### 2.8. O terminal neutro comprime o valor — mas não é ele que desloca o nível
+
+> **Correção de 09/09/2026.** Esta seção atribuía ao terminal neutro o
+> deslocamento do nível do potencial. O [DCF reverso](dcf_reverso.md) mediu, e
+> **não é ele**: o retorno terminal é *inatingível* em 73 dos 122 avaliados —
+> nem 200% ao ano perpétuo alcança o preço de mercado — e não é explicação
+> exclusiva em ativo nenhum, contra 56 ativos em que o nível da curva de
+> desconto resolve e o terminal não. O que se lê abaixo continua verdadeiro
+> como **mecanismo**: o múltiplo terminal cai de `1/(r − g_∞)` para `1/r`, e
+> isso comprime. O que deixou de se sustentar é a atribuição do nível
+> observado a ele. Ver a [decisão 35](../decisoes/035-dcf-reverso-e-regressao-condicional.md).
+
 
 A [decisão 25](../decisoes/025-reconstrucao-do-motor-de-avaliacao.md) adotou
 `ROIC_∞ = WACC` e `ROE_∞ = Ke`: nenhuma empresa preserva retorno excedente na

@@ -1770,7 +1770,96 @@ entrariam num otimizador com retorno esperado negativo.
 
 ---
 
+## 17. Sétima rodada — o DCF reverso da [decisão 35](decisoes/035-dcf-reverso-e-regressao-condicional.md)
+
+Esta rodada não conserta nada. Ela **mede qual conserto vale a pena**, e o
+resultado contraria a hipótese que estava em primeiro lugar na fila.
+
+O relatório completo está em [`docs/validacao/dcf_reverso.md`](validacao/dcf_reverso.md).
+Aqui ficam só as três coisas que mudam o que vem depois.
+
+### 17.1 A assimetria entre os eixos
+
+Cada ativo avaliado foi varrido em três eixos, procurando o valor que iguala o
+preço justo ao preço de mercado:
+
+| Eixo | raiz única | inatingível |
+|---|---:|---:|
+| `RONIC_∞` | 45 | **73** |
+| Prêmio de risco | 46 | **72** |
+| Nível da curva de desconto | **99** | 16 |
+
+```
+ativos em que a TAXA resolve e o TERMINAL é inatingível:   56
+ativos em que o TERMINAL resolve e a TAXA é inatingível:    0
+```
+
+Nem retorno terminal de 200% ao ano perpétuo alcança o preço em 73 dos 122. O
+terminal neutro **não é** a explicação do viés de nível, e a §2.8 das
+[limitações](validacao/limitacoes.md) — que o descrevia como o deslocador do
+nível do potencial — passa a ter essa correção ao lado.
+
+O fator de normalização da base sai junto: mediana **1,00**, abaixo de 1 em
+apenas 27 dos 122. A saturação de `[0,33; 3,00]` da
+[decisão 28](decisoes/028-travas-de-ciclo-saturacao-e-saude.md) confina catorze
+ativos e não move o universo.
+
+### 17.2 A taxa que resolveria não é uma taxa
+
+O eixo da curva resolve 99 dos 122, com deslocamento mediano de −3,4 p.p. e
+taxa de equilíbrio implícita de **5,98%** contra os 9,40% medidos. Só que:
+
+| Taxa de equilíbrio implícita | Ativos |
+|---|---:|
+| abaixo do crescimento nominal da economia (6,86%) | **63 de 99** |
+| abaixo da âncora de inflação (5,00%) | **44 de 99** |
+
+Taxa livre de risco nominal abaixo da inflação esperada é taxa real negativa.
+A leitura que sobra: o desconto do motor está alto na direção certa — o CDI de
+14,09% é *overnight* em pico de ciclo e a taxa de equilíbrio é média
+histórica —, e a curva observada da §2.9 das limitações **não fecha o vão**.
+
+O resíduo fica no fluxo-base, com multiplicador mediano necessário de 1,64×, e
+nenhuma instrumentação atual o isola. O suspeito nomeado é o freio de
+reinvestimento: o fluxo explícito paga `1 − g/ROIC` e o terminal, `NOPAT/WACC`,
+não paga nada. **É hipótese.**
+
+### 17.3 A ordenação não sobrevive ao controle
+
+| Grandeza, 36 meses | média | IC 95% | t |
+|---|---:|---|---:|
+| IC do potencial, sozinho | 0,170 | [+0,012; +0,329] | 2,98 |
+| coef. do potencial **com** P/B e L/P | **0,041** | [−0,170; +0,253] | 0,54 |
+| IC incremental do potencial | **0,031** | [−0,090; +0,152] | 0,71 |
+
+Em doze meses o quadro se inverte — o coeficiente não cai ao entrar com os
+outros (0,098 sozinho, 0,100 acompanhado) —, mas ali o sinal é fraco para os
+três e o `t` não sustenta afirmação.
+
+Cinco coortes sobrepostas têm potência baixa, e não rejeitar não prova
+ausência. O que a medição estabelece é que a contribuição própria da cascata
+não é detectável neste tamanho de amostra, e que o intervalo exclui o 0,170 do
+IC bruto.
+
+### 17.4 O que fica em aberto
+
+1. **O nível do fluxo explícito não tem instrumentação.** É a pendência de
+   maior efeito medido, e a única que explica o resíduo depois de terminal e
+   taxa saírem.
+2. **A não monotonia sobreviveu à [decisão 34](decisoes/034-fronteira-das-vias-medida-na-taxa-estrutural.md)**,
+   em 46 dos 122. Aquela decisão resolveu a travessia induzida por mover só a
+   taxa corrente; deslocar as duas juntas move a participação estrutural e a
+   fronteira volta a ser cruzada.
+3. **Dezesseis ativos são inatingíveis nos três eixos** — ALPA4, AXIA3, B3SA3,
+   BRAP4, EMBJ3, FESA4, MDNE3, MULT3, RAIL3, RENT4, SAUD3, SBSP3, SMFT3,
+   TEND3, TOTS3 e UGPA3 —, com peso terminal baixo e multiplicador de fluxo de
+   2,55× a 14,09×. São o recorte onde investigar o item 1.
+4. **A estatística nova não tem conferência externa**, por ausência de `numpy`
+   e `statsmodels` na máquina do projeto.
+
+---
+
 *Documento gerado a partir de medições executadas contra a cascata real do Equisim e dados de
 produção da brapi. As seções 1 a 9 têm data de referência em 02/09/2026; as seções 10 a 16
 registram a homologação de 05/09, a implementação de 06–07/09 e as seis rodadas de validação de
-07/09.*
+07/09; a seção 17 registra o DCF reverso de 09/09.*

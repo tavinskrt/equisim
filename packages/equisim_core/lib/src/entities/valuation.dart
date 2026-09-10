@@ -198,6 +198,15 @@ class ValuationDiagnostics {
   /// `true` quando a perpetuidade preserva excedente de retorno.
   final bool moatApplied;
 
+  /// Custo de capital de equilíbrio — a taxa que desconta a perpetuidade.
+  ///
+  /// [ValuationResult.discountRate] é a taxa do **primeiro ano**, e desde a
+  /// estrutura a termo da decisão 31 as duas não coincidem: a taxa decai
+  /// linearmente do CDI corrente até esta ao longo da projeção. Com o terminal
+  /// respondendo pela maior parte do valor, era esta que faltava sair — e ela
+  /// é também a referência contra a qual o excedente de retorno se mede.
+  final double terminalDiscountRate;
+
   /// Ressalvas medidas, na ordem em que a cascata as apura.
   final List<ValuationCaveat> caveats;
 
@@ -207,6 +216,7 @@ class ValuationDiagnostics {
     required this.baseFactor,
     required this.growthIdentified,
     required this.moatApplied,
+    required this.terminalDiscountRate,
     this.caveats = const [],
   });
 

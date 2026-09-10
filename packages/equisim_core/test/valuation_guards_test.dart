@@ -1359,6 +1359,7 @@ void main() {
         baseFactor: 1.0,
         growthIdentified: true,
         moatApplied: false,
+        terminalDiscountRate: 0.12,
       );
       expect(d.hasCaveats, isFalse);
       expect(d.caveats, isEmpty);
@@ -1673,6 +1674,117 @@ void main() {
       expect(vias.length, 1,
           reason: 'a estrutura de capital é fato de longo prazo; qual via a '
               'descreve não pode depender de onde a Selic está hoje');
+    });
+  });
+
+  group('Retorno terminal imposto — a costura do DCF reverso', () {
+    // `terminalReturnOverride` existe para a varredura da decisão 35. Ele é a
+    // única entrada capaz de mudar o valor terminal de fora, e por isso precisa
+    // de três garantias travadas: não fazer nada quando nulo, mandar quando
+    // preenchido, e não se passar por vantagem competitiva reconhecida.
+    FundamentalsSnapshot exercicio(int ano, double escala) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(ano, 12, 31),
+          totalRevenue: 10000 * escala,
+          ebit: 1400 * escala,
+          ebitda: 1900 * escala,
+          netIncome: 700 * escala,
+          incomeBeforeTax: 1060 * escala,
+          incomeTaxExpense: 360 * escala,
+          interestExpense: 120,
+          earningsPerShare: 0.7 * escala,
+          cash: 800,
+          shortTermInvestments: 200,
+          shortTermDebt: 400,
+          longTermDebt: 1600,
+          totalStockholderEquity: 5000 * escala,
+          bookValuePerShare: 5.0 * escala,
+          operatingCashFlow: 1500 * escala,
+          freeCashFlow: 900 * escala,
+          nopat: 924 * escala,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 12000,
+          enterpriseToEbitda: 8.0,
+        );
+
+    List<FundamentalsSnapshot> serie() {
+      final out = <FundamentalsSnapshot>[];
+      var escala = 1.0;
+      for (var i = 15; i >= 0; i--) {
+        out.add(exercicio(2025 - i, escala));
+        escala *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult? com(double? imposto) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: serie(),
+        marketPrice: 12.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.14,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        declaredTerminalRiskFreeRate: 0.094,
+        terminalReturnOverride: imposto,
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('nulo é exatamente o comportamento de produção', () {
+      final semCampo = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: serie(),
+        marketPrice: 12.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.14,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        declaredTerminalRiskFreeRate: 0.094,
+      ));
+      final comNulo = com(null);
+      expect(semCampo.isOk, isTrue);
+      expect(comNulo, isNotNull);
+      expect(comNulo!.fairValue.reais,
+          closeTo(semCampo.unwrap().fairValue.reais, 1e-9));
+    });
+
+    test('retorno terminal maior não reduz o preço justo', () {
+      // Monotonia é o que a varredura por bissecção pressupõe dentro do
+      // intervalo que ela isola. Se ela quebrasse aqui, a raiz não teria
+      // significado.
+      final baixo = com(0.10);
+      final alto = com(0.40);
+      expect(baixo, isNotNull);
+      expect(alto, isNotNull);
+      expect(alto!.fairValue.reais,
+          greaterThanOrEqualTo(baixo!.fairValue.reais - 0.01));
+      expect(alto.fairValue.reais, greaterThan(baixo.fairValue.reais),
+          reason: 'sem efeito algum, a varredura da decisão 35 não mede nada');
+    });
+
+    test('imposição não se passa por vantagem competitiva reconhecida', () {
+      final v = com(0.40);
+      expect(v, isNotNull);
+      expect(v!.diagnostics!.moatApplied, isFalse,
+          reason: 'moatApplied alimenta relatório de cobertura; varredura de '
+              'diagnóstico não é veredito');
+      expect(
+        v.warnings.any((w) => w.contains('imposto')),
+        isTrue,
+        reason: 'o resultado precisa declarar que é instrumento, não avaliação',
+      );
+      expect(
+        v.warnings.any((w) => w.contains('Vantagem competitiva comprovada')),
+        isFalse,
+      );
     });
   });
 }

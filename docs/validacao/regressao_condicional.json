@@ -1,0 +1,434 @@
+{
+ "gerado": "2026-09-09T22:30:51.702058",
+ "fonte": "docs/validacao/backtest_valuation.json",
+ "h36": {
+  "observacoes": 462,
+  "coortesUsadas": 5,
+  "porCoorte": [
+   {
+    "coorte": 2018,
+    "n": 70,
+    "coefPotencial": 0.11294333700157155,
+    "coefBookToMarket": 0.059974856127692905,
+    "coefEarningsYield": 0.02706281247764386,
+    "tPotencial": 0.4618049518730821,
+    "r2": 0.031439573726226744,
+    "coefSozinho": 0.16784183361035776,
+    "icIncremental": 0.03333041728632666,
+    "icPotencial": 0.1678418336103578,
+    "icBookToMarket": 0.1353687341439944,
+    "icEarningsYield": 0.1612632315632928
+   },
+   {
+    "coorte": 2019,
+    "n": 81,
+    "coefPotencial": -0.22353137261298506,
+    "coefBookToMarket": 0.04021219297040579,
+    "coefEarningsYield": 0.4747456943473132,
+    "tPotencial": -1.3069176933625888,
+    "r2": 0.13262559531390006,
+    "coefSozinho": 0.16427280939476063,
+    "icIncremental": -0.08279132791327913,
+    "icPotencial": 0.1642728093947606,
+    "icBookToMarket": 0.287962962962963,
+    "icEarningsYield": 0.3323170731707317
+   },
+   {
+    "coorte": 2020,
+    "n": 90,
+    "coefPotencial": 0.24277992836605722,
+    "coefBookToMarket": -0.02161933948390543,
+    "coefEarningsYield": 0.1653984288124315,
+    "tPotencial": 1.4465303638069131,
+    "r2": 0.14159597967483384,
+    "coefSozinho": 0.36494217393093764,
+    "icIncremental": 0.18470593077334652,
+    "icPotencial": 0.364942173930938,
+    "icBookToMarket": 0.20265053298761163,
+    "icEarningsYield": 0.34689879408980534
+   },
+   {
+    "coorte": 2021,
+    "n": 108,
+    "coefPotencial": 0.04291872011397474,
+    "coefBookToMarket": 0.23584349395363136,
+    "coefEarningsYield": -0.010647311770576817,
+    "tPotencial": 0.32395948012797005,
+    "r2": 0.06353507972619676,
+    "coefSozinho": 0.1491135309192413,
+    "icIncremental": 0.02187354120818924,
+    "icPotencial": 0.1491135309192413,
+    "icBookToMarket": 0.24982137243133556,
+    "icEarningsYield": 0.16750026198710072
+   },
+   {
+    "coorte": 2022,
+    "n": 113,
+    "coefPotencial": 0.031550350752408765,
+    "coefBookToMarket": 0.4119130974579683,
+    "coefEarningsYield": -0.36925733687575846,
+    "tPotencial": 0.24953989779144164,
+    "r2": 0.10661597920231569,
+    "coefSozinho": 0.0058802980903586355,
+    "icIncremental": -0.0033768048439683277,
+    "icPotencial": 0.00588029809035864,
+    "icBookToMarket": 0.1880115110785814,
+    "icEarningsYield": -0.07849823674229822
+   }
+  ],
+  "famaMacBeth": {
+   "potencialConjunto": {
+    "media": 0.04133219272420544,
+    "desvio": 0.17026468800414182,
+    "t": 0.5428112762183392,
+    "coortes": 5,
+    "positivas": 4
+   },
+   "bookToMarketConjunto": {
+    "media": 0.14526486020515858,
+    "desvio": 0.17710629231925942,
+    "t": 1.8340517319124965,
+    "coortes": 5,
+    "positivas": 4
+   },
+   "earningsYieldConjunto": {
+    "media": 0.05746045739821064,
+    "desvio": 0.30554391486192,
+    "t": 0.42051398346026386,
+    "coortes": 5,
+    "positivas": 3
+   },
+   "potencialSozinho": {
+    "media": 0.17041012918913118,
+    "desvio": 0.12787747034478572,
+    "t": 2.97979489189165,
+    "coortes": 5,
+    "positivas": 5
+   },
+   "icIncremental": {
+    "media": 0.030748351302122993,
+    "desvio": 0.09726786549770665,
+    "t": 0.7068665828717325,
+    "coortes": 5,
+    "positivas": 3
+   },
+   "icPotencial": {
+    "media": 0.17041012918913126,
+    "desvio": 0.12787747034478583,
+    "t": 2.979794891891649,
+    "coortes": 5,
+    "positivas": 5
+   },
+   "icBookToMarket": {
+    "media": 0.2127630227208972,
+    "desvio": 0.058594214682811945,
+    "t": 8.119446339159076,
+    "coortes": 5,
+    "positivas": 5
+   },
+   "icEarningsYield": {
+    "media": 0.1858962248137265,
+    "desvio": 0.17190878340952975,
+    "t": 2.4180067312432194,
+    "coortes": 5,
+    "positivas": 4
+   }
+  }
+ },
+ "h12": {
+  "observacoes": 668,
+  "coortesUsadas": 7,
+  "porCoorte": [
+   {
+    "coorte": 2018,
+    "n": 70,
+    "coefPotencial": 0.4959652330956055,
+    "coefBookToMarket": 0.06279061192387808,
+    "coefEarningsYield": -0.14916413510419324,
+    "tPotencial": 2.1840397592616783,
+    "r2": 0.16496621287147473,
+    "coefSozinho": 0.3992476598722771,
+    "icIncremental": 0.2259994751115388,
+    "icPotencial": 0.3992476598722771,
+    "icBookToMarket": 0.23261306972268392,
+    "icEarningsYield": 0.31946461376957397
+   },
+   {
+    "coorte": 2019,
+    "n": 81,
+    "coefPotencial": 0.022017789937575714,
+    "coefBookToMarket": 0.08766872909169895,
+    "coefEarningsYield": -0.06233717521994281,
+    "tPotencial": 0.12010603625960847,
+    "r2": 0.0035766722963745945,
+    "coefSozinho": 0.018179765130984637,
+    "icIncremental": 0.048373983739837395,
+    "icPotencial": 0.018179765130984644,
+    "icBookToMarket": 0.051422764227642276,
+    "icEarningsYield": 0.02136404697380307
+   },
+   {
+    "coorte": 2020,
+    "n": 90,
+    "coefPotencial": 0.16387761312292393,
+    "coefBookToMarket": 0.15159235296327656,
+    "coefEarningsYield": 0.03424244109197638,
+    "tPotencial": 0.9489554658434936,
+    "r2": 0.09119880371377809,
+    "coefSozinho": 0.2666255093221383,
+    "icIncremental": 0.13716096637444952,
+    "icPotencial": 0.2666255093221385,
+    "icBookToMarket": 0.25441000946618925,
+    "icEarningsYield": 0.2610281104663127
+   },
+   {
+    "coorte": 2021,
+    "n": 108,
+    "coefPotencial": -0.06165171611872168,
+    "coefBookToMarket": 0.17570589649608886,
+    "coefEarningsYield": 0.042267623130124554,
+    "tPotencial": -0.45765556599823665,
+    "r2": 0.03173949320512348,
+    "coefSozinho": 0.05237836653424421,
+    "icIncremental": -0.06198138462564425,
+    "icPotencial": 0.052378366534244096,
+    "icBookToMarket": 0.17258757514266387,
+    "icEarningsYield": 0.10987262663503768
+   },
+   {
+    "coorte": 2022,
+    "n": 113,
+    "coefPotencial": -0.2001207209417644,
+    "coefBookToMarket": 0.08752283162584258,
+    "coefEarningsYield": 0.09512455065722117,
+    "tPotencial": -1.5129964072519744,
+    "r2": 0.022271878426836533,
+    "coefSozinho": -0.08677390378601367,
+    "icIncremental": -0.18604863929735843,
+    "icPotencial": -0.08677390378601371,
+    "icBookToMarket": 0.039373877170803116,
+    "icEarningsYield": 0.015353649610752544
+   },
+   {
+    "coorte": 2023,
+    "n": 107,
+    "coefPotencial": 0.2507398342207919,
+    "coefBookToMarket": 0.14057773722917724,
+    "coefEarningsYield": -0.28617510463191,
+    "tPotencial": 1.853814503923065,
+    "r2": 0.0512236876720652,
+    "coefSozinho": 0.1128842649738434,
+    "icIncremental": 0.17317149630674583,
+    "icPotencial": 0.11288426497384353,
+    "icBookToMarket": 0.09528987636905112,
+    "icEarningsYield": -0.033278473324320615
+   },
+   {
+    "coorte": 2024,
+    "n": 99,
+    "coefPotencial": 0.02787147585526878,
+    "coefBookToMarket": 0.16151678709215675,
+    "coefEarningsYield": -0.3241584058784136,
+    "tPotencial": 0.23525973665468844,
+    "r2": 0.07567458187734732,
+    "coefSozinho": -0.07901051329622759,
+    "icIncremental": 0.007000618429189857,
+    "icPotencial": -0.07901051329622759,
+    "icBookToMarket": 0.016895485466914037,
+    "icEarningsYield": -0.2318243661100804
+   }
+  ],
+  "famaMacBeth": {
+   "potencialConjunto": {
+    "media": 0.09981421559595424,
+    "desvio": 0.22769809867197205,
+    "t": 1.1597970879692128,
+    "coortes": 7,
+    "positivas": 5
+   },
+   "bookToMarketConjunto": {
+    "media": 0.12391070663173129,
+    "desvio": 0.043806861703381446,
+    "t": 7.4836886683562,
+    "coortes": 7,
+    "positivas": 7
+   },
+   "earningsYieldConjunto": {
+    "media": -0.09288574370787679,
+    "desvio": 0.16569257296475864,
+    "t": -1.48318403050325,
+    "coortes": 7,
+    "positivas": 3
+   },
+   "potencialSozinho": {
+    "media": 0.09764730696446378,
+    "desvio": 0.179504923907484,
+    "t": 1.4392390180689931,
+    "coortes": 7,
+    "positivas": 5
+   },
+   "icIncremental": {
+    "media": 0.04909664514839411,
+    "desvio": 0.14367134706947993,
+    "t": 0.9041295701599974,
+    "coortes": 7,
+    "positivas": 5
+   },
+   "icPotencial": {
+    "media": 0.0976473069644638,
+    "desvio": 0.179504923907484,
+    "t": 1.4392390180689936,
+    "coortes": 7,
+    "positivas": 5
+   },
+   "icBookToMarket": {
+    "media": 0.12322752250942105,
+    "desvio": 0.09650978270035386,
+    "t": 3.3782003245288283,
+    "coortes": 7,
+    "positivas": 7
+   },
+   "icEarningsYield": {
+    "media": 0.06599717257443985,
+    "desvio": 0.18588440451084243,
+    "t": 0.9393585563289972,
+    "coortes": 7,
+    "positivas": 5
+   }
+  }
+ },
+ "h36ajustado": {
+  "observacoes": 462,
+  "coortesUsadas": 5,
+  "porCoorte": [
+   {
+    "coorte": 2018,
+    "n": 70,
+    "coefPotencial": 0.049025042222591964,
+    "coefBookToMarket": 0.04467386638752269,
+    "coefEarningsYield": 0.10873183513963025,
+    "tPotencial": 0.20068068383927679,
+    "r2": 0.033621032243456916,
+    "coefSozinho": 0.16686204181611403,
+    "icIncremental": 0.017513778322106554,
+    "icPotencial": 0.16686204181611408,
+    "icBookToMarket": 0.13575365234887588,
+    "icEarningsYield": 0.17819963257807717
+   },
+   {
+    "coorte": 2019,
+    "n": 81,
+    "coefPotencial": -0.27072210801402297,
+    "coefBookToMarket": 0.018839157315620136,
+    "coefEarningsYield": 0.5596572216822262,
+    "tPotencial": -1.6114840097319587,
+    "r2": 0.16320022868699147,
+    "coefSozinho": 0.17197380307136415,
+    "icIncremental": -0.11050135501355013,
+    "icPotencial": 0.17197380307136403,
+    "icBookToMarket": 0.30724932249322495,
+    "icEarningsYield": 0.364453477868112
+   },
+   {
+    "coorte": 2020,
+    "n": 90,
+    "coefPotencial": 0.22317717907370116,
+    "coefBookToMarket": -0.01894714382854562,
+    "coefEarningsYield": 0.20566444224493563,
+    "tPotencial": 1.3419349322908252,
+    "r2": 0.15713514622493763,
+    "coefSozinho": 0.37901798575955864,
+    "icIncremental": 0.17555253735029017,
+    "icPotencial": 0.3790179857595588,
+    "icBookToMarket": 0.2208585422068568,
+    "icEarningsYield": 0.37309132814750795
+   },
+   {
+    "coorte": 2021,
+    "n": 108,
+    "coefPotencial": 0.060883885847820535,
+    "coefBookToMarket": 0.23171319577766342,
+    "coefEarningsYield": 0.0039009092062512463,
+    "tPotencial": 0.46177268309726877,
+    "r2": 0.07247072539115484,
+    "coefSozinho": 0.1752074461497423,
+    "icIncremental": 0.03134318404831995,
+    "icPotencial": 0.1752074461497423,
+    "icBookToMarket": 0.26349233568645386,
+    "icEarningsYield": 0.19194604018405784
+   },
+   {
+    "coorte": 2022,
+    "n": 113,
+    "coefPotencial": 0.004159808601330667,
+    "coefBookToMarket": 0.3937503120952518,
+    "coefEarningsYield": -0.23356248910816785,
+    "tPotencial": 0.03259734249456831,
+    "r2": 0.0898937671929727,
+    "coefSozinho": 0.06134806041652801,
+    "icIncremental": -0.02158327234014239,
+    "icPotencial": 0.061348060416528044,
+    "icBookToMarket": 0.24342105263157895,
+    "icEarningsYield": 0.026581941579612748
+   }
+  ],
+  "famaMacBeth": {
+   "potencialConjunto": {
+    "media": 0.013304761546284271,
+    "desvio": 0.17912358579783041,
+    "t": 0.16608840823170473,
+    "coortes": 5,
+    "positivas": 4
+   },
+   "bookToMarketConjunto": {
+    "media": 0.1340058775495025,
+    "desvio": 0.1743933052966607,
+    "t": 1.7182210697565017,
+    "coortes": 5,
+    "positivas": 4
+   },
+   "earningsYieldConjunto": {
+    "media": 0.1288783838329751,
+    "desvio": 0.2910563282561731,
+    "t": 0.9901204650228391,
+    "coortes": 5,
+    "positivas": 4
+   },
+   "potencialSozinho": {
+    "media": 0.1908818674426614,
+    "desvio": 0.11549281425948099,
+    "t": 3.6956830085977064,
+    "coortes": 5,
+    "positivas": 5
+   },
+   "icIncremental": {
+    "media": 0.01846497447340483,
+    "desvio": 0.10377792597748052,
+    "t": 0.3978585786566129,
+    "coortes": 5,
+    "positivas": 3
+   },
+   "icPotencial": {
+    "media": 0.19088186744266145,
+    "desvio": 0.11549281425948106,
+    "t": 3.6956830085977055,
+    "coortes": 5,
+    "positivas": 5
+   },
+   "icBookToMarket": {
+    "media": 0.2341549810733981,
+    "desvio": 0.06353923981819204,
+    "t": 8.240363851510635,
+    "coortes": 5,
+    "positivas": 5
+   },
+   "icEarningsYield": {
+    "media": 0.22685448407147352,
+    "desvio": 0.14492556965888148,
+    "t": 3.5001556218024605,
+    "coortes": 5,
+    "positivas": 5
+   }
+  }
+ }
+}
