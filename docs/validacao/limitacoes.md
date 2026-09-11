@@ -94,9 +94,29 @@ no WACC.
 publicado, por `N = lucro ÷ LPA`. Nos 38 divergentes com LPA utilizável, o
 árbitro confirmou a contagem do exercício em 34 e a corrente em nenhum.
 
-**O que sobra.** A contagem do exercício tem a idade do último encerramento.
-Grupamento ou desdobramento posterior a ele não aparece nela, e o preço já o
-reflete.
+**O que sobra, agora medido.** A contagem do exercício tem a idade do último
+encerramento. Grupamento ou desdobramento posterior a ele não aparece nela, e o
+preço já o reflete.
+
+O resíduo **não é simétrico**, e isso é consequência da regra do maior que a
+ponte adota na divergência. `reconciledShares` só pode confirmar a contagem do
+exercício — o árbitro `N = lucro ÷ LPA` compara dois campos das **mesmas**
+demonstrações. Um grupamento reduz a contagem corrente sem tocar a do
+exercício, de modo que a candidata contábil fica maior **sempre** e vence
+**sempre**; um desdobramento faz o contrário, e a regra o absorve bem.
+
+Medido em 11/09/2026: **29 ativos com grupamento aparente** (exercício acima de
+1,5× a corrente), e em **27** a contábil vence. O divisor fica maior que o
+implícito no valor de mercado por praticamente o mesmo fator do grupamento —
+MILS3 4.852×, MEAL3 858×, COGN3 11,5×, SAPR 2,93×, RENT 1,8×. O preço justo
+desses 27 é menor na mesma proporção.
+
+**A regra fica.** Invertê-la faria o MILS3 sair com preço justo de R$ 37.708,72
+contra R$ 15,79 de mercado, que é falso desconto de 238.000% — o pior sentido
+possível. Nada no dado arbitra: o `close` da fonte já vem ajustado por ação
+societária e não denuncia salto em dez anos. O motor declara a escolha e o
+sentido do erro no aviso do resultado. Tabela completa em
+[unidade.md §4](unidade.md).
 
 ### 1.8. O universo devolvido é parcial
 
@@ -148,6 +168,29 @@ imposto a pagar. A conta passou a negar o sinal em vez de modulá-lo: a alíquot
 estrutural mediana caiu de 22,1% para 18,9% e 33 dos 122 preços justos se
 moveram. Ver a §8 de [fluxo_explicito.md](fluxo_explicito.md).
 
+### 2.1-c. O CAGR do índice depende da janela das pontas
+
+`marketCagr` sai do Ibovespa, e até 11/09/2026 saía **ponta a ponta** — o
+fechamento do primeiro pregão contra o do último. A [decisão 60](../decisoes/060-as-pontas-do-cagr-do-indice-sao-medias.md)
+passou a promediar 63 pregões em cada ponta e a contar os anos de centro a
+centro, como o índice de atividade já fazia.
+
+O que sobra é que **a escolha da janela move o número**. Na janela de dez anos,
+2.479 pregões:
+
+| ponta | CAGR |
+|---|---:|
+| 1 pregão | 12,57% |
+| 21 pregões | 11,43% |
+| 63 pregões | 11,06% |
+| 252 pregões | 10,24% |
+
+Do trimestre para o ano sobra 0,82 p.p. de sensibilidade que nenhuma convenção
+elimina — ela é o próprio nível do índice mudando com o recorte. O trimestre é
+o menor prazo em que o resultado para de se mover muito com a janela, e essa é
+a justificativa inteira: não há verdade a apurar aqui, há uma convenção a
+declarar.
+
 ### 2.2. Prêmio de risco de mercado é parâmetro, não observação
 
 O CAPM usa prêmio parametrizado (padrão 5,5%). Estimá-lo pela média histórica
@@ -163,6 +206,13 @@ Assume-se que um exercício se torna público **90 dias** após o encerramento.
 É aproximação: a divulgação real varia por empresa.
 
 **Efeito.** Medido na análise de sensibilidade, variando de 0 a 365 dias.
+
+**Agora medida, e com solução conhecida.** A CVM publica `DT_RECEB` por
+documento. Sobre o universo em 2024: a defasagem real do documento anual tem
+mediana de **78 dias** (p90 de 90, máximo de 472) e a do trimestral, **40**.
+A premissa de 90 dias acerta o p90 do anual, erra a mediana em 12 dias e a do
+trimestral em 50. Com a ingestão do A1 ela deixa de ser premissa.
+Ver [cvm_conferencia.md §5](cvm_conferencia.md).
 
 ### 2.4. Beta com índice de referência único
 
@@ -491,6 +541,37 @@ lucro, distribuição e evento societário.
 
 ---
 
+### 2.17. Não há conferência analítica do balanço, e não pode haver
+
+O capital investido tem duas rotas. A do **financiamento**,
+`PL + dívida bruta − caixa`, é a que o motor usa: é o denominador do ROIC, e
+portanto o freio de reinvestimento `b = g/ROIC` e o veredito de fosso saem
+dela. Ela fecha por construção.
+
+A do lado **operacional**, `imobilizado + intangível + capital de giro`,
+existiria para conferi-la. O comentário de `investedCapital` afirmava que a
+concordância entre as duas "serve de teste de qualidade" — **e esse teste nunca
+foi executado**: `investedCapitalOperating` não é lido por linha nenhuma do
+motor, só por um despejo de auditoria.
+
+Executado em 11/09/2026 sobre 3.915 exercícios de 316 ativos, ele **reprova**:
+distância multiplicativa com mediana de 1,199×, p90 de 3,165×, máximo de 316×,
+e 28% dos exercícios acima de 1,5×. O viés é de mão única — a rota do
+financiamento é 1,35× a operacional, em média geométrica.
+
+**A causa é falta de linha na fonte, não erro de conta.** A rota operacional
+não soma propriedade para investimento, participação em coligada, recebível de
+longo prazo nem crédito tributário diferido, e a fonte não publica nenhuma
+dessas — nem o ativo total de onde inferi-las. Por isso a cauda é setorial:
+as quinze piores são imobiliário e *holding* (HBRE3 316×, BRAP 239×, LOGG3
+157×, IGTI 125×, SYNE3 89×, SCAR3 100×, CURY3 74×), cujo ativo é exatamente o
+que falta.
+
+**Nada de numérico muda por isso**, porque a metade quebrada é a que não é
+usada. O que sobra é a ausência de uma conferência independente do balanço, e
+a alternativa — inventar o não circulante que falta — seria pior. Medição em
+[capital_investido.md](capital_investido.md).
+
 ## 3. Escopo e método
 
 ### 3.1. Ferramenta, não experimento
@@ -533,6 +614,90 @@ As 80 comparações atuais estão dentro de 1e-4.
 
 ---
 
+### 3.5. A validação fora da amostra não exercita a ponte por papel
+
+`tool/backtest_valuation.dart` reconstrói o valor de mercado de cada exercício
+como `contagem do exercício × preço da coorte`. É necessário: a fonte repete o
+valor de mercado **de hoje** em todos os exercícios, e deixá-lo assim daria a
+uma avaliação de 2018 a capitalização de 2026.
+
+A consequência não declarada é que, com `marketCap = N·P` e
+`sharesOutstanding = N`, a razão de unidade vale `N·P ÷ (N·P) = 1` sempre, e a
+contagem implícita no valor de mercado fica **idêntica** à conciliada pelas
+demonstrações. Conferido em 11/09/2026, e não suposto: **351 de 351 ativos**
+saem com `u = 1` e sem divergência sob a reescala do backtest.
+
+**Três peças do motor ficam, portanto, sem evidência preditiva:** a razão de
+unidade da [decisão 61](../decisoes/061-a-tolerancia-da-razao-de-unidade-e-relativa.md),
+a regra do maior na divergência de divisores, e a escolha entre as duas
+contagens da §1.7. Nenhuma delas é exercitada por coorte alguma.
+
+O backtest continua válido para o que mede — a ordenação do universo, em que
+116 dos 127 avaliados não são afetados por essas peças. O que ele **não** é, e
+não pode ser com esta reescala, é evidência sobre a ponte por papel. Consertar
+isso exigiria preservar a contagem implícita no valor de mercado ao longo das
+coortes, o que injetaria a base societária de hoje numa avaliação de 2018 — a
+troca de um viés declarado por outro, e não uma melhora óbvia. Medição em
+[unidade.md §6](unidade.md).
+
+### 3.6. A cascata não supera um fator de valor de uma linha
+
+**É a limitação mais importante do trabalho, e a última a ser medida.**
+
+O cabeçalho de `tool/backtest_valuation.dart` sempre declarou o critério: *"se
+o motor não os supera, a cascata inteira está cobrando um custo de complexidade
+que não entrega."* Executado em 11/09/2026 sobre 8 coortes *point-in-time* e o
+motor atual:
+
+| horizonte | n | motor | book-to-market | earnings yield |
+|---|---:|---:|---:|---:|
+| 12 meses | 685 | +0,0696 | **+0,1394** | +0,0571 |
+| 36 meses | 470 | +0,1559 | **+0,2403** | +0,1383 |
+
+E o teste que decide — regressão transversal com os três preditores em posto
+normalizado por coorte: o coeficiente do motor tem **t = +0,24** em 12 meses e
+**t = +1,16** em 36. Sozinho ele tem sinal (t = +1,85 e +3,42); **condicionado
+ao book-to-market, não tem**. O IC ortogonalizado é de +0,0066 e +0,0394.
+
+**Por quê, medido:** o potencial já é um fator de valor — Spearman de **+0,54**
+com o B/M e **+0,69** com o E/P, estável nas oito coortes —, e é lento, com
+autocorrelação de posto de **+0,666** entre coortes consecutivas. Não é o
+provento: sob retorno ajustado a distância persiste. Não são as ressalvas:
+restringir aos casos sem ressalva **piora** o motor.
+
+**O que isto não é.** Não é prova de que o DCF esteja errado. É prova de que a
+*ordenação* que ele produz não acrescenta à de um fator de uma linha, nesta
+amostra e neste horizonte. Um DCF pode valer como afirmação auditável sobre
+**um** ativo sem ser o melhor ordenador de uma seção transversal — mas o
+projeto usa a ordenação no retorno esperado, na meta e na recomendação de
+troca, e para esse uso o teste é o certo.
+
+**Ressalvas da amostra:** janelas de 36 meses de coortes vizinhas se sobrepõem,
+o `n` efetivo é menor que 470 e os erros-padrão estão subestimados nos dois
+lados; há viés de sobrevivência; os fundamentos vêm como publicados hoje.
+Nenhuma favorece o motor seletivamente.
+
+Reprodução: `python tool/habilidade.py`. Plano de ataque em
+[plano-motor-de-referencia.md](../plano-motor-de-referencia.md).
+
+### 3.7. Ação em tesouraria não é tratada em lugar nenhum
+
+**Descoberto em 11/09/2026 pela conferência do A1**, e sem lista anterior
+porque a fonte atual não publica o campo.
+
+O `composicao_capital` da CVM publica `QT_ACAO_TOTAL_CAP_INTEGR` e
+`QT_ACAO_TOTAL_TESOURO`. Sobre os 286 CNPJs do universo, **178 (62%) têm ações
+em tesouraria maiores que zero**.
+
+Ação em tesouraria não tem direito a fluxo, e a contagem que divide o valor do
+capital próprio deveria ser a integralizada **menos** a em tesouraria. O motor
+não faz essa subtração em caminho nenhum, e não tem como fazer com a fonte de
+hoje.
+
+**Tamanho por medir** — exige comparar `CAP_INTEGR − TESOURO` contra a contagem
+que a ponte usa hoje, ativo a ativo. É a primeira medição depois da ingestão.
+Ver [cvm_conferencia.md §6](cvm_conferencia.md).
+
 ## 4. O que foi verificado, e como
 
 | Evidência | Método | Resultado |
@@ -540,7 +705,9 @@ As 80 comparações atuais estão dentro de 1e-4.
 | Corretude do motor | invariantes matemáticas sem fonte externa | [aprovadas](invariantes.md) |
 | Estatística | Recálculo independente em `pandas`/`numpy` | [80/80 dentro de 1e-4](conferencia_python.md) |
 | Robustez às premissas | Varredura em três eixos | [medida](sensibilidade.md) |
-| Cobertura de testes | 457 testes automatizados, 84,2% no núcleo | — |
+| **Habilidade preditiva** | IC incremental contra fatores ingênuos, 8 coortes | **reprovada** — [§3.6](#36-a-cascata-não-supera-um-fator-de-valor-de-uma-linha) |
+| **Incerteza calibrada** | cobertura da banda fora da amostra | **não medida** |
+| Cobertura de testes | **685** testes automatizados — 419 no núcleo, 266 na aplicação (11/09/2026) | — |
 
 > O oráculo `adjustedClose` previsto no plano original **não pôde ser usado**:
 > a própria auditoria mostrou que aquela série é inconsistente com o fluxo de

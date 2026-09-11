@@ -99,6 +99,40 @@ class FundamentalsSnapshot {
   /// A demonstração consolida 100% das controladas, e o acionista da
   /// controladora não é dono de tudo isso. O fluxo da firma carrega o
   /// resultado inteiro; a ponte precisa devolver a parte que não é dele.
+  /// Data em que o documento se tornou **público**, quando a fonte a informa.
+  ///
+  /// É o `DT_RECEB` da CVM. Enquanto a única fonte era a brapi, a publicidade
+  /// tinha de ser presumida por defasagem fixa de 90 dias (§2.3), e a
+  /// conferência de 11/09/2026 mostrou que a premissa erra: a defasagem real
+  /// tem mediana de **78 dias** no documento anual e de **40** no trimestral.
+  ///
+  /// `null` para exercício vindo de fonte que não publica a data — e aí
+  /// `PointInTimeView` volta a presumir.
+  final DateTime? receiptDate;
+
+  /// Ações em tesouraria na data do exercício.
+  ///
+  /// Ação em tesouraria **não tem direito a fluxo**: quem divide o valor do
+  /// capital próprio deve usar a contagem integralizada menos esta. Medido em
+  /// 11/09/2026 sobre o `composicao_capital` da CVM, **178 das 286 companhias
+  /// do universo (62%) têm tesouraria maior que zero** — e o motor não a
+  /// tratava, porque a fonte anterior não publicava o campo.
+  final double? treasuryShares;
+
+  /// Ativo total publicado.
+  ///
+  /// A conta `1` do plano da CVM, presente em **100%** do universo conferido.
+  /// É o que fecha a lacuna da §2.17: a rota operacional do capital investido
+  /// não conseguia somar o ativo não circulante que não fosse imobilizado nem
+  /// intangível — propriedade para investimento, participação em coligada —, e
+  /// com o total ela passa a obtê-lo por subtração.
+  ///
+  /// **A identidade `ativo = passivo` é conferida na ingestão**, e não aqui:
+  /// ela valida o *leitor* do plano de contas, não a companhia. Medida sobre o
+  /// DFP de 2024, fecha em **283 de 283** dentro de `1e-6` relativo — ver
+  /// `tool/cvm_conferir.dart`.
+  final double? totalAssets;
+
   final double? minorityInterest;
 
   /// Resultado de **equivalência patrimonial**, em reais do exercício.
@@ -151,6 +185,9 @@ class FundamentalsSnapshot {
     this.enterpriseToEbitda,
     this.minorityInterest,
     this.equityIncomeResult,
+    this.receiptDate,
+    this.treasuryShares,
+    this.totalAssets,
   });
 
   /// Depreciação e amortização, derivada de EBITDA − EBIT.
@@ -354,9 +391,12 @@ class FundamentalsSnapshot {
 
   /// Capital investido pelo lado do financiamento: `PL + dívida bruta − caixa`.
   ///
-  /// Base da via A. Equivale, por identidade de balanço, a
-  /// `imobilizado + intangível + capital de giro` — ver [investedCapitalOperating],
-  /// cuja concordância com este serve de teste de qualidade.
+  /// Base da via A, e **a única das duas rotas que fecha com o que a fonte
+  /// publica**. A identidade de balanço a igualaria a `ativo não circulante
+  /// operacional + capital de giro`, mas [investedCapitalOperating] não
+  /// consegue somar o primeiro termo — ver lá por quê, e por que a
+  /// concordância entre as duas **não** serve de teste de qualidade, ao
+  /// contrário do que este comentário afirmou até 11/09/2026.
   ///
   /// A soma que a taxa de reinvestimento pede — `CapEx − Depreciação + ΔNKG` — é
   /// exatamente a variação desta grandeza, o que dispensa o CapEx que a fonte não
@@ -368,10 +408,33 @@ class FundamentalsSnapshot {
     return (ci.isFinite && ci > 0) ? ci : null;
   }
 
-  /// Capital investido pelo lado operacional, quando as linhas existem.
+  /// Capital investido pelo lado operacional, **incompleto por falta de
+  /// linha na fonte**.
   ///
-  /// Devolve `null` sem imobilizado ou sem capital de giro. O capital de giro é
-  /// **operacional**: exclui caixa do ativo e dívida de curto prazo do passivo.
+  /// Soma `imobilizado + intangível + capital de giro`. O capital de giro é
+  /// **operacional**: exclui caixa do ativo e dívida de curto prazo do
+  /// passivo. Devolve `null` sem imobilizado ou sem capital de giro.
+  ///
+  /// **Não é o contraponto de [investedCapital], e não pode ser.** Falta-lhe
+  /// todo ativo não circulante que não seja imobilizado nem intangível —
+  /// propriedade para investimento, participação em coligada, recebível de
+  /// longo prazo, crédito tributário diferido —, e a fonte não publica nenhuma
+  /// dessas linhas nem o ativo total de onde inferi-las.
+  ///
+  /// **A conferência foi feita, e as duas rotas não concordam.** Sobre os
+  /// 3.915 exercícios de 316 ativos em que ambas se apuram (11/09/2026), a
+  /// distância multiplicativa tem mediana de **1,199×**, p90 de **3,165×** e
+  /// máximo de **316×**; 28% passam de 1,5×. O viés é sistemático — a rota do
+  /// financiamento é **1,35×** a operacional, em média geométrica —, e a cauda
+  /// é setorial: as quinze piores são imobiliário e *holding* (HBRE3, IGTI,
+  /// SYNE3, LOGG3, SCAR3, CURY3, BRAP), cujo ativo é propriedade para
+  /// investimento ou participação societária, exatamente as linhas que faltam.
+  ///
+  /// Fica no lugar porque é informação útil onde o ativo **é** imobilizado, e
+  /// porque `tool/deep_audit.dart` a despeja. **Não use como validador de
+  /// [investedCapital]**: o ROIC, o freio de reinvestimento e o veredito de
+  /// fosso saem da rota do financiamento, que fecha por construção. Medição em
+  /// `docs/validacao/capital_investido.md`.
   double? get investedCapitalOperating {
     final imob = propertyPlantEquipment;
     final ac = totalCurrentAssets;
@@ -459,6 +522,28 @@ class FundamentalsSnapshot {
     if (!marketPrice.isFinite || marketPrice <= 0) return null;
     final n = vm / marketPrice;
     return n.isFinite && n > 0 ? n : null;
+  }
+
+  /// Contagem de papéis com direito a fluxo: integralizada **menos** a que está
+  /// em tesouraria.
+  ///
+  /// Ação recomprada e mantida em tesouraria não recebe dividendo e não vota;
+  /// dividir o valor do capital próprio pela contagem bruta atribui valor a
+  /// papel que não o tem, e **subestima o preço justo por ação** — o erro é
+  /// conservador, mas é erro.
+  ///
+  /// - [bruta]: a contagem integralizada de que se parte.
+  ///
+  /// Devolve `bruta` intacta quando não há tesouraria informada, e nunca um
+  /// resultado não positivo: tesouraria maior que a base é dado corrompido, e
+  /// devolver zero ou negativo daria divisão por zero adiante.
+  double? sharesNetOfTreasury(double? bruta) {
+    final b = _positive(bruta);
+    if (b == null) return null;
+    final t = treasuryShares;
+    if (t == null || !t.isFinite || t <= 0) return b;
+    final liquida = b - t;
+    return liquida > 0 ? liquida : b;
   }
 
   /// `true` quando as duas contagens discordam além de uma ação societária

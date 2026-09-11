@@ -2146,6 +2146,167 @@ sobra capital próprio a repartir. Cobertura não é critério; recusa nomeada �
 
 ---
 
+## 23. Décima sétima rodada — as costuras do bloco B (decisões 60 a 62)
+
+As três correções desta rodada não têm assunto em comum, e têm **forma** em
+comum: nenhuma delas é um erro dentro de uma função. Todas são uma premissa que
+valia quando foi escrita e parou de valer em outro arquivo.
+
+### 23.1 Duas convenções para a mesma pergunta
+
+`ResolveMarketAnchors` apura duas taxas de crescimento. A do IBC-Br já media
+médias de doze meses nas pontas e contava os anos de centro a centro, com a
+justificativa no próprio código: *"um CAGR entre dois pontos isolados herdaria
+inteiramente o ruído deles"*. A do Ibovespa — que oscila muito mais — media
+ponta a ponta.
+
+O argumento estava escrito, correto, e aplicado a **uma** das duas. Entre as
+duas convenções havia **1,51 ponto percentual** no CAGR de dez anos: 12,57%
+ponta a ponta contra 11,06% com trimestre nas pontas. Esse número é o
+`marketCagr`, e dois dias de pregão decidiam o nível dele.
+[Decisão 60](decisoes/060-as-pontas-do-cagr-do-indice-sao-medias.md).
+
+`ResolveMarketAnchors` não tinha teste nenhum antes disso.
+
+### 23.2 A tolerância absoluta sobre uma grandeza relativa
+
+`quotedUnitRatio` recusava a razão de unidade a mais de **0,12 absolutos** de
+um inteiro. O desvio que ela testa é a discordância **relativa** entre
+`ações × preço` e `u × valor de mercado` — quanto o preço andou desde o valor
+de mercado publicado. A banda absoluta dava 12% de folga onde a folga não
+decide nada (`u = 1`) e 1,2% onde o erro custa dez vezes (`u = 10`).
+
+**A SAPR11 era recusada por 0,0001**, e é uma das duas ações que a documentação
+da própria função nomeia como motivo de ela existir.
+[Decisão 61](decisoes/061-a-tolerancia-da-razao-de-unidade-e-relativa.md).
+
+O que torna este caso instrutivo é **como ele se enxerga**. Nenhuma peça
+isolada o revela: a função estava certa em tudo o que sabia, e a suíte de 414
+testes passava. Ele só aparece confrontando **dois tickers da mesma empresa** —
+a unit e a classe que entra na cesta descrevem o mesmo negócio e não podem
+discordar. A SAPR11 acusava −58,4% e a SAPR4, +115,6%: **174 pontos percentuais
+de contradição sobre a Sanepar**, ao mesmo tempo, na mesma tela. Depois da
+correção, +108,0% contra +115,6%, e os 7,6 p.p. que sobram são o ágio ON/PN.
+
+### 23.3 O rótulo que sobreviveu ao número
+
+A [decisão 58](decisoes/058-a-carteira-de-acoes-nao-espera-a-renda-fixa.md)
+trocou a âncora do retorno esperado de `CDI` para `Ke`. Três rótulos a três
+funções de distância continuaram descrevendo o anterior — e um deles não era
+rótulo, era conta.
+
+`GoalAlignment.yieldToCloseGap` dizia ao usuário quanto de *dividend yield*
+fecharia a lacuna, e existia porque o esperado era retorno de **preço**. Com a
+âncora em `Ke = Rf + β·prêmio`, o esperado virou retorno **total** pelo CAPM —
+provento incluído por definição. A tela passou a mandar somar um yield a um
+número que já o contava, no sentido que faz a carteira parecer melhor do que é.
+[Decisão 62](decisoes/062-o-esperado-e-retorno-total-e-nao-pede-yield.md).
+
+O teste que cobria o getter afirmava a identidade `yield == −gap`. Ela
+continuou verdadeira e vazia enquanto a premissa morria embaixo dela. **Um
+teste de identidade não protege uma premissa**, e é por isso que os testes
+desta rodada foram escritos como confronto entre duas medidas independentes —
+a unit contra a classe, o CAGR com ruído contra o CAGR sem — e não como
+verificação de fórmula.
+
+### 23.4 A conferência que era prosa
+
+`investedCapital` afirmava, em comentário, que a concordância com
+`investedCapitalOperating` *"serve de teste de qualidade"*. O teste nunca foi
+executado: a rota operacional não é lida por linha nenhuma do motor.
+
+Executado, ele **reprova** — mediana de 1,199×, p90 de 3,165×, máximo de 316×,
+28% dos exercícios acima de 1,5× —, e não tem conserto: falta à rota
+operacional todo ativo não circulante que não seja imobilizado nem intangível,
+e a fonte não publica nenhuma dessas linhas. Nada de numérico muda, porque a
+metade quebrada é a que não é usada; o que muda é o registro deixar de afirmar
+uma verificação que não acontece.
+[limitacoes.md §2.17](validacao/limitacoes.md), medição em
+[capital_investido.md](validacao/capital_investido.md).
+
+---
+
+## 24. Décima oitava rodada — três medições, e uma delas achou outra coisa
+
+A rodada anterior deixou três itens marcados como "exige medição antes de
+ação". Medidos, **dois refutam a proposta que os originou** e o terceiro
+confirma a regra que questionava — e, no caminho, expõe um limite da própria
+validação.
+
+### 24.1 A Porta 3 é a fatia mais bem ordenada, não a pior
+
+A lente `metodo` queria que empresa com lucro operacional insustentado
+**falhasse** em vez de migrar para a via do acionista, argumentando que a via é
+leniente e lava ativo ruim. Sobre 8 coortes e 846 avaliações:
+
+| grupo | N | IC 12m | IC 36m |
+|---|---:|---:|---:|
+| via da firma | 716 | +0,0417 | +0,1279 |
+| Porta 1 (banco) | 95 | +0,1127 | +0,1089 |
+| **Porta 3** | **35** | **+0,4197** | **+0,3815** |
+
+Recusá-la **baixa** o IC do universo — de +0,0845 para +0,0650 em 12 meses. E
+das 7 avaliações de Porta 3 com potencial acima de +50%, só **1** terminou
+negativa em 36 meses; na via da firma, 31 de 66.
+
+Com `n = 25` em 36 meses, a permutação dá p = 0,062 ali e **p = 0,014** em 12
+meses, e as varreduras deixa-um-fora mantêm o IC36 entre +0,27 e +0,50.
+[Decisão 64](decisoes/064-a-porta-3-fica-e-a-medicao-e-a-razao.md), medição em
+[porta3.md](validacao/porta3.md).
+
+### 24.2 O retorno por ativo mede o dinheiro, e é o certo para a pergunta
+
+A mesma lente queria trocar `AssetPerformance.totalReturn` por TWR por ativo,
+"isolado do cronograma". O canal que ela teme — históricos de tamanhos
+diferentes — está fechado **duas vezes**: o backtest recua o início para o
+ativo mais novo e avisa, e o provider iguala o início entre as duas carteiras
+antes de rodar qualquer uma.
+
+O que resta é o efeito do aporte mensal, e ele é grande: dois ativos que partem
+de 100 e voltam a 100 — retorno de preço **zero para ambos** — chegam a **56,5
+p.p.** de distância, e numa carteira real o Spearman entre as duas medidas é
+0,7571 com deslocamento máximo de 6 postos em 15.
+
+Mas a medida no lugar é a certa para a pergunta que o cartão faz: trocar o pior
+ativo da Principal pelo melhor da Reserva é decisão sobre **o dinheiro que
+seguiu aquele cronograma**. A conta fica; o glossário ganhou a ressalva com a
+magnitude.
+[Decisão 65](decisoes/065-o-retorno-por-ativo-mede-o-dinheiro.md), medição em
+[retorno_por_ativo.md](validacao/retorno_por_ativo.md).
+
+### 24.3 A regra do maior é confirmada — e o backtest não pode julgá-la
+
+Dos 127 avaliados, 11 têm a candidata contábil vencendo a divergência de
+divisores. Trocá-la pela implícita no valor de mercado move **todos os onze
+para cima**, e o extremo diz por que a regra existe: o MILS3 sairia com
+**+69.039,8%** de potencial. Três dos onze, porém, ocupam o topo da lista —
+ANIM3 em 3º de 127, SAPR4 em 7º, SAPR11 em 8º —, onde a direção é robusta e a
+magnitude não.
+
+**O achado que não estava na pergunta.** Ao tentar confrontar isso com retornos
+realizados, apareceu que não dá: `backtest_valuation.dart` reconstrói o valor
+de mercado como `contagem do exercício × preço da coorte`, o que é necessário
+para não injetar a capitalização de hoje em 2018 — e faz as duas candidatas
+colapsarem na mesma. Conferido em vez de suposto: **351 de 351 ativos** saem
+com `u = 1` e sem divergência.
+
+A razão de unidade, a regra do maior e a escolha entre as duas contagens
+**não têm evidência preditiva, e não são testáveis por este instrumento**.
+[Decisão 66](decisoes/066-a-regra-do-maior-e-confirmada-por-contrafactual.md),
+[limitacoes.md §3.5](validacao/limitacoes.md).
+
+### 24.4 O que a rodada ensina sobre as lentes
+
+Três achados estruturais de lente, três medições, **zero mudanças de método**.
+Isso não é motivo para parar de rodar as lentes: a mesma lente `metodo` produziu
+nesta rodada e na anterior o achado do `yieldToCloseGap`, que era defeito real e
+estava na tela. É motivo para manter a regra que já vigora — **quem propõe não
+bloqueia** —, e para tratar achado estrutural como hipótese a medir, nunca como
+tarefa a executar.
+
+O custo de não medir teria sido alto: remover a Porta 3 teria apagado a fatia
+mais bem ordenada do motor.
+
 ---
 
 *Documento gerado a partir de medições executadas contra a cascata real do Equisim e dados de

@@ -710,6 +710,17 @@ const List<HintEntry> _perAssetGlossary = [
         'e sob o mesmo cronograma de aportes, os retornos são comparáveis '
         'entre Principal e Reserva.',
   ),
+  HintEntry(
+    'Por que ele difere do gráfico do ativo',
+    'Este número mede o que o SEU dinheiro fez, não o que o preço fez. Com '
+        'aporte mensal, quem cai e volta rende — o aporte comprou barato no '
+        'meio —, e quem sobe e volta perde. Dois ativos que começam e terminam '
+        'no mesmo preço, um em vale e outro em pico, chegam aqui a 56,5 pontos '
+        'percentuais de distância. As duas leituras são verdadeiras e '
+        'respondem a perguntas diferentes; esta responde a que importa para a '
+        'troca entre carteiras, porque é o dinheiro que de fato seguiu este '
+        'cronograma.',
+  ),
 ];
 
 /// Ressalva sobre o que o patrimônio da Reserva significa.

@@ -1,0 +1,3233 @@
+[
+ {
+  "ticker": "AZUL3",
+  "bruto": 18.446601825124457,
+  "inteiro": 18.0,
+  "desvioAbsoluto": 0.446601825124457,
+  "desvioRelativo": 0.024811212506914277,
+  "aceitoHoje": false,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "KLBN11",
+  "bruto": 4.974450689831374,
+  "inteiro": 5.0,
+  "desvioAbsoluto": 0.025549310168625716,
+  "desvioRelativo": 0.005109862033725143,
+  "aceitoHoje": true,
+  "adotadoHoje": 5.0
+ },
+ {
+  "ticker": "ENGI11",
+  "bruto": 4.963327542945377,
+  "inteiro": 5.0,
+  "desvioAbsoluto": 0.03667245705462285,
+  "desvioRelativo": 0.007334491410924571,
+  "aceitoHoje": true,
+  "adotadoHoje": 5.0
+ },
+ {
+  "ticker": "SAPR11",
+  "bruto": 4.879921809550405,
+  "inteiro": 5.0,
+  "desvioAbsoluto": 0.12007819044959511,
+  "desvioRelativo": 0.024015638089919022,
+  "aceitoHoje": false,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TAEE11",
+  "bruto": 3.017437636231533,
+  "inteiro": 3.0,
+  "desvioAbsoluto": 0.017437636231532938,
+  "desvioRelativo": 0.005812545410510979,
+  "aceitoHoje": true,
+  "adotadoHoje": 3.0
+ },
+ {
+  "ticker": "IGTI11",
+  "bruto": 2.98869204673954,
+  "inteiro": 3.0,
+  "desvioAbsoluto": 0.011307953260459858,
+  "desvioRelativo": 0.0037693177534866193,
+  "aceitoHoje": true,
+  "adotadoHoje": 3.0
+ },
+ {
+  "ticker": "ALUP11",
+  "bruto": 2.9691085613415704,
+  "inteiro": 3.0,
+  "desvioAbsoluto": 0.030891438658429582,
+  "desvioRelativo": 0.010297146219476527,
+  "aceitoHoje": true,
+  "adotadoHoje": 3.0
+ },
+ {
+  "ticker": "BRBI11",
+  "bruto": 2.9586206896551723,
+  "inteiro": 3.0,
+  "desvioAbsoluto": 0.04137931034482767,
+  "desvioRelativo": 0.01379310344827589,
+  "aceitoHoje": true,
+  "adotadoHoje": 3.0
+ },
+ {
+  "ticker": "BPAC11",
+  "bruto": 2.9399503722084366,
+  "inteiro": 3.0,
+  "desvioAbsoluto": 0.06004962779156342,
+  "desvioRelativo": 0.020016542597187808,
+  "aceitoHoje": true,
+  "adotadoHoje": 3.0
+ },
+ {
+  "ticker": "SANB11",
+  "bruto": 2.034090909090909,
+  "inteiro": 2.0,
+  "desvioAbsoluto": 0.03409090909090917,
+  "desvioRelativo": 0.017045454545454586,
+  "aceitoHoje": true,
+  "adotadoHoje": 2.0
+ },
+ {
+  "ticker": "EQPA5",
+  "bruto": 1.7912087971490218,
+  "inteiro": 2.0,
+  "desvioAbsoluto": 0.20879120285097819,
+  "desvioRelativo": 0.10439560142548909,
+  "aceitoHoje": false,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ONCO3",
+  "bruto": 1.1709400958531533,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.17094009585315328,
+  "desvioRelativo": 0.17094009585315328,
+  "aceitoHoje": false,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AZEV3",
+  "bruto": 1.1461748550538817,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.14617485505388172,
+  "desvioRelativo": 0.14617485505388172,
+  "aceitoHoje": false,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CVCB3",
+  "bruto": 1.13939390654798,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.1393939065479799,
+  "desvioRelativo": 0.1393939065479799,
+  "aceitoHoje": false,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "VSTE3",
+  "bruto": 1.1374407399325352,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.13744073993253525,
+  "desvioRelativo": 0.13744073993253525,
+  "aceitoHoje": false,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BIED3",
+  "bruto": 1.112962950581167,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.1129629505811669,
+  "desvioRelativo": 0.1129629505811669,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "OSXB3",
+  "bruto": 1.0952380621036835,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.09523806210368346,
+  "desvioRelativo": 0.09523806210368346,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AVLL3",
+  "bruto": 1.0832025278793918,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.08320252787939175,
+  "desvioRelativo": 0.08320252787939175,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RAIZ4",
+  "bruto": 1.076923076923077,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0769230769230771,
+  "desvioRelativo": 0.0769230769230771,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "DOTZ3",
+  "bruto": 1.072100308938655,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.07210030893865493,
+  "desvioRelativo": 0.07210030893865493,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "JFEN3",
+  "bruto": 1.0697673851059224,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0697673851059224,
+  "desvioRelativo": 0.0697673851059224,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AGXY3",
+  "bruto": 1.0640000448718632,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.06400004487186317,
+  "desvioRelativo": 0.06400004487186317,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AZZA3",
+  "bruto": 1.063100942479323,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.06310094247932296,
+  "desvioRelativo": 0.06310094247932296,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BHIA3",
+  "bruto": 1.0615384615384615,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.06153846153846154,
+  "desvioRelativo": 0.06153846153846154,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PDTC3",
+  "bruto": 1.0609756045460659,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.060975604546065876,
+  "desvioRelativo": 0.060975604546065876,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "LWSA3",
+  "bruto": 1.05764414690523,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.05764414690523001,
+  "desvioRelativo": 0.05764414690523001,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PTBL3",
+  "bruto": 1.0569620746630242,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.056962074663024165,
+  "desvioRelativo": 0.056962074663024165,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TELB3",
+  "bruto": 1.0568047092011434,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.056804709201143444,
+  "desvioRelativo": 0.056804709201143444,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AMER3",
+  "bruto": 1.0531309208097082,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.05313092080970816,
+  "desvioRelativo": 0.05313092080970816,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "JALL3",
+  "bruto": 1.0513834071500254,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.05138340715002543,
+  "desvioRelativo": 0.05138340715002543,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MOVI3",
+  "bruto": 1.0491591224029322,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.04915912240293219,
+  "desvioRelativo": 0.04915912240293219,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "DIRR3",
+  "bruto": 1.0484903934126257,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.04849039341262573,
+  "desvioRelativo": 0.04849039341262573,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "DASA3",
+  "bruto": 1.0483271682885713,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.04832716828857131,
+  "desvioRelativo": 0.04832716828857131,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TEND3",
+  "bruto": 1.0481235063513863,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.04812350635138629,
+  "desvioRelativo": 0.04812350635138629,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AMOB3",
+  "bruto": 1.047297304394913,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.047297304394912976,
+  "desvioRelativo": 0.047297304394912976,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ECOM3",
+  "bruto": 1.0467289572965535,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.046728957296553464,
+  "desvioRelativo": 0.046728957296553464,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "IGTI3",
+  "bruto": 1.0434782780617138,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.04347827806171378,
+  "desvioRelativo": 0.04347827806171378,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "LOGG3",
+  "bruto": 1.04261601122318,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.04261601122317993,
+  "desvioRelativo": 0.04261601122317993,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ALPK3",
+  "bruto": 1.041666648634875,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0416666486348749,
+  "desvioRelativo": 0.0416666486348749,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CGRA3",
+  "bruto": 1.0412100558089508,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.04121005580895076,
+  "desvioRelativo": 0.04121005580895076,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PLPL3",
+  "bruto": 1.0402877554694163,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.04028775546941632,
+  "desvioRelativo": 0.04028775546941632,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TOTS3",
+  "bruto": 1.0400964766128662,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.040096476612866194,
+  "desvioRelativo": 0.040096476612866194,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MGLU3",
+  "bruto": 1.039497294976182,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03949729497618204,
+  "desvioRelativo": 0.03949729497618204,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AUAU3",
+  "bruto": 1.0389610479336442,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03896104793364419,
+  "desvioRelativo": 0.03896104793364419,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "VAMO3",
+  "bruto": 1.0385756969145923,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03857569691459228,
+  "desvioRelativo": 0.03857569691459228,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AHEB3",
+  "bruto": 1.0382441937870142,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03824419378701416,
+  "desvioRelativo": 0.03824419378701416,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MATD3",
+  "bruto": 1.0381525938170575,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03815259381705749,
+  "desvioRelativo": 0.03815259381705749,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PINE4",
+  "bruto": 1.0372438927330332,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03724389273303319,
+  "desvioRelativo": 0.03724389273303319,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "HAPV3",
+  "bruto": 1.037142874829387,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03714287482938694,
+  "desvioRelativo": 0.03714287482938694,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PNVL3",
+  "bruto": 1.037037063176394,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0370370631763941,
+  "desvioRelativo": 0.0370370631763941,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MGEL4",
+  "bruto": 1.0368931969206348,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03689319692063475,
+  "desvioRelativo": 0.03689319692063475,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PINE3",
+  "bruto": 1.0363127940860557,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0363127940860557,
+  "desvioRelativo": 0.0363127940860557,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PDGR3",
+  "bruto": 1.0353982245141349,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03539822451413488,
+  "desvioRelativo": 0.03539822451413488,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CGRA4",
+  "bruto": 1.0346187275443883,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03461872754438833,
+  "desvioRelativo": 0.03461872754438833,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BMGB4",
+  "bruto": 1.0346020998699335,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.034602099869933456,
+  "desvioRelativo": 0.034602099869933456,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ABCB10",
+  "bruto": 1.034482785755702,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03448278575570196,
+  "desvioRelativo": 0.03448278575570196,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "HOOT4",
+  "bruto": 1.0337209511683152,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.033720951168315194,
+  "desvioRelativo": 0.033720951168315194,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "VIVA3",
+  "bruto": 1.0335121262040525,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03351212620405253,
+  "desvioRelativo": 0.03351212620405253,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TFCO4",
+  "bruto": 1.0332278868073588,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.033227886807358775,
+  "desvioRelativo": 0.033227886807358775,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MSPA4",
+  "bruto": 1.0326470398557144,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03264703985571438,
+  "desvioRelativo": 0.03264703985571438,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "FESA3",
+  "bruto": 1.0325534228058553,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03255342280585527,
+  "desvioRelativo": 0.03255342280585527,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SBFG3",
+  "bruto": 1.0319634396766095,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03196343967660953,
+  "desvioRelativo": 0.03196343967660953,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MDIA3",
+  "bruto": 1.0319210679048172,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03192106790481719,
+  "desvioRelativo": 0.03192106790481719,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MBRF3",
+  "bruto": 1.0308857606931072,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.030885760693107223,
+  "desvioRelativo": 0.030885760693107223,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BBSE3",
+  "bruto": 1.0305548517879275,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.030554851787927495,
+  "desvioRelativo": 0.030554851787927495,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EPAR3",
+  "bruto": 1.0305343235523956,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.030534323552395604,
+  "desvioRelativo": 0.030534323552395604,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "IFCM3",
+  "bruto": 1.0297619189965954,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.029761918996595416,
+  "desvioRelativo": 0.029761918996595416,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "GMAT3",
+  "bruto": 1.0295982637857082,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02959826378570818,
+  "desvioRelativo": 0.02959826378570818,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "COGN3",
+  "bruto": 1.0295358842171802,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02953588421718023,
+  "desvioRelativo": 0.02953588421718023,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PGMN3",
+  "bruto": 1.0294906112841617,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02949061128416175,
+  "desvioRelativo": 0.02949061128416175,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MWET4",
+  "bruto": 1.029373804718207,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.029373804718207053,
+  "desvioRelativo": 0.029373804718207053,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "DXCO3",
+  "bruto": 1.0291970631261098,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.029197063126109812,
+  "desvioRelativo": 0.029197063126109812,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CURY3",
+  "bruto": 1.0291292642818235,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.029129264281823497,
+  "desvioRelativo": 0.029129264281823497,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PFRM3",
+  "bruto": 1.0287581660245313,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.028758166024531295,
+  "desvioRelativo": 0.028758166024531295,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EUCA3",
+  "bruto": 1.0287081076124536,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02870810761245357,
+  "desvioRelativo": 0.02870810761245357,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BRSR5",
+  "bruto": 1.0285714357571476,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0285714357571476,
+  "desvioRelativo": 0.0285714357571476,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AZEV4",
+  "bruto": 1.0283687486872515,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.028368748687251477,
+  "desvioRelativo": 0.028368748687251477,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "POMO4",
+  "bruto": 1.0269058073066049,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.026905807306604856,
+  "desvioRelativo": 0.026905807306604856,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RENT3",
+  "bruto": 1.0257558329803989,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02575583298039885,
+  "desvioRelativo": 0.02575583298039885,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "HYPE3",
+  "bruto": 1.0252323759338,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02523237593380001,
+  "desvioRelativo": 0.02523237593380001,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MOTV3",
+  "bruto": 1.0244200244200246,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.024420024420024555,
+  "desvioRelativo": 0.024420024420024555,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ALPA4",
+  "bruto": 1.0241509603700274,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.024150960370027397,
+  "desvioRelativo": 0.024150960370027397,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "WIZC3",
+  "bruto": 1.02402021525432,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.024020215254320076,
+  "desvioRelativo": 0.024020215254320076,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "OPCT3",
+  "bruto": 1.0234234257288974,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02342342572889744,
+  "desvioRelativo": 0.02342342572889744,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ENGI4",
+  "bruto": 1.0228215686742959,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.022821568674295856,
+  "desvioRelativo": 0.022821568674295856,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MDNE3",
+  "bruto": 1.0213692261956115,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.021369226195611546,
+  "desvioRelativo": 0.021369226195611546,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TAEE3",
+  "bruto": 1.0208333809568548,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02083338095685483,
+  "desvioRelativo": 0.02083338095685483,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "IRBR3",
+  "bruto": 1.0206726304528229,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02067263045282286,
+  "desvioRelativo": 0.02067263045282286,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ENGI3",
+  "bruto": 1.0205930743154952,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.020593074315495175,
+  "desvioRelativo": 0.020593074315495175,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "QUAL3",
+  "bruto": 1.0204081138947898,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.020408113894789803,
+  "desvioRelativo": 0.020408113894789803,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SANB3",
+  "bruto": 1.0201477190115493,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.020147719011549325,
+  "desvioRelativo": 0.020147719011549325,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BMOB3",
+  "bruto": 1.019968620885912,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.019968620885912003,
+  "desvioRelativo": 0.019968620885912003,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RADL3",
+  "bruto": 1.019897930676989,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.019897930676989084,
+  "desvioRelativo": 0.019897930676989084,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CYRE3",
+  "bruto": 1.019514192467267,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.019514192467267044,
+  "desvioRelativo": 0.019514192467267044,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "VTRU3",
+  "bruto": 1.0193236417305134,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.019323641730513375,
+  "desvioRelativo": 0.019323641730513375,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EVEN3",
+  "bruto": 1.019277108433735,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01927710843373509,
+  "desvioRelativo": 0.01927710843373509,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "POMO3",
+  "bruto": 1.0191387280863817,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01913872808638173,
+  "desvioRelativo": 0.01913872808638173,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SMFT3",
+  "bruto": 1.018130314329822,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.018130314329821928,
+  "desvioRelativo": 0.018130314329821928,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CPFE3",
+  "bruto": 1.018043497467894,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01804349746789402,
+  "desvioRelativo": 0.01804349746789402,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PCAR3",
+  "bruto": 1.0179855524847858,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01798555248478584,
+  "desvioRelativo": 0.01798555248478584,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ALLD3",
+  "bruto": 1.0176470455156217,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.017647045515621684,
+  "desvioRelativo": 0.017647045515621684,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "WEST3",
+  "bruto": 1.0175438387803137,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.017543838780313736,
+  "desvioRelativo": 0.017543838780313736,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SMTO3",
+  "bruto": 1.017283927949913,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01728392794991307,
+  "desvioRelativo": 0.01728392794991307,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CEEB3",
+  "bruto": 1.0172413886787042,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.017241388678704173,
+  "desvioRelativo": 0.017241388678704173,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PSSA3",
+  "bruto": 1.0169291134246823,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.016929113424682285,
+  "desvioRelativo": 0.016929113424682285,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PRNR3",
+  "bruto": 1.0168067572628605,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.016806757262860517,
+  "desvioRelativo": 0.016806757262860517,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EZTC3",
+  "bruto": 1.016419054940796,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.016419054940796096,
+  "desvioRelativo": 0.016419054940796096,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CSED3",
+  "bruto": 1.0163934702503614,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01639347025036142,
+  "desvioRelativo": 0.01639347025036142,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MLAS3",
+  "bruto": 1.0163934669906174,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01639346699061739,
+  "desvioRelativo": 0.01639346699061739,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SYNE3",
+  "bruto": 1.0161289499423602,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01612894994236025,
+  "desvioRelativo": 0.01612894994236025,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ALPA3",
+  "bruto": 1.0159362383883939,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.015936238388393864,
+  "desvioRelativo": 0.015936238388393864,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CRPG5",
+  "bruto": 1.0158192082484607,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.015819208248460725,
+  "desvioRelativo": 0.015819208248460725,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "VITT3",
+  "bruto": 1.0157232365821625,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01572323658216246,
+  "desvioRelativo": 0.01572323658216246,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BBAS3",
+  "bruto": 1.0153291103210687,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01532911032106865,
+  "desvioRelativo": 0.01532911032106865,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CLSC3",
+  "bruto": 1.0147693291030184,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.014769329103018425,
+  "desvioRelativo": 0.014769329103018425,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CEAB3",
+  "bruto": 1.014317160612094,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.014317160612093982,
+  "desvioRelativo": 0.014317160612093982,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "INEP3",
+  "bruto": 1.0139859889593716,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.013985988959371642,
+  "desvioRelativo": 0.013985988959371642,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AFLT3",
+  "bruto": 1.0137174277376468,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.013717427737646837,
+  "desvioRelativo": 0.013717427737646837,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TAEE4",
+  "bruto": 1.0137085322498942,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.013708532249894212,
+  "desvioRelativo": 0.013708532249894212,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MYPK3",
+  "bruto": 1.0134297030293833,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.013429703029383289,
+  "desvioRelativo": 0.013429703029383289,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BMKS3",
+  "bruto": 1.0134136029373733,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.013413602937373259,
+  "desvioRelativo": 0.013413602937373259,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "WLMM4",
+  "bruto": 1.012903254519536,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.012903254519536,
+  "desvioRelativo": 0.012903254519536,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TECN3",
+  "bruto": 1.0120361311311616,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.012036131131161643,
+  "desvioRelativo": 0.012036131131161643,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "HBSA3",
+  "bruto": 1.0118342948804453,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.011834294880445295,
+  "desvioRelativo": 0.011834294880445295,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "WHRL3",
+  "bruto": 1.0110193171067217,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01101931710672166,
+  "desvioRelativo": 0.01101931710672166,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EQPA3",
+  "bruto": 1.0109890143417792,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010989014341779235,
+  "desvioRelativo": 0.010989014341779235,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "DOHL4",
+  "bruto": 1.0108400363356091,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010840036335609149,
+  "desvioRelativo": 0.010840036335609149,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ETER3",
+  "bruto": 1.0107816577519808,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010781657751980811,
+  "desvioRelativo": 0.010781657751980811,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BIOM3",
+  "bruto": 1.0106707416141731,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01067074161417314,
+  "desvioRelativo": 0.01067074161417314,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CXSE3",
+  "bruto": 1.0106221547799696,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01062215477996964,
+  "desvioRelativo": 0.01062215477996964,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MULT3",
+  "bruto": 1.010378287470153,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010378287470153014,
+  "desvioRelativo": 0.010378287470153014,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "COCE5",
+  "bruto": 1.0103559849333208,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010355984933320794,
+  "desvioRelativo": 0.010355984933320794,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ABEV3",
+  "bruto": 1.0102696211875868,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010269621187586786,
+  "desvioRelativo": 0.010269621187586786,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "VLID3",
+  "bruto": 1.010169459499758,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010169459499757894,
+  "desvioRelativo": 0.010169459499757894,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ALOS3",
+  "bruto": 1.010168345713784,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010168345713784,
+  "desvioRelativo": 0.010168345713784,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TRIS3",
+  "bruto": 1.0101625935370033,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010162593537003328,
+  "desvioRelativo": 0.010162593537003328,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "GGPS3",
+  "bruto": 1.0100308602197516,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010030860219751636,
+  "desvioRelativo": 0.010030860219751636,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "DMVF3",
+  "bruto": 1.0097244823129574,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.009724482312957416,
+  "desvioRelativo": 0.009724482312957416,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ENEV3",
+  "bruto": 1.0095133102444935,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.009513310244493534,
+  "desvioRelativo": 0.009513310244493534,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SANB4",
+  "bruto": 1.0094022525835147,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.00940225258351468,
+  "desvioRelativo": 0.00940225258351468,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CSUD3",
+  "bruto": 1.0092725195690633,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.009272519569063276,
+  "desvioRelativo": 0.009272519569063276,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SIMH3",
+  "bruto": 1.0091503143687544,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.009150314368754353,
+  "desvioRelativo": 0.009150314368754353,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PEAB4",
+  "bruto": 1.0090861579134103,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.009086157913410275,
+  "desvioRelativo": 0.009086157913410275,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EQTL3",
+  "bruto": 1.0090182833126793,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.009018283312679287,
+  "desvioRelativo": 0.009018283312679287,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RIAA3",
+  "bruto": 1.008450664619088,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.008450664619088055,
+  "desvioRelativo": 0.008450664619088055,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RSUL4",
+  "bruto": 1.0081664861444775,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.008166486144477458,
+  "desvioRelativo": 0.008166486144477458,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ITUB4",
+  "bruto": 1.007934559465338,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.007934559465337943,
+  "desvioRelativo": 0.007934559465337943,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "LPSB3",
+  "bruto": 1.0078124658495118,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.007812465849511785,
+  "desvioRelativo": 0.007812465849511785,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EUCA4",
+  "bruto": 1.0076554765729429,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.007655476572942854,
+  "desvioRelativo": 0.007655476572942854,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ANIM3",
+  "bruto": 1.006872838454691,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.006872838454690999,
+  "desvioRelativo": 0.006872838454690999,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CSMG3",
+  "bruto": 1.0068431202778363,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.00684312027783629,
+  "desvioRelativo": 0.00684312027783629,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "VIVR3",
+  "bruto": 1.0066666666666668,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.006666666666666821,
+  "desvioRelativo": 0.006666666666666821,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BBDC4",
+  "bruto": 1.0061832142009925,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.006183214200992548,
+  "desvioRelativo": 0.006183214200992548,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SAUD3",
+  "bruto": 1.006164351038829,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.006164351038828952,
+  "desvioRelativo": 0.006164351038828952,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "POSI3",
+  "bruto": 1.0058823529411764,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.00588235294117645,
+  "desvioRelativo": 0.00588235294117645,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "NATU3",
+  "bruto": 1.0056818806393149,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.005681880639314851,
+  "desvioRelativo": 0.005681880639314851,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "UNIP6",
+  "bruto": 1.0054712535858277,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.005471253585827673,
+  "desvioRelativo": 0.005471253585827673,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RDOR3",
+  "bruto": 1.0054155991955425,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.005415599195542464,
+  "desvioRelativo": 0.005415599195542464,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AURE3",
+  "bruto": 1.0050250711357496,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.00502507113574957,
+  "desvioRelativo": 0.00502507113574957,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CAMB3",
+  "bruto": 1.0047170046740426,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.004717004674042569,
+  "desvioRelativo": 0.004717004674042569,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "B3SA3",
+  "bruto": 1.004627009564492,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.004627009564492024,
+  "desvioRelativo": 0.004627009564492024,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BALM3",
+  "bruto": 1.0038610038610039,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0038610038610038533,
+  "desvioRelativo": 0.0038610038610038533,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BSLI4",
+  "bruto": 1.0038609632030138,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0038609632030137675,
+  "desvioRelativo": 0.0038609632030137675,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TELB4",
+  "bruto": 1.0037128859038478,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0037128859038477735,
+  "desvioRelativo": 0.0037128859038477735,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AXIA3",
+  "bruto": 1.0036310910097173,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0036310910097172577,
+  "desvioRelativo": 0.0036310910097172577,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BRST3",
+  "bruto": 1.0035587314994494,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.003558731499449408,
+  "desvioRelativo": 0.003558731499449408,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RAIL3",
+  "bruto": 1.0034483186760368,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.003448318676036788,
+  "desvioRelativo": 0.003448318676036788,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "GEPA3",
+  "bruto": 1.0032738120533704,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0032738120533704063,
+  "desvioRelativo": 0.0032738120533704063,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BGIP4",
+  "bruto": 1.0029498232945893,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.00294982329458926,
+  "desvioRelativo": 0.00294982329458926,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ITSA4",
+  "bruto": 1.0028756687133509,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0028756687133508763,
+  "desvioRelativo": 0.0028756687133508763,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "LUPA3",
+  "bruto": 1.002762442647482,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.002762442647481933,
+  "desvioRelativo": 0.002762442647481933,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CSAN3",
+  "bruto": 1.0026385284299446,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.002638528429944609,
+  "desvioRelativo": 0.002638528429944609,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ECOR3",
+  "bruto": 1.0025316783735438,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.002531678373543844,
+  "desvioRelativo": 0.002531678373543844,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ITUB3",
+  "bruto": 1.0024117420225853,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.002411742022585317,
+  "desvioRelativo": 0.002411742022585317,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "VULC3",
+  "bruto": 1.0023112714840008,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0023112714840007875,
+  "desvioRelativo": 0.0023112714840007875,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "UNIP5",
+  "bruto": 1.0022580910874799,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0022580910874798743,
+  "desvioRelativo": 0.0022580910874798743,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SHUL4",
+  "bruto": 1.0022421642878452,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.002242164287845183,
+  "desvioRelativo": 0.002242164287845183,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CGAS5",
+  "bruto": 1.00215228953492,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.002152289534919971,
+  "desvioRelativo": 0.002152289534919971,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AGRO3",
+  "bruto": 1.002080084374036,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.002080084374036062,
+  "desvioRelativo": 0.002080084374036062,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "LEVE3",
+  "bruto": 1.0018319657131505,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.001831965713150474,
+  "desvioRelativo": 0.001831965713150474,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CBEE3",
+  "bruto": 1.0011350515652397,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.001135051565239742,
+  "desvioRelativo": 0.001135051565239742,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "WEGE3",
+  "bruto": 1.0009672931848945,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0009672931848945243,
+  "desvioRelativo": 0.0009672931848945243,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "LREN3",
+  "bruto": 1.0008817845989673,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0008817845989672612,
+  "desvioRelativo": 0.0008817845989672612,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CEBR5",
+  "bruto": 1.0004237735085968,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.00042377350859679197,
+  "desvioRelativo": 0.00042377350859679197,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "USIM6",
+  "bruto": 1.0000000522977588,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 5.2297758790231796e-8,
+  "desvioRelativo": 5.2297758790231796e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SOND5",
+  "bruto": 1.0000000495555905,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 4.955559052000069e-8,
+  "desvioRelativo": 4.955559052000069e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PEAB3",
+  "bruto": 1.0000000420496808,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 4.2049680848421644e-8,
+  "desvioRelativo": 4.2049680848421644e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "LOGN3",
+  "bruto": 1.0000000399390052,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 3.993900521415128e-8,
+  "desvioRelativo": 3.993900521415128e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RCSL4",
+  "bruto": 1.000000035913727,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 3.5913727103320525e-8,
+  "desvioRelativo": 3.5913727103320525e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BRKM6",
+  "bruto": 1.0000000358393755,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 3.583937546736138e-8,
+  "desvioRelativo": 3.583937546736138e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ROMI3",
+  "bruto": 1.0000000341633748,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 3.4163374795781465e-8,
+  "desvioRelativo": 3.4163374795781465e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RNEW4",
+  "bruto": 1.000000032625486,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 3.2625486090509526e-8,
+  "desvioRelativo": 3.2625486090509526e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RNEW3",
+  "bruto": 1.000000032625486,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 3.2625486090509526e-8,
+  "desvioRelativo": 3.2625486090509526e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "USIM5",
+  "bruto": 1.0000000309591242,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 3.09591241531848e-8,
+  "desvioRelativo": 3.09591241531848e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MWET3",
+  "bruto": 1.0000000297494667,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 2.9749466667894353e-8,
+  "desvioRelativo": 2.9749466667894353e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "DTCY3",
+  "bruto": 1.0000000263342357,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 2.633423568099147e-8,
+  "desvioRelativo": 2.633423568099147e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BGIP3",
+  "bruto": 1.0000000255527484,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 2.5552748361690192e-8,
+  "desvioRelativo": 2.5552748361690192e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "COCE3",
+  "bruto": 1.0000000244618987,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 2.4461898728844744e-8,
+  "desvioRelativo": 2.4461898728844744e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SOND6",
+  "bruto": 1.0000000207154474,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 2.071544735748887e-8,
+  "desvioRelativo": 2.071544735748887e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CGAS3",
+  "bruto": 1.000000012185024,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 1.2185024100830333e-8,
+  "desvioRelativo": 1.2185024100830333e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BRKM3",
+  "bruto": 1.000000001762592,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 1.7625920722963428e-9,
+  "desvioRelativo": 1.7625920722963428e-9,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BDLL4",
+  "bruto": 1.0,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0,
+  "desvioRelativo": 0.0,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SNSY5",
+  "bruto": 1.0,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0,
+  "desvioRelativo": 0.0,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CEED3",
+  "bruto": 1.0,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0,
+  "desvioRelativo": 0.0,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ITSA3",
+  "bruto": 0.9999999950527843,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 4.947215748174472e-9,
+  "desvioRelativo": 4.947215748174472e-9,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CRPG6",
+  "bruto": 0.9999999948947436,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 5.1052564398190725e-9,
+  "desvioRelativo": 5.1052564398190725e-9,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AMBP3",
+  "bruto": 0.9999999914478245,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 8.55217552331311e-9,
+  "desvioRelativo": 8.55217552331311e-9,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CEGR3",
+  "bruto": 0.9999999889956567,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 1.1004343325460297e-8,
+  "desvioRelativo": 1.1004343325460297e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "GFSA3",
+  "bruto": 0.9999999878962034,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 1.2103796631635078e-8,
+  "desvioRelativo": 1.2103796631635078e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ARND3",
+  "bruto": 0.9999999874836285,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 1.251637149479734e-8,
+  "desvioRelativo": 1.251637149479734e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BEEF3",
+  "bruto": 0.9999999844388084,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 1.5561191557544873e-8,
+  "desvioRelativo": 1.5561191557544873e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EKTR4",
+  "bruto": 0.9999999837019676,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 1.6298032368133875e-8,
+  "desvioRelativo": 1.6298032368133875e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RPAD3",
+  "bruto": 0.9999999831302183,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 1.6869781682693485e-8,
+  "desvioRelativo": 1.6869781682693485e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "DEXP4",
+  "bruto": 0.9999999783152818,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 2.1684718243264456e-8,
+  "desvioRelativo": 2.1684718243264456e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BAUH4",
+  "bruto": 0.9999999642815643,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 3.571843565364219e-8,
+  "desvioRelativo": 3.571843565364219e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "NEXP3",
+  "bruto": 0.9999999628281387,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 3.7171861255735905e-8,
+  "desvioRelativo": 3.7171861255735905e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BSLI3",
+  "bruto": 0.9999999594983867,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 4.0501613285393034e-8,
+  "desvioRelativo": 4.0501613285393034e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PATI4",
+  "bruto": 0.9999999534414046,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 4.6558595423462634e-8,
+  "desvioRelativo": 4.6558595423462634e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BNBR3",
+  "bruto": 0.9999999526678691,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 4.7332130881372336e-8,
+  "desvioRelativo": 4.7332130881372336e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MAPT3",
+  "bruto": 0.9999999471716716,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 5.2828328378495826e-8,
+  "desvioRelativo": 5.2828328378495826e-8,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BALM4",
+  "bruto": 0.9993333333333333,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0006666666666667043,
+  "desvioRelativo": 0.0006666666666667043,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "LAVV3",
+  "bruto": 0.9990583789702477,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0009416210297522598,
+  "desvioRelativo": 0.0009416210297522598,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BBDC3",
+  "bruto": 0.9987365758830284,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0012634241169715565,
+  "desvioRelativo": 0.0012634241169715565,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "FIEI3",
+  "bruto": 0.9986666666666667,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0013333333333332975,
+  "desvioRelativo": 0.0013333333333332975,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ESPA3",
+  "bruto": 0.9985754752758347,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0014245247241653214,
+  "desvioRelativo": 0.0014245247241653214,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CEBR3",
+  "bruto": 0.9983051293461475,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0016948706538525427,
+  "desvioRelativo": 0.0016948706538525427,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MILS3",
+  "bruto": 0.998103640051099,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0018963599489010274,
+  "desvioRelativo": 0.0018963599489010274,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BAZA3",
+  "bruto": 0.9976577539727111,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.002342246027288941,
+  "desvioRelativo": 0.002342246027288941,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CLSC4",
+  "bruto": 0.9975853139386196,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0024146860613804,
+  "desvioRelativo": 0.0024146860613804,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "GGBR4",
+  "bruto": 0.9972451270795266,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0027548729204733835,
+  "desvioRelativo": 0.0027548729204733835,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ABCB4",
+  "bruto": 0.9971602695637315,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.002839730436268506,
+  "desvioRelativo": 0.002839730436268506,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EMBJ3",
+  "bruto": 0.9969560275061983,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0030439724938017276,
+  "desvioRelativo": 0.0030439724938017276,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "FHER3",
+  "bruto": 0.9967532751150934,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0032467248849066266,
+  "desvioRelativo": 0.0032467248849066266,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BMEB4",
+  "bruto": 0.9965820258173539,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0034179741826461107,
+  "desvioRelativo": 0.0034179741826461107,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PLAS3",
+  "bruto": 0.9961538708217392,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.003846129178260771,
+  "desvioRelativo": 0.003846129178260771,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BRAP4",
+  "bruto": 0.9960124352611925,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.003987564738807459,
+  "desvioRelativo": 0.003987564738807459,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "USIM3",
+  "bruto": 0.995804115779902,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0041958842200979785,
+  "desvioRelativo": 0.0041958842200979785,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "GOAU4",
+  "bruto": 0.9955436290813824,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.004456370918617614,
+  "desvioRelativo": 0.004456370918617614,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "VIVT3",
+  "bruto": 0.9953642418836861,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.004635758116313893,
+  "desvioRelativo": 0.004635758116313893,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MTSA4",
+  "bruto": 0.9948925609169711,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0051074390830289085,
+  "desvioRelativo": 0.0051074390830289085,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "WHRL4",
+  "bruto": 0.9946667019670293,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.005333298032970668,
+  "desvioRelativo": 0.005333298032970668,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "REDE3",
+  "bruto": 0.9946140001837133,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.005385999816286735,
+  "desvioRelativo": 0.005385999816286735,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RAPT3",
+  "bruto": 0.9941107011825724,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.005889298817427613,
+  "desvioRelativo": 0.005889298817427613,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "VALE3",
+  "bruto": 0.9939317206624093,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.006068279337590687,
+  "desvioRelativo": 0.006068279337590687,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CMIG4",
+  "bruto": 0.9938217141073631,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.006178285892636914,
+  "desvioRelativo": 0.006178285892636914,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SBSP3",
+  "bruto": 0.9936329355722211,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.006367064427778901,
+  "desvioRelativo": 0.006367064427778901,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BEES4",
+  "bruto": 0.9933555022407057,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.006644497759294321,
+  "desvioRelativo": 0.006644497759294321,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SUZB3",
+  "bruto": 0.9928011731823224,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.007198826817677584,
+  "desvioRelativo": 0.007198826817677584,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SAPR4",
+  "bruto": 0.9927430834398957,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.007256916560104298,
+  "desvioRelativo": 0.007256916560104298,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ALUP3",
+  "bruto": 0.9923404298021222,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.007659570197877774,
+  "desvioRelativo": 0.007659570197877774,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CEDO4",
+  "bruto": 0.9922480950535468,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.00775190494645317,
+  "desvioRelativo": 0.00775190494645317,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SCAR3",
+  "bruto": 0.9922480193846641,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.007751980615335885,
+  "desvioRelativo": 0.007751980615335885,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BEES3",
+  "bruto": 0.9921525006798964,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.007847499320103646,
+  "desvioRelativo": 0.007847499320103646,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "DEXP3",
+  "bruto": 0.9920529835516382,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.007947016448361821,
+  "desvioRelativo": 0.007947016448361821,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CPLE3",
+  "bruto": 0.9918648656961305,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.008135134303869473,
+  "desvioRelativo": 0.008135134303869473,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BRSR6",
+  "bruto": 0.991339146762256,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.008660853237744015,
+  "desvioRelativo": 0.008660853237744015,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "UCAS3",
+  "bruto": 0.9913043295650539,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.008695670434946123,
+  "desvioRelativo": 0.008695670434946123,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SOJA3",
+  "bruto": 0.9911950436755176,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.008804956324482416,
+  "desvioRelativo": 0.008804956324482416,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "FLRY3",
+  "bruto": 0.9911548502573385,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.008845149742661484,
+  "desvioRelativo": 0.008845149742661484,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CBAV3",
+  "bruto": 0.9911110941969546,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.008888905803045355,
+  "desvioRelativo": 0.008888905803045355,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "DESK3",
+  "bruto": 0.9910619900345163,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.008938009965483662,
+  "desvioRelativo": 0.008938009965483662,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AALR3",
+  "bruto": 0.9909909943115017,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.009009005688498273,
+  "desvioRelativo": 0.009009005688498273,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CASH3",
+  "bruto": 0.990791858474415,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.009208141525585023,
+  "desvioRelativo": 0.009208141525585023,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BRAP3",
+  "bruto": 0.9902513765991908,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.009748623400809175,
+  "desvioRelativo": 0.009748623400809175,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "GOAU3",
+  "bruto": 0.9900596629807022,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.009940337019297751,
+  "desvioRelativo": 0.009940337019297751,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "HAGA4",
+  "bruto": 0.9898477157360406,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010152284263959421,
+  "desvioRelativo": 0.010152284263959421,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BRSR3",
+  "bruto": 0.9894150764205862,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010584923579413763,
+  "desvioRelativo": 0.010584923579413763,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SEER3",
+  "bruto": 0.9890270807332272,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.010972919266772796,
+  "desvioRelativo": 0.010972919266772796,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MTRE3",
+  "bruto": 0.9884393154330529,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.011560684566947144,
+  "desvioRelativo": 0.011560684566947144,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TGMA3",
+  "bruto": 0.9882559831648576,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.011744016835142368,
+  "desvioRelativo": 0.011744016835142368,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MNPR3",
+  "bruto": 0.988009592326139,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.011990407673860948,
+  "desvioRelativo": 0.011990407673860948,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CAML3",
+  "bruto": 0.9880000000000001,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0119999999999999,
+  "desvioRelativo": 0.0119999999999999,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RENT4",
+  "bruto": 0.9879618817106517,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01203811828934831,
+  "desvioRelativo": 0.01203811828934831,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PASS3",
+  "bruto": 0.9878151481339503,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.012184851866049673,
+  "desvioRelativo": 0.012184851866049673,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "JHSF3",
+  "bruto": 0.9870689729841278,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.012931027015872232,
+  "desvioRelativo": 0.012931027015872232,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ASAI3",
+  "bruto": 0.9869565502537716,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.013043449746228397,
+  "desvioRelativo": 0.013043449746228397,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "KEPL3",
+  "bruto": 0.9867060399917711,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.013293960008228911,
+  "desvioRelativo": 0.013293960008228911,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "GRND3",
+  "bruto": 0.9865951742627346,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.013404825737265424,
+  "desvioRelativo": 0.013404825737265424,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "NUTR3",
+  "bruto": 0.9863636363636363,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.013636363636363669,
+  "desvioRelativo": 0.013636363636363669,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BPAC3",
+  "bruto": 0.98613445165123,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.013865548348769963,
+  "desvioRelativo": 0.013865548348769963,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "INEP4",
+  "bruto": 0.9860139616777336,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.013986038322266414,
+  "desvioRelativo": 0.013986038322266414,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AERI3",
+  "bruto": 0.9857142978040803,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.014285702195919736,
+  "desvioRelativo": 0.014285702195919736,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "INTB3",
+  "bruto": 0.9854881218869073,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.014511878113092735,
+  "desvioRelativo": 0.014511878113092735,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "GGBR3",
+  "bruto": 0.9853680991671308,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.014631900832869249,
+  "desvioRelativo": 0.014631900832869249,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "HAGA3",
+  "bruto": 0.9850187265917603,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.014981273408239737,
+  "desvioRelativo": 0.014981273408239737,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "WDCN3",
+  "bruto": 0.9847908764128286,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.015209123587171414,
+  "desvioRelativo": 0.015209123587171414,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EALT3",
+  "bruto": 0.9847877959640768,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01521220403592316,
+  "desvioRelativo": 0.01521220403592316,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "UNIP3",
+  "bruto": 0.9845857481748821,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.015414251825117908,
+  "desvioRelativo": 0.015414251825117908,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MRVE3",
+  "bruto": 0.9840425569114154,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0159574430885846,
+  "desvioRelativo": 0.0159574430885846,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ISAE3",
+  "bruto": 0.9831121773845413,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.016887822615458736,
+  "desvioRelativo": 0.016887822615458736,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "OFSA3",
+  "bruto": 0.9825327112209302,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01746728877906978,
+  "desvioRelativo": 0.01746728877906978,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CMIG3",
+  "bruto": 0.9821325786877474,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.017867421312252607,
+  "desvioRelativo": 0.017867421312252607,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SAPR3",
+  "bruto": 0.9821200712795244,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.017879928720475613,
+  "desvioRelativo": 0.017879928720475613,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ARML3",
+  "bruto": 0.9820972091728626,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.017902790827137416,
+  "desvioRelativo": 0.017902790827137416,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TTEN3",
+  "bruto": 0.9817231981308828,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.018276801869117176,
+  "desvioRelativo": 0.018276801869117176,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RAPT4",
+  "bruto": 0.9815951128600379,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.018404887139962134,
+  "desvioRelativo": 0.018404887139962134,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EALT4",
+  "bruto": 0.9815789518276185,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01842104817238155,
+  "desvioRelativo": 0.01842104817238155,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TOKY3",
+  "bruto": 0.9813084173068287,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.018691582693171283,
+  "desvioRelativo": 0.018691582693171283,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "HBRE3",
+  "bruto": 0.9810606700195911,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.018939329980408925,
+  "desvioRelativo": 0.018939329980408925,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EGIE3",
+  "bruto": 0.9808005109291683,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.019199489070831688,
+  "desvioRelativo": 0.019199489070831688,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RANI3",
+  "bruto": 0.9807938693972302,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.019206130602769766,
+  "desvioRelativo": 0.019206130602769766,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "LIGT3",
+  "bruto": 0.9807691745616706,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.019230825438329435,
+  "desvioRelativo": 0.019230825438329435,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BLAU3",
+  "bruto": 0.9807497139417356,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0192502860582644,
+  "desvioRelativo": 0.0192502860582644,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "EMAE4",
+  "bruto": 0.9802800872416375,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01971991275836249,
+  "desvioRelativo": 0.01971991275836249,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "GEPA4",
+  "bruto": 0.9802649441024515,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.019735055897548537,
+  "desvioRelativo": 0.019735055897548537,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "IGTI4",
+  "bruto": 0.9800865702389182,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.01991342976108179,
+  "desvioRelativo": 0.01991342976108179,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TIMS3",
+  "bruto": 0.9793707704223447,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02062922957765534,
+  "desvioRelativo": 0.02062922957765534,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "FRAS3",
+  "bruto": 0.9788245785310024,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.021175421468997646,
+  "desvioRelativo": 0.021175421468997646,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BMEB3",
+  "bruto": 0.9787398539923416,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.021260146007658354,
+  "desvioRelativo": 0.021260146007658354,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CEBR6",
+  "bruto": 0.9776173319472247,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.022382668052775334,
+  "desvioRelativo": 0.022382668052775334,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RECV3",
+  "bruto": 0.9772329194451691,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0227670805548309,
+  "desvioRelativo": 0.0227670805548309,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ORVR3",
+  "bruto": 0.9771428571428571,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02285714285714291,
+  "desvioRelativo": 0.02285714285714291,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "LJQQ3",
+  "bruto": 0.9765624734523649,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02343752654763509,
+  "desvioRelativo": 0.02343752654763509,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "KLBN3",
+  "bruto": 0.9757868882584636,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.024213111741536397,
+  "desvioRelativo": 0.024213111741536397,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "VBBR3",
+  "bruto": 0.9747035277403849,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.025296472259615066,
+  "desvioRelativo": 0.025296472259615066,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "UGPA3",
+  "bruto": 0.9744791475630835,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.025520852436916486,
+  "desvioRelativo": 0.025520852436916486,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ENJU3",
+  "bruto": 0.9740260024081512,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02597399759184882,
+  "desvioRelativo": 0.02597399759184882,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "JSLG3",
+  "bruto": 0.9732441479556301,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02675585204436992,
+  "desvioRelativo": 0.02675585204436992,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PETR4",
+  "bruto": 0.972945051332661,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02705494866733904,
+  "desvioRelativo": 0.02705494866733904,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TPIS3",
+  "bruto": 0.972139303482587,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.027860696517412964,
+  "desvioRelativo": 0.027860696517412964,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "HBOR3",
+  "bruto": 0.9718309828476592,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02816901715234077,
+  "desvioRelativo": 0.02816901715234077,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BRAV3",
+  "bruto": 0.9706840501592529,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.029315949840747146,
+  "desvioRelativo": 0.029315949840747146,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "LUXM4",
+  "bruto": 0.9701492537313433,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.02985074626865669,
+  "desvioRelativo": 0.02985074626865669,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MELK3",
+  "bruto": 0.9700000313505966,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.029999968649403352,
+  "desvioRelativo": 0.029999968649403352,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BOBR4",
+  "bruto": 0.9699247767578445,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.030075223242155502,
+  "desvioRelativo": 0.030075223242155502,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TCSA3",
+  "bruto": 0.9692307591034951,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0307692408965049,
+  "desvioRelativo": 0.0307692408965049,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PETR3",
+  "bruto": 0.9687092635222625,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0312907364777375,
+  "desvioRelativo": 0.0312907364777375,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MNDL3",
+  "bruto": 0.9685863567655963,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.031413643234403654,
+  "desvioRelativo": 0.031413643234403654,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "FIQE3",
+  "bruto": 0.966601226080574,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03339877391942603,
+  "desvioRelativo": 0.03339877391942603,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "NORD3",
+  "bruto": 0.9652777615800413,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.034722238419958695,
+  "desvioRelativo": 0.034722238419958695,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TASA4",
+  "bruto": 0.9640410494362874,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.035958950563712566,
+  "desvioRelativo": 0.035958950563712566,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PRIO3",
+  "bruto": 0.9627319218938806,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03726807810611943,
+  "desvioRelativo": 0.03726807810611943,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "TASA3",
+  "bruto": 0.9626485619212386,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0373514380787614,
+  "desvioRelativo": 0.0373514380787614,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "VVEO3",
+  "bruto": 0.9620253315446166,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.03797466845538344,
+  "desvioRelativo": 0.03797466845538344,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CYRE4",
+  "bruto": 0.9601752804838206,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.039824719516179385,
+  "desvioRelativo": 0.039824719516179385,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BRKM5",
+  "bruto": 0.9580838270579669,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.04191617294203309,
+  "desvioRelativo": 0.04191617294203309,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "FESA4",
+  "bruto": 0.9573378839590444,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0426621160409556,
+  "desvioRelativo": 0.0426621160409556,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "LAND3",
+  "bruto": 0.9540000297421855,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.04599997025781455,
+  "desvioRelativo": 0.04599997025781455,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "RCSL3",
+  "bruto": 0.9523809865845022,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.04761901341549779,
+  "desvioRelativo": 0.04761901341549779,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ATED3",
+  "bruto": 0.9512195297380904,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.04878047026190957,
+  "desvioRelativo": 0.04878047026190957,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ENMT4",
+  "bruto": 0.9477900825138682,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.052209917486131796,
+  "desvioRelativo": 0.052209917486131796,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CMIN3",
+  "bruto": 0.9468390734474514,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.05316092655254856,
+  "desvioRelativo": 0.05316092655254856,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ESTR4",
+  "bruto": 0.9455782312925171,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.05442176870748294,
+  "desvioRelativo": 0.05442176870748294,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "YDUQ3",
+  "bruto": 0.9450980297501913,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.054901970249808696,
+  "desvioRelativo": 0.054901970249808696,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BMIN4",
+  "bruto": 0.943,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.05700000000000005,
+  "desvioRelativo": 0.05700000000000005,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PATI3",
+  "bruto": 0.9421513993365009,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.05784860066349906,
+  "desvioRelativo": 0.05784860066349906,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "KLBN4",
+  "bruto": 0.9322033547878622,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0677966452121378,
+  "desvioRelativo": 0.0677966452121378,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ALUP4",
+  "bruto": 0.929361706126859,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.07063829387314102,
+  "desvioRelativo": 0.07063829387314102,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CTKA4",
+  "bruto": 0.92844312129821,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.07155687870178995,
+  "desvioRelativo": 0.07155687870178995,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ENMT3",
+  "bruto": 0.9254218691939895,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.0745781308060105,
+  "desvioRelativo": 0.0745781308060105,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "MEAL3",
+  "bruto": 0.918918918918919,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.08108108108108103,
+  "desvioRelativo": 0.08108108108108103,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "SLCE3",
+  "bruto": 0.9177852400040952,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.08221475999590477,
+  "desvioRelativo": 0.08221475999590477,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BDLL3",
+  "bruto": 0.8982035928143712,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.10179640718562877,
+  "desvioRelativo": 0.10179640718562877,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "CSNA3",
+  "bruto": 0.8945148001893827,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.10548519981061732,
+  "desvioRelativo": 0.10548519981061732,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "AMAR3",
+  "bruto": 0.8888888888888888,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.11111111111111116,
+  "desvioRelativo": 0.11111111111111116,
+  "aceitoHoje": true,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ISAE4",
+  "bruto": 0.8353437826242881,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.1646562173757119,
+  "desvioRelativo": 0.1646562173757119,
+  "aceitoHoje": false,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "BPAC5",
+  "bruto": 0.8239495780520076,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.17605042194799236,
+  "desvioRelativo": 0.17605042194799236,
+  "aceitoHoje": false,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "PMAM3",
+  "bruto": 0.7804877763355568,
+  "inteiro": 1.0,
+  "desvioAbsoluto": 0.21951222366444323,
+  "desvioRelativo": 0.21951222366444323,
+  "aceitoHoje": false,
+  "adotadoHoje": 1.0
+ },
+ {
+  "ticker": "ONCO11",
+  "bruto": 0.25641023996784373,
+  "inteiro": 0.0,
+  "desvioAbsoluto": 0.25641023996784373,
+  "desvioRelativo": null,
+  "aceitoHoje": false,
+  "adotadoHoje": 1.0
+ }
+]

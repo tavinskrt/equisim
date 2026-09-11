@@ -1,0 +1,1877 @@
+[
+ {
+  "ticker": "AALR3",
+  "nome": "ALLIANÇA SAÚDE E PARTICIPAÇÕES S.A.",
+  "setor": "saude"
+ },
+ {
+  "ticker": "ABCB10",
+  "nome": "ABCB10",
+  "setor": ""
+ },
+ {
+  "ticker": "ABCB4",
+  "nome": "BANCO ABC BRASIL S/A",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "ABEV3",
+  "nome": "AMBEV S.A",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "AERI3",
+  "nome": "AERIS IND. E COM. DE EQUIP. PARA GER. DE ENG. S.A.",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "AFLT3",
+  "nome": "AFLUENTE TRANSMISSÃO DE ENERGIA ELETRICA S/A",
+  "setor": "energia"
+ },
+ {
+  "ticker": "AGRO3",
+  "nome": "BRASILAGRO CIA BRAS DE PROP AGRICOLAS",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "AGXY3",
+  "nome": "AGROGALAXY PARTICIPAÇÕES S.A. - EM RECUPERAÇÃO JUDICIAL",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "AHEB3",
+  "nome": "SÃO PAULO TURISMO S. A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "ALLD3",
+  "nome": "ALLIED TECNOLOGIA S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "ALOS3",
+  "nome": "ALLOS S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "ALPA3",
+  "nome": "ALPARGATAS",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "ALPA4",
+  "nome": "ALPA4",
+  "setor": ""
+ },
+ {
+  "ticker": "ALPK3",
+  "nome": "ALLPARK EMPREENDIMENTOS, PARTICIPAÇÕES E SERVIÇOS S.A.",
+  "setor": "servicos"
+ },
+ {
+  "ticker": "ALUP11",
+  "nome": "ALUP11",
+  "setor": ""
+ },
+ {
+  "ticker": "ALUP3",
+  "nome": "ALUPAR INVESTIMENTO S/A",
+  "setor": "energia"
+ },
+ {
+  "ticker": "ALUP4",
+  "nome": "ALUP4",
+  "setor": ""
+ },
+ {
+  "ticker": "AMAR3",
+  "nome": "MARISA LOJAS SA",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "AMBP3",
+  "nome": "AMBIPAR PARTICIPAÇÕES E EMPREENDIMENTOS S.A.",
+  "setor": "saneamento"
+ },
+ {
+  "ticker": "AMER3",
+  "nome": "AMERICANAS S.A. - EM RECUPERAÇÃO JUDICIAL",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "AMOB3",
+  "nome": "VAMOS COMÉRCIO DE MÁQUINAS LINHA AMARELA S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "ANIM3",
+  "nome": "ANIMA HOLDING S/A",
+  "setor": "educacao"
+ },
+ {
+  "ticker": "ARML3",
+  "nome": "ARMAC LOCAÇÃO, LOGÍSTICA E SERVIÇOS S.A.",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "ARND3",
+  "nome": "GETNINJAS S.A.",
+  "setor": "emp-adm-part-intermediacao-financeira"
+ },
+ {
+  "ticker": "ASAI3",
+  "nome": "SENDAS DISTRIBUIDORA S.A.",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "ATED3",
+  "nome": "ATOM EDUCAÇÃO E EDITORA S.A.",
+  "setor": "educacao"
+ },
+ {
+  "ticker": "AUAU3",
+  "nome": "PET CENTER COMÉRCIO E PARTICIPAÇÕES S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "AURE3",
+  "nome": "AUREN ENERGIA S.A",
+  "setor": "energia"
+ },
+ {
+  "ticker": "AVLL3",
+  "nome": "ALPHAVILLE S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "AXIA3",
+  "nome": "AXIA ENERGIA S.A.",
+  "setor": "emp-adm-part-energia-eletrica"
+ },
+ {
+  "ticker": "AXIA7",
+  "nome": "AXIA7",
+  "setor": ""
+ },
+ {
+  "ticker": "AZEV3",
+  "nome": "AZEVEDO & TRAVASSOS",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "AZEV4",
+  "nome": "AZEV4",
+  "setor": ""
+ },
+ {
+  "ticker": "AZTE3",
+  "nome": "AZTE3",
+  "setor": ""
+ },
+ {
+  "ticker": "AZUL3",
+  "nome": "AZUL3",
+  "setor": ""
+ },
+ {
+  "ticker": "AZUL97",
+  "nome": "AZUL97",
+  "setor": ""
+ },
+ {
+  "ticker": "AZUL98",
+  "nome": "AZUL98",
+  "setor": ""
+ },
+ {
+  "ticker": "AZUL99",
+  "nome": "AZUL99",
+  "setor": ""
+ },
+ {
+  "ticker": "AZZA3",
+  "nome": "AZZAS 2154 S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "B1003",
+  "nome": "B1003",
+  "setor": ""
+ },
+ {
+  "ticker": "B3SA3",
+  "nome": "B3",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BALM3",
+  "nome": "BAUMER",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "BALM4",
+  "nome": "BALM4",
+  "setor": ""
+ },
+ {
+  "ticker": "BAUH4",
+  "nome": "BAUH4",
+  "setor": ""
+ },
+ {
+  "ticker": "BAZA3",
+  "nome": "BANCO DA AMAZONIA S.A.",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BBAS3",
+  "nome": "BBAS3",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BBDC3",
+  "nome": "BANCO BRADESCO S.A.",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BBDC4",
+  "nome": "BBDC4",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BBSE3",
+  "nome": "BB SEGURIDADE PARTICIPAÇÕES S.A.",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BDLL3",
+  "nome": "BARDELLA",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "BDLL4",
+  "nome": "BDLL4",
+  "setor": ""
+ },
+ {
+  "ticker": "BEEF3",
+  "nome": "MINERVA S/A",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "BEES3",
+  "nome": "BANESTES S/A",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BEES4",
+  "nome": "BEES4",
+  "setor": ""
+ },
+ {
+  "ticker": "BGIP3",
+  "nome": "BANESE",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BGIP4",
+  "nome": "BGIP4",
+  "setor": ""
+ },
+ {
+  "ticker": "BHIA3",
+  "nome": "PONTO FRIO",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "BIED3",
+  "nome": "BIOMA EDUCAÇÃO S.A.",
+  "setor": "educacao"
+ },
+ {
+  "ticker": "BIOM3",
+  "nome": "BIOMM SA",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "BLAU3",
+  "nome": "BLAU FARMACÊUTICA S.A.",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "BMEB3",
+  "nome": "BANCO MERCANTIL DO BRASIL S/A",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BMEB4",
+  "nome": "BMEB4",
+  "setor": ""
+ },
+ {
+  "ticker": "BMGB4",
+  "nome": "BANCO BMG S/A",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BMIN4",
+  "nome": "BMIN4",
+  "setor": ""
+ },
+ {
+  "ticker": "BMKS3",
+  "nome": "MONARK",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "BMOB3",
+  "nome": "BEMOBI MOBILE TECH S.A.",
+  "setor": "tecnologia"
+ },
+ {
+  "ticker": "BNBR3",
+  "nome": "BANCO DO NORDESTE",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BOBR4",
+  "nome": "BOBR4",
+  "setor": ""
+ },
+ {
+  "ticker": "BPAC11",
+  "nome": "BPAC11",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BPAC3",
+  "nome": "BANCO UBS PACTUAL S/A",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BPAC5",
+  "nome": "BPAC5",
+  "setor": ""
+ },
+ {
+  "ticker": "BRAP3",
+  "nome": "BRADESPAR S/A",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "BRAP4",
+  "nome": "BRAP4",
+  "setor": ""
+ },
+ {
+  "ticker": "BRAV3",
+  "nome": "BRAVA ENERGIA S.A.",
+  "setor": "energia"
+ },
+ {
+  "ticker": "BRBI11",
+  "nome": "BRBI BR PARTNERS S.A",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BRKM3",
+  "nome": "BRASKEM",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "BRKM5",
+  "nome": "BRKM5",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "BRKM6",
+  "nome": "BRKM6",
+  "setor": ""
+ },
+ {
+  "ticker": "BRSR3",
+  "nome": "BANRISUL S/A",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BRSR5",
+  "nome": "BRSR5",
+  "setor": ""
+ },
+ {
+  "ticker": "BRSR6",
+  "nome": "BRSR6",
+  "setor": ""
+ },
+ {
+  "ticker": "BRST3",
+  "nome": "BRISANET SERVIÇOS DE TELECOMUNICAÇÕES S.A.",
+  "setor": "telecomunicacoes"
+ },
+ {
+  "ticker": "BSLI3",
+  "nome": "BRB",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "BSLI4",
+  "nome": "BSLI4",
+  "setor": ""
+ },
+ {
+  "ticker": "CAMB3",
+  "nome": "PENALTY",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "CAML3",
+  "nome": "CAMIL ALIMENTOS S/A",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "CASH3",
+  "nome": "MELIUZ S.A.",
+  "setor": "tecnologia"
+ },
+ {
+  "ticker": "CBAV3",
+  "nome": "COMPANHIA BRASILEIRA DE ALUMINIO",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "CBEE3",
+  "nome": "AMPLA",
+  "setor": "energia"
+ },
+ {
+  "ticker": "CEAB3",
+  "nome": "C&A MODAS LTDA",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "CEBR3",
+  "nome": "CEB - COMPANHIA ENERGÉTICA DE BRASÍLIA",
+  "setor": "energia"
+ },
+ {
+  "ticker": "CEBR5",
+  "nome": "CEBR5",
+  "setor": ""
+ },
+ {
+  "ticker": "CEBR6",
+  "nome": "CEBR6",
+  "setor": ""
+ },
+ {
+  "ticker": "CEDO4",
+  "nome": "CEDO4",
+  "setor": ""
+ },
+ {
+  "ticker": "CEEB3",
+  "nome": "COELBA",
+  "setor": "energia"
+ },
+ {
+  "ticker": "CEED3",
+  "nome": "CEEE-D",
+  "setor": "energia"
+ },
+ {
+  "ticker": "CEGR3",
+  "nome": "CEG",
+  "setor": "energia"
+ },
+ {
+  "ticker": "CGAS3",
+  "nome": "COMPANHIA DE GÁS DE SÃO PAULO - COMGÁS",
+  "setor": "energia"
+ },
+ {
+  "ticker": "CGAS5",
+  "nome": "CGAS5",
+  "setor": ""
+ },
+ {
+  "ticker": "CGRA3",
+  "nome": "GRAZZIOTIN",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "CGRA4",
+  "nome": "CGRA4",
+  "setor": ""
+ },
+ {
+  "ticker": "CLSC3",
+  "nome": "CELESC",
+  "setor": "energia"
+ },
+ {
+  "ticker": "CLSC4",
+  "nome": "CLSC4",
+  "setor": ""
+ },
+ {
+  "ticker": "CMIG3",
+  "nome": "CEMIG",
+  "setor": "energia"
+ },
+ {
+  "ticker": "CMIG4",
+  "nome": "CMIG4",
+  "setor": "energia"
+ },
+ {
+  "ticker": "CMIN3",
+  "nome": "CSN MINERAÇÃO S.A",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "COCE3",
+  "nome": "CIA ENERG CEARA - COELCE",
+  "setor": "energia"
+ },
+ {
+  "ticker": "COCE5",
+  "nome": "COCE5",
+  "setor": ""
+ },
+ {
+  "ticker": "COGN3",
+  "nome": "KROTON EDUCACIONAL S.A.",
+  "setor": "educacao"
+ },
+ {
+  "ticker": "CPFE3",
+  "nome": "CPFL ENERGIA S.A.",
+  "setor": "energia"
+ },
+ {
+  "ticker": "CPLE3",
+  "nome": "COPEL",
+  "setor": "energia"
+ },
+ {
+  "ticker": "CRPG5",
+  "nome": "CRPG5",
+  "setor": ""
+ },
+ {
+  "ticker": "CRPG6",
+  "nome": "CRPG6",
+  "setor": ""
+ },
+ {
+  "ticker": "CSAN3",
+  "nome": "COSAN SA INDUSTRIA E COMERCIO",
+  "setor": "energia"
+ },
+ {
+  "ticker": "CSED3",
+  "nome": "CRUZEIRO DO SUL EDUCACIONAL S.A.",
+  "setor": "educacao"
+ },
+ {
+  "ticker": "CSMG3",
+  "nome": "COPASA MG",
+  "setor": "saneamento"
+ },
+ {
+  "ticker": "CSNA3",
+  "nome": "CSN",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "CSUD3",
+  "nome": "CSU DIGITAL S.A.",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "CTAX3",
+  "nome": "CTAX3",
+  "setor": ""
+ },
+ {
+  "ticker": "CTKA4",
+  "nome": "CTKA4",
+  "setor": ""
+ },
+ {
+  "ticker": "CURY3",
+  "nome": "CURY CONSTRUTORA E INCORPORADORA S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "CVCB3",
+  "nome": "CVC BRASIL OPERADORA E AGÊNCIA DE VIAGENS SA",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "CXSE3",
+  "nome": "CAIXA SEGURIDADE PARTICIPAÇÕES S.A.",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "CYRE3",
+  "nome": "CYRELA BRAZIL REALTY S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "CYRE4",
+  "nome": "CYRE4",
+  "setor": ""
+ },
+ {
+  "ticker": "DASA3",
+  "nome": "DIAGNOSTICOS DA AMERICA SA",
+  "setor": "saude"
+ },
+ {
+  "ticker": "DESK3",
+  "nome": "DESKTOP S.A",
+  "setor": "telecomunicacoes"
+ },
+ {
+  "ticker": "DEXP3",
+  "nome": "DEXXOS PARTICPAÇÕES S.A.",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "DEXP4",
+  "nome": "DEXP4",
+  "setor": ""
+ },
+ {
+  "ticker": "DIRR3",
+  "nome": "DIRECIONAL ENGENHARIA SA",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "DMVF3",
+  "nome": "D1000 VAREJO FARMA PARTICIPAÇÕES S.A.",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "DOHL4",
+  "nome": "DOHL4",
+  "setor": ""
+ },
+ {
+  "ticker": "DOTZ3",
+  "nome": "DOTZ S.A",
+  "setor": "servicos"
+ },
+ {
+  "ticker": "DTCY3",
+  "nome": "DTCOM",
+  "setor": "servicos"
+ },
+ {
+  "ticker": "DXCO3",
+  "nome": "DEXCO S.A.",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "EALT3",
+  "nome": "ELECTRO AÇO ALTONA S/A",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "EALT4",
+  "nome": "EALT4",
+  "setor": ""
+ },
+ {
+  "ticker": "ECOM3",
+  "nome": "ECONOMATICA S.A.",
+  "setor": "comunicacao-e-informatica"
+ },
+ {
+  "ticker": "ECOR3",
+  "nome": "ECORODOVIAS INFRAESTRUTURA E LOGÍSTICA S.A.",
+  "setor": "infraestrutura"
+ },
+ {
+  "ticker": "EGIE3",
+  "nome": "TRACTEBEL ENERGIA",
+  "setor": "energia"
+ },
+ {
+  "ticker": "EKTR4",
+  "nome": "EKTR4",
+  "setor": ""
+ },
+ {
+  "ticker": "EMAE4",
+  "nome": "EMAE4",
+  "setor": ""
+ },
+ {
+  "ticker": "EMBJ3",
+  "nome": "EMBRAER",
+  "setor": "maquinas-equipamentos-veiculos-e-pecas"
+ },
+ {
+  "ticker": "ENEV3",
+  "nome": "ENEVA SA",
+  "setor": "energia"
+ },
+ {
+  "ticker": "ENGI11",
+  "nome": "ENGI11",
+  "setor": "energia"
+ },
+ {
+  "ticker": "ENGI3",
+  "nome": "ENERGISA",
+  "setor": "energia"
+ },
+ {
+  "ticker": "ENGI4",
+  "nome": "ENGI4",
+  "setor": ""
+ },
+ {
+  "ticker": "ENJU3",
+  "nome": "ENJOEI S.A.",
+  "setor": "tecnologia"
+ },
+ {
+  "ticker": "ENMT3",
+  "nome": "ENERGISA MATO GROSSO - DISTRIBUIDORA DE ENERGIA S.A.",
+  "setor": "energia"
+ },
+ {
+  "ticker": "ENMT4",
+  "nome": "ENMT4",
+  "setor": ""
+ },
+ {
+  "ticker": "EPAR3",
+  "nome": "EMBPAR PARTICIPAÇÕES S/A",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "EQPA3",
+  "nome": "EQUATORIAL PARÁ DISTRIBUIDORA DE ENERGIA S.A.",
+  "setor": "energia"
+ },
+ {
+  "ticker": "EQPA5",
+  "nome": "EQPA5",
+  "setor": ""
+ },
+ {
+  "ticker": "EQTL3",
+  "nome": "EQUATORIAL S.A.",
+  "setor": "energia"
+ },
+ {
+  "ticker": "ESPA3",
+  "nome": "MPM CORPÓREOS S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "ESTR4",
+  "nome": "ESTR4",
+  "setor": ""
+ },
+ {
+  "ticker": "ETER3",
+  "nome": "ETERNIT",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "EUCA3",
+  "nome": "EUCATEX",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "EUCA4",
+  "nome": "EUCA4",
+  "setor": ""
+ },
+ {
+  "ticker": "EVEN3",
+  "nome": "EVEN",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "EZTC3",
+  "nome": "EZ TEC EMPREEND. E PARTICIPAÇÕES S/A",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "FASA3",
+  "nome": "FASA3",
+  "setor": ""
+ },
+ {
+  "ticker": "FESA3",
+  "nome": "FERBASA",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "FESA4",
+  "nome": "FESA4",
+  "setor": ""
+ },
+ {
+  "ticker": "FHER3",
+  "nome": "FERTILIZANTES HERINGER SA",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "FIEI3",
+  "nome": "CR2 EMPREENDIMENTOS IMOBILIÁRIOS S/A",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "FIQE3",
+  "nome": "UNIFIQUE TELECOMUNICAÇÕES S.A.",
+  "setor": "telecomunicacoes"
+ },
+ {
+  "ticker": "FLRY3",
+  "nome": "FLEURY SA",
+  "setor": "saude"
+ },
+ {
+  "ticker": "FRAS3",
+  "nome": "FRASLE MOBILITY S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "GEPA3",
+  "nome": "DUKE ENERGY INT,GERAÇÃO PARANAPANEMA SA",
+  "setor": "energia"
+ },
+ {
+  "ticker": "GEPA4",
+  "nome": "GEPA4",
+  "setor": ""
+ },
+ {
+  "ticker": "GFSA3",
+  "nome": "GAFISA",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "GGBR3",
+  "nome": "GERDAU S.A.",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "GGBR4",
+  "nome": "GGBR4",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "GGPS3",
+  "nome": "GPS PARTICIPAÇÕES E EMPREENDIMENTOS S/A",
+  "setor": "servicos"
+ },
+ {
+  "ticker": "GMAT3",
+  "nome": "GRUPO MATEUS S.A.",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "GOAU3",
+  "nome": "METALÚRGICA GERDAU",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "GOAU4",
+  "nome": "GOAU4",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "GRND3",
+  "nome": "GRENDENE SA",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "HAGA3",
+  "nome": "HAGA",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "HAGA4",
+  "nome": "HAGA4",
+  "setor": ""
+ },
+ {
+  "ticker": "HAPV3",
+  "nome": "HAPVIDA PARTICIPAÇÕES E INVESTIMENTOS S.A.",
+  "setor": "saude"
+ },
+ {
+  "ticker": "HBOR3",
+  "nome": "HELBOR",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "HBRE3",
+  "nome": "HBR REALTY EMPREENDIMENTOS IMOBILIÁRIOS S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "HBSA3",
+  "nome": "HIDROVIAS DO BRASIL S.A.",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "HETA4",
+  "nome": "HETA4",
+  "setor": ""
+ },
+ {
+  "ticker": "HOOT4",
+  "nome": "HOOT4",
+  "setor": ""
+ },
+ {
+  "ticker": "HYPE3",
+  "nome": "HYPERA PHARMA S/A",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "IFCM3",
+  "nome": "INFRACOMMERCE CXAAS S.A.",
+  "setor": "tecnologia"
+ },
+ {
+  "ticker": "IGTI11",
+  "nome": "IGUATEMI EMPRESA DE SHOPPING CENTERS S/A",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "IGTI3",
+  "nome": "IGUATEMI S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "IGTI4",
+  "nome": "IGTI4",
+  "setor": ""
+ },
+ {
+  "ticker": "INEP3",
+  "nome": "INEPAR S/A",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "INEP4",
+  "nome": "INEP4",
+  "setor": ""
+ },
+ {
+  "ticker": "INTB3",
+  "nome": "INTELBRAS S.A.",
+  "setor": "tecnologia"
+ },
+ {
+  "ticker": "IRBR3",
+  "nome": "IRB - BRASIL RESSEGUROS S.A.",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "ISAE3",
+  "nome": "CTEEP",
+  "setor": "energia"
+ },
+ {
+  "ticker": "ISAE4",
+  "nome": "ISAE4",
+  "setor": "energia"
+ },
+ {
+  "ticker": "ITSA3",
+  "nome": "ITAÚSA",
+  "setor": "holdings"
+ },
+ {
+  "ticker": "ITSA4",
+  "nome": "ITSA4",
+  "setor": ""
+ },
+ {
+  "ticker": "ITUB3",
+  "nome": "ITAÚ UNIBANCO",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "ITUB4",
+  "nome": "ITUB4",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "JALL3",
+  "nome": "JALLES MACHADO S.A",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "JFEN3",
+  "nome": "JOÃO FORTES ENGENHARIA S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "JHSF3",
+  "nome": "JHSF",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "JOPA3",
+  "nome": "JOSAPAR S/A",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "JOPA4",
+  "nome": "JOPA4",
+  "setor": ""
+ },
+ {
+  "ticker": "JSLG3",
+  "nome": "JSL S.A.",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "KEPL3",
+  "nome": "KEPLER WEBER SA",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "KLBN11",
+  "nome": "KLBN11",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "KLBN3",
+  "nome": "KLABIN",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "KLBN4",
+  "nome": "KLBN4",
+  "setor": ""
+ },
+ {
+  "ticker": "LAND3",
+  "nome": "TS AGRO S.A.",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "LAVV3",
+  "nome": "LAVVI EMPREENDIMENTOS IMOBILIÁRIOS S.A",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "LEVE3",
+  "nome": "MAHLE METAL LEVE",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "LIGT3",
+  "nome": "LIGHT S.A. - EM RECUPERAÇÃO JUDICIAL",
+  "setor": "energia"
+ },
+ {
+  "ticker": "LJQQ3",
+  "nome": "LOJAS QUERO-QUERO S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "LOGG3",
+  "nome": "LOG COMMERCIAL PROPERTIES E PARTICIPAÇÕES S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "LOGN3",
+  "nome": "LOG-IN LOGISTICA INTERMODAL SA",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "LPSB3",
+  "nome": "LOPES",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "LREN3",
+  "nome": "RENNER",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "LUPA3",
+  "nome": "LUPATECH",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "LUXM4",
+  "nome": "LUXM4",
+  "setor": ""
+ },
+ {
+  "ticker": "LWSA3",
+  "nome": "LWSA S/A",
+  "setor": "tecnologia"
+ },
+ {
+  "ticker": "MAPT3",
+  "nome": "CIA MARCOPOLO",
+  "setor": "outros"
+ },
+ {
+  "ticker": "MATD3",
+  "nome": "HOSPITAL MATER DEI S.A.",
+  "setor": "saude"
+ },
+ {
+  "ticker": "MBRF3",
+  "nome": "BRF S.A.",
+  "setor": "emp-adm-part-alimentos"
+ },
+ {
+  "ticker": "MDIA3",
+  "nome": "M DIAS BRANCO SA IND E COM DE ALIMENTOS",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "MDNE3",
+  "nome": "MOURA DUBEUX",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "MEAL3",
+  "nome": "INTERNATIONAL MEAL COMAPANY ALIMENTAÇÃO S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "MELK3",
+  "nome": "MELNICK EVEN DESENVOLVIMENTO IMOBILIÁRIO S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "MGEL4",
+  "nome": "MGEL4",
+  "setor": ""
+ },
+ {
+  "ticker": "MGLU3",
+  "nome": "MAGAZINE LUIZA SA",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "MILS3",
+  "nome": "MILLS ESTRUTURAS E SERVIÇOS DE ENGENHARIA S/A",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "MLAS3",
+  "nome": "GRUPO MULTILASER S.A.",
+  "setor": "tecnologia"
+ },
+ {
+  "ticker": "MNDL3",
+  "nome": "MUNDIAL",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "MNPR3",
+  "nome": "MINUPAR",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "MOTV3",
+  "nome": "MOTIVA INFRAESTRUTURA DE MOBILIDADE S.A.",
+  "setor": "infraestrutura"
+ },
+ {
+  "ticker": "MOVI3",
+  "nome": "MOVIDA PARTICIPAÇÕES S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "MRVE3",
+  "nome": "MRV ENGENHARIA",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "MSPA4",
+  "nome": "MSPA4",
+  "setor": ""
+ },
+ {
+  "ticker": "MTRE3",
+  "nome": "MITRE REALTY EMPREENDIMENTOS E PARTICIPAÇÕES S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "MTSA4",
+  "nome": "MTSA4",
+  "setor": ""
+ },
+ {
+  "ticker": "MULT3",
+  "nome": "MULTIPLAN",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "MWET3",
+  "nome": "WETZEL S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "MWET4",
+  "nome": "MWET4",
+  "setor": ""
+ },
+ {
+  "ticker": "MYPK3",
+  "nome": "IOCHPE-MAXION",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "NATU3",
+  "nome": "NATU3",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "NEXP3",
+  "nome": "NEXPE PARTICIPAÃiES S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "NORD3",
+  "nome": "NORDON INDS METALURGICAS SA",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "NUTR3",
+  "nome": "NUTRIPLANT",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "OBTC3",
+  "nome": "OBTC3",
+  "setor": ""
+ },
+ {
+  "ticker": "OFSA3",
+  "nome": "OUROFINO S.A.",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "ONCO11",
+  "nome": "ONCO11",
+  "setor": ""
+ },
+ {
+  "ticker": "ONCO3",
+  "nome": "ONCOCLÍNICAS DO BRASIL SERVIÇOS MÉDICOS S.A.",
+  "setor": "saude"
+ },
+ {
+  "ticker": "OPCT3",
+  "nome": "OCEANPACT SERVIÇOS MARÍTIMOS S.A.",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "ORVR3",
+  "nome": "ORIZON VALORIZAÇÃO DE RESÍDUOS S.A.",
+  "setor": "saneamento"
+ },
+ {
+  "ticker": "OSXB3",
+  "nome": "OSX BRASIL S.A. - EM RECUPERAÇÃO JUDICIAL",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "PASS3",
+  "nome": "COMPASS GÁS E ENERGIA S.A.",
+  "setor": "energia"
+ },
+ {
+  "ticker": "PATI3",
+  "nome": "PANATLANTICA",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "PATI4",
+  "nome": "PATI4",
+  "setor": ""
+ },
+ {
+  "ticker": "PCAR3",
+  "nome": "PÃO DE AÇÚCAR",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "PDGR3",
+  "nome": "PDG REALTY SA EMPREENDIMENTOS E PARTS",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "PDTC3",
+  "nome": "--",
+  "setor": "tecnologia"
+ },
+ {
+  "ticker": "PEAB3",
+  "nome": "CIA. DE PARTICIPAÇÕES ALIANÇA DA BAHIA",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "PEAB4",
+  "nome": "PEAB4",
+  "setor": ""
+ },
+ {
+  "ticker": "PETR3",
+  "nome": "PETROBRAS",
+  "setor": "energia"
+ },
+ {
+  "ticker": "PETR4",
+  "nome": "PETR4",
+  "setor": "energia"
+ },
+ {
+  "ticker": "PFRM3",
+  "nome": "PROFARMA",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "PGMN3",
+  "nome": "EMPREENDIMENTOS PAGUE MENOS SA",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "PINE3",
+  "nome": "BANCO PINE S/A",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "PINE4",
+  "nome": "PINE4",
+  "setor": ""
+ },
+ {
+  "ticker": "PLAS3",
+  "nome": "PLASCAR PARTICIPAÇÕES INDUSTRIAIS S.A",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "PLPL3",
+  "nome": "PLANO & PLANO DESENVOLVIMENTO IMOBILIÁRIO S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "PMAM3",
+  "nome": "PARANAPANEMA S.A.",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "PNVL3",
+  "nome": "PANVEL FARMÁCIAS",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "POMO3",
+  "nome": "MARCOPOLO",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "POMO4",
+  "nome": "POMO4",
+  "setor": ""
+ },
+ {
+  "ticker": "POSI3",
+  "nome": "POSITIVO INFORMATICA SA",
+  "setor": "tecnologia"
+ },
+ {
+  "ticker": "PRIO3",
+  "nome": "PETRO RIO S.A.",
+  "setor": "energia"
+ },
+ {
+  "ticker": "PRNR3",
+  "nome": "PRINER SERVIÇOS INDUSTRIAIS S.A.",
+  "setor": "servicos"
+ },
+ {
+  "ticker": "PSSA3",
+  "nome": "PORTO SEGURO SA",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "PTBL3",
+  "nome": "PORTOBELLO S/A",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "QUAL3",
+  "nome": "QUALICORP CONSULTORIA E CORRETORA DE SEGUROS S.A.",
+  "setor": "saude"
+ },
+ {
+  "ticker": "RADL3",
+  "nome": "DROGASIL SA",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "RAIL3",
+  "nome": "ALL - AMÉRICA LATINA LOGÍSTICA S.A.",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "RAIZ4",
+  "nome": "RAÍZEN S.A.",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "RANI3",
+  "nome": "IRANI PAPEL E EMBALAGEM S.A.",
+  "setor": "materiais"
+ },
+ {
+  "ticker": "RAPT3",
+  "nome": "RANDON S.A. IMPLEMENTOS E PARTICIPAÇÕES",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "RAPT4",
+  "nome": "RAPT4",
+  "setor": ""
+ },
+ {
+  "ticker": "RCSL3",
+  "nome": "RECRUSUL",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "RCSL4",
+  "nome": "RCSL4",
+  "setor": ""
+ },
+ {
+  "ticker": "RDOR3",
+  "nome": "REDE D'OR SÃO LUIZ S.A.",
+  "setor": "saude"
+ },
+ {
+  "ticker": "RECV3",
+  "nome": "PETRORECÔNCAVO S.A.",
+  "setor": "energia"
+ },
+ {
+  "ticker": "REDE3",
+  "nome": "REDE ENERGIA PARTICIPAÇÕES S.A.",
+  "setor": "energia"
+ },
+ {
+  "ticker": "RENT3",
+  "nome": "LOCALIZA RENT A CAR",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "RENT4",
+  "nome": "RENT4",
+  "setor": ""
+ },
+ {
+  "ticker": "RIAA3",
+  "nome": "GUARARAPES CONFECÇÕES",
+  "setor": "textil-e-vestuario"
+ },
+ {
+  "ticker": "RNEW3",
+  "nome": "RENOVA ENERGIA S/A",
+  "setor": "energia"
+ },
+ {
+  "ticker": "RNEW4",
+  "nome": "RNEW4",
+  "setor": ""
+ },
+ {
+  "ticker": "ROMI3",
+  "nome": "ROMI S.A.",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "RPAD3",
+  "nome": "ALFA HOLDINGS",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "RSUL4",
+  "nome": "RSUL4",
+  "setor": ""
+ },
+ {
+  "ticker": "RVEE3",
+  "nome": "RVEE3",
+  "setor": ""
+ },
+ {
+  "ticker": "SANB11",
+  "nome": "SANB11",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "SANB3",
+  "nome": "BANCO SANTANDER (BRASIL) S.A.",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "SANB4",
+  "nome": "SANB4",
+  "setor": ""
+ },
+ {
+  "ticker": "SAPR11",
+  "nome": "SAPR11",
+  "setor": ""
+ },
+ {
+  "ticker": "SAPR3",
+  "nome": "SANEPAR",
+  "setor": "saneamento"
+ },
+ {
+  "ticker": "SAPR4",
+  "nome": "SAPR4",
+  "setor": ""
+ },
+ {
+  "ticker": "SAUD3",
+  "nome": "BRADSAÚDE S.A.",
+  "setor": "servicos-medicos"
+ },
+ {
+  "ticker": "SBFG3",
+  "nome": "GRUPO SBF S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "SBSP3",
+  "nome": "SABESP",
+  "setor": "saneamento"
+ },
+ {
+  "ticker": "SCAR3",
+  "nome": "SÃO CARLOS EMPREEND.E PARTICIPAÇÕES S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "SEER3",
+  "nome": "SER EDUCACIONAL S.A.",
+  "setor": "educacao"
+ },
+ {
+  "ticker": "SEQL3",
+  "nome": "SEQL3",
+  "setor": ""
+ },
+ {
+  "ticker": "SHUL4",
+  "nome": "SHUL4",
+  "setor": ""
+ },
+ {
+  "ticker": "SIMH3",
+  "nome": "SIMPAR S.A.",
+  "setor": "holdings"
+ },
+ {
+  "ticker": "SLCE3",
+  "nome": "SLC AGRICOLA SA",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "SMFT3",
+  "nome": "SMARTFIT ESCOLA DE GINÁSTICA E DANÇA S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "SMTO3",
+  "nome": "SÃO MARTINHO SA",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "SNSY5",
+  "nome": "SNSY5",
+  "setor": ""
+ },
+ {
+  "ticker": "SOJA3",
+  "nome": "BOA SAFRA SEMENTES S.A.",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "SOND5",
+  "nome": "SOND5",
+  "setor": ""
+ },
+ {
+  "ticker": "SOND6",
+  "nome": "SOND6",
+  "setor": ""
+ },
+ {
+  "ticker": "SUZB3",
+  "nome": "SUZANO PAPEL E CELULOSE SA",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "SYNE3",
+  "nome": "SYN PROP & TECH S.A.",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "TAEE11",
+  "nome": "TAEE11",
+  "setor": "energia"
+ },
+ {
+  "ticker": "TAEE3",
+  "nome": "TRANSMISSORA ALIANÇA DE ENERGIA ELÉTRICA S.A.",
+  "setor": "energia"
+ },
+ {
+  "ticker": "TAEE4",
+  "nome": "TAEE4",
+  "setor": ""
+ },
+ {
+  "ticker": "TASA3",
+  "nome": "TAURUS ARMAS S.A.",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "TASA4",
+  "nome": "TASA4",
+  "setor": ""
+ },
+ {
+  "ticker": "TCSA3",
+  "nome": "TECNISA S/A",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "TECN3",
+  "nome": "TECHNOS SA",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "TELB3",
+  "nome": "TELEBRAS",
+  "setor": "telecomunicacoes"
+ },
+ {
+  "ticker": "TELB4",
+  "nome": "TELB4",
+  "setor": ""
+ },
+ {
+  "ticker": "TEND3",
+  "nome": "CONSTRUTORA TENDA S/A",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "TFCO4",
+  "nome": "TRACK & FIELD CO S.A",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "TGMA3",
+  "nome": "TEGMA GESTÃO LOGÍSTICA SA",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "TIMS3",
+  "nome": "TIM S.A.",
+  "setor": "telecomunicacoes"
+ },
+ {
+  "ticker": "TOKY3",
+  "nome": "GRUPO TOKY S.A. - EM RECUPERAÇÃO JUDICIAL",
+  "setor": "comercio-atacado-e-varejo"
+ },
+ {
+  "ticker": "TOTS3",
+  "nome": "TOTVS S.A",
+  "setor": "tecnologia"
+ },
+ {
+  "ticker": "TPIS3",
+  "nome": "TPI",
+  "setor": "infraestrutura"
+ },
+ {
+  "ticker": "TRIS3",
+  "nome": "TRISUL",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "TTEN3",
+  "nome": "TRÊS TENTOS AGROINDUSTRIAL S.A.",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "TUPY3",
+  "nome": "TUPY3",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "TXRX4",
+  "nome": "TXRX4",
+  "setor": ""
+ },
+ {
+  "ticker": "UCAS3",
+  "nome": "UNICASA INDÚSTRIA DE MÓVEIS S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "UGPA3",
+  "nome": "ULTRAPAR PARTICIPAÇÕES SA",
+  "setor": "energia"
+ },
+ {
+  "ticker": "UNIP3",
+  "nome": "UNIPAR CARBOCLORO S.A.",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "UNIP5",
+  "nome": "UNIP5",
+  "setor": ""
+ },
+ {
+  "ticker": "UNIP6",
+  "nome": "UNIP6",
+  "setor": ""
+ },
+ {
+  "ticker": "USIM3",
+  "nome": "USIMINAS",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "USIM5",
+  "nome": "USIM5",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "USIM6",
+  "nome": "USIM6",
+  "setor": ""
+ },
+ {
+  "ticker": "VALE3",
+  "nome": "VALE",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "VAMO3",
+  "nome": "VAMOS LOCAÇÃO DE CAMINHÕES, MÁQUINAS E EQUIPAMENTOS S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "VBBR3",
+  "nome": "VIBRA ENERGIA S/A",
+  "setor": "energia"
+ },
+ {
+  "ticker": "VITT3",
+  "nome": "VITTIA S.A.",
+  "setor": "materiais-basicos"
+ },
+ {
+  "ticker": "VIVA3",
+  "nome": "VIVARA PARTICIPAÇÕES S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "VIVR3",
+  "nome": "VIVER",
+  "setor": "construcao-e-imobiliario"
+ },
+ {
+  "ticker": "VIVT3",
+  "nome": "TELEFÔNICA BRASIL",
+  "setor": "telecomunicacoes"
+ },
+ {
+  "ticker": "VLID3",
+  "nome": "AMERICAN BANKNOTE COMPANY",
+  "setor": "servicos"
+ },
+ {
+  "ticker": "VSTE3",
+  "nome": "LE LIS BLANC DEUX",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "VTRU3",
+  "nome": "VITRU EDUCAÇÃO S.A.",
+  "setor": "educacao"
+ },
+ {
+  "ticker": "VULC3",
+  "nome": "VULCABRAS S/A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "VVEO3",
+  "nome": "CM HOSPITALAR S.A",
+  "setor": "consumo-nao-ciclico"
+ },
+ {
+  "ticker": "WDCN3",
+  "nome": "LIVETECH DA BAHIA INDÚSTRIA E COMÉRCIO S.A.",
+  "setor": "comercio-atacado-e-varejo"
+ },
+ {
+  "ticker": "WEGE3",
+  "nome": "WEG SA",
+  "setor": "bens-industriais"
+ },
+ {
+  "ticker": "WEST3",
+  "nome": "WESTWING COMÉRCIO VAREJISTA S.A.",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "WHRL3",
+  "nome": "WHIRLPOOL S.A",
+  "setor": "consumo-ciclico"
+ },
+ {
+  "ticker": "WHRL4",
+  "nome": "WHRL4",
+  "setor": ""
+ },
+ {
+  "ticker": "WIZC3",
+  "nome": "WIZ CO PARTICIPAÇÕES E CORRETAGEM DE SEGUROS S.A.",
+  "setor": "servicos-financeiros"
+ },
+ {
+  "ticker": "WLMM4",
+  "nome": "WLMM4",
+  "setor": ""
+ },
+ {
+  "ticker": "YDUQ3",
+  "nome": "ESTACIO PARTICIPAÇÕES SA",
+  "setor": "educacao"
+ }
+]

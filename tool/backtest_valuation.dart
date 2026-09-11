@@ -285,11 +285,22 @@ Future<void> main(List<String> args) async {
           return pf / pa - 1;
         }
 
+        // Roteamento, para separar quem chegou ao acionista por qual porta.
+        // A Porta 1 é setorial; a Porta 3 é o fluxo da firma não sustentado.
+        final perfil = await fundamentals.profile(ticker);
+        final setor = perfil.isOk ? perfil.unwrap().sector.key : null;
+        final porta1 = setor == 'servicos-financeiros';
+        final sustentado = GrowthGuards.firmFlowIsSustained(pub);
+
         linhas.add({
           'coorte': t.year,
           'ticker': ticker.value,
           'preco': p0,
           'upside': upside,
+          'setor': setor,
+          'porta1': porta1,
+          'fluxoSustentado': sustentado,
+          'porta3': !porta1 && !sustentado,
           'ressalvas': r.isOk
               ? [for (final c in r.unwrap().diagnostics!.caveats) c.name]
               : null,

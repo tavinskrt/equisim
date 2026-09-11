@@ -1,0 +1,122 @@
+[
+ {
+  "ticker": "ALOS3",
+  "totalReturn": 0.39072067780806924,
+  "retornoDePreco": -0.000346981263011803,
+  "aportado": 4933.55,
+  "caixa": 4.41,
+  "pregoes": 1727
+ },
+ {
+  "ticker": "ABCB4",
+  "totalReturn": 0.310747838777351,
+  "retornoDePreco": 0.3731843575418994,
+  "aportado": 4933.55,
+  "caixa": 2.1,
+  "pregoes": 1727
+ },
+ {
+  "ticker": "ALPK3",
+  "totalReturn": 0.27635265259786335,
+  "retornoDePreco": -0.5287958115183247,
+  "aportado": 4932.9,
+  "caixa": 0.62,
+  "pregoes": 1574
+ },
+ {
+  "ticker": "ALUP3",
+  "totalReturn": 0.25422165460479634,
+  "retornoDePreco": 0.18190848825187023,
+  "aportado": 4932.9,
+  "caixa": 7.15,
+  "pregoes": 1727
+ },
+ {
+  "ticker": "ALUP11",
+  "totalReturn": 0.22866468000567616,
+  "retornoDePreco": 0.38337726639059433,
+  "aportado": 4932.9,
+  "caixa": 5.68,
+  "pregoes": 1727
+ },
+ {
+  "ticker": "ALUP4",
+  "totalReturn": 0.16847493360903323,
+  "retornoDePreco": 0.44253632760898287,
+  "aportado": 4932.9,
+  "caixa": 9.13,
+  "pregoes": 1727
+ },
+ {
+  "ticker": "ABEV3",
+  "totalReturn": 0.1066291007489536,
+  "retornoDePreco": -0.18233766233766235,
+  "aportado": 4933.55,
+  "caixa": 13.57,
+  "pregoes": 1727
+ },
+ {
+  "ticker": "ALPA4",
+  "totalReturn": 0.07220358565333279,
+  "retornoDePreco": -0.476061776061776,
+  "aportado": 4933.55,
+  "caixa": 11.04,
+  "pregoes": 1727
+ },
+ {
+  "ticker": "AFLT3",
+  "totalReturn": -0.0956208004378186,
+  "retornoDePreco": -0.5777142857142857,
+  "aportado": 4933.55,
+  "caixa": 5.63,
+  "pregoes": 1289
+ },
+ {
+  "ticker": "ALPA3",
+  "totalReturn": -0.14867387580950836,
+  "retornoDePreco": -0.5622317596566524,
+  "aportado": 4933.55,
+  "caixa": 7.86,
+  "pregoes": 1723
+ },
+ {
+  "ticker": "AGRO3",
+  "totalReturn": -0.21524662768189234,
+  "retornoDePreco": 0.08258426966292132,
+  "aportado": 4933.55,
+  "caixa": 17.62,
+  "pregoes": 1727
+ },
+ {
+  "ticker": "ALLD3",
+  "totalReturn": -0.39559140983673013,
+  "retornoDePreco": -0.6979045401629802,
+  "aportado": 4933.55,
+  "caixa": 2.82,
+  "pregoes": 1350
+ },
+ {
+  "ticker": "AALR3",
+  "totalReturn": -0.619168752723698,
+  "retornoDePreco": -0.8285714285714285,
+  "aportado": 4933.55,
+  "caixa": 1.15,
+  "pregoes": 1727
+ },
+ {
+  "ticker": "AMAR3",
+  "totalReturn": -0.6245190455918426,
+  "retornoDePreco": -0.9578947368421052,
+  "aportado": 4932.9,
+  "caixa": 0.21,
+  "pregoes": 1727
+ },
+ {
+  "ticker": "AERI3",
+  "totalReturn": -0.75732890109556,
+  "retornoDePreco": -0.9787692307692307,
+  "aportado": 4933.55,
+  "caixa": 0.77,
+  "pregoes": 1450
+ }
+]

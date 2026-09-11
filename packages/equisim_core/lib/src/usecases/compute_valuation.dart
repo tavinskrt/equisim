@@ -526,10 +526,20 @@ abstract final class ValuationCascade {
   /// - [marketCap]: valor de mercado publicado.
   /// - [marketPrice]: cotação da unidade negociada.
   ///
+  /// **A tolerância é relativa, e a razão de ser dela está na grandeza que
+  /// mede** (decisão 61). O desvio `bruto ÷ u − 1` é exatamente a discordância
+  /// relativa entre `ações × preço` e `u × valor de mercado` — isto é, o quanto
+  /// o preço andou desde o instante do valor de mercado publicado. Uma banda
+  /// **absoluta** de 0,12 dava 12% de folga à ação comum, onde aceitar e
+  /// recusar devolvem o mesmo 1,0, e 1,2% à unit de dez ações, onde o fator
+  /// errado custa dez vezes. **A SAPR11 — uma das duas que motivaram esta
+  /// função — media 4,8799 e era recusada por 0,0001**, caindo para a convenção
+  /// de ação comum.
+  ///
   /// Retorna a razão arredondada, sempre em `[1, maxSharesPerUnit]`. Devolve
   /// `1.0` — nunca `null`, nunca zero — para qualquer entrada ausente, não
-  /// positiva, não finita, fora da faixa, ou a mais de 0,12 de um inteiro.
-  /// O valor é seguro como divisor.
+  /// positiva, não finita, fora da faixa, ou a mais de [unitRatioTolerance] de
+  /// um inteiro, em termos relativos. O valor é seguro como divisor.
   static double quotedUnitRatio({
     required double? sharesOutstanding,
     required double? marketCap,
@@ -545,8 +555,8 @@ abstract final class ValuationCascade {
     final rounded = raw.roundToDouble();
     if (rounded < 1 || rounded > maxSharesPerUnit) return 1.0;
     // A tolerância absorve a diferença de data entre o preço e o valor de
-    // mercado publicado, que é de fechamento.
-    if ((raw - rounded).abs() > 0.12) return 1.0;
+    // mercado publicado, que é de fechamento — e essa diferença é relativa.
+    if ((raw / rounded - 1).abs() > unitRatioTolerance) return 1.0;
     return rounded;
   }
 
@@ -608,6 +618,21 @@ abstract final class ValuationCascade {
 
   /// Teto de ações por unit. As units da B3 vão até 5 (1 ON + 4 PN).
   static const double maxSharesPerUnit = 10;
+
+  /// Folga **relativa** admitida entre a razão medida e o inteiro mais
+  /// próximo, em [quotedUnitRatio].
+  ///
+  /// Cinco por cento é o que separa os dois grupos medidos em 11/09/2026 sobre
+  /// os 359 ativos com razão mensurável: as nove units reais ficam todas em
+  /// **2,40% ou menos** (IGTI11 0,38%, KLBN11 0,51%, TAEE11 0,58%, ENGI11
+  /// 0,73%, ALUP11 1,03%, BRBI11 1,38%, SANB11 1,70%, BPAC11 2,00%, SAPR11
+  /// 2,40%), e o falso positivo mais próximo, a EQPA5, em **10,44%**. Há um
+  /// fator de quatro de margem para cada lado.
+  ///
+  /// **Não é mais permissiva que a banda absoluta que substituiu, senão de
+  /// u = 3 para cima**: em u = 2 ela aperta de 0,12 para 0,10, e em u = 1 tanto
+  /// faz — aceitar e recusar devolvem 1,0 igualmente.
+  static const double unitRatioTolerance = 0.05;
 
   /// Papéis na **unidade negociada** para a ponte por papel.
   ///
@@ -2458,7 +2483,8 @@ abstract final class ValuationCascade {
           'Passo 1: razão medida → ${_r(shares!, 0)} × '
               '${_r(inputs.marketPrice)} ÷ ${_r(cap!)} = ${_r(raw, 4)}',
           'Passo 2: arredondamento e teste de plausibilidade (1 ≤ u ≤ '
-              '${_r(maxSharesPerUnit, 0)}, desvio ≤ 0,12) → u = '
+              '${_r(maxSharesPerUnit, 0)}, desvio relativo ≤ '
+              '${_r(unitRatioTolerance * 100, 0)}%) → u = '
               '${_r(sharesPerQuote, 0)}',
         ],
       ],

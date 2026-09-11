@@ -428,14 +428,13 @@ class _AlignmentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final meets = alignment.meetsGoal;
-    final yieldToClose = alignment.yieldToCloseGap;
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SectionHeader(
             title: 'Carteira frente à meta',
-            subtitle: 'CDI à vista mais prêmio pelo desconto relativo',
+            subtitle: 'Custo do capital próprio mais prêmio pelo desconto',
           ),
           const Gap.md(),
           // DUAS colunas, e nao tres. A taxa exigida saiu daqui: ela ja
@@ -454,7 +453,12 @@ class _AlignmentCard extends StatelessWidget {
                 // errado nas duas metades: o DY saiu pela decisão 23, e a
                 // anualização do upside saiu quando o esperado passou a ser o
                 // estimador transversal.
-                hint: 'CDI + prêmio pelo desconto relativo',
+                // Era "CDI + prêmio pelo desconto relativo", e o CDI saiu
+                // daqui pela decisão 58: a âncora de cada ativo passou a ser
+                // o `Ke` dele. O rótulo sobreviveu à mudança do número por
+                // duas semanas, que é o prazo que um rótulo leva para virar
+                // mentira quando ninguém o lê junto com a conta.
+                hint: 'Ke do ativo + prêmio pelo desconto relativo',
                 trend: meets ? FinTrend.positive : FinTrend.negative,
               ),
               MetricTile(
@@ -471,24 +475,12 @@ class _AlignmentCard extends StatelessWidget {
               ),
             ],
           ),
-          // A lacuna precisa ser lida sabendo o que ela NÃO contém. O
-          // esperado é retorno de preço, e só; a carteira que paga provento
-          // entrega mais do que este cartão mostra, e sem esta linha o
-          // investidor lê um déficit maior que o real e vai buscar risco que
-          // não precisa correr. O número é a própria lacuna invertida — nada
-          // aqui estima yield nem soma coisa alguma ao esperado.
-          if (yieldToClose != null) ...[
-            const Gap.sm(),
-            Text(
-              'O esperado conta apenas valorização: a simulação não distribui '
-              'provento. Um dividend yield de '
-              '${Fmt.percent(yieldToClose, decimals: 2)} ao ano fecharia esta '
-              'lacuna.',
-              style: context.finType.caption.copyWith(
-                color: context.fin.textSecondary,
-              ),
-            ),
-          ],
+          // Aqui ficava a linha "um dividend yield de X% ao ano fecharia
+          // esta lacuna". Ela saiu pela decisão 62: o esperado deixou de ser
+          // retorno de preço quando a âncora virou o `Ke` (decisão 58), e
+          // `Ke = Rf + β·prêmio` é retorno TOTAL pelo CAPM. Mandar somar um
+          // yield a ele contava o provento duas vezes, no sentido que faz a
+          // carteira parecer melhor do que é.
           if (alignment.coverageIsWeak) ...[
             const Gap.md(),
             NoticeBanner(

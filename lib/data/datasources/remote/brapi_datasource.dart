@@ -134,14 +134,12 @@ class BrapiDatasource {
       '/v2/stocks/cash-flow',
     ];
     final merged = <String, Map<String, dynamic>>{};
-    var anySucceeded = false;
     for (final endpoint in endpoints) {
       final response = await client.getJson(
         _url(endpoint),
         query: {'symbols': ticker.value, 'mode': 'history'},
       );
-      if (response.isErr) continue;
-      anySucceeded = true;
+      if (response.isErr) return Err(response.failureOrNull!);
       for (final item in BrapiJson.firstDataList(response.unwrap())) {
         if (item is! Map<String, dynamic>) continue;
         final endDate = BrapiJson.asString(item['endDate']);
@@ -150,7 +148,7 @@ class BrapiDatasource {
         (merged[key] ??= <String, dynamic>{}).addAll(item);
       }
     }
-    if (!anySucceeded) {
+    if (merged.isEmpty) {
       return Err(InsufficientData(
         'Nenhum demonstrativo disponível para ${ticker.value}.',
       ));
@@ -169,16 +167,28 @@ class BrapiDatasource {
     ];
 
     // Chave = fim do exercício; os quatro demonstrativos são fundidos por ela.
+    //
+    // **Falha de um endpoint reprova a busca inteira** (decisão 68). A versão
+    // anterior seguia com `continue` e devolvia `Ok` desde que **algum** dos
+    // quatro respondesse — de modo que uma falha de rede na demonstração de
+    // resultado produzia série com balanço preenchido e resultado ausente.
+    // Duas coisas tornavam isso grave: essa forma é exatamente a que a
+    // decisão 52 trata como "ausência não é zero", e o repositório **grava o
+    // resultado no cache**, de modo que a corrupção sobrevivia à falha e era
+    // preferida nas leituras seguintes.
+    //
+    // `getJson` devolve `Err` para status de erro, resposta vazia, falha de
+    // transporte e JSON inválido — todos "deu errado". Companhia que
+    // legitimamente não publica um demonstrativo responde 200 com lista
+    // vazia, e essa continua passando.
     final merged = <String, Map<String, dynamic>>{};
-    var anySucceeded = false;
 
     for (final endpoint in endpoints) {
       final response = await client.getJson(
         _url(endpoint),
         query: {'symbols': ticker.value, 'mode': 'history'},
       );
-      if (response.isErr) continue;
-      anySucceeded = true;
+      if (response.isErr) return Err(response.failureOrNull!);
 
       for (final item in BrapiJson.firstDataList(response.unwrap())) {
         if (item is! Map<String, dynamic>) continue;
@@ -189,7 +199,7 @@ class BrapiDatasource {
       }
     }
 
-    if (!anySucceeded) {
+    if (merged.isEmpty) {
       return Err(InsufficientData(
         'Nenhum demonstrativo disponível para ${ticker.value}.',
       ));

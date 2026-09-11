@@ -235,6 +235,49 @@ void main() {
   });
 
   group('BrapiDatasource — fundamentos', () {
+    test('falha de UM demonstrativo reprova a busca inteira', () async {
+      // Decisao 68. A versao anterior seguia com `continue` e devolvia Ok
+      // desde que ALGUM dos quatro respondesse — produzindo serie com balanco
+      // preenchido e resultado ausente, que e a forma que a decisao 52 trata
+      // como "ausencia nao e zero". E o repositorio GRAVA o resultado no
+      // cache, de modo que a corrupcao sobrevivia a falha de rede e era
+      // preferida nas leituras seguintes.
+      final datasource = BrapiDatasource(clientWith(FixtureAdapter(
+        routes: {
+          '/v2/stocks/statistics?symbols=PETR4&mode=history':
+              'brapi_statistics_history_petr4',
+          '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+          '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+          '/v2/stocks/statistics?symbols=PETR4&mode=current':
+              'brapi_statistics_current_petr4',
+        },
+        failures: {'/v2/stocks/income-statement': 503},
+      )));
+
+      final r = await datasource.fundamentalsHistory(Ticker.parse('PETR4'));
+      expect(r.isErr, isTrue,
+          reason: 'sem a DRE, a serie nao descreve a empresa');
+    });
+
+    test('e o mesmo vale para falha de transporte', () async {
+      final datasource = BrapiDatasource(clientWith(FixtureAdapter(
+        routes: {
+          '/v2/stocks/statistics?symbols=PETR4&mode=history':
+              'brapi_statistics_history_petr4',
+          '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
+          '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+          '/v2/stocks/statistics?symbols=PETR4&mode=current':
+              'brapi_statistics_current_petr4',
+        },
+        transportErrors: {
+          '/v2/stocks/cash-flow': DioExceptionType.connectionTimeout,
+        },
+      )));
+
+      final r = await datasource.fundamentalsHistory(Ticker.parse('PETR4'));
+      expect(r.isErr, isTrue);
+    });
+
     test('funde os quatro demonstrativos pela chave do exercício', () async {
       final datasource = BrapiDatasource(clientWith(FixtureAdapter(routes: {
         '/v2/stocks/statistics?symbols=PETR4&mode=history':

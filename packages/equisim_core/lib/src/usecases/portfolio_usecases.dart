@@ -81,7 +81,11 @@ class GoalAlignment {
   final FeasibilityVerdict verdict;
 
   /// Retorno anual esperado da carteira, pelo **estimador transversal**:
-  /// `CDI_spot + z(potencial) · prêmio`, ponderado pelos pesos.
+  /// `Ke_i + z(potencial) · prêmio`, ponderado pelos pesos.
+  ///
+  /// **A âncora é o custo de capital próprio de cada ativo, e não o CDI**
+  /// (decisão 58): ancorar na renda fixa dava ao ativo mediano da seção um
+  /// retorno esperado sem prêmio de risco algum.
   ///
   /// **Não é mais a anualização do potencial.** Aquela leitura era uma
   /// afirmação de nível, e o nível do potencial carrega todo o conservadorismo
@@ -113,33 +117,28 @@ class GoalAlignment {
   /// Cobertura baixa torna o retorno esperado pouco representativo.
   bool get coverageIsWeak => valuationCoverage < 0.6;
 
-  /// *Dividend yield* que fecharia a lacuna, em fração ao ano. `null` quando a
-  /// meta já é atingida.
-  ///
-  /// **Por que este número existe.** [expectedReturn] é retorno de preço e nada
-  /// mais — o trabalho não modela provento desde a
-  /// `docs/decisoes/023-remocao-de-proventos.md`. Uma carteira que paga bem e
-  /// valoriza pouco aparece aqui em déficit permanente, e o usuário, lendo um
-  /// abismo que não existe, é empurrado para ativos mais arriscados do que
-  /// precisa.
-  ///
-  /// Este getter fecha a leitura **sem premissa nenhuma**: ele não estima
-  /// yield, não adota média de mercado e não soma nada ao esperado. Ele apenas
-  /// inverte a lacuna — se faltam 2,3 p.p. ao ano, um yield de 2,3% cobriria.
-  /// Quem sabe quanto a carteira efetivamente paga é o investidor, e é ele
-  /// quem compara.
-  ///
-  /// É exatamente `−gap` em fração, e existe como nome próprio para que a
-  /// interface não precise reinterpretar o sinal do outro.
-  double? get yieldToCloseGap =>
-      meetsGoal ? null : required.annual - expectedReturn;
+  // Aqui existiu `yieldToCloseGap`, o *dividend yield* que fecharia a lacuna.
+  // Ele foi **removido pela decisão 62**, e o motivo é que a premissa que o
+  // justificava deixou de valer três funções adiante.
+  //
+  // A justificativa era: "[expectedReturn] é retorno de preço e nada mais — o
+  // trabalho não modela provento desde a decisão 23 —, logo a carteira que
+  // paga bem aparece em déficit que não existe". Isso era verdade enquanto o
+  // esperado fosse `CDI + z·prêmio`. Pela **decisão 58** ele passou a ser
+  // `Ke + z·prêmio`, com `Ke = Rf + β·prêmio`, que é o retorno **total**
+  // esperado pelo CAPM — dividendo incluído, por definição do modelo.
+  //
+  // Somar um yield a um retorno total é contar o provento duas vezes, e no
+  // sentido que faz a carteira parecer melhor do que é. A lacuna sem
+  // remendo é [gap], e ela já está certa.
 }
 
 /// Confronta o retorno esperado da carteira com a rentabilidade exigida.
 abstract final class EvaluateGoalAlignment {
   /// - [crossSection]: potenciais que definem mediana e escala do escore. Passe
   ///   o universo avaliado sempre que ele estiver à mão; omitido, a seção é a
-  ///   própria carteira, o que a centra no CDI por construção — limitação
+  ///   própria carteira, e o escore de cada ativo passa a medir desconto
+  ///   contra os próprios companheiros em vez de contra o mercado — limitação
   ///   declarada em `ExpectedReturn.crossSection`, não escondida.
   static Result<GoalAlignment> call({
     required Portfolio portfolio,
@@ -257,25 +256,68 @@ abstract final class ResolveMarketAnchors {
     return series.tail(currentRateWindowDays).annualized();
   }
 
-  /// CAGR do índice entre o primeiro e o último ponto **efetivamente
-  /// disponíveis** na série.
+  /// Pregões de cada ponta que formam a média do CAGR do índice.
+  ///
+  /// **Um trimestre, pela mesma razão de [currentRateWindowDays]:** longo o
+  /// bastante para não repicar num único dia atípico e curto o bastante para
+  /// não comer o horizonte. Numa janela de cinco anos são 5% da amostra em
+  /// cada ponta.
+  static const int indexEndWindowDays = 63;
+
+  /// CAGR do índice entre as **médias das duas pontas**, medido de centro a
+  /// centro.
   ///
   /// A janela usada é a da própria série, não a solicitada: se o índice começa
   /// depois do início pedido, anualizar sobre o prazo pedido subestimaria o
-  /// retorno. Devolve o CAGR de [MarketAnchors.fallback2026] quando a série é
-  /// curta demais, tem preço inicial não positivo ou colapsa num único dia.
+  /// retorno.
+  ///
+  /// **Ponta a ponta herdava o ruído de dois dias** (decisão 60). O índice de
+  /// atividade já era medido por média móvel nas pontas — *"um CAGR entre dois
+  /// pontos isolados herdaria inteiramente o ruído deles"* —, e o Ibovespa, que
+  /// oscila muito mais, era o que não recebia o mesmo tratamento. Medido em
+  /// 11/09/2026 na janela de dez anos: **12,57% ponta a ponta contra 11,06%**
+  /// com trimestre nas pontas.
+  ///
+  /// **De centro a centro, e não de ponta a ponta**, como em
+  /// [_activityCagrOf]: com as pontas mediadas, o crescimento medido é o que
+  /// vai do centro da primeira janela ao centro da última, e usar as datas
+  /// extremas alongaria o prazo e diluiria o CAGR.
+  ///
+  /// Devolve o CAGR de [MarketAnchors.fallback2026] quando a série é curta
+  /// demais, tem preço inicial não positivo ou colapsa num único dia.
   static double _cagrOf(PriceSeries series) {
-    if (series.points.length < 2) {
+    final p = series.points;
+    if (p.length < 2) return MarketAnchors.fallback2026.marketCagr;
+
+    // Com série curta demais para duas pontas inteiras, cada ponta é metade do
+    // que há — nunca sobrepostas, para que os dois centros sejam distintos.
+    final n = p.length ~/ 2 < indexEndWindowDays
+        ? p.length ~/ 2
+        : indexEndWindowDays;
+    if (n < 1) return MarketAnchors.fallback2026.marketCagr;
+
+    double media(Iterable<PricePoint> xs) {
+      var soma = 0.0;
+      var quantos = 0;
+      for (final x in xs) {
+        soma += x.close;
+        quantos++;
+      }
+      return quantos == 0 ? 0 : soma / quantos;
+    }
+
+    final inicio = media(p.take(n));
+    final fim = media(p.skip(p.length - n));
+    if (inicio <= 0 || fim <= 0) {
       return MarketAnchors.fallback2026.marketCagr;
     }
-    final first = series.points.first;
-    final last = series.points.last;
-    if (first.close <= 0) return MarketAnchors.fallback2026.marketCagr;
 
-    final years = DateRange(first.date, last.date).years;
+    final centroInicial = p[(n - 1) ~/ 2].date;
+    final centroFinal = p[p.length - 1 - (n - 1) ~/ 2].date;
+    final years = DateRange(centroInicial, centroFinal).years;
     if (years <= 0) return MarketAnchors.fallback2026.marketCagr;
 
-    return Returns.annualize(last.close / first.close - 1, years);
+    return Returns.annualize(fim / inicio - 1, years);
   }
 
   /// Crescimento real anual a partir do índice de atividade.

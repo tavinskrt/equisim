@@ -165,3 +165,7 @@ docs/telas/
 test/**/failures/
 
 .obsidian/
+# Base bruta da CVM: ~750 MB para 16 anos, reproduzível por
+# `python tool/cvm_baixar.py`. Dado de terceiro, e não fonte deste projeto.
+data/cvm/
+data/cvm_exercicios.json

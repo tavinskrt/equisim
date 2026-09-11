@@ -191,6 +191,12 @@ void main() {
       // exercício. Agora quem decide é o lucro operacional recorrente, que é o
       // fluxo de manutenção sob a aproximação de capex de manutenção igual à
       // depreciação — o que não penaliza quem está em ciclo de investimento.
+      //
+      // **Não remova esta migração sem refazer a medição da decisão 64.** A
+      // lente `metodo` propôs recusar estes ativos em vez de migrá-los; sobre
+      // 8 coortes *point-in-time*, a Porta 3 saiu com o MAIOR poder de
+      // ordenação dos três roteamentos (IC12 +0,4197, IC36 +0,3815), e
+      // recusá-la baixaria o IC do universo inteiro.
       final history = growingHistory(rate: 0.08)
           .map((s) => FundamentalsSnapshot(
                 ticker: s.ticker,
@@ -398,6 +404,69 @@ void main() {
         ),
         3.0,
       );
+    });
+
+    test('a unit é reconhecida mesmo com o preço andado desde o valor de '
+        'mercado', () {
+      // SAPR11 em 04/09/2026: 503,7 mi de ações, R$ 3,608 bi de valor de
+      // mercado e unit a R$ 34,95 — razão medida de **4,8799**, a 0,1201 do
+      // inteiro. A banda absoluta de 0,12 recusava por **0,0001**, e a unit
+      // de cinco ações caía para a convenção de ação comum. Decisão 61.
+      expect(
+        ValuationCascade.quotedUnitRatio(
+          sharesOutstanding: 503733800,
+          marketCap: 3607751300,
+          marketPrice: 34.95,
+        ),
+        5.0,
+      );
+    });
+
+    test('a mesma discordância relativa decide igual em qualquer unit', () {
+      // O desvio mede quanto o preço andou desde o valor de mercado
+      // publicado, e isso não depende de quantas ações formam a unit. Com
+      // banda absoluta, 3% valiam 0,06 em u = 2 e 0,15 em u = 5 — aceito ali,
+      // recusado aqui, pela mesma discordância.
+      for (final u in [2, 3, 5, 10]) {
+        expect(
+          ValuationCascade.quotedUnitRatio(
+            sharesOutstanding: u * 1.03e9,
+            marketCap: 1e9,
+            marketPrice: 1.0,
+          ),
+          u.toDouble(),
+          reason: '3% de discordância cabe em qualquer unit',
+        );
+      }
+    });
+
+    test('e a tolerância relativa aperta a unit de duas ações', () {
+      // 5,5% em u = 2 são 0,11 absolutos — dentro da banda antiga, fora da
+      // nova. A troca não é permissiva em toda parte: de u = 3 para cima
+      // afrouxa, em u = 2 aperta, e em u = 1 não decide nada.
+      expect(
+        ValuationCascade.quotedUnitRatio(
+          sharesOutstanding: 2.11e9,
+          marketCap: 1e9,
+          marketPrice: 1.0,
+        ),
+        1.0,
+      );
+    });
+
+    test('em ação comum a tolerância não decide nada', () {
+      // Aceitar devolve 1,0 e recusar devolve 1,0. É por isso que apertar a
+      // banda em u = 1 não tem consequência.
+      for (final bruto in [0.79, 0.95, 1.0, 1.05, 1.21]) {
+        expect(
+          ValuationCascade.quotedUnitRatio(
+            sharesOutstanding: bruto * 1e9,
+            marketCap: 1e9,
+            marketPrice: 1.0,
+          ),
+          1.0,
+        );
+      }
     });
 
     test('razão longe de um inteiro é recusada em favor de 1', () {
@@ -823,7 +892,7 @@ void main() {
       expect(esticada, greaterThan(0));
     });
 
-    test('a lacuna vira o yield que a fecharia, sem premissa de provento', () {
+    test('a lacuna é a distância até o exigido, e nada mais', () {
       // O esperado é retorno de PREÇO desde a decisão 023. Uma carteira que
       // paga bem aparece em déficit permanente, e o número que desfaz essa
       // leitura é a própria lacuna invertida — não uma estimativa de yield.
@@ -845,14 +914,16 @@ void main() {
       ).unwrap();
 
       expect(alignment.meetsGoal, isFalse);
-      final yieldToClose = alignment.yieldToCloseGap;
-      expect(yieldToClose, isNotNull);
-      // Identidade exata: o yield que fecha é a lacuna com o sinal trocado.
-      expect(yieldToClose!, closeTo(-alignment.gap / 100, 1e-12));
-      expect(yieldToClose, greaterThan(0));
+      // A lacuna é negativa quando o esperado não alcança o exigido, e é o
+      // único número desta leitura. `yieldToCloseGap` saiu pela decisão 62:
+      // somar um yield ao esperado contaria o provento duas vezes desde que
+      // a âncora virou o `Ke`, que é retorno total pelo CAPM.
+      expect(alignment.gap, lessThan(0));
+      expect(alignment.gap / 100,
+          closeTo(alignment.expectedReturn - alignment.required.annual, 1e-12));
     });
 
-    test('meta atingida não tem lacuna a fechar', () {
+    test('meta atingida não tem lacuna', () {
       final goal = FinancialGoal.unvalidated(
         initialContribution: Money.fromReais(10000),
         monthlyContribution: Money.fromReais(1000),
@@ -871,7 +942,7 @@ void main() {
       ).unwrap();
 
       expect(alignment.meetsGoal, isTrue);
-      expect(alignment.yieldToCloseGap, isNull);
+      expect(alignment.gap, greaterThanOrEqualTo(0));
     });
 
     test('sinaliza cobertura fraca de avaliação', () {

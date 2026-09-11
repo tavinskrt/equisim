@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-11, a partir de `e46c8bc`.
+Gerado em 2026-09-11, a partir de `c80b5e6`.
 
 ## Decisões registradas
 
-**39** aceita · **2** cumprida
+**48** aceita · **2** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -56,6 +56,15 @@ Gerado em 2026-09-11, a partir de `e46c8bc`.
 | 57 | A correção de negociação não síncrona no beta é medida e recusada, e a cotação suja fica declarada como bloqueio de dado | aceita | conselheiro | 2026-09-11 |
 | 58 | O retorno esperado transversal ancora no custo de capital próprio, o caixa rende a taxa livre de risco, e três invariantes do núcleo passam a ser do tipo | aceita | voce | 2026-09-11 |
 | 59 | O tipo carrega a invariante — ponto de taxa, base de tempo, valor medido na falha, e os verbos de interface saem do domínio | aceita | conselheiro | 2026-09-11 |
+| 60 | As pontas do CAGR do índice são médias, e os anos vão de centro a centro | aceita | parecer | 2026-09-11 |
+| 61 | A tolerância da razão de unidade é relativa, não absoluta | aceita | parecer | 2026-09-11 |
+| 62 | O retorno esperado já é total; a lacuna não pede dividend yield | aceita | parecer | 2026-09-11 |
+| 63 | A contagem implícita no valor de mercado não é contagem, e fica em double | aceita | parecer | 2026-09-11 |
+| 64 | A Porta 3 fica, e a medição é a razão | aceita | parecer | 2026-09-11 |
+| 65 | O retorno por ativo mede o dinheiro, e o rótulo passa a dizer quanto | aceita | parecer | 2026-09-11 |
+| 66 | A regra do maior é confirmada por contrafactual, e o backtest não a vê | aceita | parecer | 2026-09-11 |
+| 67 | A conta da CVM se resolve por evidência, e a ausência do conceito é nula | aceita | parecer | 2026-09-11 |
+| 68 | Falha de um demonstrativo reprova a busca inteira | aceita | parecer | 2026-09-11 |
 
 ## Caixa de entrada
 
@@ -69,16 +78,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 43 | 13.747 |
-| Apresentacao | 35 | 15.857 |
-| Camada de dados | 13 | 2.612 |
-| Testes do app | 29 | 5.126 |
-| Testes do nucleo | 15 | 8.055 |
+| Nucleo de dominio | 45 | 14.600 |
+| Apresentacao | 35 | 15.860 |
+| Camada de dados | 13 | 2.622 |
+| Testes do app | 29 | 5.169 |
+| Testes do nucleo | 19 | 8.950 |
 | Ferramentas de QA | 20 | 6.535 |
 
 ## Histórico recente
 
 ```
+2026-09-11  c80b5e6  Refino do motor de valuation (parte 9)
 2026-09-10  e46c8bc  Refino do motor de valuation (parte 8)
 2026-09-09  30bc51d  Refino do motor de valuation (parte 7)
 2026-09-09  9b90a3d  Refino do motor de valuation (parte 6)
@@ -93,5 +103,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-08-30  afb785e  Garantindo estabilidade dos testes
 2026-08-30  eacbcd9  Aprimorando UI/UX (4/4)
 2026-08-30  f14989e  Aprimorando UI/UX (3/4)
-2026-08-30  55d61d1  Aprimorando UI/UX (2/4)
 ```
