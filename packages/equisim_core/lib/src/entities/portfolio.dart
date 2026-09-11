@@ -65,8 +65,19 @@ class Portfolio {
   /// devolve uma carteira nova.
   final Map<Ticker, PortfolioEntry> entries;
 
-  /// Teto de ativos por carteira. Acima disso a interface de arrastar e soltar
-  /// degrada e o alerta de concentração setorial perde utilidade prática.
+  /// Teto de ativos por carteira.
+  ///
+  /// **É regra de produto, e por isso mora aqui** (decisão 59). A ferramenta
+  /// estuda carteira concentrada: acima de quinze ativos o alerta de
+  /// concentração setorial deixa de discriminar e a comparação entre Principal
+  /// e Reserva perde o sentido de "duas teses", que é o que a tela existe para
+  /// confrontar.
+  ///
+  /// A lente `nucleo` a apontou como limite de interface vazado para o
+  /// domínio, e a conferência mostrou o contrário: **a interface só exibe o
+  /// contador**, e quem recusa o décimo sexto ativo são as fábricas daqui. Um
+  /// teto que a apresentação apenas mostra e o domínio impõe é regra de
+  /// domínio com justificativa mal escrita — o que mudou foi a justificativa.
   static const int maxAssets = 15;
 
   /// Constrói a carteira congelando o mapa de posições.
@@ -182,6 +193,7 @@ class Portfolio {
     if ((total - 1.0).abs() > 1e-6) {
       return Err(InvalidInput(
         'Os pesos devem somar 100%; somam ${(total * 100).toStringAsFixed(2)}%.',
+        actual: total,
         field: 'weights',
       ));
     }

@@ -226,6 +226,26 @@ class FundamentalsSnapshot {
         vazio(earningsPerShare, _residuoPorPapel));
   }
 
+  /// Alavancagem observada: dívida **líquida** sobre o valor de mercado.
+  ///
+  /// **É a régua de desalavancar o beta, e existe para ser a mesma da
+  /// realavancagem** (decisão 54). `LeveredCostOfCapital` relavanca contra
+  /// `netDebt` porque é essa a dívida da ponte, do peso do WACC e do capital
+  /// investido; desalavancar contra a bruta fazia a ida e a volta não se
+  /// cancelarem, e o beta que voltava era menor que o medido em 100 dos 127
+  /// avaliados.
+  ///
+  /// Devolve `null` sem valor de mercado utilizável. Pode ser **negativa** —
+  /// caixa líquido —, e quem consome confina: ver
+  /// [BetaShrinkage.leverageFactor].
+  double? debtToMarketEquity(double? marketEquity) {
+    if (marketEquity == null || !marketEquity.isFinite || marketEquity <= 0) {
+      return null;
+    }
+    final de = netDebt / marketEquity;
+    return de.isFinite ? de : null;
+  }
+
   /// Dívida bruta: curto mais longo prazo.
   ///
   /// **Trata ausência como zero.** Uma parcela não informada pela fonte é

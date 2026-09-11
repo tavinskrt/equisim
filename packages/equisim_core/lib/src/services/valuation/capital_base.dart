@@ -179,6 +179,11 @@ class CapitalSeries {
   bool get isTooShort => points.length < 4;
 
   /// Base do exercício mais recente.
+  ///
+  /// É contra ela que o retorno do ciclo é aplicado quando o exercício
+  /// corrente vem no prejuízo: `fluxo-base = retorno do ciclo × capital de
+  /// hoje` é a mesma conta que o fator de normalização faz, escrita de um
+  /// jeito que sobrevive a um denominador não positivo (decisão 53).
   double? get latestBase => points.isEmpty ? null : points.last.base;
 
   /// Variações anuais da base, só entre exercícios **consecutivos**.
@@ -253,6 +258,25 @@ class CapitalSeries {
     final janela = r.sublist(ini < 0 ? 0 : ini, r.length - 1);
     if (janela.length < 3) return null;
     return Inference.median([for (final x in janela) x.value]);
+  }
+
+  /// Fração dos retornos da janela do ciclo que são positivos.
+  ///
+  /// **Separa o vale do declínio.** A mediana do ciclo pode sair positiva com
+  /// metade dos anos no prejuízo — e nesse caso ela descreve uma empresa que
+  /// alterna, não uma que caiu num ano ruim. Medido em 11/09/2026: a AZEV4
+  /// tinha mediana de retorno sobre patrimônio de +10,2% com quatro dos oito
+  /// exercícios negativos.
+  ///
+  /// Devolve `null` com a mesma janela curta que [cycleReturn] recusa, para
+  /// que as duas medidas nunca discordem sobre haver ciclo.
+  double? positiveShare({required int window}) {
+    final r = returns;
+    if (r.length < 4) return null;
+    final ini = r.length - 1 - window;
+    final janela = r.sublist(ini < 0 ? 0 : ini, r.length - 1);
+    if (janela.length < 3) return null;
+    return janela.where((x) => x.value > 0).length / janela.length;
   }
 
   /// Retorno do exercício mais recente.

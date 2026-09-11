@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-11, a partir de `30bc51d`.
+Gerado em 2026-09-11, a partir de `e46c8bc`.
 
 ## Decisões registradas
 
-**32** aceita · **2** cumprida
+**39** aceita · **2** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -49,6 +49,13 @@ Gerado em 2026-09-11, a partir de `30bc51d`.
 | 50 | Contrato de prazo determinado recusa o excedente perpétuo, e a perpetuidade fica declarada | aceita | voce | 2026-09-10 |
 | 51 | A volta entre o veredito e a taxa é fechada até parar, e o peso do terminal passa a medir a mesma coisa nas três rotas | aceita | voce | 2026-09-10 |
 | 52 | Exercício publicado sem demonstração de resultado sai da série, e a recusa passa a nomear a causa certa | aceita | voce | 2026-09-10 |
+| 53 | O fluxo-base é reconstruído do ciclo quando o exercício vem no prejuízo, e a normalização deixa de funcionar só no pico | aceita | voce | 2026-09-11 |
+| 54 | O beta é desalavancado pela mesma dívida com que é realavancado, e o desalavancado passa a sair do beta encolhido | aceita | conselheiro | 2026-09-11 |
+| 55 | O beta é desalavancado pela alavancagem da janela em que foi estimado e pelo mesmo escudo fiscal com que é realavancado | aceita | conselheiro | 2026-09-11 |
+| 56 | O crescimento perpétuo passa a ter o piso da banda de sanidade, e não zero | aceita | voce | 2026-09-11 |
+| 57 | A correção de negociação não síncrona no beta é medida e recusada, e a cotação suja fica declarada como bloqueio de dado | aceita | conselheiro | 2026-09-11 |
+| 58 | O retorno esperado transversal ancora no custo de capital próprio, o caixa rende a taxa livre de risco, e três invariantes do núcleo passam a ser do tipo | aceita | voce | 2026-09-11 |
+| 59 | O tipo carrega a invariante — ponto de taxa, base de tempo, valor medido na falha, e os verbos de interface saem do domínio | aceita | conselheiro | 2026-09-11 |
 
 ## Caixa de entrada
 
@@ -62,16 +69,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 42 | 13.333 |
-| Apresentacao | 35 | 15.849 |
-| Camada de dados | 13 | 2.605 |
-| Testes do app | 29 | 5.123 |
-| Testes do nucleo | 15 | 7.412 |
+| Nucleo de dominio | 43 | 13.747 |
+| Apresentacao | 35 | 15.857 |
+| Camada de dados | 13 | 2.612 |
+| Testes do app | 29 | 5.126 |
+| Testes do nucleo | 15 | 8.055 |
 | Ferramentas de QA | 20 | 6.535 |
 
 ## Histórico recente
 
 ```
+2026-09-10  e46c8bc  Refino do motor de valuation (parte 8)
 2026-09-09  30bc51d  Refino do motor de valuation (parte 7)
 2026-09-09  9b90a3d  Refino do motor de valuation (parte 6)
 2026-09-08  d94a726  Refino do motor de valuation (parte 5)
@@ -86,5 +94,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-08-30  eacbcd9  Aprimorando UI/UX (4/4)
 2026-08-30  f14989e  Aprimorando UI/UX (3/4)
 2026-08-30  55d61d1  Aprimorando UI/UX (2/4)
-2026-08-30  25e0ed6  Ajustando UI/UX (1/4)
 ```

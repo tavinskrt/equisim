@@ -398,10 +398,10 @@ class MacroRepositoryImpl implements MacroRepository {
           BrapiJson.isoDay(range.end),
         ));
     if (rows == null || rows.isEmpty) return null;
-    return RateSeries(
-      dates: rows.map((r) => DateTime.parse(r.date)).toList(),
-      rates: rows.map((r) => r.value).toList(),
-    );
+    return RateSeries([
+      for (final r in rows)
+        RatePoint(date: DateTime.parse(r.date), rate: r.value),
+    ], basis: BcbDatasource.basisOf(seriesId));
   }
 
   Future<Result<RateSeries>> _series(int seriesId, DateRange range) async {
@@ -438,11 +438,12 @@ class MacroRepositoryImpl implements MacroRepository {
     if (db == null) return Ok(series);
     await _tryCache(() async {
       await db.upsertMacro([
-        for (var i = 0; i < series.rates.length; i++)
+        // Um ponto por linha: não há mais duas listas a indexar em paralelo.
+        for (final p in series.points)
           CachedMacroRatesCompanion.insert(
             seriesId: seriesId,
-            date: BrapiJson.isoDay(series.dates[i]),
-            value: series.rates[i],
+            date: BrapiJson.isoDay(p.date),
+            value: p.rate,
           ),
       ]);
       await db.touch(CachePolicy.macroKey(seriesId));

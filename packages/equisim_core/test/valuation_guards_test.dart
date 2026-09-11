@@ -1675,6 +1675,7 @@ void main() {
         baseFactor: 1.0,
         growthIdentified: true,
         moatApplied: false,
+        costOfEquity: 0.16,
         terminalDiscountRate: 0.12,
         terminalRetainedSpread: 0.0,
         growthRate: 0.06,
@@ -2505,6 +2506,236 @@ void main() {
         isFalse,
         reason: 'a narrativa do veredito não sai junto com a imposição',
       );
+    });
+  });
+
+  group('Caixa rende taxa livre de risco, e não o WACC', () {
+    // Sem dívida bruta não há custo de dívida a medir, e o recuo era a própria
+    // taxa de desconto. Com dívida líquida **negativa** ela multiplica um peso
+    // negativo: o motor creditava ao caixa o rendimento do negócio. Medido em
+    // 11/09/2026, a ALOS3 — R$ 2,43 bi de caixa líquido — caiu 10,5% ao trocar
+    // o recuo pela taxa livre de risco. Decisão 58.
+    const premissas = DcfAssumptions(
+      projectionYears: 5,
+      growthRate: 0.04,
+      perpetualGrowth: 0.04,
+      discountRate: 0.12,
+      terminalDiscountRate: 0.12,
+      returnOnCapital: 0.0,
+    );
+
+    double justoCom(double kd, {required double dividaLiquida}) =>
+        DcfCalculator.equityFromFirm(
+          baseProfit: 100,
+          assumptions: premissas,
+          netDebt: dividaLiquida,
+          sharesOutstanding: 10,
+          costOfDebt: kd,
+          taxRate: 0.34,
+          equityDiscountRate: 0.14,
+          terminalEquityDiscountRate: 0.14,
+        ).unwrap().fairValuePerShare;
+
+    test('com caixa líquido, o rendimento atribuído a ele decide o preço', () {
+      const rf = 0.09;
+      const wacc = 0.12;
+      final comRf = justoCom(rf, dividaLiquida: -400);
+      final comWacc = justoCom(wacc, dividaLiquida: -400);
+      expect(comWacc, greaterThan(comRf),
+          reason: 'creditar o WACC ao caixa infla o fluxo do acionista — é '
+              'exatamente o que o recuo antigo fazia');
+      expect((comWacc / comRf - 1).abs(), greaterThan(0.01),
+          reason: 'se a diferença fosse desprezível o teste não mediria nada');
+    });
+
+    test('sem dívida líquida, o rendimento do caixa não decide nada', () {
+      // O termo da ponte é `D·(kd(1−τ) − g)`: com `D = 0` ele some, e a
+      // escolha do recuo deixa de importar.
+      expect(justoCom(0.09, dividaLiquida: 0),
+          closeTo(justoCom(0.30, dividaLiquida: 0), 1e-9));
+    });
+
+    test('sem dívida bruta não há custo de dívida a medir', () {
+      final semDivida = FundamentalsSnapshot(
+        ticker: ticker,
+        fiscalPeriodEnd: DateTime(2025, 12, 31),
+        interestExpense: 50,
+        cash: 900,
+        netIncome: 100,
+        ebit: 150,
+      );
+      expect(semDivida.totalDebt, 0);
+      expect(semDivida.costOfDebt, isNull);
+      expect(semDivida.netDebt, lessThan(0),
+          reason: 'é o caso que torna o recuo alcançável');
+    });
+  });
+
+  group('O vale do ciclo não descarta a empresa', () {
+    // A normalização funcionava no pico e desligava no vale: o fator é
+    // `ciclo ÷ atual` e exige denominador positivo. Medido em 11/09/2026:
+    // sete ativos elegíveis eram recusados por fluxo-base não positivo, entre
+    // eles USIM3, USIM5, CSAN3 e CSNA3 — cíclicos num ano ruim.
+    FundamentalsSnapshot ano(
+      int y,
+      double lucro, {
+      double patrimonio = 10000,
+      double? ebitda,
+    }) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 20000,
+          ebit: lucro / 0.66,
+          ebitda: ebitda ?? (lucro / 0.66 + 800),
+          netIncome: lucro,
+          incomeBeforeTax: lucro * 1.4,
+          incomeTaxExpense: -lucro * 0.4,
+          interestExpense: 120,
+          earningsPerShare: lucro / 1000,
+          cash: 500,
+          shortTermInvestments: 100,
+          shortTermDebt: 300,
+          longTermDebt: 1200,
+          totalStockholderEquity: patrimonio,
+          bookValuePerShare: patrimonio / 1000,
+          operatingCashFlow: lucro * 1.5,
+          freeCashFlow: lucro,
+          nopat: lucro,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 12000,
+        );
+
+    /// Série com [negativos] exercícios de prejuízo no fim.
+    List<FundamentalsSnapshot> serie({
+      required int negativos,
+      double lucroBom = 1200,
+      double? ebitdaFinal,
+    }) {
+      final out = <FundamentalsSnapshot>[];
+      for (var i = 15; i >= 0; i--) {
+        final y = 2025 - i;
+        final ruim = i < negativos;
+        out.add(ano(
+          y,
+          ruim ? -400 : lucroBom,
+          ebitda: i == 0 ? ebitdaFinal : null,
+        ));
+      }
+      return out;
+    }
+
+    ValuationResult? avaliar(
+      List<FundamentalsSnapshot> f, {
+      String? setor,
+      String? subsetor,
+    }) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: f,
+        marketPrice: 12.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.13,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        declaredTerminalRiskFreeRate: 0.094,
+        sectorKey: setor,
+        industry: subsetor,
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('um ano de prejuízo deixa de descartar a empresa', () {
+      // Cíclico de propósito: em não cíclico, prejuízo depois de lucro sempre
+      // reprova na trava de saúde — ver o teste dela abaixo.
+      final v = avaliar(serie(negativos: 1), setor: 'materiais-basicos');
+      expect(v, isNotNull,
+          reason: 'com o fluxo-base do exercício, este fixture seria recusado '
+              'por lucro não positivo');
+      expect(v!.fairValue.reais, greaterThan(0));
+      expect(v.diagnostics!.caveats,
+          contains(ValuationCaveat.baseReconstruida));
+      expect(
+        v.warnings.any((w) => w.contains('reconstruído do ciclo')),
+        isTrue,
+      );
+    });
+
+    test('o fluxo-base é o retorno do ciclo sobre o capital de hoje', () {
+      final f = serie(negativos: 1);
+      final v = avaliar(f, setor: 'materiais-basicos')!;
+      final pub = PointInTimeView(DateTime(2026, 9, 9)).published(f);
+      // A mesma alíquota que a cascata aplica: sem ela o NOPAT da série é
+      // outro, e o ciclo também.
+      final s = CapitalSeries.build(
+        pub,
+        ValuationLane.firm,
+        firmTaxRate: CapitalSeries.structuralTaxRate(
+          pub,
+          statutoryRate: ValuationParameters.statutoryTaxRate,
+        ),
+      );
+      final ciclo = s.cycleReturn(window: ValuationParameters.cycleWindow)!;
+      // O retorno que governa o freio é o do ciclo, e não o do exercício de
+      // prejuízo: sem isso o fluxo viria do ciclo e o reinvestimento do vale.
+      expect(v.diagnostics!.returnOnCapital, closeTo(ciclo, 1e-12));
+      expect(ciclo, greaterThan(0));
+    });
+
+    test('ciclo não positivo continua recusando', () {
+      // Empresa que perde dinheiro na maior parte da janela: não há a que
+      // voltar, e a mediana não é resgate.
+      expect(avaliar(serie(negativos: 7), setor: 'materiais-basicos'), isNull);
+    });
+
+    test('prejuízo que virou regra continua recusando', () {
+      // Metade da janela negativa passa no teste do sinal da mediana e falha
+      // no da frequência — é o caso que separa vale de declínio.
+      final f = serie(negativos: 5);
+      final pub = PointInTimeView(DateTime(2026, 9, 9)).published(f);
+      final s = CapitalSeries.build(pub, ValuationLane.firm);
+      final fracao = s.positiveShare(window: ValuationParameters.cycleWindow)!;
+      expect(fracao, lessThan(ValuationParameters.minPositiveFlow),
+          reason: 'o fixture precisa cair abaixo do corte para medir o que '
+              'promete');
+      expect(avaliar(f, setor: 'materiais-basicos'), isNull);
+    });
+
+    test('a trava de saúde bloqueia, e cíclico é isento dela', () {
+      // Ela foi retirada e reposta por medição: sem ela a RAPT4 entra a
+      // +311,7% de potencial, com o resultado caído 109% no triênio e o
+      // fluxo-base reconstruído sobre um retorno de ciclo que a empresa
+      // acabou de deixar de ter. Reconstruir a base erra para cima, e é esse
+      // risco que a trava controla.
+      final f = serie(negativos: 1);
+      final queda = GrowthGuards.recentOperationalDecline(
+        PointInTimeView(DateTime(2026, 9, 9)).published(f),
+      );
+      expect(queda, isNotNull);
+      expect(queda!, greaterThan(ValuationParameters.maxOperationalDecline));
+
+      expect(avaliar(f, setor: 'bens-industriais'), isNull);
+      // A isenção cíclica da decisão 30 vale aqui pela mesma razão que vale na
+      // normalização: em commodity, queda entre pico e vale é o ciclo.
+      expect(avaliar(f, setor: 'materiais-basicos'), isNotNull);
+    });
+
+    test('a trava tem um buraco, e a frequência o cobre', () {
+      // Quando a referência de três anos atrás também era prejuízo, a trava
+      // **aprova** — não há queda a medir. É a frequência do prejuízo na
+      // janela que recusa nesse caso, e não a trava.
+      final f = serie(negativos: 5);
+      final queda = GrowthGuards.recentOperationalDecline(
+        PointInTimeView(DateTime(2026, 9, 9)).published(f),
+      );
+      expect(queda, isNotNull);
+      expect(queda!, lessThan(ValuationParameters.maxOperationalDecline),
+          reason: 'a trava aprova este caso — é o buraco que a frequência '
+              'cobre');
+      expect(avaliar(f, setor: 'materiais-basicos'), isNull);
     });
   });
 

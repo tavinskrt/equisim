@@ -128,9 +128,32 @@ void main() {
       expect(
           GrowthEstimator.perpetual(explicitGrowth: 0.01, economyGrowth: teto),
           0.01);
+      // **O piso é o da banda de sanidade, e não zero** (decisão 56). O piso
+      // em zero afirmava que toda empresa em declínio volta a crescer zero em
+      // dez anos, e tornava inalcançável o limite que o projeto já declarara
+      // em `floorRate` — com a razão escrita lá.
       expect(
           GrowthEstimator.perpetual(explicitGrowth: -0.05, economyGrowth: teto),
-          0.0);
+          GrowthEstimator.floorRate);
+      expect(
+          GrowthEstimator.perpetual(explicitGrowth: -0.02, economyGrowth: teto),
+          -0.02);
+      // Abaixo da banda, o piso segura: encolher para sempre tem limite.
+      expect(
+          GrowthEstimator.perpetual(explicitGrowth: -0.40, economyGrowth: teto),
+          GrowthEstimator.floorRate);
+      // E o teto continua onde estava, mesmo com economia encolhendo.
+      expect(
+          GrowthEstimator.perpetual(explicitGrowth: 0.10, economyGrowth: -0.01),
+          closeTo(-0.01, 1e-12));
+      // Economia encolhendo mais que o piso: o teto vence, e não estoura.
+      // `clamp` lança quando o piso passa o teto.
+      expect(
+          GrowthEstimator.perpetual(explicitGrowth: 0.10, economyGrowth: -0.20),
+          closeTo(-0.20, 1e-12));
+      expect(
+          GrowthEstimator.perpetual(explicitGrowth: -0.30, economyGrowth: -0.20),
+          closeTo(-0.20, 1e-12));
     });
   });
 
@@ -899,7 +922,7 @@ void main() {
         valuations: const {},
         anchors: MarketAnchors.fallback2026,
       ).unwrap();
-      expect(alignment.verdict.blocks, isTrue);
+      expect(alignment.verdict.level, FeasibilityLevel.unrealistic);
     });
   });
 }

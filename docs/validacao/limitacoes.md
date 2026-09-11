@@ -38,6 +38,13 @@ contra 7,7%), mas a correlação entre proporção de JCP e desvio é de apenas
 2,1%; EGIE3 tem 31% e desvia 21,0%. **A divergência é fato medido; a explicação
 pelo tratamento de JCP é hipótese plausível não confirmada.**
 
+**Consequência para o beta, medida em 11/09/2026.** O retorno que entra na
+regressão do CAPM é de preço, e não total. Corrigir isso exige a série acima, e
+ela erra 9,1% na mediana — o remédio é maior que a doença. A
+[decisão 57](../decisoes/057-a-correcao-de-nao-sincronia-e-medida-e-recusada.md)
+registra o bloqueio, e a Fase B é onde ele se resolve: segunda fonte para o
+fluxo de proventos, ou nada.
+
 ### 1.3. Viés de sobrevivência
 
 `/v2/tickers?type=stock` lista **781 ações vivas**. Empresas deslistadas não

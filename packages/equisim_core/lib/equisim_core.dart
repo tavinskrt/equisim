@@ -42,6 +42,7 @@ export 'src/services/goal/feasibility.dart';
 export 'src/services/goal/required_return.dart';
 export 'src/services/metrics/beta.dart';
 export 'src/services/metrics/beta_shrinkage.dart';
+export 'src/services/metrics/market_leverage.dart';
 export 'src/services/metrics/returns.dart';
 export 'src/services/metrics/risk_metrics.dart';
 export 'src/services/portfolio/expected_return.dart';

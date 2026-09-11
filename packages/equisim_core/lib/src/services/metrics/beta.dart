@@ -47,6 +47,19 @@ class BetaEstimate {
 /// Todas as estatísticas usam divisor **amostral** (n−1), uniforme com
 /// [RiskMetrics]: a série observada é amostra do processo gerador, não a
 /// população.
+///
+/// **A correção de negociação não síncrona foi medida e recusada** (decisão
+/// 57). Ativo que não negocia todo dia responde ao mercado com atraso, e o
+/// beta diário sai enviesado para baixo; a correção clássica é a de Dimson.
+/// Medido em 11/09/2026 sobre os 127 ativos que o motor avalia, Dimson devolve
+/// **0,978 do beta diário na mediana** — reduz em vez de elevar — e custa 74%
+/// mais erro-padrão. A razão é a Porta 0: as duas metades do universo, por
+/// liquidez, negociam **250 pregões por ano**, e o corte de liquidez já removeu
+/// quem sofreria o viés. No universo cru, antes da porta, a razão vai a 1,411
+/// no p90 — lá o viés existe. Ver
+/// [`beta_sincronia.md`](../../../../../docs/validacao/beta_sincronia.md).
+///
+/// **Se o corte de liquidez for afrouxado, este item volta.**
 abstract final class BetaCalculator {
   /// β = Cov(R_ativo, R_mercado) / Var(R_mercado).
   ///

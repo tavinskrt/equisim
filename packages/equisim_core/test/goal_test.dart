@@ -146,7 +146,7 @@ void main() {
     test('abaixo do CDI: avisa que a meta dispensa risco de mercado', () {
       final verdict = verdictFor(0.06);
       expect(verdict.level, FeasibilityLevel.riskFreeSufficient);
-      expect(verdict.blocks, isFalse);
+      expect(verdict.level, isNot(FeasibilityLevel.unrealistic));
       // O motivo, e não a frase: o texto é composto na apresentação desde que
       // o núcleo parou de montar prosa (ver `FeasibilityCopy`).
       expect(verdict.reason, FeasibilityReason.belowRiskFree);
@@ -159,14 +159,14 @@ void main() {
     test('acima do Ibovespa: alerta sem bloquear', () {
       final verdict = verdictFor(0.18);
       expect(verdict.level, FeasibilityLevel.demanding);
-      expect(verdict.warns, isTrue);
-      expect(verdict.blocks, isFalse);
+      expect(verdict.level, FeasibilityLevel.demanding);
+      expect(verdict.level, isNot(FeasibilityLevel.unrealistic));
     });
 
     test('acima de 2,5× o Ibovespa: bloqueia e cita o número', () {
       final verdict = verdictFor(0.40);
       expect(verdict.level, FeasibilityLevel.unrealistic);
-      expect(verdict.blocks, isTrue);
+      expect(verdict.level, FeasibilityLevel.unrealistic);
       expect(verdict.reason, FeasibilityReason.beyondAnyReference);
       // O múltiplo viaja apurado, para a tela citá-lo sem recalcular.
       expect(verdict.marketMultiple, closeTo(0.40 / 0.1126, 1e-9));

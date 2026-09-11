@@ -1,0 +1,5911 @@
+[
+ {
+  "ticker": "ABCB4",
+  "deJanela": -0.1193501766282782,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.20375719142383644
+   },
+   {
+    "ano": 2022,
+    "de": -0.07429021594851279
+   },
+   {
+    "ano": 2023,
+    "de": -0.1193501766282782
+   },
+   {
+    "ano": 2024,
+    "de": -1.200680359793851
+   },
+   {
+    "ano": 2025,
+    "de": -0.10732830556357811
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.055413256838257555,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -662886000.0,
+  "valorDeMercado": 6423816700.0,
+  "vmPorPrecoEAcoes": 6405574792.2,
+  "deBruta": 0.0,
+  "deLiquida": -0.10319192326891893,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.8294485535437827,
+  "betaDesalavancado": 0.8294485535437827,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.8293821107400863,
+  "erroPadrao": 0.038854223783937984,
+  "peso": 0.9946135245370074,
+  "desalavancadoDoCru": 0.8293821107400863,
+  "desalavancadoDoEncolhido": 0.8294485535437827
+ },
+ {
+  "ticker": "ABEV3",
+  "deJanela": -0.06358087105801213,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.06358087105801213
+   },
+   {
+    "ano": 2022,
+    "de": -0.050756050390898276
+   },
+   {
+    "ano": 2023,
+    "de": -0.05941145559701484
+   },
+   {
+    "ano": 2024,
+    "de": -0.14258921077861936
+   },
+   {
+    "ano": 2025,
+    "de": -0.07751204608092198
+   }
+  ],
+  "setor": "consumo-nao-ciclico",
+  "aliquota": 0.13326329145612048,
+  "dividaBruta": 3386924000.0,
+  "dividaLiquida": -16932995000.0,
+  "valorDeMercado": 241251070000.0,
+  "vmPorPrecoEAcoes": 243728627100.0,
+  "deBruta": 0.014039000946192695,
+  "deLiquida": -0.07018826900954263,
+  "fatorBruta": 1.0121681174713475,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0121681174713475,
+  "betaAlavancado": 0.6094219462658285,
+  "betaDesalavancado": 0.6094219462658285,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.609164668432745,
+  "erroPadrao": 0.03381888299515398,
+  "peso": 0.995913851534672,
+  "desalavancadoDoCru": 0.609164668432745,
+  "desalavancadoDoEncolhido": 0.6094219462658285
+ },
+ {
+  "ticker": "AGRO3",
+  "deJanela": 0.25194074125839117,
+  "exerciciosNaJanela": 4,
+  "alavancagemPorAno": [
+   {
+    "ano": 2022,
+    "de": 0.06884308438621356
+   },
+   {
+    "ano": 2023,
+    "de": 0.18274566462101477
+   },
+   {
+    "ano": 2024,
+    "de": 0.3211358178957675
+   },
+   {
+    "ano": 2025,
+    "de": 0.5663611445629462
+   }
+  ],
+  "setor": "consumo-nao-ciclico",
+  "aliquota": 0.1046589130451063,
+  "dividaBruta": 1311303030.0,
+  "dividaLiquida": 1151487030.0,
+  "valorDeMercado": 1968709900.0,
+  "vmPorPrecoEAcoes": 1972804982.7,
+  "deBruta": 0.6660722486334832,
+  "deLiquida": 0.5848942142262809,
+  "fatorBruta": 1.5963618510819932,
+  "fatorLiquida": 1.5236798215189866,
+  "razaoDosFatores": 1.0477016421275098,
+  "betaAlavancado": 0.6362144671259161,
+  "betaDesalavancado": 0.5191159731237456,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.6349387373480088,
+  "erroPadrao": 0.04354717175401986,
+  "peso": 0.9932430718016642,
+  "desalavancadoDoCru": 0.416714015884929,
+  "desalavancadoDoEncolhido": 0.41843983035308213
+ },
+ {
+  "ticker": "ALOS3",
+  "deJanela": -0.26050886136308044,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.2821556444269187
+   },
+   {
+    "ano": 2022,
+    "de": -0.26050886136308044
+   },
+   {
+    "ano": 2023,
+    "de": -0.14434319085450967
+   },
+   {
+    "ano": 2024,
+    "de": -0.34264684474741663
+   },
+   {
+    "ano": 2025,
+    "de": -0.16988475276844406
+   }
+  ],
+  "setor": "construcao-e-imobiliario",
+  "aliquota": 0.2334815843560522,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -2430014000.0,
+  "valorDeMercado": 14379525000.0,
+  "vmPorPrecoEAcoes": 14525740981.4,
+  "deBruta": 0.0,
+  "deLiquida": -0.1689912566652932,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 1.1023760162275327,
+  "betaDesalavancado": 1.1023760162275327,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 1.102959272849438,
+  "erroPadrao": 0.03419075565970894,
+  "peso": 0.9958238721787983,
+  "desalavancadoDoCru": 1.102959272849438,
+  "desalavancadoDoEncolhido": 1.1023760162275327
+ },
+ {
+  "ticker": "ALPA4",
+  "deJanela": 0.060941628854477785,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.02171201836804416
+   },
+   {
+    "ano": 2022,
+    "de": 0.060941628854477785
+   },
+   {
+    "ano": 2023,
+    "de": 0.0885442259118677
+   },
+   {
+    "ano": 2024,
+    "de": -0.014959228212794285
+   },
+   {
+    "ano": 2025,
+    "de": 0.08336902723614174
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.07264887287811801,
+  "dividaBruta": 1235533000.0,
+  "dividaLiquida": 679938000.0,
+  "valorDeMercado": 9050574000.0,
+  "vmPorPrecoEAcoes": 9269154054.0,
+  "deBruta": 0.13651432494778784,
+  "deLiquida": 0.07512650578847264,
+  "fatorBruta": 1.1265967131086139,
+  "fatorLiquida": 1.0696686498196688,
+  "razaoDosFatores": 1.0532202783530604,
+  "betaAlavancado": 1.3246814038666477,
+  "betaDesalavancado": 1.2538225167924115,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.3348598089133268,
+  "erroPadrao": 0.06479690024115636,
+  "peso": 0.9851615086685872,
+  "desalavancadoDoCru": 1.2479189785905809,
+  "desalavancadoDoEncolhido": 1.2385155822020757
+ },
+ {
+  "ticker": "ALUP11",
+  "deJanela": 0.3622205086166209,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.40077962796571565
+   },
+   {
+    "ano": 2022,
+    "de": 0.3622205086166209
+   },
+   {
+    "ano": 2023,
+    "de": 0.32288354500774397
+   },
+   {
+    "ano": 2024,
+    "de": 0.3656402281733382
+   },
+   {
+    "ano": 2025,
+    "de": 0.2988446742583499
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.16723620666348682,
+  "dividaBruta": 12611435000.0,
+  "dividaLiquida": 9382814000.0,
+  "valorDeMercado": 11204017198.000002,
+  "vmPorPrecoEAcoes": 33265943384.0,
+  "deBruta": 1.1256172475575308,
+  "deLiquida": 0.8374508744662494,
+  "fatorBruta": 1.9373732889210142,
+  "fatorLiquida": 1.697398766953494,
+  "razaoDosFatores": 1.1413778109419912,
+  "betaAlavancado": 0.6399209865360996,
+  "betaDesalavancado": 0.49162514880503666,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.6394552263395653,
+  "erroPadrao": 0.028526139555365565,
+  "peso": 0.9970893236162882,
+  "desalavancadoDoCru": 0.3767265764468918,
+  "desalavancadoDoEncolhido": 0.3774177920260758
+ },
+ {
+  "ticker": "ANIM3",
+  "deJanela": 2.6981451207034373,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 1.3390207178078388
+   },
+   {
+    "ano": 2022,
+    "de": 2.6981451207034373
+   },
+   {
+    "ano": 2023,
+    "de": 2.4048783212747784
+   },
+   {
+    "ano": 2024,
+    "de": 6.359082015706115
+   },
+   {
+    "ano": 2025,
+    "de": 2.9855018619429496
+   }
+  ],
+  "setor": "educacao",
+  "aliquota": 0.0,
+  "dividaBruta": 5696451000.0,
+  "dividaLiquida": 3991035990.0,
+  "valorDeMercado": 241141140.0,
+  "vmPorPrecoEAcoes": 242798464.10000002,
+  "deBruta": 23.622891556372338,
+  "deLiquida": 16.550622552418886,
+  "fatorBruta": 4.0,
+  "fatorLiquida": 4.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 2.1129329215332917,
+  "betaDesalavancado": 0.5713493799105924,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 2.0886459947213494,
+  "erroPadrao": 0.09065945751461221,
+  "peso": 0.9713595333395733,
+  "desalavancadoDoCru": 0.5221614986803373,
+  "desalavancadoDoEncolhido": 0.5299494978516701
+ },
+ {
+  "ticker": "AXIA3",
+  "deJanela": 0.43181223014466064,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.5063357194450981
+   },
+   {
+    "ano": 2022,
+    "de": 0.3481192888890865
+   },
+   {
+    "ano": 2023,
+    "de": 0.43181223014466064
+   },
+   {
+    "ano": 2024,
+    "de": 0.5047370158980844
+   },
+   {
+    "ano": 2025,
+    "de": 0.3168018721125316
+   }
+  ],
+  "setor": "emp-adm-part-energia-eletrica",
+  "aliquota": 0.17402994552750978,
+  "dividaBruta": 74295768000.0,
+  "dividaLiquida": 46744066000.0,
+  "valorDeMercado": 160630100000.0,
+  "vmPorPrecoEAcoes": 161213362512.0,
+  "deBruta": 0.46252706061939824,
+  "deLiquida": 0.29100440079412265,
+  "fatorBruta": 1.382033501454805,
+  "fatorLiquida": 1.2403609207756559,
+  "razaoDosFatores": 1.1142188360711611,
+  "betaAlavancado": 1.1344334786015728,
+  "betaDesalavancado": 0.8361934146099501,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.1361339344942432,
+  "erroPadrao": 0.03967272389281961,
+  "peso": 0.9943854795951829,
+  "desalavancadoDoCru": 0.9159704368820047,
+  "desalavancadoDoEncolhido": 0.9142761546752634
+ },
+ {
+  "ticker": "AZEV4",
+  "deJanela": 0.01907702764808428,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.00014016866681443484
+   },
+   {
+    "ano": 2022,
+    "de": 0.053390977545754004
+   },
+   {
+    "ano": 2023,
+    "de": 0.011547870157446448
+   },
+   {
+    "ano": 2024,
+    "de": 0.01907702764808428
+   },
+   {
+    "ano": 2025,
+    "de": 0.08441365491387456
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.13501021936874613,
+  "dividaBruta": 240224000.0,
+  "dividaLiquida": 210154000.0,
+  "valorDeMercado": 156827460.0,
+  "vmPorPrecoEAcoes": 161276458.79999998,
+  "deBruta": 1.5317725607492463,
+  "deLiquida": 1.3400331804136851,
+  "fatorBruta": 2.3249676112994644,
+  "fatorLiquida": 2.159115006764635,
+  "razaoDosFatores": 1.076815085817663,
+  "betaAlavancado": 1.121919802606176,
+  "betaDesalavancado": 1.1037070535503728,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.1570244780576984,
+  "erroPadrao": 0.14023718718379302,
+  "peso": 0.9340988386919896,
+  "desalavancadoDoCru": 0.5358790404553126,
+  "desalavancadoDoEncolhido": 0.5410406477772919
+ },
+ {
+  "ticker": "AZZA3",
+  "deJanela": 0.047951919434457924,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.03227348662316027
+   },
+   {
+    "ano": 2022,
+    "de": -0.00864769827950041
+   },
+   {
+    "ano": 2023,
+    "de": 0.047951919434457924
+   },
+   {
+    "ano": 2024,
+    "de": 0.3078254210766692
+   },
+   {
+    "ano": 2025,
+    "de": 0.4129173991400236
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.2087924421498492,
+  "dividaBruta": 3226560000.0,
+  "dividaLiquida": 2145223000.0,
+  "valorDeMercado": 3435990500.0,
+  "vmPorPrecoEAcoes": 3652804738.9,
+  "deBruta": 0.9390479979499361,
+  "deLiquida": 0.624339037025859,
+  "fatorBruta": 1.7429818731620423,
+  "fatorLiquida": 1.4939817647557447,
+  "razaoDosFatores": 1.1666687735288437,
+  "betaAlavancado": 1.3784197221280432,
+  "betaDesalavancado": 1.3280342090581634,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.3854221566622595,
+  "erroPadrao": 0.058080131586487026,
+  "peso": 0.9880434719393283,
+  "desalavancadoDoCru": 0.9273353861107977,
+  "desalavancadoDoEncolhido": 0.925460543386242
+ },
+ {
+  "ticker": "B3SA3",
+  "deJanela": -0.018619646397063122,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.07268946288101502
+   },
+   {
+    "ano": 2022,
+    "de": -0.036338918984105295
+   },
+   {
+    "ano": 2023,
+    "de": -0.018619646397063122
+   },
+   {
+    "ano": 2024,
+    "de": -0.0009235916943224821
+   },
+   {
+    "ano": 2025,
+    "de": -0.0057256822283761185
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.26326732666150543,
+  "dividaBruta": 14944304030.0,
+  "dividaLiquida": -596472970.0,
+  "valorDeMercado": 87253980000.0,
+  "vmPorPrecoEAcoes": 87657705000.0,
+  "deBruta": 0.17127360872249037,
+  "deLiquida": -0.006836054584558779,
+  "fatorBruta": 1.1261828636264517,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.1261828636264517,
+  "betaAlavancado": 1.487046229886679,
+  "betaDesalavancado": 1.487046229886679,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 1.4909803018123147,
+  "erroPadrao": 0.04122338311537568,
+  "peso": 0.9939407120453745,
+  "desalavancadoDoCru": 1.4909803018123147,
+  "desalavancadoDoEncolhido": 1.487046229886679
+ },
+ {
+  "ticker": "BBAS3",
+  "deJanela": -0.9594167828426352,
+  "exerciciosNaJanela": 4,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -1.3184098884917412
+   },
+   {
+    "ano": 2022,
+    "de": -1.3832212457486637
+   },
+   {
+    "ano": 2024,
+    "de": -0.6004236771935291
+   },
+   {
+    "ano": 2025,
+    "de": -0.47472998216799456
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.18592039319669124,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -59635524000.0,
+  "valorDeMercado": 127109900000.0,
+  "vmPorPrecoEAcoes": 129058381680.0,
+  "deBruta": 0.0,
+  "deLiquida": -0.4691650611006696,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.9793696715174155,
+  "betaDesalavancado": 0.9793696715174155,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.9799481147407962,
+  "erroPadrao": 0.0342256322722371,
+  "peso": 0.9958153837041982,
+  "desalavancadoDoCru": 0.9799481147407962,
+  "desalavancadoDoEncolhido": 0.9793696715174155
+ },
+ {
+  "ticker": "BBDC3",
+  "deJanela": -1.159831516235325,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.4550558415440487
+   },
+   {
+    "ano": 2022,
+    "de": -0.823181773176922
+   },
+   {
+    "ano": 2023,
+    "de": -1.159831516235325
+   },
+   {
+    "ano": 2024,
+    "de": -1.845835240986924
+   },
+   {
+    "ano": 2025,
+    "de": -1.1711585107720799
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.13327823484265183,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -193516830000.0,
+  "valorDeMercado": 167671550000.0,
+  "vmPorPrecoEAcoes": 167459709720.0,
+  "deBruta": 0.0,
+  "deLiquida": -1.1541423097716936,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 1.0587770707146447,
+  "betaDesalavancado": 1.0587770707146447,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 1.059546744434161,
+  "erroPadrao": 0.0314395745852,
+  "peso": 0.9964666233928852,
+  "desalavancadoDoCru": 1.059546744434161,
+  "desalavancadoDoEncolhido": 1.0587770707146447
+ },
+ {
+  "ticker": "BBDC4",
+  "deJanela": -1.0044020213328448,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.4602214586005372
+   },
+   {
+    "ano": 2022,
+    "de": -0.8782778997776743
+   },
+   {
+    "ano": 2023,
+    "de": -1.2555292700626695
+   },
+   {
+    "ano": 2024,
+    "de": -1.6989348584862345
+   },
+   {
+    "ano": 2025,
+    "de": -1.0044020213328448
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.13327823484265183,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -193516830000.0,
+  "valorDeMercado": 188431900000.0,
+  "vmPorPrecoEAcoes": 189597014800.0,
+  "deBruta": 0.0,
+  "deLiquida": -1.0269855051082115,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 1.1028043793411209,
+  "betaDesalavancado": 1.1028043793411209,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 1.1041686727095872,
+  "erroPadrao": 0.03816578577004894,
+  "peso": 0.9948017304026846,
+  "desalavancadoDoCru": 1.1041686727095872,
+  "desalavancadoDoEncolhido": 1.1028043793411209
+ },
+ {
+  "ticker": "BBSE3",
+  "deJanela": -0.07012012393036293,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.0495670578313253
+   },
+   {
+    "ano": 2022,
+    "de": -0.06008684366656778
+   },
+   {
+    "ano": 2023,
+    "de": -0.07012012393036293
+   },
+   {
+    "ano": 2024,
+    "de": -0.11759226091763406
+   },
+   {
+    "ano": 2025,
+    "de": -0.14312657521817226
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.0,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -10044854000.0,
+  "valorDeMercado": 79422680000.0,
+  "vmPorPrecoEAcoes": 81849428216.0,
+  "deBruta": 0.0,
+  "deLiquida": -0.1264733700751473,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.4753135922530545,
+  "betaDesalavancado": 0.4753135922530545,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.47384827401582086,
+  "erroPadrao": 0.03338867347534089,
+  "peso": 0.9960167385059201,
+  "desalavancadoDoCru": 0.47384827401582086,
+  "desalavancadoDoEncolhido": 0.4753135922530545
+ },
+ {
+  "ticker": "BEEF3",
+  "deJanela": 1.9972249486434985,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.9480352125050863
+   },
+   {
+    "ano": 2022,
+    "de": 0.8506577899844974
+   },
+   {
+    "ano": 2023,
+    "de": 1.9972249486434985
+   },
+   {
+    "ano": 2024,
+    "de": 5.05364431590593
+   },
+   {
+    "ano": 2025,
+    "de": 2.213302823547371
+   }
+  ],
+  "setor": "consumo-nao-ciclico",
+  "aliquota": 0.0,
+  "dividaBruta": 27786869000.0,
+  "dividaLiquida": 12755469000.0,
+  "valorDeMercado": 3952139500.0,
+  "vmPorPrecoEAcoes": 3952139438.5,
+  "deBruta": 7.030842155242749,
+  "deLiquida": 3.227484505544402,
+  "fatorBruta": 4.0,
+  "fatorLiquida": 4.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.8411307174838347,
+  "betaDesalavancado": 0.280636499394054,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8228197334990804,
+  "erroPadrao": 0.06595504713502934,
+  "peso": 0.9846345601668917,
+  "desalavancadoDoCru": 0.2057049333747701,
+  "desalavancadoDoEncolhido": 0.21287173011661997
+ },
+ {
+  "ticker": "BMGB4",
+  "deJanela": -0.47457795641382255,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.2240041437323687
+   },
+   {
+    "ano": 2022,
+    "de": -0.4839720526811985
+   },
+   {
+    "ano": 2023,
+    "de": -0.47457795641382255
+   },
+   {
+    "ano": 2024,
+    "de": -0.7836988347677879
+   },
+   {
+    "ano": 2025,
+    "de": -0.19154121522670534
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.0,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -568013000.0,
+  "valorDeMercado": 3747079700.0,
+  "vmPorPrecoEAcoes": 3876736526.0000005,
+  "deBruta": 0.0,
+  "deLiquida": -0.15158818212486913,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.8539287887298126,
+  "betaDesalavancado": 0.8539287887298126,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.8540523442361202,
+  "erroPadrao": 0.053107826883505474,
+  "peso": 0.9899834343823742,
+  "desalavancadoDoCru": 0.8540523442361202,
+  "desalavancadoDoEncolhido": 0.8539287887298126
+ },
+ {
+  "ticker": "BPAC11",
+  "deJanela": -0.011141671579311448,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.013324755703507185
+   },
+   {
+    "ano": 2022,
+    "de": -0.011141671579311448
+   },
+   {
+    "ano": 2023,
+    "de": -0.005693859948559448
+   },
+   {
+    "ano": 2024,
+    "de": -0.015047056287794465
+   },
+   {
+    "ano": 2025,
+    "de": -0.009476790755135361
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.1358977786290212,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -5815071700.0,
+  "valorDeMercado": 235151769450.0,
+  "vmPorPrecoEAcoes": 691334532120.0,
+  "deBruta": 0.0,
+  "deLiquida": -0.02472901528064602,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 1.4474710181084554,
+  "betaDesalavancado": 1.4474710181084554,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 1.450610498880568,
+  "erroPadrao": 0.038009654151443494,
+  "peso": 0.9948439555508096,
+  "desalavancadoDoCru": 1.450610498880568,
+  "desalavancadoDoEncolhido": 1.4474710181084554
+ },
+ {
+  "ticker": "BRAP4",
+  "deJanela": -0.030000455946178006,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.030000455946178006
+   },
+   {
+    "ano": 2022,
+    "de": -0.03498295932545648
+   },
+   {
+    "ano": 2023,
+    "de": -0.02464853727645344
+   },
+   {
+    "ano": 2024,
+    "de": -0.044180771897633676
+   },
+   {
+    "ano": 2025,
+    "de": -0.002352408080076125
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.003417897871843429,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -18402000.0,
+  "valorDeMercado": 8872190000.0,
+  "vmPorPrecoEAcoes": 8836811568.0,
+  "deBruta": 0.0,
+  "deLiquida": -0.0020741214964963553,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.9045979792227123,
+  "betaDesalavancado": 0.9045979792227123,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.9062062499153767,
+  "erroPadrao": 0.039291420234023565,
+  "peso": 0.9944922942773303,
+  "desalavancadoDoCru": 0.9062062499153767,
+  "desalavancadoDoEncolhido": 0.9045979792227123
+ },
+ {
+  "ticker": "BRAV3",
+  "deJanela": 1.175890657061959,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.3619078866135911
+   },
+   {
+    "ano": 2022,
+    "de": 0.02872827533116309
+   },
+   {
+    "ano": 2023,
+    "de": 1.175890657061959
+   },
+   {
+    "ano": 2024,
+    "de": 1.2176169937923087
+   },
+   {
+    "ano": 2025,
+    "de": 1.386149120476888
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.17772807907615637,
+  "dividaBruta": 16448057000.0,
+  "dividaLiquida": 10844045000.0,
+  "valorDeMercado": 8557145000.0,
+  "vmPorPrecoEAcoes": 8306284166.4,
+  "deBruta": 1.9221430745885455,
+  "deLiquida": 1.2672503504381427,
+  "fatorBruta": 2.580524278232386,
+  "fatorLiquida": 2.0420243799461857,
+  "razaoDosFatores": 1.263708848716288,
+  "betaAlavancado": 1.120479538843315,
+  "betaDesalavancado": 0.5696672296097964,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.125332869768564,
+  "erroPadrao": 0.069634495976252,
+  "peso": 0.9829024786682402,
+  "desalavancadoDoCru": 0.5510868924092965,
+  "desalavancadoDoEncolhido": 0.5489792579736978
+ },
+ {
+  "ticker": "BRSR6",
+  "deJanela": -0.8670818463747278,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -1.679990131889455
+   },
+   {
+    "ano": 2022,
+    "de": -0.8670818463747278
+   },
+   {
+    "ano": 2023,
+    "de": -1.0797263829612482
+   },
+   {
+    "ano": 2024,
+    "de": -0.42963419222976884
+   },
+   {
+    "ano": 2025,
+    "de": -0.6406120403083195
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.23738830541598696,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -3992788000.0,
+  "valorDeMercado": 6138706400.0,
+  "vmPorPrecoEAcoes": 6085539964.8,
+  "deBruta": 0.0,
+  "deLiquida": -0.6504282400604792,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.8587914871304179,
+  "betaDesalavancado": 0.8587914871304179,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.8601282863722263,
+  "erroPadrao": 0.039032621979265235,
+  "peso": 0.9945642167383144,
+  "desalavancadoDoCru": 0.8601282863722263,
+  "desalavancadoDoEncolhido": 0.8587914871304179
+ },
+ {
+  "ticker": "CAML3",
+  "deJanela": 1.050001067425725,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2022,
+    "de": 0.5405258258258259
+   },
+   {
+    "ano": 2023,
+    "de": 1.050001067425725
+   },
+   {
+    "ano": 2024,
+    "de": 0.971243794180503
+   },
+   {
+    "ano": 2025,
+    "de": 2.399035814889336
+   },
+   {
+    "ano": 2026,
+    "de": 1.3489381644518272
+   }
+  ],
+  "setor": "consumo-nao-ciclico",
+  "aliquota": 0.035008626204324225,
+  "dividaBruta": 5270946000.0,
+  "dividaLiquida": 3248243100.0,
+  "valorDeMercado": 1750000000.0,
+  "vmPorPrecoEAcoes": 1729000000.0000002,
+  "deBruta": 3.0119691428571427,
+  "deLiquida": 1.8561389142857143,
+  "fatorBruta": 3.8949741213870275,
+  "fatorLiquida": 2.791158040852186,
+  "razaoDosFatores": 1.3954688571478484,
+  "betaAlavancado": 1.0110178257453148,
+  "betaDesalavancado": 0.5021839597694882,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.0067117836620751,
+  "erroPadrao": 0.059231284948390896,
+  "peso": 0.9875707654171767,
+  "desalavancadoDoCru": 0.3606788898828207,
+  "desalavancadoDoEncolhido": 0.3645499648834216
+ },
+ {
+  "ticker": "CEAB3",
+  "deJanela": 0.1469709106801292,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.171215794226281
+   },
+   {
+    "ano": 2022,
+    "de": 0.6630095947503927
+   },
+   {
+    "ano": 2023,
+    "de": 0.1469709106801292
+   },
+   {
+    "ano": 2024,
+    "de": -0.030032569879133914
+   },
+   {
+    "ano": 2025,
+    "de": -0.02107772378241819
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.19243143906099333,
+  "dividaBruta": 960471970.0,
+  "dividaLiquida": -82903050.0,
+  "valorDeMercado": 2798865200.0,
+  "vmPorPrecoEAcoes": 2838937002.6000004,
+  "deBruta": 0.3431647833557686,
+  "deLiquida": -0.029620236801686628,
+  "fatorBruta": 1.277129090259564,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.277129090259564,
+  "betaAlavancado": 1.7483832654580003,
+  "betaDesalavancado": 1.5628857794618198,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 1.7731150751942457,
+  "erroPadrao": 0.08819141850635032,
+  "peso": 0.9728559256843614,
+  "desalavancadoDoCru": 1.7731150751942457,
+  "desalavancadoDoEncolhido": 1.74590084337985
+ },
+ {
+  "ticker": "CMIG4",
+  "deJanela": 0.39197926744296235,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.5161755375029418
+   },
+   {
+    "ano": 2022,
+    "de": 0.39197926744296235
+   },
+   {
+    "ano": 2023,
+    "de": 0.3012254569771198
+   },
+   {
+    "ano": 2024,
+    "de": 0.31524934026727014
+   },
+   {
+    "ano": 2025,
+    "de": 0.5242735183382742
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.2367657025770657,
+  "dividaBruta": 19465331000.0,
+  "dividaLiquida": 16803993000.0,
+  "valorDeMercado": 32423990000.0,
+  "vmPorPrecoEAcoes": 32223665320.0,
+  "deBruta": 0.6003373119717839,
+  "deLiquida": 0.5182580243825636,
+  "fatorBruta": 1.4581980265195573,
+  "fatorLiquida": 1.395552299123424,
+  "razaoDosFatores": 1.044889559091037,
+  "betaAlavancado": 0.8926793100997054,
+  "betaDesalavancado": 0.6871140201711475,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8945895437544745,
+  "erroPadrao": 0.039757861130904945,
+  "peso": 0.9943614923573622,
+  "desalavancadoDoCru": 0.6410290351113214,
+  "desalavancadoDoEncolhido": 0.6398268292363908
+ },
+ {
+  "ticker": "COGN3",
+  "deJanela": 0.8744833959339413,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.8744833959339413
+   },
+   {
+    "ano": 2022,
+    "de": 1.0507774261056053
+   },
+   {
+    "ano": 2023,
+    "de": 0.653059202269875
+   },
+   {
+    "ano": 2024,
+    "de": 1.8639677834964847
+   },
+   {
+    "ano": 2025,
+    "de": 0.5661320569620253
+   }
+  ],
+  "setor": "educacao",
+  "aliquota": 0.01993080269395682,
+  "dividaBruta": 6649824000.0,
+  "dividaLiquida": 5366931900.0,
+  "valorDeMercado": 636828160.0,
+  "vmPorPrecoEAcoes": 655637442.8,
+  "deBruta": 10.442101052817765,
+  "deLiquida": 8.427598270779985,
+  "fatorBruta": 3.9402075919181296,
+  "fatorLiquida": 3.9402075919181296,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 1.64005886429226,
+  "betaDesalavancado": 0.8831507605137879,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.6429105464349434,
+  "erroPadrao": 0.06932574056630192,
+  "peso": 0.9830511973538681,
+  "desalavancadoDoCru": 0.4169604032550882,
+  "desalavancadoDoEncolhido": 0.4233522036750268
+ },
+ {
+  "ticker": "CPFE3",
+  "deJanela": 0.6934472089136754,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 2.0008897793948854
+   },
+   {
+    "ano": 2022,
+    "de": 1.711709676709056
+   },
+   {
+    "ano": 2023,
+    "de": 0.4723312161774187
+   },
+   {
+    "ano": 2024,
+    "de": 0.6934472089136754
+   },
+   {
+    "ano": 2025,
+    "de": 0.4258810229873057
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.3187185084872073,
+  "dividaBruta": 29055728000.0,
+  "dividaLiquida": 26150646000.0,
+  "valorDeMercado": 53003706000.0,
+  "vmPorPrecoEAcoes": 53960078235.0,
+  "deBruta": 0.5481829515845552,
+  "deLiquida": 0.493373916155976,
+  "fatorBruta": 1.3734668988774108,
+  "fatorLiquida": 1.336126517472251,
+  "razaoDosFatores": 1.0279467407591028,
+  "betaAlavancado": 0.6977230838696542,
+  "betaDesalavancado": 0.47385735236502974,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.6980077121449335,
+  "erroPadrao": 0.03421040335951016,
+  "peso": 0.9958190912529622,
+  "desalavancadoDoCru": 0.5224113907008285,
+  "desalavancadoDoEncolhido": 0.5220158941158782
+ },
+ {
+  "ticker": "CPLE3",
+  "deJanela": 0.4977942461989727,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.4977942461989727
+   },
+   {
+    "ano": 2022,
+    "de": 0.5199705620089322
+   },
+   {
+    "ano": 2023,
+    "de": 0.33753255414392463
+   },
+   {
+    "ano": 2024,
+    "de": 0.532321454694409
+   },
+   {
+    "ano": 2025,
+    "de": 0.43275677593171624
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.2520791794987253,
+  "dividaBruta": 20015343000.0,
+  "dividaLiquida": 16884076000.0,
+  "valorDeMercado": 4373012500.0,
+  "vmPorPrecoEAcoes": 4337437456.0,
+  "deBruta": 4.577014815301808,
+  "deLiquida": 3.860971355558668,
+  "fatorBruta": 3.243762461503824,
+  "fatorLiquida": 3.243762461503824,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.8180034176379564,
+  "betaDesalavancado": 0.5960774254174985,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8191740748546219,
+  "erroPadrao": 0.03759316243637979,
+  "peso": 0.9949557645941268,
+  "desalavancadoDoCru": 0.25253824365266525,
+  "desalavancadoDoEncolhido": 0.25342238363858527
+ },
+ {
+  "ticker": "CSAN3",
+  "deJanela": 1.3193347418362555,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.8057493924939094
+   },
+   {
+    "ano": 2022,
+    "de": 1.3470119573464128
+   },
+   {
+    "ano": 2023,
+    "de": 1.3193347418362555
+   },
+   {
+    "ano": 2024,
+    "de": 3.6807059026859172
+   },
+   {
+    "ano": 2025,
+    "de": 1.0196486607142856
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.1416477254384796,
+  "dividaBruta": 70639931000.0,
+  "dividaLiquida": 43396247000.0,
+  "valorDeMercado": 15033304000.0,
+  "vmPorPrecoEAcoes": 15072969800.0,
+  "deBruta": 4.698895931326873,
+  "deLiquida": 2.8866739473904075,
+  "fatorBruta": 3.5750568236845615,
+  "fatorLiquida": 3.477783148660039,
+  "razaoDosFatores": 1.0279700231056674,
+  "betaAlavancado": 1.489492873555011,
+  "betaDesalavancado": 0.6984877000513667,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.493870652787231,
+  "erroPadrao": 0.0459809967746618,
+  "peso": 0.9924725286912361,
+  "desalavancadoDoCru": 0.42954680867977835,
+  "desalavancadoDoEncolhido": 0.4295337766668996
+ },
+ {
+  "ticker": "CSNA3",
+  "deJanela": 1.4237561603613418,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.38115658357085924
+   },
+   {
+    "ano": 2022,
+    "de": 1.4237561603613418
+   },
+   {
+    "ano": 2023,
+    "de": 1.0598444952386759
+   },
+   {
+    "ano": 2024,
+    "de": 2.782578041335476
+   },
+   {
+    "ano": 2025,
+    "de": 3.1935820031505355
+   }
+  ],
+  "setor": "materiais-basicos",
+  "aliquota": 0.12718421000193977,
+  "dividaBruta": 52924547000.0,
+  "dividaLiquida": 37860810000.0,
+  "valorDeMercado": 9428528000.0,
+  "vmPorPrecoEAcoes": 8433957840.0,
+  "deBruta": 5.61323538520541,
+  "deLiquida": 4.0155589504533475,
+  "fatorBruta": 3.618447369994181,
+  "fatorLiquida": 3.618447369994181,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 1.620406614119996,
+  "betaDesalavancado": 0.7225323650321646,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.6215589940311383,
+  "erroPadrao": 0.06338025658223977,
+  "peso": 0.9857941226218905,
+  "desalavancadoDoCru": 0.4481366807979153,
+  "desalavancadoDoEncolhido": 0.4515281705433272
+ },
+ {
+  "ticker": "CVCB3",
+  "deJanela": 0.06569275989993052,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.0011323001956101949
+   },
+   {
+    "ano": 2022,
+    "de": 0.06569275989993052
+   },
+   {
+    "ano": 2023,
+    "de": 0.10247519759993709
+   },
+   {
+    "ano": 2024,
+    "de": 0.04457093538403093
+   },
+   {
+    "ano": 2025,
+    "de": 0.08180912528417651
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.34,
+  "dividaBruta": 395335000.0,
+  "dividaLiquida": 92876000.0,
+  "valorDeMercado": 867225340.0,
+  "vmPorPrecoEAcoes": 988111268.0,
+  "deBruta": 0.4558619101236133,
+  "deLiquida": 0.10709557910288922,
+  "fatorBruta": 1.3008688606815848,
+  "fatorLiquida": 1.070683082207907,
+  "razaoDosFatores": 1.214989647542577,
+  "betaAlavancado": 1.9444623601738003,
+  "betaDesalavancado": 1.863659272243338,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.9845626210715361,
+  "erroPadrao": 0.09899983846002292,
+  "peso": 0.9660346928475361,
+  "desalavancadoDoCru": 1.8535481264718168,
+  "desalavancadoDoEncolhido": 1.8167630981380836
+ },
+ {
+  "ticker": "CXSE3",
+  "deJanela": -0.028302245614035087,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.014448763955342902
+   },
+   {
+    "ano": 2022,
+    "de": -0.03664910179640719
+   },
+   {
+    "ano": 2023,
+    "de": -0.022167942708333332
+   },
+   {
+    "ano": 2024,
+    "de": -0.028302245614035087
+   },
+   {
+    "ano": 2025,
+    "de": -0.033820016044925794
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.11923791677680562,
+  "dividaBruta": 10129000.0,
+  "dividaLiquida": -1686266000.0,
+  "valorDeMercado": 59310000000.0,
+  "vmPorPrecoEAcoes": 59940000000.0,
+  "deBruta": 0.00017078064407351207,
+  "deLiquida": -0.02843139436857191,
+  "fatorBruta": 1.0001504171158484,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0001504171158484,
+  "betaAlavancado": 0.6909386407706147,
+  "betaDesalavancado": 0.6909386407706147,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.6901448738676822,
+  "erroPadrao": 0.038308022479704495,
+  "peso": 0.994763115542031,
+  "desalavancadoDoCru": 0.6901448738676822,
+  "desalavancadoDoEncolhido": 0.6909386407706147
+ },
+ {
+  "ticker": "CYRE3",
+  "deJanela": 0.4163589644380919,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.21437596801230235
+   },
+   {
+    "ano": 2022,
+    "de": 0.4604462446859606
+   },
+   {
+    "ano": 2023,
+    "de": 0.31565716075674527
+   },
+   {
+    "ano": 2024,
+    "de": 0.5340373887910242
+   },
+   {
+    "ano": 2025,
+    "de": 0.4163589644380919
+   }
+  ],
+  "setor": "construcao-e-imobiliario",
+  "aliquota": 0.14469307647965068,
+  "dividaBruta": 8717269000.0,
+  "dividaLiquida": 4735705000.0,
+  "valorDeMercado": 11386040000.0,
+  "vmPorPrecoEAcoes": 11608229376.0,
+  "deBruta": 0.7656102560679569,
+  "deLiquida": 0.41592204137698446,
+  "fatorBruta": 1.6548317527331111,
+  "fatorLiquida": 1.355741001634452,
+  "razaoDosFatores": 1.2206105375127563,
+  "betaAlavancado": 1.536525089347007,
+  "betaDesalavancado": 1.1330347526904139,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.5385246762290707,
+  "erroPadrao": 0.049208823738223946,
+  "peso": 0.9913880106997427,
+  "desalavancadoDoCru": 1.1348219714342627,
+  "desalavancadoDoEncolhido": 1.1333447814110358
+ },
+ {
+  "ticker": "CYRE4",
+  "deJanela": 0.42663086563894115,
+  "exerciciosNaJanela": 1,
+  "alavancagemPorAno": [
+   {
+    "ano": 2025,
+    "de": 0.42663086563894115
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.14469307647965068,
+  "dividaBruta": 8717269000.0,
+  "dividaLiquida": 4735705000.0,
+  "valorDeMercado": 11386040000.0,
+  "vmPorPrecoEAcoes": 10932594150.6,
+  "deBruta": 0.7656102560679569,
+  "deLiquida": 0.41592204137698446,
+  "fatorBruta": 1.6548317527331111,
+  "fatorLiquida": 1.355741001634452,
+  "razaoDosFatores": 1.2206105375127563,
+  "betaAlavancado": 1.693199489830134,
+  "betaDesalavancado": 1.2489107342691925,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.7583761779272151,
+  "erroPadrao": 0.14530608076423887,
+  "peso": 0.9295902218493676,
+  "desalavancadoDoCru": 1.2969853208004736,
+  "desalavancadoDoEncolhido": 1.2489107342691925
+ },
+ {
+  "ticker": "DIRR3",
+  "deJanela": 0.090418071531786,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.35791845854871324
+   },
+   {
+    "ano": 2022,
+    "de": 0.2987219227744423
+   },
+   {
+    "ano": 2023,
+    "de": 0.013422508430086614
+   },
+   {
+    "ano": 2024,
+    "de": 0.011807342233670396
+   },
+   {
+    "ano": 2025,
+    "de": 0.090418071531786
+   }
+  ],
+  "setor": "construcao-e-imobiliario",
+  "aliquota": 0.11792080124231478,
+  "dividaBruta": 2847323000.0,
+  "dividaLiquida": 664524000.0,
+  "valorDeMercado": 5689065000.0,
+  "vmPorPrecoEAcoes": 5964930000.0,
+  "deBruta": 0.500490502393627,
+  "deLiquida": 0.11680724336951678,
+  "fatorBruta": 1.4414722613372017,
+  "fatorLiquida": 1.1030332396404774,
+  "razaoDosFatores": 1.3068257687384246,
+  "betaAlavancado": 1.3632993561025222,
+  "betaDesalavancado": 1.2625995893969393,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.3665776974262842,
+  "erroPadrao": 0.053176597348199815,
+  "peso": 0.9899577369331904,
+  "desalavancadoDoCru": 1.2389270316746814,
+  "desalavancadoDoEncolhido": 1.2361590604599422
+ },
+ {
+  "ticker": "DXCO3",
+  "deJanela": 0.770605210709346,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.24087798138485308
+   },
+   {
+    "ano": 2022,
+    "de": 0.770605210709346
+   },
+   {
+    "ano": 2023,
+    "de": 0.7331737514243936
+   },
+   {
+    "ano": 2024,
+    "de": 1.082287284961915
+   },
+   {
+    "ano": 2025,
+    "de": 1.099555167805507
+   }
+  ],
+  "setor": "materiais-basicos",
+  "aliquota": 0.152990223606556,
+  "dividaBruta": 7581644000.0,
+  "dividaLiquida": 5052644020.0,
+  "valorDeMercado": 5036307500.0,
+  "vmPorPrecoEAcoes": 5183352888.0,
+  "deBruta": 1.5053973570914803,
+  "deLiquida": 1.003243749512912,
+  "fatorBruta": 2.2750862788133364,
+  "fatorLiquida": 1.849757263943052,
+  "razaoDosFatores": 1.229937745433489,
+  "betaAlavancado": 1.3417239590971892,
+  "betaDesalavancado": 0.8118325898596066,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.343813904562146,
+  "erroPadrao": 0.05311304312441534,
+  "peso": 0.9899814863492084,
+  "desalavancadoDoCru": 0.7264812149987685,
+  "desalavancadoDoEncolhido": 0.7260844213261768
+ },
+ {
+  "ticker": "ECOR3",
+  "deJanela": 2.9240912150819707,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 1.5198434732503994
+   },
+   {
+    "ano": 2022,
+    "de": 3.274480893955611
+   },
+   {
+    "ano": 2023,
+    "de": 2.0869099528455917
+   },
+   {
+    "ano": 2024,
+    "de": 5.475544590893498
+   },
+   {
+    "ano": 2025,
+    "de": 2.9240912150819707
+   }
+  ],
+  "setor": "infraestrutura",
+  "aliquota": 0.34,
+  "dividaBruta": 26363627000.0,
+  "dividaLiquida": 21583134000.0,
+  "valorDeMercado": 5501040000.0,
+  "vmPorPrecoEAcoes": 5514966864.0,
+  "deBruta": 4.792480512775766,
+  "deLiquida": 3.9234642903887265,
+  "fatorBruta": 2.9799999999999995,
+  "fatorLiquida": 2.9799999999999995,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 1.6790702261318164,
+  "betaDesalavancado": 0.5730810302043594,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.6813625659436298,
+  "erroPadrao": 0.05597607114642716,
+  "peso": 0.9888846203840533,
+  "desalavancadoDoCru": 0.5642156261555805,
+  "desalavancadoDoEncolhido": 0.5635404699210924
+ },
+ {
+  "ticker": "EGIE3",
+  "deJanela": 0.684939966360311,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.669106270442397
+   },
+   {
+    "ano": 2022,
+    "de": 0.684939966360311
+   },
+   {
+    "ano": 2023,
+    "de": 0.572350366321046
+   },
+   {
+    "ano": 2024,
+    "de": 0.9516340979086063
+   },
+   {
+    "ano": 2025,
+    "de": 0.706057486207024
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.24838310111835743,
+  "dividaBruta": 28659357000.0,
+  "dividaLiquida": 25300805000.0,
+  "valorDeMercado": 43525407000.0,
+  "vmPorPrecoEAcoes": 42689741424.0,
+  "deBruta": 0.6584512121851037,
+  "deLiquida": 0.5812881887583498,
+  "fatorBruta": 1.494903058167426,
+  "fatorLiquida": 1.4369060257910777,
+  "razaoDosFatores": 1.0403624393908562,
+  "betaAlavancado": 0.564823065268362,
+  "betaDesalavancado": 0.37286666345213515,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.5645681752735371,
+  "erroPadrao": 0.02921666182524105,
+  "peso": 0.9969471380253453,
+  "desalavancadoDoCru": 0.39290542675727064,
+  "desalavancadoDoEncolhido": 0.39301200253984203
+ },
+ {
+  "ticker": "EMBJ3",
+  "deJanela": 0.21836439241210537,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.4426331988948317
+   },
+   {
+    "ano": 2022,
+    "de": 0.4392180272125166
+   },
+   {
+    "ano": 2023,
+    "de": 0.21836439241210537
+   },
+   {
+    "ano": 2024,
+    "de": 0.04290719484075945
+   },
+   {
+    "ano": 2025,
+    "de": -0.0026908096109883
+   }
+  ],
+  "setor": "maquinas-equipamentos-veiculos-e-pecas",
+  "aliquota": 0.34,
+  "dividaBruta": 14272461000.0,
+  "dividaLiquida": -176531100.0,
+  "valorDeMercado": 70544100000.0,
+  "vmPorPrecoEAcoes": 70329365700.0,
+  "deBruta": 0.2023196978911064,
+  "deLiquida": -0.0025024218892862765,
+  "fatorBruta": 1.1335310006081303,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.1335310006081303,
+  "betaAlavancado": 0.7588830705400558,
+  "betaDesalavancado": 0.6632894622626362,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.7596876098539329,
+  "erroPadrao": 0.06319282542594241,
+  "peso": 0.9858768341180814,
+  "desalavancadoDoCru": 0.7596876098539329,
+  "desalavancadoDoEncolhido": 0.7576328995956232
+ },
+ {
+  "ticker": "ENEV3",
+  "deJanela": 0.6643734825429903,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.33424913363284536
+   },
+   {
+    "ano": 2022,
+    "de": 0.8696294744056228
+   },
+   {
+    "ano": 2023,
+    "de": 0.8123260369320412
+   },
+   {
+    "ano": 2024,
+    "de": 0.6643734825429903
+   },
+   {
+    "ano": 2025,
+    "de": 0.43376143392843025
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.08255314629632134,
+  "dividaBruta": 19605799000.0,
+  "dividaLiquida": 16954923000.0,
+  "valorDeMercado": 53139670000.0,
+  "vmPorPrecoEAcoes": 53645204167.0,
+  "deBruta": 0.36894845225798356,
+  "deLiquida": 0.31906338522614086,
+  "fatorBruta": 1.338490596702929,
+  "fatorLiquida": 1.2927236989077677,
+  "razaoDosFatores": 1.0354034646644368,
+  "betaAlavancado": 1.0260582099334146,
+  "betaDesalavancado": 0.6374903804933594,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.02814936559949,
+  "erroPadrao": 0.041560802229020304,
+  "peso": 0.9938417272208663,
+  "desalavancadoDoCru": 0.7953357445741742,
+  "desalavancadoDoEncolhido": 0.7930724549536426
+ },
+ {
+  "ticker": "ENGI11",
+  "deJanela": 0.24094905993780039,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.23533160015564616
+   },
+   {
+    "ano": 2022,
+    "de": 0.2740723975536224
+   },
+   {
+    "ano": 2023,
+    "de": 0.2300507543310104
+   },
+   {
+    "ano": 2024,
+    "de": 0.3497677385295625
+   },
+   {
+    "ano": 2025,
+    "de": 0.24094905993780039
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.2264456649454056,
+  "dividaBruta": 44562718000.0,
+  "dividaLiquida": 34089473000.0,
+  "valorDeMercado": 26095320926.4,
+  "vmPorPrecoEAcoes": 129519625096.0,
+  "deBruta": 1.7076899772831298,
+  "deLiquida": 1.3063442713023894,
+  "fatorBruta": 2.320990984856647,
+  "fatorLiquida": 2.0105282741396984,
+  "razaoDosFatores": 1.154418475338177,
+  "betaAlavancado": 0.9397852759877892,
+  "betaDesalavancado": 0.792140444564963,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.9415546353269233,
+  "erroPadrao": 0.03378029566993111,
+  "peso": 0.9959231328074863,
+  "desalavancadoDoCru": 0.4683120587945041,
+  "desalavancadoDoEncolhido": 0.46814695989943506
+ },
+ {
+  "ticker": "EQTL3",
+  "deJanela": 0.907371199136368,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.5888970379635141
+   },
+   {
+    "ano": 2022,
+    "de": 1.09138803865831
+   },
+   {
+    "ano": 2023,
+    "de": 0.6517039619047619
+   },
+   {
+    "ano": 2024,
+    "de": 6344.269536857293
+   },
+   {
+    "ano": 2025,
+    "de": 0.907371199136368
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.1561332067309557,
+  "dividaBruta": 54471762000.0,
+  "dividaLiquida": 43989863000.0,
+  "valorDeMercado": 48876810000.0,
+  "vmPorPrecoEAcoes": 49317594919.99999,
+  "deBruta": 1.1144704820138631,
+  "deLiquida": 0.9000150173466722,
+  "fatorBruta": 1.9404646318500447,
+  "fatorLiquida": 1.7594927865823196,
+  "razaoDosFatores": 1.1028545536803531,
+  "betaAlavancado": 0.8775681964785302,
+  "betaDesalavancado": 0.49700854374317227,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8779618930792771,
+  "erroPadrao": 0.029971213696876643,
+  "peso": 0.996787927929386,
+  "desalavancadoDoCru": 0.4989857871396285,
+  "desalavancadoDoEncolhido": 0.4987571832031749
+ },
+ {
+  "ticker": "EVEN3",
+  "deJanela": 0.25446,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.44954118590202424
+   },
+   {
+    "ano": 2022,
+    "de": -0.1972800115349757
+   },
+   {
+    "ano": 2023,
+    "de": 0.25446
+   },
+   {
+    "ano": 2024,
+    "de": 0.38443563432835814
+   },
+   {
+    "ano": 2025,
+    "de": 0.33022109897172236
+   }
+  ],
+  "setor": "construcao-e-imobiliario",
+  "aliquota": 0.19169055677282817,
+  "dividaBruta": 1490910000.0,
+  "dividaLiquida": 513824030.0,
+  "valorDeMercado": 830000000.0,
+  "vmPorPrecoEAcoes": 846000000.0000001,
+  "deBruta": 1.796277108433735,
+  "deLiquida": 0.6190650963855422,
+  "fatorBruta": 2.4519477493997863,
+  "fatorLiquida": 1.5003961633807732,
+  "razaoDosFatores": 1.634200226075576,
+  "betaAlavancado": 1.3669988693203667,
+  "betaDesalavancado": 1.1337967988893856,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.3693350751594267,
+  "erroPadrao": 0.05628432293016657,
+  "peso": 0.9887632412745515,
+  "desalavancadoDoCru": 0.9126490113610843,
+  "desalavancadoDoEncolhido": 0.9132181060535869
+ },
+ {
+  "ticker": "EZTC3",
+  "deJanela": 0.03093605926536491,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.2444046367629153
+   },
+   {
+    "ano": 2022,
+    "de": -0.10335425612898289
+   },
+   {
+    "ano": 2023,
+    "de": 0.03093605926536491
+   },
+   {
+    "ano": 2024,
+    "de": 0.19449437729734456
+   },
+   {
+    "ano": 2025,
+    "de": 0.038216185043013065
+   }
+  ],
+  "setor": "construcao-e-imobiliario",
+  "aliquota": 0.0641811530014755,
+  "dividaBruta": 1705985010.0,
+  "dividaLiquida": 147443010.0,
+  "valorDeMercado": 3547422200.0,
+  "vmPorPrecoEAcoes": 3605667520.0,
+  "deBruta": 0.48090836495300726,
+  "deLiquida": 0.04156342315273327,
+  "fatorBruta": 1.4500431116022687,
+  "fatorLiquida": 1.0388958347321027,
+  "razaoDosFatores": 1.3957540911463828,
+  "betaAlavancado": 1.4849807298571898,
+  "betaDesalavancado": 1.443199319671819,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.49070187330481,
+  "erroPadrao": 0.05683028436612446,
+  "peso": 0.9885466983424943,
+  "desalavancadoDoCru": 1.4348906054563337,
+  "desalavancadoDoEncolhido": 1.4294892766247025
+ },
+ {
+  "ticker": "FESA4",
+  "deJanela": -0.2555028794145379,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.18268359739118561
+   },
+   {
+    "ano": 2022,
+    "de": -0.44855422280677504
+   },
+   {
+    "ano": 2023,
+    "de": -0.5418345873577446
+   },
+   {
+    "ano": 2024,
+    "de": -0.14734297014186587
+   },
+   {
+    "ano": 2025,
+    "de": -0.2555028794145379
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.11457556531886531,
+  "dividaBruta": 364253000.0,
+  "dividaLiquida": -625344000.0,
+  "valorDeMercado": 2069605500.0,
+  "vmPorPrecoEAcoes": 1981311750.0,
+  "deBruta": 0.17600117510317786,
+  "deLiquida": -0.30215613555336995,
+  "fatorBruta": 1.1558357409689466,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.1558357409689466,
+  "betaAlavancado": 1.0041156977420544,
+  "betaDesalavancado": 1.0041156977420544,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 1.0077667876569976,
+  "erroPadrao": 0.05109052602596036,
+  "peso": 0.9907230150626276,
+  "desalavancadoDoCru": 1.0077667876569976,
+  "desalavancadoDoEncolhido": 1.0041156977420544
+ },
+ {
+  "ticker": "FRAS3",
+  "deJanela": 0.04558061834078548,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.4743146148601344
+   },
+   {
+    "ano": 2022,
+    "de": -0.05399836034556143
+   },
+   {
+    "ano": 2023,
+    "de": -0.038843036806113763
+   },
+   {
+    "ano": 2024,
+    "de": 0.04558061834078548
+   },
+   {
+    "ano": 2025,
+    "de": 0.20955147443317898
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.21272053436616906,
+  "dividaBruta": 2748800000.0,
+  "dividaLiquida": 1418682900.0,
+  "valorDeMercado": 6486954000.0,
+  "vmPorPrecoEAcoes": 6349590015.0,
+  "deBruta": 0.42374279207159476,
+  "deLiquida": 0.2186978511023818,
+  "fatorBruta": 1.3336039989083126,
+  "fatorLiquida": 1.1721763273511503,
+  "razaoDosFatores": 1.1377162017270488,
+  "betaAlavancado": 0.7606104437620894,
+  "betaDesalavancado": 0.734261694265509,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.7603889938091264,
+  "erroPadrao": 0.04053487977665457,
+  "peso": 0.9941402473246901,
+  "desalavancadoDoCru": 0.6486984731447624,
+  "desalavancadoDoEncolhido": 0.6494123783451802
+ },
+ {
+  "ticker": "GGBR4",
+  "deJanela": 0.1342299687402239,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.07094954112096517
+   },
+   {
+    "ano": 2022,
+    "de": 0.16678346597390759
+   },
+   {
+    "ano": 2023,
+    "de": 0.1342299687402239
+   },
+   {
+    "ano": 2024,
+    "de": 0.145676235010131
+   },
+   {
+    "ano": 2025,
+    "de": 0.08508914522903713
+   }
+  ],
+  "setor": "materiais-basicos",
+  "aliquota": 0.16959061758466198,
+  "dividaBruta": 14182151000.0,
+  "dividaLiquida": 7807354000.0,
+  "valorDeMercado": 50261440000.0,
+  "vmPorPrecoEAcoes": 50122976120.0,
+  "deBruta": 0.28216762193840844,
+  "deLiquida": 0.1553348650575869,
+  "fatorBruta": 1.2343146406714784,
+  "fatorLiquida": 1.1289915293600405,
+  "razaoDosFatores": 1.0932895496312,
+  "betaAlavancado": 0.9559452585696535,
+  "betaDesalavancado": 0.8600761595062701,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.9572755792631833,
+  "erroPadrao": 0.04389024551368838,
+  "peso": 0.9931369209835077,
+  "desalavancadoDoCru": 0.8479032431765072,
+  "desalavancadoDoEncolhido": 0.8467980948068939
+ },
+ {
+  "ticker": "GOAU4",
+  "deJanela": 0.6295234392622415,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.6986347259742225
+   },
+   {
+    "ano": 2022,
+    "de": 0.6224699763778345
+   },
+   {
+    "ano": 2023,
+    "de": 0.6295234392622415
+   },
+   {
+    "ano": 2024,
+    "de": 0.6891290446305234
+   },
+   {
+    "ano": 2025,
+    "de": 0.5761848888888889
+   }
+  ],
+  "setor": "materiais-basicos",
+  "aliquota": 0.172666831470615,
+  "dividaBruta": 14182151000.0,
+  "dividaLiquida": 7778496000.0,
+  "valorDeMercado": 14840560000.0,
+  "vmPorPrecoEAcoes": 14774424960.0,
+  "deBruta": 0.9556344908817457,
+  "deLiquida": 0.5241376336202946,
+  "fatorBruta": 1.7906281112971603,
+  "fatorLiquida": 1.4336364491685722,
+  "razaoDosFatores": 1.2490112903697608,
+  "betaAlavancado": 0.9727282198092277,
+  "betaDesalavancado": 0.6396053603713914,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.9722667305670972,
+  "erroPadrao": 0.04230212796173172,
+  "peso": 0.9936214897749208,
+  "desalavancadoDoCru": 0.6781822066054171,
+  "desalavancadoDoEncolhido": 0.6782376547803409
+ },
+ {
+  "ticker": "GRND3",
+  "deJanela": -0.18940171008043935,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.1434332797176308
+   },
+   {
+    "ano": 2022,
+    "de": -0.18940171008043935
+   },
+   {
+    "ano": 2023,
+    "de": -0.12380169527470154
+   },
+   {
+    "ano": 2024,
+    "de": -0.24416650494187356
+   },
+   {
+    "ano": 2025,
+    "de": -0.2379571709057682
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.06513764120971832,
+  "dividaBruta": 70567000.0,
+  "dividaLiquida": -987507030.0,
+  "valorDeMercado": 3365056800.0,
+  "vmPorPrecoEAcoes": 3319948800.0,
+  "deBruta": 0.020970522696674838,
+  "deLiquida": -0.2934592456210546,
+  "fatorBruta": 1.0196045523132786,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0196045523132786,
+  "betaAlavancado": 0.8671072400549918,
+  "betaDesalavancado": 0.8671072400549918,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.867908046774235,
+  "erroPadrao": 0.048077350437887155,
+  "peso": 0.9917762742875572,
+  "desalavancadoDoCru": 0.867908046774235,
+  "desalavancadoDoEncolhido": 0.8671072400549918
+ },
+ {
+  "ticker": "HAPV3",
+  "deJanela": 0.013075176493170373,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.0031730522280281302
+   },
+   {
+    "ano": 2022,
+    "de": 0.013075176493170373
+   },
+   {
+    "ano": 2023,
+    "de": 0.009322181490146238
+   },
+   {
+    "ano": 2024,
+    "de": 0.01578268962713988
+   },
+   {
+    "ano": 2025,
+    "de": 0.6759812385711703
+   }
+  ],
+  "setor": "saude",
+  "aliquota": 0.24580091033767135,
+  "dividaBruta": 12868220000.0,
+  "dividaLiquida": 5004798030.0,
+  "valorDeMercado": 3518416100.0,
+  "vmPorPrecoEAcoes": 3649100188.7999997,
+  "deBruta": 3.6573900397966006,
+  "deLiquida": 1.4224576877078297,
+  "fatorBruta": 3.262597268986986,
+  "fatorLiquida": 2.0728162931524263,
+  "razaoDosFatores": 1.5739924853760632,
+  "betaAlavancado": 1.6524446839290967,
+  "betaDesalavancado": 1.6363085767288394,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.6745467511638457,
+  "erroPadrao": 0.09193951431545205,
+  "peso": 0.9705690224571455,
+  "desalavancadoDoCru": 0.807860666039596,
+  "desalavancadoDoEncolhido": 0.8110005906038644
+ },
+ {
+  "ticker": "HYPE3",
+  "deJanela": 0.30684271390651696,
+  "exerciciosNaJanela": 4,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.2833517599658125
+   },
+   {
+    "ano": 2022,
+    "de": 0.23558993700819647
+   },
+   {
+    "ano": 2023,
+    "de": 0.33033366784722146
+   },
+   {
+    "ano": 2024,
+    "de": 0.6668114622409023
+   }
+  ],
+  "setor": "consumo-nao-ciclico",
+  "aliquota": 0.06117901865636701,
+  "dividaBruta": 9311463000.0,
+  "dividaLiquida": 7665922000.0,
+  "valorDeMercado": 15903566000.0,
+  "vmPorPrecoEAcoes": 16304850756.0,
+  "deBruta": 0.5854952908045906,
+  "deLiquida": 0.4820253520499742,
+  "fatorBruta": 1.5496752634852415,
+  "fatorLiquida": 1.452535514044067,
+  "razaoDosFatores": 1.066875989262888,
+  "betaAlavancado": 0.8841455211154452,
+  "betaDesalavancado": 0.6864108796864673,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8842678871376457,
+  "erroPadrao": 0.04305930074292509,
+  "peso": 0.9933926284390256,
+  "desalavancadoDoCru": 0.6087753990094997,
+  "desalavancadoDoEncolhido": 0.6091939936887997
+ },
+ {
+  "ticker": "IGTI11",
+  "deJanela": 0.06992409142875947,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.06992409142875947
+   },
+   {
+    "ano": 2022,
+    "de": 0.056072869601371214
+   },
+   {
+    "ano": 2023,
+    "de": 0.060374574896455487
+   },
+   {
+    "ano": 2024,
+    "de": 0.07812955267036216
+   },
+   {
+    "ano": 2025,
+    "de": 0.07165107324150548
+   }
+  ],
+  "setor": "construcao-e-imobiliario",
+  "aliquota": 0.22477746812735588,
+  "dividaBruta": 3964050000.0,
+  "dividaLiquida": 2210196000.0,
+  "valorDeMercado": 1459124089.0333335,
+  "vmPorPrecoEAcoes": 4360872560.1,
+  "deBruta": 2.7167326136231322,
+  "deLiquida": 1.5147416293183467,
+  "fatorBruta": 3.1060723351539106,
+  "fatorLiquida": 2.174261841013063,
+  "razaoDosFatores": 1.4285640655435892,
+  "betaAlavancado": 1.25106172915525,
+  "betaDesalavancado": 1.1867328220676079,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.2522559505902386,
+  "erroPadrao": 0.037593615041539324,
+  "peso": 0.9949556437453344,
+  "desalavancadoDoCru": 0.5759453286485355,
+  "desalavancadoDoEncolhido": 0.5778992574601862
+ },
+ {
+  "ticker": "IRBR3",
+  "deJanela": -0.024824819289425037,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.124774898178949
+   },
+   {
+    "ano": 2022,
+    "de": 8.220143183798314
+   },
+   {
+    "ano": 2023,
+    "de": -0.024824819289425037
+   },
+   {
+    "ano": 2024,
+    "de": -1.070895211674474
+   },
+   {
+    "ano": 2025,
+    "de": -1.1635997334733539
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.34,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -5113978000.0,
+  "valorDeMercado": 4988324400.0,
+  "vmPorPrecoEAcoes": 5091446186.9,
+  "deBruta": 0.0,
+  "deLiquida": -1.025189540600046,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 1.1735092609749158,
+  "betaDesalavancado": 1.1735092609749158,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 1.1812401340939251,
+  "erroPadrao": 0.08059245217281763,
+  "peso": 0.977230186922308,
+  "desalavancadoDoCru": 1.1812401340939251,
+  "desalavancadoDoEncolhido": 1.1735092609749158
+ },
+ {
+  "ticker": "ISAE4",
+  "deJanela": 0.4485750485114277,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.39458714321961774
+   },
+   {
+    "ano": 2022,
+    "de": 0.4485750485114277
+   },
+   {
+    "ano": 2023,
+    "de": 0.4342669194869052
+   },
+   {
+    "ano": 2024,
+    "de": 0.6512185238200058
+   },
+   {
+    "ano": 2025,
+    "de": 0.7628476223688313
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.1819006286680215,
+  "dividaBruta": 16007349000.0,
+  "dividaLiquida": 13842362970.0,
+  "valorDeMercado": 23322348000.0,
+  "vmPorPrecoEAcoes": 19482178398.0,
+  "deBruta": 0.6863523775564965,
+  "deLiquida": 0.5935235581769039,
+  "fatorBruta": 1.5615044485911787,
+  "fatorLiquida": 1.4855612498152442,
+  "razaoDosFatores": 1.0511208802635228,
+  "betaAlavancado": 0.5848148554964676,
+  "betaDesalavancado": 0.4278155482944314,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.5848148554964676,
+  "erroPadrao": 0.030626028994723196,
+  "peso": 0.9966465148911017,
+  "desalavancadoDoCru": 0.39366593303991987,
+  "desalavancadoDoEncolhido": 0.3937804532661505
+ },
+ {
+  "ticker": "ITSA4",
+  "deJanela": 0.039165724801812005,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.04427875200280143
+   },
+   {
+    "ano": 2022,
+    "de": 0.05454367508813161
+   },
+   {
+    "ano": 2023,
+    "de": 0.02522943215339233
+   },
+   {
+    "ano": 2024,
+    "de": 0.039165724801812005
+   },
+   {
+    "ano": 2025,
+    "de": 0.030859969558599695
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.011722555847675802,
+  "dividaBruta": 10785000000.0,
+  "dividaLiquida": 4866000000.0,
+  "valorDeMercado": 155982380000.0,
+  "vmPorPrecoEAcoes": 156430933650.0,
+  "deBruta": 0.06914242493286742,
+  "deLiquida": 0.031195831221449498,
+  "fatorBruta": 1.0683318989951482,
+  "fatorLiquida": 1.0308301363477415,
+  "razaoDosFatores": 1.0363801574333833,
+  "betaAlavancado": 0.9762403469310976,
+  "betaDesalavancado": 0.9398615014771767,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.9770679790595078,
+  "erroPadrao": 0.026115825585921227,
+  "peso": 0.9975592680963162,
+  "desalavancadoDoCru": 0.9478457648912804,
+  "desalavancadoDoEncolhido": 0.9470314311442968
+ },
+ {
+  "ticker": "ITUB3",
+  "deJanela": -0.14109353767354935,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.2694580342849644
+   },
+   {
+    "ano": 2022,
+    "de": -0.1867861657514638
+   },
+   {
+    "ano": 2023,
+    "de": -0.12980525189482023
+   },
+   {
+    "ano": 2024,
+    "de": -0.14109353767354935
+   },
+   {
+    "ano": 2025,
+    "de": -0.09266848016392493
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.1902816267216966,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -37144000000.0,
+  "valorDeMercado": 502935500000.0,
+  "vmPorPrecoEAcoes": 504148450680.0,
+  "deBruta": 0.0,
+  "deLiquida": -0.07385440081282789,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.9006456074745742,
+  "betaDesalavancado": 0.9006456074745742,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.9007813690495987,
+  "erroPadrao": 0.025341904931857884,
+  "peso": 0.9977014552072481,
+  "desalavancadoDoCru": 0.9007813690495987,
+  "desalavancadoDoEncolhido": 0.9006456074745742
+ },
+ {
+  "ticker": "ITUB4",
+  "deJanela": -0.12350854079817684,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.24553561333377286
+   },
+   {
+    "ano": 2022,
+    "de": -0.16355016413937637
+   },
+   {
+    "ano": 2023,
+    "de": -0.11032647884909995
+   },
+   {
+    "ano": 2024,
+    "de": -0.12350854079817684
+   },
+   {
+    "ano": 2025,
+    "de": -0.08586539010855651
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.1902816267216966,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -37144000000.0,
+  "valorDeMercado": 458607500000.0,
+  "vmPorPrecoEAcoes": 462246348480.0,
+  "deBruta": 0.0,
+  "deLiquida": -0.08099300600186433,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.9806286021467896,
+  "betaDesalavancado": 0.9806286021467896,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.9809759108651549,
+  "erroPadrao": 0.02639988363608085,
+  "peso": 0.9975060175068224,
+  "desalavancadoDoCru": 0.9809759108651549,
+  "desalavancadoDoEncolhido": 0.9806286021467896
+ },
+ {
+  "ticker": "JHSF3",
+  "deJanela": 0.6262978105456125,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.2871402621676871
+   },
+   {
+    "ano": 2022,
+    "de": 0.6262978105456125
+   },
+   {
+    "ano": 2023,
+    "de": 0.7196441895722333
+   },
+   {
+    "ano": 2024,
+    "de": 1.0763457664806417
+   },
+   {
+    "ano": 2025,
+    "de": 0.09021424666630892
+   }
+  ],
+  "setor": "construcao-e-imobiliario",
+  "aliquota": 0.14472077764870672,
+  "dividaBruta": 5857537030.0,
+  "dividaLiquida": 537980030.0,
+  "valorDeMercado": 7931570700.0,
+  "vmPorPrecoEAcoes": 7829007344.999999,
+  "deBruta": 0.7385090862267671,
+  "deLiquida": 0.0678276788228087,
+  "fatorBruta": 1.6316314769673936,
+  "fatorLiquida": 1.058011604397465,
+  "razaoDosFatores": 1.5421678459723547,
+  "betaAlavancado": 1.3405183858843226,
+  "betaDesalavancado": 0.8729268318107442,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.339234612805028,
+  "erroPadrao": 0.050781139517864116,
+  "peso": 0.9908340045341115,
+  "desalavancadoDoCru": 1.2658033307373022,
+  "desalavancadoDoEncolhido": 1.2630305390671661
+ },
+ {
+  "ticker": "JSLG3",
+  "deJanela": 2.4680193488350044,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 1.3865624948343218
+   },
+   {
+    "ano": 2022,
+    "de": 2.4680193488350044
+   },
+   {
+    "ano": 2023,
+    "de": 1.5344581705435694
+   },
+   {
+    "ano": 2024,
+    "de": 3.9243954227345816
+   },
+   {
+    "ano": 2025,
+    "de": 3.732657052954745
+   }
+  ],
+  "setor": "bens-industriais",
+  "aliquota": 0.31025669200670236,
+  "dividaBruta": 7946624000.0,
+  "dividaLiquida": 6465669000.0,
+  "valorDeMercado": 1706506200.0,
+  "vmPorPrecoEAcoes": 1660847172.6000001,
+  "deBruta": 4.656662835447067,
+  "deLiquida": 3.7888341689001774,
+  "fatorBruta": 3.069229923979893,
+  "fatorLiquida": 3.069229923979893,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 1.5591239370823486,
+  "betaDesalavancado": 0.5769618603591077,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.556900725350532,
+  "erroPadrao": 0.06839982911758043,
+  "peso": 0.9834934857106908,
+  "desalavancadoDoCru": 0.507261027655982,
+  "desalavancadoDoEncolhido": 0.5092206763329831
+ },
+ {
+  "ticker": "KEPL3",
+  "deJanela": -0.08357438868979228,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.360562442044623
+   },
+   {
+    "ano": 2022,
+    "de": -0.09233156040862914
+   },
+   {
+    "ano": 2023,
+    "de": -0.08357438868979228
+   },
+   {
+    "ano": 2024,
+    "de": -0.05515079983051984
+   },
+   {
+    "ano": 2025,
+    "de": 0.009460859562972193
+   }
+  ],
+  "setor": "bens-industriais",
+  "aliquota": 0.209443252114632,
+  "dividaBruta": 333162020.0,
+  "dividaLiquida": 16731020.0,
+  "valorDeMercado": 1216705300.0,
+  "vmPorPrecoEAcoes": 1200530468.3999999,
+  "deBruta": 0.2738231024390212,
+  "deLiquida": 0.013751086643577538,
+  "fatorBruta": 1.2164727013600745,
+  "fatorLiquida": 1.0108710143368367,
+  "razaoDosFatores": 1.2033906246269401,
+  "betaAlavancado": 0.895652858772442,
+  "betaDesalavancado": 0.895652858772442,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8983091907571962,
+  "erroPadrao": 0.05240059628259859,
+  "peso": 0.990245851998978,
+  "desalavancadoDoCru": 0.888648678235685,
+  "desalavancadoDoEncolhido": 0.8860865763198316
+ },
+ {
+  "ticker": "KLBN11",
+  "deJanela": 0.16460862387330996,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.12736253531761496
+   },
+   {
+    "ano": 2022,
+    "de": 0.16460862387330996
+   },
+   {
+    "ano": 2023,
+    "de": 0.14831462839392545
+   },
+   {
+    "ano": 2024,
+    "de": 0.21668930495689656
+   },
+   {
+    "ano": 2025,
+    "de": 0.2205963449109746
+   }
+  ],
+  "setor": "materiais-basicos",
+  "aliquota": 0.2894691820392156,
+  "dividaBruta": 36721042000.0,
+  "dividaLiquida": 25829657000.0,
+  "valorDeMercado": 24429147631.8,
+  "vmPorPrecoEAcoes": 121521590289.0,
+  "deBruta": 1.5031650941516825,
+  "deLiquida": 1.057329440605489,
+  "fatorBruta": 2.0680451238776945,
+  "fatorLiquida": 1.7512651522874365,
+  "razaoDosFatores": 1.1808863558876233,
+  "betaAlavancado": 0.4959529145443457,
+  "betaDesalavancado": 0.4440204989272047,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.4947372338746117,
+  "erroPadrao": 0.03534523582564999,
+  "peso": 0.9955383692849066,
+  "desalavancadoDoCru": 0.28250275706588723,
+  "desalavancadoDoEncolhido": 0.28430691745707826
+ },
+ {
+  "ticker": "KLBN3",
+  "deJanela": 0.8238475774416681,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.5862839560572628
+   },
+   {
+    "ano": 2022,
+    "de": 0.8238475774416681
+   },
+   {
+    "ano": 2023,
+    "de": 0.7483054807402075
+   },
+   {
+    "ano": 2024,
+    "de": 1.0216208492521541
+   },
+   {
+    "ano": 2025,
+    "de": 1.0861909266482634
+   }
+  ],
+  "setor": "materiais-basicos",
+  "aliquota": 0.2894691820392156,
+  "dividaBruta": 36721042000.0,
+  "dividaLiquida": 25829657000.0,
+  "valorDeMercado": 25777308000.0,
+  "vmPorPrecoEAcoes": 25153159161.0,
+  "deBruta": 1.42454914221454,
+  "deLiquida": 1.0020308171823062,
+  "fatorBruta": 2.0121860672430305,
+  "fatorLiquida": 1.7119737761544571,
+  "razaoDosFatores": 1.1753603327750317,
+  "betaAlavancado": 0.5093018086316684,
+  "betaDesalavancado": 0.32125125363957785,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.505898775400603,
+  "erroPadrao": 0.04045420546834786,
+  "peso": 0.9941634127899908,
+  "desalavancadoDoCru": 0.2955061476099152,
+  "desalavancadoDoEncolhido": 0.2977904070577999
+ },
+ {
+  "ticker": "KLBN4",
+  "deJanela": 0.8177199549129355,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.65362453125
+   },
+   {
+    "ano": 2022,
+    "de": 0.8177199549129355
+   },
+   {
+    "ano": 2023,
+    "de": 0.7391919438073393
+   },
+   {
+    "ano": 2024,
+    "de": 1.0952487745098038
+   },
+   {
+    "ano": 2025,
+    "de": 1.1006349549281607
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.2894691820392156,
+  "dividaBruta": 36721042000.0,
+  "dividaLiquida": 25829657000.0,
+  "valorDeMercado": 25777308000.0,
+  "vmPorPrecoEAcoes": 24029692995.0,
+  "deBruta": 1.42454914221454,
+  "deLiquida": 1.0020308171823062,
+  "fatorBruta": 2.0121860672430305,
+  "fatorLiquida": 1.7119737761544571,
+  "razaoDosFatores": 1.1753603327750317,
+  "betaAlavancado": 0.4872556479422899,
+  "betaDesalavancado": 0.30819162218129365,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.48502190338038015,
+  "erroPadrao": 0.03587512026027606,
+  "peso": 0.9954042112677557,
+  "desalavancadoDoCru": 0.2833115262255166,
+  "desalavancadoDoEncolhido": 0.28483223126091356
+ },
+ {
+  "ticker": "LEVE3",
+  "deJanela": 0.11649233290439819,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.022493221560101744
+   },
+   {
+    "ano": 2022,
+    "de": 0.009062947037212627
+   },
+   {
+    "ano": 2023,
+    "de": 0.11649233290439819
+   },
+   {
+    "ano": 2024,
+    "de": 0.19084547360194734
+   },
+   {
+    "ano": 2025,
+    "de": 0.21605128522561232
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.22592587136333014,
+  "dividaBruta": 1657572000.0,
+  "dividaLiquida": 998856000.0,
+  "valorDeMercado": 4438903000.0,
+  "vmPorPrecoEAcoes": 4447034918.1,
+  "deBruta": 0.3734192885043895,
+  "deLiquida": 0.22502316450708654,
+  "fatorBruta": 1.2890542103651605,
+  "fatorLiquida": 1.174184609988889,
+  "razaoDosFatores": 1.0978292505276137,
+  "betaAlavancado": 0.7834320696635815,
+  "betaDesalavancado": 0.7186304979502574,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.7828770060858705,
+  "erroPadrao": 0.05229415478299912,
+  "peso": 0.9902850544301212,
+  "desalavancadoDoCru": 0.6667409872569174,
+  "desalavancadoDoEncolhido": 0.6677492961521512
+ },
+ {
+  "ticker": "LIGT3",
+  "deJanela": 2.415703882476049,
+  "exerciciosNaJanela": 4,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 1.7222866300954203
+   },
+   {
+    "ano": 2022,
+    "de": 4.988685409742689
+   },
+   {
+    "ano": 2023,
+    "de": 3.1091211348566774
+   },
+   {
+    "ano": 2024,
+    "de": 0.9583850413153581
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.33951701030927833,
+  "dividaBruta": 9712358000.0,
+  "dividaLiquida": 7965725000.0,
+  "valorDeMercado": 5862885000.0,
+  "vmPorPrecoEAcoes": 5750136882.0,
+  "deBruta": 1.6565834056100368,
+  "deLiquida": 1.3586698357549227,
+  "fatorBruta": 2.0941451604093544,
+  "fatorLiquida": 1.8973783151220132,
+  "razaoDosFatores": 1.1037045926577316,
+  "betaAlavancado": 0.20412678100124718,
+  "betaDesalavancado": 0.07864547009366062,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.18336554627741117,
+  "erroPadrao": 0.07991126700584233,
+  "peso": 0.9776048875080452,
+  "desalavancadoDoCru": 0.0966415315364346,
+  "desalavancadoDoEncolhido": 0.10405821089614246
+ },
+ {
+  "ticker": "LOGG3",
+  "deJanela": 0.8964938554024672,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.4103340253627135
+   },
+   {
+    "ano": 2022,
+    "de": 0.8964938554024672
+   },
+   {
+    "ano": 2023,
+    "de": 0.7024347238717599
+   },
+   {
+    "ano": 2024,
+    "de": 1.1628103205441496
+   },
+   {
+    "ano": 2025,
+    "de": 1.043786071510974
+   }
+  ],
+  "setor": "construcao-e-imobiliario",
+  "aliquota": 0.04410207728123833,
+  "dividaBruta": 2238757000.0,
+  "dividaLiquida": 2219289000.0,
+  "valorDeMercado": 2082261900.0,
+  "vmPorPrecoEAcoes": 2170999596.5,
+  "deBruta": 1.0751562999832058,
+  "deLiquida": 1.0658068516741337,
+  "fatorBruta": 2.0277396737519364,
+  "fatorLiquida": 2.0188025555347275,
+  "razaoDosFatores": 1.0044269402139931,
+  "betaAlavancado": 1.0929245223623825,
+  "betaDesalavancado": 0.5885568429861132,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.0853013616459763,
+  "erroPadrao": 0.05526063638774349,
+  "peso": 0.9891638785518726,
+  "desalavancadoDoCru": 0.5375965859912976,
+  "desalavancadoDoEncolhido": 0.542209503717054
+ },
+ {
+  "ticker": "LREN3",
+  "deJanela": -0.11245964486412274,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.11404557616679635
+   },
+   {
+    "ano": 2022,
+    "de": -0.061850547816379504
+   },
+   {
+    "ano": 2023,
+    "de": -0.07888656282239201
+   },
+   {
+    "ano": 2024,
+    "de": -0.14217751363073522
+   },
+   {
+    "ano": 2025,
+    "de": -0.11245964486412274
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.2716780136000706,
+  "dividaBruta": 379875000.0,
+  "dividaLiquida": -1522936000.0,
+  "valorDeMercado": 11417624000.0,
+  "vmPorPrecoEAcoes": 11427691885.0,
+  "deBruta": 0.033270932726458674,
+  "deLiquida": -0.13338466917460234,
+  "fatorBruta": 1.0242319518127128,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0242319518127128,
+  "betaAlavancado": 1.5677951744392604,
+  "betaDesalavancado": 1.5677951744392604,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 1.5760735049195516,
+  "erroPadrao": 0.053800111731005844,
+  "peso": 0.9897232924562919,
+  "desalavancadoDoCru": 1.5760735049195516,
+  "desalavancadoDoEncolhido": 1.5677951744392604
+ },
+ {
+  "ticker": "MBRF3",
+  "deJanela": 2.8573331808959614,
+  "exerciciosNaJanela": 4,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 1.868698330436467
+   },
+   {
+    "ano": 2022,
+    "de": 9.13868188960634
+   },
+   {
+    "ano": 2024,
+    "de": 3.845968031355456
+   },
+   {
+    "ano": 2025,
+    "de": 1.7602590195017618
+   }
+  ],
+  "setor": "emp-adm-part-alimentos",
+  "aliquota": 0.0,
+  "dividaBruta": 74562689000.0,
+  "dividaLiquida": 49305358000.0,
+  "valorDeMercado": 23688344000.0,
+  "vmPorPrecoEAcoes": 24419976524.0,
+  "deBruta": 3.147653082038998,
+  "deLiquida": 2.0814185238106977,
+  "fatorBruta": 4.0,
+  "fatorLiquida": 3.0814185238106977,
+  "razaoDosFatores": 1.298103444595809,
+  "betaAlavancado": 0.8800169822441088,
+  "betaDesalavancado": 0.22814129373177533,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8480013897356468,
+  "erroPadrao": 0.07741447713147366,
+  "peso": 0.978953480999037,
+  "desalavancadoDoCru": 0.27519838125946905,
+  "desalavancadoDoEncolhido": 0.28233323800740834
+ },
+ {
+  "ticker": "MDIA3",
+  "deJanela": 0.02258597564433273,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.02258597564433273
+   },
+   {
+    "ano": 2022,
+    "de": 0.1285900256619879
+   },
+   {
+    "ano": 2023,
+    "de": -0.008748390705464727
+   },
+   {
+    "ano": 2024,
+    "de": 0.032360838317186384
+   },
+   {
+    "ano": 2025,
+    "de": -0.05967726446732755
+   }
+  ],
+  "setor": "consumo-nao-ciclico",
+  "aliquota": 0.06962386928003707,
+  "dividaBruta": 1419965000.0,
+  "dividaLiquida": -484725000.0,
+  "valorDeMercado": 5840970000.0,
+  "vmPorPrecoEAcoes": 6027420000.0,
+  "deBruta": 0.24310431315346595,
+  "deLiquida": -0.08298707235270854,
+  "fatorBruta": 1.226178450233056,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.226178450233056,
+  "betaAlavancado": 0.6862518079552822,
+  "betaDesalavancado": 0.6721280764602926,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.6862518079552822,
+  "erroPadrao": 0.05638268503203848,
+  "peso": 0.9887243756217727,
+  "desalavancadoDoCru": 0.6862518079552822,
+  "desalavancadoDoEncolhido": 0.6860925540641257
+ },
+ {
+  "ticker": "MDNE3",
+  "deJanela": 0.03357669049269622,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.12104162081170736
+   },
+   {
+    "ano": 2022,
+    "de": -0.2608207527824642
+   },
+   {
+    "ano": 2023,
+    "de": 0.03357669049269622
+   },
+   {
+    "ano": 2024,
+    "de": 0.11646731059084295
+   },
+   {
+    "ano": 2025,
+    "de": 0.11334279005784093
+   }
+  ],
+  "setor": "construcao-e-imobiliario",
+  "aliquota": 0.13620311321401632,
+  "dividaBruta": 875990010.0,
+  "dividaLiquida": 324238020.0,
+  "valorDeMercado": 2633497600.0,
+  "vmPorPrecoEAcoes": 2689773405.9,
+  "deBruta": 0.3326336845721826,
+  "deLiquida": 0.12312068178835629,
+  "fatorBruta": 1.2873279411736023,
+  "fatorLiquida": 1.10635126162775,
+  "razaoDosFatores": 1.163579765145823,
+  "betaAlavancado": 1.525698369993123,
+  "betaDesalavancado": 1.482695110262474,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.5336254008710792,
+  "erroPadrao": 0.06429968427841411,
+  "peso": 0.9853850444589551,
+  "desalavancadoDoCru": 1.3862011587664214,
+  "desalavancadoDoEncolhido": 1.380020401375782
+ },
+ {
+  "ticker": "MGLU3",
+  "deJanela": 0.027602150350702688,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.005754064050401589
+   },
+   {
+    "ano": 2022,
+    "de": 0.024895233125046573
+   },
+   {
+    "ano": 2023,
+    "de": 0.027602150350702688
+   },
+   {
+    "ano": 2024,
+    "de": 0.5283499638304181
+   },
+   {
+    "ano": 2025,
+    "de": 0.4193157962558262
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.1577507436721386,
+  "dividaBruta": 4944536000.0,
+  "dividaLiquida": 2908772000.0,
+  "valorDeMercado": 4322013700.0,
+  "vmPorPrecoEAcoes": 4492721550.0,
+  "deBruta": 1.1440352444972584,
+  "deLiquida": 0.6730131373715914,
+  "fatorBruta": 1.963562833890679,
+  "fatorLiquida": 1.5668448144501037,
+  "razaoDosFatores": 1.2531954765282907,
+  "betaAlavancado": 2.1983189992920664,
+  "betaDesalavancado": 2.148373839295485,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 2.24413390405613,
+  "erroPadrao": 0.09517570657934382,
+  "peso": 0.9685270238014632,
+  "desalavancadoDoCru": 1.432263031641539,
+  "desalavancadoDoEncolhido": 1.4114363375709922
+ },
+ {
+  "ticker": "MILS3",
+  "deJanela": 0.13544099656146133,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.008347775670316923
+   },
+   {
+    "ano": 2022,
+    "de": 0.06253875527989594
+   },
+   {
+    "ano": 2023,
+    "de": 0.13544099656146133
+   },
+   {
+    "ano": 2024,
+    "de": 0.5267056065196949
+   },
+   {
+    "ano": 2025,
+    "de": 0.3906441899220988
+   }
+  ],
+  "setor": "bens-industriais",
+  "aliquota": 0.28156855214121285,
+  "dividaBruta": 1870969000.0,
+  "dividaLiquida": 1280725000.0,
+  "valorDeMercado": 762081.06,
+  "vmPorPrecoEAcoes": 760635.88,
+  "deBruta": 2455.078728764103,
+  "deLiquida": 1680.5626949973012,
+  "fatorBruta": 3.1552943435763616,
+  "fatorLiquida": 3.1552943435763616,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 1.166468342503369,
+  "betaDesalavancado": 1.0630301208440793,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.1717238654180084,
+  "erroPadrao": 0.05527033477258844,
+  "peso": 0.9891601159168288,
+  "desalavancadoDoCru": 0.3713516831808219,
+  "desalavancadoDoEncolhido": 0.3741118326729777
+ },
+ {
+  "ticker": "MOTV3",
+  "deJanela": 1.661556840458885,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.5971843915707261
+   },
+   {
+    "ano": 2022,
+    "de": 0.6330576037234455
+   },
+   {
+    "ano": 2023,
+    "de": 1.661556840458885
+   },
+   {
+    "ano": 2024,
+    "de": 2.6451194057458842
+   },
+   {
+    "ano": 2025,
+    "de": 1.9264114499099312
+   }
+  ],
+  "setor": "infraestrutura",
+  "aliquota": 0.34,
+  "dividaBruta": 37240690000.0,
+  "dividaLiquida": 29301874000.0,
+  "valorDeMercado": 33087600000.0,
+  "vmPorPrecoEAcoes": 33895600000.000004,
+  "deBruta": 1.1255180188348506,
+  "deLiquida": 0.8855847507827705,
+  "fatorBruta": 1.7428418924310014,
+  "fatorLiquida": 1.5844859355166285,
+  "razaoDosFatores": 1.0999415352101187,
+  "betaAlavancado": 1.0555993273364268,
+  "betaDesalavancado": 0.5034748995393334,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.0555993273364268,
+  "erroPadrao": 0.03436140071007156,
+  "peso": 0.9957822585503817,
+  "desalavancadoDoCru": 0.6662093387356222,
+  "desalavancadoDoEncolhido": 0.6655229669461437
+ },
+ {
+  "ticker": "MOVI3",
+  "deJanela": 3.93659348534075,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 1.2207556727017272
+   },
+   {
+    "ano": 2022,
+    "de": 3.93659348534075
+   },
+   {
+    "ano": 2023,
+    "de": 3.0586924332055467
+   },
+   {
+    "ano": 2024,
+    "de": 13.337749338646042
+   },
+   {
+    "ano": 2025,
+    "de": 11.985228070161936
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.22802524378811453,
+  "dividaBruta": 21909922000.0,
+  "dividaLiquida": 17788341900.0,
+  "valorDeMercado": 3108688600.0,
+  "vmPorPrecoEAcoes": 3261509003.3999996,
+  "deBruta": 7.047962925588623,
+  "deLiquida": 5.722136948679903,
+  "fatorBruta": 3.3159242686356567,
+  "fatorLiquida": 3.3159242686356567,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 2.0028155657634827,
+  "betaDesalavancado": 0.6039991880114756,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.9917201809971188,
+  "erroPadrao": 0.07484005214833858,
+  "peso": 0.9803028994854397,
+  "desalavancadoDoCru": 0.6006530968865027,
+  "desalavancadoDoEncolhido": 0.6039991880114756
+ },
+ {
+  "ticker": "MRVE3",
+  "deJanela": 1.8210155331046836,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.7389208162194288
+   },
+   {
+    "ano": 2022,
+    "de": 1.8210155331046836
+   },
+   {
+    "ano": 2023,
+    "de": 1.233198186354062
+   },
+   {
+    "ano": 2024,
+    "de": 3.1339170045149727
+   },
+   {
+    "ano": 2025,
+    "de": 1.9035603481955194
+   }
+  ],
+  "setor": "construcao-e-imobiliario",
+  "aliquota": 0.1370745055010096,
+  "dividaBruta": 8602006000.0,
+  "dividaLiquida": 8346142990.0,
+  "valorDeMercado": 3174393900.0,
+  "vmPorPrecoEAcoes": 3123738690.0,
+  "deBruta": 2.709810524774509,
+  "deLiquida": 2.6292083632091154,
+  "fatorBruta": 3.3383645870896115,
+  "fatorLiquida": 3.268810926963107,
+  "razaoDosFatores": 1.0212779697818508,
+  "betaAlavancado": 1.6772204918685394,
+  "betaDesalavancado": 0.652259475816261,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.6641068812242474,
+  "erroPadrao": 0.06760587946603959,
+  "peso": 0.983868314044801,
+  "desalavancadoDoCru": 0.509086306429564,
+  "desalavancadoDoEncolhido": 0.5164134554717692
+ },
+ {
+  "ticker": "MULT3",
+  "deJanela": 0.1996443426282652,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.1996443426282652
+   },
+   {
+    "ano": 2022,
+    "de": 0.14734898168192215
+   },
+   {
+    "ano": 2023,
+    "de": 0.11890894529690242
+   },
+   {
+    "ano": 2024,
+    "de": 0.3918948589785331
+   },
+   {
+    "ano": 2025,
+    "de": 0.3338266972493691
+   }
+  ],
+  "setor": "construcao-e-imobiliario",
+  "aliquota": 0.17136866284600183,
+  "dividaBruta": 5439999000.0,
+  "dividaLiquida": 4668136000.0,
+  "valorDeMercado": 15328200000.0,
+  "vmPorPrecoEAcoes": 15487280466.0,
+  "deBruta": 0.35490135828081576,
+  "deLiquida": 0.30454560874727626,
+  "fatorBruta": 1.2940823870700027,
+  "fatorLiquida": 1.252356035000634,
+  "razaoDosFatores": 1.0333182824238536,
+  "betaAlavancado": 1.1368957784010687,
+  "betaDesalavancado": 0.9755148382794678,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.1369568847126854,
+  "erroPadrao": 0.034584120218425995,
+  "peso": 0.9957276396296135,
+  "desalavancadoDoCru": 0.90785435845495,
+  "desalavancadoDoEncolhido": 0.9080912200707038
+ },
+ {
+  "ticker": "MYPK3",
+  "deJanela": 2.263772285465002,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 1.8834140520995828
+   },
+   {
+    "ano": 2022,
+    "de": 2.315802260162659
+   },
+   {
+    "ano": 2023,
+    "de": 1.9713894338726063
+   },
+   {
+    "ano": 2024,
+    "de": 2.263772285465002
+   },
+   {
+    "ano": 2025,
+    "de": 2.5994410256584697
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.34,
+  "dividaBruta": 5631546000.0,
+  "dividaLiquida": 4031813000.0,
+  "valorDeMercado": 1488005800.0,
+  "vmPorPrecoEAcoes": 1507989276.0,
+  "deBruta": 3.784626377128369,
+  "deLiquida": 2.709541185928173,
+  "fatorBruta": 2.9799999999999995,
+  "fatorLiquida": 2.788297182712594,
+  "razaoDosFatores": 1.0687526489199073,
+  "betaAlavancado": 0.8666690773363301,
+  "betaDesalavancado": 0.3474891357816935,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8567213884614994,
+  "erroPadrao": 0.05126568319744019,
+  "peso": 0.9906598913113465,
+  "desalavancadoDoCru": 0.3072561252699894,
+  "desalavancadoDoEncolhido": 0.31158315773290785
+ },
+ {
+  "ticker": "PCAR3",
+  "deJanela": 1.1195236226015512,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.39861752995304983
+   },
+   {
+    "ano": 2022,
+    "de": 1.4197605230957366
+   },
+   {
+    "ano": 2023,
+    "de": 1.3481962358387067
+   },
+   {
+    "ano": 2024,
+    "de": 1.1189937502051448
+   },
+   {
+    "ano": 2025,
+    "de": 1.1195236226015512
+   }
+  ],
+  "setor": "consumo-nao-ciclico",
+  "aliquota": 0.2948717948717949,
+  "dividaBruta": 4101999900.0,
+  "dividaLiquida": 2087999900.0,
+  "valorDeMercado": 1369363500.0,
+  "vmPorPrecoEAcoes": 1393992259.1000001,
+  "deBruta": 2.9955522401466084,
+  "deLiquida": 1.5247959362141608,
+  "fatorBruta": 3.112248374462352,
+  "fatorLiquida": 2.0751766216894723,
+  "razaoDosFatores": 1.4997510775389153,
+  "betaAlavancado": 1.260581278218079,
+  "betaDesalavancado": 0.704468462091257,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.2622945930407605,
+  "erroPadrao": 0.09084570815744074,
+  "peso": 0.9712451218925174,
+  "desalavancadoDoCru": 0.6082829672652554,
+  "desalavancadoDoEncolhido": 0.6101188255979175
+ },
+ {
+  "ticker": "PETR3",
+  "deJanela": 0.6434082841478251,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.6636717261225848
+   },
+   {
+    "ano": 2022,
+    "de": 0.6138048890836346
+   },
+   {
+    "ano": 2023,
+    "de": 0.44367952397951377
+   },
+   {
+    "ano": 2024,
+    "de": 0.6434082841478251
+   },
+   {
+    "ano": 2025,
+    "de": 0.7942546253239773
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.2923371268349002,
+  "dividaBruta": 384025000000.0,
+  "dividaLiquida": 333416999000.0,
+  "valorDeMercado": 691996070000.0,
+  "vmPorPrecoEAcoes": 670343003330.0,
+  "deBruta": 0.5549525736468417,
+  "deLiquida": 0.48181920888654756,
+  "fatorBruta": 1.3927193327372906,
+  "fatorLiquida": 1.3409655657067896,
+  "razaoDosFatores": 1.0385944041771296,
+  "betaAlavancado": 0.8621486163217018,
+  "betaDesalavancado": 0.5924132796660743,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8642721922918479,
+  "erroPadrao": 0.04971144392757944,
+  "peso": 0.991212739886748,
+  "desalavancadoDoCru": 0.6445148290115201,
+  "desalavancadoDoEncolhido": 0.6426106360655045
+ },
+ {
+  "ticker": "PETR4",
+  "deJanela": 0.7024934322410251,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.7161589452359702
+   },
+   {
+    "ano": 2022,
+    "de": 0.7024934322410251
+   },
+   {
+    "ano": 2023,
+    "de": 0.462234676120531
+   },
+   {
+    "ano": 2024,
+    "de": 0.7006554428921189
+   },
+   {
+    "ano": 2025,
+    "de": 0.8393534440883174
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.2923371268349002,
+  "dividaBruta": 384025000000.0,
+  "dividaLiquida": 333416999000.0,
+  "valorDeMercado": 624072460000.0,
+  "vmPorPrecoEAcoes": 607188211630.0,
+  "deBruta": 0.6153532235663788,
+  "deLiquida": 0.534260074543267,
+  "fatorBruta": 1.4354626302003897,
+  "fatorLiquida": 1.3780760193686887,
+  "razaoDosFatores": 1.0416425581935533,
+  "betaAlavancado": 0.8219704368443497,
+  "betaDesalavancado": 0.5490313126179415,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8235280516693709,
+  "erroPadrao": 0.04891409429460678,
+  "peso": 0.9914899871347779,
+  "desalavancadoDoCru": 0.5975926146996142,
+  "desalavancadoDoEncolhido": 0.5961478096802865
+ },
+ {
+  "ticker": "PGMN3",
+  "deJanela": 1.0294620207253886,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.12905386249031928
+   },
+   {
+    "ano": 2022,
+    "de": 0.6917305346469645
+   },
+   {
+    "ano": 2023,
+    "de": 1.0294620207253886
+   },
+   {
+    "ano": 2024,
+    "de": 1.336487341772152
+   },
+   {
+    "ano": 2025,
+    "de": 1.4185687924086734
+   }
+  ],
+  "setor": "consumo-nao-ciclico",
+  "aliquota": 0.05118589798509759,
+  "dividaBruta": 1733116990.0,
+  "dividaLiquida": 1547323000.0,
+  "valorDeMercado": 2700140300.0,
+  "vmPorPrecoEAcoes": 2779769088.0,
+  "deBruta": 0.6418618284390629,
+  "deLiquida": 0.5730528150703873,
+  "fatorBruta": 1.6090075543680529,
+  "fatorLiquida": 1.5437205921381216,
+  "razaoDosFatores": 1.0422919552686059,
+  "betaAlavancado": 1.399291339208135,
+  "betaDesalavancado": 0.7078682377648313,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.4002822158934198,
+  "erroPadrao": 0.06252688094661199,
+  "peso": 0.9861688383658402,
+  "desalavancadoDoCru": 0.9070826825947607,
+  "desalavancadoDoEncolhido": 0.9038329874606246
+ },
+ {
+  "ticker": "PINE4",
+  "deJanela": -0.3458202898024263,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.839773727771045
+   },
+   {
+    "ano": 2022,
+    "de": -0.3458202898024263
+   },
+   {
+    "ano": 2023,
+    "de": -0.22001980292488313
+   },
+   {
+    "ano": 2024,
+    "de": -2.3052073809292746
+   },
+   {
+    "ano": 2025,
+    "de": -0.2055912313769508
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.26690906940947146,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -657173000.0,
+  "valorDeMercado": 2769725000.0,
+  "vmPorPrecoEAcoes": 2872880340.8,
+  "deBruta": 0.0,
+  "deLiquida": -0.237270126095551,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.7956598057401765,
+  "betaDesalavancado": 0.7956598057401765,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.7987364744654013,
+  "erroPadrao": 0.06874897392097908,
+  "peso": 0.9833273583882984,
+  "desalavancadoDoCru": 0.7987364744654013,
+  "desalavancadoDoEncolhido": 0.7956598057401765
+ },
+ {
+  "ticker": "PNVL3",
+  "deJanela": 0.4683709557723614,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.24027420980748238
+   },
+   {
+    "ano": 2022,
+    "de": 0.4683709557723614
+   },
+   {
+    "ano": 2023,
+    "de": 0.3930782065084413
+   },
+   {
+    "ano": 2024,
+    "de": 0.7725988595282929
+   },
+   {
+    "ano": 2025,
+    "de": 0.5966463807468474
+   }
+  ],
+  "setor": "consumo-nao-ciclico",
+  "aliquota": 0.19088032177420036,
+  "dividaBruta": 1506265000.0,
+  "dividaLiquida": 1075769000.0,
+  "valorDeMercado": 1908290300.0,
+  "vmPorPrecoEAcoes": 1978967768.4,
+  "deBruta": 0.789326969801188,
+  "deLiquida": 0.5637344590600287,
+  "fatorBruta": 1.6386599838204827,
+  "fatorLiquida": 1.4561286441194456,
+  "razaoDosFatores": 1.125353855538923,
+  "betaAlavancado": 1.0607810954990444,
+  "betaDesalavancado": 0.7692571362834838,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.0617997146771838,
+  "erroPadrao": 0.0460433895676822,
+  "peso": 0.9924522406873445,
+  "desalavancadoDoCru": 0.7291936182735272,
+  "desalavancadoDoEncolhido": 0.7287629012988746
+ },
+ {
+  "ticker": "POMO3",
+  "deJanela": 0.22547276356163473,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.4638570732019334
+   },
+   {
+    "ano": 2022,
+    "de": 0.5788944991364345
+   },
+   {
+    "ano": 2023,
+    "de": 0.1508303494139729
+   },
+   {
+    "ano": 2024,
+    "de": 0.19901731642639559
+   },
+   {
+    "ano": 2025,
+    "de": 0.22547276356163473
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.17901034344685807,
+  "dividaBruta": 3692534100.0,
+  "dividaLiquida": 1470578100.0,
+  "valorDeMercado": 4749615000.0,
+  "vmPorPrecoEAcoes": 4840516590.0,
+  "deBruta": 0.7774386134455108,
+  "deLiquida": 0.30962048502878653,
+  "fatorBruta": 1.6382690602437808,
+  "fatorLiquida": 1.2541952156656007,
+  "razaoDosFatores": 1.3062313105494925,
+  "betaAlavancado": 0.8620925671263177,
+  "betaDesalavancado": 0.7274362551071154,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8615366368253262,
+  "erroPadrao": 0.055085136147078925,
+  "peso": 0.9892318573700022,
+  "desalavancadoDoCru": 0.686923874421024,
+  "desalavancadoDoEncolhido": 0.687824161856294
+ },
+ {
+  "ticker": "POMO4",
+  "deJanela": 0.21678620818153826,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.38020989298013996
+   },
+   {
+    "ano": 2022,
+    "de": 0.4909363774306653
+   },
+   {
+    "ano": 2023,
+    "de": 0.11683147284609262
+   },
+   {
+    "ano": 2024,
+    "de": 0.1518251969613775
+   },
+   {
+    "ano": 2025,
+    "de": 0.21678620818153826
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.17901034344685807,
+  "dividaBruta": 3692534100.0,
+  "dividaLiquida": 1470578100.0,
+  "valorDeMercado": 5067771000.0,
+  "vmPorPrecoEAcoes": 5204123470.0,
+  "deBruta": 0.7286308122446733,
+  "deLiquida": 0.2901824293165575,
+  "fatorBruta": 1.5981983602987913,
+  "fatorLiquida": 1.238236772982357,
+  "razaoDosFatores": 1.2907049727246012,
+  "betaAlavancado": 0.9025615767484023,
+  "betaDesalavancado": 0.7661948107723301,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.904640527407054,
+  "erroPadrao": 0.056892569335499465,
+  "peso": 0.9885218676788846,
+  "desalavancadoDoCru": 0.7305876768852381,
+  "desalavancadoDoEncolhido": 0.7292517924909746
+ },
+ {
+  "ticker": "POSI3",
+  "deJanela": 1.1551745944992948,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.9201410465511383
+   },
+   {
+    "ano": 2022,
+    "de": 2.1800358931881827
+   },
+   {
+    "ano": 2023,
+    "de": 2.235612968591692
+   },
+   {
+    "ano": 2024,
+    "de": 0.9746379968523833
+   },
+   {
+    "ano": 2025,
+    "de": 1.1551745944992948
+   }
+  ],
+  "setor": "tecnologia",
+  "aliquota": 0.025648661172061698,
+  "dividaBruta": 1273577030.0,
+  "dividaLiquida": 655215030.0,
+  "valorDeMercado": 482120000.0,
+  "vmPorPrecoEAcoes": 484956000.0,
+  "deBruta": 2.6416183315357173,
+  "deLiquida": 1.3590289347050526,
+  "fatorBruta": 3.573864358004251,
+  "fatorLiquida": 2.324171662035775,
+  "razaoDosFatores": 1.5376938013579653,
+  "betaAlavancado": 1.5240981305263148,
+  "betaDesalavancado": 0.7170384424058416,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.5037247829438039,
+  "erroPadrao": 0.06911867292111758,
+  "peso": 0.9831505907917497,
+  "desalavancadoDoCru": 0.6469938548457604,
+  "desalavancadoDoEncolhido": 0.6575975585558778
+ },
+ {
+  "ticker": "PRIO3",
+  "deJanela": 0.17844552976016137,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.04108532282955053
+   },
+   {
+    "ano": 2022,
+    "de": -0.011819453117518803
+   },
+   {
+    "ano": 2023,
+    "de": 0.17844552976016137
+   },
+   {
+    "ano": 2024,
+    "de": 0.5123975579804501
+   },
+   {
+    "ano": 2025,
+    "de": 0.6928848761688094
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.054447124045948134,
+  "dividaBruta": 28438286000.0,
+  "dividaLiquida": 25039995000.0,
+  "valorDeMercado": 54548402000.0,
+  "vmPorPrecoEAcoes": 52515487893.7,
+  "deBruta": 0.5213404051689727,
+  "deLiquida": 0.45904176991289314,
+  "fatorBruta": 1.492954919458573,
+  "fatorLiquida": 1.4340482657241742,
+  "razaoDosFatores": 1.0410771765095728,
+  "betaAlavancado": 0.8626252453033112,
+  "betaDesalavancado": 0.7380879062213626,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.867178576379989,
+  "erroPadrao": 0.059162853009494774,
+  "peso": 0.9875991127245104,
+  "desalavancadoDoCru": 0.6047066874294332,
+  "desalavancadoDoEncolhido": 0.6025130803529871
+ },
+ {
+  "ticker": "PRNR3",
+  "deJanela": 0.39067693702058554,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.035079055326069225
+   },
+   {
+    "ano": 2022,
+    "de": 0.15852830056151931
+   },
+   {
+    "ano": 2023,
+    "de": 0.4419970331830608
+   },
+   {
+    "ano": 2024,
+    "de": 0.39067693702058554
+   },
+   {
+    "ano": 2025,
+    "de": 0.5394628784644544
+   }
+  ],
+  "setor": "servicos",
+  "aliquota": 0.22862912805892135,
+  "dividaBruta": 841406010.0,
+  "dividaLiquida": 486825990.0,
+  "valorDeMercado": 1017577700.0,
+  "vmPorPrecoEAcoes": 1034679881.4,
+  "deBruta": 0.826871510647295,
+  "deLiquida": 0.4784165277993022,
+  "fatorBruta": 1.637824598151241,
+  "fatorLiquida": 1.369036574199571,
+  "razaoDosFatores": 1.196333705773216,
+  "betaAlavancado": 0.9581067835418082,
+  "betaDesalavancado": 0.736236808003548,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.9594394628009627,
+  "erroPadrao": 0.061231670959764804,
+  "peso": 0.9867283874026942,
+  "desalavancadoDoCru": 0.7008136092798793,
+  "desalavancadoDoEncolhido": 0.7002732542271651
+ },
+ {
+  "ticker": "PSSA3",
+  "deJanela": -0.6504427243315112,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.6563281251468982
+   },
+   {
+    "ano": 2022,
+    "de": -0.6820237477080074
+   },
+   {
+    "ano": 2023,
+    "de": -0.6504427243315112
+   },
+   {
+    "ano": 2024,
+    "de": -0.40647242247929
+   },
+   {
+    "ano": 2025,
+    "de": -0.3976686564609753
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.3148495791748305,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -12434662000.0,
+  "valorDeMercado": 32846572000.0,
+  "vmPorPrecoEAcoes": 33402635342.999996,
+  "deBruta": 0.0,
+  "deLiquida": -0.3785680283470677,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.6494785347364862,
+  "betaDesalavancado": 0.6494785347364862,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.6485370348196273,
+  "erroPadrao": 0.0369490107363581,
+  "peso": 0.9951263123622894,
+  "desalavancadoDoCru": 0.6485370348196273,
+  "desalavancadoDoEncolhido": 0.6494785347364862
+ },
+ {
+  "ticker": "QUAL3",
+  "deJanela": 1.3477034478722374,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.30702549662450934
+   },
+   {
+    "ano": 2022,
+    "de": 0.9281869311145979
+   },
+   {
+    "ano": 2023,
+    "de": 1.36308143779853
+   },
+   {
+    "ano": 2024,
+    "de": 2.2907131203304734
+   },
+   {
+    "ano": 2025,
+    "de": 1.3477034478722374
+   }
+  ],
+  "setor": "saude",
+  "aliquota": 0.33839262013121746,
+  "dividaBruta": 1762322000.0,
+  "dividaLiquida": 872709000.0,
+  "valorDeMercado": 417501100.0,
+  "vmPorPrecoEAcoes": 426021510.0,
+  "deBruta": 4.221119417409918,
+  "deLiquida": 2.0903154506658783,
+  "fatorBruta": 2.9848221396063472,
+  "fatorLiquida": 2.382968128414285,
+  "razaoDosFatores": 1.2525648597711452,
+  "betaAlavancado": 1.8005510705212124,
+  "betaDesalavancado": 0.9518412760693189,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.8024772316139042,
+  "erroPadrao": 0.08724208479601424,
+  "peso": 0.9734217151389774,
+  "desalavancadoDoCru": 0.756400058448679,
+  "desalavancadoDoEncolhido": 0.7606033703573166
+ },
+ {
+  "ticker": "RADL3",
+  "deJanela": 0.054169390526533995,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.028626049305739122
+   },
+   {
+    "ano": 2022,
+    "de": 0.04624075366124201
+   },
+   {
+    "ano": 2023,
+    "de": 0.054169390526533995
+   },
+   {
+    "ano": 2024,
+    "de": 0.0727645913347638
+   },
+   {
+    "ano": 2025,
+    "de": 0.08125507356748612
+   }
+  ],
+  "setor": "consumo-nao-ciclico",
+  "aliquota": 0.2232546326702407,
+  "dividaBruta": 3867755000.0,
+  "dividaLiquida": 3339016000.0,
+  "valorDeMercado": 34346402000.0,
+  "vmPorPrecoEAcoes": 35029824326.0,
+  "deBruta": 0.11261019422063481,
+  "deLiquida": 0.09721588887243561,
+  "fatorBruta": 1.0874694466749826,
+  "fatorLiquida": 1.075511991312509,
+  "razaoDosFatores": 1.0111179191483315,
+  "betaAlavancado": 0.8398554299620412,
+  "betaDesalavancado": 0.8059446455914411,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8409525325853677,
+  "erroPadrao": 0.04683085595260645,
+  "peso": 0.9921938913576267,
+  "desalavancadoDoCru": 0.7819090250766103,
+  "desalavancadoDoEncolhido": 0.7810520630648485
+ },
+ {
+  "ticker": "RAIL3",
+  "deJanela": 0.35241151051565084,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.35622850802907113
+   },
+   {
+    "ano": 2022,
+    "de": 0.2716250926748741
+   },
+   {
+    "ano": 2023,
+    "de": 0.28424062486111185
+   },
+   {
+    "ano": 2024,
+    "de": 0.35241151051565084
+   },
+   {
+    "ano": 2025,
+    "de": 0.5870666389522396
+   }
+  ],
+  "setor": "bens-industriais",
+  "aliquota": 0.14123627637498512,
+  "dividaBruta": 23123837000.0,
+  "dividaLiquida": 16105705000.0,
+  "valorDeMercado": 26953015000.0,
+  "vmPorPrecoEAcoes": 27045957585.0,
+  "deBruta": 0.8579313668619262,
+  "deLiquida": 0.5975474357877959,
+  "fatorBruta": 1.7367603352210463,
+  "fatorLiquida": 1.5131520609997071,
+  "razaoDosFatores": 1.147776472692114,
+  "betaAlavancado": 1.019219380795066,
+  "betaDesalavancado": 0.7824270502350062,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.0204873173736113,
+  "erroPadrao": 0.041645422576906975,
+  "peso": 0.993816779663642,
+  "desalavancadoDoCru": 0.6744116098281604,
+  "desalavancadoDoEncolhido": 0.674112151107201
+ },
+ {
+  "ticker": "RANI3",
+  "deJanela": 0.40364298884134053,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.2179404048682654
+   },
+   {
+    "ano": 2022,
+    "de": 0.37463181230134424
+   },
+   {
+    "ano": 2023,
+    "de": 0.40364298884134053
+   },
+   {
+    "ano": 2024,
+    "de": 0.6614425876216791
+   },
+   {
+    "ano": 2025,
+    "de": 0.5347378156784126
+   }
+  ],
+  "setor": "materiais",
+  "aliquota": 0.15605837290972943,
+  "dividaBruta": 1909711000.0,
+  "dividaLiquida": 1069877000.0,
+  "valorDeMercado": 1800214500.0,
+  "vmPorPrecoEAcoes": 1765639345.2,
+  "deBruta": 1.0608241406787913,
+  "deLiquida": 0.5943052897307516,
+  "fatorBruta": 1.895273651341097,
+  "fatorLiquida": 1.5015589732037251,
+  "razaoDosFatores": 1.2622039394812063,
+  "betaAlavancado": 0.7689286440854554,
+  "betaDesalavancado": 0.5735486527217623,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.7684915697908485,
+  "erroPadrao": 0.04728048935273329,
+  "peso": 0.9920444736434543,
+  "desalavancadoDoCru": 0.5117957959061677,
+  "desalavancadoDoEncolhido": 0.5126104951855855
+ },
+ {
+  "ticker": "RDOR3",
+  "deJanela": 0.04495172460424259,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.16726998758447573
+   },
+   {
+    "ano": 2022,
+    "de": 0.03746137313949673
+   },
+   {
+    "ano": 2023,
+    "de": 0.04495172460424259
+   },
+   {
+    "ano": 2024,
+    "de": 0.004001198385078905
+   },
+   {
+    "ano": 2025,
+    "de": 0.061027683949448526
+   }
+  ],
+  "setor": "saude",
+  "aliquota": 0.17935486594014236,
+  "dividaBruta": 46234130000.0,
+  "dividaLiquida": 5673632000.0,
+  "valorDeMercado": 82734010000.0,
+  "vmPorPrecoEAcoes": 83182064238.0,
+  "deBruta": 0.5588285881465191,
+  "deLiquida": 0.06857677997234753,
+  "fatorBruta": 1.458599961635981,
+  "fatorLiquida": 1.0562772007938004,
+  "razaoDosFatores": 1.3808874796690036,
+  "betaAlavancado": 1.2581842166760548,
+  "betaDesalavancado": 1.2134217975517978,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.2606667007967862,
+  "erroPadrao": 0.04725485881075083,
+  "peso": 0.9920530280896309,
+  "desalavancadoDoCru": 1.1934998690205427,
+  "desalavancadoDoEncolhido": 1.1912830496026208
+ },
+ {
+  "ticker": "RENT3",
+  "deJanela": 0.27046531601785684,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.1917740725970279
+   },
+   {
+    "ano": 2022,
+    "de": 0.27046531601785684
+   },
+   {
+    "ano": 2023,
+    "de": 0.2566953574352741
+   },
+   {
+    "ano": 2024,
+    "de": 0.5376293400930101
+   },
+   {
+    "ano": 2025,
+    "de": 0.3787300321322011
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.25961170089748487,
+  "dividaBruta": 43595340000.0,
+  "dividaLiquida": 33002535000.0,
+  "valorDeMercado": 40158544000.0,
+  "vmPorPrecoEAcoes": 41192860752.0,
+  "deBruta": 1.0855806923677314,
+  "deLiquida": 0.8218060644828159,
+  "fatorBruta": 1.8037512423606752,
+  "fatorLiquida": 1.608455594274564,
+  "razaoDosFatores": 1.1214181160992462,
+  "betaAlavancado": 1.4133149830375995,
+  "betaDesalavancado": 1.1775178022844741,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.4170520454251163,
+  "erroPadrao": 0.04617979988015661,
+  "peso": 0.9924077917917544,
+  "desalavancadoDoCru": 0.8810016580309925,
+  "desalavancadoDoEncolhido": 0.880162937551363
+ },
+ {
+  "ticker": "RENT4",
+  "deJanela": 0.39762090361445784,
+  "exerciciosNaJanela": 1,
+  "alavancagemPorAno": [
+   {
+    "ano": 2025,
+    "de": 0.39762090361445784
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.25961170089748487,
+  "dividaBruta": 43595340000.0,
+  "dividaLiquida": 33002535000.0,
+  "valorDeMercado": 40158544000.0,
+  "vmPorPrecoEAcoes": 39675110697.0,
+  "deBruta": 1.0855806923677314,
+  "deLiquida": 0.8218060644828159,
+  "fatorBruta": 1.8037512423606752,
+  "fatorLiquida": 1.608455594274564,
+  "razaoDosFatores": 1.1214181160992462,
+  "betaAlavancado": 1.716759344099176,
+  "betaDesalavancado": 1.0673340005220713,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.7530856312467782,
+  "erroPadrao": 0.11787098645368806,
+  "peso": 0.9525250940343098,
+  "desalavancadoDoCru": 1.0899185762336476,
+  "desalavancadoDoEncolhido": 1.0673340005220713
+ },
+ {
+  "ticker": "RIAA3",
+  "deJanela": 0.28787931998909155,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.28787931998909155
+   },
+   {
+    "ano": 2022,
+    "de": 0.48672851730750505
+   },
+   {
+    "ano": 2023,
+    "de": 0.34279082619881523
+   },
+   {
+    "ano": 2024,
+    "de": 0.15372854741291736
+   },
+   {
+    "ano": 2025,
+    "de": 0.034222763227207395
+   }
+  ],
+  "setor": "textil-e-vestuario",
+  "aliquota": 0.21583309250575655,
+  "dividaBruta": 2463245980.0,
+  "dividaLiquida": 152404980.0,
+  "valorDeMercado": 3564665900.0,
+  "vmPorPrecoEAcoes": 3594789696.0,
+  "deBruta": 0.6910173489190109,
+  "deLiquida": 0.04275435181737509,
+  "fatorBruta": 1.5418729375266915,
+  "fatorLiquida": 1.0335265478465518,
+  "razaoDosFatores": 1.4918561509032606,
+  "betaAlavancado": 1.8517339206733237,
+  "betaDesalavancado": 1.5107002368975584,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.8766763367448942,
+  "erroPadrao": 0.07954403077053775,
+  "peso": 0.9778056923848258,
+  "desalavancadoDoCru": 1.8157988690809375,
+  "desalavancadoDoEncolhido": 1.7891302697643647
+ },
+ {
+  "ticker": "SANB11",
+  "deJanela": -0.09621250056800779,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.07409590495705479
+   },
+   {
+    "ano": 2022,
+    "de": -0.10409247054391801
+   },
+   {
+    "ano": 2023,
+    "de": -0.09621250056800779
+   },
+   {
+    "ano": 2024,
+    "de": -0.20762115304890347
+   },
+   {
+    "ano": 2025,
+    "de": -0.07921977957933936
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.2249908751237522,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -20232729000.0,
+  "valorDeMercado": 112178023760.0,
+  "vmPorPrecoEAcoes": 228180298330.0,
+  "deBruta": 0.0,
+  "deLiquida": -0.18036267997809485,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.9822873871067226,
+  "betaDesalavancado": 0.9822873871067226,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.9828843775267285,
+  "erroPadrao": 0.03440726770384653,
+  "peso": 0.9957710386598968,
+  "desalavancadoDoCru": 0.9828843775267285,
+  "desalavancadoDoEncolhido": 0.9822873871067226
+ },
+ {
+  "ticker": "SANB4",
+  "deJanela": -0.1820313248645011,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.13927242825156758
+   },
+   {
+    "ano": 2022,
+    "de": -0.1964100900022121
+   },
+   {
+    "ano": 2023,
+    "de": -0.1820313248645011
+   },
+   {
+    "ano": 2024,
+    "de": -0.3937528555433822
+   },
+   {
+    "ano": 2025,
+    "de": -0.15669138748387335
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.2249908751237522,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -20232729000.0,
+  "valorDeMercado": 111653130000.0,
+  "vmPorPrecoEAcoes": 112702920930.0,
+  "deBruta": 0.0,
+  "deLiquida": -0.18121058496076195,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.8737696866251918,
+  "betaDesalavancado": 0.8737696866251918,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.8748973587809258,
+  "erroPadrao": 0.03480002955992976,
+  "peso": 0.9956743597247333,
+  "desalavancadoDoCru": 0.8748973587809258,
+  "desalavancadoDoEncolhido": 0.8737696866251918
+ },
+ {
+  "ticker": "SAPR11",
+  "deJanela": 0.10830026366032945,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.10830026366032945
+   },
+   {
+    "ano": 2022,
+    "de": 0.14199249867820118
+   },
+   {
+    "ano": 2023,
+    "de": 0.10504570934280437
+   },
+   {
+    "ano": 2024,
+    "de": 0.11502361875791835
+   },
+   {
+    "ano": 2025,
+    "de": 0.0293894274538799
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.2521282319243402,
+  "dividaBruta": 7392664000.0,
+  "dividaLiquida": 1784533000.0,
+  "valorDeMercado": 3607751287.54,
+  "vmPorPrecoEAcoes": 17605544191.5,
+  "deBruta": 2.0491057755372046,
+  "deLiquida": 0.494638587244968,
+  "fatorBruta": 2.5324683593250557,
+  "fatorLiquida": 1.3699262348013408,
+  "razaoDosFatores": 1.8486165860545771,
+  "betaAlavancado": 0.6670980550833792,
+  "betaDesalavancado": 0.6171150044657082,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.6671160425249809,
+  "erroPadrao": 0.03990737104758231,
+  "peso": 0.9943192466272566,
+  "desalavancadoDoCru": 0.4869722365903318,
+  "desalavancadoDoEncolhido": 0.4876950003710956
+ },
+ {
+  "ticker": "SAPR4",
+  "deJanela": 0.5364640967360506,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.5364640967360506
+   },
+   {
+    "ano": 2022,
+    "de": 0.7025711030488528
+   },
+   {
+    "ano": 2023,
+    "de": 0.5206293475308869
+   },
+   {
+    "ano": 2024,
+    "de": 0.5687733746054361
+   },
+   {
+    "ano": 2025,
+    "de": 0.15081317945043352
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.2521282319243402,
+  "dividaBruta": 7392664000.0,
+  "dividaLiquida": 1784533000.0,
+  "valorDeMercado": 3470735400.0,
+  "vmPorPrecoEAcoes": 3445548562.7999997,
+  "deBruta": 2.129999307927651,
+  "deLiquida": 0.514165672208835,
+  "fatorBruta": 2.5929663484197842,
+  "fatorLiquida": 1.3845299903586317,
+  "razaoDosFatores": 1.8728134215049643,
+  "betaAlavancado": 0.6169663204217594,
+  "betaDesalavancado": 0.4403108216755702,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.6156421411031073,
+  "erroPadrao": 0.0389220780550018,
+  "peso": 0.9945947962147933,
+  "desalavancadoDoCru": 0.44465785890534515,
+  "desalavancadoDoEncolhido": 0.4455742822723455
+ },
+ {
+  "ticker": "SAUD3",
+  "deJanela": -0.050919516625244916,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.050919516625244916
+   },
+   {
+    "ano": 2022,
+    "de": -0.046289099153536684
+   },
+   {
+    "ano": 2023,
+    "de": -0.06012070061618321
+   },
+   {
+    "ano": 2024,
+    "de": -0.06314832933010796
+   },
+   {
+    "ano": 2025,
+    "de": -0.04793412968267633
+   }
+  ],
+  "setor": "servicos-medicos",
+  "aliquota": 0.3003635801475477,
+  "dividaBruta": 0.0,
+  "dividaLiquida": -293033000.0,
+  "valorDeMercado": 42693317000.0,
+  "vmPorPrecoEAcoes": 42956493593.0,
+  "deBruta": 0.0,
+  "deLiquida": -0.0068636737688945555,
+  "fatorBruta": 1.0,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.0,
+  "betaAlavancado": 0.5934381558113906,
+  "betaDesalavancado": 0.5934381558113906,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.5932476123329634,
+  "erroPadrao": 0.050576753546124946,
+  "peso": 0.9909069698211752,
+  "desalavancadoDoCru": 0.5932476123329634,
+  "desalavancadoDoEncolhido": 0.5934381558113906
+ },
+ {
+  "ticker": "SBFG3",
+  "deJanela": 0.7123877033329971,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.2869403792873614
+   },
+   {
+    "ano": 2022,
+    "de": 0.6660184206199856
+   },
+   {
+    "ano": 2023,
+    "de": 0.7990312046628343
+   },
+   {
+    "ano": 2024,
+    "de": 0.734223924934025
+   },
+   {
+    "ano": 2025,
+    "de": 0.7123877033329971
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.02232383148837099,
+  "dividaBruta": 2937837000.0,
+  "dividaLiquida": 2257868000.0,
+  "valorDeMercado": 2020616700.0,
+  "vmPorPrecoEAcoes": 2085202559.9999998,
+  "deBruta": 1.4539308716987245,
+  "deLiquida": 1.1174152920739495,
+  "fatorBruta": 2.4214735639231817,
+  "fatorLiquida": 2.092470301391162,
+  "razaoDosFatores": 1.1572319866682383,
+  "betaAlavancado": 1.7653530828396216,
+  "betaDesalavancado": 1.0405948909939156,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.7733721039514991,
+  "erroPadrao": 0.06984978887425151,
+  "peso": 0.9827984139022247,
+  "desalavancadoDoCru": 0.8475016839056149,
+  "desalavancadoDoEncolhido": 0.8461776564461863
+ },
+ {
+  "ticker": "SBSP3",
+  "deJanela": 0.9270780571902081,
+  "exerciciosNaJanela": 2,
+  "alavancagemPorAno": [
+   {
+    "ano": 2024,
+    "de": 0.9758632454427054
+   },
+   {
+    "ano": 2025,
+    "de": 0.8782928689377107
+   }
+  ],
+  "setor": "saneamento",
+  "aliquota": 0.27626029768596905,
+  "dividaBruta": 40142346000.0,
+  "dividaLiquida": 27771375000.0,
+  "valorDeMercado": 94105060000.0,
+  "vmPorPrecoEAcoes": 93505887020.0,
+  "deBruta": 0.4265694745851073,
+  "deLiquida": 0.295110326692316,
+  "fatorBruta": 1.308725264552478,
+  "fatorLiquida": 1.2135830599900932,
+  "razaoDosFatores": 1.078397769134287,
+  "betaAlavancado": 0.9604512599995255,
+  "betaDesalavancado": 0.7914178202251487,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.9619676966924783,
+  "erroPadrao": 0.03745416602558205,
+  "peso": 0.9949928101732987,
+  "desalavancadoDoCru": 0.7926673735049755,
+  "desalavancadoDoEncolhido": 0.7914178202251487
+ },
+ {
+  "ticker": "SEER3",
+  "deJanela": 0.5945113557924045,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.10738515410099664
+   },
+   {
+    "ano": 2022,
+    "de": 0.9122998679661258
+   },
+   {
+    "ano": 2023,
+    "de": 0.5945113557924045
+   },
+   {
+    "ano": 2024,
+    "de": 1.0247873178527531
+   },
+   {
+    "ano": 2025,
+    "de": 0.3595621290404351
+   }
+  ],
+  "setor": "educacao",
+  "aliquota": 0.04178031834230832,
+  "dividaBruta": 716434970.0,
+  "dividaLiquida": 454502970.0,
+  "valorDeMercado": 1759623700.0,
+  "vmPorPrecoEAcoes": 1740315491.2,
+  "deBruta": 0.4071523758176251,
+  "deLiquida": 0.25829554921316417,
+  "fatorBruta": 1.3901414199421376,
+  "fatorLiquida": 1.2475038789406367,
+  "razaoDosFatores": 1.1143383547012509,
+  "betaAlavancado": 1.4921355819246331,
+  "betaDesalavancado": 0.9506031346988745,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.4986050376205153,
+  "erroPadrao": 0.0856760188944574,
+  "peso": 0.97434309197485,
+  "desalavancadoDoCru": 1.201282868068603,
+  "desalavancadoDoEncolhido": 1.1908354147674836
+ },
+ {
+  "ticker": "SHUL4",
+  "deJanela": -0.028446269715628223,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.3206564424182473
+   },
+   {
+    "ano": 2022,
+    "de": 0.11054545346632054
+   },
+   {
+    "ano": 2023,
+    "de": -0.06153744490793354
+   },
+   {
+    "ano": 2024,
+    "de": -0.028446269715628223
+   },
+   {
+    "ano": 2025,
+    "de": -0.07401885294515946
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.16679244932916704,
+  "dividaBruta": 1011311020.0,
+  "dividaLiquida": -133584980.0,
+  "valorDeMercado": 1593891500.0,
+  "vmPorPrecoEAcoes": 1597465266.6,
+  "deBruta": 0.6344917580650878,
+  "deLiquida": -0.08381058560134112,
+  "fatorBruta": 1.5286633236582425,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.5286633236582425,
+  "betaAlavancado": 0.736471770634891,
+  "betaDesalavancado": 0.736471770634891,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.7372185068410637,
+  "erroPadrao": 0.04126083650586577,
+  "peso": 0.9939297636106037,
+  "desalavancadoDoCru": 0.7372185068410637,
+  "desalavancadoDoEncolhido": 0.736471770634891
+ },
+ {
+  "ticker": "SLCE3",
+  "deJanela": 0.5156794753071997,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.5758220149442549
+   },
+   {
+    "ano": 2022,
+    "de": 0.50092741887033
+   },
+   {
+    "ano": 2023,
+    "de": 0.37775435378550065
+   },
+   {
+    "ano": 2024,
+    "de": 0.5156794753071997
+   },
+   {
+    "ano": 2025,
+    "de": 0.7030416107705085
+   }
+  ],
+  "setor": "consumo-nao-ciclico",
+  "aliquota": 0.2597660349147896,
+  "dividaBruta": 7728284000.0,
+  "dividaLiquida": 5080698000.0,
+  "valorDeMercado": 8917577000.0,
+  "vmPorPrecoEAcoes": 8184420547.2,
+  "deBruta": 0.8666349614923426,
+  "deLiquida": 0.5697397398418875,
+  "fatorBruta": 1.6415126338269452,
+  "fatorLiquida": 1.4217407066897767,
+  "razaoDosFatores": 1.1545794715612112,
+  "betaAlavancado": 0.5210090733582715,
+  "betaDesalavancado": 0.37707188696987576,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.5181071276541407,
+  "erroPadrao": 0.04454457142583387,
+  "peso": 0.9929322199748918,
+  "desalavancadoDoCru": 0.3644174533487501,
+  "desalavancadoDoEncolhido": 0.3665922843442914
+ },
+ {
+  "ticker": "SMFT3",
+  "deJanela": 0.08289042661293759,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.01376723839272601
+   },
+   {
+    "ano": 2022,
+    "de": 0.062389472834076955
+   },
+   {
+    "ano": 2023,
+    "de": 0.08289042661293759
+   },
+   {
+    "ano": 2024,
+    "de": 0.29293447775491865
+   },
+   {
+    "ano": 2025,
+    "de": 0.28218941730929503
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.34,
+  "dividaBruta": 7477199000.0,
+  "dividaLiquida": 4051062100.0,
+  "valorDeMercado": 10874692000.0,
+  "vmPorPrecoEAcoes": 11071853584.199999,
+  "deBruta": 0.687578002209166,
+  "deLiquida": 0.3725220079796283,
+  "fatorBruta": 1.4538014814580495,
+  "fatorLiquida": 1.2458645252665548,
+  "razaoDosFatores": 1.16690173929385,
+  "betaAlavancado": 1.398926354880427,
+  "betaDesalavancado": 1.3263640526494307,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.4052467235434065,
+  "erroPadrao": 0.05482085730764408,
+  "peso": 0.9893338335111075,
+  "desalavancadoDoCru": 1.1279289963270698,
+  "desalavancadoDoEncolhido": 1.1241169238345903
+ },
+ {
+  "ticker": "SMTO3",
+  "deJanela": 0.6886677553763104,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2022,
+    "de": 0.37713032652402567
+   },
+   {
+    "ano": 2023,
+    "de": 0.6886677553763104
+   },
+   {
+    "ano": 2024,
+    "de": 0.5951664093987916
+   },
+   {
+    "ano": 2025,
+    "de": 1.0177241403043997
+   },
+   {
+    "ano": 2026,
+    "de": 0.9320105498072632
+   }
+  ],
+  "setor": "consumo-nao-ciclico",
+  "aliquota": 0.1919362699880655,
+  "dividaBruta": 11553109000.0,
+  "dividaLiquida": 7350208000.0,
+  "valorDeMercado": 6731817000.0,
+  "vmPorPrecoEAcoes": 6848169240.0,
+  "deBruta": 1.7161947509862494,
+  "deLiquida": 1.0918609344252823,
+  "fatorBruta": 2.386794731908852,
+  "fatorLiquida": 1.8822932193260098,
+  "razaoDosFatores": 1.2680249322491255,
+  "betaAlavancado": 0.9027609199824642,
+  "betaDesalavancado": 0.5799988484304304,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.9011348356145271,
+  "erroPadrao": 0.05622287971350672,
+  "peso": 0.9887874863419321,
+  "desalavancadoDoCru": 0.47874307061319343,
+  "desalavancadoDoEncolhido": 0.4809114026325196
+ },
+ {
+  "ticker": "SUZB3",
+  "deJanela": 1.301915474409538,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.7152970242959084
+   },
+   {
+    "ano": 2022,
+    "de": 0.8759604078461531
+   },
+   {
+    "ano": 2023,
+    "de": 1.301915474409538
+   },
+   {
+    "ano": 2024,
+    "de": 1.6483836793480982
+   },
+   {
+    "ano": 2025,
+    "de": 1.7362646109375879
+   }
+  ],
+  "setor": "materiais-basicos",
+  "aliquota": 0.18817844883236268,
+  "dividaBruta": 94801255000.0,
+  "dividaLiquida": 69688728000.0,
+  "valorDeMercado": 59704275000.0,
+  "vmPorPrecoEAcoes": 59274474264.0,
+  "deBruta": 1.5878470176549335,
+  "deLiquida": 1.1672317937032146,
+  "fatorBruta": 2.2890484288895347,
+  "fatorLiquida": 1.9475839253363274,
+  "razaoDosFatores": 1.1753272344832277,
+  "betaAlavancado": 0.3419261684028917,
+  "betaDesalavancado": 0.16623187244549276,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.33444292398655856,
+  "erroPadrao": 0.04413456759815468,
+  "peso": 0.9930608311440401,
+  "desalavancadoDoCru": 0.17172195746522387,
+  "desalavancadoDoEncolhido": 0.1752966926143904
+ },
+ {
+  "ticker": "TAEE11",
+  "deJanela": 0.21307052479038657,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.17079959119131674
+   },
+   {
+    "ano": 2022,
+    "de": 0.19739746986039564
+   },
+   {
+    "ano": 2023,
+    "de": 0.21307052479038657
+   },
+   {
+    "ano": 2024,
+    "de": 0.26645176877397514
+   },
+   {
+    "ano": 2025,
+    "de": 0.23512678267640091
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.13745866859284306,
+  "dividaBruta": 10974442000.0,
+  "dividaLiquida": 10232845970.0,
+  "valorDeMercado": 14224359581.0,
+  "vmPorPrecoEAcoes": 42921117951.0,
+  "deBruta": 0.7715245060775154,
+  "deLiquida": 0.7193888703199256,
+  "fatorBruta": 1.6654717746853493,
+  "fatorLiquida": 1.620502634005239,
+  "razaoDosFatores": 1.0277501188436604,
+  "betaAlavancado": 0.5148511173555591,
+  "betaDesalavancado": 0.43492049973468344,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.514871537962003,
+  "erroPadrao": 0.026015426164724385,
+  "peso": 0.997577952909655,
+  "desalavancadoDoCru": 0.3177233576532023,
+  "desalavancadoDoEncolhido": 0.3179900061232146
+ },
+ {
+  "ticker": "TAEE4",
+  "deJanela": 0.6367068268226833,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.5100148712338416
+   },
+   {
+    "ano": 2022,
+    "de": 0.5874480927090058
+   },
+   {
+    "ano": 2023,
+    "de": 0.6367068268226833
+   },
+   {
+    "ano": 2024,
+    "de": 0.7909309053218448
+   },
+   {
+    "ano": 2025,
+    "de": 0.7032094331323325
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.13745866859284306,
+  "dividaBruta": 10974442000.0,
+  "dividaLiquida": 10232845970.0,
+  "valorDeMercado": 14324264000.0,
+  "vmPorPrecoEAcoes": 14520628635.0,
+  "deBruta": 0.7661435170421321,
+  "deLiquida": 0.7143715006928104,
+  "fatorBruta": 1.6608304492384824,
+  "fatorLiquida": 1.6161749453269054,
+  "razaoDosFatores": 1.0276303651660337,
+  "betaAlavancado": 0.455076788110759,
+  "betaDesalavancado": 0.2937522037941435,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.45385680857743177,
+  "erroPadrao": 0.02617322441704962,
+  "peso": 0.9975485538801965,
+  "desalavancadoDoCru": 0.2808215842534483,
+  "desalavancadoDoEncolhido": 0.2816388496199193
+ },
+ {
+  "ticker": "TEND3",
+  "deJanela": 0.41514786116823654,
+  "exerciciosNaJanela": 6,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.19030423433233357
+   },
+   {
+    "ano": 2022,
+    "de": 1.833951772856497
+   },
+   {
+    "ano": 2023,
+    "de": 1.5156392030048802
+   },
+   {
+    "ano": 2023,
+    "de": 0.4648003445229682
+   },
+   {
+    "ano": 2024,
+    "de": 0.36549537781350483
+   },
+   {
+    "ano": 2025,
+    "de": 0.13540767508143323
+   }
+  ],
+  "setor": "construcao-e-imobiliario",
+  "aliquota": 0.14673407812117753,
+  "dividaBruta": 1312970000.0,
+  "dividaLiquida": 266049000.0,
+  "valorDeMercado": 4049982000.0,
+  "vmPorPrecoEAcoes": 4244881334.5000005,
+  "deBruta": 0.3241915643081871,
+  "deLiquida": 0.06569140307290254,
+  "fatorBruta": 1.2766216139847628,
+  "fatorLiquida": 1.0560522356025135,
+  "razaoDosFatores": 1.2088621859281488,
+  "betaAlavancado": 1.5788946088844,
+  "betaDesalavancado": 1.1658971030285468,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.5875207997234957,
+  "erroPadrao": 0.09361683940882029,
+  "peso": 0.9695183934098898,
+  "desalavancadoDoCru": 1.5032597311038893,
+  "desalavancadoDoEncolhido": 1.4868007330036588
+ },
+ {
+  "ticker": "TGMA3",
+  "deJanela": -0.027359089252399726,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.04990667267646415
+   },
+   {
+    "ano": 2022,
+    "de": -0.027359089252399726
+   },
+   {
+    "ano": 2023,
+    "de": -0.032894150772323494
+   },
+   {
+    "ano": 2024,
+    "de": -0.03400711846706369
+   },
+   {
+    "ano": 2025,
+    "de": 0.03610849174450601
+   }
+  ],
+  "setor": "bens-industriais",
+  "aliquota": 0.25933263474568385,
+  "dividaBruta": 202017000.0,
+  "dividaLiquida": 88157000.0,
+  "valorDeMercado": 2248059400.0,
+  "vmPorPrecoEAcoes": 2221658152.56,
+  "deBruta": 0.08986283903352375,
+  "deLiquida": 0.03921471114152945,
+  "fatorBruta": 1.0665584722212327,
+  "fatorLiquida": 1.0290450567804057,
+  "razaoDosFatores": 1.0364545898098922,
+  "betaAlavancado": 0.9955162736627621,
+  "betaDesalavancado": 0.9955162736627621,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.9981216451838498,
+  "erroPadrao": 0.04433225312607786,
+  "peso": 0.9929989648934545,
+  "desalavancadoDoCru": 0.9699494095104965,
+  "desalavancadoDoEncolhido": 0.9675412728003877
+ },
+ {
+  "ticker": "TOTS3",
+  "deJanela": -0.057267903767817124,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.08002239749231539
+   },
+   {
+    "ano": 2022,
+    "de": -0.057267903767817124
+   },
+   {
+    "ano": 2023,
+    "de": -0.06800667630098543
+   },
+   {
+    "ano": 2024,
+    "de": -0.01750113047325305
+   },
+   {
+    "ano": 2025,
+    "de": 0.0020052873289962457
+   }
+  ],
+  "setor": "tecnologia",
+  "aliquota": 0.2140051917419864,
+  "dividaBruta": 1836282000.0,
+  "dividaLiquida": 50579000.0,
+  "valorDeMercado": 19218751000.0,
+  "vmPorPrecoEAcoes": 19989355200.0,
+  "deBruta": 0.09554637551628616,
+  "deLiquida": 0.002631752708591729,
+  "fatorBruta": 1.0750989551036716,
+  "fatorLiquida": 1.002068543965572,
+  "razaoDosFatores": 1.0728796563647134,
+  "betaAlavancado": 1.11750179857497,
+  "betaDesalavancado": 1.11750179857497,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.1161343537790378,
+  "erroPadrao": 0.048991814237806686,
+  "peso": 0.9914631534607952,
+  "desalavancadoDoCru": 1.1138303467366246,
+  "desalavancadoDoEncolhido": 1.1152174604871032
+ },
+ {
+  "ticker": "UGPA3",
+  "deJanela": 0.6301511646084114,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.8413409405600136
+   },
+   {
+    "ano": 2022,
+    "de": 0.5071568803501675
+   },
+   {
+    "ano": 2023,
+    "de": 0.23858139112074175
+   },
+   {
+    "ano": 2024,
+    "de": 0.6301511646084114
+   },
+   {
+    "ano": 2025,
+    "de": 0.6350668348839509
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.31128758460695893,
+  "dividaBruta": 21832895000.0,
+  "dividaLiquida": 14806012000.0,
+  "valorDeMercado": 42848637000.0,
+  "vmPorPrecoEAcoes": 41755103258.0,
+  "deBruta": 0.5095353441464194,
+  "deLiquida": 0.34554219309239637,
+  "fatorBruta": 1.350923317595205,
+  "fatorLiquida": 1.237979198424873,
+  "razaoDosFatores": 1.0912326469734184,
+  "betaAlavancado": 1.2400679949622906,
+  "betaDesalavancado": 0.8647657659014193,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.2444201518032727,
+  "erroPadrao": 0.0440023486941623,
+  "peso": 0.9931020594025408,
+  "desalavancadoDoCru": 1.005202796126619,
+  "desalavancadoDoEncolhido": 1.001220013189342
+ },
+ {
+  "ticker": "UNIP6",
+  "deJanela": -0.0026739114662518355,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.01514167498210178
+   },
+   {
+    "ano": 2022,
+    "de": -0.0026739114662518355
+   },
+   {
+    "ano": 2023,
+    "de": -0.009784364832229614
+   },
+   {
+    "ano": 2024,
+    "de": 0.13559150132154674
+   },
+   {
+    "ano": 2025,
+    "de": 0.37405375633413673
+   }
+  ],
+  "setor": "",
+  "aliquota": 0.30253738663462937,
+  "dividaBruta": 3526567000.0,
+  "dividaLiquida": 2452344000.0,
+  "valorDeMercado": 6412397000.0,
+  "vmPorPrecoEAcoes": 6447480850.08,
+  "deBruta": 0.5499608024893031,
+  "deLiquida": 0.38243795572856765,
+  "fatorBruta": 1.3835770985527058,
+  "fatorLiquida": 1.2667361760525568,
+  "razaoDosFatores": 1.0922377719283682,
+  "betaAlavancado": 0.8294202152533405,
+  "betaDesalavancado": 0.8294202152533405,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8312609518866886,
+  "erroPadrao": 0.04882810836359208,
+  "peso": 0.9915196267812217,
+  "desalavancadoDoCru": 0.6562226354639134,
+  "desalavancadoDoEncolhido": 0.655866289081417
+ },
+ {
+  "ticker": "USIM3",
+  "deJanela": -0.008246323602002906,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.03981766774790897
+   },
+   {
+    "ano": 2022,
+    "de": 0.12118014016226457
+   },
+   {
+    "ano": 2023,
+    "de": -0.008246323602002906
+   },
+   {
+    "ano": 2024,
+    "de": 0.12215817967463699
+   },
+   {
+    "ano": 2025,
+    "de": -0.07410684279859614
+   }
+  ],
+  "setor": "materiais-basicos",
+  "aliquota": 0.21801260774640147,
+  "dividaBruta": 6390139010.0,
+  "dividaLiquida": -553455990.0,
+  "valorDeMercado": 8959517000.0,
+  "vmPorPrecoEAcoes": 8921923904.0,
+  "deBruta": 0.7132236045760056,
+  "deLiquida": -0.06177297169032661,
+  "fatorBruta": 1.5577318666361024,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.5577318666361024,
+  "betaAlavancado": 1.211198968716737,
+  "betaDesalavancado": 1.211198968716737,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 1.2183242735720499,
+  "erroPadrao": 0.0615481517099357,
+  "peso": 0.9865926862094385,
+  "desalavancadoDoCru": 1.2183242735720499,
+  "desalavancadoDoEncolhido": 1.211198968716737
+ },
+ {
+  "ticker": "USIM5",
+  "deJanela": -0.008192130894870355,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.03811044584578886
+   },
+   {
+    "ano": 2022,
+    "de": 0.12541129030759504
+   },
+   {
+    "ano": 2023,
+    "de": -0.008192130894870355
+   },
+   {
+    "ano": 2024,
+    "de": 0.12215817967463699
+   },
+   {
+    "ano": 2025,
+    "de": -0.07423139211422403
+   }
+  ],
+  "setor": "materiais-basicos",
+  "aliquota": 0.21801260774640147,
+  "dividaBruta": 6390139010.0,
+  "dividaLiquida": -553455990.0,
+  "valorDeMercado": 9560994000.0,
+  "vmPorPrecoEAcoes": 9560994296.0,
+  "deBruta": 0.6683550904853617,
+  "deLiquida": -0.05788686720230135,
+  "fatorBruta": 1.522645254308066,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.522645254308066,
+  "betaAlavancado": 1.2482686293092315,
+  "betaDesalavancado": 1.2482686293092315,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 1.2556282527572185,
+  "erroPadrao": 0.0604515162862755,
+  "peso": 0.9870600727983667,
+  "desalavancadoDoCru": 1.2556282527572185,
+  "desalavancadoDoEncolhido": 1.2482686293092315
+ },
+ {
+  "ticker": "VALE3",
+  "deJanela": 0.14205222690126876,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.026870218086490365
+   },
+   {
+    "ano": 2022,
+    "de": 0.10237044464491458
+   },
+   {
+    "ano": 2023,
+    "de": 0.14205222690126876
+   },
+   {
+    "ano": 2024,
+    "de": 0.2625575497380679
+   },
+   {
+    "ano": 2025,
+    "de": 0.19355003093119075
+   }
+  ],
+  "setor": "materiais-basicos",
+  "aliquota": 0.1859237519153477,
+  "dividaBruta": 103457000000.0,
+  "dividaLiquida": 61828000000.0,
+  "valorDeMercado": 351137560000.0,
+  "vmPorPrecoEAcoes": 349006759200.0,
+  "deBruta": 0.29463381815377426,
+  "deLiquida": 0.17607914117760573,
+  "fatorBruta": 1.2398543932414803,
+  "fatorLiquida": 1.1433418466158332,
+  "razaoDosFatores": 1.0844126775481135,
+  "betaAlavancado": 0.8381573118296554,
+  "betaDesalavancado": 0.7512784609557122,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.8386188607883607,
+  "erroPadrao": 0.04231610072204537,
+  "peso": 0.9936173022238997,
+  "desalavancadoDoCru": 0.7334804225617918,
+  "desalavancadoDoEncolhido": 0.7331829553389487
+ },
+ {
+  "ticker": "VAMO3",
+  "deJanela": 1.088133138358345,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.2320366185930533
+   },
+   {
+    "ano": 2022,
+    "de": 0.5333090215228189
+   },
+   {
+    "ano": 2023,
+    "de": 1.088133138358345
+   },
+   {
+    "ano": 2024,
+    "de": 2.2794846919120615
+   },
+   {
+    "ano": 2025,
+    "de": 3.4287267155839256
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.2648483802637069,
+  "dividaBruta": 16690214100.0,
+  "dividaLiquida": 11972206100.0,
+  "valorDeMercado": 4117556200.0,
+  "vmPorPrecoEAcoes": 4276393800.0,
+  "deBruta": 4.053427151765409,
+  "deLiquida": 2.9075999254120686,
+  "fatorBruta": 3.205454859208879,
+  "fatorLiquida": 3.1375267947118073,
+  "razaoDosFatores": 1.0216501942267273,
+  "betaAlavancado": 1.796340382561952,
+  "betaDesalavancado": 0.9979985716698555,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.8033463491288766,
+  "erroPadrao": 0.06906491296289538,
+  "peso": 0.9831763504857685,
+  "desalavancadoDoCru": 0.574766836148891,
+  "desalavancadoDoEncolhido": 0.5780602944269596
+ },
+ {
+  "ticker": "VBBR3",
+  "deJanela": 0.5540915107981381,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.4385216819882525
+   },
+   {
+    "ano": 2022,
+    "de": 0.7831035021115034
+   },
+   {
+    "ano": 2023,
+    "de": 0.368842263239356
+   },
+   {
+    "ano": 2024,
+    "de": 0.5540915107981381
+   },
+   {
+    "ano": 2025,
+    "de": 0.6445733736465864
+   }
+  ],
+  "setor": "energia",
+  "aliquota": 0.2542750058561724,
+  "dividaBruta": 23216000100.0,
+  "dividaLiquida": 19569000100.0,
+  "valorDeMercado": 45485490000.0,
+  "vmPorPrecoEAcoes": 44334867564.0,
+  "deBruta": 0.5104045290047442,
+  "deLiquida": 0.43022511354719933,
+  "fatorBruta": 1.380621414403046,
+  "fatorLiquida": 1.3208296202805128,
+  "razaoDosFatores": 1.045268362553707,
+  "betaAlavancado": 1.191807464881081,
+  "betaDesalavancado": 0.8433396255244073,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.1951614870119294,
+  "erroPadrao": 0.039902135794785944,
+  "peso": 0.9943207285258128,
+  "desalavancadoDoCru": 0.904856666341345,
+  "desalavancadoDoEncolhido": 0.9021474203276068
+ },
+ {
+  "ticker": "VIVT3",
+  "deJanela": 0.2566098868999441,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.2566098868999441
+   },
+   {
+    "ano": 2022,
+    "de": 0.5295223898755954
+   },
+   {
+    "ano": 2023,
+    "de": 0.33067927796331753
+   },
+   {
+    "ano": 2024,
+    "de": 0.1842967817831478
+   },
+   {
+    "ano": 2025,
+    "de": 0.12373971334313047
+   }
+  ],
+  "setor": "telecomunicacoes",
+  "aliquota": 0.20369004700834242,
+  "dividaBruta": 20346681000.0,
+  "dividaLiquida": 13215240000.0,
+  "valorDeMercado": 97441710000.0,
+  "vmPorPrecoEAcoes": 96989993802.0,
+  "deBruta": 0.20880874319631706,
+  "deLiquida": 0.1356220041704933,
+  "fatorBruta": 1.1662764804789063,
+  "fatorLiquida": 1.10799715176564,
+  "razaoDosFatores": 1.0525988073348345,
+  "betaAlavancado": 0.582167397534115,
+  "betaDesalavancado": 0.48339082881236367,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.5814619784086374,
+  "erroPadrao": 0.03408157539821411,
+  "peso": 0.9958503900919284,
+  "desalavancadoDoCru": 0.5247865280899444,
+  "desalavancadoDoEncolhido": 0.5251980519215964
+ },
+ {
+  "ticker": "VLID3",
+  "deJanela": 0.1612161935069829,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 1.1712944272357195
+   },
+   {
+    "ano": 2022,
+    "de": 0.6260575750432862
+   },
+   {
+    "ano": 2023,
+    "de": 0.1612161935069829
+   },
+   {
+    "ano": 2024,
+    "de": -0.008238360052309716
+   },
+   {
+    "ano": 2025,
+    "de": 0.011227635152888696
+   }
+  ],
+  "setor": "servicos",
+  "aliquota": 0.23033627406049495,
+  "dividaBruta": 784593970.0,
+  "dividaLiquida": 19662940.0,
+  "valorDeMercado": 1413103900.0,
+  "vmPorPrecoEAcoes": 1427474402.8799999,
+  "deBruta": 0.5552273757081839,
+  "deLiquida": 0.01391471639134249,
+  "fatorBruta": 1.4273383707311742,
+  "fatorLiquida": 1.0107096524631523,
+  "razaoDosFatores": 1.4122140490621378,
+  "betaAlavancado": 0.9927481575734294,
+  "betaDesalavancado": 0.883163266850524,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 0.9964996580985624,
+  "erroPadrao": 0.06458044783453952,
+  "peso": 0.9852590193899365,
+  "desalavancadoDoCru": 0.9859405771677758,
+  "desalavancadoDoEncolhido": 0.9811373455423784
+ },
+ {
+  "ticker": "VULC3",
+  "deJanela": 0.07163393485792831,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.10979150512552041
+   },
+   {
+    "ano": 2022,
+    "de": 0.07163393485792831
+   },
+   {
+    "ano": 2023,
+    "de": 0.014166145300367142
+   },
+   {
+    "ano": 2024,
+    "de": 0.00682203016546201
+   },
+   {
+    "ano": 2025,
+    "de": 0.12113463202274347
+   }
+  ],
+  "setor": "consumo-ciclico",
+  "aliquota": 0.029077358285279076,
+  "dividaBruta": 976269020.0,
+  "dividaLiquida": 772299020.0,
+  "valorDeMercado": 4127408600.0,
+  "vmPorPrecoEAcoes": 4136948161.7999997,
+  "deBruta": 0.2365331651438629,
+  "deLiquida": 0.18711474798012487,
+  "fatorBruta": 1.2296554055546238,
+  "fatorLiquida": 1.181673945412647,
+  "razaoDosFatores": 1.0406046526863393,
+  "betaAlavancado": 1.015773226777074,
+  "betaDesalavancado": 0.9497192915292771,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.0174662098893938,
+  "erroPadrao": 0.04962301469026354,
+  "peso": 0.9912437010290486,
+  "desalavancadoDoCru": 0.8610380332402853,
+  "desalavancadoDoEncolhido": 0.8602455217047433
+ },
+ {
+  "ticker": "WEGE3",
+  "deJanela": -0.01320670884388205,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.01031601003084851
+   },
+   {
+    "ano": 2022,
+    "de": -0.009423088824238396
+   },
+   {
+    "ano": 2023,
+    "de": -0.02766303508569248
+   },
+   {
+    "ano": 2024,
+    "de": -0.0198690230097332
+   },
+   {
+    "ano": 2025,
+    "de": -0.01320670884388205
+   }
+  ],
+  "setor": "bens-industriais",
+  "aliquota": 0.16003358386800354,
+  "dividaBruta": 4590821970.0,
+  "dividaLiquida": -2689043030.0,
+  "valorDeMercado": 216959370000.0,
+  "vmPorPrecoEAcoes": 217169233320.0,
+  "deBruta": 0.021159823472938735,
+  "deLiquida": -0.012394223996870934,
+  "fatorBruta": 1.01777354108855,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.01777354108855,
+  "betaAlavancado": 0.7088510869279848,
+  "betaDesalavancado": 0.7088510869279848,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 0.7094316146998653,
+  "erroPadrao": 0.04419010201140197,
+  "peso": 0.9930434786391059,
+  "desalavancadoDoCru": 0.7094316146998653,
+  "desalavancadoDoEncolhido": 0.7088510869279848
+ },
+ {
+  "ticker": "WIZC3",
+  "deJanela": 0.054475208573705206,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": -0.17589729994763123
+   },
+   {
+    "ano": 2022,
+    "de": 0.08291090350196027
+   },
+   {
+    "ano": 2023,
+    "de": 0.054475208573705206
+   },
+   {
+    "ano": 2024,
+    "de": 0.08544669993532347
+   },
+   {
+    "ano": 2025,
+    "de": -0.0117255169101436
+   }
+  ],
+  "setor": "servicos-financeiros",
+  "aliquota": 0.34,
+  "dividaBruta": 388587020.0,
+  "dividaLiquida": -16724960.0,
+  "valorDeMercado": 1264866600.0,
+  "vmPorPrecoEAcoes": 1295248968.0,
+  "deBruta": 0.3072158123236079,
+  "deLiquida": -0.013222706647483616,
+  "fatorBruta": 1.2027624361335811,
+  "fatorLiquida": 1.0,
+  "razaoDosFatores": 1.2027624361335811,
+  "betaAlavancado": 1.0957941875083226,
+  "betaDesalavancado": 1.057763733505413,
+  "premio": 0.055,
+  "caixaLiquido": true,
+  "betaCru": 1.0984522188029655,
+  "erroPadrao": 0.05753728114267584,
+  "peso": 0.9882633217142157,
+  "desalavancadoDoCru": 1.0984522188029655,
+  "desalavancadoDoEncolhido": 1.0954390028051992
+ },
+ {
+  "ticker": "YDUQ3",
+  "deJanela": 1.273535727167441,
+  "exerciciosNaJanela": 5,
+  "alavancagemPorAno": [
+   {
+    "ano": 2021,
+    "de": 0.5811034317971363
+   },
+   {
+    "ano": 2022,
+    "de": 1.353509059729252
+   },
+   {
+    "ano": 2023,
+    "de": 0.6729112694784565
+   },
+   {
+    "ano": 2024,
+    "de": 1.8444952909485082
+   },
+   {
+    "ano": 2025,
+    "de": 1.273535727167441
+   }
+  ],
+  "setor": "educacao",
+  "aliquota": 0.012583390782552247,
+  "dividaBruta": 5726171000.0,
+  "dividaLiquida": 4248084000.0,
+  "valorDeMercado": 2795706400.0,
+  "vmPorPrecoEAcoes": 2642216610.4,
+  "deBruta": 2.0482018426541497,
+  "deLiquida": 1.5195029063137675,
+  "fatorBruta": 3.022428518466489,
+  "fatorLiquida": 2.500382407448398,
+  "razaoDosFatores": 1.2087865078009532,
+  "betaAlavancado": 1.6667511964005288,
+  "betaDesalavancado": 0.738313873769178,
+  "premio": 0.055,
+  "caixaLiquido": false,
+  "betaCru": 1.6641091520425566,
+  "erroPadrao": 0.07648316134519925,
+  "peso": 0.9794464794286218,
+  "desalavancadoDoCru": 0.6655418575516033,
+  "desalavancadoDoEncolhido": 0.6681838596161661
+ }
+]

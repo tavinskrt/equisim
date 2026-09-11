@@ -38,7 +38,16 @@ final class InvalidInput extends Failure {
   /// Campo do formulário a destacar, quando a falha é atribuível a um.
   final String? field;
 
-  const InvalidInput(super.message, {this.field});
+  /// Valor medido que produziu a recusa, quando há um número a citar.
+  ///
+  /// **Existe pela mesma razão de [DataQualityFailure.deviation]** (decisão
+  /// 59): a soma dos pesos entrava na mensagem já formatada, e a interface que
+  /// quisesse arredondar de outro jeito, exibir num campo próprio ou comparar
+  /// com o limite teria de reextraí-la do texto. O domínio diz **quanto**; a
+  /// apresentação decide como escrever.
+  final double? actual;
+
+  const InvalidInput(super.message, {this.field, this.actual});
 }
 
 /// O modelo não converge ou a equação não tem solução no domínio aceitável.

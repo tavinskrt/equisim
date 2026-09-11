@@ -190,6 +190,29 @@ final riskFreeRateProvider = FutureProvider<double>((ref) async {
   return anchors.riskFreeCagr;
 });
 
+/// Taxa livre de risco anual **da janela informada**.
+///
+/// **O Sharpe compara o retorno de uma janela com a renda fixa dela**
+/// (decisão 58). [riskFreeRateProvider] devolve o CAGR decenal do CDI, e a
+/// simulação pode correr três anos: confrontar as duas mede a diferença entre
+/// os períodos, não o prêmio pelo risco. A Selic saiu de 2% para 14% no
+/// intervalo que o cache cobre, e o descasamento vale mais que o próprio
+/// índice.
+///
+/// **A janela chega por parâmetro**, e não é montada aqui a partir do relógio:
+/// quem simula já a tem, e derivá-la de novo tornaria o provedor não
+/// determinístico. `DateRange` compara por valor, de modo que a família
+/// reaproveita o resultado entre observadores da mesma janela.
+///
+/// Recua para o decenal quando a série da janela não vem — sem rede, cache
+/// vazio, janela sem pregão.
+final riskFreeRateForWindowProvider =
+    FutureProvider.family<double, DateRange>((ref, janela) async {
+  final serie = await ref.watch(macroRepositoryProvider).riskFreeDaily(janela);
+  if (serie.isOk && !serie.unwrap().isEmpty) return serie.unwrap().annualized();
+  return ref.watch(riskFreeRateProvider.future);
+});
+
 /// Registro de ativos em recuperação judicial, lido do bundle.
 ///
 /// A Porta 0 os recusa. Vem de arquivo porque a fonte de dados não publica a

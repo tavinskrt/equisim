@@ -35,6 +35,14 @@ class BcbDatasource {
   /// que não atrapalha: só razões entre pontos são usadas, e o fator cancela.
   static const int seriesIbcBrMonthly = 24364;
 
+  /// Frequência de cada série do SGS.
+  ///
+  /// **A série carrega a própria base desde a decisão 59**, e o mapeamento
+  /// mora aqui porque é aqui que se sabe qual código do SGS foi pedido: 12 é
+  /// CDI diário em dias úteis, 433 e 24364 são mensais.
+  static TimeBasis basisOf(int seriesId) =>
+      seriesId == seriesCdiDaily ? TimeBasis.businessDaily : TimeBasis.monthly;
+
   /// Busca uma série no intervalo informado.
   ///
   /// A API devolve `{"data":"02/01/2024","valor":"0.043739"}`, com a data em
@@ -58,23 +66,21 @@ class BcbDatasource {
         ));
       }
 
-      final dates = <DateTime>[];
-      final rates = <double>[];
+      final pontos = <RatePoint>[];
       for (final item in body) {
         if (item is! Map<String, dynamic>) continue;
         final date = _parseBrDate(BrapiJson.asString(item['data']));
         final percent = BrapiJson.asDouble(item['valor']);
         if (date == null || percent == null) continue;
-        dates.add(date);
-        rates.add(percent / 100.0);
+        pontos.add(RatePoint(date: date, rate: percent / 100.0));
       }
 
-      if (rates.isEmpty) {
+      if (pontos.isEmpty) {
         return Err(InsufficientData(
           'Série SGS $seriesId sem dados no período solicitado.',
         ));
       }
-      return Ok(RateSeries(dates: dates, rates: rates));
+      return Ok(RateSeries(pontos, basis: basisOf(seriesId)));
     });
   }
 

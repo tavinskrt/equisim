@@ -1,0 +1,1272 @@
+[
+ {
+  "ticker": "ABCB4",
+  "potencial": 0.15581773799837276,
+  "custoDoCapitalProprio": 0.18648347328199308,
+  "esperadoNoCdi": 0.2021175348041711,
+  "esperadoNoKe": 0.24773716666858261,
+  "z": 1.1137035161198099,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "ABEV3",
+  "potencial": 0.48348157560355787,
+  "custoDoCapitalProprio": 0.17438279815790533,
+  "esperadoNoCdi": 0.23756289019301358,
+  "esperadoNoKe": 0.2710818469333373,
+  "z": 1.7581645231896725,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "AGRO3",
+  "potencial": -0.5557861961598339,
+  "custoDoCapitalProprio": 0.17584197771023366,
+  "esperadoNoCdi": 0.12513908479673297,
+  "esperadoNoKe": 0.16011722108938506,
+  "z": -0.28590466583361107,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "ALOS3",
+  "potencial": -0.4297119055883374,
+  "custoDoCapitalProprio": 0.201504245461565,
+  "esperadoNoCdi": 0.13877729421088092,
+  "esperadoNoKe": 0.19941769825486436,
+  "z": -0.0379372219400118,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "ALPA4",
+  "potencial": -0.6927044952100221,
+  "custoDoCapitalProprio": 0.21373824927822,
+  "esperadoNoCdi": 0.11032781418310658,
+  "esperadoNoKe": 0.183202222043745,
+  "z": -0.5552004951722727,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "ALUP11",
+  "potencial": 0.07104637336504163,
+  "custoDoCapitalProprio": 0.17605761226293956,
+  "esperadoNoCdi": 0.1929473097094931,
+  "esperadoNoKe": 0.2281410805548511,
+  "z": 0.9469721507620278,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "ANIM3",
+  "potencial": 1.4914675767918086,
+  "custoDoCapitalProprio": 0.25659935135281214,
+  "esperadoNoCdi": 0.25086384141758156,
+  "esperadoNoKe": 0.36659935135281213,
+  "z": 2.0,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "AXIA3",
+  "potencial": -0.8174746743849493,
+  "custoDoCapitalProprio": 0.20325417408526864,
+  "esperadoNoCdi": 0.09683067829192009,
+  "esperadoNoKe": 0.15922101095960717,
+  "z": -0.8006029659211178,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "AZEV4",
+  "potencial": -0.9586206896551723,
+  "custoDoCapitalProprio": 0.20266283524494805,
+  "esperadoNoCdi": 0.08156207035050816,
+  "esperadoNoKe": 0.14336106417787464,
+  "z": -1.0782140194013348,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "AZZA3",
+  "potencial": -0.42849067269643876,
+  "custoDoCapitalProprio": 0.21668797277292523,
+  "esperadoNoCdi": 0.13890940227072135,
+  "esperadoNoKe": 0.214733533626065,
+  "z": -0.035535257215640347,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "B3SA3",
+  "potencial": -0.7276914219919401,
+  "custoDoCapitalProprio": 0.22265366687982735,
+  "esperadoNoCdi": 0.10654306923593065,
+  "esperadoNoKe": 0.18833289469817643,
+  "z": -0.6240140396663804,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "BBAS3",
+  "potencial": 0.530639431616341,
+  "custoDoCapitalProprio": 0.19472950962987162,
+  "esperadoNoCdi": 0.2426642372869307,
+  "esperadoNoKe": 0.29652990549922076,
+  "z": 1.850916288533621,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "BBDC3",
+  "potencial": -0.08222643896268189,
+  "custoDoCapitalProprio": 0.19909702804738116,
+  "esperadoNoCdi": 0.1763668736622607,
+  "esperadoNoKe": 0.2346000602920603,
+  "z": 0.6455096771759843,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "BBDC4",
+  "potencial": -0.19832402234636867,
+  "custoDoCapitalProprio": 0.20151887461651513,
+  "esperadoNoCdi": 0.16380790428408046,
+  "esperadoNoKe": 0.22446293748301402,
+  "z": 0.4171647793908888,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "BBSE3",
+  "potencial": 0.11385199240986728,
+  "custoDoCapitalProprio": 0.16700523695612612,
+  "esperadoNoCdi": 0.19757784932220268,
+  "esperadoNoKe": 0.22371924486074724,
+  "z": 1.03116378008402,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "BEEF3",
+  "potencial": 7.364556962025316,
+  "custoDoCapitalProprio": 0.1867416616640216,
+  "esperadoNoCdi": 0.25086384141758156,
+  "esperadoNoKe": 0.2967416616640216,
+  "z": 2.0,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "BMGB4",
+  "potencial": 0.3394648829431437,
+  "custoDoCapitalProprio": 0.1878299962106557,
+  "esperadoNoCdi": 0.2219837439235221,
+  "esperadoNoKe": 0.26894989871659625,
+  "z": 1.4749073182898278,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "BPAC11",
+  "potencial": -0.15108035111411214,
+  "custoDoCapitalProprio": 0.22047657079374083,
+  "esperadoNoCdi": 0.1689185345231083,
+  "esperadoNoKe": 0.24853126389926755,
+  "z": 0.5100853291913949,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "BRAP4",
+  "potencial": -0.6841637010676157,
+  "custoDoCapitalProprio": 0.1906244992495604,
+  "esperadoNoCdi": 0.11125172292412946,
+  "esperadoNoKe": 0.1610123807561083,
+  "z": -0.5384021544264018,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "BRAV3",
+  "potencial": 0.4429530201342283,
+  "custoDoCapitalProprio": 0.2024557276976065,
+  "esperadoNoCdi": 0.2331786741546915,
+  "esperadoNoKe": 0.29477056043471644,
+  "z": 1.6784515043110901,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "BRSR6",
+  "potencial": -0.014784946236559182,
+  "custoDoCapitalProprio": 0.18810489536401218,
+  "esperadoNoCdi": 0.1836624229517488,
+  "esperadoNoKe": 0.23090347689817942,
+  "z": 0.7781560278939498,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "CAML3",
+  "potencial": -0.285425101214575,
+  "custoDoCapitalProprio": 0.19632637114017293,
+  "esperadoNoCdi": 0.15438566007855659,
+  "esperadoNoKe": 0.20984818980114794,
+  "z": 0.24585124838136402,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "CEAB3",
+  "potencial": -0.4104234527687297,
+  "custoDoCapitalProprio": 0.23703881451302905,
+  "esperadoNoCdi": 0.14086384141758157,
+  "esperadoNoKe": 0.23703881451302905,
+  "z": 0.0,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "CMIG4",
+  "potencial": -0.11811722912966253,
+  "custoDoCapitalProprio": 0.18996604182225438,
+  "esperadoNoCdi": 0.17248435241135635,
+  "esperadoNoKe": 0.22158655281602918,
+  "z": 0.5749183817049962,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "COGN3",
+  "potencial": -0.5286885245901639,
+  "custoDoCapitalProprio": 0.23108976124871417,
+  "esperadoNoCdi": 0.12807040186247037,
+  "esperadoNoKe": 0.21829632169360297,
+  "z": -0.23260799191111292,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "CPFE3",
+  "potencial": -0.24706384796070896,
+  "custoDoCapitalProprio": 0.17924510388079434,
+  "esperadoNoCdi": 0.15853542608472496,
+  "esperadoNoKe": 0.19691668854793773,
+  "z": 0.3213015394026071,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "CPLE3",
+  "potencial": -0.7394321766561514,
+  "custoDoCapitalProprio": 0.18585810686955875,
+  "esperadoNoCdi": 0.10527300164272979,
+  "esperadoNoKe": 0.15026726709470697,
+  "z": -0.6471061777245778,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "CSAN3",
+  "potencial": -0.9631578947368421,
+  "custoDoCapitalProprio": 0.22276056339657407,
+  "esperadoNoCdi": 0.08107125376309571,
+  "esperadoNoKe": 0.1629679757420882,
+  "z": -1.0871379573542885,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "CSNA3",
+  "potencial": 0.14465408805031443,
+  "custoDoCapitalProprio": 0.229858414257971,
+  "esperadoNoCdi": 0.20090989607681678,
+  "esperadoNoKe": 0.2899044689172062,
+  "z": 1.0917464483497312,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "CVCB3",
+  "potencial": -0.23404255319148934,
+  "custoDoCapitalProprio": 0.24786109494987418,
+  "esperadoNoCdi": 0.1599440173534203,
+  "esperadoNoKe": 0.2669412708857129,
+  "z": 0.346912289742522,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "CXSE3",
+  "potencial": -0.40090090090090086,
+  "custoDoCapitalProprio": 0.17886500568485925,
+  "esperadoNoCdi": 0.14189395275861574,
+  "esperadoNoKe": 0.17989511702589342,
+  "z": 0.01872929710971215,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "CYRE3",
+  "potencial": -0.6546875,
+  "custoDoCapitalProprio": 0.22536183672827312,
+  "esperadoNoCdi": 0.1144403397394325,
+  "esperadoNoKe": 0.19893833505012407,
+  "z": -0.4804273032390739,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "CYRE4",
+  "potencial": -0.6843633347158855,
+  "custoDoCapitalProprio": 0.23394534777129733,
+  "esperadoNoCdi": 0.11123012735941226,
+  "esperadoNoKe": 0.20431163371312802,
+  "z": -0.5387948010576239,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "DIRR3",
+  "potencial": -0.7643979057591623,
+  "custoDoCapitalProprio": 0.21586054330672003,
+  "esperadoNoCdi": 0.10257230953381277,
+  "esperadoNoKe": 0.17756901142295123,
+  "z": -0.6962096706139782,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "DXCO3",
+  "potencial": -0.7056737588652482,
+  "custoDoCapitalProprio": 0.21462369773093476,
+  "esperadoNoCdi": 0.10892485143094288,
+  "esperadoNoKe": 0.18268470774429607,
+  "z": -0.5807089088479762,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "ECOR3",
+  "potencial": 1.1464646464646464,
+  "custoDoCapitalProprio": 0.2332140273322389,
+  "esperadoNoCdi": 0.25086384141758156,
+  "esperadoNoKe": 0.3432140273322389,
+  "z": 2.0,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "EGIE3",
+  "potencial": 0.7033842070338422,
+  "custoDoCapitalProprio": 0.1719301488401495,
+  "esperadoNoCdi": 0.25086384141758156,
+  "esperadoNoKe": 0.2819301488401495,
+  "z": 2.0,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "EMBJ3",
+  "potencial": -0.972941671930933,
+  "custoDoCapitalProprio": 0.18262292855956985,
+  "esperadoNoCdi": 0.0800128841174723,
+  "esperadoNoKe": 0.12177197125946058,
+  "z": -1.1063810418201685,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "ENEV3",
+  "potencial": -0.8720550924247915,
+  "custoDoCapitalProprio": 0.1972850187927902,
+  "esperadoNoCdi": 0.09092638830730208,
+  "esperadoNoKe": 0.14734756568251073,
+  "z": -0.9079536929141725,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "ENGI11",
+  "potencial": -0.6445654287380906,
+  "custoDoCapitalProprio": 0.19255648295190886,
+  "esperadoNoCdi": 0.11553530467597174,
+  "esperadoNoKe": 0.16722794621029904,
+  "z": -0.46051884984745134,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "EQTL3",
+  "potencial": 0.22574055158324832,
+  "custoDoCapitalProprio": 0.18912438777927532,
+  "esperadoNoCdi": 0.20968150339899072,
+  "esperadoNoKe": 0.25794204976068447,
+  "z": 1.251230217843803,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "EVEN3",
+  "potencial": -0.8156028368794326,
+  "custoDoCapitalProprio": 0.21605738896050503,
+  "esperadoNoCdi": 0.0970331661407414,
+  "esperadoNoKe": 0.17222671368366485,
+  "z": -0.7969213686698216,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "EZTC3",
+  "potencial": -0.46923076923076923,
+  "custoDoCapitalProprio": 0.22256222404592324,
+  "esperadoNoCdi": 0.13450230257125717,
+  "esperadoNoKe": 0.21620068519959884,
+  "z": -0.11566434266044366,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "FESA4",
+  "potencial": -0.5614973262032086,
+  "custoDoCapitalProprio": 0.1961038301059349,
+  "esperadoNoCdi": 0.12452127773099497,
+  "esperadoNoKe": 0.1797612664193483,
+  "z": -0.29713752157430184,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "FRAS3",
+  "potencial": -0.61280353200883,
+  "custoDoCapitalProprio": 0.18270083410961369,
+  "esperadoNoCdi": 0.11897117885000523,
+  "esperadoNoKe": 0.16080817154203736,
+  "z": -0.39804841031956983,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "GGBR4",
+  "potencial": -0.6298342541436464,
+  "custoDoCapitalProprio": 0.1934445326838023,
+  "esperadoNoCdi": 0.11712886386337382,
+  "esperadoNoKe": 0.16970955512959454,
+  "z": -0.43154504644014086,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "GOAU4",
+  "potencial": -0.2354521038495972,
+  "custoDoCapitalProprio": 0.19434914310652854,
+  "esperadoNoCdi": 0.1597915378354473,
+  "esperadoNoKe": 0.21327683952439427,
+  "z": 0.34413993487028627,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "GRND3",
+  "potencial": 1.8722826086956523,
+  "custoDoCapitalProprio": 0.18856197792387602,
+  "esperadoNoCdi": 0.25086384141758156,
+  "esperadoNoKe": 0.298561977923876,
+  "z": 2.0,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "HAPV3",
+  "potencial": -0.8140495867768596,
+  "custoDoCapitalProprio": 0.2317599037616152,
+  "esperadoNoCdi": 0.09720119048635073,
+  "esperadoNoKe": 0.18809725283038436,
+  "z": -0.7938663805678335,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "HYPE3",
+  "potencial": -0.6303972366148531,
+  "custoDoCapitalProprio": 0.1894729880437312,
+  "esperadoNoCdi": 0.11706796268515574,
+  "esperadoNoKe": 0.16567710931130536,
+  "z": -0.4326523405895605,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "IGTI11",
+  "potencial": -0.9349224366250474,
+  "custoDoCapitalProprio": 0.20968265795966126,
+  "esperadoNoCdi": 0.08412565199835431,
+  "esperadoNoKe": 0.152944468540434,
+  "z": -1.0316034439859503,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "IRBR3",
+  "potencial": -0.5325510368108022,
+  "custoDoCapitalProprio": 0.20541126211660476,
+  "esperadoNoCdi": 0.1276525708337096,
+  "esperadoNoKe": 0.1921999915327328,
+  "z": -0.24020491970676297,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "ISAE4",
+  "potencial": 0.563898916967509,
+  "custoDoCapitalProprio": 0.1730286584698873,
+  "esperadoNoCdi": 0.24626211457158442,
+  "esperadoNoKe": 0.27842693162389015,
+  "z": 1.9163322391636881,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "ITSA4",
+  "potencial": -0.22365591397849457,
+  "custoDoCapitalProprio": 0.19455960083613935,
+  "esperadoNoCdi": 0.16106760218625096,
+  "esperadoNoKe": 0.21476336160480874,
+  "z": 0.36734110488489824,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "ITUB3",
+  "potencial": -0.017716535433070918,
+  "custoDoCapitalProprio": 0.19039942890177872,
+  "esperadoNoCdi": 0.18334529542957878,
+  "esperadoNoKe": 0.23288088291377596,
+  "z": 0.7723900729454041,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "ITUB4",
+  "potencial": 0.03649809160305346,
+  "custoDoCapitalProprio": 0.19479861678325566,
+  "esperadoNoCdi": 0.18921001561540673,
+  "esperadoNoKe": 0.24314479098108083,
+  "z": 0.8790213490513664,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "JHSF3",
+  "potencial": -0.12925764192139727,
+  "custoDoCapitalProprio": 0.21456195324528682,
+  "esperadoNoCdi": 0.1712792273860637,
+  "esperadoNoKe": 0.24497733921376894,
+  "z": 0.5530070176087658,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "JSLG3",
+  "potencial": -0.8333333333333334,
+  "custoDoCapitalProprio": 0.22658199520893396,
+  "esperadoNoCdi": 0.09511515238425726,
+  "esperadoNoKe": 0.18083330617560966,
+  "z": -0.831794346060442,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "KEPL3",
+  "potencial": -0.09131736526946099,
+  "custoDoCapitalProprio": 0.19012828381520344,
+  "esperadoNoCdi": 0.17538345383750167,
+  "esperadoNoKe": 0.22464789623512355,
+  "z": 0.6276293167258201,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "KLBN11",
+  "potencial": -0.23523369286081144,
+  "custoDoCapitalProprio": 0.16814498327049737,
+  "esperadoNoCdi": 0.159815164657299,
+  "esperadoNoKe": 0.1870963065102148,
+  "z": 0.34456951344940795,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "KLBN3",
+  "potencial": -0.05459057071960302,
+  "custoDoCapitalProprio": 0.16887499483007853,
+  "esperadoNoCdi": 0.17935641067835179,
+  "esperadoNoKe": 0.20736756409084875,
+  "z": 0.6998648956503675,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "KLBN4",
+  "potencial": -0.2883116883116883,
+  "custoDoCapitalProprio": 0.16766403838493651,
+  "esperadoNoCdi": 0.154073400702405,
+  "esperadoNoKe": 0.18087359766975997,
+  "z": 0.24017380517860798,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "LEVE3",
+  "potencial": -0.22035964644925338,
+  "custoDoCapitalProprio": 0.1839554892388322,
+  "esperadoNoCdi": 0.16142417914294108,
+  "esperadoNoKe": 0.2045158269641917,
+  "z": 0.3738243222792637,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "LIGT3",
+  "potencial": -0.453781512605042,
+  "custoDoCapitalProprio": 0.15215238564186567,
+  "esperadoNoCdi": 0.1361735409831449,
+  "esperadoNoKe": 0.147462085207429,
+  "z": -0.08527818971703031,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "LOGG3",
+  "potencial": -0.707001214083367,
+  "custoDoCapitalProprio": 0.20085835166221638,
+  "esperadoNoCdi": 0.10878125266730485,
+  "esperadoNoKe": 0.16877576291193966,
+  "z": -0.5833197954595767,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "LREN3",
+  "potencial": 0.42026431718061685,
+  "custoDoCapitalProprio": 0.22710582553027453,
+  "esperadoNoCdi": 0.23072430157155754,
+  "esperadoNoKe": 0.3169662856842505,
+  "z": 1.6338265482541083,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "MBRF3",
+  "potencial": -0.8417184850197852,
+  "custoDoCapitalProprio": 0.18863833447649905,
+  "esperadoNoCdi": 0.09420808041779338,
+  "esperadoNoKe": 0.14198257347671087,
+  "z": -0.8482865636325125,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "MDIA3",
+  "potencial": -0.06749156355455584,
+  "custoDoCapitalProprio": 0.1786076908551221,
+  "esperadoNoCdi": 0.1779608331887943,
+  "esperadoNoKe": 0.21570468262633483,
+  "z": 0.6744907594765952,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "MDNE3",
+  "potencial": -0.8512204571871368,
+  "custoDoCapitalProprio": 0.2248101416885175,
+  "esperadoNoCdi": 0.09318019530594136,
+  "esperadoNoKe": 0.17712649557687732,
+  "z": -0.8669753838480038,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "MGLU3",
+  "potencial": -0.7305699481865285,
+  "custoDoCapitalProprio": 0.2618170639001078,
+  "esperadoNoCdi": 0.10623168185577606,
+  "esperadoNoKe": 0.22718490433830227,
+  "z": -0.6296756283964637,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "MILS3",
+  "potencial": -0.9176694110196326,
+  "custoDoCapitalProprio": 0.20502213347725645,
+  "esperadoNoCdi": 0.08599201487985603,
+  "esperadoNoKe": 0.1501503069395309,
+  "z": -0.9976695734131918,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "MOTV3",
+  "potencial": 0.39272943980929675,
+  "custoDoCapitalProprio": 0.19892180442108504,
+  "esperadoNoCdi": 0.22774568934157247,
+  "esperadoNoKe": 0.28580365234507593,
+  "z": 1.5796699622543802,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "MOVI3",
+  "potencial": 0.4697903822441431,
+  "custoDoCapitalProprio": 0.2507832133698802,
+  "esperadoNoCdi": 0.23608183199059282,
+  "esperadoNoKe": 0.34600120394289147,
+  "z": 1.7312361922365682,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "MRVE3",
+  "potencial": 0.2108108108108108,
+  "custoDoCapitalProprio": 0.23287073105509115,
+  "esperadoNoCdi": 0.2080664641215103,
+  "esperadoNoKe": 0.3000733537590199,
+  "z": 1.221865867344159,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "MULT3",
+  "potencial": -0.8472498343273691,
+  "custoDoCapitalProprio": 0.20339647007677927,
+  "esperadoNoCdi": 0.09360972130859141,
+  "esperadoNoKe": 0.1561423499677891,
+  "z": -0.8591658201634575,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "MYPK3",
+  "potencial": -0.33843017329255864,
+  "custoDoCapitalProprio": 0.18854407766053435,
+  "esperadoNoCdi": 0.14865178468068874,
+  "esperadoNoKe": 0.19633202092364152,
+  "z": 0.1415989684201302,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "PCAR3",
+  "potencial": -0.30742049469964666,
+  "custoDoCapitalProprio": 0.21015464030607478,
+  "esperadoNoCdi": 0.1520062869237588,
+  "esperadoNoKe": 0.22129708581225202,
+  "z": 0.20258991829413173,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "PETR3",
+  "potencial": 0.11459334743318594,
+  "custoDoCapitalProprio": 0.18829291896893804,
+  "esperadoNoCdi": 0.19765804612531312,
+  "esperadoNoKe": 0.24508712367666957,
+  "z": 1.032621903776937,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "PETR4",
+  "potencial": 0.26703459987263845,
+  "custoDoCapitalProprio": 0.18608235136304596,
+  "esperadoNoCdi": 0.214148527370141,
+  "esperadoNoKe": 0.2593670373156054,
+  "z": 1.3324488355010808,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "PGMN3",
+  "potencial": -0.5182291666666666,
+  "custoDoCapitalProprio": 0.2176801192683038,
+  "esperadoNoCdi": 0.12920185311277335,
+  "esperadoNoKe": 0.20601813096349558,
+  "z": -0.2120361509965129,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "PINE4",
+  "potencial": 0.10771992818671447,
+  "custoDoCapitalProprio": 0.1846475908799138,
+  "esperadoNoCdi": 0.19691450729079196,
+  "esperadoNoKe": 0.24069825675312417,
+  "z": 1.0191030158765524,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "PNVL3",
+  "potencial": -0.6922492401215805,
+  "custoDoCapitalProprio": 0.19919028427346108,
+  "esperadoNoCdi": 0.11037706184656657,
+  "esperadoNoKe": 0.16870350470244608,
+  "z": -0.5543050831093637,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "POMO3",
+  "potencial": -0.8309859154929577,
+  "custoDoCapitalProprio": 0.1882724117360311,
+  "esperadoNoCdi": 0.09536908659990445,
+  "esperadoNoKe": 0.14277765691835398,
+  "z": -0.827177360321402,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "POMO4",
+  "potencial": -0.8471615720524017,
+  "custoDoCapitalProprio": 0.19050882144071168,
+  "esperadoNoCdi": 0.09361926916631813,
+  "esperadoNoKe": 0.14326424918944825,
+  "z": -0.8589922227502443,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "POSI3",
+  "potencial": 0.06725146198830409,
+  "custoDoCapitalProprio": 0.2242525210835552,
+  "esperadoNoCdi": 0.19253679146799066,
+  "esperadoNoKe": 0.27592547113396426,
+  "z": 0.9395081827347107,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "PRIO3",
+  "potencial": -0.12842664894500744,
+  "custoDoCapitalProprio": 0.18831380280249352,
+  "esperadoNoCdi": 0.1713691208622222,
+  "esperadoNoKe": 0.21881908224713414,
+  "z": 0.5546414444480116,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "PRNR3",
+  "potencial": -0.9774104683195592,
+  "custoDoCapitalProprio": 0.19355132230877808,
+  "esperadoNoCdi": 0.07952946770718752,
+  "esperadoNoKe": 0.13221694859838404,
+  "z": -1.1151704310980737,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "PSSA3",
+  "potencial": -0.3751451800232287,
+  "custoDoCapitalProprio": 0.1765846138604472,
+  "esperadoNoCdi": 0.1446801029986826,
+  "esperadoNoKe": 0.18040087544154823,
+  "z": 0.06938657420183704,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "QUAL3",
+  "potencial": -0.3,
+  "custoDoCapitalProprio": 0.23989387211386098,
+  "esperadoNoCdi": 0.15280900617929938,
+  "esperadoNoKe": 0.2518390368755788,
+  "z": 0.21718481384941468,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "RADL3",
+  "potencial": -0.8274137068534267,
+  "custoDoCapitalProprio": 0.18705649933487373,
+  "esperadoNoCdi": 0.09575551375548162,
+  "esperadoNoKe": 0.1419481716727738,
+  "z": -0.8201514120381809,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "RAIL3",
+  "potencial": -0.7938144329896907,
+  "custoDoCapitalProprio": 0.1969084508778736,
+  "esperadoNoCdi": 0.09939014799407031,
+  "esperadoNoKe": 0.15543475745436233,
+  "z": -0.7540671531547501,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "RANI3",
+  "potencial": 0.2362924281984335,
+  "custoDoCapitalProprio": 0.18314742385337157,
+  "esperadoNoCdi": 0.2108229629490529,
+  "esperadoNoKe": 0.2531065453848429,
+  "z": 1.271984027844933,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "RDOR3",
+  "potencial": -0.5531914893617021,
+  "custoDoCapitalProprio": 0.21006279818196238,
+  "esperadoNoCdi": 0.12541976973670624,
+  "esperadoNoKe": 0.19461872650108705,
+  "z": -0.2808013032886423,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "RENT3",
+  "potencial": -0.8883733624454148,
+  "custoDoCapitalProprio": 0.21859877955440604,
+  "esperadoNoCdi": 0.0891611435233811,
+  "esperadoNoKe": 0.1668960816602056,
+  "z": -0.9400490526218267,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "RENT4",
+  "potencial": -0.8756021535845848,
+  "custoDoCapitalProprio": 0.2352918515932242,
+  "esperadoNoCdi": 0.0905426815048861,
+  "esperadoNoKe": 0.1849706916805287,
+  "z": -0.9149301802308266,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "RIAA3",
+  "potencial": -0.2192737430167598,
+  "custoDoCapitalProprio": 0.24272970917432407,
+  "esperadoNoCdi": 0.16154164780644698,
+  "esperadoNoKe": 0.2634075155631895,
+  "z": 0.3759601161611893,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SANB11",
+  "potencial": -0.27801511666118967,
+  "custoDoCapitalProprio": 0.1948899947544322,
+  "esperadoNoCdi": 0.15518724238876885,
+  "esperadoNoKe": 0.20921339572561948,
+  "z": 0.2604254722034049,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SANB4",
+  "potencial": -0.24284763805721882,
+  "custoDoCapitalProprio": 0.18892719785012824,
+  "esperadoNoCdi": 0.15899151870548967,
+  "esperadoNoKe": 0.20705487513803633,
+  "z": 0.32959413250741965,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SAPR11",
+  "potencial": -0.8715307582260371,
+  "custoDoCapitalProprio": 0.17755999184334267,
+  "esperadoNoCdi": 0.09098310867093211,
+  "esperadoNoKe": 0.1276792590966932,
+  "z": -0.9069224135754448,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SAPR4",
+  "potencial": -0.29532163742690054,
+  "custoDoCapitalProprio": 0.1747967866458853,
+  "esperadoNoCdi": 0.153315092616098,
+  "esperadoNoKe": 0.18724803784440172,
+  "z": 0.2263863854275714,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SAUD3",
+  "potencial": -0.9019741320626277,
+  "custoDoCapitalProprio": 0.17351411491613786,
+  "esperadoNoCdi": 0.08768986699751448,
+  "esperadoNoKe": 0.12034014049607077,
+  "z": -0.9667995349103108,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SBFG3",
+  "potencial": -0.5331858407079646,
+  "custoDoCapitalProprio": 0.23782044241020475,
+  "esperadoNoCdi": 0.1275839003026507,
+  "esperadoNoKe": 0.2245405012952739,
+  "z": -0.24145347481692472,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SBSP3",
+  "potencial": -0.5367508480964945,
+  "custoDoCapitalProprio": 0.19368675781658856,
+  "esperadoNoCdi": 0.12719825214942804,
+  "esperadoNoKe": 0.18002116854843503,
+  "z": -0.24846525942097328,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SEER3",
+  "potencial": 0.08727810650887573,
+  "custoDoCapitalProprio": 0.223040521612241,
+  "esperadoNoCdi": 0.19470319328231905,
+  "esperadoNoKe": 0.27687987347697846,
+  "z": 0.9788973066315905,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SHUL4",
+  "potencial": 0.04474272930648774,
+  "custoDoCapitalProprio": 0.18137775550161117,
+  "esperadoNoCdi": 0.1901018873446349,
+  "esperadoNoKe": 0.2306158014286645,
+  "z": 0.8952371986736971,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SLCE3",
+  "potencial": -0.4241316270566728,
+  "custoDoCapitalProprio": 0.16950904686565096,
+  "esperadoNoCdi": 0.13938094628664618,
+  "esperadoNoKe": 0.16802615173471558,
+  "z": -0.026961729653370795,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SMFT3",
+  "potencial": -0.7484696716750139,
+  "custoDoCapitalProprio": 0.21781770924582697,
+  "esperadoNoCdi": 0.1042953617996829,
+  "esperadoNoKe": 0.1812492296279283,
+  "z": -0.6648814475981577,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SMTO3",
+  "potencial": 1.1019417475728153,
+  "custoDoCapitalProprio": 0.19047652188729486,
+  "esperadoNoCdi": 0.25086384141758156,
+  "esperadoNoKe": 0.30047652188729485,
+  "z": 2.0,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "SUZB3",
+  "potencial": 0.8464491362763915,
+  "custoDoCapitalProprio": 0.15962936700989008,
+  "esperadoNoCdi": 0.25086384141758156,
+  "esperadoNoKe": 0.2696293670098901,
+  "z": 2.0,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "TAEE11",
+  "potencial": 0.1642186371297857,
+  "custoDoCapitalProprio": 0.16918175070232022,
+  "esperadoNoCdi": 0.20302631026586104,
+  "esperadoNoKe": 0.2313442195505997,
+  "z": 1.1302267063323543,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "TAEE4",
+  "potencial": 0.27900355871886107,
+  "custoDoCapitalProprio": 0.16588610855392186,
+  "esperadoNoCdi": 0.2154432811734276,
+  "esperadoNoKe": 0.24046554830976788,
+  "z": 1.355989813742655,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "TEND3",
+  "potencial": -0.7845798440658388,
+  "custoDoCapitalProprio": 0.22766697463276633,
+  "esperadoNoCdi": 0.10038910866262661,
+  "esperadoNoKe": 0.18719224187781136,
+  "z": -0.735904231908272,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "TGMA3",
+  "potencial": -0.47296494355317886,
+  "custoDoCapitalProprio": 0.1956201819284852,
+  "esperadoNoCdi": 0.13409835461987785,
+  "esperadoNoKe": 0.18885469513078149,
+  "z": -0.12300885086734033,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "TOTS3",
+  "potencial": -0.7197101449275362,
+  "custoDoCapitalProprio": 0.2023256488109783,
+  "esperadoNoCdi": 0.10740645167102711,
+  "esperadoNoKe": 0.16886825906442385,
+  "z": -0.608316177210081,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "UGPA3",
+  "potencial": -0.9494922501336184,
+  "custoDoCapitalProprio": 0.20907964129360784,
+  "esperadoNoCdi": 0.08254954820388331,
+  "esperadoNoKe": 0.1507653480799096,
+  "z": -1.0602598766126956,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "UNIP6",
+  "potencial": -0.672634720028085,
+  "custoDoCapitalProprio": 0.18649354354159248,
+  "esperadoNoCdi": 0.1124988816988179,
+  "esperadoNoKe": 0.1581285838228288,
+  "z": -0.5157265403411576,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "USIM3",
+  "potencial": -0.6502808988764045,
+  "custoDoCapitalProprio": 0.2074996801964522,
+  "esperadoNoCdi": 0.11491702811622835,
+  "esperadoNoKe": 0.181552866895099,
+  "z": -0.47176024184278575,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "USIM5",
+  "potencial": -0.6788990825688073,
+  "custoDoCapitalProprio": 0.2095380979251304,
+  "esperadoNoCdi": 0.11182122816779871,
+  "esperadoNoKe": 0.18049548467534754,
+  "z": -0.5280475136324156,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "VALE3",
+  "potencial": 0.08725515136097683,
+  "custoDoCapitalProprio": 0.18696576120458544,
+  "esperadoNoCdi": 0.19470071008679393,
+  "esperadoNoKe": 0.2408026298737978,
+  "z": 0.978852157622043,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "VAMO3",
+  "potencial": -0.3085714285714286,
+  "custoDoCapitalProprio": 0.23963270398950534,
+  "esperadoNoCdi": 0.1518817835290219,
+  "esperadoNoKe": 0.2506506461009457,
+  "z": 0.20032622020800617,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "VBBR3",
+  "potencial": -0.8158961881589619,
+  "custoDoCapitalProprio": 0.20641879944657474,
+  "esperadoNoCdi": 0.09700143257980684,
+  "esperadoNoKe": 0.1625563906088,
+  "z": -0.7974983425049951,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "VIVT3",
+  "potencial": -0.687624750499002,
+  "custoDoCapitalProprio": 0.1728777097102167,
+  "esperadoNoCdi": 0.11087732052436983,
+  "esperadoNoKe": 0.14289118881700497,
+  "z": -0.5452094707856682,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "VLID3",
+  "potencial": -0.5469798657718121,
+  "custoDoCapitalProprio": 0.1954691039012303,
+  "esperadoNoCdi": 0.12609171818025303,
+  "esperadoNoKe": 0.18069698066390175,
+  "z": -0.268584058860519,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "VULC3",
+  "potencial": 0.2697924673328209,
+  "custoDoCapitalProprio": 0.1967317250045773,
+  "esperadoNoCdi": 0.21444686237395452,
+  "esperadoNoKe": 0.2703147459609503,
+  "z": 1.33787310829769,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "WEGE3",
+  "potencial": -0.6283339775802088,
+  "custoDoCapitalProprio": 0.17985241369620358,
+  "esperadoNoCdi": 0.11729115774469212,
+  "esperadoNoKe": 0.15627973002331413,
+  "z": -0.42859424859798995,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "WIZC3",
+  "potencial": 1.040740740740741,
+  "custoDoCapitalProprio": 0.20113405538507684,
+  "esperadoNoCdi": 0.25086384141758156,
+  "esperadoNoKe": 0.3111340553850768,
+  "z": 2.0,
+  "ancoradoNoKe": true,
+  "pisado": false
+ },
+ {
+  "ticker": "YDUQ3",
+  "potencial": -0.5352697095435685,
+  "custoDoCapitalProprio": 0.232483177850844,
+  "esperadoNoCdi": 0.12735847575778314,
+  "esperadoNoKe": 0.21897781219104556,
+  "z": -0.2455521029054261,
+  "ancoradoNoKe": true,
+  "pisado": false
+ }
+]

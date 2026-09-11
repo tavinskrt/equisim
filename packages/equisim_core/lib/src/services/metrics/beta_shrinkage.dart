@@ -155,55 +155,53 @@ abstract final class BetaShrinkage {
     required double taxRate,
   }) {
     final fator = leverageFactor(debtToEquity: debtToEquity, taxRate: taxRate);
-    final unlevered = unlever(
-      leveredBeta: leveredBeta,
-      debtToEquity: debtToEquity,
-      taxRate: taxRate,
-    );
     final priorAlavancado = (fator == null)
         ? leveredBeta
         : prior.unleveredFor(sectorKey) * fator;
 
+    // **O desalavancado sai do beta que sai daqui, e não do cru** (decisão
+    // 54). Encolher em espaço alavancado e desalavancar o resultado é
+    // idêntico a encolher em espaço desalavancado, porque o fator é o mesmo
+    // nos dois lados:
+    //
+    // ```
+    // encolhido / f = w·(β_L/f) + (1 − w)·β_U,prior = w·β_U + (1 − w)·β_U,prior
+    // ```
+    //
+    // Derivá-lo do cru descartava o encolhimento inteiro para quem usa o
+    // caminho resolvido — que é a maioria do universo —, porque o ponto fixo
+    // realavanca `unlevered` e nunca toca em `beta`. A decisão 40 existe para
+    // trocar precisão por viés, e essa troca não estava chegando ao preço.
+    double? desalavancar(double b) =>
+        (fator != null && fator > 0 && b.isFinite) ? b / fator : null;
+
+    ShrunkBeta resultado(double beta, double peso) => ShrunkBeta(
+          beta: beta,
+          weight: peso,
+          unlevered: desalavancar(beta),
+          prior: priorAlavancado,
+        );
+
     if (!priorAlavancado.isFinite || prior.dispersion <= 0) {
-      return ShrunkBeta(
-        beta: leveredBeta,
-        weight: 1.0,
-        unlevered: unlevered,
-        prior: priorAlavancado,
-      );
+      return resultado(leveredBeta, 1.0);
     }
 
     if (standardError == null ||
         !standardError.isFinite ||
         standardError <= 0) {
-      return ShrunkBeta(
-        beta: priorAlavancado,
-        weight: 0.0,
-        unlevered: unlevered,
-        prior: priorAlavancado,
-      );
+      return resultado(priorAlavancado, 0.0);
     }
 
     final precisaoIndividual = 1 / (standardError * standardError);
     final precisaoPrior = 1 / (prior.dispersion * prior.dispersion);
     final soma = precisaoIndividual + precisaoPrior;
-    if (!soma.isFinite || soma <= 0) {
-      return ShrunkBeta(
-        beta: leveredBeta,
-        weight: 1.0,
-        unlevered: unlevered,
-        prior: priorAlavancado,
-      );
-    }
+    if (!soma.isFinite || soma <= 0) return resultado(leveredBeta, 1.0);
 
     final w = (precisaoIndividual / soma).clamp(0.0, 1.0).toDouble();
     final encolhido = w * leveredBeta + (1 - w) * priorAlavancado;
 
-    return ShrunkBeta(
-      beta: encolhido.isFinite ? encolhido : priorAlavancado,
-      weight: w,
-      unlevered: unlevered,
-      prior: priorAlavancado,
-    );
+    return encolhido.isFinite
+        ? resultado(encolhido, w)
+        : resultado(priorAlavancado, w);
   }
 }

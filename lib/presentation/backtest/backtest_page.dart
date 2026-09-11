@@ -541,14 +541,13 @@ class _GoalConfrontationCard extends ConsumerWidget {
     return verdict.maybeWhen(
       orElse: () => const SizedBox.shrink(),
       data: (v) {
-        // Taxa não finita é meta que o solver não resolveu. A aba Meta já
+        // Taxa ausente é meta que o solver não resolveu. A aba Meta já
         // explica o porquê; repetir aqui um travessão sem contexto só ocuparia
         // espaço.
-        if (v == null || !v.requiredAnnualRate.isFinite) {
+        final exigido = v?.requiredAnnualRate;
+        if (exigido == null || !exigido.isFinite) {
           return const SizedBox.shrink();
         }
-
-        final exigido = v.requiredAnnualRate;
         final realizado = principal.metrics.moneyWeightedReturn;
         final folga = realizado == null ? null : (realizado - exigido) * 100;
 

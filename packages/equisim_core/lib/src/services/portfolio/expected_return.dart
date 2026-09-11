@@ -131,22 +131,36 @@ abstract final class ExpectedReturn {
   /// impõem de conservadorismo ao custo de capital brasileiro; a **ordenação**
   /// entre ativos, não.
   ///
-  /// Este estimador usa só a ordenação:
+  /// Este estimador usa só a ordenação, **em torno do custo de capital próprio
+  /// de cada ativo**:
   ///
-  ///     E[R_i] = CDI_spot + z_i · prêmio,    z_i = (u_i − mediana(u)) / MAD*(u)
+  ///     E[R_i] = Ke_i + z_i · prêmio,    z_i = (u_i − mediana(u)) / MAD*(u)
   ///
-  /// O ativo mediano da seção recebe o CDI à vista; quem está descontado em
-  /// relação aos pares recebe o CDI mais um prêmio proporcional à distância, e
-  /// quem está esticado recebe menos. **O preço justo do ativo individual não é
-  /// tocado** — ele continua saindo do DCF, e é ele que a tela de avaliação
-  /// mostra. Esta é a projeção de otimização, e só ela.
+  /// O ativo mediano da seção recebe o **próprio `Ke`** — `Rf + β_i·prêmio`,
+  /// que é o retorno esperado incondicional dele —; quem está descontado em
+  /// relação aos pares recebe mais, e quem está esticado recebe menos. **O
+  /// preço justo do ativo individual não é tocado** — ele continua saindo do
+  /// DCF, e é ele que a tela de avaliação mostra. Esta é a projeção de
+  /// otimização, e só ela.
+  ///
+  /// **A âncora era o CDI, e isso subtraía o prêmio de risco inteiro**
+  /// (decisão 58). Com ela, uma carteira de ações centrada na seção esperava
+  /// exatamente a renda fixa: o prêmio de mercado aparecia só como dispersão em
+  /// torno do CDI, nunca como nível. É afirmação que nenhuma teoria de
+  /// precificação sustenta, e a lente `metodo` a apontou em oito rodadas.
+  ///
+  /// Sem `Ke` disponível para um ativo, a âncora dele recua para [spotRiskFree]
+  /// — o comportamento anterior, e o resultado declara em
+  /// [CrossSectionalReturn.anchoredOnCostOfEquity].
   ///
   /// Escala robusta e não desvio-padrão pelo mesmo motivo da Guarda 3: com
   /// ponto de ruptura de 50%, a cauda de potencial não infla o denominador e
   /// achata todo mundo no centro.
   ///
   /// - [upsides]: potenciais dos ativos a estimar.
-  /// - [spotRiskFree]: CDI corrente, em fração ao ano. É a âncora.
+  /// - [costOfEquity]: custo do capital próprio de cada ativo. É a âncora.
+  /// - [spotRiskFree]: CDI corrente, em fração ao ano. Âncora de recuo, para
+  ///   o ativo cujo `Ke` não veio.
   /// - [riskPremium]: prêmio de risco de mercado. O padrão é o mesmo parâmetro
   ///   do CAPM que desconta o fluxo, para que as duas pontas do trabalho não
   ///   adotem prêmios diferentes.
@@ -159,6 +173,7 @@ abstract final class ExpectedReturn {
   static Map<Ticker, CrossSectionalReturn> crossSection({
     required Map<Ticker, double> upsides,
     required double spotRiskFree,
+    Map<Ticker, double>? costOfEquity,
     double riskPremium = CapmInputs.defaultMarketPremium,
     Iterable<double>? reference,
     double zCap = defaultZCap,
@@ -175,7 +190,14 @@ abstract final class ExpectedReturn {
       final z = (centro == null || escala == null)
           ? 0.0
           : ((e.value - centro) / escala).clamp(-zCap, zCap);
-      final bruto = spotRiskFree + z * riskPremium;
+      // **A bandeira sai de haver `Ke`, e não de comparar as duas âncoras.**
+      // Um `Ke` numericamente igual ao CDI é possível — beta zero, ou
+      // coincidência de arredondamento — e compará-los declararia recuo onde
+      // não houve.
+      final ke = costOfEquity?[e.key];
+      final temKe = ke != null && ke.isFinite && ke > 0;
+      final ancora = temKe ? ke : spotRiskFree;
+      final bruto = ancora + z * riskPremium;
       saida[e.key] = CrossSectionalReturn(
         ticker: e.key,
         upside: e.value,
@@ -183,6 +205,7 @@ abstract final class ExpectedReturn {
         expected: bruto < 0 ? 0.0 : bruto,
         floored: bruto < 0,
         referenceSize: secao.length,
+        anchoredOnCostOfEquity: temKe,
       );
     }
     return saida;
@@ -213,6 +236,11 @@ abstract final class ExpectedReturn {
     final estimado = crossSection(
       upsides: upsides,
       spotRiskFree: spotRiskFree,
+      costOfEquity: {
+        for (final e in valuations.entries)
+          if (e.value.diagnostics != null)
+            e.key: e.value.diagnostics!.costOfEquity,
+      },
       riskPremium: riskPremium,
       reference: reference ?? [for (final v in valuations.values) v.upside],
       zCap: zCap,
@@ -271,6 +299,13 @@ class CrossSectionalReturn {
   /// contra cento e vinte não sustentam a mesma conclusão.
   final int referenceSize;
 
+  /// `true` quando a âncora foi o custo de capital próprio do ativo, e não o
+  /// CDI de recuo.
+  ///
+  /// Sai porque a diferença entre as duas é o prêmio de risco inteiro, e o
+  /// leitor precisa poder distinguir um número do outro (decisão 58).
+  final bool anchoredOnCostOfEquity;
+
   const CrossSectionalReturn({
     required this.ticker,
     required this.upside,
@@ -278,5 +313,6 @@ class CrossSectionalReturn {
     required this.expected,
     required this.floored,
     required this.referenceSize,
+    this.anchoredOnCostOfEquity = false,
   });
 }

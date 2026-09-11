@@ -202,7 +202,11 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
   );
 
   final prices = ref.watch(priceRepositoryProvider);
-  final riskFree = await ref.watch(riskFreeRateProvider.future);
+
+  // A taxa livre de risco do Sharpe é a **da própria janela** da simulação —
+  // ver `riskFreeRateForYearsProvider`.
+  final riskFree =
+      await ref.watch(riskFreeRateForWindowProvider(requested).future);
 
   final tickers = <Ticker>{
     ...study.principal.tickers,

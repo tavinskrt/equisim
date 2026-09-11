@@ -22,7 +22,10 @@ abstract final class FeasibilityCopy {
   /// Cobre os casos de [FeasibilityReason] exaustivamente: acrescentar um caso
   /// lá quebra a compilação aqui, que é o efeito desejado.
   static String of(FeasibilityVerdict verdict) {
-    final required = Fmt.percent(verdict.requiredAnnualRate, decimals: 2);
+    // A taxa só falta no caso `unsolvable`, cuja frase não a cita; o travessão
+    // existe para que o `switch` continue exaustivo sem ramo condicional.
+    final taxa = verdict.requiredAnnualRate;
+    final required = taxa == null ? '—' : Fmt.percent(taxa, decimals: 2);
     final cdi = Fmt.percent(verdict.anchors.riskFreeCagr, decimals: 2);
     final market = Fmt.percent(verdict.anchors.marketCagr, decimals: 2);
     final years = verdict.anchors.observedYears;

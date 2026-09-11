@@ -430,3 +430,83 @@ está travada por teste nas duas convenções.
 | potenciais positivos | 30 | **36** |
 
 **O quartil superior deixou de tangenciar o zero e passou a +8,2%.**
+
+---
+
+## 13. O piso do crescimento perpétuo, e o piso que ele escondia
+
+### 13.1 Dois pisos, e o de baixo nunca era alcançado
+
+`GrowthEstimator` declara uma banda de sanidade para o crescimento estimado:
+
+```dart
+/// Piso: uma empresa em perpetuidade não encolhe indefinidamente.
+static const double floorRate = -0.05;
+```
+
+E `perpetual` aplicava, **por cima dela**, um segundo piso:
+
+```dart
+math.min(explicitGrowth, economyGrowth).clamp(0.0, economyGrowth)
+```
+
+O segundo tornava o primeiro inalcançável na perpetuidade. O projeto tinha
+declarado onde fica o limite do encolhimento eterno — −5% ao ano, com a razão
+escrita — e depois o substituía por zero sem dizer.
+
+### 13.2 O que o piso em zero afirma
+
+Que **toda empresa em declínio volta a crescer zero em dez anos**. O caminho
+explícito decai linearmente de `g₁` até `g_∞`; com `g₁ = −4,56%` e `g_∞ = 0`,
+ele **sobe** — uma recuperação que nada no dado sustenta.
+
+E é o único elemento assimétrico da regra. O teto diz "ninguém cresce acima da
+economia para sempre", que é afirmação sobre um limite externo. O piso em zero
+diz "ninguém encolhe para sempre", que é afirmação sobre a empresa — e a banda
+de sanidade já a fazia, com número próprio.
+
+**Com o terminal neutro, o crescimento perpétuo não cria valor.** `ROIC_∞ =
+WACC` faz o terminal virar `fluxo/r`, de modo que `g_∞` não entra na
+perpetuidade a não ser por `fluxo_{N+1} = fluxo_N·(1 + g_∞)`. O papel dele é
+ser o **alvo do decaimento** do período explícito — e é aí que os dez anos de
+recuperação presumida pesam.
+
+### 13.3 O tamanho
+
+O piso mordia em **3 dos 127**:
+
+| Ativo | crescimento medido | efeito de remover o piso |
+|---|---:|---:|
+| PCAR3 | −4,56% | **−23,4%** |
+| BRAP4 | −1,31% | −4,7% |
+| B3SA3 | −0,83% | −2,3% |
+
+A PRNR3 aparece com −2,4% na varredura e **não é efeito econômico**: o preço
+justo dela vai de R$ 0,42 para R$ 0,41, um passo de um centavo sobre um papel
+de centavos, vindo de diferença de convergência do ponto fixo na oitava casa.
+
+A distribuição do universo não se move: potencial mediano segue em −41,0%, com
+34 positivos.
+
+### 13.4 O que fica
+
+O piso passa a ser o `floorRate` da banda de sanidade, e o teto continua sendo
+o crescimento nominal da economia. **Uma regra, e não uma regra com exceção.**
+
+O caso patológico ficou fechado junto: `clamp` lança quando o piso supera o
+teto, e supera quando a economia encolhe mais de 5% ao ano. É caminho
+implausível e é público — quem monta premissas à mão alcança —, e ali o teto
+vence, porque "ninguém cresce acima da economia para sempre" é a regra mais
+forte das duas.
+
+### 13.5 O piso que a mudança tornou alcançável
+
+O reinvestimento terminal do ramo com vantagem competitiva é `(g_∞ / ROIC_∞)`
+confinado em `[0; 0,95]`, e `retentionAt` faz o mesmo no período explícito. Com
+`g_∞` negativo a razão fica negativa e o piso morde: **a empresa que encolhe
+libera capital, e o motor não lhe credita isso**.
+
+Antes da decisão 56 o caminho não era alcançável, porque `g_∞` nunca era
+negativo. Agora é, em três ativos. Fica **declarado e não corrigido**: creditar
+o capital liberado exigiria afirmar que ele chega ao acionista, e a direção do
+piso é a conservadora.

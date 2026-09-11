@@ -851,6 +851,8 @@ abstract final class ValuationCascade {
       diagnostics: ValuationDiagnostics(
         terminalShare: mistura(dFirma.terminalShare, dAcionista.terminalShare),
         equityShare: dFirma.equityShare,
+        // Não se mistura: é o mesmo CAPM nos dois lados, sobre o mesmo beta.
+        costOfEquity: dFirma.costOfEquity,
         baseFactor: mistura(dFirma.baseFactor, dAcionista.baseFactor),
         growthIdentified:
             dFirma.growthIdentified && dAcionista.growthIdentified,
@@ -1349,13 +1351,78 @@ abstract final class ValuationCascade {
     }
 
     // --- Fluxo-base --------------------------------------------------------
-    final base = _baseProfitFor(
-      lane,
-      latest,
-      divisor,
-      fatorBase,
-      aliquotaEstrutural,
-    );
+    //
+    // **A normalização funcionava no pico e desligava no vale** (decisão 53).
+    // O fator é `ciclo ÷ atual` e exige denominador positivo, de modo que um
+    // exercício de prejuízo não era corrigido — era recusado. Numa siderúrgica
+    // o vale é metade do ciclo, e recusar ali descarta a empresa por causa de
+    // um ano.
+    //
+    // A reconstrução escreve a mesma conta de um jeito que sobrevive ao
+    // denominador: `fluxo-base = retorno do ciclo × capital de hoje`. As três
+    // condições são as que já existem, e nenhuma é nova:
+    //
+    // - **o ciclo tem de ser positivo e medível** — sem isso não há a que
+    //   voltar;
+    // - **o prejuízo tem de ser exceção** — ao menos
+    //   [ValuationParameters.minPositiveFlow] da janela positiva, que é o
+    //   mesmo corte com que a Porta 3 decide se um fluxo se sustenta. É ele
+    //   que separa o vale do declínio: a HBSA3 tem mediana de +0,2% com
+    //   metade da janela no prejuízo, e não volta.
+    //
+    // - **a trava de saúde tem de não reprovar** — a mesma que já impede a
+    //   normalização para cima em quem deteriorou, com a isenção cíclica da
+    //   decisão 30.
+    //
+    // **A trava foi retirada e reposta, por medição.** O argumento para tirá-la
+    // era de ordenação: ela devolve nulo quando a referência de três anos
+    // atrás também era prejuízo, de modo que aprova quem já perdia dinheiro lá
+    // atrás e reprova quem perdeu agora. Sem ela, porém, a RAPT4 entra a
+    // **+311,7% de potencial** — resultado caído 109% no triênio, e o
+    // fluxo-base reconstruído sobre um retorno de ciclo de 17,6% que a empresa
+    // acabou de deixar de ter. O risco que a trava controla é esse, e é
+    // assimétrico: reconstruir a base erra para cima. A ordenação imperfeita é
+    // o preço, e ele é menor.
+    double? baseDoCiclo;
+    if (retornoAtual != null &&
+        retornoAtual <= 0 &&
+        retornoCiclo != null &&
+        retornoCiclo > 0 &&
+        !travaDeSaude) {
+      final fracao =
+          series.positiveShare(window: ValuationParameters.cycleWindow);
+      final capital = series.latestBase;
+      if (fracao != null &&
+          fracao >= ValuationParameters.minPositiveFlow &&
+          capital != null &&
+          capital > 0) {
+        final total = retornoCiclo * capital;
+        final porUnidade = lane == ValuationLane.firm
+            ? total
+            : (divisor.count > 0 ? total / divisor.count : null);
+        if (porUnidade != null && porUnidade.isFinite && porUnidade > 0) {
+          baseDoCiclo = porUnidade;
+          local.add(
+            'O exercício-base veio no prejuízo — retorno de '
+            '${_pct(retornoAtual)} sobre o capital —, e o fluxo-base foi '
+            'reconstruído do ciclo: ${_pct(retornoCiclo)} de retorno mediano '
+            'sobre o capital de hoje, com ${_pct(fracao)} da janela positiva. '
+            '**O preço justo não repousa em nenhum exercício recente '
+            'observado**: repousa na afirmação de que a empresa volta ao que '
+            'já foi.',
+          );
+        }
+      }
+    }
+
+    final base = baseDoCiclo ??
+        _baseProfitFor(
+          lane,
+          latest,
+          divisor,
+          fatorBase,
+          aliquotaEstrutural,
+        );
     if (base == null || base <= 0) return null;
 
     // --- Custo de capital realavancado ano a ano (decisão 41) --------------
@@ -1424,7 +1491,7 @@ abstract final class ValuationCascade {
                   riskFreePath: rfPath,
                   terminalRiskFree: inputs.terminalRiskFreeRate,
                   marketPremium: inputs.capm.marketPremium,
-                  costOfDebt: kd ?? desconto,
+                  costOfDebt: kd ?? inputs.capm.riskFreeRate,
                   taxRate: ValuationParameters.statutoryTaxRate,
                 )
               : LeveredCostOfCapital.solveEquity(
@@ -1599,7 +1666,16 @@ abstract final class ValuationCascade {
     // discordavam, e sob esta rota há um só.
     final taxas = taxasResolvidas;
     final rotaDerivada = taxas != null;
-    final kdParaFcfe = latest.costOfDebt ?? desconto;
+    // **Sem dívida bruta não há custo de dívida a medir, e o que sobra é
+    // rendimento de caixa** (decisão 58). O recuo era a própria taxa de
+    // desconto — o WACC —, e com dívida líquida **negativa** ela multiplica um
+    // peso negativo: o motor creditava ao caixa o rendimento do negócio. A
+    // taxa livre de risco é o que caixa rende.
+    //
+    // Medido em 11/09/2026: 18 dos avaliados chegam aqui, e em 16 deles a via
+    // é a do acionista, que não usa este número. Os dois que usam são ALOS3,
+    // com R$ 2,43 bi de caixa líquido, e BRAP4, com R$ 18 mi.
+    final kdParaFcfe = latest.costOfDebt ?? inputs.capm.riskFreeRate;
 
     // --- A estrutura de capital recusada (decisão 45) ----------------------
     //
@@ -1902,6 +1978,10 @@ abstract final class ValuationCascade {
         moatApplied: moatVerificado != null,
         migrated: !allowLaneMigration,
         finiteTerm: prazoDeterminado,
+        rebuiltBase: baseDoCiclo != null,
+        // `Rf + β·prêmio` sobre a taxa corrente: o retorno esperado
+        // incondicional do papel, que a camada de carteira ancora.
+        costOfEquity: inputs.capm.costOfEquity,
         terminalDiscountRate:
             taxasResolvidas?.terminalWacc ?? descontoTerminal,
         terminalRetainedSpread: moatVeredito.retainedFraction ?? 0.0,
@@ -1965,6 +2045,8 @@ abstract final class ValuationCascade {
     required bool moatApplied,
     required bool migrated,
     required bool finiteTerm,
+    required bool rebuiltBase,
+    required double costOfEquity,
     required double terminalDiscountRate,
     required double terminalRetainedSpread,
     required double growthRate,
@@ -1989,12 +2071,14 @@ abstract final class ValuationCascade {
     }
     if (migrated) caveats.add(ValuationCaveat.viaMigrada);
     if (finiteTerm) caveats.add(ValuationCaveat.prazoDeterminado);
+    if (rebuiltBase) caveats.add(ValuationCaveat.baseReconstruida);
     if (outcome.equityShare < ValuationDiagnostics.fragileEquityShare) {
       caveats.add(ValuationCaveat.ponteFragil);
     }
     return ValuationDiagnostics(
       terminalShare: outcome.terminalShare,
       equityShare: outcome.equityShare,
+      costOfEquity: costOfEquity,
       baseFactor: baseFactor,
       growthIdentified: growthOrigin == GrowthOrigin.fundamental,
       moatApplied: moatApplied,

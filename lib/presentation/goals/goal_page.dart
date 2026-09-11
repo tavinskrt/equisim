@@ -347,8 +347,10 @@ class _FeasibilityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Taxa ausente é meta sem solução: os cartões numéricos somem, e a frase
+    // do veredito explica. Ver `FeasibilityVerdict.requiredAnnualRate`.
     final rate = verdict.requiredAnnualRate;
-    final showRates = rate.isFinite;
+    final showRates = rate != null && rate.isFinite;
 
     return GlassCard(
       borderColor: _color(context).withValues(alpha: 0.5),

@@ -4,7 +4,7 @@ library;
 import '../repositories/repositories.dart';
 import '../services/metrics/beta.dart';
 import '../services/metrics/beta_shrinkage.dart';
-import '../services/valuation/capital_base.dart';
+import '../services/metrics/market_leverage.dart';
 import '../services/valuation/growth_guards.dart';
 import '../services/valuation/inference.dart';
 import '../time/point_in_time_view.dart';
@@ -161,12 +161,22 @@ abstract final class ResolveBetaPrior {
       observacoes.add(BetaObservation(
         leveredBeta: estimativa.unwrap().beta,
         sectorKey: chave.isEmpty ? null : chave,
-        debtToEquity: ultimo.totalDebt / equity,
-        taxRate: CapitalSeries.structuralTaxRate(
-              pub,
-              statutoryRate: ValuationParameters.statutoryTaxRate,
+        // A mesma régua de [PrepareValuationInputs]: dívida líquida, medida na
+        // janela em que o beta foi estimado. O prior é mediana de betas
+        // desalavancados, e desalavancá-los por uma régua e realavancá-los por
+        // outra desloca o setor inteiro. Ver [MarketLeverage.overWindow] e
+        // [FundamentalsSnapshot.debtToMarketEquity].
+        debtToEquity: MarketLeverage.overWindow(
+              snapshots: pub,
+              prices: pontos,
+              window: janela,
             ) ??
-            ValuationParameters.statutoryTaxRate,
+            ultimo.debtToMarketEquity(equity) ??
+            0.0,
+        // A estatutária, pela mesma razão de [PrepareValuationInputs]: o
+        // `(1 − τ)` de Hamada é escudo fiscal do juro, e a realavancagem o usa
+        // cheio (decisão 55).
+        taxRate: ValuationParameters.statutoryTaxRate,
       ));
     }
 

@@ -217,7 +217,7 @@ abstract final class ResolveMarketAnchors {
     // inflação de fallback mantém o crescimento perpétuo nominal — o que é
     // menos errado que voltar a misturar real com nominal.
     final inflation = ipca.isOk && ipca.unwrap().rates.isNotEmpty
-        ? ipca.unwrap().annualized(periodsPerYear: 12)
+        ? ipca.unwrap().annualized()
         : MarketAnchors.fallback2026.inflationCagr;
 
     final current = cdi.isOk
@@ -251,16 +251,10 @@ abstract final class ResolveMarketAnchors {
   static const int currentRateWindowDays = 63;
 
   static double _currentRateOf(RateSeries series) {
-    if (series.rates.isEmpty) {
+    if (series.isEmpty) {
       return MarketAnchors.fallback2026.currentRiskFreeRate;
     }
-    final tail = series.rates.length <= currentRateWindowDays
-        ? series.rates
-        : series.rates.sublist(series.rates.length - currentRateWindowDays);
-    return RateSeries(
-      dates: series.dates.sublist(series.dates.length - tail.length),
-      rates: tail,
-    ).annualized();
+    return series.tail(currentRateWindowDays).annualized();
   }
 
   /// CAGR do índice entre o primeiro e o último ponto **efetivamente

@@ -176,6 +176,20 @@ enum ValuationCaveat {
   /// ressalva declara.
   viasMescladas('o preço justo combina as duas vias'),
 
+  /// O fluxo-base não veio do exercício observado: ele foi reconstruído do
+  /// retorno mediano do ciclo sobre o capital de hoje.
+  ///
+  /// Acontece quando o exercício mais recente veio no prejuízo. O fator de
+  /// normalização não serve ali — ele é `ciclo ÷ atual`, e o denominador não é
+  /// positivo —, e sem a reconstrução a avaliação seria recusada por fluxo-base
+  /// não positivo. Ver
+  /// [`base_negativa.md`](../../../../../docs/validacao/base_negativa.md).
+  ///
+  /// **É a ressalva mais forte da lista.** O preço justo aqui não repousa em
+  /// nenhum exercício observado recente: repousa na afirmação de que a empresa
+  /// volta ao que já foi.
+  baseReconstruida('o fluxo-base vem do ciclo, e não do exercício observado'),
+
   /// O negócio opera sob contrato de prazo determinado, e o valor terminal
   /// supõe perpetuidade.
   ///
@@ -314,6 +328,19 @@ class ValuationDiagnostics {
   final List<double> retentionPath;
 
   /// Ressalvas medidas, na ordem em que a cascata as apura.
+  /// Custo do capital próprio do ativo pelo CAPM, sobre a taxa livre de risco
+  /// **corrente**.
+  ///
+  /// **É o retorno esperado incondicional do papel** — `Rf + β·prêmio` —, e
+  /// sai com o resultado porque a camada de carteira precisa dele. O estimador
+  /// transversal ancorava no CDI, o que dava ao ativo mediano um retorno
+  /// esperado **sem prêmio de risco algum**: uma carteira de ações centrada na
+  /// seção esperava exatamente a renda fixa (decisão 58).
+  ///
+  /// Não confundir com [ValuationResult.discountRate], que é WACC na via da
+  /// firma — abaixo do `Ke` sempre que há dívida.
+  final double costOfEquity;
+
   final List<ValuationCaveat> caveats;
 
   const ValuationDiagnostics({
@@ -329,6 +356,7 @@ class ValuationDiagnostics {
     this.terminalReturnOnCapital,
     this.firmTaxRate,
     this.terminalCostOfEquity,
+    required this.costOfEquity,
     this.retentionPath = const [],
     this.growthPath = const [],
     this.caveats = const [],

@@ -1368,6 +1368,9 @@ void main() {
 
       final container = ProviderContainer(overrides: [
         riskFreeRateProvider.overrideWith((ref) async => 0.10),
+        // O Sharpe usa a taxa **da janela** desde a decisão 58; sem o override
+        // o provedor vai ao repositório macro e, por ele, ao banco em disco.
+        riskFreeRateForWindowProvider.overrideWith((ref, janela) async => 0.10),
         priceRepositoryProvider.overrideWithValue(FakePriceRepository({
           for (final symbol in ['PETR4', 'VALE3', 'ITUB4'])
             Ticker.parse(symbol): seriesOf(symbol, start, closes),

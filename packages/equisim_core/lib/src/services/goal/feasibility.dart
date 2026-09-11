@@ -162,8 +162,13 @@ class FeasibilityVerdict {
   /// apresentação usa para escolher a frase.
   final FeasibilityReason reason;
 
-  /// Taxa anual exigida pela meta, em fração.
-  final double requiredAnnualRate;
+  /// Taxa anual exigida pela meta, em fração. `null` quando não há taxa.
+  ///
+  /// **Nulo em vez de `double.infinity`** (decisão 58). O sentinela dizia "não
+  /// há taxa" com um número, e obrigava todo consumidor a lembrar de testar
+  /// `isFinite` antes de formatar — quem esquecesse publicaria `Infinity%` na
+  /// tela. O tipo agora carrega a ausência, e o compilador cobra o tratamento.
+  final double? requiredAnnualRate;
 
   /// Quantas vezes a taxa exigida supera o CAGR histórico do índice.
   ///
@@ -186,11 +191,6 @@ class FeasibilityVerdict {
     this.marketMultiple,
   });
 
-  /// A interface deve impedir o prosseguimento.
-  bool get blocks => level == FeasibilityLevel.unrealistic;
-
-  /// A interface deve alertar, sem impedir.
-  bool get warns => level == FeasibilityLevel.demanding;
 }
 
 /// Julga se uma meta patrimonial é plausível diante do que o mercado entregou.
@@ -291,13 +291,13 @@ abstract final class GoalFeasibility {
   /// interface montava este caso à mão, e era o único ponto em que ela
   /// decidia um `FeasibilityLevel` por conta própria.
   ///
-  /// A taxa sai como `double.infinity` — não há taxa —, e a interface já trata
-  /// valor não finito escondendo os cartões numéricos.
+  /// A taxa sai **nula** — não há taxa —, e a interface esconde os cartões
+  /// numéricos quando ela falta.
   static FeasibilityVerdict unsolvable({required MarketAnchors anchors}) =>
       FeasibilityVerdict(
         level: FeasibilityLevel.unrealistic,
         reason: FeasibilityReason.unsolvable,
-        requiredAnnualRate: double.infinity,
+        requiredAnnualRate: null,
         anchors: anchors,
       );
 }

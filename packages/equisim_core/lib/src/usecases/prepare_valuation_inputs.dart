@@ -4,7 +4,7 @@ import '../failures/result.dart';
 import '../repositories/repositories.dart';
 import '../services/metrics/beta.dart';
 import '../services/metrics/beta_shrinkage.dart';
-import '../services/valuation/capital_base.dart';
+import '../services/metrics/market_leverage.dart';
 import '../services/valuation/growth_guards.dart';
 import '../time/point_in_time_view.dart';
 import '../services/valuation/cost_of_capital.dart';
@@ -116,12 +116,27 @@ abstract final class PrepareValuationInputs {
         standardError: beta.standardError,
         prior: betaPrior,
         sectorKey: sectorKey,
-        debtToEquity: ultimo.totalDebt / equityMercado,
-        taxRate: CapitalSeries.structuralTaxRate(
-              publicados,
-              statutoryRate: ValuationParameters.statutoryTaxRate,
+        // **A alavancagem da janela do beta, e não a de hoje** (decisão 55).
+        // O beta é covariância de cinco anos e carrega a estrutura de capital
+        // daqueles cinco; desalavancá-lo com a foto de hoje mistura janelas.
+        // Sem exercícios suficientes na janela, recua para a foto — que é o
+        // comportamento anterior. Ver [MarketLeverage.overWindow] e
+        // [FundamentalsSnapshot.debtToMarketEquity].
+        debtToEquity: MarketLeverage.overWindow(
+              snapshots: publicados,
+              prices: series.points,
+              window: window,
             ) ??
-            ValuationParameters.statutoryTaxRate,
+            ultimo.debtToMarketEquity(equityMercado) ??
+            0.0,
+        // **A estatutária, e é a mesma que a realavancagem usa** (decisão 55).
+        // O `(1 − τ)` de Hamada é o escudo fiscal do juro, e a
+        // [decisão 37](../../../../../docs/decisoes/037-aliquota-estrutural-no-fluxo-da-firma.md)
+        // já dizia que ele continua na estatutária: a dedutibilidade vale na
+        // margem, e a margem é a alíquota cheia. A estrutural é a do **fluxo**,
+        // que é outra coisa — usá-la aqui desalavancava por um escudo e
+        // realavancava por outro.
+        taxRate: ValuationParameters.statutoryTaxRate,
       );
       betaFinal = encolhido.beta;
       betaDesalavancado = encolhido.unlevered;
