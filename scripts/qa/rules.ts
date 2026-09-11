@@ -151,6 +151,20 @@ R1 -- PRECISAO MONETARIA
   Correcao aceita: "int" de centavos internamente; "double" so na fronteira.
   Severidade: FAIL se introduzido pelo diff; WARN se preexistente.
 
+  NAO ACUSE -- CAMINHO DE CALCULO DE FLUXO DESCONTADO. Um laco de projecao de
+  DCF nao e caminho monetario no sentido desta regra, e forcar centavos ali
+  PIORA o numero. A razao e aritmetica: a projecao tem dez iteracoes, e o erro
+  relativo de ponto flutuante acumulado fica na casa de 1e-14 -- onze ordens de
+  grandeza abaixo do meio centavo que decidiria a apresentacao. Normalizar cada
+  valor presente anual em centavos antes de somar INTRODUZ arredondamento de
+  ate meio centavo por ano, que e erro real onde hoje nao ha nenhum.
+  O criterio que separa: o valor e convertido para "Money" na FRONTEIRA (uma
+  unica vez, ao fim do calculo) e nunca persistido nem exibido como "double"?
+  Entao esta correto, e acusar e falso positivo. E o arranjo que
+  "DcfCalculator" ja usa desde a decisao 25, e que "Money.fromReais" fecha.
+  Continua sendo FAIL: saldo de carteira somado em laco, preco vezes
+  quantidade sem normalizar, e qualquer "double" que vire saldo persistido.
+
 R2 -- ARREDONDAMENTO
   Todo arredondamento monetario deve ser EXPLICITO, aplicado em UM ponto
   definido (fronteira de apresentacao ou persistencia) e com modo declarado.

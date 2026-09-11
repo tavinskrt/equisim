@@ -194,6 +194,13 @@ class BrapiFundamentalsDto {
         sharesOutstandingAsOf: _num('sharesOutstandingAsOf'),
         marketCap: _num('marketCap'),
         enterpriseToEbitda: _num('enterpriseToEbitda'),
+        // Os dois termos da ponte (decisão 49). `minorityInterest` é a
+        // participação dos não controladores **dentro** do patrimônio
+        // consolidado; `equityIncomeResult` é a equivalência patrimonial, que
+        // na DRE brasileira entra **acima** do EBIT.
+        minorityInterest: _num('minorityInterest') ??
+            _num('nonControllingShareholdersEquity'),
+        equityIncomeResult: _num('equityIncomeResult'),
       );
 }
 

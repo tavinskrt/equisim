@@ -9,6 +9,13 @@ enum BetaSource {
 
   /// Arbitrado pelo usuário.
   manual,
+
+  /// Regressão **encolhida** em direção ao prior transversal, por precisão.
+  ///
+  /// Só aparece quando o encolhimento de fato moveu o número — peso do
+  /// estimador individual abaixo de 1. Medido em 10/09/2026: 23 dos 363
+  /// papéis, com peso mediano de 0,98 no universo inteiro.
+  shrunk,
 }
 
 /// Como o prêmio de risco de mercado foi definido.

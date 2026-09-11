@@ -41,14 +41,17 @@ export 'src/services/backtest/portfolio_backtest.dart';
 export 'src/services/goal/feasibility.dart';
 export 'src/services/goal/required_return.dart';
 export 'src/services/metrics/beta.dart';
+export 'src/services/metrics/beta_shrinkage.dart';
 export 'src/services/metrics/returns.dart';
 export 'src/services/metrics/risk_metrics.dart';
 export 'src/services/portfolio/expected_return.dart';
 export 'src/services/portfolio/sector_concentration.dart';
 export 'src/services/valuation/capital_base.dart';
+export 'src/services/valuation/concession_sectors.dart';
 export 'src/services/valuation/cyclical_sectors.dart';
 export 'src/services/valuation/eligibility.dart';
 export 'src/services/valuation/growth_guards.dart';
+export 'src/services/valuation/levered_rates.dart';
 export 'src/services/valuation/inference.dart';
 export 'src/services/valuation/cost_of_capital.dart';
 export 'src/services/valuation/dcf.dart';
@@ -56,6 +59,7 @@ export 'src/services/valuation/growth_estimator.dart';
 export 'src/services/valuation/scenario_engine.dart';
 
 // --- Casos de uso ---
+export 'src/usecases/resolve_beta_prior.dart';
 export 'src/usecases/compute_valuation.dart';
 export 'src/usecases/portfolio_usecases.dart';
 export 'src/usecases/prepare_valuation_inputs.dart';

@@ -138,14 +138,22 @@ Future<void> main(List<String> args) async {
 
       final e0 = ciclo - rInf;
 
-      // O veredito completo, com as condições que barram — é o que permite
-      // separar "não tem excedente" de "tem, e o corte tirou".
+      // Excedente por exercício, com o ano — a regressão de persistência só
+      // pareia anos adjacentes, e sem o ano não teria como saber.
+      final excedentes = [
+        for (final r in serie.returns)
+          if (r.value.isFinite) (year: r.year, excess: r.value - rInf),
+      ];
+
+      // O veredito completo, com as condições que barram e os dois valores de
+      // persistência lado a lado.
       final veredito = GrowthGuards.residualMoat(
         cycleReturn: ciclo,
         terminalDiscountRate: rInf,
         externalCapitalRatio: GrowthGuards.externalCapitalRatio(serie),
         periods: serie.length,
-        operationalDecline: GrowthGuards.recentOperationalDecline(pub),
+        excessReturns: excedentes,
+        projectionYears: inputs.projectionYears,
       );
 
       final curva = <String, double?>{};
@@ -162,14 +170,9 @@ Future<void> main(List<String> args) async {
           ? comPadrao / semExcedente - 1
           : null;
 
-      // Excedente ano a ano, para a persistência.
-      final excedente = [
-        for (final r in serie.returns)
-          if (r.value.isFinite) r.value - rInf,
-      ];
-      final p = _persistencia(excedente);
-      final anosPositivos =
-          excedente.where((x) => x > 0).length / (excedente.isEmpty ? 1 : excedente.length);
+      final p = _persistencia([for (final e in excedentes) e.excess]);
+      final anosPositivos = excedentes.where((x) => x.excess > 0).length /
+          (excedentes.isEmpty ? 1 : excedentes.length);
 
       saida.add({
         'ticker': ticker.value,
@@ -183,10 +186,12 @@ Future<void> main(List<String> args) async {
         'excedente': e0,
         'pesoTerminal': base.diagnostics!.terminalShare,
         'moatConcedido': base.diagnostics!.moatApplied,
+        'lambdaAplicado': base.diagnostics!.terminalRetainedSpread,
+        'phiCru': veredito.rawPersistence,
+        'phiAplicado': veredito.persistence,
         'bloqueios': [for (final b in veredito.blocks) b.name],
-        // Distância relativa ao corte que menos falta: negativa reprova.
-        'folgaPorMultiplo': ciclo - veredito.requiredByMultiple,
-        'folgaPorExcedente': ciclo - veredito.requiredBySpread,
+        // A única fronteira de nível que restou: o excedente ser positivo.
+        'folgaPorExcedente': e0,
         'curva': curva,
         'saltoDoDegrau': salto,
         'persistenciaPhi': p?.phi,
@@ -279,7 +284,25 @@ void _imprimir(List<Map<String, dynamic>> linhas) {
         'ROIC=${pc(e['roicCiclo'] as double?)}');
   }
 
-  // --- 3. Que lambda a persistência sugeriria ---
+  // --- 3. O lambda que a produção passou a aplicar ---
+  final aplicados = [
+    for (final e in linhas)
+      if (e['lambdaAplicado'] != null && (e['lambdaAplicado'] as num) > 0)
+        (e['lambdaAplicado'] as num).toDouble(),
+  ];
+  stdout.writeln('\n-- lambda EM PRODUÇÃO (decisão 36) --');
+  stdout.writeln('  ativos com preservação > 0: ${aplicados.length} de '
+      '${linhas.length}   (o degrau concedia a 8)');
+  if (aplicados.isNotEmpty) {
+    final s = [...aplicados]..sort();
+    stdout.writeln('  λ: mediana=${med(s)!.toStringAsFixed(4)}  '
+        'p75=${s[3 * s.length ~/ 4].toStringAsFixed(4)}  '
+        'p90=${s[9 * s.length ~/ 10].toStringAsFixed(4)}  '
+        'máx=${s.last.toStringAsFixed(4)}   contra 0,3000 fixo');
+    stdout.writeln('  acima de 0,30: ${s.where((x) => x > 0.30).length}');
+  }
+
+  // --- 4. Que lambda a persistência crua sugeriria ---
   final phis = [
     for (final e in comExcedente)
       if (e['persistenciaPhi'] != null)
@@ -317,12 +340,6 @@ void _imprimir(List<Map<String, dynamic>> linhas) {
   }
 }
 
-double? _folga(Map<String, dynamic> e) {
-  final a = (e['folgaPorMultiplo'] as num?)?.toDouble();
-  final b = (e['folgaPorExcedente'] as num?)?.toDouble();
-  if (a == null) return b;
-  if (b == null) return a;
-  // A aprovação é por união, então quem decide é a perna que está mais perto
-  // de passar — a de maior folga.
-  return a > b ? a : b;
-}
+/// Distância à única fronteira de nível que restou: o excedente ser positivo.
+double? _folga(Map<String, dynamic> e) =>
+    (e['folgaPorExcedente'] as num?)?.toDouble();

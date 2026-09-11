@@ -20,10 +20,21 @@ class BetaEstimate {
   /// Quantidade de observações pareadas usadas.
   final int observations;
 
+  /// Erro-padrão da inclinação. `null` quando não é estimável — correlação
+  /// nula ou perfeita, ou amostra de menos de três pontos.
+  ///
+  /// **Sai da mesma regressão, e é o que separa beta de número.** Medido em
+  /// 10/09/2026 sobre os 363 papéis do universo, ele fica em 0,07 na mediana
+  /// e acima de 0,30 em seis — mas a AZUL3 devolve `β = 109.108` com `ρ = 0,11`
+  /// sobre 142 pregões, e erro-padrão de **83.228**. Sem este campo, aquele
+  /// número entrava no CAPM indistinguível de um beta de verdade.
+  final double? standardError;
+
   const BetaEstimate({
     required this.beta,
     required this.correlation,
     required this.observations,
+    this.standardError,
   });
 
   @override
@@ -90,10 +101,19 @@ abstract final class BetaCalculator {
     final denominator = math.sqrt(assetVariance * marketVariance);
     final correlation = denominator > 0 ? covariance / denominator : 0.0;
 
+    // `SE(β) = |β| · √((1 − ρ²) / (ρ² · (n − 2)))` — a identidade que liga
+    // erro-padrão a correlação e tamanho de amostra. Vale para a regressão
+    // simples, que é o que esta função faz.
+    final r2 = correlation * correlation;
+    final se = (n > 2 && r2 > 0 && r2 < 1)
+        ? beta.abs() * math.sqrt((1 - r2) / (r2 * (n - 2)))
+        : null;
+
     return Ok(BetaEstimate(
       beta: beta,
       correlation: correlation,
       observations: n,
+      standardError: (se != null && se.isFinite) ? se : null,
     ));
   }
 

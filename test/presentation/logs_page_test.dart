@@ -38,7 +38,8 @@ void main() {
             ebit: 1400.0 * (year - 2015),
             ebitda: 1800.0 * (year - 2015),
             incomeBeforeTax: 1300.0 * (year - 2015),
-            incomeTaxExpense: 300.0 * (year - 2015),
+            // Negativo, na convenção da fonte: 1300 − 300 = 1000 de líquido.
+            incomeTaxExpense: -300.0 * (year - 2015),
             interestExpense: 120.0,
             operatingCashFlow: 1600.0 * (year - 2015),
             freeCashFlow: 1200.0 * (year - 2015),
@@ -167,7 +168,8 @@ void main() {
             ebit: entry.value * 1.4,
             ebitda: entry.value * 1.8,
             incomeBeforeTax: entry.value * 1.3,
-            incomeTaxExpense: entry.value * 0.3,
+            // Negativo, na convenção da fonte: a despesa soma ao lucro antes.
+            incomeTaxExpense: -entry.value * 0.3,
             interestExpense: 120.0,
             operatingCashFlow: entry.value,
             freeCashFlow: entry.value,

@@ -1859,7 +1859,296 @@ IC bruto.
 
 ---
 
+## 18. Oitava rodada — o decaimento medido da [decisão 36](decisoes/036-decaimento-medido-do-excedente-na-perpetuidade.md)
+
+A exceção de vantagem competitiva deixou de ser degrau. O relatório inteiro
+está em [`docs/validacao/fade_terminal.md`](validacao/fade_terminal.md); aqui
+ficam os três números.
+
+### 18.1 O degrau era material e estava ordenado ao contrário
+
+Dos 117 avaliados, 48 têm excedente positivo e **8 recebiam a exceção**. O
+salto entre `λ = 0` e `λ = 0,30` valia 5,7% de preço justo na mediana e até
+32,2%, acima de 10% em onze ativos.
+
+E os que mais ganhariam eram os negados: UNIP6 (+22,3%), SLCE3 (+18,6%), SAPR4
+(+16,2%). Quatro deles — SAPR4, SAPR11, TAEE4 e TAEE11 — barrados **só** pelo
+corte de rentabilidade, com excedente de 1,4 a 2,4 p.p. RENT3 e RENT4, mesma
+empresa e mesmo ROIC de 23,6%, caíam em lados opostos porque o `r_∞` de cada
+classe difere pelo beta.
+
+### 18.2 O `λ = 0,30` não é sustentado pelo dado
+
+O parâmetro fixo equivale a decaimento anual de `φ = 0,887`. Medido por AR(1)
+sobre o excedente de cada ativo:
+
+| | p25 | mediana | p75 | p90 | máx |
+|---|---:|---:|---:|---:|---:|
+| `φ` | 0,27 | **0,48** | 0,67 | 0,78 | 0,93 |
+
+Um único ativo dos 47 mensuráveis alcança 0,887.
+
+**A correção de viés de Kendall foi implementada, medida e descartada.** Com
+sete a dez pares ela vale de 0,25 a 0,35 — a ordem de grandeza do próprio `φ̂` —
+e pôs **dez dos vinte e quatro** ativos no teto, trocando o `0,30` fixo por um
+`0,3487` fixo. Sem ela o teto morde uma vez em quarenta e sete.
+
+### 18.3 O efeito é cirúrgico, e o nível não se move
+
+Vinte e três dos 117 passam a ter preservação positiva, contra oito, mas com
+`λ` mediano de **0,0015** e máximo de 0,2580. **Oito ativos** se movem além de
+0,5%, e as seis maiores quedas são de quem tinha a exceção: EGIE3 −24,3%,
+BBSE3 −15,1%, CXSE3 −7,0%, ABEV3 −6,7%, VBBR3 −5,8% e WEGE3 −3,7%. A maior
+alta é a CPFE3, com +8,1%.
+
+O potencial mediano fica em **−52,2% antes e depois**, com 14 positivos nos
+dois casos. É a segunda medição independente a confirmar a decisão 35: o
+terminal não é onde o vão mora.
+
+### 18.4 O que fica em aberto
+
+1. **`φ` por ativo em sete a quinze pontos é ordem de grandeza.** O conserto
+   estatístico é encolher para uma média transversal, e o núcleo avalia um
+   ativo por vez — não enxerga a seção.
+2. **A não monotonia da VBBR3 continua**, porque vem da fronteira dos 20% da
+   ponte e não do terminal.
+3. **O excedente é medido contra `r_∞`**, então revisar a curva de desconto
+   muda a série que estima `φ`.
+
+---
+
+## 19. Nona rodada — a alíquota estrutural da [decisão 37](decisoes/037-aliquota-estrutural-no-fluxo-da-firma.md)
+
+O resíduo que o DCF reverso nomeou e não isolou — 1,74× entre o fluxo descontado
+e o que o preço capitaliza — foi decomposto. O relatório está em
+[`docs/validacao/fluxo_explicito.md`](validacao/fluxo_explicito.md).
+
+### 19.1 Três dos quatro suspeitos não são defeito
+
+Contrafactuais medidos por um laço que reproduz a produção com **erro zero** em
+122 de 122:
+
+| Contrafactual | `m` | fecha do vão |
+|---|---:|---:|
+| freio desligado | 1,43× | 29,7% |
+| freio só no crescimento real | 1,33× | 22,4% |
+| sem convergência do ROIC | 0,96× | −4,8% |
+| **alíquota efetiva** | **1,18×** | **13,3%** |
+
+O freio custa 47,8% do lucro operacional no primeiro ano e põe 20 dos 122 no
+teto de 95% — porque o ROIC da base tem mediana de 11,2% e **30 dos 122 rendem
+menos que o crescimento nominal de 6,86%**. É a identidade `b = g/ROIC` dizendo
+isso, não um defeito. Cobrar só o crescimento real é mudança de método, e
+adotá-la porque fecha 22,4% seria ajustar o motor ao mercado.
+
+### 19.2 A alíquota é o defeito, e é regime
+
+A fonte aplica `NOPAT = EBIT × 0,66` a toda empresa. Medido: alíquota efetiva
+mediana de **22,1%**, com **112 dos 122** abaixo da estatutária.
+
+E é estrutural, não evento: dispersão robusta dentro da empresa de **7,5 p.p.**
+sobre **15 exercícios** de mediana, com 82 de 120 estáveis abaixo de 10 p.p.
+
+### 19.3 O efeito compõe
+
+A alíquota entra na série e no fluxo-base ao mesmo tempo — NOPAT maior é ROIC
+maior, ROIC maior é retenção menor, retenção menor é fluxo maior de novo.
+
+| | antes | depois |
+|---|---:|---:|
+| multiplicador necessário | 1,74× | **1,53×** |
+| potencial mediano | −45,7% | **−42,3%** |
+| potencial p75 | −19,6% | **−0,9%** |
+| potenciais positivos | 15 | **28** |
+| preços justos alterados | — | 80 de 122 |
+
+**O vão não fechou**: restam 1,53×, e o que sobra depois do freio não tem
+candidato nomeado.
+
+### 19.4 E revelou um segundo defeito
+
+Nove ativos caíram mais de 5%, e **os nove são troca de via**: o NOPAT maior
+cruza os 20% da pós-condição da ponte, a migração deixa de disparar, e o ativo
+fica na via da firma. A VBBR3 vai de R$ 33,71 para R$ 2,65 — as duas vias
+discordam por **12,7×**.
+
+A correção não criou isso: expôs. **Treze ativos** estão a menos de 10 p.p.
+acima do corte de 20%, e para eles um limiar decide entre dois números que
+diferem por múltiplos. É a mesma família do degrau que a decisão 36 removeu.
+
+### 19.5 O que fica em aberto
+
+1. **Conciliar as duas vias** é agora a pendência de maior efeito medido.
+2. **Restam 1,53× de multiplicador**, sem candidato nomeado depois do freio.
+3. **O teto de retenção de 95% cria região hipersensível** — quinze dos vinte
+   continuam nele.
+4. **A alíquota efetiva usa o valor absoluto da despesa**, o que torna crédito
+   tributário em alíquota positiva. Conservador, e anterior a esta rodada.
+
+---
+
+## 20. Décima rodada — a transição entre as vias da [decisão 38](decisoes/038-transicao-continua-entre-as-vias.md)
+
+A rodada anterior derrubou nove ativos ao corrigir a alíquota, e nenhum caiu por
+causa do imposto: todos trocaram de via. Esta rodada mede a discordância entre
+as duas vias e remove o degrau. Relatório em
+[`docs/validacao/vias.md`](validacao/vias.md).
+
+### 20.1 As vias discordam, e não é viés — é ruído de especificação
+
+Razão entre o preço justo da firma e o do acionista, nos 92 ativos em que as
+duas são avaliáveis:
+
+| p10 | p25 | mediana | p75 | p90 |
+|---:|---:|---:|---:|---:|
+| 0,35× | 0,64× | **1,04×** | 1,75× | 2,44× |
+
+Mediana de 1,04× — em agregado concordam. Mas **55 dos 92 discordam além de
+1,5×** e **33 além de 2×**. Em teoria `FCFF/WACC` e `FCFE/Ke` são a mesma
+avaliação vista de dois lados; a distância entre elas mede **inconsistência
+interna do motor**.
+
+As fontes: desconto (`WACC − Ke` além de 2 p.p. em 59 de 92), crescimento (43) e
+normalização da base (34). E **nenhuma das duas fica mais perto do mercado** —
+39 contra 53, com erro mediano de 59,1% e 53,3%.
+
+### 20.2 O degrau saiu, sem parâmetro novo
+
+O peso da via da firma passa a ser contínuo na faixa que o projeto já declarava
+frágil: zero em `s = 0,20`, um em `s = 0,35`, linear entre os dois. Os dois
+cortes já existiam com justificativa própria; o que muda é que delimitam uma
+transição em vez de um degrau.
+
+A combinação é do **número**, não dos cenários: duas vias que discordam por
+múltiplos não têm banda comum.
+
+### 20.3 O efeito, e são os mesmos ativos
+
+| | antes | depois |
+|---|---:|---:|
+| potencial mediano | −42,3% | **−40,0%** |
+| potenciais positivos | 28 | 28 |
+| preços justos alterados | — | **11 de 122** |
+
+VBBR3 +760,4%, SBFG3 +251,0%, AGRO3 +227,9%, PRIO3 +149,3%, KLBN3/4/11 de
++96,7% a +111,5%, MULT3 +71,7%, MYPK3 +27,8%, MOTV3 +4,3% — e **QUAL3 −23,6%**.
+
+São os mesmos que a rodada anterior derrubou, e a QUAL3 é a prova de que não é
+restauração: ela entra na transição e **perde**, porque para ela a via do
+acionista vale menos. A regra não é restaurar valor, é não saltar.
+
+### 20.4 O que fica em aberto
+
+1. **A inconsistência entre as vias continua, e agora está medida.** É a maior
+   pendência de método do motor. Conciliá-las exige um único conjunto de
+   premissas com a alavancagem ligando `Ke` e `WACC` — reconstrução da Porta 2.
+2. **A rampa é linear, e a forma é escolha.** Ponderar por precisão — o erro da
+   firma escala com `1/s` — teria fundamento mais forte.
+3. **Fora da faixa, o ativo continua com uma via só**, e a discordância fica
+   invisível no resultado.
+
+---
+
+## 21. Décima primeira rodada — o teste A1 da [decisão 39](decisoes/039-as-duas-vias-sao-modelos-independentes.md)
+
+A rodada anterior removeu o degrau entre as vias e deixou a discordância. Esta
+testa a explicação mais barata para ela, e a descarta.
+
+### 21.1 Compartilhar os insumos fecha 15,5%
+
+Uma empresa tem um crescimento e uma posição no ciclo; as duas vias os medem
+separadamente e divergem em mais de 3 p.p. em 44 de 96, com fator fora de
+[0,8; 1,25] em 35. Impondo os mesmos dois:
+
+| Insumos | mediana \|ln r\| | fora de 1,5× |
+|---|---:|---:|
+| como está hoje | **0,554** | 59/96 |
+| ambos, da firma | 0,468 | 52/96 |
+| ambos, do acionista | 0,491 | 46/85 |
+
+**15,5% de colapso no melhor sentido, e piora em 39 dos 96.** O crescimento
+sozinho não move nada.
+
+### 21.2 POSI3 e PRIO3 encerram a questão
+
+Os dois já usavam **crescimento idêntico e fator idêntico** nas duas vias, e os
+preços justos diferem por **28,15×** e **5,9×**. Não há o que amarrar onde já
+está amarrado.
+
+### 21.3 A identidade nunca foi construída
+
+`FCFF/WACC ≡ FCFE/Ke` exige que os fluxos derivem um do outro e que as taxas
+estejam ligadas pela alavancagem. Nenhuma das duas vale aqui: o fluxo da firma
+sai do NOPAT e o do acionista sai do LPA publicado, sem a ponte
+`FCFE = FCFF − juros(1−t) + ΔDívida` — e o termo `ΔDívida` não existe no motor.
+O beta é regressão crua, sem versão desalavancada que ligue `Ke` a `WACC`.
+
+### 21.4 O que muda na fila
+
+O **beta *bottom-up*** deixa de ser sucessor da ingestão da CVM e vira
+**pré-requisito** da conciliação. A conciliação, por sua vez, passa a ter escopo
+nomeado: reconstrução da Porta 2 **e** do custo de capital.
+
+A via do acionista para instituição financeira segue como exceção legítima —
+ali não há valor da firma nem dívida líquida com sentido econômico.
+
+## 22. Décima segunda a décima sexta rodadas — o custo de capital resolvido (decisões 40 a 46)
+
+Quatro rodadas encadeadas, todas nascidas do mesmo achado do teste A1: as duas
+vias do capital próprio são modelos independentes, e a distância entre elas mede
+inconsistência interna. O detalhe de cada uma está em
+[identidade_das_vias.md](validacao/identidade_das_vias.md) e
+[vias.md](validacao/vias.md); aqui fica o encadeamento.
+
+| Rodada | Decisão | O que entrou | Critério de aceite |
+|---|---|---|---|
+| 12ª | [40](decisoes/040-beta-encolhido-por-precisao.md) | beta desalavancado, encolhido por precisão contra o prior setorial | prior em 14 setores |
+| 13ª | [41](decisoes/041-custo-de-capital-realavancado-ano-a-ano.md) | `LeveredCostOfCapital`: ponto fixo do `Ke` contra a alavancagem de cada ano | identidade entre as rotas de 4,2% para **< 1e-6** |
+| 13ª-b | [42](decisoes/042-caminho-de-taxas-em-producao.md) | o caminho resolvido entra na cascata | 117 de 122 resolvidos; variação mediana **+0,0%** |
+| 14ª | [43](decisoes/043-capital-proprio-pela-rota-derivada.md), [44](decisoes/044-moat-contra-a-taxa-resolvida.md) | capital próprio pela rota derivada; segundo passe do *moat* | potencial mediano −37,3% → **−35,8%**; p75 cruza o zero |
+| 15ª | [45](decisoes/045-estrutura-de-capital-recusada.md) | recusa do solucionador deixa de virar preço | **0 mesclados, 0 migrados** em 90 |
+| 16ª | [46](decisoes/046-custo-de-capital-do-acionista-resolvido.md) | a via do acionista resolve o próprio `Ke` | dois `Ke` para o mesmo ativo: **38 → 18 em 90** acima de 1 p.p. |
+
+### 22.1 A pergunta mudou no meio do caminho
+
+A pergunta original era **conciliar as duas vias**. Depois da 13ª rodada ela
+deixou de fazer sentido nessa forma: sob o caminho resolvido, `FCFF/WACC` e
+`FCFE/Ke` são a mesma conta e coincidem dentro de 1e-6. O que sobrou de
+discordância não é entre as duas rotas do mesmo modelo — é entre **dois
+modelos**, o da firma sobre NOPAT e o do acionista sobre LPA.
+
+A pergunta virou, então, mais estreita: a discordância ainda **decide** alguma
+coisa? Discordância que não escolhe nada é fato registrado; a que escolhe é
+defeito. A 15ª rodada respondeu: em 90 ativos com as duas vias calculáveis,
+nenhum resultado mescla e nenhum migra.
+
+### 22.2 A 16ª fechou o custo de capital pelos dois lados
+
+A via do acionista avalia sozinha 33 dos 120 — instituição financeira, lucro
+operacional não sustentado e a estrutura recusada pela 15ª rodada —, e nela o
+motor ainda supunha a alavancagem de hoje perene. **Emprestar o caminho da via
+da firma não era opção**: nos 18 casos fora da Porta 1 em que ela decide
+sozinha, a via da firma produz caminho de taxas em **zero**, porque as portas
+que mandam o ativo para lá são exatamente as que a tornam indisponível.
+
+O ponto fixo passou a ter uma segunda forma, pelo lado do capital próprio. Os
+dois `Ke` do motor convergiram — a diferença acima de 1 p.p. caiu de 38 para 18
+em 90, e a mediana foi a zero. O banco fica de fora por direito, e a alavancagem
+perene vira premissa declarada em vez de descuido. Ver
+[via_acionista.md](validacao/via_acionista.md).
+
+### 22.3 O que a 15ª rodada custou de cobertura
+
+Dois ativos deixaram de ser avaliados — AMER3 e BHIA3 —, e a **BHIA3 saía com
++230,4% de potencial**. O motor anunciava tripla enquanto a própria conta dizia
+que, reprecificado o custo do capital próprio pela alavancagem que ele tem, não
+sobra capital próprio a repartir. Cobertura não é critério; recusa nomeada é.
+
+---
+
+---
+
 *Documento gerado a partir de medições executadas contra a cascata real do Equisim e dados de
 produção da brapi. As seções 1 a 9 têm data de referência em 02/09/2026; as seções 10 a 16
 registram a homologação de 05/09, a implementação de 06–07/09 e as seis rodadas de validação de
-07/09; a seção 17 registra o DCF reverso de 09/09.*
+07/09; as seções 17 e 18 registram o DCF reverso e o decaimento medido de 09/09, e as 19 a 21 a alíquota estrutural, a transição entre as vias e o teste A1 de 10/09; a 22 resume as cinco rodadas do custo de capital resolvido, de 10/09.*

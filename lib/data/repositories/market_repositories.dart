@@ -241,6 +241,8 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
           profitReserves: Value(s.profitReserves),
           marketCap: Value(s.marketCap),
           enterpriseToEbitda: Value(s.enterpriseToEbitda),
+          minorityInterest: Value(s.minorityInterest),
+          equityIncomeResult: Value(s.equityIncomeResult),
         ),
       ]);
       await db.touch(CachePolicy.fundamentalsKey(ticker.value));
@@ -334,6 +336,8 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
         profitReserves: r.profitReserves,
         marketCap: r.marketCap,
         enterpriseToEbitda: r.enterpriseToEbitda,
+        minorityInterest: r.minorityInterest,
+        equityIncomeResult: r.equityIncomeResult,
       );
 }
 

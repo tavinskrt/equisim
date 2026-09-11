@@ -67,6 +67,10 @@ class CachedFundamentalsTable extends Table {
   RealColumn get realizedShareCapital => real().nullable()();
   RealColumn get profitReserves => real().nullable()();
 
+  // Os dois termos da ponte que a decisão 49 passou a exigir.
+  RealColumn get minorityInterest => real().nullable()();
+  RealColumn get equityIncomeResult => real().nullable()();
+
   @override
   Set<Column> get primaryKey => {ticker, fiscalPeriodEnd};
 }
@@ -126,7 +130,7 @@ class CacheDatabase extends _$CacheDatabase {
   CacheDatabase(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   /// Migrações do cache.
   ///
@@ -170,6 +174,23 @@ class CacheDatabase extends _$CacheDatabase {
             ]) {
               await m.addColumn(cachedFundamentalsTable, c);
             }
+          }
+          if (from < 4) {
+            // v3 → v4: os dois termos da ponte de equity da decisão 49.
+            // Aditivas e nuláveis, como as da v3 — mas, ao contrário
+            // daquelas, **o cache não repovoa sozinho**: a validade dos
+            // fundamentos é de 30 dias, e uma linha antiga responderia com os
+            // campos vazios até ela vencer. A migração invalida a chave de
+            // fundamentos para que a próxima leitura vá à fonte.
+            for (final c in [
+              cachedFundamentalsTable.minorityInterest,
+              cachedFundamentalsTable.equityIncomeResult,
+            ]) {
+              await m.addColumn(cachedFundamentalsTable, c);
+            }
+            await m.database.customStatement(
+              "DELETE FROM cache_entries WHERE key LIKE 'fundamentals:%'",
+            );
           }
         },
       );

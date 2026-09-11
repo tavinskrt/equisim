@@ -72,10 +72,14 @@ class CapitalSeries {
   /// - [snapshots]: exercícios em ordem cronológica, já filtrados por
   ///   publicação.
   /// - [lane]: convenção a aplicar.
+  /// - [firmTaxRate]: alíquota estrutural da via da firma, de
+  ///   [structuralTaxRate]. Nula reproduz o comportamento anterior, que é a
+  ///   alíquota estatutária embutida pela fonte no `NOPAT` publicado.
   static CapitalSeries build(
     List<FundamentalsSnapshot> snapshots,
-    ValuationLane lane,
-  ) {
+    ValuationLane lane, {
+    double? firmTaxRate,
+  }) {
     final brutos = <CapitalPoint>[];
     for (final s in snapshots) {
       final base = lane == ValuationLane.firm
@@ -85,10 +89,49 @@ class CapitalSeries {
       brutos.add(CapitalPoint(
         year: s.fiscalPeriodEnd.year,
         base: base,
-        profit: lane == ValuationLane.firm ? s.nopatOrDerived : s.netIncome,
+        profit: lane == ValuationLane.firm
+            ? s.nopatAtRate(firmTaxRate)
+            : s.netIncome,
       ));
     }
     return CapitalSeries(points: _cleanByNeighbour(brutos), lane: lane);
+  }
+
+  /// Exercícios mínimos com alíquota medível para a estrutural ser usada.
+  ///
+  /// Cinco. Abaixo disso a mediana descreve poucos anos e um único exercício
+  /// atípico a domina — e o recuo, que é a estatutária, é conservador na
+  /// direção que este projeto já assume.
+  static const int minTaxObservations = 5;
+
+  /// Alíquota **estrutural** de imposto do ativo: a mediana dos exercícios.
+  ///
+  /// **Mediana e não último exercício, de propósito.** É ela que separa
+  /// incentivo estrutural de evento: prejuízo fiscal compensado num ano move a
+  /// alíquota daquele ano e não a mediana de quinze. Medido em 10/09/2026, a
+  /// dispersão robusta dentro da empresa é de 7,5 p.p. na mediana — a alíquota
+  /// brasileira é regime, e um regime é o que se projeta.
+  ///
+  /// Confinada em `[0, alíquota estatutária]`. O teto existe porque pagar mais
+  /// que a marginal em perpetuidade é transitório — reversão de diferido,
+  /// operação no exterior —, e a fonte já aplicou a estatutária; ir além
+  /// penalizaria duas vezes.
+  ///
+  /// Devolve `null` com menos de [minTaxObservations] exercícios medíveis, o
+  /// que faz o chamador recuar para o `NOPAT` publicado.
+  static double? structuralTaxRate(
+    List<FundamentalsSnapshot> snapshots, {
+    required double statutoryRate,
+  }) {
+    final taxas = <double>[];
+    for (final s in snapshots) {
+      final t = s.effectiveTaxRate;
+      if (t != null && t.isFinite) taxas.add(t);
+    }
+    if (taxas.length < minTaxObservations) return null;
+    final m = Inference.median(taxas);
+    if (m == null || !m.isFinite) return null;
+    return m.clamp(0.0, statutoryRate).toDouble();
   }
 
   /// Quantos vizinhos de cada lado formam a referência local.

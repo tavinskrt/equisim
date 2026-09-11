@@ -3,6 +3,10 @@ import '../failures/failure.dart';
 import '../failures/result.dart';
 import '../repositories/repositories.dart';
 import '../services/metrics/beta.dart';
+import '../services/metrics/beta_shrinkage.dart';
+import '../services/valuation/capital_base.dart';
+import '../services/valuation/growth_guards.dart';
+import '../time/point_in_time_view.dart';
 import '../services/valuation/cost_of_capital.dart';
 import '../value_objects/date_range.dart';
 import '../value_objects/ticker.dart';
@@ -35,6 +39,10 @@ abstract final class PrepareValuationInputs {
   /// Propaga a falha do histórico de fundamentos e a de cotações; devolve
   /// [InsufficientData] quando a série de preços vem vazia na janela.
   ///
+  /// - [betaPrior]: prior transversal do beta, de `ResolveBetaPrior`. Sem ele
+  ///   vale a regressão crua, que é o comportamento anterior — e o que expõe o
+  ///   motor ao caso da AZUL3, cujo `β = 109.108` tem erro-padrão de 83.228.
+  ///
   /// **Falha do índice não interrompe**: o beta cai para 1,0, registrado em
   /// [BetaSource.manual].
   static Future<Result<ValuationInputs>> call({
@@ -51,6 +59,7 @@ abstract final class PrepareValuationInputs {
     double inflation = 0.05,
     double? terminalRiskFreeRate,
     bool isDistressed = false,
+    BetaPrior? betaPrior,
   }) async {
     final today = asOf ?? DateTime.now();
     final window = DateRange(
@@ -89,6 +98,36 @@ abstract final class PrepareValuationInputs {
       window: window,
     );
 
+    // Encolhimento por precisão. Sem prior, ou sem valor de mercado para medir
+    // a alavancagem, vale a regressão crua — e o resultado diz qual dos dois
+    // caminhos valeu, por [BetaSource].
+    final publicados = PointInTimeView(today).published(historyResult.unwrap());
+    final ultimo = publicados.isEmpty ? null : publicados.last;
+    final equityMercado = ultimo?.marketCap;
+    var betaFinal = beta.beta;
+    var origemBeta = beta.source;
+    double? betaDesalavancado;
+    if (betaPrior != null &&
+        ultimo != null &&
+        equityMercado != null &&
+        equityMercado > 0) {
+      final encolhido = BetaShrinkage.shrink(
+        leveredBeta: beta.beta,
+        standardError: beta.standardError,
+        prior: betaPrior,
+        sectorKey: sectorKey,
+        debtToEquity: ultimo.totalDebt / equityMercado,
+        taxRate: CapitalSeries.structuralTaxRate(
+              publicados,
+              statutoryRate: ValuationParameters.statutoryTaxRate,
+            ) ??
+            ValuationParameters.statutoryTaxRate,
+      );
+      betaFinal = encolhido.beta;
+      betaDesalavancado = encolhido.unlevered;
+      if (encolhido.weight < 1.0) origemBeta = BetaSource.shrunk;
+    }
+
     return Ok(ValuationInputs(
       ticker: ticker,
       asOf: today,
@@ -96,9 +135,9 @@ abstract final class PrepareValuationInputs {
       marketPrice: series.points.last.close,
       capm: CapmInputs(
         riskFreeRate: riskFreeRate,
-        beta: beta.beta,
+        beta: betaFinal,
         marketPremium: marketPremium,
-        betaSource: beta.source,
+        betaSource: origemBeta,
       ),
       marginOfSafety: marginOfSafety,
       projectionYears: projectionYears,
@@ -111,6 +150,7 @@ abstract final class PrepareValuationInputs {
       // Porta 0 — não há segunda busca.
       prices: series,
       isDistressed: isDistressed,
+      unleveredBeta: betaDesalavancado,
     ));
   }
 
@@ -129,23 +169,26 @@ abstract final class PrepareValuationInputs {
   /// Sem série de mercado utilizável, adota-se β = 1: a alternativa seria
   /// recusar a avaliação inteira por causa de um único parâmetro, e um beta
   /// neutro é premissa transparente — que fica registrada em [BetaSource].
-  static Future<({double beta, BetaSource source})> _estimateBeta({
+  static Future<({double beta, BetaSource source, double? standardError})>
+      _estimateBeta({
     required PriceSeries series,
     required BenchmarkRepository benchmark,
     required DateRange window,
   }) async {
     final marketResult = await benchmark.ibovespa(window);
-    if (marketResult.isErr) return (beta: 1.0, source: BetaSource.manual);
+    if (marketResult.isErr) {
+      return (beta: 1.0, source: BetaSource.manual, standardError: null);
+    }
 
     final market = marketResult.unwrap();
     if (market.points.length < 30) {
-      return (beta: 1.0, source: BetaSource.manual);
+      return (beta: 1.0, source: BetaSource.manual, standardError: null);
     }
 
     final assetPoints =
         series.points.where((p) => window.contains(p.date)).toList();
     if (assetPoints.length < 2) {
-      return (beta: 1.0, source: BetaSource.manual);
+      return (beta: 1.0, source: BetaSource.manual, standardError: null);
     }
 
     final aligned = BetaCalculator.alignReturns(
@@ -158,8 +201,12 @@ abstract final class PrepareValuationInputs {
     final estimate = BetaCalculator.estimate(returns: aligned);
 
     return estimate.fold(
-      (value) => (beta: value.beta, source: BetaSource.computed),
-      (_) => (beta: 1.0, source: BetaSource.manual),
+      (value) => (
+        beta: value.beta,
+        source: BetaSource.computed,
+        standardError: value.standardError,
+      ),
+      (_) => (beta: 1.0, source: BetaSource.manual, standardError: null),
     );
   }
 }

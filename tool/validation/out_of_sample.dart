@@ -336,6 +336,11 @@ void _moatSection(StringBuffer buf, List<_Row> avaliados) {
     }
   }
 
+  // **Seção inerte desde a decisão 36.** O bloco `rentabilidadeInsuficiente`
+  // deixou de existir quando o degrau da vantagem competitiva virou decaimento
+  // medido, de modo que `moatBlockedOnlyByReturn` nunca mais é verdadeiro e o
+  // retorno antecipado abaixo sempre dispara. Fica como registro do regime
+  // anterior; removê-la é limpeza para outra rodada.
   final soRentabilidade = comDiagnostico
       .where((l) => l.diagnostics.moatBlockedOnlyByReturn)
       .toList();
@@ -355,8 +360,7 @@ void _moatSection(StringBuffer buf, List<_Row> avaliados) {
     ..writeln('Dos reprovados, ${soRentabilidade.length} '
         '${soRentabilidade.length == 1 ? "falhou" : "falharam"} **apenas** na '
         'rentabilidade — cumprem crescimento orgânico e histórico. O excedente '
-        'do ciclo sobre o custo de capital de equilíbrio nesses casos, contra o '
-        'corte de ${pct(ValuationParameters.moatMinSpread, decimals: 1)}:')
+        'do ciclo sobre o custo de capital de equilíbrio nesses casos:')
     ..writeln()
     ..writeln('| Percentil | Excedente |')
     ..writeln('|---|---:|')
@@ -772,7 +776,7 @@ class _Diagnostics {
     }
 
     final moat = trace('Vantagem competitiva residual na perpetuidade');
-    final base = trace('Base do fluxo: convergência ao ciclo');
+    final base = trace('Base do fluxo: normalização pelo ciclo');
     final bloqueios = moat?.mappedVariables['condições que barraram'];
 
     return _Diagnostics(

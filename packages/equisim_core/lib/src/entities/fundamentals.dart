@@ -94,6 +94,30 @@ class FundamentalsSnapshot {
   final double? marketCap;
   final double? enterpriseToEbitda;
 
+  /// Participação dos **não controladores** no patrimônio consolidado.
+  ///
+  /// A demonstração consolida 100% das controladas, e o acionista da
+  /// controladora não é dono de tudo isso. O fluxo da firma carrega o
+  /// resultado inteiro; a ponte precisa devolver a parte que não é dele.
+  final double? minorityInterest;
+
+  /// Resultado de **equivalência patrimonial**, em reais do exercício.
+  ///
+  /// Na DRE brasileira ele entra em "Outras Receitas e Despesas Operacionais",
+  /// **acima** do resultado antes do financeiro — de modo que já está dentro
+  /// do EBIT publicado. Medido em 10/09/2026 no ITSA4: EBIT de R$ 18,1 bi
+  /// contra equivalência de R$ 17,5 bi.
+  ///
+  /// Isso tem duas consequências opostas, e as duas importam:
+  ///
+  /// - **não se soma a participação societária ao valor da firma**, porque o
+  ///   resultado dela já está no fluxo descontado — somá-la contaria duas
+  ///   vezes;
+  /// - **não se tributa esse pedaço de novo**: a equivalência chega líquida do
+  ///   imposto pago pela investida, e aplicar a alíquota da controladora sobre
+  ///   ela cobra o mesmo tributo duas vezes.
+  final double? equityIncomeResult;
+
   const FundamentalsSnapshot({
     required this.ticker,
     required this.fiscalPeriodEnd,
@@ -125,6 +149,8 @@ class FundamentalsSnapshot {
     this.sharesOutstandingAsOf,
     this.marketCap,
     this.enterpriseToEbitda,
+    this.minorityInterest,
+    this.equityIncomeResult,
   });
 
   /// Depreciação e amortização, derivada de EBITDA − EBIT.
@@ -136,12 +162,68 @@ class FundamentalsSnapshot {
 
   /// Alíquota efetiva de imposto, limitada a [0, 0.5] para conter distorções
   /// de exercícios com prejuízo ou créditos fiscais extraordinários.
+  ///
+  /// **A fonte grava a despesa com sinal negativo**, e a conta respeita isso
+  /// desde 10/09/2026. Conferido pela identidade contábil no cache: a AALR3
+  /// tem lucro antes de R$ 34,6 mi, `incomeTaxExpense` de −R$ 5,9 mi e lucro
+  /// líquido de R$ 28,8 mi — a despesa **soma**. Num exercício de crédito o
+  /// campo vem positivo: lucro antes de −R$ 7,9 mi, imposto de +R$ 22,6 mi e
+  /// líquido de R$ 14,6 mi.
+  ///
+  /// A versão anterior usava `.abs()`, o que acertava o caso comum pelo motivo
+  /// errado e **errava o crédito**: o exercício em que a empresa recuperou
+  /// imposto saía com alíquota positiva, e o `clamp` — que existe justamente
+  /// para conter a distorção — nunca chegava a agir, porque o sinal já tinha
+  /// sido apagado. Negar o sinal em vez de tirar o módulo acerta os dois: o
+  /// crédito produz razão negativa, e o piso de zero faz o que prometia.
+  ///
+  /// **Tirar o `.abs()` sem negar seria pior que mantê-lo.** Medido: a
+  /// alíquota mediana do universo iria a 0,0% e 98 dos 122 preços justos se
+  /// moveriam, porque toda despesa normal viraria razão negativa.
+  ///
+  /// A distinção era inócua enquanto isto só alimentava o ramo de recuo de
+  /// [nopatOrDerived], nunca alcançado com o cache atual. Passou a pesar com
+  /// a decisão 37, que tornou a alíquota efetiva a base tributária do fluxo
+  /// da firma.
   double? get effectiveTaxRate {
     if (incomeBeforeTax == null || incomeTaxExpense == null) return null;
     if (incomeBeforeTax! <= 0) return null;
-    final rate = incomeTaxExpense!.abs() / incomeBeforeTax!;
+    final rate = -incomeTaxExpense! / incomeBeforeTax!;
     if (rate.isNaN || rate.isInfinite) return null;
     return rate.clamp(0.0, 0.5);
+  }
+
+  /// `true` quando o exercício traz demonstração de resultado.
+  ///
+  /// **A fonte publica o exercício com o balanço preenchido e o resultado
+  /// inteiro zerado.** Medido em 10/09/2026: acontece em 4 dos 376 ativos, em
+  /// 7 exercícios, e nos quatro o patrimônio do mesmo exercício tem valor —
+  /// prova de que o exercício existe e de que o que falta é a demonstração,
+  /// não a empresa. A TIMS3 aparecia com receita, EBIT, lucro e LPA zerados e
+  /// patrimônio líquido de R$ 24 bilhões, tendo tido EBIT de R$ 4,7 bi dois
+  /// exercícios antes.
+  ///
+  /// **Zero é um número, e ausência não é zero.** Lido como zero, o exercício
+  /// vira base de avaliação nula — e o ativo é recusado por "os dados não
+  /// sustentam nenhuma das duas vias", que é a mensagem errada para um dado
+  /// que a fonte não entregou.
+  ///
+  /// O teste são **os quatro juntos**: receita, resultado operacional, lucro
+  /// líquido e lucro por ação. Zerar um deles é possível — holding sem
+  /// receita, empresa no zero a zero, exercício sem lucro por ação publicado.
+  /// Zerar os quatro com balanço preenchido, não.
+  /// **A comparação é de magnitude, e não de igualdade.** O zero da fonte às
+  /// vezes chega como resíduo de ponto flutuante, e `== 0` trataria `1e-16`
+  /// como resultado publicado. Os agregados usam [_residuo]; o lucro por ação
+  /// usa [_residuoPorPapel], porque um LPA de R$ 0,50 é legítimo e um real
+  /// inteiro de corte o descartaria.
+  bool get hasIncomeStatement {
+    bool vazio(double? v, double residuo) =>
+        v == null || !v.isFinite || v.abs() <= residuo;
+    return !(vazio(totalRevenue, _residuo) &&
+        vazio(ebit, _residuo) &&
+        vazio(netIncome, _residuo) &&
+        vazio(earningsPerShare, _residuoPorPapel));
   }
 
   /// Dívida bruta: curto mais longo prazo.
@@ -403,6 +485,12 @@ class FundamentalsSnapshot {
   /// projetado sairia esvaziado sem que nada avisasse.
   static const double _residuo = 1.0;
 
+  /// Magnitude abaixo da qual um valor **por papel** é resíduo, não número.
+  ///
+  /// Um centavo. O corte dos agregados não serve aqui: um lucro por ação de
+  /// R$ 0,50 é legítimo, e um real inteiro de corte o leria como ausência.
+  static const double _residuoPorPapel = 0.01;
+
   /// NOPAT publicado, ou derivado por `EBIT × (1 − alíquota efetiva)`.
   ///
   /// O teste é de **magnitude**, nunca de igualdade: dinheiro em ponto flutuante
@@ -420,6 +508,55 @@ class FundamentalsSnapshot {
     if (op == null || t == null) return null;
     final v = op * (1 - t);
     return v.isFinite ? v : null;
+  }
+
+  /// NOPAT recalculado a uma alíquota informada, no lugar da que a fonte usou.
+  ///
+  /// **Por que existe.** A fonte publica `NOPAT = EBIT × 0,66` — a alíquota
+  /// estatutária brasileira aplicada a **toda** empresa, em 4.572 de 4.572
+  /// exercícios do cache. Medido em 10/09/2026 sobre os 122 avaliados, a
+  /// alíquota efetiva mediana é de **22,1%**, e 112 dos 122 pagam menos que a
+  /// estatutária. JCP, incentivo regional, lucro presumido e prejuízo fiscal
+  /// compensado não são exceção no Brasil: são o regime.
+  ///
+  /// A alíquota que entra aqui é **estrutural** — a mediana dos exercícios
+  /// publicados, não a do último —, e a dispersão dentro da empresa é de
+  /// 7,5 p.p. sobre quinze exercícios na mediana, o que a torna regime e não
+  /// evento. Ver [`fluxo_explicito.md`](../../../../../docs/validacao/fluxo_explicito.md).
+  ///
+  /// **Não confundir com o escudo fiscal do WACC**, que continua na
+  /// estatutária e deve continuar: a dedutibilidade do juro vale na margem, e
+  /// a margem é a alíquota cheia. As duas alíquotas medem coisas diferentes e
+  /// só coincidiam por acidente da fonte.
+  ///
+  /// **A equivalência patrimonial atravessa sem ser tributada de novo.** Ela
+  /// está dentro do EBIT publicado e chega líquida do imposto da investida;
+  /// multiplicar o EBIT inteiro por `(1 − τ)` cobra o tributo duas vezes sobre
+  /// esse pedaço. O que se tributa é `EBIT − equivalência`. Ver
+  /// [equityIncomeResult].
+  ///
+  /// Recua para [nopatOrDerived] sem EBIT ou sem alíquota informada.
+  double? nopatAtRate(double? rate) {
+    final op = ebit;
+    if (op == null || rate == null || !rate.isFinite) return nopatOrDerived;
+    final v = op * (1 - rate) + taxableEquityIncome * rate;
+    return v.isFinite ? v : nopatOrDerived;
+  }
+
+  /// Equivalência patrimonial utilizável na conta do tributo, ou zero.
+  ///
+  /// **Só o lado positivo.** Equivalência negativa é prejuízo da investida, e
+  /// ela reduz o EBIT sem ter gerado crédito tributário na controladora —
+  /// devolver imposto sobre ela inventaria caixa. O tratamento é assimétrico
+  /// de propósito, e é a direção conservadora.
+  double get taxableEquityIncome {
+    final e = equityIncomeResult;
+    if (e == null || !e.isFinite || e <= 0) return 0.0;
+    final op = ebit;
+    // Não pode passar do próprio EBIT: acima disso a operação dá prejuízo e a
+    // conta deixaria o NOPAT maior que o resultado que o gerou.
+    if (op == null || !op.isFinite || op <= 0) return 0.0;
+    return e > op ? op : e;
   }
 
   /// Capital externo que entrou no exercício, contra o lucro de [anterior].

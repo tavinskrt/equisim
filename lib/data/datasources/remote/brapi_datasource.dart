@@ -108,6 +108,56 @@ class BrapiDatasource {
   ///
   /// A fonte só oferece granularidade **anual** (16 exercícios, 2010–2025);
   /// `mode=history&type=quarterly` também devolve anual. Limitação a declarar.
+  /// Os campos **crus** de cada exercício, sem passar pelo domínio.
+  ///
+  /// Existe para o D7: a ponte de equity precisa saber quais termos a fonte
+  /// publica — não controladores, coligada, arrendamento —, e o mapeamento
+  /// para [FundamentalsSnapshot] descarta tudo que ele não tipa. O cache
+  /// guarda só o tipado, de modo que a pergunta só se responde na fonte.
+  Future<Result<List<Map<String, dynamic>>>> rawFundamentals(
+    Ticker ticker,
+  ) async {
+    final r = await _mergedStatements(ticker);
+    if (r.isErr) return Err(r.failureOrNull!);
+    final merged = r.unwrap();
+    final chaves = merged.keys.toList()..sort();
+    return Ok([for (final k in chaves) merged[k]!]);
+  }
+
+  Future<Result<Map<String, Map<String, dynamic>>>> _mergedStatements(
+    Ticker ticker,
+  ) async {
+    const endpoints = [
+      '/v2/stocks/statistics',
+      '/v2/stocks/income-statement',
+      '/v2/stocks/balance-sheet',
+      '/v2/stocks/cash-flow',
+    ];
+    final merged = <String, Map<String, dynamic>>{};
+    var anySucceeded = false;
+    for (final endpoint in endpoints) {
+      final response = await client.getJson(
+        _url(endpoint),
+        query: {'symbols': ticker.value, 'mode': 'history'},
+      );
+      if (response.isErr) continue;
+      anySucceeded = true;
+      for (final item in BrapiJson.firstDataList(response.unwrap())) {
+        if (item is! Map<String, dynamic>) continue;
+        final endDate = BrapiJson.asString(item['endDate']);
+        if (endDate == null) continue;
+        final key = endDate.split('T').first;
+        (merged[key] ??= <String, dynamic>{}).addAll(item);
+      }
+    }
+    if (!anySucceeded) {
+      return Err(InsufficientData(
+        'Nenhum demonstrativo disponível para ${ticker.value}.',
+      ));
+    }
+    return Ok(merged);
+  }
+
   Future<Result<List<FundamentalsSnapshot>>> fundamentalsHistory(
     Ticker ticker,
   ) async {

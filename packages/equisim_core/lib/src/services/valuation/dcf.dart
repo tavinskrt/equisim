@@ -1,9 +1,63 @@
+import 'dart:math' as math;
+
 import '../../entities/valuation.dart';
 import '../../failures/failure.dart';
 import '../../failures/result.dart';
 
+/// Como o freio de reinvestimento é formado, em cada rodada.
+///
+/// **Existe para medir, não para escolher.** A política de produção é
+/// [medido], e as outras são costuras de diagnóstico: elas permitem que
+/// `tool/fluxo_explicito.dart` rode os contrafactuais **pela cascata real** —
+/// as duas vias, a rota derivada, o caminho de taxas resolvido — em vez de
+/// reimplementar a projeção. Reimplementá-la mede outro motor: em 10/09/2026 o
+/// laço do utilitário usava o teto da economia como crescimento perpétuo em 78
+/// dos 120 ativos e reinterpolava a taxa em vez de usar o caminho resolvido, e
+/// nada acusava porque a conferência comparava o laço contra si mesmo.
+enum ReinvestmentPolicy {
+  /// `b_t = g_t / ROIC_t`, confinado em `[0; 0,95]`. O que a produção faz.
+  medido,
+
+  /// Sem freio: todo o lucro é distribuível.
+  nenhum,
+
+  /// `b_t = g_real,t / ROIC_t` — só o crescimento **real** exige capital novo.
+  ///
+  /// A hipótese: crescer nominalmente ao lado da inflação não pede
+  /// investimento líquido, pede reposição a preço maior. Exige
+  /// [DcfAssumptions.inflation].
+  crescimentoReal,
+
+  /// `b_t = g_t / ROIC_base`, sem a convergência do retorno ao custo de
+  /// capital. Isola quanto do freio vem da convergência e quanto do nível.
+  semConvergencia,
+
+  /// `b_t = g_t / ROIC_t` **sem o teto de 0,95**, de modo que a retenção pode
+  /// passar de 100% e o fluxo do ano ficar negativo.
+  ///
+  /// É o que acontece de verdade com quem cresce mais do que o retorno
+  /// financia: o capital novo vem de fora. O teto de produção esconde isso.
+  semTeto,
+}
+
+/// Quando o caixa do exercício chega, para efeito de desconto.
+enum CashTiming {
+  /// Tudo no último dia do ano. É a convenção que o motor usava até 10/09/2026,
+  /// e sob a qual `FCFF/WACC ≡ FCFE/Ke` é **identidade algébrica exata**.
+  fimDeAno,
+
+  /// Distribuído ao longo do ano, representado pelo meio dele. Produção.
+  meioDeAno,
+}
+
 /// Premissas de uma rodada de DCF.
 class DcfAssumptions {
+  /// Teto da retenção, e por consequência do crescimento financiável.
+  ///
+  /// Retenção de 100% significaria não distribuir nada para sempre, e o valor
+  /// do fluxo seria zero por construção.
+  static const double maxRetention = 0.95;
+
   /// Anos de projeção explícita.
   ///
   /// Dez por decisão 25. Com cinco, o valor terminal carregava de 63,5% a 80,0%
@@ -91,6 +145,27 @@ class DcfAssumptions {
   /// Margem de segurança sobre o preço justo, em fração.
   final double marginOfSafety;
 
+  /// Caminho explícito da taxa de desconto, do ano 1 ao ano N.
+  ///
+  /// **Existe porque a alavancagem não é constante.** A interpolação linear
+  /// entre a taxa corrente e a de equilíbrio supõe que só a taxa livre de risco
+  /// se move; medido em 10/09/2026, `D/V` sai de 0,29 no ano zero para 0,38 no
+  /// ano dez, e com ela se movem `Ke` e `WACC`. Ver
+  /// [`identidade_das_vias.md`](../../../../../docs/validacao/identidade_das_vias.md).
+  ///
+  /// Nulo mantém a interpolação de dois pontos, que é o comportamento
+  /// anterior. Preenchido, precisa ter exatamente [projectionYears] posições —
+  /// [DcfCalculator] recusa quando não tem.
+  final List<double>? discountRatePath;
+
+  /// Política do freio de reinvestimento. [ReinvestmentPolicy.medido] em
+  /// produção; as outras são costuras de diagnóstico.
+  final ReinvestmentPolicy reinvestmentPolicy;
+
+  /// Inflação do ano, usada **apenas** por
+  /// [ReinvestmentPolicy.crescimentoReal].
+  final double? inflation;
+
   /// Declara as premissas. **Não valida** — a consistência entre desconto e
   /// crescimento é conferida em [DcfCalculator], que devolve [Result].
   const DcfAssumptions({
@@ -103,6 +178,10 @@ class DcfAssumptions {
     this.neutralTerminalReturn = true,
     this.terminalReturnOnCapital,
     this.marginOfSafety = 0.0,
+    this.discountRatePath,
+    this.reinvestmentPolicy = ReinvestmentPolicy.medido,
+    this.inflation,
+    this.cashTiming = CashTiming.meioDeAno,
   }) : terminalDiscountRate = terminalDiscountRate ?? discountRate;
 
   /// Fração percorrida da janela explícita no ano [t]: 0 no ano 1, 1 no ano N.
@@ -119,8 +198,13 @@ class DcfAssumptions {
   /// É a estrutura a termo que o modelo não tinha. Note que `r_t` é taxa **do
   /// período**, não taxa à vista de vértice: o desconto composto acumula os
   /// fatores ano a ano, e não eleva `r_t` a `t`.
-  double discountRateAt(int t) =>
-      discountRate - (discountRate - terminalDiscountRate) * _step(t);
+  double discountRateAt(int t) {
+    final caminho = discountRatePath;
+    if (caminho != null && t >= 1 && t <= caminho.length) {
+      return caminho[t - 1];
+    }
+    return discountRate - (discountRate - terminalDiscountRate) * _step(t);
+  }
 
   /// Retorno sobre o capital no ano [t], convergindo do observado ao custo de
   /// capital do próprio ano.
@@ -151,12 +235,22 @@ class DcfAssumptions {
   /// retorno utilizável, o que desliga o freio e é a leitura conservadora na
   /// direção oposta — declarada no resultado.
   double retentionAt(int t) {
-    final roic = returnOnCapitalAt(t);
+    if (reinvestmentPolicy == ReinvestmentPolicy.nenhum) return 0.0;
+    final roic = reinvestmentPolicy == ReinvestmentPolicy.semConvergencia
+        ? returnOnCapital
+        : returnOnCapitalAt(t);
     if (roic <= 0) return 0.0;
-    final g = growthAt(t);
+    var g = growthAt(t);
+    if (reinvestmentPolicy == ReinvestmentPolicy.crescimentoReal) {
+      final pi = inflation;
+      // Sem inflação declarada não há crescimento real a apurar, e inventar um
+      // seria medir outra coisa: vale o nominal.
+      if (pi != null && pi.isFinite && pi > -1) g = (1 + g) / (1 + pi) - 1;
+    }
     if (g <= 0) return 0.0;
     final b = g / roic;
-    return b.clamp(0.0, 0.95);
+    if (reinvestmentPolicy == ReinvestmentPolicy.semTeto) return b;
+    return b.clamp(0.0, maxRetention);
   }
 
   /// Crescimento aplicado ao ano [t], contado a partir de 1.
@@ -172,9 +266,56 @@ class DcfAssumptions {
   /// e corte no sexto — não tem conteúdo econômico: vantagem competitiva se
   /// desgasta conforme a concorrência entra, não termina numa data.
   double growthAt(int t) {
-    if (projectionYears <= 1) return perpetualGrowth;
-    final passo = (t - 1) / (projectionYears - 1);
-    return growthRate - (growthRate - perpetualGrowth) * passo;
+    final g = projectionYears <= 1
+        ? perpetualGrowth
+        : growthRate -
+            (growthRate - perpetualGrowth) * ((t - 1) / (projectionYears - 1));
+    return sustainable(g, returnOnCapitalAt(t));
+  }
+
+  /// Convenção de chegada do caixa. [CashTiming.meioDeAno] em produção.
+  final CashTiming cashTiming;
+
+  /// Levantamento de meio de ano do ano com taxa [rate], ou 1 sob
+  /// [CashTiming.fimDeAno].
+  double lift(double rate) =>
+      cashTiming == CashTiming.meioDeAno ? midYearLift(rate) : 1.0;
+
+  /// Fator de **meio de ano**: `√(1 + r)`.
+  ///
+  /// **O caixa de um exercício não chega no dia 31 de dezembro.** Descontar o
+  /// fluxo inteiro do ano no fim dele cobra doze meses de espera por dinheiro
+  /// que, em média, chegou no sexto — e o erro é sistemático e sempre na mesma
+  /// direção: subestima. Com desconto de 13%, meio ano vale 6,3% do valor, e
+  /// isso incide sobre a avaliação inteira, período explícito e perpetuidade.
+  ///
+  /// **É aproximação, e a exata seria outra.** O ano 1 conta a partir do
+  /// último exercício publicado, e na data da avaliação parte dele já correu —
+  /// tratar o período parcial exigiria data de fechamento por empresa, que a
+  /// fonte dá, e um fluxo proporcional, que ela não dá. A convenção de meio de
+  /// ano é a aproximação padrão para exatamente esse caso, e erra menos que
+  /// supor que tudo chega no último dia.
+  static double midYearLift(double rate) =>
+      rate > -1 ? math.sqrt(1 + rate) : 1.0;
+
+  /// Confina [growth] ao que [returnOnCapital] financia: `g ≤ b_max · ROIC`.
+  ///
+  /// **É a identidade `g = b·ROIC`, aplicada na premissa em vez da
+  /// consequência.** Sem ela o motor projetava crescimento que o próprio
+  /// retorno não paga e depois truncava a conta do financiamento em
+  /// [maxRetention] — de modo que o lucro compunha à taxa cheia enquanto só
+  /// 95% dele era cobrado. Medido em 10/09/2026: 14 dos 116 ativos com retorno
+  /// utilizável tinham `g > ROIC`, e **os 14 estavam no teto da retenção**. Na
+  /// FESA4 o freio pedia 6,8 vezes o lucro operacional; na MOVI3, crescimento
+  /// de 31,8% sobre retorno de 13,4%.
+  ///
+  /// Sem retorno utilizável não há teto a aplicar, e o crescimento passa
+  /// inteiro — a mesma direção conservadora ao contrário que [retentionAt] já
+  /// adota, e que o resultado declara em texto.
+  static double sustainable(double growth, double returnOnCapital) {
+    if (returnOnCapital <= 0 || !returnOnCapital.isFinite) return growth;
+    final teto = maxRetention * returnOnCapital;
+    return growth > teto ? teto : growth;
   }
 
   /// Cópia com os campos informados substituídos.
@@ -188,6 +329,10 @@ class DcfAssumptions {
     bool? neutralTerminalReturn,
     double? terminalReturnOnCapital,
     double? marginOfSafety,
+    List<double>? discountRatePath,
+    ReinvestmentPolicy? reinvestmentPolicy,
+    double? inflation,
+    CashTiming? cashTiming,
   }) =>
       DcfAssumptions(
         projectionYears: projectionYears ?? this.projectionYears,
@@ -202,6 +347,10 @@ class DcfAssumptions {
         terminalReturnOnCapital:
             terminalReturnOnCapital ?? this.terminalReturnOnCapital,
         marginOfSafety: marginOfSafety ?? this.marginOfSafety,
+        discountRatePath: discountRatePath ?? this.discountRatePath,
+        reinvestmentPolicy: reinvestmentPolicy ?? this.reinvestmentPolicy,
+        inflation: inflation ?? this.inflation,
+        cashTiming: cashTiming ?? this.cashTiming,
       );
 }
 
@@ -228,7 +377,16 @@ class DcfOutcome {
   /// Preço justo por papel.
   final double fairValuePerShare;
 
-  /// Parcela do valor total explicada pelo valor terminal.
+  /// Parcela do **valor do capital próprio** explicada pelo valor terminal.
+  ///
+  /// **A referência é o capital próprio nas três rotas** — ponte, rota
+  /// derivada e via do acionista —, e é o que a decisão 51 uniformizou. A
+  /// pergunta que ela responde é quanto do **preço** repousa sobre a
+  /// perpetuidade, e o preço é o do acionista.
+  ///
+  /// **Pode passar de 100%.** Quando o terminal descontado supera o capital
+  /// próprio — dívida grande, participação fina —, passar é o próprio sinal, e
+  /// truncar em 1 esconderia o caso mais frágil.
   final double terminalShare;
 
   /// Participação do equity no valor da firma.
@@ -304,15 +462,22 @@ abstract final class DcfCalculator {
           'Retorno terminal deve ser positivo quando declarado.',
         ));
       }
-      final spread = r - g;
+      // O mesmo confinamento da projeção explícita, pela mesma razão: sem ele
+      // a perpetuidade cresce a uma taxa que o retorno terminal não financia,
+      // e a conta do financiamento é truncada no teto. Vem **antes** da guarda
+      // do spread: confinar o crescimento só o afasta da taxa, e checar o
+      // spread contra o `g` não confinado recusaria avaliação que fecha.
+      final gInf = DcfAssumptions.sustainable(g, moat);
+      final spread = r - gInf;
       if (spread < minimumSpread) {
         return const Err(ComputationFailure(
           'Taxa de desconto de equilíbrio não supera o crescimento perpétuo '
           'por margem suficiente: o valor terminal diverge.',
         ));
       }
-      final reinvestimento = (g / moat).clamp(0.0, 0.95);
-      return Ok(proximo * (1 - reinvestimento) / spread);
+      final reinvestimento =
+          (gInf / moat).clamp(0.0, DcfAssumptions.maxRetention);
+      return Ok(finalProfit * (1 + gInf) * (1 - reinvestimento) / spread);
     }
 
     if (assumptions.neutralTerminalReturn) return Ok(proximo / r);
@@ -345,6 +510,7 @@ abstract final class DcfCalculator {
     required DcfAssumptions assumptions,
     required double netDebt,
     required double sharesOutstanding,
+    double minorityInterest = 0,
   }) {
     if (sharesOutstanding <= 0) {
       return const Err(InsufficientData(
@@ -363,7 +529,14 @@ abstract final class DcfCalculator {
 
     final ev = p.somaDescontada + p.terminalDescontado;
     final equity = ev - netDebt;
-    final porPapel = equity / sharesOutstanding;
+    // **A demonstração consolida 100% das controladas; o acionista da
+    // controladora não é dono de tudo.** O fluxo descontado é o consolidado,
+    // e a parte dos não controladores sai antes da divisão por papel. Ela
+    // **não** entra em [equityShare]: a alavancagem da firma é `D/(D+E)` com
+    // o capital próprio inteiro, e tirar os minoritários dali os trataria como
+    // dívida.
+    final doControlador = equity - _naoNegativo(minorityInterest);
+    final porPapel = doControlador / sharesOutstanding;
 
     if (!porPapel.isFinite) {
       return const Err(ComputationFailure(
@@ -377,9 +550,194 @@ abstract final class DcfCalculator {
       terminalValue: p.terminal,
       discountedTerminalValue: p.terminalDescontado,
       enterpriseValue: ev,
-      equityValue: equity,
+      equityValue: doControlador,
       fairValuePerShare: porPapel,
-      terminalShare: ev > 0 ? p.terminalDescontado / ev : 0.0,
+      // **Contra o capital próprio, e não contra o valor da firma**
+      // (decisão 51). A pergunta que a ressalva `terminalPesado` faz é quanto
+      // do **preço** repousa sobre a perpetuidade, e o preço é o capital
+      // próprio: a dívida é subtração fixa, de modo que o terminal contribui
+      // com o valor descontado inteiro dele para o que sobra ao acionista.
+      // Medir contra `EV` subdeclara exatamente onde o capital próprio é fino
+      // — que é onde a estimativa é mais frágil. Pode passar de 100%, e passar
+      // é o próprio sinal.
+      terminalShare:
+          doControlador > 0 ? p.terminalDescontado / doControlador : 0.0,
+      equityShare: ev > 0 ? equity / ev : 0.0,
+    ));
+  }
+
+  /// O valor, ou zero quando ele é negativo ou não finito.
+  ///
+  /// Participação de não controladores negativa existe — controlada com
+  /// patrimônio negativo —, e subtraí-la **aumentaria** o valor do
+  /// controlador. Enquanto o motor não modelar a obrigação de aportar, tratar
+  /// isso como zero é a leitura conservadora.
+  static double _naoNegativo(double v) => v.isFinite && v > 0 ? v : 0.0;
+
+  /// DCF sobre o fluxo do acionista **derivado do da firma**, descontado ao Ke.
+  ///
+  /// `FCFE_t = FCFF_t − D_{t−1}·[Kd·(1−τ) − g_t]`
+  ///
+  /// **Por que existe, e o que ela não é.** A via do acionista que a decisão 25
+  /// criou parte do LPA publicado — outro dado, de outras linhas —, e por isso
+  /// discorda da via da firma além de 1,5× em 55 de 92 ativos
+  /// ([decisão 39](../../../../../docs/decisoes/039-as-duas-vias-sao-modelos-independentes.md)).
+  /// Esta **não é uma segunda opinião**: é a mesma avaliação por uma rota que
+  /// não passa pela subtração `EV − D`, e por isso não sofre a amplificação de
+  /// `1/participação` quando o capital próprio é fino.
+  ///
+  /// **A identidade que ela precisa satisfazer, e que é testável.** Sob
+  /// alavancagem constante, com `V = E + D` no ano N:
+  ///
+  /// ```
+  /// FCFE_{N+1} = FCFF_{N+1} − D·[Kd(1−τ) − g]
+  ///            = (WACC − g)·V − D·Kd(1−τ) + D·g
+  ///            = Ke·E − g·E  =  E·(Ke − g)
+  /// ```
+  ///
+  /// de modo que `TV_equity = FCFE_{N+1}/(Ke − g) = E = TV_firma − D`. A
+  /// igualdade é **exata**, e o que ela exige é que o `WACC` tenha sido montado
+  /// com os pesos `E/V` e `D/V` **do próprio modelo**. Com peso de equity vindo
+  /// do valor de mercado — que é o que `CostOfCapital` faz hoje — ela deixa de
+  /// fechar na proporção em que o preço justo discorda do preço.
+  ///
+  /// - [baseProfit]: NOPAT do exercício-base, já normalizado.
+  /// - [netDebt]: dívida líquida no ano zero. Cresce com [DcfAssumptions.growthAt],
+  ///   que é a hipótese de alavancagem constante.
+  /// - [costOfDebt]: `Kd` **antes** do escudo fiscal.
+  /// - [taxRate]: alíquota do escudo, a marginal.
+  /// - [equityDiscountRate]: `Ke` do primeiro ano.
+  /// - [terminalEquityDiscountRate]: `Ke` de equilíbrio. Decai linearmente do
+  ///   primeiro ao último, como o desconto da firma.
+  static Result<DcfOutcome> equityFromFirm({
+    required double baseProfit,
+    required DcfAssumptions assumptions,
+    required double netDebt,
+    required double sharesOutstanding,
+    required double costOfDebt,
+    required double taxRate,
+    required double equityDiscountRate,
+    required double terminalEquityDiscountRate,
+    List<double>? equityDiscountRatePath,
+    double minorityInterest = 0,
+  }) {
+    if (sharesOutstanding <= 0) {
+      return const Err(InsufficientData(
+        'Quantidade de papéis em circulação indisponível ou inválida.',
+      ));
+    }
+    if (baseProfit <= 0) {
+      return const Err(InsufficientData(
+        'Lucro operacional base não positivo: a via da firma não é aplicável.',
+      ));
+    }
+    if (equityDiscountRate <= 0 || terminalEquityDiscountRate <= 0) {
+      return const Err(InvalidInput(
+        'Custo do capital próprio deve ser positivo.',
+      ));
+    }
+    final caminhoKe = equityDiscountRatePath;
+    if (caminhoKe != null) {
+      if (caminhoKe.length != assumptions.projectionYears) {
+        return const Err(InvalidInput(
+          'Caminho de custo do capital próprio com tamanho diferente do '
+          'horizonte: cada ano projetado precisa da sua taxa.',
+        ));
+      }
+      for (final k in caminhoKe) {
+        if (!k.isFinite || k <= 0) {
+          return const Err(InvalidInput(
+            'Caminho de custo do capital próprio com taxa não positiva.',
+          ));
+        }
+      }
+    }
+
+    // O fluxo da firma vem da mesma projeção que a via A usa — é isso que faz
+    // desta rota a mesma avaliação, e não outra.
+    final projetado = _project(baseProfit, assumptions);
+    if (projetado.isErr) return Err(projetado.failureOrNull!);
+    final p = projetado.unwrap();
+
+    final kdLiquido = costOfDebt * (1 - taxRate);
+    final n = assumptions.projectionYears;
+
+    /// `Ke` do ano [t].
+    ///
+    /// Com caminho explícito, é ele — e é o que a identidade exige quando a
+    /// alavancagem muda ano a ano. Sem caminho, decai linearmente como o
+    /// desconto da firma decai, que é o comportamento de dois pontos.
+    double keAt(int t) {
+      final caminho = equityDiscountRatePath;
+      if (caminho != null && t >= 1 && t <= caminho.length) {
+        return caminho[t - 1];
+      }
+      final passo = n <= 1 ? 1.0 : (t - 1) / (n - 1);
+      return equityDiscountRate -
+          (equityDiscountRate - terminalEquityDiscountRate) * passo;
+    }
+
+    final fluxos = <double>[];
+    final descontados = <double>[];
+    var soma = 0.0;
+    var fator = 1.0;
+    var divida = netDebt;
+
+    for (var t = 1; t <= n; t++) {
+      final ke = keAt(t);
+      fator *= 1 + ke;
+      final g = assumptions.growthAt(t);
+      // `D_{t−1}` é a dívida no **início** do ano: o juro incide sobre ela, e o
+      // acréscimo de dívida do ano é `D_{t−1}·g`.
+      final fcfe = p.fluxos[t - 1] - divida * (kdLiquido - g);
+      fluxos.add(fcfe);
+      final vp = fcfe * assumptions.lift(ke) / fator;
+      descontados.add(vp);
+      soma += vp;
+      divida = divida * (1 + g);
+    }
+
+    // Terminal do acionista, pela mesma identidade: o fluxo do ano N+1 menos o
+    // serviço líquido da dívida, capitalizado a `Ke_∞ − g_∞`.
+    final gInf = assumptions.perpetualGrowth;
+    final spread = terminalEquityDiscountRate - gInf;
+    if (spread < minimumSpread) {
+      return const Err(ComputationFailure(
+        'Custo do capital próprio de equilíbrio não supera o crescimento '
+        'perpétuo por margem suficiente: o valor terminal do acionista '
+        'diverge.',
+      ));
+    }
+    final fcffTerminal = p.terminal * (assumptions.terminalDiscountRate - gInf);
+    final fcfeTerminal = fcffTerminal - divida * (kdLiquido - gInf);
+    final vt = fcfeTerminal / spread;
+    // A perpetuidade também é feita de fluxos que chegam ao longo do ano, e o
+    // mesmo levantamento vale para ela — sob a taxa de equilíbrio, que é a que
+    // a capitaliza.
+    final vtDescontado =
+        vt * assumptions.lift(terminalEquityDiscountRate) / fator;
+
+    final equity = soma + vtDescontado;
+    // O fluxo do acionista derivado do da firma continua consolidando 100% das
+    // controladas: a parte dos não controladores sai aqui, como sai na ponte.
+    final doControlador = equity - _naoNegativo(minorityInterest);
+    final porPapel = doControlador / sharesOutstanding;
+    if (!porPapel.isFinite) {
+      return const Err(ComputationFailure(
+        'Valor por papel não finito: verifique as premissas.',
+      ));
+    }
+
+    final ev = equity + netDebt;
+    return Ok(DcfOutcome(
+      projectedFlows: fluxos,
+      discountedFlows: descontados,
+      terminalValue: vt,
+      discountedTerminalValue: vtDescontado,
+      enterpriseValue: ev,
+      equityValue: doControlador,
+      fairValuePerShare: porPapel,
+      terminalShare: doControlador > 0 ? vtDescontado / doControlador : 0.0,
       equityShare: ev > 0 ? equity / ev : 0.0,
     ));
   }
@@ -459,6 +817,22 @@ abstract final class DcfCalculator {
     if (a.discountRate <= 0 || a.terminalDiscountRate <= 0) {
       return const Err(InvalidInput('Taxa de desconto deve ser positiva.'));
     }
+    final caminho = a.discountRatePath;
+    if (caminho != null) {
+      if (caminho.length != a.projectionYears) {
+        return const Err(InvalidInput(
+          'Caminho de desconto com tamanho diferente do horizonte: cada ano '
+          'projetado precisa da sua taxa.',
+        ));
+      }
+      for (final r in caminho) {
+        if (!r.isFinite || r <= 0) {
+          return const Err(InvalidInput(
+            'Caminho de desconto com taxa não positiva.',
+          ));
+        }
+      }
+    }
 
     final fluxos = <double>[];
     final descontados = <double>[];
@@ -472,10 +846,12 @@ abstract final class DcfCalculator {
     var fator = 1.0;
 
     for (var t = 1; t <= a.projectionYears; t++) {
-      fator *= 1 + a.discountRateAt(t);
+      final r = a.discountRateAt(t);
+      fator *= 1 + r;
       lucro *= 1 + a.growthAt(t);
       final distribuivel = lucro * (1 - a.retentionAt(t));
-      final vp = distribuivel / fator;
+      // Meio de ano: o fluxo do ano chega, em média, no meio dele.
+      final vp = distribuivel * a.lift(r) / fator;
       fluxos.add(distribuivel);
       descontados.add(vp);
       soma += vp;
@@ -490,7 +866,10 @@ abstract final class DcfCalculator {
       descontados: descontados,
       somaDescontada: soma,
       terminal: vt,
-      terminalDescontado: vt / fator,
+      // A perpetuidade também é feita de fluxos distribuídos no ano, e recebe
+      // o mesmo levantamento — sob a taxa de equilíbrio, que é a que a
+      // capitaliza.
+      terminalDescontado: vt * a.lift(a.terminalDiscountRate) / fator,
     ));
   }
 }

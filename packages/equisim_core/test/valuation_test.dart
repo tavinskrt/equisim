@@ -74,12 +74,18 @@ void main() {
       // Terminal neutro: VT = fluxo_{N+1}/r = 115,7625 × 1,05 / 0,10.
       expect(o.terminalValue, closeTo(115.7625 * 1.05 / 0.10, 1e-6));
 
+      // **Com o levantamento de meio de ano**, que é a convenção de produção
+      // desde a decisão 48: o caixa do exercício chega ao longo do ano, e
+      // descontá-lo inteiro no dia 31 de dezembro cobra doze meses de espera
+      // por dinheiro que em média chegou no sexto. Com taxa plana o fator é o
+      // mesmo em todo o valor, e a conta manual o carrega para fora.
+      final meioDeAno = math.sqrt(1.10);
       var vp = 0.0;
       for (var t = 1; t <= 3; t++) {
         vp += 100 * math.pow(1.05, t) / math.pow(1.10, t);
       }
       vp += o.terminalValue / math.pow(1.10, 3);
-      expect(o.fairValuePerShare, closeTo(vp / 10, 1e-6));
+      expect(o.fairValuePerShare, closeTo(vp * meioDeAno / 10, 1e-6));
     });
 
     test('o terminal neutro não depende do crescimento perpétuo', () {

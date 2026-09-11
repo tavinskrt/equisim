@@ -164,7 +164,31 @@ enum ValuationCaveat {
   /// decisão 31, e não mais um recuo. Ressalva que vale para a maioria não
   /// distingue nada; a substituição continua declarada nos avisos, que é onde
   /// ela informa.
-  ponteFragil('o preço por papel é resíduo de uma subtração frágil');
+  ponteFragil('o preço por papel é resíduo de uma subtração frágil'),
+
+  /// O preço justo é combinação das duas vias, na faixa em que nenhuma domina.
+  ///
+  /// Medido em 10/09/2026: as duas vias discordam além de 1,5× em **55 de 92**
+  /// ativos e além de 2× em 33. Enquanto a pós-condição escolhia uma delas por
+  /// limiar, essa discordância virava um degrau no preço justo — a VBBR3 saía
+  /// a R$ 2,65 ou R$ 33,71 conforme a participação cruzasse 20%. A combinação
+  /// remove o degrau; **não remove a discordância**, e é isso que esta
+  /// ressalva declara.
+  viasMescladas('o preço justo combina as duas vias'),
+
+  /// O negócio opera sob contrato de prazo determinado, e o valor terminal
+  /// supõe perpetuidade.
+  ///
+  /// **A ressalva existe porque o conserto não é possível com o que a fonte
+  /// publica.** O prazo da concessão não é campo de demonstração financeira, e
+  /// o estimador que parecia servir — `(imobilizado + intangível) ÷ D&A` —
+  /// mede giro da base, não vencimento de contrato: dá 6,3 anos para a TAEE11,
+  /// cujas outorgas vão a 2042. Ver
+  /// [`concessao.md`](../../../../../docs/validacao/concessao.md).
+  ///
+  /// O tamanho está medido: se o contrato acabasse em dez anos, o preço justo
+  /// mediano dos expostos ficaria em 0,80 do publicado; em vinte, 0,90.
+  prazoDeterminado('o negócio opera sob contrato de prazo determinado');
 
   final String label;
   const ValuationCaveat(this.label);
@@ -183,6 +207,15 @@ enum ValuationCaveat {
 /// resultado, em forma que a máquina lê.
 class ValuationDiagnostics {
   /// Parcela do preço justo explicada pelo valor terminal, em fração.
+  ///
+  /// **É contra o capital próprio, nas três rotas** (decisão 51). Antes a
+  /// ponte media contra o valor da firma e as outras duas contra o do
+  /// acionista: o mesmo campo carregava duas grandezas conforme um caminho que
+  /// o leitor não vê, e o corte de [terminalShareLimit] valia para as duas.
+  ///
+  /// Pode passar de 1: com capital próprio fino, o terminal descontado supera
+  /// o que sobra ao acionista, e é justamente o caso que a ressalva existe
+  /// para marcar.
   final double terminalShare;
 
   /// Participação do capital próprio no valor da firma. `1.0` na via do
@@ -196,7 +229,53 @@ class ValuationDiagnostics {
   final bool growthIdentified;
 
   /// `true` quando a perpetuidade preserva excedente de retorno.
+  ///
+  /// **Bandeira, e desde a decisão 36 ela vem acompanhada.** Enquanto a
+  /// exceção era um degrau, o booleano bastava: ou se preservava 30% do
+  /// excedente ou não se preservava nada. Com `λ` contínuo ele passou a
+  /// esconder a diferença entre preservar meio ponto-base e preservar um
+  /// terço — ver [terminalRetainedSpread].
   final bool moatApplied;
+
+  /// Fração do excedente de retorno preservada na perpetuidade — o `λ = φ^N`
+  /// da decisão 36. `0` no estado estacionário.
+  ///
+  /// É a magnitude que [moatApplied] não carrega. Sai com o resultado porque
+  /// duas avaliações com a bandeira ligada e `λ` de 0,001 e 0,30 não são o
+  /// mesmo objeto.
+  final double terminalRetainedSpread;
+
+  /// Crescimento do primeiro ano da projeção explícita, antes do decaimento.
+  ///
+  /// Junto com [returnOnCapital] fecha o par que governa o **freio de
+  /// reinvestimento**: `b_t = g_t / ROIC_t`. Sem os dois no resultado, o
+  /// tamanho do fluxo explícito não é auditável de fora sem reimplementar a
+  /// projeção — e reimplementá-la mediria outro motor.
+  final double growthRate;
+
+  /// Retorno terminal efetivamente aplicado, ou `null` no estado estacionário.
+  ///
+  /// **Sai porque reconstruí-lo de fora dá errado.** Ele é
+  /// `r_∞ + λ·(ROIC_do_ciclo − r_∞)`, e o retorno do ciclo **não** é
+  /// [returnOnCapital] — este é o do fluxo-base, `retorno corrente × fator`.
+  /// Quem tentasse remontar o terminal a partir dos dois campos anteriores
+  /// erraria em todo ativo em que o fator de normalização não é 1.
+  final double? terminalReturnOnCapital;
+
+  /// Alíquota estrutural aplicada ao NOPAT da via da firma.
+  ///
+  /// `null` na via do acionista, que parte do lucro líquido já tributado, e
+  /// também quando a série não tem exercícios suficientes para medi-la — caso
+  /// em que vale a estatutária embutida pela fonte.
+  final double? firmTaxRate;
+
+  /// Retorno sobre o capital do fluxo-base, o denominador do freio.
+  ///
+  /// É `retorno corrente × fator de normalização` quando há retorno corrente
+  /// utilizável, e o do ciclo quando não há. Vale `0` quando o freio está
+  /// desligado por falta de retorno medível — o que é a direção agressiva, e
+  /// o resultado já a declara em texto.
+  final double returnOnCapital;
 
   /// Custo de capital de equilíbrio — a taxa que desconta a perpetuidade.
   ///
@@ -206,6 +285,33 @@ class ValuationDiagnostics {
   /// respondendo pela maior parte do valor, era esta que faltava sair — e ela
   /// é também a referência contra a qual o excedente de retorno se mede.
   final double terminalDiscountRate;
+
+  /// Custo do capital próprio de **equilíbrio resolvido** contra a
+  /// alavancagem, quando o ponto fixo da decisão 41 valeu.
+  ///
+  /// `null` quando ele não valeu — inclusive na via do acionista, que precifica
+  /// o `Ke` pelo beta alavancado de hoje e supõe essa alavancagem perene. Sai
+  /// com o resultado porque é a única maneira de comparar, de fora, os dois
+  /// custos de capital próprio que o motor produz para o mesmo ativo.
+  final double? terminalCostOfEquity;
+
+  /// Crescimento **aplicado** em cada ano explícito.
+  ///
+  /// Não é o decaimento de [growthRate] até a perpetuidade: desde a guarda do
+  /// crescimento financiável ele é confinado a `b_max · ROIC_t`, e [growthRate]
+  /// passou a ser o que as guardas *decidiram*, não o que a projeção *usou*.
+  /// Publicar só o primeiro faria todo leitor de fora remontar a projeção
+  /// errada — foi o que aconteceu com o próprio utilitário de validação.
+  final List<double> growthPath;
+
+  /// Retenção aplicada em cada ano explícito — o `b_t = g_t/ROIC_t` do freio.
+  ///
+  /// **Sai porque reconstruí-la de fora mede outro motor.** O `ROIC_t` converge
+  /// para a taxa de desconto **daquele ano**, e desde a decisão 42 essa taxa é
+  /// um caminho resolvido por ponto fixo, não uma interpolação de dois pontos.
+  /// Quem remontasse o freio a partir de [growthRate], [returnOnCapital] e
+  /// [terminalDiscountRate] erraria em todo ativo com alavancagem que se move.
+  final List<double> retentionPath;
 
   /// Ressalvas medidas, na ordem em que a cascata as apura.
   final List<ValuationCaveat> caveats;
@@ -217,6 +323,14 @@ class ValuationDiagnostics {
     required this.growthIdentified,
     required this.moatApplied,
     required this.terminalDiscountRate,
+    required this.terminalRetainedSpread,
+    required this.growthRate,
+    required this.returnOnCapital,
+    this.terminalReturnOnCapital,
+    this.firmTaxRate,
+    this.terminalCostOfEquity,
+    this.retentionPath = const [],
+    this.growthPath = const [],
     this.caveats = const [],
   });
 

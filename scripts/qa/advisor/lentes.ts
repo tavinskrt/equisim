@@ -119,6 +119,13 @@ export const LENTES: Record<LenteId, Lente> = {
       '  que se propoe e extrair dele o que precisa virar registro enderecavel.',
       'NAO reporte ausencia de documentacao em geral. A pergunta e sobre',
       '  divergencia entre registro e realidade, nao sobre volume de texto.',
+      'ARQUIVO CITADO NAO E ARQUIVO AUSENTE. Antes de dizer que um documento',
+      '  falta, PROCURE o marcador "===== ARQUIVO: <caminho> =====" no material',
+      '  e o caminho na arvore do repositorio, que vem junto. Em 10/09/2026',
+      '  esta lente reportou como inexistentes as decisoes 031 e 032, e as duas',
+      '  estavam no payload, integrais, com marcador proprio. Se o caminho',
+      '  aparece em qualquer um dos dois lugares, o arquivo EXISTE e a tensao',
+      '  nao existe.',
     ],
     materiais: [
       { tipo: 'arquivo', caminho: 'PLANO_ARQUITETURA.md' },

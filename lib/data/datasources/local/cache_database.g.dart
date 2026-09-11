@@ -709,6 +709,28 @@ class $CachedFundamentalsTableTable extends CachedFundamentalsTable
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _minorityInterestMeta = const VerificationMeta(
+    'minorityInterest',
+  );
+  @override
+  late final GeneratedColumn<double> minorityInterest = GeneratedColumn<double>(
+    'minority_interest',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _equityIncomeResultMeta =
+      const VerificationMeta('equityIncomeResult');
+  @override
+  late final GeneratedColumn<double> equityIncomeResult =
+      GeneratedColumn<double>(
+        'equity_income_result',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     ticker,
@@ -741,6 +763,8 @@ class $CachedFundamentalsTableTable extends CachedFundamentalsTable
     currentLiabilities,
     realizedShareCapital,
     profitReserves,
+    minorityInterest,
+    equityIncomeResult,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1007,6 +1031,24 @@ class $CachedFundamentalsTableTable extends CachedFundamentalsTable
         ),
       );
     }
+    if (data.containsKey('minority_interest')) {
+      context.handle(
+        _minorityInterestMeta,
+        minorityInterest.isAcceptableOrUnknown(
+          data['minority_interest']!,
+          _minorityInterestMeta,
+        ),
+      );
+    }
+    if (data.containsKey('equity_income_result')) {
+      context.handle(
+        _equityIncomeResultMeta,
+        equityIncomeResult.isAcceptableOrUnknown(
+          data['equity_income_result']!,
+          _equityIncomeResultMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1136,6 +1178,14 @@ class $CachedFundamentalsTableTable extends CachedFundamentalsTable
         DriftSqlType.double,
         data['${effectivePrefix}profit_reserves'],
       ),
+      minorityInterest: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}minority_interest'],
+      ),
+      equityIncomeResult: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}equity_income_result'],
+      ),
     );
   }
 
@@ -1180,6 +1230,8 @@ class CachedFundamentals extends DataClass
   final double? currentLiabilities;
   final double? realizedShareCapital;
   final double? profitReserves;
+  final double? minorityInterest;
+  final double? equityIncomeResult;
   const CachedFundamentals({
     required this.ticker,
     required this.fiscalPeriodEnd,
@@ -1211,6 +1263,8 @@ class CachedFundamentals extends DataClass
     this.currentLiabilities,
     this.realizedShareCapital,
     this.profitReserves,
+    this.minorityInterest,
+    this.equityIncomeResult,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1305,6 +1359,12 @@ class CachedFundamentals extends DataClass
     if (!nullToAbsent || profitReserves != null) {
       map['profit_reserves'] = Variable<double>(profitReserves);
     }
+    if (!nullToAbsent || minorityInterest != null) {
+      map['minority_interest'] = Variable<double>(minorityInterest);
+    }
+    if (!nullToAbsent || equityIncomeResult != null) {
+      map['equity_income_result'] = Variable<double>(equityIncomeResult);
+    }
     return map;
   }
 
@@ -1392,6 +1452,12 @@ class CachedFundamentals extends DataClass
       profitReserves: profitReserves == null && nullToAbsent
           ? const Value.absent()
           : Value(profitReserves),
+      minorityInterest: minorityInterest == null && nullToAbsent
+          ? const Value.absent()
+          : Value(minorityInterest),
+      equityIncomeResult: equityIncomeResult == null && nullToAbsent
+          ? const Value.absent()
+          : Value(equityIncomeResult),
     );
   }
 
@@ -1455,6 +1521,10 @@ class CachedFundamentals extends DataClass
         json['realizedShareCapital'],
       ),
       profitReserves: serializer.fromJson<double?>(json['profitReserves']),
+      minorityInterest: serializer.fromJson<double?>(json['minorityInterest']),
+      equityIncomeResult: serializer.fromJson<double?>(
+        json['equityIncomeResult'],
+      ),
     );
   }
   @override
@@ -1497,6 +1567,8 @@ class CachedFundamentals extends DataClass
       'currentLiabilities': serializer.toJson<double?>(currentLiabilities),
       'realizedShareCapital': serializer.toJson<double?>(realizedShareCapital),
       'profitReserves': serializer.toJson<double?>(profitReserves),
+      'minorityInterest': serializer.toJson<double?>(minorityInterest),
+      'equityIncomeResult': serializer.toJson<double?>(equityIncomeResult),
     };
   }
 
@@ -1531,6 +1603,8 @@ class CachedFundamentals extends DataClass
     Value<double?> currentLiabilities = const Value.absent(),
     Value<double?> realizedShareCapital = const Value.absent(),
     Value<double?> profitReserves = const Value.absent(),
+    Value<double?> minorityInterest = const Value.absent(),
+    Value<double?> equityIncomeResult = const Value.absent(),
   }) => CachedFundamentals(
     ticker: ticker ?? this.ticker,
     fiscalPeriodEnd: fiscalPeriodEnd ?? this.fiscalPeriodEnd,
@@ -1600,6 +1674,12 @@ class CachedFundamentals extends DataClass
     profitReserves: profitReserves.present
         ? profitReserves.value
         : this.profitReserves,
+    minorityInterest: minorityInterest.present
+        ? minorityInterest.value
+        : this.minorityInterest,
+    equityIncomeResult: equityIncomeResult.present
+        ? equityIncomeResult.value
+        : this.equityIncomeResult,
   );
   CachedFundamentals copyWithCompanion(CachedFundamentalsTableCompanion data) {
     return CachedFundamentals(
@@ -1679,6 +1759,12 @@ class CachedFundamentals extends DataClass
       profitReserves: data.profitReserves.present
           ? data.profitReserves.value
           : this.profitReserves,
+      minorityInterest: data.minorityInterest.present
+          ? data.minorityInterest.value
+          : this.minorityInterest,
+      equityIncomeResult: data.equityIncomeResult.present
+          ? data.equityIncomeResult.value
+          : this.equityIncomeResult,
     );
   }
 
@@ -1714,7 +1800,9 @@ class CachedFundamentals extends DataClass
           ..write('totalCurrentAssets: $totalCurrentAssets, ')
           ..write('currentLiabilities: $currentLiabilities, ')
           ..write('realizedShareCapital: $realizedShareCapital, ')
-          ..write('profitReserves: $profitReserves')
+          ..write('profitReserves: $profitReserves, ')
+          ..write('minorityInterest: $minorityInterest, ')
+          ..write('equityIncomeResult: $equityIncomeResult')
           ..write(')'))
         .toString();
   }
@@ -1751,6 +1839,8 @@ class CachedFundamentals extends DataClass
     currentLiabilities,
     realizedShareCapital,
     profitReserves,
+    minorityInterest,
+    equityIncomeResult,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1785,7 +1875,9 @@ class CachedFundamentals extends DataClass
           other.totalCurrentAssets == this.totalCurrentAssets &&
           other.currentLiabilities == this.currentLiabilities &&
           other.realizedShareCapital == this.realizedShareCapital &&
-          other.profitReserves == this.profitReserves);
+          other.profitReserves == this.profitReserves &&
+          other.minorityInterest == this.minorityInterest &&
+          other.equityIncomeResult == this.equityIncomeResult);
 }
 
 class CachedFundamentalsTableCompanion
@@ -1820,6 +1912,8 @@ class CachedFundamentalsTableCompanion
   final Value<double?> currentLiabilities;
   final Value<double?> realizedShareCapital;
   final Value<double?> profitReserves;
+  final Value<double?> minorityInterest;
+  final Value<double?> equityIncomeResult;
   final Value<int> rowid;
   const CachedFundamentalsTableCompanion({
     this.ticker = const Value.absent(),
@@ -1852,6 +1946,8 @@ class CachedFundamentalsTableCompanion
     this.currentLiabilities = const Value.absent(),
     this.realizedShareCapital = const Value.absent(),
     this.profitReserves = const Value.absent(),
+    this.minorityInterest = const Value.absent(),
+    this.equityIncomeResult = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CachedFundamentalsTableCompanion.insert({
@@ -1885,6 +1981,8 @@ class CachedFundamentalsTableCompanion
     this.currentLiabilities = const Value.absent(),
     this.realizedShareCapital = const Value.absent(),
     this.profitReserves = const Value.absent(),
+    this.minorityInterest = const Value.absent(),
+    this.equityIncomeResult = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : ticker = Value(ticker),
        fiscalPeriodEnd = Value(fiscalPeriodEnd);
@@ -1919,6 +2017,8 @@ class CachedFundamentalsTableCompanion
     Expression<double>? currentLiabilities,
     Expression<double>? realizedShareCapital,
     Expression<double>? profitReserves,
+    Expression<double>? minorityInterest,
+    Expression<double>? equityIncomeResult,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1960,6 +2060,9 @@ class CachedFundamentalsTableCompanion
       if (realizedShareCapital != null)
         'realized_share_capital': realizedShareCapital,
       if (profitReserves != null) 'profit_reserves': profitReserves,
+      if (minorityInterest != null) 'minority_interest': minorityInterest,
+      if (equityIncomeResult != null)
+        'equity_income_result': equityIncomeResult,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1995,6 +2098,8 @@ class CachedFundamentalsTableCompanion
     Value<double?>? currentLiabilities,
     Value<double?>? realizedShareCapital,
     Value<double?>? profitReserves,
+    Value<double?>? minorityInterest,
+    Value<double?>? equityIncomeResult,
     Value<int>? rowid,
   }) {
     return CachedFundamentalsTableCompanion(
@@ -2031,6 +2136,8 @@ class CachedFundamentalsTableCompanion
       currentLiabilities: currentLiabilities ?? this.currentLiabilities,
       realizedShareCapital: realizedShareCapital ?? this.realizedShareCapital,
       profitReserves: profitReserves ?? this.profitReserves,
+      minorityInterest: minorityInterest ?? this.minorityInterest,
+      equityIncomeResult: equityIncomeResult ?? this.equityIncomeResult,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2138,6 +2245,12 @@ class CachedFundamentalsTableCompanion
     if (profitReserves.present) {
       map['profit_reserves'] = Variable<double>(profitReserves.value);
     }
+    if (minorityInterest.present) {
+      map['minority_interest'] = Variable<double>(minorityInterest.value);
+    }
+    if (equityIncomeResult.present) {
+      map['equity_income_result'] = Variable<double>(equityIncomeResult.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2177,6 +2290,8 @@ class CachedFundamentalsTableCompanion
           ..write('currentLiabilities: $currentLiabilities, ')
           ..write('realizedShareCapital: $realizedShareCapital, ')
           ..write('profitReserves: $profitReserves, ')
+          ..write('minorityInterest: $minorityInterest, ')
+          ..write('equityIncomeResult: $equityIncomeResult, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3289,6 +3404,8 @@ typedef $$CachedFundamentalsTableTableCreateCompanionBuilder =
       Value<double?> currentLiabilities,
       Value<double?> realizedShareCapital,
       Value<double?> profitReserves,
+      Value<double?> minorityInterest,
+      Value<double?> equityIncomeResult,
       Value<int> rowid,
     });
 typedef $$CachedFundamentalsTableTableUpdateCompanionBuilder =
@@ -3323,6 +3440,8 @@ typedef $$CachedFundamentalsTableTableUpdateCompanionBuilder =
       Value<double?> currentLiabilities,
       Value<double?> realizedShareCapital,
       Value<double?> profitReserves,
+      Value<double?> minorityInterest,
+      Value<double?> equityIncomeResult,
       Value<int> rowid,
     });
 
@@ -3482,6 +3601,16 @@ class $$CachedFundamentalsTableTableFilterComposer
 
   ColumnFilters<double> get profitReserves => $composableBuilder(
     column: $table.profitReserves,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get minorityInterest => $composableBuilder(
+    column: $table.minorityInterest,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get equityIncomeResult => $composableBuilder(
+    column: $table.equityIncomeResult,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3644,6 +3773,16 @@ class $$CachedFundamentalsTableTableOrderingComposer
     column: $table.profitReserves,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get minorityInterest => $composableBuilder(
+    column: $table.minorityInterest,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get equityIncomeResult => $composableBuilder(
+    column: $table.equityIncomeResult,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CachedFundamentalsTableTableAnnotationComposer
@@ -3790,6 +3929,16 @@ class $$CachedFundamentalsTableTableAnnotationComposer
     column: $table.profitReserves,
     builder: (column) => column,
   );
+
+  GeneratedColumn<double> get minorityInterest => $composableBuilder(
+    column: $table.minorityInterest,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get equityIncomeResult => $composableBuilder(
+    column: $table.equityIncomeResult,
+    builder: (column) => column,
+  );
 }
 
 class $$CachedFundamentalsTableTableTableManager
@@ -3868,6 +4017,8 @@ class $$CachedFundamentalsTableTableTableManager
                 Value<double?> currentLiabilities = const Value.absent(),
                 Value<double?> realizedShareCapital = const Value.absent(),
                 Value<double?> profitReserves = const Value.absent(),
+                Value<double?> minorityInterest = const Value.absent(),
+                Value<double?> equityIncomeResult = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CachedFundamentalsTableCompanion(
                 ticker: ticker,
@@ -3900,6 +4051,8 @@ class $$CachedFundamentalsTableTableTableManager
                 currentLiabilities: currentLiabilities,
                 realizedShareCapital: realizedShareCapital,
                 profitReserves: profitReserves,
+                minorityInterest: minorityInterest,
+                equityIncomeResult: equityIncomeResult,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3934,6 +4087,8 @@ class $$CachedFundamentalsTableTableTableManager
                 Value<double?> currentLiabilities = const Value.absent(),
                 Value<double?> realizedShareCapital = const Value.absent(),
                 Value<double?> profitReserves = const Value.absent(),
+                Value<double?> minorityInterest = const Value.absent(),
+                Value<double?> equityIncomeResult = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CachedFundamentalsTableCompanion.insert(
                 ticker: ticker,
@@ -3966,6 +4121,8 @@ class $$CachedFundamentalsTableTableTableManager
                 currentLiabilities: currentLiabilities,
                 realizedShareCapital: realizedShareCapital,
                 profitReserves: profitReserves,
+                minorityInterest: minorityInterest,
+                equityIncomeResult: equityIncomeResult,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

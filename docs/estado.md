@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-10, a partir de `9b90a3d`.
+Gerado em 2026-09-11, a partir de `30bc51d`.
 
 ## Decisões registradas
 
-**15** aceita · **2** cumprida
+**32** aceita · **2** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -32,6 +32,23 @@ Gerado em 2026-09-10, a partir de `9b90a3d`.
 | 33 | O prêmio de crédito passa a ter dois direcionadores arbitrados, e a base acionária ganha guarda de consistência | aceita | voce | 2026-09-08 |
 | 34 | A pós-condição da ponte de equity é medida na taxa estrutural | aceita | voce | 2026-09-09 |
 | 35 | O motor ganha DCF reverso e regressão condicional, e as duas medições reordenam o que vem depois | aceita | voce | 2026-09-09 |
+| 36 | A vantagem competitiva deixa de ser degrau e passa a decair pela persistência medida do próprio ativo | aceita | voce | 2026-09-09 |
+| 37 | O fluxo da firma passa a ser tributado pela alíquota estrutural do ativo, e não pela estatutária que a fonte embute | aceita | voce | 2026-09-10 |
+| 38 | A pós-condição da ponte deixa de ser degrau e vira transição contínua entre as duas vias | aceita | voce | 2026-09-10 |
+| 39 | As duas vias são modelos independentes, e amarrar seus insumos não as concilia | aceita | voce | 2026-09-10 |
+| 40 | O beta é encolhido por precisão, e não substituído pela mediana setorial | aceita | voce | 2026-09-10 |
+| 41 | O custo de capital passa a ser resolvido ano a ano contra a alavancagem, e as duas rotas do capital próprio voltam a coincidir | aceita | voce | 2026-09-10 |
+| 42 | A cascata passa a descontar pelo caminho de taxas resolvido, e a taxa de equilíbrio deixa de ser a mesma para todo ativo | aceita | voce | 2026-09-10 |
+| 43 | O capital próprio passa a vir do fluxo do acionista derivado, e a ponte deixa de decidir preço | aceita | voce | 2026-09-10 |
+| 44 | O veredito de vantagem competitiva passa a ser fechado contra a taxa de equilíbrio resolvida | aceita | voce | 2026-09-10 |
+| 45 | Recusa do solucionador deixa de virar preço pela interpolação, e a discordância entre as vias para de decidir | aceita | voce | 2026-09-10 |
+| 46 | A via do acionista resolve o próprio custo de capital contra a alavancagem, e a instituição financeira fica de fora por direito | aceita | voce | 2026-09-10 |
+| 47 | O contrafactual passa a rodar pela cascata, e o crescimento é confinado ao que o retorno financia | aceita | voce | 2026-09-10 |
+| 48 | O caixa do exercício chega ao longo do ano, e o desconto passa a refletir isso | aceita | voce | 2026-09-10 |
+| 49 | A ponte desconta os não controladores, e a equivalência patrimonial deixa de ser tributada duas vezes | aceita | voce | 2026-09-10 |
+| 50 | Contrato de prazo determinado recusa o excedente perpétuo, e a perpetuidade fica declarada | aceita | voce | 2026-09-10 |
+| 51 | A volta entre o veredito e a taxa é fechada até parar, e o peso do terminal passa a medir a mesma coisa nas três rotas | aceita | voce | 2026-09-10 |
+| 52 | Exercício publicado sem demonstração de resultado sai da série, e a recusa passa a nomear a causa certa | aceita | voce | 2026-09-10 |
 
 ## Caixa de entrada
 
@@ -45,16 +62,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 38 | 10.709 |
+| Nucleo de dominio | 42 | 13.333 |
 | Apresentacao | 35 | 15.849 |
-| Camada de dados | 13 | 2.523 |
-| Testes do app | 28 | 4.991 |
-| Testes do nucleo | 12 | 5.072 |
-| Ferramentas de QA | 20 | 6.514 |
+| Camada de dados | 13 | 2.605 |
+| Testes do app | 29 | 5.123 |
+| Testes do nucleo | 15 | 7.412 |
+| Ferramentas de QA | 20 | 6.535 |
 
 ## Histórico recente
 
 ```
+2026-09-09  30bc51d  Refino do motor de valuation (parte 7)
 2026-09-09  9b90a3d  Refino do motor de valuation (parte 6)
 2026-09-08  d94a726  Refino do motor de valuation (parte 5)
 2026-09-08  84524c8  Motor de valuation: correções medidas e validação preditiva
@@ -69,5 +87,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-08-30  f14989e  Aprimorando UI/UX (3/4)
 2026-08-30  55d61d1  Aprimorando UI/UX (2/4)
 2026-08-30  25e0ed6  Ajustando UI/UX (1/4)
-2026-08-30  b03b3fd  Correção de alguns aspectos da UI
 ```

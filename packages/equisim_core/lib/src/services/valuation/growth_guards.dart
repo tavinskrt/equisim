@@ -148,11 +148,35 @@ abstract final class ValuationParameters {
   // desceu ao piso da Porta 0. O critério de crescimento orgânico continua
   // intacto, porque é o que separa franquia de aporte.
 
-  /// Fração do excedente de retorno preservada na perpetuidade.
+  /// Teto da persistência anual do excedente de retorno.
   ///
-  /// `ROIC_∞ = WACC_∞ + 0,30 · (ROIC_ciclo − WACC_∞)`: sete décimos da vantagem
-  /// se dissolvem, três sobrevivem.
-  static const double moatRetainedSpread = 0.30;
+  /// **Substitui o `moatRetainedSpread` fixo de 0,30**, pela decisão 36. Aquele
+  /// parâmetro afirmava que 30% do excedente sobrevive à perpetuidade, o que
+  /// equivale a decaimento anual de `φ = 0,30^(1/10) = 0,887`. A medição de
+  /// 09/09/2026 sobre os 47 ativos com excedente positivo e série estimável
+  /// encontrou `φ` mediano de **0,48**, com p90 em 0,78: **um único ativo** do
+  /// universo sustentava o 0,887 pressuposto. Ver
+  /// [`fade_terminal.md`](../../../../../docs/validacao/fade_terminal.md).
+  ///
+  /// A fração preservada passa a ser `λ = φ^N`, com `φ` estimado do próprio
+  /// ativo por [GrowthGuards.excessPersistence] e `N` o horizonte de projeção.
+  ///
+  /// **Por que existe teto.** `φ → 1` é excedente que não decai nunca, que é
+  /// exatamente o que o retorno terminal neutro da decisão 25 existe para
+  /// negar. Em 0,90, o `λ` máximo em dez anos é 0,35 — pouco acima dos 0,30
+  /// que o parâmetro fixo concedia, de modo que o teto não afrouxa o que havia.
+  static const double moatMaxPersistence = 0.90;
+
+  /// Pares adjacentes mínimos para estimar a persistência.
+  ///
+  /// Quatro pares de anos consecutivos. Abaixo disso a inclinação não é
+  /// identificável, e um número saindo dali seria ruído com casas decimais.
+  ///
+  /// **Conta pares, não pontos**, desde que a regressão passou a exigir anos
+  /// adjacentes: uma série com buraco de calendário tem menos pares que
+  /// pontos, e contar pontos deixaria passar exatamente o caso que o
+  /// requisito existe para barrar.
+  static const int moatMinPersistencePairs = 4;
 
   /// Teto de capital externo para o crescimento ser considerado orgânico.
   ///
@@ -174,15 +198,15 @@ abstract final class ValuationParameters {
 
   /// Queda máxima tolerada de lucro ou de EBITDA no triênio recente.
   ///
-  /// **Filtro de saúde operacional, e vale em dois lugares.**
+  /// **Filtro de saúde operacional. Desde a decisão 36 vale só na Porta 2a.**
   ///
-  /// No *moat*, sem ele `Φ` premiava quem está encolhendo: a QUAL3 passou na
-  /// terceira rodada com `Φ = 0,01` — não porque financia o crescimento por
-  /// dentro, mas porque **não há crescimento nenhum a financiar**. O lucro dela
-  /// caiu de R$ 0,10 bi em 2022 para R$ 0,02 bi em 2025, e a mediana do ciclo de
-  /// oito anos ainda carregava os exercícios bons de antes. Vantagem competitiva
-  /// é afirmação sobre o **futuro** do retorno excedente, e quem caiu pela
-  /// metade no triênio não a sustenta.
+  /// Ele valia também no *moat*, onde barrava quem está encolhendo. Saiu de lá
+  /// porque a exceção deixou de ser um degrau: com `λ` vindo da persistência
+  /// medida do próprio excedente, deterioração aparece na série que estima `φ`
+  /// — que é onde ela pertence — em vez de precisar de um limiar em cima. O
+  /// caso que motivou o filtro, a QUAL3, era resolvido na Porta 2a de todo
+  /// jeito: ela perdeu a vantagem residual na quarta rodada e **continuou** a
+  /// +477,3% de potencial, porque o número vinha da base normalizada.
   ///
   /// Na **Porta 2a** ele proíbe normalizar a base *para cima* — ver
   /// [baseFactorCeiling]. Barrar só o *moat* resolvia metade do problema: a
@@ -201,37 +225,12 @@ abstract final class ValuationParameters {
   /// que morde só na subida a desfazia no vale — que é onde ela importa. O
   /// limite que continua valendo em commodity é a saturação.
   ///
-  /// **No *moat* não há isenção.** Nem commodity em vale, nem empresa em
-  /// contração recebe retorno excedente na perpetuidade: ali a pergunta é sobre
-  /// o futuro do excedente, e um vale de ciclo não o sustenta melhor que uma
-  /// deterioração estrutural. Ver [CyclicalSectors].
+  /// A isenção cíclica da decisão 30 continua restrita à Porta 2a, e agora é o
+  /// único lugar onde a questão se coloca. Ver [CyclicalSectors].
   static const double maxOperationalDecline = 0.50;
 
   /// Exercícios do triênio de saúde operacional.
   static const int operationalHealthWindow = 3;
-
-  /// Múltiplo do custo de capital que o retorno do ciclo precisa alcançar.
-  ///
-  /// **1,5 e não mais 2,0**, por recalibragem homologada em 07/09/2026. Com o
-  /// custo de capital de equilíbrio brasileiro na casa de 11% a 14%, o dobro
-  /// exigia de 22% a 28% de retorno sobre um capital investido **contábil
-  /// reconstituído** — base que a reavaliação de ativos e o ágio de aquisição
-  /// incham sem que a empresa tenha ficado menos rentável. O critério punia
-  /// justamente a franquia eficiente de base expandida: dos 120 avaliados na
-  /// primeira validação fora da amostra, dois passaram.
-  static const double moatReturnMultiple = 1.5;
-
-  /// Excedente absoluto que, em alternativa ao múltiplo, comprova rentabilidade
-  /// estrutural: `ROIC_ciclo − WACC_∞ ≥ 5 p.p.`
-  ///
-  /// **Vale em união com [moatReturnMultiple]**, e a união não é redundância: o
-  /// múltiplo e o excedente se cruzam em `WACC_∞ = 10%`. Acima disso o
-  /// excedente é o critério que decide — a 14% de custo de capital ele pede
-  /// 19% de retorno contra os 21% do múltiplo —, e abaixo dele o múltiplo é que
-  /// decide, impedindo que custo de capital baixo transforme 5 p.p. de spread
-  /// em vantagem competitiva declarada. Cada perna é registrada em separado no
-  /// log de avaliação, para que a calibragem seja auditável depois.
-  static const double moatMinSpread = 0.05;
 
   /// Exercícios mínimos de histórico para a vantagem ser considerada comprovada.
   ///
@@ -242,6 +241,25 @@ abstract final class ValuationParameters {
   /// que a própria janela sobre a qual o retorno do ciclo é medido reprovava por
   /// falta de dado, não por falta de vantagem.
   static const int moatMinPeriods = 8;
+
+  /// Teto de passes do veredito contra a taxa que o ponto fixo devolve.
+  ///
+  /// **O veredito e a taxa são circulares.** O excedente se mede contra o
+  /// custo de capital de equilíbrio; o retorno terminal que o veredito concede
+  /// muda a projeção; a projeção muda a alavancagem; a alavancagem muda o
+  /// custo de capital. A [decisão 44](../../../../../docs/decisoes/044-moat-contra-a-taxa-resolvida.md)
+  /// fechou um passe dessa volta e parou ali por escolha declarada.
+  ///
+  /// O teto existe porque a circularidade **de fato** não tem ponto fixo em
+  /// alguns ativos: exatamente na fronteira do veredito, conceder o excedente
+  /// muda a taxa o bastante para recusá-lo, e recusá-lo a devolve. Medido em
+  /// 10/09/2026 sobre 105 avaliados: 81 fecham em um passe, 11 em dois, **12
+  /// precisam de três ou mais**, e **três não estabilizam** — um deles batendo
+  /// neste teto.
+  ///
+  /// Dez é onde a cauda medida termina, com folga sobre os nove que o pior
+  /// caso convergente consumiu.
+  static const int moatMaxPasses = 10;
 
   // ---------------------------------------------- Alíquota do escudo fiscal --
 
@@ -372,19 +390,37 @@ enum MoatBlock {
   /// Φ acima de [ValuationParameters.moatMaxExternalCapital].
   crescimentoInorganico('crescimento inorgânico'),
 
-  /// Reprovou nas **duas** pernas da rentabilidade: nem o múltiplo do custo de
-  /// capital, nem o excedente absoluto.
-  rentabilidadeInsuficiente('rentabilidade insuficiente'),
+  /// Excedente com menos de [ValuationParameters.moatMinPersistencePairs]
+  /// pares de anos adjacentes: a persistência não é estimável, e sem ela não
+  /// há `λ`.
+  ///
+  /// **Substituiu os dois cortes de nível** — rentabilidade e saúde
+  /// operacional —, removidos pela decisão 36. Eles eram limiares sobre o
+  /// *tamanho* do excedente, e é justamente o tamanho que `λ · e₀` já
+  /// contempla de forma contínua: excedente pequeno produz preservação
+  /// pequena, sem precisar de degrau. Deterioração, do mesmo modo, aparece na
+  /// própria série que estima `φ`.
+  persistenciaNaoEstimavel('persistência do excedente não estimável'),
 
-  /// Lucro ou EBITDA recuou mais de [ValuationParameters.maxOperationalDecline]
-  /// no triênio recente. Vantagem competitiva é afirmação sobre o futuro do
-  /// retorno excedente, e quem encolheu pela metade não a sustenta.
-  saudeOperacional('resultado em queda no triênio'),
+  /// O excedente do ciclo não é positivo: não há vantagem a preservar, e
+  /// `λ · e₀` seria uma penalidade em vez de uma preservação.
+  semExcedente('retorno do ciclo não supera o custo de capital'),
 
-  /// Passou nas três condições, mas o retorno terminal resultante não supera o
-  /// próprio custo de capital — excedente que não sobrevive à preservação
-  /// parcial. Sem conteúdo econômico, e por isso tratado como reprovação.
-  excedenteDegenerado('excedente não sobrevive à preservação parcial');
+  /// A persistência medida não deixa excedente algum sobreviver ao horizonte,
+  /// e o retorno terminal resultante não supera o próprio custo de capital.
+  /// Sem conteúdo econômico, e por isso tratado como estado estacionário.
+  excedenteDegenerado('excedente não sobrevive ao decaimento medido'),
+
+  /// O negócio opera sob contrato de prazo determinado — concessão de energia,
+  /// saneamento, rodovia, ferrovia, aeroporto.
+  ///
+  /// **A perpetuidade e o excedente perpétuo são coisas diferentes, e só a
+  /// segunda é corrigível aqui.** O prazo do contrato não é publicado, de modo
+  /// que o motor não sabe quando o fluxo acaba; mas afirmar que o retorno
+  /// excedente **sobrevive para sempre** num negócio que será relicitado é
+  /// afirmação que o próprio contrato nega. A tarifa é fixada para remunerar o
+  /// capital ao custo dele, e não acima.
+  prazoDeterminado('o negócio opera sob contrato de prazo determinado');
 
   final String label;
   const MoatBlock(this.label);
@@ -416,21 +452,26 @@ class MoatVerdict {
   /// Exercícios utilizáveis na série de capital.
   final int periods;
 
-  /// Retorno exigido pela perna do múltiplo: `k · WACC_∞`.
-  final double requiredByMultiple;
+  /// Persistência anual do excedente, como saiu da regressão. `null` quando
+  /// não foi estimável.
+  ///
+  /// Viaja **crua**, sem teto, porque é ela que permite auditar a calibragem
+  /// depois — [persistence] é o número que a conta usou, e os dois só diferem
+  /// quando o confinamento morde.
+  final double? rawPersistence;
 
-  /// Retorno exigido pela perna do excedente: `WACC_∞ + 5 p.p.`
-  final double requiredBySpread;
+  /// Persistência efetivamente aplicada: [rawPersistence] confinada em
+  /// `[0, moatMaxPersistence]`. Difere da crua só nos extremos.
+  final double? persistence;
 
-  /// `true` quando a perna do múltiplo aprova, isoladamente.
-  final bool passesByMultiple;
+  /// Fração do excedente preservada na perpetuidade — `φ^N`.
+  ///
+  /// É o que o `moatRetainedSpread` fixo de 0,30 costumava valer para todo
+  /// mundo que passava no degrau.
+  final double? retainedFraction;
 
-  /// `true` quando a perna do excedente aprova, isoladamente.
-  final bool passesBySpread;
-
-  /// Queda de lucro ou EBITDA no triênio recente, em fração. `null` quando não
-  /// há referência positiva a comparar.
-  final double? operationalDecline;
+  /// Pares usados na regressão de persistência.
+  final int persistencePoints;
 
   const MoatVerdict({
     required this.terminalReturn,
@@ -439,11 +480,10 @@ class MoatVerdict {
     required this.terminalDiscountRate,
     required this.externalCapitalRatio,
     required this.periods,
-    required this.requiredByMultiple,
-    required this.requiredBySpread,
-    required this.passesByMultiple,
-    required this.passesBySpread,
-    required this.operationalDecline,
+    required this.rawPersistence,
+    required this.persistence,
+    required this.retainedFraction,
+    required this.persistencePoints,
   });
 
   /// `true` quando a vantagem foi comprovada.
@@ -453,10 +493,16 @@ class MoatVerdict {
   /// relatório agrupa.
   MoatBlock? get primaryBlock => blocks.isEmpty ? null : blocks.first;
 
-  /// `true` quando **só** a rentabilidade reprovou — a fronteira que a
-  /// recalibragem de 07/09/2026 moveu, e a que se quer medir de novo.
-  bool get blockedOnlyByReturn =>
-      blocks.length == 1 && blocks.first == MoatBlock.rentabilidadeInsuficiente;
+  /// `true` quando **só** a ausência de excedente barrou — o ativo tem dado
+  /// suficiente, mas não rende acima do próprio custo de capital.
+  ///
+  /// Substitui o `blockedOnlyByReturn` da era do degrau: aquele media distância
+  /// a um limiar de rentabilidade que não existe mais, e este mede a única
+  /// fronteira que restou no nível, que é a do excedente ser positivo. É
+  /// fronteira sem degrau — atravessá-la concede `λ · e₀` com `e₀` próximo de
+  /// zero, e portanto valor próximo de zero.
+  bool get blockedOnlyByNoSpread =>
+      blocks.length == 1 && blocks.first == MoatBlock.semExcedente;
 
   /// Excedente do ciclo sobre o custo de capital de equilíbrio, em fração.
   double? get spread =>
@@ -726,45 +772,113 @@ abstract final class GrowthGuards {
     return porLucro > porEbitda ? porLucro : porEbitda;
   }
 
-  /// Retorno terminal quando a vantagem competitiva é comprovada, com o
-  /// registro de qual condição barrou quando não é.
+  /// Persistência anual do excedente de retorno, por AR(1).
   ///
-  /// Devolve um veredito de [MoatVerdict.terminalReturn] nulo — estado
-  /// estacionário, `ROIC_∞ = WACC_∞` — quando qualquer das três condições falha,
-  /// quando falta insumo, ou quando o resultado não supera o próprio custo de
-  /// capital. As condições são **todas avaliadas**, e não em curto-circuito, de
-  /// modo que [MoatVerdict.blocks] traga o quadro inteiro: interromper na
-  /// primeira faria toda calibragem posterior enxergar só a condição mais à
-  /// esquerda.
+  /// Regride `e_t` em `e_{t−1}` sobre o excedente `retorno_t − custo de
+  /// capital de equilíbrio`. A inclinação é a fração do excedente que
+  /// sobrevive de um ano para o seguinte, e é o que substitui, pela decisão
+  /// 36, a fração fixa de 0,30 que a exceção concedia a quem passava no
+  /// degrau.
   ///
-  /// A rentabilidade aprova por **união** de duas pernas: `ROIC_ciclo ≥ k·WACC_∞`
-  /// ou `ROIC_ciclo − WACC_∞ ≥ 5 p.p.` — ver [ValuationParameters.moatMinSpread].
+  /// **A correção de viés de amostra pequena foi tentada e descartada, por
+  /// medição.** O estimador de AR(1) com intercepto é enviesado para baixo, e
+  /// o viés de Kendall é da ordem de `−(1 + 3φ)/T`. A correção foi
+  /// implementada e rodada sobre o universo em 09/09/2026: com sete a dez
+  /// pares ela vale de 0,25 a 0,35 — a mesma ordem de grandeza do próprio
+  /// `φ̂`, cujo erro-padrão nesses tamanhos é de 0,3 a 0,4. O resultado foi
+  /// que **dez dos vinte e quatro ativos com preservação positiva foram parar
+  /// no teto**, e o teto passou a decidir no lugar do dado — trocando o
+  /// `0,30` fixo por um `0,3487` fixo.
   ///
-  /// - [operationalDecline]: queda de lucro ou EBITDA no triênio, de
-  ///   [recentOperationalDecline]. `null` não reprova.
+  /// Sem a correção, o teto morde uma vez em quarenta e sete. Fica então o
+  /// `φ̂` cru, e o viés para baixo fica **declarado como conservadorismo**: a
+  /// persistência medida subestima a verdadeira, e a subestimação empurra o
+  /// preço justo para baixo, que é a direção em que este projeto já erra e
+  /// admite errar.
+  ///
+  /// **O resultado é confinado em `[0, moatMaxPersistence]`.** Abaixo de zero
+  /// o excedente oscila em vez de decair, e não há vantagem que persista;
+  /// acima do teto seria excedente perene, que é o que o retorno terminal
+  /// neutro da decisão 25 existe para negar.
+  ///
+  /// - [excessReturns]: excedente por exercício, com o ano, em ordem
+  ///   cronológica.
+  ///
+  /// **Só pares de anos adjacentes entram na regressão.** `CapitalSeries.returns`
+  /// pula exercícios sem base ou sem lucro, de modo que a lista pode ter buraco
+  /// de calendário — e regredir 2023 sobre 2019 como se fosse um ano leria
+  /// quatro anos de decaimento como um, enviesando `φ` para baixo. O ano viaja
+  /// junto exatamente para que esse par não se forme.
+  ///
+  /// Devolve `null` com menos de
+  /// [ValuationParameters.moatMinPersistencePairs] pares adjacentes ou sem
+  /// dispersão no regressor.
+  static ({double phi, double rawPhi, int pairs})? excessPersistence(
+    List<({int year, double excess})> excessReturns,
+  ) {
+    final x = <double>[];
+    final y = <double>[];
+    for (var i = 1; i < excessReturns.length; i++) {
+      final anterior = excessReturns[i - 1];
+      final atual = excessReturns[i];
+      if (atual.year - anterior.year != 1) continue;
+      if (!anterior.excess.isFinite || !atual.excess.isFinite) continue;
+      x.add(anterior.excess);
+      y.add(atual.excess);
+    }
+    if (x.length < ValuationParameters.moatMinPersistencePairs) return null;
+
+    final fit = Inference.ols(x, y);
+    if (fit == null || !fit.slope.isFinite) return null;
+
+    final cru = fit.slope;
+    final confinado =
+        cru.clamp(0.0, ValuationParameters.moatMaxPersistence).toDouble();
+
+    return (phi: confinado, rawPhi: cru, pairs: x.length);
+  }
+
+  /// Retorno terminal que a persistência medida do excedente sustenta, com o
+  /// registro de qual condição barrou quando não sustenta nenhum.
+  ///
+  /// `ROIC_∞ = WACC_∞ + φ^N · (ROIC_ciclo − WACC_∞)`
+  ///
+  /// **Não é mais um degrau.** Até a decisão 36 a exceção era binária: cinco
+  /// condições cumulativas e, para quem passasse, uma fração fixa de 0,30 do
+  /// excedente. Medido em 09/09/2026, o degrau valia de 10% a 32% de preço
+  /// justo em onze ativos e estava ordenado ao contrário do tamanho do efeito
+  /// — os que mais ganhariam eram os negados. Ver
+  /// [`fade_terminal.md`](../../../../../docs/validacao/fade_terminal.md).
+  ///
+  /// As condições que restam são de **qualidade de dado**: sem retorno do
+  /// ciclo, sem custo de capital, sem histórico ou sem saber quanto da
+  /// expansão veio de fora, não há o que estimar. Os dois cortes de **nível**
+  /// saíram, porque `λ · e₀` já é contínuo no tamanho do excedente.
+  ///
+  /// As condições são **todas avaliadas**, e não em curto-circuito, de modo
+  /// que [MoatVerdict.blocks] traga o quadro inteiro.
   ///
   /// - [cycleReturn]: ROIC ou ROE mediano do ciclo.
   /// - [terminalDiscountRate]: custo de capital de equilíbrio.
   /// - [externalCapitalRatio]: Φ, ou `null` quando não medido.
   /// - [periods]: exercícios utilizáveis na série de capital.
+  /// - [excessReturns]: excedente ano a ano, para estimar a persistência.
+  /// - [projectionYears]: horizonte sobre o qual o excedente decai.
   static MoatVerdict residualMoat({
     required double? cycleReturn,
     required double terminalDiscountRate,
     required double? externalCapitalRatio,
     required int periods,
-    double? operationalDecline,
+    required List<({int year, double excess})> excessReturns,
+    required int projectionYears,
+    bool finiteTerm = false,
   }) {
-    final exigidoPorMultiplo =
-        ValuationParameters.moatReturnMultiple * terminalDiscountRate;
-    final exigidoPorExcedente =
-        terminalDiscountRate + ValuationParameters.moatMinSpread;
-
     final retorno =
         (cycleReturn != null && cycleReturn.isFinite) ? cycleReturn : null;
-    final porMultiplo = retorno != null && retorno >= exigidoPorMultiplo;
-    final porExcedente = retorno != null && retorno >= exigidoPorExcedente;
+    final persistencia = excessPersistence(excessReturns);
 
     final blocks = <MoatBlock>[];
+    if (finiteTerm) blocks.add(MoatBlock.prazoDeterminado);
     if (retorno == null) blocks.add(MoatBlock.semRetornoDoCiclo);
     if (terminalDiscountRate <= 0) blocks.add(MoatBlock.semCustoDeCapital);
     if (periods < ValuationParameters.moatMinPeriods) {
@@ -776,19 +890,24 @@ abstract final class GrowthGuards {
         ValuationParameters.moatMaxExternalCapital) {
       blocks.add(MoatBlock.crescimentoInorganico);
     }
-    if (retorno != null && !porMultiplo && !porExcedente) {
-      blocks.add(MoatBlock.rentabilidadeInsuficiente);
-    }
-    if (operationalDecline != null &&
-        operationalDecline > ValuationParameters.maxOperationalDecline) {
-      blocks.add(MoatBlock.saudeOperacional);
+    if (persistencia == null) blocks.add(MoatBlock.persistenciaNaoEstimavel);
+    if (retorno != null && retorno <= terminalDiscountRate) {
+      blocks.add(MoatBlock.semExcedente);
     }
 
+    double? lambda;
     double? terminal;
     if (blocks.isEmpty) {
+      // O horizonte é o expoente do decaimento, e horizonte nulo daria
+      // `φ⁰ = 1` — o excedente inteiro preservado para sempre, que é o que o
+      // retorno terminal neutro existe para negar. `DcfCalculator` já recusa
+      // projeção com menos de um ano (dcf.dart), então este piso nunca é
+      // alcançado por caminho de produção; ele existe para que a função não
+      // dependa dessa recusa para estar certa.
+      final horizonte = projectionYears < 1 ? 1 : projectionYears;
+      lambda = _potencia(persistencia!.phi, horizonte);
       final t = terminalDiscountRate +
-          ValuationParameters.moatRetainedSpread *
-              (retorno! - terminalDiscountRate);
+          lambda * (retorno! - terminalDiscountRate);
       if (t.isFinite && t > terminalDiscountRate) {
         terminal = t;
       } else {
@@ -803,12 +922,33 @@ abstract final class GrowthGuards {
       terminalDiscountRate: terminalDiscountRate,
       externalCapitalRatio: externalCapitalRatio,
       periods: periods,
-      requiredByMultiple: exigidoPorMultiplo,
-      requiredBySpread: exigidoPorExcedente,
-      passesByMultiple: porMultiplo,
-      passesBySpread: porExcedente,
-      operationalDecline: operationalDecline,
+      rawPersistence: persistencia?.rawPhi,
+      persistence: persistencia?.phi,
+      retainedFraction: lambda,
+      persistencePoints: persistencia?.pairs ?? 0,
     );
+  }
+
+  /// `base^expoente` para expoente inteiro.
+  ///
+  /// Escrita à mão em vez de `math.pow` porque o núcleo evita converter para
+  /// `num` e de volta num caminho de cálculo monetário, e porque o expoente
+  /// aqui é sempre o horizonte de projeção — pequeno e inteiro.
+  ///
+  /// **Expoente zero devolve 1, e não 0.** Sem horizonte não há decaimento a
+  /// aplicar, e a identidade `x⁰ = 1` é o que diz isso. A primeira versão
+  /// zerava, o que apagaria o excedente inteiro em vez de preservá-lo — e o
+  /// erro é o mais silencioso possível, porque produz um preço justo menor e
+  /// plausível. Expoente negativo devolve 0: não é caso deste cálculo, e
+  /// devolver a potência real seria inventar amplificação.
+  static double _potencia(double base, int expoente) {
+    if (expoente == 0) return 1;
+    if (expoente < 0 || base <= 0) return 0;
+    var r = 1.0;
+    for (var i = 0; i < expoente; i++) {
+      r *= base;
+    }
+    return r;
   }
 
   /// O retorno terminal do veredito, para quem só precisa do número.
@@ -817,13 +957,15 @@ abstract final class GrowthGuards {
     required double terminalDiscountRate,
     required double? externalCapitalRatio,
     required int periods,
-    double? operationalDecline,
+    required List<({int year, double excess})> excessReturns,
+    required int projectionYears,
   }) =>
       residualMoat(
         cycleReturn: cycleReturn,
         terminalDiscountRate: terminalDiscountRate,
         externalCapitalRatio: externalCapitalRatio,
         periods: periods,
-        operationalDecline: operationalDecline,
+        excessReturns: excessReturns,
+        projectionYears: projectionYears,
       ).terminalReturn;
 }

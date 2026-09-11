@@ -62,11 +62,16 @@ void main() {
     });
 
     test('alíquota efetiva é limitada para conter exercícios atípicos', () {
+      // **A fonte grava a despesa com sinal negativo.** Conferido pela
+      // identidade no cache: lucro líquido = lucro antes + incomeTaxExpense.
+      // O teste seguia a convenção oposta, e passava porque `effectiveTaxRate`
+      // tirava o módulo — os dois erros se cancelavam, e o cancelamento
+      // escondia que crédito tributário virava imposto a pagar.
       final normal = FundamentalsSnapshot(
         ticker: Ticker.parse('PETR4'),
         fiscalPeriodEnd: DateTime(2025, 12, 31),
         incomeBeforeTax: 1000,
-        incomeTaxExpense: 340,
+        incomeTaxExpense: -340,
       );
       expect(normal.effectiveTaxRate, closeTo(0.34, 1e-12));
 
@@ -74,9 +79,21 @@ void main() {
         ticker: Ticker.parse('PETR4'),
         fiscalPeriodEnd: DateTime(2025, 12, 31),
         incomeBeforeTax: 100,
-        incomeTaxExpense: 900,
+        incomeTaxExpense: -900,
       );
       expect(atipico.effectiveTaxRate, 0.5);
+    });
+
+    test('crédito tributário produz alíquota nula, não imposto a pagar', () {
+      // Campo positivo é crédito. Com o módulo, isto devolvia 0,20 e cobrava
+      // imposto de quem recuperou imposto.
+      final credito = FundamentalsSnapshot(
+        ticker: Ticker.parse('PETR4'),
+        fiscalPeriodEnd: DateTime(2025, 12, 31),
+        incomeBeforeTax: 1000,
+        incomeTaxExpense: 200,
+      );
+      expect(credito.effectiveTaxRate, 0.0);
     });
 
     test('prejuízo antes de impostos não produz alíquota', () {

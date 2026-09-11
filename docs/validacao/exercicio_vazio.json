@@ -1,0 +1,53 @@
+[
+ {
+  "ticker": "BBSE3",
+  "exercicios": 14,
+  "vazios": 1,
+  "anosVazios": [
+   2012
+  ],
+  "ultimoVazio": false,
+  "comBalanco": 1,
+  "justo": 47.03,
+  "recusa": null
+ },
+ {
+  "ticker": "GEPA3",
+  "exercicios": 16,
+  "vazios": 2,
+  "anosVazios": [
+   2024,
+   2025
+  ],
+  "ultimoVazio": true,
+  "comBalanco": 2,
+  "justo": null,
+  "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+ },
+ {
+  "ticker": "GEPA4",
+  "exercicios": 16,
+  "vazios": 2,
+  "anosVazios": [
+   2024,
+   2025
+  ],
+  "ultimoVazio": true,
+  "comBalanco": 2,
+  "justo": null,
+  "recusa": "Ativo fora do universo analisável: liquidez insuficiente para formar preço confiável."
+ },
+ {
+  "ticker": "TIMS3",
+  "exercicios": 8,
+  "vazios": 2,
+  "anosVazios": [
+   2024,
+   2025
+  ],
+  "ultimoVazio": true,
+  "comBalanco": 2,
+  "justo": null,
+  "recusa": "Os dados de TIMS3 não sustentam nenhuma das duas vias de avaliação."
+ }
+]

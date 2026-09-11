@@ -118,6 +118,29 @@ as duas rotas concordam dentro de 3 p.p. em 7 de 9 ativos. O `investmentCashFlow
 segue impróprio para conta de reinvestimento: contra `Δ(imobilizado) + D&A` ele
 erra por fatores de 0,25× a 2,42×, e para os dois lados.
 
+### 2.1-b. A alíquota da fonte é estatutária para todo mundo
+
+`/v2/stocks/financial-data` publica `NOPAT = EBIT × 0,66` — a alíquota
+estatutária brasileira de 34% aplicada a **toda** empresa, em 4.572 de 4.572
+exercícios do cache.
+
+**Efeito, medido em 10/09/2026.** A alíquota efetiva mediana dos 122 avaliados
+é de **22,1%**, e **112 dos 122** pagam menos que a estatutária. Usar 34% para
+todos subestimava o lucro operacional de quase todo o universo.
+
+**Corrigido** pela [decisão 37](../decisoes/037-aliquota-estrutural-no-fluxo-da-firma.md):
+o fluxo da firma passa a ser tributado pela mediana dos exercícios do próprio
+ativo, que a medição mostrou ser regime — dispersão de 7,5 p.p. dentro da
+empresa sobre quinze exercícios. Ver [fluxo_explicito.md](fluxo_explicito.md).
+
+**Corrigido também o sinal**, em 10/09/2026. A fonte grava a despesa
+tributária **negativa** — `lucro líquido = lucro antes + incomeTaxExpense`,
+conferido pela identidade no cache —, e `effectiveTaxRate` tirava o módulo. O
+módulo acertava o caso comum pelo motivo errado e transformava **crédito** em
+imposto a pagar. A conta passou a negar o sinal em vez de modulá-lo: a alíquota
+estrutural mediana caiu de 22,1% para 18,9% e 33 dos 122 preços justos se
+moveram. Ver a §8 de [fluxo_explicito.md](fluxo_explicito.md).
+
 ### 2.2. Prêmio de risco de mercado é parâmetro, não observação
 
 O CAPM usa prêmio parametrizado (padrão 5,5%). Estimá-lo pela média histórica
@@ -222,6 +245,11 @@ uma afirmação de posição relativa: o ativo mediano da seção recebe o CDI p
 construção. Uma seção estreita — a carteira medida contra ela mesma — centra tudo
 no CDI e não informa nada. O resultado carrega o tamanho da seção junto, e é
 contra a seção dos avaliados que a leitura faz sentido.
+
+> **Defasado desde 09/09/2026.** A [decisão 36](../decisoes/036-decaimento-medido-do-excedente-na-perpetuidade.md)
+> trocou o degrau por decaimento medido: são **23 dos 117** com preservação
+> positiva, e o `λ` mediano é de 0,0015 contra os 0,30 fixos. O parágrafo
+> abaixo descreve o regime anterior.
 
 **A exceção de *moat* ativa em 7 dos 121 avaliados** (ABEV3, BBSE3, EGIE3,
 LEVE3, SAUD3, VBBR3 e WEGE3), contra 2 antes da recalibragem. O passo é
@@ -350,6 +378,109 @@ limiar. Sanar exigiria segunda fonte para a demonstração de resultado de
 instituição financeira, ou preencher `netIncome` por `LPA × ações
 reconciliadas`, que é identidade contábil mas introduz um valor derivado onde a
 série espera um publicado.
+
+### 2.13. A dívida projetada cresce a `g`, e a recusa depende disso
+
+A rota (b) da [decisão 41](../decisoes/041-custo-de-capital-realavancado-ano-a-ano.md)
+projeta a dívida sobre a base de capital, que cresce a `g` por construção; o
+valor da firma cresce a outra taxa. É premissa deliberada — a alternativa,
+amarrar a dívida ao valor, foi a saída (a) descartada —, mas ela tem
+consequência que a [decisão 45](../decisoes/045-estrutura-de-capital-recusada.md)
+tornou visível.
+
+Quando o custo do capital próprio é reprecificado pela alavancagem, seis
+ativos ficam com capital próprio não positivo no ano zero ou com WACC de
+equilíbrio abaixo do crescimento perpétuo, e o motor **recusa a via da firma**
+para eles. **A recusa é sobre a estrutura dada essa projeção de dívida**, e não
+sobre a empresa: com a dívida amarrada ao valor, os mesmos seis fechariam.
+
+Não há como decidir entre as duas premissas com o que a fonte publica — nenhuma
+delas é observação, e a fonte não traz plano de endividamento. Fica declarado
+que a recusa carrega a premissa junto.
+
+### 2.14. Três bancos chegam sem setor, e escapam da exceção da Porta 1
+
+A Porta 1 manda instituição financeira para a via do acionista **e** a isenta da
+realavancagem da [decisão 46](../decisoes/046-custo-de-capital-do-acionista-resolvido.md),
+porque ali depósito e captação são insumo do negócio e não financiamento. O
+teste é o `sectorKey`, e a fonte não o preenche sempre: **BRSR6, PINE4 e SANB4
+chegam vazios**, a Porta 1 não os pega, e a Porta 3 os captura — pelo motivo
+certo, já que o NOPAT de um banco realmente não se sustenta, mas sem a isenção.
+
+Passam, portanto, a ser realavancados como se o depósito fosse dívida. **O
+efeito medido é de terceira casa decimal** — −0,27%, −0,15% e −0,10% no preço
+justo — porque a alavancagem de um banco está muito além do teto de `D/E = 3,0`,
+o fator de Hamada satura, e o `Ke` resolvido reencontra o do CAPM, que já fora
+estimado sobre a ação alavancada.
+
+No mesmo emissor a SANB11 é classificada e a SANB4 não. Sanar exige completar a
+taxonomia por emissor em vez de por papel, e é trabalho de dado.
+
+### 2.14. O minoritário é subtraído pelo valor contábil
+
+A [decisão 49](../decisoes/049-a-ponte-devolve-o-que-nao-e-do-controlador.md)
+passou a descontar a participação dos não controladores do valor do capital
+próprio. O correto seria descontar o **valor de mercado** da parcela deles, que
+não existe para controlada de capital fechado — que é o caso quase sempre.
+
+O contábil é o disponível, e **erra nos dois sentidos**: subestima a dedução
+onde a controlada vale mais que o livro, e a superestima onde ela vale menos.
+No universo brasileiro de holdings o segundo caso domina — a GOAU4 desconta
+R$ 34,7 bi de não controladores da Gerdau enquanto a fatia deles vale bem menos
+que isso em bolsa —, de modo que o preço justo do controlador sai **baixo**
+justamente onde o termo é grande.
+
+Sanar exigiria avaliar cada controlada em separado, o que a fonte não sustenta:
+ela publica o consolidado e a linha de participação, não a demonstração da
+controlada.
+
+### 2.15. Propriedade para investimento fica fora da ponte
+
+`longTermInvestments` decompõe-se em `shareholdings` — participação societária,
+cuja receita entra no EBIT por equivalência patrimonial — e
+`investmentProperties`. A segunda gera receita de aluguel que **pode ou não**
+estar no resultado operacional conforme o setor e a classificação contábil da
+empresa.
+
+Sem como distinguir os dois casos na fonte, nada é feito com ela. O termo é
+pequeno no universo — R$ 219,5 mi na CSNA3 contra R$ 8,07 bi de participação
+societária — e é zero na maioria.
+
+### 2.16. O horizonte é infinito, inclusive onde o contrato tem prazo
+
+Quinze dos 120 avaliados operam sob concessão — transmissão, distribuição,
+saneamento, rodovia, ferrovia — e o valor terminal deles é perpétuo.
+
+A [decisão 50](../decisoes/050-concessao-nao-preserva-excedente.md) recusou o
+excedente de retorno perpétuo nesses ativos, que é o que o contrato nega
+diretamente, e **deixou o horizonte como está**: o prazo das outorgas não é
+campo de demonstração financeira, e o estimador disponível mede giro da base de
+ativos, não vencimento — dá 6,3 anos para a TAEE11, cujos contratos vão a 2042.
+
+O tamanho está medido: se o contrato acabasse em dez anos, o preço justo
+mediano dos expostos ficaria em 0,80 do publicado; em vinte, 0,90. Sanar exige
+o prazo médio ponderado das outorgas, que existe em nota explicativa e no
+formulário de referência da CVM — dado da Fase B. E exige, junto, modelar a
+indenização do investimento não amortizado na reversão: truncar sem indenizar
+trocaria um viés por outro.
+
+### 1.9. A fonte publica exercício sem demonstração de resultado
+
+Em 4 dos 376 ativos — 7 exercícios ao todo — a linha do exercício vem com o
+balanço preenchido e receita, resultado operacional, lucro e lucro por ação
+todos zerados. A TIMS3 aparecia assim em 2024 e 2025, com patrimônio líquido de
+R$ 24 bilhões e EBIT de R$ 4,7 bi em 2023.
+
+A [decisão 52](../decisoes/052-ausencia-nao-e-zero.md) passou a excluir esses
+exercícios da série, porque ausência não é zero. **O que ela não faz é
+recuperar o dado**: a TIMS3 fica com seis exercícios utilizáveis de oito
+publicados, e é recusada por histórico curto.
+
+Sanar exige segunda fonte para a demonstração de resultado — CVM ou B3 —, o que
+é trabalho da Fase B. Não há como inferir o resultado a partir do balanço sem
+inventar a variação do patrimônio como se fosse lucro, o que a decisão 23
+proíbe ao remover provento da cadeia: a diferença entre dois patrimônios mistura
+lucro, distribuição e evento societário.
 
 ---
 
