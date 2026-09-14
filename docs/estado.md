@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-11, a partir de `c80b5e6`.
+Gerado em 2026-09-11, a partir de `6e01044`.
 
 ## Decisões registradas
 
-**48** aceita · **2** cumprida
+**51** aceita · **2** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -65,6 +65,9 @@ Gerado em 2026-09-11, a partir de `c80b5e6`.
 | 66 | A regra do maior é confirmada por contrafactual, e o backtest não a vê | aceita | parecer | 2026-09-11 |
 | 67 | A conta da CVM se resolve por evidência, e a ausência do conceito é nula | aceita | parecer | 2026-09-11 |
 | 68 | Falha de um demonstrativo reprova a busca inteira | aceita | parecer | 2026-09-11 |
+| 69 | A mescla de fontes carrega a procedência de cada campo | aceita | parecer | 2026-09-11 |
+| 70 | A contagem de ações da CVM não tem escala, e só a fração dela entra | aceita | parecer | 2026-09-11 |
+| 71 | A validade do cache macro é por série, e a cobertura é por janela | aceita | parecer | 2026-09-11 |
 
 ## Caixa de entrada
 
@@ -78,16 +81,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 45 | 14.600 |
+| Nucleo de dominio | 46 | 14.966 |
 | Apresentacao | 35 | 15.860 |
-| Camada de dados | 13 | 2.622 |
-| Testes do app | 29 | 5.169 |
-| Testes do nucleo | 19 | 8.950 |
+| Camada de dados | 13 | 2.661 |
+| Testes do app | 29 | 5.209 |
+| Testes do nucleo | 20 | 9.131 |
 | Ferramentas de QA | 20 | 6.535 |
 
 ## Histórico recente
 
 ```
+2026-09-11  6e01044  Refino do motor de valuation (parte 10)
 2026-09-11  c80b5e6  Refino do motor de valuation (parte 9)
 2026-09-10  e46c8bc  Refino do motor de valuation (parte 8)
 2026-09-09  30bc51d  Refino do motor de valuation (parte 7)
@@ -102,5 +106,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-08-30  feb211e  Garantindo estabilidade da UI
 2026-08-30  afb785e  Garantindo estabilidade dos testes
 2026-08-30  eacbcd9  Aprimorando UI/UX (4/4)
-2026-08-30  f14989e  Aprimorando UI/UX (3/4)
 ```

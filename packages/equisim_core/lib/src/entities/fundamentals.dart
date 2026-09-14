@@ -85,6 +85,11 @@ class FundamentalsSnapshot {
   /// Contagem de ações **do exercício**, preservada antes da sobrescrita pelo
   /// valor corrente.
   ///
+  /// **É contagem, e não data**, apesar do que o sufixo `AsOf` sugere — ele
+  /// significa "na data do exercício". O tipo é `double?` porque é quantidade;
+  /// a auditoria já o leu como `DateTime` uma vez, e um leitor humano pode
+  /// fazer o mesmo.
+  ///
   /// [sharesOutstanding] descreve o hoje, e é o que o preço por papel exige.
   /// Este descreve o ano, e é o que o patrimônio exige: [bookValuePerShare] é
   /// publicado por ação daquele exercício, e multiplicá-lo pela contagem
@@ -110,14 +115,31 @@ class FundamentalsSnapshot {
   /// `PointInTimeView` volta a presumir.
   final DateTime? receiptDate;
 
-  /// Ações em tesouraria na data do exercício.
+  /// Ações em tesouraria na data do exercício, em **contagem absoluta**.
   ///
   /// Ação em tesouraria **não tem direito a fluxo**: quem divide o valor do
   /// capital próprio deve usar a contagem integralizada menos esta. Medido em
   /// 11/09/2026 sobre o `composicao_capital` da CVM, **178 das 286 companhias
   /// do universo (62%) têm tesouraria maior que zero** — e o motor não a
   /// tratava, porque a fonte anterior não publicava o campo.
+  ///
+  /// **Prefira [treasuryFraction] quando a origem for a CVM.** Ver lá.
   final double? treasuryShares;
+
+  /// Fração das ações integralizadas que está em tesouraria, em `[0, 1)`.
+  ///
+  /// **Existe porque a contagem absoluta da CVM não tem escala confiável.**
+  /// Medido em 11/09/2026 sobre 2.081 pares comparáveis: em **60,9%** dos
+  /// exercícios o `QT_ACAO_TOTAL_CAP_INTEGR` vem em unidades e em **34,5%**
+  /// vem em **milhares** — a ABEV3 aparece com 15.757.657 contra os
+  /// 15.761.638.000 papéis reais, e a MILS3 com 234.178 contra 234.178.210.
+  /// Nenhum campo do arquivo declara qual é.
+  ///
+  /// A razão `tesouraria ÷ integralizadas` **não depende da escala**: as duas
+  /// vêm do mesmo registro e erram juntas. É por ela que a tesouraria entra no
+  /// motor, aplicada sobre a contagem da fonte de mercado — que a §1.7 mediu
+  /// como reproduzindo o patrimônio publicado em 4.461 de 4.462 exercícios.
+  final double? treasuryFraction;
 
   /// Ativo total publicado.
   ///
@@ -187,6 +209,7 @@ class FundamentalsSnapshot {
     this.equityIncomeResult,
     this.receiptDate,
     this.treasuryShares,
+    this.treasuryFraction,
     this.totalAssets,
   });
 
@@ -540,6 +563,18 @@ class FundamentalsSnapshot {
   double? sharesNetOfTreasury(double? bruta) {
     final b = _positive(bruta);
     if (b == null) return null;
+
+    // **A fração vem primeiro**, e a razão é de escala: a contagem absoluta
+    // da CVM vem em unidades em 60,9% dos exercícios e em milhares em 34,5%,
+    // sem campo que diga qual. A fração é invariante — ver [treasuryFraction].
+    final f = treasuryFraction;
+    if (f != null && f.isFinite && f > 0 && f < 1) {
+      // **Arredonda**: contagem de ação é inteira, e `b × (1 − f)` não é. A
+      // fração vem de uma razão entre dois inteiros de outra escala, e o
+      // produto cai entre papéis — 233.944.031,79 não é uma base societária.
+      return (b * (1 - f)).roundToDouble();
+    }
+
     final t = treasuryShares;
     if (t == null || !t.isFinite || t <= 0) return b;
     final liquida = b - t;

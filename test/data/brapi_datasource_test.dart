@@ -415,8 +415,13 @@ void main() {
       final series = (await datasource.cdi(
         DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)),
       )).unwrap();
+      // A fixture comeca em 02/01/2024. Sob uma troca dd/MM -> MM/dd ela
+      // viraria 1 de FEVEREIRO, entao a assercao de mes ja discrimina — mas
+      // so por causa desta fixture. A de dia torna o teste independente de
+      // qual arquivo o alimenta, que e o que a lente `risco` pediu.
       expect(series.dates.first.year, 2024);
       expect(series.dates.first.month, 1);
+      expect(series.dates.first.day, 2);
     });
   });
 

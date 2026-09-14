@@ -1,0 +1,1272 @@
+[
+ {
+  "ticker": "ABCB4",
+  "temCvm": true,
+  "potencialAntes": 0.15581773799837276,
+  "potencialDepois": 0.15581773799837276,
+  "justoAntes": 28.41,
+  "justoDepois": 28.41,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "ABEV3",
+  "temCvm": true,
+  "potencialAntes": -0.11753494282083861,
+  "potencialDepois": -0.11753494282083861,
+  "justoAntes": 13.89,
+  "justoDepois": 13.89,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "AGRO3",
+  "temCvm": true,
+  "potencialAntes": -0.49870264660093405,
+  "potencialDepois": -0.5547483134405812,
+  "justoAntes": 9.66,
+  "justoDepois": 8.58,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "ALOS3",
+  "temCvm": true,
+  "potencialAntes": -0.38493578618535235,
+  "potencialDepois": -0.38493578618535235,
+  "justoAntes": 17.72,
+  "justoDepois": 17.72,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "ALPA4",
+  "temCvm": true,
+  "potencialAntes": -0.6941783345615328,
+  "potencialDepois": -0.6941783345615328,
+  "justoAntes": 4.15,
+  "justoDepois": 4.15,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "ALUP11",
+  "temCvm": true,
+  "potencialAntes": 0.0793697978596909,
+  "potencialDepois": 0.0793697978596909,
+  "justoAntes": 36.31,
+  "justoDepois": 36.31,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "AMER3",
+  "temCvm": true,
+  "potencialAntes": -0.3045045045045045,
+  "potencialDepois": -0.3045045045045045,
+  "justoAntes": 3.86,
+  "justoDepois": 3.86,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "ANIM3",
+  "temCvm": true,
+  "potencialAntes": 2.191126279863481,
+  "potencialDepois": 2.191126279863481,
+  "justoAntes": 9.35,
+  "justoDepois": 9.35,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "AXIA3",
+  "temCvm": true,
+  "potencialAntes": -0.7849131693198264,
+  "potencialDepois": -0.7849131693198264,
+  "justoAntes": 11.89,
+  "justoDepois": 11.89,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "AZEV4",
+  "temCvm": true,
+  "potencialAntes": -0.9241379310344827,
+  "potencialDepois": -0.9241379310344827,
+  "justoAntes": 0.11,
+  "justoDepois": 0.11,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "AZZA3",
+  "temCvm": true,
+  "potencialAntes": 0.3487846240814018,
+  "potencialDepois": 0.3487846240814018,
+  "justoAntes": 23.86,
+  "justoDepois": 23.86,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "B3SA3",
+  "temCvm": true,
+  "potencialAntes": -0.7259643062751872,
+  "potencialDepois": -0.7259643062751872,
+  "justoAntes": 4.76,
+  "justoDepois": 4.76,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "BBAS3",
+  "temCvm": true,
+  "potencialAntes": 0.5301953818827709,
+  "potencialDepois": 0.49511545293072834,
+  "justoAntes": 34.46,
+  "justoDepois": 33.67,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "BBDC3",
+  "temCvm": true,
+  "potencialAntes": -0.08285895003162558,
+  "potencialDepois": -0.08285895003162558,
+  "justoAntes": 14.5,
+  "justoDepois": 14.5,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "BBDC4",
+  "temCvm": true,
+  "potencialAntes": -0.19888268156424577,
+  "potencialDepois": -0.19888268156424577,
+  "justoAntes": 14.34,
+  "justoDepois": 14.34,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "BBSE3",
+  "temCvm": true,
+  "potencialAntes": 0.11456356736242898,
+  "potencialDepois": 0.11456356736242898,
+  "justoAntes": 46.99,
+  "justoDepois": 46.99,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "BEEF3",
+  "temCvm": true,
+  "potencialAntes": 5.478481012658228,
+  "potencialDepois": 5.478481012658228,
+  "justoAntes": 25.59,
+  "justoDepois": 25.59,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "BHIA3",
+  "temCvm": true,
+  "potencialAntes": 3.492753623188406,
+  "potencialDepois": 3.492753623188406,
+  "justoAntes": 3.1,
+  "justoDepois": 3.1,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "BMGB4",
+  "temCvm": true,
+  "potencialAntes": 0.3394648829431437,
+  "potencialDepois": -0.5,
+  "justoAntes": 8.01,
+  "justoDepois": 2.99,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "BPAC11",
+  "temCvm": true,
+  "potencialAntes": -0.15209318028359226,
+  "potencialDepois": -0.6566509115462527,
+  "justoAntes": 50.23,
+  "justoDepois": 20.34,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "BRAP4",
+  "temCvm": true,
+  "potencialAntes": -0.6841637010676157,
+  "potencialDepois": -0.6841637010676157,
+  "justoAntes": 7.1,
+  "justoDepois": 7.1,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "BRAV3",
+  "temCvm": true,
+  "potencialAntes": 1.4060402684563762,
+  "potencialDepois": 1.4060402684563762,
+  "justoAntes": 43.02,
+  "justoDepois": 43.02,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "BRSR6",
+  "temCvm": true,
+  "potencialAntes": -0.015456989247311856,
+  "potencialDepois": 0.2923387096774193,
+  "justoAntes": 14.65,
+  "justoDepois": 19.23,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "CAML3",
+  "temCvm": false,
+  "potencialAntes": -0.6133603238866396,
+  "potencialDepois": -0.6133603238866396,
+  "justoAntes": 1.91,
+  "justoDepois": 1.91,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "CEAB3",
+  "temCvm": true,
+  "potencialAntes": -0.37567861020629756,
+  "potencialDepois": -0.37567861020629756,
+  "justoAntes": 5.75,
+  "justoDepois": 5.75,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "CMIG4",
+  "temCvm": true,
+  "potencialAntes": -0.1607460035523979,
+  "potencialDepois": -0.1607460035523979,
+  "justoAntes": 9.45,
+  "justoDepois": 9.45,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "COGN3",
+  "temCvm": true,
+  "potencialAntes": -0.4098360655737705,
+  "potencialDepois": -0.4098360655737705,
+  "justoAntes": 1.44,
+  "justoDepois": 1.44,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "CPFE3",
+  "temCvm": true,
+  "potencialAntes": -0.1962417253897074,
+  "potencialDepois": -0.1962417253897074,
+  "justoAntes": 37.64,
+  "justoDepois": 37.64,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "CPLE3",
+  "temCvm": true,
+  "potencialAntes": -0.6050473186119874,
+  "potencialDepois": -0.6050473186119874,
+  "justoAntes": 6.26,
+  "justoDepois": 6.26,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "CSNA3",
+  "temCvm": true,
+  "potencialAntes": 0.391509433962264,
+  "potencialDepois": 0.391509433962264,
+  "justoAntes": 8.85,
+  "justoDepois": 8.85,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "CVCB3",
+  "temCvm": true,
+  "potencialAntes": 0.13829787234042568,
+  "potencialDepois": 0.13829787234042568,
+  "justoAntes": 2.14,
+  "justoDepois": 2.14,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "CXSE3",
+  "temCvm": true,
+  "potencialAntes": -0.40090090090090086,
+  "potencialDepois": -0.40090090090090086,
+  "justoAntes": 11.97,
+  "justoDepois": 11.97,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "CYRE3",
+  "temCvm": true,
+  "potencialAntes": -0.70703125,
+  "potencialDepois": -0.70703125,
+  "justoAntes": 7.5,
+  "justoDepois": 7.5,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "CYRE4",
+  "temCvm": true,
+  "potencialAntes": -0.7507258399004563,
+  "potencialDepois": -0.7507258399004563,
+  "justoAntes": 6.01,
+  "justoDepois": 6.01,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "DIRR3",
+  "temCvm": true,
+  "potencialAntes": -0.7207678883071554,
+  "potencialDepois": -0.7207678883071554,
+  "justoAntes": 3.2,
+  "justoDepois": 3.2,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "DXCO3",
+  "temCvm": true,
+  "potencialAntes": -0.8581560283687943,
+  "potencialDepois": -0.8581560283687943,
+  "justoAntes": 0.8,
+  "justoDepois": 0.8,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "ECOR3",
+  "temCvm": true,
+  "potencialAntes": -0.3863636363636363,
+  "potencialDepois": -0.3863636363636363,
+  "justoAntes": 4.86,
+  "justoDepois": 4.86,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "EGIE3",
+  "temCvm": true,
+  "potencialAntes": 0.5009953550099536,
+  "potencialDepois": 0.5009953550099536,
+  "justoAntes": 45.24,
+  "justoDepois": 45.24,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "EMBJ3",
+  "temCvm": true,
+  "potencialAntes": -0.970625394819962,
+  "potencialDepois": -0.970625394819962,
+  "justoAntes": 2.79,
+  "justoDepois": 2.79,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "ENEV3",
+  "temCvm": true,
+  "potencialAntes": -0.8992388546574845,
+  "potencialDepois": -0.8992388546574845,
+  "justoAntes": 2.78,
+  "justoDepois": 2.78,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "ENGI11",
+  "temCvm": true,
+  "potencialAntes": 0.8119774450709702,
+  "potencialDepois": 0.8119774450709702,
+  "justoAntes": 93.19,
+  "justoDepois": 93.19,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "EQTL3",
+  "temCvm": true,
+  "potencialAntes": 0.034473953013278893,
+  "potencialDepois": 0.034473953013278893,
+  "justoAntes": 40.51,
+  "justoDepois": 40.51,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "EVEN3",
+  "temCvm": true,
+  "potencialAntes": -0.8274231678486997,
+  "potencialDepois": -0.8274231678486997,
+  "justoAntes": 0.73,
+  "justoDepois": 0.73,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "EZTC3",
+  "temCvm": true,
+  "potencialAntes": -0.33999999999999997,
+  "potencialDepois": -0.33999999999999997,
+  "justoAntes": 8.58,
+  "justoDepois": 8.58,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "FESA4",
+  "temCvm": true,
+  "potencialAntes": -0.6131907308377897,
+  "potencialDepois": -0.6131907308377897,
+  "justoAntes": 2.17,
+  "justoDepois": 2.17,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "FRAS3",
+  "temCvm": true,
+  "potencialAntes": -0.42030905077262687,
+  "potencialDepois": -0.42030905077262687,
+  "justoAntes": 13.13,
+  "justoDepois": 13.13,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "GGBR4",
+  "temCvm": true,
+  "potencialAntes": -0.6176006314127861,
+  "potencialDepois": -0.6176006314127861,
+  "justoAntes": 9.69,
+  "justoDepois": 9.69,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "GOAU4",
+  "temCvm": true,
+  "potencialAntes": 0.023276633840644566,
+  "potencialDepois": 0.023276633840644566,
+  "justoAntes": 11.43,
+  "justoDepois": 11.43,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "GRND3",
+  "temCvm": true,
+  "potencialAntes": -0.11413043478260879,
+  "potencialDepois": -0.11413043478260879,
+  "justoAntes": 3.26,
+  "justoDepois": 3.26,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "HAPV3",
+  "temCvm": true,
+  "potencialAntes": 0.009641873278236955,
+  "potencialDepois": 0.009641873278236955,
+  "justoAntes": 7.33,
+  "justoDepois": 7.33,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "HYPE3",
+  "temCvm": true,
+  "potencialAntes": -0.7387737478411053,
+  "potencialDepois": -0.7387737478411053,
+  "justoAntes": 6.05,
+  "justoDepois": 6.05,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "IGTI11",
+  "temCvm": true,
+  "potencialAntes": -0.8577374195989407,
+  "potencialDepois": -0.8577374195989407,
+  "justoAntes": 3.76,
+  "justoDepois": 3.76,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "IRBR3",
+  "temCvm": true,
+  "potencialAntes": -0.5336762578363607,
+  "potencialDepois": -0.5336762578363607,
+  "justoAntes": 29.01,
+  "justoDepois": 29.01,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "ISAE4",
+  "temCvm": true,
+  "potencialAntes": 0.4996389891696751,
+  "potencialDepois": 0.4996389891696751,
+  "justoAntes": 41.54,
+  "justoDepois": 41.54,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "ITSA4",
+  "temCvm": true,
+  "potencialAntes": -0.1849462365591398,
+  "potencialDepois": -0.1849462365591398,
+  "justoAntes": 11.37,
+  "justoDepois": 11.37,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "ITUB3",
+  "temCvm": true,
+  "potencialAntes": -0.017716535433070918,
+  "potencialDepois": -0.39326334208223973,
+  "justoAntes": 44.91,
+  "justoDepois": 27.74,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "ITUB4",
+  "temCvm": true,
+  "potencialAntes": 0.03649809160305346,
+  "potencialDepois": -0.35830152671755733,
+  "justoAntes": 43.45,
+  "justoDepois": 26.9,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "JHSF3",
+  "temCvm": true,
+  "potencialAntes": 0.034061135371179094,
+  "potencialDepois": 0.034061135371179094,
+  "justoAntes": 11.84,
+  "justoDepois": 11.84,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "JSLG3",
+  "temCvm": true,
+  "potencialAntes": -0.8213058419243986,
+  "potencialDepois": -0.8213058419243986,
+  "justoAntes": 1.04,
+  "justoDepois": 1.04,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "KEPL3",
+  "temCvm": true,
+  "potencialAntes": 0.04341317365269462,
+  "potencialDepois": 0.04341317365269462,
+  "justoAntes": 6.97,
+  "justoDepois": 6.97,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "KLBN11",
+  "temCvm": true,
+  "potencialAntes": -0.5963020030816641,
+  "potencialDepois": -0.5963020030816641,
+  "justoAntes": 7.86,
+  "justoDepois": 7.86,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "KLBN3",
+  "temCvm": true,
+  "potencialAntes": -0.630272952853598,
+  "potencialDepois": -0.630272952853598,
+  "justoAntes": 1.49,
+  "justoDepois": 1.49,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "LEVE3",
+  "temCvm": true,
+  "potencialAntes": 0.02224931423346531,
+  "potencialDepois": 0.02224931423346531,
+  "justoAntes": 33.54,
+  "justoDepois": 33.54,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "LIGT3",
+  "temCvm": true,
+  "potencialAntes": -0.45098039215686275,
+  "potencialDepois": -0.45098039215686275,
+  "justoAntes": 1.96,
+  "justoDepois": 1.96,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "LOGG3",
+  "temCvm": true,
+  "potencialAntes": -0.5750708215297451,
+  "potencialDepois": -0.5750708215297451,
+  "justoAntes": 10.5,
+  "justoDepois": 10.5,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "LREN3",
+  "temCvm": true,
+  "potencialAntes": -0.27400881057268717,
+  "potencialDepois": -0.27400881057268717,
+  "justoAntes": 8.24,
+  "justoDepois": 8.24,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "MBRF3",
+  "temCvm": true,
+  "potencialAntes": -0.8383267382702092,
+  "potencialDepois": -0.0808366308648954,
+  "justoAntes": 2.86,
+  "justoDepois": 16.26,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "MDIA3",
+  "temCvm": true,
+  "potencialAntes": -0.13442069741282342,
+  "potencialDepois": -0.13442069741282342,
+  "justoAntes": 15.39,
+  "justoDepois": 15.39,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "MDNE3",
+  "temCvm": true,
+  "potencialAntes": -0.8508330104610615,
+  "potencialDepois": -0.8508330104610615,
+  "justoAntes": 3.85,
+  "justoDepois": 3.85,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "MGLU3",
+  "temCvm": true,
+  "potencialAntes": 0.8221070811744388,
+  "potencialDepois": 0.8221070811744388,
+  "justoAntes": 10.55,
+  "justoDepois": 10.55,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "MILS3",
+  "temCvm": true,
+  "potencialAntes": -0.8575047498416719,
+  "potencialDepois": -0.8575047498416719,
+  "justoAntes": 2.25,
+  "justoDepois": 2.25,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "MOTV3",
+  "temCvm": true,
+  "potencialAntes": -0.6746126340882002,
+  "potencialDepois": -0.6746126340882002,
+  "justoAntes": 5.46,
+  "justoDepois": 5.46,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "MOVI3",
+  "temCvm": true,
+  "potencialAntes": -0.5265104808877928,
+  "potencialDepois": -0.5265104808877928,
+  "justoAntes": 3.84,
+  "justoDepois": 3.84,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "MRVE3",
+  "temCvm": true,
+  "potencialAntes": 0.2288288288288289,
+  "potencialDepois": 0.2288288288288289,
+  "justoAntes": 6.82,
+  "justoDepois": 6.82,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "MULT3",
+  "temCvm": true,
+  "potencialAntes": -0.8889993373094764,
+  "potencialDepois": -0.8889993373094764,
+  "justoAntes": 3.35,
+  "justoDepois": 3.35,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "MYPK3",
+  "temCvm": true,
+  "potencialAntes": -0.4587155963302753,
+  "potencialDepois": -0.4587155963302753,
+  "justoAntes": 5.31,
+  "justoDepois": 5.31,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "PCAR3",
+  "temCvm": true,
+  "potencialAntes": -0.5406360424028268,
+  "potencialDepois": -0.5406360424028268,
+  "justoAntes": 1.3,
+  "justoDepois": 1.3,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "PETR3",
+  "temCvm": true,
+  "potencialAntes": -0.22534128052297633,
+  "potencialDepois": -0.22534128052297633,
+  "justoAntes": 40.29,
+  "justoDepois": 40.29,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "PETR4",
+  "temCvm": true,
+  "potencialAntes": -0.10040331139885368,
+  "potencialDepois": -0.10040331139885368,
+  "justoAntes": 42.38,
+  "justoDepois": 42.38,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "PGMN3",
+  "temCvm": true,
+  "potencialAntes": 1.229166666666667,
+  "potencialDepois": 1.229166666666667,
+  "justoAntes": 8.56,
+  "justoDepois": 8.56,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "PINE4",
+  "temCvm": true,
+  "potencialAntes": 0.10682226211849187,
+  "potencialDepois": 0.10682226211849187,
+  "justoAntes": 12.33,
+  "justoDepois": 12.33,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "PNVL3",
+  "temCvm": true,
+  "potencialAntes": -0.7196048632218845,
+  "potencialDepois": -0.7196048632218845,
+  "justoAntes": 3.69,
+  "justoDepois": 3.69,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "POMO3",
+  "temCvm": true,
+  "potencialAntes": -0.755868544600939,
+  "potencialDepois": -0.755868544600939,
+  "justoAntes": 1.04,
+  "justoDepois": 1.04,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "POMO4",
+  "temCvm": true,
+  "potencialAntes": -0.7838427947598253,
+  "potencialDepois": -0.7838427947598253,
+  "justoAntes": 0.99,
+  "justoDepois": 0.99,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "POSI3",
+  "temCvm": true,
+  "potencialAntes": 1.456140350877193,
+  "potencialDepois": 1.456140350877193,
+  "justoAntes": 8.4,
+  "justoDepois": 8.4,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "PRIO3",
+  "temCvm": true,
+  "potencialAntes": -0.8069446751952152,
+  "potencialDepois": -0.8069446751952152,
+  "justoAntes": 11.62,
+  "justoDepois": 11.62,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "PRNR3",
+  "temCvm": true,
+  "potencialAntes": -0.9636363636363636,
+  "potencialDepois": -0.9636363636363636,
+  "justoAntes": 0.66,
+  "justoDepois": 0.66,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "PSSA3",
+  "temCvm": true,
+  "potencialAntes": -0.3749516066589237,
+  "potencialDepois": -0.3749516066589237,
+  "justoAntes": 32.29,
+  "justoDepois": 32.29,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "QUAL3",
+  "temCvm": true,
+  "potencialAntes": -0.22000000000000006,
+  "potencialDepois": -0.22000000000000006,
+  "justoAntes": 1.17,
+  "justoDepois": 1.17,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "RADL3",
+  "temCvm": true,
+  "potencialAntes": -0.5097548774387193,
+  "potencialDepois": -0.5097548774387193,
+  "justoAntes": 9.8,
+  "justoDepois": 9.8,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "RAIL3",
+  "temCvm": true,
+  "potencialAntes": -0.8831615120274915,
+  "potencialDepois": -0.8831615120274915,
+  "justoAntes": 1.7,
+  "justoDepois": 1.7,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "RANI3",
+  "temCvm": true,
+  "potencialAntes": 0.3746736292428197,
+  "potencialDepois": 0.3746736292428197,
+  "justoAntes": 10.53,
+  "justoDepois": 10.53,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "RDOR3",
+  "temCvm": true,
+  "potencialAntes": -0.413412335039052,
+  "potencialDepois": -0.413412335039052,
+  "justoAntes": 21.78,
+  "justoDepois": 21.78,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "RENT3",
+  "temCvm": true,
+  "potencialAntes": -0.5414847161572053,
+  "potencialDepois": -0.5414847161572053,
+  "justoAntes": 16.8,
+  "justoDepois": 16.8,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "RENT4",
+  "temCvm": true,
+  "potencialAntes": -0.5706999149900822,
+  "potencialDepois": -0.5706999149900822,
+  "justoAntes": 15.15,
+  "justoDepois": 15.15,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "RIAA3",
+  "temCvm": true,
+  "potencialAntes": 0.05027932960893847,
+  "potencialDepois": 0.05027932960893847,
+  "justoAntes": 7.52,
+  "justoDepois": 7.52,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "SANB11",
+  "temCvm": true,
+  "potencialAntes": -0.27834373973052906,
+  "potencialDepois": -0.27834373973052906,
+  "justoAntes": 21.96,
+  "justoDepois": 21.96,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "SANB4",
+  "temCvm": true,
+  "potencialAntes": -0.24284763805721882,
+  "potencialDepois": -0.24284763805721882,
+  "justoAntes": 11.38,
+  "justoDepois": 11.38,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "SAPR11",
+  "temCvm": true,
+  "potencialAntes": 1.0804005722460654,
+  "potencialDepois": 1.0804005722460654,
+  "justoAntes": 72.71,
+  "justoDepois": 72.71,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "SAPR4",
+  "temCvm": true,
+  "potencialAntes": 1.1564327485380117,
+  "potencialDepois": 1.1564327485380117,
+  "justoAntes": 14.75,
+  "justoDepois": 14.75,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "SAUD3",
+  "temCvm": true,
+  "potencialAntes": -0.9006126616746086,
+  "potencialDepois": -0.9006126616746086,
+  "justoAntes": 1.46,
+  "justoDepois": 1.46,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "SBFG3",
+  "temCvm": true,
+  "potencialAntes": -0.5143805309734513,
+  "potencialDepois": -0.5143805309734513,
+  "justoAntes": 4.39,
+  "justoDepois": 4.39,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "SBSP3",
+  "temCvm": true,
+  "potencialAntes": -0.7923105917828874,
+  "potencialDepois": -0.7923105917828874,
+  "justoAntes": 5.51,
+  "justoDepois": 5.51,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "SEER3",
+  "temCvm": true,
+  "potencialAntes": 0.507396449704142,
+  "potencialDepois": 0.507396449704142,
+  "justoAntes": 20.38,
+  "justoDepois": 20.38,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "SHUL4",
+  "temCvm": true,
+  "potencialAntes": 0.20805369127516793,
+  "potencialDepois": 0.20805369127516793,
+  "justoAntes": 5.4,
+  "justoDepois": 5.4,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "SLCE3",
+  "temCvm": true,
+  "potencialAntes": -0.054844606946983565,
+  "potencialDepois": -0.054844606946983565,
+  "justoAntes": 15.51,
+  "justoDepois": 15.51,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "SMFT3",
+  "temCvm": true,
+  "potencialAntes": -0.6716750139120756,
+  "potencialDepois": -0.6716750139120756,
+  "justoAntes": 5.9,
+  "justoDepois": 5.9,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "SMTO3",
+  "temCvm": true,
+  "potencialAntes": 0.920388349514563,
+  "potencialDepois": 0.4679611650485435,
+  "justoAntes": 39.56,
+  "justoDepois": 30.24,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "SUZB3",
+  "temCvm": true,
+  "potencialAntes": 0.2763915547024952,
+  "potencialDepois": 0.2763915547024952,
+  "justoAntes": 59.85,
+  "justoDepois": 59.85,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "TAEE11",
+  "temCvm": true,
+  "potencialAntes": -0.03973031543462554,
+  "potencialDepois": -0.03973031543462554,
+  "justoAntes": 39.88,
+  "justoDepois": 39.88,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "TAEE4",
+  "temCvm": true,
+  "potencialAntes": -0.010676156583629918,
+  "potencialDepois": -0.010676156583629918,
+  "justoAntes": 13.9,
+  "justoDepois": 13.9,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "TEND3",
+  "temCvm": true,
+  "potencialAntes": -0.7825584753104244,
+  "potencialDepois": -0.7825584753104244,
+  "justoAntes": 7.53,
+  "justoDepois": 7.53,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "TGMA3",
+  "temCvm": true,
+  "potencialAntes": -0.4489007724301841,
+  "potencialDepois": -0.4489007724301841,
+  "justoAntes": 18.55,
+  "justoDepois": 18.55,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "TOTS3",
+  "temCvm": true,
+  "potencialAntes": -0.7043478260869566,
+  "potencialDepois": -0.7043478260869566,
+  "justoAntes": 10.2,
+  "justoDepois": 10.2,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "UGPA3",
+  "temCvm": true,
+  "potencialAntes": -0.6333511491181187,
+  "potencialDepois": -0.6333511491181187,
+  "justoAntes": 13.72,
+  "justoDepois": 13.72,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "UNIP6",
+  "temCvm": true,
+  "potencialAntes": -0.667895383535194,
+  "potencialDepois": -0.667895383535194,
+  "justoAntes": 18.92,
+  "justoDepois": 18.92,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "USIM3",
+  "temCvm": true,
+  "potencialAntes": -0.5224719101123596,
+  "potencialDepois": -0.5224719101123596,
+  "justoAntes": 3.4,
+  "justoDepois": 3.4,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "USIM5",
+  "temCvm": true,
+  "potencialAntes": -0.5596330275229358,
+  "potencialDepois": -0.5596330275229358,
+  "justoAntes": 3.36,
+  "justoDepois": 3.36,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "VALE3",
+  "temCvm": true,
+  "potencialAntes": 0.1086237598575425,
+  "potencialDepois": 0.1086237598575425,
+  "justoAntes": 87.16,
+  "justoDepois": 87.16,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "VAMO3",
+  "temCvm": true,
+  "potencialAntes": -0.5800000000000001,
+  "potencialDepois": -0.5800000000000001,
+  "justoAntes": 1.47,
+  "justoDepois": 1.47,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "VBBR3",
+  "temCvm": true,
+  "potencialAntes": -0.3703703703703704,
+  "potencialDepois": -0.3703703703703704,
+  "justoAntes": 23.29,
+  "justoDepois": 23.29,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "VIVT3",
+  "temCvm": true,
+  "potencialAntes": -0.6427145708582834,
+  "potencialDepois": -0.6427145708582834,
+  "justoAntes": 10.74,
+  "justoDepois": 10.74,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "VLID3",
+  "temCvm": true,
+  "potencialAntes": -0.40604026845637586,
+  "potencialDepois": -0.40604026845637586,
+  "justoAntes": 10.62,
+  "justoDepois": 10.62,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "VULC3",
+  "temCvm": true,
+  "potencialAntes": 0.3666410453497311,
+  "potencialDepois": 0.3666410453497311,
+  "justoAntes": 17.78,
+  "justoDepois": 17.78,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "WEGE3",
+  "temCvm": true,
+  "potencialAntes": -0.6573250869733283,
+  "potencialDepois": -0.6573250869733283,
+  "justoAntes": 17.73,
+  "justoDepois": 17.73,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ },
+ {
+  "ticker": "WIZC3",
+  "temCvm": true,
+  "potencialAntes": 1.0382716049382719,
+  "potencialDepois": 1.0382716049382719,
+  "justoAntes": 16.51,
+  "justoDepois": 16.51,
+  "modeloAntes": "dcfEarnings",
+  "modeloDepois": "dcfEarnings"
+ },
+ {
+  "ticker": "YDUQ3",
+  "temCvm": true,
+  "potencialAntes": -0.24896265560165978,
+  "potencialDepois": -0.24896265560165978,
+  "justoAntes": 7.24,
+  "justoDepois": 7.24,
+  "modeloAntes": "dcfFcff",
+  "modeloDepois": "dcfFcff"
+ }
+]

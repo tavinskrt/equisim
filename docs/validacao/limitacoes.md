@@ -397,6 +397,16 @@ interpretar o resultado como líquido de tributos.
 
 ### 2.12. A fonte não publica lucro líquido de instituição financeira
 
+> **FECHADA em 11/09/2026 pela ingestão da CVM (A1.7).** A CVM publica o lucro
+> de instituição financeira: o Itaú tem R$ 42,1 bi em 2024, na conta `3.09` do
+> layout de banco. Com a mescla, o ITUB4 passa a ser avaliado como qualquer
+> outro — com freio de reinvestimento e série de retorno — e sai de **+3,6%
+> para −35,8%** de potencial. Cinco dos sete ativos que mais se moveram na
+> ligação são bancos. Ver [cvm_ligacao.md §2](cvm_ligacao.md).
+>
+> A seção fica como registro do que era, e do que a troca de fonte resolveu.
+> O texto abaixo descreve o estado anterior.
+
 **Registro formal de uma lacuna de cobertura, não de método.**
 
 O `/v2/stocks/financial-data` da brapi devolve `netIncome` nulo para bancos ao
@@ -694,9 +704,20 @@ capital próprio deveria ser a integralizada **menos** a em tesouraria. O motor
 não faz essa subtração em caminho nenhum, e não tem como fazer com a fonte de
 hoje.
 
-**Tamanho por medir** — exige comparar `CAP_INTEGR − TESOURO` contra a contagem
-que a ponte usa hoje, ativo a ativo. É a primeira medição depois da ingestão.
-Ver [cvm_conferencia.md §6](cvm_conferencia.md).
+**Tratada em 11/09/2026, e não pela contagem absoluta.** A medição mostrou que
+o `QT_ACAO_TOTAL_CAP_INTEGR` **não tem escala declarada**: sobre 2.081 pares
+comparáveis, 60,9% vêm em unidades e **34,5% em milhares**, e a escala varia
+por declarante. A ABEV3 aparece com 15.757.657 contra 15.761.638.000 papéis
+reais. Importar o absoluto levou a MILS3 a **+14.037% de potencial**.
+
+O que entra é a **fração** `tesouraria ÷ integralizadas`, invariante de escala
+porque as duas saem do mesmo registro
+([decisão 70](../decisoes/070-a-contagem-de-acoes-da-cvm-nao-tem-escala.md)).
+`FundamentalsSnapshot.sharesNetOfTreasury` a prefere sobre o absoluto.
+
+**O que sobra:** a contagem primária continua indisponível, e a base sobre a
+qual a fração se aplica é a do agregador. Ver
+[cvm_ligacao.md §3](cvm_ligacao.md).
 
 ## 4. O que foi verificado, e como
 

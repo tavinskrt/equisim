@@ -250,6 +250,41 @@ void main() {
       expect(second.rates.length, first.rates.length);
       expect(second.accumulated, closeTo(first.accumulated, 1e-12));
     });
+
+    test('janela curta em cache não serve janela longa', () async {
+      // A validade e por SERIE e o recorte e por JANELA. Sem conferir
+      // cobertura, um grafico de tres meses marcava o CDI como fresco e a
+      // simulacao de dez anos recebia tres meses achando que recebeu dez
+      // anos — e apurava o CAGR decenal sobre eles.
+      final adapter = FixtureAdapter(routes: {'bcdata.sgs.12': 'bcb_cdi'});
+      final repository = MacroRepositoryImpl(
+        remote: BcbDatasource(clientWith(adapter)),
+        cache: db,
+      );
+
+      final curta = DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31));
+      await repository.riskFreeDaily(curta);
+      expect(adapter.callCount['bcdata.sgs.12'], 1);
+
+      final longa = DateRange(DateTime(2014, 1, 1), DateTime(2024, 3, 31));
+      await repository.riskFreeDaily(longa);
+      expect(adapter.callCount['bcdata.sgs.12'], 2,
+          reason: 'o cache nao cobria o inicio pedido; tem de ir a rede');
+    });
+
+    test('a mesma janela continua sendo servida do cache', () async {
+      final adapter = FixtureAdapter(routes: {'bcdata.sgs.12': 'bcb_cdi'});
+      final repository = MacroRepositoryImpl(
+        remote: BcbDatasource(clientWith(adapter)),
+        cache: db,
+      );
+      final range = DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31));
+      await repository.riskFreeDaily(range);
+      await repository.riskFreeDaily(range);
+      await repository.riskFreeDaily(range);
+      expect(adapter.callCount['bcdata.sgs.12'], 1,
+          reason: 'a conferencia de cobertura nao pode anular o cache');
+    });
   });
 
   group('Reprodutibilidade', () {

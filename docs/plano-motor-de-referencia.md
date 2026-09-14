@@ -408,16 +408,50 @@ teste de payload corrompido.
 | A1.4 | *Point-in-time* por `DT_RECEB` | ✅ `PointInTimeView` prefere a data observada |
 | A1.5 | Contagem líquida de tesouraria | ✅ `sharesNetOfTreasury`; falta **ligar ao divisor** (depende de A3) |
 | A1.6 | Todos os anos, com deslistadas | ✅ baixador; **60,6% dos exercícios fora do universo vivo** |
-| **A1.7** | **Ligar a ingestão ao motor** | ⬜ **novo** — hoje a saída é um JSON paralelo |
+| A1.7 | Ligar a ingestão ao motor | ✅ **mescla com procedência**; 127 avaliados antes e depois, mediana do Δ em 0,0% |
+| **A1.8** | **Série trimestral no motor** | ⬜ **novo** — o ITR está ingerido; usá-lo é mudança de método |
+| **A1.9** | **Levar a ligação ao aplicativo** | ⬜ **novo** — hoje vive na ferramenta de validação |
 | A2 | Curva ANBIMA/Tesouro | ⬜ §2.9 |
 | A3 | Ações societárias e preço histórico de deslistada — B3 | ⬜ §1.7, §3.5; **virou pré-requisito da validação** |
 | A4 | Proventos por fonte independente | ⬜ §1.2, §2.7; reabrir a decisão 23 é **decisão do orientador** |
 | A5 | Taxonomia setorial B3 | ⬜ §1.5, §2.14 |
 | A6 | Prazo das outorgas — FRE | ⬜ §2.16 |
 | D1 | Quebrar `_evaluateLane` | ⬜ **não feito nesta rodada** — ver abaixo |
-| D2 | Camada multi-fonte com procedência | ⬜ é o que o A1.7 exige |
+| D2 | Camada multi-fonte com procedência | ✅ `FundamentalsProvenance`, campo a campo |
 
-#### O que as lentes disseram, ao final da rodada
+#### O que as lentes disseram na rodada do A1.7
+
+Cinco lentes. **Um estrutural aceito e corrigido**, um recusado por
+conferência, o resto inventariado para a Fase 3.
+
+| lente | achados | o que foi feito |
+|---|---|---|
+| `dados` | 1 estrutural, 1 local | **corrigido** ([decisão 71](decisoes/071-a-validade-do-cache-macro-nao-cobre-a-janela.md)) |
+| `nucleo` | 2 estruturais, 1 local | inventariado — são B/D, e um deles já foi recusado antes |
+| `metodo` | 1 estrutural, 1 local | é o **B1** |
+| `risco` | 1 estrutural, 1 local | cobertura — **D3** |
+| `registro` | 0 tensões | **mas leu só as decisões 0 a 30** — ver abaixo |
+
+**A ressalva do `registro`.** Ele voltou com "nenhuma tensão", e o relatório
+declara ter examinado *"as decisões 0 a 30"*. **São 71 hoje.** O aval dele
+cobre o terço mais antigo do registro, e não as decisões 31 a 71 — que são
+justamente as deste ciclo. Não é achado nem contra-indicação; é um limite de
+alcance que o quadro esconderia se ficasse só em "sem tensões".
+
+**Aceito.** A validade do cache macro é por **série** e o recorte é por
+**janela**, e as duas não conversavam: um gráfico de três meses de CDI marcava
+a série como fresca, e a simulação de dez anos recebia os três meses **achando
+que recebeu dez anos**. O CAGR decenal, a taxa de equilíbrio da estrutura a
+termo e o Sharpe sairiam apurados sobre um trimestre, sem aviso. O caminho
+normal passa a exigir cobertura do início; o degradado continua aceitando o que
+houver.
+
+**Recusado.** A `nucleo` voltou a pedir a remoção do `label` dos enums do
+domínio. Os avisos da cascata são narrativa econômica em português **por
+construção** — é o que a tela mostra e o que a auditoria registra —, e a
+proposta trataria isso como vazamento de apresentação. Já inventariado.
+
+#### O que as lentes disseram na rodada anterior
 
 Cinco lentes rodadas. **Um achado estrutural aceito, um recusado por
 conferência**, o resto inventariado.
@@ -481,7 +515,27 @@ do A1.7, que é quando os caminhos de fato mudam.
 
 ### Fase 3 — método e nível
 
-B1 (o que o potencial serve), B2, B3, B4, B5, B6, C4, D3.
+> **Detalhada em 11/09/2026**, a pedido: a lista faseada trazia o eixo B só por
+> sigla. Os itens estão descritos na §3; aqui está a ordem e o estado.
+
+| # | item | por que, e o que decide |
+|---|---|---|
+| **B1** | **O que o potencial serve** | É **decisão sua**, não trabalho meu, e destrava o resto. A §0 mostrou que a ordenação do motor não acrescenta ao book-to-market; a `metodo` propõe reverter ao IRR implícito. Três saídas: o DCF é o produto e a ordenação sai de outro modelo; o DCF tem de ganhar; ou os dois medidos lado a lado. **Recomendo o terceiro**, com o primeiro implantado enquanto o segundo é perseguido |
+| **B2** | Potencial ortogonalizado como produto | Transforma a §0 de acusação em **métrica de acompanhamento**: o resíduo do potencial contra o B/M é o que o DCF sabe que o valor patrimonial não sabe. Hoje vale +0,0394 em 36 meses |
+| **B6** | Horizonte de projeção | Fixo em dez anos para todo mundo, sem medição. É o item **mais barato** do eixo: uma varredura de 5 a 20 anos sobre o universo, sem dado novo |
+| **B3** | Prêmio de risco deixa de ser parâmetro | 5,5% fixo (§2.2). Move o **nível** de todos juntos, e quase nada na ordenação — é "exemplar", não "referência" |
+| **B4** | Risco-país e o que falta no custo de capital | Não há prêmio de risco-país nem ajuste por tamanho. CAPM de fator único é defensável numa monografia e fraco num motor de referência |
+| **B5** | Triangulação por múltiplos | Nenhuma avaliação profissional entrega DCF sozinho. Dá a segunda leitura e o teste de sanidade sobre o nível que hoje só a §2.8 discute em prosa |
+| **B7** | **Consistência real × nominal** | **Novo.** O motor desconta fluxo nominal a taxa nominal e usa o IPCA só no teto da perpetuidade. Nunca foi conferido que as duas pontas usam a mesma convenção de inflação |
+| **B8** | **Reapresentação no *point-in-time*** | **Novo.** A ingestão adota a **última versão** de cada documento, e **24,8% dos anuais têm mais de uma**. A data de cada versão está gravada; usá-la é o que torna a coorte honesta |
+
+Fecham a fase os itens de higiene: **C4** (custos de transação) e **D3**
+(cobertura apontada pela lente `risco`).
+
+**A ordem tem uma razão.** B1 primeiro porque é decisão e porque o defeito que
+ela resolve está **em produção**. B2 e B6 depois porque não precisam de dado
+novo. B3 a B5 por último dentro da fase, porque movem nível e não ordenação —
+e é a ordenação que a §0 mostrou estar em dívida.
 
 **A exceção à sequência:** o defeito que a §0 expõe está **em produção** — a
 tela de metas ordena por um potencial que não bate um fator de uma linha.

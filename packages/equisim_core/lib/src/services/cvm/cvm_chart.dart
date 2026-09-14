@@ -390,6 +390,46 @@ class CvmChart {
     return l.value;
   }
 
+  // --- Nível 3 do balanço: padronizado, e conferido ------------------------
+  //
+  // Abaixo do nível 2 a regra geral é texto livre, e o nível 3 é a exceção
+  // **medida**: sobre os 293 CNPJs do universo em 2023, cada código abaixo
+  // aparece em 246 a 260 companhias com **duas ou três grafias apenas**. As
+  // que faltam são banco e seguradora, cujo balanço tem outra estrutura — e
+  // para elas estes campos devolvem `null`, que é o certo.
+
+  /// Caixa e equivalentes — `1.01.01`.
+  double? get caixa => _nivel3('1.01.01', RegExp(r'caixa'));
+
+  /// Aplicações financeiras de curto prazo — `1.01.02`.
+  double? get aplicacoesFinanceiras =>
+      _nivel3('1.01.02', RegExp(r'aplicaco(es|ns) financeira'));
+
+  /// Imobilizado — `1.02.03`.
+  double? get imobilizado => _nivel3('1.02.03', RegExp(r'imobilizado'));
+
+  /// Intangível — `1.02.04`.
+  double? get intangivel => _nivel3('1.02.04', RegExp(r'intangivel'));
+
+  /// Empréstimos e financiamentos no circulante — `2.01.04`.
+  double? get dividaDeCurtoPrazo =>
+      _nivel3('2.01.04', RegExp(r'emprestimos e financiamentos'));
+
+  /// Empréstimos e financiamentos no não circulante — `2.02.01`.
+  double? get dividaDeLongoPrazo =>
+      _nivel3('2.02.01', RegExp(r'emprestimos e financiamentos'));
+
+  /// Lê um código de nível 3 **conferindo a descrição**.
+  ///
+  /// O código sozinho não basta: `2.01.04` é "Empréstimos e Financiamentos" na
+  /// estrutura corporativa e outra coisa na de banco. Discordando o rótulo, a
+  /// resposta é `null` — a mesma disciplina do [ebit].
+  double? _nivel3(String code, RegExp esperado) {
+    final l = porCodigo(code);
+    if (l == null) return null;
+    return esperado.hasMatch(normalizar(l.label)) ? l.value : null;
+  }
+
   // --- Fluxo de caixa: códigos de topo universais no método indireto ---
 
   /// Caixa líquido das atividades operacionais — `6.01`.
@@ -397,6 +437,29 @@ class CvmChart {
 
   /// Caixa líquido das atividades de investimento — `6.02`.
   double? get caixaDeInvestimento => porCodigo('6.02')?.value;
+
+  /// Depreciação e amortização, da reconciliação do fluxo operacional.
+  ///
+  /// `6.01.01.*` traz os ajustes que reconciliam lucro e caixa, e a
+  /// depreciação está entre eles — em texto livre, como o CapEx. Soma todas as
+  /// linhas que a mencionem, em centavos inteiros.
+  ///
+  /// Devolve `null` quando nenhuma casa: o motor deriva D&A de
+  /// `EBITDA − EBIT` quando isto falta, e um zero aqui apagaria essa rota.
+  double? get depreciacaoEAmortizacao {
+    var centavos = 0;
+    var achou = false;
+    for (final l in lines) {
+      if (!l.code.startsWith('6.01.')) continue;
+      final d = normalizar(l.label);
+      if (!d.contains('deprecia') && !d.contains('amortiza')) continue;
+      centavos += l.cents;
+      achou = true;
+    }
+    // A reconciliação soma a despesa de volta ao lucro, então ela vem
+    // **positiva**. O domínio a quer positiva também.
+    return achou ? (centavos.abs()) / 100.0 : null;
+  }
 
   /// Aquisição de imobilizado e intangível, somada — o **CapEx**.
   ///

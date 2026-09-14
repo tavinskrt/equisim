@@ -389,7 +389,11 @@ class MacroRepositoryImpl implements MacroRepository {
   /// Serve aos dois caminhos: o normal, que só chega aqui com cache válido, e o
   /// degradado, que chega com ele vencido porque a fonte falhou. Devolve `null`
   /// quando não há cache, ele não abre, ou não há linha no intervalo.
-  Future<RateSeries?> _macroFromCache(int seriesId, DateRange range) async {
+  Future<RateSeries?> _macroFromCache(
+    int seriesId,
+    DateRange range, {
+    bool exigirCobertura = false,
+  }) async {
     final db = cache;
     if (db == null) return null;
     final rows = await _tryCache(() => db.macroIn(
@@ -398,10 +402,43 @@ class MacroRepositoryImpl implements MacroRepository {
           BrapiJson.isoDay(range.end),
         ));
     if (rows == null || rows.isEmpty) return null;
-    return RateSeries([
+
+    final serie = RateSeries([
       for (final r in rows)
         RatePoint(date: DateTime.parse(r.date), rate: r.value),
     ], basis: BcbDatasource.basisOf(seriesId));
+
+    // **A validade é por série, e o recorte é por janela.** Sem esta
+    // conferência, um gráfico de seis meses grava o CDI, marca a série como
+    // fresca, e a simulação de dez anos que vier depois recebe seis meses
+    // **achando que recebeu dez anos** — e apura o CAGR decenal sobre eles.
+    // A ponta final não é exigível: uma série de publicação lenta termina
+    // onde o Banco Central parou.
+    if (exigirCobertura && !_cobreOInicio(serie, range, seriesId)) return null;
+    return serie;
+  }
+
+  /// O cache começa cedo o bastante para a janela pedida?
+  ///
+  /// A folga acomoda fim de semana, feriado e o próprio início da série no
+  /// Banco Central — o IBC-Br não existe antes de 2003, e pedir 1990 não deve
+  /// invalidar o cache para sempre.
+  static bool _cobreOInicio(RateSeries s, DateRange range, int seriesId) {
+    if (s.points.isEmpty) return false;
+    // **Compara dia civil, e não instante.** `add(Duration(days: n))` soma
+    // horas absolutas, e num dia de mudança de horário de verão o resultado
+    // cai uma hora antes ou depois — o bastante para a folga valer 9 ou 11
+    // dias conforme a época do ano. As datas aqui são datas, não momentos.
+    final primeiro = s.points.first.date;
+    final dias = BcbDatasource.basisOf(seriesId) == TimeBasis.monthly ? 62 : 10;
+    final limite = DateTime.utc(
+      range.start.year,
+      range.start.month,
+      range.start.day + dias,
+    );
+    final inicio =
+        DateTime.utc(primeiro.year, primeiro.month, primeiro.day);
+    return !inicio.isAfter(limite);
   }
 
   Future<Result<RateSeries>> _series(int seriesId, DateRange range) async {
@@ -414,7 +451,9 @@ class MacroRepositoryImpl implements MacroRepository {
                 )) ??
             false;
     if (fresh) {
-      final vigente = await _macroFromCache(seriesId, range);
+      // No caminho normal a cobertura é exigida: cache curto vai à rede.
+      final vigente =
+          await _macroFromCache(seriesId, range, exigirCobertura: true);
       if (vigente != null) return Ok(vigente);
     }
 
