@@ -122,10 +122,15 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     // Âncora top-down da Saída 2, adotada quando o crescimento fundamental não
     // é identificável e a retenção observada a financia (decisão 25).
     inflation: anchors.inflationCagr,
-    // Destino do decaimento do desconto e taxa da perpetuidade. É a média
-    // decenal do CDI: o modelo não tem curva de juros, e descontar fluxo
-    // perpétuo pela taxa de um dia casa durações incompatíveis.
+    // Taxa livre de risco de cada ano e da perpetuidade: a curva dos
+    // prefixados do Tesouro, que é o padrão (decisão 84). Sem curva recente, a
+    // cascata recua para o decaimento do CDI corrente até a média decenal —
+    // descontar fluxo perpétuo pela taxa de um dia casaria durações
+    // incompatíveis — e o aviso da avaliação diz qual caminho foi usado.
+    riskFreeCurve: await ref.watch(riskFreeCurveProvider.future),
     terminalRiskFreeRate: anchors.riskFreeCagr,
+    // Contagem oficial da B3: o árbitro do divisor por papel (decisão 83).
+    officialShares: await ref.watch(officialSharesProvider(ticker).future),
     isDistressed: (await ref.watch(distressedRegistryProvider.future))
         .contains(ticker.value),
   );
@@ -138,7 +143,12 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
       samples: settings.samples,
     ),
   );
-  return result.valueOrNull;
+  final avaliado = result.valueOrNull;
+  if (avaliado == null) return null;
+  // O que a cascata não enxerga: a avaliação seguiu sem a CVM, ou com um
+  // pacote defasado (item A1.10). Nenhum número muda; a ressalva aparece.
+  final nota = await ref.watch(cvmCoverageNoteProvider(ticker).future);
+  return nota == null ? avaliado : avaliado.withWarnings([nota]);
 });
 
 /// Avaliações de todos os ativos da carteira Principal.

@@ -44,16 +44,19 @@ def _e_metadado(nome: str, doc: str) -> bool:
     return nome.lower() == f"{doc.lower()}_cia_aberta_{nome[-8:-4]}.csv"
 
 
-def baixar(doc: str, ano: int, destino: Path) -> tuple[int, int]:
-    """Baixa um zip e extrai os CSVs de interesse. Devolve (extraídos, bytes)."""
+def baixar(doc: str, ano: int, destino: Path) -> tuple[int, int] | None:
+    """Baixa um zip e extrai os CSVs de interesse.
+
+    Devolve (extraídos, bytes), ou ``None`` quando a fonte não publica o ano.
+    """
     url = f"{RAIZ}/{doc}/DADOS/{doc.lower()}_cia_aberta_{ano}.zip"
     try:
         with urllib.request.urlopen(url, timeout=180) as r:
             bruto = r.read()
     except urllib.error.HTTPError as e:
         if e.code == 404:
-            print(f"  {doc} {ano}: não publicado (404)")
-            return (0, 0)
+            print(f"  {doc} {ano}: NÃO PUBLICADO pela CVM (404)")
+            return None
         raise
 
     n = 0
@@ -85,12 +88,16 @@ def main() -> int:
 
     docs = [d.strip().upper() for d in a.docs.split(",") if d.strip()]
     total_arq = total_bytes = 0
+    ausentes: list[str] = []
     for ano in range(a.de, a.ate + 1):
         print(f"{ano}:")
         for doc in docs:
-            n, b = baixar(doc, ano, a.destino)
-            total_arq += n
-            total_bytes += b
+            r = baixar(doc, ano, a.destino)
+            if r is None:
+                ausentes.append(f"{doc} {ano}")
+                continue
+            total_arq += r[0]
+            total_bytes += r[1]
 
     print(
         f"\n{total_arq} arquivos, {total_bytes/1e6:.0f} MB baixados "
@@ -100,6 +107,18 @@ def main() -> int:
         "Os anos antigos trazem companhias que já não existem — é o que "
         "remove o viés de sobrevivência."
     )
+    # O ano corrente da DFP ainda não existe e é esperado; qualquer outro
+    # ausente é lacuna da fonte, e tem de ser dito — em 14/09/2026 a CVM não
+    # publicava o ITR de 2025, e a série trimestral saiu com buraco por isso.
+    esperados = {f"DFP {hoje.year}"}
+    lacunas = [x for x in ausentes if x not in esperados]
+    if lacunas:
+        print()
+        print("!! LACUNAS NA FONTE — anos que a CVM não publica:")
+        for x in lacunas:
+            print(f"!!   {x}")
+        print("!! A série trimestral recua para DFP onde houver buraco "
+              "(decisão 73).")
     return 0
 
 

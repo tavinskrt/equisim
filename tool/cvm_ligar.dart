@@ -1,161 +1,75 @@
-// A1.7 — liga a ingestão da CVM ao motor, e mede o que muda.
+// A1.7 e A1.8 — a ingestão da CVM ligada ao motor, em três montagens.
 //
-// Monta o exercício de cada ativo mesclando CVM e fonte de mercado por
-// `FundamentalsMerge`, roda a cascata com ele, e confronta com o resultado que
-// o motor produz hoje. É a medição que diz se o eixo A se paga.
+//   mercado   só a fonte de mercado — o motor de antes
+//   anual     CVM mesclada, série de DFPs                     (A1.7)
+//   ancorada  CVM mesclada, doze meses no trimestre mais novo (A1.8)
+//
+// **Por que refazer o A1.7.** A primeira medição tratava como anual todo
+// exercício terminado em dezembro. Cinco companhias do universo têm exercício
+// social fora do calendário — AGRO3, SMTO3, CAML3, JALL3, RAIZ4 —, e para elas o
+// ITR de dezembro é um acumulado parcial que entrava como ano cheio. O SMTO3
+// (−45,2 p.p.) e o AGRO3 (−5,6 p.p.) estavam na lista de movimentos daquela
+// medição, e eram artefato. Aqui a série anual é **a DFP**, pelo tipo de
+// documento, e não pelo mês.
+//
+// **Sem olhar para a frente na mescla.** Um ponto da CVM terminado em junho só
+// pode ser completado com o exercício de mercado que terminou **antes** dele. O
+// de dezembro do mesmo ano ainda não existia.
 //
 // Uso:
-//   dart run tool/cvm_ingerir.dart data/cvm     # produz cvm_exercicios.json
+//   dart run tool/cvm_ingerir.dart data/cvm
 //   dart run tool/cvm_ligar.dart
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:equisim_core/equisim_core.dart';
 
+import 'cvm/documentos.dart';
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+/// Data da avaliação. Primeiro argumento, `AAAA-MM-DD`; padrão 04/09/2026.
+late final DateTime _hoje;
 
-/// Fundamentos da CVM, indexados por ticker.
-///
-/// A ingestão grava por CNPJ com a lista de tickers; aqui a chave inverte.
-class _DaCvm {
-  final Map<String, List<FundamentalsSnapshot>> porTicker;
-  final int exercicios;
-  final int companhias;
-  _DaCvm(this.porTicker, this.exercicios, this.companhias);
+/// Repositório que monta a série pelo `CvmSeries` do núcleo — a mesma
+/// montagem que o aplicativo usa (A1.9), e não uma cópia dela.
+class _DaCvm implements FundamentalsRepository {
+  final FundamentalsRepository mercado;
+  final Map<String, List<CvmPeriodDocument>> docs;
+  final bool ancorada;
+  final Map<FieldSource, int> procedencia = {};
 
-  static _DaCvm carregar(String caminho) {
-    final f = File(caminho);
-    if (!f.existsSync()) {
-      stderr.writeln('$caminho não existe. Rode antes:');
-      stderr.writeln('  dart run tool/cvm_ingerir.dart data/cvm');
-      exit(2);
-    }
-    final linhas = (jsonDecode(f.readAsStringSync()) as List)
-        .cast<Map<String, dynamic>>();
-    final out = <String, List<FundamentalsSnapshot>>{};
-    final cnpjs = <String>{};
-    for (final e in linhas) {
-      cnpjs.add(e['cnpj'] as String);
-      final tickers = (e['tickers'] as List).cast<String>();
-      if (tickers.isEmpty) continue;
-      final fim = DateTime.tryParse(e['fimDoExercicio'] as String);
-      if (fim == null) continue;
-      // Só exercício **anual**: a série do motor é anual, e misturar o
-      // trimestral nela duplicaria períodos sem que a cascata saiba.
-      if (fim.month != 12) continue;
+  /// Tickers cuja série terminou ancorada em trimestre. Conjunto, e não
+  /// contador: `history` é chamado mais de uma vez por ativo.
+  final Set<String> ancoradasEmTrimestre = {};
 
-      double? n(String k) => (e[k] as num?)?.toDouble();
-      final integralizadas = n('acoesIntegralizadas');
-      final tesouraria = n('acoesEmTesouraria');
-      final pl = n('patrimonioLiquido');
-
-      for (final t in tickers) {
-        out.putIfAbsent(t, () => []).add(FundamentalsSnapshot(
-              ticker: Ticker.parse(t),
-              fiscalPeriodEnd: fim,
-              receiptDate: e['recebidoEm'] == null
-                  ? null
-                  : DateTime.tryParse(e['recebidoEm'] as String),
-              totalRevenue: n('receita'),
-              ebit: n('ebit'),
-              netIncome: n('lucroLiquido'),
-              incomeBeforeTax: n('resultadoAntesDosTributos'),
-              incomeTaxExpense: n('tributos'),
-              earningsPerShare: n('lucroPorAcao'),
-              cash: n('caixa'),
-              shortTermInvestments: n('aplicacoesFinanceiras'),
-              shortTermDebt: n('dividaDeCurtoPrazo'),
-              longTermDebt: n('dividaDeLongoPrazo'),
-              totalStockholderEquity: pl,
-              propertyPlantEquipment: n('imobilizado'),
-              intangibleAssets: n('intangivel'),
-              totalCurrentAssets: n('ativoCirculante'),
-              currentLiabilities: n('passivoCirculante'),
-              operatingCashFlow: n('caixaOperacional'),
-              investmentCashFlow: n('caixaDeInvestimento'),
-              minorityInterest: n('naoControladores'),
-              totalAssets: n('ativoTotal'),
-              // **A contagem absoluta da CVM NÃO entra**, e a fração entra.
-              // Medido em 2.081 pares: 60,9% dos `QT_ACAO_TOTAL_CAP_INTEGR`
-              // vêm em unidades e 34,5% em milhares, sem campo que declare —
-              // a ABEV3 aparece com 15.757.657 contra 15.761.638.000 papéis.
-              // Importar o absoluto levou o MILS3 a +14.037% de potencial na
-              // primeira execução. A razão `tesouraria ÷ integralizadas` não
-              // depende da escala: as duas saem do mesmo registro.
-              treasuryFraction: (integralizadas != null &&
-                      integralizadas > 0 &&
-                      tesouraria != null &&
-                      tesouraria >= 0 &&
-                      tesouraria < integralizadas)
-                  ? tesouraria / integralizadas
-                  : null,
-            ));
-      }
-    }
-    for (final v in out.values) {
-      v.sort((a, b) => a.fiscalPeriodEnd.compareTo(b.fiscalPeriodEnd));
-    }
-    return _DaCvm(out, linhas.length, cnpjs.length);
-  }
-}
-
-/// Repositório que devolve a série mesclada em vez da bruta.
-class _Mesclado implements FundamentalsRepository {
-  final FundamentalsRepository interno;
-  final _DaCvm cvm;
-  final Map<String, FundamentalsProvenance> procedencia = {};
-  int comCvm = 0, semCvm = 0;
-
-  _Mesclado(this.interno, this.cvm);
+  _DaCvm(this.mercado, this.docs, {required this.ancorada});
 
   @override
   Future<Result<List<FundamentalsSnapshot>>> history(Ticker t) async {
-    final base = await interno.history(t);
+    final base = await mercado.history(t);
     if (base.isErr) return base;
-    final doMercado = base.unwrap();
-    final daCvm = cvm.porTicker[t.value];
-    if (daCvm == null || daCvm.isEmpty) {
-      semCvm++;
-      return base;
-    }
-    comCvm++;
-
-    // Índice por ano: a CVM e o mercado nomeiam o mesmo exercício com datas
-    // que podem diferir em dias.
-    final porAno = <int, FundamentalsSnapshot>{
-      for (final s in doMercado) s.fiscalPeriodEnd.year: s,
-    };
-    final anos = {
-      ...porAno.keys,
-      ...daCvm.map((s) => s.fiscalPeriodEnd.year),
-    }.toList()
-      ..sort();
-
-    final out = <FundamentalsSnapshot>[];
-    for (final ano in anos) {
-      final c = daCvm.where((s) => s.fiscalPeriodEnd.year == ano).firstOrNull;
-      final m = porAno[ano];
-      final merged = FundamentalsMerge.merge(cvm: c, mercado: m);
-      if (merged == null) continue;
-      out.add(merged.snapshot);
-      if (c != null && m != null) {
-        procedencia['${t.value}:$ano'] = merged.provenance;
-      }
-    }
-    return Ok(out);
+    final meus = docs[t.value];
+    if (meus == null || meus.isEmpty) return base;
+    final r = CvmSeries.build(
+      documentos: meus,
+      mercado: base.unwrap(),
+      asOf: _hoje,
+      publicado: PointInTimeView(_hoje).isPublished,
+      ancorada: ancorada,
+    );
+    if (r.anchoredOnQuarter) ancoradasEmTrimestre.add(t.value);
+    r.provenance.forEach((k, v) => procedencia[k] = (procedencia[k] ?? 0) + v);
+    return Ok(r.series);
   }
 
   @override
-  Future<Result<Asset>> profile(Ticker t) => interno.profile(t);
+  Future<Result<Asset>> profile(Ticker t) => mercado.profile(t);
 
   @override
-  Future<Result<List<Ticker>>> universe() => interno.universe();
+  Future<Result<List<Ticker>>> universe() => mercado.universe();
 }
 
-String _pc(double? v) =>
-    v == null ? '—' : '${(v * 100).toStringAsFixed(1)}%';
+String _pc(double? v) => v == null ? '—' : '${(v * 100).toStringAsFixed(1)}%';
 
 double? _mediana(List<double> v) {
   if (v.isEmpty) return null;
@@ -164,14 +78,52 @@ double? _mediana(List<double> v) {
   return s.length.isOdd ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-Future<void> main(List<String> args) async {
-  final cvm = _DaCvm.carregar('data/cvm_exercicios.json');
-  stdout.writeln('== A1.7 — a ingestão ligada ao motor ==\n');
-  stdout.writeln('  exercícios ingeridos: ${cvm.exercicios} '
-      '(${cvm.companhias} companhias)');
-  stdout.writeln('  tickers com exercício ANUAL da CVM: '
-      '${cvm.porTicker.length}\n');
+void _comparar(
+  String titulo,
+  List<Map<String, Object?>> linhas,
+  String de,
+  String para,
+) {
+  final ambos = [
+    for (final l in linhas)
+      if (l[de] != null && l[para] != null) l,
+  ];
+  final ganhos = [
+    for (final l in linhas)
+      if (l[de] == null && l[para] != null) l['ticker'],
+  ];
+  final perdidos = [
+    for (final l in linhas)
+      if (l[de] != null && l[para] == null) l['ticker'],
+  ];
+  final dif = [
+    for (final l in ambos) ((l[para]! as double) - (l[de]! as double)).abs(),
+  ];
+  stdout.writeln('\n== $titulo ==');
+  stdout.writeln('  avaliados: ${linhas.where((l) => l[de] != null).length} '
+      '→ ${linhas.where((l) => l[para] != null).length}');
+  stdout.writeln('  ganhos  (${ganhos.length}): ${ganhos.take(14).join(" ")}');
+  stdout.writeln('  perdidos (${perdidos.length}): ${perdidos.take(14).join(" ")}');
+  stdout.writeln('  mediana do |Δ potencial|: ${_pc(_mediana(dif))}');
+  stdout.writeln('  |Δ| > 1 p.p.: ${dif.where((d) => d > 0.01).length}   '
+      '|Δ| > 10 p.p.: ${dif.where((d) => d > 0.10).length}');
+  ambos.sort((a, b) => (((b[para]! as double) - (b[de]! as double)).abs())
+      .compareTo(((a[para]! as double) - (a[de]! as double)).abs()));
+  stdout.writeln('  os que mais se moveram:');
+  for (final l in ambos.take(12)) {
+    final a = l[de]! as double, d = l[para]! as double;
+    stdout.writeln('    ${(l['ticker']! as String).padRight(8)} '
+        '${_pc(a).padLeft(9)} → ${_pc(d).padLeft(9)}  '
+        '(${_pc(d - a)})  ${l['fimAncora'] ?? ''}');
+  }
+}
 
+Future<void> main(List<String> args) async {
+  _hoje = args.isEmpty
+      ? DateTime(2026, 9, 4)
+      : DateTime.parse(args.first);
+  stdout.writeln('== avaliação em ${_hoje.toIso8601String().substring(0, 10)} ==');
+  final docs = carregarDocumentos('data/cvm_exercicios.json');
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
   try {
     final anchors = (await ResolveMarketAnchors.call(
@@ -181,16 +133,14 @@ Future<void> main(List<String> args) async {
     ))
         .getOrElse(MarketAnchors.fallback2026);
     final universe = (await ctx.fundamentals.universe()).unwrap();
-    final mesclado = _Mesclado(ctx.fundamentals, cvm);
+    final anual = _DaCvm(ctx.fundamentals, docs, ancorada: false);
+    final ancorada = _DaCvm(ctx.fundamentals, docs, ancorada: true);
 
-    Future<ValuationResult?> avaliar(
-      Ticker t,
-      FundamentalsRepository fonte,
-    ) async {
+    Future<ValuationResult?> avaliar(Ticker t, FundamentalsRepository f) async {
       final prep = await PrepareValuationInputs.call(
         ticker: t,
         prices: ctx.prices,
-        fundamentals: fonte,
+        fundamentals: f,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
         asOf: _hoje,
@@ -207,96 +157,45 @@ Future<void> main(List<String> args) async {
     final linhas = <Map<String, Object?>>[];
     var i = 0;
     for (final t in universe) {
-      i++;
-      if (i % 25 == 0) stderr.write('  $i/${universe.length}   \r');
-      final antes = await avaliar(t, ctx.fundamentals);
-      final depois = await avaliar(t, mesclado);
-      if (antes == null && depois == null) continue;
+      if (++i % 25 == 0) stderr.write('  $i/${universe.length}   \r');
+      final m = await avaliar(t, ctx.fundamentals);
+      final a = await avaliar(t, anual);
+      final h = await ancorada.history(t);
+      final z = await avaliar(t, ancorada);
+      // O fim do último ponto **publicado** na data: a série montada traz
+      // todos os exercícios, e o recorte é da cascata.
+      final publicados = h.isOk
+          ? h.unwrap().where(PointInTimeView(_hoje).isPublished).toList()
+          : const <FundamentalsSnapshot>[];
       linhas.add({
         'ticker': t.value,
-        'temCvm': cvm.porTicker.containsKey(t.value),
-        'potencialAntes': antes?.upside,
-        'potencialDepois': depois?.upside,
-        'justoAntes': antes?.fairValue.reais,
-        'justoDepois': depois?.fairValue.reais,
-        'modeloAntes': antes?.model.name,
-        'modeloDepois': depois?.model.name,
+        'mercado': m?.upside,
+        'anual': a?.upside,
+        'ancorada': z?.upside,
+        'fimAncora': publicados.isEmpty
+            ? null
+            : publicados.last.fiscalPeriodEnd.toIso8601String().substring(0, 10),
       });
     }
     stderr.writeln('');
 
-    final comAmbos = linhas
-        .where((l) => l['potencialAntes'] != null && l['potencialDepois'] != null)
-        .toList();
-    final novos = linhas
-        .where((l) => l['potencialAntes'] == null && l['potencialDepois'] != null)
-        .toList();
-    final perdidos = linhas
-        .where((l) => l['potencialAntes'] != null && l['potencialDepois'] == null)
-        .toList();
+    stdout.writeln('  documentos da CVM por ticker: ${docs.length}');
+    stdout.writeln('  avaliações com série ancorada em trimestre: '
+        '${ancorada.ancoradasEmTrimestre.length}');
 
-    stdout.writeln('  tickers com série da CVM : ${mesclado.comCvm}');
-    stdout.writeln('  tickers só de mercado    : ${mesclado.semCvm}');
-    stdout.writeln('');
-    stdout.writeln('  avaliados antes  : '
-        '${linhas.where((l) => l['potencialAntes'] != null).length}');
-    stdout.writeln('  avaliados depois : '
-        '${linhas.where((l) => l['potencialDepois'] != null).length}');
-    stdout.writeln('  GANHOS  (só depois): ${novos.length}  '
-        '${novos.map((l) => l['ticker']).take(12).join(" ")}');
-    stdout.writeln('  PERDIDOS (só antes): ${perdidos.length}  '
-        '${perdidos.map((l) => l['ticker']).take(12).join(" ")}');
+    _comparar('A1.7 refeito — mercado → CVM anual', linhas, 'mercado', 'anual');
+    _comparar('A1.8 — CVM anual → CVM ancorada', linhas, 'anual', 'ancorada');
 
-    if (comAmbos.isNotEmpty) {
-      final dif = [
-        for (final l in comAmbos)
-          (l['potencialDepois']! as double) - (l['potencialAntes']! as double)
-      ];
-      final absDif = [for (final d in dif) d.abs()];
-      stdout.writeln('');
-      stdout.writeln('  dos ${comAmbos.length} avaliados nas duas montagens:');
-      stdout.writeln('    mediana do |Δ potencial| : ${_pc(_mediana(absDif))}');
-      stdout.writeln('    moveram mais de 1 p.p.   : '
-          '${absDif.where((d) => d > 0.01).length}');
-      stdout.writeln('    moveram mais de 10 p.p.  : '
-          '${absDif.where((d) => d > 0.10).length}');
-      comAmbos.sort((a, b) => (((b['potencialDepois']! as double) -
-              (b['potencialAntes']! as double))
-          .abs())
-          .compareTo(((a['potencialDepois']! as double) -
-                  (a['potencialAntes']! as double))
-              .abs()));
-      stdout.writeln('\n    os dez que mais se moveram:');
-      stdout.writeln('    ticker      antes     depois      Δ');
-      for (final l in comAmbos.take(10)) {
-        final a = l['potencialAntes']! as double;
-        final d = l['potencialDepois']! as double;
-        stdout.writeln('    ${(l['ticker']! as String).padRight(8)} '
-            '${_pc(a).padLeft(9)} ${_pc(d).padLeft(10)} '
-            '${_pc(d - a).padLeft(9)}');
-      }
-    }
-
-    // Procedência: quantos campos vieram de cada fonte, no agregado.
-    final total = <FieldSource, int>{};
-    for (final p in mesclado.procedencia.values) {
-      p.contagem.forEach((k, v) => total[k] = (total[k] ?? 0) + v);
-    }
-    stdout.writeln('\n  procedência dos campos, sobre '
-        '${mesclado.procedencia.length} exercícios mesclados:');
-    for (final e in total.entries) {
-      stdout.writeln('    ${e.key.label.padRight(18)} ${e.value}');
-    }
-    final exemplo = mesclado.procedencia.entries.firstOrNull;
-    if (exemplo != null) {
-      stdout.writeln('    exemplo (${exemplo.key}): da CVM vieram '
-          '${exemplo.value.daCvm.length} campos');
-    }
-
-    File('docs/validacao/cvm_ligacao.json').writeAsStringSync(
+    stdout.writeln('\n  procedência na montagem ancorada: ${ancorada.procedencia}');
+    // Com data explícita, o arquivo leva a data: sem isso, a medição de
+    // outra data sobrescrevia a da data padrão.
+    final saida = args.isEmpty
+        ? 'docs/validacao/cvm_ligacao.json'
+        : 'docs/validacao/cvm_ligacao_${args.first}.json';
+    File(saida).writeAsStringSync(
       const JsonEncoder.withIndent(' ').convert(linhas),
     );
-    stdout.writeln('\n  gravado docs/validacao/cvm_ligacao.json');
+    stdout.writeln('  gravado $saida');
   } finally {
     await ctx.dispose();
   }

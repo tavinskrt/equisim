@@ -17,6 +17,7 @@ import '../services/valuation/growth_estimator.dart';
 import '../services/valuation/growth_guards.dart';
 import '../services/valuation/levered_rates.dart';
 import '../services/valuation/scenario_engine.dart';
+import '../services/valuation/yield_curve.dart';
 import '../time/point_in_time_view.dart';
 import '../value_objects/money.dart';
 import '../value_objects/ticker.dart';
@@ -100,9 +101,35 @@ class ValuationInputs {
   /// para a taxa corrente, que reproduz o comportamento anterior.
   final double? declaredTerminalRiskFreeRate;
 
+  /// Curva de juros observada, quando disponível (item A2, decisão 74).
+  ///
+  /// **Com ela, a taxa de cada ano da projeção é o forward de um ano da curva
+  /// dos títulos prefixados**, e a da perpetuidade é o forward depois do fim
+  /// da projeção. Sem ela, vale a interpolação linear entre o CDI corrente e
+  /// [declaredTerminalRiskFreeRate], que é o comportamento anterior.
+  ///
+  /// A diferença não é detalhe: medido nas coortes de 30/09 de 2021 a 2025, o
+  /// forward longo da curva ficou de **2,9 a 4,5 p.p. acima** da média decenal
+  /// do CDI que o motor usava como taxa de equilíbrio.
+  final YieldCurve? riskFreeCurve;
+
+  /// Contagem oficial de ações do registro da B3, quando disponível
+  /// (item A3.3, decisão 83).
+  ///
+  /// **É o árbitro que a ponte por papel não tinha.** As duas contagens da
+  /// fonte de preços divergem, e a regra do maior acertava onde a corrente
+  /// estava errada para menos — MILS3, MEAL3 — e errava onde estava errada
+  /// para mais: CTKA4 com 62 milhões contra 6,2 oficiais, FIEI3 com 48 contra
+  /// 2,4, AUAU3 com 451 contra 861.
+  final OfficialShareCount? officialShares;
+
   /// Taxa livre de risco estrutural, com o padrão já resolvido.
+  ///
+  /// Com [riskFreeCurve], é o forward da curva depois do fim da projeção.
   double get terminalRiskFreeRate =>
-      declaredTerminalRiskFreeRate ?? capm.riskFreeRate;
+      riskFreeCurve?.terminalRate(projectionYears) ??
+      declaredTerminalRiskFreeRate ??
+      capm.riskFreeRate;
 
   /// Retorno terminal imposto de fora, no lugar do que o veredito de vantagem
   /// competitiva decidiria.
@@ -202,6 +229,8 @@ class ValuationInputs {
     this.industry,
     this.inflation = 0.05,
     this.declaredTerminalRiskFreeRate,
+    this.riskFreeCurve,
+    this.officialShares,
     this.prices,
     this.isDistressed = false,
     this.terminalReturnOverride,
@@ -225,10 +254,25 @@ enum QuotedSharesSource {
   reconciled('conciliada pelas demonstrações'),
 
   /// Única disponível: o valor de mercado não pôde ser usado.
-  onlyAvailable('única contagem disponível');
+  onlyAvailable('única contagem disponível'),
+
+  /// Registro oficial da B3, líquida da fração em tesouraria (decisão 83).
+  official('contagem oficial da B3, líquida de tesouraria');
 
   final String label;
   const QuotedSharesSource(this.label);
+}
+
+/// Contagem de ações de um emissor no registro oficial da B3.
+class OfficialShareCount {
+  /// Ações emitidas, **com as em tesouraria** — é como a B3 publica.
+  final double total;
+
+  /// Dia em que o registro foi consultado.
+  final DateTime asOf;
+
+  /// Declara a contagem.
+  const OfficialShareCount({required this.total, required this.asOf});
 }
 
 /// Contagem de papéis da ponte, com a origem e as duas candidatas.
@@ -250,13 +294,45 @@ class QuotedShares {
   /// Razão de unidade medida, para o aviso de *unit*.
   final double sharesPerQuote;
 
+  /// Contagem oficial da B3 na unidade negociada e líquida de tesouraria,
+  /// quando havia registro utilizável — adotada ou não.
+  final double? fromRegistry;
+
+  /// Dia da consulta ao registro, quando [fromRegistry] existe.
+  final DateTime? registryAsOf;
+
   const QuotedShares({
     required this.count,
     required this.source,
     required this.fromMarketCap,
     required this.fromStatements,
     required this.sharesPerQuote,
+    this.fromRegistry,
+    this.registryAsOf,
   });
+
+  /// Cópia adotando a contagem oficial.
+  QuotedShares _comOficial(double oficial, DateTime consulta) => QuotedShares(
+        count: oficial,
+        source: QuotedSharesSource.official,
+        fromMarketCap: fromMarketCap,
+        fromStatements: fromStatements,
+        sharesPerQuote: sharesPerQuote,
+        fromRegistry: oficial,
+        registryAsOf: consulta,
+      );
+
+  /// Cópia registrando a contagem oficial que **não** foi adotada.
+  QuotedShares _comOficialRecusada(double oficial, DateTime consulta) =>
+      QuotedShares(
+        count: count,
+        source: source,
+        fromMarketCap: fromMarketCap,
+        fromStatements: fromStatements,
+        sharesPerQuote: sharesPerQuote,
+        fromRegistry: oficial,
+        registryAsOf: consulta,
+      );
 
   /// `true` quando as duas candidatas divergem além da banda de conciliação.
   bool get diverge {
@@ -429,6 +505,8 @@ abstract final class ValuationCascade {
       marketPrice: inputs.marketPrice,
       sharesPerQuote: sharesPerQuote,
       published: published,
+      official: inputs.officialShares,
+      asOf: inputs.asOf,
     );
     if (divisor == null) {
       const message = 'Nenhuma contagem de papéis utilizável: a ponte por papel '
@@ -451,7 +529,37 @@ abstract final class ValuationCascade {
       );
     }
 
-    if (divisor.diverge) {
+    if (divisor.source == QuotedSharesSource.official) {
+      final oficial = divisor.fromRegistry!;
+      final discordantes = [
+        if (divisor.fromMarketCap != null &&
+            _razao(divisor.fromMarketCap!, oficial) >
+                FundamentalsSnapshot.reconciliationBand)
+          '${_r(divisor.fromMarketCap!, 0)} implícitas no valor de mercado',
+        if (divisor.fromStatements != null &&
+            _razao(divisor.fromStatements!, oficial) >
+                FundamentalsSnapshot.reconciliationBand)
+          '${_r(divisor.fromStatements!, 0)} conciliadas pelas demonstrações',
+      ];
+      if (discordantes.isNotEmpty) {
+        warnings.add(
+          'A contagem oficial da B3, de ${_fmt(divisor.registryAsOf!)}, é de '
+          '${_r(oficial, 0)} papéis líquidos de tesouraria, e a fonte de '
+          'preços diverge dela além da banda de conciliação: '
+          '${discordantes.join(' e ')}. Foi adotada a oficial.',
+        );
+      }
+    } else if (divisor.fromRegistry != null) {
+      warnings.add(
+        'A contagem oficial da B3 é de ${_fmt(divisor.registryAsOf!)}, mais '
+        'antiga que $officialSharesMaxAgeDays dias, e diverge das duas '
+        'contagens da fonte — o que um evento de ações depois da consulta '
+        'explicaria. Ela não foi usada, e a ponte por papel seguiu a regra da '
+        'fonte.',
+      );
+    }
+
+    if (divisor.diverge && divisor.source != QuotedSharesSource.official) {
       warnings.add(
         'As contagens de papéis da fonte divergem por '
         '${divisor.divergence!.toStringAsFixed(2)}x: '
@@ -684,6 +792,96 @@ abstract final class ValuationCascade {
   ///
   /// Devolve `null` quando nenhuma das duas contagens é utilizável.
   static QuotedShares? quotedShares({
+    required FundamentalsSnapshot latest,
+    required double marketPrice,
+    required double sharesPerQuote,
+    List<FundamentalsSnapshot> published = const [],
+    OfficialShareCount? official,
+    DateTime? asOf,
+  }) {
+    final daFonte = _quotedSharesDaFonte(
+      latest: latest,
+      marketPrice: marketPrice,
+      sharesPerQuote: sharesPerQuote,
+      published: published,
+    );
+    final oficial = _oficialNaUnidade(latest, official, sharesPerQuote, asOf);
+    if (oficial == null) return daFonte;
+    final consulta = official!.asOf;
+    if (daFonte == null) {
+      return QuotedShares(
+        count: oficial,
+        source: QuotedSharesSource.official,
+        fromMarketCap: null,
+        fromStatements: null,
+        sharesPerQuote: sharesPerQuote,
+        fromRegistry: oficial,
+        registryAsOf: consulta,
+      );
+    }
+    final idade = asOf == null
+        ? 0
+        : DateTime.utc(asOf.year, asOf.month, asOf.day)
+            .difference(
+                DateTime.utc(consulta.year, consulta.month, consulta.day))
+            .inDays;
+    bool concorda(double? c) {
+      if (c == null || c <= 0) return false;
+      final d = c >= oficial ? c / oficial : oficial / c;
+      return d <= FundamentalsSnapshot.reconciliationBand;
+    }
+
+    // Registro recente arbitra sozinho. Registro antigo só arbitra quando
+    // concorda com alguma das contagens da fonte: um evento de ações depois
+    // da consulta o deixaria defasado por um fator, e a fonte já o refletiria.
+    if (idade <= officialSharesMaxAgeDays ||
+        concorda(daFonte.fromMarketCap) ||
+        concorda(daFonte.fromStatements)) {
+      return daFonte._comOficial(oficial, consulta);
+    }
+    return daFonte._comOficialRecusada(oficial, consulta);
+  }
+
+  /// Idade máxima, em dias, em que o registro oficial arbitra sozinho.
+  ///
+  /// O registro é consultado quando o pacote do aplicativo é gerado. Um mês
+  /// cobre um ciclo de build; mais velho que isso, ele só vale quando concorda
+  /// com alguma das contagens da fonte — ver [quotedShares].
+  static const int officialSharesMaxAgeDays = 31;
+
+  /// A contagem oficial na unidade negociada e líquida de tesouraria, ou
+  /// `null` quando não há registro utilizável **na data**.
+  ///
+  /// **Nunca olha para a frente:** um registro consultado depois de [asOf] não
+  /// existia na avaliação, e é por isso que coorte de backtest não o usa.
+  ///
+  /// **A tesouraria sai pela fração, e só por ela.** O total da B3 inclui as
+  /// ações em tesouraria — conferido contra o capital integralizado declarado
+  /// à CVM em 260 de 293 emissores —, e ação em tesouraria não tem direito ao
+  /// patrimônio. A contagem absoluta da CVM não serve aqui: vem em unidade ou
+  /// em milhar sem dizer qual (decisão 70); a fração é invariante.
+  static double? _oficialNaUnidade(
+    FundamentalsSnapshot latest,
+    OfficialShareCount? official,
+    double sharesPerQuote,
+    DateTime? asOf,
+  ) {
+    if (official == null) return null;
+    if (!official.total.isFinite || official.total <= 0) return null;
+    if (asOf != null) {
+      final c = DateTime.utc(
+          official.asOf.year, official.asOf.month, official.asOf.day);
+      final a = DateTime.utc(asOf.year, asOf.month, asOf.day);
+      if (c.isAfter(a)) return null;
+    }
+    final f = latest.treasuryFraction;
+    final liquida = (f != null && f.isFinite && f > 0 && f < 1)
+        ? (official.total * (1 - f)).roundToDouble()
+        : official.total;
+    return liquida / sharesPerQuote;
+  }
+
+  static QuotedShares? _quotedSharesDaFonte({
     required FundamentalsSnapshot latest,
     required double marketPrice,
     required double sharesPerQuote,
@@ -1280,14 +1478,27 @@ abstract final class ValuationCascade {
     // de determinismo de ponto flutuante para decidir se um aviso aparece. A
     // banda de 1e-7 é muito menor que qualquer diferença de taxa que valha ser
     // declarada (0,00001 p.p.) e maior que qualquer ruído de IEEE-754.
-    if ((desconto - descontoTerminal).abs() > 1e-7) {
+    final curvaDeJuros = inputs.riskFreeCurve;
+    if (curvaDeJuros != null) {
+      final ref = curvaDeJuros.referenceDate;
+      final fw = curvaDeJuros.annualForwards(inputs.projectionYears);
+      local.add(
+        'A taxa livre de risco segue a curva dos títulos prefixados do Tesouro '
+        'de ${ref.day.toString().padLeft(2, '0')}/'
+        '${ref.month.toString().padLeft(2, '0')}/${ref.year}: '
+        '${_pct(fw.first)} a.a. no primeiro ano, ${_pct(fw.last)} a.a. no ano '
+        '${inputs.projectionYears} e ${_pct(inputs.terminalRiskFreeRate)} a.a. '
+        'na perpetuidade. É a taxa que o mercado de títulos atribui a cada '
+        'prazo, e não uma previsão do motor.',
+      );
+    } else if ((desconto - descontoTerminal).abs() > 1e-7) {
       local.add(
         'O desconto parte de ${_pct(desconto)} a.a. no primeiro ano e converge '
         'linearmente para ${_pct(descontoTerminal)} a.a. no ano '
         '${inputs.projectionYears}, que é a taxa da perpetuidade. A taxa livre '
         'de risco vai de ${_pct(inputs.capm.riskFreeRate)} para '
-        '${_pct(inputs.terminalRiskFreeRate)}: o modelo não tem curva de juros, '
-        'e descontar perpetuidade pelo CDI de um dia casaria durações '
+        '${_pct(inputs.terminalRiskFreeRate)}: sem curva de juros observada, '
+        'descontar perpetuidade pelo CDI de um dia casaria durações '
         'incompatíveis.',
       );
     }
@@ -1491,14 +1702,18 @@ abstract final class ValuationCascade {
         (lane == ValuationLane.firm || !ehFinanceira);
     if (resolveTaxas) {
       final n = inputs.projectionYears;
-      // Caminho da taxa livre de risco: o mesmo decaimento linear que a
-      // estrutura a termo da decisão 31 já aplica.
-      final rfPath = <double>[
-        for (var tAno = 1; tAno <= n; tAno++)
-          inputs.capm.riskFreeRate -
-              (inputs.capm.riskFreeRate - inputs.terminalRiskFreeRate) *
-                  (n <= 1 ? 1.0 : (tAno - 1) / (n - 1)),
-      ];
+      // Caminho da taxa livre de risco. Com curva observada, o forward de um
+      // ano de cada ano da projeção (decisão 74); sem ela, o decaimento linear
+      // de dois pontos da decisão 31.
+      final curva = inputs.riskFreeCurve;
+      final rfPath = curva != null
+          ? curva.annualForwards(n)
+          : <double>[
+              for (var tAno = 1; tAno <= n; tAno++)
+                inputs.capm.riskFreeRate -
+                    (inputs.capm.riskFreeRate - inputs.terminalRiskFreeRate) *
+                        (n <= 1 ? 1.0 : (tAno - 1) / (n - 1)),
+            ];
       final kd = latest.costOfDebt;
       // A dívida por papel usa a mesma contagem que forma a cotação, que é a
       // que o preço justo da via do acionista carrega. Ver [quotedShares].
@@ -2089,7 +2304,9 @@ abstract final class ValuationCascade {
     if (growthOrigin != GrowthOrigin.fundamental) {
       caveats.add(ValuationCaveat.crescimentoNaoIdentificado);
     }
-    if (divisor.diverge) caveats.add(ValuationCaveat.escalaIncerta);
+    if (divisor.diverge && divisor.source != QuotedSharesSource.official) {
+      caveats.add(ValuationCaveat.escalaIncerta);
+    }
     if (baseFactor > ValuationDiagnostics.baseFactorLimit ||
         baseFactor < 1 / ValuationDiagnostics.baseFactorLimit) {
       caveats.add(ValuationCaveat.baseNormalizadaForte);
@@ -2179,7 +2396,12 @@ abstract final class ValuationCascade {
   }) {
     final capm = capmOverride ?? inputs.capm;
     final debt = latest.totalDebt;
-    final equity = latest.marketCap ?? (divisor.count * inputs.marketPrice);
+    // O peso do capital próprio é o valor de mercado **pelo divisor da ponte**,
+    // e não o `marketCap` da fonte (decisão 83). Quando o divisor é a contagem
+    // implícita no valor de mercado, os dois são o mesmo número; quando a
+    // fonte erra a contagem — a MILS3 com R$ 762 mil de capitalização —, o
+    // divisor já foi arbitrado, e o WACC não pode readquirir o erro.
+    final equity = divisor.count * inputs.marketPrice;
     // O observado entra apenas como **conferência**: desde a decisão 31 o Kd
     // aplicado é `Rf + spread(cobertura)`, e como `capm` aqui pode ser o de
     // equilíbrio, o custo da dívida do terminal decai junto com a taxa livre de
@@ -2493,6 +2715,8 @@ abstract final class ValuationCascade {
     );
   }
 
+  static double _razao(double a, double b) => a >= b ? a / b : b / a;
+
   static void _auditQuotedShares(
     AuditTransaction? audit,
     FundamentalsSnapshot latest,
@@ -2517,6 +2741,9 @@ abstract final class ValuationCascade {
             : _r(divisor.fromStatements!, 0),
         'divergência (x)':
             divisor.divergence == null ? null : _r(divisor.divergence!, 3),
+        'N oficial da B3, líquido de tesouraria': divisor.fromRegistry == null
+            ? null
+            : _r(divisor.fromRegistry!, 0),
       },
       steps: [
         'Passo 1: contagem implícita no valor de mercado → '
@@ -2525,6 +2752,9 @@ abstract final class ValuationCascade {
             'negociada → ${_r(divisor.fromStatements ?? 0, 0)}',
         'Passo 3: as duas ${divisor.diverge ? 'divergem além da banda de ${FundamentalsSnapshot.reconciliationBand}x; adotada a maior, que é o sentido conservador do erro' : 'concordam dentro da banda de ${FundamentalsSnapshot.reconciliationBand}x; adotada a do mercado'} → '
             '${divisor.source.label}',
+        if (divisor.fromRegistry != null)
+          'Passo 4: registro oficial da B3 de ${_fmt(divisor.registryAsOf!)} → '
+              '${divisor.source == QuotedSharesSource.official ? 'adotado; ele arbitra a divergência da fonte' : 'recusado; antigo demais e sem concordar com a fonte'}',
       ],
       result: _r(divisor.count, 0).toDouble(),
       unit: 'papéis na unidade negociada',

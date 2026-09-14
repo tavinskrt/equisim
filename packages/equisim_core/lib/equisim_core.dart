@@ -34,6 +34,7 @@ export 'src/entities/price_series.dart';
 export 'src/entities/valuation.dart';
 
 // --- Recorte temporal ---
+export 'src/time/brazilian_calendar.dart';
 export 'src/time/point_in_time_view.dart';
 
 // --- Serviços de domínio ---
@@ -50,6 +51,11 @@ export 'src/services/portfolio/sector_concentration.dart';
 export 'src/services/valuation/capital_base.dart';
 export 'src/services/cvm/cvm_bridge.dart';
 export 'src/services/cvm/fundamentals_merge.dart';
+export 'src/services/cvm/cvm_document_codec.dart';
+export 'src/services/cvm/cvm_series.dart';
+export 'src/services/cvm/trailing_twelve_months.dart';
+export 'src/services/b3/b3_registry.dart';
+export 'src/services/b3/corporate_events.dart';
 export 'src/services/cvm/cvm_chart.dart';
 export 'src/services/valuation/concession_sectors.dart';
 export 'src/services/valuation/cyclical_sectors.dart';
@@ -61,6 +67,7 @@ export 'src/services/valuation/cost_of_capital.dart';
 export 'src/services/valuation/dcf.dart';
 export 'src/services/valuation/growth_estimator.dart';
 export 'src/services/valuation/scenario_engine.dart';
+export 'src/services/valuation/yield_curve.dart';
 
 // --- Casos de uso ---
 export 'src/usecases/resolve_beta_prior.dart';

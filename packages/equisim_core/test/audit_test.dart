@@ -45,6 +45,52 @@ ValuationInputs _inputs(Ticker ticker) => ValuationInputs(
 void main() {
   final ticker = Ticker.parse('PETR4');
 
+  test('o WACC pondera o capital próprio pelo divisor, e não pelo VM da fonte '
+      '— decisão 83', () {
+    // Sem beta desalavancado, a taxa sai do WACC estático. Com o valor de
+    // mercado da fonte 2,6x menor que o real — o erro de contagem que a ponte
+    // arbitra —, o peso do capital próprio não pode readquirir o erro: o
+    // divisor é conciliado pelas demonstrações, e o WACC tem de ser o mesmo do
+    // caso consistente.
+    final consistente = ValuationCascade.evaluate(_inputs(ticker)).unwrap();
+    final corrompido = ValuationCascade.evaluate(ValuationInputs(
+      ticker: ticker,
+      asOf: DateTime(2026, 8, 20),
+      fundamentals: [
+        for (final s in _history(ticker))
+          FundamentalsSnapshot(
+            ticker: s.ticker,
+            fiscalPeriodEnd: s.fiscalPeriodEnd,
+            netIncome: s.netIncome,
+            ebit: s.ebit,
+            ebitda: s.ebitda,
+            incomeBeforeTax: s.incomeBeforeTax,
+            incomeTaxExpense: s.incomeTaxExpense,
+            interestExpense: s.interestExpense,
+            operatingCashFlow: s.operatingCashFlow,
+            freeCashFlow: s.freeCashFlow,
+            shortTermDebt: s.shortTermDebt,
+            longTermDebt: s.longTermDebt,
+            cash: s.cash,
+            nopat: s.nopat,
+            sharesOutstanding: s.sharesOutstanding,
+            sharesOutstandingAsOf: s.sharesOutstandingAsOf,
+            marketCap: 20000.0 / 2.6,
+            bookValuePerShare: s.bookValuePerShare,
+            enterpriseToEbitda: s.enterpriseToEbitda,
+          ),
+      ],
+      marketPrice: 20.0,
+      capm: const CapmInputs(
+        riskFreeRate: 0.105,
+        beta: 1.2,
+        marketPremium: 0.055,
+      ),
+      projectionYears: 5,
+    )).unwrap();
+    expect(corrompido.discountRate, closeTo(consistente.discountRate, 1e-12));
+  });
+
   setUp(AuditRecorder.detach);
   tearDown(AuditRecorder.detach);
 

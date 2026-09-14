@@ -208,11 +208,19 @@ class BrapiDatasource {
     // `sharesOutstanding`, `marketCap` e `enterpriseToEbitda` descrevem o
     // **hoje**, não o exercício; sem eles não há valor por ação nem múltiplo
     // de saída.
+    //
+    // **Falha aqui também reprova a busca** (decisão 77), pela mesma razão da
+    // decisão 68 e com consequência pior: sem o corrente, as linhas anuais
+    // ficam com o próprio `marketCap` — o inflado pelo fator da unit, descrito
+    // logo abaixo — e com a contagem do exercício no lugar da de hoje. Isso
+    // saía como `Ok` e ia para o cache. Resposta 200 sem dado continua
+    // passando: é ausência declarada pela fonte, e não falha.
     final current = await client.getJson(
       _url('/v2/stocks/statistics'),
       query: {'symbols': ticker.value, 'mode': 'current'},
     );
-    final currentData = current.isOk ? BrapiJson.firstData(current.unwrap()) : null;
+    if (current.isErr) return Err(current.failureOrNull!);
+    final currentData = BrapiJson.firstData(current.unwrap());
 
     final snapshots = <FundamentalsSnapshot>[];
     for (final entry in merged.entries) {
@@ -243,6 +251,18 @@ class BrapiDatasource {
         if (currentData?['marketCap'] != null)
           'marketCap': currentData!['marketCap'],
       };
+      // **Sem snapshot corrente, os campos de hoje ficam ausentes** — e não
+      // com o valor da linha anual. A resposta vazia é ausência declarada, e
+      // não falha (decisão 77); mas o `marketCap` da linha anual é o do fim do
+      // exercício, e o inflado pela unit nas units, e a contagem é a do
+      // exercício, que já está em `sharesOutstandingAsOf`. Nenhum descreve
+      // hoje, e ausência não é o valor errado.
+      if (currentData == null) {
+        fields
+          ..remove('sharesOutstanding')
+          ..remove('enterpriseToEbitda')
+          ..remove('marketCap');
+      }
       snapshots.add(
         BrapiFundamentalsDto(fiscalPeriodEnd: date, fields: fields)
             .toDomain(ticker),

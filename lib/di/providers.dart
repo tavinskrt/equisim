@@ -5,6 +5,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:equisim_core/equisim_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,8 +16,12 @@ import '../data/datasources/local/cache_database.dart';
 import '../data/datasources/remote/bcb_datasource.dart';
 import '../data/datasources/remote/brapi_datasource.dart';
 import '../data/network/api_client.dart';
+import '../data/datasources/remote/tesouro_datasource.dart';
+import '../data/repositories/b3_registry_repository.dart';
+import '../data/repositories/cvm_fundamentals_repository.dart';
 import '../data/repositories/market_repositories.dart';
 import '../data/repositories/portfolio_repository.dart';
+import '../data/repositories/risk_free_curve_repository.dart';
 
 /// Raiz de composição.
 ///
@@ -147,12 +152,75 @@ final priceRepositoryProvider = Provider<PriceRepository>(
   ),
 );
 
+/// Caminho do pacote da CVM empacotado com o aplicativo (item A1.9).
+///
+/// Gerado por `tool/cvm_empacotar.dart` e versionado (decisão 80). Ausente, a
+/// avaliação segue só com a fonte de mercado, e a ressalva diz isso — ver
+/// [cvmCoverageNoteProvider].
+const String cvmPackageAsset = 'assets/cvm/documentos.json';
+
 final fundamentalsRepositoryProvider = Provider<FundamentalsRepository>(
-  (ref) => FundamentalsRepositoryImpl(
-    remote: ref.watch(brapiDatasourceProvider),
-    cache: ref.watch(cacheDatabaseProvider),
+  (ref) => CvmFundamentalsRepository(
+    mercado: FundamentalsRepositoryImpl(
+      remote: ref.watch(brapiDatasourceProvider),
+      cache: ref.watch(cacheDatabaseProvider),
+    ),
+    carregarPacote: () => rootBundle.loadString(cvmPackageAsset),
+    // A data da avaliação é a do dia, e a camada de aplicativo é o lugar de
+    // perguntá-la: o núcleo recebe a data pronta.
+    hoje: DateTime.now,
   ),
 );
+
+/// A ressalva de cobertura da CVM para a avaliação de um ativo, ou `null`.
+///
+/// Só existe quando o repositório de fundamentos é o da CVM: um teste que o
+/// substitui por um falso não ganha ressalva de pacote que ele não usa.
+final cvmCoverageNoteProvider =
+    FutureProvider.family<String?, Ticker>((ref, ticker) async {
+  final repo = ref.watch(fundamentalsRepositoryProvider);
+  return repo is CvmFundamentalsRepository ? repo.coverageNote(ticker) : null;
+});
+
+/// Caminho do registro de emissores da B3 empacotado (item A3.3).
+const String b3RegistryAsset = 'assets/b3/emissores.json';
+
+/// Caminho das cotações recentes do Tesouro empacotadas (item A2.1).
+const String tesouroQuotesAsset = 'assets/tesouro/curva.json';
+
+final b3RegistryRepositoryProvider = Provider<B3RegistryRepository>(
+  (ref) => B3RegistryRepository(
+    carregarPacote: () => rootBundle.loadString(b3RegistryAsset),
+  ),
+);
+
+/// Contagem oficial de ações do emissor de um ativo, ou `null` (decisão 83).
+final officialSharesProvider =
+    FutureProvider.family<OfficialShareCount?, Ticker>((ref, ticker) =>
+        ref.watch(b3RegistryRepositoryProvider).officialSharesFor(ticker));
+
+final tesouroDatasourceProvider = Provider<TesouroDatasource>(
+  (ref) => TesouroDatasource(ref.watch(apiClientProvider)),
+);
+
+final riskFreeCurveRepositoryProvider = Provider<RiskFreeCurveRepository>(
+  (ref) => RiskFreeCurveRepository(
+    remote: ref.watch(tesouroDatasourceProvider),
+    carregarPacote: () => rootBundle.loadString(tesouroQuotesAsset),
+  ),
+);
+
+/// Curva de juros da avaliação de hoje, ou `null` — e aí a cascata recua para
+/// os dois pontos do CDI, declarando (decisão 84).
+final riskFreeCurveProvider = FutureProvider<YieldCurve?>((ref) async {
+  try {
+    return await ref
+        .watch(riskFreeCurveRepositoryProvider)
+        .curveAt(DateTime.now());
+  } on Object {
+    return null;
+  }
+});
 
 final benchmarkRepositoryProvider = Provider<BenchmarkRepository>(
   (ref) => BenchmarkRepositoryImpl(ref.watch(brapiDatasourceProvider)),

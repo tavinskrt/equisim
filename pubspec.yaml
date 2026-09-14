@@ -51,5 +51,16 @@ flutter:
     # Lista de ativos sem continuidade operacional, lida pela Porta 0. A fonte
     # de dados não publica recuperação judicial; ver decisão 25.
     - config/distressed_tickers.json
+    # Demonstrações da CVM do universo, no formato compacto do núcleo.
+    # documentos.json é gerado por tool/cvm_empacotar.dart e VERSIONADO
+    # (decisão 80): regerá-lo exige a base de 750 MB, que não vem num clone.
+    # O teste test/data/cvm_package_asset_test.dart reprova a suíte se ele
+    # faltar ou não for legível; no aplicativo, a ausência vira ressalva.
+    - assets/cvm/
+    # Registro de emissores da B3 — contagem oficial de ações e eventos — e
+    # cotações recentes do Tesouro, gerados por tool/b3_empacotar.dart e
+    # tool/curva_empacotar.dart e versionados (decisões 83 e 84).
+    - assets/b3/
+    - assets/tesouro/
 
 

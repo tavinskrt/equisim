@@ -104,8 +104,54 @@ abstract final class FundamentalsMerge {
     // preenchê-lo; a regra fica **aqui** para que outra montagem não o
     // reintroduza, que é a lição do veto de `CvmBridge.semPonte`.
     'sharesOutstandingAsOf',
+    // O VPA **da CVM** também nunca entra. Desde a decisão 81 o VPA do
+    // exercício mesclado é derivado — PL da CVM sobre a contagem do mercado —,
+    // e só recua para o do mercado quando a CVM não traz o PL.
+    'bookValuePerShare',
+    // **LPA também.** A conta `3.99` da CVM vem **exatamente zero em 14.684 de
+    // 15.206** exercícios ingeridos (96,6%). Zero não é nulo, e a regra "CVM
+    // vence" o preferia ao LPA do mercado — o que desligava em silêncio o
+    // árbitro `lucro ÷ LPA` de `reconciledShares`, que recusa LPA nulo.
+    'earningsPerShare',
+  };
+
+  /// O que o mercado **empresta** a um ponto de outra data (decisão 78).
+  ///
+  /// - **O que descreve hoje**: valor de mercado, contagem corrente e
+  ///   EV/EBITDA, que a fonte sobrescreve em toda linha com o snapshot
+  ///   corrente. Não têm janela.
+  /// - **O par por ação do último encerramento**: VPA e contagem do exercício.
+  ///   São estoque, e não fluxo, e entram **juntos** — é do produto dos dois que
+  ///   a cascata reconstitui o patrimônio (`equityBookValue`), e metade do par
+  ///   de uma data com metade de outra mistura escalas. Sem eles a cascata não
+  ///   tem base de patrimônio e recusa o ativo como insolvente: medido em
+  ///   04/09/2024, 106 de 113 avaliados perdidos na série ancorada.
+  ///
+  /// **O preço disso é declarado:** num ponto de junho, a base de patrimônio é
+  /// a do dezembro anterior. A saída certa é a cascata ler o patrimônio da CVM
+  /// na data do ponto — item A1.11 do plano.
+  ///
+  /// **Fluxo nunca é emprestado**, e o LPA é fluxo por ação: com ele, o
+  /// árbitro `lucro ÷ LPA` dividiria o lucro de uma janela pelo LPA de outra.
+  static const Set<String> emprestaveis = {
+    'marketCap',
+    'sharesOutstanding',
+    'enterpriseToEbitda',
+    'sharesOutstandingAsOf',
     'bookValuePerShare',
   };
+
+  /// Folga, em dias, para dois exercícios serem da mesma janela. Cobre o
+  /// fevereiro bissexto — a CAML3 encerra em 28 ou 29 — e fim de mês em dia
+  /// não útil.
+  static const int folgaDeJanelaDias = 4;
+
+  /// `true` quando os dois exercícios terminam na mesma data, dentro da folga.
+  static bool mesmaJanela(DateTime a, DateTime b) {
+    final da = DateTime.utc(a.year, a.month, a.day);
+    final db = DateTime.utc(b.year, b.month, b.day);
+    return da.difference(db).inDays.abs() <= folgaDeJanelaDias;
+  }
 
   /// Mescla [cvm] sobre [mercado], preferindo a CVM onde ela tem o campo.
   ///
@@ -116,6 +162,13 @@ abstract final class FundamentalsMerge {
   /// **A preferência é por campo, não por exercício.** A CVM pode ter o lucro
   /// e não ter o EBITDA; o mercado pode ter o valor de mercado e não ter o
   /// ativo total. Escolher a fonte inteira descartaria o que a outra sabe.
+  ///
+  /// **Mas só completa com exercício da mesma janela** (decisão 78). Um ponto
+  /// de doze meses até junho completado pelo exercício de dezembro anterior
+  /// levaria a despesa de juros de outra janela para o custo da dívida, e o
+  /// LPA de outro lucro para o árbitro `lucro ÷ LPA` da contagem. Quando as
+  /// datas diferem além de [folgaDeJanelaDias], do mercado vêm só os campos
+  /// [emprestaveis]; o resto fica com a CVM, ou ausente.
   ///
   /// Devolve `null` quando as duas faltam.
   static MergedFundamentals? merge({
@@ -131,9 +184,12 @@ abstract final class FundamentalsMerge {
     }
 
     final origem = <String, FieldSource>{};
+    final completa = mesmaJanela(cvm.fiscalPeriodEnd, mercado.fiscalPeriodEnd);
 
     /// Escolhe entre as duas e registra de onde veio.
-    double? campo(String nome, double? daCvm, double? doMercado) {
+    double? campo(String nome, double? daCvm, double? doMercadoBruto) {
+      final doMercado =
+          completa || emprestaveis.contains(nome) ? doMercadoBruto : null;
       if (somenteDeMercado.contains(nome)) {
         if (doMercado != null) origem[nome] = FieldSource.mercado;
         return doMercado;
@@ -144,6 +200,29 @@ abstract final class FundamentalsMerge {
       }
       if (doMercado != null) origem[nome] = FieldSource.mercado;
       return doMercado;
+    }
+
+    // **A base de patrimônio é o PL da CVM** (decisão 81). A cascata a
+    // reconstitui como `VPA × contagem do exercício`, e a contagem continua
+    // sendo a do mercado — a da CVM não tem escala (decisão 70). O VPA é que
+    // passa a ser derivado: `PL ÷ contagem`, e o produto devolve o PL da
+    // demonstração exatamente. Medido em 14/09/2026, a base de mercado já era
+    // o PL consolidado da CVM em 99,4% dos 4.443 exercícios anuais, a 0,5%;
+    // o que muda é o resto — a HAPV3 com R$ 373 bi contra R$ 48 bi —, e o
+    // ponto de doze meses até junho, que deixa de levar o PL de dezembro.
+    final contagemDoExercicio = campo('sharesOutstandingAsOf',
+        cvm.sharesOutstandingAsOf, mercado.sharesOutstandingAsOf);
+    final plDaCvm = cvm.totalStockholderEquity;
+    final double? vpa;
+    if (plDaCvm != null &&
+        plDaCvm.isFinite &&
+        contagemDoExercicio != null &&
+        contagemDoExercicio > 0) {
+      vpa = plDaCvm / contagemDoExercicio;
+      origem['bookValuePerShare'] = FieldSource.derivado;
+    } else {
+      vpa = campo(
+          'bookValuePerShare', cvm.bookValuePerShare, mercado.bookValuePerShare);
     }
 
     final montado = FundamentalsSnapshot(
@@ -169,8 +248,7 @@ abstract final class FundamentalsMerge {
       longTermDebt: campo('longTermDebt', cvm.longTermDebt, mercado.longTermDebt),
       totalStockholderEquity: campo('totalStockholderEquity',
           cvm.totalStockholderEquity, mercado.totalStockholderEquity),
-      bookValuePerShare: campo(
-          'bookValuePerShare', cvm.bookValuePerShare, mercado.bookValuePerShare),
+      bookValuePerShare: vpa,
       propertyPlantEquipment: campo('propertyPlantEquipment',
           cvm.propertyPlantEquipment, mercado.propertyPlantEquipment),
       intangibleAssets:
@@ -190,8 +268,7 @@ abstract final class FundamentalsMerge {
       freeCashFlow: campo('freeCashFlow', cvm.freeCashFlow, mercado.freeCashFlow),
       sharesOutstanding:
           campo('sharesOutstanding', cvm.sharesOutstanding, mercado.sharesOutstanding),
-      sharesOutstandingAsOf: campo('sharesOutstandingAsOf',
-          cvm.sharesOutstandingAsOf, mercado.sharesOutstandingAsOf),
+      sharesOutstandingAsOf: contagemDoExercicio,
       marketCap: campo('marketCap', cvm.marketCap, mercado.marketCap),
       enterpriseToEbitda: campo(
           'enterpriseToEbitda', cvm.enterpriseToEbitda, mercado.enterpriseToEbitda),
@@ -206,7 +283,7 @@ abstract final class FundamentalsMerge {
           'treasuryFraction', cvm.treasuryFraction, mercado.treasuryFraction),
       // A data de recebimento é da CVM por natureza: é ela que registra o
       // protocolo. Quando falta, a publicidade volta a ser presumida.
-      receiptDate: cvm.receiptDate ?? mercado.receiptDate,
+      receiptDate: cvm.receiptDate ?? (completa ? mercado.receiptDate : null),
     );
     if (montado.receiptDate != null) {
       origem['receiptDate'] =

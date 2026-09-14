@@ -453,5 +453,25 @@ void main() {
       expect(valuation.safetyPrice.reais, closeTo(80.0, 1e-9));
       expect(valuation.isUndervalued, isTrue);
     });
+
+    test('withWarnings acrescenta a ressalva e não muda número nenhum', () {
+      final base = ValuationResult(
+        ticker: Ticker.parse('PETR4'),
+        asOf: DateTime(2026, 8, 19),
+        model: ValuationModel.dcfFcff,
+        fairValue: Money.fromReais(100),
+        marketPrice: Money.fromReais(80),
+        discountRate: 0.12,
+        marginOfSafety: 0.20,
+        warnings: const ['da cascata'],
+      );
+      final com = base.withWarnings(['sem a CVM']);
+      expect(com.warnings, ['da cascata', 'sem a CVM']);
+      expect(com.fairValue, base.fairValue);
+      expect(com.discountRate, base.discountRate);
+      expect(com.marginOfSafety, base.marginOfSafety);
+      expect(identical(base.withWarnings(const []), base), isTrue);
+      expect(() => com.warnings.add('x'), throwsUnsupportedError);
+    });
   });
 }

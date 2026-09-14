@@ -1,0 +1,108 @@
+// Leitura da base ingerida (`data/cvm_exercicios.json`) para documentos do
+// núcleo.
+//
+// Compartilhado por `cvm_ligar.dart` e `cvm_empacotar.dart`: a conversão da
+// linha da ingestão para `CvmPeriodDocument` já teve dois defeitos — a contagem
+// absoluta de ações (decisão 70) e o "anual é dezembro" (decisão 72) —, e duas
+// cópias dela voltariam a divergir.
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:equisim_core/equisim_core.dart';
+
+DateTime? _data(Object? s) => s is String && s.length >= 10
+    ? DateTime.tryParse('${s.substring(0, 10)}T00:00:00Z')
+    : null;
+
+double? _n(Map<String, dynamic> e, String k) => (e[k] as num?)?.toDouble();
+
+FundamentalsSnapshot _snap(
+  Ticker t,
+  DateTime fim,
+  Map<String, dynamic> e, {
+  DateTime? recebido,
+  double? fracaoTesouraria,
+}) {
+  final ebit = _n(e, 'ebit');
+  final da = _n(e, 'depreciacaoEAmortizacao');
+  return FundamentalsSnapshot(
+    ticker: t,
+    fiscalPeriodEnd: fim,
+    receiptDate: recebido,
+    totalRevenue: _n(e, 'receita'),
+    ebit: ebit,
+    // EBITDA da própria CVM, para que o D&A dos doze meses se some junto.
+    ebitda: (ebit != null && da != null) ? ebit + da : null,
+    netIncome: _n(e, 'lucroLiquido'),
+    incomeBeforeTax: _n(e, 'resultadoAntesDosTributos'),
+    incomeTaxExpense: _n(e, 'tributos'),
+    operatingCashFlow: _n(e, 'caixaOperacional'),
+    investmentCashFlow: _n(e, 'caixaDeInvestimento'),
+    cash: _n(e, 'caixa'),
+    shortTermInvestments: _n(e, 'aplicacoesFinanceiras'),
+    shortTermDebt: _n(e, 'dividaDeCurtoPrazo'),
+    longTermDebt: _n(e, 'dividaDeLongoPrazo'),
+    totalStockholderEquity: _n(e, 'patrimonioLiquido'),
+    propertyPlantEquipment: _n(e, 'imobilizado'),
+    intangibleAssets: _n(e, 'intangivel'),
+    totalCurrentAssets: _n(e, 'ativoCirculante'),
+    currentLiabilities: _n(e, 'passivoCirculante'),
+    minorityInterest: _n(e, 'naoControladores'),
+    totalAssets: _n(e, 'ativoTotal'),
+    treasuryFraction: fracaoTesouraria,
+  );
+}
+
+/// Documentos por ticker, da base ingerida.
+///
+/// Encerra o processo com código 2 quando a base não existe, dizendo o que
+/// rodar antes.
+Map<String, List<CvmPeriodDocument>> carregarDocumentos(
+  String caminho, {
+  Set<String>? soTickers,
+}) {
+  final f = File(caminho);
+  if (!f.existsSync()) {
+    stderr.writeln('$caminho não existe. Rode antes:');
+    stderr.writeln('  dart run tool/cvm_ingerir.dart data/cvm');
+    exit(2);
+  }
+  final out = <String, List<CvmPeriodDocument>>{};
+  for (final e in (jsonDecode(f.readAsStringSync()) as List)
+      .cast<Map<String, dynamic>>()) {
+    final tickers = (e['tickers'] as List).cast<String>();
+    if (tickers.isEmpty) continue;
+    final fim = _data(e['fimDoExercicio']);
+    final ini = _data(e['inicioDoPeriodo']);
+    if (fim == null || ini == null) continue;
+    final kind =
+        e['documento'] == 'DFP' ? CvmDocumentKind.dfp : CvmDocumentKind.itr;
+
+    final integ = _n(e, 'acoesIntegralizadas');
+    final tes = _n(e, 'acoesEmTesouraria');
+    // Decisão 70: só a fração, porque a escala da contagem varia por
+    // declarante.
+    final fracao =
+        (integ != null && integ > 0 && tes != null && tes >= 0 && tes < integ)
+            ? tes / integ
+            : null;
+    final ant = e['anterior'] as Map<String, dynamic>?;
+
+    for (final t in tickers) {
+      if (soTickers != null && !soTickers.contains(t)) continue;
+      final tk = Ticker.parse(t);
+      out.putIfAbsent(t, () => []).add(CvmPeriodDocument(
+            kind: kind,
+            periodStart: ini,
+            periodEnd: fim,
+            current: _snap(tk, fim, e,
+                recebido: _data(e['recebidoEm']), fracaoTesouraria: fracao),
+            prior: ant == null
+                ? null
+                : _snap(tk, DateTime.utc(fim.year - 1, fim.month, fim.day), ant),
+            priorStart: _data(ant?['inicioDoPeriodo']),
+          ));
+    }
+  }
+  return out;
+}

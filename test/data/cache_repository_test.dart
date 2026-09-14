@@ -183,6 +183,41 @@ void main() {
       expect(result.unwrap()[ticker]!.points.length, gravada.points.length);
     });
 
+    test('ativo que o lote omite também recorre ao cache vencido', () async {
+      // Decisão 77. O recurso ao cache vencido existia só para o lote que
+      // falha inteiro. Um lote que responde e deixa um ativo de fora — série
+      // corrompida daquele papel, ou papel que a fonte deixou de devolver —
+      // fazia o ativo sumir da resposta com o histórico dele em disco.
+      final petr = Ticker.parse('PETR4');
+      final vale = Ticker.parse('VALE3');
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+
+      final ok = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: db,
+      );
+      final gravada = (await ok.dailyBatch([petr], range)).unwrap()[petr]!;
+      await db.customStatement('DELETE FROM cache_entries');
+
+      final parcial = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(bodies: {
+          '/v2/stocks/historical': '''
+{"results":[{"symbol":"VALE3","data":{"historicalDataPrice":[
+  {"date":1704157200,"close":60.0},
+  {"date":1704243600,"close":61.0}
+]}}]}''',
+        }))),
+        cache: db,
+      );
+
+      final r = (await parcial.dailyBatch([petr, vale], range)).unwrap();
+      expect(r[vale], isNotNull, reason: 'o que veio da rede continua vindo');
+      expect(r[petr]?.points.length, gravada.points.length,
+          reason: 'havia histórico em disco, e o lote não o substituiu');
+    });
+
     test('sem cache algum, a falha de rede é reportada', () async {
       // A contraprova: o fallback não pode transformar ausência de dado em
       // sucesso vazio. `cache: null` é o caminho real de quem roda onde o
@@ -230,6 +265,53 @@ void main() {
       expect(second.length, first.length);
       final withCashFlow = second.where((s) => s.operatingCashFlow != null);
       expect(withCashFlow, isNotEmpty);
+    });
+
+    test('falha da fonte recorre ao cache VENCIDO de fundamentos', () async {
+      // Desde a decisão 77, falha do snapshot corrente reprova a busca — e é
+      // este recurso que impede a reprovação de virar avaliação nenhuma para
+      // quem já tem os exercícios em disco.
+      final ticker = Ticker.parse('PETR4');
+      final ok = FundamentalsRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/statistics?symbols=PETR4&mode=history':
+              'brapi_statistics_history_petr4',
+          '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
+          '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+          '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+          '/v2/stocks/statistics?symbols=PETR4&mode=current':
+              'brapi_statistics_current_petr4',
+        }))),
+        cache: db,
+      );
+      final gravada = (await ok.history(ticker)).unwrap();
+      await db.customStatement('DELETE FROM cache_entries');
+
+      final fora = FundamentalsRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/statistics?symbols=PETR4&mode=history':
+              'brapi_statistics_history_petr4',
+          '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
+          '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+          '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+        }, failures: {
+          '/v2/stocks/statistics?symbols=PETR4&mode=current': 503,
+        }))),
+        cache: db,
+      );
+      final r = await fora.history(ticker);
+      expect(r.isOk, isTrue);
+      expect(r.unwrap().length, gravada.length);
+    });
+
+    test('sem cache, a falha da fonte é reportada', () async {
+      final fora = FundamentalsRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(
+          failures: {'/v2/stocks/statistics': 503},
+        ))),
+        cache: db,
+      );
+      expect((await fora.history(Ticker.parse('PETR4'))).isErr, isTrue);
     });
   });
 

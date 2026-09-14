@@ -117,3 +117,114 @@ exports.brapi = onRequest(
     }
   }
 );
+
+/**
+ * Cotações do dia dos títulos prefixados do Tesouro Direto (item A2.1).
+ *
+ * Existe por causa do alvo web: o arquivo do Tesouro Transparente só libera
+ * CORS para o domínio do próprio Tesouro, e o navegador não pode lê-lo. No
+ * nativo o aplicativo lê o arquivo direto e não precisa disto.
+ *
+ * Lê **só o começo** do arquivo: ele vem em ordem decrescente de data-base, e
+ * as linhas do dia mais recente estão nos primeiros quilobytes de 14,5 MB.
+ * A leitura para na primeira linha de outra data.
+ *
+ * A resposta tem o formato de `TreasuryQuotesCodec`, no núcleo Dart — mude os
+ * dois juntos: `{versao, geradoEm, cotacoes: [{tipo, vencimento, dataBase,
+ * taxa}]}`, datas `AAAA-MM-DD` e taxa em fração.
+ *
+ * Sem credencial: o dado é aberto. O cliente aponta para cá via
+ * `--dart-define=TESOURO_PROXY_URL=...`.
+ */
+const TESOURO_CATALOGO =
+  "https://www.tesourotransparente.gov.br/ckan/api/3/action/package_show" +
+  "?id=taxas-dos-titulos-ofertados-pelo-tesouro-direto";
+const PREFIXADOS = ["Tesouro Prefixado", "Tesouro Prefixado com Juros Semestrais"];
+
+function dataIso(ddmmaaaa) {
+  const p = (ddmmaaaa || "").trim().split("/");
+  if (p.length !== 3) return null;
+  return `${p[2]}-${p[1].padStart(2, "0")}-${p[0].padStart(2, "0")}`;
+}
+
+exports.tesouro = onRequest(
+  {
+    region: "southamerica-east1",
+    cors: false, // tratado manualmente, com lista de origens
+    memory: "256MiB",
+    timeoutSeconds: 60,
+  },
+  async (req, res) => {
+    applyCors(req, res);
+    if (req.method === "OPTIONS") {
+      return res.status(204).send("");
+    }
+    if (req.method !== "GET") {
+      return res.status(405).json({ error: "Somente GET é aceito." });
+    }
+
+    try {
+      const catalogo = await (await fetch(TESOURO_CATALOGO)).json();
+      const recurso = (catalogo?.result?.resources || []).find(
+        (r) => (r.format || "").toUpperCase() === "CSV" && r.url
+      );
+      if (!recurso) {
+        return res.status(502).json({ error: "O catálogo do Tesouro não lista o CSV." });
+      }
+
+      const resposta = await fetch(recurso.url);
+      if (!resposta.ok || !resposta.body) {
+        return res.status(502).json({ error: "Falha ao ler o arquivo do Tesouro." });
+      }
+
+      const leitor = resposta.body.getReader();
+      let resto = "";
+      let cabecalho = true;
+      let base = null;
+      const cotacoes = [];
+      let terminou = false;
+
+      while (!terminou) {
+        const { done, value } = await leitor.read();
+        if (done) break;
+        resto += Buffer.from(value).toString("latin1");
+        const linhas = resto.split(/\r?\n/);
+        resto = linhas.pop();
+        for (const linha of linhas) {
+          if (cabecalho) {
+            cabecalho = false;
+            continue;
+          }
+          const c = linha.split(";");
+          if (c.length < 4) continue;
+          const dataBase = dataIso(c[2]);
+          if (!dataBase) continue;
+          if (base === null) base = dataBase;
+          if (dataBase !== base) {
+            terminou = true;
+            break;
+          }
+          const taxa = parseFloat((c[3] || "").replace(",", "."));
+          if (!PREFIXADOS.includes(c[0]) || !(taxa > 0)) continue;
+          cotacoes.push({
+            tipo: c[0],
+            vencimento: dataIso(c[1]),
+            dataBase,
+            taxa: taxa / 100,
+          });
+        }
+      }
+      await leitor.cancel().catch(() => {});
+
+      if (cotacoes.length === 0) {
+        return res.status(502).json({ error: "Nenhum título prefixado na data mais recente." });
+      }
+      // O arquivo muda uma vez por dia útil.
+      res.set("Cache-Control", "public, max-age=3600, s-maxage=3600");
+      return res.json({ versao: 1, geradoEm: base, cotacoes });
+    } catch (error) {
+      console.error("Falha ao ler o Tesouro:", error.message);
+      return res.status(502).json({ error: "Falha ao contatar o Tesouro." });
+    }
+  }
+);

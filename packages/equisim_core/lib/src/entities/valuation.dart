@@ -474,6 +474,28 @@ class ValuationResult {
   List<ValuationCaveat> get caveats =>
       diagnostics?.caveats ?? const <ValuationCaveat>[];
 
+  /// O mesmo resultado, com [extra] ao fim dos avisos.
+  ///
+  /// Para o que a cascata não enxerga e quem monta a avaliação sabe — a
+  /// demonstração da CVM que faltou no pacote, por exemplo. Nenhum número
+  /// muda: só a narrativa ganha a ressalva.
+  ValuationResult withWarnings(List<String> extra) => extra.isEmpty
+      ? this
+      : ValuationResult(
+          ticker: ticker,
+          asOf: asOf,
+          model: model,
+          fairValue: fairValue,
+          marketPrice: marketPrice,
+          discountRate: discountRate,
+          marginOfSafety: marginOfSafety,
+          mode: mode,
+          discreteScenarios: discreteScenarios,
+          distribution: distribution,
+          warnings: List.unmodifiable([...warnings, ...extra]),
+          diagnostics: diagnostics,
+        );
+
   /// Preço justo já descontado da margem de segurança.
   ///
   /// É o limiar de compra: só abaixo dele o ativo é considerado descontado.

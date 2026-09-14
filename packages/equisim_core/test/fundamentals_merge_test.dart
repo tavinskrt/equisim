@@ -28,6 +28,19 @@ FundamentalsSnapshot _mercado() => FundamentalsSnapshot(
       enterpriseToEbitda: 7.5,
     );
 
+FundamentalsSnapshot _cvmSemPl() => FundamentalsSnapshot(
+      ticker: _t,
+      fiscalPeriodEnd: DateTime(2024, 12, 31),
+      netIncome: 140,
+    );
+
+FundamentalsSnapshot _mercado2() => FundamentalsSnapshot(
+      ticker: _t,
+      fiscalPeriodEnd: DateTime(2024, 12, 31),
+      bookValuePerShare: 6.18,
+      sharesOutstandingAsOf: 234178210,
+    );
+
 void main() {
   group('Mescla', () {
     test('a CVM vence no que ela publica', () {
@@ -43,6 +56,125 @@ void main() {
       final m = FundamentalsMerge.merge(cvm: _cvm(), mercado: _mercado())!;
       expect(m.snapshot.ebitda, 300);
       expect(m.provenance.of('ebitda'), FieldSource.mercado);
+    });
+
+    test('exercício de outra data não empresta fluxo — decisão 78',
+        () {
+      // Doze meses até junho de 2025 contra o dezembro de 2024 do mercado.
+      final junho = FundamentalsSnapshot(
+        ticker: _t,
+        fiscalPeriodEnd: DateTime.utc(2025, 6, 30),
+        receiptDate: DateTime.utc(2025, 8, 10),
+        ebit: 260,
+        netIncome: 150,
+      );
+      final dezembro = FundamentalsSnapshot(
+        ticker: _t,
+        fiscalPeriodEnd: DateTime.utc(2024, 12, 31),
+        receiptDate: DateTime.utc(2025, 2, 19),
+        ebitda: 300,
+        interestExpense: -40,
+        nopat: 170,
+        earningsPerShare: 1.38,
+        sharesOutstandingAsOf: 1e8,
+        bookValuePerShare: 19.5,
+        marketCap: 9e9,
+        sharesOutstanding: 1e9,
+        enterpriseToEbitda: 7.5,
+      );
+      final m = FundamentalsMerge.merge(cvm: junho, mercado: dezembro)!;
+      final s = m.snapshot;
+      expect(s.interestExpense, isNull,
+          reason: 'juros de outra janela no custo da dívida');
+      expect(s.nopat, isNull, reason: 'o NOPAT sai do EBIT desta janela');
+      expect(s.ebitda, isNull);
+      expect(s.earningsPerShare, isNull,
+          reason: 'LPA de outro lucro no árbitro lucro ÷ LPA');
+      expect(s.sharesOutstandingAsOf, 1e8,
+          reason: 'o par por ação do último encerramento é estoque, e é a '
+              'base de patrimônio da cascata');
+      expect(s.bookValuePerShare, 19.5);
+      expect(s.marketCap, 9e9, reason: 'o valor de mercado é de hoje');
+      expect(s.sharesOutstanding, 1e9);
+      expect(s.enterpriseToEbitda, 7.5);
+      expect(s.ebit, 260);
+      expect(m.provenance.of('interestExpense'), FieldSource.ausente);
+      expect(m.provenance.of('marketCap'), FieldSource.mercado);
+    });
+
+    group('A base de patrimônio é o PL da CVM — decisão 81', () {
+      test('o VPA é derivado, e o produto devolve o PL da demonstração', () {
+        final cvm = FundamentalsSnapshot(
+          ticker: _t,
+          fiscalPeriodEnd: DateTime.utc(2025, 12, 31),
+          totalStockholderEquity: 48.25e9,
+        );
+        // HAPV3: a base de mercado dava R$ 373 bi.
+        final mercado = FundamentalsSnapshot(
+          ticker: _t,
+          fiscalPeriodEnd: DateTime.utc(2025, 12, 31),
+          bookValuePerShare: 49.7,
+          sharesOutstandingAsOf: 7.507e9,
+        );
+        final m = FundamentalsMerge.merge(cvm: cvm, mercado: mercado)!;
+        expect(m.snapshot.equityBookValue, closeTo(48.25e9, 1e-3));
+        expect(m.snapshot.sharesOutstandingAsOf, 7.507e9,
+            reason: 'a contagem continua sendo a do mercado — decisão 70');
+        expect(m.provenance.of('bookValuePerShare'), FieldSource.derivado);
+      });
+
+      test('no ponto de junho, o PL é o de junho', () {
+        final junho = FundamentalsSnapshot(
+          ticker: _t,
+          fiscalPeriodEnd: DateTime.utc(2025, 6, 30),
+          totalStockholderEquity: 2100,
+        );
+        final dezembro = FundamentalsSnapshot(
+          ticker: _t,
+          fiscalPeriodEnd: DateTime.utc(2024, 12, 31),
+          bookValuePerShare: 20,
+          sharesOutstandingAsOf: 100,
+        );
+        final m = FundamentalsMerge.merge(cvm: junho, mercado: dezembro)!;
+        expect(m.snapshot.equityBookValue, closeTo(2100, 1e-9),
+            reason: 'e não os 2.000 de dezembro, que a decisão 78 declarava');
+      });
+
+      test('PL negativo continua sem base, como o VPA negativo do mercado', () {
+        final cvm = FundamentalsSnapshot(
+          ticker: _t,
+          fiscalPeriodEnd: DateTime.utc(2025, 12, 31),
+          totalStockholderEquity: -500,
+        );
+        final mercado = FundamentalsSnapshot(
+          ticker: _t,
+          fiscalPeriodEnd: DateTime.utc(2025, 12, 31),
+          bookValuePerShare: 3,
+          sharesOutstandingAsOf: 100,
+        );
+        final m = FundamentalsMerge.merge(cvm: cvm, mercado: mercado)!;
+        expect(m.snapshot.equityBookValue, isNull);
+        expect(m.snapshot.bookValuePerShare, -5);
+      });
+
+      test('sem PL na CVM, o VPA do mercado segue', () {
+        final m = FundamentalsMerge.merge(cvm: _cvmSemPl(), mercado: _mercado2())!;
+        expect(m.snapshot.bookValuePerShare, 6.18);
+        expect(m.provenance.of('bookValuePerShare'), FieldSource.mercado);
+      });
+    });
+
+    test('fevereiro bissexto é a mesma janela', () {
+      expect(
+        FundamentalsMerge.mesmaJanela(
+            DateTime.utc(2024, 2, 29), DateTime.utc(2024, 2, 28)),
+        isTrue,
+      );
+      expect(
+        FundamentalsMerge.mesmaJanela(
+            DateTime.utc(2024, 6, 30), DateTime.utc(2023, 12, 31)),
+        isFalse,
+      );
     });
 
     test('a contagem do exercício NUNCA vem da CVM — decisão 70', () {

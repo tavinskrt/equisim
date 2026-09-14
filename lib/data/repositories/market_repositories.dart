@@ -93,9 +93,19 @@ class PriceRepositoryImpl implements PriceRepository {
       return out.isEmpty ? Err(fetched.failureOrNull!) : Ok(out);
     }
 
-    for (final entry in fetched.unwrap().entries) {
+    final vieram = fetched.unwrap();
+    for (final entry in vieram.entries) {
       await _persist(entry.key, entry.value);
       out[entry.key] = _slice(entry.value, range);
+    }
+    // O lote pode responder e deixar um ativo de fora — série corrompida
+    // daquele papel, papel que a fonte deixou de devolver. Para ele a rede
+    // falhou do mesmo jeito, e o histórico em disco serve pela mesma razão
+    // do caminho acima (decisão 77).
+    for (final ticker in missing) {
+      if (vieram.containsKey(ticker)) continue;
+      final stale = await _seriesFromCache(ticker, range);
+      if (stale != null) out[ticker] = stale;
     }
     return Ok(out);
   }

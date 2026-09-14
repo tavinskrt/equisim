@@ -146,6 +146,47 @@ class ApiClient {
     }
   }
 
+  /// Lê um arquivo de texto **em fluxo**, linha a linha, e para quando [stop]
+  /// devolve `true` — sem baixar o resto.
+  ///
+  /// Existe para o arquivo de taxas do Tesouro, que tem 14,5 MB e traz o dia
+  /// mais recente nas primeiras linhas (item A2.1). A linha que dispara a
+  /// parada **não** entra no resultado.
+  Future<Result<List<String>>> readLinesUntil(
+    String url, {
+    required bool Function(String line) stop,
+    Encoding encoding = latin1,
+  }) async {
+    final cancelar = CancelToken();
+    try {
+      final response = await _dio.get<ResponseBody>(
+        url,
+        options: Options(responseType: ResponseType.stream),
+        cancelToken: cancelar,
+      );
+      final status = response.statusCode ?? 0;
+      final corpo = response.data;
+      if (status != 200 || corpo == null) {
+        return Err(_failureFor(status, ''));
+      }
+      final linhas = <String>[];
+      await for (final linha in corpo.stream
+          .cast<List<int>>()
+          .transform(encoding.decoder)
+          .transform(const LineSplitter())) {
+        if (stop(linha)) break;
+        linhas.add(linha);
+      }
+      if (!cancelar.isCancelled) cancelar.cancel('leitura encerrada');
+      return Ok(linhas);
+    } on DioException catch (e) {
+      if (CancelToken.isCancel(e)) {
+        return const Err(ComputationFailure('Leitura cancelada.'));
+      }
+      return Err(_failureForDio(e));
+    }
+  }
+
   Failure _failureFor(int status, String body) => switch (status) {
         401 || 403 => const InvalidInput(
             'Credencial da brapi inválida, ausente ou sem permissão para este '

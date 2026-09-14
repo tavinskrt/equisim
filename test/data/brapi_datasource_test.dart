@@ -278,6 +278,56 @@ void main() {
       expect(r.isErr, isTrue);
     });
 
+    test('e vale para o snapshot corrente, que as linhas anuais não substituem',
+        () async {
+      // Decisão 77. Sem o corrente, as linhas anuais ficavam com o PRÓPRIO
+      // `marketCap` — o calculado por ações × preço da unit, que inflava o
+      // SAPR11 de R$ 10,1 bi para R$ 59,9 bi — e com a contagem do exercício
+      // no lugar da de hoje. O resultado era `Ok`, ia para o cache e valia
+      // pelo prazo inteiro dele.
+      final datasource = BrapiDatasource(clientWith(FixtureAdapter(
+        routes: {
+          '/v2/stocks/statistics?symbols=PETR4&mode=history':
+              'brapi_statistics_history_petr4',
+          '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
+          '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+          '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+        },
+        failures: {'/v2/stocks/statistics?symbols=PETR4&mode=current': 503},
+      )));
+
+      final r = await datasource.fundamentalsHistory(Ticker.parse('PETR4'));
+      expect(r.isErr, isTrue,
+          reason: 'sem o corrente, valor de mercado e contagem descrevem o '
+              'exercício, e não hoje');
+    });
+
+    test('snapshot corrente vazio não deixa o valor de mercado anual no lugar',
+        () async {
+      // Lente `dados`, 14/09/2026. Resposta 200 sem dado é ausência declarada,
+      // e não falha — mas as linhas anuais ficavam com o próprio `marketCap`,
+      // que é o do fim do exercício, e o inflado pela unit nas units. Nenhum
+      // dos dois descreve hoje.
+      final datasource = BrapiDatasource(clientWith(FixtureAdapter(
+        routes: {
+          '/v2/stocks/statistics?symbols=PETR4&mode=history':
+              'brapi_statistics_history_petr4',
+          '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
+          '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+          '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+        },
+        bodies: {
+          '/v2/stocks/statistics?symbols=PETR4&mode=current': '{"results":[]}',
+        },
+      )));
+      final r = await datasource.fundamentalsHistory(Ticker.parse('PETR4'));
+      final s = r.unwrap();
+      expect(s.every((x) => x.marketCap == null), isTrue);
+      expect(s.every((x) => x.sharesOutstanding == null), isTrue);
+      expect(s.any((x) => x.sharesOutstandingAsOf != null), isTrue,
+          reason: 'a contagem do exercício continua, em campo próprio');
+    });
+
     test('funde os quatro demonstrativos pela chave do exercício', () async {
       final datasource = BrapiDatasource(clientWith(FixtureAdapter(routes: {
         '/v2/stocks/statistics?symbols=PETR4&mode=history':

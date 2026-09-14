@@ -435,8 +435,11 @@ function decisoesDoPlanoCongelado() {
   } catch {
     return numeros;
   }
-  // Linhas de tabela markdown que abrem com o numero da decisao.
-  const linhaDeDecisao = /^\|\s*(\d{1,2})\s*\|/gm;
+  // Linhas de tabela markdown que abrem com o numero da decisao -- com ou sem
+  // negrito, e com ou sem citacao: a tabela grafa `> | **0** |`, `> | 1 |` e
+  // `| **18** |`. Sem aceitar os dois, as decisoes 0 a 8 e a 18 ficavam de
+  // fora, e a decisao 85 era bloqueada por citar a 18.
+  const linhaDeDecisao = /^(?:>\s*)?\|\s*(?:\*\*)?(\d{1,2})(?:\*\*)?\s*\|/gm;
   for (const m of texto.matchAll(linhaDeDecisao)) {
     numeros.add(Number.parseInt(m[1], 10));
   }

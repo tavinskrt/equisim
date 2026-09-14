@@ -6,9 +6,16 @@
 /// branco**, e o resto traz código CVM (`25585` na CSN Mineração), zeros
 /// (`000000` no BTG) ou a string `ADR` (Marfrig).
 ///
-/// A resolução usa quatro regras, em ordem, e **para na primeira que
+/// A resolução usa cinco regras, em ordem, e **para na primeira que
 /// responde**:
 ///
+/// 0. **O registro oficial da B3**, quando há: o emissor de quatro letras traz
+///    o código CVM, e o código CVM leva ao CNPJ pelos metadados das
+///    demonstrações (decisão 82). É declarado, e não inferido — e é o único que
+///    acompanha fusão: em 14/09/2026 ele corrigiu `MBRF3`, que as regras abaixo
+///    ligavam à BRF por causa do nome "BRF S.A." na fonte de preços, quando a
+///    MBRF é a Marfrig; e `AUAU3`, ligado à Petz pelo nome "Pet Center" em vez
+///    da União Pet.
 /// 1. `Codigo_Negociacao` com **formato de ticker**, sobre todos os anos de
 ///    FCA disponíveis. Sete anos dão 644 códigos e **zero ambiguidade**.
 /// 2. Propagação pela **raiz de quatro letras**, quando ela aponta para um
@@ -125,6 +132,8 @@ abstract final class CvmBridge {
   ///   [pareceTicker] e já conferido como não ambíguo.
   /// - [porNome]: mapa nome normalizado → CNPJ, do `DENOM_CIA` da CVM.
   /// - [nomeDoAtivo]: nome do ativo na fonte de preços, para a regra 3.
+  /// - [porRegistroOficial]: raiz de quatro letras → CNPJ, do registro da B3
+  ///   cruzado com o código CVM das demonstrações. Regra 0.
   ///
   /// Devolve `null` quando nenhuma regra responde — e isso é resposta, não
   /// falha.
@@ -133,6 +142,7 @@ abstract final class CvmBridge {
     required Map<String, String> porCodigo,
     Map<String, String> porNome = const {},
     String? nomeDoAtivo,
+    Map<String, String> porRegistroOficial = const {},
   }) {
     final t = ticker.trim().toUpperCase();
 
@@ -141,6 +151,11 @@ abstract final class CvmBridge {
     // pela regra de nome, ao lado de `POMO3` e `POMO4`, que é o engano que a
     // própria lista existia para impedir.
     if (semPonte.contains(t)) return null;
+
+    // Regra 0: o registro da B3, por emissor. Declarado vence inferido.
+    final r0 = raiz(t);
+    final oficial = r0 == null ? null : porRegistroOficial[r0];
+    if (oficial != null) return oficial;
 
     final direto = porCodigo[t];
     if (direto != null) return direto;
@@ -178,11 +193,15 @@ abstract final class CvmBridge {
     required Map<String, String> porCodigo,
     Map<String, String> porNome = const {},
     Map<String, String> nomes = const {},
+    Map<String, String> porRegistroOficial = const {},
   }) {
     final out = <String, String>{};
     for (final t in tickers) {
       final c = resolver(t,
-          porCodigo: porCodigo, porNome: porNome, nomeDoAtivo: nomes[t]);
+          porCodigo: porCodigo,
+          porNome: porNome,
+          nomeDoAtivo: nomes[t],
+          porRegistroOficial: porRegistroOficial);
       if (c != null) out[t.trim().toUpperCase()] = c;
     }
 

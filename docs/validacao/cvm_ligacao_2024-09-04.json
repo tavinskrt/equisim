@@ -1,0 +1,2634 @@
+[
+ {
+  "ticker": "AALR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-09-30"
+ },
+ {
+  "ticker": "ABCB10",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ABCB4",
+  "mercado": 0.015358361774744003,
+  "anual": 0.015358361774744003,
+  "ancorada": 0.1493174061433447,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ABEV3",
+  "mercado": -0.1893764434180139,
+  "anual": -0.1893764434180139,
+  "ancorada": -0.27944572748267904,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "AERI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "AFLT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "AGRO3",
+  "mercado": 1.9829931972789117,
+  "anual": 1.9829931972789117,
+  "ancorada": 1.203325774754346,
+  "fimAncora": "2024-03-31"
+ },
+ {
+  "ticker": "AGXY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "AHEB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ALLD3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ALOS3",
+  "mercado": -0.07850707850707844,
+  "anual": -0.07850707850707844,
+  "ancorada": -0.07636207636207626,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ALPA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ALPA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ALPK3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ALUP11",
+  "mercado": -0.7682529335071708,
+  "anual": -0.7682529335071708,
+  "ancorada": -0.8279009126466753,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ALUP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ALUP4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "AMAR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "AMBP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "AMER3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "AMOB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "ANIM3",
+  "mercado": -0.9472140762463342,
+  "anual": -0.9472140762463342,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ARML3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ARND3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ASAI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ATED3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "AUAU3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "AURE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "AVLL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "AXIA3",
+  "mercado": -0.7650503630826891,
+  "anual": -0.7535722651674867,
+  "ancorada": -0.8193956430077302,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "AXIA7",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "AZEV3",
+  "mercado": -0.16363636363636366,
+  "anual": -0.16363636363636366,
+  "ancorada": -0.16363636363636366,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "AZEV4",
+  "mercado": 1.2992481203007515,
+  "anual": 1.2992481203007515,
+  "ancorada": 1.2992481203007515,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "AZTE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "AZUL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "AZUL97",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "AZUL98",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "AZUL99",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "AZZA3",
+  "mercado": -0.02650250417362277,
+  "anual": -0.02650250417362277,
+  "ancorada": -0.32929883138564275,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "B1003",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "B3SA3",
+  "mercado": -0.6860557768924304,
+  "anual": -0.6860557768924304,
+  "ancorada": -0.6812749003984064,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BALM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BALM4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BAUH4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BAZA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BBAS3",
+  "mercado": 1.0507071403932393,
+  "anual": 0.3735770955501898,
+  "ancorada": 0.7305967575025872,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BBDC3",
+  "mercado": -0.05038488453463953,
+  "anual": 0.13715885234429678,
+  "ancorada": 0.2988103568929321,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BBDC4",
+  "mercado": -0.15437933207309384,
+  "anual": 0.012602394454946507,
+  "ancorada": 0.156269691241336,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BBSE3",
+  "mercado": -0.4208979155531801,
+  "anual": -0.4208979155531801,
+  "ancorada": 0.15473009086050238,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BDLL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BDLL4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BEEF3",
+  "mercado": 3.4480431848852904,
+  "anual": 3.928475033738192,
+  "ancorada": 1.526315789473684,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BEES3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BEES4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BGIP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BGIP4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BHIA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BIED3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BIOM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BLAU3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BMEB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BMEB4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BMGB4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BMIN4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BMKS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BMOB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BNBR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BOBR4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BPAC11",
+  "mercado": -0.6739007891770011,
+  "anual": -0.8196166854565953,
+  "ancorada": -0.8196166854565953,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "BPAC3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "BPAC5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "BRAP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BRAP4",
+  "mercado": 0.3868225292242296,
+  "anual": 0.3868225292242296,
+  "ancorada": 0.48777895855472897,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BRAV3",
+  "mercado": -0.8141987829614605,
+  "anual": -0.8141987829614605,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BRBI11",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BRKM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BRKM5",
+  "mercado": -0.8929712460063899,
+  "anual": -0.8929712460063899,
+  "ancorada": -0.16719914802981897,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BRKM6",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BRSR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BRSR5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BRSR6",
+  "mercado": 0.17743190661478608,
+  "anual": 0.17743190661478608,
+  "ancorada": 0.10194552529182883,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "BRST3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-03-31"
+ },
+ {
+  "ticker": "BSLI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "BSLI4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "CAMB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CAML3",
+  "mercado": 1.9412371134020623,
+  "anual": 1.9412371134020623,
+  "ancorada": 0.12371134020618568,
+  "fimAncora": "2024-05-31"
+ },
+ {
+  "ticker": "CASH3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CBAV3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CBEE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CCTY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "CEAB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CEBR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CEBR5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CEBR6",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CEDO4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CEEB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CEED3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CEGR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CGAS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CGAS5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CGRA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CGRA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CLSC3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CLSC4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CMIG3",
+  "mercado": -0.6832548755884331,
+  "anual": -0.6832548755884331,
+  "ancorada": -0.7659717552118359,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CMIG4",
+  "mercado": -0.4895397489539749,
+  "anual": -0.4895397489539749,
+  "ancorada": -0.6451882845188284,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CMIN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "COCE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "COCE5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "COGN3",
+  "mercado": 0.11111111111111104,
+  "anual": 0.11111111111111104,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CPFE3",
+  "mercado": -0.7477451265638637,
+  "anual": -0.7477451265638637,
+  "ancorada": -0.05324410823392489,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CPLE3",
+  "mercado": -0.38422131147540983,
+  "anual": -0.38422131147540983,
+  "ancorada": -0.6936475409836065,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CRPG5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CRPG6",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CSAN3",
+  "mercado": 0.6246268656716417,
+  "anual": 1.358955223880597,
+  "ancorada": 1.358955223880597,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "CSED3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CSMG3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CSNA3",
+  "mercado": 1.1614035087719299,
+  "anual": 1.3622807017543859,
+  "ancorada": -0.7956140350877193,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CSUD3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CTAX3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "CTKA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CURY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CVCB3",
+  "mercado": -0.26288659793814434,
+  "anual": -0.005154639175257737,
+  "ancorada": 1.2164948453608246,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CXSE3",
+  "mercado": -0.42597239648682556,
+  "anual": -0.42597239648682556,
+  "ancorada": -0.4711417816813049,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CYRE3",
+  "mercado": -0.8523415977961433,
+  "anual": -0.8523415977961433,
+  "ancorada": -0.9300275482093664,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "CYRE4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "DASA3",
+  "mercado": -0.589171974522293,
+  "anual": -0.589171974522293,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "DESK3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "DEXP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "DEXP4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "DIRR3",
+  "mercado": -0.8347910592808553,
+  "anual": -0.8347910592808553,
+  "ancorada": -0.8464528668610302,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "DMVF3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "DOHL4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "DOTZ3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "DTCY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "DXCO3",
+  "mercado": -0.6041379310344828,
+  "anual": -0.6041379310344828,
+  "ancorada": -0.27172413793103445,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EALT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EALT4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ECOM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ECOR3",
+  "mercado": -0.5070603337612324,
+  "anual": -0.4736842105263158,
+  "ancorada": -0.5584082156611039,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EGIE3",
+  "mercado": 0.11586121437422559,
+  "anual": 0.11586121437422559,
+  "ancorada": -0.4532218091697646,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EKTR4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EMAE4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EMBJ3",
+  "mercado": -0.9894115251476278,
+  "anual": -0.9894115251476278,
+  "ancorada": -0.8505396049684382,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ENEV3",
+  "mercado": -0.9711191335740071,
+  "anual": -0.9711191335740071,
+  "ancorada": -0.8909747292418773,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ENGI11",
+  "mercado": -0.8967525195968645,
+  "anual": -0.8967525195968645,
+  "ancorada": -0.8772676371780516,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ENGI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ENGI4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ENJU3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ENMT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ENMT4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EPAR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "EQPA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EQPA5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EQTL3",
+  "mercado": 0.3046524663677129,
+  "anual": 0.3046524663677129,
+  "ancorada": -0.06642376681614343,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ESPA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ESTR4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ETER3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EUCA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EUCA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EVEN3",
+  "mercado": -0.2772727272727273,
+  "anual": -0.2772727272727273,
+  "ancorada": -0.4621212121212121,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "EZTC3",
+  "mercado": -0.7759710930442637,
+  "anual": -0.7759710930442637,
+  "ancorada": -0.8112014453477868,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "FASA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "FESA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "FESA4",
+  "mercado": 0.3295880149812735,
+  "anual": 0.3295880149812735,
+  "ancorada": -0.3857677902621723,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "FHER3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "FIEI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "FIQE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "FLRY3",
+  "mercado": -0.7672052663076002,
+  "anual": -0.7672052663076002,
+  "ancorada": -0.4386594853381209,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "FRAS3",
+  "mercado": -0.6747524752475247,
+  "anual": -0.6747524752475247,
+  "ancorada": -0.5188118811881187,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "GEPA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "GEPA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "GFSA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "GGBR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "GGBR4",
+  "mercado": -0.4769736842105263,
+  "anual": -0.4769736842105263,
+  "ancorada": -0.6167763157894737,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "GGPS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "GMAT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "GOAU3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "GOAU4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "GRND3",
+  "mercado": -0.553921568627451,
+  "anual": -0.553921568627451,
+  "ancorada": -0.35457516339869277,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "HAGA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "HAGA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "HAPV3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "HBOR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "HBRE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "HBSA3",
+  "mercado": -0.9742120343839542,
+  "anual": -0.9742120343839542,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "HETA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "HOOT4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-03-31"
+ },
+ {
+  "ticker": "HYPE3",
+  "mercado": -0.06966053748231975,
+  "anual": -0.06966053748231975,
+  "ancorada": -0.2560113154172561,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "IFCM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "IGTI11",
+  "mercado": -0.9570416297608504,
+  "anual": -0.9570416297608504,
+  "ancorada": -0.9393268379096545,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "IGTI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "IGTI4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "INEP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "INEP4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "INTB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "IRBR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": -0.9825462012320328,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ISAE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ISAE4",
+  "mercado": 0.2414750198255353,
+  "anual": 0.2414750198255353,
+  "ancorada": 0.4666931007137194,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ITSA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ITSA4",
+  "mercado": -0.2929020664869722,
+  "anual": -0.2929020664869722,
+  "ancorada": -0.31266846361185985,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ITUB3",
+  "mercado": 0.5075096053091163,
+  "anual": -0.40621725462801256,
+  "ancorada": -0.34299685644428923,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ITUB4",
+  "mercado": 0.25616063279586254,
+  "anual": -0.37937328871311227,
+  "ancorada": -0.3118344995436568,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "JALL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "JFEN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "JHSF3",
+  "mercado": -0.6355555555555557,
+  "anual": -0.6355555555555557,
+  "ancorada": -0.7200000000000001,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "JOPA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "JOPA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "JSLG3",
+  "mercado": -0.6944444444444444,
+  "anual": -0.6944444444444444,
+  "ancorada": -0.3670634920634921,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "KEPL3",
+  "mercado": -0.588031222896791,
+  "anual": -0.588031222896791,
+  "ancorada": 0.10147441457068516,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "KLBN11",
+  "mercado": -0.9489284085727314,
+  "anual": -0.9384404924760601,
+  "ancorada": -0.9329685362517101,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "KLBN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "KLBN4",
+  "mercado": -0.7227272727272728,
+  "anual": -0.6704545454545454,
+  "ancorada": -0.6363636363636364,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "LAND3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "LAVV3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "LEVE3",
+  "mercado": -0.627514600908501,
+  "anual": -0.627514600908501,
+  "ancorada": -0.0973393900064893,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "LIGT3",
+  "mercado": -0.8807749627421759,
+  "anual": -0.8807749627421759,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "LJQQ3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "LOGG3",
+  "mercado": -0.5966057441253264,
+  "anual": -0.5966057441253264,
+  "ancorada": -0.5526544821583986,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "LOGN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "LPSB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "LREN3",
+  "mercado": -0.5810553083280356,
+  "anual": -0.5810553083280356,
+  "ancorada": -0.5111252383979656,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "LUPA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "LUXM4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "LWSA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MAPT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "MATD3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MBRF3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": -0.8203539823008851,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MDIA3",
+  "mercado": 0.0286855482933914,
+  "anual": 0.0286855482933914,
+  "ancorada": -0.11909949164851118,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MDNE3",
+  "mercado": -0.8972332015810276,
+  "anual": -0.8972332015810276,
+  "ancorada": -0.8761528326745719,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MEAL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MELK3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MGEL4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MGLU3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MILS3",
+  "mercado": 0.15116279069767438,
+  "anual": 0.15116279069767438,
+  "ancorada": -0.4946332737030411,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MLAS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MNDL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MNPR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MOTV3",
+  "mercado": -0.6369661266568484,
+  "anual": -0.5795287187039765,
+  "ancorada": -0.6774668630338733,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MOVI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MRVE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MSPA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MTRE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MTSA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MULT3",
+  "mercado": -0.7841171935235159,
+  "anual": -0.7841171935235159,
+  "ancorada": -0.8211256746337702,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MWET3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MWET4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "MYPK3",
+  "mercado": -0.20189003436426128,
+  "anual": -0.20189003436426128,
+  "ancorada": -0.4192439862542956,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "NATU3",
+  "mercado": null,
+  "anual": -0.44633604737231675,
+  "ancorada": -0.5965951147298296,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "NEXP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "NORD3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "NUTR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "OBTC3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "OFSA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ONCO11",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ONCO3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "OPCT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ORVR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "OSXB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PASS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PATI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PATI4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PCAR3",
+  "mercado": 3.2352941176470584,
+  "anual": 3.2352941176470584,
+  "ancorada": 0.4458204334365325,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PDGR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PDTC3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PEAB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PEAB4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PETR3",
+  "mercado": -0.790747330960854,
+  "anual": -0.7976275207591933,
+  "ancorada": -0.726453143534994,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PETR4",
+  "mercado": -0.7952776336274001,
+  "anual": -0.802283341982356,
+  "ancorada": -0.6914893617021276,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PFRM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PGMN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PINE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PINE4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PLAS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PLPL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PMAM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PNVL3",
+  "mercado": -0.6561576354679803,
+  "anual": -0.6561576354679803,
+  "ancorada": -0.6541871921182266,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "POMO3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "POMO4",
+  "mercado": -0.8647140864714087,
+  "anual": -0.8619246861924685,
+  "ancorada": -0.7085076708507672,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "POSI3",
+  "mercado": 9.440422322775264,
+  "anual": 9.440422322775264,
+  "ancorada": 4.244343891402716,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PRIO3",
+  "mercado": -0.5727355901189387,
+  "anual": -0.5706770356816102,
+  "ancorada": -0.011207685269899405,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PRNR3",
+  "mercado": -0.6122137404580152,
+  "anual": -0.6122137404580152,
+  "ancorada": -0.8541984732824427,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PSSA3",
+  "mercado": -0.47876004592422505,
+  "anual": -0.47876004592422505,
+  "ancorada": -0.22187141216991974,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "PTBL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "QUAL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RADL3",
+  "mercado": -0.5227106227106227,
+  "anual": -0.5208791208791209,
+  "ancorada": -0.6604395604395604,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RAIL3",
+  "mercado": -0.8107983387171204,
+  "anual": -0.8107983387171204,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RAIZ4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RANI3",
+  "mercado": 1.316055625790139,
+  "anual": 1.316055625790139,
+  "ancorada": -0.40834386852085974,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RAPT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RAPT4",
+  "mercado": 1.39375,
+  "anual": 1.39375,
+  "ancorada": -0.8285714285714285,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RCSL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RCSL4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RDOR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RECV3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "REDE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RENT3",
+  "mercado": -0.6139177810797425,
+  "anual": -0.593858345715701,
+  "ancorada": -0.6498266468548787,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RENT4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RIAA3",
+  "mercado": -0.7508305647840532,
+  "anual": -0.7375415282392026,
+  "ancorada": -0.5514950166112956,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RNEW3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RNEW4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "ROMI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RPAD3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RSUL4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "RVEE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "SANB11",
+  "mercado": -0.5357255272269437,
+  "anual": -0.541391249606547,
+  "ancorada": -0.6672961913755114,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SANB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SANB4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SAPR11",
+  "mercado": 0.6009615384615383,
+  "anual": 0.6009615384615383,
+  "ancorada": -0.08928571428571433,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SAPR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SAPR4",
+  "mercado": 1.003384094754653,
+  "anual": 1.003384094754653,
+  "ancorada": 0.14213197969543145,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SAUD3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": -0.9819897084048027,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SBFG3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SBSP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SCAR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SEER3",
+  "mercado": -0.4276729559748428,
+  "anual": -0.40251572327044033,
+  "ancorada": -0.4355345911949686,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SEQL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "SHUL4",
+  "mercado": -0.1174698795180722,
+  "anual": -0.1174698795180722,
+  "ancorada": -0.1174698795180722,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "SIMH3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SLCE3",
+  "mercado": 0.666240409207161,
+  "anual": 0.666240409207161,
+  "ancorada": -0.4232736572890026,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SMFT3",
+  "mercado": -0.709255079006772,
+  "anual": -0.7237020316027087,
+  "ancorada": -0.6063205417607223,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SMTO3",
+  "mercado": 1.3373045420699927,
+  "anual": 1.3373045420699927,
+  "ancorada": 0.18652271034996284,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SNSY5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SOJA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SOND5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SOND6",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SUZB3",
+  "mercado": -0.33224990971469853,
+  "anual": -0.00433369447453958,
+  "ancorada": 0.17695919104369814,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "SYNE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TAEE11",
+  "mercado": -0.5966363385718224,
+  "anual": -0.5966363385718224,
+  "ancorada": -0.6708023159636064,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TAEE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TAEE4",
+  "mercado": 0.09735973597359748,
+  "anual": 0.09735973597359748,
+  "ancorada": -0.08168316831683156,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TASA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TASA4",
+  "mercado": -0.03564356435643559,
+  "anual": -0.03564356435643559,
+  "ancorada": -0.3930693069306931,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TCSA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TECN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "TELB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TELB4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TEND3",
+  "mercado": -0.8333333333333333,
+  "anual": -0.8333333333333333,
+  "ancorada": -0.898355754857997,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TFCO4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TGMA3",
+  "mercado": -0.5955719557195572,
+  "anual": -0.5955719557195572,
+  "ancorada": -0.5088560885608856,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TIMS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TOKY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TOTS3",
+  "mercado": -0.7323990657323991,
+  "anual": -0.7323990657323991,
+  "ancorada": -0.7791124457791124,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TPIS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TRIS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TTEN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "TUPY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "TXRX4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "UCAS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "UGPA3",
+  "mercado": -0.9008733624454148,
+  "anual": -0.9008733624454148,
+  "ancorada": -0.7454148471615721,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "UNIP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "UNIP5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "UNIP6",
+  "mercado": -0.13340122199592677,
+  "anual": -0.13340122199592677,
+  "ancorada": -0.8164969450101833,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "USIM3",
+  "mercado": -0.12251655629139076,
+  "anual": -0.12251655629139076,
+  "ancorada": -0.12251655629139076,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "USIM5",
+  "mercado": -0.2483552631578947,
+  "anual": -0.2483552631578947,
+  "ancorada": -0.2483552631578947,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "USIM6",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2023-12-31"
+ },
+ {
+  "ticker": "VALE3",
+  "mercado": -0.3398841902088086,
+  "anual": -0.3398841902088086,
+  "ancorada": -0.45815055272854893,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "VAMO3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "VBBR3",
+  "mercado": -0.6498357963875205,
+  "anual": -0.6498357963875205,
+  "ancorada": -0.8123973727422004,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "VITT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "VIVA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "VIVR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "VIVT3",
+  "mercado": -0.5612619222303742,
+  "anual": -0.5586940572267058,
+  "ancorada": -0.5388848129126926,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "VLID3",
+  "mercado": -0.7121342512908777,
+  "anual": -0.7121342512908777,
+  "ancorada": -0.466867469879518,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "VSTE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "VTRU3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "VULC3",
+  "mercado": 0.14758545849158974,
+  "anual": 0.14758545849158974,
+  "ancorada": -0.02224633749321759,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "VVEO3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "WDCN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "WEGE3",
+  "mercado": -0.8554036336392583,
+  "anual": -0.8554036336392583,
+  "ancorada": -0.8664543922082787,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "WEST3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "WHRL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "WHRL4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "WIZC3",
+  "mercado": 0.5438311688311688,
+  "anual": 0.5438311688311688,
+  "ancorada": 0.9707792207792209,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "WLMM4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-06-30"
+ },
+ {
+  "ticker": "YDUQ3",
+  "mercado": -0.7297029702970297,
+  "anual": -0.18712871287128702,
+  "ancorada": -0.6584158415841583,
+  "fimAncora": "2024-06-30"
+ }
+]

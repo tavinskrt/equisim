@@ -20,6 +20,13 @@ não por revisão de fundamento.
 
 **Para resolver.** Fonte com dados trimestrais (CVM, B3 ou provedor pago).
 
+**Atualizado em 14/09/2026.** A CVM publica ITR, e a ingestão o lê
+(decisão 72). A série de doze meses **ancorada no trimestre** existe e está
+testada (decisão 73), mas **não é o padrão**: ela move a ordenação de metade do
+universo — correlação de postos de 0,683 contra a série anual em 04/09/2024 — e
+se isso é informação ou ruído é a pergunta da coorte trimestral (C1c). Ver
+[cvm_trimestral.md](cvm_trimestral.md).
+
 ### 1.2. `adjustedClose` diverge de forma material
 
 Medido sobre 11 ativos em janela de 10 anos: **desvio mediano de 9,1%** entre o
@@ -53,6 +60,22 @@ aparecem.
 **Efeito.** Qualquer análise histórica sobre o universo herda viés de
 sobrevivência. O sistema mitiga parcialmente resolvendo renomeações
 (`/v2/tickers/resolve`), mas não recupera deslistagens.
+
+**Estado em 14/09/2026: as duas pontas existem, e falta a ponte entre elas.**
+Os demonstrativos das deslistadas estão ingeridos — 60,6% dos exercícios da CVM
+são de companhias fora do universo vivo. O preço delas está no COTAHIST da B3,
+que lista todo papel negociado no ano: em 2019 e 2024, os dois anos baixados,
+há **487 papéis fora do universo de hoje** com fechamento bruto. O que falta é ligar
+um ao outro — o COTAHIST identifica o papel por ISIN e a CVM por CNPJ, e a FCA
+faz a ponte — e baixar o histórico inteiro. É o item A3.2 do
+[plano](../plano-motor-de-referencia.md), e é pré-requisito do C1b.
+
+**Atualizado à tarde: a ponte existe.** O COTAHIST de 2010 a 2026 está baixado —
+1,63 milhão de pregões à vista —, e **164 das 290** companhias fora do universo
+que tinham ação em bolsa estão ligadas ao preço, com 1.272 exercícios que têm
+pregão no ano seguinte. As outras 634 fora do universo nunca tiveram ação
+negociada. Faltam, para a coorte, o ajuste por evento e a contagem de ações por
+data (item A3.4). Ver [b3_deslistadas.md](b3_deslistadas.md).
 
 ### 1.4. Limite de requisições inobservável
 
@@ -117,6 +140,40 @@ possível. Nada no dado arbitra: o `close` da fonte já vem ajustado por ação
 societária e não denuncia salto em dez anos. O motor declara a escolha e o
 sentido do erro no aviso do resultado. Tabela completa em
 [unidade.md §4](unidade.md).
+
+**Atualizado em 14/09/2026: o dado passa a poder arbitrar.** O COTAHIST traz o
+fechamento **bruto**, e um grupamento aparece nele como salto da razão entre
+pregões — `CorporateEvents` o detecta e mede o fator (decisão 75). **Ainda não
+arbitra nenhum dos 27**: nenhum deles tem evento em 2019 ou 2024, os dois anos
+baixados, e o fator detectado ainda não entra no divisor. Os dois passos são os
+itens A3.2 (histórico inteiro) e A3.3 (evento no divisor) do
+[plano](../plano-motor-de-referencia.md).
+
+**Revisto na tarde de 14/09/2026: o diagnóstico desta seção estava errado, e o
+divisor tem árbitro.** O registro de empresas listadas da B3 dá a contagem
+oficial de ações de cada emissor ([b3_registro.md](b3_registro.md)):
+
+- **MILS3 e MEAL3 não eram grupamento.** A B3 registra 234.286.833 e 286.676.540
+  ações, e nenhum evento de ações. A contagem "corrente" da fonte — 48.172 e
+  307.010 — está errada. A regra do maior acertava nelas, pelo motivo errado.
+- **Em dez ativos, a "contagem do exercício" da fonte é o capital autorizado** —
+  número redondo: GGBR3/4 com 4.499.999.700 contra 1.978.018.049 emitidas,
+  CSAN3 com 8 bilhões contra 3,97, B3SA3 com 7,5 contra 5,05, RENT3/4, COGN3,
+  ENMT3/4, VIVR3. A regra do maior o adotava, e o preço justo saía até 2,28x
+  subestimado.
+- **E o erro também ia para o lado ruim**: AUAU3 com 451 milhões contra 861, e
+  AZUL3 com 21,7 milhões implícitos contra 368,6.
+
+**Mitigação implementada ([decisão 83](../decisoes/083-a-contagem-oficial-da-b3-arbitra-o-divisor.md)):**
+a contagem oficial arbitra o divisor, líquida da fração em tesouraria. Medido na
+mesma execução, o potencial mediano do universo sai de −37,6% para −28,7%, com
+correlação de postos de 0,982: quase ninguém muda de posição, e os que mudam são
+os de divisor errado.
+
+**O que sobra.** O registro é o da data do build do aplicativo; um evento de
+ações entre o build e a avaliação passa despercebido por até 31 dias, quando a
+fonte ainda não o refletiu. E ele não existe para o passado: coorte de backtest
+não o usa, e a §3.5 continua valendo.
 
 ### 1.8. O universo devolvido é parcial
 
@@ -362,6 +419,22 @@ taxa de equilíbrio, e ela não é uma previsão.
 
 **Para resolver.** Curva da ANBIMA ou do Tesouro (NTN-B), com desconto por
 vértice.
+
+**Resolvida como capacidade em 14/09/2026, e não ligada por padrão.** A curva
+nominal dos títulos prefixados do Tesouro Direto entra por
+`ValuationInputs.riskFreeCurve` (decisão 74). Medida contra o motor, a
+perpetuidade da curva ficou **2,9 a 4,5 p.p. acima** da média decenal do CDI em
+todas as coortes de 2021 a 2025, e ligá-la derruba o potencial mediano em cerca
+de 12 pontos — de −37,6% a **−48,6%** na primeira medição, de −33,1% a −53,2%
+na remedição com o prazo em dias úteis (decisão 79) —, com correlação de postos
+de 0,93 e 0,92. **O padrão é decisão do usuário**, porque muda o nível de toda
+avaliação.
+
+**Decidido em 14/09/2026: a curva é o padrão do aplicativo**
+([decisão 84](../decisoes/084-a-curva-e-o-padrao-do-aplicativo.md)). Sem curva
+de até sete dias — rede fora, função da web ainda não publicada, pacote velho —,
+a avaliação recua para os dois pontos do CDI e diz isso no aviso. Ver
+[curva_de_juros.md](curva_de_juros.md).
 
 ### 2.10. As primitivas estatísticas do núcleo, e sua conferência externa
 
@@ -718,6 +791,92 @@ porque as duas saem do mesmo registro
 **O que sobra:** a contagem primária continua indisponível, e a base sobre a
 qual a fração se aplica é a do agregador. Ver
 [cvm_ligacao.md §3](cvm_ligacao.md).
+
+### 1.10. A CVM não publica o ITR de 2025
+
+**Registrado em 14/09/2026.** O diretório de dados abertos da CVM lista
+`itr_cia_aberta_2017.zip` a `2024` e `2026`, e o endereço de 2025 devolve 404.
+DFP de 2025 existe; o ITR, não.
+
+**Efeito.** Toda série de doze meses ancorada em trimestre de 2026 tem um
+buraco em 2025, e recua para a âncora de DFP (decisão 73). A primeira versão da
+série não recuava, e as guardas leram dois anos como um: QUAL3 de −22% a
++908%. O baixador passou a listar anos ausentes em vez de pular em silêncio.
+
+**Para resolver.** A CVM republicar o arquivo. Nada do lado do motor.
+
+### 3.8. O motor é sensível à janela do exercício
+
+**Medido em 14/09/2026.** Deslocar os exercícios seis meses — doze meses
+terminados em junho em vez de dezembro —, com o mesmo preço, dá correlação de
+postos de **0,683** entre as duas ordenações — contra 0,977 entre a montagem só
+de mercado e a anual da CVM. A mediana do `|Δ potencial|` é de 14,8%, e 60
+ativos se movem mais de 10 p.p.
+
+A primeira medição dava 0,816, e estava contaminada: a mescla completava o
+ponto de junho com fluxos do dezembro anterior, o que o ancorava parcialmente
+em dezembro e amortecia a diferença (decisão 78).
+
+Não é defeito da soma: na CSNA3 o lucro de doze meses de junho de 2023 é
+prejuízo de R$ 0,10 bi, onde o exercício de 2022 tinha lucro de R$ 2,17 bi. A
+janela de junho vê a virada do ciclo antes, e as guardas — trava de saúde, base
+por ciclo, veredito de fosso — reagem com limiares.
+
+**Leitura.** Uma ordenação que muda desse tanto por um deslocamento de seis
+meses carrega ruído de calendário. É consistente com a §3.6 — o motor não supera
+um fator de valor de uma linha —, e a coorte trimestral (C1c) é onde isso se
+separa em informação e ruído.
+
+### 3.9. Eventos de ações inferidos do preço têm teto
+
+**Medido em 14/09/2026** sobre o COTAHIST de 2019 e 2024: os retornos diários
+ajustados batem com a fonte de mercado em **99,96%** dos 118.871 pares. O que
+não bate:
+
+- **Bonificação de até 20% não é detectável pelo preço** — uma de 10% e uma
+  queda de 8,5% em data ex ficam a 0,6% uma da outra. GGBR3/4, LREN3, CRPG5/6.
+- **Evento com o mercado andando junto** sai da folga: AERI3 agrupou 15:1 e
+  subiu 22,8% no mesmo pregão.
+- **O `DISMES` não marca todo evento**: AFLT3 dobra de preço sem troca.
+
+**Para resolver.** O registro oficial de eventos da B3, que declara o fator
+(item A3.1). Ver [b3_cotahist.md](b3_cotahist.md).
+
+**Medido contra o registro em 14/09/2026, o teto é mais baixo do que os 99,96%
+sugeriam.** Aqueles eram retornos diários batendo, e evento é raro no dia. Papel
+a papel, de 2010 em diante: a inferência encontra **41,5%** dos 289 eventos
+oficiais, e **63,8%** do que ela encontra é evento de fato — parte do resto é
+cisão, como a da XP no ITUB3 em 2021. Bonificação de até 20% sai com 1,6% de
+cobertura; grupamento de papel de centavos escapa pelo tick. **Para emissor
+listado, o registro substitui a inferência. Para deslistada, ela é a única
+fonte, e retorno de coorte ajustado só por ela erra o evento em mais da metade
+dos casos.** Ver [b3_registro.md](b3_registro.md).
+
+### 1.11. A FCA não traz código de negociação de 2010 a 2017
+
+**Conferido em 14/09/2026, arquivo a arquivo.** A coluna `Codigo_Negociacao` da
+FCA vem vazia em todas as linhas de 2010 a 2017, e preenchida de 2018 em diante.
+
+**Efeito.** Companhia deslistada antes de 2018 não tem ponte declarada entre o
+CNPJ e o ticker. A ponte do item A3.2 usa o nome — atual e anteriores — com
+sobreposição de anos, e liga 42 companhias assim, revisadas à mão. É ponte
+inferida, e carrega o risco que a proibição de casamento aproximado da decisão
+do A1.1 existe para evitar; o casamento aqui é de prefixo exato do nome
+normalizado, e não de similaridade.
+
+### 3.10. A migração de via é descontínua na taxa
+
+**Medido em 14/09/2026, na PRIO3.** Com a curva do Tesouro — mais alta que os
+dois pontos do CDI em quase todo ano —, o potencial **sobe** de −80,6% para
+−18,3%. A perpetuidade maior leva o capital próprio a 14,4% do valor da firma, a
+cascata migra para a via do acionista (decisão 43), e a outra via vale mais.
+
+**Efeito.** A resposta do preço justo à taxa não é monótona perto do limiar de
+migração. Um ativo perto dele pode mudar dezenas de pontos por uma variação
+pequena de taxa, no sentido contrário ao da teoria.
+
+**Para resolver.** Item B10 do [plano](../plano-motor-de-referencia.md): a
+migração precisa de transição, e não de degrau.
 
 ## 4. O que foi verificado, e como
 

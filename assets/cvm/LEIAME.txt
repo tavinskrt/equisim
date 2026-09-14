@@ -1,0 +1,3 @@
+Pacote da CVM gerado por `dart run tool/cvm_empacotar.dart` e versionado
+(decisão 80). Regerar exige a base ingerida em data/cvm_exercicios.json, que
+sai de `python tool/cvm_baixar.py` e `dart run tool/cvm_ingerir.dart data/cvm`.

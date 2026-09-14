@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-11, a partir de `6e01044`.
+Gerado em 2026-09-14, a partir de `7d43639`.
 
 ## Decisões registradas
 
-**51** aceita · **2** cumprida
+**65** aceita · **2** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -68,6 +68,20 @@ Gerado em 2026-09-11, a partir de `6e01044`.
 | 69 | A mescla de fontes carrega a procedência de cada campo | aceita | parecer | 2026-09-11 |
 | 70 | A contagem de ações da CVM não tem escala, e só a fração dela entra | aceita | parecer | 2026-09-11 |
 | 71 | A validade do cache macro é por série, e a cobertura é por janela | aceita | parecer | 2026-09-11 |
+| 72 | A ingestão lê o período e o tipo do documento, e o LPA da CVM não entra | aceita | parecer | 2026-09-14 |
+| 73 | Os doze meses ancoram a série inteira, recusam buraco, e não entram por padrão | aceita | parecer | 2026-09-14 |
+| 74 | A taxa livre de risco pode seguir a curva observada, e o padrão é decisão do usuário | aceita | parecer | 2026-09-14 |
+| 75 | Eventos de ações se inferem do COTAHIST com recusa, e o que o preço não separa fica declarado | aceita | parecer | 2026-09-14 |
+| 76 | A CVM chega ao aplicativo por pacote empacotado, e sem ele o repositório é transparente | aceita | parecer | 2026-09-14 |
+| 77 | O snapshot corrente e o ativo omitido pelo lote seguem a regra da falha | aceita | parecer | 2026-09-14 |
+| 78 | A mescla não empresta fluxo de outra janela, e documento recebido depois da data não ocupa o ano | aceita | parecer | 2026-09-14 |
+| 79 | O prazo da curva conta dias úteis da liquidação, pelo calendário conhecido na data-base | aceita | parecer | 2026-09-14 |
+| 80 | O pacote da CVM é versionado, e a avaliação que segue sem ele diz isso | aceita | voce | 2026-09-14 |
+| 81 | A base de patrimônio da cascata é o PL da CVM, pela contagem de mercado | aceita | parecer | 2026-09-14 |
+| 82 | A ponte ticker↔CNPJ começa pelo registro oficial da B3 | aceita | parecer | 2026-09-14 |
+| 83 | A contagem oficial da B3 arbitra o divisor por papel, líquida de tesouraria | aceita | parecer | 2026-09-14 |
+| 84 | A curva do Tesouro é o padrão do aplicativo, lida no dia e com recuo declarado | aceita | voce | 2026-09-14 |
+| 85 | A substituição das decisões 12, 16, 17 e 18 pela 23 passa a constar do registro | aceita | conselheiro | 2026-09-14 |
 
 ## Caixa de entrada
 
@@ -81,16 +95,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 46 | 14.966 |
-| Apresentacao | 35 | 15.860 |
-| Camada de dados | 13 | 2.661 |
-| Testes do app | 29 | 5.209 |
-| Testes do nucleo | 20 | 9.131 |
-| Ferramentas de QA | 20 | 6.535 |
+| Nucleo de dominio | 46 | 15.329 |
+| Apresentacao | 35 | 15.870 |
+| Camada de dados | 17 | 3.173 |
+| Testes do app | 33 | 5.867 |
+| Testes do nucleo | 20 | 9.534 |
+| Ferramentas de QA | 20 | 6.538 |
 
 ## Histórico recente
 
 ```
+2026-09-14  7d43639  Refino do motor de valuation (parte 11)
 2026-09-11  6e01044  Refino do motor de valuation (parte 10)
 2026-09-11  c80b5e6  Refino do motor de valuation (parte 9)
 2026-09-10  e46c8bc  Refino do motor de valuation (parte 8)
@@ -105,5 +120,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-02  fc52eee  Remoção dos proventos na parte de backtest e estabilização de estrutura interna
 2026-08-30  feb211e  Garantindo estabilidade da UI
 2026-08-30  afb785e  Garantindo estabilidade dos testes
-2026-08-30  eacbcd9  Aprimorando UI/UX (4/4)
 ```

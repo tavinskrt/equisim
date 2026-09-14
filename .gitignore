@@ -169,3 +169,14 @@ test/**/failures/
 # `python tool/cvm_baixar.py`. Dado de terceiro, e não fonte deste projeto.
 data/cvm/
 data/cvm_exercicios.json
+
+# Taxas do Tesouro Direto (~15 MB), reproduzível por tool/tesouro_baixar.py.
+data/tesouro/
+
+# Série histórica de cotações da B3 (COTAHIST, ~80 MB por ano).
+data/b3/
+
+# Gabarito da cascata (D1), gerado por tool/gabarito_cascata.dart. Congela a
+# saída sobre um cache e um Ibovespa que mudam: vale só na sessão em que foi
+# gravado, e por isso não é versionado.
+docs/validacao/gabarito_cascata.json

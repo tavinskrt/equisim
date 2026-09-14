@@ -1612,6 +1612,108 @@ void main() {
       expect(d.count, closeTo(234178210, 1));
       expect(d.diverge, isFalse, reason: 'não há duas candidatas a divergir');
     });
+
+    group('O registro oficial da B3 arbitra — decisão 83', () {
+      final hoje = DateTime(2026, 9, 14);
+
+      test('corrige a regra do maior quando a maior é a errada', () {
+        // Forma da CTKA4: a fonte dá 62 milhões correntes e no valor de
+        // mercado, e 6,2 milhões no exercício. A regra do maior adotava 62, e o
+        // preço justo saía dez vezes menor. A B3 registra 6.205.375.
+        final s = comMercado(
+          corrente: 62053752,
+          doExercicio: 6205375,
+          valorDeMercado: 62053751 * 3.0,
+        );
+        final antes = ValuationCascade.quotedShares(
+            latest: s, marketPrice: 3.0, sharesPerQuote: 1.0);
+        expect(antes!.count, closeTo(62053751, 1));
+        final d = ValuationCascade.quotedShares(
+          latest: s,
+          marketPrice: 3.0,
+          sharesPerQuote: 1.0,
+          official: OfficialShareCount(total: 6205375, asOf: hoje),
+          asOf: hoje,
+        );
+        expect(d!.source, QuotedSharesSource.official);
+        expect(d.count, closeTo(6205375, 1));
+      });
+
+      test('desconta a tesouraria pela fração, e entra na unidade negociada', () {
+        final s = FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(2025, 12, 31),
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 200 * 10.0,
+          treasuryFraction: 0.04,
+          // Contagem absoluta em outra escala: não pode entrar.
+          treasuryShares: 40000,
+        );
+        final d = ValuationCascade.quotedShares(
+          latest: s,
+          marketPrice: 10.0,
+          sharesPerQuote: 5.0,
+          official: OfficialShareCount(total: 1000, asOf: hoje),
+          asOf: hoje,
+        );
+        expect(d!.source, QuotedSharesSource.official);
+        expect(d.count, closeTo(960 / 5, 1e-9));
+      });
+
+      test('registro antigo que diverge das duas não é usado', () {
+        // Um desdobramento depois da consulta: a fonte já dobrou, o registro
+        // não. Adotá-lo daria o preço justo em dobro.
+        final s = comMercado(
+          corrente: 2000,
+          doExercicio: 2000,
+          valorDeMercado: 2000 * 5.0,
+        );
+        final d = ValuationCascade.quotedShares(
+          latest: s,
+          marketPrice: 5.0,
+          sharesPerQuote: 1.0,
+          official: OfficialShareCount(total: 1000, asOf: DateTime(2026, 6, 1)),
+          asOf: hoje,
+        );
+        expect(d!.source, QuotedSharesSource.market);
+        expect(d.fromRegistry, 1000, reason: 'recusado, mas registrado');
+      });
+
+      test('registro antigo que concorda com a fonte é usado', () {
+        final s = comMercado(
+          corrente: 1030,
+          doExercicio: 1030,
+          valorDeMercado: 1030 * 5.0,
+        );
+        final d = ValuationCascade.quotedShares(
+          latest: s,
+          marketPrice: 5.0,
+          sharesPerQuote: 1.0,
+          official: OfficialShareCount(total: 1000, asOf: DateTime(2026, 6, 1)),
+          asOf: hoje,
+        );
+        expect(d!.source, QuotedSharesSource.official);
+        expect(d.count, 1000);
+      });
+
+      test('registro consultado depois da avaliação não existia nela', () {
+        final s = comMercado(
+          corrente: 2000,
+          doExercicio: 2000,
+          valorDeMercado: 2000 * 5.0,
+        );
+        final d = ValuationCascade.quotedShares(
+          latest: s,
+          marketPrice: 5.0,
+          sharesPerQuote: 1.0,
+          official: OfficialShareCount(total: 1000, asOf: hoje),
+          asOf: DateTime(2024, 9, 4),
+        );
+        expect(d!.source, QuotedSharesSource.market);
+        expect(d.fromRegistry, isNull);
+      });
+    });
   });
 
   group('Ponte de equity — recusa nomeada quando não há o que repartir', () {

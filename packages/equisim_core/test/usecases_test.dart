@@ -170,6 +170,76 @@ void main() {
           capm: capm,
         );
 
+    group('Curva de juros observada — decisão 74', () {
+      YieldCurve plana(double r) => YieldCurve.of(DateTime.utc(2026, 9, 10), [
+            CurveVertex(0.5, r),
+            CurveVertex(2, r),
+            CurveVertex(5, r),
+            CurveVertex(10, r),
+          ])!;
+
+      test('curva plana na mesma taxa reproduz o motor sem curva', () {
+        // Se a curva é plana em Rf e a taxa estrutural também é Rf, o caminho
+        // de forwards e o de interpolação linear são o mesmo número. É a
+        // prova de que a ligação troca a fonte da taxa e nada mais.
+        final rf = capm.riskFreeRate;
+        final base = inputsWith(growingHistory(rate: 0.08));
+        final semCurva = ValuationCascade.evaluate(ValuationInputs(
+          ticker: base.ticker,
+          asOf: base.asOf,
+          fundamentals: base.fundamentals,
+          marketPrice: base.marketPrice,
+          capm: base.capm,
+          declaredTerminalRiskFreeRate: rf,
+        )).unwrap();
+        final comCurva = ValuationCascade.evaluate(ValuationInputs(
+          ticker: base.ticker,
+          asOf: base.asOf,
+          fundamentals: base.fundamentals,
+          marketPrice: base.marketPrice,
+          capm: base.capm,
+          riskFreeCurve: plana(rf),
+        )).unwrap();
+        expect(comCurva.upside, closeTo(semCurva.upside, 1e-9));
+      });
+
+      test('a perpetuidade passa a ser o forward longo da curva', () {
+        final base = inputsWith(growingHistory(rate: 0.08));
+        final i = ValuationInputs(
+          ticker: base.ticker,
+          asOf: base.asOf,
+          fundamentals: base.fundamentals,
+          marketPrice: base.marketPrice,
+          capm: base.capm,
+          declaredTerminalRiskFreeRate: 0.09,
+          riskFreeCurve: plana(0.14),
+        );
+        expect(i.terminalRiskFreeRate, closeTo(0.14, 1e-12),
+            reason: 'a curva vence a média decenal do CDI');
+      });
+
+      test('taxa longa mais alta baixa o preço justo, e o aviso diz de onde veio',
+          () {
+        final base = inputsWith(growingHistory(rate: 0.08));
+        ValuationResult com(double r) => ValuationCascade.evaluate(ValuationInputs(
+              ticker: base.ticker,
+              asOf: base.asOf,
+              fundamentals: base.fundamentals,
+              marketPrice: base.marketPrice,
+              capm: base.capm,
+              riskFreeCurve: plana(r),
+            )).unwrap();
+        final baixa = com(0.09), alta = com(0.14);
+        expect(alta.upside, lessThan(baixa.upside));
+        expect(
+          alta.warnings.any((w) => w.contains('curva dos títulos prefixados')),
+          isTrue,
+        );
+        expect(alta.warnings.any((w) => w.contains('sem curva de juros')),
+            isFalse);
+      });
+    });
+
     test('usa FCFF quando há fluxo, dívida e ações', () {
       final result =
           ValuationCascade.evaluate(inputsWith(growingHistory(rate: 0.08)));

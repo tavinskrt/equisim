@@ -6,6 +6,7 @@ import '../services/metrics/beta.dart';
 import '../services/metrics/beta_shrinkage.dart';
 import '../services/metrics/market_leverage.dart';
 import '../services/valuation/growth_guards.dart';
+import '../services/valuation/yield_curve.dart';
 import '../time/point_in_time_view.dart';
 import '../services/valuation/cost_of_capital.dart';
 import '../value_objects/date_range.dart';
@@ -26,6 +27,9 @@ abstract final class PrepareValuationInputs {
   ///
   /// - [ticker]: ativo a preparar.
   /// - [prices], [fundamentals], [benchmark]: repositórios.
+  /// - [riskFreeCurve]: curva de juros observada. Presente, substitui o
+  ///   decaimento linear e a taxa estrutural — ver `ValuationInputs.
+  ///   riskFreeCurve`.
   /// - [terminalRiskFreeRate]: taxa livre de risco **estrutural**, destino do
   ///   decaimento do desconto e taxa da perpetuidade. Omiti-la faz cair para a
   ///   corrente, o que reproduz o modelo sem estrutura a termo.
@@ -58,6 +62,8 @@ abstract final class PrepareValuationInputs {
     double perpetualGrowthCap = 0.0652,
     double inflation = 0.05,
     double? terminalRiskFreeRate,
+    YieldCurve? riskFreeCurve,
+    OfficialShareCount? officialShares,
     bool isDistressed = false,
     BetaPrior? betaPrior,
   }) async {
@@ -161,6 +167,8 @@ abstract final class PrepareValuationInputs {
       industry: industry,
       inflation: inflation,
       declaredTerminalRiskFreeRate: terminalRiskFreeRate,
+      riskFreeCurve: riskFreeCurve,
+      officialShares: officialShares,
       // A mesma série que estima o beta alimenta o corte de liquidez da
       // Porta 0 — não há segunda busca.
       prices: series,

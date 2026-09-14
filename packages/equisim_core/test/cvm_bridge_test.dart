@@ -150,4 +150,37 @@ void main() {
       expect(out['PETR4'], 'CNPJ-P');
     });
   });
+
+  group('Regra 0: registro oficial da B3 — decisão 82', () {
+    test('vence o nome que a fonte de preços deixou com a empresa absorvida', () {
+      // MBRF3: a fonte de preços chama de "BRF S.A." e a regra de nome casava
+      // com a BRF; o emissor MBRF, no registro da B3, é a Marfrig.
+      final c = CvmBridge.resolver(
+        'MBRF3',
+        porCodigo: const {},
+        porNome: {CvmBridge.normalizarNome('BRF S.A.'): 'CNPJ-BRF'},
+        nomeDoAtivo: 'BRF S.A.',
+        porRegistroOficial: const {'MBRF': 'CNPJ-MARFRIG'},
+      );
+      expect(c, 'CNPJ-MARFRIG');
+    });
+
+    test('o veto de semPonte continua vindo antes', () {
+      expect(
+        CvmBridge.resolver('MAPT3',
+            porCodigo: const {},
+            porRegistroOficial: const {'MAPT': 'CNPJ-QUALQUER'}),
+        isNull,
+      );
+    });
+
+    test('sem registro, as regras de antes seguem', () {
+      expect(
+        CvmBridge.resolver('PETR4',
+            porCodigo: const {'PETR4': 'CNPJ-PETRO'},
+            porRegistroOficial: const {'VALE': 'CNPJ-VALE'}),
+        'CNPJ-PETRO',
+      );
+    });
+  });
 }

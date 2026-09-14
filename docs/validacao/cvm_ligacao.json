@@ -1,1272 +1,2634 @@
 [
  {
+  "ticker": "AALR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ABCB10",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
   "ticker": "ABCB4",
-  "temCvm": true,
-  "potencialAntes": 0.15581773799837276,
-  "potencialDepois": 0.15581773799837276,
-  "justoAntes": 28.41,
-  "justoDepois": 28.41,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": 0.1550040683482507,
+  "anual": 0.1550040683482507,
+  "ancorada": 0.1550040683482507,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "ABEV3",
-  "temCvm": true,
-  "potencialAntes": -0.11753494282083861,
-  "potencialDepois": -0.11753494282083861,
-  "justoAntes": 13.89,
-  "justoDepois": 13.89,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.11944091486658201,
+  "anual": -0.11944091486658201,
+  "ancorada": -0.11944091486658201,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "AERI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "AFLT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "AGRO3",
-  "temCvm": true,
-  "potencialAntes": -0.49870264660093405,
-  "potencialDepois": -0.5547483134405812,
-  "justoAntes": 9.66,
-  "justoDepois": 8.58,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.49870264660093405,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2026-06-30"
+ },
+ {
+  "ticker": "AGXY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-12-31"
+ },
+ {
+  "ticker": "AHEB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ALLD3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "ALOS3",
-  "temCvm": true,
-  "potencialAntes": -0.38493578618535235,
-  "potencialDepois": -0.38493578618535235,
-  "justoAntes": 17.72,
-  "justoDepois": 17.72,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.3845886844845539,
+  "anual": -0.3845886844845539,
+  "ancorada": -0.3845886844845539,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ALPA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "ALPA4",
-  "temCvm": true,
-  "potencialAntes": -0.6941783345615328,
-  "potencialDepois": -0.6941783345615328,
-  "justoAntes": 4.15,
-  "justoDepois": 4.15,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.6941783345615328,
+  "anual": -0.6941783345615328,
+  "ancorada": -0.6941783345615328,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ALPK3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "ALUP11",
-  "temCvm": true,
-  "potencialAntes": 0.0793697978596909,
-  "potencialDepois": 0.0793697978596909,
-  "justoAntes": 36.31,
-  "justoDepois": 36.31,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.07639714625445898,
+  "anual": 0.07639714625445898,
+  "ancorada": 0.07639714625445898,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ALUP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ALUP4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "AMAR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "AMBP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-12-31"
  },
  {
   "ticker": "AMER3",
-  "temCvm": true,
-  "potencialAntes": -0.3045045045045045,
-  "potencialDepois": -0.3045045045045045,
-  "justoAntes": 3.86,
-  "justoDepois": 3.86,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.3045045045045045,
+  "anual": -0.3045045045045045,
+  "ancorada": -0.3045045045045045,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "AMOB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "ANIM3",
-  "temCvm": true,
-  "potencialAntes": 2.191126279863481,
-  "potencialDepois": 2.191126279863481,
-  "justoAntes": 9.35,
-  "justoDepois": 9.35,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 2.1843003412969284,
+  "anual": 2.1843003412969284,
+  "ancorada": 2.1843003412969284,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ARML3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ARND3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ASAI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ATED3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2026-06-30"
+ },
+ {
+  "ticker": "AUAU3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "AURE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "AVLL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "AXIA3",
-  "temCvm": true,
-  "potencialAntes": -0.7849131693198264,
-  "potencialDepois": -0.7849131693198264,
-  "justoAntes": 11.89,
-  "justoDepois": 11.89,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.7849131693198264,
+  "anual": -0.7849131693198264,
+  "ancorada": -0.7849131693198264,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "AXIA7",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "AZEV3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "AZEV4",
-  "temCvm": true,
-  "potencialAntes": -0.9241379310344827,
-  "potencialDepois": -0.9241379310344827,
-  "justoAntes": 0.11,
-  "justoDepois": 0.11,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.9241379310344827,
+  "anual": -0.9241379310344827,
+  "ancorada": -0.9241379310344827,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "AZTE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "AZUL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "AZUL97",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "AZUL98",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "AZUL99",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
  },
  {
   "ticker": "AZZA3",
-  "temCvm": true,
-  "potencialAntes": 0.3487846240814018,
-  "potencialDepois": 0.3487846240814018,
-  "justoAntes": 23.86,
-  "justoDepois": 23.86,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.34934991520633124,
+  "anual": 0.34934991520633124,
+  "ancorada": 0.34934991520633124,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "B1003",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
  },
  {
   "ticker": "B3SA3",
-  "temCvm": true,
-  "potencialAntes": -0.7259643062751872,
-  "potencialDepois": -0.7259643062751872,
-  "justoAntes": 4.76,
-  "justoDepois": 4.76,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.7259643062751872,
+  "anual": -0.7259643062751872,
+  "ancorada": -0.7259643062751872,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BALM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BALM4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BAUH4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BAZA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "BBAS3",
-  "temCvm": true,
-  "potencialAntes": 0.5301953818827709,
-  "potencialDepois": 0.49511545293072834,
-  "justoAntes": 34.46,
-  "justoDepois": 33.67,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": 0.5293072824156305,
+  "anual": 0.49422735346358787,
+  "ancorada": 0.49422735346358787,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "BBDC3",
-  "temCvm": true,
-  "potencialAntes": -0.08285895003162558,
-  "potencialDepois": -0.08285895003162558,
-  "justoAntes": 14.5,
-  "justoDepois": 14.5,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.08349146110056928,
+  "anual": -0.08349146110056928,
+  "ancorada": -0.08349146110056928,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "BBDC4",
-  "temCvm": true,
-  "potencialAntes": -0.19888268156424577,
-  "potencialDepois": -0.19888268156424577,
-  "justoAntes": 14.34,
-  "justoDepois": 14.34,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.19944134078212283,
+  "anual": -0.19944134078212283,
+  "ancorada": -0.19944134078212283,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "BBSE3",
-  "temCvm": true,
-  "potencialAntes": 0.11456356736242898,
-  "potencialDepois": 0.11456356736242898,
-  "justoAntes": 46.99,
-  "justoDepois": 46.99,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": 0.11005692599620495,
+  "anual": 0.11005692599620495,
+  "ancorada": 0.11005692599620495,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BDLL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BDLL4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "BEEF3",
-  "temCvm": true,
-  "potencialAntes": 5.478481012658228,
-  "potencialDepois": 5.478481012658228,
-  "justoAntes": 25.59,
-  "justoDepois": 25.59,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 5.468354430379747,
+  "anual": 5.468354430379747,
+  "ancorada": 5.468354430379747,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BEES3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BEES4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BGIP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BGIP4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "BHIA3",
-  "temCvm": true,
-  "potencialAntes": 3.492753623188406,
-  "potencialDepois": 3.492753623188406,
-  "justoAntes": 3.1,
-  "justoDepois": 3.1,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 3.492753623188406,
+  "anual": 3.492753623188406,
+  "ancorada": 3.492753623188406,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BIED3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BIOM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BLAU3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BMEB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BMEB4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "BMGB4",
-  "temCvm": true,
-  "potencialAntes": 0.3394648829431437,
-  "potencialDepois": -0.5,
-  "justoAntes": 8.01,
-  "justoDepois": 2.99,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": 0.3394648829431437,
+  "anual": -0.5,
+  "ancorada": -0.5,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BMIN4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BMKS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BMOB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BNBR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BOBR4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "BPAC11",
-  "temCvm": true,
-  "potencialAntes": -0.15209318028359226,
-  "potencialDepois": -0.6566509115462527,
-  "justoAntes": 50.23,
-  "justoDepois": 20.34,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.15378122889939227,
+  "anual": -0.6583389601620526,
+  "ancorada": -0.6583389601620526,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BPAC3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BPAC5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BRAP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "BRAP4",
-  "temCvm": true,
-  "potencialAntes": -0.6841637010676157,
-  "potencialDepois": -0.6841637010676157,
-  "justoAntes": 7.1,
-  "justoDepois": 7.1,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.6841637010676157,
+  "anual": -0.6841637010676157,
+  "ancorada": -0.6841637010676157,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "BRAV3",
-  "temCvm": true,
-  "potencialAntes": 1.4060402684563762,
-  "potencialDepois": 1.4060402684563762,
-  "justoAntes": 43.02,
-  "justoDepois": 43.02,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 1.401006711409396,
+  "anual": 1.401006711409396,
+  "ancorada": 1.401006711409396,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BRBI11",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BRKM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BRKM5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BRKM6",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BRSR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BRSR5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "BRSR6",
-  "temCvm": true,
-  "potencialAntes": -0.015456989247311856,
-  "potencialDepois": 0.2923387096774193,
-  "justoAntes": 14.65,
-  "justoDepois": 19.23,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.015456989247311856,
+  "anual": 0.2923387096774193,
+  "ancorada": 0.2923387096774193,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BRST3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "BSLI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-12-31"
+ },
+ {
+  "ticker": "BSLI4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2024-12-31"
+ },
+ {
+  "ticker": "CAMB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "CAML3",
-  "temCvm": false,
-  "potencialAntes": -0.6133603238866396,
-  "potencialDepois": -0.6133603238866396,
-  "justoAntes": 1.91,
-  "justoDepois": 1.91,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.6133603238866396,
+  "anual": -0.6133603238866396,
+  "ancorada": -0.6133603238866396,
+  "fimAncora": "2026-02-28"
+ },
+ {
+  "ticker": "CASH3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CBAV3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CBEE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CCTY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
  },
  {
   "ticker": "CEAB3",
-  "temCvm": true,
-  "potencialAntes": -0.37567861020629756,
-  "potencialDepois": -0.37567861020629756,
-  "justoAntes": 5.75,
-  "justoDepois": 5.75,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.37567861020629756,
+  "anual": -0.37567861020629756,
+  "ancorada": -0.37567861020629756,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CEBR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CEBR5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CEBR6",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CEDO4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CEEB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CEED3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CEGR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CGAS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CGAS5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CGRA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CGRA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CLSC3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CLSC4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CMIG3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "CMIG4",
-  "temCvm": true,
-  "potencialAntes": -0.1607460035523979,
-  "potencialDepois": -0.1607460035523979,
-  "justoAntes": 9.45,
-  "justoDepois": 9.45,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.1607460035523979,
+  "anual": -0.1607460035523979,
+  "ancorada": -0.1607460035523979,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CMIN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "COCE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "COCE5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "COGN3",
-  "temCvm": true,
-  "potencialAntes": -0.4098360655737705,
-  "potencialDepois": -0.4098360655737705,
-  "justoAntes": 1.44,
-  "justoDepois": 1.44,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.4098360655737705,
+  "anual": -0.4098360655737705,
+  "ancorada": -0.4098360655737705,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "CPFE3",
-  "temCvm": true,
-  "potencialAntes": -0.1962417253897074,
-  "potencialDepois": -0.1962417253897074,
-  "justoAntes": 37.64,
-  "justoDepois": 37.64,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.19730941704035865,
+  "anual": -0.19730941704035865,
+  "ancorada": -0.19730941704035865,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "CPLE3",
-  "temCvm": true,
-  "potencialAntes": -0.6050473186119874,
-  "potencialDepois": -0.6050473186119874,
-  "justoAntes": 6.26,
-  "justoDepois": 6.26,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.6056782334384858,
+  "anual": -0.6056782334384858,
+  "ancorada": -0.6056782334384858,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CRPG5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CRPG6",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CSAN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CSED3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CSMG3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "CSNA3",
-  "temCvm": true,
-  "potencialAntes": 0.391509433962264,
-  "potencialDepois": 0.391509433962264,
-  "justoAntes": 8.85,
-  "justoDepois": 8.85,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": 0.391509433962264,
+  "anual": 0.391509433962264,
+  "ancorada": 0.391509433962264,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CSUD3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CTAX3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "CTKA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "CURY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "CVCB3",
-  "temCvm": true,
-  "potencialAntes": 0.13829787234042568,
-  "potencialDepois": 0.13829787234042568,
-  "justoAntes": 2.14,
-  "justoDepois": 2.14,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.13829787234042568,
+  "anual": 0.13829787234042568,
+  "ancorada": 0.13829787234042568,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "CXSE3",
-  "temCvm": true,
-  "potencialAntes": -0.40090090090090086,
-  "potencialDepois": -0.40090090090090086,
-  "justoAntes": 11.97,
-  "justoDepois": 11.97,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.40240240240240244,
+  "anual": -0.40240240240240244,
+  "ancorada": -0.40240240240240244,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "CYRE3",
-  "temCvm": true,
-  "potencialAntes": -0.70703125,
-  "potencialDepois": -0.70703125,
-  "justoAntes": 7.5,
-  "justoDepois": 7.5,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.70703125,
+  "anual": -0.70703125,
+  "ancorada": -0.70703125,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "CYRE4",
-  "temCvm": true,
-  "potencialAntes": -0.7507258399004563,
-  "potencialDepois": -0.7507258399004563,
-  "justoAntes": 6.01,
-  "justoDepois": 6.01,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.7503110742430527,
+  "anual": -0.7503110742430527,
+  "ancorada": -0.7503110742430527,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "DASA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "DESK3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "DEXP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "DEXP4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "DIRR3",
-  "temCvm": true,
-  "potencialAntes": -0.7207678883071554,
-  "potencialDepois": -0.7207678883071554,
-  "justoAntes": 3.2,
-  "justoDepois": 3.2,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.7207678883071554,
+  "anual": -0.7207678883071554,
+  "ancorada": -0.7207678883071554,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "DMVF3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "DOHL4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "DOTZ3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "DTCY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "DXCO3",
-  "temCvm": true,
-  "potencialAntes": -0.8581560283687943,
-  "potencialDepois": -0.8581560283687943,
-  "justoAntes": 0.8,
-  "justoDepois": 0.8,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.8581560283687943,
+  "anual": -0.8581560283687943,
+  "ancorada": -0.8581560283687943,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "EALT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "EALT4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ECOM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "ECOR3",
-  "temCvm": true,
-  "potencialAntes": -0.3863636363636363,
-  "potencialDepois": -0.3863636363636363,
-  "justoAntes": 4.86,
-  "justoDepois": 4.86,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.38762626262626265,
+  "anual": -0.38762626262626265,
+  "ancorada": -0.38762626262626265,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "EGIE3",
-  "temCvm": true,
-  "potencialAntes": 0.5009953550099536,
-  "potencialDepois": 0.5009953550099536,
-  "justoAntes": 45.24,
-  "justoDepois": 45.24,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.4983410749834106,
+  "anual": 0.4983410749834106,
+  "ancorada": 0.4983410749834106,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "EKTR4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "EMAE4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "EMBJ3",
-  "temCvm": true,
-  "potencialAntes": -0.970625394819962,
-  "potencialDepois": -0.970625394819962,
-  "justoAntes": 2.79,
-  "justoDepois": 2.79,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.970625394819962,
+  "anual": -0.970625394819962,
+  "ancorada": -0.970625394819962,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "ENEV3",
-  "temCvm": true,
-  "potencialAntes": -0.8992388546574845,
-  "potencialDepois": -0.8992388546574845,
-  "justoAntes": 2.78,
-  "justoDepois": 2.78,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.8985139543312795,
+  "anual": -0.8985139543312795,
+  "ancorada": -0.8985139543312795,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "ENGI11",
-  "temCvm": true,
-  "potencialAntes": 0.8119774450709702,
-  "potencialDepois": 0.8119774450709702,
-  "justoAntes": 93.19,
-  "justoDepois": 93.19,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": 0.8108108108108107,
+  "anual": 0.8108108108108107,
+  "ancorada": 0.8108108108108107,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ENGI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ENGI4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ENJU3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ENMT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ENMT4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "EPAR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "EQPA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "EQPA5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "EQTL3",
-  "temCvm": true,
-  "potencialAntes": 0.034473953013278893,
-  "potencialDepois": 0.034473953013278893,
-  "justoAntes": 40.51,
-  "justoDepois": 40.51,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.031664964249233964,
+  "anual": 0.031664964249233964,
+  "ancorada": 0.031664964249233964,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ESPA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ESTR4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ETER3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "EUCA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "EUCA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "EVEN3",
-  "temCvm": true,
-  "potencialAntes": -0.8274231678486997,
-  "potencialDepois": -0.8274231678486997,
-  "justoAntes": 0.73,
-  "justoDepois": 0.73,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.8226950354609929,
+  "anual": -0.8226950354609929,
+  "ancorada": -0.8226950354609929,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "EZTC3",
-  "temCvm": true,
-  "potencialAntes": -0.33999999999999997,
-  "potencialDepois": -0.33999999999999997,
-  "justoAntes": 8.58,
-  "justoDepois": 8.58,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.3392307692307692,
+  "anual": -0.3392307692307692,
+  "ancorada": -0.3392307692307692,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "FASA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "FESA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "FESA4",
-  "temCvm": true,
-  "potencialAntes": -0.6131907308377897,
-  "potencialDepois": -0.6131907308377897,
-  "justoAntes": 2.17,
-  "justoDepois": 2.17,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.6131907308377897,
+  "anual": -0.6131907308377897,
+  "ancorada": -0.6131907308377897,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "FHER3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "FIEI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "FIQE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "FLRY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "FRAS3",
-  "temCvm": true,
-  "potencialAntes": -0.42030905077262687,
-  "potencialDepois": -0.42030905077262687,
-  "justoAntes": 13.13,
-  "justoDepois": 13.13,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.42207505518763794,
+  "anual": -0.42207505518763794,
+  "ancorada": -0.42207505518763794,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "GEPA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "GEPA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "GFSA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "GGBR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "GGBR4",
-  "temCvm": true,
-  "potencialAntes": -0.6176006314127861,
-  "potencialDepois": -0.6176006314127861,
-  "justoAntes": 9.69,
-  "justoDepois": 9.69,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.6176006314127861,
+  "anual": -0.6176006314127861,
+  "ancorada": -0.6176006314127861,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "GGPS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "GMAT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "GOAU3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "GOAU4",
-  "temCvm": true,
-  "potencialAntes": 0.023276633840644566,
-  "potencialDepois": 0.023276633840644566,
-  "justoAntes": 11.43,
-  "justoDepois": 11.43,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.020590868397493325,
+  "anual": 0.020590868397493325,
+  "ancorada": 0.020590868397493325,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "GRND3",
-  "temCvm": true,
-  "potencialAntes": -0.11413043478260879,
-  "potencialDepois": -0.11413043478260879,
-  "justoAntes": 3.26,
-  "justoDepois": 3.26,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.11413043478260879,
+  "anual": -0.11413043478260879,
+  "ancorada": -0.11413043478260879,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "HAGA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "HAGA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "HAPV3",
-  "temCvm": true,
-  "potencialAntes": 0.009641873278236955,
-  "potencialDepois": 0.009641873278236955,
-  "justoAntes": 7.33,
-  "justoDepois": 7.33,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.009641873278236955,
+  "anual": 0.08539944903581269,
+  "ancorada": 0.08539944903581269,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "HBOR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "HBRE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "HBSA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "HETA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "HOOT4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "HYPE3",
-  "temCvm": true,
-  "potencialAntes": -0.7387737478411053,
-  "potencialDepois": -0.7387737478411053,
-  "justoAntes": 6.05,
-  "justoDepois": 6.05,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.7392055267702936,
+  "anual": -0.7392055267702936,
+  "ancorada": -0.7392055267702936,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "IFCM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "IGTI11",
-  "temCvm": true,
-  "potencialAntes": -0.8577374195989407,
-  "potencialDepois": -0.8577374195989407,
-  "justoAntes": 3.76,
-  "justoDepois": 3.76,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.8577374195989407,
+  "anual": -0.8577374195989407,
+  "ancorada": -0.8577374195989407,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "IGTI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "IGTI4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "INEP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "INEP4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "INTB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "IRBR3",
-  "temCvm": true,
-  "potencialAntes": -0.5336762578363607,
-  "potencialDepois": -0.5336762578363607,
-  "justoAntes": 29.01,
-  "justoDepois": 29.01,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.5336762578363607,
+  "anual": -0.5336762578363607,
+  "ancorada": -0.5336762578363607,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ISAE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "ISAE4",
-  "temCvm": true,
-  "potencialAntes": 0.4996389891696751,
-  "potencialDepois": 0.4996389891696751,
-  "justoAntes": 41.54,
-  "justoDepois": 41.54,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.49747292418772554,
+  "anual": 0.49747292418772554,
+  "ancorada": 0.49747292418772554,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ITSA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "ITSA4",
-  "temCvm": true,
-  "potencialAntes": -0.1849462365591398,
-  "potencialDepois": -0.1849462365591398,
-  "justoAntes": 11.37,
-  "justoDepois": 11.37,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.18566308243727597,
+  "anual": -0.18566308243727597,
+  "ancorada": -0.18566308243727597,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "ITUB3",
-  "temCvm": true,
-  "potencialAntes": -0.017716535433070918,
-  "potencialDepois": -0.39326334208223973,
-  "justoAntes": 44.91,
-  "justoDepois": 27.74,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.019903762029746207,
+  "anual": -0.3937007874015748,
+  "ancorada": -0.3937007874015748,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "ITUB4",
-  "temCvm": true,
-  "potencialAntes": 0.03649809160305346,
-  "potencialDepois": -0.35830152671755733,
-  "justoAntes": 43.45,
-  "justoDepois": 26.9,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": 0.03411259541984732,
+  "anual": -0.3587786259541985,
+  "ancorada": -0.3587786259541985,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "JALL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2026-03-31"
+ },
+ {
+  "ticker": "JFEN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "JHSF3",
-  "temCvm": true,
-  "potencialAntes": 0.034061135371179094,
-  "potencialDepois": 0.034061135371179094,
-  "justoAntes": 11.84,
-  "justoDepois": 11.84,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.03318777292576426,
+  "anual": 0.03318777292576426,
+  "ancorada": 0.03318777292576426,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "JOPA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "JOPA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "JSLG3",
-  "temCvm": true,
-  "potencialAntes": -0.8213058419243986,
-  "potencialDepois": -0.8213058419243986,
-  "justoAntes": 1.04,
-  "justoDepois": 1.04,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.8213058419243986,
+  "anual": -0.8213058419243986,
+  "ancorada": -0.8213058419243986,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "KEPL3",
-  "temCvm": true,
-  "potencialAntes": 0.04341317365269462,
-  "potencialDepois": 0.04341317365269462,
-  "justoAntes": 6.97,
-  "justoDepois": 6.97,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.040419161676646775,
+  "anual": 0.040419161676646775,
+  "ancorada": 0.040419161676646775,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "KLBN11",
-  "temCvm": true,
-  "potencialAntes": -0.5963020030816641,
-  "potencialDepois": -0.5963020030816641,
-  "justoAntes": 7.86,
-  "justoDepois": 7.86,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.5978428351309707,
+  "anual": -0.768361581920904,
+  "ancorada": -0.768361581920904,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "KLBN3",
-  "temCvm": true,
-  "potencialAntes": -0.630272952853598,
-  "potencialDepois": -0.630272952853598,
-  "justoAntes": 1.49,
-  "justoDepois": 1.49,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.630272952853598,
+  "anual": -0.7915632754342432,
+  "ancorada": -0.7915632754342432,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "KLBN4",
+  "mercado": null,
+  "anual": -0.6519480519480518,
+  "ancorada": -0.6519480519480518,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "LAND3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "LAVV3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "LEVE3",
-  "temCvm": true,
-  "potencialAntes": 0.02224931423346531,
-  "potencialDepois": 0.02224931423346531,
-  "justoAntes": 33.54,
-  "justoDepois": 33.54,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.02224931423346531,
+  "anual": 0.02224931423346531,
+  "ancorada": 0.02224931423346531,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "LIGT3",
-  "temCvm": true,
-  "potencialAntes": -0.45098039215686275,
-  "potencialDepois": -0.45098039215686275,
-  "justoAntes": 1.96,
-  "justoDepois": 1.96,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.45098039215686275,
+  "anual": -0.45098039215686275,
+  "ancorada": -0.45098039215686275,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "LJQQ3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "LOGG3",
-  "temCvm": true,
-  "potencialAntes": -0.5750708215297451,
-  "potencialDepois": -0.5750708215297451,
-  "justoAntes": 10.5,
-  "justoDepois": 10.5,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.5738567381626872,
+  "anual": -0.5738567381626872,
+  "ancorada": -0.5738567381626872,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "LOGN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "LPSB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "LREN3",
-  "temCvm": true,
-  "potencialAntes": -0.27400881057268717,
-  "potencialDepois": -0.27400881057268717,
-  "justoAntes": 8.24,
-  "justoDepois": 8.24,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.27400881057268717,
+  "anual": -0.27400881057268717,
+  "ancorada": -0.27400881057268717,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "LUPA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "LUXM4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "LWSA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MAPT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MATD3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "MBRF3",
-  "temCvm": true,
-  "potencialAntes": -0.8383267382702092,
-  "potencialDepois": -0.0808366308648954,
-  "justoAntes": 2.86,
-  "justoDepois": 16.26,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.8377614471452798,
+  "anual": -0.8377614471452798,
+  "ancorada": -0.8377614471452798,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "MDIA3",
-  "temCvm": true,
-  "potencialAntes": -0.13442069741282342,
-  "potencialDepois": -0.13442069741282342,
-  "justoAntes": 15.39,
-  "justoDepois": 15.39,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.13498312710911137,
+  "anual": -0.13498312710911137,
+  "ancorada": -0.13498312710911137,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "MDNE3",
-  "temCvm": true,
-  "potencialAntes": -0.8508330104610615,
-  "potencialDepois": -0.8508330104610615,
-  "justoAntes": 3.85,
-  "justoDepois": 3.85,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.8504455637349865,
+  "anual": -0.8504455637349865,
+  "ancorada": -0.8504455637349865,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MEAL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MELK3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MGEL4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "MGLU3",
-  "temCvm": true,
-  "potencialAntes": 0.8221070811744388,
-  "potencialDepois": 0.8221070811744388,
-  "justoAntes": 10.55,
-  "justoDepois": 10.55,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.8221070811744388,
+  "anual": 0.8221070811744388,
+  "ancorada": 0.8221070811744388,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "MILS3",
-  "temCvm": true,
-  "potencialAntes": -0.8575047498416719,
-  "potencialDepois": -0.8575047498416719,
-  "justoAntes": 2.25,
-  "justoDepois": 2.25,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.8575047498416719,
+  "anual": -0.8575047498416719,
+  "ancorada": -0.8575047498416719,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MLAS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MNDL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MNPR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "MOTV3",
-  "temCvm": true,
-  "potencialAntes": -0.6746126340882002,
-  "potencialDepois": -0.6746126340882002,
-  "justoAntes": 5.46,
-  "justoDepois": 5.46,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.6758045292014302,
+  "anual": -0.6758045292014302,
+  "ancorada": -0.6758045292014302,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "MOVI3",
-  "temCvm": true,
-  "potencialAntes": -0.5265104808877928,
-  "potencialDepois": -0.5265104808877928,
-  "justoAntes": 3.84,
-  "justoDepois": 3.84,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.5265104808877928,
+  "anual": -0.5265104808877928,
+  "ancorada": -0.5265104808877928,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "MRVE3",
-  "temCvm": true,
-  "potencialAntes": 0.2288288288288289,
-  "potencialDepois": 0.2288288288288289,
-  "justoAntes": 6.82,
-  "justoDepois": 6.82,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": 0.2288288288288289,
+  "anual": 0.2288288288288289,
+  "ancorada": 0.2288288288288289,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MSPA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MTRE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MTSA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "MULT3",
-  "temCvm": true,
-  "potencialAntes": -0.8889993373094764,
-  "potencialDepois": -0.8889993373094764,
-  "justoAntes": 3.35,
-  "justoDepois": 3.35,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.8889993373094764,
+  "anual": -0.8889993373094764,
+  "ancorada": -0.8889993373094764,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MWET3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "MWET4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "MYPK3",
-  "temCvm": true,
-  "potencialAntes": -0.4587155963302753,
-  "potencialDepois": -0.4587155963302753,
-  "justoAntes": 5.31,
-  "justoDepois": 5.31,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.45769622833843016,
+  "anual": -0.45769622833843016,
+  "ancorada": -0.45769622833843016,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "NATU3",
+  "mercado": null,
+  "anual": -0.8214689265536723,
+  "ancorada": -0.8214689265536723,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "NEXP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "NORD3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "NUTR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "OBTC3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "OFSA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ONCO11",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ONCO3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "OPCT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ORVR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "OSXB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PASS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PATI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PATI4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "PCAR3",
-  "temCvm": true,
-  "potencialAntes": -0.5406360424028268,
-  "potencialDepois": -0.5406360424028268,
-  "justoAntes": 1.3,
-  "justoDepois": 1.3,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.5406360424028268,
+  "anual": -0.5406360424028268,
+  "ancorada": -0.5406360424028268,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PDGR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PDTC3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PEAB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PEAB4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "PETR3",
-  "temCvm": true,
-  "potencialAntes": -0.22534128052297633,
-  "potencialDepois": -0.22534128052297633,
-  "justoAntes": 40.29,
-  "justoDepois": 40.29,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.22534128052297633,
+  "anual": -0.22534128052297633,
+  "ancorada": -0.22534128052297633,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "PETR4",
-  "temCvm": true,
-  "potencialAntes": -0.10040331139885368,
-  "potencialDepois": -0.10040331139885368,
-  "justoAntes": 42.38,
-  "justoDepois": 42.38,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.10040331139885368,
+  "anual": -0.10040331139885368,
+  "ancorada": -0.10040331139885368,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PFRM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "PGMN3",
-  "temCvm": true,
-  "potencialAntes": 1.229166666666667,
-  "potencialDepois": 1.229166666666667,
-  "justoAntes": 8.56,
-  "justoDepois": 8.56,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 1.2265625000000002,
+  "anual": 1.2265625000000002,
+  "ancorada": 1.2265625000000002,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PINE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "PINE4",
-  "temCvm": true,
-  "potencialAntes": 0.10682226211849187,
-  "potencialDepois": 0.10682226211849187,
-  "justoAntes": 12.33,
-  "justoDepois": 12.33,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": 0.10682226211849187,
+  "anual": 0.10682226211849187,
+  "ancorada": 0.10682226211849187,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PLAS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PLPL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PMAM3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "PNVL3",
-  "temCvm": true,
-  "potencialAntes": -0.7196048632218845,
-  "potencialDepois": -0.7196048632218845,
-  "justoAntes": 3.69,
-  "justoDepois": 3.69,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.7188449848024316,
+  "anual": -0.7188449848024316,
+  "ancorada": -0.7188449848024316,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "POMO3",
-  "temCvm": true,
-  "potencialAntes": -0.755868544600939,
-  "potencialDepois": -0.755868544600939,
-  "justoAntes": 1.04,
-  "justoDepois": 1.04,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.755868544600939,
+  "anual": -0.755868544600939,
+  "ancorada": -0.755868544600939,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "POMO4",
-  "temCvm": true,
-  "potencialAntes": -0.7838427947598253,
-  "potencialDepois": -0.7838427947598253,
-  "justoAntes": 0.99,
-  "justoDepois": 0.99,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.7816593886462883,
+  "anual": -0.7816593886462883,
+  "ancorada": -0.7816593886462883,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "POSI3",
-  "temCvm": true,
-  "potencialAntes": 1.456140350877193,
-  "potencialDepois": 1.456140350877193,
-  "justoAntes": 8.4,
-  "justoDepois": 8.4,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 1.456140350877193,
+  "anual": 1.456140350877193,
+  "ancorada": 1.456140350877193,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "PRIO3",
-  "temCvm": true,
-  "potencialAntes": -0.8069446751952152,
-  "potencialDepois": -0.8069446751952152,
-  "justoAntes": 11.62,
-  "justoDepois": 11.62,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.8069446751952152,
+  "anual": -0.8069446751952152,
+  "ancorada": -0.8069446751952152,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "PRNR3",
-  "temCvm": true,
-  "potencialAntes": -0.9636363636363636,
-  "potencialDepois": -0.9636363636363636,
-  "justoAntes": 0.66,
-  "justoDepois": 0.66,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.9630853994490357,
+  "anual": -0.9630853994490357,
+  "ancorada": -0.9630853994490357,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "PSSA3",
-  "temCvm": true,
-  "potencialAntes": -0.3749516066589237,
-  "potencialDepois": -0.3749516066589237,
-  "justoAntes": 32.29,
-  "justoDepois": 32.29,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.37533875338753375,
+  "anual": -0.37533875338753375,
+  "ancorada": -0.37533875338753375,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "PTBL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "QUAL3",
-  "temCvm": true,
-  "potencialAntes": -0.22000000000000006,
-  "potencialDepois": -0.22000000000000006,
-  "justoAntes": 1.17,
-  "justoDepois": 1.17,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.22000000000000006,
+  "anual": -0.22000000000000006,
+  "ancorada": -0.22000000000000006,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "RADL3",
-  "temCvm": true,
-  "potencialAntes": -0.5097548774387193,
-  "potencialDepois": -0.5097548774387193,
-  "justoAntes": 9.8,
-  "justoDepois": 9.8,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.5107553776888444,
+  "anual": -0.5107553776888444,
+  "ancorada": -0.5107553776888444,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "RAIL3",
-  "temCvm": true,
-  "potencialAntes": -0.8831615120274915,
-  "potencialDepois": -0.8831615120274915,
-  "justoAntes": 1.7,
-  "justoDepois": 1.7,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.8838487972508592,
+  "anual": -0.8838487972508592,
+  "ancorada": -0.8838487972508592,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "RAIZ4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2026-03-31"
  },
  {
   "ticker": "RANI3",
-  "temCvm": true,
-  "potencialAntes": 0.3746736292428197,
-  "potencialDepois": 0.3746736292428197,
-  "justoAntes": 10.53,
-  "justoDepois": 10.53,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.3746736292428197,
+  "anual": 0.3746736292428197,
+  "ancorada": 0.3746736292428197,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "RAPT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "RAPT4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "RCSL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "RCSL4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "RDOR3",
-  "temCvm": true,
-  "potencialAntes": -0.413412335039052,
-  "potencialDepois": -0.413412335039052,
-  "justoAntes": 21.78,
-  "justoDepois": 21.78,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.413412335039052,
+  "anual": -0.413412335039052,
+  "ancorada": -0.413412335039052,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "RECV3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "REDE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "RENT3",
-  "temCvm": true,
-  "potencialAntes": -0.5414847161572053,
-  "potencialDepois": -0.5414847161572053,
-  "justoAntes": 16.8,
-  "justoDepois": 16.8,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.5420305676855895,
+  "anual": -0.5420305676855895,
+  "ancorada": -0.5420305676855895,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "RENT4",
-  "temCvm": true,
-  "potencialAntes": -0.5706999149900822,
-  "potencialDepois": -0.5706999149900822,
-  "justoAntes": 15.15,
-  "justoDepois": 15.15,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.5712666477755738,
+  "anual": -0.5712666477755738,
+  "ancorada": -0.5712666477755738,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "RIAA3",
-  "temCvm": true,
-  "potencialAntes": 0.05027932960893847,
-  "potencialDepois": 0.05027932960893847,
-  "justoAntes": 7.52,
-  "justoDepois": 7.52,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.05027932960893847,
+  "anual": 0.05027932960893847,
+  "ancorada": 0.05027932960893847,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "RNEW3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "RNEW4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "ROMI3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "RPAD3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "RSUL4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "RVEE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
  },
  {
   "ticker": "SANB11",
-  "temCvm": true,
-  "potencialAntes": -0.27834373973052906,
-  "potencialDepois": -0.27834373973052906,
-  "justoAntes": 21.96,
-  "justoDepois": 21.96,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.27834373973052906,
+  "anual": -0.27834373973052906,
+  "ancorada": -0.27834373973052906,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "SANB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "SANB4",
-  "temCvm": true,
-  "potencialAntes": -0.24284763805721882,
-  "potencialDepois": -0.24284763805721882,
-  "justoAntes": 11.38,
-  "justoDepois": 11.38,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.24284763805721882,
+  "anual": -0.24284763805721882,
+  "ancorada": -0.24284763805721882,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "SAPR11",
-  "temCvm": true,
-  "potencialAntes": 1.0804005722460654,
-  "potencialDepois": 1.0804005722460654,
-  "justoAntes": 72.71,
-  "justoDepois": 72.71,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 1.0781115879828322,
+  "anual": 1.0781115879828322,
+  "ancorada": 1.0781115879828322,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "SAPR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "SAPR4",
-  "temCvm": true,
-  "potencialAntes": 1.1564327485380117,
-  "potencialDepois": 1.1564327485380117,
-  "justoAntes": 14.75,
-  "justoDepois": 14.75,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 1.1535087719298247,
+  "anual": 1.1535087719298247,
+  "ancorada": 1.1535087719298247,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "SAUD3",
-  "temCvm": true,
-  "potencialAntes": -0.9006126616746086,
-  "potencialDepois": -0.9006126616746086,
-  "justoAntes": 1.46,
-  "justoDepois": 1.46,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.9006126616746086,
+  "anual": -0.9006126616746086,
+  "ancorada": -0.9006126616746086,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "SBFG3",
-  "temCvm": true,
-  "potencialAntes": -0.5143805309734513,
-  "potencialDepois": -0.5143805309734513,
-  "justoAntes": 4.39,
-  "justoDepois": 4.39,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.5143805309734513,
+  "anual": -0.5143805309734513,
+  "ancorada": -0.5143805309734513,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "SBSP3",
-  "temCvm": true,
-  "potencialAntes": -0.7923105917828874,
-  "potencialDepois": -0.7923105917828874,
-  "justoAntes": 5.51,
-  "justoDepois": 5.51,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.792687523558236,
+  "anual": -0.792687523558236,
+  "ancorada": -0.792687523558236,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "SCAR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "SEER3",
-  "temCvm": true,
-  "potencialAntes": 0.507396449704142,
-  "potencialDepois": 0.507396449704142,
-  "justoAntes": 20.38,
-  "justoDepois": 20.38,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.5044378698224853,
+  "anual": 0.5044378698224853,
+  "ancorada": 0.5044378698224853,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "SEQL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
  },
  {
   "ticker": "SHUL4",
-  "temCvm": true,
-  "potencialAntes": 0.20805369127516793,
-  "potencialDepois": 0.20805369127516793,
-  "justoAntes": 5.4,
-  "justoDepois": 5.4,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.2058165548098434,
+  "anual": 0.2058165548098434,
+  "ancorada": 0.2058165548098434,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "SIMH3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "SLCE3",
-  "temCvm": true,
-  "potencialAntes": -0.054844606946983565,
-  "potencialDepois": -0.054844606946983565,
-  "justoAntes": 15.51,
-  "justoDepois": 15.51,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.05667276051188298,
+  "anual": -0.05667276051188298,
+  "ancorada": -0.05667276051188298,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "SMFT3",
-  "temCvm": true,
-  "potencialAntes": -0.6716750139120756,
-  "potencialDepois": -0.6716750139120756,
-  "justoAntes": 5.9,
-  "justoDepois": 5.9,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.6716750139120756,
+  "anual": -0.6716750139120756,
+  "ancorada": -0.6716750139120756,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "SMTO3",
-  "temCvm": true,
-  "potencialAntes": 0.920388349514563,
-  "potencialDepois": 0.4679611650485435,
-  "justoAntes": 39.56,
-  "justoDepois": 30.24,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.9179611650485434,
+  "anual": 0.9087378640776698,
+  "ancorada": 0.9087378640776698,
+  "fimAncora": "2026-03-31"
+ },
+ {
+  "ticker": "SNSY5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "SOJA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "SOND5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "SOND6",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "SUZB3",
-  "temCvm": true,
-  "potencialAntes": 0.2763915547024952,
-  "potencialDepois": 0.2763915547024952,
-  "justoAntes": 59.85,
-  "justoDepois": 59.85,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.272552783109405,
+  "anual": 0.272552783109405,
+  "ancorada": 0.272552783109405,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "SYNE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "TAEE11",
-  "temCvm": true,
-  "potencialAntes": -0.03973031543462554,
-  "potencialDepois": -0.03973031543462554,
-  "justoAntes": 39.88,
-  "justoDepois": 39.88,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.04117505417770288,
+  "anual": -0.04117505417770288,
+  "ancorada": -0.04117505417770288,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TAEE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "TAEE4",
-  "temCvm": true,
-  "potencialAntes": -0.010676156583629918,
-  "potencialDepois": -0.010676156583629918,
-  "justoAntes": 13.9,
-  "justoDepois": 13.9,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.012811387900355978,
+  "anual": -0.012811387900355978,
+  "ancorada": -0.012811387900355978,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TASA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TASA4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TCSA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TECN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TELB3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TELB4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "TEND3",
-  "temCvm": true,
-  "potencialAntes": -0.7825584753104244,
-  "potencialDepois": -0.7825584753104244,
-  "justoAntes": 7.53,
-  "justoDepois": 7.53,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.7825584753104244,
+  "anual": -0.7825584753104244,
+  "ancorada": -0.7825584753104244,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TFCO4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "TGMA3",
-  "temCvm": true,
-  "potencialAntes": -0.4489007724301841,
-  "potencialDepois": -0.4489007724301841,
-  "justoAntes": 18.55,
-  "justoDepois": 18.55,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.4497920380273321,
+  "anual": -0.4497920380273321,
+  "ancorada": -0.4497920380273321,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TIMS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TOKY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "TOTS3",
-  "temCvm": true,
-  "potencialAntes": -0.7043478260869566,
-  "potencialDepois": -0.7043478260869566,
-  "justoAntes": 10.2,
-  "justoDepois": 10.2,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.7046376811594204,
+  "anual": -0.7046376811594204,
+  "ancorada": -0.7046376811594204,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TPIS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TRIS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TTEN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "TUPY3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": null
+ },
+ {
+  "ticker": "TXRX4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "UCAS3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "UGPA3",
-  "temCvm": true,
-  "potencialAntes": -0.6333511491181187,
-  "potencialDepois": -0.6333511491181187,
-  "justoAntes": 13.72,
-  "justoDepois": 13.72,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.6336183858898985,
+  "anual": -0.6336183858898985,
+  "ancorada": -0.6336183858898985,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "UNIP3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "UNIP5",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "UNIP6",
-  "temCvm": true,
-  "potencialAntes": -0.667895383535194,
-  "potencialDepois": -0.667895383535194,
-  "justoAntes": 18.92,
-  "justoDepois": 18.92,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.668948569422503,
+  "anual": -0.668948569422503,
+  "ancorada": -0.668948569422503,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "USIM3",
-  "temCvm": true,
-  "potencialAntes": -0.5224719101123596,
-  "potencialDepois": -0.5224719101123596,
-  "justoAntes": 3.4,
-  "justoDepois": 3.4,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.5224719101123596,
+  "anual": -0.5224719101123596,
+  "ancorada": -0.5224719101123596,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "USIM5",
-  "temCvm": true,
-  "potencialAntes": -0.5596330275229358,
-  "potencialDepois": -0.5596330275229358,
-  "justoAntes": 3.36,
-  "justoDepois": 3.36,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.5596330275229358,
+  "anual": -0.5596330275229358,
+  "ancorada": -0.5596330275229358,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "USIM6",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "VALE3",
-  "temCvm": true,
-  "potencialAntes": 0.1086237598575425,
-  "potencialDepois": 0.1086237598575425,
-  "justoAntes": 87.16,
-  "justoDepois": 87.16,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.1086237598575425,
+  "anual": 0.1086237598575425,
+  "ancorada": 0.1086237598575425,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "VAMO3",
-  "temCvm": true,
-  "potencialAntes": -0.5800000000000001,
-  "potencialDepois": -0.5800000000000001,
-  "justoAntes": 1.47,
-  "justoDepois": 1.47,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.5828571428571429,
+  "anual": -0.5828571428571429,
+  "ancorada": -0.5828571428571429,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "VBBR3",
-  "temCvm": true,
-  "potencialAntes": -0.3703703703703704,
-  "potencialDepois": -0.3703703703703704,
-  "justoAntes": 23.29,
-  "justoDepois": 23.29,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": -0.36901865369018655,
+  "anual": -0.36901865369018655,
+  "ancorada": -0.36901865369018655,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "VITT3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "VIVA3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "VIVR3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "VIVT3",
-  "temCvm": true,
-  "potencialAntes": -0.6427145708582834,
-  "potencialDepois": -0.6427145708582834,
-  "justoAntes": 10.74,
-  "justoDepois": 10.74,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.6427145708582834,
+  "anual": -0.6427145708582834,
+  "ancorada": -0.6427145708582834,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "VLID3",
-  "temCvm": true,
-  "potencialAntes": -0.40604026845637586,
-  "potencialDepois": -0.40604026845637586,
-  "justoAntes": 10.62,
-  "justoDepois": 10.62,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.40604026845637586,
+  "anual": -0.40604026845637586,
+  "ancorada": -0.40604026845637586,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "VSTE3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "VTRU3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "VULC3",
-  "temCvm": true,
-  "potencialAntes": 0.3666410453497311,
-  "potencialDepois": 0.3666410453497311,
-  "justoAntes": 17.78,
-  "justoDepois": 17.78,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": 0.3651037663335897,
+  "anual": 0.3651037663335897,
+  "ancorada": 0.3651037663335897,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "VVEO3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "WDCN3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "WEGE3",
-  "temCvm": true,
-  "potencialAntes": -0.6573250869733283,
-  "potencialDepois": -0.6573250869733283,
-  "justoAntes": 17.73,
-  "justoDepois": 17.73,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.6586780054116737,
+  "anual": -0.6586780054116737,
+  "ancorada": -0.6586780054116737,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "WEST3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "WHRL3",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "WHRL4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "WIZC3",
-  "temCvm": true,
-  "potencialAntes": 1.0382716049382719,
-  "potencialDepois": 1.0382716049382719,
-  "justoAntes": 16.51,
-  "justoDepois": 16.51,
-  "modeloAntes": "dcfEarnings",
-  "modeloDepois": "dcfEarnings"
+  "mercado": 1.0333333333333332,
+  "anual": 1.0333333333333332,
+  "ancorada": 1.0333333333333332,
+  "fimAncora": "2025-12-31"
+ },
+ {
+  "ticker": "WLMM4",
+  "mercado": null,
+  "anual": null,
+  "ancorada": null,
+  "fimAncora": "2025-12-31"
  },
  {
   "ticker": "YDUQ3",
-  "temCvm": true,
-  "potencialAntes": -0.24896265560165978,
-  "potencialDepois": -0.24896265560165978,
-  "justoAntes": 7.24,
-  "justoDepois": 7.24,
-  "modeloAntes": "dcfFcff",
-  "modeloDepois": "dcfFcff"
+  "mercado": -0.25,
+  "anual": -0.25,
+  "ancorada": -0.25,
+  "fimAncora": "2025-12-31"
  }
 ]

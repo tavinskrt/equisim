@@ -1,0 +1,776 @@
+[
+ {
+  "ticker": "ABCB4",
+  "doisPontos": 0.1550040683482507,
+  "curva": -0.08746948738812037,
+  "pesoTerminal": 0.4440733560676142
+ },
+ {
+  "ticker": "ABEV3",
+  "doisPontos": -0.11944091486658201,
+  "curva": -0.298602287166455,
+  "pesoTerminal": 0.3448109700754519
+ },
+ {
+  "ticker": "AGRO3",
+  "doisPontos": -0.49870264660093405,
+  "curva": -0.5703165542293721,
+  "pesoTerminal": 0.19485661903749557
+ },
+ {
+  "ticker": "ALOS3",
+  "doisPontos": -0.3845886844845539,
+  "curva": -0.4599097535577924,
+  "pesoTerminal": 0.22246049713058008
+ },
+ {
+  "ticker": "ALPA4",
+  "doisPontos": -0.6941783345615328,
+  "curva": -0.7472365512159175,
+  "pesoTerminal": 0.3530935952776317
+ },
+ {
+  "ticker": "ALUP11",
+  "doisPontos": 0.07639714625445898,
+  "curva": -0.34631391200951256,
+  "pesoTerminal": 1.1802992631284148
+ },
+ {
+  "ticker": "AMER3",
+  "doisPontos": -0.3045045045045045,
+  "curva": null,
+  "pesoTerminal": null
+ },
+ {
+  "ticker": "ANIM3",
+  "doisPontos": 2.1843003412969284,
+  "curva": 1.1706484641638226,
+  "pesoTerminal": 1.0435848381472663
+ },
+ {
+  "ticker": "AXIA3",
+  "doisPontos": -0.7849131693198264,
+  "curva": -0.8162083936324168,
+  "pesoTerminal": 0.2637255131800898
+ },
+ {
+  "ticker": "AZEV4",
+  "doisPontos": -0.9241379310344827,
+  "curva": -0.9379310344827586,
+  "pesoTerminal": 0.2831739957695156
+ },
+ {
+  "ticker": "AZZA3",
+  "doisPontos": 0.34934991520633124,
+  "curva": -0.005652911249293466,
+  "pesoTerminal": 0.6433408790330502
+ },
+ {
+  "ticker": "B3SA3",
+  "doisPontos": -0.7259643062751872,
+  "curva": -0.7507196315486471,
+  "pesoTerminal": 0.12510567741791254
+ },
+ {
+  "ticker": "BBAS3",
+  "doisPontos": 0.5293072824156305,
+  "curva": 0.23401420959147423,
+  "pesoTerminal": 0.41029261388115656
+ },
+ {
+  "ticker": "BBDC3",
+  "doisPontos": -0.08349146110056928,
+  "curva": -0.24098671726755222,
+  "pesoTerminal": 0.35564615821775875
+ },
+ {
+  "ticker": "BBDC4",
+  "doisPontos": -0.19944134078212283,
+  "curva": -0.3340782122905027,
+  "pesoTerminal": 0.349589858951734
+ },
+ {
+  "ticker": "BBSE3",
+  "doisPontos": 0.11005692599620495,
+  "curva": -0.09653700189753306,
+  "pesoTerminal": 0.2882809483362808
+ },
+ {
+  "ticker": "BEEF3",
+  "doisPontos": 5.468354430379747,
+  "curva": 3.6025316455696204,
+  "pesoTerminal": 0.8973418803042278
+ },
+ {
+  "ticker": "BHIA3",
+  "doisPontos": 3.492753623188406,
+  "curva": 1.5797101449275364,
+  "pesoTerminal": 0.919147051489114
+ },
+ {
+  "ticker": "BMGB4",
+  "doisPontos": 0.3394648829431437,
+  "curva": 0.14381270903010024,
+  "pesoTerminal": 0.2142684372489832
+ },
+ {
+  "ticker": "BPAC11",
+  "doisPontos": -0.15378122889939227,
+  "curva": -0.27295746117488184,
+  "pesoTerminal": 0.22665684240040632
+ },
+ {
+  "ticker": "BRAP4",
+  "doisPontos": -0.6926156583629893,
+  "curva": -0.7241992882562278,
+  "pesoTerminal": 0.14319446719931428
+ },
+ {
+  "ticker": "BRAV3",
+  "doisPontos": 1.482102908277405,
+  "curva": 0.7567114093959733,
+  "pesoTerminal": 0.6457151598096503
+ },
+ {
+  "ticker": "BRSR6",
+  "doisPontos": -0.07258064516129033,
+  "curva": -0.23454301075268819,
+  "pesoTerminal": 0.3558483156280586
+ },
+ {
+  "ticker": "CAML3",
+  "doisPontos": -0.611336032388664,
+  "curva": -0.6659919028340081,
+  "pesoTerminal": 0.39079204261955713
+ },
+ {
+  "ticker": "CEAB3",
+  "doisPontos": -0.24864277958740508,
+  "curva": -0.3452768729641694,
+  "pesoTerminal": 0.19360034786779326
+ },
+ {
+  "ticker": "CMIG4",
+  "doisPontos": -0.20426287744227345,
+  "curva": -0.44493783303730017,
+  "pesoTerminal": 0.7236208379638446
+ },
+ {
+  "ticker": "COGN3",
+  "doisPontos": -0.3770491803278688,
+  "curva": -0.5327868852459017,
+  "pesoTerminal": 0.5964301083374813
+ },
+ {
+  "ticker": "CPFE3",
+  "doisPontos": -0.32372410847747163,
+  "curva": -0.5462310484732009,
+  "pesoTerminal": 0.8717149924617117
+ },
+ {
+  "ticker": "CPLE3",
+  "doisPontos": -0.6176656151419558,
+  "curva": -0.7848580441640378,
+  "pesoTerminal": 1.6562945879806337
+ },
+ {
+  "ticker": "CSAN3",
+  "doisPontos": null,
+  "curva": -0.3421052631578947,
+  "pesoTerminal": 0.29077268832240827
+ },
+ {
+  "ticker": "CSNA3",
+  "doisPontos": 0.6650943396226414,
+  "curva": 0.46855345911949675,
+  "pesoTerminal": 0.16458930392624369
+ },
+ {
+  "ticker": "CVCB3",
+  "doisPontos": 0.4627659574468086,
+  "curva": 0.24468085106382978,
+  "pesoTerminal": 0.2296660991086921
+ },
+ {
+  "ticker": "CXSE3",
+  "doisPontos": -0.47247247247247254,
+  "curva": -0.5495495495495496,
+  "pesoTerminal": 0.24910629210361013
+ },
+ {
+  "ticker": "CYRE3",
+  "doisPontos": -0.5769531250000001,
+  "curva": -0.76015625,
+  "pesoTerminal": 1.2920465031644928
+ },
+ {
+  "ticker": "CYRE4",
+  "doisPontos": -0.5769390294483617,
+  "curva": -0.7598506843633347,
+  "pesoTerminal": 1.2920465031644928
+ },
+ {
+  "ticker": "DIRR3",
+  "doisPontos": -0.6614310645724258,
+  "curva": -0.7547993019197208,
+  "pesoTerminal": 0.6078092359280738
+ },
+ {
+  "ticker": "DXCO3",
+  "doisPontos": -0.8528368794326241,
+  "curva": -0.8705673758865249,
+  "pesoTerminal": 0.45999984068632715
+ },
+ {
+  "ticker": "ECOR3",
+  "doisPontos": -0.0946969696969697,
+  "curva": -0.3573232323232323,
+  "pesoTerminal": 0.2729010251492737
+ },
+ {
+  "ticker": "EGIE3",
+  "doisPontos": 0.1937624419376243,
+  "curva": -0.16589250165892502,
+  "pesoTerminal": 0.8961206774908527
+ },
+ {
+  "ticker": "EMBJ3",
+  "doisPontos": -0.9767319435670668,
+  "curva": -0.98883975573805,
+  "pesoTerminal": 2.2106357536316095
+ },
+ {
+  "ticker": "ENEV3",
+  "doisPontos": -0.9028633562885103,
+  "curva": -0.8448713301920986,
+  "pesoTerminal": 0.3180890478318719
+ },
+ {
+  "ticker": "ENGI11",
+  "doisPontos": 0.8493097413960723,
+  "curva": 0.4639315574567374,
+  "pesoTerminal": 0.5080719799155816
+ },
+ {
+  "ticker": "EQTL3",
+  "doisPontos": -0.013534218590398214,
+  "curva": -0.28396322778345245,
+  "pesoTerminal": 0.6770512435647958
+ },
+ {
+  "ticker": "EVEN3",
+  "doisPontos": -0.7281323877068558,
+  "curva": null,
+  "pesoTerminal": null
+ },
+ {
+  "ticker": "EZTC3",
+  "doisPontos": -0.21846153846153846,
+  "curva": -0.38230769230769235,
+  "pesoTerminal": 0.44829864326746677
+ },
+ {
+  "ticker": "FESA4",
+  "doisPontos": -0.6131907308377897,
+  "curva": -0.6327985739750446,
+  "pesoTerminal": 0.11187124821407633
+ },
+ {
+  "ticker": "FRAS3",
+  "doisPontos": -0.4838852097130243,
+  "curva": -0.6088300220750552,
+  "pesoTerminal": 0.5031609073108695
+ },
+ {
+  "ticker": "GGBR4",
+  "doisPontos": -0.6239147592738753,
+  "curva": -0.6973164956590372,
+  "pesoTerminal": 0.40359621006602847
+ },
+ {
+  "ticker": "GOAU4",
+  "doisPontos": -0.005371530886302641,
+  "curva": -0.6768128916741272,
+  "pesoTerminal": 3.6995939521009555
+ },
+ {
+  "ticker": "GRND3",
+  "doisPontos": -0.1494565217391305,
+  "curva": -0.2608695652173913,
+  "pesoTerminal": 0.26588961473190104
+ },
+ {
+  "ticker": "HAPV3",
+  "doisPontos": 0.16528925619834725,
+  "curva": -0.2424242424242424,
+  "pesoTerminal": 0.6845564090748102
+ },
+ {
+  "ticker": "HYPE3",
+  "doisPontos": -0.7672711571675302,
+  "curva": -0.6161485319516408,
+  "pesoTerminal": 0.3690463472110955
+ },
+ {
+  "ticker": "IGTI11",
+  "doisPontos": -0.8467650397275822,
+  "curva": -0.8861142640938329,
+  "pesoTerminal": 0.7060743893984266
+ },
+ {
+  "ticker": "IRBR3",
+  "doisPontos": -0.5065102073621605,
+  "curva": -0.564539463108825,
+  "pesoTerminal": 0.1645893039262437
+ },
+ {
+  "ticker": "ISAE4",
+  "doisPontos": 0.2054151624548737,
+  "curva": -0.19566787003610103,
+  "pesoTerminal": 0.9357712329374265
+ },
+ {
+  "ticker": "ITSA4",
+  "doisPontos": -0.19426523297491033,
+  "curva": -0.3555555555555555,
+  "pesoTerminal": 0.42432968470059734
+ },
+ {
+  "ticker": "ITUB3",
+  "doisPontos": -0.05905511811023613,
+  "curva": -0.20669291338582668,
+  "pesoTerminal": 0.24257360361789518
+ },
+ {
+  "ticker": "ITUB4",
+  "doisPontos": 0.02624045801526721,
+  "curva": -0.134780534351145,
+  "pesoTerminal": 0.24257360361789518
+ },
+ {
+  "ticker": "JHSF3",
+  "doisPontos": 0.14585152838427948,
+  "curva": -0.07423580786026199,
+  "pesoTerminal": 0.4343760799484733
+ },
+ {
+  "ticker": "JSLG3",
+  "doisPontos": -0.774914089347079,
+  "curva": -0.8195876288659795,
+  "pesoTerminal": 0.46325482656960476
+ },
+ {
+  "ticker": "KEPL3",
+  "doisPontos": 0.0029940119760479733,
+  "curva": -0.1661676646706586,
+  "pesoTerminal": 0.30895410977618143
+ },
+ {
+  "ticker": "KLBN11",
+  "doisPontos": -0.7981510015408321,
+  "curva": -0.7529532614278378,
+  "pesoTerminal": 0.28667028535655104
+ },
+ {
+  "ticker": "KLBN3",
+  "doisPontos": -0.8238213399503722,
+  "curva": -0.7667493796526055,
+  "pesoTerminal": 0.286670285356551
+ },
+ {
+  "ticker": "KLBN4",
+  "doisPontos": -0.7220779220779221,
+  "curva": -0.7662337662337663,
+  "pesoTerminal": 0.286670285356551
+ },
+ {
+  "ticker": "LEVE3",
+  "doisPontos": -0.05394696738799156,
+  "curva": -0.21182566290765018,
+  "pesoTerminal": 0.2635349306684577
+ },
+ {
+  "ticker": "LIGT3",
+  "doisPontos": -0.6274509803921569,
+  "curva": -0.6890756302521008,
+  "pesoTerminal": 0.304793716326896
+ },
+ {
+  "ticker": "LOGG3",
+  "doisPontos": -0.5584783488466208,
+  "curva": -0.6390125455281263,
+  "pesoTerminal": 0.37727103974045956
+ },
+ {
+  "ticker": "LREN3",
+  "doisPontos": -0.08898678414096915,
+  "curva": -0.2731277533039647,
+  "pesoTerminal": 0.46953147955128044
+ },
+ {
+  "ticker": "MBRF3",
+  "doisPontos": -0.8485019785189373,
+  "curva": -0.8767665347654042,
+  "pesoTerminal": 0.4007238709209431
+ },
+ {
+  "ticker": "MDIA3",
+  "doisPontos": -0.23790776152980878,
+  "curva": -0.3886389201349832,
+  "pesoTerminal": 0.4616546012385384
+ },
+ {
+  "ticker": "MDNE3",
+  "doisPontos": -0.7993025958930647,
+  "curva": -0.8570321580782642,
+  "pesoTerminal": 0.7199835470125491
+ },
+ {
+  "ticker": "MGLU3",
+  "doisPontos": 1.5889464594127805,
+  "curva": 0.9378238341968913,
+  "pesoTerminal": 0.53666489899555
+ },
+ {
+  "ticker": "MILS3",
+  "doisPontos": -0.8480050664977834,
+  "curva": -0.8720709309689677,
+  "pesoTerminal": 0.30352797387503644
+ },
+ {
+  "ticker": "MOTV3",
+  "doisPontos": -0.6555423122765196,
+  "curva": -0.6960667461263409,
+  "pesoTerminal": 0.16458930392624369
+ },
+ {
+  "ticker": "MOVI3",
+  "doisPontos": -0.3390875462392108,
+  "curva": -0.4475955610357582,
+  "pesoTerminal": 0.287348732736956
+ },
+ {
+  "ticker": "MRVE3",
+  "doisPontos": 0.545945945945946,
+  "curva": 0.30450450450450456,
+  "pesoTerminal": 0.28856064454287766
+ },
+ {
+  "ticker": "MULT3",
+  "doisPontos": -0.8780649436713055,
+  "curva": -0.7998674618952949,
+  "pesoTerminal": 0.31537588153270524
+ },
+ {
+  "ticker": "MYPK3",
+  "doisPontos": -0.5045871559633027,
+  "curva": -0.5158002038735984,
+  "pesoTerminal": 0.6366392600990374
+ },
+ {
+  "ticker": "PCAR3",
+  "doisPontos": -0.5053003533568905,
+  "curva": -0.558303886925795,
+  "pesoTerminal": 0.14129941066583285
+ },
+ {
+  "ticker": "PETR3",
+  "doisPontos": -0.27725437415881554,
+  "curva": -0.48336858296481444,
+  "pesoTerminal": 0.6209840124903512
+ },
+ {
+  "ticker": "PETR4",
+  "doisPontos": -0.17597113139460835,
+  "curva": -0.41137762683082146,
+  "pesoTerminal": 0.6235214346549914
+ },
+ {
+  "ticker": "PGMN3",
+  "doisPontos": 1.6640625000000002,
+  "curva": 0.8619791666666669,
+  "pesoTerminal": 0.7761052041902566
+ },
+ {
+  "ticker": "PINE4",
+  "doisPontos": 0.031418312387791705,
+  "curva": -0.0978456014362657,
+  "pesoTerminal": 0.18541743282402617
+ },
+ {
+  "ticker": "PNVL3",
+  "doisPontos": -0.7302431610942248,
+  "curva": -0.6656534954407295,
+  "pesoTerminal": 0.3028692095863933
+ },
+ {
+  "ticker": "POMO3",
+  "doisPontos": -0.7793427230046949,
+  "curva": -0.7370892018779343,
+  "pesoTerminal": 1.1707064001836835
+ },
+ {
+  "ticker": "POMO4",
+  "doisPontos": -0.796943231441048,
+  "curva": -0.7423580786026202,
+  "pesoTerminal": 1.1381195263612516
+ },
+ {
+  "ticker": "POSI3",
+  "doisPontos": 1.7602339181286548,
+  "curva": 0.888888888888889,
+  "pesoTerminal": 0.766483760744527
+ },
+ {
+  "ticker": "PRIO3",
+  "doisPontos": -0.830702774547267,
+  "curva": -0.25037381624854627,
+  "pesoTerminal": 0.2562138814659697
+ },
+ {
+  "ticker": "PRNR3",
+  "doisPontos": -0.9641873278236915,
+  "curva": -0.9707988980716252,
+  "pesoTerminal": 0.4258379950005816
+ },
+ {
+  "ticker": "PSSA3",
+  "doisPontos": -0.4684475416182733,
+  "curva": -0.5609756097560975,
+  "pesoTerminal": 0.35025563767628576
+ },
+ {
+  "ticker": "QUAL3",
+  "doisPontos": -0.040000000000000036,
+  "curva": -0.82,
+  "pesoTerminal": 0.5534262453071016
+ },
+ {
+  "ticker": "RADL3",
+  "doisPontos": -0.5542771385692846,
+  "curva": -0.6688344172086043,
+  "pesoTerminal": 0.566776823784275
+ },
+ {
+  "ticker": "RAIL3",
+  "doisPontos": -0.8838487972508592,
+  "curva": -0.8948453608247423,
+  "pesoTerminal": 0.1645893039262437
+ },
+ {
+  "ticker": "RANI3",
+  "doisPontos": 0.2610966057441253,
+  "curva": 0.005221932114882511,
+  "pesoTerminal": 0.7018047385846263
+ },
+ {
+  "ticker": "RDOR3",
+  "doisPontos": -0.3692431995690816,
+  "curva": -0.47050902235389175,
+  "pesoTerminal": 0.2449084956692461
+ },
+ {
+  "ticker": "RENT3",
+  "doisPontos": -0.6604803493449782,
+  "curva": -0.548853711790393,
+  "pesoTerminal": 0.26319821142517524
+ },
+ {
+  "ticker": "RENT4",
+  "doisPontos": -0.6474922074241996,
+  "curva": -0.5315953527911589,
+  "pesoTerminal": 0.26319821142517524
+ },
+ {
+  "ticker": "RIAA3",
+  "doisPontos": 0.3729050279329609,
+  "curva": 0.06843575418994416,
+  "pesoTerminal": 0.5166275402205698
+ },
+ {
+  "ticker": "SANB11",
+  "doisPontos": -0.2829444627012816,
+  "curva": -0.3933618139993427,
+  "pesoTerminal": 0.28101114838152697
+ },
+ {
+  "ticker": "SANB4",
+  "doisPontos": -0.279441117764471,
+  "curva": -0.3905522288755821,
+  "pesoTerminal": 0.28101114838152697
+ },
+ {
+  "ticker": "SAPR11",
+  "doisPontos": 0.9553648068669527,
+  "curva": 0.4082975679542202,
+  "pesoTerminal": 0.6708816353926382
+ },
+ {
+  "ticker": "SAPR4",
+  "doisPontos": 1.010233918128655,
+  "curva": 0.4400584795321637,
+  "pesoTerminal": 0.670933191768697
+ },
+ {
+  "ticker": "SAUD3",
+  "doisPontos": -0.9128658951667802,
+  "curva": -0.9223961878829136,
+  "pesoTerminal": 0.15002821077153042
+ },
+ {
+  "ticker": "SBFG3",
+  "doisPontos": -0.2853982300884955,
+  "curva": -0.3561946902654866,
+  "pesoTerminal": 0.7922407592062597
+ },
+ {
+  "ticker": "SBSP3",
+  "doisPontos": -0.7998492272898606,
+  "curva": -0.7056162834526951,
+  "pesoTerminal": 0.8092536428675388
+ },
+ {
+  "ticker": "SEER3",
+  "doisPontos": 0.7899408284023669,
+  "curva": 0.440828402366864,
+  "pesoTerminal": 0.37731582347646325
+ },
+ {
+  "ticker": "SHUL4",
+  "doisPontos": 0.11633109619686811,
+  "curva": -0.07606263982102905,
+  "pesoTerminal": 0.3271376347280102
+ },
+ {
+  "ticker": "SLCE3",
+  "doisPontos": -0.2821450335161487,
+  "curva": -0.6526508226691042,
+  "pesoTerminal": 1.1838314968163404
+ },
+ {
+  "ticker": "SMFT3",
+  "doisPontos": -0.6293823038397328,
+  "curva": -0.6727879799666111,
+  "pesoTerminal": 0.16458930392624369
+ },
+ {
+  "ticker": "SMTO3",
+  "doisPontos": 0.878155339805825,
+  "curva": 0.6718446601941745,
+  "pesoTerminal": 0.9735784605088231
+ },
+ {
+  "ticker": "SUZB3",
+  "doisPontos": -0.020899978673491235,
+  "curva": -0.45404137342716994,
+  "pesoTerminal": 1.1265711975965527
+ },
+ {
+  "ticker": "TAEE11",
+  "doisPontos": -0.2875030098723814,
+  "curva": -0.5831928726222009,
+  "pesoTerminal": 1.3554964799634863
+ },
+ {
+  "ticker": "TAEE4",
+  "doisPontos": -0.2939501779359431,
+  "curva": -0.5871886120996441,
+  "pesoTerminal": 1.3565414323499667
+ },
+ {
+  "ticker": "TEND3",
+  "doisPontos": -0.7375108287611898,
+  "curva": -0.7793820386947733,
+  "pesoTerminal": 0.2514882729755633
+ },
+ {
+  "ticker": "TGMA3",
+  "doisPontos": -0.45008912655971467,
+  "curva": -0.541592394533571,
+  "pesoTerminal": 0.30336734335837756
+ },
+ {
+  "ticker": "TOTS3",
+  "doisPontos": -0.7046376811594204,
+  "curva": -0.751304347826087,
+  "pesoTerminal": 0.29397450128919106
+ },
+ {
+  "ticker": "UGPA3",
+  "doisPontos": -0.6336183858898985,
+  "curva": -0.6905398182789952,
+  "pesoTerminal": 0.31953165685319684
+ },
+ {
+  "ticker": "UNIP6",
+  "doisPontos": -0.668948569422503,
+  "curva": -0.7779533087589959,
+  "pesoTerminal": 1.0004011962106805
+ },
+ {
+  "ticker": "USIM3",
+  "doisPontos": -0.5224719101123596,
+  "curva": -0.601123595505618,
+  "pesoTerminal": 0.29248113584811125
+ },
+ {
+  "ticker": "USIM5",
+  "doisPontos": -0.5596330275229358,
+  "curva": -0.6317169069462648,
+  "pesoTerminal": 0.2894390695586996
+ },
+ {
+  "ticker": "VALE3",
+  "doisPontos": 0.1086237598575425,
+  "curva": -0.10429916051895195,
+  "pesoTerminal": 0.3430155903367126
+ },
+ {
+  "ticker": "VAMO3",
+  "doisPontos": -0.5828571428571429,
+  "curva": -0.6485714285714286,
+  "pesoTerminal": 0.20441696582264104
+ },
+ {
+  "ticker": "VBBR3",
+  "doisPontos": -0.36901865369018655,
+  "curva": -0.1873479318734794,
+  "pesoTerminal": 0.30212916132599493
+ },
+ {
+  "ticker": "VIVT3",
+  "doisPontos": -0.6427145708582834,
+  "curva": -0.7232202262142382,
+  "pesoTerminal": 0.324629506861772
+ },
+ {
+  "ticker": "VLID3",
+  "doisPontos": -0.40604026845637586,
+  "curva": -0.5553691275167786,
+  "pesoTerminal": 0.644753607762291
+ },
+ {
+  "ticker": "VULC3",
+  "doisPontos": 0.3651037663335897,
+  "curva": 0.10069177555726368,
+  "pesoTerminal": 0.385606990350882
+ },
+ {
+  "ticker": "WEGE3",
+  "doisPontos": -0.6586780054116737,
+  "curva": -0.7427522226517201,
+  "pesoTerminal": 0.36989648772750333
+ },
+ {
+  "ticker": "WIZC3",
+  "doisPontos": 1.0333333333333332,
+  "curva": 0.7506172839506173,
+  "pesoTerminal": 0.24023846185656728
+ },
+ {
+  "ticker": "YDUQ3",
+  "doisPontos": -0.25,
+  "curva": -0.7717842323651453,
+  "pesoTerminal": 0.2778499072642176
+ }
+]

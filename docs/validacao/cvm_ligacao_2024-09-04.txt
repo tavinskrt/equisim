@@ -1,0 +1,46 @@
+== avaliação em 2024-09-04 ==
+  documentos da CVM por ticker: 371
+  avaliações com série ancorada em trimestre: 341
+
+== A1.7 refeito — mercado → CVM anual ==
+  avaliados: 112 → 113
+  ganhos  (1): NATU3
+  perdidos (0): 
+  mediana do |Δ potencial|: 0.0%
+  |Δ| > 1 p.p.: 20   |Δ| > 10 p.p.: 12
+  os que mais se moveram:
+    ITUB3        50.8% →    -40.6%  (-91.4%)  2024-06-30
+    CSAN3        62.5% →    135.9%  (73.4%)  2023-12-31
+    BBAS3       105.1% →     37.4%  (-67.7%)  2024-06-30
+    ITUB4        25.6% →    -37.9%  (-63.6%)  2024-06-30
+    YDUQ3       -73.0% →    -18.7%  (54.3%)  2024-06-30
+    BEEF3       344.8% →    392.8%  (48.0%)  2024-06-30
+    CVCB3       -26.3% →     -0.5%  (25.8%)  2024-06-30
+    SUZB3       -54.6% →    -30.8%  (23.8%)  2024-06-30
+    BPAC11      -67.4% →    -89.7%  (-22.3%)  2023-12-31
+    CSNA3       116.1% →    136.2%  (20.1%)  2024-06-30
+    BBDC3        -5.0% →     13.7%  (18.8%)  2024-06-30
+    BBDC4       -15.4% →      1.3%  (16.7%)  2024-06-30
+
+== A1.8 — CVM anual → CVM ancorada ==
+  avaliados: 113 → 108
+  ganhos  (3): IRBR3 MBRF3 SAUD3
+  perdidos (8): ANIM3 BRAV3 COGN3 CVCB3 DASA3 HBSA3 LIGT3 RAIL3
+  mediana do |Δ potencial|: 14.8%
+  |Δ| > 1 p.p.: 95   |Δ| > 10 p.p.: 60
+  os que mais se moveram:
+    POSI3       989.3% →    498.8%  (-490.5%)  2024-06-30
+    PCAR3       323.5% →     11.5%  (-312.1%)  2024-06-30
+    BEEF3       392.8% →    151.3%  (-241.6%)  2024-06-30
+    CSNA3       136.2% →    -80.4%  (-216.6%)  2024-06-30
+    RAPT4       142.3% →    -67.1%  (-209.4%)  2024-06-30
+    CAML3       194.1% →     20.7%  (-173.4%)  2024-05-31
+    RANI3       113.3% →    -47.2%  (-160.4%)  2024-06-30
+    SMTO3       130.0% →     15.2%  (-114.8%)  2024-06-30
+    LREN3       -58.1% →     54.0%  (112.1%)  2024-06-30
+    SLCE3        28.8% →    -65.4%  (-94.2%)  2024-06-30
+    SAPR4        81.2% →     -8.6%  (-89.8%)  2024-06-30
+    AGRO3       198.3% →    109.3%  (-89.0%)  2024-03-31
+
+  procedência na montagem ancorada: {FieldSource.cvm: 166428, FieldSource.mercado: 44992}
+  gravado docs/validacao/cvm_ligacao_2024-09-04.json

@@ -91,6 +91,35 @@ Future<void> main(List<String> args) async {
     }
   }
 
+  // --- Regra 0: registro oficial da B3 (decisão 82) ---
+  // Emissor → código CVM, de data/b3/companhias; código CVM → CNPJ, dos
+  // metadados de DFP e ITR de todos os anos. Ausente o registro, a regra só
+  // não responde.
+  final cvmParaCnpj = <String, String>{};
+  for (final f in Directory(dir).listSync().whereType<File>().where((f) {
+    final n = f.uri.pathSegments.last;
+    return RegExp(r'^(dfp|itr)_cia_aberta_\d{4}\.csv$').hasMatch(n);
+  })) {
+    for (final r in _lerCsv(f)) {
+      final cd = int.tryParse(r['CD_CVM'] ?? '');
+      final cnpj = r['CNPJ_CIA'];
+      if (cd != null && cnpj != null) cvmParaCnpj['$cd'] = cnpj;
+    }
+  }
+  final porRegistroOficial = <String, String>{};
+  final registro = Directory('data/b3/companhias');
+  if (registro.existsSync()) {
+    for (final f in registro.listSync().whereType<File>()) {
+      final bruto = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
+      for (final c in (bruto['resposta'] as List).cast<Map<String, dynamic>>()) {
+        final cd = int.tryParse('${c['codeCVM']}');
+        final cnpj = cd == null ? null : cvmParaCnpj['$cd'];
+        final code = c['code'];
+        if (code is String && cnpj != null) porRegistroOficial[code] = cnpj;
+      }
+    }
+  }
+
   // --- Universo ---
   final uni = (jsonDecode(
     File('docs/validacao/universo.json').readAsStringSync(),
@@ -102,11 +131,18 @@ Future<void> main(List<String> args) async {
       if (u['nome'] != null) u['ticker'] as String: u['nome'] as String,
   };
 
+  final semOficial = CvmBridge.resolverUniverso(
+    tickers,
+    porCodigo: codigoUnico,
+    porNome: porNome,
+    nomes: nomes,
+  );
   final ponte = CvmBridge.resolverUniverso(
     tickers,
     porCodigo: codigoUnico,
     porNome: porNome,
     nomes: nomes,
+    porRegistroOficial: porRegistroOficial,
   );
   final faltando = [for (final t in tickers) if (!ponte.containsKey(t)) t];
 
@@ -124,6 +160,17 @@ Future<void> main(List<String> args) async {
       '(${(100 * ponte.length / tickers.length).toStringAsFixed(1)}%)');
   stdout.writeln('  companhias distintas: ${ponte.values.toSet().length}');
   stdout.writeln('  sem ponte: ${faltando.length}  ${faltando.join(" ")}');
+  stdout.writeln('  emissores no registro oficial da B3: '
+      '${porRegistroOficial.length}');
+  final corrigidos = [
+    for (final e in ponte.entries)
+      if (semOficial[e.key] != null && semOficial[e.key] != e.value)
+        '${e.key} ${semOficial[e.key]} → ${e.value}',
+  ];
+  stdout.writeln('  corrigidos pelo registro oficial: ${corrigidos.length}');
+  for (final c in corrigidos) {
+    stdout.writeln('    $c');
+  }
   final inesperados =
       faltando.where((t) => !CvmBridge.semPonte.contains(t)).toList();
   stdout.writeln('  fora do que o núcleo declara em semPonte: '
@@ -144,7 +191,7 @@ Future<void> main(List<String> args) async {
 
   File('docs/validacao/ponte_cvm.json').writeAsStringSync(
     const JsonEncoder.withIndent(' ').convert({
-      'medidoEm': '2026-09-11',
+      'medidoEm': '2026-09-14',
       'universo': tickers.length,
       'resolvidos': ponte.length,
       'companhias': ponte.values.toSet().length,

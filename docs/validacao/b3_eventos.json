@@ -1,0 +1,245 @@
+{
+ "ALPA4": [
+  {
+   "dataEx": "2019-03-21",
+   "fator": 1.25,
+   "razaoObservada": 0.7989637305699482
+  }
+ ],
+ "AZEV4": [
+  {
+   "dataEx": "2019-06-10",
+   "fator": 0.25,
+   "razaoObservada": 4.177777777777777
+  }
+ ],
+ "BBAS3": [
+  {
+   "dataEx": "2024-04-16",
+   "fator": 2.0,
+   "razaoObservada": 0.4943322706340772
+  }
+ ],
+ "CAMB4": [
+  {
+   "dataEx": "2019-08-15",
+   "fator": 10.0,
+   "razaoObservada": 0.10129146619397315
+  }
+ ],
+ "CGAS5": [
+  {
+   "dataEx": "2019-12-10",
+   "fator": 1.3,
+   "razaoObservada": 0.7746428571428572
+  }
+ ],
+ "CMIG3": [
+  {
+   "dataEx": "2024-04-30",
+   "fator": 1.3,
+   "razaoObservada": 0.7771739130434782
+  }
+ ],
+ "CMIG4": [
+  {
+   "dataEx": "2024-04-30",
+   "fator": 1.3,
+   "razaoObservada": 0.7698975571315997
+  }
+ ],
+ "EQTL3": [
+  {
+   "dataEx": "2019-11-28",
+   "fator": 5.0,
+   "razaoObservada": 0.2012770137524558
+  }
+ ],
+ "FESA3": [
+  {
+   "dataEx": "2024-01-24",
+   "fator": 4.0,
+   "razaoObservada": 0.25
+  }
+ ],
+ "FESA4": [
+  {
+   "dataEx": "2024-01-24",
+   "fator": 4.0,
+   "razaoObservada": 0.2549707602339181
+  }
+ ],
+ "GSHP3": [
+  {
+   "dataEx": "2019-03-27",
+   "fator": 5.0,
+   "razaoObservada": 0.19553072625698323
+  }
+ ],
+ "GUAR3": [
+  {
+   "dataEx": "2019-05-02",
+   "fator": 8.0,
+   "razaoObservada": 0.12748976334235548
+  }
+ ],
+ "IDVL3": [
+  {
+   "dataEx": "2019-01-09",
+   "fator": 0.1,
+   "razaoObservada": 10.0
+  }
+ ],
+ "IDVL4": [
+  {
+   "dataEx": "2019-01-07",
+   "fator": 0.1,
+   "razaoObservada": 9.583333333333334
+  }
+ ],
+ "IRBR3": [
+  {
+   "dataEx": "2019-09-26",
+   "fator": 3.0,
+   "razaoObservada": 0.33572141108188996
+  }
+ ],
+ "LCAM3": [
+  {
+   "dataEx": "2019-10-18",
+   "fator": 3.0,
+   "razaoObservada": 0.339463601532567
+  }
+ ],
+ "MGLU3": [
+  {
+   "dataEx": "2019-08-06",
+   "fator": 8.0,
+   "razaoObservada": 0.13260869565217392
+  },
+  {
+   "dataEx": "2024-05-27",
+   "fator": 0.1,
+   "razaoObservada": 9.962121212121211
+  }
+ ],
+ "NATU3": [
+  {
+   "dataEx": "2019-09-18",
+   "fator": 2.0,
+   "razaoObservada": 0.4996544574982723
+  }
+ ],
+ "PMAM3": [
+  {
+   "dataEx": "2019-05-02",
+   "fator": 0.06666666666666667,
+   "razaoObservada": 15.764285714285716
+  }
+ ],
+ "POMO4": [
+  {
+   "dataEx": "2024-03-08",
+   "fator": 1.25,
+   "razaoObservada": 0.7995444191343963
+  }
+ ],
+ "PRIO3": [
+  {
+   "dataEx": "2019-03-06",
+   "fator": 10.0,
+   "razaoObservada": 0.10136904761904762
+  }
+ ],
+ "RCSL3": [
+  {
+   "dataEx": "2024-05-31",
+   "fator": 0.25,
+   "razaoObservada": 3.8151260504201683
+  }
+ ],
+ "RCSL4": [
+  {
+   "dataEx": "2024-05-31",
+   "fator": 0.25,
+   "razaoObservada": 3.833333333333333
+  }
+ ],
+ "SLCE3": [
+  {
+   "dataEx": "2019-05-02",
+   "fator": 2.0,
+   "razaoObservada": 0.48905109489051096
+  }
+ ],
+ "TEND3": [
+  {
+   "dataEx": "2019-03-26",
+   "fator": 2.0,
+   "razaoObservada": 0.5143454871488344
+  }
+ ],
+ "TRPL4": [
+  {
+   "dataEx": "2019-04-05",
+   "fator": 4.0,
+   "razaoObservada": 0.2563131313131313
+  }
+ ],
+ "TRPN3": [
+  {
+   "dataEx": "2019-01-07",
+   "fator": 2.0,
+   "razaoObservada": 0.4845814977973569
+  }
+ ],
+ "UGPA3": [
+  {
+   "dataEx": "2019-04-18",
+   "fator": 2.0,
+   "razaoObservada": 0.5088823926242411
+  }
+ ],
+ "PATI4": [
+  {
+   "dataEx": "2024-09-10",
+   "fator": 1.25,
+   "razaoObservada": 0.8003557136505114
+  }
+ ],
+ "SQIA3": [
+  {
+   "dataEx": "2019-10-01",
+   "fator": 4.0,
+   "razaoObservada": 0.24838709677419354
+  }
+ ],
+ "AMBP3": [
+  {
+   "dataEx": "2024-12-20",
+   "fator": 1.25,
+   "razaoObservada": 0.79375
+  }
+ ],
+ "TRAD3": [
+  {
+   "dataEx": "2024-07-22",
+   "fator": 0.125,
+   "razaoObservada": 7.653846153846153
+  }
+ ],
+ "SYNE3": [
+  {
+   "dataEx": "2024-12-09",
+   "fator": 2.0,
+   "razaoObservada": 0.5298416565164432
+  }
+ ],
+ "SEQL3": [
+  {
+   "dataEx": "2024-05-31",
+   "fator": 0.05,
+   "razaoObservada": 20.612903225806452
+  }
+ ]
+}
