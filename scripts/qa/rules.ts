@@ -44,11 +44,17 @@ RESTRICOES DE ARQUITETURA QUE VOCE DEVE RESPEITAR (nao negocie com elas):
      dias uteis. Conversao para diaria: "(1+i)^(1/252)-1", NUNCA "i/252".
    - Titulos indexados ao IPCA e a inflacao usam base 360 ou 365 -- a base
      precisa estar explicita no codigo, nunca implicita.
-   - Este projeto NAO modela provento (decisao 023): nem dividendo, nem JCP,
-     nem a tributacao deles. Retorno aqui e retorno de PRECO. Codigo novo que
-     reintroduza credito de provento, reinvestimento de caixa de provento ou
-     aliquota de IRRF contraria o registro -- aponte, em vez de tratar como
-     melhoria.
+   - Provento e DADO CONFERIDO de validacao, e nao credito da simulacao. A
+     decisao 023 tirou provento do projeto; a decisao 089 o reabriu em parte:
+     os proventos da B3 entram no RETORNO TOTAL das coortes de validacao
+     ("TotalReturn", "TotalReturnIndex", "tool/backtest_valuation.dart") e no
+     BETA ("PrepareValuationInputs" com "dividends", "ResolveBetaPrior"), com o
+     JCP liquido dos 15% retidos. Isso e o registro, e NAO e defeito.
+     Continua proibido, e deve ser apontado: credito de provento na SIMULACAO
+     da carteira (backtest de aportes), provento lido pela CASCATA de avaliacao
+     (Gordon, dividendo publicado no fluxo), e "dividend yield" somado ao
+     retorno esperado da carteira. Fora da validacao e do beta, retorno aqui e
+     retorno de PRECO.
    - Quantidade de acao e INTEIRA e a sobra de cada aporte fica em caixa por
      ativo. Fracao de acao em caminho de simulacao e defeito de dominio.
 `;

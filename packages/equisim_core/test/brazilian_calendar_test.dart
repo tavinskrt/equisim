@@ -91,4 +91,20 @@ void main() {
       expect(_duDoTesouro(_d(2019, 3, 15), _d(2025, 1, 1)), 1458);
     });
   });
+
+  group('Pregão da B3 — data ex', () {
+    test('24/12 e 31/12 são dias úteis e não têm pregão', () {
+      expect(BrazilianCalendar.isBusinessDay(_d(2014, 12, 31)), isTrue);
+      expect(BrazilianCalendar.isTradingDay(_d(2014, 12, 31)), isFalse);
+      expect(BrazilianCalendar.isTradingDay(_d(2025, 12, 24)), isFalse);
+      expect(BrazilianCalendar.isTradingDay(_d(2025, 12, 23)), isTrue);
+    });
+
+    test('data-com em 30/12 tem data ex no primeiro pregão de janeiro', () {
+      expect(BrazilianCalendar.nextTradingSession(_d(2014, 12, 30)),
+          _d(2015, 1, 2));
+      expect(BrazilianCalendar.nextTradingSession(_d(2025, 9, 12)),
+          _d(2025, 9, 15));
+    });
+  });
 }

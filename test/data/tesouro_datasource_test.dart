@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'fixture_adapter.dart';
 
-ApiClient _cliente(FixtureAdapter adapter, {String? tesouroProxyUrl}) {
+ApiClient _cliente(FixtureAdapter adapter) {
   final dio = Dio(BaseOptions(
     responseType: ResponseType.plain,
     validateStatus: ApiClient.acceptsStatus,
@@ -22,7 +22,6 @@ ApiClient _cliente(FixtureAdapter adapter, {String? tesouroProxyUrl}) {
       mode: BrapiMode.direct,
       brapiBaseUrl: 'https://brapi.dev/api',
       bcbBaseUrl: 'https://api.bcb.gov.br/dados/serie',
-      tesouroProxyUrl: tesouroProxyUrl,
     ),
     dio: dio,
   );
@@ -74,26 +73,6 @@ void main() {
         failures: {'precotaxatesourodireto.csv': 503},
       )));
       expect((await fonte.latest()).isErr, isTrue);
-    });
-  });
-
-  group('Tesouro pela função de nuvem', () {
-    test('com o endereço configurado, pergunta à função', () async {
-      final corpo = jsonEncode(TreasuryQuotesCodec.encode([
-        TreasuryQuote(
-          type: TreasuryCurve.ltn,
-          maturity: DateTime.utc(2027, 1, 1),
-          baseDate: DateTime.utc(2026, 9, 10),
-          rate: 0.1356,
-        ),
-      ], geradoEm: DateTime.utc(2026, 9, 10)));
-      final adapter = FixtureAdapter(bodies: {'/tesouro': corpo});
-      final fonte = TesouroDatasource(_cliente(adapter,
-          tesouroProxyUrl: 'https://funcoes.exemplo/tesouro'));
-      final cotacoes = (await fonte.latest()).unwrap();
-      expect(cotacoes.single.rate, closeTo(0.1356, 1e-12));
-      expect(adapter.callCount['package_show'], isNull,
-          reason: 'a função substitui o caminho direto');
     });
   });
 
@@ -164,6 +143,55 @@ void main() {
       expect(chamadas, 1, reason: 'o mesmo dia usa a mesma busca');
       await repo.curveAt(DateTime(2026, 9, 12));
       expect(chamadas, 2);
+    });
+
+    String pacoteDe(DateTime base) => jsonEncode(
+        TreasuryQuotesCodec.encode(dia(base), geradoEm: base));
+
+    test('na web, só o pacote — decisão 86', () async {
+      final repo = RiskFreeCurveRepository(
+        remote: null,
+        carregarPacote: () async => pacoteDe(DateTime.utc(2026, 9, 8)),
+      );
+      final r = await repo.readAt(DateTime(2026, 9, 11));
+      expect(r.curve!.referenceDate, DateTime.utc(2026, 9, 8));
+      expect(r.note, isNull, reason: 'com curva, a avaliação já diz a data');
+    });
+
+    test('na web, pacote vencido: a ressalva diz a data e o remédio', () async {
+      final repo = RiskFreeCurveRepository(
+        remote: null,
+        carregarPacote: () async => pacoteDe(DateTime.utc(2026, 6, 1)),
+      );
+      final r = await repo.readAt(DateTime(2026, 9, 11));
+      expect(r.curve, isNull);
+      expect(r.note, contains('Na web'));
+      expect(r.note, contains('01/06/2026'));
+      expect(r.note, contains('build novo'));
+    });
+
+    test('na web, sem pacote legível, a ressalva diz isso', () async {
+      final repo = RiskFreeCurveRepository(
+        remote: null,
+        carregarPacote: () async => '{isto não é json',
+      );
+      final r = await repo.readAt(DateTime(2026, 9, 11));
+      expect(r.curve, isNull);
+      expect(r.note, contains('não pôde ser lido'));
+    });
+
+    test('no nativo, sem o Tesouro e com pacote vencido, a ressalva não fala '
+        'em build', () async {
+      final repo = RiskFreeCurveRepository(
+        remote: _Fonte(() async => const Err(InsufficientData('sem rede'))),
+        carregarPacote: () async => pacoteDe(DateTime.utc(2026, 6, 1)),
+      );
+      final r = await repo.readAt(DateTime(2026, 9, 11));
+      expect(r.curve, isNull);
+      expect(r.note, contains('O Tesouro não trouxe'));
+      expect(r.note, contains('01/06/2026'));
+      expect(r.note, isNot(contains('build novo')),
+          reason: 'no nativo o remédio é a rede, e não um build');
     });
   });
 

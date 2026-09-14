@@ -169,6 +169,74 @@ abstract final class CorporateEvents {
     return out;
   }
 
+  /// Data ex de um evento **declarado** — pela CVM, no Formulário de
+  /// Referência —, localizada no preço (item A3.4).
+  ///
+  /// O formulário dá o fator, pela contagem antes e depois, e a **data de
+  /// aprovação**, que não é a data ex: entre a assembleia e o primeiro pregão
+  /// sem direito correm dias ou meses. A data ex é o primeiro pregão, a partir
+  /// da aprovação e dentro de [windowDays] dias, em que o fechamento se divide
+  /// pelo fator declarado, com a mesma folga de [detect].
+  ///
+  /// Fator perto de 1 — bonificação pequena — não se distingue de provento
+  /// pelo preço. Para ele vale a primeira troca de `DISMES` na janela, que é
+  /// onde a B3 marca o evento, e o [ShareEvent] sai com `observedRatio` da
+  /// troca.
+  ///
+  /// **Fator longe de 1 tem uma segunda chance.** O grupamento de papel em
+  /// crise acontece no dia em que o mercado também despenca, e a folga de 6%
+  /// o recusa. Mas um fator de 25 não se confunde com oscilação: vale a
+  /// primeira troca de `DISMES` em que a razão está a [toleranciaDeclarada] do
+  /// declarado. Sem troca nem razão que case, `null`: evento que não se
+  /// localiza não ajusta nada.
+  static ShareEvent? locate(
+    List<RawQuote> quotes, {
+    required double factor,
+    required DateTime approvedOn,
+    int windowDays = 365,
+  }) {
+    if (!(factor > 0) || !factor.isFinite) return null;
+    final inicio = DateTime.utc(approvedOn.year, approvedOn.month, approvedOn.day);
+    final fim = inicio.add(Duration(days: windowDays));
+    final s = [
+      for (final q in quotes)
+        if (q.close.isFinite && q.close > 0) q,
+    ]..sort((a, b) => a.date.compareTo(b.date));
+    final pertoDeUm = math.log(factor).abs() < math.log(1.6);
+    final folga = pertoDeUm ? toleranciaBonificacao : tolerancia;
+
+    ShareEvent? primeiraTroca;
+    ShareEvent? trocaQueCasa;
+    for (var i = 1; i < s.length; i++) {
+      final antes = s[i - 1], depois = s[i];
+      final dia = DateTime.utc(depois.date.year, depois.date.month, depois.date.day);
+      if (dia.isBefore(inicio)) continue;
+      if (dia.isAfter(fim)) break;
+      if (_dias(antes.date, depois.date) > maxDiasEntrePregoes) continue;
+      final razao = depois.close / antes.close;
+      if (((1 / razao) / factor - 1).abs() <= folga &&
+          (!pertoDeUm || (razao - 1).abs() >= minDesvio)) {
+        return ShareEvent(exDate: dia, factor: factor, observedRatio: razao);
+      }
+      if (depois.distribution != antes.distribution) {
+        final ev = ShareEvent(exDate: dia, factor: factor, observedRatio: razao);
+        primeiraTroca ??= ev;
+        if (trocaQueCasa == null &&
+            !pertoDeUm &&
+            math.log((1 / razao) / factor).abs() <
+                math.log(1 + toleranciaDeclarada)) {
+          trocaQueCasa = ev;
+        }
+      }
+    }
+    return pertoDeUm ? primeiraTroca : trocaQueCasa;
+  }
+
+  /// Folga da segunda chance de [locate]: fator declarado longe de 1, com
+  /// troca de `DISMES`, a 25% da razão observada — em escala logarítmica, onde
+  /// ½ e 2 são simétricos.
+  static const double toleranciaDeclarada = 0.25;
+
   static int _dias(DateTime a, DateTime b) =>
       DateTime.utc(b.year, b.month, b.day)
           .difference(DateTime.utc(a.year, a.month, a.day))

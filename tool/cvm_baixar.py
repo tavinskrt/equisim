@@ -13,6 +13,7 @@ Uso:
     python tool/cvm_baixar.py                    # 2010 até o ano corrente
     python tool/cvm_baixar.py --de 2020 --ate 2024
     python tool/cvm_baixar.py --destino data/cvm
+    python tool/cvm_baixar.py --docs FRE --destino data/cvm/fre
 """
 
 from __future__ import annotations
@@ -36,6 +37,11 @@ INTERESSAM = (
     "_DFC_MI_con_", "_DFC_MI_ind_",
     "_composicao_capital_",
     "_valor_mobiliario_",
+    # Formulário de Referência: contagem de ações e eventos por data, para as
+    # companhias que já não estão na B3 (item A3.4), e o prazo das outorgas
+    # no quadro de intangíveis (item A6).
+    "_capital_social_",
+    "_ativo_intangivel_",
 )
 
 

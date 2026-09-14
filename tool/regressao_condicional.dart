@@ -292,6 +292,16 @@ Future<void> main(List<String> args) async {
     'h36ajustado': _horizonte(bruto, 'ret36aj'),
   };
 
+  // Retorno total, com os proventos da B3 reinvestidos na data ex (item A4,
+  // decisão 89). Vem de `tool/proventos_conferir.dart`, que grava as mesmas
+  // coortes com `ret12tot` e `ret36tot`.
+  final comTotal = File('docs/validacao/backtest_valuation_total.json');
+  if (comTotal.existsSync()) {
+    final total = jsonDecode(comTotal.readAsStringSync()) as List<dynamic>;
+    resultado['h36total'] = _horizonte(total, 'ret36tot');
+    resultado['h12total'] = _horizonte(total, 'ret12tot');
+  }
+
   File('docs/validacao/regressao_condicional.json').writeAsStringSync(
     const JsonEncoder.withIndent(' ').convert(resultado),
   );
@@ -302,6 +312,12 @@ Future<void> main(List<String> args) async {
     '36 MESES — série ajustada (secundária, ver §1.2 das limitações)',
     resultado['h36ajustado'] as Map<String, dynamic>,
   );
+  if (resultado['h36total'] != null) {
+    _imprimirHorizonte('36 MESES — retorno total, proventos da B3',
+        resultado['h36total'] as Map<String, dynamic>);
+    _imprimirHorizonte('12 MESES — retorno total, proventos da B3',
+        resultado['h12total'] as Map<String, dynamic>);
+  }
 
   stderr.writeln('\nescrito docs/validacao/regressao_condicional.json');
 }

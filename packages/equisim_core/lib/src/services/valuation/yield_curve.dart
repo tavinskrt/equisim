@@ -258,11 +258,11 @@ abstract final class TreasuryCsv {
   }
 }
 
-/// Formato das cotações empacotadas e da resposta da função de nuvem.
+/// Formato das cotações empacotadas.
 ///
-/// As duas pontas — `tool/curva_empacotar.dart` e a função `tesouro` de um
-/// lado, o aplicativo do outro — precisam concordar sobre o formato, e ele mora
-/// aqui pela mesma razão do `CvmDocumentCodec`.
+/// As duas pontas — `tool/curva_empacotar.dart` de um lado, o aplicativo do
+/// outro — precisam concordar sobre o formato, e ele mora aqui pela mesma razão
+/// do `CvmDocumentCodec`.
 abstract final class TreasuryQuotesCodec {
   /// Versão do formato.
   static const int versao = 1;

@@ -2,6 +2,7 @@ import '../entities/price_series.dart';
 import '../failures/failure.dart';
 import '../failures/result.dart';
 import '../repositories/repositories.dart';
+import '../services/b3/cash_dividends.dart';
 import '../services/metrics/beta.dart';
 import '../services/metrics/beta_shrinkage.dart';
 import '../services/metrics/market_leverage.dart';
@@ -43,6 +44,12 @@ abstract final class PrepareValuationInputs {
   /// Propaga a falha do histórico de fundamentos e a de cotações; devolve
   /// [InsufficientData] quando a série de preços vem vazia na janela.
   ///
+  /// - [dividends]: proventos em dinheiro da classe do ativo, da B3. Presentes,
+  ///   o beta sai do **retorno total** do ativo, que é a convenção do Ibovespa
+  ///   do outro lado da regressão (item A4, decisão 89).
+  /// - [concessionEnd]: fim do contrato de concessão, do Formulário de
+  ///   Referência (item A6). Só age sobre concessão que acaba dentro da
+  ///   projeção — ver `ValuationInputs.concessionEnd`.
   /// - [betaPrior]: prior transversal do beta, de `ResolveBetaPrior`. Sem ele
   ///   vale a regressão crua, que é o comportamento anterior — e o que expõe o
   ///   motor ao caso da AZUL3, cujo `β = 109.108` tem erro-padrão de 83.228.
@@ -66,6 +73,8 @@ abstract final class PrepareValuationInputs {
     OfficialShareCount? officialShares,
     bool isDistressed = false,
     BetaPrior? betaPrior,
+    DateTime? concessionEnd,
+    List<CashDividend>? dividends,
   }) async {
     final today = asOf ?? DateTime.now();
     final window = DateRange(
@@ -102,6 +111,7 @@ abstract final class PrepareValuationInputs {
       series: series,
       benchmark: benchmark,
       window: window,
+      dividends: dividends,
     );
 
     // Encolhimento por precisão. Sem prior, ou sem valor de mercado para medir
@@ -174,6 +184,8 @@ abstract final class PrepareValuationInputs {
       prices: series,
       isDistressed: isDistressed,
       unleveredBeta: betaDesalavancado,
+      concessionEnd: concessionEnd,
+      dividendsInBeta: beta.dividends,
     ));
   }
 
@@ -192,44 +204,58 @@ abstract final class PrepareValuationInputs {
   /// Sem série de mercado utilizável, adota-se β = 1: a alternativa seria
   /// recusar a avaliação inteira por causa de um único parâmetro, e um beta
   /// neutro é premissa transparente — que fica registrada em [BetaSource].
-  static Future<({double beta, BetaSource source, double? standardError})>
+  static Future<
+      ({double beta, BetaSource source, double? standardError, int dividends})>
       _estimateBeta({
     required PriceSeries series,
     required BenchmarkRepository benchmark,
     required DateRange window,
+    List<CashDividend>? dividends,
   }) async {
     final marketResult = await benchmark.ibovespa(window);
     if (marketResult.isErr) {
-      return (beta: 1.0, source: BetaSource.manual, standardError: null);
+      return (beta: 1.0, source: BetaSource.manual, standardError: null, dividends: 0);
     }
 
     final market = marketResult.unwrap();
     if (market.points.length < 30) {
-      return (beta: 1.0, source: BetaSource.manual, standardError: null);
+      return (beta: 1.0, source: BetaSource.manual, standardError: null, dividends: 0);
     }
 
     final assetPoints =
         series.points.where((p) => window.contains(p.date)).toList();
     if (assetPoints.length < 2) {
-      return (beta: 1.0, source: BetaSource.manual, standardError: null);
+      return (beta: 1.0, source: BetaSource.manual, standardError: null, dividends: 0);
     }
 
+    // **Retorno total dos dois lados** (decisão 89). O Ibovespa reinveste
+    // provento por construção, e o ativo pelo fechamento não: a regressão
+    // misturava as duas convenções, e a queda da data ex entrava como risco.
+    final datas = [for (final p in assetPoints) p.date];
+    final fechamentos = [for (final p in assetPoints) p.close];
+    final total = dividends == null || dividends.isEmpty
+        ? null
+        : TotalReturnIndex.build(
+            dates: datas, closes: fechamentos, dividends: dividends);
+
     final aligned = BetaCalculator.alignReturns(
-      assetDates: [for (final p in assetPoints) p.date],
-      assetIndex: [for (final p in assetPoints) p.close],
+      assetDates: datas,
+      assetIndex: total?.index ?? fechamentos,
       marketDates: market.dates,
       marketIndex: market.points.map((p) => p.close).toList(),
     );
 
     final estimate = BetaCalculator.estimate(returns: aligned);
+    final reinvestidos = total?.applied ?? 0;
 
     return estimate.fold(
       (value) => (
         beta: value.beta,
         source: BetaSource.computed,
         standardError: value.standardError,
+        dividends: reinvestidos,
       ),
-      (_) => (beta: 1.0, source: BetaSource.manual, standardError: null),
+      (_) => (beta: 1.0, source: BetaSource.manual, standardError: null, dividends: 0),
     );
   }
 }

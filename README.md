@@ -219,6 +219,27 @@ versionadas; nada a fazer na máquina nova. Para usar outro projeto, regenere co
 flutter run
 ```
 
+### Build web
+
+Na web, a curva de juros do Tesouro vem **só do pacote do build**: o navegador
+não lê o arquivo do Tesouro, e o pacote serve por cerca de uma semana depois da
+última data-base ([decisão 86](docs/decisoes/086-na-web-a-curva-vem-so-do-pacote.md)).
+Regere antes de cada build:
+
+```bash
+python tool/tesouro_baixar.py
+```
+
+```bash
+dart run tool/curva_empacotar.dart
+```
+
+```bash
+flutter build web
+```
+
+Com o pacote vencido, a avaliação recua para os dois pontos do CDI e diz por quê.
+
 ## Testes e análise estática
 
 Os testes do aplicativo rodam **offline**, sobre respostas reais capturadas em
@@ -251,6 +272,9 @@ dart run build_runner build
 
 Publica uma função que injeta o token no servidor, de modo que o aplicativo não
 carregue credencial alguma — e que resolve o CORS no alvo web.
+
+**Exige o plano Blaze do Firebase**, que pede conta de faturamento. O projeto do
+TCC está no plano sem cobrança, e nenhuma função foi publicada nele (decisão 86).
 
 ```bash
 firebase functions:secrets:set BRAPI_TOKEN

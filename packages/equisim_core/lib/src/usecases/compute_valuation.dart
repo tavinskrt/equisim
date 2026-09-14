@@ -9,6 +9,7 @@ import '../failures/failure.dart';
 import '../failures/result.dart';
 import '../services/valuation/capital_base.dart';
 import '../services/valuation/concession_sectors.dart';
+import '../services/valuation/financial_sectors.dart';
 import '../services/valuation/cost_of_capital.dart';
 import '../services/valuation/cyclical_sectors.dart';
 import '../services/valuation/dcf.dart';
@@ -50,16 +51,18 @@ class ValuationInputs {
   /// Anos de projeção explícita.
   final int projectionYears;
 
-  /// Chave do setor na taxonomia da fonte, em minúsculas.
+  /// Chave do setor, em minúsculas: a do setor econômico da B3 quando o
+  /// emissor é classificado (decisão 87), e a da fonte de preços no recuo.
   ///
-  /// Entra na Porta 1, que exige `"finance"` **e** dívida bruta nula. `null`
+  /// Entra na Porta 1, por [FinancialSectors]. `null`
   /// quando o perfil não pôde ser carregado, caso em que a Porta 1 não dispara e
   /// o roteamento cai na Porta 3 — degradação segura, porque o teste de fluxo
   /// sozinho já barra instituição financeira: BBAS3 e BPAC11 não têm NOPAT em
   /// exercício nenhum.
   final String? sectorKey;
 
-  /// Subsetor na taxonomia da fonte, como publicado — com acento e pontuação.
+  /// Subsetor como publicado — com acento e pontuação. Na taxonomia oficial da
+  /// B3, "Subsetor / Segmento".
   ///
   /// Entra na precedência da Guarda 3 sobre a Guarda 1, e existe porque a chave
   /// setorial sozinha não separa o que precisa ser separado: `energia` reúne
@@ -206,6 +209,20 @@ class ValuationInputs {
   /// e não por um laço paralelo.
   final CashTiming? cashTimingOverride;
 
+  /// Proventos reinvestidos no retorno do ativo que estimou o beta. Zero
+  /// quando o beta saiu do fechamento, que é o retorno de preço (decisão 89).
+  final int dividendsInBeta;
+
+  /// Fim do contrato de concessão: a mediana das outorgas vigentes no
+  /// Formulário de Referência da CVM (item A6, decisão 88).
+  ///
+  /// **Só age sobre concessão**, pela classificação de [ConcessionSectors], e
+  /// **só quando acaba antes do fim da projeção explícita**: aí a projeção
+  /// termina no contrato. Depois dele, o prazo não muda o preço — com retorno
+  /// terminal neutro, o valor terminal já é o capital investido, que é o que
+  /// um contrato que acaba devolve. `null` mantém a projeção inteira.
+  final DateTime? concessionEnd;
+
   /// Teto **nominal** do crescimento na perpetuidade, em fração.
   ///
   /// Precisa estar na mesma unidade do desconto, que é nominal por vir do CDI.
@@ -240,7 +257,38 @@ class ValuationInputs {
     this.unleveredBeta,
     this.reinvestmentOverride,
     this.cashTimingOverride,
+    this.concessionEnd,
+    this.dividendsInBeta = 0,
   });
+
+  /// Os mesmos insumos, com [n] anos de projeção explícita.
+  ValuationInputs withProjectionYears(int n) => ValuationInputs(
+        ticker: ticker,
+        asOf: asOf,
+        fundamentals: fundamentals,
+        marketPrice: marketPrice,
+        capm: capm,
+        marginOfSafety: marginOfSafety,
+        projectionYears: n,
+        perpetualGrowthCap: perpetualGrowthCap,
+        sectorKey: sectorKey,
+        industry: industry,
+        inflation: inflation,
+        declaredTerminalRiskFreeRate: declaredTerminalRiskFreeRate,
+        riskFreeCurve: riskFreeCurve,
+        officialShares: officialShares,
+        prices: prices,
+        isDistressed: isDistressed,
+        terminalReturnOverride: terminalReturnOverride,
+        laneOverride: laneOverride,
+        growthOverride: growthOverride,
+        baseFactorOverride: baseFactorOverride,
+        unleveredBeta: unleveredBeta,
+        reinvestmentOverride: reinvestmentOverride,
+        cashTimingOverride: cashTimingOverride,
+        concessionEnd: concessionEnd,
+        dividendsInBeta: dividendsInBeta,
+      );
 }
 
 /// De onde veio a contagem de papéis da ponte.
@@ -393,7 +441,7 @@ abstract final class ValuationCascade {
   /// A instrumentação de auditoria abre transação **antes** da primeira
   /// validação: um ativo recusado é tão auditável quanto um avaliado.
   static Result<ValuationResult> evaluate(
-    ValuationInputs inputs, {
+    ValuationInputs recebidos, {
     AssumptionSource Function(DcfAssumptions base)? scenarioBuilder,
     int monteCarloSamples = 10000,
     int seed = 42,
@@ -402,9 +450,19 @@ abstract final class ValuationCascade {
     // falta de dado é tão auditável quanto um avaliado, e a banca pergunta
     // justamente pelos recusados.
     final audit = AuditRecorder.begin(
-      '/core/valuation/${inputs.ticker.value}',
-      inputPayload: _inputPayload(inputs),
+      '/core/valuation/${recebidos.ticker.value}',
+      inputPayload: _inputPayload(recebidos),
     );
+
+    // **Concessão que acaba dentro da projeção termina a projeção no contrato**
+    // (item A6, decisão 88). Antes de tudo, porque o horizonte governa a curva,
+    // o decaimento do crescimento, a convergência do retorno e o ponto fixo das
+    // taxas — encurtá-lo depois deixaria cada peça com um N diferente.
+    final anosDeContrato = contractYears(recebidos);
+    final inputs = anosDeContrato != null &&
+            anosDeContrato < recebidos.projectionYears
+        ? recebidos.withProjectionYears(anosDeContrato)
+        : recebidos;
 
     if (inputs.marketPrice <= 0) {
       audit?.abort('Preço de mercado indisponível.');
@@ -489,7 +547,7 @@ abstract final class ValuationCascade {
       marketPrice: inputs.marketPrice,
     );
     _auditUnitRatio(audit, inputs, latest, sharesPerQuote);
-    _auditCapm(audit, inputs.capm);
+    _auditCapm(audit, inputs.capm, inputs.dividendsInBeta);
 
     if (sharesPerQuote > 1) {
       warnings.add(
@@ -932,16 +990,40 @@ abstract final class ValuationCascade {
     );
   }
 
-  // -------------------------------------------- Porta 1 e Porta 3: a via --
+  // ------------------------------------------------- A6: prazo do contrato --
 
-  /// Chave do setor financeiro na taxonomia do **perfil** da fonte.
+  /// Anos até o fim do contrato de concessão, ou `null`.
   ///
-  /// A fonte mantém duas taxonomias que não coincidem: o perfil devolve
-  /// `servicos-financeiros`, em português, enquanto a listagem de tickers
-  /// devolve `Finance`, em inglês. Comparar contra a errada faz a Porta 1 nunca
-  /// disparar — defeito que a validação fora da amostra expôs, com o Banco ABC
-  /// chegando à porta com `servicos-financeiros` e passando reto.
-  static const String _financeSectorKey = 'servicos-financeiros';
+  /// `null` quando o ativo não é concessão, quando o fim não é conhecido e
+  /// quando ele já passou — o Formulário de Referência repete contrato vencido
+  /// e renovado, e sem o prazo novo não há horizonte a impor. Arredondado ao
+  /// ano, e nunca abaixo de um: a projeção explícita conta anos inteiros.
+  static int? contractYears(ValuationInputs inputs) {
+    final fim = inputs.concessionEnd;
+    if (fim == null) return null;
+    if (!ConcessionSectors.hasFiniteTerm(
+        sectorKey: inputs.sectorKey, industry: inputs.industry)) {
+      return null;
+    }
+    final hoje =
+        DateTime.utc(inputs.asOf.year, inputs.asOf.month, inputs.asOf.day);
+    final ate = DateTime.utc(fim.year, fim.month, fim.day);
+    final dias = ate.difference(hoje).inDays;
+    if (dias <= 0) return null;
+    final anos = (dias / 365.25).round();
+    return anos < 1 ? 1 : anos;
+  }
+
+  /// Anos de contrato depois do fim da projeção — já encurtada até ele, quando
+  /// acaba antes —, ou `null` sem prazo.
+  static int? _anosDeContratoAlemDaProjecao(ValuationInputs inputs) {
+    final t = contractYears(inputs);
+    if (t == null) return null;
+    final m = t - inputs.projectionYears;
+    return m < 0 ? 0 : m;
+  }
+
+  // -------------------------------------------- Porta 1 e Porta 3: a via --
 
   /// Decide de quem é o fluxo.
   ///
@@ -1109,7 +1191,15 @@ abstract final class ValuationCascade {
     List<String> warnings,
     AuditTransaction? audit,
   ) {
-    final porta1 = inputs.sectorKey == _financeSectorKey;
+    // Taxonomia oficial da B3 quando o emissor é classificado, e a da fonte de
+    // preços no recuo (decisão 87). A fonte mantém duas taxonomias que não
+    // coincidem — o perfil devolve `servicos-financeiros` e a listagem de
+    // tickers `Finance` —, e comparar contra a errada fazia a Porta 1 nunca
+    // disparar: o Banco ABC chegava com `servicos-financeiros` e passava reto.
+    final porta1 = FinancialSectors.isFinancial(
+      sectorKey: inputs.sectorKey,
+      industry: inputs.industry,
+    );
 
     final fluxoSustentado =
         porta1 ? false : GrowthGuards.firmFlowIsSustained(published);
@@ -1568,6 +1658,7 @@ abstract final class ValuationCascade {
           inputs.reinvestmentOverride ?? ReinvestmentPolicy.medido,
       inflation: inputs.inflation,
       cashTiming: inputs.cashTimingOverride ?? CashTiming.meioDeAno,
+      contractYearsAfterHorizon: _anosDeContratoAlemDaProjecao(inputs),
     );
     if (inputs.cashTimingOverride != null) {
       local.add(
@@ -1696,7 +1787,10 @@ abstract final class ValuationCascade {
     // que o roteamento da Porta 1 existe para não fazer. Para banco vale o
     // `Ke` do CAPM sobre o beta observado, e a alavancagem perene é premissa
     // declarada em vez de descuido.
-    final ehFinanceira = inputs.sectorKey == _financeSectorKey;
+    final ehFinanceira = FinancialSectors.isFinancial(
+      sectorKey: inputs.sectorKey,
+      industry: inputs.industry,
+    );
     final resolveTaxas = betaU != null &&
         betaU.isFinite &&
         (lane == ValuationLane.firm || !ehFinanceira);
@@ -1856,16 +1950,7 @@ abstract final class ValuationCascade {
     // que pode ser o do segundo passe.
     _auditMoat(audit, moatVeredito);
     if (prazoDeterminado) {
-      local.add(
-        'O negócio opera sob contrato de prazo determinado, e o valor terminal '
-        'supõe perpetuidade. O prazo não é publicado — o estimador que pareceu '
-        'servir, base de ativos sobre depreciação, mede giro e não vencimento —, '
-        'de modo que o horizonte fica como está e a suposição fica declarada. '
-        'O excedente de retorno perpétuo, esse sim, é recusado: uma concessão é '
-        'relicitada, e a tarifa remunera o capital ao custo dele. Medido: se o '
-        'contrato acabasse em dez anos, o preço justo ficaria em torno de 0,80 '
-        'do publicado; em vinte, 0,90.',
-      );
+      local.add(_avisoDoContrato(inputs, capitalApurado: retornoDaBase > 0));
     }
     final rInfFinal = taxasResolvidas?.terminalWacc ?? descontoTerminal;
     if (moatVerificado != null && inputs.terminalReturnOverride == null) {
@@ -2066,6 +2151,7 @@ abstract final class ValuationCascade {
               returnOnCapital: retornoDaBase,
               terminalReturnOnCapital: moat,
               marginOfSafety: inputs.marginOfSafety,
+              contractYearsAfterHorizon: _anosDeContratoAlemDaProjecao(inputs),
             ),
             netDebt: latest.netDebt,
             sharesOutstanding: shares,
@@ -2265,6 +2351,51 @@ abstract final class ValuationCascade {
   /// Com caixa líquido maior que o próprio negócio, `E + D` fica não positivo
   /// e a razão não tem sentido. Dizer "0%" ali seria afirmar o que não se
   /// mediu.
+  /// O que o prazo da concessão faz com a avaliação, em texto (decisão 88).
+  ///
+  /// [capitalApurado] é `false` quando não há retorno sobre o capital
+  /// utilizável: sem ele o capital investido não se apura, e o terminal do
+  /// contrato não pode ser montado.
+  static String _avisoDoContrato(ValuationInputs inputs,
+      {required bool capitalApurado}) {
+    final n = inputs.projectionYears;
+    const recusa = 'O excedente de retorno do capital novo é recusado, como em '
+        'toda concessão: a tarifa remunera o capital ao custo dele.';
+    const devolve = 'o que a amortização, a indenização do investimento não '
+        'amortizado ou uma renovação que refaz a tarifa ao custo de capital '
+        'devolvem';
+    final fim = inputs.concessionEnd;
+    final anos = contractYears(inputs);
+    final anosTexto = n == 1 ? '1 ano' : '$n anos';
+    if (fim != null && anos != null && capitalApurado) {
+      if (anos <= n) {
+        return 'O negócio opera sob concessão, e a mediana das outorgas '
+            'vigentes no Formulário de Referência termina em ${_fmt(fim)}: a '
+            'projeção explícita vai até lá, $anosTexto, e o valor terminal é o '
+            'capital investido nessa data — $devolve —, sem excedente depois '
+            'do contrato. $recusa';
+      }
+      final alem = anos - n;
+      return 'O negócio opera sob concessão, e a mediana das outorgas vigentes '
+          'no Formulário de Referência termina em ${_fmt(fim)}, $alem '
+          '${alem == 1 ? "ano" : "anos"} depois da projeção. O valor terminal é '
+          'o capital investido no fim da projeção mais o excedente de retorno '
+          'sobre ele até o fim do contrato, e não para sempre: no fim, o '
+          'capital volta — $devolve. $recusa';
+    }
+    final motivo = fim == null
+        ? 'o prazo não foi lido do Formulário de Referência'
+        : anos == null
+            ? 'a mediana das outorgas declaradas no Formulário de Referência, '
+                '${_fmt(fim)}, já passou'
+            : 'sem retorno sobre o capital utilizável, o capital investido não '
+                'se apura e o terminal do contrato não pode ser montado';
+    return 'O negócio opera sob concessão, e $motivo. O valor terminal supõe o '
+        'excedente de retorno sobre o capital existente para sempre; num '
+        'contrato que acaba, ele acaba junto, e o preço justo fica abaixo do '
+        'publicado — acima, se o capital rende menos que o custo dele. $recusa';
+  }
+
   static String _trechoDaParticipacao(LeveredRates r, int n) {
     final inicio = r.equityShareAt(0);
     final fim = r.equityShareAt(n);
@@ -2601,6 +2732,8 @@ abstract final class ValuationCascade {
       },
       'marginOfSafety': _r(inputs.marginOfSafety, 4),
       'projectionYears': inputs.projectionYears,
+      if (inputs.concessionEnd != null)
+        'concessionEnd': _fmt(inputs.concessionEnd!),
       'perpetualGrowthCap': _r(inputs.perpetualGrowthCap, 6),
       'fundamentalsPeriods': inputs.fundamentals.length,
       'fundamentals': [
@@ -2761,7 +2894,8 @@ abstract final class ValuationCascade {
     );
   }
 
-  static void _auditCapm(AuditTransaction? audit, CapmInputs capm) {
+  static void _auditCapm(
+      AuditTransaction? audit, CapmInputs capm, int proventosNoBeta) {
     if (audit == null) return;
     final risk = capm.beta * capm.marketPremium;
     audit.step(
@@ -2772,6 +2906,9 @@ abstract final class ValuationCascade {
         'beta': _r(capm.beta, 4),
         'R_m - R_f (% a.a.)': _r(capm.marketPremium * 100),
         'origem do beta': capm.betaSource.name,
+        'retorno do beta': proventosNoBeta > 0
+            ? 'total, $proventosNoBeta proventos reinvestidos'
+            : 'de preço',
       },
       steps: [
         'Passo 1: prêmio ajustado ao risco sistemático → ${_r(capm.beta, 4)} × '

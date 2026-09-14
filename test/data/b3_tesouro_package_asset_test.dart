@@ -36,6 +36,61 @@ void main() {
       // 297 de 297 emissores em 14/09/2026.
       expect(cobertos.length / universo.length, greaterThanOrEqualTo(0.95));
     });
+
+    test('classifica o setor de todo emissor do universo — item A5', () {
+      final emissores = B3RegistryCodec.decodePackage(
+          jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>);
+      final universo = (jsonDecode(
+        File('docs/validacao/universo.json').readAsStringSync(),
+      ) as List)
+          .map((e) => ((e as Map<String, dynamic>)['ticker'] as String).substring(0, 4))
+          .toSet();
+      final semSetor = [
+        for (final r in universo)
+          if (emissores[r] != null && emissores[r]!.classification == null) r,
+      ];
+      expect(semSetor, isEmpty,
+          reason: 'rodar `python tool/b3_complemento_baixar.py` antes de empacotar');
+      for (final banco in ['BRSR', 'PINE', 'SANB']) {
+        final c = emissores[banco]!.classification!;
+        expect(
+            FinancialSectors.isFinancial(
+                sectorKey: c.sectorKey, industry: c.industry),
+            isTrue,
+            reason: '$banco escapava da Porta 1 sem setor');
+      }
+    });
+  });
+
+  group('Proventos da B3 — decisão 89', () {
+    final arquivo = File(cashDividendsAsset);
+
+    test('existe, é legível e traz o preço com direito', () {
+      expect(arquivo.existsSync(), isTrue,
+          reason: 'gerar com `dart run tool/b3_proventos_empacotar.dart`');
+      final proventos = CashDividendsCodec.decode(
+          jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>);
+      expect(proventos.length, greaterThan(200));
+      expect(
+          proventos.values.every((l) => l.every((p) => p.closeWithRights != null)),
+          isTrue,
+          reason: 'provento sem preço com direito não entra no índice');
+    });
+  });
+
+  group('Prazo das outorgas — decisão 88', () {
+    final arquivo = File(concessionTermsAsset);
+
+    test('existe e é legível', () {
+      expect(arquivo.existsSync(), isTrue,
+          reason: 'gerar com `dart run tool/fre_outorgas.dart`');
+      expect(pubspec, contains('- assets/cvm/'));
+      final prazos = ConcessionTermsCodec.decode(
+          jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>);
+      expect(prazos, isNotEmpty);
+      expect(prazos['TAEE11'], isNotNull,
+          reason: 'transmissora com 39 outorgas legíveis no FRE de 2022');
+    });
   });
 
   group('Cotações do Tesouro — decisão 84', () {

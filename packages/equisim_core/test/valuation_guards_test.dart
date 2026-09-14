@@ -569,7 +569,8 @@ void main() {
       return pontos;
     }
 
-    ValuationResult? avaliar({required String? setor, required double divida}) {
+    ValuationResult? avaliar(
+        {required String? setor, required double divida, String? subsetor}) {
       final r = ValuationCascade.evaluate(ValuationInputs(
         ticker: ticker,
         asOf: DateTime(2026, 6, 30),
@@ -581,9 +582,27 @@ void main() {
           marketPremium: 0.055,
         ),
         sectorKey: setor,
+        industry: subsetor,
       ));
       return r.isOk ? r.unwrap() : null;
     }
+
+    test('pela classificação oficial da B3, banco entra; shopping não — A5', () {
+      final banco = avaliar(
+          setor: 'financeiro',
+          subsetor: 'Intermediários Financeiros / Bancos',
+          divida: 0)!;
+      expect(banco.model, ValuationModel.dcfEarnings);
+      expect(banco.warnings.any((w) => w.contains('Instituição financeira')),
+          isTrue);
+      final shopping = avaliar(
+          setor: 'financeiro',
+          subsetor: 'Exploração de Imóveis / Exploração de Imóveis',
+          divida: 0)!;
+      expect(shopping.model, ValuationModel.dcfFcff);
+      expect(shopping.warnings.any((w) => w.contains('Instituição financeira')),
+          isFalse);
+    });
 
     test('setor financeiro manda para a via do acionista', () {
       final v = avaliar(setor: 'servicos-financeiros', divida: 0);

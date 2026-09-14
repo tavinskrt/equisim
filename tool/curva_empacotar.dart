@@ -1,10 +1,10 @@
 // A2.1 — empacota as cotações recentes do Tesouro para o aplicativo.
 //
-// O aplicativo busca a curva do dia em tempo de execução — lendo só o começo do
-// arquivo do Tesouro, ou pela função `tesouro` na web. O pacote é o recuo:
-// sem rede, ou antes de a função ser publicada, a avaliação ainda tem a curva
-// das últimas datas-base do build. Com mais de `TreasuryCurve.diasDeRecuo`
-// dias, nem ele serve, e a avaliação recua para os dois pontos, declarando.
+// No nativo, o aplicativo busca a curva do dia em tempo de execução, lendo só o
+// começo do arquivo do Tesouro, e o pacote é o recuo sem rede. **Na web o pacote
+// é a única fonte** (decisão 86): rode os dois comandos abaixo antes de cada
+// `flutter build web`. Com mais de `TreasuryCurve.diasDeRecuo` dias, o pacote
+// não serve, e a avaliação recua para os dois pontos, declarando por quê.
 //
 // Uso:
 //   python tool/tesouro_baixar.py

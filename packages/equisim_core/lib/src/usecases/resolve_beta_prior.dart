@@ -2,6 +2,7 @@
 library;
 
 import '../repositories/repositories.dart';
+import '../services/b3/cash_dividends.dart';
 import '../services/metrics/beta.dart';
 import '../services/metrics/beta_shrinkage.dart';
 import '../services/metrics/market_leverage.dart';
@@ -106,6 +107,9 @@ abstract final class ResolveBetaPrior {
   ///
   /// - [tickers]: universo a percorrer.
   /// - [windowYears]: janela do beta, alinhada com `PrepareValuationInputs`.
+  /// - [dividendsFor]: proventos da classe de cada ativo. Presente, o beta de
+  ///   cada observação sai do retorno total, como em `PrepareValuationInputs`
+  ///   (decisão 89) — o prior e o beta que ele encolhe precisam da mesma régua.
   ///
   /// Ativo que falhe em qualquer etapa é **pulado**, não interrompe: o prior é
   /// estatística de grupo, e um papel a menos não a invalida.
@@ -116,6 +120,7 @@ abstract final class ResolveBetaPrior {
     required BenchmarkRepository benchmark,
     required DateTime asOf,
     int windowYears = 5,
+    List<CashDividend> Function(Ticker)? dividendsFor,
   }) async {
     final janela = DateRange(
       DateTime(asOf.year - windowYears, asOf.month, asOf.day),
@@ -137,10 +142,17 @@ abstract final class ResolveBetaPrior {
           .toList();
       if (pontos.length < 2) continue;
 
+      final datas = [for (final p in pontos) p.date];
+      final fechamentos = [for (final p in pontos) p.close];
+      final proventos = dividendsFor?.call(t);
       final estimativa = BetaCalculator.estimate(
         returns: BetaCalculator.alignReturns(
-          assetDates: [for (final p in pontos) p.date],
-          assetIndex: [for (final p in pontos) p.close],
+          assetDates: datas,
+          assetIndex: proventos == null || proventos.isEmpty
+              ? fechamentos
+              : TotalReturnIndex.build(
+                      dates: datas, closes: fechamentos, dividends: proventos)
+                  .index,
           marketDates: indice.dates,
           marketIndex: indice.points.map((p) => p.close).toList(),
         ),

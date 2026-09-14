@@ -18,6 +18,8 @@ import '../data/datasources/remote/brapi_datasource.dart';
 import '../data/network/api_client.dart';
 import '../data/datasources/remote/tesouro_datasource.dart';
 import '../data/repositories/b3_registry_repository.dart';
+import '../data/repositories/cash_dividends_repository.dart';
+import '../data/repositories/concession_term_repository.dart';
 import '../data/repositories/cvm_fundamentals_repository.dart';
 import '../data/repositories/market_repositories.dart';
 import '../data/repositories/portfolio_repository.dart';
@@ -160,15 +162,19 @@ final priceRepositoryProvider = Provider<PriceRepository>(
 const String cvmPackageAsset = 'assets/cvm/documentos.json';
 
 final fundamentalsRepositoryProvider = Provider<FundamentalsRepository>(
-  (ref) => CvmFundamentalsRepository(
-    mercado: FundamentalsRepositoryImpl(
-      remote: ref.watch(brapiDatasourceProvider),
-      cache: ref.watch(cacheDatabaseProvider),
+  (ref) => OfficialSectorFundamentalsRepository(
+    inner: CvmFundamentalsRepository(
+      mercado: FundamentalsRepositoryImpl(
+        remote: ref.watch(brapiDatasourceProvider),
+        cache: ref.watch(cacheDatabaseProvider),
+      ),
+      carregarPacote: () => rootBundle.loadString(cvmPackageAsset),
+      // A data da avaliação é a do dia, e a camada de aplicativo é o lugar de
+      // perguntá-la: o núcleo recebe a data pronta.
+      hoje: DateTime.now,
     ),
-    carregarPacote: () => rootBundle.loadString(cvmPackageAsset),
-    // A data da avaliação é a do dia, e a camada de aplicativo é o lugar de
-    // perguntá-la: o núcleo recebe a data pronta.
-    hoje: DateTime.now,
+    // O setor é o da B3, por emissor (item A5, decisão 87).
+    classificacao: ref.watch(b3RegistryRepositoryProvider).classificationFor,
   ),
 );
 
@@ -178,12 +184,43 @@ final fundamentalsRepositoryProvider = Provider<FundamentalsRepository>(
 /// substitui por um falso não ganha ressalva de pacote que ele não usa.
 final cvmCoverageNoteProvider =
     FutureProvider.family<String?, Ticker>((ref, ticker) async {
-  final repo = ref.watch(fundamentalsRepositoryProvider);
+  final externo = ref.watch(fundamentalsRepositoryProvider);
+  final repo = externo is OfficialSectorFundamentalsRepository
+      ? externo.inner
+      : externo;
   return repo is CvmFundamentalsRepository ? repo.coverageNote(ticker) : null;
 });
 
 /// Caminho do registro de emissores da B3 empacotado (item A3.3).
 const String b3RegistryAsset = 'assets/b3/emissores.json';
+
+/// Caminho dos proventos da B3 empacotados (item A4).
+const String cashDividendsAsset = 'assets/b3/proventos.json';
+
+final cashDividendsRepositoryProvider = Provider<CashDividendsRepository>(
+  (ref) => CashDividendsRepository(
+    carregarPacote: () => rootBundle.loadString(cashDividendsAsset),
+  ),
+);
+
+/// Proventos da classe de um ativo: o beta sai do retorno total (decisão 89).
+final cashDividendsProvider = FutureProvider.family<List<CashDividend>, Ticker>(
+    (ref, ticker) =>
+        ref.watch(cashDividendsRepositoryProvider).dividendsFor(ticker));
+
+/// Caminho do prazo das outorgas empacotado (item A6).
+const String concessionTermsAsset = 'assets/cvm/outorgas.json';
+
+final concessionTermRepositoryProvider = Provider<ConcessionTermRepository>(
+  (ref) => ConcessionTermRepository(
+    carregarPacote: () => rootBundle.loadString(concessionTermsAsset),
+  ),
+);
+
+/// Fim do contrato de concessão de um ativo, ou `null` (decisão 88).
+final concessionEndProvider = FutureProvider.family<DateTime?, Ticker>(
+    (ref, ticker) =>
+        ref.watch(concessionTermRepositoryProvider).endFor(ticker));
 
 /// Caminho das cotações recentes do Tesouro empacotadas (item A2.1).
 const String tesouroQuotesAsset = 'assets/tesouro/curva.json';
@@ -205,22 +242,28 @@ final tesouroDatasourceProvider = Provider<TesouroDatasource>(
 
 final riskFreeCurveRepositoryProvider = Provider<RiskFreeCurveRepository>(
   (ref) => RiskFreeCurveRepository(
-    remote: ref.watch(tesouroDatasourceProvider),
+    // Na web o navegador não lê o arquivo do Tesouro, e o aplicativo nem tenta:
+    // a curva vem só do pacote do build (decisão 86).
+    remote: kIsWeb ? null : ref.watch(tesouroDatasourceProvider),
     carregarPacote: () => rootBundle.loadString(tesouroQuotesAsset),
   ),
 );
 
-/// Curva de juros da avaliação de hoje, ou `null` — e aí a cascata recua para
-/// os dois pontos do CDI, declarando (decisão 84).
-final riskFreeCurveProvider = FutureProvider<YieldCurve?>((ref) async {
+/// Curva de juros da avaliação de hoje e, sem ela, a razão (decisões 84 e 86).
+final riskFreeCurveReadingProvider = FutureProvider<CurveReading>((ref) async {
   try {
     return await ref
         .watch(riskFreeCurveRepositoryProvider)
-        .curveAt(DateTime.now());
+        .readAt(DateTime.now());
   } on Object {
-    return null;
+    return (curve: null, note: null);
   }
 });
+
+/// Curva de juros da avaliação de hoje, ou `null` — e aí a cascata recua para
+/// os dois pontos do CDI, declarando (decisão 84).
+final riskFreeCurveProvider = FutureProvider<YieldCurve?>((ref) async =>
+    (await ref.watch(riskFreeCurveReadingProvider.future)).curve);
 
 final benchmarkRepositoryProvider = Provider<BenchmarkRepository>(
   (ref) => BenchmarkRepositoryImpl(ref.watch(brapiDatasourceProvider)),

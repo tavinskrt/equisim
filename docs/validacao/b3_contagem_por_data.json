@@ -1,0 +1,72 @@
+{
+ "medidoEm": "2026-09-14",
+ "listadas": {
+  "emissores": 291,
+  "batemA1pct": 281,
+  "divergentes": [
+   "AGXY 12.8407",
+   "AHEB 0.6061",
+   "JFEN 1.6435",
+   "MBRF 0.5008",
+   "PINE 1.0158",
+   "PMAM 0.9446",
+   "POMO 0.9091",
+   "RCSL 0.8661",
+   "TOKY 20.0000",
+   "VITT 0.9818"
+  ]
+ },
+ "deslistadas": {
+  "companhias": 164,
+  "comContagem": 160,
+  "comEventosDeclarados": 100,
+  "eventosDeclarados": 186,
+  "eventosComPregaoNaAprovacao": 89,
+  "eventosLocalizados": 69,
+  "eventosNaoLocalizados": [
+   "BANCO INTER S.A. 2021-04-28 Desdobramento fator 22.5868",
+   "GOL LINHAS AEREAS INTELIGENTES S.A. 2015-03-21 Desdobramento fator 18.2725",
+   "GOL LINHAS AEREAS INTELIGENTES S.A. 2015-03-23 Desdobramento fator 18.2725",
+   "CCX CARVÃO DA COLÔMBIA S.A. - EM LIQUIDAÇÃO 2018-04-27 Grupamento fator 0.1000",
+   "ÓLEO E GÁS PARTICIPAÇÕES S.A. 2011-05-23 Grupamento fator 0.0080",
+   "ÓLEO E GÁS PARTICIPAÇÕES S.A. 2016-04-29 Grupamento fator 0.0100",
+   "CIA TECIDOS SANTANENSE EM RECUPERAÇÃO JUDICIAL 2020-06-25 Bonificação fator 2.8321",
+   "TEC TOY S.A. 2015-06-17 Grupamento fator 0.0000",
+   "TEKNO S.A. - INDUSTRIA E COMERCIO 2012-04-26 Bonificação fator 1.0284",
+   "TEKNO S.A. - INDUSTRIA E COMERCIO 2013-04-29 Bonificação fator 32.9611",
+   "BLUE TECH SOLUTIONS EQI S.A. 2013-04-30 Grupamento fator 0.0100",
+   "BLUE TECH SOLUTIONS EQI S.A. 2014-12-15 Grupamento fator 0.0100",
+   "BLUE TECH SOLUTIONS EQI S.A. 2014-09-26 Grupamento fator 0.0100",
+   "BLUE TECH SOLUTIONS EQI S.A. 2018-09-21 Grupamento fator 0.1217",
+   "CONSTRUTORA ADOLPHO LINDENBERG S.A. 2022-04-28 Desdobramento fator 5.0000",
+   "ALIPERTI S.A. 2016-04-29 Grupamento fator 0.1000",
+   "CPFL TRANSMISSÃO S.A. 2016-04-29 Grupamento fator 0.0250",
+   "SPRINGER S.A. 2016-04-29 Grupamento fator 0.0200",
+   "ANHANGUERA EDUCACIONAL PARTICIPAÇÕES S.A. 2010-10-29 Grupamento fator 0.1429",
+   "RJ CAPITAL PARTNERS S.A. 2011-10-14 Desdobramento fator 25.0000",
+   "CLARION S/A AGROINDUSTRIAL 2010-09-15 Desdobramento fator 2.0000",
+   "CLARION S/A AGROINDUSTRIAL 2010-10-01 Desdobramento fator 2.0000"
+  ],
+  "papelEventoLocalizado": 89,
+  "papelEventoInferido": 17,
+  "composicaoConferida": 1848,
+  "composicaoBateA2pct": 1619,
+  "pvpaConferido": 867,
+  "pvpaNaFaixa": 860,
+  "pvpaMediano": 1.2684165864604275,
+  "pvpaForaDaFaixa": [
+   "AES ELPA S.A. AELP3 2016: 76.267",
+   "CIA ENERGETICA DE PERNAMBUCO - CELPE CEPE5 2019: 1190.829",
+   "MULTIPLUS S.A. MPLU3 2012: 51.787",
+   "SERENA ENERGIA S.A. MEGA3 2021: 0.000",
+   "CETIP S.A. - BALCÃO ORGANIZADO DE ATIVOS E DERIVATIVOS CTIP3 2011: 0.005",
+   "CENTENNIAL ASSET PARTICIPAÇÕES SUDESTE S/A PRTX3 2010: 86.725",
+   "SOUZA CRUZ SA CRUZ3 2010: 65.929"
+  ],
+  "exerciciosUtilizaveis": 1151,
+  "companhiasComProventos": 135,
+  "proventosNaVidaDoPapel": 3008,
+  "proventosComPrecoConferido": 1779,
+  "proventosQueBatemA1pct": 1753
+ }
+}

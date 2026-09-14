@@ -1,0 +1,2259 @@
+{
+ "medidoEm": "2026-09-14",
+ "dataCom": {
+  "comPrecoDaB3": 9243,
+  "batemA1pct": 9241,
+  "desvioMediano": 0.0
+ },
+ "dataEx": {
+  "comPregaoNasDuasDatas": 9141,
+  "quedaSobreProventoMediana": 1.1665535063832442,
+  "quedaSobreProventoP25": 0.25000000000000355,
+  "quedaSobreProventoP75": 2.3157894736842124,
+  "n": 6073
+ },
+ "adjustedClose": {
+  "ativos": 278,
+  "desvioMediano": 0.032649052714233906,
+  "desvioP90": 0.16490029957903296,
+  "acimaDe5pct": 101,
+  "porAtivo": [
+   {
+    "ticker": "AALR3",
+    "proventos": 2,
+    "semPreco": 0,
+    "observado": 0.9790572916666667,
+    "implicitoB3": 0.986190523850781,
+    "desvio": 0.0072331177511837375
+   },
+   {
+    "ticker": "ABCB4",
+    "proventos": 24,
+    "semPreco": 0,
+    "observado": 0.5489416058394161,
+    "implicitoB3": 0.49124332634890244,
+    "desvio": 0.11745356403993945
+   },
+   {
+    "ticker": "AERI3",
+    "proventos": 1,
+    "semPreco": 0,
+    "observado": 0.9965323076923077,
+    "implicitoB3": 0.996532268482412,
+    "desvio": 3.9346338187584706e-8
+   },
+   {
+    "ticker": "AFLT3",
+    "proventos": 26,
+    "semPreco": 0,
+    "observado": 0.5316417910447762,
+    "implicitoB3": 0.5192452371666795,
+    "desvio": 0.023874179271705875
+   },
+   {
+    "ticker": "AGRO3",
+    "proventos": 12,
+    "semPreco": 0,
+    "observado": 0.4850131233595801,
+    "implicitoB3": 0.5019592956229227,
+    "desvio": 0.03376005267979498
+   },
+   {
+    "ticker": "AGXY3",
+    "proventos": 2,
+    "semPreco": 0,
+    "observado": 0.9772629107981221,
+    "implicitoB3": 0.9772627136311061,
+    "desvio": 2.0175436277192205e-7
+   },
+   {
+    "ticker": "ALLD3",
+    "proventos": 13,
+    "semPreco": 0,
+    "observado": 0.5251920838183936,
+    "implicitoB3": 0.41333628566747654,
+    "desvio": 0.27061693354670413
+   },
+   {
+    "ticker": "ALOS3",
+    "proventos": 35,
+    "semPreco": 0,
+    "observado": 0.6278565827927863,
+    "implicitoB3": 0.7147441438647607,
+    "desvio": 0.1215645651913374
+   },
+   {
+    "ticker": "ALPA3",
+    "proventos": 18,
+    "semPreco": 0,
+    "observado": 0.8734418282548476,
+    "implicitoB3": 0.7781870156242623,
+    "desvio": 0.1224060678449792
+   },
+   {
+    "ticker": "ALPA4",
+    "proventos": 18,
+    "semPreco": 0,
+    "observado": 0.8729625,
+    "implicitoB3": 0.7766382298397497,
+    "desvio": 0.1240272065671113
+   },
+   {
+    "ticker": "ALPK3",
+    "proventos": 1,
+    "semPreco": 0,
+    "observado": 0.998261780104712,
+    "implicitoB3": 0.9982582702636363,
+    "desvio": 0.0000035159649363070145
+   },
+   {
+    "ticker": "ALUP11",
+    "proventos": 30,
+    "semPreco": 0,
+    "observado": 0.6954850119827244,
+    "implicitoB3": 0.6977506513012501,
+    "desvio": 0.003247061560315956
+   },
+   {
+    "ticker": "ALUP3",
+    "proventos": 30,
+    "semPreco": 0,
+    "observado": 0.7144939932350998,
+    "implicitoB3": 0.7114494642246872,
+    "desvio": 0.004279332775561695
+   },
+   {
+    "ticker": "ALUP4",
+    "proventos": 30,
+    "semPreco": 0,
+    "observado": 0.7178222222222223,
+    "implicitoB3": 0.6887806100616168,
+    "desvio": 0.04216380620529869
+   },
+   {
+    "ticker": "AMBP3",
+    "proventos": 3,
+    "semPreco": 0,
+    "observado": 0.981693082688291,
+    "implicitoB3": 0.9817371247252323,
+    "desvio": 0.000044861333886703214
+   },
+   {
+    "ticker": "AMER3",
+    "proventos": 1,
+    "semPreco": 0,
+    "observado": 0.9709213707165109,
+    "implicitoB3": 0.9804174367707348,
+    "desvio": 0.009685737623661317
+   },
+   {
+    "ticker": "ANIM3",
+    "proventos": 6,
+    "semPreco": 0,
+    "observado": 0.8330995475113122,
+    "implicitoB3": 0.8330954270459396,
+    "desvio": 0.000004945970460079607
+   },
+   {
+    "ticker": "ARML3",
+    "proventos": 22,
+    "semPreco": 0,
+    "observado": 0.8018981064021642,
+    "implicitoB3": 0.7941759199633376,
+    "desvio": 0.009723521256075118
+   },
+   {
+    "ticker": "ASAI3",
+    "proventos": 8,
+    "semPreco": 0,
+    "observado": 0.954733893557423,
+    "implicitoB3": 0.9495201934934384,
+    "desvio": 0.00549087855077901
+   },
+   {
+    "ticker": "AUAU3",
+    "proventos": 1,
+    "semPreco": 0,
+    "observado": 0.9232562568544653,
+    "implicitoB3": 0.9910423064940829,
+    "desvio": 0.06839874463020446
+   },
+   {
+    "ticker": "AURE3",
+    "proventos": 6,
+    "semPreco": 0,
+    "observado": 0.5844014885259459,
+    "implicitoB3": 0.7778846109957246,
+    "desvio": 0.24872984981938684
+   },
+   {
+    "ticker": "AXIA3",
+    "proventos": 15,
+    "semPreco": 0,
+    "observado": 0.7109977116704804,
+    "implicitoB3": 0.745398131411467,
+    "desvio": 0.046150397071490934
+   },
+   {
+    "ticker": "AZZA3",
+    "proventos": 34,
+    "semPreco": 0,
+    "observado": 0.7264069591527987,
+    "implicitoB3": 0.7258310210528285,
+    "desvio": 0.000793487854976016
+   },
+   {
+    "ticker": "B3SA3",
+    "proventos": 68,
+    "semPreco": 0,
+    "observado": 0.7255264063150653,
+    "implicitoB3": 0.6908054276977069,
+    "desvio": 0.050261589190280676
+   },
+   {
+    "ticker": "BALM3",
+    "proventos": 37,
+    "semPreco": 0,
+    "observado": 0.7270056497175141,
+    "implicitoB3": 0.6515625054819854,
+    "desvio": 0.11578803814028649
+   },
+   {
+    "ticker": "BALM4",
+    "proventos": 41,
+    "semPreco": 0,
+    "observado": 0.638775,
+    "implicitoB3": 0.5875134673134915,
+    "desvio": 0.08725167258022326
+   },
+   {
+    "ticker": "BAUH4",
+    "proventos": 9,
+    "semPreco": 0,
+    "observado": 0.8532,
+    "implicitoB3": 0.8532060660385659,
+    "desvio": 0.000007109699294627347
+   },
+   {
+    "ticker": "BAZA3",
+    "proventos": 28,
+    "semPreco": 0,
+    "observado": 0.33679,
+    "implicitoB3": 0.43339311783689616,
+    "desvio": 0.2228995197686825
+   },
+   {
+    "ticker": "BBAS3",
+    "proventos": 112,
+    "semPreco": 0,
+    "observado": 0.5834929320565435,
+    "implicitoB3": 0.5386940919549825,
+    "desvio": 0.08316192950804568
+   },
+   {
+    "ticker": "BBDC3",
+    "proventos": 148,
+    "semPreco": 0,
+    "observado": 0.6003524124413471,
+    "implicitoB3": 0.553028421954386,
+    "desvio": 0.08557243824778404
+   },
+   {
+    "ticker": "BBDC4",
+    "proventos": 148,
+    "semPreco": 0,
+    "observado": 0.6007799628787721,
+    "implicitoB3": 0.5587992857661569,
+    "desvio": 0.07512657618210161
+   },
+   {
+    "ticker": "BBSE3",
+    "proventos": 35,
+    "semPreco": 0,
+    "observado": 0.3955117056856187,
+    "implicitoB3": 0.4175677051405472,
+    "desvio": 0.05282017546712514
+   },
+   {
+    "ticker": "BEEF3",
+    "proventos": 11,
+    "semPreco": 0,
+    "observado": 0.7465484880083421,
+    "implicitoB3": 0.7460752434726075,
+    "desvio": 0.0006343120749214837
+   },
+   {
+    "ticker": "BEES3",
+    "proventos": 142,
+    "semPreco": 0,
+    "observado": 0.5278260869565218,
+    "implicitoB3": 0.4952622164799806,
+    "desvio": 0.06575076675136904
+   },
+   {
+    "ticker": "BEES4",
+    "proventos": 142,
+    "semPreco": 0,
+    "observado": 0.555405457563009,
+    "implicitoB3": 0.5119720274159681,
+    "desvio": 0.08483555315757885
+   },
+   {
+    "ticker": "BGIP3",
+    "proventos": 28,
+    "semPreco": 0,
+    "observado": 0.5450472193074503,
+    "implicitoB3": 0.5121477586439532,
+    "desvio": 0.06423822052957351
+   },
+   {
+    "ticker": "BGIP4",
+    "proventos": 28,
+    "semPreco": 0,
+    "observado": 0.49740458015267175,
+    "implicitoB3": 0.46230751594776537,
+    "desvio": 0.07591713955364687
+   },
+   {
+    "ticker": "BHIA3",
+    "proventos": 2,
+    "semPreco": 0,
+    "observado": 0.9955927152317882,
+    "implicitoB3": 0.9950751869461388,
+    "desvio": 0.0005200896298476199
+   },
+   {
+    "ticker": "BLAU3",
+    "proventos": 23,
+    "semPreco": 0,
+    "observado": 0.8435825578673685,
+    "implicitoB3": 0.8334786656977256,
+    "desvio": 0.012122556443822985
+   },
+   {
+    "ticker": "BMEB3",
+    "proventos": 16,
+    "semPreco": 0,
+    "observado": 0.7017457180500659,
+    "implicitoB3": 0.7034899272889963,
+    "desvio": 0.002479366329596111
+   },
+   {
+    "ticker": "BMEB4",
+    "proventos": 18,
+    "semPreco": 0,
+    "observado": 0.5604020100502513,
+    "implicitoB3": 0.5205221692403836,
+    "desvio": 0.07661506688190767
+   },
+   {
+    "ticker": "BMGB4",
+    "proventos": 19,
+    "semPreco": 0,
+    "observado": 0.5079166666666666,
+    "implicitoB3": 0.5072968366529801,
+    "desvio": 0.0012218290533327902
+   },
+   {
+    "ticker": "BMIN4",
+    "proventos": 12,
+    "semPreco": 0,
+    "observado": 0.5152137931034483,
+    "implicitoB3": 0.5251220640092112,
+    "desvio": 0.018868509980546455
+   },
+   {
+    "ticker": "BMKS3",
+    "proventos": 12,
+    "semPreco": 0,
+    "observado": 0.36206172413793103,
+    "implicitoB3": 0.37865473627764423,
+    "desvio": 0.04382095494917182
+   },
+   {
+    "ticker": "BMOB3",
+    "proventos": 12,
+    "semPreco": 0,
+    "observado": 0.7687943925233646,
+    "implicitoB3": 0.7775970037209902,
+    "desvio": 0.011320274069348213
+   },
+   {
+    "ticker": "BNBR3",
+    "proventos": 35,
+    "semPreco": 0,
+    "observado": 0.5530639466457434,
+    "implicitoB3": 0.5496537553581755,
+    "desvio": 0.006204253594784825
+   },
+   {
+    "ticker": "BPAC11",
+    "proventos": 24,
+    "semPreco": 0,
+    "observado": 0.7672457142857143,
+    "implicitoB3": 0.731234437336178,
+    "desvio": 0.049247238793515
+   },
+   {
+    "ticker": "BPAC3",
+    "proventos": 24,
+    "semPreco": 0,
+    "observado": 0.8175743707093821,
+    "implicitoB3": 0.7883087165227093,
+    "desvio": 0.037124610667462754
+   },
+   {
+    "ticker": "BPAC5",
+    "proventos": 23,
+    "semPreco": 0,
+    "observado": 0.7695193434935522,
+    "implicitoB3": 0.7232453789879388,
+    "desvio": 0.06398100264444984
+   },
+   {
+    "ticker": "BRAP3",
+    "proventos": 30,
+    "semPreco": 0,
+    "observado": 0.4232816106694024,
+    "implicitoB3": 0.4033383519792273,
+    "desvio": 0.04944548067971044
+   },
+   {
+    "ticker": "BRAP4",
+    "proventos": 30,
+    "semPreco": 0,
+    "observado": 0.4189353921170256,
+    "implicitoB3": 0.399271048150788,
+    "desvio": 0.04925061322956514
+   },
+   {
+    "ticker": "BRAV3",
+    "proventos": 2,
+    "semPreco": 0,
+    "observado": 0.6119921104536489,
+    "implicitoB3": 0.9824044834345825,
+    "desvio": 0.3770467045161843
+   },
+   {
+    "ticker": "BRBI11",
+    "proventos": 18,
+    "semPreco": 0,
+    "observado": 0.6182960725075528,
+    "implicitoB3": 0.6371484863935879,
+    "desvio": 0.02958872898332421
+   },
+   {
+    "ticker": "BRKM3",
+    "proventos": 6,
+    "semPreco": 0,
+    "observado": 0.730595,
+    "implicitoB3": 0.7305953815922026,
+    "desvio": 5.223030589140976e-7
+   },
+   {
+    "ticker": "BRKM5",
+    "proventos": 6,
+    "semPreco": 0,
+    "observado": 0.701437908496732,
+    "implicitoB3": 0.733696431220516,
+    "desvio": 0.043967125027610354
+   },
+   {
+    "ticker": "BRSR3",
+    "proventos": 55,
+    "semPreco": 0,
+    "observado": 0.5601578073089701,
+    "implicitoB3": 0.5115514488042249,
+    "desvio": 0.09501753659063006
+   },
+   {
+    "ticker": "BRSR5",
+    "proventos": 55,
+    "semPreco": 0,
+    "observado": 0.5341964285714286,
+    "implicitoB3": 0.5403155716534311,
+    "desvio": 0.01132512813442943
+   },
+   {
+    "ticker": "BRSR6",
+    "proventos": 55,
+    "semPreco": 0,
+    "observado": 0.43494535519125677,
+    "implicitoB3": 0.47167766435884473,
+    "desvio": 0.07787587147574282
+   },
+   {
+    "ticker": "BRST3",
+    "proventos": 3,
+    "semPreco": 0,
+    "observado": 0.9053553481694185,
+    "implicitoB3": 0.9624349456832904,
+    "desvio": 0.059307486464290404
+   },
+   {
+    "ticker": "BSLI3",
+    "proventos": 40,
+    "semPreco": 0,
+    "observado": 0.6341,
+    "implicitoB3": 0.6392673264396097,
+    "desvio": 0.008083201230366432
+   },
+   {
+    "ticker": "BSLI4",
+    "proventos": 40,
+    "semPreco": 0,
+    "observado": 0.618328350772297,
+    "implicitoB3": 0.5856076434649237,
+    "desvio": 0.05587479547529717
+   },
+   {
+    "ticker": "CAMB3",
+    "proventos": 26,
+    "semPreco": 0,
+    "observado": 0.7495076923076923,
+    "implicitoB3": 0.7365937463160146,
+    "desvio": 0.017531978863878805
+   },
+   {
+    "ticker": "CAML3",
+    "proventos": 45,
+    "semPreco": 0,
+    "observado": 0.6984427141268076,
+    "implicitoB3": 0.7018017948407057,
+    "desvio": 0.004786366661630681
+   },
+   {
+    "ticker": "CASH3",
+    "proventos": 3,
+    "semPreco": 0,
+    "observado": 0.9988823529411764,
+    "implicitoB3": 0.42228648511491995,
+    "desvio": 1.3654139740449973
+   },
+   {
+    "ticker": "CBAV3",
+    "proventos": 5,
+    "semPreco": 0,
+    "observado": 0.9077796467619849,
+    "implicitoB3": 0.9078369212067586,
+    "desvio": 0.00006308891325723653
+   },
+   {
+    "ticker": "CBEE3",
+    "proventos": 5,
+    "semPreco": 0,
+    "observado": 0.89895546875,
+    "implicitoB3": 0.9115678055633168,
+    "desvio": 0.013835873465850246
+   },
+   {
+    "ticker": "CEAB3",
+    "proventos": 4,
+    "semPreco": 0,
+    "observado": 0.918289241622575,
+    "implicitoB3": 0.9036827983995919,
+    "desvio": 0.016163241403787776
+   },
+   {
+    "ticker": "CEBR3",
+    "proventos": 17,
+    "semPreco": 0,
+    "observado": 0.27613333333333334,
+    "implicitoB3": 0.2733326823716106,
+    "desvio": 0.010246308408575544
+   },
+   {
+    "ticker": "CEBR5",
+    "proventos": 17,
+    "semPreco": 0,
+    "observado": 0.034273414647607484,
+    "implicitoB3": 0.21132294839864796,
+    "desvio": 0.8378149892980257
+   },
+   {
+    "ticker": "CEBR6",
+    "proventos": 17,
+    "semPreco": 0,
+    "observado": 0.031587982832618024,
+    "implicitoB3": 0.2412962006413292,
+    "desvio": 0.8690904260047946
+   },
+   {
+    "ticker": "CEEB3",
+    "proventos": 39,
+    "semPreco": 0,
+    "observado": 0.4185701754385965,
+    "implicitoB3": 0.4067982210102936,
+    "desvio": 0.028938067622485963
+   },
+   {
+    "ticker": "CGAS3",
+    "proventos": 36,
+    "semPreco": 0,
+    "observado": 0.2571483976321698,
+    "implicitoB3": 0.3859518580707444,
+    "desvio": 0.3337293440752528
+   },
+   {
+    "ticker": "CGAS5",
+    "proventos": 36,
+    "semPreco": 0,
+    "observado": 0.3701476635514019,
+    "implicitoB3": 0.3487303065028988,
+    "desvio": 0.06141524452886937
+   },
+   {
+    "ticker": "CGRA3",
+    "proventos": 20,
+    "semPreco": 0,
+    "observado": 0.4803367283309083,
+    "implicitoB3": 0.41150223524460144,
+    "desvio": 0.16727610980142282
+   },
+   {
+    "ticker": "CGRA4",
+    "proventos": 20,
+    "semPreco": 0,
+    "observado": 0.4796170680759663,
+    "implicitoB3": 0.411723705667591,
+    "desvio": 0.16490029957903296
+   },
+   {
+    "ticker": "CLSC3",
+    "proventos": 63,
+    "semPreco": 0,
+    "observado": 0.7466134913400182,
+    "implicitoB3": 0.5449388051780131,
+    "desvio": 0.37008685057054214
+   },
+   {
+    "ticker": "CLSC4",
+    "proventos": 63,
+    "semPreco": 0,
+    "observado": 0.7254751773049646,
+    "implicitoB3": 0.5215935850716511,
+    "desvio": 0.3908820930098409
+   },
+   {
+    "ticker": "CMIG3",
+    "proventos": 66,
+    "semPreco": 0,
+    "observado": 0.6954076850984067,
+    "implicitoB3": 0.5343923520272247,
+    "desvio": 0.30130545929478236
+   },
+   {
+    "ticker": "CMIG4",
+    "proventos": 68,
+    "semPreco": 0,
+    "observado": 0.59932763778799,
+    "implicitoB3": 0.4108835460901915,
+    "desvio": 0.4586313895773131
+   },
+   {
+    "ticker": "CMIN3",
+    "proventos": 24,
+    "semPreco": 0,
+    "observado": 0.5333222222222223,
+    "implicitoB3": 0.526193888005828,
+    "desvio": 0.013546972663269097
+   },
+   {
+    "ticker": "COCE5",
+    "proventos": 13,
+    "semPreco": 0,
+    "observado": 0.5500409668168783,
+    "implicitoB3": 0.6829134340828816,
+    "desvio": 0.1945670719517245
+   },
+   {
+    "ticker": "COGN3",
+    "proventos": 17,
+    "semPreco": 0,
+    "observado": 0.867090937779414,
+    "implicitoB3": 0.8677111931789974,
+    "desvio": 0.0007148177924395371
+   },
+   {
+    "ticker": "CPFE3",
+    "proventos": 15,
+    "semPreco": 0,
+    "observado": 0.3487484303055672,
+    "implicitoB3": 0.529678879223664,
+    "desvio": 0.34158516794794924
+   },
+   {
+    "ticker": "CPLE3",
+    "proventos": 28,
+    "semPreco": 0,
+    "observado": 0.5054807692307691,
+    "implicitoB3": 0.4784541346886563,
+    "desvio": 0.05648740930977603
+   },
+   {
+    "ticker": "CRPG5",
+    "proventos": 21,
+    "semPreco": 0,
+    "observado": 0.613755389630876,
+    "implicitoB3": 0.5572476943294635,
+    "desvio": 0.10140498718331736
+   },
+   {
+    "ticker": "CRPG6",
+    "proventos": 21,
+    "semPreco": 0,
+    "observado": 0.6108015508069606,
+    "implicitoB3": 0.5562890240537969,
+    "desvio": 0.09799317332547619
+   },
+   {
+    "ticker": "CSAN3",
+    "proventos": 10,
+    "semPreco": 0,
+    "observado": 0.7956744578991833,
+    "implicitoB3": 0.7956764429019562,
+    "desvio": 0.0000024947361336735696
+   },
+   {
+    "ticker": "CSED3",
+    "proventos": 8,
+    "semPreco": 0,
+    "observado": 0.738497688751926,
+    "implicitoB3": 0.7384960787879012,
+    "desvio": 0.0000021800576481822986
+   },
+   {
+    "ticker": "CSMG3",
+    "proventos": 54,
+    "semPreco": 0,
+    "observado": 0.47467297916686313,
+    "implicitoB3": 0.4425663855056029,
+    "desvio": 0.07254639012987973
+   },
+   {
+    "ticker": "CSNA3",
+    "proventos": 14,
+    "semPreco": 0,
+    "observado": 0.5953995157384988,
+    "implicitoB3": 0.6026669191226117,
+    "desvio": 0.012058739501901172
+   },
+   {
+    "ticker": "CSUD3",
+    "proventos": 40,
+    "semPreco": 0,
+    "observado": 0.5787799564270153,
+    "implicitoB3": 0.5457792568912515,
+    "desvio": 0.06046528723670286
+   },
+   {
+    "ticker": "CVCB3",
+    "proventos": 7,
+    "semPreco": 0,
+    "observado": 0.9675076120052196,
+    "implicitoB3": 0.9631081177137861,
+    "desvio": 0.004568017038291572
+   },
+   {
+    "ticker": "CXSE3",
+    "proventos": 20,
+    "semPreco": 0,
+    "observado": 0.6611542288557213,
+    "implicitoB3": 0.6609807987024586,
+    "desvio": 0.0002623830429009377
+   },
+   {
+    "ticker": "CYRE3",
+    "proventos": 14,
+    "semPreco": 0,
+    "observado": 0.5854795737122557,
+    "implicitoB3": 0.6064153131831413,
+    "desvio": 0.034523764515430266
+   },
+   {
+    "ticker": "DASA3",
+    "proventos": 7,
+    "semPreco": 0,
+    "observado": 0.9465459742734637,
+    "implicitoB3": 0.948621632995434,
+    "desvio": 0.0021880786287954423
+   },
+   {
+    "ticker": "DESK3",
+    "proventos": 7,
+    "semPreco": 0,
+    "observado": 0.9790103092783505,
+    "implicitoB3": 0.979123905700253,
+    "desvio": 0.00011601843366415565
+   },
+   {
+    "ticker": "DEXP3",
+    "proventos": 7,
+    "semPreco": 0,
+    "observado": 0.7132919254658384,
+    "implicitoB3": 0.7746630785653444,
+    "desvio": 0.07922302585165641
+   },
+   {
+    "ticker": "DEXP4",
+    "proventos": 7,
+    "semPreco": 0,
+    "observado": 0.6952576757261388,
+    "implicitoB3": 0.7648126220237196,
+    "desvio": 0.09094377406264043
+   },
+   {
+    "ticker": "DIRR3",
+    "proventos": 13,
+    "semPreco": 0,
+    "observado": 0.5157990088985985,
+    "implicitoB3": 0.515829236469441,
+    "desvio": 0.000058599956546445675
+   },
+   {
+    "ticker": "DOHL4",
+    "proventos": 10,
+    "semPreco": 0,
+    "observado": 0.7779829545454546,
+    "implicitoB3": 0.8089742612511108,
+    "desvio": 0.038309385341539715
+   },
+   {
+    "ticker": "DXCO3",
+    "proventos": 14,
+    "semPreco": 0,
+    "observado": 0.7640188976377953,
+    "implicitoB3": 0.7397585676167698,
+    "desvio": 0.032794929431075426
+   },
+   {
+    "ticker": "EALT3",
+    "proventos": 50,
+    "semPreco": 0,
+    "observado": 0.7519545454545454,
+    "implicitoB3": 0.5941794214343504,
+    "desvio": 0.2655344805434787
+   },
+   {
+    "ticker": "EALT4",
+    "proventos": 50,
+    "semPreco": 0,
+    "observado": 0.705,
+    "implicitoB3": 0.5480851003346291,
+    "desvio": 0.28629659804575547
+   },
+   {
+    "ticker": "ECOM3",
+    "proventos": 1,
+    "semPreco": 0,
+    "observado": 0.9999616402116402,
+    "implicitoB3": 0.9999612508688213,
+    "desvio": 3.893579063607433e-7
+   },
+   {
+    "ticker": "ECOR3",
+    "proventos": 12,
+    "semPreco": 0,
+    "observado": 0.7364193168433452,
+    "implicitoB3": 0.7659576580100154,
+    "desvio": 0.03856393477860365
+   },
+   {
+    "ticker": "EGIE3",
+    "proventos": 33,
+    "semPreco": 0,
+    "observado": 0.5599271756455786,
+    "implicitoB3": 0.5418361621303749,
+    "desvio": 0.03338834647741851
+   },
+   {
+    "ticker": "EKTR4",
+    "proventos": 43,
+    "semPreco": 0,
+    "observado": 0.35200560224089633,
+    "implicitoB3": 0.3397621297679327,
+    "desvio": 0.03603542419906036
+   },
+   {
+    "ticker": "EMAE4",
+    "proventos": 19,
+    "semPreco": 0,
+    "observado": 0.6464727272727273,
+    "implicitoB3": 0.6385654208800842,
+    "desvio": 0.012382922930191054
+   },
+   {
+    "ticker": "EMBJ3",
+    "proventos": 16,
+    "semPreco": 0,
+    "observado": 0.9740862944162436,
+    "implicitoB3": 0.9626699646331214,
+    "desvio": 0.011859027706835112
+   },
+   {
+    "ticker": "ENGI11",
+    "proventos": 21,
+    "semPreco": 0,
+    "observado": 0.6908649462456794,
+    "implicitoB3": 0.6908639069615755,
+    "desvio": 0.000001504325372048143
+   },
+   {
+    "ticker": "ENGI3",
+    "proventos": 21,
+    "semPreco": 0,
+    "observado": 0.7080775707534359,
+    "implicitoB3": 0.7795583871183088,
+    "desvio": 0.09169398668021089
+   },
+   {
+    "ticker": "ENGI4",
+    "proventos": 21,
+    "semPreco": 0,
+    "observado": 0.6553144219567043,
+    "implicitoB3": 0.6552996557983077,
+    "desvio": 0.000022533444457017993
+   },
+   {
+    "ticker": "ENJU3",
+    "proventos": 1,
+    "semPreco": 0,
+    "observado": 1.0,
+    "implicitoB3": 0.79833877286,
+    "desvio": 0.2526010686134672
+   },
+   {
+    "ticker": "ENMT3",
+    "proventos": 21,
+    "semPreco": 0,
+    "observado": 0.5848242293131423,
+    "implicitoB3": 0.6110260810955763,
+    "desvio": 0.04288172402633594
+   },
+   {
+    "ticker": "ENMT4",
+    "proventos": 26,
+    "semPreco": 0,
+    "observado": 0.5605932203389831,
+    "implicitoB3": 0.5874401879194336,
+    "desvio": 0.04570161887550772
+   },
+   {
+    "ticker": "EQPA3",
+    "proventos": 17,
+    "semPreco": 0,
+    "observado": 0.5483737024221453,
+    "implicitoB3": 0.5391636541421453,
+    "desvio": 0.017082101527511107
+   },
+   {
+    "ticker": "EQTL3",
+    "proventos": 16,
+    "semPreco": 0,
+    "observado": 0.8223939393939393,
+    "implicitoB3": 0.8156226634510847,
+    "desvio": 0.008301971299085498
+   },
+   {
+    "ticker": "ESPA3",
+    "proventos": 7,
+    "semPreco": 0,
+    "observado": 0.9539980934223069,
+    "implicitoB3": 0.9539896947868284,
+    "desvio": 0.000008803696229131575
+   },
+   {
+    "ticker": "ETER3",
+    "proventos": 14,
+    "semPreco": 0,
+    "observado": 0.8248625,
+    "implicitoB3": 0.8061754939493587,
+    "desvio": 0.02317982398484464
+   },
+   {
+    "ticker": "EUCA3",
+    "proventos": 10,
+    "semPreco": 0,
+    "observado": 0.7608709999456983,
+    "implicitoB3": 0.7780066335944542,
+    "desvio": 0.022025048256449797
+   },
+   {
+    "ticker": "EUCA4",
+    "proventos": 10,
+    "semPreco": 0,
+    "observado": 0.672753164556962,
+    "implicitoB3": 0.6967764258539603,
+    "desvio": 0.034477718254540046
+   },
+   {
+    "ticker": "EVEN3",
+    "proventos": 12,
+    "semPreco": 0,
+    "observado": 0.5989680589680589,
+    "implicitoB3": 0.6433363296398399,
+    "desvio": 0.06896590263543756
+   },
+   {
+    "ticker": "EZTC3",
+    "proventos": 26,
+    "semPreco": 0,
+    "observado": 0.5958808527019874,
+    "implicitoB3": 0.6339267700961272,
+    "desvio": 0.06001626558280626
+   },
+   {
+    "ticker": "FESA3",
+    "proventos": 46,
+    "semPreco": 0,
+    "observado": 0.6499692307692307,
+    "implicitoB3": 0.6117174268753469,
+    "desvio": 0.06253181978037481
+   },
+   {
+    "ticker": "FESA4",
+    "proventos": 46,
+    "semPreco": 0,
+    "observado": 0.5431073446327683,
+    "implicitoB3": 0.4969182918163113,
+    "desvio": 0.09295100135603596
+   },
+   {
+    "ticker": "FIQE3",
+    "proventos": 21,
+    "semPreco": 0,
+    "observado": 0.764437562772012,
+    "implicitoB3": 0.7243696981016302,
+    "desvio": 0.05531410932206082
+   },
+   {
+    "ticker": "FLRY3",
+    "proventos": 30,
+    "semPreco": 0,
+    "observado": 0.47536411363732595,
+    "implicitoB3": 0.6087765907242164,
+    "desvio": 0.21914850064812696
+   },
+   {
+    "ticker": "GEPA3",
+    "proventos": 28,
+    "semPreco": 0,
+    "observado": 0.3139829268292683,
+    "implicitoB3": 0.3052946622862117,
+    "desvio": 0.028458619217231584
+   },
+   {
+    "ticker": "GEPA4",
+    "proventos": 28,
+    "semPreco": 0,
+    "observado": 0.33283529411764706,
+    "implicitoB3": 0.3208969367985361,
+    "desvio": 0.03720308906097802
+   },
+   {
+    "ticker": "GGBR3",
+    "proventos": 40,
+    "semPreco": 0,
+    "observado": 0.5862017721471959,
+    "implicitoB3": 0.5762525907126665,
+    "desvio": 0.01726531315412383
+   },
+   {
+    "ticker": "GGBR4",
+    "proventos": 40,
+    "semPreco": 0,
+    "observado": 0.627119574917963,
+    "implicitoB3": 0.6225076047003409,
+    "desvio": 0.0074086969906852485
+   },
+   {
+    "ticker": "GGPS3",
+    "proventos": 5,
+    "semPreco": 0,
+    "observado": 0.912897147196415,
+    "implicitoB3": 0.9129030467294039,
+    "desvio": 0.0000064623872272351335
+   },
+   {
+    "ticker": "GMAT3",
+    "proventos": 8,
+    "semPreco": 0,
+    "observado": 0.9480201342281881,
+    "implicitoB3": 0.9390945148922507,
+    "desvio": 0.009504495228535692
+   },
+   {
+    "ticker": "GOAU3",
+    "proventos": 40,
+    "semPreco": 0,
+    "observado": 0.5244323081345215,
+    "implicitoB3": 0.5223085775017392,
+    "desvio": 0.004066045866871093
+   },
+   {
+    "ticker": "GOAU4",
+    "proventos": 40,
+    "semPreco": 0,
+    "observado": 0.5383989816844637,
+    "implicitoB3": 0.5376366556193163,
+    "desvio": 0.001417920555043306
+   },
+   {
+    "ticker": "GRND3",
+    "proventos": 64,
+    "semPreco": 0,
+    "observado": 0.41930860033726813,
+    "implicitoB3": 0.3995268002292707,
+    "desvio": 0.04951307420840245
+   },
+   {
+    "ticker": "HAPV3",
+    "proventos": 11,
+    "semPreco": 0,
+    "observado": 0.8199736625514403,
+    "implicitoB3": 0.9762565391002628,
+    "desvio": 0.16008382048109593
+   },
+   {
+    "ticker": "HBOR3",
+    "proventos": 7,
+    "semPreco": 0,
+    "observado": 0.7807962085308056,
+    "implicitoB3": 0.7872187044149862,
+    "desvio": 0.008158464538712273
+   },
+   {
+    "ticker": "HBRE3",
+    "proventos": 2,
+    "semPreco": 0,
+    "observado": 0.4943915343915344,
+    "implicitoB3": 0.7591786688254042,
+    "desvio": 0.34878105155871486
+   },
+   {
+    "ticker": "HYPE3",
+    "proventos": 47,
+    "semPreco": 0,
+    "observado": 0.7110071134406589,
+    "implicitoB3": 0.6566540956443144,
+    "desvio": 0.0827726776652673
+   },
+   {
+    "ticker": "IGTI11",
+    "proventos": 18,
+    "semPreco": 0,
+    "observado": 0.8963484432234431,
+    "implicitoB3": 0.887776520891018,
+    "desvio": 0.009655495646383905
+   },
+   {
+    "ticker": "IGTI3",
+    "proventos": 18,
+    "semPreco": 0,
+    "observado": 0.926972248207047,
+    "implicitoB3": 0.8722735139830248,
+    "desvio": 0.06270823697747496
+   },
+   {
+    "ticker": "IGTI4",
+    "proventos": 15,
+    "semPreco": 0,
+    "observado": 0.9416111111111112,
+    "implicitoB3": 0.9012278826459912,
+    "desvio": 0.04480912013791172
+   },
+   {
+    "ticker": "INTB3",
+    "proventos": 18,
+    "semPreco": 0,
+    "observado": 0.8198328267477204,
+    "implicitoB3": 0.8199817677453736,
+    "desvio": 0.00018163940164506176
+   },
+   {
+    "ticker": "IRBR3",
+    "proventos": 22,
+    "semPreco": 0,
+    "observado": 0.8861986637755764,
+    "implicitoB3": 0.8777191281231417,
+    "desvio": 0.009660875991807094
+   },
+   {
+    "ticker": "ISAE3",
+    "proventos": 37,
+    "semPreco": 0,
+    "observado": 0.5006121739130435,
+    "implicitoB3": 0.4910655437986459,
+    "desvio": 0.01944064338244833
+   },
+   {
+    "ticker": "ISAE4",
+    "proventos": 37,
+    "semPreco": 0,
+    "observado": 0.4725528062764031,
+    "implicitoB3": 0.4423546504394425,
+    "desvio": 0.06826684382533621
+   },
+   {
+    "ticker": "ITSA3",
+    "proventos": 95,
+    "semPreco": 0,
+    "observado": 0.5182656826568265,
+    "implicitoB3": 0.4966149483493716,
+    "desvio": 0.04359662225113592
+   },
+   {
+    "ticker": "ITSA4",
+    "proventos": 95,
+    "semPreco": 0,
+    "observado": 0.5084344660194174,
+    "implicitoB3": 0.48636315855073525,
+    "desvio": 0.04538030292929718
+   },
+   {
+    "ticker": "ITUB3",
+    "proventos": 166,
+    "semPreco": 0,
+    "observado": 0.5514918190567853,
+    "implicitoB3": 0.5222282823933633,
+    "desvio": 0.05603590929489255
+   },
+   {
+    "ticker": "ITUB4",
+    "proventos": 166,
+    "semPreco": 0,
+    "observado": 0.5907164398076452,
+    "implicitoB3": 0.5627935948331467,
+    "desvio": 0.04961471706652398
+   },
+   {
+    "ticker": "JALL3",
+    "proventos": 6,
+    "semPreco": 0,
+    "observado": 0.8891150442477876,
+    "implicitoB3": 0.8869826711002639,
+    "desvio": 0.002404075318493737
+   },
+   {
+    "ticker": "JHSF3",
+    "proventos": 50,
+    "semPreco": 0,
+    "observado": 0.6077710843373494,
+    "implicitoB3": 0.614990222168989,
+    "desvio": 0.011738622129923826
+   },
+   {
+    "ticker": "JOPA3",
+    "proventos": 11,
+    "semPreco": 0,
+    "observado": 0.7426333333333334,
+    "implicitoB3": 0.7545151223557016,
+    "desvio": 0.01574758234834528
+   },
+   {
+    "ticker": "JSLG3",
+    "proventos": 13,
+    "semPreco": 0,
+    "observado": 0.5453720802151165,
+    "implicitoB3": 0.591636378358056,
+    "desvio": 0.0781971829915783
+   },
+   {
+    "ticker": "KEPL3",
+    "proventos": 30,
+    "semPreco": 0,
+    "observado": 0.6418529411764706,
+    "implicitoB3": 0.518882856854912,
+    "desvio": 0.2369900695253515
+   },
+   {
+    "ticker": "LAND3",
+    "proventos": 5,
+    "semPreco": 0,
+    "observado": 0.9369886742171886,
+    "implicitoB3": 0.9374421145424519,
+    "desvio": 0.00048369954606164445
+   },
+   {
+    "ticker": "LAVV3",
+    "proventos": 21,
+    "semPreco": 0,
+    "observado": 0.5090555555555556,
+    "implicitoB3": 0.5512523837760117,
+    "desvio": 0.07654720317291508
+   },
+   {
+    "ticker": "LEVE3",
+    "proventos": 30,
+    "semPreco": 0,
+    "observado": 0.32804347826086955,
+    "implicitoB3": 0.3885537407892864,
+    "desvio": 0.15573202925675012
+   },
+   {
+    "ticker": "LJQQ3",
+    "proventos": 5,
+    "semPreco": 0,
+    "observado": 0.9177326035965598,
+    "implicitoB3": 0.9049447579778751,
+    "desvio": 0.014131078727125379
+   },
+   {
+    "ticker": "LOGG3",
+    "proventos": 14,
+    "semPreco": 0,
+    "observado": 0.5986400000000001,
+    "implicitoB3": 0.5986419024982217,
+    "desvio": 0.0000031780238129996974
+   },
+   {
+    "ticker": "LPSB3",
+    "proventos": 7,
+    "semPreco": 0,
+    "observado": 0.8024494382022471,
+    "implicitoB3": 0.8030349233075651,
+    "desvio": 0.0007290904645920193
+   },
+   {
+    "ticker": "LREN3",
+    "proventos": 45,
+    "semPreco": 0,
+    "observado": 0.7944736960532829,
+    "implicitoB3": 0.7637652528412255,
+    "desvio": 0.0402066513209669
+   },
+   {
+    "ticker": "LUXM4",
+    "proventos": 13,
+    "semPreco": 0,
+    "observado": 0.6460150375939849,
+    "implicitoB3": 0.6705635338735406,
+    "desvio": 0.036608755232707346
+   },
+   {
+    "ticker": "LWSA3",
+    "proventos": 6,
+    "semPreco": 0,
+    "observado": 0.9497864077669902,
+    "implicitoB3": 0.8960823849009393,
+    "desvio": 0.05993201492515432
+   },
+   {
+    "ticker": "MATD3",
+    "proventos": 5,
+    "semPreco": 0,
+    "observado": 0.9254107142857143,
+    "implicitoB3": 0.9254084193974494,
+    "desvio": 0.00000247986534018807
+   },
+   {
+    "ticker": "MBRF3",
+    "proventos": 8,
+    "semPreco": 0,
+    "observado": 0.5274816702199573,
+    "implicitoB3": 0.5503021228871392,
+    "desvio": 0.041468952631793066
+   },
+   {
+    "ticker": "MDIA3",
+    "proventos": 45,
+    "semPreco": 0,
+    "observado": 0.8137917451971411,
+    "implicitoB3": 0.7945608130907549,
+    "desvio": 0.02420322244634754
+   },
+   {
+    "ticker": "MDNE3",
+    "proventos": 10,
+    "semPreco": 0,
+    "observado": 0.8698702702702703,
+    "implicitoB3": 0.7804491319256267,
+    "desvio": 0.11457651073813357
+   },
+   {
+    "ticker": "MELK3",
+    "proventos": 18,
+    "semPreco": 0,
+    "observado": 0.4288862275449102,
+    "implicitoB3": 0.47032072041833667,
+    "desvio": 0.08809837856297653
+   },
+   {
+    "ticker": "MGLU3",
+    "proventos": 12,
+    "semPreco": 0,
+    "observado": 0.9402339998253734,
+    "implicitoB3": 0.9383194220423499,
+    "desvio": 0.0020404328611851597
+   },
+   {
+    "ticker": "MILS3",
+    "proventos": 23,
+    "semPreco": 0,
+    "observado": 0.801784140969163,
+    "implicitoB3": 0.7911829967538089,
+    "desvio": 0.013399105211879148
+   },
+   {
+    "ticker": "MLAS3",
+    "proventos": 2,
+    "semPreco": 0,
+    "observado": 0.9417220077220078,
+    "implicitoB3": 0.9417221600360413,
+    "desvio": 1.6173988459655675e-7
+   },
+   {
+    "ticker": "MNPR3",
+    "proventos": 1,
+    "semPreco": 0,
+    "observado": 0.9708571428571429,
+    "implicitoB3": 0.9707992728719101,
+    "desvio": 0.000059610659844722136
+   },
+   {
+    "ticker": "MOTV3",
+    "proventos": 21,
+    "semPreco": 0,
+    "observado": 0.5613309566250744,
+    "implicitoB3": 0.7159674147778686,
+    "desvio": 0.2159825363012795
+   },
+   {
+    "ticker": "MOVI3",
+    "proventos": 24,
+    "semPreco": 0,
+    "observado": 0.7384520547945206,
+    "implicitoB3": 0.710283802239787,
+    "desvio": 0.03965774309636316
+   },
+   {
+    "ticker": "MRVE3",
+    "proventos": 14,
+    "semPreco": 0,
+    "observado": 0.7371196581196582,
+    "implicitoB3": 0.7530504017937669,
+    "desvio": 0.021154950101828107
+   },
+   {
+    "ticker": "MTRE3",
+    "proventos": 37,
+    "semPreco": 0,
+    "observado": 0.5734615384615385,
+    "implicitoB3": 0.5781440814088386,
+    "desvio": 0.008099266424884122
+   },
+   {
+    "ticker": "MTSA4",
+    "proventos": 29,
+    "semPreco": 0,
+    "observado": 0.5935735735735735,
+    "implicitoB3": 0.5766460333826066,
+    "desvio": 0.02935516627361512
+   },
+   {
+    "ticker": "MULT3",
+    "proventos": 29,
+    "semPreco": 0,
+    "observado": 0.7787954225472189,
+    "implicitoB3": 0.7589476084544379,
+    "desvio": 0.026151757870612746
+   },
+   {
+    "ticker": "MYPK3",
+    "proventos": 18,
+    "semPreco": 0,
+    "observado": 0.7266864864864865,
+    "implicitoB3": 0.7032560027284377,
+    "desvio": 0.033317147194115604
+   },
+   {
+    "ticker": "NATU3",
+    "proventos": 9,
+    "semPreco": 2,
+    "observado": 0.8456291600633914,
+    "implicitoB3": 0.9615489732117412,
+    "desvio": 0.12055528774697499
+   },
+   {
+    "ticker": "OPCT3",
+    "proventos": 1,
+    "semPreco": 0,
+    "observado": 0.9908340807174888,
+    "implicitoB3": 0.990830985854717,
+    "desvio": 0.0000031235022077691355
+   },
+   {
+    "ticker": "PATI3",
+    "proventos": 14,
+    "semPreco": 0,
+    "observado": 0.6542916071711884,
+    "implicitoB3": 0.5712372508182405,
+    "desvio": 0.14539380307215755
+   },
+   {
+    "ticker": "PCAR3",
+    "proventos": 11,
+    "semPreco": 0,
+    "observado": 0.8905656931926383,
+    "implicitoB3": 0.89812812581167,
+    "desvio": 0.008420215781793083
+   },
+   {
+    "ticker": "PDTC3",
+    "proventos": 1,
+    "semPreco": 0,
+    "observado": 0.9799,
+    "implicitoB3": 0.9799040373913044,
+    "desvio": 0.000004120190498557719
+   },
+   {
+    "ticker": "PEAB3",
+    "proventos": 22,
+    "semPreco": 0,
+    "observado": 0.3299699248120301,
+    "implicitoB3": 0.40072382561824405,
+    "desvio": 0.17656524589485922
+   },
+   {
+    "ticker": "PEAB4",
+    "proventos": 21,
+    "semPreco": 0,
+    "observado": 0.35167076923076923,
+    "implicitoB3": 0.41035453822939477,
+    "desvio": 0.14300748141311004
+   },
+   {
+    "ticker": "PETR3",
+    "proventos": 81,
+    "semPreco": 0,
+    "observado": 0.2866331994645248,
+    "implicitoB3": 0.2779720298807672,
+    "desvio": 0.03115842118170198
+   },
+   {
+    "ticker": "PETR4",
+    "proventos": 84,
+    "semPreco": 0,
+    "observado": 0.2496109839816934,
+    "implicitoB3": 0.2431285269208384,
+    "desvio": 0.026662675675922065
+   },
+   {
+    "ticker": "PFRM3",
+    "proventos": 10,
+    "semPreco": 0,
+    "observado": 0.717774193548387,
+    "implicitoB3": 0.7183925189786233,
+    "desvio": 0.0008607069448821614
+   },
+   {
+    "ticker": "PGMN3",
+    "proventos": 4,
+    "semPreco": 0,
+    "observado": 0.8079999999999999,
+    "implicitoB3": 0.7761031750023675,
+    "desvio": 0.04109869154643664
+   },
+   {
+    "ticker": "PINE3",
+    "proventos": 16,
+    "semPreco": 0,
+    "observado": 0.7576,
+    "implicitoB3": 0.7204735250084454,
+    "desvio": 0.05153065824468639
+   },
+   {
+    "ticker": "PINE4",
+    "proventos": 17,
+    "semPreco": 0,
+    "observado": 0.7663744075829385,
+    "implicitoB3": 0.7149407045686753,
+    "desvio": 0.07194121510439566
+   },
+   {
+    "ticker": "PLPL3",
+    "proventos": 6,
+    "semPreco": 0,
+    "observado": 0.7118191489361702,
+    "implicitoB3": 0.746022488046345,
+    "desvio": 0.0458475979722075
+   },
+   {
+    "ticker": "PNVL3",
+    "proventos": 62,
+    "semPreco": 0,
+    "observado": 0.9025639387550841,
+    "implicitoB3": 0.8364549922832704,
+    "desvio": 0.07903467261442998
+   },
+   {
+    "ticker": "POMO3",
+    "proventos": 30,
+    "semPreco": 0,
+    "observado": 0.5476231558968165,
+    "implicitoB3": 0.5155897191749912,
+    "desvio": 0.06212970416299779
+   },
+   {
+    "ticker": "POMO4",
+    "proventos": 30,
+    "semPreco": 0,
+    "observado": 0.5984973757998419,
+    "implicitoB3": 0.5688772475653933,
+    "desvio": 0.05206769713714676
+   },
+   {
+    "ticker": "POSI3",
+    "proventos": 12,
+    "semPreco": 0,
+    "observado": 0.7499006622516556,
+    "implicitoB3": 0.7454778592422283,
+    "desvio": 0.005932842880032707
+   },
+   {
+    "ticker": "PRIO3",
+    "proventos": 1,
+    "semPreco": 0,
+    "observado": 0.9985074626865672,
+    "implicitoB3": 0.9983963907284769,
+    "desvio": 0.00011125036019943302
+   },
+   {
+    "ticker": "PRNR3",
+    "proventos": 5,
+    "semPreco": 0,
+    "observado": 0.944134328358209,
+    "implicitoB3": 0.9368809788299023,
+    "desvio": 0.007742018134860196
+   },
+   {
+    "ticker": "PSSA3",
+    "proventos": 41,
+    "semPreco": 0,
+    "observado": 0.6037996661101837,
+    "implicitoB3": 0.570752593795006,
+    "desvio": 0.05790087101565944
+   },
+   {
+    "ticker": "PTBL3",
+    "proventos": 19,
+    "semPreco": 0,
+    "observado": 0.7270758122743681,
+    "implicitoB3": 0.7475331375159427,
+    "desvio": 0.02736644600071436
+   },
+   {
+    "ticker": "QUAL3",
+    "proventos": 19,
+    "semPreco": 0,
+    "observado": 0.7180510554737358,
+    "implicitoB3": 0.6437943761069909,
+    "desvio": 0.11534223056711568
+   },
+   {
+    "ticker": "RADL3",
+    "proventos": 51,
+    "semPreco": 0,
+    "observado": 0.9025663161199183,
+    "implicitoB3": 0.8911926006710033,
+    "desvio": 0.012762353996601306
+   },
+   {
+    "ticker": "RAIL3",
+    "proventos": 5,
+    "semPreco": 0,
+    "observado": 0.9431006864988557,
+    "implicitoB3": 0.9430997129562622,
+    "desvio": 0.0000010322795991335454
+   },
+   {
+    "ticker": "RAIZ4",
+    "proventos": 12,
+    "semPreco": 0,
+    "observado": 0.8845441988950276,
+    "implicitoB3": 0.8790712857356883,
+    "desvio": 0.006225789930971448
+   },
+   {
+    "ticker": "RANI3",
+    "proventos": 35,
+    "semPreco": 0,
+    "observado": 0.6272791519434628,
+    "implicitoB3": 0.6269133769999549,
+    "desvio": 0.0005834537225195557
+   },
+   {
+    "ticker": "RAPT3",
+    "proventos": 19,
+    "semPreco": 0,
+    "observado": 0.7319692307692307,
+    "implicitoB3": 0.7071273788154508,
+    "desvio": 0.03513066061081371
+   },
+   {
+    "ticker": "RAPT4",
+    "proventos": 19,
+    "semPreco": 0,
+    "observado": 0.7646636771300449,
+    "implicitoB3": 0.7416228521890671,
+    "desvio": 0.031068116190011708
+   },
+   {
+    "ticker": "RDOR3",
+    "proventos": 24,
+    "semPreco": 0,
+    "observado": 0.803115987460815,
+    "implicitoB3": 0.8339406400369601,
+    "desvio": 0.03696264589621023
+   },
+   {
+    "ticker": "RECV3",
+    "proventos": 13,
+    "semPreco": 0,
+    "observado": 0.6894490711082639,
+    "implicitoB3": 0.6437109275541729,
+    "desvio": 0.07105385600315417
+   },
+   {
+    "ticker": "REDE3",
+    "proventos": 27,
+    "semPreco": 0,
+    "observado": 0.5420571428571429,
+    "implicitoB3": 0.5579282972743022,
+    "desvio": 0.028446584435125488
+   },
+   {
+    "ticker": "RENT3",
+    "proventos": 43,
+    "semPreco": 0,
+    "observado": 0.7438820190712775,
+    "implicitoB3": 0.7991150721556262,
+    "desvio": 0.06911777165628552
+   },
+   {
+    "ticker": "RIAA3",
+    "proventos": 30,
+    "semPreco": 0,
+    "observado": 0.5775684210526316,
+    "implicitoB3": 0.6035975841756211,
+    "desvio": 0.04312337193751281
+   },
+   {
+    "ticker": "ROMI3",
+    "proventos": 35,
+    "semPreco": 0,
+    "observado": 0.5357880368205523,
+    "implicitoB3": 0.4869057658991435,
+    "desvio": 0.10039369903771944
+   },
+   {
+    "ticker": "RPAD3",
+    "proventos": 4,
+    "semPreco": 0,
+    "observado": 0.9892105263157894,
+    "implicitoB3": 0.9977376156580507,
+    "desvio": 0.008546424639545469
+   },
+   {
+    "ticker": "RSUL4",
+    "proventos": 5,
+    "semPreco": 0,
+    "observado": 0.8452747252747252,
+    "implicitoB3": 0.8452880813059143,
+    "desvio": 0.000015800567267465482
+   },
+   {
+    "ticker": "SANB11",
+    "proventos": 52,
+    "semPreco": 0,
+    "observado": 0.5863071297989031,
+    "implicitoB3": 0.5445655306580329,
+    "desvio": 0.07665119584493563
+   },
+   {
+    "ticker": "SANB3",
+    "proventos": 52,
+    "semPreco": 0,
+    "observado": 0.6001523656776263,
+    "implicitoB3": 0.5596111290067494,
+    "desvio": 0.07244537245503557
+   },
+   {
+    "ticker": "SANB4",
+    "proventos": 52,
+    "semPreco": 0,
+    "observado": 0.5787065217391304,
+    "implicitoB3": 0.5252364920457326,
+    "desvio": 0.1018018178537794
+   },
+   {
+    "ticker": "SAPR11",
+    "proventos": 20,
+    "semPreco": 0,
+    "observado": 0.6606498015873016,
+    "implicitoB3": 0.6142001438491012,
+    "desvio": 0.07562625669070555
+   },
+   {
+    "ticker": "SAPR3",
+    "proventos": 22,
+    "semPreco": 0,
+    "observado": 0.6723561324844552,
+    "implicitoB3": 0.626902778061607,
+    "desvio": 0.0725046307234285
+   },
+   {
+    "ticker": "SAPR4",
+    "proventos": 23,
+    "semPreco": 0,
+    "observado": 0.6185831845691645,
+    "implicitoB3": 0.5685795120803374,
+    "desvio": 0.08794490731097926
+   },
+   {
+    "ticker": "SAUD3",
+    "proventos": 69,
+    "semPreco": 0,
+    "observado": 0.6535655737704918,
+    "implicitoB3": 0.6413211309335941,
+    "desvio": 0.019092529851734374
+   },
+   {
+    "ticker": "SBFG3",
+    "proventos": 5,
+    "semPreco": 0,
+    "observado": 0.8745528455284552,
+    "implicitoB3": 0.8745529876573419,
+    "desvio": 1.6251603807138082e-7
+   },
+   {
+    "ticker": "SBSP3",
+    "proventos": 12,
+    "semPreco": 0,
+    "observado": 0.7700496054513036,
+    "implicitoB3": 0.773108041127772,
+    "desvio": 0.003956026213369657
+   },
+   {
+    "ticker": "SCAR3",
+    "proventos": 11,
+    "semPreco": 0,
+    "observado": 0.6074164133738602,
+    "implicitoB3": 0.6056274490451847,
+    "desvio": 0.002953902323112878
+   },
+   {
+    "ticker": "SEER3",
+    "proventos": 16,
+    "semPreco": 0,
+    "observado": 0.7687721441661576,
+    "implicitoB3": 0.7545030782906104,
+    "desvio": 0.01891187231187308
+   },
+   {
+    "ticker": "SHUL4",
+    "proventos": 37,
+    "semPreco": 0,
+    "observado": 0.66,
+    "implicitoB3": 0.6121530635797774,
+    "desvio": 0.07816172011036104
+   },
+   {
+    "ticker": "SIMH3",
+    "proventos": 8,
+    "semPreco": 0,
+    "observado": 0.8891292517006804,
+    "implicitoB3": 0.884623546580981,
+    "desvio": 0.005093358793255787
+   },
+   {
+    "ticker": "SLCE3",
+    "proventos": 16,
+    "semPreco": 0,
+    "observado": 0.6103641822216421,
+    "implicitoB3": 0.6085266139144906,
+    "desvio": 0.003019700807054271
+   },
+   {
+    "ticker": "SMFT3",
+    "proventos": 10,
+    "semPreco": 0,
+    "observado": 0.9211129032258065,
+    "implicitoB3": 0.9065977372126546,
+    "desvio": 0.016010591486560477
+   },
+   {
+    "ticker": "SMTO3",
+    "proventos": 19,
+    "semPreco": 0,
+    "observado": 0.7285,
+    "implicitoB3": 0.7256851985138667,
+    "desvio": 0.003878818931263517
+   },
+   {
+    "ticker": "SOJA3",
+    "proventos": 8,
+    "semPreco": 0,
+    "observado": 0.8915045541030335,
+    "implicitoB3": 0.8739902756282524,
+    "desvio": 0.02003944318738715
+   },
+   {
+    "ticker": "SUZB3",
+    "proventos": 10,
+    "semPreco": 0,
+    "observado": 0.8593768856349813,
+    "implicitoB3": 0.8509038676111403,
+    "desvio": 0.009957667777005685
+   },
+   {
+    "ticker": "SYNE3",
+    "proventos": 8,
+    "semPreco": 0,
+    "observado": 0.2953454483113321,
+    "implicitoB3": 0.11152273678843656,
+    "desvio": 1.6482980674300984
+   },
+   {
+    "ticker": "TAEE11",
+    "proventos": 70,
+    "semPreco": 0,
+    "observado": 0.37813963963963965,
+    "implicitoB3": 0.38309011357502404,
+    "desvio": 0.012922478967640871
+   },
+   {
+    "ticker": "TAEE3",
+    "proventos": 67,
+    "semPreco": 0,
+    "observado": 0.3974625,
+    "implicitoB3": 0.4096003240971417,
+    "desvio": 0.02963333616470254
+   },
+   {
+    "ticker": "TAEE4",
+    "proventos": 67,
+    "semPreco": 0,
+    "observado": 0.3948416666666667,
+    "implicitoB3": 0.4069683770461588,
+    "desvio": 0.029797672407644304
+   },
+   {
+    "ticker": "TASA3",
+    "proventos": 6,
+    "semPreco": 0,
+    "observado": 0.8133001864512119,
+    "implicitoB3": 0.8198939093233141,
+    "desvio": 0.008042165940157053
+   },
+   {
+    "ticker": "TASA4",
+    "proventos": 6,
+    "semPreco": 0,
+    "observado": 0.8131157449380477,
+    "implicitoB3": 0.8195644012311112,
+    "desvio": 0.00786839482458801
+   },
+   {
+    "ticker": "TECN3",
+    "proventos": 7,
+    "semPreco": 0,
+    "observado": 0.7962142857142857,
+    "implicitoB3": 0.7968379859406736,
+    "desvio": 0.0007827189935625256
+   },
+   {
+    "ticker": "TEND3",
+    "proventos": 13,
+    "semPreco": 0,
+    "observado": 0.861296928327645,
+    "implicitoB3": 0.8612937227268008,
+    "desvio": 0.00000372184396524311
+   },
+   {
+    "ticker": "TFCO4",
+    "proventos": 24,
+    "semPreco": 0,
+    "observado": 0.9204216216216216,
+    "implicitoB3": 0.9124615196476454,
+    "desvio": 0.008723767306976438
+   },
+   {
+    "ticker": "TGMA3",
+    "proventos": 51,
+    "semPreco": 0,
+    "observado": 0.5494197530864198,
+    "implicitoB3": 0.5574602157768387,
+    "desvio": 0.014423383880792784
+   },
+   {
+    "ticker": "TIMS3",
+    "proventos": 34,
+    "semPreco": 0,
+    "observado": 0.677735368956743,
+    "implicitoB3": 0.6833402517220689,
+    "desvio": 0.008202184418671599
+   },
+   {
+    "ticker": "TOTS3",
+    "proventos": 28,
+    "semPreco": 0,
+    "observado": 0.8914015904572563,
+    "implicitoB3": 0.8813654417612249,
+    "desvio": 0.011387045850103084
+   },
+   {
+    "ticker": "TPIS3",
+    "proventos": 6,
+    "semPreco": 0,
+    "observado": 0.7353875968992248,
+    "implicitoB3": 0.7353855657111686,
+    "desvio": 0.000002762072239148594
+   },
+   {
+    "ticker": "TRIS3",
+    "proventos": 23,
+    "semPreco": 0,
+    "observado": 0.7555980048816724,
+    "implicitoB3": 0.6229392628500182,
+    "desvio": 0.21295614186321354
+   },
+   {
+    "ticker": "TTEN3",
+    "proventos": 5,
+    "semPreco": 0,
+    "observado": 0.9537438016528926,
+    "implicitoB3": 0.9537400781316829,
+    "desvio": 0.000003904125762455024
+   },
+   {
+    "ticker": "TUPY3",
+    "proventos": 26,
+    "semPreco": 0,
+    "observado": 0.6815886524822695,
+    "implicitoB3": 0.6882894587008994,
+    "desvio": 0.009735447977479161
+   },
+   {
+    "ticker": "UCAS3",
+    "proventos": 9,
+    "semPreco": 0,
+    "observado": 0.6928402366863906,
+    "implicitoB3": 0.6710296421288107,
+    "desvio": 0.032503175997392386
+   },
+   {
+    "ticker": "UGPA3",
+    "proventos": 19,
+    "semPreco": 0,
+    "observado": 0.7195302108391114,
+    "implicitoB3": 0.7161934764752034,
+    "desvio": 0.004658984580996117
+   },
+   {
+    "ticker": "UNIP3",
+    "proventos": 34,
+    "semPreco": 0,
+    "observado": 0.31589291658081187,
+    "implicitoB3": 0.34345529872007663,
+    "desvio": 0.0802502749032522
+   },
+   {
+    "ticker": "UNIP5",
+    "proventos": 33,
+    "semPreco": 0,
+    "observado": 0.26294751750727835,
+    "implicitoB3": 0.31881797292118047,
+    "desvio": 0.17524248994492742
+   },
+   {
+    "ticker": "UNIP6",
+    "proventos": 34,
+    "semPreco": 0,
+    "observado": 0.25202072876605175,
+    "implicitoB3": 0.2985427224603943,
+    "desvio": 0.15583027216653833
+   },
+   {
+    "ticker": "USIM3",
+    "proventos": 13,
+    "semPreco": 0,
+    "observado": 0.8039518413597735,
+    "implicitoB3": 0.7997953446057373,
+    "desvio": 0.005196950422467372
+   },
+   {
+    "ticker": "USIM5",
+    "proventos": 13,
+    "semPreco": 0,
+    "observado": 0.7886834733893557,
+    "implicitoB3": 0.7841715402279419,
+    "desvio": 0.005753757857754449
+   },
+   {
+    "ticker": "VALE3",
+    "proventos": 32,
+    "semPreco": 0,
+    "observado": 0.5058834134615384,
+    "implicitoB3": 0.48220648645200276,
+    "desvio": 0.04910122048284049
+   },
+   {
+    "ticker": "VAMO3",
+    "proventos": 7,
+    "semPreco": 0,
+    "observado": 0.8572223596339352,
+    "implicitoB3": 0.8506826303885098,
+    "desvio": 0.007687625222156935
+   },
+   {
+    "ticker": "VBBR3",
+    "proventos": 30,
+    "semPreco": 0,
+    "observado": 0.5058135253994498,
+    "implicitoB3": 0.5656707647412437,
+    "desvio": 0.10581639192397463
+   },
+   {
+    "ticker": "VITT3",
+    "proventos": 13,
+    "semPreco": 0,
+    "observado": 0.8316959233306845,
+    "implicitoB3": 0.8492533468318245,
+    "desvio": 0.020673952674591933
+   },
+   {
+    "ticker": "VIVA3",
+    "proventos": 9,
+    "semPreco": 0,
+    "observado": 0.8954334301119867,
+    "implicitoB3": 0.8926353086375699,
+    "desvio": 0.0031346748748799502
+   },
+   {
+    "ticker": "VIVT3",
+    "proventos": 78,
+    "semPreco": 0,
+    "observado": 0.5755935828877006,
+    "implicitoB3": 0.5022372345411621,
+    "desvio": 0.14605915949970538
+   },
+   {
+    "ticker": "VLID3",
+    "proventos": 31,
+    "semPreco": 0,
+    "observado": 0.7149023079863975,
+    "implicitoB3": 0.5983913121146094,
+    "desvio": 0.19470703119010668
+   },
+   {
+    "ticker": "VSTE3",
+    "proventos": 7,
+    "semPreco": 0,
+    "observado": 0.9296789617486338,
+    "implicitoB3": 0.901150947449468,
+    "desvio": 0.031657309333035455
+   },
+   {
+    "ticker": "VTRU3",
+    "proventos": 2,
+    "semPreco": 0,
+    "observado": 0.9953372868791697,
+    "implicitoB3": 0.9953380038885354,
+    "desvio": 7.203677172551437e-7
+   },
+   {
+    "ticker": "VULC3",
+    "proventos": 32,
+    "semPreco": 0,
+    "observado": 0.5773593073593074,
+    "implicitoB3": 0.5780505094884434,
+    "desvio": 0.001195746942161957
+   },
+   {
+    "ticker": "VVEO3",
+    "proventos": 4,
+    "semPreco": 0,
+    "observado": 0.923894495412844,
+    "implicitoB3": 0.9335628320860438,
+    "desvio": 0.010356385602451668
+   },
+   {
+    "ticker": "WDCN3",
+    "proventos": 3,
+    "semPreco": 0,
+    "observado": 0.8999683114531462,
+    "implicitoB3": 0.9169858266819289,
+    "desvio": 0.018558100609209816
+   },
+   {
+    "ticker": "WEGE3",
+    "proventos": 62,
+    "semPreco": 0,
+    "observado": 0.8493425972083748,
+    "implicitoB3": 0.8273983007697796,
+    "desvio": 0.02652204677986303
+   },
+   {
+    "ticker": "WEST3",
+    "proventos": 1,
+    "semPreco": 0,
+    "observado": 1.0,
+    "implicitoB3": 0.41796707453074433,
+    "desvio": 1.3925329551920078
+   },
+   {
+    "ticker": "WHRL3",
+    "proventos": 23,
+    "semPreco": 0,
+    "observado": 0.4628834355828221,
+    "implicitoB3": 0.44307585976844127,
+    "desvio": 0.04470470547579053
+   },
+   {
+    "ticker": "WHRL4",
+    "proventos": 23,
+    "semPreco": 0,
+    "observado": 0.4510588235294118,
+    "implicitoB3": 0.43261624242906155,
+    "desvio": 0.04263034831239465
+   },
+   {
+    "ticker": "WIZC3",
+    "proventos": 23,
+    "semPreco": 0,
+    "observado": 0.5390921318090114,
+    "implicitoB3": 0.5033776049449794,
+    "desvio": 0.07094977311900008
+   },
+   {
+    "ticker": "WLMM4",
+    "proventos": 33,
+    "semPreco": 0,
+    "observado": 0.6922571428571428,
+    "implicitoB3": 0.6940206208909793,
+    "desvio": 0.002540959131117071
+   },
+   {
+    "ticker": "YDUQ3",
+    "proventos": 14,
+    "semPreco": 0,
+    "observado": 0.6799166666666667,
+    "implicitoB3": 0.7042201607468014,
+    "desvio": 0.03451121600148688
+   }
+  ]
+ },
+ "coortes": {
+  "linhas": 2630,
+  "proventosSemPreco": 8,
+  "proventosPeloPrecoComDireito": 1354,
+  "totalMenosPreco36m": {
+   "2018": 0.11243437469583062,
+   "2019": 0.08018876344890802,
+   "2020": 0.10543699757424257,
+   "2021": 0.0700275876010259,
+   "2022": 0.08262222196545949
+  }
+ }
+}

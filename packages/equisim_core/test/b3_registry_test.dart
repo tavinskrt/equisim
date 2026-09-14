@@ -146,4 +146,68 @@ void main() {
       expect(B3RegistryCodec.decodePackage({'versao': 99, 'emissores': {}}), isEmpty);
     });
   });
+
+  group('Classificação setorial oficial — item A5', () {
+    test('lê setor, subsetor e segmento, com a pontuação da B3', () {
+      final c = B3Classification.parse(
+          'Petróleo. Gás e Biocombustíveis / Petróleo. Gás e Biocombustíveis / '
+          'Exploração. Refino e Distribuição')!;
+      expect(c.sector, 'Petróleo. Gás e Biocombustíveis');
+      expect(c.segment, 'Exploração. Refino e Distribuição');
+      expect(c.sectorKey, 'petroleo-gas-e-biocombustiveis');
+      expect(c.industry,
+          'Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição');
+    });
+
+    test('a chave do setor casa com a da fonte onde os nomes coincidem', () {
+      expect(B3Classification.parse('Materiais Básicos / Mineração')!.sectorKey,
+          'materiais-basicos', reason: 'é a chave de CyclicalSectors');
+      expect(
+          B3Classification.parse('Consumo não Cíclico / Bebidas')!.sectorKey,
+          'consumo-nao-ciclico');
+    });
+
+    test('texto vazio não é classificação', () {
+      expect(B3Classification.parse(''), isNull);
+      expect(B3Classification.parse(null), isNull);
+      expect(B3Classification.parse(' / '), isNull);
+    });
+
+    test('o emissor leva a classificação do detalhe, e o pacote a guarda', () {
+      final e = B3Registry.issuer(
+        {'code': 'SANB', 'totalNumberShares': '7.498.531.051'},
+        consultedOn: _d(2026, 9, 14),
+        detail: {
+          'industryClassification':
+              'Financeiro / Intermediários Financeiros / Bancos',
+        },
+      )!;
+      expect(e.classification!.sectorKey, 'financeiro');
+      final lido = B3RegistryCodec.decodePackage(
+          B3RegistryCodec.encodePackage([e], geradoEm: _d(2026, 9, 14)))['SANB']!;
+      expect(lido.classification!.label,
+          'Financeiro / Intermediários Financeiros / Bancos');
+    });
+
+    test('pacote da versão 1 continua legível, sem classificação', () {
+      final lido = B3RegistryCodec.decodePackage({
+        'versao': 1,
+        'geradoEm': '2026-09-14',
+        'emissores': {
+          'CTKA': {'consultadoEm': '2026-09-14', 'total': 6205375, 'eventos': []},
+        },
+      });
+      expect(lido['CTKA']!.totalShares, closeTo(6205375, 1e-6));
+      expect(lido['CTKA']!.classification, isNull);
+    });
+
+    test('versão futura não é lida pela metade', () {
+      expect(
+          B3RegistryCodec.decodePackage({
+            'versao': B3RegistryCodec.versao + 1,
+            'emissores': {'CTKA': {'consultadoEm': '2026-09-14'}},
+          }),
+          isEmpty);
+    });
+  });
 }

@@ -120,12 +120,26 @@ abstract final class BrazilianCalendar {
 
   /// Liquidação de um título público negociado em [tradeDate]: o dia útil
   /// seguinte, pulando 24/12 e 31/12, em que a B3 não liquida.
-  static DateTime treasurySettlement(DateTime tradeDate) {
-    var d = _dia(tradeDate);
+  static DateTime treasurySettlement(DateTime tradeDate) =>
+      nextTradingSession(tradeDate);
+
+  /// `true` quando a B3 abre em [day]: dia útil que não é 24/12 nem 31/12.
+  ///
+  /// As duas datas são dias úteis bancários e não têm pregão. A data ex de um
+  /// evento com data-com em 30/12 é o primeiro pregão de janeiro, e não 31/12.
+  static bool isTradingDay(DateTime day, {DateTime? knownAt}) {
+    final d = _dia(day);
+    if (d.month == 12 && (d.day == 24 || d.day == 31)) return false;
+    return isBusinessDay(d, knownAt: knownAt);
+  }
+
+  /// Primeiro pregão depois de [day] — a data ex de quem tem data-com em
+  /// [day], e a liquidação D+1 de quem negociou nele.
+  static DateTime nextTradingSession(DateTime day) {
+    var d = _dia(day);
     do {
       d = DateTime.utc(d.year, d.month, d.day + 1);
-    } while (!isBusinessDay(d, knownAt: tradeDate) ||
-        (d.month == 12 && (d.day == 24 || d.day == 31)));
+    } while (!isTradingDay(d, knownAt: day));
     return d;
   }
 }

@@ -4,18 +4,13 @@ import '../../network/api_client.dart';
 
 /// Cotações do dia dos títulos prefixados do Tesouro Direto (item A2.1).
 ///
-/// **Dois caminhos, porque o navegador não pode ler o arquivo do Tesouro**: o
-/// CORS dele só libera o domínio do próprio Tesouro.
+/// Lê o arquivo **direto**, e só o começo: ele vem em ordem decrescente de
+/// data-base, e as linhas do dia mais recente estão nos primeiros quilobytes de
+/// um arquivo de 14,5 MB. A leitura para na primeira linha de outra data.
 ///
-/// - Com [ApiClient.config] trazendo `tesouroProxyUrl`, pergunta à função
-///   `tesouro`, que lê o arquivo no servidor e devolve o dia em JSON.
-/// - Sem ela, lê o arquivo **direto**, e só o começo: ele vem em ordem
-///   decrescente de data-base, e as linhas do dia mais recente estão nos
-///   primeiros quilobytes de um arquivo de 14,5 MB. A leitura para na
-///   primeira linha de outra data.
-///
-/// No alvo web sem a função, o caminho direto falha — e o repositório recua
-/// para a curva empacotada.
+/// **Só no nativo.** O arquivo libera CORS apenas para o domínio do próprio
+/// Tesouro, e o navegador não pode lê-lo: na web o aplicativo nem chama esta
+/// fonte, e a curva vem do pacote do build (decisão 86).
 class TesouroDatasource {
   /// Cliente HTTP compartilhado.
   final ApiClient client;
@@ -33,26 +28,6 @@ class TesouroDatasource {
 
   /// Cotações da data-base mais recente publicada.
   Future<Result<List<TreasuryQuote>>> latest() async {
-    final proxy = client.config.tesouroProxyUrl;
-    if (proxy != null) return _pelaFuncao(proxy);
-    return _direto();
-  }
-
-  Future<Result<List<TreasuryQuote>>> _pelaFuncao(String url) async {
-    final r = await client.getJson(url);
-    return r.flatMap((body) {
-      if (body is! Map<String, dynamic>) {
-        return const Err(
-            ComputationFailure('Resposta inesperada da função tesouro.'));
-      }
-      final cotacoes = TreasuryQuotesCodec.decode(body);
-      return cotacoes.isEmpty
-          ? const Err(InsufficientData('A função tesouro não trouxe cotação.'))
-          : Ok(cotacoes);
-    });
-  }
-
-  Future<Result<List<TreasuryQuote>>> _direto() async {
     final pacote = await client.getJson(catalogo);
     if (pacote.isErr) return Err(pacote.failureOrNull!);
     final csv = _enderecoDoCsv(pacote.unwrap());

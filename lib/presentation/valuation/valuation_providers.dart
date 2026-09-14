@@ -133,6 +133,12 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     officialShares: await ref.watch(officialSharesProvider(ticker).future),
     isDistressed: (await ref.watch(distressedRegistryProvider.future))
         .contains(ticker.value),
+    // Prazo da concessão, do Formulário de Referência: só encurta a projeção
+    // quando o contrato acaba dentro dela (decisão 88).
+    concessionEnd: await ref.watch(concessionEndProvider(ticker).future),
+    // Proventos da B3: o beta sai do retorno total, que é a convenção do
+    // Ibovespa do outro lado da regressão (decisão 89).
+    dividends: await ref.watch(cashDividendsProvider(ticker).future),
   );
   if (inputs.isErr) return null;
 
@@ -146,9 +152,13 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
   final avaliado = result.valueOrNull;
   if (avaliado == null) return null;
   // O que a cascata não enxerga: a avaliação seguiu sem a CVM, ou com um
-  // pacote defasado (item A1.10). Nenhum número muda; a ressalva aparece.
-  final nota = await ref.watch(cvmCoverageNoteProvider(ticker).future);
-  return nota == null ? avaliado : avaliado.withWarnings([nota]);
+  // pacote defasado (item A1.10); ou sem curva, e por quê (decisão 86).
+  // Nenhum número muda; a ressalva aparece.
+  final notas = [
+    await ref.watch(cvmCoverageNoteProvider(ticker).future),
+    (await ref.watch(riskFreeCurveReadingProvider.future)).note,
+  ].nonNulls.toList();
+  return notas.isEmpty ? avaliado : avaliado.withWarnings(notas);
 });
 
 /// Avaliações de todos os ativos da carteira Principal.

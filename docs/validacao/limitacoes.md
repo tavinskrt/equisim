@@ -1,6 +1,6 @@
 # Limitações do trabalho
 
-Documento de referência para a seção de limitações da monografia. Cada item
+Documento de referência para a seção de limitações do artigo. Cada item
 traz o que foi observado, o efeito prático e o que seria necessário para
 resolver.
 
@@ -52,6 +52,15 @@ ela erra 9,1% na mediana — o remédio é maior que a doença. A
 registra o bloqueio, e a Fase B é onde ele se resolve: segunda fonte para o
 fluxo de proventos, ou nada.
 
+**Remedido em 14/09/2026, com a B3 como segunda fonte.** Contra o histórico de
+proventos do portal de empresas listadas, sobre 278 ativos e dez anos, o desvio
+mediano do ajuste da fonte é de **3,3%**, com p90 de 16,5% e 101 ativos acima de
+5%. Erra menos do que se media, e ainda erra; continua fora de cálculo. O
+bloqueio de dado da decisão 57 **caiu**: o beta passou a sair do retorno total
+com os proventos da B3
+([decisão 89](../decisoes/089-proventos-voltam-como-dado-conferido.md),
+[proventos.md](proventos.md)).
+
 ### 1.3. Viés de sobrevivência
 
 `/v2/tickers?type=stock` lista **781 ações vivas**. Empresas deslistadas não
@@ -94,6 +103,13 @@ da B3.**
 
 **Efeito.** O alerta de concentração setorial depende dessa classificação. Uma
 taxonomia diferente produziria agrupamentos diferentes.
+
+**Resolvida em 14/09/2026.** O setor de todo ativo passou a ser o da
+classificação oficial da B3, por emissor — 297 de 297 classificados —, com a
+taxonomia da fonte como recuo. 51 tickers do universo mudam de porta, quase
+todos por chegarem sem setor da fonte
+([decisão 87](../decisoes/087-o-setor-e-o-da-b3-por-emissor.md),
+[b3_classificacao.md](b3_classificacao.md)).
 
 ### 1.6. IFIX indisponível
 
@@ -312,6 +328,15 @@ por construção; o `close` dos ativos não. Beta e correlação misturam as dua
 convenções. O efeito é de segunda ordem, porque essas medidas olham
 covariância de variações e não nível.
 
+**Reaberta em parte em 14/09/2026, pelo orientador.** Provento voltou como dado
+conferido da B3 em dois lugares: o **retorno total nas coortes de validação** e o
+**beta**, que sai do retorno total dos dois lados
+([decisão 89](../decisoes/089-proventos-voltam-como-dado-conferido.md)). A
+simulação da carteira, a cascata e o retorno esperado **continuam de preço**, e o
+que se lê acima continua valendo para eles. Nas coortes, o retorno total fica 7%
+a 11% acima do de preço em 36 meses, e não muda a conclusão sobre a habilidade
+([proventos.md](proventos.md)).
+
 ### 2.8. O terminal neutro comprime o valor — mas não é ele que desloca o nível
 
 > **Correção de 09/09/2026.** Esta seção atribuía ao terminal neutro o
@@ -432,9 +457,12 @@ avaliação.
 
 **Decidido em 14/09/2026: a curva é o padrão do aplicativo**
 ([decisão 84](../decisoes/084-a-curva-e-o-padrao-do-aplicativo.md)). Sem curva
-de até sete dias — rede fora, função da web ainda não publicada, pacote velho —,
-a avaliação recua para os dois pontos do CDI e diz isso no aviso. Ver
-[curva_de_juros.md](curva_de_juros.md).
+de até sete dias — Tesouro fora no nativo, ou pacote do build vencido —, a
+avaliação recua para os dois pontos do CDI e diz no aviso qual das duas foi.
+**Na web o pacote é a única fonte**
+([decisão 86](../decisoes/086-na-web-a-curva-vem-so-do-pacote.md)): a função
+que buscaria a curva do dia exige o plano Blaze do Firebase, e o build web serve
+a curva por cerca de uma semana. Ver [curva_de_juros.md](curva_de_juros.md).
 
 ### 2.10. As primitivas estatísticas do núcleo, e sua conferência externa
 
@@ -556,6 +584,13 @@ estimado sobre a ação alavancada.
 No mesmo emissor a SANB11 é classificada e a SANB4 não. Sanar exige completar a
 taxonomia por emissor em vez de por papel, e é trabalho de dado.
 
+**Resolvida em 14/09/2026.** A classificação oficial da B3 é por emissor, e os
+três passam pela Porta 1, por subsetor
+([decisão 87](../decisoes/087-o-setor-e-o-da-b3-por-emissor.md)). Na montagem do
+aplicativo o preço justo deles não se move: a isenção de realavancagem só age com
+o beta desalavancado, e o aplicativo não resolve o prior do beta (item B11 do
+plano).
+
 ### 2.14. O minoritário é subtraído pelo valor contábil
 
 A [decisão 49](../decisoes/049-a-ponte-devolve-o-que-nao-e-do-controlador.md)
@@ -603,6 +638,20 @@ o prazo médio ponderado das outorgas, que existe em nota explicativa e no
 formulário de referência da CVM — dado da Fase B. E exige, junto, modelar a
 indenização do investimento não amortizado na reversão: truncar sem indenizar
 trocaria um viés por outro.
+
+**Resolvida em 14/09/2026, e a medição de cima estava mal posta.** A truncagem
+para 0,80 não devolvia nada no fim do contrato. O terminal neutro mantém para
+sempre o excedente de retorno do capital existente, e é esse excedente que o
+contrato corta: o terminal da concessão com prazo passa a ser o capital mais o
+excedente até o fim do contrato, e a projeção termina nele quando ele acaba antes.
+O prazo vem do Formulário de Referência, pela mediana das outorgas vigentes.
+Na mesma execução, a correlação de postos fica em 0,998, e a EGIE3 se move 34
+p.p.; o excedente tem sinal, e três elétricas com capital rendendo abaixo do custo
+sobem.
+([decisão 88](../decisoes/088-o-prazo-da-concessao-corta-o-excedente.md),
+[outorgas.md](outorgas.md)). **O que sobra:** sem peso por contrato no FRE, a
+mediana não é o prazo ponderado pela receita, e o quadro de intangíveis parou em
+2023.
 
 ### 1.9. A fonte publica exercício sem demonstração de resultado
 
@@ -722,6 +771,14 @@ isso exigiria preservar a contagem implícita no valor de mercado ao longo das
 coortes, o que injetaria a base societária de hoje numa avaliação de 2018 — a
 troca de um viés declarado por outro, e não uma melhora óbvia. Medição em
 [unidade.md §6](unidade.md).
+
+**O dado que faltava existe desde 14/09/2026.** A contagem de ações por data vem
+do Formulário de Referência — aprovação de capital, evento de ações declarado e
+formulário que a série não explica —, conferida contra a contagem oficial da B3
+nas listadas e contra a composição do capital do DFP e do ITR nas deslistadas
+([b3_contagem_por_data.md](b3_contagem_por_data.md)). Com ela, a coorte pode
+formar o valor de mercado pela contagem **daquela data**, e a ponte por papel
+deixa de colapsar para `u = 1`. **Ligá-la às coortes é o C1**, da Fase 2.
 
 ### 3.6. A cascata não supera um fator de valor de uma linha
 

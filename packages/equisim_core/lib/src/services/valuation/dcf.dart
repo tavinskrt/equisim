@@ -118,9 +118,12 @@ class DcfAssumptions {
   ///
   /// Quando `true` — o padrão, por decisão 25 —, impõe `ROIC_∞ = WACC` e
   /// `ROE_∞ = Ke`, o que faz o valor terminal virar `fluxo_{N+1} / desconto` e
-  /// **deixar de depender do crescimento perpétuo**. É a afirmação de que não há
-  /// lucro econômico em perpetuidade: crescimento sem retorno excedente não cria
-  /// valor.
+  /// **deixar de depender do crescimento perpétuo**. É a afirmação de que o
+  /// **capital novo** não cria valor: crescimento sem retorno excedente não
+  /// cria valor. O capital que já existe no ano N continua rendendo o que o
+  /// lucro dele diz, e esse excedente fica na perpetuidade — o valor terminal
+  /// é `capital_N + EVA_{N+1}/r`, e não `capital_N`. Onde há contrato que acaba,
+  /// ver [contractYearsAfterHorizon].
   ///
   /// [terminalReturnOnCapital] tem precedência sobre este campo.
   final bool neutralTerminalReturn;
@@ -166,6 +169,30 @@ class DcfAssumptions {
   /// [ReinvestmentPolicy.crescimentoReal].
   final double? inflation;
 
+  /// Anos de contrato que restam depois do fim da projeção explícita — zero
+  /// quando o contrato acaba no ano N —, ou `null` sem prazo (item A6,
+  /// decisão 88).
+  ///
+  /// **Com prazo, o excedente sobre o capital existente acaba no contrato.** O
+  /// valor terminal neutro é `capital_N + EVA_{N+1}/r`: o capital investido mais
+  /// o lucro econômico dele para sempre. Um contrato que acaba em `m` anos
+  /// devolve o capital — pela amortização, pela indenização do não amortizado
+  /// ou por renovação que refaz a tarifa ao custo de capital — e só paga o
+  /// excedente até lá — `capital_N` é o capital que rende o lucro de N+1:
+  ///
+  /// ```
+  /// VT = capital_N + EVA_{N+1} · (1 − (1+r)^−m) / r
+  /// EVA_{N+1} = lucro_{N+1} − r · capital_N
+  /// ```
+  ///
+  /// Com `m → ∞` volta ao terminal neutro, e com `EVA = 0` — o capital já
+  /// rende o custo dele — o prazo não muda nada. O capital sai da projeção: o
+  /// do primeiro ano é `lucro_1 / retorno`, e cada ano soma o reinvestimento. Sem
+  /// retorno utilizável não há capital a apurar, e o terminal fica perpétuo.
+  /// Só age com retorno terminal neutro: o excedente preservado é recusado a
+  /// concessão pela decisão 50.
+  final int? contractYearsAfterHorizon;
+
   /// Declara as premissas. **Não valida** — a consistência entre desconto e
   /// crescimento é conferida em [DcfCalculator], que devolve [Result].
   const DcfAssumptions({
@@ -182,6 +209,7 @@ class DcfAssumptions {
     this.reinvestmentPolicy = ReinvestmentPolicy.medido,
     this.inflation,
     this.cashTiming = CashTiming.meioDeAno,
+    this.contractYearsAfterHorizon,
   }) : terminalDiscountRate = terminalDiscountRate ?? discountRate;
 
   /// Fração percorrida da janela explícita no ano [t]: 0 no ano 1, 1 no ano N.
@@ -333,6 +361,7 @@ class DcfAssumptions {
     ReinvestmentPolicy? reinvestmentPolicy,
     double? inflation,
     CashTiming? cashTiming,
+    int? contractYearsAfterHorizon,
   }) =>
       DcfAssumptions(
         projectionYears: projectionYears ?? this.projectionYears,
@@ -351,6 +380,8 @@ class DcfAssumptions {
         reinvestmentPolicy: reinvestmentPolicy ?? this.reinvestmentPolicy,
         inflation: inflation ?? this.inflation,
         cashTiming: cashTiming ?? this.cashTiming,
+        contractYearsAfterHorizon:
+            contractYearsAfterHorizon ?? this.contractYearsAfterHorizon,
       );
 }
 
@@ -441,9 +472,12 @@ abstract final class DcfCalculator {
   /// avaliação que carregava de 63% a 80% do valor deixa de depender dela.
   ///
   /// - [finalProfit]: lucro do ano N, **antes** da retenção.
+  /// - [finalCapital]: capital investido no ano N, da projeção. Com ele e com
+  ///   [DcfAssumptions.contractYearsAfterHorizon], o terminal é o do contrato.
   static Result<double> terminalValue({
     required double finalProfit,
     required DcfAssumptions assumptions,
+    double? finalCapital,
   }) {
     final r = assumptions.terminalDiscountRate;
     final g = assumptions.perpetualGrowth;
@@ -451,6 +485,21 @@ abstract final class DcfCalculator {
 
     if (r <= 0) {
       return const Err(InvalidInput('Taxa de desconto deve ser positiva.'));
+    }
+
+    // Contrato que acaba: o capital volta, e o excedente sobre ele só dura os
+    // anos que faltam (decisão 88).
+    final anos = assumptions.contractYearsAfterHorizon;
+    if (anos != null &&
+        anos >= 0 &&
+        assumptions.terminalReturnOnCapital == null &&
+        assumptions.neutralTerminalReturn &&
+        finalCapital != null &&
+        finalCapital.isFinite &&
+        finalCapital > 0) {
+      final eva = proximo - r * finalCapital;
+      final anuidade = (1 - math.pow(1 + r, -anos)) / r;
+      return Ok(finalCapital + eva * anuidade);
     }
 
     // Vantagem competitiva residual: parte do retorno excedente sobrevive à
@@ -708,9 +757,16 @@ abstract final class DcfCalculator {
         'diverge.',
       ));
     }
+    // Com contrato que acaba, o terminal da firma não é perpetuidade, e a
+    // identidade `TV_acionista = TV_firma − D` vale direto: a dívida sai do
+    // capital devolvido (decisão 88).
+    final contrato = assumptions.contractYearsAfterHorizon != null &&
+        assumptions.terminalReturnOnCapital == null &&
+        assumptions.neutralTerminalReturn &&
+        p.capitalFinal != null;
     final fcffTerminal = p.terminal * (assumptions.terminalDiscountRate - gInf);
     final fcfeTerminal = fcffTerminal - divida * (kdLiquido - gInf);
-    final vt = fcfeTerminal / spread;
+    final vt = contrato ? p.terminal - divida : fcfeTerminal / spread;
     // A perpetuidade também é feita de fluxos que chegam ao longo do ano, e o
     // mesmo levantamento vale para ela — sob a taxa de equilíbrio, que é a que
     // a capitaliza.
@@ -838,6 +894,12 @@ abstract final class DcfCalculator {
     final descontados = <double>[];
     var lucro = baseProfit;
     var soma = 0.0;
+    // Capital investido implícito, **o que gera o lucro do ano seguinte**: o do
+    // primeiro ano é o lucro dele sobre o retorno, e cada ano soma o
+    // reinvestimento. No fim da projeção, é o capital que rende o lucro de N+1
+    // — com retorno igual ao custo de capital e crescimento constante, o EVA
+    // de N+1 sai exatamente zero. Só existe com retorno utilizável.
+    var capital = double.nan;
 
     // O fator de desconto **acumula** as taxas de cada ano, porque `r_t` é taxa
     // do período e não taxa à vista de vértice. Elevar `r_t` a `t` trataria a
@@ -849,7 +911,10 @@ abstract final class DcfCalculator {
       final r = a.discountRateAt(t);
       fator *= 1 + r;
       lucro *= 1 + a.growthAt(t);
-      final distribuivel = lucro * (1 - a.retentionAt(t));
+      if (t == 1 && a.returnOnCapital > 0) capital = lucro / a.returnOnCapital;
+      final retencao = a.retentionAt(t);
+      capital += retencao * lucro;
+      final distribuivel = lucro * (1 - retencao);
       // Meio de ano: o fluxo do ano chega, em média, no meio dele.
       final vp = distribuivel * a.lift(r) / fator;
       fluxos.add(distribuivel);
@@ -857,7 +922,11 @@ abstract final class DcfCalculator {
       soma += vp;
     }
 
-    final terminal = terminalValue(finalProfit: lucro, assumptions: a);
+    final terminal = terminalValue(
+      finalProfit: lucro,
+      assumptions: a,
+      finalCapital: capital.isFinite ? capital : null,
+    );
     if (terminal.isErr) return Err(terminal.failureOrNull!);
     final vt = terminal.unwrap();
 
@@ -866,6 +935,7 @@ abstract final class DcfCalculator {
       descontados: descontados,
       somaDescontada: soma,
       terminal: vt,
+      capitalFinal: capital.isFinite ? capital : null,
       // A perpetuidade também é feita de fluxos distribuídos no ano, e recebe
       // o mesmo levantamento — sob a taxa de equilíbrio, que é a que a
       // capitaliza.
@@ -880,6 +950,7 @@ class _Projection {
   final double somaDescontada;
   final double terminal;
   final double terminalDescontado;
+  final double? capitalFinal;
 
   const _Projection({
     required this.fluxos,
@@ -887,5 +958,6 @@ class _Projection {
     required this.somaDescontada,
     required this.terminal,
     required this.terminalDescontado,
+    this.capitalFinal,
   });
 }

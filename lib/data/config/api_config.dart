@@ -39,15 +39,6 @@ class ApiConfig {
   /// Como a credencial foi obtida — para diagnóstico e alerta.
   final String credentialSource;
 
-  /// Endereço da função `tesouro`, que devolve as cotações do dia do Tesouro
-  /// Direto em JSON (item A2.1).
-  ///
-  /// Existe por causa do alvo **web**: o arquivo do Tesouro só libera CORS
-  /// para o domínio do próprio Tesouro, e o navegador não pode lê-lo. No
-  /// nativo, `null` basta — o aplicativo lê o arquivo direto. Vem de
-  /// `--dart-define=TESOURO_PROXY_URL=...`.
-  final String? tesouroProxyUrl;
-
   /// Declara a configuração. Para resolvê-la a partir do ambiente, use
   /// [ApiConfig.resolve].
   const ApiConfig({
@@ -56,16 +47,11 @@ class ApiConfig {
     required this.bcbBaseUrl,
     this.brapiToken,
     this.credentialSource = 'não identificada',
-    this.tesouroProxyUrl,
   });
 
   // --- Valores de compilação (`--dart-define-from-file=config/local.json`) ---
   static const String _definedToken = String.fromEnvironment('BRAPI_TOKEN');
   static const String _definedProxy = String.fromEnvironment('BRAPI_PROXY_URL');
-  static const String _definedTesouro =
-      String.fromEnvironment('TESOURO_PROXY_URL');
-  static String? get _tesouro =>
-      _definedTesouro.isEmpty ? null : _definedTesouro;
   static const String _definedBase = String.fromEnvironment(
     'BRAPI_BASE_URL',
     defaultValue: 'https://brapi.dev/api',
@@ -94,7 +80,6 @@ class ApiConfig {
         brapiBaseUrl: _definedProxy,
         bcbBaseUrl: bcbDefaultBaseUrl,
         credentialSource: 'proxy de custódia',
-        tesouroProxyUrl: _tesouro,
       );
     }
 
@@ -105,7 +90,6 @@ class ApiConfig {
         brapiToken: _definedToken,
         bcbBaseUrl: bcbDefaultBaseUrl,
         credentialSource: 'definição de compilação',
-        tesouroProxyUrl: _tesouro,
       );
     }
 
@@ -119,7 +103,6 @@ class ApiConfig {
         brapiToken: token,
         bcbBaseUrl: bcbDefaultBaseUrl,
         credentialSource: 'arquivo .env (embarcado no bundle)',
-        tesouroProxyUrl: _tesouro,
       );
     }
 
@@ -128,7 +111,6 @@ class ApiConfig {
       brapiBaseUrl: _definedBase,
       bcbBaseUrl: bcbDefaultBaseUrl,
       credentialSource: 'ausente',
-      tesouroProxyUrl: _tesouro,
     );
   }
 

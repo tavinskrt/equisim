@@ -25,14 +25,17 @@
 // 2. *Reapresentação.* Os exercícios vêm como a fonte os publica hoje, não
 //    como estavam no dia da coorte. Reapresentação contábil entra como
 //    conhecimento futuro.
-// 3. *Provento.* O retorno de referência é de preço, pela decisão 23. O valor
-//    que o motor apura inclui a distribuição, então a medição **penaliza** o
-//    motor em ativo de *payout* alto. O relatório traz também a leitura por
-//    `adjustedClose`, com a ressalva da §0.4 da auditoria.
+// 3. *Provento.* O retorno de referência continua o de preço, e ao lado dele
+//    sai o **retorno total** — `ret12tot` e `ret36tot` —, com os proventos da
+//    B3 reinvestidos na data ex (item A4, decisão 89). O valor que o motor
+//    apura inclui a distribuição, então só o de preço **penaliza** o motor em
+//    ativo de *payout* alto. A leitura por `adjustedClose` segue, secundária:
+//    a conferência de `tool/proventos_conferir.dart` mede o ajuste da fonte.
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:equisim_core/equisim_core.dart';
+import 'b3/proventos.dart';
 import 'validation/context.dart';
 
 /// Índice buscado uma vez e reaproveitado.
@@ -217,6 +220,9 @@ Future<void> main(List<String> args) async {
     final universe = (await fundamentals.universe()).unwrap();
     stderr.writeln('universo: ${universe.length} ativos, '
         '${coortes.length} coortes');
+    // Proventos da B3 e fechamento bruto do COTAHIST: o retorno total (A4).
+    final proventos = lerProventos();
+    final bruto = lerCotahistBruto({for (final t in universe) t.value});
 
     final linhas = <Map<String, dynamic>>[];
     for (final t in coortes) {
@@ -285,11 +291,30 @@ Future<void> main(List<String> args) async {
           return pf / pa - 1;
         }
 
+        // Retorno de preço vezes o reinvestimento dos proventos da classe no
+        // fechamento bruto da data ex. Sem COTAHIST do papel, não há total.
+        final brutoDoPapel = bruto[ticker.value];
+        double? total(int meses) {
+          final preco = retorno(meses);
+          if (preco == null || brutoDoPapel == null) return null;
+          final r = TotalReturn.factor(
+            dividends: proventosDo(proventos, ticker.value),
+            de: t,
+            ate: DateTime(t.year + meses ~/ 12, t.month, t.day),
+            closeOnExDate: (d) =>
+                pregaoApartir(brutoDoPapel, d, folgaDias: 5)?.close,
+          );
+          return (1 + preco) * r.factor - 1;
+        }
+
         // Roteamento, para separar quem chegou ao acionista por qual porta.
         // A Porta 1 é setorial; a Porta 3 é o fluxo da firma não sustentado.
         final perfil = await fundamentals.profile(ticker);
         final setor = perfil.isOk ? perfil.unwrap().sector.key : null;
-        final porta1 = setor == 'servicos-financeiros';
+        final porta1 = FinancialSectors.isFinancial(
+          sectorKey: setor,
+          industry: perfil.isOk ? perfil.unwrap().industry : null,
+        );
         final sustentado = GrowthGuards.firmFlowIsSustained(pub);
 
         linhas.add({
@@ -313,6 +338,8 @@ Future<void> main(List<String> args) async {
           'ret36': retorno(36),
           'ret12aj': retorno(12, ajustado: true),
           'ret36aj': retorno(36, ajustado: true),
+          'ret12tot': total(12),
+          'ret36tot': total(36),
         });
       }
       stderr.writeln('  ${t.year}: $avaliados avaliados de ${universe.length}'

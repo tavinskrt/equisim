@@ -152,10 +152,13 @@ Moeda é BRL: 2 casas, arredondamento half-up. Quantidade de ação e cota de FI
   por composição — `(1+i)^(1/252)-1` —, **nunca** por `i/252`.
 - Taxa real usa Fisher: `(1+nominal)/(1+inflação)-1`. A subtração simples erra
   quase meio ponto percentual com a inflação brasileira.
-- **O projeto não modela provento.** Dividendo, JCP e a tributação deles saíram
-  pela [decisão 23](docs/decisoes/023-remocao-de-proventos.md); o retorno
-  apurado é de preço. Não reintroduza crédito de provento sem uma decisão nova
-  que substitua aquela.
+- **Provento é dado conferido da validação, e não crédito da simulação.** A
+  [decisão 23](docs/decisoes/023-remocao-de-proventos.md) tirou provento do
+  projeto; a [decisão 89](docs/decisoes/089-proventos-voltam-como-dado-conferido.md)
+  o reabriu, por decisão do orientador, só como **retorno total nas coortes de
+  validação**, com o histórico da B3. A simulação da carteira, a cascata de
+  avaliação e o retorno esperado continuam de preço. Estender provento a
+  qualquer um deles exige decisão nova.
 - A simulação compra **ação inteira**, e a sobra de cada aporte fica em caixa
   por ativo, acumula e entra no aporte seguinte. Fração de ação em caminho de
   cálculo é defeito.

@@ -8,7 +8,12 @@
 //   mercado    fonte de preços, dois pontos do CDI, divisor da fonte (antes)
 //   +oficial   mais a contagem oficial da B3 no divisor        (A3.3, dec. 83)
 //   +curva     mais a curva do Tesouro                         (A2.1, dec. 84)
-//   padrão     mais a CVM anual — é a configuração do aplicativo
+//   padrão     mais a CVM anual — a configuração do aplicativo até A3
+//   +setor     mais a classificação setorial oficial da B3     (A5, dec. 87)
+//   +prazo     mais o prazo das outorgas do FRE                (A6, dec. 88)
+//   +proventos mais o beta sobre retorno total, com a B3       (A4, dec. 89)
+//
+// `+proventos` é a configuração do aplicativo ao fim da Fase 1.
 //
 // A data é a da consulta ao registro da B3: registro consultado depois da
 // avaliação não entra nela, pela regra de nunca olhar para a frente.
@@ -20,6 +25,8 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:equisim_core/equisim_core.dart';
+
+import 'package:equisim/data/repositories/b3_registry_repository.dart';
 
 import 'curva_ligar.dart' show lerTesouro;
 import 'cvm/documentos.dart';
@@ -105,6 +112,12 @@ Future<void> main(List<String> args) async {
   final curva = TreasuryCurve.at(
       lerTesouro('data/tesouro/precotaxatesourodireto.csv'), hoje);
   final docs = carregarDocumentos('data/cvm_exercicios.json');
+  final prazos = ConcessionTermsCodec.decode(
+      jsonDecode(File('assets/cvm/outorgas.json').readAsStringSync())
+          as Map<String, dynamic>);
+  final proventos = CashDividendsCodec.decode(
+      jsonDecode(File('assets/b3/proventos.json').readAsStringSync())
+          as Map<String, dynamic>);
 
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
   try {
@@ -116,14 +129,25 @@ Future<void> main(List<String> args) async {
         .getOrElse(MarketAnchors.fallback2026);
     final universe = (await ctx.fundamentals.universe()).unwrap();
     final daCvm = _DaCvm(ctx.fundamentals, docs, hoje);
+    B3Issuer? emissor(Ticker t) =>
+        registro[t.value.length >= 4 ? t.value.substring(0, 4) : ''];
+    final comSetor = OfficialSectorFundamentalsRepository(
+      inner: daCvm,
+      classificacao: (t) async => emissor(t)?.classification,
+    );
 
     Future<ValuationResult?> avaliar(Ticker t,
-        {required bool oficial, required bool comCurva, required bool cvm}) async {
-      final e = registro[t.value.length >= 4 ? t.value.substring(0, 4) : ''];
+        {required bool oficial,
+        required bool comCurva,
+        required bool cvm,
+        bool setor = false,
+        bool prazo = false,
+        bool comProventos = false}) async {
+      final e = emissor(t);
       final prep = await PrepareValuationInputs.call(
         ticker: t,
         prices: ctx.prices,
-        fundamentals: cvm ? daCvm : ctx.fundamentals,
+        fundamentals: setor ? comSetor : (cvm ? daCvm : ctx.fundamentals),
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
         asOf: hoje,
@@ -135,10 +159,38 @@ Future<void> main(List<String> args) async {
             ? OfficialShareCount(total: e!.totalShares!, asOf: e.consultedOn)
             : null,
         projectionYears: 10,
+        concessionEnd: prazo ? prazos[t.value]?.end : null,
+        dividends: comProventos
+            ? CashDividendsCodec.forTicker(proventos, t.value)
+            : null,
       );
       if (prep.isErr) return null;
       final r = ValuationCascade.evaluate(prep.unwrap());
       return r.isOk ? r.unwrap() : null;
+    }
+
+    // A5 antes de avaliar: o que muda de porta pela classificação oficial.
+    final mudancas = <String>[];
+    for (final t in universe) {
+      final fonte = await ctx.fundamentals.profile(t);
+      final oficial = emissor(t)?.classification;
+      if (oficial == null) continue;
+      final sk = fonte.isOk ? fonte.unwrap().sector.key : null;
+      final ind = fonte.isOk ? fonte.unwrap().industry : null;
+      String portas(String? chave, String? sub) => [
+            if (FinancialSectors.isFinancial(sectorKey: chave, industry: sub))
+              'financeira',
+            if (CyclicalSectors.hasCyclePrecedence(sectorKey: chave, industry: sub))
+              'cíclica',
+            if (ConcessionSectors.hasFiniteTerm(sectorKey: chave, industry: sub))
+              'concessão',
+          ].join('+');
+      final antes = portas(sk, ind);
+      final depois = portas(oficial.sectorKey, oficial.industry);
+      if (antes != depois) {
+        mudancas.add('    ${t.value.padRight(7)} ${antes.isEmpty ? '—' : antes} → '
+            '${depois.isEmpty ? '—' : depois}   (${sk ?? 'sem setor'} | ${oficial.label})');
+      }
     }
 
     final linhas = <Map<String, Object?>>[];
@@ -149,12 +201,27 @@ Future<void> main(List<String> args) async {
       final o = await avaliar(t, oficial: true, comCurva: false, cvm: false);
       final c = await avaliar(t, oficial: true, comCurva: true, cvm: false);
       final p = await avaliar(t, oficial: true, comCurva: true, cvm: true);
+      final st = await avaliar(t,
+          oficial: true, comCurva: true, cvm: true, setor: true);
+      final pz = await avaliar(t,
+          oficial: true, comCurva: true, cvm: true, setor: true, prazo: true);
+      final pv = await avaliar(t,
+          oficial: true,
+          comCurva: true,
+          cvm: true,
+          setor: true,
+          prazo: true,
+          comProventos: true);
       linhas.add({
         'ticker': t.value,
         'mercado': m?.upside,
         'oficial': o?.upside,
         'curva': c?.upside,
         'padrao': p?.upside,
+        'setor': st?.upside,
+        'prazo': pz?.upside,
+        'proventos': pv?.upside,
+        'fimDoContrato': prazos[t.value]?.end.toIso8601String().substring(0, 10),
         'fonteDoDivisor': o?.warnings
                 .any((w) => w.contains('contagem oficial da B3')) ==
             true
@@ -204,7 +271,13 @@ Future<void> main(List<String> args) async {
     comparar('A3.3 — contagem oficial no divisor', 'mercado', 'oficial');
     comparar('A2.1 — curva do Tesouro', 'oficial', 'curva');
     comparar('A1.7 a A1.11 — CVM anual', 'curva', 'padrao');
-    comparar('Fase 1 inteira — antes → padrão do aplicativo', 'mercado', 'padrao');
+    stdout.writeln('\n== A5 — portas que mudam pela classificação oficial '
+        '(${mudancas.length}) ==');
+    mudancas.forEach(stdout.writeln);
+    comparar('A5 — classificação setorial oficial', 'padrao', 'setor');
+    comparar('A6 — prazo das outorgas', 'setor', 'prazo');
+    comparar('A4 — beta sobre retorno total', 'prazo', 'proventos');
+    comparar('Fase 1 inteira — antes → padrão do aplicativo', 'mercado', 'proventos');
 
     final saida = 'docs/validacao/padrao_ligacao_${hoje.toIso8601String().substring(0, 10)}.json';
     File(saida).writeAsStringSync(const JsonEncoder.withIndent(' ').convert(linhas));

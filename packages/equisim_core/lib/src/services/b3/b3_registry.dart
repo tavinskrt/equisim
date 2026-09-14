@@ -39,7 +39,7 @@ class OfficialShareEvent {
   /// Último dia com direito — a data-com.
   final DateTime lastDateWithRights;
 
-  /// Primeiro dia útil depois da data-com: a data ex.
+  /// Primeiro pregão depois da data-com: a data ex.
   final DateTime exDate;
 
   /// Ações depois ÷ ações antes, composto sobre os eventos do mesmo dia.
@@ -56,6 +56,84 @@ class OfficialShareEvent {
     required this.factor,
     required this.labels,
   });
+}
+
+/// Classificação setorial oficial da B3: setor econômico, subsetor e segmento
+/// (item A5).
+///
+/// **Por emissor, e não por papel.** A fonte de preços classifica papel a
+/// papel e deixa buracos — SANB11 vinha classificada e SANB4 não, e BRSR6 e
+/// PINE4 chegavam sem setor e escapavam da Porta 1 (limitações §2.14). A B3
+/// classifica a companhia, e todas as classes herdam.
+///
+/// Vem do `GetDetail` do portal de empresas listadas, como texto
+/// `Setor / Subsetor / Segmento` — com a pontuação da B3, que escreve
+/// "Petróleo. Gás e Biocombustíveis" com ponto onde caberia vírgula.
+class B3Classification {
+  /// Setor econômico — "Financeiro", "Utilidade Pública".
+  final String sector;
+
+  /// Subsetor — "Intermediários Financeiros", "Energia Elétrica".
+  final String? subsector;
+
+  /// Segmento — "Bancos", "Energia Elétrica".
+  final String? segment;
+
+  /// Declara a classificação.
+  const B3Classification({required this.sector, this.subsector, this.segment});
+
+  /// Lê o texto `Setor / Subsetor / Segmento`, ou `null` sem setor.
+  static B3Classification? parse(Object? raw) {
+    if (raw is! String) return null;
+    final partes = [
+      for (final p in raw.split('/'))
+        if (p.trim().isNotEmpty) p.trim(),
+    ];
+    if (partes.isEmpty) return null;
+    return B3Classification(
+      sector: partes[0],
+      subsector: partes.length > 1 ? partes[1] : null,
+      segment: partes.length > 2 ? partes.sublist(2).join(' / ') : null,
+    );
+  }
+
+  /// Chave do setor, no formato das chaves que o motor compara: minúsculas,
+  /// sem acento, palavras unidas por hífen — "Materiais Básicos" vira
+  /// `materiais-basicos`, "Consumo não Cíclico" vira `consumo-nao-ciclico`.
+  String get sectorKey => slug(sector);
+
+  /// Subsetor e segmento, como a B3 escreve: "Intermediários Financeiros /
+  /// Bancos". É o que o motor lê como subsetor.
+  String get industry =>
+      [subsector, segment].whereType<String>().join(' / ');
+
+  /// O texto inteiro, na ordem da B3.
+  String get label =>
+      [sector, subsector, segment].whereType<String>().join(' / ');
+
+  /// Minúsculas, sem acento, com hífen no lugar de tudo que não é letra ou
+  /// dígito.
+  static String slug(String s) {
+    const de = 'áàâãäéèêëíìîïóòôõöúùûüç';
+    const para = 'aaaaaeeeeiiiiooooouuuuc';
+    final b = StringBuffer();
+    var hifen = false;
+    for (final r in s.toLowerCase().runes) {
+      var c = String.fromCharCode(r);
+      final i = de.indexOf(c);
+      if (i >= 0) c = para[i];
+      final u = c.codeUnitAt(0);
+      final alfanumerico = (u >= 0x61 && u <= 0x7a) || (u >= 0x30 && u <= 0x39);
+      if (alfanumerico) {
+        if (hifen && b.isNotEmpty) b.write('-');
+        b.write(c);
+        hifen = false;
+      } else {
+        hifen = true;
+      }
+    }
+    return b.toString();
+  }
 }
 
 /// Um emissor no registro.
@@ -82,6 +160,10 @@ class B3Issuer {
   /// Eventos de ações, em ordem de data ex.
   final List<OfficialShareEvent> events;
 
+  /// Classificação setorial oficial, ou `null` quando o detalhe do emissor não
+  /// foi consultado.
+  final B3Classification? classification;
+
   /// Declara o emissor.
   const B3Issuer({
     required this.code,
@@ -90,6 +172,7 @@ class B3Issuer {
     required this.preferredShares,
     required this.consultedOn,
     required this.events,
+    this.classification,
   });
 
   /// Eventos com data ex em `(depois, ate]`, compostos num fator só — o que
@@ -189,7 +272,11 @@ abstract final class B3Registry {
   }
 
   /// Um emissor a partir da resposta do endpoint, ou `null` sem código.
-  static B3Issuer? issuer(Map<String, dynamic> json, {required DateTime consultedOn}) {
+  ///
+  /// [detail] é a resposta do `GetDetail` do mesmo emissor, de onde sai a
+  /// classificação setorial.
+  static B3Issuer? issuer(Map<String, dynamic> json,
+      {required DateTime consultedOn, Map<String, dynamic>? detail}) {
     final code = json['code'];
     if (code is! String || code.trim().isEmpty) return null;
     final eventos = json['stockDividends'];
@@ -200,18 +287,14 @@ abstract final class B3Registry {
       preferredShares: parseNumber(json['numberPreferredShares']),
       consultedOn: DateTime.utc(consultedOn.year, consultedOn.month, consultedOn.day),
       events: eventos is List ? events(eventos) : const [],
+      classification: B3Classification.parse(detail?['industryClassification']),
     );
   }
 
   static double? _positivo(double? v) => v != null && v > 0 ? v : null;
 
-  static DateTime _proximoDiaUtil(DateTime d) {
-    var x = DateTime.utc(d.year, d.month, d.day + 1);
-    while (!BrazilianCalendar.isBusinessDay(x, knownAt: d)) {
-      x = DateTime.utc(x.year, x.month, x.day + 1);
-    }
-    return x;
-  }
+  static DateTime _proximoDiaUtil(DateTime d) =>
+      BrazilianCalendar.nextTradingSession(d);
 }
 
 /// Formato de pacote do registro, para empacotar no aplicativo.
@@ -221,7 +304,10 @@ abstract final class B3Registry {
 /// cópias divergiriam em silêncio.
 abstract final class B3RegistryCodec {
   /// Versão do formato. Muda quando uma chave muda de significado.
-  static const int versao = 1;
+  ///
+  /// A 2 acrescenta `classificacao`. A 1 continua legível — sem a chave, o
+  /// emissor fica sem classificação, que é o que ela era.
+  static const int versao = 2;
 
   static String _dia(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-'
@@ -249,6 +335,8 @@ abstract final class B3RegistryCodec {
           for (final e in emissores)
             e.code: {
               'consultadoEm': _dia(e.consultedOn),
+              if (e.classification != null)
+                'classificacao': e.classification!.label,
               if (e.totalShares != null) 'total': e.totalShares!,
               if (e.commonShares != null) 'on': e.commonShares!,
               if (e.preferredShares != null) 'pn': e.preferredShares!,
@@ -269,7 +357,8 @@ abstract final class B3RegistryCodec {
   /// Lê o pacote. Versão desconhecida devolve mapa vazio: formato que o leitor
   /// não entende não é lido pela metade.
   static Map<String, B3Issuer> decodePackage(Map<String, dynamic> pacote) {
-    if (pacote['versao'] != versao) return const {};
+    final v = pacote['versao'];
+    if (v is! int || v < 1 || v > versao) return const {};
     final emissores = pacote['emissores'];
     if (emissores is! Map<String, dynamic>) return const {};
     final out = <String, B3Issuer>{};
@@ -309,6 +398,7 @@ abstract final class B3RegistryCodec {
         consultedOn: consultado,
         events: List.unmodifiable(eventos
           ..sort((a, b) => a.exDate.compareTo(b.exDate))),
+        classification: B3Classification.parse(v['classificacao']),
       );
     }
     return out;
