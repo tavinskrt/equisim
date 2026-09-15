@@ -478,7 +478,14 @@ class MacroRepositoryImpl implements MacroRepository {
       // Vencido aqui não significa errado: significa sem os pontos mais
       // recentes. O CDI e o IPCA são séries de publicação lenta, e a diferença
       // de um dia é de um ponto na ponta.
-      final stale = await _macroFromCache(seriesId, range);
+      //
+      // **A cobertura do início é exigida aqui também.** Vencido autoriza
+      // faltar a ponta, e não o começo: sem a exigência, três meses guardados
+      // por um gráfico serviam a simulação de dez anos justamente quando a
+      // fonte caía, e o CAGR decenal saía sobre eles sem aviso. Sem cache que
+      // cubra a janela, a falha da fonte é reportada.
+      final stale =
+          await _macroFromCache(seriesId, range, exigirCobertura: true);
       if (stale != null) return Ok(stale);
       return fetched;
     }

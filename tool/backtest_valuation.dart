@@ -31,12 +31,74 @@
 //    apura inclui a distribuição, então só o de preço **penaliza** o motor em
 //    ativo de *payout* alto. A leitura por `adjustedClose` segue, secundária:
 //    a conferência de `tool/proventos_conferir.dart` mede o ajuste da fonte.
+//
+// **Duas montagens.** `mercado` é a das medições de 11/09/2026: só a fonte de
+// preços, com a taxa de dois pontos. `aplicativo` é a montagem do aplicativo
+// **na data de cada coorte**, peça a peça:
+//
+// - a curva do Tesouro daquele dia (decisão 74);
+// - a CVM mesclada, com os documentos recebidos até ali (decisões 69 a 81);
+// - o setor da B3 (decisão 87) — a classificação é a de hoje, e setor muda
+//   pouco; é a única peça que não é da data;
+// - o prazo das outorgas do Formulário de Referência recebido até ali
+//   (decisão 88, `tool/cvm/outorgas_por_data.dart`);
+// - o beta sobre retorno total, com os proventos da B3 (decisão 89).
+//
+// A contagem oficial da B3 fica de fora por construção: ela é de hoje, e a
+// reescala abaixo reconstrói o valor de mercado da coorte.
+//
+// Na montagem `aplicativo` cada linha leva também o que o C2 e o C0 medem: a
+// banda dos cenários discretos, os quantis da distribuição de Monte Carlo com
+// os sorteios padrão do aplicativo, a liquidez da Porta 0 e, para ativo
+// recusado, o potencial sem o corte de liquidez.
+//
+// Uso:
+//   dart run tool/backtest_valuation.dart                        # mercado
+//   dart run tool/backtest_valuation.dart --montagem aplicativo
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:equisim_core/equisim_core.dart';
+
+import 'package:equisim/data/repositories/b3_registry_repository.dart';
+
 import 'b3/proventos.dart';
+import 'curva_ligar.dart' show lerTesouro;
+import 'cvm/documentos.dart';
+import 'cvm/outorgas_por_data.dart';
 import 'validation/context.dart';
+
+/// CVM mesclada à série de mercado já reescalada, com o que era público na
+/// data da coorte.
+class _CvmNaData implements FundamentalsRepository {
+  _CvmNaData(this.inner, this.hist, this.docs, this.data);
+  final FundamentalsRepository inner;
+  final List<FundamentalsSnapshot> hist;
+  final List<CvmPeriodDocument>? docs;
+  final DateTime data;
+
+  @override
+  Future<Result<List<FundamentalsSnapshot>>> history(Ticker t) async {
+    final meus = docs;
+    if (meus == null || meus.isEmpty) return Ok(hist);
+    return Ok(CvmSeries.build(
+      documentos: meus,
+      mercado: hist,
+      asOf: data,
+      publicado: PointInTimeView(data).isPublished,
+      ancorada: false,
+    ).series);
+  }
+
+  @override
+  Future<Result<Asset>> profile(Ticker t) => inner.profile(t);
+
+  @override
+  Future<Result<List<Ticker>>> universe() => inner.universe();
+}
+
+/// Sorteios da distribuição, iguais ao padrão do aplicativo.
+const _sorteios = 10000;
 
 /// Índice buscado uma vez e reaproveitado.
 ///
@@ -204,10 +266,48 @@ double? _ajustadoEm(PriceSeries s, DateTime data) {
 }
 
 Future<void> main(List<String> args) async {
+  final iMontagem = args.indexOf('--montagem');
+  final app = iMontagem >= 0 && args[iMontagem + 1] == 'aplicativo';
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
   final prices = _MemoPrices(ctx.prices);
   final fundamentals = _MemoFundamentals(ctx.fundamentals);
   final benchmark = _MemoBenchmark(ctx.benchmark);
+
+  // Peças da montagem do aplicativo, lidas uma vez.
+  final tesouro =
+      app ? lerTesouro('data/tesouro/precotaxatesourodireto.csv') : null;
+  final docsCvm = app ? carregarDocumentos('data/cvm_exercicios.json') : null;
+  final registro = app
+      ? B3RegistryCodec.decodePackage(
+          jsonDecode(File('assets/b3/emissores.json').readAsStringSync())
+              as Map<String, dynamic>)
+      : null;
+  final pacoteDeProventos = app
+      ? CashDividendsCodec.decode(
+          jsonDecode(File('assets/b3/proventos.json').readAsStringSync())
+              as Map<String, dynamic>)
+      : null;
+  final outorgas = app ? OutorgasPorData.ler() : null;
+  if (app && outorgas == null) {
+    stderr.writeln('sem data/cvm/fre: rode python tool/cvm_baixar.py --docs FRE');
+    exit(2);
+  }
+  if (app) {
+    // O prazo lido na data de montagem do pacote tem de ser o do pacote.
+    final pacote = ConcessionTermsCodec.decode(
+        jsonDecode(File('assets/cvm/outorgas.json').readAsStringSync())
+            as Map<String, dynamic>);
+    var iguais = 0;
+    for (final e in pacote.entries) {
+      final lido = outorgas!.naData(e.key, DateTime(2026, 9, 14));
+      if (lido != null && lido.end == e.value.end) iguais++;
+    }
+    stderr.writeln('outorgas por data contra o pacote: $iguais de '
+        '${pacote.length} iguais em 14/09/2026');
+  }
+  B3Classification? classe(Ticker t) => registro?[
+          t.value.length >= 4 ? t.value.substring(0, 4) : '']
+      ?.classification;
 
   // Coortes anuais. A primeira é 2018 porque a Porta 0 exige oito exercícios
   // publicados, e o oitavo (2017) só é público a partir de 2018.
@@ -232,6 +332,10 @@ Future<void> main(List<String> args) async {
         asOf: t,
       ))
           .getOrElse(MarketAnchors.fallback2026);
+      final curvaDaCoorte = app ? TreasuryCurve.at(tesouro!, t) : null;
+      if (app && curvaDaCoorte == null) {
+        stderr.writeln('  ${t.year}: sem curva do Tesouro na data');
+      }
 
       var i = 0, avaliados = 0;
       for (final ticker in universe) {
@@ -253,10 +357,16 @@ Future<void> main(List<String> args) async {
         if (histRes.isErr) continue;
         final hist = _reescala(histRes.unwrap(), p0);
 
+        final FundamentalsRepository fonte = app
+            ? OfficialSectorFundamentalsRepository(
+                inner: _CvmNaData(fundamentals, hist, docsCvm![ticker.value], t),
+                classificacao: (x) async => classe(x),
+              )
+            : _EscaladoFundamentals(fundamentals, hist);
         final prep = await PrepareValuationInputs.call(
           ticker: ticker,
           prices: prices,
-          fundamentals: _EscaladoFundamentals(fundamentals, hist),
+          fundamentals: fonte,
           benchmark: benchmark,
           riskFreeRate: anchors.currentRiskFreeRate,
           asOf: t,
@@ -264,16 +374,59 @@ Future<void> main(List<String> args) async {
           inflation: anchors.inflationCagr,
           terminalRiskFreeRate: anchors.riskFreeCagr,
           projectionYears: 10,
+          riskFreeCurve: curvaDaCoorte,
+          concessionEnd: app ? outorgas!.naData(ticker.value, t)?.end : null,
+          dividends: app
+              ? CashDividendsCodec.forTicker(pacoteDeProventos!, ticker.value)
+              : null,
         );
         if (prep.isErr) continue;
+        final insumos = prep.unwrap();
 
-        final r = ValuationCascade.evaluate(prep.unwrap());
+        final r = ValuationCascade.evaluate(insumos);
         final upside = r.isOk ? r.unwrap().upside : null;
         if (upside != null) avaliados++;
 
-        // Fatores ingênuos, sobre o mesmo exercício que o motor usou.
+        // Banda de Monte Carlo com os sorteios do aplicativo, e o potencial do
+        // recusado sem o corte de liquidez — só na montagem do aplicativo.
+        List<double>? quantis;
+        if (app && r.isOk) {
+          final mc = ValuationCascade.evaluate(
+            insumos,
+            scenarioBuilder: StochasticScenarios.around,
+            monteCarloSamples: _sorteios,
+          );
+          final dist = mc.isOk ? mc.unwrap().distribution : null;
+          if (dist != null && !dist.isEmpty) {
+            quantis = [for (var q = 0; q <= 100; q++) dist.percentile(q / 100)];
+          }
+        }
+        final cenarios = r.isOk ? r.unwrap().discreteScenarios : null;
+        double? semLiquidez;
+        if (app && r.isErr) {
+          final contra = ValuationCascade.evaluate(_semSerie(insumos));
+          if (contra.isOk) semLiquidez = contra.unwrap().upside;
+        }
+        final serieDaJanela = insumos.prices;
+        final liquidez = serieDaJanela == null
+            ? null
+            : EligibilityGate.medianTradedValue(serieDaJanela);
+        // Fração dos últimos pregões da janela de liquidez sem negócio.
+        double? semNegocio;
+        if (serieDaJanela != null && serieDaJanela.points.length >= 20) {
+          final pts = serieDaJanela.points;
+          final ini = pts.length > EligibilityGate.liquidityWindowDays
+              ? pts.length - EligibilityGate.liquidityWindowDays
+              : 0;
+          final janela = pts.sublist(ini);
+          semNegocio = janela.where((p) => (p.volume ?? 0) <= 0).length /
+              janela.length;
+        }
+
+        // Fatores ingênuos, sobre o mesmo exercício que o motor usou — na
+        // montagem do aplicativo, a série mesclada com a CVM.
         final view = PointInTimeView(t);
-        final pub = view.published(hist);
+        final pub = view.published(insumos.fundamentals);
         final ultimo = pub.isEmpty ? null : pub.last;
         final pl = ultimo?.equityBookValue;
         final vm = ultimo?.marketCap;
@@ -307,13 +460,36 @@ Future<void> main(List<String> args) async {
           return (1 + preco) * r.factor - 1;
         }
 
+        // O mesmo retorno total **começando um mês depois** da coorte (C0). O
+        // sinal escalado pelo preço — B/M, potencial — divide pelo mesmo
+        // fechamento em que o retorno começa, e em papel ilíquido esse
+        // fechamento é ruído: quem saiu barato por acaso volta, e qualquer sinal
+        // que dependa do preço "prevê" a volta. Pular o mês separa a reversão do
+        // fechamento do que o sinal sabe.
+        double? totalPulandoUmMes(int meses) {
+          if (brutoDoPapel == null) return null;
+          final de = DateTime(t.year, t.month + 1, t.day);
+          final ate = DateTime(t.year + meses ~/ 12, t.month, t.day);
+          if (ate.isAfter(DateTime(fim, 9, 4))) return null;
+          final pa = _precoEm(serie, de);
+          final pf = _precoEm(serie, ate);
+          if (pa == null || pf == null || pa <= 0) return null;
+          final r = TotalReturn.factor(
+            dividends: proventosDo(proventos, ticker.value),
+            de: de,
+            ate: ate,
+            closeOnExDate: (d) =>
+                pregaoApartir(brutoDoPapel, d, folgaDias: 5)?.close,
+          );
+          return pf / pa * r.factor - 1;
+        }
+
         // Roteamento, para separar quem chegou ao acionista por qual porta.
         // A Porta 1 é setorial; a Porta 3 é o fluxo da firma não sustentado.
-        final perfil = await fundamentals.profile(ticker);
-        final setor = perfil.isOk ? perfil.unwrap().sector.key : null;
+        final setor = insumos.sectorKey;
         final porta1 = FinancialSectors.isFinancial(
           sectorKey: setor,
-          industry: perfil.isOk ? perfil.unwrap().industry : null,
+          industry: insumos.industry,
         );
         final sustentado = GrowthGuards.firmFlowIsSustained(pub);
 
@@ -340,6 +516,20 @@ Future<void> main(List<String> args) async {
           'ret36aj': retorno(36, ajustado: true),
           'ret12tot': total(12),
           'ret36tot': total(36),
+          if (app) ...{
+            'justo': r.isOk ? r.unwrap().fairValue.reais : null,
+            'pessimista': cenarios == null ? null : cenarios[ScenarioBand.bear]?.reais,
+            'otimista': cenarios == null ? null : cenarios[ScenarioBand.bull]?.reais,
+            'ke': r.isOk ? r.unwrap().diagnostics!.costOfEquity : null,
+            'mcQuantis': quantis,
+            'liquidez': liquidez,
+            'upsideSemLiquidez': semLiquidez,
+            'semNegocio': semNegocio,
+            'ret12totPulo': totalPulandoUmMes(12),
+            'ret36totPulo': totalPulandoUmMes(36),
+            'fimDoContrato':
+                insumos.concessionEnd?.toIso8601String().substring(0, 10),
+          },
         });
       }
       stderr.writeln('  ${t.year}: $avaliados avaliados de ${universe.length}'
@@ -347,14 +537,40 @@ Future<void> main(List<String> args) async {
           'rf_inf=${(anchors.riskFreeCagr * 100).toStringAsFixed(2)}%)');
     }
 
-    File('docs/validacao/backtest_valuation.json')
-        .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(linhas));
-    stderr.writeln('escrito docs/validacao/backtest_valuation.json '
-        '(${linhas.length} observações)');
+    final destino = app
+        ? 'docs/validacao/backtest_aplicativo.json'
+        : 'docs/validacao/backtest_valuation.json';
+    File(destino).writeAsStringSync(app
+        ? jsonEncode(linhas)
+        : const JsonEncoder.withIndent(' ').convert(linhas));
+    stderr.writeln('escrito $destino (${linhas.length} observações)');
   } finally {
     await ctx.dispose();
   }
 }
+
+/// Os mesmos insumos sem a série de cotações: a Porta 0 omite o corte de
+/// liquidez sem ela, e nada mais na cascata lê a série.
+ValuationInputs _semSerie(ValuationInputs b) => ValuationInputs(
+      ticker: b.ticker,
+      asOf: b.asOf,
+      fundamentals: b.fundamentals,
+      marketPrice: b.marketPrice,
+      capm: b.capm,
+      marginOfSafety: b.marginOfSafety,
+      projectionYears: b.projectionYears,
+      perpetualGrowthCap: b.perpetualGrowthCap,
+      sectorKey: b.sectorKey,
+      industry: b.industry,
+      inflation: b.inflation,
+      declaredTerminalRiskFreeRate: b.declaredTerminalRiskFreeRate,
+      riskFreeCurve: b.riskFreeCurve,
+      officialShares: b.officialShares,
+      isDistressed: b.isDistressed,
+      unleveredBeta: b.unleveredBeta,
+      concessionEnd: b.concessionEnd,
+      dividendsInBeta: b.dividendsInBeta,
+    );
 
 /// Devolve o histórico já reescalado, mantendo o resto do repositório.
 class _EscaladoFundamentals implements FundamentalsRepository {

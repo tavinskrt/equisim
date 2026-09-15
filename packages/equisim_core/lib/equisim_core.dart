@@ -48,6 +48,7 @@ export 'src/services/metrics/returns.dart';
 export 'src/services/metrics/risk_metrics.dart';
 export 'src/services/portfolio/expected_return.dart';
 export 'src/services/portfolio/sector_concentration.dart';
+export 'src/services/valuation/calibrated_band.dart';
 export 'src/services/valuation/capital_base.dart';
 export 'src/services/cvm/cvm_bridge.dart';
 export 'src/services/cvm/fundamentals_merge.dart';

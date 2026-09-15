@@ -11,6 +11,78 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O que a primeira rodada da Fase 2 encontrou — D1, C2 e C0 (14 e 15/09/2026)
+
+**O gabarito do D1 não enxergava o miolo do método.** As duas montagens que ele
+gravava não passavam o prior do beta, e sem ele não há taxa resolvida: o ponto
+fixo, os passes do veredito, a rota derivada e a recursão da estrutura recusada
+ficavam fora da prova de que a refatoração não mudou nenhum número. O gabarito
+passou a nove montagens, com o prior, as imposições de diagnóstico, o Monte Carlo
+e a impressão do rastro de auditoria.
+
+**A entrada do gabarito também derivava.** A primeira gravação levou dez minutos
+para cinquenta ativos, porque o Ibovespa vinha da rede a cada montagem — e a
+mesma deriva que contaminou 26 ativos em meia hora na Fase 1 valia aqui. A
+gravação passou a copiar o cache e o Ibovespa servido, e a conferência os repete
+sem rede, em três minutos. O controle sobre o código intacto deu idêntico, e uma
+mutação que só troca a ordem de dois passos do rastro divergiu em 1.212
+montagens.
+
+**Os seis passos deram idênticos**, conferidos em ordem sobre cópias guardadas de
+cada um — os commits são do usuário. A ordem mudou em relação à recomendada: com
+os *records* dos estágios de cima prontos, a ponta de baixo deixou de precisar de
+duas dezenas de variáveis soltas, e ela saiu por último.
+
+**Quebrar o método expôs um defeito latente**, registrado no B11: com as taxas
+resolvidas, o preço justo sai das premissas finais e os cenários, a taxa exibida e
+o rastro saem das interpoladas. No aplicativo de hoje coincidem, porque ele não
+resolve o prior. **E um caminho sem prova**: nenhum ativo das nove montagens passa
+pelo veredito que não se estabiliza, e nenhum teste o constrói — foi para o D3.
+
+**As coortes passaram a ser as do aplicativo.** O C2 e o C0 pediam medir o motor
+de agora, e `tool/backtest_valuation.dart` só sabia montar o de 11/09. A montagem
+por data leu o Formulário de Referência pelo recebimento de cada documento, e o
+prazo lido em 14/09/2026 reproduziu o pacote do aplicativo em 35 de 35 tickers.
+
+**A banda de cenários cobria 8%, contra 90% nominais.** Não é detalhe de
+calibragem: o realizado ficou acima dela em 71% dos casos, a 2,1 vezes a mediana,
+e a largura dela é de 1,3 vez contra 43 a 47 da dispersão realizada. Duas recalibragens
+estreitas — em torno do preço e da convergência parcial — calibraram em 12 meses
+e não em 36; a que calibra nos dois é a faixa em torno do preço justo, larga como
+o erro dele. **E a regressão que mediu a convergência desmentiu a decisão 26**: o
+preço anda um quarto do caminho até o preço justo em 36 meses.
+
+**O C0 achou sinal onde se esperava cauda, e o testou antes de acreditar.**
+Soltando o corte de liquidez, o potencial ordena além do B/M nas ilíquidas, e não
+nas avaliadas. Começar o retorno um mês depois não o desfez, então não é reversão
+de fechamento; o nível do potencial confirma o beta enviesado, e o retorno delas
+tem a forma do viés de sobrevivência. A recusa ficou, e a remedição com as
+deslistadas virou o C0b. A faixa calibrada tem o mesmo problema na cauda de baixo,
+e virou o C2b.
+
+**O que as lentes disseram.** Das seis, uma trouxe defeito que procede: a
+`dados` apontou que o cache macroeconômico vencido, no recurso sem rede, não
+exigia cobrir o início da janela — três meses guardados passariam por dez anos no
+CAGR decenal. Conferido, corrigido, e o teste novo falha sem a correção. A `rumo`
+trouxe de volta a não monotonia de 46 de 122 no nível da curva, medida no DCF
+reverso e esquecida pelo plano: entrou no critério do B10. **Não procederam**: o
+deadlock de repetição da `dados`, pela terceira vez; e, da `rumo` e da
+`registro`, três achados lidos de texto antigo — os bancos sem setor, que o A5
+resolveu; o módulo na alíquota efetiva, que o código já nega em vez de tirar; e a
+nota de superação em `crescimento_log_linear.md`, que já existe. A `metodo` e a
+`risco` não acharam tensão, com o material cortado por tamanho. Os achados da
+`nucleo` — o exercício com valor de mercado de hoje, um tipo de data de
+calendário, os rótulos dos enums — ficam fora dos dois objetivos.
+
+**O auditor aprovou, com um INFO que levou a um defeito anterior.** Ele apontou
+as duas colunas da faixa calibrada sem adaptação a tela estreita. O teste escrito
+para isso montou a tela de avaliação **carregada** em 320 dp, pela primeira vez, e
+quem estourou foi o gráfico de sensibilidade, que já existia: 134 px à direita.
+A tela só entrava no teste de estouro vazia — a pendência do D3. As duas coisas
+foram corrigidas.
+
+---
+
 ## O que a rodada de A3.4 a A6 encontrou (14/09/2026)
 
 **A fonte de proventos que o plano dava como existente não servia.** O registro do

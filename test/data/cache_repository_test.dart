@@ -354,6 +354,51 @@ void main() {
           reason: 'o cache nao cobria o inicio pedido; tem de ir a rede');
     });
 
+    test('fonte fora recorre ao cache vencido que cobre a janela', () async {
+      final range = DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31));
+      final gravada = (await MacroRepositoryImpl(
+        remote: BcbDatasource(clientWith(
+            FixtureAdapter(routes: {'bcdata.sgs.12': 'bcb_cdi'}))),
+        cache: db,
+      ).riskFreeDaily(range))
+          .unwrap();
+
+      // Marca de validade apagada, e o Banco Central devolve erro.
+      await db.customStatement('DELETE FROM cache_entries');
+      final fora = MacroRepositoryImpl(
+        remote: BcbDatasource(clientWith(
+            FixtureAdapter(failures: {'bcdata.sgs.12': 503}))),
+        cache: db,
+      );
+
+      final r = await fora.riskFreeDaily(range);
+      expect(r.isOk, isTrue,
+          reason: 'havia dado em disco cobrindo a janela: é a contingência');
+      expect(r.unwrap().rates.length, gravada.rates.length);
+    });
+
+    test('fonte fora não faz cache curto passar por janela longa', () async {
+      // O caminho degradado exige a cobertura do início como o normal: sem
+      // isso, a queda do Banco Central servia três meses à simulação de dez
+      // anos, e o CAGR decenal saía sobre eles.
+      await MacroRepositoryImpl(
+        remote: BcbDatasource(clientWith(
+            FixtureAdapter(routes: {'bcdata.sgs.12': 'bcb_cdi'}))),
+        cache: db,
+      ).riskFreeDaily(DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)));
+
+      await db.customStatement('DELETE FROM cache_entries');
+      final fora = MacroRepositoryImpl(
+        remote: BcbDatasource(clientWith(
+            FixtureAdapter(failures: {'bcdata.sgs.12': 503}))),
+        cache: db,
+      );
+
+      final longa = DateRange(DateTime(2014, 1, 1), DateTime(2024, 3, 31));
+      expect((await fora.riskFreeDaily(longa)).isErr, isTrue,
+          reason: 'o cache não cobre o início pedido; a falha da fonte vale');
+    });
+
     test('a mesma janela continua sendo servida do cache', () async {
       final adapter = FixtureAdapter(routes: {'bcdata.sgs.12': 'bcb_cdi'});
       final repository = MacroRepositoryImpl(

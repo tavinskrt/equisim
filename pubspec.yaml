@@ -62,5 +62,8 @@ flutter:
     # tool/curva_empacotar.dart e versionados (decisões 83 e 84).
     - assets/b3/
     - assets/tesouro/
+    # Faixa do valor realizado em torno do preço justo, medida nas coortes da
+    # validação por tool/cobertura_banda.py e versionada (decisão 92).
+    - assets/validacao/
 
 

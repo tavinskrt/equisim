@@ -75,9 +75,16 @@ class ValidationContext {
   /// **Encerra o processo com código 2** quando não encontra credencial da
   /// brapi, em vez de lançar: é ferramenta de linha de comando, e uma exceção
   /// com pilha esconderia a instrução de configuração.
+  /// - [cacheFile]: arquivo de cache no lugar do padrão, dentro de
+  ///   [outputDir].
+  /// - [frozenCache]: toda entrada presente no cache vale como fresca, de modo
+  ///   que a execução só vai à rede pelo que falta. É o que congela a entrada
+  ///   do gabarito do D1 entre execuções.
   static ValidationContext create({
     required String outputDir,
     bool verbose = false,
+    String? cacheFile,
+    bool frozenCache = false,
   }) {
     final config = ApiConfig.resolve(
       fallbackToken: _readEnvFile('BRAPI_TOKEN') ??
@@ -94,9 +101,9 @@ class ValidationContext {
     }
 
     Directory(outputDir).createSync(recursive: true);
-    final cache = CacheDatabase(
-      NativeDatabase(File('$outputDir/$cacheFileName')),
-    );
+    final executor = NativeDatabase(File(cacheFile ?? '$outputDir/$cacheFileName'));
+    final cache =
+        frozenCache ? _FrozenCacheDatabase(executor) : CacheDatabase(executor);
 
     final client = ApiClient(
       config,
@@ -143,6 +150,20 @@ class ValidationContext {
     }
     return null;
   }
+}
+
+/// Cache em que toda entrada presente é fresca.
+///
+/// O prazo de validade existe para o aplicativo ver dado novo; numa comparação
+/// entre execuções, ele é justamente o que faz a entrada derivar.
+class _FrozenCacheDatabase extends CacheDatabase {
+  _FrozenCacheDatabase(super.executor);
+
+  @override
+  Future<bool> isFresh(String key, Duration ttl) async =>
+      await (select(cacheEntries)..where((t) => t.key.equals(key)))
+          .getSingleOrNull() !=
+      null;
 }
 
 /// Amostra padrão para as varreduras.

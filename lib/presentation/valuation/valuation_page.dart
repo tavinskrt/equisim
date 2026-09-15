@@ -5,6 +5,7 @@ import '../theme/fin_space.dart';
 import '../../presentation/theme/fin_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../di/providers.dart';
 import '../components/fin_amount.dart';
 import '../shared/charts.dart';
 import '../shared/theme_bridge.dart';
@@ -253,6 +254,7 @@ class _ValuationBody extends ConsumerWidget {
               const Gap.md(),
               _ModelCard(result: result, isLight: isLight),
               const Gap.md(),
+              _CalibratedBandCard(result: result),
               _ScenarioCard(
                 result: result,
                 settings: settings,
@@ -446,9 +448,11 @@ class _ScenarioCard extends ConsumerWidget {
         children: [
           SectionHeader(
             title: 'Cenários',
+            // Sensibilidade, e não probabilidade: a banda de cenários cobriu 8%
+            // do que aconteceu nas coortes, contra 90% nominais (decisão 92).
             subtitle: settings.monteCarlo
-                ? '${settings.samples} sorteios de premissas'
-                : 'Três conjuntos fixos de premissas',
+                ? 'Sensibilidade: ${settings.samples} sorteios de premissas'
+                : 'Sensibilidade: três conjuntos fixos de premissas',
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -496,6 +500,102 @@ class _ScenarioCard extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Onde o valor realizado caiu, nas coortes, em torno do preço justo
+/// (item C2, decisão 92).
+///
+/// **É a incerteza medida, e não a sensibilidade.** A banda de cenários desloca
+/// premissas e cobriu 8% do que aconteceu; esta vem do que aconteceu, com a
+/// cobertura fora da amostra declarada. Sem pacote, o cartão não aparece.
+class _CalibratedBandCard extends ConsumerWidget {
+  final ValuationResult result;
+
+  const _CalibratedBandCard({required this.result});
+
+  /// Frequência apresentada: oito em cada dez.
+  static const double nominal = 0.8;
+
+  /// Largura abaixo da qual cada horizonte ganha linha própria, em dp.
+  static const double larguraMinimaPorColuna = 220;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabelas = ref.watch(calibratedBandsProvider).value ?? const [];
+    final faixas = [
+      for (final meses in const [12, 36])
+        if (CalibratedBand.select(tabelas, months: meses, nominal: nominal)
+            case final t?)
+          if (CalibratedBand.around(result.fairValue, t) case final b?)
+            (tabela: t, faixa: b),
+    ];
+    if (faixas.isEmpty) return const SizedBox.shrink();
+
+    final coberturas = [
+      for (final f in faixas)
+        if (f.tabela.outOfSampleCoverage case final c?)
+          '${Fmt.percent(c, decimals: 1)} em ${f.tabela.months} meses',
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: FinSpace.md),
+      child: GlassCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SectionHeader(
+              title: 'Faixa calibrada',
+              subtitle: 'Preço mais proventos, medido nas coortes de validação',
+            ),
+            const Gap.md(),
+            // Cada faixa são dois valores em reais: abaixo de
+            // [larguraMinimaPorColuna] por horizonte, elas se empilham em vez
+            // de espremer os dois números numa coluna estreita.
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final tiles = [
+                  for (final f in faixas)
+                    MetricTile(
+                      label: 'Em ${f.tabela.months} meses',
+                      value: '${Fmt.money(f.faixa.low.reais)} a '
+                          '${Fmt.money(f.faixa.high.reais)}',
+                      hint: 'coortes de ${f.tabela.firstCohort} a '
+                          '${f.tabela.lastCohort}',
+                      valueMaxLines: 2,
+                    ),
+                ];
+                if (constraints.maxWidth <
+                    larguraMinimaPorColuna * tiles.length) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (final (i, t) in tiles.indexed) ...[
+                        if (i > 0) const Gap.sm(),
+                        t,
+                      ],
+                    ],
+                  );
+                }
+                return Row(
+                  children: [for (final t in tiles) Expanded(child: t)],
+                );
+              },
+            ),
+            const Gap.sm(),
+            Text(
+              'Em 8 de cada 10 avaliações passadas, o preço mais os proventos '
+              'terminaram nesta faixa em torno do preço justo'
+              '${coberturas.isEmpty ? '' : ' — ${coberturas.join(' e ')}, '
+                  'medidos fora da amostra'}. A largura é o tamanho do erro do '
+              'preço justo contra o que aconteceu: não é previsão.',
+              style: context.finType.caption.copyWith(
+                color: context.fin.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -578,9 +678,10 @@ class _DistributionView extends StatelessWidget {
           icon: Icons.casino_outlined,
           trend: probability > 0.5 ? FinTrend.positive : FinTrend.negative,
           message:
-              'Em ${Fmt.percent(probability, decimals: 0)} dos cenários '
-              'o preço justo supera o preço de mercado atual '
-              '(${Fmt.money(marketPrice)}).',
+              'Em ${Fmt.percent(probability, decimals: 0)} dos sorteios de '
+              'premissas o preço justo supera o preço de mercado atual '
+              '(${Fmt.money(marketPrice)}). Sorteio de premissa não é '
+              'probabilidade de preço.',
         ),
       ],
     );

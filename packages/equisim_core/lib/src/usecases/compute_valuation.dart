@@ -216,11 +216,13 @@ class ValuationInputs {
   /// Fim do contrato de concessão: a mediana das outorgas vigentes no
   /// Formulário de Referência da CVM (item A6, decisão 88).
   ///
-  /// **Só age sobre concessão**, pela classificação de [ConcessionSectors], e
-  /// **só quando acaba antes do fim da projeção explícita**: aí a projeção
-  /// termina no contrato. Depois dele, o prazo não muda o preço — com retorno
-  /// terminal neutro, o valor terminal já é o capital investido, que é o que
-  /// um contrato que acaba devolve. `null` mantém a projeção inteira.
+  /// **Só age sobre concessão**, pela classificação de [ConcessionSectors].
+  /// Quando acaba antes do fim da projeção explícita, a projeção termina no
+  /// contrato e o valor terminal é o capital investido nessa data. Quando acaba
+  /// depois, o valor terminal é o capital no fim da projeção mais o excedente
+  /// de retorno sobre ele só até o fim do contrato
+  /// ([DcfAssumptions.contractYearsAfterHorizon]). `null` mantém a projeção
+  /// inteira e o excedente perpétuo.
   final DateTime? concessionEnd;
 
   /// Teto **nominal** do crescimento na perpetuidade, em fração.
@@ -397,6 +399,187 @@ class QuotedShares {
     if (a == null || b == null) return null;
     return a >= b ? a / b : b / a;
   }
+}
+
+/// O que uma via recebe e não muda ao longo dos estágios dela (D1).
+class _Via {
+  final ValuationInputs inputs;
+
+  /// Exercícios publicados na data, com demonstração de resultado.
+  final List<FundamentalsSnapshot> published;
+
+  /// O mais recente deles.
+  final FundamentalsSnapshot latest;
+
+  final ValuationLane lane;
+
+  /// Contagem de papéis da ponte.
+  final QuotedShares divisor;
+
+  final AuditTransaction? audit;
+
+  const _Via({
+    required this.inputs,
+    required this.published,
+    required this.latest,
+    required this.lane,
+    required this.divisor,
+    required this.audit,
+  });
+}
+
+/// O que os estágios de uma via devolvem ao condutor, `_evaluateLane` (D1).
+sealed class _Desconto {
+  const _Desconto();
+}
+
+/// A realavancagem recusou a estrutura de capital (decisão 45). Se a avaliação
+/// migra de via é decisão do condutor, e não do estágio.
+final class _EstruturaRecusada extends _Desconto {
+  /// Frase da recusa, com o ativo e a via.
+  final String motivo;
+
+  const _EstruturaRecusada(this.motivo);
+}
+
+/// A via descontada, com tudo o que a pós-condição da ponte e a conclusão leem.
+final class _ViaDescontada extends _Desconto {
+  final _Base saida1;
+  final GrowthOrigin origem;
+  final _Premissas premissas;
+
+  /// Fluxo-base descontado.
+  final double base;
+
+  /// `true` quando o fluxo-base foi reconstruído do ciclo (decisão 53).
+  final bool baseReconstruida;
+
+  final _Custo custo;
+
+  /// O desconto sob as premissas finais.
+  final DcfOutcome outcome;
+
+  /// Avisos da via, na ordem em que os estágios os declararam.
+  final List<String> avisos;
+
+  const _ViaDescontada({
+    required this.saida1,
+    required this.origem,
+    required this.premissas,
+    required this.base,
+    required this.baseReconstruida,
+    required this.custo,
+    required this.outcome,
+    required this.avisos,
+  });
+}
+
+/// O que a Saída 1 da Porta 2 deixa para os estágios seguintes da via (D1).
+class _Base {
+  /// Alíquota estrutural do ativo, ou `null` sem exercício que a meça.
+  final double? aliquota;
+
+  /// Série de capital da via, na alíquota estrutural.
+  final CapitalSeries series;
+
+  /// Retorno sobre o capital do exercício mais recente.
+  final double? retornoAtual;
+
+  /// Retorno mediano na janela do ciclo.
+  final double? retornoCiclo;
+
+  /// Φ — capital externo em múltiplos da base inicial da janela.
+  final double? phi;
+
+  /// `true` quando a trava de saúde operacional vale para o ativo.
+  final bool travaDeSaude;
+
+  /// Fator de normalização aplicado ao fluxo-base.
+  final double fator;
+
+  const _Base({
+    required this.aliquota,
+    required this.series,
+    required this.retornoAtual,
+    required this.retornoCiclo,
+    required this.phi,
+    required this.travaDeSaude,
+    required this.fator,
+  });
+}
+
+/// As premissas de uma via, antes do ponto fixo das taxas (D1).
+class _Premissas {
+  /// Taxa de desconto corrente: WACC na via da firma, Ke na do acionista.
+  final double desconto;
+
+  /// Taxa de equilíbrio, sobre a taxa livre de risco estrutural.
+  final double descontoTerminal;
+
+  /// Crescimento na perpetuidade.
+  final double perpetuo;
+
+  /// `true` quando o ativo é concessão.
+  final bool prazoDeterminado;
+
+  /// Primeiro veredito da vantagem competitiva, contra [descontoTerminal].
+  final MoatVerdict veredito;
+
+  /// Retorno terminal que o veredito concede, ou `null`.
+  final double? moatVerificado;
+
+  /// Retorno terminal aplicado: o imposto de fora, ou o do veredito.
+  final double? moat;
+
+  /// Retorno implícito no fluxo-base, que converte crescimento em retenção.
+  final double retornoDaBase;
+
+  /// Premissas do DCF com a taxa interpolada.
+  final DcfAssumptions assumptions;
+
+  const _Premissas({
+    required this.desconto,
+    required this.descontoTerminal,
+    required this.perpetuo,
+    required this.prazoDeterminado,
+    required this.veredito,
+    required this.moatVerificado,
+    required this.moat,
+    required this.retornoDaBase,
+    required this.assumptions,
+  });
+}
+
+/// O custo de capital resolvido de uma via, e o veredito que fechou com ele (D1).
+class _Custo {
+  /// Premissas finais: as de [_Premissas], com o caminho de taxas resolvido e
+  /// o retorno terminal do último passe quando o ponto fixo fechou.
+  final DcfAssumptions assumptions;
+
+  /// Caminho de taxas resolvido, ou `null` quando vale a interpolação.
+  final LeveredRates? taxas;
+
+  /// Motivo da recusa **econômica** da estrutura de capital pelo solucionador,
+  /// ou `null` (decisão 45).
+  final String? estruturaRejeitada;
+
+  /// Veredito final da vantagem competitiva.
+  final MoatVerdict veredito;
+
+  /// Retorno terminal que o veredito final concede, ou `null`.
+  final double? moatVerificado;
+
+  /// Retorno terminal aplicado ao fim.
+  final double? moat;
+
+  const _Custo({
+    required this.assumptions,
+    required this.taxas,
+    required this.estruturaRejeitada,
+    required this.veredito,
+    required this.moatVerificado,
+    required this.moat,
+  });
 }
 
 /// Roteia o ativo por portas e aplica a via correspondente.
@@ -1249,6 +1432,16 @@ abstract final class ValuationCascade {
 
   /// Aplica a Porta 2 e desconta, na via informada.
   ///
+  /// **É o condutor, e os estágios são funções** (item D1). A Saída 1, a Saída
+  /// 2, as premissas, o fluxo-base e o custo de capital resolvido estão em
+  /// [_descontarVia], cada um com entrada e saída declaradas; a pós-condição
+  /// da ponte em [_participacaoQueDecide]; e o rastro, os cenários e os
+  /// diagnósticos em [_concluir]. **As duas migrações de via são decisões
+  /// devolvidas a este condutor**, e não chamadas de dentro de um estágio: a
+  /// estrutura de capital recusada volta como [_EstruturaRecusada], e a
+  /// participação que decide a ponte volta medida. A segunda avaliação, na via
+  /// do acionista, sai daqui, e nunca migra de novo.
+  ///
   /// Devolve `null` quando a via não é aplicável com os dados disponíveis, o que
   /// o chamador converte em recusa declarada.
   static ValuationResult? _evaluateLane(
@@ -1265,507 +1458,510 @@ abstract final class ValuationCascade {
     bool allowLaneMigration = true,
     List<String>? refusals,
   }) {
-    // Alíquota estrutural do ativo, no lugar dos 34% que a fonte embute em
-    // todo `NOPAT` publicado. Ela entra **na série e no fluxo-base ao mesmo
-    // tempo**: mudar só o fluxo deixaria o ROIC na convenção antiga, e o freio
-    // `b = g/ROIC` passaria a cobrar reinvestimento de um retorno que não é o
-    // do fluxo que se está descontando — o mesmo defeito que a decisão 31
-    // mediu em 17% na AZZA3.
-    final aliquotaEstrutural = CapitalSeries.structuralTaxRate(
-      published,
-      statutoryRate: ValuationParameters.statutoryTaxRate,
+    final via = _Via(
+      inputs: inputs,
+      published: published,
+      latest: latest,
+      lane: lane,
+      divisor: divisor,
+      audit: audit,
     );
-    final series = CapitalSeries.build(
-      published,
-      lane,
-      firmTaxRate: aliquotaEstrutural,
-    );
-    if (series.isTooShort) return null;
+    ValuationResult? migrar(List<String> avisos) => _evaluateLane(
+          inputs,
+          published,
+          latest,
+          ValuationLane.shareholder,
+          avisos,
+          scenarioBuilder,
+          samples,
+          seed,
+          divisor,
+          audit,
+          allowLaneMigration: false,
+          refusals: refusals,
+        );
 
+    final descontada = _descontarVia(via, warnings);
+    switch (descontada) {
+      case null:
+        return null;
+
+      // --- A estrutura de capital recusada (decisão 45) ----------------------
+      //
+      // O solucionador tem duas maneiras de não entregar caminho, e elas não
+      // significam a mesma coisa:
+      //
+      // - **não convergir** é falha de método, e recuar para a interpolação de
+      //   dois pontos é resposta legítima;
+      // - **recusar** é a conta dizendo que a estrutura não fecha — o capital
+      //   próprio some quando o custo dele é reprecificado pela alavancagem que
+      //   ele mesmo tem, ou a taxa de equilíbrio não supera o crescimento
+      //   perpétuo e o valor terminal diverge.
+      //
+      // Medido em 10/09/2026: seis dos noventa e seis com as duas vias
+      // avaliáveis caem aqui, e **os seis são exatamente os que ainda eram
+      // mesclados e migrados**. Em todos a recusa vem na segunda ou terceira
+      // iteração — quer dizer, depois de a realavancagem corrigir a taxa, e não
+      // por o ponto fixo ter passeado. AGRO3, MYPK3 e PRIO3 ficam com capital
+      // próprio não positivo **no ano zero**; as três KLBN têm WACC de
+      // equilíbrio abaixo do crescimento perpétuo.
+      //
+      // Recuar para a interpolação nesse caso **lava a recusa em preço**: a
+      // interpolação não enxerga o problema porque desconta a uma taxa que a
+      // própria conta rejeitou, e o número que ela produz ia então ser mesclado
+      // com o da via do acionista. A via da firma não tem valor aqui; a do
+      // acionista é o que sobra, e a migração é declarada.
+      case _EstruturaRecusada(:final motivo):
+        if (lane == ValuationLane.firm && allowLaneMigration) {
+          final migrada = migrar([
+            // `local` fica de fora de propósito: são notas da via da firma —
+            // curva de WACC, veredito do moat — e não descrevem o resultado
+            // que a via do acionista produz.
+            ...warnings,
+            '$motivo A avaliação migra para o fluxo do acionista, e o número '
+                'da via da firma não entra na conta — descontá-lo pela '
+                'interpolação seria usar a taxa que a própria realavancagem '
+                'rejeitou.',
+          ]);
+          if (migrada != null) return migrada;
+        }
+        refusals?.add(
+          lane == ValuationLane.firm
+              ? '$motivo E a via do acionista não avalia este ativo.'
+              : '$motivo E não há outra via: o roteamento já trouxe o ativo '
+                  'para cá.',
+        );
+        return null;
+
+      case final _ViaDescontada d:
+        final ponte = _participacaoQueDecide(via, d);
+        final participacao = ponte.participacao;
+        final pesoDaFirma = ponte.peso;
+        ValuationResult? outraVia;
+
+        // **A pós-condição só se aplica à ponte**, e a rota derivada não passa por
+        // ela. Sob o caminho resolvido o preço por papel vem de descontar o fluxo
+        // do acionista, sem a subtração `EV − D` — e sem ela não há amplificação
+        // por `1/participação` a conter, nem dois estimadores entre os quais
+        // escolher. Ver a decisão 43.
+        if (lane == ValuationLane.firm &&
+            d.custo.taxas == null &&
+            allowLaneMigration &&
+            pesoDaFirma < 1.0) {
+          _auditEquityBridgeFailure(audit, participacao);
+          final migrada = migrar([
+            ...warnings,
+            if (pesoDaFirma <= 0)
+              'O capital próprio responde por apenas '
+                  '${_pct(participacao)} do valor da firma: o preço por '
+                  'papel seria resíduo de uma subtração entre números próximos. '
+                  'A avaliação migra para o fluxo do acionista.',
+          ]);
+          if (migrada != null) {
+            // Abaixo do piso vale a via do acionista inteira, que é o
+            // comportamento que a decisão 25 estabeleceu. Na faixa de
+            // transição a outra via fica guardada e entra na combinação ao fim.
+            if (pesoDaFirma <= 0) return migrada;
+            outraVia = migrada;
+          }
+          if (migrada == null && pesoDaFirma > 0) {
+            // A via do acionista não avalia este ativo, e a da firma ainda tem
+            // peso. Segue com a firma sozinha, declarando que a combinação que
+            // a faixa pediria não pôde ser feita.
+            d.avisos.add(
+              'O capital próprio responde por ${_pct(participacao)} do '
+              'valor da firma, faixa em que o preço justo combinaria as duas vias '
+              '— mas a via do acionista não avalia este ativo. Vale a da firma '
+              'sozinha, com a fragilidade da ponte que a faixa declara.',
+            );
+          }
+          if (migrada == null && pesoDaFirma <= 0) {
+            // **Migração impossível vira recusa nomeada, não número sem conteúdo.**
+            // A própria pós-condição afirma que, com a dívida líquida consumindo o
+            // valor da firma, o que sobra é resíduo de subtração e não avaliação —
+            // publicar esse resíduo contradiria a afirmação que o motivou. O erro
+            // relativo do valor da firma chega ao preço por papel amplificado por
+            // `1/participação`, e num ativo de 3% de participação isso é trinta
+            // vezes: a AMER3 saía a R$ 0,20 em dez anos e R$ 1,47 em cinco, um fator
+            // de 7,35 vindo só da forma da curva de desconto.
+            //
+            // O efeito colateral é aceito: um ativo deixa de ser avaliado num
+            // horizonte e continua sendo em outro, conforme a pós-condição dispare ou
+            // não. Entre um número sem conteúdo e uma recusa que diz por quê, a
+            // recusa é a saída que a decisão 25 exige.
+            //
+            // A recusa é **nomeada**, que é o que a decisão 25 exige de toda saída.
+            //
+            // A participação **não** é positiva por construção: com a dívida líquida
+            // maior que o valor da firma ela fica negativa, e foi medida em −142,6%
+            // na CSNA3 e −558,3% na MRVE3. A amplificação `1/participação` só tem
+            // sentido no ramo positivo, e nem `Infinity` nem número negativo passam
+            // por `toStringAsFixed`.
+            final amplificacao = participacao > 0
+                ? 'com o erro do valor da firma amplificado '
+                    '${(1 / participacao).toStringAsFixed(0)} vezes'
+                : 'e a dívida líquida supera o próprio valor da firma, de modo que '
+                    'não sobra capital próprio a repartir';
+            refusals?.add(
+              'O capital próprio responde por apenas ${_pct(participacao)} do valor da '
+              'firma de ${inputs.ticker.value}, e a via do acionista não se aplica: '
+              'o preço por papel seria resíduo de uma subtração entre números '
+              'próximos, $amplificacao. O ativo não é avaliável por fluxo descontado '
+              'nesta estrutura de capital.',
+            );
+            return null;
+          }
+        }
+
+        final resultado = _concluir(via, d, scenarioBuilder, samples, seed,
+            migrada: !allowLaneMigration);
+        if (resultado == null || outraVia == null) return resultado;
+        return _mesclarVias(
+          firma: resultado,
+          acionista: outraVia,
+          peso: pesoDaFirma,
+          participacao: participacao,
+        );
+    }
+  }
+
+  /// **Os estágios da via, até o primeiro desconto.**
+  ///
+  /// Devolve `null` quando um estágio não se aplica aos dados;
+  /// [_EstruturaRecusada] quando a realavancagem recusa a estrutura de capital,
+  /// para o condutor decidir se migra; e [_ViaDescontada] com tudo o que a
+  /// pós-condição e a conclusão leem.
+  static _Desconto? _descontarVia(_Via via, List<String> warnings) {
+    final inputs = via.inputs;
+    final lane = via.lane;
+    final audit = via.audit;
     final local = [...warnings];
 
     // --- Saída 1: a base ---------------------------------------------------
-    final retornoAtual = series.latestReturn;
-    final retornoCiclo =
-        series.cycleReturn(window: ValuationParameters.cycleWindow);
-    // A deriva da tendência é medida na janela do ciclo, e **não** no horizonte
-    // de projeção: um veredito estatístico sobre a série não pode mudar porque
-    // o usuário trocou a projeção de 5 para 10 anos. Ver
-    // [ValuationParameters.trendDriftWindow].
-    final tendencia = GrowthGuards.trend(series);
-    final phi = GrowthGuards.externalCapitalRatio(series);
-    final destoa = GrowthGuards.deviatesFromCycle(series);
-
-    final comparavel =
-        phi == null || phi <= ValuationParameters.maxExternalCapital;
-
-    // **A comparabilidade não trava a normalização.** Φ mede quanto da expansão
-    // da base veio de fora, e é uma grandeza de *tamanho*; o que se normaliza
-    // aqui é o **retorno percentual**, que é intensivo. Que a base tenha mudado
-    // de escala por evento societário não torna o ROIC de um exercício de pico
-    // um patamar perene: a rentabilidade percentual reverte à mediana do ciclo
-    // independentemente do tamanho que a empresa passou a ter.
-    //
-    // Sob a precedência anterior, Φ > 1,0 impedia a normalização e o pico virava
-    // base perene. A guarda passa a **declarar** a base inorgânica em vez de
-    // barrar a correção do nível, e o fator continua sendo aplicado sobre a base
-    // de capital corrente — a da empresa de hoje, já incorporada.
-    //
-    // **Em commodity, a Guarda 3 tem precedência sobre a Guarda 1.** A perna de
-    // alta do ciclo tem exatamente a forma de uma tendência, e o teste a lê como
-    // estrutural: a SUZB3 travou 41,5% de retorno corrente contra 18,4% de ciclo
-    // e saiu a +259,1%. Em setor de commodity o preço reverte à média por
-    // definição do produto, e nenhuma sequência de anos de alta muda isso — ver
-    // [CyclicalSectors].
-    final precedenciaDoCiclo = CyclicalSectors.hasCyclePrecedence(
-      sectorKey: inputs.sectorKey,
-      industry: inputs.industry,
-    );
-    final tendenciaTrava = tendencia?.dominates == true && !precedenciaDoCiclo;
-
-    final normaliza = !tendenciaTrava &&
-        destoa == true &&
-        retornoAtual != null &&
-        retornoCiclo != null &&
-        retornoAtual > 0;
-
-    // **Saúde operacional trava a normalização para cima.** A mesma medida que
-    // barra o *moat*: empresa que perdeu mais da metade do resultado no triênio
-    // mudou de patamar, e puxar a base dela de volta à mediana de oito anos
-    // produz um retorno que ela não vai repetir. A QUAL3 perdeu a vantagem
-    // residual na quarta rodada e continuou a +477,3% justamente por aqui — o
-    // número não vinha da perpetuidade, vinha da base normalizada por 2,1x.
-    //
-    // Só o teto cai; o piso continua valendo. Quem deteriorou e ainda assim teve
-    // um exercício acima do ciclo é normalizado para baixo normalmente, que é a
-    // direção conservadora.
-    final queda = GrowthGuards.recentOperationalDecline(published);
-    final saudeReprovada =
-        queda != null && queda > ValuationParameters.maxOperationalDecline;
-
-    // **Setor cíclico é isento da trava, aqui e só aqui.** Em commodity a queda
-    // de resultado entre pico e vale é oscilação do preço do insumo, e a trava
-    // desfazia no vale exatamente a precedência que a decisão 28 estabeleceu:
-    // VALE3 e GGBR4 acusavam quedas de 87% e iam a −70,3% e −92,7% de potencial.
-    // O que limita a normalização em commodity é a saturação, que vale igual.
-    //
-    // A isenção **não alcança o *moat***: lá a pergunta é sobre o futuro do
-    // retorno excedente, e um vale de ciclo não o sustenta melhor que uma
-    // deterioração estrutural. `moatVeredito` recebe a queda sem filtro.
-    final travaDeSaude = saudeReprovada && !precedenciaDoCiclo;
-    final teto = travaDeSaude ? 1.0 : ValuationParameters.baseFactorCeiling;
-
-    // O fator é saturado em razão, `1/3` a `3`. Sem teto ele explode quando o
-    // exercício corrente tem retorno próximo de zero, e o DCF é homogêneo de
-    // grau 1 no fluxo-base: a MBRF3 recebeu 21,4x e saiu a +406,1%.
-    final fatorBruto = normaliza ? retornoCiclo / retornoAtual : 1.0;
-    final fatorDecidido =
-        normaliza ? fatorBruto.clamp(ValuationParameters.baseFactorFloor, teto) : 1.0;
-    final fatorBase = inputs.baseFactorOverride ?? fatorDecidido;
-    if (inputs.baseFactorOverride != null) {
-      local.add(
-        'Fator de normalização imposto em '
-        '${fatorBase.toStringAsFixed(3)}x por varredura externa, no lugar do '
-        '${fatorDecidido.toStringAsFixed(3)}x apurado. Este resultado é '
-        'instrumento de diagnóstico, não avaliação.',
-      );
-    }
-
-    // Os dois confinamentos são reportados em separado: um é a banda de
-    // política, o outro é a trava de saúde, e atribuir um ao outro faria a
-    // calibragem seguinte olhar para o parâmetro errado.
-    final travadoPelaSaude = normaliza && travaDeSaude && fatorBruto > 1.0;
-    final saturou = normaliza &&
-        (fatorBruto > ValuationParameters.baseFactorCeiling ||
-            fatorBruto < ValuationParameters.baseFactorFloor);
-
-    _auditBaseGuards(audit, retornoAtual, retornoCiclo, tendencia, phi,
-        destoa == true, normaliza, fatorBase, series,
-        precedenciaDoCiclo: precedenciaDoCiclo,
-        rawFactor: fatorBruto,
-        saturated: saturou,
-        operationalDecline: queda,
-        healthCapped: travadoPelaSaude,
-        healthExempt: saudeReprovada && precedenciaDoCiclo);
-
-    if (normaliza) {
-      local.add(
-        'O retorno sobre o capital do exercício mais recente '
-        '(${_pct(retornoAtual)}) destoa da mediana de '
-        '${ValuationParameters.cycleWindow} exercícios (${_pct(retornoCiclo)}); '
-        'a base converge para o ciclo ao longo da projeção, fator de '
-        '${fatorBase.toStringAsFixed(2)}x.',
-      );
-      if (precedenciaDoCiclo && tendencia?.dominates == true) {
-        local.add(
-          'A tendência do retorno é significante e domina a reversão à média, '
-          'mas o ativo é de setor de commodity ou cíclico pesado: ali a perna '
-          'de alta do ciclo tem a forma de uma tendência, e lê-la como patamar '
-          'estrutural é o erro que se quer evitar. A reversão ao ciclo tem '
-          'precedência, e a base foi normalizada.',
-        );
-      }
-      if (saudeReprovada && precedenciaDoCiclo && fatorBruto > 1.0) {
-        local.add(
-          'O lucro ou o EBITDA recuou ${_pct(queda)} no triênio, acima do '
-          'máximo de ${_pct(ValuationParameters.maxOperationalDecline)}, mas o '
-          'ativo é de setor de commodity: ali a queda entre pico e vale é '
-          'oscilação do preço do insumo, não quebra de modelo de negócio. A '
-          'trava de saúde não se aplica à base, e a convergência ao ciclo opera '
-          'nos dois sentidos. A vantagem competitiva residual segue barrada por '
-          'ela, sem isenção.',
-        );
-      }
-      if (travadoPelaSaude) {
-        local.add(
-          'O lucro ou o EBITDA recuou ${_pct(queda)} no triênio recente, acima '
-          'do máximo de ${_pct(ValuationParameters.maxOperationalDecline)}. A '
-          'base **não foi normalizada para cima**: o fator seria de '
-          '${fatorBruto.toStringAsFixed(2)}x e ficou em 1,00x. Uma empresa que '
-          'perdeu mais da metade do resultado mudou de patamar, e trazer a base '
-          'de volta à mediana de ${ValuationParameters.cycleWindow} exercícios '
-          'atribuiria a ela um retorno que não vai se repetir.',
-        );
-      }
-      if (saturou && !travadoPelaSaude) {
-        local.add(
-          'O fator bruto de normalização seria de '
-          '${fatorBruto.toStringAsFixed(2)}x e foi saturado em '
-          '${fatorBase.toStringAsFixed(2)}x. O limite é de política, não de '
-          'estatística: o preço justo é proporcional ao fluxo-base, e acima de '
-          '${ValuationParameters.baseFactorCeiling.toStringAsFixed(2)}x a '
-          'normalização deixaria de corrigir um exercício para inventar uma '
-          'empresa. O preço justo abaixo é, nesta medida, conservador.',
-        );
-      }
-      if (!comparavel) {
-        local.add(
-          'A base de capital cresceu ${_r(phi, 2)}x além do que o lucro '
-          'retido financiaria, o que indica evento societário ou aquisição. '
-          'A normalização foi aplicada mesmo assim: o retorno percentual é '
-          'grandeza intensiva, e reverte à mediana do ciclo qualquer que tenha '
-          'sido a mudança de tamanho. O que a série não sustenta é comparar '
-          '**níveis absolutos** de lucro entre as pontas da janela.',
-        );
-      }
-    }
+    final b = _saida1(via, local);
+    if (b == null) return null;
 
     // --- Saída 2: a taxa ---------------------------------------------------
-    final dispersao = GrowthGuards.dispersion(series);
-    if (dispersao == null) return null;
-
-    final retencao = series.medianRetention;
-    final GrowthOrigin origem;
-    final double gDecidido;
-    if (dispersao.isIdentified) {
-      origem = GrowthOrigin.fundamental;
-      gDecidido = dispersao.medianGrowth;
-    } else if (GrowthGuards.anchorIsFundable(
-      inflation: inputs.inflation,
-      cycleReturn: retornoCiclo,
-      observedRetention: retencao,
-    )) {
-      origem = GrowthOrigin.inflationAnchor;
-      gDecidido = inputs.inflation;
-      local.add(
-        'Crescimento fundamental não identificável: ${dispersao.failure}. '
-        'Adotada a inflação de ${_pct(inputs.inflation)}, que a retenção '
-        'observada de ${_pct(retencao ?? 0)} financia.',
-      );
-    } else {
-      origem = GrowthOrigin.earningsPower;
-      gDecidido = 0.0;
-      local.add(
-        'Crescimento não identificável nem financiável pela retenção observada; '
-        'a avaliação é do valor da capacidade de gerar lucro, sem crescimento. '
-        'É estimativa deliberadamente conservadora.',
-      );
-    }
-    final g = inputs.growthOverride ?? gDecidido;
-    if (inputs.growthOverride != null) {
-      local.add(
-        'Crescimento imposto em ${_pct(g)} por varredura externa, no lugar '
-        'dos ${_pct(gDecidido)} que as guardas apuraram. Este resultado é '
-        'instrumento de diagnóstico, não avaliação.',
-      );
-    }
-    _auditGrowthOutcome(
-        audit, dispersao, origem, g, retencao, retornoCiclo, inputs.inflation);
+    final taxa = _saida2(via, b, local);
+    if (taxa == null) return null;
 
     // --- Premissas ---------------------------------------------------------
-    final custoCorrente = lane == ValuationLane.firm
-        ? _wacc(inputs, latest, local, divisor, audit)
-        : (rate: inputs.capm.costOfEquity, costOfDebtEstimated: false);
-    final desconto = custoCorrente.rate;
-
-    // Custo de capital de **equilíbrio**: o mesmo beta, o mesmo prêmio e a mesma
-    // estrutura de capital, sobre a taxa livre de risco estrutural em vez da
-    // corrente. É o destino do decaimento e a taxa da perpetuidade. Os avisos e
-    // a auditoria saem só da montagem corrente — esta repetiria os mesmos.
-    final capmTerminal = inputs.capm.withRiskFree(inputs.terminalRiskFreeRate);
-    final descontoTerminal = lane == ValuationLane.firm
-        ? _wacc(inputs, latest, <String>[], divisor, null,
-                capmOverride: capmTerminal)
-            .rate
-        : capmTerminal.costOfEquity;
-
-    final perpetuo = GrowthEstimator.perpetual(
-      explicitGrowth: g,
-      economyGrowth: inputs.perpetualGrowthCap,
-    );
-    _auditPerpetualGrowth(audit, g, inputs.perpetualGrowthCap, perpetuo);
-
-    // Vantagem competitiva residual, contínua desde a decisão 36: o que
-    // sobrevive à perpetuidade é `φ^N` do excedente, com `φ` estimado da série
-    // do próprio ativo. O veredito carrega o motivo da recusa e os dois valores
-    // de `φ` — sem isso, um universo em que quase ninguém passa é
-    // indistinguível de um universo em que quase ninguém merece passar.
-    //
-    // O excedente é medido contra a taxa de **equilíbrio**, e não contra a
-    // corrente: é a perpetuidade que se está descrevendo, e usar a taxa do dia
-    // faria a persistência do excedente andar com o ciclo monetário — o mesmo
-    // erro que a decisão 34 removeu da fronteira das vias.
-    //
-    // **A taxa de equilíbrio contra a qual o excedente se mede é a resolvida,
-    // não a interpolada** (decisão 44). O veredito é fechado uma vez com a
-    // interpolação — que é o chute de que o ponto fixo parte — e refeito
-    // contra a taxa que o ponto fixo devolve.
-    // **Concessão não preserva excedente** (decisão 50). O prazo do contrato
-    // não é publicado e a perpetuidade continua onde está; o que sai é a
-    // afirmação que o contrato nega de frente — a de que o retorno excedente
-    // sobrevive para sempre num negócio que será relicitado.
-    final prazoDeterminado = ConcessionSectors.hasFiniteTerm(
-      sectorKey: inputs.sectorKey,
-      industry: inputs.industry,
-    );
-
-    MoatVerdict vereditoDoMoat(double rInf) => GrowthGuards.residualMoat(
-          cycleReturn: retornoCiclo,
-          terminalDiscountRate: rInf,
-          externalCapitalRatio: phi,
-          periods: series.length,
-          excessReturns: [
-            for (final r in series.returns)
-              if (r.value.isFinite) (year: r.year, excess: r.value - rInf),
-          ],
-          projectionYears: inputs.projectionYears,
-          finiteTerm: prazoDeterminado,
-        );
-
-    var moatVeredito = vereditoDoMoat(descontoTerminal);
-    // O veredito e o retorno terminal efetivamente aplicado são grandezas
-    // distintas: o segundo pode vir imposto pelo DCF reverso. Manter os dois
-    // separados é o que impede a narrativa de vantagem competitiva de afirmar
-    // um veredito que não houve.
-    var moatVerificado = moatVeredito.terminalReturn;
-    var moat = inputs.terminalReturnOverride ?? moatVerificado;
-
-    _auditDiscountTerm(audit, inputs, desconto, descontoTerminal);
-
-    // Tolerância, e não igualdade estrita: os dois vêm de `_wacc` sobre os
-    // mesmos insumos com taxas livres de risco diferentes, e quando as duas
-    // coincidem o resultado é bit a bit idêntico — mas depender disso é depender
-    // de determinismo de ponto flutuante para decidir se um aviso aparece. A
-    // banda de 1e-7 é muito menor que qualquer diferença de taxa que valha ser
-    // declarada (0,00001 p.p.) e maior que qualquer ruído de IEEE-754.
-    final curvaDeJuros = inputs.riskFreeCurve;
-    if (curvaDeJuros != null) {
-      final ref = curvaDeJuros.referenceDate;
-      final fw = curvaDeJuros.annualForwards(inputs.projectionYears);
-      local.add(
-        'A taxa livre de risco segue a curva dos títulos prefixados do Tesouro '
-        'de ${ref.day.toString().padLeft(2, '0')}/'
-        '${ref.month.toString().padLeft(2, '0')}/${ref.year}: '
-        '${_pct(fw.first)} a.a. no primeiro ano, ${_pct(fw.last)} a.a. no ano '
-        '${inputs.projectionYears} e ${_pct(inputs.terminalRiskFreeRate)} a.a. '
-        'na perpetuidade. É a taxa que o mercado de títulos atribui a cada '
-        'prazo, e não uma previsão do motor.',
-      );
-    } else if ((desconto - descontoTerminal).abs() > 1e-7) {
-      local.add(
-        'O desconto parte de ${_pct(desconto)} a.a. no primeiro ano e converge '
-        'linearmente para ${_pct(descontoTerminal)} a.a. no ano '
-        '${inputs.projectionYears}, que é a taxa da perpetuidade. A taxa livre '
-        'de risco vai de ${_pct(inputs.capm.riskFreeRate)} para '
-        '${_pct(inputs.terminalRiskFreeRate)}: sem curva de juros observada, '
-        'descontar perpetuidade pelo CDI de um dia casaria durações '
-        'incompatíveis.',
-      );
-    }
-
-    if (lane == ValuationLane.firm &&
-        aliquotaEstrutural != null &&
-        (aliquotaEstrutural - ValuationParameters.statutoryTaxRate).abs() >
-            0.01) {
-      local.add(
-        'O lucro operacional é tributado à alíquota estrutural do ativo, '
-        '${_pct(aliquotaEstrutural)}, e não aos '
-        '${_pct(ValuationParameters.statutoryTaxRate)} estatutários que a '
-        'fonte embute em todo NOPAT publicado. É a mediana dos exercícios, '
-        'não a do último: JCP, incentivo regional e lucro presumido são '
-        'regime no Brasil, e regime é o que se projeta. O escudo fiscal do '
-        'WACC continua na estatutária, que é a alíquota da margem.',
-      );
-    }
-
-    if (inputs.terminalReturnOverride != null) {
-      local.add(
-        'Retorno terminal imposto em '
-        '${_pct(inputs.terminalReturnOverride!)} por varredura externa. '
-        'Este resultado é instrumento de diagnóstico, não avaliação: o '
-        'veredito de vantagem competitiva foi ignorado.',
-      );
-    }
-
-    // A narrativa e a auditoria do *moat* saem **depois** do ponto fixo, porque
-    // o veredito pode ser refeito contra a taxa resolvida. Publicá-los aqui
-    // afirmaria um veredito que a taxa final pode não sustentar.
-
-    // O retorno que converte crescimento em retenção, ano a ano — `b_t = g_t /
-    // ROIC_t` —, precisa ser o retorno **do fluxo-base que se está
-    // descontando**, e não o do ciclo por princípio.
-    //
-    // Como o fluxo-base é `NOPAT_atual × fator` sobre a mesma base de capital,
-    // o retorno implícito nele é `retorno_atual × fator`. A identidade fecha os
-    // três casos de uma vez: normalizado sem saturar, dá exatamente o retorno do
-    // ciclo; normalizado com saturação, dá o retorno que a saturação de fato
-    // impôs; não normalizado, dá o retorno corrente.
-    //
-    // Usar o ciclo quando a base **não** foi normalizada misturava o fluxo de um
-    // ano com o retorno de outro, e sempre na direção de exigir menos
-    // reinvestimento do que a empresa precisa: medido na AZZA3, um retorno de
-    // ciclo de 19,55% sobre um fluxo-base de retorno corrente de 7,82% inflava
-    // o valor da firma em 17%.
-    //
-    // Sem retorno corrente utilizável — série curta, exercício de prejuízo ou
-    // buraco na ponta —, o do ciclo continua sendo a melhor estimativa
-    // disponível e é o que entra. Zerar ali **desligaria** o freio, que é a
-    // direção agressiva: o fluxo cresceria sem nada retido para financiá-lo.
-    final retornoDaBase = (retornoAtual != null && retornoAtual > 0)
-        ? retornoAtual * fatorBase
-        : (retornoCiclo ?? 0.0);
-
-    final assumptions = DcfAssumptions(
-      projectionYears: inputs.projectionYears,
-      growthRate: g,
-      perpetualGrowth: perpetuo,
-      discountRate: desconto,
-      terminalDiscountRate: descontoTerminal,
-      returnOnCapital: retornoDaBase,
-      terminalReturnOnCapital: moat,
-      marginOfSafety: inputs.marginOfSafety,
-      reinvestmentPolicy:
-          inputs.reinvestmentOverride ?? ReinvestmentPolicy.medido,
-      inflation: inputs.inflation,
-      cashTiming: inputs.cashTimingOverride ?? CashTiming.meioDeAno,
-      contractYearsAfterHorizon: _anosDeContratoAlemDaProjecao(inputs),
-    );
-    if (inputs.cashTimingOverride != null) {
-      local.add(
-        'Convenção de caixa imposta em '
-        '"${inputs.cashTimingOverride!.name}" por varredura externa, no lugar '
-        'do meio de ano. Este resultado é instrumento de diagnóstico, não '
-        'avaliação.',
-      );
-    }
-    if (inputs.reinvestmentOverride != null) {
-      local.add(
-        'Freio de reinvestimento imposto em '
-        '"${inputs.reinvestmentOverride!.name}" por varredura externa, no '
-        'lugar do `b = g/ROIC` medido. Este resultado é instrumento de '
-        'diagnóstico, não avaliação.',
-      );
-    }
+    final p = _premissas(via, b, taxa.g, local);
 
     // --- Fluxo-base --------------------------------------------------------
-    //
-    // **A normalização funcionava no pico e desligava no vale** (decisão 53).
-    // O fator é `ciclo ÷ atual` e exige denominador positivo, de modo que um
-    // exercício de prejuízo não era corrigido — era recusado. Numa siderúrgica
-    // o vale é metade do ciclo, e recusar ali descarta a empresa por causa de
-    // um ano.
-    //
-    // A reconstrução escreve a mesma conta de um jeito que sobrevive ao
-    // denominador: `fluxo-base = retorno do ciclo × capital de hoje`. As três
-    // condições são as que já existem, e nenhuma é nova:
-    //
-    // - **o ciclo tem de ser positivo e medível** — sem isso não há a que
-    //   voltar;
-    // - **o prejuízo tem de ser exceção** — ao menos
-    //   [ValuationParameters.minPositiveFlow] da janela positiva, que é o
-    //   mesmo corte com que a Porta 3 decide se um fluxo se sustenta. É ele
-    //   que separa o vale do declínio: a HBSA3 tem mediana de +0,2% com
-    //   metade da janela no prejuízo, e não volta.
-    //
-    // - **a trava de saúde tem de não reprovar** — a mesma que já impede a
-    //   normalização para cima em quem deteriorou, com a isenção cíclica da
-    //   decisão 30.
-    //
-    // **A trava foi retirada e reposta, por medição.** O argumento para tirá-la
-    // era de ordenação: ela devolve nulo quando a referência de três anos
-    // atrás também era prejuízo, de modo que aprova quem já perdia dinheiro lá
-    // atrás e reprova quem perdeu agora. Sem ela, porém, a RAPT4 entra a
-    // **+311,7% de potencial** — resultado caído 109% no triênio, e o
-    // fluxo-base reconstruído sobre um retorno de ciclo de 17,6% que a empresa
-    // acabou de deixar de ter. O risco que a trava controla é esse, e é
-    // assimétrico: reconstruir a base erra para cima. A ordenação imperfeita é
-    // o preço, e ele é menor.
-    double? baseDoCiclo;
-    if (retornoAtual != null &&
-        retornoAtual <= 0 &&
-        retornoCiclo != null &&
-        retornoCiclo > 0 &&
-        !travaDeSaude) {
-      final fracao =
-          series.positiveShare(window: ValuationParameters.cycleWindow);
-      final capital = series.latestBase;
-      if (fracao != null &&
-          fracao >= ValuationParameters.minPositiveFlow &&
-          capital != null &&
-          capital > 0) {
-        final total = retornoCiclo * capital;
-        final porUnidade = lane == ValuationLane.firm
-            ? total
-            : (divisor.count > 0 ? total / divisor.count : null);
-        if (porUnidade != null && porUnidade.isFinite && porUnidade > 0) {
-          baseDoCiclo = porUnidade;
-          local.add(
-            'O exercício-base veio no prejuízo — retorno de '
-            '${_pct(retornoAtual)} sobre o capital —, e o fluxo-base foi '
-            'reconstruído do ciclo: ${_pct(retornoCiclo)} de retorno mediano '
-            'sobre o capital de hoje, com ${_pct(fracao)} da janela positiva. '
-            '**O preço justo não repousa em nenhum exercício recente '
-            'observado**: repousa na afirmação de que a empresa volta ao que '
-            'já foi.',
-          );
-        }
-      }
+    final fluxo = _fluxoBase(via, b, local);
+    if (fluxo == null) return null;
+
+    // --- Custo de capital realavancado e quem resolve o Ke ----------------
+    final custo = _resolverCusto(via, b, p, fluxo.base, local);
+
+    // A auditoria e a narrativa do *moat* saem agora, com o veredito final —
+    // que pode ser o do segundo passe.
+    _auditMoat(audit, custo.veredito);
+    if (p.prazoDeterminado) {
+      local.add(_avisoDoContrato(inputs, capitalApurado: p.retornoDaBase > 0));
+    }
+    final rInfFinal = custo.taxas?.terminalWacc ?? p.descontoTerminal;
+    if (custo.moatVerificado != null &&
+        inputs.terminalReturnOverride == null) {
+      local.add(
+        'Vantagem competitiva residual: retorno do ciclo de '
+        '${_pct(b.retornoCiclo!)} contra custo de capital de equilíbrio de '
+        '${_pct(rInfFinal)}, com excedente decaindo '
+        '${_pct(1 - custo.veredito.persistence!)} ao ano — persistência medida '
+        'na própria série do ativo, sobre ${custo.veredito.persistencePoints} '
+        'pares. Em ${inputs.projectionYears} anos sobram '
+        '${_pct(custo.veredito.retainedFraction!)} do excedente, e o retorno '
+        'terminal fica em ${_pct(custo.moatVerificado!)} em vez do estado '
+        'estacionário. O valor terminal volta a depender do crescimento '
+        'perpétuo.',
+      );
     }
 
-    final base = baseDoCiclo ??
-        _baseProfitFor(
-          lane,
-          latest,
-          divisor,
-          fatorBase,
-          aliquotaEstrutural,
-        );
-    if (base == null || base <= 0) return null;
 
-    // --- Custo de capital realavancado ano a ano (decisão 41) --------------
-    //
-    // A interpolação de dois pontos supõe que só a taxa livre de risco se
-    // move. Medido, `D/V` sai de 0,29 no ano zero para 0,38 no ano dez — e um
-    // `WACC` único ao longo da projeção **é** a hipótese de `D/V` constante,
-    // que a projeção da dívida contradizia. Ver
-    // `docs/validacao/identidade_das_vias.md`.
-    //
-    // O ponto fixo resolve as duas coisas de uma vez: o caminho de taxas e a
-    // circularidade do peso do capital próprio, que hoje vem do valor de
-    // mercado enquanto o modelo diz outra coisa.
-    //
-    // **Sem beta desalavancado não há realavancagem**, e aí vale a
-    // interpolação — que é o comportamento anterior, declarado.
+    if (custo.estruturaRejeitada != null) {
+      return _EstruturaRecusada(
+        'A estrutura de capital de ${inputs.ticker.value} não sustenta a via '
+        '${lane == ValuationLane.firm ? 'da firma' : 'do acionista'}: '
+        '${custo.estruturaRejeitada}',
+      );
+    }
+
+    final primeiro =
+        _descontarFluxo(via, fluxo.base, custo.taxas, custo.assumptions);
+    if (primeiro.isErr) return null;
+
+    return _ViaDescontada(
+      saida1: b,
+      origem: taxa.origem,
+      premissas: p,
+      base: fluxo.base,
+      baseReconstruida: fluxo.reconstruida,
+      custo: custo,
+      outcome: primeiro.unwrap(),
+      avisos: local,
+    );
+  }
+
+  /// **O desconto do fluxo da via**, sob as premissas [a].
+  ///
+  /// Com o caminho de taxas resolvido, o capital próprio vem do **fluxo do
+  /// acionista derivado do da firma** — `FCFE = FCFF − juros(1−τ) + ΔDívida`
+  /// — e não da subtração `EV − D`.
+  ///
+  /// **Não é uma segunda opinião**: sob o caminho resolvido as duas rotas
+  /// coincidem dentro de 1e-6, e isso está travado por teste. O que muda é a
+  /// **condição numérica**: a ponte é a diferença de dois números grandes e
+  /// quase iguais quando o capital próprio é fino, e o erro relativo chega ao
+  /// preço por papel amplificado por `1/participação` — 138 vezes na RENT3.
+  /// A rota derivada não faz essa subtração.
+  ///
+  /// É por isso que a pós-condição dos 20% e a mescla da decisão 38 **não se
+  /// aplicam** aqui: elas existiam para escolher entre dois estimadores que
+  /// discordavam, e sob esta rota há um só.
+  ///
+  /// **Sem dívida bruta não há custo de dívida a medir, e o que sobra é
+  /// rendimento de caixa** (decisão 58). O recuo era a própria taxa de
+  /// desconto — o WACC —, e com dívida líquida **negativa** ela multiplica um
+  /// peso negativo: o motor creditava ao caixa o rendimento do negócio. A
+  /// taxa livre de risco é o que caixa rende.
+  ///
+  /// Medido em 11/09/2026: 18 dos avaliados chegam aqui, e em 16 deles a via
+  /// é a do acionista, que não usa este número. Os dois que usam são ALOS3,
+  /// com R$ 2,43 bi de caixa líquido, e BRAP4, com R$ 18 mi.
+  ///
+  /// A parte dos não controladores no patrimônio consolidado, que o fluxo da
+  /// firma carrega e o acionista da controladora não recebe (decisão 49).
+  static Result<DcfOutcome> _descontarFluxo(
+    _Via via,
+    double base,
+    LeveredRates? taxas,
+    DcfAssumptions a,
+  ) {
+    if (via.lane == ValuationLane.shareholder) {
+      return DcfCalculator.shareholder(baseProfit: base, assumptions: a);
+    }
+    final latest = via.latest;
+    // O divisor é a contagem de unidades que forma a cotação — ver
+    // [ValuationCascade.quotedShares]. Com ela, o potencial é `E ÷ VM − 1` e
+    // nenhuma contagem de ação sobra na comparação com o preço de tela.
+    final shares = via.divisor.count;
+    final minoritarios = latest.minorityInterest ?? 0;
+    if (taxas == null) {
+      return DcfCalculator.firm(
+        baseProfit: base,
+        assumptions: a,
+        netDebt: latest.netDebt,
+        sharesOutstanding: shares,
+        minorityInterest: minoritarios,
+      );
+    }
+    return DcfCalculator.equityFromFirm(
+      baseProfit: base,
+      assumptions: a,
+      netDebt: latest.netDebt,
+      sharesOutstanding: shares,
+      costOfDebt: latest.costOfDebt ?? via.inputs.capm.riskFreeRate,
+      taxRate: ValuationParameters.statutoryTaxRate,
+      equityDiscountRate: taxas.costOfEquity.first,
+      terminalEquityDiscountRate: taxas.terminalCostOfEquity,
+      equityDiscountRatePath: List<double>.from(taxas.costOfEquity),
+      minorityInterest: minoritarios,
+    );
+  }
+
+  /// **A participação do capital próprio que decide a pós-condição da ponte**,
+  /// e o peso da via da firma que sai dela.
+  ///
+  /// Não pode ser pré-filtro: depende do valor da firma, que só existe depois
+  /// do desconto. Medido, a RENT3 tem participação de equity de 54% pelo
+  /// mercado e ainda assim saía com preço justo de R$ 0,12, porque o valor da
+  /// firma do modelo era metade do de mercado. A migração agora é declarada,
+  /// e não silenciosa como no antigo `fairValuePerShare <= 0`.
+  /// **A participação que decide a via é medida na taxa estrutural, não na
+  /// corrente.** A pós-condição é um degrau entre dois estimadores diferentes,
+  /// e medi-la na taxa do dia fazia o degrau andar com o ciclo monetário: o
+  /// preço justo deixava de ser monótono na taxa de desconto. Medido na
+  /// KLBN11, antes desta correção — baixando a taxa livre de risco de 9,00%
+  /// para 8,75%, o valor da firma sobe, a participação cruza os 20%, a
+  /// migração deixa de disparar, e o preço justo **cai** de R$ 7,98 para
+  /// R$ 5,36. Capital mais barato produzindo empresa menos valiosa contradiz a
+  /// definição de fluxo descontado, e com a Selic em queda os 33 ativos que
+  /// hoje migram atravessariam essa fronteira.
+  ///
+  /// A taxa estrutural é a mesma que a decisão 31 já usa para a perpetuidade, e
+  /// pela mesma razão: a estrutura de capital de um ativo é fato de longo
+  /// prazo, e qual das duas vias o descreve não pode depender de onde a Selic
+  /// está hoje. Dentro de cada via o preço justo continua monótono na taxa; o
+  /// que esta medida remove é a travessia induzida pelo ciclo.
+  ///
+  /// **Isto não concilia as duas vias**, que seguem discordando por medirem
+  /// crescimento e base em séries de capital diferentes — na KLBN11, 5,0%
+  /// contra 10,16% de crescimento e fator de base 0,665 contra 1,000. Essa
+  /// divergência é assunto de outra decisão; aqui só se impede que o ciclo
+  /// monetário escolha entre elas.
+  ///
+  /// Sem a medida estrutural — projeção degenerada, valor terminal divergente
+  /// na taxa de equilíbrio —, vale a da taxa corrente. Ausência de medida não
+  /// é motivo para deixar de aplicar a pós-condição.
+  ///
+  /// **A pós-condição deixou de ser degrau, pela decisão 38.** Ela escolhia
+  /// uma via inteira em `s = 20%`, e as duas discordam além de 1,5x em 55 de
+  /// 92 ativos — de modo que o preço justo saltava por múltiplos quando `s`
+  /// cruzava o corte. O peso passa a ser contínuo na faixa que o projeto já
+  /// declarava frágil, e o degrau some sem que nenhum parâmetro novo entre.
+  static ({double participacao, double peso}) _participacaoQueDecide(
+    _Via via,
+    _ViaDescontada d,
+  ) {
+    final inputs = via.inputs;
+    final p = d.premissas;
+    final participacaoEstrutural = via.lane == ValuationLane.firm
+        ? DcfCalculator.firm(
+            baseProfit: d.base,
+            assumptions: DcfAssumptions(
+              projectionYears: inputs.projectionYears,
+              growthRate: p.assumptions.growthRate,
+              perpetualGrowth: p.perpetuo,
+              discountRate: p.descontoTerminal,
+              terminalDiscountRate: p.descontoTerminal,
+              returnOnCapital: p.retornoDaBase,
+              terminalReturnOnCapital: d.custo.moat,
+              marginOfSafety: inputs.marginOfSafety,
+              contractYearsAfterHorizon: _anosDeContratoAlemDaProjecao(inputs),
+            ),
+            netDebt: via.latest.netDebt,
+            sharesOutstanding: via.divisor.count,
+          ).valueOrNull?.equityShare
+        : null;
+    final participacao = participacaoEstrutural ?? d.outcome.equityShare;
+    return (
+      participacao: participacao,
+      peso: via.lane == ValuationLane.firm ? _pesoDaFirma(participacao) : 1.0,
+    );
+  }
+
+  /// **A conclusão da via**: o rastro do desconto e da ponte, os cenários e os
+  /// diagnósticos. Devolve `null` com preço justo não positivo.
+  ///
+  /// - [migrada]: `true` no passe que veio de migração de via, que é
+  ///   justamente quando a migração chega desligada.
+  static ValuationResult? _concluir(
+    _Via via,
+    _ViaDescontada d,
+    AssumptionSource Function(DcfAssumptions)? scenarioBuilder,
+    int samples,
+    int seed, {
+    required bool migrada,
+  }) {
+    final inputs = via.inputs;
+    final lane = via.lane;
+    final audit = via.audit;
+    final outcome = d.outcome;
+    final assumptions = d.premissas.assumptions;
+    final assumptionsFinal = d.custo.assumptions;
+    if (outcome.fairValuePerShare <= 0) return null;
+
+    _auditDcf(
+      audit,
+      outcome: outcome,
+      assumptions: assumptions,
+      baseFlow: d.base,
+      flowSymbol: lane == ValuationLane.firm ? 'NOPAT' : 'LPA',
+      discountSymbol: lane == ValuationLane.firm ? 'WACC' : 'K_e',
+      perShareAlready: lane == ValuationLane.shareholder,
+    );
+    if (lane == ValuationLane.firm) {
+      _auditEquityBridge(
+        audit,
+        enterpriseValue: outcome.enterpriseValue,
+        netDebt: via.latest.netDebt,
+        shares: via.divisor.count,
+        perShare: outcome.fairValuePerShare,
+      );
+    }
+
+    return _withScenarios(
+      inputs: inputs,
+      model: lane == ValuationLane.firm
+          ? ValuationModel.dcfFcff
+          : ValuationModel.dcfEarnings,
+      assumptions: assumptions,
+      baseValue: outcome.fairValuePerShare,
+      valuate: (a) => _descontarFluxo(via, d.base, d.custo.taxas, a)
+          .map((o) => o.fairValuePerShare),
+      scenarioBuilder: scenarioBuilder,
+      samples: samples,
+      seed: seed,
+      warnings: d.avisos,
+      diagnostics: _diagnose(
+        outcome: outcome,
+        divisor: via.divisor,
+        baseFactor: d.saida1.fator,
+        growthOrigin: d.origem,
+        // O veredito, e não o retorno imposto: `moatApplied` alimenta relatório
+        // de cobertura, e uma varredura de diagnóstico não é vantagem
+        // competitiva reconhecida.
+        moatApplied: d.custo.moatVerificado != null,
+        migrated: migrada,
+        finiteTerm: d.premissas.prazoDeterminado,
+        rebuiltBase: d.baseReconstruida,
+        // `Rf + β·prêmio` sobre a taxa corrente: o retorno esperado
+        // incondicional do papel, que a camada de carteira ancora.
+        costOfEquity: inputs.capm.costOfEquity,
+        terminalDiscountRate:
+            d.custo.taxas?.terminalWacc ?? d.premissas.descontoTerminal,
+        terminalRetainedSpread: d.custo.veredito.retainedFraction ?? 0.0,
+        growthRate: assumptions.growthRate,
+        returnOnCapital: assumptions.returnOnCapital,
+        terminalReturnOnCapital: assumptions.terminalReturnOnCapital,
+        firmTaxRate: lane == ValuationLane.firm ? d.saida1.aliquota : null,
+        terminalCostOfEquity: d.custo.taxas?.terminalCostOfEquity,
+        retentionPath: [
+          for (var t = 1; t <= inputs.projectionYears; t++)
+            assumptionsFinal.retentionAt(t),
+        ],
+        growthPath: [
+          for (var t = 1; t <= inputs.projectionYears; t++)
+            assumptionsFinal.growthAt(t),
+        ],
+      ),
+    );
+  }
+
+  /// **O custo de capital realavancado ano a ano** (decisões 41, 44, 46 e 51),
+  /// com o veredito da vantagem competitiva refeito contra a taxa resolvida até
+  /// o par parar de mudar.
+  ///
+  /// A interpolação de dois pontos supõe que só a taxa livre de risco se
+  /// move. Medido, `D/V` sai de 0,29 no ano zero para 0,38 no ano dez — e um
+  /// `WACC` único ao longo da projeção **é** a hipótese de `D/V` constante,
+  /// que a projeção da dívida contradizia. Ver
+  /// `docs/validacao/identidade_das_vias.md`.
+  ///
+  /// O ponto fixo resolve as duas coisas de uma vez: o caminho de taxas e a
+  /// circularidade do peso do capital próprio, que hoje vem do valor de
+  /// mercado enquanto o modelo diz outra coisa.
+  ///
+  /// **Sem beta desalavancado não há realavancagem**, e aí vale a
+  /// interpolação — que é o comportamento anterior, declarado.
+  static _Custo _resolverCusto(
+    _Via via,
+    _Base b,
+    _Premissas p,
+    double base,
+    List<String> local,
+  ) {
+    final inputs = via.inputs;
+    final latest = via.latest;
+    final lane = via.lane;
+    final divisor = via.divisor;
+    final assumptions = p.assumptions;
+    var moatVeredito = p.veredito;
+    var moatVerificado = p.moatVerificado;
+    var moat = p.moat;
+    MoatVerdict vereditoDoMoat(double rInf) =>
+        _vereditoDoMoat(inputs, b, p.prazoDeterminado, rInf);
     var assumptionsFinal = assumptions;
     LeveredRates? taxasResolvidas;
     // Recusa **econômica** do solucionador, distinta da numérica: ver o
@@ -1946,395 +2142,594 @@ abstract final class ValuationCascade {
       }
     }
 
-    // A auditoria e a narrativa do *moat* saem agora, com o veredito final —
-    // que pode ser o do segundo passe.
-    _auditMoat(audit, moatVeredito);
-    if (prazoDeterminado) {
-      local.add(_avisoDoContrato(inputs, capitalApurado: retornoDaBase > 0));
-    }
-    final rInfFinal = taxasResolvidas?.terminalWacc ?? descontoTerminal;
-    if (moatVerificado != null && inputs.terminalReturnOverride == null) {
+    return _Custo(
+      assumptions: assumptionsFinal,
+      taxas: taxasResolvidas,
+      estruturaRejeitada: estruturaRejeitada,
+      veredito: moatVeredito,
+      moatVerificado: moatVerificado,
+      moat: moat,
+    );
+  }
+
+  /// **As premissas da via**: a taxa corrente e a de equilíbrio, o crescimento
+  /// perpétuo, o primeiro veredito da vantagem competitiva — contra a taxa
+  /// interpolada, que é o chute de que o ponto fixo parte — e o retorno que
+  /// converte crescimento em retenção.
+  static _Premissas _premissas(
+    _Via via,
+    _Base b,
+    double g,
+    List<String> local,
+  ) {
+    final inputs = via.inputs;
+    final latest = via.latest;
+    final lane = via.lane;
+    final divisor = via.divisor;
+    final audit = via.audit;
+    final aliquotaEstrutural = b.aliquota;
+    final retornoAtual = b.retornoAtual;
+    final retornoCiclo = b.retornoCiclo;
+    final fatorBase = b.fator;
+
+    final custoCorrente = lane == ValuationLane.firm
+        ? _wacc(inputs, latest, local, divisor, audit)
+        : (rate: inputs.capm.costOfEquity, costOfDebtEstimated: false);
+    final desconto = custoCorrente.rate;
+
+    // Custo de capital de **equilíbrio**: o mesmo beta, o mesmo prêmio e a mesma
+    // estrutura de capital, sobre a taxa livre de risco estrutural em vez da
+    // corrente. É o destino do decaimento e a taxa da perpetuidade. Os avisos e
+    // a auditoria saem só da montagem corrente — esta repetiria os mesmos.
+    final capmTerminal = inputs.capm.withRiskFree(inputs.terminalRiskFreeRate);
+    final descontoTerminal = lane == ValuationLane.firm
+        ? _wacc(inputs, latest, <String>[], divisor, null,
+                capmOverride: capmTerminal)
+            .rate
+        : capmTerminal.costOfEquity;
+
+    final perpetuo = GrowthEstimator.perpetual(
+      explicitGrowth: g,
+      economyGrowth: inputs.perpetualGrowthCap,
+    );
+    _auditPerpetualGrowth(audit, g, inputs.perpetualGrowthCap, perpetuo);
+
+    // Vantagem competitiva residual, contínua desde a decisão 36: o que
+    // sobrevive à perpetuidade é `φ^N` do excedente, com `φ` estimado da série
+    // do próprio ativo. O veredito carrega o motivo da recusa e os dois valores
+    // de `φ` — sem isso, um universo em que quase ninguém passa é
+    // indistinguível de um universo em que quase ninguém merece passar.
+    //
+    // O excedente é medido contra a taxa de **equilíbrio**, e não contra a
+    // corrente: é a perpetuidade que se está descrevendo, e usar a taxa do dia
+    // faria a persistência do excedente andar com o ciclo monetário — o mesmo
+    // erro que a decisão 34 removeu da fronteira das vias.
+    //
+    // **A taxa de equilíbrio contra a qual o excedente se mede é a resolvida,
+    // não a interpolada** (decisão 44). O veredito é fechado uma vez com a
+    // interpolação — que é o chute de que o ponto fixo parte — e refeito
+    // contra a taxa que o ponto fixo devolve.
+    // **Concessão não preserva excedente** (decisão 50): o que sai é a
+    // afirmação que o contrato nega de frente — a de que o retorno excedente
+    // do capital novo sobrevive para sempre num negócio que será relicitado.
+    // O do capital existente acaba no fim do contrato, quando o prazo foi lido
+    // do Formulário de Referência (decisão 88).
+    final prazoDeterminado = ConcessionSectors.hasFiniteTerm(
+      sectorKey: inputs.sectorKey,
+      industry: inputs.industry,
+    );
+
+    final moatVeredito =
+        _vereditoDoMoat(inputs, b, prazoDeterminado, descontoTerminal);
+    // O veredito e o retorno terminal efetivamente aplicado são grandezas
+    // distintas: o segundo pode vir imposto pelo DCF reverso. Manter os dois
+    // separados é o que impede a narrativa de vantagem competitiva de afirmar
+    // um veredito que não houve.
+    final moatVerificado = moatVeredito.terminalReturn;
+    final moat = inputs.terminalReturnOverride ?? moatVerificado;
+
+    _auditDiscountTerm(audit, inputs, desconto, descontoTerminal);
+
+    // Tolerância, e não igualdade estrita: os dois vêm de `_wacc` sobre os
+    // mesmos insumos com taxas livres de risco diferentes, e quando as duas
+    // coincidem o resultado é bit a bit idêntico — mas depender disso é depender
+    // de determinismo de ponto flutuante para decidir se um aviso aparece. A
+    // banda de 1e-7 é muito menor que qualquer diferença de taxa que valha ser
+    // declarada (0,00001 p.p.) e maior que qualquer ruído de IEEE-754.
+    final curvaDeJuros = inputs.riskFreeCurve;
+    if (curvaDeJuros != null) {
+      final ref = curvaDeJuros.referenceDate;
+      final fw = curvaDeJuros.annualForwards(inputs.projectionYears);
       local.add(
-        'Vantagem competitiva residual: retorno do ciclo de '
-        '${_pct(retornoCiclo!)} contra custo de capital de equilíbrio de '
-        '${_pct(rInfFinal)}, com excedente decaindo '
-        '${_pct(1 - moatVeredito.persistence!)} ao ano — persistência medida '
-        'na própria série do ativo, sobre ${moatVeredito.persistencePoints} '
-        'pares. Em ${inputs.projectionYears} anos sobram '
-        '${_pct(moatVeredito.retainedFraction!)} do excedente, e o retorno '
-        'terminal fica em ${_pct(moatVerificado)} em vez do estado '
-        'estacionário. O valor terminal volta a depender do crescimento '
-        'perpétuo.',
+        'A taxa livre de risco segue a curva dos títulos prefixados do Tesouro '
+        'de ${ref.day.toString().padLeft(2, '0')}/'
+        '${ref.month.toString().padLeft(2, '0')}/${ref.year}: '
+        '${_pct(fw.first)} a.a. no primeiro ano, ${_pct(fw.last)} a.a. no ano '
+        '${inputs.projectionYears} e ${_pct(inputs.terminalRiskFreeRate)} a.a. '
+        'na perpetuidade. É a taxa que o mercado de títulos atribui a cada '
+        'prazo, e não uma previsão do motor.',
+      );
+    } else if ((desconto - descontoTerminal).abs() > 1e-7) {
+      local.add(
+        'O desconto parte de ${_pct(desconto)} a.a. no primeiro ano e converge '
+        'linearmente para ${_pct(descontoTerminal)} a.a. no ano '
+        '${inputs.projectionYears}, que é a taxa da perpetuidade. A taxa livre '
+        'de risco vai de ${_pct(inputs.capm.riskFreeRate)} para '
+        '${_pct(inputs.terminalRiskFreeRate)}: sem curva de juros observada, '
+        'descontar perpetuidade pelo CDI de um dia casaria durações '
+        'incompatíveis.',
       );
     }
 
-    // O divisor é a contagem de unidades que forma a cotação — ver
-    // [ValuationCascade.quotedShares]. Com ela, o potencial é `E ÷ VM − 1` e
-    // nenhuma contagem de ação sobra na comparação com o preço de tela.
-    final shares = divisor.count;
-
-    // --- A rota do capital próprio (decisão 43) ----------------------------
-    //
-    // Com o caminho de taxas resolvido, o capital próprio vem do **fluxo do
-    // acionista derivado do da firma** — `FCFE = FCFF − juros(1−τ) + ΔDívida`
-    // — e não da subtração `EV − D`.
-    //
-    // **Não é uma segunda opinião**: sob o caminho resolvido as duas rotas
-    // coincidem dentro de 1e-6, e isso está travado por teste. O que muda é a
-    // **condição numérica**: a ponte é a diferença de dois números grandes e
-    // quase iguais quando o capital próprio é fino, e o erro relativo chega ao
-    // preço por papel amplificado por `1/participação` — 138 vezes na RENT3.
-    // A rota derivada não faz essa subtração.
-    //
-    // É por isso que a pós-condição dos 20% e a mescla da decisão 38 **não se
-    // aplicam** aqui: elas existiam para escolher entre dois estimadores que
-    // discordavam, e sob esta rota há um só.
-    final taxas = taxasResolvidas;
-    final rotaDerivada = taxas != null;
-    // **Sem dívida bruta não há custo de dívida a medir, e o que sobra é
-    // rendimento de caixa** (decisão 58). O recuo era a própria taxa de
-    // desconto — o WACC —, e com dívida líquida **negativa** ela multiplica um
-    // peso negativo: o motor creditava ao caixa o rendimento do negócio. A
-    // taxa livre de risco é o que caixa rende.
-    //
-    // Medido em 11/09/2026: 18 dos avaliados chegam aqui, e em 16 deles a via
-    // é a do acionista, que não usa este número. Os dois que usam são ALOS3,
-    // com R$ 2,43 bi de caixa líquido, e BRAP4, com R$ 18 mi.
-    final kdParaFcfe = latest.costOfDebt ?? inputs.capm.riskFreeRate;
-
-    // --- A estrutura de capital recusada (decisão 45) ----------------------
-    //
-    // O solucionador tem duas maneiras de não entregar caminho, e elas não
-    // significam a mesma coisa:
-    //
-    // - **não convergir** é falha de método, e recuar para a interpolação de
-    //   dois pontos é resposta legítima;
-    // - **recusar** é a conta dizendo que a estrutura não fecha — o capital
-    //   próprio some quando o custo dele é reprecificado pela alavancagem que
-    //   ele mesmo tem, ou a taxa de equilíbrio não supera o crescimento
-    //   perpétuo e o valor terminal diverge.
-    //
-    // Medido em 10/09/2026: seis dos noventa e seis com as duas vias
-    // avaliáveis caem aqui, e **os seis são exatamente os que ainda eram
-    // mesclados e migrados**. Em todos a recusa vem na segunda ou terceira
-    // iteração — quer dizer, depois de a realavancagem corrigir a taxa, e não
-    // por o ponto fixo ter passeado. AGRO3, MYPK3 e PRIO3 ficam com capital
-    // próprio não positivo **no ano zero**; as três KLBN têm WACC de
-    // equilíbrio abaixo do crescimento perpétuo.
-    //
-    // Recuar para a interpolação nesse caso **lava a recusa em preço**: a
-    // interpolação não enxerga o problema porque desconta a uma taxa que a
-    // própria conta rejeitou, e o número que ela produz ia então ser mesclado
-    // com o da via do acionista. A via da firma não tem valor aqui; a do
-    // acionista é o que sobra, e a migração é declarada.
-    if (estruturaRejeitada != null) {
-      final via = lane == ValuationLane.firm ? 'da firma' : 'do acionista';
-      final motivo =
-          'A estrutura de capital de ${inputs.ticker.value} não sustenta a via '
-          '$via: $estruturaRejeitada';
-      if (lane == ValuationLane.firm && allowLaneMigration) {
-        final migrada = _evaluateLane(
-          inputs,
-          published,
-          latest,
-          ValuationLane.shareholder,
-          [
-            // `local` fica de fora de propósito: são notas da via da firma —
-            // curva de WACC, veredito do moat — e não descrevem o resultado
-            // que a via do acionista produz.
-            ...warnings,
-            '$motivo A avaliação migra para o fluxo do acionista, e o número '
-                'da via da firma não entra na conta — descontá-lo pela '
-                'interpolação seria usar a taxa que a própria realavancagem '
-                'rejeitou.',
-          ],
-          scenarioBuilder,
-          samples,
-          seed,
-          divisor,
-          audit,
-          allowLaneMigration: false,
-          refusals: refusals,
-        );
-        if (migrada != null) return migrada;
-      }
-      refusals?.add(
-        lane == ValuationLane.firm
-            ? '$motivo E a via do acionista não avalia este ativo.'
-            : '$motivo E não há outra via: o roteamento já trouxe o ativo '
-                'para cá.',
-      );
-      return null;
-    }
-
-    // A parte dos não controladores no patrimônio consolidado, que o fluxo da
-    // firma carrega e o acionista da controladora não recebe (decisão 49).
-    final minoritarios = latest.minorityInterest ?? 0;
-
-    Result<DcfOutcome> avaliarFirma(DcfAssumptions a) {
-      if (!rotaDerivada) {
-        return DcfCalculator.firm(
-          baseProfit: base,
-          assumptions: a,
-          netDebt: latest.netDebt,
-          sharesOutstanding: shares,
-          minorityInterest: minoritarios,
-        );
-      }
-      return DcfCalculator.equityFromFirm(
-        baseProfit: base,
-        assumptions: a,
-        netDebt: latest.netDebt,
-        sharesOutstanding: shares,
-        costOfDebt: kdParaFcfe,
-        taxRate: ValuationParameters.statutoryTaxRate,
-        equityDiscountRate: taxas.costOfEquity.first,
-        terminalEquityDiscountRate: taxas.terminalCostOfEquity,
-        equityDiscountRatePath: List<double>.from(taxas.costOfEquity),
-        minorityInterest: minoritarios,
-      );
-    }
-
-    Result<double> valuate(DcfAssumptions a) => lane == ValuationLane.firm
-        ? avaliarFirma(a).map((o) => o.fairValuePerShare)
-        : DcfCalculator.shareholder(baseProfit: base, assumptions: a)
-            .map((o) => o.fairValuePerShare);
-
-    final primeiro = lane == ValuationLane.firm
-        ? avaliarFirma(assumptionsFinal)
-        : DcfCalculator.shareholder(
-            baseProfit: base,
-            assumptions: assumptionsFinal,
-          );
-    if (primeiro.isErr) return null;
-
-    final outcome = primeiro.unwrap();
-
-    // --- Pós-condição: a ponte de equity -----------------------------------
-    //
-    // Não pode ser pré-filtro: depende do valor da firma, que só existe depois
-    // do desconto. Medido, a RENT3 tem participação de equity de 54% pelo
-    // mercado e ainda assim saía com preço justo de R$ 0,12, porque o valor da
-    // firma do modelo era metade do de mercado. A migração agora é declarada,
-    // e não silenciosa como no antigo `fairValuePerShare <= 0`.
-    // **A participação que decide a via é medida na taxa estrutural, não na
-    // corrente.** A pós-condição é um degrau entre dois estimadores diferentes,
-    // e medi-la na taxa do dia fazia o degrau andar com o ciclo monetário: o
-    // preço justo deixava de ser monótono na taxa de desconto. Medido na
-    // KLBN11, antes desta correção — baixando a taxa livre de risco de 9,00%
-    // para 8,75%, o valor da firma sobe, a participação cruza os 20%, a
-    // migração deixa de disparar, e o preço justo **cai** de R$ 7,98 para
-    // R$ 5,36. Capital mais barato produzindo empresa menos valiosa contradiz a
-    // definição de fluxo descontado, e com a Selic em queda os 33 ativos que
-    // hoje migram atravessariam essa fronteira.
-    //
-    // A taxa estrutural é a mesma que a decisão 31 já usa para a perpetuidade, e
-    // pela mesma razão: a estrutura de capital de um ativo é fato de longo
-    // prazo, e qual das duas vias o descreve não pode depender de onde a Selic
-    // está hoje. Dentro de cada via o preço justo continua monótono na taxa; o
-    // que esta medida remove é a travessia induzida pelo ciclo.
-    //
-    // **Isto não concilia as duas vias**, que seguem discordando por medirem
-    // crescimento e base em séries de capital diferentes — na KLBN11, 5,0%
-    // contra 10,16% de crescimento e fator de base 0,665 contra 1,000. Essa
-    // divergência é assunto de outra decisão; aqui só se impede que o ciclo
-    // monetário escolha entre elas.
-    final participacaoEstrutural = lane == ValuationLane.firm
-        ? DcfCalculator.firm(
-            baseProfit: base,
-            assumptions: DcfAssumptions(
-              projectionYears: inputs.projectionYears,
-              growthRate: g,
-              perpetualGrowth: perpetuo,
-              discountRate: descontoTerminal,
-              terminalDiscountRate: descontoTerminal,
-              returnOnCapital: retornoDaBase,
-              terminalReturnOnCapital: moat,
-              marginOfSafety: inputs.marginOfSafety,
-              contractYearsAfterHorizon: _anosDeContratoAlemDaProjecao(inputs),
-            ),
-            netDebt: latest.netDebt,
-            sharesOutstanding: shares,
-          ).valueOrNull?.equityShare
-        : null;
-
-    // Sem a medida estrutural — projeção degenerada, valor terminal divergente
-    // na taxa de equilíbrio —, vale a da taxa corrente. Ausência de medida não
-    // é motivo para deixar de aplicar a pós-condição.
-    final participacaoQueDecide = participacaoEstrutural ?? outcome.equityShare;
-
-    // **A pós-condição deixou de ser degrau, pela decisão 38.** Ela escolhia
-    // uma via inteira em `s = 20%`, e as duas discordam além de 1,5x em 55 de
-    // 92 ativos — de modo que o preço justo saltava por múltiplos quando `s`
-    // cruzava o corte. O peso passa a ser contínuo na faixa que o projeto já
-    // declarava frágil, e o degrau some sem que nenhum parâmetro novo entre.
-    final pesoDaFirma =
-        lane == ValuationLane.firm ? _pesoDaFirma(participacaoQueDecide) : 1.0;
-    ValuationResult? outraVia;
-
-    // **A pós-condição só se aplica à ponte**, e a rota derivada não passa por
-    // ela. Sob o caminho resolvido o preço por papel vem de descontar o fluxo
-    // do acionista, sem a subtração `EV − D` — e sem ela não há amplificação
-    // por `1/participação` a conter, nem dois estimadores entre os quais
-    // escolher. Ver a decisão 43.
     if (lane == ValuationLane.firm &&
-        !rotaDerivada &&
-        allowLaneMigration &&
-        pesoDaFirma < 1.0) {
-      _auditEquityBridgeFailure(audit, participacaoQueDecide);
-      final migrada = _evaluateLane(
-        inputs,
-        published,
-        latest,
-        ValuationLane.shareholder,
-        [
-          ...warnings,
-          if (pesoDaFirma <= 0)
-            'O capital próprio responde por apenas '
-                '${_pct(participacaoQueDecide)} do valor da firma: o preço por '
-                'papel seria resíduo de uma subtração entre números próximos. '
-                'A avaliação migra para o fluxo do acionista.',
-        ],
-        scenarioBuilder,
-        samples,
-        seed,
-        divisor,
-        audit,
-        allowLaneMigration: false,
-        refusals: refusals,
+        aliquotaEstrutural != null &&
+        (aliquotaEstrutural - ValuationParameters.statutoryTaxRate).abs() >
+            0.01) {
+      local.add(
+        'O lucro operacional é tributado à alíquota estrutural do ativo, '
+        '${_pct(aliquotaEstrutural)}, e não aos '
+        '${_pct(ValuationParameters.statutoryTaxRate)} estatutários que a '
+        'fonte embute em todo NOPAT publicado. É a mediana dos exercícios, '
+        'não a do último: JCP, incentivo regional e lucro presumido são '
+        'regime no Brasil, e regime é o que se projeta. O escudo fiscal do '
+        'WACC continua na estatutária, que é a alíquota da margem.',
       );
-      if (migrada != null) {
-        // Abaixo do piso vale a via do acionista inteira, que é o
-        // comportamento que a decisão 25 estabeleceu. Na faixa de transição a
-        // outra via fica guardada e entra na combinação ao fim.
-        if (pesoDaFirma <= 0) return migrada;
-        outraVia = migrada;
-      }
-      if (migrada == null && pesoDaFirma > 0) {
-        // A via do acionista não avalia este ativo, e a da firma ainda tem
-        // peso. Segue com a firma sozinha, declarando que a combinação que a
-        // faixa pediria não pôde ser feita.
+    }
+
+    if (inputs.terminalReturnOverride != null) {
+      local.add(
+        'Retorno terminal imposto em '
+        '${_pct(inputs.terminalReturnOverride!)} por varredura externa. '
+        'Este resultado é instrumento de diagnóstico, não avaliação: o '
+        'veredito de vantagem competitiva foi ignorado.',
+      );
+    }
+
+    // A narrativa e a auditoria do *moat* saem **depois** do ponto fixo, porque
+    // o veredito pode ser refeito contra a taxa resolvida. Publicá-los aqui
+    // afirmaria um veredito que a taxa final pode não sustentar.
+
+    // O retorno que converte crescimento em retenção, ano a ano — `b_t = g_t /
+    // ROIC_t` —, precisa ser o retorno **do fluxo-base que se está
+    // descontando**, e não o do ciclo por princípio.
+    //
+    // Como o fluxo-base é `NOPAT_atual × fator` sobre a mesma base de capital,
+    // o retorno implícito nele é `retorno_atual × fator`. A identidade fecha os
+    // três casos de uma vez: normalizado sem saturar, dá exatamente o retorno do
+    // ciclo; normalizado com saturação, dá o retorno que a saturação de fato
+    // impôs; não normalizado, dá o retorno corrente.
+    //
+    // Usar o ciclo quando a base **não** foi normalizada misturava o fluxo de um
+    // ano com o retorno de outro, e sempre na direção de exigir menos
+    // reinvestimento do que a empresa precisa: medido na AZZA3, um retorno de
+    // ciclo de 19,55% sobre um fluxo-base de retorno corrente de 7,82% inflava
+    // o valor da firma em 17%.
+    //
+    // Sem retorno corrente utilizável — série curta, exercício de prejuízo ou
+    // buraco na ponta —, o do ciclo continua sendo a melhor estimativa
+    // disponível e é o que entra. Zerar ali **desligaria** o freio, que é a
+    // direção agressiva: o fluxo cresceria sem nada retido para financiá-lo.
+    final retornoDaBase = (retornoAtual != null && retornoAtual > 0)
+        ? retornoAtual * fatorBase
+        : (retornoCiclo ?? 0.0);
+
+    final assumptions = DcfAssumptions(
+      projectionYears: inputs.projectionYears,
+      growthRate: g,
+      perpetualGrowth: perpetuo,
+      discountRate: desconto,
+      terminalDiscountRate: descontoTerminal,
+      returnOnCapital: retornoDaBase,
+      terminalReturnOnCapital: moat,
+      marginOfSafety: inputs.marginOfSafety,
+      reinvestmentPolicy:
+          inputs.reinvestmentOverride ?? ReinvestmentPolicy.medido,
+      inflation: inputs.inflation,
+      cashTiming: inputs.cashTimingOverride ?? CashTiming.meioDeAno,
+      contractYearsAfterHorizon: _anosDeContratoAlemDaProjecao(inputs),
+    );
+    if (inputs.cashTimingOverride != null) {
+      local.add(
+        'Convenção de caixa imposta em '
+        '"${inputs.cashTimingOverride!.name}" por varredura externa, no lugar '
+        'do meio de ano. Este resultado é instrumento de diagnóstico, não '
+        'avaliação.',
+      );
+    }
+    if (inputs.reinvestmentOverride != null) {
+      local.add(
+        'Freio de reinvestimento imposto em '
+        '"${inputs.reinvestmentOverride!.name}" por varredura externa, no '
+        'lugar do `b = g/ROIC` medido. Este resultado é instrumento de '
+        'diagnóstico, não avaliação.',
+      );
+    }
+
+    return _Premissas(
+      desconto: desconto,
+      descontoTerminal: descontoTerminal,
+      perpetuo: perpetuo,
+      prazoDeterminado: prazoDeterminado,
+      veredito: moatVeredito,
+      moatVerificado: moatVerificado,
+      moat: moat,
+      retornoDaBase: retornoDaBase,
+      assumptions: assumptions,
+    );
+  }
+
+  /// Veredito da vantagem competitiva residual contra a taxa de equilíbrio
+  /// [rInf] (decisões 36, 44 e 50).
+  static MoatVerdict _vereditoDoMoat(
+    ValuationInputs inputs,
+    _Base b,
+    bool prazoDeterminado,
+    double rInf,
+  ) =>
+      GrowthGuards.residualMoat(
+        cycleReturn: b.retornoCiclo,
+        terminalDiscountRate: rInf,
+        externalCapitalRatio: b.phi,
+        periods: b.series.length,
+        excessReturns: [
+          for (final r in b.series.returns)
+            if (r.value.isFinite) (year: r.year, excess: r.value - rInf),
+        ],
+        projectionYears: inputs.projectionYears,
+        finiteTerm: prazoDeterminado,
+      );
+
+  /// **Saída 1 da Porta 2 — a base.**
+  ///
+  /// Monta a série de capital na alíquota estrutural e decide se o retorno do
+  /// exercício mais recente converge ao do ciclo, com a precedência do ciclo em
+  /// commodity, a trava de saúde operacional e a saturação do fator. Devolve
+  /// `null` quando a série é curta demais, e aí a via não se aplica.
+  static _Base? _saida1(_Via via, List<String> local) {
+    final inputs = via.inputs;
+    final published = via.published;
+    final lane = via.lane;
+    final audit = via.audit;
+    // Alíquota estrutural do ativo, no lugar dos 34% que a fonte embute em
+    // todo `NOPAT` publicado. Ela entra **na série e no fluxo-base ao mesmo
+    // tempo**: mudar só o fluxo deixaria o ROIC na convenção antiga, e o freio
+    // `b = g/ROIC` passaria a cobrar reinvestimento de um retorno que não é o
+    // do fluxo que se está descontando — o mesmo defeito que a decisão 31
+    // mediu em 17% na AZZA3.
+    final aliquotaEstrutural = CapitalSeries.structuralTaxRate(
+      published,
+      statutoryRate: ValuationParameters.statutoryTaxRate,
+    );
+    final series = CapitalSeries.build(
+      published,
+      lane,
+      firmTaxRate: aliquotaEstrutural,
+    );
+    if (series.isTooShort) return null;
+
+    final retornoAtual = series.latestReturn;
+    final retornoCiclo =
+        series.cycleReturn(window: ValuationParameters.cycleWindow);
+    // A deriva da tendência é medida na janela do ciclo, e **não** no horizonte
+    // de projeção: um veredito estatístico sobre a série não pode mudar porque
+    // o usuário trocou a projeção de 5 para 10 anos. Ver
+    // [ValuationParameters.trendDriftWindow].
+    final tendencia = GrowthGuards.trend(series);
+    final phi = GrowthGuards.externalCapitalRatio(series);
+    final destoa = GrowthGuards.deviatesFromCycle(series);
+
+    final comparavel =
+        phi == null || phi <= ValuationParameters.maxExternalCapital;
+
+    // **A comparabilidade não trava a normalização.** Φ mede quanto da expansão
+    // da base veio de fora, e é uma grandeza de *tamanho*; o que se normaliza
+    // aqui é o **retorno percentual**, que é intensivo. Que a base tenha mudado
+    // de escala por evento societário não torna o ROIC de um exercício de pico
+    // um patamar perene: a rentabilidade percentual reverte à mediana do ciclo
+    // independentemente do tamanho que a empresa passou a ter.
+    //
+    // Sob a precedência anterior, Φ > 1,0 impedia a normalização e o pico virava
+    // base perene. A guarda passa a **declarar** a base inorgânica em vez de
+    // barrar a correção do nível, e o fator continua sendo aplicado sobre a base
+    // de capital corrente — a da empresa de hoje, já incorporada.
+    //
+    // **Em commodity, a Guarda 3 tem precedência sobre a Guarda 1.** A perna de
+    // alta do ciclo tem exatamente a forma de uma tendência, e o teste a lê como
+    // estrutural: a SUZB3 travou 41,5% de retorno corrente contra 18,4% de ciclo
+    // e saiu a +259,1%. Em setor de commodity o preço reverte à média por
+    // definição do produto, e nenhuma sequência de anos de alta muda isso — ver
+    // [CyclicalSectors].
+    final precedenciaDoCiclo = CyclicalSectors.hasCyclePrecedence(
+      sectorKey: inputs.sectorKey,
+      industry: inputs.industry,
+    );
+    final tendenciaTrava = tendencia?.dominates == true && !precedenciaDoCiclo;
+
+    final normaliza = !tendenciaTrava &&
+        destoa == true &&
+        retornoAtual != null &&
+        retornoCiclo != null &&
+        retornoAtual > 0;
+
+    // **Saúde operacional trava a normalização para cima.** A mesma medida que
+    // barra o *moat*: empresa que perdeu mais da metade do resultado no triênio
+    // mudou de patamar, e puxar a base dela de volta à mediana de oito anos
+    // produz um retorno que ela não vai repetir. A QUAL3 perdeu a vantagem
+    // residual na quarta rodada e continuou a +477,3% justamente por aqui — o
+    // número não vinha da perpetuidade, vinha da base normalizada por 2,1x.
+    //
+    // Só o teto cai; o piso continua valendo. Quem deteriorou e ainda assim teve
+    // um exercício acima do ciclo é normalizado para baixo normalmente, que é a
+    // direção conservadora.
+    final queda = GrowthGuards.recentOperationalDecline(published);
+    final saudeReprovada =
+        queda != null && queda > ValuationParameters.maxOperationalDecline;
+
+    // **Setor cíclico é isento da trava, aqui e só aqui.** Em commodity a queda
+    // de resultado entre pico e vale é oscilação do preço do insumo, e a trava
+    // desfazia no vale exatamente a precedência que a decisão 28 estabeleceu:
+    // VALE3 e GGBR4 acusavam quedas de 87% e iam a −70,3% e −92,7% de potencial.
+    // O que limita a normalização em commodity é a saturação, que vale igual.
+    //
+    // A isenção **não alcança o *moat***: lá a pergunta é sobre o futuro do
+    // retorno excedente, e um vale de ciclo não o sustenta melhor que uma
+    // deterioração estrutural. `moatVeredito` recebe a queda sem filtro.
+    final travaDeSaude = saudeReprovada && !precedenciaDoCiclo;
+    final teto = travaDeSaude ? 1.0 : ValuationParameters.baseFactorCeiling;
+
+    // O fator é saturado em razão, `1/3` a `3`. Sem teto ele explode quando o
+    // exercício corrente tem retorno próximo de zero, e o DCF é homogêneo de
+    // grau 1 no fluxo-base: a MBRF3 recebeu 21,4x e saiu a +406,1%.
+    final fatorBruto = normaliza ? retornoCiclo / retornoAtual : 1.0;
+    final fatorDecidido =
+        normaliza ? fatorBruto.clamp(ValuationParameters.baseFactorFloor, teto) : 1.0;
+    final fatorBase = inputs.baseFactorOverride ?? fatorDecidido;
+    if (inputs.baseFactorOverride != null) {
+      local.add(
+        'Fator de normalização imposto em '
+        '${fatorBase.toStringAsFixed(3)}x por varredura externa, no lugar do '
+        '${fatorDecidido.toStringAsFixed(3)}x apurado. Este resultado é '
+        'instrumento de diagnóstico, não avaliação.',
+      );
+    }
+
+    // Os dois confinamentos são reportados em separado: um é a banda de
+    // política, o outro é a trava de saúde, e atribuir um ao outro faria a
+    // calibragem seguinte olhar para o parâmetro errado.
+    final travadoPelaSaude = normaliza && travaDeSaude && fatorBruto > 1.0;
+    final saturou = normaliza &&
+        (fatorBruto > ValuationParameters.baseFactorCeiling ||
+            fatorBruto < ValuationParameters.baseFactorFloor);
+
+    _auditBaseGuards(audit, retornoAtual, retornoCiclo, tendencia, phi,
+        destoa == true, normaliza, fatorBase, series,
+        precedenciaDoCiclo: precedenciaDoCiclo,
+        rawFactor: fatorBruto,
+        saturated: saturou,
+        operationalDecline: queda,
+        healthCapped: travadoPelaSaude,
+        healthExempt: saudeReprovada && precedenciaDoCiclo);
+
+    if (normaliza) {
+      local.add(
+        'O retorno sobre o capital do exercício mais recente '
+        '(${_pct(retornoAtual)}) destoa da mediana de '
+        '${ValuationParameters.cycleWindow} exercícios (${_pct(retornoCiclo)}); '
+        'a base converge para o ciclo ao longo da projeção, fator de '
+        '${fatorBase.toStringAsFixed(2)}x.',
+      );
+      if (precedenciaDoCiclo && tendencia?.dominates == true) {
         local.add(
-          'O capital próprio responde por ${_pct(participacaoQueDecide)} do '
-          'valor da firma, faixa em que o preço justo combinaria as duas vias '
-          '— mas a via do acionista não avalia este ativo. Vale a da firma '
-          'sozinha, com a fragilidade da ponte que a faixa declara.',
+          'A tendência do retorno é significante e domina a reversão à média, '
+          'mas o ativo é de setor de commodity ou cíclico pesado: ali a perna '
+          'de alta do ciclo tem a forma de uma tendência, e lê-la como patamar '
+          'estrutural é o erro que se quer evitar. A reversão ao ciclo tem '
+          'precedência, e a base foi normalizada.',
         );
       }
-      if (migrada == null && pesoDaFirma <= 0) {
-      // **Migração impossível vira recusa nomeada, não número sem conteúdo.**
-      // A própria pós-condição afirma que, com a dívida líquida consumindo o
-      // valor da firma, o que sobra é resíduo de subtração e não avaliação —
-      // publicar esse resíduo contradiria a afirmação que o motivou. O erro
-      // relativo do valor da firma chega ao preço por papel amplificado por
-      // `1/participação`, e num ativo de 3% de participação isso é trinta
-      // vezes: a AMER3 saía a R$ 0,20 em dez anos e R$ 1,47 em cinco, um fator
-      // de 7,35 vindo só da forma da curva de desconto.
-      //
-      // O efeito colateral é aceito: um ativo deixa de ser avaliado num
-      // horizonte e continua sendo em outro, conforme a pós-condição dispare ou
-      // não. Entre um número sem conteúdo e uma recusa que diz por quê, a
-      // recusa é a saída que a decisão 25 exige.
-      //
-      // A recusa é **nomeada**, que é o que a decisão 25 exige de toda saída.
-      //
-      // A participação **não** é positiva por construção: com a dívida líquida
-      // maior que o valor da firma ela fica negativa, e foi medida em −142,6%
-      // na CSNA3 e −558,3% na MRVE3. A amplificação `1/participação` só tem
-      // sentido no ramo positivo, e nem `Infinity` nem número negativo passam
-      // por `toStringAsFixed`.
-      final share = participacaoQueDecide;
-      final amplificacao = share > 0
-          ? 'com o erro do valor da firma amplificado '
-              '${(1 / share).toStringAsFixed(0)} vezes'
-          : 'e a dívida líquida supera o próprio valor da firma, de modo que '
-              'não sobra capital próprio a repartir';
-      refusals?.add(
-        'O capital próprio responde por apenas ${_pct(share)} do valor da '
-        'firma de ${inputs.ticker.value}, e a via do acionista não se aplica: '
-        'o preço por papel seria resíduo de uma subtração entre números '
-        'próximos, $amplificacao. O ativo não é avaliável por fluxo descontado '
-        'nesta estrutura de capital.',
-      );
-      return null;
+      if (saudeReprovada && precedenciaDoCiclo && fatorBruto > 1.0) {
+        local.add(
+          'O lucro ou o EBITDA recuou ${_pct(queda)} no triênio, acima do '
+          'máximo de ${_pct(ValuationParameters.maxOperationalDecline)}, mas o '
+          'ativo é de setor de commodity: ali a queda entre pico e vale é '
+          'oscilação do preço do insumo, não quebra de modelo de negócio. A '
+          'trava de saúde não se aplica à base, e a convergência ao ciclo opera '
+          'nos dois sentidos. A vantagem competitiva residual segue barrada por '
+          'ela, sem isenção.',
+        );
+      }
+      if (travadoPelaSaude) {
+        local.add(
+          'O lucro ou o EBITDA recuou ${_pct(queda)} no triênio recente, acima '
+          'do máximo de ${_pct(ValuationParameters.maxOperationalDecline)}. A '
+          'base **não foi normalizada para cima**: o fator seria de '
+          '${fatorBruto.toStringAsFixed(2)}x e ficou em 1,00x. Uma empresa que '
+          'perdeu mais da metade do resultado mudou de patamar, e trazer a base '
+          'de volta à mediana de ${ValuationParameters.cycleWindow} exercícios '
+          'atribuiria a ela um retorno que não vai se repetir.',
+        );
+      }
+      if (saturou && !travadoPelaSaude) {
+        local.add(
+          'O fator bruto de normalização seria de '
+          '${fatorBruto.toStringAsFixed(2)}x e foi saturado em '
+          '${fatorBase.toStringAsFixed(2)}x. O limite é de política, não de '
+          'estatística: o preço justo é proporcional ao fluxo-base, e acima de '
+          '${ValuationParameters.baseFactorCeiling.toStringAsFixed(2)}x a '
+          'normalização deixaria de corrigir um exercício para inventar uma '
+          'empresa. O preço justo abaixo é, nesta medida, conservador.',
+        );
+      }
+      if (!comparavel) {
+        local.add(
+          'A base de capital cresceu ${_r(phi, 2)}x além do que o lucro '
+          'retido financiaria, o que indica evento societário ou aquisição. '
+          'A normalização foi aplicada mesmo assim: o retorno percentual é '
+          'grandeza intensiva, e reverte à mediana do ciclo qualquer que tenha '
+          'sido a mudança de tamanho. O que a série não sustenta é comparar '
+          '**níveis absolutos** de lucro entre as pontas da janela.',
+        );
       }
     }
 
-    if (outcome.fairValuePerShare <= 0) return null;
-
-    _auditDcf(
-      audit,
-      outcome: outcome,
-      assumptions: assumptions,
-      baseFlow: base,
-      flowSymbol: lane == ValuationLane.firm ? 'NOPAT' : 'LPA',
-      discountSymbol: lane == ValuationLane.firm ? 'WACC' : 'K_e',
-      perShareAlready: lane == ValuationLane.shareholder,
+    return _Base(
+      aliquota: aliquotaEstrutural,
+      series: series,
+      retornoAtual: retornoAtual,
+      retornoCiclo: retornoCiclo,
+      phi: phi,
+      travaDeSaude: travaDeSaude,
+      fator: fatorBase,
     );
-    if (lane == ValuationLane.firm) {
-      _auditEquityBridge(
-        audit,
-        enterpriseValue: outcome.enterpriseValue,
-        netDebt: latest.netDebt,
-        shares: shares,
-        perShare: outcome.fairValuePerShare,
-      );
+  }
+
+  /// **O fluxo-base da via**: o exercício mais recente vezes o fator do ciclo,
+  /// ou, com o exercício no prejuízo, o retorno do ciclo sobre o capital de
+  /// hoje. Devolve `null` sem base positiva, e aí a via não se aplica.
+  ///
+  /// **A normalização funcionava no pico e desligava no vale** (decisão 53).
+  /// O fator é `ciclo ÷ atual` e exige denominador positivo, de modo que um
+  /// exercício de prejuízo não era corrigido — era recusado. Numa siderúrgica
+  /// o vale é metade do ciclo, e recusar ali descarta a empresa por causa de
+  /// um ano.
+  ///
+  /// A reconstrução escreve a mesma conta de um jeito que sobrevive ao
+  /// denominador: `fluxo-base = retorno do ciclo × capital de hoje`. As três
+  /// condições são as que já existem, e nenhuma é nova:
+  ///
+  /// - **o ciclo tem de ser positivo e medível** — sem isso não há a que
+  ///   voltar;
+  /// - **o prejuízo tem de ser exceção** — ao menos
+  ///   [ValuationParameters.minPositiveFlow] da janela positiva, que é o
+  ///   mesmo corte com que a Porta 3 decide se um fluxo se sustenta. É ele
+  ///   que separa o vale do declínio: a HBSA3 tem mediana de +0,2% com
+  ///   metade da janela no prejuízo, e não volta.
+  ///
+  /// - **a trava de saúde tem de não reprovar** — a mesma que já impede a
+  ///   normalização para cima em quem deteriorou, com a isenção cíclica da
+  ///   decisão 30.
+  ///
+  /// **A trava foi retirada e reposta, por medição.** O argumento para tirá-la
+  /// era de ordenação: ela devolve nulo quando a referência de três anos
+  /// atrás também era prejuízo, de modo que aprova quem já perdia dinheiro lá
+  /// atrás e reprova quem perdeu agora. Sem ela, porém, a RAPT4 entra a
+  /// **+311,7% de potencial** — resultado caído 109% no triênio, e o
+  /// fluxo-base reconstruído sobre um retorno de ciclo de 17,6% que a empresa
+  /// acabou de deixar de ter. O risco que a trava controla é esse, e é
+  /// assimétrico: reconstruir a base erra para cima. A ordenação imperfeita é
+  /// o preço, e ele é menor.
+  static ({double base, bool reconstruida})? _fluxoBase(
+    _Via via,
+    _Base b,
+    List<String> local,
+  ) {
+    final lane = via.lane;
+    final latest = via.latest;
+    final divisor = via.divisor;
+    final series = b.series;
+    final retornoAtual = b.retornoAtual;
+    final retornoCiclo = b.retornoCiclo;
+    final fatorBase = b.fator;
+    double? baseDoCiclo;
+    if (retornoAtual != null &&
+        retornoAtual <= 0 &&
+        retornoCiclo != null &&
+        retornoCiclo > 0 &&
+        !b.travaDeSaude) {
+      final fracao =
+          series.positiveShare(window: ValuationParameters.cycleWindow);
+      final capital = series.latestBase;
+      if (fracao != null &&
+          fracao >= ValuationParameters.minPositiveFlow &&
+          capital != null &&
+          capital > 0) {
+        final total = retornoCiclo * capital;
+        final porUnidade = lane == ValuationLane.firm
+            ? total
+            : (divisor.count > 0 ? total / divisor.count : null);
+        if (porUnidade != null && porUnidade.isFinite && porUnidade > 0) {
+          baseDoCiclo = porUnidade;
+          local.add(
+            'O exercício-base veio no prejuízo — retorno de '
+            '${_pct(retornoAtual)} sobre o capital —, e o fluxo-base foi '
+            'reconstruído do ciclo: ${_pct(retornoCiclo)} de retorno mediano '
+            'sobre o capital de hoje, com ${_pct(fracao)} da janela positiva. '
+            '**O preço justo não repousa em nenhum exercício recente '
+            'observado**: repousa na afirmação de que a empresa volta ao que '
+            'já foi.',
+          );
+        }
+      }
     }
 
-    final resultado = _withScenarios(
-      inputs: inputs,
-      model: lane == ValuationLane.firm
-          ? ValuationModel.dcfFcff
-          : ValuationModel.dcfEarnings,
-      assumptions: assumptions,
-      baseValue: outcome.fairValuePerShare,
-      valuate: valuate,
-      scenarioBuilder: scenarioBuilder,
-      samples: samples,
-      seed: seed,
-      warnings: local,
-      diagnostics: _diagnose(
-        outcome: outcome,
-        divisor: divisor,
-        baseFactor: fatorBase,
-        growthOrigin: origem,
-        // O veredito, e não o retorno imposto: `moatApplied` alimenta relatório
-        // de cobertura, e uma varredura de diagnóstico não é vantagem
-        // competitiva reconhecida.
-        moatApplied: moatVerificado != null,
-        migrated: !allowLaneMigration,
-        finiteTerm: prazoDeterminado,
-        rebuiltBase: baseDoCiclo != null,
-        // `Rf + β·prêmio` sobre a taxa corrente: o retorno esperado
-        // incondicional do papel, que a camada de carteira ancora.
-        costOfEquity: inputs.capm.costOfEquity,
-        terminalDiscountRate:
-            taxasResolvidas?.terminalWacc ?? descontoTerminal,
-        terminalRetainedSpread: moatVeredito.retainedFraction ?? 0.0,
-        growthRate: assumptions.growthRate,
-        returnOnCapital: assumptions.returnOnCapital,
-        terminalReturnOnCapital: assumptions.terminalReturnOnCapital,
-        firmTaxRate:
-            lane == ValuationLane.firm ? aliquotaEstrutural : null,
-        terminalCostOfEquity: taxasResolvidas?.terminalCostOfEquity,
-        retentionPath: [
-          for (var t = 1; t <= inputs.projectionYears; t++)
-            assumptionsFinal.retentionAt(t),
-        ],
-        growthPath: [
-          for (var t = 1; t <= inputs.projectionYears; t++)
-            assumptionsFinal.growthAt(t),
-        ],
-      ),
-    );
+    final base = baseDoCiclo ??
+        _baseProfitFor(
+          lane,
+          latest,
+          divisor,
+          fatorBase,
+          b.aliquota,
+        );
+    if (base == null || base <= 0) return null;
+    return (base: base, reconstruida: baseDoCiclo != null);
+  }
 
-    if (outraVia == null) return resultado;
-    return _mesclarVias(
-      firma: resultado,
-      acionista: outraVia,
-      peso: pesoDaFirma,
-      participacao: participacaoQueDecide,
-    );
+  /// **Saída 2 da Porta 2 — de onde vem a taxa de crescimento.**
+  ///
+  /// Fundamental quando a dispersão da série a identifica; a inflação quando
+  /// não identifica e a retenção observada a financia; zero no resto, que é o
+  /// valor da capacidade de gerar lucro. Devolve `null` quando a dispersão não
+  /// é medível, e aí a via não se aplica.
+  static ({GrowthOrigin origem, double g})? _saida2(
+    _Via via,
+    _Base b,
+    List<String> local,
+  ) {
+    final inputs = via.inputs;
+    final series = b.series;
+    final retornoCiclo = b.retornoCiclo;
+    final audit = via.audit;
+    final dispersao = GrowthGuards.dispersion(series);
+    if (dispersao == null) return null;
+
+    final retencao = series.medianRetention;
+    final GrowthOrigin origem;
+    final double gDecidido;
+    if (dispersao.isIdentified) {
+      origem = GrowthOrigin.fundamental;
+      gDecidido = dispersao.medianGrowth;
+    } else if (GrowthGuards.anchorIsFundable(
+      inflation: inputs.inflation,
+      cycleReturn: retornoCiclo,
+      observedRetention: retencao,
+    )) {
+      origem = GrowthOrigin.inflationAnchor;
+      gDecidido = inputs.inflation;
+      local.add(
+        'Crescimento fundamental não identificável: ${dispersao.failure}. '
+        'Adotada a inflação de ${_pct(inputs.inflation)}, que a retenção '
+        'observada de ${_pct(retencao ?? 0)} financia.',
+      );
+    } else {
+      origem = GrowthOrigin.earningsPower;
+      gDecidido = 0.0;
+      local.add(
+        'Crescimento não identificável nem financiável pela retenção observada; '
+        'a avaliação é do valor da capacidade de gerar lucro, sem crescimento. '
+        'É estimativa deliberadamente conservadora.',
+      );
+    }
+    final g = inputs.growthOverride ?? gDecidido;
+    if (inputs.growthOverride != null) {
+      local.add(
+        'Crescimento imposto em ${_pct(g)} por varredura externa, no lugar '
+        'dos ${_pct(gDecidido)} que as guardas apuraram. Este resultado é '
+        'instrumento de diagnóstico, não avaliação.',
+      );
+    }
+    _auditGrowthOutcome(
+        audit, dispersao, origem, g, retencao, retornoCiclo, inputs.inflation);
+    return (origem: origem, g: g);
   }
 
   /// Reúne os fatos que qualificam o preço justo.

@@ -49,7 +49,11 @@ RESTRICOES DE ARQUITETURA QUE VOCE DEVE RESPEITAR (nao negocie com elas):
      os proventos da B3 entram no RETORNO TOTAL das coortes de validacao
      ("TotalReturn", "TotalReturnIndex", "tool/backtest_valuation.dart") e no
      BETA ("PrepareValuationInputs" com "dividends", "ResolveBetaPrior"), com o
-     JCP liquido dos 15% retidos. Isso e o registro, e NAO e defeito.
+     JCP liquido dos 15% retidos. A decisao 092 acrescenta a FAIXA
+     CALIBRADA ("CalibratedBand", "assets/validacao/banda_calibrada.json",
+     "tool/cobertura_banda.py"): quantis da razao entre o retorno total
+     realizado nas coortes e o preco justo, apresentados na tela de avaliacao
+     como incerteza medida. Isso e o registro, e NAO e defeito.
      Continua proibido, e deve ser apontado: credito de provento na SIMULACAO
      da carteira (backtest de aportes), provento lido pela CASCATA de avaliacao
      (Gordon, dividendo publicado no fluxo), e "dividend yield" somado ao

@@ -19,6 +19,7 @@ import '../data/network/api_client.dart';
 import '../data/datasources/remote/tesouro_datasource.dart';
 import '../data/repositories/b3_registry_repository.dart';
 import '../data/repositories/cash_dividends_repository.dart';
+import '../data/repositories/calibrated_band_repository.dart';
 import '../data/repositories/concession_term_repository.dart';
 import '../data/repositories/cvm_fundamentals_repository.dart';
 import '../data/repositories/market_repositories.dart';
@@ -221,6 +222,20 @@ final concessionTermRepositoryProvider = Provider<ConcessionTermRepository>(
 final concessionEndProvider = FutureProvider.family<DateTime?, Ticker>(
     (ref, ticker) =>
         ref.watch(concessionTermRepositoryProvider).endFor(ticker));
+
+/// Caminho da faixa calibrada empacotada (item C2).
+const String calibratedBandAsset = 'assets/validacao/banda_calibrada.json';
+
+final calibratedBandRepositoryProvider = Provider<CalibratedBandRepository>(
+  (ref) => CalibratedBandRepository(
+    carregarPacote: () => rootBundle.loadString(calibratedBandAsset),
+  ),
+);
+
+/// Faixas do valor realizado em torno do preço justo, medidas nas coortes
+/// (decisão 92). Vazio sem pacote.
+final calibratedBandsProvider = FutureProvider<List<CalibratedBandTable>>(
+    (ref) => ref.watch(calibratedBandRepositoryProvider).tables());
 
 /// Caminho das cotações recentes do Tesouro empacotadas (item A2.1).
 const String tesouroQuotesAsset = 'assets/tesouro/curva.json';

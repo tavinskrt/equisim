@@ -307,6 +307,10 @@ class TornadoChart extends StatelessWidget {
   /// Valor do cenário central, onde fica a linha de referência vertical.
   final double baseValue;
 
+  /// Largura mínima da barra, em dp, para rótulo e valores ficarem na mesma
+  /// linha dela.
+  static const double minBarWidth = 48;
+
   /// Tema corrente.
   final bool isLight;
 
@@ -352,67 +356,84 @@ class TornadoChart extends StatelessWidget {
     rotuloWidth += FinSpace.sm;
     faixaWidth += FinSpace.xs;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Colunas medidas do conteudo real: a de rotulo pelo maior nome, a de
-        // faixa pelo maior par de valores. Constante em pixel alinhava em 1,0x
-        // e cortava em 2,0x.
-        for (final bar in bars) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: FinSpace.xs),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: rotuloWidth,
-                  child: Text(
-                    bar.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.finType.caption.copyWith(
-                      color: context.fin.textSecondary,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: SizedBox(
-                    height: 18,
-                    child: RepaintBoundary(
-                      child: CustomPaint(
-                        painter: _TornadoBarPainter(
-                          low: bar.low,
-                          high: bar.high,
-                          base: baseValue,
-                          maxSpan: maxSpan,
-                          downColor: context.fin.negative.withValues(
-                            alpha: 0.7,
-                          ),
-                          upColor: context.fin.brand.withValues(alpha: 0.7),
-                          axisColor: context.fin.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: faixaWidth,
-                  child: Text(
-                    '${Fmt.money(bar.low)} — ${Fmt.money(bar.high)}',
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    // `numSm`: sao dois valores monetarios empilhados linha a
-                    // linha, e sem cifra tabular a virgula dança entre elas.
-                    style: context.finType.numSm.copyWith(
-                      color: context.fin.textTertiary,
-                    ),
-                  ),
-                ),
-              ],
+    Widget barra(({String label, double low, double high}) bar) => SizedBox(
+          height: 18,
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: _TornadoBarPainter(
+                low: bar.low,
+                high: bar.high,
+                base: baseValue,
+                maxSpan: maxSpan,
+                downColor: context.fin.negative.withValues(alpha: 0.7),
+                upColor: context.fin.brand.withValues(alpha: 0.7),
+                axisColor: context.fin.textSecondary,
+              ),
             ),
           ),
-        ],
-      ],
+        );
+    Text rotulo(String label) => Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.finType.caption.copyWith(
+            color: context.fin.textSecondary,
+          ),
+        );
+    Text faixa(({String label, double low, double high}) bar) => Text(
+          '${Fmt.money(bar.low)} — ${Fmt.money(bar.high)}',
+          textAlign: TextAlign.right,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          // `numSm`: sao dois valores monetarios empilhados linha a linha, e
+          // sem cifra tabular a virgula dança entre elas.
+          style: context.finType.numSm.copyWith(
+            color: context.fin.textTertiary,
+          ),
+        );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Em 320 dp o rotulo e o par de valores medidos nao deixam espaco para
+        // a barra: a linha estourava 134 px com a tela carregada. Abaixo de
+        // [minBarWidth] sobrando, rotulo e valores sobem para cima da barra.
+        final empilha =
+            rotuloWidth + faixaWidth + minBarWidth > constraints.maxWidth;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Colunas medidas do conteudo real: a de rotulo pelo maior nome, a
+            // de faixa pelo maior par de valores. Constante em pixel alinhava
+            // em 1,0x e cortava em 2,0x.
+            for (final bar in bars)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: FinSpace.xs),
+                child: empilha
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(child: rotulo(bar.label)),
+                              const SizedBox(width: FinSpace.sm),
+                              Flexible(child: faixa(bar)),
+                            ],
+                          ),
+                          const SizedBox(height: FinSpace.xs),
+                          barra(bar),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          SizedBox(width: rotuloWidth, child: rotulo(bar.label)),
+                          Expanded(child: barra(bar)),
+                          SizedBox(width: faixaWidth, child: faixa(bar)),
+                        ],
+                      ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

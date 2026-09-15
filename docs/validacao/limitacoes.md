@@ -86,6 +86,13 @@ pregão no ano seguinte. As outras 634 fora do universo nunca tiveram ação
 negociada. Faltam, para a coorte, o ajuste por evento e a contagem de ações por
 data (item A3.4). Ver [b3_deslistadas.md](b3_deslistadas.md).
 
+**Onde o viés pesa, medido na Fase 2.** As duas medições da primeira rodada — a
+cobertura da faixa de incerteza e o custo das recusas — são dos sobreviventes, e
+o viés cai exatamente sobre elas: os recusados por liquidez renderam 73% em média
+em 36 meses, contra 31% dos avaliados, e a cauda de baixo do realizado, que decide
+a borda inferior da faixa calibrada, é a que as quebras esconderiam. Remedir as
+duas com as deslistadas são os itens C2b e C0b.
+
 ### 1.4. Limite de requisições inobservável
 
 A API **não expõe nenhum cabeçalho de rate limit** — verificado: nenhum
@@ -934,6 +941,43 @@ pequena de taxa, no sentido contrário ao da teoria.
 
 **Para resolver.** Item B10 do [plano](../plano-motor-de-referencia.md): a
 migração precisa de transição, e não de degrau.
+
+### 3.11. A banda de cenários não mede incerteza
+
+**Medido em 14/09/2026, nas coortes da montagem do aplicativo.** A banda `P5–P95`
+do Monte Carlo cobriu **8,2%** do preço mais proventos realizado em 12 meses e
+7,7% em 36, contra 90% nominais; a dos cenários pessimista e otimista, 12,6% e
+13,2%. O realizado fica acima dela em 71% dos casos, e a largura dela é de 1,3
+vez contra 43 a 47 vezes da dispersão realizada em torno do preço justo. Ver
+[cobertura_banda.md](cobertura_banda.md).
+
+**Efeito.** A banda desloca premissas e mede a sensibilidade do preço justo a
+elas; lida como intervalo de probabilidade, afirmava uma precisão que o motor não
+tem.
+
+**Estado.** Resolvido na tela pela [decisão 92](../decisoes/092-a-incerteza-e-a-faixa-calibrada-e-os-cenarios-sao-sensibilidade.md):
+os cenários se declaram sensibilidade, e a incerteza apresentada é a faixa
+calibrada fora da amostra, que cobre a até 5 p.p. da nominal em 12 e 36 meses.
+**O que continua limitação:** a faixa é larga — de 0,62 a 9,2 vezes o preço justo
+na de 80% em 12 meses —, a calibração é marginal e não por ativo, os 36 meses
+têm duas coortes de teste, e a amostra é dos sobreviventes (§1.3, item C2b).
+
+### 3.12. O preço converge ao preço justo um quarto do caminho em 36 meses
+
+**Medido em 14/09/2026.** Na regressão `log(W/P₀) = a + b·log(V/P₀)` sobre as
+coortes, com `W` o preço mais proventos realizado e `V` o preço justo da data,
+`b` é **0,06 em 12 meses e 0,24 em 36**. A [decisão 26](../decisoes/026-horizonte-de-convergencia-de-36-meses.md)
+anualiza o potencial supondo convergência completa em 36 meses — `b = 1/3` e `1`.
+
+**Efeito.** A premissa que dá prazo ao potencial não se sustenta nas coortes, e
+a decisão 26 já a declarava forte. O aplicativo não usa a anualização na
+carteira — o retorno esperado transversal ancora no custo de capital de cada
+ativo, e a tela diz que o potencial é "total, sem prazo" —, mas
+`ExpectedReturn.annualizedFromUpside` continua no núcleo supondo o que o mercado
+não entregou.
+
+**Para resolver.** Entra no B1 do [plano](../plano-motor-de-referencia.md): o
+que o potencial é para servir decide se ele precisa de prazo, e qual.
 
 ## 4. O que foi verificado, e como
 

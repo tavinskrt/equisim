@@ -156,9 +156,11 @@ Moeda é BRL: 2 casas, arredondamento half-up. Quantidade de ação e cota de FI
   [decisão 23](docs/decisoes/023-remocao-de-proventos.md) tirou provento do
   projeto; a [decisão 89](docs/decisoes/089-proventos-voltam-como-dado-conferido.md)
   o reabriu, por decisão do orientador, só como **retorno total nas coortes de
-  validação**, com o histórico da B3. A simulação da carteira, a cascata de
-  avaliação e o retorno esperado continuam de preço. Estender provento a
-  qualquer um deles exige decisão nova.
+  validação** e no beta, com o histórico da B3; a
+  [decisão 92](docs/decisoes/092-a-incerteza-e-a-faixa-calibrada-e-os-cenarios-sao-sensibilidade.md)
+  leva esse retorno total medido à **faixa calibrada** da tela de avaliação. A
+  simulação da carteira, a cascata de avaliação e o retorno esperado continuam
+  de preço. Estender provento a qualquer um deles exige decisão nova.
 - A simulação compra **ação inteira**, e a sobra de cada aporte fica em caixa
   por ativo, acumula e entra no aporte seguinte. Fração de ação em caminho de
   cálculo é defeito.

@@ -176,7 +176,9 @@ data/tesouro/
 # Série histórica de cotações da B3 (COTAHIST, ~80 MB por ano).
 data/b3/
 
-# Gabarito da cascata (D1), gerado por tool/gabarito_cascata.dart. Congela a
-# saída sobre um cache e um Ibovespa que mudam: vale só na sessão em que foi
-# gravado, e por isso não é versionado.
+# Gabarito da cascata (D1), gerado por tool/gabarito_cascata.dart, com a
+# entrada congelada que ele repete: a cópia do cache da validação e o Ibovespa
+# servido. Centenas de megabytes, e só valem contra o código em que foram
+# gravados.
 docs/validacao/gabarito_cascata.json
+data/gabarito/
