@@ -30,26 +30,63 @@ meses, a de 2018 calibra a de 2021. Três formas:
 - ``preço``: quantis de ``log(W/P0)`` — a banda que não usa o motor, como
   referência de largura.
 
-Entrada: ``docs/validacao/backtest_aplicativo.json``, de
-``dart run tool/backtest_valuation.dart --montagem aplicativo``.
+**Com as deslistadas (C2b).** Quando a entrada traz a marca ``deslistada``, a
+recalibragem é refeita cruzada: calibrada nas listadas ou em todas, testada em
+cada grupo, sempre fora da amostra.
+
+**Coortes por data (C1c, C1d e C3).** A coorte é o ano (saídas anuais antigas)
+ou a data ISO (a montagem trimestral na base da data). "O horizonte já tinha
+terminado" passa a ser comparado em data: a coorte de 31/03/2019 calibra a de
+31/03/2020 em doze meses, e não a de 30/09/2019. ``--so-setembro`` refaz a
+medição só com as coortes de 30/09, para comparar com as anuais.
+
+Entrada: ``docs/validacao/backtest_trimestral.json``, de
+``dart run tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas
+--trimestral``.
 
 Uso:
-    python tool/cobertura_banda.py
+    python tool/cobertura_banda.py                       # trimestral, e o pacote
+    python tool/cobertura_banda.py --so-setembro --saida docs/validacao/cobertura_banda_setembro.json --sem-pacote
+    python tool/cobertura_banda.py --entrada docs/validacao/backtest_aplicativo_deslistadas.json
+        --saida docs/validacao/cobertura_banda_deslistadas.json --sem-pacote   # o C2b
 """
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 import math
 import statistics as st
 from collections import defaultdict
 from pathlib import Path
 
-ENTRADA = Path("docs/validacao/backtest_aplicativo.json")
-SAIDA = Path("docs/validacao/cobertura_banda.json")
+# A amostra trimestral na base da data, com as deslistadas da ponte ampliada
+# (itens C1c, C1d e C3, decisão 97), é a que gera o pacote.
+ENTRADA = Path("docs/validacao/backtest_trimestral.json")
+SAIDA = Path("docs/validacao/cobertura_banda_trimestral.json")
 PACOTE = Path("assets/validacao/banda_calibrada.json")
 CONVERGENCIA_MESES = 36
 NOMINAIS = (0.9, 0.8, 0.5)
+
+
+def data_da_coorte(c) -> dt.date:
+    """A data da coorte: o ano das saídas anuais é 30/09, a data ISO é ela."""
+    if isinstance(c, int):
+        return dt.date(c, 9, 30)
+    return dt.date.fromisoformat(str(c))
+
+
+def ano_da_coorte(c) -> int:
+    return data_da_coorte(c).year
+
+
+def terminou(calibra, testa, meses: int) -> bool:
+    """O horizonte da coorte ``calibra`` já tinha terminado na data de ``testa``."""
+    d = data_da_coorte(calibra)
+    total = d.month - 1 + meses
+    ano, mes = d.year + total // 12, total % 12 + 1
+    ultimo = (dt.date(ano + (mes == 12), mes % 12 + 1, 1) - dt.timedelta(days=1)).day
+    return dt.date(ano, mes, min(d.day, ultimo)) <= data_da_coorte(testa)
 
 
 def quantil(v: list[float], p: float) -> float:
@@ -101,10 +138,87 @@ def pct(x):
     return None if x is None else round(100 * x, 1)
 
 
+def cruzada(linhas: list[dict]) -> dict:
+    """C2b — a faixa calibrada com e sem as deslistadas, fora da amostra.
+
+    Calibra com as listadas — a faixa que o aplicativo mostrava — ou com todas,
+    e testa em cada grupo. A pergunta do C2b é a primeira coluna: a faixa dos
+    sobreviventes cobre o mundo que inclui quem quebrou?
+    """
+    out: dict = {}
+    for h in (12, 36):
+        k = f"ret{h}tot"
+        base = [l for l in linhas
+                if l.get("upside") is not None and l.get("justo") and l["justo"] > 0
+                and l.get(k) is not None]
+
+        def residuo(l):
+            return math.log(l["preco"] * (1 + l[k]) / l["justo"])
+
+        grupos = {
+            "listadas": [l for l in base if not l.get("deslistada")],
+            "deslistadas": [l for l in base if l.get("deslistada")],
+            "todas": base,
+        }
+        H: dict = {"n": {g: len(v) for g, v in grupos.items()}}
+        print(f"\n===== C2b, {h} meses — " + ", ".join(f"{g} {len(v)}" for g, v in grupos.items()) + " =====")
+        for g, v in grupos.items():
+            if len(v) < 10:
+                continue
+            r = [residuo(l) for l in v]
+            H.setdefault("realizadoSobreJusto", {})[g] = {
+                "p5": round(math.exp(quantil(r, 0.05)), 3),
+                "mediana": round(math.exp(quantil(r, 0.5)), 3),
+                "p95": round(math.exp(quantil(r, 0.95)), 3),
+            }
+            print(f"  {g}: realizado ÷ justo P5 {math.exp(quantil(r, .05)):.3f}, "
+                  f"mediana {math.exp(quantil(r, .5)):.3f}, P95 {math.exp(quantil(r, .95)):.3f}")
+        for cal_nome in ("listadas", "todas"):
+            cal_por = defaultdict(list)
+            for l in grupos[cal_nome]:
+                cal_por[l["coorte"]].append(residuo(l))
+            for teste_nome in ("listadas", "deslistadas", "todas"):
+                teste_por = defaultdict(list)
+                for l in grupos[teste_nome]:
+                    teste_por[l["coorte"]].append(residuo(l))
+                cob = {nom: [0, 0] for nom in NOMINAIS}
+                for c in sorted(teste_por):
+                    cal = [x for cc, v in cal_por.items() if terminou(cc, c, h) for x in v]
+                    if len(cal) < 30:
+                        continue
+                    for nom in NOMINAIS:
+                        lo, hi = quantil(cal, (1 - nom) / 2), quantil(cal, 1 - (1 - nom) / 2)
+                        cob[nom][0] += sum(1 for x in teste_por[c] if lo <= x <= hi)
+                        cob[nom][1] += len(teste_por[c])
+                chave = f"calibrada em {cal_nome}, testada em {teste_nome}"
+                H.setdefault("foraDaAmostra", {})[chave] = {
+                    "nTeste": cob[0.9][1],
+                    "cobertura": {f"{nom:.0%}": pct(x / n) for nom, (x, n) in cob.items() if n},
+                }
+                if cob[0.9][1]:
+                    print(f"  {chave}: n={cob[0.9][1]}, "
+                          + ", ".join(f"{nom:.0%} → {x / n:.1%}" for nom, (x, n) in cob.items() if n))
+        out[str(h)] = H
+    return out
+
+
 def main() -> None:
-    linhas = json.loads(ENTRADA.read_text(encoding="utf-8"))
-    saida: dict = {"entrada": ENTRADA.as_posix(), "convergenciaMeses": CONVERGENCIA_MESES, "horizontes": {}}
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--entrada", type=Path, default=ENTRADA)
+    ap.add_argument("--saida", type=Path, default=SAIDA)
+    ap.add_argument("--pacote", type=Path, default=PACOTE)
+    ap.add_argument("--sem-pacote", action="store_true")
+    ap.add_argument("--so-setembro", action="store_true")
+    args = ap.parse_args()
+    entrada, saida_arq, pacote = args.entrada, args.saida, args.pacote
+    linhas = json.loads(entrada.read_text(encoding="utf-8"))
+    if args.so_setembro:
+        linhas = [l for l in linhas if data_da_coorte(l["coorte"]).month == 9]
+    saida: dict = {"entrada": entrada.as_posix(), "convergenciaMeses": CONVERGENCIA_MESES, "horizontes": {}}
     faixas: list[dict] = []
+    if any("deslistada" in l for l in linhas):
+        saida["c2b"] = cruzada(linhas)
 
     for h in (12, 36):
         k = f"ret{h}tot"
@@ -115,7 +229,7 @@ def main() -> None:
         ]
         coortes = sorted({l["coorte"] for l in amostra})
         H: dict = {"n": len(amostra), "coortes": coortes}
-        print(f"\n===== {h} meses — {len(amostra)} observações, coortes {coortes[0]} a {coortes[-1]} =====")
+        print(f"\n===== {h} meses — {len(amostra)} observações com Monte Carlo, coortes {coortes[0]} a {coortes[-1]} =====")
 
         def W(l, ret=k):
             return l["preco"] * (1 + l[ret])
@@ -206,7 +320,6 @@ def main() -> None:
         # Toda avaliação com preço justo entra, e não só as que têm cenários:
         # a combinação das duas vias (decisão 38) tira a banda de cenários,
         # mas o preço justo continua sendo o que a tela mostra.
-        anos = h // 12
         recal = {}
         todos = [l for l in linhas
                  if l.get("upside") is not None and l.get("justo") and l["justo"] > 0
@@ -223,7 +336,7 @@ def main() -> None:
             cob_tercil = [[0, 0], [0, 0], [0, 0]]
             larguras = []
             for c in coortes_recal:
-                cal = [(uu, rr) for cc, g in por.items() if cc + anos <= c for uu, rr in g]
+                cal = [(uu, rr) for cc, g in por.items() if terminou(cc, c, h) for uu, rr in g]
                 if len(cal) < 30:
                     continue
                 if forma == "justo":
@@ -276,17 +389,20 @@ def main() -> None:
                 "fatorInferior": round(math.exp(lo), 4),
                 "fatorSuperior": round(math.exp(hi), 4),
                 "observacoes": len(todas),
-                "primeiraCoorte": coortes_recal[0],
-                "ultimaCoorte": coortes_recal[-1],
+                "primeiraCoorte": ano_da_coorte(coortes_recal[0]),
+                "ultimaCoorte": ano_da_coorte(coortes_recal[-1]),
                 "coberturaForaDaAmostra": None if fora is None else round(fora / 100, 3),
                 "observacoesForaDaAmostra": recal["justo"]["nTeste"],
             })
 
-    SAIDA.write_text(json.dumps(saida, ensure_ascii=False, indent=1), encoding="utf-8")
-    PACOTE.parent.mkdir(parents=True, exist_ok=True)
-    PACOTE.write_text(json.dumps({"versao": 1, "fonte": ENTRADA.as_posix(), "faixas": faixas},
+    saida_arq.write_text(json.dumps(saida, ensure_ascii=False, indent=1), encoding="utf-8")
+    if args.sem_pacote:
+        print(f"gravado {saida_arq}")
+        return
+    pacote.parent.mkdir(parents=True, exist_ok=True)
+    pacote.write_text(json.dumps({"versao": 1, "fonte": entrada.as_posix(), "faixas": faixas},
                                  ensure_ascii=False), encoding="utf-8")
-    print(f"gravado {SAIDA} e {PACOTE}")
+    print(f"gravado {saida_arq} e {pacote}")
 
 
 if __name__ == "__main__":

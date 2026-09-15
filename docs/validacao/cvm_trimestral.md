@@ -204,11 +204,14 @@ execução, onde isso não entra.
 
 ## 4. O que fica em aberto
 
-- **O ITR de 2025 na fonte.** Até a CVM republicá-lo, a série ancorada é
-  idêntica à anual. O baixador passou a precisar avisar ano ausente em vez de
-  pular em silêncio.
-- **C1c decide o padrão.** A série ancorada só deve virar padrão se a coorte
-  trimestral mostrar que ela ordena o retorno melhor que a anual.
+- **O ITR de 2025 na fonte** — republicado pela CVM em 14/09/2026, baixado e
+  reingerido em 15/09/2026. A série ancorada deixou de recuar em 2025.
+- **C1c decidiu, em 15/09/2026: fica fora do padrão.** Nas coortes trimestrais
+  com as deslistadas, a ancorada ordena mais que a anual — IC de 0,124 contra
+  0,088 em 36 meses —, e a diferença não passa no critério das janelas
+  sobrepostas (`t` corrigido de 0,70 contra o crítico de 2,70). Ver a
+  [decisão 98](../decisoes/098-a-serie-ancorada-ordena-mais-sem-provar-e-fica-fora-do-padrao.md)
+  e [habilidade_trimestral.md](habilidade_trimestral.md) §4.
 - **As séries que recuaram em 2024** não foram investigadas uma a uma.
 - **A base de patrimônio do ponto de junho é a de dezembro** (decisão 78). Ler
   o patrimônio da CVM na data do ponto é o A1.11.

@@ -169,6 +169,32 @@ void main() {
       expect(adapter.callCount['/teste'], 1);
     });
 
+    test('rajada acima do teto de concorrência, toda com 429, não trava',
+        () async {
+      // A lente `dados` apontou quatro vezes um deadlock: o `RetryInterceptor`
+      // reemite pelo mesmo cliente, e a reemissão passa de novo pelo
+      // `ThrottleInterceptor`. Não trava porque o `onError` dos interceptores
+      // corre na ordem de inserção, e o limitador libera a vaga ANTES de o
+      // repetidor reemitir. Oito requisições contra um teto de quatro, todas
+      // bloqueadas uma vez: se a vaga não voltasse, as quatro últimas
+      // esperariam para sempre e o `timeout` reprovaria.
+      final caminhos = [for (var i = 0; i < 8; i++) '/rajada$i'];
+      final adapter = FixtureAdapter(
+        statusSequence: {for (final c in caminhos) c: [429, 200]},
+        bodies: {for (final c in caminhos) c: '{"results":[{"ok":true}]}'},
+      );
+      final cliente = clienteCom(adapter);
+
+      final resultados = await Future.wait([
+        for (final c in caminhos) cliente.getJson('https://brapi.dev/api$c'),
+      ]).timeout(const Duration(seconds: 60));
+
+      expect(resultados.every((r) => r.isOk), isTrue);
+      for (final c in caminhos) {
+        expect(adapter.callCount[c], 2, reason: '$c: uma repetição');
+      }
+    });
+
     test('falha de transporte é repetida como o 429', () async {
       // Sem status, mas transitória: é a outra metade de `_isRetryable`.
       final adapter = FixtureAdapter(

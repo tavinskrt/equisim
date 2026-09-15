@@ -440,66 +440,90 @@ class _ScenarioCard extends ConsumerWidget {
     required this.isLight,
   });
 
+  /// Largura por unidade de escala de texto abaixo da qual o alternador sai do
+  /// lado do título: em 320 dp sob 2,0x ele estourava 51 px.
+  static const double larguraDoCabecalho = 300;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return GlassCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    // Empilhado, o rótulo cede e quebra linha: em 320 dp sob 2,0x nem a linha
+    // própria cabia o texto ao lado do `Switch`. Ao lado do título ele não pode
+    // ser flexível — ali a largura que o `Row` recebe não é limitada.
+    Widget alternador({required bool empilhado}) {
+      final rotulo = Text(
+        'Monte Carlo',
+        textAlign: TextAlign.right,
+        style: context.finType.caption.copyWith(
+          color: context.fin.textSecondary,
+        ),
+      );
+      return Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SectionHeader(
-            title: 'Cenários',
-            // Sensibilidade, e não probabilidade: a banda de cenários cobriu 8%
-            // do que aconteceu nas coortes, contra 90% nominais (decisão 92).
-            subtitle: settings.monteCarlo
-                ? 'Sensibilidade: ${settings.samples} sorteios de premissas'
-                : 'Sensibilidade: três conjuntos fixos de premissas',
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+          empilhado ? Flexible(child: rotulo) : rotulo,
+          // Mesmo motivo do alternador de IR na tela de análise: o
+          // `Switch` pinta o respingo de tinta no `Material` mais
+          // próximo, e o `GlassCard` interpõe um fundo próprio entre os
+          // dois. Sem este `Material` transparente o toque não devolve
+          // retorno visual e o framework acusa em tempo de execução.
+          Material(
+            type: MaterialType.transparency,
+            child: Switch(
+              value: settings.monteCarlo,
+              activeThumbColor: context.fin.brand,
+              onChanged:
+                  ref.read(valuationSettingsProvider.notifier).setMonteCarlo,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return GlassCard(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final escala = MediaQuery.textScalerOf(context).scale(1);
+          final empilha = constraints.maxWidth < larguraDoCabecalho * escala;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SectionHeader(
+                title: 'Cenários',
+                // Sensibilidade, e não probabilidade: a banda de cenários
+                // cobriu 8% do que aconteceu nas coortes, contra 90% nominais
+                // (decisão 92).
+                subtitle: settings.monteCarlo
+                    ? 'Sensibilidade: ${settings.samples} sorteios de premissas'
+                    : 'Sensibilidade: três conjuntos fixos de premissas',
+                trailing: empilha ? null : alternador(empilhado: false),
+              ),
+              if (empilha)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: alternador(empilhado: true),
+                ),
+              const Gap.md(),
+              if (result.distribution != null)
+                _DistributionView(
+                  isLight: isLight,
+                  distribution: result.distribution!,
+                  marketPrice: result.marketPrice.reais,
+                )
+              else if (result.discreteScenarios != null)
+                _DiscreteView(
+                  isLight: isLight,
+                  scenarios: result.discreteScenarios!,
+                )
+              else
                 Text(
-                  'Monte Carlo',
+                  'Apenas o cenário base pôde ser calculado.',
                   style: context.finType.caption.copyWith(
                     color: context.fin.textSecondary,
                   ),
                 ),
-                // Mesmo motivo do alternador de IR na tela de análise: o
-                // `Switch` pinta o respingo de tinta no `Material` mais
-                // próximo, e o `GlassCard` interpõe um fundo próprio entre os
-                // dois. Sem este `Material` transparente o toque não devolve
-                // retorno visual e o framework acusa em tempo de execução.
-                Material(
-                  type: MaterialType.transparency,
-                  child: Switch(
-                    value: settings.monteCarlo,
-                    activeThumbColor: context.fin.brand,
-                    onChanged: ref
-                        .read(valuationSettingsProvider.notifier)
-                        .setMonteCarlo,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Gap.md(),
-          if (result.distribution != null)
-            _DistributionView(
-              isLight: isLight,
-              distribution: result.distribution!,
-              marketPrice: result.marketPrice.reais,
-            )
-          else if (result.discreteScenarios != null)
-            _DiscreteView(
-              isLight: isLight,
-              scenarios: result.discreteScenarios!,
-            )
-          else
-            Text(
-              'Apenas o cenário base pôde ser calculado.',
-              style: context.finType.caption.copyWith(
-                color: context.fin.textSecondary,
-              ),
-            ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -518,6 +542,13 @@ class _CalibratedBandCard extends ConsumerWidget {
 
   /// Frequência apresentada: oito em cada dez.
   static const double nominal = 0.8;
+
+  /// Distância da nominal até onde a faixa se diz calibrada — o critério do R2.
+  ///
+  /// Na montagem das coortes na base da data (decisão 97) a faixa de 80% cobriu
+  /// 74,9% em 12 meses e 73,0% em 36, fora da amostra: o cartão passa a dizer a
+  /// cobertura medida em vez de afirmar oito em cada dez.
+  static const double folgaDoCriterio = 0.05;
 
   /// Largura abaixo da qual cada horizonte ganha linha própria, em dp.
   static const double larguraMinimaPorColuna = 220;
@@ -539,6 +570,20 @@ class _CalibratedBandCard extends ConsumerWidget {
         if (f.tabela.outOfSampleCoverage case final c?)
           '${Fmt.percent(c, decimals: 1)} em ${f.tabela.months} meses',
     ];
+    final calibrada = faixas.every((f) => switch (f.tabela.outOfSampleCoverage) {
+          final c? => (c - nominal).abs() <= folgaDoCriterio,
+          null => false,
+        });
+    final leitura = calibrada
+        ? 'Em 8 de cada 10 avaliações passadas, o preço mais os proventos '
+            'terminaram nesta faixa em torno do preço justo'
+            '${coberturas.isEmpty ? '' : ' — ${coberturas.join(' e ')}, '
+                'medidos fora da amostra'}.'
+        : 'Faixa central de 80% das avaliações passadas em torno do preço '
+            'justo. Medida fora da amostra, ela conteve o preço mais os '
+            'proventos em ${coberturas.isEmpty ? 'uma fração não medida' : coberturas.join(' e ')}'
+            ' dos casos — a mais de 5 pontos dos 80% que a nomeiam, e por isso '
+            'não está calibrada.';
     return Padding(
       padding: const EdgeInsets.only(bottom: FinSpace.md),
       child: GlassCard(
@@ -585,11 +630,8 @@ class _CalibratedBandCard extends ConsumerWidget {
             ),
             const Gap.sm(),
             Text(
-              'Em 8 de cada 10 avaliações passadas, o preço mais os proventos '
-              'terminaram nesta faixa em torno do preço justo'
-              '${coberturas.isEmpty ? '' : ' — ${coberturas.join(' e ')}, '
-                  'medidos fora da amostra'}. A largura é o tamanho do erro do '
-              'preço justo contra o que aconteceu: não é previsão.',
+              '$leitura A largura é o tamanho do erro do preço justo contra o '
+              'que aconteceu: não é previsão.',
               style: context.finType.caption.copyWith(
                 color: context.fin.textSecondary,
               ),

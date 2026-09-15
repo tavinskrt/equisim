@@ -101,7 +101,13 @@ class OutorgasPorData {
   /// O prazo conhecido em [data], ou `null`.
   ConcessionTerm? naData(String ticker, DateTime data) {
     final cnpj = _ponte[ticker];
-    final meus = cnpj == null ? null : _docs[cnpj];
+    return cnpj == null ? null : naDataPorCnpj(cnpj, data);
+  }
+
+  /// O prazo da companhia [cnpj] conhecido em [data], ou `null` — para as
+  /// deslistadas, que não estão na ponte do universo de hoje.
+  ConcessionTerm? naDataPorCnpj(String cnpj, DateTime data) {
+    final meus = _docs[cnpj];
     if (meus == null) return null;
     final dia = DateTime.utc(data.year, data.month, data.day);
     ({DateTime receb, DateTime ref, int versao, List<String> duracoes})? melhor;

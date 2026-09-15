@@ -1,0 +1,1665 @@
+{
+ "geradoPor": "tool/b3_ponte.py",
+ "motivos": {
+  "ultimoDfpAntesDaJanela": "o último DFP é anterior a 2017: a companhia não chega à primeira coorte, de 2018",
+  "codigoNoCotahistForaDaPonte": "o código tem pregão, e a companhia ficou fora por outro motivo — a conferir",
+  "codigoSemPregaoAVista": "o código declarado não tem pregão à vista de lote padrão de 2010 em diante",
+  "codigoDeclaradoInvalido": "a FCA declara algo que não é ticker nem raiz de emissor com pregão",
+  "semCodigoENomeSemCandidato": "sem código na FCA e nenhum emissor do COTAHIST com o nome e os anos"
+ },
+ "companhias": [
+  {
+   "cnpj": "37.702.340/0001-74",
+   "nome": "AUSTRAVIAS S.A.",
+   "anosDfp": [
+    2021,
+    2025
+   ],
+   "codigosDeclarados": [
+    "N/A"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "93.828.986/0001-73",
+   "nome": "CEMEPE INVESTIMENTOS S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "713854"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "07.043.628/0001-13",
+   "nome": "CLARO TELECOM PARTICIPAÇÕES S.A.",
+   "anosDfp": [
+    2013,
+    2025
+   ],
+   "codigosDeclarados": [
+    "NÃO"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "21.254.073/0001-80",
+   "nome": "COMPANHIA ITAUNENSE ENERGIA E PARTICIPAÇÕES",
+   "anosDfp": [
+    2014,
+    2025
+   ],
+   "codigosDeclarados": [
+    "0"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "61.190.096/0001-92",
+   "nome": "EUROFARMA LABORATÓRIOS S.A.",
+   "anosDfp": [
+    2020,
+    2025
+   ],
+   "codigosDeclarados": [
+    "EUFA"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "08.159.965/0001-33",
+   "nome": "IGUA SANEAMENTO S.A.",
+   "anosDfp": [
+    2012,
+    2025
+   ],
+   "codigosDeclarados": [
+    "023175"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "00.644.907/0001-93",
+   "nome": "INVESTCO S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "00"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "02.357.251/0001-53",
+   "nome": "LIFEMED INDUSTRIAL DE EQUIP. E ART. MEDICOS E HOSP. S.A",
+   "anosDfp": [
+    2018,
+    2025
+   ],
+   "codigosDeclarados": [
+    "LMED"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "00.743.065/0001-27",
+   "nome": "LITEL PARTICIPACOES S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "007424",
+    "LTEL3B"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "16.234.171/0001-15",
+   "nome": "METANOR SA METANOL DO NE",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "NÃO"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "13.444.994/0001-87",
+   "nome": "MLOG S.A.",
+   "anosDfp": [
+    2011,
+    2025
+   ],
+   "codigosDeclarados": [
+    "000000"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "04.912.242/0001-02",
+   "nome": "PORTUENSE FERRAGENS S/A",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "1212"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "02.291.077/0001-93",
+   "nome": "PRODUTORES ENERGET.DE MANSO S.A.- PROMAN",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "PRMN3B"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "52.475.549/0001-36",
+   "nome": "R/HOLDINGS S.A.",
+   "anosDfp": [
+    2023,
+    2025
+   ],
+   "codigosDeclarados": [
+    "0000"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "52.810.883/0001-07",
+   "nome": "REVEE MCO S.A.",
+   "anosDfp": [
+    2023,
+    2025
+   ],
+   "codigosDeclarados": [
+    "0000"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "59.981.829/0001-65",
+   "nome": "RODOBENS SA",
+   "anosDfp": [
+    2020,
+    2025
+   ],
+   "codigosDeclarados": [
+    "RBNS"
+   ],
+   "mercados": [],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "24.962.466/0001-36",
+   "nome": "RUMO MALHA NORTE S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "FRRN3B",
+    "FRRN5B"
+   ],
+   "mercados": [
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "87.043.832/0001-73",
+   "nome": "SEIVA S.A. - FLORESTAS E INDÚSTRIAS",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "SEIVA"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "08.424.178/0001-71",
+   "nome": "TECBLU TECELAGEM BLUMENAU S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "11215"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "30.213.493/0001-09",
+   "nome": "TEGRA INCORPORADORA S.A.",
+   "anosDfp": [
+    2020,
+    2025
+   ],
+   "codigosDeclarados": [
+    "TEGA"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "92.660.570/0001-26",
+   "nome": "TREVISA INVESTIMENTOS S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "8192"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "23.041.875/0001-37",
+   "nome": "ALMACENES ÉXITO S.A.",
+   "anosDfp": [
+    2021,
+    2024
+   ],
+   "codigosDeclarados": [
+    "-"
+   ],
+   "mercados": [],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "09.116.278/0001-01",
+   "nome": "CONPEL CIA NORDESTINA PAPEL - EM RECUPERAÇÃO JUDICIAL",
+   "anosDfp": [
+    2010,
+    2024
+   ],
+   "codigosDeclarados": [
+    "468-5"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "85.041.333/0001-11",
+   "nome": "PORTO PONTA DO FELIX S/A",
+   "anosDfp": [
+    2010,
+    2024
+   ],
+   "codigosDeclarados": [
+    "0000",
+    "00000"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "00.545.378/0001-70",
+   "nome": "SERRA AZUL WATER PARK SA",
+   "anosDfp": [
+    2010,
+    2023
+   ],
+   "codigosDeclarados": [
+    "00000"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "10.851.805/0001-00",
+   "nome": "FLEX GESTÃO DE RELACIONAMENTOS S.A.-EM RECUPERAÇÃO JUDICIAL",
+   "anosDfp": [
+    2016,
+    2022
+   ],
+   "codigosDeclarados": [
+    "FLEX"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "92.934.215/0001-06",
+   "nome": "BANRISUL SOLUÇÕES EM PAGAMENTOS S.A. - INSTITUIÇÃO DE PAGAME",
+   "anosDfp": [
+    2017,
+    2021
+   ],
+   "codigosDeclarados": [
+    "000000"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "02.318.346/0001-68",
+   "nome": "OPPORTUNITY ENERGIA E PARTICIPACOES S.A. - EM LIQUIDAÇÃO",
+   "anosDfp": [
+    2010,
+    2020
+   ],
+   "codigosDeclarados": [
+    "OPHE3B"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "91.495.499/0001-00",
+   "nome": "STARA S.A. - INDÚSTRIA DE IMPLEMENTOS AGRÍCOLAS",
+   "anosDfp": [
+    2016,
+    2020
+   ],
+   "codigosDeclarados": [
+    "24201A"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "14.962.356/0001-10",
+   "nome": "FRIGOL FOODS PARTICIPAÇÕES S.A.",
+   "anosDfp": [
+    2011,
+    2019
+   ],
+   "codigosDeclarados": [
+    "22853"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "02.604.860/0001-60",
+   "nome": "INNCORP S.A.",
+   "anosDfp": [
+    2010,
+    2019
+   ],
+   "codigosDeclarados": [
+    "SLCTB3"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "05.495.546/0001-84",
+   "nome": "LITELA PARTICIPAÇÕES S.A. - EM LIQUIDAÇÃO",
+   "anosDfp": [
+    2018,
+    2019
+   ],
+   "codigosDeclarados": [
+    "LTLA"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "00.514.998/0001-42",
+   "nome": "ELETRON S.A.",
+   "anosDfp": [
+    2010,
+    2018
+   ],
+   "codigosDeclarados": [
+    "ETRO3B"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "02.465.783/0001-04",
+   "nome": "FUTURETEL S.A. - EM LIQUIDAÇÃO",
+   "anosDfp": [
+    2010,
+    2018
+   ],
+   "codigosDeclarados": [
+    "FTRT3B"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "02.604.997/0001-14",
+   "nome": "NEWTEL PARTICIPACOES S.A.",
+   "anosDfp": [
+    2010,
+    2018
+   ],
+   "codigosDeclarados": [
+    "NEWT3B"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "15.151.269/0001-46",
+   "nome": "ÓLEOS DE PALMA S.A. AGROINDUSTRIAL",
+   "anosDfp": [
+    2014,
+    2018
+   ],
+   "codigosDeclarados": [
+    "0001"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "02.117.801/0001-67",
+   "nome": "BONAIRE PARTICIPACOES S.A. - EM LIQUIDAÇÃO",
+   "anosDfp": [
+    2010,
+    2017
+   ],
+   "codigosDeclarados": [
+    "BNPA3B"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "11.423.623/0001-93",
+   "nome": "DUFRY A.G.",
+   "anosDfp": [
+    2010,
+    2017
+   ],
+   "codigosDeclarados": [
+    "8011-0"
+   ],
+   "mercados": [],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "02.363.917/0001-86",
+   "nome": "RET PARTICIPACOES S.A.",
+   "anosDfp": [
+    2010,
+    2017
+   ],
+   "codigosDeclarados": [
+    "OPRE3B"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "02.476.710/0001-18",
+   "nome": "TELINVEST S.A.",
+   "anosDfp": [
+    2010,
+    2017
+   ],
+   "codigosDeclarados": [
+    "TLVT3B"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoDeclaradoInvalido"
+  },
+  {
+   "cnpj": "06.981.381/0001-13",
+   "nome": "CTC - CENTRO DE TECNOLOGIA CANAVIEIRA S.A.",
+   "anosDfp": [
+    2016,
+    2026
+   ],
+   "codigosDeclarados": [
+    "CTCA3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "01.851.771/0001-55",
+   "nome": "524 PARTICIPACOES S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "QVQP3",
+    "QVQP3B"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "00.194.724/0001-13",
+   "nome": "AUREN OPERAÇÕES S.A.",
+   "anosDfp": [
+    2020,
+    2025
+   ],
+   "codigosDeclarados": [
+    "AESO3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "01.107.327/0001-20",
+   "nome": "BBM LOGÍSTICA S.A.",
+   "anosDfp": [
+    2017,
+    2025
+   ],
+   "codigosDeclarados": [
+    "BBM",
+    "BBML3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "02.762.124/0001-30",
+   "nome": "BETAPART PARTICIPACOES S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "BETP3",
+    "BETP3B"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "36.542.025/0001-64",
+   "nome": "BRQ SOLUCOES EM INFORMATICA S.A.",
+   "anosDfp": [
+    2014,
+    2025
+   ],
+   "codigosDeclarados": [
+    "BRQB",
+    "BRQB3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "04.030.182/0001-02",
+   "nome": "CABINDA PARTICIPACOES S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "CABI3"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "39.881.421/0001-04",
+   "nome": "COMPANHIA ESTADUAL DE GERAÇÃO DE ENERGIA ELÉTRICA - CEEE-G",
+   "anosDfp": [
+    2021,
+    2025
+   ],
+   "codigosDeclarados": [
+    "CGEE3",
+    "CGEE4"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "19.526.748/0001-50",
+   "nome": "COMPANHIA INDUSTRIAL CATAGUASES",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "CATA3"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "00.938.574/0001-05",
+   "nome": "CONC RIO-TERESOPOLIS S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "CRTE3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "02.796.775/0001-40",
+   "nome": "GAMA PARTICIPACOES S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "OPGM3",
+    "OPGM3B"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "17.765.891/0001-70",
+   "nome": "GRUPO SALTA EDUCAÇÃO S.A.",
+   "anosDfp": [
+    2024,
+    2025
+   ],
+   "codigosDeclarados": [
+    "SALT3",
+    "SALT4"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "40.159.947/0001-64",
+   "nome": "HMOBI PARTICIPAÇÕES S.A.",
+   "anosDfp": [
+    2020,
+    2025
+   ],
+   "codigosDeclarados": [
+    "HMOB3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "09.611.768/0001-76",
+   "nome": "INC EMPREENDIMENTOS IMOBILIÁRIOS S.A.",
+   "anosDfp": [
+    2016,
+    2025
+   ],
+   "codigosDeclarados": [
+    "INNC3",
+    "INNT3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "03.758.318/0001-24",
+   "nome": "INVESTIMENTOS E PARTICIP. EM INFRA S.A. - INVEPAR",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "IVPR3",
+    "IVPR4"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "09.146.451/0001-06",
+   "nome": "KALLAS INCORPORAÇÕES E CONSTRUÇÕES S.A.",
+   "anosDfp": [
+    2020,
+    2025
+   ],
+   "codigosDeclarados": [
+    "KLAS3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "08.795.211/0001-70",
+   "nome": "MAESTRO LOCADORA DE VEICULOS S.A.",
+   "anosDfp": [
+    2014,
+    2025
+   ],
+   "codigosDeclarados": [
+    "MSRO3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "59.789.545/0001-71",
+   "nome": "POLPAR S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "PPAR3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "02.992.449/0001-09",
+   "nome": "PROMPT PARTICIPACOES S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "PRPT3",
+    "PRPT3B"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "08.574.411/0001-00",
+   "nome": "PRÁTICA PRODUTOS S.A.",
+   "anosDfp": [
+    2017,
+    2025
+   ],
+   "codigosDeclarados": [
+    "PTCA11",
+    "PTCA3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "35.791.391/0001-94",
+   "nome": "QUALITY SOFTWARE S.A.",
+   "anosDfp": [
+    2012,
+    2025
+   ],
+   "codigosDeclarados": [
+    "QUSW3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "38.199.406/0001-18",
+   "nome": "RIO ALTO ENERGIAS RENOVÁVEIS S.A.",
+   "anosDfp": [
+    2020,
+    2025
+   ],
+   "codigosDeclarados": [
+    "RIOS3"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "02.062.747/0001-08",
+   "nome": "SUDESTE S.A.",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "OPSE3",
+    "OPSE3B"
+   ],
+   "mercados": [
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "01.957.772/0001-89",
+   "nome": "SUL 116 PARTICIPAÇÕES S.A. - EM LIQUIDAÇÃO",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [
+    "OPTS3",
+    "OPTS3B"
+   ],
+   "mercados": [
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "11.284.204/0001-18",
+   "nome": "YOU INC INCORPORADORA E PARTICIPAÇÕES S.A",
+   "anosDfp": [
+    2014,
+    2025
+   ],
+   "codigosDeclarados": [
+    "YOUC3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "18.483.666/0001-03",
+   "nome": "HUMBERG AGRIBRASIL COMÉRCIO E EXPORTAÇÃO DE GRÃOS S.A.",
+   "anosDfp": [
+    2020,
+    2024
+   ],
+   "codigosDeclarados": [
+    "GRAO3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "29.950.060/0001-57",
+   "nome": "NORTEC QUÍMICA S.A.",
+   "anosDfp": [
+    2011,
+    2024
+   ],
+   "codigosDeclarados": [
+    "NRTQ3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "02.664.042/0001-52",
+   "nome": "TERMINAL GARAGEM MENEZES CORTES S.A.",
+   "anosDfp": [
+    2010,
+    2024
+   ],
+   "codigosDeclarados": [
+    "MNZC3"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "00.272.185/0001-93",
+   "nome": "CIMS S.A.",
+   "anosDfp": [
+    2010,
+    2023
+   ],
+   "codigosDeclarados": [
+    "CMFA3",
+    "CMFA4"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "00.622.416/0001-41",
+   "nome": "STATKRAFT ENERGIAS RENOVAVEIS S.A.",
+   "anosDfp": [
+    2010,
+    2023
+   ],
+   "codigosDeclarados": [
+    "STKF3"
+   ],
+   "mercados": [
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "02.162.616/0001-94",
+   "nome": "UPTICK PARTICIPACOES S.A. - EM LIQUIDAÇÃO",
+   "anosDfp": [
+    2010,
+    2023
+   ],
+   "codigosDeclarados": [
+    "UPKP3",
+    "UPKP3B"
+   ],
+   "mercados": [
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "80.227.184/0001-66",
+   "nome": "METALGRAFICA IGUACU S.A.",
+   "anosDfp": [
+    2010,
+    2022
+   ],
+   "codigosDeclarados": [
+    "MITG03",
+    "MITG04"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "00.354.053/0001-00",
+   "nome": "KOSMOS COMÉRCIO DE VESTUÁRIO S/A - EM RECUPERAÇÃO JUDICIAL",
+   "anosDfp": [
+    2010,
+    2019
+   ],
+   "codigosDeclarados": [
+    "LOAR11"
+   ],
+   "mercados": [
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "02.084.220/0001-76",
+   "nome": "NUMERAL 80 PARTICIPAÇÕES S.A.",
+   "anosDfp": [
+    2010,
+    2019
+   ],
+   "codigosDeclarados": [
+    "STBR11"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "21.728.500/0001-14",
+   "nome": "PACIFIC RDSL PARTICIPAÇÕES S.A.",
+   "anosDfp": [
+    2016,
+    2018
+   ],
+   "codigosDeclarados": [
+    "PACF3"
+   ],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "codigoSemPregaoAVista"
+  },
+  {
+   "cnpj": "02.258.422/0001-97",
+   "nome": "INEPAR EQUIPAMENTOS E MONTAGENS S/A - EM RECUPERACAO JUDICIA",
+   "anosDfp": [
+    2010,
+    2025
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "semCodigoENomeSemCandidato"
+  },
+  {
+   "cnpj": "92.859.974/0001-43",
+   "nome": "ALTUS SISTEMAS DE AUTOMAÇÃO S.A.",
+   "anosDfp": [
+    2012,
+    2016
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "53.790.218/0001-53",
+   "nome": "JPSP INVESTIMENTOS E PARTICIPAÇÕES S/A",
+   "anosDfp": [
+    2010,
+    2016
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "10.747.021/0001-29",
+   "nome": "PRÁTICA PARTICIPAÇÕES S/A",
+   "anosDfp": [
+    2014,
+    2016
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "00.866.577/0001-80",
+   "nome": "SAUIPE SA",
+   "anosDfp": [
+    2010,
+    2016
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "02.363.918/0001-20",
+   "nome": "ZAIN PARTICIPACOES S.A.",
+   "anosDfp": [
+    2010,
+    2016
+   ],
+   "codigosDeclarados": [
+    "ESVUFR"
+   ],
+   "mercados": [
+    "Balcão Organizado"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "10.603.674/0001-34",
+   "nome": "BS&C EMPREENDIMENTOS E PARTICIPAÇÕES S.A.",
+   "anosDfp": [
+    2014,
+    2015
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "13.407.573/0001-86",
+   "nome": "HARPIA ÔMEGA PARTICIPAÇÕES S.A.",
+   "anosDfp": [
+    2011,
+    2015
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "00.924.432/0001-99",
+   "nome": "HOPI HARI SA",
+   "anosDfp": [
+    2010,
+    2015
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "13.324.184/0001-97",
+   "nome": "VIGOR ALIMENTOS S.A.",
+   "anosDfp": [
+    2011,
+    2015
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "07.450.604/0001-89",
+   "nome": "BANCO INDUSTRIAL E COMERCIAL S/A",
+   "anosDfp": [
+    2010,
+    2014
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "15.483.430/0001-89",
+   "nome": "BPMB I PARTICIPAÇÕES S.A.",
+   "anosDfp": [
+    2012,
+    2014
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "84.208.123/0001-02",
+   "nome": "CIA DOCAS DE IMBITUBA",
+   "anosDfp": [
+    2010,
+    2014
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "76.255.926/0001-90",
+   "nome": "CIA. IGUAÇU DE CAFÉ SOLÚVEL",
+   "anosDfp": [
+    2010,
+    2014
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "52.736.840/0001-10",
+   "nome": "CERAMICA CHIARELLI SA",
+   "anosDfp": [
+    2010,
+    2013
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "02.558.124/0001-12",
+   "nome": "EMBRATEL PARTICIPAÇÕES SA",
+   "anosDfp": [
+    2010,
+    2013
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "08.936.792/0001-12",
+   "nome": "INTERNATIONAL MEAL COMPANY HOLDINGS S/A",
+   "anosDfp": [
+    2010,
+    2013
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "15.463.423/0001-15",
+   "nome": "JP PARTICIPAÇÕES S.A.",
+   "anosDfp": [
+    2013,
+    2013
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "02.390.206/0001-09",
+   "nome": "LF TEL SA",
+   "anosDfp": [
+    2010,
+    2013
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "84.683.762/0001-20",
+   "nome": "METALURGICA DUQUE SA",
+   "anosDfp": [
+    2010,
+    2013
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "07.949.970/0001-87",
+   "nome": "CENTENNIAL ASSET PART. MINAS-RIO S/A",
+   "anosDfp": [
+    2010,
+    2012
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Balcão Organizado",
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "02.808.708/0001-07",
+   "nome": "COMPANHIA DE BEBIDAS DAS AMÉRICAS-AMBEV",
+   "anosDfp": [
+    2010,
+    2012
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "82.981.671/0001-45",
+   "nome": "FAB TECIDOS CARLOS RENAUX SA - EM RECUPERACAO JUDICIAL",
+   "anosDfp": [
+    2010,
+    2012
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "00.249.786/0001-85",
+   "nome": "FORPART S.A. - EM LIQUIDAÇÃO",
+   "anosDfp": [
+    2010,
+    2012
+   ],
+   "codigosDeclarados": [
+    "NÃO HÁ"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Balcão Organizado"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "33.858.168/0001-91",
+   "nome": "HOTEIS E TURISMO GUANABARA SA",
+   "anosDfp": [
+    2010,
+    2012
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "00.185.475/0001-08",
+   "nome": "PARCOM PARTICIPACOES S.A. - EM LIQUIDAÇÃO",
+   "anosDfp": [
+    2010,
+    2012
+   ],
+   "codigosDeclarados": [
+    "NÃO HÁ"
+   ],
+   "mercados": [
+    "Balcão Não-Organizado",
+    "Balcão Organizado"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "44.689.123/0001-57",
+   "nome": "USINA COSTA PINTO SA ACUC ALC",
+   "anosDfp": [
+    2011,
+    2012
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "62.136.254/0001-99",
+   "nome": "BANCO CRUZEIRO DO SUL SA",
+   "anosDfp": [
+    2010,
+    2011
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "67.203.208/0001-89",
+   "nome": "CAMARGO CORREA DESENVOLVIMENTO IMOBILIARIO SA",
+   "anosDfp": [
+    2010,
+    2011
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "13.608.583/0001-80",
+   "nome": "QGN PARTICIPAÇÕES SA",
+   "anosDfp": [
+    2010,
+    2011
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "02.558.154/0001-29",
+   "nome": "TELE NORTE CELULAR PARTICIPAÇÕES SA",
+   "anosDfp": [
+    2010,
+    2011
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "09.462.850/0001-86",
+   "nome": "BANJUL PARTICIPAÇÕES SA",
+   "anosDfp": [
+    2010,
+    2010
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "02.225.714/0001-23",
+   "nome": "INEPAR ENERGIA SA",
+   "anosDfp": [
+    2010,
+    2010
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "32.286.411/0001-81",
+   "nome": "SOLA SA INDS ALIMENTICIAS",
+   "anosDfp": [
+    2010,
+    2010
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "02.558.134/0001-58",
+   "nome": "TELE NORTE LESTE PARTICIPAÇÕES SA",
+   "anosDfp": [
+    2010,
+    2010
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "01.109.184/0001-95",
+   "nome": "UNIVERSO ONLINE SA",
+   "anosDfp": [
+    2010,
+    2010
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  },
+  {
+   "cnpj": "00.095.147/0001-02",
+   "nome": "VBC ENERGIA SA",
+   "anosDfp": [
+    2010,
+    2010
+   ],
+   "codigosDeclarados": [],
+   "mercados": [
+    "Bolsa"
+   ],
+   "motivo": "ultimoDfpAntesDaJanela"
+  }
+ ]
+}

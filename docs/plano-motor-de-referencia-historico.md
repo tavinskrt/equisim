@@ -11,6 +11,126 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O que a terceira rodada da Fase 2 encontrou — C1d, C1c e C3 (15/09/2026)
+
+**O preço das coortes estava na base de ações de hoje.** Foi o que o C3 achou ao
+ir ao COTAHIST pelo preço bruto: a MGLU3 de 30/09/2020 entrava a R$ 212,38, e o
+fechamento do dia tinha sido R$ 84,95. A fonte publica o fechamento ajustado por
+todo evento de ações até hoje, e a coorte o multiplicava pela contagem do
+exercício, na base daquele ano. Uma em cada três observações das listadas estava
+fora da base da data, uma em cinco por mais de 1,5 vez, e o volume da fonte, que
+não é ajustado, errava a Porta 0 pelo mesmo fator. **O defeito olhava para a
+frente**: a companhia que desdobrou depois — a que subiu — parecia barata. Nas
+mesmas observações, o IC do book-to-market em 36 meses cai de 0,255 para 0,151
+quando o preço vai à base da data, e o do potencial, de 0,179 para 0,085. Ele
+passou por quatro dias de medições, por duas rodadas de lentes e pela conferência
+do C1b.
+
+**O registro de eventos da B3 não serve para desfazer o ajuste.** Ele repete
+evento: a BBAS3 de 2018 tem fator 2 no preço e produto 8 no registro. O fator
+passou a ser medido, pregão contra pregão.
+
+**A razão de unidade deixou de colapsar, e mostrou que erra.** Contra a
+composição que a FCA declara, acerta 141 de 220 observações de unit; quando a
+ordinária e a preferencial negociam a preços diferentes, cai em 1 ou no inteiro
+errado. É o B16.
+
+**A faixa calibrada fechava o R2 sobre o defeito.** Sem ele, cobre 84,8/74,9% em
+12 meses e 83,6/73,0% em 36, nas faixas de 90 e 80%. Cinco variantes exploratórias
+não fecharam, e a sexta foi fixada por escrito antes de rodar e também não. O
+cartão do aplicativo dizia "8 de cada 10"; passou a dizer a cobertura medida.
+
+**O `t` da decisão 93 era otimista.** Com coortes que compartilham janela, o `t`
+comum mente por construção, e o Newey-West com poucas coortes não tem
+distribuição conhecida. A correção pela estrutura da sobreposição, com crítico
+simulado — que reproduz a t de Student no caso sem sobreposição —, leva a leitura
+anual de 1,24 da rodada anterior a 0,63 contra 3,24, e a ordenação dos soltos do
+corte de liquidez, de 3,08 a 1,56.
+
+**A série ancorada ordena mais e não prova.** A regra de quando ela viraria padrão
+foi escrita antes de o backtest terminar, e o resultado caiu do lado de "não
+provado": diferença de IC de +0,036 em 36 meses, `t` corrigido de 0,70.
+
+**A BRF estava fora das duas amostras.** A ponte excluía companhia da lista de
+hoje, e a BRF estava nela quando a ponte foi montada; a coorte, porém, só tinha
+como listada a companhia que a fonte de preços devolve, e a fonte não a devolvia
+mais. A Petz, a Tupy e a Sequoia estavam no mesmo buraco. **E a CVM republicou o
+ITR de 2025 no dia anterior**, o que deixou a série ancorada medível em 2025.
+
+**O usuário moveu a medição da habilidade para o fim.** O C1 virou a Fase 4, com o
+C2c, a faixa calibrada na montagem corrigida.
+
+**O que as lentes disseram.** Procederam duas. A `dados` achou que o snapshot
+corrente da fonte só limpava os campos de hoje quando vinha inteiro vazio: um
+corrente com a contagem e sem o `marketCap` deixava o da linha anual — o do fim
+do exercício, inflado pela unit — passando por valor de hoje. Conferido no código
+e corrigido campo a campo, com teste que reprova sem a correção. A `metodo` achou
+que o retorno esperado da meta é total pelo CAPM e a simulação é de preço — e o
+comentário de `expectedReturn` dizia o contrário da decisão 62; o comentário foi
+corrigido, e a decisão entrou no B1. **Não procederam**: a `rumo`, que só respondeu
+pelo modelo rebaixado, pediu recalibrar a faixa até passar — busca de
+especificação contra a regra fixada antes, e a faixa já é o C2c — e medir o R3
+agora, contra o pedido do usuário; a `registro` não achou tensão, com o material
+cortado por tamanho. **Fora dos objetivos**: o `touch` do ativo que o lote de
+cotações omite, da `dados`, que é cache de ausência; os quatro da `risco`, de
+teste de caminho de erro em código antigo; e os quatro da `nucleo` — listas
+paralelas em `TotalReturnIndex.build`, o capital investido operacional mantido
+para uma ferramenta, a porcentagem formatada em `Portfolio.weighted` e o `drift`
+em pontos percentuais.
+
+---
+
+## O que a segunda rodada da Fase 2 encontrou — C1a, C1b, C0b e C2b (15/09/2026)
+
+**O portal da B3 responde para boa parte das deslistadas.** O `GetDetail` devolve
+a classificação oficial de 43 das 164 companhias da ponte — 62 dos 231 papéis —,
+e para as outras o setor veio da FCA da CVM, pela classificação da B3 que
+representa cada setor de atividade nas listadas. A tradução não foi escrita à
+mão: foi medida nas próprias listadas, sem a companhia, e acerta as três portas
+em 91% delas.
+
+**A série das deslistadas tinha eventos que ninguém declarou.** Ajustada pelos
+eventos do FRE e pelos inferidos, ela ainda saltava mais de três vezes em 44
+pregões — o grupamento de 2024 da KRSA3 e da NGRD3, a TOYB3 dividida por 270 mil.
+O critério do C1b só excluía evento declarado e não localizado; o salto entrou
+na mesma regra, e 48 das 492 observações saíram.
+
+**O Newey-West subiu o `t` em vez de baixar.** Com cinco coortes, a
+autocovariância dos coeficientes saiu negativa, e a correção que devia alargar o
+erro das janelas sobrepostas o estreitou — o `t` do potencial dado o P/B foi de
+1,24 a 1,81, e o IC incremental sem as deslistadas passou de 2. Ler aquilo como
+habilidade seria aprovar o R3 por ruído na estimativa do próprio erro. Vale o
+menor dos dois até as coortes trimestrais.
+
+**O viés de sobrevivência não estava onde se esperava.** A cauda de baixo da faixa
+calibrada não desceu com as deslistadas, e a ordenação dos recusados por
+liquidez não caiu — o viés pesou no nível do retorno. As deslistadas avaliadas
+terminaram mais acima do preço justo que as listadas; o motivo da saída de cada
+uma não foi levantado.
+
+**O R2 fechou**, primeira das três condições do motor de referência, e fechou
+por declarar uma faixa larga.
+
+**O que as lentes disseram.** Procederam três: a `risco`, sobre a tela de
+avaliação só testada vazia na matriz de estouro — posta carregada, ela achou o
+alternador de Monte Carlo estourando 51 px em 320 dp sob 2,0x, e ele desce para
+a linha de baixo quando não cabe; a `registro`, sobre o `CLAUDE.md` e o auditor
+ainda falarem de cota de FII, que a decisão 0 tirou do projeto — corrigidos; e a
+`metodo`, sobre o custo de capital da perpetuidade manter o beta e a
+alavancagem de hoje, conferido no código e registrado como B15, e sobre o
+retorno esperado somar prêmio por um potencial sem habilidade demonstrada, que
+foi para o B1. **Não procederam**: o deadlock de repetição da `dados`, pela
+quarta vez — agora com um teste que dispara oito requisições com 429 contra o
+teto de quatro vagas e que reprova quando a liberação da vaga sai, e com a
+disciplina da lente dizendo isso —; o texto da tela de metas que a `registro`
+leu da decisão 24, já corrigido na tela; a mescla de vias da `metodo`, que é a
+decisão 38; e, da `rumo`, três achados de decisão antiga já no plano ou
+resolvidos — B13, os bancos sem setor que o A5 resolveu, e a não monotonia do
+B10. Os da `dados` sobre cache de ausência e os quatro da `nucleo` ficam fora
+dos dois objetivos.
+
+---
+
 ## O que a primeira rodada da Fase 2 encontrou — D1, C2 e C0 (14 e 15/09/2026)
 
 **O gabarito do D1 não enxergava o miolo do método.** As duas montagens que ele

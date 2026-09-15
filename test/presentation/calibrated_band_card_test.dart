@@ -58,11 +58,71 @@ void main() {
       expect(find.text('FAIXA CALIBRADA'), findsOneWidget);
       expect(find.text('Em 12 meses'), findsOneWidget);
       expect(find.text('Em 36 meses'), findsOneWidget);
-      // R$ 42,80 × 0,6248 e × 9,2125, na faixa de 80% em 12 meses.
+      // R$ 42,80 vezes os fatores da faixa de 80% em 12 meses, lidos do pacote.
       final t = CalibratedBand.select(tabelas, months: 12, nominal: 0.8)!;
       final b = CalibratedBand.around(Money.fromReais(42.80), t)!;
       expect(find.textContaining(Fmt.money(b.low.reais)), findsOneWidget);
-      expect(find.textContaining('medidos fora da amostra'), findsOneWidget);
+      // A cobertura de cada horizonte aparece como foi medida.
+      final t36 = CalibratedBand.select(tabelas, months: 36, nominal: 0.8)!;
+      expect(
+          find.textContaining(
+              Fmt.percent(t.outOfSampleCoverage!, decimals: 1)),
+          findsOneWidget);
+      expect(
+          find.textContaining(
+              Fmt.percent(t36.outOfSampleCoverage!, decimals: 1)),
+          findsOneWidget);
+    });
+  }
+
+  // A tela só diz "8 de cada 10" quando a faixa de 80% cobriu isso fora da
+  // amostra, a até 5 pontos (decisão 97). O pacote de hoje não cobre, e a tela
+  // tem de dizê-lo; uma tabela sintética calibrada confere o outro caminho.
+  CalibratedBandTable comCobertura(int meses, double cobertura) =>
+      CalibratedBandTable(
+        months: meses,
+        nominal: 0.8,
+        lowerFactor: 0.7,
+        upperFactor: 8,
+        observations: 1000,
+        firstCohort: 2018,
+        lastCohort: 2025,
+        outOfSampleCoverage: cobertura,
+        outOfSampleObservations: 900,
+      );
+
+  for (final (rotulo, coberturas, esperado, ausente) in [
+    (
+      'calibrada',
+      (0.79, 0.82),
+      'Em 8 de cada 10 avaliações passadas',
+      'não está calibrada',
+    ),
+    (
+      'fora do critério',
+      (0.749, 0.73),
+      'não está calibrada',
+      'Em 8 de cada 10',
+    ),
+  ]) {
+    testWidgets('faixa $rotulo: o texto diz a cobertura medida', (tester) async {
+      tester.view.physicalSize = const Size(1024, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(tela([
+        calibratedBandsProvider.overrideWith((ref) async => [
+              comCobertura(12, coberturas.$1),
+              comCobertura(36, coberturas.$2),
+            ]),
+      ]));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining(esperado), findsOneWidget);
+      expect(find.textContaining(ausente), findsNothing);
+      expect(find.textContaining(Fmt.percent(coberturas.$2, decimals: 1)),
+          findsOneWidget);
     });
   }
 

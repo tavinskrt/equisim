@@ -42,6 +42,10 @@ INTERESSAM = (
     # no quadro de intangíveis (item A6).
     "_capital_social_",
     "_ativo_intangivel_",
+    # FCA geral: o setor de atividade que a companhia declara, por ano — o
+    # recuo da classificação da B3 para as deslistadas que o portal não
+    # responde (item C1b).
+    "_geral_",
 )
 
 

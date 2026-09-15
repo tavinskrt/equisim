@@ -1,0 +1,133 @@
+{
+ "fonte": "docs/validacao/backtest_trimestral.json",
+ "observacoes": 10863,
+ "fatorDeBase": {
+  "observacoesDasListadas": 8999,
+  "faixas": {
+   "ate2pct": 6035,
+   "de2a10pct": 261,
+   "de10a50pct": 1068,
+   "acimaDe1vezEMeia": 1635
+  },
+  "pregaoDeCodigoAnterior": 489,
+  "foraDe2pctPorCoorte": {
+   "2018-03-31": "129/232",
+   "2018-06-30": "123/226",
+   "2018-09-30": "125/227",
+   "2018-12-31": "118/226",
+   "2019-03-31": "119/231",
+   "2019-06-30": "116/235",
+   "2019-09-30": "113/238",
+   "2019-12-31": "106/240",
+   "2020-03-31": "103/241",
+   "2020-06-30": "99/250",
+   "2020-09-30": "99/268",
+   "2020-12-31": "103/276",
+   "2021-03-31": "105/290",
+   "2021-06-30": "106/306",
+   "2021-09-30": "107/323",
+   "2021-12-31": "97/317",
+   "2022-03-31": "101/323",
+   "2022-06-30": "97/317",
+   "2022-09-30": "98/325",
+   "2022-12-31": "98/325",
+   "2023-03-31": "97/323",
+   "2023-06-30": "90/328",
+   "2023-09-30": "87/324",
+   "2023-12-31": "86/325",
+   "2024-03-31": "80/320",
+   "2024-06-30": "70/323",
+   "2024-09-30": "67/325",
+   "2024-12-31": "63/320",
+   "2025-03-31": "62/332",
+   "2025-06-30": "52/332",
+   "2025-09-30": "48/331"
+  }
+ },
+ "origemDoValorDeMercado": {
+  "listada:umaEspecie": 5403,
+  "listada:especies": 3408,
+  "listada:contagemDoExercicio": 170,
+  "deslistada:umaEspecie": 1267,
+  "deslistada:especies": 594,
+  "deslistada:contagemVezesPreco": 3,
+  "listada:semPregaoDeEspecie": 18
+ },
+ "razaoDeUnidade": {
+  "unitsComComposicaoDeclarada": 220,
+  "iguaisADeclarada": 141,
+  "distanciaRelativaDaDeclarada": {
+   "mediana": 0.016914207134820614,
+   "p75": 0.12595518112889637,
+   "p90": 0.4505097716360098
+  },
+  "folgaDaDecisao61": 0.05,
+  "porUnit": {
+   "ALUP11": {
+    "declarada": 3,
+    "coortes": 31,
+    "iguais": 22,
+    "brutaMediana": 2.9478678772779725
+   },
+   "ENGI11": {
+    "declarada": 5,
+    "coortes": 31,
+    "iguais": 4,
+    "brutaMediana": 4.369780638833179
+   },
+   "KLBN11": {
+    "declarada": 5,
+    "coortes": 31,
+    "iguais": 24,
+    "brutaMediana": 4.927673338082628
+   },
+   "SANB11": {
+    "declarada": 2,
+    "coortes": 31,
+    "iguais": 31,
+    "brutaMediana": 1.998615427598922
+   },
+   "SAPR11": {
+    "declarada": 5,
+    "coortes": 31,
+    "iguais": 30,
+    "brutaMediana": 4.9835536460752445
+   },
+   "TAEE11": {
+    "declarada": 3,
+    "coortes": 31,
+    "iguais": 30,
+    "brutaMediana": 2.9882151419475704
+   },
+   "BRBI11": {
+    "declarada": 3,
+    "coortes": 18,
+    "iguais": 0,
+    "brutaMediana": 0.9999997341186918
+   },
+   "IGTI11": {
+    "declarada": 3,
+    "coortes": 16,
+    "iguais": 0,
+    "brutaMediana": 4.274455201866759
+   }
+  },
+  "naoUnitsComRazaoMaiorQueUm": 16,
+  "naoUnitsMedidas": 8740
+ },
+ "divisor": {
+  "origem": {
+   "official": 10676,
+   "onlyAvailable": 15,
+   "market": 155
+  },
+  "candidatasDivergem": 869,
+  "medidos": 10846
+ },
+ "unitContraEspecie": {
+  "pares": 75,
+  "distanciaMediana": 0.014776595030395079,
+  "paresNaBaseAntiga": 20,
+  "distanciaMedianaNaBaseAntiga": 0.801342803037703
+ }
+}

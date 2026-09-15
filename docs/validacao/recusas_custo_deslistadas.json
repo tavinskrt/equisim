@@ -1,0 +1,1203 @@
+{
+ "entrada": "docs/validacao/backtest_aplicativo_deslistadas.json",
+ "grupo": "todas",
+ "observacoes": 3077,
+ "motivos": {
+  "avaliado": {
+   "n": 951,
+   "liquidezMediana": 35793814,
+   "acimaDoCorte": 939,
+   "bm12": {
+    "coortes": 7,
+    "icMedio": 0.1356,
+    "tEntreCoortes": 2.9,
+    "tNeweyWest": 2.9,
+    "defasagem": 0,
+    "positivas": 6,
+    "porCoorte": {
+     "2018": 0.1641,
+     "2019": -0.1051,
+     "2020": 0.228,
+     "2021": 0.2802,
+     "2022": 0.0921,
+     "2023": 0.1726,
+     "2024": 0.1168
+    },
+    "n": 828,
+    "spreadQuintil": 0.1614
+   },
+   "bm36": {
+    "coortes": 5,
+    "icMedio": 0.2405,
+    "tEntreCoortes": 7.43,
+    "tNeweyWest": 7.55,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.1236,
+     "2019": 0.2312,
+     "2020": 0.3165,
+     "2021": 0.2746,
+     "2022": 0.2566
+    },
+    "n": 594,
+    "spreadQuintil": 0.6799
+   }
+  },
+  "todos os recusados": {
+   "n": 2126,
+   "liquidezMediana": 130807,
+   "acimaDoCorte": 547,
+   "bm12": {
+    "coortes": 7,
+    "icMedio": 0.2387,
+    "tEntreCoortes": 6.84,
+    "tNeweyWest": 6.84,
+    "defasagem": 0,
+    "positivas": 7,
+    "porCoorte": {
+     "2018": 0.2731,
+     "2019": 0.2703,
+     "2020": 0.1998,
+     "2021": 0.3187,
+     "2022": 0.3265,
+     "2023": 0.2256,
+     "2024": 0.0566
+    },
+    "n": 1529,
+    "spreadQuintil": 0.315
+   },
+   "bm36": {
+    "coortes": 5,
+    "icMedio": 0.4101,
+    "tEntreCoortes": 25.75,
+    "tNeweyWest": 37.84,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.3899,
+     "2019": 0.405,
+     "2020": 0.412,
+     "2021": 0.4685,
+     "2022": 0.3751
+    },
+    "n": 1058,
+    "spreadQuintil": 1.1762
+   }
+  },
+  "Porta 0 — mais de um motivo": {
+   "n": 357,
+   "liquidezMediana": 57200,
+   "acimaDoCorte": 8,
+   "bm12": {
+    "coortes": 4,
+    "icMedio": -0.052,
+    "tEntreCoortes": -0.28,
+    "tNeweyWest": -0.28,
+    "defasagem": 0,
+    "positivas": 2,
+    "porCoorte": {
+     "2021": -0.3833,
+     "2022": 0.05,
+     "2023": 0.4271,
+     "2024": -0.3017
+    },
+    "n": 90,
+    "spreadQuintil": 0.4443
+   },
+   "bm36": {
+    "coortes": 2,
+    "icMedio": 0.2777,
+    "tEntreCoortes": null,
+    "tNeweyWest": null,
+    "defasagem": 1,
+    "positivas": 2,
+    "porCoorte": {
+     "2021": 0.4833,
+     "2022": 0.0721
+    },
+    "n": 44,
+    "spreadQuintil": 0.4378
+   }
+  },
+  "Porta 0 — só histórico curto": {
+   "n": 344,
+   "liquidezMediana": 19765119,
+   "acimaDoCorte": 339,
+   "bm12": {
+    "coortes": 7,
+    "icMedio": 0.1266,
+    "tEntreCoortes": 1.82,
+    "tNeweyWest": 1.82,
+    "defasagem": 0,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.0029,
+     "2019": 0.0683,
+     "2020": -0.0593,
+     "2021": 0.3926,
+     "2022": 0.3179,
+     "2023": 0.2192,
+     "2024": -0.0553
+    },
+    "n": 294,
+    "spreadQuintil": 0.2374
+   },
+   "bm36": {
+    "coortes": 5,
+    "icMedio": 0.3702,
+    "tEntreCoortes": 7.37,
+    "tNeweyWest": 12.9,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.2382,
+     "2019": 0.5113,
+     "2020": 0.2952,
+     "2021": 0.455,
+     "2022": 0.3512
+    },
+    "n": 190,
+    "spreadQuintil": 0.7129
+   }
+  },
+  "Porta 0 — só liquidez": {
+   "n": 1203,
+   "liquidezMediana": 30430,
+   "acimaDoCorte": 0,
+   "bm12": {
+    "coortes": 7,
+    "icMedio": 0.1962,
+    "tEntreCoortes": 7.36,
+    "tNeweyWest": 7.36,
+    "defasagem": 0,
+    "positivas": 7,
+    "porCoorte": {
+     "2018": 0.3238,
+     "2019": 0.1727,
+     "2020": 0.1487,
+     "2021": 0.1912,
+     "2022": 0.2581,
+     "2023": 0.1244,
+     "2024": 0.1546
+    },
+    "n": 1021,
+    "spreadQuintil": 0.2206
+   },
+   "bm36": {
+    "coortes": 5,
+    "icMedio": 0.3263,
+    "tEntreCoortes": 15.46,
+    "tNeweyWest": 38.64,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.3578,
+     "2019": 0.298,
+     "2020": 0.293,
+     "2021": 0.394,
+     "2022": 0.2887
+    },
+    "n": 733,
+    "spreadQuintil": 1.0296
+   }
+  },
+  "Porta 0 — só patrimônio não positivo": {
+   "n": 57,
+   "liquidezMediana": 43076201,
+   "acimaDoCorte": 48,
+   "bm12": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   },
+   "bm36": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   }
+  },
+  "exercícios sem resultado": {
+   "n": 1,
+   "liquidezMediana": 12473612,
+   "acimaDoCorte": 1,
+   "bm12": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   },
+   "bm36": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   }
+  },
+  "nenhum exercício divulgado": {
+   "n": 14,
+   "liquidezMediana": 12688248,
+   "acimaDoCorte": 11,
+   "bm12": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   },
+   "bm36": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   }
+  },
+  "nenhuma via aplicável": {
+   "n": 101,
+   "liquidezMediana": 21564694,
+   "acimaDoCorte": 91,
+   "bm12": {
+    "coortes": 7,
+    "icMedio": 0.3536,
+    "tEntreCoortes": 3.62,
+    "tNeweyWest": 3.62,
+    "defasagem": 0,
+    "positivas": 6,
+    "porCoorte": {
+     "2018": 0.4336,
+     "2019": 0.5385,
+     "2020": 0.2727,
+     "2021": 0.42,
+     "2022": 0.6667,
+     "2023": 0.2867,
+     "2024": -0.1429
+    },
+    "n": 90,
+    "spreadQuintil": 0.9793
+   },
+   "bm36": {
+    "coortes": 5,
+    "icMedio": 0.6055,
+    "tEntreCoortes": 6.62,
+    "tNeweyWest": 10.24,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.3287,
+     "2019": 0.7033,
+     "2020": 0.6993,
+     "2021": 0.4631,
+     "2022": 0.8333
+    },
+    "n": 70,
+    "spreadQuintil": 1.4877
+   }
+  },
+  "ponte frágil sem via do acionista": {
+   "n": 40,
+   "liquidezMediana": 47370306,
+   "acimaDoCorte": 40,
+   "bm12": {
+    "coortes": 1,
+    "icMedio": 0.3333,
+    "tEntreCoortes": null,
+    "tNeweyWest": null,
+    "defasagem": 0,
+    "positivas": 1,
+    "porCoorte": {
+     "2018": 0.3333
+    },
+    "n": 34,
+    "spreadQuintil": null
+   },
+   "bm36": {
+    "coortes": 1,
+    "icMedio": 0.2857,
+    "tEntreCoortes": null,
+    "tNeweyWest": null,
+    "defasagem": 0,
+    "positivas": 1,
+    "porCoorte": {
+     "2018": 0.2857
+    },
+    "n": 21,
+    "spreadQuintil": null
+   }
+  },
+  "sem contagem de papéis": {
+   "n": 9,
+   "liquidezMediana": 39561882,
+   "acimaDoCorte": 9,
+   "bm12": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   },
+   "bm36": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   }
+  }
+ },
+ "tercisDeLiquidez": [
+  {
+   "faixa": [
+    44,
+    23154
+   ],
+   "n": 700,
+   "bm12": {
+    "coortes": 7,
+    "icMedio": 0.1832,
+    "tEntreCoortes": 4.83,
+    "tNeweyWest": 4.83,
+    "defasagem": 0,
+    "positivas": 7,
+    "porCoorte": {
+     "2018": 0.1857,
+     "2019": 0.3643,
+     "2020": 0.1757,
+     "2021": 0.0518,
+     "2022": 0.1648,
+     "2023": 0.2397,
+     "2024": 0.1007
+    },
+    "n": 473,
+    "spreadQuintil": 0.2811
+   },
+   "bm36": {
+    "coortes": 5,
+    "icMedio": 0.2832,
+    "tEntreCoortes": 9.27,
+    "tNeweyWest": 8.35,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.324,
+     "2019": 0.3808,
+     "2020": 0.2611,
+     "2021": 0.2135,
+     "2022": 0.2368
+    },
+    "n": 352,
+    "spreadQuintil": 0.8545
+   }
+  },
+  {
+   "faixa": [
+    23160,
+    990630
+   ],
+   "n": 700,
+   "bm12": {
+    "coortes": 7,
+    "icMedio": 0.1702,
+    "tEntreCoortes": 3.22,
+    "tNeweyWest": 3.22,
+    "defasagem": 0,
+    "positivas": 7,
+    "porCoorte": {
+     "2018": 0.4103,
+     "2019": 0.0016,
+     "2020": 0.1197,
+     "2021": 0.1907,
+     "2022": 0.2854,
+     "2023": 0.0548,
+     "2024": 0.129
+    },
+    "n": 517,
+    "spreadQuintil": 0.1656
+   },
+   "bm36": {
+    "coortes": 5,
+    "icMedio": 0.3588,
+    "tEntreCoortes": 10.23,
+    "tNeweyWest": 23.9,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.4403,
+     "2019": 0.2425,
+     "2020": 0.4159,
+     "2021": 0.3689,
+     "2022": 0.3264
+    },
+    "n": 359,
+    "spreadQuintil": 1.1814
+   }
+  },
+  {
+   "faixa": [
+    993298,
+    1391320637775
+   ],
+   "n": 701,
+   "bm12": {
+    "coortes": 7,
+    "icMedio": 0.2417,
+    "tEntreCoortes": 4.08,
+    "tNeweyWest": 4.08,
+    "defasagem": 0,
+    "positivas": 6,
+    "porCoorte": {
+     "2018": 0.4121,
+     "2019": 0.1701,
+     "2020": 0.1258,
+     "2021": 0.3988,
+     "2022": 0.339,
+     "2023": 0.2599,
+     "2024": -0.0141
+    },
+    "n": 526,
+    "spreadQuintil": 0.3783
+   },
+   "bm36": {
+    "coortes": 5,
+    "icMedio": 0.4529,
+    "tEntreCoortes": 10.94,
+    "tNeweyWest": 23.83,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.4226,
+     "2019": 0.5605,
+     "2020": 0.3302,
+     "2021": 0.5291,
+     "2022": 0.422
+    },
+    "n": 335,
+    "spreadQuintil": 1.0942
+   }
+  }
+ ],
+ "contrafactual": {
+  "avaliados (referência)": {
+   "n": 951,
+   "semNegocioMediano": 0.0,
+   "motor12": {
+    "coortes": 7,
+    "icMedio": 0.0951,
+    "tEntreCoortes": 1.57,
+    "tNeweyWest": 1.57,
+    "defasagem": 0,
+    "positivas": 4,
+    "porCoorte": {
+     "2018": 0.25,
+     "2019": -0.0908,
+     "2020": 0.2829,
+     "2021": 0.1181,
+     "2022": -0.0984,
+     "2023": 0.2062,
+     "2024": -0.0027
+    },
+    "n": 831,
+    "spreadQuintil": 0.146
+   },
+   "bm12": {
+    "coortes": 7,
+    "icMedio": 0.1356,
+    "tEntreCoortes": 2.9,
+    "tNeweyWest": 2.9,
+    "defasagem": 0,
+    "positivas": 6,
+    "porCoorte": {
+     "2018": 0.1641,
+     "2019": -0.1051,
+     "2020": 0.228,
+     "2021": 0.2802,
+     "2022": 0.0921,
+     "2023": 0.1726,
+     "2024": 0.1168
+    },
+    "n": 828,
+    "spreadQuintil": 0.1614
+   },
+   "motorDadoBm12": {
+    "coortes": 7,
+    "icMedio": 0.0362,
+    "tEntreCoortes": 0.65,
+    "tNeweyWest": 0.65,
+    "defasagem": 0,
+    "positivas": 3,
+    "porCoorte": {
+     "2018": 0.1969,
+     "2019": -0.0667,
+     "2020": 0.201,
+     "2021": -0.0109,
+     "2022": -0.1746,
+     "2023": 0.1502,
+     "2024": -0.042
+    },
+    "n": 828
+   },
+   "motor36": {
+    "coortes": 5,
+    "icMedio": 0.1795,
+    "tEntreCoortes": 3.61,
+    "tNeweyWest": 5.32,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.1053,
+     "2019": 0.1493,
+     "2020": 0.3741,
+     "2021": 0.1571,
+     "2022": 0.112
+    },
+    "n": 597,
+    "spreadQuintil": 0.5199
+   },
+   "bm36": {
+    "coortes": 5,
+    "icMedio": 0.2405,
+    "tEntreCoortes": 7.43,
+    "tNeweyWest": 7.55,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.1236,
+     "2019": 0.2312,
+     "2020": 0.3165,
+     "2021": 0.2746,
+     "2022": 0.2566
+    },
+    "n": 594,
+    "spreadQuintil": 0.6799
+   },
+   "motorDadoBm36": {
+    "coortes": 5,
+    "icMedio": 0.0573,
+    "tEntreCoortes": 1.25,
+    "tNeweyWest": 1.88,
+    "defasagem": 2,
+    "positivas": 4,
+    "porCoorte": {
+     "2018": 0.0276,
+     "2019": 0.0126,
+     "2020": 0.2326,
+     "2021": 0.048,
+     "2022": -0.0344
+    },
+    "n": 594
+   },
+   "motor12Pulo": {
+    "coortes": 7,
+    "icMedio": 0.1046,
+    "tEntreCoortes": 1.79,
+    "tNeweyWest": 1.79,
+    "defasagem": 0,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.252,
+     "2019": -0.0936,
+     "2020": 0.3075,
+     "2021": 0.0984,
+     "2022": -0.0386,
+     "2023": 0.206,
+     "2024": 0.0003
+    },
+    "n": 831,
+    "spreadQuintil": 0.1222
+   },
+   "bm12Pulo": {
+    "coortes": 7,
+    "icMedio": 0.1412,
+    "tEntreCoortes": 2.75,
+    "tNeweyWest": 2.75,
+    "defasagem": 0,
+    "positivas": 6,
+    "porCoorte": {
+     "2018": 0.0855,
+     "2019": -0.1167,
+     "2020": 0.2426,
+     "2021": 0.2973,
+     "2022": 0.1936,
+     "2023": 0.1883,
+     "2024": 0.098
+    },
+    "n": 828,
+    "spreadQuintil": 0.1527
+   },
+   "motorDadoBm12Pulo": {
+    "coortes": 7,
+    "icMedio": 0.0431,
+    "tEntreCoortes": 0.72,
+    "tNeweyWest": 0.72,
+    "defasagem": 0,
+    "positivas": 3,
+    "porCoorte": {
+     "2018": 0.2405,
+     "2019": -0.0633,
+     "2020": 0.221,
+     "2021": -0.0459,
+     "2022": -0.1669,
+     "2023": 0.1497,
+     "2024": -0.033
+    },
+    "n": 828
+   },
+   "motor36Pulo": {
+    "coortes": 5,
+    "icMedio": 0.176,
+    "tEntreCoortes": 3.05,
+    "tNeweyWest": 4.32,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.0549,
+     "2019": 0.138,
+     "2020": 0.3963,
+     "2021": 0.1529,
+     "2022": 0.138
+    },
+    "n": 597,
+    "spreadQuintil": 0.4861
+   },
+   "bm36Pulo": {
+    "coortes": 5,
+    "icMedio": 0.2325,
+    "tEntreCoortes": 4.57,
+    "tNeweyWest": 4.46,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.0402,
+     "2019": 0.2229,
+     "2020": 0.3255,
+     "2021": 0.2791,
+     "2022": 0.2945
+    },
+    "n": 594,
+    "spreadQuintil": 0.6726
+   },
+   "motorDadoBm36Pulo": {
+    "coortes": 5,
+    "icMedio": 0.0582,
+    "tEntreCoortes": 1.16,
+    "tNeweyWest": 1.78,
+    "defasagem": 2,
+    "positivas": 4,
+    "porCoorte": {
+     "2018": 0.0121,
+     "2019": 0.0043,
+     "2020": 0.2536,
+     "2021": 0.0455,
+     "2022": -0.0246
+    },
+    "n": 594
+   }
+  },
+  "recusados só por liquidez, soltos": {
+   "n": 1003,
+   "semNegocioMediano": 0.0,
+   "motor12": {
+    "coortes": 7,
+    "icMedio": 0.2121,
+    "tEntreCoortes": 4.62,
+    "tNeweyWest": 4.62,
+    "defasagem": 0,
+    "positivas": 7,
+    "porCoorte": {
+     "2018": 0.3379,
+     "2019": 0.1555,
+     "2020": 0.0563,
+     "2021": 0.3892,
+     "2022": 0.2135,
+     "2023": 0.2348,
+     "2024": 0.0974
+    },
+    "n": 875,
+    "spreadQuintil": 0.1983
+   },
+   "bm12": {
+    "coortes": 7,
+    "icMedio": 0.2278,
+    "tEntreCoortes": 8.03,
+    "tNeweyWest": 8.03,
+    "defasagem": 0,
+    "positivas": 7,
+    "porCoorte": {
+     "2018": 0.36,
+     "2019": 0.2186,
+     "2020": 0.1366,
+     "2021": 0.2637,
+     "2022": 0.2637,
+     "2023": 0.1733,
+     "2024": 0.1787
+    },
+    "n": 871,
+    "spreadQuintil": 0.265
+   },
+   "motorDadoBm12": {
+    "coortes": 7,
+    "icMedio": 0.116,
+    "tEntreCoortes": 2.73,
+    "tNeweyWest": 2.73,
+    "defasagem": 0,
+    "positivas": 6,
+    "porCoorte": {
+     "2018": 0.1682,
+     "2019": 0.032,
+     "2020": -0.0217,
+     "2021": 0.2986,
+     "2022": 0.1454,
+     "2023": 0.1724,
+     "2024": 0.0169
+    },
+    "n": 871
+   },
+   "motor36": {
+    "coortes": 5,
+    "icMedio": 0.3349,
+    "tEntreCoortes": 5.73,
+    "tNeweyWest": 7.18,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.2374,
+     "2019": 0.2689,
+     "2020": 0.4164,
+     "2021": 0.5252,
+     "2022": 0.2267
+    },
+    "n": 627,
+    "spreadQuintil": 0.8762
+   },
+   "bm36": {
+    "coortes": 5,
+    "icMedio": 0.3633,
+    "tEntreCoortes": 13.22,
+    "tNeweyWest": 19.32,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.3659,
+     "2019": 0.3201,
+     "2020": 0.3093,
+     "2021": 0.4646,
+     "2022": 0.3565
+    },
+    "n": 625,
+    "spreadQuintil": 1.1009
+   },
+   "motorDadoBm36": {
+    "coortes": 5,
+    "icMedio": 0.1894,
+    "tEntreCoortes": 3.08,
+    "tNeweyWest": 3.22,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.0329,
+     "2019": 0.109,
+     "2020": 0.3148,
+     "2021": 0.3522,
+     "2022": 0.1383
+    },
+    "n": 625
+   },
+   "motor12Pulo": {
+    "coortes": 7,
+    "icMedio": 0.1914,
+    "tEntreCoortes": 4.28,
+    "tNeweyWest": 4.28,
+    "defasagem": 0,
+    "positivas": 7,
+    "porCoorte": {
+     "2018": 0.3147,
+     "2019": 0.1844,
+     "2020": 0.0087,
+     "2021": 0.3443,
+     "2022": 0.1874,
+     "2023": 0.2154,
+     "2024": 0.0847
+    },
+    "n": 875,
+    "spreadQuintil": 0.1567
+   },
+   "bm12Pulo": {
+    "coortes": 7,
+    "icMedio": 0.2074,
+    "tEntreCoortes": 6.45,
+    "tNeweyWest": 6.45,
+    "defasagem": 0,
+    "positivas": 7,
+    "porCoorte": {
+     "2018": 0.3265,
+     "2019": 0.2081,
+     "2020": 0.0904,
+     "2021": 0.1902,
+     "2022": 0.3122,
+     "2023": 0.1692,
+     "2024": 0.155
+    },
+    "n": 871,
+    "spreadQuintil": 0.2292
+   },
+   "motorDadoBm12Pulo": {
+    "coortes": 7,
+    "icMedio": 0.1053,
+    "tEntreCoortes": 2.63,
+    "tNeweyWest": 2.63,
+    "defasagem": 0,
+    "positivas": 6,
+    "porCoorte": {
+     "2018": 0.1561,
+     "2019": 0.0672,
+     "2020": -0.0413,
+     "2021": 0.2839,
+     "2022": 0.1043,
+     "2023": 0.1498,
+     "2024": 0.0171
+    },
+    "n": 871
+   },
+   "motor36Pulo": {
+    "coortes": 5,
+    "icMedio": 0.3219,
+    "tEntreCoortes": 5.42,
+    "tNeweyWest": 6.65,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.2036,
+     "2019": 0.2859,
+     "2020": 0.3935,
+     "2021": 0.516,
+     "2022": 0.2104
+    },
+    "n": 627,
+    "spreadQuintil": 0.8103
+   },
+   "bm36Pulo": {
+    "coortes": 5,
+    "icMedio": 0.3504,
+    "tEntreCoortes": 12.41,
+    "tNeweyWest": 15.38,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.3342,
+     "2019": 0.3197,
+     "2020": 0.2828,
+     "2021": 0.4501,
+     "2022": 0.3654
+    },
+    "n": 625,
+    "spreadQuintil": 1.0382
+   },
+   "motorDadoBm36Pulo": {
+    "coortes": 5,
+    "icMedio": 0.1824,
+    "tEntreCoortes": 2.91,
+    "tNeweyWest": 3.08,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.0101,
+     "2019": 0.13,
+     "2020": 0.3042,
+     "2021": 0.3477,
+     "2022": 0.1202
+    },
+    "n": 625
+   }
+  }
+ },
+ "bmPulandoUmMes": {
+  "avaliado": {
+   "12": {
+    "coortes": 7,
+    "icMedio": 0.1412,
+    "tEntreCoortes": 2.75,
+    "tNeweyWest": 2.75,
+    "defasagem": 0,
+    "positivas": 6,
+    "porCoorte": {
+     "2018": 0.0855,
+     "2019": -0.1167,
+     "2020": 0.2426,
+     "2021": 0.2973,
+     "2022": 0.1936,
+     "2023": 0.1883,
+     "2024": 0.098
+    },
+    "n": 828,
+    "spreadQuintil": 0.1527
+   },
+   "36": {
+    "coortes": 5,
+    "icMedio": 0.2325,
+    "tEntreCoortes": 4.57,
+    "tNeweyWest": 4.46,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.0402,
+     "2019": 0.2229,
+     "2020": 0.3255,
+     "2021": 0.2791,
+     "2022": 0.2945
+    },
+    "n": 594,
+    "spreadQuintil": 0.6726
+   }
+  },
+  "todos os recusados": {
+   "12": {
+    "coortes": 7,
+    "icMedio": 0.2231,
+    "tEntreCoortes": 6.83,
+    "tNeweyWest": 6.83,
+    "defasagem": 0,
+    "positivas": 7,
+    "porCoorte": {
+     "2018": 0.2571,
+     "2019": 0.2591,
+     "2020": 0.1805,
+     "2021": 0.2504,
+     "2022": 0.3418,
+     "2023": 0.2097,
+     "2024": 0.0633
+    },
+    "n": 1529,
+    "spreadQuintil": 0.2869
+   },
+   "36": {
+    "coortes": 5,
+    "icMedio": 0.396,
+    "tEntreCoortes": 31.45,
+    "tNeweyWest": 40.31,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.3684,
+     "2019": 0.3999,
+     "2020": 0.3943,
+     "2021": 0.4409,
+     "2022": 0.3767
+    },
+    "n": 1058,
+    "spreadQuintil": 1.1125
+   }
+  },
+  "Porta 0 — mais de um motivo": {
+   "12": {
+    "coortes": 4,
+    "icMedio": -0.0812,
+    "tEntreCoortes": -0.47,
+    "tNeweyWest": -0.47,
+    "defasagem": 0,
+    "positivas": 1,
+    "porCoorte": {
+     "2021": -0.4167,
+     "2022": -0.0754,
+     "2023": 0.397,
+     "2024": -0.2296
+    },
+    "n": 90,
+    "spreadQuintil": 0.6679
+   },
+   "36": {
+    "coortes": 2,
+    "icMedio": 0.2817,
+    "tEntreCoortes": null,
+    "tNeweyWest": null,
+    "defasagem": 1,
+    "positivas": 2,
+    "porCoorte": {
+     "2021": 0.4833,
+     "2022": 0.08
+    },
+    "n": 44,
+    "spreadQuintil": 0.3511
+   }
+  },
+  "Porta 0 — só histórico curto": {
+   "12": {
+    "coortes": 7,
+    "icMedio": 0.1315,
+    "tEntreCoortes": 1.69,
+    "tNeweyWest": 1.69,
+    "defasagem": 0,
+    "positivas": 4,
+    "porCoorte": {
+     "2018": -0.0794,
+     "2019": 0.1564,
+     "2020": -0.0089,
+     "2021": 0.3912,
+     "2022": 0.3273,
+     "2023": 0.2597,
+     "2024": -0.1256
+    },
+    "n": 294,
+    "spreadQuintil": 0.2426
+   },
+   "36": {
+    "coortes": 5,
+    "icMedio": 0.3691,
+    "tEntreCoortes": 5.25,
+    "tNeweyWest": 9.07,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.1618,
+     "2019": 0.5835,
+     "2020": 0.3032,
+     "2021": 0.4425,
+     "2022": 0.3546
+    },
+    "n": 190,
+    "spreadQuintil": 0.7032
+   }
+  },
+  "Porta 0 — só liquidez": {
+   "12": {
+    "coortes": 7,
+    "icMedio": 0.1897,
+    "tEntreCoortes": 6.43,
+    "tNeweyWest": 6.43,
+    "defasagem": 0,
+    "positivas": 7,
+    "porCoorte": {
+     "2018": 0.3011,
+     "2019": 0.16,
+     "2020": 0.1262,
+     "2021": 0.1314,
+     "2022": 0.3018,
+     "2023": 0.1359,
+     "2024": 0.1711
+    },
+    "n": 1021,
+    "spreadQuintil": 0.1843
+   },
+   "36": {
+    "coortes": 5,
+    "icMedio": 0.3157,
+    "tEntreCoortes": 17.32,
+    "tNeweyWest": 33.72,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.3299,
+     "2019": 0.2954,
+     "2020": 0.2728,
+     "2021": 0.3788,
+     "2022": 0.3014
+    },
+    "n": 733,
+    "spreadQuintil": 0.9659
+   }
+  },
+  "Porta 0 — só patrimônio não positivo": {
+   "12": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   },
+   "36": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   }
+  },
+  "exercícios sem resultado": {
+   "12": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   },
+   "36": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   }
+  },
+  "nenhum exercício divulgado": {
+   "12": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   },
+   "36": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   }
+  },
+  "nenhuma via aplicável": {
+   "12": {
+    "coortes": 7,
+    "icMedio": 0.3352,
+    "tEntreCoortes": 3.3,
+    "tNeweyWest": 3.3,
+    "defasagem": 0,
+    "positivas": 6,
+    "porCoorte": {
+     "2018": 0.5105,
+     "2019": 0.489,
+     "2020": 0.3357,
+     "2021": 0.3869,
+     "2022": 0.619,
+     "2023": 0.1958,
+     "2024": -0.1905
+    },
+    "n": 90,
+    "spreadQuintil": 0.8823
+   },
+   "36": {
+    "coortes": 5,
+    "icMedio": 0.5745,
+    "tEntreCoortes": 6.63,
+    "tNeweyWest": 11.68,
+    "defasagem": 2,
+    "positivas": 5,
+    "porCoorte": {
+     "2018": 0.3077,
+     "2019": 0.7033,
+     "2020": 0.7203,
+     "2021": 0.4269,
+     "2022": 0.7143
+    },
+    "n": 70,
+    "spreadQuintil": 1.3276
+   }
+  },
+  "ponte frágil sem via do acionista": {
+   "12": {
+    "coortes": 1,
+    "icMedio": 0.0,
+    "tEntreCoortes": null,
+    "tNeweyWest": null,
+    "defasagem": 0,
+    "positivas": 0,
+    "porCoorte": {
+     "2018": 0.0
+    },
+    "n": 34,
+    "spreadQuintil": null
+   },
+   "36": {
+    "coortes": 1,
+    "icMedio": 0.2143,
+    "tEntreCoortes": null,
+    "tNeweyWest": null,
+    "defasagem": 0,
+    "positivas": 1,
+    "porCoorte": {
+     "2018": 0.2143
+    },
+    "n": 21,
+    "spreadQuintil": null
+   }
+  },
+  "sem contagem de papéis": {
+   "12": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   },
+   "36": {
+    "coortes": 0,
+    "n": 0,
+    "spreadQuintil": null
+   }
+  }
+ }
+}

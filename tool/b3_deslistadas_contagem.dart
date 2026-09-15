@@ -24,6 +24,14 @@
 // Grava `data/b3/deslistadas_contagem.json`, para as coortes da Fase 2, e o
 // resumo em `docs/validacao/b3_contagem_por_data.json`.
 //
+// **E as listadas, desde o item C3.** A coorte da listada também precisa da
+// contagem da data — o valor de mercado dela era `contagem do exercício ×
+// preço`, e a razão de unidade colapsava. A mesma série sai para cada companhia
+// do universo em `data/b3/listadas_contagem.json`, com os eventos declarados
+// localizados no preço dos códigos que a FCA declara. Nas duas, a série leva
+// também a divisão entre ordinárias e preferenciais (`ClassesDoCapital`), para
+// o valor de mercado espécie a espécie.
+//
 // Uso:
 //   python tool/cvm_baixar.py --docs FRE --destino data/cvm/fre
 //   dart run tool/b3_deslistadas_contagem.dart
@@ -34,6 +42,8 @@ import 'dart:math' as math;
 import 'package:equisim_core/equisim_core.dart';
 
 import 'b3/proventos.dart';
+import 'coortes/base_da_data.dart';
+import 'cvm/codigos_fca.dart';
 import 'cvm/csv.dart';
 
 /// Contagens que batem: a 2% entre formulários, a 1% contra a B3.
@@ -149,6 +159,21 @@ void main() {
     for (final c in ponte.values)
       ...(c['papeis'] as Map<String, dynamic>).keys,
   };
+  // Os códigos das listadas: os da ponte do universo e os que a FCA declara.
+  final ponteListadas = ((jsonDecode(File('docs/validacao/ponte_cvm.json')
+          .readAsStringSync()) as Map<String, dynamic>)['ponte']
+      as Map<String, dynamic>);
+  final fca = CodigosFca.ler();
+  final codigosListadas = <String, Set<String>>{};
+  for (final e in ponteListadas.entries) {
+    final cnpj = e.value as String;
+    (codigosListadas[cnpj] ??= <String>{})
+      ..add(e.key)
+      ..addAll(fca.porCnpj[cnpj] ?? const <String>{});
+  }
+  for (final e in codigosListadas.entries) {
+    codigosListadas[e.key] = codigosDaCompanhia(e.value);
+  }
 
   // Proventos das deslistadas, pelo nome de pregão (item A4): a consulta da B3
   // responde para companhia que saiu da bolsa. Um nome de pregão pode ser de
@@ -166,15 +191,13 @@ void main() {
       ];
     }
   }
-  final cotahist = lerCotahistBruto(tickers);
+  final cotahist = lerCotahistBruto(
+      {...tickers, for (final c in codigosListadas.values) ...c});
 
   // ---- 1. O método nas listadas: FRE contra a contagem oficial da B3 ----
   final registro = B3RegistryCodec.decodePackage(
       jsonDecode(File('assets/b3/emissores.json').readAsStringSync())
           as Map<String, dynamic>);
-  final ponteListadas = ((jsonDecode(File('docs/validacao/ponte_cvm.json')
-          .readAsStringSync()) as Map<String, dynamic>)['ponte']
-      as Map<String, dynamic>);
   final consulta = DateTime.utc(2026, 9, 14);
   var listadas = 0, listadasBatem = 0;
   final emissoresVistos = <String>[];
@@ -203,6 +226,49 @@ void main() {
       divergentesListadas.add('$raiz ${razao.toStringAsFixed(4)}');
     }
   }
+
+  // ---- 1b. A contagem por data das listadas, para as coortes (item C3) ----
+  final saidaListadas = <String, Object?>{};
+  var listadasComContagem = 0, listadasEventos = 0, listadasEventosLocalizados = 0;
+  for (final entrada in codigosListadas.entries) {
+    final cnpj = entrada.key;
+    final declarados = _declarados(desdobramentos[cnpj] ?? const []);
+    // A data ex de cada evento, no primeiro código que o localiza.
+    final dataEx = <int, DateTime>{};
+    for (final codigo in entrada.value) {
+      final serie = cotahist[codigo];
+      if (serie == null || serie.isEmpty) continue;
+      final brutos = [for (final p in serie) p.raw];
+      for (var k = 0; k < declarados.length; k++) {
+        final ev = CorporateEvents.locate(brutos,
+            factor: declarados[k].fator, approvedOn: declarados[k].aprovacao);
+        if (ev == null) continue;
+        final ja = dataEx[k];
+        if (ja == null || ev.exDate.isBefore(ja)) dataEx[k] = ev.exDate;
+      }
+    }
+    listadasEventos += declarados.length;
+    listadasEventosLocalizados += dataEx.length;
+    final historico = ShareCountHistory.fromFre(
+      capital[cnpj] ?? const [],
+      events: [
+        for (var k = 0; k < declarados.length; k++)
+          (date: dataEx[k] ?? declarados[k].aprovacao, totalAfter: declarados[k].depois),
+      ],
+      receivedOn: recebidos,
+    );
+    if (historico.points.isEmpty) continue;
+    listadasComContagem++;
+    saidaListadas[cnpj] = {
+      'codigos': entrada.value.toList()..sort(),
+      'contagem': [
+        for (final p in historico.points)
+          {'desde': _dia(p.date), 'acoes': p.total, 'fonte': p.source.name},
+      ],
+      'classes': ClassesDoCapital.fromFre(capital[cnpj] ?? const []).toJson(),
+    };
+  }
+  File('data/b3/listadas_contagem.json').writeAsStringSync(jsonEncode(saidaListadas));
 
   // ---- 2 e 3: as deslistadas ---------------------------------------------
   final saida = <String, Object?>{};
@@ -397,17 +463,21 @@ void main() {
           {'desde': _dia(p.date), 'acoes': p.total, 'fonte': p.source.name},
       ],
       'papeis': papeis,
+      'classes': ClassesDoCapital.fromFre(capital[cnpj] ?? const []).toJson(),
       'conferenciaComComposicao': conferencias,
     };
   }
 
   File('data/b3/deslistadas_contagem.json').writeAsStringSync(jsonEncode(saida));
   final resumo = {
-    'medidoEm': '2026-09-14',
+    'medidoEm': '2026-09-15',
     'listadas': {
       'emissores': listadas,
       'batemA1pct': listadasBatem,
       'divergentes': divergentesListadas,
+      'companhiasComContagemPorData': listadasComContagem,
+      'eventosDeclarados': listadasEventos,
+      'eventosLocalizados': listadasEventosLocalizados,
     },
     'deslistadas': {
       'companhias': ponte.length,
@@ -440,6 +510,9 @@ void main() {
   for (final d in divergentesListadas.take(15)) {
     stdout.writeln('    $d');
   }
+  stdout.writeln('  contagem por data para as coortes: $listadasComContagem '
+      'companhias; $listadasEventosLocalizados de $listadasEventos eventos '
+      'declarados localizados no preço');
   stdout.writeln('\n== Deslistadas (${ponte.length} companhias da ponte) ==');
   stdout.writeln('  com contagem por data: $comContagem');
   stdout.writeln('  com evento declarado no FRE: $comEventosFre '
@@ -462,6 +535,6 @@ void main() {
   stdout.writeln('  4. proventos: $companhiasComProventos companhias; '
       '$proventosNoPapel na vida dos papéis; preço com direito contra o '
       'COTAHIST: $proventosBatem de $proventosConferidos a 1%');
-  stdout.writeln('\n  gravado data/b3/deslistadas_contagem.json e '
-      'docs/validacao/b3_contagem_por_data.json');
+  stdout.writeln('\n  gravado data/b3/deslistadas_contagem.json, '
+      'data/b3/listadas_contagem.json e docs/validacao/b3_contagem_por_data.json');
 }

@@ -19,23 +19,32 @@ Três perguntas, por motivo de recusa:
    fechamento em que o retorno começa. O retorno que começa um mês depois da
    coorte (``ret12totPulo``, ``ret36totPulo``) separa a reversão do sinal.
 
-Entrada: ``docs/validacao/backtest_aplicativo.json``, de
-``dart run tool/backtest_valuation.dart --montagem aplicativo``.
+**Coortes por data (C1c).** A coorte é o ano ou a data ISO. O `t` de cada
+IC sai de três jeitos: entre coortes, com Newey-West e corrigido pela estrutura
+da sobreposição contra o crítico simulado dela (decisão 96), com a defasagem
+`h/passo − 1` do passo das coortes da entrada — doze meses nas anuais, três nas
+trimestrais.
+
+Entrada: ``docs/validacao/backtest_trimestral.json``, de
+``dart run tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas
+--trimestral``.
 
 Uso:
-    python tool/recusas_custo.py
+    python tool/recusas_custo.py --grupo todas --saida docs/validacao/recusas_custo_trimestral.json
+    python tool/recusas_custo.py --entrada docs/validacao/backtest_aplicativo.json   # o C0
 """
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 import math
 import statistics as st
 from collections import defaultdict
 from pathlib import Path
 
-ENTRADA = Path("docs/validacao/backtest_aplicativo.json")
-SAIDA = Path("docs/validacao/recusas_custo.json")
+ENTRADA = Path("docs/validacao/backtest_trimestral.json")
+SAIDA = Path("docs/validacao/recusas_custo_trimestral.json")
 CORTE_LIQUIDEZ = 2_000_000.0
 
 
@@ -75,18 +84,129 @@ def residuo(y: list[float], x: list[float]) -> list[float]:
     return [w - my - b * (u - mx) for u, w in zip(rx, ry)]
 
 
-def resumo_ic(por_coorte: dict[int, float]) -> dict:
-    v = [x for x in por_coorte.values() if x is not None]
+def t_newey_west(v: list[float], defasagem: int) -> float | None:
+    """`t` da média com Newey-West e núcleo de Bartlett (item C1a).
+
+    A mesma conta de `Regression.neweyWestMean` em `tool/validation/regression.dart`:
+    com o fator `k/(k−1)`, defasagem zero é o `t` entre coortes de sempre.
+    """
+    k = len(v)
+    if k < 2:
+        return None
+    m = sum(v) / k
+    lags = min(defasagem, k - 1)
+
+    def gama(j):
+        return sum((v[t] - m) * (v[t - j] - m) for t in range(j, k)) / k
+
+    lrv = gama(0) + sum(2 * (1 - j / (lags + 1)) * gama(j) for j in range(1, lags + 1))
+    var = lrv / k * k / (k - 1)
+    return m / math.sqrt(var) if var > 0 else None
+
+
+class SplitMix64:
+    """O gerador de `SplitMix64` em `tool/validation/regression.dart`, bit a bit."""
+
+    M = (1 << 64) - 1
+
+    def __init__(self, seed: int):
+        self.x = seed & self.M
+
+    def next_int(self) -> int:
+        self.x = (self.x + 0x9E3779B97F4A7C15) & self.M
+        z = self.x
+        z = ((z ^ (z >> 30)) * 0xBF58476D1CE4E5B9) & self.M
+        z = ((z ^ (z >> 27)) * 0x94D049BB133111EB) & self.M
+        return z ^ (z >> 31)
+
+    def next_double(self) -> float:
+        return (self.next_int() >> 11) * (1.0 / 9007199254740992)
+
+
+# Nível unilateral de t > 2 sob a normal, e a nula simulada da sobreposição, com
+# a mesma semente e o mesmo número de séries de `Regression.overlapNull`.
+R3_CAUDA = 0.022750131948179195
+_NULAS: dict = {}
+
+
+def t_sobreposicao(v: list[float], sobreposicao: int) -> float | None:
+    """`Regression.overlapAdjustedT`: o t entre coortes vezes √(c/F)."""
+    k = len(v)
+    if k < 2 or sobreposicao < 0:
+        return None
+    m = sum(v) / k
+    sd = math.sqrt(sum((x - m) ** 2 for x in v) / (k - 1))
+    if not sd > 0:
+        return None
+    l = min(sobreposicao, k - 1)
+    soma_c = sum((k - j) * (1 - j / (l + 1)) for j in range(1, l + 1))
+    soma_f = sum((1 - j / k) * (1 - j / (l + 1)) for j in range(1, l + 1))
+    c = 1 - 2 / (k * (k - 1)) * soma_c
+    f = 1 + 2 * soma_f
+    if not (c > 0 and f > 0):
+        return None
+    return m / (sd / math.sqrt(k)) * math.sqrt(c / f)
+
+
+def nula_sobreposicao(k: int, sobreposicao: int, series: int = 20000, semente: int = 20260915) -> list[float]:
+    l = min(sobreposicao, k - 1)
+    chave = (k, l, series, semente)
+    if chave not in _NULAS:
+        g = SplitMix64(semente)
+        out = []
+        while len(out) < series:
+            choques = []
+            for _ in range(k + l):
+                u = 1 - g.next_double()
+                w = g.next_double()
+                choques.append(math.sqrt(-2 * math.log(u)) * math.cos(2 * math.pi * w))
+            serie = [sum(choques[t:t + l + 1]) for t in range(k)]
+            t = t_sobreposicao(serie, l)
+            if t is not None and math.isfinite(t):
+                out.append(t)
+        _NULAS[chave] = sorted(out)
+    return _NULAS[chave]
+
+
+def critico_sobreposicao(k: int, sobreposicao: int) -> float:
+    nula = nula_sobreposicao(k, sobreposicao)
+    return nula[min(max(int(math.floor((1 - R3_CAUDA) * len(nula))), 0), len(nula) - 1)]
+
+
+def data_da_coorte(c) -> dt.date:
+    return dt.date(c, 9, 30) if isinstance(c, int) else dt.date.fromisoformat(str(c))
+
+
+def passo_em_meses(linhas: list[dict]) -> int:
+    """O menor intervalo entre coortes da entrada: 12 nas anuais, 3 nas trimestrais."""
+    datas = sorted({data_da_coorte(l["coorte"]) for l in linhas})
+    passos = [(b.year - a.year) * 12 + b.month - a.month for a, b in zip(datas, datas[1:])]
+    return min(passos) if passos else 12
+
+
+PASSO = 12
+
+
+def resumo_ic(por_coorte: dict, defasagem: int = 0) -> dict:
+    ordenadas = [por_coorte[c] for c in sorted(por_coorte) if por_coorte[c] is not None]
+    v = ordenadas
     if not v:
         return {"coortes": 0}
     media = st.mean(v)
     t = None
     if len(v) >= 3 and st.stdev(v) > 0:
         t = media / (st.stdev(v) / math.sqrt(len(v)))
+    tnw = t_newey_west(v, defasagem) if len(v) >= 3 else None
+    tsob = t_sobreposicao(v, defasagem) if len(v) >= 3 else None
+    critico = critico_sobreposicao(len(v), defasagem) if tsob is not None else None
     return {
         "coortes": len(v),
         "icMedio": round(media, 4),
         "tEntreCoortes": None if t is None else round(t, 2),
+        "tNeweyWest": None if tnw is None else round(tnw, 2),
+        "tSobreposicao": None if tsob is None else round(tsob, 2),
+        "criticoSobreposicao": None if critico is None else round(critico, 2),
+        "defasagem": min(defasagem, max(len(v) - 1, 0)),
         "positivas": sum(1 for x in v if x > 0),
         "porCoorte": {str(k): round(x, 4) for k, x in sorted(por_coorte.items()) if x is not None},
     }
@@ -125,7 +245,9 @@ def medir(linhas: list[dict], sinal: str, ret: str, controle: str | None = None)
         if controle is not None:
             s = residuo(s, [l[controle] for l in g])
         ics[c] = spearman(s, r)
-    out = resumo_ic(ics)
+    # A janela de h meses sobrepõe as h/passo − 1 coortes seguintes.
+    meses = 36 if ret.startswith("ret36") else 12
+    out = resumo_ic(ics, defasagem=max(meses // PASSO - 1, 0))
     out["n"] = sum(len(g) for g in por.values())
     if controle is None:
         out["spreadQuintil"] = spread_quintil(linhas, sinal, ret)
@@ -176,7 +298,21 @@ def motivo(l: dict) -> str:
 
 
 def main() -> None:
-    linhas = json.loads(ENTRADA.read_text(encoding="utf-8"))
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--entrada", type=Path, default=ENTRADA)
+    ap.add_argument("--saida", type=Path, default=SAIDA)
+    # C0b: com as deslistadas na entrada, o grupo diz quais linhas medir — as
+    # listadas repetem o C0 na mesma execução, e `todas` é a amostra sem viés.
+    ap.add_argument("--grupo", choices=("todas", "listadas", "deslistadas"), default="todas")
+    args = ap.parse_args()
+    global PASSO
+    linhas = json.loads(args.entrada.read_text(encoding="utf-8"))
+    PASSO = passo_em_meses(linhas)
+    if args.grupo == "listadas":
+        linhas = [l for l in linhas if not l.get("deslistada")]
+    elif args.grupo == "deslistadas":
+        linhas = [l for l in linhas if l.get("deslistada")]
     for l in linhas:
         l["motivo"] = motivo(l)
     grupos = defaultdict(list)
@@ -184,7 +320,8 @@ def main() -> None:
         grupos[l["motivo"]].append(l)
     recusados = [l for l in linhas if l["upside"] is None]
 
-    saida: dict = {"entrada": ENTRADA.as_posix(), "observacoes": len(linhas), "motivos": {}}
+    saida: dict = {"entrada": args.entrada.as_posix(), "grupo": args.grupo,
+                   "passoEmMeses": PASSO, "observacoes": len(linhas), "motivos": {}}
     print(f"observações: {len(linhas)}   avaliadas: {len(grupos['avaliado'])}   "
           f"recusadas: {len(recusados)}\n")
 
@@ -262,7 +399,9 @@ def main() -> None:
                       f"(t {d[f'motor{chave}'].get('tEntreCoortes')}, Q5−Q1 {d[f'motor{chave}'].get('spreadQuintil')})   "
                       f"B/M IC {d[f'bm{chave}'].get('icMedio')} (t {d[f'bm{chave}'].get('tEntreCoortes')}, "
                       f"Q5−Q1 {d[f'bm{chave}'].get('spreadQuintil')})   motor dado B/M IC "
-                      f"{d[f'motorDadoBm{chave}'].get('icMedio')} (t {d[f'motorDadoBm{chave}'].get('tEntreCoortes')})")
+                      f"{d[f'motorDadoBm{chave}'].get('icMedio')} (t {d[f'motorDadoBm{chave}'].get('tEntreCoortes')}, "
+                      f"t_NW {d[f'motorDadoBm{chave}'].get('tNeweyWest')}, t_sob "
+                      f"{d[f'motorDadoBm{chave}'].get('tSobreposicao')}/{d[f'motorDadoBm{chave}'].get('criticoSobreposicao')})")
         saida["contrafactual"][nome] = d
 
     # O mesmo pulo sobre o B/M, por motivo: o spread que sobrevive ao mês.
@@ -274,8 +413,8 @@ def main() -> None:
         print(f"  {nome:42s} 12m IC {d[12].get('icMedio')} (t {d[12].get('tEntreCoortes')}, Q5−Q1 {d[12].get('spreadQuintil')})"
               f"   36m IC {d[36].get('icMedio')} (t {d[36].get('tEntreCoortes')}, Q5−Q1 {d[36].get('spreadQuintil')})")
 
-    SAIDA.write_text(json.dumps(saida, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"\ngravado {SAIDA}")
+    args.saida.write_text(json.dumps(saida, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"\ngravado {args.saida}")
 
 
 if __name__ == "__main__":

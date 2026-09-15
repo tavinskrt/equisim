@@ -96,7 +96,11 @@ class GoalAlignment {
   /// **ordenação** entre ativos, e é só ela que este número usa — ver
   /// `ExpectedReturn.crossSection`.
   ///
-  /// Não há parcela de provento: o modelo não distribui.
+  /// Não há parcela de provento **somada**: o `Ke` do CAPM já é o retorno
+  /// total esperado, dividendo incluído (decisão 62). A simulação da carteira,
+  /// porém, é de preço (decisão 23), e a meta comparada com este número não
+  /// recebe o provento que ele embute — a coerência entre os dois é do item B1
+  /// do plano.
   final double expectedReturn;
 
   /// Fração do peso da carteira que possui avaliação disponível.

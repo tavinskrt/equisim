@@ -35,7 +35,10 @@ class Pregao {
   final DateTime date;
   final double close;
   final int distribuicao;
-  const Pregao(this.date, this.close, this.distribuicao);
+
+  /// Volume financeiro do dia, em reais. `null` quando o arquivo não o traz.
+  final double? financeiro;
+  const Pregao(this.date, this.close, this.distribuicao, [this.financeiro]);
 
   RawQuote get raw => RawQuote(date, close, distribuicao);
 }
@@ -43,8 +46,12 @@ class Pregao {
 /// Fechamento **bruto por ação** do COTAHIST, por ticker, em ordem de data.
 ///
 /// O CSV compacto guarda o fechamento em centavos por lote de `fatorCotacao`
-/// ações; aqui ele sai em reais por ação.
-Map<String, List<Pregao>> lerCotahistBruto(Set<String> tickers) {
+/// ações, e o volume financeiro em centavos; aqui saem em reais.
+///
+/// - [isins]: quando dado, só entra o pregão do ISIN do ticker. Um ticker pode
+///   ter sido de mais de um papel ao longo dos anos.
+Map<String, List<Pregao>> lerCotahistBruto(Set<String> tickers,
+    {Map<String, String>? isins}) {
   final out = <String, List<Pregao>>{};
   final arquivos = Directory('data/b3')
       .listSync()
@@ -61,6 +68,8 @@ Map<String, List<Pregao>> lerCotahistBruto(Set<String> tickers) {
       }
       final c = linha.split(';');
       if (c.length < 8 || !tickers.contains(c[1])) continue;
+      final isin = isins?[c[1]];
+      if (isin != null && c[2] != isin) continue;
       final data = DateTime.tryParse('${c[0]}T00:00:00Z');
       final centavos = double.tryParse(c[5]);
       final fator = double.tryParse(c[6]);
@@ -68,7 +77,9 @@ Map<String, List<Pregao>> lerCotahistBruto(Set<String> tickers) {
       if (data == null || centavos == null || fator == null || fator <= 0) {
         continue;
       }
-      (out[c[1]] ??= []).add(Pregao(data, centavos / 100 / fator, distribuicao));
+      final volume = c.length > 8 ? double.tryParse(c[8]) : null;
+      (out[c[1]] ??= []).add(Pregao(data, centavos / 100 / fator, distribuicao,
+          volume == null ? null : volume / 100));
     }
   }
   for (final s in out.values) {

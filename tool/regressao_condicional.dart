@@ -33,6 +33,8 @@
 //
 // Uso:
 //   dart run tool/regressao_condicional.dart
+//   dart run tool/regressao_condicional.dart --aplicativo   # C1a e C1b, anuais
+//   dart run tool/regressao_condicional.dart --trimestral   # C1c, C1d e C3
 import 'dart:convert';
 import 'dart:io';
 
@@ -40,7 +42,9 @@ import 'validation/regression.dart';
 
 /// Uma observação utilizável: os três ordenadores e o retorno, todos presentes.
 class Obs {
-  final int coorte;
+  /// A data da coorte, ou o ano nas saídas anuais antigas: em ordem de texto é
+  /// a ordem de data nos dois formatos.
+  final String coorte;
   final String ticker;
   final double potencial;
   final double bookToMarket;
@@ -69,17 +73,31 @@ double? _num(dynamic v) {
 ///
 /// O recorte é **conjunto** de propósito: comparar ordenadores medidos em
 /// subconjuntos diferentes compararia coberturas, e não ordenadores.
-List<Obs> _carregar(List<dynamic> bruto, String campoRetorno) {
+/// - [potencial], [bookToMarket], [earningsYield]: os campos lidos — os da série
+///   de DFPs por padrão; os `…Ancorada` e `…BaseAntiga` nas comparações.
+/// - [exigir]: campos que têm de estar presentes, para que duas leituras sejam
+///   medidas sobre as mesmas observações.
+List<Obs> _carregar(
+  List<dynamic> bruto,
+  String campoRetorno, {
+  String potencial = 'upside',
+  String bookToMarket = 'bookToMarket',
+  String earningsYield = 'earningsYield',
+  List<String> exigir = const [],
+  bool Function(Map<String, dynamic>)? filtro,
+}) {
   final out = <Obs>[];
   for (final linha in bruto) {
     final m = linha as Map<String, dynamic>;
-    final pot = _num(m['upside']);
-    final bm = _num(m['bookToMarket']);
-    final ey = _num(m['earningsYield']);
+    if (filtro != null && !filtro(m)) continue;
+    if (exigir.any((c) => _num(m[c]) == null)) continue;
+    final pot = _num(m[potencial]);
+    final bm = _num(m[bookToMarket]);
+    final ey = _num(m[earningsYield]);
     final ret = _num(m[campoRetorno]);
     if (pot == null || bm == null || ey == null || ret == null) continue;
     out.add(Obs(
-      coorte: (m['coorte'] as num).toInt(),
+      coorte: '${m['coorte']}',
       ticker: m['ticker'] as String,
       potencial: pot,
       bookToMarket: bm,
@@ -92,7 +110,7 @@ List<Obs> _carregar(List<dynamic> bruto, String campoRetorno) {
 
 /// O que uma coorte devolve.
 class PorCoorte {
-  final int coorte;
+  final String coorte;
   final int n;
 
   /// Coeficientes da regressão conjunta, em postos padronizados.
@@ -101,6 +119,9 @@ class PorCoorte {
   final double? coefEarningsYield;
   final double? tPotencial;
   final double? r2;
+
+  /// Coeficiente do potencial condicionado **só** ao P/B — o critério do R3.
+  final double? coefPotencialDadoBm;
 
   /// Coeficiente da regressão só com o potencial — equivalente ao IC.
   final double? coefSozinho;
@@ -121,6 +142,7 @@ class PorCoorte {
     required this.coefEarningsYield,
     required this.tPotencial,
     required this.r2,
+    required this.coefPotencialDadoBm,
     required this.coefSozinho,
     required this.icIncremental,
     required this.icPotencial,
@@ -136,6 +158,7 @@ class PorCoorte {
         'coefEarningsYield': coefEarningsYield,
         'tPotencial': tPotencial,
         'r2': r2,
+        'coefPotencialDadoBm': coefPotencialDadoBm,
         'coefSozinho': coefSozinho,
         'icIncremental': icIncremental,
         'icPotencial': icPotencial,
@@ -144,7 +167,7 @@ class PorCoorte {
       };
 }
 
-PorCoorte _rodarCoorte(int coorte, List<Obs> obs) {
+PorCoorte _rodarCoorte(String coorte, List<Obs> obs) {
   final pot = [for (final o in obs) o.potencial];
   final bm = [for (final o in obs) o.bookToMarket];
   final ey = [for (final o in obs) o.earningsYield];
@@ -156,6 +179,7 @@ PorCoorte _rodarCoorte(int coorte, List<Obs> obs) {
   final zRet = Regression.standardizedRanks(ret);
 
   final conjunta = Regression.ols([zPot, zBm, zEy], zRet);
+  final dadoBm = Regression.ols([zPot, zBm], zRet);
   final sozinho = Regression.ols([zPot], zRet);
   final residuo = Regression.residualize(zPot, [zBm, zEy]);
 
@@ -167,6 +191,7 @@ PorCoorte _rodarCoorte(int coorte, List<Obs> obs) {
     coefEarningsYield: conjunta?.coefficients[3],
     tPotencial: conjunta?.tStats[1],
     r2: conjunta?.r2,
+    coefPotencialDadoBm: dadoBm?.coefficients[1],
     coefSozinho: sozinho?.coefficients[1],
     icIncremental: residuo == null ? null : Regression.spearman(residuo, ret),
     icPotencial: Regression.spearman(pot, ret),
@@ -175,9 +200,26 @@ PorCoorte _rodarCoorte(int coorte, List<Obs> obs) {
   );
 }
 
-Map<String, dynamic> _horizonte(List<dynamic> bruto, String campo) {
-  final obs = _carregar(bruto, campo);
-  final porCoorte = <int, List<Obs>>{};
+/// - [defasagem]: coortes vizinhas cujas janelas se sobrepõem — `h/12 − 1` em
+///   coortes anuais, `h/3 − 1` nas trimestrais —, para o `t` de Newey-West
+///   (item C1a) e para a correção da sobreposição (item C1c).
+Map<String, dynamic> _horizonte(
+  List<dynamic> bruto,
+  String campo, {
+  int defasagem = 0,
+  String potencial = 'upside',
+  String bookToMarket = 'bookToMarket',
+  String earningsYield = 'earningsYield',
+  List<String> exigir = const [],
+  bool Function(Map<String, dynamic>)? filtro,
+}) {
+  final obs = _carregar(bruto, campo,
+      potencial: potencial,
+      bookToMarket: bookToMarket,
+      earningsYield: earningsYield,
+      exigir: exigir,
+      filtro: filtro);
+  final porCoorte = <String, List<Obs>>{};
   for (final o in obs) {
     (porCoorte[o.coorte] ??= []).add(o);
   }
@@ -200,31 +242,38 @@ Map<String, dynamic> _horizonte(List<dynamic> bruto, String campo) {
       Regression.summarize(col(f));
 
   Map<String, dynamic>? j(
-    ({double mean, double sd, double t, int n, int positive})? v,
-  ) =>
-      v == null
-          ? null
-          : {
-              'media': v.mean,
-              'desvio': v.sd,
-              't': v.t,
-              'coortes': v.n,
-              'positivas': v.positive,
-            };
+    ({double mean, double sd, double t, int n, int positive})? v, [
+    double? Function(PorCoorte)? f,
+  ]) {
+    if (v == null) return null;
+    // `linhas` está em ordem de coorte: é a ordem que a autocovariância exige.
+    final serie = f == null ? null : col(f);
+    return {
+      'media': v.mean,
+      'desvio': v.sd,
+      't': v.t,
+      if (serie != null) ..._leiturasDoT(serie, defasagem),
+      'coortes': v.n,
+      'positivas': v.positive,
+    };
+  }
+
+  Map<String, dynamic>? js(double? Function(PorCoorte) f) => j(s(f), f);
 
   return {
     'observacoes': obs.length,
     'coortesUsadas': linhas.length,
     'porCoorte': [for (final l in linhas) l.toJson()],
     'famaMacBeth': {
-      'potencialConjunto': j(s((l) => l.coefPotencial)),
-      'bookToMarketConjunto': j(s((l) => l.coefBookToMarket)),
-      'earningsYieldConjunto': j(s((l) => l.coefEarningsYield)),
-      'potencialSozinho': j(s((l) => l.coefSozinho)),
-      'icIncremental': j(s((l) => l.icIncremental)),
-      'icPotencial': j(s((l) => l.icPotencial)),
-      'icBookToMarket': j(s((l) => l.icBookToMarket)),
-      'icEarningsYield': j(s((l) => l.icEarningsYield)),
+      'potencialConjunto': js((l) => l.coefPotencial),
+      'potencialDadoBm': js((l) => l.coefPotencialDadoBm),
+      'bookToMarketConjunto': js((l) => l.coefBookToMarket),
+      'earningsYieldConjunto': js((l) => l.coefEarningsYield),
+      'potencialSozinho': js((l) => l.coefSozinho),
+      'icIncremental': js((l) => l.icIncremental),
+      'icPotencial': js((l) => l.icPotencial),
+      'icBookToMarket': js((l) => l.icBookToMarket),
+      'icEarningsYield': js((l) => l.icEarningsYield),
     },
   };
 }
@@ -253,9 +302,15 @@ void _imprimirHorizonte(String titulo, Map<String, dynamic> h) {
       stdout.writeln('  ${rotulo.padRight(34)} —');
       return;
     }
+    final nw = v['tNeweyWest'] as double?;
+    final sob = v['tSobreposicao'] as double?;
+    final critico = v['criticoSobreposicao'] as double?;
+    final p = v['pSobreposicao'] as double?;
     stdout.writeln('  ${rotulo.padRight(34)} '
         'média=${(v['media'] as double).toStringAsFixed(3)}  '
         't=${(v['t'] as double).toStringAsFixed(2)}  '
+        '${nw == null ? '' : 't_NW(${v['defasagem']})=${nw.toStringAsFixed(2)}  '}'
+        '${sob == null || critico == null || p == null ? '' : 't_sob=${sob.toStringAsFixed(2)}/${critico.toStringAsFixed(2)} p=${p.toStringAsFixed(3)}  '}'
         'positivas=${v['positivas']}/${v['coortes']}');
   }
 
@@ -264,6 +319,7 @@ void _imprimirHorizonte(String titulo, Map<String, dynamic> h) {
   linha('IC do P/B', 'icBookToMarket');
   linha('IC do L/P', 'icEarningsYield');
   linha('coef. do potencial sozinho', 'potencialSozinho');
+  linha('coef. do potencial DADO O P/B', 'potencialDadoBm');
   linha('coef. do potencial COM P/B e L/P', 'potencialConjunto');
   linha('coef. do P/B com os outros', 'bookToMarketConjunto');
   linha('coef. do L/P com os outros', 'earningsYieldConjunto');
@@ -271,6 +327,8 @@ void _imprimirHorizonte(String titulo, Map<String, dynamic> h) {
 }
 
 Future<void> main(List<String> args) async {
+  if (args.contains('--aplicativo')) return _aplicativo();
+  if (args.contains('--trimestral')) return _trimestral();
   final arquivo = File('docs/validacao/backtest_valuation.json');
   if (!arquivo.existsSync()) {
     stderr.writeln('Falta docs/validacao/backtest_valuation.json. '
@@ -320,4 +378,256 @@ Future<void> main(List<String> args) async {
   }
 
   stderr.writeln('\nescrito docs/validacao/regressao_condicional.json');
+}
+
+/// As leituras do `t` de uma série de coeficientes de coorte em ordem de data.
+///
+/// **O critério do R3 (decisão 96).** O `t` corrigido pela estrutura da
+/// sobreposição, contra o crítico que a mesma estrutura dá ao nível de `t > 2`,
+/// **e** o Newey-West acima de 2. O corrigido não estima nada da série; o
+/// Newey-West pega a persistência que vá além da sobreposição.
+Map<String, dynamic> _leiturasDoT(List<double> serie, int defasagem) {
+  final nw = Regression.neweyWestMean(serie, defasagem);
+  final sob = Regression.overlapAdjustedT(serie, defasagem);
+  final critico =
+      sob == null ? null : Regression.overlapCritical(sob.n, sob.overlap);
+  return {
+    if (nw != null) 'tNeweyWest': nw.t,
+    if (nw != null) 'defasagem': nw.lags,
+    if (sob != null) 'tSobreposicao': sob.t,
+    'criticoSobreposicao': ?critico,
+    if (sob != null)
+      'pSobreposicao': Regression.overlapPValue(sob.t, sob.n, sob.overlap),
+    if (sob != null && nw != null && critico != null)
+      'passaR3': sob.t > critico && nw.t > 2,
+  };
+}
+
+/// Média, entre coortes, de uma diferença entre duas leituras medidas nas mesmas
+/// observações, com as mesmas leituras do `t`.
+Map<String, dynamic>? _diferenca(List<double> serie, int defasagem) {
+  final v = Regression.summarize(serie);
+  if (v == null) return null;
+  return {
+    'media': v.mean,
+    't': v.t,
+    ..._leiturasDoT(serie, defasagem),
+    'coortes': v.n,
+    'positivas': v.positive,
+  };
+}
+
+/// A série ancorada no trimestre contra a de DFPs, nas mesmas observações e com
+/// o mesmo B/M da série anual como controle (item C1c).
+///
+/// Três perguntas: qual ordena mais sozinha (IC), qual ordena mais dado o B/M,
+/// e se uma acrescenta à outra — o coeficiente da ancorada com a anual e o B/M
+/// na mesma regressão, e o inverso.
+Map<String, dynamic> _comparacaoAncorada(
+    List<dynamic> bruto, String campo, int defasagem) {
+  const exigir = ['upside', 'upsideAncorada', 'bookToMarket', 'earningsYield'];
+  final anual = _horizonte(bruto, campo, defasagem: defasagem, exigir: exigir);
+  final ancorada = _horizonte(bruto, campo,
+      defasagem: defasagem, potencial: 'upsideAncorada', exigir: exigir);
+  final ancoradaComSeuBm = _horizonte(bruto, campo,
+      defasagem: defasagem,
+      potencial: 'upsideAncorada',
+      bookToMarket: 'bookToMarketAncorada',
+      earningsYield: 'earningsYieldAncorada',
+      exigir: exigir);
+
+  // Por coorte: a diferença de IC e as regressões cruzadas.
+  final porCoorte = <String, List<Map<String, dynamic>>>{};
+  for (final l in bruto) {
+    final m = l as Map<String, dynamic>;
+    if ([...exigir, campo].any((c) => _num(m[c]) == null)) continue;
+    (porCoorte['${m['coorte']}'] ??= []).add(m);
+  }
+  final difIc = <double>[];
+  final ancoradaDadaAnual = <double>[];
+  final anualDadaAncorada = <double>[];
+  var movidas = 0, total = 0;
+  for (final c in porCoorte.keys.toList()..sort()) {
+    final g = porCoorte[c]!;
+    if (g.length < 30) continue;
+    List<double> col(String k) => [for (final m in g) _num(m[k])!];
+    final ret = col(campo);
+    final a = col('upside');
+    final q = col('upsideAncorada');
+    total += g.length;
+    for (var i = 0; i < a.length; i++) {
+      if ((a[i] - q[i]).abs() > 1e-9) movidas++;
+    }
+    final icQ = Regression.spearman(q, ret);
+    final icA = Regression.spearman(a, ret);
+    if (icQ != null && icA != null) difIc.add(icQ - icA);
+    final r = Regression.ols([
+      Regression.standardizedRanks(q),
+      Regression.standardizedRanks(a),
+      Regression.standardizedRanks(col('bookToMarket')),
+    ], Regression.standardizedRanks(ret));
+    if (r != null) {
+      ancoradaDadaAnual.add(r.coefficients[1]);
+      anualDadaAncorada.add(r.coefficients[2]);
+    }
+  }
+  Map<String, dynamic>? fm(Map<String, dynamic> h, String k) =>
+      (h['famaMacBeth'] as Map<String, dynamic>)[k] as Map<String, dynamic>?;
+  return {
+    'observacoes': anual['observacoes'],
+    'fracaoComPotencialDiferente': total == 0 ? null : movidas / total,
+    'icAnual': fm(anual, 'icPotencial'),
+    'icAncorada': fm(ancorada, 'icPotencial'),
+    'diferencaDeIc': _diferenca(difIc, defasagem),
+    'anualDadoBm': fm(anual, 'potencialDadoBm'),
+    'ancoradaDadoBm': fm(ancorada, 'potencialDadoBm'),
+    'ancoradaDadoSeuBm': fm(ancoradaComSeuBm, 'potencialDadoBm'),
+    'ancoradaDadaAnualEBm': _diferenca(ancoradaDadaAnual, defasagem),
+    'anualDadaAncoradaEBm': _diferenca(anualDadaAncorada, defasagem),
+  };
+}
+
+/// Coortes trimestrais, com as deslistadas da ponte ampliada, na montagem na
+/// base da data (itens C1c, C1d e C3).
+///
+/// Tudo sai da **mesma execução** de `dart run tool/backtest_valuation.dart
+/// --montagem aplicativo --com-deslistadas --trimestral --contrafactual-base`.
+/// **Não é o veredito do R3**: a medição da habilidade fica para o fim das
+/// fases, a pedido do usuário em 15/09/2026. O que sai aqui é o instrumento
+/// calibrado, e a leitura dele.
+Future<void> _trimestral() async {
+  const fonte = 'docs/validacao/backtest_trimestral.json';
+  final arquivo = File(fonte);
+  if (!arquivo.existsSync()) {
+    stderr.writeln('Falta $fonte. Rode antes: dart run '
+        'tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas '
+        '--trimestral --contrafactual-base');
+    exit(2);
+  }
+  final todas = jsonDecode(arquivo.readAsStringSync()) as List<dynamic>;
+  bool listada(Map<String, dynamic> m) => m['deslistada'] != true;
+  bool setembro(Map<String, dynamic> m) => '${m['coorte']}'.endsWith('-09-30');
+  stderr.writeln('${todas.length} linhas');
+
+  Map<String, dynamic> leitura(String campo, int meses) => {
+        'trimestral': {
+          'comDeslistadas': _horizonte(todas, campo, defasagem: meses ~/ 3 - 1),
+          'semDeslistadas': _horizonte(todas, campo,
+              defasagem: meses ~/ 3 - 1, filtro: listada),
+        },
+        'anualEm30deSetembro': {
+          'comDeslistadas': _horizonte(todas, campo,
+              defasagem: meses ~/ 12 - 1, filtro: setembro),
+          'semDeslistadas': _horizonte(todas, campo,
+              defasagem: meses ~/ 12 - 1,
+              filtro: (m) => listada(m) && setembro(m)),
+        },
+        'ancoradaContraAnual':
+            _comparacaoAncorada(todas, campo, meses ~/ 3 - 1),
+      };
+
+  // O contrafactual da base (item C3): as mesmas observações de 30/09 das
+  // listadas, na montagem da rodada anterior e na da data.
+  Map<String, dynamic> base(String campo, int meses) {
+    const exigir = [
+      'upside',
+      'upsideBaseAntiga',
+      'bookToMarket',
+      'bookToMarketBaseAntiga',
+    ];
+    bool f(Map<String, dynamic> m) => listada(m) && setembro(m);
+    return {
+      'naData': _horizonte(todas, campo,
+          defasagem: meses ~/ 12 - 1, exigir: exigir, filtro: f),
+      'baseAntiga': _horizonte(todas, campo,
+          defasagem: meses ~/ 12 - 1,
+          potencial: 'upsideBaseAntiga',
+          bookToMarket: 'bookToMarketBaseAntiga',
+          exigir: exigir,
+          filtro: f),
+    };
+  }
+
+  final resultado = {
+    'gerado': DateTime.now().toIso8601String(),
+    'fonte': fonte,
+    'retorno': 'total, com os proventos da B3 reinvestidos na data ex',
+    'h36': leitura('ret36tot', 36),
+    'h12': leitura('ret12tot', 12),
+    'contrafactualDaBase': {
+      'h36': base('ret36tot', 36),
+      'h12': base('ret12tot', 12),
+    },
+  };
+  File('docs/validacao/habilidade_trimestral.json').writeAsStringSync(
+    const JsonEncoder.withIndent(' ').convert(resultado),
+  );
+  for (final h in ['h36', 'h12']) {
+    final r = resultado[h] as Map<String, dynamic>;
+    for (final g in ['trimestral', 'anualEm30deSetembro']) {
+      for (final a in ['comDeslistadas', 'semDeslistadas']) {
+        _imprimirHorizonte('$h — $g — $a',
+            (r[g] as Map<String, dynamic>)[a] as Map<String, dynamic>);
+      }
+    }
+    stdout.writeln('\n=== $h — ancorada contra anual ===');
+    stdout.writeln(
+        const JsonEncoder.withIndent(' ').convert(r['ancoradaContraAnual']));
+  }
+  final contra = resultado['contrafactualDaBase'] as Map<String, dynamic>;
+  for (final h in ['h36', 'h12']) {
+    final b = contra[h] as Map<String, dynamic>;
+    _imprimirHorizonte(
+        '$h — base da data', b['naData'] as Map<String, dynamic>);
+    _imprimirHorizonte(
+        '$h — base antiga', b['baseAntiga'] as Map<String, dynamic>);
+  }
+  stderr.writeln('\nescrito docs/validacao/habilidade_trimestral.json');
+}
+
+/// A habilidade sobre a montagem do aplicativo por data, com e sem as
+/// deslistadas, no retorno total (itens C1a e C1b).
+///
+/// As duas amostras saem da **mesma execução** de
+/// `dart run tool/backtest_valuation.dart --montagem aplicativo
+/// --com-deslistadas`: comparar com uma execução anterior misturaria o efeito
+/// das deslistadas com a deriva do dado de mercado.
+Future<void> _aplicativo() async {
+  const fonte = 'docs/validacao/backtest_aplicativo_deslistadas.json';
+  final arquivo = File(fonte);
+  if (!arquivo.existsSync()) {
+    stderr.writeln('Falta $fonte. Rode antes: dart run tool/backtest_valuation.dart '
+        '--montagem aplicativo --com-deslistadas');
+    exit(2);
+  }
+  final todas = jsonDecode(arquivo.readAsStringSync()) as List<dynamic>;
+  final listadas = [
+    for (final l in todas)
+      if ((l as Map<String, dynamic>)['deslistada'] != true) l,
+  ];
+  stderr.writeln('${todas.length} linhas, ${listadas.length} de listadas');
+
+  final resultado = {
+    'gerado': DateTime.now().toIso8601String(),
+    'fonte': fonte,
+    'retorno': 'total, com os proventos da B3 reinvestidos na data ex',
+    'h36': {
+      'semDeslistadas': _horizonte(listadas, 'ret36tot', defasagem: 2),
+      'comDeslistadas': _horizonte(todas, 'ret36tot', defasagem: 2),
+    },
+    'h12': {
+      'semDeslistadas': _horizonte(listadas, 'ret12tot'),
+      'comDeslistadas': _horizonte(todas, 'ret12tot'),
+    },
+  };
+  File('docs/validacao/habilidade_aplicativo.json').writeAsStringSync(
+    const JsonEncoder.withIndent(' ').convert(resultado),
+  );
+  for (final h in ['h36', 'h12']) {
+    for (final a in ['semDeslistadas', 'comDeslistadas']) {
+      _imprimirHorizonte('${h == 'h36' ? '36' : '12'} MESES — $a',
+          (resultado[h] as Map<String, dynamic>)[a] as Map<String, dynamic>);
+    }
+  }
+  stderr.writeln('\nescrito docs/validacao/habilidade_aplicativo.json');
 }

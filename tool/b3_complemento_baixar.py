@@ -23,6 +23,15 @@ Uso:
     python tool/b3_complemento_baixar.py               # emissores já baixados
     python tool/b3_complemento_baixar.py PETR VALE     # emissores específicos
     python tool/b3_complemento_baixar.py --deslistadas # proventos das deslistadas
+    python tool/b3_complemento_baixar.py --deslistadas-classificacao
+                                                       # setor das deslistadas (C1b)
+    python tool/b3_complemento_baixar.py --deslistadas --so-faltantes
+    python tool/b3_complemento_baixar.py --deslistadas-classificacao --so-faltantes
+                                                       # só as que a ponte ganhou (C1d)
+
+``--so-faltantes`` consulta só a companhia sem arquivo — ou, na classificação, sem
+detalhe gravado. Sem ele, ``--deslistadas`` regrava o arquivo inteiro e apaga o
+detalhe que a classificação tinha gravado nele.
 """
 
 from __future__ import annotations
@@ -93,7 +102,7 @@ def nomes_de_pregao(tickers: set[str]) -> dict[str, str]:
     return nomes
 
 
-def deslistadas() -> int:
+def deslistadas(so_faltantes: bool = False) -> int:
     ponte = json.loads(Path("data/b3/ponte_deslistadas.json").read_text(encoding="utf-8"))
     tickers = {t for c in ponte.values() for t in c["papeis"]}
     nomes = nomes_de_pregao(tickers)
@@ -101,6 +110,8 @@ def deslistadas() -> int:
     destino.mkdir(parents=True, exist_ok=True)
     falhas, sem_nome = [], []
     for i, (cnpj, c) in enumerate(sorted(ponte.items()), 1):
+        if so_faltantes and (destino / (cnpj.replace(".", "").replace("/", "").replace("-", "") + ".json")).exists():
+            continue
         candidatos = {nomes[t] for t in c["papeis"] if t in nomes}
         if not candidatos:
             sem_nome.append(cnpj)
@@ -135,10 +146,72 @@ def deslistadas() -> int:
     return 0
 
 
+def codigos_cvm(cnpjs: set[str]) -> dict[str, str]:
+    """Código CVM de cada CNPJ, do índice anual da FCA — o último declarado."""
+    codigos: dict[str, str] = {}
+    for arquivo in sorted(Path("data/cvm").glob("fca_cia_aberta_20[0-9][0-9].csv")):
+        with arquivo.open(encoding="latin-1") as f:
+            next(f, None)
+            for linha in f:
+                c = linha.split(";")
+                if len(c) > 4 and c[0] in cnpjs and c[4].strip().isdigit():
+                    codigos[c[0]] = str(int(c[4]))
+    return codigos
+
+
+def classificacao_deslistadas(so_faltantes: bool = False) -> int:
+    """Classificação setorial da B3 das deslistadas (item C1b).
+
+    O ``GetDetail`` responde para boa parte das companhias que saíram da bolsa,
+    e é a mesma taxonomia que a decisão 87 usa nas listadas. Grava o detalhe no
+    arquivo de proventos de cada companhia, que já existe; resposta vazia fica
+    registrada como vazia, e não inventada.
+    """
+    destino = Path("data/b3/complemento_deslistadas")
+    ponte = json.loads(Path("data/b3/ponte_deslistadas.json").read_text(encoding="utf-8"))
+    codigos = codigos_cvm(set(ponte))
+    sem_codigo, vazias, falhas, com = [], [], [], 0
+    for i, cnpj in enumerate(sorted(ponte), 1):
+        arquivo = destino / (cnpj.replace(".", "").replace("/", "").replace("-", "") + ".json")
+        if not arquivo.exists():
+            continue
+        registro = json.loads(arquivo.read_text(encoding="utf-8"))
+        if so_faltantes and "detalhe" in registro:
+            continue
+        codigo = codigos.get(cnpj)
+        if codigo is None:
+            sem_codigo.append(cnpj)
+            continue
+        detalhe = consultar("GetDetail", {"codeCVM": codigo, "language": "pt-br"})
+        time.sleep(PAUSA)
+        if detalhe is None:
+            falhas.append(cnpj)
+            continue
+        registro["codigoCvm"] = codigo
+        registro["detalhe"] = detalhe
+        registro["detalheConsultadoEm"] = dt.date.today().isoformat()
+        arquivo.write_text(json.dumps(registro, ensure_ascii=False), encoding="utf-8")
+        if isinstance(detalhe, dict) and (detalhe.get("industryClassification") or "").strip():
+            com += 1
+        else:
+            vazias.append(cnpj)
+        if i % 25 == 0:
+            print(f"  {i}/{len(ponte)}")
+    print(f"\n{com} com classificação; {len(vazias)} sem; {len(sem_codigo)} sem código CVM")
+    if vazias:
+        print("sem classificação: " + " ".join(vazias))
+    if falhas:
+        print("!! FALHARAM: " + " ".join(falhas))
+    return 0
+
+
 def main() -> int:
+    so_faltantes = "--so-faltantes" in sys.argv[1:]
+    if "--deslistadas-classificacao" in sys.argv[1:]:
+        return classificacao_deslistadas(so_faltantes)
     if "--deslistadas" in sys.argv[1:]:
-        return deslistadas()
-    pedidos = {a.upper()[:4] for a in sys.argv[1:]}
+        return deslistadas(so_faltantes)
+    pedidos = {a.upper()[:4] for a in sys.argv[1:] if not a.startswith("--")}
     arquivos = sorted(ORIGEM.glob("*.json"))
     if pedidos:
         arquivos = [a for a in arquivos if a.stem in pedidos]

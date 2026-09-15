@@ -249,6 +249,171 @@ class Regression {
     );
   }
 
+  /// `t` da média de uma série de coeficientes de coorte com erro-padrão de
+  /// Newey-West (item C1a).
+  ///
+  /// Coortes anuais medidas em 36 meses se sobrepõem por dois anos, e o
+  /// retorno de uma carrega o choque das duas vizinhas: os coeficientes saem
+  /// autocorrelados, e o `t` de [summarize] superestima a confiança. A variância
+  /// de longo prazo soma as autocovariâncias até [lags], com o núcleo de
+  /// Bartlett `w_j = 1 − j/(L+1)`, que a mantém não negativa:
+  ///
+  /// ```
+  /// V̂(média) = [γ₀ + 2 Σ_{j=1}^{L} w_j γ_j] / k · k/(k−1)
+  /// γ_j = (1/k) Σ_{t=j+1}^{k} (x_t − x̄)(x_{t−j} − x̄)
+  /// ```
+  ///
+  /// O fator `k/(k−1)` faz `lags = 0` devolver exatamente o `t` de
+  /// [summarize] — é a conferência de que as duas contas são a mesma no caso
+  /// sem sobreposição. A ordem dos valores é a das coortes: **a série tem de
+  /// vir em ordem de data**.
+  ///
+  /// Devolve `null` com menos de duas coortes ou variância não positiva.
+  static ({double mean, double se, double t, int n, int lags})? neweyWestMean(
+    List<double> values,
+    int lags,
+  ) {
+    final v = [for (final x in values) if (x.isFinite) x];
+    final k = v.length;
+    if (k < 2 || lags < 0) return null;
+    var s = 0.0;
+    for (final x in v) {
+      s += x;
+    }
+    final m = s / k;
+    double gama(int j) {
+      var soma = 0.0;
+      for (var t = j; t < k; t++) {
+        soma += (v[t] - m) * (v[t - j] - m);
+      }
+      return soma / k;
+    }
+
+    final l = lags < k ? lags : k - 1;
+    var lrv = gama(0);
+    for (var j = 1; j <= l; j++) {
+      lrv += 2 * (1 - j / (l + 1)) * gama(j);
+    }
+    final variancia = lrv / k * k / (k - 1);
+    if (!(variancia > 0) || !variancia.isFinite) return null;
+    final se = math.sqrt(variancia);
+    return (mean: m, se: se, t: m / se, n: k, lags: l);
+  }
+
+  /// `t` da média de uma série de coeficientes de coorte **corrigido pela
+  /// estrutura da sobreposição**, e não estimado dela (item C1c).
+  ///
+  /// Coortes trimestrais medidas em 36 meses compartilham até 33 meses de
+  /// retorno: a coorte `t` e a `t+j` têm correlação `ρ_j = 1 − j/(L+1)` quando o
+  /// que as move são choques independentes mês a mês, com `L = h/Δ − 1`
+  /// sobreposições. É a correlação que a sobreposição **produz**, antes de
+  /// qualquer persistência do sinal. Sob ela, duas coisas erram no `t` de
+  /// [summarize], e as duas são contas fechadas em `k` e `L`:
+  ///
+  /// ```
+  /// E[s²] = σ² · c,   c = 1 − 2/(k(k−1)) · Σ_{j=1}^{L} (k−j) ρ_j
+  /// V(média) = σ²/k · F,   F = 1 + 2 Σ_{j=1}^{L} (1 − j/k) ρ_j
+  /// t corrigido = t de summarize · √(c/F)
+  /// ```
+  ///
+  /// **Por que ao lado do Newey-West, e não no lugar.** O Newey-West estima as
+  /// autocovariâncias da própria série, e com 22 coortes e 11 defasagens a
+  /// estimativa é ruído — com cinco coortes anuais ela saiu negativa e
+  /// estreitou o erro (decisão 93). Esta correção não estima nada: vale o que a
+  /// sobreposição impõe, e o critério do R3 fica com o menor dos dois.
+  ///
+  /// Com `L = 0` devolve o `t` de [summarize]. Devolve `null` com menos de duas
+  /// coortes, `L` negativo ou desvio nulo.
+  static ({double t, double c, double f, int n, int overlap})? overlapAdjustedT(
+    List<double> values,
+    int overlap,
+  ) {
+    final base = summarize(values);
+    if (base == null || overlap < 0 || !base.t.isFinite) return null;
+    final k = base.n;
+    final l = overlap < k ? overlap : k - 1;
+    var somaC = 0.0, somaF = 0.0;
+    for (var j = 1; j <= l; j++) {
+      final rho = 1 - j / (l + 1);
+      somaC += (k - j) * rho;
+      somaF += (1 - j / k) * rho;
+    }
+    final c = 1 - 2 / (k * (k - 1)) * somaC;
+    final f = 1 + 2 * somaF;
+    if (!(c > 0) || !(f > 0)) return null;
+    return (t: base.t * math.sqrt(c / f), c: c, f: f, n: k, overlap: l);
+  }
+
+  /// Nível unilateral de `t > 2` sob a normal: `1 − Φ(2)`. É o que o critério
+  /// do R3 pede, escrito como probabilidade.
+  static const double r3Tail = 0.022750131948179195;
+
+  static final Map<String, List<double>> _nulas = {};
+
+  /// Distribuição, sob a hipótese nula, do `t` de [overlapAdjustedT] para `k`
+  /// coortes com `L` sobreposições: [draws] séries de somas sobrepostas de
+  /// choques normais independentes, média zero, ordenadas.
+  ///
+  /// **Por que simular.** A correção acerta a variância da média, mas o desvio
+  /// no denominador tem poucos graus de liberdade efetivos, e o `t` corrigido
+  /// tem cauda mais pesada que a normal — medido: o percentil 95 de `|t|` é
+  /// 2,66 com 22 coortes e 11 sobreposições, e 3,14 com cinco coortes anuais e
+  /// duas. O limiar de `t > 2` tem de vir da mesma distribuição. A semente é
+  /// fixa: o crítico é o mesmo em toda execução.
+  static List<double> overlapNull(int k, int overlap,
+      {int draws = 20000, int seed = 20260915}) {
+    final l = overlap < k ? overlap : k - 1;
+    return _nulas['$k|$l|$draws|$seed'] ??= () {
+      final rng = SplitMix64(seed);
+      double normal() {
+        // Box-Muller: u em (0, 1] para o logaritmo.
+        final u = 1 - rng.nextDouble();
+        final v = rng.nextDouble();
+        return math.sqrt(-2 * math.log(u)) * math.cos(2 * math.pi * v);
+      }
+
+      final out = <double>[];
+      final choques = List<double>.filled(k + l, 0);
+      while (out.length < draws) {
+        for (var i = 0; i < choques.length; i++) {
+          choques[i] = normal();
+        }
+        final serie = [
+          for (var t = 0; t < k; t++)
+            [for (var m = t; m <= t + l; m++) choques[m]]
+                .fold<double>(0, (a, b) => a + b),
+        ];
+        final r = overlapAdjustedT(serie, l);
+        if (r != null && r.t.isFinite) out.add(r.t);
+      }
+      return out..sort();
+    }();
+  }
+
+  /// Crítico unilateral do `t` corrigido com o nível de [tail] — por padrão, o
+  /// de `t > 2` sob a normal.
+  static double overlapCritical(int k, int overlap, {double tail = r3Tail}) {
+    final nula = overlapNull(k, overlap);
+    final i = ((1 - tail) * nula.length).floor().clamp(0, nula.length - 1);
+    return nula[i];
+  }
+
+  /// Probabilidade unilateral, sob a nula da sobreposição, de um `t` corrigido
+  /// pelo menos tão alto quanto [t].
+  static double overlapPValue(double t, int k, int overlap) {
+    final nula = overlapNull(k, overlap);
+    var lo = 0, hi = nula.length;
+    while (lo < hi) {
+      final m = (lo + hi) ~/ 2;
+      if (nula[m] < t) {
+        lo = m + 1;
+      } else {
+        hi = m;
+      }
+    }
+    return (nula.length - lo) / nula.length;
+  }
+
   /// Inversa por Gauss-Jordan com pivoteamento parcial. `null` se singular.
   static List<List<double>>? _inverse(List<List<double>> a) {
     final n = a.length;
@@ -288,4 +453,26 @@ class Regression {
       for (var i = 0; i < n; i++) m[i].sublist(n),
     ];
   }
+}
+
+/// Gerador splitmix64, escrito igual em `tool/recusas_custo.py`.
+///
+/// O crítico da sobreposição sai de uma simulação, e o Dart e o Python têm de
+/// chegar ao mesmo número: `math.Random` e o `random` do Python são geradores
+/// diferentes. Este é pequeno, de período 2⁶⁴ e com a mesma sequência nos dois.
+class SplitMix64 {
+  SplitMix64(int seed) : _estado = seed;
+  int _estado;
+
+  /// Próximo inteiro de 64 bits, com a aritmética modular do inteiro nativo.
+  int nextInt() {
+    _estado += 0x9E3779B97F4A7C15;
+    var z = _estado;
+    z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9;
+    z = (z ^ (z >>> 27)) * 0x94D049BB133111EB;
+    return z ^ (z >>> 31);
+  }
+
+  /// Uniforme em [0, 1), com os 53 bits altos.
+  double nextDouble() => (nextInt() >>> 11) * (1.0 / 9007199254740992);
 }

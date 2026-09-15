@@ -90,8 +90,107 @@ para ela.
 ## 5. O que isto não diz
 
 - **A amostra é dos sobreviventes**, e o IC das recusadas está inflado na medida
-  do viés, que só o C1b mede.
-- **O `t` de 36 meses é otimista**: cinco coortes com janelas sobrepostas.
+  do viés, que só o C1b mede — **medido em 15/09/2026, na §6**: o viés pesa no
+  nível do retorno, e não na ordenação.
+- **O `t` de 36 meses é otimista**: cinco coortes com janelas sobrepostas — a §6
+  o refaz com Newey-West.
 - **O contrafactual só existe para a liquidez.** Soltar o histórico curto pediria
   mudar a Porta 0 no núcleo, e as guardas perdem o poder abaixo de oito
   exercícios (decisão 25) — medir isso é método novo, e não C0.
+
+## 6. Com as deslistadas — item C0b
+
+> **Medido sobre a montagem com o preço na base de ações de hoje, e com o `t` da
+> decisão 93.** A §7 remede na base da data e com o `t` da decisão 96.
+
+Medido em 15/09/2026 por `python tool/recusas_custo.py --entrada
+docs/validacao/backtest_aplicativo_deslistadas.json --grupo todas` (e
+`--grupo listadas`, `--grupo deslistadas`), sobre a montagem do aplicativo por
+data com as deslistadas da ponte, na mesma execução. Dados em
+[recusas_custo_deslistadas.json](recusas_custo_deslistadas.json) e
+[recusas_custo_so_deslistadas.json](recusas_custo_so_deslistadas.json). Decisão:
+[95](../decisoes/095-a-recusa-por-liquidez-fica-pelo-nivel-e-nao-pela-ordenacao.md).
+
+**O `t` de 36 meses passa a sair também com Newey-West**, e vale o menor dos dois
+(decisão 93). Em 12 meses as coortes não se sobrepõem, e os dois coincidem.
+
+**A pergunta da §3.3**: o sinal dos soltos do corte de liquidez é viés de
+sobrevivência?
+
+| soltos do corte de liquidez | n | IC dado o B/M, 12m | `t` | IC dado o B/M, 36m | `t` comum / Newey-West |
+|---|---:|---:|---:|---:|---:|
+| listadas | 848 | 0,120 | 2,75 | 0,169 | 2,56 / 2,85 |
+| **com as deslistadas** | **1.003** | **0,116** | **2,73** | **0,189** | **3,08 / 3,22** |
+| só as deslistadas | 155 | 0,107 | 1,10 | 0,158 | 2,39 / 4,06 |
+
+Começando o retorno um mês depois, com as deslistadas: 0,105 (`t` 2,63) em 12
+meses e 0,182 (`t` 2,91) em 36. Nas avaliadas, com as deslistadas, o potencial
+dado o B/M continua sem sinal: 0,036 (`t` 0,65) e 0,057 (`t` 1,25).
+
+**Não é o viés que produz a ordenação.** O viés existe, e pesa no nível do
+retorno: os soltos com as deslistadas renderam 67,8% em média em 36 meses, contra
+73,4% só nas listadas, e os deslistados soltos, 45,6%.
+
+**O nível do preço justo continua fora**: o potencial mediano dos soltos é de
+−24,5%, contra −52,1% das avaliadas, com as deslistadas nos dois grupos.
+
+**O B/M por motivo, com as deslistadas**, repete a §2: nas 1.203 recusadas só por
+liquidez, IC de 0,196 em 12 meses (`t` 7,36); nas 101 que nenhuma via avalia, de
+0,354 (`t` 3,62); nas 344 de histórico curto, de 0,127 (`t` 1,82).
+
+**O que se decidiu** (decisão 95): a recusa por liquidez fica, pelo nível — beta
+de papel pouco negociado sai baixo e infla o preço justo —, e não pela ordenação,
+que sobreviveu às deslistadas. A razão da investibilidade sai, porque não era da
+Porta 0. O caminho para soltar é corrigir o beta pela negociação não sincrônica e
+remedir o nível, e entrou no plano.
+
+## 7. Na base da data, trimestral
+
+Medido em 15/09/2026 por `python tool/recusas_custo.py --grupo todas --saida
+docs/validacao/recusas_custo_trimestral_todas.json` (e `--grupo listadas`,
+`--grupo deslistadas`), sobre `docs/validacao/backtest_trimestral.json` — as 31
+coortes trimestrais com as deslistadas da ponte ampliada (C1d), na base de ações
+da data (C3). Os `t` saem de três jeitos, e o que decide é o corrigido pela
+sobreposição contra o crítico dela, com o Newey-West acima de 2
+([decisão 96](../decisoes/096-o-t-da-habilidade-e-corrigido-pela-sobreposicao-contra-o-critico-dela.md)).
+
+**Por que remedir.** As §§1 a 6 foram medidas com o preço da coorte na base de
+ações de hoje, que inflava o valor de mercado de quem desdobrou depois e o
+book-to-market de quem agrupou ([ponte_por_papel.md](ponte_por_papel.md) §1).
+
+**A pergunta das §§3 e 6, de novo** — o potencial dos soltos do corte de liquidez
+ordena além do B/M?
+
+| com as deslistadas | n | 12 meses: IC · `t` comum · NW · corrigido / crítico | 36 meses: IC · `t` comum · NW · corrigido / crítico |
+|---|---:|---|---|
+| avaliadas | 3.672 | 0,019 · 0,74 · 0,52 · 0,36 / 2,24 | 0,026 · 0,97 · 0,65 · 0,24 / 2,70 |
+| **soltos do corte de liquidez** | **3.488** | **0,084** · 3,44 · 2,32 · **1,67 / 2,24** | **0,148** · 4,79 · 2,42 · **1,16 / 2,70** |
+| começando um mês depois | | 0,084 · 3,66 · 2,50 · 1,77 / 2,24 | 0,148 · 4,68 · 2,35 · 1,14 / 2,70 |
+| só as listadas | 2.884 | 0,086 · 3,41 · 2,38 · 1,66 / 2,24 | 0,122 · 3,63 · 1,98 · 0,88 / 2,70 |
+| só as deslistadas | 604 | 0,091 · 2,18 · 1,56 · 1,05 / 2,24 | 0,142 · 3,28 · 3,90 · 0,80 / 2,70 |
+
+**O sinal está lá, e não prova.** O coeficiente é quatro a seis vezes o das
+avaliadas, positivo nos dois horizontes e nas duas amostras, e sobrevive ao mês
+pulado. Com o `t` comum — o da §6 —, passaria de 2 com folga. Com o que as coortes
+sobrepostas permitem dizer, não passa em nenhum horizonte. **A leitura da
+[decisão 95](../decisoes/095-a-recusa-por-liquidez-fica-pelo-nivel-e-nao-pela-ordenacao.md)
+de que "a ordenação sobreviveu" fica como direção, e não como prova.**
+
+**O nível continua fora**: o potencial mediano dos soltos é de −25,4%, contra
+−51,5% das avaliadas. **A recusa por liquidez fica, pela razão que a decisão 95
+deu.**
+
+**O B/M, por grupo, com as deslistadas:**
+
+| grupo | n | IC 12m · corrigido / crítico | IC 36m · corrigido / crítico |
+|---|---:|---|---|
+| avaliadas | 3.672 | 0,094 · 1,61 / 2,24 | **0,179 · 3,09 / 2,70** |
+| todas as recusadas | 7.191 | **0,132 · 3,20 / 2,24** | **0,254 · 3,75 / 2,70** |
+| só liquidez | 4.190 | **0,121 · 2,51 / 2,24** | 0,204 · 1,77 / 2,70 |
+| só histórico curto | 1.334 | 0,039 · 0,51 / 2,24 | 0,212 · 1,84 / 2,70 |
+| nenhuma via aplicável | 332 | 0,110 · 0,86 / 2,35 | 0,225 · 0,90 / 2,72 |
+
+**O recorte da §0 do plano sobrevive à correção**: o B/M ordena mais nas
+recusadas do que nas avaliadas, e passa no critério nas duas amostras em 36 meses.
+Nas deslistadas sozinhas, o B/M dos recusados só por liquidez não ordena — IC de
+−0,008 em 12 meses e de 0,030 em 36.

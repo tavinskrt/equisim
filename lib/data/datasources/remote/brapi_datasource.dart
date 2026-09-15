@@ -251,17 +251,20 @@ class BrapiDatasource {
         if (currentData?['marketCap'] != null)
           'marketCap': currentData!['marketCap'],
       };
-      // **Sem snapshot corrente, os campos de hoje ficam ausentes** — e não
-      // com o valor da linha anual. A resposta vazia é ausência declarada, e
-      // não falha (decisão 77); mas o `marketCap` da linha anual é o do fim do
-      // exercício, e o inflado pela unit nas units, e a contagem é a do
+      // **Campo de hoje que o snapshot corrente não traz fica ausente** — e
+      // não com o valor da linha anual. A resposta vazia é ausência declarada,
+      // e não falha (decisão 77); mas o `marketCap` da linha anual é o do fim
+      // do exercício, e o inflado pela unit nas units, e a contagem é a do
       // exercício, que já está em `sharesOutstandingAsOf`. Nenhum descreve
-      // hoje, e ausência não é o valor errado.
-      if (currentData == null) {
-        fields
-          ..remove('sharesOutstanding')
-          ..remove('enterpriseToEbitda')
-          ..remove('marketCap');
+      // hoje, e ausência não é o valor errado. **Campo a campo**, e não só com
+      // o snapshot inteiro ausente: um corrente que traga a contagem e omita o
+      // valor de mercado deixava o anual no lugar (lente `dados`, 15/09/2026).
+      for (final campo in const [
+        'sharesOutstanding',
+        'enterpriseToEbitda',
+        'marketCap',
+      ]) {
+        if (currentData?[campo] == null) fields.remove(campo);
       }
       snapshots.add(
         BrapiFundamentalsDto(fiscalPeriodEnd: date, fields: fields)

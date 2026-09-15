@@ -14,9 +14,12 @@ import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
-import 'populated_state.dart' show comparisonOf, outcomeOf;
+import 'populated_state.dart' show comparisonOf, outcomeOf, valuationOf;
 import 'ui_test.dart' show serieLonga;
 
 /// Regressao de layout: nenhuma tela pode estourar em largura suportada nem
@@ -83,11 +86,16 @@ Asset _asset(String symbol, String sector) => Asset(
 /// chamada: `comparisonProvider` ja e sobrescrito aqui, e o Riverpod recusa o
 /// mesmo provider duas vezes no mesmo container. `null` reproduz o estado
 /// vazio, que e o padrao da matriz.
-List<Override> _overrides({PortfolioComparison? comparacao}) => <Override>[
+List<Override> _overrides({
+  PortfolioComparison? comparacao,
+  ValuationResult? avaliacao,
+  List<CalibratedBandTable> faixas = const [],
+}) => <Override>[
   currentUserIdProvider.overrideWithValue(null),
   marketAnchorsProvider.overrideWith((ref) async => MarketAnchors.fallback2026),
   savedStudiesProvider.overrideWith((ref) async => const <PortfolioStudy>[]),
-  valuationProvider.overrideWith((ref, ticker) async => null),
+  valuationProvider.overrideWith((ref, ticker) async => avaliacao),
+  calibratedBandsProvider.overrideWith((ref) async => faixas),
   portfolioValuationsProvider.overrideWith(
     (ref) async => const <Ticker, ValuationResult>{},
   ),
@@ -104,15 +112,22 @@ Future<void> _pump(
   required double escala,
   bool comAtivos = false,
   PortfolioComparison? comparacao,
+  ValuationResult? avaliacao,
+  List<CalibratedBandTable> faixas = const [],
 }) async {
   tester.view.devicePixelRatio = 1.0;
   // Altura generosa quando a tela vem populada: o `SliverList` so infla os
   // cartoes que entram na viewport, e um estouro fora dela nao seria visto.
-  tester.view.physicalSize = Size(largura, comparacao == null ? 900 : 6000);
+  final populada = comparacao != null || avaliacao != null;
+  tester.view.physicalSize = Size(largura, populada ? 6000 : 900);
   addTearDown(tester.view.reset);
 
   final container = ProviderContainer(
-    overrides: _overrides(comparacao: comparacao),
+    overrides: _overrides(
+      comparacao: comparacao,
+      avaliacao: avaliacao,
+      faixas: faixas,
+    ),
   );
   addTearDown(container.dispose);
 
@@ -238,6 +253,58 @@ void main() {
             isNull,
             reason:
                 'BacktestPage populada estourou o layout em '
+                '${largura.toInt()} dp sob escala ${escala}x.',
+          );
+        }, skip: pendente != null);
+      }
+    }
+  });
+
+  // ---------------------------------------------------------------------
+  // ValuationPage POPULADA
+  //
+  // A tela vazia so mostra o estado sem avaliacao, e nao constroi o preco, o
+  // modelo, a faixa calibrada, os cenarios, a sensibilidade nem as ressalvas.
+  // Foi o teste da faixa calibrada em 320 dp que achou o grafico de
+  // sensibilidade estourando 134 px -- e so em 1,0x. A matriz inteira fecha o
+  // que aquele teste deixou de fora: 1,3x e 2,0x.
+  // ---------------------------------------------------------------------
+  group('ValuationPage populada', () {
+    final faixas = CalibratedBandCodec.decode(
+        jsonDecode(File(calibratedBandAsset).readAsStringSync())
+            as Map<String, dynamic>);
+    final avaliacao = valuationOf('PETR4', justo: 1234.56, mercado: 987.65)
+        .withWarnings(const [
+      ('O capital proprio responde por 27,4% do valor da firma, dentro da '
+          'faixa em que nenhuma das duas vias domina. O preco justo combina as '
+          'duas com peso de 49,3% para a firma.'),
+      ('A taxa livre de risco segue a curva dos titulos prefixados do Tesouro '
+          'de 10/09/2026: 14,2% a.a. no primeiro ano, 12,9% a.a. no ano 10 e '
+          '12,6% a.a. na perpetuidade.'),
+    ]);
+    for (final largura in _larguras) {
+      for (final escala in _escalas) {
+        final pendente =
+            _pendentesPopulada[_chave('ValuationPage', largura, escala)];
+
+        testWidgets('cabe em ${largura.toInt()} dp sob ${escala}x'
+            '${pendente == null ? '' : '  [PENDENTE: $pendente]'}', (
+          tester,
+        ) async {
+          await _pump(
+            tester,
+            ValuationPage(ticker: Ticker.parse('PETR4')),
+            largura: largura,
+            escala: escala,
+            avaliacao: avaliacao,
+            faixas: faixas,
+          );
+
+          expect(
+            tester.takeException(),
+            isNull,
+            reason:
+                'ValuationPage populada estourou o layout em '
                 '${largura.toInt()} dp sob escala ${escala}x.',
           );
         }, skip: pendente != null);

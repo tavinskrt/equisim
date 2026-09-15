@@ -153,3 +153,28 @@ não o de outra com nome parecido: o fechamento com direito que a B3 publica é 
 do papel da ponte no mesmo dia. Os proventos ficam por papel em
 `data/b3/deslistadas_contagem.json`, para o retorno total das coortes das
 deslistadas (C1b).
+
+## 8. Refeito com a ponte ampliada, e para as listadas — itens C1d e C3
+
+Refeito em 15/09/2026, na mesma ferramenta, depois do C1d ampliar a ponte de 164
+para 189 companhias.
+
+**Nas deslistadas**, os números do §4 ao §7 passam a ser: 185 de 189 companhias
+com contagem por data; 73 eventos declarados localizados no preço e 22 inferidos;
+formulário contra composição a 2% em 2.013 de 2.314 datas; P/VPA na faixa em 933
+de 940 exercícios; 148 companhias com proventos, e 1.906 de 1.932 preços com
+direito batendo com o COTAHIST a 1%. Entraram eventos não localizados das
+companhias novas — o desdobramento de 2013 da Tupy, o de 2011 da BRF, o
+grupamento de 2010 da Contax —, e a coorte cuja janela os atravessa sai.
+
+**E a série sai também para as listadas** (`data/b3/listadas_contagem.json`), para
+a coorte formar o valor de mercado pela contagem da data (item C3): 291 companhias
+do universo, com os eventos declarados localizados no preço dos códigos que a
+companhia usou — os da ponte do universo, os que a FCA declara e as espécies da
+raiz de cada um —, 241 de 467. A escala é a do §5.1: 281 de 291 emissores batem a
+1% com a contagem oficial da B3 em 14/09/2026.
+
+**Nas duas, a série leva a divisão entre ordinárias e preferenciais**
+(`ClassesDoCapital`), lida do mesmo quadro de capital social com a mesma regra de
+data: cada aprovação vale pela primeira declaração dela. É o que o valor de
+mercado espécie a espécie usa.

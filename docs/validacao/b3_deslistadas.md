@@ -84,3 +84,77 @@ exercício da CVM. **Faltam duas coisas antes de uma coorte usá-la:**
 
 O arquivo `data/b3/ponte_deslistadas.json` fica fora do git, como toda base
 bruta: é reproduzível pelas duas ferramentas.
+
+## 6. As que ficaram sem ponte — item C1d
+
+Medido em 15/09/2026 por `python tool/b3_ponte.py`, depois de levantar, uma a uma,
+as companhias com ação em bolsa e sem ponte. Registro de cada uma em
+[ponte_deslistadas_registro.json](ponte_deslistadas_registro.json).
+
+### 6.1 Por que ficavam fora
+
+Das 128 que o levantamento achou sobre a base de hoje — eram 126 no §4 —, a
+causa se divide assim:
+
+| causa | companhias |
+|---|---:|
+| último DFP antes de 2017: não chega à primeira coorte, de 2018 | 46 |
+| **o código tem pregão, e a companhia estava na lista de hoje quando a ponte foi montada** | **2** |
+| código declarado sem pregão à vista de lote padrão | 35 |
+| a FCA declara algo que não é ticker — `0000`, `N/A`, as quatro letras do emissor | 43 |
+| sem código e sem nome que case | 2 |
+
+**As duas do meio são as grandes.** A BRF (BRFS3) e a Petz (PETZ3) saíram da bolsa
+por incorporação em 2025. A ponte excluía a companhia com ticker em
+`universo.json`, e elas estavam lá quando foi montada; a coorte, porém, não as
+tinha como listadas, porque a fonte de preços não as devolve mais. Ficavam sem as
+duas pontas — e a BRF é das maiores companhias do período. **Pela mesma razão**,
+a Tupy (TUPY3), a Sequoia (SEQL3) e a Contax (CTAX3), listadas em
+`universo.json` e sem série na fonte, não estavam em amostra nenhuma.
+
+### 6.2 O que mudou na ponte
+
+- **Viva é quem as coortes observam como listada**, e não a lista de hoje. O
+  backtest grava o universo que usou em
+  [universo_coortes.json](universo_coortes.json), e a ponte o lê. No backtest,
+  papel da ponte que já entrou como listado na coorte não entra de novo.
+- **Código de emissor.** Parte da FCA declara as quatro letras do emissor em vez
+  do ticker; o COTAHIST as tem no ISIN. Com os anos de DFP e de pregão tocando,
+  e um emissor só.
+- **Nome contido e nome curto.** O nome do COTAHIST dentro do nome empresarial,
+  com seis letras ou mais, ou nome de três a quatro letras que também é a raiz do
+  ISIN. Com um candidato só e os anos tocando, como a regra do nome.
+
+**As doze ligações por nome relaxado foram revisadas uma a uma**, e todas são a
+companhia certa: NET (NETC3), TAM (TAMM3), Vivo Participações (VIVO3), BHG
+(BHGR3), Amil (AMIL3), Raia (RAIA3), Sofisa (SFSA4), Daycoval (DAYC4),
+Providência (PRVI3), Cacique (CIQU3), Schlosser (SCLO3) e DHB (DHBI3). As três
+por código de emissor: Prio Forte (DMMO3, que antes casava por nome), Fiação São
+José (SJOS3) e OranjeBTC (OBTC3).
+
+### 6.3 A cobertura depois
+
+| | antes | depois |
+|---|---:|---:|
+| fora do universo das coortes e com ação em bolsa | 290 | 301 |
+| **ligadas** | **164** | **189** |
+| por código | 122 | 133 |
+| por código de emissor | — | 3 |
+| por nome | 42 | 41 |
+| por nome relaxado | — | 12 |
+| sem ponte | 126 | 112 |
+
+Entraram 26 e saiu uma: a Marfrig, que agora é listada nas coortes pelo MBRF3,
+com o preço de antes do novo código encadeado pela FCA (item C3). Duas das 26 —
+a Livetech da Bahia (WDCN3) e a União Pet (AUAU3) — entraram na segunda passada:
+o backtest trimestral as tirou do universo das coortes, porque só negociam depois
+de 30/09/2025, e a ponte refeita as ligou. **A ponte convergiu nisso**: elas não
+têm pregão em data de coorte nenhuma, e o backtest não muda com elas. **Das 112 sem
+ponte, nenhuma tem código com pregão**: 36 terminam antes da janela das coortes,
+35 declaram código que nunca negociou à vista em lote padrão — papel de balcão
+organizado ou sem negócio —, 40 declaram código que não é ticker, e uma, a Inepar
+Equipamentos, não tem código na FCA nem nome que case com emissor do COTAHIST.
+
+A contagem por data do A3.4 cobre 185 das 189; os proventos, 148 companhias, com
+1.906 de 1.932 preços com direito batendo com o COTAHIST a 1%; e a classificação
+da B3 respondeu para 12 das 26 novas.

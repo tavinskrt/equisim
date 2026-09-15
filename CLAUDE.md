@@ -145,8 +145,8 @@ O hook de pre-commit bloqueia a forma direta e permite a forma com `??`.
 
 ## 4. Convenções de domínio
 
-Moeda é BRL: 2 casas, arredondamento half-up. Quantidade de ação e cota de FII
-é **inteira**.
+Moeda é BRL: 2 casas, arredondamento half-up. Quantidade de ação é **inteira**
+(o projeto não tem FII desde a decisão 0).
 
 - Selic/CDI são publicados em % ao ano na **base 252 dias úteis**. Converta
   por composição — `(1+i)^(1/252)-1` —, **nunca** por `i/252`.

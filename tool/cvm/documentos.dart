@@ -55,11 +55,16 @@ FundamentalsSnapshot _snap(
 
 /// Documentos por ticker, da base ingerida.
 ///
+/// - [tickersPorCnpj]: tickers a mais para cada CNPJ. A ingestão só liga
+///   ticker à companhia do universo de hoje; as deslistadas (item C1b) chegam
+///   com a lista vazia, e o ticker delas vem da ponte do COTAHIST.
+///
 /// Encerra o processo com código 2 quando a base não existe, dizendo o que
 /// rodar antes.
 Map<String, List<CvmPeriodDocument>> carregarDocumentos(
   String caminho, {
   Set<String>? soTickers,
+  Map<String, List<String>>? tickersPorCnpj,
 }) {
   final f = File(caminho);
   if (!f.existsSync()) {
@@ -70,7 +75,10 @@ Map<String, List<CvmPeriodDocument>> carregarDocumentos(
   final out = <String, List<CvmPeriodDocument>>{};
   for (final e in (jsonDecode(f.readAsStringSync()) as List)
       .cast<Map<String, dynamic>>()) {
-    final tickers = (e['tickers'] as List).cast<String>();
+    final tickers = [
+      ...(e['tickers'] as List).cast<String>(),
+      ...?tickersPorCnpj?[e['cnpj']],
+    ];
     if (tickers.isEmpty) continue;
     final fim = _data(e['fimDoExercicio']);
     final ini = _data(e['inicioDoPeriodo']);

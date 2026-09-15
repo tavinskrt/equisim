@@ -30,15 +30,28 @@ void main() {
     }
   });
 
-  test('a cobertura fora da amostra fica a até 5 p.p. da nominal — o critério '
-      'do R2', () {
+  // **A cobertura declarada é a medida** (decisão 97). Até 15/09/2026 este teste
+  // exigia a cobertura a até 5 p.p. da nominal, e passava — sobre coortes com o
+  // preço na base de ações de hoje. Na montagem corrigida a faixa não cobre, e
+  // o critério do R2 continua sendo esse: ele mora na §7 do plano, desmarcado,
+  // e o item C2c o persegue. O que o pacote não pode é declarar ao aplicativo
+  // uma cobertura diferente da que a ferramenta mediu.
+  test('a cobertura fora da amostra do pacote é a que cobertura_banda mediu', () {
     final tabelas = CalibratedBandCodec.decode(
         jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>);
+    final medicao = jsonDecode(
+        File('docs/validacao/cobertura_banda_trimestral.json')
+            .readAsStringSync()) as Map<String, dynamic>;
+    Map<String, dynamic> campo(Map<String, dynamic> m, String k) =>
+        m[k] as Map<String, dynamic>;
     for (final t in tabelas) {
       expect(t.outOfSampleCoverage, isNotNull);
-      expect((t.outOfSampleCoverage! - t.nominal).abs(), lessThanOrEqualTo(0.05),
-          reason: '${t.months} meses a ${t.nominal}: '
-              '${t.outOfSampleCoverage} fora da amostra');
+      final horizonte = campo(campo(medicao, 'horizontes'), '${t.months}');
+      final cobertura =
+          campo(campo(campo(horizonte, 'recalibrada'), 'justo'), 'cobertura');
+      final medida = cobertura['${(t.nominal * 100).round()}%'] as num;
+      expect(t.outOfSampleCoverage, closeTo(medida / 100, 1e-9),
+          reason: '${t.months} meses a ${t.nominal}');
       // A faixa central mais larga contém a mais estreita.
       final estreita = CalibratedBand.select(tabelas,
           months: t.months, nominal: t.nominal - 0.1);

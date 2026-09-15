@@ -188,6 +188,14 @@ export const LENTES: Record<LenteId, Lente> = {
       'NAO proponha trocar de biblioteca de rede ou de banco local. Dio e Drift',
       '  sao decisao registrada.',
       'NAO especule sobre comportamento da API que o material nao demonstre.',
+      'O RetryInterceptor reemite pelo mesmo cliente e passa de novo pelo',
+      '  ThrottleInterceptor, e isso NAO e deadlock: o onError dos',
+      '  interceptores corre na ordem de insercao, e o limitador libera a vaga',
+      '  antes de o repetidor reemitir. Apontado quatro vezes e conferido',
+      '  quatro vezes; o teste "rajada acima do teto de concorrencia, toda com',
+      '  429, nao trava" em test/data/network_and_quality_test.dart o prova, e',
+      '  reprova quando a liberacao sai. So reaponte mostrando o caminho que',
+      '  aquele teste nao cobre.',
     ],
     materiais: [
       {
@@ -197,6 +205,7 @@ export const LENTES: Record<LenteId, Lente> = {
         excluir: GERADOS,
       },
       { tipo: 'arquivo', caminho: 'functions/index.js' },
+      { tipo: 'arquivo', caminho: 'test/data/network_and_quality_test.dart' },
       { tipo: 'arquivo', caminho: 'firestore.rules', opcional: true },
       { tipo: 'diretorio', caminho: 'docs/decisoes', extensoes: ['.md'], opcional: true },
     ],

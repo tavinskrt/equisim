@@ -180,3 +180,9 @@ Isso não invalida o backtest para o que ele mede — a ordenação do universo,
 onde 116 dos 127 não são afetados. Invalida-o como evidência sobre a ponte por
 papel, e é o que fica declarado em
 [limitacoes.md §3.5](limitacoes.md).
+
+**Resolvido em 15/09/2026, pelo item C3.** A coorte passou a formar o preço, a
+contagem e o valor de mercado na base de ações da data, e a razão de unidade e o
+divisor deixaram de colapsar. O que a medição achou — a razão confere com a
+composição declarada em 141 de 220 observações de unit, e erra quando as espécies
+negociam a preços diferentes — está em [ponte_por_papel.md](ponte_por_papel.md).

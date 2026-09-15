@@ -14,7 +14,7 @@ export const PROJECT_CONTEXT = `
 ## Contexto do projeto auditado
 
 Equisim -- simulador de valuation (DCF/CAPM), backtest de carteira e metricas de
-desempenho para acoes e FIIs da B3. Publico: investidor pessoa fisica brasileiro.
+desempenho para acoes da B3 (sem FII, desde a decisao 0). Publico: investidor pessoa fisica brasileiro.
 
 Stack:
 - App:      Flutter / Dart 3 (Riverpod, Drift, fl_chart, intl pt_BR).
@@ -37,7 +37,7 @@ RESTRICOES DE ARQUITETURA QUE VOCE DEVE RESPEITAR (nao negocie com elas):
 
 3. A moeda e o Real (BRL): 2 casas decimais, arredondamento half-up e a
    convencao do mercado brasileiro. Quantidade de acoes e INTEIRA (lote
-   fracionario tambem e inteiro). Cotas de FII sao inteiras.
+   fracionario tambem e inteiro).
 
 4. Convencoes do mercado brasileiro que voce deve assumir como corretas:
    - Taxa de juros do BCB (Selic/CDI) e publicada como % ao ano na base 252

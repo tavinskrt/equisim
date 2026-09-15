@@ -93,6 +93,27 @@ em 36 meses, contra 31% dos avaliados, e a cauda de baixo do realizado, que deci
 a borda inferior da faixa calibrada, é a que as quebras esconderiam. Remedir as
 duas com as deslistadas são os itens C2b e C0b.
 
+**Atualizado em 15/09/2026: as deslistadas da ponte entram nas coortes** (item
+C1b, decisão 93) — 444 observações de 86 companhias, 106 delas avaliadas, com a
+CVM pelo CNPJ, o COTAHIST ajustado pelos eventos até a data, a contagem do FRE e
+o setor da B3 ou o representante do setor da CVM. **O viés pesou no nível, e não
+na ordenação**: com elas, os recusados por liquidez rendem 68% em média em 36
+meses, e o potencial deles continua ordenando além do B/M; a faixa calibrada
+continua cobrindo, e a cauda de baixo não desceu. **O que resta do viés**: as
+126 companhias com ação em bolsa e sem ponte, e as 48 observações que saem por
+evento não localizado ou salto na série.
+
+**Atualizado à tarde: a ponte chegou a 189 companhias** (item C1d). Das 128 que
+ficavam sem ela, duas eram grandes e o motivo era da própria ponte: a BRF e a
+Petz, incorporadas em 2025, estavam na lista de hoje quando ela foi montada, e a
+fonte de preços já não as traz. A ponte passou a excluir só quem as coortes
+observam como listado, e ganhou o código de emissor e o nome relaxado, revisados
+um a um. **Das 112 que seguem sem ponte, nenhuma tem código com pregão**: 36
+terminam antes da janela das coortes, e as outras declaram código que nunca
+negociou à vista ou que não é ticker — registro companhia a companhia em
+[ponte_deslistadas_registro.json](ponte_deslistadas_registro.json). Nas coortes
+trimestrais entram 1.864 observações de 103 deslistadas, 449 avaliadas.
+
 ### 1.4. Limite de requisições inobservável
 
 A API **não expõe nenhum cabeçalho de rate limit** — verificado: nenhum
@@ -787,6 +808,18 @@ nas listadas e contra a composição do capital do DFP e do ITR nas deslistadas
 formar o valor de mercado pela contagem **daquela data**, e a ponte por papel
 deixa de colapsar para `u = 1`. **Ligá-la às coortes é o C1**, da Fase 2.
 
+**Resolvido em 15/09/2026, e o defeito era maior que a limitação** (item C3,
+[decisão 97](../decisoes/097-a-coorte-forma-preco-contagem-e-valor-de-mercado-na-base-da-data.md)).
+O preço da coorte das listadas estava **na base de ações de hoje** — a fonte o
+publica ajustado por todo evento posterior —, e a contagem do exercício, na base
+daquele ano. Uma em cada três observações estava fora da base da data, e uma em
+cinco por mais de 1,5 vez; o defeito olhava para a frente, e fazia parecer barata
+a companhia que depois desdobrou. A coorte passou a montar preço, contagem e valor
+de mercado na base da data, e a ponte por papel passou a ser exercitada: a razão
+de unidade confere com a composição declarada em 141 de 220 observações de unit,
+e a unit e a espécie da mesma companhia concordam a 1,5% na mediana, contra 80%
+antes. Ver [ponte_por_papel.md](ponte_por_papel.md) e a §3.13.
+
 ### 3.6. A cascata não supera um fator de valor de uma linha
 
 **É a limitação mais importante do trabalho, e a última a ser medida.**
@@ -826,6 +859,24 @@ Nenhuma favorece o motor seletivamente.
 
 Reprodução: `python tool/habilidade.py`. Plano de ataque em
 [plano-motor-de-referencia.md](../plano-motor-de-referencia.md).
+
+**Atualizado em 15/09/2026, sobre o motor de hoje.** Com a montagem do aplicativo
+na data de cada coorte, o retorno total, as deslistadas da ponte e o `t` que
+corrige a sobreposição das janelas (itens C1a e C1b), o coeficiente do potencial
+condicionado ao book-to-market em 36 meses é de **0,070, com `t` de 1,24** — o
+menor entre o comum e o de Newey-West, que com cinco coortes estreitou o erro por
+autocovariância negativa. Sem as deslistadas, 0,068 e 1,04. **A conclusão não
+muda.** Ver [habilidade_aplicativo.md](habilidade_aplicativo.md).
+
+**Remedido à tarde, com o instrumento pronto, e as medições acima carregam o
+defeito de base** (§3.5). Na base da data, com 31 coortes trimestrais e as
+deslistadas da ponte ampliada, o potencial condicionado ao book-to-market em 36
+meses tem coeficiente de **0,030**, com `t` corrigido pela sobreposição de 0,24
+contra o crítico de 2,70 (decisão 96). **A conclusão continua — e o fator de uma
+linha fica menor do que parecia**: nas mesmas observações, o IC do B/M em 36 meses
+cai de 0,255 para 0,151 quando o preço vai à base da data. O defeito inflava os
+dois sinais de valor, e o B/M mais. Não é o veredito do R3, que fica para o fim
+das fases. Ver [habilidade_trimestral.md](habilidade_trimestral.md).
 
 ### 3.7. Ação em tesouraria não é tratada em lugar nenhum
 
@@ -868,6 +919,14 @@ série não recuava, e as guardas leram dois anos como um: QUAL3 de −22% a
 +908%. O baixador passou a listar anos ausentes em vez de pular em silêncio.
 
 **Para resolver.** A CVM republicar o arquivo. Nada do lado do motor.
+
+**Resolvido em 15/09/2026.** A CVM republicou `itr_cia_aberta_2025.zip` em
+14/09/2026, às 11h06, com 30 MB. Baixado e reingerido: 42.145 documentos
+montados, 31.299 deles ITR — eram 29.218 —, com ativo igual a passivo em 42.015
+de 42.021. A série ancorada deixa de recuar em 2025, e as coortes trimestrais do
+item C1c a usam. Só o arquivo de 2025 foi baixado de novo: os de 2022 a 2024
+têm data de 13/09/2026 no diretório da CVM, e a cópia local, de 14/09/2026, já é
+posterior a ela.
 
 ### 3.8. O motor é sensível à janela do exercício
 
@@ -958,11 +1017,21 @@ tem.
 **Estado.** Resolvido na tela pela [decisão 92](../decisoes/092-a-incerteza-e-a-faixa-calibrada-e-os-cenarios-sao-sensibilidade.md):
 os cenários se declaram sensibilidade, e a incerteza apresentada é a faixa
 calibrada fora da amostra, que cobre a até 5 p.p. da nominal em 12 e 36 meses.
-**O que continua limitação:** a faixa é larga — de 0,62 a 9,2 vezes o preço justo
-na de 80% em 12 meses —, a calibração é marginal e não por ativo, os 36 meses
-têm duas coortes de teste, e a amostra é dos sobreviventes (§1.3, item C2b).
+**O que continua limitação:** a faixa é larga — de 0,64 a 10,7 vezes o preço justo
+na de 80% em 12 meses —, a calibração é marginal e não por ativo, e os 36 meses
+têm duas coortes de teste. **A amostra deixou de ser só a dos sobreviventes em
+15/09/2026** (item C2b, decisão 94): com as deslistadas da ponte, a faixa cobre a
+até 5 p.p. da nominal, e o pacote passou a sair dessa amostra; as 126 companhias
+com ação em bolsa e sem ponte seguem fora.
 
-### 3.12. O preço converge ao preço justo um quarto do caminho em 36 meses
+**Desfeito à tarde, na base da data** (§3.5, decisão 97). A faixa calibrada fechava
+os 5 p.p. sobre coortes com o preço na base de ações de hoje. Na montagem
+corrigida, trimestral e com as deslistadas, ela cobre **84,8/74,9/49,1% em 12
+meses e 83,6/73,0/47,0% em 36**, fora da amostra, e seis formas de recalibrar não
+fecharam os dois horizontes. O aplicativo mostra a faixa com a cobertura medida e
+diz que ela não está calibrada. Ver [cobertura_banda.md](cobertura_banda.md) §8.
+
+### 3.12. O preço converge ao preço justo um quarto do caminho em 36 meses — e menos de um décimo na base da data
 
 **Medido em 14/09/2026.** Na regressão `log(W/P₀) = a + b·log(V/P₀)` sobre as
 coortes, com `W` o preço mais proventos realizado e `V` o preço justo da data,
@@ -978,6 +1047,31 @@ não entregou.
 
 **Para resolver.** Entra no B1 do [plano](../plano-motor-de-referencia.md): o
 que o potencial é para servir decide se ele precisa de prazo, e qual.
+
+**Remedido em 15/09/2026, na base da data** (§3.5): `b` de **0,019 em 12 meses e
+0,077 em 36**, nas coortes trimestrais com as deslistadas. O um quarto era, em
+parte, o defeito de base, que dava ao preço justo e ao realizado o mesmo erro. Ver
+[cobertura_banda.md](cobertura_banda.md) §8.
+
+### 3.13. A razão de unidade inferida do valor de mercado erra com ágio entre espécies
+
+**Medido em 15/09/2026, nas coortes na base da data.** `quotedUnitRatio` mede
+`contagem × preço da unit ÷ valor de mercado`, e o resultado só é o número de
+ações da unit quando ordinária e preferencial valem o mesmo. Contra a composição
+que a FCA declara, ele acerta **141 de 220** observações de unit: a SANB11 em 31 de
+31, a SAPR11 e a TAEE11 em 30, a ENGI11 em 4, a IGTI11 e a BRBI11 em nenhuma. Em 49
+a razão cai em 1 — a ON da ALUP11 de 2019 negociava 35% acima da PN, e a razão foi
+de 2,69 —, em 12 cai no inteiro errado dentro da folga, e em 18 a companhia não
+tem espécie negociando.
+
+**Efeito.** Unit com a razão errada é avaliada por ação, e o potencial sai de três
+a cinco vezes errado — ou 25% errado, no inteiro vizinho, sem aviso. No aplicativo,
+as nove units passaram em 04/09/2026 (decisão 61), mas a convenção do valor de
+mercado da fonte não é conhecida, e é ela que decide se o erro aparece.
+
+**Para resolver.** Item B16 do [plano](../plano-motor-de-referencia.md): a
+composição declarada entra no pacote do aplicativo, e a razão medida vira
+conferência.
 
 ## 4. O que foi verificado, e como
 
