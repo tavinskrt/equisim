@@ -1,7 +1,9 @@
+import '../../di/providers.dart';
 import '../theme/fin_space.dart';
 import '../components/fin_amount.dart';
 import '../shared/theme_bridge.dart';
 import 'feasibility_copy.dart';
+import 'skill_copy.dart';
 import '../shared/ui_kit.dart';
 import '../study/study_notifier.dart';
 import '../theme/fin_colors.dart';
@@ -87,6 +89,12 @@ class _GoalPageState extends ConsumerState<GoalPage> {
     final isLight = ref.watch(isLightModeProvider);
     final feasibility = ref.watch(goalFeasibilityProvider);
     final alignment = ref.watch(goalAlignmentProvider);
+    // Enquanto o pacote carrega não há ressalva a mostrar; carregado, a falta
+    // dele é ressalva também (item B1.0).
+    final habilidade = ref.watch(skillReadingProvider);
+    final ressalvaDaHabilidade = habilidade.isLoading
+        ? null
+        : SkillCopy.caveat(habilidade.value);
 
     // `CustomScrollView`, e nao `ListView`: cada cartao vira um sliver proprio,
     // entao o framework so infla os que entram na viewport -- e cada um ganha a
@@ -176,7 +184,11 @@ class _GoalPageState extends ConsumerState<GoalPage> {
                               'retorno esperado com a rentabilidade exigida.',
                         ),
                       )
-                    : _AlignmentCard(alignment: value, isLight: isLight),
+                    : _AlignmentCard(
+                        alignment: value,
+                        isLight: isLight,
+                        skillCaveat: ressalvaDaHabilidade,
+                      ),
               ),
             ],
           ),
@@ -423,7 +435,14 @@ class _AlignmentCard extends StatelessWidget {
   final GoalAlignment alignment;
   final bool isLight;
 
-  const _AlignmentCard({required this.alignment, required this.isLight});
+  /// A ressalva sobre o prêmio tirado do potencial, ou `null` (item B1.0).
+  final String? skillCaveat;
+
+  const _AlignmentCard({
+    required this.alignment,
+    required this.isLight,
+    required this.skillCaveat,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -481,6 +500,13 @@ class _AlignmentCard extends StatelessWidget {
           // `Ke = Rf + β·prêmio` é retorno TOTAL pelo CAPM. Mandar somar um
           // yield a ele contava o provento duas vezes, no sentido que faz a
           // carteira parecer melhor do que é.
+          // O prêmio do esperado sai do potencial, e a ressalva diz o que a
+          // validação mediu dele. Vem antes da de cobertura porque vale para
+          // toda carteira, e a de cobertura só para a que tem pouca avaliação.
+          if (skillCaveat case final ressalva?) ...[
+            const Gap.md(),
+            NoticeBanner(icon: Icons.rule_outlined, message: ressalva),
+          ],
           if (alignment.coverageIsWeak) ...[
             const Gap.md(),
             NoticeBanner(

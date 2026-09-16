@@ -1,10 +1,10 @@
 {
  "fonte": "docs/validacao/backtest_trimestral.json",
- "observacoes": 10863,
+ "observacoes": 10874,
  "fatorDeBase": {
-  "observacoesDasListadas": 8999,
+  "observacoesDasListadas": 9010,
   "faixas": {
-   "ate2pct": 6035,
+   "ate2pct": 6046,
    "de2a10pct": 261,
    "de10a50pct": 1068,
    "acimaDe1vezEMeia": 1635
@@ -18,23 +18,23 @@
    "2019-03-31": "119/231",
    "2019-06-30": "116/235",
    "2019-09-30": "113/238",
-   "2019-12-31": "106/240",
-   "2020-03-31": "103/241",
-   "2020-06-30": "99/250",
-   "2020-09-30": "99/268",
-   "2020-12-31": "103/276",
-   "2021-03-31": "105/290",
-   "2021-06-30": "106/306",
-   "2021-09-30": "107/323",
+   "2019-12-31": "106/241",
+   "2020-03-31": "103/242",
+   "2020-06-30": "99/251",
+   "2020-09-30": "99/269",
+   "2020-12-31": "103/277",
+   "2021-03-31": "105/291",
+   "2021-06-30": "106/307",
+   "2021-09-30": "107/324",
    "2021-12-31": "97/317",
-   "2022-03-31": "101/323",
+   "2022-03-31": "101/324",
    "2022-06-30": "97/317",
-   "2022-09-30": "98/325",
+   "2022-09-30": "98/326",
    "2022-12-31": "98/325",
    "2023-03-31": "97/323",
    "2023-06-30": "90/328",
    "2023-09-30": "87/324",
-   "2023-12-31": "86/325",
+   "2023-12-31": "86/326",
    "2024-03-31": "80/320",
    "2024-06-30": "70/323",
    "2024-09-30": "67/325",
@@ -47,7 +47,7 @@
  "origemDoValorDeMercado": {
   "listada:umaEspecie": 5403,
   "listada:especies": 3408,
-  "listada:contagemDoExercicio": 170,
+  "listada:contagemDoExercicio": 181,
   "deslistada:umaEspecie": 1267,
   "deslistada:especies": 594,
   "deslistada:contagemVezesPreco": 3,
@@ -113,16 +113,16 @@
    }
   },
   "naoUnitsComRazaoMaiorQueUm": 16,
-  "naoUnitsMedidas": 8740
+  "naoUnitsMedidas": 8751
  },
  "divisor": {
   "origem": {
    "official": 10676,
    "onlyAvailable": 15,
-   "market": 155
+   "market": 166
   },
   "candidatasDivergem": 869,
-  "medidos": 10846
+  "medidos": 10857
  },
  "unitContraEspecie": {
   "pares": 75,

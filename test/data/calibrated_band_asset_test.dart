@@ -30,12 +30,11 @@ void main() {
     }
   });
 
-  // **A cobertura declarada é a medida** (decisão 97). Até 15/09/2026 este teste
-  // exigia a cobertura a até 5 p.p. da nominal, e passava — sobre coortes com o
-  // preço na base de ações de hoje. Na montagem corrigida a faixa não cobre, e
-  // o critério do R2 continua sendo esse: ele mora na §7 do plano, desmarcado,
-  // e o item C2c o persegue. O que o pacote não pode é declarar ao aplicativo
-  // uma cobertura diferente da que a ferramenta mediu.
+  // **A cobertura declarada é a medida.** O pacote não pode dizer ao aplicativo
+  // uma cobertura diferente da que a ferramenta mediu, e a forma do pacote é a
+  // que a regra da §9 de `cobertura_banda.md` escolheu — hoje a da volatilidade
+  // (decisão 100). Até 15/09/2026 este teste exigia a cobertura a até 5 p.p. da
+  // nominal; o critério do R2 mora na §7 do plano, e quem o persegue é o C2c.
   test('a cobertura fora da amostra do pacote é a que cobertura_banda mediu', () {
     final tabelas = CalibratedBandCodec.decode(
         jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>);
@@ -44,21 +43,55 @@ void main() {
             .readAsStringSync()) as Map<String, dynamic>;
     Map<String, dynamic> campo(Map<String, dynamic> m, String k) =>
         m[k] as Map<String, dynamic>;
+    final forma = campo(medicao, 'regraDoPacote')['forma'] as String;
     for (final t in tabelas) {
       expect(t.outOfSampleCoverage, isNotNull);
       final horizonte = campo(campo(medicao, 'horizontes'), '${t.months}');
-      final cobertura =
-          campo(campo(campo(horizonte, 'recalibrada'), 'justo'), 'cobertura');
-      final medida = cobertura['${(t.nominal * 100).round()}%'] as num;
+      final medidas = t is VolatilityBandTable
+          ? campo(campo(campo(horizonte, 'formaFixada'), 'formas'), forma)
+          : campo(campo(horizonte, 'recalibrada'), 'justo');
+      final medida =
+          campo(medidas, 'cobertura')['${(t.nominal * 100).round()}%'] as num;
       expect(t.outOfSampleCoverage, closeTo(medida / 100, 1e-9),
           reason: '${t.months} meses a ${t.nominal}');
       // A faixa central mais larga contém a mais estreita.
       final estreita = CalibratedBand.select(tabelas,
           months: t.months, nominal: t.nominal - 0.1);
-      if (estreita != null) {
-        expect(t.lowerFactor, lessThanOrEqualTo(estreita.lowerFactor));
-        expect(t.upperFactor, greaterThanOrEqualTo(estreita.upperFactor));
+      if (estreita == null) continue;
+      switch ((t, estreita)) {
+        case (FairValueBandTable(:final lowerFactor, :final upperFactor),
+              FairValueBandTable estreita):
+          expect(lowerFactor, lessThanOrEqualTo(estreita.lowerFactor));
+          expect(upperFactor, greaterThanOrEqualTo(estreita.upperFactor));
+        case (VolatilityBandTable(:final a, :final b, :final zLower, :final zUpper),
+              VolatilityBandTable estreita):
+          // O centro é o mesmo nas três frequências do horizonte; o que muda
+          // são os quantis.
+          expect(a, closeTo(estreita.a, 1e-12));
+          expect(b, closeTo(estreita.b, 1e-12));
+          expect(zLower, lessThanOrEqualTo(estreita.zLower));
+          expect(zUpper, greaterThanOrEqualTo(estreita.zUpper));
+        case _:
+          fail('o pacote mistura formas em ${t.months} meses');
       }
+    }
+  });
+
+  // A faixa da volatilidade precisa do preço e da volatilidade do papel; a do
+  // justo, não. O aplicativo lê a que estiver no pacote, e o cartão de
+  // avaliação passa os dois.
+  test('a faixa do pacote se forma com o que a avaliação tem', () {
+    final tabelas = CalibratedBandCodec.decode(
+        jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>);
+    for (final t in tabelas) {
+      final faixa = CalibratedBand.of(
+        Money.fromReais(42.80),
+        t,
+        marketPrice: Money.fromReais(33.15),
+        volatility: 0.42,
+      );
+      expect(faixa, isNotNull, reason: '${t.months} meses a ${t.nominal}');
+      expect(faixa!.low.cents, lessThan(faixa.high.cents));
     }
   });
 

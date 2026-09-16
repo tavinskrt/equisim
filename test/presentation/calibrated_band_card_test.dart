@@ -24,13 +24,19 @@ void main() {
       jsonDecode(File(calibratedBandAsset).readAsStringSync())
           as Map<String, dynamic>);
 
+  // A avaliação que a tela recebe. É variável porque a família de providers não
+  // aceita ser sobrescrita duas vezes no mesmo contêiner, e um dos casos precisa
+  // de uma avaliação sem volatilidade.
+  ValuationResult? Function(String) avaliacao =
+      (simbolo) => valuationOf(simbolo, justo: 42.80);
+
   Widget tela(List<Override> overrides) => ProviderScope(
         overrides: [
           currentUserIdProvider.overrideWithValue('usuario-1'),
           marketAnchorsProvider
               .overrideWith((ref) async => MarketAnchors.fallback2026),
-          valuationProvider.overrideWith(
-              (ref, ticker) async => valuationOf(ticker.value, justo: 42.80)),
+          valuationProvider
+              .overrideWith((ref, ticker) async => avaliacao(ticker.value)),
           isLightModeProvider.overrideWith(() => IsLightMode(inicial: false)),
           ...overrides,
         ],
@@ -60,7 +66,12 @@ void main() {
       expect(find.text('Em 36 meses'), findsOneWidget);
       // R$ 42,80 vezes os fatores da faixa de 80% em 12 meses, lidos do pacote.
       final t = CalibratedBand.select(tabelas, months: 12, nominal: 0.8)!;
-      final b = CalibratedBand.around(Money.fromReais(42.80), t)!;
+      final b = CalibratedBand.of(
+        Money.fromReais(42.80),
+        t,
+        marketPrice: valuationOf('PETR4', justo: 42.80).marketPrice,
+        volatility: valuationOf('PETR4', justo: 42.80).priceVolatility,
+      )!;
       expect(find.textContaining(Fmt.money(b.low.reais)), findsOneWidget);
       // A cobertura de cada horizonte aparece como foi medida.
       final t36 = CalibratedBand.select(tabelas, months: 36, nominal: 0.8)!;
@@ -79,11 +90,13 @@ void main() {
   // amostra, a até 5 pontos (decisão 97). O pacote de hoje não cobre, e a tela
   // tem de dizê-lo; uma tabela sintética calibrada confere o outro caminho.
   CalibratedBandTable comCobertura(int meses, double cobertura) =>
-      CalibratedBandTable(
+      VolatilityBandTable(
         months: meses,
         nominal: 0.8,
-        lowerFactor: 0.7,
-        upperFactor: 8,
+        a: 0.08,
+        b: 0.03,
+        zLower: -1.2,
+        zUpper: 1.2,
         observations: 1000,
         firstCohort: 2018,
         lastCohort: 2025,
@@ -94,7 +107,7 @@ void main() {
   for (final (rotulo, coberturas, esperado, ausente) in [
     (
       'calibrada',
-      (0.79, 0.82),
+      (0.79, 0.804),
       'Em 8 de cada 10 avaliações passadas',
       'não está calibrada',
     ),
@@ -125,6 +138,34 @@ void main() {
           findsOneWidget);
     });
   }
+
+  // A faixa da volatilidade precisa da volatilidade do papel, e a avaliação a
+  // traz da mesma série que a cascata usou. Sem ela — papel com menos de 120
+  // pregões na janela —, o cartão some em vez de inventar uma largura.
+  testWidgets('sem a volatilidade do papel, o cartão não aparece',
+      (tester) async {
+    tester.view.physicalSize = const Size(1024, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    avaliacao = (simbolo) => ValuationResult(
+          ticker: Ticker.parse(simbolo),
+          asOf: DateTime(2024, 12, 31),
+          model: ValuationModel.dcfEarnings,
+          fairValue: Money.fromReais(42.80),
+          marketPrice: Money.fromReais(33.15),
+          discountRate: 0.132,
+        );
+    addTearDown(() => avaliacao = (s) => valuationOf(s, justo: 42.80));
+
+    await tester.pumpWidget(tela([
+      calibratedBandsProvider.overrideWith((ref) async => tabelas),
+    ]));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('FAIXA CALIBRADA'), findsNothing);
+  });
 
   testWidgets('sem pacote, o cartão não aparece e a sensibilidade fica',
       (tester) async {

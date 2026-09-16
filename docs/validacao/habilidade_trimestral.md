@@ -25,7 +25,7 @@ sobre `docs/validacao/backtest_trimestral.json` (de
 | preço e valor de mercado | preço na base de ações de **hoje** × contagem do exercício | **na base da data**: fator medido no COTAHIST, contagem do FRE, valor de mercado espécie a espécie (C3) |
 | deslistadas | 164 companhias da ponte | **189** (C1d) — com a BRF, a Petz, a Tupy, a Sequoia, a Azul |
 | `t` do critério | o menor entre o comum e o de Newey-West | **corrigido pela sobreposição contra o crítico dela, e Newey-West acima de 2** |
-| observações | 3.077, 951 avaliadas | **10.863, 3.672 avaliadas** |
+| observações | 3.077, 951 avaliadas | **10.874, 3.673 avaliadas** |
 
 **As deslistadas.** Em 31 coortes, 2.039 observações de papel da ponte
 negociavam na data; 170 saíram por evento não localizado ou salto, e 54 porque o
@@ -34,7 +34,7 @@ companhias, com 449 avaliadas, de 33. Das companhias que o C1d trouxe, a Tupy
 entra em 31 coortes e é avaliada em todas; a BRF, em 31, avaliada em 15; a Azul
 em 29, a Petz em 21, a Sequoia em 19 — essas três sempre recusadas.
 
-**As listadas.** 8.999 observações, 3.223 avaliadas; 1.077 saem por não ter
+**As listadas.** 9.010 observações, 3.224 avaliadas; 1.077 saem por não ter
 pregão no COTAHIST a até dez dias da data — antes, entravam com o último preço da
 fonte, de qualquer idade.
 

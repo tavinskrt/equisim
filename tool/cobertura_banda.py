@@ -40,6 +40,16 @@ terminado" passa a ser comparado em data: a coorte de 31/03/2019 calibra a de
 31/03/2020 em doze meses, e não a de 30/09/2019. ``--so-setembro`` refaz a
 medição só com as coortes de 30/09, para comparar com as anuais.
 
+**A forma fixada antes de medir (C2b, quarta rodada).** A §9 de
+``docs/validacao/cobertura_banda.md`` registrou, antes de medir, uma sétima
+forma e o que fazer com o resultado: a convergência parcial na escala da
+volatilidade do papel — ``z = (log(W/P0) − a − b·log(V/P0)) / σ``, com ``σ`` a
+volatilidade dos 252 pregões até a data (campo ``volatilidade`` do backtest,
+``CalibratedBand.trailingVolatility``). ``forma_fixada`` a mede com as formas de
+controle sobre as mesmas observações, e ``regra_do_pacote`` aplica a regra
+registrada: passa nos dois horizontes, ou não é pior que a do justo, e vai ao
+aplicativo; senão, o aplicativo fica com a do justo.
+
 Entrada: ``docs/validacao/backtest_trimestral.json``, de
 ``dart run tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas
 --trimestral``.
@@ -200,6 +210,161 @@ def cruzada(linhas: list[dict]) -> dict:
                           + ", ".join(f"{nom:.0%} → {x / n:.1%}" for nom, (x, n) in cob.items() if n))
         out[str(h)] = H
     return out
+
+
+FORMA_FIXADA = "convergência na escala da volatilidade"
+FORMAS_DE_CONTROLE = ("justo", "convergência parcial")
+FOLGA_PP = 5.0
+
+
+def _desvio_maximo(cob: dict) -> float | None:
+    lidas = [abs(100 * x / n - 100 * nom) for nom, (x, n) in cob.items() if n]
+    return round(max(lidas), 1) if lidas else None
+
+
+def dispersao_entre_coortes(linhas: list[dict], h: int) -> dict:
+    """O que a §9 leu antes de fixar a forma: nível e dispersão de log(W/V) por coorte.
+
+    Descritivo, sem cobertura de forma nenhuma: o desvio da mediana entre coortes
+    contra o desvio médio dentro delas, e o P5 e o P95 de cada coorte.
+    """
+    k = f"ret{h}tot"
+    por = defaultdict(list)
+    for l in linhas:
+        if l.get("upside") is not None and l.get("justo") and l["justo"] > 0 and l.get(k) is not None:
+            por[l["coorte"]].append(math.log(l["preco"] * (1 + l[k]) / l["justo"]))
+    medianas = [st.median(v) for _, v in sorted(por.items())]
+    return {
+        "desvioDaMedianaEntreCoortes": round(st.pstdev(medianas), 3) if len(medianas) > 1 else None,
+        "desvioMedioDentroDasCoortes": round(st.mean(st.pstdev(v) for v in por.values()), 3) if por else None,
+        "porCoorte": {str(c): {"n": len(v), "mediana": round(st.median(v), 3),
+                               "p5": round(quantil(v, 0.05), 3), "p95": round(quantil(v, 0.95), 3)}
+                      for c, v in sorted(por.items())},
+    }
+
+
+def forma_fixada(linhas: list[dict], h: int) -> dict:
+    """A forma da §9 e os controles, fora da amostra, sobre as mesmas observações.
+
+    Só entram observações com preço justo positivo, retorno total no horizonte e
+    ``volatilidade`` positiva. A calibragem de cada coorte de teste é a da §8:
+    as coortes cujo horizonte já tinha terminado, com 30 observações no mínimo.
+    """
+    k = f"ret{h}tot"
+    elegiveis = [l for l in linhas
+                 if l.get("upside") is not None and l.get("justo") and l["justo"] > 0
+                 and l.get(k) is not None]
+    com_sigma = [l for l in elegiveis if (l.get("volatilidade") or 0) > 0]
+    por = defaultdict(list)
+    for l in com_sigma:
+        u = math.log(l["justo"] / l["preco"])
+        r = math.log(l["preco"] * (1 + l[k]) / l["preco"])
+        por[l["coorte"]].append((u, r, l["volatilidade"], bool(l.get("deslistada"))))
+    coortes = sorted(por)
+    todos_u = sorted(u for g in por.values() for u, *_ in g)
+    c1, c2 = (quantil(todos_u, 1 / 3), quantil(todos_u, 2 / 3)) if todos_u else (0, 0)
+    formas = (FORMA_FIXADA, *FORMAS_DE_CONTROLE)
+    cob = {f: {nom: [0, 0] for nom in NOMINAIS} for f in formas}
+    por_coorte = {f: defaultdict(dict) for f in formas}
+    tercil = {f: [[0, 0], [0, 0], [0, 0]] for f in formas}
+    grupo = {f: {"listadas": [0, 0], "deslistadas": [0, 0]} for f in formas}
+    abaixo = {f: 0 for f in formas}
+    for c in coortes:
+        cal = [x for cc, g in por.items() if terminou(cc, c, h) for x in g]
+        if len(cal) < 30:
+            continue
+        a, b = mqo([u for u, *_ in cal], [r for _, r, *_ in cal])
+        escores = {
+            "justo": lambda u, r, s: r - u,
+            "convergência parcial": lambda u, r, s: r - (a + b * u),
+            FORMA_FIXADA: lambda u, r, s: (r - (a + b * u)) / s,
+        }
+        for f in formas:
+            res = [escores[f](u, r, s) for u, r, s, _ in cal]
+            for nom in NOMINAIS:
+                lo, hi = quantil(res, (1 - nom) / 2), quantil(res, 1 - (1 - nom) / 2)
+                dentro = 0
+                for u, r, s, desl in por[c]:
+                    e = escores[f](u, r, s)
+                    ok = lo <= e <= hi
+                    dentro += ok
+                    if nom == 0.9:
+                        t = 0 if u < c1 else (1 if u < c2 else 2)
+                        tercil[f][t][0] += ok
+                        tercil[f][t][1] += 1
+                        g = grupo[f]["deslistadas" if desl else "listadas"]
+                        g[0] += ok
+                        g[1] += 1
+                        abaixo[f] += e < lo
+                cob[f][nom][0] += dentro
+                cob[f][nom][1] += len(por[c])
+                por_coorte[f][str(c)][f"{nom:.0%}"] = pct(dentro / len(por[c]))
+    out: dict = {
+        "observacoesElegiveis": len(elegiveis),
+        "semVolatilidade": len(elegiveis) - len(com_sigma),
+        "nTeste": cob[FORMA_FIXADA][0.9][1],
+        "formas": {},
+    }
+    for f in formas:
+        n90 = cob[f][0.9][1]
+        out["formas"][f] = {
+            "cobertura": {f"{nom:.0%}": pct(x / n) for nom, (x, n) in cob[f].items() if n},
+            "desvioMaximoPp": _desvio_maximo(cob[f]),
+            "abaixoDa90": pct(abaixo[f] / n90) if n90 else None,
+            "porTercilDePotencial90": [pct(x / n) if n else None for x, n in tercil[f]],
+            "porGrupo90": {g: pct(x / n) if n else None for g, (x, n) in grupo[f].items()},
+            "porCoorte": dict(por_coorte[f]),
+        }
+        print(f"  [{h}m] {f}: n={n90}, "
+              + ", ".join(f"{nom:.0%} → {x / n:.1%}" for nom, (x, n) in cob[f].items() if n)
+              + f"; desvio máximo {_desvio_maximo(cob[f])} p.p.; tercis {out['formas'][f]['porTercilDePotencial90']}; "
+              f"grupos {out['formas'][f]['porGrupo90']}")
+    return out
+
+
+def pacote_da_forma_fixada(linhas: list[dict], h: int, medida: dict) -> list[dict]:
+    """As faixas da forma fixada, com todas as coortes cujo horizonte terminou."""
+    k = f"ret{h}tot"
+    obs = [(math.log(l["justo"] / l["preco"]), math.log(1 + l[k]), l["volatilidade"], l["coorte"])
+           for l in linhas
+           if l.get("upside") is not None and l.get("justo") and l["justo"] > 0
+           and l.get(k) is not None and (l.get("volatilidade") or 0) > 0]
+    a, b = mqo([u for u, *_ in obs], [r for _, r, *_ in obs])
+    z = [(r - (a + b * u)) / s for u, r, s, _ in obs]
+    coortes = sorted({c for *_, c in obs})
+    faixas = []
+    for nom in NOMINAIS:
+        fora = medida["formas"][FORMA_FIXADA]["cobertura"].get(f"{nom:.0%}")
+        faixas.append({
+            "meses": h,
+            "nominal": nom,
+            "a": round(a, 6),
+            "b": round(b, 6),
+            "zInferior": round(quantil(z, (1 - nom) / 2), 6),
+            "zSuperior": round(quantil(z, 1 - (1 - nom) / 2), 6),
+            "observacoes": len(obs),
+            "primeiraCoorte": ano_da_coorte(coortes[0]),
+            "ultimaCoorte": ano_da_coorte(coortes[-1]),
+            "coberturaForaDaAmostra": None if fora is None else round(fora / 100, 3),
+            "observacoesForaDaAmostra": medida["nTeste"],
+        })
+    return faixas
+
+
+def regra_do_pacote(medidas: dict) -> tuple[str, str]:
+    """A regra registrada na §9: qual forma vai ao aplicativo, e por quê."""
+    fixada = [medidas[h]["formas"][FORMA_FIXADA] for h in ("12", "36")]
+    justo = [medidas[h]["formas"]["justo"] for h in ("12", "36")]
+    if all(m["desvioMaximoPp"] is not None and m["desvioMaximoPp"] <= FOLGA_PP for m in fixada):
+        return FORMA_FIXADA, "passa a até 5 p.p. nos dois horizontes"
+    # Horizonte sem coorte de teste não tem desvio, e conta como o pior.
+    pior_fixada = max(math.inf if m["desvioMaximoPp"] is None else m["desvioMaximoPp"] for m in fixada)
+    pior_justo = max(math.inf if m["desvioMaximoPp"] is None else m["desvioMaximoPp"] for m in justo)
+    if pior_fixada <= pior_justo:
+        return FORMA_FIXADA, (f"não passa, e o maior desvio dela ({pior_fixada} p.p.) não é maior "
+                              f"que o da forma em torno do justo ({pior_justo} p.p.)")
+    return "justo", (f"não passa, e o maior desvio dela ({pior_fixada} p.p.) é maior que o da "
+                     f"forma em torno do justo ({pior_justo} p.p.)")
 
 
 def main() -> None:
@@ -374,6 +539,10 @@ def main() -> None:
                   + f"; largura 90% {[round(x, 1) for x in larguras]}×; tercis de potencial "
                   f"{[pct(x / n) if n else None for x, n in cob_tercil]}")
         H["recalibrada"] = recal
+        # --- 3b. A forma fixada antes de medir (§9 do documento) -------------
+        H["dispersaoEntreCoortes"] = dispersao_entre_coortes(linhas, h)
+        if any("volatilidade" in l for l in linhas):
+            H["formaFixada"] = forma_fixada(linhas, h)
         saida["horizontes"][str(h)] = H
 
         # --- 4. O pacote do aplicativo --------------------------------------
@@ -395,13 +564,25 @@ def main() -> None:
                 "observacoesForaDaAmostra": recal["justo"]["nTeste"],
             })
 
+    conteudo_do_pacote = {"versao": 1, "fonte": entrada.as_posix(), "faixas": faixas}
+    medidas = {h: H["formaFixada"] for h, H in saida["horizontes"].items() if "formaFixada" in H}
+    if len(medidas) == 2:
+        forma, razao = regra_do_pacote(medidas)
+        saida["regraDoPacote"] = {"forma": forma, "razao": razao}
+        print(f"\nregra da §9: o aplicativo recebe a forma '{forma}' — {razao}")
+        if forma == FORMA_FIXADA:
+            conteudo_do_pacote = {
+                "versao": 2,
+                "fonte": entrada.as_posix(),
+                "forma": "convergenciaNaVolatilidade",
+                "faixas": [f for h in (12, 36) for f in pacote_da_forma_fixada(linhas, h, medidas[str(h)])],
+            }
     saida_arq.write_text(json.dumps(saida, ensure_ascii=False, indent=1), encoding="utf-8")
     if args.sem_pacote:
         print(f"gravado {saida_arq}")
         return
     pacote.parent.mkdir(parents=True, exist_ok=True)
-    pacote.write_text(json.dumps({"versao": 1, "fonte": entrada.as_posix(), "faixas": faixas},
-                                 ensure_ascii=False), encoding="utf-8")
+    pacote.write_text(json.dumps(conteudo_do_pacote, ensure_ascii=False), encoding="utf-8")
     print(f"gravado {saida_arq} e {pacote}")
 
 

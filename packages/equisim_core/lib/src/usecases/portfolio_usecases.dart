@@ -92,9 +92,11 @@ class GoalAlignment {
   /// que a estrutura a termo e o terminal neutro impõem ao custo de capital
   /// brasileiro: com potencial mediano de −39,4% no universo elegível, ela
   /// devolvia retorno esperado negativo para a carteira mediana e nenhuma meta
-  /// era alcançável, por construção. O que a avaliação sustenta com firmeza é a
-  /// **ordenação** entre ativos, e é só ela que este número usa — ver
-  /// `ExpectedReturn.crossSection`.
+  /// era alcançável, por construção. Este número usa só a **ordenação** entre
+  /// ativos — ver `ExpectedReturn.crossSection` —, **e a ordenação não tem
+  /// habilidade demonstrada**: condicionado ao book-to-market, o potencial não
+  /// passa no critério da decisão 96 nas coortes da validação. A tela de metas
+  /// diz isso com o número medido (item B1.0, `SkillReading`).
   ///
   /// Não há parcela de provento **somada**: o `Ke` do CAPM já é o retorno
   /// total esperado, dividendo incluído (decisão 62). A simulação da carteira,

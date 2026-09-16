@@ -7,6 +7,7 @@ import '../entities/price_series.dart';
 import '../entities/valuation.dart';
 import '../failures/failure.dart';
 import '../failures/result.dart';
+import '../services/valuation/calibrated_band.dart';
 import '../services/valuation/capital_base.dart';
 import '../services/valuation/concession_sectors.dart';
 import '../services/valuation/financial_sectors.dart';
@@ -1323,6 +1324,7 @@ abstract final class ValuationCascade {
       model: peso >= 0.5 ? firma.model : acionista.model,
       fairValue: justo,
       marketPrice: firma.marketPrice,
+      priceVolatility: firma.priceVolatility,
       marginOfSafety: firma.marginOfSafety,
       discountRate: mistura(firma.discountRate, acionista.discountRate),
       warnings: [
@@ -3027,6 +3029,9 @@ abstract final class ValuationCascade {
     required ValuationDiagnostics diagnostics,
   }) {
     final source = (scenarioBuilder ?? DiscreteScenarios.around)(assumptions);
+    final volatilidade = inputs.prices == null
+        ? null
+        : CalibratedBand.trailingVolatility(inputs.prices!);
     final outcome = ScenarioEngine.run(
       source: source,
       valuate: valuate,
@@ -3048,6 +3053,7 @@ abstract final class ValuationCascade {
           'Cenários não puderam ser gerados; apresentado apenas o cenário base.',
         ],
         diagnostics: diagnostics,
+        priceVolatility: volatilidade,
       );
     }
 
@@ -3078,6 +3084,7 @@ abstract final class ValuationCascade {
       distribution: scenarios.distribution,
       warnings: local,
       diagnostics: diagnostics,
+      priceVolatility: volatilidade,
     );
   }
 

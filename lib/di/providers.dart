@@ -20,6 +20,7 @@ import '../data/datasources/remote/tesouro_datasource.dart';
 import '../data/repositories/b3_registry_repository.dart';
 import '../data/repositories/cash_dividends_repository.dart';
 import '../data/repositories/calibrated_band_repository.dart';
+import '../data/repositories/skill_reading_repository.dart';
 import '../data/repositories/concession_term_repository.dart';
 import '../data/repositories/cvm_fundamentals_repository.dart';
 import '../data/repositories/market_repositories.dart';
@@ -236,6 +237,20 @@ final calibratedBandRepositoryProvider = Provider<CalibratedBandRepository>(
 /// (decisão 92). Vazio sem pacote.
 final calibratedBandsProvider = FutureProvider<List<CalibratedBandTable>>(
     (ref) => ref.watch(calibratedBandRepositoryProvider).tables());
+
+/// Caminho da leitura da habilidade empacotada (item B1.0).
+const String skillReadingAsset = 'assets/validacao/habilidade.json';
+
+final skillReadingRepositoryProvider = Provider<SkillReadingRepository>(
+  (ref) => SkillReadingRepository(
+    carregarPacote: () => rootBundle.loadString(skillReadingAsset),
+  ),
+);
+
+/// A habilidade do potencial medida nas coortes (decisão 96), ou `null` sem
+/// pacote.
+final skillReadingProvider = FutureProvider<SkillReading?>(
+    (ref) => ref.watch(skillReadingRepositoryProvider).reading());
 
 /// Caminho das cotações recentes do Tesouro empacotadas (item A2.1).
 const String tesouroQuotesAsset = 'assets/tesouro/curva.json';

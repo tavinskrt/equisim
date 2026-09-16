@@ -261,3 +261,138 @@ diz a cobertura e que a faixa não está calibrada.
 |---|---|---|---|
 | 12 meses (3.550) | 1,26 a 4,29× | **0,76 a 8,16×** | 0,54 a 12,81× |
 | 36 meses (2.610) | 1,29 a 4,86× | **0,69 a 9,97×** | 0,41 a 15,56× |
+
+**Remedida na quarta rodada**, sobre a execução com a volatilidade do papel, que
+reproduz esta com um papel a mais no universo da fonte: 84,8 / 74,9 / **49,0**%
+e 83,6 / 73,0 / 47,0% — o terceiro decimal. **O que vai ao aplicativo mudou na
+§10**: a forma fixada antes de medir (§9) cobre, e é ela que o pacote leva.
+
+## 9. A forma fixada antes de medir — quarta rodada, item C2b
+
+**Escrito em 15/09/2026, antes de qualquer cobertura desta forma ser calculada, e
+não alterado depois.** O resultado fica na §10. O que já tinha sido visto quando
+este texto foi escrito está declarado abaixo.
+
+**O que já se sabia, e de onde a forma sai.**
+
+1. **As deslistadas não são a causa.** Calibrada em todas as companhias, a faixa
+   de 90% cobre 90,4% das deslistadas em 12 meses e 96,3% em 36, contra 84,1% e
+   82,1% das listadas ([cobertura_banda_trimestral.json](cobertura_banda_trimestral.json), bloco `c2b`).
+2. **O choque comum às coortes é pequeno, e a cauda de baixo muda.** O desvio da
+   mediana de `log(W/V)` entre coortes é de 0,18 em 12 meses e 0,22 em 36, contra
+   0,98 e 1,13 dentro delas. O P5 de `log(W/V)` vai de +0,05 a +0,27 nas coortes
+   de 2018 para −0,54 a −1,08 nas de 2021 e 2022, em 12 meses; em 36, de −0,23 a
+   +0,09 para −1,06 a −1,26. É um regime de dispersão, e não de nível.
+3. **O centro da forma do aplicativo está errado.** Ela impõe `b = 1` em
+   `log(W/P₀) = a + b·log(V/P₀)`, e o medido é 0,019 em 12 meses e 0,077 em 36
+   (§8); por isso cobre 68,9% e 64,8% no terço de maior potencial.
+4. **A calibragem de 36 meses tem pouca informação.** Cada coorte de teste é
+   calibrada com no máximo dez coortes sobrepostas — 1,4 janela independente pela
+   estrutura da [decisão 96](../decisoes/096-o-t-da-habilidade-e-corrigido-pela-sobreposicao-contra-o-critico-dela.md).
+5. **Seis formas já foram medidas** na terceira rodada (§8). Esta é a sétima, e a
+   única desta rodada.
+
+**A forma: convergência parcial na escala da volatilidade do papel.** É a
+simulação histórica filtrada (Barone-Adesi, Giannopoulos e Vosper, 1999) sobre a
+convergência parcial da §4: a dispersão que muda de regime é levada pela
+volatilidade que se conhece na data, e o centro é o quanto o preço de fato
+convergiu.
+
+- `σ` é o desvio-padrão amostral dos retornos logarítmicos diários do papel nos
+  252 pregões até a data, na série que a própria avaliação usa — a janela do
+  beta —, anualizado por √252. Com menos de 120 retornos, a observação fica sem
+  `σ`.
+- Na calibragem, `a` e `b` saem por mínimos quadrados de `r = log(W/P₀)` sobre
+  `u = log(V/P₀)`, e `z = (r − a − b·u) / σ`. As bordas são os quantis de `z` em
+  `(1 − q)/2` e `(1 + q)/2`.
+- A faixa de um papel é `P₀·exp(a + b·u + σ·z_inferior)` a
+  `P₀·exp(a + b·u + σ·z_superior)`.
+
+**A medição é a da §8, sem mudança.** Cada coorte de teste é calibrada só com as
+coortes cujo horizonte já tinha terminado na data dela, com 30 observações no
+mínimo; 12 e 36 meses; retorno total; listadas e deslistadas; preço justo
+positivo. Só entram observações com `σ`, e as formas de controle — em torno do
+justo, a do aplicativo, e a convergência parcial sem escala — são medidas sobre
+exatamente as mesmas observações.
+
+**O critério é o do R2**: cobertura a até 5 p.p. da nominal nas faixas de 90, 80 e
+50%, em 12 e em 36 meses.
+
+**O que se faz com o resultado.**
+
+- **Passa nos dois horizontes**: a forma vai ao aplicativo, o cartão diz a
+  frequência, e o C2b fecha. O C2c passa a ser remedir esta forma sobre o motor da
+  Fase 3, sem escolher outra.
+- **Não passa em algum**: a forma vai ao aplicativo se o maior desvio dela nas
+  seis leituras não for maior que o da forma em torno do justo nas mesmas
+  observações; se for, o aplicativo fica com a do justo. O cartão diz a cobertura
+  medida. O C2b fecha com a forma fixada e medida, e o R2 fica com o C2c, que
+  remede esta forma sobre o motor da Fase 3 — sem escolher outra — ou declara, por
+  decisão, por que a amostra não fecha o R2.
+- **Em nenhum caso outra forma é medida nesta rodada.**
+
+São informados, sem entrar no critério: a cobertura por coorte, por terço de
+potencial, nas listadas e nas deslistadas, só nas coortes de 30/09, e quantas
+observações ficaram sem `σ`.
+
+## 10. O resultado da forma fixada — e a faixa passa a cobrir
+
+Medido em 15/09/2026 por `python tool/cobertura_banda.py`, sobre a mesma
+montagem da §8 reexecutada com a volatilidade do papel em cada observação
+(`docs/validacao/backtest_trimestral.json`). A execução reproduz a da §8 —
+10.863 observações idênticas, três valores de liquidez e um papel a mais que a
+fonte passou a listar, 10.874 no total. Decisão:
+[100](../decisoes/100-a-faixa-calibrada-sai-da-volatilidade-do-papel-e-o-justo-entra-com-o-peso-medido.md).
+
+**A forma da §9 cobre nos dois horizontes, e é a única que cobre:**
+
+| fora da amostra | 12 meses: 90 / 80 / 50% | desvio | 36 meses: 90 / 80 / 50% | desvio |
+|---|---|---:|---|---:|
+| **convergência na escala da volatilidade** | **87,9 / 79,0 / 50,3** | **2,1 p.p.** | **88,2 / 80,4 / 51,2** | **1,8 p.p.** |
+| em torno do justo (a do aplicativo até aqui) | 84,6 / 74,9 / 48,9 | 5,4 p.p. | 83,5 / 72,8 / 46,6 | 7,2 p.p. |
+| convergência parcial, sem a escala | 85,9 / 78,3 / 49,5 | 4,1 p.p. | 82,6 / 72,5 / 43,9 | 7,5 p.p. |
+
+As três sobre as mesmas observações: 3.136 de teste em 12 meses e 1.271 em 36.
+Ficaram de fora 34 observações em 12 meses e 30 em 36, de 3.551 e 2.611
+elegíveis, por não terem 120 retornos na janela.
+
+**É a escala que conserta, e não o centro.** A convergência parcial sozinha
+melhora 12 meses e piora 36; com a volatilidade dividindo o resíduo, os dois
+passam. O que a §9 diagnosticou era isso: a dispersão muda de regime entre as
+coortes, e a volatilidade que se conhece na data carrega parte dessa mudança.
+
+**Onde ela continua desigual.** Por coorte de teste, a cobertura de 90% vai de
+59,8% (30/09/2019) a 100% (30/09/2023) em 12 meses, e de 70,2% (30/06/2021) a
+96,6% (31/03/2023) em 36 — uma dispersão maior que a da faixa em torno do justo
+(63,6% a 93,3%, e 79,4% a 90,7%). **Ela calibra na média das coortes, não em cada
+uma**, e as piores continuam sendo as primeiras, calibradas com pouca coorte.
+Por terço de potencial ela é uniforme, o que a do justo não era: 88,1 / 88,5 /
+87,0% em 12 meses e 83,0 / 90,6 / 90,9% em 36, contra 88,1 / 97,4 / 68,9% e
+91,6 / 94,8 / 64,3%. Nas deslistadas cobre 86,0% e 94,1%; nas listadas, 88,1% e
+87,5%. Só nas coortes de 30/09: 88,7 / 82,3 / 56,8% e 85,9 / 72,9 / 50,2%.
+
+**O preço justo entra com o peso que a medição deu, e ele é pequeno.** O centro é
+`a + b·log(V/P₀)` com `a = 0,080` e `b = 0,028` em 12 meses, e `a = 0,144` e
+`b = 0,083` em 36. Dobrar o preço justo move a faixa 2% em 12 meses e 6% em 36 —
+o resto é o preço de hoje e a volatilidade do papel. **A faixa que cobre não é
+uma faixa em torno do preço justo**, e o cartão do aplicativo passou a dizer
+isso.
+
+**A faixa de 80% que o aplicativo mostra**, por volatilidade do papel:
+
+| σ do papel | 12 meses | 36 meses |
+|---|---|---|
+| 30% ao ano | 0,76 a 1,57 × o preço | 0,68 a 2,11 × o preço |
+| 60% ao ano | 0,53 a 2,26 × o preço | 0,40 a 3,87 × o preço |
+
+Contra 0,76 a 8,16 × o **preço justo** em 12 meses e 0,69 a 9,97 × em 36, da
+forma anterior. A faixa ficou muito mais estreita porque passou a ser sobre o
+preço, e não sobre um preço justo que erra o realizado por um fator de dezenas.
+
+**O que isto não diz.** Não diz que o preço justo está certo: o erro dele contra
+o realizado continua o da §8, e é justamente por isso que `b` é pequeno. Não diz
+que a faixa de 36 meses está demonstrada: cada coorte de teste é calibrada com o
+equivalente a 1,4 janela independente (§9), e dez coortes de teste sobrepostas
+não são dez observações. **O que ela diz é que a incerteza que o aplicativo
+declara passou a conter o que aconteceu na frequência que promete**, fora da
+amostra, nos dois horizontes — e é isso que o R2 pede.

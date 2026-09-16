@@ -802,6 +802,11 @@ Future<void> main(List<String> args) async {
               'liquidez': liquidez,
               'upsideSemLiquidez': semLiquidez,
               'semNegocio': semNegocio,
+              // A escala da forma do C2b, pela mesma função que o aplicativo
+              // usa sobre a mesma janela (`cobertura_banda.md` §9).
+              'volatilidade': serieDaJanela == null
+                  ? null
+                  : CalibratedBand.trailingVolatility(serieDaJanela),
               'ret12totPulo': totalPulandoUmMes(12),
               'ret36totPulo': totalPulandoUmMes(36),
               'fimDoContrato':

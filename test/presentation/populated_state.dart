@@ -128,6 +128,9 @@ ValuationResult valuationOf(
         ScenarioBand.bull: Money.fromReais(justo * 1.31),
       },
       warnings: const [],
+      // A faixa calibrada da tela de avaliacao sai do preco de hoje, do justo e
+      // desta volatilidade (item C2b): sem ela o cartao nao se forma.
+      priceVolatility: 0.42,
     );
 
 /// Veredito de meta no nivel `demanding`: o unico que exercita ao mesmo tempo

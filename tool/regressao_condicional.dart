@@ -35,8 +35,15 @@
 //   dart run tool/regressao_condicional.dart
 //   dart run tool/regressao_condicional.dart --aplicativo   # C1a e C1b, anuais
 //   dart run tool/regressao_condicional.dart --trimestral   # C1c, C1d e C3
+//   dart run tool/regressao_condicional.dart --pacote-habilidade  # B1.0
+//
+// `--trimestral` grava também `assets/validacao/habilidade.json`, a leitura que a
+// tela de metas mostra (item B1.0); `--pacote-habilidade` regrava só o pacote,
+// a partir de `docs/validacao/habilidade_trimestral.json`, sem remedir.
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:equisim_core/equisim_core.dart' show SkillReadingCodec;
 
 import 'validation/regression.dart';
 
@@ -329,6 +336,11 @@ void _imprimirHorizonte(String titulo, Map<String, dynamic> h) {
 Future<void> main(List<String> args) async {
   if (args.contains('--aplicativo')) return _aplicativo();
   if (args.contains('--trimestral')) return _trimestral();
+  if (args.contains('--pacote-habilidade')) {
+    return _pacoteDaHabilidade(jsonDecode(
+            File('docs/validacao/habilidade_trimestral.json').readAsStringSync())
+        as Map<String, dynamic>);
+  }
   final arquivo = File('docs/validacao/backtest_valuation.json');
   if (!arquivo.existsSync()) {
     stderr.writeln('Falta docs/validacao/backtest_valuation.json. '
@@ -583,6 +595,48 @@ Future<void> _trimestral() async {
         '$h — base antiga', b['baseAntiga'] as Map<String, dynamic>);
   }
   stderr.writeln('\nescrito docs/validacao/habilidade_trimestral.json');
+  _pacoteDaHabilidade(resultado);
+}
+
+/// Caminho do pacote da habilidade que o aplicativo lê (item B1.0).
+const _pacoteHabilidade = 'assets/validacao/habilidade.json';
+
+/// Grava a leitura que a tela de metas mostra: 36 meses, coortes trimestrais,
+/// com as deslistadas — a amostra do R3 (decisões 93 e 96).
+///
+/// O pacote leva os números, e não o veredito: o critério da decisão 96 mora em
+/// `SkillReading.demonstrated`, e o teste do pacote confere que ele concorda
+/// com o `passaR3` desta medição.
+void _pacoteDaHabilidade(Map<String, dynamic> resultado) {
+  Map<String, dynamic> m(Object? v) => v as Map<String, dynamic>;
+  final amostra = m(m(m(resultado['h36'])['trimestral'])['comDeslistadas']);
+  final fm = m(amostra['famaMacBeth']);
+  final dado = m(fm['potencialDadoBm']);
+  final pacote = {
+    'versao': SkillReadingCodec.versao,
+    'fonte': 'docs/validacao/habilidade_trimestral.json',
+    'medidoEm': '${resultado['gerado']}'.substring(0, 10),
+    'horizonteMeses': 36,
+    'coortes': dado['coortes'],
+    'observacoes': amostra['observacoes'],
+    'potencialDadoBookToMarket': {
+      'coeficiente': dado['media'],
+      'tCorrigido': dado['tSobreposicao'],
+      'critico': dado['criticoSobreposicao'],
+      'tNeweyWest': dado['tNeweyWest'],
+    },
+    'icPotencial': m(fm['icPotencial'])['media'],
+    'icBookToMarket': m(fm['icBookToMarket'])['media'],
+  };
+  final leitura = SkillReadingCodec.decode(pacote);
+  if (leitura == null) {
+    stderr.writeln('A leitura da habilidade saiu malformada; o pacote não foi '
+        'gravado.');
+    exit(1);
+  }
+  File(_pacoteHabilidade).writeAsStringSync(jsonEncode(pacote));
+  stderr.writeln('escrito $_pacoteHabilidade — habilidade '
+      '${leitura.demonstrated ? 'comprovada' : 'não comprovada'}');
 }
 
 /// A habilidade sobre a montagem do aplicativo por data, com e sem as

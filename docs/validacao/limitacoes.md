@@ -1028,8 +1028,26 @@ com ação em bolsa e sem ponte seguem fora.
 os 5 p.p. sobre coortes com o preço na base de ações de hoje. Na montagem
 corrigida, trimestral e com as deslistadas, ela cobre **84,8/74,9/49,1% em 12
 meses e 83,6/73,0/47,0% em 36**, fora da amostra, e seis formas de recalibrar não
-fecharam os dois horizontes. O aplicativo mostra a faixa com a cobertura medida e
-diz que ela não está calibrada. Ver [cobertura_banda.md](cobertura_banda.md) §8.
+fecharam os dois horizontes. Ver [cobertura_banda.md](cobertura_banda.md) §8.
+
+**Refeito por outra forma** ([decisão 100](../decisoes/100-a-faixa-calibrada-sai-da-volatilidade-do-papel-e-o-justo-entra-com-o-peso-medido.md),
+[cobertura_banda.md](cobertura_banda.md) §§9 e 10). A faixa que o aplicativo
+mostra passou a sair do preço de hoje, da volatilidade do papel e do preço justo
+com o peso medido, e cobre **87,9/79,0/50,3% em 12 meses e 88,2/80,4/51,2% em 36**,
+fora da amostra. **O que continua limitação**, e mudou de forma:
+
+- **a faixa quase não usa o preço justo.** Com `b = 0,028` em 12 meses e `0,083`
+  em 36, dobrar o preço justo move as bordas 2% e 6%. Ela é uma afirmação sobre
+  onde o preço vai estar, e quase nenhuma sobre o erro do preço justo — esse erro
+  é o da §8, de dezenas de vezes;
+- **ela calibra na média das coortes, e não em cada uma**: de 59,8% a 100% em 12
+  meses e de 70,2% a 96,6% em 36, por coorte de teste;
+- **o 36 meses tem 1,4 janela independente de calibragem**, pela estrutura da
+  sobreposição (decisão 96);
+- **papel com menos de 120 retornos na janela fica sem faixa** — 34 observações em
+  12 meses e 30 em 36, e no aplicativo o cartão some;
+- **a forma foi a sétima tentada** desde a decisão 92, e a réplica sobre o motor
+  da Fase 3 é o item C2c.
 
 ### 3.12. O preço converge ao preço justo um quarto do caminho em 36 meses — e menos de um décimo na base da data
 
@@ -1072,6 +1090,25 @@ mercado da fonte não é conhecida, e é ela que decide se o erro aparece.
 **Para resolver.** Item B16 do [plano](../plano-motor-de-referencia.md): a
 composição declarada entra no pacote do aplicativo, e a razão medida vira
 conferência.
+
+### 3.14. A série de preços das coortes tem no máximo dez anos, e o beta das antigas é de janela curta
+
+**Achado em 15/09/2026**, conferindo um apontamento da lente `dados`. A fonte de
+cotações devolve uma janela fixa de dez anos (`range: '10y'`), e o cache da
+validação guarda o que ela devolve: a série de qualquer listada começa em
+09/09/2016. A janela do beta é de cinco anos e o mínimo do estimador é de 30
+pares — então a coorte de 31/03/2018 estima beta com **383 pregões em vez de
+1.240**, e passa sem ressalva.
+
+**Efeito.** Ruído no `Ke` das coortes de 2018 a 2021, que entra no preço justo
+delas, na medição da habilidade e na da faixa calibrada. Não é viés conhecido, é
+variância — e ela empurra a habilidade medida para baixo. **As deslistadas não
+têm o problema**: a série delas vem do COTAHIST, que o projeto tem desde 2010, de
+modo que as duas metades da amostra não são estimadas na mesma janela.
+
+**Estado.** Registrado como item B17 do plano, a resolver antes da Fase 4. O
+COTAHIST resolve também para as listadas: a montagem na base da data já o lê,
+papel a papel, para medir o fator e refazer o volume (decisão 97).
 
 ## 4. O que foi verificado, e como
 

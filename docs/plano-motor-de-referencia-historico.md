@@ -11,6 +11,76 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O que a quarta rodada encontrou — C2b e B1.0 (15/09/2026)
+
+**O que estava errado na faixa era o centro, e não a amostra.** A terceira rodada
+tinha medido seis formas de recalibrar e nenhuma fechou. Antes de tentar a sétima,
+o diagnóstico foi refeito e escrito: as deslistadas cobrem — 90,4% em 12 meses e
+96,3% em 36 —, o choque comum às coortes é pequeno — desvio de 0,18 entre coortes
+contra 0,98 dentro delas —, e o que muda entre elas é a cauda de baixo, que se
+alarga de 2018 para 2021. A forma do aplicativo impunha `b = 1` — convergência
+total ao preço justo — onde o medido é 0,02 a 0,08, e era isso que a fazia cobrir
+68,9% no terço de maior potencial.
+
+**A forma e a regra foram escritas antes de medir**, na §9 de
+`cobertura_banda.md`, e postas em staging antes de a ferramenta rodar: a
+convergência parcial na escala da volatilidade do papel — a simulação histórica
+filtrada —, medida como a §8 mede, com as formas de controle sobre as mesmas
+observações, e o que fazer com cada resultado. **Ela cobre**: 87,9/79,0/50,3% em
+12 meses e 88,2/80,4/51,2% em 36, fora da amostra, contra 84,6/74,9/48,9% e
+83,5/72,8/46,6% da forma em torno do justo. A regra do pacote virou código
+(`regra_do_pacote`), e não decisão de quem lê o resultado.
+
+**O R2 fechou, e o que ele declara encolheu.** Com `b = 0,028` em 12 meses e
+`0,083` em 36, dobrar o preço justo move a faixa 2% e 6%: a incerteza que o motor
+declara é o preço de hoje mais a volatilidade do papel. A faixa de 80% de um papel
+de 30% de volatilidade vai de 0,76 a 1,57 vez o preço em 12 meses, contra 0,76 a
+8,16 vezes o preço **justo** na forma anterior. É honesta e é modesta — e o erro
+do preço justo contra o realizado continua sendo o da §8, de dezenas de vezes.
+
+**Ela calibra na média das coortes, e não em cada uma.** De 59,8% a 100% em 12
+meses, e de 70,2% a 96,6% em 36 — dispersão maior que a da forma antiga. O 36
+meses continua com 1,4 janela independente de calibragem. A réplica sobre o motor
+da Fase 3 é o C2c, e é ela que separa a sétima tentativa de um ajuste ao teste.
+
+**A tela de metas passou a dizer o que a §0 mediu.** O prêmio somado ao `Ke` sai
+do potencial, e o potencial não comprovou ordenar: a ressalva cita a correlação de
+postos — 0,09 contra 0,18 do book-to-market — e o `t` corrigido de 0,24 contra
+2,70. **A frase sai do pacote da medição**, e o critério da decisão 96 mora no
+núcleo: quando o C1 aprovar, ela some sem mudar código; sem pacote, ela diz que a
+habilidade não foi medida. Era o defeito em produção que a §0 apontou em 11/09, e
+que a conferência de 14/09 encontrou intocado.
+
+**A execução do backtest reproduziu a anterior.** As 10.863 observações são
+idênticas nas comparáveis; mudaram três valores de liquidez e entrou um papel que
+a fonte passou a listar (EQPA7, ilíquido), com 11 observações. As medições
+derivadas foram regeradas e os documentos, corrigidos no terceiro decimal — o
+maior efeito foi no contrafactual das recusas, que ganhou dez observações.
+
+**O que as lentes disseram.** A `dados` levou ao achado maior da rodada: no
+caminho de sucesso, a renovação do cache devolvia o recorte da resposta, e a fonte
+devolve uma janela fixa de dez anos — quando o disco acumular mais que ela, a
+série sairia encurtada justamente quando a rede funciona. Corrigido, com teste que
+reprova sem a correção. **Conferir o achado expôs outra coisa, maior**: a série de
+qualquer listada começa em setembro de 2016, e a coorte de 31/03/2018 estima beta
+com 383 pregões em vez de 1.240, sem ressalva — enquanto as deslistadas, que vêm
+do COTAHIST, têm a janela inteira. Virou o item **B17**, a resolver antes da Fase
+4. A `registro` apontou que a decisão 28 elevou o limiar Φ da 27 sem marcar
+`substitui`; o código aplica 0,60, a 27 diz 0,35, e decisão aceita não se edita —
+entrou a decisão 101, que declara as duas substituições parciais (28 sobre 27 no
+Φ, 89 sobre 23 no provento) e fixa o critério para as próximas. A `tela` não achou
+tensão nas capturas novas. **Não procederam**: as duas da `rumo`, que são o B13 e
+o B10, já no plano; a do `metodo` sobre contagem de ações em `double`, porque a
+contagem do divisor é estimada de valor de mercado sobre preço e arredondá-la
+fingiria precisão que ela não tem — a regra de ação inteira é da simulação, que a
+cumpre. **Ficam registradas sem virar item**: a âncora do retorno esperado ser a
+Selic corrente, que é assunto do B1; a cobertura de payload malformado nos
+datasources de fundamentos e do Tesouro, que entrou no critério do D3; e as três
+da `nucleo` — listas paralelas em `TotalReturnIndex`, `ContributionPlan` sem
+validar o dia do aporte, e a contagem em `double`.
+
+---
+
 ## O que a terceira rodada da Fase 2 encontrou — C1d, C1c e C3 (15/09/2026)
 
 **O preço das coortes estava na base de ações de hoje.** Foi o que o C3 achou ao

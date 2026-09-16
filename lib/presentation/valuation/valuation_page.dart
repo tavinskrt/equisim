@@ -529,12 +529,17 @@ class _ScenarioCard extends ConsumerWidget {
   }
 }
 
-/// Onde o valor realizado caiu, nas coortes, em torno do preço justo
-/// (item C2, decisão 92).
+/// Onde o preço mais os proventos caíram, nas coortes (itens C2 e C2b).
 ///
 /// **É a incerteza medida, e não a sensibilidade.** A banda de cenários desloca
 /// premissas e cobriu 8% do que aconteceu; esta vem do que aconteceu, com a
 /// cobertura fora da amostra declarada. Sem pacote, o cartão não aparece.
+///
+/// **A faixa mudou de forma em 15/09/2026** (decisão 100). A de antes era a
+/// razão entre o realizado e o preço justo, e na montagem corrigida das coortes
+/// ela deixou de cobrir. A que cobre sai do preço de hoje, da volatilidade do
+/// papel e — com o peso que a validação mediu, pequeno — do preço justo. O
+/// cartão diz isso: a faixa não é mais "em torno do preço justo".
 class _CalibratedBandCard extends ConsumerWidget {
   final ValuationResult result;
 
@@ -545,9 +550,10 @@ class _CalibratedBandCard extends ConsumerWidget {
 
   /// Distância da nominal até onde a faixa se diz calibrada — o critério do R2.
   ///
-  /// Na montagem das coortes na base da data (decisão 97) a faixa de 80% cobriu
-  /// 74,9% em 12 meses e 73,0% em 36, fora da amostra: o cartão passa a dizer a
-  /// cobertura medida em vez de afirmar oito em cada dez.
+  /// O cartão só afirma "8 de cada 10" quando a cobertura medida fora da
+  /// amostra fica a até esta distância da nominal nos dois horizontes; senão,
+  /// diz a cobertura e que a faixa não está calibrada. Na forma fixada antes de
+  /// medir no C2b (decisão 100) ela fica: 79,0% em 12 meses e 80,4% em 36.
   static const double folgaDoCriterio = 0.05;
 
   /// Largura abaixo da qual cada horizonte ganha linha própria, em dp.
@@ -560,7 +566,13 @@ class _CalibratedBandCard extends ConsumerWidget {
       for (final meses in const [12, 36])
         if (CalibratedBand.select(tabelas, months: meses, nominal: nominal)
             case final t?)
-          if (CalibratedBand.around(result.fairValue, t) case final b?)
+          if (CalibratedBand.of(
+                result.fairValue,
+                t,
+                marketPrice: result.marketPrice,
+                volatility: result.priceVolatility,
+              )
+              case final b?)
             (tabela: t, faixa: b),
     ];
     if (faixas.isEmpty) return const SizedBox.shrink();
@@ -574,16 +586,26 @@ class _CalibratedBandCard extends ConsumerWidget {
           final c? => (c - nominal).abs() <= folgaDoCriterio,
           null => false,
         });
+    // A forma diz de onde a faixa sai, e as duas dizem coisas diferentes: a do
+    // justo é a razão entre o realizado e ele; a da volatilidade parte do preço
+    // de hoje e usa o justo com o peso medido. Prometer "em torno do preço
+    // justo" na segunda seria o rótulo velho sobre o número novo.
+    final daVolatilidade = faixas.any((f) => f.tabela is VolatilityBandTable);
+    final origem = daVolatilidade
+        ? 'Ela sai do preço de hoje, da volatilidade do papel e do preço justo, '
+            'que entra com o peso que a validação mediu — pequeno, porque o '
+            'preço converge pouco ao justo.'
+        : 'Ela é a razão entre o realizado e o preço justo nas coortes.';
     final leitura = calibrada
         ? 'Em 8 de cada 10 avaliações passadas, o preço mais os proventos '
-            'terminaram nesta faixa em torno do preço justo'
+            'terminaram nesta faixa'
             '${coberturas.isEmpty ? '' : ' — ${coberturas.join(' e ')}, '
-                'medidos fora da amostra'}.'
-        : 'Faixa central de 80% das avaliações passadas em torno do preço '
-            'justo. Medida fora da amostra, ela conteve o preço mais os '
-            'proventos em ${coberturas.isEmpty ? 'uma fração não medida' : coberturas.join(' e ')}'
+                'medidos fora da amostra'}. $origem'
+        : 'Faixa central de 80% das avaliações passadas. Medida fora da '
+            'amostra, ela conteve o preço mais os proventos em '
+            '${coberturas.isEmpty ? 'uma fração não medida' : coberturas.join(' e ')}'
             ' dos casos — a mais de 5 pontos dos 80% que a nomeiam, e por isso '
-            'não está calibrada.';
+            'não está calibrada. $origem';
     return Padding(
       padding: const EdgeInsets.only(bottom: FinSpace.md),
       child: GlassCard(
@@ -592,7 +614,7 @@ class _CalibratedBandCard extends ConsumerWidget {
           children: [
             SectionHeader(
               title: 'Faixa calibrada',
-              subtitle: 'Preço mais proventos, medido nas coortes de validação',
+              subtitle: 'Preço mais proventos no horizonte, medido nas coortes',
             ),
             const Gap.md(),
             // Cada faixa são dois valores em reais: abaixo de
@@ -630,8 +652,8 @@ class _CalibratedBandCard extends ConsumerWidget {
             ),
             const Gap.sm(),
             Text(
-              '$leitura A largura é o tamanho do erro do preço justo contra o '
-              'que aconteceu: não é previsão.',
+              '$leitura A largura é o tamanho do erro medido contra o que '
+              'aconteceu: não é previsão.',
               style: context.finType.caption.copyWith(
                 color: context.fin.textSecondary,
               ),

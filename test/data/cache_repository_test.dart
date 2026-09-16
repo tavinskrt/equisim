@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:equisim/data/config/api_config.dart';
 import 'package:equisim/data/datasources/local/cache_database.dart';
@@ -64,6 +65,38 @@ void main() {
         second.unwrap()[Ticker.parse('PETR4')]!.points.length,
         first.unwrap()[Ticker.parse('PETR4')]!.points.length,
       );
+    });
+
+    // A fonte devolve uma janela fixa de dez anos e a gravação é aditiva: com o
+    // tempo o disco guarda mais do que a resposta traz. O caminho de SUCESSO
+    // devolvia o recorte da resposta, e encurtava a série de quem já tinha
+    // histórico mais longo — pior que o caminho degradado, que lê o disco.
+    test('a renovação devolve o acumulado, e não só a janela que a fonte trouxe',
+        () async {
+      final antigo = DateTime(2001, 3, 15);
+      await db.upsertPrices([
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2001-03-15',
+          close: 3.21,
+          volume: const Value(1000),
+        ),
+      ]);
+      final repository = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: db,
+      );
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+
+      final serie = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
+          .unwrap()[Ticker.parse('PETR4')]!;
+
+      expect(serie.points.first.date, antigo,
+          reason: 'o pregão que só o disco tem precisa sobreviver à renovação');
+      expect(serie.points.first.close, 3.21);
+      expect(serie.points.length, greaterThan(1));
     });
 
     test('cache preserva preços e datas fielmente', () async {

@@ -96,7 +96,13 @@ class PriceRepositoryImpl implements PriceRepository {
     final vieram = fetched.unwrap();
     for (final entry in vieram.entries) {
       await _persist(entry.key, entry.value);
-      out[entry.key] = _slice(entry.value, range);
+      // **O que sai é o disco, e não o que a rede trouxe.** A gravação é
+      // aditiva e a fonte devolve uma janela fixa de dez anos: quando o banco
+      // já acumulou mais do que ela, devolver o recorte da resposta encurtaria
+      // a série no caminho de SUCESSO — pior do que o caminho degradado, que
+      // lê o disco. Sem cache, o recorte da resposta é tudo o que há.
+      out[entry.key] = await _seriesFromCache(entry.key, range) ??
+          _slice(entry.value, range);
     }
     // O lote pode responder e deixar um ativo de fora — série corrompida
     // daquele papel, papel que a fonte deixou de devolver. Para ele a rede

@@ -453,6 +453,15 @@ class ValuationResult {
   /// é montado à mão, fora da cascata.
   final ValuationDiagnostics? diagnostics;
 
+  /// Volatilidade anualizada do papel na janela da avaliação, ou `null`.
+  ///
+  /// É a escala da faixa calibrada na forma que cobre (item C2b): a faixa de um
+  /// papel sai do preço de hoje, do preço justo e dela. Sai com o resultado
+  /// porque vem da **mesma série** que a cascata usou — recalculá-la na tela, de
+  /// outra janela, daria outra faixa. `null` quando a série tem menos de
+  /// `CalibratedBand.volatilityMinimumReturns` retornos.
+  final double? priceVolatility;
+
   /// Agrupa o resultado já apurado. Não calcula nada — o cálculo vive em
   /// `ValuationCascade.evaluate`.
   const ValuationResult({
@@ -468,6 +477,7 @@ class ValuationResult {
     this.distribution,
     this.warnings = const [],
     this.diagnostics,
+    this.priceVolatility,
   });
 
   /// Ressalvas estruturadas do cálculo, vazias quando não há diagnóstico.
@@ -494,6 +504,7 @@ class ValuationResult {
           distribution: distribution,
           warnings: List.unmodifiable([...warnings, ...extra]),
           diagnostics: diagnostics,
+          priceVolatility: priceVolatility,
         );
 
   /// Preço justo já descontado da margem de segurança.

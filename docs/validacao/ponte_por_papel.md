@@ -18,9 +18,9 @@ fonte de preços publica o fechamento ajustado por todo evento de ações até h
 a coorte o multiplicava pela contagem do exercício, que está na base daquele ano.
 O fator entre o fechamento bruto do COTAHIST e o da fonte, no mesmo pregão:
 
-| fator de base, nas 8.999 observações das listadas | observações |
+| fator de base, nas 9.010 observações das listadas | observações |
 |---|---:|
-| a até 2% de 1 | 6.035 |
+| a até 2% de 1 | 6.046 |
 | de 2% a 10% | 261 |
 | de 10% a 50% | 1.068 |
 | **mais de 1,5 vez** | **1.635** |

@@ -143,6 +143,11 @@ abstract final class ExpectedReturn {
   /// DCF, e é ele que a tela de avaliação mostra. Esta é a projeção de
   /// otimização, e só ela.
   ///
+  /// **O prêmio pressupõe que a ordenação informa, e isso não está
+  /// demonstrado**: condicionado ao book-to-market, o potencial não passa no
+  /// critério da decisão 96 nas coortes da validação, e a tela de metas diz
+  /// isso (item B1.0). O que o prêmio deve ser é do item B1.
+  ///
   /// **A âncora era o CDI, e isso subtraía o prêmio de risco inteiro**
   /// (decisão 58). Com ela, uma carteira de ações centrada na seção esperava
   /// exatamente a renda fixa: o prêmio de mercado aparecia só como dispersão em
