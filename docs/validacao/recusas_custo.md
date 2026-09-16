@@ -194,3 +194,28 @@ deu.**
 recusadas do que nas avaliadas, e passa no critério nas duas amostras em 36 meses.
 Nas deslistadas sozinhas, o B/M dos recusados só por liquidez não ordena — IC de
 −0,008 em 12 meses e de 0,030 em 36.
+
+## 8. Sobre o motor da decisão 102 — remedido em 16/09/2026
+
+A decisão 102 tirou a migração de via, e o motor passou a recusar onde o fluxo do
+acionista derivado do da firma não sustenta capital próprio positivo — uma família
+de recusa nova, **capital próprio não positivo pela firma**, com 382 observações
+das coortes. O JSON desta medição é o do motor novo; a §7 registra o de 15/09.
+
+**A pergunta do C0b, de novo:**
+
+| com as deslistadas | n | 12 meses: IC dado o B/M · corrigido / crítico | 36 meses: IC dado o B/M · corrigido / crítico |
+|---|---:|---|---|
+| avaliadas | 3.470 | 0,013 · 0,23 / 2,24 | 0,014 · 0,12 / 2,70 |
+| **soltos do corte de liquidez** | **3.359** | **0,074 · 1,47 / 2,24** | **0,137 · 1,10 / 2,70** |
+| só as listadas | 2.771 | 0,075 · 1,33 / 2,24 | 0,115 · 0,81 / 2,70 |
+| só as deslistadas | 588 | 0,062 · 0,60 / 2,24 | 0,148 · 0,64 / 2,70 |
+
+**A leitura não muda**: a ordenação dos soltos é direção, e não prova. O nível
+continua fora — potencial mediano de −27,6% nos soltos contra −49,4% nas avaliadas
+—, e a recusa por liquidez fica pela razão da decisão 95.
+
+**O book-to-market por grupo, em 36 meses:** nas avaliadas, IC de 0,184 com `t`
+corrigido de **2,67 contra 2,70** — deixa de passar por três centésimos, como na
+medição lado a lado do B1 —; em todas as recusadas, 0,246 com 3,86, e passa; na
+família nova, 0,234 com 1,38.

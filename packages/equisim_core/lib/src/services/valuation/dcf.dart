@@ -757,16 +757,39 @@ abstract final class DcfCalculator {
         'diverge.',
       ));
     }
-    // Com contrato que acaba, o terminal da firma não é perpetuidade, e a
-    // identidade `TV_acionista = TV_firma − D` vale direto: a dívida sai do
-    // capital devolvido (decisão 88).
     final contrato = assumptions.contractYearsAfterHorizon != null &&
         assumptions.terminalReturnOnCapital == null &&
         assumptions.neutralTerminalReturn &&
         p.capitalFinal != null;
-    final fcffTerminal = p.terminal * (assumptions.terminalDiscountRate - gInf);
+    // O fluxo da firma do ano N+1 é o da **perpetuidade**, e não o do terminal
+    // que a projeção devolveu: com contrato, aquele já é o terminal do contrato.
+    // No retorno terminal neutro o terminal perpétuo é `lucro_{N+1}/r`.
+    final perpetuoDaFirma = contrato
+        ? p.lucroFinal * (1 + gInf) / assumptions.terminalDiscountRate
+        : p.terminal;
+    final fcffTerminal =
+        perpetuoDaFirma * (assumptions.terminalDiscountRate - gInf);
     final fcfeTerminal = fcffTerminal - divida * (kdLiquido - gInf);
-    final vt = contrato ? p.terminal - divida : fcfeTerminal / spread;
+    final perpetuo = fcfeTerminal / spread;
+    // **Com contrato que acaba, o terminal do acionista é o perpétuo truncado**
+    // (decisões 88 e 102): o fluxo do acionista durante os anos que faltam, e o
+    // capital devolvido menos a dívida no fim, os dois crescendo a `g` e
+    // descontados ao `Ke`. Em fechado, `VT = VT_∞·(1 − qᴹ) + (K − D)·qᴹ`, com
+    // `q = (1 + g)/(1 + Ke)`: no contrato que acaba no horizonte é `K − D` — o
+    // terminal da firma menos a dívida —, e no contrato sem fim é a
+    // perpetuidade.
+    //
+    // Era `TV_firma − D`, com o terminal da firma ao WACC. A identidade só vale
+    // com as taxas resolvidas; sem elas, o contrato de 21 anos saía **acima** do
+    // perpétuo, porque os dois terminais eram medidos por taxas diferentes.
+    final double vt;
+    if (contrato) {
+      final q = (1 + gInf) / (1 + terminalEquityDiscountRate);
+      final qM = math.pow(q, assumptions.contractYearsAfterHorizon!).toDouble();
+      vt = perpetuo * (1 - qM) + (p.capitalFinal! - divida) * qM;
+    } else {
+      vt = perpetuo;
+    }
     // A perpetuidade também é feita de fluxos que chegam ao longo do ano, e o
     // mesmo levantamento vale para ela — sob a taxa de equilíbrio, que é a que
     // a capitaliza.
@@ -936,6 +959,7 @@ abstract final class DcfCalculator {
       somaDescontada: soma,
       terminal: vt,
       capitalFinal: capital.isFinite ? capital : null,
+      lucroFinal: lucro,
       // A perpetuidade também é feita de fluxos distribuídos no ano, e recebe
       // o mesmo levantamento — sob a taxa de equilíbrio, que é a que a
       // capitaliza.
@@ -952,6 +976,9 @@ class _Projection {
   final double terminalDescontado;
   final double? capitalFinal;
 
+  /// Lucro do ano N, antes da retenção — o que o terminal capitaliza.
+  final double lucroFinal;
+
   const _Projection({
     required this.fluxos,
     required this.descontados,
@@ -959,5 +986,6 @@ class _Projection {
     required this.terminal,
     required this.terminalDescontado,
     this.capitalFinal,
+    required this.lucroFinal,
   });
 }

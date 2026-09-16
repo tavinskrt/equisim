@@ -153,6 +153,9 @@ enum ValuationCaveat {
   baseNormalizadaForte('a base depende de forte correção de um só exercício'),
 
   /// A avaliação começou na via da firma e migrou para a do acionista.
+  ///
+  /// **Não é mais emitida desde a decisão 102**: nenhuma avaliação muda de via.
+  /// Fica para ler resultados gravados antes dela.
   viaMigrada('a via de avaliação mudou no meio do cálculo'),
 
   /// O capital próprio responde por pouco do valor da firma, e o preço por
@@ -174,6 +177,10 @@ enum ValuationCaveat {
   /// a R$ 2,65 ou R$ 33,71 conforme a participação cruzasse 20%. A combinação
   /// remove o degrau; **não remove a discordância**, e é isso que esta
   /// ressalva declara.
+  ///
+  /// **Não é mais emitida desde a decisão 102**: a mistura continuava subindo
+  /// com a taxa, e as duas vias deixaram de se combinar. Fica para ler
+  /// resultados gravados antes dela.
   viasMescladas('o preço justo combina as duas vias'),
 
   /// O fluxo-base não veio do exercício observado: ele foi reconstruído do

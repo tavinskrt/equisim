@@ -695,6 +695,39 @@ void main() {
               'alavancagem');
     });
 
+    test('a faixa que decide se a cobertura fala é a da data, e não a da taxa '
+        'suposta — item B10', () {
+      // Despesa financeira de 14% ao ano, cobertura apertada de 1,3x e
+      // alavancagem baixa: a cobertura só fala se 14% estiver dentro de
+      // `[Rf, Rf + 10 p.p.]`. Medida contra a taxa do CAPM, a resposta mudava com
+      // o cenário — com a Rf a 14,5% a cobertura saía da conta e o custo da
+      // dívida caía 5,5 p.p. —, e o preço justo subia com a taxa.
+      CostOfCapital com({required double rfSuposta, double? referencia}) =>
+          CostOfCapital(
+            capm: CapmInputs(
+                riskFreeRate: rfSuposta,
+                beta: 1.0,
+                marketPremium: CapmInputs.defaultMarketPremium),
+            costOfDebt: 0.14,
+            taxRate: 0.34,
+            equityValue: 100,
+            debtValue: 50,
+            interestCoverage: 1.3,
+            netDebtToEbitda: 0.8,
+            creditReferenceRate: referencia,
+          );
+      // Sem referência, a faixa anda com a taxa suposta: é o degrau.
+      expect(com(rfSuposta: 0.135).effectiveCostOfDebt, closeTo(0.135 + 0.075, 1e-12));
+      expect(com(rfSuposta: 0.145).effectiveCostOfDebt, closeTo(0.145 + 0.013, 1e-12));
+      // Com a referência da data, o veredito é um só, e o custo da dívida sobe
+      // com a taxa suposta, sem saltar.
+      final baixo = com(rfSuposta: 0.135, referencia: 0.125).effectiveCostOfDebt;
+      final alto = com(rfSuposta: 0.145, referencia: 0.125).effectiveCostOfDebt;
+      expect(baixo, closeTo(0.135 + 0.075, 1e-12));
+      expect(alto, closeTo(0.145 + 0.075, 1e-12));
+      expect(alto - baixo, closeTo(0.01, 1e-12));
+    });
+
     test('sem EBITDA positivo, o prêmio é o do pior caso', () {
       const coc = CostOfCapital(
         capm: capmRf,

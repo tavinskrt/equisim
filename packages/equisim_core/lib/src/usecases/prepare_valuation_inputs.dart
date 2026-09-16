@@ -186,6 +186,8 @@ abstract final class PrepareValuationInputs {
       unleveredBeta: betaDesalavancado,
       concessionEnd: concessionEnd,
       dividendsInBeta: beta.dividends,
+      // A taxa da data arbitra a despesa financeira, e não a do cenário (B10).
+      creditReferenceRiskFree: riskFreeRate,
     ));
   }
 

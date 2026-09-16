@@ -407,6 +407,20 @@ void main() {
       expect(withTax, isNotEmpty);
       expect(withTax.every((s) => s.effectiveTaxRate! <= 0.5), isTrue,
           reason: 'a alíquota é limitada para conter exercícios atípicos');
+
+      // Os números de um exercício, e não só a existência deles (lente `risco`,
+      // 16/09/2026). No arquivo de 2025: imposto de R$ 39,994 bi sobre lucro
+      // antes do imposto de R$ 150,599 bi; caixa de R$ 35,608 bi e aplicações
+      // de R$ 15,000001 bi, que a dívida líquida desconta.
+      final a2025 = snapshots.singleWhere((s) => s.fiscalPeriodEnd.year == 2025);
+      expect(a2025.effectiveTaxRate, closeTo(39994 / 150599, 1e-12));
+      expect(a2025.cash, 35608000000);
+      expect(a2025.shortTermInvestments, 15000001000);
+      expect(a2025.totalDebt, greaterThan(0));
+      expect(a2025.netDebt,
+          closeTo(a2025.totalDebt - 35608000000 - 15000001000, 1e-3));
+      expect(a2025.depreciationAndAmortization,
+          a2025.ebitda == null ? isNull : closeTo(a2025.ebitda! - 145628000000, 1e-3));
     });
 
     test('exercícios saem em ordem cronológica', () async {
@@ -479,10 +493,13 @@ void main() {
         DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)),
       )).unwrap();
 
-      expect(series.accumulated, greaterThan(0));
-      // Um trimestre de CDI a ~10,6% a.a. anualiza para a mesma ordem.
-      expect(series.annualized(), greaterThan(0.08));
-      expect(series.annualized(), lessThan(0.16));
+      // Os 61 dias do arquivo, compostos à mão fora do código: fator de
+      // 1,0262106 no período e 11,2806% ao ano na base 252. A média linear das
+      // taxas diárias vezes 252 daria 10,69% — um intervalo largo aceitava as
+      // duas contas, e a composição é a regra (lente `risco`, 16/09/2026).
+      expect(series.rates, hasLength(61));
+      expect(series.accumulated, closeTo(0.0262105893, 1e-9));
+      expect(series.annualized(), closeTo(0.1128063761, 1e-9));
     });
 
     test('datas dd/MM/yyyy são interpretadas corretamente', () async {

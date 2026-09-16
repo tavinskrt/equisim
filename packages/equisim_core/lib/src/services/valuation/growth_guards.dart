@@ -63,12 +63,9 @@ abstract final class ValuationParameters {
   /// Porta 3.
   static const double minPositiveFlow = 0.60;
 
-  /// P10 — participação mínima do equity no valor da firma, como
-  /// **pós-condição** da via A.
-  ///
-  /// Não é pré-filtro: depende do valor da firma, que só existe depois do
-  /// desconto. Ver `ValuationCascade`.
-  static const double minEquityShare = 0.20;
+  // P10 — a participação mínima do equity como pós-condição da via da firma —
+  // saiu pela decisão 102: ela trocava de via, e a troca era o degrau na taxa.
+  // O capital próprio fino continua declarado, pela ressalva `ponteFragil`.
 
   /// Teto e piso do fator de normalização da base.
   ///

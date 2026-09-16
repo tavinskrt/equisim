@@ -585,8 +585,9 @@ class _GoalConfrontationCard extends ConsumerWidget {
               const Gap.sm(),
               Text(
                 'O exigido vem do plano da aba Meta. O realizado é o XIRR da '
-                'janela simulada — o que esta composição entregou no passado, '
-                'não o que ela promete para o prazo da meta.',
+                'janela simulada, só de preço — a simulação não distribui '
+                'provento —: o que esta composição entregou no passado, e não '
+                'o que ela promete para o prazo da meta.',
                 style: context.finType.caption.copyWith(
                   color: context.fin.textTertiary,
                 ),

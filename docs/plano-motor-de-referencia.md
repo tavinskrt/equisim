@@ -7,21 +7,22 @@ mesma régua, onde cada objetivo está. O que cada rodada encontrou, o que as
 lentes disseram e o que a auditoria reprovou ficam no
 [histórico](plano-motor-de-referencia-historico.md).
 
-> **Última atualização: 15/09/2026, quarta rodada — C2b e B1.0.** A Fase 2
-> fechou, e a Fase 3 começou. **A faixa calibrada voltou a cobrir, por uma forma
-> fixada por escrito antes de medir**: o centro é o quanto o preço de fato
-> converge ao preço justo, e a largura é a volatilidade do papel. Fora da
-> amostra, 87,9/79,0/50,3% em 12 meses e 88,2/80,4/51,2% em 36 — 2,1 e 1,8 p.p.
-> da nominal, contra 5,4 e 7,2 da forma anterior nas mesmas observações
-> ([decisão 100](decisoes/100-a-faixa-calibrada-sai-da-volatilidade-do-papel-e-o-justo-entra-com-o-peso-medido.md)).
-> **O R2 está atingido de novo, e o que ele declara é outra coisa**: com
-> `b = 0,03` em 12 meses e `0,08` em 36, dobrar o preço justo move a faixa 2% e
-> 6% — a incerteza que o motor declara é, sobretudo, o preço de hoje mais a
-> volatilidade do papel. **E a tela de metas passou a dizer que o prêmio tirado
-> do potencial não está comprovado** (B1.0,
-> [decisão 99](decisoes/099-a-tela-de-metas-diz-que-o-premio-do-potencial-nao-esta-comprovado.md)),
-> com a medição empacotada: a ressalva some sozinha quando o C1 aprovar. O
-> defeito em produção que a §0 apontou está fechado.
+> **Última atualização: 16/09/2026, segunda rodada da Fase 3 — B1, B10 e B13.**
+> **Nenhuma avaliação muda mais de via** ([decisão 102](decisoes/102-nenhuma-avaliacao-muda-de-via-e-a-firma-avalia-pelo-fluxo-do-acionista-derivado.md)):
+> a via da firma avalia o capital próprio pelo fluxo do acionista derivado, sem
+> ponte, sem mescla e sem migração, e a do acionista fica para instituição
+> financeira e lucro operacional não sustentado. A varredura do nível da curva,
+> que achava **25 de 128** avaliados com o preço justo subindo com a taxa — 7 deles
+> por uma causa que ninguém tinha visto, a faixa do prêmio de crédito andando com a
+> taxa suposta —, dá **0 de 114**. O B10 e o B13 fecharam, e o custo está medido: 16
+> ativos saem do aplicativo, e o preço justo da via da firma cai 5,5% na mediana.
+> **E o B1 decidiu** ([decisão 103](decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md)):
+> o preço justo é o produto, e o prêmio do retorno esperado sai da ordenação que a
+> validação comprovar. Medidas lado a lado pela regra fixada antes de medir,
+> **nenhuma passa** — nem o book-to-market, que passava por pouco no motor de antes
+> e fica com `t` corrigido de 2,52 contra 2,70 neste. **O retorno esperado, hoje, é
+> o `Ke` de cada ativo.** A faixa calibrada, remedida sobre o motor novo sem mudar a
+> forma, continua cobrindo: 88,2/78,7/51,6% e 88,9/78,7/49,6%.
 
 ## Os dois objetivos
 
@@ -70,6 +71,11 @@ na lista — ver o fim da §6.
 > é de 0,181 e o do potencial, de 0,091; o potencial dado o B/M, de 0,030. **O B/M
 > ordena menos do que esta seção diz, e o motor continua não acrescentando a ele**
 > ([habilidade_trimestral.md](validacao/habilidade_trimestral.md)).
+>
+> **E sobre o motor da decisão 102, em 16/09/2026**, o potencial dado o B/M cai a
+> 0,010, com `t` corrigido de 0,08; o B/M tem IC de 0,186 e deixa de passar no
+> critério da decisão 96. **O B1 tirou o prêmio do retorno esperado** até uma
+> ordenação passar ([ordenacao_lado_a_lado.md](validacao/ordenacao_lado_a_lado.md)).
 
 O cabeçalho de `tool/backtest_valuation.dart` declara, desde que foi escrito, o
 critério pelo qual a cascata se justifica:
@@ -433,6 +439,20 @@ simulação não credita. O comentário de `expectedReturn` dizia "não há parc
 provento", e foi corrigido para dizer isso. Decidir o que o retorno esperado é —
 e com que retorno a meta é julgada — é deste item.
 
+**Estado: decidido em 16/09/2026 pela recomendação, e medido** ([decisão 103](decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md),
+[ordenacao_lado_a_lado.md](validacao/ordenacao_lado_a_lado.md)). **O preço justo é o
+produto, e o prêmio do retorno esperado sai da ordenação comprovada** — a saída
+(a), com a (c) como método. A medição e a regra foram fixadas por escrito antes de
+medir: o composto dos escores do potencial, do book-to-market e do lucro sobre o
+preço, com pesos iguais; o book-to-market; e o potencial, sobre as mesmas
+observações, pelo critério da decisão 96; o prêmio sai da primeira que passar, e
+de nenhuma se nenhuma passar. **Nenhuma passou**: em 36 meses, o composto tem IC
+de 0,173 e `t` corrigido de 1,57; o book-to-market, 0,186 e 2,52; o potencial,
+0,078 e 0,61 — crítico de 2,70. O aplicativo espera de cada ativo o `Ke` dele, a
+tela de metas diz por quê, e **o retorno esperado é declarado total**, com a aba
+Análise dizendo ao lado do XIRR que a simulação é só de preço. A regra mora no
+núcleo: quando uma ordenação passar, o prêmio volta dela sem mudar código.
+
 ### B1.0. A ressalva na tela de metas
 
 A §0 chamou de **defeito em produção**: a tela de metas ordena a carteira por um
@@ -450,7 +470,8 @@ empacotada** (`assets/validacao/habilidade.json`, gravado por
 `tool/regressao_condicional.dart`), e o critério da decisão 96 mora no núcleo
 (`SkillReading.demonstrated`): quando o C1 aprovar, a ressalva some sem mudar
 código; sem pacote, ela diz que a habilidade não foi medida. O número não muda —
-o que o prêmio deve ser é o B1.
+o que o prêmio deve ser é o B1. **O B1 decidiu em 16/09/2026**, e a ressalva passou
+a dizer também de onde sai o prêmio — hoje, que não há.
 
 ### B2. Medir o potencial ortogonalizado como produto
 
@@ -518,6 +539,18 @@ deslocar as duas taxas juntas move também a participação estrutural que decid
 via, e a decisão 34 só resolvia o deslocamento da taxa corrente. A medição é
 anterior às decisões 38 e 43, e tem de ser refeita.
 
+**Estado: feito em 16/09/2026** ([decisão 102](decisoes/102-nenhuma-avaliacao-muda-de-via-e-a-firma-avalia-pelo-fluxo-do-acionista-derivado.md)).
+A varredura foi refeita sobre a entrada congelada do gabarito, com o nível da taxa
+livre de risco — a corrente, a de equilíbrio e a curva inteira — de −3 a +3 p.p.:
+**25 de 128 avaliados pelo aplicativo subiam com a taxa**, 18 por trocarem de via
+na grade e **7 por outra causa**, que a varredura achou: a faixa que decide se a
+cobertura de juros entra no prêmio de crédito andava com a taxa suposta, e 25
+pontos-base tiravam a cobertura da conta. Com as duas correções — nenhuma
+avaliação muda de via, e a faixa do crédito é medida na taxa da data —, **nenhum
+dos 114 avaliados sobe com a taxa**. A PRIO3 foi a −72,3%, pela via da firma e
+monótona. Na montagem com o prior do beta, que o aplicativo não usa, sobram 2 de
+104, pelo veredito da perpetuidade que alterna entre passes — foi para o B11.
+
 ### B11. O aplicativo não resolve o prior do beta
 
 Achado na rodada do A5, em 14/09/2026. `ResolveBetaPrior` só é chamado pelas
@@ -563,6 +596,19 @@ discordância de quem migra da firma, e deixou com ela quem cai na via do
 acionista pela Porta 3 — que as decisões 42, 43 e 64 mantiveram. A revisão de
 14/09 não a pôs entre os defeitos abertos. É a raiz do B10: a migração é
 descontínua porque os dois modelos não concordam.
+
+**Estado: feito em 16/09/2026, junto com o B10** (decisão 102, que substitui a 39).
+Dos 109 não financeiros avaliados pelo aplicativo, 42 tinham o preço, inteiro ou
+em parte, da via do acionista — 37 migrados e 5 mesclados. **Nenhum tem mais**: a
+via da firma avalia o capital próprio pelo fluxo do acionista derivado do da
+firma, sem ponte, sem pós-condição e sem migração, e a via do acionista fica para
+o que o roteamento manda — instituição financeira e lucro operacional não
+sustentado, fatos de longo prazo que não dependem da taxa nem da conta. **A
+discordância entre as duas vias deixa de ser defeito**, porque nenhum ativo tem o
+preço escolhido entre elas. O custo: 16 ativos saem do aplicativo, onde o fluxo do
+acionista derivado não sustenta capital próprio positivo, e o preço justo dos que
+eram só da firma cai 5,5% na mediana, porque sem taxas resolvidas o `Ke` do CAPM e
+o WACC de pesos de mercado não coincidem.
 
 ---
 
@@ -714,7 +760,8 @@ série para o erro-padrão.
   ponte por papel passa a ser exercitada (decisão 97, e o C3 abaixo).
 
 **A leitura, que não é o veredito**: em 36 meses, o potencial dado o B/M tem
-coeficiente de 0,030 e `t` corrigido de 0,24 contra 2,70, com as deslistadas.
+coeficiente de 0,030 e `t` corrigido de 0,24 contra 2,70, com as deslistadas. **Sobre
+o motor da decisão 102, em 16/09/2026: 0,010 e 0,08.**
 
 **O C1 foi para depois da Fase 3.** O usuário pediu, em 15/09/2026, para medir a
 habilidade quando todas as fases estiverem completas: medir agora seria medir um
@@ -1008,7 +1055,7 @@ ou ação do usuário ou do orientador.
 | C2 | Cobertura da banda fora da amostra | R2 | ✅ | a fração de ativos cujo preço realizado cai na banda declarada é medida por coorte em 12 e 36 meses e fica a até 5 p.p. da nominal — ou a banda é recalibrada até ficar — atingido pela recalibragem: a banda de cenários cobria 8% contra 90%; a faixa calibrada cobre 90,2/80,3/54,2% em 12 meses e 91,8/78,8/52,8% em 36, fora da amostra, e é a que o aplicativo mostra ([decisão 92](decisoes/092-a-incerteza-e-a-faixa-calibrada-e-os-cenarios-sao-sensibilidade.md)) |
 | C0 | O que as recusas custam | R3 | ✅ | o spread do B/M dentro dos recusados é medido por motivo de recusa e por liquidez, e para cada motivo há decisão registrada: manter a recusa ou soltá-la — atingido: oito motivos e três tercis de liquidez medidos, contrafactual sem o corte de liquidez, e todas as recusas mantidas ([decisão 91](decisoes/091-as-recusas-ficam-e-a-liquidez-e-remedida-com-as-deslistadas.md)) |
 | C2b | Faixa calibrada com as deslistadas | R2 | ✅ | a cobertura fora da amostra da faixa calibrada é remedida com as companhias do C1b e fica a até 5 p.p. da nominal em 12 e 36 meses — ou a faixa é recalibrada com elas e o pacote do aplicativo, regerado — atingido em 15/09/2026 e **desfeito no mesmo dia** pela correção do C3 (84,8/74,9/49,1% e 83,6/73,0/47,0%, decisão 97); **refeito na quarta rodada por uma forma fixada por escrito antes de medir**, a convergência parcial na escala da volatilidade do papel: 87,9/79,0/50,3% e 88,2/80,4/51,2%, fora da amostra, com as deslistadas, e o pacote do aplicativo regerado na versão 2 ([decisão 100](decisoes/100-a-faixa-calibrada-sai-da-volatilidade-do-papel-e-o-justo-entra-com-o-peso-medido.md), [cobertura_banda.md](validacao/cobertura_banda.md) §§9 e 10) |
-| C0b | Custo da recusa por liquidez com as deslistadas | R3 | ✅ | o IC do potencial sem o corte de liquidez, condicionado ao B/M, é remedido com as deslistadas do C1b, e a decisão 91 é mantida ou substituída pelo resultado — atingido: a recusa fica pelo nível, e a razão da investibilidade sai ([decisão 95](decisoes/095-a-recusa-por-liquidez-fica-pelo-nivel-e-nao-pela-ordenacao.md)); **remedido na base da data, trimestral**: 0,084 e 0,148 dado o B/M, `t` corrigido de 1,67 e 1,16 contra 2,24 e 2,70 — a ordenação é direção, e não prova; o nível, −25,4% contra −51,5%, mantém a recusa ([recusas_custo.md](validacao/recusas_custo.md) §7) |
+| C0b | Custo da recusa por liquidez com as deslistadas | R3 | ✅ | o IC do potencial sem o corte de liquidez, condicionado ao B/M, é remedido com as deslistadas do C1b, e a decisão 91 é mantida ou substituída pelo resultado — atingido: a recusa fica pelo nível, e a razão da investibilidade sai ([decisão 95](decisoes/095-a-recusa-por-liquidez-fica-pelo-nivel-e-nao-pela-ordenacao.md)); **remedido na base da data, trimestral**: 0,084 e 0,148 dado o B/M, `t` corrigido de 1,67 e 1,16 contra 2,24 e 2,70 — a ordenação é direção, e não prova; o nível, −25,4% contra −51,5%, mantém a recusa ([recusas_custo.md](validacao/recusas_custo.md) §7); **sobre o motor da decisão 102**, 0,074 e 0,137, `t` corrigido de 1,47 e 1,10, nível de −27,6% contra −49,4% — a leitura não muda (§8) |
 | C1a | Erro-padrão para janelas sobrepostas | R3 | ✅ | o teste de habilidade reporta `t` com Newey-West ou com coortes não sobrepostas — atingido: Newey-West com defasagem da sobreposição, conferido contra a conta à mão, as coortes não sobrepostas ao lado, e o menor dos dois `t` valendo para o R3 ([decisão 93](decisoes/093-as-deslistadas-entram-nas-coortes-e-o-t-e-o-menor.md)) |
 | C1b | Amostra com deslistadas | R3 | ✅ | as coortes incluem as companhias da ponte do A3.2, com a contagem por data, os eventos e o retorno total do A3.4, excluída a janela que atravessa evento não localizado, e o resultado é reportado com e sem elas — atingido: 444 observações de 86 companhias, 106 avaliadas, fora também o salto que a série ajustada não explica, e o resultado com e sem elas na mesma execução ([habilidade_aplicativo.md](validacao/habilidade_aplicativo.md)) |
 | C1d | Ponte das deslistadas que ficaram fora | R3, R2 | ✅ | das 126 companhias com ação em bolsa e sem ponte para o preço, as que negociaram em lote padrão têm ponte, contagem por data e eventos, e o C2b e o C0b são remedidos com elas — ou o registro mostra, companhia a companhia, por que não há preço a ligar — atingido: ponte de 164 para 189 companhias, com a BRF, a Petz e a Tupy; das 112 sem ponte, nenhuma tem código com pregão, e o registro diz o motivo de cada uma ([b3_deslistadas.md](validacao/b3_deslistadas.md) §6, [ponte_deslistadas_registro.json](validacao/ponte_deslistadas_registro.json)); C2b e C0b remedidos. **O critério mudou**: "o C1 é remedido" saiu, porque o C1 foi para o fim |
@@ -1030,12 +1077,12 @@ o instrumento sob as duas medições.
 | # | item | serve a | estado | pronto se |
 |---|---|---|---|---|
 | B1.0 | Ressalva na tela de metas | R1 | ✅ | a tela de metas diz ao usuário que a ordenação por potencial não supera o book-to-market, enquanto o C1 não aprovar — **defeito em produção desde a §0, e não depende de fase nenhuma** — atingido: o cartão do confronto cita a medição empacotada, com o critério da decisão 96 no núcleo, e a ressalva some quando ele aprovar ou diz "não medida" sem pacote, com teste do pacote contra a medição e da tela nos três casos ([decisão 99](decisoes/099-a-tela-de-metas-diz-que-o-premio-do-potencial-nao-esta-comprovado.md)) |
-| B1 | O que o potencial serve | R3 | ⬜ 👤 | decisão registrada entre as três saídas da §3 (recomendada: medir DCF e modelo transversal lado a lado), e retorno esperado e tela de metas coerentes com ela |
-| B10 | Migração de via descontínua | R1, E | ⬜ | um teste varia a taxa em torno do limiar de migração e o preço justo não sobe com a taxa, a PRIO3 é remedida, e a varredura do nível da curva do `dcf_reverso` é refeita no universo sem ativo não monótono |
+| B1 | O que o potencial serve | R3 | ✅ | decisão registrada entre as três saídas da §3 (recomendada: medir DCF e modelo transversal lado a lado), e retorno esperado e tela de metas coerentes com ela — atingido: a saída (a) com a (c) como método, autorizada pelo usuário; as três ordenações medidas lado a lado pela regra fixada antes de medir, nenhuma passa, e o retorno esperado da meta e do estudo é o `Ke` de cada ativo, declarado total, com a regra no núcleo e o pacote contra a medição testados ([decisão 103](decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md), [ordenacao_lado_a_lado.md](validacao/ordenacao_lado_a_lado.md)) |
+| B10 | Migração de via descontínua | R1, E | ✅ | um teste varia a taxa em torno do limiar de migração e o preço justo não sobe com a taxa, a PRIO3 é remedida, e a varredura do nível da curva do `dcf_reverso` é refeita no universo sem ativo não monótono — atingido: a varredura do nível, de −3 a +3 p.p., refeita sobre a entrada congelada do gabarito, dá 0 de 114 avaliados pelo aplicativo subindo com a taxa, contra 25 de 128; o teste do nível da curva inteira e o da faixa do crédito reprovam no código de antes; a PRIO3 vai de −17,9%, migrada, a −72,3%, monótona ([decisão 102](decisoes/102-nenhuma-avaliacao-muda-de-via-e-a-firma-avalia-pelo-fluxo-do-acionista-derivado.md), [monotonia_vias.json](validacao/monotonia_vias.json)). **O critério ficou mais largo que o item**: a varredura achou uma segunda causa, a faixa do prêmio de crédito, e ela entrou |
 | B9 | Convenção de dívida no WACC | R1, E | ⬜ | o WACC estático e o realavancado usam a mesma convenção de dívida, declarada, com teste |
-| B11 | Prior do beta no aplicativo | R1, E | ⬜ | o aplicativo e a montagem padrão da validação avaliam com o prior do beta e o custo de capital resolvido das decisões 40 e 41, com a tensão da via do acionista resolvida, os cenários e a taxa exibida saindo das premissas resolvidas, e o efeito medido na mesma execução — **ou** uma decisão declara que o aplicativo fica com o beta cru, e as decisões que dependem do prior ficam marcadas como de diagnóstico |
+| B11 | Prior do beta no aplicativo | R1, E | ⬜ | o aplicativo e a montagem padrão da validação avaliam com o prior do beta e o custo de capital resolvido das decisões 40 e 41, com a tensão da via do acionista resolvida, os cenários e a taxa exibida saindo das premissas resolvidas, e o efeito medido na mesma execução — **ou** uma decisão declara que o aplicativo fica com o beta cru, e as decisões que dependem do prior ficam marcadas como de diagnóstico. **Desde 16/09/2026, também**: no caminho resolvido, a varredura do nível da curva não acha ativo subindo com a taxa — hoje RADL3 e SEER3, pelo veredito da perpetuidade que alterna entre passes —, e o custo da dívida da rota derivada e do solucionador é o sintético que o WACC aplica, e não o observado, que a decisão 31 já descartou |
 | B16 | Razão de unidade pela composição declarada | R1, E | ⬜ | a composição de cada unit sai de fonte declarada — a FCA da CVM, por ano — no pacote do aplicativo e nas coortes, a razão medida do valor de mercado vira conferência, e as 79 observações de unit que a inferência erra nas coortes passam a sair com a composição, com teste |
-| B13 | As duas vias discordam | R1, E | ⬜ | a via do acionista sobre LPA fica só para instituição financeira, ou as duas vias concordam dentro de tolerância declarada e medida no universo, ou uma decisão nova substitui a 39 e diz por que a discordância deixa de ser defeito — resolver junto com o B10 |
+| B13 | As duas vias discordam | R1, E | ✅ | a via do acionista sobre LPA fica só para instituição financeira, ou as duas vias concordam dentro de tolerância declarada e medida no universo, ou uma decisão nova substitui a 39 e diz por que a discordância deixa de ser defeito — resolver junto com o B10 — atingido pela terceira saída: a decisão 102 substitui a 39; nenhuma avaliação muda de via, a via do acionista fica para as Portas 1 e 3, e nenhum ativo tem o preço escolhido entre as duas — 42 dos 109 não financeiros tinham antes |
 | B12 | Excedente do capital existente na perpetuidade | E | ⬜ | o peso de `EVA_{N+1}/r` no preço justo está medido no universo, declarado no aviso, e uma decisão diz se ele fica, decai ou acaba num horizonte |
 | B14 | Beta de papel pouco negociado | E, R3 | ⬜ | um beta com correção por negociação não sincrônica é medido nos soltos do corte de liquidez, o nível do potencial deles é remedido com ele contra o das avaliadas, e uma decisão diz se a recusa por liquidez fica |
 | B15 | Beta e alavancagem da perpetuidade | E | ⬜ | o custo de capital da perpetuidade declara de onde vêm o beta e a estrutura de capital, o efeito de levá-los ao estado estacionário — beta em direção a 1, alavancagem da mediana do setor — está medido no universo, e uma decisão escolhe |
@@ -1062,7 +1109,7 @@ ordenação que a §0 mostrou estar em dívida.
 
 | # | item | serve a | estado | pronto se |
 |---|---|---|---|---|
-| C1 | Habilidade, com todas as fases completas | R3 | ⬜ | com as Fases 1 a 3 fechadas, `tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas --trimestral` monta as coortes do motor daquele dia, e o potencial condicionado ao B/M em 36 meses passa no critério da decisão 96 — `t` corrigido pela sobreposição acima do crítico dela, e Newey-West acima de 2 — **ou** o registro declara que não passa, e o B1 decide. **O instrumento está pronto** (C1a a C1d, C3); a leitura sobre o motor de hoje, que não é o veredito, dá 0,030 com `t` corrigido de 0,24 contra 2,70 ([habilidade_trimestral.md](validacao/habilidade_trimestral.md)) |
+| C1 | Habilidade, com todas as fases completas | R3 | ⬜ | com as Fases 1 a 3 fechadas, `tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas --trimestral` monta as coortes do motor daquele dia, e o potencial condicionado ao B/M em 36 meses passa no critério da decisão 96 — `t` corrigido pela sobreposição acima do crítico dela, e Newey-West acima de 2 — **ou** o registro declara que não passa, e o B1 decide. **O instrumento está pronto** (C1a a C1d, C3); a leitura sobre o motor de hoje, que não é o veredito, dá 0,010 com `t` corrigido de 0,08 contra 2,70, sobre o motor da decisão 102 ([habilidade_trimestral.md](validacao/habilidade_trimestral.md) §7). **Se passar, o B1 já decidiu o que muda**: o prêmio do retorno esperado volta da ordenação que passar |
 | C2c | A faixa calibrada sobre o motor da Fase 3 | R2 | ⬜ | **a forma da decisão 100 é remedida sobre o motor que a Fase 3 deixar, sem escolher outra**, e cobre fora da amostra a até 5 p.p. da nominal em 12 e 36 meses — **ou** uma decisão declara o que o aplicativo mostra e por que o R2 não se sustenta com a amostra que há. É a réplica que separa a forma fixada no C2b de um ajuste ao teste: ela foi a sétima tentada, e o motor sob ela vai mudar |
 
 **Por que a Fase 4 é só isto.** A habilidade e a incerteza são do motor, e o motor
@@ -1119,11 +1166,10 @@ Cada condição cita os itens da §6 que a fecham.
 **Motor de referência** — as três condições combinadas:
 
 - [ ] **R1. Nenhum defeito conhecido** — desmarcado em 14/09/2026. **Defeitos
-  abertos hoje:** B10 (migração de via), B13 (as duas vias
-  discordam — declarado na decisão 39 e fora da lista até 14/09), B9 (convenção
-  de dívida), B11 (prior do beta fora do aplicativo), B8 (reapresentação nas
-  coortes), B16 (razão de unidade inferida — entrou em 15/09/2026, pelo C3) e B7
-  (inflação — a conferir; pode não ser defeito). O A5 fechou.
+  abertos hoje:** B9 (convenção de dívida), B11 (prior do beta fora do aplicativo),
+  B8 (reapresentação nas coortes), B16 (razão de unidade inferida — entrou em
+  15/09/2026, pelo C3) e B7 (inflação — a conferir; pode não ser defeito). O A5, o
+  B1.0, o B10 e o B13 fecharam — os dois últimos em 16/09/2026, pela decisão 102.
   Prevenção em aberto, que não conta: D3 — o D1 fechou.
 - [x] **R2. Incerteza calibrada** — **atingida em 15/09/2026, desfeita no mesmo dia
   e refeita por outra forma.** A banda de cenários cobria 8% contra 90%, e a
@@ -1134,15 +1180,19 @@ Cada condição cita os itens da §6 que a fecham.
   forma fixada por escrito antes de medir cobre**: 87,9/79,0/50,3% em 12 meses e
   88,2/80,4/51,2% em 36, fora da amostra, com as deslistadas (C2b, decisão 100). O
   que a faixa declara mudou junto: ela é o preço de hoje mais a volatilidade do
-  papel, com o preço justo entrando pelo peso medido. **Confirma-se, ou cai, no C2c
-  da Fase 4**, que a remede sobre o motor que a Fase 3 deixar
+  papel, com o preço justo entrando pelo peso medido. **Remedida sobre o motor da
+  decisão 102, sem mudar a forma, continua cobrindo**: 88,2/78,7/51,6% e
+  88,9/78,7/49,6% ([cobertura_banda.md](validacao/cobertura_banda.md) §11).
+  **Confirma-se, ou cai, no C2c da Fase 4**, que a remede sobre o motor que a Fase 3
+  deixar
 - [ ] **R3. Habilidade comprovada** — **a medir com as fases completas** (C1, Fase
   4). O instrumento está quase pronto: coortes trimestrais, deslistadas da ponte
   ampliada, base da data e o `t` corrigido pela sobreposição (C1a a C1d, C3,
   decisões 93, 96 e 97); falta o B17, a série de dez anos que deixa o beta das
-  coortes de 2018 a 2021 em janela curta. A leitura sobre o motor de hoje, que não é o veredito: o
-  potencial dado o B/M em 36 meses tem coeficiente de 0,030 e `t` corrigido de
-  0,24 contra o crítico de 2,70
+  coortes de 2018 a 2021 em janela curta. A leitura sobre o motor de hoje, que não
+  é o veredito: o potencial dado o B/M em 36 meses tem coeficiente de 0,010 e `t`
+  corrigido de 0,08 contra o crítico de 2,70 — e nenhuma das três ordenações
+  medidas no B1 passa, nem o book-to-market (decisão 103)
 
 **A leitura honesta.** A Fase 1 deu ao preço justo fonte primária e procedência.
 A Fase 2 construiu o instrumento que mede o motor, e **o instrumento tinha um
@@ -1155,10 +1205,14 @@ ordena menos do que parecia. **O R2 fechou, e fechou por medir a incerteza onde
 ela está**: no preço e na volatilidade do papel, com o preço justo entrando pelo
 peso pequeno que a validação lhe deu. É uma faixa honesta e uma afirmação modesta
 sobre o preço justo — a largura do erro dele continua sendo a da §8 de
-[cobertura_banda.md](validacao/cobertura_banda.md). O R3 é medido no fim, sobre o
-motor que a Fase 3 deixar; o R1 fecha nos defeitos de método dela, e o primeiro
-deles — a tela de metas que usava a ordenação sem dizer o que ela vale — está
-fechado.
+[cobertura_banda.md](validacao/cobertura_banda.md). **Na Fase 3, o motor ficou
+coerente com a taxa e parou de escolher entre dois modelos**: nenhuma avaliação
+sobe com o capital mais caro, e nenhuma troca de via pela conta. **E parou de
+afirmar prêmio que não mediu**: nenhuma ordenação — nem a do DCF, nem a do
+book-to-market, nem a das duas juntas — passa no critério que o projeto adotou
+para 22 coortes sobrepostas, e o retorno esperado ficou no `Ke`. O R3 é medido no
+fim, sobre o motor que a Fase 3 deixar; o R1 fecha nos defeitos de método que
+sobram — B9, B11, B8, B16 e B7.
 
 ---
 
@@ -1167,8 +1221,10 @@ fechado.
 **A distância pode não fechar.** É possível que um DCF sobre fundamento anual
 brasileiro simplesmente não bata um fator de valor, e que a resposta certa seja
 a opção (a) da B1 — o DCF como produto de análise individual, e a ordenação
-saindo de um modelo declarado. Se for isso, o registro deve dizê-lo, e a
-o artigo fica mais forte por dizê-lo do que por escondê-lo.
+saindo de um modelo declarado. Se for isso, o registro deve dizê-lo, e o artigo
+fica mais forte por dizê-lo do que por escondê-lo. **Em 16/09/2026 o B1 implantou
+(a)**, e a medição acrescentou um fato que esta seção não previa: nem o fator de
+valor passa no critério, com a amostra que há.
 
 **O dado de mercado deriva entre execuções.** O cache da validação vence e o
 Ibovespa vem sem cache: em meia hora, 26 ativos mudaram de valor sem mudança de

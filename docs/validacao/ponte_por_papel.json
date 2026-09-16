@@ -125,9 +125,9 @@
   "medidos": 10857
  },
  "unitContraEspecie": {
-  "pares": 75,
-  "distanciaMediana": 0.014776595030395079,
-  "paresNaBaseAntiga": 20,
-  "distanciaMedianaNaBaseAntiga": 0.801342803037703
+  "pares": 68,
+  "distanciaMediana": 0.013495240845420198,
+  "paresNaBaseAntiga": 18,
+  "distanciaMedianaNaBaseAntiga": 0.7748690557851049
  }
 }

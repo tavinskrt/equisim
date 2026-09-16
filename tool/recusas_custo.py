@@ -57,7 +57,9 @@ def postos(v: list[float]) -> list[float]:
     i = 0
     while i < len(idx):
         j = i
-        while j + 1 < len(idx) and v[idx[j + 1]] == v[idx[i]]:
+        # Empate é valor igual até a precisão da máquina — e não `==` entre
+        # floats, que a regra do projeto veda.
+        while j + 1 < len(idx) and math.isclose(v[idx[j + 1]], v[idx[i]], rel_tol=1e-12, abs_tol=0.0):
             j += 1
         for k in range(i, j + 1):
             r[idx[k]] = (i + j) / 2 + 1
@@ -286,6 +288,11 @@ def motivo(l: dict) -> str:
         return "estrutura de capital recusada"
     if "capital próprio responde por apenas" in m:
         return "ponte frágil sem via do acionista"
+    # Desde a decisão 102 a via da firma avalia pelo fluxo do acionista
+    # derivado, e não migra: o capital próprio não positivo é recusa própria, e
+    # absorve a "ponte frágil" das execuções anteriores.
+    if "derivado do da firma, não sustenta capital próprio positivo" in m:
+        return "capital próprio não positivo pela firma"
     if "não sustentam nenhuma das duas vias" in m:
         return "nenhuma via aplicável"
     if "Nenhum exercício" in m:

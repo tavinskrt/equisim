@@ -99,6 +99,10 @@ List<Override> _overrides({
   portfolioValuationsProvider.overrideWith(
     (ref) async => const <Ticker, ValuationResult>{},
   ),
+  // Os sinais do prêmio leem os fundamentos, que iriam à rede (item B1).
+  portfolioSignalsProvider.overrideWith(
+    (ref) async => const <Ticker, TransversalSignals>{},
+  ),
   comparisonProvider.overrideWith((ref) async => comparacao),
   correlationProvider.overrideWith((ref) async => null),
   goalAlignmentProvider.overrideWith((ref) async => null),

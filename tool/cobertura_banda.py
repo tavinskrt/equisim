@@ -114,7 +114,9 @@ def postos(v):
     i = 0
     while i < len(idx):
         j = i
-        while j + 1 < len(idx) and v[idx[j + 1]] == v[idx[i]]:
+        # Empate é valor igual até a precisão da máquina — e não `==` entre
+        # floats, que a regra do projeto veda.
+        while j + 1 < len(idx) and math.isclose(v[idx[j + 1]], v[idx[i]], rel_tol=1e-12, abs_tol=0.0):
             j += 1
         for k in range(i, j + 1):
             r[idx[k]] = (i + j) / 2 + 1

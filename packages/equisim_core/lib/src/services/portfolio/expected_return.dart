@@ -5,6 +5,7 @@ import '../../entities/valuation.dart';
 import '../../value_objects/ticker.dart';
 import '../valuation/cost_of_capital.dart';
 import '../valuation/inference.dart';
+import 'transversal_ordering.dart';
 
 /// Retorno anual esperado de um ativo, decomposto.
 class ExpectedAssetReturn {
@@ -143,10 +144,12 @@ abstract final class ExpectedReturn {
   /// DCF, e é ele que a tela de avaliação mostra. Esta é a projeção de
   /// otimização, e só ela.
   ///
-  /// **O prêmio pressupõe que a ordenação informa, e isso não está
-  /// demonstrado**: condicionado ao book-to-market, o potencial não passa no
-  /// critério da decisão 96 nas coortes da validação, e a tela de metas diz
-  /// isso (item B1.0). O que o prêmio deve ser é do item B1.
+  /// **O prêmio pressupõe que a ordenação informa, e para o potencial isso não
+  /// está demonstrado**: condicionado ao book-to-market, ele não passa no
+  /// critério da decisão 96. Por isso o aplicativo não usa mais este estimador:
+  /// usa [forPortfolioOrdered], com o prêmio da ordenação que a validação
+  /// comprovou, ou sem prêmio (decisão 103). Este fica para as ferramentas de
+  /// validação que medem o potencial sozinho.
   ///
   /// **A âncora era o CDI, e isso subtraía o prêmio de risco inteiro**
   /// (decisão 58). Com ela, uma carteira de ações centrada na seção esperava
@@ -257,6 +260,59 @@ abstract final class ExpectedReturn {
       final r = estimado[entry.ticker];
       if (r == null) continue;
       weighted += entry.weight.value * r.expected;
+      covered += entry.weight.value;
+    }
+    return covered <= 0 ? 0.0 : weighted / covered;
+  }
+
+  /// Retorno esperado da carteira com o prêmio da **ordenação medida** (item B1).
+  ///
+  /// `E[R_i] = Ke_i + z_i · prêmio`, com `z_i` o escore de [ordering] contra a
+  /// seção dos sinais da carteira — ver [TransversalScore]. **Sem ordenação não
+  /// há prêmio**: `E[R_i] = Ke_i`. É o caso em que nenhuma das ordenações
+  /// passou no critério da decisão 96, e afirmar desconto relativo como prêmio
+  /// seria afirmar habilidade que a validação não mediu.
+  ///
+  /// Os pesos e a cobertura seguem [forPortfolioCrossSectional]: só entra o
+  /// ativo com avaliação, que é o que dá o `Ke`. O ativo avaliado sem o sinal
+  /// que a ordenação pede recebe escore zero — a âncora, sem prêmio nem
+  /// desconto —, e não sai da conta.
+  ///
+  /// - [signals]: os sinais de cada ativo da carteira. O potencial que não vier
+  ///   aqui é lido da avaliação.
+  static double forPortfolioOrdered({
+    required Portfolio portfolio,
+    required Map<Ticker, ValuationResult> valuations,
+    required Map<Ticker, TransversalSignals> signals,
+    required TransversalOrdering? ordering,
+    required double spotRiskFree,
+    double riskPremium = CapmInputs.defaultMarketPremium,
+  }) {
+    final secao = <Ticker, TransversalSignals>{};
+    for (final entry in portfolio.entries.values) {
+      final v = valuations[entry.ticker];
+      if (v == null) continue;
+      final s = signals[entry.ticker];
+      secao[entry.ticker] = TransversalSignals(
+        potential: s?.potential ?? v.upside,
+        bookToMarket: s?.bookToMarket,
+        earningsYield: s?.earningsYield,
+      );
+    }
+    if (secao.isEmpty) return 0.0;
+    final escores = ordering == null
+        ? const <Ticker, double>{}
+        : TransversalScore.scores(secao, ordering);
+
+    var weighted = 0.0;
+    var covered = 0.0;
+    for (final entry in portfolio.entries.values) {
+      final v = valuations[entry.ticker];
+      if (v == null) continue;
+      final ke = v.diagnostics?.costOfEquity;
+      final ancora = (ke != null && ke.isFinite && ke > 0) ? ke : spotRiskFree;
+      final bruto = ancora + (escores[entry.ticker] ?? 0.0) * riskPremium;
+      weighted += entry.weight.value * (bruto < 0 ? 0.0 : bruto);
       covered += entry.weight.value;
     }
     return covered <= 0 ? 0.0 : weighted / covered;

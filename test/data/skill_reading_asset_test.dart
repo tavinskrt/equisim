@@ -25,8 +25,8 @@ void main() {
         isNotNull);
   });
 
-  test('os números e o veredito são os da medição trimestral com deslistadas',
-      () {
+  test('os números, o veredito e o prêmio são os da medição trimestral com '
+      'deslistadas', () {
     final leitura =
         SkillReadingCodec.decode(m(jsonDecode(arquivo.readAsStringSync())))!;
     final medicao = m(jsonDecode(
@@ -34,24 +34,39 @@ void main() {
     final fm = m(m(m(m(medicao['h36'])['trimestral'])['comDeslistadas'])[
         'famaMacBeth']);
     final dado = m(fm['potencialDadoBm']);
+    double numero(Map<String, dynamic> x, String k) => (x[k] as num).toDouble();
 
     expect(leitura.months, 36);
     expect(leitura.cohorts, dado['coortes']);
-    expect(leitura.conditionalCoefficient,
-        closeTo((dado['media'] as num).toDouble(), 1e-12));
-    expect(leitura.overlapT,
-        closeTo((dado['tSobreposicao'] as num).toDouble(), 1e-12));
+    expect(leitura.conditionalCoefficient, closeTo(numero(dado, 'media'), 1e-12));
+    expect(leitura.overlapT, closeTo(numero(dado, 'tSobreposicao'), 1e-12));
     expect(leitura.overlapCritical,
-        closeTo((dado['criticoSobreposicao'] as num).toDouble(), 1e-12));
-    expect(leitura.neweyWestT,
-        closeTo((dado['tNeweyWest'] as num).toDouble(), 1e-12));
-    expect(leitura.potentialIc,
-        closeTo((m(fm['icPotencial'])['media'] as num).toDouble(), 1e-12));
-    expect(leitura.bookToMarketIc,
-        closeTo((m(fm['icBookToMarket'])['media'] as num).toDouble(), 1e-12));
+        closeTo(numero(dado, 'criticoSobreposicao'), 1e-12));
+    expect(leitura.neweyWestT, closeTo(numero(dado, 'tNeweyWest'), 1e-12));
     // O critério mora no núcleo, e a ferramenta o aplica por conta própria: os
     // dois têm de concordar.
     expect(leitura.demonstrated, dado['passaR3']);
+
+    // As três ordenações lado a lado (item B1), cada uma contra a medição.
+    const pares = [
+      (TransversalOrdering.composite, 'icComposto'),
+      (TransversalOrdering.bookToMarket, 'icBookToMarket'),
+      (TransversalOrdering.potential, 'icPotencial'),
+    ];
+    for (final (ordenacao, chave) in pares) {
+      final medida = m(fm[chave]);
+      final lida = leitura.orderings[ordenacao]!;
+      expect(lida.ic, closeTo(numero(medida, 'media'), 1e-12), reason: chave);
+      expect(lida.overlapT, closeTo(numero(medida, 'tSobreposicao'), 1e-12),
+          reason: chave);
+      expect(lida.demonstrated, medida['passaR3'], reason: chave);
+    }
+    // A regra do prêmio é a primeira que passa, na ordem fixada antes de medir.
+    final primeira = pares
+        .where((e) => m(fm[e.$2])['passaR3'] == true)
+        .map((e) => e.$1)
+        .firstOrNull;
+    expect(leitura.premiumOrdering, primeira);
   });
 
   test('sem pacote, ou com lixo, a leitura é nula', () async {

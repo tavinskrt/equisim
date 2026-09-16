@@ -180,6 +180,25 @@ final portfolioValuationsProvider =
       return out;
     });
 
+/// Os sinais transversais dos ativos da carteira Principal (item B1).
+///
+/// Book-to-market e lucro sobre o preço do último exercício publicado, pela
+/// mesma conta que as coortes da validação fazem — ver
+/// `TransversalSignals.of`. O potencial vem da avaliação, e não daqui.
+final portfolioSignalsProvider =
+    FutureProvider<Map<Ticker, TransversalSignals>>((ref) async {
+  final tickers = ref.watch(studyProvider).study.principal.tickers;
+  final fundamentos = ref.watch(fundamentalsRepositoryProvider);
+  final out = <Ticker, TransversalSignals>{};
+  for (final t in tickers) {
+    final historico = await fundamentos.history(t);
+    if (historico.isErr) continue;
+    // O exercício publicado na data da avaliação, que o núcleo resolve.
+    out[t] = TransversalSignals.fromHistory(historico.unwrap());
+  }
+  return out;
+});
+
 /// Situação da carteira frente à meta patrimonial.
 final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
   final study = ref.watch(studyProvider).study;
@@ -188,6 +207,10 @@ final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
 
   final anchors = await ref.watch(marketAnchorsProvider.future);
   final valuations = await ref.watch(portfolioValuationsProvider.future);
+  // A ordenação do prêmio é a que a validação escolheu pela regra fixada antes
+  // de medir (item B1); sem pacote, ou sem ordenação que passe, não há prêmio.
+  final habilidade = await ref.watch(skillReadingProvider.future);
+  final sinais = await ref.watch(portfolioSignalsProvider.future);
 
   // A seção transversal é a das avaliações carregadas, que aqui são as da
   // carteira. É estreita, e o resultado declara o tamanho — ver
@@ -198,6 +221,8 @@ final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
     goal: goal,
     valuations: valuations,
     anchors: anchors,
+    ordering: habilidade?.premiumOrdering,
+    signals: sinais,
   );
   return result.valueOrNull;
 });

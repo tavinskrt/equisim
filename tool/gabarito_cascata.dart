@@ -40,6 +40,15 @@
 //   dart run tool/gabarito_cascata.dart                # grava o gabarito
 //   dart run tool/gabarito_cascata.dart --conferir     # compara com o gravado
 //   dart run tool/gabarito_cascata.dart --rastro PETR4 # rastro de um ativo
+//   dart run tool/gabarito_cascata.dart --monotonia docs/validacao/monotonia_vias.json
+//   dart run tool/gabarito_cascata.dart --nivel GOAU4  # a grade de um ativo, aberta
+//
+// **`--monotonia`** usa a mesma entrada congelada para a varredura do item
+// B10: desloca o nível da taxa livre de risco — a corrente, a de equilíbrio e a
+// curva inteira — de −3 a +3 p.p., de 25 em 25 pontos-base, nas montagens
+// `aplicativo` e `prior`, e confere se o preço justo cai quando o capital
+// encarece. Conta também o que muda de via e o que alterna entre avaliado e
+// recusado no meio da grade.
 import 'dart:convert';
 import 'dart:io';
 
@@ -56,6 +65,7 @@ const _arquivo = 'docs/validacao/gabarito_cascata.json';
 const _pasta = 'data/gabarito';
 const _cache = '$_pasta/cache.sqlite';
 const _ibovespa = '$_pasta/ibovespa.json';
+const _universo = '$_pasta/universo.json';
 
 /// O Ibovespa servido, por janela: gravado na primeira execução e repetido nas
 /// seguintes. Janela que não foi gravada é recusada, e a divergência aparece.
@@ -238,7 +248,12 @@ class _DaCvm implements FundamentalsRepository {
 }
 
 Future<void> main(List<String> args) async {
-  final conferir = args.contains('--conferir');
+  final iMonotonia = args.indexOf('--monotonia');
+  final saidaMonotonia = iMonotonia >= 0 ? args[iMonotonia + 1] : null;
+  final iNivel = args.indexOf('--nivel');
+  final soNivel = iNivel >= 0 ? args[iNivel + 1] : null;
+  final conferir =
+      args.contains('--conferir') || saidaMonotonia != null || soNivel != null;
   final iRastro = args.indexOf('--rastro');
   final soRastro = iRastro >= 0 ? args[iRastro + 1] : null;
 
@@ -294,7 +309,26 @@ Future<void> main(List<String> args) async {
       asOf: _hoje,
     ))
         .getOrElse(MarketAnchors.fallback2026);
-    var universe = (await ctx.fundamentals.universe()).unwrap();
+    // **O universo também é entrada**, e vem da rede: em 15/09/2026 a fonte
+    // passou a listar a EQPA7 e deixou de listar a COCE3, e as duas apareciam
+    // como divergência do gabarito sem que o código tivesse mudado. A gravação
+    // guarda a lista, e a conferência a repete.
+    final universoGravado = File(_universo);
+    final List<Ticker> universoInteiro;
+    if (!conferir && soRastro == null) {
+      universoInteiro = (await ctx.fundamentals.universe()).unwrap();
+      universoGravado.writeAsStringSync(
+          jsonEncode([for (final t in universoInteiro) t.value]));
+    } else if (universoGravado.existsSync()) {
+      universoInteiro = [
+        for (final s in (jsonDecode(universoGravado.readAsStringSync()) as List)
+            .cast<String>())
+          Ticker.parse(s),
+      ];
+    } else {
+      universoInteiro = (await ctx.fundamentals.universe()).unwrap();
+    }
+    var universe = universoInteiro;
     if (soRastro != null) {
       universe = [for (final t in universe) if (t.value == soRastro) t];
     }
@@ -314,7 +348,7 @@ Future<void> main(List<String> args) async {
 
     // O prior sai do universo inteiro, na montagem do aplicativo.
     final prior = await ResolveBetaPrior.call(
-      tickers: (await ctx.fundamentals.universe()).unwrap(),
+      tickers: universoInteiro,
       prices: ctx.prices,
       fundamentals: comSetor,
       benchmark: ctx.benchmark,
@@ -354,6 +388,30 @@ Future<void> main(List<String> args) async {
         dividends: app ? proventosDe(t) : null,
         betaPrior: comPrior ? prior : null,
       );
+    }
+
+    if (soNivel != null) {
+      AuditRecorder.detach();
+      for (final (nome, comPrior) in [('aplicativo', false), ('prior', true)]) {
+        final p = await preparar(Ticker.parse(soNivel),
+            fundamentos: comSetor, c: curva, app: true, comPrior: comPrior);
+        if (p.isErr) continue;
+        stdout.writeln('== $soNivel, $nome');
+        _abrirGrade(p.unwrap());
+      }
+      return;
+    }
+    if (saidaMonotonia != null) {
+      AuditRecorder.detach();
+      await _varrerNivel(
+        universe: universe,
+        saida: saidaMonotonia,
+        aplicativo: (t) =>
+            preparar(t, fundamentos: comSetor, c: curva, app: true),
+        prior: (t) => preparar(t,
+            fundamentos: comSetor, c: curva, app: true, comPrior: true),
+      );
+      return;
     }
 
     final rastros = <String, Object?>{};
@@ -492,6 +550,17 @@ Future<void> main(List<String> args) async {
           'montagens cada, saída completa e rastro bit a bit.');
     } else {
       stdout.writeln('GABARITO DIVERGE em ${divergentes.length} montagem(ns):');
+      // Por montagem, primeiro: a entrada da CVM não é congelada, e uma
+      // reingestão muda a `ancorada` sem que o código tenha mudado.
+      final porMontagem = <String, int>{};
+      for (final k in divergentes) {
+        final m = k.substring(k.indexOf('/') + 1);
+        porMontagem[m] = (porMontagem[m] ?? 0) + 1;
+      }
+      stdout.writeln('  por montagem: $porMontagem');
+      for (final k in divergentes.where((k) => !k.endsWith('/ancorada'))) {
+        stdout.writeln('  $k');
+      }
       for (final k in divergentes.take(30)) {
         stdout.writeln('  $k');
       }
@@ -500,5 +569,146 @@ Future<void> main(List<String> args) async {
   } finally {
     AuditRecorder.detach();
     await ctx0.dispose();
+  }
+}
+
+/// Deslocamentos do nível da taxa livre de risco na varredura do B10.
+final _grade = [for (var i = -12; i <= 12; i++) i * 0.0025];
+
+/// A varredura do nível da curva (item B10): em cada ativo e montagem, o preço
+/// justo ao longo da grade, e se ele sobe quando o capital encarece.
+///
+/// **Tolerância de 0,1% do preço de mercado**, a mesma do `dcf_reverso`:
+/// variação abaixo disso é ruído de ponto flutuante, e não direção.
+Future<void> _varrerNivel({
+  required List<Ticker> universe,
+  required String saida,
+  required Future<Result<ValuationInputs>> Function(Ticker) aplicativo,
+  required Future<Result<ValuationInputs>> Function(Ticker) prior,
+}) async {
+  final linhas = <String, Object?>{};
+  final resumo = <String, Map<String, int>>{};
+  void conta(String montagem, String k) {
+    final m = resumo[montagem] ??= <String, int>{};
+    m[k] = (m[k] ?? 0) + 1;
+  }
+
+  String estado(ValuationResult v) {
+    final avisos = v.warnings.join(' ');
+    if (avisos.contains('nenhuma das duas vias domina')) return 'mescla';
+    if (avisos.contains('não sustenta a via')) return 'estruturaRecusada';
+    if (avisos.contains('migra para o fluxo do acionista')) return 'migrada';
+    return v.model.name;
+  }
+
+  var n = 0;
+  for (final t in universe) {
+    if (++n % 25 == 0) stderr.write('  $n/${universe.length}   \r');
+    final linha = <String, Object?>{};
+    for (final (nome, prep) in [('aplicativo', aplicativo), ('prior', prior)]) {
+      final p = await prep(t);
+      if (p.isErr) continue;
+      final base = p.unwrap();
+      final r0 = ValuationCascade.evaluate(base);
+      if (r0.isErr) continue;
+      conta(nome, 'avaliados na base');
+      final preco = base.marketPrice;
+      final justos = <double?>[];
+      final estados = <String?>[];
+      for (final d in _grade) {
+        final r = ValuationCascade.evaluate(base.withRiskFreeShift(d));
+        justos.add(r.isOk ? r.unwrap().fairValue.reais : null);
+        estados.add(r.isOk ? estado(r.unwrap()) : null);
+      }
+      // Sobe quando o capital encarece: entre dois pontos avaliados em
+      // sequência, o de taxa maior vale mais.
+      final tol = preco * 1e-3;
+      var subidas = 0;
+      var maiorSubida = 0.0;
+      double? anterior;
+      for (final j in justos) {
+        if (j == null) {
+          anterior = null;
+          continue;
+        }
+        if (anterior != null && j - anterior > tol) {
+          subidas++;
+          final rel = anterior > 0 ? (j - anterior) / anterior : double.infinity;
+          if (rel > maiorSubida) maiorSubida = rel;
+        }
+        anterior = j;
+      }
+      final avaliados = [for (var i = 0; i < justos.length; i++) if (justos[i] != null) i];
+      final lacunas = avaliados.isEmpty
+          ? 0
+          : [
+              for (var i = avaliados.first; i <= avaliados.last; i++)
+                if (justos[i] == null) i,
+            ].length;
+      final vias = {...estados.nonNulls};
+      if (subidas > 0) conta(nome, 'não monótonos');
+      if (subidas > 0 && vias.length > 1) conta(nome, 'não monótonos com troca de via');
+      if (vias.length > 1) conta(nome, 'trocam de via na grade');
+      if (lacunas > 0) conta(nome, 'recusados no meio da grade');
+      linha[nome] = {
+        'estadoNaBase': estado(r0.unwrap()),
+        'justoNaBase': r0.unwrap().fairValue.reais,
+        'preco': preco,
+        'subidas': subidas,
+        'maiorSubidaRelativa': maiorSubida.isFinite ? maiorSubida : null,
+        'lacunas': lacunas,
+        'vias': vias.toList()..sort(),
+        'justos': justos,
+      };
+    }
+    if (linha.isNotEmpty) linhas[t.value] = linha;
+  }
+  stderr.writeln('');
+  File(saida).writeAsStringSync(const JsonEncoder.withIndent(' ').convert({
+    'hoje': _hoje.toIso8601String().substring(0, 10),
+    'grade': _grade,
+    'resumo': resumo,
+    'ativos': linhas,
+  }));
+  stdout.writeln('varredura do nível da curva, de −3 a +3 p.p.:');
+  for (final e in resumo.entries) {
+    stdout.writeln('  ${e.key}: ${e.value}');
+  }
+  stdout.writeln('gravado $saida');
+}
+
+/// A grade de um ativo, aberta: o que muda no diagnóstico a cada ponto.
+void _abrirGrade(ValuationInputs base) {
+  String pc(double? x) => x == null ? '—' : '${(x * 100).toStringAsFixed(2)}%';
+  List<String>? avisosAnteriores;
+  for (final d in _grade) {
+    final r = ValuationCascade.evaluate(base.withRiskFreeShift(d));
+    if (r.isErr) {
+      stdout.writeln('${pc(d).padLeft(7)}  recusa: ${r.failureOrNull!.message}');
+      avisosAnteriores = null;
+      continue;
+    }
+    final v = r.unwrap();
+    final g = v.diagnostics;
+    stdout.writeln('${pc(d).padLeft(7)}  R\$ ${v.fairValue.reais.toStringAsFixed(2).padLeft(8)}'
+        '  ${v.model.name.padRight(12)} desc ${pc(v.discountRate)}'
+        '  g ${pc(g?.growthRate)}  base ${g?.baseFactor.toStringAsFixed(3)}'
+        '  moat ${g?.moatApplied}  retido ${pc(g?.terminalRetainedSpread)}'
+        '  rTerm ${pc(g?.terminalReturnOnCapital)}  equity ${pc(g?.equityShare)}'
+        '  ressalvas ${g?.caveats.map((c) => c.name).join(',')}');
+    // Os avisos que entram ou saem de um ponto para o outro: é onde está o
+    // degrau, quando há um.
+    final avisos = [
+      for (final a in v.warnings) a.replaceAll(RegExp(r'[\d.,]+'), '#'),
+    ];
+    if (avisosAnteriores != null) {
+      for (final a in avisos.where((a) => !avisosAnteriores!.contains(a))) {
+        stdout.writeln('           + ${a.length > 150 ? a.substring(0, 150) : a}');
+      }
+      for (final a in avisosAnteriores.where((a) => !avisos.contains(a))) {
+        stdout.writeln('           - ${a.length > 150 ? a.substring(0, 150) : a}');
+      }
+    }
+    avisosAnteriores = avisos;
   }
 }

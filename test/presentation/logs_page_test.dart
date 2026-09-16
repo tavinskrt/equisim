@@ -170,11 +170,14 @@ void main() {
             incomeBeforeTax: entry.value * 1.3,
             // Negativo, na convenção da fonte: a despesa soma ao lucro antes.
             incomeTaxExpense: -entry.value * 0.3,
-            interestExpense: 120.0,
+            interestExpense: 60.0,
             operatingCashFlow: entry.value,
             freeCashFlow: entry.value,
-            shortTermDebt: 400.0,
-            longTermDebt: 1600.0,
+            // Dívida pequena: desde a decisão 102 a via da firma não migra, e com
+            // a dívida de antes o fluxo do acionista derivado não sustentava
+            // capital próprio positivo — o ativo era recusado.
+            shortTermDebt: 100.0,
+            longTermDebt: 400.0,
             cash: 300.0,
             sharesOutstanding: 1000.0,
             sharesOutstandingAsOf: 1000.0,
@@ -214,19 +217,13 @@ void main() {
     // de quantos exercícios a janela do ciclo alcançou.
     expect(find.text('define a mediana do ciclo'), findsAtLeastNWidgets(1));
 
-    // **Duas amostras, porque duas vias foram percorridas.** O ativo tem
-    // dívida líquida consumindo quase todo o valor da firma, a pós-condição da
-    // ponte dispara e a avaliação migra para o fluxo do acionista — e o painel
-    // mostra a base de cada uma, com o retorno sobre o capital investido na
-    // primeira e sobre o patrimônio na segunda. É o que o rastro deve mostrar:
-    // a via descartada é parte de como o número foi obtido.
-    expect(find.textContaining('RETORNO SOBRE O PATRIMÔNIO'), findsOneWidget);
-    expect(find.text('observado · normalizado'), findsNWidgets(2));
-    expect(
-      find.textContaining('migra para o fluxo do acionista'),
-      findsAtLeastNWidgets(1),
-      reason: 'a migração precisa estar declarada junto das duas amostras',
-    );
+    // **Uma amostra, porque uma via foi percorrida.** Até a decisão 102 a via
+    // da firma migrava para a do acionista com o capital próprio fino, e o
+    // painel mostrava as duas bases. Nenhuma avaliação muda mais de via: o
+    // rastro tem a base da via que o roteamento escolheu, e só ela.
+    expect(find.textContaining('RETORNO SOBRE O PATRIMÔNIO'), findsNothing);
+    expect(find.text('observado · normalizado'), findsOneWidget);
+    expect(find.textContaining('migra para o fluxo do acionista'), findsNothing);
 
     // Em tela estreita a etiqueta desce para a segunda linha em vez de
     // disputar espaço com o número: numa única linha ela espremia o valor até

@@ -43,7 +43,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:equisim_core/equisim_core.dart' show SkillReadingCodec;
+import 'package:equisim_core/equisim_core.dart'
+    show
+        SkillReadingCodec,
+        TransversalOrdering,
+        TransversalScore,
+        TransversalSignals;
 
 import 'validation/regression.dart';
 
@@ -141,6 +146,10 @@ class PorCoorte {
   final double? icBookToMarket;
   final double? icEarningsYield;
 
+  /// IC do composto — a média dos escores robustos dos três sinais, pela mesma
+  /// função que o aplicativo usa (item B1, `ordenacao_lado_a_lado.md` §1).
+  final double? icComposto;
+
   const PorCoorte({
     required this.coorte,
     required this.n,
@@ -155,6 +164,7 @@ class PorCoorte {
     required this.icPotencial,
     required this.icBookToMarket,
     required this.icEarningsYield,
+    required this.icComposto,
   });
 
   Map<String, dynamic> toJson() => {
@@ -171,6 +181,7 @@ class PorCoorte {
         'icPotencial': icPotencial,
         'icBookToMarket': icBookToMarket,
         'icEarningsYield': icEarningsYield,
+        'icComposto': icComposto,
       };
 }
 
@@ -189,6 +200,15 @@ PorCoorte _rodarCoorte(String coorte, List<Obs> obs) {
   final dadoBm = Regression.ols([zPot, zBm], zRet);
   final sozinho = Regression.ols([zPot], zRet);
   final residuo = Regression.residualize(zPot, [zBm, zEy]);
+  // O composto com a seção da coorte, pela função do núcleo.
+  final composto = TransversalScore.scores({
+    for (var i = 0; i < obs.length; i++)
+      i: TransversalSignals(
+        potential: obs[i].potencial,
+        bookToMarket: obs[i].bookToMarket,
+        earningsYield: obs[i].earningsYield,
+      ),
+  }, TransversalOrdering.composite);
 
   return PorCoorte(
     coorte: coorte,
@@ -204,6 +224,8 @@ PorCoorte _rodarCoorte(String coorte, List<Obs> obs) {
     icPotencial: Regression.spearman(pot, ret),
     icBookToMarket: Regression.spearman(bm, ret),
     icEarningsYield: Regression.spearman(ey, ret),
+    icComposto: Regression.spearman(
+        [for (var i = 0; i < obs.length; i++) composto[i]!], ret),
   );
 }
 
@@ -281,6 +303,7 @@ Map<String, dynamic> _horizonte(
       'icPotencial': js((l) => l.icPotencial),
       'icBookToMarket': js((l) => l.icBookToMarket),
       'icEarningsYield': js((l) => l.icEarningsYield),
+      'icComposto': js((l) => l.icComposto),
     },
   };
 }
@@ -325,6 +348,7 @@ void _imprimirHorizonte(String titulo, Map<String, dynamic> h) {
   linha('IC do potencial (referência)', 'icPotencial');
   linha('IC do P/B', 'icBookToMarket');
   linha('IC do L/P', 'icEarningsYield');
+  linha('IC do COMPOSTO', 'icComposto');
   linha('coef. do potencial sozinho', 'potencialSozinho');
   linha('coef. do potencial DADO O P/B', 'potencialDadoBm');
   linha('coef. do potencial COM P/B e L/P', 'potencialConjunto');
@@ -604,14 +628,25 @@ const _pacoteHabilidade = 'assets/validacao/habilidade.json';
 /// Grava a leitura que a tela de metas mostra: 36 meses, coortes trimestrais,
 /// com as deslistadas — a amostra do R3 (decisões 93 e 96).
 ///
-/// O pacote leva os números, e não o veredito: o critério da decisão 96 mora em
-/// `SkillReading.demonstrated`, e o teste do pacote confere que ele concorda
+/// O pacote leva os números, e não o veredito: o critério da decisão 96 e a
+/// regra que escolhe a ordenação do prêmio (item B1, `ordenacao_lado_a_lado.md`
+/// §1) moram em `SkillReading`, e o teste do pacote confere que eles concordam
 /// com o `passaR3` desta medição.
 void _pacoteDaHabilidade(Map<String, dynamic> resultado) {
   Map<String, dynamic> m(Object? v) => v as Map<String, dynamic>;
   final amostra = m(m(m(resultado['h36'])['trimestral'])['comDeslistadas']);
   final fm = m(amostra['famaMacBeth']);
   final dado = m(fm['potencialDadoBm']);
+  Map<String, Object?> leitura(String chave) {
+    final l = m(fm[chave]);
+    return {
+      'ic': l['media'],
+      'tCorrigido': l['tSobreposicao'],
+      'critico': l['criticoSobreposicao'],
+      'tNeweyWest': l['tNeweyWest'],
+    };
+  }
+
   final pacote = {
     'versao': SkillReadingCodec.versao,
     'fonte': 'docs/validacao/habilidade_trimestral.json',
@@ -625,18 +660,26 @@ void _pacoteDaHabilidade(Map<String, dynamic> resultado) {
       'critico': dado['criticoSobreposicao'],
       'tNeweyWest': dado['tNeweyWest'],
     },
-    'icPotencial': m(fm['icPotencial'])['media'],
-    'icBookToMarket': m(fm['icBookToMarket'])['media'],
+    'ordenacoes': {
+      SkillReadingCodec.chave(TransversalOrdering.composite):
+          leitura('icComposto'),
+      SkillReadingCodec.chave(TransversalOrdering.bookToMarket):
+          leitura('icBookToMarket'),
+      SkillReadingCodec.chave(TransversalOrdering.potential):
+          leitura('icPotencial'),
+    },
   };
-  final leitura = SkillReadingCodec.decode(pacote);
-  if (leitura == null) {
+  final lida = SkillReadingCodec.decode(pacote);
+  if (lida == null) {
     stderr.writeln('A leitura da habilidade saiu malformada; o pacote não foi '
         'gravado.');
     exit(1);
   }
   File(_pacoteHabilidade).writeAsStringSync(jsonEncode(pacote));
-  stderr.writeln('escrito $_pacoteHabilidade — habilidade '
-      '${leitura.demonstrated ? 'comprovada' : 'não comprovada'}');
+  final premio = lida.premiumOrdering;
+  stderr.writeln('escrito $_pacoteHabilidade — potencial dado o B/M '
+      '${lida.demonstrated ? 'comprovado' : 'não comprovado'}; prêmio do '
+      'retorno esperado: ${premio == null ? 'nenhum, nenhuma ordenação passou' : premio.label}');
 }
 
 /// A habilidade sobre a montagem do aplicativo por data, com e sem as

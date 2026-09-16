@@ -11,6 +11,82 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O que a segunda rodada da Fase 3 encontrou — B1, B10 e B13 (16/09/2026)
+
+**O instrumento vem antes do conserto.** O gabarito da cascata, conferido no
+código intacto como controle, divergia em 384 montagens sem mudança de código: a
+reingestão do ITR de 2025 mexia na `ancorada`, e **o universo vinha da rede** — a
+fonte tinha passado a listar a EQPA7 e a deixar de listar a COCE3. O universo
+passou a ser congelado com o resto da entrada, e o gabarito ganhou a varredura do
+nível da taxa livre de risco — a corrente, a de equilíbrio e a curva inteira — de
+−3 a +3 p.p., sobre a mesma entrada.
+
+**A varredura achou duas causas, e só uma estava no item.** Dos 128 avaliados pelo
+aplicativo, 25 tinham o preço justo subindo com a taxa. Em 18 era a troca de via;
+em 7 era outra coisa: a regra que decide se a cobertura de juros entra no prêmio de
+crédito compara o custo da dívida observado com `[Rf, Rf + 10 p.p.]`, e a faixa
+andava com a taxa suposta — na SMTO3, 25 pontos-base tiravam a cobertura da conta e
+o desconto caía 2,3 p.p. Medida na taxa da data, os 7 somem, e o WACC corrente e o
+de equilíbrio passam a ler o mesmo veredito.
+
+**42 dos 109 não financeiros avaliados tinham o preço de outro modelo.** Migrados
+ou mesclados com a via do acionista sobre LPA, pela ponte fina. A decisão 102 tirou
+a pós-condição, a mescla e as duas migrações: a via da firma avalia o capital próprio
+pelo fluxo do acionista derivado — a rota da decisão 43, agora também sem taxas
+resolvidas — e a via do acionista fica para o que o roteamento manda. **Nenhum dos
+114 avaliados sobe mais com a taxa.** O custo: 16 saem do aplicativo, entre eles a
+CSNA3, a CSAN3 e a MRVE3, que tinham potencial positivo pelo LPA e não têm capital
+próprio positivo pela firma; entram a AMER3 e a DASA3; e o preço justo da via da
+firma cai 5,5% na mediana, porque sem taxas resolvidas o `Ke` do CAPM e o WACC de
+pesos de mercado não são as taxas coerentes que tornariam as duas contas a mesma.
+A PRIO3 vai de −17,9% a −72,3%.
+
+**O terminal do contrato, na rota derivada, punha o contrato longo acima do
+perpétuo.** Era o terminal da firma menos a dívida, ao WACC, contra a perpetuidade
+do acionista, ao `Ke`. Virou a perpetuidade do acionista truncada, com o capital
+devolvido no fim — coincide no contrato que acaba no horizonte e tende ao perpétuo
+no contrato sem fim. O teste de concessão mostrou outra coisa: ao `Ke` do CAPM, o
+capital devolvido pode valer mais que a perpetuidade do acionista mesmo com a firma
+rendendo acima do WACC, e a ordem entre contrato e perpétuo passou a ser a do
+excedente do acionista.
+
+**O B1 foi fixado antes de medir, e a regra tirou o prêmio.** Três ordenações — o
+composto dos escores do potencial, do book-to-market e do lucro sobre o preço; o
+book-to-market; o potencial —, sobre as mesmas observações, e o prêmio da primeira
+que passasse. **Nenhuma passou.** O book-to-market, que passava com 2,92 contra 2,70
+no motor de antes, fica com 2,52 neste: a amostra é a das avaliadas, e a decisão 102
+tirou dela as endividadas. O IC dele até subiu; caiu a estabilidade entre coortes.
+**O retorno esperado da meta e do estudo é o `Ke` de cada ativo**, declarado total,
+e a aba Análise passou a dizer que o XIRR dela é só de preço.
+
+**A faixa calibrada teve a primeira réplica sem querer.** O motor mudou, o
+backtest foi reexecutado, e a forma da decisão 100, sem mudança, cobriu
+88,2/78,7/51,6% e 88,9/78,7/49,6%.
+
+**O que as lentes disseram.** Procederam quatro. A `metodo` achou que o rastro de
+auditoria continuava mostrando a ponte `EV − D` depois de a ponte ter saído do
+preço — corrigido, com teste que confere que o passo soma ao preço justo. A `risco`
+achou três testes de dados com asserção frouxa — a taxa do Tesouro aceita abaixo de
+20%, o CDI anualizado entre 8% e 16%, e a dívida líquida sem asserção —; os três
+passaram a conferir os números do arquivo, e o do CDI distingue a composição da
+média linear. **Não procederam**: a retenção `b = g/ROIC`, da `metodo`, porque o
+`ROIC_t` que converge ao WACC é o do capital novo, e a fórmula é a do vetor de valor
+de livro-texto; e as duas da `rumo`, que leram a decisão 39, substituída, e os
+bancos sem setor, que o A5 resolveu. A `registro` e a `tela` não acharam tensão — a
+`tela` pelo modelo rebaixado, que vale pouco. **Fora dos objetivos**: as três da
+`nucleo`, de sempre, e as duas da `dados` — a conferência de cobertura do cache
+macroeconômico e o proxy que não publica sem o plano Blaze.
+
+**O que a auditoria do gate reprovou.** Um `DateTime.now()` direto no provider dos
+sinais — a data passou ao núcleo, pela forma `asOf ?? DateTime.now()` —; uma
+divisão pela escala do escore robusto que a função da escala já protege, e a guarda
+foi repetida no ponto; e a igualdade entre floats nos postos das ferramentas de
+recusa e de cobertura, que passou a tolerância relativa de 1e-12 — e mudou, de fato,
+a referência das avaliadas no grupo só de deslistadas, onde resíduos iguais
+diferiam na 16ª casa.
+
+---
+
 ## O que a quarta rodada encontrou — C2b e B1.0 (15/09/2026)
 
 **O que estava errado na faixa era o centro, e não a amostra.** A terceira rodada

@@ -878,6 +878,14 @@ cai de 0,255 para 0,151 quando o preço vai à base da data. O defeito inflava o
 dois sinais de valor, e o B/M mais. Não é o veredito do R3, que fica para o fim
 das fases. Ver [habilidade_trimestral.md](habilidade_trimestral.md).
 
+**Sobre o motor da decisão 102, em 16/09/2026**, o potencial dado o book-to-market
+cai a 0,010, com `t` corrigido de 0,08. **E o book-to-market também deixa de
+passar**: IC de 0,186 com `t` corrigido de 2,52 contra 2,70. **O que muda no
+aplicativo** ([decisão 103](../decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md)):
+o prêmio do retorno esperado sai da ordenação que a validação comprovar, e hoje
+nenhuma — composto, book-to-market ou potencial — passa; o retorno esperado de cada
+ativo é o `Ke` dele. Ver [ordenacao_lado_a_lado.md](ordenacao_lado_a_lado.md).
+
 ### 3.7. Ação em tesouraria não é tratada em lugar nenhum
 
 **Descoberto em 11/09/2026 pela conferência do A1**, e sem lista anterior
@@ -1000,6 +1008,25 @@ pequena de taxa, no sentido contrário ao da teoria.
 
 **Para resolver.** Item B10 do [plano](../plano-motor-de-referencia.md): a
 migração precisa de transição, e não de degrau.
+
+**Resolvido em 16/09/2026** ([decisão 102](../decisoes/102-nenhuma-avaliacao-muda-de-via-e-a-firma-avalia-pelo-fluxo-do-acionista-derivado.md)).
+A varredura do nível da curva, de −3 a +3 p.p., achava 25 de 128 avaliados pelo
+aplicativo com o preço justo subindo com a taxa: 18 pela troca de via, 7 pela
+faixa do prêmio de crédito que andava com a taxa suposta. **Nenhuma avaliação muda
+mais de via** — a via da firma avalia o capital próprio pelo fluxo do acionista
+derivado, e a do acionista fica para instituição financeira e lucro operacional
+não sustentado —, e a faixa do crédito é medida na taxa da data. Na mesma
+varredura, **nenhum dos 114 avaliados sobe com a taxa**
+([monotonia_vias.json](monotonia_vias.json)). A PRIO3 vai a −72,3%, pela via da
+firma e monótona.
+
+**O que sobra.** A cobertura caiu de 128 para 114: onde o fluxo do acionista
+derivado não sustenta capital próprio positivo, o ativo é recusado, e a via do
+acionista não o carrega mais. E a rota derivada sem taxas resolvidas não é a
+identidade com `FCFF/WACC − D`: nos 65 que eram avaliados só pela firma, o preço
+justo cai 5,5% na mediana. Na montagem com o prior do beta, que o aplicativo não
+usa, 2 de 104 ainda sobem com a taxa, pelo veredito da perpetuidade que alterna
+entre passes do ponto fixo — é do B11.
 
 ### 3.11. A banda de cenários não mede incerteza
 

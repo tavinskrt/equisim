@@ -226,6 +226,19 @@ class ValuationInputs {
   /// inteira e o excedente perpétuo.
   final DateTime? concessionEnd;
 
+  /// Taxa livre de risco **da data da avaliação**, que arbitra se a despesa
+  /// financeira publicada pode ser lida como juro de dívida (item B10).
+  ///
+  /// A regra de `CostOfCapital.syntheticSpread` compara o custo da dívida
+  /// observado com a faixa `[Rf, Rf + 10 p.p.]`. Medida contra a taxa do
+  /// cenário, a faixa andava com ela: um deslocamento de 25 pontos-base tirava a
+  /// cobertura de juros da conta, o custo da dívida caía até 2,3 p.p. e o preço
+  /// justo **subia** com a taxa — GOAU4, SMTO3, RANI3 e UNIP6 na varredura de
+  /// 16/09/2026. A pergunta é sobre o dado do exercício, e não sobre a taxa que
+  /// se está supondo: a referência fica fixa na data, e o WACC corrente e o de
+  /// equilíbrio leem o mesmo veredito. `null` recua para a taxa do CAPM.
+  final double? creditReferenceRiskFree;
+
   /// Teto **nominal** do crescimento na perpetuidade, em fração.
   ///
   /// Precisa estar na mesma unidade do desconto, que é nominal por vir do CDI.
@@ -262,6 +275,7 @@ class ValuationInputs {
     this.cashTimingOverride,
     this.concessionEnd,
     this.dividendsInBeta = 0,
+    this.creditReferenceRiskFree,
   });
 
   /// Os mesmos insumos, com [n] anos de projeção explícita.
@@ -291,7 +305,58 @@ class ValuationInputs {
         cashTimingOverride: cashTimingOverride,
         concessionEnd: concessionEnd,
         dividendsInBeta: dividendsInBeta,
+        creditReferenceRiskFree: creditReferenceRiskFree,
       );
+
+  /// Os mesmos insumos com o **nível** da taxa livre de risco deslocado em
+  /// [delta]: a corrente, a de equilíbrio declarada e cada vértice da curva.
+  ///
+  /// É instrumento de diagnóstico — a varredura que confere se o preço justo
+  /// cai quando o capital encarece (item B10). Deslocar só uma das taxas mudaria
+  /// a inclinação da estrutura a termo, que é outra pergunta. O piso de 0,1%
+  /// evita taxa negativa, que não tem leitura aqui. O custo da dívida observado
+  /// nos exercícios não se move, e a referência do crédito
+  /// ([creditReferenceRiskFree]) também não: ela é da data do dado.
+  ValuationInputs withRiskFreeShift(double delta) {
+    double piso(double x) => x < 0.001 ? 0.001 : x;
+    final curva = riskFreeCurve;
+    final declarada = declaredTerminalRiskFreeRate;
+    return ValuationInputs(
+      ticker: ticker,
+      asOf: asOf,
+      fundamentals: fundamentals,
+      marketPrice: marketPrice,
+      capm: capm.withRiskFree(piso(capm.riskFreeRate + delta)),
+      marginOfSafety: marginOfSafety,
+      projectionYears: projectionYears,
+      perpetualGrowthCap: perpetualGrowthCap,
+      sectorKey: sectorKey,
+      industry: industry,
+      inflation: inflation,
+      declaredTerminalRiskFreeRate:
+          declarada == null ? null : piso(declarada + delta),
+      riskFreeCurve: curva == null
+          ? null
+          : YieldCurve.of(curva.referenceDate, [
+              for (final v in curva.vertices)
+                CurveVertex(v.years, piso(v.rate + delta)),
+            ]),
+      officialShares: officialShares,
+      prices: prices,
+      isDistressed: isDistressed,
+      terminalReturnOverride: terminalReturnOverride,
+      laneOverride: laneOverride,
+      growthOverride: growthOverride,
+      baseFactorOverride: baseFactorOverride,
+      unleveredBeta: unleveredBeta,
+      reinvestmentOverride: reinvestmentOverride,
+      cashTimingOverride: cashTimingOverride,
+      concessionEnd: concessionEnd,
+      dividendsInBeta: dividendsInBeta,
+      creditReferenceRiskFree:
+          creditReferenceRiskFree ?? capm.riskFreeRate,
+    );
+  }
 }
 
 /// De onde veio a contagem de papéis da ponte.
@@ -538,6 +603,16 @@ class _Premissas {
   /// Premissas do DCF com a taxa interpolada.
   final DcfAssumptions assumptions;
 
+  /// `Ke` do CAPM na taxa corrente e na de equilíbrio. Na via da firma, é o
+  /// desconto do fluxo do acionista derivado quando o caminho de taxas não é
+  /// resolvido (decisão 102).
+  final double keCorrente;
+  final double keTerminal;
+
+  /// Custo da dívida aplicado no WACC — a classificação sintética —, ou
+  /// `null` quando o WACC degenerou para o `Ke`.
+  final double? custoDaDivida;
+
   const _Premissas({
     required this.desconto,
     required this.descontoTerminal,
@@ -548,6 +623,9 @@ class _Premissas {
     required this.moat,
     required this.retornoDaBase,
     required this.assumptions,
+    required this.keCorrente,
+    required this.keTerminal,
+    required this.custoDaDivida,
   });
 }
 
@@ -829,14 +907,12 @@ abstract final class ValuationCascade {
       warnings.add(
         'Via imposta em "${imposta.label}" por varredura externa. Este '
         'resultado é instrumento de diagnóstico, não avaliação: o roteamento '
-        'e a pós-condição da ponte foram ignorados.',
+        'foi ignorado.',
       );
     }
     final refusals = <String>[];
     final result = _evaluateLane(inputs, published, latest, lane, warnings,
         scenarioBuilder, monteCarloSamples, seed, divisor, audit,
-        // Via imposta não migra: o ponto de impô-la é medir aquela via.
-        allowLaneMigration: imposta == null,
         refusals: refusals);
     if (result != null) {
       _auditVerdict(audit, result);
@@ -1235,140 +1311,6 @@ abstract final class ValuationCascade {
   /// sobre o fluxo livre publicado: este reprova quem está em ciclo de
   /// investimento. A EGIE3 caía para a via do acionista por um exercício
   /// negativo depois de onze positivos em dezesseis.
-  /// Formata dinheiro **a partir dos centavos inteiros**, não do `double`.
-  ///
-  /// `toStringAsFixed` opera sobre a representação binária e arredonda meio
-  /// para par, não meio para cima — que é a convenção do real. Como [Money]
-  /// já guarda centavos inteiros, a conversão exata é divisão e resto, e não
-  /// há arredondamento algum a fazer aqui.
-  ///
-  /// O sinal é extraído antes do resto: o `%` do Dart é sempre não negativo, e
-  /// `(-150) % 100` daria 50 em vez dos 50 centavos de um valor negativo.
-  static String _moeda(Money v) {
-    final sinal = v.cents < 0 ? '-' : '';
-    final abs = v.cents.abs();
-    final centavos = (abs % 100).toString().padLeft(2, '0');
-    return 'R\$ $sinal${abs ~/ 100},$centavos';
-  }
-
-  /// Peso da via da firma, contínuo na participação do capital próprio.
-  ///
-  /// **Substitui o degrau da pós-condição**, pela decisão 38. A regra anterior
-  /// escolhia uma via inteira em `s = 20%`, e as duas discordam além de 1,5×
-  /// em 55 de 92 ativos — de modo que o preço justo saltava por múltiplos
-  /// quando `s` cruzava o corte. Medido: a VBBR3 sai a R$ 2,65 pela firma e
-  /// R$ 33,71 pelo acionista.
-  ///
-  /// A rampa percorre exatamente a **faixa que o projeto já declarava frágil**:
-  /// de [ValuationParameters.minEquityShare], onde a ponte deixa de ser
-  /// utilizável, a [ValuationDiagnostics.fragileEquityShare], onde ela deixa
-  /// de ser frágil. Nenhum parâmetro novo — o que muda é que os dois cortes
-  /// passam a delimitar uma transição em vez de um degrau.
-  ///
-  /// ```
-  /// s ≤ 0,20            → 0    (só o acionista, como antes)
-  /// 0,20 < s < 0,35     → (s − 0,20) / 0,15
-  /// s ≥ 0,35            → 1    (só a firma, como antes)
-  /// ```
-  static double _pesoDaFirma(double equityShare) {
-    const piso = ValuationParameters.minEquityShare;
-    const teto = ValuationDiagnostics.fragileEquityShare;
-    if (!equityShare.isFinite || equityShare <= piso) return 0.0;
-    if (equityShare >= teto) return 1.0;
-    return (equityShare - piso) / (teto - piso);
-  }
-
-  /// Combina os preços justos das duas vias na faixa de transição.
-  ///
-  /// **Combina o número, e não os cenários.** Duas vias que discordam por
-  /// múltiplos não têm uma banda comum, e apresentar a da firma em torno de um
-  /// ponto que é média das duas afirmaria uma dispersão que nenhuma das duas
-  /// mediu. A banda sai; o ponto fica, e os dois valores de origem viajam no
-  /// aviso.
-  static ValuationResult _mesclarVias({
-    required ValuationResult firma,
-    required ValuationResult acionista,
-    required double peso,
-    required double participacao,
-  }) {
-    // Mistura de **taxas e frações**, que não são dinheiro e vivem em `double`
-    // por natureza.
-    double mistura(double a, double b) => peso * a + (1 - peso) * b;
-
-    // O preço justo é dinheiro, e a mistura dele é feita **em centavos
-    // inteiros**: passar por `reais` e voltar arredondaria duas vezes, e o
-    // ponto flutuante ainda decidiria o centavo no meio do caminho.
-    final justo = Money(
-      (firma.fairValue.cents * peso + acionista.fairValue.cents * (1 - peso))
-          .round(),
-    );
-    final dFirma = firma.diagnostics!;
-    final dAcionista = acionista.diagnostics!;
-
-    final caveats = <ValuationCaveat>{
-      ...dFirma.caveats,
-      ...dAcionista.caveats,
-      ValuationCaveat.viasMescladas,
-    }.toList();
-
-    // Razão entre os dois, para o aviso. Sai dos centavos pelo mesmo motivo:
-    // é comparação exata entre duas grandezas monetárias.
-    final razao = acionista.fairValue.cents > 0
-        ? firma.fairValue.cents / acionista.fairValue.cents
-        : double.nan;
-
-    return ValuationResult(
-      ticker: firma.ticker,
-      asOf: firma.asOf,
-      // A via de maior peso nomeia o resultado; o aviso declara a combinação.
-      model: peso >= 0.5 ? firma.model : acionista.model,
-      fairValue: justo,
-      marketPrice: firma.marketPrice,
-      priceVolatility: firma.priceVolatility,
-      marginOfSafety: firma.marginOfSafety,
-      discountRate: mistura(firma.discountRate, acionista.discountRate),
-      warnings: [
-        ...{...firma.warnings, ...acionista.warnings},
-        'O capital próprio responde por ${_pct(participacao)} do valor da '
-            'firma, dentro da faixa em que nenhuma das duas vias domina. O '
-            'preço justo combina as duas com peso de ${_pct(peso)} para a '
-            'firma: ${_moeda(firma.fairValue)} pelo fluxo da firma contra '
-            '${_moeda(acionista.fairValue)} pelo do acionista'
-            '${razao.isFinite ? ', uma razão de ${razao.toStringAsFixed(2)}x' : ''}. '
-            'A combinação remove o degrau que havia no corte; a discordância '
-            'entre as vias continua, e é o que esta faixa expõe.',
-      ],
-      diagnostics: ValuationDiagnostics(
-        terminalShare: mistura(dFirma.terminalShare, dAcionista.terminalShare),
-        equityShare: dFirma.equityShare,
-        // Não se mistura: é o mesmo CAPM nos dois lados, sobre o mesmo beta.
-        costOfEquity: dFirma.costOfEquity,
-        baseFactor: mistura(dFirma.baseFactor, dAcionista.baseFactor),
-        growthIdentified:
-            dFirma.growthIdentified && dAcionista.growthIdentified,
-        moatApplied: dFirma.moatApplied || dAcionista.moatApplied,
-        terminalDiscountRate: mistura(
-          dFirma.terminalDiscountRate,
-          dAcionista.terminalDiscountRate,
-        ),
-        terminalRetainedSpread: mistura(
-          dFirma.terminalRetainedSpread,
-          dAcionista.terminalRetainedSpread,
-        ),
-        growthRate: mistura(dFirma.growthRate, dAcionista.growthRate),
-        returnOnCapital:
-            mistura(dFirma.returnOnCapital, dAcionista.returnOnCapital),
-        // Não se mistura: é o retorno de uma via só, e a média de dois
-        // retornos terminais não é o retorno terminal de coisa alguma.
-        terminalReturnOnCapital: peso >= 0.5
-            ? dFirma.terminalReturnOnCapital
-            : dAcionista.terminalReturnOnCapital,
-        firmTaxRate: dFirma.firmTaxRate,
-        caveats: List.unmodifiable(caveats),
-      ),
-    );
-  }
-
   static ValuationLane _route(
     ValuationInputs inputs,
     List<FundamentalsSnapshot> published,
@@ -1436,16 +1378,23 @@ abstract final class ValuationCascade {
   ///
   /// **É o condutor, e os estágios são funções** (item D1). A Saída 1, a Saída
   /// 2, as premissas, o fluxo-base e o custo de capital resolvido estão em
-  /// [_descontarVia], cada um com entrada e saída declaradas; a pós-condição
-  /// da ponte em [_participacaoQueDecide]; e o rastro, os cenários e os
-  /// diagnósticos em [_concluir]. **As duas migrações de via são decisões
-  /// devolvidas a este condutor**, e não chamadas de dentro de um estágio: a
-  /// estrutura de capital recusada volta como [_EstruturaRecusada], e a
-  /// participação que decide a ponte volta medida. A segunda avaliação, na via
-  /// do acionista, sai daqui, e nunca migra de novo.
+  /// [_descontarVia], cada um com entrada e saída declaradas; e o rastro, os
+  /// cenários e os diagnósticos em [_concluir].
+  ///
+  /// **Nenhuma avaliação muda de via no meio da conta** (decisão 102). A via
+  /// sai do roteamento — setor e sustentação do lucro operacional, fatos de
+  /// longo prazo que não dependem da taxa nem do resultado —, e a conta que ela
+  /// começa é a que ela termina. Até 16/09/2026 a via da firma migrava para a do
+  /// acionista sobre LPA quando a participação do capital próprio caía abaixo
+  /// de 35%, e quando a realavancagem recusava a estrutura de capital: 42 dos
+  /// 109 não financeiros avaliados pelo aplicativo tinham o preço, inteiro ou em
+  /// parte, de um modelo diferente do que a rota decidia, e o preço justo subia
+  /// com a taxa em 18 deles. As duas vias são modelos independentes (decisão
+  /// 39), e escolher entre elas pela conta é o que fazia o degrau.
   ///
   /// Devolve `null` quando a via não é aplicável com os dados disponíveis, o que
-  /// o chamador converte em recusa declarada.
+  /// o chamador converte em recusa declarada; a recusa com motivo vai para
+  /// [refusals].
   static ValuationResult? _evaluateLane(
     ValuationInputs inputs,
     List<FundamentalsSnapshot> published,
@@ -1457,7 +1406,6 @@ abstract final class ValuationCascade {
     int seed,
     QuotedShares divisor,
     AuditTransaction? audit, {
-    bool allowLaneMigration = true,
     List<String>? refusals,
   }) {
     final via = _Via(
@@ -1468,20 +1416,6 @@ abstract final class ValuationCascade {
       divisor: divisor,
       audit: audit,
     );
-    ValuationResult? migrar(List<String> avisos) => _evaluateLane(
-          inputs,
-          published,
-          latest,
-          ValuationLane.shareholder,
-          avisos,
-          scenarioBuilder,
-          samples,
-          seed,
-          divisor,
-          audit,
-          allowLaneMigration: false,
-          refusals: refusals,
-        );
 
     final descontada = _descontarVia(via, warnings);
     switch (descontada) {
@@ -1490,140 +1424,38 @@ abstract final class ValuationCascade {
 
       // --- A estrutura de capital recusada (decisão 45) ----------------------
       //
-      // O solucionador tem duas maneiras de não entregar caminho, e elas não
-      // significam a mesma coisa:
-      //
-      // - **não convergir** é falha de método, e recuar para a interpolação de
-      //   dois pontos é resposta legítima;
-      // - **recusar** é a conta dizendo que a estrutura não fecha — o capital
-      //   próprio some quando o custo dele é reprecificado pela alavancagem que
-      //   ele mesmo tem, ou a taxa de equilíbrio não supera o crescimento
-      //   perpétuo e o valor terminal diverge.
-      //
-      // Medido em 10/09/2026: seis dos noventa e seis com as duas vias
-      // avaliáveis caem aqui, e **os seis são exatamente os que ainda eram
-      // mesclados e migrados**. Em todos a recusa vem na segunda ou terceira
-      // iteração — quer dizer, depois de a realavancagem corrigir a taxa, e não
-      // por o ponto fixo ter passeado. AGRO3, MYPK3 e PRIO3 ficam com capital
-      // próprio não positivo **no ano zero**; as três KLBN têm WACC de
-      // equilíbrio abaixo do crescimento perpétuo.
-      //
-      // Recuar para a interpolação nesse caso **lava a recusa em preço**: a
-      // interpolação não enxerga o problema porque desconta a uma taxa que a
-      // própria conta rejeitou, e o número que ela produz ia então ser mesclado
-      // com o da via do acionista. A via da firma não tem valor aqui; a do
-      // acionista é o que sobra, e a migração é declarada.
+      // Não convergir é falha de método, e recuar para a interpolação é resposta
+      // legítima; **recusar** é a conta dizendo que a estrutura não fecha — o
+      // capital próprio some quando o custo dele é reprecificado pela
+      // alavancagem que ele mesmo tem. Recuar para a interpolação lavaria a
+      // recusa em preço, e a decisão 45 mandava o ativo para a via do acionista.
+      // Desde a decisão 102 ele não vai: a via do acionista é outro modelo, e
+      // trocar de modelo porque o primeiro recusou é o degrau que o B10 mediu.
       case _EstruturaRecusada(:final motivo):
-        if (lane == ValuationLane.firm && allowLaneMigration) {
-          final migrada = migrar([
-            // `local` fica de fora de propósito: são notas da via da firma —
-            // curva de WACC, veredito do moat — e não descrevem o resultado
-            // que a via do acionista produz.
-            ...warnings,
-            '$motivo A avaliação migra para o fluxo do acionista, e o número '
-                'da via da firma não entra na conta — descontá-lo pela '
-                'interpolação seria usar a taxa que a própria realavancagem '
-                'rejeitou.',
-          ]);
-          if (migrada != null) return migrada;
-        }
         refusals?.add(
-          lane == ValuationLane.firm
-              ? '$motivo E a via do acionista não avalia este ativo.'
-              : '$motivo E não há outra via: o roteamento já trouxe o ativo '
-                  'para cá.',
+          '$motivo A avaliação não muda de via: a do acionista é outro modelo, '
+          'e trocar de modelo porque este recusou faria o preço justo depender '
+          'de qual dos dois a conta alcançou.',
         );
         return null;
 
       case final _ViaDescontada d:
-        final ponte = _participacaoQueDecide(via, d);
-        final participacao = ponte.participacao;
-        final pesoDaFirma = ponte.peso;
-        ValuationResult? outraVia;
-
-        // **A pós-condição só se aplica à ponte**, e a rota derivada não passa por
-        // ela. Sob o caminho resolvido o preço por papel vem de descontar o fluxo
-        // do acionista, sem a subtração `EV − D` — e sem ela não há amplificação
-        // por `1/participação` a conter, nem dois estimadores entre os quais
-        // escolher. Ver a decisão 43.
-        if (lane == ValuationLane.firm &&
-            d.custo.taxas == null &&
-            allowLaneMigration &&
-            pesoDaFirma < 1.0) {
-          _auditEquityBridgeFailure(audit, participacao);
-          final migrada = migrar([
-            ...warnings,
-            if (pesoDaFirma <= 0)
-              'O capital próprio responde por apenas '
-                  '${_pct(participacao)} do valor da firma: o preço por '
-                  'papel seria resíduo de uma subtração entre números próximos. '
-                  'A avaliação migra para o fluxo do acionista.',
-          ]);
-          if (migrada != null) {
-            // Abaixo do piso vale a via do acionista inteira, que é o
-            // comportamento que a decisão 25 estabeleceu. Na faixa de
-            // transição a outra via fica guardada e entra na combinação ao fim.
-            if (pesoDaFirma <= 0) return migrada;
-            outraVia = migrada;
-          }
-          if (migrada == null && pesoDaFirma > 0) {
-            // A via do acionista não avalia este ativo, e a da firma ainda tem
-            // peso. Segue com a firma sozinha, declarando que a combinação que
-            // a faixa pediria não pôde ser feita.
-            d.avisos.add(
-              'O capital próprio responde por ${_pct(participacao)} do '
-              'valor da firma, faixa em que o preço justo combinaria as duas vias '
-              '— mas a via do acionista não avalia este ativo. Vale a da firma '
-              'sozinha, com a fragilidade da ponte que a faixa declara.',
-            );
-          }
-          if (migrada == null && pesoDaFirma <= 0) {
-            // **Migração impossível vira recusa nomeada, não número sem conteúdo.**
-            // A própria pós-condição afirma que, com a dívida líquida consumindo o
-            // valor da firma, o que sobra é resíduo de subtração e não avaliação —
-            // publicar esse resíduo contradiria a afirmação que o motivou. O erro
-            // relativo do valor da firma chega ao preço por papel amplificado por
-            // `1/participação`, e num ativo de 3% de participação isso é trinta
-            // vezes: a AMER3 saía a R$ 0,20 em dez anos e R$ 1,47 em cinco, um fator
-            // de 7,35 vindo só da forma da curva de desconto.
-            //
-            // O efeito colateral é aceito: um ativo deixa de ser avaliado num
-            // horizonte e continua sendo em outro, conforme a pós-condição dispare ou
-            // não. Entre um número sem conteúdo e uma recusa que diz por quê, a
-            // recusa é a saída que a decisão 25 exige.
-            //
-            // A recusa é **nomeada**, que é o que a decisão 25 exige de toda saída.
-            //
-            // A participação **não** é positiva por construção: com a dívida líquida
-            // maior que o valor da firma ela fica negativa, e foi medida em −142,6%
-            // na CSNA3 e −558,3% na MRVE3. A amplificação `1/participação` só tem
-            // sentido no ramo positivo, e nem `Infinity` nem número negativo passam
-            // por `toStringAsFixed`.
-            final amplificacao = participacao > 0
-                ? 'com o erro do valor da firma amplificado '
-                    '${(1 / participacao).toStringAsFixed(0)} vezes'
-                : 'e a dívida líquida supera o próprio valor da firma, de modo que '
-                    'não sobra capital próprio a repartir';
-            refusals?.add(
-              'O capital próprio responde por apenas ${_pct(participacao)} do valor da '
-              'firma de ${inputs.ticker.value}, e a via do acionista não se aplica: '
-              'o preço por papel seria resíduo de uma subtração entre números '
-              'próximos, $amplificacao. O ativo não é avaliável por fluxo descontado '
-              'nesta estrutura de capital.',
-            );
-            return null;
-          }
+        if (lane == ValuationLane.firm && d.outcome.fairValuePerShare <= 0) {
+          // **Recusa nomeada, e não número sem conteúdo.** O capital próprio sai
+          // do fluxo do acionista derivado do da firma; não positivo, a dívida
+          // consome o que a operação gera, e não há o que repartir por papel.
+          final participacao = d.outcome.equityShare;
+          refusals?.add(
+            'O fluxo do acionista de ${inputs.ticker.value}, derivado do da '
+            'firma, não sustenta capital próprio positivo: a dívida líquida '
+            'consome o valor que a operação gera'
+            '${participacao > 0 ? ', e o capital próprio responderia por ${_pct(participacao)} do valor da firma' : ''}. '
+            'O ativo não é avaliável por fluxo descontado nesta estrutura de '
+            'capital.',
+          );
+          return null;
         }
-
-        final resultado = _concluir(via, d, scenarioBuilder, samples, seed,
-            migrada: !allowLaneMigration);
-        if (resultado == null || outraVia == null) return resultado;
-        return _mesclarVias(
-          firma: resultado,
-          acionista: outraVia,
-          peso: pesoDaFirma,
-          participacao: participacao,
-        );
+        return _concluir(via, d, scenarioBuilder, samples, seed);
     }
   }
 
@@ -1690,7 +1522,7 @@ abstract final class ValuationCascade {
     }
 
     final primeiro =
-        _descontarFluxo(via, fluxo.base, custo.taxas, custo.assumptions);
+        _descontarFluxo(via, fluxo.base, custo.taxas, custo.assumptions, p);
     if (primeiro.isErr) return null;
 
     return _ViaDescontada(
@@ -1707,30 +1539,26 @@ abstract final class ValuationCascade {
 
   /// **O desconto do fluxo da via**, sob as premissas [a].
   ///
-  /// Com o caminho de taxas resolvido, o capital próprio vem do **fluxo do
-  /// acionista derivado do da firma** — `FCFE = FCFF − juros(1−τ) + ΔDívida`
-  /// — e não da subtração `EV − D`.
+  /// **Na via da firma, o capital próprio vem sempre do fluxo do acionista
+  /// derivado do da firma** — `FCFE = FCFF − juros(1−τ) + ΔDívida` —, e nunca
+  /// da subtração `EV − D` (decisão 102, que estende a 43).
   ///
-  /// **Não é uma segunda opinião**: sob o caminho resolvido as duas rotas
-  /// coincidem dentro de 1e-6, e isso está travado por teste. O que muda é a
-  /// **condição numérica**: a ponte é a diferença de dois números grandes e
-  /// quase iguais quando o capital próprio é fino, e o erro relativo chega ao
-  /// preço por papel amplificado por `1/participação` — 138 vezes na RENT3.
-  /// A rota derivada não faz essa subtração.
+  /// - **Com o caminho de taxas resolvido**, descontado ao caminho de `Ke` que a
+  ///   realavancagem devolve; as duas rotas coincidem dentro de 1e-6, travado
+  ///   por teste (decisão 43).
+  /// - **Sem ele**, descontado ao `Ke` do CAPM, da taxa corrente à de
+  ///   equilíbrio — o desconto que a via do acionista já usa —, com o custo da
+  ///   dívida que o WACC aplica. O deslocamento que um cenário impõe ao desconto
+  ///   da firma é aplicado ao `Ke` do mesmo jeito.
   ///
-  /// É por isso que a pós-condição dos 20% e a mescla da decisão 38 **não se
-  /// aplicam** aqui: elas existiam para escolher entre dois estimadores que
-  /// discordavam, e sob esta rota há um só.
+  /// **Por que não a ponte.** Com o capital próprio fino, `EV − D` é a diferença
+  /// de dois números grandes e quase iguais, e o erro relativo chega ao preço por
+  /// papel amplificado por `1/participação` — 138 vezes na RENT3. A ponte pedia
+  /// uma pós-condição, e a pós-condição trocava de modelo: era o degrau.
   ///
   /// **Sem dívida bruta não há custo de dívida a medir, e o que sobra é
-  /// rendimento de caixa** (decisão 58). O recuo era a própria taxa de
-  /// desconto — o WACC —, e com dívida líquida **negativa** ela multiplica um
-  /// peso negativo: o motor creditava ao caixa o rendimento do negócio. A
-  /// taxa livre de risco é o que caixa rende.
-  ///
-  /// Medido em 11/09/2026: 18 dos avaliados chegam aqui, e em 16 deles a via
-  /// é a do acionista, que não usa este número. Os dois que usam são ALOS3,
-  /// com R$ 2,43 bi de caixa líquido, e BRAP4, com R$ 18 mi.
+  /// rendimento de caixa** (decisão 58): a taxa livre de risco é o que caixa
+  /// rende.
   ///
   /// A parte dos não controladores no patrimônio consolidado, que o fluxo da
   /// firma carrega e o acionista da controladora não recebe (decisão 49).
@@ -1739,6 +1567,7 @@ abstract final class ValuationCascade {
     double base,
     LeveredRates? taxas,
     DcfAssumptions a,
+    _Premissas premissas,
   ) {
     if (via.lane == ValuationLane.shareholder) {
       return DcfCalculator.shareholder(baseProfit: base, assumptions: a);
@@ -1750,11 +1579,18 @@ abstract final class ValuationCascade {
     final shares = via.divisor.count;
     final minoritarios = latest.minorityInterest ?? 0;
     if (taxas == null) {
-      return DcfCalculator.firm(
+      final centro = premissas.assumptions;
+      return DcfCalculator.equityFromFirm(
         baseProfit: base,
         assumptions: a,
         netDebt: latest.netDebt,
         sharesOutstanding: shares,
+        costOfDebt: premissas.custoDaDivida ?? via.inputs.capm.riskFreeRate,
+        taxRate: ValuationParameters.statutoryTaxRate,
+        equityDiscountRate:
+            premissas.keCorrente + (a.discountRate - centro.discountRate),
+        terminalEquityDiscountRate: premissas.keTerminal +
+            (a.terminalDiscountRate - centro.terminalDiscountRate),
         minorityInterest: minoritarios,
       );
     }
@@ -1772,90 +1608,15 @@ abstract final class ValuationCascade {
     );
   }
 
-  /// **A participação do capital próprio que decide a pós-condição da ponte**,
-  /// e o peso da via da firma que sai dela.
-  ///
-  /// Não pode ser pré-filtro: depende do valor da firma, que só existe depois
-  /// do desconto. Medido, a RENT3 tem participação de equity de 54% pelo
-  /// mercado e ainda assim saía com preço justo de R$ 0,12, porque o valor da
-  /// firma do modelo era metade do de mercado. A migração agora é declarada,
-  /// e não silenciosa como no antigo `fairValuePerShare <= 0`.
-  /// **A participação que decide a via é medida na taxa estrutural, não na
-  /// corrente.** A pós-condição é um degrau entre dois estimadores diferentes,
-  /// e medi-la na taxa do dia fazia o degrau andar com o ciclo monetário: o
-  /// preço justo deixava de ser monótono na taxa de desconto. Medido na
-  /// KLBN11, antes desta correção — baixando a taxa livre de risco de 9,00%
-  /// para 8,75%, o valor da firma sobe, a participação cruza os 20%, a
-  /// migração deixa de disparar, e o preço justo **cai** de R$ 7,98 para
-  /// R$ 5,36. Capital mais barato produzindo empresa menos valiosa contradiz a
-  /// definição de fluxo descontado, e com a Selic em queda os 33 ativos que
-  /// hoje migram atravessariam essa fronteira.
-  ///
-  /// A taxa estrutural é a mesma que a decisão 31 já usa para a perpetuidade, e
-  /// pela mesma razão: a estrutura de capital de um ativo é fato de longo
-  /// prazo, e qual das duas vias o descreve não pode depender de onde a Selic
-  /// está hoje. Dentro de cada via o preço justo continua monótono na taxa; o
-  /// que esta medida remove é a travessia induzida pelo ciclo.
-  ///
-  /// **Isto não concilia as duas vias**, que seguem discordando por medirem
-  /// crescimento e base em séries de capital diferentes — na KLBN11, 5,0%
-  /// contra 10,16% de crescimento e fator de base 0,665 contra 1,000. Essa
-  /// divergência é assunto de outra decisão; aqui só se impede que o ciclo
-  /// monetário escolha entre elas.
-  ///
-  /// Sem a medida estrutural — projeção degenerada, valor terminal divergente
-  /// na taxa de equilíbrio —, vale a da taxa corrente. Ausência de medida não
-  /// é motivo para deixar de aplicar a pós-condição.
-  ///
-  /// **A pós-condição deixou de ser degrau, pela decisão 38.** Ela escolhia
-  /// uma via inteira em `s = 20%`, e as duas discordam além de 1,5x em 55 de
-  /// 92 ativos — de modo que o preço justo saltava por múltiplos quando `s`
-  /// cruzava o corte. O peso passa a ser contínuo na faixa que o projeto já
-  /// declarava frágil, e o degrau some sem que nenhum parâmetro novo entre.
-  static ({double participacao, double peso}) _participacaoQueDecide(
-    _Via via,
-    _ViaDescontada d,
-  ) {
-    final inputs = via.inputs;
-    final p = d.premissas;
-    final participacaoEstrutural = via.lane == ValuationLane.firm
-        ? DcfCalculator.firm(
-            baseProfit: d.base,
-            assumptions: DcfAssumptions(
-              projectionYears: inputs.projectionYears,
-              growthRate: p.assumptions.growthRate,
-              perpetualGrowth: p.perpetuo,
-              discountRate: p.descontoTerminal,
-              terminalDiscountRate: p.descontoTerminal,
-              returnOnCapital: p.retornoDaBase,
-              terminalReturnOnCapital: d.custo.moat,
-              marginOfSafety: inputs.marginOfSafety,
-              contractYearsAfterHorizon: _anosDeContratoAlemDaProjecao(inputs),
-            ),
-            netDebt: via.latest.netDebt,
-            sharesOutstanding: via.divisor.count,
-          ).valueOrNull?.equityShare
-        : null;
-    final participacao = participacaoEstrutural ?? d.outcome.equityShare;
-    return (
-      participacao: participacao,
-      peso: via.lane == ValuationLane.firm ? _pesoDaFirma(participacao) : 1.0,
-    );
-  }
-
   /// **A conclusão da via**: o rastro do desconto e da ponte, os cenários e os
   /// diagnósticos. Devolve `null` com preço justo não positivo.
-  ///
-  /// - [migrada]: `true` no passe que veio de migração de via, que é
-  ///   justamente quando a migração chega desligada.
   static ValuationResult? _concluir(
     _Via via,
     _ViaDescontada d,
     AssumptionSource Function(DcfAssumptions)? scenarioBuilder,
     int samples,
-    int seed, {
-    required bool migrada,
-  }) {
+    int seed,
+  ) {
     final inputs = via.inputs;
     final lane = via.lane;
     final audit = via.audit;
@@ -1876,10 +1637,11 @@ abstract final class ValuationCascade {
     if (lane == ValuationLane.firm) {
       _auditEquityBridge(
         audit,
-        enterpriseValue: outcome.enterpriseValue,
+        outcome: outcome,
         netDebt: via.latest.netDebt,
+        minorityInterest: via.latest.minorityInterest ?? 0,
         shares: via.divisor.count,
-        perShare: outcome.fairValuePerShare,
+        resolved: d.custo.taxas != null,
       );
     }
 
@@ -1890,8 +1652,9 @@ abstract final class ValuationCascade {
           : ValuationModel.dcfEarnings,
       assumptions: assumptions,
       baseValue: outcome.fairValuePerShare,
-      valuate: (a) => _descontarFluxo(via, d.base, d.custo.taxas, a)
-          .map((o) => o.fairValuePerShare),
+      valuate: (a) =>
+          _descontarFluxo(via, d.base, d.custo.taxas, a, d.premissas)
+              .map((o) => o.fairValuePerShare),
       scenarioBuilder: scenarioBuilder,
       samples: samples,
       seed: seed,
@@ -1905,7 +1668,6 @@ abstract final class ValuationCascade {
         // de cobertura, e uma varredura de diagnóstico não é vantagem
         // competitiva reconhecida.
         moatApplied: d.custo.moatVerificado != null,
-        migrated: migrada,
         finiteTerm: d.premissas.prazoDeterminado,
         rebuiltBase: d.baseReconstruida,
         // `Rf + β·prêmio` sobre a taxa corrente: o retorno esperado
@@ -2176,7 +1938,11 @@ abstract final class ValuationCascade {
 
     final custoCorrente = lane == ValuationLane.firm
         ? _wacc(inputs, latest, local, divisor, audit)
-        : (rate: inputs.capm.costOfEquity, costOfDebtEstimated: false);
+        : (
+            rate: inputs.capm.costOfEquity,
+            costOfDebtEstimated: false,
+            costOfDebt: null,
+          );
     final desconto = custoCorrente.rate;
 
     // Custo de capital de **equilíbrio**: o mesmo beta, o mesmo prêmio e a mesma
@@ -2357,6 +2123,9 @@ abstract final class ValuationCascade {
       moat: moat,
       retornoDaBase: retornoDaBase,
       assumptions: assumptions,
+      keCorrente: inputs.capm.costOfEquity,
+      keTerminal: capmTerminal.costOfEquity,
+      custoDaDivida: custoCorrente.costOfDebt,
     );
   }
 
@@ -2740,9 +2509,6 @@ abstract final class ValuationCascade {
   /// cascata já tomou e já declarou em texto; o que muda é que sai também em
   /// forma estruturada, para que a carteira possa ponderar por firmeza em vez
   /// de tratar todo preço justo como igualmente apoiado.
-  ///
-  /// - [migrated]: `true` no passe que veio de migração de via, que é
-  ///   justamente quando `allowLaneMigration` chega desligado.
   /// A frase da participação do capital próprio, ou o motivo de não haver uma.
   ///
   /// Com caixa líquido maior que o próprio negócio, `E + D` fica não positivo
@@ -2811,7 +2577,6 @@ abstract final class ValuationCascade {
     required double baseFactor,
     required GrowthOrigin growthOrigin,
     required bool moatApplied,
-    required bool migrated,
     required bool finiteTerm,
     required bool rebuiltBase,
     required double costOfEquity,
@@ -2839,7 +2604,6 @@ abstract final class ValuationCascade {
         baseFactor < 1 / ValuationDiagnostics.baseFactorLimit) {
       caveats.add(ValuationCaveat.baseNormalizadaForte);
     }
-    if (migrated) caveats.add(ValuationCaveat.viaMigrada);
     if (finiteTerm) caveats.add(ValuationCaveat.prazoDeterminado);
     if (rebuiltBase) caveats.add(ValuationCaveat.baseReconstruida);
     if (outcome.equityShare < ValuationDiagnostics.fragileEquityShare) {
@@ -2914,7 +2678,7 @@ abstract final class ValuationCascade {
   /// O segundo campo não é detalhe de log: ele entra nos diagnósticos do
   /// resultado, e recalculá-lo fora daqui duplicaria a regra de
   /// `CostOfCapital`.
-  static ({double rate, bool costOfDebtEstimated}) _wacc(
+  static ({double rate, bool costOfDebtEstimated, double? costOfDebt}) _wacc(
     ValuationInputs inputs,
     FundamentalsSnapshot latest,
     List<String> warnings,
@@ -2966,7 +2730,11 @@ abstract final class ValuationCascade {
         result: capm.costOfEquity * 100,
         unit: '% a.a.',
       );
-      return (rate: capm.costOfEquity, costOfDebtEstimated: false);
+      return (
+        rate: capm.costOfEquity,
+        costOfDebtEstimated: false,
+        costOfDebt: null,
+      );
     }
 
     if (efetiva != null && (efetiva - tax).abs() > 0.10) {
@@ -2979,6 +2747,11 @@ abstract final class ValuationCascade {
       );
     }
 
+    // A faixa que decide se a despesa financeira é juro de dívida é medida na
+    // taxa da **data**, e não na do cenário nem na de equilíbrio: é pergunta
+    // sobre o dado do exercício (item B10). Ver
+    // [ValuationInputs.creditReferenceRiskFree].
+    final referencia = inputs.creditReferenceRiskFree ?? inputs.capm.riskFreeRate;
     final coc = CostOfCapital(
       capm: capm,
       costOfDebt: kd,
@@ -2987,6 +2760,7 @@ abstract final class ValuationCascade {
       debtValue: debt,
       interestCoverage: latest.interestCoverage,
       netDebtToEbitda: latest.netDebtToEbitda,
+      creditReferenceRate: referencia,
     );
 
     if (coc.costOfDebtWasClamped) {
@@ -2994,8 +2768,8 @@ abstract final class ValuationCascade {
       warnings.add(
         'O custo da dívida implícito nos demonstrativos deu '
         '${_pct(kd)} a.a., fora da faixa defensável de '
-        '${_pct(capm.riskFreeRate)} a '
-        '${_pct(capm.riskFreeRate + CostOfCapital.maxCreditSpread)}. A despesa '
+        '${_pct(referencia)} a '
+        '${_pct(referencia + CostOfCapital.maxCreditSpread)}. A despesa '
         'financeira publicada inclui arrendamento e variação cambial, que não '
         'são captação. Adotado ${_pct(coc.effectiveCostOfDebt)} a.a., da '
         'classificação sintética por alavancagem'
@@ -3011,7 +2785,11 @@ abstract final class ValuationCascade {
     }
 
     _auditWacc(audit, coc);
-    return (rate: coc.wacc, costOfDebtEstimated: coc.costOfDebtWasClamped);
+    return (
+      rate: coc.wacc,
+      costOfDebtEstimated: coc.costOfDebtWasClamped,
+      costOfDebt: coc.effectiveCostOfDebt,
+    );
   }
 
   static String _pct(double fraction) =>
@@ -3532,34 +3310,6 @@ abstract final class ValuationCascade {
     );
   }
 
-  /// Registra a migração de via disparada pela ponte de equity fina.
-  static void _auditEquityBridgeFailure(
-    AuditTransaction? audit,
-    double equityShare,
-  ) {
-    if (audit == null) return;
-    audit.step(
-      formulaName: 'Pós-condição da ponte de equity',
-      latex: r'\frac{EV - D_{liq}}{EV} \geq 0{,}20',
-      variables: {
-        'participação do equity (%)': _r(equityShare * 100),
-        'mínimo exigido (%)': _r(ValuationParameters.minEquityShare * 100),
-        'amplificação do erro (x)':
-            equityShare > 0 ? _r(1 / equityShare, 1) : 'infinita',
-      },
-      steps: [
-        'O capital próprio responde por ${_pct(equityShare)} do valor da firma, '
-            'abaixo do mínimo de ${_pct(ValuationParameters.minEquityShare)}',
-        'Subtrair dois números próximos amplifica o erro relativo por '
-            '${equityShare > 0 ? (1 / equityShare).toStringAsFixed(0) : "∞"}x: '
-            'o preço por papel seria resíduo, não avaliação',
-        'A avaliação migra para o fluxo do acionista, e a migração é declarada',
-      ],
-      result: _r(equityShare * 100).toDouble(),
-      unit: '% do valor da firma',
-    );
-  }
-
   static void _auditPerpetualGrowth(
     AuditTransaction? audit,
     double explicitGrowth,
@@ -3838,31 +3588,51 @@ abstract final class ValuationCascade {
     }
   }
 
+  /// O capital próprio da via da firma, **como ele é calculado**: pelo fluxo do
+  /// acionista derivado do da firma, e não pela subtração `EV − D` (decisão
+  /// 102). O rastro mostrava a ponte depois de a ponte ter saído da conta, e o
+  /// rastro que descreve outra conta é pior que nenhum.
   static void _auditEquityBridge(
     AuditTransaction? audit, {
-    required double enterpriseValue,
+    required DcfOutcome outcome,
     required double netDebt,
+    required double minorityInterest,
     required double shares,
-    required double perShare,
+    required bool resolved,
   }) {
     if (audit == null) return;
+    final explicito =
+        outcome.discountedFlows.fold<double>(0, (a, b) => a + b);
+    final terminal = outcome.discountedTerminalValue;
+    final minoritarios = minorityInterest < 0 ? 0.0 : minorityInterest;
     audit.step(
-      formulaName: 'Ponte do valor da firma ao preço justo por papel',
-      latex: r'P_0 = \frac{EV - D_{liq}}{N_{papéis}}',
+      formulaName: 'Capital próprio pelo fluxo do acionista derivado',
+      latex: r'FCFE_t = FCFF_t - D_{t-1}\,[K_d(1-\tau) - g_t] \quad;\quad '
+          r'P_0 = \frac{\sum_t \frac{FCFE_t}{(1+K_{e,t})^t} + '
+          r'\frac{VT_{acionista}}{(1+K_e)^N} - M}{N_{papéis}}',
       variables: {
-        'EV (R\$)': _r(enterpriseValue),
-        'D_liq (R\$)': _r(netDebt),
+        'VP do fluxo explícito do acionista (R\$)': _r(explicito),
+        'VP do terminal do acionista (R\$)': _r(terminal),
+        'minoritários M (R\$)': _r(minoritarios),
+        'dívida líquida inicial D_0 (R\$)': _r(netDebt),
         'N_papéis': _r(shares, 0),
+        'desconto': resolved
+            ? 'caminho de K_e resolvido pela realavancagem'
+            : 'K_e do CAPM, da taxa corrente à de equilíbrio',
       },
       steps: [
-        'Passo 1: valor da firma → ${_r(enterpriseValue)}',
-        'Passo 2: desconto da dívida líquida → ${_r(enterpriseValue)} − '
-            '${_r(netDebt)} = ${_r(enterpriseValue - netDebt)}',
-        'Passo 3: divisão pelo número de papéis negociados → '
-            '${_r(enterpriseValue - netDebt)} ÷ ${_r(shares, 0)} = '
-            '${_r(perShare)}',
+        'Passo 1: fluxo do acionista de cada ano = fluxo da firma menos o juro '
+            'líquido da dívida, mais o acréscimo dela a g — a dívida parte de '
+            '${_r(netDebt)}',
+        'Passo 2: valor presente do fluxo explícito → ${_r(explicito)}',
+        'Passo 3: valor presente do terminal do acionista → ${_r(terminal)}',
+        'Passo 4: menos a parte dos não controladores → ${_r(explicito)} + '
+            '${_r(terminal)} − ${_r(minoritarios)} = ${_r(outcome.equityValue)}',
+        'Passo 5: divisão pelo número de papéis negociados → '
+            '${_r(outcome.equityValue)} ÷ ${_r(shares, 0)} = '
+            '${_r(outcome.fairValuePerShare)}',
       ],
-      result: perShare,
+      result: outcome.fairValuePerShare,
       unit: r'R$ por papel',
     );
   }

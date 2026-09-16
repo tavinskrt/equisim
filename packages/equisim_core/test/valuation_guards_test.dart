@@ -1737,8 +1737,8 @@ void main() {
 
   group('Ponte de equity — recusa nomeada quando não há o que repartir', () {
     /// Empresa com fluxo de firma positivo e dívida líquida maior que o valor
-    /// da firma, e **sem** lucro líquido: a via da firma produz participação
-    /// não positiva, e a via do acionista não tem base para migrar.
+    /// da firma: o fluxo do acionista derivado do da firma não sustenta capital
+    /// próprio positivo, e desde a decisão 102 nenhuma outra via é tentada.
     List<FundamentalsSnapshot> afogada() {
       final pontos = <FundamentalsSnapshot>[];
       var pl = 1000.0;
@@ -1776,7 +1776,7 @@ void main() {
       ));
       expect(r.isErr, isTrue);
       final msg = r.failureOrNull!.message;
-      expect(msg, contains('capital próprio responde por apenas'));
+      expect(msg, contains('não sustenta capital próprio positivo'));
       expect(msg, contains('não é avaliável por fluxo descontado'));
       expect(msg, isNot(contains('Infinity')),
           reason: 'participação não positiva não pode virar 1/0 na mensagem');
@@ -1820,16 +1820,12 @@ void main() {
     test('os cortes carregam a decisão que os originou', () {
       // 80% é o topo da faixa que a decisão 25 citou para justificar dez anos
       // de projeção em vez de cinco; 2,0x é metade da autoridade que a
-      // saturação da decisão 28 concede a um único exercício; 35% é a faixa
-      // acima do corte de migração em que a ponte já é resíduo e ninguém
-      // avisava.
+      // saturação da decisão 28 concede a um único exercício; 35% é a faixa em
+      // que o capital próprio fino amplifica o erro do fluxo — declarada, e,
+      // desde a decisão 102, nunca motivo para trocar de via.
       expect(ValuationDiagnostics.terminalShareLimit, 0.80);
       expect(ValuationDiagnostics.baseFactorLimit, 2.0);
       expect(ValuationDiagnostics.fragileEquityShare, 0.35);
-      expect(ValuationDiagnostics.fragileEquityShare,
-          greaterThan(ValuationParameters.minEquityShare),
-          reason: 'a ressalva precisa cobrir a faixa que a migração deixa '
-              'passar, não repeti-la');
     });
 
     test('resultado montado à mão não inventa diagnóstico', () {
@@ -2029,13 +2025,13 @@ void main() {
   });
 
   group('Fronteira das vias e monotonia na taxa', () {
-    // A pós-condição da ponte de equity é um degrau entre dois estimadores
-    // diferentes. Medi-la na taxa do dia fazia o degrau andar com o ciclo
-    // monetário: na KLBN11, baixar a taxa livre de risco de 9,00% para 8,75%
-    // levava o preço justo de R$ 7,98 para R$ 5,36 — capital mais barato
-    // produzindo empresa menos valiosa, que contradiz a definição de fluxo
-    // descontado. Passou a ser medida na taxa estrutural, que não acompanha a
-    // Selic.
+    // A pós-condição da ponte de equity era um degrau entre dois estimadores
+    // diferentes, e medi-la na taxa do dia fazia o degrau andar com o ciclo
+    // monetário (decisão 34); a rampa da decisão 38 trocou o degrau por uma
+    // mistura, e a mistura continuava subindo com a taxa. **Desde a decisão
+    // 102 não há fronteira**: a via da firma é a via da firma em toda taxa, e o
+    // capital próprio fino é ressalva, e não troca de modelo. Este fixture é
+    // alavancado de propósito, para atravessar a faixa que migrava.
     FundamentalsSnapshot alavancado(int ano, double escala) =>
         FundamentalsSnapshot(
           ticker: ticker,
@@ -2135,7 +2131,8 @@ void main() {
               'dois passos de 10 pontos-base é degrau de via, não desconto');
     });
 
-    test('na faixa de transição o justo fica entre as duas vias', () {
+    test('não há faixa de transição: o justo é o da via da firma em toda taxa',
+        () {
       ValuationResult? porVia(double rf, ValuationLane? via) {
         final r = ValuationCascade.evaluate(ValuationInputs(
           ticker: ticker,
@@ -2149,31 +2146,63 @@ void main() {
         return r.isOk ? r.unwrap() : null;
       }
 
-      var mesclados = 0;
+      var frageis = 0;
+      var avaliados = 0;
       for (var passo = 0; passo <= 60; passo++) {
         final rf = 0.1600 - passo * 0.0010;
         final producao = porVia(rf, null);
         if (producao == null) continue;
-        final temMescla = producao.diagnostics!.caveats
-            .contains(ValuationCaveat.viasMescladas);
-        if (!temMescla) continue;
-        mesclados++;
-
-        final firma = porVia(rf, ValuationLane.firm);
-        final acionista = porVia(rf, ValuationLane.shareholder);
-        expect(firma, isNotNull);
-        expect(acionista, isNotNull);
-
-        final a = firma!.fairValue.reais;
-        final b = acionista!.fairValue.reais;
-        final menor = a < b ? a : b;
-        final maior = a < b ? b : a;
-        final justo = producao.fairValue.reais;
-        expect(justo, greaterThanOrEqualTo(menor - 0.01));
-        expect(justo, lessThanOrEqualTo(maior + 0.01));
+        avaliados++;
+        expect(producao.model, ValuationModel.dcfFcff);
+        final caveats = producao.diagnostics!.caveats;
+        expect(caveats, isNot(contains(ValuationCaveat.viasMescladas)));
+        expect(caveats, isNot(contains(ValuationCaveat.viaMigrada)));
+        if (caveats.contains(ValuationCaveat.ponteFragil)) frageis++;
+        // A mesma conta que a via imposta faz: não há segunda via na mistura.
+        expect(producao.fairValue.cents, porVia(rf, ValuationLane.firm)!.fairValue.cents);
       }
-      expect(mesclados, greaterThan(0),
-          reason: 'a varredura precisa atravessar a faixa de transição');
+      expect(avaliados, greaterThan(40));
+      expect(frageis, greaterThan(0),
+          reason: 'a varredura precisa atravessar o capital próprio fino que '
+              'migrava — se não atravessar, o teste não mede o que promete');
+    });
+
+    test('deslocar o nível da curva inteira não faz o preço justo subir com a '
+        'taxa — o critério do B10', () {
+      // A decisão 34 resolvia a taxa corrente, e não o nível: deslocar as duas
+      // taxas juntas movia a participação estrutural, e a fronteira voltava a
+      // ser cruzada — 46 de 122 ativos no `dcf_reverso`, 25 de 128 na varredura
+      // do aplicativo em 16/09/2026.
+      final base = ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: serie(),
+        marketPrice: 9.0,
+        capm: const CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+      );
+      double? anterior;
+      final modelos = <ValuationModel>{};
+      var avaliados = 0;
+      for (var passo = -40; passo <= 40; passo++) {
+        final r = ValuationCascade.evaluate(base.withRiskFreeShift(passo * 0.001));
+        if (r.isErr) {
+          anterior = null;
+          continue;
+        }
+        final v = r.unwrap();
+        avaliados++;
+        modelos.add(v.model);
+        final justo = v.fairValue.reais;
+        if (anterior != null) {
+          expect(justo, lessThanOrEqualTo(anterior + 0.01),
+              reason: 'no deslocamento de ${(passo / 10).toStringAsFixed(1)} '
+                  'p.p. o preço justo subiu de $anterior para $justo com a taxa');
+        }
+        anterior = justo;
+      }
+      expect(avaliados, greaterThan(60));
+      expect(modelos, {ValuationModel.dcfFcff});
     });
 
     test('crescimento e fator impostos são nulos em produção', () {
@@ -2278,10 +2307,12 @@ void main() {
       );
     });
 
-    test('com o caminho resolvido, o capital próprio não passa pela ponte', () {
-      // O fixture é alavancado de propósito: sob a interpolação ele atravessa
-      // a pós-condição dos 20% e recebe a mescla da decisão 38. Sob a rota
-      // derivada não há ponte, não há degrau e não há mescla.
+    test('com ou sem o caminho resolvido, o capital próprio não passa pela '
+        'ponte, e nada é mesclado', () {
+      // O fixture é alavancado de propósito: sob a ponte ele atravessava a
+      // pós-condição dos 20% e recebia a mescla da decisão 38. Com o caminho
+      // resolvido já não havia ponte (decisão 43); sem ele, desde a decisão 102,
+      // também não.
       ValuationResult? avaliar({double? betaU, required double rf}) {
         final r = ValuationCascade.evaluate(ValuationInputs(
           ticker: ticker,
@@ -2295,33 +2326,26 @@ void main() {
         return r.isOk ? r.unwrap() : null;
       }
 
-      var mescladosSem = 0;
-      var mescladosCom = 0;
+      var avaliadosSem = 0;
       var avaliadosCom = 0;
       for (var passo = 0; passo <= 40; passo++) {
         final rf = 0.1600 - passo * 0.0015;
-        final sem = avaliar(rf: rf);
-        final comU = avaliar(betaU: 0.60, rf: rf);
-        if (sem != null &&
-            sem.diagnostics!.caveats.contains(ValuationCaveat.viasMescladas)) {
-          mescladosSem++;
-        }
-        if (comU != null) {
-          avaliadosCom++;
-          if (comU.diagnostics!.caveats
-              .contains(ValuationCaveat.viasMescladas)) {
-            mescladosCom++;
+        for (final (betaU, conta) in [(null, 0), (0.60, 1)]) {
+          final v = avaliar(betaU: betaU, rf: rf);
+          if (v == null) continue;
+          if (conta == 0) {
+            avaliadosSem++;
+          } else {
+            avaliadosCom++;
           }
+          expect(v.diagnostics!.caveats,
+              isNot(contains(ValuationCaveat.viasMescladas)));
         }
       }
-
+      expect(avaliadosSem, greaterThan(20),
+          reason: 'a varredura precisa cobrir a faixa para ter conteúdo');
       expect(avaliadosCom, greaterThan(20),
           reason: 'a varredura precisa cobrir a faixa para ter conteúdo');
-      expect(mescladosSem, greaterThan(0),
-          reason: 'sem o caminho resolvido, este fixture atravessa a mescla — '
-              'se não atravessar, o teste não está medindo o que promete');
-      expect(mescladosCom, 0,
-          reason: 'sob a rota derivada não há dois estimadores a mesclar');
     });
 
     test('a rota derivada é contínua na taxa, sem degrau de ponte', () {
@@ -2468,7 +2492,7 @@ void main() {
       expect(aviso, contains('$pct%'));
     });
 
-    test('a via imposta ignora roteamento e pós-condição, e declara', () {
+    test('a via imposta ignora o roteamento, e declara', () {
       final r = ValuationCascade.evaluate(ValuationInputs(
         ticker: ticker,
         asOf: DateTime(2026, 9, 9),
@@ -2493,7 +2517,7 @@ void main() {
       expect(
         v.diagnostics!.caveats.contains(ValuationCaveat.viasMescladas),
         isFalse,
-        reason: 'via imposta não mescla: o ponto de impô-la é medir aquela via',
+        reason: 'nada mescla desde a decisão 102, e a via imposta muito menos',
       );
     });
 
@@ -3360,77 +3384,64 @@ void main() {
       return out;
     }
 
-    ValuationResult? avaliar({required double divida, double? betaU}) {
-      final r = ValuationCascade.evaluate(ValuationInputs(
-        ticker: ticker,
-        asOf: DateTime(2026, 9, 9),
-        fundamentals: serie(divida),
-        marketPrice: 9.0,
-        capm: CapmInputs(
-          riskFreeRate: 0.14,
-          beta: 1.0,
-          marketPremium: 0.055,
-        ),
-        declaredTerminalRiskFreeRate: 0.094,
-        unleveredBeta: betaU,
-      ));
-      return r.isOk ? r.unwrap() : null;
-    }
+    Result<ValuationResult> avaliar({required double divida, double? betaU}) =>
+        ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: serie(divida),
+          marketPrice: 9.0,
+          capm: CapmInputs(
+            riskFreeRate: 0.14,
+            beta: 1.0,
+            marketPremium: 0.055,
+          ),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: betaU,
+        ));
 
-    test('a recusa da realavancagem não vira preço pela interpolação', () {
-      var mescladosSem = 0;
-      var mescladosCom = 0;
-      var recusados = 0;
+    test('a recusa da realavancagem não vira preço de outra via', () {
+      // Decisão 102. A estrutura recusada migrava para a via do acionista
+      // (decisão 45), e sem beta desalavancado a ponte fina era mesclada com
+      // ela (decisão 38). Nenhuma das duas acontece mais: com ou sem caminho
+      // resolvido, o ativo é avaliado pela via da firma ou recusado.
+      var recusadosPelaEstrutura = 0;
       var avaliados = 0;
       for (var passo = 0; passo <= 30; passo++) {
         final divida = 16000 + passo * 2000.0;
-        final sem = avaliar(divida: divida);
-        final comU = avaliar(divida: divida, betaU: 0.60);
-        if (sem != null &&
-            sem.diagnostics!.caveats.contains(ValuationCaveat.viasMescladas)) {
-          mescladosSem++;
-        }
-        if (comU == null) {
-          recusados++;
-          continue;
-        }
-        avaliados++;
-        if (comU.diagnostics!.caveats
-            .contains(ValuationCaveat.viasMescladas)) {
-          mescladosCom++;
+        for (final betaU in [null, 0.60]) {
+          final r = avaliar(divida: divida, betaU: betaU);
+          if (r.isErr) {
+            final motivo = r.failureOrNull!.message;
+            if (motivo.contains('não sustenta a via da firma')) {
+              recusadosPelaEstrutura++;
+              expect(motivo, contains('não muda de via'));
+            }
+            continue;
+          }
+          avaliados++;
+          final v = r.unwrap();
+          expect(v.model, ValuationModel.dcfFcff, reason: 'dívida $divida');
+          expect(v.diagnostics!.caveats,
+              isNot(contains(ValuationCaveat.viasMescladas)));
+          expect(v.diagnostics!.caveats,
+              isNot(contains(ValuationCaveat.viaMigrada)));
         }
       }
-
-      expect(mescladosSem, greaterThan(0),
-          reason: 'sem beta desalavancado esta varredura precisa atravessar a '
-              'mescla — se não atravessar, o teste não mede o que promete');
-      expect(avaliados + recusados, 31);
-      expect(mescladosCom, 0,
-          reason: 'a via da firma recusada não pode voltar pela interpolação '
-              'para ser mesclada com a do acionista');
+      expect(avaliados, greaterThan(0));
+      expect(recusadosPelaEstrutura, greaterThan(0),
+          reason: 'a varredura precisa alcançar a recusa da realavancagem — se '
+              'não alcançar, o teste não mede o que promete');
     });
 
-    test('a via do acionista carrega o ativo, e a migração é declarada', () {
+    test('sem via da firma, o ativo é recusado, e a recusa diz por quê', () {
       // Dívida escolhida para a recusa disparar: com ela o capital próprio
       // some quando o custo dele é reprecificado pela alavancagem que tem.
-      final comU = avaliar(divida: 60000, betaU: 0.60)!;
-      expect(comU.model, ValuationModel.dcfEarnings,
-          reason: 'sem via da firma, quem avalia é o fluxo do acionista');
-      expect(comU.diagnostics!.caveats, contains(ValuationCaveat.viaMigrada));
-      expect(
-        comU.warnings.any((w) => w.contains('não sustenta a via da firma')),
-        isTrue,
-        reason: 'a migração por estrutura recusada precisa ser nomeada',
-      );
-      // A via do acionista resolve o próprio `Ke` desde a decisão 46, de modo
-      // que a nota do caminho resolvido **existe** aqui — o que não pode
-      // acontecer é ela descrever um custo médio, que esta via não tem.
-      final nota = comU.warnings
-          .where((w) => w.contains('resolvido ano a ano'))
-          .toList();
-      expect(nota, hasLength(1));
-      expect(nota.single, contains('o Ke vai de'));
-      expect(nota.single, isNot(contains('WACC')));
+      final r = avaliar(divida: 60000, betaU: 0.60);
+      expect(r.isErr, isTrue,
+          reason: 'a via do acionista é outro modelo, e não carrega o ativo '
+              'que a da firma recusou');
+      expect(r.failureOrNull!.message, contains('não sustenta a via da firma'));
+      expect(r.failureOrNull!.message, contains('não muda de via'));
     });
   });
 

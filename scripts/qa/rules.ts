@@ -251,6 +251,11 @@ R9 -- CALENDARIO E CONTAGEM DE DIAS
   onde a base e 252 dias uteis (ou vice-versa) sem conversao; feriado da B3
   ignorado em serie diaria; "DateTime.now()" dentro de funcao de calculo
   (torna o resultado nao-deterministico e o teste nao-reproduzivel).
+  EXCECAO, e ela e a convencao do projeto (CLAUDE.md 3.2): "asOf ?? DateTime.now()"
+  com "asOf" recebido por parametro NAO e achado -- nem FAIL, nem WARN. E a forma
+  que o hook de pre-commit libera e que "PrepareValuationInputs" usa: quem valida
+  passa a data, e so o aplicativo cai no relogio. Achado e o "DateTime.now()"
+  sem parametro que o substitua.
 `;
 
 const RESPONSIVE_RULES = `

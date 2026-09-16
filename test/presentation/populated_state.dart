@@ -200,6 +200,10 @@ List<Override> populatedOverrides() {
     portfolioValuationsProvider.overrideWith(
       (ref) async => {for (final t in tickers) t: valuationOf(t.value)},
     ),
+    // Os sinais do prêmio leem os fundamentos, que iriam à rede (item B1).
+    portfolioSignalsProvider.overrideWith(
+      (ref) async => const <Ticker, TransversalSignals>{},
+    ),
 
     comparisonProvider.overrideWith(
       (ref) async => comparisonOf(

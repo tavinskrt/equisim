@@ -122,6 +122,17 @@ class CostOfCapital {
   /// doc de [syntheticSpread].
   final double? netDebtToEbitda;
 
+  /// Taxa livre de risco contra a qual a despesa financeira observada é julgada
+  /// utilizável — ver [syntheticSpread]. `null` usa a do [capm].
+  ///
+  /// Existe separada da taxa do CAPM porque as duas respondem a perguntas
+  /// diferentes: a do CAPM é a taxa que se supõe, e muda com o cenário e com a
+  /// perpetuidade; esta é a do ambiente em que a despesa foi incorrida, e é
+  /// fato do dado. Medida contra a do cenário, a faixa andava com a taxa e o
+  /// custo da dívida saltava — o preço justo subia com o capital mais caro
+  /// (item B10).
+  final double? creditReferenceRate;
+
   /// Declara a estrutura de capital. Todos os valores monetários devem estar
   /// na **mesma escala** — misturar reais com milhares distorce os pesos.
   const CostOfCapital({
@@ -132,6 +143,7 @@ class CostOfCapital {
     required this.debtValue,
     this.interestCoverage,
     this.netDebtToEbitda,
+    this.creditReferenceRate,
   });
 
   /// Prêmio de crédito máximo admitido sobre a taxa livre de risco.
@@ -295,7 +307,7 @@ class CostOfCapital {
         leverage: netDebtToEbitda,
         coverage: interestCoverage,
         observedCostOfDebt: costOfDebt,
-        riskFreeRate: capm.riskFreeRate,
+        riskFreeRate: creditReferenceRate ?? capm.riskFreeRate,
       );
 
   /// `true` quando o observado se afasta materialmente do estimado.

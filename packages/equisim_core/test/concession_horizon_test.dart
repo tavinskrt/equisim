@@ -103,8 +103,35 @@ void main() {
       expect(firma(0.0, 0), closeTo(firma(0.0, null), 1e-9));
     });
 
-    test('na rota derivada, o terminal do acionista é o da firma menos a dívida',
-        () {
+    test('na rota derivada, o contrato longo tende à perpetuidade do acionista, '
+        'e fica entre ela e o capital devolvido', () {
+      double terminal(int? contrato) => DcfCalculator.equityFromFirm(
+            baseProfit: 1000,
+            assumptions: premissas(retorno: 0.24, contrato: contrato),
+            netDebt: 2000,
+            sharesOutstanding: 1,
+            costOfDebt: 0.10,
+            taxRate: 0.34,
+            equityDiscountRate: 0.15,
+            terminalEquityDiscountRate: 0.15,
+          ).unwrap().terminalValue;
+      final perpetuo = terminal(null);
+      final devolvido = terminal(0);
+      expect(terminal(400), closeTo(perpetuo, perpetuo.abs() * 1e-6));
+      final menor = devolvido < perpetuo ? devolvido : perpetuo;
+      final maior = devolvido < perpetuo ? perpetuo : devolvido;
+      var anterior = devolvido;
+      for (final m in [5, 15, 30, 60]) {
+        final v = terminal(m);
+        expect(v, inInclusiveRange(menor, maior), reason: '$m anos');
+        // Monótono no prazo, na direção do perpétuo.
+        expect((v - anterior) * (perpetuo - devolvido), greaterThanOrEqualTo(0));
+        anterior = v;
+      }
+    });
+
+    test('na rota derivada, no contrato que acaba no horizonte, o terminal do '
+        'acionista é o da firma menos a dívida', () {
       final a = premissas(retorno: 0.24, contrato: 0);
       final firmaR = DcfCalculator.firm(
               baseProfit: 1000, assumptions: a, netDebt: 2000, sharesOutstanding: 1)
@@ -170,10 +197,23 @@ void main() {
       final longo = ValuationCascade.evaluate(
               _inputs(ticker, fim: DateTime(2047, 8, 11)))
           .unwrap();
-      expect(curto.fairValue.cents, lessThanOrEqualTo(longo.fairValue.cents));
-      expect(longo.fairValue.cents, lessThanOrEqualTo(cheio.fairValue.cents));
-      expect(curto.fairValue.cents, lessThan(cheio.fairValue.cents),
-          reason: 'o fixture rende acima do custo de capital');
+      // **Entre os dois, na direção que o excedente do acionista dá** (decisão
+      // 102). O capital próprio sai do fluxo do acionista derivado, ao `Ke`, e
+      // o terminal do contrato é a perpetuidade truncada com o capital devolvido
+      // no fim: o contrato longo fica entre o que acaba no horizonte e o
+      // perpétuo. Se fica acima ou abaixo do perpétuo é o excedente do
+      // acionista sobre o capital contábil que decide — e neste fixture, ao `Ke`
+      // do CAPM, o capital devolvido vale mais que a perpetuidade, embora a
+      // firma renda acima do WACC: sem taxas resolvidas, WACC e `Ke` não
+      // conversam, e a ordem da firma não é a do acionista.
+      final menor = curto.fairValue.cents < cheio.fairValue.cents
+          ? curto.fairValue.cents
+          : cheio.fairValue.cents;
+      final maior = curto.fairValue.cents < cheio.fairValue.cents
+          ? cheio.fairValue.cents
+          : curto.fairValue.cents;
+      expect(longo.fairValue.cents, inInclusiveRange(menor, maior));
+      expect(curto.fairValue.cents, isNot(cheio.fairValue.cents));
       expect(longo.warnings.join(' '), contains('anos depois da projeção'));
     });
 

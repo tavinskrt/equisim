@@ -146,17 +146,24 @@ class _StudyHeader extends ConsumerWidget {
     final state = ref.watch(studyProvider);
     final expected = ref.watch(portfolioValuationsProvider);
     final anchors = ref.watch(marketAnchorsProvider);
+    final habilidade = ref.watch(skillReadingProvider);
+    final sinais = ref.watch(portfolioSignalsProvider);
 
-    // Estimador transversal, o mesmo do cartao de meta: `CDI_spot + z x premio`.
-    // Duas telas que dizem "Esperado da carteira" nao podem mostrar numeros de
-    // definicoes diferentes, e a anualizacao do potencial saiu das duas ao mesmo
-    // tempo -- ver `ExpectedReturn.crossSection`.
+    // O mesmo estimador do cartao de meta: `Ke + z x premio`, com `z` da
+    // ordenacao que a validacao escolheu (item B1). Duas telas que dizem
+    // "Esperado da carteira" nao podem mostrar numeros de definicoes diferentes.
+    final ordenacao = habilidade.value?.premiumOrdering;
     double? weightedUpside;
     var coverage = 0.0;
-    if (expected.hasValue && expected.value!.isNotEmpty) {
-      weightedUpside = ExpectedReturn.forPortfolioCrossSectional(
+    if (expected.hasValue &&
+        expected.value!.isNotEmpty &&
+        sinais.hasValue &&
+        !habilidade.isLoading) {
+      weightedUpside = ExpectedReturn.forPortfolioOrdered(
         portfolio: state.study.principal,
         valuations: expected.value!,
+        signals: sinais.value!,
+        ordering: ordenacao,
         spotRiskFree:
             (anchors.value ?? MarketAnchors.fallback2026).currentRiskFreeRate,
       );
@@ -166,12 +173,10 @@ class _StudyHeader extends ConsumerWidget {
       );
     }
 
-    // Referência de leitura: o próprio CDI à vista, que é a âncora do
-    // estimador. Acima dele a carteira está descontada em relação aos pares
-    // avaliados; abaixo, esticada. A antiga referência era o triplo do CAGR do
-    // Ibovespa, e existia porque o número podia ser um upside cru de +209% —
-    // com o escore confinado a dois desvios robustos isso não acontece mais, e
-    // o aviso que descrevia aquela conta saiu junto com ela.
+    // Referência de leitura: o CDI à vista. Acima dele a carteira espera mais
+    // que a renda fixa; abaixo, menos. A antiga referência era o triplo do CAGR
+    // do Ibovespa, e existia porque o número podia ser um upside cru de +209% —
+    // com o escore confinado a dois desvios robustos isso não acontece mais.
     final cdi =
         (anchors.value ?? MarketAnchors.fallback2026).currentRiskFreeRate;
 
@@ -246,13 +251,12 @@ class _StudyHeader extends ConsumerWidget {
                 value: weightedUpside == null
                     ? '—'
                     : Fmt.percent(weightedUpside, decimals: 1, signed: true),
-                // A premissa que sustenta o número precisa vir junto dele. Não
-                // é mais "se o preço justo for alcançado em N meses": é o CDI
-                // à vista mais o prêmio proporcional ao quanto a carteira está
-                // descontada em relação aos pares avaliados.
+                // A premissa que sustenta o número precisa vir junto dele: o
+                // `Ke` de cada ativo, e o prêmio só quando uma ordenação provou
+                // habilidade na validação (item B1).
                 hint: weightedUpside == null
                     ? null
-                    : 'CDI à vista + prêmio pelo desconto relativo · '
+                    : '${ordenacao == null ? 'Ke dos ativos, sem prêmio' : 'Ke dos ativos + prêmio pela ordenação medida'} · '
                           '${Fmt.percent(coverage, decimals: 0)} da carteira '
                           'avaliada',
                 // O sinal é contra o CDI, não contra zero: o estimador é

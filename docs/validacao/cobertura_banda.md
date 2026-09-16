@@ -396,3 +396,27 @@ equivalente a 1,4 janela independente (§9), e dez coortes de teste sobrepostas
 não são dez observações. **O que ela diz é que a incerteza que o aplicativo
 declara passou a conter o que aconteceu na frequência que promete**, fora da
 amostra, nos dois horizontes — e é isso que o R2 pede.
+
+## 11. A mesma forma sobre o motor da decisão 102 — uma primeira réplica
+
+A decisão 102 mudou o preço justo de toda a via da firma, e o backtest foi
+reexecutado em 16/09/2026. `python tool/cobertura_banda.py` refez a medição da §10
+**sem mudar nada da forma nem da regra**: a convergência parcial na escala da
+volatilidade, com `a`, `b` e os `z` recalibrados nas coortes do motor novo. É uma
+réplica sobre um motor diferente daquele em que a forma foi escolhida — não é o
+C2c, que remede sobre o motor que a Fase 3 inteira deixar.
+
+| fora da amostra | 12 meses: 90 / 80 / 50% | desvio | 36 meses: 90 / 80 / 50% | desvio |
+|---|---|---:|---|---:|
+| §10, motor de 15/09 | 87,9 / 79,0 / 50,3 | 2,1 p.p. | 88,2 / 80,4 / 51,2 | 1,8 p.p. |
+| **motor de 16/09** | **88,2 / 78,7 / 51,6** | **1,8 p.p.** | **88,9 / 78,7 / 49,6** | **1,3 p.p.** |
+| em torno do justo, mesmas observações | 84,1 / 73,1 / 44,9 | 6,9 p.p. | 84,1 / 75,1 / 47,3 | 5,9 p.p. |
+
+Sobre 2.966 observações de teste em 12 meses e 1.193 em 36; ficaram sem
+volatilidade 30 de 3.365 e 26 de 2.497. **A forma continua cobrindo, e a regra
+continua mandando-a ao aplicativo.** Por coorte, a de 90% vai de 54,6% a 100% em 12
+meses e de 72,0% a 97,1% em 36 — a mesma desigualdade da §10. Só nas coortes de
+30/09: 88,8 / 81,4 / 57,1% e 86,4 / 75,6 / 50,0%.
+
+O centro mudou pouco: `a = 0,078` e `b = 0,023` em 12 meses, `a = 0,130` e
+`b = 0,070` em 36. O preço justo continua entrando com peso pequeno.

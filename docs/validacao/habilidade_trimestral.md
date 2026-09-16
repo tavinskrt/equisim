@@ -145,3 +145,34 @@ reingestão da CVM.
   unidade inferida do valor de mercado falha em 79 de 220 observações de unit
   ([ponte_por_papel.md](ponte_por_papel.md)).
 - **O motivo de saída das deslistadas** continua não levantado.
+
+## 7. Sobre o motor da decisão 102 — remedido em 16/09/2026
+
+A decisão 102 tirou a migração de via: a via da firma avalia o capital próprio pelo
+fluxo do acionista derivado, e nenhuma avaliação passa mais para a via do
+acionista pela conta. O preço justo de toda a via da firma mudou, e o backtest foi
+reexecutado. **O JSON desta medição é o do motor novo; as §§1 a 5 registram o de
+15/09/2026.** A mesma execução mede as três ordenações lado a lado, que é o item B1
+([ordenacao_lado_a_lado.md](ordenacao_lado_a_lado.md)).
+
+| 36 meses, trimestral, com as deslistadas | 15/09 (§3) | **16/09** |
+|---|---|---|
+| observações avaliadas no backtest | 3.673 | **3.470** |
+| observações da regressão | 2.570 | **2.452** |
+| IC do potencial · `t` corrigido | 0,091 · 0,74 | **0,078 · 0,61** |
+| IC do book-to-market · `t` corrigido | 0,181 · 2,92 | **0,186 · 2,52** |
+| IC do composto · `t` corrigido | — | **0,173 · 1,57** |
+| **potencial dado o B/M · `t` corrigido** | 0,030 · 0,24 | **0,010 · 0,08** |
+
+Crítico de 2,70 nas duas. **O book-to-market deixa de passar** no critério da
+decisão 96, e nenhuma das três ordenações passa — o que, pela regra fixada antes
+de medir, tira o prêmio do retorno esperado ([decisão 103](../decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md)).
+
+**A série ancorada contra a anual** (§4), sobre 2.359 observações: IC de 0,059
+contra 0,079, diferença de +0,020 com `t` corrigido de 0,36. A decisão 98 continua
+valendo — ordena mais, e não prova.
+
+**O contrafactual da base** (§5), nas coortes de 30/09 das listadas, 461
+observações: o IC do book-to-market vai de 0,253 na base de hoje a 0,161 na da
+data, e o do potencial, de 0,204 a 0,114. A correção do C3 continua sendo a maior
+mudança do instrumento.

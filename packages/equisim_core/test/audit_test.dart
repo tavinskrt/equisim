@@ -94,6 +94,23 @@ void main() {
   setUp(AuditRecorder.detach);
   tearDown(AuditRecorder.detach);
 
+  test('o rastro da via da firma descreve a conta que o preço sai — decisão 102',
+      () {
+    // A ponte `EV − D` saiu do preço, e o rastro continuava mostrando-a: a
+    // lente `metodo` apontou em 16/09/2026. O passo do capital próprio precisa
+    // somar ao preço justo que a avaliação devolve.
+    final eventos = <AuditEvent>[];
+    AuditRecorder.attach(eventos.add);
+    final r = ValuationCascade.evaluate(_inputs(ticker)).unwrap();
+    expect(r.model, ValuationModel.dcfFcff);
+    final calculos = eventos.last.calculations;
+    expect(calculos.map((c) => c.formulaName),
+        isNot(contains('Ponte do valor da firma ao preço justo por papel')));
+    final passo = calculos.singleWhere(
+        (c) => c.formulaName == 'Capital próprio pelo fluxo do acionista derivado');
+    expect(passo.finalValue, closeTo(r.fairValue.reais, 0.005));
+  });
+
   group('AuditRecorder', () {
     test('desligado, não constrói transação nenhuma', () {
       expect(AuditRecorder.isActive, isFalse);

@@ -180,8 +180,9 @@ void main() {
         netDebt: 0,
         sharesOutstanding: 10,
       ).unwrap();
-      // Dívida a 95% do valor da firma deixa 5% de equity — abaixo do mínimo
-      // de 20%, é o caso RENT3, em que o preço por papel vira resíduo.
+      // Dívida a 95% do valor da firma deixa 5% de equity — abaixo dos 35% em
+      // que a ressalva `ponteFragil` avisa; é o caso RENT3, em que o preço por
+      // papel vira resíduo.
       final fino = DcfCalculator.firm(
         baseProfit: 100,
         assumptions: flat,
@@ -189,7 +190,7 @@ void main() {
         sharesOutstanding: 10,
       ).unwrap();
       expect(fino.equityShare, closeTo(0.05, 1e-6));
-      expect(fino.equityShare, lessThan(ValuationParameters.minEquityShare));
+      expect(fino.equityShare, lessThan(ValuationDiagnostics.fragileEquityShare));
     });
 
     test('lucro operacional negativo não é avaliável pela via da firma', () {

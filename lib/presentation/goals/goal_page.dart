@@ -95,6 +95,7 @@ class _GoalPageState extends ConsumerState<GoalPage> {
     final ressalvaDaHabilidade = habilidade.isLoading
         ? null
         : SkillCopy.caveat(habilidade.value);
+    final comPremio = habilidade.value?.premiumOrdering != null;
 
     // `CustomScrollView`, e nao `ListView`: cada cartao vira um sliver proprio,
     // entao o framework so infla os que entram na viewport -- e cada um ganha a
@@ -188,6 +189,7 @@ class _GoalPageState extends ConsumerState<GoalPage> {
                         alignment: value,
                         isLight: isLight,
                         skillCaveat: ressalvaDaHabilidade,
+                        withPremium: comPremio,
                       ),
               ),
             ],
@@ -435,13 +437,17 @@ class _AlignmentCard extends StatelessWidget {
   final GoalAlignment alignment;
   final bool isLight;
 
-  /// A ressalva sobre o prêmio tirado do potencial, ou `null` (item B1.0).
+  /// O que a validação diz do prêmio, ou `null` (itens B1.0 e B1).
   final String? skillCaveat;
+
+  /// `true` quando o esperado leva prêmio pela ordenação medida (item B1).
+  final bool withPremium;
 
   const _AlignmentCard({
     required this.alignment,
     required this.isLight,
     required this.skillCaveat,
+    required this.withPremium,
   });
 
   @override
@@ -451,9 +457,11 @@ class _AlignmentCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeader(
+          SectionHeader(
             title: 'Carteira frente à meta',
-            subtitle: 'Custo do capital próprio mais prêmio pelo desconto',
+            subtitle: withPremium
+                ? 'Custo do capital próprio mais prêmio pela ordenação medida'
+                : 'Custo do capital próprio, sem prêmio',
           ),
           const Gap.md(),
           // DUAS colunas, e nao tres. A taxa exigida saiu daqui: ela ja
@@ -477,7 +485,10 @@ class _AlignmentCard extends StatelessWidget {
                 // o `Ke` dele. O rótulo sobreviveu à mudança do número por
                 // duas semanas, que é o prazo que um rótulo leva para virar
                 // mentira quando ninguém o lê junto com a conta.
-                hint: 'Ke do ativo + prêmio pelo desconto relativo',
+                // Retorno **total**: o `Ke` do CAPM inclui o provento, e a meta
+                // supõe reinvesti-lo (decisão 103). A simulação da aba Análise
+                // é só de preço, e diz isso ao lado do XIRR dela.
+                hint: 'retorno total, com proventos reinvestidos',
                 trend: meets ? FinTrend.positive : FinTrend.negative,
               ),
               MetricTile(

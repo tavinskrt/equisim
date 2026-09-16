@@ -54,6 +54,9 @@ Widget harness({
             .overrideWith((ref) async => MarketAnchors.fallback2026),
         portfolioValuationsProvider
             .overrideWith((ref) async => const <Ticker, ValuationResult>{}),
+        // Os sinais do prêmio leem os fundamentos, que iriam à rede (item B1).
+        portfolioSignalsProvider
+            .overrideWith((ref) async => const <Ticker, TransversalSignals>{}),
         valuationProvider.overrideWith((ref, ticker) async => null),
         isLightModeProvider.overrideWith(() => IsLightMode(inicial: isLight)),
         ...overrides,

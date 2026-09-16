@@ -12,6 +12,7 @@ import '../services/goal/required_return.dart';
 import '../services/metrics/returns.dart';
 import '../services/portfolio/expected_return.dart';
 import '../services/portfolio/sector_concentration.dart';
+import '../services/portfolio/transversal_ordering.dart';
 import '../value_objects/date_range.dart';
 import '../value_objects/ticker.dart';
 
@@ -92,17 +93,17 @@ class GoalAlignment {
   /// que a estrutura a termo e o terminal neutro impõem ao custo de capital
   /// brasileiro: com potencial mediano de −39,4% no universo elegível, ela
   /// devolvia retorno esperado negativo para a carteira mediana e nenhuma meta
-  /// era alcançável, por construção. Este número usa só a **ordenação** entre
-  /// ativos — ver `ExpectedReturn.crossSection` —, **e a ordenação não tem
-  /// habilidade demonstrada**: condicionado ao book-to-market, o potencial não
-  /// passa no critério da decisão 96 nas coortes da validação. A tela de metas
-  /// diz isso com o número medido (item B1.0, `SkillReading`).
+  /// era alcançável, por construção. Este número usa só uma **ordenação** entre
+  /// ativos, e **só a que a validação comprovou**: o prêmio sai da primeira
+  /// que passa no critério da decisão 96 — o composto, o book-to-market ou o
+  /// potencial —, e sem nenhuma o esperado é o `Ke` de cada ativo (decisão 103,
+  /// `ExpectedReturn.forPortfolioOrdered`, `SkillReading.premiumOrdering`).
   ///
-  /// Não há parcela de provento **somada**: o `Ke` do CAPM já é o retorno
-  /// total esperado, dividendo incluído (decisão 62). A simulação da carteira,
-  /// porém, é de preço (decisão 23), e a meta comparada com este número não
-  /// recebe o provento que ele embute — a coerência entre os dois é do item B1
-  /// do plano.
+  /// **É retorno total** (decisão 103): o `Ke` do CAPM inclui o provento
+  /// (decisão 62), e a meta é um plano de patrimônio que o reinveste. A
+  /// simulação da carteira é de preço (decisão 23), e a aba Análise declara
+  /// isso ao lado do XIRR dela — o realizado dela fica abaixo deste esperado
+  /// por construção, e a tela não os confunde.
   final double expectedReturn;
 
   /// Fração do peso da carteira que possui avaliação disponível.
@@ -146,12 +147,19 @@ abstract final class EvaluateGoalAlignment {
   ///   própria carteira, e o escore de cada ativo passa a medir desconto
   ///   contra os próprios companheiros em vez de contra o mercado — limitação
   ///   declarada em `ExpectedReturn.crossSection`, não escondida.
+  /// - [ordering] e [signals]: a ordenação medida que decide o prêmio (item B1)
+  ///   e os sinais de cada ativo — ver `ExpectedReturn.forPortfolioOrdered`.
+  ///   Com [ordering] nula e [signals] informados, não há prêmio. Sem
+  ///   [signals], vale o estimador do potencial sozinho, que é o que as
+  ///   ferramentas de validação antigas medem.
   static Result<GoalAlignment> call({
     required Portfolio portfolio,
     required FinancialGoal goal,
     required Map<Ticker, ValuationResult> valuations,
     required MarketAnchors anchors,
     Iterable<double>? crossSection,
+    TransversalOrdering? ordering,
+    Map<Ticker, TransversalSignals>? signals,
   }) {
     final solved = RequiredReturnSolver.solve(goal);
     if (solved.isErr) return Err(solved.failureOrNull!);
@@ -164,12 +172,20 @@ abstract final class EvaluateGoalAlignment {
         anchors: anchors,
         goal: goal,
       ),
-      expectedReturn: ExpectedReturn.forPortfolioCrossSectional(
-        portfolio: portfolio,
-        valuations: valuations,
-        spotRiskFree: anchors.currentRiskFreeRate,
-        reference: crossSection,
-      ),
+      expectedReturn: signals == null
+          ? ExpectedReturn.forPortfolioCrossSectional(
+              portfolio: portfolio,
+              valuations: valuations,
+              spotRiskFree: anchors.currentRiskFreeRate,
+              reference: crossSection,
+            )
+          : ExpectedReturn.forPortfolioOrdered(
+              portfolio: portfolio,
+              valuations: valuations,
+              signals: signals,
+              ordering: ordering,
+              spotRiskFree: anchors.currentRiskFreeRate,
+            ),
       valuationCoverage: ExpectedReturn.coverage(
         portfolio: portfolio,
         valuations: valuations,

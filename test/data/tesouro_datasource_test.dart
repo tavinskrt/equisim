@@ -58,6 +58,15 @@ void main() {
       expect(cotacoes.map((q) => q.baseDate).toSet(), {DateTime.utc(2026, 9, 10)});
       expect(cotacoes.every((q) => q.rate < 0.2), isTrue,
           reason: 'a linha de 09/09, com 99,99%, não pode ter sido lida');
+      // A taxa exata de cada título, e não só a ordem de grandeza: "13,56" é
+      // 13,56% ao ano — a vírgula decimal lida errado passaria pelo teto de 20%
+      // e deslocaria a curva inteira (lente `risco`, 16/09/2026).
+      final porVencimento = {
+        for (final q in cotacoes) q.maturity.toIso8601String().substring(0, 10): q.rate,
+      };
+      expect(porVencimento['2027-01-01'], closeTo(0.1356, 1e-12));
+      expect(porVencimento['2029-01-01'], closeTo(0.1393, 1e-12));
+      expect(porVencimento['2037-01-01'], closeTo(0.1433, 1e-12));
     });
 
     test('catálogo sem CSV é falha declarada', () async {
