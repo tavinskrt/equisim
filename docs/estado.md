@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-14, a partir de `7d43639`.
+Gerado em 2026-09-20, a partir de `d7fa781`.
 
 ## Decisões registradas
 
-**65** aceita · **2** cumprida
+**83** aceita · **2** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -82,6 +82,24 @@ Gerado em 2026-09-14, a partir de `7d43639`.
 | 83 | A contagem oficial da B3 arbitra o divisor por papel, líquida de tesouraria | aceita | parecer | 2026-09-14 |
 | 84 | A curva do Tesouro é o padrão do aplicativo, lida no dia e com recuo declarado | aceita | voce | 2026-09-14 |
 | 85 | A substituição das decisões 12, 16, 17 e 18 pela 23 passa a constar do registro | aceita | conselheiro | 2026-09-14 |
+| 86 | Na web, a curva do Tesouro vem só do pacote do build, e a função tesouro sai | aceita | voce | 2026-09-14 |
+| 87 | O setor é o da classificação oficial da B3, por emissor, e a Porta 1 entra por subsetor | aceita | voce | 2026-09-14 |
+| 88 | O prazo da concessão corta o excedente sobre o capital no fim do contrato, e encurta a projeção quando acaba dentro dela | aceita | voce | 2026-09-14 |
+| 89 | Proventos voltam como dado conferido da B3, no retorno total das coortes e no beta, e não como crédito da simulação | aceita | orientador | 2026-09-14 |
+| 90 | A contagem de ações por data vem do Formulário de Referência, em três camadas, e o evento declarado se localiza no preço | aceita | voce | 2026-09-14 |
+| 91 | Todas as recusas ficam, e o custo da recusa por liquidez é remedido com as deslistadas antes de qualquer soltura | aceita | voce | 2026-09-14 |
+| 92 | A incerteza do preço justo é a faixa calibrada fora da amostra nas coortes, e a banda de cenários passa a se declarar sensibilidade | aceita | voce | 2026-09-14 |
+| 93 | As deslistadas entram nas coortes com a montagem do aplicativo por data, e o t da habilidade é o menor entre o comum e o de Newey-West | aceita | voce | 2026-09-15 |
+| 94 | A faixa calibrada do aplicativo passa a sair da amostra com as deslistadas, que a cobre a até 5 p.p. da nominal dos dois jeitos | aceita | voce | 2026-09-15 |
+| 95 | A recusa por liquidez fica pelo nível do preço justo, e não pela ordenação, que sobreviveu às deslistadas | aceita | voce | 2026-09-15 |
+| 96 | O t da habilidade é corrigido pela estrutura da sobreposição e comparado com o crítico que ela dá, e o Newey-West tem de passar de 2 junto | aceita | voce | 2026-09-15 |
+| 97 | A coorte forma preço, contagem e valor de mercado na base de ações da data, e o aplicativo declara a cobertura que a faixa mediu nessa montagem | aceita | voce | 2026-09-15 |
+| 98 | A série ancorada no trimestre ordena mais que a anual sem provar, e continua fora do padrão | aceita | voce | 2026-09-15 |
+| 99 | A tela de metas diz, pela leitura medida, que o prêmio tirado do potencial não está comprovado | aceita | voce | 2026-09-15 |
+| 100 | A faixa calibrada sai do preço, da volatilidade do papel e do preço justo com o peso medido | aceita | voce | 2026-09-15 |
+| 101 | O registro declara as substituições parciais que os campos não marcaram | aceita | voce | 2026-09-15 |
+| 102 | Nenhuma avaliação muda de via, e a via da firma avalia o capital próprio pelo fluxo do acionista derivado | aceita | voce | 2026-09-16 |
+| 103 | O preço justo é o produto, o prêmio do retorno esperado sai da ordenação comprovada — e hoje não há nenhuma | aceita | voce | 2026-09-16 |
 
 ## Caixa de entrada
 
@@ -95,16 +113,22 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 46 | 15.329 |
-| Apresentacao | 35 | 15.870 |
-| Camada de dados | 17 | 3.173 |
-| Testes do app | 33 | 5.867 |
-| Testes do nucleo | 20 | 9.534 |
-| Ferramentas de QA | 20 | 6.538 |
+| Nucleo de dominio | 60 | 19.098 |
+| Apresentacao | 36 | 16.200 |
+| Camada de dados | 21 | 3.384 |
+| Testes do app | 38 | 7.090 |
+| Testes do nucleo | 37 | 12.338 |
+| Ferramentas de QA | 20 | 6.562 |
 
 ## Histórico recente
 
 ```
+2026-09-16  d7fa781  Refino do motor de valuation (parte 17)
+2026-09-15  5ee27e5  Refino do motor de valuation (parte 15)
+2026-09-15  e1077f2  Refino do motor de valuation (parte 15)
+2026-09-15  92f0bef  Refino do motor de valuation (parte 14)
+2026-09-14  cfc5517  Refino do motor de valuation (parte 13)
+2026-09-14  b688eeb  Refino do motor de valuation (parte 12)
 2026-09-14  7d43639  Refino do motor de valuation (parte 11)
 2026-09-11  6e01044  Refino do motor de valuation (parte 10)
 2026-09-11  c80b5e6  Refino do motor de valuation (parte 9)
@@ -114,10 +138,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-08  d94a726  Refino do motor de valuation (parte 5)
 2026-09-08  84524c8  Motor de valuation: correções medidas e validação preditiva
 2026-09-07  9c6b12f  Refino do motor de valuation (parte 4)
-2026-09-07  3749211  Refino do motor de valuation (parte 3)
-2026-09-07  1515d78  Refino do motor de valuation (parte 2)
-2026-09-07  68b156f  Refino do motor de valuation (parte 1)
-2026-09-02  fc52eee  Remoção dos proventos na parte de backtest e estabilização de estrutura interna
-2026-08-30  feb211e  Garantindo estabilidade da UI
-2026-08-30  afb785e  Garantindo estabilidade dos testes
 ```
