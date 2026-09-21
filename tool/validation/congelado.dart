@@ -213,7 +213,18 @@ class Congelado {
   }
 
   /// A entrada da montagem **do aplicativo**, a mesma do gabarito.
-  Future<Result<ValuationInputs>> preparar(Ticker t) {
+  ///
+  /// [anos] existe para a varredura do horizonte (item B6) e **nada mais**: o
+  /// padrão de 10 é o do gabarito, e passar outro valor produz uma montagem que
+  /// não é a dele — quem varre precisa dizer isso ao imprimir número.
+  ///
+  /// [premio] existe para a varredura do prêmio de risco de mercado (item B3),
+  /// e tem a mesma ressalva: o padrão é o do gabarito.
+  Future<Result<ValuationInputs>> preparar(
+    Ticker t, {
+    int anos = 10,
+    double premio = CapmInputs.defaultMarketPremium,
+  }) {
     final e = emissor(t);
     return PrepareValuationInputs.call(
       ticker: t,
@@ -226,7 +237,8 @@ class Congelado {
       inflation: anchors.inflationCagr,
       terminalRiskFreeRate: anchors.riskFreeCagr,
       riskFreeCurve: curva,
-      projectionYears: 10,
+      projectionYears: anos,
+      marketPremium: premio,
       officialShares: e?.totalShares != null
           ? OfficialShareCount(total: e!.totalShares!, asOf: e.consultedOn)
           : null,

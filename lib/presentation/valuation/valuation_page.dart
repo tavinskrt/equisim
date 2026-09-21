@@ -262,6 +262,10 @@ class _ValuationBody extends ConsumerWidget {
               ),
               const Gap.md(),
               _SensitivityCard(result: result, isLight: isLight),
+              if (result.triangulation != null) ...[
+                const Gap.md(),
+                _PeerCard(result: result),
+              ],
               if (result.warnings.isNotEmpty ||
                   (result.diagnostics?.caveats.isNotEmpty ?? false)) ...[
                 const Gap.md(),
@@ -419,6 +423,95 @@ class _ModelCard extends StatelessWidget {
                 ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A segunda leitura, por múltiplos de pares (item B5, decisão 118).
+///
+/// **Ela fica depois da sensibilidade, e antes das ressalvas.** A ordem é de
+/// autoridade: primeiro o preço justo e o modelo que o produziu, depois a faixa,
+/// e só então a leitura que serve para conferir o nível. Pô-la ao lado do preço
+/// justo sugeriria que as duas competem, e elas não competem — uma é o produto,
+/// a outra é o teste de sanidade.
+class _PeerCard extends StatelessWidget {
+  final ValuationResult result;
+  const _PeerCard({required this.result});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = result.triangulation!;
+    final aplicadas = [for (final r in t.readings) if (r.applied) r];
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SectionHeader(
+            title: 'Segunda leitura — múltiplos de pares',
+            subtitle: 'Teste de sanidade sobre o nível; o preço justo continua '
+                'sendo o do fluxo descontado',
+          ),
+          const Gap.md(),
+          if (aplicadas.isEmpty)
+            Text(
+              'Nenhum múltiplo se aplicou a este ativo. '
+              '${[for (final r in t.readings) '${r.kind.label}: ${r.refusal?.label ?? "—"}'].join("; ")}.',
+              style: context.finType.bodySm.copyWith(
+                color: context.fin.textSecondary,
+              ),
+            )
+          else ...[
+            Row(
+              children: [
+                for (final r in aplicadas)
+                  Expanded(
+                    child: MetricTile(
+                      label: r.kind.label,
+                      value: Fmt.money(r.fairValuePerShare!),
+                      hint: '${r.peer!.median.toStringAsFixed(1)}× em '
+                          '${r.peer!.peers} pares',
+                    ),
+                  ),
+              ],
+            ),
+            const Gap.md(),
+            Row(
+              children: [
+                Expanded(
+                  child: MetricTile(
+                    label: 'Mediana dos múltiplos',
+                    value: Fmt.money(t.consolidated!),
+                    hint: 'das ${t.applied} leituras que se aplicaram',
+                  ),
+                ),
+                Expanded(
+                  child: MetricTile(
+                    label: 'Contra o fluxo descontado',
+                    value: t.divergence == null
+                        ? '—'
+                        : Fmt.percent(t.divergence!, decimals: 0),
+                    hint: t.diverges
+                        ? 'as duas leituras discordam'
+                        : 'as duas leituras concordam',
+                  ),
+                ),
+              ],
+            ),
+          ],
+          // As recusas ficam listadas mesmo quando alguma leitura se aplicou:
+          // saber que o `EV/EBITDA` não entrou, e por quê, é parte de ler o
+          // número que entrou.
+          if (aplicadas.isNotEmpty && aplicadas.length < t.readings.length) ...[
+            const Gap.sm(),
+            Text(
+              'Fora: ${[for (final r in t.readings) if (!r.applied) '${r.kind.label} (${r.refusal?.label ?? "—"})'].join("; ")}.',
+              style: context.finType.bodySm.copyWith(
+                color: context.fin.textSecondary,
+              ),
+            ),
+          ],
         ],
       ),
     );

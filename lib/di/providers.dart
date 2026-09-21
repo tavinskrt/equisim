@@ -18,6 +18,7 @@ import '../data/datasources/remote/brapi_datasource.dart';
 import '../data/network/api_client.dart';
 import '../data/datasources/remote/tesouro_datasource.dart';
 import '../data/repositories/b3_registry_repository.dart';
+import '../data/repositories/peer_multiples_repository.dart';
 import '../data/repositories/beta_prior_repository.dart';
 import '../data/repositories/unit_composition_repository.dart';
 import '../data/repositories/cash_dividends_repository.dart';
@@ -201,6 +202,9 @@ const String b3RegistryAsset = 'assets/b3/emissores.json';
 /// Caminho do prior transversal do beta empacotado (item B11).
 const String betaPriorAsset = 'assets/mercado/beta_prior.json';
 
+/// Pacote das medianas de múltiplos por grupo de pares (item B5, decisão 118).
+const String peerMultiplesAsset = 'assets/mercado/multiplos_setoriais.json';
+
 /// Caminho da composição declarada das units, da FCA da CVM (item B16).
 const String unitCompositionAsset = 'assets/cvm/units.json';
 
@@ -287,6 +291,27 @@ final betaPriorReadingProvider =
     return await ref.watch(betaPriorRepositoryProvider).reading();
   } on Object {
     return (prior: null, note: null);
+  }
+});
+
+/// As medianas de múltiplos dos pares, do pacote do build (item B5).
+///
+/// A mediana é do **universo**, e a cascata avalia um ativo por vez: calculá-la
+/// em tempo de execução seria varrer a bolsa inteira para abrir uma tela. Sem
+/// pacote, a triangulação some e a avaliação sai como sempre saiu.
+final peerMultiplesRepositoryProvider = Provider<PeerMultiplesRepository>(
+  (ref) => PeerMultiplesRepository(
+    carregarPacote: () => rootBundle.loadString(peerMultiplesAsset),
+  ),
+);
+
+/// As medianas que valem para um ticker, ou `null`.
+final peerMultiplesProvider =
+    FutureProvider.family<PeerMultipleSet?, Ticker>((ref, ticker) async {
+  try {
+    return await ref.watch(peerMultiplesRepositoryProvider).forTicker(ticker);
+  } on Object {
+    return null;
   }
 });
 

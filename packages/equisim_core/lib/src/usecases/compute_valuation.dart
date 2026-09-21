@@ -11,6 +11,7 @@ import '../services/valuation/calibrated_band.dart';
 import '../services/valuation/capital_base.dart';
 import '../services/valuation/concession_sectors.dart';
 import '../services/valuation/financial_sectors.dart';
+import '../services/valuation/peer_multiples.dart';
 import '../services/valuation/cost_of_capital.dart';
 import '../services/valuation/cyclical_sectors.dart';
 import '../services/valuation/dcf.dart';
@@ -50,7 +51,20 @@ class ValuationInputs {
   final double marginOfSafety;
 
   /// Anos de projeção explícita.
+  ///
+  /// **Dez, por medição** ([decisão 115](../../../../../docs/decisoes/115-o-horizonte-fica-em-dez-anos-por-medicao.md)):
+  /// a mediana do preço justo anda menos de 1% entre 5 e 20 anos, e o que muda
+  /// é o peso do terminal — 57% a cinco anos, 8% a vinte.
   final int projectionYears;
+
+  /// Medianas de múltiplos dos pares do ativo, para a segunda leitura (item
+  /// B5).
+  ///
+  /// **O núcleo não sabe calculá-las**: a mediana é do universo, e a cascata
+  /// avalia um ativo por vez. Quem mede é `tool/multiplos_empacotar.dart`, que
+  /// grava pacote versionado; quem carrega é o aplicativo. `null` desliga a
+  /// triangulação, e a avaliação sai como sempre saiu.
+  final PeerMultipleSet? peerMultiples;
 
   /// Chave do setor, em minúsculas: a do setor econômico da B3 quando o
   /// emissor é classificado (decisão 87), e a da fonte de preços no recuo.
@@ -336,6 +350,7 @@ class ValuationInputs {
     this.terminalBetaWeightOverride,
     this.terminalLeverageOverride,
     this.betaWindowYears,
+    this.peerMultiples,
   });
 
   /// Os mesmos insumos, com [n] anos de projeção explícita.
@@ -1765,6 +1780,11 @@ abstract final class ValuationCascade {
     // decisão 31 já descartou: ele carrega arrendamento e variação cambial, e
     // caía fora da banda defensável em 70 dos 120 avaliados.
     final kd = premissas.custoDaDivida ?? via.inputs.capm.riskFreeRate;
+    // **O caixa rende a taxa livre de risco** (decisão 119, que estende a 113
+    // à rota derivada). A taxa é **uma só** para todo o caminho, como o `K_d`
+    // logo acima: a rota derivada não recebe caminho de custo da dívida, e
+    // dar caminho ao rendimento e não ao juro seria misturar convenções.
+    final rendimentoDoCaixa = via.inputs.capm.riskFreeRate;
     if (taxas == null) {
       return DcfCalculator.equityFromFirm(
         baseProfit: base,
@@ -1776,6 +1796,8 @@ abstract final class ValuationCascade {
         equityDiscountRate: premissas.keCorrente + dKe,
         terminalEquityDiscountRate: premissas.keTerminal + dKeTerminal,
         minorityInterest: minoritarios,
+        cash: latest.totalCash,
+        cashYield: rendimentoDoCaixa,
       );
     }
     return DcfCalculator.equityFromFirm(
@@ -1791,6 +1813,8 @@ abstract final class ValuationCascade {
         for (final k in taxas.costOfEquity) k + dKe,
       ],
       minorityInterest: minoritarios,
+      cash: latest.totalCash,
+      cashYield: rendimentoDoCaixa,
     );
   }
 
@@ -1862,6 +1886,24 @@ abstract final class ValuationCascade {
       );
     }
 
+    // **A segunda leitura** (item B5, decisão 118). Ela usa o **mesmo
+    // exercício-base e o mesmo divisor** do fluxo descontado: comparar duas
+    // leituras que dividem por contagens diferentes mediria a ponte, e não o
+    // modelo (decisão 83).
+    final triangulacao = PeerTriangulation.build(
+      latest: via.latest,
+      shares: via.divisor.count,
+      peers: inputs.peerMultiples,
+      dcfFairValue: outcome.fairValuePerShare,
+      sectorKey: inputs.sectorKey,
+      industry: inputs.industry,
+    );
+    final avisosComTriangulacao = [
+      ...d.avisos,
+      if (triangulacao != null && triangulacao.diverges)
+        _avisoDaTriangulacao(triangulacao, outcome.fairValuePerShare),
+    ];
+
     return _withScenarios(
       inputs: inputs,
       model: lane == ValuationLane.firm
@@ -1869,12 +1911,13 @@ abstract final class ValuationCascade {
           : ValuationModel.dcfEarnings,
       assumptions: assumptions,
       baseValue: outcome.fairValuePerShare,
+      triangulation: triangulacao,
       valuate: (a) => _descontarFluxo(via, d.base, d.custo, a, d.premissas)
           .map((o) => o.fairValuePerShare),
       scenarioBuilder: scenarioBuilder,
       samples: samples,
       seed: seed,
-      warnings: d.avisos,
+      warnings: avisosComTriangulacao,
       diagnostics: _diagnose(
         outcome: outcome,
         divisor: via.divisor,
@@ -2958,6 +3001,15 @@ abstract final class ValuationCascade {
     // fonte erra a contagem — a MILS3 com R$ 762 mil de capitalização —, o
     // divisor já foi arbitrado, e o WACC não pode readquirir o erro.
     final equity = divisor.count * inputs.marketPrice;
+    // **O minoritário não entra neste peso, e é premissa** (lente `metodo`,
+    // 21/09/2026; item B23). O fluxo descontado é o **consolidado**, e este `E`
+    // é o valor de mercado da **controladora**: a fatia dos não controladores
+    // fica fora do denominador `E + D`, o que infla a participação da dívida e
+    // achata o WACC. **O obstáculo é o dado** — o valor de mercado do
+    // minoritário não é observável, e só o contábil existe; usá-lo num peso de
+    // mercado troca uma distorção por outra. A ponte devolve a parcela ao final
+    // (decisão 49); o que falta é o peso, e fica inventariado.
+
     // O observado entra apenas como **conferência**: desde a decisão 31 o Kd
     // aplicado é `Rf + spread(cobertura)`, e como `capm` aqui pode ser o de
     // equilíbrio, o custo da dívida do terminal decai junto com a taxa livre de
@@ -3104,6 +3156,28 @@ abstract final class ValuationCascade {
 
   static String _pct(double fraction) =>
       '${(fraction * 100).toStringAsFixed(1)}%';
+
+  /// O aviso da triangulação, quando as duas leituras discordam além do limite.
+  ///
+  /// **Ele não escolhe.** Diz quanto cada uma vale, de quantos pares saiu a
+  /// segunda, e que o preço justo continua sendo o do fluxo descontado. Um
+  /// aviso que sugerisse a média estaria propondo um terceiro modelo que
+  /// ninguém validou.
+  static String _avisoDaTriangulacao(PeerTriangulation t, double dcf) {
+    final aplicadas = [
+      for (final r in t.readings)
+        if (r.applied)
+          '${r.kind.label} ${_r(r.peer!.median, 2)}× '
+              '(${r.peer!.peers} pares, ${r.peer!.group})',
+    ];
+    return 'A leitura por múltiplos de pares diverge do fluxo descontado: '
+        'R\$ ${_r(t.consolidated!, 2)} contra R\$ ${_r(dcf, 2)}, '
+        '${_pct(t.divergence!)} de diferença. '
+        'Saiu de ${aplicadas.join("; ")}. '
+        '**O preço justo continua sendo o do fluxo descontado** — a segunda '
+        'leitura é teste de sanidade sobre o nível, e a divergência fica '
+        'declarada em vez de reconciliada.';
+  }
   static ValuationResult _withScenarios({
     required ValuationInputs inputs,
     required ValuationModel model,
@@ -3115,6 +3189,7 @@ abstract final class ValuationCascade {
     required int seed,
     required List<String> warnings,
     required ValuationDiagnostics diagnostics,
+    PeerTriangulation? triangulation,
   }) {
     final source = (scenarioBuilder ?? DiscreteScenarios.around)(assumptions);
     final volatilidade = inputs.prices == null
@@ -3146,6 +3221,7 @@ abstract final class ValuationCascade {
         ],
         diagnostics: diagnostics,
         priceVolatility: volatilidade,
+        triangulation: triangulation,
       );
     }
 
@@ -3177,6 +3253,7 @@ abstract final class ValuationCascade {
       warnings: local,
       diagnostics: diagnostics,
       priceVolatility: volatilidade,
+      triangulation: triangulation,
     );
   }
 

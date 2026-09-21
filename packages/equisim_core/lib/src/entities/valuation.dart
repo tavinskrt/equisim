@@ -1,3 +1,4 @@
+import '../services/valuation/peer_multiples.dart';
 import '../value_objects/money.dart';
 import '../value_objects/ticker.dart';
 
@@ -516,6 +517,14 @@ class ValuationResult {
   /// `CalibratedBand.volatilityMinimumReturns` retornos.
   final double? priceVolatility;
 
+  /// A segunda leitura, por múltiplos de pares (item B5, decisão 118).
+  ///
+  /// **Não é preço, e não entra em [fairValue].** O produto do motor continua
+  /// sendo o fluxo descontado; isto é o teste de sanidade sobre o nível, com a
+  /// divergência declarada em vez de reconciliada. `null` quando o pacote de
+  /// medianas setoriais não está presente.
+  final PeerTriangulation? triangulation;
+
   /// Agrupa o resultado já apurado. Não calcula nada — o cálculo vive em
   /// `ValuationCascade.evaluate`.
   const ValuationResult({
@@ -532,6 +541,7 @@ class ValuationResult {
     this.warnings = const [],
     this.diagnostics,
     this.priceVolatility,
+    this.triangulation,
   });
 
   /// Ressalvas estruturadas do cálculo, vazias quando não há diagnóstico.
@@ -559,6 +569,7 @@ class ValuationResult {
           warnings: List.unmodifiable([...warnings, ...extra]),
           diagnostics: diagnostics,
           priceVolatility: priceVolatility,
+          triangulation: triangulation,
         );
 
   /// Preço justo já descontado da margem de segurança.

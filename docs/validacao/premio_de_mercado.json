@@ -1,0 +1,185 @@
+{
+  "historico": {
+    "anos": 4.999315537303217,
+    "pregoes": 1248,
+    "cagrIbovespa": 0.09811492266288813,
+    "cagrCdi": 0.093885141195994,
+    "premio": 0.0038667510030070407,
+    "volatilidadeAnual": 0.1754811477786269,
+    "erroPadrao": 0.07848292708798639,
+    "ic95": [
+      -0.14995978608944627,
+      0.15769328809546035
+    ]
+  },
+  "encolhimento": [
+    {
+      "tau": 0.0025,
+      "peso": 0.0010136527108847752,
+      "premio": 0.054948168643537854
+    },
+    {
+      "tau": 0.005,
+      "peso": 0.004042318322760724,
+      "premio": 0.05479330313067717
+    },
+    {
+      "tau": 0.01,
+      "peso": 0.01597553865320147,
+      "premio": 0.05418311880418476
+    },
+    {
+      "tau": 0.02,
+      "peso": 0.060979608342412006,
+      "premio": 0.05188191450288834
+    }
+  ],
+  "referencia": 0.055,
+  "varredura": [
+    {
+      "premio": -0.06,
+      "avaliados": 97,
+      "potencialMediano": 0.33442354865085855,
+      "acimaDeZero": 60,
+      "precoJustoMedianoVsReferencia": 1.6833130328867236,
+      "spearmanContraReferencia": 0.782536719382903
+    },
+    {
+      "premio": -0.05,
+      "avaliados": 105,
+      "potencialMediano": 0.12367567567567565,
+      "acimaDeZero": 57,
+      "precoJustoMedianoVsReferencia": 1.3702801461632155,
+      "spearmanContraReferencia": 0.8496550229382653
+    },
+    {
+      "premio": -0.04,
+      "avaliados": 108,
+      "potencialMediano": 0.006918918918918925,
+      "acimaDeZero": 55,
+      "precoJustoMedianoVsReferencia": 1.177923021060276,
+      "spearmanContraReferencia": 0.8724633749321759
+    },
+    {
+      "premio": -0.03,
+      "avaliados": 109,
+      "potencialMediano": -0.11524470899470898,
+      "acimaDeZero": 46,
+      "precoJustoMedianoVsReferencia": 0.9542483660130718,
+      "spearmanContraReferencia": 0.9059146854618136
+    },
+    {
+      "premio": -0.02,
+      "avaliados": 110,
+      "potencialMediano": -0.19534883720930224,
+      "acimaDeZero": 40,
+      "precoJustoMedianoVsReferencia": 0.7570093457943925,
+      "spearmanContraReferencia": 0.9338707132337472
+    },
+    {
+      "premio": -0.01,
+      "avaliados": 109,
+      "potencialMediano": -0.2747596691258663,
+      "acimaDeZero": 36,
+      "precoJustoMedianoVsReferencia": 0.6122004357298474,
+      "spearmanContraReferencia": 0.9538580896276037
+    },
+    {
+      "premio": 0.0,
+      "avaliados": 108,
+      "potencialMediano": -0.29859459459459464,
+      "acimaDeZero": 33,
+      "precoJustoMedianoVsReferencia": 0.48123620309050774,
+      "spearmanContraReferencia": 0.9685067325899432
+    },
+    {
+      "premio": 0.01,
+      "avaliados": 108,
+      "potencialMediano": -0.34962162162162164,
+      "acimaDeZero": 28,
+      "precoJustoMedianoVsReferencia": 0.3727678571428572,
+      "spearmanContraReferencia": 0.978789711760993
+    },
+    {
+      "premio": 0.02,
+      "avaliados": 108,
+      "potencialMediano": -0.38716577540106945,
+      "acimaDeZero": 25,
+      "precoJustoMedianoVsReferencia": 0.27375707992448084,
+      "spearmanContraReferencia": 0.9870608037029245
+    },
+    {
+      "premio": 0.03,
+      "avaliados": 104,
+      "potencialMediano": -0.3928571428571429,
+      "acimaDeZero": 22,
+      "precoJustoMedianoVsReferencia": 0.1818753933291377,
+      "spearmanContraReferencia": 0.9938985903639806
+    },
+    {
+      "premio": 0.04,
+      "avaliados": 101,
+      "potencialMediano": -0.4258207849913601,
+      "acimaDeZero": 18,
+      "precoJustoMedianoVsReferencia": 0.10021786492374729,
+      "spearmanContraReferencia": 0.9977251209762256
+    },
+    {
+      "premio": 0.045,
+      "avaliados": 100,
+      "potencialMediano": -0.4353256021409456,
+      "acimaDeZero": 15,
+      "precoJustoMedianoVsReferencia": 0.06463326071169218,
+      "spearmanContraReferencia": 0.9988428361035135
+    },
+    {
+      "premio": 0.05,
+      "avaliados": 99,
+      "potencialMediano": -0.4477906689706245,
+      "acimaDeZero": 15,
+      "precoJustoMedianoVsReferencia": 0.0320956576463185,
+      "spearmanContraReferencia": 0.9997238586156112
+    },
+    {
+      "premio": 0.055,
+      "avaliados": 97,
+      "potencialMediano": -0.4473053892215568,
+      "acimaDeZero": 15,
+      "precoJustoMedianoVsReferencia": 0.0,
+      "spearmanContraReferencia": 1.0
+    },
+    {
+      "premio": 0.06,
+      "avaliados": 97,
+      "potencialMediano": -0.4679640718562874,
+      "acimaDeZero": 14,
+      "precoJustoMedianoVsReferencia": -0.02977487291212777,
+      "spearmanContraReferencia": 0.9991978750262992
+    },
+    {
+      "premio": 0.07,
+      "avaliados": 96,
+      "potencialMediano": -0.48926191063934826,
+      "acimaDeZero": 11,
+      "precoJustoMedianoVsReferencia": -0.08371454711802384,
+      "spearmanContraReferencia": 0.9962018448182312
+    },
+    {
+      "premio": 0.08,
+      "avaliados": 93,
+      "potencialMediano": -0.5106951871657754,
+      "acimaDeZero": 10,
+      "precoJustoMedianoVsReferencia": -0.1329384666008555,
+      "spearmanContraReferencia": 0.9919429441079048
+    },
+    {
+      "premio": 0.1,
+      "avaliados": 87,
+      "potencialMediano": -0.5372340425531914,
+      "acimaDeZero": 5,
+      "precoJustoMedianoVsReferencia": -0.21637694419030196,
+      "spearmanContraReferencia": 0.9810636436538602
+    }
+  ],
+  "premioImplicito": -0.03943363511406106
+}

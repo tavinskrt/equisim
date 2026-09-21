@@ -6,6 +6,7 @@ import '../services/b3/cash_dividends.dart';
 import '../services/metrics/beta.dart';
 import '../services/metrics/beta_shrinkage.dart';
 import '../services/metrics/market_leverage.dart';
+import '../services/valuation/peer_multiples.dart';
 import '../services/valuation/growth_guards.dart';
 import '../services/valuation/yield_curve.dart';
 import '../time/point_in_time_view.dart';
@@ -71,6 +72,7 @@ abstract final class PrepareValuationInputs {
     required double riskFreeRate,
     DateTime? asOf,
     double marketPremium = CapmInputs.defaultMarketPremium,
+    PeerMultipleSet? peerMultiples,
     double marginOfSafety = 0.0,
     int projectionYears = 10,
     double perpetualGrowthCap = 0.0652,
@@ -198,6 +200,9 @@ abstract final class PrepareValuationInputs {
       creditReferenceRiskFree: riskFreeRate,
       // A composição declarada da unit, quando a companhia a publica (B16).
       declaredSharesPerUnit: declaredSharesPerUnit,
+      // A segunda leitura, por múltiplos de pares (item B5). Só viaja: quem
+      // calcula é a cascata, e quem mede a mediana é `tool/multiplos_empacotar`.
+      peerMultiples: peerMultiples,
       // A janela que a série de fato cobriu, para a cascata declarar quando
       // ela é curta demais para os cinco anos pedidos (item B17).
       betaWindowYears: beta.janelaEmAnos,

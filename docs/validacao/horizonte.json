@@ -1,0 +1,199 @@
+{
+  "referencia": 10,
+  "horizontes": [
+    {
+      "anos": 5,
+      "avaliados": 102,
+      "comuns": 97,
+      "entram": [
+        "ENEV3",
+        "ENGI11",
+        "GOAU4",
+        "MOTV3",
+        "PNVL3"
+      ],
+      "saem": [],
+      "precoJusto": {
+        "p10": -0.03274760383386577,
+        "p25": -0.005725190839694694,
+        "mediana": 0.007748404740200554,
+        "p75": 0.07834101382488479,
+        "p90": 0.21311475409836067,
+        "sobem": 55
+      },
+      "pesoTerminalMediano": 0.59208072764478,
+      "spearmanPotencialContra10": 0.9937407952871871,
+      "formasDeRecusa": 40
+    },
+    {
+      "anos": 6,
+      "avaliados": 102,
+      "comuns": 97,
+      "entram": [
+        "ENEV3",
+        "ENGI11",
+        "GOAU4",
+        "MOTV3",
+        "PNVL3"
+      ],
+      "saem": [],
+      "precoJusto": {
+        "p10": -0.023521026372059883,
+        "p25": -0.0019731649565903897,
+        "mediana": 0.00822078684674099,
+        "p75": 0.06451612903225801,
+        "p90": 0.16885245901639334,
+        "sobem": 57
+      },
+      "pesoTerminalMediano": 0.5235573781096009,
+      "spearmanPotencialContra10": 0.9968046496949295,
+      "formasDeRecusa": 40
+    },
+    {
+      "anos": 7,
+      "avaliados": 101,
+      "comuns": 97,
+      "entram": [
+        "ENGI11",
+        "GOAU4",
+        "MOTV3",
+        "PNVL3"
+      ],
+      "saem": [],
+      "precoJusto": {
+        "p10": -0.016617790811339184,
+        "p25": -0.0015785319652722452,
+        "mediana": 0.005871990604815025,
+        "p75": 0.04608294930875578,
+        "p90": 0.12295081967213117,
+        "sobem": 56
+      },
+      "pesoTerminalMediano": 0.44772011053866195,
+      "spearmanPotencialContra10": 0.9985009467704608,
+      "formasDeRecusa": 41
+    },
+    {
+      "anos": 8,
+      "avaliados": 100,
+      "comuns": 97,
+      "entram": [
+        "GOAU4",
+        "MOTV3",
+        "PNVL3"
+      ],
+      "saem": [],
+      "precoJusto": {
+        "p10": -0.009782608695652173,
+        "p25": 0.0,
+        "mediana": 0.005284791544333478,
+        "p75": 0.032258064516129004,
+        "p90": 0.0803278688524589,
+        "sobem": 56
+      },
+      "pesoTerminalMediano": 0.3968007901464851,
+      "spearmanPotencialContra10": 0.9993819692825584,
+      "formasDeRecusa": 42
+    },
+    {
+      "anos": 9,
+      "avaliados": 97,
+      "comuns": 97,
+      "entram": [],
+      "saem": [],
+      "precoJusto": {
+        "p10": -0.004347826086956497,
+        "p25": 0.0,
+        "mediana": 0.0015766653527788943,
+        "p75": 0.017204301075268713,
+        "p90": 0.03858520900321549,
+        "sobem": 56
+      },
+      "pesoTerminalMediano": 0.34646183739557085,
+      "spearmanPotencialContra10": 0.9997501577950768,
+      "formasDeRecusa": 45
+    },
+    {
+      "anos": 10,
+      "avaliados": 97,
+      "comuns": 97,
+      "entram": [],
+      "saem": [],
+      "precoJusto": {
+        "p10": 0.0,
+        "p25": 0.0,
+        "mediana": 0.0,
+        "p75": 0.0,
+        "p90": 0.0,
+        "sobem": 0
+      },
+      "pesoTerminalMediano": 0.3051550566137954,
+      "spearmanPotencialContra10": 1.0,
+      "formasDeRecusa": 45
+    },
+    {
+      "anos": 12,
+      "avaliados": 96,
+      "comuns": 96,
+      "entram": [],
+      "saem": [
+        "EMBJ3"
+      ],
+      "precoJusto": {
+        "p10": -0.0646067415730337,
+        "p25": -0.020576131687242816,
+        "mediana": -0.002625533311453876,
+        "p75": 0.0,
+        "p90": 0.007608695652173925,
+        "sobem": 21
+      },
+      "pesoTerminalMediano": 0.2330877548692492,
+      "spearmanPotencialContra10": 0.9987927292457949,
+      "formasDeRecusa": 46
+    },
+    {
+      "anos": 15,
+      "avaliados": 95,
+      "comuns": 95,
+      "entram": [],
+      "saem": [
+        "AMER3",
+        "EMBJ3"
+      ],
+      "precoJusto": {
+        "p10": -0.1336032388663968,
+        "p25": -0.04526748971193417,
+        "mediana": -0.008671659440283808,
+        "p75": 0.0,
+        "p90": 0.017391304347825987,
+        "sobem": 21
+      },
+      "pesoTerminalMediano": 0.1591006407409338,
+      "spearmanPotencialContra10": 0.997018477043673,
+      "formasDeRecusa": 47
+    },
+    {
+      "anos": 20,
+      "avaliados": 94,
+      "comuns": 94,
+      "entram": [],
+      "saem": [
+        "AMER3",
+        "EMBJ3",
+        "MULT3"
+      ],
+      "precoJusto": {
+        "p10": -0.23287671232876717,
+        "p25": -0.06760792831930496,
+        "mediana": -0.009845749917952062,
+        "p75": 0.0,
+        "p90": 0.0304347826086957,
+        "sobem": 21
+      },
+      "pesoTerminalMediano": 0.08437076412264898,
+      "spearmanPotencialContra10": 0.9929776397066792,
+      "formasDeRecusa": 48
+    }
+  ],
+  "spearmanExtremos": 0.9828486796951198,
+  "ativosNosExtremos": 94
+}

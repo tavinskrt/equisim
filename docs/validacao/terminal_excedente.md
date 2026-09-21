@@ -5,10 +5,12 @@
 > números saem dos diagnósticos que a cascata devolve, e não de uma conta
 > paralela.
 >
-> **Remedido depois da [decisão 113](../decisoes/113-o-caixa-rende-a-taxa-livre-de-risco-e-nao-o-custo-de-emprestimo.md)**,
-> que separou o caixa da dívida bruta no WACC. O custo de capital de equilíbrio
-> subiu e três ativos deixaram de ser avaliáveis; a leitura não mudou de
-> direção, e os números abaixo são os de hoje.
+> **Remedido duas vezes em 21/09/2026**, depois da
+> [decisão 113](../decisoes/113-o-caixa-rende-a-taxa-livre-de-risco-e-nao-o-custo-de-emprestimo.md)
+> e da [decisão 119](../decisoes/119-a-rota-derivada-tambem-remunera-o-caixa-pela-taxa-livre-de-risco.md),
+> que separaram o caixa da dívida bruta no WACC e na rota derivada. O custo de
+> capital de equilíbrio subiu e cinco ativos deixaram de ser avaliáveis; a
+> leitura não mudou de direção, e os números abaixo são os de hoje.
 
 ## 1. A álgebra, e o que o rótulo não diz
 
@@ -37,17 +39,17 @@ já corta esse excedente no fim do contrato, pela mesma álgebra: ali
 O item B12 falava em "manter para sempre o retorno **acima** do custo". Medido,
 é o contrário na grande maioria: o capital instalado rende, na perpetuidade,
 **0,70 vez** o custo de capital de equilíbrio na mediana, e fica abaixo dele em
-**70 dos 81** avaliados em que a decomposição se aplica.
+**69 dos 80** avaliados em que a decomposição se aplica.
 
 | | mediana |
 |---|---:|
 | retorno implícito do capital instalado | **13,1%** |
-| custo de capital de equilíbrio | 19,2% |
+| custo de capital de equilíbrio | 19,3% |
 | razão entre os dois | **0,695** |
 
 | razão retorno ÷ custo | p10 | p25 | mediana | p75 | p90 |
 |---|---:|---:|---:|---:|---:|
-| | 0,389 | 0,516 | **0,695** | 0,935 | 1,058 |
+| | 0,389 | 0,516 | **0,695** | 0,942 | 1,178 |
 
 **O terminal mantém um déficit, e não um excedente.** Para o ativo mediano, ele
 avalia o negócio em 70% do capital investido que a projeção implica — que é o
@@ -57,11 +59,11 @@ O peso disso no preço:
 
 | peso de `EVA_{N+1}/r` no valor do capital próprio | p10 | p25 | mediana | p75 | p90 |
 |---|---:|---:|---:|---:|---:|
-| | −60,7% | −26,6% | **−11,8%** | −2,6% | +2,8% |
+| | −68,4% | −31,7% | **−12,2%** | −2,5% | +3,8% |
 
-Passa de 10% em módulo em **47 dos 81**, de 20% em **31** e de 50% em **9**. Os
+Passa de 10% em módulo em **49 dos 80**, de 20% em **31** e de 50% em **12**. Os
 extremos são ativos de capital próprio fino, onde qualquer parcela do terminal
-sai amplificada — a EMBJ3 chega a −523%, com peso do terminal de 182%.
+sai amplificada — a EMBJ3 chega a **−3.653%**, com peso do terminal de 1.042%.
 
 ### De onde vem o mecanismo
 
@@ -75,7 +77,7 @@ terminal, e é isso que o preço carrega.
 
 ## 3. Decair num horizonte não é uma terceira opção
 
-O item oferecia três saídas: fica, decai, ou acaba num horizonte. A 19,2% ao
+O item oferecia três saídas: fica, decai, ou acaba num horizonte. A 19,3% ao
 ano, as duas últimas colapsam na primeira.
 
 Com o excedente truncado em `M` anos — exatamente a forma da decisão 88 —, ele
@@ -83,10 +85,10 @@ vale `EVA·(1 − (1+r)^-M)/r`, e o preço justo se move:
 
 | horizonte | p25 | mediana | p75 |
 |---|---:|---:|---:|
-| 0 anos (`VT = capital_N`) | +2,6% | **+11,8%** | +26,6% |
-| 10 anos | +0,4% | +2,2% | +4,6% |
-| 20 anos | +0,1% | +0,4% | +0,7% |
-| 30 anos | +0,0% | +0,0% | +0,1% |
+| 0 anos (`VT = capital_N`) | +2,6% | **+12,2%** | +33,5% |
+| 10 anos | +0,4% | +2,2% | +5,3% |
+| 20 anos | +0,1% | +0,4% | +0,9% |
+| 30 anos | +0,0% | +0,1% | +0,1% |
 
 **Vinte anos devolvem 0,4% do preço justo.** A escolha é binária: ou o instalado
 mantém o retorno que a projeção alcança, ou converge ao custo de capital de

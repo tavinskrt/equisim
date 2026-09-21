@@ -9,8 +9,10 @@
 >
 > Montagem conferida contra o gabarito ativo a ativo: zero divergências.
 >
-> **Remedido** depois da [decisão 113](../decisoes/113-o-caixa-rende-a-taxa-livre-de-risco-e-nao-o-custo-de-emprestimo.md),
-> que subiu o custo de capital e reduziu os avaliados de 103 para 99. A
+> **Remedido** depois das decisões
+> [113](../decisoes/113-o-caixa-rende-a-taxa-livre-de-risco-e-nao-o-custo-de-emprestimo.md)
+> e [119](../decisoes/119-a-rota-derivada-tambem-remunera-o-caixa-pela-taxa-livre-de-risco.md),
+> que subiram o custo de capital e reduziram os avaliados de 103 para 97. A
 > [decisão 112](../decisoes/112-a-rentabilidade-reverte-a-mediana-do-mercado-e-nao-ao-custo-de-capital.md)
 > foi escrita com os números anteriores — 18,6% de custo e 12,9% de retorno
 > implícito —, e a conclusão dela fica de pé com os de hoje: o destino medido
@@ -23,7 +25,7 @@ na projeção — e ele é de **0,70 vez** o custo de capital na mediana
 ([terminal_excedente.md](terminal_excedente.md)). A
 [decisão 107](../decisoes/107-o-terminal-neutro-e-do-capital-novo-e-o-instalado-mantem-o-retorno-que-tem.md)
 manteve o número por não haver medição de reversão à média; convergir o terminal
-ao custo de capital move **+11,8%** do preço justo mediano.
+ao custo de capital move **+12,2%** do preço justo mediano.
 
 São duas perguntas, e só as duas juntas decidem: **em quanto tempo** a
 rentabilidade reverte, e **para onde**.
@@ -77,7 +79,7 @@ contra 0,01 em dez anos, e é o que se esperaria de uma amostra de sobreviventes
 | | |
 |---|---:|
 | `ROIC` mediano do universo, mediana dos anos | **9,5%** |
-| custo de capital de equilíbrio mediano, dos 99 avaliados | **18,9%** |
+| custo de capital de equilíbrio mediano, dos 97 avaliados | **18,9%** |
 
 Por ano, a mediana do universo:
 

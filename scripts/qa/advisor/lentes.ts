@@ -119,6 +119,9 @@ export const LENTES: Record<LenteId, Lente> = {
       '  que se propoe e extrair dele o que precisa virar registro enderecavel.',
       'NAO reporte ausencia de documentacao em geral. A pergunta e sobre',
       '  divergencia entre registro e realidade, nao sobre volume de texto.',
+      'A secao `## Contexto` de uma decisao descreve o estado NO DIA EM QUE ELA',
+      '  FOI ESCRITA. Decisao e imutavel e o contexto dela envelhece de',
+      '  proposito: citar um Contexto como estado atual FABRICA divergencia.',
       'ARQUIVO CITADO NAO E ARQUIVO AUSENTE. Antes de dizer que um documento',
       '  falta, PROCURE o marcador "===== ARQUIVO: <caminho> =====" no material',
       '  e o caminho na arvore do repositorio, que vem junto. Em 10/09/2026',
@@ -299,10 +302,26 @@ export const LENTES: Record<LenteId, Lente> = {
       '  decidido e o entregue, nao sobre o que mais o aplicativo poderia fazer.',
       'NAO repita o que outra lente ja cobre melhor. Modelagem e da `nucleo`,',
       '  cobertura e da `risco`, integridade documental e da `registro`.',
+      'A secao `## Contexto` de uma decisao descreve o estado NO DIA EM QUE ELA',
+      '  FOI ESCRITA, e nao hoje: decisao e imutavel, e o contexto dela envelhece',
+      '  de proposito. Citar um Contexto como se fosse o estado atual FABRICA',
+      '  divergencia. Antes de reportar qualquer coisa que saia de um Contexto,',
+      '  CONFIRA o veredito na tabela da secao 6 do plano do motor de',
+      '  referencia: item marcado como feito ali esta feito, e decisao posterior',
+      '  que trate do mesmo assunto manda sobre a anterior.',
+      'Limitacao JA DECLARADA no proprio comentario do codigo ou no registro nao',
+      '  e tensao. Se o trecho que voce citaria como evidencia ja diz "fica',
+      '  registrado como limitacao, nao corrigido aqui", ele esta cumprindo o',
+      '  que a lente pede -- e reporta-lo e cobrar duas vezes a mesma coisa.',
     ],
     materiais: [
       { tipo: 'diretorio', caminho: 'docs/decisoes', extensoes: ['.md'], opcional: true },
       { tipo: 'arquivo', caminho: 'docs/estado.md', opcional: true },
+      // **O veredito de cada item mora aqui**, e sem ele a lente le o
+      // `## Contexto` das decisoes como se fosse o estado de hoje -- foi o que
+      // produziu, em duas rodadas seguidas, o mesmo falso positivo sobre os
+      // bancos sem setor que a decisao 87 resolveu.
+      { tipo: 'arquivo', caminho: 'docs/plano-motor-de-referencia.md', opcional: true },
       { tipo: 'arquivo', caminho: 'README.md' },
       { tipo: 'arvore', raizes: ['lib', 'packages', 'test'] },
       { tipo: 'git-log', quantidade: 40 },

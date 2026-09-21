@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:equisim/data/config/api_config.dart';
 import 'package:equisim/data/datasources/local/cache_database.dart';
+import 'package:equisim/data/datasources/local/cache_policy.dart';
 import 'package:equisim/data/datasources/remote/bcb_datasource.dart';
 import 'package:equisim/data/datasources/remote/brapi_datasource.dart';
 import 'package:equisim/data/network/api_client.dart';
@@ -38,6 +41,79 @@ void main() {
   });
 
   tearDown(() async => db.close());
+
+  group('Falha de gravação no cache não derruba a busca', () {
+    // Lente `risco`, 21/09/2026. O cache é **otimização, não requisito**, e a
+    // suíte cobria a ausência dele desde a raiz (`cache: null`). Faltava o
+    // outro caminho: o banco **existe como objeto**, a rede responde, e toda
+    // operação nele falha — disco cheio, permissão negada, arquivo num
+    // diretório que não existe. Se a exceção subisse, o aplicativo jogaria
+    // fora o dado verdadeiro que acabou de baixar.
+
+    /// Um banco que **nunca abre**: o caminho atravessa um **arquivo** como se
+    /// fosse pasta, e o sistema operacional recusa em qualquer plataforma.
+    ///
+    /// Diretório apenas inexistente não serve — o `sqlite3` o cria sozinho, e
+    /// o banco abriria normalmente. Foi o que a primeira tentativa deste teste
+    /// fez, e ela passava sem exercitar nada.
+    CacheDatabase bancoQuebrado() {
+      final barreira = File('${Directory.systemTemp.path}/equisim-barreira-'
+          '${DateTime.now().microsecondsSinceEpoch}')
+        ..createSync();
+      addTearDown(() {
+        if (barreira.existsSync()) barreira.deleteSync();
+      });
+      return CacheDatabase(
+          NativeDatabase(File('${barreira.path}/cache.sqlite')));
+    }
+
+    test('a premissa do grupo: o banco realmente falha', () async {
+      // **Sem esta conferência os dois testes abaixo passariam vazios.** Um
+      // banco que funcionasse faria a gravação dar certo, e eles provariam
+      // apenas que o caminho feliz funciona.
+      final quebrado = bancoQuebrado();
+      await expectLater(
+        quebrado.isFresh(CachePolicy.pricesKey('PETR4'),
+            CachePolicy.historicalPrices),
+        throwsA(anything),
+      );
+    });
+
+    test('o que a rede trouxe chega a quem pediu', () async {
+      final ticker = Ticker.parse('PETR4');
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+      final repository = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: bancoQuebrado(),
+      );
+
+      final r = await repository.dailyBatch([ticker], range);
+      expect(r.isOk, isTrue,
+          reason: 'a série veio da rede: falhar aqui joga fora dado bom por '
+              'causa de uma otimização');
+      expect(r.unwrap()[ticker]!.points, isNotEmpty);
+    });
+
+    test('e a leitura seguinte volta à rede, porque não há cache', () async {
+      // A consequência aceita: sem gravação, não há o que reaproveitar, e a
+      // segunda chamada repete a requisição. É degradação, e não defeito.
+      final ticker = Ticker.parse('PETR4');
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+      final adapter = FixtureAdapter(routes: {
+        '/v2/stocks/historical': 'brapi_historical_batch',
+      });
+      final repository = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(adapter)),
+        cache: bancoQuebrado(),
+      );
+      await repository.dailyBatch([ticker], range);
+      expect(adapter.callCount['/v2/stocks/historical'], 1);
+      await repository.dailyBatch([ticker], range);
+      expect(adapter.callCount['/v2/stocks/historical'], 2);
+    });
+  });
 
   group('Cache de cotações', () {
     test('segunda leitura não vai à rede', () async {

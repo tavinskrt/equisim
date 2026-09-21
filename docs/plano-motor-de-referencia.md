@@ -491,11 +491,48 @@ métrica de acompanhamento.
 com encolhimento, ou implícito da própria seção. **Move o nível de todo mundo
 junto, e portanto quase nada na ordenação** — item de "exemplar".
 
+**Estado: feito em 21/09/2026, e as duas saídas foram rodadas**
+([decisão 116](decisoes/116-o-premio-de-mercado-fica-em-5-5-por-cento-por-medicao-das-duas-alternativas.md),
+[premio_de_mercado.md](validacao/premio_de_mercado.md)). O **histórico** do
+Ibovespa contra o CDI dá **0,39%**, com erro-padrão de **7,85 p.p.** e intervalo
+de 95% de −15,0% a +15,8%: são precisos **308 anos** de série para um
+erro-padrão de um ponto. O **encolhimento** — a saída que o item nomeia — dá
+peso de 0,1% à amostra e **devolve 5,49%**. O **implícito** que zera o potencial
+mediano é de **−3,9%**: o acionista exigindo quase quatro pontos abaixo do CDI.
+
+**5,5% fica, e deixa de ser convenção.** A previsão da seção se confirmou —
+postos de 0,996 ou mais entre 4% e 7% —, **mas a varredura resolveu outra
+coisa**: o desacordo de nível do motor **não é do prêmio**. Zerá-lo move o
+potencial mediano de −44,7% para −29,9%, e dois terços do desacordo sobrevivem a um prêmio
+nulo. A explicação está na [decisão 112](decisoes/112-a-rentabilidade-reverte-a-mediana-do-mercado-e-nao-ao-custo-de-capital.md).
+
 ### B4. Risco-país e o que mais falta no custo de capital
 
 Não há prêmio de risco-país, nem ajuste por tamanho, nem qualquer fator além do
 beta. Um CAPM de fator único é defensável num artigo e é fraco como motor
 de referência.
+
+**Estado: os dois recusados, com medição, em 21/09/2026**
+([decisão 117](decisoes/117-risco-pais-e-tamanho-sao-recusados-com-medicao.md),
+[risco_pais_e_tamanho.md](validacao/risco_pais_e_tamanho.md)).
+
+**Risco-país já está no desconto.** A taxa livre de risco é brasileira, em
+reais, e rende **9,23% real** contra ~2% do americano de longo prazo: os sete
+pontos de diferença são exatamente o que um prêmio-país serve para introduzir.
+A forma usual — prêmio maduro mais prêmio-país, perto de 8% — custa **−13,3%** de
+preço justo e quatro avaliações, para contar duas vezes a mesma coisa. O caminho
+correto de usá-lo seria avaliar em dólar contra a curva americana, e não é o
+deste projeto.
+
+**O tamanho já é cobrado pelo beta.** Postos de **−0,327** entre o logaritmo do
+valor de mercado e o beta: o tercil menor tem beta mediano de **1,387** contra
+**0,876** do maior, e a diferença de 0,511 vale **2,81 p.p.** de custo do capital
+próprio — **acima** da magnitude do prêmio por tamanho da literatura. Somar 2
+p.p. por cima só do tercil menor derruba **11,6%** do preço justo dele, deixa a
+ordenação em postos de 0,992, e o faz **no tercil de potencial menos negativo**.
+
+**A recusa é do ajuste, e não da crítica**: o CAPM continua de fator único, e
+isso continua declarado.
 
 ### B5. Triangulação por múltiplos
 
@@ -503,16 +540,75 @@ Nenhuma avaliação profissional entrega DCF sozinho. Um múltiplo de pares —
 EV/EBITDA, P/L, P/VP setorial — dá uma segunda leitura e, principalmente, um
 teste de sanidade sobre o nível que hoje só a §2.8 discute em prosa.
 
+**Estado: feito em 21/09/2026** ([decisão 118](decisoes/118-a-triangulacao-por-multiplos-e-segunda-leitura-declarada-e-nao-entra-no-preco.md),
+[multiplos.md](validacao/multiplos.md)). Os três múltiplos entram, com a mediana
+de pares vinda de **pacote versionado** — o núcleo avalia um ativo por vez e não
+calcula mediana de bolsa sem deixar de ser puro, que é o arranjo do prior do beta
+e do registro da B3. Grupo por múltiplo, na ordem subsetor, setor e mercado, com
+mínimo de cinco pares; aplicabilidade declarada quando morde — prejuízo tira o
+P/L e **não o inverte**, banco não usa EV/EBITDA; e o **divisor da ponte dos dois
+lados**, ou a comparação mediria a ponte.
+
+**O teste de sanidade que a §2.8 discutia em prosa agora tem número.** 93 dos 97
+recebem leitura, 66 as três, e a divergência mediana é de **+78,2%** — o DCF fica
+acima dos pares em **apenas 13 de 93**. O potencial mediano é de −48,4% pelo
+fluxo e de −2,3% pelos múltiplos, com postos de **0,470** entre as duas
+ordenações.
+
+**O −2,3% é quase mecânico** e não é evidência: as medianas saem dos preços dos
+pares, e avaliação relativa devolve o preço de mercado por construção. O que fica
+estabelecido é que **o desacordo de nível do motor não é com o mercado, é com
+qualquer leitura relativa** — e que as duas ordenações são meio diferentes, o que
+faz do múltiplo relativo candidato à comparação da §0 (item **B22**).
+
 ### B6. O horizonte de projeção é fixo em dez anos
 
 Para todo mundo, independentemente de ciclo, setor ou maturidade. Nunca foi
 medido se dez é melhor que sete ou quinze.
+
+**Estado: medido e decidido em 21/09/2026**
+([decisão 115](decisoes/115-o-horizonte-fica-em-dez-anos-por-medicao.md),
+[horizonte.md](validacao/horizonte.md)). **A mediana do preço justo anda entre
+−1,0% e +0,8% de cinco a vinte anos**: quadruplicar a projeção explícita não move
+o ativo mediano. O que muda é **onde o valor mora** — o peso do terminal vai de
+**59,2%** a **8,4%** —, as caudas (p10 de −3,3% a −23,3%) e a cobertura (102 a
+94 avaliados).
+
+**Dez ficam**, entre o terminal dominante a cinco anos e a extrapolação de duas
+décadas a vinte. E a varredura deu de graça uma evidência que não procurava: **a
+invariância ao horizonte é o terminal neutro funcionando** — o valor terminal
+neutro transfere valor do terminal para os fluxos sem mudar o total, e é
+exatamente o que se observa.
+
+**A perna da habilidade depende do C5.** No lugar dela fica o limite superior do
+efeito: com postos de 0,9828 entre os extremos, a desigualdade
+`|ΔIC| ≤ (1−ρ)·IC + √(1−ρ²)` dá **+0,20** — e não é apertada. A aposta de que a
+habilidade esteja escondida no horizonte é fraca, e não está descartada.
 
 ### B7. Consistência real × nominal
 
 O motor desconta fluxo nominal a taxa nominal e usa o IPCA só no teto da
 perpetuidade. Nunca foi conferido que as duas pontas usam a mesma convenção de
 inflação em todo o caminho.
+
+**Estado: provado em 21/09/2026, por invariância**
+([decisão 114](decisoes/114-o-motor-e-nominal-e-a-nao-neutralidade-de-unidade-esta-medida.md),
+[real_nominal.md](validacao/real_nominal.md)). Conferir lendo o código não é
+prova: é a mesma inspeção que deixou passar tudo o que as rodadas anteriores
+acharam. A prova é que **valor presente é quantia de hoje** — reexpressa a conta
+em moeda constante, o preço justo tem de ficar onde estava.
+
+**Vale ao último dígito** no desconto dos fluxos, no decaimento linear do
+crescimento e na estrutura a termo da taxa. O decaimento sobreviver a Fisher não
+era óbvio, e fecha porque interpolar linearmente entre dois fatores brutos é o
+mesmo que interpolar entre os deflacionados.
+
+**Não vale em três lugares, e os três têm forma fechada**: o caixa no meio do
+ano, que custa meia inflação; o terminal neutro, que vale `r∞ ÷ (r∞ − π)` —
+**1,305** na mediana dos 97 —; e o freio de reinvestimento. **A raiz é uma só**:
+operação sobre taxa **líquida** não é neutra à unidade, e `g = b·ROIC` é
+identidade **nominal**. A formulação nominal é a correta, e a tradução ingênua
+para termos reais é que estaria errada.
 
 ### B8. Reapresentação no *point-in-time*
 
@@ -568,6 +664,17 @@ muda é a taxa de cada metade, nas duas rotas. **O efeito:** o WACC sobe em todo
 ativo com caixa (ANIM3, de 17,7% para 19,6% no primeiro ano); o preço justo muda
 em 61 dos 99, com mediana de +0,28%, e **três ativos deixam de ser avaliáveis** —
 MOTV3, MYPK3 e QUAL3, cujo valor de firma não cobre mais a dívida líquida.
+
+**E o mesmo defeito tinha um segundo lugar, achado na rodada seguinte pela mesma
+lente** ([decisão 119](decisoes/119-a-rota-derivada-tambem-remunera-o-caixa-pela-taxa-livre-de-risco.md)).
+A ponte do acionista da rota derivada — que é o **caminho de produção** da via da
+firma desde a decisão 102 — calculava o serviço da dívida como
+`D_líquida·(K_d(1−τ) − g)`: com caixa, o caixa rendia ao custo de **empréstimo**,
+e o fluxo do acionista saía inflado em toda companhia com caixa no balanço. A
+correção é a mesma álgebra, e o efeito é grande: **o preço justo cai em 73 dos
+97, todos**, com mediana de −4,63% e p10 de −42,8%; ENGI11 e GOAU4 deixam de ser
+avaliáveis. **Toda a medição da rodada foi refeita depois dela.** Fica o aviso de
+método: **corrigir uma ocorrência não corrige a regra**.
 
 ### B10. A migração de via é descontínua na taxa
 
@@ -1297,7 +1404,7 @@ o instrumento sob as duas medições.
 | B11 | Prior do beta no aplicativo | R1, E | ✅ | o aplicativo e a montagem padrão da validação avaliam com o prior do beta e o custo de capital resolvido das decisões 40 e 41, com a tensão da via do acionista resolvida, os cenários e a taxa exibida saindo das premissas resolvidas, e o efeito medido na mesma execução; e, desde 16/09/2026, a varredura do nível no caminho resolvido sem ativo subindo com a taxa e o custo da dívida sintético nas duas rotas — **atingido**: o prior vem do pacote do build, com deriva medida (3,1% em um ano) e validade de um ano; 83 das 102 avaliações resolvem as taxas, e todas as 82 da via da firma; `K_d = Rf_t + prêmio` no solucionador e na rota derivada; a dívida da via do acionista fica constante, porque o fluxo já financia o crescimento com lucro retido; a taxa exibida é a do ano 1 resolvido e a faixa é centrada no preço justo; **0 de 102 sobem com a taxa nas duas montagens** ([decisão 105](decisoes/105-o-aplicativo-resolve-o-prior-do-beta-e-o-custo-de-capital.md), [prior_no_aplicativo.md](validacao/prior_no_aplicativo.md)) |
 | B16 | Razão de unidade pela composição declarada | R1, E | ✅ | a composição de cada unit sai de fonte declarada — a FCA da CVM, por ano — no pacote do aplicativo e nas coortes, a razão medida do valor de mercado vira conferência, e as 79 observações de unit que a inferência erra nas coortes passam a sair com a composição, com teste — atingido: pacote por CNPJ e por ano com as nove units declaradas, leitura do texto livre no núcleo com o caso de três letras corrigido, conferência declarada na avaliação e no rastro, e a ONCO11, que a companhia não declara, seguindo inferida e dizendo que é; **as coortes só recolhem o ganho com a reexecução do backtest (C5)** ([decisão 106](decisoes/106-a-razao-de-unidade-sai-da-composicao-declarada-e-a-medida-confere.md), [ponte_por_papel.md](validacao/ponte_por_papel.md) §7) |
 | B13 | As duas vias discordam | R1, E | ✅ | a via do acionista sobre LPA fica só para instituição financeira, ou as duas vias concordam dentro de tolerância declarada e medida no universo, ou uma decisão nova substitui a 39 e diz por que a discordância deixa de ser defeito — resolver junto com o B10 — atingido pela terceira saída: a decisão 102 substitui a 39; nenhuma avaliação muda de via, a via do acionista fica para as Portas 1 e 3, e nenhum ativo tem o preço escolhido entre as duas — 42 dos 109 não financeiros tinham antes |
-| B12 | Excedente do capital existente na perpetuidade | E | ✅ | o peso de `EVA_{N+1}/r` no preço justo está medido no universo, declarado no aviso, e uma decisão diz se ele fica, decai ou acaba num horizonte — atingido: o instalado rende 0,70 vez o custo de capital na mediana e o peso é de **−11,8%** do preço justo, déficit em 70 de 81 (remedido em 21/09/2026 sob a decisão 113); truncar em 20 anos devolve 0,4%, de modo que a escolha é binária; o número fica, o rótulo passa a `RONIC_∞ = r`, e o peso sai nos diagnósticos, sempre no rastro e como ressalva acima de 20% ([decisão 107](decisoes/107-o-terminal-neutro-e-do-capital-novo-e-o-instalado-mantem-o-retorno-que-tem.md), [terminal_excedente.md](validacao/terminal_excedente.md)) |
+| B12 | Excedente do capital existente na perpetuidade | E | ✅ | o peso de `EVA_{N+1}/r` no preço justo está medido no universo, declarado no aviso, e uma decisão diz se ele fica, decai ou acaba num horizonte — atingido: o instalado rende 0,70 vez o custo de capital na mediana e o peso é de **−12,2%** do preço justo, déficit em 69 de 80 (remedido em 21/09/2026 sob as decisões 113 e 119); truncar em 20 anos devolve 0,4%, de modo que a escolha é binária; o número fica, o rótulo passa a `RONIC_∞ = r`, e o peso sai nos diagnósticos, sempre no rastro e como ressalva acima de 20% ([decisão 107](decisoes/107-o-terminal-neutro-e-do-capital-novo-e-o-instalado-mantem-o-retorno-que-tem.md), [terminal_excedente.md](validacao/terminal_excedente.md)) |
 | B14 | Beta de papel pouco negociado | E, R3 | ✅ | um beta com correção por negociação não sincrônica é medido nos soltos do corte de liquidez, o nível do potencial deles é remedido com ele contra o das avaliadas, e uma decisão diz se a recusa por liquidez fica — atingido: Dimson com uma e com cinco defasagens, nos 185 soltos e nos 102 avaliados; o viés existe e cresce com a iliquidez (0,134 → 0,367 em quem negocia menos de 120 pregões), mas fecha **6,5 dos 17,8 p.p.** de distância e triplica o erro-padrão onde não há viés: **a recusa fica** ([decisão 108](decisoes/108-a-recusa-por-liquidez-fica-e-o-beta-corrigido-fecha-um-terco-da-distancia.md), [beta_liquidez.md](validacao/beta_liquidez.md)) |
 | B15 | Beta e alavancagem da perpetuidade | E | ✅ | o custo de capital da perpetuidade declara de onde vêm o beta e a estrutura de capital, o efeito de levá-los ao estado estacionário — beta em direção a 1, alavancagem da mediana do setor — está medido no universo, e uma decisão escolhe — atingido: a estrutura é a do ano N do modelo desde a decisão 105, e ela fica a −0,01 da de hoje ativo a ativo; o beta é o de hoje encolhido, e Blume por cima move **+0,1%** do preço justo porque o encolhimento já o aproximou de 1; a mediana setorial move 0,0% e custa cinco avaliações; as duas ficam como imposição de diagnóstico ([decisão 109](decisoes/109-a-perpetuidade-declara-de-onde-vem-o-beta-e-a-estrutura-e-nao-os-converge.md), [perpetuidade.md](validacao/perpetuidade.md)) |
 | B17 | Série de preços das coortes limitada a dez anos | R3 | ✅ | a série que a coorte usa para o beta cobre a janela inteira de cinco anos nas listadas, pelo COTAHIST, **ou a coorte declara a janela curta** — atingido pela segunda saída: o preparo mede a extensão da série que estimou o beta e a cascata declara abaixo de 80% da janela pedida, com a constante numa fonte só; a coorte grava a janela efetiva, e um dos avaliados do aplicativo — a CYRE4, com 0,7 ano — já sai com a ressalva. **A cobertura pelo COTAHIST depende do C5**, e com ela a contagem nas coortes de 2018 a 2021 ([decisão 111](decisoes/111-a-avaliacao-declara-a-janela-curta-do-beta.md)) |
@@ -1305,13 +1412,15 @@ o instrumento sob as duas medições.
 | B19 | Reversão da rentabilidade à média | E | ✅ | a persistência do `ROIC` contra o custo de capital está medida na série do universo — horizonte, dispersão e viés do estimador declarados —, e uma decisão diz se o terminal mantém o retorno do capital instalado ou o faz convergir — atingido: AR(1) no painel de 3.246 pares com `φ` de 0,237 e meia-vida de meio ano, `φ` mediano por ativo de 0,392 com o viés de Kendall declarado, e a leitura sem forma funcional mostrando o quinto superior indo de 14,3% a 0,1% em dez anos; **mas o destino é a mediana do mercado, 9,5%, contra 18,9% de custo de capital**, e converger o terminal a `r` afirmaria rentabilidade que a seção transversal nunca teve — **o terminal fica**, agora por medição ([decisão 112](decisoes/112-a-rentabilidade-reverte-a-mediana-do-mercado-e-nao-ao-custo-de-capital.md), [reversao_roic.md](validacao/reversao_roic.md)) |
 | B8 | Reapresentação no *point-in-time* | R3, R1 | 🟨 | a ingestão guarda cada versão com a data de recebimento dela, e a coorte usa a versão recebida até a data da avaliação — **o conserto depende da base bruta (C5)**, e o que foi feito em 21/09/2026 é medir o tamanho: das duas metades do defeito, a que o pacote versionado permite medir é **pequena** — 0,0% a 1,1% dos exercícios de cada coorte somem porque a única versão disponível chegou depois da data, com a pior em 30/06/2020 —, e a outra, o número **reapresentado** entrando como se fosse o original, não é medível sem as versões antigas e é maior por construção: 24,8% dos anuais têm mais de uma ([reapresentacao.md](validacao/reapresentacao.md)) |
 | B2 | Potencial ortogonalizado | R3 | ✅ | o IC do potencial ortogonalizado ao B/M sai do `backtest_valuation` em toda execução e fica registrado — atingido: `regressao_condicional.dart`, que é o que lê a saída do backtest, passou a medir o resíduo contra o **P/B sozinho** ao lado do que já media contra P/B e L/P, com a mesma inferência do resto — `t` corrigido pela sobreposição contra o crítico e Newey-West (decisão 96) —, e o número mora em [potencial_ortogonalizado.md](validacao/potencial_ortogonalizado.md), com o histórico entre rodadas: **+0,016 em 36 meses, `t` corrigido de 0,13 contra 2,70**, positivo em 10 de 22 coortes |
-| B6 | Horizonte de projeção | E, R3 | ⬜ | a varredura de 5 a 20 anos está medida sobre o universo e sobre a habilidade, e o horizonte é escolhido por decisão |
-| B7 | Consistência real × nominal | E, R1 | ⬜ | um teste confere que fluxo, taxa e perpetuidade usam a mesma convenção de inflação em todo o caminho |
-| B3 | Prêmio de risco de mercado | E | ⬜ | o prêmio é estimado — implícito ou histórico com encolhimento —, por decisão e com efeito medido; hoje é 5,5% fixo |
-| B4 | Risco-país e tamanho | E | ⬜ | decisão registrada sobre prêmio de risco-país e ajuste por tamanho, implementados ou recusados com medição |
-| B5 | Triangulação por múltiplos | E | ⬜ | cada avaliação traz o preço justo por múltiplos de pares ao lado do DCF, com a divergência declarada — hoje não há modelo por múltiplos |
+| B6 | Horizonte de projeção | E, R3 | ✅ | a varredura de 5 a 20 anos está medida sobre o universo e sobre a habilidade, e o horizonte é escolhido por decisão — atingido no universo: **a mediana do preço justo anda entre −1,0% e +0,8%** de 5 a 20 anos, e o que muda é o peso do terminal, de 59,2% a 8,4%; a ordenação fica em postos de **0,9828** entre os extremos, e a cobertura vai de 102 a 94. **Dez ficam**, entre o terminal dominante e a extrapolação de duas décadas. A invariância ao horizonte saiu de graça como evidência de que o terminal neutro está bem especificado. **A perna da habilidade depende do C5**, e no lugar dela fica o limite superior do efeito — `(1−ρ)·IC + √(1−ρ²)` = +0,20, que não é apertado ([decisão 115](decisoes/115-o-horizonte-fica-em-dez-anos-por-medicao.md), [horizonte.md](validacao/horizonte.md)) |
+| B7 | Consistência real × nominal | E, R1 | ✅ | um teste confere que fluxo, taxa e perpetuidade usam a mesma convenção de inflação em todo o caminho — atingido por **invariância de unidade**, e não por inspeção: reexpressa a conta inteira em moeda constante por Fisher, o preço justo tem de ficar onde estava. Vale **ao último dígito** no desconto dos fluxos, no decaimento linear do crescimento e na estrutura a termo; **não vale em três lugares, e os três têm forma fechada** — caixa no meio do ano `(1+π)^−1/2`, terminal neutro `r∞÷(r∞−π)` (1,305 na mediana dos 97) e o freio de reinvestimento. A raiz é uma só: operação sobre taxa **líquida** não é neutra à unidade, e `g = b·ROIC` é identidade nominal ([decisão 114](decisoes/114-o-motor-e-nominal-e-a-nao-neutralidade-de-unidade-esta-medida.md), [real_nominal.md](validacao/real_nominal.md)) |
+| B3 | Prêmio de risco de mercado | E | ✅ | o prêmio é estimado — implícito ou histórico com encolhimento —, por decisão e com efeito medido — atingido, e as duas saídas foram rodadas: o **histórico** dá 0,39% com erro-padrão de **7,85 p.p.** (308 anos de série para 1 p.p. de erro), e o **encolhimento devolve 5,49%** porque o peso da amostra é de 0,1%; o **implícito** é **−3,9%**, que é absurdo econômico. **5,5% fica, e deixa de ser convenção.** E a varredura resolveu de passagem uma hipótese aberta desde a §0: **o desacordo de nível não é do prêmio** — zerá-lo deixa dois terços do potencial mediano de pé, de −44,7% para −29,9%; postos de 0,996 ou mais entre 4% e 7% ([decisão 116](decisoes/116-o-premio-de-mercado-fica-em-5-5-por-cento-por-medicao-das-duas-alternativas.md), [premio_de_mercado.md](validacao/premio_de_mercado.md)) |
+| B4 | Risco-país e tamanho | E | ✅ | decisão registrada sobre prêmio de risco-país e ajuste por tamanho, implementados ou recusados com medição — atingido: os **dois recusados, com medição**. O `R_f` deste motor é brasileiro e rende **9,23% real** contra ~2% do americano: somar prêmio-país é contar duas vezes, e custaria −13,3% de preço justo e quatro avaliações. O tamanho já é cobrado pelo beta — postos de **−0,327** contra `log`(valor de mercado), e o tercil menor tem beta 1,387 contra 0,876 do maior, que é **2,81 p.p.** de `Ke`, **acima** da magnitude do ajuste da literatura; somar 2 p.p. por cima move a ordenação em postos de 0,992 e derruba 11,6% do preço justo do tercil **de potencial menos negativo** ([decisão 117](decisoes/117-risco-pais-e-tamanho-sao-recusados-com-medicao.md), [risco_pais_e_tamanho.md](validacao/risco_pais_e_tamanho.md)) |
+| B5 | Triangulação por múltiplos | E | ✅ | cada avaliação traz o preço justo por múltiplos de pares ao lado do DCF, com a divergência declarada — atingido: P/L, P/VP e EV/EBITDA, com mediana de pares em pacote versionado (`tool/multiplos_empacotar.dart`), grupo escolhido por múltiplo na ordem subsetor → setor → mercado com mínimo de cinco pares, aplicabilidade declarada quando morde e o **divisor da ponte dos dois lados**. **93 dos 97 recebem leitura**, 66 as três; a divergência mediana é de **+78,2%**, o DCF fica acima dos pares em só 13 de 93, e os postos entre as duas ordenações são de **0,470**. A tela traz o cartão e a ressalva acima de 50%; **o preço justo não muda em ativo nenhum**, conferido contra o gabarito ([decisão 118](decisoes/118-a-triangulacao-por-multiplos-e-segunda-leitura-declarada-e-nao-entra-no-preco.md), [multiplos.md](validacao/multiplos.md)) |
 | B20 | Tradução do cenário para o `Ke` | E | ⬜ | uma decisão diz o que o cenário de desconto perturba — a taxa em si, a livre de risco, ou a taxa aplicada ao fluxo —, e a tradução para o `Ke` da rota derivada sai dessa escolha com o efeito na faixa medido. **Hoje a soma é um a um, e está declarada no código** (lente `metodo`, 21/09/2026): `ΔK_e = ΔWACC ÷ w_E` seria a leitura de estrutura fixa, perto de 1,4 vez, e `ΔK_e = ΔWACC ÷ (1 − w_D·t)` a de taxa livre de risco, perto de 1,1. Vale um a um porque na via do acionista o campo perturbado **é** o `Ke`, e as duas vias precisam querer dizer a mesma coisa. **Não move o preço justo** — só a largura da faixa de sensibilidade, que a decisão 92 já separa da calibrada |
-| B21 | O `Failure` carrega formatação de tela | E, prevenção | ⬜ | o erro do núcleo transporta a grandeza que a regra violou, e a frase é montada na apresentação — hoje o núcleo formata percentual e casas decimais dentro da mensagem (`'Os pesos devem somar 100%; somam ${(total * 100).toStringAsFixed(2)}%.'`), e a tela é obrigada a exibir a frase pronta ou a repetir o limite. **Dívida de arquitetura inventariada**, das lentes `nucleo` e `registro` de 21/09/2026: não é regressão e não afeta cálculo, e o repositório está sob preservação. A lente `registro` aponta a outra metade da mesma dívida — o `Money` em centavos inteiros vale na carteira e no aporte, e o caminho de avaliação corre em `double` do começo ao fim, o que o [PLANO_ARQUITETURA.md](../PLANO_ARQUITETURA.md), congelado, não distingue |
+| B22 | O múltiplo relativo como ordenação | R3 | ⬜ | a ordenação por `múltiplos ÷ preço` é medida lado a lado com as três da [decisão 103](decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md), pelo mesmo critério fixado antes de medir, e o registro diz se ela passa. **Entrou pelo B5**: os postos entre o potencial do DCF e o dos múltiplos são de **0,470**, com o mesmo sinal em 63 de 93 — é sinal **distinto**, e não cópia. Depende da reexecução das coortes (item C5), e a regra da decisão 103 já diz o que acontece se ele passar: o prêmio do retorno esperado sai da primeira ordenação que passar no critério |
+| B23 | O minoritário não entra nos pesos do WACC | E | ⬜ | os pesos do custo médio incluem a parcela dos não controladores, ou uma decisão diz por que não — hoje o peso do capital próprio é `divisor × preço`, que é o valor de mercado **da controladora**, enquanto o fluxo descontado é o **consolidado**. Omitir a fatia dos minoritários do denominador `E + D` infla a participação da dívida e achata o WACC. **O obstáculo é o dado**: o valor de **mercado** do minoritário não é observável, e só o contábil existe — usar contábil num peso de mercado é trocar uma distorção por outra. A ponte já devolve a parcela ao final (decisão 49); o que falta é o peso. Da lente `metodo` de 21/09/2026, LOCAL, inventariado |
+| B21 | O `Failure` carrega formatação de tela | E, prevenção | ⬜ | o erro do núcleo transporta a grandeza que a regra violou, e a frase é montada na apresentação — hoje o núcleo formata percentual e casas decimais dentro da mensagem (`'Os pesos devem somar 100%; somam ${(total * 100).toStringAsFixed(2)}%.'`), e a tela é obrigada a exibir a frase pronta ou a repetir o limite. **Dívida de arquitetura inventariada**, e **três execuções de lente em duas rodadas convergiram nela**: `nucleo` e `registro` em 21/09/2026, e `nucleo` de novo na rodada seguinte. Não é regressão e não afeta cálculo, e o repositório está sob preservação. São três metades da mesma coisa: (a) o `Failure` monta frase e formata percentual; (b) o `Money` em centavos inteiros vale na carteira e no aporte, e o caminho de avaliação corre em `double` do começo ao fim — inclusive `FundamentalsSnapshot.netIncome`, `ebitda` e a contagem de ações, que é grandeza **inteira** por convenção de domínio —, o que o [PLANO_ARQUITETURA.md](../PLANO_ARQUITETURA.md), congelado, não distingue; (c) os enums do núcleo carregam `label` pronto para a tela (`ValuationCaveat`, `ScenarioBand`, `MultipleKind`). **A (c) cresceu nesta rodada**, com os enums do B5 seguindo a convenção existente: desviar num enum novo seria incoerência, não melhoria — e é mais um motivo para a dívida virar tarefa por decisão, e não por iniciativa dentro de item alheio |
 | C5 | Base bruta e reexecução do backtest | R2, R3 | ⬜ 👤 | a base bruta — CVM ingerida, COTAHIST e derivados, Tesouro — está na máquina, e o backtest é reexecutado sobre o motor da Fase 3, com habilidade, faixa, recusas e ponte regeradas — hoje as quatro são do motor da decisão 102, e o `data/` não existe no clone |
 | C4 | Custos de transação | R3 | ⬜ | o custo de transação entra no backtest, e o efeito sobre o retorno medido é reportado |
 | D3 | Cobertura de caminhos de erro | R1 prevenção | 🟨 | as telas carregadas entram no teste de estouro — **a de avaliação entrou, na matriz de três larguras e três escalas**, e faltam estudo e metas —, o cache macroeconômico tem teste de recurso offline — **feito**, com a cobertura do início exigida no recurso —, o veredito que não se estabiliza em `moatMaxPasses` passes tem teste, e os datasources de fundamentos e do Tesouro têm teste de payload malformado como o de cotações tem (lente `risco`, 15/09/2026) — **o do Banco Central e o do Tesouro entraram em 20/09/2026 e o de demonstrativos em 21/09**, com JSON sem as chaves, CSV de colunas trocadas e literal de tipo indevido virando `Result.err`; faltam as telas de estudo e metas carregadas |

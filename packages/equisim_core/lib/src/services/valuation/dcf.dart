@@ -760,6 +760,8 @@ abstract final class DcfCalculator {
     required double terminalEquityDiscountRate,
     List<double>? equityDiscountRatePath,
     double minorityInterest = 0,
+    double cash = 0,
+    double? cashYield,
   }) {
     if (sharesOutstanding <= 0) {
       return const Err(InsufficientData(
@@ -800,6 +802,17 @@ abstract final class DcfCalculator {
     final p = projetado.unwrap();
 
     final kdLiquido = costOfDebt * (1 - taxRate);
+    // **O caixa rende a taxa livre de risco, e não o custo de empréstimo**
+    // (lente `metodo`, 21/09/2026; decisão 119). É o mesmo defeito que a
+    // decisão 113 corrigiu no WACC, num segundo lugar: aqui o serviço da
+    // dívida entrava como `D_líquida · K_d`, de modo que a companhia de caixa
+    // líquido recebia **receita financeira ao custo de empréstimo**. O fluxo
+    // do acionista saía inflado, e este é o caminho de produção da via da
+    // firma desde a decisão 102.
+    //
+    // Sem [cashYield], vale a forma anterior — `K_d` nos dois lados —, que é a
+    // que quem monta a projeção à mão obtém.
+    final rendimentoDoCaixa = (cashYield ?? costOfDebt) * (1 - taxRate);
     final n = assumptions.projectionYears;
 
     /// `Ke` do ano [t].
@@ -822,6 +835,18 @@ abstract final class DcfCalculator {
     var soma = 0.0;
     var fator = 1.0;
     var divida = netDebt;
+    // As duas metades crescem com o mesmo fator, e a diferença delas é a
+    // líquida: a separação não muda a **dívida projetada**, só a taxa de cada
+    // metade do serviço.
+    var bruta = netDebt + cash;
+    var saldoDeCaixa = cash;
+
+    /// Serviço líquido da dívida no ano, com o caixa remunerado à taxa dele.
+    ///
+    /// `D_bruta·K_d(1−τ) − C·R_f(1−τ) − D_líquida·g`. Com caixa zero, colapsa
+    /// em `D_líquida·(K_d(1−τ) − g)`, que é a forma anterior.
+    double servico(double g) =>
+        bruta * kdLiquido - saldoDeCaixa * rendimentoDoCaixa - divida * g;
 
     for (var t = 1; t <= n; t++) {
       final ke = keAt(t);
@@ -829,12 +854,14 @@ abstract final class DcfCalculator {
       final g = assumptions.growthAt(t);
       // `D_{t−1}` é a dívida no **início** do ano: o juro incide sobre ela, e o
       // acréscimo de dívida do ano é `D_{t−1}·g`.
-      final fcfe = p.fluxos[t - 1] - divida * (kdLiquido - g);
+      final fcfe = p.fluxos[t - 1] - servico(g);
       fluxos.add(fcfe);
       final vp = fcfe * assumptions.lift(ke) / fator;
       descontados.add(vp);
       soma += vp;
       divida = divida * (1 + g);
+      bruta = bruta * (1 + g);
+      saldoDeCaixa = saldoDeCaixa * (1 + g);
     }
 
     // Terminal do acionista, pela mesma identidade: o fluxo do ano N+1 menos o
@@ -860,7 +887,7 @@ abstract final class DcfCalculator {
         : p.terminal;
     final fcffTerminal =
         perpetuoDaFirma * (assumptions.terminalDiscountRate - gInf);
-    final fcfeTerminal = fcffTerminal - divida * (kdLiquido - gInf);
+    final fcfeTerminal = fcffTerminal - servico(gInf);
     final perpetuo = fcfeTerminal / spread;
     // **Com contrato que acaba, o terminal do acionista é o perpétuo truncado**
     // (decisões 88 e 102): o fluxo do acionista durante os anos que faltam, e o

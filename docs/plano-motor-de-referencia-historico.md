@@ -11,6 +11,134 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O que a sexta rodada da Fase 3 encontrou — B6, B7, B3, B4 e B5 (21/09/2026)
+
+**A rodada achou um defeito grande no meio dela, e teve de refazer a própria
+medição.** A lente `metodo` apontou que a separação do caixa que a decisão 113
+fez no WACC tinha um **segundo lugar**: a ponte do acionista da rota derivada —
+o caminho de produção da via da firma desde a decisão 102 — calculava o serviço
+da dívida como `D_líquida·(K_d(1−τ) − g)`, de modo que o caixa rendia ao custo de
+**empréstimo**. A correção
+([decisão 119](decisoes/119-a-rota-derivada-tambem-remunera-o-caixa-pela-taxa-livre-de-risco.md))
+derruba o preço justo em **73 dos 97, todos**, com mediana de −4,63% e p10 de
+−42,8%, e tira ENGI11 e GOAU4. **Todas as cinco medições da rodada foram
+refeitas depois dela**, e as decisões 114 a 118 carregam os números de depois.
+
+O aviso de método que fica: **corrigir uma ocorrência não corrige a regra.** Duas
+rodadas seguidas, a mesma lente, o mesmo argumento, lugares diferentes do mesmo
+caminho. A varredura por `K_d` aplicado a grandeza líquida foi feita e não achou
+um terceiro.
+
+**O B7 virou prova, e não inspeção.** Conferir no código que cada linha está na
+unidade certa é a mesma leitura que deixou passar tudo o que as rodadas
+anteriores acharam. O que prova é a **invariância de unidade**: valor presente é
+quantia de hoje, e reexpressa a conta em moeda constante por Fisher, o preço
+justo tem de ficar onde estava. Vale **ao último dígito** no desconto dos fluxos,
+no decaimento linear do crescimento e na estrutura a termo — e o decaimento
+sobreviver a Fisher **não era óbvio**, porque a interpolação é linear e Fisher
+não é. **Não vale em três lugares, e os três têm forma fechada**: caixa no meio
+do ano, `(1+π)^−1/2`; terminal neutro, `r∞ ÷ (r∞ − π)`, que é 1,305 na mediana;
+e o freio de reinvestimento. **A raiz é uma só** — operação sobre taxa líquida
+não é neutra à unidade, e `g = b·ROIC` é identidade **nominal**. A formulação do
+motor é a correta, e a tradução ingênua para termos reais é que estaria errada.
+
+**O B6 fechou com um achado que não procurava.** A mediana do preço justo anda
+entre −1,0% e +0,8% de cinco a vinte anos: quadruplicar a projeção explícita não
+move o ativo mediano. O que muda é **onde o valor mora** — o peso do terminal vai
+de 59,2% a 8,4%. **Isso é o terminal neutro funcionando**: `VT = lucro/r` com
+`RONIC_∞ = r` transfere valor do terminal para os fluxos sem mudar o total, e é
+exatamente o que se observa. Evidência independente de que a construção está
+certa, saída de uma varredura que perguntava outra coisa. Dez anos ficam, entre o
+terminal dominante e a extrapolação de duas décadas.
+
+**O B3 rodou as duas saídas que o item pedia, e as duas devolveram o
+parâmetro.** O prêmio **histórico** do Ibovespa contra o CDI é de 0,39%, com
+erro-padrão de **7,85 p.p.** — são precisos **308 anos** de série para um
+erro-padrão de um ponto. O **encolhimento** dá peso de 0,1% à amostra e devolve
+**5,49%**. E o **implícito** é **−3,9%**: o acionista exigindo quase quatro
+pontos abaixo do CDI. **Mas a varredura resolveu outra coisa, e é a mais
+importante da rodada**: o desacordo de nível do motor **não é do prêmio de
+risco**. Zerá-lo move o potencial mediano de −44,7% para −29,9%, e dois terços do
+desacordo sobrevivem a um prêmio **nulo**. Uma hipótese aberta desde a §0 fechou.
+
+**O B4 recusou os dois ajustes, com medição.** O `R_f` deste motor é brasileiro e
+rende **9,23% real** contra ~2% do americano: somar prêmio-país é contar duas
+vezes, e custaria −13,3% de preço justo e quatro avaliações. O tamanho já é
+cobrado pelo beta — o tercil menor tem beta 1,387 contra 0,876 do maior, que é
+**2,81 p.p.** de `Ke`, **acima** do prêmio por tamanho da literatura. Somar 2
+p.p. por cima não move a ordenação (postos de 0,992) e derruba 11,6% do preço
+justo do tercil **de potencial menos negativo**.
+
+**O B5 construiu o modelo por múltiplos, e ele confirmou o diagnóstico por outro
+caminho.** P/L, P/VP e EV/EBITDA, com mediana de pares em pacote versionado —
+porque o núcleo avalia um ativo por vez e não calcula mediana de bolsa sem
+deixar de ser puro. 93 dos 97 recebem leitura, e **a divergência mediana é de
++78,2%**: o DCF fica acima dos pares em **apenas 13 de 93**. O potencial mediano
+é de −48,4% pelo fluxo e de −2,3% pelos múltiplos. **O −2,3% é quase mecânico** —
+as medianas saem dos preços dos pares, e avaliação relativa devolve o preço de
+mercado por construção —, e lê-lo como confirmação do mercado seria tomar
+tautologia por prova. **O que fica é que o desacordo do motor não é com o
+mercado: é com qualquer leitura relativa.** E os postos entre as duas ordenações
+são de **0,470**, o que faz do múltiplo relativo sinal **distinto** — item
+**B22**.
+
+### O que as lentes disseram nesta rodada
+
+**A `metodo` achou o defeito da rodada**, descrito acima, e um segundo que não
+procede agora: o minoritário fica fora dos pesos do WACC, enquanto o fluxo
+descontado é o consolidado. **O obstáculo é o dado** — o valor de **mercado** do
+minoritário não é observável, e usar o contábil num peso de mercado troca uma
+distorção por outra. Virou o item **B23**, declarado no código.
+
+**A `risco` achou dois buracos de cobertura, e nenhum defeito.** O `BcbDatasource`
+e o `TesouroDatasource` não tinham teste para falha de rede **sem status HTTP** —
+a captura é central, no `ApiClient`, mas a cobertura precisa ser de cada fonte,
+porque quem acrescentar uma quarta amanhã pode não passar por lá. E a falha de
+**gravação** no cache depois de uma busca bem-sucedida não era exercitada.
+**A primeira tentativa do segundo teste passou sem testar nada**: fechar o banco
+não o quebra, e diretório inexistente o `sqlite3` cria sozinho. O teste agora
+atravessa um **arquivo** como se fosse pasta, e o grupo abre com uma conferência
+da própria premissa — sem ela, os outros dois passariam vazios.
+
+**A `dados`, a `registro` e a `tela` não acharam nada.**
+
+**A `nucleo` voltou à mesma dívida pela terceira vez em duas rodadas**: o núcleo
+carrega `double` onde o domínio pede inteiro e centavo, e os enums carregam
+`label` pronto para a tela. O item **B21** foi alargado para nomear as três
+metades — inclusive a confissão de que **ela cresceu nesta rodada**, com os enums
+do B5 seguindo a convenção existente. Desviar num enum novo seria incoerência,
+não melhoria; a dívida vira tarefa por decisão, e não por iniciativa dentro de
+item alheio.
+
+**A `rumo` repetiu dois falsos positivos da rodada anterior, e desta vez a
+correção foi na lente.** Ela lia o `## Contexto` de decisões imutáveis como se
+fosse o estado de hoje — os bancos sem setor que a decisão 87 resolveu, a
+alíquota efetiva em valor absoluto que já é limitação declarada. **O plano
+passou a ser material dela**, e a disciplina ganhou duas linhas: o Contexto
+descreve o dia em que a decisão foi escrita, e limitação já declarada no próprio
+comentário não é tensão. Reexecutada, os dois falsos positivos sumiram. A mesma
+disciplina entrou na `registro`.
+
+**Sobrou da `rumo` um achado que não procede**: a divergência entre as vias, que
+a decisão 102 fechou — nenhum ativo tem o preço escolhido entre as duas, e o item
+B13 está feito. É discordância de juízo sobre item encerrado, e não fabricação.
+
+### A auditoria do gate
+
+**Dois FAIL, os dois em código desta rodada, os dois na mesma ferramenta.**
+Igualdade estrita entre `double` na busca do prêmio implícito — com a agravante
+de que a linha seguinte dividia pela diferença — e `indexOf` numa lista de
+`double`, que é a mesma regra por outro nome. Corrigidos por guarda de
+denominador e por constante declarada com conferência de coerência. Mais dois
+WARN, também meus: variância amostral sem guarda de `n < 2` e formatador sem
+guarda de `NaN`.
+
+**E o `agy` alternou REPROVADO e APROVADO no mesmo alvo**, duas vezes. Vale o
+FAIL mais severo visto, e não o último — foi a segunda passada que achou o
+`indexOf`.
+
+---
+
 ## O que a quinta rodada da Fase 3 encontrou — B17, B18, B19, B8 e B2 (21/09/2026)
 
 **O `data/` sumiu de novo.** O discard do merge levou junto a FCA baixada e a

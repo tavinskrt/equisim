@@ -66,6 +66,7 @@ export 'src/services/cvm/share_count_history.dart';
 export 'src/services/cvm/unit_composition.dart';
 export 'src/services/valuation/concession_sectors.dart';
 export 'src/services/valuation/financial_sectors.dart';
+export 'src/services/valuation/peer_multiples.dart';
 export 'src/services/valuation/cyclical_sectors.dart';
 export 'src/services/valuation/eligibility.dart';
 export 'src/services/valuation/growth_guards.dart';

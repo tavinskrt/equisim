@@ -148,6 +148,10 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     // A composição declarada da unit, da FCA da CVM (item B16, decisão 106).
     declaredSharesPerUnit:
         await ref.watch(declaredSharesPerUnitProvider(ticker).future),
+    // **A segunda leitura, por múltiplos de pares** (item B5, decisão 118).
+    // Ela não entra no preço justo: fica ao lado dele, e a divergência é
+    // declarada em vez de reconciliada.
+    peerMultiples: await ref.watch(peerMultiplesProvider(ticker).future),
   );
   if (inputs.isErr) return null;
 

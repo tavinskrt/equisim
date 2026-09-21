@@ -4163,6 +4163,95 @@ void main() {
     });
   });
 
+  group('A rota derivada remunera o caixa pela taxa dele', () {
+    // Lente `metodo`, 21/09/2026; decisão 119. A decisão 113 separou o caixa
+    // no **WACC**; a ponte do acionista continuava com `D_líquida · K_d`, de
+    // modo que a companhia de caixa líquido recebia receita financeira ao
+    // custo de **empréstimo**. É o caminho de produção da via da firma desde a
+    // decisão 102, e o fluxo do acionista saía inflado.
+    const premissas = DcfAssumptions(
+      growthRate: 0.06,
+      perpetualGrowth: 0.045,
+      discountRate: 0.16,
+      terminalDiscountRate: 0.14,
+      reinvestmentPolicy: ReinvestmentPolicy.nenhum,
+    );
+
+    /// A **dívida líquida é a mesma em todas as chamadas**: é ela que a ponte
+    /// desconta, e variá-la mediria outra coisa. O que varia é quanto dela é
+    /// caixa, e a que taxa esse caixa rende.
+    DcfOutcome derivada({double caixa = 0, double? rendimento}) =>
+        DcfCalculator.equityFromFirm(
+          baseProfit: 1000,
+          assumptions: premissas,
+          netDebt: 1500,
+          sharesOutstanding: 1000,
+          costOfDebt: 0.18,
+          taxRate: 0.34,
+          equityDiscountRate: 0.18,
+          terminalEquityDiscountRate: 0.16,
+          cash: caixa,
+          cashYield: rendimento,
+        ).unwrap();
+
+    test('sem rendimento declarado, vale a forma anterior', () {
+      expect(derivada(caixa: 2500).fairValuePerShare,
+          closeTo(derivada().fairValuePerShare, 1e-9),
+          reason: 'sem `cashYield`, as duas metades pagam a mesma taxa e a '
+              'separação não pode mover nada');
+    });
+
+    test('com o rendimento, o caixa deixa de render prêmio de crédito', () {
+      final antes = derivada(caixa: 2500);
+      final depois = derivada(caixa: 2500, rendimento: 0.14);
+      expect(depois.fairValuePerShare, lessThan(antes.fairValuePerShare),
+          reason: 'render `R_f` em vez de `R_f + spread` reduz o fluxo do '
+              'acionista');
+    });
+
+    test('a diferença é exatamente o spread sobre o caixa, descontada', () {
+      // O serviço da dívida muda em `C·(K_d − R_f)·(1 − τ)` no ano 1, e o
+      // caixa cresce a `g` como a dívida: a diferença de fluxo de cada ano é
+      // essa, e nada mais.
+      const caixa = 2500.0;
+      const kd = 0.18;
+      const rf = 0.14;
+      const tau = 0.34;
+      final antes = derivada(caixa: caixa);
+      final depois = derivada(caixa: caixa, rendimento: rf);
+      final esperado = caixa * (kd - rf) * (1 - tau);
+      expect(antes.projectedFlows.first - depois.projectedFlows.first,
+          closeTo(esperado, 1e-9));
+    });
+
+    test('caixa zero não muda nada, com ou sem rendimento', () {
+      expect(derivada(rendimento: 0.14).fairValuePerShare,
+          closeTo(derivada().fairValuePerShare, 1e-12));
+    });
+
+    test('a dívida projetada é a mesma: o que muda é a taxa', () {
+      // As duas metades crescem com o mesmo fator, e a diferença delas é a
+      // série líquida de antes. Se a separação mudasse a dívida, a ponte
+      // deixaria de ser a mesma do DCF.
+      final a = derivada(caixa: 2500);
+      final b = derivada(caixa: 2500, rendimento: 0.14);
+      // O fluxo da **firma** não depende do financiamento: ele é o mesmo nos
+      // dois, e é isso que isola a mudança no serviço da dívida.
+      expect(a.projectedFlows.length, b.projectedFlows.length);
+      for (var t = 1; t < a.projectedFlows.length; t++) {
+        final difA = a.projectedFlows[t] - b.projectedFlows[t];
+        final difAnterior = a.projectedFlows[t - 1] - b.projectedFlows[t - 1];
+        // `g_t` é o crescimento do ano `t`, que é o que leva o saldo do
+        // início do ano `t` ao do início do ano `t+1`. Ele **decai** ao longo
+        // da projeção, e fixar 6% aqui era supor um caminho que o modelo não
+        // percorre.
+        expect(difA / difAnterior, closeTo(1 + premissas.growthAt(t), 1e-9),
+            reason: 'a diferença cresce a `g_t`, porque o caixa cresce a '
+                '`g_t` — ano $t');
+      }
+    });
+  });
+
   group('O caixa rende a taxa livre de risco, e não o custo de empréstimo', () {
     // Lente `metodo`, 21/09/2026. A decisão 104 pôs a dívida **líquida** nos
     // pesos e disse, no caso sem dívida contratada, que o que remunera o peso

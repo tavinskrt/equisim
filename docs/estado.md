@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-21, a partir de `0ec1ec1`.
+Gerado em 2026-09-21, a partir de `80866a8`.
 
 ## Decisões registradas
 
-**93** aceita · **2** cumprida
+**99** aceita · **2** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -110,6 +110,12 @@ Gerado em 2026-09-21, a partir de `0ec1ec1`.
 | 111 | A avaliação declara quando o beta saiu de uma janela mais curta que a pedida | aceita | voce | 2026-09-21 |
 | 112 | A rentabilidade reverte, e reverte à mediana do mercado — que vive abaixo do custo de capital; o terminal fica | aceita | voce | 2026-09-21 |
 | 113 | O caixa rende a taxa livre de risco, e não o custo de empréstimo | aceita | lente | 2026-09-21 |
+| 114 | O motor é nominal em todo o caminho, e as três não neutralidades de unidade ficam medidas | aceita | voce | 2026-09-21 |
+| 115 | O horizonte fica em dez anos, e agora por medição — o nível não depende dele, e o peso do terminal sim | aceita | voce | 2026-09-21 |
+| 116 | O prêmio de mercado fica em 5,5%, por medição das duas alternativas — e o implícito de −3,9% diz que o desacordo de nível não é dele | aceita | voce | 2026-09-21 |
+| 117 | Risco-país e ajuste por tamanho são recusados, com medição — o R_f brasileiro já contém um, e o beta já cobra o outro | aceita | voce | 2026-09-21 |
+| 118 | A triangulação por múltiplos de pares entra como segunda leitura declarada, e não entra no preço | aceita | voce | 2026-09-21 |
+| 119 | A rota derivada também remunera o caixa pela taxa livre de risco — o defeito da decisão 113 tinha um segundo lugar, e era o caminho de produção | aceita | lente | 2026-09-21 |
 
 ## Caixa de entrada
 
@@ -123,16 +129,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 61 | 20.415 |
-| Apresentacao | 36 | 16.212 |
+| Nucleo de dominio | 61 | 20.536 |
+| Apresentacao | 36 | 16.309 |
 | Camada de dados | 23 | 3.627 |
-| Testes do app | 40 | 7.610 |
-| Testes do nucleo | 38 | 13.550 |
-| Ferramentas de QA | 20 | 6.562 |
+| Testes do app | 40 | 7.686 |
+| Testes do nucleo | 38 | 13.639 |
+| Ferramentas de QA | 20 | 6.581 |
 
 ## Histórico recente
 
 ```
+2026-09-21  80866a8  Refino do motor de valuation (parte 20)
 2026-09-21  0ec1ec1  Refino do motor de valuation (parte 19)
 2026-09-20  ec063b9  Refino do motor de valuation (parte 18)
 2026-09-20  bb57462  Regerado estado
@@ -147,5 +154,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-11  c80b5e6  Refino do motor de valuation (parte 9)
 2026-09-10  e46c8bc  Refino do motor de valuation (parte 8)
 2026-09-09  30bc51d  Refino do motor de valuation (parte 7)
-2026-09-09  9b90a3d  Refino do motor de valuation (parte 6)
 ```
