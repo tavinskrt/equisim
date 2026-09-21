@@ -11,8 +11,12 @@ import 'package:equisim_core/equisim_core.dart';
 import 'package:test/test.dart';
 
 void main() {
-  const kd = 0.11, tax = 0.30, premio = 0.055, betaU = 0.60;
+  const spread = 0.02, tax = 0.30, premio = 0.055, betaU = 0.60;
   const rf = 0.09;
+  // O `K_d` aplicado é `Rf + spread` — a classificação sintética, a mesma do
+  // WACC estático (item B11). Com a taxa livre de risco constante nestes
+  // testes, ele é o número único de antes.
+  const kd = rf + spread;
 
   // **Sob a convenção de fim de ano, de propósito.** `FCFF/WACC ≡ FCFE/Ke` é
   // identidade algébrica exata quando os dois fluxos são descontados nos
@@ -50,7 +54,7 @@ void main() {
         riskFreePath: List<double>.filled(10, rf),
         terminalRiskFree: rf,
         marketPremium: premio,
-        costOfDebt: kd,
+        creditSpread: spread,
         taxRate: tax,
       );
 
@@ -208,9 +212,48 @@ void main() {
         expect(w, greaterThan(0));
       }
       expect(v.terminalWacc.isFinite, isTrue);
-      // Com caixa dominando, o peso do capital próprio passa de 1 e é
-      // confinado: o `WACC` não pode ficar abaixo do `Ke` sem dívida onerosa.
+      // Com caixa dominando, o peso do capital próprio passa de 1 — e **não é
+      // confinado** (decisão 104): o peso da dívida fica negativo e o `WACC`
+      // sobe acima do `Ke`, que é o mesmo tratamento do WACC estático.
       expect(v.equityShareAt(0)!, greaterThan(1.0));
+      expect(v.wacc.first, greaterThan(v.costOfEquity.first),
+          reason: 'com caixa líquido o ativo operacional sozinho é mais caro '
+              'que a companhia inteira');
+    });
+
+    test('o custo da dívida é Rf do ano mais o prêmio, e decai com a curva', () {
+      // Item B11. Antes entrava o custo **observado**, que não decai com a
+      // curva: a perpetuidade herdava o juro de hoje. Agora o `K_d` de cada ano
+      // é `Rf_t + spread`, como em `CostOfCapital.effectiveCostOfDebt`.
+      const terminalRf = 0.06;
+      final r = LeveredCostOfCapital.solve(
+        baseProfit: base,
+        assumptions: premissas(g: 0.04),
+        netDebt: 3000,
+        unleveredBeta: betaU,
+        riskFreePath: List<double>.filled(10, rf),
+        terminalRiskFree: terminalRf,
+        marketPremium: premio,
+        creditSpread: spread,
+        taxRate: tax,
+      );
+      expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
+      final v = r.unwrap();
+
+      // O `K_d` implícito sai da própria identidade do WACC do ano, com o peso
+      // que o ponto fixo fixou: é o número que a conta usou, e não um número
+      // remontado por outro caminho.
+      double kdImplicito(double wacc, double ke, double pesoE) =>
+          (wacc - ke * pesoE) / ((1 - pesoE) * (1 - tax));
+
+      expect(
+          kdImplicito(v.wacc.first, v.costOfEquity.first, v.equityShareAt(0)!),
+          closeTo(rf + spread, 1e-9));
+      expect(
+          kdImplicito(v.terminalWacc, v.terminalCostOfEquity,
+              v.equityShareAt(10)!),
+          closeTo(terminalRf + spread, 1e-9),
+          reason: 'o prêmio de crédito é da empresa; a taxa base é do ano');
     });
 
     test('exige beta desalavancado, e recusa sem ele', () {
@@ -222,7 +265,7 @@ void main() {
         riskFreePath: List<double>.filled(10, rf),
         terminalRiskFree: rf,
         marketPremium: premio,
-        costOfDebt: kd,
+        creditSpread: spread,
         taxRate: tax,
       );
       expect(r.isErr, isTrue);
@@ -238,7 +281,7 @@ void main() {
         riskFreePath: List<double>.filled(3, rf),
         terminalRiskFree: rf,
         marketPremium: premio,
-        costOfDebt: kd,
+        creditSpread: spread,
         taxRate: tax,
       );
       expect(r.isErr, isTrue);
@@ -411,6 +454,35 @@ void main() {
       // Fora do intervalo também é nulo, e não NaN.
       expect(v.equityShareAt(-1), isNull);
       expect(v.equityShareAt(999), isNull);
+    });
+
+    test('a dívida não cresce: o crescimento já sai do lucro retido', () {
+      // Item B11. Esta via desconta `lucro × (1 − b)`, isto é, o crescimento já
+      // é financiado por retenção. Fazer a dívida crescer a `g` junto
+      // financiaria o mesmo crescimento duas vezes, e o acionista pagaria o
+      // `Ke` mais alto sem receber nada pela dívida nova.
+      final r = LeveredCostOfCapital.solveEquity(
+        baseProfit: 1.0,
+        assumptions: premissas(g: 0.08),
+        netDebtPerShare: 3.0,
+        unleveredBeta: betaU,
+        riskFreePath: List<double>.filled(10, rf),
+        terminalRiskFree: rf,
+        marketPremium: premio,
+        taxRate: tax,
+      );
+      expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
+      final v = r.unwrap();
+
+      expect(v.debt, everyElement(closeTo(3.0, 1e-12)),
+          reason: 'a dívida fica parada em termos nominais');
+      final de0 = v.debt.first / v.equity.first;
+      final deN = v.debt.last / v.equity.last;
+      expect(deN, lessThan(de0),
+          reason: 'o capital próprio cresce pelo lucro retido e a dívida não: '
+              'a alavancagem cai');
+      expect(v.costOfEquity.last, lessThan(v.costOfEquity.first),
+          reason: 'desalavancagem de verdade barateia o capital próprio');
     });
 
     test('sem beta desalavancado, recusa', () {

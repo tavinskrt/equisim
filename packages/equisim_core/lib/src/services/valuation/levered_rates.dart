@@ -116,8 +116,16 @@ abstract final class LeveredCostOfCapital {
   /// - [unleveredBeta]: `β_U` do ativo, da decisão 40.
   /// - [riskFreePath]: taxa livre de risco do ano 1 ao ano N.
   /// - [terminalRiskFree]: taxa livre de risco de equilíbrio.
-  /// - [marketPremium], [costOfDebt], [taxRate]: parâmetros do CAPM e da
-  ///   dívida.
+  /// - [marketPremium], [taxRate]: parâmetros do CAPM e do escudo fiscal.
+  /// - [creditSpread]: **prêmio de crédito** sobre a taxa livre de risco, e não
+  ///   o custo da dívida pronto. O `K_d` de cada ano é `Rf_t + spread`, e o de
+  ///   equilíbrio é `Rf_∞ + spread` — a mesma classificação sintética que
+  ///   `CostOfCapital.effectiveCostOfDebt` aplica, e a mesma leitura da decisão
+  ///   31: o prêmio é da empresa e a taxa base é do ano. Antes entrava o custo
+  ///   **observado**, `despesa financeira ÷ dívida bruta`, que a decisão 31
+  ///   descartou por carregar arrendamento e variação cambial — e que não
+  ///   decaía com a curva, de modo que a perpetuidade herdava o juro de hoje
+  ///   (item B11).
   ///
   /// Devolve falha quando a avaliação intermediária não é possível — o que
   /// inclui o caso em que a alavancagem cresce a ponto de o capital próprio
@@ -130,7 +138,7 @@ abstract final class LeveredCostOfCapital {
     required List<double> riskFreePath,
     required double terminalRiskFree,
     required double marketPremium,
-    required double costOfDebt,
+    required double creditSpread,
     required double taxRate,
   }) {
     final n = assumptions.projectionYears;
@@ -157,7 +165,10 @@ abstract final class LeveredCostOfCapital {
       divida.add(divida[t - 1] * (1 + assumptions.growthAt(t)));
     }
 
-    final kdLiquido = costOfDebt * (1 - taxRate);
+    // `K_d` do ano, líquido do escudo: o prêmio de crédito é constante e a
+    // taxa base é a do ano, como em `CostOfCapital.effectiveCostOfDebt`.
+    double kdLiquidoEm(double rf) => (rf + creditSpread) * (1 - taxRate);
+    final kdTerminal = kdLiquidoEm(terminalRiskFree);
 
     // Chute inicial: as taxas que a interpolação de dois pontos daria.
     var ke = <double>[
@@ -260,9 +271,16 @@ abstract final class LeveredCostOfCapital {
             'de ter sentido.',
           ));
         }
-        final pesoE = (eAnterior / vT).clamp(0.0, 1.0).toDouble();
+        // **O peso não é confinado em [0, 1]** (decisão 104): com caixa
+        // líquido, `D` é negativa, o peso do capital próprio passa de 1 e o
+        // `WACC` fica acima do `Ke` — que é o mesmo tratamento do WACC
+        // estático. Confinar devolvia `WACC = Ke` e fazia as duas rotas
+        // discordarem no mesmo ativo. O caso sem sentido — `E + D` não
+        // positivo — já é recusado acima.
+        final pesoE = eAnterior / vT;
         novoKe.add(keT);
-        novoWacc.add(keT * pesoE + kdLiquido * (1 - pesoE));
+        novoWacc.add(
+            keT * pesoE + kdLiquidoEm(riskFreePath[t - 1]) * (1 - pesoE));
       }
       ke = novoKe;
       wacc = novoWacc;
@@ -293,8 +311,8 @@ abstract final class LeveredCostOfCapital {
           'no custo médio de equilíbrio deixa de ter sentido.',
         ));
       }
-      final pesoEN = (eN / vN).clamp(0.0, 1.0).toDouble();
-      waccTerminal = keTerminal * pesoEN + kdLiquido * (1 - pesoEN);
+      final pesoEN = eN / vN;
+      waccTerminal = keTerminal * pesoEN + kdTerminal * (1 - pesoEN);
 
       final valor = e[0];
       if (valorAnterior.isFinite && valorAnterior.abs() > 0) {
@@ -345,6 +363,10 @@ abstract final class LeveredCostOfCapital {
   /// na escala por papel evita carregar a contagem de ações para dentro do
   /// ponto fixo.
   ///
+  /// **A dívida não cresce aqui**, ao contrário de [solve]: o fluxo desta via
+  /// já retém lucro para financiar o crescimento, e emitir dívida junto seria
+  /// financiá-lo duas vezes (item B11).
+  ///
   /// O [LeveredRates] devolvido descreve a via do acionista, e nela **não há
   /// custo médio**: `wacc` repete `costOfEquity` e `terminalWacc` repete
   /// `terminalCostOfEquity`, porque a taxa que desconta o fluxo é o próprio
@@ -376,12 +398,24 @@ abstract final class LeveredCostOfCapital {
       ));
     }
 
-    // A dívida segue a base de capital, como na via da firma — a premissa é a
-    // mesma, e trocá-la aqui faria as duas vias divergirem por construção.
-    final divida = <double>[netDebtPerShare];
-    for (var t = 1; t <= n; t++) {
-      divida.add(divida[t - 1] * (1 + assumptions.growthAt(t)));
-    }
+    // **A dívida fica constante em termos nominais, e a razão é o fluxo**
+    // (item B11). Esta via desconta o lucro por papel com a retenção descontada
+    // dele — `lucro × (1 − b)`, com `b = g/retorno` —, isto é, **o crescimento
+    // já é financiado por lucro retido**. Fazer a dívida crescer a `g` junto
+    // financiaria o mesmo crescimento duas vezes: a alavancagem subiria, o
+    // `Ke` subiria com ela, e o acionista não receberia nada pela dívida nova
+    // que a conta supõe emitida. Na via da firma a premissa oposta é
+    // consistente porque lá o fluxo do acionista **credita** o `+ΔD`
+    // (decisão 102); aqui não há onde creditá-lo.
+    //
+    // Medido em 20/09/2026, antes da correção: com `g = 8%` e `D/E` inicial de
+    // 0,63, a razão ia a 0,81 no ano dez e o `Ke` subia de 19,73% a 20,20% —
+    // o modelo **re**alavancava, e a leitura da lente `metodo`, de que ele
+    // desalavancava, estava invertida. O que sobra agora é desalavancagem de
+    // verdade: a dívida parada e o capital próprio crescendo pelo lucro retido.
+    final divida = <double>[
+      for (var t = 0; t <= n; t++) netDebtPerShare,
+    ];
 
     var ke = <double>[
       for (var t = 1; t <= n; t++) assumptions.discountRateAt(t),

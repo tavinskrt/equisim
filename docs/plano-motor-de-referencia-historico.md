@@ -11,6 +11,97 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O que a terceira rodada da Fase 3 encontrou — B9, B11 e B16 (20/09/2026)
+
+**A base bruta tinha sumido, e isso mudou o instrumento.** O diretório `data/`
+não existe mais nesta máquina: a base ingerida da CVM, o COTAHIST e o arquivo do
+Tesouro são ignorados pelo git e não vêm no clone. O gabarito da cascata
+dependia dos três. Ele passou a ler os **pacotes versionados** — os mesmos que o
+aplicativo lê —, e com isso se reproduz num clone limpo: as 376 avaliações, as
+nove montagens e a varredura reproduzem o estado de 16/09/2026 exatamente, 114 e
+104 avaliados. O backtest não se reproduz, e virou o item C5.
+
+**O B9 era contagem dupla, e não estilo.** A dívida dos pesos do WACC era a
+bruta; a da realavancagem, a do beta desalavancado e a da apuração do capital
+próprio, a líquida. O fluxo da firma é operacional — não traz o rendimento do
+caixa —, de modo que dar peso de dívida bruta e depois devolver o caixa ao
+acionista conta o mesmo caixa duas vezes. Com a líquida, o preço justo sobe 3,0%
+na mediana em 73 de 114, e até 41,9% na EMBJ3. **Na montagem com o prior o efeito
+é de 2 em 102** — ali a dívida já era a líquida.
+
+**E a medição do B9 expôs o sintoma que era do B11.** O desconto subiu e o preço
+justo subiu junto, porque sem taxas resolvidas a via da firma reinveste contra o
+WACC — a retenção é `g/ROIC` e o retorno terminal neutro é o próprio WACC — e
+desconta ao `Ke` do CAPM. **As duas taxas só são a mesma conta no caminho
+resolvido.**
+
+**O B11 tinha quatro pendências, e uma delas estava com o sinal trocado.** O
+custo da dívida do solucionador era o **observado**, que a decisão 31 já
+descartara e que não decai com a curva: sozinho, trocá-lo pelo sintético move o
+preço justo em 76 de 98 da montagem com prior, com mediana de −7,0% — e faz a
+RADL3 ir de R$ 3,43 a R$ 7,42, contra R$ 8,07 da montagem sem prior, de modo que
+as duas param de discordar por um fator de dois. A tensão da via do acionista,
+que a lente `metodo` descreveu como desalavancagem, era **re**alavancagem: com
+`g = 8%`, `D/E` ia de 0,63 a 0,81 e o `Ke` subia. A causa é o fluxo — ele já
+desconta a retenção que financia o crescimento, e crescer a dívida junto
+financiava o mesmo crescimento duas vezes. Com a dívida constante, `D/E` vai de
+0,61 a 0,43 e o `Ke` cai. As premissas exibidas passaram a ser as finais: a taxa
+do ano 1 resolvido, a faixa centrada no preço justo, e o cenário movendo o
+caminho de `Ke`. E os dois ativos que subiam com a taxa no caminho resolvido
+ficaram monótonos.
+
+**O prior vem do pacote, e a razão está medida.** Resolvê-lo é varrer o universo
+inteiro para avaliar um ativo. Ele anda devagar — a mediana desalavancada do
+universo vai de 0,6421 a 0,6620 recuando um ano, 3,1% —, e o pacote vale por um
+ano; fora disso o motor volta ao beta cru **e a avaliação diz que voltou**.
+
+**Ligar custou catorze ativos.** 83 das 102 avaliações passam a resolver as taxas,
+e todas as 82 da via da firma. Saem RENT3, RENT4, UGPA3, RAIL3, ECOR3, ENEV3,
+DXCO3, LOGG3, CAML3, DASA3, MOVI3, PNVL3, VAMO3 e VBBR3, todos pela recusa da
+decisão 45 — e todos no ano zero da primeira iteração, o que virou o item B18: **o
+veredito é do chute de que o ponto fixo parte, e não do ponto fixo**. A mediana da
+rodada inteira, somando o B9, é de −0,4%: os dois itens andam em direções opostas
+e quase se cancelam no nível.
+
+**O que as lentes disseram.** Procederam quatro achados, em três lentes. A
+`metodo` achou o caso que o B9 deixou passar: **companhia sem dívida contratada e
+com caixa** ainda degenerava para o `Ke`, enquanto a apuração devolvia o caixa —
+a mesma contagem dupla, no canto que a guarda da dívida bruta protegia. São três
+no universo (ALOS3, BRAP4, SAUD3), e hoje não muda número nenhum, porque as três
+resolvem as taxas pelo prior e o WACC estático só lhes serve de chute; o que a
+correção conserta é o **recuo**. A `risco` achou que o `BcbDatasource` e o
+`TesouroDatasource` não tinham teste de payload malformado, como a fonte de
+cotações tem — os dois ganharam, e passaram: a proteção existia, a cobertura não.
+A `dados` achou duas: `FundamentalsRepositoryImpl.history` devolvia **a janela da
+fonte** logo depois de atualizar e **a união do banco** depois do TTL, de modo que
+a profundidade da série dependia do relógio — corrigido, com teste que falha sem
+a correção; e o comentário de `_cobreOInicio` prometia acomodar série que nasce
+depois da janela pedida, o que o código não faz — o comentário passou a dizer o
+que o código faz.
+
+**Não procederam quatro.** Da `metodo`, o prêmio de crédito fixo ao longo da
+projeção — é a classificação da companhia hoje, e movê-la com a alavancagem
+projetada é do mesmo tipo do B15 — e o teto de zero no crescimento perpétuo, que
+é a recusa deliberada de modelar *run-off*. Da `rumo`, as três: a discordância
+entre as vias lê a decisão 39, substituída pela 102; o setor das preferenciais
+foi resolvido pelo A5, por emissor; e a alíquota efetiva não tem `abs()` algum —
+crédito tributário vira zero pelo piso, e não despesa inventada. Da `dados`, a
+meta que não se apaga no Firestore é comportamento **declarado** no próprio
+código, e mudá-lo é decisão de produto. A `registro` e a `tela` não acharam
+tensão; as três da `nucleo` são as de sempre, fora dos objetivos.
+
+**O B16 não mudou número nenhum no aplicativo, e o ponto é esse.** Nas sete units
+avaliadas, a razão medida no valor de mercado coincide com a composição que a
+companhia declara. O que muda é a dependência: o motor deixa de depender de uma
+convenção de valor de mercado que ninguém conhece, o rastro traz as duas razões e
+diz qual valeu, e a divergência vira aviso. A chave do pacote é o **CNPJ**, porque
+o código de negociação da FCA vem em branco em 44% das linhas e zerado no BTG. O
+leitor do texto livre foi para o núcleo e ganhou o caso que errava: código de três
+letras, a ENGI11 de 2018 com "1 ENG3 e 4 ENGI4" — quatro ações em vez de cinco, um
+dos doze erros de inteiro que o C3 tinha achado.
+
+---
+
 ## O que a segunda rodada da Fase 3 encontrou — B1, B10 e B13 (16/09/2026)
 
 **O instrumento vem antes do conserto.** O gabarito da cascata, conferido no

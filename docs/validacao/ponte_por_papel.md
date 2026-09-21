@@ -118,6 +118,52 @@ Na montagem antiga, a unit e a espécie da mesma companhia discordavam pelo fato
 da unit. Na da data, a distância mediana cai para 1,5%; a das observações em que
 a razão errou fica na cauda, e não foi separada.
 
+## 7. A composição declarada passou a decidir — item B16, 20/09/2026
+
+A §3 mediu a inferência contra a declaração e achou 79 erros em 220 observações.
+A [decisão 106](../decisoes/106-a-razao-de-unidade-sai-da-composicao-declarada-e-a-medida-confere.md)
+inverteu os papéis: **a composição declarada decide, e a razão medida vira
+conferência**, no aplicativo e nas coortes.
+
+**O pacote.** `tool/unit_empacotar.dart` lê o quadro de valores mobiliários da
+FCA, ano a ano, e grava `assets/cvm/units.json`. A chave é o **CNPJ**, e não o
+código de negociação: a coluna de código vem em branco em 44% das linhas e zerada
+no BTG, que declara a composição da BPAC11 sob `000000`. Nove das dez units do
+universo saem com composição:
+
+| unit | ações | declarado |
+|---|---:|---|
+| ALUP11 | 3 | "1 ON E 2 PN" |
+| BPAC11 | 3 | "1 ON E 2 PNA" |
+| BRBI11 | 3 | "2 ações preferenciais e 1 ação ordinária" |
+| ENGI11 | 5 | "1 ação ordinária e 4 ações preferenciais" |
+| IGTI11 | 3 | "1 ON e 2 PN" |
+| KLBN11 | 5 | "1 KLBN3 + 4 KLBN4" |
+| SANB11 | 2 | "1 ON + 1 PN" |
+| SAPR11 | 5 | "1 ON e 4 PN" |
+| TAEE11 | 3 | "1 ON / 2 PN" |
+
+A décima, a ONCO11, não é declarada como unit pela companhia — e ali o motor
+continua inferindo, **dizendo que inferiu**.
+
+**No aplicativo de 14/09/2026, nenhum número muda.** Nas sete units avaliadas, a
+razão medida coincide com a declarada, e nenhuma conferência dispara. É o que a
+decisão 61 já tinha visto ao medir as nove a até 2,4% do inteiro. O que muda é de
+onde o número vem: ele deixa de depender de uma convenção de valor de mercado que
+não é conhecida, e o rastro de auditoria passa a trazer as duas razões e a dizer
+qual valeu.
+
+**O leitor do texto livre ganhou um caso que errava.** O código de negociação de
+três letras: a ENGI11 de 2018 declara "1 ENG3 e 4 ENGI4", e exigir quatro letras
+somava só o 4 — a unit saía com quatro ações em vez de cinco, que é justamente um
+dos doze erros de inteiro da §3. A leitura passou ao núcleo
+(`UnitCompositionCodec.parse`), porque deixou de ser conferência e passou a
+decidir número, e tem teste sobre as dezoito formas que as companhias escreveram.
+
+**As coortes só recolhem o ganho quando o backtest for reexecutado.** O código
+delas já passa a composição por CNPJ e por data; os números da §3 continuam sendo
+os da inferência até lá (item C5).
+
 ## 6. O que isto não diz
 
 - **A contagem do FRE não é a oficial.** Nas dez companhias em que diverge da B3

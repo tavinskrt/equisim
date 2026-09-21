@@ -263,6 +263,16 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
       ]);
       await db.touch(CachePolicy.fundamentalsKey(ticker.value));
     });
+    // **O que volta é o banco depois do upsert, e não só o que a rede trouxe**
+    // (lente `dados`, 20/09/2026). A fonte devolve uma janela; o banco guarda
+    // a união do que já se viu. Devolver a janela logo depois de atualizar e a
+    // união um minuto depois faz a mesma chamada ter profundidades diferentes
+    // conforme o TTL — e a série de exercícios é o que forma a base de capital
+    // e o crescimento. A leitura do cache é a mesma do caminho fresco.
+    final relidos = await _tryCache(() => db.fundamentalsOf(ticker.value));
+    if (relidos != null && relidos.length >= snapshots.length) {
+      return Ok([for (final r in relidos) _toDomain(ticker, r)]);
+    }
     return Ok(snapshots);
   }
 
@@ -436,9 +446,16 @@ class MacroRepositoryImpl implements MacroRepository {
 
   /// O cache começa cedo o bastante para a janela pedida?
   ///
-  /// A folga acomoda fim de semana, feriado e o próprio início da série no
-  /// Banco Central — o IBC-Br não existe antes de 2003, e pedir 1990 não deve
-  /// invalidar o cache para sempre.
+  /// A folga acomoda fim de semana e feriado no começo da janela: dez dias na
+  /// série diária, dois meses na mensal.
+  ///
+  /// **Ela não acomoda série que nasce depois da janela pedida** — o IBC-Br não
+  /// existe antes de 2003, e pedir 1990 invalida o cache dele em toda leitura,
+  /// porque o cache nunca vai cobrir um início que a fonte não publica (lente
+  /// `dados`, 20/09/2026). O comentário anterior prometia o contrário do que o
+  /// código faz. Não é alcançável hoje: as séries que o motor lê — CDI, IPCA —
+  /// começam muito antes das janelas de dez anos que ele pede. Resolver pede
+  /// guardar o primeiro ponto que a fonte publica, e não inferi-lo da janela.
   static bool _cobreOInicio(RateSeries s, DateRange range, int seriesId) {
     if (s.points.isEmpty) return false;
     // **Compara dia civil, e não instante.** `add(Duration(days: n))` soma

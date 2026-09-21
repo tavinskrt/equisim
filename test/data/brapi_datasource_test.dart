@@ -517,6 +517,28 @@ void main() {
       expect(series.dates.first.month, 1);
       expect(series.dates.first.day, 2);
     });
+
+    test('JSON sem as chaves esperadas vira falha, e não exceção crua',
+        () async {
+      // Lente `risco`, 20/09/2026. A fonte de cotações já tinha este teste; a
+      // do Banco Central não, e a troca de layout dela escapava como exceção
+      // nativa em vez de `Result.err`.
+      for (final corpo in [
+        '[{"valor":"0,04"}]', // sem `data`
+        '[{"data":"02/01/2024"}]', // sem `valor`
+        '[{"data":"02/01/2024","valor":"não é número"}]',
+        '{"erro":"série indisponível"}', // objeto no lugar da lista
+        'isto não é json',
+      ]) {
+        final datasource = BcbDatasource(clientWith(FixtureAdapter(
+          bodies: {'bcdata.sgs.12': corpo},
+        )));
+        final r = await datasource.cdi(
+          DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)),
+        );
+        expect(r.isErr, isTrue, reason: corpo);
+      }
+    });
   });
 
   group('Tratamento de erro da API', () {

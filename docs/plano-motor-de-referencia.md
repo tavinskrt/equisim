@@ -7,22 +7,25 @@ mesma régua, onde cada objetivo está. O que cada rodada encontrou, o que as
 lentes disseram e o que a auditoria reprovou ficam no
 [histórico](plano-motor-de-referencia-historico.md).
 
-> **Última atualização: 16/09/2026, segunda rodada da Fase 3 — B1, B10 e B13.**
-> **Nenhuma avaliação muda mais de via** ([decisão 102](decisoes/102-nenhuma-avaliacao-muda-de-via-e-a-firma-avalia-pelo-fluxo-do-acionista-derivado.md)):
-> a via da firma avalia o capital próprio pelo fluxo do acionista derivado, sem
-> ponte, sem mescla e sem migração, e a do acionista fica para instituição
-> financeira e lucro operacional não sustentado. A varredura do nível da curva,
-> que achava **25 de 128** avaliados com o preço justo subindo com a taxa — 7 deles
-> por uma causa que ninguém tinha visto, a faixa do prêmio de crédito andando com a
-> taxa suposta —, dá **0 de 114**. O B10 e o B13 fecharam, e o custo está medido: 16
-> ativos saem do aplicativo, e o preço justo da via da firma cai 5,5% na mediana.
-> **E o B1 decidiu** ([decisão 103](decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md)):
-> o preço justo é o produto, e o prêmio do retorno esperado sai da ordenação que a
-> validação comprovar. Medidas lado a lado pela regra fixada antes de medir,
-> **nenhuma passa** — nem o book-to-market, que passava por pouco no motor de antes
-> e fica com `t` corrigido de 2,52 contra 2,70 neste. **O retorno esperado, hoje, é
-> o `Ke` de cada ativo.** A faixa calibrada, remedida sobre o motor novo sem mudar a
-> forma, continua cobrindo: 88,2/78,7/51,6% e 88,9/78,7/49,6%.
+> **Última atualização: 20/09/2026, terceira rodada da Fase 3 — B9, B11 e B16.**
+> **O aplicativo passou a rodar o motor que o registro descreve**
+> ([decisão 105](decisoes/105-o-aplicativo-resolve-o-prior-do-beta-e-o-custo-de-capital.md)):
+> ele resolve o prior do beta, e com ele o custo de capital ano a ano, os passes
+> do veredito da perpetuidade e a recusa de estrutura — **83 das 102 avaliações
+> resolvem as taxas, contra nenhuma antes**, e todas as 82 da via da firma. A
+> dívida dos pesos do WACC passou a ser a líquida, a mesma do resto do modelo
+> ([decisão 104](decisoes/104-a-divida-do-wacc-e-a-liquida-como-no-resto-do-modelo.md)),
+> e a razão de unidade passou a sair da composição que a companhia declara na
+> FCA, com a medida virando conferência
+> ([decisão 106](decisoes/106-a-razao-de-unidade-sai-da-composicao-declarada-e-a-medida-confere.md)).
+> **A varredura do nível da curva não acha ativo subindo com a taxa em nenhuma
+> das duas montagens** — 0 de 102 e 0 de 102, contra 2 de 104 no caminho
+> resolvido. O custo: 14 ativos saem do aplicativo pela recusa de estrutura da
+> decisão 45, entre eles RENT3, UGPA3 e RAIL3, e a cobertura vai de 114 a 102.
+> **O que esta rodada não pôde fazer**: a base bruta — COTAHIST, CVM ingerida,
+> FRE — não está na máquina, e sem ela o backtest não reexecuta. A habilidade, a
+> faixa, as recusas e a ponte continuam medidas sobre o motor da decisão 102, e
+> refazê-las virou o item C5.
 
 ## Os dois objetivos
 
@@ -524,6 +527,20 @@ pondera pela **dívida líquida**; o WACC estático, que é o recuo, pela **brut
 ponte desconta a líquida. As duas vias de taxa não usam a mesma convenção, e a
 diferença cai sobre ativo com muito caixa.
 
+**Estado: feito em 20/09/2026** ([decisão 104](decisoes/104-a-divida-do-wacc-e-a-liquida-como-no-resto-do-modelo.md),
+[divida_do_wacc.md](validacao/divida_do_wacc.md)). A dívida dos pesos passou a ser
+a líquida — a mesma que a apuração do capital próprio subtrai, que a
+realavancagem pondera e contra a qual o beta é desalavancado (decisão 54). **Não
+era questão de estilo**: o fluxo da firma é operacional, o valor que ele desconta
+é o dos ativos operacionais, e dar peso de dívida bruta e devolver o caixa ao
+acionista conta o mesmo caixa duas vezes. A ausência de estrutura passou a ser
+medida na bruta, e com caixa líquido o peso da dívida é negativo, o WACC fica
+acima do `Ke` e a avaliação diz isso. **O efeito, na montagem de então:** o preço
+justo sobe 3,0% na mediana em 73 de 114, e até 41,9% na EMBJ3; na montagem com o
+prior, que já usava a líquida, muda em 2 de 102. **E a medição expôs um sintoma
+que é do B11**: um desconto maior subindo o preço justo, porque sem taxas
+resolvidas a via da firma reinveste contra o WACC e desconta ao `Ke`.
+
 ### B10. A migração de via é descontínua na taxa
 
 Na PRIO3, uma curva mais alta levou o capital próprio a 14,4% do valor da firma,
@@ -573,6 +590,35 @@ terminal do último passe —, mas os cenários, a taxa de desconto exibida e o 
 do DCF saem das premissas **interpoladas**, de antes do ponto fixo. No aplicativo
 de hoje as duas coincidem, porque ele não resolve o prior; ligar o prior sem
 corrigir isso descasaria a banda de sensibilidade do preço que ela cerca.
+
+**Estado: feito em 20/09/2026** ([decisão 105](decisoes/105-o-aplicativo-resolve-o-prior-do-beta-e-o-custo-de-capital.md),
+[prior_no_aplicativo.md](validacao/prior_no_aplicativo.md)). **O prior é
+empacotado com o build**, como a curva na web e o registro da B3: resolvê-lo em
+tempo de execução é varrer o universo inteiro para avaliar um ativo. Ele anda
+devagar, e isso foi medido — a mediana desalavancada vai de 0,6421 a 0,6620
+recuando um ano, 3,1% —, e o pacote vale por um ano; fora da validade, o motor
+volta ao beta cru **e a avaliação diz que voltou**.
+
+As quatro pendências do item foram resolvidas antes de ligar. **O custo da dívida
+do solucionador** era o observado, que a decisão 31 já descartara e que não decai
+com a curva: passou a ser `Rf_t + prêmio`, e só isso move o preço justo em 76 de
+98 da montagem com prior, com mediana de −7,0% — a RADL3 vai de R$ 3,43 a R$ 7,42,
+e as duas montagens param de discordar por um fator de dois. **A tensão da via do
+acionista** estava com o sinal invertido: o modelo **re**alavancava, porque a
+dívida crescia a `g` enquanto o fluxo já financiava o crescimento com lucro
+retido — o mesmo crescimento financiado duas vezes. A dívida ficou constante em
+termos nominais, e a desalavancagem passou a ser a do lucro retido. **O que a tela
+mostra** passou a sair das premissas finais: a taxa exibida é a do ano 1
+resolvido, a faixa é centrada no preço justo e o cenário move o caminho de `Ke`.
+**E os dois ativos que subiam com a taxa** no caminho resolvido — RADL3 e SEER3 —
+ficaram monótonos.
+
+**O efeito de ligar:** 83 das 102 avaliações resolvem as taxas, e todas as 82 da
+via da firma; 14 ativos saem pela recusa de estrutura da decisão 45 — RENT3,
+RENT4, UGPA3, RAIL3, ECOR3, ENEV3, DXCO3, LOGG3, CAML3, DASA3, MOVI3, PNVL3,
+VAMO3, VBBR3 —, a GOAU4 entra, e o preço justo cai 2,4% na mediana. Somando o B9
+da mesma rodada, a mediana do aplicativo se move **−0,4%**: os dois itens andam
+em direções opostas e quase se cancelam no nível.
 
 ### B12. O excedente do capital existente na perpetuidade
 
@@ -646,6 +692,34 @@ no inteiro errado dentro da folga — a ENGI11 com 4 em vez de 5 —, sem aviso.
 aplicativo as nove units passaram em 04/09/2026** (decisão 61), e a convenção do
 valor de mercado da fonte, que não é conhecida, é o que decide se o erro aparece.
 A composição declarada existe, por ano, na FCA.
+
+**Estado: feito em 20/09/2026** ([decisão 106](decisoes/106-a-razao-de-unidade-sai-da-composicao-declarada-e-a-medida-confere.md),
+[ponte_por_papel.md](validacao/ponte_por_papel.md) §7). **A composição declarada
+decide, e a medida vira conferência** — no aplicativo e nas coortes, pelo
+formulário mais recente até a data da avaliação. A chave é o **CNPJ**, e não o
+código de negociação: a coluna de código vem em branco em 44% das linhas e zerada
+no BTG, que declara a BPAC11 sob `000000`. Nove das dez units do universo saem com
+composição declarada; na ONCO11, que a companhia não declara, o motor infere **e
+diz que inferiu**. **No aplicativo nenhum número muda**, porque a razão medida
+coincidia com a declarada nas sete units avaliadas — o que muda é a dependência
+de uma convenção de fonte que não é conhecida, e o rastro passa a trazer as duas
+razões. A leitura do texto livre foi para o núcleo, porque deixou de ser
+conferência e passou a decidir número, e ganhou o caso que errava: código de três
+letras, a ENGI11 de 2018 com "1 ENG3 e 4 ENGI4". **Nas coortes o ganho só entra
+quando o backtest for reexecutado** (C5).
+
+### B18. A recusa de estrutura é decidida pelo chute inicial do ponto fixo
+
+**Achado em 20/09/2026, ao ligar o prior** ([prior_no_aplicativo.md](validacao/prior_no_aplicativo.md)
+§5). Os 14 ativos que saíram do aplicativo foram recusados pela decisão 45, e
+todos no **ano zero da primeira iteração**: o valor da firma, descontado à
+interpolação de dois pontos de que o ponto fixo parte, não cobre a dívida
+líquida. O guarda dispara antes de o ponto fixo ter chance de convergir.
+
+A direção é conservadora — mais alavancagem eleva o `Ke`, que eleva o WACC, que
+baixa o valor da firma —, mas **o veredito é do recuo, e não do ponto fixo**, e o
+recuo é a taxa que a própria decisão 41 descartou. É a mesma forma de defeito que
+o B10 mediu: a resposta depende de qual conta o motor alcançou primeiro.
 
 ### B17. A série de preços das coortes tem no máximo dez anos
 
@@ -846,6 +920,36 @@ espécies negociam a preços diferentes** — é o B16.
 
 §2.5. O backtest é otimista. Baixo por não rebalancear, mas não medido.
 
+### C5. A base bruta e a reexecução do backtest
+
+**Achado em 20/09/2026, no começo da terceira rodada da Fase 3.** O diretório
+`data/` **não existe mais nesta máquina**: a base ingerida da CVM
+(`data/cvm_exercicios.json`), o COTAHIST e seus derivados (`data/b3/`) e o
+arquivo do Tesouro (`data/tesouro/`) são todos ignorados pelo git, e por isso não
+vêm no clone. O que sobreviveu foram os **pacotes versionados** — documentos da
+CVM, registro da B3, proventos, curva, outorgas — e o cache da validação.
+
+**O que isso permitiu e o que impediu.** O gabarito da cascata passou a ler os
+pacotes versionados em vez da base bruta, e com isso se reproduz num clone limpo:
+as 376 avaliações, as nove montagens e a varredura do nível da curva foram
+refeitas nesta rodada, e reproduzem o estado de 16/09/2026 exatamente — 114
+avaliados, 104 na montagem com o prior. **O backtest não**: ele precisa do
+COTAHIST papel a papel, da ponte das deslistadas e do FRE.
+
+**Consequência.** As medições de coorte — a habilidade
+([habilidade_trimestral.md](validacao/habilidade_trimestral.md)), a faixa
+calibrada ([cobertura_banda.md](validacao/cobertura_banda.md)), o custo das
+recusas ([recusas_custo.md](validacao/recusas_custo.md)) e a ponte por papel
+([ponte_por_papel.md](validacao/ponte_por_papel.md)) — continuam sendo as do
+motor da decisão 102, e não as do motor que esta rodada deixou. O C1 e o C2c da
+Fase 4 dependem disto.
+
+**Para resolver:** restaurar a base com `python tool/cvm_baixar.py`,
+`python tool/b3_baixar.py` e `python tool/tesouro_baixar.py`, reingerir com
+`dart run tool/cvm_ingerir.dart data/cvm`, e reexecutar
+`tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas`. A FCA de
+valor mobiliário já foi baixada nesta rodada, para o B16.
+
 ---
 
 ## 5. Eixo D — Engenharia
@@ -912,10 +1016,22 @@ formas distintas de recusa no conjunto.
 
 **A ressalva da entrada foi resolvida.** A gravação copia o cache da validação
 para `data/gabarito/`, trata toda entrada presente como fresca e grava o
-Ibovespa servido; a conferência repete os dois sem ir à rede, em três minutos. O
-controle — conferir o código intacto — deu idêntico; e uma mutação que só troca
-a ordem de dois passos do rastro, sem mudar número, **divergiu em 1.212 das 3.420
-montagens**.
+Ibovespa servido e o universo; a conferência repete os três sem ir à rede, em
+três minutos. O controle — conferir o código intacto — deu idêntico; e uma
+mutação que só troca a ordem de dois passos do rastro, sem mudar número,
+**divergiu em 1.212 das 3.420 montagens**.
+
+**E, desde 20/09/2026, o gabarito se reproduz num clone limpo.** Ele lia a curva
+do CSV do Tesouro e os documentos da base ingerida da CVM, e os dois moram em
+`data/`, que é ignorado pelo git: numa máquina sem a base bruta ele não roda. Ele
+passou a ler os **pacotes versionados** — `assets/tesouro/curva.json` e
+`assets/cvm/documentos.json` —, que são as duas fontes de que aqueles arquivos
+são gerados e o que o aplicativo de fato lê. A montagem `aplicativo` passou a
+ler também o prior do beta e a composição das units dos pacotes, pela mesma
+razão. **A troca foi conferida**: sobre a entrada congelada, ela reproduz o
+estado de 16/09/2026 exatamente — 114 avaliados na montagem do aplicativo e 104
+na do prior. O modo `--regravar` grava sem atualizar a entrada congelada, que é
+o que permite medir o efeito de uma mudança sem misturá-lo com a deriva do dado.
 
 **Os nove estágios, e o estado que atravessa as fronteiras.** A contagem é por
 variável local declarada num estágio e lida num posterior — limite inferior,
@@ -1079,14 +1195,15 @@ o instrumento sob as duas medições.
 | B1.0 | Ressalva na tela de metas | R1 | ✅ | a tela de metas diz ao usuário que a ordenação por potencial não supera o book-to-market, enquanto o C1 não aprovar — **defeito em produção desde a §0, e não depende de fase nenhuma** — atingido: o cartão do confronto cita a medição empacotada, com o critério da decisão 96 no núcleo, e a ressalva some quando ele aprovar ou diz "não medida" sem pacote, com teste do pacote contra a medição e da tela nos três casos ([decisão 99](decisoes/099-a-tela-de-metas-diz-que-o-premio-do-potencial-nao-esta-comprovado.md)) |
 | B1 | O que o potencial serve | R3 | ✅ | decisão registrada entre as três saídas da §3 (recomendada: medir DCF e modelo transversal lado a lado), e retorno esperado e tela de metas coerentes com ela — atingido: a saída (a) com a (c) como método, autorizada pelo usuário; as três ordenações medidas lado a lado pela regra fixada antes de medir, nenhuma passa, e o retorno esperado da meta e do estudo é o `Ke` de cada ativo, declarado total, com a regra no núcleo e o pacote contra a medição testados ([decisão 103](decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md), [ordenacao_lado_a_lado.md](validacao/ordenacao_lado_a_lado.md)) |
 | B10 | Migração de via descontínua | R1, E | ✅ | um teste varia a taxa em torno do limiar de migração e o preço justo não sobe com a taxa, a PRIO3 é remedida, e a varredura do nível da curva do `dcf_reverso` é refeita no universo sem ativo não monótono — atingido: a varredura do nível, de −3 a +3 p.p., refeita sobre a entrada congelada do gabarito, dá 0 de 114 avaliados pelo aplicativo subindo com a taxa, contra 25 de 128; o teste do nível da curva inteira e o da faixa do crédito reprovam no código de antes; a PRIO3 vai de −17,9%, migrada, a −72,3%, monótona ([decisão 102](decisoes/102-nenhuma-avaliacao-muda-de-via-e-a-firma-avalia-pelo-fluxo-do-acionista-derivado.md), [monotonia_vias.json](validacao/monotonia_vias.json)). **O critério ficou mais largo que o item**: a varredura achou uma segunda causa, a faixa do prêmio de crédito, e ela entrou |
-| B9 | Convenção de dívida no WACC | R1, E | ⬜ | o WACC estático e o realavancado usam a mesma convenção de dívida, declarada, com teste |
-| B11 | Prior do beta no aplicativo | R1, E | ⬜ | o aplicativo e a montagem padrão da validação avaliam com o prior do beta e o custo de capital resolvido das decisões 40 e 41, com a tensão da via do acionista resolvida, os cenários e a taxa exibida saindo das premissas resolvidas, e o efeito medido na mesma execução — **ou** uma decisão declara que o aplicativo fica com o beta cru, e as decisões que dependem do prior ficam marcadas como de diagnóstico. **Desde 16/09/2026, também**: no caminho resolvido, a varredura do nível da curva não acha ativo subindo com a taxa — hoje RADL3 e SEER3, pelo veredito da perpetuidade que alterna entre passes —, e o custo da dívida da rota derivada e do solucionador é o sintético que o WACC aplica, e não o observado, que a decisão 31 já descartou |
-| B16 | Razão de unidade pela composição declarada | R1, E | ⬜ | a composição de cada unit sai de fonte declarada — a FCA da CVM, por ano — no pacote do aplicativo e nas coortes, a razão medida do valor de mercado vira conferência, e as 79 observações de unit que a inferência erra nas coortes passam a sair com a composição, com teste |
+| B9 | Convenção de dívida no WACC | R1, E | ✅ | o WACC estático e o realavancado usam a mesma convenção de dívida, declarada, com teste — atingido: a dívida dos pesos é a **líquida**, a mesma da apuração do capital próprio, da realavancagem e da desalavancagem do beta; a ausência de estrutura é medida na bruta, o caixa líquido dá peso negativo e a avaliação declara o WACC acima do `Ke`; quatro testes, e o efeito medido — +3,0% na mediana de 73 de 114 na montagem de então, e 2 de 102 na resolvida ([decisão 104](decisoes/104-a-divida-do-wacc-e-a-liquida-como-no-resto-do-modelo.md), [divida_do_wacc.md](validacao/divida_do_wacc.md)) |
+| B11 | Prior do beta no aplicativo | R1, E | ✅ | o aplicativo e a montagem padrão da validação avaliam com o prior do beta e o custo de capital resolvido das decisões 40 e 41, com a tensão da via do acionista resolvida, os cenários e a taxa exibida saindo das premissas resolvidas, e o efeito medido na mesma execução; e, desde 16/09/2026, a varredura do nível no caminho resolvido sem ativo subindo com a taxa e o custo da dívida sintético nas duas rotas — **atingido**: o prior vem do pacote do build, com deriva medida (3,1% em um ano) e validade de um ano; 83 das 102 avaliações resolvem as taxas, e todas as 82 da via da firma; `K_d = Rf_t + prêmio` no solucionador e na rota derivada; a dívida da via do acionista fica constante, porque o fluxo já financia o crescimento com lucro retido; a taxa exibida é a do ano 1 resolvido e a faixa é centrada no preço justo; **0 de 102 sobem com a taxa nas duas montagens** ([decisão 105](decisoes/105-o-aplicativo-resolve-o-prior-do-beta-e-o-custo-de-capital.md), [prior_no_aplicativo.md](validacao/prior_no_aplicativo.md)) |
+| B16 | Razão de unidade pela composição declarada | R1, E | ✅ | a composição de cada unit sai de fonte declarada — a FCA da CVM, por ano — no pacote do aplicativo e nas coortes, a razão medida do valor de mercado vira conferência, e as 79 observações de unit que a inferência erra nas coortes passam a sair com a composição, com teste — atingido: pacote por CNPJ e por ano com as nove units declaradas, leitura do texto livre no núcleo com o caso de três letras corrigido, conferência declarada na avaliação e no rastro, e a ONCO11, que a companhia não declara, seguindo inferida e dizendo que é; **as coortes só recolhem o ganho com a reexecução do backtest (C5)** ([decisão 106](decisoes/106-a-razao-de-unidade-sai-da-composicao-declarada-e-a-medida-confere.md), [ponte_por_papel.md](validacao/ponte_por_papel.md) §7) |
 | B13 | As duas vias discordam | R1, E | ✅ | a via do acionista sobre LPA fica só para instituição financeira, ou as duas vias concordam dentro de tolerância declarada e medida no universo, ou uma decisão nova substitui a 39 e diz por que a discordância deixa de ser defeito — resolver junto com o B10 — atingido pela terceira saída: a decisão 102 substitui a 39; nenhuma avaliação muda de via, a via do acionista fica para as Portas 1 e 3, e nenhum ativo tem o preço escolhido entre as duas — 42 dos 109 não financeiros tinham antes |
 | B12 | Excedente do capital existente na perpetuidade | E | ⬜ | o peso de `EVA_{N+1}/r` no preço justo está medido no universo, declarado no aviso, e uma decisão diz se ele fica, decai ou acaba num horizonte |
 | B14 | Beta de papel pouco negociado | E, R3 | ⬜ | um beta com correção por negociação não sincrônica é medido nos soltos do corte de liquidez, o nível do potencial deles é remedido com ele contra o das avaliadas, e uma decisão diz se a recusa por liquidez fica |
 | B15 | Beta e alavancagem da perpetuidade | E | ⬜ | o custo de capital da perpetuidade declara de onde vêm o beta e a estrutura de capital, o efeito de levá-los ao estado estacionário — beta em direção a 1, alavancagem da mediana do setor — está medido no universo, e uma decisão escolhe |
 | B17 | Série de preços das coortes limitada a dez anos | R3 | ⬜ | a série que a coorte usa para o beta cobre a janela inteira de cinco anos nas listadas, pelo COTAHIST, ou a coorte declara a janela curta — hoje a de 31/03/2018 estima beta com 383 pregões, contra 1.240, e as deslistadas, que vêm do COTAHIST, não têm o problema |
+| B18 | Recusa de estrutura decidida pelo chute | R1, E | ⬜ | a recusa da decisão 45 sai do ponto fixo, e não da interpolação de que ele parte — os 14 ativos que saíram em 20/09/2026 foram recusados no ano zero da primeira iteração —, **ou** uma decisão declara que recusar no chute é a regra, com o custo medido |
 | B8 | Reapresentação no *point-in-time* | R3, R1 | ⬜ | a ingestão guarda cada versão com a data de recebimento dela, e a coorte usa a versão recebida até a data da avaliação |
 | B2 | Potencial ortogonalizado | R3 | ⬜ | o IC do potencial ortogonalizado ao B/M sai do `backtest_valuation` em toda execução e fica registrado |
 | B6 | Horizonte de projeção | E, R3 | ⬜ | a varredura de 5 a 20 anos está medida sobre o universo e sobre a habilidade, e o horizonte é escolhido por decisão |
@@ -1094,11 +1211,12 @@ o instrumento sob as duas medições.
 | B3 | Prêmio de risco de mercado | E | ⬜ | o prêmio é estimado — implícito ou histórico com encolhimento —, por decisão e com efeito medido; hoje é 5,5% fixo |
 | B4 | Risco-país e tamanho | E | ⬜ | decisão registrada sobre prêmio de risco-país e ajuste por tamanho, implementados ou recusados com medição |
 | B5 | Triangulação por múltiplos | E | ⬜ | cada avaliação traz o preço justo por múltiplos de pares ao lado do DCF, com a divergência declarada — hoje não há modelo por múltiplos |
+| C5 | Base bruta e reexecução do backtest | R2, R3 | ⬜ 👤 | a base bruta — CVM ingerida, COTAHIST e derivados, Tesouro — está na máquina, e o backtest é reexecutado sobre o motor da Fase 3, com habilidade, faixa, recusas e ponte regeradas — hoje as quatro são do motor da decisão 102, e o `data/` não existe no clone |
 | C4 | Custos de transação | R3 | ⬜ | o custo de transação entra no backtest, e o efeito sobre o retorno medido é reportado |
-| D3 | Cobertura de caminhos de erro | R1 prevenção | 🟨 | as telas carregadas entram no teste de estouro — **a de avaliação entrou, na matriz de três larguras e três escalas**, e faltam estudo e metas —, o cache macroeconômico tem teste de recurso offline — **feito**, com a cobertura do início exigida no recurso —, o veredito que não se estabiliza em `moatMaxPasses` passes tem teste, e os datasources de fundamentos e do Tesouro têm teste de payload malformado como o de cotações tem (lente `risco`, 15/09/2026) |
+| D3 | Cobertura de caminhos de erro | R1 prevenção | 🟨 | as telas carregadas entram no teste de estouro — **a de avaliação entrou, na matriz de três larguras e três escalas**, e faltam estudo e metas —, o cache macroeconômico tem teste de recurso offline — **feito**, com a cobertura do início exigida no recurso —, o veredito que não se estabiliza em `moatMaxPasses` passes tem teste, e os datasources de fundamentos e do Tesouro têm teste de payload malformado como o de cotações tem (lente `risco`, 15/09/2026) — **o do Banco Central e o do Tesouro entraram em 20/09/2026**, com JSON sem as chaves e CSV de colunas trocadas virando `Result.err`; falta o do snapshot de fundamentos, e faltam as telas de estudo e metas carregadas |
 
 **A ordem tem uma razão.** O B1.0 primeiro porque é defeito em produção e custa
-pouco. Depois os defeitos de método (B10 com B13, B9, B11, B16, B8), porque R1 não
+pouco. Depois os defeitos de método (B10 com B13, B9, B11, B16, B18, B8), porque R1 não
 fecha com eles abertos — e o B17 antes da Fase 4, porque é do instrumento que
 mede o C1 e o C2c — e o B11 depois do B9, porque ligar o custo de capital resolvido
 com convenções de dívida diferentes ligaria o defeito junto. B1 é decisão e destrava o sentido da ordenação. B2 e B6 não precisam de
@@ -1152,12 +1270,16 @@ Cada condição cita os itens da §6 que a fecham.
   outorgas (FRE) — A1 a A6
 - [x] **Curva de desconto observada** — padrão do aplicativo (A2, A2.1); na web,
   do pacote do build, que serve por cerca de uma semana (A2.2)
-- [ ] **Divisor por papel correto** — contagem oficial e tesouraria no divisor
-  (A1.5, A3.3) feitos; falta o WACC com a mesma convenção de dívida (B9) e a
-  razão de unidade pela composição declarada (B16)
-- [ ] **Resposta coerente à taxa** — a migração de via é descontínua (B10)
-- [ ] **Custo de capital completo e consistente** — prêmio de risco, risco-país,
-  inflação e o prior do beta que o aplicativo não resolve (B3, B4, B7, B11)
+- [x] **Divisor por papel correto** — contagem oficial e tesouraria no divisor
+  (A1.5, A3.3), WACC com a mesma convenção de dívida do resto do modelo (B9,
+  decisão 104) e razão de unidade pela composição declarada na FCA (B16,
+  decisão 106)
+- [x] **Resposta coerente à taxa** — nenhuma avaliação muda de via (B10 e B13,
+  decisão 102), e a varredura do nível da curva não acha ativo subindo com a
+  taxa em nenhuma das duas montagens: 0 de 102 (B11, decisão 105)
+- [ ] **Custo de capital completo e consistente** — o prior do beta e o custo
+  resolvido ano a ano agem em produção desde 20/09/2026 (B11, decisão 105);
+  faltam prêmio de risco, risco-país e a conferência da inflação (B3, B4, B7)
 - [x] **Horizonte compatível com o contrato onde há contrato** — o terminal da
   concessão corta o excedente no fim do contrato (A6); fora de contrato, o
   excedente perpétuo é premissa a declarar (B12)
@@ -1166,11 +1288,13 @@ Cada condição cita os itens da §6 que a fecham.
 **Motor de referência** — as três condições combinadas:
 
 - [ ] **R1. Nenhum defeito conhecido** — desmarcado em 14/09/2026. **Defeitos
-  abertos hoje:** B9 (convenção de dívida), B11 (prior do beta fora do aplicativo),
-  B8 (reapresentação nas coortes), B16 (razão de unidade inferida — entrou em
-  15/09/2026, pelo C3) e B7 (inflação — a conferir; pode não ser defeito). O A5, o
-  B1.0, o B10 e o B13 fecharam — os dois últimos em 16/09/2026, pela decisão 102.
-  Prevenção em aberto, que não conta: D3 — o D1 fechou.
+  abertos hoje:** B18 (a recusa de estrutura decidida pelo chute do ponto fixo —
+  entrou em 20/09/2026, ao ligar o prior), B8 (reapresentação nas coortes) e B7
+  (inflação — a conferir; pode não ser defeito). O A5, o B1.0, o B10 e o B13
+  fecharam, e em 20/09/2026 fecharam **o B9, o B11 e o B16** — a dívida do WACC é
+  a líquida, o aplicativo resolve o prior e o custo de capital, e a razão de
+  unidade sai da composição declarada. Prevenção em aberto, que não conta: D3 —
+  o D1 fechou.
 - [x] **R2. Incerteza calibrada** — **atingida em 15/09/2026, desfeita no mesmo dia
   e refeita por outra forma.** A banda de cenários cobria 8% contra 90%, e a
   incerteza que o aplicativo mostra passou a ser a faixa calibrada (C2, decisão 92),
@@ -1183,6 +1307,8 @@ Cada condição cita os itens da §6 que a fecham.
   papel, com o preço justo entrando pelo peso medido. **Remedida sobre o motor da
   decisão 102, sem mudar a forma, continua cobrindo**: 88,2/78,7/51,6% e
   88,9/78,7/49,6% ([cobertura_banda.md](validacao/cobertura_banda.md) §11).
+  **Esses números são do motor da decisão 102**, e não do que a Fase 3 deixou: a
+  base bruta não está na máquina e o backtest não reexecutou (C5).
   **Confirma-se, ou cai, no C2c da Fase 4**, que a remede sobre o motor que a Fase 3
   deixar
 - [ ] **R3. Habilidade comprovada** — **a medir com as fases completas** (C1, Fase
@@ -1192,7 +1318,8 @@ Cada condição cita os itens da §6 que a fecham.
   coortes de 2018 a 2021 em janela curta. A leitura sobre o motor de hoje, que não
   é o veredito: o potencial dado o B/M em 36 meses tem coeficiente de 0,010 e `t`
   corrigido de 0,08 contra o crítico de 2,70 — e nenhuma das três ordenações
-  medidas no B1 passa, nem o book-to-market (decisão 103)
+  medidas no B1 passa, nem o book-to-market (decisão 103). **A leitura é do motor
+  da decisão 102**; remedi-la sobre o motor da Fase 3 depende do C5
 
 **A leitura honesta.** A Fase 1 deu ao preço justo fonte primária e procedência.
 A Fase 2 construiu o instrumento que mede o motor, e **o instrumento tinha um
@@ -1212,7 +1339,15 @@ afirmar prêmio que não mediu**: nenhuma ordenação — nem a do DCF, nem a do
 book-to-market, nem a das duas juntas — passa no critério que o projeto adotou
 para 22 coortes sobrepostas, e o retorno esperado ficou no `Ke`. O R3 é medido no
 fim, sobre o motor que a Fase 3 deixar; o R1 fecha nos defeitos de método que
-sobram — B9, B11, B8, B16 e B7.
+sobram — **B18, B8 e B7**. **Na terceira rodada o aplicativo passou a rodar o
+motor que o registro descreve**: o prior do beta e o custo de capital resolvido
+ano a ano deixaram de ser diagnóstico, a dívida passou a ser a mesma nas três
+pontas do modelo, e a razão de unidade passou a sair da declaração da companhia
+em vez de ser inferida de um valor de mercado cuja convenção ninguém conhece. O
+preço custou cobertura: 114 avaliados viraram 102, e catorze companhias grandes
+saem porque a conta coerente diz que a dívida consome o valor da operação delas.
+**E ficou uma dívida de medição**: as coortes ainda descrevem o motor da decisão
+102, porque a base bruta não está na máquina (C5).
 
 ---
 

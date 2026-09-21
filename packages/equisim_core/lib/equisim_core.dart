@@ -63,6 +63,7 @@ export 'src/services/b3/cash_dividends.dart';
 export 'src/services/cvm/cvm_chart.dart';
 export 'src/services/cvm/fre_concessions.dart';
 export 'src/services/cvm/share_count_history.dart';
+export 'src/services/cvm/unit_composition.dart';
 export 'src/services/valuation/concession_sectors.dart';
 export 'src/services/valuation/financial_sectors.dart';
 export 'src/services/valuation/cyclical_sectors.dart';

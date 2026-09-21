@@ -346,6 +346,44 @@ void main() {
       );
       expect((await fora.history(Ticker.parse('PETR4'))).isErr, isTrue);
     });
+
+    test('a atualização devolve a união do banco, e não só a janela da fonte',
+        () async {
+      // Lente `dados`, 20/09/2026. A fonte devolve uma janela; o banco guarda
+      // a união do que já se viu. Devolver a janela logo depois de atualizar e
+      // a união depois do TTL faz a mesma chamada ter profundidades
+      // diferentes — e a série de exercícios forma a base de capital e o
+      // crescimento.
+      final ticker = Ticker.parse('PETR4');
+      // Um exercício antigo que a fonte não traz mais, já no banco.
+      await db.upsertFundamentals([
+        CachedFundamentalsTableCompanion.insert(
+          ticker: ticker.value,
+          fiscalPeriodEnd: '2001-12-31',
+          netIncome: const Value(1000),
+        ),
+      ]);
+
+      final repository = FundamentalsRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/statistics?symbols=PETR4&mode=history':
+              'brapi_statistics_history_petr4',
+          '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
+          '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+          '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+          '/v2/stocks/statistics?symbols=PETR4&mode=current':
+              'brapi_statistics_current_petr4',
+        }))),
+        cache: db,
+      );
+
+      final logoDepois = (await repository.history(ticker)).unwrap();
+      final pelaSegundaVez = (await repository.history(ticker)).unwrap();
+      expect(logoDepois.length, pelaSegundaVez.length,
+          reason: 'a profundidade não pode depender do TTL');
+      expect(logoDepois.any((s) => s.fiscalPeriodEnd.year == 2001), isTrue,
+          reason: 'o exercício que só o banco tem precisa voltar na atualização');
+    });
   });
 
   group('Cache macroeconômico', () {

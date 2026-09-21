@@ -50,6 +50,9 @@ abstract final class PrepareValuationInputs {
   /// - [concessionEnd]: fim do contrato de concessão, do Formulário de
   ///   Referência (item A6). Só age sobre concessão que acaba dentro da
   ///   projeção — ver `ValuationInputs.concessionEnd`.
+  /// - [declaredSharesPerUnit]: ações na unit, como a companhia declara no
+  ///   formulário cadastral da CVM (item B16). Sem ela, a razão continua sendo
+  ///   inferida do valor de mercado, e a avaliação diz que foi.
   /// - [betaPrior]: prior transversal do beta, de `ResolveBetaPrior`. Sem ele
   ///   vale a regressão crua, que é o comportamento anterior — e o que expõe o
   ///   motor ao caso da AZUL3, cujo `β = 109.108` tem erro-padrão de 83.228.
@@ -75,6 +78,7 @@ abstract final class PrepareValuationInputs {
     BetaPrior? betaPrior,
     DateTime? concessionEnd,
     List<CashDividend>? dividends,
+    int? declaredSharesPerUnit,
   }) async {
     final today = asOf ?? DateTime.now();
     final window = DateRange(
@@ -188,6 +192,8 @@ abstract final class PrepareValuationInputs {
       dividendsInBeta: beta.dividends,
       // A taxa da data arbitra a despesa financeira, e não a do cenário (B10).
       creditReferenceRiskFree: riskFreeRate,
+      // A composição declarada da unit, quando a companhia a publica (B16).
+      declaredSharesPerUnit: declaredSharesPerUnit,
     ));
   }
 

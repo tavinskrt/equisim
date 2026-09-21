@@ -24,7 +24,12 @@ class BetaObservation {
   /// Chave do setor, ou `null`.
   final String? sectorKey;
 
-  /// Dívida bruta sobre valor de mercado do capital próprio.
+  /// Dívida **líquida** sobre valor de mercado do capital próprio.
+  ///
+  /// A mesma régua da realavancagem e dos pesos do WACC (decisões 54 e 104).
+  /// Este comentário dizia "bruta" e o chamador sempre passou a líquida —
+  /// `FundamentalsSnapshot.debtToMarketEquity` —, o que fazia o registro
+  /// descrever um motor que não existe.
   final double debtToEquity;
 
   /// Alíquota estrutural do ativo.

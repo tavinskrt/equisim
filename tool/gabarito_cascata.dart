@@ -39,6 +39,9 @@
 // Uso:
 //   dart run tool/gabarito_cascata.dart                # grava o gabarito
 //   dart run tool/gabarito_cascata.dart --conferir     # compara com o gravado
+//   dart run tool/gabarito_cascata.dart --regravar --saida <arq>
+//                                                      # regrava sem mexer na
+//                                                      # entrada congelada
 //   dart run tool/gabarito_cascata.dart --rastro PETR4 # rastro de um ativo
 //   dart run tool/gabarito_cascata.dart --monotonia docs/validacao/monotonia_vias.json
 //   dart run tool/gabarito_cascata.dart --nivel GOAU4  # a grade de um ativo, aberta
@@ -56,8 +59,6 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'package:equisim/data/repositories/b3_registry_repository.dart';
 
-import 'curva_ligar.dart' show lerTesouro;
-import 'cvm/documentos.dart';
 import 'validation/context.dart';
 
 final _hoje = DateTime(2026, 9, 14);
@@ -252,23 +253,56 @@ Future<void> main(List<String> args) async {
   final saidaMonotonia = iMonotonia >= 0 ? args[iMonotonia + 1] : null;
   final iNivel = args.indexOf('--nivel');
   final soNivel = iNivel >= 0 ? args[iNivel + 1] : null;
-  final conferir =
-      args.contains('--conferir') || saidaMonotonia != null || soNivel != null;
+  final conferir = args.contains('--conferir') ||
+      saidaMonotonia != null ||
+      soNivel != null ||
+      args.contains('--regravar');
   final iRastro = args.indexOf('--rastro');
   final soRastro = iRastro >= 0 ? args[iRastro + 1] : null;
+  // **Regravar sobre a entrada já congelada.** Medir o efeito de uma mudança
+  // pede gravar de novo *sem* atualizar cache, Ibovespa e universo — se a
+  // entrada se mover junto com o código, a diferença mistura os dois. É o que
+  // o `--conferir` já faz para comparar, e o que faltava para quantificar.
+  final iSaida = args.indexOf('--saida');
+  final saidaArquivo = iSaida >= 0 ? args[iSaida + 1] : _arquivo;
+  final regravar = args.contains('--regravar');
 
+  // **A entrada sai dos pacotes versionados, e não da base bruta.** Os
+  // pacotes são o que o aplicativo lê, e vêm no clone: o gabarito passou a
+  // reproduzir-se sem os 750 MB da CVM nem o arquivo do Tesouro, que não
+  // sobrevivem a uma máquina nova. Antes a curva vinha do CSV do Tesouro e os
+  // documentos, da base ingerida — as duas fontes de que o pacote é gerado.
   final curva = TreasuryCurve.at(
-      lerTesouro('data/tesouro/precotaxatesourodireto.csv'), _hoje);
+      TreasuryQuotesCodec.decode(
+          jsonDecode(File('assets/tesouro/curva.json').readAsStringSync())
+              as Map<String, dynamic>),
+      _hoje);
   final registro = B3RegistryCodec.decodePackage(
       jsonDecode(File('assets/b3/emissores.json').readAsStringSync())
           as Map<String, dynamic>);
-  final docs = carregarDocumentos('data/cvm_exercicios.json');
+  final docs = CvmDocumentCodec.decodePackage(
+      jsonDecode(File('assets/cvm/documentos.json').readAsStringSync())
+          as Map<String, dynamic>);
   final prazos = ConcessionTermsCodec.decode(
       jsonDecode(File('assets/cvm/outorgas.json').readAsStringSync())
           as Map<String, dynamic>);
   final proventos = CashDividendsCodec.decode(
       jsonDecode(File('assets/b3/proventos.json').readAsStringSync())
           as Map<String, dynamic>);
+  // O prior do pacote e a composição declarada das units: são o que o
+  // aplicativo lê, e por isso é deles que a montagem `aplicativo` parte
+  // (itens B11 e B16). O prior **resolvido** sobre a entrada congelada continua
+  // na montagem `prior`, que é o diagnóstico.
+  final priorDoPacote = File('assets/mercado/beta_prior.json').existsSync()
+      ? BetaPriorCodec.decode(
+          jsonDecode(File('assets/mercado/beta_prior.json').readAsStringSync())
+              as Map<String, dynamic>)
+      : null;
+  final units = File('assets/cvm/units.json').existsSync()
+      ? UnitCompositionCodec.decodePackage(
+          jsonDecode(File('assets/cvm/units.json').readAsStringSync())
+              as Map<String, dynamic>)
+      : const <String, List<UnitComposition>>{};
 
   // O rastro de cada avaliação é capturado no fim da transação dela.
   AuditEvent? ultimo;
@@ -386,7 +420,12 @@ Future<void> main(List<String> args) async {
             : null,
         concessionEnd: app ? prazos[t.value]?.end : null,
         dividends: app ? proventosDe(t) : null,
-        betaPrior: comPrior ? prior : null,
+        // A montagem do aplicativo usa o prior **do pacote**, que é o que ele
+        // lê; a montagem `prior` usa o resolvido sobre a entrada congelada.
+        betaPrior: comPrior ? prior : (app ? priorDoPacote?.prior : null),
+        declaredSharesPerUnit: app
+            ? UnitCompositionCodec.at(units[t.value] ?? const [], _hoje)?.shares
+            : null,
       );
     }
 
@@ -530,6 +569,12 @@ Future<void> main(List<String> args) async {
       File(_ibovespa).writeAsStringSync(jsonEncode(ibov.toJson()));
       File(_arquivo).writeAsStringSync(texto);
       stdout.writeln('gabarito gravado: ${saida.length} ativos em $_arquivo');
+      return;
+    }
+    if (regravar) {
+      File(saidaArquivo).writeAsStringSync(texto);
+      stdout.writeln('gabarito regravado sobre a entrada congelada: '
+          '${saida.length} ativos em $saidaArquivo');
       return;
     }
 

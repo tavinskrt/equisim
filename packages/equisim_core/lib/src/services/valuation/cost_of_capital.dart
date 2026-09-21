@@ -101,7 +101,24 @@ class CostOfCapital {
   /// Valor de mercado do equity.
   final double equityValue;
 
-  /// Dívida bruta.
+  /// Dívida **líquida** dos pesos: bruta menos caixa e aplicações.
+  ///
+  /// **É a mesma dívida da ponte e da realavancagem, e passou a ser** (decisão
+  /// 104). Antes daqui saíam pesos de dívida bruta enquanto o capital próprio
+  /// era apurado subtraindo a líquida, e a decisão 54 desalavancava o beta
+  /// contra a líquida: as três pontas do mesmo modelo usavam duas réguas.
+  ///
+  /// **A escolha é da convenção que o resto do motor já usa**, e não uma
+  /// preferência de estilo. O fluxo da firma é operacional — não tem o
+  /// rendimento do caixa —, de modo que o valor que ele desconta é o dos ativos
+  /// operacionais, e o capital que os financia é `E + D_líquida`. Descontar a
+  /// esse valor um WACC com peso de dívida **bruta** conta o caixa duas vezes:
+  /// uma barateando a taxa, outra somando-se ao capital próprio na ponte.
+  ///
+  /// **Pode ser negativa**, e aí o peso da dívida é negativo e o WACC fica
+  /// acima do `Ke`. Não é anomalia: com caixa líquido, o ativo operacional
+  /// sozinho é mais arriscado que a companhia inteira, que é a mesma leitura
+  /// que o `β_U` da decisão 54 faz ao desalavancar contra a líquida.
   final double debtValue;
 
   /// Cobertura de juros, `EBIT ÷ despesa financeira`. `null` quando não medível.
@@ -121,6 +138,18 @@ class CostOfCapital {
   /// cobertura de juros nesse papel em 08/09/2026, e o motivo está medido no
   /// doc de [syntheticSpread].
   final double? netDebtToEbitda;
+
+  /// `false` quando a companhia **não tem dívida contratada**, e o que resta do
+  /// lado direito do balanço é caixa.
+  ///
+  /// **O que muda é o `K_d`**: sem dívida não há prêmio de crédito a cobrar, e
+  /// o que sobra é rendimento de caixa — a taxa livre de risco é o que caixa
+  /// rende ([decisão 58](../../../../../docs/decisoes/058-a-carteira-de-acoes-nao-espera-a-renda-fixa.md)).
+  /// Os **pesos continuam existindo**, e são negativos: o caixa é dívida
+  /// líquida negativa, e a apuração do capital próprio o devolve ao acionista
+  /// (decisão 104). Degenerar para o `Ke` aqui contaria o caixa duas vezes, que
+  /// é exatamente o defeito que a decisão 104 corrigiu para quem tem dívida.
+  final bool hasContractedDebt;
 
   /// Taxa livre de risco contra a qual a despesa financeira observada é julgada
   /// utilizável — ver [syntheticSpread]. `null` usa a do [capm].
@@ -144,6 +173,7 @@ class CostOfCapital {
     this.interestCoverage,
     this.netDebtToEbitda,
     this.creditReferenceRate,
+    this.hasContractedDebt = true,
   });
 
   /// Prêmio de crédito máximo admitido sobre a taxa livre de risco.
@@ -301,14 +331,17 @@ class CostOfCapital {
   /// a própria despesa financeira arbitra qual delas pode falar — ver
   /// [syntheticSpread]. O observado continua sendo medido e entra no resultado
   /// como conferência — ver [costOfDebtWasClamped].
-  double get effectiveCostOfDebt =>
-      capm.riskFreeRate +
-      syntheticSpread(
-        leverage: netDebtToEbitda,
-        coverage: interestCoverage,
-        observedCostOfDebt: costOfDebt,
-        riskFreeRate: creditReferenceRate ?? capm.riskFreeRate,
-      );
+  double get effectiveCostOfDebt => hasContractedDebt
+      ? capm.riskFreeRate +
+          syntheticSpread(
+            leverage: netDebtToEbitda,
+            coverage: interestCoverage,
+            observedCostOfDebt: costOfDebt,
+            riskFreeRate: creditReferenceRate ?? capm.riskFreeRate,
+          )
+      // Sem dívida contratada não há prêmio de crédito: o que o peso negativo
+      // remunera é caixa, e caixa rende a taxa livre de risco (decisão 58).
+      : capm.riskFreeRate;
 
   /// `true` quando o observado se afasta materialmente do estimado.
   ///

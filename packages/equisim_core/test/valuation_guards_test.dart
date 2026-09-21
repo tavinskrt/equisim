@@ -3588,6 +3588,348 @@ void main() {
               'e o lucro por papel é o mesmo nos dois');
     });
   });
+
+  group('Com taxas resolvidas, a tela mostra as premissas finais', () {
+    // Item B11. O preço justo sai do caminho de taxas e do retorno terminal do
+    // último passe; o rastro, os cenários, a taxa exibida e os diagnósticos
+    // saíam das premissas **interpoladas**, que são o chute de que o ponto fixo
+    // parte. No aplicativo de antes as duas coincidiam, porque ele não
+    // resolvia o prior — ligar o prior sem isto descasaria a banda do preço.
+    FundamentalsSnapshot ano(int y, double escala) => FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 20000 * escala,
+          ebit: 3000 * escala,
+          ebitda: 4000 * escala,
+          netIncome: 1500 * escala,
+          incomeBeforeTax: 2200 * escala,
+          incomeTaxExpense: -700 * escala,
+          interestExpense: 500,
+          earningsPerShare: 1.5 * escala,
+          cash: 600,
+          shortTermDebt: 1500,
+          longTermDebt: 4500,
+          totalStockholderEquity: 9000 * escala,
+          bookValuePerShare: 9.0 * escala,
+          operatingCashFlow: 3400 * escala,
+          nopat: 1980 * escala,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 18000,
+        );
+
+    List<FundamentalsSnapshot> serie() {
+      final out = <FundamentalsSnapshot>[];
+      var escala = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(ano(2025 - i, escala));
+        escala *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult avaliar({double? betaU}) => ValuationCascade.evaluate(
+          ValuationInputs(
+            ticker: ticker,
+            asOf: DateTime(2026, 9, 9),
+            fundamentals: serie(),
+            marketPrice: 18.0,
+            capm:
+                CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+            declaredTerminalRiskFreeRate: 0.094,
+            unleveredBeta: betaU,
+          ),
+        ).unwrap();
+
+    test('a taxa exibida é a do ano 1 resolvido, e não o chute', () {
+      final sem = avaliar();
+      final com = avaliar(betaU: 0.60);
+      final nota =
+          com.warnings.firstWhere((w) => w.contains('resolvido ano a ano'));
+      // O aviso diz a taxa do primeiro ano com uma casa; a exibida tem de ser
+      // a mesma, e não a da interpolação.
+      final primeiro = '${(com.discountRate * 100).toStringAsFixed(1)}%';
+      expect(nota, contains('o WACC vai de $primeiro no primeiro ano'));
+      expect(com.discountRate, isNot(closeTo(sem.discountRate, 1e-9)),
+          reason: 'resolver a taxa tem de mover a taxa que a tela mostra');
+    });
+
+    test('o cenário base volta ao preço justo', () {
+      final com = avaliar(betaU: 0.60);
+      final base = com.discreteScenarios![ScenarioBand.base]!;
+      expect(base.cents, com.fairValue.cents,
+          reason: 'a faixa de sensibilidade cerca o preço justo; centrada nas '
+              'premissas interpoladas, ela cercava outro número');
+    });
+
+    test('a faixa responde ao desconto no caminho resolvido', () {
+      final com = avaliar(betaU: 0.60);
+      final bear = com.discreteScenarios![ScenarioBand.bear]!;
+      final bull = com.discreteScenarios![ScenarioBand.bull]!;
+      expect(bear.reais, lessThan(com.fairValue.reais));
+      expect(bull.reais, greaterThan(com.fairValue.reais));
+    });
+
+    test('os diagnósticos saem do retorno terminal do último passe', () {
+      final com = avaliar(betaU: 0.60);
+      final d = com.diagnostics!;
+      // O desconto de equilíbrio é o resolvido, e o retorno terminal tem de
+      // estar do mesmo lado da conta: neutro significa ausente, e não o número
+      // que a interpolação teria dado.
+      expect(d.terminalDiscountRate, isNot(closeTo(0.094, 1e-9)));
+      if (!d.moatApplied) {
+        expect(d.terminalReturnOnCapital, isNull,
+            reason: 'terminal neutro não tem retorno próprio a declarar');
+      }
+    });
+  });
+
+  group('A composição declarada da unit decide, e a medida confere', () {
+    // Item B16, decisão 106. A razão medida — `contagem × preço ÷ valor de
+    // mercado` — só devolve o número de ações da unit quando as espécies valem
+    // o mesmo; nas coortes ela erra 79 de 220 observações de unit.
+    FundamentalsSnapshot ano(int y, double escala) => FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 10000 * escala,
+          ebit: 1600 * escala,
+          ebitda: 2100 * escala,
+          netIncome: 800 * escala,
+          incomeBeforeTax: 1200 * escala,
+          incomeTaxExpense: -400 * escala,
+          interestExpense: 300,
+          earningsPerShare: 0.8 * escala,
+          cash: 400,
+          shortTermDebt: 800,
+          longTermDebt: 2200,
+          totalStockholderEquity: 5000 * escala,
+          bookValuePerShare: 5.0 * escala,
+          operatingCashFlow: 1800 * escala,
+          nopat: 1056 * escala,
+          sharesOutstanding: 3000,
+          sharesOutstandingAsOf: 3000,
+          // Valor de mercado de 30.000 com 3.000 ações: a razão **medida** com
+          // preço de unit 30 dá 3. É a unit em que as espécies valem o mesmo.
+          marketCap: 30000,
+        );
+
+    List<FundamentalsSnapshot> serie() {
+      final out = <FundamentalsSnapshot>[];
+      var escala = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(ano(2025 - i, escala));
+        escala *= 1.05;
+      }
+      return out;
+    }
+
+    // A contagem oficial da B3 arbitra o divisor (decisão 83), e é sobre ela
+    // que a razão de unidade age: `divisor = contagem ÷ u`. É o caminho do
+    // aplicativo, e por isso é o que o teste exercita.
+    ValuationResult? avaliar({int? declarada, double preco = 30.0}) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: serie(),
+        marketPrice: preco,
+        capm: CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+        declaredSharesPerUnit: declarada,
+        officialShares:
+            OfficialShareCount(total: 3000, asOf: DateTime(2026, 9, 1)),
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('sem declaração vale a medida, e a avaliação diz que inferiu', () {
+      final v = avaliar()!;
+      final aviso =
+          v.warnings.firstWhere((w) => w.contains('negociada em unit'));
+      expect(aviso, contains('3 ações'));
+      expect(aviso, contains('inferida do valor de mercado'));
+    });
+
+    test('a declarada decide quando discorda da medida', () {
+      // O preço de 20 faz a razão medida cair em 2 — é o que acontece quando a
+      // preferencial negocia abaixo da ordinária. A companhia declara 3.
+      final semDeclarar = avaliar(preco: 20.0)!;
+      expect(semDeclarar.warnings.firstWhere((w) => w.contains('unit de')),
+          contains('2 ações'));
+
+      final comDeclarar = avaliar(declarada: 3, preco: 20.0)!;
+      expect(comDeclarar.warnings.firstWhere((w) => w.contains('unit de')),
+          contains('3 ações'));
+      expect(
+          comDeclarar.warnings.any((w) => w.contains('razão de unidade medida')),
+          isTrue,
+          reason: 'a divergência é a conferência, e tem de aparecer');
+      // Perto de 3/2, e não exatamente: a razão também divide o divisor, e o
+      // divisor forma o peso do capital próprio no WACC. Uma unit de três
+      // ações tem um terço menos unidades, valor de mercado menor e desconto
+      // um pouco diferente — o efeito de segunda ordem fica declarado aqui em
+      // vez de virar uma tolerância sem explicação.
+      expect(comDeclarar.fairValue.reais / semDeclarar.fairValue.reais,
+          closeTo(3 / 2, 0.02),
+          reason: 'três ações por unit valem uma vez e meia duas');
+    });
+
+    test('declarada igual à medida não gera conferência', () {
+      final v = avaliar(declarada: 3)!;
+      expect(v.warnings.any((w) => w.contains('razão de unidade medida')),
+          isFalse);
+      expect(v.warnings.firstWhere((w) => w.contains('unit de')),
+          contains('formulário cadastral'));
+    });
+
+    test('declaração fora da faixa é ignorada, e vale a medida', () {
+      final absurda = avaliar(declarada: 99)!;
+      final semNada = avaliar()!;
+      expect(absurda.fairValue.reais, closeTo(semNada.fairValue.reais, 1e-9));
+    });
+
+    test('o rastro mostra as duas razões e diz qual valeu', () {
+      final rastro = <AuditEvent>[];
+      AuditRecorder.attach(rastro.add);
+      addTearDown(AuditRecorder.detach);
+      avaliar(declarada: 3, preco: 20.0);
+      final passo = rastro.single.calculations
+          .firstWhere((p) => p.formulaName.contains('unidade negociada'));
+      expect(passo.mappedVariables['u_declarada'], 3);
+      expect((passo.mappedVariables['u_medida']! as num).toDouble(), 2.0);
+      expect(passo.intermediateSteps.last, contains('é ela que vale'));
+      expect(passo.finalValue, 3.0);
+    });
+  });
+
+  group('A dívida do WACC é a mesma do resto do modelo', () {
+    // Item B9, decisão 104. O peso do WACC vinha da dívida **bruta**, enquanto
+    // a apuração do capital próprio subtrai a **líquida** e a realavancagem da
+    // decisão 41 pondera a líquida — o mesmo caixa barateava a taxa e depois
+    // se somava ao acionista.
+    FundamentalsSnapshot ano(int y, double escala,
+            {required double caixa, double divida = 4000}) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 10000 * escala,
+          ebit: 1800 * escala,
+          ebitda: 2400 * escala,
+          netIncome: 900 * escala,
+          incomeBeforeTax: 1300 * escala,
+          incomeTaxExpense: -400 * escala,
+          interestExpense: divida > 0 ? 400 : null,
+          earningsPerShare: 0.9 * escala,
+          cash: caixa,
+          shortTermDebt: divida * 0.25,
+          longTermDebt: divida * 0.75,
+          totalStockholderEquity: 6000 * escala,
+          bookValuePerShare: 6.0 * escala,
+          operatingCashFlow: 2000 * escala,
+          nopat: 1188 * escala,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 12000,
+        );
+
+    List<FundamentalsSnapshot> serie(double caixa, {double divida = 4000}) {
+      final out = <FundamentalsSnapshot>[];
+      var escala = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(ano(2025 - i, escala, caixa: caixa, divida: divida));
+        escala *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult? avaliar(double caixa, {double divida = 4000}) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: serie(caixa, divida: divida),
+        marketPrice: 12.0,
+        capm: CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('mais caixa, mesma dívida bruta: o desconto sobe', () {
+      final pouco = avaliar(200)!;
+      final muito = avaliar(3000)!;
+      expect(muito.discountRate, greaterThan(pouco.discountRate),
+          reason: 'o caixa reduz a dívida líquida, o peso do capital próprio '
+              'sobe e o WACC se aproxima do Ke — com a dívida bruta o peso não '
+              'se movia');
+    });
+
+    test('caixa maior que a dívida: o peso é negativo e o WACC passa do Ke', () {
+      final v = avaliar(6000)!;
+      expect(v.discountRate, greaterThan(v.diagnostics!.costOfEquity),
+          reason: 'com caixa líquido o ativo operacional sozinho é mais '
+              'arriscado que a companhia inteira');
+      expect(v.warnings.any((w) => w.contains('caixa líquido')), isTrue,
+          reason: 'a taxa acima do Ke precisa estar declarada na tela');
+    });
+
+    test('o rastro declara que a dívida do peso é a líquida', () {
+      final rastro = <AuditEvent>[];
+      AuditRecorder.attach(rastro.add);
+      addTearDown(AuditRecorder.detach);
+      final serieDela = serie(3000);
+      ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: serieDela,
+        marketPrice: 12.0,
+        capm: CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+      ));
+      final passo = rastro.single.calculations
+          .firstWhere((p) => p.formulaName.contains('WACC'));
+      final liquida = serieDela.last.netDebt;
+      expect(passo.mappedVariables.keys, contains('D líquida (R\$)'));
+      expect((passo.mappedVariables['D líquida (R\$)']! as num).toDouble(),
+          closeTo(liquida, 0.01));
+      expect(liquida, lessThan(serieDela.last.totalDebt));
+    });
+
+    test('caixa maior que a dívida é estrutura conhecida, e não ausente', () {
+      const capm =
+          CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055);
+      final comCaixa = avaliar(6000)!;
+      expect(
+          comCaixa.warnings
+              .any((w) => w.contains('Estrutura de capital indisponível')),
+          isFalse);
+      expect(comCaixa.discountRate, isNot(closeTo(capm.costOfEquity, 1e-9)));
+    });
+
+    test('sem dívida contratada o caixa entra no desconto, e não degenera', () {
+      // Lente `metodo`, 20/09/2026. Companhia sem empréstimo e com caixa tem
+      // estrutura conhecida — dívida líquida negativa —, e a apuração do
+      // capital próprio devolve esse caixa. Degenerar para o `Ke` aqui
+      // devolveria o caixa duas vezes.
+      const capm =
+          CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055);
+      final semDivida = avaliar(3000, divida: 0)!;
+      expect(
+          semDivida.warnings
+              .any((w) => w.contains('Estrutura de capital indisponível')),
+          isFalse);
+      expect(semDivida.discountRate, greaterThan(capm.costOfEquity),
+          reason: 'peso negativo do caixa põe o WACC acima do Ke');
+      expect(
+          semDivida.warnings.any((w) => w.contains('não tem dívida contratada')),
+          isTrue);
+      // O que remunera o peso negativo é caixa, e caixa rende a taxa livre de
+      // risco: sem dívida não há prêmio de crédito a cobrar (decisão 58).
+      final peso = 1 -
+          (semDivida.discountRate - capm.costOfEquity) /
+              (capm.riskFreeRate * (1 - ValuationParameters.statutoryTaxRate) -
+                  capm.costOfEquity);
+      expect(peso, greaterThan(1.0));
+    });
+  });
 }
 
 /// Potencia de expoente inteiro, usada pelos testes de persistencia.

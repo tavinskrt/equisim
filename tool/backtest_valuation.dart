@@ -566,6 +566,25 @@ Future<void> main(List<String> args) async {
       var avaliados = 0, avaliadasDeslistadas = 0;
       final valorPorCnpj = <String, ValorDeMercado?>{};
 
+      // **O prior transversal do beta da coorte** (item B11). Sem ele não há
+      // beta desalavancado, e a montagem padrão media um motor — beta cru e
+      // WACC estático — que não é o que as decisões 40 a 46 descrevem. É
+      // resolvido **na data da coorte**, sobre o universo listado dela: um
+      // prior de hoje seria conhecimento futuro.
+      final priorDaCoorte = app
+          ? await ResolveBetaPrior.call(
+              tickers: universe,
+              prices: prices,
+              fundamentals: fundamentals,
+              benchmark: benchmark,
+              asOf: t,
+              dividendsFor: (x) => proventosDo(proventos, x.value),
+            )
+          : null;
+      if (app && priorDaCoorte == null) {
+        stderr.writeln('  ${_dia(t)}: sem prior do beta');
+      }
+
       // A medição de uma observação, para listada e deslistada: o que muda
       // entre as duas é de onde vêm o preço, os fundamentos e os proventos.
       Future<void> observar({
@@ -581,6 +600,7 @@ Future<void> main(List<String> args) async {
         required List<CashDividend>? proventosDoBeta,
         required DateTime? fimDoContrato,
         required OfficialShareCount? contagemOficial,
+        required int? acoesNaUnit,
         required void Function() contar,
         bool Function(DateTime de, DateTime ate)? janelaInvalida,
         Map<String, Object?> extras = const {},
@@ -601,6 +621,8 @@ Future<void> main(List<String> args) async {
             officialShares: contagemOficial,
             concessionEnd: fimDoContrato,
             dividends: proventosDoBeta,
+            betaPrior: priorDaCoorte,
+            declaredSharesPerUnit: acoesNaUnit,
           );
           if (prep.isErr) return;
           final insumos = prep.unwrap();
@@ -860,6 +882,9 @@ Future<void> main(List<String> args) async {
             proventosDoBeta: null,
             fimDoContrato: null,
             contagemOficial: null,
+            // A montagem antiga não passa pela FCA, e a razão de unidade dela
+            // continua sendo a medida — é o ponto de comparação.
+            acoesNaUnit: null,
             contar: () => avaliados++,
           );
           continue;
@@ -967,6 +992,11 @@ Future<void> main(List<String> args) async {
           fimDoContrato: fimDoContrato,
           contagemOficial:
               acoes == null ? null : OfficialShareCount(total: acoes, asOf: t),
+          // A composição declarada da unit na FCA vigente na data (item B16).
+          acoesNaUnit: cnpj == null
+              ? null
+              : UnitCompositionCodec.at(
+                  fca?.unitsPorCnpj[cnpj] ?? const [], t)?.shares,
           contar: () => avaliados++,
           extras: {
             if (deslistadas != null) 'deslistada': false,
@@ -1032,6 +1062,8 @@ Future<void> main(List<String> args) async {
           fimDoContrato: outorgas!.naDataPorCnpj(papel.cnpj, t)?.end,
           contagemOficial:
               acoes == null ? null : OfficialShareCount(total: acoes, asOf: t),
+          acoesNaUnit: UnitCompositionCodec.at(
+              fca?.unitsPorCnpj[papel.cnpj] ?? const [], t)?.shares,
           contar: () => avaliadasDeslistadas++,
           janelaInvalida: papel.janelaSuspeita,
           extras: {

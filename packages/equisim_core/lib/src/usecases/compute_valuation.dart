@@ -239,6 +239,26 @@ class ValuationInputs {
   /// equilíbrio leem o mesmo veredito. `null` recua para a taxa do CAPM.
   final double? creditReferenceRiskFree;
 
+  /// Ações reunidas na unit, **como a companhia declara** (item B16).
+  ///
+  /// Vem do quadro de valores mobiliários da FCA da CVM, pelo formulário mais
+  /// recente até [asOf] — ver `UnitCompositionCodec`. Presente, é ela que
+  /// converte a contagem por ação das demonstrações para a unidade negociada, e
+  /// a razão medida no valor de mercado vira **conferência**.
+  ///
+  /// **Por que a medida não basta.** `contagem × preço da unit ÷ valor de
+  /// mercado` só devolve o número de ações da unit quando ordinária e
+  /// preferencial valem o mesmo. Nas coortes, contra a composição declarada,
+  /// ela erra 79 de 220 observações: em 49 cai em 1 e a unit é avaliada como
+  /// ação; em 12 cai no inteiro errado dentro da folga de 5% — a ENGI11 com 4
+  /// em vez de 5 —, sem aviso; em 18 a espécie não negocia e o valor de mercado
+  /// volta a ser a contagem vezes o preço, o que devolve 1 por construção. Ver
+  /// [`ponte_por_papel.md`](../../../../../docs/validacao/ponte_por_papel.md) §3.
+  ///
+  /// `null` sem declaração — e aí vale a medida, com a ressalva dizendo que foi
+  /// inferida.
+  final int? declaredSharesPerUnit;
+
   /// Teto **nominal** do crescimento na perpetuidade, em fração.
   ///
   /// Precisa estar na mesma unidade do desconto, que é nominal por vir do CDI.
@@ -276,6 +296,7 @@ class ValuationInputs {
     this.concessionEnd,
     this.dividendsInBeta = 0,
     this.creditReferenceRiskFree,
+    this.declaredSharesPerUnit,
   });
 
   /// Os mesmos insumos, com [n] anos de projeção explícita.
@@ -306,6 +327,7 @@ class ValuationInputs {
         concessionEnd: concessionEnd,
         dividendsInBeta: dividendsInBeta,
         creditReferenceRiskFree: creditReferenceRiskFree,
+        declaredSharesPerUnit: declaredSharesPerUnit,
       );
 
   /// Os mesmos insumos com o **nível** da taxa livre de risco deslocado em
@@ -355,6 +377,7 @@ class ValuationInputs {
       dividendsInBeta: dividendsInBeta,
       creditReferenceRiskFree:
           creditReferenceRiskFree ?? capm.riskFreeRate,
+      declaredSharesPerUnit: declaredSharesPerUnit,
     );
   }
 }
@@ -613,6 +636,14 @@ class _Premissas {
   /// `null` quando o WACC degenerou para o `Ke`.
   final double? custoDaDivida;
 
+  /// Prêmio de crédito da classificação sintética, em fração.
+  ///
+  /// É o que o solucionador do caminho de taxas recebe, para que o `K_d` de
+  /// cada ano seja `Rf_t + spread` — o mesmo que o WACC estático aplica, e a
+  /// mesma leitura da decisão 31. Zero sem dívida bruta: ali não há custo de
+  /// dívida a medir, e o que sobra é rendimento de caixa (decisão 58).
+  final double spreadDeCredito;
+
   const _Premissas({
     required this.desconto,
     required this.descontoTerminal,
@@ -626,6 +657,7 @@ class _Premissas {
     required this.keCorrente,
     required this.keTerminal,
     required this.custoDaDivida,
+    required this.spreadDeCredito,
   });
 }
 
@@ -803,20 +835,42 @@ abstract final class ValuationCascade {
       );
     }
 
-    final sharesPerQuote = quotedUnitRatio(
+    // **A composição declarada decide, e a medida confere** (item B16). A razão
+    // medida no valor de mercado continua sendo calculada: ela é a conferência,
+    // e é o que sobra quando a companhia não declara.
+    final medida = quotedUnitRatio(
       sharesOutstanding: latest.sharesOutstanding,
       marketCap: latest.marketCap,
       marketPrice: inputs.marketPrice,
     );
-    _auditUnitRatio(audit, inputs, latest, sharesPerQuote);
+    final declarada = inputs.declaredSharesPerUnit;
+    final declaradaValida =
+        declarada != null && declarada >= 1 && declarada <= maxSharesPerUnit;
+    final sharesPerQuote =
+        declaradaValida ? declarada.toDouble() : medida;
+    _auditUnitRatio(audit, inputs, latest, sharesPerQuote,
+        medida: medida, declarada: declaradaValida ? declarada : null);
     _auditCapm(audit, inputs.capm, inputs.dividendsInBeta);
 
     if (sharesPerQuote > 1) {
       warnings.add(
         '${inputs.ticker.value} é negociada em unit de '
-        '${sharesPerQuote.toStringAsFixed(0)} ações. Os demonstrativos vêm por '
-        'ação e a cotação é por unit: o valor justo é convertido para a unit '
-        'antes de ser comparado ao preço.',
+        '${sharesPerQuote.toStringAsFixed(0)} ações'
+        '${declaradaValida ? ', pela composição que a companhia declara no formulário cadastral da CVM' : ', razão inferida do valor de mercado — a companhia não declara a composição'}'
+        '. Os demonstrativos vêm por ação e a cotação é por unit: o valor '
+        'justo é convertido para a unit antes de ser comparado ao preço.',
+      );
+    }
+    // A conferência: a razão medida discorda da declarada. Não muda número —
+    // vale a declarada —, mas é o sinal de que as espécies negociam a preços
+    // diferentes, ou de que uma delas não negociou na data.
+    if (declaradaValida && (medida - declarada).abs() > 1e-9) {
+      warnings.add(
+        'A razão de unidade medida no valor de mercado deu '
+        '${medida.toStringAsFixed(0)} e a composição declarada diz '
+        '${declarada.toStringAsFixed(0)}: vale a declarada. A razão medida só '
+        'devolve o número de ações da unit quando as espécies valem o mesmo, e '
+        'esta divergência diz que não valem.',
       );
     }
 
@@ -1522,7 +1576,7 @@ abstract final class ValuationCascade {
     }
 
     final primeiro =
-        _descontarFluxo(via, fluxo.base, custo.taxas, custo.assumptions, p);
+        _descontarFluxo(via, fluxo.base, custo, custo.assumptions, p);
     if (primeiro.isErr) return null;
 
     return _ViaDescontada(
@@ -1565,32 +1619,43 @@ abstract final class ValuationCascade {
   static Result<DcfOutcome> _descontarFluxo(
     _Via via,
     double base,
-    LeveredRates? taxas,
+    _Custo custo,
     DcfAssumptions a,
     _Premissas premissas,
   ) {
     if (via.lane == ValuationLane.shareholder) {
       return DcfCalculator.shareholder(baseProfit: base, assumptions: a);
     }
+    final taxas = custo.taxas;
     final latest = via.latest;
+    // **O centro é a premissa que produziu o preço justo**, e não a
+    // interpolada (item B11). O cenário move o desconto da firma em relação ao
+    // centro, e o mesmo deslocamento é aplicado ao `Ke` — que é a taxa que esta
+    // rota usa. Com o centro errado, o cenário base não voltava ao preço
+    // justo, e a faixa de sensibilidade cercava outro número.
+    final centro = custo.assumptions;
+    final dKe = a.discountRate - centro.discountRate;
+    final dKeTerminal = a.terminalDiscountRate - centro.terminalDiscountRate;
     // O divisor é a contagem de unidades que forma a cotação — ver
     // [ValuationCascade.quotedShares]. Com ela, o potencial é `E ÷ VM − 1` e
     // nenhuma contagem de ação sobra na comparação com o preço de tela.
     final shares = via.divisor.count;
     final minoritarios = latest.minorityInterest ?? 0;
+    // O custo da dívida é **sempre o sintético que o WACC aplica** — nas duas
+    // rotas (item B11). O observado, `despesa financeira ÷ dívida bruta`, a
+    // decisão 31 já descartou: ele carrega arrendamento e variação cambial, e
+    // caía fora da banda defensável em 70 dos 120 avaliados.
+    final kd = premissas.custoDaDivida ?? via.inputs.capm.riskFreeRate;
     if (taxas == null) {
-      final centro = premissas.assumptions;
       return DcfCalculator.equityFromFirm(
         baseProfit: base,
         assumptions: a,
         netDebt: latest.netDebt,
         sharesOutstanding: shares,
-        costOfDebt: premissas.custoDaDivida ?? via.inputs.capm.riskFreeRate,
+        costOfDebt: kd,
         taxRate: ValuationParameters.statutoryTaxRate,
-        equityDiscountRate:
-            premissas.keCorrente + (a.discountRate - centro.discountRate),
-        terminalEquityDiscountRate: premissas.keTerminal +
-            (a.terminalDiscountRate - centro.terminalDiscountRate),
+        equityDiscountRate: premissas.keCorrente + dKe,
+        terminalEquityDiscountRate: premissas.keTerminal + dKeTerminal,
         minorityInterest: minoritarios,
       );
     }
@@ -1599,11 +1664,13 @@ abstract final class ValuationCascade {
       assumptions: a,
       netDebt: latest.netDebt,
       sharesOutstanding: shares,
-      costOfDebt: latest.costOfDebt ?? via.inputs.capm.riskFreeRate,
+      costOfDebt: kd,
       taxRate: ValuationParameters.statutoryTaxRate,
-      equityDiscountRate: taxas.costOfEquity.first,
-      terminalEquityDiscountRate: taxas.terminalCostOfEquity,
-      equityDiscountRatePath: List<double>.from(taxas.costOfEquity),
+      equityDiscountRate: taxas.costOfEquity.first + dKe,
+      terminalEquityDiscountRate: taxas.terminalCostOfEquity + dKeTerminal,
+      equityDiscountRatePath: [
+        for (final k in taxas.costOfEquity) k + dKe,
+      ],
       minorityInterest: minoritarios,
     );
   }
@@ -1621,8 +1688,13 @@ abstract final class ValuationCascade {
     final lane = via.lane;
     final audit = via.audit;
     final outcome = d.outcome;
-    final assumptions = d.premissas.assumptions;
-    final assumptionsFinal = d.custo.assumptions;
+    // **As premissas finais, e não as interpoladas** (item B11). O preço justo
+    // sai do caminho de taxas e do retorno terminal do último passe; o rastro,
+    // os cenários, a taxa exibida e os diagnósticos saíam do chute de que o
+    // ponto fixo parte. No aplicativo de antes as duas coincidiam, porque ele
+    // não resolvia o prior — ligar o prior sem isto descasaria a banda de
+    // sensibilidade do preço que ela cerca.
+    final assumptions = d.custo.assumptions;
     if (outcome.fairValuePerShare <= 0) return null;
 
     _auditDcf(
@@ -1652,9 +1724,8 @@ abstract final class ValuationCascade {
           : ValuationModel.dcfEarnings,
       assumptions: assumptions,
       baseValue: outcome.fairValuePerShare,
-      valuate: (a) =>
-          _descontarFluxo(via, d.base, d.custo.taxas, a, d.premissas)
-              .map((o) => o.fairValuePerShare),
+      valuate: (a) => _descontarFluxo(via, d.base, d.custo, a, d.premissas)
+          .map((o) => o.fairValuePerShare),
       scenarioBuilder: scenarioBuilder,
       samples: samples,
       seed: seed,
@@ -1683,11 +1754,11 @@ abstract final class ValuationCascade {
         terminalCostOfEquity: d.custo.taxas?.terminalCostOfEquity,
         retentionPath: [
           for (var t = 1; t <= inputs.projectionYears; t++)
-            assumptionsFinal.retentionAt(t),
+            assumptions.retentionAt(t),
         ],
         growthPath: [
           for (var t = 1; t <= inputs.projectionYears; t++)
-            assumptionsFinal.growthAt(t),
+            assumptions.growthAt(t),
         ],
       ),
     );
@@ -1768,7 +1839,6 @@ abstract final class ValuationCascade {
                     (inputs.capm.riskFreeRate - inputs.terminalRiskFreeRate) *
                         (n <= 1 ? 1.0 : (tAno - 1) / (n - 1)),
             ];
-      final kd = latest.costOfDebt;
       // A dívida por papel usa a mesma contagem que forma a cotação, que é a
       // que o preço justo da via do acionista carrega. Ver [quotedShares].
       final dividaPorPapel = divisor.count > 0
@@ -1785,7 +1855,9 @@ abstract final class ValuationCascade {
                   riskFreePath: rfPath,
                   terminalRiskFree: inputs.terminalRiskFreeRate,
                   marketPremium: inputs.capm.marketPremium,
-                  costOfDebt: kd ?? inputs.capm.riskFreeRate,
+                  // O prêmio de crédito da classificação sintética, e não o
+                  // custo observado que a decisão 31 descartou (item B11).
+                  creditSpread: p.spreadDeCredito,
                   taxRate: ValuationParameters.statutoryTaxRate,
                 )
               : LeveredCostOfCapital.solveEquity(
@@ -2126,6 +2198,9 @@ abstract final class ValuationCascade {
       keCorrente: inputs.capm.costOfEquity,
       keTerminal: capmTerminal.costOfEquity,
       custoDaDivida: custoCorrente.costOfDebt,
+      spreadDeCredito: custoCorrente.costOfDebt == null
+          ? 0.0
+          : custoCorrente.costOfDebt! - inputs.capm.riskFreeRate,
     );
   }
 
@@ -2687,7 +2762,13 @@ abstract final class ValuationCascade {
     CapmInputs? capmOverride,
   }) {
     final capm = capmOverride ?? inputs.capm;
-    final debt = latest.totalDebt;
+    // **A dívida dos pesos é a líquida** (decisão 104), a mesma que a apuração
+    // do capital próprio subtrai, que a realavancagem da decisão 41 pondera e
+    // contra a qual o beta é desalavancado (decisão 54). A bruta continua sendo
+    // o denominador do custo da dívida observado, que é razão sobre o que de
+    // fato paga juro.
+    final bruta = latest.totalDebt;
+    final debt = latest.netDebt;
     // O peso do capital próprio é o valor de mercado **pelo divisor da ponte**,
     // e não o `marketCap` da fonte (decisão 83). Quando o divisor é a contagem
     // implícita no valor de mercado, os dois são o mesmo número; quando a
@@ -2709,7 +2790,21 @@ abstract final class ValuationCascade {
     const tax = ValuationParameters.statutoryTaxRate;
     final efetiva = latest.effectiveTaxRate;
 
-    if (debt <= 0 || equity <= 0 || kd == null) {
+    // **Quando a estrutura é mesmo desconhecida, e não só sem dívida.** Duas
+    // situações, e só elas: sem valor de mercado utilizável não há peso a
+    // formar; e com dívida contratada cujo custo não é medível — despesa
+    // financeira ausente — não há `K_d` a ponderar.
+    //
+    // **Companhia sem dívida e com caixa não entra aqui** (lente `metodo`,
+    // 20/09/2026). Ela tem estrutura conhecida: dívida líquida **negativa**, e
+    // a apuração do capital próprio devolve esse caixa ao acionista. Degenerar
+    // para o `Ke` devolveria o caixa duas vezes — uma no desconto brando, outra
+    // na apuração —, que é o defeito que a decisão 104 corrigiu para quem tem
+    // dívida. O que falta ali é o prêmio de crédito, e não o peso: sem dívida
+    // contratada o `K_d` é a taxa livre de risco, que é o que caixa rende
+    // (decisão 58).
+    final semDividaContratada = bruta <= 0;
+    if (equity <= 0 || (!semDividaContratada && kd == null)) {
       warnings.add(
         'Estrutura de capital indisponível; desconto feito ao custo do capital '
         'próprio em vez do WACC.',
@@ -2718,7 +2813,8 @@ abstract final class ValuationCascade {
         formulaName: 'Taxa de desconto — degeneração para o Ke',
         latex: r'r = K_e \quad (\text{sem estrutura de capital observável})',
         variables: {
-          'D (R\$)': _r(debt),
+          'D bruta (R\$)': _r(bruta),
+          'D líquida (R\$)': _r(debt),
           'E (R\$)': _r(equity),
           'K_d (% a.a.)': kd == null ? null : _r(kd * 100),
         },
@@ -2754,20 +2850,31 @@ abstract final class ValuationCascade {
     final referencia = inputs.creditReferenceRiskFree ?? inputs.capm.riskFreeRate;
     final coc = CostOfCapital(
       capm: capm,
-      costOfDebt: kd,
+      costOfDebt: kd ?? capm.riskFreeRate,
       taxRate: tax,
       equityValue: equity,
       debtValue: debt,
       interestCoverage: latest.interestCoverage,
       netDebtToEbitda: latest.netDebtToEbitda,
       creditReferenceRate: referencia,
+      hasContractedDebt: !semDividaContratada,
     );
 
-    if (coc.costOfDebtWasClamped) {
+    if (semDividaContratada) {
+      warnings.add(
+        '${inputs.ticker.value} não tem dívida contratada nos demonstrativos: '
+        'o que sobra do lado do financiamento é caixa, e ele entra no desconto '
+        'com peso negativo e rendimento igual à taxa livre de risco '
+        '(${_pct(capm.riskFreeRate)} a.a.). O caixa sai da taxa e volta na '
+        'apuração do capital próprio — contá-lo só de um lado inflaria o preço '
+        'justo.',
+      );
+    }
+    if (!semDividaContratada && coc.costOfDebtWasClamped) {
       final alavancagem = latest.netDebtToEbitda;
       warnings.add(
         'O custo da dívida implícito nos demonstrativos deu '
-        '${_pct(kd)} a.a., fora da faixa defensável de '
+        '${_pct(kd!)} a.a., fora da faixa defensável de '
         '${_pct(referencia)} a '
         '${_pct(referencia + CostOfCapital.maxCreditSpread)}. A despesa '
         'financeira publicada inclui arrendamento e variação cambial, que não '
@@ -2781,6 +2888,19 @@ abstract final class ValuationCascade {
         'O WACC calculado (${_pct(coc.rawWacc)} a.a.) ficou abaixo da taxa '
         'livre de risco; adotada a própria taxa livre de risco '
         '(${_pct(capm.riskFreeRate)} a.a.) como piso do desconto.',
+      );
+    }
+    // **Caixa líquido**: o peso da dívida é negativo e o WACC fica acima do Ke.
+    // É consequência da convenção — a ponte devolve o caixa ao acionista, de
+    // modo que o fluxo descontado é o do ativo operacional sozinho —, e fica
+    // declarada em vez de aparecer como taxa inexplicada na tela (decisão 104).
+    if (debt < 0 && coc.totalCapital > 0) {
+      warnings.add(
+        '${inputs.ticker.value} tem caixa líquido: o peso da dívida no WACC é '
+        'negativo (${_r(coc.debtShare, 4)}) e o desconto fica acima do custo '
+        'do capital próprio. A conta é a mesma dos dois lados — o caixa sai da '
+        'taxa e volta na apuração do capital próprio, que subtrai a dívida '
+        'líquida.',
       );
     }
 
@@ -2824,7 +2944,11 @@ abstract final class ValuationCascade {
         model: model,
         fairValue: Money.fromReais(baseValue),
         marketPrice: Money.fromReais(inputs.marketPrice),
-        discountRate: assumptions.discountRate,
+        // **A taxa do ano 1, e não o campo escalar** (item B11): com o
+        // caminho resolvido, `discountRate` guarda o chute da interpolação,
+        // e o que desconta o primeiro fluxo é `discountRateAt(1)`. Exibir o
+        // chute mostrava na tela uma taxa que a conta não usou.
+        discountRate: assumptions.discountRateAt(1),
         marginOfSafety: inputs.marginOfSafety,
         warnings: [
           ...warnings,
@@ -2853,7 +2977,7 @@ abstract final class ValuationCascade {
       model: model,
       fairValue: Money.fromReais(baseValue),
       marketPrice: Money.fromReais(inputs.marketPrice),
-      discountRate: assumptions.discountRate,
+      discountRate: assumptions.discountRateAt(1),
       marginOfSafety: inputs.marginOfSafety,
       mode: scenarios.mode,
       discreteScenarios: scenarios.discrete?.map(
@@ -2993,8 +3117,10 @@ abstract final class ValuationCascade {
     AuditTransaction? audit,
     ValuationInputs inputs,
     FundamentalsSnapshot latest,
-    double sharesPerQuote,
-  ) {
+    double sharesPerQuote, {
+    required double medida,
+    required int? declarada,
+  }) {
     if (audit == null) return;
     final shares = latest.sharesOutstanding;
     final cap = latest.marketCap;
@@ -3004,24 +3130,37 @@ abstract final class ValuationCascade {
 
     audit.step(
       formulaName: 'Razão da unidade negociada',
-      latex: r'u = \mathrm{round}\!\left(\frac{N_{ações} \cdot P_{mkt}}{VM}\right)',
+      latex: declarada != null
+          ? r'u = u_{declarada} \quad ; \quad '
+              r'u_{medida} = \mathrm{round}\!\left('
+              r'\frac{N_{ações} \cdot P_{mkt}}{VM}\right)'
+          : r'u = \mathrm{round}\!\left(\frac{N_{ações} \cdot P_{mkt}}{VM}\right)',
       variables: {
         'N_ações': shares == null ? null : _r(shares, 0),
         'P_mkt (R\$)': _r(inputs.marketPrice),
         'VM (R\$)': cap == null ? null : _r(cap),
+        'u_declarada': declarada,
+        'u_medida': _r(medida, 0),
       },
       steps: [
         if (raw == null)
-          'Passo único: quantidade de ações ou valor de mercado ausentes; '
-              'adotada a convenção de ação comum (u = 1).'
+          'Passo 1: quantidade de ações ou valor de mercado ausentes; a razão '
+              'medida cai na convenção de ação comum (u = 1).'
         else ...[
           'Passo 1: razão medida → ${_r(shares!, 0)} × '
               '${_r(inputs.marketPrice)} ÷ ${_r(cap!)} = ${_r(raw, 4)}',
           'Passo 2: arredondamento e teste de plausibilidade (1 ≤ u ≤ '
               '${_r(maxSharesPerUnit, 0)}, desvio relativo ≤ '
-              '${_r(unitRatioTolerance * 100, 0)}%) → u = '
-              '${_r(sharesPerQuote, 0)}',
+              '${_r(unitRatioTolerance * 100, 0)}%) → u medida = '
+              '${_r(medida, 0)}',
         ],
+        if (declarada != null)
+          'Passo 3: a composição declarada no formulário cadastral da CVM diz '
+              '$declarada ${declarada == 1 ? 'ação' : 'ações'} por unit, e é '
+              'ela que vale; a medida fica como conferência (item B16)'
+        else
+          'Passo 3: sem composição declarada para este papel; vale a razão '
+              'medida, e a avaliação declara que ela foi inferida',
       ],
       result: sharesPerQuote,
       unit: 'ações por papel negociado',
@@ -3110,10 +3249,11 @@ abstract final class ValuationCascade {
 
     audit.step(
       formulaName: 'Custo médio ponderado de capital (WACC)',
-      latex: r'WACC = \frac{E}{E+D}\,K_e + \frac{D}{E+D}\,K_d\,(1 - t)',
+      latex: r'WACC = \frac{E}{E+D_{liq}}\,K_e + '
+          r'\frac{D_{liq}}{E+D_{liq}}\,K_d\,(1 - t)',
       variables: {
         'E (R\$)': _r(coc.equityValue),
-        'D (R\$)': _r(coc.debtValue),
+        'D líquida (R\$)': _r(coc.debtValue),
         'K_e (% a.a.)': _r(coc.costOfEquity * 100),
         'K_d (% a.a.)': _r(kd * 100),
         't (%)': _r(coc.effectiveTaxShield * 100),

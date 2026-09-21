@@ -170,7 +170,7 @@ void main() {
       };
       final v = ValorDeMercado.naData(
           acoes: acoes, fracaoOrdinarias: 0.2, papeis: papeis, data: _d(2020, 9, 30));
-      final composicao = CodigosFca.acoesNaComposicao('1 ON e 4 PN')!;
+      final composicao = UnitCompositionCodec.parse('1 ON e 4 PN')!;
       expect(
         ValuationCascade.quotedUnitRatio(
             sharesOutstanding: acoes, marketCap: v!.valor, marketPrice: precoUnit),
@@ -222,7 +222,11 @@ void main() {
     });
   });
 
-  group('CodigosFca.acoesNaComposicao', () {
+  // A leitura do texto passou ao núcleo em 20/09/2026 (item B16): ela deixou
+  // de ser conferência de ferramenta e virou o que o motor usa, e por isso é
+  // testada também em `unit_composition_test.dart`. Este caso fica porque é o
+  // que confere a lista inteira contra a FCA de 2024.
+  group('UnitCompositionCodec.parse', () {
     test('lê as composições declaradas na FCA de 2024', () {
       const casos = {
         '1 ação ordinária e 4 ações preferenciais': 5,
@@ -238,9 +242,9 @@ void main() {
         '1 ON + 1 PN': 2,
       };
       for (final e in casos.entries) {
-        expect(CodigosFca.acoesNaComposicao(e.key), e.value, reason: e.key);
+        expect(UnitCompositionCodec.parse(e.key), e.value, reason: e.key);
       }
-      expect(CodigosFca.acoesNaComposicao('não se aplica'), isNull);
+      expect(UnitCompositionCodec.parse('não se aplica'), isNull);
     });
   });
 }

@@ -18,6 +18,8 @@ import '../data/datasources/remote/brapi_datasource.dart';
 import '../data/network/api_client.dart';
 import '../data/datasources/remote/tesouro_datasource.dart';
 import '../data/repositories/b3_registry_repository.dart';
+import '../data/repositories/beta_prior_repository.dart';
+import '../data/repositories/unit_composition_repository.dart';
 import '../data/repositories/cash_dividends_repository.dart';
 import '../data/repositories/calibrated_band_repository.dart';
 import '../data/repositories/skill_reading_repository.dart';
@@ -196,6 +198,12 @@ final cvmCoverageNoteProvider =
 /// Caminho do registro de emissores da B3 empacotado (item A3.3).
 const String b3RegistryAsset = 'assets/b3/emissores.json';
 
+/// Caminho do prior transversal do beta empacotado (item B11).
+const String betaPriorAsset = 'assets/mercado/beta_prior.json';
+
+/// Caminho da composição declarada das units, da FCA da CVM (item B16).
+const String unitCompositionAsset = 'assets/cvm/units.json';
+
 /// Caminho dos proventos da B3 empacotados (item A4).
 const String cashDividendsAsset = 'assets/b3/proventos.json';
 
@@ -260,6 +268,49 @@ final b3RegistryRepositoryProvider = Provider<B3RegistryRepository>(
     carregarPacote: () => rootBundle.loadString(b3RegistryAsset),
   ),
 );
+
+final betaPriorRepositoryProvider = Provider<BetaPriorRepository>(
+  (ref) => BetaPriorRepository(
+    carregarPacote: () => rootBundle.loadString(betaPriorAsset),
+  ),
+);
+
+/// O prior do beta do pacote, e a ressalva quando ele não pôde ser usado
+/// (item B11).
+///
+/// Sem prior não há beta desalavancado, e a cascata recua para o beta cru e o
+/// WACC estático — as decisões 40 e 41 declaram esse recuo, e a ressalva diz ao
+/// usuário qual dos dois motores produziu o número.
+final betaPriorReadingProvider =
+    FutureProvider<({BetaPrior? prior, String? note})>((ref) async {
+  try {
+    return await ref.watch(betaPriorRepositoryProvider).reading();
+  } on Object {
+    return (prior: null, note: null);
+  }
+});
+
+final unitCompositionRepositoryProvider = Provider<UnitCompositionRepository>(
+  (ref) => UnitCompositionRepository(
+    carregarPacote: () => rootBundle.loadString(unitCompositionAsset),
+    // A data da avaliação é a do dia, e a camada de aplicativo é o lugar de
+    // perguntá-la — a mesma convenção do pacote da CVM.
+    hoje: DateTime.now,
+  ),
+);
+
+/// Ações na unit de um ativo, pela composição que a companhia declara na FCA
+/// (item B16), ou `null` — e aí a razão volta a ser inferida.
+final declaredSharesPerUnitProvider =
+    FutureProvider.family<int?, Ticker>((ref, ticker) async {
+  try {
+    return await ref
+        .watch(unitCompositionRepositoryProvider)
+        .sharesPerUnitFor(ticker);
+  } on Object {
+    return null;
+  }
+});
 
 /// Contagem oficial de ações do emissor de um ativo, ou `null` (decisão 83).
 final officialSharesProvider =

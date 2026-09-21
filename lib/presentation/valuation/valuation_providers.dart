@@ -139,6 +139,15 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     // Proventos da B3: o beta sai do retorno total, que é a convenção do
     // Ibovespa do outro lado da regressão (decisão 89).
     dividends: await ref.watch(cashDividendsProvider(ticker).future),
+    // **O prior transversal do beta** (item B11, decisão 105). Sem ele não há
+    // beta desalavancado, e o motor cai no beta cru e no WACC estático — o
+    // recuo das decisões 40 e 41, que era o que o aplicativo fazia. Ele vem do
+    // pacote do build: resolvê-lo em tempo de execução seria varrer o universo
+    // inteiro para avaliar um ativo.
+    betaPrior: (await ref.watch(betaPriorReadingProvider.future)).prior,
+    // A composição declarada da unit, da FCA da CVM (item B16, decisão 106).
+    declaredSharesPerUnit:
+        await ref.watch(declaredSharesPerUnitProvider(ticker).future),
   );
   if (inputs.isErr) return null;
 
@@ -157,6 +166,9 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
   final notas = [
     await ref.watch(cvmCoverageNoteProvider(ticker).future),
     (await ref.watch(riskFreeCurveReadingProvider.future)).note,
+    // Sem prior do beta o motor é outro — beta cru e WACC estático —, e quem
+    // lê o preço justo tem de saber qual dos dois rodou (item B11).
+    (await ref.watch(betaPriorReadingProvider.future)).note,
   ].nonNulls.toList();
   return notas.isEmpty ? avaliado : avaliado.withWarnings(notas);
 });

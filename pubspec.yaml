@@ -65,5 +65,9 @@ flutter:
     # Faixa do valor realizado em torno do preço justo, medida nas coortes da
     # validação por tool/cobertura_banda.py e versionada (decisão 92).
     - assets/validacao/
+    # Prior transversal do beta, gerado por tool/beta_prior_empacotar.dart e
+    # versionado (item B11). Sem ele o motor cai no beta cru e no WACC
+    # estático, e a avaliação declara que caiu.
+    - assets/mercado/
 
 

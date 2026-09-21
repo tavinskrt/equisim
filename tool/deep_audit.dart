@@ -88,7 +88,8 @@ Map<String, dynamic> diagnose(ValuationInputs inputs) {
           costOfDebt: kd,
           taxRate: ValuationParameters.statutoryTaxRate,
           equityValue: equityMkt,
-          debtValue: latest.totalDebt,
+          // A líquida, como o motor (decisão 104).
+          debtValue: latest.netDebt,
           interestCoverage: latest.interestCoverage,
           netDebtToEbitda: latest.netDebtToEbitda,
         )

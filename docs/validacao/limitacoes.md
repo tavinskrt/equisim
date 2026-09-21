@@ -614,10 +614,12 @@ taxonomia por emissor em vez de por papel, e é trabalho de dado.
 
 **Resolvida em 14/09/2026.** A classificação oficial da B3 é por emissor, e os
 três passam pela Porta 1, por subsetor
-([decisão 87](../decisoes/087-o-setor-e-o-da-b3-por-emissor.md)). Na montagem do
-aplicativo o preço justo deles não se move: a isenção de realavancagem só age com
-o beta desalavancado, e o aplicativo não resolve o prior do beta (item B11 do
-plano).
+([decisão 87](../decisoes/087-o-setor-e-o-da-b3-por-emissor.md)). Na medição de
+14/09/2026 o preço justo deles não se movia, porque a isenção de realavancagem só
+age com o beta desalavancado e o aplicativo não resolvia o prior. **Desde
+20/09/2026 ele resolve**
+([decisão 105](../decisoes/105-o-aplicativo-resolve-o-prior-do-beta-e-o-custo-de-capital.md)),
+e a isenção age.
 
 ### 2.14. O minoritário é subtraído pelo valor contábil
 
@@ -1025,8 +1027,14 @@ derivado não sustenta capital próprio positivo, o ativo é recusado, e a via d
 acionista não o carrega mais. E a rota derivada sem taxas resolvidas não é a
 identidade com `FCFF/WACC − D`: nos 65 que eram avaliados só pela firma, o preço
 justo cai 5,5% na mediana. Na montagem com o prior do beta, que o aplicativo não
-usa, 2 de 104 ainda sobem com a taxa, pelo veredito da perpetuidade que alterna
-entre passes do ponto fixo — é do B11.
+usava, 2 de 104 ainda subiam com a taxa, pelo veredito da perpetuidade que
+alternava entre passes do ponto fixo.
+
+**Fechado em 20/09/2026, com o B11.** O aplicativo passou a resolver o prior, e a
+montagem dele é a resolvida: **nenhum dos 102 avaliados sobe com a taxa**, nas
+duas montagens, e a RADL3 e a SEER3 ficaram monótonas
+([prior_no_aplicativo.md](prior_no_aplicativo.md)). A cobertura foi a 102: a
+recusa de estrutura da decisão 45 alcança 25 ativos, contra nenhum antes.
 
 ### 3.11. A banda de cenários não mede incerteza
 
@@ -1114,9 +1122,17 @@ a cinco vezes errado — ou 25% errado, no inteiro vizinho, sem aviso. No aplica
 as nove units passaram em 04/09/2026 (decisão 61), mas a convenção do valor de
 mercado da fonte não é conhecida, e é ela que decide se o erro aparece.
 
-**Para resolver.** Item B16 do [plano](../plano-motor-de-referencia.md): a
-composição declarada entra no pacote do aplicativo, e a razão medida vira
-conferência.
+**Resolvida em 20/09/2026**
+([decisão 106](../decisoes/106-a-razao-de-unidade-sai-da-composicao-declarada-e-a-medida-confere.md),
+[ponte_por_papel.md](ponte_por_papel.md) §7). A composição declarada entra no
+pacote do aplicativo, por CNPJ e por ano, e decide; a razão medida vira
+conferência, e a divergência entre as duas aparece na avaliação. As nove units
+que a FCA declara saem com a composição dela; na décima, a ONCO11, que a
+companhia não declara, o motor infere **e diz que inferiu**. **No aplicativo
+nenhum número muda** — a razão medida coincidia com a declarada nas sete units
+avaliadas —, e o que muda é a dependência de uma convenção de valor de mercado
+que não é conhecida. **Nas coortes o ganho só entra quando o backtest for
+reexecutado** (item C5).
 
 ### 3.14. A série de preços das coortes tem no máximo dez anos, e o beta das antigas é de janela curta
 

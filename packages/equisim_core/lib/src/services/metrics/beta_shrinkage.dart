@@ -36,6 +36,91 @@ class BetaPrior {
   }
 }
 
+/// O prior empacotado para o aplicativo (item B11).
+///
+/// **Por que empacotado, e não resolvido em tempo de execução.** Resolver o
+/// prior é varrer o universo inteiro — cinco anos de cotação, o histórico de
+/// fundamentos e o perfil de cada um dos 376 papéis — para avaliar **um**
+/// ativo. O aplicativo não pode pagar isso a cada abertura de tela, e sem o
+/// prior não há beta desalavancado: o motor cai no beta cru e no WACC estático,
+/// que são o recuo das decisões 40 e 41.
+///
+/// **O prior é lento, e é isso que torna o pacote honesto.** Ele é mediana
+/// transversal de betas desalavancados sobre janela de cinco anos: um dia a
+/// mais ou a menos não o move. O pacote traz [geradoEm] para que o aplicativo
+/// possa dizer de quando ele é, e para que uma defasagem grande demais seja
+/// recusada em vez de passar em silêncio — o mesmo arranjo do pacote da curva
+/// (decisão 86).
+class BetaPriorPackage {
+  /// O prior.
+  final BetaPrior prior;
+
+  /// Data em que foi resolvido.
+  final DateTime geradoEm;
+
+  /// Papéis que entraram na mediana.
+  final int observations;
+
+  const BetaPriorPackage({
+    required this.prior,
+    required this.geradoEm,
+    required this.observations,
+  });
+}
+
+/// Serialização do prior do beta.
+abstract final class BetaPriorCodec {
+  /// Versão do formato.
+  static const int versao = 1;
+
+  /// Grava o pacote.
+  static Map<String, Object> encode(
+    BetaPrior prior, {
+    required DateTime geradoEm,
+    required int observations,
+  }) =>
+      {
+        'versao': versao,
+        'geradoEm': geradoEm.toIso8601String().substring(0, 10),
+        'observacoes': observations,
+        'universo': prior.unleveredUniverse,
+        'dispersao': prior.dispersion,
+        'setores': {...prior.unleveredBySector},
+      };
+
+  /// Lê o pacote, ou devolve `null` quando ele não é utilizável.
+  ///
+  /// Recusa em vez de adivinhar: versão diferente, mediana do universo ausente
+  /// ou não positiva, e dispersão não positiva devolvem `null`, e quem chama
+  /// segue com o beta cru — que é o comportamento anterior, declarado.
+  static BetaPriorPackage? decode(Map<String, dynamic> pacote) {
+    if (pacote['versao'] != versao) return null;
+    final universo = (pacote['universo'] as num?)?.toDouble();
+    final dispersao = (pacote['dispersao'] as num?)?.toDouble();
+    final data = DateTime.tryParse('${pacote['geradoEm']}');
+    if (universo == null || !universo.isFinite || universo <= 0) return null;
+    if (dispersao == null || !dispersao.isFinite || dispersao <= 0) return null;
+    if (data == null) return null;
+    final setores = <String, double>{};
+    final bruto = pacote['setores'];
+    if (bruto is Map) {
+      for (final e in bruto.entries) {
+        final v = (e.value as num?)?.toDouble();
+        if (v != null && v.isFinite && v > 0) setores['${e.key}'] = v;
+      }
+    }
+    return BetaPriorPackage(
+      prior: BetaPrior(
+        unleveredBySector: Map.unmodifiable(setores),
+        unleveredUniverse: universo,
+        dispersion: dispersao,
+      ),
+      geradoEm: data,
+      observations: (pacote['observacoes'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 /// Beta resultante do encolhimento, com o peso que o produziu.
 class ShrunkBeta {
   /// Beta a usar no CAPM.

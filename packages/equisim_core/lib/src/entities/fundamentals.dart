@@ -310,9 +310,14 @@ class FundamentalsSnapshot {
   ///
   /// **Trata ausência como zero.** Uma parcela não informada pela fonte é
   /// indistinguível aqui de uma parcela realmente nula, e o efeito não é
-  /// neutro: dívida subestimada infla o equity no *bridge* do DCF
-  /// (`Equity = EV − dívida líquida`). Quem precisa distinguir "sem dívida" de
-  /// "sem dado" deve inspecionar [shortTermDebt] e [longTermDebt] diretamente.
+  /// neutro: dívida subestimada infla o capital próprio, que sai do fluxo do
+  /// acionista derivado do da firma (decisão 102). Quem precisa distinguir "sem
+  /// dívida" de "sem dado" deve inspecionar [shortTermDebt] e [longTermDebt]
+  /// diretamente.
+  ///
+  /// **Não é a dívida dos pesos do WACC**, que é a líquida (decisão 104). Esta
+  /// é o denominador do custo da dívida observado — ver [costOfDebt] —, que é
+  /// razão sobre o que de fato paga juro.
   double get totalDebt => (shortTermDebt ?? 0) + (longTermDebt ?? 0);
 
   /// Caixa e equivalentes: disponibilidades mais aplicações de curto prazo.
@@ -322,7 +327,11 @@ class FundamentalsSnapshot {
   double get totalCash => (cash ?? 0) + (shortTermInvestments ?? 0);
 
   /// Dívida líquida: [totalDebt] menos [totalCash]. Negativa em empresa com
-  /// caixa maior que a dívida, e é assim que entra no *bridge* do DCF.
+  /// caixa maior que a dívida.
+  ///
+  /// **É a dívida do modelo inteiro**: a que o fluxo do acionista derivado
+  /// desconta (decisão 102), a que a realavancagem pondera (decisão 41), a que
+  /// desalavanca o beta (decisão 54) e a dos pesos do WACC (decisão 104).
   double get netDebt => totalDebt - totalCash;
 
   /// Cobertura de juros: `EBIT ÷ despesa financeira`.
