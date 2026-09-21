@@ -47,6 +47,98 @@ void main() {
     });
   });
 
+  group('O terminal neutro e o capital instalado', () {
+    // Item B12, decisão 107. O retorno terminal neutro fixa o retorno do
+    // capital **novo** — é o que faz o crescimento sair da fórmula —, e não o
+    // do capital que já existe. A mesma expressão reagrupada é
+    // `VT = capital_N + EVA_(N+1)/r`, e a segunda parcela é perpétua.
+    DcfAssumptions premissas({
+      required double roic,
+      double g = 0.04,
+      int? contrato,
+    }) =>
+        DcfAssumptions(
+          projectionYears: 10,
+          growthRate: g,
+          perpetualGrowth: g,
+          discountRate: 0.15,
+          terminalDiscountRate: 0.15,
+          returnOnCapital: roic,
+          neutralTerminalReturn: true,
+          contractYearsAfterHorizon: contrato,
+          cashTiming: CashTiming.fimDeAno,
+        );
+
+    DcfOutcome firma({required double roic, int? contrato}) =>
+        DcfCalculator.firm(
+          baseProfit: 1000,
+          assumptions: premissas(roic: roic, contrato: contrato),
+          netDebt: 0,
+          sharesOutstanding: 100,
+        ).unwrap();
+
+    test('o retorno implícito do instalado é o ROIC, e não o custo', () {
+      // O capital parte de `lucro_1/ROIC` e acumula a retenção; o retorno
+      // médio caminha do ROIC observado em direção ao marginal, sem chegar.
+      final baixo = firma(roic: 0.08);
+      final alto = firma(roic: 0.25);
+      expect(baixo.impliedTerminalReturn!, lessThan(0.15),
+          reason: 'quem rende abaixo do custo continua rendendo abaixo');
+      expect(alto.impliedTerminalReturn!, greaterThan(0.15));
+      expect(baixo.impliedTerminalReturn!, greaterThan(0.08),
+          reason: 'o capital novo entra ao custo e puxa a média para cima');
+    });
+
+    test('o excedente é negativo quando o instalado rende abaixo do custo', () {
+      final baixo = firma(roic: 0.08);
+      final alto = firma(roic: 0.25);
+      expect(baixo.discountedTerminalExcess!, lessThan(0));
+      expect(alto.discountedTerminalExcess!, greaterThan(0));
+    });
+
+    test('tirar o excedente é o mesmo que cortar o contrato em zero ano', () {
+      // O ramo de contrato da decisão 88 faz `VT = capital_N + EVA·anuidade(M)`;
+      // com `M = 0` sobra o capital. A decomposição tem de bater com ele **ao
+      // centavo**, porque as duas contas são a mesma álgebra por caminhos
+      // diferentes — é o que impede a parcela declarada de ser aproximação.
+      for (final roic in [0.08, 0.15, 0.25]) {
+        final neutro = firma(roic: roic);
+        final semExcedente = firma(roic: roic, contrato: 0);
+        final excedentePorPapel = neutro.discountedTerminalExcess! / 100;
+        expect(semExcedente.fairValuePerShare,
+            closeTo(neutro.fairValuePerShare - excedentePorPapel, 1e-9),
+            reason: 'ROIC $roic');
+      }
+    });
+
+    test('com o instalado rendendo o custo, o excedente é zero', () {
+      // O caso em que o rótulo "sem lucro econômico na perpetuidade" é
+      // verdadeiro: o terminal vale exatamente o capital.
+      final r = firma(roic: 0.15);
+      expect(r.impliedTerminalReturn!, closeTo(0.15, 1e-9));
+      expect(r.discountedTerminalExcess!, closeTo(0, 1e-9));
+    });
+
+    test('vantagem competitiva concedida não tem decomposição', () {
+      final comMoat = DcfCalculator.firm(
+        baseProfit: 1000,
+        assumptions: DcfAssumptions(
+          projectionYears: 10,
+          growthRate: 0.04,
+          perpetualGrowth: 0.04,
+          discountRate: 0.15,
+          terminalDiscountRate: 0.15,
+          returnOnCapital: 0.20,
+          terminalReturnOnCapital: 0.18,
+        ),
+        netDebt: 0,
+        sharesOutstanding: 100,
+      ).unwrap();
+      expect(comMoat.discountedTerminalExcess, isNull,
+          reason: 'ali o terminal é outro, e a álgebra não é esta');
+    });
+  });
+
   group('DCF pela via da firma', () {
     // Sem decaimento e sem freio, para que o valor confira com conta manual.
     const flat = DcfAssumptions(

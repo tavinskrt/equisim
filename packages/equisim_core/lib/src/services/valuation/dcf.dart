@@ -430,6 +430,32 @@ class DcfOutcome {
   /// Vale `1.0` na via do acionista, que não tem ponte.
   final double equityShare;
 
+  /// O quanto do **valor do capital próprio** vem do excedente perpétuo do
+  /// capital instalado, a valor presente (item B12).
+  ///
+  /// É a parcela que o terminal neutro mantém para sempre: `EVA_{N+1}/r`,
+  /// trazida a presente pelo mesmo caminho do terminal. Tirá-la deixaria o
+  /// terminal em `capital_N` — a companhia rendendo exatamente o custo de
+  /// capital sobre o ativo instalado, além de sobre o novo.
+  ///
+  /// `null` quando a decomposição não se aplica — vantagem competitiva
+  /// concedida, contrato com prazo, ou capital não medível. **Pode ser
+  /// negativa**, quando o instalado rende abaixo do custo.
+  ///
+  /// Ver [DcfCalculator.neutralTerminalExcess].
+  final double? discountedTerminalExcess;
+
+  /// Retorno que o capital instalado rende na perpetuidade, **implícito na
+  /// projeção**: `lucro_{N+1} ÷ capital_N` (item B12).
+  ///
+  /// O terminal neutro é apresentado como "sem lucro econômico na
+  /// perpetuidade", e isso só é verdade quando este número **é** a taxa de
+  /// desconto de equilíbrio. Ele não é: a projeção faz o `ROIC` convergir para
+  /// a taxa do ano N, e o terminal desconta à taxa de equilíbrio, que é outra.
+  ///
+  /// `null` nos mesmos casos de [discountedTerminalExcess].
+  final double? impliedTerminalReturn;
+
   /// Agrupa a saída já calculada.
   const DcfOutcome({
     required this.projectedFlows,
@@ -441,6 +467,8 @@ class DcfOutcome {
     required this.fairValuePerShare,
     required this.terminalShare,
     this.equityShare = 1.0,
+    this.discountedTerminalExcess,
+    this.impliedTerminalReturn,
   });
 }
 
@@ -457,6 +485,56 @@ abstract final class DcfCalculator {
   /// diverge.
   static const double minimumSpread = 0.005;
 
+  /// Abaixo disto, em módulo, o valor terminal é resíduo de ponto flutuante e
+  /// não denominador.
+  ///
+  /// Ele é soma acumulada de dez anos de fluxo descontado: um terminal
+  /// algebricamente nulo chega aqui como 1e-14, e `== 0` o deixaria passar
+  /// para a divisão. A escala é a de reais, e um bilionésimo de centavo não é
+  /// valor de empresa.
+  static const double _residuoDoTerminal = 1e-9;
+
+  /// O **excedente perpétuo do capital instalado**, embutido no terminal
+  /// neutro (item B12).
+  ///
+  /// O terminal neutro `VT = lucro_{N+1}/r` recusa o valor do capital **novo**
+  /// — `RONIC = r`, e por isso o crescimento some da fórmula. Ele não recusa o
+  /// excedente do capital que **já existe** no ano N. A mesma expressão,
+  /// reagrupada:
+  ///
+  /// ```
+  /// VT = lucro_{N+1}/r = capital_N + EVA_{N+1}/r
+  /// com  EVA_{N+1} = lucro_{N+1} − r·capital_N
+  /// ```
+  ///
+  /// **É premissa, e não identidade.** Ela afirma que a companhia mantém, para
+  /// sempre, o retorno acima do custo de capital sobre o ativo instalado —
+  /// enquanto afirma que qualquer ativo novo renderá exatamente o custo. Nas
+  /// concessões a [decisão 88](../../../../../docs/decisoes/088-o-prazo-da-concessao-corta-o-excedente.md)
+  /// já corta esse excedente no fim do contrato, pela mesma álgebra; fora
+  /// delas, ele é perpétuo.
+  ///
+  /// Devolve `null` quando a decomposição não se aplica: com vantagem
+  /// competitiva concedida o terminal é outro, com contrato o corte já está
+  /// feito, e sem capital utilizável não há o que separar. **Pode ser
+  /// negativo**, quando o capital instalado rende abaixo do custo dele.
+  static double? neutralTerminalExcess({
+    required double finalProfit,
+    required double? finalCapital,
+    required DcfAssumptions assumptions,
+  }) {
+    if (!assumptions.neutralTerminalReturn) return null;
+    if (assumptions.terminalReturnOnCapital != null) return null;
+    if (assumptions.contractYearsAfterHorizon != null) return null;
+    final k = finalCapital;
+    if (k == null || !k.isFinite || k <= 0) return null;
+    final r = assumptions.terminalDiscountRate;
+    if (r <= 0) return null;
+    final proximo = finalProfit * (1 + assumptions.perpetualGrowth);
+    final eva = proximo - r * k;
+    return eva.isFinite ? eva / r : null;
+  }
+
   /// Valor terminal no ano N.
   ///
   /// **Com retorno terminal neutro** — `ROIC_∞ = WACC` ou `ROE_∞ = Ke` — a
@@ -470,6 +548,10 @@ abstract final class DcfCalculator {
   ///
   /// É o que blinda o resultado da premissa de crescimento perpétuo — a parte da
   /// avaliação que carregava de 63% a 80% do valor deixa de depender dela.
+  ///
+  /// **O que ele não blinda é o excedente do capital instalado**, que continua
+  /// perpétuo: `lucro_{N+1}/r = capital_N + EVA_{N+1}/r`. Ver
+  /// [neutralTerminalExcess] e o item B12.
   ///
   /// - [finalProfit]: lucro do ano N, **antes** da retenção.
   /// - [finalCapital]: capital investido no ano N, da projeção. Com ele e com
@@ -593,6 +675,13 @@ abstract final class DcfCalculator {
       ));
     }
 
+    // O excedente entra no valor da firma inteiro, e a dívida é subtração
+    // fixa: o que ele acrescenta ao capital próprio é o mesmo valor descontado.
+    // O fator é o do próprio terminal — levantamento de meio ano e desconto
+    // acumulado —, e sai da razão em vez de ser remontado, para que as duas
+    // partes não possam divergir.
+    final excedenteDescontado = _descontadoComoOTerminal(p);
+
     return Ok(DcfOutcome(
       projectedFlows: p.fluxos,
       discountedFlows: p.descontados,
@@ -601,6 +690,8 @@ abstract final class DcfCalculator {
       enterpriseValue: ev,
       equityValue: doControlador,
       fairValuePerShare: porPapel,
+      discountedTerminalExcess: excedenteDescontado,
+      impliedTerminalReturn: p.retornoImplicitoTerminal,
       // **Contra o capital próprio, e não contra o valor da firma**
       // (decisão 51). A pergunta que a ressalva `terminalPesado` faz é quanto
       // do **preço** repousa sobre a perpetuidade, e o preço é o capital
@@ -796,6 +887,32 @@ abstract final class DcfCalculator {
     final vtDescontado =
         vt * assumptions.lift(terminalEquityDiscountRate) / fator;
 
+    // **O excedente perpétuo do capital instalado, pela mesma rota** (item
+    // B12). Ele entra no terminal do acionista pelo fluxo da firma: tirá-lo do
+    // terminal da firma reduz `FCFF_{N+1}` em `(EVA/r)·(r_∞ − g)` e, como o
+    // serviço da dívida não muda, reduz o do acionista no mesmo tanto. Tudo
+    // aqui é linear, de modo que a parcela é exata, e não aproximação.
+    final excedenteDaFirma = neutralTerminalExcess(
+      finalProfit: p.lucroFinal,
+      finalCapital: p.capitalFinal,
+      assumptions: assumptions,
+    );
+    final double? excedenteDescontado;
+    // Comparação por tolerância, e não igualdade: `vt` é `double` acumulado de
+    // dez anos de fluxo, e `== 0` deixaria passar um resíduo de 1e-14 para o
+    // denominador. A escala é a do próprio terminal.
+    if (excedenteDaFirma == null ||
+        vt.abs() < _residuoDoTerminal ||
+        !vt.isFinite) {
+      excedenteDescontado = null;
+    } else {
+      final delta = excedenteDaFirma *
+          (assumptions.terminalDiscountRate - gInf) /
+          spread;
+      final v = delta * (vtDescontado / vt);
+      excedenteDescontado = v.isFinite ? v : null;
+    }
+
     final equity = soma + vtDescontado;
     // O fluxo do acionista derivado do da firma continua consolidando 100% das
     // controladas: a parte dos não controladores sai aqui, como sai na ponte.
@@ -818,6 +935,8 @@ abstract final class DcfCalculator {
       fairValuePerShare: porPapel,
       terminalShare: doControlador > 0 ? vtDescontado / doControlador : 0.0,
       equityShare: ev > 0 ? equity / ev : 0.0,
+      discountedTerminalExcess: excedenteDescontado,
+      impliedTerminalReturn: p.retornoImplicitoTerminal,
     ));
   }
 
@@ -862,7 +981,25 @@ abstract final class DcfCalculator {
       equityValue: porPapel,
       fairValuePerShare: porPapel,
       terminalShare: porPapel > 0 ? p.terminalDescontado / porPapel : 0.0,
+      discountedTerminalExcess: _descontadoComoOTerminal(p),
+      impliedTerminalReturn: p.retornoImplicitoTerminal,
     ));
+  }
+
+  /// O excedente perpétuo trazido a presente **pelo mesmo fator do terminal**.
+  ///
+  /// A razão `terminalDescontado ÷ terminal` é o fator acumulado com o
+  /// levantamento de meio ano já dentro. Remontá-lo à mão deixaria duas contas
+  /// do mesmo desconto, que é como elas divergem.
+  static double? _descontadoComoOTerminal(_Projection p) {
+    final e = p.excedenteTerminal;
+    if (e == null ||
+        p.terminal.abs() < _residuoDoTerminal ||
+        !p.terminal.isFinite) {
+      return null;
+    }
+    final v = e * (p.terminalDescontado / p.terminal);
+    return v.isFinite ? v : null;
   }
 
   /// Taxa de retenção implícita num crescimento, pela relação `g = retorno × b`.
@@ -960,6 +1097,14 @@ abstract final class DcfCalculator {
       terminal: vt,
       capitalFinal: capital.isFinite ? capital : null,
       lucroFinal: lucro,
+      excedenteTerminal: neutralTerminalExcess(
+        finalProfit: lucro,
+        finalCapital: capital.isFinite ? capital : null,
+        assumptions: a,
+      ),
+      retornoImplicitoTerminal: (capital.isFinite && capital > 0)
+          ? lucro * (1 + a.perpetualGrowth) / capital
+          : null,
       // A perpetuidade também é feita de fluxos distribuídos no ano, e recebe
       // o mesmo levantamento — sob a taxa de equilíbrio, que é a que a
       // capitaliza.
@@ -979,6 +1124,14 @@ class _Projection {
   /// Lucro do ano N, antes da retenção — o que o terminal capitaliza.
   final double lucroFinal;
 
+  /// O excedente perpétuo do capital instalado dentro de [terminal], em valor
+  /// futuro, ou `null` quando a decomposição não se aplica (item B12).
+  final double? excedenteTerminal;
+
+  /// `lucro_{N+1} ÷ capital_N`, o retorno que a perpetuidade supõe sobre o
+  /// capital instalado. `null` sem capital medível.
+  final double? retornoImplicitoTerminal;
+
   const _Projection({
     required this.fluxos,
     required this.descontados,
@@ -987,5 +1140,7 @@ class _Projection {
     required this.terminalDescontado,
     this.capitalFinal,
     required this.lucroFinal,
+    this.excedenteTerminal,
+    this.retornoImplicitoTerminal,
   });
 }

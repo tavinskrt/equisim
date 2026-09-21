@@ -3589,6 +3589,158 @@ void main() {
     });
   });
 
+  group('A perpetuidade declara de onde vêm o beta e a estrutura', () {
+    // Item B15, decisão 109. Em produção o beta de equilíbrio é o de hoje,
+    // encolhido, e a estrutura é a do ano N do modelo. As duas alternativas do
+    // item — convergir o beta em direção a 1 e impor uma alavancagem — entram
+    // por imposição de diagnóstico, e é o que estes casos exercitam.
+    FundamentalsSnapshot ano(int y, double escala) => FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 20000 * escala,
+          ebit: 3000 * escala,
+          ebitda: 4000 * escala,
+          netIncome: 1500 * escala,
+          incomeBeforeTax: 2200 * escala,
+          incomeTaxExpense: -700 * escala,
+          interestExpense: 500,
+          earningsPerShare: 1.5 * escala,
+          cash: 600,
+          shortTermDebt: 1500,
+          longTermDebt: 4500,
+          totalStockholderEquity: 9000 * escala,
+          bookValuePerShare: 9.0 * escala,
+          operatingCashFlow: 3400 * escala,
+          nopat: 1980 * escala,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 18000,
+        );
+
+    List<FundamentalsSnapshot> serie() {
+      final out = <FundamentalsSnapshot>[];
+      var escala = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(ano(2025 - i, escala));
+        escala *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult avaliar({
+      double beta = 1.6,
+      double? pesoDoBeta,
+      double? alavancagem,
+    }) =>
+        ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: serie(),
+          marketPrice: 18.0,
+          capm: CapmInputs(
+              riskFreeRate: 0.14, beta: beta, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: 0.60,
+          terminalBetaWeightOverride: pesoDoBeta,
+          terminalLeverageOverride: alavancagem,
+        )).unwrap();
+
+    test('sem imposição, nada muda — é o caminho de produção', () {
+      final a = avaliar();
+      final b = avaliar(pesoDoBeta: null, alavancagem: null);
+      expect(b.fairValue.cents, a.fairValue.cents);
+    });
+
+    test('a estrutura de equilíbrio sai nos diagnósticos, e é a do ano N', () {
+      final d = avaliar().diagnostics!;
+      expect(d.terminalEquityShare, isNotNull,
+          reason: 'com taxas resolvidas, a perpetuidade tem estrutura própria');
+      expect(d.terminalEquityShare, isNot(closeTo(d.equityShare, 1e-9)),
+          reason: 'a do ano N não é a de hoje — se fosse, a decisão 105 não '
+              'teria mudado nada');
+    });
+
+    test('convergir o beta aproxima a taxa de equilíbrio da de beta 1', () {
+      // **O beta que a perpetuidade usa é o realavancado do ano N** —
+      // `β_U · fator(D_N/E_N)` —, e não o `beta` do CAPM: com o caminho de
+      // taxas resolvido, quem entra é o desalavancado. Blume o puxa para 1, e o
+      // sentido do movimento depende de que lado desse 1 ele estava. O que vale
+      // nos dois lados é a aproximação.
+      const taxaDeBetaUm = 0.094 + 1.0 * 0.055;
+      for (final betaU in [0.35, 1.30]) {
+        final sem = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: serie(),
+          marketPrice: 18.0,
+          capm: CapmInputs(
+              riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: betaU,
+        )).unwrap();
+        final com = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: serie(),
+          marketPrice: 18.0,
+          capm: CapmInputs(
+              riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: betaU,
+          terminalBetaWeightOverride: 0.67,
+        )).unwrap();
+        expect(
+            (com.diagnostics!.terminalCostOfEquity! - taxaDeBetaUm).abs(),
+            lessThan(
+                (sem.diagnostics!.terminalCostOfEquity! - taxaDeBetaUm).abs()),
+            reason: 'β_U = $betaU');
+        // A **corrente** não se move: a imposição é só da perpetuidade.
+        expect(com.diagnostics!.costOfEquity,
+            closeTo(sem.diagnostics!.costOfEquity, 1e-12));
+      }
+    });
+
+    test('alavancagem imposta impossível é recusada, e não vira NaN', () {
+      // Auditoria do gate, 21/09/2026. `D/E = −1` é caixa líquido igual ao
+      // capital próprio: o valor da firma zera e o peso `1/(1 + D/E)` divide
+      // por zero. A varredura que pede o impossível precisa ouvir isso.
+      for (final de in [-1.0, -2.0, double.nan, double.infinity]) {
+        final r = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: serie(),
+          marketPrice: 18.0,
+          capm: CapmInputs(
+              riskFreeRate: 0.14, beta: 1.6, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: 0.60,
+          terminalLeverageOverride: de,
+        ));
+        // A recusa do solucionador é recuo declarado, não queda: a cascata
+        // segue pela interpolação. O que não pode é sair número não finito.
+        if (r.isOk) {
+          final v = r.unwrap();
+          expect(v.fairValue.reais.isFinite, isTrue, reason: '$de');
+          expect(v.diagnostics!.terminalDiscountRate.isFinite, isTrue,
+              reason: '$de');
+        }
+      }
+    });
+
+    test('a alavancagem imposta encarece o capital próprio de equilíbrio', () {
+      final sem = avaliar();
+      final com = avaliar(alavancagem: 3.0);
+      expect(com.diagnostics!.terminalCostOfEquity!,
+          greaterThan(sem.diagnostics!.terminalCostOfEquity!),
+          reason: 'mais dívida na perpetuidade, capital próprio mais caro');
+      // O custo do capital próprio **corrente** é o do CAPM sobre a taxa de
+      // hoje: ele não passa pelo ponto fixo, e nenhuma imposição de equilíbrio
+      // o alcança.
+      expect(com.diagnostics!.costOfEquity,
+          closeTo(sem.diagnostics!.costOfEquity, 1e-12));
+    });
+  });
+
   group('Com taxas resolvidas, a tela mostra as premissas finais', () {
     // Item B11. O preço justo sai do caminho de taxas e do retorno terminal do
     // último passe; o rastro, os cenários, a taxa exibida e os diagnósticos

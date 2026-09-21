@@ -99,6 +99,78 @@ void main() {
       expect(serie.points.length, greaterThan(1));
     });
 
+    test('desdobramento entre duas buscas descarta a base velha', () async {
+      // Lente `risco`, 21/09/2026. A fonte devolve o fechamento já ajustado por
+      // todo evento até hoje, numa janela fixa. O que está em disco fora dela
+      // foi ajustado até o dia em que foi baixado: um desdobramento no meio
+      // deixa as duas metades em bases diferentes, com um degrau exatamente na
+      // borda — o mesmo defeito que a decisão 97 mediu nas coortes, entrando
+      // pelo cache. A resposta traz 2026-07-21 a R$ 41,66; o disco o tem a
+      // 83,32, o dobro, que é como um grupamento de 2 apareceria.
+      await db.upsertPrices([
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2001-03-15',
+          close: 6.42,
+          volume: const Value(1000),
+        ),
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2026-07-21',
+          close: 83.32,
+          volume: const Value(1000),
+        ),
+      ]);
+      final repository = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: db,
+      );
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+
+      final serie = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
+          .unwrap()[Ticker.parse('PETR4')]!;
+
+      expect(serie.points.first.date, DateTime(2026, 7, 21),
+          reason: 'o histórico em outra base sai inteiro — perder profundidade '
+              'é menos grave que servir uma série com degrau');
+      expect(serie.points.first.close, closeTo(41.66, 1e-9));
+      expect(serie.points.any((p) => p.date.year == 2001), isFalse);
+    });
+
+    test('sem evento, a profundidade do disco continua sobrevivendo', () async {
+      // O contraponto do caso acima: a tolerância não pode disparar em ruído.
+      // O disco concorda com a resposta no pregão comum, e o histórico fica.
+      await db.upsertPrices([
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2001-03-15',
+          close: 3.21,
+          volume: const Value(1000),
+        ),
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2026-07-21',
+          close: 41.70,
+          volume: const Value(1000),
+        ),
+      ]);
+      final repository = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: db,
+      );
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+
+      final serie = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
+          .unwrap()[Ticker.parse('PETR4')]!;
+
+      expect(serie.points.first.date, DateTime(2001, 3, 15),
+          reason: 'diferença de um centavo é ruído, e não mudança de base');
+    });
+
     test('cache preserva preços e datas fielmente', () async {
       final repository = PriceRepositoryImpl(
         remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
@@ -387,6 +459,35 @@ void main() {
   });
 
   group('Cache macroeconômico', () {
+    test('a atualização devolve a união do banco, e não só a janela do SGS',
+        () async {
+      // Lente `dados`, 21/09/2026 — a mesma correção que os fundamentos
+      // receberam no dia anterior. O SGS responde a janela pedida; o banco
+      // guarda a união do que já se viu, e é sobre essa série que o CAGR
+      // decenal é apurado. A profundidade não pode depender do TTL.
+      await db.upsertMacro([
+        CachedMacroRatesCompanion.insert(
+          seriesId: 12,
+          date: '2010-01-04',
+          value: 0.0004,
+        ),
+      ]);
+      final repository = MacroRepositoryImpl(
+        remote: BcbDatasource(clientWith(
+            FixtureAdapter(routes: {'bcdata.sgs.12': 'bcb_cdi'}))),
+        cache: db,
+      );
+      final range = DateRange(DateTime(2010, 1, 1), DateTime(2024, 3, 31));
+
+      final logoDepois = (await repository.riskFreeDaily(range)).unwrap();
+      final pelaSegundaVez = (await repository.riskFreeDaily(range)).unwrap();
+
+      expect(logoDepois.dates.length, pelaSegundaVez.dates.length,
+          reason: 'a profundidade não pode depender do TTL');
+      expect(logoDepois.dates.first, DateTime(2010, 1, 4),
+          reason: 'o ponto que só o banco tem precisa voltar na atualização');
+    });
+
     test('CDI é buscado uma vez e reutilizado', () async {
       final adapter = FixtureAdapter(routes: {'bcdata.sgs.12': 'bcb_cdi'});
       final repository = MacroRepositoryImpl(

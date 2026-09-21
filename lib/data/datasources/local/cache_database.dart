@@ -158,9 +158,17 @@ class CacheDatabase extends _$CacheDatabase {
             );
           }
           if (from < 3) {
-            // v2 → v3: colunas novas da decisão 25. Todas nuláveis, então a
-            // adição é aditiva e nenhuma linha existente precisa ser reescrita
-            // — o cache repovoa sozinho na próxima busca.
+            // v2 → v3: colunas novas da decisão 25. Todas nuláveis, de modo que
+            // a adição é aditiva e nenhuma linha existente precisa ser
+            // reescrita.
+            //
+            // **O comentário anterior dizia que o cache repovoava sozinho, e
+            // não é bem isso** (lente `rumo`, 21/09/2026). A validade dos
+            // fundamentos é de 30 dias: uma linha antiga responderia com os
+            // campos novos vazios até vencer — exatamente o que o bloco da v4
+            // explica. Quem vem da v2 passa pelos dois blocos, e a invalidação
+            // que a v4 faz cobre também estas colunas; a coluna de volume das
+            // cotações repovoa com a validade delas, que é curta.
             await m.addColumn(cachedPrices, cachedPrices.volume);
             for (final c in [
               cachedFundamentalsTable.sharesOutstandingAsOf,
@@ -249,6 +257,19 @@ class CacheDatabase extends _$CacheDatabase {
   /// Insere ou atualiza cotações em lote, pela chave `(ticker, date)`.
   Future<void> upsertPrices(List<CachedPricesCompanion> rows) =>
       batch((b) => b.insertAllOnConflictUpdate(cachedPrices, rows));
+
+  /// Apaga as cotações de um ativo **anteriores** a [isoExclusivo].
+  ///
+  /// Existe para a rebase do preço: a fonte devolve o fechamento já ajustado
+  /// por todo evento societário até hoje, numa janela de dez anos. O que está
+  /// em disco fora dessa janela foi ajustado até a data em que **foi baixado**,
+  /// e um desdobramento no meio deixa as duas metades em bases diferentes — um
+  /// degrau silencioso na série. Ver `PriceRepositoryImpl`.
+  Future<void> deletePricesBefore(String ticker, String isoExclusivo) =>
+      (delete(cachedPrices)
+            ..where((t) =>
+                t.ticker.equals(ticker) & t.date.isSmallerThanValue(isoExclusivo)))
+          .go();
 
   // ----------------------------------------------------------- Fundamentos --
 

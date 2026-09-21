@@ -11,6 +11,103 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O que a quarta rodada da Fase 3 encontrou — B12, B14 e B15 (21/09/2026)
+
+**Três itens que eram premissa não declarada, e nenhum número mudou.** O gabarito
+confere idêntico ao da rodada anterior nas duas montagens — 102 e 102 —, e o que
+a rodada produziu foi o motor dizendo de si o que antes carregava em silêncio.
+Duas das três alternativas propostas pelos itens foram medidas e **recusadas**;
+a terceira inverteu a pergunta.
+
+**O terminal neutro não é neutro, e o sinal estava trocado.** `VT = lucro_{N+1}/r`
+reagrupa em `capital_N + EVA_{N+1}/r`: o retorno neutro fixa o do capital **novo**
+e não diz nada do instalado. O item supunha que o motor mantinha um excedente
+para sempre; medido, ele mantém um **déficit**. O capital instalado rende **0,71
+vez** o custo de capital de equilíbrio na mediana — 12,9% contra 18,9% — e fica
+abaixo dele em 71 dos 83 avaliados em que a decomposição se aplica. O peso é de
+−14,1% do preço justo na mediana, passa de 10% em módulo em 50 e de 20% em 33; a
+EMBJ3 chega a −610%, com peso do terminal de 238%.
+
+**E a terceira saída do item não existe.** A 18,9% ao ano, truncar o excedente em
+20 anos devolve 0,4% do preço justo e em 30 anos, 0,1%: decair num horizonte é
+indistinguível de manter. A escolha é binária — manter, ou zerar de imediato, o
+que move +14,1% na mediana. Manter é o que fica, porque zerar afirma reversão da
+rentabilidade à média, que o motor não mediu, e a decisão 35 exige de quem troque
+o terminal um argumento que não seja o viés de nível. **Medir essa reversão virou
+o B19.** A decomposição é conferida contra o terminal de contrato da decisão 88:
+com prazo zero as duas contas têm de bater ao centavo, e o teste trava isso.
+
+**O beta do papel pouco negociado: o viés existe e não é a causa.** Nos 185
+recusados só por liquidez, Dimson sobre o beta diário dá mediana de 1,052 contra
+0,988 nos avaliados, e o efeito se concentra onde a teoria manda: nos 37 que
+negociam menos de 120 pregões por ano, o beta vai de **0,134** a 0,294 com uma
+defasagem e a 0,367 com cinco. **Mas não chega perto** — com o mesmo encolhimento
+que a produção aplica, o beta dos soltos vai a 0,723 contra 0,955 dos avaliados,
+e o potencial mediano deles vai de −30,4% a −36,9% contra −48,2%: dos 17,8 p.p.
+de distância, Dimson fecha 6,5. A correção ainda **triplica** o erro-padrão nos
+dois grupos, e o encolhimento pondera por `1/SE²`. A recusa por liquidez fica,
+agora por duas razões medidas. **E sobra um grupo nomeado**: os 100 soltos que
+negociam todo pregão têm beta de 0,801, quase o dos avaliados, e a distância de
+nível inteira — ali a não sincronia não tem o que explicar.
+
+**A perpetuidade: metade do apontamento já tinha caído, e a outra metade se
+resolveu sozinha.** A alavancagem de equilíbrio deixou de ser a de hoje com a
+decisão 105 — é a do ano N do modelo, e medida ativo a ativo ela fica a −0,01 da
+de hoje, de modo que o modelo chega perto de onde partiu. Sobrou o beta, e
+convergi-lo em direção a 1 move a taxa de equilíbrio em −0,0% e o preço justo em
+**+0,1%**: o encolhimento da decisão 40 já puxou cada beta ao prior transversal, e
+o que chega ao preço tem mediana de 0,955. Impor a mediana setorial move 0,0% e
+**custa cinco avaliações**. As duas ficam como imposição de diagnóstico.
+
+**O que as lentes disseram.** Procederam quatro achados, em três lentes. A
+`metodo` achou que o rastro de auditoria imprimia a perpetuidade de Gordon nas
+**concessões**, onde o terminal é o do contrato (decisão 88) — a mesma forma de
+defeito que a ponte `EV − D` tinha antes da decisão 102, e corrigida com teste
+que confere as duas formas pela cascata real. A `risco` achou que o cache de
+cotações pode **misturar duas bases de ações**: a fonte devolve o fechamento
+ajustado por todo evento até hoje numa janela de dez anos, e o que está em disco
+fora dela foi ajustado até o dia em que foi baixado — um desdobramento no meio
+deixa um degrau exatamente na borda. Agora, quando o disco discorda da resposta
+no pregão comum por mais de meio por cento, o histórico em outra base sai;
+perder profundidade é menos grave que servir série com degrau que ninguém vê. A
+mesma lente achou que o leitor de demonstrativos não tinha teste de payload de
+tipo indevido, como a fonte de cotações e a do Banco Central já têm — ganhou. E a
+`dados` achou que o repositório macroeconômico devolvia **a janela do SGS** logo
+depois de atualizar e **a união do banco** depois do TTL, de modo que a
+profundidade da série sobre a qual o CAGR decenal é apurado dependia do relógio:
+é a mesma correção que os fundamentos receberam na rodada anterior, agora no
+irmão.
+
+**A `rumo` achou meio achado.** Ela disse que a migração v2 → v3 do cache deixa
+os campos novos vazios até a validade de trinta dias vencer. O comportamento está
+certo — quem vem da v2 passa também pelo bloco da v4, que invalida a chave de
+fundamentos —, mas o **comentário** da v3 dizia o contrário do que o da v4 diz
+para o mesmo tipo de mudança. O comentário foi corrigido.
+
+**Não procederam nove.** Da `metodo`, o divisor das units aplicado a todo o
+balanço — é a limitação 3.13, declarada, e a decisão 106 a endereçou — e o
+`expectedReturn` fora do `RebalanceOutcome`, que arrastaria a camada de avaliação
+para dentro de uma operação de carteira. Da `risco`, a trava da alíquota efetiva
+sem outlier — ela **tem** teste com outlier, no núcleo, onde a regra mora — e a
+derivação só no ano completo, coberta pelos casos de ausência do mesmo arquivo.
+Da `rumo`, o setor das preferenciais, resolvido pelo A5, e a discordância entre as
+vias, que lê a decisão 39 substituída pela 102. Da `registro`, três dos quatro
+achados são **eco do próprio prompt da lente** — ela devolveu como tensão o texto
+que o enunciado dá como fato conhecido —, e o quarto pede um aviso no
+`crescimento_log_linear.md` que já está lá, em negrito, na primeira linha. Da
+`dados`, o upsert de fundamentos sobrescrevendo com nulo: a fonte é autoritativa
+por exercício, e apagar o que ela deixou de publicar é o comportamento certo. As
+três da `nucleo` e as duas da `tela` são contratos declarados e preferências de
+nomenclatura, fora dos objetivos.
+
+**O instrumento ganhou um módulo, e ele se confere sozinho.**
+`tool/validation/congelado.dart` monta a entrada congelada do gabarito para quem
+só quer medir sobre ela, e `conferirContraGabarito` compara as avaliações ativo a
+ativo com as que o gabarito gravou. As duas medições da rodada abriram com
+"montagem idêntica à do gabarito" — sem isso, os números descreveriam outro motor.
+
+---
+
 ## O que a terceira rodada da Fase 3 encontrou — B9, B11 e B16 (20/09/2026)
 
 **A base bruta tinha sumido, e isso mudou o instrumento.** O diretório `data/`

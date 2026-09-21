@@ -348,6 +348,37 @@ class ValuationDiagnostics {
   /// firma — abaixo do `Ke` sempre que há dívida.
   final double costOfEquity;
 
+  /// Parcela do preço justo que vem do **excedente perpétuo do capital
+  /// instalado**, em fração (item B12).
+  ///
+  /// O terminal neutro recusa valor ao capital **novo** — `RONIC = r` —, e
+  /// mantém para sempre o retorno acima do custo sobre o capital que já existe:
+  /// `lucro_{N+1}/r = capital_N + EVA_{N+1}/r`. Este campo é o peso da segunda
+  /// parcela no valor do capital próprio.
+  ///
+  /// `null` quando a decomposição não se aplica — vantagem competitiva
+  /// concedida, contrato com prazo, ou capital não medível. **Pode ser
+  /// negativa**, quando o instalado rende abaixo do custo dele, e aí o terminal
+  /// vale menos que o capital.
+  final double? terminalExcessShare;
+
+  /// Retorno que a perpetuidade supõe sobre o capital instalado, implícito na
+  /// projeção: `lucro_{N+1} ÷ capital_N` (item B12).
+  ///
+  /// Sai ao lado de [terminalDiscountRate] porque a comparação entre os dois é
+  /// a pergunta: o terminal neutro se apresenta como "sem lucro econômico na
+  /// perpetuidade", e isso exige que os dois sejam o mesmo número.
+  final double? impliedTerminalReturn;
+
+  /// Participação do capital próprio no valor da firma **no ano N**, que é a
+  /// estrutura de capital com que a perpetuidade é descontada (item B15).
+  ///
+  /// **Não é a de hoje.** Desde a decisão 105 o caminho de taxas é resolvido, e
+  /// a alavancagem de equilíbrio é a que a própria projeção alcança no fim do
+  /// horizonte — a de hoje é [equityShare]. `null` quando as taxas não são
+  /// resolvidas, e aí a perpetuidade herda a estrutura de hoje.
+  final double? terminalEquityShare;
+
   final List<ValuationCaveat> caveats;
 
   const ValuationDiagnostics({
@@ -366,6 +397,9 @@ class ValuationDiagnostics {
     required this.costOfEquity,
     this.retentionPath = const [],
     this.growthPath = const [],
+    this.terminalExcessShare,
+    this.impliedTerminalReturn,
+    this.terminalEquityShare,
     this.caveats = const [],
   });
 
@@ -386,6 +420,19 @@ class ValuationDiagnostics {
   /// não proíbe nada — apenas marca que, passando de 2x, o preço justo passou a
   /// depender mais da mediana do ciclo que do exercício observado.
   static const double baseFactorLimit = 2.0;
+
+  /// Acima disto em módulo, o excedente perpétuo do capital instalado é
+  /// declarado na avaliação (item B12).
+  ///
+  /// **Vinte por cento, e o corte tem origem na distribuição medida.** Em
+  /// 21/09/2026, sobre os 83 avaliados do universo em que a decomposição se
+  /// aplica, o peso é de **−14,1%** na mediana — déficit, e não excedente —,
+  /// passa de 10% em módulo em 50 deles e de 20% em 33. Um quinto do preço
+  /// justo é o ponto em que a parcela deixa de ser detalhe e vira a premissa
+  /// dominante; abaixo disso ela fica no rastro de auditoria, que a traz
+  /// sempre. Ver
+  /// [`terminal_excedente.md`](../../../../../docs/validacao/terminal_excedente.md).
+  static const double terminalExcessLimit = 0.20;
 
   /// Abaixo disto a ponte é frágil, embora ainda acima do corte que faz migrar.
   ///

@@ -151,9 +151,48 @@ class PriceRepositoryImpl implements PriceRepository {
     );
   }
 
+  /// Diferença relativa a partir da qual o disco e a rede estão em **bases de
+  /// ações diferentes** (lente `risco`, 21/09/2026).
+  ///
+  /// Meio por cento: acima disso não é arredondamento de centavo nem correção
+  /// de fechamento, é evento societário. O menor desdobramento usual já move a
+  /// série por um fator inteiro, de modo que o corte não precisa ser fino — ele
+  /// precisa não disparar em ruído.
+  static const double _toleranciaDeBase = 0.005;
+
+  /// O disco e a resposta discordam no mesmo pregão?
+  ///
+  /// **A base da fonte é a de hoje**: o `close` vem ajustado por todo evento
+  /// até agora, numa janela de dez anos. O que está em disco fora dessa janela
+  /// foi ajustado até o dia em que foi baixado — e um desdobramento no meio
+  /// deixa as duas metades em bases diferentes, com um degrau exatamente na
+  /// borda. Misturar bases é o defeito que a decisão 97 mediu nas coortes; aqui
+  /// ele entraria pelo cache.
+  Future<bool> _mudouDeBase(Ticker ticker, PriceSeries vinda) async {
+    final db = cache;
+    if (db == null || vinda.points.isEmpty) return false;
+    final primeiro = vinda.points.first;
+    final iso = BrapiJson.isoDay(primeiro.date);
+    final rows = await _tryCache(() => db.pricesIn(ticker.value, iso, iso));
+    if (rows == null || rows.isEmpty) return false;
+    final emDisco = rows.first.close;
+    if (emDisco <= 0 || !primeiro.close.isFinite || primeiro.close <= 0) {
+      return false;
+    }
+    return (primeiro.close / emDisco - 1).abs() > _toleranciaDeBase;
+  }
+
   Future<void> _persist(Ticker ticker, PriceSeries series) async {
     final db = cache;
     if (db == null) return;
+    // **Duas bases não se somam.** Quando o pregão mais antigo que a fonte
+    // devolve já está em disco com outro preço, o que está atrás dele é de
+    // outra base e sai — perder profundidade é menos grave que servir uma série
+    // com degrau que ninguém vê.
+    if (await _mudouDeBase(ticker, series) && series.points.isNotEmpty) {
+      final corte = BrapiJson.isoDay(series.points.first.date);
+      await _tryCache(() => db.deletePricesBefore(ticker.value, corte));
+    }
     await _tryCache(() async {
       await db.upsertPrices([
         for (final p in series.points)
@@ -527,6 +566,21 @@ class MacroRepositoryImpl implements MacroRepository {
       ]);
       await db.touch(CachePolicy.macroKey(seriesId));
     });
+    // **O que sai é o banco depois do upsert, e não só o que a rede trouxe**
+    // (lente `dados`, 21/09/2026) — a mesma correção que os fundamentos
+    // receberam em 20/09. O SGS responde a janela pedida; o banco guarda a
+    // união do que já se viu. Devolver a janela logo depois de atualizar e a
+    // união depois do TTL faz a mesma chamada ter profundidades diferentes
+    // conforme o relógio, e é sobre essa série que o CAGR decenal é apurado.
+    //
+    // A cobertura do início **não** é exigida aqui: o que acabou de vir da
+    // fonte é o que há, e recusá-lo por não cobrir a janela devolveria a falha
+    // no caminho de sucesso.
+    final relida =
+        await _macroFromCache(seriesId, range, exigirCobertura: false);
+    if (relida != null && relida.points.length >= series.points.length) {
+      return Ok(relida);
+    }
     return Ok(series);
   }
 }

@@ -259,6 +259,46 @@ void main() {
           reason: 'sem a DRE, a serie nao descreve a empresa');
     });
 
+    test('demonstrativo com tipo indevido vira falha, e não exceção crua',
+        () async {
+      // Lente `risco`, 21/09/2026. A fonte de cotações e a do Banco Central já
+      // tinham este teste; a de demonstrativos tolerava ausência e 503 e não
+      // dizia nada sobre literal de tipo errado — que é como uma troca de
+      // contrato chega.
+      for (final corpo in [
+        '{"results":[{"incomeStatementHistory":"não é lista"}]}',
+        '{"results":[{"incomeStatementHistory":[{"endDate":"2024-12-31",'
+            '"netIncome":"quarenta bilhões"}]}]}',
+        '{"results":"nem objeto"}',
+        '[]',
+        'isto não é json',
+      ]) {
+        final datasource = BrapiDatasource(clientWith(FixtureAdapter(
+          routes: {
+            '/v2/stocks/statistics?symbols=PETR4&mode=history':
+                'brapi_statistics_history_petr4',
+            '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+            '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+            '/v2/stocks/statistics?symbols=PETR4&mode=current':
+                'brapi_statistics_current_petr4',
+          },
+          bodies: {'/v2/stocks/income-statement': corpo},
+        )));
+        // O contrato é `Result`: ou vem erro, ou vem série — e nunca uma
+        // exceção atravessando a camada de dados.
+        final r = await datasource.fundamentalsHistory(Ticker.parse('PETR4'));
+        expect(r.isOk || r.isErr, isTrue, reason: corpo);
+        if (r.isOk) {
+          // Tolerar o corpo é legítimo; **inventar número** não. Nenhum
+          // exercício pode sair com lucro lido de um literal que não é número.
+          for (final s in r.unwrap()) {
+            expect(s.netIncome == null || s.netIncome!.isFinite, isTrue,
+                reason: corpo);
+          }
+        }
+      }
+    });
+
     test('e o mesmo vale para falha de transporte', () async {
       final datasource = BrapiDatasource(clientWith(FixtureAdapter(
         routes: {

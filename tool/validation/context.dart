@@ -125,6 +125,23 @@ class ValidationContext {
     );
   }
 
+  /// O mesmo contexto com outro repositório de índice.
+  ///
+  /// Existe para a entrada congelada: o Ibovespa vem sem cache da fonte, e
+  /// medir sobre ele em duas execuções dá dois números. Quem congela grava a
+  /// série e a serve por aqui — ver `tool/validation/congelado.dart`.
+  ValidationContext comBenchmark(BenchmarkRepository outro) =>
+      ValidationContext._(
+        client: client,
+        brapi: brapi,
+        bcb: bcb,
+        cache: cache,
+        prices: prices,
+        fundamentals: fundamentals,
+        benchmark: outro,
+        macro: macro,
+      );
+
   /// Fecha o cliente HTTP e o banco de cache.
   ///
   /// Chamar sempre ao fim da execução: sem fechar o banco, o arquivo SQLite

@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-21, a partir de `bb57462`.
+Gerado em 2026-09-21, a partir de `ec063b9`.
 
 ## Decisões registradas
 
-**86** aceita · **2** cumprida
+**89** aceita · **2** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -103,6 +103,9 @@ Gerado em 2026-09-21, a partir de `bb57462`.
 | 104 | A dívida dos pesos do WACC é a líquida, como no resto do modelo | aceita | voce | 2026-09-20 |
 | 105 | O aplicativo resolve o prior do beta e o custo de capital contra a alavancagem que a própria avaliação produz | aceita | voce | 2026-09-20 |
 | 106 | A razão de unidade sai da composição declarada na FCA, e a medida no valor de mercado vira conferência | aceita | voce | 2026-09-20 |
+| 107 | O retorno terminal neutro é do capital novo; o instalado mantém o retorno que a projeção alcança, e isso passa a ser declarado | aceita | voce | 2026-09-21 |
+| 108 | A recusa por liquidez fica, e o beta corrigido fecha só um terço da distância que a justifica | aceita | voce | 2026-09-21 |
+| 109 | A perpetuidade declara de onde vêm o beta e a estrutura de capital, e não os leva a um estado estacionário imposto | aceita | voce | 2026-09-21 |
 
 ## Caixa de entrada
 
@@ -116,16 +119,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 61 | 19.554 |
+| Nucleo de dominio | 61 | 19.903 |
 | Apresentacao | 36 | 16.212 |
-| Camada de dados | 23 | 3.540 |
-| Testes do app | 40 | 7.420 |
-| Testes do nucleo | 38 | 12.865 |
+| Camada de dados | 23 | 3.615 |
+| Testes do app | 40 | 7.561 |
+| Testes do nucleo | 38 | 13.118 |
 | Ferramentas de QA | 20 | 6.562 |
 
 ## Histórico recente
 
 ```
+2026-09-20  ec063b9  Refino do motor de valuation (parte 18)
 2026-09-20  bb57462  Regerado estado
 2026-09-16  d7fa781  Refino do motor de valuation (parte 17)
 2026-09-15  5ee27e5  Refino do motor de valuation (parte 15)
@@ -140,5 +144,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-09  30bc51d  Refino do motor de valuation (parte 7)
 2026-09-09  9b90a3d  Refino do motor de valuation (parte 6)
 2026-09-08  d94a726  Refino do motor de valuation (parte 5)
-2026-09-08  84524c8  Motor de valuation: correções medidas e validação preditiva
 ```

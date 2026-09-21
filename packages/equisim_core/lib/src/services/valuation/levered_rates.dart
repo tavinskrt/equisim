@@ -92,6 +92,24 @@ class LeveredRates {
 /// cada ano; o critério de parada é o valor da firma no ano zero parar de se
 /// mover.
 abstract final class LeveredCostOfCapital {
+  /// O beta de equilíbrio, com a convergência do item B15 quando ela é imposta.
+  ///
+  /// `β_∞ = w·β_L,N + (1 − w)·1` — o ajuste de Blume. Sem imposição, o beta de
+  /// equilíbrio é o realavancado do ano N, sem convergência: é o que a
+  /// produção faz, e é a premissa que o B15 existe para declarar.
+  static double _betaDeEquilibrio(double betaLevered, double? peso) =>
+      peso == null ? betaLevered : peso * betaLevered + (1 - peso) * 1.0;
+
+  /// A alavancagem imposta do B15 descreve uma estrutura possível?
+  ///
+  /// `D/E = −1` é caixa líquido igual ao capital próprio: o valor da firma
+  /// zera, e o peso `1/(1 + D/E)` divide por zero. Abaixo disso o caixa supera
+  /// o negócio e o peso fica negativo. Recusar é o certo — a imposição é de
+  /// diagnóstico, e uma varredura que peça o impossível precisa ouvir isso em
+  /// vez de receber `NaN`.
+  static bool _alavancagemImpossivel(double? de) =>
+      de != null && (!de.isFinite || 1 + de <= 0);
+
   /// Teto de iterações do ponto fixo.
   static const int maxIterations = 100;
 
@@ -127,6 +145,13 @@ abstract final class LeveredCostOfCapital {
   ///   decaía com a curva, de modo que a perpetuidade herdava o juro de hoje
   ///   (item B11).
   ///
+  /// - [terminalBetaWeight] e [terminalLeverage]: imposições de diagnóstico do
+  ///   item B15, e `null` em produção. A primeira converge o beta **de
+  ///   equilíbrio** em direção a 1 — `β_∞ = w·β_L,N + (1 − w)`, o ajuste de
+  ///   Blume —; a segunda substitui a alavancagem do ano N pela informada. Elas
+  ///   só tocam a perpetuidade: o caminho explícito continua saindo da
+  ///   estrutura que a projeção produz.
+  ///
   /// Devolve falha quando a avaliação intermediária não é possível — o que
   /// inclui o caso em que a alavancagem cresce a ponto de o capital próprio
   /// desaparecer.
@@ -140,6 +165,8 @@ abstract final class LeveredCostOfCapital {
     required double marketPremium,
     required double creditSpread,
     required double taxRate,
+    double? terminalBetaWeight,
+    double? terminalLeverage,
   }) {
     final n = assumptions.projectionYears;
     if (n < 1) {
@@ -149,6 +176,12 @@ abstract final class LeveredCostOfCapital {
       return const Err(InvalidInput(
         'Caminho da taxa livre de risco precisa de uma taxa por ano '
         'projetado.',
+      ));
+    }
+    if (_alavancagemImpossivel(terminalLeverage)) {
+      return const Err(InvalidInput(
+        'Alavancagem de equilíbrio imposta não descreve estrutura possível: '
+        'com D/E de −1 ou menos o valor da firma não é positivo.',
       ));
     }
     if (!unleveredBeta.isFinite || unleveredBeta < 0) {
@@ -294,8 +327,11 @@ abstract final class LeveredCostOfCapital {
           '$iteracoes).',
         ));
       }
+      // **A alavancagem de equilíbrio é a do ano N**, e a imposição do B15 a
+      // substitui quando a varredura quer testar outra.
+      final deTerminal = terminalLeverage ?? dN / eN;
       final fatorN = BetaShrinkage.leverageFactor(
-        debtToEquity: dN / eN,
+        debtToEquity: deTerminal,
         taxRate: taxRate,
       );
       if (fatorN == null) {
@@ -303,7 +339,9 @@ abstract final class LeveredCostOfCapital {
           'Fator de alavancagem terminal não finito.',
         ));
       }
-      keTerminal = terminalRiskFree + unleveredBeta * fatorN * marketPremium;
+      keTerminal = terminalRiskFree +
+          _betaDeEquilibrio(unleveredBeta * fatorN, terminalBetaWeight) *
+              marketPremium;
       final vN = eN + dN;
       if (!vN.isFinite || vN <= 0) {
         return const Err(ComputationFailure(
@@ -311,7 +349,9 @@ abstract final class LeveredCostOfCapital {
           'no custo médio de equilíbrio deixa de ter sentido.',
         ));
       }
-      final pesoEN = eN / vN;
+      final pesoEN = terminalLeverage == null
+          ? eN / vN
+          : 1 / (1 + terminalLeverage);
       waccTerminal = keTerminal * pesoEN + kdTerminal * (1 - pesoEN);
 
       final valor = e[0];
@@ -381,6 +421,8 @@ abstract final class LeveredCostOfCapital {
     required double terminalRiskFree,
     required double marketPremium,
     required double taxRate,
+    double? terminalBetaWeight,
+    double? terminalLeverage,
   }) {
     final n = assumptions.projectionYears;
     if (n < 1) {
@@ -390,6 +432,12 @@ abstract final class LeveredCostOfCapital {
       return const Err(InvalidInput(
         'Caminho da taxa livre de risco precisa de uma taxa por ano '
         'projetado.',
+      ));
+    }
+    if (_alavancagemImpossivel(terminalLeverage)) {
+      return const Err(InvalidInput(
+        'Alavancagem de equilíbrio imposta não descreve estrutura possível: '
+        'com D/E de −1 ou menos o valor da firma não é positivo.',
       ));
     }
     if (!unleveredBeta.isFinite || unleveredBeta < 0) {
@@ -492,7 +540,7 @@ abstract final class LeveredCostOfCapital {
         ));
       }
       final fatorN = BetaShrinkage.leverageFactor(
-        debtToEquity: divida[n] / eN,
+        debtToEquity: terminalLeverage ?? divida[n] / eN,
         taxRate: taxRate,
       );
       if (fatorN == null) {
@@ -500,7 +548,9 @@ abstract final class LeveredCostOfCapital {
           'Fator de alavancagem terminal não finito.',
         ));
       }
-      keTerminal = terminalRiskFree + unleveredBeta * fatorN * marketPremium;
+      keTerminal = terminalRiskFree +
+          _betaDeEquilibrio(unleveredBeta * fatorN, terminalBetaWeight) *
+              marketPremium;
 
       final valor = e[0];
       if (valorAnterior.isFinite && valorAnterior.abs() > 0) {

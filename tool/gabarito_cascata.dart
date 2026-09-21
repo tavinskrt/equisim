@@ -166,6 +166,9 @@ Map<String, Object?> _serializar(Result<ValuationResult> r) {
     if (d != null)
       'diagnostico': {
         'pesoTerminal': d.terminalShare.toString(),
+        'excedenteTerminal': d.terminalExcessShare?.toString(),
+        'retornoImplicitoTerminal': d.impliedTerminalReturn?.toString(),
+        'pesoEquityTerminal': d.terminalEquityShare?.toString(),
         'pesoEquity': d.equityShare.toString(),
         'fatorBase': d.baseFactor.toString(),
         'crescimentoIdentificado': d.growthIdentified,

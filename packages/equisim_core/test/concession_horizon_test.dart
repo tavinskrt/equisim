@@ -238,4 +238,40 @@ void main() {
           reason: 'a truncagem sem indenização não é a conta certa');
     });
   });
+
+  group('O rastro do terminal da concessão', () {
+    // Lente `metodo`, 21/09/2026. Com prazo, o terminal é
+    // `capital_N + EVA·anuidade(M)` (decisão 88), e o rastro imprimia a
+    // perpetuidade de Gordon — a mesma forma de defeito que a ponte `EV − D`
+    // tinha antes da decisão 102: rastro que descreve outra conta é pior que
+    // nenhum.
+    List<CalculationTrace> rastroDe(DateTime? fim) {
+      final capturadas = <CalculationTrace>[];
+      AuditRecorder.attach((e) => capturadas.addAll(e.calculations));
+      try {
+        ValuationCascade.evaluate(_inputs(Ticker.parse('TEST3'), fim: fim));
+      } finally {
+        AuditRecorder.detach();
+      }
+      return capturadas;
+    }
+
+    test('com prazo, o rastro traz o capital devolvido e a anuidade', () {
+      final passo = rastroDe(DateTime(2040, 6, 30))
+          .firstWhere((c) => c.formulaName.contains('Valor terminal'));
+      expect(passo.formulaName, contains('contrato com prazo'));
+      expect(passo.latexRepresentation, contains('K_N'));
+      expect(passo.mappedVariables['M (anos de contrato além de N)'], isNotNull);
+      expect(passo.intermediateSteps.first, contains('o capital volta'));
+      expect(passo.latexRepresentation, isNot(contains(r'\frac{L_{N+1}}{r_\infty}')),
+          reason: 'a perpetuidade não é a conta que foi feita aqui');
+    });
+
+    test('sem prazo, continua sendo a perpetuidade de retorno neutro', () {
+      final passo = rastroDe(null)
+          .firstWhere((c) => c.formulaName.contains('Valor terminal'));
+      expect(passo.formulaName, contains('retorno neutro'));
+      expect(passo.mappedVariables['M (anos de contrato além de N)'], isNull);
+    });
+  });
 }

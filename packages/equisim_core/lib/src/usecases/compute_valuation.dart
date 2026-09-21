@@ -239,6 +239,31 @@ class ValuationInputs {
   /// equilíbrio leem o mesmo veredito. `null` recua para a taxa do CAPM.
   final double? creditReferenceRiskFree;
 
+  /// Peso do beta do próprio ativo no beta de **equilíbrio** — imposição de
+  /// diagnóstico do item B15.
+  ///
+  /// `β_∞ = w·β + (1 − w)·1`, o ajuste de Blume. `0,67` é a forma clássica;
+  /// `1` é o comportamento de produção, que leva o beta de hoje à perpetuidade
+  /// sem convergência. Só age sobre a taxa de **equilíbrio** — a corrente
+  /// continua sendo o beta observado, que é o que o dado mede.
+  ///
+  /// **Não é do aplicativo.** Como as demais imposições, existe para que a
+  /// varredura meça o efeito de uma alternativa antes de o registro escolher
+  /// entre elas.
+  final double? terminalBetaWeightOverride;
+
+  /// `D/E` imposto na perpetuidade — imposição de diagnóstico do item B15.
+  ///
+  /// Em produção a alavancagem de equilíbrio é a que a projeção alcança no ano
+  /// N (decisão 105) ou, sem taxas resolvidas, a de hoje. Este campo a
+  /// substitui pela que a varredura quiser testar — a mediana do setor da B3,
+  /// por exemplo.
+  ///
+  /// O prêmio de crédito **não** se move com ele: ele sai da alavancagem
+  /// observada sobre o EBITDA, que é fato do exercício, e não da estrutura que
+  /// se está supondo.
+  final double? terminalLeverageOverride;
+
   /// Ações reunidas na unit, **como a companhia declara** (item B16).
   ///
   /// Vem do quadro de valores mobiliários da FCA da CVM, pelo formulário mais
@@ -297,6 +322,8 @@ class ValuationInputs {
     this.dividendsInBeta = 0,
     this.creditReferenceRiskFree,
     this.declaredSharesPerUnit,
+    this.terminalBetaWeightOverride,
+    this.terminalLeverageOverride,
   });
 
   /// Os mesmos insumos, com [n] anos de projeção explícita.
@@ -328,6 +355,8 @@ class ValuationInputs {
         dividendsInBeta: dividendsInBeta,
         creditReferenceRiskFree: creditReferenceRiskFree,
         declaredSharesPerUnit: declaredSharesPerUnit,
+        terminalBetaWeightOverride: terminalBetaWeightOverride,
+        terminalLeverageOverride: terminalLeverageOverride,
       );
 
   /// Os mesmos insumos com o **nível** da taxa livre de risco deslocado em
@@ -378,6 +407,26 @@ class ValuationInputs {
       creditReferenceRiskFree:
           creditReferenceRiskFree ?? capm.riskFreeRate,
       declaredSharesPerUnit: declaredSharesPerUnit,
+      terminalBetaWeightOverride: terminalBetaWeightOverride,
+      terminalLeverageOverride: terminalLeverageOverride,
+    );
+  }
+
+  /// O CAPM de **equilíbrio**: a taxa livre de risco estrutural e, quando a
+  /// varredura do B15 o impõe, o beta convergido em direção a 1.
+  ///
+  /// Existe aqui para que as duas rotas — a interpolada e a resolvida — leiam a
+  /// mesma regra, em vez de cada uma remontar o ajuste do seu jeito.
+  CapmInputs get terminalCapm {
+    final w = terminalBetaWeightOverride;
+    final base = capm.withRiskFree(terminalRiskFreeRate);
+    if (w == null) return base;
+    return CapmInputs(
+      riskFreeRate: base.riskFreeRate,
+      beta: w * capm.beta + (1 - w) * 1.0,
+      marketPremium: base.marketPremium,
+      betaSource: base.betaSource,
+      premiumSource: base.premiumSource,
     );
   }
 }
@@ -1697,6 +1746,32 @@ abstract final class ValuationCascade {
     final assumptions = d.custo.assumptions;
     if (outcome.fairValuePerShare <= 0) return null;
 
+    // **O que a perpetuidade supõe sobre o capital que já existe** (item B12,
+    // decisão 107). O retorno neutro fixa o do capital **novo**; o instalado
+    // continua rendendo o que a projeção alcança, e na maioria dos avaliados
+    // isso é **abaixo** do custo de capital. Onde a parcela domina o preço, ela
+    // é dita — no rastro de auditoria ela sai sempre.
+    final excedente = outcome.discountedTerminalExcess;
+    final pesoExcedente = (excedente == null || outcome.equityValue <= 0)
+        ? null
+        : excedente / outcome.equityValue;
+    final retornoInstalado = outcome.impliedTerminalReturn;
+    if (pesoExcedente != null &&
+        retornoInstalado != null &&
+        pesoExcedente.abs() > ValuationDiagnostics.terminalExcessLimit) {
+      final rInf = d.custo.taxas?.terminalWacc ?? d.premissas.descontoTerminal;
+      final deficit = retornoInstalado < rInf;
+      d.avisos.add(
+        'A perpetuidade supõe que o capital já instalado continue rendendo '
+        '${_pct(retornoInstalado)} ao ano para sempre, contra um custo de '
+        'capital de equilíbrio de ${_pct(rInf)}: '
+        '${_pct(pesoExcedente.abs())} do preço justo '
+        '${deficit ? 'é subtraído por esse déficit' : 'vem desse excedente'}. '
+        'O retorno terminal neutro recusa valor ao capital **novo**, e não ao '
+        'que já existe — são duas afirmações, e só a primeira está no rótulo.',
+      );
+    }
+
     _auditDcf(
       audit,
       outcome: outcome,
@@ -1752,6 +1827,10 @@ abstract final class ValuationCascade {
         terminalReturnOnCapital: assumptions.terminalReturnOnCapital,
         firmTaxRate: lane == ValuationLane.firm ? d.saida1.aliquota : null,
         terminalCostOfEquity: d.custo.taxas?.terminalCostOfEquity,
+        // A estrutura de capital da perpetuidade é a do ano N do modelo, e não
+        // a de hoje (item B15, decisão 105).
+        terminalEquityShare:
+            d.custo.taxas?.equityShareAt(inputs.projectionYears),
         retentionPath: [
           for (var t = 1; t <= inputs.projectionYears; t++)
             assumptions.retentionAt(t),
@@ -1859,6 +1938,8 @@ abstract final class ValuationCascade {
                   // custo observado que a decisão 31 descartou (item B11).
                   creditSpread: p.spreadDeCredito,
                   taxRate: ValuationParameters.statutoryTaxRate,
+                  terminalBetaWeight: inputs.terminalBetaWeightOverride,
+                  terminalLeverage: inputs.terminalLeverageOverride,
                 )
               : LeveredCostOfCapital.solveEquity(
                   baseProfit: base,
@@ -1869,6 +1950,8 @@ abstract final class ValuationCascade {
                   terminalRiskFree: inputs.terminalRiskFreeRate,
                   marketPremium: inputs.capm.marketPremium,
                   taxRate: ValuationParameters.statutoryTaxRate,
+                  terminalBetaWeight: inputs.terminalBetaWeightOverride,
+                  terminalLeverage: inputs.terminalLeverageOverride,
                 );
 
       final resolvido = resolverTaxas(assumptions);
@@ -2021,10 +2104,14 @@ abstract final class ValuationCascade {
     // estrutura de capital, sobre a taxa livre de risco estrutural em vez da
     // corrente. É o destino do decaimento e a taxa da perpetuidade. Os avisos e
     // a auditoria saem só da montagem corrente — esta repetiria os mesmos.
-    final capmTerminal = inputs.capm.withRiskFree(inputs.terminalRiskFreeRate);
+    // **O beta e a estrutura de equilíbrio** (item B15). Em produção o beta é o
+    // de hoje — ele não converge para 1 — e a estrutura, sem taxas resolvidas,
+    // é a de hoje também; com elas, é a do ano N (decisão 105). As duas
+    // imposições de diagnóstico entram por aqui.
+    final capmTerminal = inputs.terminalCapm;
     final descontoTerminal = lane == ValuationLane.firm
         ? _wacc(inputs, latest, <String>[], divisor, null,
-                capmOverride: capmTerminal)
+                capmOverride: capmTerminal, terminal: true)
             .rate
         : capmTerminal.costOfEquity;
 
@@ -2662,6 +2749,7 @@ abstract final class ValuationCascade {
     required double? terminalReturnOnCapital,
     required double? firmTaxRate,
     required double? terminalCostOfEquity,
+    required double? terminalEquityShare,
     required List<double> retentionPath,
     required List<double> growthPath,
   }) {
@@ -2684,8 +2772,19 @@ abstract final class ValuationCascade {
     if (outcome.equityShare < ValuationDiagnostics.fragileEquityShare) {
       caveats.add(ValuationCaveat.ponteFragil);
     }
+    // **O excedente perpétuo do capital instalado** (item B12): a parcela do
+    // preço justo que vem de o terminal neutro manter para sempre o retorno
+    // acima do custo sobre o ativo que já existe. O denominador é o valor do
+    // capital próprio, o mesmo de `terminalShare`.
+    final excedente = outcome.discountedTerminalExcess;
+    final pesoDoExcedente = (excedente == null || outcome.equityValue <= 0)
+        ? null
+        : excedente / outcome.equityValue;
     return ValuationDiagnostics(
       terminalShare: outcome.terminalShare,
+      terminalExcessShare: pesoDoExcedente,
+      impliedTerminalReturn: outcome.impliedTerminalReturn,
+      terminalEquityShare: terminalEquityShare,
       equityShare: outcome.equityShare,
       costOfEquity: costOfEquity,
       baseFactor: baseFactor,
@@ -2760,6 +2859,7 @@ abstract final class ValuationCascade {
     QuotedShares divisor,
     AuditTransaction? audit, {
     CapmInputs? capmOverride,
+    bool terminal = false,
   }) {
     final capm = capmOverride ?? inputs.capm;
     // **A dívida dos pesos é a líquida** (decisão 104), a mesma que a apuração
@@ -2768,7 +2868,12 @@ abstract final class ValuationCascade {
     // o denominador do custo da dívida observado, que é razão sobre o que de
     // fato paga juro.
     final bruta = latest.totalDebt;
-    final debt = latest.netDebt;
+    // `D/E` imposto na perpetuidade é imposição de diagnóstico do B15, e só
+    // vale na montagem de equilíbrio: a corrente é a estrutura observada.
+    final imposto = terminal ? inputs.terminalLeverageOverride : null;
+    final debt = imposto == null
+        ? latest.netDebt
+        : divisor.count * inputs.marketPrice * imposto;
     // O peso do capital próprio é o valor de mercado **pelo divisor da ponte**,
     // e não o `marketCap` da fonte (decisão 83). Quando o divisor é a contagem
     // implícita no valor de mercado, os dois são o mesmo número; quando a
@@ -3648,10 +3753,6 @@ abstract final class ValuationCascade {
       unit: perShareAlready ? r'R$ por papel' : r'R$',
     );
 
-    // Duas formas de terminal, e o rastro precisa dizer qual foi aplicada: com
-    // retorno neutro o crescimento perpétuo **sai** da fórmula, e exibir o
-    // spread de Gordon ali descreveria uma conta que não foi feita. A taxa é a
-    // de equilíbrio, não a corrente.
     // Três formas de terminal, e o rastro precisa dizer qual foi aplicada. Com
     // retorno neutro o crescimento perpétuo **sai** da fórmula, e exibir o
     // spread de Gordon ali descreveria uma conta que não foi feita. A taxa é
@@ -3662,13 +3763,22 @@ abstract final class ValuationCascade {
     // mas que a classe permite a quem monta premissas à mão.
     final moat = assumptions.terminalReturnOnCapital;
     final neutro = moat == null && assumptions.neutralTerminalReturn;
+    // **A concessão tem terminal próprio, e o rastro tem de dizê-lo** (lente
+    // `metodo`, 21/09/2026). Com prazo, o terminal é `capital_N + EVA·anuidade`
+    // (decisão 88), e imprimir a perpetuidade de Gordon ali descrevia uma conta
+    // que não foi feita — o mesmo defeito que a ponte `EV − D` tinha.
+    final contrato =
+        neutro ? assumptions.contractYearsAfterHorizon : null;
     final reinvestimento = moat != null
         ? (gInf / moat).clamp(0.0, 0.95)
         : assumptions.retentionAt(assumptions.projectionYears);
     final fatorFinal = n == 0 ? 1.0 : fatores[n - 1];
-    final vtForma = neutro
-        ? r'VT = \frac{L_{N+1}}{r_\infty}'
-        : r'VT = \frac{L_{N+1}\,(1 - b_\infty)}{r_\infty - g_\infty}';
+    final vtForma = contrato != null
+        ? r'VT = K_N + EVA_{N+1}\,'
+            r'\frac{1 - (1+r_\infty)^{-M}}{r_\infty}'
+        : neutro
+            ? r'VT = \frac{L_{N+1}}{r_\infty}'
+            : r'VT = \frac{L_{N+1}\,(1 - b_\infty)}{r_\infty - g_\infty}';
     // O valor presente do terminal carrega o mesmo levantamento dos fluxos,
     // sob a taxa de equilíbrio, que é a que o capitaliza.
     final vpForma = meioDeAno
@@ -3676,21 +3786,34 @@ abstract final class ValuationCascade {
         : r'VP(VT) = \frac{VT}{\prod_{s=1}^{N}(1+r_s)}';
     const separadorLatex = r'\quad;\quad ';
     audit.step(
-      formulaName: neutro
-          ? 'Valor terminal (retorno neutro, ROIC_inf = r_inf)'
-          : 'Valor terminal (Gordon com reinvestimento)',
+      formulaName: contrato != null
+          ? 'Valor terminal (contrato com prazo: capital devolvido e excedente '
+              'até o fim)'
+          : neutro
+              ? 'Valor terminal (retorno neutro, RONIC_inf = r_inf)'
+              : 'Valor terminal (Gordon com reinvestimento)',
       latex: '$vtForma$separadorLatex$vpForma',
       variables: {
         'L_N': n == 0 ? null : _r(outcome.projectedFlows[n - 1]),
         'g_inf (% a.a.)': _r(gInf * 100),
         'r_inf (% a.a.)': _r(rInf * 100),
         'ROIC_inf (% a.a.)': moat == null ? null : _r(moat * 100),
+        'ROIC implícito do instalado (% a.a.)':
+            outcome.impliedTerminalReturn == null
+                ? null
+                : _r(outcome.impliedTerminalReturn! * 100),
         'N (anos)': assumptions.projectionYears,
+        'M (anos de contrato além de N)': contrato,
       },
       steps: [
-        if (neutro)
-          'Passo 1: com ROIC_inf = r_inf a álgebra colapsa e o crescimento '
-              'perpétuo sai da perpetuidade — VT = L_(N+1) ÷ r_inf, sem spread'
+        if (contrato != null)
+          'Passo 1: o contrato acaba $contrato ano(s) depois do horizonte — o '
+              'capital volta e o excedente sobre ele dura só até lá, de modo '
+              'que a perpetuidade não se aplica (decisão 88)'
+        else if (neutro)
+          'Passo 1: com RONIC_inf = r_inf — o **capital novo** sem valor — a '
+              'álgebra colapsa e o crescimento perpétuo sai da perpetuidade: '
+              'VT = L_(N+1) ÷ r_inf, sem spread'
         else
           'Passo 1: spread da perpetuidade → ${_pct(rInf)} − ${_pct(gInf)} = '
               '${_pct(rInf - gInf)}; retenção perpétua = '
@@ -3704,6 +3827,20 @@ abstract final class ValuationCascade {
             ' → ${_r(outcome.discountedTerminalValue)}',
         'Passo 4: participação do valor terminal no total → '
             '${_pct(outcome.terminalShare)}',
+        // **O que o retorno neutro não diz** (item B12): ele fixa o retorno do
+        // capital **novo**, e não o do instalado. O instalado continua rendendo
+        // o que a projeção alcança, e a mesma expressão reagrupada mostra
+        // quanto disso é excedente — ou déficit — perpétuo.
+        if (contrato == null &&
+            neutro &&
+            outcome.impliedTerminalReturn != null)
+          'Passo 5: o retorno neutro vale para o capital **novo**; o instalado '
+              'rende ${_pct(outcome.impliedTerminalReturn!)} na perpetuidade, '
+              'contra ${_pct(rInf)} de custo de capital. Reagrupando, '
+              'VT = capital_N + EVA_(N+1) ÷ r_inf, e a segunda parcela vale '
+              '${_r(outcome.discountedTerminalExcess ?? 0)} a valor presente '
+              '— ${outcome.impliedTerminalReturn! < rInf ? 'déficit' : 'excedente'} '
+              'mantido para sempre',
       ],
       result: outcome.discountedTerminalValue,
       unit: perShareAlready ? r'R$ por papel' : r'R$',
