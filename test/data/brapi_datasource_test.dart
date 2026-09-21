@@ -285,9 +285,12 @@ void main() {
           bodies: {'/v2/stocks/income-statement': corpo},
         )));
         // O contrato é `Result`: ou vem erro, ou vem série — e nunca uma
-        // exceção atravessando a camada de dados.
+        // exceção atravessando a camada de dados. **Quem cobra isso é o
+        // `await`**: exceção que escape reprova o teste aqui mesmo, antes de
+        // qualquer asserção (lente `risco`, 21/09/2026). Afirmar
+        // `isOk || isErr` era tautologia — todo `Result` é um dos dois — e
+        // disfarçava de asserção o que já estava coberto.
         final r = await datasource.fundamentalsHistory(Ticker.parse('PETR4'));
-        expect(r.isOk || r.isErr, isTrue, reason: corpo);
         if (r.isOk) {
           // Tolerar o corpo é legítimo; **inventar número** não. Nenhum
           // exercício pode sair com lucro lido de um literal que não é número.

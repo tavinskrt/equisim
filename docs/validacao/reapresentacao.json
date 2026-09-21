@@ -1,0 +1,335 @@
+{
+ "medidoEm": "2026-09-14",
+ "fonte": "assets/cvm/documentos.json",
+ "documentos": 19065,
+ "semDataDeRecebimento": 0,
+ "atrasoEmDias": {
+  "dfp": {
+   "n": 5142,
+   "p50": 79.0,
+   "p90": 115.0,
+   "max": 3000.0,
+   "foraDoPrazo": 784,
+   "prazoEmDias": 92
+  },
+  "itr": {
+   "n": 13923,
+   "p50": 42.0,
+   "p90": 56.0,
+   "max": 2129.0,
+   "foraDoPrazo": 2385,
+   "prazoEmDias": 45
+  }
+ },
+ "porCoorte": [
+  {
+   "coorte": "2018-03-31",
+   "deviamEstarPublicos": 7955,
+   "perdidosPelaVersaoTardia": 46,
+   "fracao": 0.0057825267127592705,
+   "tickersAtingidos": 15
+  },
+  {
+   "coorte": "2018-06-30",
+   "deviamEstarPublicos": 8553,
+   "perdidosPelaVersaoTardia": 69,
+   "fracao": 0.008067344791301298,
+   "tickersAtingidos": 38
+  },
+  {
+   "coorte": "2018-09-30",
+   "deviamEstarPublicos": 8854,
+   "perdidosPelaVersaoTardia": 64,
+   "fracao": 0.007228371357578495,
+   "tickersAtingidos": 38
+  },
+  {
+   "coorte": "2018-12-31",
+   "deviamEstarPublicos": 9154,
+   "perdidosPelaVersaoTardia": 52,
+   "fracao": 0.005680576797028622,
+   "tickersAtingidos": 25
+  },
+  {
+   "coorte": "2019-03-31",
+   "deviamEstarPublicos": 9157,
+   "perdidosPelaVersaoTardia": 46,
+   "fracao": 0.005023479305449383,
+   "tickersAtingidos": 21
+  },
+  {
+   "coorte": "2019-06-30",
+   "deviamEstarPublicos": 9767,
+   "perdidosPelaVersaoTardia": 76,
+   "fracao": 0.007781304392341559,
+   "tickersAtingidos": 43
+  },
+  {
+   "coorte": "2019-09-30",
+   "deviamEstarPublicos": 10076,
+   "perdidosPelaVersaoTardia": 72,
+   "fracao": 0.007145692735212386,
+   "tickersAtingidos": 34
+  },
+  {
+   "coorte": "2019-12-31",
+   "deviamEstarPublicos": 10384,
+   "perdidosPelaVersaoTardia": 63,
+   "fracao": 0.006067026194144838,
+   "tickersAtingidos": 28
+  },
+  {
+   "coorte": "2020-03-31",
+   "deviamEstarPublicos": 10387,
+   "perdidosPelaVersaoTardia": 32,
+   "fracao": 0.003080774044478675,
+   "tickersAtingidos": 16
+  },
+  {
+   "coorte": "2020-06-30",
+   "deviamEstarPublicos": 11066,
+   "perdidosPelaVersaoTardia": 120,
+   "fracao": 0.010844026748599312,
+   "tickersAtingidos": 72
+  },
+  {
+   "coorte": "2020-09-30",
+   "deviamEstarPublicos": 11412,
+   "perdidosPelaVersaoTardia": 113,
+   "fracao": 0.009901857693655801,
+   "tickersAtingidos": 54
+  },
+  {
+   "coorte": "2020-12-31",
+   "deviamEstarPublicos": 11755,
+   "perdidosPelaVersaoTardia": 44,
+   "fracao": 0.0037430880476393025,
+   "tickersAtingidos": 22
+  },
+  {
+   "coorte": "2021-03-31",
+   "deviamEstarPublicos": 11760,
+   "perdidosPelaVersaoTardia": 9,
+   "fracao": 0.0007653061224489796,
+   "tickersAtingidos": 7
+  },
+  {
+   "coorte": "2021-06-30",
+   "deviamEstarPublicos": 12475,
+   "perdidosPelaVersaoTardia": 29,
+   "fracao": 0.0023246492985971945,
+   "tickersAtingidos": 21
+  },
+  {
+   "coorte": "2021-09-30",
+   "deviamEstarPublicos": 12841,
+   "perdidosPelaVersaoTardia": 27,
+   "fracao": 0.002102639981309867,
+   "tickersAtingidos": 16
+  },
+  {
+   "coorte": "2021-12-31",
+   "deviamEstarPublicos": 13204,
+   "perdidosPelaVersaoTardia": 24,
+   "fracao": 0.0018176310209027568,
+   "tickersAtingidos": 13
+  },
+  {
+   "coorte": "2022-03-31",
+   "deviamEstarPublicos": 13211,
+   "perdidosPelaVersaoTardia": 19,
+   "fracao": 0.00143819544319128,
+   "tickersAtingidos": 9
+  },
+  {
+   "coorte": "2022-06-30",
+   "deviamEstarPublicos": 13931,
+   "perdidosPelaVersaoTardia": 43,
+   "fracao": 0.003086641303567583,
+   "tickersAtingidos": 28
+  },
+  {
+   "coorte": "2022-09-30",
+   "deviamEstarPublicos": 14298,
+   "perdidosPelaVersaoTardia": 40,
+   "fracao": 0.0027975940691005734,
+   "tickersAtingidos": 24
+  },
+  {
+   "coorte": "2022-12-31",
+   "deviamEstarPublicos": 14663,
+   "perdidosPelaVersaoTardia": 49,
+   "fracao": 0.0033417445270408513,
+   "tickersAtingidos": 24
+  },
+  {
+   "coorte": "2023-03-31",
+   "deviamEstarPublicos": 14668,
+   "perdidosPelaVersaoTardia": 41,
+   "fracao": 0.0027952004363239707,
+   "tickersAtingidos": 16
+  },
+  {
+   "coorte": "2023-06-30",
+   "deviamEstarPublicos": 15388,
+   "perdidosPelaVersaoTardia": 85,
+   "fracao": 0.005523784767351183,
+   "tickersAtingidos": 47
+  },
+  {
+   "coorte": "2023-09-30",
+   "deviamEstarPublicos": 15756,
+   "perdidosPelaVersaoTardia": 70,
+   "fracao": 0.004442751967504443,
+   "tickersAtingidos": 36
+  },
+  {
+   "coorte": "2023-12-31",
+   "deviamEstarPublicos": 16120,
+   "perdidosPelaVersaoTardia": 71,
+   "fracao": 0.004404466501240695,
+   "tickersAtingidos": 27
+  },
+  {
+   "coorte": "2024-03-31",
+   "deviamEstarPublicos": 16125,
+   "perdidosPelaVersaoTardia": 48,
+   "fracao": 0.0029767441860465114,
+   "tickersAtingidos": 14
+  },
+  {
+   "coorte": "2024-06-30",
+   "deviamEstarPublicos": 16858,
+   "perdidosPelaVersaoTardia": 98,
+   "fracao": 0.005813263732352593,
+   "tickersAtingidos": 52
+  },
+  {
+   "coorte": "2024-09-30",
+   "deviamEstarPublicos": 17232,
+   "perdidosPelaVersaoTardia": 63,
+   "fracao": 0.0036559888579387185,
+   "tickersAtingidos": 21
+  },
+  {
+   "coorte": "2024-12-31",
+   "deviamEstarPublicos": 17603,
+   "perdidosPelaVersaoTardia": 39,
+   "fracao": 0.002215531443503948,
+   "tickersAtingidos": 25
+  },
+  {
+   "coorte": "2025-03-31",
+   "deviamEstarPublicos": 17608,
+   "perdidosPelaVersaoTardia": 8,
+   "fracao": 0.00045433893684688776,
+   "tickersAtingidos": 3
+  },
+  {
+   "coorte": "2025-06-30",
+   "deviamEstarPublicos": 17975,
+   "perdidosPelaVersaoTardia": 10,
+   "fracao": 0.0005563282336578582,
+   "tickersAtingidos": 10
+  },
+  {
+   "coorte": "2025-09-30",
+   "deviamEstarPublicos": 17979,
+   "perdidosPelaVersaoTardia": 10,
+   "fracao": 0.0005562044607597753,
+   "tickersAtingidos": 10
+  }
+ ],
+ "pioresAtrasos": [
+  {
+   "ticker": "ITUB4",
+   "fimDoExercicio": "2011-12-31",
+   "recebidoEm": "2020-03-18",
+   "diasDeAtraso": 3000
+  },
+  {
+   "ticker": "ITUB3",
+   "fimDoExercicio": "2011-12-31",
+   "recebidoEm": "2020-03-18",
+   "diasDeAtraso": 3000
+  },
+  {
+   "ticker": "ITUB4",
+   "fimDoExercicio": "2012-12-31",
+   "recebidoEm": "2020-03-18",
+   "diasDeAtraso": 2634
+  },
+  {
+   "ticker": "ITUB3",
+   "fimDoExercicio": "2012-12-31",
+   "recebidoEm": "2020-03-18",
+   "diasDeAtraso": 2634
+  },
+  {
+   "ticker": "RNEW3",
+   "fimDoExercicio": "2014-06-30",
+   "recebidoEm": "2020-04-28",
+   "diasDeAtraso": 2129
+  },
+  {
+   "ticker": "RNEW4",
+   "fimDoExercicio": "2014-06-30",
+   "recebidoEm": "2020-04-28",
+   "diasDeAtraso": 2129
+  },
+  {
+   "ticker": "RNEW3",
+   "fimDoExercicio": "2014-09-30",
+   "recebidoEm": "2020-04-28",
+   "diasDeAtraso": 2037
+  },
+  {
+   "ticker": "RNEW4",
+   "fimDoExercicio": "2014-09-30",
+   "recebidoEm": "2020-04-28",
+   "diasDeAtraso": 2037
+  },
+  {
+   "ticker": "RNEW3",
+   "fimDoExercicio": "2015-06-30",
+   "recebidoEm": "2020-04-28",
+   "diasDeAtraso": 1764
+  },
+  {
+   "ticker": "RNEW4",
+   "fimDoExercicio": "2015-06-30",
+   "recebidoEm": "2020-04-28",
+   "diasDeAtraso": 1764
+  },
+  {
+   "ticker": "RNEW3",
+   "fimDoExercicio": "2015-09-30",
+   "recebidoEm": "2020-04-28",
+   "diasDeAtraso": 1672
+  },
+  {
+   "ticker": "RNEW4",
+   "fimDoExercicio": "2015-09-30",
+   "recebidoEm": "2020-04-28",
+   "diasDeAtraso": 1672
+  },
+  {
+   "ticker": "PFRM3",
+   "fimDoExercicio": "2014-03-31",
+   "recebidoEm": "2018-06-29",
+   "diasDeAtraso": 1551
+  },
+  {
+   "ticker": "PFRM3",
+   "fimDoExercicio": "2014-06-30",
+   "recebidoEm": "2018-06-29",
+   "diasDeAtraso": 1460
+  },
+  {
+   "ticker": "BPAC3",
+   "fimDoExercicio": "2020-12-31",
+   "recebidoEm": "2024-12-23",
+   "diasDeAtraso": 1453
+  }
+ ]
+}

@@ -141,6 +141,16 @@ class PorCoorte {
   /// Correlação de ordem do resíduo do potencial com o retorno.
   final double? icIncremental;
 
+  /// O IC do potencial **ortogonalizado ao book-to-market sozinho** — o item
+  /// B2, ao pé da letra.
+  ///
+  /// [icIncremental] tira do potencial o que o P/B **e** o L/P explicam; este
+  /// tira só o que o P/B explica. A distinção importa: o P/B é o fator contra
+  /// o qual a §0 do plano mediu o motor, e é ele que o B2 nomeia. Publicar os
+  /// dois evita que a grandeza de acompanhamento mude de definição entre
+  /// rodadas sem ninguém notar.
+  final double? icIncrementalDadoBm;
+
   /// IC simples de cada ordenador, para conferir contra o relatório anterior.
   final double? icPotencial;
   final double? icBookToMarket;
@@ -161,6 +171,7 @@ class PorCoorte {
     required this.coefPotencialDadoBm,
     required this.coefSozinho,
     required this.icIncremental,
+    required this.icIncrementalDadoBm,
     required this.icPotencial,
     required this.icBookToMarket,
     required this.icEarningsYield,
@@ -178,6 +189,7 @@ class PorCoorte {
         'coefPotencialDadoBm': coefPotencialDadoBm,
         'coefSozinho': coefSozinho,
         'icIncremental': icIncremental,
+        'icIncrementalDadoBm': icIncrementalDadoBm,
         'icPotencial': icPotencial,
         'icBookToMarket': icBookToMarket,
         'icEarningsYield': icEarningsYield,
@@ -200,6 +212,7 @@ PorCoorte _rodarCoorte(String coorte, List<Obs> obs) {
   final dadoBm = Regression.ols([zPot, zBm], zRet);
   final sozinho = Regression.ols([zPot], zRet);
   final residuo = Regression.residualize(zPot, [zBm, zEy]);
+  final residuoDadoBm = Regression.residualize(zPot, [zBm]);
   // O composto com a seção da coorte, pela função do núcleo.
   final composto = TransversalScore.scores({
     for (var i = 0; i < obs.length; i++)
@@ -221,6 +234,9 @@ PorCoorte _rodarCoorte(String coorte, List<Obs> obs) {
     coefPotencialDadoBm: dadoBm?.coefficients[1],
     coefSozinho: sozinho?.coefficients[1],
     icIncremental: residuo == null ? null : Regression.spearman(residuo, ret),
+    icIncrementalDadoBm: residuoDadoBm == null
+        ? null
+        : Regression.spearman(residuoDadoBm, ret),
     icPotencial: Regression.spearman(pot, ret),
     icBookToMarket: Regression.spearman(bm, ret),
     icEarningsYield: Regression.spearman(ey, ret),
@@ -300,6 +316,7 @@ Map<String, dynamic> _horizonte(
       'earningsYieldConjunto': js((l) => l.coefEarningsYield),
       'potencialSozinho': js((l) => l.coefSozinho),
       'icIncremental': js((l) => l.icIncremental),
+      'icIncrementalDadoBm': js((l) => l.icIncrementalDadoBm),
       'icPotencial': js((l) => l.icPotencial),
       'icBookToMarket': js((l) => l.icBookToMarket),
       'icEarningsYield': js((l) => l.icEarningsYield),
@@ -355,6 +372,7 @@ void _imprimirHorizonte(String titulo, Map<String, dynamic> h) {
   linha('coef. do P/B com os outros', 'bookToMarketConjunto');
   linha('coef. do L/P com os outros', 'earningsYieldConjunto');
   linha('IC INCREMENTAL do potencial', 'icIncremental');
+  linha('IC ORTOGONALIZADO ao P/B (B2)', 'icIncrementalDadoBm');
 }
 
 Future<void> main(List<String> args) async {

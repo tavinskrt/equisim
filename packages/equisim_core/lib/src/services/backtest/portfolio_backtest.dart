@@ -18,11 +18,17 @@ class ContributionPlan {
   /// Aporte mensal (PMT).
   final Money monthly;
 
-  /// Dia do mês do aporte. Limitado a 28 para existir em todos os meses.
+  /// Dia do mês do aporte.
+  ///
+  /// **Dia que não existe no mês não perde o aporte** (lente `nucleo`,
+  /// 21/09/2026): o aporte sai no primeiro pregão a partir do dia pedido e,
+  /// se o mês acabar antes — fevereiro com dia 30, ou dia 31 caindo em fim de
+  /// semana —, no **último pregão do mês**. Perder calado o aporte de
+  /// fevereiro falseava o patrimônio e o TWR de toda simulação com dia acima
+  /// de 28.
   final int contributionDay;
 
-  /// Declara o cronograma. **Não valida** [contributionDay]; dias acima de 28
-  /// simplesmente não ocorrem em fevereiro, e o aporte do mês é perdido.
+  /// Declara o cronograma.
   const ContributionPlan({
     required this.initial,
     required this.monthly,
@@ -350,10 +356,15 @@ abstract final class PortfolioBacktest {
         lastContributionKey = '${today.year}-${today.month}';
       }
 
-      // 2) Aporte mensal no primeiro pregão a partir do dia estipulado.
+      // 2) Aporte mensal no primeiro pregão a partir do dia estipulado —
+      // ou no último pregão do mês, quando o dia pedido não chega a existir
+      // nele. Sem o segundo caso, dia 30 perde fevereiro **em silêncio**.
       if (plan.hasMonthly) {
         final key = '${today.year}-${today.month}';
-        if (key != lastContributionKey && today.day >= plan.contributionDay) {
+        final ultimoDoMes =
+            i + 1 >= dates.length || dates[i + 1].month != today.month;
+        if (key != lastContributionKey &&
+            (today.day >= plan.contributionDay || ultimoDoMes)) {
           _allocate(
             amount: plan.monthly,
             portfolio: portfolio,

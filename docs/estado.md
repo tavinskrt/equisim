@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-21, a partir de `ec063b9`.
+Gerado em 2026-09-21, a partir de `0ec1ec1`.
 
 ## Decisões registradas
 
-**89** aceita · **2** cumprida
+**93** aceita · **2** cumprida
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -106,6 +106,10 @@ Gerado em 2026-09-21, a partir de `ec063b9`.
 | 107 | O retorno terminal neutro é do capital novo; o instalado mantém o retorno que a projeção alcança, e isso passa a ser declarado | aceita | voce | 2026-09-21 |
 | 108 | A recusa por liquidez fica, e o beta corrigido fecha só um terço da distância que a justifica | aceita | voce | 2026-09-21 |
 | 109 | A perpetuidade declara de onde vêm o beta e a estrutura de capital, e não os leva a um estado estacionário imposto | aceita | voce | 2026-09-21 |
+| 110 | O ponto fixo do custo de capital é tentado de duas partidas, e a recusa de estrutura deixa de ser do chute | aceita | voce | 2026-09-21 |
+| 111 | A avaliação declara quando o beta saiu de uma janela mais curta que a pedida | aceita | voce | 2026-09-21 |
+| 112 | A rentabilidade reverte, e reverte à mediana do mercado — que vive abaixo do custo de capital; o terminal fica | aceita | voce | 2026-09-21 |
+| 113 | O caixa rende a taxa livre de risco, e não o custo de empréstimo | aceita | lente | 2026-09-21 |
 
 ## Caixa de entrada
 
@@ -119,16 +123,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 61 | 19.903 |
+| Nucleo de dominio | 61 | 20.415 |
 | Apresentacao | 36 | 16.212 |
-| Camada de dados | 23 | 3.615 |
-| Testes do app | 40 | 7.561 |
-| Testes do nucleo | 38 | 13.118 |
+| Camada de dados | 23 | 3.627 |
+| Testes do app | 40 | 7.610 |
+| Testes do nucleo | 38 | 13.550 |
 | Ferramentas de QA | 20 | 6.562 |
 
 ## Histórico recente
 
 ```
+2026-09-21  0ec1ec1  Refino do motor de valuation (parte 19)
 2026-09-20  ec063b9  Refino do motor de valuation (parte 18)
 2026-09-20  bb57462  Regerado estado
 2026-09-16  d7fa781  Refino do motor de valuation (parte 17)
@@ -143,5 +148,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-10  e46c8bc  Refino do motor de valuation (parte 8)
 2026-09-09  30bc51d  Refino do motor de valuation (parte 7)
 2026-09-09  9b90a3d  Refino do motor de valuation (parte 6)
-2026-09-08  d94a726  Refino do motor de valuation (parte 5)
 ```

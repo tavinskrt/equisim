@@ -22,7 +22,11 @@ import 'compute_valuation.dart';
 /// de uma isolate.
 abstract final class PrepareValuationInputs {
   /// Janela usada para estimar o beta.
-  static const int betaWindowYears = 5;
+  ///
+  /// **A constante mora na cascata**, que é quem declara a janela curta contra
+  /// ela (item B17): duas cópias divergiriam, e o aviso passaria a medir
+  /// contra um número que o preparo não usa.
+  static const int betaWindowYears = ValuationCascade.betaWindowYears;
 
   /// Busca fundamentos e cotações e monta os insumos da cascata.
   ///
@@ -194,6 +198,9 @@ abstract final class PrepareValuationInputs {
       creditReferenceRiskFree: riskFreeRate,
       // A composição declarada da unit, quando a companhia a publica (B16).
       declaredSharesPerUnit: declaredSharesPerUnit,
+      // A janela que a série de fato cobriu, para a cascata declarar quando
+      // ela é curta demais para os cinco anos pedidos (item B17).
+      betaWindowYears: beta.janelaEmAnos,
     ));
   }
 
@@ -213,8 +220,13 @@ abstract final class PrepareValuationInputs {
   /// recusar a avaliação inteira por causa de um único parâmetro, e um beta
   /// neutro é premissa transparente — que fica registrada em [BetaSource].
   static Future<
-      ({double beta, BetaSource source, double? standardError, int dividends})>
-      _estimateBeta({
+      ({
+        double beta,
+        BetaSource source,
+        double? standardError,
+        int dividends,
+        double janelaEmAnos,
+      })> _estimateBeta({
     required PriceSeries series,
     required BenchmarkRepository benchmark,
     required DateRange window,
@@ -222,18 +234,36 @@ abstract final class PrepareValuationInputs {
   }) async {
     final marketResult = await benchmark.ibovespa(window);
     if (marketResult.isErr) {
-      return (beta: 1.0, source: BetaSource.manual, standardError: null, dividends: 0);
+      return (
+        beta: 1.0,
+        source: BetaSource.manual,
+        standardError: null,
+        dividends: 0,
+        janelaEmAnos: 0.0,
+      );
     }
 
     final market = marketResult.unwrap();
     if (market.points.length < 30) {
-      return (beta: 1.0, source: BetaSource.manual, standardError: null, dividends: 0);
+      return (
+        beta: 1.0,
+        source: BetaSource.manual,
+        standardError: null,
+        dividends: 0,
+        janelaEmAnos: 0.0,
+      );
     }
 
     final assetPoints =
         series.points.where((p) => window.contains(p.date)).toList();
     if (assetPoints.length < 2) {
-      return (beta: 1.0, source: BetaSource.manual, standardError: null, dividends: 0);
+      return (
+        beta: 1.0,
+        source: BetaSource.manual,
+        standardError: null,
+        dividends: 0,
+        janelaEmAnos: 0.0,
+      );
     }
 
     // **Retorno total dos dois lados** (decisão 89). O Ibovespa reinveste
@@ -255,6 +285,14 @@ abstract final class PrepareValuationInputs {
 
     final estimate = BetaCalculator.estimate(returns: aligned);
     final reinvestidos = total?.applied ?? 0;
+    // **A janela que a série de fato cobriu** (item B17). A fonte de cotações
+    // devolve uma janela fixa de dez anos, e a coorte datada de 2018 pede cinco
+    // anos que a série não tem: o beta sai de 383 pregões em vez de 1.240, e
+    // saía sem dizer. Medir a extensão da série, e não a contagem de pares,
+    // separa janela curta de pregão faltando no meio.
+    final janelaEfetiva = datas.length < 2
+        ? 0.0
+        : datas.last.difference(datas.first).inDays / 365.25;
 
     return estimate.fold(
       (value) => (
@@ -262,8 +300,15 @@ abstract final class PrepareValuationInputs {
         source: BetaSource.computed,
         standardError: value.standardError,
         dividends: reinvestidos,
+        janelaEmAnos: janelaEfetiva,
       ),
-      (_) => (beta: 1.0, source: BetaSource.manual, standardError: null, dividends: 0),
+      (_) => (
+        beta: 1.0,
+        source: BetaSource.manual,
+        standardError: null,
+        dividends: 0,
+        janelaEmAnos: janelaEfetiva,
+      ),
     );
   }
 }

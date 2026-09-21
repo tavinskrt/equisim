@@ -3589,6 +3589,86 @@ void main() {
     });
   });
 
+  group('A janela curta do beta é declarada', () {
+    // Item B17, decisão 111. A fonte de cotações devolve dez anos: numa
+    // avaliação datada de 2018 a série começa em 2016, e o beta sai de pouco
+    // mais de um ano de pregões — 383 contra 1.240 — sem que nada diga.
+    FundamentalsSnapshot ano(int y, double escala) => FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 10000 * escala,
+          ebit: 1600 * escala,
+          ebitda: 2100 * escala,
+          netIncome: 800 * escala,
+          incomeBeforeTax: 1200 * escala,
+          incomeTaxExpense: -400 * escala,
+          interestExpense: 300,
+          earningsPerShare: 0.8 * escala,
+          cash: 400,
+          shortTermDebt: 800,
+          longTermDebt: 2200,
+          totalStockholderEquity: 5000 * escala,
+          bookValuePerShare: 5.0 * escala,
+          operatingCashFlow: 1800 * escala,
+          nopat: 1056 * escala,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 10000,
+        );
+
+    List<FundamentalsSnapshot> serie() {
+      final out = <FundamentalsSnapshot>[];
+      var escala = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(ano(2025 - i, escala));
+        escala *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult avaliar(double? janela) =>
+        ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: serie(),
+          marketPrice: 10.0,
+          capm: CapmInputs(
+              riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          betaWindowYears: janela,
+        )).unwrap();
+
+    bool declara(ValuationResult r) =>
+        r.warnings.any((w) => w.contains('O beta foi estimado sobre'));
+
+    test('janela inteira não gera ressalva', () {
+      expect(declara(avaliar(5.0)), isFalse);
+      expect(declara(avaliar(4.6)), isFalse,
+          reason: 'feriado e pregão faltando tiram dias, não anos');
+    });
+
+    test('janela curta gera ressalva, com o número', () {
+      final r = avaliar(1.6);
+      expect(declara(r), isTrue);
+      final aviso =
+          r.warnings.firstWhere((w) => w.contains('O beta foi estimado sobre'));
+      expect(aviso, contains('1.6 ano(s)'));
+      expect(aviso, contains('${ValuationCascade.betaWindowYears} que a janela pede'));
+    });
+
+    test('sem medição da janela, nada é afirmado', () {
+      // Quem monta os insumos à mão não informa a janela, e o silêncio é o
+      // certo: afirmar janela cheia seria inventar.
+      expect(declara(avaliar(null)), isFalse);
+      expect(declara(avaliar(0.0)), isFalse);
+    });
+
+    test('a constante da janela é uma só nos dois lados', () {
+      expect(PrepareValuationInputs.betaWindowYears,
+          ValuationCascade.betaWindowYears);
+    });
+  });
+
   group('A perpetuidade declara de onde vêm o beta e a estrutura', () {
     // Item B15, decisão 109. Em produção o beta de equilíbrio é o de hoje,
     // encolhido, e a estrutura é a do ano N do modelo. As duas alternativas do
@@ -4080,6 +4160,124 @@ void main() {
               (capm.riskFreeRate * (1 - ValuationParameters.statutoryTaxRate) -
                   capm.costOfEquity);
       expect(peso, greaterThan(1.0));
+    });
+  });
+
+  group('O caixa rende a taxa livre de risco, e não o custo de empréstimo', () {
+    // Lente `metodo`, 21/09/2026. A decisão 104 pôs a dívida **líquida** nos
+    // pesos e disse, no caso sem dívida contratada, que o que remunera o peso
+    // negativo é caixa — e caixa rende `R_f`. A regra valia só quando a dívida
+    // **bruta** era zero: com dívida e caixa maior que ela, o peso negativo
+    // continuava remunerado ao custo de **empréstimo**, e o WACC saía baixo
+    // demais justamente nos balanços mais líquidos.
+    const capm =
+        CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055);
+    const tax = ValuationParameters.statutoryTaxRate;
+
+    CostOfCapital custo({double? caixa, double divida = -2000}) =>
+        CostOfCapital(
+          capm: capm,
+          costOfDebt: 0.18,
+          taxRate: tax,
+          equityValue: 12000,
+          debtValue: divida,
+          interestCoverage: 4.0,
+          cashValue: caixa,
+        );
+
+    test('sem o caixa, vale a forma de uma perna só', () {
+      final c = custo();
+      expect(c.grossDebtShare, isNull);
+      expect(c.cashShare, isNull);
+      final esperado = c.equityShare * c.costOfEquity +
+          c.debtShare * c.effectiveCostOfDebt * (1 - c.effectiveTaxShield);
+      expect(c.rawWacc, closeTo(esperado, 1e-12));
+    });
+
+    test('a separação move o WACC pela diferença entre as duas taxas', () {
+      final sem = custo();
+      final com = custo(caixa: 6000);
+      // `w_caixa · [K_d(1 − escudo) − R_f(1 − τ)]`: a perna é a mesma, e o que
+      // muda é a taxa da metade que **rende**.
+      final diferenca = com.cashShare! *
+          (com.effectiveCostOfDebt * (1 - com.effectiveTaxShield) -
+              capm.riskFreeRate * (1 - tax));
+      expect(com.rawWacc - sem.rawWacc, closeTo(diferenca, 1e-12));
+      expect(com.rawWacc, greaterThan(sem.rawWacc),
+          reason: 'o caixa deixa de ser creditado com prêmio de crédito');
+    });
+
+    test('os pesos não mudam: só a taxa de cada metade', () {
+      final c = custo(caixa: 6000);
+      expect(c.grossDebtShare! - c.cashShare!, closeTo(c.debtShare, 1e-12));
+      expect(c.grossDebtShare, greaterThan(0.0),
+          reason: 'a bruta é 4.000 com 6.000 de caixa e −2.000 de líquida');
+    });
+
+    test('mesma dívida líquida, mais caixa: o desconto é maior', () {
+      // O caso que a forma anterior não distinguia — os dois balanços davam o
+      // mesmo WACC, embora um tenha o dobro de caixa aplicado à taxa básica.
+      final enxuto = custo(caixa: 2000);
+      final inchado = custo(caixa: 8000);
+      expect(inchado.debtShare, closeTo(enxuto.debtShare, 1e-12));
+      expect(inchado.rawWacc, greaterThan(enxuto.rawWacc));
+    });
+
+    test('o rendimento do caixa é tributado, e não escudado', () {
+      final c = custo(caixa: 6000);
+      expect(c.afterTaxCashYield,
+          closeTo(capm.riskFreeRate * (1 - tax), 1e-12));
+    });
+
+    test('o rastro mostra a forma de três pernas que a conta usou', () {
+      final rastro = <AuditEvent>[];
+      AuditRecorder.attach(rastro.add);
+      addTearDown(AuditRecorder.detach);
+      final serieDela = <FundamentalsSnapshot>[];
+      var escala = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        serieDela.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(2025 - i, 12, 31),
+          totalRevenue: 10000 * escala,
+          ebit: 1800 * escala,
+          ebitda: 2400 * escala,
+          netIncome: 900 * escala,
+          incomeBeforeTax: 1300 * escala,
+          incomeTaxExpense: -400 * escala,
+          interestExpense: 400,
+          earningsPerShare: 0.9 * escala,
+          cash: 3000,
+          shortTermDebt: 1000,
+          longTermDebt: 3000,
+          totalStockholderEquity: 6000 * escala,
+          bookValuePerShare: 6.0 * escala,
+          operatingCashFlow: 2000 * escala,
+          nopat: 1188 * escala,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 12000,
+        ));
+        escala *= 1.05;
+      }
+      ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: serieDela,
+        marketPrice: 12.0,
+        capm: capm,
+        declaredTerminalRiskFreeRate: 0.094,
+      ));
+      final passo = rastro.single.calculations
+          .firstWhere((p) => p.formulaName.contains('WACC'));
+      expect(passo.mappedVariables.keys, contains('C — caixa (R\$)'));
+      expect(passo.mappedVariables.keys, contains('D bruta (R\$)'));
+      expect((passo.mappedVariables['C — caixa (R\$)']! as num).toDouble(),
+          closeTo(3000, 0.01));
+      expect(passo.latexRepresentation, contains('R_f'));
+      expect(passo.intermediateSteps
+              .any((e) => e.contains('o caixa rende a taxa livre')),
+          isTrue);
     });
   });
 }

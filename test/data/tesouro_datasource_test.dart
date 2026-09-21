@@ -240,7 +240,11 @@ void main() {
     test('a contagem vem pela raiz do ticker', () async {
       final repo = B3RegistryRepository(carregarPacote: () async => pacote);
       final c = await repo.officialSharesFor(Ticker.parse('CTKA4'));
-      expect(c!.total, closeTo(6205375, 1e-6));
+      // **Igualdade, e não tolerância** (lente `risco`, 21/09/2026). A
+      // contagem da B3 é inteiro publicado — `6.205.375` —, e o que o teste
+      // cobra do analisador é que ele leia esse inteiro, e não que chegue
+      // perto dele. Fração aqui é defeito de leitura, não erro de arredondar.
+      expect(c!.total, equals(6205375));
       expect(c.asOf, DateTime.utc(2026, 9, 14));
       expect(await repo.officialSharesFor(Ticker.parse('PETR4')), isNull);
     });

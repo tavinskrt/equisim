@@ -1,0 +1,139 @@
+{
+ "medidoEm": "2026-09-14",
+ "conferidoContraOGabarito": 0,
+ "ativosComSerie": 307,
+ "painel": {
+  "pares": 3246,
+  "phi": 0.23708575220652423,
+  "t": 47.35332545226698,
+  "r2": 0.40871300014459677,
+  "meiaVidaAnos": 0.48157514469413404
+ },
+ "porAtivo": {
+  "ativos": 219,
+  "paresMedianos": 14.0,
+  "phiP25": 0.1815127622365012,
+  "phiMediano": 0.3917444569773376,
+  "phiP75": 0.6143810309069111
+ },
+ "sobrevivenciaDoSpread": {
+  "1": {
+   "pares": 3246.0,
+   "spreadInicialAlto": 0.14307442917199664,
+   "spreadFinalAlto": 0.10321570482256376,
+   "sobraAlto": 0.7214126620661419,
+   "spreadInicialBaixo": -0.1056596083718196,
+   "spreadFinalBaixo": -0.08132191038174866,
+   "sobraBaixo": 0.7696593961958879
+  },
+  "3": {
+   "pares": 2591.0,
+   "spreadInicialAlto": 0.1433853564898535,
+   "spreadFinalAlto": 0.0530063897073081,
+   "sobraAlto": 0.36967784580609553,
+   "spreadInicialBaixo": -0.10320432677498217,
+   "spreadFinalBaixo": -0.04167923791942252,
+   "sobraBaixo": 0.40385165256003597
+  },
+  "5": {
+   "pares": 2017.0,
+   "spreadInicialAlto": 0.12484045265550014,
+   "spreadFinalAlto": 0.01728309577236352,
+   "sobraAlto": 0.13844146993007614,
+   "spreadInicialBaixo": -0.09428307272016032,
+   "spreadFinalBaixo": -0.01780541251751573,
+   "sobraBaixo": 0.18885057522853138
+  },
+  "10": {
+   "pares": 968.0,
+   "spreadInicialAlto": 0.11320579086151336,
+   "spreadFinalAlto": 0.0013937870177800488,
+   "sobraAlto": 0.012311976332421837,
+   "spreadInicialBaixo": -0.09807163301482101,
+   "spreadFinalBaixo": -0.020830344020124153,
+   "sobraBaixo": 0.21239927775013373
+  }
+ },
+ "nivelDoMercado": {
+  "medianaRoicPorAno": [
+   {
+    "ano": 2011,
+    "medianaRoic": 0.10308717071817339,
+    "ativos": 214
+   },
+   {
+    "ano": 2012,
+    "medianaRoic": 0.09402519358591785,
+    "ativos": 219
+   },
+   {
+    "ano": 2013,
+    "medianaRoic": 0.08340317584248569,
+    "ativos": 220
+   },
+   {
+    "ano": 2014,
+    "medianaRoic": 0.0761332721995607,
+    "ativos": 220
+   },
+   {
+    "ano": 2015,
+    "medianaRoic": 0.06813885270157005,
+    "ativos": 214
+   },
+   {
+    "ano": 2016,
+    "medianaRoic": 0.06027711784449521,
+    "ativos": 214
+   },
+   {
+    "ano": 2017,
+    "medianaRoic": 0.0780371568672849,
+    "ativos": 222
+   },
+   {
+    "ano": 2018,
+    "medianaRoic": 0.09486904965716807,
+    "ativos": 223
+   },
+   {
+    "ano": 2019,
+    "medianaRoic": 0.08832396686319179,
+    "ativos": 221
+   },
+   {
+    "ano": 2020,
+    "medianaRoic": 0.09716758747586514,
+    "ativos": 243
+   },
+   {
+    "ano": 2021,
+    "medianaRoic": 0.15715376201547243,
+    "ativos": 265
+   },
+   {
+    "ano": 2022,
+    "medianaRoic": 0.11748585777553863,
+    "ativos": 282
+   },
+   {
+    "ano": 2023,
+    "medianaRoic": 0.09978245555390235,
+    "ativos": 283
+   },
+   {
+    "ano": 2024,
+    "medianaRoic": 0.0976913504496572,
+    "ativos": 278
+   },
+   {
+    "ano": 2025,
+    "medianaRoic": 0.09589843103078491,
+    "ativos": 276
+   }
+  ],
+  "medianaRoicDoPeriodo": 0.09486904965716807,
+  "medianaCustoDeCapital": 0.18903490401339923,
+  "ativosComCusto": 99
+ }
+}

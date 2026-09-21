@@ -139,6 +139,22 @@ class CostOfCapital {
   /// doc de [syntheticSpread].
   final double? netDebtToEbitda;
 
+  /// Caixa e aplicações, em valor absoluto — a parcela do lado direito que
+  /// **rende**, em vez de custar (lente `metodo`, 21/09/2026).
+  ///
+  /// **Por que ele entra separado.** A dívida dos pesos é a líquida (decisão
+  /// 104), e colapsar bruta e caixa numa grandeza só faz o caixa ser
+  /// remunerado ao custo de **empréstimo**: com caixa maior que a dívida, o
+  /// peso fica negativo e `− w·K_d` credita ao acionista um prêmio de crédito
+  /// que o caixa não rende. O efeito é um WACC baixo demais e um preço justo
+  /// alto demais, exatamente nos balanços mais líquidos.
+  ///
+  /// Com ele, a perna do financiamento se abre em duas — `+ D_bruta·K_d(1−escudo)`
+  /// e `− Caixa·R_f(1−τ)` —, sobre o mesmo denominador `E + D_líquida`. Sem ele
+  /// — `null` —, vale a forma anterior, que é a que quem monta o custo à mão
+  /// obtém.
+  final double? cashValue;
+
   /// `false` quando a companhia **não tem dívida contratada**, e o que resta do
   /// lado direito do balanço é caixa.
   ///
@@ -174,6 +190,7 @@ class CostOfCapital {
     this.netDebtToEbitda,
     this.creditReferenceRate,
     this.hasContractedDebt = true,
+    this.cashValue,
   });
 
   /// Prêmio de crédito máximo admitido sobre a taxa livre de risco.
@@ -383,10 +400,52 @@ class CostOfCapital {
     return taxRate * (c < 0 ? 0.0 : c);
   }
 
-  /// WACC bruto: `E/(E+D)·Ke + D/(E+D)·Kd·(1 − t)`.
-  double get rawWacc =>
-      equityShare * costOfEquity +
-      debtShare * effectiveCostOfDebt * (1.0 - effectiveTaxShield);
+  /// Participação da dívida **bruta**, sobre o mesmo capital total.
+  ///
+  /// `null` sem [cashValue]: sem saber quanto é caixa, a bruta não é
+  /// separável da líquida.
+  double? get grossDebtShare {
+    final caixa = cashValue;
+    if (caixa == null || totalCapital <= 0) return null;
+    return (debtValue + caixa) / totalCapital;
+  }
+
+  /// Participação do caixa, sobre o mesmo capital total. `null` sem
+  /// [cashValue].
+  double? get cashShare {
+    final caixa = cashValue;
+    if (caixa == null || totalCapital <= 0) return null;
+    return caixa / totalCapital;
+  }
+
+  /// O que o caixa rende, líquido de imposto: a taxa livre de risco.
+  ///
+  /// **É rendimento, e é tributado** — ao contrário do juro da dívida, que é
+  /// dedutível. Por isso o fator aqui é `(1 − τ)` sobre a receita, e não o
+  /// escudo fiscal de [effectiveTaxShield].
+  double get afterTaxCashYield => capm.riskFreeRate * (1.0 - taxRate);
+
+  /// WACC bruto.
+  ///
+  /// ```
+  /// WACC = w_E·K_e + w_D,bruta·K_d·(1 − escudo) − w_caixa·R_f·(1 − τ)
+  /// ```
+  ///
+  /// com os três pesos sobre `E + D_líquida`. **Sem [cashValue] a forma colapsa
+  /// na anterior**, `w_E·K_e + w_D,líquida·K_d·(1 − escudo)`, que é o que quem
+  /// monta o custo à mão obtém — e que trata o caixa como dívida negativa
+  /// remunerada ao custo de empréstimo.
+  double get rawWacc {
+    final wD = grossDebtShare;
+    final wC = cashShare;
+    final juro = effectiveCostOfDebt * (1.0 - effectiveTaxShield);
+    if (wD == null || wC == null) {
+      return equityShare * costOfEquity + debtShare * juro;
+    }
+    return equityShare * costOfEquity +
+        wD * juro -
+        wC * afterTaxCashYield;
+  }
 
   /// WACC aplicado ao desconto, nunca abaixo da taxa livre de risco.
   ///

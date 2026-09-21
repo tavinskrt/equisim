@@ -11,6 +11,119 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O que a quinta rodada da Fase 3 encontrou — B17, B18, B19, B8 e B2 (21/09/2026)
+
+**O `data/` sumiu de novo.** O discard do merge levou junto a FCA baixada e a
+entrada congelada. O cache da validação sobreviveu — ele mora em
+`docs/validacao/`, e não em `data/` —, de modo que o gabarito se recriou do
+zero e reproduziu 376 ativos e 102 avaliados, o estado exato do fim da rodada
+anterior. **A entrada congelada é reconstruível; a base bruta não**, e é isso
+que separa o que esta rodada pôde medir do que não pôde.
+
+**O B18 era verdade, e era pequeno.** Os 14 ativos que saíram ao ligar o prior
+foram recusados no ano zero da primeira iteração — antes de o ponto fixo
+iterar. O ponto fixo passou a ser tentado de duas partidas: a interpolação de
+dois pontos, que é o recuo, e o custo de capital **desalavancado**, que é o
+mesmo caminho no limite de dívida zero. **Um volta** — a CAML3 —; os outros 13
+continuam recusados pelas duas, e a recusa passou a dizer isso. Nenhum preço
+justo se move.
+
+**E a pergunta de fundo do item foi respondida por medição.** "A resposta
+depende de qual conta o motor alcançou primeiro?" Agora dá para verificar: as
+duas convergências são comparadas, e divergir acima de um décimo de por cento é
+ressalva. **Não há divergência em nenhum ativo do universo, nas duas montagens** —
+o ponto fixo é independente da partida onde converge, e agora isso é fato medido
+em vez de propriedade suposta.
+
+**O B17 fechou pela saída de declarar.** A cobertura pelo COTAHIST nas listadas
+depende da base bruta; declarar a janela curta, não. O preparo mede a extensão
+da série que estimou o beta — extensão, e não contagem de pares, porque feriado
+tira dias e o que se quer separar é série que não existe — e a cascata avisa
+abaixo de 80% da janela pedida. **A CYRE4, com 0,7 ano de cotação, já sai com a
+ressalva no aplicativo de hoje**: o defeito não era só das coortes.
+
+**O B19 respondeu o B12, e a resposta tem duas metades.** A rentabilidade
+brasileira **reverte, e rápido**: AR(1) no painel de 3.246 pares dá `φ` de 0,237
+com meia-vida de meio ano, e a leitura sem forma funcional mostra o quinto
+superior indo de 14,3% de spread a 0,1% em dez anos — o horizonte que a projeção
+explicita. **Mas reverte para onde?** A mediana do `ROIC` do universo é de 9,5%,
+entre 6,0% e 15,7% em quinze anos, contra 18,6% de custo de capital de
+equilíbrio mediano. **A rentabilidade reverte à metade do que o capital custa.**
+Converger o terminal a `r` afirmaria uma rentabilidade que esta seção
+transversal nunca teve; e o retorno implícito que o motor já usa — 12,9% — está
+entre os dois, mais perto do destino medido. O terminal fica, agora por medição
+em vez de por ausência dela. **E a alternativa andaria para baixo**: a escolha
+da decisão 107 não era a otimista.
+
+**O B2 já existia e não estava terminado.** O IC incremental era medido e
+reportado, mas contra o P/B **e** o L/P — e o item nomeia o P/B. As duas
+ortogonalizações passaram a sair lado a lado, com a inferência do resto: `t`
+corrigido pela sobreposição contra o crítico e Newey-West. O resíduo contra o
+P/B vale **+0,016** em 36 meses, com `t` corrigido de 0,13 contra 2,70, positivo
+em 10 de 22 coortes — indistinguível de zero. A grandeza ganhou documento
+próprio, com o histórico entre rodadas e a ressalva de que a série começa em
+16/09/2026, porque antes disso o instrumento era outro.
+
+**O B8 é duas metades, e só uma é medível daqui.** A que o pacote versionado
+permite — o exercício que **some** porque a última versão chegou depois da
+coorte — é **pequena**: de 0,0% a 1,1% dos exercícios que deviam estar públicos,
+com a pior coorte em 30/06/2020, quando a CVM prorrogou prazos. Um sexto dos
+documentos chega além do prazo regulamentar, e os extremos são grandes — a DFP de
+2011 do Itaú tem recebimento em 2020, 3.000 dias depois. **A outra metade — o
+número reapresentado entrando na coorte como se fosse o original — não é medível
+sem as versões antigas**, e é a maior por construção: 24,8% dos anuais têm mais
+de uma. O item ficou **em curso**, com o tamanho de uma das metades no registro.
+
+### O que as lentes disseram nesta rodada
+
+As sete rodaram. **A `metodo` achou o defeito da rodada**, e ele estava na
+metade que a decisão 104 tinha deixado em aberto: com dívida contratada e caixa
+maior que ela, a perna negativa do WACC remunerava o caixa ao custo de
+**empréstimo**. O argumento que a 104 usou para o caso sem dívida — «caixa rende
+a taxa livre de risco» — valia igual aqui, e não estava aplicado. A perna se
+abriu em duas, nas duas rotas, e virou a
+[decisão 113](decisoes/113-o-caixa-rende-a-taxa-livre-de-risco-e-nao-o-custo-de-emprestimo.md).
+**Custou três avaliações** — MOTV3, MYPK3 e QUAL3 —, e obrigou a remedir o
+terminal excedente do B12 e o destino da reversão do B19 na mesma tarde.
+
+O segundo achado da `metodo` era escolha, e não defeito: o cenário de desconto
+soma o deslocamento ao `Ke` um a um, e `Ke` e `WACC` não se movem na mesma razão.
+**Qual é a razão depende do que o cenário perturba**, e ele não diz — são três
+leituras e três fatores. Ficou o um a um, agora **declarado no código** com as
+três leituras e o motivo (as duas vias precisam querer dizer a mesma coisa), e
+virou o item **B20**.
+
+A `risco` achou duas asserções de teste vazias: um `expect(isOk || isErr)`, que é
+tautologia — quem cobra a ausência de exceção ali é o `await` —, e um `closeTo`
+com tolerância sobre a contagem de ações da B3, que é inteiro publicado. As duas
+foram corrigidas.
+
+A `nucleo` achou um defeito real e calado: com `contributionDay` acima de 28, o
+mês sem aquele dia **perdia o aporte**, e o patrimônio e o TWR de toda a
+simulação saíam de um cronograma que ninguém pediu. O aporte passa a sair no
+último pregão do mês quando o dia pedido não chega a existir nele.
+
+A `dados` achou o terceiro: com a rede fora e o cache vencido cobrindo **parte**
+do lote, o repositório devolvia `Ok` com meio lote e engolia o motivo — o 429, a
+credencial —, que reaparecia três camadas adiante como "ativo sem cotação". O
+recuo ao cache vencido passou a valer só quando ele cobre tudo que faltou.
+
+**A `tela` não achou nada.** A `rumo` e a `registro` trouxeram cinco apontamentos
+que **não procedem**: quatro citam o texto histórico de decisões e do plano —
+os três bancos sem setor que a decisão 87 resolveu (A5 ✅), a discordância entre
+as vias que a decisão 102 fechou (B13 ✅), a alíquota efetiva em valor absoluto
+que já é limitação declarada, e a tarja de depreciação do
+`crescimento_log_linear.md`, **que já está lá desde que foi escrita**. É o modo
+de falhar próprio dessas duas lentes: ler a narrativa de um registro imutável
+como se fosse o estado de hoje.
+
+O que sobrou delas é dívida de arquitetura, inventariada e não acionada, porque
+o repositório está sob preservação: o `Failure` do núcleo monta frase e formata
+percentual para a tela, e o `Money` em centavos inteiros vale na carteira mas
+não no caminho de avaliação. Virou o item **B21**.
+
+---
+
 ## O que a quarta rodada da Fase 3 encontrou — B12, B14 e B15 (21/09/2026)
 
 **Três itens que eram premissa não declarada, e nenhum número mudou.** O gabarito

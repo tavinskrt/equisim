@@ -437,4 +437,49 @@ void main() {
       expect(result.isErr, isTrue);
     });
   });
+
+  group('O mês não perde o aporte por um dia que não existe nele', () {
+    // Lente `nucleo`, 21/09/2026. O aporte saía no primeiro pregão com
+    // `dia >= contributionDay`. Com dia 30, fevereiro não tem pregão que
+    // satisfaça a condição, e o aporte do mês sumia **em silêncio** — o
+    // patrimônio e o TWR de toda a simulação saíam de um cronograma que
+    // ninguém pediu.
+    final portfolio = Portfolio.equalWeighted(
+      id: 'p',
+      name: 'Principal',
+      kind: PortfolioKind.principal,
+      assets: [assetOf('PETR4')],
+    ).unwrap();
+
+    int aportes(int dia) {
+      // Ano bissexto de propósito: fevereiro de 2024 acaba no dia 29.
+      final serie = seriesOf(
+        'PETR4',
+        DateTime(2024, 1, 2),
+        List<double>.filled(90, 10.0),
+      );
+      final r = PortfolioBacktest.run(
+        portfolio: portfolio,
+        prices: {Ticker.parse('PETR4'): serie},
+        plan: ContributionPlan(
+          initial: Money.zero,
+          monthly: const Money(100000),
+          contributionDay: dia,
+        ),
+        range: DateRange(DateTime(2024, 1, 2), DateTime(2024, 4, 30)),
+      );
+      expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
+      return r.unwrap().totalContributed.cents ~/ 100000;
+    }
+
+    test('dia 5 e dia 30 aportam o mesmo número de vezes', () {
+      expect(aportes(30), equals(aportes(5)));
+    });
+
+    test('nenhum mês da janela fica sem aporte', () {
+      // Janeiro, fevereiro, março e abril: quatro meses, quatro aportes.
+      expect(aportes(30), equals(4));
+      expect(aportes(31), equals(4));
+    });
+  });
 }

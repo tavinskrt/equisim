@@ -288,6 +288,48 @@ void main() {
       expect(result.unwrap()[ticker]!.points.length, gravada.points.length);
     });
 
+    test('recuperação parcial devolve o erro da rede, e não meio lote',
+        () async {
+      // Lente `dados`, 21/09/2026. Com a rede fora e o cache vencido cobrindo
+      // só parte do lote, devolver `Ok` com o que sobrou engolia o motivo — o
+      // 429, a credencial, o 503 — e a falha reaparecia adiante como "ativo
+      // sem cotação", que é o sintoma. O recuo ao cache vencido vale quando
+      // ele cobre tudo que faltou.
+      final petr = Ticker.parse('PETR4');
+      // Papel fora do lote da fixture: ele nunca chega ao disco, e é a metade
+      // que o cache vencido não cobre.
+      final ausente = Ticker.parse('BBAS3');
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+
+      final ok = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: db,
+      );
+      await ok.dailyBatch([petr], range);
+      await db.customStatement('DELETE FROM cache_entries');
+
+      final offline = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(
+          failures: {'/v2/stocks/historical': 429},
+        ))),
+        cache: db,
+      );
+
+      final r = await offline.dailyBatch([petr, ausente], range);
+      expect(r.isErr, isTrue,
+          reason: 'o cache vencido não cobre a BBAS3: o lote está incompleto');
+      expect(r.failureOrNull, isA<DataQualityFailure>(),
+          reason: 'o motivo tem de chegar a quem lê, e é o da rede — não '
+              '"ativo sem cotação" três camadas adiante');
+
+      // E cobrindo tudo, o recuo continua valendo.
+      final sr = await offline.dailyBatch([petr], range);
+      expect(sr.isOk, isTrue);
+      expect(sr.unwrap().containsKey(petr), isTrue);
+    });
+
     test('ativo que o lote omite também recorre ao cache vencido', () async {
       // Decisão 77. O recurso ao cache vencido existia só para o lote que
       // falha inteiro. Um lote que responde e deixa um ativo de fora — série

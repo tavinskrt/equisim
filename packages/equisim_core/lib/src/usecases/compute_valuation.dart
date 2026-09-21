@@ -239,6 +239,17 @@ class ValuationInputs {
   /// equilíbrio leem o mesmo veredito. `null` recua para a taxa do CAPM.
   final double? creditReferenceRiskFree;
 
+  /// Extensão, em anos, da série que estimou o beta (item B17).
+  ///
+  /// **A janela pedida é de cinco anos, e nem toda série a tem.** A fonte de
+  /// cotações devolve uma janela fixa de dez anos: numa avaliação datada de
+  /// 2018, a série começa em 2016 e o beta sai de pouco mais de um ano de
+  /// pregões. O efeito é ruído no `Ke`, e ele entrava sem dizer.
+  ///
+  /// `null` quando não foi medida — o que inclui todo chamador que monta os
+  /// insumos à mão.
+  final double? betaWindowYears;
+
   /// Peso do beta do próprio ativo no beta de **equilíbrio** — imposição de
   /// diagnóstico do item B15.
   ///
@@ -324,6 +335,7 @@ class ValuationInputs {
     this.declaredSharesPerUnit,
     this.terminalBetaWeightOverride,
     this.terminalLeverageOverride,
+    this.betaWindowYears,
   });
 
   /// Os mesmos insumos, com [n] anos de projeção explícita.
@@ -357,6 +369,7 @@ class ValuationInputs {
         declaredSharesPerUnit: declaredSharesPerUnit,
         terminalBetaWeightOverride: terminalBetaWeightOverride,
         terminalLeverageOverride: terminalLeverageOverride,
+        betaWindowYears: betaWindowYears,
       );
 
   /// Os mesmos insumos com o **nível** da taxa livre de risco deslocado em
@@ -409,6 +422,7 @@ class ValuationInputs {
       declaredSharesPerUnit: declaredSharesPerUnit,
       terminalBetaWeightOverride: terminalBetaWeightOverride,
       terminalLeverageOverride: terminalLeverageOverride,
+      betaWindowYears: betaWindowYears,
     );
   }
 
@@ -901,6 +915,23 @@ abstract final class ValuationCascade {
         medida: medida, declarada: declaradaValida ? declarada : null);
     _auditCapm(audit, inputs.capm, inputs.dividendsInBeta);
 
+    // **A janela do beta, quando ela é curta** (item B17, decisão 111). A
+    // fonte de cotações devolve dez anos: numa avaliação datada de 2018 a
+    // série começa em 2016, e o beta sai de pouco mais de um ano de pregões
+    // sem que nada diga. O corte é de 80% da janela pedida — abaixo disso não
+    // é feriado nem pregão faltando, é série que não existe.
+    final janelaDoBeta = inputs.betaWindowYears;
+    if (janelaDoBeta != null &&
+        janelaDoBeta > 0 &&
+        janelaDoBeta < betaWindowYears * minimumBetaWindowShare) {
+      warnings.add(
+        'O beta foi estimado sobre ${janelaDoBeta.toStringAsFixed(1)} ano(s) '
+        'de cotação, e não sobre os $betaWindowYears que a janela pede: a '
+        'série do papel não cobre o período inteiro. O custo do capital próprio '
+        'carrega esse ruído, e o preço justo com ele.',
+      );
+    }
+
     if (sharesPerQuote > 1) {
       warnings.add(
         '${inputs.ticker.value} é negociada em unit de '
@@ -1144,6 +1175,24 @@ abstract final class ValuationCascade {
     final razao = alvo >= referencia ? alvo / referencia : referencia / alvo;
     return razao <= CapitalSeries.neighbourFactor;
   }
+
+  /// Janela, em anos, que o beta pede — e contra a qual a efetiva é medida.
+  ///
+  /// Mora aqui, e não em `PrepareValuationInputs`, porque quem declara a
+  /// janela curta é a cascata: o preparo apenas mede a que a série deu. O
+  /// preparo referencia esta constante, de modo que as duas não podem
+  /// divergir.
+  static const int betaWindowYears = 5;
+
+  /// Fração da janela do beta abaixo da qual a avaliação declara a janela
+  /// curta (item B17).
+  ///
+  /// **Oitenta por cento.** Feriado, suspensão e pregão faltando no meio tiram
+  /// dias, não anos: uma série que cobre quatro dos cinco anos pedidos é a
+  /// mesma janela. Abaixo disso a série **não existe** no período — é o caso
+  /// da coorte de 31/03/2018, cuja cotação começa em setembro de 2016 e dá
+  /// pouco mais de um ano e meio.
+  static const double minimumBetaWindowShare = 0.8;
 
   /// Teto de ações por unit. As units da B3 vão até 5 (1 ON + 4 PN).
   static const double maxSharesPerUnit = 10;
@@ -1683,6 +1732,27 @@ abstract final class ValuationCascade {
     // rota usa. Com o centro errado, o cenário base não voltava ao preço
     // justo, e a faixa de sensibilidade cercava outro número.
     final centro = custo.assumptions;
+    // **O deslocamento é somado ao `Ke` um a um, e isso é escolha** (lente
+    // `metodo`, 21/09/2026; item B20). `Ke` e `WACC` não se movem na mesma
+    // razão, e qual é a razão depende do que o cenário está perturbando —
+    // coisa que ele não diz:
+    //
+    // - a **taxa de desconto em si**, com `K_d` parado → `ΔK_e = ΔWACC ÷ w_E`,
+    //   perto de 1,4 vez com participação de 70%;
+    // - a **taxa livre de risco**, que move `K_e` e `K_d` juntos →
+    //   `ΔK_e = ΔWACC ÷ (1 − w_D·t)`, perto de 1,1 vez;
+    // - a **taxa aplicada ao fluxo**, que é esta rota → um a um.
+    //
+    // Vale a terceira, e a razão é que as vias precisam querer dizer a mesma
+    // coisa: na via do acionista o campo perturbado **é** o `Ke`, e o cenário
+    // move um a um. Amplificar aqui faria o mesmo cenário de "+1 p.p. de
+    // desconto" significar perturbações diferentes conforme a via que a
+    // cascata escolheu — e os ativos trocam de via.
+    //
+    // O que isto custa está declarado: a faixa de cenários **subestima** a
+    // sensibilidade do capital próprio na leitura de estrutura fixa. Ela é
+    // sensibilidade, e não incerteza (decisão 92) — a faixa calibrada sai da
+    // volatilidade medida, e não daqui.
     final dKe = a.discountRate - centro.discountRate;
     final dKeTerminal = a.terminalDiscountRate - centro.terminalDiscountRate;
     // O divisor é a contagem de unidades que forma a cotação — ver
@@ -1938,8 +2008,15 @@ abstract final class ValuationCascade {
                   // custo observado que a decisão 31 descartou (item B11).
                   creditSpread: p.spreadDeCredito,
                   taxRate: ValuationParameters.statutoryTaxRate,
+                  // O caixa rende `R_f`, e não `R_f + spread` — a mesma
+                  // separação do WACC estático, para que as duas rotas não
+                  // discordem no mesmo ativo (lente `metodo`, 21/09/2026).
+                  cash: latest.totalCash,
                   terminalBetaWeight: inputs.terminalBetaWeightOverride,
                   terminalLeverage: inputs.terminalLeverageOverride,
+                  // O ponto fixo é tentado de dois lugares, e o que ele tem a
+                  // dizer sobre a diferença entre eles é ressalva (item B18).
+                  warnings: local,
                 )
               : LeveredCostOfCapital.solveEquity(
                   baseProfit: base,
@@ -1952,6 +2029,7 @@ abstract final class ValuationCascade {
                   taxRate: ValuationParameters.statutoryTaxRate,
                   terminalBetaWeight: inputs.terminalBetaWeightOverride,
                   terminalLeverage: inputs.terminalLeverageOverride,
+                  warnings: local,
                 );
 
       final resolvido = resolverTaxas(assumptions);
@@ -2963,6 +3041,13 @@ abstract final class ValuationCascade {
       netDebtToEbitda: latest.netDebtToEbitda,
       creditReferenceRate: referencia,
       hasContractedDebt: !semDividaContratada,
+      // **O caixa entra separado, e rende a taxa livre de risco** (lente
+      // `metodo`, 21/09/2026). Sem ele, a perna negativa da dívida líquida
+      // seria remunerada ao custo de **empréstimo**, e um balanço com mais
+      // caixa que dívida ganharia um WACC baixo demais. Com `D/E` imposto o
+      // corte não existe — a dívida ali é arbitrada, não observada —, e a
+      // forma colapsa na anterior.
+      cashValue: imposto == null ? latest.totalCash : null,
     );
 
     if (semDividaContratada) {
@@ -3350,24 +3435,52 @@ abstract final class ValuationCascade {
     final kd = coc.effectiveCostOfDebt;
     final afterTax = kd * (1 - coc.effectiveTaxShield);
     final equityLeg = coc.equityShare * coc.costOfEquity;
-    final debtLeg = coc.debtShare * afterTax;
+    // **A perna do financiamento se abre em duas quando o caixa é conhecido**
+    // (lente `metodo`, 21/09/2026): dívida bruta ao custo de empréstimo, caixa
+    // ao rendimento da taxa livre de risco. O registro tem de mostrar a forma
+    // que a conta usou — repetir a de uma perna só faria o Passo 5 fechar num
+    // número diferente do resultado.
+    final wBruta = coc.grossDebtShare;
+    final wCaixa = coc.cashShare;
+    final separa = wBruta != null && wCaixa != null;
+    final rendimento = coc.afterTaxCashYield;
+    final debtLeg = separa
+        ? wBruta * afterTax - wCaixa * rendimento
+        : coc.debtShare * afterTax;
 
     audit.step(
       formulaName: 'Custo médio ponderado de capital (WACC)',
-      latex: r'WACC = \frac{E}{E+D_{liq}}\,K_e + '
-          r'\frac{D_{liq}}{E+D_{liq}}\,K_d\,(1 - t)',
+      latex: separa
+          ? r'WACC = \frac{E}{E+D_{liq}}\,K_e + '
+              r'\frac{D_{bruta}}{E+D_{liq}}\,K_d\,(1 - t) - '
+              r'\frac{C}{E+D_{liq}}\,R_f\,(1 - \tau)'
+          : r'WACC = \frac{E}{E+D_{liq}}\,K_e + '
+              r'\frac{D_{liq}}{E+D_{liq}}\,K_d\,(1 - t)',
       variables: {
         'E (R\$)': _r(coc.equityValue),
         'D líquida (R\$)': _r(coc.debtValue),
+        if (separa) 'D bruta (R\$)': _r(coc.debtValue + coc.cashValue!),
+        if (separa) 'C — caixa (R\$)': _r(coc.cashValue!),
         'K_e (% a.a.)': _r(coc.costOfEquity * 100),
         'K_d (% a.a.)': _r(kd * 100),
+        if (separa) 'R_f (% a.a.)': _r(coc.capm.riskFreeRate * 100),
         't (%)': _r(coc.effectiveTaxShield * 100),
       },
       steps: [
         'Passo 1: participação do capital próprio → ${_r(coc.equityValue)} ÷ '
             '${_r(coc.totalCapital)} = ${_r(coc.equityShare, 4)}',
-        'Passo 2: participação do capital de terceiros → ${_r(coc.debtValue)} ÷ '
-            '${_r(coc.totalCapital)} = ${_r(coc.debtShare, 4)}',
+        if (separa)
+          'Passo 2: participação da dívida bruta → '
+              '${_r(coc.debtValue + coc.cashValue!)} ÷ '
+              '${_r(coc.totalCapital)} = ${_r(wBruta, 4)}; e do caixa → '
+              '${_r(coc.cashValue!)} ÷ ${_r(coc.totalCapital)} = '
+              '${_r(wCaixa, 4)}. A diferença das duas é a participação da '
+              'dívida líquida, ${_r(coc.debtShare, 4)} — o que a separação '
+              'muda é a **taxa** de cada metade, e não o peso'
+        else
+          'Passo 2: participação do capital de terceiros → '
+              '${_r(coc.debtValue)} ÷ ${_r(coc.totalCapital)} = '
+              '${_r(coc.debtShare, 4)}',
         if (coc.costOfDebtWasClamped)
           'Passo 3: custo da dívida observado (${_pct(coc.costOfDebt)}) fora da '
               'banda defensável; limitado a ${_pct(kd)}'
@@ -3375,10 +3488,19 @@ abstract final class ValuationCascade {
           'Passo 3: custo da dívida observado dentro da banda → ${_pct(kd)}',
         'Passo 4: benefício fiscal da dívida → ${_pct(kd)} × (1 − '
             '${_r(coc.effectiveTaxShield, 4)}) = ${_pct(afterTax)}',
-        'Passo 5: soma ponderada → ${_r(coc.equityShare, 4)} × '
-            '${_pct(coc.costOfEquity)} + ${_r(coc.debtShare, 4)} × '
-            '${_pct(afterTax)} = ${_pct(equityLeg)} + ${_pct(debtLeg)} = '
-            '${_pct(coc.rawWacc)}',
+        if (separa)
+          'Passo 5: o caixa rende a taxa livre de risco, tributada → '
+              '${_pct(coc.capm.riskFreeRate)} × (1 − ${_r(coc.taxRate, 4)}) = '
+              '${_pct(rendimento)}. Soma ponderada → '
+              '${_r(coc.equityShare, 4)} × ${_pct(coc.costOfEquity)} + '
+              '${_r(wBruta, 4)} × ${_pct(afterTax)} − ${_r(wCaixa, 4)} × '
+              '${_pct(rendimento)} = ${_pct(equityLeg)} + ${_pct(debtLeg)} = '
+              '${_pct(coc.rawWacc)}'
+        else
+          'Passo 5: soma ponderada → ${_r(coc.equityShare, 4)} × '
+              '${_pct(coc.costOfEquity)} + ${_r(coc.debtShare, 4)} × '
+              '${_pct(afterTax)} = ${_pct(equityLeg)} + ${_pct(debtLeg)} = '
+              '${_pct(coc.rawWacc)}',
         if (coc.waccWasFloored)
           'Passo 6: WACC abaixo da taxa livre de risco; adotado o piso de '
               '${_pct(coc.capm.riskFreeRate)}'

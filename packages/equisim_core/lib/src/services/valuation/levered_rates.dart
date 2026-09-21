@@ -155,6 +155,36 @@ abstract final class LeveredCostOfCapital {
   /// Devolve falha quando a avaliação intermediária não é possível — o que
   /// inclui o caso em que a alavancagem cresce a ponto de o capital próprio
   /// desaparecer.
+  /// Distância relativa a partir da qual duas soluções do ponto fixo são
+  /// **respostas diferentes**, e não o mesmo ponto alcançado por caminhos
+  /// diferentes (item B18).
+  ///
+  /// Um décimo de por cento no valor do ano zero. O critério de parada é de
+  /// 1e-10, de modo que duas convergências legítimas ficam muito abaixo disso;
+  /// o corte existe para separar convergência de dois pontos fixos distintos,
+  /// e não para acomodar imprecisão.
+  static const double startIndependence = 0.001;
+
+  /// Resolve o caminho de taxas, **de dois pontos de partida** (item B18).
+  ///
+  /// **Por que dois.** A versão anterior partia sempre da interpolação de dois
+  /// pontos — o recuo que a decisão 41 substituiu — e recusava a estrutura de
+  /// capital quando o capital próprio sumia já na primeira iteração. Medido em
+  /// 20/09/2026, os 14 ativos que saíram do aplicativo ao ligar o prior foram
+  /// recusados **todos** ali: o veredito era do chute, e não do ponto fixo.
+  ///
+  /// Aqui o ponto fixo é tentado de dois lugares:
+  ///
+  ///  1. a interpolação de dois pontos, que é o recuo;
+  ///  2. o custo de capital **desalavancado** — `Rf_t + β_U·prêmio` —, que é o
+  ///     mesmo caminho no limite de dívida zero, e portanto uma partida tão
+  ///     legítima quanto a primeira.
+  ///
+  /// **Um ponto fixo é um ponto fixo**: quando as duas convergem, elas têm de
+  /// convergir para o mesmo lugar, e [startIndependence] mede isso. Quando
+  /// divergem, o resultado não é do modelo — é de onde a conta começou —, e o
+  /// aviso diz isso. Quando só uma converge, vale ela: recusar por causa de um
+  /// chute infeliz é justamente o defeito que o item nomeia.
   static Result<LeveredRates> solve({
     required double baseProfit,
     required DcfAssumptions assumptions,
@@ -165,6 +195,99 @@ abstract final class LeveredCostOfCapital {
     required double marketPremium,
     required double creditSpread,
     required double taxRate,
+    double? cash,
+    double? terminalBetaWeight,
+    double? terminalLeverage,
+    List<String>? warnings,
+  }) {
+    Result<LeveredRates> de(List<double>? inicial, double? terminalInicial) =>
+        _tentar(
+          waccInicial: inicial,
+          waccTerminalInicial: terminalInicial,
+          baseProfit: baseProfit,
+          assumptions: assumptions,
+          netDebt: netDebt,
+          unleveredBeta: unleveredBeta,
+          riskFreePath: riskFreePath,
+          terminalRiskFree: terminalRiskFree,
+          marketPremium: marketPremium,
+          creditSpread: creditSpread,
+          taxRate: taxRate,
+          cash: cash,
+          terminalBetaWeight: terminalBetaWeight,
+          terminalLeverage: terminalLeverage,
+        );
+
+    final pelaInterpolacao = de(null, null);
+    // O desalavancado: o mesmo caminho de `Ke` com `D/E = 0`, que é o limite
+    // inferior de alavancagem do próprio modelo.
+    final desalavancado = [
+      for (final rf in riskFreePath) rf + unleveredBeta * marketPremium,
+    ];
+    final peloDesalavancado = de(
+      desalavancado,
+      terminalRiskFree + unleveredBeta * marketPremium,
+    );
+
+    final a = pelaInterpolacao.valueOrNull;
+    final b = peloDesalavancado.valueOrNull;
+    if (a == null && b == null) {
+      // **A recusa é do ponto fixo, e o texto precisa dizer isso** (item B18).
+      // Dizer só que a interpolação não fechou deixaria em pé a leitura de que
+      // o veredito é do chute — que era, e deixou de ser.
+      final motivo = pelaInterpolacao.failureOrNull?.message ?? '';
+      return Err(ComputationFailure(
+        '$motivo O ponto fixo foi tentado também a partir do custo de capital '
+        'desalavancado, e não fecha de nenhuma das duas partidas: a recusa é '
+        'do método, e não do chute.',
+      ));
+    }
+    if (a == null) {
+      warnings?.add(
+        'O ponto fixo do custo de capital não fecha a partir da interpolação '
+        'de dois pontos, e fecha a partir do custo desalavancado. O resultado '
+        'é o do ponto fixo, e não o do chute — recusar aqui seria recusar por '
+        'causa de onde a conta começou (item B18).',
+      );
+      return peloDesalavancado;
+    }
+    if (b == null) return pelaInterpolacao;
+
+    final va = a.equity.isEmpty ? double.nan : a.equity.first;
+    final vb = b.equity.isEmpty ? double.nan : b.equity.first;
+    final distancia = (va.abs() > 0 && va.isFinite && vb.isFinite)
+        ? (vb / va - 1).abs()
+        : 0.0;
+    if (distancia > startIndependence) {
+      warnings?.add(
+        'O ponto fixo do custo de capital chega a dois resultados conforme o '
+        'chute de partida — ${(distancia * 100).toStringAsFixed(1)}% de '
+        'diferença no capital próprio do ano zero. Vale o da interpolação, '
+        'que é o caminho declarado, e esta divergência é ressalva do método '
+        '(item B18).',
+      );
+    }
+    return pelaInterpolacao;
+  }
+
+  /// Uma tentativa do ponto fixo, a partir de um caminho de partida.
+  ///
+  /// Separado de [solve] porque **o ponto fixo não pode depender de onde
+  /// começa** (item B18): se a resposta muda com o chute, ela é do chute. A
+  /// [solve] roda esta função de dois pontos de partida e compara.
+  static Result<LeveredRates> _tentar({
+    required List<double>? waccInicial,
+    required double? waccTerminalInicial,
+    required double baseProfit,
+    required DcfAssumptions assumptions,
+    required double netDebt,
+    required double unleveredBeta,
+    required List<double> riskFreePath,
+    required double terminalRiskFree,
+    required double marketPremium,
+    required double creditSpread,
+    required double taxRate,
+    double? cash,
     double? terminalBetaWeight,
     double? terminalLeverage,
   }) {
@@ -197,19 +320,34 @@ abstract final class LeveredCostOfCapital {
     for (var t = 1; t <= n; t++) {
       divida.add(divida[t - 1] * (1 + assumptions.growthAt(t)));
     }
+    // **O caixa acompanha a mesma base, e por isso a líquida não muda**: as
+    // duas metades crescem com o mesmo fator, e a diferença delas é a série de
+    // [divida] acima. O que a separação muda é só a **composição da taxa** —
+    // o caixa rende `R_f`, e não `R_f + spread` (lente `metodo`, 21/09/2026).
+    // Sem `cash`, vale a forma anterior, que remunera a perna negativa ao
+    // custo de empréstimo. Ver `CostOfCapital.rawWacc`.
+    final caixa = cash == null ? null : <double>[cash];
+    if (caixa != null) {
+      for (var t = 1; t <= n; t++) {
+        caixa.add(caixa[t - 1] * (1 + assumptions.growthAt(t)));
+      }
+    }
 
     // `K_d` do ano, líquido do escudo: o prêmio de crédito é constante e a
     // taxa base é a do ano, como em `CostOfCapital.effectiveCostOfDebt`.
     double kdLiquidoEm(double rf) => (rf + creditSpread) * (1 - taxRate);
     final kdTerminal = kdLiquidoEm(terminalRiskFree);
 
-    // Chute inicial: as taxas que a interpolação de dois pontos daria.
-    var ke = <double>[
-      for (var t = 1; t <= n; t++) assumptions.discountRateAt(t),
-    ];
+    // Chute inicial: o informado, ou as taxas que a interpolação de dois
+    // pontos daria — que é o recuo, e o que a versão anterior usava sempre.
+    var ke = waccInicial != null && waccInicial.length == n
+        ? [...waccInicial]
+        : <double>[
+            for (var t = 1; t <= n; t++) assumptions.discountRateAt(t),
+          ];
     var wacc = [...ke];
-    var keTerminal = assumptions.terminalDiscountRate;
-    var waccTerminal = assumptions.terminalDiscountRate;
+    var keTerminal = waccTerminalInicial ?? assumptions.terminalDiscountRate;
+    var waccTerminal = keTerminal;
     List<double>? equityAnterior;
 
     var iteracoes = 0;
@@ -311,9 +449,18 @@ abstract final class LeveredCostOfCapital {
         // discordarem no mesmo ativo. O caso sem sentido — `E + D` não
         // positivo — já é recusado acima.
         final pesoE = eAnterior / vT;
+        final juro = kdLiquidoEm(riskFreePath[t - 1]);
         novoKe.add(keT);
-        novoWacc.add(
-            keT * pesoE + kdLiquidoEm(riskFreePath[t - 1]) * (1 - pesoE));
+        if (caixa == null) {
+          novoWacc.add(keT * pesoE + juro * (1 - pesoE));
+        } else {
+          // `w_bruta − w_caixa` é exatamente `1 − pesoE`: a separação redistribui
+          // a mesma perna entre duas taxas, e não altera os pesos.
+          final wBruta = (dAnterior + caixa[t - 1]) / vT;
+          final wCaixa = caixa[t - 1] / vT;
+          final rendimento = riskFreePath[t - 1] * (1 - taxRate);
+          novoWacc.add(keT * pesoE + juro * wBruta - rendimento * wCaixa);
+        }
       }
       ke = novoKe;
       wacc = novoWacc;
@@ -352,7 +499,15 @@ abstract final class LeveredCostOfCapital {
       final pesoEN = terminalLeverage == null
           ? eN / vN
           : 1 / (1 + terminalLeverage);
-      waccTerminal = keTerminal * pesoEN + kdTerminal * (1 - pesoEN);
+      // Mesma separação do ano a ano, na estrutura do ano N. Com `D/E`
+      // imposto não há separação: a dívida ali é arbitrada, e não observada.
+      if (caixa == null || terminalLeverage != null) {
+        waccTerminal = keTerminal * pesoEN + kdTerminal * (1 - pesoEN);
+      } else {
+        waccTerminal = keTerminal * pesoEN +
+            kdTerminal * ((dN + caixa[n]) / vN) -
+            terminalRiskFree * (1 - taxRate) * (caixa[n] / vN);
+      }
 
       final valor = e[0];
       if (valorAnterior.isFinite && valorAnterior.abs() > 0) {
@@ -412,7 +567,85 @@ abstract final class LeveredCostOfCapital {
   /// `terminalCostOfEquity`, porque a taxa que desconta o fluxo é o próprio
   /// `Ke`. `enterpriseValue` sai como `E + D`, que é o valor da firma
   /// *implicado* por esta via — não um valor descontado de fluxo de firma.
+  /// **Também de duas partidas** (item B18), pela mesma razão de [solve]: a
+  /// recusa não pode ser do chute. A segunda é o `Ke` desalavancado.
   static Result<LeveredRates> solveEquity({
+    required double baseProfit,
+    required DcfAssumptions assumptions,
+    required double netDebtPerShare,
+    required double unleveredBeta,
+    required List<double> riskFreePath,
+    required double terminalRiskFree,
+    required double marketPremium,
+    required double taxRate,
+    double? terminalBetaWeight,
+    double? terminalLeverage,
+    List<String>? warnings,
+  }) {
+    Result<LeveredRates> de(List<double>? inicial, double? terminalInicial) =>
+        _tentarEquity(
+          keInicial: inicial,
+          keTerminalInicial: terminalInicial,
+          baseProfit: baseProfit,
+          assumptions: assumptions,
+          netDebtPerShare: netDebtPerShare,
+          unleveredBeta: unleveredBeta,
+          riskFreePath: riskFreePath,
+          terminalRiskFree: terminalRiskFree,
+          marketPremium: marketPremium,
+          taxRate: taxRate,
+          terminalBetaWeight: terminalBetaWeight,
+          terminalLeverage: terminalLeverage,
+        );
+
+    final pelaInterpolacao = de(null, null);
+    final desalavancado = [
+      for (final rf in riskFreePath) rf + unleveredBeta * marketPremium,
+    ];
+    final peloDesalavancado = de(
+      desalavancado,
+      terminalRiskFree + unleveredBeta * marketPremium,
+    );
+
+    final a = pelaInterpolacao.valueOrNull;
+    final b = peloDesalavancado.valueOrNull;
+    if (a == null && b == null) {
+      final motivo = pelaInterpolacao.failureOrNull?.message ?? '';
+      return Err(ComputationFailure(
+        '$motivo O ponto fixo foi tentado também a partir do custo de capital '
+        'desalavancado, e não fecha de nenhuma das duas partidas: a recusa é '
+        'do método, e não do chute.',
+      ));
+    }
+    if (a == null) {
+      warnings?.add(
+        'O ponto fixo do custo do capital próprio não fecha a partir da '
+        'interpolação de dois pontos, e fecha a partir do custo desalavancado. '
+        'O resultado é o do ponto fixo, e não o do chute (item B18).',
+      );
+      return peloDesalavancado;
+    }
+    if (b == null) return pelaInterpolacao;
+
+    final va = a.equity.isEmpty ? double.nan : a.equity.first;
+    final vb = b.equity.isEmpty ? double.nan : b.equity.first;
+    final distancia = (va.abs() > 0 && va.isFinite && vb.isFinite)
+        ? (vb / va - 1).abs()
+        : 0.0;
+    if (distancia > startIndependence) {
+      warnings?.add(
+        'O ponto fixo do custo do capital próprio chega a dois resultados '
+        'conforme o chute de partida — ${(distancia * 100).toStringAsFixed(1)}% '
+        'de diferença no capital próprio do ano zero. Vale o da interpolação, '
+        'e a divergência é ressalva do método (item B18).',
+      );
+    }
+    return pelaInterpolacao;
+  }
+
+  static Result<LeveredRates> _tentarEquity({
+    required List<double>? keInicial,
+    required double? keTerminalInicial,
     required double baseProfit,
     required DcfAssumptions assumptions,
     required double netDebtPerShare,
@@ -465,10 +698,12 @@ abstract final class LeveredCostOfCapital {
       for (var t = 0; t <= n; t++) netDebtPerShare,
     ];
 
-    var ke = <double>[
-      for (var t = 1; t <= n; t++) assumptions.discountRateAt(t),
-    ];
-    var keTerminal = assumptions.terminalDiscountRate;
+    var ke = keInicial != null && keInicial.length == n
+        ? [...keInicial]
+        : <double>[
+            for (var t = 1; t <= n; t++) assumptions.discountRateAt(t),
+          ];
+    var keTerminal = keTerminalInicial ?? assumptions.terminalDiscountRate;
     List<double>? equityAnterior;
 
     var iteracoes = 0;

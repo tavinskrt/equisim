@@ -86,11 +86,23 @@ class PriceRepositoryImpl implements PriceRepository {
       // sem os pregões mais recentes, porque a gravação é aditiva (ver
       // `CacheDatabase.isFresh`). A série chega mais curta, e o encurtamento
       // já é anunciado pelo backtest.
+      var recuperados = 0;
       for (final ticker in missing) {
         final stale = await _seriesFromCache(ticker, range);
-        if (stale != null) out[ticker] = stale;
+        if (stale != null) {
+          out[ticker] = stale;
+          recuperados++;
+        }
       }
-      return out.isEmpty ? Err(fetched.failureOrNull!) : Ok(out);
+      // **Recuperação parcial não é sucesso** (lente `dados`, 21/09/2026).
+      // Devolver `Ok` com o lote incompleto engolia o motivo — limite de
+      // requisições, credencial, rede fora — e a falha reaparecia adiante
+      // como "ativo sem cotação", que é o sintoma e não a causa. O recuo ao
+      // cache vencido vale quando ele cobre **tudo** que faltou; quando não
+      // cobre, quem manda é o erro da rede.
+      return recuperados == missing.length
+          ? Ok(out)
+          : Err(fetched.failureOrNull!);
     }
 
     final vieram = fetched.unwrap();

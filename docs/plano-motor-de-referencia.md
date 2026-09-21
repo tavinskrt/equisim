@@ -7,24 +7,27 @@ mesma régua, onde cada objetivo está. O que cada rodada encontrou, o que as
 lentes disseram e o que a auditoria reprovou ficam no
 [histórico](plano-motor-de-referencia-historico.md).
 
-> **Última atualização: 21/09/2026, quarta rodada da Fase 3 — B12, B14 e B15.**
-> **Três premissas declaradas, e nenhum número mudou** — o gabarito confere
-> idêntico ao da rodada anterior, nas duas montagens. O terminal neutro fixa o
-> retorno do capital **novo**, e não o do instalado: medido, o instalado rende
-> **0,71 vez** o custo de capital na mediana, de modo que a perpetuidade mantém
-> um **déficit** perpétuo que vale −14,1% do preço justo
-> ([decisão 107](decisoes/107-o-terminal-neutro-e-do-capital-novo-e-o-instalado-mantem-o-retorno-que-tem.md)).
-> O beta corrigido por não sincronia fecha **um terço** da distância de nível que
-> justifica a recusa por liquidez, e triplica o erro-padrão onde não há viés: a
-> recusa fica
-> ([decisão 108](decisoes/108-a-recusa-por-liquidez-fica-e-o-beta-corrigido-fecha-um-terco-da-distancia.md)).
-> E a perpetuidade passa a declarar de onde vêm o beta e a estrutura de capital:
-> convergir o beta em direção a 1 move **0,1%** do preço justo, porque o
-> encolhimento da decisão 40 já o aproximou de 1
-> ([decisão 109](decisoes/109-a-perpetuidade-declara-de-onde-vem-o-beta-e-a-estrutura-e-nao-os-converge.md)).
-> **Entrou o B19**: medir a reversão da rentabilidade à média é o que pode
-> reabrir o terminal, e é medição que o projeto não tem. **O C5 continua de pé**
-> — sem a base bruta, as medições de coorte são do motor da decisão 102.
+> **Última atualização: 21/09/2026, quinta rodada da Fase 3 — B17, B18, B19, B8
+> e B2.** **O R1 ficou em um defeito.** O B18 fechou: o ponto fixo do custo de
+> capital passou a ser tentado de duas partidas, e a recusa de estrutura deixou
+> de ser do chute — a CAML3 volta, os outros 13 recusados continuam recusados
+> pelas duas, e **não há divergência entre partidas em nenhum ativo**
+> ([decisão 110](decisoes/110-o-ponto-fixo-e-tentado-de-duas-partidas-e-a-recusa-deixa-de-ser-do-chute.md)).
+> O B17 fechou pela segunda saída: a avaliação **declara a janela curta do
+> beta**, e um dos 103 avaliados já a tem
+> ([decisão 111](decisoes/111-a-avaliacao-declara-a-janela-curta-do-beta.md)). O
+> B19 fechou com a medição que faltava ao B12: a rentabilidade **reverte, e
+> rápido** — em dez anos não sobra nada da vantagem relativa —, mas reverte para
+> a mediana do mercado, **9,5%**, contra 18,6% de custo de capital. Converger o
+> terminal a `r` seria inventar uma rentabilidade que a seção transversal nunca
+> teve, e o terminal fica
+> ([decisão 112](decisoes/112-a-rentabilidade-reverte-a-mediana-do-mercado-e-nao-ao-custo-de-capital.md)).
+> O **B2** virou métrica de acompanhamento, com inferência: o potencial
+> ortogonalizado ao P/B vale **+0,016** em 36 meses, com `t` corrigido de 0,13
+> contra 2,70 ([potencial_ortogonalizado.md](validacao/potencial_ortogonalizado.md)).
+> **O B8 ficou em curso**: metade dele foi medida e é pequena — menos de 1,1%
+> dos exercícios de cada coorte somem por versão tardia —, e a outra metade, o
+> número reapresentado entrando como original, depende da base bruta (C5).
 
 ## Os dois objetivos
 
@@ -519,6 +522,18 @@ honesta. Evidência: a DFP de 2023 da USIM3 foi reapresentada, e a versão
 ingerida tem recebimento em 16/01/2025 — em 04/09/2024 o ano ficava sem CVM, e
 a decisão 78 o devolve ao mercado em vez da versão original.
 
+**Estado: medido em 21/09/2026, e o conserto depende do C5**
+([reapresentacao.md](validacao/reapresentacao.md)). **São duas metades.** A
+primeira — o documento que **some** porque a última versão chegou depois da
+coorte — é medível com o pacote versionado, e é pequena: de 0,0% a 1,1% dos
+exercícios que deviam estar públicos, com a pior coorte em 30/06/2020, quando a
+CVM prorrogou prazos. Um sexto dos documentos chega além do prazo regulamentar —
+784 DFP e 2.385 ITR —, e os extremos são grandes: a DFP de 2011 do Itaú tem
+recebimento em 2020, 3.000 dias depois. **A segunda metade — o número
+reapresentado entrando na coorte como se fosse o original — não é medível sem as
+versões antigas**, e é a maior por construção. Guardar cada versão é trabalho de
+ingestão sobre a base bruta.
+
 ### B9. WACC estático e WACC resolvido com convenções de dívida diferentes
 
 Da lente `metodo`, em 14/09/2026. O custo de capital realavancado da decisão 41
@@ -539,6 +554,20 @@ justo sobe 3,0% na mediana em 73 de 114, e até 41,9% na EMBJ3; na montagem com 
 prior, que já usava a líquida, muda em 2 de 102. **E a medição expôs um sintoma
 que é do B11**: um desconto maior subindo o preço justo, porque sem taxas
 resolvidas a via da firma reinveste contra o WACC e desconta ao `Ke`.
+
+**A regra valia pela metade, e foi completada em 21/09/2026**
+([decisão 113](decisoes/113-o-caixa-rende-a-taxa-livre-de-risco-e-nao-o-custo-de-emprestimo.md)).
+A decisão 104 disse, no caso **sem dívida contratada**, que o que remunera o peso
+negativo é caixa, e caixa rende `R_f`. Com dívida contratada e caixa maior que
+ela — peso negativo, `hasContractedDebt` verdadeiro — o `K_d` aplicado continuava
+sendo `R_f + spread`: o caixa era creditado com **prêmio de crédito**. A lente
+`metodo` apontou a diferença, e a perna do financiamento se abriu em duas,
+`+ w_bruta·K_d(1−escudo) − w_caixa·R_f(1−τ)`, sobre o mesmo denominador. **Os
+pesos não mudam** — a diferença dos dois é a participação da líquida —, e o que
+muda é a taxa de cada metade, nas duas rotas. **O efeito:** o WACC sobe em todo
+ativo com caixa (ANIM3, de 17,7% para 19,6% no primeiro ano); o preço justo muda
+em 61 dos 99, com mediana de +0,28%, e **três ativos deixam de ser avaliáveis** —
+MOTV3, MYPK3 e QUAL3, cujo valor de firma não cobre mais a dívida líquida.
 
 ### B10. A migração de via é descontínua na taxa
 
@@ -767,6 +796,18 @@ baixa o valor da firma —, mas **o veredito é do recuo, e não do ponto fixo**
 recuo é a taxa que a própria decisão 41 descartou. É a mesma forma de defeito que
 o B10 mediu: a resposta depende de qual conta o motor alcançou primeiro.
 
+**Estado: feito em 21/09/2026** ([decisão 110](decisoes/110-o-ponto-fixo-e-tentado-de-duas-partidas-e-a-recusa-deixa-de-ser-do-chute.md)).
+O ponto fixo passou a ser tentado de **duas partidas** — a interpolação de dois
+pontos, que é o recuo, e o custo de capital **desalavancado**, que é o mesmo
+caminho no limite de dívida zero. A recusa só vale quando nenhuma das duas fecha,
+e o texto dela diz isso. **Um dos 14 volta** — a CAML3 —, e a cobertura vai de 102
+a 103; os outros 13 continuam recusados pelas duas partidas, de modo que a recusa
+passou a ser do método. **E, porque um ponto fixo é um ponto fixo**, as duas
+convergências são comparadas: divergir acima de um décimo de por cento no capital
+próprio do ano zero é ressalva declarada, e **não há divergência em nenhum ativo
+do universo**, nas duas montagens. Nenhum preço justo se move. A via do acionista
+recebeu o mesmo tratamento, pela mesma razão.
+
 ### B17. A série de preços das coortes tem no máximo dez anos
 
 **Achado em 15/09/2026**, ao conferir um apontamento da lente `dados`. A fonte de
@@ -783,6 +824,17 @@ tem desde 2010 — as duas metades da amostra não são estimadas na mesma janel
 
 O COTAHIST resolve também para as listadas: a montagem na base da data já o lê,
 papel a papel, para medir o fator e refazer o volume (decisão 97).
+
+**Estado: feito em 21/09/2026, pela segunda saída** ([decisão 111](decisoes/111-a-avaliacao-declara-a-janela-curta-do-beta.md)).
+A avaliação passou a **declarar a janela curta**: o preparo mede a extensão da
+série que estimou o beta — da primeira à última cotação alinhada, e não a
+contagem de pares, porque feriado tira dias e o que se quer separar é série que
+não existe —, e a cascata avisa abaixo de 80% da janela pedida. A constante da
+janela mora na cascata, e o preparo a referencia, para que as duas não divirjam.
+A coorte grava a janela efetiva. **Um dos 103 avaliados do aplicativo já tem
+janela curta** — a CYRE4, com 0,7 ano —, e agora diz. **A cobertura pelo COTAHIST
+nas listadas, que é a primeira saída, depende da base bruta (C5)**, e com ela a
+contagem de quantas observações de 2018 a 2021 sofrem.
 
 ---
 
@@ -1245,19 +1297,21 @@ o instrumento sob as duas medições.
 | B11 | Prior do beta no aplicativo | R1, E | ✅ | o aplicativo e a montagem padrão da validação avaliam com o prior do beta e o custo de capital resolvido das decisões 40 e 41, com a tensão da via do acionista resolvida, os cenários e a taxa exibida saindo das premissas resolvidas, e o efeito medido na mesma execução; e, desde 16/09/2026, a varredura do nível no caminho resolvido sem ativo subindo com a taxa e o custo da dívida sintético nas duas rotas — **atingido**: o prior vem do pacote do build, com deriva medida (3,1% em um ano) e validade de um ano; 83 das 102 avaliações resolvem as taxas, e todas as 82 da via da firma; `K_d = Rf_t + prêmio` no solucionador e na rota derivada; a dívida da via do acionista fica constante, porque o fluxo já financia o crescimento com lucro retido; a taxa exibida é a do ano 1 resolvido e a faixa é centrada no preço justo; **0 de 102 sobem com a taxa nas duas montagens** ([decisão 105](decisoes/105-o-aplicativo-resolve-o-prior-do-beta-e-o-custo-de-capital.md), [prior_no_aplicativo.md](validacao/prior_no_aplicativo.md)) |
 | B16 | Razão de unidade pela composição declarada | R1, E | ✅ | a composição de cada unit sai de fonte declarada — a FCA da CVM, por ano — no pacote do aplicativo e nas coortes, a razão medida do valor de mercado vira conferência, e as 79 observações de unit que a inferência erra nas coortes passam a sair com a composição, com teste — atingido: pacote por CNPJ e por ano com as nove units declaradas, leitura do texto livre no núcleo com o caso de três letras corrigido, conferência declarada na avaliação e no rastro, e a ONCO11, que a companhia não declara, seguindo inferida e dizendo que é; **as coortes só recolhem o ganho com a reexecução do backtest (C5)** ([decisão 106](decisoes/106-a-razao-de-unidade-sai-da-composicao-declarada-e-a-medida-confere.md), [ponte_por_papel.md](validacao/ponte_por_papel.md) §7) |
 | B13 | As duas vias discordam | R1, E | ✅ | a via do acionista sobre LPA fica só para instituição financeira, ou as duas vias concordam dentro de tolerância declarada e medida no universo, ou uma decisão nova substitui a 39 e diz por que a discordância deixa de ser defeito — resolver junto com o B10 — atingido pela terceira saída: a decisão 102 substitui a 39; nenhuma avaliação muda de via, a via do acionista fica para as Portas 1 e 3, e nenhum ativo tem o preço escolhido entre as duas — 42 dos 109 não financeiros tinham antes |
-| B12 | Excedente do capital existente na perpetuidade | E | ✅ | o peso de `EVA_{N+1}/r` no preço justo está medido no universo, declarado no aviso, e uma decisão diz se ele fica, decai ou acaba num horizonte — atingido: o instalado rende 0,71 vez o custo de capital na mediana e o peso é de **−14,1%** do preço justo, déficit em 71 de 83; truncar em 20 anos devolve 0,4%, de modo que a escolha é binária; o número fica, o rótulo passa a `RONIC_∞ = r`, e o peso sai nos diagnósticos, sempre no rastro e como ressalva acima de 20% ([decisão 107](decisoes/107-o-terminal-neutro-e-do-capital-novo-e-o-instalado-mantem-o-retorno-que-tem.md), [terminal_excedente.md](validacao/terminal_excedente.md)) |
+| B12 | Excedente do capital existente na perpetuidade | E | ✅ | o peso de `EVA_{N+1}/r` no preço justo está medido no universo, declarado no aviso, e uma decisão diz se ele fica, decai ou acaba num horizonte — atingido: o instalado rende 0,70 vez o custo de capital na mediana e o peso é de **−11,8%** do preço justo, déficit em 70 de 81 (remedido em 21/09/2026 sob a decisão 113); truncar em 20 anos devolve 0,4%, de modo que a escolha é binária; o número fica, o rótulo passa a `RONIC_∞ = r`, e o peso sai nos diagnósticos, sempre no rastro e como ressalva acima de 20% ([decisão 107](decisoes/107-o-terminal-neutro-e-do-capital-novo-e-o-instalado-mantem-o-retorno-que-tem.md), [terminal_excedente.md](validacao/terminal_excedente.md)) |
 | B14 | Beta de papel pouco negociado | E, R3 | ✅ | um beta com correção por negociação não sincrônica é medido nos soltos do corte de liquidez, o nível do potencial deles é remedido com ele contra o das avaliadas, e uma decisão diz se a recusa por liquidez fica — atingido: Dimson com uma e com cinco defasagens, nos 185 soltos e nos 102 avaliados; o viés existe e cresce com a iliquidez (0,134 → 0,367 em quem negocia menos de 120 pregões), mas fecha **6,5 dos 17,8 p.p.** de distância e triplica o erro-padrão onde não há viés: **a recusa fica** ([decisão 108](decisoes/108-a-recusa-por-liquidez-fica-e-o-beta-corrigido-fecha-um-terco-da-distancia.md), [beta_liquidez.md](validacao/beta_liquidez.md)) |
 | B15 | Beta e alavancagem da perpetuidade | E | ✅ | o custo de capital da perpetuidade declara de onde vêm o beta e a estrutura de capital, o efeito de levá-los ao estado estacionário — beta em direção a 1, alavancagem da mediana do setor — está medido no universo, e uma decisão escolhe — atingido: a estrutura é a do ano N do modelo desde a decisão 105, e ela fica a −0,01 da de hoje ativo a ativo; o beta é o de hoje encolhido, e Blume por cima move **+0,1%** do preço justo porque o encolhimento já o aproximou de 1; a mediana setorial move 0,0% e custa cinco avaliações; as duas ficam como imposição de diagnóstico ([decisão 109](decisoes/109-a-perpetuidade-declara-de-onde-vem-o-beta-e-a-estrutura-e-nao-os-converge.md), [perpetuidade.md](validacao/perpetuidade.md)) |
-| B17 | Série de preços das coortes limitada a dez anos | R3 | ⬜ | a série que a coorte usa para o beta cobre a janela inteira de cinco anos nas listadas, pelo COTAHIST, ou a coorte declara a janela curta — hoje a de 31/03/2018 estima beta com 383 pregões, contra 1.240, e as deslistadas, que vêm do COTAHIST, não têm o problema |
-| B18 | Recusa de estrutura decidida pelo chute | R1, E | ⬜ | a recusa da decisão 45 sai do ponto fixo, e não da interpolação de que ele parte — os 14 ativos que saíram em 20/09/2026 foram recusados no ano zero da primeira iteração —, **ou** uma decisão declara que recusar no chute é a regra, com o custo medido |
-| B19 | Reversão da rentabilidade à média | E | ⬜ | a persistência do `ROIC` contra o custo de capital está medida na série do universo — horizonte, dispersão e viés do estimador declarados —, e uma decisão diz se o terminal mantém o retorno do capital instalado ou o faz convergir; hoje ele mantém, e isso vale −14,1% do preço justo na mediana (B12, decisão 107) |
-| B8 | Reapresentação no *point-in-time* | R3, R1 | ⬜ | a ingestão guarda cada versão com a data de recebimento dela, e a coorte usa a versão recebida até a data da avaliação |
-| B2 | Potencial ortogonalizado | R3 | ⬜ | o IC do potencial ortogonalizado ao B/M sai do `backtest_valuation` em toda execução e fica registrado |
+| B17 | Série de preços das coortes limitada a dez anos | R3 | ✅ | a série que a coorte usa para o beta cobre a janela inteira de cinco anos nas listadas, pelo COTAHIST, **ou a coorte declara a janela curta** — atingido pela segunda saída: o preparo mede a extensão da série que estimou o beta e a cascata declara abaixo de 80% da janela pedida, com a constante numa fonte só; a coorte grava a janela efetiva, e um dos avaliados do aplicativo — a CYRE4, com 0,7 ano — já sai com a ressalva. **A cobertura pelo COTAHIST depende do C5**, e com ela a contagem nas coortes de 2018 a 2021 ([decisão 111](decisoes/111-a-avaliacao-declara-a-janela-curta-do-beta.md)) |
+| B18 | Recusa de estrutura decidida pelo chute | R1, E | ✅ | a recusa da decisão 45 sai do ponto fixo, e não da interpolação de que ele parte — atingido: o ponto fixo é tentado da interpolação **e** do custo de capital desalavancado, e só recusa quando nenhuma das duas fecha; a CAML3 volta, os outros 13 continuam recusados pelas duas, nenhum preço se move, e a independência da partida é verificada em todo o universo — **zero divergências** ([decisão 110](decisoes/110-o-ponto-fixo-e-tentado-de-duas-partidas-e-a-recusa-deixa-de-ser-do-chute.md)) |
+| B19 | Reversão da rentabilidade à média | E | ✅ | a persistência do `ROIC` contra o custo de capital está medida na série do universo — horizonte, dispersão e viés do estimador declarados —, e uma decisão diz se o terminal mantém o retorno do capital instalado ou o faz convergir — atingido: AR(1) no painel de 3.246 pares com `φ` de 0,237 e meia-vida de meio ano, `φ` mediano por ativo de 0,392 com o viés de Kendall declarado, e a leitura sem forma funcional mostrando o quinto superior indo de 14,3% a 0,1% em dez anos; **mas o destino é a mediana do mercado, 9,5%, contra 18,9% de custo de capital**, e converger o terminal a `r` afirmaria rentabilidade que a seção transversal nunca teve — **o terminal fica**, agora por medição ([decisão 112](decisoes/112-a-rentabilidade-reverte-a-mediana-do-mercado-e-nao-ao-custo-de-capital.md), [reversao_roic.md](validacao/reversao_roic.md)) |
+| B8 | Reapresentação no *point-in-time* | R3, R1 | 🟨 | a ingestão guarda cada versão com a data de recebimento dela, e a coorte usa a versão recebida até a data da avaliação — **o conserto depende da base bruta (C5)**, e o que foi feito em 21/09/2026 é medir o tamanho: das duas metades do defeito, a que o pacote versionado permite medir é **pequena** — 0,0% a 1,1% dos exercícios de cada coorte somem porque a única versão disponível chegou depois da data, com a pior em 30/06/2020 —, e a outra, o número **reapresentado** entrando como se fosse o original, não é medível sem as versões antigas e é maior por construção: 24,8% dos anuais têm mais de uma ([reapresentacao.md](validacao/reapresentacao.md)) |
+| B2 | Potencial ortogonalizado | R3 | ✅ | o IC do potencial ortogonalizado ao B/M sai do `backtest_valuation` em toda execução e fica registrado — atingido: `regressao_condicional.dart`, que é o que lê a saída do backtest, passou a medir o resíduo contra o **P/B sozinho** ao lado do que já media contra P/B e L/P, com a mesma inferência do resto — `t` corrigido pela sobreposição contra o crítico e Newey-West (decisão 96) —, e o número mora em [potencial_ortogonalizado.md](validacao/potencial_ortogonalizado.md), com o histórico entre rodadas: **+0,016 em 36 meses, `t` corrigido de 0,13 contra 2,70**, positivo em 10 de 22 coortes |
 | B6 | Horizonte de projeção | E, R3 | ⬜ | a varredura de 5 a 20 anos está medida sobre o universo e sobre a habilidade, e o horizonte é escolhido por decisão |
 | B7 | Consistência real × nominal | E, R1 | ⬜ | um teste confere que fluxo, taxa e perpetuidade usam a mesma convenção de inflação em todo o caminho |
 | B3 | Prêmio de risco de mercado | E | ⬜ | o prêmio é estimado — implícito ou histórico com encolhimento —, por decisão e com efeito medido; hoje é 5,5% fixo |
 | B4 | Risco-país e tamanho | E | ⬜ | decisão registrada sobre prêmio de risco-país e ajuste por tamanho, implementados ou recusados com medição |
 | B5 | Triangulação por múltiplos | E | ⬜ | cada avaliação traz o preço justo por múltiplos de pares ao lado do DCF, com a divergência declarada — hoje não há modelo por múltiplos |
+| B20 | Tradução do cenário para o `Ke` | E | ⬜ | uma decisão diz o que o cenário de desconto perturba — a taxa em si, a livre de risco, ou a taxa aplicada ao fluxo —, e a tradução para o `Ke` da rota derivada sai dessa escolha com o efeito na faixa medido. **Hoje a soma é um a um, e está declarada no código** (lente `metodo`, 21/09/2026): `ΔK_e = ΔWACC ÷ w_E` seria a leitura de estrutura fixa, perto de 1,4 vez, e `ΔK_e = ΔWACC ÷ (1 − w_D·t)` a de taxa livre de risco, perto de 1,1. Vale um a um porque na via do acionista o campo perturbado **é** o `Ke`, e as duas vias precisam querer dizer a mesma coisa. **Não move o preço justo** — só a largura da faixa de sensibilidade, que a decisão 92 já separa da calibrada |
+| B21 | O `Failure` carrega formatação de tela | E, prevenção | ⬜ | o erro do núcleo transporta a grandeza que a regra violou, e a frase é montada na apresentação — hoje o núcleo formata percentual e casas decimais dentro da mensagem (`'Os pesos devem somar 100%; somam ${(total * 100).toStringAsFixed(2)}%.'`), e a tela é obrigada a exibir a frase pronta ou a repetir o limite. **Dívida de arquitetura inventariada**, das lentes `nucleo` e `registro` de 21/09/2026: não é regressão e não afeta cálculo, e o repositório está sob preservação. A lente `registro` aponta a outra metade da mesma dívida — o `Money` em centavos inteiros vale na carteira e no aporte, e o caminho de avaliação corre em `double` do começo ao fim, o que o [PLANO_ARQUITETURA.md](../PLANO_ARQUITETURA.md), congelado, não distingue |
 | C5 | Base bruta e reexecução do backtest | R2, R3 | ⬜ 👤 | a base bruta — CVM ingerida, COTAHIST e derivados, Tesouro — está na máquina, e o backtest é reexecutado sobre o motor da Fase 3, com habilidade, faixa, recusas e ponte regeradas — hoje as quatro são do motor da decisão 102, e o `data/` não existe no clone |
 | C4 | Custos de transação | R3 | ⬜ | o custo de transação entra no backtest, e o efeito sobre o retorno medido é reportado |
 | D3 | Cobertura de caminhos de erro | R1 prevenção | 🟨 | as telas carregadas entram no teste de estouro — **a de avaliação entrou, na matriz de três larguras e três escalas**, e faltam estudo e metas —, o cache macroeconômico tem teste de recurso offline — **feito**, com a cobertura do início exigida no recurso —, o veredito que não se estabiliza em `moatMaxPasses` passes tem teste, e os datasources de fundamentos e do Tesouro têm teste de payload malformado como o de cotações tem (lente `risco`, 15/09/2026) — **o do Banco Central e o do Tesouro entraram em 20/09/2026 e o de demonstrativos em 21/09**, com JSON sem as chaves, CSV de colunas trocadas e literal de tipo indevido virando `Result.err`; faltam as telas de estudo e metas carregadas |
@@ -1307,7 +1361,7 @@ Se um deles passar a afetar número, entra na tabela com *serve a* `R1`.
 
 ## 7. Critério de parada
 
-Conferido contra o código e as medições em 21/09/2026, quarta rodada da Fase 3.
+Conferido contra o código e as medições em 21/09/2026, quinta rodada da Fase 3.
 Cada condição cita os itens da §6 que a fecham.
 
 **Valuation exemplar** — o preço justo de um ativo é defensável linha a linha:
@@ -1331,8 +1385,10 @@ Cada condição cita os itens da §6 que a fecham.
   concessão corta o excedente no fim do contrato (A6); fora de contrato, o
   excedente perpétuo do capital instalado é **premissa declarada** desde
   21/09/2026, com o peso medido — −14,1% do preço justo na mediana, e déficit em
-  71 de 83 (B12, decisão 107). Fazê-lo convergir exige medir a reversão da
-  rentabilidade à média (B19)
+  71 de 83 (B12, decisão 107). **E a reversão foi medida** (B19, decisão 112): ela
+  existe e é rápida, mas o destino é a mediana do mercado — 9,5% contra 18,6% de
+  custo de capital —, de modo que convergir o terminal a `r` afirmaria
+  rentabilidade que esta seção transversal nunca teve
 - [x] **A perpetuidade diz de onde vêm o beta e a estrutura de capital** — a
   estrutura é a do ano N do modelo (decisão 105) e o beta é o de hoje,
   encolhido; convergi-lo em direção a 1 move 0,1% do preço justo, porque o
@@ -1341,14 +1397,16 @@ Cada condição cita os itens da §6 que a fecham.
 
 **Motor de referência** — as três condições combinadas:
 
-- [ ] **R1. Nenhum defeito conhecido** — desmarcado em 14/09/2026. **Defeitos
-  abertos hoje:** B18 (a recusa de estrutura decidida pelo chute do ponto fixo —
-  entrou em 20/09/2026, ao ligar o prior), B8 (reapresentação nas coortes) e B7
-  (inflação — a conferir; pode não ser defeito). O A5, o B1.0, o B10 e o B13
-  fecharam, e em 20/09/2026 fecharam **o B9, o B11 e o B16** — a dívida do WACC é
-  a líquida, o aplicativo resolve o prior e o custo de capital, e a razão de
-  unidade sai da composição declarada. Prevenção em aberto, que não conta: D3 —
-  o D1 fechou.
+- [ ] **R1. Nenhum defeito conhecido** — desmarcado em 14/09/2026. **Restam
+  dois, e um deles pode não ser defeito.** **B8** (reapresentação nas coortes)
+  está **em curso**: a metade medível dele é pequena — até 1,1% dos exercícios de
+  cada coorte —, e a outra metade, o número reapresentado entrando como original,
+  depende da base bruta (C5). **B7** (consistência real × nominal) continua a
+  conferir, e o próprio item diz que pode não ser defeito. O A5, o B1.0, o B10 e
+  o B13 fecharam; em 20/09/2026 fecharam o B9, o B11 e o B16; em 21/09 fecharam
+  **o B18 e o B17** — a recusa de estrutura passou a sair do ponto fixo, e a
+  janela curta do beta passou a ser declarada. Prevenção em aberto, que não
+  conta: D3 — o D1 fechou.
 - [x] **R2. Incerteza calibrada** — **atingida em 15/09/2026, desfeita no mesmo dia
   e refeita por outra forma.** A banda de cenários cobria 8% contra 90%, e a
   incerteza que o aplicativo mostra passou a ser a faixa calibrada (C2, decisão 92),
@@ -1402,6 +1460,19 @@ preço custou cobertura: 114 avaliados viraram 102, e catorze companhias grandes
 saem porque a conta coerente diz que a dívida consome o valor da operação delas.
 **E ficou uma dívida de medição**: as coortes ainda descrevem o motor da decisão
 102, porque a base bruta não está na máquina (C5).
+
+**Na quinta rodada o R1 ficou a um defeito de fechar.** O B18 saiu — o ponto
+fixo passou a ser tentado de duas partidas, e a recusa de estrutura deixou de
+ser do chute que a antecede — e o B17 saiu pela saída de declarar. Sobram o B8,
+cuja metade medível é pequena e cuja outra metade depende da base bruta, e o B7,
+que o próprio item diz que pode não ser defeito. **E o B19 fechou a pergunta que
+o B12 tinha deixado aberta**: a rentabilidade brasileira reverte, e rápido — em
+dez anos não sobra nada da vantagem relativa —, mas reverte para a mediana do
+mercado, que vive na metade do custo de capital. O déficit perpétuo que o
+terminal carrega não é peculiaridade do modelo: é o que a seção transversal
+mostra, e um DCF honesto sobre esta amostra tem de dizê-lo. **O B2 virou métrica
+com inferência**, e fixou o número que a próxima mudança de método terá de
+bater: +0,016, com `t` corrigido de 0,13 contra 2,70.
 
 **Na quarta rodada nenhum número mudou, e o que mudou foi o que o motor diz de
 si.** O B12, o B14 e o B15 eram três premissas não declaradas, e as três foram

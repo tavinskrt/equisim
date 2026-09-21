@@ -45,6 +45,7 @@ void main() {
     required double divida,
     double base = base,
     CashTiming timing = CashTiming.fimDeAno,
+    double? caixa,
   }) =>
       LeveredCostOfCapital.solve(
         baseProfit: base,
@@ -56,6 +57,7 @@ void main() {
         marketPremium: premio,
         creditSpread: spread,
         taxRate: tax,
+        cash: caixa,
       );
 
   group('Ponto fixo do custo de capital', () {
@@ -329,6 +331,104 @@ void main() {
     });
   });
 
+  group('O ponto fixo não depende de onde começa', () {
+    // Item B18, decisão 110. A recusa da decisão 45 saía da interpolação de
+    // dois pontos — o recuo que a decisão 41 substituiu —, e não do ponto
+    // fixo: os 14 ativos que saíram do aplicativo em 20/09/2026 foram
+    // recusados todos na primeira iteração. Agora o ponto fixo é tentado de
+    // duas partidas, e um ponto fixo é um ponto fixo.
+    Result<LeveredRates> comChute(double taxa, {double divida = 3000}) =>
+        LeveredCostOfCapital.solve(
+          baseProfit: base,
+          assumptions: DcfAssumptions(
+            projectionYears: 10,
+            growthRate: 0.05,
+            perpetualGrowth: 0.05,
+            discountRate: taxa,
+            terminalDiscountRate: taxa,
+            returnOnCapital: 0.0,
+            cashTiming: CashTiming.fimDeAno,
+          ),
+          netDebt: divida,
+          unleveredBeta: betaU,
+          riskFreePath: List<double>.filled(10, rf),
+          terminalRiskFree: rf,
+          marketPremium: premio,
+          creditSpread: spread,
+          taxRate: tax,
+        );
+
+    test('dois chutes bem diferentes chegam ao mesmo lugar', () {
+      // O chute só semeia: dentro do laço o caminho é reescrito. Se a resposta
+      // dependesse dele, ela seria do chute.
+      final baixo = comChute(0.10).unwrap();
+      final alto = comChute(0.30).unwrap();
+      expect(baixo.converged && alto.converged, isTrue);
+      expect((alto.equity.first / baixo.equity.first - 1).abs(),
+          lessThan(LeveredCostOfCapital.startIndependence),
+          reason: 'o mesmo ponto fixo, por caminhos diferentes');
+      expect(alto.terminalWacc, closeTo(baixo.terminalWacc, 1e-6));
+    });
+
+    test('chute que mata o capital próprio não decide a recusa', () {
+      // Com o chute alto o capital próprio some no ano zero da primeira
+      // iteração; a partida desalavancada fecha, e é ela que vale.
+      final avisos = <String>[];
+      final r = LeveredCostOfCapital.solve(
+        baseProfit: base,
+        assumptions: const DcfAssumptions(
+          projectionYears: 10,
+          growthRate: 0.05,
+          perpetualGrowth: 0.05,
+          // Um chute absurdamente caro: a interpolação não sustenta a dívida.
+          discountRate: 0.90,
+          terminalDiscountRate: 0.90,
+          returnOnCapital: 0.0,
+          cashTiming: CashTiming.fimDeAno,
+        ),
+        netDebt: 6000,
+        unleveredBeta: 0.30,
+        riskFreePath: List<double>.filled(10, rf),
+        terminalRiskFree: rf,
+        marketPremium: premio,
+        creditSpread: spread,
+        taxRate: tax,
+        warnings: avisos,
+      );
+      expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
+      expect(avisos.any((a) => a.contains('não fecha a partir da interpolação')),
+          isTrue,
+          reason: 'quando as duas partidas discordam sobre existir solução, a '
+              'avaliação precisa dizer de onde veio a que valeu');
+    });
+
+    test('quando nenhuma das duas fecha, a recusa diz que é do método', () {
+      final r = LeveredCostOfCapital.solve(
+        baseProfit: 1.0,
+        assumptions: const DcfAssumptions(
+          projectionYears: 10,
+          growthRate: 0.05,
+          perpetualGrowth: 0.05,
+          discountRate: 0.13,
+          terminalDiscountRate: 0.13,
+          returnOnCapital: 0.0,
+          cashTiming: CashTiming.fimDeAno,
+        ),
+        // Dívida de ordem de grandeza acima do que o fluxo sustenta.
+        netDebt: 1e9,
+        unleveredBeta: betaU,
+        riskFreePath: List<double>.filled(10, rf),
+        terminalRiskFree: rf,
+        marketPremium: premio,
+        creditSpread: spread,
+        taxRate: tax,
+      );
+      expect(r.isErr, isTrue);
+      expect(r.failureOrNull!.message, contains('nenhuma das duas partidas'));
+      expect(r.failureOrNull!.message, contains('e não do chute'));
+    });
+  });
+
   group('Ponto fixo pelo lado do acionista', () {
     // A via do acionista avalia sozinha 33 dos 120 em produção, e em nenhum
     // deles a via da firma produz caminho de taxas para emprestar: ou o `Ke`
@@ -498,6 +598,68 @@ void main() {
       );
       expect(r.isErr, isTrue);
       expect(r.failureOrNull!.message, contains('desalavancado'));
+    });
+  });
+
+  group('O caixa da via alavancada rende a taxa livre de risco', () {
+    // Lente `metodo`, 21/09/2026. A via da firma projetava a dívida
+    // **líquida** e remunerava a perna inteira ao custo de empréstimo. Quem
+    // tem caixa via a metade que rende `R_f` ser creditada com prêmio de
+    // crédito — e o WACC saía baixo demais. A separação não muda os pesos:
+    // as duas metades crescem com o mesmo fator, e a diferença delas é a
+    // mesma série líquida de antes.
+    test('a mesma dívida líquida, com caixa conhecido, custa mais', () {
+      final sem = resolver(g: 0.05, divida: 3000);
+      final com = resolver(g: 0.05, divida: 3000, caixa: 2000);
+      expect(sem.isOk, isTrue, reason: sem.failureOrNull?.message);
+      expect(com.isOk, isTrue, reason: com.failureOrNull?.message);
+      final a = sem.unwrap();
+      final b = com.unwrap();
+      for (var t = 0; t < a.wacc.length; t++) {
+        expect(b.wacc[t], greaterThan(a.wacc[t]),
+            reason: 'ano ${t + 1}: o caixa deixa de render prêmio de crédito');
+      }
+      expect(b.terminalWacc, greaterThan(a.terminalWacc));
+      expect(b.equity.first, lessThan(a.equity.first),
+          reason: 'taxa maior, valor menor');
+    });
+
+    test('a dívida projetada é a mesma: o que muda é a taxa', () {
+      final sem = resolver(g: 0.05, divida: 3000).unwrap();
+      final com = resolver(g: 0.05, divida: 3000, caixa: 2000).unwrap();
+      for (var t = 0; t < sem.debt.length; t++) {
+        expect(com.debt[t], closeTo(sem.debt[t], 1e-9));
+      }
+    });
+
+    test('o WACC do ano 1 fecha na forma de três pernas', () {
+      final r = resolver(g: 0.05, divida: 3000, caixa: 2000).unwrap();
+      const caixa = 2000.0;
+      final v0 = r.equity.first + r.debt.first;
+      final pesoE = r.equity.first / v0;
+      final wBruta = (r.debt.first + caixa) / v0;
+      final wCaixa = caixa / v0;
+      final juro = (rf + spread) * (1 - tax);
+      final rendimento = rf * (1 - tax);
+      expect(
+        r.wacc.first,
+        closeTo(
+          r.costOfEquity.first * pesoE + juro * wBruta - rendimento * wCaixa,
+          1e-9,
+        ),
+      );
+      // E a soma dos dois pesos da perna é a participação da líquida: a
+      // separação redistribui a mesma perna entre duas taxas.
+      expect(wBruta - wCaixa, closeTo(1 - pesoE, 1e-12));
+    });
+
+    test('caixa zero é a forma anterior, bit a bit', () {
+      final sem = resolver(g: 0.05, divida: 3000).unwrap();
+      final com = resolver(g: 0.05, divida: 3000, caixa: 0).unwrap();
+      for (var t = 0; t < sem.wacc.length; t++) {
+        expect(com.wacc[t], closeTo(sem.wacc[t], 1e-12));
+      }
+      expect(com.terminalWacc, closeTo(sem.terminalWacc, 1e-12));
     });
   });
 }

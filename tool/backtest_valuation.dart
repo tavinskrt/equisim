@@ -821,6 +821,10 @@ Future<void> main(List<String> args) async {
               'otimista': cenarios == null ? null : cenarios[ScenarioBand.bull]?.reais,
               'ke': r.isOk ? r.unwrap().diagnostics!.costOfEquity : null,
               'mcQuantis': quantis,
+              // A janela que a série de fato deu ao beta (item B17): a fonte
+              // devolve dez anos, e a coorte de 2018 pede cinco que ela não
+              // tem. Sem isto, a janela curta entrava sem aparecer.
+              'janelaDoBeta': insumos.betaWindowYears,
               'liquidez': liquidez,
               'upsideSemLiquidez': semLiquidez,
               'semNegocio': semNegocio,
