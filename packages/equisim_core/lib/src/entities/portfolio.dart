@@ -7,13 +7,10 @@ import 'asset.dart';
 /// Papel da carteira na dupla gestão.
 enum PortfolioKind {
   /// Portfólio vigente.
-  principal('Principal'),
+  principal,
 
   /// Candidatos a substituição.
-  reserva('Reserva');
-
-  final String label;
-  const PortfolioKind(this.label);
+  reserva;
 }
 
 /// Posição de um ativo dentro da carteira.
@@ -185,16 +182,40 @@ class Portfolio {
       return const Err(InvalidInput('A carteira precisa de ao menos um ativo.'));
     }
     if (allocation.length > maxAssets) {
+      // **A frase diz a regra; os campos dizem os números** (item B21, decisão
+      // 122). Interpolar o limite aqui obrigava a tela a exibir a frase pronta
+      // ou a repetir a constante do lado dela.
       return Err(InvalidInput(
-        'Limite de $maxAssets ativos por carteira excedido.',
+        'Limite de ativos por carteira excedido.',
+        field: 'assets',
+        actual: allocation.length.toDouble(),
+        limit: maxAssets.toDouble(),
+        unit: QuantityUnit.count,
       ));
+    }
+    // Cada peso em [0, 1] antes da soma: pesos que fecham 100% com um
+    // negativo passavam por ela e estouravam `ArgumentError` em
+    // `Weight.fraction` — exceção numa fábrica que devolve `Result`
+    // (lente `nucleo`, 22/09/2026). A carteira é só comprada.
+    for (final v in allocation.values) {
+      if (v.isNaN || v < 0 || v > 1) {
+        return Err(InvalidInput(
+          'Cada peso deve estar entre 0% e 100%.',
+          field: 'weights',
+          actual: v,
+          limit: v < 0 ? 0.0 : 1.0,
+          unit: QuantityUnit.fraction,
+        ));
+      }
     }
     final total = allocation.values.fold<double>(0.0, (a, b) => a + b);
     if ((total - 1.0).abs() > 1e-6) {
       return Err(InvalidInput(
-        'Os pesos devem somar 100%; somam ${(total * 100).toStringAsFixed(2)}%.',
-        actual: total,
+        'Os pesos devem somar 100%.',
         field: 'weights',
+        actual: total,
+        limit: 1.0,
+        unit: QuantityUnit.fraction,
       ));
     }
     return Ok(Portfolio(

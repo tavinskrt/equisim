@@ -131,6 +131,8 @@ void _sintetico() {
       contributionDay: 1,
     ),
     range: DateRange(dias.first, dias.last),
+    // A demonstração é de TWR contra XIRR, e não de custo (item C4).
+    costs: TransactionCosts.none,
   );
   if (r.isErr) {
     stdout.writeln('  falhou: ${r.failureOrNull?.message}');

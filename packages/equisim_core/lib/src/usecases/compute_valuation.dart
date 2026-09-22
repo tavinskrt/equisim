@@ -19,6 +19,7 @@ import '../services/valuation/eligibility.dart';
 import '../services/valuation/growth_estimator.dart';
 import '../services/valuation/growth_guards.dart';
 import '../services/valuation/levered_rates.dart';
+import '../services/valuation/moat_fixed_point.dart';
 import '../services/valuation/scenario_engine.dart';
 import '../services/valuation/yield_curve.dart';
 import '../time/point_in_time_view.dart';
@@ -56,6 +57,25 @@ class ValuationInputs {
   /// a mediana do preço justo anda menos de 1% entre 5 e 20 anos, e o que muda
   /// é o peso do terminal — 57% a cinco anos, 8% a vinte.
   final int projectionYears;
+
+  /// Como o cenário de desconto vira deslocamento do `Ke` na rota derivada
+  /// (item B20, decisão 121). O padrão é o declarado; as outras duas são
+  /// imposição de diagnóstico, para medir a largura da faixa sob cada leitura.
+  final ScenarioTranslation scenarioTranslation;
+
+  /// Valor a somar ao peso do capital próprio pelo minoritário, em reais —
+  /// **imposição de diagnóstico do item B23**, e não caminho de produção.
+  ///
+  /// O peso do WACC estático é `divisor × preço`, que é o valor de mercado da
+  /// **controladora**, enquanto o fluxo descontado é o consolidado. Este campo
+  /// existe para medir o que mudaria se a fatia dos não controladores entrasse
+  /// no denominador. `null` é o comportamento declarado.
+  ///
+  /// **O caminho resolvido não precisa dele**: a realavancagem pondera pelo
+  /// capital próprio que o **modelo** produz — `V − D` sobre um fluxo
+  /// consolidado —, que já inclui o minoritário. A assimetria é entre o
+  /// estático e o resolvido, e não entre o motor e a teoria.
+  final double? minorityEquityValue;
 
   /// Medianas de múltiplos dos pares do ativo, para a segunda leitura (item
   /// B5).
@@ -351,6 +371,8 @@ class ValuationInputs {
     this.terminalLeverageOverride,
     this.betaWindowYears,
     this.peerMultiples,
+    this.minorityEquityValue,
+    this.scenarioTranslation = ScenarioTranslation.umPorUm,
   });
 
   /// Os mesmos insumos, com [n] anos de projeção explícita.
@@ -464,20 +486,39 @@ class ValuationInputs {
 enum QuotedSharesSource {
   /// Implícita no valor de mercado: `VM ÷ preço`. É a que forma a cotação, e é
   /// a adotada sempre que as duas contagens publicadas concordam.
-  market('implícita no valor de mercado'),
+  market,
 
   /// Conciliada pelas demonstrações, adotada quando é a **maior** das duas e as
   /// duas divergem além de uma ação societária plausível.
-  reconciled('conciliada pelas demonstrações'),
+  reconciled,
 
   /// Única disponível: o valor de mercado não pôde ser usado.
-  onlyAvailable('única contagem disponível'),
+  onlyAvailable,
 
   /// Registro oficial da B3, líquida da fração em tesouraria (decisão 83).
-  official('contagem oficial da B3, líquida de tesouraria');
+  official;
+}
 
-  final String label;
-  const QuotedSharesSource(this.label);
+/// Como o deslocamento do cenário de desconto vira deslocamento do `Ke` na
+/// rota derivada (item B20, decisão 121).
+///
+/// O cenário perturba `DcfAssumptions.discountRate`. Na via do acionista esse
+/// campo **é** o `Ke`, e o deslocamento é um a um por construção. Na via da
+/// firma ele é o WACC, e a rota derivada desconta ao `Ke`: traduzir exige
+/// escolher **o que o cenário está perturbando**, e ele não diz.
+enum ScenarioTranslation {
+  /// `ΔK_e = ΔWACC`. O cenário perturba **a taxa aplicada ao fluxo**, que é a
+  /// que esta rota usa — e é o que faz as duas vias quererem dizer a mesma
+  /// coisa.
+  umPorUm,
+
+  /// `ΔK_e = ΔWACC ÷ w_E`. O cenário perturba **o custo de capital da firma**
+  /// com `K_d` e os pesos parados.
+  estruturaFixa,
+
+  /// `ΔK_e = ΔWACC ÷ (1 − w_D·t)`. O cenário perturba **a taxa livre de
+  /// risco**, que move `K_e` e `K_d` juntos.
+  taxaLivreDeRisco,
 }
 
 /// Contagem de ações de um emissor no registro oficial da B3.
@@ -761,9 +802,15 @@ class _Custo {
   /// Retorno terminal aplicado ao fim.
   final double? moat;
 
+  /// O caminho da taxa livre de risco contra o qual [taxas] foram resolvidas,
+  /// ou `null` sem elas. A rota derivada precisa dele para o `K_d` e o
+  /// rendimento do caixa de cada ano (item B24, decisão 127).
+  final List<double>? caminhoRf;
+
   const _Custo({
     required this.assumptions,
     required this.taxas,
+    this.caminhoRf,
     required this.estruturaRejeitada,
     required this.veredito,
     required this.moatVerificado,
@@ -1035,7 +1082,7 @@ abstract final class ValuationCascade {
         '${_r(divisor.fromMarketCap!, 0)} implícitas no valor de mercado '
         'contra ${_r(divisor.fromStatements!, 0)} conciliadas pelas '
         'demonstrações. Nada no dado arbitra qual descreve a base societária '
-        'de hoje, e foi adotada a **maior** — ${divisor.source.label} —, '
+        'de hoje, e foi adotada a **maior** — ${divisor.source.diagnostico} —, '
         'porque divisor pequeno demais infla o preço justo e produz sinal '
         'falso de desconto. O preço justo é, nesta medida, conservador.',
       );
@@ -1054,7 +1101,7 @@ abstract final class ValuationCascade {
     final lane = imposta ?? _route(inputs, published, latest, warnings, audit);
     if (imposta != null) {
       warnings.add(
-        'Via imposta em "${imposta.label}" por varredura externa. Este '
+        'Via imposta em "${imposta.diagnostico}" por varredura externa. Este '
         'resultado é instrumento de diagnóstico, não avaliação: o roteamento '
         'foi ignorado.',
       );
@@ -1074,7 +1121,7 @@ abstract final class ValuationCascade {
         : 'Os dados de ${inputs.ticker.value} não sustentam nenhuma das duas '
             'vias de avaliação.';
     audit?.abort(message, extra: {
-      'viaTentada': lane.label,
+      'viaTentada': lane.diagnostico,
       'exerciciosPublicados': published.length,
     });
     return Err(InsufficientData(message, subject: inputs.ticker.value));
@@ -1197,6 +1244,13 @@ abstract final class ValuationCascade {
   /// janela curta é a cascata: o preparo apenas mede a que a série deu. O
   /// preparo referencia esta constante, de modo que as duas não podem
   /// divergir.
+  /// Fração do patrimônio consolidado a partir da qual o minoritário torna o
+  /// recuo ao WACC estático uma ressalva (item B23, decisão 120).
+  ///
+  /// Um centésimo do consolidado: abaixo disso o tratamento do minoritário
+  /// move o terceiro decimal da taxa, e declarar seria ruído.
+  static const double minorityWeightMateriality = 0.01;
+
   static const int betaWindowYears = 5;
 
   /// Fração da janela do beta abaixo da qual a avaliação declara a janela
@@ -1423,8 +1477,19 @@ abstract final class ValuationCascade {
   ///
   /// `null` quando o ativo não é concessão, quando o fim não é conhecido e
   /// quando ele já passou — o Formulário de Referência repete contrato vencido
-  /// e renovado, e sem o prazo novo não há horizonte a impor. Arredondado ao
-  /// ano, e nunca abaixo de um: a projeção explícita conta anos inteiros.
+  /// e renovado, e sem o prazo novo não há horizonte a impor.
+  ///
+  /// **Arredondado ao ano, e nunca abaixo de um**: a projeção explícita conta
+  /// anos inteiros. O arredondamento é `round` e não `floor` porque ele
+  /// **minimiza o erro** — `floor` tiraria até um ano inteiro de contrato que
+  /// existe, e `round` erra no máximo meio ano, para os dois lados (lente
+  /// `metodo`, 21/09/2026).
+  ///
+  /// **O piso de um ano é a única assimetria**, e é deliberada: um contrato com
+  /// dias de vida recebe um ano que não tem, porque projeção de zero ano
+  /// explícito não é modelo. Ela só morde em concessão a menos de seis meses do
+  /// fim, e ali o prazo da renovação — que o Formulário ainda não traz — é a
+  /// incerteza que domina.
   static int? contractYears(ValuationInputs inputs) {
     final fim = inputs.concessionEnd;
     if (fim == null) return null;
@@ -1747,29 +1812,18 @@ abstract final class ValuationCascade {
     // rota usa. Com o centro errado, o cenário base não voltava ao preço
     // justo, e a faixa de sensibilidade cercava outro número.
     final centro = custo.assumptions;
-    // **O deslocamento é somado ao `Ke` um a um, e isso é escolha** (lente
-    // `metodo`, 21/09/2026; item B20). `Ke` e `WACC` não se movem na mesma
-    // razão, e qual é a razão depende do que o cenário está perturbando —
-    // coisa que ele não diz:
-    //
-    // - a **taxa de desconto em si**, com `K_d` parado → `ΔK_e = ΔWACC ÷ w_E`,
-    //   perto de 1,4 vez com participação de 70%;
-    // - a **taxa livre de risco**, que move `K_e` e `K_d` juntos →
-    //   `ΔK_e = ΔWACC ÷ (1 − w_D·t)`, perto de 1,1 vez;
-    // - a **taxa aplicada ao fluxo**, que é esta rota → um a um.
-    //
-    // Vale a terceira, e a razão é que as vias precisam querer dizer a mesma
-    // coisa: na via do acionista o campo perturbado **é** o `Ke`, e o cenário
-    // move um a um. Amplificar aqui faria o mesmo cenário de "+1 p.p. de
-    // desconto" significar perturbações diferentes conforme a via que a
-    // cascata escolheu — e os ativos trocam de via.
-    //
-    // O que isto custa está declarado: a faixa de cenários **subestima** a
-    // sensibilidade do capital próprio na leitura de estrutura fixa. Ela é
-    // sensibilidade, e não incerteza (decisão 92) — a faixa calibrada sai da
-    // volatilidade medida, e não daqui.
-    final dKe = a.discountRate - centro.discountRate;
-    final dKeTerminal = a.terminalDiscountRate - centro.terminalDiscountRate;
+    // **O deslocamento vira deslocamento do `Ke` pelo fator que a
+    // [ScenarioTranslation] escolhe** (item B20, decisão 121). `Ke` e `WACC`
+    // não se movem na mesma razão, e qual é a razão depende do que o cenário
+    // está perturbando — coisa que ele não diz. As três leituras estão no
+    // enum, e o padrão é o **um a um**, porque é o que faz as duas vias
+    // quererem dizer a mesma coisa: na via do acionista o campo perturbado
+    // **é** o `Ke`.
+    final fatorDoCenario = _fatorDoCenario(via, custo);
+    final dKe = (a.discountRate - centro.discountRate) * fatorDoCenario;
+    final dKeTerminal =
+        (a.terminalDiscountRate - centro.terminalDiscountRate) *
+            fatorDoCenario;
     // O divisor é a contagem de unidades que forma a cotação — ver
     // [ValuationCascade.quotedShares]. Com ela, o potencial é `E ÷ VM − 1` e
     // nenhuma contagem de ação sobra na comparação com o preço de tela.
@@ -1781,10 +1835,16 @@ abstract final class ValuationCascade {
     // caía fora da banda defensável em 70 dos 120 avaliados.
     final kd = premissas.custoDaDivida ?? via.inputs.capm.riskFreeRate;
     // **O caixa rende a taxa livre de risco** (decisão 119, que estende a 113
-    // à rota derivada). A taxa é **uma só** para todo o caminho, como o `K_d`
-    // logo acima: a rota derivada não recebe caminho de custo da dívida, e
-    // dar caminho ao rendimento e não ao juro seria misturar convenções.
+    // à rota derivada).
     final rendimentoDoCaixa = via.inputs.capm.riskFreeRate;
+    // **Com o caminho de taxas resolvido, o juro e o rendimento seguem a
+    // curva** (item B24, decisão 127). O ponto fixo fecha o WACC com
+    // `K_d,t = Rf_t + spread` e o caixa a `Rf_t`, e o `Ke` que desconta este
+    // fluxo sai desse mesmo caminho. Projetar o juro com o `K_d` do primeiro
+    // ano parado e descontar pelo `Ke` que se move quebrava a identidade entre
+    // as duas rotas (lente `metodo`, 22/09/2026).
+    final caminhoRf = custo.caminhoRf;
+    final spread = premissas.spreadDeCredito;
     if (taxas == null) {
       return DcfCalculator.equityFromFirm(
         baseProfit: base,
@@ -1815,6 +1875,14 @@ abstract final class ValuationCascade {
       minorityInterest: minoritarios,
       cash: latest.totalCash,
       cashYield: rendimentoDoCaixa,
+      costOfDebtPath:
+          caminhoRf == null ? null : [for (final rf in caminhoRf) rf + spread],
+      cashYieldPath: caminhoRf,
+      terminalCostOfDebt: caminhoRf == null
+          ? null
+          : via.inputs.terminalRiskFreeRate + spread,
+      terminalCashYield:
+          caminhoRf == null ? null : via.inputs.terminalRiskFreeRate,
     );
   }
 
@@ -1991,6 +2059,7 @@ abstract final class ValuationCascade {
         _vereditoDoMoat(inputs, b, p.prazoDeterminado, rInf);
     var assumptionsFinal = assumptions;
     LeveredRates? taxasResolvidas;
+    List<double>? caminhoRfResolvido;
     // Recusa **econômica** do solucionador, distinta da numérica: ver o
     // bloco da estrutura rejeitada mais abaixo.
     String? estruturaRejeitada;
@@ -2095,39 +2164,37 @@ abstract final class ValuationCascade {
           // até parar de mudar, com teto declarado porque a circularidade
           // pode não ter ponto fixo: um ativo na fronteira do veredito
           // alterna entre conceder e recusar para sempre.
-          var passes = 1;
-          var estavel = false;
-          var travouNoSolucionador = false;
-          while (passes < ValuationParameters.moatMaxPasses) {
-            final refeito = vereditoDoMoat(r.terminalWacc);
-            final novoMoat =
-                inputs.terminalReturnOverride ?? refeito.terminalReturn;
-            final mudou = (novoMoat == null) != (moat == null) ||
-                (novoMoat != null &&
-                    moat != null &&
-                    (novoMoat - moat).abs() > 1e-9);
-            if (!mudou) {
-              estavel = true;
-              break;
-            }
-            // **O veredito só é adotado se a taxa dele existir.** Adotá-lo
-            // antes de saber se o solucionador fecha deixaria o retorno
-            // terminal de um passe casado com o caminho de taxas do anterior
-            // — que é premissa de uma conta contra o desconto de outra.
-            final proximo = resolverTaxas(assumptions.copyWith(
-              terminalReturnOnCapital: novoMoat,
-              neutralTerminalReturn: novoMoat == null,
-            ));
-            if (!proximo.isOk || !proximo.unwrap().converged) {
-              travouNoSolucionador = true;
-              break;
-            }
-            moatVeredito = refeito;
-            moatVerificado = refeito.terminalReturn;
-            moat = novoMoat;
-            r = proximo.unwrap();
-            passes++;
+          //
+          // A volta mora em `MoatFixedPoint.iterate`, que a testa isolada —
+          // inclusive o teto alcançado com o par alternando (item D3). **O
+          // veredito só é adotado se a taxa dele existir**: adotá-lo antes de
+          // saber se o solucionador fecha deixaria o retorno terminal de um
+          // passe casado com o caminho de taxas do anterior.
+          final volta = MoatFixedPoint.iterate<MoatVerdict, LeveredRates>(
+            verdict: moatVeredito,
+            moat: moat,
+            rates: r,
+            reassess: (taxas) => vereditoDoMoat(taxas.terminalWacc),
+            moatOf: (v) => inputs.terminalReturnOverride ?? v.terminalReturn,
+            solve: (novoMoat) {
+              final proximo = resolverTaxas(assumptions.copyWith(
+                terminalReturnOnCapital: novoMoat,
+                neutralTerminalReturn: novoMoat == null,
+              ));
+              return proximo.isOk && proximo.unwrap().converged
+                  ? proximo.unwrap()
+                  : null;
+            },
+          );
+          final passes = volta.passes;
+          final estavel = volta.stable;
+          final travouNoSolucionador = volta.solverFailed;
+          if (passes > 1) {
+            moatVeredito = volta.verdict;
+            moatVerificado = volta.verdict.terminalReturn;
           }
+          moat = volta.moat;
+          r = volta.rates;
           if (!estavel) {
             final motivo = travouNoSolucionador
                 ? 'o veredito seguinte pedia uma taxa que o ponto fixo não '
@@ -2143,6 +2210,7 @@ abstract final class ValuationCascade {
             );
           }
           taxasResolvidas = r;
+          caminhoRfResolvido = rfPath;
           assumptionsFinal = assumptions.copyWith(
             terminalReturnOnCapital: moat,
             neutralTerminalReturn: moat == null,
@@ -2182,9 +2250,39 @@ abstract final class ValuationCascade {
       }
     }
 
+    // **A condição de exposição do minoritário** (item B23, decisão 120). O
+    // peso do WACC **estático** é o valor de mercado da controladora, e o fluxo
+    // que ele desconta é o consolidado; o **resolvido** não tem o problema,
+    // porque pondera pelo capital próprio que o modelo produz. Medido em
+    // 21/09/2026, a interseção — via da firma, recuo estático e minoritário
+    // material — é **vazia** no universo inteiro.
+    //
+    // **Vazia hoje não é vazia sempre.** O aviso existe para que, no dia em que
+    // um ativo cair nas três condições, o preço justo dele não saia calado com
+    // um WACC achatado.
+    if (lane == ValuationLane.firm && taxasResolvidas == null) {
+      final minoritario = latest.minorityInterest ?? 0;
+      final controlador = latest.totalStockholderEquity ?? 0;
+      final consolidado = minoritario + controlador;
+      if (minoritario > 0 &&
+          consolidado > 0 &&
+          minoritario / consolidado >= minorityWeightMateriality) {
+        local.add(
+          'A avaliação recuou para o WACC estático, e ${_pct(minoritario / consolidado)} '
+          'do patrimônio consolidado é de não controladores. **O peso do '
+          'capital próprio na taxa é o valor de mercado da controladora**, e o '
+          'fluxo descontado é o consolidado: a participação da dívida sai '
+          'inflada e o desconto, achatado. O caminho resolvido não teria o '
+          'problema, porque pondera pelo capital próprio que o próprio modelo '
+          'produz (item B23).',
+        );
+      }
+    }
+
     return _Custo(
       assumptions: assumptionsFinal,
       taxas: taxasResolvidas,
+      caminhoRf: taxasResolvidas == null ? null : caminhoRfResolvido,
       estruturaRejeitada: estruturaRejeitada,
       veredito: moatVeredito,
       moatVerificado: moatVerificado,
@@ -3000,15 +3098,19 @@ abstract final class ValuationCascade {
     // implícita no valor de mercado, os dois são o mesmo número; quando a
     // fonte erra a contagem — a MILS3 com R$ 762 mil de capitalização —, o
     // divisor já foi arbitrado, e o WACC não pode readquirir o erro.
-    final equity = divisor.count * inputs.marketPrice;
-    // **O minoritário não entra neste peso, e é premissa** (lente `metodo`,
-    // 21/09/2026; item B23). O fluxo descontado é o **consolidado**, e este `E`
-    // é o valor de mercado da **controladora**: a fatia dos não controladores
-    // fica fora do denominador `E + D`, o que infla a participação da dívida e
-    // achata o WACC. **O obstáculo é o dado** — o valor de mercado do
-    // minoritário não é observável, e só o contábil existe; usá-lo num peso de
-    // mercado troca uma distorção por outra. A ponte devolve a parcela ao final
-    // (decisão 49); o que falta é o peso, e fica inventariado.
+    // **O minoritário não entra neste peso** (lente `metodo`, 21/09/2026; item
+    // B23). O fluxo descontado é o **consolidado**, e este `E` é o valor de
+    // mercado da **controladora**: a fatia dos não controladores fica fora do
+    // denominador `E + D`, o que infla a participação da dívida e achata o
+    // WACC. **O obstáculo é o dado** — o valor de mercado do minoritário não é
+    // observável, e só o contábil existe.
+    //
+    // **E a assimetria é interna**: o caminho **resolvido** pondera pelo
+    // capital próprio que o modelo produz, `V − D` sobre fluxo consolidado, que
+    // já inclui o minoritário. Só o estático — que é o recuo — fica de fora.
+    // [ValuationInputs.minorityEquityValue] mede o que mudaria.
+    final equity =
+        divisor.count * inputs.marketPrice + (inputs.minorityEquityValue ?? 0);
 
     // O observado entra apenas como **conferência**: desde a decisão 31 o Kd
     // aplicado é `Rf + spread(cobertura)`, e como `capm` aqui pode ser o de
@@ -3154,6 +3256,44 @@ abstract final class ValuationCascade {
     );
   }
 
+  /// O fator que traduz o deslocamento do cenário em deslocamento do `Ke`
+  /// (item B20, decisão 121).
+  ///
+  /// A participação sai do **caminho resolvido** quando há um — `E ÷ (E + D)`
+  /// no ano zero, que é a estrutura que a própria avaliação produziu —, e do
+  /// WACC estático quando não há. Participação fora de `(0, 1]` devolve 1: com
+  /// caixa líquido ela passa de 1 e o fator viraria **redutor**, o que nenhuma
+  /// das três leituras quer dizer.
+  static double _fatorDoCenario(_Via via, _Custo custo) {
+    final leitura = via.inputs.scenarioTranslation;
+    if (leitura == ScenarioTranslation.umPorUm) return 1.0;
+
+    final taxas = custo.taxas;
+    double? pesoE;
+    if (taxas != null && taxas.equity.isNotEmpty && taxas.debt.isNotEmpty) {
+      final v = taxas.equity.first + taxas.debt.first;
+      if (v > 0) pesoE = taxas.equity.first / v;
+    } else {
+      final e = via.divisor.count * via.inputs.marketPrice;
+      final v = e + via.latest.netDebt;
+      if (v > 0) pesoE = e / v;
+    }
+    if (pesoE == null || !pesoE.isFinite || pesoE <= 0 || pesoE > 1) {
+      return 1.0;
+    }
+
+    return switch (leitura) {
+      ScenarioTranslation.umPorUm => 1.0,
+      // `ΔWACC = w_E·ΔK_e` com `K_d` e os pesos parados.
+      ScenarioTranslation.estruturaFixa => 1 / pesoE,
+      // `ΔWACC = ΔR_f·(w_E + w_D(1−t))` quando os dois custos sobem junto com
+      // a taxa livre de risco, e `ΔK_e = ΔR_f`.
+      ScenarioTranslation.taxaLivreDeRisco => 1 /
+          (1 -
+              (1 - pesoE) * ValuationParameters.statutoryTaxRate),
+    };
+  }
+
   static String _pct(double fraction) =>
       '${(fraction * 100).toStringAsFixed(1)}%';
 
@@ -3167,7 +3307,7 @@ abstract final class ValuationCascade {
     final aplicadas = [
       for (final r in t.readings)
         if (r.applied)
-          '${r.kind.label} ${_r(r.peer!.median, 2)}× '
+          '${r.kind.diagnostico} ${_r(r.peer!.median, 2)}× '
               '(${r.peer!.peers} pares, ${r.peer!.group})',
     ];
     return 'A leitura por múltiplos de pares diverge do fluxo descontado: '
@@ -3339,7 +3479,7 @@ abstract final class ValuationCascade {
   static Map<String, dynamic> _outputPayload(ValuationResult result) => {
         'status': 'ok',
         'ticker': result.ticker.value,
-        'model': result.model.label,
+        'model': result.model.diagnostico,
         'fairValue': _r(result.fairValue.reais),
         'safetyPrice': _r(result.safetyPrice.reais),
         'marketPrice': _r(result.marketPrice.reais),
@@ -3470,7 +3610,7 @@ abstract final class ValuationCascade {
         'Passo 2: contagem conciliada pelas demonstrações, na unidade '
             'negociada → ${_r(divisor.fromStatements ?? 0, 0)}',
         'Passo 3: as duas ${divisor.diverge ? 'divergem além da banda de ${FundamentalsSnapshot.reconciliationBand}x; adotada a maior, que é o sentido conservador do erro' : 'concordam dentro da banda de ${FundamentalsSnapshot.reconciliationBand}x; adotada a do mercado'} → '
-            '${divisor.source.label}',
+            '${divisor.source.diagnostico}',
         if (divisor.fromRegistry != null)
           'Passo 4: registro oficial da B3 de ${_fmt(divisor.registryAsOf!)} → '
               '${divisor.source == QuotedSharesSource.official ? 'adotado; ele arbitra a divergência da fonte' : 'recusado; antigo demais e sem concordar com a fonte'}',
@@ -3747,7 +3887,7 @@ abstract final class ValuationCascade {
               '${exigida == null ? "n/d" : _pct(exigida)} contra '
               '${retencao == null ? "n/d" : _pct(retencao)} observados → '
               '${origem == GrowthOrigin.inflationAnchor ? "âncora aceita" : "âncora recusada"}',
-        'Origem adotada: ${origem.label}',
+        'Origem adotada: ${origem.diagnostico}',
       ],
       result: _r(g * 100).toDouble(),
       unit: '% a.a.',
@@ -3863,7 +4003,7 @@ abstract final class ValuationCascade {
             ? 'Passo 5: há excedente e ele persiste — ROIC_inf = '
                 '${_pct(v.terminalReturn!)}, e o valor terminal volta a depender '
                 'de g_inf, que é o preço declarado da exceção'
-            : 'Passo 5: barrado por ${v.blocks.map((b) => b.label).join(", ")} — '
+            : 'Passo 5: barrado por ${v.blocks.map((b) => b.diagnostico).join(", ")} — '
                 'vale o estado estacionário, ROIC_inf = WACC_inf, e o valor '
                 'terminal não depende de g_inf',
       ],
@@ -4140,4 +4280,65 @@ abstract final class ValuationCascade {
       unit: '% (total, sem prazo)',
     );
   }
+}
+
+// ---------------------------------------------------------------- diagnóstico
+
+/// Fraseado de **diagnóstico** — rastro de cálculo e mensagem de falha, que a decisão 122 mantém no núcleo. O rótulo de tela, quando há, mora na apresentação (decisão 125).
+extension _QuotedSharesSourceDiagnostico on QuotedSharesSource {
+  String get diagnostico => switch (this) {
+        QuotedSharesSource.market => 'implícita no valor de mercado',
+        QuotedSharesSource.reconciled => 'conciliada pelas demonstrações',
+        QuotedSharesSource.onlyAvailable => 'única contagem disponível',
+        QuotedSharesSource.official => 'contagem oficial da B3, líquida de tesouraria',
+      };
+}
+
+/// Fraseado de **diagnóstico** — rastro de cálculo e mensagem de falha, que a decisão 122 mantém no núcleo. O rótulo de tela, quando há, mora na apresentação (decisão 125).
+extension _ValuationLaneDiagnostico on ValuationLane {
+  String get diagnostico => switch (this) {
+        ValuationLane.firm => 'firma',
+        ValuationLane.shareholder => 'acionista',
+      };
+}
+
+/// Fraseado de **diagnóstico** — rastro de cálculo e mensagem de falha, que a decisão 122 mantém no núcleo. O rótulo de tela, quando há, mora na apresentação (decisão 125).
+extension _MultipleKindDiagnostico on MultipleKind {
+  String get diagnostico => switch (this) {
+        MultipleKind.precoLucro => 'P/L',
+        MultipleKind.precoPatrimonio => 'P/VP',
+        MultipleKind.firmaEbitda => 'EV/EBITDA',
+      };
+}
+
+/// Fraseado de **diagnóstico** — rastro de cálculo e mensagem de falha, que a decisão 122 mantém no núcleo. O rótulo de tela, quando há, mora na apresentação (decisão 125).
+extension _ValuationModelDiagnostico on ValuationModel {
+  String get diagnostico => switch (this) {
+        ValuationModel.dcfFcff => 'DCF por fluxo da firma',
+        ValuationModel.dcfEarnings => 'DCF sobre lucro distribuível',
+      };
+}
+
+/// Fraseado de **diagnóstico** — rastro de cálculo e mensagem de falha, que a decisão 122 mantém no núcleo. O rótulo de tela, quando há, mora na apresentação (decisão 125).
+extension _GrowthOriginDiagnostico on GrowthOrigin {
+  String get diagnostico => switch (this) {
+        GrowthOrigin.fundamental => 'crescimento fundamental da base de capital',
+        GrowthOrigin.inflationAnchor => 'âncora de inflação, financiável pela retenção observada',
+        GrowthOrigin.earningsPower => 'valor da capacidade de gerar lucro, sem crescimento',
+      };
+}
+
+/// Fraseado de **diagnóstico** — rastro de cálculo e mensagem de falha, que a decisão 122 mantém no núcleo. O rótulo de tela, quando há, mora na apresentação (decisão 125).
+extension _MoatBlockDiagnostico on MoatBlock {
+  String get diagnostico => switch (this) {
+        MoatBlock.semRetornoDoCiclo => 'retorno do ciclo não medido',
+        MoatBlock.semCustoDeCapital => 'custo de capital de equilíbrio não positivo',
+        MoatBlock.historicoCurto => 'histórico curto',
+        MoatBlock.capitalExternoNaoMedido => 'capital externo não medido',
+        MoatBlock.crescimentoInorganico => 'crescimento inorgânico',
+        MoatBlock.persistenciaNaoEstimavel => 'persistência do excedente não estimável',
+        MoatBlock.semExcedente => 'retorno do ciclo não supera o custo de capital',
+        MoatBlock.excedenteDegenerado => 'excedente não sobrevive ao decaimento medido',
+        MoatBlock.prazoDeterminado => 'o negócio opera sob contrato de prazo determinado',
+      };
 }

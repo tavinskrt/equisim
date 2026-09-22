@@ -321,13 +321,28 @@ O beta é calculado contra o Ibovespa. O beta publicado pela fonte foi
 descartado de propósito: sua janela e seu índice de referência não são
 documentados, o que é incompatível com reprodutibilidade.
 
-### 2.5. Backtest sem custos de transação
+### 2.5. Custos de transação: a tarifa entra, o spread é declarado
 
-O motor não modela corretagem, emolumentos nem *spread* de compra e venda.
+> **Reescrita em 22/09/2026** (item C4,
+> [decisão 126](../decisoes/126-a-tarifa-entra-na-simulacao-e-o-custo-nao-muda-a-ordem.md)).
+> Até ali esta seção dizia que o motor não modelava corretagem, emolumentos nem
+> spread, e que a distorção era «baixa por não rebalancear, mas não medida».
 
-**Efeito.** Os retornos simulados são otimistas em relação ao que o investidor
-obteria. Como o modelo **não rebalanceia**, o número de operações é baixo — o
-aporte inicial mais um por mês —, o que limita a distorção.
+**A simulação cobra a tarifa da B3** — negociação de 0,005% e liquidação de
+0,025% — em cada compra, em centavos inteiros, e a tela mostra o total pago.
+Corretagem fica em zero, que é o que as corretoras de varejo cobram em ações.
+
+**O spread de compra e venda não entra na simulação, e é declarado.** Ela
+compra ao fechamento, e quanto um investidor paga de spread depende de como ele
+manda a ordem. Medido nas coortes pelo estimador de Abdi e Ranaldo, o meio
+spread vai de 0,2% a 0,9% por ponta do tercil mais ao menos líquido.
+
+**Efeito medido** ([custos_transacao.md](custos_transacao.md)): em cinquenta
+carteiras sorteadas, a tarifa tira **0,024%** do patrimônio final e 0,006 p.p.
+do XIRR; um meio spread de 0,5% por compra tiraria 0,53% e 0,12 p.p. **Nas
+coortes de validação**, tarifa e spread nas duas pontas tiram 0,86 p.p. do
+retorno mediano de 36 meses e **não mudam nenhum veredito da habilidade**: o
+custo muda o nível, e não a ordem.
 
 ### 2.6. Caixa parado entre aportes
 

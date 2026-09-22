@@ -8,19 +8,16 @@ import 'inference.dart';
 /// Por que um ativo não é avaliável.
 enum IneligibilityReason {
   /// Volume financeiro médio abaixo do corte.
-  illiquid('liquidez insuficiente para formar preço confiável'),
+  illiquid,
 
   /// Exercícios publicados de menos para qualquer inferência.
-  shortHistory('histórico curto demais para os testes das guardas'),
+  shortHistory,
 
   /// Patrimônio líquido não positivo de forma persistente.
-  insolvent('patrimônio líquido não positivo em exercícios consecutivos'),
+  insolvent,
 
   /// Continuidade formalmente suspensa.
-  distressed('em recuperação judicial ou extrajudicial');
-
-  final String label;
-  const IneligibilityReason(this.label);
+  distressed;
 }
 
 /// Veredito da Porta 0.
@@ -44,11 +41,12 @@ class EligibilityVerdict {
     this.averageDailyTradedValue,
   });
 
-  /// Frase única para a interface, ou `null` quando elegível.
+  /// Diagnóstico técnico da recusa, ou `null` quando elegível — é o que vai
+  /// para a falha e para o rastro. A tela lê [reasons].
   String? get message {
     if (isEligible) return null;
     return 'Ativo fora do universo analisável: '
-        '${reasons.map((r) => r.label).join('; ')}.';
+        '${reasons.map((r) => r.diagnostico).join('; ')}.';
   }
 }
 
@@ -163,4 +161,14 @@ abstract final class EligibilityGate {
     bool ruim(double? v) => v == null || v <= 0;
     return ruim(ultimo) && ruim(penultimo);
   }
+}
+
+/// Fraseado de **diagnóstico** — rastro de cálculo e mensagem de falha, que a decisão 122 mantém no núcleo. O rótulo de tela, quando há, mora na apresentação (decisão 125).
+extension _IneligibilityReasonDiagnostico on IneligibilityReason {
+  String get diagnostico => switch (this) {
+        IneligibilityReason.illiquid => 'liquidez insuficiente para formar preço confiável',
+        IneligibilityReason.shortHistory => 'histórico curto demais para os testes das guardas',
+        IneligibilityReason.insolvent => 'patrimônio líquido não positivo em exercícios consecutivos',
+        IneligibilityReason.distressed => 'em recuperação judicial ou extrajudicial',
+      };
 }

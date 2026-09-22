@@ -556,7 +556,14 @@ class _GoalConfrontationCard extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SectionHeader(
-                title: 'A carteira frente à meta',
+                // **"Realizado", e não "frente à meta"** (lente `tela`,
+                // 22/09/2026). A tela de Meta tem um cartão de mesmo nome que
+                // mostra o **esperado** — projeção —, e este mostra o
+                // **realizado** da simulação. Dois blocos de layout parecido,
+                // mesmo título e naturezas opostas: quem lê +78% aqui e +15%
+                // lá não tem como saber que um é passado e o outro é
+                // promessa.
+                title: 'O realizado frente à meta',
                 subtitle: 'No período simulado · ${principal.effectivePeriod}',
               ),
               const Gap.md(),
@@ -1101,6 +1108,14 @@ class _CarteirasLadoALado extends StatelessWidget {
                 ],
               ),
               (
+                rotulo: 'Custos',
+                destaque: false,
+                nota: 'tarifa da B3 nas compras',
+                celulas: [
+                  for (final o in carteiras) _dinheiro(o.transactionCosts.reais),
+                ],
+              ),
+              (
                 rotulo: 'Em caixa',
                 destaque: false,
                 nota: 'sobra à espera do próximo aporte',
@@ -1195,11 +1210,13 @@ class _CarteirasLadoALado extends StatelessWidget {
 ///
 /// **Nunca é negativo, e nunca some.** A divisão de cada aporte distribui o
 /// resto e a fatia de um ativo sem cotação no dia fica no caixa dele, de modo
-/// que aportado = alocado + caixa exatamente.
+/// que aportado = alocado + custos + caixa exatamente — a tarifa da B3 sai do
+/// caixa antes da compra (item C4).
 String _legendaDeCapital(BacktestOutcome outcome) {
   final base =
       'aportado ${Fmt.money(outcome.totalContributed.reais)} · '
-      'alocado ${Fmt.money(outcome.totalAllocated.reais)}';
+      'alocado ${Fmt.money(outcome.totalAllocated.reais)} · '
+      'custos ${Fmt.money(outcome.transactionCosts.reais)}';
 
   final caixa = outcome.residualCash;
   if (caixa.cents < 100) return base;

@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:equisim/presentation/shared/domain_copy.dart';
 
 /// A ressalva da tela de metas sobre o prêmio tirado do potencial (item B1.0):
 /// a §0 do plano chamou de defeito em produção a tela que soma ao `Ke` um
@@ -113,7 +114,7 @@ void main() {
     if (premio == null) {
       expect(texto, contains('O retorno esperado não leva prêmio'));
     } else {
-      expect(texto, contains('O prêmio sobre o Ke sai de ${premio.label}'));
+      expect(texto, contains('O prêmio sobre o Ke sai de ${premio.rotulo}'));
     }
     expect(texto, contains('O potencial do valuation sozinho não comprovou'));
     expect(texto, contains('t corrigido de ${_duas(doPacote.overlapT)}'));

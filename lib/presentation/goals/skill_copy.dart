@@ -1,6 +1,7 @@
 import 'package:equisim_core/equisim_core.dart';
 
 import '../shared/ui_kit.dart';
+import '../shared/domain_copy.dart';
 
 /// O que a tela de metas diz sobre o prêmio do retorno esperado (itens B1.0 e
 /// B1).
@@ -36,7 +37,7 @@ abstract final class SkillCopy {
           '$potencial';
     }
     final r = leitura.orderings[premio]!;
-    return 'O prêmio sobre o Ke sai de ${premio.label}, que ordenou as ações nas '
+    return 'O prêmio sobre o Ke sai de ${premio.rotulo}, que ordenou as ações nas '
         'coortes de validação em ${leitura.months} meses: correlação de postos '
         'de ${n(r.ic)}, t corrigido de ${n(r.overlapT)} contra '
         '${n(r.overlapCritical)} exigido. $potencial';

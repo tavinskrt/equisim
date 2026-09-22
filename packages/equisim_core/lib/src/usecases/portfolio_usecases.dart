@@ -50,12 +50,12 @@ abstract final class SwapAssetBetweenPortfolios {
     final entry = source.entries[ticker];
     if (entry == null) {
       return Err(InvalidInput(
-        '${ticker.value} não está na carteira ${source.kind.label}.',
+        '${ticker.value} não está na carteira ${source.kind.name}.',
       ));
     }
     if (target.entries.containsKey(ticker)) {
       return Err(InvalidInput(
-        '${ticker.value} já está na carteira ${target.kind.label}.',
+        '${ticker.value} já está na carteira ${target.kind.name}.',
       ));
     }
 

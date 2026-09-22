@@ -37,7 +37,7 @@ Future<void> main(List<String> args) async {
       final res = r.isOk ? r.unwrap() : null;
       stdout.writeln('$nome  preço R\$ ${inputs.marketPrice.toStringAsFixed(2)}'
           '${res == null ? "  (recusado: ${r.failureOrNull?.message})" : "  justo R\$ ${res.fairValue}  potencial ${(res.upside * 100).toStringAsFixed(1)}%"}');
-      stdout.writeln('   u=${u.toStringAsFixed(0)}  fonte=${q?.source.label}  '
+      stdout.writeln('   u=${u.toStringAsFixed(0)}  fonte=${q?.source.name}  '
           'N=${q?.count.toStringAsFixed(0)}  '
           'mercado=${q?.fromMarketCap?.toStringAsFixed(0)}  '
           'balanço=${q?.fromStatements?.toStringAsFixed(0)}  '

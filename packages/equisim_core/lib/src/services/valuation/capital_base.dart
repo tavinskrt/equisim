@@ -10,13 +10,10 @@ import 'inference.dart';
 /// as três coisas andam juntas e não se combinam entre vias.
 enum ValuationLane {
   /// Fluxo da firma: capital investido, ROIC, WACC, com ponte de dívida.
-  firm('firma'),
+  firm,
 
   /// Fluxo do acionista: patrimônio líquido, ROE, Ke, sem ponte.
-  shareholder('acionista');
-
-  final String label;
-  const ValuationLane(this.label);
+  shareholder;
 }
 
 /// Um exercício com base de capital e lucro na convenção da via.

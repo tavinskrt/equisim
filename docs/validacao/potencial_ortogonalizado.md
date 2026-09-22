@@ -3,8 +3,8 @@
 > **Métrica de acompanhamento.** Ela sai de
 > `tool/regressao_condicional.dart` em toda execução que remede as coortes, e
 > este documento é onde ela fica registrada rodada a rodada. A última leitura é
-> de **16/09/2026**, sobre o motor da decisão 102 — é o último backtest que
-> rodou, e o item C5 diz por quê.
+> de **21/09/2026**, sobre o motor da Fase 3: o item C5 restaurou a base bruta e
+> o backtest foi reexecutado.
 >
 > ```bash
 > dart run tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas --trimestral
@@ -42,20 +42,18 @@ Newey-West ao lado ([decisão 96](../decisoes/096-o-t-da-habilidade-e-corrigido-
 
 ## 2. A leitura de hoje
 
-**36 meses, coortes trimestrais, com as deslistadas** — 2.452 observações, 22
-coortes:
+**36 meses, coortes trimestrais, com as deslistadas** — 2.165 observações, 22
+coortes, sobre o **motor da Fase 3**:
 
 | | média | `t` | Newey-West | `t` corrigido / crítico | coortes positivas |
 |---|---:|---:|---:|---:|---:|
-| **IC ortogonalizado ao P/B** | **+0,016** | +0,53 | +0,33 | **+0,13 / 2,70** | 10 de 22 |
-| IC incremental (P/B e L/P) | −0,012 | −0,36 | −0,20 | −0,09 / 2,70 | 10 de 22 |
-| IC do potencial, sozinho | +0,078 | +2,50 | +1,45 | +0,61 / 2,70 | 13 de 22 |
-| IC do book-to-market | +0,186 | +10,39 | +5,45 | +2,52 / 2,70 | 22 de 22 |
+| **IC ortogonalizado ao P/B** | **+0,025** | +0,64 | +0,40 | **+0,16 / 2,70** | 10 de 22 |
+| IC incremental (P/B e L/P) | +0,013 | +0,33 | +0,19 | +0,08 / 2,70 | 10 de 22 |
+| IC do potencial, sozinho | +0,089 | +2,18 | +1,26 | +0,53 / 2,70 | 13 de 22 |
+| IC do book-to-market | +0,157 | +8,16 | +4,26 | +1,98 / 2,70 | 20 de 22 |
 
-**12 meses**, 3.307 observações, 30 coortes: IC ortogonalizado ao P/B de
-**+0,015**, `t` corrigido de 0,26 contra 2,24, positivo em 16 de 30.
-
-Sem as deslistadas, 36 meses: **+0,026**, `t` corrigido de 0,19.
+**12 meses**, 2.943 observações, 30 coortes: IC ortogonalizado ao P/B de
+**+0,044**, `t` corrigido de 0,76 contra 2,24, positivo em 18 de 30.
 
 **O resíduo é indistinguível de zero.** Ele é positivo, é pequeno, e está
 positivo em menos da metade das coortes — que é a assinatura de ruído, não de
@@ -69,7 +67,19 @@ instrumento produziu cada número.
 | medido em | montagem | 12 meses | 36 meses |
 |---|---|---:|---:|
 | 11/09/2026 | 8 coortes anuais, base de ações de hoje, sem deslistadas | +0,0066 | +0,0394 |
-| 16/09/2026 | 22 coortes trimestrais, base da data, com deslistadas, motor da decisão 102 | **+0,015** | **+0,016** |
+| 16/09/2026 | 22 coortes trimestrais, base da data, com deslistadas, motor da decisão 102 | +0,015 | +0,016 |
+| 21/09/2026 | mesma montagem, **motor da Fase 3**, base bruta restaurada (item C5) | **+0,044** | **+0,025** |
+
+**A subida de 0,016 para 0,025 é o motor, e desta vez o instrumento não mudou.**
+Entre 16/09 e 21/09 a montagem é a mesma — 22 coortes trimestrais, base da data,
+com as deslistadas —, e o que mudou foram as **doze decisões** de método das
+rodadas 4 a 6 e a **reexecução das coortes** sobre a base bruta restaurada. É a
+primeira vez que a série mede duas vezes o mesmo instrumento, e por isso a
+primeira vez que a diferença é atribuível ao motor.
+
+**Continua indistinguível de zero**: `t` corrigido de 0,16 contra o crítico de
+2,70, positivo em 10 de 22 coortes. Subiu 0,009 num intervalo cuja largura é da
+ordem de 0,4.
 
 **A queda de 0,039 para 0,016 não é o motor piorando.** Entre as duas leituras o
 instrumento mudou de coortes anuais para trimestrais, o preço das coortes foi
@@ -91,4 +101,4 @@ serve para acompanhar, não para decidir.
 
 **Decide o que a próxima rodada tem de bater.** Qualquer mudança de método que
 se proponha a fazer o DCF acrescentar ao P/B tem aqui o número contra o qual ela
-será medida: **+0,016 em 36 meses**, com `t` corrigido de 0,13.
+será medida: **+0,025 em 36 meses**, com `t` corrigido de 0,16.

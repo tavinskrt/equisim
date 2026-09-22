@@ -22,21 +22,16 @@ import '../../entities/fundamentals.dart';
 /// De onde um campo veio.
 enum FieldSource {
   /// Demonstração entregue à CVM — DFP ou ITR.
-  cvm('CVM'),
+  cvm,
 
   /// Fonte de cotações e dados de mercado.
-  mercado('fonte de mercado'),
+  mercado,
 
   /// Calculado a partir de outros campos, e não publicado por ninguém.
-  derivado('derivado'),
+  derivado,
 
   /// Nenhuma fonte forneceu.
-  ausente('ausente');
-
-  /// Rótulo para relatório e diagnóstico.
-  final String label;
-
-  const FieldSource(this.label);
+  ausente;
 }
 
 /// Origem de cada campo de um exercício mesclado.

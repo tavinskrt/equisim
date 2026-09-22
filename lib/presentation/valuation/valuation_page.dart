@@ -13,6 +13,7 @@ import '../shared/ui_kit.dart';
 import '../study/study_notifier.dart';
 import '../theme/fin_colors.dart';
 import 'valuation_providers.dart';
+import '../shared/domain_copy.dart';
 
 /// A avaliação de um ativo, **sem casca**.
 ///
@@ -289,7 +290,7 @@ class _ValuationBody extends ConsumerWidget {
                             padding:
                                 const EdgeInsets.only(bottom: FinSpace.xs),
                             child: Text(
-                              '• ${c.label}',
+                              '• ${c.rotulo}',
                               style: context.finType.bodySm.copyWith(
                                 color: context.fin.textSecondary,
                               ),
@@ -391,7 +392,7 @@ class _ModelCard extends StatelessWidget {
               Expanded(
                 child: MetricTile(
                   label: 'Método',
-                  value: result.model.label,
+                  value: result.model.rotulo,
                   // O "valor" aqui e nome, nao numero: `DCF simplificado (LPA)`
                   // nao cabe em uma linha ao lado da taxa de desconto, e a
                   // sigla cortada e o que distingue um modelo do outro.
@@ -457,7 +458,7 @@ class _PeerCard extends StatelessWidget {
           if (aplicadas.isEmpty)
             Text(
               'Nenhum múltiplo se aplicou a este ativo. '
-              '${[for (final r in t.readings) '${r.kind.label}: ${r.refusal?.label ?? "—"}'].join("; ")}.',
+              '${[for (final r in t.readings) '${r.kind.rotulo}: ${r.refusal?.rotulo ?? "—"}'].join("; ")}.',
               style: context.finType.bodySm.copyWith(
                 color: context.fin.textSecondary,
               ),
@@ -468,7 +469,7 @@ class _PeerCard extends StatelessWidget {
                 for (final r in aplicadas)
                   Expanded(
                     child: MetricTile(
-                      label: r.kind.label,
+                      label: r.kind.rotulo,
                       value: Fmt.money(r.fairValuePerShare!),
                       hint: '${r.peer!.median.toStringAsFixed(1)}× em '
                           '${r.peer!.peers} pares',
@@ -506,7 +507,7 @@ class _PeerCard extends StatelessWidget {
           if (aplicadas.isNotEmpty && aplicadas.length < t.readings.length) ...[
             const Gap.sm(),
             Text(
-              'Fora: ${[for (final r in t.readings) if (!r.applied) '${r.kind.label} (${r.refusal?.label ?? "—"})'].join("; ")}.',
+              'Fora: ${[for (final r in t.readings) if (!r.applied) '${r.kind.rotulo} (${r.refusal?.rotulo ?? "—"})'].join("; ")}.',
               style: context.finType.bodySm.copyWith(
                 color: context.fin.textSecondary,
               ),
@@ -772,7 +773,7 @@ class _DiscreteView extends StatelessWidget {
           if (scenarios[band] != null)
             Expanded(
               child: MetricTile(
-                label: band.label,
+                label: band.rotulo,
                 value: Fmt.money(scenarios[band]!.reais),
                 trend: switch (band) {
                   ScenarioBand.bear => FinTrend.negative,

@@ -76,7 +76,11 @@ void main() {
         },
       );
       expect(invalid.isErr, isTrue);
-      expect(invalid.failureOrNull!.message, contains('90.00%'));
+      // **A regra, e não o número** (decisão 122). O medido viaja em `actual`,
+      // e quem escreve o percentual é a tela.
+      expect(invalid.failureOrNull!.message, contains('100%'));
+      expect((invalid.failureOrNull! as InvalidInput).actual,
+          closeTo(0.90, 1e-12));
 
       final valid = Portfolio.weighted(
         id: 'p',
@@ -88,6 +92,24 @@ void main() {
         },
       );
       expect(valid.isOk, isTrue);
+    });
+
+    test('peso negativo que fecha 100% é recusado, e não lança', () {
+      // 1,2 − 0,2 = 1,0: passava pela soma e estourava ArgumentError em
+      // `Weight.fraction` (lente `nucleo`, 22/09/2026).
+      final r = Portfolio.weighted(
+        id: 'p',
+        name: 'Principal',
+        kind: PortfolioKind.principal,
+        allocation: {
+          assetOf('PETR4', 'energia'): 1.2,
+          assetOf('VALE3', 'materiais'): -0.2,
+        },
+      );
+      expect(r.isErr, isTrue);
+      final f = r.failureOrNull! as InvalidInput;
+      expect(f.field, 'weights');
+      expect(f.unit, QuantityUnit.fraction);
     });
 
     test('adicionar e remover reequipondera mantendo 100%', () {
@@ -120,9 +142,11 @@ void main() {
 
   group('A falha carrega o número, e não só o texto', () {
     test('soma dos pesos fora de 100% viaja como valor medido', () {
-      // Pela mesma razão de `DataQualityFailure.deviation`: a interface que
-      // quiser arredondar de outro jeito, exibir num campo próprio ou comparar
-      // com o limite não precisa reextrair o número do texto. Decisão 59.
+      // Pela mesma razão de `DataQualityFailure.observedDeviation`: a
+      // interface que quiser arredondar de outro jeito, exibir num campo
+      // próprio ou comparar com o limite não precisa reextrair o número do
+      // texto. Decisão 59, completada pela 122 — que acrescentou o **limite** e
+      // a **unidade**, e tirou o percentual formatado da frase do núcleo.
       final r = Portfolio.weighted(
         id: 'p',
         name: 'Principal',
@@ -137,8 +161,12 @@ void main() {
       expect(f, isA<InvalidInput>());
       expect((f as InvalidInput).field, 'weights');
       expect(f.actual, closeTo(0.90, 1e-12));
-      // E o texto continua completo, para quem só o exibe.
-      expect(f.message, contains('90.00%'));
+      expect(f.limit, closeTo(1.0, 1e-12));
+      expect(f.unit, QuantityUnit.fraction);
+      // **E o núcleo não formata.** A frase diz a regra; o percentual é da
+      // tela, e sai por `FailureCopy`.
+      expect(f.message, contains('100%'));
+      expect(f.message, isNot(contains('90')));
     });
   });
 

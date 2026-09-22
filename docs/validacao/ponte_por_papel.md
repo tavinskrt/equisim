@@ -1,4 +1,11 @@
 # A ponte por papel nas coortes — item C3
+> ---
+>
+> **Remedido em 21/09/2026, sobre o motor da Fase 3.** O item C5 restaurou a
+> base bruta — CVM ingerida, COTAHIST, Tesouro, FRE, registro e complemento da
+> B3 — e o backtest foi reexecutado: **10.919 observações, 31 coortes**. Os
+> números abaixo, salvo onde a seção diz o contrário, são os da leitura anterior;
+> o JSON ao lado é o de hoje. O divisor sai do registro oficial em 10.663 das 10.902 observações, e as candidatas divergem em 869.
 
 Medido em 15/09/2026 por `dart run tool/ponte_por_papel.dart`, sobre
 `docs/validacao/backtest_trimestral.json` — as 31 coortes trimestrais com as

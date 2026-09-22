@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-21, a partir de `80866a8`.
+Gerado em 2026-09-22, a partir de `5345767`.
 
 ## Decisões registradas
 
-**99** aceita · **2** cumprida
+**102** aceita · **2** cumprida · **6** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -19,29 +19,29 @@ Gerado em 2026-09-21, a partir de `80866a8`.
 | 20 | Cadeia de QA por agente, com auditor que bloqueia e conselheiro que não | aceita | voce | 2026-08-30 |
 | 21 | Sistema de design próprio e adequação à WCAG, em quatro ondas | aceita | voce | 2026-08-29 |
 | 22 | Reconstrução da disposição da UI, com fronteira declarada | cumprida | voce | 2026-08-30 |
-| 23 | Backtest sem proventos, com ação inteira e caixa residual | aceita | voce | 2026-09-02 |
+| 23 | Backtest sem proventos, com ação inteira e caixa residual | substituída pela 101 | voce | 2026-09-02 |
 | 24 | Lucro retido sai do fluxo descontado; a lacuna da meta é lida como yield | aceita | parecer | 2026-09-02 |
 | 25 | Reconstrução do motor de avaliação por portas, vias e crescimento fundamental | cumprida | orientador | 2026-09-04 |
 | 26 | O horizonte de convergência do upside passa de 12 para 36 meses | aceita | orientador | 2026-09-07 |
-| 27 | Recalibragem do motor de avaliação após a primeira validação fora da amostra | aceita | orientador | 2026-09-07 |
+| 27 | Recalibragem do motor de avaliação após a primeira validação fora da amostra | substituída pela 101 | orientador | 2026-09-07 |
 | 28 | Precedência do ciclo em commodity, saturação do fator de base e filtro de saúde no moat | aceita | orientador | 2026-09-07 |
 | 29 | A saúde operacional proíbe normalizar a base para cima, e a decisão 25 se encerra | aceita | orientador | 2026-09-07 |
 | 30 | Setor cíclico é isento da trava de saúde na Porta 2a, e não no moat | aceita | orientador | 2026-09-07 |
 | 31 | Escala do preço, alíquota do escudo, custo da dívida e invariância das guardas ao horizonte | aceita | voce | 2026-09-08 |
 | 32 | Validação preditiva fora da amostra e diagnósticos estruturados no resultado | aceita | voce | 2026-09-08 |
 | 33 | O prêmio de crédito passa a ter dois direcionadores arbitrados, e a base acionária ganha guarda de consistência | aceita | voce | 2026-09-08 |
-| 34 | A pós-condição da ponte de equity é medida na taxa estrutural | aceita | voce | 2026-09-09 |
+| 34 | A pós-condição da ponte de equity é medida na taxa estrutural | substituída pela 102 | voce | 2026-09-09 |
 | 35 | O motor ganha DCF reverso e regressão condicional, e as duas medições reordenam o que vem depois | aceita | voce | 2026-09-09 |
 | 36 | A vantagem competitiva deixa de ser degrau e passa a decair pela persistência medida do próprio ativo | aceita | voce | 2026-09-09 |
 | 37 | O fluxo da firma passa a ser tributado pela alíquota estrutural do ativo, e não pela estatutária que a fonte embute | aceita | voce | 2026-09-10 |
-| 38 | A pós-condição da ponte deixa de ser degrau e vira transição contínua entre as duas vias | aceita | voce | 2026-09-10 |
-| 39 | As duas vias são modelos independentes, e amarrar seus insumos não as concilia | aceita | voce | 2026-09-10 |
+| 38 | A pós-condição da ponte deixa de ser degrau e vira transição contínua entre as duas vias | substituída pela 102 | voce | 2026-09-10 |
+| 39 | As duas vias são modelos independentes, e amarrar seus insumos não as concilia | substituída pela 102 | voce | 2026-09-10 |
 | 40 | O beta é encolhido por precisão, e não substituído pela mediana setorial | aceita | voce | 2026-09-10 |
 | 41 | O custo de capital passa a ser resolvido ano a ano contra a alavancagem, e as duas rotas do capital próprio voltam a coincidir | aceita | voce | 2026-09-10 |
 | 42 | A cascata passa a descontar pelo caminho de taxas resolvido, e a taxa de equilíbrio deixa de ser a mesma para todo ativo | aceita | voce | 2026-09-10 |
 | 43 | O capital próprio passa a vir do fluxo do acionista derivado, e a ponte deixa de decidir preço | aceita | voce | 2026-09-10 |
 | 44 | O veredito de vantagem competitiva passa a ser fechado contra a taxa de equilíbrio resolvida | aceita | voce | 2026-09-10 |
-| 45 | Recusa do solucionador deixa de virar preço pela interpolação, e a discordância entre as vias para de decidir | aceita | voce | 2026-09-10 |
+| 45 | Recusa do solucionador deixa de virar preço pela interpolação, e a discordância entre as vias para de decidir | substituída pela 102 | voce | 2026-09-10 |
 | 46 | A via do acionista resolve o próprio custo de capital contra a alavancagem, e a instituição financeira fica de fora por direito | aceita | voce | 2026-09-10 |
 | 47 | O contrafactual passa a rodar pela cascata, e o crescimento é confinado ao que o retorno financia | aceita | voce | 2026-09-10 |
 | 48 | O caixa do exercício chega ao longo do ano, e o desconto passa a refletir isso | aceita | voce | 2026-09-10 |
@@ -116,6 +116,15 @@ Gerado em 2026-09-21, a partir de `80866a8`.
 | 117 | Risco-país e ajuste por tamanho são recusados, com medição — o R_f brasileiro já contém um, e o beta já cobra o outro | aceita | voce | 2026-09-21 |
 | 118 | A triangulação por múltiplos de pares entra como segunda leitura declarada, e não entra no preço | aceita | voce | 2026-09-21 |
 | 119 | A rota derivada também remunera o caixa pela taxa livre de risco — o defeito da decisão 113 tinha um segundo lugar, e era o caminho de produção | aceita | lente | 2026-09-21 |
+| 120 | O minoritário fica fora do peso do WACC, e a condição de exposição passa a ser declarada | aceita | lente | 2026-09-21 |
+| 121 | O cenário de desconto move o Ke um por um, e as três leituras possíveis estão medidas | aceita | voce | 2026-09-21 |
+| 122 | O erro do núcleo transporta a grandeza que a regra violou, e a frase é montada na tela | aceita | voce | 2026-09-21 |
+| 123 | O múltiplo de pares entra como quarta ordenação candidata, e não passa — a regra da decisão 103 segue devolvendo prêmio nenhum | aceita | voce | 2026-09-21 |
+| 124 | A faixa calibrada replica sobre o motor da Fase 3 — a forma da decisão 100 não era ajuste ao teste | aceita | voce | 2026-09-21 |
+| 125 | A fronteira do dinheiro arredonda o decimal escrito, o caminho de estimação é real, e o rótulo de tela sai do núcleo | aceita | voce | 2026-09-22 |
+| 126 | A tarifa da B3 entra na simulação, o spread entra nas coortes, e o custo muda o nível e não a ordem | aceita | voce | 2026-09-22 |
+| 127 | O juro e o rendimento do caixa da rota derivada seguem a curva, como o ponto fixo que fecha o Ke | aceita | voce | 2026-09-22 |
+| 128 | A coorte lê a versão do documento que era pública na data dela | aceita | voce | 2026-09-22 |
 
 ## Caixa de entrada
 
@@ -129,16 +138,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 61 | 20.536 |
-| Apresentacao | 36 | 16.309 |
-| Camada de dados | 23 | 3.627 |
-| Testes do app | 40 | 7.686 |
-| Testes do nucleo | 38 | 13.639 |
-| Ferramentas de QA | 20 | 6.581 |
+| Nucleo de dominio | 63 | 21.422 |
+| Apresentacao | 37 | 16.459 |
+| Camada de dados | 24 | 3.680 |
+| Testes do app | 44 | 8.344 |
+| Testes do nucleo | 41 | 14.889 |
+| Ferramentas de QA | 20 | 6.641 |
 
 ## Histórico recente
 
 ```
+2026-09-21  5345767  Refino do motor de valuation (parte 21)
 2026-09-21  80866a8  Refino do motor de valuation (parte 20)
 2026-09-21  0ec1ec1  Refino do motor de valuation (parte 19)
 2026-09-20  ec063b9  Refino do motor de valuation (parte 18)
@@ -153,5 +163,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-11  6e01044  Refino do motor de valuation (parte 10)
 2026-09-11  c80b5e6  Refino do motor de valuation (parte 9)
 2026-09-10  e46c8bc  Refino do motor de valuation (parte 8)
-2026-09-09  30bc51d  Refino do motor de valuation (parte 7)
 ```

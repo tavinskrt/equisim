@@ -586,6 +586,38 @@ void main() {
       addTearDown(tester.view.reset);
     }
 
+    testWidgets('a tarifa da B3 aparece, e a legenda fecha a conta (C4)',
+        (tester) async {
+      telaAlta(tester);
+      // Com a tarifa, R$ 1.000,00 a R$ 10,00 compram 99 cotas, e não 100:
+      // cem custariam R$ 1.000,30. A tela diz quanto foi de custo, e a
+      // legenda mostra as três parcelas do aportado.
+      final start = DateTime(2024, 1, 1);
+      final comCusto = PortfolioBacktest.run(
+        portfolio: Portfolio.equalWeighted(
+          id: 'PETR4',
+          name: 'PETR4',
+          kind: PortfolioKind.principal,
+          assets: [assetOf('PETR4')],
+        ).unwrap(),
+        prices: {
+          Ticker.parse('PETR4'): seriesOf('PETR4', start, const [10, 12, 14]),
+        },
+        plan: const ContributionPlan(initial: Money(100000), monthly: Money.zero),
+        range: DateRange(start, DateTime(2024, 12, 31)),
+      ).unwrap();
+      expect(comCusto.transactionCosts, const Money(30));
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(principal: comCusto)),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('custos ${Fmt.money(0.30)}'), findsWidgets);
+      expect(find.text('99 cotas · ${Fmt.money(1000)} destinados'),
+          findsOneWidget);
+    });
+
     testWidgets('o cartão de uma carteira diz o aportado E o alocado',
         (tester) async {
       telaAlta(tester);
@@ -717,6 +749,7 @@ void main() {
         'Patrimônio final',
         'Aportado',
         'Alocado',
+        'Custos',
         'Em caixa',
         'TWR',
         'XIRR',
@@ -952,7 +985,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('A CARTEIRA FRENTE À META'), findsOneWidget);
+      expect(find.text('O REALIZADO FRENTE À META'), findsOneWidget);
       // Os mesmos tres rotulos da aba Meta -- e a mesma grandeza medida de
       // outro jeito, e vocabulario divergente esconderia isso.
       expect(find.text('Exigido'), findsOneWidget);
@@ -985,7 +1018,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('A CARTEIRA FRENTE À META'), findsOneWidget);
+      expect(find.text('O REALIZADO FRENTE À META'), findsOneWidget);
       expect(find.text('18,40%'), findsOneWidget);
       // Realizado, a Folga que dele deriva, e o XIRR do painel abaixo.
       expect(find.text('—'), findsNWidgets(3));
@@ -1004,7 +1037,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('A CARTEIRA FRENTE À META'), findsNothing);
+      expect(find.text('O REALIZADO FRENTE À META'), findsNothing);
     });
 
     testWidgets('taxa exigida nao finita nao rende cartao', (tester) async {
@@ -1022,7 +1055,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('A CARTEIRA FRENTE À META'), findsNothing);
+      expect(find.text('O REALIZADO FRENTE À META'), findsNothing);
     });
 
     testWidgets('com Reserva simulada, a alternativa ganha a propria linha',
@@ -1061,7 +1094,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('A CARTEIRA FRENTE À META'), findsNothing);
+      expect(find.text('O REALIZADO FRENTE À META'), findsNothing);
     });
   });
 
@@ -1440,6 +1473,9 @@ BacktestOutcome outcomeOf(String symbol, List<double> closes) {
     prices: {Ticker.parse(symbol): seriesOf(symbol, start, closes)},
     plan: const ContributionPlan(initial: Money(100000), monthly: Money.zero),
     range: DateRange(start, DateTime(2024, 12, 31)),
+    // Os números conferidos pelas telas são os do cenário sem custo — cem
+    // cotas exatas a R$ 10,00. O custo tem teste próprio (item C4).
+    costs: TransactionCosts.none,
   ).unwrap();
 }
 

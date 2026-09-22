@@ -375,11 +375,16 @@ class _FeasibilityCard extends StatelessWidget {
             children: [
               Icon(_icon, size: 20, color: _color(context)),
               const Gap.sm(axis: Axis.horizontal),
-              Text(
-                _title,
-                style: context.finType.bodyMd.copyWith(
-                  color: _color(context),
-                  fontWeight: FontWeight.bold,
+              // Expanded: sob escala de 2,0x em 320 dp o título passa da
+              // largura e quebra linha, em vez de estourar 141 px — o que a
+              // matriz de estouro da tela populada achou (item D3).
+              Expanded(
+                child: Text(
+                  _title,
+                  style: context.finType.bodyMd.copyWith(
+                    color: _color(context),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

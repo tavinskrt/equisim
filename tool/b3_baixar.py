@@ -33,10 +33,16 @@ from pathlib import Path
 
 RAIZ = "https://bvmf.bmfbovespa.com.br/InstDados/SerHist"
 CABECALHO = "data;ticker;isin;especificacao;nome;fechamento;fatorCotacao;distribuicao;volume\n"
+# Máxima e mínima do pregão, para a estimativa de spread de Corwin e Schultz
+# (item C4). Arquivo à parte, e não colunas a mais em `avista_*.csv`: os
+# leitores de lá são posicionais, e baixar de novo por cima misturaria uma
+# revisão eventual da fonte à medição que estiver em curso.
+CABECALHO_EXTREMOS = "data;ticker;isin;maxima;minima;fechamento;fatorCotacao\n"
 
 
-def baixar(ano: int, destino: Path) -> tuple[int, int] | None:
-    """Baixa um ano e grava `avista_{ano}.csv`. Devolve (linhas, bytes do ZIP)."""
+def baixar(ano: int, destino: Path, extremos: bool = False) -> tuple[int, int] | None:
+    """Baixa um ano e grava `avista_{ano}.csv` — ou `extremos_{ano}.csv`, com
+    [extremos]. Devolve (linhas, bytes do ZIP)."""
     url = f"{RAIZ}/COTAHIST_A{ano}.ZIP"
     # O servidor da B3 devolve 403 ao User-Agent padrão do urllib.
     pedido = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (equisim)"})
@@ -50,10 +56,10 @@ def baixar(ano: int, destino: Path) -> tuple[int, int] | None:
         raise
 
     destino.mkdir(parents=True, exist_ok=True)
-    saida = destino / f"avista_{ano}.csv"
+    saida = destino / (f"extremos_{ano}.csv" if extremos else f"avista_{ano}.csv")
     n = 0
     with zipfile.ZipFile(io.BytesIO(bruto)) as z, saida.open("w", encoding="utf-8") as out:
-        out.write(CABECALHO)
+        out.write(CABECALHO_EXTREMOS if extremos else CABECALHO)
         nome = next(x for x in z.namelist() if x.upper().endswith(".TXT"))
         with z.open(nome) as f:
             for linha in io.TextIOWrapper(f, encoding="latin-1"):
@@ -62,6 +68,18 @@ def baixar(ano: int, destino: Path) -> tuple[int, int] | None:
                 if linha[24:27] != "010" or linha[10:12] != "02":
                     continue
                 data = f"{linha[2:6]}-{linha[6:8]}-{linha[8:10]}"
+                if extremos:
+                    out.write(";".join((
+                        data,
+                        linha[12:24].strip(),
+                        linha[230:242].strip(),
+                        str(int(linha[69:82])),   # PREMAX, em centavos
+                        str(int(linha[82:95])),   # PREMIN
+                        str(int(linha[108:121])),
+                        str(int(linha[210:217])),
+                    )) + "\n")
+                    n += 1
+                    continue
                 campos = (
                     data,
                     linha[12:24].strip(),
@@ -85,12 +103,14 @@ def main() -> int:
     ap.add_argument("--de", type=int, default=2010)
     ap.add_argument("--ate", type=int, default=hoje.year)
     ap.add_argument("--destino", type=Path, default=Path("data/b3"))
+    ap.add_argument("--extremos", action="store_true",
+                    help="grava máxima e mínima em extremos_{ano}.csv (item C4)")
     a = ap.parse_args()
 
     ausentes = []
     total = 0
     for ano in range(a.de, a.ate + 1):
-        r = baixar(ano, a.destino)
+        r = baixar(ano, a.destino, extremos=a.extremos)
         if r is None:
             ausentes.append(ano)
         else:

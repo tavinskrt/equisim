@@ -1,0 +1,97 @@
+{
+ "observacoesSemVersoes": 10919,
+ "observacoesComVersoes": 10919,
+ "emComum": 10919,
+ "avaliadasNasDuas": 3045,
+ "passaramASerAvaliadas": 6,
+ "deixaramDeSerAvaliadas": 16,
+ "exercicioMaisRecenteMudou": 61,
+ "precoJustoMudou": 84,
+ "fracaoDasAvaliadasQueMudou": 0.027586206896551724,
+ "movimentoDoJustoEntreAsQueMudaram": {
+  "mediana": 0.20848938826466912,
+  "p90": 0.8275,
+  "maximo": 4.291338582677166
+ },
+ "movimentoDoPotencialEmTodasAsAvaliadas": {
+  "mediana": 0.0,
+  "p90": 0.0
+ },
+ "bookToMarketMudou": 87,
+ "coorteComMaisMudanca": [
+  "2019-03-31",
+  0.026058631921824105
+ ],
+ "maioresMovimentos": [
+  {
+   "coorte": "2022-03-31",
+   "ticker": "ENAT3",
+   "movimento": 4.2913,
+   "justoSem": 3.81,
+   "justoCom": 20.16
+  },
+  {
+   "coorte": "2023-03-31",
+   "ticker": "MOVI3",
+   "movimento": 1.9044,
+   "justoSem": 3.87,
+   "justoCom": 11.24
+  },
+  {
+   "coorte": "2019-03-31",
+   "ticker": "LCAM3",
+   "movimento": 1.4494,
+   "justoSem": 12.75,
+   "justoCom": 31.23
+  },
+  {
+   "coorte": "2023-09-30",
+   "ticker": "MOVI3",
+   "movimento": 1.4346,
+   "justoSem": 5.43,
+   "justoCom": 13.22
+  },
+  {
+   "coorte": "2023-06-30",
+   "ticker": "MOVI3",
+   "movimento": 1.2733,
+   "justoSem": 6.77,
+   "justoCom": 15.39
+  },
+  {
+   "coorte": "2022-06-30",
+   "ticker": "MRVE3",
+   "movimento": 0.9664,
+   "justoSem": 2.98,
+   "justoCom": 0.1
+  },
+  {
+   "coorte": "2022-12-31",
+   "ticker": "MRVE3",
+   "movimento": 0.9102,
+   "justoSem": 3.23,
+   "justoCom": 0.29
+  },
+  {
+   "coorte": "2022-09-30",
+   "ticker": "MRVE3",
+   "movimento": 0.8659,
+   "justoSem": 3.58,
+   "justoCom": 0.48
+  },
+  {
+   "coorte": "2021-12-31",
+   "ticker": "BPAC11",
+   "movimento": 0.853,
+   "justoSem": 38.57,
+   "justoCom": 5.67
+  },
+  {
+   "coorte": "2022-03-31",
+   "ticker": "MRVE3",
+   "movimento": 0.8275,
+   "justoSem": 4.0,
+   "justoCom": 0.69
+  }
+ ]
+}

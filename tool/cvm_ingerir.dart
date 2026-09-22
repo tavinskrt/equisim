@@ -24,13 +24,25 @@
 //    exercício social fora do calendário, e para elas o ITR de dezembro é um
 //    acumulado de nove meses.
 //
-// **A regra de versão é decisão, e está aqui.** A CVM republica documento
-// reapresentado com `VERSAO` maior. Esta ingestão adota a **última versão**,
-// que é o número correto conhecido hoje — o que injeta conhecimento futuro numa
-// avaliação datada. É o item B8 do plano.
+// **A regra de versão é decisão, e está aqui** (item B8). A CVM republica
+// documento reapresentado com `VERSAO` maior, e os CSVs anuais trazem só a
+// última — o número correto conhecido hoje, que numa avaliação datada é
+// conhecimento futuro. Por isso a ingestão grava **dois arquivos**:
+//
+//   data/cvm_exercicios.json  a última versão de cada documento, como sempre;
+//                             é o que o pacote do aplicativo e as ferramentas
+//                             de conferência leem
+//   data/cvm_versoes.json     as versões anteriores que estavam vigentes em
+//                             alguma coorte, baixadas do RAD por
+//                             `tool/cvm_versoes_baixar.py`, cada uma com a data
+//                             de recebimento **dela**
+//
+// O backtest lê os dois, e `CvmSeries.vigentes` escolhe, em cada coorte, a
+// versão que era pública naquela data.
 //
 // Uso:
 //   python tool/cvm_baixar.py --de 2010 --ate 2026 --docs DFP,ITR,FCA
+//   python tool/cvm_versoes_baixar.py            # as versões antigas
 //   dart run tool/cvm_ingerir.dart data/cvm
 import 'dart:convert';
 import 'dart:io';
@@ -80,6 +92,9 @@ String _dia(String? s) => (s == null || s.length < 10) ? '' : s.substring(0, 10)
 
 /// Chave de um documento: companhia, data de referência e tipo.
 typedef _Doc = ({String cnpj, String refer, String doc});
+
+/// Chave de uma versão de documento.
+typedef _Versao = ({String cnpj, String refer, String doc, int versao});
 
 /// Metadados de um documento entregue à CVM.
 class _Meta {
@@ -143,8 +158,9 @@ void main(List<String> args) {
   stdout.writeln('  anos encontrados: ${anosOrdenados.first}–'
       '${anosOrdenados.last}\n');
 
-  // --- Metadados: recebimento e versão vigente -----------------------------
+  // --- Metadados: recebimento de cada versão, e a vigente -----------------
   final meta = <_Doc, _Meta>{};
+  final porVersao = <_Versao, _Meta>{};
   for (final ano in anosOrdenados) {
     for (final doc in ['dfp', 'itr']) {
       final f = porNome['${doc}_cia_aberta_$ano.csv'];
@@ -156,10 +172,13 @@ void main(List<String> args) {
           doc: doc.toUpperCase(),
         );
         final v = int.tryParse(r['VERSAO'] ?? '') ?? 1;
+        final m = _Meta(r['DENOM_CIA'] ?? '', v, _dia(r['DT_RECEB']));
+        // A mesma versão aparece, às vezes, no índice de dois anos com datas
+        // diferentes; vale a primeira lida, que é a regra de antes do B8.
+        porVersao.putIfAbsent(
+            (cnpj: k.cnpj, refer: k.refer, doc: k.doc, versao: v), () => m);
         final atual = meta[k];
-        if (atual == null || v > atual.versao) {
-          meta[k] = _Meta(r['DENOM_CIA'] ?? '', v, _dia(r['DT_RECEB']));
-        }
+        if (atual == null || v > atual.versao) meta[k] = m;
       }
     }
   }
@@ -172,74 +191,75 @@ void main(List<String> args) {
   stdout.writeln('  reapresentados (VERSAO > 1): $reapresentados '
       '(${(100 * reapresentados / meta.length).toStringAsFixed(1)}%)');
 
-  // --- Composição de capital -----------------------------------------------
-  final capital = <_Doc, ({double integralizadas, double tesouraria})>{};
-  for (final ano in anosOrdenados) {
+  // As versões antigas, no layout dos anuais, quando foram baixadas.
+  final dirVersoes = Directory('$dir/versoes');
+  final porNomeVersoes = <String, File>{
+    if (dirVersoes.existsSync())
+      for (final f in dirVersoes.listSync().whereType<File>())
+        f.path.replaceAll('\\', '/').split('/').last: f,
+  };
+
+  /// Arquivos de um demonstrativo: os anuais, ou o das versões antigas.
+  Iterable<(String, File)> arquivos(String sufixo,
+      {required bool antigas}) sync* {
     for (final doc in ['dfp', 'itr']) {
-      final f = porNome['${doc}_cia_aberta_composicao_capital_$ano.csv'];
-      if (f == null) continue;
-      for (final r in lerCsv(f)) {
-        final tot = double.tryParse(r['QT_ACAO_TOTAL_CAP_INTEGR'] ?? '');
-        final tes = double.tryParse(r['QT_ACAO_TOTAL_TESOURO'] ?? '') ?? 0;
-        if (tot == null || tot <= 0) continue;
-        capital[(
-          cnpj: r['CNPJ_CIA'] ?? '',
-          refer: _dia(r['DT_REFER']),
-          doc: doc.toUpperCase(),
-        )] = (integralizadas: tot, tesouraria: tes);
+      if (antigas) {
+        final f = porNomeVersoes['${doc}_cia_aberta_${sufixo}_versoes.csv'];
+        if (f != null) yield (doc, f);
+      } else {
+        for (final ano in anosOrdenados) {
+          final f = porNome['${doc}_cia_aberta_${sufixo}_$ano.csv'];
+          if (f != null) yield (doc, f);
+        }
       }
     }
   }
 
-  // --- Demonstrações --------------------------------------------------------
-  /// Lê uma demonstração de todos os anos. [ordem] é `Ú` (exercício do
-  /// documento) ou `P` (o comparativo que o acompanha).
-  Map<_Doc, _Demonstracao> carregar(String sufixo, String ordem) {
-    final out = <_Doc, _Demonstracao>{};
-    for (final ano in anosOrdenados) {
-      for (final doc in ['dfp', 'itr']) {
-        final f = porNome['${doc}_cia_aberta_${sufixo}_$ano.csv'];
-        if (f == null) continue;
-        for (final r in lerCsv(f)) {
-          if (!(r['ORDEM_EXERC'] ?? '').startsWith(ordem)) continue;
-          final linha = CvmAccountLine.doTexto(
-            code: r['CD_CONTA'] ?? '',
-            label: r['DS_CONTA'] ?? '',
-            valor: r['VL_CONTA'] ?? '',
-            escala: _escala(r['ESCALA_MOEDA']),
-          );
-          if (linha == null) continue;
-          out
-              .putIfAbsent(
-                (
-                  cnpj: r['CNPJ_CIA'] ?? '',
-                  refer: _dia(r['DT_REFER']),
-                  doc: doc.toUpperCase(),
-                ),
-                _Demonstracao.new,
-              )
-              .acrescentar(_dia(r['DT_INI_EXERC']), linha);
-        }
+  _Versao chave(Map<String, String> r, String doc) => (
+        cnpj: r['CNPJ_CIA'] ?? '',
+        refer: _dia(r['DT_REFER']),
+        doc: doc.toUpperCase(),
+        versao: int.tryParse(r['VERSAO'] ?? '') ?? 1,
+      );
+
+  // --- Composição de capital -----------------------------------------------
+  Map<_Versao, ({double integralizadas, double tesouraria})> carregarCapital(
+      {required bool antigas}) {
+    final out = <_Versao, ({double integralizadas, double tesouraria})>{};
+    for (final (doc, f) in arquivos('composicao_capital', antigas: antigas)) {
+      for (final r in lerCsv(f)) {
+        final tot = double.tryParse(r['QT_ACAO_TOTAL_CAP_INTEGR'] ?? '');
+        final tes = double.tryParse(r['QT_ACAO_TOTAL_TESOURO'] ?? '') ?? 0;
+        if (tot == null || tot <= 0) continue;
+        out[chave(r, doc)] = (integralizadas: tot, tesouraria: tes);
       }
     }
     return out;
   }
 
-  final dre = {'con': carregar('DRE_con', 'Ú'), 'ind': carregar('DRE_ind', 'Ú')};
-  final dreAnt = {
-    'con': carregar('DRE_con', 'P'),
-    'ind': carregar('DRE_ind', 'P'),
-  };
-  final dfc = {
-    'con': carregar('DFC_MI_con', 'Ú'),
-    'ind': carregar('DFC_MI_ind', 'Ú'),
-  };
-  final dfcAnt = {
-    'con': carregar('DFC_MI_con', 'P'),
-    'ind': carregar('DFC_MI_ind', 'P'),
-  };
-  final bpa = {'con': carregar('BPA_con', 'Ú'), 'ind': carregar('BPA_ind', 'Ú')};
-  final bpp = {'con': carregar('BPP_con', 'Ú'), 'ind': carregar('BPP_ind', 'Ú')};
+  // --- Demonstrações --------------------------------------------------------
+  /// Lê uma demonstração de todos os anos. [ordem] é `Ú` (exercício do
+  /// documento) ou `P` (o comparativo que o acompanha).
+  Map<_Versao, _Demonstracao> carregar(String sufixo, String ordem,
+      {required bool antigas}) {
+    final out = <_Versao, _Demonstracao>{};
+    for (final (doc, f) in arquivos(sufixo, antigas: antigas)) {
+      for (final r in lerCsv(f)) {
+        if (!(r['ORDEM_EXERC'] ?? '').startsWith(ordem)) continue;
+        final linha = CvmAccountLine.doTexto(
+          code: r['CD_CONTA'] ?? '',
+          label: r['DS_CONTA'] ?? '',
+          valor: r['VL_CONTA'] ?? '',
+          escala: _escala(r['ESCALA_MOEDA']),
+        );
+        if (linha == null) continue;
+        out
+            .putIfAbsent(chave(r, doc), _Demonstracao.new)
+            .acrescentar(_dia(r['DT_INI_EXERC']), linha);
+      }
+    }
+    return out;
+  }
 
   // --- Ponte ---------------------------------------------------------------
   final pontePath = File('docs/validacao/ponte_cvm.json');
@@ -268,92 +288,163 @@ void main(List<String> args) {
       };
 
   // --- Montagem ------------------------------------------------------------
-  final exercicios = <Map<String, Object?>>[];
   var comRecuo = 0, semDre = 0, balancoOk = 0, balancoN = 0;
-  var duplicadasResolvidas = 0;
+  var duplicadasResolvidas = 0, semRecebimento = 0;
   final layouts = <String, int>{};
 
-  for (final k in meta.keys) {
-    final m = meta[k]!;
-    var origem = 'con';
-    if (dre['con']![k] == null) {
-      origem = 'ind';
-      if (dre['ind']![k] != null) comRecuo++;
-    }
-    final demDre = dre[origem]![k];
-    if (demDre == null) {
-      semDre++;
-      continue;
-    }
+  /// Monta os exercícios de um conjunto de CSVs — os anuais ou os das versões
+  /// antigas. A data de recebimento é a **da versão** que as contas trazem.
+  List<Map<String, Object?>> montar({required bool antigas}) {
+    final dre = {
+      'con': carregar('DRE_con', 'Ú', antigas: antigas),
+      'ind': carregar('DRE_ind', 'Ú', antigas: antigas),
+    };
+    final dreAnt = {
+      'con': carregar('DRE_con', 'P', antigas: antigas),
+      'ind': carregar('DRE_ind', 'P', antigas: antigas),
+    };
+    final dfc = {
+      'con': carregar('DFC_MI_con', 'Ú', antigas: antigas),
+      'ind': carregar('DFC_MI_ind', 'Ú', antigas: antigas),
+    };
+    final dfcAnt = {
+      'con': carregar('DFC_MI_con', 'P', antigas: antigas),
+      'ind': carregar('DFC_MI_ind', 'P', antigas: antigas),
+    };
+    final bpa = {
+      'con': carregar('BPA_con', 'Ú', antigas: antigas),
+      'ind': carregar('BPA_ind', 'Ú', antigas: antigas),
+    };
+    final bpp = {
+      'con': carregar('BPP_con', 'Ú', antigas: antigas),
+      'ind': carregar('BPP_ind', 'Ú', antigas: antigas),
+    };
+    final capital = carregarCapital(antigas: antigas);
 
-    final chartDre = CvmChart.of(demDre.linhas);
-    final chartDfc = CvmChart.of(dfc[origem]![k]?.linhas ?? const []);
-    final chartBal = CvmChart.of([
-      ...?bpa[origem]![k]?.linhas,
-      ...?bpp[origem]![k]?.linhas,
-    ]);
-    layouts[chartDre.layout.name] = (layouts[chartDre.layout.name] ?? 0) + 1;
-
-    final at = chartBal.ativoTotal;
-    final pt = chartBal.passivoTotal;
-    if (at != null && pt != null && at.abs() > 1) {
-      balancoN++;
-      if (((at - pt).abs() / at.abs()) < 1e-6) balancoOk++;
+    final exercicios = <Map<String, Object?>>[];
+    final chaves = {...dre['con']!.keys, ...dre['ind']!.keys};
+    if (!antigas) {
+      final comDre = {
+        for (final k in chaves) (cnpj: k.cnpj, refer: k.refer, doc: k.doc),
+      };
+      semDre = meta.keys.where((k) => !comDre.contains(k)).length;
     }
-
-    // Acumulado do mesmo período no exercício anterior — só o ITR precisa,
-    // para os últimos doze meses. A DFP é o ano cheio por si.
-    Map<String, Object?>? anterior;
-    if (k.doc == 'ITR') {
-      final dAnt = dreAnt[origem]![k];
-      if (dAnt != null) {
-        final fAnt = fluxos(
-          CvmChart.of(dAnt.linhas),
-          CvmChart.of(dfcAnt[origem]![k]?.linhas ?? const []),
-        );
-        anterior = {'inicioDoPeriodo': dAnt.inicio, ...fAnt};
+    for (final k in chaves) {
+      // A versão das contas dá a data de recebimento. Nos anuais, a versão que
+      // o CSV traz é a última, e o índice a confirma; sem ela no índice, fica a
+      // vigente, como antes.
+      final m = porVersao[k] ??
+          (antigas ? null : meta[(cnpj: k.cnpj, refer: k.refer, doc: k.doc)]);
+      if (m == null) {
+        semRecebimento++;
+        continue;
       }
-      if (demDre.duplicadas > 0) duplicadasResolvidas++;
+      var origem = 'con';
+      if (dre['con']![k] == null) {
+        origem = 'ind';
+        if (dre['ind']![k] != null) comRecuo++;
+      }
+      final demDre = dre[origem]![k];
+      if (demDre == null) continue;
+
+      final chartDre = CvmChart.of(demDre.linhas);
+      final chartDfc = CvmChart.of(dfc[origem]![k]?.linhas ?? const []);
+      final chartBal = CvmChart.of([
+        ...?bpa[origem]![k]?.linhas,
+        ...?bpp[origem]![k]?.linhas,
+      ]);
+      layouts[chartDre.layout.name] = (layouts[chartDre.layout.name] ?? 0) + 1;
+
+      final at = chartBal.ativoTotal;
+      final pt = chartBal.passivoTotal;
+      if (at != null && pt != null && at.abs() > 1) {
+        balancoN++;
+        if (((at - pt).abs() / at.abs()) < 1e-6) balancoOk++;
+      }
+
+      // Acumulado do mesmo período no exercício anterior — só o ITR precisa,
+      // para os últimos doze meses. A DFP é o ano cheio por si.
+      Map<String, Object?>? anterior;
+      if (k.doc == 'ITR') {
+        final dAnt = dreAnt[origem]![k];
+        if (dAnt != null) {
+          final fAnt = fluxos(
+            CvmChart.of(dAnt.linhas),
+            CvmChart.of(dfcAnt[origem]![k]?.linhas ?? const []),
+          );
+          anterior = {'inicioDoPeriodo': dAnt.inicio, ...fAnt};
+        }
+        if (demDre.duplicadas > 0) duplicadasResolvidas++;
+      }
+
+      final cap = capital[k];
+      exercicios.add({
+        'cnpj': k.cnpj,
+        'nome': m.denom,
+        'tickers': porCnpj[k.cnpj] ?? const <String>[],
+        'documento': k.doc,
+        'inicioDoPeriodo': demDre.inicio,
+        'fimDoExercicio': k.refer,
+        'recebidoEm': m.recebido,
+        'versao': m.versao,
+        'origem': origem == 'con' ? 'consolidado' : 'individual',
+        'layout': chartDre.layout.name,
+        ...fluxos(chartDre, chartDfc),
+        'lucroPorAcao': chartDre.lucroPorAcao,
+        'ativoTotal': at,
+        'ativoCirculante': chartBal.ativoCirculante,
+        'passivoCirculante': chartBal.passivoCirculante,
+        'patrimonioLiquido': chartBal.patrimonioLiquido,
+        'naoControladores': chartBal.participacaoNaoControladores,
+        'caixa': chartBal.caixa,
+        'aplicacoesFinanceiras': chartBal.aplicacoesFinanceiras,
+        'imobilizado': chartBal.imobilizado,
+        'intangivel': chartBal.intangivel,
+        'dividaDeCurtoPrazo': chartBal.dividaDeCurtoPrazo,
+        'dividaDeLongoPrazo': chartBal.dividaDeLongoPrazo,
+        'acoesIntegralizadas': cap?.integralizadas,
+        'acoesEmTesouraria': cap?.tesouraria,
+        'anterior': anterior,
+      });
     }
 
-    final cap = capital[k];
-    exercicios.add({
-      'cnpj': k.cnpj,
-      'nome': m.denom,
-      'tickers': porCnpj[k.cnpj] ?? const <String>[],
-      'documento': k.doc,
-      'inicioDoPeriodo': demDre.inicio,
-      'fimDoExercicio': k.refer,
-      'recebidoEm': m.recebido,
-      'versao': m.versao,
-      'origem': origem == 'con' ? 'consolidado' : 'individual',
-      'layout': chartDre.layout.name,
-      ...fluxos(chartDre, chartDfc),
-      'lucroPorAcao': chartDre.lucroPorAcao,
-      'ativoTotal': at,
-      'ativoCirculante': chartBal.ativoCirculante,
-      'passivoCirculante': chartBal.passivoCirculante,
-      'patrimonioLiquido': chartBal.patrimonioLiquido,
-      'naoControladores': chartBal.participacaoNaoControladores,
-      'caixa': chartBal.caixa,
-      'aplicacoesFinanceiras': chartBal.aplicacoesFinanceiras,
-      'imobilizado': chartBal.imobilizado,
-      'intangivel': chartBal.intangivel,
-      'dividaDeCurtoPrazo': chartBal.dividaDeCurtoPrazo,
-      'dividaDeLongoPrazo': chartBal.dividaDeLongoPrazo,
-      'acoesIntegralizadas': cap?.integralizadas,
-      'acoesEmTesouraria': cap?.tesouraria,
-      'anterior': anterior,
+    exercicios.sort((a, b) {
+      final c = (a['cnpj']! as String).compareTo(b['cnpj']! as String);
+      if (c != 0) return c;
+      final f = (a['fimDoExercicio']! as String)
+          .compareTo(b['fimDoExercicio']! as String);
+      return f != 0 ? f : (a['versao']! as int).compareTo(b['versao']! as int);
     });
+    return exercicios;
   }
 
-  exercicios.sort((a, b) {
-    final c = (a['cnpj']! as String).compareTo(b['cnpj']! as String);
-    return c != 0
-        ? c
-        : (a['fimDoExercicio']! as String)
-            .compareTo(b['fimDoExercicio']! as String);
-  });
+  // Nos anuais, **uma entrada por documento, a de maior versão**: um
+  // documento raro vem com duas versões em arquivos de anos diferentes (a DFP
+  // de 2021 da INTER & CO), e a versão menor não é a vigente de hoje.
+  final exercicios = () {
+    final porDoc = <String, Map<String, Object?>>{};
+    for (final e in montar(antigas: false)) {
+      final k = '${e['cnpj']}|${e['fimDoExercicio']}|${e['documento']}';
+      final atual = porDoc[k];
+      if (atual == null || (e['versao']! as int) > (atual['versao']! as int)) {
+        porDoc[k] = e;
+      }
+    }
+    return [for (final e in porDoc.values) e];
+  }();
+  // O recuo, as duplicadas e a identidade descrevem a base vigente; as
+  // versões antigas são contadas à parte.
+  final (recuo0, dup0, balOk0, balN0) =
+      (comRecuo, duplicadasResolvidas, balancoOk, balancoN);
+  final antigas = porNomeVersoes.isEmpty
+      ? const <Map<String, Object?>>[]
+      : montar(antigas: true);
+  final balancoAntigasOk = balancoOk - balOk0;
+  final balancoAntigasN = balancoN - balN0;
+  comRecuo = recuo0;
+  duplicadasResolvidas = dup0;
+  balancoOk = balOk0;
+  balancoN = balN0;
 
   final comTicker =
       exercicios.where((e) => (e['tickers']! as List).isNotEmpty).length;
@@ -376,4 +467,22 @@ void main(List<String> args) {
   saida.writeAsStringSync(jsonEncode(exercicios));
   stdout.writeln('\n  gravado ${saida.path} '
       '(${(saida.lengthSync() / 1e6).toStringAsFixed(1)} MB)');
+
+  // --- Versões antigas (item B8) --------------------------------------------
+  final saidaVersoes = File('data/cvm_versoes.json');
+  if (antigas.isEmpty) {
+    if (saidaVersoes.existsSync()) saidaVersoes.deleteSync();
+    stdout.writeln('  sem versões antigas em $dir/versoes — rode '
+        'tool/cvm_versoes_baixar.py para o point-in-time por versão');
+  } else {
+    saidaVersoes.writeAsStringSync(jsonEncode(antigas));
+    stdout.writeln('  versões antigas montadas: ${antigas.length}   '
+        'IDENTIDADE ativo = passivo: $balancoAntigasOk / $balancoAntigasN');
+    stdout.writeln('  gravado ${saidaVersoes.path} '
+        '(${(saidaVersoes.lengthSync() / 1e6).toStringAsFixed(1)} MB)');
+  }
+  if (semRecebimento > 0) {
+    stdout.writeln('  versões sem data de recebimento no índice, descartadas: '
+        '$semRecebimento');
+  }
 }

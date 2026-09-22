@@ -122,7 +122,9 @@ void main() {
     });
 
     test('série vazia não quebra', () {
-      const empty = RateSeries.empty;
+      // `final`, e não `const`: o construtor ordena desde a lente `nucleo` de
+      // 21/09/2026, e ordenar não é operação de tempo de compilação.
+      final empty = RateSeries.empty;
       expect(empty.isEmpty, isTrue);
       expect(empty.accumulated, 0.0);
       expect(empty.annualized(), 0.0);

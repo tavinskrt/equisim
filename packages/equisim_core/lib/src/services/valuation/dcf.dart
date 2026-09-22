@@ -762,7 +762,19 @@ abstract final class DcfCalculator {
     double minorityInterest = 0,
     double cash = 0,
     double? cashYield,
+    List<double>? costOfDebtPath,
+    List<double>? cashYieldPath,
+    double? terminalCostOfDebt,
+    double? terminalCashYield,
   }) {
+    for (final c in [costOfDebtPath, cashYieldPath]) {
+      if (c != null && c.length != assumptions.projectionYears) {
+        return const Err(InvalidInput(
+          'Caminho de custo da dívida ou de rendimento do caixa com tamanho '
+          'diferente do horizonte.',
+        ));
+      }
+    }
     if (sharesOutstanding <= 0) {
       return const Err(InsufficientData(
         'Quantidade de papéis em circulação indisponível ou inválida.',
@@ -815,6 +827,23 @@ abstract final class DcfCalculator {
     final rendimentoDoCaixa = (cashYield ?? costOfDebt) * (1 - taxRate);
     final n = assumptions.projectionYears;
 
+    // **Com caminho, o juro e o rendimento do ano t são os do ano t** (item
+    // B24): é o que o ponto fixo usa para fechar o `Ke` que desconta este
+    // fluxo, e as duas contas precisam ler a mesma dívida. Sem caminho, vale a
+    // taxa única — que é a forma de quem monta a projeção à mão.
+    double kdEm(int t) => costOfDebtPath == null
+        ? kdLiquido
+        : costOfDebtPath[t - 1] * (1 - taxRate);
+    double caixaEm(int t) => cashYieldPath == null
+        ? rendimentoDoCaixa
+        : cashYieldPath[t - 1] * (1 - taxRate);
+    final kdTerminal = terminalCostOfDebt == null
+        ? kdLiquido
+        : terminalCostOfDebt * (1 - taxRate);
+    final caixaTerminal = terminalCashYield == null
+        ? rendimentoDoCaixa
+        : terminalCashYield * (1 - taxRate);
+
     /// `Ke` do ano [t].
     ///
     /// Com caminho explícito, é ele — e é o que a identidade exige quando a
@@ -845,8 +874,8 @@ abstract final class DcfCalculator {
     ///
     /// `D_bruta·K_d(1−τ) − C·R_f(1−τ) − D_líquida·g`. Com caixa zero, colapsa
     /// em `D_líquida·(K_d(1−τ) − g)`, que é a forma anterior.
-    double servico(double g) =>
-        bruta * kdLiquido - saldoDeCaixa * rendimentoDoCaixa - divida * g;
+    double servico(double g, {required double kd, required double rc}) =>
+        bruta * kd - saldoDeCaixa * rc - divida * g;
 
     for (var t = 1; t <= n; t++) {
       final ke = keAt(t);
@@ -854,7 +883,8 @@ abstract final class DcfCalculator {
       final g = assumptions.growthAt(t);
       // `D_{t−1}` é a dívida no **início** do ano: o juro incide sobre ela, e o
       // acréscimo de dívida do ano é `D_{t−1}·g`.
-      final fcfe = p.fluxos[t - 1] - servico(g);
+      final fcfe =
+          p.fluxos[t - 1] - servico(g, kd: kdEm(t), rc: caixaEm(t));
       fluxos.add(fcfe);
       final vp = fcfe * assumptions.lift(ke) / fator;
       descontados.add(vp);
@@ -887,7 +917,8 @@ abstract final class DcfCalculator {
         : p.terminal;
     final fcffTerminal =
         perpetuoDaFirma * (assumptions.terminalDiscountRate - gInf);
-    final fcfeTerminal = fcffTerminal - servico(gInf);
+    final fcfeTerminal =
+        fcffTerminal - servico(gInf, kd: kdTerminal, rc: caixaTerminal);
     final perpetuo = fcfeTerminal / spread;
     // **Com contrato que acaba, o terminal do acionista é o perpétuo truncado**
     // (decisões 88 e 102): o fluxo do acionista durante os anos que faltam, e o

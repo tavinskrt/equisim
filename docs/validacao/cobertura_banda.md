@@ -6,6 +6,17 @@ Medido em 14/09/2026 por `tool/cobertura_banda.py`, sobre
 [cobertura_banda.json](cobertura_banda.json). Decisão:
 [92](../decisoes/092-a-incerteza-e-a-faixa-calibrada-e-os-cenarios-sao-sensibilidade.md).
 
+> **Remedido em 21/09/2026, sobre o motor da Fase 3.** O item C5 restaurou a
+> base bruta — CVM ingerida, COTAHIST, Tesouro, FRE, registro e complemento da
+> B3 — e o backtest foi reexecutado: **10.919 observações, 31 coortes**. Os
+> números abaixo, salvo onde a seção diz o contrário, são os da leitura anterior;
+> o JSON ao lado é o de hoje. **A forma escolhida continua passando**: 90% nominal cobre 88,1% em 12 meses e 89,3% em 36, com desvio máximo de 2,6 p.p. contra o limite de 5 da §9 — agora sobre o motor da Fase 3, que é o que o item C2c pedia.
+>
+> **E de novo em 22/09/2026, sobre o motor que fecha a Fase 3** — com as versões
+> antigas dos documentos (item B8) e o juro da rota derivada pela curva (item
+> B24): **87,8%** em 12 meses e **88,4%** em 36, desvio máximo de **2,2** e
+> **2,8 p.p.** A forma não foi reescolhida, e o pacote do aplicativo foi regerado.
+
 ## 1. A amostra
 
 As coortes de 30/09 de 2018 a 2025 com a **montagem do aplicativo na data de

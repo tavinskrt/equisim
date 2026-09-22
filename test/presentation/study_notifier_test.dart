@@ -5,6 +5,7 @@ import 'package:equisim/presentation/study/study_notifier.dart';
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:equisim/presentation/shared/domain_copy.dart';
 
 Asset assetOf(String symbol, [String sector = 'financeiro']) => Asset(
       ticker: Ticker.parse(symbol),
@@ -18,7 +19,7 @@ Portfolio portfolioOf(
 }) =>
     Portfolio.equalWeighted(
       id: kind.name,
-      name: kind.label,
+      name: kind.rotulo,
       kind: kind,
       assets: assets,
     ).unwrap();

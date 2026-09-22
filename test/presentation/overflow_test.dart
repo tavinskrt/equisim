@@ -19,7 +19,15 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'populated_state.dart' show comparisonOf, outcomeOf, valuationOf;
+import 'populated_state.dart'
+    show
+        assetOf,
+        carteiraDemo,
+        comparisonOf,
+        metaDemo,
+        outcomeOf,
+        populatedOverrides,
+        valuationOf;
 import 'ui_test.dart' show serieLonga;
 
 /// Regressao de layout: nenhuma tela pode estourar em largura suportada nem
@@ -81,7 +89,9 @@ Asset _asset(String symbol, String sector) => Asset(
 /// `PortfolioComparison` de verdade e cobre a mesma matriz. Foi o que a tabela
 /// comparativa das duas carteiras exigiu -- ela e a coluna numerica mais densa
 /// do aplicativo, e a suite nao podia ficar cega justamente ali. StudyPage,
-/// GoalPage e ValuationPage seguem cobertas so em estado vazio.
+/// A ValuationPage populada entrou depois, e a StudyPage e a GoalPage
+/// populadas entraram em 22/09/2026 (item D3), com os providers de
+/// `populatedOverrides` — os mesmos da captura das telas.
 /// [comparacao] entra pelo parametro, e nao por um override adicional na
 /// chamada: `comparisonProvider` ja e sobrescrito aqui, e o Riverpod recusa o
 /// mesmo provider duas vezes no mesmo container. `null` reproduz o estado
@@ -315,4 +325,71 @@ void main() {
       }
     }
   });
+
+  // ---------------------------------------------------------------------
+  // StudyPage e GoalPage POPULADAS (item D3)
+  //
+  // Vazias, as duas montam formulario e estado sem dado: a StudyPage nao
+  // constroi o cartao do esperado da carteira, a dispersao nem a barra de
+  // concentracao; a GoalPage nao constroi o veredito, o exigido contra o
+  // esperado nem o alinhamento. Aqui elas recebem o mesmo conteudo da captura
+  // das telas -- quatro ativos de setores distintos, avaliacoes, sinais e a
+  // meta de demonstracao.
+  // ---------------------------------------------------------------------
+  for (final entry in <String, Widget Function()>{
+    'StudyPage': StudyPage.new,
+    'GoalPage': GoalPage.new,
+  }.entries) {
+    group('${entry.key} populada', () {
+      for (final largura in _larguras) {
+        for (final escala in _escalas) {
+          final pendente =
+              _pendentesPopulada[_chave(entry.key, largura, escala)];
+
+          testWidgets('cabe em ${largura.toInt()} dp sob ${escala}x'
+              '${pendente == null ? '' : '  [PENDENTE: $pendente]'}', (
+            tester,
+          ) async {
+            tester.view.devicePixelRatio = 1.0;
+            tester.view.physicalSize = Size(largura, 6000);
+            addTearDown(tester.view.reset);
+
+            final container = ProviderContainer(overrides: populatedOverrides());
+            addTearDown(container.dispose);
+            container.read(isLightModeProvider.notifier).definir(true);
+            final notifier = container.read(studyProvider.notifier);
+            for (final (simbolo, setor) in carteiraDemo) {
+              notifier.addAsset(assetOf(simbolo, setor), toPrincipal: true);
+            }
+            notifier.setGoal(metaDemo);
+
+            await tester.pumpWidget(
+              UncontrolledProviderScope(
+                container: container,
+                child: MaterialApp(
+                  theme: buildFinTheme(isLight: true),
+                  home: MediaQuery(
+                    data: MediaQueryData(
+                      size: Size(largura, 6000),
+                      textScaler: TextScaler.linear(escala),
+                    ),
+                    child: Scaffold(body: entry.value()),
+                  ),
+                ),
+              ),
+            );
+            await tester.pumpAndSettle();
+
+            expect(
+              tester.takeException(),
+              isNull,
+              reason:
+                  '${entry.key} populada estourou o layout em '
+                  '${largura.toInt()} dp sob escala ${escala}x.',
+            );
+          }, skip: pendente != null);
+        }
+      }
+    });
+  }
 }

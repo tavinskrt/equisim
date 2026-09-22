@@ -1,5 +1,10 @@
 # O instrumento da habilidade, pronto — itens C1c, C1d e C3
 
+> **A leitura mais recente é a §8**, de 21/09/2026, sobre o motor da Fase 3 e
+> as coortes reexecutadas pelo item C5. As seções 1 a 7 registram as anteriores,
+> e ficam porque a comparação entre instrumentos é parte do que este documento
+> serve para mostrar.
+
 Medido em 15/09/2026 por `dart run tool/regressao_condicional.dart --trimestral`,
 sobre `docs/validacao/backtest_trimestral.json` (de
 `dart run tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas
@@ -145,6 +150,68 @@ reingestão da CVM.
   unidade inferida do valor de mercado falha em 79 de 220 observações de unit
   ([ponte_por_papel.md](ponte_por_papel.md)).
 - **O motivo de saída das deslistadas** continua não levantado.
+
+## 9. Sobre o motor que fecha a Fase 3 — remedido em 22/09/2026
+
+**É a leitura sobre o motor com a Fase 3 inteira fechada**: além do da §8, as
+versões antigas dos documentos da CVM (item B8, decisão 128), o juro da rota
+derivada seguindo a curva (item B24, decisão 127) e a fronteira do dinheiro
+arredondando o decimal escrito (decisão 125). Mesmas 10.919 observações, 31
+coortes.
+
+| 36 meses, trimestral, com deslistadas (n = 2.164) | média | `t` corrigido / crítico | Newey-West | passa |
+|---|---:|---:|---:|---|
+| **potencial dado o B/M (critério do R3)** | **0,028** | **0,15 / 2,70** | 0,40 | não |
+| IC do potencial | 0,088 | 0,53 / 2,70 | 1,23 | não |
+| IC do book-to-market | 0,160 | 2,07 / 2,70 | 4,36 | não |
+| IC do lucro sobre o preço | 0,123 | 1,04 / 2,70 | 2,82 | não |
+| IC do composto | 0,146 | 1,19 / 2,70 | 2,86 | não |
+| IC do múltiplo de pares | 0,083 | 1,24 / 2,70 | 3,49 | não |
+
+**Nada muda de veredito, e quase nada de número.** O potencial condicionado ao
+B/M vai de 0,027 a 0,028; o book-to-market sobe de `t` corrigido 1,98 para 2,07,
+e continua abaixo do crítico. As versões antigas mexem em 2,8% das observações
+avaliadas, e o juro pela curva move o preço justo em −0,65% na mediana — os dois
+defeitos eram reais, e nenhum deles era o que separava o motor da habilidade.
+**Líquido de custo de transação** (item C4), a leitura é a mesma
+([custos_transacao.md](custos_transacao.md)).
+
+## 8. Sobre o motor da Fase 3 — remedido em 21/09/2026, com a base restaurada
+
+**É a primeira leitura sobre o motor que a Fase 3 deixou.** Entre 16/09 e hoje o
+motor mudou doze vezes — as decisões 104 a 121 —, e as coortes continuavam sendo
+as da decisão 102 porque o `data/` não existia nesta máquina. O item **C5**
+restaurou a base bruta — CVM, COTAHIST, Tesouro, FRE, registro e complemento da
+B3 — e reexecutou o backtest: **10.919 observações, 31 coortes**.
+
+| 36 meses, trimestral, com as deslistadas | 16/09 (§7) | **21/09** |
+|---|---|---|
+| observações da regressão | 2.452 | **2.165** |
+| coortes | 22 | 22 |
+| IC do potencial · `t` corrigido | 0,078 · 0,61 | **0,089 · 0,53** |
+| IC do book-to-market · `t` corrigido | 0,186 · 2,52 | **0,157 · 1,98** |
+| IC do lucro sobre preço · `t` corrigido | — | 0,124 · 1,02 |
+| IC do composto · `t` corrigido | 0,173 · 1,57 | **0,147 · 1,17** |
+| **potencial dado o B/M · `t` corrigido** | 0,010 · 0,08 | **0,027 · 0,15** |
+| ortogonalizado ao P/B (item B2) | +0,016 | **+0,025** |
+
+Crítico de 2,70. **Nenhuma ordenação passa, e agora nem de perto**: o
+book-to-market, que estava a 2,52 do crítico de 2,70, caiu para **1,98**.
+
+**O que isso é, e o que não é.** Não é o motor piorando: o potencial **subiu**,
+de 0,078 para 0,089, e o condicionado ao B/M também, de 0,010 para 0,027. O que
+caiu foi o **fator contra o qual ele é medido** — e a queda do book-to-market
+vem da amostra, não da cascata: são 287 observações a menos, com a base bruta
+reconstruída de zero e o COTAHIST rebaixado do dia.
+
+**A regra da [decisão 103](../decisoes/103-o-premio-do-retorno-esperado-sai-da-ordenacao-comprovada-e-hoje-nao-ha.md)
+devolve o mesmo:** prêmio nenhum. E ela agora foi aplicada a **cinco**
+candidatas, com a quarta e a quinta entrando nesta rodada
+([multiplos_ordenacao.md](multiplos_ordenacao.md), item B22).
+
+**A faixa calibrada, medida na mesma execução, passa** — 90% nominal cobrindo
+88,1% em 12 meses e 89,3% em 36, desvio máximo de 2,6 p.p. contra o limite de 5
+([cobertura_banda.md](cobertura_banda.md)).
 
 ## 7. Sobre o motor da decisão 102 — remedido em 16/09/2026
 

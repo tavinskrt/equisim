@@ -4,41 +4,31 @@ import 'financial_sectors.dart';
 /// Qual múltiplo produziu uma leitura.
 enum MultipleKind {
   /// Preço sobre lucro por ação.
-  precoLucro('P/L'),
+  precoLucro,
 
   /// Preço sobre valor patrimonial por ação.
-  precoPatrimonio('P/VP'),
+  precoPatrimonio,
 
   /// Valor da firma sobre EBITDA.
-  firmaEbitda('EV/EBITDA');
-
-  const MultipleKind(this.label);
-
-  /// Como o múltiplo aparece na tela e no rastro.
-  final String label;
+  firmaEbitda;
 }
 
 /// Por que um múltiplo não se aplicou a um ativo.
 enum MultipleRefusal {
   /// O grupo de pares não tem observações suficientes.
-  paresInsuficientes('pares insuficientes no setor'),
+  paresInsuficientes,
 
   /// A grandeza de baixo não é positiva — lucro, patrimônio ou EBITDA.
-  baseNaoPositiva('a grandeza de baixo não é positiva'),
+  baseNaoPositiva,
 
   /// A grandeza de baixo não está publicada.
-  baseAusente('a grandeza de baixo não está publicada'),
+  baseAusente,
 
   /// EBITDA de instituição financeira não descreve geração operacional.
-  instituicaoFinanceira('EBITDA não descreve instituição financeira'),
+  instituicaoFinanceira,
 
   /// A ponte de dívida líquida não fecha em valor positivo do acionista.
-  ponteNaoPositiva('a ponte deixa o acionista em valor não positivo');
-
-  const MultipleRefusal(this.label);
-
-  /// Como a recusa aparece na tela e no rastro.
-  final String label;
+  ponteNaoPositiva;
 }
 
 /// A mediana de um múltiplo num grupo de pares, com o tamanho do grupo.

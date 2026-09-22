@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:equisim_core/equisim_core.dart';
 import 'validation/context.dart';
+import 'package:equisim/presentation/shared/domain_copy.dart';
 
 String raiz(String t) => t.replaceAll(RegExp(r'(3|4|5|6|10|11)$'), '');
 
@@ -60,12 +61,12 @@ Future<void> main(List<String> args) async {
         'setorHerdado': herdadoSetor,
         'industriaHerdada': herdadaIndustria,
         'antes': antes.isOk
-            ? {'via': antes.unwrap().model.label, 'justo': antes.unwrap().fairValue.reais,
+            ? {'via': antes.unwrap().model.rotulo, 'justo': antes.unwrap().fairValue.reais,
                'potencial': antes.unwrap().upside,
                'fator': antes.unwrap().diagnostics?.baseFactor}
             : {'recusa': antes.failureOrNull?.message},
         'depois': depois.isOk
-            ? {'via': depois.unwrap().model.label, 'justo': depois.unwrap().fairValue.reais,
+            ? {'via': depois.unwrap().model.rotulo, 'justo': depois.unwrap().fairValue.reais,
                'potencial': depois.unwrap().upside,
                'fator': depois.unwrap().diagnostics?.baseFactor}
             : {'recusa': depois.failureOrNull?.message},

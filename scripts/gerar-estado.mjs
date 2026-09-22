@@ -94,6 +94,9 @@ function lerDecisoes() {
       const campos = lerFrontmatter(readFileSync(join(DECISOES, arquivo), 'utf8'));
       if (!campos) return { arquivo, invalida: true };
       const afeta = Array.isArray(campos.afeta) ? campos.afeta : [];
+      const substitui = (Array.isArray(campos.substitui) ? campos.substitui : [])
+        .map(Number)
+        .filter((n) => Number.isFinite(n));
       return {
         arquivo,
         numero: Number(campos.numero),
@@ -102,6 +105,7 @@ function lerDecisoes() {
         origem: campos.origem ?? '(sem origem)',
         data: campos.data ?? '',
         afeta,
+        substitui,
         // O unico teste que uma maquina consegue fazer sozinha: o caminho
         // existe? Se a decisao e RESPEITADA e semantico, e cabe a lente.
         quebrados: afeta.filter((p) => !existsSync(join(ROOT, p))),
@@ -172,9 +176,14 @@ function gerar() {
     L.push('elas ainda vivem em prosa dentro do parecer, que é exatamente a');
     L.push('condição que a lente `registro` do conselheiro existe para corrigir.');
   } else {
+    const substituidas = new Set();
+    for (const d of decisoes) {
+      for (const alvo of d.substitui ?? []) substituidas.add(alvo);
+    }
     const porStatus = {};
     for (const d of decisoes) {
-      porStatus[d.status] = (porStatus[d.status] ?? 0) + 1;
+      const chave = substituidas.has(d.numero) ? 'substituída' : d.status;
+      porStatus[chave] = (porStatus[chave] ?? 0) + 1;
     }
     L.push(
       Object.entries(porStatus)
@@ -182,10 +191,29 @@ function gerar() {
         .join(' · '),
     );
     L.push('');
+    // **Quem foi substituído tem de aparecer substituído.** O campo
+    // `substitui` mora em quem substitui, e a tabela mostrava só o `status` de
+    // cada decisão — de modo que a 39, substituída pela 102, continuava
+    // constando como `aceita`. Quem lesse o estado — pessoa ou lente — via
+    // decisão morta como viva, e a lente `rumo` reabriu o mesmo item duas
+    // rodadas seguidas por causa disto.
+    const substituidaPor = new Map();
+    for (const d of decisoes) {
+      for (const alvo of d.substitui ?? []) {
+        const lista = substituidaPor.get(alvo) ?? [];
+        lista.push(d.numero);
+        substituidaPor.set(alvo, lista);
+      }
+    }
+
     L.push('| # | Título | Status | Origem | Data |');
     L.push('|---|---|---|---|---|');
     for (const d of decisoes) {
-      L.push(`| ${d.numero} | ${d.titulo} | ${d.status} | ${d.origem} | ${d.data} |`);
+      const por = substituidaPor.get(d.numero);
+      const status = por
+        ? `substituída pela ${por.sort((a, b) => a - b).join(', ')}`
+        : d.status;
+      L.push(`| ${d.numero} | ${d.titulo} | ${status} | ${d.origem} | ${d.data} |`);
     }
 
     const comQuebra = decisoes.filter((d) => d.quebrados?.length > 0);

@@ -113,6 +113,38 @@ void main() {
       await repository.dailyBatch([ticker], range);
       expect(adapter.callCount['/v2/stocks/historical'], 2);
     });
+
+    // Lente `risco`, 22/09/2026: a prova valia só para cotações, e o nome do
+    // grupo prometia os três repositórios que gravam no mesmo banco.
+    test('fundamentos: o que a rede trouxe chega a quem pediu', () async {
+      final repository = FundamentalsRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/statistics?symbols=PETR4&mode=history':
+              'brapi_statistics_history_petr4',
+          '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
+          '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+          '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+          '/v2/stocks/statistics?symbols=PETR4&mode=current':
+              'brapi_statistics_current_petr4',
+        }))),
+        cache: bancoQuebrado(),
+      );
+      final r = await repository.history(Ticker.parse('PETR4'));
+      expect(r.isOk, isTrue, reason: 'os exercícios vieram da rede');
+      expect(r.unwrap(), isNotEmpty);
+    });
+
+    test('macro: o que a rede trouxe chega a quem pediu', () async {
+      final repository = MacroRepositoryImpl(
+        remote: BcbDatasource(clientWith(
+            FixtureAdapter(routes: {'bcdata.sgs.12': 'bcb_cdi'}))),
+        cache: bancoQuebrado(),
+      );
+      final r = await repository.riskFreeDaily(
+          DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)));
+      expect(r.isOk, isTrue, reason: 'a série do CDI veio do SGS');
+      expect(r.unwrap().dates, isNotEmpty);
+    });
   });
 
   group('Cache de cotações', () {

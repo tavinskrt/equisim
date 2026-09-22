@@ -265,24 +265,53 @@ void main() {
       // tinham este teste; a de demonstrativos tolerava ausência e 503 e não
       // dizia nada sobre literal de tipo errado — que é como uma troca de
       // contrato chega.
-      for (final corpo in [
-        '{"results":[{"incomeStatementHistory":"não é lista"}]}',
-        '{"results":[{"incomeStatementHistory":[{"endDate":"2024-12-31",'
-            '"netIncome":"quarenta bilhões"}]}]}',
-        '{"results":"nem objeto"}',
-        '[]',
-        'isto não é json',
-      ]) {
+      //
+      // **As três rotas de demonstrativo**, e não só a DRE (lente `risco`,
+      // 22/09/2026): o balanço e o fluxo de caixa passam pelo mesmo tipo de
+      // leitura, e o contrato de um não prova o do outro.
+      const rotas = {
+        '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
+        '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+        '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+      };
+      const quebrados = {
+        '/v2/stocks/income-statement': [
+          '{"results":[{"incomeStatementHistory":"não é lista"}]}',
+          ('{"results":[{"incomeStatementHistory":[{"endDate":"2024-12-31",'
+              '"netIncome":"quarenta bilhões"}]}]}'),
+        ],
+        '/v2/stocks/balance-sheet': [
+          '{"results":[{"data":"não é lista"}]}',
+          ('{"results":[{"data":[{"type":"yearly","endDate":"2024-12-31",'
+              '"totalAssets":"um trilhão","cash":[1]}]}]}'),
+        ],
+        '/v2/stocks/cash-flow': [
+          '{"results":[{"data":{"não":"é lista"}}]}',
+          ('{"results":[{"data":[{"type":"yearly","endDate":"2024-12-31",'
+              '"operatingCashFlow":"duzentos bilhões"}]}]}'),
+        ],
+      };
+      final casos = [
+        for (final rota in rotas.keys)
+          for (final corpo in [
+            ...quebrados[rota]!,
+            '{"results":"nem objeto"}',
+            '[]',
+            'isto não é json',
+          ])
+            (rota, corpo),
+      ];
+      for (final (rota, corpo) in casos) {
         final datasource = BrapiDatasource(clientWith(FixtureAdapter(
           routes: {
             '/v2/stocks/statistics?symbols=PETR4&mode=history':
                 'brapi_statistics_history_petr4',
-            '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
-            '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+            for (final e in rotas.entries)
+              if (e.key != rota) e.key: e.value,
             '/v2/stocks/statistics?symbols=PETR4&mode=current':
                 'brapi_statistics_current_petr4',
           },
-          bodies: {'/v2/stocks/income-statement': corpo},
+          bodies: {rota: corpo},
         )));
         // O contrato é `Result`: ou vem erro, ou vem série — e nunca uma
         // exceção atravessando a camada de dados. **Quem cobra isso é o
@@ -295,8 +324,9 @@ void main() {
           // Tolerar o corpo é legítimo; **inventar número** não. Nenhum
           // exercício pode sair com lucro lido de um literal que não é número.
           for (final s in r.unwrap()) {
-            expect(s.netIncome == null || s.netIncome!.isFinite, isTrue,
-                reason: corpo);
+            for (final v in [s.netIncome, s.totalAssets, s.operatingCashFlow]) {
+              expect(v == null || v.isFinite, isTrue, reason: '$rota $corpo');
+            }
           }
         }
       }
@@ -448,8 +478,17 @@ void main() {
 
       final withTax = snapshots.where((s) => s.effectiveTaxRate != null);
       expect(withTax, isNotEmpty);
+      // **Isto não testa o teto** (lente `risco`, 21/09/2026). A fixture não
+      // tem exercício que chegue perto de 50%, e um `every` sobre dados que
+      // nunca acionam a guarda passa com a guarda apagada. É conferência de
+      // **faixa do que a fonte trouxe**, e é só isso que a linha afirma.
+      //
+      // **Quem testa o teto é o núcleo**, onde ele mora:
+      // `point_in_time_test.dart` constrói o exercício atípico e cobra 0,5
+      // exato, o crédito tributário e 0,0, e o prejuízo e `null`.
       expect(withTax.every((s) => s.effectiveTaxRate! <= 0.5), isTrue,
-          reason: 'a alíquota é limitada para conter exercícios atípicos');
+          reason: 'nenhum exercício da fixture sai fora da faixa que o núcleo '
+              'garante');
 
       // Os números de um exercício, e não só a existência deles (lente `risco`,
       // 16/09/2026). No arquivo de 2025: imposto de R$ 39,994 bi sobre lucro

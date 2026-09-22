@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:equisim_core/equisim_core.dart';
 import 'package:test/test.dart';
 
@@ -7,6 +9,49 @@ void main() {
       expect(Money.fromReais(10.55).cents, 1055);
       expect(Money.fromReais(0.1).cents, 10);
       expect(Money.fromReais(1 / 3).cents, 33);
+    });
+
+    test('arredonda o decimal escrito meio afastado de zero (B21, dec. 125)',
+        () {
+      // `1.005 * 100` é `100.49999999999999`: o produto binário perde o meio,
+      // e a regra do BRL manda subir.
+      expect(Money.fromReais(1.005).cents, 101);
+      expect(Money.fromReais(2.675).cents, 268);
+      expect(Money.fromReais(-1.005).cents, -101);
+      expect(Money.fromReais(0.005).cents, 1);
+      expect(Money.fromReais(0.0049999).cents, 0);
+      expect(Money.fromReais(10.125).cents, 1013);
+      // Um valor que já chega com erro de conta é arredondado pelo que é.
+      expect(Money.fromReais(0.1 + 0.2).cents, 30);
+      expect(Money.fromReais(1e-7).cents, 0);
+      expect(Money.fromReais(123456789.995).cents, 12345679000);
+      expect(Money.fromReais(2e15).cents, 200000000000000000);
+      expect(Money.fromReais(-0.0).cents, 0);
+      expect(() => Money.fromReais(double.nan), throwsUnsupportedError);
+      expect(() => Money.fromReais(double.infinity), throwsUnsupportedError);
+    });
+
+    test('o double do balanço não perde centavo (B21, decisão 125)', () {
+      // A CVM é lida em centavos exatos (`CvmAccountLine.doTexto`), e o
+      // `FundamentalsSnapshot` a guarda em reais `double`. A ida e volta
+      // centavo → double → Money é exata em toda a faixa de um balanço: o
+      // maior ativo total do universo passa pouco de R$ 1,5 trilhão, e o
+      // double tem casa de centavo até R$ 90 trilhões.
+      final casos = <int>[
+        1, 99, 12345, 123456789,
+        150000000000037, // R$ 1,5 trilhão e 37 centavos
+        987654321098765, // R$ 9,9 trilhões
+        -4567890123401,
+      ];
+      final rnd = math.Random(7);
+      for (var i = 0; i < 20000; i++) {
+        casos.add(rnd.nextInt(1 << 32) * rnd.nextInt(1 << 20) *
+            (rnd.nextBool() ? 1 : -1));
+      }
+      for (final c in casos) {
+        if (c.abs() >= 1e17) continue; // fora do alcance de centavo do double
+        expect(Money.fromReais(c / 100).cents, c, reason: '$c centavos');
+      }
     });
 
     test('somas repetidas não acumulam erro de ponto flutuante', () {

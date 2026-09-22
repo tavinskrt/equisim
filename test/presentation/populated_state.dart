@@ -67,6 +67,9 @@ BacktestOutcome outcomeOf(String symbol, List<double> closes) {
     prices: {Ticker.parse(symbol): seriesOf(symbol, start, closes)},
     plan: const ContributionPlan(initial: Money(100000), monthly: Money.zero),
     range: DateRange(start, DateTime(2024, 12, 31)),
+    // Os números conferidos pelas telas são os do cenário sem custo — cem
+    // cotas exatas a R$ 10,00. O custo tem teste próprio (item C4).
+    costs: TransactionCosts.none,
   ).unwrap();
 }
 
@@ -201,8 +204,22 @@ List<Override> populatedOverrides() {
       (ref) async => {for (final t in tickers) t: valuationOf(t.value)},
     ),
     // Os sinais do prêmio leem os fundamentos, que iriam à rede (item B1).
+    //
+    // **Sinais plausíveis, e não um mapa vazio** (lente `tela`, 22/09/2026).
+    // Com o mapa vazio, o cartão «Esperado da carteira» renderiza `—` na
+    // captura, embora a carteira tenha quatro ativos com potencial — e a lente
+    // reportava, com razão, um estado que o aplicativo com dado real não
+    // mostra. **Captura que não mostra o que a tela mostra é equipamento
+    // quebrado**, e o remédio é a fixture, não mais um limite documentado.
     portfolioSignalsProvider.overrideWith(
-      (ref) async => const <Ticker, TransversalSignals>{},
+      (ref) async => {
+        for (final (i, t) in tickers.indexed)
+          t: TransversalSignals(
+            potential: 0.29,
+            bookToMarket: 0.55 + i * 0.10,
+            earningsYield: 0.09 + i * 0.01,
+          ),
+      },
     ),
 
     comparisonProvider.overrideWith(

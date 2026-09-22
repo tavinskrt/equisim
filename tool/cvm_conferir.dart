@@ -195,7 +195,7 @@ Future<void> main(List<String> args) async {
   stdout.writeln('  companhias lidas: $n   (recuo para individual: $recuouInd)');
   stdout.writeln('  layouts detectados:');
   for (final e in porLayout.entries) {
-    stdout.writeln('    ${e.value.toString().padLeft(4)}  ${e.key.label}');
+    stdout.writeln('    ${e.value.toString().padLeft(4)}  ${e.key.name}');
   }
   stdout.writeln('');
   stdout.writeln('  lucro líquido resolvido : $comLucro / $n  ${_pc(comLucro, n)}');

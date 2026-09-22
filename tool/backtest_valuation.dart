@@ -426,7 +426,9 @@ Future<void> main(List<String> args) async {
   // Peças da montagem do aplicativo, lidas uma vez.
   final tesouro =
       app ? lerTesouro('data/tesouro/precotaxatesourodireto.csv') : null;
-  final docsCvm = app ? carregarDocumentos('data/cvm_exercicios.json') : null;
+  final docsCvm = app
+      ? carregarDocumentos('data/cvm_exercicios.json', comVersoesAntigas: true)
+      : null;
   final registro = app
       ? B3RegistryCodec.decodePackage(
           jsonDecode(File('assets/b3/emissores.json').readAsStringSync())
@@ -809,6 +811,28 @@ Future<void> main(List<String> args) async {
             'recusa': r.isOk ? null : r.failureOrNull?.message,
             'bookToMarket': ingenuos.bm,
             'earningsYield': ingenuos.ey,
+            // **Os ingredientes do múltiplo de pares** (item B22, decisão 123).
+            // `bookToMarket` é `1 ÷ (P/VP)` e `earningsYield` é `1 ÷ (P/L)`:
+            // dois dos três já estavam aqui, e faltava a firma sobre EBITDA.
+            //
+            // **A mediana é de quem calcula, e não daqui**: ela tem de sair da
+            // seção transversal **da própria coorte**, ou o sinal carrega o
+            // múltiplo de 2026 numa observação de 2018 — conhecimento futuro
+            // pela porta da frente. Por isso o que a coorte grava é o
+            // ingrediente, e `regressao_condicional.dart` monta a mediana.
+            'firmaSobreEbitda': () {
+              final u = ingenuos.ultimo;
+              final vm = u?.marketCap;
+              final ebitda = u?.ebitda;
+              if (u == null || vm == null || vm <= 0) return null;
+              if (ebitda == null || ebitda <= 0) return null;
+              return (vm + u.netDebt) / ebitda;
+            }(),
+            'ebitda': ingenuos.ultimo?.ebitda,
+            'dividaLiquida': ingenuos.ultimo?.netDebt,
+            'lucro': ingenuos.ultimo?.netIncome,
+            'patrimonio': ingenuos.ultimo?.equityBookValue,
+            'valorDeMercado': ingenuos.ultimo?.marketCap,
             'ret12': retorno(12),
             'ret36': retorno(36),
             'ret12aj': retorno(12, ajustado: true),

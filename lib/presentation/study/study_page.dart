@@ -16,6 +16,7 @@ import '../valuation/valuation_page.dart';
 import '../valuation/valuation_providers.dart';
 import 'asset_picker.dart';
 import 'study_notifier.dart';
+import '../shared/domain_copy.dart';
 
 /// Tela da dupla carteira.
 ///
@@ -1252,7 +1253,7 @@ class _UpsideCell extends StatelessWidget {
   String _tooltip(double value) {
     final buffer = StringBuffer()
       ..write('Distância entre o preço de mercado e o preço justo estimado')
-      ..write(model == null ? '' : ' por ${model!.label}')
+      ..write(model == null ? '' : ' por ${model!.rotulo}')
       ..write(
         '. Não é previsão de retorno: só se realiza se o mercado '
         'convergir para essa estimativa, e não há prazo para isso.',

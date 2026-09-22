@@ -290,16 +290,13 @@ abstract final class ValuationParameters {
 /// Como o crescimento foi obtido.
 enum GrowthOrigin {
   /// Mediana das variações anuais da base de capital.
-  fundamental('crescimento fundamental da base de capital'),
+  fundamental,
 
   /// Âncora *top-down* pela inflação, autorizada pela retenção observada.
-  inflationAnchor('âncora de inflação, financiável pela retenção observada'),
+  inflationAnchor,
 
   /// Sem crescimento: valor da capacidade de gerar lucro.
-  earningsPower('valor da capacidade de gerar lucro, sem crescimento');
-
-  final String label;
-  const GrowthOrigin(this.label);
+  earningsPower;
 }
 
 /// Resultado do teste de tendência da Guarda 1.
@@ -372,20 +369,20 @@ class DispersionVerdict {
 /// diferença entre calibrar um parâmetro e adivinhar qual deles está apertado.
 enum MoatBlock {
   /// Sem retorno do ciclo medível — série curta ou lucro não publicado.
-  semRetornoDoCiclo('retorno do ciclo não medido'),
+  semRetornoDoCiclo,
 
   /// Custo de capital de equilíbrio não positivo: nada a comparar.
-  semCustoDeCapital('custo de capital de equilíbrio não positivo'),
+  semCustoDeCapital,
 
   /// Histórico mais curto que [ValuationParameters.moatMinPeriods].
-  historicoCurto('histórico curto'),
+  historicoCurto,
 
   /// Φ não medido. Ausência não é aprovação: sem saber quanto da expansão veio
   /// de fora, não há como afirmar que o crescimento foi orgânico.
-  capitalExternoNaoMedido('capital externo não medido'),
+  capitalExternoNaoMedido,
 
   /// Φ acima de [ValuationParameters.moatMaxExternalCapital].
-  crescimentoInorganico('crescimento inorgânico'),
+  crescimentoInorganico,
 
   /// Excedente com menos de [ValuationParameters.moatMinPersistencePairs]
   /// pares de anos adjacentes: a persistência não é estimável, e sem ela não
@@ -397,16 +394,16 @@ enum MoatBlock {
   /// contempla de forma contínua: excedente pequeno produz preservação
   /// pequena, sem precisar de degrau. Deterioração, do mesmo modo, aparece na
   /// própria série que estima `φ`.
-  persistenciaNaoEstimavel('persistência do excedente não estimável'),
+  persistenciaNaoEstimavel,
 
   /// O excedente do ciclo não é positivo: não há vantagem a preservar, e
   /// `λ · e₀` seria uma penalidade em vez de uma preservação.
-  semExcedente('retorno do ciclo não supera o custo de capital'),
+  semExcedente,
 
   /// A persistência medida não deixa excedente algum sobreviver ao horizonte,
   /// e o retorno terminal resultante não supera o próprio custo de capital.
   /// Sem conteúdo econômico, e por isso tratado como estado estacionário.
-  excedenteDegenerado('excedente não sobrevive ao decaimento medido'),
+  excedenteDegenerado,
 
   /// O negócio opera sob contrato de prazo determinado — concessão de energia,
   /// saneamento, rodovia, ferrovia, aeroporto.
@@ -417,10 +414,7 @@ enum MoatBlock {
   /// excedente **sobrevive para sempre** num negócio que será relicitado é
   /// afirmação que o próprio contrato nega. A tarifa é fixada para remunerar o
   /// capital ao custo dele, e não acima.
-  prazoDeterminado('o negócio opera sob contrato de prazo determinado');
-
-  final String label;
-  const MoatBlock(this.label);
+  prazoDeterminado;
 }
 
 /// Veredito da vantagem competitiva residual, com o porquê da recusa.

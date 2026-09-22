@@ -33,6 +33,23 @@ final class InsufficientData extends Failure {
   const InsufficientData(super.message, {this.subject});
 }
 
+/// Unidade da grandeza que uma regra de domínio comparou.
+///
+/// **Existe para a apresentação saber escrever o número** (item B21, decisão
+/// 122). Sem ela, a tela teria de deduzir o formato pelo nome do campo — o que
+/// é acoplamento por convenção de string, e quebra calado quando alguém
+/// renomeia o campo.
+enum QuantityUnit {
+  /// Fração de um inteiro: `1.005` é 100,5%.
+  fraction,
+
+  /// Contagem de coisas: ativos, meses, pregões.
+  count,
+
+  /// Reais.
+  currency,
+}
+
 /// Entrada do usuário viola uma invariante do domínio.
 final class InvalidInput extends Failure {
   /// Campo do formulário a destacar, quando a falha é atribuível a um.
@@ -40,14 +57,31 @@ final class InvalidInput extends Failure {
 
   /// Valor medido que produziu a recusa, quando há um número a citar.
   ///
-  /// **Existe pela mesma razão de [DataQualityFailure.deviation]** (decisão
-  /// 59): a soma dos pesos entrava na mensagem já formatada, e a interface que
-  /// quisesse arredondar de outro jeito, exibir num campo próprio ou comparar
-  /// com o limite teria de reextraí-la do texto. O domínio diz **quanto**; a
-  /// apresentação decide como escrever.
+  /// **Existe pela mesma razão de [DataQualityFailure.observedDeviation]**
+  /// (decisão 59): a soma dos pesos entrava na mensagem já formatada, e a
+  /// interface que quisesse arredondar de outro jeito, exibir num campo
+  /// próprio ou comparar com o limite teria de reextraí-la do texto. O domínio
+  /// diz **quanto**; a apresentação decide como escrever.
   final double? actual;
 
-  const InvalidInput(super.message, {this.field, this.actual});
+  /// O limite que a regra impõe, na mesma unidade de [actual].
+  ///
+  /// **É a metade que faltava** (item B21, decisão 122). Com só o medido, a
+  /// tela sabe que 18 ativos foram recusados e não sabe contra o quê: ou
+  /// repete a frase pronta do domínio, ou chumba o limite na camada visual e
+  /// passa a ter duas fontes para o mesmo número.
+  final double? limit;
+
+  /// Unidade de [actual] e [limit]. `null` quando não há número a escrever.
+  final QuantityUnit? unit;
+
+  const InvalidInput(
+    super.message, {
+    this.field,
+    this.actual,
+    this.limit,
+    this.unit,
+  });
 }
 
 /// O modelo não converge ou a equação não tem solução no domínio aceitável.

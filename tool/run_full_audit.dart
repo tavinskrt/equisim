@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:equisim_core/equisim_core.dart';
 import 'validation/context.dart';
+import 'package:equisim/presentation/shared/domain_copy.dart';
 
 class AssetAuditResult {
   final String ticker;
@@ -160,8 +161,8 @@ Future<void> main(List<String> args) async {
         fv5: eval5.isOk ? eval5.unwrap().fairValue.reais : null,
         upside10: eval10.isOk ? eval10.unwrap().upside : null,
         upside5: eval5.isOk ? eval5.unwrap().upside : null,
-        lane10: eval10.isOk ? eval10.unwrap().model.label : null,
-        lane5: eval5.isOk ? eval5.unwrap().model.label : null,
+        lane10: eval10.isOk ? eval10.unwrap().model.rotulo : null,
+        lane5: eval5.isOk ? eval5.unwrap().model.rotulo : null,
         factor10: eval10.isOk ? parseFactor(eval10.unwrap().warnings) : null,
         factor5: eval5.isOk ? parseFactor(eval5.unwrap().warnings) : null,
         currentRoic: currentRoic,

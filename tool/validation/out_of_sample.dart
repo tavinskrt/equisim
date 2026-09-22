@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:equisim_core/equisim_core.dart';
 
 import 'context.dart';
+import 'package:equisim/presentation/shared/domain_copy.dart';
 
 /// Validação fora da amostra da arquitetura de portas.
 ///
@@ -106,7 +107,7 @@ abstract final class OutOfSampleValidation {
       linhas.add(_Row(
         ticker: ticker.value,
         outcome: 'avaliado',
-        lane: v.model.label,
+        lane: v.model.rotulo,
         sector: inputs.sectorKey,
         fairValue: v.fairValue.reais,
         price: v.marketPrice.reais,

@@ -149,6 +149,51 @@ class PerformanceMetrics {
   });
 }
 
+/// Custo de transação das compras da simulação (item C4).
+///
+/// **Tudo em inteiro.** A tarifa é proporcional ao valor negociado e vem em
+/// partes por milhão — 300 é 0,030% —, para que `valor × tarifa` seja conta de
+/// inteiros e o arredondamento seja um só, meio para cima, no centavo. A
+/// corretagem é fixa por ordem executada, e só é cobrada quando a ordem compra
+/// ao menos uma ação.
+class TransactionCosts {
+  /// Tarifa sobre o valor negociado, em partes por milhão.
+  final int feePartsPerMillion;
+
+  /// Corretagem por ordem executada.
+  final Money brokeragePerOrder;
+
+  /// Declara os custos. Os dois precisam ser não negativos.
+  const TransactionCosts({
+    this.feePartsPerMillion = 0,
+    this.brokeragePerOrder = Money.zero,
+  }) : assert(feePartsPerMillion >= 0);
+
+  /// Sem custo — a simulação de antes do item C4, para comparação.
+  static const TransactionCosts none = TransactionCosts();
+
+  /// Tarifa da B3 para ações à vista, pessoa física: negociação de 0,005% e
+  /// liquidação de 0,025%. Corretagem zero, que é o que as corretoras de varejo
+  /// cobram em ações desde 2019.
+  ///
+  /// **É o padrão da simulação.** O spread de compra e venda não entra: a
+  /// simulação compra ao fechamento, e o investidor que manda ordem a mercado
+  /// paga meio spread a mais — medido nas coortes em 0,4% a 1,7% por ponta,
+  /// conforme a liquidez (`docs/validacao/custos_transacao.md`). Aqui ele é
+  /// declarado, e não somado: um único número para todas as carteiras seria
+  /// falsa precisão.
+  static const TransactionCosts b3 = TransactionCosts(feePartsPerMillion: 300);
+
+  /// Tarifa, em centavos, sobre [tradedCents] negociados — meio para cima.
+  int feeCents(int tradedCents) =>
+      (tradedCents * feePartsPerMillion + 500000) ~/ 1000000;
+
+  /// Custo total de uma ordem de [tradedCents]: tarifa e corretagem.
+  int orderCents(int tradedCents) => tradedCents <= 0
+      ? 0
+      : feeCents(tradedCents) + brokeragePerOrder.cents;
+}
+
 /// Resultado da simulação de uma carteira.
 class BacktestOutcome {
   /// Período **efetivamente** simulado, que pode ser mais curto que o pedido
@@ -178,9 +223,16 @@ class BacktestOutcome {
   /// Capital aportado no período, somando inicial e mensais.
   final Money totalContributed;
 
-  /// Capital que virou posição: o custo de aquisição das ações efetivamente
-  /// compradas, e portanto `totalContributed − residualCash` por construção.
+  /// Capital que virou posição: o valor pago pelas ações efetivamente
+  /// compradas, e portanto `totalContributed − transactionCosts −
+  /// residualCash` por construção.
   final Money totalAllocated;
+
+  /// Tarifa e corretagem pagas nas compras (item C4).
+  ///
+  /// Sai do caixa de cada ativo antes da compra, e por isso a identidade
+  /// `aportado = alocado + custos + caixa` fecha ao centavo.
+  final Money transactionCosts;
 
   /// Patrimônio no último pregão: posições a mercado mais [residualCash].
   final Money finalValue;
@@ -211,6 +263,7 @@ class BacktestOutcome {
     required this.cashFlows,
     required this.totalContributed,
     required this.totalAllocated,
+    required this.transactionCosts,
     required this.finalValue,
     required this.residualCash,
     required this.metrics,
@@ -240,6 +293,9 @@ abstract final class PortfolioBacktest {
   ///   [BacktestOutcome.effectivePeriod].
   /// - [riskFreeRate]: taxa livre de risco **anual** para Sharpe e Sortino.
   ///   Padrão `0.0`, que produz Sharpe igual ao CAGR sobre a volatilidade.
+  /// - [costs]: custo de transação das compras. Padrão
+  ///   [TransactionCosts.b3], a tarifa da B3 — a simulação sem custo era
+  ///   otimista por construção (limitações, §2.5).
   ///
   /// Devolve [InvalidInput] para carteira vazia, pesos que não somam 100% ou
   /// plano sem aporte; [InsufficientData] quando falta cotação de algum ativo,
@@ -253,6 +309,7 @@ abstract final class PortfolioBacktest {
     required ContributionPlan plan,
     required DateRange range,
     double riskFreeRate = 0.0,
+    TransactionCosts costs = TransactionCosts.b3,
   }) {
     if (portfolio.isEmpty) {
       return const Err(InvalidInput('Carteira vazia.'));
@@ -325,6 +382,7 @@ abstract final class PortfolioBacktest {
       for (final t in portfolio.tickers) t: 0
     };
     final cashCents = <Ticker, int>{for (final t in portfolio.tickers) t: 0};
+    final costCents = <Ticker, int>{for (final t in portfolio.tickers) t: 0};
 
     // Acumulador, e não duas listas paralelas: patrimônio e fluxo do dia
     // entram numa chamada só, então não há como desalinhá-los.
@@ -349,6 +407,8 @@ abstract final class PortfolioBacktest {
           shares: shares,
           investedCents: investedCents,
           cashCents: cashCents,
+          costCents: costCents,
+          costs: costs,
         );
         flowToday += plan.initial.cents;
         totalContributedCents += plan.initial.cents;
@@ -373,6 +433,8 @@ abstract final class PortfolioBacktest {
             shares: shares,
             investedCents: investedCents,
             cashCents: cashCents,
+            costCents: costCents,
+            costs: costs,
           );
           flowToday += plan.monthly.cents;
           totalContributedCents += plan.monthly.cents;
@@ -429,6 +491,7 @@ abstract final class PortfolioBacktest {
 
     final perAsset = <Ticker, AssetPerformance>{};
     var residualCashCents = 0;
+    final totalCostCents = costCents.values.fold(0, (a, b) => a + b);
     final finalWealthCents = finalValue.cents;
     for (final entry in portfolio.entries.values) {
       final ticker = entry.ticker;
@@ -465,7 +528,8 @@ abstract final class PortfolioBacktest {
       base100: base100,
       cashFlows: cashFlows,
       totalContributed: totalContributed,
-      totalAllocated: totalContributed - residualCash,
+      totalAllocated: totalContributed - Money(totalCostCents) - residualCash,
+      transactionCosts: Money(totalCostCents),
       finalValue: finalValue,
       residualCash: residualCash,
       metrics: PerformanceMetrics(
@@ -490,7 +554,8 @@ abstract final class PortfolioBacktest {
   /// rebalancear, e a estratégia não rebalanceia.
   ///
   /// A fatia de cada ativo entra no **caixa dele**, e a compra consome desse
-  /// caixa o maior múltiplo inteiro do preço do dia. O que sobra fica lá e
+  /// caixa o maior número de ações cujo valor **mais o custo da ordem** caiba
+  /// nele (item C4). O que sobra fica lá e
   /// participa do aporte seguinte — inclusive a fatia inteira de um ativo sem
   /// cotação no dia, que assim não se perde. É essa acumulação que faz
   /// `Σ AssetPerformance.invested` reconstituir o aportado sem perda.
@@ -502,6 +567,8 @@ abstract final class PortfolioBacktest {
     required Map<Ticker, int> shares,
     required Map<Ticker, int> investedCents,
     required Map<Ticker, int> cashCents,
+    required Map<Ticker, int> costCents,
+    required TransactionCosts costs,
   }) {
     if (amount.cents == 0) return;
 
@@ -523,11 +590,34 @@ abstract final class PortfolioBacktest {
 
       final available = cashCents[ticker]!;
       if (available <= 0) continue;
-      final quantity = available ~/ priceCents;
+      final quantity = _affordable(available, priceCents, costs);
       if (quantity <= 0) continue;
+      final traded = quantity * priceCents;
+      final cost = costs.orderCents(traded);
       shares[ticker] = shares[ticker]! + quantity;
-      cashCents[ticker] = available - quantity * priceCents;
+      costCents[ticker] = costCents[ticker]! + cost;
+      cashCents[ticker] = available - traded - cost;
     }
+  }
+
+  /// O maior número de ações a [priceCents] que, somado ao custo da ordem,
+  /// cabe em [available].
+  ///
+  /// Parte da estimativa fechada `(caixa − corretagem) ÷ (preço·(1 + tarifa))`
+  /// e a corrige para os dois lados: o arredondamento da tarifa pode deixar a
+  /// estimativa uma ação acima ou abaixo do limite.
+  static int _affordable(int available, int priceCents, TransactionCosts c) {
+    int total(int q) => q * priceCents + c.orderCents(q * priceCents);
+    final livre = available - c.brokeragePerOrder.cents;
+    if (livre < priceCents) return 0;
+    var q = (livre * 1000000) ~/ (priceCents * (1000000 + c.feePartsPerMillion));
+    while (total(q + 1) <= available) {
+      q++;
+    }
+    while (q > 0 && total(q) > available) {
+      q--;
+    }
+    return q;
   }
 
   /// Cotação em centavos inteiros.
