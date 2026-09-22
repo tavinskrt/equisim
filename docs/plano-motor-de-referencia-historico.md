@@ -11,6 +11,216 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O que a oitava rodada da Fase 3 encontrou — B8, B21, C4, D3 e B24 (22/09/2026)
+
+**A Fase 3 fechou.** Os quatro itens do escopo e um quinto, aberto por uma lente
+no meio da rodada, estão prontos pelo critério de cada um. **O R1 foi atingido**
+— não sobra defeito conhecido —, o R2 continua atingido sobre o motor final, e o
+R3 está medido e reprovado. O que resta no plano é o C1, que é a Fase 4.
+
+**O B8 tinha um obstáculo que não era o que parecia.** O plano dizia que o
+conserto dependia da base bruta, e a base voltou na rodada anterior — mas os CSVs
+anuais da CVM trazem nos demonstrativos **só a última versão** de cada documento
+(conferido: 0 de 386 DREs consolidadas de 2019 com mais de uma). A versão original
+estava em outro lugar: o índice da CVM traz o `ID_DOC` de cada versão, e o RAD
+entrega o pacote dela. **O pacote do RAD mudou de formato em 2023** — de um
+`.dfp` interno com XML de contas numeradas por período para um XML único com
+números em formato brasileiro —, e os dois conversores foram conferidos conta a
+conta contra os CSVs da WEG, com zero divergência. Das 626 versões vigentes em
+alguma coorte, 616 vieram; o RAD reseta conexão longa, e foram três passes.
+
+**O efeito é raro e grande, e não muda a conclusão.** Duas execuções do backtest
+sobre o mesmo motor: o preço justo muda em 2,8% das observações avaliadas, com
+mediana de 21% entre elas — a ENAT3 de R$ 3,81 a R$ 20,16 —, e o potencial
+condicionado ao book-to-market vai de 0,027 a 0,028. Uma amostra com esses
+erros e outra sem eles dão o mesmo IC porque 97% das observações são as mesmas.
+
+**O B21 fechou medindo antes de reescrever.** A metade (b) dizia que o caminho de
+avaliação corria em `double` onde o domínio pede centavo e inteiro, e eram três
+coisas diferentes: **a fronteira para o dinheiro tinha defeito** — `Money.fromReais`
+perdia o meio centavo, exatamente o padrão que o fixture financeiro registra —, e
+foi consertada; **os insumos contábeis não perdem centavo** no `double`, e um teste
+de 20 mil valores prova isso; **a contagem de ações do motor é fracionária por
+construção**, e forçá-la a inteiro seria arredondar uma razão. A metade (c) tirou
+o rótulo de tela de catorze enums, e o rastro de cálculo não mudou uma letra.
+
+**O C4 eram dois backtests.** A simulação da carteira passou a cobrar a tarifa da
+B3 em cada compra — 0,024% do patrimônio em cinquenta carteiras, menos que o
+arredondamento de uma ação. As coortes passaram a pagar tarifa e meio spread nas
+duas pontas, com o spread estimado da máxima e da mínima do COTAHIST: 0,86 p.p. a
+menos no retorno mediano de 36 meses, e **nenhum veredito muda** — custo muda o
+nível, e não a ordem. **O estimador mais citado, o de Corwin e Schultz, ordenou a
+liquidez ao contrário** nesta amostra, e foi descartado com a medição registrada;
+o de Abdi e Ranaldo ordena como deve.
+
+**O D3 achou defeito na primeira execução.** A tela de metas, populada, estourava
+141 px em 320 dp sob escala ampliada — o título do veredito num `Row` sem
+`Expanded`. E o veredito do moat que não se estabiliza ganhou teste do único jeito
+que não é frágil: a volta foi extraída para uma função pura e alimentada com um
+veredito que alterna para sempre, e o gabarito confere que a cascata faz a mesma
+conta.
+
+### O que as lentes disseram nesta rodada
+
+**A `metodo` achou um defeito real — o quinto item da rodada, o B24.** A rota
+derivada projetava o juro com o `K_d` do primeiro ano, enquanto o `Ke` que a
+desconta vinha do ponto fixo que fecha o WACC com `K_d` ano a ano pela curva. Era
+limitação declarada no código, e deixava de ser simplificação porque a outra metade
+da conta já lia a curva. Corrigido e medido: o preço justo muda em 64 de 97
+avaliados, −0,65% na mediana, e o gabarito foi regravado. **A outra observação
+dela relitigava a decisão 120** — o minoritário, medido com efeito de 0,00% —, e é
+a terceira premissa medida que ela reabre em duas rodadas; **a disciplina da lente
+passou a exigir que ela diga o que a medição não cobriu** antes de reabrir.
+
+**A `nucleo` achou uma exceção onde devia haver `Result`**: pesos que fecham 100%
+com um negativo passavam pela soma e estouravam `ArgumentError` dentro de
+`Weight.fraction`. Corrigido, com teste. As outras duas — o snapshot com método
+que recebe preço, e a contagem sem objeto de valor — são estilo, e a segunda foi
+respondida pela própria decisão 125.
+
+**A `risco` achou duas coberturas pela metade**: o cache quebrado só era provado
+para cotações, e o literal inválido só era injetado na DRE. As duas ganharam os
+casos que faltavam, e o código já se comportava bem — o que a lente pedia era a
+prova.
+
+**A `dados` não achou nada.**
+
+### A medição sobre o motor que fecha a Fase 3
+
+| | |
+|---|---:|
+| potencial dado o B/M, 36 meses | **0,028**, `t` corrigido 0,15 / 2,70 |
+| book-to-market | 0,160, `t` corrigido 2,07 |
+| múltiplo de pares | 0,083, `t` corrigido 1,24 |
+| faixa calibrada, 90% nominal | **87,8%** em 12 meses, **88,4%** em 36 |
+| custo de ida e volta mediano, amostra do R3 | 0,60% |
+
+---
+
+## O que a sétima rodada da Fase 3 encontrou — B20, B22, B23, B21 e C5 (21 e 22/09/2026)
+
+**O C5 era o item que travava tudo, e ele saiu.** A base bruta foi reconstruída
+do zero — 6,8 GB da CVM de 2010 a 2026, 17 anos de COTAHIST, o Tesouro, 276 MB
+de FRE, o registro e o complemento da B3 por emissor —, reingerida em 42.145
+documentos, e o backtest reexecutado: **10.919 observações, 31 coortes**. Desde
+16/09 as coortes descreviam o motor da decisão 102; agora descrevem o da Fase 3.
+
+**A ordem das dependências não estava escrita em lugar nenhum**, e custou três
+execuções abortadas: `b3_deslistadas_contagem` precisa da ponte, que precisa do
+COTAHIST; o backtest precisa do complemento da B3, que precisa do registro por
+emissor. A sequência inteira está agora na §C5 do plano, em bloco executável.
+
+**Duas leituras mudaram, e nas direções opostas.**
+
+**A faixa calibrada replicou, e isso fecha o R2.** A forma da decisão 100 — a
+sétima tentada — foi remedida **sem reescolha** sobre um motor doze decisões
+adiante e uma base reconstruída: 90% nominal cobre **88,1%** em 12 meses e
+**89,3%** em 36, com desvios de 1,9 e 2,6 p.p. contra o limite de 5. Réplica, e
+não reajuste — que era exatamente a pergunta que o item C2c existia para fazer
+(decisão 124).
+
+**E nenhuma ordenação passa — agora nem o book-to-market.** Ele tinha `t`
+corrigido de 2,52 contra o crítico de 2,70, e caiu para **1,98**. O potencial do
+DCF subiu de 0,078 para 0,089, e o condicionado ao B/M de 0,010 para 0,027: **o
+motor melhorou e o fator contra o qual ele é medido encolheu**, e mesmo assim a
+distância continua. A regra da decisão 103, fixada antes de qualquer medição,
+devolve o mesmo de sempre: prêmio nenhum.
+
+**O B22 acrescentou a quinta candidata, e ela também não passa.** O múltiplo de
+pares tem IC de **+0,075** em 36 meses com `t` corrigido de 1,04 — mais
+consistente que o potencial (18 coortes positivas contra 13, Newey-West de 2,65
+contra 1,26) e menos forte. **A mediana setorial é da própria coorte**, e não do
+pacote de hoje: usar o pacote numa observação de 2018 seria conhecimento futuro
+pela porta da frente, que é o defeito que o B8 nomeia em outro lugar.
+
+**O B23 mediu o escopo antes de aceitar a acusação, e o escopo era vazio.** A
+lente disse que o minoritário falta nos pesos do WACC, e falta mesmo — mas só no
+WACC **estático**: o caminho resolvido pondera por `V − D` sobre fluxo
+consolidado, que já o inclui. A interseção das três condições — via da firma,
+recuo estático, minoritário material — é **vazia** nos 97, e impor o minoritário
+move **0,00%**. Recusado, e a condição de exposição virou aviso, para o dia em
+que deixar de ser vazia.
+
+**O B20 escolheu entre três leituras, e a medição decidiu.** A faixa de cenários
+vai de 24,9% (um a um) a 40,2% (estrutura fixa, 1,246×) e 28,2% (taxa livre). O
+preço justo não muda em nenhuma, e a pós-condição da decisão 105 vale nas três —
+mas **a tradução feita para alargar a faixa é a única que apaga uma**: sob
+estrutura fixa a YDUQ3 perde os cenários, porque o lado otimista derruba
+`Ke_∞ − g_∞` abaixo do mínimo. Fica o um a um.
+
+**O B21 fechou uma das três metades, e disse por que as outras não.**
+`InvalidInput` ganhou `limit` e `unit`, o núcleo passou a dizer a **regra** em
+vez do número formatado, e a tela escreve «Informado: X. Limite: Y.» na unidade
+declarada. As outras duas — o `double` onde o domínio pede centavo, e os enums
+com `label` de tela — são reescrita de motor e de vocabulário, e **exigem decisão
+própria**: não cabem num item cujo critério de pronto nomeia o `Failure`. O item
+ficou 🟨 em vez de ✅, que é o que ele é.
+
+### O que as lentes disseram nesta rodada
+
+**A `metodo` trouxe três, e nenhuma procede como mudança.** Duas relitigam
+decisões medidas — o beta não convergir na perpetuidade (decisão 109; remedi e
+Blume continua movendo **+0,1%**) e a tradução do cenário (decisão 121, tomada
+horas antes, com a medição e a razão no documento). A terceira, o arredondamento
+do prazo de concessão, é convenção declarada em que `round` **minimiza o erro**;
+o comentário passou a dizer isso e a nomear a única assimetria, que é o piso de
+um ano.
+
+**A `risco` achou uma falsa cobertura real**: o teste do teto de 50% da alíquota
+efetiva rodava um `every` sobre dados que nunca chegam perto do teto — passaria
+com a guarda apagada. **Quem testa o teto é o núcleo**, e testa bem
+(`point_in_time_test.dart` cobra 0,5 exato, 0,0 no crédito e `null` no prejuízo);
+o que estava errado era a **afirmação** do teste de integração, e ela foi
+corrigida.
+
+**A `nucleo` achou um invariante ausente**: `RateSeries` aceitava qualquer ordem
+e `tail(n)` recortava a fatia errada em silêncio, enquanto `PriceSeries` ordena
+no construtor desde sempre. Agora ordena também — ao custo do `const`, que era
+barato porque a única instância constante era a vazia.
+
+**A `dados` não achou nada.**
+
+**A `tela` achou dois de verdade e um artefato.** Dois blocos de layout parecido
+chamavam-se «A carteira frente à meta» mostrando **realizado** num e
+**esperado** no outro — quem lê +78% aqui e +15% lá não tem como saber que um é
+passado e o outro é promessa; o da simulação virou «O realizado frente à meta».
+E o botão de logs, ferramenta de depuração, tinha o maior peso visual do
+cabeçalho, com a cor de cautela: ficou terciário.
+
+**O artefato era da captura, e a correção foi nela.** O cartão «Esperado da
+carteira» aparecia como `—` porque a fixture zerava os sinais transversais.
+**Captura que não mostra o que a tela mostra é equipamento quebrado**, e o
+remédio foi dar sinais plausíveis à fixture — não documentar um quarto limite.
+
+**E a `rumo` e a `registro` acharam um defeito de registro que era real, depois
+de dois falsos positivos.** As duas insistiam em reabrir a divergência entre as
+vias (B13, fechada pela decisão 102) e a defasagem do `crescimento_log_linear.md`
+(que tem tarja de superado no topo). Investigando **por que** elas insistiam:
+
+1. **O `docs/estado.md` não mostrava substituição.** A decisão 39 consta como
+   `aceita` embora a 102 a substitua — o campo `substitui` mora em quem
+   substitui, e o gerador só imprimia o `status` de cada uma. Quem lesse o estado
+   via decisão morta como viva. **Corrigido no gerador**: seis decisões passam a
+   aparecer como substituídas, com o número de quem as substituiu.
+2. **A lente `registro` acusava arquivo que não podia ler.** De
+   `docs/validacao/` ela recebe só a **árvore**, e reportava que um documento
+   «continua descrevendo» algo — afirmação sobre conteúdo que nunca viu, tirada
+   do anúncio de defasagem dentro de uma decisão antiga. A disciplina passou a
+   proibir isso, e o `docs/estado.md` entrou nos materiais dela.
+
+**Reexecutadas, as duas ficaram limpas.** É a segunda rodada seguida em que o
+conserto é **na lente**, e desta vez também no gerador do registro — que é onde
+o defeito realmente estava.
+
+### A auditoria do gate
+
+Quatro grupos, **nenhum FAIL**. Dois WARN em código meu — divisão sem guarda na
+assimetria da faixa e `NaN` chegando ao `JsonEncoder` —, os dois corrigidos: onde
+o cenário pessimista coincide com o preço justo não há assimetria a medir, e o
+ativo sai da conta em vez de entrar com `Infinity`.
+
+---
+
 ## O que a sexta rodada da Fase 3 encontrou — B6, B7, B3, B4 e B5 (21/09/2026)
 
 **A rodada achou um defeito grande no meio dela, e teve de refazer a própria

@@ -1,0 +1,43 @@
+{
+  "naViaDaFirma": 77,
+  "leituras": [
+    {
+      "leitura": "umPorUm",
+      "comFaixa": 77,
+      "larguraP25": 0.03488372093023256,
+      "larguraMediana": 0.24896265560165975,
+      "larguraP75": 0.2998436833878073,
+      "razaoMedianaContraUmPorUm": 1.0,
+      "baseForaDoJusto": 0,
+      "precoJustoMuda": 0,
+      "assimetriaMediana": 1.3009404388714734,
+      "perdemAFaixa": []
+    },
+    {
+      "leitura": "estruturaFixa",
+      "comFaixa": 76,
+      "larguraP25": 0.2635882635882636,
+      "larguraMediana": 0.4017632241813602,
+      "larguraP75": 0.5999211667323611,
+      "razaoMedianaContraUmPorUm": 1.2463768115942029,
+      "baseForaDoJusto": 0,
+      "precoJustoMuda": 0,
+      "assimetriaMediana": 1.660919540229885,
+      "perdemAFaixa": [
+        "YDUQ3"
+      ]
+    },
+    {
+      "leitura": "taxaLivreDeRisco",
+      "comFaixa": 77,
+      "larguraP25": 0.08916586768935762,
+      "larguraMediana": 0.28160919540229884,
+      "larguraP75": 0.3333333333333333,
+      "razaoMedianaContraUmPorUm": 1.069767441860465,
+      "baseForaDoJusto": 0,
+      "precoJustoMuda": 0,
+      "assimetriaMediana": 1.3934426229508197,
+      "perdemAFaixa": []
+    }
+  ]
+}

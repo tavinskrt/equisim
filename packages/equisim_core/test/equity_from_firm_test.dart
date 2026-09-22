@@ -241,4 +241,70 @@ void main() {
       expect(r.isErr, isTrue);
     });
   });
+
+  group('o juro e o rendimento do caixa seguem a curva (item B24)', () {
+    const a = DcfAssumptions(
+      projectionYears: 5,
+      growthRate: 0.03,
+      perpetualGrowth: 0.03,
+      discountRate: 0.12,
+      terminalDiscountRate: 0.12,
+      returnOnCapital: 0.0,
+      cashTiming: CashTiming.fimDeAno,
+    );
+    Result<DcfOutcome> rodar({
+      List<double>? kd,
+      List<double>? caixa,
+      double? kdInf,
+      double? caixaInf,
+    }) =>
+        DcfCalculator.equityFromFirm(
+          baseProfit: 1000,
+          assumptions: a,
+          netDebt: 2000,
+          sharesOutstanding: 100,
+          costOfDebt: 0.12,
+          taxRate: 0.34,
+          equityDiscountRate: 0.15,
+          terminalEquityDiscountRate: 0.15,
+          cash: 500,
+          cashYield: 0.10,
+          costOfDebtPath: kd,
+          cashYieldPath: caixa,
+          terminalCostOfDebt: kdInf,
+          terminalCashYield: caixaInf,
+        );
+
+    test('caminho constante é a taxa única', () {
+      final unica = rodar().unwrap().equityValue;
+      final caminho = rodar(
+        kd: List.filled(5, 0.12),
+        caixa: List.filled(5, 0.10),
+        kdInf: 0.12,
+        caixaInf: 0.10,
+      ).unwrap().equityValue;
+      expect(caminho, closeTo(unica, 1e-6));
+    });
+
+    test('juro mais alto no caminho baixa o capital próprio', () {
+      final unica = rodar().unwrap().equityValue;
+      final alto = rodar(
+        kd: [0.15, 0.14, 0.13, 0.12, 0.12],
+        caixa: List.filled(5, 0.10),
+        kdInf: 0.12,
+        caixaInf: 0.10,
+      ).unwrap().equityValue;
+      expect(alto, lessThan(unica));
+    });
+
+    test('o terminal usa a taxa de equilíbrio, e não a do ano 1', () {
+      final unica = rodar().unwrap().equityValue;
+      final terminalBaixo = rodar(kdInf: 0.09).unwrap().equityValue;
+      expect(terminalBaixo, greaterThan(unica));
+    });
+
+    test('caminho de tamanho errado é recusado', () {
+      expect(rodar(kd: [0.12, 0.12]).isErr, isTrue);
+    });
+  });
 }

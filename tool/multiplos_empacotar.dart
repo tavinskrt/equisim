@@ -23,6 +23,7 @@ import 'dart:io';
 import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/congelado.dart';
+import 'package:equisim/presentation/shared/domain_copy.dart';
 
 const _saida = 'assets/mercado/multiplos_setoriais.json';
 
@@ -202,9 +203,9 @@ Future<void> main(List<String> args) async {
     for (final k in MultipleKind.values) {
       final m = grupos[_mercado]?[k.name] as Map<String, Object?>?;
       if (m == null) {
-        stdout.writeln('    ${k.label.padRight(10)} —');
+        stdout.writeln('    ${k.rotulo.padRight(10)} —');
       } else {
-        stdout.writeln('    ${k.label.padRight(10)} '
+        stdout.writeln('    ${k.rotulo.padRight(10)} '
             '${(m['mediana'] as double).toStringAsFixed(2).padLeft(7)}×   '
             '${m['pares']} pares');
       }
@@ -220,7 +221,7 @@ Future<void> main(List<String> args) async {
         final m = g[k.name] as Map<String, Object?>?;
         if (m == null) continue;
         final mediana = (m['mediana'] as double).toStringAsFixed(1);
-        linha.add('${k.label} $mediana× (${m['pares']})');
+        linha.add('${k.rotulo} $mediana× (${m['pares']})');
       }
       stdout.writeln('    ${chave.padRight(32)} ${linha.join("  ")}');
     }

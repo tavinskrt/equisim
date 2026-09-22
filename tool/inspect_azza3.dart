@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:equisim_core/equisim_core.dart';
 import 'validation/context.dart';
+import 'package:equisim/presentation/shared/domain_copy.dart';
 
 Future<void> main(List<String> args) async {
   final tickerStr = args.isNotEmpty ? args.first : 'AZZA3';
@@ -103,7 +104,7 @@ Future<void> main(List<String> args) async {
     } else {
       final res = evalResult.unwrap();
       print('10-YEAR PROJECTION (Cascade default):');
-      print('  Model: ${res.model.label}');
+      print('  Model: ${res.model.rotulo}');
       print('  Fair Value: R\$ ${res.fairValue.reais.toStringAsFixed(2)}');
       print('  Market Price: R\$ ${res.marketPrice.reais.toStringAsFixed(2)}');
       print('  Upside: ${(res.upside * 100).toStringAsFixed(2)}%');
@@ -134,7 +135,7 @@ Future<void> main(List<String> args) async {
     } else {
       final res5 = evalResult5.unwrap();
       print('\n5-YEAR PROJECTION (ValuationSettings in Flutter App UI!):');
-      print('  Model: ${res5.model.label}');
+      print('  Model: ${res5.model.rotulo}');
       print('  Fair Value: R\$ ${res5.fairValue.reais.toStringAsFixed(2)}');
       print('  Market Price: R\$ ${res5.marketPrice.reais.toStringAsFixed(2)}');
       print('  Upside: ${(res5.upside * 100).toStringAsFixed(2)}%');

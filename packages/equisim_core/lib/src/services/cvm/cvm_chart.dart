@@ -145,23 +145,18 @@ class CvmAccountLine {
 /// é feita por documento e não guardada por CNPJ.
 enum CvmLayout {
   /// Plano padrão: `3.01 = Receita de Venda de Bens e/ou Serviços`.
-  corporativo('não financeira'),
+  corporativo,
 
   /// Intermediação financeira. **Não tem EBIT** — a estrutura não separa
   /// resultado operacional de resultado financeiro, porque o financeiro *é* a
   /// operação.
-  intermediacaoFinanceira('intermediação financeira'),
+  intermediacaoFinanceira,
 
   /// Atividades seguradoras e resseguradoras. Também sem EBIT.
-  seguradora('seguradora'),
+  seguradora,
 
   /// Nenhum padrão reconhecido. Tudo que dependa de layout devolve `null`.
-  desconhecido('desconhecido');
-
-  /// Rótulo para mensagem e diagnóstico.
-  final String label;
-
-  const CvmLayout(this.label);
+  desconhecido;
 
   /// `true` quando a estrutura separa resultado operacional do financeiro.
   ///

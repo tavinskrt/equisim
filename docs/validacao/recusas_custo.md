@@ -6,6 +6,12 @@ cada coorte, descrita em [cobertura_banda.md](cobertura_banda.md) §1. Dados em
 [recusas_custo.json](recusas_custo.json). Decisão:
 [91](../decisoes/091-as-recusas-ficam-e-a-liquidez-e-remedida-com-as-deslistadas.md).
 
+> **Remedido em 21/09/2026, sobre o motor da Fase 3.** O item C5 restaurou a
+> base bruta — CVM ingerida, COTAHIST, Tesouro, FRE, registro e complemento da
+> B3 — e o backtest foi reexecutado: **10.919 observações, 31 coortes**. Os
+> números abaixo, salvo onde a seção diz o contrário, são os da leitura anterior;
+> o JSON ao lado é o de hoje. O book-to-market dos recusados continua ordenando mais que o dos avaliados: IC de 0,247 contra 0,153 em 36 meses.
+
 **A régua.** O IC é a correlação de postos entre o sinal e o retorno total de
 cada coorte, na média das coortes; o `t` é o da média entre coortes. Em 12 meses
 são sete coortes que não se sobrepõem; em 36, cinco que se sobrepõem, e o `t`

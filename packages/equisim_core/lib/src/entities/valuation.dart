@@ -12,7 +12,7 @@ enum ValuationModel {
   ///
   /// `NOPAT × (1 − RI)`, com freio de reinvestimento — a decisão 25 estendeu à
   /// firma a correção que a 24 fizera só do lado do acionista.
-  dcfFcff('DCF por fluxo da firma'),
+  dcfFcff,
 
   /// DCF sobre lucro distribuível, descontado ao Ke.
   ///
@@ -20,22 +20,7 @@ enum ValuationModel {
   /// `LPA × (1 − b)`, e `1 − b` é o *payout*. O dividendo vem da identidade da
   /// retenção, não de dado publicado de provento — o que o mantém compatível com
   /// a decisão 23.
-  dcfEarnings('DCF sobre lucro distribuível');
-
-  final String label;
-  const ValuationModel(this.label);
-}
-
-/// Método de cálculo do valor terminal.
-enum TerminalValueMethod {
-  /// Perpetuidade de Gordon.
-  gordon('Perpetuidade de Gordon'),
-
-  /// Múltiplo de saída sobre EBITDA.
-  exitMultiple('Múltiplo de saída (EV/EBITDA)');
-
-  final String label;
-  const TerminalValueMethod(this.label);
+  dcfEarnings;
 }
 
 /// Como os cenários foram gerados.
@@ -52,19 +37,14 @@ enum ScenarioMode {
 /// Faixas nomeadas apresentadas ao usuário.
 enum ScenarioBand {
   /// Crescimento deslocado para baixo e desconto para cima.
-  bear('Pessimista'),
+  bear,
 
   /// Premissas centrais. É o cenário cujo valor vira o preço justo.
-  base('Base'),
+  base,
 
   /// Crescimento deslocado para cima e desconto para baixo, respeitado o
   /// spread mínimo da perpetuidade.
-  bull('Otimista');
-
-  /// Rótulo de exibição, em português.
-  final String label;
-
-  const ScenarioBand(this.label);
+  bull;
 }
 
 /// Distribuição de valores justos produzida pelo motor de cenários.
@@ -139,25 +119,25 @@ enum ValuationCaveat {
   /// O valor terminal responde por mais que
   /// [ValuationDiagnostics.terminalShareLimit] do total: o número é sobretudo
   /// premissa, e a parte apoiada em exercício observado decide pouco.
-  terminalPesado('o valor terminal domina o preço justo'),
+  terminalPesado,
 
   /// A taxa de crescimento não veio do próprio ativo — foi a âncora de
   /// inflação ou a ausência de crescimento.
-  crescimentoNaoIdentificado('o crescimento não é identificável no histórico'),
+  crescimentoNaoIdentificado,
 
   /// As duas contagens de papéis publicadas divergem além de uma ação
   /// societária plausível, e a escolha do divisor foi por conservadorismo.
-  escalaIncerta('a base societária publicada é ambígua'),
+  escalaIncerta,
 
   /// Um único exercício foi multiplicado por mais de
   /// [ValuationDiagnostics.baseFactorLimit] para virar o fluxo-base.
-  baseNormalizadaForte('a base depende de forte correção de um só exercício'),
+  baseNormalizadaForte,
 
   /// A avaliação começou na via da firma e migrou para a do acionista.
   ///
   /// **Não é mais emitida desde a decisão 102**: nenhuma avaliação muda de via.
   /// Fica para ler resultados gravados antes dela.
-  viaMigrada('a via de avaliação mudou no meio do cálculo'),
+  viaMigrada,
 
   /// O capital próprio responde por pouco do valor da firma, e o preço por
   /// papel é resíduo de subtração entre números próximos.
@@ -168,7 +148,7 @@ enum ValuationCaveat {
   /// decisão 31, e não mais um recuo. Ressalva que vale para a maioria não
   /// distingue nada; a substituição continua declarada nos avisos, que é onde
   /// ela informa.
-  ponteFragil('o preço por papel é resíduo de uma subtração frágil'),
+  ponteFragil,
 
   /// O preço justo é combinação das duas vias, na faixa em que nenhuma domina.
   ///
@@ -182,7 +162,7 @@ enum ValuationCaveat {
   /// **Não é mais emitida desde a decisão 102**: a mistura continuava subindo
   /// com a taxa, e as duas vias deixaram de se combinar. Fica para ler
   /// resultados gravados antes dela.
-  viasMescladas('o preço justo combina as duas vias'),
+  viasMescladas,
 
   /// O fluxo-base não veio do exercício observado: ele foi reconstruído do
   /// retorno mediano do ciclo sobre o capital de hoje.
@@ -196,7 +176,7 @@ enum ValuationCaveat {
   /// **É a ressalva mais forte da lista.** O preço justo aqui não repousa em
   /// nenhum exercício observado recente: repousa na afirmação de que a empresa
   /// volta ao que já foi.
-  baseReconstruida('o fluxo-base vem do ciclo, e não do exercício observado'),
+  baseReconstruida,
 
   /// O negócio opera sob contrato de prazo determinado, e o valor terminal
   /// supõe perpetuidade.
@@ -210,10 +190,7 @@ enum ValuationCaveat {
   ///
   /// O tamanho está medido: se o contrato acabasse em dez anos, o preço justo
   /// mediano dos expostos ficaria em 0,80 do publicado; em vinte, 0,90.
-  prazoDeterminado('o negócio opera sob contrato de prazo determinado');
-
-  final String label;
-  const ValuationCaveat(this.label);
+  prazoDeterminado;
 }
 
 /// Fatos medidos que qualificam o preço justo.

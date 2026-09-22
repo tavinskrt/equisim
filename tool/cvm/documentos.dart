@@ -53,11 +53,20 @@ FundamentalsSnapshot _snap(
   );
 }
 
+/// As versões anteriores de cada documento, gravadas por `cvm_ingerir.dart`.
+const versoesAntigas = 'data/cvm_versoes.json';
+
 /// Documentos por ticker, da base ingerida.
 ///
 /// - [tickersPorCnpj]: tickers a mais para cada CNPJ. A ingestão só liga
 ///   ticker à companhia do universo de hoje; as deslistadas (item C1b) chegam
 ///   com a lista vazia, e o ticker delas vem da ponte do COTAHIST.
+///
+/// - [comVersoesAntigas]: acrescenta as versões anteriores de cada documento,
+///   de `data/cvm_versoes.json` (item B8), cada uma com a data de recebimento
+///   dela. Quem lê a lista precisa escolher a vigente — `CvmSeries.build` o
+///   faz por `CvmSeries.vigentes`. Sem o arquivo, avisa e segue com a última
+///   versão, que é o comportamento anterior ao B8.
 ///
 /// Encerra o processo com código 2 quando a base não existe, dizendo o que
 /// rodar antes.
@@ -65,6 +74,7 @@ Map<String, List<CvmPeriodDocument>> carregarDocumentos(
   String caminho, {
   Set<String>? soTickers,
   Map<String, List<String>>? tickersPorCnpj,
+  bool comVersoesAntigas = false,
 }) {
   final f = File(caminho);
   if (!f.existsSync()) {
@@ -72,9 +82,23 @@ Map<String, List<CvmPeriodDocument>> carregarDocumentos(
     stderr.writeln('  dart run tool/cvm_ingerir.dart data/cvm');
     exit(2);
   }
+  final linhas = [
+    ...(jsonDecode(f.readAsStringSync()) as List).cast<Map<String, dynamic>>(),
+  ];
+  if (comVersoesAntigas) {
+    final v = File(versoesAntigas);
+    if (v.existsSync()) {
+      linhas.addAll(
+          (jsonDecode(v.readAsStringSync()) as List).cast<Map<String, dynamic>>());
+    } else {
+      stderr.writeln('AVISO: $versoesAntigas não existe — as coortes leem a '
+          'última versão de cada documento (item B8). Rode antes:');
+      stderr.writeln('  python tool/cvm_versoes_baixar.py');
+      stderr.writeln('  dart run tool/cvm_ingerir.dart data/cvm');
+    }
+  }
   final out = <String, List<CvmPeriodDocument>>{};
-  for (final e in (jsonDecode(f.readAsStringSync()) as List)
-      .cast<Map<String, dynamic>>()) {
+  for (final e in linhas) {
     final tickers = [
       ...(e['tickers'] as List).cast<String>(),
       ...?tickersPorCnpj?[e['cnpj']],

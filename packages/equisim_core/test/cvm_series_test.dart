@@ -197,4 +197,64 @@ void main() {
     expect(r.provenance[FieldSource.cvm], greaterThan(0));
     expect(r.provenance[FieldSource.mercado], greaterThan(0));
   });
+
+  group('versões do mesmo documento (item B8)', () {
+    // A DFP de 2021 saiu com lucro 10 em 01/03/2022 e foi reapresentada com
+    // lucro 4 em 15/06/2023. Quem avaliava em 2022 só tinha a original.
+    CvmPeriodDocument versao(double lucro, DateTime rec) => CvmPeriodDocument(
+          kind: CvmDocumentKind.dfp,
+          periodStart: _d(2021, 1, 1),
+          periodEnd: _d(2021, 12, 31),
+          current: _s(_d(2021, 12, 31), lucro: lucro, rec: rec),
+        );
+    final original = versao(10, _d(2022, 3, 1));
+    final reapresentada = versao(4, _d(2023, 6, 15));
+    final docs = [_dfp(2020), reapresentada, original];
+
+    FundamentalsSnapshot doAno2021(DateTime asOf) => CvmSeries.build(
+          documentos: docs,
+          mercado: mercado,
+          asOf: asOf,
+          publicado: PointInTimeView(asOf).isPublished,
+          ancorada: false,
+        ).series.lastWhere((s) => s.fiscalPeriodEnd.year == 2021);
+
+    test('antes da reapresentação, a coorte lê a original', () {
+      expect(doAno2021(_d(2022, 9, 30)).netIncome, 10);
+    });
+
+    test('depois dela, a reapresentada — em qualquer ordem da lista', () {
+      expect(doAno2021(_d(2023, 9, 30)).netIncome, 4);
+    });
+
+    test('um exercício entra uma vez só, com qualquer número de versões', () {
+      final r = CvmSeries.build(
+        documentos: docs,
+        mercado: mercado,
+        asOf: _d(2023, 9, 30),
+        publicado: _todos,
+        ancorada: false,
+      );
+      expect(r.series.where((s) => s.fiscalPeriodEnd.year == 2021).length, 1);
+    });
+
+    test('vigentes: descarta a versão ainda não recebida e a superada', () {
+      final em2022 = CvmSeries.vigentes(
+          docs, PointInTimeView(_d(2022, 9, 30)).isPublished);
+      expect(em2022.map((d) => d.current.netIncome), [10, 10],
+          reason: 'a DFP de 2020 e a original de 2021');
+      final em2023 = CvmSeries.vigentes(
+          docs, PointInTimeView(_d(2023, 9, 30)).isPublished);
+      expect(em2023.last, same(reapresentada));
+    });
+
+    test('com uma versão por documento, vigentes é o filtro de publicados', () {
+      final uma = [for (var a = 2019; a <= 2022; a++) _dfp(a)];
+      final p = PointInTimeView(_d(2022, 9, 30)).isPublished;
+      expect(CvmSeries.vigentes(uma, p), [
+        for (final d in uma)
+          if (p(d.current)) d,
+      ]);
+    });
+  });
 }

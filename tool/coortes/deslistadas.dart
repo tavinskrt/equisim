@@ -212,7 +212,9 @@ class Deslistadas {
     }
     final cotahist = lerCotahistBruto(isins.keys.toSet(), isins: isins);
     final documentos = carregarDocumentos('data/cvm_exercicios.json',
-        soTickers: isins.keys.toSet(), tickersPorCnpj: tickersPorCnpj);
+        soTickers: isins.keys.toSet(),
+        tickersPorCnpj: tickersPorCnpj,
+        comVersoesAntigas: true);
 
     final papeis = <String, PapelDeslistado>{};
     for (final e in tickersPorCnpj.entries) {
@@ -354,8 +356,8 @@ class FundamentosDeslistada implements FundamentalsRepository {
           subject: t.value));
     }
     final mercado = <FundamentalsSnapshot>[
-      for (final d in documentos)
-        if (d.kind == CvmDocumentKind.dfp && publicado(d.current))
+      for (final d in CvmSeries.vigentes(documentos, publicado))
+        if (d.kind == CvmDocumentKind.dfp)
           FundamentalsSnapshot(
             ticker: t,
             fiscalPeriodEnd: d.periodEnd,

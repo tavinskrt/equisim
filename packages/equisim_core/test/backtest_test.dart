@@ -35,6 +35,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {Ticker.parse('PETR4'): seriesOf('PETR4', start, [10, 15, 20])},
         plan: const ContributionPlan(
@@ -63,6 +64,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {
           Ticker.parse('PETR4'): seriesOf('PETR4', start, [10, 15, 20]),
@@ -96,6 +98,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {
           Ticker.parse('PETR4'): seriesOf('PETR4', start, [10, 15, 20]),
@@ -124,6 +127,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {Ticker.parse('PETR4'): seriesOf('PETR4', start, closes)},
         plan: const ContributionPlan(
@@ -159,6 +163,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {Ticker.parse('PETR4'): seriesOf('PETR4', start, closes)},
         plan: const ContributionPlan(
@@ -190,6 +195,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {
           Ticker.parse('PETR4'):
@@ -238,6 +244,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {
           for (final symbol in ['PETR4', 'VALE3', 'ITUB4'])
@@ -282,6 +289,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {
           Ticker.parse('PETR4'):
@@ -319,6 +327,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {
           Ticker.parse('PETR4'):
@@ -359,6 +368,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {Ticker.parse('PETR4'): seriesOf('PETR4', start, closes)},
         plan: const ContributionPlan(
@@ -382,6 +392,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {
           Ticker.parse('PETR4'): seriesOf('PETR4', start, [10, 10, 10, 10, 10]),
@@ -408,6 +419,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: const {},
         plan: const ContributionPlan(
@@ -429,6 +441,7 @@ void main() {
       ).unwrap();
 
       final result = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {Ticker.parse('PETR4'): seriesOf('PETR4', start, [10, 11])},
         plan: ContributionPlan.none,
@@ -459,6 +472,7 @@ void main() {
         List<double>.filled(90, 10.0),
       );
       final r = PortfolioBacktest.run(
+        costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {Ticker.parse('PETR4'): serie},
         plan: ContributionPlan(
@@ -480,6 +494,86 @@ void main() {
       // Janeiro, fevereiro, março e abril: quatro meses, quatro aportes.
       expect(aportes(30), equals(4));
       expect(aportes(31), equals(4));
+    });
+  });
+
+  group('custo de transação (item C4)', () {
+    // Um ativo a R$ 10,00, aporte inicial de R$ 1.000,00, sem mensal: sem
+    // custo compraria 100 ações exatas; com a tarifa da B3 (0,030%), cem ações
+    // custariam R$ 1.000,30, e a simulação compra 99.
+    final t = Ticker.parse('ABCD3');
+    final asset = Asset(ticker: t, name: 'ABCD', sector: Sector.unknown);
+    final carteira = Portfolio.equalWeighted(
+      id: 'p',
+      name: 'P',
+      kind: PortfolioKind.principal,
+      assets: [asset],
+    ).unwrap();
+    final dias = [
+      for (var d = 2; d <= 31; d++) DateTime(2024, 1, d),
+    ];
+    final precos = {
+      t: PriceSeries(ticker: t, points: [
+        for (final d in dias) PricePoint(date: d, close: 10.0),
+      ]),
+    };
+    final plano = ContributionPlan(
+      initial: const Money(100000),
+      monthly: Money.zero,
+      contributionDay: 1,
+    );
+    BacktestOutcome rodar(TransactionCosts c) => PortfolioBacktest.run(
+          portfolio: carteira,
+          prices: precos,
+          plan: plano,
+          range: DateRange(dias.first, dias.last),
+          costs: c,
+        ).unwrap();
+
+    test('a tarifa sai do caixa e a compra respeita o que sobra', () {
+      final r = rodar(TransactionCosts.b3);
+      expect(r.perAsset[t]!.shares, 99);
+      // 99 × R$ 10,00 = R$ 990,00; tarifa de 0,030% = R$ 0,297 → R$ 0,30.
+      expect(r.transactionCosts, const Money(30));
+      expect(r.totalAllocated, const Money(99000));
+      expect(r.residualCash, const Money(970));
+    });
+
+    test('aportado = alocado + custos + caixa, ao centavo', () {
+      for (final c in [
+        TransactionCosts.none,
+        TransactionCosts.b3,
+        const TransactionCosts(
+            feePartsPerMillion: 2500, brokeragePerOrder: Money(490)),
+      ]) {
+        final r = rodar(c);
+        expect(r.totalAllocated + r.transactionCosts + r.residualCash,
+            r.totalContributed,
+            reason: '$c');
+        expect(r.residualCash.cents, greaterThanOrEqualTo(0));
+      }
+    });
+
+    test('sem custo, a simulação é a de antes do C4', () {
+      final r = rodar(TransactionCosts.none);
+      expect(r.perAsset[t]!.shares, 100);
+      expect(r.transactionCosts, Money.zero);
+    });
+
+    test('a corretagem só é cobrada em ordem que compra', () {
+      // R$ 1.000,00 de corretagem não deixa comprar nada — e não é cobrada.
+      final r = rodar(const TransactionCosts(brokeragePerOrder: Money(100000)));
+      expect(r.perAsset[t]!.shares, 0);
+      expect(r.transactionCosts, Money.zero);
+      expect(r.residualCash, const Money(100000));
+    });
+
+    test('a tarifa arredonda meio para cima no centavo', () {
+      const b3 = TransactionCosts.b3;
+      expect(b3.feeCents(99000), 30); // 29,7 centavos
+      expect(b3.feeCents(5000), 2); // 1,5 centavo
+      expect(b3.feeCents(4999), 1); // 1,4997
+      expect(b3.orderCents(0), 0);
     });
   });
 }

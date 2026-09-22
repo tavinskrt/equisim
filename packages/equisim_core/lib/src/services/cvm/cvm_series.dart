@@ -36,6 +36,40 @@ abstract final class CvmSeries {
   /// mercado que o completa.
   static const int folgaDias = 4;
 
+  /// A versão vigente de cada documento: das já publicadas, a de recebimento
+  /// mais recente, por tipo e data de referência (item B8).
+  ///
+  /// A CVM republica o documento reapresentado com outra versão, e cada versão
+  /// tem a sua data de recebimento. Com todas elas na lista, a pergunta da
+  /// coorte deixa de ser «o documento era público?» e passa a ser «**qual**
+  /// versão era pública?» — a original até a reapresentação chegar, a
+  /// reapresentada depois. Sem isso o número corrigido em 2021 entra numa
+  /// avaliação de 2019, que é conhecimento futuro pela porta da frente.
+  ///
+  /// Com uma versão por documento — o pacote do aplicativo, que só traz a
+  /// última —, devolve os publicados, e nada muda. Em empate de data, fica a
+  /// que vem depois na lista. Documento sem data de recebimento conta como
+  /// recebido no fecho, que é o mais cedo que ele pode ter sido.
+  static List<CvmPeriodDocument> vigentes(
+    List<CvmPeriodDocument> documentos,
+    bool Function(FundamentalsSnapshot) publicado,
+  ) {
+    DateTime dia(DateTime d) => DateTime.utc(d.year, d.month, d.day);
+    final porChave = <(CvmDocumentKind, DateTime), CvmPeriodDocument>{};
+    for (final d in documentos) {
+      if (!publicado(d.current)) continue;
+      final k = (d.kind, dia(d.periodEnd));
+      final atual = porChave[k];
+      if (atual == null ||
+          !dia(d.current.receiptDate ?? d.periodEnd)
+              .isBefore(dia(atual.current.receiptDate ?? atual.periodEnd))) {
+        porChave[k] = d;
+      }
+    }
+    return porChave.values.toList()
+      ..sort((a, b) => a.periodEnd.compareTo(b.periodEnd));
+  }
+
   /// Monta a série de [documentos] da CVM, mesclada com [mercado].
   ///
   /// - [ancorada]: `true` para a série de doze meses no trimestre mais recente
@@ -68,13 +102,17 @@ abstract final class CvmSeries {
     // ponto mesclado por ser do futuro — o ano sumia. USIM3 em 04/09/2024:
     // DFP de 2023 reapresentada, com a versão ingerida recebida em 16/01/2025,
     // e avaliação feita sobre 2022 (decisão 78).
+    //
+    // **E só a versão vigente de cada um** (item B8): com as versões antigas
+    // na lista, a coorte lê o número que era público na data, e não o
+    // reapresentado depois.
+    final emVigor = vigentes(documentos, publicado);
     final daCvm = ancorada
-        ? TrailingTwelveMonths.serieAncorada(documentos,
+        ? TrailingTwelveMonths.serieAncorada(emVigor,
             asOf: asOf, publicado: publicado)
         : [
-            for (final d in documentos)
-              if (d.kind == CvmDocumentKind.dfp && publicado(d.current))
-                d.current,
+            for (final d in emVigor)
+              if (d.kind == CvmDocumentKind.dfp) d.current,
           ];
     if (daCvm.isEmpty) {
       return CvmSeriesResult(

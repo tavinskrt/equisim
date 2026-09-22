@@ -1,0 +1,52 @@
+{
+  "materialidade": 0.01,
+  "avaliados": 97,
+  "usamWaccEstatico": 19,
+  "viaDaFirma": 77,
+  "viaDaFirmaEEstatico": [],
+  "comMinoritario": 64,
+  "comFatiaMaterial": 33,
+  "estaticoEMaterial": [],
+  "fatia": {
+    "p50": 0.010783899460683869,
+    "p90": 0.1085980934212242,
+    "maximo": 0.31583567434264354
+  },
+  "maioresFatias": {
+    "WIZC3": 0.31583567434264354,
+    "BEEF3": 0.23544104433159346,
+    "ALUP11": 0.21343369816026309,
+    "ANIM3": 0.15836508163275612,
+    "DIRR3": 0.14815611666711337,
+    "USIM5": 0.1085980934212242,
+    "USIM3": 0.1085980934212242,
+    "SLCE3": 0.09941961222446628,
+    "CYRE3": 0.09754831044671058,
+    "CYRE4": 0.09754831044671058,
+    "RDOR3": 0.09499098929254875,
+    "EMBJ3": 0.08788872937835436,
+    "EQTL3": 0.083367150034356,
+    "BPAC11": 0.07956213719312137,
+    "EGIE3": 0.07675304875014415
+  },
+  "formas": [
+    {
+      "forma": "contabil",
+      "avaliados": 97,
+      "justoMedianoTodos": 0.0,
+      "justoMedianoExpostos": null,
+      "deltaDescontoMedianoExpostos": null,
+      "spearmanPotencial": 1.0,
+      "saem": []
+    },
+    {
+      "forma": "pelaRazao",
+      "avaliados": 97,
+      "justoMedianoTodos": 0.0,
+      "justoMedianoExpostos": null,
+      "deltaDescontoMedianoExpostos": null,
+      "spearmanPotencial": 1.0,
+      "saem": []
+    }
+  ]
+}

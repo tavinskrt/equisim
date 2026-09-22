@@ -51,6 +51,7 @@ import 'package:equisim_core/equisim_core.dart'
         TransversalSignals;
 
 import 'validation/regression.dart';
+import 'package:equisim/presentation/shared/domain_copy.dart';
 
 /// Uma observação utilizável: os três ordenadores e o retorno, todos presentes.
 class Obs {
@@ -378,6 +379,7 @@ void _imprimirHorizonte(String titulo, Map<String, dynamic> h) {
 Future<void> main(List<String> args) async {
   if (args.contains('--aplicativo')) return _aplicativo();
   if (args.contains('--trimestral')) return _trimestral();
+  if (args.contains('--custos')) return _custos();
   if (args.contains('--pacote-habilidade')) {
     return _pacoteDaHabilidade(jsonDecode(
             File('docs/validacao/habilidade_trimestral.json').readAsStringSync())
@@ -697,7 +699,7 @@ void _pacoteDaHabilidade(Map<String, dynamic> resultado) {
   final premio = lida.premiumOrdering;
   stderr.writeln('escrito $_pacoteHabilidade — potencial dado o B/M '
       '${lida.demonstrated ? 'comprovado' : 'não comprovado'}; prêmio do '
-      'retorno esperado: ${premio == null ? 'nenhum, nenhuma ordenação passou' : premio.label}');
+      'retorno esperado: ${premio == null ? 'nenhum, nenhuma ordenação passou' : premio.rotulo}');
 }
 
 /// A habilidade sobre a montagem do aplicativo por data, com e sem as
@@ -745,4 +747,182 @@ Future<void> _aplicativo() async {
     }
   }
   stderr.writeln('\nescrito docs/validacao/habilidade_aplicativo.json');
+}
+
+/// A habilidade sobre o retorno **líquido** de custo de transação (item C4).
+///
+/// O custo de ida e volta de cada observação sai de `tool/custos_spread.py`:
+/// tarifa da B3 nas duas pontas e meio spread de Abdi e Ranaldo em cada uma.
+/// O retorno líquido é `(1 + r)·fator − 1`, e o resto é a mesma medição de
+/// `--trimestral` — coortes trimestrais com as deslistadas, 36 e 12 meses,
+/// critério da decisão 96.
+///
+/// **Custo uniforme não mexe no IC**, e isto não é descoberta: somar a mesma
+/// constante a todos os retornos de uma coorte preserva a ordem. O que o custo
+/// pode mudar é a ordem **quando ele varia com a liquidez** — e varia, de
+/// 0,4% a 1,7% de spread entre os tercis. Por isso a medição importa.
+Future<void> _custos() async {
+  const fonte = 'docs/validacao/backtest_trimestral.json';
+  const custos = 'docs/validacao/custos_spread.json';
+  for (final f in [fonte, custos]) {
+    if (!File(f).existsSync()) {
+      stderr.writeln('Falta $f. Rode antes: dart run tool/backtest_valuation.dart '
+          '--montagem aplicativo --com-deslistadas --trimestral, '
+          'python tool/b3_baixar.py --extremos --de 2017 e '
+          'python tool/custos_spread.py');
+      exit(2);
+    }
+  }
+  final todas = jsonDecode(File(fonte).readAsStringSync()) as List<dynamic>;
+  final porObs = ((jsonDecode(File(custos).readAsStringSync())
+          as Map<String, dynamic>)['porObservacao'] as Map<String, dynamic>)
+      .cast<String, Map<String, dynamic>>();
+  var semCusto = 0;
+  for (final l in todas) {
+    final m = l as Map<String, dynamic>;
+    final c = porObs['${m['coorte']}|${m['ticker']}'];
+    if (c == null) {
+      semCusto++;
+      continue;
+    }
+    for (final h in ['12', '36']) {
+      final r = _num(m['ret${h}tot']);
+      final f = _num(c['fator$h']);
+      if (r != null && f != null) m['ret${h}totLiq'] = (1 + r) * f - 1;
+    }
+  }
+
+  /// Custo de ida e volta de cada observação, `1 − fator`, por horizonte.
+  double? custoDe(Obs o, String h) {
+    final f = _num(porObs['${o.coorte}|${o.ticker}']?['fator$h']);
+    return f == null ? null : 1 - f;
+  }
+
+  /// Quintil de cima menos o de baixo, por coorte, em média igual.
+  ///
+  /// Com [custo], acrescenta a carteira **comprada e vendida**: a diferença
+  /// entre os líquidos já desconta o custo da ponta comprada, mas trata a
+  /// vendida como se o custo dela a favorecesse. Vender a descoberto e zerar
+  /// também paga spread e tarifa — o custo da perna vendida entra duas vezes,
+  /// uma para desfazer o sinal errado e outra para cobrá-lo.
+  Map<String, dynamic> quintis(List<Obs> obs, double Function(Obs) chave,
+      {double? Function(Obs)? custo}) {
+    final porCoorte = <String, List<Obs>>{};
+    for (final o in obs) {
+      (porCoorte[o.coorte] ??= []).add(o);
+    }
+    final difs = <double>[];
+    final compradoVendido = <double>[];
+    for (final g in porCoorte.values) {
+      if (g.length < 30) continue;
+      final s = [...g]..sort((a, b) => chave(a).compareTo(chave(b)));
+      final q = s.length ~/ 5;
+      double media(Iterable<double> xs) => xs.reduce((a, b) => a + b) / xs.length;
+      final topo = s.skip(s.length - q), fundo = s.take(q);
+      final d = media(topo.map((o) => o.retorno)) -
+          media(fundo.map((o) => o.retorno));
+      difs.add(d);
+      if (custo != null) {
+        final c = [for (final o in fundo) custo(o) ?? 0.0];
+        compradoVendido.add(d - 2 * media(c));
+      }
+    }
+    final v = Regression.summarize(difs);
+    final cv = Regression.summarize(compradoVendido);
+    return {
+      'media': v?.mean,
+      't': v?.t,
+      'coortes': difs.length,
+      if (cv != null) 'compradoVendido': {'media': cv.mean, 't': cv.t},
+    };
+  }
+
+  Map<String, dynamic> par(String bruto, String liquido, int meses) {
+    final h = '$meses';
+    final defasagem = meses ~/ 3 - 1;
+    // As mesmas observações nas duas leituras: a bruta só entra onde a líquida
+    // existe.
+    final exigir = [bruto, liquido];
+    Map<String, dynamic> leitura(String campo, {required bool comCusto}) {
+      final r = _horizonte(todas, campo, defasagem: defasagem, exigir: exigir);
+      final obs = _carregar(todas, campo, exigir: exigir);
+      final retornos = [for (final o in obs) o.retorno]..sort();
+      final custos = [
+        for (final o in obs) ?custoDe(o, h),
+      ]..sort();
+      double? custo(Obs o) => comCusto ? custoDe(o, h) : null;
+      return {
+        ...r,
+        'retornoMediano':
+            retornos.isEmpty ? null : retornos[retornos.length ~/ 2],
+        if (comCusto)
+          'custoIdaEVoltaMediano':
+              custos.isEmpty ? null : custos[custos.length ~/ 2],
+        'quintilPotencial': quintis(obs, (o) => o.potencial,
+            custo: comCusto ? custo : null),
+        'quintilBookToMarket': quintis(obs, (o) => o.bookToMarket,
+            custo: comCusto ? custo : null),
+      };
+    }
+
+    return {
+      'bruto': leitura(bruto, comCusto: false),
+      'liquido': leitura(liquido, comCusto: true),
+    };
+  }
+
+  final resultado = {
+    'gerado': DateTime.now().toIso8601String(),
+    'fonte': fonte,
+    'custos': custos,
+    'observacoesSemCusto': semCusto,
+    'h36': par('ret36tot', 'ret36totLiq', 36),
+    'h12': par('ret12tot', 'ret12totLiq', 12),
+  };
+  File('docs/validacao/custos_transacao.json').writeAsStringSync(
+    const JsonEncoder.withIndent(' ').convert(resultado),
+  );
+
+  for (final h in ['h36', 'h12']) {
+    final r = resultado[h] as Map<String, dynamic>;
+    stdout.writeln('\n=== $h: bruto contra líquido ===');
+    for (final k in ['bruto', 'liquido']) {
+      final l = r[k] as Map<String, dynamic>;
+      final fm = l['famaMacBeth'] as Map<String, dynamic>;
+      String ic(String chave) {
+        final v = fm[chave] as Map<String, dynamic>?;
+        if (v == null) return '—';
+        final sob = v['tSobreposicao'] as double?;
+        final nw = v['tNeweyWest'] as double?;
+        return '${(v['media'] as double).toStringAsFixed(3)} '
+            '(t_sob ${sob?.toStringAsFixed(2) ?? '—'}, '
+            'NW ${nw?.toStringAsFixed(2) ?? '—'}, '
+            '${v['passaR3'] == true ? 'PASSA' : 'não passa'})';
+      }
+
+      final qp = l['quintilPotencial'] as Map<String, dynamic>;
+      final qb = l['quintilBookToMarket'] as Map<String, dynamic>;
+      String pct(Object? v) =>
+          v == null ? '—' : '${((v as double) * 100).toStringAsFixed(2)}%';
+      stdout.writeln('  $k  n=${l['observacoes']}  '
+          'retorno mediano ${pct(l['retornoMediano'])}');
+      stdout.writeln('    potencial dado o B/M  ${ic('potencialDadoBm')}');
+      stdout.writeln('    IC do potencial       ${ic('icPotencial')}');
+      stdout.writeln('    IC do B/M             ${ic('icBookToMarket')}');
+      stdout.writeln('    IC do L/P             ${ic('icEarningsYield')}');
+      stdout.writeln('    IC do composto        ${ic('icComposto')}');
+      String cv(Map<String, dynamic> q) {
+        final c = q['compradoVendido'] as Map<String, dynamic>?;
+        return c == null ? '' : ' (comprado-vendido ${pct(c['media'])})';
+      }
+
+      stdout.writeln('    Q5−Q1 potencial ${pct(qp['media'])}${cv(qp)}  '
+          'Q5−Q1 B/M ${pct(qb['media'])}${cv(qb)}');
+      if (l['custoIdaEVoltaMediano'] != null) {
+        stdout.writeln('    custo de ida e volta mediano '
+            '${pct(l['custoIdaEVoltaMediano'])}');
+      }
+    }
+  }
+  stderr.writeln('\nescrito docs/validacao/custos_transacao.json');
 }

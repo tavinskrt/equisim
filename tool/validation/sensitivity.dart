@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:equisim_core/equisim_core.dart';
 
 import 'context.dart';
+import 'package:equisim/presentation/shared/domain_copy.dart';
 
 /// Avaliação de um ativo sob uma configuração de premissas.
 class SensitivityPoint {
@@ -199,7 +200,7 @@ abstract final class SensitivityReports {
       ..writeln('| Modelo | Ocorrências |')
       ..writeln('|---|---|');
     for (final entry in modelCounts.entries) {
-      buffer.writeln('| ${entry.key.label} | ${entry.value} |');
+      buffer.writeln('| ${entry.key.rotulo} | ${entry.value} |');
     }
     if (failures > 0) {
       buffer.writeln('| *(não avaliável)* | $failures |');
@@ -254,7 +255,7 @@ abstract final class SensitivityReports {
       buffer.writeln(
         '| ${point.ticker.value} '
         '| ${point.scenario} '
-        '| ${point.model?.label ?? '—'} '
+        '| ${point.model?.rotulo ?? '—'} '
         '| ${point.fairValue == null ? '—' : num2(point.fairValue!, decimals: 2)} '
         '| ${point.discountRate == null ? '—' : pct(point.discountRate!)} |',
       );

@@ -1,5 +1,9 @@
 # A reapresentação no *point-in-time* — item B8
 
+> **Consertado em 22/09/2026** ([decisão 128](../decisoes/128-a-coorte-le-a-versao-que-era-publica-na-data.md)).
+> As §0 a §3 são a medição de 21/09, feita antes de haver as versões antigas;
+> a §4 é o conserto e o efeito dele.
+
 > **Medido em 21/09/2026**, sobre `assets/cvm/documentos.json`, que é
 > versionado. Esta medição **não precisa da base bruta nem da entrada
 > congelada** — ela se reproduz num clone limpo.
@@ -91,3 +95,70 @@ deixa de ser "24,8% dos anuais têm mais de uma versão" — que é a contagem d
 reapresentações, não a do dano — e passa a ser **"menos de 1,1% dos exercícios
 de cada coorte somem, e a parte que entra com número corrigido não foi
 medida"**.
+
+## 4. O conserto, e o que ele moveu
+
+> **Medido em 22/09/2026**, com a base bruta restaurada pelo C5.
+>
+> ```bash
+> python tool/cvm_versoes_baixar.py      # repetir até nada faltar
+> dart run tool/cvm_ingerir.dart data/cvm
+> dart run tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas --trimestral
+> python tool/reapresentacao_efeito.py SEM.json docs/validacao/backtest_trimestral.json
+> ```
+
+**A versão original existia, e é pública.** Os CSVs anuais da CVM trazem nos
+demonstrativos só a última versão — conferido: na DRE consolidada de 2019, 0 de
+386 documentos aparecem com mais de uma —, mas o índice lista todas, com o
+`ID_DOC` de cada uma, e o RAD entrega o pacote de qualquer versão por esse
+número. Dentro do pacote vêm as mesmas contas, na mesma escala: a conversão foi
+conferida conta a conta contra os CSVs em quatro documentos da WEG, dois no
+formato até 2022 (um `.dfp` interno com `InfoFinaDFin.xml`) e dois no de 2023 em
+diante (um XML único com os valores em formato brasileiro) — **zero
+divergência** nos oito demonstrativos que o motor lê.
+
+**Só a versão vigente em alguma coorte é baixada**: a de recebimento mais
+recente até a data, quando não é a última. São **626** no universo das coortes
+— 316 DFP e 310 ITR. O RAD reseta conexão longa, e o download precisou de três
+passes; **616 foram convertidas**, 9 recusaram o download nas três tentativas e
+1 veio sem demonstrativo. As dez restantes caem na última versão, que é o
+comportamento de antes.
+
+**A ingestão grava as antigas em arquivo à parte** (`data/cvm_versoes.json`),
+cada uma com a data de recebimento **dela**, e a base vigente ficou idêntica em
+conteúdo à anterior. O backtest lê as duas, e `CvmSeries.vigentes` escolhe em
+cada coorte a versão recebida mais recentemente até a data — a original até a
+reapresentação chegar, a reapresentada depois.
+
+### O efeito
+
+Duas execuções do backtest sobre o mesmo motor, sem e com as versões antigas
+([reapresentacao_efeito.json](reapresentacao_efeito.json)):
+
+| | |
+|---|---:|
+| observações | 10.919 nas duas |
+| avaliadas nas duas | 3.045 |
+| **preço justo que muda** | **84 (2,8%)** |
+| passam a ser avaliadas | 6 |
+| deixam de ser avaliadas | 16 |
+| exercício mais recente que muda | 61 |
+| book-to-market que muda | 87 |
+| movimento do justo entre as que mudam | mediana 21%, p90 83% |
+
+**O efeito é raro e grande.** Em 97% das observações nada muda — a
+reapresentação típica chega antes da coorte seguinte, ou corrige o que o motor
+não lê. Onde muda, muda muito: a ENAT3 em 31/03/2022 vai de R$ 3,81 a R$ 20,16 de
+preço justo, a MRVE3 ao longo de 2022 perde de 83% a 97%, o BPAC11 em 31/12/2021
+cai de R$ 38,57 para R$ 5,67. **São exatamente os casos que a metade (b) nomeava**:
+número corrigido depois entrando numa avaliação que não o tinha.
+
+**E a leitura do R3 não muda.** O potencial condicionado ao book-to-market, em 36
+meses, dá 0,028 com `t` corrigido de 0,15 — era 0,027 com 0,15 —, e nenhuma
+das cinco ordenações passa. A faixa calibrada continua replicando: 87,8% em 12
+meses e 88,4% em 36 contra 90% nominal.
+
+**O que isto fecha.** As duas metades: (a) o documento que sumia porque a única
+versão disponível chegou depois volta pela versão original; (b) o número
+reapresentado deixa de entrar antes de ter sido publicado. O que sobra são as dez
+versões que o RAD não entregou — 1,6% das 626 —, declaradas.

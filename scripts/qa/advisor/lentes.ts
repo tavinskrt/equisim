@@ -122,6 +122,24 @@ export const LENTES: Record<LenteId, Lente> = {
       'A secao `## Contexto` de uma decisao descreve o estado NO DIA EM QUE ELA',
       '  FOI ESCRITA. Decisao e imutavel e o contexto dela envelhece de',
       '  proposito: citar um Contexto como estado atual FABRICA divergencia.',
+      'ARQUIVO NAO LIDO NAO SE ACUSA. Voce recebe o conteudo das decisoes e dos',
+      '  pareceres, e de `docs/validacao/` recebe apenas a ARVORE -- os nomes.',
+      '  Dizer que um documento de validacao "continua descrevendo" algo e',
+      '  afirmar sobre conteudo que voce nao viu, e ja produziu o mesmo falso',
+      '  positivo duas rodadas seguidas: uma decisao antiga anuncia que tal',
+      '  documento vai ficar defasado, o documento ganhou tarja de superado, e a',
+      '  lente reporta a defasagem lendo o anuncio. Sobre arquivo cujo conteudo',
+      '  nao veio, o maximo e INVENTARIAR que ele existe e que uma decisao',
+      '  previu defasagem nele -- nunca afirmar que a defasagem persiste.',
+      'CODIGO NAO RECEBIDO NAO SE ACUSA, E O CONGELADO NAO E O ATUAL. Esta lente',
+      '  nao recebe o codigo-fonte: afirmar que um simbolo, arquivo ou linha',
+      '  "persiste" no repositorio e afirmar o que voce nao viu. O',
+      '  `PLANO_ARQUITETURA.md` e CONGELADO -- descreve o repositorio de agosto,',
+      '  e as observacoes citadas dentro dele sao retrato daquela data. Em',
+      '  22/09/2026 esta lente acusou `_stockUnitsWhitelist` em',
+      '  `stock_service.dart:344` a partir de uma observacao do documento',
+      '  congelado; o simbolo nao existe mais. Promessa do congelado so e',
+      '  reportavel com evidencia de NAO entrega vinda de material atual.',
       'ARQUIVO CITADO NAO E ARQUIVO AUSENTE. Antes de dizer que um documento',
       '  falta, PROCURE o marcador "===== ARQUIVO: <caminho> =====" no material',
       '  e o caminho na arvore do repositorio, que vem junto. Em 10/09/2026',
@@ -136,6 +154,12 @@ export const LENTES: Record<LenteId, Lente> = {
       { tipo: 'arquivo', caminho: 'CLAUDE.md' },
       { tipo: 'diretorio', caminho: 'docs/decisoes', extensoes: ['.md'], opcional: true },
       { tipo: 'diretorio', caminho: 'docs/apontamentos', extensoes: ['.md'], opcional: true },
+      // **A tabela de substituicoes, ja resolvida.** O campo `substitui` mora
+      // em quem substitui, e refazer o grafo lendo 100 decisoes e trabalho que
+      // o modelo faz mal: em 21/09/2026 ele reportou a decisao 23 como viva
+      // duas vezes, embora a 101 a substitua parcialmente e diga isso no campo.
+      // O estado gerado traz o veredito de cada uma numa linha.
+      { tipo: 'arquivo', caminho: 'docs/estado.md', opcional: true },
       // ARVORE COMPLETA, nao um subconjunto. Esta lente pergunta se o registro
       // bate com a realidade; mandar arvore parcial faz o modelo ver ausencia
       // onde ha apenas material nao enviado, e ele reporta "promessa nao
@@ -233,6 +257,14 @@ export const LENTES: Record<LenteId, Lente> = {
       'NAO proponha metodologia alternativa sem dizer o que ela CUSTA em dado',
       '  de entrada. Metodo que exige serie que o projeto nao tem e proposta',
       '  vazia.',
+      'PREMISSA JA MEDIDA NAO SE REABRE SEM EVIDENCIA NOVA. Quando o comentario',
+      '  no codigo cita uma decisao que MEDIU a premissa (efeito, conjunto',
+      '  exposto, alternativa comparada), reporta-la de novo so procede se voce',
+      '  apontar o que a medicao NAO cobriu -- outro caminho de codigo, outro',
+      '  subconjunto, outra condicao. Repetir a objecao que a decisao ja',
+      '  respondeu e ruido: em 21 e 22/09/2026 esta lente reabriu tres',
+      '  premissas medidas (Blume +0,1%, traducao do cenario, minoritario com',
+      '  efeito 0,00%). Limitacao declarada SEM medicao continua reportavel.',
     ],
     materiais: [
       {

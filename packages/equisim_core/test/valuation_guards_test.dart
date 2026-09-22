@@ -4163,6 +4163,231 @@ void main() {
     });
   });
 
+  group('A tradução do cenário para o Ke é escolha declarada', () {
+    // Item B20, decisão 121. O cenário perturba `discountRate`; na via do
+    // acionista esse campo **é** o `Ke`, e na via da firma é o WACC. A rota
+    // derivada desconta ao `Ke`, e traduzir exige escolher o que o cenário
+    // perturba. As três leituras estão no enum, e o padrão é o um a um.
+    FundamentalsSnapshot ano(int y, double escala) => FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 10000 * escala,
+          ebit: 1800 * escala,
+          ebitda: 2400 * escala,
+          netIncome: 900 * escala,
+          incomeBeforeTax: 1300 * escala,
+          incomeTaxExpense: -400 * escala,
+          interestExpense: 400,
+          earningsPerShare: 0.9 * escala,
+          cash: 500,
+          shortTermDebt: 1000,
+          longTermDebt: 3000,
+          totalStockholderEquity: 6000 * escala,
+          bookValuePerShare: 6.0 * escala,
+          operatingCashFlow: 2000 * escala,
+          nopat: 1188 * escala,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 12000,
+        );
+
+    List<FundamentalsSnapshot> serie() {
+      final out = <FundamentalsSnapshot>[];
+      var escala = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(ano(2025 - i, escala));
+        escala *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult avaliar(ScenarioTranslation leitura) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: serie(),
+        marketPrice: 12.0,
+        capm: const CapmInputs(
+            riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+        unleveredBeta: 0.8,
+        scenarioTranslation: leitura,
+      ));
+      expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
+      return r.unwrap();
+    }
+
+    double largura(ValuationResult v) {
+      final c = v.discreteScenarios!;
+      return (c[ScenarioBand.bull]!.cents - c[ScenarioBand.bear]!.cents) /
+          v.fairValue.cents;
+    }
+
+    test('o padrão declarado é o um a um', () {
+      // Se alguém trocar o padrão do enum, a faixa de produção muda de largura
+      // sem que nada mais no repositório mude — e este é o único lugar que
+      // reprova.
+      final padrao = ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: serie(),
+        marketPrice: 12.0,
+        capm: const CapmInputs(
+            riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+      );
+      expect(padrao.scenarioTranslation, ScenarioTranslation.umPorUm);
+    });
+
+    test('as três leituras dão o mesmo preço justo', () {
+      // O cenário base tem deslocamento zero, e multiplicar zero por qualquer
+      // fator dá zero: a tradução não pode mover o centro. Se mover, a faixa
+      // passa a cercar outro número.
+      final a = avaliar(ScenarioTranslation.umPorUm);
+      for (final leitura in ScenarioTranslation.values) {
+        expect(avaliar(leitura).fairValue, a.fairValue, reason: '$leitura');
+      }
+    });
+
+    test('o cenário base volta ao preço justo nas três', () {
+      for (final leitura in ScenarioTranslation.values) {
+        final v = avaliar(leitura);
+        expect(v.discreteScenarios![ScenarioBand.base], v.fairValue,
+            reason: '$leitura — pós-condição da decisão 105');
+      }
+    });
+
+    test('amplificar alarga a faixa, e na ordem esperada', () {
+      final umPorUm = largura(avaliar(ScenarioTranslation.umPorUm));
+      final taxaLivre = largura(avaliar(ScenarioTranslation.taxaLivreDeRisco));
+      final estrutura = largura(avaliar(ScenarioTranslation.estruturaFixa));
+      expect(taxaLivre, greaterThan(umPorUm));
+      expect(estrutura, greaterThan(taxaLivre),
+          reason: '`1 ÷ w_E` passa de `1 ÷ (1 − w_D·t)` sempre que há dívida');
+    });
+
+    test('sem via da firma, a tradução não tem o que traduzir', () {
+      // **Por construção, e não por medição**: `_descontarFluxo` devolve o
+      // fluxo do acionista antes de calcular o fator, porque lá o campo
+      // perturbado **é** o `Ke`. É por isso que a medição do universo se
+      // restringe aos 77 da via da firma — nos outros as três leituras são a
+      // mesma conta, e medi-las seria medir nada.
+      //
+      // O que este teste cobra é o lado observável disso: o fator só existe
+      // para a via da firma, e o enum não tem efeito fora dela.
+      final v = avaliar(ScenarioTranslation.umPorUm);
+      expect(v.model, ValuationModel.dcfFcff,
+          reason: 'o cenário do grupo precisa mesmo ser da via da firma');
+    });
+  });
+
+  group('O minoritário no peso do WACC estático é declarado', () {
+    // Item B23, decisão 120. O peso do WACC **estático** é o valor de mercado
+    // da controladora, e o fluxo que ele desconta é o **consolidado**: com
+    // minoritário material, a participação da dívida sai inflada. O caminho
+    // **resolvido** não tem o problema — ele pondera pelo capital próprio que o
+    // próprio modelo produz, `V − D` sobre fluxo consolidado.
+    //
+    // A interseção das três condições é **vazia** no universo de hoje. O aviso
+    // existe para o dia em que deixar de ser.
+    FundamentalsSnapshot ano(int y, double escala, {double? minoritario}) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 10000 * escala,
+          ebit: 1800 * escala,
+          ebitda: 2400 * escala,
+          netIncome: 900 * escala,
+          incomeBeforeTax: 1300 * escala,
+          incomeTaxExpense: -400 * escala,
+          interestExpense: 400,
+          earningsPerShare: 0.9 * escala,
+          cash: 500,
+          shortTermDebt: 1000,
+          longTermDebt: 3000,
+          totalStockholderEquity: 6000 * escala,
+          minorityInterest: minoritario,
+          bookValuePerShare: 6.0 * escala,
+          operatingCashFlow: 2000 * escala,
+          nopat: 1188 * escala,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 12000,
+        );
+
+    List<FundamentalsSnapshot> serie({double? minoritario}) {
+      final out = <FundamentalsSnapshot>[];
+      var escala = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(ano(2025 - i, escala, minoritario: minoritario));
+        escala *= 1.05;
+      }
+      return out;
+    }
+
+    /// Sem beta desalavancado **não há realavancagem**, e a avaliação recua
+    /// para o WACC estático — que é exatamente a condição do aviso.
+    ValuationResult? avaliar({double? minoritario, double? betaU}) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: serie(minoritario: minoritario),
+        marketPrice: 12.0,
+        capm: const CapmInputs(
+            riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+        unleveredBeta: betaU,
+      ));
+      return r.valueOrNull;
+    }
+
+    bool declara(ValuationResult? v) =>
+        v?.warnings.any((w) => w.contains('não controladores')) ?? false;
+
+    test('recuo estático com minoritário material declara', () {
+      // 900 de minoritário contra 6.000 do controlador: 13% do consolidado.
+      final v = avaliar(minoritario: 900);
+      expect(v, isNotNull);
+      expect(declara(v), isTrue);
+    });
+
+    test('minoritário abaixo da materialidade não declara', () {
+      // 30 contra 6.000: 0,5% do consolidado, abaixo do corte de 1%.
+      expect(declara(avaliar(minoritario: 30)), isFalse);
+    });
+
+    test('sem minoritário não declara', () {
+      expect(declara(avaliar()), isFalse);
+    });
+
+    test('com as taxas resolvidas não declara, mesmo com minoritário grande',
+        () {
+      // **É a metade que importa.** O caminho resolvido pondera pelo capital
+      // próprio do modelo, que já é o consolidado: ali o minoritário não falta
+      // no peso, e avisar seria cobrar defeito que não existe.
+      final v = avaliar(minoritario: 900, betaU: 0.8);
+      expect(v, isNotNull);
+      expect(
+        v!.warnings.any((w) => w.contains('resolvido ano a ano')),
+        isTrue,
+        reason: 'o cenário precisa mesmo resolver as taxas, ou o teste não '
+            'prova nada',
+      );
+      expect(declara(v), isFalse);
+    });
+
+    test('o aviso não muda o preço justo', () {
+      final com = avaliar(minoritario: 900);
+      final sem = avaliar(minoritario: 30);
+      // A mesma companhia, com o minoritário apenas mudando de tamanho, muda
+      // de preço pela ponte (decisão 49) — o que o teste cobra é que o aviso
+      // em si não entre na conta: ele é narrativa.
+      expect(com, isNotNull);
+      expect(sem, isNotNull);
+      expect(com!.discountRate, closeTo(sem!.discountRate, 1e-12),
+          reason: 'o minoritário não entra no peso, e declarar não o põe lá');
+    });
+  });
+
   group('A rota derivada remunera o caixa pela taxa dele', () {
     // Lente `metodo`, 21/09/2026; decisão 119. A decisão 113 separou o caixa
     // no **WACC**; a ponte do acionista continuava com `D_líquida · K_d`, de

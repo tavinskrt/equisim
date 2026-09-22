@@ -412,11 +412,15 @@ class _AuditButton extends StatelessWidget {
             horizontal: FinSpace.sm,
             vertical: FinSpace.xs,
           ),
+          // **Sem cor de atenção** (lente `tela`, 22/09/2026). O painel de
+          // logs é ferramenta de depuração, e o fundo com a cor de cautela
+          // dava a ele o maior peso visual do cabeçalho — mais que o nome do
+          // aplicativo e que as abas. Quem abre a tela lia alerta onde há
+          // atalho técnico. Fica terciário, que é o lugar dele na hierarquia.
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: context.fin.caution.withValues(alpha: 0.14),
             border: Border.all(
-              color: context.fin.caution.withValues(alpha: 0.4),
+              color: context.fin.textTertiary.withValues(alpha: 0.35),
             ),
           ),
           child: Row(
@@ -425,14 +429,13 @@ class _AuditButton extends StatelessWidget {
               Icon(
                 Icons.terminal,
                 size: 14,
-                color: isLight ? context.fin.caution : context.fin.caution,
+                color: context.fin.textTertiary,
               ),
               const Gap.xs(axis: Axis.horizontal),
               Text(
                 'LOGS',
                 style: context.finType.caption.copyWith(
-                  color: isLight ? context.fin.caution : context.fin.caution,
-                  fontWeight: FontWeight.bold,
+                  color: context.fin.textTertiary,
                   letterSpacing: 0.6,
                 ),
               ),

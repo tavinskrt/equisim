@@ -70,6 +70,7 @@ export 'src/services/valuation/peer_multiples.dart';
 export 'src/services/valuation/cyclical_sectors.dart';
 export 'src/services/valuation/eligibility.dart';
 export 'src/services/valuation/growth_guards.dart';
+export 'src/services/valuation/moat_fixed_point.dart';
 export 'src/services/valuation/levered_rates.dart';
 export 'src/services/valuation/inference.dart';
 export 'src/services/valuation/cost_of_capital.dart';

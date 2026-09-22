@@ -101,6 +101,12 @@ abstract final class CsvExport {
       decimals: 2,
     );
     row(
+      'custos_de_transacao',
+      result.principal?.transactionCosts.reais,
+      result.reserva?.transactionCosts.reais,
+      decimals: 2,
+    );
+    row(
       'caixa_residual',
       result.principal?.residualCash.reais,
       result.reserva?.residualCash.reais,

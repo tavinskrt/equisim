@@ -14,18 +14,13 @@ enum TransversalOrdering {
   /// Média dos escores robustos do potencial, do book-to-market e do lucro
   /// sobre o preço — o modelo transversal declarado, com o potencial como um
   /// insumo entre outros.
-  composite('o composto de potencial, valor patrimonial e lucro sobre o preço'),
+  composite,
 
   /// O valor patrimonial sobre o valor de mercado.
-  bookToMarket('o valor patrimonial sobre o preço'),
+  bookToMarket,
 
   /// O potencial do valuation.
-  potential('o potencial do valuation');
-
-  /// Como a tela nomeia a ordenação.
-  final String label;
-
-  const TransversalOrdering(this.label);
+  potential;
 }
 
 /// Os sinais de um ativo que a ordenação transversal lê.

@@ -59,10 +59,28 @@ class RateSeries {
   /// **Não há construtor por listas paralelas**, e a ausência é a decisão: com
   /// um ponto por período, não existe estado em que a data e a taxa discordem
   /// em quantidade.
-  const RateSeries(this.points, {this.basis = TimeBasis.businessDaily});
+  /// Declara a série, **em ordem de data**.
+  ///
+  /// **Ordena, como `PriceSeries` faz** (lente `nucleo`, 21/09/2026). A série
+  /// era `const` e aceitava qualquer ordem, e [tail] recortava a fatia errada
+  /// em silêncio: com os pontos fora de ordem, "os `n` últimos" vira "os `n`
+  /// que estavam no fim da lista", e a anualização da janela recente do CDI ou
+  /// do IPCA sai de um pedaço arbitrário da série.
+  ///
+  /// **O custo é o `const`**, e ele era barato: a única instância constante era
+  /// a vazia, e ordenar lista vazia não custa nada. Complexidade O(n log n),
+  /// como a da série de preços.
+  RateSeries(List<RatePoint> points,
+      {this.basis = TimeBasis.businessDaily})
+      : points = List<RatePoint>.unmodifiable(
+          <RatePoint>[...points]
+            ..sort((RatePoint a, RatePoint b) => a.date.compareTo(b.date)),
+        );
 
   /// Série vazia, para recuo de chamador sem dado.
-  static const RateSeries empty = RateSeries([]);
+  /// A série vazia. **`final`, e não `const`**: o construtor ordena, e ordenar
+  /// não é operação de tempo de compilação.
+  static final RateSeries empty = RateSeries(const []);
 
   /// Datas dos períodos. **Vista derivada** — a fonte da verdade é [points].
   List<DateTime> get dates => [for (final p in points) p.date];

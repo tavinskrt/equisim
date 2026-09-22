@@ -169,6 +169,9 @@ test/**/failures/
 # `python tool/cvm_baixar.py`. Dado de terceiro, e não fonte deste projeto.
 data/cvm/
 data/cvm_exercicios.json
+# As versões antigas dos documentos (item B8), por tool/cvm_versoes_baixar.py
+# e tool/cvm_ingerir.dart.
+data/cvm_versoes.json
 
 # Taxas do Tesouro Direto (~15 MB), reproduzível por tool/tesouro_baixar.py.
 data/tesouro/

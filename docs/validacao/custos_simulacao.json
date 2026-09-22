@@ -1,0 +1,1422 @@
+{
+ "semente": 20260922,
+ "janela": "2019-01-02 a 2026-08-31",
+ "plano": "R$ 10.000 inicial e R$ 1.000 por mês",
+ "resumo": {
+  "carteiras": 50,
+  "tarifaB3": {
+   "variacaoDoPatrimonioFinalMediana": -0.0002407132108518395,
+   "variacaoDoXirrMediana": -0.000056768916496578725,
+   "piorVariacaoDoXirr": -0.00018706741395496662,
+   "custoSobreAportadoMediano": 0.00030920792079207923
+  },
+  "tarifaEMeioSpread": {
+   "variacaoDoPatrimonioFinalMediana": -0.005259129580746591,
+   "variacaoDoXirrMediana": -0.0012421902968314455,
+   "piorVariacaoDoXirr": -0.0014020559553362122,
+   "custoSobreAportadoMediano": 0.005268118811881189
+  }
+ },
+ "carteiras": [
+  {
+   "ativos": [
+    "BRKM6",
+    "LOGG3",
+    "ITUB3",
+    "PATI3",
+    "LUXM4",
+    "BRSR5",
+    "RCSL3",
+    "HAGA3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 92124.1,
+    "xirr": -0.021986140019538226,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 92113.77,
+    "xirr": -0.022013053917243838,
+    "custos": 31.31
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 91696.77,
+    "xirr": -0.02310227650677508,
+    "custos": 532.32
+   }
+  },
+  {
+   "ativos": [
+    "LREN3",
+    "SEER3",
+    "TECN3",
+    "TEND3",
+    "PATI4",
+    "CLSC3",
+    "PATI3",
+    "KEPL3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 168724.01,
+    "xirr": 0.12034273451666266,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 168711.05,
+    "xirr": 0.12032489645010276,
+    "custos": 31.04
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 167903.71,
+    "xirr": 0.11921091488809905,
+    "custos": 531.99
+   }
+  },
+  {
+   "ativos": [
+    "SCAR3",
+    "SOND6",
+    "TECN3",
+    "UNIP5",
+    "AGRO3",
+    "RNEW4",
+    "MTSA4",
+    "ALOS3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 155144.82,
+    "xirr": 0.10089737315875387,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 155079.02,
+    "xirr": 0.10079859652221379,
+    "custos": 31.02
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 154323.27,
+    "xirr": 0.09966099245059595,
+    "custos": 531.93
+   }
+  },
+  {
+   "ativos": [
+    "VSTE3",
+    "MTSA4",
+    "LUXM4",
+    "EMAE4",
+    "NORD3",
+    "SLCE3",
+    "UCAS3",
+    "AFLT3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 74222.02,
+    "xirr": -0.07442614630570037,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 74208.55,
+    "xirr": -0.07447075482832038,
+    "custos": 31.43
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 73811.58,
+    "xirr": -0.07578951533882419,
+    "custos": 532.09
+   }
+  },
+  {
+   "ativos": [
+    "IGTI11",
+    "TXRX4",
+    "CEBR6",
+    "CSMG3",
+    "PLAS3",
+    "NATU3",
+    "TAEE4",
+    "AMER3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 110979.42,
+    "xirr": 0.02234237915009633,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 110937.4,
+    "xirr": 0.022252888034828788,
+    "custos": 31.23
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 110378.83,
+    "xirr": 0.021059833337042092,
+    "custos": 532.28
+   }
+  },
+  {
+   "ativos": [
+    "ABCB4",
+    "TAEE3",
+    "JFEN3",
+    "AXIA3",
+    "TELB3",
+    "KLBN3",
+    "SANB3",
+    "JHSF3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 114326.92,
+    "xirr": 0.029353724353501667,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 114299.4,
+    "xirr": 0.029296955437005088,
+    "custos": 31.25
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 113714.89,
+    "xirr": 0.02808776418064506,
+    "custos": 532.28
+   }
+  },
+  {
+   "ativos": [
+    "AZEV4",
+    "ENMT4",
+    "ETER3",
+    "EMBJ3",
+    "MOVI3",
+    "ENGI3",
+    "LIGT3",
+    "AMER3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 112234.44,
+    "xirr": 0.025029651385828886,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 112171.91,
+    "xirr": 0.024897883504843604,
+    "custos": 31.22
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 111624.69,
+    "xirr": 0.023741389226152147,
+    "custos": 531.95
+   }
+  },
+  {
+   "ativos": [
+    "MNPR3",
+    "RAPT4",
+    "VIVT3",
+    "ECOR3",
+    "ETER3",
+    "ALUP11",
+    "ABEV3",
+    "RCSL3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 149730.19,
+    "xirr": 0.09251008322346996,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 149695.41,
+    "xirr": 0.09245601086034823,
+    "custos": 31.47
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 148947.69,
+    "xirr": 0.09129038411346325,
+    "custos": 532.4
+   }
+  },
+  {
+   "ativos": [
+    "KLBN3",
+    "BRKM3",
+    "CLSC3",
+    "EALT3",
+    "FESA3",
+    "JSLG3",
+    "CEBR5",
+    "JFEN3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 108054.08,
+    "xirr": 0.01602941141117448,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 108019.65,
+    "xirr": 0.015953934256961268,
+    "custos": 31.33
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 107488.93,
+    "xirr": 0.014787221114343035,
+    "custos": 532.19
+   }
+  },
+  {
+   "ativos": [
+    "YDUQ3",
+    "AXIA3",
+    "JHSF3",
+    "CSNA3",
+    "GRND3",
+    "MULT3",
+    "CBEE3",
+    "FLRY3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 100654.25,
+    "xirr": -0.000816075468008973,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 100608.07,
+    "xirr": -0.000925303875129682,
+    "custos": 31.05
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 100083.32,
+    "xirr": -0.0021703068518405693,
+    "custos": 532.3
+   }
+  },
+  {
+   "ativos": [
+    "KLBN11",
+    "YDUQ3",
+    "HOOT4",
+    "RENT3",
+    "ALUP4",
+    "EMBJ3",
+    "AURE3",
+    "UGPA3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 153389.9,
+    "xirr": 0.09813654035894653,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 153266.59,
+    "xirr": 0.09794947294499157,
+    "custos": 31.18
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 152569.27,
+    "xirr": 0.09688867755725049,
+    "custos": 531.64
+   }
+  },
+  {
+   "ativos": [
+    "TELB3",
+    "FESA3",
+    "RANI3",
+    "PETR3",
+    "AHEB3",
+    "CBEE3",
+    "CSUD3",
+    "CVCB3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 94702.02,
+    "xirr": -0.015363097733621512,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 94680.43,
+    "xirr": -0.015417656221975766,
+    "custos": 31.19
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 94218.89,
+    "xirr": -0.016587236597772316,
+    "custos": 532.41
+   }
+  },
+  {
+   "ativos": [
+    "SHUL4",
+    "MWET4",
+    "PNVL3",
+    "CBEE3",
+    "LOGN3",
+    "COCE3",
+    "TPIS3",
+    "RDOR3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 126939.04,
+    "xirr": 0.05395192128083547,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 126890.85,
+    "xirr": 0.053862927060301505,
+    "custos": 31.29
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 126187.74,
+    "xirr": 0.05256040972238498,
+    "custos": 532.08
+   }
+  },
+  {
+   "ativos": [
+    "PMAM3",
+    "REDE3",
+    "EMBJ3",
+    "SUZB3",
+    "BRKM6",
+    "NORD3",
+    "AMER3",
+    "GGBR3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 115069.79,
+    "xirr": 0.030900063888787657,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 115096.54,
+    "xirr": 0.030954888561561048,
+    "custos": 31.23
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 114583.09,
+    "xirr": 0.0299001889495391,
+    "custos": 532.01
+   }
+  },
+  {
+   "ativos": [
+    "ISAE3",
+    "AZEV3",
+    "BBDC4",
+    "PEAB3",
+    "MRVE3",
+    "BRAP3",
+    "RENT3",
+    "LOGG3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 97148.53,
+    "xirr": -0.009271004054037897,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 97135.9,
+    "xirr": -0.0093020580182386,
+    "custos": 30.92
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 96629.48,
+    "xirr": -0.010550844097407822,
+    "custos": 532.07
+   }
+  },
+  {
+   "ativos": [
+    "ITUB4",
+    "BEES4",
+    "IGTI11",
+    "MBRF3",
+    "AZEV4",
+    "CSMG3",
+    "DOHL4",
+    "AALR3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 131185.35,
+    "xirr": 0.06168063709865901,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 131165.45,
+    "xirr": 0.06164512375076426,
+    "custos": 31.28
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 130564.63,
+    "xirr": 0.060570240377300716,
+    "custos": 532.08
+   }
+  },
+  {
+   "ativos": [
+    "CMIG4",
+    "GOAU3",
+    "HAGA4",
+    "BRSR5",
+    "INEP4",
+    "BRKM5",
+    "AHEB3",
+    "DXCO3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 89581.63,
+    "xirr": -0.02869999346873243,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 89568.15,
+    "xirr": -0.02873619521489921,
+    "custos": 31.49
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 89132.09,
+    "xirr": -0.02991051379633931,
+    "custos": 532.35
+   }
+  },
+  {
+   "ativos": [
+    "NORD3",
+    "VSTE3",
+    "ANIM3",
+    "PFRM3",
+    "IRBR3",
+    "UNIP3",
+    "MDIA3",
+    "FLRY3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 79215.22,
+    "xirr": -0.058488902617274484,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 79197.61,
+    "xirr": -0.058543112296043455,
+    "custos": 31.11
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 78848.6,
+    "xirr": -0.05962027371079112,
+    "custos": 531.95
+   }
+  },
+  {
+   "ativos": [
+    "MWET4",
+    "RNEW3",
+    "CTKA3",
+    "CRPG6",
+    "MILS3",
+    "LUXM4",
+    "AFLT3",
+    "PFRM3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 130309.1,
+    "xirr": 0.060129488931458044,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 130253.92,
+    "xirr": 0.060030273557648485,
+    "custos": 31.67
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 129623.4,
+    "xirr": 0.05889344131417357,
+    "custos": 532.46
+   }
+  },
+  {
+   "ativos": [
+    "BBAS3",
+    "CTKA3",
+    "AZZA3",
+    "PRIO3",
+    "MYPK3",
+    "CSUD3",
+    "BEEF3",
+    "CPLE3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 181676.79,
+    "xirr": 0.13752018814904904,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 181565.76,
+    "xirr": 0.13737837549815166,
+    "custos": 31.19
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 180646.16,
+    "xirr": 0.13620043359600423,
+    "custos": 532.07
+   }
+  },
+  {
+   "ativos": [
+    "MTSA4",
+    "YDUQ3",
+    "GGBR4",
+    "OSXB3",
+    "BGIP3",
+    "DXCO3",
+    "TELB3",
+    "ENMT3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 96860.53,
+    "xirr": -0.009987126784259887,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 96839.01,
+    "xirr": -0.010040248402585002,
+    "custos": 31.06
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 96306.74,
+    "xirr": -0.011358240465309201,
+    "custos": 531.96
+   }
+  },
+  {
+   "ativos": [
+    "KLBN3",
+    "USIM5",
+    "RADL3",
+    "PATI4",
+    "BRSR5",
+    "JFEN3",
+    "AHEB3",
+    "EKTR4"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 91668.41,
+    "xirr": -0.02317092566181195,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 91660.29,
+    "xirr": -0.023192191606296677,
+    "custos": 31.09
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 91175.43,
+    "xirr": -0.02446577378065728,
+    "custos": 532.33
+   }
+  },
+  {
+   "ativos": [
+    "RSUL4",
+    "BRAV3",
+    "GFSA3",
+    "NUTR3",
+    "JOPA4",
+    "MTSA4",
+    "CEBR6",
+    "IGTI11"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 119506.32,
+    "xirr": 0.03981263199396764,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 119441.3,
+    "xirr": 0.0396845612892614,
+    "custos": 30.65
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 118891.18,
+    "xirr": 0.03859802009381928,
+    "custos": 531.78
+   }
+  },
+  {
+   "ativos": [
+    "BGIP3",
+    "RAIL3",
+    "SMTO3",
+    "DTCY3",
+    "KLBN11",
+    "YDUQ3",
+    "BBDC4",
+    "ISAE3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 90291.61,
+    "xirr": -0.026829086209474266,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 90281.2,
+    "xirr": -0.026856827585033785,
+    "custos": 30.79
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 89802.18,
+    "xirr": -0.028137164947600178,
+    "custos": 531.96
+   }
+  },
+  {
+   "ativos": [
+    "SANB11",
+    "TELB4",
+    "BRSR6",
+    "ALUP11",
+    "BBAS3",
+    "PDGR3",
+    "VIVT3",
+    "BMEB3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 134507.42,
+    "xirr": 0.06751096957391721,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 134484.9,
+    "xirr": 0.06747183145368492,
+    "custos": 30.83
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 133806.12,
+    "xirr": 0.06628893637113475,
+    "custos": 531.85
+   }
+  },
+  {
+   "ativos": [
+    "CTKA4",
+    "EMBJ3",
+    "ALUP4",
+    "TAEE3",
+    "CPLE3",
+    "HAPV3",
+    "HETA4",
+    "RAIL3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 171531.53,
+    "xirr": 0.12408947058976892,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 171438.17,
+    "xirr": 0.12396319023543585,
+    "custos": 31.34
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 170591.15,
+    "xirr": 0.12281428485001637,
+    "custos": 531.97
+   }
+  },
+  {
+   "ativos": [
+    "WEGE3",
+    "TGMA3",
+    "USIM6",
+    "HAGA3",
+    "LUPA3",
+    "MRVE3",
+    "CVCB3",
+    "NATU3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 86993.29,
+    "xirr": -0.0357633908916539,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 86977.2,
+    "xirr": -0.0358080203321618,
+    "custos": 31.16
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 86586.02,
+    "xirr": -0.036895862638500504,
+    "custos": 532.3
+   }
+  },
+  {
+   "ativos": [
+    "UNIP5",
+    "BNBR3",
+    "ENGI4",
+    "GSHP3",
+    "BPAC11",
+    "AZZA3",
+    "AHEB3",
+    "SMTO3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 117460.86,
+    "xirr": 0.03572769592297466,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 117406.1,
+    "xirr": 0.03561791524298063,
+    "custos": 30.64
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 116891.59,
+    "xirr": 0.03458378386609037,
+    "custos": 531.95
+   }
+  },
+  {
+   "ativos": [
+    "ITSA4",
+    "BMEB3",
+    "BPAC5",
+    "PDGR3",
+    "LUXM4",
+    "USIM5",
+    "MRVE3",
+    "HAPV3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 147739.8,
+    "xirr": 0.08940168842351785,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 147713.74,
+    "xirr": 0.08936060611508718,
+    "custos": 31.51
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 146988.2,
+    "xirr": 0.08821380849113254,
+    "custos": 532.34
+   }
+  },
+  {
+   "ativos": [
+    "RNEW4",
+    "TRIS3",
+    "BOBR4",
+    "LOGN3",
+    "SANB3",
+    "TOTS3",
+    "TELB3",
+    "SBSP3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 126939.65,
+    "xirr": 0.05395304756222265,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 126888.42,
+    "xirr": 0.05385843854987316,
+    "custos": 31.45
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 126215.09,
+    "xirr": 0.052611218421723505,
+    "custos": 532.34
+   }
+  },
+  {
+   "ativos": [
+    "USIM3",
+    "VULC3",
+    "GSHP3",
+    "CEBR5",
+    "SANB3",
+    "DIRR3",
+    "GOAU4",
+    "INEP4"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 124632.97,
+    "xirr": 0.049670972984719376,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 124599.59,
+    "xirr": 0.04960810568058901,
+    "custos": 31.73
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 123992.45,
+    "xirr": 0.04846152174421415,
+    "custos": 532.33
+   }
+  },
+  {
+   "ativos": [
+    "MULT3",
+    "CBEE3",
+    "JHSF3",
+    "BMKS3",
+    "LIGT3",
+    "KLBN3",
+    "SEER3",
+    "BMEB3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 159062.75,
+    "xirr": 0.10657931801004755,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 159028.47,
+    "xirr": 0.10652923450157177,
+    "custos": 31.17
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 158204.03,
+    "xirr": 0.1053213680401857,
+    "custos": 531.24
+   }
+  },
+  {
+   "ativos": [
+    "GGBR4",
+    "OSXB3",
+    "CMIG4",
+    "INEP3",
+    "WHRL3",
+    "BAZA3",
+    "IRBR3",
+    "DOHL4"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 96690.57,
+    "xirr": -0.010397864972398271,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 96668.03,
+    "xirr": -0.010453563319807013,
+    "custos": 31.55
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 96216.46,
+    "xirr": -0.011572418344290772,
+    "custos": 531.88
+   }
+  },
+  {
+   "ativos": [
+    "HOOT4",
+    "ISAE4",
+    "ALPA4",
+    "FLRY3",
+    "SMTO3",
+    "VIVT3",
+    "ROMI3",
+    "EALT3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 100477.48,
+    "xirr": -0.0012345584454010467,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 100467.08,
+    "xirr": -0.0012592009809410994,
+    "custos": 31.13
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 99977.11,
+    "xirr": -0.0024233121173226698,
+    "custos": 532.01
+   }
+  },
+  {
+   "ativos": [
+    "MNDL3",
+    "LUXM4",
+    "RCSL3",
+    "HAGA3",
+    "ABEV3",
+    "ITUB3",
+    "CSUD3",
+    "VALE3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 114688.18,
+    "xirr": 0.030101786974028794,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 114655.93,
+    "xirr": 0.030035472618926227,
+    "custos": 31.46
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 114085.02,
+    "xirr": 0.028858235825012332,
+    "custos": 532.1
+   }
+  },
+  {
+   "ativos": [
+    "SOND6",
+    "AFLT3",
+    "TAEE3",
+    "B3SA3",
+    "PRIO3",
+    "AURE3",
+    "UGPA3",
+    "SAPR3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 203582.79,
+    "xirr": 0.1640064578469869,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 203552.91,
+    "xirr": 0.16397241092914452,
+    "custos": 31.28
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 202568.18,
+    "xirr": 0.16284754566611176,
+    "custos": 531.82
+   }
+  },
+  {
+   "ativos": [
+    "KLBN3",
+    "BOBR4",
+    "VIVR3",
+    "RAIL3",
+    "CLSC3",
+    "FHER3",
+    "BDLL4",
+    "EZTC3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 94195.97,
+    "xirr": -0.016651649861054163,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 94151.93,
+    "xirr": -0.01676364673747611,
+    "custos": 31.19
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 93700.95,
+    "xirr": -0.017913821628480438,
+    "custos": 532.22
+   }
+  },
+  {
+   "ativos": [
+    "TXRX4",
+    "TAEE3",
+    "RNEW3",
+    "MGLU3",
+    "ETER3",
+    "KLBN11",
+    "ANIM3",
+    "SANB4"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 66688.98,
+    "xirr": -0.1008896444215461,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 66669.24,
+    "xirr": -0.10096346662186187,
+    "custos": 31.55
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 66315.21,
+    "xirr": -0.10229170037688232,
+    "custos": 532.41
+   }
+  },
+  {
+   "ativos": [
+    "B3SA3",
+    "TASA4",
+    "COGN3",
+    "BAZA3",
+    "SEER3",
+    "INEP3",
+    "HBOR3",
+    "VALE3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 102167.24,
+    "xirr": 0.0027328997727901817,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 102148.03,
+    "xirr": 0.002688196257913497,
+    "custos": 31.36
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 101619.95,
+    "xirr": 0.0014557348882880967,
+    "custos": 531.92
+   }
+  },
+  {
+   "ativos": [
+    "ESTR4",
+    "LOGN3",
+    "UCAS3",
+    "CVCB3",
+    "AGRO3",
+    "GEPA4",
+    "HAPV3",
+    "PDGR3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 64872.09,
+    "xirr": -0.10779648228773073,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 64872.52,
+    "xirr": -0.10779482147929009,
+    "custos": 31.17
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 64536.75,
+    "xirr": -0.10909466422842742,
+    "custos": 532.23
+   }
+  },
+  {
+   "ativos": [
+    "ITSA3",
+    "ETER3",
+    "SANB4",
+    "RAPT4",
+    "CMIG4",
+    "MDIA3",
+    "BMEB3",
+    "MYPK3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 128336.1,
+    "xirr": 0.05652078798329629,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 128304.68,
+    "xirr": 0.05646342646809431,
+    "custos": 31.42
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 127647.03,
+    "xirr": 0.055259397773086985,
+    "custos": 532.26
+   }
+  },
+  {
+   "ativos": [
+    "UNIP3",
+    "JHSF3",
+    "JOPA4",
+    "EUCA3",
+    "TASA4",
+    "B3SA3",
+    "UNIP5",
+    "HAGA3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 119341.41,
+    "xirr": 0.03954114058342906,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 119296.23,
+    "xirr": 0.03945189473625732,
+    "custos": 30.99
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 118645.88,
+    "xirr": 0.03816325832506999,
+    "custos": 532.04
+   }
+  },
+  {
+   "ativos": [
+    "GGBR4",
+    "EVEN3",
+    "ITUB3",
+    "LOGG3",
+    "BGIP4",
+    "GOAU4",
+    "ALOS3",
+    "RANI3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 130448.36,
+    "xirr": 0.060339065522343374,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 130367.35,
+    "xirr": 0.060193666094647165,
+    "custos": 31.13
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 129742.58,
+    "xirr": 0.0590691151789039,
+    "custos": 532.24
+   }
+  },
+  {
+   "ativos": [
+    "PINE4",
+    "ITUB4",
+    "RADL3",
+    "TIMS3",
+    "BEES3",
+    "TASA3",
+    "QUAL3",
+    "SHUL4"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 136913.81,
+    "xirr": 0.07164865560736468,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 136840.9,
+    "xirr": 0.07152425410177668,
+    "custos": 31.51
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 136184.41,
+    "xirr": 0.07040100533855374,
+    "custos": 532.07
+   }
+  },
+  {
+   "ativos": [
+    "AURE3",
+    "COCE5",
+    "BEES4",
+    "MOVI3",
+    "ALPA4",
+    "CTKA3",
+    "IRBR3",
+    "GGBR3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 113974.48,
+    "xirr": 0.028643486152154847,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 113948.35,
+    "xirr": 0.028589371218864013,
+    "custos": 31.19
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 113389.54,
+    "xirr": 0.027428908946952768,
+    "custos": 531.99
+   }
+  },
+  {
+   "ativos": [
+    "ISAE3",
+    "CLSC3",
+    "TASA3",
+    "UCAS3",
+    "JHSF3",
+    "MDIA3",
+    "ROMI3",
+    "PCAR3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 109932.49,
+    "xirr": 0.020134664594974656,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 109885.82,
+    "xirr": 0.0200340833801506,
+    "custos": 31.29
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 109324.95,
+    "xirr": 0.01882173858232956,
+    "custos": 532.3
+   }
+  },
+  {
+   "ativos": [
+    "CRPG6",
+    "ITSA3",
+    "SAUD3",
+    "JFEN3",
+    "BBSE3",
+    "BBDC3",
+    "TIMS3",
+    "VIVT3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 98406.98,
+    "xirr": -0.006195427190049254,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 98389.42,
+    "xirr": -0.006237983660352634,
+    "custos": 31.1
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 97916.05,
+    "xirr": -0.00738830746585364,
+    "custos": 532.08
+   }
+  },
+  {
+   "ativos": [
+    "PINE4",
+    "BRSR5",
+    "TAEE4",
+    "JOPA4",
+    "BRAP3",
+    "ENGI4",
+    "LIGT3",
+    "POSI3"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 123891.01,
+    "xirr": 0.048258844704215174,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 123845.24,
+    "xirr": 0.04817211455444929,
+    "custos": 31.52
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 123240.15,
+    "xirr": 0.04702233373605106,
+    "custos": 532.42
+   }
+  },
+  {
+   "ativos": [
+    "EVEN3",
+    "IRBR3",
+    "MNPR3",
+    "RIAA3",
+    "LREN3",
+    "SUZB3",
+    "INEP3",
+    "ITSA4"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 145288.68,
+    "xirr": 0.08549767066151408,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 145225.32,
+    "xirr": 0.08539603801605201,
+    "custos": 31.48
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 144566.1,
+    "xirr": 0.08433588176078544,
+    "custos": 531.93
+   }
+  },
+  {
+   "ativos": [
+    "HAGA4",
+    "DASA3",
+    "BMEB4",
+    "KEPL3",
+    "CSAN3",
+    "TAEE11",
+    "BRSR6",
+    "BPAC11"
+   ],
+   "aportado": 101000.0,
+   "semCusto": {
+    "patrimonioFinal": 191736.56,
+    "xirr": 0.14992409769581574,
+    "custos": 0.0
+   },
+   "tarifaB3": {
+    "patrimonioFinal": 191680.5,
+    "xirr": 0.14985635302158226,
+    "custos": 31.22
+   },
+   "tarifaEMeioSpread": {
+    "patrimonioFinal": 190724.94,
+    "xirr": 0.1486985427962446,
+    "custos": 531.56
+   }
+  }
+ ]
+}

@@ -9,9 +9,9 @@
 /// vale para representação em ponto flutuante, não para esta. Comparar dois
 /// `Money` é comparar dois `int`.
 ///
-/// **Regra de arredondamento.** [operator *], [operator /] e [Money.fromReais]
-/// arredondam por `num.round()`, que em Dart é *meio afastado de zero* — não
-/// *meio para cima*. Verificado: `(-2.5).round() == -3`, enquanto meio para
+/// **Regra de arredondamento.** [operator *] e [operator /] arredondam por
+/// `num.round()`, e [Money.fromReais] pelo decimal escrito (ver lá) — nos dois
+/// casos *meio afastado de zero*, e não *meio para cima*. Verificado: `(-2.5).round() == -3`, enquanto meio para
 /// cima devolveria `-2`. A diferença só aparece em valores negativos exatamente
 /// no meio (estornos, fatias de aporte negativo), e é simétrica: o mesmo módulo
 /// arredonda para o mesmo módulo, com o sinal preservado.
@@ -31,25 +31,49 @@ class Money implements Comparable<Money> {
   /// convenção da TIR, estorno, imposto retido.
   const Money(this.cents);
 
-  /// Converte um valor em reais para centavos, arredondando.
+  /// Converte um valor em reais para centavos, arredondando **o decimal
+  /// escrito** meio afastado de zero.
   ///
-  /// **Não é arredondamento decimal exato.** O produto `reais * 100` é
-  /// calculado em ponto flutuante binário antes do arredondamento, e valores
-  /// que parecem estar no meio muitas vezes não estão. Verificado:
-  /// `Money.fromReais(1.005).cents == 100`, não 101, porque `1.005 * 100`
-  /// resulta em `100.49999999999999`.
+  /// **É a fronteira do `double` para o dinheiro** — por onde passam o preço
+  /// justo, os cenários e a faixa da avaliação, a cotação da simulação e o que
+  /// o usuário digita. Até 22/09/2026 ela fazia `(reais * 100).round()`, e o
+  /// produto em ponto flutuante perdia o meio: `1.005 * 100` resulta em
+  /// `100.49999999999999`, e R$ 1,005 virava R$ 1,00. É o defeito que
+  /// `test/qa_fixtures/financial_edge_cases.json` registra como
+  /// `tostringasfixed-nao-e-half-up` (item B21, decisão 125).
   ///
-  /// Use este construtor apenas na fronteira de entrada, sobre valores que já
-  /// vêm como cotação ou digitação do usuário. Para aritmética interna, opere
-  /// sobre [cents].
+  /// Agora o arredondamento é feito sobre a **menor representação decimal**
+  /// do `double` — a que `toString` devolve, e que é a que se escreveu: `1.005`
+  /// dá 101 centavos, `2.675` dá 268, `-1.005` dá −101. Um valor que já chega
+  /// com erro de conta, como `0.1 + 0.2`, é arredondado pelo que ele é:
+  /// `0.30000000000000004` dá 30.
   ///
   /// - [reais]: valor em reais. Aceita `int` ou `double`.
   ///
-  /// Retorna o [Money] correspondente.
-  ///
-  /// Lança [UnsupportedError] se [reais] for `NaN` ou infinito — `round()` não
-  /// tem inteiro para devolver.
-  factory Money.fromReais(num reais) => Money((reais * 100).round());
+  /// Lança [UnsupportedError] se [reais] for `NaN` ou infinito — não há
+  /// centavo para devolver.
+  factory Money.fromReais(num reais) => Money(_centavos(reais));
+
+  /// Centavos de [reais], arredondando o decimal escrito meio afastado de zero.
+  static int _centavos(num reais) {
+    if (reais is int) return reais * 100;
+    final d = reais.toDouble();
+    if (!d.isFinite) {
+      throw UnsupportedError('Infinity or NaN toInt');
+    }
+    final modulo = d.abs();
+    // Acima de 1e15 o `double` já não tem casa de centavo, e o produto é
+    // inteiro; abaixo de 1e-6 `toString` usa notação científica, e o valor é
+    // menos de meio centavo.
+    if (modulo >= 1e15) return (d * 100).round();
+    if (modulo < 1e-6) return 0;
+    final partes = modulo.toString().split('.');
+    final fracao = (partes.length > 1 ? partes[1] : '').padRight(3, '0');
+    var c = int.parse(partes[0]) * 100 + int.parse(fracao.substring(0, 2));
+    // O terceiro dígito decide: 5 ou mais é meio centavo ou além.
+    if (fracao.codeUnitAt(2) >= 0x35) c += 1;
+    return d < 0 ? -c : c;
+  }
 
   /// Zero absoluto. Ponto neutro da soma.
   static const Money zero = Money(0);
