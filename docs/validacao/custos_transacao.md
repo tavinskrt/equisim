@@ -51,34 +51,34 @@ Ranaldo ordena como deve. **Ele também superestima o papel muito líquido** —
 PETR4 sai com 0,72% em 30/06/2022, contra um spread cotado de centésimos —, e
 por isso o custo daqui é **conservador**: pune mais do que o investidor pagaria.
 
-Das 10.919 observações, 10.330 têm spread estimável na compra. Sem spread numa
-ponta, vale o da outra (508 observações); sem nas duas, a mediana do tercil de
-liquidez da coorte (649) ou a geral (21).
+Das 10.837 observações, 10.253 têm spread estimável na compra. Sem spread numa
+ponta, vale o da outra (501 observações); sem nas duas, a mediana do tercil de
+liquidez da coorte (648) ou a geral (19).
 
 ## 2. As coortes: o custo muda o nível, e não a ordem
 
 Coortes trimestrais com as deslistadas, as mesmas observações nas duas leituras
 ([custos_transacao.json](custos_transacao.json)):
 
-| 36 meses, n = 2.164 | bruto | líquido |
+| 36 meses, n = 2.165 | bruto | líquido |
 |---|---:|---:|
-| retorno mediano | 14,00% | **13,14%** |
+| retorno mediano | 13,69% | **13,11%** |
 | custo de ida e volta mediano | — | 0,60% |
-| potencial dado o B/M (critério do R3) | 0,028, `t` 0,15 | 0,028, `t` 0,16 |
-| IC do potencial | 0,088 | 0,089 |
-| IC do book-to-market | 0,160, `t` 2,07 | 0,159, `t` 2,08 |
-| IC do composto | 0,146 | 0,146 |
-| Q5 − Q1 pelo potencial | +0,75% | +0,75% (comprado e vendido: −0,49%) |
-| Q5 − Q1 pelo B/M | 28,39% | 28,16% (comprado e vendido: 26,86%) |
+| potencial dado o B/M (critério do R3) | 0,052, `t` 0,30 | 0,052, `t` 0,30 |
+| IC do potencial | 0,105 | 0,106 |
+| IC do book-to-market | 0,158, `t` 2,01 | 0,158, `t` 2,02 |
+| IC do composto | 0,151 | 0,151 |
+| Q5 − Q1 pelo potencial | +6,01% | +5,97% (comprado e vendido: +4,71%) |
+| Q5 − Q1 pelo B/M | 28,20% | 27,98% (comprado e vendido: 26,68%) |
 
-| 12 meses, n = 2.935 | bruto | líquido |
+| 12 meses, n = 2.938 | bruto | líquido |
 |---|---:|---:|
 | retorno mediano | 6,81% | **6,15%** |
-| potencial dado o B/M | 0,042, `t` 0,63 | 0,042, `t` 0,63 |
-| IC do book-to-market | 0,087, `t` 1,49 | 0,085, `t` 1,46 |
-| Q5 − Q1 pelo potencial | 3,79% | 3,72% (comprado e vendido: 2,38%) |
+| potencial dado o B/M | 0,047, `t` 0,72 | 0,048, `t` 0,72 |
+| IC do book-to-market | 0,086, `t` 1,49 | 0,084, `t` 1,47 |
+| Q5 − Q1 pelo potencial | 6,21% | 6,11% (comprado e vendido: 4,75%) |
 
-> Sobre o backtest final da rodada — motor com as decisões 125 a 128 e as
+> Sobre o backtest final da rodada do C1 — motor com as decisões 125 a 130 e as
 > versões antigas dos documentos (item B8).
 
 **Nenhum veredito muda.** O critério da decisão 96 dá o mesmo resultado nas
@@ -92,7 +92,7 @@ de 0,4% a 1,7% de spread entre os tercis. A medição responde que, nesta amostr
 essa variação é pequena demais diante da dispersão dos retornos em 36 meses para
 reordenar alguém que importe.
 
-**O que o custo muda é o nível**: 0,86 p.p. a menos no retorno mediano de 36
+**O que o custo muda é o nível**: 0,58 p.p. a menos no retorno mediano de 36
 meses, e 1,5 p.p. a menos na carteira comprada e vendida pelo book-to-market,
 que paga as duas pernas. É o que se lê numa promessa de retorno, e não numa
 promessa de ordenação.

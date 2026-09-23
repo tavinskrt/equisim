@@ -93,7 +93,11 @@ class CostOfCapital {
   /// PETR4 saiu com 0,9% a.a. e WEGE3 com 47,3% a.a. — nenhum dos dois é um
   /// custo de dívida. Por isso o valor usado no WACC é [effectiveCostOfDebt],
   /// não este.
-  final double costOfDebt;
+  ///
+  /// **`null` quando a despesa financeira não está publicada** (item B26). A
+  /// ausência não é custo zero nem cobertura ruim: sem ela a cobertura de juros
+  /// não é medível, e o prêmio sintético sai só da alavancagem.
+  final double? costOfDebt;
 
   /// Alíquota efetiva de imposto, em fração.
   final double taxRate;
@@ -311,16 +315,23 @@ class CostOfCapital {
   ///
   /// - [leverage]: dívida líquida sobre EBITDA.
   /// - [coverage]: EBIT sobre despesa financeira.
-  /// - [observedCostOfDebt]: a razão observada, que arbitra.
+  /// - [observedCostOfDebt]: a razão observada, que arbitra. `null` quando a
+  ///   despesa financeira não está publicada — e aí a cobertura não fala.
   /// - [riskFreeRate]: piso da banda de plausibilidade.
+  ///
+  /// **Sem a despesa, a cobertura sai da conta, e não entra no teto** (item
+  /// B26). A tabela de cobertura devolve o prêmio máximo para cobertura não
+  /// medível, e deixá-la falar puniria com 10 p.p. uma empresa cujo único
+  /// problema é um campo em branco na fonte.
   static double syntheticSpread({
     required double? leverage,
     required double? coverage,
-    required double observedCostOfDebt,
+    required double? observedCostOfDebt,
     required double riskFreeRate,
   }) {
     final porAlavancagem = leverageSpread(leverage);
-    final despesaUtilizavel = observedCostOfDebt >= riskFreeRate &&
+    final despesaUtilizavel = observedCostOfDebt != null &&
+        observedCostOfDebt >= riskFreeRate &&
         observedCostOfDebt <= riskFreeRate + maxCreditSpread;
     if (!despesaUtilizavel) return porAlavancagem;
     final porCobertura = coverageSpread(coverage);
@@ -366,8 +377,10 @@ class CostOfCapital {
   /// número estimado como se fosse o medido. O corte de 1 p.p. é o passo da
   /// própria tabela de prêmios: abaixo dele os dois números diriam a mesma
   /// coisa.
-  bool get costOfDebtWasClamped =>
-      (effectiveCostOfDebt - costOfDebt).abs() > 0.01;
+  bool get costOfDebtWasClamped {
+    final observado = costOfDebt;
+    return observado != null && (effectiveCostOfDebt - observado).abs() > 0.01;
+  }
 
   /// Capital total: equity mais dívida. Denominador dos pesos do WACC.
   double get totalCapital => equityValue + debtValue;

@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-22, a partir de `5345767`.
+Gerado em 2026-09-23, a partir de `2a19372`.
 
 ## Decisões registradas
 
-**102** aceita · **2** cumprida · **6** substituída
+**104** aceita · **2** cumprida · **6** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -125,6 +125,8 @@ Gerado em 2026-09-22, a partir de `5345767`.
 | 126 | A tarifa da B3 entra na simulação, o spread entra nas coortes, e o custo muda o nível e não a ordem | aceita | voce | 2026-09-22 |
 | 127 | O juro e o rendimento do caixa da rota derivada seguem a curva, como o ponto fixo que fecha o Ke | aceita | voce | 2026-09-22 |
 | 128 | A coorte lê a versão do documento que era pública na data dela | aceita | voce | 2026-09-22 |
+| 129 | O R3 não passa sobre o motor final, o teste declara o poder que tem, e a réplica fora da amostra fica pré-registrada | aceita | voce | 2026-09-22 |
+| 130 | Sem despesa financeira, o prêmio de crédito sai da alavancagem, e o rastro diz a regra que a conta usa | aceita | voce | 2026-09-22 |
 
 ## Caixa de entrada
 
@@ -138,16 +140,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 63 | 21.422 |
+| Nucleo de dominio | 63 | 21.505 |
 | Apresentacao | 37 | 16.459 |
 | Camada de dados | 24 | 3.680 |
 | Testes do app | 44 | 8.344 |
-| Testes do nucleo | 41 | 14.889 |
-| Ferramentas de QA | 20 | 6.641 |
+| Testes do nucleo | 41 | 14.946 |
+| Ferramentas de QA | 20 | 6.652 |
 
 ## Histórico recente
 
 ```
+2026-09-22  2a19372  Refino do motor de valuation (parte 21)
 2026-09-21  5345767  Refino do motor de valuation (parte 21)
 2026-09-21  80866a8  Refino do motor de valuation (parte 20)
 2026-09-21  0ec1ec1  Refino do motor de valuation (parte 19)
@@ -162,5 +165,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-14  7d43639  Refino do motor de valuation (parte 11)
 2026-09-11  6e01044  Refino do motor de valuation (parte 10)
 2026-09-11  c80b5e6  Refino do motor de valuation (parte 9)
-2026-09-10  e46c8bc  Refino do motor de valuation (parte 8)
 ```

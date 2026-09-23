@@ -6,6 +6,8 @@
 > **Remedido em 22/09/2026 sobre o motor que fecha a Fase 3** (itens B8 e B24):
 > o múltiplo de pares vai a IC **0,083**, `t` corrigido **1,24** contra 2,70 e
 > Newey-West 3,49, com 20 de 22 coortes positivas — e **continua não passando**.
+> Com o item B26 corrigido: IC **0,079**, `t` corrigido **1,18**, Newey-West
+> 3,65, 18 de 22 coortes positivas — não passa.
 > As tabelas abaixo são as de 21/09; o `multiplos_ordenacao.json` é o de 22/09.
 >
 > ```bash

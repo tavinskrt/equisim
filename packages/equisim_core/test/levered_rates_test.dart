@@ -157,6 +157,18 @@ void main() {
               '(${(divergencia * 100).toStringAsFixed(2)}%)');
     });
 
+    test('a dívida cresce ao ritmo do lucro, e o prêmio de crédito não tem '
+        'o que mudar', () {
+      // O prêmio sintético sai de dívida ÷ EBITDA. Com a dívida crescendo a
+      // `g_t` como o lucro projetado, a razão fica parada — e é essa a
+      // premissa que torna correto um prêmio só para o caminho inteiro.
+      final a = premissas(g: 0.06);
+      final r = resolver(g: 0.06, divida: 3000).unwrap();
+      for (var t = 1; t < r.debt.length; t++) {
+        expect(r.debt[t] / r.debt[t - 1] - 1, closeTo(a.growthAt(t), 1e-12));
+      }
+    });
+
     test('sem dívida o caminho é plano e igual ao CAPM sem alavancagem', () {
       final v = resolver(g: 0.04, divida: 0).unwrap();
       final esperado = rf + betaU * premio;

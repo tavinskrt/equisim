@@ -145,6 +145,15 @@ abstract final class LeveredCostOfCapital {
   ///   decaía com a curva, de modo que a perpetuidade herdava o juro de hoje
   ///   (item B11).
   ///
+  ///   **O prêmio é constante ao longo da projeção, e não por simplificação.**
+  ///   Ele sai da dívida líquida sobre o EBITDA, e aqui a dívida cresce a
+  ///   `g_t` — o mesmo ritmo do lucro projetado —, de modo que essa razão fica
+  ///   **parada por construção** do ano 1 ao N. O que muda ano a ano é a
+  ///   alavancagem **a mercado**, `D/E`, que move o beta e não a
+  ///   classificação de crédito. Recalcular o prêmio a cada ano devolveria o
+  ///   mesmo número (lente `metodo`, 22/09/2026; o teste
+  ///   «a dívida cresce ao ritmo do lucro» cobra a premissa).
+  ///
   /// - [terminalBetaWeight] e [terminalLeverage]: imposições de diagnóstico do
   ///   item B15, e `null` em produção. A primeira converge o beta **de
   ///   equilíbrio** em direção a 1 — `β_∞ = w·β_L,N + (1 − w)`, o ajuste de

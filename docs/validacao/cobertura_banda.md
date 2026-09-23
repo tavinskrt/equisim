@@ -16,6 +16,8 @@ Medido em 14/09/2026 por `tool/cobertura_banda.py`, sobre
 > antigas dos documentos (item B8) e o juro da rota derivada pela curva (item
 > B24): **87,8%** em 12 meses e **88,4%** em 36, desvio máximo de **2,2** e
 > **2,8 p.p.** A forma não foi reescolhida, e o pacote do aplicativo foi regerado.
+> **Com o item B26** (o prêmio de crédito que sumia sem despesa financeira):
+> **87,8%** e **88,9%**, desvios de 2,2 e **3,5 p.p.** — continua dentro dos 5.
 
 ## 1. A amostra
 

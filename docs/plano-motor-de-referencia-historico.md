@@ -11,6 +11,93 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## A Fase 4 — o veredito do C1, e o poder do teste (22/09/2026)
+
+**O R3 não passa.** Com as três primeiras fases fechadas e os dois defeitos que
+a rodada achou corrigidos, o potencial condicionado ao book-to-market em 36
+meses dá 0,052 com `t` corrigido de 0,30 contra 2,70, e nenhuma das cinco
+ordenações passa, bruta ou líquida de custo. O
+C1 pedia exatamente isto — passar, **ou o registro declarar que não passa** —, e
+a decisão 129 o declara.
+
+**Mas «não passa» sozinho não dizia nada, e por isso a rodada abriu o C6.** Um
+teste que só detecta efeitos que nenhum preditor tem reprova qualquer motor. A
+simulação do poder, sobre a mesma estrutura de sobreposição com que o crítico é
+simulado e calibrada no nível nominal, respondeu: **com 22 coortes sobrepostas,
+o menor coeficiente que o critério vê com 80% de chance é 0,62**. Nem o
+book-to-market, a anomalia mais documentada que existe, tem poder para passar
+no próprio efeito — 37% —, e precisaria de 66 coortes, com retornos em 2037.
+
+**E o motor não reprova só por isso.** A estimativa pontual do que o potencial
+acrescenta é pequena, e o sinal dele é duas vezes mais instável que o do
+book-to-market. **As duas coisas são verdade ao mesmo tempo**: o teste não
+aprovaria nenhum motor realista, e este motor, em particular, não mostrou o que
+aprovar.
+
+**A primeira versão da simulação inflava o poder**, e a correção foi antes de
+qualquer número sair daqui: sob a sobreposição o desvio observado tem esperança
+`σ·√c`, e usar o cru subestimava o ruído. Com a correção, o efeito mínimo
+detectável do critério do R3 subiu de 0,49 para 0,64 — e, com o B26, ficou em
+0,62.
+
+**Mais engenharia não muda o veredito, e a decisão diz por quê.** Mexer no motor
+até o potencial passar nas mesmas 31 coortes seria o ajuste ao teste que a
+decisão 103 impede — cinco ordenações já foram testadas nelas. O que pode mudar
+o R3 é dado novo, e a rodada o pré-registrou (C7): as coortes a partir de
+31/12/2025, lidas em 30/09/2029 e 30/09/2031, pelo mesmo critério, sem juntar as
+antigas. **E o que o R3 exige é decisão do usuário** (C8): «comprovada», que a
+série não sustenta, ou «testada com o poder declarado», que está atingida.
+
+**Um defeito de registro que três rodadas deixaram passar**: o aviso de
+«última atualização» no topo do plano ainda descrevia a quinta rodada, e o §7
+mantinha desmarcado o «custo de capital completo» embora B3, B4 e B7 tivessem
+fechado em 21/09. Os dois foram conferidos e corrigidos. **O valuation exemplar
+tem agora as oito condições marcadas.**
+
+### O que as lentes disseram na rodada do C1
+
+**A `metodo` achou um defeito real no rastro, e trouxe uma premissa refutável.**
+O Passo 3 do WACC no rastro de auditoria escrevia «custo observado fora da banda;
+limitado a X» — a regra anterior à decisão 31. Desde ela o `K_d` é sempre `R_f`
+mais o prêmio sintético, e o observado só arbitra se a cobertura pode falar. **A
+própria lente foi enganada pelo rastro**: a segunda tensão dela pedia para
+«descartar o observado integralmente», que é o que a conta já faz. Corrigido como
+**B25**, sem mudar preço; o gabarito foi regravado só no rastro.
+
+**A outra pedia o prêmio de crédito recalculado ano a ano no ponto fixo, e a
+premissa dela era falsa.** Ela supunha que a projeção desalavanca; mas a dívida
+projetada cresce ao ritmo do lucro, e a razão que dá o prêmio — dívida sobre
+EBITDA — fica parada por construção. O que muda ano a ano é o `D/E` a mercado, que
+move o beta. Recusado com prova, e um teste passou a cobrar a premissa.
+
+**E a segunda execução da `metodo` achou o defeito que mais pesou: o B26.**
+Quando a despesa financeira de uma empresa com dívida não estava publicada, o
+WACC estático degenerava para o `Ke`, e o prêmio de crédito do ponto fixo —
+derivado do custo que o estático devolvia — virava zero: o caminho resolvido
+tomava dinheiro à taxa livre de risco. No gabarito só a NATU3 caía nisso
+(−13,3% depois de corrigida). **Nas coortes eram 546 observações**, a maioria
+deslistadas, que são montadas só com dado da CVM e não têm despesa financeira. O
+backtest foi reexecutado — e, com o cache da fonte de mercado vencido, rebuscou
+a fonte; conferido que nenhum insumo de mercado mudou nas 10.837 observações em
+comum, e que só seis papéis pequenos saíram do universo. **Com o B26, o
+potencial melhorou**: o condicionado ao B/M foi de 0,028 a 0,052, e a carteira
+que compra o quintil de maior potencial e vende o de menor, de +0,75% a +6,0%. Não
+é ajuste ao teste: o defeito foi achado por ser defeito, e seria corrigido se
+piorasse o número.
+
+**A `rumo` trouxe três pendências de decisões antigas, e as três estavam
+fechadas**: a divergência das vias (decisão 39, substituída pela 102), a não
+monotonia na curva (decisão 35, fechada pela 105) e o perfil de três papéis
+preferenciais (decisão 30, resolvido pelo setor da B3 pela raiz do emissor). É o
+mesmo erro que a `registro` cometia duas rodadas atrás — ler o que a decisão diz
+que faltava na data como se faltasse hoje —, e o conserto foi o mesmo: disciplina
+nova na lente, e o `docs/estado.md` nos materiais dela.
+
+**A `registro` não achou nada**, e a auditoria da ferramenta e do teste novos
+aprovou os dois sem achado.
+
+---
+
 ## O que a oitava rodada da Fase 3 encontrou — B8, B21, C4, D3 e B24 (22/09/2026)
 
 **A Fase 3 fechou.** Os quatro itens do escopo e um quinto, aberto por uma lente

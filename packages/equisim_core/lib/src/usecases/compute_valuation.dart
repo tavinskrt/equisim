@@ -2316,6 +2316,7 @@ abstract final class ValuationCascade {
             rate: inputs.capm.costOfEquity,
             costOfDebtEstimated: false,
             costOfDebt: null,
+            creditSpread: 0.0,
           );
     final desconto = custoCorrente.rate;
 
@@ -2504,9 +2505,7 @@ abstract final class ValuationCascade {
       keCorrente: inputs.capm.costOfEquity,
       keTerminal: capmTerminal.costOfEquity,
       custoDaDivida: custoCorrente.costOfDebt,
-      spreadDeCredito: custoCorrente.costOfDebt == null
-          ? 0.0
-          : custoCorrente.costOfDebt! - inputs.capm.riskFreeRate,
+      spreadDeCredito: custoCorrente.creditSpread,
     );
   }
 
@@ -3071,7 +3070,12 @@ abstract final class ValuationCascade {
   /// O segundo campo não é detalhe de log: ele entra nos diagnósticos do
   /// resultado, e recalculá-lo fora daqui duplicaria a regra de
   /// `CostOfCapital`.
-  static ({double rate, bool costOfDebtEstimated, double? costOfDebt}) _wacc(
+  static ({
+    double rate,
+    bool costOfDebtEstimated,
+    double? costOfDebt,
+    double creditSpread,
+  }) _wacc(
     ValuationInputs inputs,
     FundamentalsSnapshot latest,
     List<String> warnings,
@@ -3141,10 +3145,35 @@ abstract final class ValuationCascade {
     // contratada o `K_d` é a taxa livre de risco, que é o que caixa rende
     // (decisão 58).
     final semDividaContratada = bruta <= 0;
-    if (equity <= 0 || (!semDividaContratada && kd == null)) {
+    // A faixa que decide se a despesa financeira é juro de dívida é medida na
+    // taxa da **data**, e não na do cenário nem na de equilíbrio: é pergunta
+    // sobre o dado do exercício (item B10). Ver
+    // [ValuationInputs.creditReferenceRiskFree].
+    final referencia = inputs.creditReferenceRiskFree ?? inputs.capm.riskFreeRate;
+    // **O prêmio de crédito existe mesmo quando o WACC estático não** (item
+    // B26). Ele é o que o ponto fixo recebe, e o ponto fixo não precisa do
+    // valor de mercado — pondera pelo capital próprio que a própria avaliação
+    // produz. Com o prêmio derivado do custo que o WACC estático devolvia, a
+    // degeneração dele zerava o prêmio, e o caminho resolvido tomava dinheiro
+    // à taxa livre de risco: a NATU3 descontava a 16,3% com `Ke` de 21,0%.
+    final premio = semDividaContratada
+        ? 0.0
+        : CostOfCapital.syntheticSpread(
+            leverage: latest.netDebtToEbitda,
+            coverage: latest.interestCoverage,
+            observedCostOfDebt: kd,
+            riskFreeRate: referencia,
+          );
+
+    // **Só a falta de valor de mercado impede o WACC estático** (item B26).
+    // Até 22/09/2026 a despesa financeira ausente também o impedia — «não há
+    // `K_d` a ponderar» —, o que contradizia a decisão 31: desde ela o `K_d` é
+    // a classificação sintética, e a alavancagem não precisa da despesa.
+    if (equity <= 0) {
       warnings.add(
-        'Estrutura de capital indisponível; desconto feito ao custo do capital '
-        'próprio em vez do WACC.',
+        'Estrutura de capital indisponível: sem valor de mercado utilizável o '
+        'WACC estático não é montável, e quando o custo de capital não é '
+        'resolvido ano a ano o desconto é o custo do capital próprio.',
       );
       audit?.step(
         formulaName: 'Taxa de desconto — degeneração para o Ke',
@@ -3167,6 +3196,7 @@ abstract final class ValuationCascade {
         rate: capm.costOfEquity,
         costOfDebtEstimated: false,
         costOfDebt: null,
+        creditSpread: premio,
       );
     }
 
@@ -3180,14 +3210,9 @@ abstract final class ValuationCascade {
       );
     }
 
-    // A faixa que decide se a despesa financeira é juro de dívida é medida na
-    // taxa da **data**, e não na do cenário nem na de equilíbrio: é pergunta
-    // sobre o dado do exercício (item B10). Ver
-    // [ValuationInputs.creditReferenceRiskFree].
-    final referencia = inputs.creditReferenceRiskFree ?? inputs.capm.riskFreeRate;
     final coc = CostOfCapital(
       capm: capm,
-      costOfDebt: kd ?? capm.riskFreeRate,
+      costOfDebt: kd,
       taxRate: tax,
       equityValue: equity,
       debtValue: debt,
@@ -3212,6 +3237,16 @@ abstract final class ValuationCascade {
         '(${_pct(capm.riskFreeRate)} a.a.). O caixa sai da taxa e volta na '
         'apuração do capital próprio — contá-lo só de um lado inflaria o preço '
         'justo.',
+      );
+    }
+    if (!semDividaContratada && kd == null) {
+      final alavancagem = latest.netDebtToEbitda;
+      warnings.add(
+        'A despesa financeira de ${inputs.ticker.value} não está publicada: a '
+        'cobertura de juros não é medível, e o prêmio de crédito sai só da '
+        'alavancagem'
+        '${alavancagem == null ? ', que também não é medível — prêmio máximo' : ' (${alavancagem.toStringAsFixed(2)}x de dívida líquida sobre EBITDA)'}'
+        '. Custo da dívida adotado: ${_pct(coc.effectiveCostOfDebt)} a.a.',
       );
     }
     if (!semDividaContratada && coc.costOfDebtWasClamped) {
@@ -3253,6 +3288,7 @@ abstract final class ValuationCascade {
       rate: coc.wacc,
       costOfDebtEstimated: coc.costOfDebtWasClamped,
       costOfDebt: coc.effectiveCostOfDebt,
+      creditSpread: premio,
     );
   }
 
@@ -3664,6 +3700,35 @@ abstract final class ValuationCascade {
     final debtLeg = separa
         ? wBruta * afterTax - wCaixa * rendimento
         : coc.debtShare * afterTax;
+    // **O Passo 3 diz a regra que a conta usa** (item B25, lente `metodo`,
+    // 22/09/2026). Ele escrevia «observado fora da banda; limitado a X» e
+    // «observado dentro da banda → X», que é a regra anterior à decisão 31 —
+    // limitar o observado a uma banda. Desde ela o `K_d` é sempre `R_f` mais o
+    // prêmio sintético, e o observado só arbitra se a cobertura pode falar:
+    // um leitor do rastro concluía que o custo observado entrava na taxa.
+    final porAlavancagem = CostOfCapital.leverageSpread(coc.netDebtToEbitda);
+    final referencia = coc.creditReferenceRate ?? coc.capm.riskFreeRate;
+    final observado = coc.costOfDebt;
+    final despesaFala = observado != null &&
+        observado >= referencia &&
+        observado <= referencia + CostOfCapital.maxCreditSpread;
+    final porCobertura = CostOfCapital.coverageSpread(coc.interestCoverage);
+    final passo3 = !coc.hasContractedDebt
+        ? 'Passo 3: sem dívida contratada não há prêmio de crédito → K_d = R_f '
+            '= ${_pct(kd)}'
+        : 'Passo 3: K_d = R_f + prêmio sintético → prêmio pela alavancagem '
+            '(${coc.netDebtToEbitda == null ? '—' : _r(coc.netDebtToEbitda!, 2)}× '
+            'dívida líquida ÷ EBITDA) = ${_pct(porAlavancagem)}; '
+            '${observado == null ? 'a despesa financeira não está publicada, e a '
+                'cobertura sai da conta' : despesaFala ? 'a despesa observada '
+                '(${_pct(observado)} da dívida) está na banda, e a cobertura '
+                'fala → prêmio pela cobertura = ${_pct(porCobertura)}, vale o '
+                'maior' : 'a despesa observada (${_pct(observado)} da dívida) '
+                'está fora da banda e mede outra coisa, e a cobertura sai da '
+                'conta'} → '
+            '${_pct(coc.capm.riskFreeRate)} + '
+            '${_pct(kd - coc.capm.riskFreeRate)} = ${_pct(kd)}. O observado '
+            'não entra na taxa';
 
     audit.step(
       formulaName: 'Custo médio ponderado de capital (WACC)',
@@ -3698,11 +3763,7 @@ abstract final class ValuationCascade {
           'Passo 2: participação do capital de terceiros → '
               '${_r(coc.debtValue)} ÷ ${_r(coc.totalCapital)} = '
               '${_r(coc.debtShare, 4)}',
-        if (coc.costOfDebtWasClamped)
-          'Passo 3: custo da dívida observado (${_pct(coc.costOfDebt)}) fora da '
-              'banda defensável; limitado a ${_pct(kd)}'
-        else
-          'Passo 3: custo da dívida observado dentro da banda → ${_pct(kd)}',
+        passo3,
         'Passo 4: benefício fiscal da dívida → ${_pct(kd)} × (1 − '
             '${_r(coc.effectiveTaxShield, 4)}) = ${_pct(afterTax)}',
         if (separa)

@@ -153,28 +153,37 @@ reingestão da CVM.
 
 ## 9. Sobre o motor que fecha a Fase 3 — remedido em 22/09/2026
 
-**É a leitura sobre o motor com a Fase 3 inteira fechada**: além do da §8, as
+**É a leitura sobre o motor com as Fases 1 a 3 fechadas**: além do da §8, as
 versões antigas dos documentos da CVM (item B8, decisão 128), o juro da rota
-derivada seguindo a curva (item B24, decisão 127) e a fronteira do dinheiro
-arredondando o decimal escrito (decisão 125). Mesmas 10.919 observações, 31
-coortes.
+derivada seguindo a curva (item B24, decisão 127), a fronteira do dinheiro
+arredondando o decimal escrito (decisão 125) e o prêmio de crédito que não some
+sem a despesa financeira (item B26, decisão 130). 10.837 observações, 31 coortes
+— a fonte de mercado tirou seis papéis pequenos do universo ao renovar o cache.
 
-| 36 meses, trimestral, com deslistadas (n = 2.164) | média | `t` corrigido / crítico | Newey-West | passa |
+| 36 meses, trimestral, com deslistadas (n = 2.165) | média | `t` corrigido / crítico | Newey-West | passa |
 |---|---:|---:|---:|---|
-| **potencial dado o B/M (critério do R3)** | **0,028** | **0,15 / 2,70** | 0,40 | não |
-| IC do potencial | 0,088 | 0,53 / 2,70 | 1,23 | não |
-| IC do book-to-market | 0,160 | 2,07 / 2,70 | 4,36 | não |
-| IC do lucro sobre o preço | 0,123 | 1,04 / 2,70 | 2,82 | não |
-| IC do composto | 0,146 | 1,19 / 2,70 | 2,86 | não |
-| IC do múltiplo de pares | 0,083 | 1,24 / 2,70 | 3,49 | não |
+| **potencial dado o B/M (critério do R3)** | **0,052** | **0,30 / 2,70** | 0,84 | não |
+| IC do potencial | 0,105 | 0,65 / 2,70 | 1,61 | não |
+| IC do book-to-market | 0,158 | 2,01 / 2,70 | 4,23 | não |
+| IC do lucro sobre o preço | 0,125 | 1,06 / 2,70 | 2,87 | não |
+| IC do composto | 0,151 | 1,24 / 2,70 | 3,02 | não |
+| IC do múltiplo de pares | 0,079 | 1,18 / 2,70 | 3,65 | não |
 
-**Nada muda de veredito, e quase nada de número.** O potencial condicionado ao
-B/M vai de 0,027 a 0,028; o book-to-market sobe de `t` corrigido 1,98 para 2,07,
-e continua abaixo do crítico. As versões antigas mexem em 2,8% das observações
-avaliadas, e o juro pela curva move o preço justo em −0,65% na mediana — os dois
-defeitos eram reais, e nenhum deles era o que separava o motor da habilidade.
-**Líquido de custo de transação** (item C4), a leitura é a mesma
-([custos_transacao.md](custos_transacao.md)).
+**Nada muda de veredito.** O B8 e o B24 moveram quase nada — o condicionado foi
+de 0,027 a 0,028 —, e **o B26 foi o que mais mexeu**: as deslistadas das coortes
+são montadas só com dado da CVM, sem despesa financeira, e caíam todas no
+defeito. Com o prêmio de crédito de volta, o preço justo muda em 546 observações
+(mediana de −1,1%), o condicionado vai a **0,052** e a carteira que compra o
+quintil de maior potencial e vende o de menor passa de +0,75% para **+6,0%** em
+36 meses. **O sinal melhorou, e continua longe do crítico.** Líquido de custo de
+transação (item C4), a leitura é a mesma ([custos_transacao.md](custos_transacao.md)).
+
+**É o veredito do C1, e ele vem com o poder medido** ([decisão 129](../decisoes/129-o-r3-nao-passa-e-o-teste-declara-o-poder-que-tem.md),
+[poder_r3.md](poder_r3.md)). Com estas 22 coortes, o menor coeficiente que o
+critério vê com 80% de chance é **0,62**; o book-to-market tem 37% de chance de
+passar no próprio efeito. A reprovação não prova ausência de habilidade — prova
+que o potencial não acrescenta ao book-to-market nada que esta amostra consiga
+distinguir de zero, com estimativa pontual de 0,052 e o dobro da instabilidade.
 
 ## 8. Sobre o motor da Fase 3 — remedido em 21/09/2026, com a base restaurada
 

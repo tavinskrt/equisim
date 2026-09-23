@@ -340,7 +340,7 @@ spread vai de 0,2% a 0,9% por ponta do tercil mais ao menos líquido.
 **Efeito medido** ([custos_transacao.md](custos_transacao.md)): em cinquenta
 carteiras sorteadas, a tarifa tira **0,024%** do patrimônio final e 0,006 p.p.
 do XIRR; um meio spread de 0,5% por compra tiraria 0,53% e 0,12 p.p. **Nas
-coortes de validação**, tarifa e spread nas duas pontas tiram 0,86 p.p. do
+coortes de validação**, tarifa e spread nas duas pontas tiram 0,58 p.p. do
 retorno mediano de 36 meses e **não mudam nenhum veredito da habilidade**: o
 custo muda o nível, e não a ordem.
 

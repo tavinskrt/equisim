@@ -4039,7 +4039,9 @@ void main() {
     // decisão 41 pondera a líquida — o mesmo caixa barateava a taxa e depois
     // se somava ao acionista.
     FundamentalsSnapshot ano(int y, double escala,
-            {required double caixa, double divida = 4000}) =>
+            {required double caixa,
+            double divida = 4000,
+            bool despesaPublicada = true}) =>
         FundamentalsSnapshot(
           ticker: ticker,
           fiscalPeriodEnd: DateTime(y, 12, 31),
@@ -4049,7 +4051,7 @@ void main() {
           netIncome: 900 * escala,
           incomeBeforeTax: 1300 * escala,
           incomeTaxExpense: -400 * escala,
-          interestExpense: divida > 0 ? 400 : null,
+          interestExpense: divida > 0 && despesaPublicada ? 400 : null,
           earningsPerShare: 0.9 * escala,
           cash: caixa,
           shortTermDebt: divida * 0.25,
@@ -4063,21 +4065,27 @@ void main() {
           marketCap: 12000,
         );
 
-    List<FundamentalsSnapshot> serie(double caixa, {double divida = 4000}) {
+    List<FundamentalsSnapshot> serie(double caixa,
+        {double divida = 4000, bool despesaPublicada = true}) {
       final out = <FundamentalsSnapshot>[];
       var escala = 1.0;
       for (var i = 12; i >= 0; i--) {
-        out.add(ano(2025 - i, escala, caixa: caixa, divida: divida));
+        out.add(ano(2025 - i, escala,
+            caixa: caixa,
+            divida: divida,
+            despesaPublicada: despesaPublicada));
         escala *= 1.05;
       }
       return out;
     }
 
-    ValuationResult? avaliar(double caixa, {double divida = 4000}) {
+    ValuationResult? avaliar(double caixa,
+        {double divida = 4000, bool despesaPublicada = true}) {
       final r = ValuationCascade.evaluate(ValuationInputs(
         ticker: ticker,
         asOf: DateTime(2026, 9, 9),
-        fundamentals: serie(caixa, divida: divida),
+        fundamentals:
+            serie(caixa, divida: divida, despesaPublicada: despesaPublicada),
         marketPrice: 12.0,
         capm: CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
         declaredTerminalRiskFreeRate: 0.094,
@@ -4123,6 +4131,43 @@ void main() {
       expect((passo.mappedVariables['D líquida (R\$)']! as num).toDouble(),
           closeTo(liquida, 0.01));
       expect(liquida, lessThan(serieDela.last.totalDebt));
+    });
+
+    test('despesa financeira ausente não zera o prêmio de crédito (B26)', () {
+      // A NATU3 no gabarito de 22/09/2026: dívida contratada, despesa em
+      // branco na fonte. O WACC estático degenerava para o `Ke`, o prêmio que
+      // o ponto fixo recebia virava zero, e o caminho resolvido tomava
+      // dinheiro à taxa livre de risco — com o aviso dizendo «desconto ao
+      // Ke» ao lado do caminho de WACC que a conta de fato usou.
+      final sem = avaliar(200, despesaPublicada: false)!;
+      expect(
+          sem.warnings
+              .any((w) => w.contains('Estrutura de capital indisponível')),
+          isFalse,
+          reason: 'há valor de mercado: o WACC é montável');
+      expect(sem.warnings.any((w) => w.contains('não está publicada')), isTrue);
+      // Dívida líquida de 3.800 sobre EBITDA de ~4.310 no último ano: 0,88x,
+      // a faixa de 1,0 p.p. — e não o teto de 10 que a cobertura nula daria.
+      final rastro = <AuditEvent>[];
+      AuditRecorder.attach(rastro.add);
+      addTearDown(AuditRecorder.detach);
+      avaliar(200, despesaPublicada: false);
+      final passo = rastro.single.calculations
+          .firstWhere((p) => p.formulaName.contains('WACC'));
+      final kd = (passo.mappedVariables['K_d (% a.a.)']! as num).toDouble();
+      expect(kd, closeTo(14.0 + 100 * CostOfCapital.leverageSpread(0.88), 0.01));
+      expect(
+          passo.intermediateSteps.any((p) => p.contains('não está publicada')),
+          isTrue);
+    });
+
+    test('com a despesa publicada nada muda no prêmio (B26)', () {
+      // O prêmio do ponto fixo passou a sair do `_wacc` em vez de ser
+      // recalculado do custo que ele devolvia: para quem tinha WACC, são o
+      // mesmo número.
+      final com = avaliar(200)!;
+      expect(com.warnings.any((w) => w.contains('não está publicada')),
+          isFalse);
     });
 
     test('caixa maior que a dívida é estrutura conhecida, e não ausente', () {
