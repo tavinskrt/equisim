@@ -11,6 +11,151 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## A rodada do C7 — a réplica selada, o rastro íntegro, B27, D5 e B28 (24/09/2026)
+
+**O usuário aprovou o C7 e deixou o C8 para depois**, e pediu, na mesma janela,
+que o painel de logs recebesse o rastro do motor de forma íntegra, para depurar
+pelo JSON exportado.
+
+**O C7 precisava de um «como» que a decisão 129 não tinha.** Ela fixou a
+amostra, o critério e as datas, mas não o que garante que a previsão lida em
+2029 seja a que existia antes do desfecho. Um backtest rodado na data da
+leitura **refaz** as previsões com o motor e a base daquele dia. A resposta é o
+selo: um arquivo por coorte, com as previsões de todos os ativos e nenhum campo
+de desfecho, o hash do git dele no índice, e nenhuma reescrita. O motor é
+identificado pela impressão das fontes do núcleo, que o git reencontra em
+qualquer commit. A leitura recusa a data antecipada e recusa observação anterior
+a 31/12/2025, em vez de filtrá-la. **As três primeiras coortes foram seladas no
+fim da rodada**, depois de a última mudança no núcleo ter sido conferida no
+gabarito (decisão 133).
+
+**O motor pré-registrado é o de 24/09, e não o de 22/09 que a decisão 129
+nomeou.** Entre os dois só mudaram o rastro e as cópias dos insumos. No gabarito,
+376 ativos em nove montagens, nenhum campo além do rastro e dos avisos das
+montagens de diagnóstico se moveu. O de 22/09 está no commit `e1a843d`, e a
+afirmação pode ser conferida.
+
+**O rastro perdia informação em nove lugares**, e conferir o caminho inteiro
+antes de mexer foi o que os achou. O mais grave: `jsonEncode` lança diante de
+`NaN`, e o evento era serializado dentro do encerramento da transação. Um valor
+degenerado derrubava a exportação e, com ela, a própria avaliação. O mais
+enganoso: o arredondador do rastro transformava `NaN` em zero. O resto era
+falta de completude (5 dos 19 campos do diagnóstico, a entrada resumida sem
+dizer) e de emissão (exceção, falha de preparo e isolate sem evento, e o anel
+único que descartava em silêncio). Fechado como **D4** (decisão 131).
+
+**Conferir a integridade do rastro achou um defeito que não era do rastro**, o
+**B27**. `ValuationInputs` tem 34 campos, e cada cópia repetia a lista à mão.
+As rodadas recentes acrescentaram campos sem lembrar de todas as cópias, e a
+usada em produção pela concessão que acaba dentro da projeção perdia os
+múltiplos de pares. EGIE3, EQTL3, TAEE11 e TAEE4 ficavam sem a segunda leitura
+na tela. Uma cópia só, e um teste que preenche os 34 campos (decisão 132). A
+medição do B5 foi remedida: os 97 avaliados recebem leitura, e a divergência
+mediana passa de +78,2% para +73,4%. Parte dessa mudança vem do B24 e do B26, que
+tinham mexido no preço justo depois da medição de 21/09. 
+
+**E o B27 pedia o backtest de novo**, porque a leitura ancorada e o
+contrafactual sem o corte de liquidez passavam pelas cópias com defeito. A SAPR4
+de 30/06/2021 tinha justo ancorado de R$ 5,94 contra R$ 30,15 do anual, com o
+divisor da unit aplicado à espécie. Reexecutado, o backtest regerou as sete
+medições que o leem. **Nenhum veredito muda.** O critério do R3 não passa por
+essas cópias e fica em 0,052 com 0,30. A ancorada continua fora do padrão pela
+regra da decisão 98, agora com diferença de IC de +0,021 e `t` corrigido de 0,27.
+O C0b mantém a recusa por liquidez, com os soltos em −28,1% contra −54,3%. A faixa
+calibrada fica em 87,8% e 88,9%, e o poder em 0,62. **A fonte de mercado renovou
+o cache na mesma execução**, e três papéis saíram do universo. Por isso o
+backtest tem 10.808 observações, e não 10.837. **Um achado de registro no
+caminho**: o `recusas_custo.md` citava ainda os números de 16/09, embora o JSON
+tivesse sido regravado duas vezes depois. A §9 nova é a primeira atualização
+do texto desde então.
+
+### O que as lentes disseram na rodada do C7
+
+**A `dados` achou o D5, e errou o custo de outros dois achados.** O cache de
+cotações já descartava a base velha depois de um desdobramento, mas só antes da
+resposta. O pregão que a resposta omitia no meio da janela ficava na escala
+velha, e a fixture real da fonte tem um desses, em 18/08/2026. Conferindo, achei
+um segundo furo: a mudança só era vista no primeiro dia da resposta. Os dois
+fecharam com teste (decisão 134). Os outros dois achados da lente descreviam
+dado velho em lugar que ninguém lê: os campos «de hoje» dos exercícios antigos
+e o volume de cotações com mais de dez anos. **A lente não recebe o núcleo, e
+por isso não via o consumidor.** A disciplina dela passou a exigir que o
+consumidor seja citado.
+
+**A `risco` achou um ponto cego real**: o teste de resposta malformada da fonte
+de demonstrativos deixava de fora as duas rotas de estatística, que trazem a
+contagem de ações e o valor de mercado. O laço agora cobre as cinco rotas. O
+código já tolerava todos os corpos quebrados.
+
+**A `nucleo` trouxe quatro tensões de estrutura, e nenhuma é regressão.**
+`viaMigrada`, o construtor sem validação, um tipo de data sem hora e o sufixo
+`AsOf` ficam inventariados. A quarta afirmava que `AuditJson` converte `NaN`
+em texto «em memória», e a conversão está só no `toJson`. A disciplina ganhou a
+distinção.
+
+**A `metodo` achou uma premissa que ninguém tinha escrito**, aberta como
+**B28**. A ponte por papel divide o capital próprio do último balanço pela
+contagem que forma a cotação de hoje. Uma emissão depois do balanço entra no
+divisor e não entra no numerador, porque o caixa captado não está no patrimônio
+publicado. Nenhuma decisão nem comentário do núcleo declara isso, e o efeito
+nunca foi medido. **O exemplar volta a ter uma condição aberta**, e o item mede
+antes de decidir. As outras duas tensões da lente foram recusadas. A tradução do
+cenário foi reaberta pela terceira vez sem evidência nova (decisão 121). E a via
+do acionista com o `Ke` resolvido, em companhia não financeira, atende um ativo
+de 97 (decisão 41). A disciplina da lente passou a nomear as duas.
+
+**A `tela` não rodou, de propósito.** Nenhuma das cinco telas capturadas mudou.
+A única interface mexida é o cabeçalho do painel de logs, e o painel usa fontes
+que a captura não carrega, que é o primeiro limite do equipamento. O cabeçalho
+novo está coberto por teste de widget.
+
+**As duas lentes de registro rodaram em silêncio, e o silêncio era do
+equipamento.** A `registro` e a `rumo` voltaram sem tensão nenhuma, mas a
+`rumo` só tinha visto até a decisão 50, e a `registro`, até a 32. O conselheiro
+tinha dois defeitos, ambos na montagem do material. **Só mandava arquivo
+versionado**, e por isso as decisões 131 a 134, os testes novos e o
+`tool/c7/` não chegavam a lente nenhuma, porque o conselheiro roda antes do
+commit. **E cortava o que vinha por último**: as decisões iam em ordem
+crescente e antes do material pequeno e indispensável, e com 134 delas o
+registro sozinho passa do teto. O `estado.md`, o plano e a árvore, que a
+disciplina das duas lentes exige, nunca chegavam. Agora o material inclui os
+arquivos novos que o `.gitignore` não exclui, e as duas lentes recebem primeiro
+o indispensável e depois as decisões, das recentes para as antigas. A
+`registro`, a `rumo` e a `risco` rodaram de novo depois da correção.
+
+**Com o material inteiro, a `registro` achou duas tensões reais.** A primeira:
+o apontamento de 09/09/2026 está na caixa de entrada há 15 dias sem virar
+decisão nem ser descartado. Ele pergunta por que a tela de avaliação mostra o
+preço justo ao lado do preço de mercado, com o mesmo peso, se o motor não
+prevê nível. **É decisão do usuário**, pela regra da caixa de entrada, e
+ficou registrada no plano como pendente, com as duas saídas. A segunda: o
+`CLAUDE.md` descrevia `docs/eap/` como reconstrução «em curso», e ela está
+cumprida desde a decisão 22. A linha foi corrigida. **A `rumo`, agora com o
+plano, o `estado.md` e as decisões de 71 a 134, não achou nada.** A `risco`
+apontou dois testes antigos que conferem menos do que o nome promete, o do
+cache macroeconômico e o do Tesouro. São código que esta rodada não tocou, e
+ficam inventariados.
+
+**O gate local também tinha um teto**, e esta rodada bateu nele. Regerar o
+backtest e o gabarito juntos dá um diff de 33 MB, e o `qa-local` lia o diff com
+um buffer de 32 MB: o hook caía com `ENOBUFS` antes de verificar qualquer coisa,
+e travaria o commit no GitHub Desktop. O teto foi a 512 MB. Na primeira execução
+depois disso, o gate achou um bloqueio real no código desta rodada: um tamanho
+de fonte literal no aviso de descarte do painel de logs, corrigido para o token
+do tema.
+
+### A auditoria do gate
+
+Em quatro grupos, com índice temporário. O **aplicativo**, o **núcleo** e os
+**testes** aprovaram. O núcleo teve um WARN em código preexistente: o
+arredondador do rastro, `(valor * fator).round() / fator`, que é de
+apresentação e não de dinheiro. As **ferramentas** reprovaram uma vez, com
+razão: `tool/c7_selar.dart` lia o relógio sem parâmetro que o substituísse, e
+ganhou `--hoje`, como a leitura. Reauditadas, aprovaram. A mudança de estilo no
+painel de logs foi reauditada e aprovou.
+
+---
+
 ## A Fase 4 — o veredito do C1, e o poder do teste (22/09/2026)
 
 **O R3 não passa.** Com as três primeiras fases fechadas e os dois defeitos que

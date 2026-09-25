@@ -8,7 +8,11 @@
 > Newey-West 3,49, com 20 de 22 coortes positivas — e **continua não passando**.
 > Com o item B26 corrigido: IC **0,079**, `t` corrigido **1,18**, Newey-West
 > 3,65, 18 de 22 coortes positivas — não passa.
-> As tabelas abaixo são as de 21/09; o `multiplos_ordenacao.json` é o de 22/09.
+> **Remedido em 24/09/2026**, com o backtest reexecutado pelo item B27 e a
+> fonte de mercado renovada, que tirou três papéis do universo: IC **0,078**,
+> `t` corrigido **1,15**, Newey-West 3,52, 18 de 22 coortes positivas — não
+> passa.
+> As tabelas abaixo são as de 21/09; o `multiplos_ordenacao.json` é o de 24/09.
 >
 > ```bash
 > dart run tool/backtest_valuation.dart --montagem aplicativo \

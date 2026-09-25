@@ -319,8 +319,15 @@ function truncate(text) {
   return clean.length <= WIDTH ? clean : `${clean.slice(0, WIDTH - 3)}...`;
 }
 
+/**
+ * Teto de 512 MB para a saida do git. Os 32 MB de antes estouraram em
+ * 24/09/2026 (`ENOBUFS`): regerar o backtest e o gabarito juntos da um diff de
+ * 33 MB, e o hook caia antes de verificar qualquer coisa, travando o commit no
+ * GitHub Desktop. Das regras por linha, so a do marcador de conflito le JSON;
+ * as outras filtram pela extensao, e o laco segue barato.
+ */
 function git(args) {
-  return execFileSync('git', args, { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
+  return execFileSync('git', args, { encoding: 'utf8', maxBuffer: 512 * 1024 * 1024 });
 }
 
 /** Percorre o diff em staging e devolve as linhas ADICIONADAS, com arquivo e numero. */

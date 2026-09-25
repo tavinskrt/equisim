@@ -1,23 +1,22 @@
 {
   "avaliados": 97,
-  "comTriangulacao": 93,
+  "comTriangulacao": 97,
   "limiteDeDivergencia": 0.5,
-  "acimaDoLimite": 61,
+  "acimaDoLimite": 62,
   "divergencia": {
-    "p10": -0.022475246666562865,
-    "p25": 0.28131315682779334,
-    "mediana": 0.7821498811757586,
-    "p75": 2.1157185709207873,
-    "p90": 9.61410551164252
+    "p10": -0.06894965585727564,
+    "p25": 0.26531435449354435,
+    "mediana": 0.7339710685520249,
+    "p75": 2.1299774590667804,
+    "p90": 9.813245589097088
   },
-  "potencialMedianoDcf": -0.48382526564344747,
-  "potencialMedianoMultiplos": -0.02310984530737137,
-  "spearmanPotencial": 0.47005636230356823,
+  "potencialMedianoDcf": -0.4544910179640719,
+  "potencialMedianoMultiplos": -0.032438068714051194,
+  "spearmanPotencial": 0.44537806838707283,
   "leiturasAplicadasPorAtivo": {
-    "0": 4,
     "1": 3,
     "2": 24,
-    "3": 66
+    "3": 70
   },
   "recusas": {
     "firmaEbitda: instituicaoFinanceira": 19,
@@ -55,11 +54,11 @@
     {
       "ticker": "ABEV3",
       "setor": "consumo-nao-ciclico",
-      "dcf": 10.23,
+      "dcf": 10.25,
       "preco": 15.87,
-      "potencial": -0.35538752362948955,
+      "potencial": -0.3541272841839949,
       "multiplos": 11.78869246011641,
-      "divergencia": 0.1518134452734683,
+      "divergencia": 0.1499579786300349,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -85,11 +84,11 @@
     {
       "ticker": "ALOS3",
       "setor": "financeiro",
-      "dcf": 12.77,
+      "dcf": 12.81,
       "preco": 28.44,
-      "potencial": -0.5509845288326302,
+      "potencial": -0.54957805907173,
       "multiplos": 26.330391480776886,
-      "divergencia": 1.0622581729401515,
+      "divergencia": 1.055295090853051,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -115,11 +114,11 @@
     {
       "ticker": "ALPA4",
       "setor": "consumo-ciclico",
-      "dcf": 3.44,
+      "dcf": 3.43,
       "preco": 13.02,
-      "potencial": -0.7357910906298003,
+      "potencial": -0.7365591397849462,
       "multiplos": 6.1330406782744005,
-      "divergencia": 0.7821498811757586,
+      "divergencia": 0.7860720434676594,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -145,11 +144,11 @@
     {
       "ticker": "ALUP11",
       "setor": "utilidade-publica",
-      "dcf": 18.46,
+      "dcf": 18.22,
       "preco": 33.4,
-      "potencial": -0.4473053892215568,
+      "potencial": -0.4544910179640719,
       "multiplos": 43.675034571369444,
-      "divergencia": 1.3657533867481346,
+      "divergencia": 1.3970371447872116,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -175,11 +174,11 @@
     {
       "ticker": "AMER3",
       "setor": "consumo-ciclico",
-      "dcf": 1.58,
+      "dcf": 1.51,
       "preco": 4.99,
-      "potencial": -0.6833667334669339,
+      "potencial": -0.6973947895791583,
       "multiplos": 21.467861623251103,
-      "divergencia": 12.622959461171138,
+      "divergencia": 13.249950989928719,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
@@ -202,11 +201,11 @@
     {
       "ticker": "ANIM3",
       "setor": "consumo-ciclico",
-      "dcf": 1.99,
+      "dcf": 1.93,
       "preco": 2.9,
-      "potencial": -0.3137931034482758,
+      "potencial": -0.33448275862068966,
       "multiplos": 4.975037372733352,
-      "divergencia": 1.4939246936337667,
+      "divergencia": 1.5786794468794731,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -256,11 +255,11 @@
     {
       "ticker": "AZZA3",
       "setor": "consumo-ciclico",
-      "dcf": 12.4,
+      "dcf": 12.34,
       "preco": 15.77,
-      "potencial": -0.21369689283449583,
+      "potencial": -0.2175015852885225,
       "multiplos": 26.283400623855663,
-      "divergencia": 1.119377601388683,
+      "divergencia": 1.1305781114615319,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -421,11 +420,11 @@
     {
       "ticker": "BEEF3",
       "setor": "consumo-nao-ciclico",
-      "dcf": 9.79,
+      "dcf": 9.53,
       "preco": 4.08,
-      "potencial": 1.3995098039215683,
+      "potencial": 1.33578431372549,
       "multiplos": 9.7353270641331,
-      "divergencia": -0.005162257908858714,
+      "divergencia": 0.02186022746319627,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -451,11 +450,11 @@
     {
       "ticker": "BHIA3",
       "setor": "consumo-ciclico",
-      "dcf": 1.36,
+      "dcf": 1.35,
       "preco": 0.78,
-      "potencial": 0.7435897435897436,
+      "potencial": 0.7307692307692308,
       "multiplos": 4.225278006357095,
-      "divergencia": 2.1040326299613152,
+      "divergencia": 2.1299774590667804,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
@@ -536,7 +535,7 @@
       "preco": 21.64,
       "potencial": -0.12245841035120157,
       "multiplos": 28.663637091482546,
-      "divergencia": 0.5097989156224114,
+      "divergencia": 0.5097774314396242,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -562,11 +561,11 @@
     {
       "ticker": "BRAV3",
       "setor": "petroleo-gas-e-biocombustiveis",
-      "dcf": 30.47,
+      "dcf": 30.25,
       "preco": 17.75,
-      "potencial": 0.716619718309859,
+      "potencial": 0.704225352112676,
       "multiplos": 38.26966385844601,
-      "divergencia": 0.25608274953796717,
+      "divergencia": 0.26531435449354435,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -619,11 +618,11 @@
     {
       "ticker": "CEAB3",
       "setor": "consumo-ciclico",
-      "dcf": 4.44,
+      "dcf": 4.45,
       "preco": 9.35,
-      "potencial": -0.5251336898395721,
+      "potencial": -0.5240641711229946,
       "multiplos": 13.399636168801692,
-      "divergencia": 2.014690774231617,
+      "divergencia": 2.013787456586031,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -649,11 +648,11 @@
     {
       "ticker": "CMIG4",
       "setor": "utilidade-publica",
-      "dcf": 6.49,
+      "dcf": 6.43,
       "preco": 11.22,
-      "potencial": -0.4215686274509804,
+      "potencial": -0.42691622103386817,
       "multiplos": 14.226612391415541,
-      "divergencia": 1.1934712578251392,
+      "divergencia": 1.2114983545302804,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -679,11 +678,11 @@
     {
       "ticker": "COGN3",
       "setor": "consumo-ciclico",
-      "dcf": 0.71,
+      "dcf": 0.7,
       "preco": 2.34,
-      "potencial": -0.6965811965811965,
+      "potencial": -0.7008547008547008,
       "multiplos": 2.150865152065447,
-      "divergencia": 2.0197062398591514,
+      "divergencia": 2.0517229650015754,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -709,11 +708,11 @@
     {
       "ticker": "CPFE3",
       "setor": "utilidade-publica",
-      "dcf": 24.74,
+      "dcf": 24.52,
       "preco": 44.73,
-      "potencial": -0.44690364408674266,
+      "potencial": -0.45182204337133913,
       "multiplos": 41.396684131863765,
-      "divergencia": 0.6730139434116433,
+      "divergencia": 0.6879570755121152,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -739,11 +738,11 @@
     {
       "ticker": "CPLE3",
       "setor": "utilidade-publica",
-      "dcf": 1.77,
+      "dcf": 1.71,
       "preco": 15.92,
-      "potencial": -0.8888190954773869,
+      "potencial": -0.8925879396984925,
       "multiplos": 8.820224467132164,
-      "divergencia": 3.997132350577968,
+      "divergencia": 4.1567978461702095,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -773,7 +772,7 @@
       "preco": 1.61,
       "potencial": -0.10559006211180133,
       "multiplos": 2.528173018614822,
-      "divergencia": 0.754194887090704,
+      "divergencia": 0.7550990661363257,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
@@ -823,11 +822,11 @@
     {
       "ticker": "CYRE3",
       "setor": "consumo-ciclico",
-      "dcf": 3.56,
+      "dcf": 3.5,
       "preco": 25.33,
-      "potencial": -0.8594551914725622,
+      "potencial": -0.8618239242005526,
       "multiplos": 25.049544920614803,
-      "divergencia": 6.03533213583736,
+      "divergencia": 6.151774789270506,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -853,11 +852,11 @@
     {
       "ticker": "CYRE4",
       "setor": "consumo-ciclico",
-      "dcf": 3.11,
+      "dcf": 3.06,
       "preco": 24.96,
-      "potencial": -0.8754006410256411,
+      "potencial": -0.8774038461538463,
       "multiplos": 25.049544920614803,
-      "divergencia": 7.060375113178978,
+      "divergencia": 7.195334175599008,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -883,11 +882,11 @@
     {
       "ticker": "DIRR3",
       "setor": "consumo-ciclico",
-      "dcf": 1.76,
+      "dcf": 1.75,
       "preco": 10.13,
-      "potencial": -0.826258637709773,
+      "potencial": -0.8272458045409674,
       "multiplos": 8.53774230942615,
-      "divergencia": 3.85718573288496,
+      "divergencia": 3.881385464469072,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -913,13 +912,32 @@
     {
       "ticker": "EGIE3",
       "setor": "utilidade-publica",
-      "dcf": 20.79,
+      "dcf": 20.64,
       "preco": 30.46,
-      "potencial": -0.3174655285620486,
-      "multiplos": null,
-      "divergencia": null,
-      "aplicadas": 0,
-      "leituras": {}
+      "potencial": -0.32239001969796455,
+      "multiplos": 16.760176881105245,
+      "divergencia": -0.18803856751030867,
+      "aplicadas": 3,
+      "leituras": {
+        "precoLucro": {
+          "justo": 16.760176881105245,
+          "mediana": 8.306325268955735,
+          "pares": 36,
+          "grupo": "Energia Elétrica / Energia Elétrica"
+        },
+        "precoPatrimonio": {
+          "justo": 15.233571006591315,
+          "mediana": 1.5506528665718355,
+          "pares": 41,
+          "grupo": "Energia Elétrica / Energia Elétrica"
+        },
+        "firmaEbitda": {
+          "justo": 17.835784495529982,
+          "mediana": 6.600496828687227,
+          "pares": 41,
+          "grupo": "Energia Elétrica / Energia Elétrica"
+        }
+      }
     },
     {
       "ticker": "EMBJ3",
@@ -928,7 +946,7 @@
       "preco": 96.52,
       "potencial": -0.9977206796518856,
       "multiplos": 34.29835060673407,
-      "divergencia": 155.16748053923058,
+      "divergencia": 152.89184147679447,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -954,13 +972,32 @@
     {
       "ticker": "EQTL3",
       "setor": "utilidade-publica",
-      "dcf": 26.24,
+      "dcf": 26.33,
       "preco": 39.48,
-      "potencial": -0.3353596757852077,
-      "multiplos": null,
-      "divergencia": null,
-      "aplicadas": 0,
-      "leituras": {}
+      "potencial": -0.33308004052684903,
+      "multiplos": 24.18230582252389,
+      "divergencia": -0.08169652820496054,
+      "aplicadas": 3,
+      "leituras": {
+        "precoLucro": {
+          "justo": 16.525834281853072,
+          "mediana": 8.306325268955735,
+          "pares": 36,
+          "grupo": "Energia Elétrica / Energia Elétrica"
+        },
+        "precoPatrimonio": {
+          "justo": 34.902922283394155,
+          "mediana": 1.5506528665718355,
+          "pares": 41,
+          "grupo": "Energia Elétrica / Energia Elétrica"
+        },
+        "firmaEbitda": {
+          "justo": 24.18230582252389,
+          "mediana": 6.600496828687227,
+          "pares": 41,
+          "grupo": "Energia Elétrica / Energia Elétrica"
+        }
+      }
     },
     {
       "ticker": "EZTC3",
@@ -969,7 +1006,7 @@
       "preco": 12.86,
       "potencial": -0.5754276827371695,
       "multiplos": 10.382642880482038,
-      "divergencia": 0.9001177415538941,
+      "divergencia": 0.9015139813185067,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -995,11 +1032,11 @@
     {
       "ticker": "FESA4",
       "setor": "materiais-basicos",
-      "dcf": 2.14,
+      "dcf": 2.16,
       "preco": 5.68,
-      "potencial": -0.6232394366197183,
+      "potencial": -0.6197183098591549,
       "multiplos": 5.68,
-      "divergencia": 1.6542199188004854,
+      "divergencia": 1.6280536564361991,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1025,11 +1062,11 @@
     {
       "ticker": "FRAS3",
       "setor": "bens-industriais",
-      "dcf": 9.2,
+      "dcf": 9.15,
       "preco": 23.2,
-      "potencial": -0.603448275862069,
+      "potencial": -0.605603448275862,
       "multiplos": 11.940801865301548,
-      "divergencia": 0.2977943380707151,
+      "divergencia": 0.30448717303390116,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1055,11 +1092,11 @@
     {
       "ticker": "GGBR4",
       "setor": "materiais-basicos",
-      "dcf": 16.37,
+      "dcf": 16.33,
       "preco": 25.06,
-      "potencial": -0.34676775738228244,
+      "potencial": -0.3483639265762171,
       "multiplos": 12.401654475779738,
-      "divergencia": -0.24218957526835894,
+      "divergencia": -0.24047243688910758,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1085,11 +1122,11 @@
     {
       "ticker": "GRND3",
       "setor": "consumo-ciclico",
-      "dcf": 2.17,
+      "dcf": 2.19,
       "preco": 3.76,
-      "potencial": -0.4228723404255319,
+      "potencial": -0.4175531914893617,
       "multiplos": 3.76,
-      "divergencia": 0.7313840661943014,
+      "divergencia": 0.7203091778732602,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1115,11 +1152,11 @@
     {
       "ticker": "HAPV3",
       "setor": "saude",
-      "dcf": 2.92,
+      "dcf": 2.91,
       "preco": 6.72,
-      "potencial": -0.5654761904761905,
+      "potencial": -0.5669642857142857,
       "multiplos": 68.38102660873159,
-      "divergencia": 22.412734730145154,
+      "divergencia": 22.52350898780073,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
@@ -1142,11 +1179,11 @@
     {
       "ticker": "HYPE3",
       "setor": "saude",
-      "dcf": 2.19,
+      "dcf": 2.11,
       "preco": 23.53,
-      "potencial": -0.9069273268168295,
+      "potencial": -0.9103272418189545,
       "multiplos": 17.40360961164616,
-      "divergencia": 6.947550805856008,
+      "divergencia": 7.245793849296243,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1172,11 +1209,11 @@
     {
       "ticker": "IGTI11",
       "setor": "financeiro",
-      "dcf": 0.86,
+      "dcf": 0.85,
       "preco": 25.76,
-      "potencial": -0.9666149068322981,
+      "potencial": -0.9670031055900621,
       "multiplos": 20.14538247021666,
-      "divergencia": 22.437048703247097,
+      "divergencia": 22.803326530981174,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1229,11 +1266,11 @@
     {
       "ticker": "ISAE4",
       "setor": "utilidade-publica",
-      "dcf": 30.33,
+      "dcf": 30.0,
       "preco": 27.28,
-      "potencial": 0.11180351906158346,
+      "potencial": 0.09970674486803514,
       "multiplos": 29.655174852033404,
-      "divergencia": -0.02220563429300937,
+      "divergencia": -0.011484605805064496,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1259,11 +1296,11 @@
     {
       "ticker": "ITSA4",
       "setor": "financeiro",
-      "dcf": 8.87,
+      "dcf": 8.86,
       "preco": 14.05,
-      "potencial": -0.3686832740213524,
+      "potencial": -0.3693950177935944,
       "multiplos": 12.642145172806082,
-      "divergencia": 0.42552064319600635,
+      "divergencia": 0.42641107279541735,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1343,11 +1380,11 @@
     {
       "ticker": "JHSF3",
       "setor": "consumo-ciclico",
-      "dcf": 8.21,
+      "dcf": 8.2,
       "preco": 11.83,
-      "potencial": -0.30600169061707516,
+      "potencial": -0.30684699915469155,
       "multiplos": 12.638247108032784,
-      "divergencia": 0.5395215123793944,
+      "divergencia": 0.5409286854872435,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1377,7 +1414,7 @@
       "preco": 6.58,
       "potencial": -0.20364741641337383,
       "multiplos": 6.779808356726804,
-      "divergencia": 0.2937542923438208,
+      "divergencia": 0.2939836645897975,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1403,11 +1440,11 @@
     {
       "ticker": "LEVE3",
       "setor": "consumo-ciclico",
-      "dcf": 25.34,
+      "dcf": 25.29,
       "preco": 32.67,
-      "potencial": -0.22436486072849715,
+      "potencial": -0.22589531680440778,
       "multiplos": 27.388291247613694,
-      "divergencia": 0.08095521094210079,
+      "divergencia": 0.08297486759061523,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1433,11 +1470,11 @@
     {
       "ticker": "LREN3",
       "setor": "consumo-ciclico",
-      "dcf": 5.71,
+      "dcf": 5.73,
       "preco": 11.21,
-      "potencial": -0.4906333630686887,
+      "potencial": -0.4888492417484389,
       "multiplos": 10.259804083960262,
-      "divergencia": 0.79802722483811,
+      "divergencia": 0.7919195787615674,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1463,11 +1500,11 @@
     {
       "ticker": "MDIA3",
       "setor": "consumo-nao-ciclico",
-      "dcf": 9.64,
+      "dcf": 9.66,
       "preco": 17.05,
-      "potencial": -0.4346041055718475,
+      "potencial": -0.4334310850439883,
       "multiplos": 21.67479621666796,
-      "divergencia": 1.2491076060388546,
+      "divergencia": 1.2444901932557824,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1493,11 +1530,11 @@
     {
       "ticker": "MDNE3",
       "setor": "consumo-ciclico",
-      "dcf": 2.67,
+      "dcf": 2.65,
       "preco": 24.71,
-      "potencial": -0.8919465803318494,
+      "potencial": -0.8927559692432214,
       "multiplos": 18.326332022416246,
-      "divergencia": 5.874542462759437,
+      "divergencia": 5.917151281780557,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1523,11 +1560,11 @@
     {
       "ticker": "MGLU3",
       "setor": "consumo-ciclico",
-      "dcf": 5.66,
+      "dcf": 5.65,
       "preco": 5.57,
-      "potencial": 0.016157989228007156,
+      "potencial": 0.014362657091561952,
       "multiplos": 13.413984770617397,
-      "divergencia": 1.369606382403659,
+      "divergencia": 1.3761570499152862,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1553,11 +1590,11 @@
     {
       "ticker": "MULT3",
       "setor": "financeiro",
-      "dcf": 2.47,
+      "dcf": 2.43,
       "preco": 29.83,
-      "potencial": -0.9171974522292994,
+      "potencial": -0.9185383841770031,
       "multiplos": 26.25850085870792,
-      "divergencia": 9.61410551164252,
+      "divergencia": 9.813245589097088,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1583,11 +1620,11 @@
     {
       "ticker": "NATU3",
       "setor": "consumo-nao-ciclico",
-      "dcf": 2.04,
+      "dcf": 1.76,
       "preco": 8.03,
-      "potencial": -0.7459526774595268,
+      "potencial": -0.7808219178082192,
       "multiplos": 7.354637944136036,
-      "divergencia": 2.602008897565844,
+      "divergencia": 3.18329271870562,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
@@ -1610,11 +1647,11 @@
     {
       "ticker": "PETR3",
       "setor": "petroleo-gas-e-biocombustiveis",
-      "dcf": 30.39,
+      "dcf": 30.17,
       "preco": 54.26,
-      "potencial": -0.4399189089568743,
+      "potencial": -0.44397346111315883,
       "multiplos": 52.20048046041774,
-      "divergencia": 0.7178498104361399,
+      "divergencia": 0.7302832693782351,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1640,11 +1677,11 @@
     {
       "ticker": "PETR4",
       "setor": "petroleo-gas-e-biocombustiveis",
-      "dcf": 31.07,
+      "dcf": 30.85,
       "preco": 48.92,
-      "potencial": -0.36488143908421916,
+      "potencial": -0.36937857726901063,
       "multiplos": 52.20048046041774,
-      "divergencia": 0.6798898000488773,
+      "divergencia": 0.6921843868876636,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1670,11 +1707,11 @@
     {
       "ticker": "PGMN3",
       "setor": "saude",
-      "dcf": 6.27,
+      "dcf": 6.23,
       "preco": 3.8,
-      "potencial": 0.6499999999999999,
+      "potencial": 0.6394736842105265,
       "multiplos": 4.930352630652828,
-      "divergencia": -0.21368014037699457,
+      "divergencia": -0.20915700261039638,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1727,11 +1764,11 @@
     {
       "ticker": "POMO3",
       "setor": "bens-industriais",
-      "dcf": 0.18,
+      "dcf": 0.17,
       "preco": 4.19,
-      "potencial": -0.9570405727923629,
+      "potencial": -0.9594272076372315,
       "multiplos": 5.342260839842307,
-      "divergencia": 29.06061610399286,
+      "divergencia": 30.378401781237294,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1761,7 +1798,7 @@
       "preco": 4.43,
       "potencial": -0.963882618510158,
       "multiplos": 5.342260839842307,
-      "divergencia": 31.39397384522411,
+      "divergencia": 32.837884715348856,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1787,11 +1824,11 @@
     {
       "ticker": "POSI3",
       "setor": "tecnologia-da-informacao",
-      "dcf": 4.59,
+      "dcf": 4.56,
       "preco": 3.48,
-      "potencial": 0.3189655172413793,
+      "potencial": 0.3103448275862068,
       "multiplos": 7.819311497143425,
-      "divergencia": 0.7019248931931636,
+      "divergencia": 0.716078033463154,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1817,11 +1854,11 @@
     {
       "ticker": "PRIO3",
       "setor": "petroleo-gas-e-biocombustiveis",
-      "dcf": 10.43,
+      "dcf": 10.25,
       "preco": 63.91,
-      "potencial": -0.836801752464403,
+      "potencial": -0.839618213112189,
       "multiplos": 30.963583113043676,
-      "divergencia": 1.9679190411830332,
+      "divergencia": 2.020999762241622,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1874,11 +1911,11 @@
     {
       "ticker": "RADL3",
       "setor": "saude",
-      "dcf": 7.4,
+      "dcf": 7.37,
       "preco": 19.54,
-      "potencial": -0.6212896622313203,
+      "potencial": -0.6228249744114636,
       "multiplos": 10.131741050357219,
-      "divergencia": 0.3696296486599817,
+      "divergencia": 0.3751138973253443,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1904,11 +1941,11 @@
     {
       "ticker": "RANI3",
       "setor": "materiais-basicos",
-      "dcf": 6.94,
+      "dcf": 6.89,
       "preco": 7.97,
-      "potencial": -0.12923462986198236,
+      "potencial": -0.1355081555834379,
       "multiplos": 14.172451464785894,
-      "divergencia": 1.041856167927489,
+      "divergencia": 1.057025128822199,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1934,11 +1971,11 @@
     {
       "ticker": "RDOR3",
       "setor": "saude",
-      "dcf": 15.89,
+      "dcf": 15.88,
       "preco": 37.05,
-      "potencial": -0.5711201079622131,
+      "potencial": -0.5713900134952765,
       "multiplos": 25.793772857002516,
-      "divergencia": 0.6231589510055133,
+      "divergencia": 0.6245964412746725,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -1968,7 +2005,7 @@
       "preco": 7.05,
       "potencial": -0.34042553191489355,
       "multiplos": 18.369983729040516,
-      "divergencia": 2.9524115039347194,
+      "divergencia": 2.9545342145879743,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2075,11 +2112,11 @@
     {
       "ticker": "SAPR11",
       "setor": "utilidade-publica",
-      "dcf": 36.83,
+      "dcf": 36.74,
       "preco": 34.74,
-      "potencial": 0.06016119746689684,
+      "potencial": 0.05757052389176741,
       "multiplos": 38.15,
-      "divergencia": 0.03580950577542552,
+      "divergencia": 0.03829980599970706,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2105,11 +2142,11 @@
     {
       "ticker": "SAPR4",
       "setor": "utilidade-publica",
-      "dcf": 7.94,
+      "dcf": 7.92,
       "preco": 6.82,
-      "potencial": 0.16422287390029328,
+      "potencial": 0.1612903225806451,
       "multiplos": 7.63,
-      "divergencia": -0.038469634274261866,
+      "divergencia": -0.03609360239745096,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2139,7 +2176,7 @@
       "preco": 15.02,
       "potencial": -0.9201065246338216,
       "multiplos": 1.59991401732062,
-      "divergencia": 0.3325989678808947,
+      "divergencia": 0.33179585142466594,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2165,11 +2202,11 @@
     {
       "ticker": "SBFG3",
       "setor": "consumo-ciclico",
-      "dcf": 1.27,
+      "dcf": 1.23,
       "preco": 8.74,
-      "potencial": -0.8546910755148742,
+      "potencial": -0.8592677345537757,
       "multiplos": 10.316883895491404,
-      "divergencia": 7.152914144624994,
+      "divergencia": 7.391914248703886,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2195,11 +2232,11 @@
     {
       "ticker": "SBSP3",
       "setor": "utilidade-publica",
-      "dcf": 3.65,
+      "dcf": 3.58,
       "preco": 26.84,
-      "potencial": -0.8640089418777944,
+      "potencial": -0.8666169895678092,
       "multiplos": 11.291035881829696,
-      "divergencia": 2.0971710992126824,
+      "divergencia": 2.155957236106239,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2225,11 +2262,11 @@
     {
       "ticker": "SEER3",
       "setor": "consumo-ciclico",
-      "dcf": 16.99,
+      "dcf": 16.96,
       "preco": 13.87,
-      "potencial": 0.22494592645998554,
+      "potencial": 0.22278298485940892,
       "multiplos": 12.307157508235528,
-      "divergencia": -0.2754614127314434,
+      "divergencia": -0.2741791209467882,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2259,7 +2296,7 @@
       "preco": 4.35,
       "potencial": -0.2206896551724137,
       "multiplos": 5.878889064981032,
-      "divergencia": 0.7359915485630137,
+      "divergencia": 0.7339710685520249,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2285,11 +2322,11 @@
     {
       "ticker": "SLCE3",
       "setor": "consumo-nao-ciclico",
-      "dcf": 4.48,
+      "dcf": 4.35,
       "preco": 17.35,
-      "potencial": -0.7417867435158502,
+      "potencial": -0.7492795389048992,
       "multiplos": 12.869361758233387,
-      "divergencia": 1.8696322376095678,
+      "divergencia": 1.9596838372845133,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2315,11 +2352,11 @@
     {
       "ticker": "SMTO3",
       "setor": "consumo-nao-ciclico",
-      "dcf": 25.37,
+      "dcf": 25.07,
       "preco": 19.74,
-      "potencial": 0.2852077001013173,
+      "potencial": 0.27001013171225946,
       "multiplos": 20.13238521994325,
-      "divergencia": -0.2063669778828987,
+      "divergencia": -0.19680282967561846,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2345,11 +2382,11 @@
     {
       "ticker": "SUZB3",
       "setor": "materiais-basicos",
-      "dcf": 30.59,
+      "dcf": 29.89,
       "preco": 47.3,
-      "potencial": -0.35327695560253697,
+      "potencial": -0.368076109936575,
       "multiplos": 73.77117218838937,
-      "divergencia": 1.412002745902948,
+      "divergencia": 1.4684030797624663,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2375,33 +2412,71 @@
     {
       "ticker": "TAEE11",
       "setor": "utilidade-publica",
-      "dcf": 21.94,
+      "dcf": 21.71,
       "preco": 40.51,
-      "potencial": -0.4584053320167859,
-      "multiplos": null,
-      "divergencia": null,
-      "aplicadas": 0,
-      "leituras": {}
+      "potencial": -0.4640829424833374,
+      "multiplos": 34.24942578988646,
+      "divergencia": 0.5775880959008544,
+      "aplicadas": 3,
+      "leituras": {
+        "precoLucro": {
+          "justo": 38.09259098284516,
+          "mediana": 8.306325268955735,
+          "pares": 36,
+          "grupo": "Energia Elétrica / Energia Elétrica"
+        },
+        "precoPatrimonio": {
+          "justo": 34.24942578988646,
+          "mediana": 1.5506528665718355,
+          "pares": 41,
+          "grupo": "Energia Elétrica / Energia Elétrica"
+        },
+        "firmaEbitda": {
+          "justo": 23.934808862194355,
+          "mediana": 6.600496828687227,
+          "pares": 41,
+          "grupo": "Energia Elétrica / Energia Elétrica"
+        }
+      }
     },
     {
       "ticker": "TAEE4",
       "setor": "utilidade-publica",
-      "dcf": 7.79,
+      "dcf": 7.71,
       "preco": 13.72,
-      "potencial": -0.4322157434402333,
-      "multiplos": null,
-      "divergencia": null,
-      "aplicadas": 0,
-      "leituras": {}
+      "potencial": -0.4380466472303207,
+      "multiplos": 11.416475263295487,
+      "divergencia": 0.48139847364233246,
+      "aplicadas": 3,
+      "leituras": {
+        "precoLucro": {
+          "justo": 12.697530327615054,
+          "mediana": 8.306325268955735,
+          "pares": 36,
+          "grupo": "Energia Elétrica / Energia Elétrica"
+        },
+        "precoPatrimonio": {
+          "justo": 11.416475263295487,
+          "mediana": 1.5506528665718355,
+          "pares": 41,
+          "grupo": "Energia Elétrica / Energia Elétrica"
+        },
+        "firmaEbitda": {
+          "justo": 7.978269620731452,
+          "mediana": 6.600496828687227,
+          "pares": 41,
+          "grupo": "Energia Elétrica / Energia Elétrica"
+        }
+      }
     },
     {
       "ticker": "TEND3",
       "setor": "consumo-ciclico",
-      "dcf": 5.22,
+      "dcf": 5.21,
       "preco": 31.48,
-      "potencial": -0.8341804320203304,
+      "potencial": -0.8344980940279543,
       "multiplos": 18.079317786678736,
-      "divergencia": 2.4632959460810575,
+      "divergencia": 2.470474896057733,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2427,11 +2502,11 @@
     {
       "ticker": "TGMA3",
       "setor": "bens-industriais",
-      "dcf": 15.25,
+      "dcf": 15.24,
       "preco": 35.25,
-      "potencial": -0.5673758865248227,
+      "potencial": -0.567659574468085,
       "multiplos": 28.92246919524657,
-      "divergencia": 0.8968206567361448,
+      "divergencia": 0.8983364194512469,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2461,7 +2536,7 @@
       "preco": 34.37,
       "potencial": -0.7753855106197265,
       "multiplos": 28.758617304791525,
-      "divergencia": 2.725834843114619,
+      "divergencia": 2.726214058491318,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2487,11 +2562,11 @@
     {
       "ticker": "UNIP6",
       "setor": "materiais-basicos",
-      "dcf": 46.3,
+      "dcf": 46.1,
       "preco": 57.04,
-      "potencial": -0.188288920056101,
+      "potencial": -0.19179523141654975,
       "multiplos": 55.01,
-      "divergencia": 0.18824182373089182,
+      "divergencia": 0.19330227264253708,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2521,7 +2596,7 @@
       "preco": 6.64,
       "potencial": -0.9337349397590361,
       "multiplos": 8.66669145736735,
-      "divergencia": 18.78771413264379,
+      "divergencia": 18.67306915631187,
       "aplicadas": 1,
       "leituras": {
         "precoLucro": {
@@ -2545,7 +2620,7 @@
       "preco": 7.03,
       "potencial": -0.9416785206258891,
       "multiplos": 8.66669145736735,
-      "divergencia": 20.059790444008,
+      "divergencia": 19.93199111284513,
       "aplicadas": 1,
       "leituras": {
         "precoLucro": {
@@ -2565,11 +2640,11 @@
     {
       "ticker": "VALE3",
       "setor": "materiais-basicos",
-      "dcf": 70.37,
+      "dcf": 70.25,
       "preco": 75.48,
-      "potencial": -0.06770005299417063,
+      "potencial": -0.06928987811340757,
       "multiplos": 72.89879756542258,
-      "divergencia": 0.03592306530516809,
+      "divergencia": 0.037771508816425214,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2595,11 +2670,11 @@
     {
       "ticker": "VIVT3",
       "setor": "comunicacoes",
-      "dcf": 8.32,
+      "dcf": 8.3,
       "preco": 30.51,
-      "potencial": -0.7273025237627008,
+      "potencial": -0.7279580465421174,
       "multiplos": 25.93827512110845,
-      "divergencia": 2.1157185709207873,
+      "divergencia": 2.1267702238170823,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2629,7 +2704,7 @@
       "preco": 17.7,
       "potencial": -0.655367231638418,
       "multiplos": 31.418051855618973,
-      "divergencia": 4.146989520272155,
+      "divergencia": 4.149619011581889,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2655,11 +2730,11 @@
     {
       "ticker": "VULC3",
       "setor": "consumo-ciclico",
-      "dcf": 13.77,
+      "dcf": 13.75,
       "preco": 13.29,
-      "potencial": 0.03611738148984202,
+      "potencial": 0.03461249059443197,
       "multiplos": 13.46430533669873,
-      "divergencia": -0.022475246666562865,
+      "divergencia": -0.020591618047705706,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2685,11 +2760,11 @@
     {
       "ticker": "WEGE3",
       "setor": "bens-industriais",
-      "dcf": 12.52,
+      "dcf": 12.53,
       "preco": 50.74,
-      "potencial": -0.7532518722901064,
+      "potencial": -0.7530547891210091,
       "multiplos": 11.66487727882898,
-      "divergencia": -0.06822722186584684,
+      "divergencia": -0.06894965585727564,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
@@ -2742,11 +2817,11 @@
     {
       "ticker": "YDUQ3",
       "setor": "consumo-ciclico",
-      "dcf": 0.61,
+      "dcf": 0.53,
       "preco": 9.92,
-      "potencial": -0.9385080645161291,
+      "potencial": -0.9465725806451614,
       "multiplos": 9.920000000000002,
-      "divergencia": 15.275703246371908,
+      "divergencia": 17.646653077249045,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {

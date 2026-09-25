@@ -209,31 +209,7 @@ Future<void> main(List<String> args) async {
 /// Os mesmos insumos, mais o pacote de pares. É a única diferença contra a
 /// montagem do gabarito.
 ValuationInputs _comPares(ValuationInputs b, PeerMultipleSet? pares) =>
-    ValuationInputs(
-      ticker: b.ticker,
-      asOf: b.asOf,
-      fundamentals: b.fundamentals,
-      marketPrice: b.marketPrice,
-      capm: b.capm,
-      marginOfSafety: b.marginOfSafety,
-      projectionYears: b.projectionYears,
-      perpetualGrowthCap: b.perpetualGrowthCap,
-      sectorKey: b.sectorKey,
-      industry: b.industry,
-      inflation: b.inflation,
-      declaredTerminalRiskFreeRate: b.declaredTerminalRiskFreeRate,
-      riskFreeCurve: b.riskFreeCurve,
-      officialShares: b.officialShares,
-      prices: b.prices,
-      isDistressed: b.isDistressed,
-      unleveredBeta: b.unleveredBeta,
-      concessionEnd: b.concessionEnd,
-      dividendsInBeta: b.dividendsInBeta,
-      creditReferenceRiskFree: b.creditReferenceRiskFree,
-      declaredSharesPerUnit: b.declaredSharesPerUnit,
-      betaWindowYears: b.betaWindowYears,
-      peerMultiples: pares,
-    );
+    b.withPeerMultiples(pares);
 
 String _pct(double v) =>
     v.isNaN ? '   —  ' : '${(v * 100).toStringAsFixed(1).padLeft(6)}%';

@@ -1,0 +1,42 @@
+{
+ "protocolo": "decisão 129, operacionalizada pela 133",
+ "primeiraCoorte": "2025-12-31",
+ "datasDeLeitura": {
+  "12m": "2029-09-30",
+  "36m": "2031-09-30"
+ },
+ "motorPreRegistrado": {
+  "impressao": "689fad50738defa82c1665853b79bc06651df1d4",
+  "commitBase": "e1a843d2728167406a9c6c5389bfadc4b1108b5b",
+  "arvoreLimpa": false
+ },
+ "selos": [
+  {
+   "coorte": "2025-12-31",
+   "arquivo": "previsoes_2025-12-31.json",
+   "hash": "db676e571a9f07f5af714a583e706f7b1e0bd24f",
+   "motor": "689fad50738defa82c1665853b79bc06651df1d4",
+   "serie": "preRegistrado",
+   "seladoEm": "2026-09-24",
+   "observacoes": 344
+  },
+  {
+   "coorte": "2026-03-31",
+   "arquivo": "previsoes_2026-03-31.json",
+   "hash": "8f2f4aef450167cfdccd825a54de2d1d934887af",
+   "motor": "689fad50738defa82c1665853b79bc06651df1d4",
+   "serie": "preRegistrado",
+   "seladoEm": "2026-09-24",
+   "observacoes": 338
+  },
+  {
+   "coorte": "2026-06-30",
+   "arquivo": "previsoes_2026-06-30.json",
+   "hash": "2f8d778e33158df8ead9fea4c91ecbfc251ba1c1",
+   "motor": "689fad50738defa82c1665853b79bc06651df1d4",
+   "serie": "preRegistrado",
+   "seladoEm": "2026-09-24",
+   "observacoes": 336
+  }
+ ]
+}

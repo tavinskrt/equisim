@@ -337,6 +337,15 @@ class ValuationInputs {
   /// `MarketAnchors.nominalEconomyGrowth`, derivado do IPCA observado.
   final double perpetualGrowthCap;
 
+  /// Ressalvas que a camada de dados conhece e a cascata não enxerga — a CVM
+  /// ausente ou defasada, a curva que faltou, o prior do beta indisponível.
+  ///
+  /// **Entram no resultado e no rastro** (item D4). Antes a tela as acrescentava
+  /// depois da avaliação, e o JSON exportado do painel de logs não as tinha: o
+  /// que se lia na tela não era o que se depurava no arquivo. Nenhum número
+  /// muda por elas.
+  final List<String> contextNotes;
+
   /// Agrupa os insumos. Não busca nada — quem busca é
   /// [PrepareValuationInputs], e a separação é o que mantém a cascata pura.
   const ValuationInputs({
@@ -373,40 +382,122 @@ class ValuationInputs {
     this.peerMultiples,
     this.minorityEquityValue,
     this.scenarioTranslation = ScenarioTranslation.umPorUm,
+    this.contextNotes = const [],
   });
 
+  /// Marcador de «não mudar» para os campos anuláveis de [_copy]: com ele, o
+  /// `null` passado de propósito — tirar a série de preços, por exemplo — se
+  /// distingue do campo que não foi mencionado.
+  static const Object _mantem = Object();
+
+  /// **A única cópia de [ValuationInputs]** (item B27).
+  ///
+  /// Até 22/09/2026 cada cópia repetia a lista de campos à mão, e cada campo
+  /// novo precisava ser lembrado em todas. Não foi: [withProjectionYears] — que
+  /// a concessão que acaba dentro da projeção usa em produção — perdia os
+  /// múltiplos de pares, o valor do minoritário e a tradução do cenário, e as
+  /// cópias das ferramentas perdiam a composição declarada da unit, a taxa de
+  /// referência do crédito e a janela do beta. **Ao acrescentar um campo,
+  /// acrescente aqui e no teste «a cópia preserva todo campo».**
+  ValuationInputs _copy({
+    List<FundamentalsSnapshot>? fundamentals,
+    CapmInputs? capm,
+    int? projectionYears,
+    Object? declaredTerminalRiskFreeRate = _mantem,
+    Object? riskFreeCurve = _mantem,
+    Object? prices = _mantem,
+    Object? creditReferenceRiskFree = _mantem,
+    Object? terminalReturnOverride = _mantem,
+    Object? laneOverride = _mantem,
+    Object? growthOverride = _mantem,
+    Object? baseFactorOverride = _mantem,
+    Object? reinvestmentOverride = _mantem,
+    Object? cashTimingOverride = _mantem,
+    Object? peerMultiples = _mantem,
+    List<String>? contextNotes,
+  }) {
+    T? ou<T>(Object? novo, T? atual) =>
+        identical(novo, _mantem) ? atual : novo as T?;
+    return ValuationInputs(
+      ticker: ticker,
+      asOf: asOf,
+      fundamentals: fundamentals ?? this.fundamentals,
+      marketPrice: marketPrice,
+      capm: capm ?? this.capm,
+      marginOfSafety: marginOfSafety,
+      projectionYears: projectionYears ?? this.projectionYears,
+      perpetualGrowthCap: perpetualGrowthCap,
+      sectorKey: sectorKey,
+      industry: industry,
+      inflation: inflation,
+      declaredTerminalRiskFreeRate:
+          ou(declaredTerminalRiskFreeRate, this.declaredTerminalRiskFreeRate),
+      riskFreeCurve: ou(riskFreeCurve, this.riskFreeCurve),
+      officialShares: officialShares,
+      prices: ou(prices, this.prices),
+      isDistressed: isDistressed,
+      terminalReturnOverride:
+          ou(terminalReturnOverride, this.terminalReturnOverride),
+      laneOverride: ou(laneOverride, this.laneOverride),
+      growthOverride: ou(growthOverride, this.growthOverride),
+      baseFactorOverride: ou(baseFactorOverride, this.baseFactorOverride),
+      unleveredBeta: unleveredBeta,
+      reinvestmentOverride: ou(reinvestmentOverride, this.reinvestmentOverride),
+      cashTimingOverride: ou(cashTimingOverride, this.cashTimingOverride),
+      concessionEnd: concessionEnd,
+      dividendsInBeta: dividendsInBeta,
+      creditReferenceRiskFree:
+          ou(creditReferenceRiskFree, this.creditReferenceRiskFree),
+      declaredSharesPerUnit: declaredSharesPerUnit,
+      terminalBetaWeightOverride: terminalBetaWeightOverride,
+      terminalLeverageOverride: terminalLeverageOverride,
+      betaWindowYears: betaWindowYears,
+      peerMultiples: ou(peerMultiples, this.peerMultiples),
+      minorityEquityValue: minorityEquityValue,
+      scenarioTranslation: scenarioTranslation,
+      contextNotes: contextNotes ?? this.contextNotes,
+    );
+  }
+
   /// Os mesmos insumos, com [n] anos de projeção explícita.
-  ValuationInputs withProjectionYears(int n) => ValuationInputs(
-        ticker: ticker,
-        asOf: asOf,
-        fundamentals: fundamentals,
-        marketPrice: marketPrice,
-        capm: capm,
-        marginOfSafety: marginOfSafety,
-        projectionYears: n,
-        perpetualGrowthCap: perpetualGrowthCap,
-        sectorKey: sectorKey,
-        industry: industry,
-        inflation: inflation,
-        declaredTerminalRiskFreeRate: declaredTerminalRiskFreeRate,
-        riskFreeCurve: riskFreeCurve,
-        officialShares: officialShares,
-        prices: prices,
-        isDistressed: isDistressed,
-        terminalReturnOverride: terminalReturnOverride,
-        laneOverride: laneOverride,
-        growthOverride: growthOverride,
-        baseFactorOverride: baseFactorOverride,
-        unleveredBeta: unleveredBeta,
-        reinvestmentOverride: reinvestmentOverride,
-        cashTimingOverride: cashTimingOverride,
-        concessionEnd: concessionEnd,
-        dividendsInBeta: dividendsInBeta,
-        creditReferenceRiskFree: creditReferenceRiskFree,
-        declaredSharesPerUnit: declaredSharesPerUnit,
-        terminalBetaWeightOverride: terminalBetaWeightOverride,
-        terminalLeverageOverride: terminalLeverageOverride,
-        betaWindowYears: betaWindowYears,
+  ValuationInputs withProjectionYears(int n) => _copy(projectionYears: n);
+
+  /// Os mesmos insumos com outra série de exercícios — a ancorada no trimestre
+  /// do backtest (item C1c), por exemplo.
+  ValuationInputs withFundamentals(List<FundamentalsSnapshot> series) =>
+      _copy(fundamentals: series);
+
+  /// Os mesmos insumos sem a série de cotações: a Porta 0 omite o corte de
+  /// liquidez sem ela, e nada mais na cascata lê a série. Instrumento de
+  /// diagnóstico.
+  ValuationInputs withoutPrices() => _copy(prices: null);
+
+  /// Os mesmos insumos com outras medianas de pares — ou sem elas.
+  ValuationInputs withPeerMultiples(PeerMultipleSet? pares) =>
+      _copy(peerMultiples: pares);
+
+  /// Os mesmos insumos com as ressalvas de contexto (ver [contextNotes]).
+  ValuationInputs withContextNotes(List<String> notes) =>
+      _copy(contextNotes: List.unmodifiable(notes));
+
+  /// Os mesmos insumos com as **imposições de diagnóstico** trocadas pelas
+  /// informadas — `null` desliga a imposição. Não são do aplicativo: servem às
+  /// varreduras que medem o efeito de uma alternativa.
+  ValuationInputs withOverrides({
+    ValuationLane? lane,
+    double? terminalReturn,
+    double? growth,
+    double? baseFactor,
+    ReinvestmentPolicy? reinvestment,
+    CashTiming? cashTiming,
+  }) =>
+      _copy(
+        laneOverride: lane,
+        terminalReturnOverride: terminalReturn,
+        growthOverride: growth,
+        baseFactorOverride: baseFactor,
+        reinvestmentOverride: reinvestment,
+        cashTimingOverride: cashTiming,
       );
 
   /// Os mesmos insumos com o **nível** da taxa livre de risco deslocado em
@@ -422,18 +513,8 @@ class ValuationInputs {
     double piso(double x) => x < 0.001 ? 0.001 : x;
     final curva = riskFreeCurve;
     final declarada = declaredTerminalRiskFreeRate;
-    return ValuationInputs(
-      ticker: ticker,
-      asOf: asOf,
-      fundamentals: fundamentals,
-      marketPrice: marketPrice,
+    return _copy(
       capm: capm.withRiskFree(piso(capm.riskFreeRate + delta)),
-      marginOfSafety: marginOfSafety,
-      projectionYears: projectionYears,
-      perpetualGrowthCap: perpetualGrowthCap,
-      sectorKey: sectorKey,
-      industry: industry,
-      inflation: inflation,
       declaredTerminalRiskFreeRate:
           declarada == null ? null : piso(declarada + delta),
       riskFreeCurve: curva == null
@@ -442,24 +523,7 @@ class ValuationInputs {
               for (final v in curva.vertices)
                 CurveVertex(v.years, piso(v.rate + delta)),
             ]),
-      officialShares: officialShares,
-      prices: prices,
-      isDistressed: isDistressed,
-      terminalReturnOverride: terminalReturnOverride,
-      laneOverride: laneOverride,
-      growthOverride: growthOverride,
-      baseFactorOverride: baseFactorOverride,
-      unleveredBeta: unleveredBeta,
-      reinvestmentOverride: reinvestmentOverride,
-      cashTimingOverride: cashTimingOverride,
-      concessionEnd: concessionEnd,
-      dividendsInBeta: dividendsInBeta,
-      creditReferenceRiskFree:
-          creditReferenceRiskFree ?? capm.riskFreeRate,
-      declaredSharesPerUnit: declaredSharesPerUnit,
-      terminalBetaWeightOverride: terminalBetaWeightOverride,
-      terminalLeverageOverride: terminalLeverageOverride,
-      betaWindowYears: betaWindowYears,
+      creditReferenceRiskFree: creditReferenceRiskFree ?? capm.riskFreeRate,
     );
   }
 
@@ -872,6 +936,32 @@ abstract final class ValuationCascade {
       '/core/valuation/${recebidos.ticker.value}',
       inputPayload: _inputPayload(recebidos),
     );
+    // **Uma exceção também fecha a transação** (item D4). Sem isto, um erro
+    // inesperado no meio da cascata deixava a transação aberta para sempre, e o
+    // painel de logs não recebia nada — justamente o caso que se abre o painel
+    // para depurar. A exceção continua subindo: o rastro registra, não engole.
+    try {
+      return _evaluate(recebidos, audit,
+          scenarioBuilder: scenarioBuilder,
+          monteCarloSamples: monteCarloSamples,
+          seed: seed);
+    } catch (e, pilha) {
+      audit?.abort('Exceção não tratada na cascata: $e', extra: {
+        'excecao': e.runtimeType.toString(),
+        'pilha': pilha.toString().split('\n').take(12).toList(),
+        'notasDeContexto': recebidos.contextNotes,
+      });
+      rethrow;
+    }
+  }
+
+  static Result<ValuationResult> _evaluate(
+    ValuationInputs recebidos,
+    AuditTransaction? audit, {
+    AssumptionSource Function(DcfAssumptions base)? scenarioBuilder,
+    required int monteCarloSamples,
+    required int seed,
+  }) {
 
     // **Concessão que acaba dentro da projeção termina a projeção no contrato**
     // (item A6, decisão 88). Antes de tudo, porque o horizonte governa a curva,
@@ -1111,9 +1201,12 @@ abstract final class ValuationCascade {
         scenarioBuilder, monteCarloSamples, seed, divisor, audit,
         refusals: refusals);
     if (result != null) {
-      _auditVerdict(audit, result);
-      audit?.complete(_outputPayload(result));
-      return Ok(result);
+      final comNotas = inputs.contextNotes.isEmpty
+          ? result
+          : result.withWarnings(inputs.contextNotes);
+      _auditVerdict(audit, comNotas);
+      audit?.complete(_outputPayload(comNotas));
+      return Ok(comNotas);
     }
 
     final message = refusals.isNotEmpty
@@ -1123,6 +1216,7 @@ abstract final class ValuationCascade {
     audit?.abort(message, extra: {
       'viaTentada': lane.diagnostico,
       'exerciciosPublicados': published.length,
+      if (inputs.contextNotes.isNotEmpty) 'notasDeContexto': inputs.contextNotes,
     });
     return Err(InsufficientData(message, subject: inputs.ticker.value));
   }
@@ -3451,8 +3545,14 @@ abstract final class ValuationCascade {
 
   /// Arredonda para o JSON: `num` em vez de `String` para o valor continuar
   /// sendo número no payload exportado.
+  ///
+  /// **O que não é finito passa como é** (item D4). Até 22/09/2026 ele virava
+  /// `0`, e um `NaN` ou um infinito — o sinal de que uma conta degenerou —
+  /// aparecia no rastro como zero, que é o valor mais enganoso possível numa
+  /// depuração. Agora ele chega ao rastro e sai no JSON como `"NaN"` ou
+  /// `"Infinity"`, pela serialização segura de [AuditJson].
   static num _r(double value, [int decimals = 2]) {
-    if (!value.isFinite) return 0;
+    if (!value.isFinite) return value;
     if (decimals <= 0) return value.round();
     final factor = math.pow(10, decimals);
     return (value * factor).round() / factor;
@@ -3483,6 +3583,9 @@ abstract final class ValuationCascade {
         'concessionEnd': _fmt(inputs.concessionEnd!),
       'perpetualGrowthCap': _r(inputs.perpetualGrowthCap, 6),
       'fundamentalsPeriods': inputs.fundamentals.length,
+      // Quantos exercícios ficaram de fora do resumo abaixo — o rastro diz que
+      // resumiu, em vez de parecer que a série tinha seis.
+      'fundamentalsOmitted': inputs.fundamentals.length - recent.length,
       'fundamentals': [
         for (final f in recent)
           {
@@ -3509,6 +3612,73 @@ abstract final class ValuationCascade {
                 : _r(f.bookValuePerShare!),
           },
       ],
+      // **O resto do que entra na conta** (item D4). O payload trazia preço,
+      // CAPM e exercícios; a curva, a contagem oficial, a composição da unit,
+      // o prior do beta e as imposições de diagnóstico mudam o preço justo e
+      // não apareciam — depurar pelo JSON exigia adivinhar com que insumo a
+      // cascata tinha rodado.
+      'scenarioTranslation': inputs.scenarioTranslation.name,
+      'sectorKey': inputs.sectorKey,
+      'industry': inputs.industry,
+      'isDistressed': inputs.isDistressed,
+      'inflation': _r(inputs.inflation, 6),
+      'terminalRiskFreeRate': _r(inputs.terminalRiskFreeRate, 6),
+      if (inputs.riskFreeCurve case final curva?)
+        'riskFreeCurve': {
+          'referenceDate': _fmt(curva.referenceDate),
+          'vertices': [
+            for (final v in curva.vertices)
+              {'years': _r(v.years, 4), 'rate': _r(v.rate, 6)},
+          ],
+        },
+      if (inputs.officialShares case final oficial?)
+        'officialShares': {
+          'total': _r(oficial.total, 0),
+          'asOf': _fmt(oficial.asOf),
+        },
+      'declaredSharesPerUnit': inputs.declaredSharesPerUnit,
+      'unleveredBeta':
+          inputs.unleveredBeta == null ? null : _r(inputs.unleveredBeta!, 4),
+      'betaWindowYears': inputs.betaWindowYears == null
+          ? null
+          : _r(inputs.betaWindowYears!, 2),
+      'dividendsInBeta': inputs.dividendsInBeta,
+      'creditReferenceRiskFree': inputs.creditReferenceRiskFree == null
+          ? null
+          : _r(inputs.creditReferenceRiskFree!, 6),
+      'minorityEquityValue': inputs.minorityEquityValue == null
+          ? null
+          : _r(inputs.minorityEquityValue!),
+      if (inputs.prices case final serie?)
+        'prices': {
+          'points': serie.points.length,
+          if (serie.points.isNotEmpty) 'first': _fmt(serie.points.first.date),
+          if (serie.points.isNotEmpty) 'last': _fmt(serie.points.last.date),
+        },
+      if (inputs.peerMultiples case final pares?)
+        'peerMultiples': {
+          'asOf': _fmt(pares.asOf),
+          for (final e in pares.byKind.entries)
+            e.key.name: {
+              'median': _r(e.value.median, 4),
+              'peers': e.value.peers,
+              'group': e.value.group,
+            },
+        },
+      'overrides': {
+        if (inputs.laneOverride case final v?) 'lane': v.name,
+        if (inputs.terminalReturnOverride case final v?)
+          'terminalReturn': _r(v, 6),
+        if (inputs.growthOverride case final v?) 'growth': _r(v, 6),
+        if (inputs.baseFactorOverride case final v?) 'baseFactor': _r(v, 4),
+        if (inputs.reinvestmentOverride case final v?) 'reinvestment': v.name,
+        if (inputs.cashTimingOverride case final v?) 'cashTiming': v.name,
+        if (inputs.terminalBetaWeightOverride case final v?)
+          'terminalBetaWeight': _r(v, 4),
+        if (inputs.terminalLeverageOverride case final v?)
+          'terminalLeverage': _r(v, 4),
+      },
+      if (inputs.contextNotes.isNotEmpty) 'contextNotes': inputs.contextNotes,
     };
   }
 
@@ -3542,15 +3712,68 @@ abstract final class ValuationCascade {
               4,
             ),
           },
-        if (result.diagnostics != null)
+        // **O diagnóstico inteiro, e não cinco campos** (item D4). A tela lê o
+        // `Ke`, o caminho de crescimento e o retorno terminal; o rastro
+        // exportado precisa ter o mesmo, ou a depuração do JSON não reproduz a
+        // tela.
+        if (result.diagnostics case final d?)
           'diagnostics': {
-            'terminalShare': _r(result.diagnostics!.terminalShare, 4),
-            'equityShare': _r(result.diagnostics!.equityShare, 4),
-            'baseFactor': _r(result.diagnostics!.baseFactor, 4),
-            'growthIdentified': result.diagnostics!.growthIdentified,
-            'moatApplied': result.diagnostics!.moatApplied,
-            'caveats': [
-              for (final c in result.diagnostics!.caveats) c.name,
+            'terminalShare': _r(d.terminalShare, 4),
+            'equityShare': _r(d.equityShare, 4),
+            'baseFactor': _r(d.baseFactor, 4),
+            'growthIdentified': d.growthIdentified,
+            'moatApplied': d.moatApplied,
+            'caveats': [for (final c in d.caveats) c.name],
+            'terminalRetainedSpread': _r(d.terminalRetainedSpread, 6),
+            'growthRate': _r(d.growthRate, 6),
+            'terminalReturnOnCapital': d.terminalReturnOnCapital == null
+                ? null
+                : _r(d.terminalReturnOnCapital!, 6),
+            'firmTaxRate':
+                d.firmTaxRate == null ? null : _r(d.firmTaxRate!, 6),
+            'returnOnCapital': _r(d.returnOnCapital, 6),
+            'terminalDiscountRate': _r(d.terminalDiscountRate, 6),
+            'terminalCostOfEquity': d.terminalCostOfEquity == null
+                ? null
+                : _r(d.terminalCostOfEquity!, 6),
+            'costOfEquity': _r(d.costOfEquity, 6),
+            'terminalExcessShare': d.terminalExcessShare == null
+                ? null
+                : _r(d.terminalExcessShare!, 4),
+            'impliedTerminalReturn': d.impliedTerminalReturn == null
+                ? null
+                : _r(d.impliedTerminalReturn!, 6),
+            'terminalEquityShare': d.terminalEquityShare == null
+                ? null
+                : _r(d.terminalEquityShare!, 4),
+            'growthPath': [for (final g in d.growthPath) _r(g, 6)],
+            'retentionPath': [for (final b in d.retentionPath) _r(b, 6)],
+          },
+        // O insumo da faixa calibrada, que a tela monta com ele (decisão 100).
+        'priceVolatility': result.priceVolatility == null
+            ? null
+            : _r(result.priceVolatility!, 6),
+        if (result.triangulation case final t?)
+          'triangulation': {
+            'asOf': _fmt(t.asOf),
+            'consolidated':
+                t.consolidated == null ? null : _r(t.consolidated!),
+            'divergence': t.divergence == null ? null : _r(t.divergence!, 4),
+            'readings': [
+              for (final r in t.readings)
+                {
+                  'kind': r.kind.name,
+                  'fairValuePerShare': r.fairValuePerShare == null
+                      ? null
+                      : _r(r.fairValuePerShare!),
+                  'refusal': r.refusal?.name,
+                  if (r.peer case final p?)
+                    'peer': {
+                      'median': _r(p.median, 4),
+                      'peers': p.peers,
+                      'group': p.group,
+                    },
+                },
             ],
           },
         'warnings': result.warnings,

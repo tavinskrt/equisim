@@ -1,3 +1,4 @@
+import '../audit/audit_recorder.dart';
 import '../entities/price_series.dart';
 import '../failures/failure.dart';
 import '../failures/result.dart';
@@ -64,6 +65,33 @@ abstract final class PrepareValuationInputs {
   ///
   /// **Falha do índice não interrompe**: o beta cai para 1,0, registrado em
   /// [BetaSource.manual].
+  /// A falha do preparo, **registrada no painel de logs** (item D4).
+  ///
+  /// O preparo acontece antes da cascata, e a cascata é quem abre transação: um
+  /// ativo sem exercícios ou sem cotação saía da avaliação sem deixar evento, e
+  /// o painel não tinha como dizer por que ele não foi avaliado. Agora a falha
+  /// sai no mesmo endpoint da avaliação, com a etapa e a fonte que faltou.
+  static Result<ValuationInputs> _falha(
+    Ticker ticker,
+    DateTime asOf,
+    String fonte,
+    Failure failure,
+  ) {
+    AuditRecorder.begin(
+      '/core/valuation/${ticker.value}',
+      inputPayload: {
+        'ticker': ticker.value,
+        'asOf': asOf.toIso8601String(),
+        'etapa': 'preparo',
+      },
+    )?.abort(failure.message, extra: {
+      'etapa': 'preparo',
+      'fonte': fonte,
+      'falha': failure.runtimeType.toString(),
+    });
+    return Err(failure);
+  }
+
   static Future<Result<ValuationInputs>> call({
     required Ticker ticker,
     required PriceRepository prices,
@@ -93,7 +121,9 @@ abstract final class PrepareValuationInputs {
     );
 
     final historyResult = await fundamentals.history(ticker);
-    if (historyResult.isErr) return Err(historyResult.failureOrNull!);
+    if (historyResult.isErr) {
+      return _falha(ticker, today, 'exercícios', historyResult.failureOrNull!);
+    }
 
     // O perfil alimenta a Porta 1. Falha dele **não** interrompe: sem setor a
     // porta não dispara e o roteamento cai na Porta 3, que já barra instituição
@@ -107,14 +137,21 @@ abstract final class PrepareValuationInputs {
     final industry = profile.isOk ? profile.unwrap().industry : null;
 
     final priceResult = await prices.daily(ticker, window);
-    if (priceResult.isErr) return Err(priceResult.failureOrNull!);
+    if (priceResult.isErr) {
+      return _falha(ticker, today, 'cotações', priceResult.failureOrNull!);
+    }
 
     final series = priceResult.unwrap();
     if (series.isEmpty) {
-      return Err(InsufficientData(
-        'Sem cotações de ${ticker.value} na janela de análise.',
-        subject: ticker.value,
-      ));
+      return _falha(
+        ticker,
+        today,
+        'cotações',
+        InsufficientData(
+          'Sem cotações de ${ticker.value} na janela de análise.',
+          subject: ticker.value,
+        ),
+      );
     }
 
     final beta = await _estimateBeta(

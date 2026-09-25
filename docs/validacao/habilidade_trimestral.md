@@ -151,6 +151,51 @@ reingestão da CVM.
   ([ponte_por_papel.md](ponte_por_papel.md)).
 - **O motivo de saída das deslistadas** continua não levantado.
 
+## 10. Com a cópia dos insumos corrigida — remedido em 24/09/2026
+
+**O backtest foi reexecutado por causa do item B27** ([decisão 132](../decisoes/132-a-copia-dos-insumos-passa-por-um-lugar-so.md)):
+as cópias que montam a leitura ancorada e o contrafactual sem o corte de
+liquidez perdiam a composição declarada da unit, a taxa de referência do
+crédito e a janela do beta. **A leitura padrão não passa por essas cópias**, e
+por isso o critério do R3 não se move. O que se move são as duas leituras
+secundárias. A SAPR4 de 30/06/2021, por exemplo, tinha justo ancorado de
+R$ 5,94 contra R$ 30,15 do anual, com o divisor da unit aplicado à espécie, e
+agora tem R$ 29,69.
+
+A fonte de mercado renovou o cache na mesma execução. Três papéis saíram do
+universo (PEAB3, SOND5 e CEGR3), a WLMM3 entrou, e o `Ke` mudou na quinta casa
+em parte das observações: **10.808 observações**, contra 10.837.
+
+| 36 meses, trimestral, com deslistadas (n = 2.165) | média | `t` corrigido / crítico | Newey-West | passa |
+|---|---:|---:|---:|---|
+| **potencial dado o B/M (critério do R3)** | **0,052** | **0,30 / 2,70** | 0,83 | não |
+| IC do potencial | 0,105 | 0,65 / 2,70 | 1,61 | não |
+| IC do book-to-market | 0,158 | 2,01 / 2,70 | 4,23 | não |
+| IC do lucro sobre o preço | 0,125 | 1,06 / 2,70 | 2,87 | não |
+| IC do composto | 0,152 | 1,24 / 2,70 | 3,02 | não |
+| IC do múltiplo de pares | 0,078 | 1,15 / 2,70 | 3,52 | não |
+
+**Nenhum veredito muda**, e o critério do R3 fica nos mesmos 0,052 com `t`
+corrigido de 0,30. O Newey-West dele vai de 0,84 a 0,83, e o IC do composto, de
+0,151 a 0,152.
+
+**A série ancorada contra a anual, com a cópia corrigida**, nas mesmas
+observações (o potencial difere entre as duas em 70,2% delas):
+
+| | 36 meses (2.034) | 12 meses (2.765) |
+|---|---:|---:|
+| IC da anual | 0,090 | 0,057 |
+| IC da ancorada | 0,111 | 0,079 |
+| diferença | +0,021 | +0,022 |
+| **`t` corrigido / crítico da diferença** | **0,27 / 2,70** | **0,78 / 2,24** |
+| Newey-West da diferença | 1,22 | 1,37 |
+| anual dado o B/M | 0,022 | 0,024 |
+| ancorada dado o B/M | 0,052 | 0,056 |
+
+**A regra da decisão 98 dá o mesmo veredito**: a diferença em 36 meses é
+positiva e não passa no critério, e a ancorada continua fora do padrão. Os
+números da §4 são de 15/09, anteriores aos três campos que a cópia perdia.
+
 ## 9. Sobre o motor que fecha a Fase 3 — remedido em 22/09/2026
 
 **É a leitura sobre o motor com as Fases 1 a 3 fechadas**: além do da §8, as

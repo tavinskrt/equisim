@@ -46,14 +46,35 @@ class AuditBus extends ChangeNotifier {
   /// Nome do canal. Fixo: as duas janelas precisam concordar sem combinar.
   static const String channelName = 'equisim-audit-v1';
 
-  /// Teto do anel de histórico.
+  /// Teto do anel de **cálculos**.
   ///
-  /// Duzentos eventos cobrem com folga uma sessão de demonstração e mantêm o
-  /// *replay* numa mensagem que o navegador transmite sem esforço.
-  static const int bufferLimit = 200;
+  /// **Dois anéis, e não um** (item D4). Com um só, de 200, cada avaliação
+  /// dispara várias idas à rede, e numa carteira de quinze ativos o ruído de
+  /// rede empurrava para fora justamente as avaliações que se abre o painel
+  /// para depurar. Cada anel descarta o seu mais antigo, e o descarte é
+  /// contado — ver [discardedCalculations].
+  static const int calculationLimit = 200;
+
+  /// Teto do anel de eventos de **rede**.
+  static const int networkLimit = 300;
+
+  /// O evento é de cálculo do núcleo, e não de ida à rede?
+  ///
+  /// **Pela origem, e não pela presença de passos** (item D4). Uma avaliação
+  /// recusada antes do primeiro passo — preço de mercado ausente, falha de
+  /// preparo — não tem cálculo decomposto, e a regra antiga a mostrava como ida
+  /// à rede.
+  static bool isCalculation(AuditEvent event) =>
+      event.endpoint.startsWith('/core/');
 
   final List<AuditEvent> _buffer = [];
   final Set<String> _seen = <String>{};
+
+  int _discardedCalculations = 0;
+  int _discardedNetwork = 0;
+  int _originDiscardedCalculations = 0;
+  int _originDiscardedNetwork = 0;
+  int _untransmitted = 0;
 
   AuditChannel? _channel;
   StreamSubscription<String>? _subscription;
@@ -61,6 +82,24 @@ class AuditBus extends ChangeNotifier {
 
   /// Eventos, do mais antigo ao mais recente.
   List<AuditEvent> get history => List.unmodifiable(_buffer);
+
+  /// Cálculos que saíram do histórico por falta de espaço, **nesta janela ou
+  /// na que calcula** — o maior dos dois, porque o painel em outra aba só vê
+  /// o que a janela emissora ainda tinha. Um arquivo exportado com descarte não
+  /// está completo, e diz isso.
+  int get discardedCalculations =>
+      _discardedCalculations > _originDiscardedCalculations
+          ? _discardedCalculations
+          : _originDiscardedCalculations;
+
+  /// Eventos de rede descartados, pela mesma regra.
+  int get discardedNetwork => _discardedNetwork > _originDiscardedNetwork
+      ? _discardedNetwork
+      : _originDiscardedNetwork;
+
+  /// Eventos que não puderam ser transmitidos à outra janela. Com a
+  /// serialização segura do núcleo, deve ser sempre zero.
+  int get untransmitted => _untransmitted;
 
   /// Papel assumido pelo barramento, ou `null` enquanto ele não foi ligado.
   AuditRole? get role => _role;
@@ -113,23 +152,64 @@ class AuditBus extends ChangeNotifier {
 
   void _publishLocal(AuditEvent event) {
     _record(event);
-    _channel?.post(jsonEncode({'kind': 'event', 'event': event.toJson()}));
+    // **O coletor roda dentro da transação que fecha o cálculo**: uma exceção
+    // aqui subiria para a avaliação. A serialização do núcleo já é segura
+    // (`AuditJson`), e esta guarda é a segunda linha — o evento fica no
+    // histórico local mesmo que não atravesse para a outra janela.
+    try {
+      _channel?.post(jsonEncode({
+        'kind': 'event',
+        'event': event.toJson(),
+        'descartados': _discardedPayload,
+      }));
+    } catch (error) {
+      _untransmitted++;
+      debugPrint('⚠️  Evento de auditoria não transmitido: $error');
+    }
   }
 
   void _record(AuditEvent event) {
     if (!_seen.add(event.transactionId)) return;
     _buffer.add(event);
-    while (_buffer.length > bufferLimit) {
-      _seen.remove(_buffer.removeAt(0).transactionId);
+    final calculo = isCalculation(event);
+    final teto = calculo ? calculationLimit : networkLimit;
+    var mesmos = _buffer.where((e) => isCalculation(e) == calculo).length;
+    while (mesmos > teto) {
+      final i = _buffer.indexWhere((e) => isCalculation(e) == calculo);
+      _seen.remove(_buffer.removeAt(i).transactionId);
+      mesmos--;
+      if (calculo) {
+        _discardedCalculations++;
+      } else {
+        _discardedNetwork++;
+      }
     }
     notifyListeners();
   }
 
   void _clearLocal() {
+    _discardedCalculations = 0;
+    _discardedNetwork = 0;
+    _originDiscardedCalculations = 0;
+    _originDiscardedNetwork = 0;
     if (_buffer.isEmpty) return;
     _buffer.clear();
     _seen.clear();
     notifyListeners();
+  }
+
+  Map<String, int> get _discardedPayload => {
+        'calculos': _discardedCalculations,
+        'rede': _discardedNetwork,
+      };
+
+  void _readOriginDiscarded(Object? raw) {
+    if (raw is! Map) return;
+    final c = raw['calculos'], r = raw['rede'];
+    if (c is int && c > _originDiscardedCalculations) {
+      _originDiscardedCalculations = c;
+    }
+    if (r is int && r > _originDiscardedNetwork) _originDiscardedNetwork = r;
   }
 
   void _onRemoteMessage(String raw) {
@@ -144,6 +224,7 @@ class AuditBus extends ChangeNotifier {
 
     switch (decoded['kind']) {
       case 'event':
+        _readOriginDiscarded(decoded['descartados']);
         final payload = decoded['event'];
         if (payload is Map<String, dynamic>) {
           _record(AuditEvent.fromJson(payload));
@@ -155,9 +236,11 @@ class AuditBus extends ChangeNotifier {
         _channel?.post(jsonEncode({
           'kind': 'replay',
           'events': [for (final e in _buffer) e.toJson()],
+          'descartados': _discardedPayload,
         }));
 
       case 'replay':
+        _readOriginDiscarded(decoded['descartados']);
         final events = decoded['events'];
         if (events is! List) return;
         for (final item in events) {

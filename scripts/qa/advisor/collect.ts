@@ -59,11 +59,20 @@ function git(args: string[], cwd: string): string {
   });
 }
 
-/** Lista os arquivos versionados sob os caminhos dados. */
+/**
+ * Lista os arquivos sob os caminhos dados: os versionados **e os novos que o
+ * `.gitignore` nao exclui**.
+ *
+ * So os versionados, como era, deixava a lente cega para o que a rodada acabou
+ * de escrever: em 24/09/2026 as decisoes 131 a 134, os testes novos e o
+ * `tool/c7/` nao chegaram a lente nenhuma, porque ainda nao tinham commit -- e
+ * o conselheiro roda justamente antes do commit. O `.gitignore` continua
+ * barrando `data/`, `.env*` e o resto que nao e do projeto.
+ */
 function listar(root: string, caminhos: string[]): string[] {
   const existentes = caminhos.filter((c) => existsSync(join(root, c)));
   if (existentes.length === 0) return [];
-  return git(['ls-files', '--', ...existentes], root)
+  return git(['ls-files', '--cached', '--others', '--exclude-standard', '--', ...existentes], root)
     .split('\n')
     .map((l) => l.trim())
     .filter((l) => l !== '');
@@ -119,16 +128,22 @@ function blocosDeMaterial(root: string, material: Material): Bloco[] {
       }
       const extensoes = material.extensoes;
       const excluir = material.excluir ?? [];
-      return listar(root, [material.caminho])
+      const arquivos = listar(root, [material.caminho])
         .filter((f) => !extensoes || extensoes.some((e) => f.endsWith(e)))
         .filter((f) => !excluido(f, excluir))
+        .sort();
+      if (material.recentesPrimeiro) arquivos.reverse();
+      return arquivos
         .map((f) => blocoDeArquivo(root, f))
         .filter((b): b is Bloco => b !== null);
     }
 
     case 'arvore-completa': {
       const excluir = material.excluirPrefixos ?? [];
-      const arquivos = git(['ls-files'], root)
+      // Os novos que o `.gitignore` nao exclui tambem: a arvore que a lente
+      // `registro` confronta com o registro e a do commit que vem, e nao a do
+      // ultimo (ver [listar]).
+      const arquivos = git(['ls-files', '--cached', '--others', '--exclude-standard'], root)
         .split('\n')
         .map((l) => l.trim())
         .filter((l) => l !== '' && !excluir.some((p) => l.startsWith(p)));

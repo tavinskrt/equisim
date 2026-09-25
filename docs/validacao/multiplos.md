@@ -14,8 +14,17 @@
 >
 > **Remedido depois da [decisão 119](../decisoes/119-a-rota-derivada-tambem-remunera-o-caixa-pela-taxa-livre-de-risco.md)**,
 > que estendeu à rota derivada a separação do caixa que a decisão 113 fez no
-> WACC. O preço justo caiu em 73 dos 97 e dois ativos saíram; os números abaixo
-> são os de depois.
+> WACC. O preço justo caiu em 73 dos 97 e dois ativos saíram.
+>
+> **Remedido em 24/09/2026**, sobre o motor que fecha a Fase 3 — com o juro da
+> rota derivada pela curva (B24) e o prêmio de crédito sem despesa financeira
+> (B26), que movem o preço justo, e com a cópia única dos insumos
+> ([decisão 132](../decisoes/132-a-copia-dos-insumos-passa-por-um-lugar-so.md)),
+> que não o move. A cópia usada pela concessão que acaba dentro da projeção
+> perdia os múltiplos de pares, e **quatro concessionárias — EGIE3, EQTL3,
+> TAEE11 e TAEE4 — ficavam sem a segunda leitura**; agora as quatro recebem as
+> três. Os números abaixo são os de depois; os de 21/09 estão no histórico do
+> git deste arquivo.
 
 ## 0. O que o item pedia
 
@@ -72,12 +81,12 @@ por contagens diferentes mediria a ponte, e não o modelo (decisão 83).
 
 | leituras aplicadas | ativos |
 |---:|---:|
-| 3 de 3 | **66** |
+| 3 de 3 | **70** |
 | 2 de 3 | 24 |
 | 1 de 3 | 3 |
-| 0 de 3 | 4 |
+| 0 de 3 | 0 |
 
-**93 dos 97 avaliados recebem alguma leitura.** As recusas são as previstas: 19
+**Os 97 avaliados recebem alguma leitura.** As recusas são as previstas: 19
 instituições financeiras sem EV/EBITDA, 8 prejuízos sem P/L, 3 EBITDA não
 positivo.
 
@@ -85,35 +94,35 @@ positivo.
 
 | divergência (múltiplos ÷ DCF − 1) | p10 | p25 | mediana | p75 | p90 |
 |---|---:|---:|---:|---:|---:|
-| | −2,2% | +28,1% | **+78,2%** | +211,6% | +961,4% |
+| | −6,9% | +26,5% | **+73,4%** | +213,0% | +981,3% |
 
-**61 dos 93 passam do limite de 50%**, e **o DCF fica acima dos pares em apenas
-13 de 93**.
+**62 dos 97 passam do limite de 50%**, e **o DCF fica acima dos pares em apenas
+14 de 97**.
 
 | | potencial mediano |
 |---|---:|
-| pelo fluxo descontado | **−48,4%** |
-| pelos múltiplos | **−2,3%** |
+| pelo fluxo descontado | **−45,4%** |
+| pelos múltiplos | **−3,2%** |
 
 E a ordenação:
 
 | | |
 |---|---:|
-| postos entre os dois potenciais | **0,470** |
-| mesmo sinal de potencial | 63 de 93 |
+| postos entre os dois potenciais | **0,445** |
+| mesmo sinal de potencial | 67 de 97 |
 
 Os extremos dos dois lados:
 
 | | DCF | pares | divergência |
 |---|---:|---:|---:|
 | BBSE3 | R$ 38,24 | R$ 23,13 | −39,5% |
-| SEER3 | R$ 16,99 | R$ 12,31 | −27,5% |
-| POMO4 | R$ 0,16 | R$ 5,34 | +3.139% |
-| EMBJ3 | R$ 0,22 | R$ 34,30 | +15.517% |
+| SEER3 | R$ 16,96 | R$ 12,31 | −27,4% |
+| POMO4 | R$ 0,16 | R$ 5,34 | +3.284% |
+| EMBJ3 | R$ 0,22 | R$ 34,30 | +15.289% |
 
 ## 4. Como ler isso — e o que **não** se pode concluir
 
-**O potencial mediano de −2,3% pelos múltiplos é quase mecânico.** As medianas
+**O potencial mediano de −3,2% pelos múltiplos é quase mecânico.** As medianas
 saem dos preços de mercado dos pares: uma avaliação relativa tende a devolver o
 preço de mercado por construção. **Ela não confirma o nível do mercado**, e
 dizer «os múltiplos dão razão ao mercado» seria ler tautologia como evidência.
@@ -121,15 +130,15 @@ dizer «os múltiplos dão razão ao mercado» seria ler tautologia como evidên
 **O que a medição estabelece, e é o que o item pedia:**
 
 1. **O desacordo de nível do motor não é com o mercado — é com qualquer leitura
-   relativa.** O DCF fica 78% abaixo do que os pares implicam na mediana, e
-   acima em só 13 de 93. A §2.8 discutia isso em prosa; agora tem número.
+   relativa.** O DCF fica 73% abaixo do que os pares implicam na mediana, e
+   acima em só 14 de 97. A §2.8 discutia isso em prosa; agora tem número.
 2. **O teste de sanidade funciona por ativo.** Os extremos são informativos: a
    EMBJ3 vale R$ 0,22 pelo DCF e R$ 34,30 pelos pares, e o rastro já dizia por
-   quê — excedente terminal de **−3.653%** do preço justo, com peso do terminal
-   de 1.042%. A divergência não é ruído da triangulação; é a mesma coisa que o
+   quê — excedente terminal de **−3.600%** do preço justo, com peso do terminal
+   de 1.028%. A divergência não é ruído da triangulação; é a mesma coisa que o
    diagnóstico do terminal já apontava, dita por outro caminho.
-3. **As duas ordenações são meio diferentes.** Postos de 0,470, mesmo sinal em
-   63 de 93. **O múltiplo relativo é um sinal distinto, e não uma cópia do DCF**
+3. **As duas ordenações são meio diferentes.** Postos de 0,445, mesmo sinal em
+   67 de 97. **O múltiplo relativo é um sinal distinto, e não uma cópia do DCF**
    — o que o torna útil como conferência e o torna candidato a entrar na §0 como
    mais uma ordenação a medir.
 
@@ -159,7 +168,7 @@ exatamente por isso que as duas leituras se afastam.
   descontado (decisão 103).
 - **Não há medição de habilidade do múltiplo.** Se a ordenação por
   `múltiplos ÷ preço` prevê retorno melhor que o potencial do DCF é pergunta de
-  coorte, e depende da base bruta (item C5). **Os postos de 0,470 dizem que vale
+  coorte, e depende da base bruta (item C5). **Os postos de 0,445 dizem que vale
   a pena perguntar**, e isso entra como item.
 - **As medianas são de uma data só.** O pacote é de 14/09/2026, como os outros
   pacotes versionados; múltiplo setorial se move com o ciclo, e o pacote precisa

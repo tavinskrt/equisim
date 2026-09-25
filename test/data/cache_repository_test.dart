@@ -279,6 +279,74 @@ void main() {
           reason: 'diferença de um centavo é ruído, e não mudança de base');
     });
 
+    test('o pregão que a resposta omite também sai da base velha', () async {
+      // Lente `dados`, decisão 134. A resposta pula 18/08/2026; o disco o tem,
+      // da busca anterior, na escala de antes do grupamento. Apagar só o que
+      // antecede a resposta deixava esse pregão no meio da série nova, com o
+      // dobro do preço dos vizinhos — o upsert não o alcança.
+      await db.upsertPrices([
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2026-07-21',
+          close: 83.32,
+          volume: const Value(1000),
+        ),
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2026-08-18',
+          close: 85.00,
+          volume: const Value(1000),
+        ),
+      ]);
+      final repository = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: db,
+      );
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+
+      final serie = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
+          .unwrap()[Ticker.parse('PETR4')]!;
+
+      expect(serie.points.any((p) => p.date == DateTime(2026, 8, 18)), isFalse,
+          reason: 'o pregão da base velha no meio da janela é degrau');
+      expect(serie.points.first.close, closeTo(41.66, 1e-9));
+    });
+
+    test('a mudança de base é vista no primeiro pregão em comum', () async {
+      // O primeiro dia da resposta, 21/07/2026, não está no disco; o segundo
+      // está, no dobro. Comparar só o primeiro dia da resposta dava "sem
+      // evento", e o histórico de 2001 ficava em outra base.
+      await db.upsertPrices([
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2001-03-15',
+          close: 6.42,
+          volume: const Value(1000),
+        ),
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2026-07-22',
+          close: 85.16,
+          volume: const Value(1000),
+        ),
+      ]);
+      final repository = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: db,
+      );
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+
+      final serie = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
+          .unwrap()[Ticker.parse('PETR4')]!;
+
+      expect(serie.points.any((p) => p.date.year == 2001), isFalse);
+      expect(serie.points.first.date, DateTime(2026, 7, 21));
+    });
+
     test('cache preserva preços e datas fielmente', () async {
       final repository = PriceRepositoryImpl(
         remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {

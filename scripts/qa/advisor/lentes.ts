@@ -33,6 +33,12 @@ export type Material =
       extensoes?: string[];
       excluir?: string[];
       opcional?: boolean;
+      /**
+       * Do mais recente ao mais antigo, pela ordem inversa do nome. Serve ao
+       * registro de decisoes, numerado em sequencia: quando o payload bate no
+       * teto, o corte leva as antigas, e nao as que acabaram de ser escritas.
+       */
+      recentesPrimeiro?: boolean;
     }
   | { tipo: 'arvore'; raizes: string[] }
   | { tipo: 'git-log'; quantidade: number };
@@ -148,12 +154,14 @@ export const LENTES: Record<LenteId, Lente> = {
       '  aparece em qualquer um dos dois lugares, o arquivo EXISTE e a tensao',
       '  nao existe.',
     ],
+    // **A ordem e a do corte.** Com 134 decisoes, o registro sozinho passa do
+    // teto do payload, e o que vem depois dele nao chegava ao modelo: em
+    // 24/09/2026 esta lente rodou sem o `estado.md`, sem a arvore e sem o log,
+    // e inventariou so ate a decisao 32. O pequeno e indispensavel vem antes;
+    // as decisoes vem por ultimo, das recentes para as antigas.
     materiais: [
-      { tipo: 'arquivo', caminho: 'PLANO_ARQUITETURA.md' },
       { tipo: 'arquivo', caminho: 'README.md' },
       { tipo: 'arquivo', caminho: 'CLAUDE.md' },
-      { tipo: 'diretorio', caminho: 'docs/decisoes', extensoes: ['.md'], opcional: true },
-      { tipo: 'diretorio', caminho: 'docs/apontamentos', extensoes: ['.md'], opcional: true },
       // **A tabela de substituicoes, ja resolvida.** O campo `substitui` mora
       // em quem substitui, e refazer o grafo lendo 100 decisoes e trabalho que
       // o modelo faz mal: em 21/09/2026 ele reportou a decisao 23 como viva
@@ -168,6 +176,15 @@ export const LENTES: Record<LenteId, Lente> = {
       // raizes e viraram duas tensoes ESTRUTURAL falsas.
       { tipo: 'arvore-completa', excluirPrefixos: PLATAFORMAS },
       { tipo: 'git-log', quantidade: 40 },
+      { tipo: 'diretorio', caminho: 'docs/apontamentos', extensoes: ['.md'], opcional: true },
+      { tipo: 'arquivo', caminho: 'PLANO_ARQUITETURA.md' },
+      {
+        tipo: 'diretorio',
+        caminho: 'docs/decisoes',
+        extensoes: ['.md'],
+        opcional: true,
+        recentesPrimeiro: true,
+      },
     ],
   },
 
@@ -186,6 +203,11 @@ export const LENTES: Record<LenteId, Lente> = {
       'Toda proposta cita arquivo e tipo que EXISTEM no material.',
       'NAO proponha renomear por gosto. Nome so entra em tensao quando ele',
       '  descreve coisa diferente do que o tipo faz.',
+      'Serializacao que acompanha o tipo (`toJson`/`fromJson`) e contrato do',
+      '  proprio tipo, e nao infraestrutura vazada: antes de afirmar que um',
+      '  valor e convertido "em memoria", confira se a conversao esta no',
+      '  construtor ou so no `toJson`. So o primeiro altera o dado que o',
+      '  calculo le.',
     ],
     materiais: [
       {
@@ -223,6 +245,14 @@ export const LENTES: Record<LenteId, Lente> = {
       '  429, nao trava" em test/data/network_and_quality_test.dart o prova, e',
       '  reprova quando a liberacao sai. So reaponte mostrando o caminho que',
       '  aquele teste nao cobre.',
+      'O custo de um dado velho no cache depende de QUEM O LE, e quem le esta',
+      '  no nucleo, fora deste material. Afirmar que ele contamina o calculo',
+      '  exige citar o consumidor; sem isso, a tensao e no maximo LOCAL. Dois',
+      '  ja conferidos (24/09/2026): os campos "de hoje" dos fundamentos',
+      '  (`sharesOutstanding`, `marketCap`, `enterpriseToEbitda`) sao lidos so',
+      '  do exercicio mais recente, que e o que a resposta renova; o volume, so da',
+      '  janela de liquidez recente (`EligibilityGate.medianTradedValue`), e volume',
+      '  ausente e omissao do teste, e nao reprovacao.',
     ],
     materiais: [
       {
@@ -265,6 +295,15 @@ export const LENTES: Record<LenteId, Lente> = {
       '  respondeu e ruido: em 21 e 22/09/2026 esta lente reabriu tres',
       '  premissas medidas (Blume +0,1%, traducao do cenario, minoritario com',
       '  efeito 0,00%). Limitacao declarada SEM medicao continua reportavel.',
+      'A traducao do cenario (`ScenarioTranslation`, decisao 121) foi reaberta',
+      '  pela TERCEIRA vez em 24/09/2026, sem evidencia nova. Os cenarios sao',
+      '  sensibilidade, e nao a incerteza (decisao 92): o que a tela mostra como',
+      '  incerteza e a faixa calibrada. So reaponte com medicao que a decisao',
+      '  121 nao fez.',
+      'ESTRUTURAL exige conjunto exposto que pese. A via do acionista de',
+      '  companhia NAO financeira atende 1 dos 97 avaliados do aplicativo',
+      '  (24/09/2026), e as financeiras nao realavancam. Tensao sobre esse',
+      '  caminho e no maximo LOCAL, a menos que voce mostre um conjunto maior.',
     ],
     materiais: [
       {
@@ -357,8 +396,10 @@ export const LENTES: Record<LenteId, Lente> = {
       '  30, resolvido pelo setor da B3 pela raiz do emissor). Sem evidencia de',
       '  que persiste em material ATUAL, o maximo e inventariar.',
     ],
+    // **A ordem e a do corte**, como na `registro`: em 24/09/2026 as decisoes
+    // vinham primeiro, em ordem crescente, e o teto do payload cortava na 50 --
+    // o `estado.md` e o plano, que a disciplina acima exige, nunca chegavam.
     materiais: [
-      { tipo: 'diretorio', caminho: 'docs/decisoes', extensoes: ['.md'], opcional: true },
       { tipo: 'arquivo', caminho: 'docs/estado.md', opcional: true },
       // **O veredito de cada item mora aqui**, e sem ele a lente le o
       // `## Contexto` das decisoes como se fosse o estado de hoje -- foi o que
@@ -368,6 +409,13 @@ export const LENTES: Record<LenteId, Lente> = {
       { tipo: 'arquivo', caminho: 'README.md' },
       { tipo: 'arvore', raizes: ['lib', 'packages', 'test'] },
       { tipo: 'git-log', quantidade: 40 },
+      {
+        tipo: 'diretorio',
+        caminho: 'docs/decisoes',
+        extensoes: ['.md'],
+        opcional: true,
+        recentesPrimeiro: true,
+      },
     ],
   },
 

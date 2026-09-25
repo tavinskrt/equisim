@@ -268,7 +268,7 @@ no [README de lá](docs/decisoes/README.md).
 | `docs/decisoes/` | Decisões 19+. Imutáveis, com `origem`, `data` e `afeta` |
 | `docs/apontamentos/` | O que orientador e devs apontam fora do git |
 | `docs/estado.md` | **Gerado** por `npm run estado`. Nunca edite à mão |
-| `docs/eap/` | Pacotes da reconstrução da UI em curso |
+| `docs/eap/` | Pacotes da reconstrução da UI, cumprida (decisão 22) — especificação histórica |
 | `PLANO_ARQUITETURA.md` | **Congelado.** Plano de transição já cumprido; decisões 0–18 estão nele |
 
 O gate local bloqueia **referência quebrada** — `afeta` apontando para caminho

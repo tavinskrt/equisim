@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:equisim/audit/audit_bus.dart';
 import 'package:equisim/presentation/audit/logs_page.dart';
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -333,6 +336,126 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('/v2/stocks/historical'), findsOneWidget);
     expect(find.text('/core/valuation/PETR4'), findsNothing);
+  });
+
+  // ------------------------------------------------------------------ D4 --
+
+  AuditEvent rede(int i) => AuditEvent(
+        transactionId: 'rede-$i',
+        timestamp: DateTime.now(),
+        endpoint: '/v2/stocks/quote',
+        inputPayload: const {'method': 'GET'},
+        outputPayload: const {'statusCode': 200},
+        executionTimeMs: 1,
+      );
+
+  testWidgets('recusa antes do primeiro passo é cálculo, e não rede (D4)',
+      (tester) async {
+    // Sem preço de mercado a cascata recusa antes de qualquer passo, e o
+    // evento sai sem fórmula decomposta — a regra antiga o filtrava como rede.
+    ValuationCascade.evaluate(ValuationInputs(
+      ticker: Ticker.parse('VALE3'),
+      asOf: DateTime(2026, 8, 20),
+      fundamentals: const [],
+      marketPrice: 0,
+      capm: const CapmInputs(
+          riskFreeRate: 0.105, beta: 1.0, marketPremium: 0.055),
+    ));
+    await pumpPanel(tester);
+    await tester.tap(find.text('Cálculos'));
+    await tester.pumpAndSettle();
+    expect(find.text('/core/valuation/VALE3'), findsOneWidget);
+    await tester.tap(find.text('Rede'));
+    await tester.pumpAndSettle();
+    expect(find.text('/core/valuation/VALE3'), findsNothing);
+  });
+
+  testWidgets('o ruído de rede não empurra a avaliação para fora (D4)',
+      (tester) async {
+    emitValuation();
+    for (var i = 0; i < AuditBus.networkLimit + 50; i++) {
+      AuditRecorder.emit(rede(i));
+    }
+    final bus = AuditBus.instance;
+    expect(bus.history.where(AuditBus.isCalculation), hasLength(1),
+        reason: 'a avaliação continua no histórico');
+    expect(bus.discardedNetwork, 50);
+    expect(bus.discardedCalculations, 0);
+
+    tester.view.physicalSize = const Size(1400, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await pumpPanel(tester);
+    expect(find.text('0 cálculo(s) e 50 de rede descartados'), findsOneWidget);
+  });
+
+  testWidgets('o descarte de cálculos é contado, e limpar zera (D4)',
+      (tester) async {
+    for (var i = 0; i < AuditBus.calculationLimit + 3; i++) {
+      AuditRecorder.emit(AuditEvent(
+        transactionId: 'calc-$i',
+        timestamp: DateTime.now(),
+        endpoint: '/core/valuation/X$i',
+        inputPayload: const {},
+        outputPayload: const {'status': 'ok'},
+        executionTimeMs: 1,
+      ));
+    }
+    expect(AuditBus.instance.discardedCalculations, 3);
+    expect(AuditBus.instance.history.first.transactionId, 'calc-3',
+        reason: 'sai o mais antigo');
+    AuditBus.instance.clear();
+    expect(AuditBus.instance.discardedCalculations, 0);
+  });
+
+  testWidgets('a exportação é íntegra: completa, declarada e serializável (D4)',
+      (tester) async {
+    String? exportado;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          exportado = (call.arguments as Map)['text'] as String;
+        }
+        return null;
+      },
+    );
+    addTearDown(() => tester.binding.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, null));
+
+    emitValuation();
+    // Um passo degenerado: `NaN` no rastro derrubava o `jsonEncode`.
+    AuditRecorder.begin('/core/valuation/NAN3', inputPayload: {'x': double.nan})!
+      ..step(
+        formulaName: 'conta degenerada',
+        latex: 'x',
+        variables: {'a': double.infinity},
+        result: double.nan,
+      )
+      ..complete({'status': 'ok'});
+    tester.view.physicalSize = const Size(1400, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await pumpPanel(tester);
+    await tester.tap(find.text('Exportar Auditoria (JSON)'));
+    await tester.pumpAndSettle();
+
+    final doc = jsonDecode(exportado!) as Map<String, dynamic>;
+    expect(doc['formato'], 2);
+    expect(doc['totalDeAvaliacoes'], 2);
+    expect(doc['buscaAplicada'], isNull);
+    expect(doc['descartados'], {'calculos': 0, 'rede': 0});
+    final eventos = (doc['eventos'] as List).cast<Map<String, dynamic>>();
+    final petr = eventos.firstWhere(
+        (e) => e['endpoint'] == '/core/valuation/PETR4');
+    final original = AuditBus.instance.history.firstWhere(
+        (e) => e.endpoint == '/core/valuation/PETR4');
+    expect(jsonEncode(petr), jsonEncode(original.toJson()),
+        reason: 'o arquivo leva o evento inteiro, sem corte');
+    final nan = eventos.firstWhere(
+        (e) => e['endpoint'] == '/core/valuation/NAN3');
+    final passo = (nan['calculations'] as List).single as Map<String, dynamic>;
+    expect(passo['finalValue'], 'NaN');
   });
 
   testWidgets('limpar esvazia a lista', (tester) async {

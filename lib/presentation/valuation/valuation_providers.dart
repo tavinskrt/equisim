@@ -153,20 +153,17 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     // declarada em vez de reconciliada.
     peerMultiples: await ref.watch(peerMultiplesProvider(ticker).future),
   );
+  // A falha do preparo já foi registrada no painel de logs pelo próprio
+  // preparo (item D4); aqui só não há o que mostrar.
   if (inputs.isErr) return null;
 
-  final result = await ValuationRunner.run(
-    ValuationRequest(
-      inputs: inputs.unwrap(),
-      monteCarlo: settings.monteCarlo,
-      samples: settings.samples,
-    ),
-  );
-  final avaliado = result.valueOrNull;
-  if (avaliado == null) return null;
   // O que a cascata não enxerga: a avaliação seguiu sem a CVM, ou com um
   // pacote defasado (item A1.10); ou sem curva, e por quê (decisão 86).
   // Nenhum número muda; a ressalva aparece.
+  //
+  // **Entram antes da cascata, e não depois** (item D4): acrescentadas ao
+  // resultado pronto, elas apareciam na tela e faltavam no rastro que o painel
+  // de logs exporta — o arquivo de depuração não dizia o que a tela dizia.
   final notas = [
     await ref.watch(cvmCoverageNoteProvider(ticker).future),
     (await ref.watch(riskFreeCurveReadingProvider.future)).note,
@@ -174,7 +171,15 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     // lê o preço justo tem de saber qual dos dois rodou (item B11).
     (await ref.watch(betaPriorReadingProvider.future)).note,
   ].nonNulls.toList();
-  return notas.isEmpty ? avaliado : avaliado.withWarnings(notas);
+
+  final result = await ValuationRunner.run(
+    ValuationRequest(
+      inputs: inputs.unwrap().withContextNotes(notas),
+      monteCarlo: settings.monteCarlo,
+      samples: settings.samples,
+    ),
+  );
+  return result.valueOrNull;
 });
 
 /// Avaliações de todos os ativos da carteira Principal.

@@ -121,6 +121,22 @@ List<Obs> _carregar(
   return out;
 }
 
+/// **O instrumento do R3, para quem o reaplica** — a leitura do C7
+/// (`tool/c7_leitura.dart`). É a mesma função que mede as coortes de 2018 a
+/// 2025: reimplementá-la ao lado daria dois instrumentos, e a réplica só vale
+/// se o instrumento for o mesmo.
+///
+/// - [linhas]: observações no formato do backtest — `coorte`, `upside`,
+///   `bookToMarket`, `earningsYield` e o campo de retorno.
+/// - [campo]: `ret12tot` ou `ret36tot`.
+/// - [defasagem]: `meses ÷ 3 − 1` nas coortes trimestrais.
+Map<String, dynamic> horizonteDaHabilidade(
+  List<dynamic> linhas,
+  String campo, {
+  required int defasagem,
+}) =>
+    _horizonte(linhas, campo, defasagem: defasagem);
+
 /// O que uma coorte devolve.
 class PorCoorte {
   final String coorte;

@@ -1,5 +1,58 @@
 import 'dart:math' as math;
 
+/// O que o JSON não representa, convertido em algo que ele representa.
+///
+/// **Por que existe** (item D4). O rastro é serializado com `jsonEncode` em
+/// dois lugares — a mensagem entre janelas do painel e o arquivo exportado —, e
+/// `jsonEncode` **lança** diante de `NaN`, de infinito e de qualquer objeto que
+/// não seja mapa, lista, texto, número ou booleano. Um valor degenerado numa
+/// variável do rastro derrubava a exportação inteira, e dentro da transação
+/// derrubaria a própria avaliação. Aqui ele vira texto legível, e o resto passa
+/// intacto — o JSON de um rastro sem valor degenerado não muda um byte.
+abstract final class AuditJson {
+  /// Cópia de [value] que `jsonEncode` aceita sempre.
+  ///
+  /// - `NaN`, `Infinity` e `-Infinity` viram os textos de mesmo nome;
+  /// - data vira ISO-8601, enum vira o nome, e qualquer outro objeto vira o
+  ///   `toString()` dele;
+  /// - mapas e listas são percorridos, com as chaves convertidas em texto.
+  static Object? safe(Object? value) {
+    if (value == null || value is bool || value is String || value is int) {
+      return value;
+    }
+    if (value is double) {
+      if (value.isFinite) return value;
+      if (value.isNaN) return 'NaN';
+      return value > 0 ? 'Infinity' : '-Infinity';
+    }
+    if (value is Map) {
+      return {for (final e in value.entries) '${e.key}': safe(e.value)};
+    }
+    if (value is Iterable) return [for (final v in value) safe(v)];
+    if (value is DateTime) return value.toIso8601String();
+    if (value is Enum) return value.name;
+    return value.toString();
+  }
+
+  /// Mapa de chaves texto, pela mesma regra de [safe].
+  static Map<String, dynamic> safeMap(Map<String, dynamic> value) =>
+      safe(value)! as Map<String, dynamic>;
+
+  /// Número de um campo do JSON, aceitando os textos que [safe] produz.
+  ///
+  /// Devolve `null` para ausente e para o que não é número — a leitura é
+  /// tolerante, como as demais `fromJson` deste arquivo.
+  static double? number(Object? value) {
+    if (value is num) return value.toDouble();
+    return switch (value) {
+      'NaN' => double.nan,
+      'Infinity' => double.infinity,
+      '-Infinity' => double.negativeInfinity,
+      _ => null,
+    };
+  }
+}
+
 /// Um ponto da amostra que sustenta um cálculo agregado.
 class TraceSamplePoint {
   /// Rótulo do período — o ano fiscal, tipicamente.
@@ -26,7 +79,7 @@ class TraceSamplePoint {
   /// Serializa para o formato consumido pela página de logs e pela exportação.
   Map<String, dynamic> toJson() => {
         'label': label,
-        'value': value,
+        'value': AuditJson.safe(value),
         'definesResult': definesResult,
         'isObserved': isObserved,
       };
@@ -42,7 +95,7 @@ class TraceSamplePoint {
   static TraceSamplePoint fromJson(Map<String, dynamic> json) =>
       TraceSamplePoint(
         label: json['label'] as String? ?? '—',
-        value: (json['value'] as num?)?.toDouble() ?? 0,
+        value: AuditJson.number(json['value']) ?? 0,
         definesResult: json['definesResult'] as bool? ?? false,
         isObserved: json['isObserved'] as bool? ?? false,
       );
@@ -96,11 +149,11 @@ class TraceSample {
   Map<String, dynamic> toJson() => {
         'title': title,
         'points': [for (final p in points) p.toJson()],
-        'summary': summary,
+        'summary': AuditJson.safe(summary),
         'summaryLabel': summaryLabel,
-        'lowerBound': lowerBound,
-        'upperBound': upperBound,
-        'selected': selected,
+        'lowerBound': AuditJson.safe(lowerBound),
+        'upperBound': AuditJson.safe(upperBound),
+        'selected': AuditJson.safe(selected),
         'unit': unit,
       };
 
@@ -114,11 +167,11 @@ class TraceSample {
           for (final p in (json['points'] as List? ?? const []))
             if (p is Map) TraceSamplePoint.fromJson(_stringKeyed(p)),
         ],
-        summary: (json['summary'] as num?)?.toDouble(),
+        summary: AuditJson.number(json['summary']),
         summaryLabel: json['summaryLabel'] as String? ?? 'mediana',
-        lowerBound: (json['lowerBound'] as num?)?.toDouble(),
-        upperBound: (json['upperBound'] as num?)?.toDouble(),
-        selected: (json['selected'] as num?)?.toDouble(),
+        lowerBound: AuditJson.number(json['lowerBound']),
+        upperBound: AuditJson.number(json['upperBound']),
+        selected: AuditJson.number(json['selected']),
         unit: json['unit'] as String? ?? '',
       );
 
@@ -180,9 +233,9 @@ class CalculationTrace {
   Map<String, dynamic> toJson() => {
         'formulaName': formulaName,
         'latexRepresentation': latexRepresentation,
-        'mappedVariables': mappedVariables,
+        'mappedVariables': AuditJson.safe(mappedVariables),
         'intermediateSteps': intermediateSteps,
-        'finalValue': finalValue,
+        'finalValue': AuditJson.safe(finalValue),
         'unit': unit,
         if (sample != null) 'sample': sample!.toJson(),
       };
@@ -201,7 +254,7 @@ class CalculationTrace {
           for (final step in (json['intermediateSteps'] as List? ?? const []))
             '$step',
         ],
-        finalValue: (json['finalValue'] as num?)?.toDouble(),
+        finalValue: AuditJson.number(json['finalValue']),
         unit: json['unit'] as String? ?? '',
         sample: json['sample'] is Map
             ? TraceSample.fromJson(
@@ -256,8 +309,8 @@ class AuditEvent {
         'transactionId': transactionId,
         'timestamp': timestamp.toUtc().toIso8601String(),
         'endpoint': endpoint,
-        'inputPayload': inputPayload,
-        'outputPayload': outputPayload,
+        'inputPayload': AuditJson.safeMap(inputPayload),
+        'outputPayload': AuditJson.safeMap(outputPayload),
         'executionTimeMs': executionTimeMs,
         'calculations': [for (final c in calculations) c.toJson()],
       };

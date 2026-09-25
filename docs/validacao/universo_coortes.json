@@ -85,7 +85,6 @@
   "CEEB3",
   "CEEB5",
   "CEED3",
-  "CEGR3",
   "CGAS3",
   "CGAS5",
   "CGRA3",
@@ -245,7 +244,6 @@
   "PCAR3",
   "PDGR3",
   "PDTC3",
-  "PEAB3",
   "PEAB4",
   "PETR3",
   "PETR4",
@@ -303,7 +301,6 @@
   "SMTO3",
   "SNSY5",
   "SOJA3",
-  "SOND5",
   "SOND6",
   "SUZB3",
   "SYNE3",
@@ -351,6 +348,7 @@
   "WHRL3",
   "WHRL4",
   "WIZC3",
+  "WLMM3",
   "WLMM4",
   "YDUQ3"
  ]

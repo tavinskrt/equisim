@@ -268,11 +268,18 @@ void main() {
       //
       // **As três rotas de demonstrativo**, e não só a DRE (lente `risco`,
       // 22/09/2026): o balanço e o fluxo de caixa passam pelo mesmo tipo de
-      // leitura, e o contrato de um não prova o do outro.
+      // leitura, e o contrato de um não prova o do outro. **E as duas de
+      // estatística** (lente `risco`, 24/09/2026): o histórico e o corrente
+      // trazem a contagem de ações e o valor de mercado, que dividem o preço
+      // justo — a rota que mais pesa era a que o laço deixava de fora.
       const rotas = {
+        '/v2/stocks/statistics?symbols=PETR4&mode=history':
+            'brapi_statistics_history_petr4',
         '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
         '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
         '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+        '/v2/stocks/statistics?symbols=PETR4&mode=current':
+            'brapi_statistics_current_petr4',
       };
       const quebrados = {
         '/v2/stocks/income-statement': [
@@ -290,6 +297,16 @@ void main() {
           ('{"results":[{"data":[{"type":"yearly","endDate":"2024-12-31",'
               '"operatingCashFlow":"duzentos bilhões"}]}]}'),
         ],
+        '/v2/stocks/statistics?symbols=PETR4&mode=history': [
+          '{"results":[{"data":"não é lista"}]}',
+          ('{"results":[{"data":[{"type":"yearly","endDate":"2025-12-31",'
+              '"sharesOutstanding":"treze bilhões","marketCap":[1]}]}]}'),
+        ],
+        '/v2/stocks/statistics?symbols=PETR4&mode=current': [
+          '{"results":[{"data":["não é objeto"]}]}',
+          ('{"results":[{"data":{"sharesOutstanding":"treze bilhões",'
+              '"marketCap":{"x":1},"enterpriseToEbitda":"quatro"}}]}'),
+        ],
       };
       final casos = [
         for (final rota in rotas.keys)
@@ -304,12 +321,8 @@ void main() {
       for (final (rota, corpo) in casos) {
         final datasource = BrapiDatasource(clientWith(FixtureAdapter(
           routes: {
-            '/v2/stocks/statistics?symbols=PETR4&mode=history':
-                'brapi_statistics_history_petr4',
             for (final e in rotas.entries)
               if (e.key != rota) e.key: e.value,
-            '/v2/stocks/statistics?symbols=PETR4&mode=current':
-                'brapi_statistics_current_petr4',
           },
           bodies: {rota: corpo},
         )));
@@ -324,7 +337,15 @@ void main() {
           // Tolerar o corpo é legítimo; **inventar número** não. Nenhum
           // exercício pode sair com lucro lido de um literal que não é número.
           for (final s in r.unwrap()) {
-            for (final v in [s.netIncome, s.totalAssets, s.operatingCashFlow]) {
+            for (final v in [
+              s.netIncome,
+              s.totalAssets,
+              s.operatingCashFlow,
+              s.sharesOutstanding,
+              s.sharesOutstandingAsOf,
+              s.marketCap,
+              s.enterpriseToEbitda,
+            ]) {
               expect(v == null || v.isFinite, isTrue, reason: '$rota $corpo');
             }
           }

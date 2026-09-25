@@ -53,20 +53,45 @@ abstract final class ValuationRunner {
   /// completo.
   ///
   /// **No alvo web `compute` executa em linha**, porque não há isolates no
-  /// navegador. Aceitável: lá o gargalo é a rede. A consequência colateral é
-  /// que o coletor de auditoria, sendo estático e local à isolate, **não emite
-  /// rastro** quando a execução de fato migra — o que só ocorre fora do web e
-  /// acima do limiar.
+  /// navegador. Aceitável: lá o gargalo é a rede.
+  ///
+  /// **O rastro atravessa a isolate** (item D4). O coletor de auditoria é
+  /// estático e local à isolate, e a avaliação que migrava saía sem evento no
+  /// painel de logs. Agora a isolate liga um coletor próprio, devolve o evento
+  /// junto com o resultado, e esta isolate o reemite — o painel recebe o mesmo
+  /// rastro que receberia se a conta tivesse rodado aqui.
   ///
   /// Propaga a falha de `ValuationCascade.evaluate` sem traduzir.
-  static Future<Result<ValuationResult>> run(ValuationRequest request) {
+  static Future<Result<ValuationResult>> run(ValuationRequest request) async {
     final needsIsolate =
         request.monteCarlo && request.samples >= isolateThresholdSamples;
 
-    if (!needsIsolate) {
-      return Future.value(_evaluate(request));
+    // No web o `compute` roda nesta mesma isolate: trocar o coletor ali
+    // desligaria o do painel de logs ao terminar. Roda direto, que é o que o
+    // `compute` já fazia no navegador.
+    if (!needsIsolate || kIsWeb) return _evaluate(request);
+    if (!AuditRecorder.isActive) return compute(_evaluate, request);
+    final (resultado, evento) = await compute(_evaluateWithTrace, request);
+    if (evento != null) AuditRecorder.emit(evento);
+    return resultado;
+  }
+
+  /// Ponto de entrada da isolate quando há alguém ouvindo do lado de cá: a
+  /// avaliação com um coletor próprio, e o evento que ele recebeu.
+  ///
+  /// Uma exceção dentro da isolate sobe pelo `compute` e leva o evento de
+  /// falha junto: é o único caso em que o rastro não atravessa, e o erro
+  /// continua visível para quem chamou.
+  static (Result<ValuationResult>, AuditEvent?) _evaluateWithTrace(
+    ValuationRequest request,
+  ) {
+    AuditEvent? evento;
+    AuditRecorder.attach((e) => evento = e);
+    try {
+      return (_evaluate(request), evento);
+    } finally {
+      AuditRecorder.detach();
     }
-    return compute(_evaluate, request);
   }
 
   /// Ponto de entrada da isolate: precisa ser função de topo ou estática.

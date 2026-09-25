@@ -110,10 +110,11 @@ class _LogsPageState extends State<LogsPage> {
 
   bool _matchesFilter(AuditEvent event) => switch (_filter) {
     _Filter.todos => true,
-    // A separação é estrutural, não um rótulo à parte: evento sem fórmula
-    // decomposta é ida à rede; com fórmula, é cálculo do núcleo.
-    _Filter.calculos => event.calculations.isNotEmpty,
-    _Filter.rede => event.calculations.isEmpty,
+    // **Pela origem, e não pela presença de passos** (item D4): a avaliação
+    // recusada antes do primeiro passo não tem fórmula decomposta, e a regra
+    // antiga a filtrava como ida à rede.
+    _Filter.calculos => AuditBus.isCalculation(event),
+    _Filter.rede => !AuditBus.isCalculation(event),
   };
 
   bool _matchesQuery(AuditEvent event, String query) {
@@ -193,16 +194,34 @@ class _LogsPageState extends State<LogsPage> {
 
   void _export() {
     final events = _visible;
+    final busca = _search.text.trim();
+    final descartadosCalculos = _bus.discardedCalculations;
+    final descartadosRede = _bus.discardedNetwork;
     final document = const JsonEncoder.withIndent('  ').convert({
       'aplicacao': 'Equisim',
       'documento': 'Auditoria de cálculos',
+      // **O arquivo diz o que ele é, e o que ficou de fora** (item D4). Antes
+      // ele não registrava a busca digitada, nem que o histórico tinha perdido
+      // eventos por falta de espaço: um arquivo filtrado ou incompleto parecia
+      // o histórico inteiro.
+      'formato': 2,
       'exportadoEm': DateTime.now().toIso8601String(),
       'totalDeEventos': events.length,
+      'totalDeAvaliacoes': events.where(AuditBus.isCalculation).length,
       'totalDeCalculos': events.fold<int>(
         0,
         (sum, e) => sum + e.calculations.length,
       ),
+      'totalNoHistorico': _bus.history.length,
       'filtroAplicado': _filter.name,
+      'buscaAplicada': busca.isEmpty ? null : busca,
+      'descartados': {
+        'calculos': descartadosCalculos,
+        'rede': descartadosRede,
+      },
+      if (descartadosCalculos > 0 || descartadosRede > 0)
+        'aviso': 'O histórico descartou eventos antigos por falta de espaço: '
+            'este arquivo não tem a sessão inteira.',
       'eventos': [for (final e in events) e.toJson()],
     });
 
@@ -332,6 +351,20 @@ class _Header extends StatelessWidget {
                     : '$showing de $total evento(s)',
                 style: TextStyle(color: theme.dim, fontSize: 12),
               ),
+              // O histórico tem teto, e o que sai dele não volta: quem vai
+              // exportar precisa saber antes que o arquivo não terá tudo.
+              if (bus.discardedCalculations > 0 || bus.discardedNetwork > 0)
+                Text(
+                  '${bus.discardedCalculations} cálculo(s) e '
+                  '${bus.discardedNetwork} de rede descartados',
+                  // O token do tema, e não um tamanho no ponto de uso: esta
+                  // janela tem `MaterialApp` próprio, sem a `FinTypography`,
+                  // e o `bodySmall` padrão tem os 12 px do contador ao lado.
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: theme.warning),
+                ),
             ],
           ),
           const SizedBox(height: 10),
@@ -492,7 +525,7 @@ class _EventCard extends StatelessWidget {
   final int ordinal;
   final ConsoleTheme theme;
 
-  bool get _isNetwork => event.calculations.isEmpty;
+  bool get _isNetwork => !AuditBus.isCalculation(event);
 
   @override
   Widget build(BuildContext context) {

@@ -172,6 +172,9 @@ data/cvm_exercicios.json
 # As versões antigas dos documentos (item B8), por tool/cvm_versoes_baixar.py
 # e tool/cvm_ingerir.dart.
 data/cvm_versoes.json
+# As coortes da réplica fora da amostra (item C7), antes de seladas: as seladas
+# vão para docs/validacao/c7/ por tool/c7_selar.dart.
+data/c7/
 
 # Taxas do Tesouro Direto (~15 MB), reproduzível por tool/tesouro_baixar.py.
 data/tesouro/

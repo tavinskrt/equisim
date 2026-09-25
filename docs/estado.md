@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-23, a partir de `2a19372`.
+Gerado em 2026-09-24, a partir de `e1a843d`.
 
 ## Decisões registradas
 
-**104** aceita · **2** cumprida · **6** substituída
+**108** aceita · **2** cumprida · **6** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -127,6 +127,10 @@ Gerado em 2026-09-23, a partir de `2a19372`.
 | 128 | A coorte lê a versão do documento que era pública na data dela | aceita | voce | 2026-09-22 |
 | 129 | O R3 não passa sobre o motor final, o teste declara o poder que tem, e a réplica fora da amostra fica pré-registrada | aceita | voce | 2026-09-22 |
 | 130 | Sem despesa financeira, o prêmio de crédito sai da alavancagem, e o rastro diz a regra que a conta usa | aceita | voce | 2026-09-22 |
+| 131 | O rastro que o painel de logs exporta é íntegro — serializável sempre, completo, e emitido por toda saída da avaliação | aceita | voce | 2026-09-24 |
+| 132 | A cópia dos insumos da avaliação passa por um lugar só, e nenhum campo se perde | aceita | voce | 2026-09-24 |
+| 133 | A réplica fora da amostra começa selada — três coortes, o motor pré-registrado identificado pela impressão, e a leitura travada até a data | aceita | voce | 2026-09-24 |
+| 134 | A mudança de base apaga do cache o ativo inteiro, e é vista no primeiro pregão em comum | aceita | voce | 2026-09-24 |
 
 ## Caixa de entrada
 
@@ -140,16 +144,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 63 | 21.505 |
-| Apresentacao | 37 | 16.459 |
-| Camada de dados | 24 | 3.680 |
-| Testes do app | 44 | 8.344 |
+| Nucleo de dominio | 63 | 21.818 |
+| Apresentacao | 37 | 16.497 |
+| Camada de dados | 24 | 3.718 |
+| Testes do app | 45 | 8.605 |
 | Testes do nucleo | 41 | 14.946 |
-| Ferramentas de QA | 20 | 6.652 |
+| Ferramentas de QA | 20 | 6.722 |
 
 ## Histórico recente
 
 ```
+2026-09-22  e1a843d  Refino do motor de valuation (parte 23)
 2026-09-22  2a19372  Refino do motor de valuation (parte 21)
 2026-09-21  5345767  Refino do motor de valuation (parte 21)
 2026-09-21  80866a8  Refino do motor de valuation (parte 20)
@@ -164,5 +169,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-14  b688eeb  Refino do motor de valuation (parte 12)
 2026-09-14  7d43639  Refino do motor de valuation (parte 11)
 2026-09-11  6e01044  Refino do motor de valuation (parte 10)
-2026-09-11  c80b5e6  Refino do motor de valuation (parte 9)
 ```

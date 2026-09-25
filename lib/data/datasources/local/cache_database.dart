@@ -258,18 +258,17 @@ class CacheDatabase extends _$CacheDatabase {
   Future<void> upsertPrices(List<CachedPricesCompanion> rows) =>
       batch((b) => b.insertAllOnConflictUpdate(cachedPrices, rows));
 
-  /// Apaga as cotações de um ativo **anteriores** a [isoExclusivo].
+  /// Apaga **todas** as cotações de um ativo.
   ///
   /// Existe para a rebase do preço: a fonte devolve o fechamento já ajustado
   /// por todo evento societário até hoje, numa janela de dez anos. O que está
-  /// em disco fora dessa janela foi ajustado até a data em que **foi baixado**,
-  /// e um desdobramento no meio deixa as duas metades em bases diferentes — um
-  /// degrau silencioso na série. Ver `PriceRepositoryImpl`.
-  Future<void> deletePricesBefore(String ticker, String isoExclusivo) =>
-      (delete(cachedPrices)
-            ..where((t) =>
-                t.ticker.equals(ticker) & t.date.isSmallerThanValue(isoExclusivo)))
-          .go();
+  /// em disco foi ajustado até a data em que **foi baixado**, e um
+  /// desdobramento entre duas buscas deixa as duas bases misturadas — um
+  /// degrau silencioso na série. Todas, e não só as anteriores à janela: o
+  /// pregão que a resposta omite no meio dela também é da base velha (decisão
+  /// 134). Ver `PriceRepositoryImpl`.
+  Future<void> deletePricesOf(String ticker) =>
+      (delete(cachedPrices)..where((t) => t.ticker.equals(ticker))).go();
 
   // ----------------------------------------------------------- Fundamentos --
 

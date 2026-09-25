@@ -225,3 +225,27 @@ continua fora — potencial mediano de −27,6% nos soltos contra −49,4% nas a
 corrigido de **2,67 contra 2,70** — deixa de passar por três centésimos, como na
 medição lado a lado do B1 —; em todas as recusadas, 0,246 com 3,86, e passa; na
 família nova, 0,234 com 1,38.
+
+## 9. Com a cópia dos insumos corrigida — remedido em 24/09/2026
+
+**O contrafactual sem o corte de liquidez passava por uma cópia dos insumos
+que perdia campos** (item B27, [decisão 132](../decisoes/132-a-copia-dos-insumos-passa-por-um-lugar-so.md)):
+a composição declarada da unit, a taxa de referência do crédito e a janela do
+beta. Nas units e nas espécies da mesma companhia, o potencial solto saía com
+outro divisor. A ALUP4 de 31/12/2021, por exemplo, saía com −24,9% e sai com
++125,4%. O backtest foi reexecutado com a cópia corrigida. A fonte de mercado
+renovou o cache na mesma execução, e três papéis recusados saíram do universo.
+
+| com as deslistadas | n | 12 meses: IC dado o B/M · corrigido / crítico | 36 meses: IC dado o B/M · corrigido / crítico |
+|---|---:|---|---|
+| avaliadas | 3.055 | 0,044 · 0,75 / 2,24 | 0,043 · 0,27 / 2,70 |
+| **soltos do corte de liquidez** | **3.050** | **0,061 · 1,19 / 2,24** | **0,093 · 0,70 / 2,70** |
+
+**A leitura não muda**: a ordenação dos soltos é direção, e não prova. **O nível
+continua fora**, com potencial mediano de **−28,1%** nos soltos contra **−54,3%**
+nas avaliadas (era −31,0% nos soltos antes da correção). A recusa por liquidez
+fica pela razão da decisão 95.
+
+A §8 é de 16/09. Entre ela e esta seção, o JSON foi regravado em 21 e 22/09
+sem que este texto acompanhasse: 0,066 e 0,108, com `t` corrigido de 1,34 e
+0,80. **Este é o primeiro texto desde a §8, e é o que vale.**

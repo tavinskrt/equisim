@@ -405,6 +405,18 @@ Object? _compacto(Object? v) {
   return v;
 }
 
+/// Primeira coorte da réplica fora da amostra (decisão 129).
+final primeiraCoorteDoC7 = DateTime(2025, 12, 31);
+
+/// As coortes do C7: o último dia de cada trimestre, de 31/12/2025 até o
+/// último que o fim dos dados cobre.
+List<DateTime> coortesDoC7(DateTime fimDosDados) => [
+      for (var d = primeiraCoorteDoC7;
+          !d.isAfter(fimDosDados);
+          d = DateTime(d.year, d.month + 4, 0))
+        d,
+    ];
+
 Future<void> main(List<String> args) async {
   final iMontagem = args.indexOf('--montagem');
   final app = iMontagem >= 0 && args[iMontagem + 1] == 'aplicativo';
@@ -413,9 +425,26 @@ Future<void> main(List<String> args) async {
   final contrafactualBase = args.contains('--contrafactual-base');
   final iAmostra = args.indexOf('--amostra');
   final amostra = iAmostra >= 0 ? int.parse(args[iAmostra + 1]) : null;
+  // **A réplica fora da amostra** (item C7, decisões 129 e 133): as coortes a
+  // partir de 31/12/2025, que nenhuma decisão do motor viu, na mesma montagem
+  // da amostra do R3. Saem em `data/c7/coortes.json`, e quem as sela é
+  // `tool/c7_selar.dart` — este modo não escreve nada versionado.
+  final c7 = args.contains('--c7');
+  // O fim dos dados é o da base restaurada; a leitura do C7, anos depois,
+  // passa a data da base de então para que os retornos das coortes novas
+  // existam.
+  final iFim = args.indexOf('--fim-dos-dados');
+  final fimDosDados =
+      iFim >= 0 ? DateTime.parse(args[iFim + 1]) : DateTime(2026, 9, 4);
   if ((comDeslistadas || trimestral || contrafactualBase) && !app) {
     stderr.writeln('--com-deslistadas, --trimestral e --contrafactual-base '
         'exigem --montagem aplicativo');
+    exit(2);
+  }
+  if (c7 && !(app && trimestral && comDeslistadas) ||
+      c7 && (contrafactualBase || amostra != null)) {
+    stderr.writeln('--c7 é a montagem da amostra do R3: exige --montagem '
+        'aplicativo --com-deslistadas --trimestral, e nada mais');
     exit(2);
   }
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
@@ -507,14 +536,15 @@ Future<void> main(List<String> args) async {
     }
   }
 
-  final coortes = trimestral
-      ? [
-          for (var ano = 2018; ano <= 2025; ano++)
-            for (final mes in const [3, 6, 9, 12])
-              if (!(ano == 2025 && mes > 9)) DateTime(ano, mes + 1, 0),
-        ]
-      : [for (var ano = 2018; ano <= 2025; ano++) DateTime(ano, 9, 30)];
-  final fimDosDados = DateTime(2026, 9, 4);
+  final coortes = c7
+      ? coortesDoC7(fimDosDados)
+      : trimestral
+          ? [
+              for (var ano = 2018; ano <= 2025; ano++)
+                for (final mes in const [3, 6, 9, 12])
+                  if (!(ano == 2025 && mes > 9)) DateTime(ano, mes + 1, 0),
+            ]
+          : [for (var ano = 2018; ano <= 2025; ano++) DateTime(ano, 9, 30)];
 
   try {
     final universoInteiro = (await fundamentals.universe()).unwrap();
@@ -1113,7 +1143,9 @@ Future<void> main(List<String> args) async {
           'rf_inf=${(anchors.riskFreeCagr * 100).toStringAsFixed(2)}%)');
     }
 
-    final destino = amostra != null
+    final destino = c7
+        ? 'data/c7/coortes.json'
+        : amostra != null
         ? 'docs/validacao/backtest_amostra.json'
         : !app
         ? 'docs/validacao/backtest_valuation.json'
@@ -1122,11 +1154,13 @@ Future<void> main(List<String> args) async {
             : comDeslistadas
                 ? 'docs/validacao/backtest_aplicativo_deslistadas.json'
                 : 'docs/validacao/backtest_aplicativo.json';
-    File(destino).writeAsStringSync(app
+    File(destino)
+      ..parent.createSync(recursive: true)
+      ..writeAsStringSync(app
         ? jsonEncode(_compacto(linhas))
         : const JsonEncoder.withIndent(' ').convert(linhas));
     stderr.writeln('escrito $destino (${linhas.length} observações)');
-    if (app && trimestral && comDeslistadas && amostra == null) {
+    if (app && trimestral && comDeslistadas && amostra == null && !c7) {
       // O universo que as coortes observam como listado: é o que a ponte das
       // deslistadas (`tool/b3_ponte.py`) exclui, para não dar duas pontas à
       // mesma companhia (item C1d).
@@ -1143,52 +1177,17 @@ Future<void> main(List<String> args) async {
 
 /// Os mesmos insumos com outra série de exercícios — a ancorada no trimestre
 /// (item C1c). O beta, a curva, a série de preço e a contagem ficam.
+///
+/// **Pela cópia do núcleo** (item B27): a versão à mão perdia a composição
+/// declarada da unit, a taxa de referência do crédito e a janela do beta, e a
+/// leitura ancorada saía com outro divisor nas units.
 ValuationInputs _comFundamentos(
         ValuationInputs b, List<FundamentalsSnapshot> fundamentos) =>
-    ValuationInputs(
-      ticker: b.ticker,
-      asOf: b.asOf,
-      fundamentals: fundamentos,
-      marketPrice: b.marketPrice,
-      capm: b.capm,
-      marginOfSafety: b.marginOfSafety,
-      projectionYears: b.projectionYears,
-      perpetualGrowthCap: b.perpetualGrowthCap,
-      sectorKey: b.sectorKey,
-      industry: b.industry,
-      inflation: b.inflation,
-      declaredTerminalRiskFreeRate: b.declaredTerminalRiskFreeRate,
-      riskFreeCurve: b.riskFreeCurve,
-      officialShares: b.officialShares,
-      prices: b.prices,
-      isDistressed: b.isDistressed,
-      unleveredBeta: b.unleveredBeta,
-      concessionEnd: b.concessionEnd,
-      dividendsInBeta: b.dividendsInBeta,
-    );
+    b.withFundamentals(fundamentos);
 
 /// Os mesmos insumos sem a série de cotações: a Porta 0 omite o corte de
 /// liquidez sem ela, e nada mais na cascata lê a série.
-ValuationInputs _semSerie(ValuationInputs b) => ValuationInputs(
-      ticker: b.ticker,
-      asOf: b.asOf,
-      fundamentals: b.fundamentals,
-      marketPrice: b.marketPrice,
-      capm: b.capm,
-      marginOfSafety: b.marginOfSafety,
-      projectionYears: b.projectionYears,
-      perpetualGrowthCap: b.perpetualGrowthCap,
-      sectorKey: b.sectorKey,
-      industry: b.industry,
-      inflation: b.inflation,
-      declaredTerminalRiskFreeRate: b.declaredTerminalRiskFreeRate,
-      riskFreeCurve: b.riskFreeCurve,
-      officialShares: b.officialShares,
-      isDistressed: b.isDistressed,
-      unleveredBeta: b.unleveredBeta,
-      concessionEnd: b.concessionEnd,
-      dividendsInBeta: b.dividendsInBeta,
-    );
+ValuationInputs _semSerie(ValuationInputs b) => b.withoutPrices();
 
 /// Devolve o histórico já reescalado, mantendo o resto do repositório.
 class _EscaladoFundamentals implements FundamentalsRepository {

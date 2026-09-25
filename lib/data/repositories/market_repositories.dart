@@ -180,30 +180,44 @@ class PriceRepositoryImpl implements PriceRepository {
   /// deixa as duas metades em bases diferentes, com um degrau exatamente na
   /// borda. Misturar bases é o defeito que a decisão 97 mediu nas coortes; aqui
   /// ele entraria pelo cache.
+  ///
+  /// **O primeiro pregão que os dois têm, e não o primeiro da resposta**
+  /// (decisão 134). Comparar só o primeiro dia da resposta dava "sem evento"
+  /// sempre que ele faltasse no disco — um feriado lido de outro jeito, um
+  /// pregão que a busca anterior não trouxe —, e o histórico em outra base
+  /// ficava. Um evento entre duas buscas reajusta todo pregão anterior a ele,
+  /// de modo que o primeiro dia em comum basta para enxergá-lo.
   Future<bool> _mudouDeBase(Ticker ticker, PriceSeries vinda) async {
     final db = cache;
     if (db == null || vinda.points.isEmpty) return false;
-    final primeiro = vinda.points.first;
-    final iso = BrapiJson.isoDay(primeiro.date);
-    final rows = await _tryCache(() => db.pricesIn(ticker.value, iso, iso));
+    final rows = await _tryCache(() => db.pricesIn(
+          ticker.value,
+          BrapiJson.isoDay(vinda.points.first.date),
+          BrapiJson.isoDay(vinda.points.last.date),
+        ));
     if (rows == null || rows.isEmpty) return false;
-    final emDisco = rows.first.close;
-    if (emDisco <= 0 || !primeiro.close.isFinite || primeiro.close <= 0) {
-      return false;
+    final emDisco = {for (final r in rows) r.date: r.close};
+    for (final p in vinda.points) {
+      final antes = emDisco[BrapiJson.isoDay(p.date)];
+      if (antes == null || antes <= 0 || !p.close.isFinite || p.close <= 0) {
+        continue;
+      }
+      return (p.close / antes - 1).abs() > _toleranciaDeBase;
     }
-    return (primeiro.close / emDisco - 1).abs() > _toleranciaDeBase;
+    return false;
   }
 
   Future<void> _persist(Ticker ticker, PriceSeries series) async {
     final db = cache;
     if (db == null) return;
-    // **Duas bases não se somam.** Quando o pregão mais antigo que a fonte
-    // devolve já está em disco com outro preço, o que está atrás dele é de
-    // outra base e sai — perder profundidade é menos grave que servir uma série
-    // com degrau que ninguém vê.
-    if (await _mudouDeBase(ticker, series) && series.points.isNotEmpty) {
-      final corte = BrapiJson.isoDay(series.points.first.date);
-      await _tryCache(() => db.deletePricesBefore(ticker.value, corte));
+    // **Duas bases não se somam.** Quando um pregão que a fonte devolve já
+    // está em disco com outro preço, todo o disco daquele ativo é de outra base
+    // e sai — perder profundidade é menos grave que servir uma série com degrau
+    // que ninguém vê. **Todo, e não só o que antecede a resposta** (lente
+    // `dados`, decisão 134): o pregão que a resposta omite no meio da janela
+    // ficava em disco na escala velha, e o upsert não o alcançava.
+    if (await _mudouDeBase(ticker, series)) {
+      await _tryCache(() => db.deletePricesOf(ticker.value));
     }
     await _tryCache(() async {
       await db.upsertPrices([

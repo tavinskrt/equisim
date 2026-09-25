@@ -188,39 +188,24 @@ Map<String, Object?> _serializar(Result<ValuationResult> r) {
   };
 }
 
-/// Os mesmos insumos com as imposições de diagnóstico. `ValuationInputs` não
-/// tem cópia genérica, e é de propósito: as imposições não são do aplicativo.
+/// Os mesmos insumos com as imposições de diagnóstico.
+///
+/// **Pela cópia do núcleo** (item B27). A versão à mão perdia a composição
+/// declarada da unit, a taxa de referência do crédito, a janela do beta e os
+/// múltiplos de pares, e as montagens de diagnóstico rodavam outro divisor nas
+/// units.
 ValuationInputs _impor(
   ValuationInputs b, {
   ValuationLane? via,
   bool tudo = false,
 }) =>
-    ValuationInputs(
-      ticker: b.ticker,
-      asOf: b.asOf,
-      fundamentals: b.fundamentals,
-      marketPrice: b.marketPrice,
-      capm: b.capm,
-      marginOfSafety: b.marginOfSafety,
-      projectionYears: b.projectionYears,
-      perpetualGrowthCap: b.perpetualGrowthCap,
-      sectorKey: b.sectorKey,
-      industry: b.industry,
-      inflation: b.inflation,
-      declaredTerminalRiskFreeRate: b.declaredTerminalRiskFreeRate,
-      riskFreeCurve: b.riskFreeCurve,
-      officialShares: b.officialShares,
-      prices: b.prices,
-      isDistressed: b.isDistressed,
-      unleveredBeta: b.unleveredBeta,
-      concessionEnd: b.concessionEnd,
-      dividendsInBeta: b.dividendsInBeta,
-      laneOverride: via,
-      terminalReturnOverride: tudo ? 0.13 : null,
-      growthOverride: tudo ? 0.06 : null,
-      baseFactorOverride: tudo ? 1.1 : null,
-      reinvestmentOverride: tudo ? ReinvestmentPolicy.crescimentoReal : null,
-      cashTimingOverride: tudo ? CashTiming.fimDeAno : null,
+    b.withOverrides(
+      lane: via,
+      terminalReturn: tudo ? 0.13 : null,
+      growth: tudo ? 0.06 : null,
+      baseFactor: tudo ? 1.1 : null,
+      reinvestment: tudo ? ReinvestmentPolicy.crescimentoReal : null,
+      cashTiming: tudo ? CashTiming.fimDeAno : null,
     );
 
 class _DaCvm implements FundamentalsRepository {
@@ -465,12 +450,15 @@ Future<void> main(List<String> args) async {
         monteCarloSamples: 300,
       );
       final ev = ultimo;
-      final rastro = ev == null
+      // Pela serialização segura do evento (item D4): um `NaN` no rastro sai
+      // como texto, em vez de derrubar a gravação do gabarito.
+      final j = ev?.toJson();
+      final rastro = j == null
           ? null
           : jsonEncode({
-              'entrada': ev.inputPayload,
-              'saida': ev.outputPayload,
-              'calculos': [for (final c in ev.calculations) c.toJson()],
+              'entrada': j['inputPayload'],
+              'saida': j['outputPayload'],
+              'calculos': j['calculations'],
             });
       if (soRastro != null) rastros['${rastros.length}'] = jsonDecode(rastro ?? 'null');
       return {
