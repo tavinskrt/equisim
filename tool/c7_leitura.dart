@@ -4,7 +4,8 @@
 // quantas já têm o retorno do horizonte — nenhuma estatística. **Na data**, o
 // critério da decisão 96 sobre as previsões seladas do motor pré-registrado,
 // pela mesma função que mede o R3, com os retornos de um backtest `--c7` feito
-// com a base de então.
+// com a base de então — e, ao lado, a mesma conta sobre a série de cada motor
+// posterior, que é referência e não a leitura.
 //
 // Uso:
 //   dart run tool/c7_leitura.dart                        # situação
@@ -52,6 +53,15 @@ Future<void> main(List<String> args) async {
         'Newey-West ${fm?['tNeweyWest']}  passa: ${fm?['passaR3'] ?? false}');
     stdout.writeln('  previsões refeitas que divergem do selo: '
         '${leitura['previsoesRefeitasQueDivergem']}');
+    // A leitura é a do pré-registrado; a de cada motor posterior vem ao lado,
+    // sem decidir nada (decisão 129).
+    for (final e in (leitura['motoresDaData'] as Map).entries) {
+      final m = (((e.value as Map)['famaMacBeth'] as Map)['potencialDadoBm'])
+          as Map?;
+      stdout.writeln('  motor da data ${(e.key as String).substring(0, 8)}: '
+          '${m?['media']}  t corrigido ${m?['tSobreposicao']}  '
+          '(referência, não a leitura)');
+    }
     stdout.writeln('  escrito ${saida.path}');
   } on ProtocoloViolado catch (e) {
     stderr.writeln(e);

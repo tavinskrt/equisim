@@ -357,6 +357,13 @@ class ValuationDiagnostics {
   /// resolvidas, e aí a perpetuidade herda a estrutura de hoje.
   final double? terminalEquityShare;
 
+  /// Capital das emissões de ações por valor **depois** do balanço usado, em
+  /// reais, somado ao patrimônio da ponte (item B28).
+  ///
+  /// `null` sem emissão no intervalo. Presente, o preço justo já o contém: é
+  /// este valor dividido pela contagem de hoje, por papel.
+  final double? postStatementCapital;
+
   final List<ValuationCaveat> caveats;
 
   const ValuationDiagnostics({
@@ -378,6 +385,7 @@ class ValuationDiagnostics {
     this.terminalExcessShare,
     this.impliedTerminalReturn,
     this.terminalEquityShare,
+    this.postStatementCapital,
     this.caveats = const [],
   });
 

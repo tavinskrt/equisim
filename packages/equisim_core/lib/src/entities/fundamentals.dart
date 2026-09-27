@@ -245,6 +245,13 @@ class FundamentalsSnapshot {
   /// [nopatOrDerived], nunca alcançado com o cache atual. Passou a pesar com
   /// a decisão 37, que tornou a alíquota efetiva a base tributária do fluxo
   /// da firma.
+  ///
+  /// **Com lucro antes do imposto nulo ou negativo não há alíquota**, e a
+  /// conta devolve `null`. Ali a razão troca de sinal: o crédito sobre
+  /// prejuízo do exemplo acima (−R$ 7,9 mi antes, +R$ 22,6 mi de imposto)
+  /// daria 286%, e o teto o levaria a 50% — imposto máximo num exercício que
+  /// recuperou imposto. O piso de zero age no crédito sobre lucro, que é onde
+  /// a razão negativa quer dizer alguma coisa.
   double? get effectiveTaxRate {
     if (incomeBeforeTax == null || incomeTaxExpense == null) return null;
     if (incomeBeforeTax! <= 0) return null;

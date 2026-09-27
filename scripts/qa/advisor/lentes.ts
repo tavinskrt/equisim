@@ -208,6 +208,17 @@ export const LENTES: Record<LenteId, Lente> = {
       '  valor e convertido "em memoria", confira se a conversao esta no',
       '  construtor ou so no `toJson`. So o primeiro altera o dado que o',
       '  calculo le.',
+      'JA INVENTARIADO NO PLANO, e voce nao recebe o plano: o tipo de data de',
+      '  calendario no lugar do `DateTime` truncado, e as listas paralelas de',
+      '  `TotalReturnIndex.build`. Os dois estao na secao "Fora dos dois',
+      '  objetivos" desde 14/09/2026, e voltaram em 21 e 25/09/2026 sem fato',
+      '  novo. So reaponte mostrando um numero que um deles erra.',
+      'Contagem de acoes em `double` no `FundamentalsSnapshot` e no divisor',
+      '  NAO e defeito de tipo: parte das contagens do motor e ESTIMATIVA',
+      '  continua (valor de mercado dividido pelo preco, razao medida da unit),',
+      '  e o dado que chega inteiro da fonte nao ganha fracao em conta nenhuma.',
+      '  Recusado em 25/09/2026. So reaponte com um preco justo que a fracao',
+      '  mude.',
     ],
     materiais: [
       {
@@ -304,6 +315,11 @@ export const LENTES: Record<LenteId, Lente> = {
       '  companhia NAO financeira atende 1 dos 97 avaliados do aplicativo',
       '  (24/09/2026), e as financeiras nao realavancam. Tensao sobre esse',
       '  caminho e no maximo LOCAL, a menos que voce mostre um conjunto maior.',
+      'O escudo fiscal do WACC na aliquota estatutaria e a decisao 37: a',
+      '  deducao do juro vale na margem, e a margem de quem esta no Lucro Real',
+      '  e a aliquota cheia. O Lucro Presumido tem teto de receita que quase',
+      '  nenhuma listada respeita. Recusado em 25/09/2026; so reaponte com uma',
+      '  companhia avaliada que esteja no Presumido.',
     ],
     materiais: [
       {

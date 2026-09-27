@@ -1,9 +1,11 @@
 import '../audit/audit_recorder.dart';
 import '../entities/price_series.dart';
+import '../entities/share_issue.dart';
 import '../failures/failure.dart';
 import '../failures/result.dart';
 import '../repositories/repositories.dart';
 import '../services/b3/cash_dividends.dart';
+import '../services/b3/corporate_events.dart';
 import '../services/metrics/beta.dart';
 import '../services/metrics/beta_shrinkage.dart';
 import '../services/metrics/market_leverage.dart';
@@ -63,6 +65,13 @@ abstract final class PrepareValuationInputs {
   ///   vale a regressão crua, que é o comportamento anterior — e o que expõe o
   ///   motor ao caso da AZUL3, cujo `β = 109.108` tem erro-padrão de 83.228.
   ///
+  /// - [shareEvents]: desdobramentos, grupamentos e bonificações do ativo, com
+  ///   a data ex (item B29). A série da fonte vem ajustada por uns e não por
+  ///   outros; o preparo completa o que faltou antes de estimar o beta, e a
+  ///   avaliação diz o que ajustou. Ver [CorporateEvents.completeAdjustment].
+  /// - [shareIssues]: emissões de ações por valor conhecidas na data (item
+  ///   B28). Só viajam: quem soma as posteriores ao balanço é a cascata.
+  ///
   /// **Falha do índice não interrompe**: o beta cai para 1,0, registrado em
   /// [BetaSource.manual].
   /// A falha do preparo, **registrada no painel de logs** (item D4).
@@ -113,6 +122,8 @@ abstract final class PrepareValuationInputs {
     DateTime? concessionEnd,
     List<CashDividend>? dividends,
     int? declaredSharesPerUnit,
+    List<ShareEvent> shareEvents = const [],
+    List<ShareIssue> shareIssues = const [],
   }) async {
     final today = asOf ?? DateTime.now();
     final window = DateRange(
@@ -141,7 +152,12 @@ abstract final class PrepareValuationInputs {
       return _falha(ticker, today, 'cotações', priceResult.failureOrNull!);
     }
 
-    final series = priceResult.unwrap();
+    // **O ajuste que a fonte deixou de fazer** (item B29): uma bonificação não
+    // ajustada é uma queda que não aconteceu, e ela entraria no beta, no corte
+    // de liquidez e na volatilidade da faixa.
+    final ajuste =
+        CorporateEvents.completeAdjustment(priceResult.unwrap(), shareEvents);
+    final series = ajuste.series;
     if (series.isEmpty) {
       return _falha(
         ticker,
@@ -243,7 +259,27 @@ abstract final class PrepareValuationInputs {
       // A janela que a série de fato cobriu, para a cascata declarar quando
       // ela é curta demais para os cinco anos pedidos (item B17).
       betaWindowYears: beta.janelaEmAnos,
+      // As emissões por valor: a cascata soma as posteriores ao balanço (B28).
+      shareIssues: shareIssues,
+      contextNotes: [
+        if (ajuste.applied.isNotEmpty) _notaDoAjuste(ajuste.applied),
+      ],
     ));
+  }
+
+  /// A ressalva do ajuste que o preparo completou na série (item B29).
+  static String _notaDoAjuste(List<ShareEvent> aplicados) {
+    String dia(DateTime d) => '${d.day.toString().padLeft(2, '0')}/'
+        '${d.month.toString().padLeft(2, '0')}/${d.year}';
+    String fator(double f) => f >= 1
+        ? '${((f - 1) * 100).toStringAsFixed(0)}% de ações novas'
+        : 'grupamento de ${(1 / f).toStringAsFixed(0)} para 1';
+    final lista = [for (final e in aplicados) '${dia(e.exDate)} (${fator(e.factor)})'];
+    return 'A série de preços da fonte não trazia '
+        '${aplicados.length == 1 ? 'ajustado o evento de ações de' : 'ajustados os eventos de ações de'} '
+        '${lista.join(', ')}: a data ex aparecia como queda de preço que não '
+        'aconteceu. A série foi ajustada antes do beta, do corte de liquidez e '
+        'da volatilidade da faixa.';
   }
 
   /// Estima o beta contra o Ibovespa.

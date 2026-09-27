@@ -11,6 +11,128 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## A rodada do B28 e do fim do C7 — capital posterior, B29, B30, B31 e a série pré-registrada pelo commit (25/09/2026)
+
+**O usuário aprovou o B28 e a finalização do C7**, deixou o C8 para depois
+("o ideal era ter habilidade comprovada") e pediu as lentes a cada mudança de
+código.
+
+**O B28 começou pela medição errada e foi salvo por ela.** A primeira ideia era
+medir a variação da contagem do FRE entre o balanço e a data. Ela mistura
+emissão com bonificação — e aparecia como emissão de 10% no Bradesco todo ano —
+e com desdobramento que o formulário registrou só como aprovação de capital. **O
+dado bom é o quadro de aumentos do capital social**, emissão por emissão, com
+valor, preço, tipo de subscrição e forma de integralização. Ele tem três
+armadilhas, e cada uma apareceu como um preço justo absurdo antes de virar
+regra: bonificação registrada como subscrição (SHUL4, SLCE3 com preço zero),
+cada versão do formulário relistando os aumentos com identificador novo (ALPA4
+contada cinco vezes) e o fim do quadro em 2023. Depois de 2023 só há a variação
+do capital integralizado, que já apareceu com R$ 49,8 bilhões na BPAC11 sem o
+preço se mexer: **ela é avisada, e não somada** (decisão 135). **No aplicativo
+de hoje nenhum preço muda**, porque nenhuma emissão declarada caiu depois do
+balanço de 2025; nove ativos ganham o aviso. **Nas coortes o efeito é raro e
+grande**: 111 observações de 31 papéis, mediana de +0,35 p.p. no potencial, e a
+ALOS3 de 2023 — o balanço só da Aliansce Sonae, a contagem já com a brMalls —
+saía com o preço justo pela metade.
+
+**Separar emissão de bonificação achou o B29.** Comparando o fechamento bruto do
+COTAHIST com o da fonte de mercado em volta de cada mudança de contagem, **a
+fonte ajusta desdobramento e grupamento, e não toda bonificação**: 67 ajustadas
+e 133 como vieram. Numa série assim o dia ex é uma queda que não aconteceu, e
+ela entrava no retorno das coortes — a variável de desfecho do R2 e do R3 —, no
+beta, na volatilidade e no corte de liquidez. **O retorno perdido estava em quem
+bonifica**, e quem bonifica é quem retém lucro: 57 papéis, o retorno de 36 meses
+muda em 509 observações com mediana de +9,3%. No backtest a correção é exata
+pelo COTAHIST; no aplicativo, pelo salto da série (decisão 136). Quatro regras
+nasceram de casos: a AMER3 caindo 38% na semana da fraude casava com uma
+mudança de contagem (o preço tem de confirmar pela troca de `DISMES`); a SYNE3
+distribuindo caixa parecia desdobramento (o `DISMES` sozinho não basta sem a
+contagem do FRE); o evento do FRE da ASAI3 estava fora do dia (localizar pelo
+preço); fator de menos de 2% não se separa de um pregão comum.
+
+**E conferir a contagem achou o B30.** O quadro de eventos do FRE parou em 2022,
+e a contagem da coorte só muda quando a companhia corrige o formulário. **O
+Banco do Brasil ficou quatro coortes com a contagem de antes do desdobramento de
+2024**, o valor de mercado pela metade e +100% de potencial. A regra é aplicar o
+evento que a contagem não absorveu quando ela está parada; a AERI3, que
+registrou o grupamento junto com uma emissão antes da data ex, mostrou que
+«parada» tem de ser «nenhuma mudança», e não «nenhuma mudança pelo mesmo fator».
+41 observações de 10 papéis (decisão 137).
+
+**As três juntas levam o critério do R3 de 0,052 a 0,058, com `t` corrigido de
+0,30 a 0,34** — não passa —, e a faixa calibrada continua cobrindo. O B31, que a lente `nucleo` achou depois, só mexe
+na quarta casa: 0,0580. A faixa cobre 87,6% em 12 meses e 88,1% em 36 contra 90%
+nominal. **O backtest foi refeito sobre o motor final** — a primeira tentativa
+morreu com o fim da sessão, na coorte de 2021 —, as oito medições que o leem
+foram regeradas, e o gabarito foi regravado e confere idêntico: o preço justo
+muda em oito ativos, de −0,6% (ITSA4) a +0,8% (MDNE3), pelo beta da série
+completada, dez ganham a nota do B29 e nove o aviso do B28.
+
+**O fim do C7 era a máquina que a decisão 133 prometia e não tinha.** A série
+pré-registrada das coortes novas sai agora do commit do motor pré-registrado —
+`e856ec6`, achado pela impressão —, num worktree com a base bruta ligada por
+junção e o backtest daquele commit. **Refeitas por ele, as 1.018 previsões
+seladas não divergem em nenhuma**: o selo se reproduz ao último dígito. A
+primeira execução falhou pela credencial da fonte de mercado, que o worktree não
+tem; ela passou a ir pelo ambiente do processo, e não por cópia do `.env`. O
+motor desta rodada selou as três coortes na série «motor da data», e a leitura
+passou a trazer as duas: a pré-registrada decide, a outra é referência
+(decisão 138). **O C7 fica 🟨 porque a leitura é de 2029 e 2031**; a rotina do
+trimestre roda inteira sem decisão manual.
+
+### O que a auditoria reprovou
+
+**O núcleo reprovou três vezes, e as três eram do código novo.** A emissão
+guardava valor e quantidade em `double` e somava no laço: passou a `Money` e
+`int`, e o pacote grava centavos inteiros (formato 2). O aviso dividia pela
+contagem sem guarda, e formatava dinheiro com `toStringAsFixed`, que perde o meio
+centavo que a decisão 125 corrigiu: guarda e `Money` no texto. As ferramentas
+reprovaram por datas no fuso local e por três anos contados como 1.095 dias:
+UTC e ano de calendário. O teste do núcleo levou um WARN pelo mesmo motivo, e foi
+corrigido.
+
+### O que as lentes disseram
+
+**Duas passadas**: uma depois do B28 ao B30, outra depois das correções da
+auditoria. Na primeira, a `metodo` não achou nada; a `nucleo` devolveu dois
+achados já inventariados no plano (a data de calendário e as listas paralelas do
+índice de retorno total), e a disciplina dela passou a dizê-lo; a `dados`
+apontou a dupla leitura do `PortfolioRepository.delete`, preexistente e
+inventariada; e a `risco` pediu o teste da falha do isolate da avaliação, que
+entrou.
+
+**Na segunda, a `risco` achou um `if (r.isOk)` que escondia a pergunta.** O teste de corpo
+quebrado da brapi aceitava qualquer `Ok`, inclusive série vazia. Medido antes de
+mudar: o que nem é JSON dá erro em toda rota, e o JSON de forma errada numa rota
+deixa as outras entregarem os 16 exercícios. O teste passou a cobrar exatamente
+isso.
+
+**A `nucleo` achou o B31 e errou dois.** O fator de retorno total multiplicava
+os proventos da mesma data ex, e inventava o termo cruzado de um rendendo sobre
+o outro (decisão 139). Os dois recusados: a contagem de ações em `double` — parte
+dela é estimativa contínua, `VM ÷ P` —, e a guarda da alíquota efetiva com
+prejuízo, que a lente leu como defeito e é o que impede um crédito sobre prejuízo
+de sair com 50%; a documentação passou a dizê-lo, e a disciplina da lente
+registra a recusa da contagem.
+
+**A `metodo` reabriu a decisão 37**: o escudo fiscal do WACC na estatutária,
+com o Lucro Presumido como contraexemplo. Recusado — o Presumido tem teto de
+receita que quase nenhuma listada respeita —, e registrado na disciplina.
+
+**A `dados` não achou nada.**
+
+**Com os documentos fechados, a `registro` e a `rumo`.** A `rumo` não achou
+tensão: o que falta depende do calendário do C7 ou de escolha do usuário, e está
+declarado. A `registro` achou uma divergência real e fora da rodada: o README
+manda regenerar as credenciais do Firebase com `flutterfire configure`, e o hook
+de pre-commit barra `google-services.json` em staging. **A regra do hook é
+política de segurança do usuário, e não mudou**; o README passou a dizer o
+caminho que já existe, a válvula `.qa-skip`. E ela reapontou o apontamento de
+09/09/2026, que continua esperando a decisão do usuário. A `tela` não rodou: a
+rodada não mexeu em leiaute, só no texto dos avisos da avaliação.
+
+---
+
 ## A rodada do C7 — a réplica selada, o rastro íntegro, B27, D5 e B28 (24/09/2026)
 
 **O usuário aprovou o C7 e deixou o C8 para depois**, e pediu, na mesma janela,

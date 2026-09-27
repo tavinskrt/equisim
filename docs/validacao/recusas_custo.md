@@ -249,3 +249,18 @@ fica pela razão da decisão 95.
 A §8 é de 16/09. Entre ela e esta seção, o JSON foi regravado em 21 e 22/09
 sem que este texto acompanhasse: 0,066 e 0,108, com `t` corrigido de 1,34 e
 0,80. **Este é o primeiro texto desde a §8, e é o que vale.**
+
+## 10. Com o dado das coortes corrigido — remedido em 25/09/2026
+
+**O contrafactual foi refeito sobre as coortes com o B28 ao B31** (decisões 135
+a 137 e 139): o capital posterior e a contagem atrasada mexem no potencial, e as
+bonificações não ajustadas e os proventos do mesmo dia, no retorno.
+
+| com as deslistadas | n | 12 meses: IC dado o B/M · corrigido / crítico | 36 meses: IC dado o B/M · corrigido / crítico |
+|---|---:|---|---|
+| avaliadas | 3.059 | 0,042 · 0,71 / 2,24 | 0,050 · 0,32 / 2,70 |
+| **soltos do corte de liquidez** | **3.051** | **0,059 · 1,16 / 2,24** | **0,087 · 0,61 / 2,70** |
+
+**A leitura não muda**: a ordenação dos soltos é direção, e não prova. **O nível
+continua fora**, com potencial mediano de **−28,2%** nos soltos contra **−53,8%**
+nas avaliadas. A recusa por liquidez fica pela razão da decisão 95.

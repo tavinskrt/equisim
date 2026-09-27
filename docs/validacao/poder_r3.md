@@ -79,6 +79,11 @@ mostrou, e precisaria de 66 coortes para chegar a 80% — retornos disponíveis 
 descarta um pouco**: o coeficiente condicionado fica abaixo de **0,20** ao nível
 do critério. É a leitura mais informativa que os dados sustentam.
 
+> **Remedido em 25/09/2026**, com o dado das coortes corrigido pelos itens B28 a
+> B31: o critério do R3 tem estimativa de 0,058, e o efeito mínimo detectável a
+> 80% continua em **0,62**; o book-to-market, com 38% de poder no próprio efeito,
+> continua pedindo 66 coortes — retornos em 2037.
+
 ## 4. Consequência para o R3
 
 «Habilidade **comprovada**» não é atingível com a série brasileira de 2018 a

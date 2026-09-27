@@ -4,6 +4,7 @@ import '../audit/audit_recorder.dart';
 import '../audit/calculation_trace.dart';
 import '../entities/fundamentals.dart';
 import '../entities/price_series.dart';
+import '../entities/share_issue.dart';
 import '../entities/valuation.dart';
 import '../failures/failure.dart';
 import '../failures/result.dart';
@@ -346,6 +347,16 @@ class ValuationInputs {
   /// muda por elas.
   final List<String> contextNotes;
 
+  /// Emissões de ações por valor conhecidas na data (item B28).
+  ///
+  /// A cascata soma ao patrimônio da ponte as que caem **depois** do balanço
+  /// usado e até [asOf]: elas estão no divisor, porque a contagem é a de hoje,
+  /// e não estavam no patrimônio publicado. As anteriores ao balanço já estão
+  /// nele, e as posteriores a [asOf] ainda não existiam — ficam de fora sem
+  /// aviso. Quem busca garante que só entra emissão **conhecida** na data: o
+  /// Formulário de Referência recebido até ela.
+  final List<ShareIssue> shareIssues;
+
   /// Agrupa os insumos. Não busca nada — quem busca é
   /// [PrepareValuationInputs], e a separação é o que mantém a cascata pura.
   const ValuationInputs({
@@ -383,6 +394,7 @@ class ValuationInputs {
     this.minorityEquityValue,
     this.scenarioTranslation = ScenarioTranslation.umPorUm,
     this.contextNotes = const [],
+    this.shareIssues = const [],
   });
 
   /// Marcador de «não mudar» para os campos anuláveis de [_copy]: com ele, o
@@ -456,6 +468,7 @@ class ValuationInputs {
       minorityEquityValue: minorityEquityValue,
       scenarioTranslation: scenarioTranslation,
       contextNotes: contextNotes ?? this.contextNotes,
+      shareIssues: shareIssues,
     );
   }
 
@@ -690,6 +703,10 @@ class _Via {
 
   final AuditTransaction? audit;
 
+  /// Capital das emissões por valor depois do balanço usado e até a data, em
+  /// reais (item B28). Zero sem emissão.
+  final double capitalPosterior;
+
   const _Via({
     required this.inputs,
     required this.published,
@@ -697,6 +714,7 @@ class _Via {
     required this.lane,
     required this.divisor,
     required this.audit,
+    this.capitalPosterior = 0,
   });
 }
 
@@ -1734,6 +1752,40 @@ abstract final class ValuationCascade {
     AuditTransaction? audit, {
     List<String>? refusals,
   }) {
+    // **O capital que entrou depois do balanço** (item B28). O patrimônio é o
+    // do exercício publicado; a contagem, a que forma a cotação de hoje. Uma
+    // emissão entre as duas datas estava num lado da divisão e não no outro.
+    final capital = _capitalPosterior(inputs, latest);
+    // A contagem sai positiva de `quotedShares`; a guarda repete a de
+    // `_comCapitalPosterior`, que sem papel não soma nada.
+    final comPapeis = divisor.count > 0;
+    if (capital.valor > 0 && comPapeis) {
+      warnings.add(
+        'O patrimônio é o do balanço de ${_fmt(latest.fiscalPeriodEnd)}, e '
+        'depois dele a companhia emitiu ações por R\$ '
+        '${_milhoes(capital.valor)} em ${capital.emissoes} '
+        '${capital.emissoes == 1 ? 'emissão conhecida' : 'emissões conhecidas'} '
+        'até ${_fmt(inputs.asOf)}. As ações novas estão na contagem de hoje, e '
+        'o capital delas não estava no balanço: ele entra no patrimônio da '
+        'ponte pelo valor de emissão, somando '
+        '${Money.fromReais(capital.valor / divisor.count)} ao preço justo de '
+        'cada papel.',
+      );
+    }
+    if (capital.semDeclaracao > 0 && comPapeis) {
+      warnings.add(
+        'Depois do balanço de ${_fmt(latest.fiscalPeriodEnd)}, o Formulário de '
+        'Referência mostra o capital integralizado subindo R\$ '
+        '${_milhoes(capital.semDeclaracao)} com '
+        '${(capital.acoesSemDeclaracao / 1e6).toStringAsFixed(1)} milhões de '
+        'ações novas, sem evento de ações no preço que o explique. '
+        'O formulário não declara mais emissão por emissão, e a variação do '
+        'capital não separa emissão por valor de bonificação ou de troca de '
+        'ações numa reorganização: **ela não foi somada ao patrimônio**. Se foi '
+        'emissão por valor, o preço justo está subavaliado em até '
+        '${Money.fromReais(capital.semDeclaracao / divisor.count)} por papel.',
+      );
+    }
     final via = _Via(
       inputs: inputs,
       published: published,
@@ -1741,6 +1793,7 @@ abstract final class ValuationCascade {
       lane: lane,
       divisor: divisor,
       audit: audit,
+      capitalPosterior: comPapeis ? capital.valor : 0.0,
     );
 
     final descontada = _descontarVia(via, warnings);
@@ -1894,6 +1947,17 @@ abstract final class ValuationCascade {
     _Custo custo,
     DcfAssumptions a,
     _Premissas premissas,
+  ) =>
+      _descontarDoBalanco(via, base, custo, a, premissas)
+          .map((o) => _comCapitalPosterior(via, o));
+
+  /// O desconto sobre o patrimônio do balanço, antes do capital posterior.
+  static Result<DcfOutcome> _descontarDoBalanco(
+    _Via via,
+    double base,
+    _Custo custo,
+    DcfAssumptions a,
+    _Premissas premissas,
   ) {
     if (via.lane == ValuationLane.shareholder) {
       return DcfCalculator.shareholder(baseProfit: base, assumptions: a);
@@ -2036,6 +2100,9 @@ abstract final class ValuationCascade {
       flowSymbol: lane == ValuationLane.firm ? 'NOPAT' : 'LPA',
       discountSymbol: lane == ValuationLane.firm ? 'WACC' : 'K_e',
       perShareAlready: lane == ValuationLane.shareholder,
+      capitalPorPapel: via.divisor.count > 0
+          ? via.capitalPosterior / via.divisor.count
+          : 0.0,
     );
     if (lane == ValuationLane.firm) {
       _auditEquityBridge(
@@ -2045,6 +2112,7 @@ abstract final class ValuationCascade {
         minorityInterest: via.latest.minorityInterest ?? 0,
         shares: via.divisor.count,
         resolved: d.custo.taxas != null,
+        capitalPosterior: via.capitalPosterior,
       );
     }
 
@@ -2106,6 +2174,8 @@ abstract final class ValuationCascade {
         // a de hoje (item B15, decisão 105).
         terminalEquityShare:
             d.custo.taxas?.equityShareAt(inputs.projectionYears),
+        postStatementCapital:
+            via.capitalPosterior > 0 ? via.capitalPosterior : null,
         retentionPath: [
           for (var t = 1; t <= inputs.projectionYears; t++)
             assumptions.retentionAt(t),
@@ -3062,6 +3132,7 @@ abstract final class ValuationCascade {
     required double? firmTaxRate,
     required double? terminalCostOfEquity,
     required double? terminalEquityShare,
+    double? postStatementCapital,
     required List<double> retentionPath,
     required List<double> growthPath,
   }) {
@@ -3097,6 +3168,7 @@ abstract final class ValuationCascade {
       terminalExcessShare: pesoDoExcedente,
       impliedTerminalReturn: outcome.impliedTerminalReturn,
       terminalEquityShare: terminalEquityShare,
+      postStatementCapital: postStatementCapital,
       equityShare: outcome.equityShare,
       costOfEquity: costOfEquity,
       baseFactor: baseFactor,
@@ -3427,6 +3499,93 @@ abstract final class ValuationCascade {
   static String _pct(double fraction) =>
       '${(fraction * 100).toStringAsFixed(1)}%';
 
+  static String _milhoes(double reais) =>
+      '${(reais / 1e6).toStringAsFixed(1)} milhões';
+
+  /// As emissões por valor **depois** do balanço usado e até a data da
+  /// avaliação (item B28), somadas.
+  ///
+  /// Emissão anterior ao fim do exercício já está no patrimônio publicado;
+  /// posterior à data da avaliação ainda não existia. O dia do fim do exercício
+  /// fica de fora: o balanço é o do fechamento daquele dia.
+  ///
+  /// Só a emissão **declarada** entra no valor (ver [ShareIssue.declared]); a
+  /// variação do capital sem declaração sai somada à parte, para o aviso.
+  ///
+  /// A soma é em centavos inteiros ([Money]); o `double` só aparece na saída,
+  /// que é onde o valor entra na conta do desconto.
+  static ({double valor, int emissoes, double semDeclaracao, int acoesSemDeclaracao})
+      _capitalPosterior(
+    ValuationInputs inputs,
+    FundamentalsSnapshot latest,
+  ) {
+    if (inputs.shareIssues.isEmpty) {
+      return (valor: 0.0, emissoes: 0, semDeclaracao: 0.0, acoesSemDeclaracao: 0);
+    }
+    final de = DateTime.utc(latest.fiscalPeriodEnd.year,
+        latest.fiscalPeriodEnd.month, latest.fiscalPeriodEnd.day);
+    final ate =
+        DateTime.utc(inputs.asOf.year, inputs.asOf.month, inputs.asOf.day);
+    var valor = Money.zero;
+    var n = 0;
+    var sem = Money.zero;
+    var acoesSem = 0;
+    for (final i in inputs.shareIssues) {
+      if (!i.isUsable) continue;
+      final d = DateTime.utc(i.date.year, i.date.month, i.date.day);
+      if (!d.isAfter(de) || d.isAfter(ate)) continue;
+      if (i.declared) {
+        valor += i.amount;
+        n++;
+      } else {
+        sem += i.amount;
+        acoesSem += i.shares;
+      }
+    }
+    return (
+      valor: valor.reais,
+      emissoes: n,
+      semDeclaracao: sem.reais,
+      acoesSemDeclaracao: acoesSem,
+    );
+  }
+
+  /// O desfecho do desconto **com o capital que entrou depois do balanço**
+  /// (item B28): somado ao capital próprio antes da divisão por papel.
+  ///
+  /// **Pelo valor de emissão, e fora do fluxo.** Emissão a preço de mercado é
+  /// neutra em valor para quem já era acionista — é a hipótese de toda ponte
+  /// *pro forma* —, e o capital novo não está no fluxo projetado, que sai do
+  /// exercício anterior a ele. Pôr o dinheiro no caixa da projeção o faria
+  /// render a taxa livre de risco descontada ao custo do capital próprio, o que
+  /// o avalia abaixo do que custou; somá-lo ao fim o avalia pelo que entrou.
+  /// Nas duas vias o preço justo é por papel da contagem de hoje, e a soma é a
+  /// mesma: capital ÷ papéis.
+  static DcfOutcome _comCapitalPosterior(_Via via, DcfOutcome o) {
+    final c = via.capitalPosterior;
+    if (!(c > 0) || !(via.divisor.count > 0)) return o;
+    final porPapel = c / via.divisor.count;
+    final e0 = o.equityValue;
+    final e1 = e0 + (via.lane == ValuationLane.shareholder ? porPapel : c);
+    return DcfOutcome(
+      projectedFlows: o.projectedFlows,
+      discountedFlows: o.discountedFlows,
+      terminalValue: o.terminalValue,
+      discountedTerminalValue: o.discountedTerminalValue,
+      enterpriseValue: o.enterpriseValue,
+      equityValue: e1,
+      fairValuePerShare: o.fairValuePerShare + porPapel,
+      // A participação do terminal é contra o capital próprio (decisão 51), e
+      // o capital novo não é terminal: a razão encolhe na mesma proporção.
+      terminalShare: (e0.abs() > 0 && e1.abs() > 0)
+          ? o.terminalShare * e0 / e1
+          : o.terminalShare,
+      equityShare: o.equityShare,
+      discountedTerminalExcess: o.discountedTerminalExcess,
+      impliedTerminalReturn: o.impliedTerminalReturn,
+    );
+  }
+
   /// O aviso da triangulação, quando as duas leituras discordam além do limite.
   ///
   /// **Ele não escolhe.** Diz quanto cada uma vale, de quantos pares saiu a
@@ -3665,6 +3824,17 @@ abstract final class ValuationCascade {
               'group': e.value.group,
             },
         },
+      // Só com emissão: o rastro de quem não tem fica como era (item B28).
+      if (inputs.shareIssues.isNotEmpty)
+        'shareIssues': [
+          for (final i in inputs.shareIssues)
+            {
+              'date': _fmt(i.date),
+              'amount': _r(i.amount.reais),
+              'shares': i.shares,
+              if (!i.declared) 'declared': false,
+            },
+        ],
       'overrides': {
         if (inputs.laneOverride case final v?) 'lane': v.name,
         if (inputs.terminalReturnOverride case final v?)
@@ -3746,6 +3916,9 @@ abstract final class ValuationCascade {
             'terminalEquityShare': d.terminalEquityShare == null
                 ? null
                 : _r(d.terminalEquityShare!, 4),
+            // Só com emissão: o rastro de quem não tem fica como era (B28).
+            if (d.postStatementCapital case final c?)
+              'postStatementCapital': _r(c),
             'growthPath': [for (final g in d.growthPath) _r(g, 6)],
             'retentionPath': [for (final b in d.retentionPath) _r(b, 6)],
           },
@@ -4307,6 +4480,7 @@ abstract final class ValuationCascade {
     required String flowSymbol,
     required String discountSymbol,
     bool perShareAlready = false,
+    double capitalPorPapel = 0,
   }) {
     if (audit == null) return;
     final r = assumptions.discountRate;
@@ -4476,11 +4650,20 @@ abstract final class ValuationCascade {
         variables: {
           'VP_explícito (R\$)': _r(sumPv),
           'VP(VT) (R\$)': _r(outcome.discountedTerminalValue),
+          if (capitalPorPapel > 0)
+            'capital emitido depois do balanço, por papel (R\$)':
+                _r(capitalPorPapel),
         },
         steps: [
-          'Passo único: soma das duas parcelas → ${_r(sumPv)} + '
-              '${_r(outcome.discountedTerminalValue)} = '
-              '${_r(outcome.fairValuePerShare)}',
+          if (capitalPorPapel > 0)
+            'Passo único: soma das duas parcelas e do capital emitido depois do '
+                'balanço (item B28) → ${_r(sumPv)} + '
+                '${_r(outcome.discountedTerminalValue)} + '
+                '${_r(capitalPorPapel)} = ${_r(outcome.fairValuePerShare)}'
+          else
+            'Passo único: soma das duas parcelas → ${_r(sumPv)} + '
+                '${_r(outcome.discountedTerminalValue)} = '
+                '${_r(outcome.fairValuePerShare)}',
         ],
         result: outcome.fairValuePerShare,
         unit: r'R$ por papel',
@@ -4499,12 +4682,17 @@ abstract final class ValuationCascade {
     required double minorityInterest,
     required double shares,
     required bool resolved,
+    double capitalPosterior = 0,
   }) {
     if (audit == null) return;
     final explicito =
         outcome.discountedFlows.fold<double>(0, (a, b) => a + b);
     final terminal = outcome.discountedTerminalValue;
     final minoritarios = minorityInterest < 0 ? 0.0 : minorityInterest;
+    // O capital emitido depois do balanço entra depois do fluxo (item B28): o
+    // rastro mostra o capital próprio do balanço e soma o novo num passo seu.
+    final capital = capitalPosterior > 0 ? capitalPosterior : 0.0;
+    final doBalanco = outcome.equityValue - capital;
     audit.step(
       formulaName: 'Capital próprio pelo fluxo do acionista derivado',
       latex: r'FCFE_t = FCFF_t - D_{t-1}\,[K_d(1-\tau) - g_t] \quad;\quad '
@@ -4515,6 +4703,7 @@ abstract final class ValuationCascade {
         'VP do terminal do acionista (R\$)': _r(terminal),
         'minoritários M (R\$)': _r(minoritarios),
         'dívida líquida inicial D_0 (R\$)': _r(netDebt),
+        if (capital > 0) 'capital emitido depois do balanço C (R\$)': _r(capital),
         'N_papéis': _r(shares, 0),
         'desconto': resolved
             ? 'caminho de K_e resolvido pela realavancagem'
@@ -4527,7 +4716,11 @@ abstract final class ValuationCascade {
         'Passo 2: valor presente do fluxo explícito → ${_r(explicito)}',
         'Passo 3: valor presente do terminal do acionista → ${_r(terminal)}',
         'Passo 4: menos a parte dos não controladores → ${_r(explicito)} + '
-            '${_r(terminal)} − ${_r(minoritarios)} = ${_r(outcome.equityValue)}',
+            '${_r(terminal)} − ${_r(minoritarios)} = ${_r(doBalanco)}',
+        if (capital > 0)
+          'Passo 4b: mais o capital emitido depois do balanço, que está na '
+              'contagem e não no patrimônio publicado (item B28) → '
+              '${_r(doBalanco)} + ${_r(capital)} = ${_r(outcome.equityValue)}',
         'Passo 5: divisão pelo número de papéis negociados → '
             '${_r(outcome.equityValue)} ÷ ${_r(shares, 0)} = '
             '${_r(outcome.fairValuePerShare)}',

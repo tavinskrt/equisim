@@ -99,8 +99,9 @@ class Motor {
       );
 }
 
-Future<String> _git(List<String> args, {String? entrada}) async {
-  final p = await Process.start('git', args);
+Future<String> _git(List<String> args,
+    {String? entrada, String? diretorio}) async {
+  final p = await Process.start('git', args, workingDirectory: diretorio);
   if (entrada != null) {
     p.stdin.write(entrada);
   }
@@ -137,6 +138,44 @@ Future<String> impressaoDoMotor(
     for (var i = 0; i < fontes.length; i++) '${fontes[i]} ${hashes[i]}',
   ].join('\n');
   return _git(['hash-object', '--stdin'], entrada: '$manifesto\n');
+}
+
+/// A impressão do núcleo **num commit**, pela árvore dele — a mesma conta de
+/// [impressaoDoMotor] sobre uma árvore de trabalho limpa naquele commit.
+Future<String> impressaoDoCommit(String commit,
+    {String raiz = 'packages/equisim_core/lib'}) async {
+  final saida = await _git(['ls-tree', '-r', commit, '--', raiz]);
+  final fontes = <({String caminho, String hash})>[];
+  for (final l in saida.split('\n')) {
+    final tab = l.indexOf('\t');
+    if (tab < 0) continue;
+    final caminho = l.substring(tab + 1);
+    if (!caminho.endsWith('.dart')) continue;
+    final campos = l.substring(0, tab).split(' ');
+    if (campos.length < 3) continue;
+    fontes.add((caminho: caminho, hash: campos[2]));
+  }
+  fontes.sort((a, b) => a.caminho.compareTo(b.caminho));
+  final manifesto =
+      [for (final f in fontes) '${f.caminho} ${f.hash}'].join('\n');
+  return _git(['hash-object', '--stdin'], entrada: '$manifesto\n');
+}
+
+/// O commit **mais antigo** cujo núcleo tem a impressão [impressao], ou `null`
+/// quando ela ainda não está em commit nenhum.
+///
+/// A impressão só muda quando o núcleo muda, e por isso basta olhar os commits
+/// que o tocaram; o primeiro que casa é o que a introduziu, e todo commit
+/// seguinte que não tocou o núcleo tem a mesma.
+Future<String?> commitDaImpressao(String impressao) async {
+  final commits = (await _git(
+          ['log', '--reverse', '--format=%H', '--', 'packages/equisim_core/lib']))
+      .split('\n')
+      .where((c) => c.trim().isNotEmpty);
+  for (final c in commits) {
+    if (await impressaoDoCommit(c) == impressao) return c;
+  }
+  return null;
 }
 
 /// O motor desta árvore de trabalho.
@@ -339,9 +378,18 @@ Map<String, Object?> situacao({
   final seladas = pre == null
       ? <String>[]
       : (indice.daImpressao(pre.impressao).keys.toList()..sort());
+  final porMotor = <String, List<String>>{};
+  for (final s in indice.selos) {
+    (porMotor[s['motor']! as String] ??= []).add(s['coorte']! as String);
+  }
   return {
     'motorPreRegistrado': pre?.toJson(),
     'coortesSeladas': seladas,
+    // As séries de motores posteriores ao pré-registrado (decisão 133).
+    'motoresDaData': {
+      for (final e in porMotor.entries)
+        if (e.key != pre?.impressao) e.key: e.value..sort(),
+    },
     for (final e in datasDeLeitura.entries)
       '${e.key}m': {
         'dataDaLeitura': e.value.toIso8601String().substring(0, 10),
@@ -389,24 +437,45 @@ Future<Map<String, dynamic>> ler({
     for (final l in linhas) '${l['coorte']}|${l['ticker']}': l,
   };
 
-  final observacoes = <Map<String, Object?>>[];
-  var divergentes = 0;
-  final selos = indice.daImpressao(pre.impressao);
-  for (final c in selos.keys.toList()..sort()) {
-    final selado = jsonDecode(
-            File('${pasta.path}/${selos[c]!['arquivo']}').readAsStringSync())
-        as Map<String, dynamic>;
-    for (final p in (selado['previsoes'] as List).cast<Map<String, dynamic>>()) {
-      final r = retorno['$c|${p['ticker']}'];
-      if (r != null && _diferem(r['upside'], p['upside'])) divergentes++;
-      observacoes.add({...p, campo: r?[campo]});
+  /// As previsões seladas de um motor, com o retorno realizado ao lado.
+  ({List<Map<String, Object?>> obs, int divergentes}) daSerie(String impressao) {
+    final observacoes = <Map<String, Object?>>[];
+    var divergentes = 0;
+    final selos = indice.daImpressao(impressao);
+    for (final c in selos.keys.toList()..sort()) {
+      final selado = jsonDecode(
+              File('${pasta.path}/${selos[c]!['arquivo']}').readAsStringSync())
+          as Map<String, dynamic>;
+      for (final p
+          in (selado['previsoes'] as List).cast<Map<String, dynamic>>()) {
+        final r = retorno['$c|${p['ticker']}'];
+        if (r != null && _diferem(r['upside'], p['upside'])) divergentes++;
+        observacoes.add({...p, campo: r?[campo]});
+      }
     }
+    return (obs: observacoes, divergentes: divergentes);
   }
+
+  final preRegistrada = daSerie(pre.impressao);
+  // **As duas versões, como a decisão 129 pede**: a do motor pré-registrado é
+  // a leitura do C7; a de cada motor posterior, selada em série própria, vem ao
+  // lado — para que a réplica não vire reajuste, e para que se veja o que as
+  // correções depois do selo fizeram.
+  final outros = <String>{
+    for (final s in indice.selos)
+      if (s['motor'] != pre.impressao) s['motor']! as String,
+  }.toList()
+    ..sort();
   return {
     'horizonteEmMeses': meses,
     'motorPreRegistrado': pre.toJson(),
-    'previsoesRefeitasQueDivergem': divergentes,
-    'leitura': habilidade.horizonteDaHabilidade(observacoes, campo,
+    'previsoesRefeitasQueDivergem': preRegistrada.divergentes,
+    'leitura': habilidade.horizonteDaHabilidade(preRegistrada.obs, campo,
         defasagem: meses ~/ 3 - 1),
+    'motoresDaData': {
+      for (final m in outros)
+        m: habilidade.horizonteDaHabilidade(daSerie(m).obs, campo,
+            defasagem: meses ~/ 3 - 1),
+    },
   };
 }

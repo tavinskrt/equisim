@@ -433,3 +433,30 @@ meses e de 72,0% a 97,1% em 36 — a mesma desigualdade da §10. Só nas coortes
 
 O centro mudou pouco: `a = 0,078` e `b = 0,023` em 12 meses, `a = 0,130` e
 `b = 0,070` em 36. O preço justo continua entrando com peso pequeno.
+
+## 12. Sobre o retorno corrigido — remedido em 25/09/2026
+
+**A variável que a faixa tenta cobrir mudou.** O retorno total das coortes
+perdia o fator das bonificações que a fonte de preços não ajusta (item B29,
+[decisão 136](../decisoes/136-o-evento-de-acoes-que-a-fonte-nao-ajustou-e-ajustado.md))
+e compunha entre si os proventos da mesma data ex (item B31,
+[decisão 139](../decisoes/139-proventos-da-mesma-data-ex-entram-juntos-no-retorno-total.md)).
+A volatilidade do papel, que dá a largura, lê a série completada. `python
+tool/cobertura_banda.py` refez a medição **sem mudar a forma nem a regra**, com o
+centro e os `z` recalibrados.
+
+| fora da amostra | 12 meses: 90 / 80 / 50% | desvio | 36 meses: 90 / 80 / 50% | desvio |
+|---|---|---:|---|---:|
+| **convergência na escala da volatilidade** | **87,6 / 79,5 / 50,9** | **2,4 p.p.** | **88,1 / 80,0 / 53,0** | **3,0 p.p.** |
+| em torno do justo, mesmas observações | 83,1 / 72,9 / 45,0 | 7,1 p.p. | 84,9 / 75,1 / 45,9 | 5,1 p.p. |
+
+Sobre 2.643 observações de teste em 12 meses e 1.044 em 36. Por tercil de
+potencial, a de 90% cobre 88,2 / 86,5 / 87,9% em 12 meses e 82,8 / 90,3 / 91,5% em
+36; nas listadas, 88,1% e 87,5%, e nas deslistadas, 83,4% e 93,3%. **A forma
+continua cobrindo, e a regra continua mandando-a ao aplicativo**: o pacote
+`assets/validacao/banda_calibrada.json` foi regerado com `a = 0,086` e
+`b = 0,029` em 12 meses, `a = 0,161` e `b = 0,093` em 36.
+
+As remedições de 21, 22 e 24/09 — 88,1 e 89,3%, 87,8 e 88,4%, 87,8 e 88,9% — estão
+no item C2c do plano e no histórico do git do JSON, e não ganharam seção aqui. Esta é a
+primeira desde a §11.

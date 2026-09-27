@@ -211,7 +211,9 @@ Cloud Function e deixe o token vazio. Ver a seção *Proxy de custódia* adiante
 **Firebase** — as credenciais em `lib/firebase_options.dart` e
 `android/app/google-services.json` já apontam para o projeto do TCC e são
 versionadas; nada a fazer na máquina nova. Para usar outro projeto, regenere com
-`flutterfire configure`.
+`flutterfire configure`. **O hook de pre-commit barra `google-services.json` em
+staging**, para que credencial nova não entre por engano: commitar a troca de
+projeto exige a válvula `.qa-skip` (ver `CLAUDE.md`, §2), apagada logo depois.
 
 ## Execução
 

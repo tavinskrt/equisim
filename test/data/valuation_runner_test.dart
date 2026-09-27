@@ -61,6 +61,26 @@ void main() {
         reason: 'o coletor desta isolate continua ligado');
   });
 
+  test('a recusa dentro da isolate volta como falha, com o evento, e sem '
+      'travar', () async {
+    // Lente `risco`, 25/09/2026: o teste cobria só o caminho feliz. Sem
+    // exercícios não há via, e a cascata recusa — dentro da outra isolate. A
+    // falha tem de voltar como `Err`, com o evento de recusa no painel.
+    final eventos = <AuditEvent>[];
+    AuditRecorder.attach(eventos.add);
+    addTearDown(AuditRecorder.detach);
+
+    final r = await ValuationRunner.run(ValuationRequest(
+      inputs: inputs.withFundamentals(const []),
+      monteCarlo: true,
+      samples: ValuationRunner.isolateThresholdSamples,
+    )).timeout(const Duration(seconds: 30));
+
+    expect(r.isErr, isTrue);
+    expect(eventos, hasLength(1));
+    expect(eventos.single.endpoint, '/core/valuation/PETR4');
+  });
+
   test('sem ninguém ouvindo, a isolate não monta rastro', () async {
     expect(AuditRecorder.isActive, isFalse);
     final r = await ValuationRunner.run(ValuationRequest(

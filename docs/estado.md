@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-24, a partir de `e1a843d`.
+Gerado em 2026-09-25, a partir de `e856ec6`.
 
 ## Decisões registradas
 
-**108** aceita · **2** cumprida · **6** substituída
+**113** aceita · **2** cumprida · **6** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -131,6 +131,11 @@ Gerado em 2026-09-24, a partir de `e1a843d`.
 | 132 | A cópia dos insumos da avaliação passa por um lugar só, e nenhum campo se perde | aceita | voce | 2026-09-24 |
 | 133 | A réplica fora da amostra começa selada — três coortes, o motor pré-registrado identificado pela impressão, e a leitura travada até a data | aceita | voce | 2026-09-24 |
 | 134 | A mudança de base apaga do cache o ativo inteiro, e é vista no primeiro pregão em comum | aceita | voce | 2026-09-24 |
+| 135 | O capital emitido depois do balanço entra no patrimônio da ponte quando o valor é declarado, e é avisado quando não é | aceita | voce | 2026-09-24 |
+| 136 | O evento de ações que a fonte de preços não ajustou é ajustado — na série do beta e da faixa, e no retorno das coortes | aceita | voce | 2026-09-24 |
+| 137 | A contagem por data da coorte recebe o evento de ações que o FRE ainda não absorveu | aceita | voce | 2026-09-24 |
+| 138 | A série pré-registrada do C7 sai do commit dela, reproduzida ao último dígito, e a leitura traz as duas séries | aceita | voce | 2026-09-25 |
+| 139 | Os proventos da mesma data ex entram juntos no fator de retorno total | aceita | voce | 2026-09-25 |
 
 ## Caixa de entrada
 
@@ -144,16 +149,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 63 | 21.818 |
-| Apresentacao | 37 | 16.497 |
+| Nucleo de dominio | 63 | 22.233 |
+| Apresentacao | 37 | 16.507 |
 | Camada de dados | 24 | 3.718 |
-| Testes do app | 45 | 8.605 |
-| Testes do nucleo | 41 | 14.946 |
-| Ferramentas de QA | 20 | 6.722 |
+| Testes do app | 47 | 8.955 |
+| Testes do nucleo | 43 | 15.484 |
+| Ferramentas de QA | 20 | 6.738 |
 
 ## Histórico recente
 
 ```
+2026-09-24  e856ec6  Refino do motor de valuation (parte 24)
 2026-09-22  e1a843d  Refino do motor de valuation (parte 23)
 2026-09-22  2a19372  Refino do motor de valuation (parte 21)
 2026-09-21  5345767  Refino do motor de valuation (parte 21)
@@ -168,5 +174,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-14  cfc5517  Refino do motor de valuation (parte 13)
 2026-09-14  b688eeb  Refino do motor de valuation (parte 12)
 2026-09-14  7d43639  Refino do motor de valuation (parte 11)
-2026-09-11  6e01044  Refino do motor de valuation (parte 10)
 ```

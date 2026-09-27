@@ -109,6 +109,7 @@ class Congelado {
     required this.prazos,
     required this.proventos,
     required this.units,
+    this.capital = const {},
   });
 
   final ValidationContext ctx;
@@ -127,6 +128,9 @@ class Congelado {
   final Map<String, ConcessionTerm> prazos;
   final Map<String, List<CashDividend>> proventos;
   final Map<String, List<UnitComposition>> units;
+
+  /// Emissões e eventos de ações do pacote do aplicativo (itens B28 e B29).
+  final Map<String, CapitalEvents> capital;
 
   /// O Ibovespa da janela do beta, já congelado.
   late final DateRange janelaDoBeta = DateRange(
@@ -167,6 +171,9 @@ class Congelado {
     final prior = File('assets/mercado/beta_prior.json').existsSync()
         ? BetaPriorCodec.decode(ler('assets/mercado/beta_prior.json'))?.prior
         : null;
+    final capital = File('assets/cvm/capital.json').existsSync()
+        ? CapitalEventsCodec.decodePackage(ler('assets/cvm/capital.json'))
+        : const <String, CapitalEvents>{};
     final units = File('assets/cvm/units.json').existsSync()
         ? UnitCompositionCodec.decodePackage(ler('assets/cvm/units.json'))
         : const <String, List<UnitComposition>>{};
@@ -209,6 +216,7 @@ class Congelado {
       prazos: prazos,
       proventos: proventos,
       units: units,
+      capital: capital,
     );
   }
 
@@ -248,6 +256,8 @@ class Congelado {
       declaredSharesPerUnit:
           UnitCompositionCodec.at(units[t.value] ?? const [], hojeCongelado)
               ?.shares,
+      shareEvents: capital[t.value]?.shareEvents ?? const [],
+      shareIssues: capital[t.value]?.issues ?? const [],
     );
   }
 

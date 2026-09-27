@@ -1,56 +1,56 @@
 {
   "entrada": "docs/validacao/backtest_trimestral.json",
   "h12": {
-    "observacoes": 2938,
+    "observacoes": 2942,
     "semMedianaUsavel": 0,
     "coortes": 30,
     "leituras": {
       "potencial": {
         "coortes": 30,
-        "media": 0.07130252478128708,
-        "t": 2.340016161217545,
-        "tNeweyWest": 1.5836225051648773,
-        "tSobreposicao": 1.1352872647040106,
+        "media": 0.0703277277032372,
+        "t": 2.222461515141621,
+        "tNeweyWest": 1.4995786284525578,
+        "tSobreposicao": 1.0782542002283604,
         "criticoSobreposicao": 2.240627209430018,
         "positivas": 18,
         "passaR3": false
       },
       "bookToMarket": {
         "coortes": 30,
-        "media": 0.0860478406986572,
-        "t": 3.0740259442816975,
-        "tNeweyWest": 2.084579043707067,
-        "tSobreposicao": 1.491401026947132,
+        "media": 0.08811101461650148,
+        "t": 3.143348239142418,
+        "tNeweyWest": 2.1354081552441997,
+        "tSobreposicao": 1.525033580354149,
         "criticoSobreposicao": 2.240627209430018,
         "positivas": 25,
         "passaR3": false
       },
       "earningsYield": {
         "coortes": 30,
-        "media": 0.04470513744723777,
-        "t": 1.695351971334887,
-        "tNeweyWest": 1.1982592673243755,
-        "tSobreposicao": 0.8225206022704905,
+        "media": 0.05248277746460072,
+        "t": 1.95637174662946,
+        "tNeweyWest": 1.374130004558171,
+        "tSobreposicao": 0.9491575168521594,
         "criticoSobreposicao": 2.240627209430018,
         "positivas": 20,
         "passaR3": false
       },
       "multiplos": {
         "coortes": 30,
-        "media": 0.031072377465399818,
-        "t": 1.4857013830038994,
-        "tNeweyWest": 0.9793159123363068,
-        "tSobreposicao": 0.7208060727238093,
+        "media": 0.030995341013093078,
+        "t": 1.4872414878078337,
+        "tNeweyWest": 0.9706601844390815,
+        "tSobreposicao": 0.7215532732770338,
         "criticoSobreposicao": 2.240627209430018,
-        "positivas": 18,
+        "positivas": 20,
         "passaR3": false
       },
       "composto": {
         "coortes": 30,
-        "media": 0.08433108566401644,
-        "t": 2.815317564573395,
-        "tNeweyWest": 1.8719491415464324,
-        "tSobreposicao": 1.3658855140105783,
+        "media": 0.08756829560858896,
+        "t": 2.8311073396380437,
+        "tNeweyWest": 1.8834362142490917,
+        "tSobreposicao": 1.3735461151810033,
         "criticoSobreposicao": 2.240627209430018,
         "positivas": 20,
         "passaR3": false
@@ -60,328 +60,328 @@
       {
         "coorte": "2018-03-31",
         "n": 74,
-        "icPotencial": 0.23400222139948168,
-        "icBookToMarket": 0.33064534066870377,
-        "icEarningsYield": 0.39192861665576384,
-        "icMultiplos": 0.15526676303729692,
-        "icComposto": 0.4218141429100335
+        "icPotencial": 0.25669011477230663,
+        "icBookToMarket": 0.3328964421549372,
+        "icEarningsYield": 0.3926987303221068,
+        "icMultiplos": 0.1407530824023721,
+        "icComposto": 0.43478711588300634
       },
       {
         "coorte": "2018-06-30",
         "n": 73,
-        "icPotencial": 0.3499629766753055,
-        "icBookToMarket": 0.3859984730160322,
-        "icEarningsYield": 0.22639093527477996,
-        "icMultiplos": 0.17298272962426633,
-        "icComposto": 0.3769620585239443
+        "icPotencial": 0.38874490929285443,
+        "icBookToMarket": 0.382573683398928,
+        "icEarningsYield": 0.253727544290583,
+        "icMultiplos": 0.16557777910079816,
+        "icComposto": 0.4053745526348266
       },
       {
         "coorte": "2018-09-30",
         "n": 74,
-        "icPotencial": 0.3063013698630137,
-        "icBookToMarket": 0.23734310801561612,
-        "icEarningsYield": 0.12786848836932674,
-        "icMultiplos": 0.15191973056434485,
-        "icComposto": 0.24950943732218508
+        "icPotencial": 0.3368974453905961,
+        "icBookToMarket": 0.24492576565345436,
+        "icEarningsYield": 0.1454033841568277,
+        "icMultiplos": 0.14356695926016366,
+        "icComposto": 0.27788432347539654
       },
       {
         "coorte": "2018-12-31",
         "n": 80,
-        "icPotencial": -0.0005625879043600711,
-        "icBookToMarket": 0.08044070680629853,
-        "icEarningsYield": -0.10950860027557155,
-        "icMultiplos": 0.1094382747268555,
-        "icComposto": -0.010958807775667415
+        "icPotencial": -0.0312470698546648,
+        "icBookToMarket": 0.07660796440127743,
+        "icEarningsYield": -0.09376739828797734,
+        "icMultiplos": 0.10600404376455831,
+        "icComposto": -0.008157572419106453
       },
       {
         "coorte": "2019-03-31",
         "n": 90,
-        "icPotencial": 0.08658682141828208,
-        "icBookToMarket": -0.09776716813133544,
-        "icEarningsYield": -0.17626407099404606,
-        "icMultiplos": -0.057349824060875146,
-        "icComposto": -0.07565543071161046
+        "icPotencial": 0.02975676009383875,
+        "icBookToMarket": -0.09847508902544119,
+        "icEarningsYield": -0.16335686213407002,
+        "icMultiplos": -0.04941452473624703,
+        "icComposto": -0.0976169897518212
       },
       {
         "coorte": "2019-06-30",
-        "n": 92,
-        "icPotencial": -0.045481867361250226,
-        "icBookToMarket": -0.22212717756032568,
-        "icEarningsYield": -0.20111972939111078,
-        "icMultiplos": -0.11904734384373825,
-        "icComposto": -0.21546475964428274
+        "n": 93,
+        "icPotencial": -0.06755990570260512,
+        "icBookToMarket": -0.22219238075655776,
+        "icEarningsYield": -0.22131205637925266,
+        "icMultiplos": -0.14376890741562712,
+        "icComposto": -0.23098385604726804
       },
       {
         "coorte": "2019-09-30",
-        "n": 96,
-        "icPotencial": -0.19058600108518722,
-        "icBookToMarket": -0.18604556526298288,
-        "icEarningsYield": -0.14298988723566183,
-        "icMultiplos": -0.15587674738876667,
-        "icComposto": -0.1946690179055887
+        "n": 97,
+        "icPotencial": -0.1952582579423522,
+        "icBookToMarket": -0.19002189453572613,
+        "icEarningsYield": -0.14975705656690882,
+        "icMultiplos": -0.16629956674482277,
+        "icComposto": -0.2006364401430675
       },
       {
         "coorte": "2019-12-31",
-        "n": 100,
-        "icPotencial": -0.202928292829283,
-        "icBookToMarket": -0.22251892483897703,
-        "icEarningsYield": -0.09063496685097636,
-        "icMultiplos": -0.28545454006229787,
-        "icComposto": -0.20264026402640267
+        "n": 101,
+        "icPotencial": -0.18795573675014554,
+        "icBookToMarket": -0.2142443206917022,
+        "icEarningsYield": -0.08227890494526777,
+        "icMultiplos": -0.2744668645533903,
+        "icComposto": -0.1904484566103669
       },
       {
         "coorte": "2020-03-31",
         "n": 104,
-        "icPotencial": -0.13623172943561285,
-        "icBookToMarket": 0.005830670501181413,
-        "icEarningsYield": -0.10656843970915049,
-        "icMultiplos": -0.13925860332419152,
-        "icComposto": -0.09127280486503789
+        "icPotencial": -0.13042782460258184,
+        "icBookToMarket": 0.009927610066512929,
+        "icEarningsYield": -0.09875864866273731,
+        "icMultiplos": -0.1362819206712553,
+        "icComposto": -0.08352715245919123
       },
       {
         "coorte": "2020-06-30",
         "n": 110,
-        "icPotencial": 0.05057818452313866,
-        "icBookToMarket": 0.034087425390382606,
-        "icEarningsYield": 0.001816853912488328,
-        "icMultiplos": -0.007298973906497743,
-        "icComposto": 0.014854721276739593
+        "icPotencial": 0.06177670581340304,
+        "icBookToMarket": 0.04851405695356531,
+        "icEarningsYield": 0.023790417112160976,
+        "icMultiplos": -0.0059825437763573255,
+        "icComposto": 0.03055248743322135
       },
       {
         "coorte": "2020-09-30",
         "n": 117,
-        "icPotencial": 0.27554736321539347,
-        "icBookToMarket": 0.10665392831738252,
-        "icEarningsYield": 0.11683713614281704,
-        "icMultiplos": 0.03242666068032971,
-        "icComposto": 0.17366674972241294
+        "icPotencial": 0.2782897990378995,
+        "icBookToMarket": 0.11337529507191879,
+        "icEarningsYield": 0.13069199358890138,
+        "icMultiplos": 0.03391780001606298,
+        "icComposto": 0.18218636375504793
       },
       {
         "coorte": "2020-12-31",
         "n": 118,
-        "icPotencial": 0.22042663219133823,
-        "icBookToMarket": 0.1007103336301607,
-        "icEarningsYield": 0.11439840769622688,
-        "icMultiplos": 0.14636159452285755,
-        "icComposto": 0.14325547762501584
+        "icPotencial": 0.22767229447189563,
+        "icBookToMarket": 0.1049832916497171,
+        "icEarningsYield": 0.13044573892522765,
+        "icMultiplos": 0.15204426347878044,
+        "icComposto": 0.1515310324177118
       },
       {
         "coorte": "2021-03-31",
         "n": 113,
-        "icPotencial": 0.22533981248762136,
-        "icBookToMarket": 0.050807209590877776,
-        "icEarningsYield": 0.20994518799838593,
-        "icMultiplos": 0.057494448112784265,
-        "icComposto": 0.21223771789978108
+        "icPotencial": 0.23026315789473675,
+        "icBookToMarket": 0.052699431933830136,
+        "icEarningsYield": 0.23346280854650864,
+        "icMultiplos": 0.06433555966038138,
+        "icComposto": 0.22342453990723513
       },
       {
         "coorte": "2021-06-30",
         "n": 117,
-        "icPotencial": 0.3316773816481591,
-        "icBookToMarket": 0.14518833238843631,
-        "icEarningsYield": 0.26367837677625333,
-        "icMultiplos": 0.02489991889589046,
-        "icComposto": 0.29640134155293446
+        "icPotencial": 0.33134768990993413,
+        "icBookToMarket": 0.1280438802566887,
+        "icEarningsYield": 0.2515468785239371,
+        "icMultiplos": 0.012341307981201208,
+        "icComposto": 0.2810737905386247
       },
       {
         "coorte": "2021-09-30",
         "n": 108,
-        "icPotencial": 0.14298779616450885,
-        "icBookToMarket": 0.16563774253173666,
-        "icEarningsYield": 0.13527495146716492,
-        "icMultiplos": 0.08996417823117385,
-        "icComposto": 0.19648267058796132
+        "icPotencial": 0.1271637752817553,
+        "icBookToMarket": 0.15467207810898104,
+        "icEarningsYield": 0.13394116083364122,
+        "icMultiplos": 0.0811611600499174,
+        "icComposto": 0.18230665168595947
       },
       {
         "coorte": "2021-12-31",
-        "n": 104,
-        "icPotencial": 0.061005014403072697,
-        "icBookToMarket": 0.05140447417452036,
-        "icEarningsYield": 0.02551019048386847,
-        "icMultiplos": -0.07732009637666028,
-        "icComposto": 0.05122227705401967
+        "n": 105,
+        "icPotencial": 0.04156126891975947,
+        "icBookToMarket": 0.03977419992178465,
+        "icEarningsYield": 0.011772084976198777,
+        "icMultiplos": -0.08582580843281491,
+        "icComposto": 0.03490092915658424
       },
       {
         "coorte": "2022-03-31",
         "n": 108,
-        "icPotencial": -0.0028770947059552324,
-        "icBookToMarket": 0.035764302393002025,
-        "icEarningsYield": 0.054189491745177246,
-        "icMultiplos": -0.01928261801902935,
-        "icComposto": 0.015766935165207753
+        "icPotencial": -0.014233044671182363,
+        "icBookToMarket": 0.03304911161463084,
+        "icEarningsYield": 0.06023912733909216,
+        "icMultiplos": -0.020740246752681237,
+        "icComposto": 0.012632601830250997
       },
       {
         "coorte": "2022-06-30",
         "n": 102,
-        "icPotencial": -0.16902929584791723,
-        "icBookToMarket": 0.08769186840011321,
-        "icEarningsYield": -0.10498370058785803,
-        "icMultiplos": -0.08588238955770704,
-        "icComposto": -0.08443855120601682
+        "icPotencial": -0.1911835386851078,
+        "icBookToMarket": 0.08584846182941189,
+        "icEarningsYield": -0.10153438154452116,
+        "icMultiplos": -0.08545263833263557,
+        "icComposto": -0.09450920410214735
       },
       {
         "coorte": "2022-09-30",
         "n": 100,
-        "icPotencial": -0.14009000900090018,
-        "icBookToMarket": 0.005976759050578227,
-        "icEarningsYield": 0.058711456376362915,
-        "icMultiplos": -0.020678626193064827,
-        "icComposto": -0.030099190514736418
+        "icPotencial": -0.1607800780078009,
+        "icBookToMarket": 0.008755111902403271,
+        "icEarningsYield": 0.07181112003842345,
+        "icMultiplos": -0.015968027945370143,
+        "icComposto": -0.03194738642353609
       },
       {
         "coorte": "2022-12-31",
         "n": 100,
-        "icPotencial": -0.08234023402340232,
-        "icBookToMarket": 0.27904995097418156,
-        "icEarningsYield": 0.056227646996432054,
-        "icMultiplos": 0.12842946649067635,
-        "icComposto": 0.10002460260967723
+        "icPotencial": -0.07215121512151212,
+        "icBookToMarket": 0.2783598571209703,
+        "icEarningsYield": 0.055609562936599286,
+        "icMultiplos": 0.12950361257523998,
+        "icComposto": 0.10117672473464324
       },
       {
         "coorte": "2023-03-31",
         "n": 96,
-        "icPotencial": -0.052699403147042925,
-        "icBookToMarket": 0.2769742088944913,
-        "icEarningsYield": 0.03094975670835223,
-        "icMultiplos": 0.15788242097311295,
-        "icComposto": 0.11544435326061288
+        "icPotencial": -0.04746337493217583,
+        "icBookToMarket": 0.2740644027082359,
+        "icEarningsYield": 0.03060383569320303,
+        "icMultiplos": 0.1609550135194385,
+        "icComposto": 0.11735700866390837
       },
       {
         "coorte": "2023-06-30",
         "n": 96,
-        "icPotencial": 0.15263157894736834,
-        "icBookToMarket": 0.11768575989403982,
-        "icEarningsYield": 0.14235474067876827,
-        "icMultiplos": 0.12620476827551158,
-        "icComposto": 0.18607632283179035
+        "icPotencial": 0.14782962561041782,
+        "icBookToMarket": 0.10736256661649221,
+        "icEarningsYield": 0.16508347786261413,
+        "icMultiplos": 0.11967985898970282,
+        "icComposto": 0.18912163972449944
       },
       {
         "coorte": "2023-09-30",
         "n": 97,
-        "icPotencial": 0.19393014937933928,
-        "icBookToMarket": 0.1463719328281509,
-        "icEarningsYield": 0.038332062186152184,
-        "icMultiplos": 0.0708387029148548,
-        "icComposto": 0.16006995581737862
+        "icPotencial": 0.19586313907006092,
+        "icBookToMarket": 0.1448005155275522,
+        "icEarningsYield": 0.05318491441231306,
+        "icMultiplos": 0.069951082263889,
+        "icComposto": 0.16932726698926998
       },
       {
         "coorte": "2023-12-31",
         "n": 98,
-        "icPotencial": 0.3256444095913902,
-        "icBookToMarket": -0.03541064296637662,
-        "icEarningsYield": 0.21560070265592224,
-        "icMultiplos": 0.12382886346650473,
-        "icComposto": 0.20137202022327202
+        "icPotencial": 0.31407914618518445,
+        "icBookToMarket": -0.030998657922672517,
+        "icEarningsYield": 0.22456493816379505,
+        "icMultiplos": 0.12905693822927544,
+        "icComposto": 0.20679124508285027
       },
       {
         "coorte": "2024-03-31",
         "n": 102,
-        "icPotencial": 0.15988035125614225,
-        "icBookToMarket": 0.021317862338430138,
-        "icEarningsYield": 0.10989160124271914,
-        "icMultiplos": 0.18894298466214987,
-        "icComposto": 0.1727174801234876
+        "icPotencial": 0.1666204884337664,
+        "icBookToMarket": 0.03038219478630903,
+        "icEarningsYield": 0.1200981639803495,
+        "icMultiplos": 0.17953937589058228,
+        "icComposto": 0.1792027141674112
       },
       {
         "coorte": "2024-06-30",
         "n": 100,
-        "icPotencial": -0.06520252025202522,
-        "icBookToMarket": 0.003510435294987717,
-        "icEarningsYield": -0.11099576350664561,
-        "icMultiplos": -0.0047825930429148894,
-        "icComposto": -0.055463712762664215
+        "icPotencial": -0.056297629762976316,
+        "icBookToMarket": 0.018278266510312082,
+        "icEarningsYield": -0.0869987878747552,
+        "icMultiplos": 0.015541927203449844,
+        "icComposto": -0.04319231923192321
       },
       {
         "coorte": "2024-09-30",
         "n": 95,
-        "icPotencial": -0.05284154535274353,
-        "icBookToMarket": 0.038683622984933635,
-        "icEarningsYield": -0.10350861232570722,
-        "icMultiplos": -0.005368253813903404,
-        "icComposto": -0.03327279280812927
+        "icPotencial": -0.047144456886898084,
+        "icBookToMarket": 0.05137985821103638,
+        "icEarningsYield": -0.08854469230729066,
+        "icMultiplos": 0.015348866510938936,
+        "icComposto": -0.025713885778275446
       },
       {
         "coorte": "2024-12-31",
         "n": 90,
-        "icPotencial": 0.002642301518706031,
-        "icBookToMarket": 0.21266525088389762,
-        "icEarningsYield": -0.05823908070460913,
-        "icMultiplos": 0.03260565352239668,
-        "icComposto": 0.08821665226159603
+        "icPotencial": 0.001242951804749578,
+        "icBookToMarket": 0.21801583780375575,
+        "icEarningsYield": -0.06854513427947423,
+        "icMultiplos": 0.026415436039730098,
+        "icComposto": 0.0851216199530806
       },
       {
         "coorte": "2025-03-31",
         "n": 93,
-        "icPotencial": 0.05452707516627702,
-        "icBookToMarket": 0.3256752573463643,
-        "icEarningsYield": 0.17248389494314254,
-        "icMultiplos": 0.11878410792753963,
-        "icComposto": 0.2526782250604279
+        "icPotencial": 0.06761237956382103,
+        "icBookToMarket": 0.35157768309215104,
+        "icEarningsYield": 0.18340588552258713,
+        "icMultiplos": 0.14022522877817067,
+        "icComposto": 0.26692727761033685
       },
       {
         "coorte": "2025-06-30",
         "n": 91,
-        "icPotencial": 0.1062748845357541,
-        "icBookToMarket": 0.09918974340521462,
-        "icEarningsYield": 0.05357647668836576,
-        "icMultiplos": 0.021500666923095643,
-        "icComposto": 0.09509476031215161
+        "icPotencial": 0.10812231247013857,
+        "icBookToMarket": 0.10839521413228821,
+        "icEarningsYield": 0.05725547969520656,
+        "icMultiplos": 0.028141984039340744,
+        "icComposto": 0.10210224558050651
       }
     ]
   },
   "h36": {
-    "observacoes": 2165,
+    "observacoes": 2169,
     "semMedianaUsavel": 0,
     "coortes": 22,
     "leituras": {
       "potencial": {
         "coortes": 22,
-        "media": 0.10501198577762673,
-        "t": 2.6827427756389075,
-        "tNeweyWest": 1.6065522830790417,
-        "tSobreposicao": 0.6511856340228992,
+        "media": 0.11094332435186732,
+        "t": 2.833744871379121,
+        "tNeweyWest": 1.7050630119019685,
+        "tSobreposicao": 0.6878385686039865,
         "criticoSobreposicao": 2.7049530339490526,
-        "positivas": 13,
+        "positivas": 14,
         "passaR3": false
       },
       "bookToMarket": {
         "coortes": 22,
-        "media": 0.15808873315248345,
-        "t": 8.289407606943728,
-        "tNeweyWest": 4.228492140440422,
-        "tSobreposicao": 2.0120986615708434,
+        "media": 0.1599360279610402,
+        "t": 8.345418915416264,
+        "tNeweyWest": 4.412904011016335,
+        "tSobreposicao": 2.0256943591350476,
         "criticoSobreposicao": 2.7049530339490526,
-        "positivas": 20,
+        "positivas": 21,
         "passaR3": false
       },
       "earningsYield": {
         "coortes": 22,
-        "media": 0.1246617096941455,
-        "t": 4.349131416302347,
-        "tNeweyWest": 2.8731771397704864,
-        "tSobreposicao": 1.0556703104341703,
+        "media": 0.13257610125048078,
+        "t": 4.562821366076461,
+        "tNeweyWest": 2.9864291885018868,
+        "tSobreposicao": 1.1075395491444817,
         "criticoSobreposicao": 2.7049530339490526,
-        "positivas": 18,
+        "positivas": 19,
         "passaR3": false
       },
       "multiplos": {
         "coortes": 22,
-        "media": 0.07758865716275304,
-        "t": 4.723736334422556,
-        "tNeweyWest": 3.5245080767751054,
-        "tSobreposicao": 1.146598648152314,
+        "media": 0.07533858969587236,
+        "t": 4.295947622347542,
+        "tNeweyWest": 3.2129248803359425,
+        "tSobreposicao": 1.042760939136747,
         "criticoSobreposicao": 2.7049530339490526,
         "positivas": 18,
         "passaR3": false
       },
       "composto": {
         "coortes": 22,
-        "media": 0.1515004069185774,
-        "t": 5.098836304016476,
-        "tNeweyWest": 3.0219276317616726,
-        "tSobreposicao": 1.2376471503568593,
+        "media": 0.15765219796015836,
+        "t": 5.348990559002242,
+        "tNeweyWest": 3.2090991469748067,
+        "tSobreposicao": 1.29836741717321,
         "criticoSobreposicao": 2.7049530339490526,
-        "positivas": 18,
+        "positivas": 19,
         "passaR3": false
       }
     },
@@ -389,200 +389,200 @@
       {
         "coorte": "2018-03-31",
         "n": 74,
-        "icPotencial": -0.14692336171788226,
-        "icBookToMarket": 0.07132437340591588,
-        "icEarningsYield": -0.0053019363952072135,
-        "icMultiplos": 0.018778925556208755,
-        "icComposto": -0.011951129211403165
+        "icPotencial": -0.1415623843021103,
+        "icBookToMarket": 0.0815876189977555,
+        "icEarningsYield": 0.012573586590868486,
+        "icMultiplos": 0.011655374142536479,
+        "icComposto": 0.006205109218807846
       },
       {
         "coorte": "2018-06-30",
         "n": 73,
-        "icPotencial": -0.09721708009379254,
-        "icBookToMarket": -0.0727227849325597,
-        "icEarningsYield": -0.12693319355644903,
-        "icMultiplos": -0.03612998776242143,
-        "icComposto": -0.12185395728763446
+        "icPotencial": -0.07022090583734425,
+        "icBookToMarket": -0.07755142975307118,
+        "icEarningsYield": -0.11602631851459072,
+        "icMultiplos": -0.05805172670793849,
+        "icComposto": -0.10604097247932862
       },
       {
         "coorte": "2018-09-30",
         "n": 74,
-        "icPotencial": -0.028774527952610186,
-        "icBookToMarket": 0.028597874802081296,
-        "icEarningsYield": -0.022200007420155286,
-        "icMultiplos": -0.010026287540657217,
-        "icComposto": -0.03194396108166864
+        "icPotencial": -0.031173639392817424,
+        "icBookToMarket": 0.015343033814063285,
+        "icEarningsYield": -0.022007479003569606,
+        "icMultiplos": -0.04531822728864255,
+        "icComposto": -0.03185510444444557
       },
       {
         "coorte": "2018-12-31",
         "n": 80,
-        "icPotencial": -0.19868729488982653,
-        "icBookToMarket": 0.12629296456911945,
-        "icEarningsYield": -0.019468456069541316,
-        "icMultiplos": 0.06271866852987082,
-        "icComposto": -0.05303594137421923
+        "icPotencial": -0.21263478668541955,
+        "icBookToMarket": 0.13821314507647853,
+        "icEarningsYield": -0.003961672577667065,
+        "icMultiplos": 0.0567292759642263,
+        "icComposto": -0.042288105299045996
       },
       {
         "coorte": "2019-03-31",
         "n": 90,
-        "icPotencial": -0.007663497551137995,
-        "icBookToMarket": -0.0020743728524961202,
-        "icEarningsYield": 0.16170230283505538,
-        "icMultiplos": -0.048764225310266134,
-        "icComposto": 0.0686092933283945
+        "icPotencial": -0.03178170144462281,
+        "icBookToMarket": 0.004906056428919448,
+        "icEarningsYield": 0.15918342151416723,
+        "icMultiplos": -0.05742390880560713,
+        "icComposto": 0.056492571099312675
       },
       {
         "coorte": "2019-06-30",
-        "n": 92,
-        "icPotencial": -0.019111323459149527,
-        "icBookToMarket": 0.09205207937684187,
-        "icEarningsYield": 0.2908753232380826,
-        "icMultiplos": 0.0424079190297832,
-        "icComposto": 0.15221244393754912
+        "n": 93,
+        "icPotencial": 0.0004476142162274868,
+        "icBookToMarket": 0.0861598833347038,
+        "icEarningsYield": 0.2996609259593946,
+        "icMultiplos": 0.051185640277028564,
+        "icComposto": 0.16190206200948945
       },
       {
         "coorte": "2019-09-30",
-        "n": 96,
-        "icPotencial": 0.02860824742268045,
-        "icBookToMarket": 0.1752341678503253,
-        "icEarningsYield": 0.3154839016639585,
-        "icMultiplos": 0.08677604673622315,
-        "icComposto": 0.21580303852414554
+        "n": 97,
+        "icPotencial": 0.05538607195455502,
+        "icBookToMarket": 0.18843733771820725,
+        "icEarningsYield": 0.3276153406776985,
+        "icMultiplos": 0.1000046024666412,
+        "icComposto": 0.2319982116557963
       },
       {
         "coorte": "2019-12-31",
-        "n": 100,
-        "icPotencial": 0.05864986498649873,
-        "icBookToMarket": 0.12178473597991037,
-        "icEarningsYield": 0.2646260198067538,
-        "icMultiplos": 0.027681349449387816,
-        "icComposto": 0.1682328232823283
+        "n": 101,
+        "icPotencial": 0.08245777518928366,
+        "icBookToMarket": 0.143398380311279,
+        "icEarningsYield": 0.2877461102018089,
+        "icMultiplos": 0.058842201221918314,
+        "icComposto": 0.19442050087361679
       },
       {
         "coorte": "2020-03-31",
         "n": 104,
-        "icPotencial": 0.1258508481809452,
-        "icBookToMarket": 0.1387198130948966,
-        "icEarningsYield": 0.1636001856635246,
-        "icMultiplos": 0.04646398908077796,
-        "icComposto": 0.17646431238664242
+        "icPotencial": 0.14347594153419396,
+        "icBookToMarket": 0.14812997115901738,
+        "icEarningsYield": 0.18649610313019474,
+        "icMultiplos": 0.04770160624113842,
+        "icComposto": 0.1954336925210712
       },
       {
         "coorte": "2020-06-30",
         "n": 109,
-        "icPotencial": 0.2270688536743581,
-        "icBookToMarket": 0.19303854656502964,
-        "icEarningsYield": 0.23200674647890357,
-        "icMultiplos": 0.1447754347573115,
-        "icComposto": 0.2495134834584375
+        "icPotencial": 0.24134927254193314,
+        "icBookToMarket": 0.1988165900005352,
+        "icEarningsYield": 0.24626419607878353,
+        "icMultiplos": 0.14177752449045353,
+        "icComposto": 0.26115281252895917
       },
       {
         "coorte": "2020-09-30",
         "n": 116,
-        "icPotencial": 0.4007842232729792,
-        "icBookToMarket": 0.2478241147189375,
-        "icEarningsYield": 0.3052505728849421,
-        "icMultiplos": 0.1813635036080868,
-        "icComposto": 0.3526347656600563
+        "icPotencial": 0.4060892630607774,
+        "icBookToMarket": 0.2536444158076595,
+        "icEarningsYield": 0.31505358991020044,
+        "icMultiplos": 0.18278590215684964,
+        "icComposto": 0.360888410507676
       },
       {
         "coorte": "2020-12-31",
         "n": 117,
-        "icPotencial": 0.4007627867943474,
-        "icBookToMarket": 0.2871882868084151,
-        "icEarningsYield": 0.3524082844179449,
-        "icMultiplos": 0.2548180674066266,
-        "icComposto": 0.38591239549663
+        "icPotencial": 0.40945465989299984,
+        "icBookToMarket": 0.29201384729331153,
+        "icEarningsYield": 0.36140001202955274,
+        "icMultiplos": 0.25671382331140724,
+        "icComposto": 0.39259241220604957
       },
       {
         "coorte": "2021-03-31",
         "n": 112,
-        "icPotencial": 0.34402301231630245,
-        "icBookToMarket": 0.23779097090625487,
-        "icEarningsYield": 0.16998248841698343,
-        "icMultiplos": 0.029581856243429978,
-        "icComposto": 0.32302938282779503
+        "icPotencial": 0.3333447227252537,
+        "icBookToMarket": 0.23261008848880185,
+        "icEarningsYield": 0.17739290143782538,
+        "icMultiplos": 0.022265408113918674,
+        "icComposto": 0.31884800767192933
       },
       {
         "coorte": "2021-06-30",
         "n": 116,
-        "icPotencial": 0.3689386076192676,
-        "icBookToMarket": 0.21401839526815306,
-        "icEarningsYield": 0.2296571808468357,
-        "icMultiplos": 0.08350296498391538,
-        "icComposto": 0.3246084975128417
+        "icPotencial": 0.38573790028062915,
+        "icBookToMarket": 0.21614431670989626,
+        "icEarningsYield": 0.23392824544317717,
+        "icMultiplos": 0.07667156823531185,
+        "icComposto": 0.32905645316761833
       },
       {
         "coorte": "2021-09-30",
         "n": 107,
-        "icPotencial": 0.324154078253884,
-        "icBookToMarket": 0.20995836403875637,
-        "icEarningsYield": 0.14798432531495395,
-        "icMultiplos": 0.08548126381355334,
-        "icComposto": 0.286567983006982
+        "icPotencial": 0.31957914535943127,
+        "icBookToMarket": 0.20469752641708666,
+        "icEarningsYield": 0.14317413672605311,
+        "icMultiplos": 0.07253979919860826,
+        "icComposto": 0.2774768067376505
       },
       {
         "coorte": "2021-12-31",
-        "n": 103,
-        "icPotencial": 0.2729539164433511,
-        "icBookToMarket": 0.18882637701949107,
-        "icEarningsYield": 0.07171393507336148,
-        "icMultiplos": -0.013536629907024702,
-        "icComposto": 0.212359590687854
+        "n": 104,
+        "icPotencial": 0.2592553077989972,
+        "icBookToMarket": 0.178982577150589,
+        "icEarningsYield": 0.06534403110242819,
+        "icMultiplos": -0.021749335848199852,
+        "icComposto": 0.20515583534091747
       },
       {
         "coorte": "2022-03-31",
         "n": 108,
-        "icPotencial": 0.0887993369344651,
-        "icBookToMarket": 0.24509122092764224,
-        "icEarningsYield": 0.12495593771619981,
-        "icMultiplos": 0.12786166819831637,
-        "icComposto": 0.17405076858052113
+        "icPotencial": 0.09640172625682362,
+        "icBookToMarket": 0.24028962039325955,
+        "icEarningsYield": 0.13533082458513407,
+        "icMultiplos": 0.13139617970279255,
+        "icComposto": 0.18006221032628925
       },
       {
         "coorte": "2022-06-30",
         "n": 102,
-        "icPotencial": -0.029431555377125374,
-        "icBookToMarket": 0.20100482628442265,
-        "icEarningsYield": 0.00434840384315749,
-        "icMultiplos": 0.09181408738797,
-        "icComposto": 0.04076889802420021
+        "icPotencial": -0.0264459912581778,
+        "icBookToMarket": 0.19976080958026843,
+        "icEarningsYield": 0.01134882511471673,
+        "icMultiplos": 0.09516162324642152,
+        "icComposto": 0.04416724860846434
       },
       {
         "coorte": "2022-09-30",
         "n": 100,
-        "icPotencial": -0.04122412241224124,
-        "icBookToMarket": 0.16047838081286506,
-        "icEarningsYield": 0.018320326688167965,
-        "icMultiplos": 0.08372863356698597,
-        "icComposto": 0.0654249350442924
+        "icPotencial": -0.037623762376237636,
+        "icBookToMarket": 0.16412084340694236,
+        "icEarningsYield": 0.02701543096958145,
+        "icMultiplos": 0.08914732174235965,
+        "icComposto": 0.06932534848818774
       },
       {
         "coorte": "2022-12-31",
         "n": 100,
-        "icPotencial": -0.03187518751875189,
-        "icBookToMarket": 0.22784498706590461,
-        "icEarningsYield": 0.012091644471484543,
-        "icMultiplos": 0.10785266803275051,
-        "icComposto": 0.05062136586569306
+        "icPotencial": -0.027638763876387633,
+        "icBookToMarket": 0.22901514620830626,
+        "icEarningsYield": 0.00932526824252462,
+        "icMultiplos": 0.10478625099804648,
+        "icComposto": 0.04957125455387512
       },
       {
         "coorte": "2023-03-31",
         "n": 96,
-        "icPotencial": 0.1783369506239827,
-        "icBookToMarket": 0.22197955025076557,
-        "icEarningsYield": 0.019907415283588394,
-        "icMultiplos": 0.19712749928004394,
-        "icComposto": 0.18666702840247845
+        "icPotencial": 0.18170103092783504,
+        "icBookToMarket": 0.22064334554518913,
+        "icEarningsYield": 0.02615434185128341,
+        "icMultiplos": 0.19980669145619984,
+        "icComposto": 0.19118415073792097
       },
       {
         "coorte": "2023-06-30",
         "n": 96,
-        "icPotencial": 0.09224091155724362,
-        "icBookToMarket": 0.16369925739396302,
-        "icEarningsYield": 0.03154621206865599,
-        "icMultiplos": 0.14267304243969395,
-        "icComposto": 0.11831293513678705
+        "icPotencial": 0.10515463917525776,
+        "icBookToMarket": 0.15922949105368459,
+        "icEarningsYield": 0.03366240604101048,
+        "icMultiplos": 0.14082137899372127,
+        "icComposto": 0.1225994390926716
       }
     ]
   }

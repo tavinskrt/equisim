@@ -76,9 +76,11 @@ import 'package:equisim/data/repositories/b3_registry_repository.dart';
 import 'b3/proventos.dart';
 import 'coortes/base_da_data.dart';
 import 'coortes/deslistadas.dart';
+import 'coortes/eventos_de_acoes.dart';
 import 'curva_ligar.dart' show lerTesouro;
 import 'cvm/codigos_fca.dart';
 import 'cvm/documentos.dart';
+import 'cvm/emissoes_fre.dart';
 import 'cvm/outorgas_por_data.dart';
 import 'validation/context.dart';
 
@@ -579,6 +581,38 @@ Future<void> main(List<String> args) async {
     List<Pregao> brutosDe(String codigo, Set<String> daCompanhia) =>
         encadeados[codigo] ??= encadear(codigo, daCompanhia, bruto);
 
+    // **Os eventos de ações e as emissões por valor** (itens B28, B29 e B30).
+    // Os eventos corrigem a série da fonte onde ela não ajustou e a contagem
+    // do FRE onde ela não absorveu; as emissões entram no patrimônio da ponte.
+    final emissoesFre = app ? EmissoesFre.ler() : null;
+    final eventosDeAcoes = app ? EventosDeAcoes.ler(emissoes: emissoesFre) : null;
+    if (app && emissoesFre == null) {
+      stderr.writeln('sem data/cvm/fre: as emissões por valor ficam de fora — '
+          'rode python tool/cvm_baixar.py --docs FRE --destino data/cvm/fre');
+    }
+    final eventosDo = <String, List<ShareEvent>>{};
+    List<ShareEvent> eventosDoPapel(String ticker) =>
+        eventosDo[ticker] ??= eventosDeAcoes!.doPapel(
+          cnpj: ponteListadas[ticker],
+          ticker: ticker,
+          brutos: brutosDe(ticker, codigosDoTicker[ticker] ?? {ticker}),
+        );
+    final serieCompleta = <String, PriceSeries>{};
+    final semAjusteDo = <String, List<ShareEvent>>{};
+    // As emissões por valor conhecidas na data: o quadro de aumentos do FRE,
+    // até 2023, e a variação do capital integralizado que nenhum evento de
+    // ações explica no preço, depois (item B28).
+    List<ShareIssue> emissoesDe(String? cnpj, DateTime t,
+        {required List<Pregao> brutos, required List<ShareEvent> eventos}) {
+      if (cnpj == null || emissoesFre == null) return const [];
+      return [
+        ...emissoesFre.conhecidas(cnpj, t),
+        ...emissoesSemEvento(
+            emissoesFre.pelaVariacaoDoCapital(cnpj, t), brutos, eventos),
+      ];
+    }
+    final eventosDeclaradosDo = <String, List<ShareEvent>>{};
+
     final linhas = <Map<String, dynamic>>[];
     final tickersListados = <String>{};
     final semBase = <String, int>{};
@@ -637,6 +671,7 @@ Future<void> main(List<String> args) async {
         bool Function(DateTime de, DateTime ate)? janelaInvalida,
         Map<String, Object?> extras = const {},
         Future<Map<String, Object?>> Function()? contrafactual,
+        List<ShareIssue> emissoes = const [],
       }) async {
           final prep = await PrepareValuationInputs.call(
             ticker: ticker,
@@ -655,6 +690,8 @@ Future<void> main(List<String> args) async {
             dividends: proventosDoBeta,
             betaPrior: priorDaCoorte,
             declaredSharesPerUnit: acoesNaUnit,
+            // As emissões por valor do FRE conhecidas na data (item B28).
+            shareIssues: emissoes,
           );
           if (prep.isErr) return;
           final insumos = prep.unwrap();
@@ -894,6 +931,9 @@ Future<void> main(List<String> args) async {
               'fimDoExercicio':
                   pub.isEmpty ? null : _dia(pub.last.fiscalPeriodEnd),
               'acoesNaData': contagemOficial?.total,
+              // O capital emitido depois do balanço que entrou na ponte (B28).
+              'capitalPosterior':
+                  r.isOk ? r.unwrap().diagnostics?.postStatementCapital : null,
               'valorDeMercado': ultimo?.marketCap,
               'razaoDeUnidade': razaoDeUnidade,
               'origemDoDivisor': divisor?.source.name,
@@ -918,7 +958,23 @@ Future<void> main(List<String> args) async {
           DateRange(DateTime(2010, 1, 1), fimDosDados),
         );
         if (serieRes.isErr) continue;
-        final serie = serieRes.unwrap();
+        // **O ajuste que a fonte deixou de fazer** (item B29): a bonificação
+        // que ela não ajustou é uma queda que não aconteceu, e entrava no
+        // retorno de toda janela que a atravessa, no beta e na volatilidade. O
+        // fator entre o bruto e a fonte diz, sem ruído, quais ficaram assim.
+        final serieDaFonte = serieRes.unwrap();
+        final serie = !app
+            ? serieDaFonte
+            : serieCompleta[ticker.value] ??= () {
+                final sem = naoAjustadosPelaFonte(
+                  serieDaFonte,
+                  brutosDe(ticker.value,
+                      codigosDoTicker[ticker.value] ?? {ticker.value}),
+                  eventosDoPapel(ticker.value),
+                );
+                semAjusteDo[ticker.value] = sem;
+                return CorporateEvents.applyToSeries(serieDaFonte, sem);
+              }();
         final p0 = _precoEm(serie, t);
         if (p0 == null || p0 <= 0) continue;
 
@@ -961,7 +1017,14 @@ Future<void> main(List<String> args) async {
         final serieNaData = serieNaBaseDaData(serie, brutos, base.fator);
         final cnpj = ponteListadas[ticker.value];
         final contagem = cnpj == null ? null : contagemListadas![cnpj];
-        final acoes = contagem?.acoesEm(t);
+        // A contagem do FRE com o evento que ele ainda não absorveu (B30): o
+        // quadro de eventos parou em 2022, e o desdobramento de 2024 do BB só
+        // entrou no formulário em 2025.
+        final comEventos = contagem == null
+            ? null
+            : acoesComEventos(
+                contagem.contagem, t, eventosDoPapel(ticker.value));
+        final acoes = comEventos?.acoes;
         final valor = (cnpj == null || acoes == null)
             ? null
             : valorPorCnpj.putIfAbsent(
@@ -1056,9 +1119,25 @@ Future<void> main(List<String> args) async {
               : UnitCompositionCodec.at(
                   fca?.unitsPorCnpj[cnpj] ?? const [], t)?.shares,
           contar: () => avaliados++,
+          emissoes: emissoesDe(cnpj, t,
+              brutos: brutos,
+              eventos: eventosDeclaradosDo[ticker.value] ??=
+                  eventosDeAcoes!.doPapel(
+                      cnpj: cnpj,
+                      ticker: ticker.value,
+                      brutos: brutos,
+                      comContagem: false)),
           extras: {
             if (deslistadas != null) 'deslistada': false,
             'fatorDeBase': base.fator,
+            // Os eventos que a fonte não ajustou e foram ajustados (B29), e se
+            // a contagem da data recebeu evento que o FRE não tinha (B30).
+            'eventosSemAjusteNaFonte': semAjusteDo[ticker.value]?.length ?? 0,
+            if (comEventos != null && comEventos.aplicados.isNotEmpty)
+              'contagemComEvento': [
+                for (final e in comEventos.aplicados)
+                  '${_dia(e.exDate)}×${e.factor}',
+              ],
             // O pregão da data veio de um código anterior da companhia.
             if (!(bruto[ticker.value]?.contains(base.pregao) ?? false))
               'pregaoDeOutroCodigo': true,
@@ -1124,6 +1203,8 @@ Future<void> main(List<String> args) async {
               fca?.unitsPorCnpj[papel.cnpj] ?? const [], t)?.shares,
           contar: () => avaliadasDeslistadas++,
           janelaInvalida: papel.janelaSuspeita,
+          emissoes: emissoesDe(papel.cnpj, t,
+              brutos: papel.pregoes, eventos: papel.eventos),
           extras: {
             'deslistada': true,
             'cnpj': papel.cnpj,

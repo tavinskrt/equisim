@@ -104,6 +104,7 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
 ) async {
   final settings = ref.watch(valuationSettingsProvider);
   final anchors = await ref.watch(marketAnchorsProvider.future);
+  final capital = await ref.watch(capitalEventsProvider(ticker).future);
 
   final inputs = await PrepareValuationInputs.call(
     ticker: ticker,
@@ -152,6 +153,11 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     // Ela não entra no preço justo: fica ao lado dele, e a divergência é
     // declarada em vez de reconciliada.
     peerMultiples: await ref.watch(peerMultiplesProvider(ticker).future),
+    // **Os eventos de capital** (itens B28 e B29): os eventos de ações
+    // completam o ajuste que a fonte de preços não fez, e as emissões com
+    // valor declarado entram no patrimônio da ponte.
+    shareEvents: capital.shareEvents,
+    shareIssues: capital.issues,
   );
   // A falha do preparo já foi registrada no painel de logs pelo próprio
   // preparo (item D4); aqui só não há o que mostrar.
@@ -172,9 +178,13 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     (await ref.watch(betaPriorReadingProvider.future)).note,
   ].nonNulls.toList();
 
+  final preparados = inputs.unwrap();
   final result = await ValuationRunner.run(
     ValuationRequest(
-      inputs: inputs.unwrap().withContextNotes(notas),
+      // As do preparo primeiro — o ajuste que ele completou na série —, e as
+      // da camada de dados depois.
+      inputs: preparados
+          .withContextNotes([...preparados.contextNotes, ...notas]),
       monteCarlo: settings.monteCarlo,
       samples: settings.samples,
     ),

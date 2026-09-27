@@ -150,6 +150,13 @@ abstract final class TotalReturn {
   ///   rendimento, e é contada em `approximated`. Sem nenhum dos dois, o
   ///   provento fica de fora e é contado em `withoutPrice`.
   /// - [net]: `true` desconta o imposto retido do juro sobre capital próprio.
+  ///
+  /// **Proventos da mesma data ex entram juntos** (lente `nucleo`,
+  /// 25/09/2026): o retorno do dia é `(P_ex + D_1 + D_2)/P_com`, e o fator é
+  /// `1 + (D_1 + D_2)/P_ex`. Multiplicar `(1 + D_1/P_ex)(1 + D_2/P_ex)`
+  /// inventava o termo cruzado `D_1·D_2/P_ex²` — um provento rendendo sobre o
+  /// outro no mesmo dia —, e dividendo e juro sobre capital próprio saem
+  /// juntos com frequência. Os rendimentos do dia somam, como no índice.
   static ({double factor, int applied, int approximated, int withoutPrice})
       factor({
     required Iterable<CashDividend> dividends,
@@ -160,24 +167,48 @@ abstract final class TotalReturn {
   }) {
     final d = DateTime.utc(de.year, de.month, de.day);
     final a = DateTime.utc(ate.year, ate.month, ate.day);
+    final porDia = <DateTime, List<CashDividend>>{};
+    for (final x in dividends) {
+      if (!x.exDate.isAfter(d) || x.exDate.isAfter(a)) continue;
+      final dia = DateTime.utc(x.exDate.year, x.exDate.month, x.exDate.day);
+      (porDia[dia] ??= []).add(x);
+    }
     var fator = 1.0;
     var aplicados = 0;
     var aproximados = 0;
     var semPreco = 0;
-    for (final x in dividends) {
-      if (!x.exDate.isAfter(d) || x.exDate.isAfter(a)) continue;
-      var preco = closeOnExDate(x.exDate);
-      if (preco == null || !(preco > 0)) {
-        final com = x.closeWithRights;
-        preco = com != null && com > x.amount ? com - x.amount : null;
-        if (preco == null) {
-          semPreco++;
+    for (final grupo in porDia.values) {
+      final preco = closeOnExDate(grupo.first.exDate);
+      // O rendimento do dia sobre o preço ex; sem o pregão, sobre o preço com
+      // direito, e o preço ex sai dele menos os proventos do dia: `D/P_ex` é
+      // `(D/P_com) / (1 − ΣD/P_com)`.
+      var sobreEx = 0.0;
+      if (preco != null && preco > 0) {
+        for (final x in grupo) {
+          sobreEx += (net ? x.netAmount : x.amount) / preco;
+        }
+      } else {
+        double? com;
+        for (final x in grupo) {
+          com ??= x.closeWithRights;
+        }
+        var queda = 0.0;
+        var pago = 0.0;
+        if (com != null && com > 0) {
+          for (final x in grupo) {
+            queda += x.amount / com;
+            pago += (net ? x.netAmount : x.amount) / com;
+          }
+        }
+        if (com == null || !(com > 0) || !(queda < 1)) {
+          semPreco += grupo.length;
           continue;
         }
-        aproximados++;
+        sobreEx = pago / (1 - queda);
+        aproximados += grupo.length;
       }
-      fator *= 1 + (net ? x.netAmount : x.amount) / preco;
-      aplicados++;
+      fator *= 1 + sobreEx;
+      aplicados += grupo.length;
     }
     return (
       factor: fator,

@@ -10,6 +10,11 @@
 //   dart run tool/backtest_valuation.dart --montagem aplicativo \
 //       --com-deslistadas --trimestral --c7 [--fim-dos-dados AAAA-MM-DD]
 //   dart run tool/c7_selar.dart [--hoje AAAA-MM-DD]
+//   dart run tool/c7_preregistrado.dart [--fim-dos-dados AAAA-MM-DD]
+//
+// Com o motor igual ao pré-registrado, este programa sela a série
+// pré-registrada; com motor novo, sela a série «motor da data», e a
+// pré-registrada sai do commit dela pelo terceiro passo (decisão 138).
 //
 // **Selar logo depois da coorte** é o que dá valor ao selo: o commit do
 // arquivo selado é a prova de que a previsão existia antes do desfecho.
@@ -58,8 +63,8 @@ Future<void> main(List<String> args) async {
     }
     if (r.serie != 'preRegistrado') {
       stdout.writeln('  ! o motor mudou desde o pré-registrado: a série dele '
-          'para estas coortes sai de um `git worktree` do commit registrado '
-          'no índice (decisão 133)');
+          'para estas coortes sai do commit registrado no índice — rode '
+          '`dart run tool/c7_preregistrado.dart` (decisão 138)');
     }
   } on ProtocoloViolado catch (e) {
     stderr.writeln(e);

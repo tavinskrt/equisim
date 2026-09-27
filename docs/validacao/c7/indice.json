@@ -37,6 +37,33 @@
    "serie": "preRegistrado",
    "seladoEm": "2026-09-24",
    "observacoes": 336
+  },
+  {
+   "coorte": "2025-12-31",
+   "arquivo": "previsoes_2025-12-31_9b5030dd.json",
+   "hash": "0304b2b8920a5a4a48bf6a9d482d8454fea357df",
+   "motor": "9b5030dd326a48864a9c904fa56d3dadec6d8c34",
+   "serie": "motorDaData",
+   "seladoEm": "2026-09-25",
+   "observacoes": 344
+  },
+  {
+   "coorte": "2026-03-31",
+   "arquivo": "previsoes_2026-03-31_9b5030dd.json",
+   "hash": "9c4350a25934ad64f95136390c43e4b1b7517e0f",
+   "motor": "9b5030dd326a48864a9c904fa56d3dadec6d8c34",
+   "serie": "motorDaData",
+   "seladoEm": "2026-09-25",
+   "observacoes": 338
+  },
+  {
+   "coorte": "2026-06-30",
+   "arquivo": "previsoes_2026-06-30_9b5030dd.json",
+   "hash": "3ff52015f4d85b003a9fb2def852f91e9222688b",
+   "motor": "9b5030dd326a48864a9c904fa56d3dadec6d8c34",
+   "serie": "motorDaData",
+   "seladoEm": "2026-09-25",
+   "observacoes": 336
   }
  ]
 }

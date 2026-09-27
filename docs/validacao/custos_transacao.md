@@ -85,6 +85,16 @@ Coortes trimestrais com as deslistadas, as mesmas observações nas duas leitura
 cinco ordenações, bruto e líquido — nenhuma passa. Os IC se movem na terceira
 casa.
 
+> **Remedido em 25/09/2026**, com o retorno das coortes corrigido pelos itens B29
+> e B31 (decisões 136 e 139) e o potencial pelos B28 e B30 (decisões 135 e 137),
+> n = 2.169 em 36 meses e 2.942 em 12. O retorno mediano de 36 meses vai de
+> **14,86% a 13,96%** líquido, e o de 12 meses, de 7,39% a 6,77% — mais altos que
+> os de 22/09 porque o B29 devolveu o retorno das bonificações que a fonte de
+> preços não ajustou. O critério do R3 fica em 0,058, `t` 0,34, bruto e líquido;
+> o IC do book-to-market, em 0,160 com `t` 2,03 bruto e 2,04 líquido. Q5 − Q1 pelo
+> potencial em 36 meses: +7,31% bruto e +7,27% líquido (comprado e vendido:
+> +6,01%). **Nenhuma ordenação passa, bruta ou líquida.**
+
 **E isto não é descoberta, é aritmética.** Custo uniforme preserva a ordem dos
 retornos de uma coorte, e o IC é correlação de ordens: ele não muda. O que o
 custo **poderia** mudar é a ordem quando ele varia com a liquidez — e varia,

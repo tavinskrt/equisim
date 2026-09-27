@@ -28,6 +28,12 @@ final _pares = PeerMultipleSet(byKind: const {
 }, asOf: DateTime(2026, 9, 1));
 final _oficial = OfficialShareCount(total: 1000, asOf: DateTime(2026, 9, 1));
 const _capm = CapmInputs(riskFreeRate: 0.14, beta: 1.2, marketPremium: 0.06);
+final _emissoes = [
+  ShareIssue(
+      date: DateTime(2026, 3, 1),
+      amount: Money.fromReais(1e6),
+      shares: 100000),
+];
 
 /// Todo campo preenchido, e nenhum com o valor padrão.
 final _completo = ValuationInputs(
@@ -65,6 +71,7 @@ final _completo = ValuationInputs(
   minorityEquityValue: 321,
   scenarioTranslation: ScenarioTranslation.estruturaFixa,
   contextNotes: const ['nota'],
+  shareIssues: _emissoes,
 );
 
 /// Os campos, por nome — para comparar e para dizer qual se perdeu.
@@ -103,6 +110,7 @@ Map<String, Object?> _campos(ValuationInputs i) => {
       'minorityEquityValue': i.minorityEquityValue,
       'scenarioTranslation': i.scenarioTranslation,
       'contextNotes': i.contextNotes,
+      'shareIssues': i.shareIssues,
     };
 
 void _preserva(ValuationInputs copia, {Set<String> exceto = const {}}) {

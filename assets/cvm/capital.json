@@ -1,0 +1,3466 @@
+{
+ "versao": 2,
+ "geradoEm": "2026-09-24",
+ "ativos": {
+  "AALR3": {
+   "emissoes": [
+    {
+     "data": "2025-01-02",
+     "centavos": 53396044083,
+     "acoes": 34066666,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "ABCB10": {
+   "emissoes": [
+    {
+     "data": "2023-12-13",
+     "centavos": 15711313128,
+     "acoes": 10845978,
+     "declarada": false
+    },
+    {
+     "data": "2024-07-29",
+     "centavos": 122647180563,
+     "acoes": 7720761,
+     "declarada": false
+    },
+    {
+     "data": "2026-03-23",
+     "centavos": 31405987563,
+     "acoes": 15944224,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "ABCB4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-07-05",
+     "fator": 1.0726524926329244
+    },
+    {
+     "dataEx": "2022-01-03",
+     "fator": 1.035405268305404
+    },
+    {
+     "dataEx": "2024-01-02",
+     "fator": 1.0479719241864431
+    },
+    {
+     "dataEx": "2024-07-01",
+     "fator": 1.0325858369845007
+    },
+    {
+     "dataEx": "2026-06-30",
+     "fator": 1.0651697409813452
+    }
+   ]
+  },
+  "AERI3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-05-14",
+     "fator": 0.05
+    }
+   ]
+  },
+  "AGRO3": {
+   "emissoes": [
+    {
+     "data": "2023-09-19",
+     "centavos": 306436,
+     "acoes": 306436
+    }
+   ],
+   "eventos": []
+  },
+  "AGXY3": {
+   "emissoes": [
+    {
+     "data": "2024-06-27",
+     "centavos": 16241405878,
+     "acoes": 83718587,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-05-06",
+     "fator": 0.06666666667
+    }
+   ]
+  },
+  "ALLD3": {
+   "emissoes": [
+    {
+     "data": "2025-03-27",
+     "centavos": 483381124,
+     "acoes": 935467,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "ALOS3": {
+   "emissoes": [
+    {
+     "data": "2023-01-06",
+     "centavos": 1090136700000,
+     "acoes": 326700896
+    }
+   ],
+   "eventos": []
+  },
+  "ALPA3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-03-21",
+     "fator": 1.250000001594219
+    }
+   ]
+  },
+  "ALPA4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-03-21",
+     "fator": 1.250000001594219
+    }
+   ]
+  },
+  "ALPK3": {
+   "emissoes": [
+    {
+     "data": "2023-11-28",
+     "centavos": 43347647611,
+     "acoes": 55688872,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "ALUP11": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2023-04-18",
+     "fator": 1.039999999817998
+    },
+    {
+     "dataEx": "2024-04-22",
+     "fator": 1.039999999824998
+    },
+    {
+     "dataEx": "2025-04-17",
+     "fator": 1.04
+    }
+   ]
+  },
+  "ALUP3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2023-04-18",
+     "fator": 1.039999999817998
+    },
+    {
+     "dataEx": "2024-04-22",
+     "fator": 1.039999999824998
+    },
+    {
+     "dataEx": "2025-04-17",
+     "fator": 1.04
+    }
+   ]
+  },
+  "ALUP4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2023-04-18",
+     "fator": 1.039999999817998
+    },
+    {
+     "dataEx": "2024-04-22",
+     "fator": 1.039999999824998
+    },
+    {
+     "dataEx": "2025-04-17",
+     "fator": 1.04
+    }
+   ]
+  },
+  "AMAR3": {
+   "emissoes": [
+    {
+     "data": "2024-06-10",
+     "centavos": 62295338604,
+     "acoes": 170680732,
+     "declarada": false
+    },
+    {
+     "data": "2024-07-31",
+     "centavos": 62286902344,
+     "acoes": 170620473,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2023-10-25",
+     "fator": 0.2
+    }
+   ]
+  },
+  "AMBP3": {
+   "emissoes": [
+    {
+     "data": "2023-10-31",
+     "centavos": 71690822325,
+     "acoes": 54106281,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-08-05",
+     "fator": 10.0
+    }
+   ]
+  },
+  "AMER3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-08-27",
+     "fator": 0.01
+    }
+   ]
+  },
+  "AMOB3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-05-29",
+     "fator": 0.02
+    }
+   ]
+  },
+  "ANIM3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-02-19",
+     "fator": 3.0
+    }
+   ]
+  },
+  "ARND3": {
+   "emissoes": [
+    {
+     "data": "2025-06-02",
+     "centavos": 42093554030,
+     "acoes": 90136090,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "ASAI3": {
+   "emissoes": [
+    {
+     "data": "2023-02-15",
+     "centavos": 63761550,
+     "acoes": 59870
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-08-12",
+     "fator": 5.0
+    }
+   ]
+  },
+  "AUAU3": {
+   "emissoes": [
+    {
+     "data": "2026-01-05",
+     "centavos": 91660700000,
+     "acoes": 451139910,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "AURE3": {
+   "emissoes": [
+    {
+     "data": "2024-10-31",
+     "centavos": 24763493747,
+     "acoes": 50377974,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "AVLL3": {
+   "emissoes": [
+    {
+     "data": "2024-01-26",
+     "centavos": 86463685372,
+     "acoes": 172914267,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2026-06-15",
+     "fator": 0.04
+    }
+   ]
+  },
+  "AXIA3": {
+   "emissoes": [
+    {
+     "data": "2023-03-08",
+     "centavos": 28608561781,
+     "acoes": 5872034
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2023-04-28",
+     "fator": 1.0503019428265763
+    },
+    {
+     "dataEx": "2024-04-29",
+     "fator": 1.0503019428265763
+    },
+    {
+     "dataEx": "2025-12-22",
+     "fator": 1.2628378881074
+    }
+   ]
+  },
+  "AXIA7": {
+   "emissoes": [
+    {
+     "data": "2023-03-08",
+     "centavos": 28608561781,
+     "acoes": 5872034
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-12-22",
+     "fator": 1.2628378881074
+    }
+   ]
+  },
+  "AZEV3": {
+   "emissoes": [
+    {
+     "data": "2023-11-17",
+     "centavos": 27092596048,
+     "acoes": 90629996,
+     "declarada": false
+    },
+    {
+     "data": "2024-10-18",
+     "centavos": 64353319204,
+     "acoes": 424943266,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2019-06-10",
+     "fator": 0.2
+    },
+    {
+     "dataEx": "2026-06-26",
+     "fator": 0.05
+    }
+   ]
+  },
+  "AZEV4": {
+   "emissoes": [
+    {
+     "data": "2023-11-17",
+     "centavos": 27092596048,
+     "acoes": 90629996,
+     "declarada": false
+    },
+    {
+     "data": "2024-10-18",
+     "centavos": 64353319204,
+     "acoes": 424943266,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2026-06-26",
+     "fator": 0.05
+    }
+   ]
+  },
+  "AZTE3": {
+   "emissoes": [
+    {
+     "data": "2026-04-17",
+     "centavos": 11790804437,
+     "acoes": 161517869,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2026-07-09",
+     "fator": 0.1
+    }
+   ]
+  },
+  "AZUL3": {
+   "emissoes": [
+    {
+     "data": "2026-03-25",
+     "centavos": 1867475050723,
+     "acoes": 270042402,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2026-02-19",
+     "fator": 0.01333333334
+    },
+    {
+     "dataEx": "2026-04-20",
+     "fator": 0.0000066667
+    }
+   ]
+  },
+  "AZUL97": {
+   "emissoes": [
+    {
+     "data": "2026-03-25",
+     "centavos": 1867475050723,
+     "acoes": 270042402,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2026-02-19",
+     "fator": 0.01333333334
+    },
+    {
+     "dataEx": "2026-04-20",
+     "fator": 0.0000066667
+    }
+   ]
+  },
+  "AZUL98": {
+   "emissoes": [
+    {
+     "data": "2026-03-25",
+     "centavos": 1867475050723,
+     "acoes": 270042402,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2026-02-19",
+     "fator": 0.01333333334
+    },
+    {
+     "dataEx": "2026-04-20",
+     "fator": 0.0000066667
+    }
+   ]
+  },
+  "AZUL99": {
+   "emissoes": [
+    {
+     "data": "2026-03-25",
+     "centavos": 1867475050723,
+     "acoes": 270042402,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2026-02-19",
+     "fator": 0.01333333334
+    },
+    {
+     "dataEx": "2026-04-20",
+     "fator": 0.0000066667
+    }
+   ]
+  },
+  "AZZA3": {
+   "emissoes": [
+    {
+     "data": "2024-07-31",
+     "centavos": 57895361518,
+     "acoes": 95500607,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "B1003": {
+   "emissoes": [
+    {
+     "data": "2026-06-24",
+     "centavos": 4557782971,
+     "acoes": 23625969,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "B3SA3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-05-17",
+     "fator": 3.0
+    }
+   ]
+  },
+  "BBAS3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-04-16",
+     "fator": 2.0
+    }
+   ]
+  },
+  "BBDC3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-04-01",
+     "fator": 1.2
+    },
+    {
+     "dataEx": "2020-04-14",
+     "fator": 1.1000000000744063
+    },
+    {
+     "dataEx": "2021-04-19",
+     "fator": 1.0956985943910658
+    },
+    {
+     "dataEx": "2022-04-19",
+     "fator": 1.0966561132708874
+    }
+   ]
+  },
+  "BBDC4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-04-01",
+     "fator": 1.2
+    },
+    {
+     "dataEx": "2020-04-14",
+     "fator": 1.1000000000744063
+    },
+    {
+     "dataEx": "2021-04-19",
+     "fator": 1.0956985943910658
+    },
+    {
+     "dataEx": "2022-04-19",
+     "fator": 1.0966561132708874
+    }
+   ]
+  },
+  "BEEF3": {
+   "emissoes": [
+    {
+     "data": "2026-05-19",
+     "centavos": 145580337767,
+     "acoes": 393257006,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-04-13",
+     "fator": 1.1290919236325607
+    }
+   ]
+  },
+  "BEES3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-09-02",
+     "fator": 1.1
+    }
+   ]
+  },
+  "BEES4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-09-02",
+     "fator": 1.1
+    }
+   ]
+  },
+  "BGIP3": {
+   "emissoes": [
+    {
+     "data": "2023-12-22",
+     "centavos": 14399992042,
+     "acoes": 2508462,
+     "declarada": false
+    },
+    {
+     "data": "2026-05-05",
+     "centavos": 10000011996,
+     "acoes": 3559032,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-02-03",
+     "fator": 1.0971787982523107
+    }
+   ]
+  },
+  "BGIP4": {
+   "emissoes": [
+    {
+     "data": "2023-12-22",
+     "centavos": 14399992042,
+     "acoes": 2508462,
+     "declarada": false
+    },
+    {
+     "data": "2026-05-05",
+     "centavos": 10000011996,
+     "acoes": 3559032,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-02-03",
+     "fator": 1.0971787982523107
+    }
+   ]
+  },
+  "BHIA3": {
+   "emissoes": [
+    {
+     "data": "2026-04-13",
+     "centavos": 167514757591,
+     "acoes": 880777788,
+     "declarada": false
+    },
+    {
+     "data": "2026-07-16",
+     "centavos": 1405927168,
+     "acoes": 37895611,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2023-12-15",
+     "fator": 0.04
+    }
+   ]
+  },
+  "BIED3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-08-19",
+     "fator": 5.0
+    }
+   ]
+  },
+  "BIOM3": {
+   "emissoes": [
+    {
+     "data": "2024-02-06",
+     "centavos": 70000048497,
+     "acoes": 91532705,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-06-05",
+     "fator": 1.0789248745434579
+    }
+   ]
+  },
+  "BLAU3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2026-01-06",
+     "fator": 1.3
+    }
+   ]
+  },
+  "BMEB3": {
+   "emissoes": [
+    {
+     "data": "2026-03-06",
+     "centavos": 14550725420,
+     "acoes": 18897046,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-12-03",
+     "fator": 2.0
+    }
+   ]
+  },
+  "BMEB4": {
+   "emissoes": [
+    {
+     "data": "2026-03-06",
+     "centavos": 14550725420,
+     "acoes": 18897046,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-12-03",
+     "fator": 2.0
+    }
+   ]
+  },
+  "BMGB4": {
+   "emissoes": [
+    {
+     "data": "2026-04-27",
+     "centavos": 26353377703,
+     "acoes": 65051285,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "BPAC11": {
+   "emissoes": [
+    {
+     "data": "2025-12-15",
+     "centavos": 4980309364439,
+     "acoes": 8874023160,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2020-07-23",
+     "fator": 1.048254678569216
+    },
+    {
+     "dataEx": "2021-07-01",
+     "fator": 4.0
+    }
+   ]
+  },
+  "BPAC3": {
+   "emissoes": [
+    {
+     "data": "2025-12-15",
+     "centavos": 4980309364439,
+     "acoes": 8874023160,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2020-07-23",
+     "fator": 1.048254678569216
+    },
+    {
+     "dataEx": "2021-07-01",
+     "fator": 4.0
+    }
+   ]
+  },
+  "BPAC5": {
+   "emissoes": [
+    {
+     "data": "2025-12-15",
+     "centavos": 4980309364439,
+     "acoes": 8874023160,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2020-07-23",
+     "fator": 1.048254678569216
+    },
+    {
+     "dataEx": "2021-07-01",
+     "fator": 4.0
+    }
+   ]
+  },
+  "BRAP3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-09-21",
+     "fator": 1.1294774624706614
+    }
+   ]
+  },
+  "BRAP4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-09-21",
+     "fator": 1.1294774624706614
+    }
+   ]
+  },
+  "BRAV3": {
+   "emissoes": [
+    {
+     "data": "2024-04-11",
+     "centavos": 90801627870,
+     "acoes": 37341411,
+     "declarada": false
+    },
+    {
+     "data": "2025-01-16",
+     "centavos": 690916602631,
+     "acoes": 223751769,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "BSLI3": {
+   "emissoes": [
+    {
+     "data": "2025-04-29",
+     "centavos": 104402082907,
+     "acoes": 123134587,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-01-05",
+     "fator": 10.0
+    }
+   ]
+  },
+  "BSLI4": {
+   "emissoes": [
+    {
+     "data": "2025-04-29",
+     "centavos": 104402082907,
+     "acoes": 123134587,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-01-05",
+     "fator": 10.0
+    }
+   ]
+  },
+  "CAMB3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-08-15",
+     "fator": 10.0
+    }
+   ]
+  },
+  "CASH3": {
+   "emissoes": [
+    {
+     "data": "2023-02-10",
+     "centavos": 41417,
+     "acoes": 248504
+    },
+    {
+     "data": "2026-01-05",
+     "centavos": 18037119664,
+     "acoes": 26037011,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2023-04-25",
+     "fator": 1.0766333950557367
+    },
+    {
+     "dataEx": "2023-06-01",
+     "fator": 0.1
+    }
+   ]
+  },
+  "CBAV3": {
+   "emissoes": [
+    {
+     "data": "2024-01-18",
+     "centavos": 20604282772,
+     "acoes": 55239364,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "CBEE3": {
+   "emissoes": [
+    {
+     "data": "2023-08-30",
+     "centavos": 29999990000,
+     "acoes": 13824885,
+     "declarada": false
+    },
+    {
+     "data": "2025-12-16",
+     "centavos": 411500000565,
+     "acoes": 199189137,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "CEBR3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-10-18",
+     "fator": 5.0
+    }
+   ]
+  },
+  "CEBR5": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-10-18",
+     "fator": 5.0
+    }
+   ]
+  },
+  "CEBR6": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-10-18",
+     "fator": 5.0
+    }
+   ]
+  },
+  "CGRA3": {
+   "emissoes": [
+    {
+     "data": "2026-07-10",
+     "centavos": 4650693939,
+     "acoes": 1833147,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2023-12-21",
+     "fator": 1.039671773630803
+    },
+    {
+     "dataEx": "2025-12-23",
+     "fator": 1.16378927
+    }
+   ]
+  },
+  "CGRA4": {
+   "emissoes": [
+    {
+     "data": "2025-04-29",
+     "centavos": 14133314310,
+     "acoes": 431595,
+     "declarada": false
+    },
+    {
+     "data": "2026-07-10",
+     "centavos": 4650693939,
+     "acoes": 1833147,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2023-12-21",
+     "fator": 1.039671773630803
+    },
+    {
+     "dataEx": "2025-12-23",
+     "fator": 1.16378927
+    }
+   ]
+  },
+  "CMIG3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-08-03",
+     "fator": 1.0411310320604528
+    },
+    {
+     "dataEx": "2024-04-30",
+     "fator": 1.3000000002726
+    }
+   ]
+  },
+  "CMIG4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-08-03",
+     "fator": 1.0411310320604528
+    },
+    {
+     "dataEx": "2021-05-03",
+     "fator": 1.1149689994835439
+    },
+    {
+     "dataEx": "2022-05-02",
+     "fator": 1.2999999997637834
+    },
+    {
+     "dataEx": "2024-04-30",
+     "fator": 1.3000000002726
+    }
+   ]
+  },
+  "COCE3": {
+   "emissoes": [
+    {
+     "data": "2025-07-17",
+     "centavos": 74513342847,
+     "acoes": 8446720,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "COCE5": {
+   "emissoes": [
+    {
+     "data": "2025-07-17",
+     "centavos": 74513342847,
+     "acoes": 8446720,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "COGN3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-12-26",
+     "fator": 1.1
+    }
+   ]
+  },
+  "CPLE3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-03-12",
+     "fator": 10.0
+    },
+    {
+     "dataEx": "2023-10-02",
+     "fator": 1.0899879423161338
+    }
+   ]
+  },
+  "CRPG5": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-04-30",
+     "fator": 1.25
+    }
+   ]
+  },
+  "CRPG6": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-04-30",
+     "fator": 1.25
+    }
+   ]
+  },
+  "CSAN3": {
+   "emissoes": [
+    {
+     "data": "2025-11-11",
+     "centavos": 210000000000,
+     "acoes": 2100000000,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-05-06",
+     "fator": 4.0
+    }
+   ]
+  },
+  "CSMG3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-11-26",
+     "fator": 3.0
+    }
+   ]
+  },
+  "CTAX3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2026-07-31",
+     "fator": 0.3
+    }
+   ]
+  },
+  "CURY3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-11-28",
+     "fator": 1.0554089974270089
+    }
+   ]
+  },
+  "CVCB3": {
+   "emissoes": [
+    {
+     "data": "2023-11-24",
+     "centavos": 34124562337,
+     "acoes": 248343788,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "CYRE3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2026-01-02",
+     "fator": 1.1895833333299999
+    }
+   ]
+  },
+  "CYRE4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2026-01-02",
+     "fator": 1.1895833333299999
+    }
+   ]
+  },
+  "DASA3": {
+   "emissoes": [
+    {
+     "data": "2025-04-30",
+     "centavos": 159285792392,
+     "acoes": 502207204,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "DEXP3": {
+   "emissoes": [
+    {
+     "data": "2024-06-04",
+     "centavos": 21113254154,
+     "acoes": 15297103,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-08-12",
+     "fator": 3.0
+    },
+    {
+     "dataEx": "2025-12-22",
+     "fator": 1.12499999
+    }
+   ]
+  },
+  "DEXP4": {
+   "emissoes": [
+    {
+     "data": "2024-06-04",
+     "centavos": 21113254154,
+     "acoes": 15297103,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-08-12",
+     "fator": 3.0
+    },
+    {
+     "dataEx": "2025-12-22",
+     "fator": 1.12499999
+    }
+   ]
+  },
+  "DIRR3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-08-11",
+     "fator": 3.0
+    }
+   ]
+  },
+  "DOHL4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-07-30",
+     "fator": 1.25
+    }
+   ]
+  },
+  "DOTZ3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2023-12-22",
+     "fator": 0.1
+    }
+   ]
+  },
+  "DXCO3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2022-12-21",
+     "fator": 1.0999999998685877
+    },
+    {
+     "dataEx": "2025-12-26",
+     "fator": 1.12
+    }
+   ]
+  },
+  "EALT3": {
+   "emissoes": [
+    {
+     "data": "2026-04-29",
+     "centavos": 20349008000,
+     "acoes": 20250000,
+     "declarada": false
+    },
+    {
+     "data": "2026-07-30",
+     "centavos": 734754855,
+     "acoes": 671009,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "EALT4": {
+   "emissoes": [
+    {
+     "data": "2026-04-29",
+     "centavos": 20349008000,
+     "acoes": 20250000,
+     "declarada": false
+    },
+    {
+     "data": "2026-07-30",
+     "centavos": 734754855,
+     "acoes": 671009,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "EGIE3": {
+   "emissoes": [
+    {
+     "data": "2026-07-14",
+     "centavos": 835952186200,
+     "acoes": 274082684,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-11-27",
+     "fator": 1.4
+    }
+   ]
+  },
+  "EMAE4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-06-16",
+     "fator": 1.0
+    }
+   ]
+  },
+  "ENEV3": {
+   "emissoes": [
+    {
+     "data": "2023-03-02",
+     "centavos": 147040056,
+     "acoes": 126154
+    },
+    {
+     "data": "2024-10-25",
+     "centavos": 487051874634,
+     "acoes": 347894196,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-03-12",
+     "fator": 4.0
+    }
+   ]
+  },
+  "ENGI11": {
+   "emissoes": [
+    {
+     "data": "2024-02-09",
+     "centavos": 249336770508,
+     "acoes": 250338123,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-11-28",
+     "fator": 1.1
+    }
+   ]
+  },
+  "ENGI3": {
+   "emissoes": [
+    {
+     "data": "2024-02-09",
+     "centavos": 249336770508,
+     "acoes": 250338123,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-11-28",
+     "fator": 1.1
+    }
+   ]
+  },
+  "ENGI4": {
+   "emissoes": [
+    {
+     "data": "2024-02-09",
+     "centavos": 249336770508,
+     "acoes": 250338123,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-11-28",
+     "fator": 1.1
+    }
+   ]
+  },
+  "ENJU3": {
+   "emissoes": [
+    {
+     "data": "2024-07-15",
+     "centavos": 126532306,
+     "acoes": 2387402,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "EQTL3": {
+   "emissoes": [
+    {
+     "data": "2023-12-29",
+     "centavos": 465343686631,
+     "acoes": 136568612,
+     "declarada": false
+    },
+    {
+     "data": "2025-03-27",
+     "centavos": 327492030833,
+     "acoes": 106739638,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2019-11-28",
+     "fator": 5.0
+    }
+   ]
+  },
+  "ESPA3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2026-06-15",
+     "fator": 0.1
+    }
+   ]
+  },
+  "ESTR4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2023-06-01",
+     "fator": 10.0
+    }
+   ]
+  },
+  "ETER3": {
+   "emissoes": [
+    {
+     "data": "2024-04-09",
+     "centavos": 10383023421,
+     "acoes": 31943242,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "EZTC3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-04-29",
+     "fator": 1.212108114007471
+    },
+    {
+     "dataEx": "2025-12-10",
+     "fator": 1.27155591016
+    }
+   ]
+  },
+  "FESA3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-01-24",
+     "fator": 4.0
+    }
+   ]
+  },
+  "FESA4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-01-24",
+     "fator": 4.0
+    }
+   ]
+  },
+  "FIQE3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-12-30",
+     "fator": 1.10229824
+    }
+   ]
+  },
+  "FLRY3": {
+   "emissoes": [
+    {
+     "data": "2023-03-17",
+     "centavos": 6428270,
+     "acoes": 7355
+    },
+    {
+     "data": "2023-04-28",
+     "centavos": 216110381348,
+     "acoes": 153924773
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2023-06-13",
+     "fator": 1.05
+    }
+   ]
+  },
+  "FRAS3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-12-17",
+     "fator": 1.038215272028923
+    }
+   ]
+  },
+  "GFSA3": {
+   "emissoes": [
+    {
+     "data": "2023-01-03",
+     "centavos": 7807938907,
+     "acoes": 13256263
+    },
+    {
+     "data": "2024-04-22",
+     "centavos": 22065212850,
+     "acoes": 29025431,
+     "declarada": false
+    },
+    {
+     "data": "2026-08-31",
+     "centavos": 19662344816,
+     "acoes": 132853043,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2022-09-23",
+     "fator": 0.11226609526173562
+    },
+    {
+     "dataEx": "2025-06-16",
+     "fator": 0.05
+    }
+   ]
+  },
+  "GGBR3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2023-03-15",
+     "fator": 1.0500000002987935
+    },
+    {
+     "dataEx": "2024-04-18",
+     "fator": 1.2
+    }
+   ]
+  },
+  "GGBR4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2023-03-15",
+     "fator": 1.0500000002987935
+    },
+    {
+     "dataEx": "2024-04-18",
+     "fator": 1.2
+    }
+   ]
+  },
+  "GGPS3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-12-17",
+     "fator": 1.1073842452402
+    }
+   ]
+  },
+  "GMAT3": {
+   "emissoes": [
+    {
+     "data": "2026-01-06",
+     "centavos": 35176881558,
+     "acoes": 55222734,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "GOAU3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-12-19",
+     "fator": 1.3333
+    }
+   ]
+  },
+  "GOAU4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-12-19",
+     "fator": 1.3333
+    }
+   ]
+  },
+  "HAPV3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-11-25",
+     "fator": 5.0
+    },
+    {
+     "dataEx": "2025-06-06",
+     "fator": 0.06666666667
+    }
+   ]
+  },
+  "HBOR3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-08-13",
+     "fator": 0.2
+    }
+   ]
+  },
+  "HBSA3": {
+   "emissoes": [
+    {
+     "data": "2025-05-08",
+     "centavos": 120000000000,
+     "acoes": 600000000,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "HYPE3": {
+   "emissoes": [
+    {
+     "data": "2026-03-31",
+     "centavos": 150000001500,
+     "acoes": 70588236,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "IFCM3": {
+   "emissoes": [
+    {
+     "data": "2023-04-05",
+     "centavos": 710928000,
+     "acoes": 16300000
+    },
+    {
+     "data": "2023-04-05",
+     "centavos": 825654100,
+     "acoes": 4583256
+    },
+    {
+     "data": "2023-05-09",
+     "centavos": 33726368,
+     "acoes": 247988
+    },
+    {
+     "data": "2024-03-19",
+     "centavos": 40020108780,
+     "acoes": 250822390,
+     "declarada": false
+    },
+    {
+     "data": "2025-05-05",
+     "centavos": 7184105105,
+     "acoes": 842924919,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-11-07",
+     "fator": 0.05
+    },
+    {
+     "dataEx": "2026-06-30",
+     "fator": 0.2
+    }
+   ]
+  },
+  "IGTI11": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-12-27",
+     "fator": 10.0
+    }
+   ]
+  },
+  "IGTI3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-12-27",
+     "fator": 10.0
+    }
+   ]
+  },
+  "IGTI4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-12-27",
+     "fator": 10.0
+    }
+   ]
+  },
+  "INEP3": {
+   "emissoes": [
+    {
+     "data": "2023-03-30",
+     "centavos": 133630500,
+     "acoes": 377638
+    },
+    {
+     "data": "2026-04-06",
+     "centavos": 12887594000,
+     "acoes": 9793504,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-07-22",
+     "fator": 20.0
+    },
+    {
+     "dataEx": "2023-06-15",
+     "fator": 0.19999999672902202
+    }
+   ]
+  },
+  "INEP4": {
+   "emissoes": [
+    {
+     "data": "2023-03-30",
+     "centavos": 133630500,
+     "acoes": 377638
+    },
+    {
+     "data": "2026-04-06",
+     "centavos": 12887594000,
+     "acoes": 9793504,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-07-22",
+     "fator": 20.0
+    },
+    {
+     "dataEx": "2023-06-15",
+     "fator": 0.19999999672902202
+    }
+   ]
+  },
+  "IRBR3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-09-26",
+     "fator": 2.9999999935897437
+    },
+    {
+     "dataEx": "2023-01-25",
+     "fator": 0.03333333334
+    }
+   ]
+  },
+  "ISAE3": {
+   "emissoes": [
+    {
+     "data": "2026-07-24",
+     "centavos": 119999998800,
+     "acoes": 44444444,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2019-04-05",
+     "fator": 4.0
+    }
+   ]
+  },
+  "ISAE4": {
+   "emissoes": [
+    {
+     "data": "2026-07-24",
+     "centavos": 119999998800,
+     "acoes": 44444444,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2019-04-05",
+     "fator": 4.0
+    }
+   ]
+  },
+  "ITSA3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-11-24",
+     "fator": 1.0500000000594474
+    },
+    {
+     "dataEx": "2022-11-11",
+     "fator": 1.0985187404767234
+    },
+    {
+     "dataEx": "2023-11-28",
+     "fator": 1.064602953015267
+    },
+    {
+     "dataEx": "2024-12-02",
+     "fator": 1.0499999999467475
+    },
+    {
+     "dataEx": "2025-12-19",
+     "fator": 1.02
+    }
+   ]
+  },
+  "ITSA4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-11-24",
+     "fator": 1.0500000000594474
+    },
+    {
+     "dataEx": "2022-11-11",
+     "fator": 1.0985187404767234
+    },
+    {
+     "dataEx": "2023-11-28",
+     "fator": 1.064602953015267
+    },
+    {
+     "dataEx": "2024-12-02",
+     "fator": 1.0499999999467475
+    },
+    {
+     "dataEx": "2025-12-19",
+     "fator": 1.02
+    }
+   ]
+  },
+  "ITUB3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-02-18",
+     "fator": 1.1000000000203995
+    },
+    {
+     "dataEx": "2025-12-26",
+     "fator": 1.03
+    }
+   ]
+  },
+  "ITUB4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-02-18",
+     "fator": 1.1000000000203995
+    },
+    {
+     "dataEx": "2025-12-26",
+     "fator": 1.03
+    }
+   ]
+  },
+  "JALL3": {
+   "emissoes": [
+    {
+     "data": "2023-10-03",
+     "centavos": 9674896991,
+     "acoes": 13606615,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2023-08-01",
+     "fator": 1.046929840531394
+    }
+   ]
+  },
+  "JFEN3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-11-22",
+     "fator": 0.05
+    }
+   ]
+  },
+  "JSLG3": {
+   "emissoes": [
+    {
+     "data": "2026-03-05",
+     "centavos": 12975882129,
+     "acoes": 78394877,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-12-30",
+     "fator": 1.25
+    }
+   ]
+  },
+  "KEPL3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-10-13",
+     "fator": 1.1383926730536453
+    },
+    {
+     "dataEx": "2022-05-06",
+     "fator": 3.0
+    },
+    {
+     "dataEx": "2023-04-04",
+     "fator": 2.0001112841394004
+    }
+   ]
+  },
+  "KLBN11": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-05-07",
+     "fator": 1.0999999998931984
+    },
+    {
+     "dataEx": "2025-12-18",
+     "fator": 1.01
+    }
+   ]
+  },
+  "KLBN3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-05-07",
+     "fator": 1.0999999998931984
+    },
+    {
+     "dataEx": "2025-12-18",
+     "fator": 1.01
+    }
+   ]
+  },
+  "KLBN4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-05-07",
+     "fator": 1.0999999998931984
+    },
+    {
+     "dataEx": "2025-12-18",
+     "fator": 1.01
+    }
+   ]
+  },
+  "LEVE3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2023-11-13",
+     "fator": 1.0563524630090757
+    }
+   ]
+  },
+  "LIGT3": {
+   "emissoes": [
+    {
+     "data": "2026-08-20",
+     "centavos": 316859369631,
+     "acoes": 1238127343,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-06-28",
+     "fator": 1.0
+    }
+   ]
+  },
+  "LJQQ3": {
+   "emissoes": [
+    {
+     "data": "2024-03-05",
+     "centavos": 3159671452,
+     "acoes": 7782442,
+     "declarada": false
+    },
+    {
+     "data": "2025-03-06",
+     "centavos": 2380754952,
+     "acoes": 11844552,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "LOGN3": {
+   "emissoes": [
+    {
+     "data": "2023-05-10",
+     "centavos": 375434253,
+     "acoes": 582127
+    }
+   ],
+   "eventos": []
+  },
+  "LREN3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-05-02",
+     "fator": 1.1000003058230126
+    },
+    {
+     "dataEx": "2021-11-05",
+     "fator": 1.0999999997774277
+    },
+    {
+     "dataEx": "2024-12-12",
+     "fator": 1.1
+    }
+   ]
+  },
+  "LUPA3": {
+   "emissoes": [
+    {
+     "data": "2024-05-20",
+     "centavos": 1706244702,
+     "acoes": 9039130,
+     "declarada": false
+    },
+    {
+     "data": "2025-02-18",
+     "centavos": 118642875,
+     "acoes": 803421,
+     "declarada": false
+    },
+    {
+     "data": "2026-01-14",
+     "centavos": 610103329,
+     "acoes": 5178384,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2023-07-12",
+     "fator": 1.1056448288941623
+    },
+    {
+     "dataEx": "2026-08-14",
+     "fator": 0.1
+    }
+   ]
+  },
+  "LUXM4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-04-30",
+     "fator": 2.0
+    }
+   ]
+  },
+  "LWSA3": {
+   "emissoes": [
+    {
+     "data": "2023-01-11",
+     "centavos": 349581050,
+     "acoes": 1579650
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-02-01",
+     "fator": 4.0
+    }
+   ]
+  },
+  "MATD3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-04-09",
+     "fator": 2.5
+    }
+   ]
+  },
+  "MDNE3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2026-01-02",
+     "fator": 1.2273602767656693
+    }
+   ]
+  },
+  "MGLU3": {
+   "emissoes": [
+    {
+     "data": "2024-03-21",
+     "centavos": 124999999995,
+     "acoes": 641025641,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2019-08-06",
+     "fator": 8.0
+    },
+    {
+     "dataEx": "2020-10-14",
+     "fator": 4.0
+    },
+    {
+     "dataEx": "2020-12-30",
+     "fator": 1.0610957595525126
+    },
+    {
+     "dataEx": "2024-05-27",
+     "fator": 0.1
+    },
+    {
+     "dataEx": "2025-12-30",
+     "fator": 1.05
+    }
+   ]
+  },
+  "MILS3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-04-14",
+     "fator": 1.042585230828076
+    }
+   ]
+  },
+  "MNDL3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-05-31",
+     "fator": 4.0
+    }
+   ]
+  },
+  "MNPR3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-10-27",
+     "fator": 10.0
+    }
+   ]
+  },
+  "MOVI3": {
+   "emissoes": [
+    {
+     "data": "2026-05-11",
+     "centavos": 6399317500,
+     "acoes": 39856855,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "MRVE3": {
+   "emissoes": [
+    {
+     "data": "2024-01-09",
+     "centavos": 100514058660,
+     "acoes": 79043114,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "MTSA4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-12-10",
+     "fator": 1.0395385296249144
+    }
+   ]
+  },
+  "NATU3": {
+   "emissoes": [
+    {
+     "data": "2025-07-01",
+     "centavos": 400000000000,
+     "acoes": 454352260,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2019-09-18",
+     "fator": 2.0
+    }
+   ]
+  },
+  "NEXP3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2023-01-27",
+     "fator": 0.02
+    }
+   ]
+  },
+  "NUTR3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2023-05-02",
+     "fator": 100.0
+    }
+   ]
+  },
+  "ONCO11": {
+   "emissoes": [
+    {
+     "data": "2024-07-10",
+     "centavos": 69230777100,
+     "acoes": 124274715,
+     "declarada": false
+    },
+    {
+     "data": "2025-11-18",
+     "centavos": 141454467200,
+     "acoes": 481173181,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "ONCO3": {
+   "emissoes": [
+    {
+     "data": "2024-07-10",
+     "centavos": 69230777100,
+     "acoes": 124274715,
+     "declarada": false
+    },
+    {
+     "data": "2025-11-18",
+     "centavos": 141454467200,
+     "acoes": 481173181,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "ORVR3": {
+   "emissoes": [
+    {
+     "data": "2025-05-28",
+     "centavos": 10000000000,
+     "acoes": 13175982,
+     "declarada": false
+    },
+    {
+     "data": "2026-08-10",
+     "centavos": 330854954130,
+     "acoes": 453169533,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2026-08-11",
+     "fator": 4.0
+    }
+   ]
+  },
+  "PATI3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-08-04",
+     "fator": 1.309943639137
+    }
+   ]
+  },
+  "PATI4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-08-05",
+     "fator": 1.3099436391372197
+    }
+   ]
+  },
+  "PCAR3": {
+   "emissoes": [
+    {
+     "data": "2025-02-13",
+     "centavos": 70400147378,
+     "acoes": 220147378,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "PDGR3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-11-17",
+     "fator": 0.005
+    }
+   ]
+  },
+  "PEAB3": {
+   "emissoes": [
+    {
+     "data": "2023-12-15",
+     "centavos": 20183486765,
+     "acoes": 6057738,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "PEAB4": {
+   "emissoes": [
+    {
+     "data": "2023-12-15",
+     "centavos": 20183486765,
+     "acoes": 6057738,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2024-05-03",
+     "fator": 1.0423972160718682
+    }
+   ]
+  },
+  "PGMN3": {
+   "emissoes": [
+    {
+     "data": "2023-04-04",
+     "centavos": 7378040464,
+     "acoes": 20049023
+    },
+    {
+     "data": "2024-03-27",
+     "centavos": 44907867197,
+     "acoes": 117885554,
+     "declarada": false
+    },
+    {
+     "data": "2025-03-26",
+     "centavos": 12410000514,
+     "acoes": 40957097,
+     "declarada": false
+    },
+    {
+     "data": "2026-03-10",
+     "centavos": 37375000346,
+     "acoes": 61225046,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-12-26",
+     "fator": 1.0642398834690587
+    }
+   ]
+  },
+  "PINE3": {
+   "emissoes": [
+    {
+     "data": "2024-04-23",
+     "centavos": 4763480400,
+     "acoes": 23817402,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-04-11",
+     "fator": 1.0768973651589877
+    },
+    {
+     "dataEx": "2026-01-09",
+     "fator": 1.0495955829209918
+    },
+    {
+     "dataEx": "2026-07-15",
+     "fator": 1.0851243742184602
+    }
+   ]
+  },
+  "PINE4": {
+   "emissoes": [
+    {
+     "data": "2024-04-23",
+     "centavos": 4763480400,
+     "acoes": 23817402,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-04-11",
+     "fator": 1.0768973651589877
+    },
+    {
+     "dataEx": "2026-01-09",
+     "fator": 1.0495955829209918
+    },
+    {
+     "dataEx": "2026-07-15",
+     "fator": 1.0851243742184602
+    }
+   ]
+  },
+  "PMAM3": {
+   "emissoes": [
+    {
+     "data": "2025-03-20",
+     "centavos": 4680156624,
+     "acoes": 18816634,
+     "declarada": false
+    },
+    {
+     "data": "2026-04-08",
+     "centavos": 8607099662,
+     "acoes": 75398527,
+     "declarada": false
+    },
+    {
+     "data": "2026-06-08",
+     "centavos": 9433471926,
+     "acoes": 155972093,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2019-05-02",
+     "fator": 0.058823529411764705
+    }
+   ]
+  },
+  "PNVL3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-03-23",
+     "fator": 30.0
+    }
+   ]
+  },
+  "POMO3": {
+   "emissoes": [
+    {
+     "data": "2024-02-22",
+     "centavos": 100000000000,
+     "acoes": 189378576,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-12-26",
+     "fator": 1.1
+    }
+   ]
+  },
+  "POMO4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-03-08",
+     "fator": 1.25
+    },
+    {
+     "dataEx": "2025-12-26",
+     "fator": 1.1
+    }
+   ]
+  },
+  "PRIO3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-03-06",
+     "fator": 10.0
+    },
+    {
+     "dataEx": "2021-05-06",
+     "fator": 5.0
+    }
+   ]
+  },
+  "PRNR3": {
+   "emissoes": [
+    {
+     "data": "2024-02-08",
+     "centavos": 26619514386,
+     "acoes": 26067260,
+     "declarada": false
+    },
+    {
+     "data": "2026-04-17",
+     "centavos": 15064838411,
+     "acoes": 10055183,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2020-01-28",
+     "fator": 0.16666666667
+    }
+   ]
+  },
+  "PSSA3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-10-21",
+     "fator": 2.0
+    }
+   ]
+  },
+  "RADL3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-09-21",
+     "fator": 5.0
+    },
+    {
+     "dataEx": "2023-04-05",
+     "fator": 1.04
+    },
+    {
+     "dataEx": "2025-12-23",
+     "fator": 1.02
+    }
+   ]
+  },
+  "RAPT3": {
+   "emissoes": [
+    {
+     "data": "2025-09-12",
+     "centavos": 15369358603,
+     "acoes": 20394138,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2022-04-20",
+     "fator": 1.0499354731861439
+    }
+   ]
+  },
+  "RAPT4": {
+   "emissoes": [
+    {
+     "data": "2025-09-12",
+     "centavos": 15369358603,
+     "acoes": 20394138,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2022-04-20",
+     "fator": 1.0499354731861439
+    }
+   ]
+  },
+  "RCSL3": {
+   "emissoes": [
+    {
+     "data": "2026-03-02",
+     "centavos": 6882319256,
+     "acoes": 72338263,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2022-06-27",
+     "fator": 0.5
+    },
+    {
+     "dataEx": "2024-05-31",
+     "fator": 0.25
+    },
+    {
+     "dataEx": "2026-03-03",
+     "fator": 4.0
+    }
+   ]
+  },
+  "RCSL4": {
+   "emissoes": [
+    {
+     "data": "2026-03-02",
+     "centavos": 6882319256,
+     "acoes": 72338263,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2024-05-31",
+     "fator": 0.25
+    },
+    {
+     "dataEx": "2026-03-03",
+     "fator": 4.0
+    }
+   ]
+  },
+  "RECV3": {
+   "emissoes": [
+    {
+     "data": "2023-01-25",
+     "centavos": 122037000,
+     "acoes": 114000
+    },
+    {
+     "data": "2023-03-02",
+     "centavos": 13493157,
+     "acoes": 13018
+    },
+    {
+     "data": "2024-04-29",
+     "centavos": 104195235911,
+     "acoes": 44800038,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "REDE3": {
+   "emissoes": [
+    {
+     "data": "2025-12-19",
+     "centavos": 234435002880,
+     "acoes": 457880865,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "RENT3": {
+   "emissoes": [
+    {
+     "data": "2023-03-07",
+     "centavos": 18069999675,
+     "acoes": 4276923
+    },
+    {
+     "data": "2024-03-11",
+     "centavos": 521758342826,
+     "acoes": 83453928,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2019-12-23",
+     "fator": 1.049999999307814
+    },
+    {
+     "dataEx": "2025-12-30",
+     "fator": 1.0384609533429
+    }
+   ]
+  },
+  "RENT4": {
+   "emissoes": [
+    {
+     "data": "2023-03-07",
+     "centavos": 18069999675,
+     "acoes": 4276923
+    },
+    {
+     "data": "2024-03-11",
+     "centavos": 521758342826,
+     "acoes": 83453928,
+     "declarada": false
+    },
+    {
+     "data": "2024-09-16",
+     "centavos": 35926925976,
+     "acoes": 10730862,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-12-30",
+     "fator": 1.0384609533429
+    }
+   ]
+  },
+  "RIAA3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-05-02",
+     "fator": 8.0
+    }
+   ]
+  },
+  "RNEW3": {
+   "emissoes": [
+    {
+     "data": "2025-05-28",
+     "centavos": 174409298782,
+     "acoes": 327170577,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-06-03",
+     "fator": 0.5
+    }
+   ]
+  },
+  "RNEW4": {
+   "emissoes": [
+    {
+     "data": "2025-05-28",
+     "centavos": 174409298782,
+     "acoes": 327170577,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-06-03",
+     "fator": 0.5
+    }
+   ]
+  },
+  "ROMI3": {
+   "emissoes": [
+    {
+     "data": "2024-03-26",
+     "centavos": 35071337306,
+     "acoes": 19836825,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2020-10-29",
+     "fator": 1.1666666746211483
+    },
+    {
+     "dataEx": "2022-09-27",
+     "fator": 1.0999999972727492
+    },
+    {
+     "dataEx": "2023-03-21",
+     "fator": 1.0999999950413621
+    },
+    {
+     "dataEx": "2024-04-02",
+     "fator": 1.05
+    }
+   ]
+  },
+  "RSUL4": {
+   "emissoes": [
+    {
+     "data": "2023-08-15",
+     "centavos": 818234195,
+     "acoes": 133415,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-09-01",
+     "fator": 10.0
+    }
+   ]
+  },
+  "RVEE3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-08-07",
+     "fator": 10.0
+    }
+   ]
+  },
+  "SAPR11": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-03-30",
+     "fator": 3.0
+    }
+   ]
+  },
+  "SAPR3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-03-30",
+     "fator": 3.0
+    }
+   ]
+  },
+  "SAPR4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-03-30",
+     "fator": 3.0
+    }
+   ]
+  },
+  "SAUD3": {
+   "emissoes": [
+    {
+     "data": "2026-04-06",
+     "centavos": 1405347300000,
+     "acoes": 2378374445,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2022-04-05",
+     "fator": 1.069963062991967
+    }
+   ]
+  },
+  "SBSP3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-12-26",
+     "fator": 1.029646975
+    },
+    {
+     "dataEx": "2026-03-20",
+     "fator": 1.00160980322
+    },
+    {
+     "dataEx": "2026-04-29",
+     "fator": 5.0
+    }
+   ]
+  },
+  "SEQL3": {
+   "emissoes": [
+    {
+     "data": "2023-01-23",
+     "centavos": 47723378,
+     "acoes": 265941
+    },
+    {
+     "data": "2023-02-06",
+     "centavos": 5543242,
+     "acoes": 30890
+    },
+    {
+     "data": "2023-04-11",
+     "centavos": 21084775,
+     "acoes": 117496
+    },
+    {
+     "data": "2024-05-14",
+     "centavos": 29994386130,
+     "acoes": 249616903,
+     "declarada": false
+    },
+    {
+     "data": "2026-06-25",
+     "centavos": 100594967136,
+     "acoes": 6335127565,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-12-02",
+     "fator": 0.1
+    }
+   ]
+  },
+  "SHUL4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-04-16",
+     "fator": 2.0
+    },
+    {
+     "dataEx": "2022-04-14",
+     "fator": 2.0
+    }
+   ]
+  },
+  "SIMH3": {
+   "emissoes": [
+    {
+     "data": "2024-02-09",
+     "centavos": 15179616,
+     "acoes": 34699790,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-08-11",
+     "fator": 4.0
+    },
+    {
+     "dataEx": "2026-02-18",
+     "fator": 0.5
+    }
+   ]
+  },
+  "SLCE3": {
+   "emissoes": [
+    {
+     "data": "2023-12-13",
+     "centavos": 106500000000,
+     "acoes": 252734716,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2019-05-02",
+     "fator": 2.0
+    },
+    {
+     "dataEx": "2022-01-03",
+     "fator": 1.0999999979286572
+    },
+    {
+     "dataEx": "2023-05-09",
+     "fator": 1.099905843822201
+    },
+    {
+     "dataEx": "2023-12-14",
+     "fator": 2.0
+    },
+    {
+     "dataEx": "2026-01-02",
+     "fator": 1.125
+    }
+   ]
+  },
+  "SMFT3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2026-03-24",
+     "fator": 1.0316112002086335
+    }
+   ]
+  },
+  "SNSY5": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-07-28",
+     "fator": 40.0
+    }
+   ]
+  },
+  "SOJA3": {
+   "emissoes": [
+    {
+     "data": "2024-04-18",
+     "centavos": 29999999700,
+     "acoes": 18181818,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-12-19",
+     "fator": 1.04862872997
+    }
+   ]
+  },
+  "TASA3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2024-05-02",
+     "fator": 1.0657777018900527
+    },
+    {
+     "dataEx": "2025-05-08",
+     "fator": 1.1
+    }
+   ]
+  },
+  "TASA4": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2022-04-20",
+     "fator": 1.18619012438779
+    },
+    {
+     "dataEx": "2024-05-02",
+     "fator": 1.0657777018900527
+    },
+    {
+     "dataEx": "2025-05-08",
+     "fator": 1.1
+    }
+   ]
+  },
+  "TCSA3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-06-05",
+     "fator": 0.09999999904916149
+    }
+   ]
+  },
+  "TELB3": {
+   "emissoes": [
+    {
+     "data": "2025-05-08",
+     "centavos": 11225640632,
+     "acoes": 7214422,
+     "declarada": false
+    },
+    {
+     "data": "2025-09-25",
+     "centavos": 13278121317,
+     "acoes": 8385891,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "TELB4": {
+   "emissoes": [
+    {
+     "data": "2025-05-08",
+     "centavos": 11225640632,
+     "acoes": 7214422,
+     "declarada": false
+    },
+    {
+     "data": "2025-09-25",
+     "centavos": 13278121317,
+     "acoes": 8385891,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "TEND3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-03-26",
+     "fator": 2.0
+    }
+   ]
+  },
+  "TIMS3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-07-03",
+     "fator": 1.0
+    }
+   ]
+  },
+  "TOKY3": {
+   "emissoes": [
+    {
+     "data": "2024-12-10",
+     "centavos": 10000000,
+     "acoes": 16273499,
+     "declarada": false
+    },
+    {
+     "data": "2025-12-30",
+     "centavos": 15335607092,
+     "acoes": 94023587,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2026-06-05",
+     "fator": 0.25
+    },
+    {
+     "dataEx": "2026-08-28",
+     "fator": 0.05
+    }
+   ]
+  },
+  "TOTS3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2020-05-04",
+     "fator": 3.0
+    },
+    {
+     "dataEx": "2021-12-29",
+     "fator": 1.067951383168054
+    }
+   ]
+  },
+  "TPIS3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2023-04-28",
+     "fator": 0.25
+    }
+   ]
+  },
+  "TRIS3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-12-15",
+     "fator": 1.30007897757
+    }
+   ]
+  },
+  "UGPA3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-04-18",
+     "fator": 2.0
+    }
+   ]
+  },
+  "UNIP3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-06-19",
+     "fator": 1.166666664754363
+    },
+    {
+     "dataEx": "2022-04-22",
+     "fator": 1.0999999872925605
+    },
+    {
+     "dataEx": "2024-04-19",
+     "fator": 1.1
+    }
+   ]
+  },
+  "UNIP5": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-06-19",
+     "fator": 1.166666664754363
+    },
+    {
+     "dataEx": "2022-04-25",
+     "fator": 1.0999999872925605
+    },
+    {
+     "dataEx": "2024-04-19",
+     "fator": 1.1
+    }
+   ]
+  },
+  "UNIP6": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2019-06-19",
+     "fator": 1.166666664754363
+    },
+    {
+     "dataEx": "2022-04-22",
+     "fator": 1.0999999872925605
+    },
+    {
+     "dataEx": "2024-04-19",
+     "fator": 1.1
+    }
+   ]
+  },
+  "VAMO3": {
+   "emissoes": [
+    {
+     "data": "2026-05-15",
+     "centavos": 15584415600,
+     "acoes": 140794328,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2021-08-16",
+     "fator": 4.0
+    },
+    {
+     "dataEx": "2022-12-27",
+     "fator": 1.0495502518828355
+    }
+   ]
+  },
+  "VBBR3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-11-26",
+     "fator": 1.0711023515914
+    }
+   ]
+  },
+  "VITT3": {
+   "emissoes": [
+    {
+     "data": "2024-03-27",
+     "centavos": 21043107946,
+     "acoes": 11664911,
+     "declarada": false
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2026-04-10",
+     "fator": 1.1
+    }
+   ]
+  },
+  "VIVR3": {
+   "emissoes": [
+    {
+     "data": "2023-01-09",
+     "centavos": 250556147225,
+     "acoes": 31365555
+    },
+    {
+     "data": "2023-03-21",
+     "centavos": 272378780585,
+     "acoes": 234784492
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2026-02-24",
+     "fator": 1.3
+    },
+    {
+     "dataEx": "2026-06-11",
+     "fator": 0.1
+    }
+   ]
+  },
+  "VIVT3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-04-15",
+     "fator": 2.0
+    }
+   ]
+  },
+  "VSTE3": {
+   "emissoes": [
+    {
+     "data": "2023-02-08",
+     "centavos": 10000000000,
+     "acoes": 58823529
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2023-02-09",
+     "fator": 0.12499999985269715
+    }
+   ]
+  },
+  "VTRU3": {
+   "emissoes": [
+    {
+     "data": "2026-05-18",
+     "centavos": 14244196604,
+     "acoes": 15656909,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "VULC3": {
+   "emissoes": [
+    {
+     "data": "2023-03-21",
+     "centavos": 163680000,
+     "acoes": 160000
+    },
+    {
+     "data": "2024-03-19",
+     "centavos": 18679125000,
+     "acoes": 28740000,
+     "declarada": false
+    },
+    {
+     "data": "2026-03-19",
+     "centavos": 30155702646,
+     "acoes": 42445926,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "VVEO3": {
+   "emissoes": [
+    {
+     "data": "2023-08-01",
+     "centavos": 77834863008,
+     "acoes": 36697248,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "WEGE3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2021-04-28",
+     "fator": 2.0
+    }
+   ]
+  },
+  "WEST3": {
+   "emissoes": [
+    {
+     "data": "2023-01-10",
+     "centavos": 1274200,
+     "acoes": 25484
+    },
+    {
+     "data": "2023-04-19",
+     "centavos": 2428150,
+     "acoes": 48563
+    }
+   ],
+   "eventos": [
+    {
+     "dataEx": "2025-01-16",
+     "fator": 0.1
+    }
+   ]
+  },
+  "WLMM4": {
+   "emissoes": [
+    {
+     "data": "2024-12-13",
+     "centavos": 27332948599,
+     "acoes": 29131736,
+     "declarada": false
+    }
+   ],
+   "eventos": []
+  },
+  "YDUQ3": {
+   "emissoes": [],
+   "eventos": [
+    {
+     "dataEx": "2025-04-29",
+     "fator": 1.054726779091062
+    }
+   ]
+  }
+ }
+}

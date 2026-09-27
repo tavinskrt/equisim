@@ -6,6 +6,12 @@ import '../value_objects/ticker.dart';
 /// proventos (convenção Yahoo, verificada em BBAS3 15/04/2024 e WEGE3
 /// 27/04/2021 — nenhuma descontinuidade nas datas-ex de split).
 ///
+/// **Nem por toda bonificação** (item B29, decisão 136): das mudanças de
+/// contagem com salto no preço bruto, a fonte deixou 133 sem ajuste — as do
+/// Bradesco de 2018 a 2022, a de 100% da SLC em 2019. Quem lê a série para
+/// beta, volatilidade ou retorno a completa antes, com os eventos declarados
+/// (`CorporateEvents.completeAdjustment` e `applyToSeries`).
+///
 /// [adjustedClose] é série de retorno total, porém **subajusta proventos
 /// brasileiros** — não deve ser usada em cálculo, apenas conferência.
 class PricePoint {

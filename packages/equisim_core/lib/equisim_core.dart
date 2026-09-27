@@ -31,6 +31,7 @@ export 'src/entities/financial_goal.dart';
 export 'src/entities/fundamentals.dart';
 export 'src/entities/portfolio.dart';
 export 'src/entities/price_series.dart';
+export 'src/entities/share_issue.dart';
 export 'src/entities/valuation.dart';
 
 // --- Recorte temporal ---
@@ -62,6 +63,7 @@ export 'src/services/b3/corporate_events.dart';
 export 'src/services/b3/cash_dividends.dart';
 export 'src/services/cvm/cvm_chart.dart';
 export 'src/services/cvm/fre_concessions.dart';
+export 'src/services/cvm/capital_events.dart';
 export 'src/services/cvm/share_count_history.dart';
 export 'src/services/cvm/unit_composition.dart';
 export 'src/services/valuation/concession_sectors.dart';

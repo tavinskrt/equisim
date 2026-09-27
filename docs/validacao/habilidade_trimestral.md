@@ -1,9 +1,10 @@
 # O instrumento da habilidade, pronto — itens C1c, C1d e C3
 
-> **A leitura mais recente é a §8**, de 21/09/2026, sobre o motor da Fase 3 e
-> as coortes reexecutadas pelo item C5. As seções 1 a 7 registram as anteriores,
-> e ficam porque a comparação entre instrumentos é parte do que este documento
-> serve para mostrar.
+> **A leitura mais recente é a §11**, de 25/09/2026, com o capital posterior, as
+> bonificações não ajustadas, a contagem atrasada e os proventos do mesmo dia
+> corrigidos (itens B28 a B31). As seções anteriores registram as leituras de
+> antes, das mais novas para as mais antigas depois da §6, e ficam porque a
+> comparação entre instrumentos é parte do que este documento serve para mostrar.
 
 Medido em 15/09/2026 por `dart run tool/regressao_condicional.dart --trimestral`,
 sobre `docs/validacao/backtest_trimestral.json` (de
@@ -150,6 +151,72 @@ reingestão da CVM.
   unidade inferida do valor de mercado falha em 79 de 220 observações de unit
   ([ponte_por_papel.md](ponte_por_papel.md)).
 - **O motivo de saída das deslistadas** continua não levantado.
+
+## 11. Com o dado das coortes corrigido — remedido em 25/09/2026
+
+**Quatro correções mudaram o que as coortes medem**, e três delas vieram de
+medir a primeira:
+
+- **B28** ([decisão 135](../decisoes/135-o-capital-emitido-depois-do-balanco-entra-quando-declarado.md)):
+  a emissão com valor declarado depois do balanço entra no patrimônio da ponte.
+  111 observações de 31 papéis, mediana de +0,35 p.p. no potencial; a ALOS3 de
+  2023 tinha o preço justo pela metade.
+- **B29** ([decisão 136](../decisoes/136-o-evento-de-acoes-que-a-fonte-nao-ajustou-e-ajustado.md)):
+  a série de preços de 57 papéis tinha bonificações que a fonte não ajustou. O
+  retorno de 36 meses muda em 509 observações, com mediana de +9,3%, e o beta
+  muda junto.
+- **B30** ([decisão 137](../decisoes/137-a-contagem-da-coorte-recebe-o-evento-que-o-fre-nao-absorveu.md)):
+  a contagem da coorte recebe o evento que o formulário não registrou. 41
+  observações de 10 papéis; o Banco do Brasil de 2024 tinha metade do valor de
+  mercado.
+- **B31** ([decisão 139](../decisoes/139-proventos-da-mesma-data-ex-entram-juntos-no-retorno-total.md)):
+  os proventos da mesma data ex deixam de compor entre si. O retorno de 36 meses
+  muda em 2.189 observações, com mediana de 0,07 p.p. e cauda de 12 p.p. na
+  PETR4.
+
+O B29 e o B31 mudam a **variável de desfecho**, e o B28 e o B30, o **potencial**.
+São as mesmas 10.808 observações da §10.
+
+| 36 meses, trimestral, com deslistadas (n = 2.169) | 24/09 (§10) | **25/09** | `t` corrigido / crítico | Newey-West | passa |
+|---|---:|---:|---:|---:|---|
+| **potencial dado o B/M (critério do R3)** | 0,052 | **0,058** | **0,34 / 2,70** | 0,94 | não |
+| IC do potencial | 0,105 | 0,111 | 0,69 / 2,70 | 1,71 | não |
+| IC do book-to-market | 0,158 | 0,160 | 2,03 / 2,70 | 4,41 | não |
+| IC do lucro sobre o preço | 0,125 | 0,133 | 1,11 / 2,70 | 2,99 | não |
+| IC do composto | 0,152 | 0,158 | 1,30 / 2,70 | 3,21 | não |
+| IC do múltiplo de pares | 0,078 | 0,075 | 1,04 / 2,70 | 3,21 | não |
+
+**Nenhum veredito muda.** O critério do R3 sobe de 0,052 para 0,058, e o `t`
+corrigido, de 0,30 para 0,34: longe do crítico, e longe do efeito mínimo
+detectável de 0,62, que não se mexe ([poder_r3.md](poder_r3.md)). Separando as
+etapas, o B28 ao B30 levaram o critério a 0,0578, e o B31 o levou a 0,0580. Em
+12 meses, 0,046 com `t` corrigido de 0,67 contra 2,24. Líquido de custo de
+transação, a leitura é a mesma ([custos_transacao.md](custos_transacao.md)).
+
+**O B29 corrigia um viés, e o viés quase não pesava na ordenação.** O retorno
+perdido estava em quem bonifica, e quem bonifica é quem retém lucro — o que
+podia favorecer ou desfavorecer um sinal de valor. Corrigido, os ICs sobem um
+pouco, salvo o de pares, que cai 0,003, e nenhum muda de lado do crítico.
+
+**A série ancorada contra a anual**, nas mesmas observações da §10:
+
+| | 36 meses (2.037) | 12 meses (2.768) |
+|---|---:|---:|
+| IC da anual | 0,096 | 0,056 |
+| IC da ancorada | 0,119 | 0,083 |
+| diferença | +0,023 | +0,026 |
+| **`t` corrigido / crítico da diferença** | **0,28 / 2,70** | **0,90 / 2,24** |
+| Newey-West da diferença | 1,32 | 1,62 |
+| anual dado o B/M | 0,029 | 0,022 |
+| ancorada dado o B/M | 0,060 | 0,059 |
+
+**A regra da decisão 98 dá o mesmo veredito**, e a ancorada continua fora do
+padrão.
+
+**A faixa calibrada, remedida sobre o retorno corrigido**, com a mesma forma:
+90% nominal cobre **87,6%** em 12 meses e **88,1%** em 36, desvios máximos de
+2,4 e 3,0 p.p. contra o limite de 5 ([cobertura_banda.md](cobertura_banda.md)
+§12). **O R2 continua atingido.**
 
 ## 10. Com a cópia dos insumos corrigida — remedido em 24/09/2026
 

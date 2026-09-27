@@ -286,6 +286,13 @@ Future<void> main(List<String> args) async {
           jsonDecode(File('assets/mercado/beta_prior.json').readAsStringSync())
               as Map<String, dynamic>)
       : null;
+  // Os eventos de capital do pacote (itens B28 e B29): a montagem do
+  // aplicativo completa o ajuste da série e soma a emissão declarada.
+  final capital = File('assets/cvm/capital.json').existsSync()
+      ? CapitalEventsCodec.decodePackage(
+          jsonDecode(File('assets/cvm/capital.json').readAsStringSync())
+              as Map<String, dynamic>)
+      : const <String, CapitalEvents>{};
   final units = File('assets/cvm/units.json').existsSync()
       ? UnitCompositionCodec.decodePackage(
           jsonDecode(File('assets/cvm/units.json').readAsStringSync())
@@ -414,6 +421,8 @@ Future<void> main(List<String> args) async {
         declaredSharesPerUnit: app
             ? UnitCompositionCodec.at(units[t.value] ?? const [], _hoje)?.shares
             : null,
+        shareEvents: app ? capital[t.value]?.shareEvents ?? const [] : const [],
+        shareIssues: app ? capital[t.value]?.issues ?? const [] : const [],
       );
     }
 

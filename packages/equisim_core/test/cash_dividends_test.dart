@@ -160,6 +160,59 @@ void main() {
     });
   });
 
+  group('proventos da mesma data ex', () {
+    // Dividendo e juro sobre capital próprio no mesmo dia: o fator é o do
+    // total, sem o termo cruzado de um rendendo sobre o outro.
+    CashDividend prov(double valor, CashDividendKind kind) => CashDividend(
+          shareClass: 'PN',
+          kind: kind,
+          lastDateWithRights: _d(2024, 6, 3),
+          exDate: _d(2024, 6, 4),
+          amount: valor,
+          closeWithRights: 24.0,
+        );
+    final dia = [
+      prov(2.0, CashDividendKind.dividendo),
+      prov(2.0, CashDividendKind.jurosSobreCapital),
+    ];
+
+    test('com o pregão ex, 1 + (D₁ + D₂)/P_ex', () {
+      final r = TotalReturn.factor(
+        dividends: dia,
+        de: _d(2024, 1, 1),
+        ate: _d(2024, 12, 31),
+        closeOnExDate: (_) => 20.0,
+        net: false,
+      );
+      expect(r.factor, closeTo(1 + 4 / 20, 1e-12),
+          reason: 'o produto separado daria 1,21, com 0,01 de termo cruzado');
+      expect(r.applied, 2);
+    });
+
+    test('sem o pregão, o preço ex sai do com direito menos os dois', () {
+      final r = TotalReturn.factor(
+        dividends: dia,
+        de: _d(2024, 1, 1),
+        ate: _d(2024, 12, 31),
+        closeOnExDate: (_) => null,
+        net: false,
+      );
+      // P_ex = 24 − 2 − 2 = 20.
+      expect(r.factor, closeTo(1 + 4 / 20, 1e-12));
+      expect(r.approximated, 2);
+    });
+
+    test('o imposto do juro sai do que se recebe, não da queda do preço', () {
+      final r = TotalReturn.factor(
+        dividends: dia,
+        de: _d(2024, 1, 1),
+        ate: _d(2024, 12, 31),
+        closeOnExDate: (_) => 20.0,
+      );
+      expect(r.factor, closeTo(1 + (2 + 2 * 0.85) / 20, 1e-12));
+    });
+  });
+
   group('Índice de retorno total — o beta da decisão 89', () {
     CashDividend div(DateTime ex, double valor, double com,
             {CashDividendKind kind = CashDividendKind.dividendo}) =>

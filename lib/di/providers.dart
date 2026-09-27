@@ -24,6 +24,7 @@ import '../data/repositories/unit_composition_repository.dart';
 import '../data/repositories/cash_dividends_repository.dart';
 import '../data/repositories/calibrated_band_repository.dart';
 import '../data/repositories/skill_reading_repository.dart';
+import '../data/repositories/capital_events_repository.dart';
 import '../data/repositories/concession_term_repository.dart';
 import '../data/repositories/cvm_fundamentals_repository.dart';
 import '../data/repositories/market_repositories.dart';
@@ -235,6 +236,21 @@ final concessionTermRepositoryProvider = Provider<ConcessionTermRepository>(
 final concessionEndProvider = FutureProvider.family<DateTime?, Ticker>(
     (ref, ticker) =>
         ref.watch(concessionTermRepositoryProvider).endFor(ticker));
+
+/// Caminho dos eventos de capital empacotados (itens B28 e B29).
+const String capitalEventsAsset = 'assets/cvm/capital.json';
+
+final capitalEventsRepositoryProvider = Provider<CapitalEventsRepository>(
+  (ref) => CapitalEventsRepository(
+    carregarPacote: () => rootBundle.loadString(capitalEventsAsset),
+  ),
+);
+
+/// Emissões de ações e eventos de ações de um ativo: as emissões vão para o
+/// patrimônio da ponte; os eventos completam o ajuste da série de preços.
+final capitalEventsProvider = FutureProvider.family<CapitalEvents, Ticker>(
+    (ref, ticker) =>
+        ref.watch(capitalEventsRepositoryProvider).eventsFor(ticker));
 
 /// Caminho da faixa calibrada empacotada (item C2).
 const String calibratedBandAsset = 'assets/validacao/banda_calibrada.json';

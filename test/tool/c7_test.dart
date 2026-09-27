@@ -168,6 +168,43 @@ void main() {
       expect(fm.containsKey('passaR3'), isTrue);
     });
 
+    test('as duas versões: a pré-registrada é a leitura, a do motor da data '
+        'vem ao lado', () async {
+      final coortes = _coortes(12);
+      await selar(
+          linhas: _linhas(coortes), motor: _motor, pasta: pasta, hoje: 'd');
+      // O motor posterior prevê outra coisa (outra semente) e sela à parte.
+      await selar(
+          linhas: _linhas(coortes, semente: 99),
+          motor: _outro,
+          pasta: pasta,
+          hoje: 'd');
+      final s = situacao(
+          pasta: pasta,
+          hoje: DateTime(2026, 9, 24),
+          fimDosDados: DateTime(2027, 3, 30));
+      expect((s['motoresDaData'] as Map)[_outro.impressao], coortes);
+      expect(s['coortesSeladas'], coortes,
+          reason: 'as coortes da leitura são as do pré-registrado');
+
+      final r = await ler(
+        meses: 12,
+        pasta: pasta,
+        hoje: DateTime(2029, 9, 30),
+        linhas: _linhas(coortes, comRetorno: true),
+      );
+      final pre = ((r['leitura'] as Map)['famaMacBeth']
+          as Map)['potencialDadoBm'] as Map;
+      final daData = (((r['motoresDaData'] as Map)[_outro.impressao]
+          as Map)['famaMacBeth'] as Map)['potencialDadoBm'] as Map;
+      expect(pre['coortes'], 12);
+      expect(daData['coortes'], 12);
+      expect((pre['media'] as num) - (daData['media'] as num), isNot(0),
+          reason: 'cada série lê as próprias previsões seladas');
+      expect(r['previsoesRefeitasQueDivergem'], 0,
+          reason: 'a divergência é medida contra o pré-registrado');
+    });
+
     test('juntar as coortes antigas às novas é recusado, e não filtrado',
         () async {
       await selar(
@@ -192,5 +229,17 @@ void main() {
     final b = await impressaoDoMotor();
     expect(a, b);
     expect(a, matches(RegExp(r'^[0-9a-f]{40}$')));
+  });
+
+  test('o motor pré-registrado do índice está num commit, e a árvore dele tem '
+      'a mesma impressão', () async {
+    // A série pré-registrada das coortes novas sai de um worktree desse commit
+    // (decisão 138): se a impressão do índice não fosse achável no histórico,
+    // não haveria de onde refazê-la.
+    final pre = Indice.ler(Directory(pastaDosSelos)).motorPreRegistrado;
+    expect(pre, isNotNull, reason: 'o C7 tem selo desde 24/09/2026');
+    final commit = await commitDaImpressao(pre!.impressao);
+    expect(commit, isNotNull);
+    expect(await impressaoDoCommit(commit!), pre.impressao);
   });
 }

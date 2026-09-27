@@ -31,6 +31,8 @@ library;
 
 import 'dart:math' as math;
 
+import '../../entities/price_series.dart';
+
 /// Um fechamento bruto, com o número de distribuição do dia.
 class RawQuote {
   /// Dia do pregão.
@@ -268,4 +270,134 @@ abstract final class CorporateEvents {
         ),
     ];
   }
+
+  /// **Completa o ajuste que a fonte de preços deixou de fazer** (item B29).
+  ///
+  /// O `close` da fonte de mercado vem ajustado por desdobramento e
+  /// grupamento, mas **não por toda bonificação**. Medido em 24/09/2026 sobre o
+  /// cache da validação: das mudanças de contagem do FRE com salto no
+  /// fechamento bruto, a fonte ajustou 67 e deixou 133 como vieram — as
+  /// bonificações anuais do Bradesco de 2018 a 2022, a de 100% da SLC em 2019,
+  /// as da Renner, da Itaúsa, da Klabin em 2024. Numa série assim, o dia ex é
+  /// uma queda de `1 − 1/fator` que não aconteceu: ela entra no beta, na
+  /// volatilidade da faixa e em todo retorno que atravessa a data.
+  ///
+  /// Para cada evento de [events], compara o fechamento do último pregão antes
+  /// da data ex com o do primeiro a partir dela. **Se o salto é o do evento, e
+  /// não o de um dia comum**, divide os fechamentos anteriores pelo fator e
+  /// multiplica o volume por ele — o financeiro do dia não muda. Se a série já
+  /// estava contínua na data, o evento já estava ajustado, e nada muda.
+  ///
+  /// A regra do salto tem duas condições, e as duas são necessárias:
+  /// - ele está mais perto de `1/fator` que de 1, em escala logarítmica — a
+  ///   série ajustada é contínua na data, e a não ajustada cai pelo fator;
+  /// - ele está a [toleranciaDaFonte] de `1/fator` — a
+  ///   [toleranciaDaFonteBonificacao], em bonificação —, ou seja, o que sobra
+  ///   além do evento é um pregão comum.
+  ///
+  /// **É a regra de quem não tem o preço bruto** — o aplicativo. Quem tem o
+  /// COTAHIST sabe, pelo fator entre o bruto e a fonte, exatamente quais
+  /// eventos ficaram sem ajuste, e usa [applyToSeries].
+  ///
+  /// Evento cuja data ex não tem pregão vizinho na série, a até
+  /// [maxDiasEntrePregoes], não ajusta nada.
+  static ({PriceSeries series, List<ShareEvent> applied}) completeAdjustment(
+    PriceSeries series,
+    List<ShareEvent> events,
+  ) {
+    if (series.isEmpty || events.isEmpty) {
+      return (series: series, applied: const []);
+    }
+    final pts = series.points;
+    final aplicados = <ShareEvent>[];
+    for (final e in events) {
+      if (!(e.factor > 0) || !e.factor.isFinite) continue;
+      // Abaixo de 3% o salto do evento não se separa de um provento ou de um
+      // pregão comum: um banco que paga 3% de dividendo no dia passaria por
+      // bonificação não ajustada.
+      if (math.log(e.factor).abs() < fatorMinimoDaFonte) continue;
+      final ex = DateTime(e.exDate.year, e.exDate.month, e.exDate.day);
+      var i = 0;
+      while (i < pts.length && pts[i].date.isBefore(ex)) {
+        i++;
+      }
+      if (i == 0 || i >= pts.length) continue;
+      final antes = pts[i - 1], depois = pts[i];
+      if (_dias(antes.date, depois.date) > maxDiasEntrePregoes) continue;
+      if (_dias(ex, depois.date) > maxDiasEntrePregoes) continue;
+      if (!(antes.close > 0) || !(depois.close > 0)) continue;
+      final salto = math.log(depois.close / antes.close);
+      final semAjuste = (salto + math.log(e.factor)).abs();
+      final folga = math.log(e.factor).abs() < math.log(1.6)
+          ? toleranciaDaFonteBonificacao
+          : toleranciaDaFonte;
+      if (semAjuste < salto.abs() && semAjuste <= folga) aplicados.add(e);
+    }
+    if (aplicados.isEmpty) return (series: series, applied: const []);
+    return (series: applyToSeries(series, aplicados), applied: aplicados);
+  }
+
+  /// A série com os fechamentos anteriores a cada evento divididos pelo fator
+  /// dele, e o volume multiplicado — **sem perguntar se a fonte já ajustou**.
+  ///
+  /// É para quem sabe a resposta: o backtest, que compara o bruto do COTAHIST
+  /// com a fonte e passa só os eventos que ficaram sem ajuste. Passar um evento
+  /// já ajustado ajustaria duas vezes.
+  static PriceSeries applyToSeries(PriceSeries series, List<ShareEvent> events) {
+    final aplicados = [
+      for (final e in events)
+        if (e.factor > 0 && e.factor.isFinite && (e.factor - 1).abs() > 1e-9) e,
+    ];
+    if (series.isEmpty || aplicados.isEmpty) return series;
+    final pts = series.points;
+    return PriceSeries(
+      ticker: series.ticker,
+      points: [
+        for (final p in pts)
+          () {
+            var f = 1.0;
+            var antesDeAlgum = false;
+            for (final e in aplicados) {
+              final ex = DateTime(e.exDate.year, e.exDate.month, e.exDate.day);
+              if (p.date.isBefore(ex)) {
+                f *= e.factor;
+                antesDeAlgum = true;
+              }
+            }
+            return !antesDeAlgum
+                ? p
+                : PricePoint(
+                    date: p.date,
+                    close: p.close / f,
+                    adjustedClose:
+                        p.adjustedClose == null ? null : p.adjustedClose! / f,
+                    volume: p.volume == null ? null : p.volume! * f,
+                  );
+          }(),
+      ],
+    );
+  }
+
+  /// Folga entre o salto do dia ex e `1/fator` em [completeAdjustment].
+  ///
+  /// **Seis por cento, a mesma de [tolerancia].** Aqui o fator é declarado — do
+  /// FRE ou do registro da B3 — e não inferido, e a pergunta não é se houve
+  /// evento, mas se a fonte o ajustou. A condição de estar mais perto de
+  /// `1/fator` que de 1 é a que separa as duas respostas; a folga só recusa o
+  /// dia em que o mercado andou tanto que nenhuma das duas explica o salto.
+  static const double toleranciaDaFonte = 0.06;
+
+  /// A mesma folga **para bonificação**, fator abaixo de 1,6: três por cento.
+  ///
+  /// Numa bonificação de 10%, a série ajustada que tivesse um pregão de −5% no
+  /// dia ex já estaria mais perto de `1/fator` que de 1, e a folga de seis por
+  /// cento a ajustaria de novo — inventando uma alta de 10% no lugar da queda
+  /// que se queria tirar. Com três, o dia comum que confunde as duas precisa
+  /// cair mais de 6%, o que é raro; e a bonificação não ajustada só escapa
+  /// quando o mercado andou mais de 3% no mesmo pregão.
+  static const double toleranciaDaFonteBonificacao = 0.03;
+
+  /// Menor fator, em log, que [completeAdjustment] examina: 3%. Ver o
+  /// comentário no laço.
+  static const double fatorMinimoDaFonte = 0.03;
 }

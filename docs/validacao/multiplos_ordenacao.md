@@ -101,6 +101,13 @@ corrigido de **2,52** contra o crítico de 2,70 — perto de passar. Agora tem
 foi fixada antes de qualquer uma ser medida, continua devolvendo o mesmo: prêmio
 nenhum.
 
+**Remedido em 25/09/2026**, com o dado das coortes corrigido pelos itens B28 a
+B31 (decisões 135 a 137 e 139): o múltiplo de pares tem IC de **0,075** em 36
+meses, com `t` corrigido de **1,04** contra 2,70, e 0,031 em 12 meses. O
+book-to-market fica em 0,160 e `t` 2,03. **Nenhuma das cinco passa**, e a regra da
+decisão 103 continua devolvendo prêmio nenhum
+([habilidade_trimestral.md](habilidade_trimestral.md) §11).
+
 ## 5. O que isto não diz
 
 - **Não é o C1.** O veredito da habilidade é o coeficiente do potencial

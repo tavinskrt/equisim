@@ -333,6 +333,16 @@ void main() {
         // `isOk || isErr` era tautologia — todo `Result` é um dos dois — e
         // disfarçava de asserção o que já estava coberto.
         final r = await datasource.fundamentalsHistory(Ticker.parse('PETR4'));
+        // **E o `if (r.isOk)` não pode esconder nada** (lente `risco`,
+        // 25/09/2026): o que nem é JSON é recusa, em toda rota; o JSON de
+        // forma errada numa rota é tolerado, e as outras rotas continuam
+        // entregando os exercícios — tolerar não é devolver série vazia.
+        if (corpo == 'isto não é json') {
+          expect(r.isErr, isTrue, reason: '$rota $corpo');
+          continue;
+        }
+        expect(r.isOk && r.unwrap().isNotEmpty, isTrue,
+            reason: 'um corpo ruim numa rota não apaga as outras: $rota $corpo');
         if (r.isOk) {
           // Tolerar o corpo é legítimo; **inventar número** não. Nenhum
           // exercício pode sair com lucro lido de um literal que não é número.
