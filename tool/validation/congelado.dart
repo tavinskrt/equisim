@@ -228,10 +228,16 @@ class Congelado {
   ///
   /// [premio] existe para a varredura do prêmio de risco de mercado (item B3),
   /// e tem a mesma ressalva: o padrão é o do gabarito.
+  ///
+  /// [taxa] troca a fonte da taxa livre de risco, para a medição da Selic
+  /// prevista (`tool/selic_focus.dart`): `curva` no lugar da do Tesouro — nula,
+  /// o motor usa os dois pontos do CDI — e `estrutural` no lugar da média
+  /// decenal. Ausente, é a montagem do gabarito.
   Future<Result<ValuationInputs>> preparar(
     Ticker t, {
     int anos = 10,
     double premio = CapmInputs.defaultMarketPremium,
+    ({YieldCurve? curva, double? estrutural})? taxa,
   }) {
     final e = emissor(t);
     return PrepareValuationInputs.call(
@@ -243,8 +249,8 @@ class Congelado {
       asOf: hojeCongelado,
       perpetualGrowthCap: anchors.nominalEconomyGrowth,
       inflation: anchors.inflationCagr,
-      terminalRiskFreeRate: anchors.riskFreeCagr,
-      riskFreeCurve: curva,
+      terminalRiskFreeRate: taxa?.estrutural ?? anchors.riskFreeCagr,
+      riskFreeCurve: taxa == null ? curva : taxa.curva,
       projectionYears: anos,
       marketPremium: premio,
       officialShares: e?.totalShares != null

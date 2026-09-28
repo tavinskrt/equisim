@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:equisim/data/config/api_config.dart';
 import 'package:equisim/data/datasources/remote/bcb_datasource.dart';
@@ -486,6 +489,54 @@ void main() {
       expect(recent.totalRevenue, isNotNull, reason: 'DRE');
       expect(recent.operatingCashFlow, isNotNull, reason: 'DFC');
       expect(recent.cash, isNotNull, reason: 'Balanço');
+    });
+
+    test('a fusão é por exercício, e não por posição: um ano que falta numa '
+        'rota não desalinha os outros', () async {
+      // Lente `risco`, 27/09/2026: o teste acima olha um exercício só, e uma
+      // fusão por posição acertaria nele por coincidência. Aqui o fluxo de
+      // caixa perde 2020, e cada exercício é conferido contra a fixture.
+      Map<String, dynamic> fixture(String nome) => jsonDecode(File(
+                  'test/fixtures/$nome.json')
+              .readAsStringSync()
+              .replaceFirst('\uFEFF', '')) as Map<String, dynamic>;
+      List<Map<String, dynamic>> anos(Map<String, dynamic> j) =>
+          (((j['results'] as List).first as Map)['data'] as List)
+              .cast<Map<String, dynamic>>();
+      final dre = anos(fixture('brapi_income_statement_history_petr4'));
+      final dfcJson = fixture('brapi_cash_flow_history_petr4');
+      final dfc = anos(dfcJson);
+      ((dfcJson['results'] as List).first as Map)['data'] =
+          dfc.where((x) => x['endDate'] != '2020-12-31').toList();
+
+      final snapshots = (await BrapiDatasource(clientWith(FixtureAdapter(
+        routes: {
+          '/v2/stocks/statistics?symbols=PETR4&mode=history':
+              'brapi_statistics_history_petr4',
+          '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
+          '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+          '/v2/stocks/statistics?symbols=PETR4&mode=current':
+              'brapi_statistics_current_petr4',
+        },
+        bodies: {'/v2/stocks/cash-flow': jsonEncode(dfcJson)},
+      ))).fundamentalsHistory(Ticker.parse('PETR4')))
+          .unwrap();
+      final porAno = {
+        for (final s in snapshots) s.fiscalPeriodEnd.year: s,
+      };
+      for (final x in dre) {
+        final ano = DateTime.parse(x['endDate'] as String).year;
+        final s = porAno[ano];
+        expect(s, isNotNull, reason: 'exercício $ano');
+        expect(s!.totalRevenue, (x['totalRevenue'] as num?)?.toDouble(),
+            reason: 'receita de $ano');
+        final caixa = dfc.firstWhere((y) => y['endDate'] == x['endDate']);
+        expect(
+          s.operatingCashFlow,
+          ano == 2020 ? isNull : (caixa['operatingCashFlow'] as num?)?.toDouble(),
+          reason: 'fluxo de caixa de $ano',
+        );
+      }
     });
 
     test('deriva D&A, alíquota efetiva e dívida líquida', () async {

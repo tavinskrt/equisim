@@ -294,14 +294,19 @@ Depois, preencha `BRAPI_PROXY_URL` em `config/local.json` com a URL retornada.
 
 | Dado | Fonte | Observação |
 |---|---|---|
-| Cotações diárias | brapi `/v2/stocks/historical` | `close` já ajustado por split, **não** por proventos — que o domínio não modela |
-| Fundamentos históricos | brapi `statistics`, `income-statement`, `balance-sheet`, `cash-flow` (`mode=history`) | granularidade **anual**, 2010–2025 |
-| Setor / indústria | brapi `/v2/stocks/profile` | taxonomia própria da brapi, não GICS nem B3 |
-| Taxa livre de risco | Banco Central, série SGS 12 (CDI) | API aberta, sem chave |
+| Cotações diárias | brapi `/v2/stocks/historical` | `close` ajustado por desdobramento e grupamento, e **não** por proventos nem por toda bonificação: a avaliação completa os eventos que a fonte deixou (decisão 136) |
+| Demonstrações | CVM Dados Abertos (DFP e ITR), no pacote `assets/cvm/documentos.json` | fonte primária desde a decisão 80; a brapi (`income-statement`, `balance-sheet`, `cash-flow`, `statistics`) completa o que a CVM não traz |
+| Contagem de ações e setor | registro da B3, no pacote `assets/b3/emissores.json` | contagem oficial líquida de tesouraria (decisão 83) e classificação setorial oficial |
+| Proventos | B3, no pacote `assets/b3/proventos.json` | dado conferido: retorno total das coortes, beta e faixa calibrada; **não** é crédito da simulação (decisões 89 e 92) |
+| Eventos de capital | Formulário de Referência da CVM, no pacote `assets/cvm/capital.json` | emissão depois do balanço e eventos de ações (decisões 135 e 136) |
+| Taxa livre de risco | curva dos prefixados do Tesouro Direto | forward de cada ano da projeção (decisão 84): no nativo, a curva do dia; na web, o pacote `assets/tesouro/curva.json`, que vale sete dias |
+| CDI | Banco Central, série SGS 12 | taxa corrente, e recuo — a média decenal — quando falta curva |
 | Índice de mercado | brapi `^BVSP` | para Rm e cálculo local de beta |
 
 Limitações conhecidas dos dados estão catalogadas em
-[`PLANO_ARQUITETURA.md`](PLANO_ARQUITETURA.md) §0.4 e §2.3.
+[`PLANO_ARQUITETURA.md`](PLANO_ARQUITETURA.md) §0.4 e §2.3 — que está
+congelado —, e as de hoje, no
+[plano do motor de referência](docs/plano-motor-de-referencia.md).
 
 ## Estrutura
 

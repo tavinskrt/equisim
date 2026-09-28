@@ -11,6 +11,92 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## A rodada do C8 — a definição do R3, a RENT3, a Selic prevista, B32 e D6 (27/09/2026)
+
+**O usuário decidiu o C8.** Nas palavras dele: se o projeto mostra que não é
+possível comprovar habilidade com nenhum motor, «não nos resta nada além de
+declarar que a habilidade do motor está testada, com o poder declarado», e o
+motor «não atinge nossos critérios de poder tomar a decisão por si só» e «serve
+para uso pessoal na maioria dos casos». Registrado na decisão 140. **Com ela as
+três condições valem juntas, e o motor é motor de referência pela definição
+escolhida** — não pela de 09/09/2026, que exigia habilidade comprovada e
+continua não atingida. A mensagem trouxe também uma pergunta sobre a RENT3, um
+pedido do orientador e a observação de que os documentos estão, em boa parte,
+desatualizados. Ficou tudo registrado como apontamento de 27/09.
+
+**A RENT3 a R$ 0,10 não era conta errada, e mesmo assim achou um defeito.**
+Reproduzida com os dados de 25/09, ela é recusada pela curva do dia e sai entre
+R$ 0,06 e R$ 1,12 com outras fontes de taxa. A operação vale pouco mais que a
+dívida líquida de R$ 33 bi, com ROIC de 10,8% a 13,8% contra custo de capital de
+17% a 20%, e o capital próprio começa em 4% a 7% do valor da firma: **conta
+certa, informação nenhuma**, e a tela não diz isso. Virou a proposta B34, que
+espera decisão, porque recusar é mudança de método. No rastro dela estava o
+**B32**: o aviso do custo da dívida dizia «14,5%, fora da faixa de 14,0% a
+24,0%» e atribuía os 23,0% à alavancagem, quando o observado estava dentro da
+faixa e os 9 p.p. vinham da cobertura. O texto era o de antes das decisões 31 e
+130. Reescrito com teste para os dois lados da faixa, ele muda em 69 ativos do
+gabarito e contradizia a conta em 14. Nenhum preço mudou.
+
+**O pedido do orientador partia do motor antigo.** «A mediana da Selic do
+passado» foi a taxa estrutural até a decisão 84; desde 14/09 a taxa de cada ano
+é o forward da curva do Tesouro, 4 pontos acima do Focus no longo prazo. Medido
+sobre a entrada congelada: **trocar a curva pelo Focus sobe o preço justo
+mediano em 18% (mediana dos cinco anos) ou 33% (trajetória)**, leva o potencial
+mediano de −45% a −42% ou −40% e mexe pouco na ordenação (postos de 0,99 e
+0,97). Trocar a média do passado pela mediana prevista, que é o que o pedido
+nomeia, os **baixaria**. A recomendação registrada é não trocar a base. O Focus
+é previsão da Selic de curto prazo, sem o prêmio de prazo que o prefixado paga
+hoje, e descontar por ele superavalia os fluxos longos. O caminho que serve ao
+orientador é o Focus como sensibilidade declarada. Virou o B33, que espera
+decisão. **E a medição achou o que o orientador provavelmente viu**: o pacote da
+curva é de 10/09, e a web, que só lê o pacote, está desde 17/09 na média decenal
+— a própria «Selic do passado».
+
+**No meio da rodada, o commit.** O usuário commitou a rodada de 25/09
+(`c375987`) enquanto esta corria, com os selos da série «motor da data»
+`9b5030dd…`. A correção do B32 muda a impressão do núcleo e não muda previsão
+nenhuma; ela entra na próxima selagem trimestral, e nenhum selo foi refeito.
+
+### O que a auditoria reprovou
+
+**A ferramenta nova reprovou três vezes, e as três procediam no código novo**: a
+média de dez forwards era aritmética, a contagem de anos usava datas locais, e a
+última reprovação lia a perpetuidade da trajetória como a média decenal. Esta
+não procedia na conta — com curva, o motor usa o forward terminal dela, e a
+medição mostra 10% —, mas uma linha deixou a intenção explícita no código. Duas
+advertências, mediana vazia e divisão pela projeção de um ano, foram corrigidas
+junto.
+
+### O que as lentes disseram
+
+**A `risco` achou o D6, e ele era pior do que o achado dizia.** Ela apontou que
+o teste da tolerância da brapi, reforçado em 25/09, aceitava resposta parcial.
+O código mostrou a consequência: o `upsert` do cache gravava nulo em todo campo
+ausente, e **a receita de R$ 213 bi da PETR4 virava nula no disco** quando a
+rota do DRE vinha corrompida. Agora o campo ausente não é gravado. O teste novo
+reprova o código antigo, o que foi conferido revertendo a correção. Os dois
+achados locais dela também entraram: a fusão dos demonstrativos conferida
+exercício a exercício, com um ano faltando de propósito, e o pacote da CVM
+exigindo conteúdo em cada documento.
+
+**A `nucleo` devolveu três já inventariados**: o snapshot com o valor de mercado
+de hoje, as listas paralelas do diagnóstico e a unidade em texto no rastro, que
+não é tela. A disciplina dela passou a registrá-los.
+
+**A `metodo` e a `dados` não acharam nada.**
+
+**Com os documentos fechados, a `rumo` não achou nada, e a `registro` achou a
+tabela de fontes do README parada antes da CVM**: cotações «não ajustadas por
+proventos — que o domínio não modela», fundamentos só da brapi, setor da brapi
+e taxa livre de risco pelo CDI. Reescrita com as fontes que os providers leem.
+Ela também reapontou os dois apontamentos pendentes, que esperam as decisões
+do usuário — o de 09/09, sobre o peso do preço justo na tela, e o de hoje, com
+o B33 e o B34. **É uma amostra do que o usuário disse na mensagem**: os
+documentos que nenhuma decisão ligou envelhecem, e só uma rodada de
+reconciliação os pega todos.
+
+---
+
 ## A rodada do B28 e do fim do C7 — capital posterior, B29, B30, B31 e a série pré-registrada pelo commit (25/09/2026)
 
 **O usuário aprovou o B28 e a finalização do C7**, deixou o C8 para depois

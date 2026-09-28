@@ -90,5 +90,7 @@ do critério. É a leitura mais informativa que os dados sustentam.
 2025, **para nenhum motor**, no critério que o projeto fixou para 36 meses. O
 que é atingível — e está atingido — é **habilidade testada, com o poder
 declarado**: o motor foi medido pelo instrumento que se fixou antes de medir, a
-reprovação está registrada, e está dito até onde o instrumento enxerga. A
-decisão entre as duas leituras é do usuário (item C8).
+reprovação está registrada, e está dito até onde o instrumento enxerga.
+**Decidido em 27/09/2026**: o R3 é a segunda leitura
+([decisão 140](../decisoes/140-o-r3-e-habilidade-testada-com-o-poder-declarado.md)),
+e a primeira fica para a réplica do C7.

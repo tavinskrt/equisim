@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-25, a partir de `e856ec6`.
+Gerado em 2026-09-28, a partir de `c375987`.
 
 ## Decisões registradas
 
-**113** aceita · **2** cumprida · **6** substituída
+**114** aceita · **2** cumprida · **6** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -136,12 +136,14 @@ Gerado em 2026-09-25, a partir de `e856ec6`.
 | 137 | A contagem por data da coorte recebe o evento de ações que o FRE ainda não absorveu | aceita | voce | 2026-09-24 |
 | 138 | A série pré-registrada do C7 sai do commit dela, reproduzida ao último dígito, e a leitura traz as duas séries | aceita | voce | 2026-09-25 |
 | 139 | Os proventos da mesma data ex entram juntos no fator de retorno total | aceita | voce | 2026-09-25 |
+| 140 | O R3 é «habilidade testada, com o poder declarado», e o motor de referência não autoriza decisão sozinho | aceita | voce | 2026-09-27 |
 
 ## Caixa de entrada
 
-1 apontamento(s) não convertidos em decisão:
+2 apontamento(s) não convertidos em decisão:
 
 - `2026-09-09-voce.md`
+- `2026-09-27-voce.md`
 
 ## Superfície medida
 
@@ -149,16 +151,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 63 | 22.233 |
+| Nucleo de dominio | 65 | 22.460 |
 | Apresentacao | 37 | 16.507 |
-| Camada de dados | 24 | 3.718 |
-| Testes do app | 47 | 8.955 |
-| Testes do nucleo | 43 | 15.484 |
-| Ferramentas de QA | 20 | 6.738 |
+| Camada de dados | 25 | 3.768 |
+| Testes do app | 48 | 9.282 |
+| Testes do nucleo | 45 | 15.902 |
+| Ferramentas de QA | 20 | 6.745 |
 
 ## Histórico recente
 
 ```
+2026-09-27  c375987  Refino do motor de valuation (parte 25)
 2026-09-24  e856ec6  Refino do motor de valuation (parte 24)
 2026-09-22  e1a843d  Refino do motor de valuation (parte 23)
 2026-09-22  2a19372  Refino do motor de valuation (parte 21)
@@ -173,5 +176,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-15  92f0bef  Refino do motor de valuation (parte 14)
 2026-09-14  cfc5517  Refino do motor de valuation (parte 13)
 2026-09-14  b688eeb  Refino do motor de valuation (parte 12)
-2026-09-14  7d43639  Refino do motor de valuation (parte 11)
 ```

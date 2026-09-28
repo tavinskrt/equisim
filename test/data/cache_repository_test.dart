@@ -627,6 +627,56 @@ void main() {
       expect(r.unwrap().length, gravada.length);
     });
 
+    test('resposta parcial não apaga do disco o que ela não trouxe', () async {
+      // Lente `risco`, 27/09/2026. A fonte tolera uma rota com corpo de forma
+      // errada e devolve os exercícios sem aquela demonstração; o `upsert`
+      // gravava nulo por cima do valor bom, e o cache ficava pior que a
+      // resposta.
+      final ticker = Ticker.parse('PETR4');
+      const rotas = {
+        '/v2/stocks/statistics?symbols=PETR4&mode=history':
+            'brapi_statistics_history_petr4',
+        '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
+        '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+        '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+        '/v2/stocks/statistics?symbols=PETR4&mode=current':
+            'brapi_statistics_current_petr4',
+      };
+      final inteira = (await FundamentalsRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: rotas))),
+        cache: db,
+      ).history(ticker))
+          .unwrap();
+      final comReceita = {
+        for (final s in inteira)
+          if (s.totalRevenue != null) s.fiscalPeriodEnd: s.totalRevenue,
+      };
+      expect(comReceita, isNotEmpty, reason: 'a premissa: o DRE foi gravado');
+      await db.customStatement('DELETE FROM cache_entries');
+
+      final parcial = await FundamentalsRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(
+          routes: {
+            for (final e in rotas.entries)
+              if (e.key != '/v2/stocks/income-statement') e.key: e.value,
+          },
+          bodies: {
+            '/v2/stocks/income-statement':
+                '{"results":[{"incomeStatementHistory":"não é lista"}]}',
+          },
+        ))),
+        cache: db,
+      ).history(ticker);
+      expect(parcial.isOk, isTrue);
+      final lidos = {
+        for (final s in parcial.unwrap()) s.fiscalPeriodEnd: s.totalRevenue,
+      };
+      for (final e in comReceita.entries) {
+        expect(lidos[e.key], e.value,
+            reason: 'a receita de ${e.key.year} estava no disco');
+      }
+    });
+
     test('sem cache, a falha da fonte é reportada', () async {
       final fora = FundamentalsRepositoryImpl(
         remote: BrapiDatasource(clientWith(FixtureAdapter(

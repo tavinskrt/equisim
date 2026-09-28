@@ -241,6 +241,16 @@ class PriceRepositoryImpl implements PriceRepository {
 }
 
 /// Fundamentos e perfil cadastral.
+/// O campo que a resposta trouxe, ou ausente — e o ausente **não apaga** o que
+/// está em disco (lente `risco`, 27/09/2026).
+///
+/// A fonte tolera uma rota com corpo de forma errada e devolve os exercícios
+/// sem aquela demonstração. Gravar `Value(null)` nesses campos trocava o valor
+/// bom do disco por nulo, e o cache — que existe para servir quando a fonte
+/// falha — ficava pior que a resposta. Com `Value.absent()`, o `upsert` só
+/// mexe no que chegou.
+Value<double?> _campo(double? v) => v == null ? const Value.absent() : Value(v);
+
 class FundamentalsRepositoryImpl implements FundamentalsRepository {
   /// Fonte remota dos fundamentos e do perfil.
   final BrapiDatasource remote;
@@ -294,36 +304,36 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
         CachedFundamentalsTableCompanion.insert(
           ticker: ticker.value,
           fiscalPeriodEnd: BrapiJson.isoDay(s.fiscalPeriodEnd),
-          totalRevenue: Value(s.totalRevenue),
-          ebit: Value(s.ebit),
-          ebitda: Value(s.ebitda),
-          netIncome: Value(s.netIncome),
-          incomeBeforeTax: Value(s.incomeBeforeTax),
-          incomeTaxExpense: Value(s.incomeTaxExpense),
-          interestExpense: Value(s.interestExpense),
-          earningsPerShare: Value(s.earningsPerShare),
-          cash: Value(s.cash),
-          shortTermInvestments: Value(s.shortTermInvestments),
-          shortTermDebt: Value(s.shortTermDebt),
-          longTermDebt: Value(s.longTermDebt),
-          totalStockholderEquity: Value(s.totalStockholderEquity),
-          bookValuePerShare: Value(s.bookValuePerShare),
-          operatingCashFlow: Value(s.operatingCashFlow),
-          investmentCashFlow: Value(s.investmentCashFlow),
-          freeCashFlow: Value(s.freeCashFlow),
-          sharesOutstanding: Value(s.sharesOutstanding),
-          sharesOutstandingAsOf: Value(s.sharesOutstandingAsOf),
-          nopat: Value(s.nopat),
-          propertyPlantEquipment: Value(s.propertyPlantEquipment),
-          intangibleAssets: Value(s.intangibleAssets),
-          totalCurrentAssets: Value(s.totalCurrentAssets),
-          currentLiabilities: Value(s.currentLiabilities),
-          realizedShareCapital: Value(s.realizedShareCapital),
-          profitReserves: Value(s.profitReserves),
-          marketCap: Value(s.marketCap),
-          enterpriseToEbitda: Value(s.enterpriseToEbitda),
-          minorityInterest: Value(s.minorityInterest),
-          equityIncomeResult: Value(s.equityIncomeResult),
+          totalRevenue: _campo(s.totalRevenue),
+          ebit: _campo(s.ebit),
+          ebitda: _campo(s.ebitda),
+          netIncome: _campo(s.netIncome),
+          incomeBeforeTax: _campo(s.incomeBeforeTax),
+          incomeTaxExpense: _campo(s.incomeTaxExpense),
+          interestExpense: _campo(s.interestExpense),
+          earningsPerShare: _campo(s.earningsPerShare),
+          cash: _campo(s.cash),
+          shortTermInvestments: _campo(s.shortTermInvestments),
+          shortTermDebt: _campo(s.shortTermDebt),
+          longTermDebt: _campo(s.longTermDebt),
+          totalStockholderEquity: _campo(s.totalStockholderEquity),
+          bookValuePerShare: _campo(s.bookValuePerShare),
+          operatingCashFlow: _campo(s.operatingCashFlow),
+          investmentCashFlow: _campo(s.investmentCashFlow),
+          freeCashFlow: _campo(s.freeCashFlow),
+          sharesOutstanding: _campo(s.sharesOutstanding),
+          sharesOutstandingAsOf: _campo(s.sharesOutstandingAsOf),
+          nopat: _campo(s.nopat),
+          propertyPlantEquipment: _campo(s.propertyPlantEquipment),
+          intangibleAssets: _campo(s.intangibleAssets),
+          totalCurrentAssets: _campo(s.totalCurrentAssets),
+          currentLiabilities: _campo(s.currentLiabilities),
+          realizedShareCapital: _campo(s.realizedShareCapital),
+          profitReserves: _campo(s.profitReserves),
+          marketCap: _campo(s.marketCap),
+          enterpriseToEbitda: _campo(s.enterpriseToEbitda),
+          minorityInterest: _campo(s.minorityInterest),
+          equityIncomeResult: _campo(s.equityIncomeResult),
         ),
       ]);
       await db.touch(CachePolicy.fundamentalsKey(ticker.value));

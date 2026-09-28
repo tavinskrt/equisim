@@ -45,6 +45,22 @@ void main() {
     for (final e in brutos.entries) {
       expect(documentos[e.key]?.length, (e.value as List).length,
           reason: '${e.key}: documento que o codec não consegue ler');
+      // **E o que foi lido tem conteúdo** (lente `risco`, 27/09/2026): um
+      // codec que deixasse de mapear datas ou contas manteria a contagem e
+      // entregaria documentos vazios.
+      for (final d in documentos[e.key] ?? const <CvmPeriodDocument>[]) {
+        expect(d.periodEnd.isAfter(d.periodStart), isTrue,
+            reason: '${e.key}: período de ${d.periodStart} a ${d.periodEnd}');
+        final c = d.current;
+        expect(
+          c.totalStockholderEquity != null ||
+              c.totalRevenue != null ||
+              c.netIncome != null,
+          isTrue,
+          reason: '${e.key} ${d.periodEnd}: documento sem patrimônio, receita '
+              'nem lucro',
+        );
+      }
     }
   });
 }

@@ -218,6 +218,11 @@ padrão.
 2,4 e 3,0 p.p. contra o limite de 5 ([cobertura_banda.md](cobertura_banda.md)
 §12). **O R2 continua atingido.**
 
+**E o R3 mudou de definição em 27/09/2026**: o usuário escolheu «habilidade
+testada, com o poder declarado» ([decisão 140](../decisoes/140-o-r3-e-habilidade-testada-com-o-poder-declarado.md)),
+e é o que esta seção e a §10 entregam — o critério medido, não passando, e o
+poder declarado em [poder_r3.md](poder_r3.md).
+
 ## 10. Com a cópia dos insumos corrigida — remedido em 24/09/2026
 
 **O backtest foi reexecutado por causa do item B27** ([decisão 132](../decisoes/132-a-copia-dos-insumos-passa-por-um-lugar-so.md)):

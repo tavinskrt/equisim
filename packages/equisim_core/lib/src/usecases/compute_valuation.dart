@@ -3416,17 +3416,13 @@ abstract final class ValuationCascade {
       );
     }
     if (!semDividaContratada && coc.costOfDebtWasClamped) {
-      final alavancagem = latest.netDebtToEbitda;
-      warnings.add(
-        'O custo da dívida implícito nos demonstrativos deu '
-        '${_pct(kd!)} a.a., fora da faixa defensável de '
-        '${_pct(referencia)} a '
-        '${_pct(referencia + CostOfCapital.maxCreditSpread)}. A despesa '
-        'financeira publicada inclui arrendamento e variação cambial, que não '
-        'são captação. Adotado ${_pct(coc.effectiveCostOfDebt)} a.a., da '
-        'classificação sintética por alavancagem'
-        '${alavancagem == null ? ' (dívida líquida sobre EBITDA não medível)' : ' de ${alavancagem.toStringAsFixed(2)}x'}.',
-      );
+      warnings.add(_avisoDoCustoDaDivida(
+        observado: kd!,
+        adotado: coc.effectiveCostOfDebt,
+        referencia: referencia,
+        alavancagem: latest.netDebtToEbitda,
+        cobertura: latest.interestCoverage,
+      ));
     }
     if (coc.waccWasFloored) {
       warnings.add(
@@ -3498,6 +3494,53 @@ abstract final class ValuationCascade {
 
   static String _pct(double fraction) =>
       '${(fraction * 100).toStringAsFixed(1)}%';
+
+  /// O aviso de quando o custo da dívida adotado se afasta do observado.
+  ///
+  /// **Descreve a regra que a conta aplica** (item B32). Até 27/09/2026 ele
+  /// dizia a regra de antes das decisões 31 e 130 — o observado «fora da faixa
+  /// defensável» e o adotado «da classificação sintética por alavancagem» —
+  /// mesmo quando o observado caía **dentro** da faixa e o prêmio vinha da
+  /// cobertura: a RENT3 lia «14,5%, fora da faixa de 14,0% a 24,0%» e um custo
+  /// de 23,0% atribuído à alavancagem de 2,40x, cujo prêmio é de 2,4 p.p. A
+  /// regra é a de [CostOfCapital.syntheticSpread]: a faixa decide se a
+  /// cobertura pode falar, vale o prêmio mais exigente, e o observado nunca
+  /// entra na taxa.
+  static String _avisoDoCustoDaDivida({
+    required double observado,
+    required double adotado,
+    required double referencia,
+    required double? alavancagem,
+    required double? cobertura,
+  }) {
+    final teto = referencia + CostOfCapital.maxCreditSpread;
+    final dentro = observado >= referencia && observado <= teto;
+    final porAlavancagem = CostOfCapital.leverageSpread(alavancagem);
+    final porCobertura = CostOfCapital.coverageSpread(cobertura);
+    final alav = alavancagem == null || !alavancagem.isFinite
+        ? 'alavancagem, que não é medível'
+        : 'alavancagem de ${alavancagem.toStringAsFixed(2)}x de dívida líquida '
+            'sobre EBITDA';
+    final cob = cobertura == null || !cobertura.isFinite
+        ? 'cobertura de juros, que não é medível'
+        : 'cobertura de juros de ${cobertura.toStringAsFixed(2)}x';
+    final pelaCobertura = dentro && porCobertura > porAlavancagem;
+    final faixa = 'da faixa defensável de ${_pct(referencia)} a ${_pct(teto)}';
+    final origem = dentro
+        ? 'A razão observada caiu dentro $faixa, e por isso a despesa é juro e '
+            'a cobertura também fala: vale o prêmio mais exigente entre a $cob '
+            'e a $alav — o da ${pelaCobertura ? 'cobertura' : 'alavancagem'}, '
+            'de ${_pct(pelaCobertura ? porCobertura : porAlavancagem)}.'
+        : 'A razão observada caiu fora $faixa, e por isso mede outra coisa — '
+            'arrendamento, variação cambial —: a cobertura sai da conta, e o '
+            'prêmio é o da $alav, de ${_pct(porAlavancagem)}.';
+    return 'O custo da dívida implícito nos demonstrativos deu '
+        '${_pct(observado)} a.a., e o adotado é ${_pct(adotado)} a.a. O '
+        'desconto usa sempre a taxa livre de risco mais o prêmio da '
+        'classificação sintética: o custo de capital pede o de captar hoje, e '
+        'a despesa publicada carrega dívida antiga, arrendamento e variação '
+        'cambial. $origem';
+  }
 
   static String _milhoes(double reais) =>
       '${(reais / 1e6).toStringAsFixed(1)} milhões';
