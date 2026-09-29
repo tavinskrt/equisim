@@ -72,10 +72,13 @@ function git(args: string[], cwd: string): string {
 function listar(root: string, caminhos: string[]): string[] {
   const existentes = caminhos.filter((c) => existsSync(join(root, c)));
   if (existentes.length === 0) return [];
+  // O indice ainda lista o arquivo apagado e nao commitado; a lente o leria
+  // como presente (28/09/2026: `docs/refinamento-do-valuation.md`, retirado
+  // pela decisao 141, voltou como "nao foi apagado"). So o que existe no disco.
   return git(['ls-files', '--cached', '--others', '--exclude-standard', '--', ...existentes], root)
     .split('\n')
     .map((l) => l.trim())
-    .filter((l) => l !== '');
+    .filter((l) => l !== '' && existsSync(join(root, l)));
 }
 
 /**
@@ -143,10 +146,17 @@ function blocosDeMaterial(root: string, material: Material): Bloco[] {
       // Os novos que o `.gitignore` nao exclui tambem: a arvore que a lente
       // `registro` confronta com o registro e a do commit que vem, e nao a do
       // ultimo (ver [listar]).
+      // Tambem so o que existe no disco: o apagado e nao commitado ainda esta
+      // no indice (ver [listar]).
       const arquivos = git(['ls-files', '--cached', '--others', '--exclude-standard'], root)
         .split('\n')
         .map((l) => l.trim())
-        .filter((l) => l !== '' && !excluir.some((p) => l.startsWith(p)));
+        .filter(
+          (l) =>
+            l !== '' &&
+            !excluir.some((p) => l.startsWith(p)) &&
+            existsSync(join(root, l)),
+        );
       return [
         {
           origem: '(arvore completa do repositorio)',

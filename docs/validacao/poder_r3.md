@@ -94,3 +94,11 @@ reprovação está registrada, e está dito até onde o instrumento enxerga.
 **Decidido em 27/09/2026**: o R3 é a segunda leitura
 ([decisão 140](../decisoes/140-o-r3-e-habilidade-testada-com-o-poder-declarado.md)),
 e a primeira fica para a réplica do C7.
+
+## Remedido em 28/09/2026
+
+Com o backtest refeito depois do item B37, o critério do R3 vai a 0,069 (`t`
+corrigido de 0,40). O efeito mínimo detectável com 80% de poder fica em
+**0,617**, e o limite superior que a amostra sustenta em 0,532. O
+book-to-market continua pedindo 66 coortes, disponíveis em 30/06/2037.
+

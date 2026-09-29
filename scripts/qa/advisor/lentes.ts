@@ -327,6 +327,15 @@ export const LENTES: Record<LenteId, Lente> = {
       '  e a aliquota cheia. O Lucro Presumido tem teto de receita que quase',
       '  nenhuma listada respeita. Recusado em 25/09/2026; so reaponte com uma',
       '  companhia avaliada que esteja no Presumido.',
+      'PONTO FLUTUANTE NO DCF NAO E PREMISSA A REABRIR. Cotacao, contagem de',
+      '  papeis e valores do fluxo descontado em `double`, convertidos para',
+      '  `Money` uma vez, na fronteira, e o arranjo aceito pela regra R1 do',
+      '  auditor ("NAO ACUSE -- caminho de calculo de fluxo descontado"): dez',
+      '  iteracoes acumulam erro de 1e-14, e normalizar em centavos no meio',
+      '  introduziria erro de meio centavo por ano. A acao inteira e regra da',
+      '  SIMULACAO, e a contagem de papeis em `double` serve a uma divisao.',
+      '  Levantado e recusado em 28/09/2026; tambem nao e tema desta lente,',
+      '  que questiona premissa financeira, e nao tipo.',
     ],
     materiais: [
       {

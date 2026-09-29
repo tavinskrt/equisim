@@ -5,7 +5,8 @@
 > 07/09/2026 e a banda `τ` não é mais aplicada. O que a substituiu é a convergência de
 > retorno — o fluxo-base deixa de ser aparado contra uma mediana e passa a ser derivado do
 > retorno sobre a base de capital, com o reinvestimento amarrado ao crescimento por
-> `b_t = g_t / retorno`. Ver a §5 do [refinamento](../refinamento-do-valuation.md).
+> `b_t = g_t / retorno`. A regra de hoje está no [capítulo 3 da documentação do motor](../motor/03-base-e-crescimento.md);
+> a §5 do documento de refinamento, apagado pela decisão 141, está no git (commit `6827219`).
 >
 > A medição que justificou `τ = 0,5` continua válida como registro do problema que motivou a
 > troca, e é por isso que o documento fica. O código que ele cita não existe mais — o link

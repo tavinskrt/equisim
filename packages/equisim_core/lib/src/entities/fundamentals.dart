@@ -343,14 +343,16 @@ class FundamentalsSnapshot {
 
   /// Cobertura de juros: `EBIT ÷ despesa financeira`.
   ///
-  /// **Serve ao escudo fiscal, e só a ele** — ver
-  /// `CostOfCapital.effectiveTaxShield`. Ali a contaminação por arrendamento e
-  /// variação cambial não atrapalha, e até ajuda: a pergunta é se há lucro
-  /// tributável que absorva a dedução, e juro de arrendamento e perda cambial
-  /// **também são dedutíveis**. O total é a grandeza certa para essa conta.
+  /// **Serve ao escudo fiscal** — ver `CostOfCapital.effectiveTaxShield`. Ali a
+  /// contaminação por arrendamento e variação cambial não atrapalha, e até
+  /// ajuda: a pergunta é se há lucro tributável que absorva a dedução, e juro
+  /// de arrendamento e perda cambial **também são dedutíveis**.
   ///
-  /// O prêmio de crédito passou a vir da alavancagem — ver [netDebtToEbitda] —,
-  /// porque ali a contaminação distorce.
+  /// **E ao prêmio de crédito, só quando a despesa é juro de verdade**
+  /// (decisão 130): a cobertura fala quando `despesa ÷ dívida bruta` cai entre
+  /// a taxa livre de risco e ela mais 10 p.p., e vale o maior entre o prêmio
+  /// dela e o da alavancagem — ver [netDebtToEbitda]. Fora da faixa, a
+  /// contaminação distorce, e só a alavancagem fala.
   ///
   /// Devolve `null` sem EBIT ou sem despesa financeira, e **zero** quando o
   /// EBIT é negativo: quem não gera resultado operacional não cobre juro

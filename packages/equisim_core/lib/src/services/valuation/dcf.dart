@@ -87,10 +87,11 @@ class DcfAssumptions {
   /// Taxa de desconto de **equilíbrio**, usada na perpetuidade e como destino do
   /// decaimento, em fração.
   ///
-  /// É o mesmo custo de capital montado sobre a taxa livre de risco estrutural —
-  /// a média decenal do CDI — em vez da corrente. Existe porque o modelo não tem
-  /// curva de juros: sem ela, um indexador *overnight* precificava fluxo
-  /// perpétuo, e no topo do ciclo monetário isso esmagava todo valor terminal.
+  /// É o mesmo custo de capital montado sobre a taxa livre de risco estrutural
+  /// em vez da corrente: com a curva do Tesouro, o forward depois do fim da
+  /// projeção (decisão 74); sem ela, a média decenal do CDI. Sem essa taxa, um
+  /// indexador *overnight* precificaria fluxo perpétuo, e no topo do ciclo
+  /// monetário isso esmagava todo valor terminal.
   ///
   /// Como `K_e = R_f + β·prêmio` e `WACC = w_E K_e + w_D K_d(1−T)` são afins em
   /// `R_f`, decair o custo de capital linearmente é **idêntico** a decair a taxa
@@ -140,9 +141,9 @@ class DcfAssumptions {
   /// ```
   ///
   /// **O preço disso é declarado**: o terminal volta a depender de `g_∞`, que o
-  /// retorno neutro havia eliminado. Por isso a ativação é restrita e cumulativa
-  /// — ver `ValuationParameters.moatRetainedSpread` e as três condições que a
-  /// cascata exige.
+  /// retorno neutro havia eliminado. Por isso a ativação é restrita — ver
+  /// `GrowthGuards.residualMoat`, que só a concede com histórico, crescimento
+  /// orgânico e persistência medida do excedente (decisão 36).
   final double? terminalReturnOnCapital;
 
   /// Margem de segurança sobre o preço justo, em fração.
@@ -156,8 +157,12 @@ class DcfAssumptions {
   /// ano dez, e com ela se movem `Ke` e `WACC`. Ver
   /// [`identidade_das_vias.md`](../../../../../docs/validacao/identidade_das_vias.md).
   ///
-  /// Nulo mantém a interpolação de dois pontos, que é o comportamento
-  /// anterior. Preenchido, precisa ter exatamente [projectionYears] posições —
+  /// **E porque a taxa livre de risco tem curva** (decisão 74, item B37): sem o
+  /// ponto fixo, a cascata preenche o caminho com o custo de capital de hoje
+  /// remontado sobre o forward de cada ano.
+  ///
+  /// Nulo mantém a interpolação de dois pontos — o que vale sem curva.
+  /// Preenchido, precisa ter exatamente [projectionYears] posições —
   /// [DcfCalculator] recusa quando não tem.
   final List<double>? discountRatePath;
 
@@ -402,7 +407,16 @@ class DcfOutcome {
   /// Valor da firma, ou o valor por papel quando o fluxo já é do acionista.
   final double enterpriseValue;
 
-  /// Valor do equity: [enterpriseValue] menos a dívida líquida.
+  /// Valor do capital próprio da controladora, **na escala do fluxo**.
+  ///
+  /// Nas rotas da firma o fluxo é agregado, e este é o capital próprio inteiro
+  /// em reais; em [DcfCalculator.shareholder] o fluxo já é lucro por papel, e
+  /// este é o valor **por papel**, igual a [fairValuePerShare]. Quem o usa
+  /// dentro do motor usa em razão contra outra grandeza da mesma rota — a
+  /// participação do terminal, o peso do excedente —, que não depende da
+  /// escala. Quem precisar do capital próprio em reais nas duas vias
+  /// multiplica [fairValuePerShare] pelo divisor da ponte (lente `metodo`,
+  /// 28/09/2026).
   final double equityValue;
 
   /// Preço justo por papel.
@@ -456,6 +470,39 @@ class DcfOutcome {
   /// `null` nos mesmos casos de [discountedTerminalExcess].
   final double? impliedTerminalReturn;
 
+  /// Taxa que descontou o fluxo de cada ano, do ano 1 ao N — `Ke` no fluxo do
+  /// acionista derivado, e a do caminho das premissas nos outros dois.
+  ///
+  /// **Existe para o rastro descrever a conta que foi feita** (item B35). O
+  /// rastro da via da firma montava o fator de desconto com o `WACC` e
+  /// mostrava ao lado o valor presente do fluxo do acionista, descontado ao
+  /// `Ke`: «fluxo ÷ fator» não dava o valor presente escrito.
+  final List<double>? discountRates;
+
+  /// Taxa que capitalizou o valor terminal descontado aqui.
+  final double? terminalDiscountRateUsed;
+
+  /// Fluxo da firma de cada ano, **antes** do serviço da dívida — só no fluxo
+  /// do acionista derivado, onde ele é o ponto de partida (item B35).
+  final List<double>? firmFlows;
+
+  /// Serviço líquido da dívida de cada ano, que separa o fluxo da firma do
+  /// fluxo do acionista: `D_bruta·K_d(1−τ) − C·R_f(1−τ) − D_líquida·g`.
+  final List<double>? debtService;
+
+  /// Valor terminal **da firma** no ano N, antes da conversão para o
+  /// acionista — só no fluxo do acionista derivado.
+  final double? firmTerminalValue;
+
+  /// Fluxo da firma do ano N+1, que o terminal do acionista parte.
+  final double? terminalFirmFlow;
+
+  /// Serviço líquido da dívida do ano N+1.
+  final double? terminalDebtService;
+
+  /// Fluxo do acionista do ano N+1, que o terminal capitaliza.
+  final double? terminalEquityFlow;
+
   /// Agrupa a saída já calculada.
   const DcfOutcome({
     required this.projectedFlows,
@@ -469,6 +516,14 @@ class DcfOutcome {
     this.equityShare = 1.0,
     this.discountedTerminalExcess,
     this.impliedTerminalReturn,
+    this.discountRates,
+    this.terminalDiscountRateUsed,
+    this.firmFlows,
+    this.debtService,
+    this.firmTerminalValue,
+    this.terminalFirmFlow,
+    this.terminalDebtService,
+    this.terminalEquityFlow,
   });
 }
 
@@ -692,6 +747,8 @@ abstract final class DcfCalculator {
       fairValuePerShare: porPapel,
       discountedTerminalExcess: excedenteDescontado,
       impliedTerminalReturn: p.retornoImplicitoTerminal,
+      discountRates: p.taxas,
+      terminalDiscountRateUsed: assumptions.terminalDiscountRate,
       // **Contra o capital próprio, e não contra o valor da firma**
       // (decisão 51). A pergunta que a ressalva `terminalPesado` faz é quanto
       // do **preço** repousa sobre a perpetuidade, e o preço é o capital
@@ -716,7 +773,9 @@ abstract final class DcfCalculator {
 
   /// DCF sobre o fluxo do acionista **derivado do da firma**, descontado ao Ke.
   ///
-  /// `FCFE_t = FCFF_t − D_{t−1}·[Kd·(1−τ) − g_t]`
+  /// `FCFE_t = FCFF_t − [D^b_{t−1}·Kd_t·(1−τ) − C_{t−1}·Rc_t·(1−τ) − D_{t−1}·g_t]`,
+  /// com `D^b` a dívida bruta, `C` o caixa e `D = D^b − C` a líquida. Sem
+  /// caixa, colapsa em `D_{t−1}·[Kd·(1−τ) − g_t]`.
   ///
   /// **Por que existe, e o que ela não é.** A via do acionista que a decisão 25
   /// criou parte do LPA publicado — outro dado, de outras linhas —, e por isso
@@ -747,8 +806,10 @@ abstract final class DcfCalculator {
   /// - [costOfDebt]: `Kd` **antes** do escudo fiscal.
   /// - [taxRate]: alíquota do escudo, a marginal.
   /// - [equityDiscountRate]: `Ke` do primeiro ano.
-  /// - [terminalEquityDiscountRate]: `Ke` de equilíbrio. Decai linearmente do
-  ///   primeiro ao último, como o desconto da firma.
+  /// - [terminalEquityDiscountRate]: `Ke` de equilíbrio. Sem
+  ///   [equityDiscountRatePath], o `Ke` decai linearmente do primeiro a ele.
+  /// - [equityDiscountRatePath]: `Ke` de cada ano — o resolvido pelo ponto
+  ///   fixo, ou o montado sobre a curva (item B37).
   static Result<DcfOutcome> equityFromFirm({
     required double baseProfit,
     required DcfAssumptions assumptions,
@@ -861,6 +922,8 @@ abstract final class DcfCalculator {
 
     final fluxos = <double>[];
     final descontados = <double>[];
+    final taxasUsadas = <double>[];
+    final servicos = <double>[];
     var soma = 0.0;
     var fator = 1.0;
     var divida = netDebt;
@@ -883,8 +946,10 @@ abstract final class DcfCalculator {
       final g = assumptions.growthAt(t);
       // `D_{t−1}` é a dívida no **início** do ano: o juro incide sobre ela, e o
       // acréscimo de dívida do ano é `D_{t−1}·g`.
-      final fcfe =
-          p.fluxos[t - 1] - servico(g, kd: kdEm(t), rc: caixaEm(t));
+      final servicoDoAno = servico(g, kd: kdEm(t), rc: caixaEm(t));
+      final fcfe = p.fluxos[t - 1] - servicoDoAno;
+      taxasUsadas.add(ke);
+      servicos.add(servicoDoAno);
       fluxos.add(fcfe);
       final vp = fcfe * assumptions.lift(ke) / fator;
       descontados.add(vp);
@@ -917,8 +982,8 @@ abstract final class DcfCalculator {
         : p.terminal;
     final fcffTerminal =
         perpetuoDaFirma * (assumptions.terminalDiscountRate - gInf);
-    final fcfeTerminal =
-        fcffTerminal - servico(gInf, kd: kdTerminal, rc: caixaTerminal);
+    final servicoTerminal = servico(gInf, kd: kdTerminal, rc: caixaTerminal);
+    final fcfeTerminal = fcffTerminal - servicoTerminal;
     final perpetuo = fcfeTerminal / spread;
     // **Com contrato que acaba, o terminal do acionista é o perpétuo truncado**
     // (decisões 88 e 102): o fluxo do acionista durante os anos que faltam, e o
@@ -995,6 +1060,14 @@ abstract final class DcfCalculator {
       equityShare: ev > 0 ? equity / ev : 0.0,
       discountedTerminalExcess: excedenteDescontado,
       impliedTerminalReturn: p.retornoImplicitoTerminal,
+      discountRates: List.unmodifiable(taxasUsadas),
+      terminalDiscountRateUsed: terminalEquityDiscountRate,
+      firmFlows: List.unmodifiable(p.fluxos),
+      debtService: List.unmodifiable(servicos),
+      firmTerminalValue: p.terminal,
+      terminalFirmFlow: fcffTerminal,
+      terminalDebtService: servicoTerminal,
+      terminalEquityFlow: fcfeTerminal,
     ));
   }
 
@@ -1041,6 +1114,8 @@ abstract final class DcfCalculator {
       terminalShare: porPapel > 0 ? p.terminalDescontado / porPapel : 0.0,
       discountedTerminalExcess: _descontadoComoOTerminal(p),
       impliedTerminalReturn: p.retornoImplicitoTerminal,
+      discountRates: p.taxas,
+      terminalDiscountRateUsed: assumptions.terminalDiscountRate,
     ));
   }
 
@@ -1110,6 +1185,7 @@ abstract final class DcfCalculator {
 
     final fluxos = <double>[];
     final descontados = <double>[];
+    final taxas = <double>[];
     var lucro = baseProfit;
     var soma = 0.0;
     // Capital investido implícito, **o que gera o lucro do ano seguinte**: o do
@@ -1127,6 +1203,7 @@ abstract final class DcfCalculator {
 
     for (var t = 1; t <= a.projectionYears; t++) {
       final r = a.discountRateAt(t);
+      taxas.add(r);
       fator *= 1 + r;
       lucro *= 1 + a.growthAt(t);
       if (t == 1 && a.returnOnCapital > 0) capital = lucro / a.returnOnCapital;
@@ -1151,6 +1228,7 @@ abstract final class DcfCalculator {
     return Ok(_Projection(
       fluxos: fluxos,
       descontados: descontados,
+      taxas: List.unmodifiable(taxas),
       somaDescontada: soma,
       terminal: vt,
       capitalFinal: capital.isFinite ? capital : null,
@@ -1174,6 +1252,9 @@ abstract final class DcfCalculator {
 class _Projection {
   final List<double> fluxos;
   final List<double> descontados;
+
+  /// A taxa de cada ano, como `discountRateAt` a deu.
+  final List<double> taxas;
   final double somaDescontada;
   final double terminal;
   final double terminalDescontado;
@@ -1193,6 +1274,7 @@ class _Projection {
   const _Projection({
     required this.fluxos,
     required this.descontados,
+    required this.taxas,
     required this.somaDescontada,
     required this.terminal,
     required this.terminalDescontado,

@@ -64,6 +64,31 @@ double _mediana(List<double> v) {
   return o.length.isOdd ? o[meio] : (o[meio - 1] + o[meio]) / 2;
 }
 
+/// A companhia do papel: as quatro letras que as classes compartilham.
+String _companhia(String ticker) =>
+    ticker.length >= 4 ? ticker.substring(0, 4) : ticker;
+
+/// Os múltiplos do grupo, **um por companhia**, sem a companhia [sem].
+///
+/// **Par é outra companhia** (item B41). A mediana contava cada classe como um
+/// par e incluía o próprio ativo: os sete «pares» de saneamento da SAPR11 eram
+/// SAPR3, SAPR4 e SAPR11 e mais quatro, a mediana caía na própria Sanepar, e a
+/// leitura de P/VP e a de EV/EBITDA devolviam, as duas, o preço da Sanepar na
+/// data do pacote — R$ 38,15 ao centavo. Cada companhia entra com a mediana
+/// das classes dela, e a do ativo avaliado não entra.
+List<double> _valores(List<_Par> grupo, MultipleKind k, {String? sem}) {
+  final porCompanhia = <String, List<double>>{};
+  for (final p in grupo) {
+    final c = _companhia(p.ticker);
+    if (c == sem) continue;
+    final m = p.mult(k);
+    if (m != null && m.isFinite && m > 0) {
+      porCompanhia.putIfAbsent(c, () => []).add(m);
+    }
+  }
+  return [for (final v in porCompanhia.values) _mediana(v)];
+}
+
 Future<void> main(List<String> args) async {
   final c = await Congelado.montar();
   try {
@@ -136,12 +161,8 @@ Future<void> main(List<String> args) async {
     }
 
     Map<String, Object?>? medianaDe(List<_Par> grupo, MultipleKind k,
-        String nome) {
-      final v = <double>[
-        for (final p in grupo)
-          if (p.mult(k) != null && p.mult(k)!.isFinite && p.mult(k)! > 0)
-            p.mult(k)!,
-      ];
+        String nome, {String? sem}) {
+      final v = _valores(grupo, k, sem: sem);
       if (v.length < _minimoDePares) return null;
       return {'mediana': _mediana(v), 'pares': v.length, 'grupo': nome};
     }
@@ -166,15 +187,21 @@ Future<void> main(List<String> args) async {
 
     // A ligação de cada ticker ao grupo que vale para ele: subsetor, setor,
     // mercado — na ordem, e **por múltiplo**, porque um subsetor pode ter pares
-    // bastantes para P/VP e não para EV/EBITDA.
+    // bastantes para P/VP e não para EV/EBITDA. A mediana de cada ticker é a
+    // do grupo **sem a companhia dele** (item B41), e o mínimo de pares vale
+    // sobre as outras companhias.
     final porTicker = <String, Map<String, Object?>>{};
     for (final p in pares) {
       final escolhido = <String, Object?>{};
+      final sem = _companhia(p.ticker);
       for (final k in MultipleKind.values) {
-        for (final chave in [p.subsetor, p.setor, _mercado]) {
-          if (chave == null) continue;
-          final g = grupos[chave];
-          final m = g?[k.name];
+        for (final (chave, membros) in [
+          (p.subsetor, porSubsetor[p.subsetor]),
+          (p.setor, porSetor[p.setor]),
+          (_mercado, pares),
+        ]) {
+          if (chave == null || membros == null) continue;
+          final m = medianaDe(membros, k, chave, sem: sem);
           if (m != null) {
             escolhido[k.name] = m;
             break;

@@ -2,48 +2,49 @@
   "avaliados": 97,
   "comTriangulacao": 97,
   "limiteDeDivergencia": 0.5,
-  "acimaDoLimite": 62,
+  "acimaDoLimite": 59,
   "divergencia": {
-    "p10": -0.06894965585727564,
-    "p25": 0.26531435449354435,
-    "mediana": 0.7339710685520249,
-    "p75": 2.1299774590667804,
-    "p90": 9.813245589097088
+    "p10": -0.1253465874913705,
+    "p25": 0.20800733620457912,
+    "mediana": 0.8743849352868014,
+    "p75": 2.4704748960506384,
+    "p90": 8.145890395506742
   },
-  "potencialMedianoDcf": -0.4544910179640719,
-  "potencialMedianoMultiplos": -0.032438068714051194,
-  "spearmanPotencial": 0.44537806838707283,
+  "potencialMedianoDcf": -0.4535928143712575,
+  "potencialMedianoMultiplos": -0.06575901757363034,
+  "spearmanPotencial": 0.35751104565537556,
   "leiturasAplicadasPorAtivo": {
     "1": 3,
-    "2": 24,
-    "3": 70
+    "2": 25,
+    "3": 69
   },
   "recusas": {
     "firmaEbitda: instituicaoFinanceira": 19,
     "precoLucro: baseNaoPositiva": 8,
-    "firmaEbitda: baseNaoPositiva": 3
+    "firmaEbitda: baseNaoPositiva": 3,
+    "firmaEbitda: ponteNaoPositiva": 1
   },
   "ativos": [
     {
       "ticker": "ABCB4",
       "setor": "financeiro",
-      "dcf": 22.84,
+      "dcf": 22.76,
       "preco": 25.05,
-      "potencial": -0.0882235528942116,
-      "multiplos": 27.40405582761278,
-      "divergencia": 0.20008149779588869,
+      "potencial": -0.09141716566866263,
+      "multiplos": 27.3370159647056,
+      "divergencia": 0.20125175284409802,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 29.660647849794376,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 29.548300251214737,
+          "mediana": 7.575204047829174,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 25.147463805431183,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 25.12573167819646,
+          "mediana": 0.9549247861576037,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -57,26 +58,26 @@
       "dcf": 10.25,
       "preco": 15.87,
       "potencial": -0.3541272841839949,
-      "multiplos": 11.78869246011641,
-      "divergencia": 0.1499579786300349,
+      "multiplos": 11.323615231746752,
+      "divergencia": 0.10459083793547963,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 11.78869246011641,
-          "mediana": 11.312135537756074,
-          "pares": 18,
+          "justo": 11.323615231746752,
+          "mediana": 10.865859018062256,
+          "pares": 16,
           "grupo": "consumo-nao-ciclico"
         },
         "precoPatrimonio": {
           "justo": 5.105882475029839,
           "mediana": 0.882401154924872,
-          "pares": 20,
+          "pares": 18,
           "grupo": "consumo-nao-ciclico"
         },
         "firmaEbitda": {
-          "justo": 11.952990142510863,
-          "mediana": 5.50151729317098,
-          "pares": 21,
+          "justo": 11.78538180929675,
+          "mediana": 5.4165255860687695,
+          "pares": 19,
           "grupo": "consumo-nao-ciclico"
         }
       }
@@ -87,26 +88,26 @@
       "dcf": 12.81,
       "preco": 28.44,
       "potencial": -0.54957805907173,
-      "multiplos": 26.330391480776886,
-      "divergencia": 1.055295090853051,
+      "multiplos": 19.060181212113097,
+      "divergencia": 0.4877977376305045,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 26.330391480776886,
-          "mediana": 13.90428719675229,
-          "pares": 10,
+          "justo": 19.060181212113097,
+          "mediana": 10.065107987051594,
+          "pares": 6,
           "grupo": "Exploração de Imóveis / Exploração de Imóveis"
         },
         "precoPatrimonio": {
-          "justo": 21.51023610351568,
-          "mediana": 0.7725370027279014,
-          "pares": 11,
+          "justo": 18.83423542823515,
+          "mediana": 0.6764288274837824,
+          "pares": 7,
           "grupo": "Exploração de Imóveis / Exploração de Imóveis"
         },
         "firmaEbitda": {
           "justo": 42.95225333127334,
           "mediana": 8.743931781638924,
-          "pares": 11,
+          "pares": 7,
           "grupo": "Exploração de Imóveis / Exploração de Imóveis"
         }
       }
@@ -117,56 +118,56 @@
       "dcf": 3.43,
       "preco": 13.02,
       "potencial": -0.7365591397849462,
-      "multiplos": 6.1330406782744005,
-      "divergencia": 0.7860720434676594,
+      "multiplos": 4.607489882406959,
+      "divergencia": 0.34179916638884467,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 4.407551556639244,
-          "mediana": 5.260669222466222,
-          "pares": 5,
-          "grupo": "Tecidos. Vestuário e Calçados / Calçados"
+          "justo": 4.893215635778474,
+          "mediana": 5.840337557766031,
+          "pares": 50,
+          "grupo": "consumo-ciclico"
         },
         "precoPatrimonio": {
-          "justo": 8.43235306886694,
-          "mediana": 1.7197075652781124,
-          "pares": 5,
-          "grupo": "Tecidos. Vestuário e Calçados / Calçados"
+          "justo": 3.7462475303050327,
+          "mediana": 0.7640157102833084,
+          "pares": 65,
+          "grupo": "consumo-ciclico"
         },
         "firmaEbitda": {
-          "justo": 6.1330406782744005,
-          "mediana": 5.655720955393789,
-          "pares": 5,
-          "grupo": "Tecidos. Vestuário e Calçados / Calçados"
+          "justo": 4.607489882406959,
+          "mediana": 4.446647500581092,
+          "pares": 65,
+          "grupo": "consumo-ciclico"
         }
       }
     },
     {
       "ticker": "ALUP11",
       "setor": "utilidade-publica",
-      "dcf": 18.22,
+      "dcf": 18.25,
       "preco": 33.4,
-      "potencial": -0.4544910179640719,
-      "multiplos": 43.675034571369444,
-      "divergencia": 1.3970371447872116,
+      "potencial": -0.4535928143712575,
+      "multiplos": 45.381071036253545,
+      "divergencia": 1.4861743829805856,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 43.675034571369444,
-          "mediana": 8.306325268955735,
-          "pares": 36,
+          "justo": 45.381071036253545,
+          "mediana": 8.63078737727691,
+          "pares": 20,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "precoPatrimonio": {
-          "justo": 59.16328260214548,
-          "mediana": 1.5506528665718355,
-          "pares": 41,
+          "justo": 63.05430543214109,
+          "mediana": 1.6526354719962741,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "firmaEbitda": {
-          "justo": 37.62095730255378,
-          "mediana": 6.600496828687227,
-          "pares": 41,
+          "justo": 44.3211829476978,
+          "mediana": 7.269698727417946,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         }
       }
@@ -177,23 +178,23 @@
       "dcf": 1.51,
       "preco": 4.99,
       "potencial": -0.6973947895791583,
-      "multiplos": 21.467861623251103,
-      "divergencia": 13.249950989928719,
+      "multiplos": 20.962311184197752,
+      "divergencia": 12.921388515486544,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
           "recusa": "baseNaoPositiva"
         },
         "precoPatrimonio": {
-          "justo": 21.895580567805347,
-          "mediana": 0.9213039460393759,
-          "pares": 72,
+          "justo": 20.934593872057086,
+          "mediana": 0.8808683507308859,
+          "pares": 65,
           "grupo": "consumo-ciclico"
         },
         "firmaEbitda": {
-          "justo": 21.040142678696856,
-          "mediana": 4.525187116565318,
-          "pares": 72,
+          "justo": 20.990028496338414,
+          "mediana": 4.5163766461771075,
+          "pares": 65,
           "grupo": "consumo-ciclico"
         }
       }
@@ -204,26 +205,26 @@
       "dcf": 1.93,
       "preco": 2.9,
       "potencial": -0.33448275862068966,
-      "multiplos": 4.975037372733352,
-      "divergencia": 1.5786794468794731,
+      "multiplos": 5.575234469265561,
+      "divergencia": 1.8897757866623817,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 4.975037372733352,
-          "mediana": 7.324206000463082,
-          "pares": 6,
+          "justo": 5.412513862627225,
+          "mediana": 7.968255018044998,
+          "pares": 5,
           "grupo": "Diversos / Serviços Educacionais"
         },
         "precoPatrimonio": {
-          "justo": 7.977653602100158,
-          "mediana": 1.0637973442738486,
-          "pares": 8,
+          "justo": 9.349478933420878,
+          "mediana": 1.2467263378168114,
+          "pares": 7,
           "grupo": "Diversos / Serviços Educacionais"
         },
         "firmaEbitda": {
-          "justo": 4.626737798857992,
-          "mediana": 4.014938860026994,
-          "pares": 7,
+          "justo": 5.575234469265561,
+          "mediana": 4.265657753102051,
+          "pares": 6,
           "grupo": "Diversos / Serviços Educacionais"
         }
       }
@@ -234,17 +235,17 @@
       "dcf": 0.31,
       "preco": 1.39,
       "potencial": -0.776978417266187,
-      "multiplos": 1.403438232621009,
-      "divergencia": 3.4715715656822272,
+      "multiplos": 1.4794494919428411,
+      "divergencia": 3.713755210074212,
       "aplicadas": 1,
       "leituras": {
         "precoLucro": {
           "recusa": "baseNaoPositiva"
         },
         "precoPatrimonio": {
-          "justo": 1.403438232621009,
-          "mediana": 1.3974219447988923,
-          "pares": 40,
+          "justo": 1.4794494919428411,
+          "mediana": 1.4731073574940812,
+          "pares": 33,
           "grupo": "bens-industriais"
         },
         "firmaEbitda": {
@@ -258,26 +259,26 @@
       "dcf": 12.34,
       "preco": 15.77,
       "potencial": -0.2175015852885225,
-      "multiplos": 26.283400623855663,
-      "divergencia": 1.1305781114615319,
+      "multiplos": 28.223088679938122,
+      "divergencia": 1.2878125945705023,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 31.20013210985003,
-          "mediana": 6.913697400751296,
-          "pares": 7,
+          "justo": 31.415491089037953,
+          "mediana": 6.961419211973048,
+          "pares": 5,
           "grupo": "Comércio / Tecidos. Vestuário e Calçados"
         },
         "precoPatrimonio": {
-          "justo": 26.283400623855663,
-          "mediana": 0.6652982965883107,
-          "pares": 8,
+          "justo": 28.223088679938122,
+          "mediana": 0.7143966297185025,
+          "pares": 6,
           "grupo": "Comércio / Tecidos. Vestuário e Calçados"
         },
         "firmaEbitda": {
-          "justo": 16.538014261792398,
-          "mediana": 2.9877836707641716,
-          "pares": 8,
+          "justo": 13.141261462231205,
+          "mediana": 2.6141433756387884,
+          "pares": 6,
           "grupo": "Comércio / Tecidos. Vestuário e Calçados"
         }
       }
@@ -285,23 +286,23 @@
     {
       "ticker": "B3SA3",
       "setor": "financeiro",
-      "dcf": 4.53,
+      "dcf": 4.52,
       "preco": 17.37,
-      "potencial": -0.7392055267702936,
-      "multiplos": 5.803323535472323,
-      "divergencia": 0.28131315682779334,
+      "potencial": -0.7397812320092113,
+      "multiplos": 5.518356689243286,
+      "divergencia": 0.2217636118663755,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 8.142679911037085,
-          "mediana": 8.564077002850238,
-          "pares": 53,
+          "justo": 7.576337235212569,
+          "mediana": 7.968425161103747,
+          "pares": 34,
           "grupo": "financeiro"
         },
         "precoPatrimonio": {
-          "justo": 3.4639671599075608,
-          "mediana": 0.9568809318699374,
-          "pares": 55,
+          "justo": 3.460376143274003,
+          "mediana": 0.9558889549879248,
+          "pares": 36,
           "grupo": "financeiro"
         },
         "firmaEbitda": {
@@ -312,23 +313,23 @@
     {
       "ticker": "BBAS3",
       "setor": "financeiro",
-      "dcf": 26.85,
+      "dcf": 26.72,
       "preco": 22.12,
-      "potencial": 0.21383363471971067,
-      "multiplos": 27.381462068174105,
-      "divergencia": 0.01998145577253463,
+      "potencial": 0.20795660036166355,
+      "multiplos": 27.25412920403506,
+      "divergencia": 0.019847887229928363,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 22.354519427330054,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 21.032044252498263,
+          "mediana": 7.154159424929907,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 32.40840470901816,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 33.47621415557186,
+          "mediana": 0.9872413203336426,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -339,23 +340,23 @@
     {
       "ticker": "BBDC3",
       "setor": "financeiro",
-      "dcf": 12.05,
+      "dcf": 12.0,
       "preco": 16.17,
-      "potencial": -0.2547928262213977,
-      "multiplos": 16.684927894701673,
-      "divergencia": 0.38450267776279223,
+      "potencial": -0.2578849721706865,
+      "multiplos": 15.837918484614375,
+      "divergencia": 0.3196350707576008,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 17.199855789403344,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 16.067033077449473,
+          "mediana": 7.103188617559613,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 16.17,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 15.608803891779278,
+          "mediana": 0.9225804439298733,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -366,23 +367,23 @@
     {
       "ticker": "BBDC4",
       "setor": "financeiro",
-      "dcf": 11.87,
+      "dcf": 11.82,
       "preco": 18.33,
-      "potencial": -0.35242771412984175,
-      "multiplos": 16.684927894701673,
-      "divergencia": 0.4060292682519966,
+      "potencial": -0.3551554828150572,
+      "multiplos": 15.837918484614375,
+      "divergencia": 0.3400713762723224,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 17.199855789403344,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 16.067033077449473,
+          "mediana": 7.103188617559613,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 16.17,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 15.608803891779278,
+          "mediana": 0.9225804439298733,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -393,23 +394,23 @@
     {
       "ticker": "BBSE3",
       "setor": "financeiro",
-      "dcf": 38.24,
+      "dcf": 38.04,
       "preco": 39.77,
-      "potencial": -0.03847120945436261,
-      "multiplos": 23.12795246681879,
-      "divergencia": -0.3952459280803293,
+      "potencial": -0.04350012572290681,
+      "multiplos": 22.003157248791364,
+      "divergencia": -0.42156769826930895,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 40.982630564200456,
-          "mediana": 8.564077002850238,
-          "pares": 53,
+          "justo": 38.73850681275888,
+          "mediana": 8.095125929024853,
+          "pares": 34,
           "grupo": "financeiro"
         },
         "precoPatrimonio": {
-          "justo": 5.273274369437129,
-          "mediana": 0.9568809318699374,
-          "pares": 55,
+          "justo": 5.267807684823853,
+          "mediana": 0.9558889549879248,
+          "pares": 36,
           "grupo": "financeiro"
         },
         "firmaEbitda": {
@@ -423,26 +424,26 @@
       "dcf": 9.53,
       "preco": 4.08,
       "potencial": 1.33578431372549,
-      "multiplos": 9.7353270641331,
-      "divergencia": 0.02186022746319627,
+      "multiplos": 10.047436133118392,
+      "divergencia": 0.05462048730096325,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 9.7353270641331,
-          "mediana": 11.312135537756074,
-          "pares": 18,
+          "justo": 10.047436133118392,
+          "mediana": 11.67479619288003,
+          "pares": 16,
           "grupo": "consumo-nao-ciclico"
         },
         "precoPatrimonio": {
           "justo": 1.694900117666902,
           "mediana": 0.882401154924872,
-          "pares": 20,
+          "pares": 18,
           "grupo": "consumo-nao-ciclico"
         },
         "firmaEbitda": {
           "justo": 13.977640688845822,
           "mediana": 5.50151729317098,
-          "pares": 21,
+          "pares": 19,
           "grupo": "consumo-nao-ciclico"
         }
       }
@@ -453,23 +454,23 @@
       "dcf": 1.35,
       "preco": 0.78,
       "potencial": 0.7307692307692308,
-      "multiplos": 4.225278006357095,
-      "divergencia": 2.1299774590667804,
+      "multiplos": 4.1596114466265846,
+      "divergencia": 2.0813333576699673,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
           "recusa": "baseNaoPositiva"
         },
         "precoPatrimonio": {
-          "justo": 2.5210649244963332,
-          "mediana": 0.9213039460393759,
-          "pares": 72,
+          "justo": 2.410416574978675,
+          "mediana": 0.8808683507308859,
+          "pares": 65,
           "grupo": "consumo-ciclico"
         },
         "firmaEbitda": {
-          "justo": 5.929491088217856,
-          "mediana": 4.525187116565318,
-          "pares": 72,
+          "justo": 5.908806318274495,
+          "mediana": 4.5163766461771075,
+          "pares": 65,
           "grupo": "consumo-ciclico"
         }
       }
@@ -477,23 +478,23 @@
     {
       "ticker": "BMGB4",
       "setor": "financeiro",
-      "dcf": 2.43,
+      "dcf": 2.42,
       "preco": 6.08,
-      "potencial": -0.600328947368421,
-      "multiplos": 6.896355021635335,
-      "divergencia": 1.8364474935548785,
+      "potencial": -0.6019736842105263,
+      "multiplos": 6.9964944197198005,
+      "divergencia": 1.8889052243895312,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 6.918791036132673,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 6.892584273491471,
+          "mediana": 7.575204047829174,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 6.873919007137998,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 7.100404565948131,
+          "mediana": 0.9872413203336426,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -504,23 +505,23 @@
     {
       "ticker": "BPAC11",
       "setor": "financeiro",
-      "dcf": 17.03,
+      "dcf": 16.95,
       "preco": 60.48,
-      "potencial": -0.7184193121693121,
-      "multiplos": 26.33651362834684,
-      "divergencia": 0.5465280408509108,
+      "potencial": -0.7197420634920636,
+      "multiplos": 24.911434046491898,
+      "divergencia": 0.4698391036392964,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 32.80517043459867,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 30.644545218152015,
+          "mediana": 7.103188617559613,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 19.867856822095007,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 19.178322874831785,
+          "mediana": 0.9225804439298733,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -534,27 +535,27 @@
       "dcf": 18.99,
       "preco": 21.64,
       "potencial": -0.12245841035120157,
-      "multiplos": 28.663637091482546,
-      "divergencia": 0.5097774314396242,
+      "multiplos": 16.491240602881994,
+      "divergencia": -0.1313697281608922,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 28.663637091482546,
-          "mediana": 20.599127540813225,
-          "pares": 5,
-          "grupo": "Mineração / Minerais Metálicos"
+          "justo": 17.535310791859473,
+          "mediana": 12.601754003390123,
+          "pares": 18,
+          "grupo": "materiais-basicos"
         },
         "precoPatrimonio": {
-          "justo": 31.34063605914699,
-          "mediana": 1.6109135315498389,
-          "pares": 5,
-          "grupo": "Mineração / Minerais Metálicos"
+          "justo": 16.491240602881994,
+          "mediana": 0.8476523127702527,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         },
         "firmaEbitda": {
-          "justo": 9.422378404868246,
-          "mediana": 7.809791334520531,
-          "pares": 5,
-          "grupo": "Mineração / Minerais Metálicos"
+          "justo": 7.781010321208972,
+          "mediana": 6.442541299664887,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         }
       }
     },
@@ -564,26 +565,26 @@
       "dcf": 30.25,
       "preco": 17.75,
       "potencial": 0.704225352112676,
-      "multiplos": 38.26966385844601,
-      "divergencia": 0.26531435449354435,
+      "multiplos": 57.39875929766785,
+      "divergencia": 0.8977818655154632,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 18.479074017653986,
-          "mediana": 6.082889947562284,
+          "justo": 57.39875929766785,
+          "mediana": 18.894363191617188,
           "pares": 6,
-          "grupo": "Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição"
+          "grupo": "petroleo-gas-e-biocombustiveis"
         },
         "precoPatrimonio": {
-          "justo": 38.26966385844601,
-          "mediana": 1.5099052572712273,
-          "pares": 7,
+          "justo": 40.35838018105539,
+          "mediana": 1.5923142318606422,
+          "pares": 5,
           "grupo": "Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição"
         },
         "firmaEbitda": {
-          "justo": 40.73705718119793,
-          "mediana": 6.549798017316355,
-          "pares": 8,
+          "justo": 67.90215102388125,
+          "mediana": 9.3263965151927,
+          "pares": 6,
           "grupo": "Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição"
         }
       }
@@ -591,23 +592,23 @@
     {
       "ticker": "BRSR6",
       "setor": "financeiro",
-      "dcf": 15.92,
+      "dcf": 15.85,
       "preco": 14.98,
-      "potencial": 0.06275033377837112,
-      "multiplos": 29.33591745535726,
-      "divergencia": 0.8427820569842093,
+      "potencial": 0.058077436582109426,
+      "multiplos": 29.716945498379033,
+      "divergencia": 0.8743849352868014,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 31.87841111209895,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 31.757663144855755,
+          "mediana": 7.575204047829174,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 26.793423798615578,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 27.676227851902315,
+          "mediana": 0.9872413203336426,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -621,26 +622,26 @@
       "dcf": 4.45,
       "preco": 9.35,
       "potencial": -0.5240641711229946,
-      "multiplos": 13.399636168801692,
-      "divergencia": 2.013787456586031,
+      "multiplos": 13.492127186360289,
+      "divergencia": 2.0345901310059515,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 13.399636168801692,
-          "mediana": 6.913697400751296,
-          "pares": 7,
+          "justo": 13.492127186360289,
+          "mediana": 6.961419211973048,
+          "pares": 5,
           "grupo": "Comércio / Tecidos. Vestuário e Calçados"
         },
         "precoPatrimonio": {
-          "justo": 8.14189942611787,
-          "mediana": 0.6652982965883107,
-          "pares": 8,
+          "justo": 8.114014159500732,
+          "mediana": 0.66301971030158,
+          "pares": 6,
           "grupo": "Comércio / Tecidos. Vestuário e Calçados"
         },
         "firmaEbitda": {
           "justo": 17.681321997025492,
           "mediana": 2.9877836707641716,
-          "pares": 8,
+          "pares": 6,
           "grupo": "Comércio / Tecidos. Vestuário e Calçados"
         }
       }
@@ -651,26 +652,26 @@
       "dcf": 6.43,
       "preco": 11.22,
       "potencial": -0.42691622103386817,
-      "multiplos": 14.226612391415541,
-      "divergencia": 1.2114983545302804,
+      "multiplos": 15.018373125973667,
+      "divergencia": 1.3345759722881798,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 14.226612391415541,
-          "mediana": 8.306325268955735,
-          "pares": 36,
+          "justo": 14.782333062268485,
+          "mediana": 8.63078737727691,
+          "pares": 20,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "precoPatrimonio": {
-          "justo": 15.49291438727228,
-          "mediana": 1.5506528665718355,
-          "pares": 41,
+          "justo": 16.511845064081243,
+          "mediana": 1.6526354719962741,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "firmaEbitda": {
-          "justo": 13.303898354655816,
-          "mediana": 6.600496828687227,
-          "pares": 41,
+          "justo": 15.018373125973667,
+          "mediana": 7.1905674085321785,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         }
       }
@@ -681,26 +682,26 @@
       "dcf": 0.7,
       "preco": 2.34,
       "potencial": -0.7008547008547008,
-      "multiplos": 2.150865152065447,
-      "divergencia": 2.0517229650015754,
+      "multiplos": 1.9617303041308933,
+      "divergencia": 1.7833718048325182,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 2.150865152065447,
-          "mediana": 7.324206000463082,
-          "pares": 6,
+          "justo": 1.9617303041308933,
+          "mediana": 6.680156982881166,
+          "pares": 5,
           "grupo": "Diversos / Serviços Educacionais"
         },
         "precoPatrimonio": {
-          "justo": 7.172385313351821,
-          "mediana": 1.0637973442738486,
-          "pares": 8,
+          "justo": 8.4057379192181,
+          "mediana": 1.2467263378168114,
+          "pares": 7,
           "grupo": "Diversos / Serviços Educacionais"
         },
         "firmaEbitda": {
-          "justo": 1.781603150896697,
-          "mediana": 4.014938860026994,
-          "pares": 7,
+          "justo": 1.5274628422924619,
+          "mediana": 3.7867220390999865,
+          "pares": 6,
           "grupo": "Diversos / Serviços Educacionais"
         }
       }
@@ -711,26 +712,26 @@
       "dcf": 24.52,
       "preco": 44.73,
       "potencial": -0.45182204337133913,
-      "multiplos": 41.396684131863765,
-      "divergencia": 0.6879570755121152,
+      "multiplos": 41.78859914393151,
+      "divergencia": 0.7039374790551187,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 41.396684131863765,
-          "mediana": 8.306325268955735,
-          "pares": 36,
+          "justo": 41.78859914393151,
+          "mediana": 8.384963779171962,
+          "pares": 20,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "precoPatrimonio": {
-          "justo": 31.63132463886493,
-          "mediana": 1.5506528665718355,
-          "pares": 41,
+          "justo": 30.73249094917549,
+          "mediana": 1.506589614292614,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "firmaEbitda": {
-          "justo": 54.360544694008745,
-          "mediana": 6.600496828687227,
-          "pares": 41,
+          "justo": 62.17296427620905,
+          "mediana": 7.269698727417946,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         }
       }
@@ -741,26 +742,26 @@
       "dcf": 1.71,
       "preco": 15.92,
       "potencial": -0.8925879396984925,
-      "multiplos": 8.820224467132164,
-      "divergencia": 4.1567978461702095,
+      "multiplos": 9.324079928031571,
+      "divergencia": 4.451380003877578,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 7.517295280579463,
-          "mediana": 8.306325268955735,
-          "pares": 36,
+          "justo": 7.588463803672293,
+          "mediana": 8.384963779171962,
+          "pares": 20,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "precoPatrimonio": {
-          "justo": 12.056159606427421,
-          "mediana": 1.5506528665718355,
-          "pares": 41,
+          "justo": 11.713572549253874,
+          "mediana": 1.506589614292614,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "firmaEbitda": {
-          "justo": 8.820224467132164,
-          "mediana": 6.600496828687227,
-          "pares": 41,
+          "justo": 9.324079928031571,
+          "mediana": 6.829776707396287,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         }
       }
@@ -771,23 +772,23 @@
       "dcf": 1.44,
       "preco": 1.61,
       "potencial": -0.10559006211180133,
-      "multiplos": 2.528173018614822,
-      "divergencia": 0.7550990661363257,
+      "multiplos": 2.4516009502591953,
+      "divergencia": 0.7019414836977644,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
           "recusa": "baseNaoPositiva"
         },
         "precoPatrimonio": {
-          "justo": 0.8469916159375971,
-          "mediana": 0.9213039460393759,
-          "pares": 72,
+          "justo": 0.7023902413926197,
+          "mediana": 0.7640157102833084,
+          "pares": 65,
           "grupo": "consumo-ciclico"
         },
         "firmaEbitda": {
-          "justo": 4.209354421292047,
-          "mediana": 4.525187116565318,
-          "pares": 72,
+          "justo": 4.200811659125771,
+          "mediana": 4.5163766461771075,
+          "pares": 65,
           "grupo": "consumo-ciclico"
         }
       }
@@ -795,23 +796,23 @@
     {
       "ticker": "CXSE3",
       "setor": "financeiro",
-      "dcf": 9.81,
+      "dcf": 9.76,
       "preco": 20.06,
-      "potencial": -0.5109670987038882,
-      "multiplos": 8.286575009926775,
-      "divergencia": -0.1550434317136382,
+      "potencial": -0.5134596211365902,
+      "multiplos": 7.858288779121166,
+      "divergencia": -0.194887520383905,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 12.251083434117323,
-          "mediana": 8.564077002850238,
-          "pares": 53,
+          "justo": 11.398991561462132,
+          "mediana": 7.968425161103747,
+          "pares": 34,
           "grupo": "financeiro"
         },
         "precoPatrimonio": {
-          "justo": 4.322066585736226,
-          "mediana": 0.9568809318699374,
-          "pares": 55,
+          "justo": 4.317585996780198,
+          "mediana": 0.9558889549879248,
+          "pares": 36,
           "grupo": "financeiro"
         },
         "firmaEbitda": {
@@ -826,25 +827,25 @@
       "preco": 25.33,
       "potencial": -0.8618239242005526,
       "multiplos": 25.049544920614803,
-      "divergencia": 6.151774789270506,
+      "divergencia": 6.151774789829937,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
           "justo": 25.049544920614803,
           "mediana": 4.522606108863741,
-          "pares": 15,
+          "pares": 13,
           "grupo": "Construção Civil / Incorporações"
         },
         "precoPatrimonio": {
-          "justo": 19.99216000385241,
-          "mediana": 0.75415884557284,
-          "pares": 19,
+          "justo": 18.228667562395312,
+          "mediana": 0.6876350970849608,
+          "pares": 17,
           "grupo": "Construção Civil / Incorporações"
         },
         "firmaEbitda": {
-          "justo": 25.33,
-          "mediana": 6.461089162254257,
-          "pares": 17,
+          "justo": 27.82345293283346,
+          "mediana": 6.905169996703714,
+          "pares": 15,
           "grupo": "Construção Civil / Incorporações"
         }
       }
@@ -856,25 +857,25 @@
       "preco": 24.96,
       "potencial": -0.8774038461538463,
       "multiplos": 25.049544920614803,
-      "divergencia": 7.195334175599008,
+      "divergencia": 7.195334176170629,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
           "justo": 25.049544920614803,
           "mediana": 4.522606108863741,
-          "pares": 15,
+          "pares": 13,
           "grupo": "Construção Civil / Incorporações"
         },
         "precoPatrimonio": {
-          "justo": 19.99216000385241,
-          "mediana": 0.75415884557284,
-          "pares": 19,
+          "justo": 18.228667562395312,
+          "mediana": 0.6876350970849608,
+          "pares": 17,
           "grupo": "Construção Civil / Incorporações"
         },
         "firmaEbitda": {
-          "justo": 25.33,
-          "mediana": 6.461089162254257,
-          "pares": 17,
+          "justo": 27.82345293283346,
+          "mediana": 6.905169996703714,
+          "pares": 15,
           "grupo": "Construção Civil / Incorporações"
         }
       }
@@ -886,25 +887,25 @@
       "preco": 10.13,
       "potencial": -0.8272458045409674,
       "multiplos": 8.53774230942615,
-      "divergencia": 3.881385464469072,
+      "divergencia": 3.881385464485673,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
           "justo": 8.53774230942615,
           "mediana": 4.522606108863741,
-          "pares": 15,
+          "pares": 13,
           "grupo": "Construção Civil / Incorporações"
         },
         "precoPatrimonio": {
-          "justo": 3.3716601709165723,
-          "mediana": 0.75415884557284,
-          "pares": 19,
+          "justo": 3.074248724358143,
+          "mediana": 0.6876350970849608,
+          "pares": 17,
           "grupo": "Construção Civil / Incorporações"
         },
         "firmaEbitda": {
-          "justo": 12.213827611927803,
-          "mediana": 6.461089162254257,
-          "pares": 17,
+          "justo": 13.141313152095803,
+          "mediana": 6.905169996703714,
+          "pares": 15,
           "grupo": "Construção Civil / Incorporações"
         }
       }
@@ -915,26 +916,26 @@
       "dcf": 20.64,
       "preco": 30.46,
       "potencial": -0.32239001969796455,
-      "multiplos": 16.760176881105245,
-      "divergencia": -0.18803856751030867,
+      "multiplos": 16.91885057834372,
+      "divergencia": -0.18035148142293156,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 16.760176881105245,
-          "mediana": 8.306325268955735,
-          "pares": 36,
+          "justo": 16.91885057834372,
+          "mediana": 8.384963779171962,
+          "pares": 20,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "precoPatrimonio": {
-          "justo": 15.233571006591315,
-          "mediana": 1.5506528665718355,
-          "pares": 41,
+          "justo": 14.800694831112509,
+          "mediana": 1.506589614292614,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "firmaEbitda": {
-          "justo": 17.835784495529982,
-          "mediana": 6.600496828687227,
-          "pares": 41,
+          "justo": 19.075844160902655,
+          "mediana": 6.829776707396287,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         }
       }
@@ -946,25 +947,25 @@
       "preco": 96.52,
       "potencial": -0.9977206796518856,
       "multiplos": 34.29835060673407,
-      "divergencia": 152.89184147679447,
+      "divergencia": 151.8461395836557,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 26.149670816201848,
-          "mediana": 9.487822817336621,
-          "pares": 32,
+          "justo": 26.392574537197753,
+          "mediana": 9.575954996233994,
+          "pares": 27,
           "grupo": "bens-industriais"
         },
         "precoPatrimonio": {
-          "justo": 40.55372510224519,
-          "mediana": 1.3974219447988923,
-          "pares": 40,
+          "justo": 42.75014503976978,
+          "mediana": 1.4731073574940812,
+          "pares": 33,
           "grupo": "bens-industriais"
         },
         "firmaEbitda": {
           "justo": 34.29835060673407,
           "mediana": 5.139227274768087,
-          "pares": 38,
+          "pares": 32,
           "grupo": "bens-industriais"
         }
       }
@@ -975,26 +976,26 @@
       "dcf": 26.33,
       "preco": 39.48,
       "potencial": -0.33308004052684903,
-      "multiplos": 24.18230582252389,
-      "divergencia": -0.08169652820496054,
+      "multiplos": 26.236475529552973,
+      "divergencia": -0.0036910978110584747,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 16.525834281853072,
-          "mediana": 8.306325268955735,
-          "pares": 36,
+          "justo": 16.682289386357855,
+          "mediana": 8.384963779171962,
+          "pares": 20,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "precoPatrimonio": {
-          "justo": 34.902922283394155,
-          "mediana": 1.5506528665718355,
-          "pares": 41,
+          "justo": 33.911123085127876,
+          "mediana": 1.506589614292614,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "firmaEbitda": {
-          "justo": 24.18230582252389,
-          "mediana": 6.600496828687227,
-          "pares": 41,
+          "justo": 26.236475529552973,
+          "mediana": 6.829776707396287,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         }
       }
@@ -1005,26 +1006,26 @@
       "dcf": 5.46,
       "preco": 12.86,
       "potencial": -0.5754276827371695,
-      "multiplos": 10.382642880482038,
-      "divergencia": 0.9015139813185067,
+      "multiplos": 10.326950227650412,
+      "divergencia": 0.8913142316768856,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
           "justo": 9.046278386546609,
           "mediana": 4.522606108863741,
-          "pares": 15,
+          "pares": 13,
           "grupo": "Construção Civil / Incorporações"
         },
         "precoPatrimonio": {
           "justo": 14.104112479396065,
           "mediana": 0.75415884557284,
-          "pares": 19,
+          "pares": 17,
           "grupo": "Construção Civil / Incorporações"
         },
         "firmaEbitda": {
-          "justo": 10.382642880482038,
-          "mediana": 6.461089162254257,
-          "pares": 17,
+          "justo": 10.326950227650412,
+          "mediana": 6.428140894696709,
+          "pares": 15,
           "grupo": "Construção Civil / Incorporações"
         }
       }
@@ -1035,57 +1036,57 @@
       "dcf": 2.16,
       "preco": 5.68,
       "potencial": -0.6197183098591549,
-      "multiplos": 5.68,
-      "divergencia": 1.6280536564361991,
+      "multiplos": 7.01645285162593,
+      "divergencia": 2.245804980042085,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 8.414807026348523,
-          "mediana": 15.11323889356283,
-          "pares": 6,
-          "grupo": "Siderurgia e Metalurgia / Siderurgia"
+          "justo": 7.01645285162593,
+          "mediana": 12.601754003390123,
+          "pares": 18,
+          "grupo": "materiais-basicos"
         },
         "precoPatrimonio": {
-          "justo": 4.364759368096237,
-          "mediana": 0.4501088031929887,
-          "pares": 10,
-          "grupo": "Siderurgia e Metalurgia / Siderurgia"
+          "justo": 8.21978674224258,
+          "mediana": 0.8476523127702527,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         },
         "firmaEbitda": {
-          "justo": 5.68,
-          "mediana": 5.2124993702114,
-          "pares": 7,
-          "grupo": "Siderurgia e Metalurgia / Siderurgia"
+          "justo": 6.5848877868331455,
+          "mediana": 6.442541299664887,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         }
       }
     },
     {
       "ticker": "FRAS3",
       "setor": "bens-industriais",
-      "dcf": 9.15,
+      "dcf": 9.16,
       "preco": 23.2,
-      "potencial": -0.605603448275862,
-      "multiplos": 11.940801865301548,
-      "divergencia": 0.30448717303390116,
+      "potencial": -0.6051724137931034,
+      "multiplos": 13.182304881577686,
+      "divergencia": 0.4384001222555316,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 9.688435909844975,
-          "mediana": 9.487822817336621,
-          "pares": 32,
+          "justo": 9.778431579376448,
+          "mediana": 9.575954996233994,
+          "pares": 27,
           "grupo": "bens-industriais"
         },
         "precoPatrimonio": {
-          "justo": 11.940801865301548,
-          "mediana": 1.3343708281802036,
-          "pares": 7,
-          "grupo": "Material de Transporte / Material Rodoviário"
+          "justo": 13.182304881577686,
+          "mediana": 1.4731073574940812,
+          "pares": 33,
+          "grupo": "bens-industriais"
         },
         "firmaEbitda": {
-          "justo": 14.109865834643504,
-          "mediana": 5.376928603040469,
-          "pares": 7,
-          "grupo": "Material de Transporte / Material Rodoviário"
+          "justo": 13.2599352327503,
+          "mediana": 5.139227274768087,
+          "pares": 32,
+          "grupo": "bens-industriais"
         }
       }
     },
@@ -1095,27 +1096,27 @@
       "dcf": 16.33,
       "preco": 25.06,
       "potencial": -0.3483639265762171,
-      "multiplos": 12.401654475779738,
-      "divergencia": -0.24047243688910758,
+      "multiplos": 20.49261770166345,
+      "divergencia": 0.2546748593376862,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 10.97892825259554,
-          "mediana": 15.11323889356283,
-          "pares": 6,
-          "grupo": "Siderurgia e Metalurgia / Siderurgia"
+          "justo": 9.154474036601624,
+          "mediana": 12.601754003390123,
+          "pares": 18,
+          "grupo": "materiais-basicos"
         },
         "precoPatrimonio": {
-          "justo": 12.401654475779738,
-          "mediana": 0.4501088031929887,
-          "pares": 10,
-          "grupo": "Siderurgia e Metalurgia / Siderurgia"
+          "justo": 23.68235711026372,
+          "mediana": 0.8595334950274495,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         },
         "firmaEbitda": {
-          "justo": 15.816654159828712,
-          "mediana": 5.2124993702114,
-          "pares": 7,
-          "grupo": "Siderurgia e Metalurgia / Siderurgia"
+          "justo": 20.49261770166345,
+          "mediana": 6.442541299664887,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         }
       }
     },
@@ -1125,27 +1126,27 @@
       "dcf": 2.19,
       "preco": 3.76,
       "potencial": -0.4175531914893617,
-      "multiplos": 3.76,
-      "divergencia": 0.7203091778732602,
+      "multiplos": 3.1901945160332534,
+      "divergencia": 0.4596066237055685,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 3.76,
-          "mediana": 5.260669222466222,
-          "pares": 5,
-          "grupo": "Tecidos. Vestuário e Calçados / Calçados"
+          "justo": 4.293145166509466,
+          "mediana": 6.006600171552121,
+          "pares": 50,
+          "grupo": "consumo-ciclico"
         },
         "precoPatrimonio": {
-          "justo": 6.012110305455158,
-          "mediana": 1.7197075652781124,
-          "pares": 5,
-          "grupo": "Tecidos. Vestuário e Calçados / Calçados"
+          "justo": 2.6710045463927936,
+          "mediana": 0.7640157102833084,
+          "pares": 65,
+          "grupo": "consumo-ciclico"
         },
         "firmaEbitda": {
-          "justo": 3.76,
-          "mediana": 5.655720955393789,
-          "pares": 5,
-          "grupo": "Tecidos. Vestuário e Calçados / Calçados"
+          "justo": 3.1901945160332534,
+          "mediana": 4.446647500581092,
+          "pares": 65,
+          "grupo": "consumo-ciclico"
         }
       }
     },
@@ -1155,8 +1156,8 @@
       "dcf": 2.91,
       "preco": 6.72,
       "potencial": -0.5669642857142857,
-      "multiplos": 68.38102660873159,
-      "divergencia": 22.52350898780073,
+      "multiplos": 71.12552619574656,
+      "divergencia": 23.467634338120032,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
@@ -1165,13 +1166,13 @@
         "precoPatrimonio": {
           "justo": 114.00177062816627,
           "mediana": 1.1216432210840201,
-          "pares": 9,
+          "pares": 7,
           "grupo": "Serv.Méd.Hospit..Análises e Diagnósticos / Serv.Méd.Hospit..Análises e Diagnósticos"
         },
         "firmaEbitda": {
-          "justo": 22.760282589296907,
-          "mediana": 5.236983113718994,
-          "pares": 7,
+          "justo": 28.24928176332685,
+          "mediana": 6.100148067638164,
+          "pares": 6,
           "grupo": "Serv.Méd.Hospit..Análises e Diagnósticos / Serv.Méd.Hospit..Análises e Diagnósticos"
         }
       }
@@ -1182,27 +1183,24 @@
       "dcf": 2.11,
       "preco": 23.53,
       "potencial": -0.9103272418189545,
-      "multiplos": 17.40360961164616,
-      "divergencia": 7.245793849296243,
-      "aplicadas": 3,
+      "multiplos": 19.303357433451207,
+      "divergencia": 8.145890395506742,
+      "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 23.033263023606885,
-          "mediana": 13.615012978840728,
-          "pares": 8,
+          "justo": 22.848333935270585,
+          "mediana": 13.505700983606557,
+          "pares": 7,
           "grupo": "Comércio e Distribuição / Medicamentos e Outros Produtos"
         },
         "precoPatrimonio": {
-          "justo": 17.40360961164616,
-          "mediana": 0.9775546146984588,
-          "pares": 8,
+          "justo": 15.758380931631832,
+          "mediana": 0.8851426999134928,
+          "pares": 7,
           "grupo": "Comércio e Distribuição / Medicamentos e Outros Produtos"
         },
         "firmaEbitda": {
-          "justo": 2.6695213588407785,
-          "mediana": 4.5851103951807675,
-          "pares": 8,
-          "grupo": "Comércio e Distribuição / Medicamentos e Outros Produtos"
+          "recusa": "ponteNaoPositiva"
         }
       }
     },
@@ -1212,26 +1210,26 @@
       "dcf": 0.85,
       "preco": 25.76,
       "potencial": -0.9670031055900621,
-      "multiplos": 20.14538247021666,
-      "divergencia": 22.803326530981174,
+      "multiplos": 14.582944607944235,
+      "divergencia": 16.230876246649537,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 20.14538247021666,
-          "mediana": 13.90428719675229,
-          "pares": 10,
+          "justo": 14.582944607944235,
+          "mediana": 10.065107987051594,
+          "pares": 6,
           "grupo": "Exploração de Imóveis / Exploração de Imóveis"
         },
         "precoPatrimonio": {
-          "justo": 8.937591434302488,
-          "mediana": 0.7725370027279014,
-          "pares": 11,
+          "justo": 7.8257021645391545,
+          "mediana": 0.6764288274837824,
+          "pares": 7,
           "grupo": "Exploração de Imóveis / Exploração de Imóveis"
         },
         "firmaEbitda": {
-          "justo": 21.8810757720236,
-          "mediana": 8.743931781638924,
-          "pares": 11,
+          "justo": 16.63491649062664,
+          "mediana": 7.068412314673331,
+          "pares": 7,
           "grupo": "Exploração de Imóveis / Exploração de Imóveis"
         }
       }
@@ -1239,23 +1237,23 @@
     {
       "ticker": "IRBR3",
       "setor": "financeiro",
-      "dcf": 25.5,
+      "dcf": 25.42,
       "preco": 61.93,
-      "potencial": -0.5882447925076699,
-      "multiplos": 51.47446277419844,
-      "divergencia": 1.0185583715849567,
+      "potencial": -0.5895365735507831,
+      "multiplos": 50.24334665597106,
+      "divergencia": 0.9768331481837658,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 41.018925548396886,
-          "mediana": 8.564077002850238,
-          "pares": 53,
+          "justo": 38.165962112730305,
+          "mediana": 7.968425161103747,
+          "pares": 34,
           "grupo": "financeiro"
         },
         "precoPatrimonio": {
-          "justo": 61.92999999999999,
-          "mediana": 0.9568809318699374,
-          "pares": 55,
+          "justo": 62.320731199211814,
+          "mediana": 0.9629181227953768,
+          "pares": 36,
           "grupo": "financeiro"
         },
         "firmaEbitda": {
@@ -1269,26 +1267,26 @@
       "dcf": 30.0,
       "preco": 27.28,
       "potencial": 0.09970674486803514,
-      "multiplos": 29.655174852033404,
-      "divergencia": -0.011484605805064496,
+      "multiplos": 30.65949625065904,
+      "divergencia": 0.021993098112953025,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 29.655174852033404,
-          "mediana": 8.306325268955735,
-          "pares": 36,
+          "justo": 30.65949625065904,
+          "mediana": 8.58763267156527,
+          "pares": 20,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "precoPatrimonio": {
-          "justo": 47.26297611946624,
-          "mediana": 1.5506528665718355,
-          "pares": 41,
+          "justo": 50.371345212693534,
+          "mediana": 1.6526354719962741,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "firmaEbitda": {
-          "justo": 19.420894347274555,
-          "mediana": 6.600496828687227,
-          "pares": 41,
+          "justo": 20.779175869347267,
+          "mediana": 6.829776707396287,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         }
       }
@@ -1296,29 +1294,29 @@
     {
       "ticker": "ITSA4",
       "setor": "financeiro",
-      "dcf": 8.86,
+      "dcf": 8.81,
       "preco": 14.05,
-      "potencial": -0.3693950177935944,
-      "multiplos": 12.642145172806082,
-      "divergencia": 0.42641107279541735,
+      "potencial": -0.37295373665480425,
+      "multiplos": 8.921188953488628,
+      "divergencia": 0.012163478625475621,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 12.642145172806082,
-          "mediana": 8.564077002850238,
-          "pares": 53,
+          "justo": 11.76285402989573,
+          "mediana": 7.968425161103747,
+          "pares": 34,
           "grupo": "financeiro"
         },
         "precoPatrimonio": {
-          "justo": 4.823740346709215,
-          "mediana": 0.5791519090713926,
-          "pares": 5,
-          "grupo": "Holdings Diversificadas / Holdings Diversificadas"
+          "justo": 7.961572856665771,
+          "mediana": 0.9558889549879248,
+          "pares": 36,
+          "grupo": "financeiro"
         },
         "firmaEbitda": {
-          "justo": 12.917237234516186,
-          "mediana": 7.723716559097501,
-          "pares": 16,
+          "justo": 8.921188953488628,
+          "mediana": 5.411999155177687,
+          "pares": 11,
           "grupo": "financeiro"
         }
       }
@@ -1326,23 +1324,23 @@
     {
       "ticker": "ITUB3",
       "setor": "financeiro",
-      "dcf": 22.49,
+      "dcf": 22.39,
       "preco": 46.25,
-      "potencial": -0.5137297297297297,
-      "multiplos": 25.130091658548835,
-      "divergencia": 0.11720729481054093,
+      "potencial": -0.5158918918918919,
+      "multiplos": 23.765376892992176,
+      "divergencia": 0.061521799936984145,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 31.617949253772256,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 29.535517199769515,
+          "mediana": 7.103188617559613,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 18.642234063325414,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 17.995236586214837,
+          "mediana": 0.9225804439298733,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -1353,23 +1351,23 @@
     {
       "ticker": "ITUB4",
       "setor": "financeiro",
-      "dcf": 21.86,
+      "dcf": 21.76,
       "preco": 42.35,
-      "potencial": -0.48382526564344747,
-      "multiplos": 25.130091658548835,
-      "divergencia": 0.14966724244788465,
+      "potencial": -0.48618654073199524,
+      "multiplos": 23.765376892992176,
+      "divergencia": 0.09223585557938385,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 31.617949253772256,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 29.535517199769515,
+          "mediana": 7.103188617559613,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 18.642234063325414,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 17.995236586214837,
+          "mediana": 0.9225804439298733,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -1383,26 +1381,26 @@
       "dcf": 8.2,
       "preco": 11.83,
       "potencial": -0.30684699915469155,
-      "multiplos": 12.638247108032784,
-      "divergencia": 0.5409286854872435,
+      "multiplos": 12.68640706003232,
+      "divergencia": 0.546800627291687,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 12.638247108032784,
-          "mediana": 4.522606108863741,
-          "pares": 15,
+          "justo": 12.68640706003232,
+          "mediana": 4.539840183435462,
+          "pares": 13,
           "grupo": "Construção Civil / Incorporações"
         },
         "precoPatrimonio": {
-          "justo": 8.049298214631989,
-          "mediana": 0.75415884557284,
-          "pares": 19,
+          "justo": 7.339276058056496,
+          "mediana": 0.6876350970849608,
+          "pares": 17,
           "grupo": "Construção Civil / Incorporações"
         },
         "firmaEbitda": {
-          "justo": 27.757291283807383,
-          "mediana": 6.461089162254257,
-          "pares": 17,
+          "justo": 29.720392737287682,
+          "mediana": 6.905169996703714,
+          "pares": 15,
           "grupo": "Construção Civil / Incorporações"
         }
       }
@@ -1413,26 +1411,26 @@
       "dcf": 5.24,
       "preco": 6.58,
       "potencial": -0.20364741641337383,
-      "multiplos": 6.779808356726804,
-      "divergencia": 0.2939836645897975,
+      "multiplos": 8.12360814228946,
+      "divergencia": 0.5504591989274816,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 8.553879274630678,
-          "mediana": 9.487822817336621,
-          "pares": 32,
+          "justo": 8.801789817067224,
+          "mediana": 9.762801131347176,
+          "pares": 27,
           "grupo": "bens-industriais"
         },
         "precoPatrimonio": {
-          "justo": 6.2419323004526195,
-          "mediana": 1.3974219447988923,
-          "pares": 40,
+          "justo": 8.12360814228946,
+          "mediana": 1.8186849428275724,
+          "pares": 33,
           "grupo": "bens-industriais"
         },
         "firmaEbitda": {
-          "justo": 6.779808356726804,
-          "mediana": 5.139227274768087,
-          "pares": 38,
+          "justo": 7.063305218745329,
+          "mediana": 5.351106860506716,
+          "pares": 32,
           "grupo": "bens-industriais"
         }
       }
@@ -1440,29 +1438,29 @@
     {
       "ticker": "LEVE3",
       "setor": "consumo-ciclico",
-      "dcf": 25.29,
+      "dcf": 25.3,
       "preco": 32.67,
-      "potencial": -0.22589531680440778,
-      "multiplos": 27.388291247613694,
-      "divergencia": 0.08297486759061523,
+      "potencial": -0.22558922558922562,
+      "multiplos": 26.231125582418475,
+      "divergencia": 0.03693072696260491,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 27.388291247613694,
-          "mediana": 6.0979794982066915,
-          "pares": 57,
+          "justo": 26.231125582418475,
+          "mediana": 5.840337557766031,
+          "pares": 50,
           "grupo": "consumo-ciclico"
         },
         "precoPatrimonio": {
-          "justo": 5.871476525968899,
-          "mediana": 0.9213039460393759,
-          "pares": 72,
+          "justo": 4.869077493572545,
+          "mediana": 0.7640157102833084,
+          "pares": 65,
           "grupo": "consumo-ciclico"
         },
         "firmaEbitda": {
-          "justo": 27.477325533481398,
-          "mediana": 4.525187116565318,
-          "pares": 72,
+          "justo": 26.87252025110121,
+          "mediana": 4.446647500581092,
+          "pares": 65,
           "grupo": "consumo-ciclico"
         }
       }
@@ -1470,29 +1468,29 @@
     {
       "ticker": "LREN3",
       "setor": "consumo-ciclico",
-      "dcf": 5.73,
+      "dcf": 5.71,
       "preco": 11.21,
-      "potencial": -0.4888492417484389,
-      "multiplos": 10.259804083960262,
-      "divergencia": 0.7919195787615674,
+      "potencial": -0.4906333630686887,
+      "multiplos": 7.159087528688268,
+      "divergencia": 0.25390563694221835,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 10.259804083960262,
-          "mediana": 6.913697400751296,
-          "pares": 7,
+          "justo": 7.159087528688268,
+          "mediana": 4.824240739277143,
+          "pares": 5,
           "grupo": "Comércio / Tecidos. Vestuário e Calçados"
         },
         "precoPatrimonio": {
-          "justo": 7.082623052217294,
-          "mediana": 0.6652982965883107,
-          "pares": 8,
+          "justo": 7.058365711046239,
+          "mediana": 0.66301971030158,
+          "pares": 6,
           "grupo": "Comércio / Tecidos. Vestuário e Calçados"
         },
         "firmaEbitda": {
-          "justo": 10.944384504530296,
-          "mediana": 2.9877836707641716,
-          "pares": 8,
+          "justo": 9.504011946948333,
+          "mediana": 2.5296623749979164,
+          "pares": 6,
           "grupo": "Comércio / Tecidos. Vestuário e Calçados"
         }
       }
@@ -1503,26 +1501,26 @@
       "dcf": 9.66,
       "preco": 17.05,
       "potencial": -0.4334310850439883,
-      "multiplos": 21.67479621666796,
-      "divergencia": 1.2444901932557824,
+      "multiplos": 22.96843664879571,
+      "divergencia": 1.378450542155007,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 22.254955390141678,
-          "mediana": 11.312135537756074,
-          "pares": 18,
+          "justo": 22.96843664879571,
+          "mediana": 11.67479619288003,
+          "pares": 16,
           "grupo": "consumo-nao-ciclico"
         },
         "precoPatrimonio": {
-          "justo": 21.67479621666796,
-          "mediana": 0.882401154924872,
-          "pares": 20,
+          "justo": 23.06899596457305,
+          "mediana": 0.939160326058456,
+          "pares": 18,
           "grupo": "consumo-nao-ciclico"
         },
         "firmaEbitda": {
           "justo": 19.5432954858441,
           "mediana": 5.50151729317098,
-          "pares": 21,
+          "pares": 19,
           "grupo": "consumo-nao-ciclico"
         }
       }
@@ -1530,29 +1528,29 @@
     {
       "ticker": "MDNE3",
       "setor": "consumo-ciclico",
-      "dcf": 2.65,
+      "dcf": 2.67,
       "preco": 24.71,
-      "potencial": -0.8927559692432214,
+      "potencial": -0.8919465803318494,
       "multiplos": 18.326332022416246,
-      "divergencia": 5.917151281780557,
+      "divergencia": 5.875955836146174,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
           "justo": 18.326332022416246,
           "mediana": 4.522606108863741,
-          "pares": 15,
+          "pares": 13,
           "grupo": "Construção Civil / Incorporações"
         },
         "precoPatrimonio": {
-          "justo": 11.030133884076042,
-          "mediana": 0.75415884557284,
-          "pares": 19,
+          "justo": 10.057174597581751,
+          "mediana": 0.6876350970849608,
+          "pares": 17,
           "grupo": "Construção Civil / Incorporações"
         },
         "firmaEbitda": {
-          "justo": 25.702072089382465,
-          "mediana": 6.461089162254257,
-          "pares": 17,
+          "justo": 27.68353698495856,
+          "mediana": 6.905169996703714,
+          "pares": 15,
           "grupo": "Construção Civil / Incorporações"
         }
       }
@@ -1563,26 +1561,26 @@
       "dcf": 5.65,
       "preco": 5.57,
       "potencial": 0.014362657091561952,
-      "multiplos": 13.413984770617397,
-      "divergencia": 1.3761570499152862,
+      "multiplos": 12.825251310839345,
+      "divergencia": 1.2718686387434928,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 1.6107182867807102,
-          "mediana": 6.0979794982066915,
-          "pares": 57,
+          "justo": 1.5426648298887213,
+          "mediana": 5.840337557766031,
+          "pares": 50,
           "grupo": "consumo-ciclico"
         },
         "precoPatrimonio": {
-          "justo": 13.413984770617397,
-          "mediana": 0.9213039460393759,
-          "pares": 72,
+          "justo": 12.825251310839345,
+          "mediana": 0.8808683507308859,
+          "pares": 65,
           "grupo": "consumo-ciclico"
         },
         "firmaEbitda": {
-          "justo": 14.95934136428044,
-          "mediana": 4.525187116565318,
-          "pares": 72,
+          "justo": 14.922904466918547,
+          "mediana": 4.5163766461771075,
+          "pares": 65,
           "grupo": "consumo-ciclico"
         }
       }
@@ -1593,26 +1591,26 @@
       "dcf": 2.43,
       "preco": 29.83,
       "potencial": -0.9185383841770031,
-      "multiplos": 26.25850085870792,
-      "divergencia": 9.813245589097088,
+      "multiplos": 19.398785698826526,
+      "divergencia": 6.988416209323009,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 32.428166303224586,
-          "mediana": 13.90428719675229,
-          "pares": 10,
+          "justo": 26.07243658011162,
+          "mediana": 11.179128746879961,
+          "pares": 6,
           "grupo": "Exploração de Imóveis / Exploração de Imóveis"
         },
         "precoPatrimonio": {
-          "justo": 9.94526521722686,
-          "mediana": 0.7725370027279014,
-          "pares": 11,
+          "justo": 8.708015365153257,
+          "mediana": 0.6764288274837824,
+          "pares": 7,
           "grupo": "Exploração de Imóveis / Exploração de Imóveis"
         },
         "firmaEbitda": {
-          "justo": 26.25850085870792,
-          "mediana": 8.743931781638924,
-          "pares": 11,
+          "justo": 19.398785698826526,
+          "mediana": 7.068412314673331,
+          "pares": 7,
           "grupo": "Exploração de Imóveis / Exploração de Imóveis"
         }
       }
@@ -1623,23 +1621,23 @@
       "dcf": 1.76,
       "preco": 8.03,
       "potencial": -0.7808219178082192,
-      "multiplos": 7.354637944136036,
-      "divergencia": 3.18329271870562,
+      "multiplos": 7.553663091667033,
+      "divergencia": 3.296497536821465,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
           "recusa": "baseNaoPositiva"
         },
         "precoPatrimonio": {
-          "justo": 8.332244425094887,
-          "mediana": 0.882401154924872,
-          "pares": 20,
+          "justo": 8.868203931280117,
+          "mediana": 0.939160326058456,
+          "pares": 18,
           "grupo": "consumo-nao-ciclico"
         },
         "firmaEbitda": {
-          "justo": 6.377031463177186,
-          "mediana": 5.50151729317098,
-          "pares": 21,
+          "justo": 6.23912225205395,
+          "mediana": 5.4165255860687695,
+          "pares": 19,
           "grupo": "consumo-nao-ciclico"
         }
       }
@@ -1650,26 +1648,26 @@
       "dcf": 30.17,
       "preco": 54.26,
       "potencial": -0.44397346111315883,
-      "multiplos": 52.20048046041774,
-      "divergencia": 0.7302832693782351,
+      "multiplos": 140.57265787377466,
+      "divergencia": 3.6595455809509065,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 52.20048046041774,
-          "mediana": 6.082889947562284,
+          "justo": 162.14247587880598,
+          "mediana": 18.894363191617188,
           "pares": 6,
-          "grupo": "Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição"
+          "grupo": "petroleo-gas-e-biocombustiveis"
         },
         "precoPatrimonio": {
-          "justo": 48.92,
-          "mediana": 1.5099052572712273,
-          "pares": 7,
+          "justo": 24.922247955631573,
+          "mediana": 0.7692198121673183,
+          "pares": 5,
           "grupo": "Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição"
         },
         "firmaEbitda": {
-          "justo": 91.02068934975868,
-          "mediana": 6.549798017316355,
-          "pares": 8,
+          "justo": 140.57265787377466,
+          "mediana": 9.3263965151927,
+          "pares": 6,
           "grupo": "Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição"
         }
       }
@@ -1680,26 +1678,26 @@
       "dcf": 30.85,
       "preco": 48.92,
       "potencial": -0.36937857726901063,
-      "multiplos": 52.20048046041774,
-      "divergencia": 0.6921843868876636,
+      "multiplos": 140.57265787377466,
+      "divergencia": 3.55694765222119,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 52.20048046041774,
-          "mediana": 6.082889947562284,
+          "justo": 162.14247587880598,
+          "mediana": 18.894363191617188,
           "pares": 6,
-          "grupo": "Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição"
+          "grupo": "petroleo-gas-e-biocombustiveis"
         },
         "precoPatrimonio": {
-          "justo": 48.92,
-          "mediana": 1.5099052572712273,
-          "pares": 7,
+          "justo": 24.922247955631573,
+          "mediana": 0.7692198121673183,
+          "pares": 5,
           "grupo": "Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição"
         },
         "firmaEbitda": {
-          "justo": 91.02068934975868,
-          "mediana": 6.549798017316355,
-          "pares": 8,
+          "justo": 140.57265787377466,
+          "mediana": 9.3263965151927,
+          "pares": 6,
           "grupo": "Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição"
         }
       }
@@ -1710,26 +1708,26 @@
       "dcf": 6.23,
       "preco": 3.8,
       "potencial": 0.6394736842105265,
-      "multiplos": 4.930352630652828,
-      "divergencia": -0.20915700261039638,
+      "multiplos": 4.9699373658346655,
+      "divergencia": -0.2028074951856167,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 4.930352630652828,
-          "mediana": 13.615012978840728,
-          "pares": 8,
+          "justo": 4.9699373658346655,
+          "mediana": 13.724324974074896,
+          "pares": 7,
           "grupo": "Comércio e Distribuição / Medicamentos e Outros Produtos"
         },
         "precoPatrimonio": {
-          "justo": 4.196732951892605,
-          "mediana": 0.9775546146984588,
-          "pares": 8,
+          "justo": 4.593465903785211,
+          "mediana": 1.0699665294834249,
+          "pares": 7,
           "grupo": "Comércio e Distribuição / Medicamentos e Outros Produtos"
         },
         "firmaEbitda": {
-          "justo": 6.6818601088147656,
-          "mediana": 4.5851103951807675,
-          "pares": 8,
+          "justo": 8.746752531228378,
+          "mediana": 5.65742434910335,
+          "pares": 7,
           "grupo": "Comércio e Distribuição / Medicamentos e Outros Produtos"
         }
       }
@@ -1737,23 +1735,23 @@
     {
       "ticker": "PINE4",
       "setor": "financeiro",
-      "dcf": 10.45,
+      "dcf": 10.4,
       "preco": 11.67,
-      "potencial": -0.10454155955441308,
-      "multiplos": 9.219035731242492,
-      "divergencia": -0.11755021422856693,
+      "potencial": -0.10882604970008565,
+      "multiplos": 9.100215983910342,
+      "divergencia": -0.1253465874913705,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 13.010841607803025,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 12.961559582085341,
+          "mediana": 7.575204047829174,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 5.42722985468196,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 5.238872385735341,
+          "mediana": 0.9225804439298733,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -1767,27 +1765,27 @@
       "dcf": 0.17,
       "preco": 4.19,
       "potencial": -0.9594272076372315,
-      "multiplos": 5.342260839842307,
-      "divergencia": 30.378401781237294,
+      "multiplos": 5.710773759075635,
+      "divergencia": 32.54290605194867,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 9.448941710244661,
-          "mediana": 9.487822817336621,
-          "pares": 32,
+          "justo": 9.722793162858157,
+          "mediana": 9.762801131347176,
+          "pares": 27,
           "grupo": "bens-industriais"
         },
         "precoPatrimonio": {
-          "justo": 4.19,
-          "mediana": 1.3343708281802036,
-          "pares": 7,
-          "grupo": "Material de Transporte / Material Rodoviário"
+          "justo": 5.710773759075635,
+          "mediana": 1.8186849428275724,
+          "pares": 33,
+          "grupo": "bens-industriais"
         },
         "firmaEbitda": {
-          "justo": 5.342260839842307,
-          "mediana": 5.376928603040469,
-          "pares": 7,
-          "grupo": "Material de Transporte / Material Rodoviário"
+          "justo": 5.310912986804533,
+          "mediana": 5.351106860506716,
+          "pares": 32,
+          "grupo": "bens-industriais"
         }
       }
     },
@@ -1797,27 +1795,27 @@
       "dcf": 0.16,
       "preco": 4.43,
       "potencial": -0.963882618510158,
-      "multiplos": 5.342260839842307,
-      "divergencia": 32.837884715348856,
+      "multiplos": 5.710773759075635,
+      "divergencia": 34.47392854408478,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 9.448941710244661,
-          "mediana": 9.487822817336621,
-          "pares": 32,
+          "justo": 9.722793162858157,
+          "mediana": 9.762801131347176,
+          "pares": 27,
           "grupo": "bens-industriais"
         },
         "precoPatrimonio": {
-          "justo": 4.19,
-          "mediana": 1.3343708281802036,
-          "pares": 7,
-          "grupo": "Material de Transporte / Material Rodoviário"
+          "justo": 5.710773759075635,
+          "mediana": 1.8186849428275724,
+          "pares": 33,
+          "grupo": "bens-industriais"
         },
         "firmaEbitda": {
-          "justo": 5.342260839842307,
-          "mediana": 5.376928603040469,
-          "pares": 7,
-          "grupo": "Material de Transporte / Material Rodoviário"
+          "justo": 5.310912986804533,
+          "mediana": 5.351106860506716,
+          "pares": 32,
+          "grupo": "bens-industriais"
         }
       }
     },
@@ -1827,26 +1825,26 @@
       "dcf": 4.56,
       "preco": 3.48,
       "potencial": 0.3103448275862068,
-      "multiplos": 7.819311497143425,
-      "divergencia": 0.716078033463154,
+      "multiplos": 9.84317479303148,
+      "divergencia": 1.1602485139797367,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 1.5591948410056369,
-          "mediana": 17.74211811437271,
-          "pares": 6,
+          "justo": 1.254964673868233,
+          "mediana": 14.280275234091105,
+          "pares": 5,
           "grupo": "tecnologia-da-informacao"
         },
         "precoPatrimonio": {
-          "justo": 7.819311497143425,
-          "mediana": 0.6906977781796058,
-          "pares": 12,
+          "justo": 9.84317479303148,
+          "mediana": 0.8694702803775052,
+          "pares": 11,
           "grupo": "tecnologia-da-informacao"
         },
         "firmaEbitda": {
-          "justo": 15.449188559763156,
-          "mediana": 8.975644048549293,
-          "pares": 8,
+          "justo": 15.941399906606378,
+          "mediana": 9.194832036948378,
+          "pares": 7,
           "grupo": "tecnologia-da-informacao"
         }
       }
@@ -1857,26 +1855,26 @@
       "dcf": 10.25,
       "preco": 63.91,
       "potencial": -0.839618213112189,
-      "multiplos": 30.963583113043676,
-      "divergencia": 2.020999762241622,
+      "multiplos": 30.258078216074615,
+      "divergencia": 1.9521663162659513,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 16.85072911776924,
-          "mediana": 6.082889947562284,
+          "justo": 31.06017043172322,
+          "mediana": 11.212309993724023,
           "pares": 6,
-          "grupo": "Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição"
+          "grupo": "petroleo-gas-e-biocombustiveis"
         },
         "precoPatrimonio": {
-          "justo": 47.892933949446494,
-          "mediana": 1.5099052572712273,
-          "pares": 7,
+          "justo": 24.399010122869804,
+          "mediana": 0.7692198121673183,
+          "pares": 5,
           "grupo": "Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição"
         },
         "firmaEbitda": {
-          "justo": 30.963583113043676,
-          "mediana": 6.549798017316355,
-          "pares": 8,
+          "justo": 30.258078216074615,
+          "mediana": 6.474992533193793,
+          "pares": 6,
           "grupo": "Petróleo. Gás e Biocombustíveis / Exploração. Refino e Distribuição"
         }
       }
@@ -1884,23 +1882,23 @@
     {
       "ticker": "PSSA3",
       "setor": "financeiro",
-      "dcf": 25.47,
+      "dcf": 25.34,
       "preco": 50.04,
-      "potencial": -0.4910071942446043,
-      "multiplos": 34.754617878128016,
-      "divergencia": 0.36460556449024506,
+      "potencial": -0.4936051159072742,
+      "multiplos": 33.149815841834155,
+      "divergencia": 0.30798141556968206,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 45.79309287584009,
-          "mediana": 8.564077002850238,
-          "pares": 53,
+          "justo": 42.608074793718195,
+          "mediana": 7.968425161103747,
+          "pares": 34,
           "grupo": "financeiro"
         },
         "precoPatrimonio": {
-          "justo": 23.71614288041594,
-          "mediana": 0.9568809318699374,
-          "pares": 55,
+          "justo": 23.69155688995012,
+          "mediana": 0.9558889549879248,
+          "pares": 36,
           "grupo": "financeiro"
         },
         "firmaEbitda": {
@@ -1914,26 +1912,26 @@
       "dcf": 7.37,
       "preco": 19.54,
       "potencial": -0.6228249744114636,
-      "multiplos": 10.131741050357219,
-      "divergencia": 0.3751138973253443,
+      "multiplos": 7.794728642019915,
+      "divergencia": 0.05792673028992845,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 10.131741050357219,
-          "mediana": 13.615012978840728,
-          "pares": 8,
+          "justo": 10.05039549224929,
+          "mediana": 13.505700983606557,
+          "pares": 7,
           "grupo": "Comércio e Distribuição / Medicamentos e Outros Produtos"
         },
         "precoPatrimonio": {
-          "justo": 4.104308110701579,
-          "mediana": 0.9775546146984588,
-          "pares": 8,
+          "justo": 3.716312426701462,
+          "mediana": 0.8851426999134928,
+          "pares": 7,
           "grupo": "Comércio e Distribuição / Medicamentos e Outros Produtos"
         },
         "firmaEbitda": {
-          "justo": 10.757492120153977,
-          "mediana": 4.5851103951807675,
-          "pares": 8,
+          "justo": 7.794728642019915,
+          "mediana": 3.5127964412581854,
+          "pares": 7,
           "grupo": "Comércio e Distribuição / Medicamentos e Outros Produtos"
         }
       }
@@ -1944,26 +1942,26 @@
       "dcf": 6.89,
       "preco": 7.97,
       "potencial": -0.1355081555834379,
-      "multiplos": 14.172451464785894,
-      "divergencia": 1.057025128822199,
+      "multiplos": 13.895574591616233,
+      "divergencia": 1.0168385256705386,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 14.172451464785894,
-          "mediana": 13.496250108867939,
-          "pares": 31,
+          "justo": 14.318059098235906,
+          "mediana": 13.634910455928186,
+          "pares": 18,
           "grupo": "materiais-basicos"
         },
         "precoPatrimonio": {
-          "justo": 5.710093255660127,
-          "mediana": 0.906503639995577,
-          "pares": 36,
+          "justo": 5.3393870038048,
+          "mediana": 0.8476523127702527,
+          "pares": 21,
           "grupo": "materiais-basicos"
         },
         "firmaEbitda": {
-          "justo": 14.45952141872054,
-          "mediana": 6.746998069403217,
-          "pares": 35,
+          "justo": 13.895574591616233,
+          "mediana": 6.54779702995893,
+          "pares": 21,
           "grupo": "materiais-basicos"
         }
       }
@@ -1974,26 +1972,26 @@
       "dcf": 15.88,
       "preco": 37.05,
       "potencial": -0.5713900134952765,
-      "multiplos": 25.793772857002516,
-      "divergencia": 0.6245964412746725,
+      "multiplos": 22.975267603169957,
+      "divergencia": 0.44707554774492,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 43.84987348441514,
-          "mediana": 19.547340292053743,
-          "pares": 5,
-          "grupo": "Serv.Méd.Hospit..Análises e Diagnósticos / Serv.Méd.Hospit..Análises e Diagnósticos"
+          "justo": 30.994032803130303,
+          "mediana": 13.816480141982446,
+          "pares": 14,
+          "grupo": "saude"
         },
         "precoPatrimonio": {
-          "justo": 11.231625097963493,
-          "mediana": 1.1216432210840201,
-          "pares": 9,
+          "justo": 6.969340529619455,
+          "mediana": 0.6959913184683459,
+          "pares": 7,
           "grupo": "Serv.Méd.Hospit..Análises e Diagnósticos / Serv.Méd.Hospit..Análises e Diagnósticos"
         },
         "firmaEbitda": {
-          "justo": 25.793772857002516,
-          "mediana": 5.236983113718994,
-          "pares": 7,
+          "justo": 22.975267603169957,
+          "mediana": 4.717640653863114,
+          "pares": 6,
           "grupo": "Serv.Méd.Hospit..Análises e Diagnósticos / Serv.Méd.Hospit..Análises e Diagnósticos"
         }
       }
@@ -2005,25 +2003,25 @@
       "preco": 7.05,
       "potencial": -0.34042553191489355,
       "multiplos": 18.369983729040516,
-      "divergencia": 2.9545342145879743,
+      "divergencia": 2.9545342145882367,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 20.31391394738904,
-          "mediana": 6.913697400751296,
-          "pares": 7,
+          "justo": 20.454130782228656,
+          "mediana": 6.961419211973048,
+          "pares": 5,
           "grupo": "Comércio / Tecidos. Vestuário e Calçados"
         },
         "precoPatrimonio": {
-          "justo": 7.093034081439623,
-          "mediana": 0.6652982965883107,
-          "pares": 8,
+          "justo": 7.616492734528327,
+          "mediana": 0.7143966297185025,
+          "pares": 6,
           "grupo": "Comércio / Tecidos. Vestuário e Calçados"
         },
         "firmaEbitda": {
           "justo": 18.369983729040516,
           "mediana": 2.9877836707641716,
-          "pares": 8,
+          "pares": 6,
           "grupo": "Comércio / Tecidos. Vestuário e Calçados"
         }
       }
@@ -2031,23 +2029,23 @@
     {
       "ticker": "SANB11",
       "setor": "financeiro",
-      "dcf": 18.36,
+      "dcf": 18.29,
       "preco": 30.37,
-      "potencial": -0.3954560421468555,
-      "multiplos": 29.384855853154267,
-      "divergencia": 0.6004402301925211,
+      "potencial": -0.3977609483042477,
+      "multiplos": 29.049176251778288,
+      "divergencia": 0.588312337851046,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 26.39117560557795,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 24.652991083148372,
+          "mediana": 7.103188617559613,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 32.378536100730585,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 33.445361420408204,
+          "mediana": 0.9872413203336426,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -2058,23 +2056,23 @@
     {
       "ticker": "SANB3",
       "setor": "financeiro",
-      "dcf": 9.29,
+      "dcf": 9.26,
       "preco": 15.08,
-      "potencial": -0.38395225464190985,
-      "multiplos": 14.692427926577134,
-      "divergencia": 0.5809226982029407,
+      "potencial": -0.3859416445623342,
+      "multiplos": 14.524588125889144,
+      "divergencia": 0.5690269506559957,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 13.195587802788975,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 12.326495541574186,
+          "mediana": 7.103188617559613,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 16.189268050365293,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 16.722680710204102,
+          "mediana": 0.9872413203336426,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -2085,23 +2083,23 @@
     {
       "ticker": "SANB4",
       "setor": "financeiro",
-      "dcf": 9.48,
+      "dcf": 9.45,
       "preco": 15.04,
-      "potencial": -0.3696808510638297,
-      "multiplos": 14.692427926577134,
-      "divergencia": 0.5491151816724729,
+      "potencial": -0.3716755319148936,
+      "multiplos": 14.524588125889144,
+      "divergencia": 0.5375951430123169,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 13.195587802788975,
-          "mediana": 7.6040062454611475,
-          "pares": 31,
+          "justo": 12.326495541574186,
+          "mediana": 7.103188617559613,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "precoPatrimonio": {
-          "justo": 16.189268050365293,
-          "mediana": 0.955750734122748,
-          "pares": 31,
+          "justo": 16.722680710204102,
+          "mediana": 0.9872413203336426,
+          "pares": 16,
           "grupo": "Intermediários Financeiros / Bancos"
         },
         "firmaEbitda": {
@@ -2115,27 +2113,27 @@
       "dcf": 36.74,
       "preco": 34.74,
       "potencial": 0.05757052389176741,
-      "multiplos": 38.15,
-      "divergencia": 0.03829980599970706,
+      "multiplos": 67.82809516932004,
+      "divergencia": 0.8460261613538624,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 57.33974280733804,
-          "mediana": 8.333666972033596,
-          "pares": 6,
-          "grupo": "Água e Saneamento / Água e Saneamento"
+          "justo": 67.82809516932004,
+          "mediana": 9.858027413687235,
+          "pares": 27,
+          "grupo": "utilidade-publica"
         },
         "precoPatrimonio": {
-          "justo": 38.15,
-          "mediana": 0.9338113552524133,
-          "pares": 7,
-          "grupo": "Água e Saneamento / Água e Saneamento"
+          "justo": 76.4873070851641,
+          "mediana": 1.8722074938087712,
+          "pares": 32,
+          "grupo": "utilidade-publica"
         },
         "firmaEbitda": {
-          "justo": 38.15,
-          "mediana": 4.492619033871535,
-          "pares": 7,
-          "grupo": "Água e Saneamento / Água e Saneamento"
+          "justo": 65.38186647290834,
+          "mediana": 7.269698727417946,
+          "pares": 32,
+          "grupo": "utilidade-publica"
         }
       }
     },
@@ -2145,27 +2143,27 @@
       "dcf": 7.92,
       "preco": 6.82,
       "potencial": 0.1612903225806451,
-      "multiplos": 7.63,
-      "divergencia": -0.03609360239745096,
+      "multiplos": 13.565619033864007,
+      "divergencia": 0.7137597607052986,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 11.467948561467608,
-          "mediana": 8.333666972033596,
-          "pares": 6,
-          "grupo": "Água e Saneamento / Água e Saneamento"
+          "justo": 13.565619033864007,
+          "mediana": 9.858027413687235,
+          "pares": 27,
+          "grupo": "utilidade-publica"
         },
         "precoPatrimonio": {
-          "justo": 7.63,
-          "mediana": 0.9338113552524133,
-          "pares": 7,
-          "grupo": "Água e Saneamento / Água e Saneamento"
+          "justo": 15.297461417032823,
+          "mediana": 1.8722074938087712,
+          "pares": 32,
+          "grupo": "utilidade-publica"
         },
         "firmaEbitda": {
-          "justo": 7.63,
-          "mediana": 4.492619033871535,
-          "pares": 7,
-          "grupo": "Água e Saneamento / Água e Saneamento"
+          "justo": 13.07637329458167,
+          "mediana": 7.269698727417946,
+          "pares": 32,
+          "grupo": "utilidade-publica"
         }
       }
     },
@@ -2175,26 +2173,26 @@
       "dcf": 1.2,
       "preco": 15.02,
       "potencial": -0.9201065246338216,
-      "multiplos": 1.59991401732062,
-      "divergencia": 0.33179585142466594,
+      "multiplos": 1.451204302936045,
+      "divergencia": 0.20800733620457912,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 3.8993036244916115,
-          "mediana": 19.547340292053743,
-          "pares": 5,
-          "grupo": "Serv.Méd.Hospit..Análises e Diagnósticos / Serv.Méd.Hospit..Análises e Diagnósticos"
+          "justo": 2.7561115880941256,
+          "mediana": 13.816480141982446,
+          "pares": 14,
+          "grupo": "saude"
         },
         "precoPatrimonio": {
-          "justo": 0.49249437716574407,
-          "mediana": 1.1216432210840201,
-          "pares": 9,
+          "justo": 0.30559789820738076,
+          "mediana": 0.6959913184683459,
+          "pares": 7,
           "grupo": "Serv.Méd.Hospit..Análises e Diagnósticos / Serv.Méd.Hospit..Análises e Diagnósticos"
         },
         "firmaEbitda": {
-          "justo": 1.59991401732062,
-          "mediana": 5.236983113718994,
-          "pares": 7,
+          "justo": 1.451204302936045,
+          "mediana": 4.717640653863114,
+          "pares": 6,
           "grupo": "Serv.Méd.Hospit..Análises e Diagnósticos / Serv.Méd.Hospit..Análises e Diagnósticos"
         }
       }
@@ -2205,26 +2203,26 @@
       "dcf": 1.23,
       "preco": 8.74,
       "potencial": -0.8592677345537757,
-      "multiplos": 10.316883895491404,
-      "divergencia": 7.391914248703886,
+      "multiplos": 10.276477960247185,
+      "divergencia": 7.359047430848969,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 9.244083521012998,
-          "mediana": 6.0979794982066915,
-          "pares": 57,
+          "justo": 9.105559256059795,
+          "mediana": 6.006600171552121,
+          "pares": 50,
           "grupo": "consumo-ciclico"
         },
         "precoPatrimonio": {
-          "justo": 13.029834543016023,
-          "mediana": 0.9213039460393759,
-          "pares": 72,
+          "justo": 12.457961255396931,
+          "mediana": 0.8808683507308859,
+          "pares": 65,
           "grupo": "consumo-ciclico"
         },
         "firmaEbitda": {
-          "justo": 10.316883895491404,
-          "mediana": 4.525187116565318,
-          "pares": 72,
+          "justo": 10.276477960247185,
+          "mediana": 4.5163766461771075,
+          "pares": 65,
           "grupo": "consumo-ciclico"
         }
       }
@@ -2235,27 +2233,27 @@
       "dcf": 3.58,
       "preco": 26.84,
       "potencial": -0.8666169895678092,
-      "multiplos": 11.291035881829696,
-      "divergencia": 2.155957236106239,
+      "multiplos": 21.6578625344452,
+      "divergencia": 5.05358876722189,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 20.10987901705978,
-          "mediana": 8.333666972033596,
-          "pares": 6,
-          "grupo": "Água e Saneamento / Água e Saneamento"
+          "justo": 21.6578625344452,
+          "mediana": 8.975161587746774,
+          "pares": 27,
+          "grupo": "utilidade-publica"
         },
         "precoPatrimonio": {
-          "justo": 11.291035881829696,
-          "mediana": 0.9338113552524133,
-          "pares": 7,
-          "grupo": "Água e Saneamento / Água e Saneamento"
+          "justo": 21.692500638579318,
+          "mediana": 1.794051815274457,
+          "pares": 32,
+          "grupo": "utilidade-publica"
         },
         "firmaEbitda": {
-          "justo": 11.052180035689304,
-          "mediana": 4.492619033871535,
-          "pares": 7,
-          "grupo": "Água e Saneamento / Água e Saneamento"
+          "justo": 20.921629290846933,
+          "mediana": 6.829776707396287,
+          "pares": 32,
+          "grupo": "utilidade-publica"
         }
       }
     },
@@ -2265,26 +2263,26 @@
       "dcf": 16.96,
       "preco": 13.87,
       "potencial": 0.22278298485940892,
-      "multiplos": 12.307157508235528,
-      "divergencia": -0.2741791209467882,
+      "multiplos": 11.224936076737857,
+      "divergencia": -0.3380036807779909,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 12.307157508235528,
-          "mediana": 7.324206000463082,
-          "pares": 6,
+          "justo": 11.224936076737857,
+          "mediana": 6.680156982881166,
+          "pares": 5,
           "grupo": "Diversos / Serviços Educacionais"
         },
         "precoPatrimonio": {
-          "justo": 11.194032478835686,
-          "mediana": 1.0637973442738486,
-          "pares": 8,
+          "justo": 9.269123466735806,
+          "mediana": 0.8808683507308859,
+          "pares": 7,
           "grupo": "Diversos / Serviços Educacionais"
         },
         "firmaEbitda": {
-          "justo": 17.495638795375232,
-          "mediana": 4.014938860026994,
-          "pares": 7,
+          "justo": 18.810585182395304,
+          "mediana": 4.265657753102051,
+          "pares": 6,
           "grupo": "Diversos / Serviços Educacionais"
         }
       }
@@ -2295,26 +2293,26 @@
       "dcf": 3.39,
       "preco": 4.35,
       "potencial": -0.2206896551724137,
-      "multiplos": 5.878889064981032,
-      "divergencia": 0.7339710685520249,
+      "multiplos": 7.651122885846313,
+      "divergencia": 1.2566892450874736,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 7.686921534312104,
-          "mediana": 9.487822817336621,
-          "pares": 32,
+          "justo": 7.909705703465668,
+          "mediana": 9.762801131347176,
+          "pares": 27,
           "grupo": "bens-industriais"
         },
         "precoPatrimonio": {
-          "justo": 5.878889064981032,
-          "mediana": 1.3974219447988923,
-          "pares": 40,
+          "justo": 7.651122885846313,
+          "mediana": 1.8186849428275724,
+          "pares": 33,
           "grupo": "bens-industriais"
         },
         "firmaEbitda": {
-          "justo": 5.080073722080864,
-          "mediana": 5.139227274768087,
-          "pares": 38,
+          "justo": 5.274068268311364,
+          "mediana": 5.351106860506716,
+          "pares": 32,
           "grupo": "bens-industriais"
         }
       }
@@ -2322,30 +2320,30 @@
     {
       "ticker": "SLCE3",
       "setor": "consumo-nao-ciclico",
-      "dcf": 4.35,
+      "dcf": 4.38,
       "preco": 17.35,
-      "potencial": -0.7492795389048992,
-      "multiplos": 12.869361758233387,
-      "divergencia": 1.9596838372845133,
+      "potencial": -0.7475504322766572,
+      "multiplos": 12.361650905850478,
+      "divergencia": 1.824228679564973,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 12.869361758233387,
-          "mediana": 11.312135537756074,
-          "pares": 18,
+          "justo": 12.361650905850478,
+          "mediana": 10.865859018062256,
+          "pares": 16,
           "grupo": "consumo-nao-ciclico"
         },
         "precoPatrimonio": {
-          "justo": 12.843033636975424,
-          "mediana": 1.1282395972266726,
-          "pares": 5,
-          "grupo": "Agropecuária / Agricultura"
+          "justo": 10.044593135946513,
+          "mediana": 0.882401154924872,
+          "pares": 18,
+          "grupo": "consumo-nao-ciclico"
         },
         "firmaEbitda": {
-          "justo": 45.51369797176103,
-          "mediana": 10.948403463005942,
-          "pares": 5,
-          "grupo": "Agropecuária / Agricultura"
+          "justo": 17.782706726753766,
+          "mediana": 5.50151729317098,
+          "pares": 19,
+          "grupo": "consumo-nao-ciclico"
         }
       }
     },
@@ -2355,26 +2353,26 @@
       "dcf": 25.07,
       "preco": 19.74,
       "potencial": 0.27001013171225946,
-      "multiplos": 20.13238521994325,
-      "divergencia": -0.19680282967561846,
+      "multiplos": 21.42737162340425,
+      "divergencia": -0.14513833967276024,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 29.30523627977093,
-          "mediana": 11.312135537756074,
-          "pares": 18,
+          "justo": 30.244745548583342,
+          "mediana": 11.67479619288003,
+          "pares": 16,
           "grupo": "consumo-nao-ciclico"
         },
         "precoPatrimonio": {
-          "justo": 20.13238521994325,
-          "mediana": 0.882401154924872,
-          "pares": 20,
+          "justo": 21.42737162340425,
+          "mediana": 0.939160326058456,
+          "pares": 18,
           "grupo": "consumo-nao-ciclico"
         },
         "firmaEbitda": {
-          "justo": 19.512539678924842,
-          "mediana": 5.50151729317098,
-          "pares": 21,
+          "justo": 18.859294606915206,
+          "mediana": 5.4165255860687695,
+          "pares": 19,
           "grupo": "consumo-nao-ciclico"
         }
       }
@@ -2385,27 +2383,27 @@
       "dcf": 29.89,
       "preco": 47.3,
       "potencial": -0.368076109936575,
-      "multiplos": 73.77117218838937,
-      "divergencia": 1.4684030797624663,
+      "multiplos": 60.42384629549318,
+      "divergencia": 1.0217979986413495,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 146.74091356706438,
-          "mediana": 13.496250108867939,
-          "pares": 31,
+          "justo": 148.24852833702016,
+          "mediana": 13.634910455928186,
+          "pares": 18,
           "grupo": "materiais-basicos"
         },
         "precoPatrimonio": {
-          "justo": 57.574035573526125,
-          "mediana": 1.6189474073544794,
-          "pares": 5,
-          "grupo": "Madeira e Papel / Papel e Celulose"
+          "justo": 30.144749723009703,
+          "mediana": 0.8476523127702527,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         },
         "firmaEbitda": {
-          "justo": 73.77117218838937,
-          "mediana": 7.295979766173655,
-          "pares": 5,
-          "grupo": "Madeira e Papel / Papel e Celulose"
+          "justo": 60.42384629549318,
+          "mediana": 6.54779702995893,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         }
       }
     },
@@ -2415,26 +2413,26 @@
       "dcf": 21.71,
       "preco": 40.51,
       "potencial": -0.4640829424833374,
-      "multiplos": 34.24942578988646,
-      "divergencia": 0.5775880959008544,
+      "multiplos": 33.27619630601453,
+      "divergencia": 0.5327594538814766,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 38.09259098284516,
-          "mediana": 8.306325268955735,
-          "pares": 36,
+          "justo": 38.45322513912636,
+          "mediana": 8.384963779171962,
+          "pares": 20,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "precoPatrimonio": {
-          "justo": 34.24942578988646,
-          "mediana": 1.5506528665718355,
-          "pares": 41,
+          "justo": 33.27619630601453,
+          "mediana": 1.506589614292614,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "firmaEbitda": {
-          "justo": 23.934808862194355,
-          "mediana": 6.600496828687227,
-          "pares": 41,
+          "justo": 25.79803225094386,
+          "mediana": 6.829776707396287,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         }
       }
@@ -2445,26 +2443,26 @@
       "dcf": 7.71,
       "preco": 13.72,
       "potencial": -0.4380466472303207,
-      "multiplos": 11.416475263295487,
-      "divergencia": 0.48139847364233246,
+      "multiplos": 11.092065435338178,
+      "divergencia": 0.43930314975032836,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 12.697530327615054,
-          "mediana": 8.306325268955735,
-          "pares": 36,
+          "justo": 12.81774171304212,
+          "mediana": 8.384963779171962,
+          "pares": 20,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "precoPatrimonio": {
-          "justo": 11.416475263295487,
-          "mediana": 1.5506528665718355,
-          "pares": 41,
+          "justo": 11.092065435338178,
+          "mediana": 1.506589614292614,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         },
         "firmaEbitda": {
-          "justo": 7.978269620731452,
-          "mediana": 6.600496828687227,
-          "pares": 41,
+          "justo": 8.599344083647953,
+          "mediana": 6.829776707396287,
+          "pares": 24,
           "grupo": "Energia Elétrica / Energia Elétrica"
         }
       }
@@ -2476,25 +2474,25 @@
       "preco": 31.48,
       "potencial": -0.8344980940279543,
       "multiplos": 18.079317786678736,
-      "divergencia": 2.470474896057733,
+      "divergencia": 2.4704748960506384,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
           "justo": 18.079317786678736,
           "mediana": 4.522606108863741,
-          "pares": 15,
+          "pares": 13,
           "grupo": "Construção Civil / Incorporações"
         },
         "precoPatrimonio": {
-          "justo": 7.498289503134531,
-          "mediana": 0.75415884557284,
-          "pares": 19,
+          "justo": 6.83687138422758,
+          "mediana": 0.6876350970849608,
+          "pares": 17,
           "grupo": "Construção Civil / Incorporações"
         },
         "firmaEbitda": {
-          "justo": 28.897686251806075,
-          "mediana": 6.461089162254257,
-          "pares": 17,
+          "justo": 28.73912709077173,
+          "mediana": 6.428140894696709,
+          "pares": 15,
           "grupo": "Construção Civil / Incorporações"
         }
       }
@@ -2506,25 +2504,25 @@
       "preco": 35.25,
       "potencial": -0.567659574468085,
       "multiplos": 28.92246919524657,
-      "divergencia": 0.8983364194512469,
+      "divergencia": 0.8983364194562846,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 34.925577077445105,
-          "mediana": 9.487822817336621,
-          "pares": 32,
+          "justo": 35.93779837262497,
+          "mediana": 9.762801131347176,
+          "pares": 27,
           "grupo": "bens-industriais"
         },
         "precoPatrimonio": {
-          "justo": 18.467025815113956,
-          "mediana": 1.3974219447988923,
-          "pares": 40,
+          "justo": 19.467213679110007,
+          "mediana": 1.4731073574940812,
+          "pares": 33,
           "grupo": "bens-industriais"
         },
         "firmaEbitda": {
           "justo": 28.92246919524657,
           "mediana": 5.139227274768087,
-          "pares": 38,
+          "pares": 32,
           "grupo": "bens-industriais"
         }
       }
@@ -2535,27 +2533,27 @@
       "dcf": 7.72,
       "preco": 34.37,
       "potencial": -0.7753855106197265,
-      "multiplos": 28.758617304791525,
-      "divergencia": 2.726214058491318,
+      "multiplos": 22.47610969993452,
+      "divergencia": 1.9121982832650186,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 28.758617304791525,
-          "mediana": 17.74211811437271,
-          "pares": 6,
+          "justo": 23.147234609583048,
+          "mediana": 14.280275234091105,
+          "pares": 5,
           "grupo": "tecnologia-da-informacao"
         },
         "precoPatrimonio": {
-          "justo": 8.33209321233649,
-          "mediana": 0.8694702803775052,
-          "pares": 9,
+          "justo": 6.618924647829836,
+          "mediana": 0.6906977781796058,
+          "pares": 8,
           "grupo": "Programas e Serviços / Programas e Serviços"
         },
         "firmaEbitda": {
-          "justo": 32.090220209044375,
-          "mediana": 12.487232498789085,
-          "pares": 5,
-          "grupo": "Programas e Serviços / Programas e Serviços"
+          "justo": 22.47610969993452,
+          "mediana": 8.756456060150208,
+          "pares": 7,
+          "grupo": "tecnologia-da-informacao"
         }
       }
     },
@@ -2565,26 +2563,26 @@
       "dcf": 46.1,
       "preco": 57.04,
       "potencial": -0.19179523141654975,
-      "multiplos": 55.01,
-      "divergencia": 0.19330227264253708,
+      "multiplos": 42.07763222223668,
+      "divergencia": -0.0872326093749054,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 58.24773432247339,
-          "mediana": 13.496250108867939,
-          "pares": 31,
+          "justo": 56.193398062926086,
+          "mediana": 13.020251577953932,
+          "pares": 18,
           "grupo": "materiais-basicos"
         },
         "precoPatrimonio": {
-          "justo": 55.01,
-          "mediana": 3.379948002570602,
-          "pares": 5,
-          "grupo": "Químicos / Químicos Diversos"
+          "justo": 13.79587901649016,
+          "mediana": 0.8476523127702527,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         },
         "firmaEbitda": {
-          "justo": 45.10434928325701,
-          "mediana": 6.746998069403217,
-          "pares": 35,
+          "justo": 42.07763222223668,
+          "mediana": 6.442541299664887,
+          "pares": 21,
           "grupo": "materiais-basicos"
         }
       }
@@ -2595,18 +2593,18 @@
       "dcf": 0.44,
       "preco": 6.64,
       "potencial": -0.9337349397590361,
-      "multiplos": 8.66669145736735,
-      "divergencia": 18.67306915631187,
+      "multiplos": 16.550024229322904,
+      "divergencia": 36.567943061516324,
       "aplicadas": 1,
       "leituras": {
         "precoLucro": {
           "recusa": "baseNaoPositiva"
         },
         "precoPatrimonio": {
-          "justo": 8.66669145736735,
-          "mediana": 0.4501088031929887,
-          "pares": 10,
-          "grupo": "Siderurgia e Metalurgia / Siderurgia"
+          "justo": 16.550024229322904,
+          "mediana": 0.8595334950274495,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         },
         "firmaEbitda": {
           "recusa": "baseNaoPositiva"
@@ -2619,18 +2617,18 @@
       "dcf": 0.41,
       "preco": 7.03,
       "potencial": -0.9416785206258891,
-      "multiplos": 8.66669145736735,
-      "divergencia": 19.93199111284513,
+      "multiplos": 16.550024229322904,
+      "divergencia": 38.971996440587596,
       "aplicadas": 1,
       "leituras": {
         "precoLucro": {
           "recusa": "baseNaoPositiva"
         },
         "precoPatrimonio": {
-          "justo": 8.66669145736735,
-          "mediana": 0.4501088031929887,
-          "pares": 10,
-          "grupo": "Siderurgia e Metalurgia / Siderurgia"
+          "justo": 16.550024229322904,
+          "mediana": 0.8595334950274495,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         },
         "firmaEbitda": {
           "recusa": "baseNaoPositiva"
@@ -2643,27 +2641,27 @@
       "dcf": 70.25,
       "preco": 75.48,
       "potencial": -0.06928987811340757,
-      "multiplos": 72.89879756542258,
-      "divergencia": 0.037771508816425214,
+      "multiplos": 38.35887721115039,
+      "divergencia": -0.4539313238419608,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 58.27629079489479,
-          "mediana": 20.599127540813225,
-          "pares": 5,
-          "grupo": "Mineração / Minerais Metálicos"
+          "justo": 35.651193448472625,
+          "mediana": 12.601754003390123,
+          "pares": 18,
+          "grupo": "materiais-basicos"
         },
         "precoPatrimonio": {
-          "justo": 72.89879756542258,
-          "mediana": 1.6109135315498389,
-          "pares": 5,
-          "grupo": "Mineração / Minerais Metálicos"
+          "justo": 38.35887721115039,
+          "mediana": 0.8476523127702527,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         },
         "firmaEbitda": {
-          "justo": 77.36743748813912,
-          "mediana": 7.809791334520531,
-          "pares": 5,
-          "grupo": "Mineração / Minerais Metálicos"
+          "justo": 61.230133441345316,
+          "mediana": 6.442541299664887,
+          "pares": 21,
+          "grupo": "materiais-basicos"
         }
       }
     },
@@ -2673,27 +2671,27 @@
       "dcf": 8.3,
       "preco": 30.51,
       "potencial": -0.7279580465421174,
-      "multiplos": 25.93827512110845,
-      "divergencia": 2.1267702238170823,
+      "multiplos": 22.584074510534997,
+      "divergencia": 1.7224328287964767,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 27.18173078579505,
-          "mediana": 14.06094810791938,
-          "pares": 6,
-          "grupo": "Telecomunicações / Telecomunicações"
+          "justo": 17.21324382083362,
+          "mediana": 8.904308928708495,
+          "pares": 212,
+          "grupo": "mercado"
         },
         "precoPatrimonio": {
-          "justo": 25.93827512110845,
-          "mediana": 1.2012353937573095,
-          "pares": 6,
-          "grupo": "Telecomunicações / Telecomunicações"
+          "justo": 22.584074510534997,
+          "mediana": 1.045897983217459,
+          "pares": 256,
+          "grupo": "mercado"
         },
         "firmaEbitda": {
-          "justo": 25.853611646201404,
-          "mediana": 3.863668531097213,
-          "pares": 5,
-          "grupo": "Telecomunicações / Telecomunicações"
+          "justo": 39.45561177353211,
+          "mediana": 5.616095368645074,
+          "pares": 226,
+          "grupo": "mercado"
         }
       }
     },
@@ -2703,26 +2701,26 @@
       "dcf": 6.1,
       "preco": 17.7,
       "potencial": -0.655367231638418,
-      "multiplos": 31.418051855618973,
-      "divergencia": 4.149619011581889,
+      "multiplos": 34.27291120582071,
+      "divergencia": 4.617546698750695,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 33.30758299593331,
-          "mediana": 9.487822817336621,
-          "pares": 32,
+          "justo": 34.27291120582071,
+          "mediana": 9.762801131347176,
+          "pares": 27,
           "grupo": "bens-industriais"
         },
         "precoPatrimonio": {
-          "justo": 31.418051855618973,
-          "mediana": 1.3974219447988923,
-          "pares": 40,
+          "justo": 40.889251850852574,
+          "mediana": 1.8186849428275724,
+          "pares": 33,
           "grupo": "bens-industriais"
         },
         "firmaEbitda": {
-          "justo": 27.700708161827652,
-          "mediana": 5.139227274768087,
-          "pares": 38,
+          "justo": 28.85334143124157,
+          "mediana": 5.351106860506716,
+          "pares": 32,
           "grupo": "bens-industriais"
         }
       }
@@ -2733,27 +2731,27 @@
       "dcf": 13.75,
       "preco": 13.29,
       "potencial": 0.03461249059443197,
-      "multiplos": 13.46430533669873,
-      "divergencia": -0.020591618047705706,
+      "multiplos": 10.060280998185279,
+      "divergencia": -0.2682040931163736,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 19.517439026357113,
-          "mediana": 5.260669222466222,
-          "pares": 5,
-          "grupo": "Tecidos. Vestuário e Calçados / Calçados"
+          "justo": 22.284893356023474,
+          "mediana": 6.006600171552121,
+          "pares": 50,
+          "grupo": "consumo-ciclico"
         },
         "precoPatrimonio": {
-          "justo": 13.29,
-          "mediana": 1.7197075652781124,
-          "pares": 5,
-          "grupo": "Tecidos. Vestuário e Calçados / Calçados"
+          "justo": 5.904357807499145,
+          "mediana": 0.7640157102833084,
+          "pares": 65,
+          "grupo": "consumo-ciclico"
         },
         "firmaEbitda": {
-          "justo": 13.46430533669873,
-          "mediana": 5.655720955393789,
-          "pares": 5,
-          "grupo": "Tecidos. Vestuário e Calçados / Calçados"
+          "justo": 10.060280998185279,
+          "mediana": 4.446647500581092,
+          "pares": 65,
+          "grupo": "consumo-ciclico"
         }
       }
     },
@@ -2764,25 +2762,25 @@
       "preco": 50.74,
       "potencial": -0.7530547891210091,
       "multiplos": 11.66487727882898,
-      "divergencia": -0.06894965585727564,
+      "divergencia": -0.06894965585728152,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 15.322628077779127,
-          "mediana": 9.487822817336621,
-          "pares": 32,
+          "justo": 15.464959635284734,
+          "mediana": 9.575954996233994,
+          "pares": 27,
           "grupo": "bens-industriais"
         },
         "precoPatrimonio": {
-          "justo": 6.179398643344398,
-          "mediana": 1.3974219447988923,
-          "pares": 40,
+          "justo": 6.514079473476144,
+          "mediana": 1.4731073574940812,
+          "pares": 33,
           "grupo": "bens-industriais"
         },
         "firmaEbitda": {
           "justo": 11.66487727882898,
           "mediana": 5.139227274768087,
-          "pares": 38,
+          "pares": 32,
           "grupo": "bens-industriais"
         }
       }
@@ -2790,23 +2788,23 @@
     {
       "ticker": "WIZC3",
       "setor": "financeiro",
-      "dcf": 14.03,
+      "dcf": 13.97,
       "preco": 7.87,
-      "potencial": 0.7827191867852604,
-      "multiplos": 13.72465806500659,
-      "divergencia": -0.02142443978537678,
+      "potencial": 0.7750952986022872,
+      "multiplos": 13.57496232659678,
+      "divergencia": -0.028052003463721054,
       "aplicadas": 2,
       "leituras": {
         "precoLucro": {
-          "justo": 19.693266718885642,
-          "mediana": 8.564077002850238,
-          "pares": 53,
+          "justo": 19.401915763572237,
+          "mediana": 8.437376234929133,
+          "pares": 34,
           "grupo": "financeiro"
         },
         "precoPatrimonio": {
-          "justo": 7.756049411127536,
-          "mediana": 0.9568809318699374,
-          "pares": 55,
+          "justo": 7.748008889621323,
+          "mediana": 0.9558889549879248,
+          "pares": 36,
           "grupo": "financeiro"
         },
         "firmaEbitda": {
@@ -2820,26 +2818,26 @@
       "dcf": 0.53,
       "preco": 9.92,
       "potencial": -0.9465725806451614,
-      "multiplos": 9.920000000000002,
-      "divergencia": 17.646653077249045,
+      "multiplos": 10.065934837603702,
+      "divergencia": 17.920967219253168,
       "aplicadas": 3,
       "leituras": {
         "precoLucro": {
-          "justo": 5.007149125294102,
-          "mediana": 7.324206000463082,
-          "pares": 6,
+          "justo": 4.566848910522982,
+          "mediana": 6.680156982881166,
+          "pares": 5,
           "grupo": "Diversos / Serviços Educacionais"
         },
         "precoPatrimonio": {
-          "justo": 11.980075849518842,
-          "mediana": 1.0637973442738486,
-          "pares": 8,
+          "justo": 14.040151699037683,
+          "mediana": 1.2467263378168114,
+          "pares": 7,
           "grupo": "Diversos / Serviços Educacionais"
         },
         "firmaEbitda": {
-          "justo": 9.920000000000002,
-          "mediana": 4.014938860026994,
-          "pares": 7,
+          "justo": 10.065934837603702,
+          "mediana": 4.037440932175043,
+          "pares": 6,
           "grupo": "Diversos / Serviços Educacionais"
         }
       }

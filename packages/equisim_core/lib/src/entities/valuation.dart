@@ -307,7 +307,8 @@ class ValuationDiagnostics {
   ///
   /// **Sai porque reconstruí-la de fora mede outro motor.** O `ROIC_t` converge
   /// para a taxa de desconto **daquele ano**, e desde a decisão 42 essa taxa é
-  /// um caminho resolvido por ponto fixo, não uma interpolação de dois pontos.
+  /// um caminho — resolvido por ponto fixo, ou montado sobre a curva —, e não
+  /// uma interpolação de dois pontos.
   /// Quem remontasse o freio a partir de [growthRate], [returnOnCapital] e
   /// [terminalDiscountRate] erraria em todo ativo com alavancagem que se move.
   final List<double> retentionPath;

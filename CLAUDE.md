@@ -268,6 +268,8 @@ no [README de lá](docs/decisoes/README.md).
 | `docs/decisoes/` | Decisões 19+. Imutáveis, com `origem`, `data` e `afeta` |
 | `docs/apontamentos/` | O que orientador e devs apontam fora do git |
 | `docs/estado.md` | **Gerado** por `npm run estado`. Nunca edite à mão |
+| `docs/motor/` | O que o código faz, regra por regra, com código, fórmula, teoria e evidência (decisão 141). Mudou uma regra, mude o capítulo |
+| `docs/estudo/` | Guia para quem não sabe finanças: capítulos e casos com os números de `tool/casos_de_estudo.dart`. Mudou o motor, refaça os dados e releia os casos |
 | `docs/eap/` | Pacotes da reconstrução da UI, cumprida (decisão 22) — especificação histórica |
 | `PLANO_ARQUITETURA.md` | **Congelado.** Plano de transição já cumprido; decisões 0–18 estão nele |
 

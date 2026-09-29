@@ -1,40 +1,40 @@
 {
  "fonte": "docs/validacao/backtest_trimestral.json",
- "observacoes": 10808,
+ "observacoes": 10792,
  "fatorDeBase": {
-  "observacoesDasListadas": 8944,
+  "observacoesDasListadas": 8928,
   "faixas": {
-   "ate2pct": 5586,
+   "ate2pct": 5572,
    "de10a50pct": 1267,
    "de2a10pct": 495,
-   "acimaDe1vezEMeia": 1596
+   "acimaDe1vezEMeia": 1594
   },
   "pregaoDeCodigoAnterior": 489,
   "foraDe2pctPorCoorte": {
    "2018-03-31": "141/229",
-   "2018-06-30": "135/226",
+   "2018-06-30": "134/225",
    "2018-09-30": "136/226",
    "2018-12-31": "132/227",
-   "2019-03-31": "132/229",
+   "2019-03-31": "131/228",
    "2019-06-30": "130/234",
    "2019-09-30": "127/238",
-   "2019-12-31": "119/240",
+   "2019-12-31": "119/239",
    "2020-03-31": "117/243",
-   "2020-06-30": "114/250",
-   "2020-09-30": "114/265",
-   "2020-12-31": "118/277",
-   "2021-03-31": "120/288",
-   "2021-06-30": "121/305",
-   "2021-09-30": "120/320",
-   "2021-12-31": "112/313",
-   "2022-03-31": "116/322",
+   "2020-06-30": "114/249",
+   "2020-09-30": "114/264",
+   "2020-12-31": "118/276",
+   "2021-03-31": "120/287",
+   "2021-06-30": "121/304",
+   "2021-09-30": "120/319",
+   "2021-12-31": "112/312",
+   "2022-03-31": "116/321",
    "2022-06-30": "111/316",
    "2022-09-30": "112/324",
-   "2022-12-31": "111/321",
-   "2023-03-31": "110/321",
-   "2023-06-30": "103/324",
-   "2023-09-30": "99/318",
-   "2023-12-31": "99/324",
+   "2022-12-31": "111/320",
+   "2023-03-31": "110/320",
+   "2023-06-30": "103/323",
+   "2023-09-30": "99/317",
+   "2023-12-31": "99/323",
    "2024-03-31": "93/316",
    "2024-06-30": "81/322",
    "2024-09-30": "78/322",
@@ -45,8 +45,8 @@
   }
  },
  "origemDoValorDeMercado": {
-  "listada:umaEspecie": 5308,
-  "listada:especies": 3360,
+  "listada:umaEspecie": 5299,
+  "listada:especies": 3353,
   "listada:contagemDoExercicio": 258,
   "deslistada:umaEspecie": 1267,
   "deslistada:especies": 594,
@@ -113,20 +113,20 @@
    }
   },
   "naoUnitsComRazaoMaiorQueUm": 16,
-  "naoUnitsMedidas": 8685
+  "naoUnitsMedidas": 8669
  },
  "divisor": {
   "origem": {
-   "official": 10541,
+   "official": 10525,
    "onlyAvailable": 15,
    "market": 243
   },
-  "candidatasDivergem": 869,
-  "medidos": 10799
+  "candidatasDivergem": 865,
+  "medidos": 10783
  },
  "unitContraEspecie": {
-  "pares": 58,
-  "distanciaMediana": 0.8122188011492399,
+  "pares": 59,
+  "distanciaMediana": 0.8124204342245285,
   "paresNaBaseAntiga": 0,
   "distanciaMedianaNaBaseAntiga": null
  }

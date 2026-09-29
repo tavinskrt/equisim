@@ -184,7 +184,9 @@ abstract final class LeveredCostOfCapital {
   ///
   /// Aqui o ponto fixo é tentado de dois lugares:
   ///
-  ///  1. a interpolação de dois pontos, que é o recuo;
+  ///  1. o caminho sem realavancagem, que é o recuo — sobre a curva, com a
+  ///     estrutura de capital de hoje (item B37), ou a interpolação de dois
+  ///     pontos sem curva;
   ///  2. o custo de capital **desalavancado** — `Rf_t + β_U·prêmio` —, que é o
   ///     mesmo caminho no limite de dívida zero, e portanto uma partida tão
   ///     legítima quanto a primeira.
@@ -253,8 +255,8 @@ abstract final class LeveredCostOfCapital {
     }
     if (a == null) {
       warnings?.add(
-        'O ponto fixo do custo de capital não fecha a partir da interpolação '
-        'de dois pontos, e fecha a partir do custo desalavancado. O resultado '
+        'O ponto fixo do custo de capital não fecha a partir do caminho sem '
+        'realavancagem, e fecha a partir do custo desalavancado. O resultado '
         'é o do ponto fixo, e não o do chute — recusar aqui seria recusar por '
         'causa de onde a conta começou (item B18).',
       );
@@ -418,7 +420,7 @@ abstract final class LeveredCostOfCapital {
         final dAnterior = divida[t - 1];
         if (!eAnterior.isFinite || eAnterior <= 0) {
           // **O momento importa.** Falhar na primeira iteração diz que a
-          // própria interpolação de dois pontos — que é o recuo — já produz
+          // própria partida sem realavancagem — que é o recuo — já produz
           // capital próprio negativo com esta dívida; falhar depois diz que o
           // ponto fixo passou por um iterado inviável e a conclusão sobre o
           // ativo é mais fraca. Sem essa distinção o recuo parece legítimo nos
@@ -628,8 +630,8 @@ abstract final class LeveredCostOfCapital {
     }
     if (a == null) {
       warnings?.add(
-        'O ponto fixo do custo do capital próprio não fecha a partir da '
-        'interpolação de dois pontos, e fecha a partir do custo desalavancado. '
+        'O ponto fixo do custo do capital próprio não fecha a partir do '
+        'caminho sem realavancagem, e fecha a partir do custo desalavancado. '
         'O resultado é o do ponto fixo, e não o do chute (item B18).',
       );
       return peloDesalavancado;

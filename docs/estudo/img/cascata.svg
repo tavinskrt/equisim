@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 560" width="760" height="560" role="img" aria-labelledby="t d"><title id="t">Cascata de avaliação</title><desc id="d">Dados, Porta 0 (elegibilidade, ou recusa), Porta 1 (financeira vai à via do acionista), Porta 3 (NOPAT positivo vai à via da firma, senão acionista), e Porta 2 (premissas e preço justo).</desc><style>
+  .fundo{fill:#fcfcfb}
+  .t1{fill:#0b0b0b;font:600 15px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .t2{fill:#52514e;font:12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .t3{fill:#0b0b0b;font:12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .tb{fill:#0b0b0b;font:600 12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .grade{stroke:#e4e3de;stroke-width:1}
+  .eixo{stroke:#b9b8b1;stroke-width:1}
+  .s1{stroke:#2a78d6;fill:#2a78d6}
+  .s2{stroke:#eb6834;fill:#eb6834}
+  .s3{stroke:#1baf7a;fill:#1baf7a}
+  .neutro{stroke:#8f8e87;fill:#8f8e87}
+  .caixa{fill:#f3f2ee;stroke:#c9c8c1;stroke-width:1}
+  .caixa2{fill:#e7f0fb;stroke:#2a78d6;stroke-width:1.5}
+  .caixa3{fill:#fdeee7;stroke:#eb6834;stroke-width:1.5}
+  .caixa4{fill:#f3f2ee;stroke:#8f8e87;stroke-width:1;stroke-dasharray:0}
+  .seta{stroke:#52514e;stroke-width:1.5;fill:none}
+  .anel{stroke:#fcfcfb;stroke-width:2}
+  @media (prefers-color-scheme: dark){
+    .fundo{fill:#1a1a19}
+    .t1,.t3,.tb{fill:#ffffff}
+    .t2{fill:#c3c2b7}
+    .grade{stroke:#33332f}
+    .eixo{stroke:#5a5953}
+    .s1{stroke:#3987e5;fill:#3987e5}
+    .s2{stroke:#d95926;fill:#d95926}
+    .s3{stroke:#199e70;fill:#199e70}
+    .caixa{fill:#262624;stroke:#4a4944}
+    .caixa2{fill:#16283f;stroke:#3987e5}
+    .caixa3{fill:#3a2016;stroke:#d95926}
+    .caixa4{fill:#262624;stroke:#6d6c66}
+    .seta{stroke:#c3c2b7}
+    .anel{stroke:#1a1a19}
+  }
+</style><rect class="fundo" width="760" height="560" rx="8"/><text class="t1" x="24" y="32">A cascata de avaliação do Equisim</text><text class="t2" x="24" y="52">Cada ativo passa pelas portas, em ordem; a via escolhida não muda depois</text><defs><marker id="ponta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 Z" class="neutro" stroke="none"/></marker></defs><rect class="caixa" x="250" y="72" width="260" height="64" rx="8"/><text class="tb" x="380.0" y="94" text-anchor="middle">Dados na data da avaliação</text><text class="t2" x="380.0" y="112" text-anchor="middle">exercícios já publicados, preço, curva, beta</text><path class="seta" d="M380,136 L380,166" marker-end="url(#ponta)"/><rect class="caixa" x="250" y="166" width="260" height="74" rx="8"/><text class="tb" x="380.0" y="188" text-anchor="middle">Porta 0 — elegibilidade</text><text class="t2" x="380.0" y="206" text-anchor="middle">liquidez ≥ R$ 2 mi/dia; ≥ 8 exercícios;</text><text class="t2" x="380.0" y="222" text-anchor="middle">PL positivo; sem recuperação judicial</text><rect class="caixa4" x="560" y="172" width="170" height="60" rx="8"/><text class="tb" x="645.0" y="194" text-anchor="middle">Recusa</text><text class="t2" x="645.0" y="212" text-anchor="middle">com o motivo</text><path class="seta" d="M510,203 L558,203" marker-end="url(#ponta)"/><text class="t2" x="534.0" y="196.0" text-anchor="middle">não</text><path class="seta" d="M380,240 L380,270" marker-end="url(#ponta)"/><text class="t2" x="388.0" y="259.0" text-anchor="start">sim</text><rect class="caixa" x="250" y="270" width="260" height="64" rx="8"/><text class="tb" x="380.0" y="292" text-anchor="middle">Porta 1 — é financeira?</text><text class="t2" x="380.0" y="310" text-anchor="middle">banco, seguradora, bolsa…</text><path class="seta" d="M380,334 L380,364" marker-end="url(#ponta)"/><text class="t2" x="388.0" y="353.0" text-anchor="start">não</text><rect class="caixa" x="250" y="364" width="260" height="64" rx="8"/><text class="tb" x="380.0" y="386" text-anchor="middle">Porta 3 — NOPAT positivo</text><text class="t2" x="380.0" y="404" text-anchor="middle">em ≥ 60% dos exercícios?</text><rect class="caixa3" x="24" y="364" width="190" height="64" rx="8"/><text class="tb" x="119.0" y="386" text-anchor="middle">Via do acionista</text><text class="t2" x="119.0" y="404" text-anchor="middle">lucro por papel, ao Ke</text><path class="seta" d="M250,302 L120,362" marker-end="url(#ponta)"/><text class="t2" x="177.0" y="336.0" text-anchor="end">sim</text><path class="seta" d="M250,396 L216,396" marker-end="url(#ponta)"/><text class="t2" x="233.0" y="389.0" text-anchor="middle">não</text><rect class="caixa2" x="546" y="364" width="190" height="64" rx="8"/><text class="tb" x="641.0" y="386" text-anchor="middle">Via da firma</text><text class="t2" x="641.0" y="404" text-anchor="middle">NOPAT → fluxo do acionista</text><path class="seta" d="M510,396 L544,396" marker-end="url(#ponta)"/><text class="t2" x="527.0" y="389.0" text-anchor="middle">sim</text><rect class="caixa" x="160" y="462" width="440" height="74" rx="8"/><text class="tb" x="380.0" y="484" text-anchor="middle">Porta 2 — premissas</text><text class="t2" x="380.0" y="502" text-anchor="middle">base (normalização pelo ciclo) e crescimento;</text><text class="t2" x="380.0" y="518" text-anchor="middle">desconto; perpetuidade; preço justo e ressalvas</text><path class="seta" d="M120,428 L250,460" marker-end="url(#ponta)"/><path class="seta" d="M640,428 L510,460" marker-end="url(#ponta)"/></svg>

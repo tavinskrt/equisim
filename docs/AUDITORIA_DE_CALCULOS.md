@@ -1,204 +1,88 @@
-# Painel de Auditoria de Cálculos
+# Painel de logs de cálculo: o que cada passo mostra
 
-Instrumento de demonstração da apuração: uma **segunda janela do navegador** que
-mostra, em tempo real, o que acontece por baixo de cada número apresentado na
-tela principal — os payloads trocados com a API, as fórmulas em formatação
-acadêmica e a substituição de variáveis passo a passo.
+O aplicativo registra cada avaliação passo a passo, com a fórmula, os números
+que entraram e o resultado de cada conta. Este documento explica como abrir o
+painel, o que há nele, e — para cada passo que aparece lá — o que ele calcula e
+onde estudar o assunto.
 
-Endereço: **`/#/logs`** · Atalho: botão **LOGS** no cabeçalho, ou
-**"Abrir Painel de Logs de Cálculo"** no menu do perfil.
-
----
-
-## Por que não há WebSocket nem SSE
-
-O requisito original pedia que o backend transmitisse os eventos por WebSocket
-ou SSE. **Este sistema não tem backend próprio.** O motor financeiro é
-`packages/equisim_core`, um pacote Dart puro que roda dentro da própria
-aplicação — a pureza é verificada por `test/purity_test.dart` —, e a única API
-remota é a brapi.dev, de terceiros, que não tem como emitir os cálculos que ela
-não executa.
-
-Levantar um servidor só para reemitir eventos criaria uma peça de infraestrutura
-que não participa do cálculo. Pior: o que ela retransmitiria seria uma **cópia**
-do que aconteceu no navegador, e uma cópia pode divergir do original — que é
-exatamente o risco que a auditoria existe para eliminar.
-
-O equivalente fiel, no alvo web, é a **`BroadcastChannel`** do próprio
-navegador: canal nomeado, mesma origem, entrega por *push* entre abas, com a
-mesma semântica de assinatura de um SSE — e o evento sai de dentro do cálculo,
-sem intermediário. O contrato de dados transmitido é exatamente o especificado.
-
-Em Android, iOS e desktop não existe segunda janela; lá o canal degrada para
-entrega local e o painel é empilhado sobre a própria aplicação, pela rota
-registrada em `MaterialApp.routes`.
+> O painel mostra **a conta que foi feita**: desde 28/09/2026 (itens B35 e B39)
+> o rastro da via da firma descreve o desconto ao custo do capital próprio, e a
+> soma das parcelas fecha com o preço justo. Os [casos de estudo](estudo/casos/)
+> refazem cada passo com os números.
 
 ---
 
-## Arquitetura
+## 1. Como abrir
 
-```
-┌─ Janela principal (emissora) ──────────┐   ┌─ Janela /logs (inspetora) ──┐
-│                                        │   │                             │
-│  ValuationCascade.evaluate()           │   │  LogsPage                   │
-│    └─ AuditRecorder.begin/step         │   │    └─ AuditBus (histórico)  │
-│  ApiClient (Dio)                       │   │           ▲                 │
-│    └─ AuditNetworkInterceptor          │   │           │                 │
-│           │                            │   │           │                 │
-│           ▼                            │   │           │                 │
-│      AuditBus ──── BroadcastChannel ───┼───┼───────────┘                 │
-│                    'equisim-audit-v1'  │   │                             │
-└────────────────────────────────────────┘   └─────────────────────────────┘
-```
+Menu do perfil → **"Abrir Painel de Logs de Cálculo"**. O painel abre numa aba
+separada (`#/logs`) e recebe os eventos da janela principal por um canal entre
+janelas; na mesma janela, a entrega é local. Ele não autentica, não lê carteira
+e não calcula nada — só observa ([logs_page.dart](../lib/presentation/audit/logs_page.dart),
+[audit_bus.dart](../lib/audit/audit_bus.dart)).
 
-| Arquivo | Papel |
+Com o painel aberto, use o aplicativo normalmente: cada ativo aberto na aba de
+avaliação gera um evento.
+
+## 2. O que há no painel
+
+| Elemento | O que faz |
 |---|---|
-| `packages/equisim_core/lib/src/audit/calculation_trace.dart` | Contrato de dados (`AuditEvent`, `CalculationTrace`), serialização e UUID v4 |
-| `packages/equisim_core/lib/src/audit/audit_recorder.dart` | Coletor ambiente; desligado, custa uma comparação com `null` |
-| `lib/src/usecases/compute_valuation.dart` (seção *Auditoria*) | Rastro de cada fórmula, montado a partir dos valores **já calculados** |
-| `lib/audit/audit_bus.dart` | Barramento, anel de histórico e protocolo entre janelas |
-| `lib/audit/audit_channel*.dart` | Transporte (`BroadcastChannel` na web, entrega local fora dela) |
-| `lib/audit/audit_network_interceptor.dart` | Captura das idas à API, com credenciais mascaradas |
-| `lib/presentation/audit/logs_page.dart` | Console de inspeção |
+| Filtros **Todos / Cálculos / Rede** | cálculos são as avaliações; rede são as requisições às fontes de dados (payload bruto) |
+| Busca | filtra por ativo ou por nome de fórmula |
+| Cada evento | três seções: **Requisição & Resposta** (insumos que entraram no motor e o resultado), **Fórmulas e Equações** (cada expressão, na ordem), **Substituição de Variáveis e Decomposição** (o valor de cada símbolo e cada passo intermediário) |
+| Exportar Auditoria (JSON) | baixa os eventos, para anexar a um relatório ou conferir fora |
+| Limpar, pausar rolagem, recarregar histórico, modo claro/escuro | utilidades |
 
-### Custo quando desligado
+O formato de cada passo é `CalculationTrace`: nome, fórmula em LaTeX, variáveis,
+passos intermediários, resultado e unidade
+([calculation_trace.dart](../packages/equisim_core/lib/src/audit/calculation_trace.dart)).
 
-`AuditRecorder.begin` devolve `null` sem consumidor acoplado, e toda a
-instrumentação vira `null?.step(...)`: nenhum objeto criado, nenhuma string
-formatada. É o que permite deixar a instrumentação permanentemente no caminho do
-cálculo em vez de mantê-la atrás de uma bifurcação que só é exercitada na
-apresentação.
+## 3. Os passos, na ordem em que aparecem
 
-A chave é `auditEnabled` (`lib/audit/audit_bus.dart`): segue `kDebugMode` por
-padrão e aceita `--dart-define=EQUISIM_AUDIT=true` para uma apresentação feita a
-partir de build de release.
+Nem toda avaliação tem todos: bancos não têm WACC nem projeção da firma; uma
+recusa para no passo em que a conta parou.
 
----
+| # | Nome no painel | O que calcula | Onde estudar | Onde está a regra |
+|---:|---|---|---|---|
+| 1 | **Razão da unidade negociada** | quantas ações há em cada papel negociado (1, ou 5 numa unit como a SAPR11) | [guia 2.8](estudo/02-a-empresa-em-numeros.md) | [motor 1.4](motor/01-insumos-e-dados.md) |
+| 2 | **Custo do capital próprio (CAPM)** | `Ke = Rf + β × 5,5%` com o CDI de hoje; o passo 3 do rastro avisa que cada ano da projeção usa o forward daquele ano | [guia 3.8](estudo/03-risco-e-retorno.md) | [motor 4.1](motor/04-custo-de-capital.md) |
+| 3 | **Contagem de papéis da ponte** | por quantos papéis o capital próprio é dividido: mercado, demonstrações, registro oficial da B3 | [guia 2.8](estudo/02-a-empresa-em-numeros.md) | [motor 1.4](motor/01-insumos-e-dados.md) |
+| 4 | **Roteamento por porta** | financeira? NOPAT positivo em 60% dos anos? → via da firma ou do acionista | [guia 4.2](estudo/04-fluxo-de-caixa-descontado.md) | [motor 2](motor/02-cascata-e-portas.md) |
+| 5 | **Base do fluxo: normalização pelo ciclo** | retorno atual × ciclo; as três guardas; fator de normalização (e "queda no triênio": negativa quer dizer que o lucro subiu) | [guia 4.4](estudo/04-fluxo-de-caixa-descontado.md), [6.2](estudo/06-estatistica.md), [6.5](estudo/06-estatistica.md) | [motor 3.2](motor/03-base-e-crescimento.md) |
+| 6 | **Crescimento explícito** | `g` pela mediana, conferido pela regressão do logaritmo; identificado, âncora de inflação ou zero | [guia 4.5](estudo/04-fluxo-de-caixa-descontado.md), [6.6](estudo/06-estatistica.md) | [motor 3.3](motor/03-base-e-crescimento.md) |
+| 7 | **Custo médio ponderado de capital (WACC)** | o WACC de hoje: pesos, custo da dívida sintético, escudo, caixa a Rf (só na via da firma) | [guia 3.9 e 3.10](estudo/03-risco-e-retorno.md) | [motor 4.3 e 4.4](motor/04-custo-de-capital.md) |
+| — | **Taxa de desconto — degeneração para o Ke** | aparece quando não há valor de mercado para ponderar: o desconto vira o Ke | [guia 3.10](estudo/03-risco-e-retorno.md) | [motor 4.4](motor/04-custo-de-capital.md) |
+| 8 | **Crescimento na perpetuidade** | `g∞ = min(g, teto nominal)`, limitado a [−5%; teto] | [guia 4.6](estudo/04-fluxo-de-caixa-descontado.md) | [motor 3.4](motor/03-base-e-crescimento.md) |
+| 9 | **Estrutura a termo da taxa de desconto** | o forward de cada ano da curva e o custo de capital montado sobre ele, com a estrutura de hoje; quando o custo é resolvido ano a ano, este caminho é o ponto de partida | [guia 3.6](estudo/03-risco-e-retorno.md) | [motor 4.5](motor/04-custo-de-capital.md) |
+| 10 | **Vantagem competitiva residual na perpetuidade** | as condições do "moat", a persistência φ e o retorno terminal `ROIC∞` | [guia 4.7](estudo/04-fluxo-de-caixa-descontado.md), [6.7](estudo/06-estatistica.md) | [motor 5.3](motor/05-projecao-desconto-e-terminal.md) |
+| 11a | **Projeção do fluxo da firma (NOPAT)** (via da firma) | ano a ano: `g`, ROIC convergindo ao WACC do ano, retenção, NOPAT e fluxo da firma; o WACC aqui é o alvo do retorno, e não desconta nada | [guia 4.6](estudo/04-fluxo-de-caixa-descontado.md) | [motor 5.1 e 5.2](motor/05-projecao-desconto-e-terminal.md) |
+| 11b | **Fluxo do acionista e desconto ao K_e (período explícito)** (via da firma) | ano a ano: fluxo da firma − serviço da dívida = fluxo do acionista; Ke do ano, fator acumulado, meio de ano, valor presente; a soma | [guia 4.8 e 4.9](estudo/04-fluxo-de-caixa-descontado.md) | [motor 5.5](motor/05-projecao-desconto-e-terminal.md) |
+| 11 | **Projeção e desconto do período explícito (LPA)** (via do acionista) | ano a ano: lucro por papel, retenção, distribuível, Ke do ano, valor presente | [guia 5.4](estudo/05-bancos.md) | [motor 5.4](motor/05-projecao-desconto-e-terminal.md) |
+| 12 | **Valor terminal (…)** | a forma aplicada (retorno neutro, Gordon com reinvestimento, contrato com prazo); na via da firma, "convertido para o acionista": fluxo da firma do ano 11 → serviço da dívida → fluxo do acionista → capitalizado ao Ke∞ → valor presente | [guia 4.7](estudo/04-fluxo-de-caixa-descontado.md), [1.7](estudo/01-dinheiro-no-tempo.md) | [motor 5.3 e 5.5](motor/05-projecao-desconto-e-terminal.md) |
+| 13a | **Capital próprio pelo fluxo do acionista derivado** (via da firma) | explícito + terminal − minoritários (+ capital posterior) ÷ papéis | [guia 4.9](estudo/04-fluxo-de-caixa-descontado.md) | [motor 5.5](motor/05-projecao-desconto-e-terminal.md) |
+| 13b | **Preço justo por papel (DCF sobre o lucro)** (via do acionista) | explícito + terminal (+ capital posterior por papel) | [guia 5.4](estudo/05-bancos.md) | [motor 5.4](motor/05-projecao-desconto-e-terminal.md) |
+| 14 | **Margem de segurança e potencial de valorização** | preço com margem e upside `(justo − preço) ÷ preço` | [guia 4.10](estudo/04-fluxo-de-caixa-descontado.md) | [motor 5.6](motor/05-projecao-desconto-e-terminal.md) |
 
-## Contrato de dados
+Os passos da montagem dos insumos (busca de fundamentos, beta, eventos de
+ações) aparecem como eventos próprios, de [prepare_valuation_inputs.dart](../packages/equisim_core/lib/src/usecases/prepare_valuation_inputs.dart).
 
-```jsonc
-{
-  "transactionId": "uuid-v4",
-  "timestamp": "ISO-8601",
-  "endpoint": "/core/valuation/PETR4",   // ou o caminho da API, em eventos de rede
-  "inputPayload":  { /* insumos resolvidos, ou requisição HTTP */ },
-  "outputPayload": { /* resultado, ou resposta HTTP */ },
-  "executionTimeMs": 142,
-  "calculations": [
-    {
-      "formulaName": "Custo do capital próprio (CAPM)",
-      "latexRepresentation": "K_e = R_f + \\beta \\cdot (R_m - R_f)",
-      "mappedVariables": { "R_f (% a.a.)": 10.65, "beta": 1.18, "R_m - R_f (% a.a.)": 5.5 },
-      "intermediateSteps": [
-        "Passo 1: prêmio ajustado ao risco sistemático → 1,18 × 5,5% = 6,5%",
-        "Passo 2: soma à taxa livre de risco → 10,7% + 6,5% = 17,1%"
-      ],
-      "finalValue": 17.14,
-      "unit": "% a.a."
-    }
-  ]
-}
-```
+## 4. Como conferir uma avaliação pelo painel
 
-Eventos de **rede** trazem `calculations` vazio — é o que os distingue dos
-eventos de **cálculo**, sem precisar de um campo de tipo à parte.
+1. Abra o passo **13a** (ou **13b**): o preço justo é a soma das parcelas dividida
+   pelos papéis.
+2. As parcelas vêm do resultado do passo **11b** (ou **11**) e do passo **12**.
+3. Em **11b**, cada linha diz `fluxo × meio de ano ÷ fator = valor presente`;
+   refaça uma com calculadora.
+4. O Ke de cada ano em **11b** é o forward do ano (passo 9) mais beta × 5,5%, com
+   o beta recalculado pela dívida do ano quando há ponto fixo.
+5. As premissas de 11a — `g` e ROIC — vêm dos passos 5, 6 e 10.
 
-### Amostra por trás de uma agregação
+O [caso WEGE3](estudo/casos/wege3.md) faz exatamente esse percurso.
 
-Fórmulas que resumem vários períodos num único número trazem um campo `sample`
-adicional. Hoje é o caso da **normalização do fluxo-base**: a mediana decide a
-banda inteira, e uma mediana apresentada sozinha não permite discutir se algum
-exercício deveria ser expurgado da janela.
+## 5. O que o painel não mostra
 
-```jsonc
-"sample": {
-  "title": "Exercícios da amostra (fluxo de caixa livre)",
-  "unit": "R$",
-  "summary": 468000000,        // a mediana
-  "summaryLabel": "mediana",
-  "lowerBound": 234000000,     // m·(1−τ)
-  "upperBound": 702000000,     // m·(1+τ)
-  "selected": 702000000,       // F₀ efetivamente adotado
-  "points": [
-    { "label": "2021", "value": 380000000, "definesResult": false, "isObserved": false },
-    { "label": "2023", "value": 468000000, "definesResult": true,  "isObserved": false },
-    { "label": "2025", "value": 4445000000, "definesResult": false, "isObserved": true  }
-  ]
-}
-```
-
-`definesResult` marca **exatamente** o exercício central da amostra ordenada —
-ou os dois centrais, quando a contagem é par. A marcação é feita pela posição
-na ordenação, não pelo valor, para que exercícios repetidos não apareçam todos
-como "a mediana". Ela é produzida pelo próprio normalizador, no ponto do
-cálculo: o painel desenha, não recalcula.
-
-Na seção **C** esse campo vira um gráfico de barras com a banda de aceitação ao
-fundo, o exercício central destacado, o exercício observado marcado e — quando
-houve winsorização — uma seta até onde o valor foi aparado. Abaixo do gráfico,
-os mesmos números em texto selecionável, porque é isso que se copia para a
-defesa. Um exercício muito fora de escala é desenhado **cortado**, com a marca
-de eixo interrompido e o valor escrito ao lado: deixar a escala alcançá-lo
-achataria a banda contra o eixo, que é justamente o que se precisa enxergar.
-
-A justificativa do τ e a análise da fórmula de crescimento estão em
-[validacao/normalizacao_fluxo_base.md](validacao/normalizacao_fluxo_base.md) e
-[validacao/crescimento_log_linear.md](validacao/crescimento_log_linear.md).
-
-### Fórmulas instrumentadas
-
-Razão da unidade negociada · CAPM · WACC (ou sua degeneração no Ke) ·
-normalização do fluxo-base (winsorização) · crescimento por regressão log-linear
-· crescimento na perpetuidade · projeção e desconto do período explícito ·
-valor terminal de Gordon · ponte do valor da firma ao valor por papel ·
-múltiplo EV/EBITDA · valor patrimonial · margem de segurança e potencial de
-valorização.
-
----
-
-## Como demonstrar
-
-```bash
-flutter run -d chrome
-```
-
-1. Entre na aplicação e clique em **LOGS** no cabeçalho — abre a guia paralela.
-2. Arraste as duas janelas para telas diferentes (ou lado a lado).
-3. Opere normalmente na janela principal: escolher ativo, mudar a margem de
-   segurança, ligar Monte Carlo, editar a meta.
-4. Cada requisição e cada avaliação aparece na guia de auditoria no instante em
-   que acontece. Expanda um item para ver as três seções: **A** requisição e
-   resposta, **B** fórmulas renderizadas em TeX, **C** substituição de variáveis
-   e decomposição aritmética.
-5. Na seção **C**, a normalização do fluxo-base traz o gráfico dos exercícios
-   que formaram a mediana — é onde se discute expurgar ou manter um período.
-
-O painel aberto **depois** das primeiras consultas não abre vazio: ele pede um
-*replay* à janela emissora, que responde com o anel de histórico (200 eventos).
-
-Controles: **Limpar Logs** (apaga nas duas janelas), **Pausar Auto-scroll**,
-**Exportar Auditoria (JSON)**, filtro Cálculos/Rede e busca por ativo ou fórmula.
-
----
-
-## Segurança
-
-Nenhum cabeçalho de autorização e nenhum parâmetro `token` entra no payload: a
-URL passa pelo mesmo higienizador do log de diagnóstico
-(`SanitizedLogInterceptor.sanitize`). O painel é feito para ser projetado numa
-tela durante a apresentação.
-
-Respostas maiores que 4.000 caracteres entram truncadas, com o tamanho original
-declarado — o histórico de dez anos de dez ativos passa de dois megabytes, e
-guardar isso por requisição encheria o anel de memória para mostrar algo que
-ninguém lê rolando.
-
----
-
-## Testes
-
-| Arquivo | Cobre |
-|---|---|
-| `packages/equisim_core/test/audit_test.dart` | Coletor ligado/desligado, contrato JSON de ida e volta, formato do UUID, e — o principal — que **instrumentar não move o número**: o preço justo com e sem auditoria é idêntico |
-| `test/presentation/logs_page_test.dart` | Arranque na rota `/logs`, chegada em tempo real, as três seções, filtros, limpeza e auto-scroll |
+- As regras de tela (qual cartão aparece, como a faixa é desenhada).
+- Os cenários e o Monte Carlo passo a passo: eles rodam a mesma conta com as
+  premissas deslocadas, e o rastro é o do cenário base.
+- A faixa calibrada: ela sai de um pacote medido nas coortes
+  ([motor 6.3](motor/06-resultado.md)).

@@ -448,7 +448,9 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
       ..writeln('Isentos da trava por serem de setor cíclico. A queda entre o '
           'pico e o vale é oscilação do preço do insumo, e a convergência ao '
           'ciclo opera nos dois sentidos — limitada pela saturação, que vale '
-          'igual. **A vantagem residual segue barrada para eles**, sem isenção.')
+          'igual. A vantagem residual não tem trava de saúde desde a decisão '
+          '36: para eles também, quem decide é a persistência medida do '
+          'excedente.')
       ..writeln()
       ..writeln('| Ativo | Setor | Queda no triênio | Fator | Potencial |')
       ..writeln('|---|---|---:|---:|---:|');

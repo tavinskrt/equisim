@@ -284,15 +284,12 @@ abstract final class PrepareValuationInputs {
 
   /// Estima o beta contra o Ibovespa.
   ///
-  /// Os dois lados da regressão são séries de **preço de fechamento**: o ativo
-  /// pelo `close` — que o domínio não ajusta por provento —, o índice pela
-  /// própria cotação. O `adjustedClose` da fonte segue fora de cálculo, por
-  /// subajustar proventos brasileiros (ver auditoria §0.4).
-  ///
-  /// A convenção não é simétrica: o Ibovespa é índice de retorno total por
-  /// construção, e o `close` do ativo não. O efeito sobre o beta é de segunda
-  /// ordem — ele mede covariância de variações, não nível —, e a assimetria
-  /// fica declarada aqui em vez de escondida.
+  /// **Retorno total dos dois lados** (decisão 89): o Ibovespa é índice de
+  /// retorno total por construção, e o ativo entra pelo índice de retorno
+  /// total montado com os proventos em dinheiro da B3 ([dividends]). Sem
+  /// proventos, vale o fechamento, e a assimetria fica declarada. O
+  /// `adjustedClose` da fonte segue fora de cálculo, por subajustar proventos
+  /// brasileiros.
   ///
   /// Sem série de mercado utilizável, adota-se β = 1: a alternativa seria
   /// recusar a avaliação inteira por causa de um único parâmetro, e um beta

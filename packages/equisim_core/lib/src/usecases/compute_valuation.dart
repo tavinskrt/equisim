@@ -129,15 +129,17 @@ class ValuationInputs {
   /// não é identificável e a retenção observada a financia.
   final double inflation;
 
-  /// Taxa livre de risco **estrutural**, em fração — o destino do decaimento.
+  /// Taxa livre de risco **estrutural**, em fração — o destino do decaimento
+  /// **quando não há curva de juros** (ver [riskFreeCurve]).
   ///
-  /// O CAPM usa a taxa corrente, que é o custo de oportunidade de hoje. Mas o
-  /// modelo não tem curva de juros, e descontar dez anos e uma perpetuidade por
-  /// um indexador de um dia casa duração infinita com duração zero: no topo do
-  /// ciclo monetário isso esmaga todo valor terminal, e no vale o infla.
+  /// O CAPM usa a taxa corrente, que é o custo de oportunidade de hoje; mas
+  /// descontar dez anos e uma perpetuidade por um indexador de um dia casa
+  /// duração infinita com duração zero: no topo do ciclo monetário isso esmaga
+  /// todo valor terminal, e no vale o infla.
   ///
-  /// Esta é a média decenal do CDI, medida — não chumbada. Omiti-la faz cair
-  /// para a taxa corrente, que reproduz o comportamento anterior.
+  /// Esta é a média decenal do CDI, medida — não chumbada. Com a curva, ela
+  /// não entra: a perpetuidade usa o forward depois do fim da projeção.
+  /// Omiti-la, sem curva, faz cair para a taxa corrente.
   final double? declaredTerminalRiskFreeRate;
 
   /// Curva de juros observada, quando disponível (item A2, decisão 74).
@@ -189,9 +191,9 @@ class ValuationInputs {
   ///
   /// É o que permite realavancar `Ke` ano a ano contra a estrutura de capital
   /// que a própria avaliação produz — ver `LeveredCostOfCapital` e a
-  /// decisão 41. Nulo faz o desconto cair para a interpolação de dois pontos,
-  /// que é o comportamento anterior e que **supõe alavancagem constante sem
-  /// produzi-la**.
+  /// decisão 41. Nulo faz o desconto cair para o custo de capital com a
+  /// estrutura de hoje — sobre a curva, ano a ano (item B37), ou interpolado
+  /// sem ela —, que **supõe alavancagem constante sem produzi-la**.
   final double? unleveredBeta;
 
   /// Crescimento explícito imposto de fora, no lugar do que as guardas
@@ -1083,7 +1085,8 @@ abstract final class ValuationCascade {
         declaradaValida ? declarada.toDouble() : medida;
     _auditUnitRatio(audit, inputs, latest, sharesPerQuote,
         medida: medida, declarada: declaradaValida ? declarada : null);
-    _auditCapm(audit, inputs.capm, inputs.dividendsInBeta);
+    _auditCapm(audit, inputs.capm, inputs.dividendsInBeta,
+        comCurva: inputs.riskFreeCurve != null);
 
     // **A janela do beta, quando ela é curta** (item B17, decisão 111). A
     // fonte de cotações devolve dez anos: numa avaliação datada de 2018 a
@@ -1195,13 +1198,17 @@ abstract final class ValuationCascade {
         'falso de desconto. O preço justo é, nesta medida, conservador.',
       );
     } else if (latest.sharesDisagree) {
+      // **A ponte por papel é a que o divisor adotou** (item B40). O texto
+      // dizia sempre «a implícita no valor de mercado», e desde a decisão 83
+      // o divisor pode ser a contagem oficial: na SAPR11 o aviso nomeava as
+      // 103.850.066 do valor de mercado ao lado de uma ponte de 302.241.104.
       warnings.add(
         'As duas contagens de ações publicadas pela fonte discordam: '
         '${_r(latest.sharesOutstanding ?? 0, 0)} correntes contra '
         '${_r(latest.sharesOutstandingAsOf ?? 0, 0)} do exercício. As bases '
         'contábeis usam a do exercício, que reconstrói o patrimônio publicado; '
-        'a ponte por papel usa a implícita no valor de mercado, que é a que '
-        'forma o preço comparado.',
+        'a ponte por papel usa a ${divisor.source.diagnostico}, '
+        '${_r(divisor.count, 0)} papéis.',
       );
     }
 
@@ -1960,7 +1967,24 @@ abstract final class ValuationCascade {
     _Premissas premissas,
   ) {
     if (via.lane == ValuationLane.shareholder) {
-      return DcfCalculator.shareholder(baseProfit: base, assumptions: a);
+      // **O deslocamento do cenário alcança o caminho de taxas** (itens B36 e
+      // B37). Com caminho — o resolvido ano a ano, ou o montado sobre a curva
+      // —, a taxa de cada ano sai dele, e o cenário, que é uma cópia do centro
+      // com `discountRate` deslocado, herdava o caminho parado: o `+2 p.p.` do
+      // pessimista só chegava à perpetuidade, e a AZEV4 saía com o pessimista
+      // acima do otimista. O deslocamento é o mesmo em todos os anos, como na
+      // interpolação — os dois construtores de cenário deslocam as duas taxas
+      // em paralelo.
+      //
+      // Na via da firma o caminho é o do `WACC`, que não desconta nada — é o
+      // alvo do retorno sobre o capital —, e o cenário chega ao `Ke` abaixo.
+      // Ali o caminho fica parado, com ou sem resolução (item B38).
+      final caminho = a.discountRatePath;
+      final desvio = a.discountRate - custo.assumptions.discountRate;
+      final deslocada = caminho == null || desvio.abs() < 1e-12
+          ? a
+          : a.copyWith(discountRatePath: [for (final r in caminho) r + desvio]);
+      return DcfCalculator.shareholder(baseProfit: base, assumptions: deslocada);
     }
     final taxas = custo.taxas;
     final latest = via.latest;
@@ -2004,6 +2028,11 @@ abstract final class ValuationCascade {
     final caminhoRf = custo.caminhoRf;
     final spread = premissas.spreadDeCredito;
     if (taxas == null) {
+      // Sem caminho resolvido, e com curva, o `Ke`, o juro e o rendimento do
+      // caixa de cada ano seguem o forward daquele ano (item B37), como o
+      // desconto da firma segue.
+      final fw = via.inputs.riskFreeCurve
+          ?.annualForwards(via.inputs.projectionYears);
       return DcfCalculator.equityFromFirm(
         baseProfit: base,
         assumptions: a,
@@ -2013,9 +2042,20 @@ abstract final class ValuationCascade {
         taxRate: ValuationParameters.statutoryTaxRate,
         equityDiscountRate: premissas.keCorrente + dKe,
         terminalEquityDiscountRate: premissas.keTerminal + dKeTerminal,
+        equityDiscountRatePath: fw == null
+            ? null
+            : [
+                for (final rf in fw)
+                  via.inputs.capm.withRiskFree(rf).costOfEquity + dKe,
+              ],
         minorityInterest: minoritarios,
         cash: latest.totalCash,
         cashYield: rendimentoDoCaixa,
+        costOfDebtPath: fw == null ? null : [for (final rf in fw) rf + spread],
+        cashYieldPath: fw,
+        terminalCostOfDebt:
+            fw == null ? null : via.inputs.terminalRiskFreeRate + spread,
+        terminalCashYield: fw == null ? null : via.inputs.terminalRiskFreeRate,
       );
     }
     return DcfCalculator.equityFromFirm(
@@ -2098,7 +2138,6 @@ abstract final class ValuationCascade {
       assumptions: assumptions,
       baseFlow: d.base,
       flowSymbol: lane == ValuationLane.firm ? 'NOPAT' : 'LPA',
-      discountSymbol: lane == ValuationLane.firm ? 'WACC' : 'K_e',
       perShareAlready: lane == ValuationLane.shareholder,
       capitalPorPapel: via.divisor.count > 0
           ? via.capitalPosterior / via.divisor.count
@@ -2112,6 +2151,7 @@ abstract final class ValuationCascade {
         minorityInterest: via.latest.minorityInterest ?? 0,
         shares: via.divisor.count,
         resolved: d.custo.taxas != null,
+        comCurva: inputs.riskFreeCurve != null,
         capitalPosterior: via.capitalPosterior,
       );
     }
@@ -2192,7 +2232,7 @@ abstract final class ValuationCascade {
   /// com o veredito da vantagem competitiva refeito contra a taxa resolvida até
   /// o par parar de mudar.
   ///
-  /// A interpolação de dois pontos supõe que só a taxa livre de risco se
+  /// O caminho sem realavancagem supõe que só a taxa livre de risco se
   /// move. Medido, `D/V` sai de 0,29 no ano zero para 0,38 no ano dez — e um
   /// `WACC` único ao longo da projeção **é** a hipótese de `D/V` constante,
   /// que a projeção da dívida contradizia. Ver
@@ -2395,8 +2435,8 @@ abstract final class ValuationCascade {
         } else {
           local.add(
             'O ponto fixo do custo de capital não convergiu em '
-            '${r.iterations} iterações; vale a interpolação de dois pontos, '
-            'que supõe alavancagem constante.',
+            '${r.iterations} iterações; vale o custo de capital com a '
+            'estrutura de hoje, que supõe alavancagem constante.',
           );
         }
       } else {
@@ -2408,7 +2448,8 @@ abstract final class ValuationCascade {
         } else {
           local.add(
             'O custo de capital não pôde ser resolvido contra a alavancagem '
-            '(${falha?.message}); vale a interpolação de dois pontos.',
+            '(${falha?.message}); vale o custo de capital com a estrutura de '
+            'hoje.',
           );
         }
       }
@@ -2505,6 +2546,26 @@ abstract final class ValuationCascade {
     );
     _auditPerpetualGrowth(audit, g, inputs.perpetualGrowthCap, perpetuo);
 
+    // **Com a curva, a taxa de cada ano é montada sobre o forward daquele ano**
+    // (decisão 74; item B37). O custo de capital resolvido já fazia isso; sem
+    // ele — banco, que não realavanca, e o recuo de quem não tem beta
+    // desalavancado — o desconto interpolava em linha reta do CDI de hoje até o
+    // forward depois do ano N, e o aviso dizia que a taxa seguia a curva. Aqui
+    // o custo é remontado ano a ano sobre o forward, com beta, prêmio e
+    // estrutura de capital de hoje. Sem curva, vale a interpolação.
+    final curvaDaData = inputs.riskFreeCurve;
+    final List<double>? caminhoPelaCurva = curvaDaData == null
+        ? null
+        : [
+            for (final rf
+                in curvaDaData.annualForwards(inputs.projectionYears))
+              lane == ValuationLane.firm
+                  ? _wacc(inputs, latest, <String>[], divisor, null,
+                          capmOverride: inputs.capm.withRiskFree(rf))
+                      .rate
+                  : inputs.capm.withRiskFree(rf).costOfEquity,
+          ];
+
     // Vantagem competitiva residual, contínua desde a decisão 36: o que
     // sobrevive à perpetuidade é `φ^N` do excedente, com `φ` estimado da série
     // do próprio ativo. O veredito carrega o motivo da recusa e os dois valores
@@ -2539,7 +2600,8 @@ abstract final class ValuationCascade {
     final moatVerificado = moatVeredito.terminalReturn;
     final moat = inputs.terminalReturnOverride ?? moatVerificado;
 
-    _auditDiscountTerm(audit, inputs, desconto, descontoTerminal);
+    _auditDiscountTerm(
+        audit, inputs, desconto, descontoTerminal, caminhoPelaCurva);
 
     // Tolerância, e não igualdade estrita: os dois vêm de `_wacc` sobre os
     // mesmos insumos com taxas livres de risco diferentes, e quando as duas
@@ -2630,6 +2692,7 @@ abstract final class ValuationCascade {
       perpetualGrowth: perpetuo,
       discountRate: desconto,
       terminalDiscountRate: descontoTerminal,
+      discountRatePath: caminhoPelaCurva,
       returnOnCapital: retornoDaBase,
       terminalReturnOnCapital: moat,
       marginOfSafety: inputs.marginOfSafety,
@@ -2849,8 +2912,9 @@ abstract final class ValuationCascade {
           'ativo é de setor de commodity: ali a queda entre pico e vale é '
           'oscilação do preço do insumo, não quebra de modelo de negócio. A '
           'trava de saúde não se aplica à base, e a convergência ao ciclo opera '
-          'nos dois sentidos. A vantagem competitiva residual segue barrada por '
-          'ela, sem isenção.',
+          'nos dois sentidos. A vantagem competitiva residual não tem trava de '
+          'saúde desde a decisão 36: quem decide é a persistência medida do '
+          'excedente.',
         );
       }
       if (travadoPelaSaude) {
@@ -3626,6 +3690,14 @@ abstract final class ValuationCascade {
       equityShare: o.equityShare,
       discountedTerminalExcess: o.discountedTerminalExcess,
       impliedTerminalReturn: o.impliedTerminalReturn,
+      discountRates: o.discountRates,
+      terminalDiscountRateUsed: o.terminalDiscountRateUsed,
+      firmFlows: o.firmFlows,
+      debtService: o.debtService,
+      firmTerminalValue: o.firmTerminalValue,
+      terminalFirmFlow: o.terminalFirmFlow,
+      terminalDebtService: o.terminalDebtService,
+      terminalEquityFlow: o.terminalEquityFlow,
     );
   }
 
@@ -4096,7 +4168,8 @@ abstract final class ValuationCascade {
   }
 
   static void _auditCapm(
-      AuditTransaction? audit, CapmInputs capm, int proventosNoBeta) {
+      AuditTransaction? audit, CapmInputs capm, int proventosNoBeta,
+      {bool comCurva = false}) {
     if (audit == null) return;
     final risk = capm.beta * capm.marketPremium;
     audit.step(
@@ -4116,6 +4189,12 @@ abstract final class ValuationCascade {
             '${_pct(capm.marketPremium)} = ${_pct(risk)}',
         'Passo 2: soma à taxa livre de risco → ${_pct(capm.riskFreeRate)} + '
             '${_pct(risk)} = ${_pct(capm.costOfEquity)}',
+        if (comCurva)
+          'Passo 3: este é o K_e sobre o CDI de hoje — o do WACC do dia e o do '
+              'retorno esperado da tela de metas. O desconto de cada ano usa a '
+              'taxa livre de risco daquele ano, da curva do Tesouro, e a '
+              'alavancagem que a avaliação produz: ver a estrutura a termo e o '
+              'desconto do período explícito.',
       ],
       result: _r(capm.costOfEquity * 100).toDouble(),
       unit: '% a.a.',
@@ -4294,7 +4373,7 @@ abstract final class ValuationCascade {
           'Saúde operacional: queda de '
               '${operationalDecline == null ? "n/d" : _pct(operationalDecline)} '
               'no triênio, mas o setor é cíclico — isento da trava na Porta 2a. '
-              'A vantagem residual segue barrada por ela',
+              'A vantagem residual não tem trava de saúde (decisão 36; item B39)',
         if (saturated)
           'Saturação: o fator bruto de ${rawFactor.toStringAsFixed(2)}x saiu da '
               'banda de [${ValuationParameters.baseFactorFloor}, '
@@ -4403,7 +4482,7 @@ abstract final class ValuationCascade {
     if (audit == null) return;
     audit.step(
       formulaName: 'Crescimento na perpetuidade',
-      latex: r'g_\infty = \mathrm{clamp}\big(\min(g,\, g_{eco}),\, 0,\, g_{eco}\big)',
+      latex: r'g_\infty = \mathrm{clamp}\big(\min(g,\, g_{eco}),\, -5\%,\, g_{eco}\big)',
       variables: {
         'g (% a.a.)': _r(explicitGrowth * 100),
         'g_eco nominal (% a.a.)': _r(economyGrowth * 100),
@@ -4412,8 +4491,10 @@ abstract final class ValuationCascade {
         'Passo 1: menor entre o crescimento explícito e o da economia → '
             'min(${_pct(explicitGrowth)}, ${_pct(economyGrowth)}) = '
             '${_pct(explicitGrowth < economyGrowth ? explicitGrowth : economyGrowth)}',
-        'Passo 2: confinado a [0, ${_pct(economyGrowth)}] — uma empresa não '
-            'cresce acima da economia para sempre → ${_pct(perpetual)}. '
+        'Passo 2: confinado a [${_pct(GrowthEstimator.floorRate)}, '
+            '${_pct(economyGrowth)}] — uma empresa não cresce acima da economia '
+            'para sempre, nem encolhe mais de 5% ao ano para sempre (decisão '
+            '56) → ${_pct(perpetual)}. '
             'O teto é **nominal**: composto do crescimento real da atividade com '
             'a inflação observada, porque a taxa de desconto também é nominal, '
             'por sair do CDI. Não é o PIB real.',
@@ -4428,8 +4509,47 @@ abstract final class ValuationCascade {
     ValuationInputs inputs,
     double spot,
     double terminal,
+    List<double>? caminho,
   ) {
     if (audit == null) return;
+    final curva = inputs.riskFreeCurve;
+    if (curva != null && caminho != null) {
+      final fw = curva.annualForwards(inputs.projectionYears);
+      final data = _fmt(curva.referenceDate);
+      audit.step(
+        formulaName: 'Estrutura a termo da taxa de desconto',
+        latex: r'R_{f,t} = f_{t-1,\,t} \quad;\quad r_t = C(R_{f,t})'
+            r'\quad;\quad r_\infty = C(f_{N,\,N+1})',
+        variables: {
+          'curva': 'prefixados do Tesouro de $data',
+          'R_f do ano 1 (% a.a.)': _r(fw.first * 100),
+          'R_f do ano N (% a.a.)': _r(fw.last * 100),
+          'R_f da perpetuidade (% a.a.)': _r(inputs.terminalRiskFreeRate * 100),
+          'r_1 (% a.a.)': _r(caminho.first * 100),
+          'r_N (% a.a.)': _r(caminho.last * 100),
+          'r_inf (% a.a.)': _r(terminal * 100),
+          'N (anos)': inputs.projectionYears,
+        },
+        steps: [
+          'Passo 1: a taxa livre de risco de cada ano é o forward de um ano da '
+              'curva dos prefixados de $data → '
+              '${[for (var t = 0; t < fw.length; t++) 'ano ${t + 1}: ${_pct(fw[t])}'].join('; ')}',
+          'Passo 2: o custo de capital de cada ano é remontado sobre ela, com '
+              'o beta, o prêmio e a estrutura de capital de hoje → '
+              '${[for (var t = 0; t < caminho.length; t++) 'ano ${t + 1}: ${_pct(caminho[t])}'].join('; ')}',
+          'Passo 3: a perpetuidade usa o forward depois do ano '
+              '${inputs.projectionYears}, ${_pct(inputs.terminalRiskFreeRate)}, '
+              'e é descontada a ${_pct(terminal)}',
+          'Passo 4: quando o custo de capital é resolvido ano a ano contra a '
+              'alavancagem que a própria avaliação produz, este caminho é o '
+              'ponto de partida, e o resolvido o substitui — ver o desconto do '
+              'período explícito',
+        ],
+        result: _r(terminal * 100).toDouble(),
+        unit: '% a.a.',
+      );
+      return;
+    }
     audit.step(
       formulaName: 'Estrutura a termo da taxa de desconto',
       latex: r'r_t = r_{spot} - (r_{spot} - r_\infty)\cdot\frac{t-1}{N-1}',
@@ -4441,8 +4561,8 @@ abstract final class ValuationCascade {
         'N (anos)': inputs.projectionYears,
       },
       steps: [
-        'Passo 1: o custo de capital do ano 1 usa a taxa livre de risco '
-            'corrente → ${_pct(spot)}',
+        'Passo 1: sem curva de juros, o custo de capital do ano 1 usa a taxa '
+            'livre de risco corrente → ${_pct(spot)}',
         'Passo 2: o custo de capital de equilíbrio repete beta, prêmio e '
             'estrutura de capital sobre a taxa estrutural → ${_pct(terminal)}. '
             'Como Ke e WACC são afins na taxa livre de risco, decair o custo de '
@@ -4521,82 +4641,166 @@ abstract final class ValuationCascade {
     required DcfAssumptions assumptions,
     required double baseFlow,
     required String flowSymbol,
-    required String discountSymbol,
     bool perShareAlready = false,
     double capitalPorPapel = 0,
   }) {
     if (audit == null) return;
-    final r = assumptions.discountRate;
-    final rInf = assumptions.terminalDiscountRate;
-    final g = assumptions.growthRate;
+    final rInf =
+        outcome.terminalDiscountRateUsed ?? assumptions.terminalDiscountRate;
     final gInf = assumptions.perpetualGrowth;
     final n = outcome.projectedFlows.length;
-    final sumPv = outcome.enterpriseValue - outcome.discountedTerminalValue;
+    final sumPv =
+        outcome.discountedFlows.fold<double>(0, (a, b) => a + b);
+    final unidade = perShareAlready ? r'R$ por papel' : r'R$';
 
-    // O rastro precisa reproduzir a conta que foi feita, e a conta usa taxa,
-    // crescimento e retenção **variáveis** ano a ano. Descrevê-la com g e r
-    // constantes escrevia números que não fecham com o resultado ao lado: num
-    // ativo típico, o fluxo do ano 10 aparecia 2,45x maior que o efetivamente
-    // usado, e o fator de desconto 1,21x maior. O fator abaixo é o mesmo
-    // acumulado que `DcfCalculator._project` monta.
+    // **O rastro descreve a conta que foi feita** (item B35). A taxa de cada
+    // ano é a que descontou aquele fluxo — o `Ke` no fluxo do acionista
+    // derivado, e não o `WACC` que a projeção da firma usa como alvo do
+    // retorno. Montar o fator com uma e mostrar o valor presente da outra
+    // escrevia «fluxo ÷ fator» que não dava o valor presente ao lado.
+    final taxas = outcome.discountRates ??
+        [for (var t = 1; t <= n; t++) assumptions.discountRateAt(t)];
     var fator = 1.0;
     final fatores = <double>[];
-    for (var t = 1; t <= n; t++) {
-      fator *= 1 + assumptions.discountRateAt(t);
+    for (final r in taxas) {
+      fator *= 1 + r;
       fatores.add(fator);
     }
+    final fatorFinal = n == 0 ? 1.0 : fatores[n - 1];
 
     // **A convenção de caixa entra na fórmula, não só na conta** (decisão
-    // 48). O rastro existe para reproduzir o que foi feito, e um LaTeX que
-    // omite o levantamento de meio de ano descreve um desconto 6% maior que
-    // o aplicado — exatamente a divergência que a auditoria existe para
-    // impedir.
+    // 48). Um LaTeX que omite o levantamento de meio de ano descreve um
+    // desconto 6% maior que o aplicado.
     final meioDeAno = assumptions.cashTiming == CashTiming.meioDeAno;
-    audit.step(
-      formulaName: 'Projeção e desconto do período explícito ($flowSymbol)',
-      latex: meioDeAno
-          ? r'VP_{explícito} = \sum_{t=1}^{N} '
-              r'\frac{L_t\,(1 - b_t)\,\sqrt{1 + r_t}}{\prod_{s=1}^{t}(1 + r_s)}'
-              r'\quad;\quad L_t = L_{t-1}(1 + g_t),\; b_t = g_t / ROIC_t'
-          : r'VP_{explícito} = \sum_{t=1}^{N} '
-              r'\frac{L_t\,(1 - b_t)}{\prod_{s=1}^{t}(1 + r_s)}'
-              r'\quad;\quad L_t = L_{t-1}(1 + g_t),\; b_t = g_t / ROIC_t',
-      variables: {
-        'F_0': _r(baseFlow),
-        'g_1 (% a.a.)': _r(g * 100),
-        'g_N (% a.a.)': _r(assumptions.growthAt(n) * 100),
-        'r_1 = $discountSymbol (% a.a.)': _r(r * 100),
-        'r_N (% a.a.)': _r(assumptions.discountRateAt(n) * 100),
-        'ROIC_1 (% a.a.)': _r(assumptions.returnOnCapitalAt(1) * 100),
-        'N (anos)': assumptions.projectionYears,
-      },
-      steps: [
-        'Passo 0: as taxas decaem linearmente ao longo da janela. O fator de '
-            'desconto **acumula** a taxa de cada ano em vez de elevar uma só a '
-            't, e o fluxo do ano é o lucro menos a retenção que financia o '
-            'crescimento daquele mesmo ano.',
-        if (meioDeAno)
-          'Passo 0b: o caixa do exercício chega ao longo do ano, e não no '
-              'último dia dele. Cada fluxo é levantado por raiz de (1 + r '
-              'do ano) — a convenção de meio de ano da decisão 48.',
-        for (var t = 1; t <= n; t++)
-          'Passo $t: ano $t → g = ${_pct(assumptions.growthAt(t))}, '
-              'retenção = ${_pct(assumptions.retentionAt(t))}, '
-              'r = ${_pct(assumptions.discountRateAt(t))}; fluxo '
-              '${_r(outcome.projectedFlows[t - 1])} ÷ fator acumulado '
-              '${_r(fatores[t - 1], 6)} → valor presente '
-              '${_r(outcome.discountedFlows[t - 1])}',
-        'Passo ${n + 1}: soma dos valores presentes do período explícito → '
-            '${_r(sumPv)}',
-      ],
-      result: sumPv,
-      unit: perShareAlready ? r'R$ por papel' : r'R$',
-    );
+    final levantamento = meioDeAno ? r'\,\sqrt{1 + k_t}' : '';
+    final origemDoCaminho = assumptions.discountRatePath != null
+        ? 'sai do caminho ano a ano — o resolvido contra a alavancagem, ou o '
+            'montado sobre a curva do Tesouro (ver a estrutura a termo)'
+        : 'decai em linha reta da corrente à de equilíbrio';
+
+    // O lucro de cada ano, pela mesma recorrência de `DcfCalculator._project`.
+    final lucros = <double>[];
+    var lucro = baseFlow;
+    for (var t = 1; t <= n; t++) {
+      lucro *= 1 + assumptions.growthAt(t);
+      lucros.add(lucro);
+    }
+
+    final firma = outcome.firmFlows;
+    final servicos = outcome.debtService;
+    if (firma != null && servicos != null) {
+      audit.step(
+        formulaName: 'Projeção do fluxo da firma (NOPAT)',
+        latex: r'FCFF_t = NOPAT_t\,(1 - b_t)\quad;\quad '
+            r'NOPAT_t = NOPAT_{t-1}(1 + g_t)\quad;\quad b_t = g_t / ROIC_t'
+            r'\quad;\quad ROIC_t \to WACC_t',
+        variables: {
+          'NOPAT_0': _r(baseFlow),
+          'g_1 (% a.a.)': _r(assumptions.growthAt(1) * 100),
+          'g_N (% a.a.)': _r(assumptions.growthAt(n) * 100),
+          'ROIC_1 (% a.a.)': _r(assumptions.returnOnCapitalAt(1) * 100),
+          'WACC_1 (% a.a.)': _r(assumptions.discountRateAt(1) * 100),
+          'WACC_N (% a.a.)': _r(assumptions.discountRateAt(n) * 100),
+          'N (anos)': assumptions.projectionYears,
+        },
+        steps: [
+          'Passo 0: o crescimento decai em linha reta até o perpétuo, e o '
+              'retorno sobre o capital converge do observado ao WACC do ano, '
+              'que $origemDoCaminho. A retenção b = g ÷ ROIC é o que a firma '
+              'reinveste para crescer g; o resto é o fluxo livre. O WACC aqui '
+              'não desconta nada: ele é o destino do retorno, e o desconto é '
+              'do fluxo do acionista, no passo seguinte (decisão 102).',
+          for (var t = 1; t <= n; t++)
+            'Passo $t: ano $t → g = ${_pct(assumptions.growthAt(t))}, '
+                'ROIC = ${_pct(assumptions.returnOnCapitalAt(t))}, '
+                'retenção = ${_pct(assumptions.retentionAt(t))}; NOPAT '
+                '${_r(lucros[t - 1])} × (1 − retenção) → fluxo da firma '
+                '${_r(firma[t - 1])}',
+        ],
+        result: n == 0 ? 0.0 : firma[n - 1],
+        unit: r'R$',
+      );
+      audit.step(
+        formulaName: 'Fluxo do acionista e desconto ao K_e (período explícito)',
+        latex: r'FCFE_t = FCFF_t - S_t\quad;\quad '
+            r'S_t = D^b_{t-1} K_{d,t}(1-\tau) - C_{t-1} R_{f,t}(1-\tau) '
+            r'- D_{t-1}\,g_t\quad;\quad '
+            'VP = \\sum_{t=1}^{N} \\frac{FCFE_t$levantamento}'
+            r'{\prod_{s=1}^{t}(1 + k_s)},\; k_t = K_{e,t}',
+        variables: {
+          'K_e,1 (% a.a.)': n == 0 ? null : _r(taxas.first * 100),
+          'K_e,N (% a.a.)': n == 0 ? null : _r(taxas.last * 100),
+          'τ (escudo fiscal)': _r(ValuationParameters.statutoryTaxRate, 4),
+          'N (anos)': assumptions.projectionYears,
+        },
+        steps: [
+          'Passo 0: o acionista recebe o fluxo da firma menos o serviço da '
+              'dívida — o juro da dívida bruta depois do imposto, menos o que '
+              'o caixa rende depois do imposto, menos a dívida nova que '
+              'mantém a alavancagem crescendo a g. O resultado é descontado ao '
+              'custo do capital próprio de cada ano, e não ao WACC.',
+          if (meioDeAno)
+            'Passo 0b: o caixa do exercício chega ao longo do ano, e não no '
+                'último dia dele. Cada fluxo é levantado por raiz de (1 + K_e '
+                'do ano) — a convenção de meio de ano da decisão 48.',
+          for (var t = 1; t <= n; t++)
+            'Passo $t: ano $t → fluxo da firma ${_r(firma[t - 1])} − serviço '
+                'da dívida ${_r(servicos[t - 1])} = fluxo do acionista '
+                '${_r(outcome.projectedFlows[t - 1])}; K_e = '
+                '${_pct(taxas[t - 1])}, fator acumulado '
+                '${_r(fatores[t - 1], 6)}'
+                '${meioDeAno ? ', levantamento ${_r(assumptions.lift(taxas[t - 1]), 6)}' : ''}'
+                ' → valor presente ${_r(outcome.discountedFlows[t - 1])}',
+          'Passo ${n + 1}: soma dos valores presentes do período explícito → '
+              '${_r(sumPv)}',
+        ],
+        result: sumPv,
+        unit: r'R$',
+      );
+    } else {
+      audit.step(
+        formulaName: 'Projeção e desconto do período explícito ($flowSymbol)',
+        latex: 'VP_{explícito} = \\sum_{t=1}^{N} '
+            '\\frac{L_t\\,(1 - b_t)$levantamento}{\\prod_{s=1}^{t}(1 + k_s)}'
+            r'\quad;\quad L_t = L_{t-1}(1 + g_t),\; b_t = g_t / ROIC_t,\; '
+            r'k_t = K_{e,t}',
+        variables: {
+          'F_0': _r(baseFlow),
+          'g_1 (% a.a.)': _r(assumptions.growthAt(1) * 100),
+          'g_N (% a.a.)': _r(assumptions.growthAt(n) * 100),
+          'K_e,1 (% a.a.)': n == 0 ? null : _r(taxas.first * 100),
+          'K_e,N (% a.a.)': n == 0 ? null : _r(taxas.last * 100),
+          'ROIC_1 (% a.a.)': _r(assumptions.returnOnCapitalAt(1) * 100),
+          'N (anos)': assumptions.projectionYears,
+        },
+        steps: [
+          'Passo 0: a taxa de cada ano $origemDoCaminho. O fator de desconto '
+              '**acumula** a taxa de cada ano em vez de elevar uma só a t, e o '
+              'fluxo do ano é o lucro menos a retenção que financia o '
+              'crescimento daquele mesmo ano.',
+          if (meioDeAno)
+            'Passo 0b: o caixa do exercício chega ao longo do ano, e não no '
+                'último dia dele. Cada fluxo é levantado por raiz de (1 + K_e '
+                'do ano) — a convenção de meio de ano da decisão 48.',
+          for (var t = 1; t <= n; t++)
+            'Passo $t: ano $t → g = ${_pct(assumptions.growthAt(t))}, '
+                'retenção = ${_pct(assumptions.retentionAt(t))}, '
+                'K_e = ${_pct(taxas[t - 1])}; lucro ${_r(lucros[t - 1])} × '
+                '(1 − retenção) = ${_r(outcome.projectedFlows[t - 1])} ÷ fator '
+                'acumulado ${_r(fatores[t - 1], 6)}'
+                '${meioDeAno ? ' × levantamento ${_r(assumptions.lift(taxas[t - 1]), 6)}' : ''}'
+                ' → valor presente ${_r(outcome.discountedFlows[t - 1])}',
+          'Passo ${n + 1}: soma dos valores presentes do período explícito → '
+              '${_r(sumPv)}',
+        ],
+        result: sumPv,
+        unit: unidade,
+      );
+    }
 
     // Três formas de terminal, e o rastro precisa dizer qual foi aplicada. Com
     // retorno neutro o crescimento perpétuo **sai** da fórmula, e exibir o
-    // spread de Gordon ali descreveria uma conta que não foi feita. A taxa é
-    // sempre a de equilíbrio, nunca a corrente.
+    // spread de Gordon ali descreveria uma conta que não foi feita.
     //
     // O ramo de retenção só existe quando não há retorno terminal declarado
     // **e** o retorno neutro está desligado — caminho que a cascata não usa,
@@ -4604,37 +4808,141 @@ abstract final class ValuationCascade {
     final moat = assumptions.terminalReturnOnCapital;
     final neutro = moat == null && assumptions.neutralTerminalReturn;
     // **A concessão tem terminal próprio, e o rastro tem de dizê-lo** (lente
-    // `metodo`, 21/09/2026). Com prazo, o terminal é `capital_N + EVA·anuidade`
-    // (decisão 88), e imprimir a perpetuidade de Gordon ali descrevia uma conta
-    // que não foi feita — o mesmo defeito que a ponte `EV − D` tinha.
+    // `metodo`, 21/09/2026; decisão 88).
     final contrato =
         neutro ? assumptions.contractYearsAfterHorizon : null;
     final reinvestimento = moat != null
         ? (gInf / moat).clamp(0.0, 0.95)
         : assumptions.retentionAt(assumptions.projectionYears);
-    final fatorFinal = n == 0 ? 1.0 : fatores[n - 1];
+    final rFirma = assumptions.terminalDiscountRate;
     final vtForma = contrato != null
         ? r'VT = K_N + EVA_{N+1}\,'
             r'\frac{1 - (1+r_\infty)^{-M}}{r_\infty}'
         : neutro
             ? r'VT = \frac{L_{N+1}}{r_\infty}'
             : r'VT = \frac{L_{N+1}\,(1 - b_\infty)}{r_\infty - g_\infty}';
-    // O valor presente do terminal carrega o mesmo levantamento dos fluxos,
-    // sob a taxa de equilíbrio, que é a que o capitaliza.
+    final passoDaForma = contrato != null
+        ? 'o contrato acaba $contrato ano(s) depois do horizonte — o capital '
+            'volta e o excedente sobre ele dura só até lá, de modo que a '
+            'perpetuidade não se aplica (decisão 88)'
+        : neutro
+            ? 'com RONIC_inf = r_inf — o **capital novo** sem valor — a '
+                'álgebra colapsa e o crescimento perpétuo sai da '
+                'perpetuidade: VT = L_(N+1) ÷ r_inf, sem spread'
+            : 'spread da perpetuidade → ${_pct(rFirma)} − ${_pct(gInf)} = '
+                '${_pct(rFirma - gInf)}; retenção perpétua = '
+                '${_pct(reinvestimento)}';
+    final nomeDaForma = contrato != null
+        ? 'contrato com prazo: capital devolvido e excedente até o fim'
+        : neutro
+            ? 'retorno neutro, RONIC_inf = r_inf'
+            : 'Gordon com reinvestimento';
+    // **O que o retorno neutro não diz** (item B12): ele fixa o retorno do
+    // capital **novo**, e não o do instalado.
+    String? passoDoExcedente(double taxa) =>
+        contrato == null && neutro && outcome.impliedTerminalReturn != null
+            ? 'o retorno neutro vale para o capital **novo**; o instalado '
+                'rende ${_pct(outcome.impliedTerminalReturn!)} na '
+                'perpetuidade, contra ${_pct(taxa)} de custo de capital. '
+                'Reagrupando, VT = capital_N + EVA_(N+1) ÷ r_inf, e a segunda '
+                'parcela vale ${_r(outcome.discountedTerminalExcess ?? 0)} a '
+                'valor presente — '
+                '${outcome.impliedTerminalReturn! < taxa ? 'déficit' : 'excedente'} '
+                'mantido para sempre'
+            : null;
+    final levantamentoTerminal = meioDeAno
+        ? ', levantado por ${_r(assumptions.lift(rInf), 6)} de meio de ano'
+        : '';
+
+    final vtFirma = outcome.firmTerminalValue;
+    final fcffTerminal = outcome.terminalFirmFlow;
+    final servicoTerminal = outcome.terminalDebtService;
+    final fcfeTerminal = outcome.terminalEquityFlow;
+    if (vtFirma != null &&
+        fcffTerminal != null &&
+        servicoTerminal != null &&
+        fcfeTerminal != null) {
+      // Sem contrato, a perpetuidade do acionista **é** o terminal que a conta
+      // produziu, e o rastro o lê em vez de refazer a divisão. Com contrato, o
+      // valor antes do corte é refeito só com `Ke∞ − g∞` positivo: a conta
+      // recusa antes, abaixo do mínimo, mas o rastro não pode depender disso
+      // para não levar infinito ao painel.
+      final spreadDoAcionista = rInf - gInf;
+      final double? perpetuo = contrato == null
+          ? outcome.terminalValue
+          : (spreadDoAcionista > 0 && spreadDoAcionista.isFinite
+              ? fcfeTerminal / spreadDoAcionista
+              : null);
+      final excedente = passoDoExcedente(rFirma);
+      final vpForma = meioDeAno
+          ? r'VP = \frac{VT_{acionista}\,\sqrt{1 + K_{e,\infty}}}'
+              r'{\prod_{s=1}^{N}(1+K_{e,s})}'
+          : r'VP = \frac{VT_{acionista}}{\prod_{s=1}^{N}(1+K_{e,s})}';
+      audit.step(
+        formulaName:
+            'Valor terminal ($nomeDaForma), convertido para o acionista',
+        latex: '$vtForma'
+            r'\quad;\quad FCFF_{N+1} = VT^{\infty}_{firma}\,(r_\infty - g_\infty)'
+            r'\quad;\quad FCFE_{N+1} = FCFF_{N+1} - S_{N+1}'
+            r'\quad;\quad VT_{acionista} = \frac{FCFE_{N+1}}'
+            r'{K_{e,\infty} - g_\infty}'
+            '${contrato != null ? r'\,(1 - q^M) + (K_N - D_N)\,q^M' : ''}'
+            r'\quad;\quad '
+            '$vpForma',
+        variables: {
+          'NOPAT_N': n == 0 ? null : _r(lucros[n - 1]),
+          'g_inf (% a.a.)': _r(gInf * 100),
+          'r_inf = WACC de equilíbrio (% a.a.)': _r(rFirma * 100),
+          'K_e,inf (% a.a.)': _r(rInf * 100),
+          'ROIC_inf (% a.a.)': moat == null ? null : _r(moat * 100),
+          'ROIC implícito do instalado (% a.a.)':
+              outcome.impliedTerminalReturn == null
+                  ? null
+                  : _r(outcome.impliedTerminalReturn! * 100),
+          'N (anos)': assumptions.projectionYears,
+          'M (anos de contrato além de N)': contrato,
+        },
+        steps: [
+          'Passo 1: valor terminal da firma no ano '
+              '${assumptions.projectionYears}, ao WACC de equilíbrio — '
+              '$passoDaForma → ${_r(vtFirma)}',
+          'Passo 2: o fluxo da firma do ano N+1 que essa perpetuidade supõe '
+              '${contrato != null ? '(a perpetuidade sem prazo, NOPAT_(N+1) '
+                  '÷ r_inf, e não o terminal do contrato) ' : ''}'
+              '→ × (${_pct(rFirma)} − ${_pct(gInf)}) = ${_r(fcffTerminal)}',
+          'Passo 3: menos o serviço da dívida do ano N+1 → '
+              '${_r(fcffTerminal)} − ${_r(servicoTerminal)} = fluxo do '
+              'acionista ${_r(fcfeTerminal)}',
+          'Passo 4: capitalizado ao K_e de equilíbrio menos o crescimento '
+              'perpétuo → ${_r(fcfeTerminal)} ÷ (${_pct(rInf)} − '
+              '${_pct(gInf)}) = ${perpetuo == null ? '—' : _r(perpetuo)}'
+              '${contrato != null ? '; truncado no contrato, com o capital '
+                  'devolvido menos a dívida no fim → '
+                  '${_r(outcome.terminalValue)}' : ''}',
+          'Passo 5: trazido a presente pelo fator acumulado do K_e '
+              '${_r(fatorFinal, 6)}$levantamentoTerminal → '
+              '${_r(outcome.discountedTerminalValue)}',
+          'Passo 6: participação do valor terminal no capital próprio → '
+              '${_pct(outcome.terminalShare)}',
+          if (excedente != null) 'Passo 7: $excedente',
+        ],
+        result: outcome.discountedTerminalValue,
+        unit: r'R$',
+      );
+      return;
+    }
+
     final vpForma = meioDeAno
-        ? r'VP(VT) = \frac{VT\,\sqrt{1 + r_\infty}}{\prod_{s=1}^{N}(1+r_s)}'
-        : r'VP(VT) = \frac{VT}{\prod_{s=1}^{N}(1+r_s)}';
-    const separadorLatex = r'\quad;\quad ';
+        ? r'VP(VT) = \frac{VT\,\sqrt{1 + r_\infty}}{\prod_{s=1}^{N}(1+k_s)}'
+        : r'VP(VT) = \frac{VT}{\prod_{s=1}^{N}(1+k_s)}';
+    final excedente = passoDoExcedente(rInf);
     audit.step(
-      formulaName: contrato != null
-          ? 'Valor terminal (contrato com prazo: capital devolvido e excedente '
-              'até o fim)'
-          : neutro
-              ? 'Valor terminal (retorno neutro, RONIC_inf = r_inf)'
-              : 'Valor terminal (Gordon com reinvestimento)',
-      latex: '$vtForma$separadorLatex$vpForma',
+      formulaName: 'Valor terminal ($nomeDaForma)',
+      latex: '$vtForma'
+          r'\quad;\quad '
+          '$vpForma',
       variables: {
-        'L_N': n == 0 ? null : _r(outcome.projectedFlows[n - 1]),
+        'L_N': n == 0 ? null : _r(lucros[n - 1]),
         'g_inf (% a.a.)': _r(gInf * 100),
         'r_inf (% a.a.)': _r(rInf * 100),
         'ROIC_inf (% a.a.)': moat == null ? null : _r(moat * 100),
@@ -4646,44 +4954,18 @@ abstract final class ValuationCascade {
         'M (anos de contrato além de N)': contrato,
       },
       steps: [
-        if (contrato != null)
-          'Passo 1: o contrato acaba $contrato ano(s) depois do horizonte — o '
-              'capital volta e o excedente sobre ele dura só até lá, de modo '
-              'que a perpetuidade não se aplica (decisão 88)'
-        else if (neutro)
-          'Passo 1: com RONIC_inf = r_inf — o **capital novo** sem valor — a '
-              'álgebra colapsa e o crescimento perpétuo sai da perpetuidade: '
-              'VT = L_(N+1) ÷ r_inf, sem spread'
-        else
-          'Passo 1: spread da perpetuidade → ${_pct(rInf)} − ${_pct(gInf)} = '
-              '${_pct(rInf - gInf)}; retenção perpétua = '
-              '${_pct(reinvestimento)}',
+        'Passo 1: $passoDaForma',
         'Passo 2: valor terminal no ano ${assumptions.projectionYears} → '
             '${_r(outcome.terminalValue)}',
         'Passo 3: trazido a presente pelo fator acumulado '
-            '${_r(fatorFinal, 6)}'
-            '${meioDeAno ? ', levantado por '
-                '${_r(assumptions.lift(rInf), 6)} de meio de ano' : ''}'
-            ' → ${_r(outcome.discountedTerminalValue)}',
+            '${_r(fatorFinal, 6)}$levantamentoTerminal → '
+            '${_r(outcome.discountedTerminalValue)}',
         'Passo 4: participação do valor terminal no total → '
             '${_pct(outcome.terminalShare)}',
-        // **O que o retorno neutro não diz** (item B12): ele fixa o retorno do
-        // capital **novo**, e não o do instalado. O instalado continua rendendo
-        // o que a projeção alcança, e a mesma expressão reagrupada mostra
-        // quanto disso é excedente — ou déficit — perpétuo.
-        if (contrato == null &&
-            neutro &&
-            outcome.impliedTerminalReturn != null)
-          'Passo 5: o retorno neutro vale para o capital **novo**; o instalado '
-              'rende ${_pct(outcome.impliedTerminalReturn!)} na perpetuidade, '
-              'contra ${_pct(rInf)} de custo de capital. Reagrupando, '
-              'VT = capital_N + EVA_(N+1) ÷ r_inf, e a segunda parcela vale '
-              '${_r(outcome.discountedTerminalExcess ?? 0)} a valor presente '
-              '— ${outcome.impliedTerminalReturn! < rInf ? 'déficit' : 'excedente'} '
-              'mantido para sempre',
+        if (excedente != null) 'Passo 5: $excedente',
       ],
       result: outcome.discountedTerminalValue,
-      unit: perShareAlready ? r'R$ por papel' : r'R$',
+      unit: unidade,
     );
 
     if (perShareAlready) {
@@ -4725,6 +5007,7 @@ abstract final class ValuationCascade {
     required double minorityInterest,
     required double shares,
     required bool resolved,
+    bool comCurva = false,
     double capitalPosterior = 0,
   }) {
     if (audit == null) return;
@@ -4738,9 +5021,11 @@ abstract final class ValuationCascade {
     final doBalanco = outcome.equityValue - capital;
     audit.step(
       formulaName: 'Capital próprio pelo fluxo do acionista derivado',
-      latex: r'FCFE_t = FCFF_t - D_{t-1}\,[K_d(1-\tau) - g_t] \quad;\quad '
-          r'P_0 = \frac{\sum_t \frac{FCFE_t}{(1+K_{e,t})^t} + '
-          r'\frac{VT_{acionista}}{(1+K_e)^N} - M}{N_{papéis}}',
+      latex: capital > 0
+          ? r'P_0 = \frac{VP_{explícito} + VP(VT_{acionista}) - M + C}'
+              r'{N_{papéis}}'
+          : r'P_0 = \frac{VP_{explícito} + VP(VT_{acionista}) - M}'
+              r'{N_{papéis}}',
       variables: {
         'VP do fluxo explícito do acionista (R\$)': _r(explicito),
         'VP do terminal do acionista (R\$)': _r(terminal),
@@ -4750,12 +5035,15 @@ abstract final class ValuationCascade {
         'N_papéis': _r(shares, 0),
         'desconto': resolved
             ? 'caminho de K_e resolvido pela realavancagem'
-            : 'K_e do CAPM, da taxa corrente à de equilíbrio',
+            : comCurva
+                ? 'K_e do CAPM sobre o forward de cada ano da curva, com a '
+                    'estrutura de capital de hoje'
+                : 'K_e do CAPM, da taxa corrente à de equilíbrio',
       },
       steps: [
-        'Passo 1: fluxo do acionista de cada ano = fluxo da firma menos o juro '
-            'líquido da dívida, mais o acréscimo dela a g — a dívida parte de '
-            '${_r(netDebt)}',
+        'Passo 1: a dívida líquida de ${_r(netDebt)} não é subtraída aqui — '
+            'ela já saiu do fluxo, ano a ano, no serviço da dívida dos dois '
+            'passos anteriores',
         'Passo 2: valor presente do fluxo explícito → ${_r(explicito)}',
         'Passo 3: valor presente do terminal do acionista → ${_r(terminal)}',
         'Passo 4: menos a parte dos não controladores → ${_r(explicito)} + '

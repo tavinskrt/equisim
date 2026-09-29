@@ -9,7 +9,8 @@
 >
 > O documento fica no lugar porque a medição que ele traz continua correta e é o que sustenta a
 > decisão de rebaixá-la — em particular o `R² ≥ 0,35` fixo, que a §6.1 do
-> [refinamento](../refinamento-do-valuation.md) substituiu por `R²_crit(n, α)`. Leia-o como
+> documento de refinamento (apagado pela [decisão 141](../decisoes/141-a-documentacao-do-motor-e-refeita-do-zero-contra-o-codigo.md);
+> está no git, commit `6827219`) substituiu por `R²_crit(n, α)`. Leia-o como
 > registro do método antigo, não como descrição do motor atual.
 
 

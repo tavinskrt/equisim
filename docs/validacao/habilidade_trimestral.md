@@ -152,6 +152,25 @@ reingestão da CVM.
   ([ponte_por_papel.md](ponte_por_papel.md)).
 - **O motivo de saída das deslistadas** continua não levantado.
 
+## 12. Com a taxa dos financeiros pela curva — remedido em 28/09/2026
+
+**Uma correção mudou o potencial dos financeiros**: sem o custo de capital
+resolvido, a taxa de cada ano interpolava em linha reta do CDI da data até a
+perpetuidade, em vez de seguir a curva (item B37,
+[decisão 141](../decisoes/141-a-documentacao-do-motor-e-refeita-do-zero-contra-o-codigo.md)).
+O backtest trimestral inteiro foi refeito com o motor corrigido.
+
+| 36 meses, trimestral, com deslistadas (n = 2.176) | 25/09 (§11) | **28/09** | `t` corrigido / crítico | Newey-West | passa |
+|---|---:|---:|---:|---:|---|
+| **potencial dado o B/M (critério do R3)** | 0,058 | **0,069** | **0,40 / 2,70** | 1,13 | não |
+| IC do potencial | 0,111 | 0,121 | 0,76 / 2,70 | 1,88 | não |
+| IC do book-to-market | 0,160 | 0,160 | 2,03 / 2,70 | 4,39 | não |
+| IC do lucro sobre o preço | 0,133 | 0,134 | 1,14 / 2,70 | 3,11 | não |
+| IC do composto | 0,158 | 0,163 | 1,37 / 2,70 | 3,37 | não |
+
+**Nenhum veredito muda.** O efeito mínimo detectável segue em 0,62
+([poder_r3.md](poder_r3.md)).
+
 ## 11. Com o dado das coortes corrigido — remedido em 25/09/2026
 
 **Quatro correções mudaram o que as coortes medem**, e três delas vieram de

@@ -12,7 +12,9 @@ library;
 /// Foi o que aconteceu com a SUZB3: retorno corrente de 41,5% contra 18,4% de
 /// mediana do ciclo, com `t` significante e deriva maior que a correção. A base
 /// ficou travada no pico de celulose e câmbio, e o preço justo saiu a
-/// +259,1% do de mercado. Ver a §13.2 de `docs/refinamento-do-valuation.md`.
+/// +259,1% do de mercado. A medição estava na §13.2 do documento de
+/// refinamento, que a decisão 141 apagou (no git, commit `6827219`); a regra de
+/// hoje está em `docs/motor/03-base-e-crescimento.md`.
 ///
 /// Aqui a determinação é setorial e vem de fora do dado: **em commodity, preço
 /// reverte à média por definição do produto**, e nenhuma quantidade de anos

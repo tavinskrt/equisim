@@ -177,3 +177,27 @@ exatamente por isso que as duas leituras se afastam.
   reúne cinco pares, a mediana vem do setor; quando nem ele, do mercado. O grupo
   usado **viaja com a leitura** e aparece na tela, mas quem só olha o número não
   vê que ele é de um grupo mais largo.
+
+## 7. Remedido em 28/09/2026: par é outra companhia (item B41)
+
+A mediana contava **cada classe de ação como um par e incluía a própria
+companhia**. Nos sete "pares" de saneamento da SAPR11 estavam SAPR3, SAPR4 e
+SAPR11: a mediana caía na Sanepar, e as leituras de P/VP e de EV/EBITDA
+devolviam, as duas, R$ 38,15 — o preço dela na data do pacote. Corrigido em
+`tool/multiplos_empacotar.dart`: cada companhia entra com a mediana das classes
+dela, a do ativo avaliado fica de fora, e o mínimo de cinco pares vale sobre as
+outras companhias ([decisão 141](../decisoes/141-a-documentacao-do-motor-e-refeita-do-zero-contra-o-codigo.md),
+plano, B41).
+
+Sobre a mesma entrada congelada, com `dart run tool/multiplos.dart`:
+
+| | antes | depois |
+|---|---:|---:|
+| divergência mediana (múltiplos ÷ DCF − 1) | +73,4% | **+87,4%** |
+| divergência além de 50% | — | 59 de 97 |
+| potencial mediano pelos múltiplos | — | −6,6% |
+| postos entre as duas leituras | 0,445 | 0,358 |
+
+Os bancos passam de 31 "pares" para 16 companhias; a SAPR11 e a VALE3, sem cinco
+outras companhias no subsetor, descem para o setor. **Nenhum preço justo muda**:
+a segunda leitura não entra nele.

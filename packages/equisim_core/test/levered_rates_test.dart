@@ -408,7 +408,7 @@ void main() {
         warnings: avisos,
       );
       expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
-      expect(avisos.any((a) => a.contains('não fecha a partir da interpolação')),
+      expect(avisos.any((a) => a.contains('não fecha a partir do caminho sem realavancagem')),
           isTrue,
           reason: 'quando as duas partidas discordam sobre existir solução, a '
               'avaliação precisa dizer de onde veio a que valeu');

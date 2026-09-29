@@ -87,11 +87,23 @@ function lerFrontmatter(texto) {
 
 function lerDecisoes() {
   if (!existsSync(DECISOES)) return [];
-  return readdirSync(DECISOES)
+  const lidas = readdirSync(DECISOES)
     .filter((f) => /^\d{3}-.*\.md$/.test(f))
     .sort()
-    .map((arquivo) => {
-      const campos = lerFrontmatter(readFileSync(join(DECISOES, arquivo), 'utf8'));
+    .map((arquivo) => ({
+      arquivo,
+      campos: lerFrontmatter(readFileSync(join(DECISOES, arquivo), 'utf8')),
+    }));
+  // **Caminho retirado não é caminho quebrado.** Decisão aceita não se edita,
+  // e a que apaga um documento declara isso em `retira`: quem o tinha em
+  // `afeta` perde esse objeto sem ser tocada, e o caminho sai da lista de
+  // quebrados para a de retirados, com a decisão que o apagou.
+  const retirados = new Map();
+  for (const { campos } of lidas) {
+    if (!campos || !Array.isArray(campos.retira)) continue;
+    for (const p of campos.retira) retirados.set(p, Number(campos.numero));
+  }
+  return lidas.map(({ arquivo, campos }) => {
       if (!campos) return { arquivo, invalida: true };
       const afeta = Array.isArray(campos.afeta) ? campos.afeta : [];
       const substitui = (Array.isArray(campos.substitui) ? campos.substitui : [])
@@ -108,7 +120,12 @@ function lerDecisoes() {
         substitui,
         // O unico teste que uma maquina consegue fazer sozinha: o caminho
         // existe? Se a decisao e RESPEITADA e semantico, e cabe a lente.
-        quebrados: afeta.filter((p) => !existsSync(join(ROOT, p))),
+        quebrados: afeta.filter(
+          (p) => !existsSync(join(ROOT, p)) && !retirados.has(p),
+        ),
+        retirados: afeta
+          .filter((p) => !existsSync(join(ROOT, p)) && retirados.has(p))
+          .map((p) => ({ caminho: p, por: retirados.get(p) })),
       };
     });
 }
@@ -214,6 +231,23 @@ function gerar() {
         ? `substituída pela ${por.sort((a, b) => a - b).join(', ')}`
         : d.status;
       L.push(`| ${d.numero} | ${d.titulo} | ${status} | ${d.origem} | ${d.data} |`);
+    }
+
+    const comRetirado = decisoes.filter((d) => d.retirados?.length > 0);
+    if (comRetirado.length > 0) {
+      L.push('');
+      L.push('### Caminhos retirados');
+      L.push('');
+      L.push(
+        'Decisões cujo `afeta` cita caminho que uma decisão posterior apagou ' +
+          '(campo `retira`). A decisão antiga não se edita; perdeu esse objeto.',
+      );
+      L.push('');
+      for (const d of comRetirado) {
+        for (const r of d.retirados) {
+          L.push(`- decisão ${d.numero} → \`${r.caminho}\`, retirado pela ${r.por}`);
+        }
+      }
     }
 
     const comQuebra = decisoes.filter((d) => d.quebrados?.length > 0);

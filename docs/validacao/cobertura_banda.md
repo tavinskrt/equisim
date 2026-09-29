@@ -460,3 +460,13 @@ continua cobrindo, e a regra continua mandando-a ao aplicativo**: o pacote
 As remedições de 21, 22 e 24/09 — 88,1 e 89,3%, 87,8 e 88,4%, 87,8 e 88,9% — estão
 no item C2c do plano e no histórico do git do JSON, e não ganharam seção aqui. Esta é a
 primeira desde a §11.
+
+## 13. Remedido em 28/09/2026 — com a taxa dos financeiros pela curva
+
+Sem reescolher a forma, com o backtest refeito depois do item B37: **87,6/79,4/50,6%**
+em 12 meses e **88,0/79,9/52,8%** em 36, contra 90/80/50% nominais, fora da
+amostra e com as deslistadas; desvios máximos de 2,4 e 2,8 p.p. contra o limite
+de 5. Coeficientes do pacote: 12 meses `a = 0,0852`, `b = 0,0289`; 36 meses
+`a = 0,1609`, `b = 0,0916`. A banda de cenários, pessimista a otimista, cobre
+9,3% em 36 meses.
+

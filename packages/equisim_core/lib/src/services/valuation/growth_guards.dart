@@ -9,9 +9,11 @@ import 'inference.dart';
 
 /// Parâmetros homologados das portas e guardas.
 ///
-/// Todos foram calibrados sobre os dezoito ativos das carteiras de teste e a
-/// sensibilidade de cada um está medida na seção 10.2 de
-/// `docs/refinamento-do-valuation.md`. **Continuam sendo escolhas** — o ganho é
+/// Todos foram calibrados sobre os dezoito ativos das carteiras de teste, e a
+/// sensibilidade de cada um foi medida na seção 10.2 do documento de
+/// refinamento, que a decisão 141 apagou (no git, commit `6827219`); a tabela de
+/// hoje está em `docs/motor/03-base-e-crescimento.md`. **Continuam sendo
+/// escolhas** — o ganho é
 /// que passaram a ter interpretação (nível de significância, ponto de ruptura,
 /// materialidade, precisão), não que dispensem calibragem.
 ///

@@ -119,8 +119,10 @@ class PeerValuation {
 
   /// Mínimo de pares para que uma mediana setorial seja usável.
   ///
-  /// Abaixo de cinco, a mediana é o próprio ativo e mais alguns — e o múltiplo
-  /// deixa de ser de pares para ser de vizinhos.
+  /// **Pares são outras companhias** (item B41): o pacote conta uma por
+  /// companhia, com a mediana das classes dela, e deixa de fora a do ativo
+  /// avaliado. Abaixo de cinco, o múltiplo deixa de ser de pares para ser de
+  /// vizinhos.
   static const int minimumPeers = 5;
 
   /// Calcula as três leituras.

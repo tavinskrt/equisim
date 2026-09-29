@@ -11,6 +11,102 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## A documentação refeita do zero — B35 a B41 (28/09/2026)
+
+**O pedido.** O usuário pediu para apagar e refazer do zero, conferindo cada
+linha do código, os documentos que dizem descrever o motor e o aplicativo — o
+README e as limitações acima de todos —, e para escrever, à parte, um guia de
+estudo para quem não sabe finanças nem estatística, com casos calculados passo
+a passo, porque a documentação anterior «estava tão difícil que ficou impossível
+até para o orientador ler». O painel de logs não foi tocado: a observação de que
+ele não orienta onde estudar ficou como apontamento, e a ponte entre os passos
+do painel e o guia está em `docs/AUDITORIA_DE_CALCULOS.md`. Registrado na
+decisão 141.
+
+**O que foi feito.** Refeitos, nos mesmos caminhos: `README.md`,
+`docs/validacao/limitacoes.md`, `docs/AUDITORIA_DE_CALCULOS.md` e
+`web/ASSETS.md`. Criados `docs/motor/` (oito capítulos e referências: cada regra
+com código, fórmula, teoria e evidência) e `docs/estudo/` (sete capítulos,
+glossário, roteiro, perguntas do orientador e os casos WEGE3, ITUB4, VALE3,
+SAPR11 e RENT3). Os números dos casos saem de `tool/casos_de_estudo.dart` sobre
+a entrada congelada, as tabelas são reconferidas por `tool/tabelas_casos.py` —
+cada linha refeita pela fórmula tem de bater com o motor — e as figuras saem de
+`tool/figuras_estudo.py`. Apagado `docs/refinamento-do-valuation.md`, com o
+campo novo `retira` para que as decisões 25, 27, 28 e 30, que o tinham em
+`afeta`, apareçam no estado como tendo perdido o objeto, e não como referência
+quebrada (`scripts/gerar-estado.mjs`, README das decisões).
+
+**Conferir cada linha achou sete defeitos.**
+
+- **B35 — o rastro da via da firma descrevia outra conta.** O fator de desconto
+  era montado com o WACC, e o valor presente escrito ao lado era o do fluxo do
+  acionista descontado ao Ke (decisão 102). Na WEGE3, a soma mostrada era
+  30,7 bi, e a das parcelas, 33,4 bi. O rastro passou a ter três passos que
+  fecham: projeção do fluxo da firma, fluxo do acionista ao Ke de cada ano,
+  terminal convertido. Também corrigidos o passo da estrutura a termo (que
+  descrevia a interpolação quando a curva estava em uso), o do crescimento
+  perpétuo (que dizia piso zero, e é −5% pela decisão 56) e uma linha nova no
+  CAPM.
+- **B36 — o cenário de desconto não alcançava o caminho de Ke resolvido** na via
+  do acionista: o `+2 p.p.` só chegava à perpetuidade (AZEV4).
+- **B37 — sem resolução, a taxa não seguia a curva ano a ano**: os bancos
+  interpolavam do CDI de hoje à perpetuidade, enquanto o aviso dizia que a taxa
+  seguia a curva. Os 19 financeiros do aplicativo mudam de −0,4% a −0,5%.
+- **B38 — o «Otimista» pode valer menos que o «Pessimista».** A sonda separou os
+  efeitos: só o crescimento +3 p.p. baixa o preço justo em 53 dos 97; só o
+  desconto nunca inverte; combinados, 17 dos 77 da via da firma saem invertidos.
+  A conta está certa; o rótulo supõe que crescer é bom. **Uma tentativa foi
+  desfeita**: deslocar também o caminho do WACC na via da firma (como no B36)
+  mudava a sensibilidade de 77 ativos e subia as inversões para 23; voltou ao
+  que era, e o assunto ficou para decisão.
+- **B39 — um aviso e um rastro diziam que a vantagem residual «segue barrada»
+  pela trava de saúde**, regra que a decisão 36 retirou; na VALE3, ao lado de um
+  veredito que a concedia.
+- **B40 — o aviso das contagens discordantes nomeava a contagem do valor de
+  mercado** quando a ponte usava a oficial (SAPR11: 103,9 mi contra 302,2 mi).
+- **B41 — a mediana dos pares incluía a própria companhia**, e cada classe de
+  ação contava como um par: as leituras de P/VP e EV/EBITDA da SAPR11 davam
+  R$ 38,15 ao centavo, o preço da própria Sanepar na data do pacote. O pacote de
+  múltiplos foi refeito (uma por companhia, sem a avaliada); a divergência
+  mediana contra o fluxo descontado foi de +73,4% a +87,4%.
+
+**Uma correção de registro minha.** Na rodada de 27/09 escrevi, no B34, que
+a tela não diz nada sobre o preço justo que é resíduo da dívida. Estava errado: a
+ressalva «ponte frágil» aparece abaixo de 35% de capital próprio. O que falta é
+o **tamanho** da fragilidade. O texto do B34 foi corrigido no plano.
+
+**As medições derivadas foram refeitas** com o backtest trimestral inteiro
+(36m40s): a faixa calibrada cobre 87,6/79,4/50,6% em 12 meses e 88,0/79,9/52,8%
+em 36 (antes 87,6/79,5/50,9 e 88,1/80,0/53,0); o critério do R3 vai de 0,058
+(`t` 0,34) a 0,069 (`t` 0,40), Newey-West 1,13; o efeito mínimo detectável fica
+em 0,62. Nenhum veredito muda. O gabarito foi regravado: além dos financeiros,
+mudam só avisos e rastros.
+
+### O que a auditoria reprovou
+
+Um FAIL, legítimo e corrigido: o rastro novo da via da firma refazia o terminal
+do acionista dividindo por `Ke∞ − g∞` sem guarda. A conta nunca chega lá com a
+diferença abaixo de 0,5 p.p. — `equityFromFirm` recusa antes —, mas o rastro não
+pode depender disso: sem contrato ele passou a ler o terminal que a conta
+produziu, e com contrato só divide com diferença positiva. Reauditado: 0 FAIL /
+0 WARN, nos dois grupos (o núcleo com os testes, e o empacotador de múltiplos com
+as ferramentas dos casos).
+
+### O que as lentes disseram
+
+- **`metodo`**: nada sobre as mudanças da rodada. Três observações sobre
+  desenho antigo: o `equityValue` do desfecho muda de escala conforme a via (não
+  produz número errado — os dois consumidores usam razões na mesma escala —, e a
+  escala foi documentada no campo); a cotação e a contagem de papéis em `double`
+  (falso positivo: a regra R1 do auditor diz que o DCF em ponto flutuante,
+  convertido para `Money` na fronteira, é o arranjo certo; a disciplina da lente
+  ganhou a regra).
+- **`risco`**: nenhuma tensão.
+- **`nucleo`**: três observações sobre código anterior à rodada, inventariadas
+  como dívida pela preservação — `Portfolio.weighted` valida a soma dos pesos em
+  vez de receber um objeto que a garanta; `AuditEvent.fromJson` preenche campo
+  ausente com travessão; `RequiredReturn.semiAnnual` existe só para exibição.
+
 ## A rodada do C8 — a definição do R3, a RENT3, a Selic prevista, B32 e D6 (27/09/2026)
 
 **O usuário decidiu o C8.** Nas palavras dele: se o projeto mostra que não é

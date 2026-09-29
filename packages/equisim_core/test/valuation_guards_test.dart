@@ -452,6 +452,21 @@ void main() {
       );
     });
 
+    test('o aviso do cíclico isento não diz que o moat está barrado', () {
+      // Item B39: desde a decisão 36 o moat não consulta a saúde operacional,
+      // e o aviso continuava dizendo que a vantagem residual «segue barrada
+      // por ela» — na VALE3, ao lado de um veredito que a concedia.
+      final r = ValuationCascade.evaluate(entradas(deterioracaoEstrutural(),
+          setor: 'materiais-basicos', subsetor: 'Siderurgia'));
+      expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
+      final aviso = r.unwrap().warnings.where((w) => w.contains('no triênio'));
+      expect(aviso, isNotEmpty, reason: 'a fixture precisa acionar a isenção');
+      for (final w in aviso) {
+        expect(w, isNot(contains('barrada')));
+        expect(w, contains('decisão 36'));
+      }
+    });
+
     test('a trava de saúde vale só na Porta 2a, e o moat não a consulta', () {
       // Desde a decisão 36 a pergunta do moat não é mais "esta empresa merece
       // uma exceção", e sim "quanto do excedente dela persiste". Deterioração
@@ -3217,15 +3232,17 @@ void main() {
       final meio = formulas(CashTiming.meioDeAno).join(' ');
       final fim = formulas(CashTiming.fimDeAno).join(' ');
       expect(meio, isNotEmpty, reason: 'o rastro precisa ter sido capturado');
-      expect(meio, contains(r'\sqrt{1 + r_t}'));
-      expect(fim, isNot(contains(r'\sqrt{1 + r_t}')));
+      // O fluxo desta via é o do acionista derivado, descontado ao `Ke` de
+      // cada ano — `k_t` na fórmula (item B35).
+      expect(meio, contains(r'\sqrt{1 + k_t}'));
+      expect(fim, isNot(contains(r'\sqrt{1 + k_t}')));
     });
 
     test('a fórmula do terminal declara o levantamento de equilíbrio', () {
       final meio = formulas(CashTiming.meioDeAno).join(' ');
       final fim = formulas(CashTiming.fimDeAno).join(' ');
-      expect(meio, contains(r'\sqrt{1 + r_\infty}'));
-      expect(fim, isNot(contains(r'\sqrt{1 + r_\infty}')));
+      expect(meio, contains(r'\sqrt{1 + K_{e,\infty}}'));
+      expect(fim, isNot(contains(r'\sqrt{1 + K_{e,\infty}}')));
     });
   });
 

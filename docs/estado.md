@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-28, a partir de `c375987`.
+Gerado em 2026-09-28, a partir de `6827219`.
 
 ## Decisões registradas
 
-**114** aceita · **2** cumprida · **6** substituída
+**115** aceita · **2** cumprida · **6** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -137,13 +137,24 @@ Gerado em 2026-09-28, a partir de `c375987`.
 | 138 | A série pré-registrada do C7 sai do commit dela, reproduzida ao último dígito, e a leitura traz as duas séries | aceita | voce | 2026-09-25 |
 | 139 | Os proventos da mesma data ex entram juntos no fator de retorno total | aceita | voce | 2026-09-25 |
 | 140 | O R3 é «habilidade testada, com o poder declarado», e o motor de referência não autoriza decisão sozinho | aceita | voce | 2026-09-27 |
+| 141 | A documentação do motor e do aplicativo é refeita do zero contra o código, e o guia de estudo passa a ser documento do projeto | aceita | voce | 2026-09-28 |
+
+### Caminhos retirados
+
+Decisões cujo `afeta` cita caminho que uma decisão posterior apagou (campo `retira`). A decisão antiga não se edita; perdeu esse objeto.
+
+- decisão 25 → `docs/refinamento-do-valuation.md`, retirado pela 141
+- decisão 27 → `docs/refinamento-do-valuation.md`, retirado pela 141
+- decisão 28 → `docs/refinamento-do-valuation.md`, retirado pela 141
+- decisão 30 → `docs/refinamento-do-valuation.md`, retirado pela 141
 
 ## Caixa de entrada
 
-2 apontamento(s) não convertidos em decisão:
+3 apontamento(s) não convertidos em decisão:
 
 - `2026-09-09-voce.md`
 - `2026-09-27-voce.md`
+- `2026-09-28-voce.md`
 
 ## Superfície medida
 
@@ -151,16 +162,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 65 | 22.460 |
+| Nucleo de dominio | 65 | 22.838 |
 | Apresentacao | 37 | 16.507 |
 | Camada de dados | 25 | 3.768 |
-| Testes do app | 48 | 9.282 |
-| Testes do nucleo | 45 | 15.902 |
-| Ferramentas de QA | 20 | 6.745 |
+| Testes do app | 49 | 9.326 |
+| Testes do nucleo | 46 | 16.005 |
+| Ferramentas de QA | 20 | 6.798 |
 
 ## Histórico recente
 
 ```
+2026-09-27  6827219  Refino do motor de valuation (parte 26)
 2026-09-27  c375987  Refino do motor de valuation (parte 25)
 2026-09-24  e856ec6  Refino do motor de valuation (parte 24)
 2026-09-22  e1a843d  Refino do motor de valuation (parte 23)
@@ -175,5 +187,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-15  e1077f2  Refino do motor de valuation (parte 15)
 2026-09-15  92f0bef  Refino do motor de valuation (parte 14)
 2026-09-14  cfc5517  Refino do motor de valuation (parte 13)
-2026-09-14  b688eeb  Refino do motor de valuation (parte 12)
 ```
