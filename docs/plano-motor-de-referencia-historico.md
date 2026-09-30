@@ -11,6 +11,85 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O prêmio de mercado medido do mercado — B42, B43 e B44 (29/09/2026)
+
+**A pergunta.** Conferindo os cálculos com o orientador, ele perguntou de onde
+vem o prêmio de risco e se há como capturá-lo em vez de deixá-lo fixo. O
+usuário pediu para calcular o retorno de mercado pelo Ibovespa e o prêmio a
+partir dele, medindo antes de ligar qualquer coisa. Registrado como apontamento
+de 29/09 e como o item B42.
+
+**O que foi medido** ([premio_historico.md](validacao/premio_historico.md)):
+o prêmio histórico `(1 + Ibovespa) ÷ (1 + CDI) − 1`, na mesma janela e com as
+regras das âncoras do aplicativo. Para as janelas longas e as datas das coortes,
+o Ibovespa antes de 23/09/2016 veio do SGS 7 do Banco Central
+(`tool/ibovespa_sgs_baixar.py`), emendado à brapi com razão mediana de 1,000000
+nos 744 pregões comuns (`tool/validation/ibovespa_longo.dart`).
+
+**O resultado.** Hoje o prêmio vai de −2,17% (20 anos) a +1,85% (10 anos), e só
+a janela de dez anos é positiva; nas datas das coortes, o de dez anos é negativo
+em 25 de 31, e o de cinco em 14 de 31. Com o de dez anos de hoje, o preço justo
+mediano sobe 28,5% e o upside mediano vai a −38,3%; com os negativos, a −18% a
+−22%. A ordem quase não muda com o de dez anos (0,985).
+
+**Uma correção de registro.** O +0,39% de cinco anos da decisão 116 comparava o
+Ibovespa de cinco anos com o CDI de dez; na mesma janela é −1,75%. A conclusão
+daquela decisão não muda.
+
+**O que não foi feito.** O backtest com o prêmio de cada coorte: com prêmio
+negativo em quase todas as datas, ele mediria um CAPM sem sentido econômico.
+Fica para o usuário decidir se quer vê-lo assim, com uma regra (piso em zero),
+ou medir o prêmio implícito do índice, que olha para a frente.
+
+### O prêmio implícito e a versão normalizada — e o B43 e o B44
+
+**O pedido.** «Vamos fazer a medição para o prêmio implícito do índice, também
+faça a medição para a versão normalizada dele (média de 5 a 10 anos do ERP
+implícito).»
+
+**O que foi medido** ([premio_implicito.md](validacao/premio_implicito.md),
+`tool/premio_implicito.dart`): em cada fim de trimestre de 2011 a 2026 e na data
+congelada, o rendimento em dinheiro da bolsa — proventos da B3 dos doze meses
+sobre o valor de mercado somado das listadas —, o crescimento nominal da
+economia das âncoras do aplicativo e o prefixado de dez anos da curva do
+Tesouro; `r = rendimento × (1 + g) + g`, e o prêmio é `(1 + r) ÷ (1 + prefixado)
+− 1`. A versão normalizada é a média dos trimestres de cinco e de dez anos.
+
+**O resultado.** O implícito do trimestre vai de −2,99% a +5,10%, com mediana de
+1,36%, e é negativo em 12 de 62 — quando o prefixado dispara. Hoje é −0,98%. As
+médias de cinco e de dez anos são **1,55% e 1,23%** hoje e positivas em todas as
+coortes, e concordam com o histórico de dez anos de hoje (+1,85%). Com elas, o
+preço justo mediano sobe cerca de um terço, o potencial mediano vai de −45,4% a
+−37,7% e −36,7%, e os postos ficam em 0,984 e 0,980. Um ponto de crescimento
+move o prêmio em um ponto.
+
+**Medir achou dois defeitos de dado, os dois também nas coortes.**
+
+- **B43 — a contagem de ações erra de escala.** A primeira rodada deu R$ 144
+  trilhões de bolsa em 2016: a correção do formulário da Ampla repetia a
+  contagem de antes de um grupamento de 40.000 para 1. A primeira regra
+  (descartar a correção que salta mais de cinco vezes) quebrava a TIMS3 e a
+  MGLU3, cuja correção é o único registro de uma mudança verdadeira. A regra que
+  ficou confere contra o preço: a partir da contagem mais recente, para trás, a
+  mudança de mais de três vezes só vale com o salto correspondente no preço bruto
+  até 400 dias depois, e passa a valer no dia dele (a primeira versão procurava
+  só até trinta dias e recusava o desdobramento da PRIO, aprovado três meses
+  antes da data ex). No backtest, a HAPV3 de 2025, a IRBR3 de 2024, a TIMS3 do
+  fim de 2020 e a MGLU3 de meados de 2024 ao começo de 2025 entram com a escala
+  errada, e a MGLU3 de 31/03/2025 foi avaliada assim (potencial de −75,8% com dez
+  vezes as ações).
+- **B44 — nove emissores sem o histórico de proventos.** A consulta à B3 é pelo
+  nome de pregão, e os nove com barra no nome voltaram vazios. Ambev, Klabin e
+  Cury entre eles; 66 observações avaliadas com retorno total sem dividendo.
+
+**O R1 foi desmarcado** pelos dois, e o motor deixa de ser motor de referência
+pela definição da decisão 140 até que fechem e o R2 e o R3 sejam remedidos.
+
+**O que não foi feito.** O backtest com o prêmio normalizado de cada coorte —
+que existe em todas, só com dado até a data — e a correção do B43 e do B44 no
+backtest: a do B44 pede consultar a B3 de novo, e as duas pedem reexecutar as
+coortes.
+
 ## A documentação refeita do zero — B35 a B41 (28/09/2026)
 
 **O pedido.** O usuário pediu para apagar e refazer do zero, conferindo cada

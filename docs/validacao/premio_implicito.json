@@ -1,0 +1,3806 @@
+{
+ "geradoPor": "tool/premio_implicito.dart",
+ "dataDaEntrada": "2026-09-14",
+ "companhias": 281,
+ "contagensSemSalto": [
+  {
+   "cnpj": "12.528.708/0001-07",
+   "desde": "2020-12-11",
+   "acoes": 766213456.0,
+   "anterior": 62120196.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "05.878.397/0001-32",
+   "desde": "2014-06-04",
+   "acoes": 76423831.0,
+   "anterior": 265772778.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "05.878.397/0001-32",
+   "desde": "2011-03-04",
+   "acoes": 76423831.0,
+   "anterior": 265772778.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "05.878.397/0001-32",
+   "desde": "2011-01-11",
+   "acoes": 53172788.0,
+   "anterior": 265772778.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "00.776.574/0001-56",
+   "desde": "2022-12-29",
+   "acoes": 902529503.0,
+   "anterior": 200244321.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "00.776.574/0001-56",
+   "desde": "2022-04-25",
+   "acoes": 907116900.0,
+   "anterior": 200244321.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "16.811.931/0001-00",
+   "desde": "2020-12-11",
+   "acoes": 22415794.0,
+   "anterior": 195330061.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "16.811.931/0001-00",
+   "desde": "2020-09-22",
+   "acoes": 11484979.0,
+   "anterior": 195330061.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "61.351.532/0001-68",
+   "desde": "2025-08-29",
+   "acoes": 592755600.0,
+   "anterior": 111225145.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "61.351.532/0001-68",
+   "desde": "2024-10-18",
+   "acoes": 592753731.0,
+   "anterior": 111225145.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "61.351.532/0001-68",
+   "desde": "2019-06-10",
+   "acoes": 5400000.0,
+   "anterior": 19800000.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "61.351.532/0001-68",
+   "desde": "2019-05-08",
+   "acoes": 5400000.0,
+   "anterior": 19800000.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "61.351.532/0001-68",
+   "desde": "2011-05-02",
+   "acoes": 27000.0,
+   "anterior": 27000000.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "61.351.532/0001-68",
+   "desde": "1996-04-30",
+   "acoes": 27000.0,
+   "anterior": 27000000.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.305.994/0001-29",
+   "desde": "2025-04-02",
+   "acoes": 96046184.0,
+   "anterior": 366088586.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.305.994/0001-29",
+   "desde": "2021-05-03",
+   "acoes": 1262570299.0,
+   "anterior": 366088586.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.305.994/0001-29",
+   "desde": "2021-03-01",
+   "acoes": 1260609782.0,
+   "anterior": 366088586.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.305.994/0001-29",
+   "desde": "2020-05-11",
+   "acoes": 1258668575.0,
+   "anterior": 366088586.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.305.994/0001-29",
+   "desde": "2019-05-06",
+   "acoes": 1256140204.0,
+   "anterior": 366088586.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.305.994/0001-29",
+   "desde": "2018-04-16",
+   "acoes": 1252930395.0,
+   "anterior": 366088586.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.305.994/0001-29",
+   "desde": "2017-02-23",
+   "acoes": 1183536324.0,
+   "anterior": 366088586.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "52.270.350/0001-71",
+   "desde": "2025-12-26",
+   "acoes": 5834014.0,
+   "anterior": 29459983.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "52.270.350/0001-71",
+   "desde": "2025-05-12",
+   "acoes": 5834014.0,
+   "anterior": 29459983.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "60.746.948/0001-12",
+   "desde": "2009-03-10",
+   "acoes": 61397396.0,
+   "anterior": 3069869800.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "17.344.597/0001-94",
+   "desde": "2012-12-31",
+   "acoes": 1250000.0,
+   "anterior": 2000000000.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "28.127.603/0001-78",
+   "desde": "2012-04-23",
+   "acoes": 1515152000.0,
+   "anterior": 151515313.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "28.127.603/0001-78",
+   "desde": "2012-04-23",
+   "acoes": 1515152.0,
+   "anterior": 151515313.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "33.041.260/0652-90",
+   "desde": "2024-10-07",
+   "acoes": 95086997.0,
+   "anterior": 975864785.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "33.041.260/0652-90",
+   "desde": "2024-02-19",
+   "acoes": 95083599.0,
+   "anterior": 975864785.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "45.987.245/0001-92",
+   "desde": "2021-04-26",
+   "acoes": 176611.0,
+   "anterior": 12988200.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "34.169.557/0001-72",
+   "desde": "2021-06-08",
+   "acoes": 710143.0,
+   "anterior": 4825200.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "34.169.557/0001-72",
+   "desde": "2018-04-02",
+   "acoes": 710143.0,
+   "anterior": 4825200.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "34.169.557/0001-72",
+   "desde": "2016-04-26",
+   "acoes": 7597149.0,
+   "anterior": 1825200.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "34.169.557/0001-72",
+   "desde": "2016-03-02",
+   "acoes": 7597149.0,
+   "anterior": 1825200.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.042.817/0001-05",
+   "desde": "2019-09-05",
+   "acoes": 4076735400.0,
+   "anterior": 41176470.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "50.564.053/0001-03",
+   "desde": "2007-05-31",
+   "acoes": 54064588.0,
+   "anterior": 260509779.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "12.091.809/0001-55",
+   "desde": "2020-08-31",
+   "acoes": 1189074.0,
+   "anterior": 109504342.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "92.702.067/0001-96",
+   "desde": "2007-04-30",
+   "acoes": 51346171730.0,
+   "anterior": 342307811.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "00.000.208/0001-00",
+   "desde": "2017-12-20",
+   "acoes": 36304650.0,
+   "anterior": 363046500.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "00.000.208/0001-00",
+   "desde": "2015-06-23",
+   "acoes": 36304650.0,
+   "anterior": 363046500.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "00.000.208/0001-00",
+   "desde": "2011-01-10",
+   "acoes": 36304650.0,
+   "anterior": 363046500.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "00.000.208/0001-00",
+   "desde": "2010-09-24",
+   "acoes": 36304650.0,
+   "anterior": 363046500.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "14.110.585/0001-07",
+   "desde": "2021-05-03",
+   "acoes": 7151173.0,
+   "anterior": 126433000.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "33.050.071/0001-58",
+   "desde": "2016-05-05",
+   "acoes": 3922515918446.0,
+   "anterior": 166634326.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "00.070.698/0001-11",
+   "desde": "2005-02-15",
+   "acoes": 9183458.0,
+   "anterior": 72081915.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "08.467.115/0001-00",
+   "desde": "2022-05-17",
+   "acoes": 9680746.0,
+   "anterior": 68254930.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "08.467.115/0001-00",
+   "desde": "2017-05-09",
+   "acoes": 9680746.0,
+   "anterior": 68254930.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "08.467.115/0001-00",
+   "desde": "2016-05-10",
+   "acoes": 387229828.0,
+   "anterior": 68254930.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "08.467.115/0001-00",
+   "desde": "2016-04-29",
+   "acoes": 9680746.0,
+   "anterior": 68254930.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "08.467.115/0001-00",
+   "desde": "2006-11-28",
+   "acoes": 387229828.0,
+   "anterior": 68254930.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "33.938.119/0001-69",
+   "desde": "2016-05-05",
+   "acoes": 51927546473.0,
+   "anterior": 259637732.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "02.800.026/0001-40",
+   "desde": "2013-03-05",
+   "acoes": 268703876.0,
+   "anterior": 1616263916.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "02.800.026/0001-40",
+   "desde": "2013-03-05",
+   "acoes": 268703876.0,
+   "anterior": 1616263916.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.800.026/0001-40",
+   "desde": "2012-11-30",
+   "acoes": 134351938.0,
+   "anterior": 1616263916.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "02.800.026/0001-40",
+   "desde": "2012-11-30",
+   "acoes": 134351938.0,
+   "anterior": 1616263916.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.429.144/0001-93",
+   "desde": "2011-04-28",
+   "acoes": 48113713.0,
+   "anterior": 962274260.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "15.115.504/0001-24",
+   "desde": "2009-12-31",
+   "acoes": 2321499770.0,
+   "anterior": 23214998.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "15.115.504/0001-24",
+   "desde": "1967-05-08",
+   "acoes": 2321499770.0,
+   "anterior": 23214998.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "04.032.433/0001-80",
+   "desde": "2021-12-15",
+   "acoes": 26710356.0,
+   "anterior": 8013000.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "04.032.433/0001-80",
+   "desde": "2021-03-15",
+   "acoes": 24778472.0,
+   "anterior": 8013000.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "04.032.433/0001-80",
+   "desde": "2019-08-12",
+   "acoes": 2798048.0,
+   "anterior": 23458943.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "04.032.433/0001-80",
+   "desde": "2018-05-10",
+   "acoes": 6851386.0,
+   "anterior": 21976447.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "04.032.433/0001-80",
+   "desde": "2016-12-16",
+   "acoes": 4185596.0,
+   "anterior": 21976447.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "04.032.433/0001-80",
+   "desde": "2016-04-28",
+   "acoes": 345767870.0,
+   "anterior": 21976447.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "04.032.433/0001-80",
+   "desde": "2016-04-22",
+   "acoes": 3457678.0,
+   "anterior": 21976447.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "04.032.433/0001-80",
+   "desde": "2013-04-30",
+   "acoes": 345767870.0,
+   "anterior": 21976447.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "04.032.433/0001-80",
+   "desde": "2013-04-02",
+   "acoes": 345767870.0,
+   "anterior": 21976447.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "04.032.433/0001-80",
+   "desde": "2010-01-18",
+   "acoes": 298853.0,
+   "anterior": 59770600.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "82.640.558/0001-04",
+   "desde": "2016-05-09",
+   "acoes": 62053751.0,
+   "anterior": 6205375.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "22.543.331/0001-00",
+   "desde": "2015-11-06",
+   "acoes": 1200000.0,
+   "anterior": 1200000000.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "02.193.750/0001-52",
+   "desde": "2019-01-08",
+   "acoes": 6267569.0,
+   "anterior": 31337845.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.193.750/0001-52",
+   "desde": "2017-12-15",
+   "acoes": 6267569.0,
+   "anterior": 31337845.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.193.750/0001-52",
+   "desde": "2011-11-21",
+   "acoes": 358849702.0,
+   "anterior": 31337845.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "02.193.750/0001-52",
+   "desde": "2011-08-09",
+   "acoes": 208849702.0,
+   "anterior": 31337845.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "02.193.750/0001-52",
+   "desde": "2011-08-08",
+   "acoes": 358849702.0,
+   "anterior": 31337845.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.193.750/0001-52",
+   "desde": "2004-06-25",
+   "acoes": 104424851.0,
+   "anterior": 31337845.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "03.303.999/0001-36",
+   "desde": "2017-05-18",
+   "acoes": 56131810.0,
+   "anterior": 7789412.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "03.303.999/0001-36",
+   "desde": "2016-05-27",
+   "acoes": 56131810.0,
+   "anterior": 7789411.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "03.303.999/0001-36",
+   "desde": "2011-04-29",
+   "acoes": 56131810.0,
+   "anterior": 7789412.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "82.643.537/0001-34",
+   "desde": "2018-05-30",
+   "acoes": 2250000.0,
+   "anterior": 22500000.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "02.302.101/0001-42",
+   "desde": "2011-05-03",
+   "acoes": 36947082787.0,
+   "anterior": 36947084.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "02.302.101/0001-42",
+   "desde": "1998-01-01",
+   "acoes": 36947082787.0,
+   "anterior": 36947084.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "04.423.567/0001-21",
+   "desde": "2014-08-01",
+   "acoes": 840106107.0,
+   "anterior": 161769820.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "04.423.567/0001-21",
+   "desde": "2013-10-30",
+   "acoes": 1458659593.0,
+   "anterior": 161769820.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "04.423.567/0001-21",
+   "desde": "2013-02-06",
+   "acoes": 578416212.0,
+   "anterior": 161769820.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "04.423.567/0001-21",
+   "desde": "2013-01-10",
+   "acoes": 578389212.0,
+   "anterior": 161769820.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "04.423.567/0001-21",
+   "desde": "2012-08-15",
+   "acoes": 578241732.0,
+   "anterior": 161769820.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "04.423.567/0001-21",
+   "desde": "2012-08-15",
+   "acoes": 578241732.0,
+   "anterior": 161769820.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "04.423.567/0001-21",
+   "desde": "2012-07-25",
+   "acoes": 578241732.0,
+   "anterior": 161769820.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "04.423.567/0001-21",
+   "desde": "2007-12-07",
+   "acoes": 4809110.0,
+   "anterior": 136657480.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "00.864.214/0001-06",
+   "desde": "2007-04-23",
+   "acoes": 207383220.0,
+   "anterior": 1099857555.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "04.895.728/0001-80",
+   "desde": "2007-04-26",
+   "acoes": 63850934.0,
+   "anterior": 1907449807.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "61.092.037/0001-81",
+   "desde": "2014-09-26",
+   "acoes": 179000000.0,
+   "anterior": 29833333.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "61.092.037/0001-81",
+   "desde": "2014-09-24",
+   "acoes": 179000000.0,
+   "anterior": 29833333.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "61.092.037/0001-81",
+   "desde": "2009-10-29",
+   "acoes": 89500000.0,
+   "anterior": 29833333.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "01.545.826/0001-07",
+   "desde": "2026-08-21",
+   "acoes": 24515924.0,
+   "anterior": 157368967.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "01.545.826/0001-07",
+   "desde": "2024-09-19",
+   "acoes": 115936297.0,
+   "anterior": 24515924.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "01.545.826/0001-07",
+   "desde": "2024-04-22",
+   "acoes": 89442291.0,
+   "anterior": 24515924.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "33.611.500/0001-19",
+   "desde": "2011-02-08",
+   "acoes": 412681538.0,
+   "anterior": 1719658728.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "33.611.500/0001-19",
+   "desde": "2010-12-30",
+   "acoes": 412681538.0,
+   "anterior": 1719658728.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "05.197.443/0001-38",
+   "desde": "2025-04-30",
+   "acoes": 502630884.0,
+   "anterior": 7539463263.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "33.200.049/0001-47",
+   "desde": "2016-03-30",
+   "acoes": 183724120.0,
+   "anterior": 18372411.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "38.456.921/0001-36",
+   "desde": "2025-05-05",
+   "acoes": 1480408287.0,
+   "anterior": 137793747.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "60.543.816/0001-93",
+   "desde": "2010-09-01",
+   "acoes": 963938751.0,
+   "anterior": 96393875.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "60.543.816/0001-93",
+   "desde": "2005-11-03",
+   "acoes": 963938751.0,
+   "anterior": 96393875.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "76.627.504/0001-06",
+   "desde": "2021-07-21",
+   "acoes": 8265054.0,
+   "anterior": 166682655.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "76.627.504/0001-06",
+   "desde": "2021-05-07",
+   "acoes": 8265054.0,
+   "anterior": 165301080.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "76.627.504/0001-06",
+   "desde": "2021-03-30",
+   "acoes": 8223255.0,
+   "anterior": 165301080.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "76.627.504/0001-06",
+   "desde": "2020-11-13",
+   "acoes": 8216579.0,
+   "anterior": 165301080.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "76.627.504/0001-06",
+   "desde": "2020-01-31",
+   "acoes": 8203980.0,
+   "anterior": 165301080.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "76.627.504/0001-06",
+   "desde": "2019-07-01",
+   "acoes": 7570927.0,
+   "anterior": 165301080.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "76.627.504/0001-06",
+   "desde": "2019-03-28",
+   "acoes": 7485339.0,
+   "anterior": 165301080.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "76.627.504/0001-06",
+   "desde": "2019-02-22",
+   "acoes": 7478441.0,
+   "anterior": 165301080.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "76.627.504/0001-06",
+   "desde": "2018-12-18",
+   "acoes": 6352316.0,
+   "anterior": 165301080.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "76.627.504/0001-06",
+   "desde": "2018-10-25",
+   "acoes": 7476218.0,
+   "anterior": 165301080.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "76.627.504/0001-06",
+   "desde": "2016-04-29",
+   "acoes": 7462981.0,
+   "anterior": 103028224.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "76.627.504/0001-06",
+   "desde": "2016-04-29",
+   "acoes": 7462981.0,
+   "anterior": 103028224.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "33.376.989/0001-91",
+   "desde": "2024-05-20",
+   "acoes": 2467890332.0,
+   "anterior": 81842887.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "60.872.504/0001-23",
+   "desde": "2011-04-25",
+   "acoes": 45709361.0,
+   "anterior": 4570936100.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "33.035.536/0001-00",
+   "desde": "2018-04-05",
+   "acoes": 105203815.0,
+   "anterior": 21040763.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "33.035.536/0001-00",
+   "desde": "2018-04-05",
+   "acoes": 105203816.0,
+   "anterior": 21040763.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "33.035.536/0001-00",
+   "desde": "2018-03-28",
+   "acoes": 105203815.0,
+   "anterior": 21040763.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "33.035.536/0001-00",
+   "desde": "2007-04-30",
+   "acoes": 936682780.0,
+   "anterior": 46834139.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "60.476.884/0001-87",
+   "desde": "2012-04-10",
+   "acoes": 427695.0,
+   "anterior": 128308500.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "09.041.168/0001-10",
+   "desde": "2016-12-22",
+   "acoes": 203402611.0,
+   "anterior": 50850649.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.041.168/0001-10",
+   "desde": "2016-01-04",
+   "acoes": 174557606.0,
+   "anterior": 50850649.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "09.041.168/0001-10",
+   "desde": "2015-04-30",
+   "acoes": 171844444.0,
+   "anterior": 50850649.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.041.168/0001-10",
+   "desde": "2013-06-25",
+   "acoes": 171453285.0,
+   "anterior": 50850649.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "08.078.847/0001-09",
+   "desde": "2011-01-19",
+   "acoes": 64000.0,
+   "anterior": 56582283.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "08.078.847/0001-09",
+   "desde": "2010-12-14",
+   "acoes": 29343.0,
+   "anterior": 56582283.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "08.078.847/0001-09",
+   "desde": "2010-12-07",
+   "acoes": 83876.0,
+   "anterior": 56582283.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2026-01-14",
+   "acoes": 47318103.0,
+   "anterior": 4731810.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2025-02-18",
+   "acoes": 42139719.0,
+   "anterior": 4731810.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2024-05-20",
+   "acoes": 41336298.0,
+   "anterior": 4731810.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2023-05-05",
+   "acoes": 32297168.0,
+   "anterior": 4731810.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2022-03-31",
+   "acoes": 29211160.0,
+   "anterior": 4731810.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2021-04-30",
+   "acoes": 28477701.0,
+   "anterior": 4731810.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2020-03-02",
+   "acoes": 25034015.0,
+   "anterior": 4731810.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2019-02-27",
+   "acoes": 16597970.0,
+   "anterior": 4731810.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2018-05-14",
+   "acoes": 15130239.0,
+   "anterior": 4731810.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2015-03-31",
+   "acoes": 4696917000.0,
+   "anterior": 9393834.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2013-09-27",
+   "acoes": 157604619.0,
+   "anterior": 9393834.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2011-05-20",
+   "acoes": 47737955.0,
+   "anterior": 9393834.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "89.463.822/0001-12",
+   "desde": "2010-05-25",
+   "acoes": 47737703.0,
+   "anterior": 9393834.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "12.049.631/0001-84",
+   "desde": "2020-01-17",
+   "acoes": 26758480.0,
+   "anterior": 84909375.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "12.049.631/0001-84",
+   "desde": "2016-12-27",
+   "acoes": 401377204.0,
+   "anterior": 84909375.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "12.049.631/0001-84",
+   "desde": "2016-10-31",
+   "acoes": 377918236.0,
+   "anterior": 84909375.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "12.049.631/0001-84",
+   "desde": "2013-11-29",
+   "acoes": 377918236.0,
+   "anterior": 84909375.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "12.049.631/0001-84",
+   "desde": "2011-12-31",
+   "acoes": 355075720.0,
+   "anterior": 84909375.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "61.065.298/0001-02",
+   "desde": "2010-04-30",
+   "acoes": 17349638.0,
+   "anterior": 5783212.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "61.065.298/0001-02",
+   "desde": "2008-04-30",
+   "acoes": 18478038.0,
+   "anterior": 5783212.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "61.065.298/0001-02",
+   "desde": "2008-04-30",
+   "acoes": 17349638.0,
+   "anterior": 5783212.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "27.093.558/0001-15",
+   "desde": "2016-04-19",
+   "acoes": 47528517.0,
+   "anterior": 175586442.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "21.314.559/0001-66",
+   "desde": "2014-12-31",
+   "acoes": 624250238.0,
+   "anterior": 142030912.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "08.613.550/0001-98",
+   "desde": "2020-07-08",
+   "acoes": 36278303.0,
+   "anterior": 132778474.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "08.613.550/0001-98",
+   "desde": "2018-09-18",
+   "acoes": 36278303.0,
+   "anterior": 255902664.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "08.613.550/0001-98",
+   "desde": "2018-08-16",
+   "acoes": 36278303.0,
+   "anterior": 255902664.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "60.884.319/0001-59",
+   "desde": "2014-05-30",
+   "acoes": 6621486930.0,
+   "anterior": 6621486.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "60.884.319/0001-59",
+   "desde": "1966-07-16",
+   "acoes": 6621486930.0,
+   "anterior": 6621487.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "51.128.999/0001-90",
+   "desde": "2020-04-30",
+   "acoes": 127944.0,
+   "anterior": 13244400.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "51.128.999/0001-90",
+   "desde": "2015-08-20",
+   "acoes": 127944.0,
+   "anterior": 13244400.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "51.128.999/0001-90",
+   "desde": "2015-08-20",
+   "acoes": 127944.0,
+   "anterior": 13244400.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.112.685/0001-32",
+   "desde": "2016-08-03",
+   "acoes": 312563568.0,
+   "anterior": 3148038.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "09.112.685/0001-32",
+   "desde": "2013-05-22",
+   "acoes": 312563568.0,
+   "anterior": 3125635.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.112.685/0001-32",
+   "desde": "2012-10-23",
+   "acoes": 293712408.0,
+   "anterior": 3125635.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.112.685/0001-32",
+   "desde": "2012-03-19",
+   "acoes": 280792778.0,
+   "anterior": 3125635.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.112.685/0001-32",
+   "desde": "2011-11-01",
+   "acoes": 280575225.0,
+   "anterior": 3125635.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "47.508.411/0001-56",
+   "desde": "2013-02-19",
+   "acoes": 41370.0,
+   "anterior": 263751303.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2025-04-07",
+   "acoes": 29691030.0,
+   "anterior": 3287486.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2023-11-21",
+   "acoes": 77786471.0,
+   "anterior": 3287486.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2022-05-24",
+   "acoes": 56133457.0,
+   "anterior": 322186437.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2021-03-24",
+   "acoes": 8066955.0,
+   "anterior": 322186437.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2021-03-19",
+   "acoes": 56133457.0,
+   "anterior": 322186437.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2019-08-23",
+   "acoes": 8066955.0,
+   "anterior": 322186437.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2018-12-12",
+   "acoes": 8066955.0,
+   "anterior": 322186437.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2018-06-15",
+   "acoes": 80669550.0,
+   "anterior": 322186437.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2015-10-09",
+   "acoes": 49192557.0,
+   "anterior": 322186437.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2015-10-08",
+   "acoes": 49192557.0,
+   "anterior": 322186437.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2012-09-18",
+   "acoes": 1339547923.0,
+   "anterior": 322186437.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2012-03-16",
+   "acoes": 1133129049.0,
+   "anterior": 322186437.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2011-04-12",
+   "acoes": 1108363344.0,
+   "anterior": 322186437.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.950.811/0001-89",
+   "desde": "2010-11-10",
+   "acoes": 1106242174.0,
+   "anterior": 322186437.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "02.365.069/0001-44",
+   "desde": "2016-04-22",
+   "acoes": 16343566.0,
+   "anterior": 78449779.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "02.365.069/0001-44",
+   "desde": "2015-07-07",
+   "acoes": 12226968.0,
+   "anterior": 78449779.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "02.365.069/0001-44",
+   "desde": "2015-06-30",
+   "acoes": 16343566.0,
+   "anterior": 78449779.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.365.069/0001-44",
+   "desde": "2015-05-12",
+   "acoes": 12226968.0,
+   "anterior": 78449779.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "02.365.069/0001-44",
+   "desde": "2013-04-29",
+   "acoes": 12226968.0,
+   "anterior": 115928487.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "60.398.369/0004-79",
+   "desde": "2019-05-16",
+   "acoes": 692370186.0,
+   "anterior": 41350802.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2013-07-05",
+   "acoes": 297466746.0,
+   "anterior": 29748449.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2013-04-30",
+   "acoes": 297462579.0,
+   "anterior": 29748449.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2013-04-25",
+   "acoes": 297447928.0,
+   "anterior": 29748449.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2013-03-26",
+   "acoes": 296185963.0,
+   "anterior": 29748449.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2012-04-27",
+   "acoes": 294267600.0,
+   "anterior": 29748449.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2012-04-11",
+   "acoes": 5883196.0,
+   "anterior": 29748449.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2011-04-15",
+   "acoes": 4714690.0,
+   "anterior": 29748449.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2011-04-14",
+   "acoes": 4686200.0,
+   "anterior": 29748449.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2011-03-29",
+   "acoes": 4684758.0,
+   "anterior": 29748449.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2011-03-25",
+   "acoes": 4667048.0,
+   "anterior": 29748449.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2011-02-10",
+   "acoes": 4647881.0,
+   "anterior": 29748449.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2010-10-04",
+   "acoes": 2557060.0,
+   "anterior": 29748449.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "10.629.105/0001-68",
+   "desde": "2010-08-31",
+   "acoes": 4495849.0,
+   "anterior": 29748449.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "18.593.815/0001-97",
+   "desde": "2019-05-29",
+   "acoes": 104873362.0,
+   "anterior": 20653497.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "18.593.815/0001-97",
+   "desde": "2018-04-26",
+   "acoes": 94198750.0,
+   "anterior": 20653497.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "11.992.680/0001-93",
+   "desde": "2017-04-07",
+   "acoes": 28551588.0,
+   "anterior": 282373588.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "61.585.865/0001-51",
+   "desde": "2007-06-13",
+   "acoes": 47080000.0,
+   "anterior": 188320020.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "02.387.241/0001-60",
+   "desde": "2016-05-20",
+   "acoes": 681995165.0,
+   "anterior": 3694629941.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "02.387.241/0001-60",
+   "desde": "2011-12-28",
+   "acoes": 687664312.0,
+   "anterior": 2616038002.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.387.241/0001-60",
+   "desde": "2010-12-22",
+   "acoes": 689122312.0,
+   "anterior": 2616038002.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.387.241/0001-60",
+   "desde": "2010-09-09",
+   "acoes": 687502312.0,
+   "anterior": 2616038002.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "33.453.598/0001-23",
+   "desde": "2019-09-05",
+   "acoes": 1743415530.0,
+   "anterior": 10352509484.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "92.791.243/0001-03",
+   "desde": "2007-02-08",
+   "acoes": 8104500.0,
+   "anterior": 162090000.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "91.333.666/0001-17",
+   "desde": "2018-01-26",
+   "acoes": 5081263.0,
+   "anterior": 53585913.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "91.333.666/0001-17",
+   "desde": "2017-10-25",
+   "acoes": 15243793.0,
+   "anterior": 53585913.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "91.333.666/0001-17",
+   "desde": "2015-08-06",
+   "acoes": 3110707.0,
+   "anterior": 53585913.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "91.333.666/0001-17",
+   "desde": "2012-12-31",
+   "acoes": 233303810.0,
+   "anterior": 53585913.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "91.333.666/0001-17",
+   "desde": "2008-04-08",
+   "acoes": 6747.0,
+   "anterior": 51279148.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "61.584.140/0001-49",
+   "desde": "2011-06-30",
+   "acoes": 426591684.0,
+   "anterior": 2057874630.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "61.584.140/0001-49",
+   "desde": "2008-12-26",
+   "acoes": 322075470.0,
+   "anterior": 2057874630.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "08.534.605/0001-74",
+   "desde": "2019-05-07",
+   "acoes": 417197244.0,
+   "anterior": 100142466.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "90.400.888/0001-42",
+   "desde": "2014-04-22",
+   "acoes": 7600840325.0,
+   "anterior": 399044116905.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "58.119.199/0001-51",
+   "desde": "2025-04-01",
+   "acoes": 545825286.0,
+   "anterior": 2924199731.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "58.119.199/0001-51",
+   "desde": "2023-04-05",
+   "acoes": 552495663.0,
+   "anterior": 2924199731.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "58.119.199/0001-51",
+   "desde": "2022-04-05",
+   "acoes": 568465803.0,
+   "anterior": 2924199731.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "58.119.199/0001-51",
+   "desde": "2022-04-04",
+   "acoes": 568465803.0,
+   "anterior": 2924199731.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "58.119.199/0001-51",
+   "desde": "2021-04-05",
+   "acoes": 531294792.0,
+   "anterior": 2924199731.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "58.119.199/0001-51",
+   "desde": "2019-04-01",
+   "acoes": 531294792.0,
+   "anterior": 2924199731.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "58.119.199/0001-51",
+   "desde": "2012-04-03",
+   "acoes": 531294792.0,
+   "anterior": 2924199731.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "58.119.199/0001-51",
+   "desde": "2010-07-02",
+   "acoes": 177098264.0,
+   "anterior": 2924199731.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "58.119.199/0001-51",
+   "desde": "2010-07-01",
+   "acoes": 177098264.0,
+   "anterior": 2924199731.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "01.599.101/0001-93",
+   "desde": "2025-03-14",
+   "acoes": 35361107.0,
+   "anterior": 6370488672.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "01.599.101/0001-93",
+   "desde": "2024-05-14",
+   "acoes": 390318916.0,
+   "anterior": 6370488672.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "01.599.101/0001-93",
+   "desde": "2023-04-11",
+   "acoes": 140702013.0,
+   "anterior": 6370488672.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "01.599.101/0001-93",
+   "desde": "2021-08-25",
+   "acoes": 139431109.0,
+   "anterior": 6370488672.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "01.599.101/0001-93",
+   "desde": "2021-07-28",
+   "acoes": 138708660.0,
+   "anterior": 6370488672.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "01.599.101/0001-93",
+   "desde": "2021-06-02",
+   "acoes": 138364247.0,
+   "anterior": 6370488672.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "01.599.101/0001-93",
+   "desde": "2021-04-15",
+   "acoes": 137533548.0,
+   "anterior": 6370488672.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "01.599.101/0001-93",
+   "desde": "2020-12-24",
+   "acoes": 127150021.0,
+   "anterior": 6370488672.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "01.599.101/0001-93",
+   "desde": "2020-09-15",
+   "acoes": 98848161.0,
+   "anterior": 6370488672.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "07.594.978/0001-78",
+   "desde": "2020-12-28",
+   "acoes": 22282733.0,
+   "anterior": 471242289.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "07.594.978/0001-78",
+   "desde": "2020-05-20",
+   "acoes": 21066187.0,
+   "anterior": 471242289.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "07.594.978/0001-78",
+   "desde": "2019-10-17",
+   "acoes": 19450615.0,
+   "anterior": 471242289.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "07.594.978/0001-78",
+   "desde": "2018-10-24",
+   "acoes": 17879379.0,
+   "anterior": 471242289.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "07.594.978/0001-78",
+   "desde": "2018-05-11",
+   "acoes": 15702116.0,
+   "anterior": 471242289.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "07.594.978/0001-78",
+   "desde": "2018-03-02",
+   "acoes": 1010514.0,
+   "anterior": 471242289.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "07.594.978/0001-78",
+   "desde": "2016-09-05",
+   "acoes": 13211475.0,
+   "anterior": 471242289.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "07.594.978/0001-78",
+   "desde": "2015-01-02",
+   "acoes": 12250007.0,
+   "anterior": 471242289.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "10.807.374/0001-77",
+   "desde": "2020-09-11",
+   "acoes": 8834460.0,
+   "anterior": 70675680.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "07.859.971/0001-30",
+   "desde": "2010-02-04",
+   "acoes": 263498907.0,
+   "anterior": 1033496721.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "92.781.335/0001-02",
+   "desde": "2011-07-01",
+   "acoes": 2969664960.0,
+   "anterior": 141412617.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "08.065.557/0001-12",
+   "desde": "2020-05-05",
+   "acoes": 73619230.0,
+   "anterior": 736192307.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "09.295.063/0001-97",
+   "desde": "2012-05-10",
+   "acoes": 268565.0,
+   "anterior": 77478413.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "00.336.701/0001-04",
+   "desde": "2016-04-04",
+   "acoes": 11884270.0,
+   "anterior": 118442718.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "00.336.701/0001-04",
+   "desde": "2016-04-04",
+   "acoes": 11844270.0,
+   "anterior": 118442718.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "71.476.527/0001-35",
+   "desde": "2013-12-30",
+   "acoes": 633037801.0,
+   "anterior": 54000000.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "71.476.527/0001-35",
+   "desde": "2012-11-22",
+   "acoes": 633136932.0,
+   "anterior": 54000000.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "71.476.527/0001-35",
+   "desde": "2011-08-08",
+   "acoes": 633058000.0,
+   "anterior": 54000000.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "02.421.421/0001-11",
+   "desde": "2020-07-02",
+   "acoes": 422967896.0,
+   "anterior": 2420804398.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "02.421.421/0001-11",
+   "desde": "1998-02-11",
+   "acoes": 42296789606.0,
+   "anterior": 2420804398.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "31.553.627/0001-01",
+   "desde": "2026-05-22",
+   "acoes": 216786990.0,
+   "anterior": 54196748.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "31.553.627/0001-01",
+   "desde": "2025-12-30",
+   "acoes": 216786990.0,
+   "anterior": 54196748.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "03.014.553/0001-91",
+   "desde": "2023-05-18",
+   "acoes": 176000000.0,
+   "anterior": 44000000.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "82.982.075/0001-80",
+   "desde": "2016-12-08",
+   "acoes": 42592810.0,
+   "anterior": 4259280.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "67.571.414/0001-41",
+   "desde": "2026-04-30",
+   "acoes": 4880040.0,
+   "anterior": 48800409.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "67.571.414/0001-41",
+   "desde": "2023-01-12",
+   "acoes": 234784492.0,
+   "anterior": 38366082.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "67.571.414/0001-41",
+   "desde": "2023-01-02",
+   "acoes": 223762960.0,
+   "anterior": 38366082.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "67.571.414/0001-41",
+   "desde": "2021-07-08",
+   "acoes": 142902713.0,
+   "anterior": 38366082.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "67.571.414/0001-41",
+   "desde": "2016-04-29",
+   "acoes": 3414193.0,
+   "anterior": 46317035.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "67.571.414/0001-41",
+   "desde": "2016-04-29",
+   "acoes": 3414193.0,
+   "anterior": 46317035.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "67.571.414/0001-41",
+   "desde": "2012-10-03",
+   "acoes": 335309452.0,
+   "anterior": 46317035.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "67.571.414/0001-41",
+   "desde": "2010-02-19",
+   "acoes": 285309452.0,
+   "anterior": 46317035.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "49.669.856/0001-43",
+   "desde": "2008-01-21",
+   "acoes": 35000.0,
+   "anterior": 57250000.0,
+   "fonte": "shareEvent"
+  },
+  {
+   "cnpj": "20.512.706/0001-40",
+   "desde": "2022-12-05",
+   "acoes": 1749387848.0,
+   "anterior": 134172428.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "50.926.955/0001-42",
+   "desde": "2017-05-10",
+   "acoes": 740921384.0,
+   "anterior": 245756346.0,
+   "fonte": "filingCorrection"
+  },
+  {
+   "cnpj": "33.228.024/0001-51",
+   "desde": "2011-04-06",
+   "acoes": 7282934.0,
+   "anterior": 36414670.0,
+   "fonte": "capitalApproval"
+  },
+  {
+   "cnpj": "33.228.024/0001-51",
+   "desde": "2010-04-18",
+   "acoes": 7282934.0,
+   "anterior": 36414670.0,
+   "fonte": "capitalApproval"
+  }
+ ],
+ "serie": [
+  {
+   "data": "2011-03-31",
+   "companhias": 131,
+   "companhiasComProvento": 104,
+   "valorDeMercado": 1475107773729.37,
+   "caixaDistribuido": 53905030159.61,
+   "rendimento": 0.036543113065784484,
+   "crescimentoNominal": 0.11483211281076611,
+   "retornoImplicito": 0.15557154875857734,
+   "prefixado10": 0.12907596210914285,
+   "premio": 0.023466611227769052,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "BSLI",
+    "CEBR",
+    "CEED",
+    "DEXP",
+    "EQPA",
+    "LUPA",
+    "MGEL",
+    "RANI",
+    "REDE",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.27285266959196575,
+   "premioComGMenos1": 0.014286156166716246,
+   "premioComGMais1": 0.032647066288821636,
+   "normalizado5": null,
+   "trimestresNaMedia5": 1,
+   "normalizado10": null,
+   "trimestresNaMedia10": 1
+  },
+  {
+   "data": "2011-06-30",
+   "companhias": 144,
+   "companhiasComProvento": 120,
+   "valorDeMercado": 1709468976236.14,
+   "caixaDistribuido": 61514480296.31,
+   "rendimento": 0.035984554941588254,
+   "crescimentoNominal": 0.11439202397912518,
+   "retornoImplicito": 0.15449292499246975,
+   "prefixado10": 0.12414215756529878,
+   "premio": 0.026999047427334055,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "BSLI",
+    "CEBR",
+    "CEED",
+    "DEXP",
+    "DTCY",
+    "EQPA",
+    "LUPA",
+    "MGEL",
+    "RANI",
+    "REDE",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.1920156965244144,
+   "premioComGMenos1": 0.017783268551240905,
+   "premioComGMais1": 0.036214826303426984,
+   "normalizado5": null,
+   "trimestresNaMedia5": 2,
+   "normalizado10": null,
+   "trimestresNaMedia10": 2
+  },
+  {
+   "data": "2011-09-30",
+   "companhias": 145,
+   "companhiasComProvento": 120,
+   "valorDeMercado": 1422689908394.75,
+   "caixaDistribuido": 59763560660.89,
+   "rendimento": 0.042007439785892935,
+   "crescimentoNominal": 0.11252643256183359,
+   "retornoImplicito": 0.15926081968788908,
+   "prefixado10": 0.11687204218434766,
+   "premio": 0.03795311898096987,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "BSLI",
+    "CEBR",
+    "DEXP",
+    "DTCY",
+    "EQPA",
+    "LUPA",
+    "MGEL",
+    "RANI",
+    "REDE",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.18454218819534354,
+   "premioComGMenos1": 0.028623424974591583,
+   "premioComGMais1": 0.04728281298734838,
+   "normalizado5": null,
+   "trimestresNaMedia5": 3,
+   "normalizado10": null,
+   "trimestresNaMedia10": 3
+  },
+  {
+   "data": "2011-12-31",
+   "companhias": 143,
+   "companhiasComProvento": 116,
+   "valorDeMercado": 1436611190969.36,
+   "caixaDistribuido": 68771462354.21,
+   "rendimento": 0.047870615784223525,
+   "crescimentoNominal": 0.11083522328789863,
+   "retornoImplicito": 0.16401158946149577,
+   "prefixado10": 0.1134839137897048,
+   "premio": 0.045378002363610115,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "BSLI",
+    "CEBR",
+    "DEXP",
+    "DTCY",
+    "LUPA",
+    "MGEL",
+    "RANI",
+    "REDE",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.20295285642553404,
+   "premioComGMenos1": 0.035967263664944626,
+   "premioComGMais1": 0.05478874106227538,
+   "normalizado5": null,
+   "trimestresNaMedia5": 4,
+   "normalizado10": null,
+   "trimestresNaMedia10": 4
+  },
+  {
+   "data": "2012-03-31",
+   "companhias": 145,
+   "companhiasComProvento": 117,
+   "valorDeMercado": 1606720666339.88,
+   "caixaDistribuido": 69704377393.35,
+   "rendimento": 0.04338300916495773,
+   "crescimentoNominal": 0.10895041778318637,
+   "retornoImplicito": 0.15706002392135804,
+   "prefixado10": 0.11181021707583105,
+   "premio": 0.04069921840126489,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "CEBR",
+    "CEED",
+    "DEXP",
+    "DTCY",
+    "LUPA",
+    "MGEL",
+    "RANI",
+    "REDE",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.19397231969410217,
+   "premioComGMenos1": 0.03131467602937388,
+   "premioComGMais1": 0.050083760773155905,
+   "normalizado5": null,
+   "trimestresNaMedia5": 5,
+   "normalizado10": null,
+   "trimestresNaMedia10": 5
+  },
+  {
+   "data": "2012-06-30",
+   "companhias": 150,
+   "companhiasComProvento": 115,
+   "valorDeMercado": 1448011623186.23,
+   "caixaDistribuido": 65713140387.27,
+   "rendimento": 0.04538163874864047,
+   "crescimentoNominal": 0.10744918989896401,
+   "retornoImplicito": 0.15770704896743334,
+   "prefixado10": 0.10148127399783347,
+   "premio": 0.051045602223928954,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "CEBR",
+    "DEXP",
+    "DTCY",
+    "LUPA",
+    "MGEL",
+    "REDE",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.16774704033819793,
+   "premioComGMenos1": 0.04155491306355463,
+   "premioComGMais1": 0.060536291384303276,
+   "normalizado5": null,
+   "trimestresNaMedia5": 6,
+   "normalizado10": null,
+   "trimestresNaMedia10": 6
+  },
+  {
+   "data": "2012-09-30",
+   "companhias": 149,
+   "companhiasComProvento": 117,
+   "valorDeMercado": 1547593621647.9,
+   "caixaDistribuido": 57598670021.62,
+   "rendimento": 0.037218213629161966,
+   "crescimentoNominal": 0.10538297218536341,
+   "retornoImplicito": 0.14652335178619627,
+   "prefixado10": 0.09844067780077004,
+   "premio": 0.043773573718786984,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "CEBR",
+    "DEXP",
+    "DTCY",
+    "LUPA",
+    "MGEL",
+    "REDE",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.19302669285886004,
+   "premioComGMenos1": 0.034330931666365805,
+   "premioComGMais1": 0.05321621577120794,
+   "normalizado5": null,
+   "trimestresNaMedia5": 7,
+   "normalizado10": null,
+   "trimestresNaMedia10": 7
+  },
+  {
+   "data": "2012-12-31",
+   "companhias": 153,
+   "companhiasComProvento": 120,
+   "valorDeMercado": 1575445508424.8,
+   "caixaDistribuido": 58480010481.07,
+   "rendimento": 0.03711966562368818,
+   "crescimentoNominal": 0.09997748559225794,
+   "retornoImplicito": 0.14080828205102786,
+   "prefixado10": 0.09232671924633262,
+   "premio": 0.04438375620633539,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "CEBR",
+    "CEED",
+    "DEXP",
+    "DTCY",
+    "LUPA",
+    "MGEL",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.16176494352551243,
+   "premioComGMenos1": 0.03488916409071563,
+   "premioComGMais1": 0.053878348321954705,
+   "normalizado5": null,
+   "trimestresNaMedia5": 8,
+   "normalizado10": null,
+   "trimestresNaMedia10": 8
+  },
+  {
+   "data": "2013-03-31",
+   "companhias": 151,
+   "companhiasComProvento": 113,
+   "valorDeMercado": 1543043316102.8,
+   "caixaDistribuido": 54202941712.24,
+   "rendimento": 0.03512729755969399,
+   "crescimentoNominal": 0.09655053141127246,
+   "retornoImplicito": 0.13506938821739678,
+   "prefixado10": 0.09814684980086974,
+   "premio": 0.03362258738275514,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "CEBR",
+    "DEXP",
+    "DTCY",
+    "LUPA",
+    "MGEL",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.1478914007604546,
+   "premioComGMenos1": 0.02419645919464064,
+   "premioComGMais1": 0.043048715570869645,
+   "normalizado5": null,
+   "trimestresNaMedia5": 9,
+   "normalizado10": null,
+   "trimestresNaMedia10": 9
+  },
+  {
+   "data": "2013-06-30",
+   "companhias": 150,
+   "companhiasComProvento": 116,
+   "valorDeMercado": 1479138671059.36,
+   "caixaDistribuido": 58928593821.06,
+   "rendimento": 0.039839803376146815,
+   "crescimentoNominal": 0.09531593841247665,
+   "retornoImplicito": 0.13895311003358946,
+   "prefixado10": 0.10843908550933601,
+   "premio": 0.027528824022144738,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "BSLI",
+    "CEBR",
+    "DTCY",
+    "LUPA",
+    "MGEL",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.13579781401361188,
+   "premioComGMenos1": 0.018147705862653574,
+   "premioComGMais1": 0.0369099421816359,
+   "normalizado5": null,
+   "trimestresNaMedia5": 10,
+   "normalizado10": null,
+   "trimestresNaMedia10": 10
+  },
+  {
+   "data": "2013-09-30",
+   "companhias": 151,
+   "companhiasComProvento": 116,
+   "valorDeMercado": 1656656832676.33,
+   "caixaDistribuido": 69677846799.34,
+   "rendimento": 0.0420593121188384,
+   "crescimentoNominal": 0.09290651327956634,
+   "retornoImplicito": 0.138873409438303,
+   "prefixado10": 0.11692696643799128,
+   "premio": 0.019648950790669417,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "CEBR",
+    "DTCY",
+    "LUPA",
+    "MGEL",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.1382769945577233,
+   "premioComGMenos1": 0.010319251146635455,
+   "premioComGMais1": 0.028978650434703157,
+   "normalizado5": null,
+   "trimestresNaMedia5": 11,
+   "normalizado10": null,
+   "trimestresNaMedia10": 11
+  },
+  {
+   "data": "2013-12-31",
+   "companhias": 153,
+   "companhiasComProvento": 117,
+   "valorDeMercado": 1659769374377.87,
+   "caixaDistribuido": 64176591420.68,
+   "rendimento": 0.0386659691469095,
+   "crescimentoNominal": 0.09261823823418025,
+   "retornoImplicito": 0.13486538132309367,
+   "prefixado10": 0.13206271836625993,
+   "premio": 0.002475713501879362,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "CEBR",
+    "DTCY",
+    "LUPA",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.1293479298171116,
+   "premioComGMenos1": -0.006699272585868998,
+   "premioComGMais1": 0.011650699589627944,
+   "normalizado5": null,
+   "trimestresNaMedia5": 12,
+   "normalizado10": null,
+   "trimestresNaMedia10": 12
+  },
+  {
+   "data": "2014-03-31",
+   "companhias": 160,
+   "companhiasComProvento": 124,
+   "valorDeMercado": 1587435750883.19,
+   "caixaDistribuido": 73802412915.96,
+   "rendimento": 0.04649159052572622,
+   "crescimentoNominal": 0.09219146972977232,
+   "retornoImplicito": 0.14296918831614,
+   "prefixado10": 0.12792322896324015,
+   "premio": 0.013339524328024988,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "BSLI",
+    "CEBR",
+    "DTCY",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.1258251548434842,
+   "premioComGMenos1": 0.0040614851525428985,
+   "premioComGMais1": 0.0226175635035073,
+   "normalizado5": null,
+   "trimestresNaMedia5": 13,
+   "normalizado10": null,
+   "trimestresNaMedia10": 13
+  },
+  {
+   "data": "2014-06-30",
+   "companhias": 156,
+   "companhiasComProvento": 126,
+   "valorDeMercado": 1588483957401.16,
+   "caixaDistribuido": 81980341473.32,
+   "rendimento": 0.051609171808976895,
+   "crescimentoNominal": 0.0907753992064968,
+   "retornoImplicito": 0.14706941418915026,
+   "prefixado10": 0.12119761805671914,
+   "premio": 0.02307514368187169,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "BSLI",
+    "CEBR",
+    "CEED",
+    "DTCY",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.13706450987821667,
+   "premioComGMenos1": 0.013695805420061546,
+   "premioComGMais1": 0.032454481943681834,
+   "normalizado5": null,
+   "trimestresNaMedia5": 14,
+   "normalizado10": null,
+   "trimestresNaMedia10": 14
+  },
+  {
+   "data": "2014-09-30",
+   "companhias": 157,
+   "companhiasComProvento": 128,
+   "valorDeMercado": 1608161342655.47,
+   "caixaDistribuido": 79532241067.69,
+   "rendimento": 0.04945538669419992,
+   "crescimentoNominal": 0.08853473966813352,
+   "retornoImplicito": 0.14236864614849132,
+   "prefixado10": 0.12460000000000004,
+   "premio": 0.015799969899067623,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "DTCY",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.1428484082356378,
+   "premioComGMenos1": 0.006468159595900191,
+   "premioComGMais1": 0.025131780202234832,
+   "normalizado5": null,
+   "trimestresNaMedia5": 15,
+   "normalizado10": null,
+   "trimestresNaMedia10": 15
+  },
+  {
+   "data": "2014-12-31",
+   "companhias": 156,
+   "companhiasComProvento": 123,
+   "valorDeMercado": 1431853194760.86,
+   "caixaDistribuido": 69997901346.53,
+   "rendimento": 0.04888622772407939,
+   "crescimentoNominal": 0.08690622976156415,
+   "retornoImplicito": 0.14004097522440853,
+   "prefixado10": 0.12338433895768253,
+   "premio": 0.014827192875219053,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "CEBR",
+    "DTCY",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.1292002052922031,
+   "premioComGMenos1": 0.005490350697970214,
+   "premioComGMais1": 0.02416403505246767,
+   "normalizado5": 0.029001052314476958,
+   "trimestresNaMedia5": 16,
+   "normalizado10": null,
+   "trimestresNaMedia10": 16
+  },
+  {
+   "data": "2015-03-31",
+   "companhias": 154,
+   "companhiasComProvento": 121,
+   "valorDeMercado": 1443033163560.58,
+   "caixaDistribuido": 64674002282.29,
+   "rendimento": 0.04481809837461502,
+   "crescimentoNominal": 0.0873147478598173,
+   "retornoImplicito": 0.13604612719356832,
+   "prefixado10": 0.13152209816427707,
+   "premio": 0.003998180006056229,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "DTCY",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.12932723397909307,
+   "premioComGMenos1": -0.005235560104452142,
+   "premioComGMais1": 0.01323192011656471,
+   "normalizado5": 0.027530295119863973,
+   "trimestresNaMedia5": 17,
+   "normalizado10": null,
+   "trimestresNaMedia10": 17
+  },
+  {
+   "data": "2015-06-30",
+   "companhias": 162,
+   "companhiasComProvento": 127,
+   "valorDeMercado": 1525400794568.39,
+   "caixaDistribuido": 59859050199.62,
+   "rendimento": 0.0392415228920587,
+   "crescimentoNominal": 0.0861991715277326,
+   "retornoImplicito": 0.1288232811825733,
+   "prefixado10": 0.126340705281762,
+   "premio": 0.0022041074154293128,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "CEBR",
+    "DTCY",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.13446570495122676,
+   "premioComGMenos1": -0.00702259919313708,
+   "premioComGMais1": 0.011430814023995595,
+   "normalizado5": 0.026123284691839825,
+   "trimestresNaMedia5": 18,
+   "normalizado10": null,
+   "trimestresNaMedia10": 18
+  },
+  {
+   "data": "2015-09-30",
+   "companhias": 155,
+   "companhiasComProvento": 122,
+   "valorDeMercado": 1182991746245.89,
+   "caixaDistribuido": 50182180473.89,
+   "rendimento": 0.04241972155185216,
+   "crescimentoNominal": 0.08371188321930667,
+   "retornoImplicito": 0.129682639547903,
+   "prefixado10": 0.15621477278833185,
+   "premio": -0.022947408963166827,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "BSLI",
+    "CEBR",
+    "DTCY",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.13121055350263336,
+   "premioComGMenos1": -0.0319632055615614,
+   "premioComGMais1": -0.013931612364772361,
+   "normalizado5": 0.02354061660473421,
+   "trimestresNaMedia5": 19,
+   "normalizado10": null,
+   "trimestresNaMedia10": 19
+  },
+  {
+   "data": "2015-12-31",
+   "companhias": 156,
+   "companhiasComProvento": 121,
+   "valorDeMercado": 1163505629452.16,
+   "caixaDistribuido": 52881090578.27,
+   "rendimento": 0.04544979348588903,
+   "crescimentoNominal": 0.08118540700435717,
+   "retornoImplicito": 0.13032506047266207,
+   "prefixado10": 0.16517232313539787,
+   "premio": -0.029907389637409465,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "DTCY",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.13309534794737946,
+   "premioComGMenos1": -0.03887988042463175,
+   "premioComGMais1": -0.020934898850187067,
+   "normalizado5": 0.02086821629262703,
+   "trimestresNaMedia5": 20,
+   "normalizado10": null,
+   "trimestresNaMedia10": 20
+  },
+  {
+   "data": "2016-03-31",
+   "companhias": 157,
+   "companhiasComProvento": 116,
+   "valorDeMercado": 1364987435143.43,
+   "caixaDistribuido": 63734236678.12,
+   "rendimento": 0.046692178284720214,
+   "crescimentoNominal": 0.07888836346362282,
+   "retornoImplicito": 0.12926401127977633,
+   "prefixado10": 0.13813722396018258,
+   "premio": -0.007796259092143321,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "CEBR",
+    "CEED",
+    "DTCY",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.129061507338182,
+   "premioComGMenos1": -0.016992796699820567,
+   "premioComGMais1": 0.001400278515534037,
+   "normalizado5": 0.01930507277663141,
+   "trimestresNaMedia5": 20,
+   "normalizado10": null,
+   "trimestresNaMedia10": 21
+  },
+  {
+   "data": "2016-06-30",
+   "companhias": 157,
+   "companhiasComProvento": 109,
+   "valorDeMercado": 1393964947267.7,
+   "caixaDistribuido": 60495057590.09,
+   "rendimento": 0.0433978327135599,
+   "crescimentoNominal": 0.07741099220865122,
+   "retornoImplicito": 0.12416829421227285,
+   "prefixado10": 0.12126024677268044,
+   "premio": 0.002593552610076655,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "BSLI",
+    "CEBR",
+    "CEED",
+    "SAUD",
+    "VIVR"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.12071416970497525,
+   "premioComGMenos1": -0.006712028638494183,
+   "premioComGMais1": 0.011899133858647382,
+   "normalizado5": 0.01808479803576854,
+   "trimestresNaMedia5": 20,
+   "normalizado10": null,
+   "trimestresNaMedia10": 22
+  },
+  {
+   "data": "2016-09-30",
+   "companhias": 159,
+   "companhiasComProvento": 109,
+   "valorDeMercado": 1668243814585.71,
+   "caixaDistribuido": 63620213016.71,
+   "rendimento": 0.038136040104251416,
+   "crescimentoNominal": 0.0752073558154911,
+   "retornoImplicito": 0.11621150665725678,
+   "prefixado10": 0.11692207441522107,
+   "premio": -0.000636183825390213,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "CEBR",
+    "REDE",
+    "SAUD"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.13147000875551682,
+   "premioComGMenos1": -0.009930798587550527,
+   "premioComGMais1": 0.0086584309367701,
+   "normalizado5": 0.016155332895450535,
+   "trimestresNaMedia5": 20,
+   "normalizado10": null,
+   "trimestresNaMedia10": 23
+  },
+  {
+   "data": "2016-12-31",
+   "companhias": 164,
+   "companhiasComProvento": 107,
+   "valorDeMercado": 1776996828100.38,
+   "caixaDistribuido": 65573846731.33,
+   "rendimento": 0.036901499031615506,
+   "crescimentoNominal": 0.0720942580565993,
+   "retornoImplicito": 0.11165614328207545,
+   "prefixado10": 0.11389572339010279,
+   "premio": -0.002010583271844557,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "BSLI",
+    "CEBR",
+    "CEED",
+    "SAUD"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.1181245187249387,
+   "premioComGMenos1": -0.011319367543641934,
+   "premioComGMais1": 0.007298200999952931,
+   "normalizado5": 0.013785903613677802,
+   "trimestresNaMedia5": 20,
+   "normalizado10": null,
+   "trimestresNaMedia10": 24
+  },
+  {
+   "data": "2017-03-31",
+   "companhias": 170,
+   "companhiasComProvento": 107,
+   "valorDeMercado": 1988754636899.55,
+   "caixaDistribuido": 66384121897.22,
+   "rendimento": 0.033379744622852134,
+   "crescimentoNominal": 0.0699590517418629,
+   "retornoImplicito": 0.1056740116459153,
+   "prefixado10": 0.10065525392706265,
+   "premio": 0.004559790816376141,
+   "foraPelaContagem": [
+    "ALOS",
+    "BOBR",
+    "BSLI",
+    "CEBR",
+    "CEED",
+    "SAUD"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.11847954890545467,
+   "premioComGMenos1": -0.004828977746130891,
+   "premioComGMais1": 0.013948559378883063,
+   "normalizado5": 0.011978932234433365,
+   "trimestresNaMedia5": 20,
+   "normalizado10": null,
+   "trimestresNaMedia10": 25
+  },
+  {
+   "data": "2017-06-30",
+   "companhias": 169,
+   "companhiasComProvento": 107,
+   "valorDeMercado": 1867669737606.09,
+   "caixaDistribuido": 66270504875.05,
+   "rendimento": 0.035482989064219185,
+   "crescimentoNominal": 0.06781916093273077,
+   "retornoImplicito": 0.10570857654267056,
+   "prefixado10": 0.1055395404004793,
+   "premio": 0.0001528992279462571,
+   "foraPelaContagem": [
+    "ALOS",
+    "AZUL",
+    "BOBR",
+    "CEED",
+    "SAUD"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.12196426084605916,
+   "premioComGMenos1": -0.009213414243656182,
+   "premioComGMais1": 0.009519212699548696,
+   "normalizado5": 0.00943429708463423,
+   "trimestresNaMedia5": 20,
+   "normalizado10": null,
+   "trimestresNaMedia10": 26
+  },
+  {
+   "data": "2017-09-30",
+   "companhias": 175,
+   "companhiasComProvento": 106,
+   "valorDeMercado": 2230544806942.67,
+   "caixaDistribuido": 78338167820.92,
+   "rendimento": 0.035120642982418,
+   "crescimentoNominal": 0.06639758693661446,
+   "retornoImplicito": 0.10385015586472736,
+   "prefixado10": 0.09776637917146558,
+   "premio": 0.0055419593901695485,
+   "foraPelaContagem": [
+    "ALOS",
+    "AZUL",
+    "BOBR",
+    "CEBR",
+    "CEED",
+    "SAUD"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.1204871102693825,
+   "premioComGMenos1": -0.0038873751442298765,
+   "premioComGMais1": 0.014971293924568974,
+   "normalizado5": 0.007522716368203358,
+   "trimestresNaMedia5": 20,
+   "normalizado10": null,
+   "trimestresNaMedia10": 27
+  },
+  {
+   "data": "2017-12-31",
+   "companhias": 177,
+   "companhiasComProvento": 115,
+   "valorDeMercado": 2330928899214.25,
+   "caixaDistribuido": 79650921992.49,
+   "rendimento": 0.03417132200786567,
+   "crescimentoNominal": 0.06723606799556037,
+   "retornoImplicito": 0.10370493533344508,
+   "prefixado10": 0.1030734099715751,
+   "premio": 0.0005725143550385781,
+   "foraPelaContagem": [
+    "ALOS",
+    "AZUL",
+    "BOBR",
+    "CEBR",
+    "SAUD"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.11321007090725281,
+   "premioComGMenos1": -0.008802848269598762,
+   "premioComGMais1": 0.009947876979675696,
+   "normalizado5": 0.005332154275638518,
+   "trimestresNaMedia5": 20,
+   "normalizado10": null,
+   "trimestresNaMedia10": 28
+  },
+  {
+   "data": "2018-03-31",
+   "companhias": 178,
+   "companhiasComProvento": 116,
+   "valorDeMercado": 2687339973714.03,
+   "caixaDistribuido": 101858771917.8,
+   "rendimento": 0.037903195321069255,
+   "crescimentoNominal": 0.06793103289597702,
+   "retornoImplicito": 0.10840903142526448,
+   "prefixado10": 0.09613056461687797,
+   "premio": 0.011201646231512763,
+   "foraPelaContagem": [
+    "ALOS",
+    "AZUL",
+    "BOBR",
+    "CEBR",
+    "CEED",
+    "SAUD"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.11719344653277347,
+   "premioComGMenos1": 0.0017328545672290474,
+   "premioComGMais1": 0.020670437895796256,
+   "normalizado5": 0.0042111072180763985,
+   "trimestresNaMedia5": 20,
+   "normalizado10": null,
+   "trimestresNaMedia10": 29
+  },
+  {
+   "data": "2018-06-30",
+   "companhias": 177,
+   "companhiasComProvento": 118,
+   "valorDeMercado": 2295884825885.05,
+   "caixaDistribuido": 82277327192.12,
+   "rendimento": 0.035836870501725876,
+   "crescimentoNominal": 0.06895303080622739,
+   "retornoImplicito": 0.10726096214365755,
+   "prefixado10": 0.11745962630143003,
+   "premio": -0.009126651127010277,
+   "foraPelaContagem": [
+    "ALOS",
+    "AZUL",
+    "BOBR",
+    "CEED",
+    "SAUD"
+   ],
+   "maiorCompanhia": "VALE",
+   "fatiaDaMaior": 0.11414209523265548,
+   "premioComGMenos1": -0.018396219763956445,
+   "premioComGMais1": 0.00014291750993589147,
+   "normalizado5": 0.002378333460618648,
+   "trimestresNaMedia5": 20,
+   "normalizado10": null,
+   "trimestresNaMedia10": 30
+  },
+  {
+   "data": "2018-09-30",
+   "companhias": 179,
+   "companhiasComProvento": 115,
+   "valorDeMercado": 2647980298222.35,
+   "caixaDistribuido": 109221982003.66,
+   "rendimento": 0.04124727894576226,
+   "crescimentoNominal": 0.06985424938554896,
+   "retornoImplicito": 0.11398282604126381,
+   "prefixado10": 0.11589328485862427,
+   "premio": -0.0017120443713418698,
+   "foraPelaContagem": [
+    "ALOS",
+    "AZUL",
+    "BOBR",
+    "BSLI",
+    "CEBR",
+    "SAUD"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.15135108300009606,
+   "premioComGMenos1": -0.011043109385123095,
+   "premioComGMais1": 0.007619020642439356,
+   "normalizado5": 0.0013102837025180836,
+   "trimestresNaMedia5": 20,
+   "normalizado10": null,
+   "trimestresNaMedia10": 31
+  },
+  {
+   "data": "2018-12-31",
+   "companhias": 176,
+   "companhiasComProvento": 118,
+   "valorDeMercado": 2841395556613.78,
+   "caixaDistribuido": 125339745528.73,
+   "rendimento": 0.04411203686054294,
+   "crescimentoNominal": 0.06821167092303715,
+   "retornoImplicito": 0.11533266352565633,
+   "prefixado10": 0.09200766689529472,
+   "premio": 0.021359737058144868,
+   "foraPelaContagem": [
+    "ALOS",
+    "AZUL",
+    "BOBR",
+    "SAUD"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.11298114465274559,
+   "premioComGMenos1": 0.01179833864938562,
+   "premioComGMais1": 0.030921135466903893,
+   "normalizado5": 0.0022544848803313588,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.013814521995439848,
+   "trimestresNaMedia10": 32
+  },
+  {
+   "data": "2019-03-31",
+   "companhias": 178,
+   "companhiasComProvento": 123,
+   "valorDeMercado": 3149239736483.43,
+   "caixaDistribuido": 135238835800.86,
+   "rendimento": 0.042943328268769156,
+   "crescimentoNominal": 0.0657275669119124,
+   "retornoImplicito": 0.11149345566288729,
+   "prefixado10": 0.08891759027995927,
+   "premio": 0.020732391123486016,
+   "foraPelaContagem": [
+    "ALOS",
+    "AZUL",
+    "BOBR",
+    "CEBR",
+    "CEED",
+    "SAUD"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.12353005795264797,
+   "premioComGMenos1": 0.011154592605228553,
+   "premioComGMais1": 0.030310189641743257,
+   "normalizado5": 0.0026241282201044103,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.014024154393259429,
+   "trimestresNaMedia10": 33
+  },
+  {
+   "data": "2019-06-30",
+   "companhias": 181,
+   "companhiasComProvento": 132,
+   "valorDeMercado": 3223901613216.75,
+   "caixaDistribuido": 141789098826.3,
+   "rendimento": 0.043980591170964874,
+   "crescimentoNominal": 0.0628904311384606,
+   "retornoImplicito": 0.10963698064989183,
+   "prefixado10": 0.07541451370511942,
+   "premio": 0.03182258237046276,
+   "foraPelaContagem": [
+    "ALOS",
+    "AZUL",
+    "BOBR",
+    "CEBR",
+    "SAUD"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.1169311323324727,
+   "premioComGMenos1": 0.022114878244598346,
+   "premioComGMais1": 0.04153028649632717,
+   "normalizado5": 0.0030615001545339637,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.014547637569059527,
+   "trimestresNaMedia10": 34
+  },
+  {
+   "data": "2019-09-30",
+   "companhias": 178,
+   "companhiasComProvento": 128,
+   "valorDeMercado": 3327933164724.31,
+   "caixaDistribuido": 136014630712.74,
+   "rendimento": 0.040870601655850144,
+   "crescimentoNominal": 0.06034018567624444,
+   "retornoImplicito": 0.1036769270247084,
+   "prefixado10": 0.07072788372074812,
+   "premio": 0.030772564911136335,
+   "foraPelaContagem": [
+    "ALOS",
+    "AZUL",
+    "BSLI",
+    "CEBR",
+    "SAUD"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.11380224675337616,
+   "premioComGMenos1": 0.021051415238272142,
+   "premioComGMais1": 0.04049371458400053,
+   "normalizado5": 0.0038101299051373993,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.015011206921690293,
+   "trimestresNaMedia10": 35
+  },
+  {
+   "data": "2019-12-31",
+   "companhias": 182,
+   "companhiasComProvento": 131,
+   "valorDeMercado": 3786243252043.38,
+   "caixaDistribuido": 152265103934.78,
+   "rendimento": 0.04021535168206764,
+   "crescimentoNominal": 0.059543782412562196,
+   "retornoImplicito": 0.10215370824483154,
+   "prefixado10": 0.06853757254934845,
+   "premio": 0.0314599472766135,
+   "foraPelaContagem": [
+    "AZUL",
+    "CEBR",
+    "CEED",
+    "SAUD"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.10755468066296717,
+   "premioComGMenos1": 0.021725003195982806,
+   "premioComGMais1": 0.04119489135724419,
+   "normalizado5": 0.004641767625207122,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.015468116375993716,
+   "trimestresNaMedia10": 36
+  },
+  {
+   "data": "2020-03-31",
+   "companhias": 184,
+   "companhiasComProvento": 131,
+   "valorDeMercado": 2498895003151.16,
+   "caixaDistribuido": 98136727656.9,
+   "rendimento": 0.03927204925903149,
+   "crescimentoNominal": 0.05651650851918988,
+   "retornoImplicito": 0.09800807688473546,
+   "prefixado10": 0.07912547446604434,
+   "premio": 0.017498060110233693,
+   "foraPelaContagem": [
+    "AZUL",
+    "CEBR",
+    "SAUD"
+   ],
+   "maiorCompanhia": "VALE",
+   "fatiaDaMaior": 0.09139839800793112,
+   "premioComGMenos1": 0.007867372355658375,
+   "premioComGMais1": 0.02712874786480879,
+   "normalizado5": 0.005316761630415995,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.015522979720162363,
+   "trimestresNaMedia10": 37
+  },
+  {
+   "data": "2020-06-30",
+   "companhias": 186,
+   "companhiasComProvento": 124,
+   "valorDeMercado": 3186722712870.56,
+   "caixaDistribuido": 103452612627.68,
+   "rendimento": 0.032463638022177076,
+   "crescimentoNominal": 0.05073587571037397,
+   "retornoImplicito": 0.0848465848363508,
+   "prefixado10": 0.07003792764729777,
+   "premio": 0.013839375975777779,
+   "foraPelaContagem": [
+    "AZUL",
+    "BSLI",
+    "CEBR",
+    "CEED",
+    "SAUD"
+   ],
+   "maiorCompanhia": "VALE",
+   "fatiaDaMaior": 0.09273095165008889,
+   "premioComGMenos1": 0.004190525114086574,
+   "premioComGMais1": 0.023488226837468762,
+   "normalizado5": 0.005898525058433418,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.015478674358468033,
+   "trimestresNaMedia10": 38
+  },
+  {
+   "data": "2020-09-30",
+   "companhias": 197,
+   "companhiasComProvento": 134,
+   "valorDeMercado": 3274517700777.75,
+   "caixaDistribuido": 111398954193.4,
+   "rendimento": 0.03401995786034107,
+   "crescimentoNominal": 0.049668262229342064,
+   "retornoImplicito": 0.08537793227772172,
+   "prefixado10": 0.07724382497403659,
+   "premio": 0.007550850712819024,
+   "foraPelaContagem": [
+    "AZUL",
+    "CEBR",
+    "CEED",
+    "SAUD"
+   ],
+   "maiorCompanhia": "VALE",
+   "fatiaDaMaior": 0.09539276709050261,
+   "premioComGMenos1": -0.0020479043126299112,
+   "premioComGMais1": 0.01714960573826807,
+   "normalizado5": 0.0074234380422327105,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.015275396829092416,
+   "trimestresNaMedia10": 39
+  },
+  {
+   "data": "2020-12-31",
+   "companhias": 207,
+   "companhiasComProvento": 132,
+   "valorDeMercado": 4270311318736.48,
+   "caixaDistribuido": 114298355494.54,
+   "rendimento": 0.026765813301021606,
+   "crescimentoNominal": 0.04996227883443449,
+   "retornoImplicito": 0.07806537316283216,
+   "prefixado10": 0.06894569280776408,
+   "premio": 0.008531472100433701,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "CEBR",
+    "CEED",
+    "SAUD",
+    "SEQL",
+    "TIMS"
+   ],
+   "maiorCompanhia": "VALE",
+   "fatiaDaMaior": 0.10821864852294573,
+   "premioComGMenos1": -0.0010739346120819393,
+   "premioComGMais1": 0.01813687881294901,
+   "normalizado5": 0.009345381129124869,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.01510679871087595,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2021-03-31",
+   "companhias": 221,
+   "companhiasComProvento": 131,
+   "valorDeMercado": 4373139360464.17,
+   "caixaDistribuido": 122757784439.19,
+   "rendimento": 0.02807086038670406,
+   "crescimentoNominal": 0.05026615939857959,
+   "retornoImplicito": 0.07974803412793699,
+   "prefixado10": 0.09246140507197809,
+   "premio": -0.011637363924269173,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "CEBR",
+    "CEED",
+    "SAUD",
+    "SEQL",
+    "TIMS"
+   ],
+   "maiorCompanhia": "VALE",
+   "fatiaDaMaior": 0.11838634713383307,
+   "premioComGMenos1": -0.021047955965449616,
+   "premioComGMais1": -0.0022267718830888406,
+   "normalizado5": 0.009153325887518576,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.014229199332074994,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2021-06-30",
+   "companhias": 232,
+   "companhiasComProvento": 149,
+   "valorDeMercado": 4786719749180.4,
+   "caixaDistribuido": 179582893114.65,
+   "rendimento": 0.037516901453317555,
+   "crescimentoNominal": 0.05368656055584542,
+   "retornoImplicito": 0.0932176154109042,
+   "prefixado10": 0.09127017247723668,
+   "premio": 0.0017845653466790345,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "CEBR",
+    "CEED",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "VALE",
+   "fatiaDaMaior": 0.12502649004341054,
+   "premioComGMenos1": -0.00772285937380135,
+   "premioComGMais1": 0.011291990067159752,
+   "normalizado5": 0.009112876524348695,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.013598837280058618,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2021-09-30",
+   "companhias": 249,
+   "companhiasComProvento": 154,
+   "valorDeMercado": 4281831278541.28,
+   "caixaDistribuido": 204256228063.22,
+   "rendimento": 0.047703007142496597,
+   "crescimentoNominal": 0.05628148396415722,
+   "retornoImplicito": 0.10666928713818633,
+   "prefixado10": 0.1112081688911779,
+   "premio": -0.004084636776492401,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "CEBR",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "VALE",
+   "fatiaDaMaior": 0.09409253451876662,
+   "premioComGMenos1": -0.013513140242120691,
+   "premioComGMais1": 0.00534386668913589,
+   "normalizado5": 0.008940453876793587,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.01254789338612206,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2021-12-31",
+   "companhias": 247,
+   "companhiasComProvento": 167,
+   "valorDeMercado": 3902469974814.64,
+   "caixaDistribuido": 270466358382.39,
+   "rendimento": 0.06930645466278998,
+   "crescimentoNominal": 0.057582369846239434,
+   "retornoImplicito": 0.1308796544141538,
+   "prefixado10": 0.10714419271962616,
+   "premio": 0.02143845566874436,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "VALE",
+   "fatiaDaMaior": 0.10556843657055635,
+   "premioComGMenos1": 0.011780215471177247,
+   "premioComGMais1": 0.03109669586631192,
+   "normalizado5": 0.010112905823823033,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.011949404718750417,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2022-03-31",
+   "companhias": 252,
+   "companhiasComProvento": 171,
+   "valorDeMercado": 4384570067306.35,
+   "caixaDistribuido": 311648173218.97,
+   "rendimento": 0.0710783881737418,
+   "crescimentoNominal": 0.059066972487117786,
+   "retornoImplicito": 0.13434374585954667,
+   "prefixado10": 0.11640516950384994,
+   "premio": 0.01606815952282714,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "VALE",
+   "fatiaDaMaior": 0.1089977404138969,
+   "premioComGMenos1": 0.006474166074644128,
+   "premioComGMais1": 0.025662152971010155,
+   "normalizado5": 0.010688324259145583,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.011333628246789473,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2022-06-30",
+   "companhias": 248,
+   "companhiasComProvento": 183,
+   "valorDeMercado": 3523690114021.37,
+   "caixaDistribuido": 319862699530.31,
+   "rendimento": 0.09077492321402532,
+   "crescimentoNominal": 0.060222862928394516,
+   "retornoImplicito": 0.1564645119004736,
+   "prefixado10": 0.1310593785618055,
+   "premio": 0.022461361286771675,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.10890787559282877,
+   "premioComGMenos1": 0.012817526985154482,
+   "premioComGMais1": 0.03210519558838887,
+   "normalizado5": 0.011803747362086853,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.01061902222336054,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2022-09-30",
+   "companhias": 250,
+   "companhiasComProvento": 182,
+   "valorDeMercado": 3816610130702.24,
+   "caixaDistribuido": 368780980897.93,
+   "rendimento": 0.09662526909188807,
+   "crescimentoNominal": 0.057928675533409635,
+   "retornoImplicito": 0.16015131848685007,
+   "prefixado10": 0.12145442420890684,
+   "premio": 0.03450598922487713,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.1082471732641302,
+   "premioComGMenos1": 0.024727390599565524,
+   "premioComGMais1": 0.04428458785018874,
+   "normalizado5": 0.013251948853822231,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.010387332611012795,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2022-12-31",
+   "companhias": 249,
+   "companhiasComProvento": 179,
+   "valorDeMercado": 3703708181979.19,
+   "caixaDistribuido": 348414328075.76,
+   "rendimento": 0.09407175483506212,
+   "crescimentoNominal": 0.05744597501208304,
+   "retornoImplicito": 0.15692177352474296,
+   "prefixado10": 0.1269007897571477,
+   "premio": 0.02664030768322112,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "VALE",
+   "fatiaDaMaior": 0.1199648187622619,
+   "premioComGMenos1": 0.016931629112937774,
+   "premioComGMais1": 0.03634898625350447,
+   "normalizado5": 0.014555338520231359,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.009943746397934938,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2023-03-31",
+   "companhias": 249,
+   "companhiasComProvento": 180,
+   "valorDeMercado": 3416889485184.18,
+   "caixaDistribuido": 325420743881.1,
+   "rendimento": 0.09523888474946063,
+   "crescimentoNominal": 0.05796976885251226,
+   "retornoImplicito": 0.15872962973667018,
+   "prefixado10": 0.12792668838401422,
+   "premio": 0.027309347025725295,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "VALE",
+   "fatiaDaMaior": 0.10665750829180119,
+   "premioComGMenos1": 0.017599151354066533,
+   "premioComGMais1": 0.03701954269738361,
+   "normalizado5": 0.015360723559941985,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.009785915389009192,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2023-06-30",
+   "companhias": 254,
+   "companhiasComProvento": 177,
+   "valorDeMercado": 3943065601452.19,
+   "caixaDistribuido": 374080120356.9,
+   "rendimento": 0.09487037705361286,
+   "crescimentoNominal": 0.058690567239472635,
+   "retornoImplicito": 0.15912894053658466,
+   "prefixado10": 0.10775411321350026,
+   "premio": 0.046377464737233254,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.10442980088340101,
+   "premioComGMenos1": 0.03649376975480201,
+   "premioComGMais1": 0.056261159719664944,
+   "normalizado5": 0.01813592935315416,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.010257131406886406,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2023-09-30",
+   "companhias": 249,
+   "companhiasComProvento": 174,
+   "valorDeMercado": 3826607971406.19,
+   "caixaDistribuido": 324334215590.4,
+   "rendimento": 0.08475762816937181,
+   "crescimentoNominal": 0.05943671622772895,
+   "retornoImplicito": 0.1492320594907391,
+   "prefixado10": 0.11703334908382623,
+   "premio": 0.028825200638209925,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.12440504832841888,
+   "premioComGMenos1": 0.01911414206454176,
+   "premioComGMais1": 0.03853625921187809,
+   "normalizado5": 0.01966279160363175,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.010486537653074918,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2023-12-31",
+   "companhias": 251,
+   "companhiasComProvento": 174,
+   "valorDeMercado": 4309335632348.22,
+   "caixaDistribuido": 316353475901.51,
+   "rendimento": 0.073411194414004,
+   "crescimentoNominal": 0.059790857889545634,
+   "retornoImplicito": 0.13759137059625914,
+   "prefixado10": 0.10341647040700463,
+   "premio": 0.030971896020954626,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.11573174577922499,
+   "premioComGMenos1": 0.021243826672686872,
+   "premioComGMais1": 0.04069996536922238,
+   "normalizado5": 0.02014339955177224,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.0111989422160518,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2024-03-31",
+   "companhias": 248,
+   "companhiasComProvento": 173,
+   "valorDeMercado": 4076686520755.08,
+   "caixaDistribuido": 308440444125.9,
+   "rendimento": 0.07565959328871108,
+   "crescimentoNominal": 0.06047729501246546,
+   "retornoImplicito": 0.14071257584502106,
+   "prefixado10": 0.11009240653087415,
+   "premio": 0.027583441823403998,
+   "foraPelaContagem": [
+    "AERI",
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.12122331717178653,
+   "premioComGMenos1": 0.017893621525918668,
+   "premioComGMais1": 0.03727326212088933,
+   "normalizado5": 0.02048595208676814,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.011555040153436275,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2024-06-30",
+   "companhias": 251,
+   "companhiasComProvento": 170,
+   "valorDeMercado": 3836129322916.65,
+   "caixaDistribuido": 266014780458.17,
+   "rendimento": 0.06934458097359349,
+   "crescimentoNominal": 0.061747606521900034,
+   "retornoImplicito": 0.135374049395877,
+   "prefixado10": 0.12189586577011036,
+   "premio": 0.012013756389515517,
+   "foraPelaContagem": [
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.13390685847545947,
+   "premioComGMenos1": 0.0024821713859504158,
+   "premioComGMais1": 0.021545341393080397,
+   "normalizado5": 0.019495510787720778,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.011278505471127371,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2024-09-30",
+   "companhias": 253,
+   "companhiasComProvento": 174,
+   "valorDeMercado": 4073730228706.88,
+   "caixaDistribuido": 272085566163.59,
+   "rendimento": 0.06679027596040836,
+   "crescimentoNominal": 0.06463808556146988,
+   "retornoImplicito": 0.13574555709408131,
+   "prefixado10": 0.1226922702552471,
+   "premio": 0.011626771809755576,
+   "foraPelaContagem": [
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.121263487569973,
+   "premioComGMenos1": 0.0021246998330965994,
+   "premioComGMais1": 0.021128843786414775,
+   "normalizado5": 0.018538221132651737,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.01117417551889457,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2024-12-31",
+   "companhias": 253,
+   "companhiasComProvento": 176,
+   "valorDeMercado": 3621964952458.01,
+   "caixaDistribuido": 256879103348.86,
+   "rendimento": 0.07092258117366143,
+   "crescimentoNominal": 0.0673479141146538,
+   "retornoImplicito": 0.14304698319398854,
+   "prefixado10": 0.151554116352282,
+   "premio": -0.007387523554030717,
+   "foraPelaContagem": [
+    "AZUL",
+    "SAUD"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.13695467867443167,
+   "premioComGMenos1": -0.016687326020683013,
+   "premioComGMais1": 0.001912278912621801,
+   "normalizado5": 0.01659584759111953,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.010618807608163324,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2025-03-31",
+   "companhias": 257,
+   "companhiasComProvento": 183,
+   "valorDeMercado": 3853257669570.79,
+   "caixaDistribuido": 292997526450.79,
+   "rendimento": 0.07603891345356789,
+   "crescimentoNominal": 0.06859844761962441,
+   "retornoImplicito": 0.14985351249479004,
+   "prefixado10": 0.1502476244977793,
+   "premio": -0.0003426323120305774,
+   "foraPelaContagem": [
+    "AZUL",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.13286754532965037,
+   "premioComGMenos1": -0.00969747809076782,
+   "premioComGMais1": 0.009012213466706775,
+   "normalizado5": 0.015703812970006316,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.010510287300211155,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2025-06-30",
+   "companhias": 257,
+   "companhiasComProvento": 184,
+   "valorDeMercado": 4064592492023.3,
+   "caixaDistribuido": 269273407623.04,
+   "rendimento": 0.06624856197798056,
+   "crescimentoNominal": 0.06953826472395486,
+   "retornoImplicito": 0.14039363674234157,
+   "prefixado10": 0.13814813384889502,
+   "premio": 0.0019729443177600725,
+   "foraPelaContagem": [
+    "B100",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.10440816569537664,
+   "premioComGMenos1": -0.0073953314827915895,
+   "premioComGMais1": 0.011341220118312068,
+   "normalizado5": 0.01511049138710543,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.010504508222769424,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2025-09-30",
+   "companhias": 256,
+   "companhiasComProvento": 180,
+   "valorDeMercado": 4191785530578.0,
+   "caixaDistribuido": 285993331293.96,
+   "rendimento": 0.06822709062944944,
+   "crescimentoNominal": 0.06999506491542018,
+   "retornoImplicito": 0.14299771518246818,
+   "prefixado10": 0.1370179350607743,
+   "premio": 0.005259178362366113,
+   "foraPelaContagem": [
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.10080187648234347,
+   "premioComGMenos1": -0.004135810561642028,
+   "premioComGMais1": 0.014654167286374253,
+   "normalizado5": 0.014995907769582784,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.011209672905907747,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2025-12-31",
+   "companhias": 256,
+   "companhiasComProvento": 180,
+   "valorDeMercado": 4518867039293.55,
+   "caixaDistribuido": 353769108546.26,
+   "rendimento": 0.07828712495191403,
+   "crescimentoNominal": 0.06889316424376113,
+   "retornoImplicito": 0.15257373695315923,
+   "prefixado10": 0.13766264150197483,
+   "premio": 0.013106781313921179,
+   "foraPelaContagem": [
+    "B100",
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "ITUB",
+   "fatiaDaMaior": 0.09214809265410429,
+   "premioComGMenos1": 0.003628689253797779,
+   "premioComGMais1": 0.0225848733740448,
+   "normalizado5": 0.015224673230257158,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.012285027179691013,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2026-03-31",
+   "companhias": 256,
+   "companhiasComProvento": 181,
+   "valorDeMercado": 5072179326202.2,
+   "caixaDistribuido": 355292578861.41,
+   "rendimento": 0.07004732207041972,
+   "crescimentoNominal": 0.06870755610794155,
+   "retornoImplicito": 0.1435676584897257,
+   "prefixado10": 0.1413700361546082,
+   "premio": 0.0019254249415214808,
+   "foraPelaContagem": [
+    "SAUD",
+    "SEQL"
+   ],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.13127047768990024,
+   "premioComGMenos1": -0.007449688195980353,
+   "premioComGMais1": 0.011300538079023648,
+   "normalizado5": 0.01590281267354669,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.012528069280532633,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2026-06-30",
+   "companhias": 257,
+   "companhiasComProvento": 185,
+   "valorDeMercado": 4622801738107.63,
+   "caixaDistribuido": 295840903891.09,
+   "rendimento": 0.0639960181403311,
+   "crescimentoNominal": 0.06859392399858688,
+   "retornoImplicito": 0.13697968014344802,
+   "prefixado10": 0.14393771312837944,
+   "premio": -0.006082527837903862,
+   "foraPelaContagem": [],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.11172042227210773,
+   "premioComGMenos1": -0.0153836987489544,
+   "premioComGMais1": 0.0032186430731466764,
+   "normalizado5": 0.015509458014317546,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.01231116726933312,
+   "trimestresNaMedia10": 40
+  },
+  {
+   "data": "2026-09-14",
+   "companhias": 259,
+   "companhiasComProvento": 185,
+   "valorDeMercado": 4944249837804.69,
+   "caixaDistribuido": 300224603750.95,
+   "rendimento": 0.060721972715734276,
+   "crescimentoNominal": 0.06778816861938641,
+   "retornoImplicito": 0.13262637266047667,
+   "prefixado10": 0.14379999999999993,
+   "premio": -0.00976886460878068,
+   "foraPelaContagem": [],
+   "maiorCompanhia": "PETR",
+   "fatiaDaMaior": 0.1354674554545537,
+   "premioComGMenos1": -0.01904253109519205,
+   "premioComGMais1": -0.0004951981223692004,
+   "normalizado5": 0.015509458014317546,
+   "trimestresNaMedia5": 20,
+   "normalizado10": 0.01231116726933312,
+   "trimestresNaMedia10": 40
+  }
+ ],
+ "efeitos": [
+  {
+   "rotulo": "5,5% fixo",
+   "premio": 0.055,
+   "avaliados": 97,
+   "potencialMediano": -0.4535928143712575,
+   "acimaDeZero": 15,
+   "precoJustoMedianoContraReferencia": 0.0,
+   "spearmanContraReferencia": 1.0,
+   "casos": {
+    "WEGE3": {
+     "justoCentavos": 1253,
+     "potencial": -0.7530547891210091
+    },
+    "ITUB4": {
+     "justoCentavos": 2176,
+     "potencial": -0.48618654073199524
+    },
+    "VALE3": {
+     "justoCentavos": 7025,
+     "potencial": -0.06928987811340757
+    },
+    "SAPR11": {
+     "justoCentavos": 3674,
+     "potencial": 0.05757052389176741
+    },
+    "RENT3": {
+     "justoCentavos": null,
+     "potencial": null
+    }
+   }
+  },
+  {
+   "rotulo": "implícito",
+   "premio": -0.00976886460878068,
+   "avaliados": 109,
+   "potencialMediano": -0.2783687943262411,
+   "acimaDeZero": 36,
+   "precoJustoMedianoContraReferencia": 0.6072727272727272,
+   "spearmanContraReferencia": 0.953766042499474,
+   "casos": {
+    "WEGE3": {
+     "justoCentavos": 1916,
+     "potencial": -0.62238864800946
+    },
+    "ITUB4": {
+     "justoCentavos": 3515,
+     "potencial": -0.1700118063754428
+    },
+    "VALE3": {
+     "justoCentavos": 10199,
+     "potencial": 0.35121886592474816
+    },
+    "SAPR11": {
+     "justoCentavos": 5243,
+     "potencial": 0.5092112838226827
+    },
+    "RENT3": {
+     "justoCentavos": null,
+     "potencial": null
+    }
+   }
+  },
+  {
+   "rotulo": "média 5 anos",
+   "premio": 0.015509458014317546,
+   "avaliados": 108,
+   "potencialMediano": -0.3773990005804373,
+   "acimaDeZero": 25,
+   "precoJustoMedianoContraReferencia": 0.3105022831050228,
+   "spearmanContraReferencia": 0.9839180517567852,
+   "casos": {
+    "WEGE3": {
+     "justoCentavos": 1584,
+     "potencial": -0.6878202601497833
+    },
+    "ITUB4": {
+     "justoCentavos": 2845,
+     "potencial": -0.32821723730814645
+    },
+    "VALE3": {
+     "justoCentavos": 8696,
+     "potencial": 0.1520932697403284
+    },
+    "SAPR11": {
+     "justoCentavos": 4518,
+     "potencial": 0.3005181347150258
+    },
+    "RENT3": {
+     "justoCentavos": null,
+     "potencial": null
+    }
+   }
+  },
+  {
+   "rotulo": "média 10 anos",
+   "premio": 0.01231116726933312,
+   "avaliados": 108,
+   "potencialMediano": -0.3666238545634912,
+   "acimaDeZero": 28,
+   "precoJustoMedianoContraReferencia": 0.3400735294117647,
+   "spearmanContraReferencia": 0.9802624658110667,
+   "casos": {
+    "WEGE3": {
+     "justoCentavos": 1619,
+     "potencial": -0.6809223492313755
+    },
+    "ITUB4": {
+     "justoCentavos": 2916,
+     "potencial": -0.3114521841794569
+    },
+    "VALE3": {
+     "justoCentavos": 8863,
+     "potencial": 0.17421833598304173
+    },
+    "SAPR11": {
+     "justoCentavos": 4600,
+     "potencial": 0.3241220495106505
+    },
+    "RENT3": {
+     "justoCentavos": null,
+     "potencial": null
+    }
+   }
+  }
+ ]
+}

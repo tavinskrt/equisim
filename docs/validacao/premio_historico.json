@@ -1,0 +1,857 @@
+{
+ "geradoPor": "tool/premio_historico.dart",
+ "dataDaEntrada": "2026-09-14",
+ "emenda": {
+  "inicioDaFonteDeMercado": "2016-09-23",
+  "razaoMedianaNaSobreposicao": 1.0
+ },
+ "premioDoAplicativoDezAnos": 0.018844691536290092,
+ "porJanela": [
+  {
+   "fim": "2026-09-14",
+   "anos": 5,
+   "ibovespa": 0.10629061701420639,
+   "cdi": 0.125945181310946,
+   "premio": -0.017456057917362933,
+   "erroPadrao": 0.07847755504053919,
+   "completa": true
+  },
+  {
+   "fim": "2026-09-14",
+   "anos": 10,
+   "ibovespa": 0.11408610957984333,
+   "cdi": 0.093885141195994,
+   "premio": 0.018467175047064632,
+   "erroPadrao": 0.07171501634891427,
+   "completa": true
+  },
+  {
+   "fim": "2026-09-14",
+   "anos": 15,
+   "ibovespa": 0.080160558789101,
+   "cdi": 0.09841329370401941,
+   "premio": -0.01661736526637203,
+   "erroPadrao": 0.059564330161492,
+   "completa": true
+  },
+  {
+   "fim": "2026-09-14",
+   "anos": 20,
+   "ibovespa": 0.07802027397543809,
+   "cdi": 0.10190466966650247,
+   "premio": -0.02167555538020649,
+   "erroPadrao": 0.05787752431379609,
+   "completa": true
+  }
+ ],
+ "efeitos": [
+  {
+   "rotulo": "5,5% fixo",
+   "premio": 0.055,
+   "avaliados": 97,
+   "potencialMediano": -0.4535928143712575,
+   "acimaDeZero": 15,
+   "precoJustoMedianoContraReferencia": 0.0,
+   "spearmanContraReferencia": 1.0,
+   "casos": {
+    "WEGE3": {
+     "justoCentavos": 1253,
+     "potencial": -0.7530547891210091
+    },
+    "ITUB4": {
+     "justoCentavos": 2176,
+     "potencial": -0.48618654073199524
+    },
+    "VALE3": {
+     "justoCentavos": 7025,
+     "potencial": -0.06928987811340757
+    },
+    "SAPR11": {
+     "justoCentavos": 3674,
+     "potencial": 0.05757052389176741
+    },
+    "RENT3": {
+     "justoCentavos": null,
+     "potencial": null
+    }
+   }
+  },
+  {
+   "rotulo": "5 anos",
+   "premio": -0.017456057917362933,
+   "avaliados": 108,
+   "potencialMediano": -0.21965089174391494,
+   "acimaDeZero": 37,
+   "precoJustoMedianoContraReferencia": 0.7175925925925926,
+   "spearmanContraReferencia": 0.9400641699978961,
+   "casos": {
+    "WEGE3": {
+     "justoCentavos": 2050,
+     "potencial": -0.5959795033504139
+    },
+    "ITUB4": {
+     "justoCentavos": 3779,
+     "potencial": -0.10767414403778044
+    },
+    "VALE3": {
+     "justoCentavos": 10754,
+     "potencial": 0.42474827768945417
+    },
+    "SAPR11": {
+     "justoCentavos": 5504,
+     "potencial": 0.5843408175014392
+    },
+    "RENT3": {
+     "justoCentavos": null,
+     "potencial": null
+    }
+   }
+  },
+  {
+   "rotulo": "10 anos",
+   "premio": 0.018467175047064632,
+   "avaliados": 107,
+   "potencialMediano": -0.3831152801777339,
+   "acimaDeZero": 25,
+   "precoJustoMedianoContraReferencia": 0.28538812785388123,
+   "spearmanContraReferencia": 0.9852987586787292,
+   "casos": {
+    "WEGE3": {
+     "justoCentavos": 1553,
+     "potencial": -0.6939298383918013
+    },
+    "ITUB4": {
+     "justoCentavos": 2782,
+     "potencial": -0.3430932703659976
+    },
+    "VALE3": {
+     "justoCentavos": 8546,
+     "potencial": 0.13222045574986738
+    },
+    "SAPR11": {
+     "justoCentavos": 4444,
+     "potencial": 0.2792170408750718
+    },
+    "RENT3": {
+     "justoCentavos": null,
+     "potencial": null
+    }
+   }
+  },
+  {
+   "rotulo": "15 anos",
+   "premio": -0.01661736526637203,
+   "avaliados": 108,
+   "potencialMediano": -0.2270125223613595,
+   "acimaDeZero": 37,
+   "precoJustoMedianoContraReferencia": 0.7037037037037037,
+   "spearmanContraReferencia": 0.9419840100988849,
+   "casos": {
+    "WEGE3": {
+     "justoCentavos": 2034,
+     "potencial": -0.5991328340559716
+    },
+    "ITUB4": {
+     "justoCentavos": 3748,
+     "potencial": -0.11499409681227873
+    },
+    "VALE3": {
+     "justoCentavos": 10691,
+     "potencial": 0.4164016958134604
+    },
+    "SAPR11": {
+     "justoCentavos": 5474,
+     "potencial": 0.5757052389176741
+    },
+    "RENT3": {
+     "justoCentavos": null,
+     "potencial": null
+    }
+   }
+  },
+  {
+   "rotulo": "20 anos",
+   "premio": -0.02167555538020649,
+   "avaliados": 109,
+   "potencialMediano": -0.18154957321076826,
+   "acimaDeZero": 42,
+   "precoJustoMedianoContraReferencia": 0.794909090909091,
+   "spearmanContraReferencia": 0.9305438670313486,
+   "casos": {
+    "WEGE3": {
+     "justoCentavos": 2132,
+     "potencial": -0.5798186834844304
+    },
+    "ITUB4": {
+     "justoCentavos": 3940,
+     "potencial": -0.06965761511216063
+    },
+    "VALE3": {
+     "justoCentavos": 11083,
+     "potencial": 0.4683359830418653
+    },
+    "SAPR11": {
+     "justoCentavos": 5656,
+     "potencial": 0.6280944156591824
+    },
+    "RENT3": {
+     "justoCentavos": null,
+     "potencial": null
+    }
+   }
+  }
+ ],
+ "porCoorte": [
+  {
+   "data": "2018-03-31",
+   "janela5": {
+    "fim": "2018-03-31",
+    "anos": 5,
+    "ibovespa": 0.09791418856200473,
+    "cdi": 0.11209601981110362,
+    "premio": -0.012752344218899148,
+    "erroPadrao": 0.10417262781102875,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2018-03-31",
+    "anos": 10,
+    "ibovespa": 0.021787902878363852,
+    "cdi": 0.10712557407589474,
+    "premio": -0.07708039015245516,
+    "erroPadrao": 0.08773538960535064,
+    "completa": true
+   }
+  },
+  {
+   "data": "2018-06-30",
+   "janela5": {
+    "fim": "2018-06-30",
+    "anos": 5,
+    "ibovespa": 0.10327740322270329,
+    "cdi": 0.11159703658771059,
+    "premio": -0.0074843968553084395,
+    "erroPadrao": 0.10414234023672628,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2018-06-30",
+    "anos": 10,
+    "ibovespa": 0.03774783597868936,
+    "cdi": 0.1058023608828138,
+    "premio": -0.06154311775007726,
+    "erroPadrao": 0.0874031769250058,
+    "completa": true
+   }
+  },
+  {
+   "data": "2018-09-30",
+   "janela5": {
+    "fim": "2018-09-30",
+    "anos": 5,
+    "ibovespa": 0.08411524137883886,
+    "cdi": 0.110597985775581,
+    "premio": -0.023845482105973814,
+    "erroPadrao": 0.10336563515022452,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2018-09-30",
+    "anos": 10,
+    "ibovespa": 0.07709073334566452,
+    "cdi": 0.1041395539875567,
+    "premio": -0.02449764664639209,
+    "erroPadrao": 0.08427662718459243,
+    "completa": true
+   }
+  },
+  {
+   "data": "2018-12-31",
+   "janela5": {
+    "fim": "2018-12-31",
+    "anos": 5,
+    "ibovespa": 0.1301725653640997,
+    "cdi": 0.10909883177360302,
+    "premio": 0.019000771605535594,
+    "erroPadrao": 0.10489173887409968,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2018-12-31",
+    "anos": 10,
+    "ibovespa": 0.08198338676181449,
+    "cdi": 0.10234676431425882,
+    "premio": -0.018472751235507845,
+    "erroPadrao": 0.07495909639934492,
+    "completa": true
+   }
+  },
+  {
+   "data": "2019-03-31",
+   "janela5": {
+    "fim": "2019-03-31",
+    "anos": 5,
+    "ibovespa": 0.13312878070885104,
+    "cdi": 0.10716472191452775,
+    "premio": 0.023450944814630503,
+    "erroPadrao": 0.10524732845866466,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2019-03-31",
+    "anos": 10,
+    "ibovespa": 0.07002846397600915,
+    "cdi": 0.10084736419785623,
+    "premio": -0.02799561612640422,
+    "erroPadrao": 0.07311145107635308,
+    "completa": true
+   }
+  },
+  {
+   "data": "2019-06-30",
+   "janela5": {
+    "fim": "2019-06-30",
+    "anos": 5,
+    "ibovespa": 0.114826093320195,
+    "cdi": 0.10495688582463991,
+    "premio": 0.008931757991796685,
+    "erroPadrao": 0.10501767804747537,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2019-06-30",
+    "anos": 10,
+    "ibovespa": 0.05751411888381064,
+    "cdi": 0.09989339978034284,
+    "premio": -0.03853035294601792,
+    "erroPadrao": 0.07178557635664923,
+    "completa": true
+   }
+  },
+  {
+   "data": "2019-09-30",
+   "janela5": {
+    "fim": "2019-09-30",
+    "anos": 5,
+    "ibovespa": 0.15007128974244432,
+    "cdi": 0.10238826827704117,
+    "premio": 0.04325428965234601,
+    "erroPadrao": 0.10421014036341503,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2019-09-30",
+    "anos": 10,
+    "ibovespa": 0.04618184776849765,
+    "cdi": 0.09915545833144934,
+    "premio": -0.04819483009561465,
+    "erroPadrao": 0.07157407810495599,
+    "completa": true
+   }
+  },
+  {
+   "data": "2019-12-31",
+   "janela5": {
+    "fim": "2019-12-31",
+    "anos": 5,
+    "ibovespa": 0.17832533066390166,
+    "cdi": 0.09917441056261223,
+    "premio": 0.07200942756734663,
+    "erroPadrao": 0.09862788904860723,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2019-12-31",
+    "anos": 10,
+    "ibovespa": 0.04854068388800603,
+    "cdi": 0.09819379170672682,
+    "premio": -0.045213429718587106,
+    "erroPadrao": 0.07063891888465804,
+    "completa": true
+   }
+  },
+  {
+   "data": "2020-03-31",
+   "janela5": {
+    "fim": "2020-03-31",
+    "anos": 5,
+    "ibovespa": 0.14480457998276175,
+    "cdi": 0.0952133996279938,
+    "premio": 0.04527992478142839,
+    "erroPadrao": 0.12202960858445949,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2020-03-31",
+    "anos": 10,
+    "ibovespa": 0.048487421186093504,
+    "cdi": 0.09705964322378735,
+    "premio": -0.04427491462083222,
+    "erroPadrao": 0.07947370720161759,
+    "completa": true
+   }
+  },
+  {
+   "data": "2020-06-30",
+   "janela5": {
+    "fim": "2020-06-30",
+    "anos": 5,
+    "ibovespa": 0.1220241681701355,
+    "cdi": 0.09028255786076889,
+    "premio": 0.0291131964650031,
+    "erroPadrao": 0.12582689807659803,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2020-06-30",
+    "anos": 10,
+    "ibovespa": 0.025433507212565543,
+    "cdi": 0.0954959672297091,
+    "premio": -0.06395501408765347,
+    "erroPadrao": 0.08046231776410846,
+    "completa": true
+   }
+  },
+  {
+   "data": "2020-09-30",
+   "janela5": {
+    "fim": "2020-09-30",
+    "anos": 5,
+    "ibovespa": 0.17806040173341886,
+    "cdi": 0.08403760398584748,
+    "premio": 0.08673388949042304,
+    "erroPadrao": 0.12540348994456435,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2020-09-30",
+    "anos": 10,
+    "ibovespa": 0.03825017774917039,
+    "cdi": 0.0932282253392045,
+    "premio": -0.05028963423714716,
+    "erroPadrao": 0.08072895004117633,
+    "completa": true
+   }
+  },
+  {
+   "data": "2020-12-31",
+   "janela5": {
+    "fim": "2020-12-31",
+    "anos": 5,
+    "ibovespa": 0.20451413738181268,
+    "cdi": 0.07788344818141102,
+    "premio": 0.11748087366407844,
+    "erroPadrao": 0.12464600085298054,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2020-12-31",
+    "anos": 10,
+    "ibovespa": 0.0464073537444496,
+    "cdi": 0.09097540626303635,
+    "premio": -0.04085156481322305,
+    "erroPadrao": 0.08107921927698346,
+    "completa": true
+   }
+  },
+  {
+   "data": "2021-03-31",
+   "janela5": {
+    "fim": "2021-03-31",
+    "anos": 5,
+    "ibovespa": 0.1912393468546023,
+    "cdi": 0.07202303412166655,
+    "premio": 0.11120685744463743,
+    "erroPadrao": 0.12241429639705664,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2021-03-31",
+    "anos": 10,
+    "ibovespa": 0.06315465342354587,
+    "cdi": 0.08869303385442717,
+    "premio": -0.023457833968556607,
+    "erroPadrao": 0.0815711284269226,
+    "completa": true
+   }
+  },
+  {
+   "data": "2021-06-30",
+   "janela5": {
+    "fim": "2021-06-30",
+    "anos": 5,
+    "ibovespa": 0.17617969318685667,
+    "cdi": 0.06666848189504737,
+    "premio": 0.10266658587047717,
+    "erroPadrao": 0.12001458182055282,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2021-06-30",
+    "anos": 10,
+    "ibovespa": 0.08288513346785553,
+    "cdi": 0.08653561267567489,
+    "premio": -0.0033597418853393846,
+    "erroPadrao": 0.0814878315964407,
+    "completa": true
+   }
+  },
+  {
+   "data": "2021-09-30",
+   "janela5": {
+    "fim": "2021-09-30",
+    "anos": 5,
+    "ibovespa": 0.15324568354944357,
+    "cdi": 0.06199292681244839,
+    "premio": 0.08592595528003044,
+    "erroPadrao": 0.12052507022508695,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2021-09-30",
+    "anos": 10,
+    "ibovespa": 0.08057810650327046,
+    "cdi": 0.08463857044682022,
+    "premio": -0.0037436101335369676,
+    "erroPadrao": 0.08032025635846814,
+    "completa": true
+   }
+  },
+  {
+   "data": "2021-12-31",
+   "janela5": {
+    "fim": "2021-12-31",
+    "anos": 5,
+    "ibovespa": 0.11059812461049301,
+    "cdi": 0.058997594636102324,
+    "premio": 0.04872582358614497,
+    "erroPadrao": 0.12019901197829108,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2021-12-31",
+    "anos": 10,
+    "ibovespa": 0.05352474771697069,
+    "cdi": 0.08372388384464058,
+    "premio": -0.02786607970706967,
+    "erroPadrao": 0.07999538012574176,
+    "completa": true
+   }
+  },
+  {
+   "data": "2022-03-31",
+   "janela5": {
+    "fim": "2022-03-31",
+    "anos": 5,
+    "ibovespa": 0.1245818396862668,
+    "cdi": 0.05786234763832088,
+    "premio": 0.06307010755879272,
+    "erroPadrao": 0.11990424091286181,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2022-03-31",
+    "anos": 10,
+    "ibovespa": 0.06926368025574225,
+    "cdi": 0.08373604553857916,
+    "premio": -0.013354142221637222,
+    "erroPadrao": 0.07996490771479035,
+    "completa": true
+   }
+  },
+  {
+   "data": "2022-06-30",
+   "janela5": {
+    "fim": "2022-06-30",
+    "anos": 5,
+    "ibovespa": 0.1010113557882133,
+    "cdi": 0.058568909611026454,
+    "premio": 0.04009417411737748,
+    "erroPadrao": 0.11909167787728887,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2022-06-30",
+    "anos": 10,
+    "ibovespa": 0.06747384349567453,
+    "cdi": 0.08461356369442474,
+    "premio": -0.015802605437063355,
+    "erroPadrao": 0.07961121296404941,
+    "completa": true
+   }
+  },
+  {
+   "data": "2022-09-30",
+   "janela5": {
+    "fim": "2022-09-30",
+    "anos": 5,
+    "ibovespa": 0.07881654337524546,
+    "cdi": 0.06067978433291654,
+    "premio": 0.017099184230927378,
+    "erroPadrao": 0.12011558013080754,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2022-09-30",
+    "anos": 10,
+    "ibovespa": 0.06347820597705245,
+    "cdi": 0.08606498018837838,
+    "premio": -0.020796890262872014,
+    "erroPadrao": 0.07928962842303162,
+    "completa": true
+   }
+  },
+  {
+   "data": "2022-12-31",
+   "janela5": {
+    "fim": "2022-12-31",
+    "anos": 5,
+    "ibovespa": 0.06295756910535832,
+    "cdi": 0.06362392812070627,
+    "premio": -0.0006264987066672001,
+    "erroPadrao": 0.12145941159439766,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2022-12-31",
+    "anos": 10,
+    "ibovespa": 0.06840524122527936,
+    "cdi": 0.0876567464231468,
+    "premio": -0.017699982334663633,
+    "erroPadrao": 0.07982406659749658,
+    "completa": true
+   }
+  },
+  {
+   "data": "2023-03-31",
+   "janela5": {
+    "fim": "2023-03-31",
+    "anos": 5,
+    "ibovespa": 0.06318372028464214,
+    "cdi": 0.06698320713967787,
+    "premio": -0.0035609621872317865,
+    "erroPadrao": 0.12160758686936038,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2023-03-31",
+    "anos": 10,
+    "ibovespa": 0.07398527518378306,
+    "cdi": 0.08929713117865434,
+    "premio": -0.01405663850257588,
+    "erroPadrao": 0.08004610553592331,
+    "completa": true
+   }
+  },
+  {
+   "data": "2023-06-30",
+   "janela5": {
+    "fim": "2023-06-30",
+    "anos": 5,
+    "ibovespa": 0.07636795876368718,
+    "cdi": 0.07041435906865923,
+    "premio": 0.0055619579881271974,
+    "erroPadrao": 0.12080636950145009,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2023-06-30",
+    "anos": 10,
+    "ibovespa": 0.08353939188531578,
+    "cdi": 0.09081955638499495,
+    "premio": -0.006674031884618792,
+    "erroPadrao": 0.07972208453257205,
+    "completa": true
+   }
+  },
+  {
+   "data": "2023-09-30",
+   "janela5": {
+    "fim": "2023-09-30",
+    "anos": 5,
+    "ibovespa": 0.06754303228626823,
+    "cdi": 0.07383981162160569,
+    "premio": -0.005863797623435696,
+    "erroPadrao": 0.11997550663904999,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2023-09-30",
+    "anos": 10,
+    "ibovespa": 0.08613693002124578,
+    "cdi": 0.0920642526118074,
+    "premio": -0.005427631731728,
+    "erroPadrao": 0.0791643665060778,
+    "completa": true
+   }
+  },
+  {
+   "data": "2023-12-31",
+   "janela5": {
+    "fim": "2023-12-31",
+    "anos": 5,
+    "ibovespa": 0.0519085485771027,
+    "cdi": 0.07662998849429337,
+    "premio": -0.022961871935003875,
+    "erroPadrao": 0.11802687705211207,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2023-12-31",
+    "anos": 10,
+    "ibovespa": 0.1002366787217186,
+    "cdi": 0.0927424923591107,
+    "premio": 0.006858144910635522,
+    "erroPadrao": 0.07901312242635807,
+    "completa": true
+   }
+  },
+  {
+   "data": "2024-03-31",
+   "janela5": {
+    "fim": "2024-03-31",
+    "anos": 5,
+    "ibovespa": 0.06388287151647698,
+    "cdi": 0.07898972211646149,
+    "premio": -0.014000921686586731,
+    "erroPadrao": 0.11680875308156033,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2024-03-31",
+    "anos": 10,
+    "ibovespa": 0.09614982326445776,
+    "cdi": 0.09298082429064602,
+    "premio": 0.002899409489520055,
+    "erroPadrao": 0.07860325398573785,
+    "completa": true
+   }
+  },
+  {
+   "data": "2024-06-30",
+   "janela5": {
+    "fim": "2024-06-30",
+    "anos": 5,
+    "ibovespa": 0.04258755538477099,
+    "cdi": 0.08102950928853137,
+    "premio": -0.03556050373598085,
+    "erroPadrao": 0.11602746691270548,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2024-06-30",
+    "anos": 10,
+    "ibovespa": 0.08317594347707868,
+    "cdi": 0.09292295510163329,
+    "premio": -0.008918297103246542,
+    "erroPadrao": 0.07823421400802619,
+    "completa": true
+   }
+  },
+  {
+   "data": "2024-09-30",
+   "janela5": {
+    "fim": "2024-09-30",
+    "anos": 5,
+    "ibovespa": 0.04152979495409359,
+    "cdi": 0.08332725099240523,
+    "premio": -0.03858248373242912,
+    "erroPadrao": 0.11523576989267931,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2024-09-30",
+    "anos": 10,
+    "ibovespa": 0.09803394024080259,
+    "cdi": 0.09282435140450462,
+    "premio": 0.004767087070856935,
+    "erroPadrao": 0.07768802459570086,
+    "completa": true
+   }
+  },
+  {
+   "data": "2024-12-31",
+   "janela5": {
+    "fim": "2024-12-31",
+    "anos": 5,
+    "ibovespa": 0.047655244152890575,
+    "cdi": 0.0864548352865071,
+    "premio": -0.03571210682069881,
+    "erroPadrao": 0.11533393655081928,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2024-12-31",
+    "anos": 10,
+    "ibovespa": 0.10219008155898957,
+    "cdi": 0.09281094301428738,
+    "premio": 0.00858258109937271,
+    "erroPadrao": 0.07592322221167427,
+    "completa": true
+   }
+  },
+  {
+   "data": "2025-03-31",
+   "janela5": {
+    "fim": "2025-03-31",
+    "anos": 5,
+    "ibovespa": 0.08616591234447646,
+    "cdi": 0.09076330253013443,
+    "premio": -0.004214837604999966,
+    "erroPadrao": 0.08915762022271499,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2025-03-31",
+    "anos": 10,
+    "ibovespa": 0.08919057861833357,
+    "cdi": 0.09300920256539102,
+    "premio": -0.0034936795940004872,
+    "erroPadrao": 0.07550849897726375,
+    "completa": true
+   }
+  },
+  {
+   "data": "2025-06-30",
+   "janela5": {
+    "fim": "2025-06-30",
+    "anos": 5,
+    "ibovespa": 0.0632763873225426,
+    "cdi": 0.09633146260278469,
+    "premio": -0.030150621785282494,
+    "erroPadrao": 0.08307376266186968,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2025-06-30",
+    "anos": 10,
+    "ibovespa": 0.10993047825655178,
+    "cdi": 0.09333242808973274,
+    "premio": 0.015181156014753006,
+    "erroPadrao": 0.07532211990368141,
+    "completa": true
+   }
+  },
+  {
+   "data": "2025-09-30",
+   "janela5": {
+    "fim": "2025-09-30",
+    "anos": 5,
+    "ibovespa": 0.05736032460887075,
+    "cdi": 0.10314817938985898,
+    "premio": -0.04150653161238327,
+    "erroPadrao": 0.08114636542998774,
+    "completa": true
+   },
+   "janela10": {
+    "fim": "2025-09-30",
+    "anos": 10,
+    "ibovespa": 0.11924480205410615,
+    "cdi": 0.09358571636483548,
+    "premio": 0.023463259720109875,
+    "erroPadrao": 0.07461824462287447,
+    "completa": true
+   }
+  }
+ ]
+}

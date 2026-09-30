@@ -7,25 +7,25 @@ mesma régua, onde cada objetivo está. O que cada rodada encontrou, o que as
 lentes disseram e o que a auditoria reprovou ficam no
 [histórico](plano-motor-de-referencia-historico.md).
 
-> **Última atualização: 28/09/2026 — a documentação foi refeita do zero contra
-> o código, e conferir cada linha achou sete defeitos** (decisão 141): o rastro
-> da via da firma descrevia outra conta (**B35**), o cenário de desconto não
-> alcançava o caminho de Ke resolvido (**B36**), a taxa dos bancos não seguia a
-> curva ano a ano (**B37**), um aviso e um rastro citavam a trava retirada pela
-> decisão 36 (**B39**), o aviso das contagens nomeava a contagem errada (**B40**)
-> e a mediana dos pares incluía a própria companhia (**B41**). **Os seis foram
-> fechados na mesma rodada**, e o R1 foi desmarcado e remarcado nela. O único
-> preço justo que mudou foi o dos 19 financeiros (−0,4% a −0,5%, B37); a faixa
-> calibrada continua cobrindo (79,4% e 79,9% a 80% nominal) e o R3 continua onde
-> estava (0,069, `t` corrigido de 0,40 contra 2,70). **Fica o B38 para decisão**:
-> o cenário «Otimista» soma crescimento, que destrói valor quando o retorno fica
-> abaixo do custo, e sai abaixo do «Pessimista» em 17 de 77 da via da firma. O
-> motor segue motor de referência pela definição da decisão 140 — «habilidade
-> comprovada» continua não atingida, e a réplica do C7 segue para 2029 —, e
-> seguem abertos, para o usuário, o B33 (a Selic do Focus, medida em
-> [selic_focus.md](validacao/selic_focus.md)) e o B34 (o preço justo que é
-> resíduo da dívida). A documentação nova está em [docs/motor/](motor/README.md)
-> e [docs/estudo/](estudo/README.md). As rodadas anteriores estão no
+> **Última atualização: 29/09/2026 — o prêmio de mercado foi medido do mercado,
+> pelas duas vias, e a medição achou dois defeitos de dado no backtest** (B42). O
+> orientador perguntou se o prêmio do CAPM podia ser capturado em vez de fixado
+> em 5,5%. O **histórico** — Ibovespa contra CDI — depende da janela e é
+> negativo em 25 de 31 coortes ([premio_historico.md](validacao/premio_historico.md)).
+> O **implícito** — a taxa que iguala o valor da bolsa ao dinheiro que ela
+> distribui, pelo método de Damodaran — é −0,98% hoje, mas a **média de cinco
+> anos (1,55%) e a de dez anos (1,23%) são positivas em todas as coortes**, e
+> concordam com o histórico de dez anos de hoje (+1,85%)
+> ([premio_implicito.md](validacao/premio_implicito.md)). Com elas, o potencial
+> mediano vai de −45% a −37%, e a ordem quase não muda (0,98). **Nada foi
+> ligado**: a decisão do B42 é do usuário e do orientador. **Medir achou o B43 e
+> o B44**: a contagem de ações que erra de escala nos dois sentidos — a MGLU3 de
+> 31/03/2025 foi avaliada com dez vezes as ações que tinha — e nove emissores com
+> barra no nome de pregão, a Ambev e a Klabin entre eles, que vieram da B3 sem
+> provento nenhum. Os dois estão nas coortes, e **o R1 foi desmarcado** até que
+> fechem e a faixa e a habilidade sejam remedidas. Seguem abertos, para o
+> usuário, o B33 (a Selic do Focus), o B34 (o preço justo que é resíduo da
+> dívida) e o B38 (o rótulo «Otimista»). As rodadas anteriores estão no
 > [histórico](plano-motor-de-referencia-historico.md).
 
 ## Os dois objetivos
@@ -1521,6 +1521,9 @@ o instrumento sob as duas medições.
 | B39 | Aviso e rastro citavam a trava de saúde retirada do moat | R1 | ✅ | o aviso e o rastro da isenção cíclica dizem que a vantagem residual não tem trava de saúde desde a decisão 36, com teste — **aberto e fechado em 28/09/2026**. Diziam que ela «segue barrada» pela trava — na VALE3, ao lado de um veredito que a concedia (com λ de 0,0001). A decisão 36 tirou os dois cortes de nível do moat. Também em `tool/validation/out_of_sample.dart`. Nenhum preço muda |
 | B40 | O aviso das contagens nomeava a contagem errada | R1 | ✅ | o aviso de contagens discordantes nomeia a contagem que a ponte usou, com teste — **aberto e fechado em 28/09/2026**. Dizia sempre «a ponte por papel usa a implícita no valor de mercado», e desde a decisão 83 ela pode ser a oficial da B3: na SAPR11 o aviso nomeava as 103.850.066 do valor de mercado ao lado de uma ponte de 302.241.104. Nenhum preço muda |
 | B41 | A mediana dos pares incluía a própria companhia | R1 | ✅ | a mediana de cada ativo é a de **outras** companhias — uma por companhia, com a mediana das classes dela, sem a do ativo —, e o mínimo de cinco pares vale sobre elas — **aberto e fechado em 28/09/2026**. Os sete «pares» de saneamento da SAPR11 eram SAPR3, SAPR4, SAPR11 e mais quatro; a mediana caía na Sanepar, e as leituras de P/VP e EV/EBITDA devolviam, as duas, R$ 38,15 — o preço dela na data do pacote. Os bancos passam de 31 «pares» a 16 companhias; a SAPR11 e a VALE3 descem ao setor. **O preço justo não muda** (a segunda leitura não entra nele); a divergência mediana contra o fluxo descontado vai de +73,4% a **+87,4%**, com 59 de 97 acima de 50% ([multiplos.md](validacao/multiplos.md)) |
+| B42 | O prêmio de mercado capturado do mercado, e não fixado | E | 👤 | o usuário e o orientador decidem, com a medição, se o prêmio do CAPM continua em 5,5% fixo, passa a ser medido do mercado (e por qual método e regra) ou aparece como sensibilidade ao lado do preço justo — **aberto em 29/09/2026, pergunta do orientador**, medido em [premio_historico.md](validacao/premio_historico.md). **O histórico do Ibovespa contra o CDI não serve como está**: hoje ele vai de −2,17% (20 anos) a +1,85% (10 anos) conforme a janela, com erro-padrão de 6 a 8 p.p.; nas datas das coortes, o de dez anos é **negativo em 25 de 31**. Um prêmio negativo faz o beta alto baratear o capital. Com o de dez anos de hoje, o preço justo sobe 28,5% na mediana, o upside mediano vai de −45,4% a −38,3%, e a ordem quase não muda (postos de 0,985). A medição também corrige o número de cinco anos da decisão 116 (+0,39% comparava Ibovespa de cinco anos com CDI de dez; na mesma janela é −1,75%). O backtest com o prêmio de cada coorte não foi rodado. **O prêmio implícito do índice foi medido no mesmo dia** ([premio_implicito.md](validacao/premio_implicito.md)), pelo método de Damodaran: o rendimento em dinheiro da bolsa, o crescimento nominal da economia e o prefixado de dez anos, em 62 trimestres desde 2011. O implícito do trimestre vai de −2,99% a +5,10%, é negativo em 12 de 62 — quando o prefixado dispara — e hoje é **−0,98%**; **a média de cinco anos é 1,55% e a de dez anos 1,23%, positivas em todas as coortes** (0,13% a 2,05% e 0,98% a 1,55%), perto do histórico de dez anos de hoje. Com as médias, o preço justo sobe cerca de um terço na mediana, o potencial mediano vai de −45,4% a −37,7% e −36,7%, e os postos ficam em 0,98. Um ponto de crescimento move o prêmio em um ponto. Ligar um prêmio tirado do preço do mercado calibra o nível do motor pelo mercado, e isso fica declarado. A medição achou o B43 e o B44 |
+| B43 | A contagem de ações da coorte erra de escala | R1, R2, R3 | ⬜ | a contagem por data que o backtest lê é conferida contra o salto do preço bruto — a mudança de mais de três vezes só vale com o salto correspondente, e passa a valer no dia dele —, as coortes são reexecutadas e a faixa calibrada e a habilidade, remedidas — **aberto em 29/09/2026**, achado ao medir o prêmio implícito ([premio_implicito.md](validacao/premio_implicito.md) §3.1). O arquivo `listadas_contagem.json` erra nos dois sentidos: a correção reenviada às vezes repete a contagem de antes de um grupamento, e às vezes é o único registro de um grupamento de verdade. No backtest, a HAPV3 de 2025 entra com R$ 278 bilhões de valor de mercado (quinze vezes o real), a IRBR3 de 2024 com trinta vezes, a TIMS3 do fim de 2020 com um sexto, e a MGLU3 de 30/06/2024 a 31/03/2025 com dez vezes — **a de 31/03/2025 foi avaliada** com divisor de 7,39 bilhões de ações, preço justo de R$ 2,46 e potencial de −75,8%, e o trimestre seguinte, com os 739 milhões certos, dá R$ 24,52. A regra está escrita e medida na ferramenta do prêmio implícito (`_conferida` em `tool/premio_implicito.dart`); falta levá-la ao backtest e medir quantas observações avaliadas mudam |
+| B44 | Nove emissores sem o histórico de proventos | R1, R2, R3 | ⬜ | os proventos dos emissores com barra no nome de pregão estão no arquivo da B3, no pacote do aplicativo e no retorno total das coortes, e a faixa calibrada e a habilidade são remedidas — **aberto em 29/09/2026**, achado ao medir o prêmio implícito ([premio_implicito.md](validacao/premio_implicito.md) §3.2). `tool/b3_complemento_baixar.py` consulta a B3 pelo nome de pregão, e os nove nomes com barra — `AMBEV S/A`, `KLABIN S/A`, `CURY S/A`, `LIGHT S/A`, `IMC S/A`, `OUROFINO S/A`, `EMBPAR S/A`, `HAGA S/A`, `WETZEL S/A` — voltaram vazios; nenhum nome com barra voltou com provento. Nas 66 observações avaliadas desses emissores (de 3.070), o retorno total é igual ao de preço, e o beta do aplicativo sobre retorno total (decisão 89) sai sem os dividendos da Ambev e da Klabin. Corrigir pede consultar a B3 de novo |
 | B21 | O `Failure` carrega formatação de tela | E, prevenção | ✅ | o erro do núcleo transporta a grandeza que a regra violou, e a frase é montada na apresentação — **as três metades fecharam**. (a) em 21/09/2026 ([decisão 122](decisoes/122-o-erro-do-nucleo-transporta-a-grandeza-e-a-frase-e-montada-na-tela.md)): `InvalidInput` ganhou `limit` e `unit`, e `FailureCopy` escreve «Informado: X. Limite: Y.». (b) e (c) em 22/09/2026 ([decisão 125](decisoes/125-o-dinheiro-arredonda-o-decimal-escrito-e-o-rotulo-de-tela-sai-do-nucleo.md)): **(b) medida antes de reescrita, e só uma das três partes era defeito** — `Money.fromReais`, a única ponte do `double` para centavos, fazia `(reais * 100).round()` e perdia o meio (R$ 1,005 → R$ 1,00); agora arredonda o decimal escrito, e o gabarito continua idêntico. Os insumos contábeis em `double` não perdem centavo — a ida e volta é exata até R$ 45 trilhões, e o teste confere 20 mil valores —, e a contagem de ações do motor é **fracionária por construção** (unidade negociada, contagem implícita no valor de mercado). (c) os catorze enums perderam `label`; o rótulo de tela mora em `lib/presentation/shared/domain_copy.dart` com `switch` exaustivo, e o diagnóstico do rastro ficou privado no núcleo, com o mesmo texto — o rastro não mudou uma letra. `TerminalValueMethod`, sem uso, saiu |
 | C5 | Base bruta e reexecução do backtest | R2, R3 | ✅ | a base bruta está na máquina, e o backtest é reexecutado sobre o motor da Fase 3, com habilidade, faixa, recusas e ponte regeradas — atingido em 21/09/2026: **6,8 GB da CVM** (2010–2026), **17 anos de COTAHIST**, Tesouro, FRE (276 MB), registro e complemento da B3 por emissor, a ponte das deslistadas e as contagens por data. Ingestão: **42.145 documentos**, 1.224 companhias, identidade ativo = passivo em 42.015 de 42.021. Backtest: **10.919 observações, 31 coortes**. **As quatro medições foram regeradas**, e duas mudam a leitura: a **faixa calibrada passa** sobre o motor da Fase 3 — 88,1% em 12 meses e 89,3% em 36 contra 90% nominal, desvio máximo de 2,6 p.p. —, e **nenhuma das cinco ordenações passa**, com o book-to-market caindo de `t` corrigido 2,52 para 1,98 |
 | C4 | Custos de transação | R3 | ✅ | o custo de transação entra no backtest, e o efeito sobre o retorno medido é reportado — feito em 22/09/2026 nos dois backtests ([decisão 126](decisoes/126-a-tarifa-entra-na-simulacao-e-o-custo-nao-muda-a-ordem.md), [custos_transacao.md](validacao/custos_transacao.md)). **A simulação cobra a tarifa da B3** (0,030% por compra, em centavos inteiros) e mostra a linha «Custos»; em cinquenta carteiras sorteadas ela tira 0,024% do patrimônio e 0,006 p.p. do XIRR, e o spread fica declarado com a sensibilidade de 0,5% (0,53% e 0,12 p.p.). **As coortes pagam tarifa e meio spread nas duas pontas**, com o spread estimado por Abdi e Ranaldo da máxima e da mínima do COTAHIST — o de Corwin e Schultz saiu invertido na amostra e foi descartado. O retorno mediano de 36 meses cai de 14,00% para 13,14%, e **o critério da decisão 96 não muda em nenhuma ordenação**: o custo muda o nível, e não a ordem **Remedido em 25/09/2026**: o retorno mediano de 36 meses vai de 14,86% a 13,96% líquido — acima do de 22/09 porque o B29 devolveu o retorno das bonificações —, e nenhuma ordenação passa, bruta ou líquida |
@@ -1622,9 +1625,10 @@ Se um deles passar a afetar número, entra na tabela com *serve a* `R1`.
 
 ## 7. Critério de parada
 
-Conferido contra o código e as medições em 28/09/2026, com a Fase 4 fechada, o
-B28 medido e decidido, o C7 finalizado, o C8 decidido pelo usuário e a
-documentação refeita contra o código (decisão 141). Cada
+Conferido contra o código e as medições em 29/09/2026, com a Fase 4 fechada, o
+B28 medido e decidido, o C7 finalizado, o C8 decidido pelo usuário, a
+documentação refeita contra o código (decisão 141) e os prêmios de mercado
+histórico e implícito medidos (B42), a medição que achou o B43 e o B44. Cada
 condição cita os itens da §6 que a fecham.
 
 **Valuation exemplar** — o preço justo de um ativo é defensável linha a linha:
@@ -1677,8 +1681,15 @@ condição cita os itens da §6 que a fecham.
 
 **Motor de referência** — as três condições combinadas:
 
-- [x] **R1. Nenhum defeito conhecido** — **atingida em 22/09/2026**, depois de
-  desmarcada em 14/09. **Os dois últimos fecharam nesta rodada**: o **B8** — a
+- [ ] **R1. Nenhum defeito conhecido** — **desmarcada em 29/09/2026** pelo
+  **B43** e pelo **B44**, dois defeitos de dado que a medição do prêmio implícito
+  achou no backtest: a contagem de ações que erra de escala — a MGLU3 de
+  31/03/2025 foi avaliada com dez vezes as ações que tinha — e nove emissores,
+  a Ambev e a Klabin entre eles, sem o histórico de proventos, o que tira os
+  dividendos do retorno total de 66 observações avaliadas. Os dois mexem na
+  variável que o R2 e o R3 medem, e a caixa volta quando fecharem e as duas
+  forem remedidas. O histórico da caixa: **atingida em 22/09/2026**, depois de
+  desmarcada em 14/09. **Os dois últimos fecharam naquela rodada**: o **B8** — a
   coorte passou a ler a versão do documento que era pública na data dela, com as
   versões antigas baixadas do RAD (decisão 128) — e o **B24**, que a lente
   `metodo` abriu na mesma rodada — o juro da rota derivada passou a seguir a curva
@@ -1761,10 +1772,12 @@ condição cita os itens da §6 que a fecham.
   pré-registrada (C7): selada desde 24/09/2026, finalizada em 25/09 (decisão
   138), com a primeira leitura em 30/09/2029.
 
-**As três condições valem juntas desde 27/09/2026: o motor é motor de
+**As três condições valeram juntas de 27 a 29/09/2026, e o motor foi motor de
 referência pela definição da decisão 140** — sem defeito conhecido, com a
 incerteza que cobre o que promete e com a habilidade testada até onde o
-instrumento enxerga. **Não é o motor de referência de 09/09/2026**, que exigia
+instrumento enxerga. **Desde 29/09/2026 o R1 está aberto** pelo B43 e pelo B44,
+e o motor volta a sê-lo quando os dois fecharem e a faixa e a habilidade forem
+remedidas sem mudar de veredito. **Não é o motor de referência de 09/09/2026**, que exigia
 habilidade comprovada; e, como a própria decisão diz, não autoriza decisão
 sozinho.
 

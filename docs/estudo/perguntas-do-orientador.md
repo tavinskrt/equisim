@@ -44,6 +44,17 @@ Porque as duas formas de medir falharam de modo informativo: o histórico tem
 erro de 7,85 pontos, e o encolhimento devolve 5,49%; o implícito sai negativo
 (decisão 116; [cap. 3, seção 3.7](03-risco-e-retorno.md)).
 
+**7a. Dá para capturar o prêmio do mercado em vez de fixá-lo?**
+Foi medido em 29/09/2026, a pedido do orientador, pelas duas vias. O
+**histórico** — quanto o Ibovespa rendeu acima do CDI — depende da janela e sai
+negativo na maior parte das datas ([premio_historico.md](../validacao/premio_historico.md)).
+O **implícito** — o retorno que o preço da bolsa embute, dado o dinheiro que ela
+distribui — é −0,98% hoje, mas a média dele em cinco anos (1,55%) e em dez anos
+(1,23%) fica positiva em todas as datas testadas
+([premio_implicito.md](../validacao/premio_implicito.md)). Nada foi ligado: a
+escolha está aberta (item B42 do plano). O «implícito» da pergunta 7 é outra
+conta — o prêmio que faria o motor concordar com o preço mediano.
+
 **8. O que é o "moat" e quando ele vale?**
 É o retorno acima do custo que sobrevive depois de dez anos, medido pela
 persistência φ do próprio histórico (φ¹⁰ do excedente sobrevive). Só com oito

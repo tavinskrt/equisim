@@ -12,7 +12,7 @@ estrutura recusada na [RENT3](../estudo/casos/rent3.md).
 | Regra | Código | Fundamento | Evidência |
 |---|---|---|---|
 | `Ke = Rf + β × prêmio` | [cost_of_capital.dart, `CapmInputs.costOfEquity`](../../packages/equisim_core/lib/src/services/valuation/cost_of_capital.dart) | Sharpe (1964), Lintner (1965) | — |
-| Prêmio de mercado **5,5%**, fixo | `CapmInputs`, `MarketPremiumSource` | histórico e implícito foram tentados: o histórico tem erro de 7,85 p.p. e o encolhimento devolve 5,49%; o implícito sai −3,9% | decisão 116, [premio_de_mercado.md](../validacao/premio_de_mercado.md) |
+| Prêmio de mercado **5,5%**, fixo | `CapmInputs`, `MarketPremiumSource` | histórico e implícito foram tentados: o histórico tem erro de 7,85 p.p. e o encolhimento devolve 5,49%; o implícito sai −3,9% | decisão 116, [premio_de_mercado.md](../validacao/premio_de_mercado.md); remedidos do mercado em 29/09/2026, sem ligar nada (B42): [premio_historico.md](../validacao/premio_historico.md), [premio_implicito.md](../validacao/premio_implicito.md) |
 | O Ke "do dia" (CDI corrente) serve ao WACC estático e à tela de metas; o de cada ano da projeção usa o forward daquele ano | `_premissas`, `_auditCapm` | a curva dá a taxa que o mercado atribui a cada prazo | decisões 74 e 103; rastro explica desde 28/09/2026 |
 
 ---
