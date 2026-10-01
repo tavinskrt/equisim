@@ -7,7 +7,7 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-09-30, a partir de `5551a7a`.
+Gerado em 2026-10-01, a partir de `1325e49`.
 
 ## Decisões registradas
 
@@ -150,12 +150,13 @@ Decisões cujo `afeta` cita caminho que uma decisão posterior apagou (campo `re
 
 ## Caixa de entrada
 
-4 apontamento(s) não convertidos em decisão:
+5 apontamento(s) não convertidos em decisão:
 
 - `2026-09-09-voce.md`
 - `2026-09-27-voce.md`
 - `2026-09-28-voce.md`
 - `2026-09-29-voce.md`
+- `2026-10-01-voce.md`
 
 ## Superfície medida
 
@@ -173,6 +174,7 @@ Linhas versionadas, excluindo artefatos gerados.
 ## Histórico recente
 
 ```
+2026-09-29  1325e49  Prêmio de risco
 2026-09-29  5551a7a  Documentação do motor de valuation (parte 1)
 2026-09-27  6827219  Refino do motor de valuation (parte 26)
 2026-09-27  c375987  Refino do motor de valuation (parte 25)
@@ -187,5 +189,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-16  d7fa781  Refino do motor de valuation (parte 17)
 2026-09-15  5ee27e5  Refino do motor de valuation (parte 15)
 2026-09-15  e1077f2  Refino do motor de valuation (parte 15)
-2026-09-15  92f0bef  Refino do motor de valuation (parte 14)
 ```

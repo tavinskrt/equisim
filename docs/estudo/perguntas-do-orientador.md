@@ -55,6 +55,16 @@ distribui — é −0,98% hoje, mas a média dele em cinco anos (1,55%) e em dez
 escolha está aberta (item B42 do plano). O «implícito» da pergunta 7 é outra
 conta — o prêmio que faria o motor concordar com o preço mediano.
 
+**7b. Por que o crescimento é a mediana da variação do patrimônio, e não ROE × retenção?**
+Porque é a mesma conta olhada para trás: o lucro retido vira patrimônio, e a
+variação anual do patrimônio é o `ROE × retenção` daquele ano (decisão 25). A
+versão que olha para a frente — o ROE normalizado vezes a retenção do payout
+praticado, com o PIB do setor para as companhias de pouco capital — foi medida
+em 01/10/2026: erra menos o crescimento que veio depois, mas quase não muda o
+preço justo, porque crescer só vale mais quando o ROE passa o custo de capital
+([crescimento_fundamental.md](../validacao/crescimento_fundamental.md); item B45
+do plano).
+
 **8. O que é o "moat" e quando ele vale?**
 É o retorno acima do custo que sobrevive depois de dez anos, medido pela
 persistência φ do próprio histórico (φ¹⁰ do excedente sobrevive). Só com oito

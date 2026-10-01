@@ -11,9 +11,10 @@ Uso, da raiz do repositório:
 
     python tool/ibovespa_sgs_baixar.py
 
-Grava `data/indices/ibovespa_sgs7.json` (ignorado pelo git, como o resto de
-`data/`): uma lista de `[AAAA-MM-DD, fechamento]`. Consulta ano a ano, porque a
-API do SGS limita a janela de uma série diária por requisição.
+Grava `data/indices/ibovespa_sgs7.json`: uma lista de `[AAAA-MM-DD,
+fechamento]`. É dado público e pequeno, e `data/indices/` não está no
+`.gitignore` (ao contrário de `data/cvm/` e `data/b3/`). Consulta ano a ano,
+porque a API do SGS limita a janela de uma série diária por requisição.
 """
 import json
 import time

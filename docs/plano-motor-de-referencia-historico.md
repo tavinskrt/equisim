@@ -11,6 +11,42 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O crescimento pela retenção e pelo PIB do setor — B45 (01/10/2026)
+
+**A pergunta.** «Por que utilizamos g como mediana de um fator temporal ao
+invés de usar g = roe * retenção (ou 1 - payout)? E pras asset-lights ou altas
+pagadoras de dividendos, por que não projetamos g utilizando o crescimento do
+pib nominal do setor?», com sugestão pedida para commodities, a medição sobre o
+preço justo e um parecer. O aval do prêmio implícito (B42) ficou para depois.
+Apontamento de 01/10.
+
+**A resposta conceitual.** A mediana das variações da base é o
+`ROE × retenção` realizado ano a ano — a decisão 25 diz `g = ROE × b`, medido
+assim. A proposta é a versão que olha para a frente, e é coerente com a
+projeção do motor: o dividendo projetado sai igual ao payout praticado.
+
+**O que foi medido** ([crescimento_fundamental.md](validacao/crescimento_fundamental.md),
+`tool/crescimento_fundamental.dart`): o payout dos dividendos e JCP pagos do
+fluxo de caixa das DFPs (`tool/cvm/dividendos_pagos.py`), o ROE normalizado
+(mediana de oito anos) e o PIB nominal de dez anos de cada atividade do IBGE
+(`tool/pib_setorial_baixar.py`, download autorizado pelo usuário). Regras e
+limiares fixados antes de medir: payout ≥ 75% é alta pagadora; receita ÷
+capital investido ≥ 2 é pouco capital; commodity é a lista de precedência do
+ciclo, com crescimento real zero. O `g` foi imposto pelo ponto de diagnóstico do
+motor (`withOverrides(growth:)`).
+
+**O resultado.** Na data congelada o nível não se mexe (potencial mediano de
+−45,4% para −45,3%), porque crescer só cria valor com ROE acima do custo de
+capital. No histórico de 2014 a 2022, a regra combinada erra menos o
+crescimento do patrimônio (−1,0 ponto, intervalo inteiro abaixo de zero) e o
+lucro das companhias de pouco capital (6,2% contra 9,7%). Parecer:
+recomendável para as de pouco capital e como substituta da mediana, com teto;
+neutro para altas pagadoras e commodities; não resolve o nível.
+
+**Achado no caminho.** A primeira versão do extrator não reconhecia «Pagamento
+de Proventos» (B3) e «Distribuição de lucros»; corrigido antes do resultado. A
+recompra fica fora do payout, declarado.
+
 ## O prêmio de mercado medido do mercado — B42, B43 e B44 (29/09/2026)
 
 **A pergunta.** Conferindo os cálculos com o orientador, ele perguntou de onde

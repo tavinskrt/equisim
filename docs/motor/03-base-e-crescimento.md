@@ -83,4 +83,7 @@ A base da via do acionista é por papel: lucro líquido ÷ papéis da ponte × f
 - A normalização supõe que o retorno volta à mediana de oito anos; não prevê
   preço de commodity nem mudança estrutural sem tendência estatística.
 - O crescimento vem só da história; aquisições aparecem como capital externo
-  declarado, e não são modeladas.
+  declarado, e não são modeladas. A alternativa que olha para a frente —
+  `ROE normalizado × (1 − payout)`, com o PIB do setor para as de pouco capital e
+  as altas pagadoras — foi medida em 01/10/2026, sem ligar nada (item B45,
+  [crescimento_fundamental.md](../validacao/crescimento_fundamental.md)).
