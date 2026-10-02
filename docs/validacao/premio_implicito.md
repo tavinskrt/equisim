@@ -1,5 +1,14 @@
 # O prêmio de risco implícito no preço do mercado
 
+> **Ligado no motor em 01/10/2026 pela [decisão 142](../decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md).**
+> O prêmio de mercado do CAPM passou a ser a média de dez anos desta série, na
+> forma que o CAPM soma (`r − Rf`, e não a razão de Fisher das tabelas abaixo):
+> **1,21%** em 14/09/2026. A série foi remedida com os dois defeitos de dado que
+> esta medição achou corrigidos — a contagem conferida contra o preço (decisão
+> 143) e os proventos dos nove emissores com barra no nome (decisão 144) —, e a
+> §10 traz os números dela. As §§1 a 9 são a medição de 29/09/2026, que levou à
+> decisão.
+
 Medido em 29/09/2026, a pedido do orientador, como segunda resposta à pergunta
 «dá para capturar o prêmio de mercado do CAPM, em vez de fixá-lo em 5,5%?». A
 primeira, o prêmio **histórico** do Ibovespa contra o CDI, está em
@@ -283,3 +292,124 @@ da metade dos 5,5%.
   prêmio que zerava o potencial mediano **do motor**; este é o que iguala o
   preço **do mercado** aos dividendos. O de lá diz que o desacordo não é só do
   prêmio; o de cá diz qual prêmio o mercado está pagando.
+
+---
+
+## 10. A série remedida, e o que ela faz ao motor (01/10/2026)
+
+A série foi medida de novo com os dois defeitos de dado da §3 corrigidos, e é
+esta que o motor usa ([decisão 142](../decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md)).
+
+- **A contagem é conferida contra o preço** ([decisão 143](../decisoes/143-a-contagem-da-coorte-e-conferida-contra-o-salto-do-preco.md)),
+  com a regra refinada: mudança de mais de três vezes sem o salto do preço só é
+  descartada quando vem de uma **correção** de formulário. A emissão grande e a
+  fusão, que a regra da §3.1 descartava, voltam a valer. Foram **36 entradas
+  descartadas** (eram 275), todas correções; nenhuma companhia fica fora da soma
+  por contagem em data nenhuma.
+- **Os nove emissores com barra no nome têm proventos** ([decisão 144](../decisoes/144-o-nome-de-pregao-da-consulta-de-proventos-vai-sem-barra.md)):
+  a B3 foi consultada de novo com o nome sem barra e sem espaço.
+
+Na data congelada entram 268 companhias (eram 259), 189 com provento nos doze
+meses, somando R$ 5,23 trilhões. **O prêmio é medido na forma que o CAPM soma**,
+`r − Rf`, que é a que o motor usa; a razão de Fisher das §§4 a 7 fica no JSON
+(campo `premio`) e dá números um pouco menores.
+
+### 10.1 A série
+
+| Data | Companhias | Valor (R$ bi) | Rendimento | g nominal | r implícito | Prefixado 10 anos | **Prêmio (`r − Rf`)** | Média 5 anos | **Média 10 anos (o motor)** |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 31/12/2011 | 158 | 1.549 | 4,85% | 11,08% | 16,48% | 11,35% | 5,13% | — | — |
+| 31/12/2012 | 167 | 1.693 | 3,79% | 10,00% | 14,17% | 9,23% | 4,93% | — | — |
+| 31/12/2013 | 164 | 1.644 | 3,96% | 9,26% | 13,58% | 13,21% | 0,38% | — | — |
+| 31/12/2014 | 168 | 1.715 | 4,83% | 8,69% | 13,94% | 12,34% | 1,60% | 3,23% | — |
+| 31/12/2015 | 168 | 1.490 | 4,36% | 8,12% | 12,84% | 16,52% | −3,68% | 2,31% | 2,31% |
+| 31/12/2016 | 176 | 2.071 | 3,66% | 7,21% | 11,13% | 11,39% | −0,26% | 1,44% | 1,84% |
+| 31/12/2017 | 188 | 2.736 | 3,29% | 6,72% | 10,23% | 10,31% | −0,07% | 0,48% | 1,61% |
+| 31/12/2018 | 186 | 3.162 | 4,25% | 6,82% | 11,36% | 9,20% | 2,16% | 0,08% | 1,46% |
+| 31/12/2019 | 192 | 4.193 | 3,85% | 5,95% | 10,03% | 6,85% | 3,18% | 0,33% | 1,62% |
+| 31/12/2020 | 221 | 4.632 | 2,62% | 5,00% | 7,74% | 6,89% | 0,85% | 0,84% | 1,57% |
+| 31/12/2021 | 259 | 4.138 | 6,72% | 5,76% | 12,87% | 10,71% | 2,15% | 0,96% | 1,20% |
+| 31/12/2022 | 262 | 3.927 | 9,14% | 5,74% | 15,41% | 12,69% | 2,72% | 1,40% | 0,94% |
+| 31/12/2023 | 263 | 4.540 | 7,22% | 5,98% | 13,63% | 10,34% | 3,29% | 2,01% | 1,05% |
+| 31/12/2024 | 263 | 3.854 | 6,99% | 6,73% | 14,20% | 15,16% | −0,95% | 1,66% | 0,99% |
+| 31/12/2025 | 267 | 4.782 | 7,86% | 6,89% | 15,29% | 13,77% | 1,52% | 1,54% | 1,19% |
+| **14/09/2026** | 268 | 5.232 | 6,05% | 6,78% | 13,24% | 14,38% | **−1,14%** | 1,57% | **1,21%** |
+
+A média do motor é a dos trimestres com fim nos dez anos até a data, com pelo
+menos 20 trimestres; por isso ela já existe em 2015, com os 20 trimestres desde
+2011. A data congelada não é trimestre: recebe a média, mas não entra nela.
+
+- **Nos 62 trimestres**, o prêmio vai de −3,68% (31/12/2015) a +5,70%
+  (30/06/2012), com mediana de 1,45%, e é negativo em 14.
+- Por período, a média é de 2,31% de 2011 a 2015, 0,84% de 2016 a 2020 e 1,38%
+  de 2021 a 2026.
+- Hoje o preço embute 13,24% ao ano, e o prefixado de dez anos paga 14,38%: o
+  prêmio do trimestre é −1,14%. **A média de dez anos é 1,21%**, e é o prêmio
+  que o motor usa.
+
+### 10.2 Nas datas do backtest
+
+| | Implícito do trimestre | Média de 5 anos | **Média de 10 anos (o motor)** |
+|---|---|---|---|
+| Nas 31 coortes: faixa | −1,30% a +4,85% | −0,01% a +2,05% | **+0,91% a +1,62%** |
+| Mediana | 1,48% | 0,96% | 1,20% |
+| Datas com prêmio negativo | 6 de 31 | 1 de 31 | **0 de 31** |
+
+**A média de dez anos existe nas 31 coortes**, só com dado até a data de cada
+uma, e fica entre 0,9% e 1,6% em todas. A de cinco anos fica negativa uma vez
+(30/09/2018, −0,01%), e é um dos motivos de a decisão ter ficado com a de dez.
+
+### 10.3 O que ela faz ao aplicativo
+
+O universo inteiro reavaliado sobre a entrada congelada:
+
+| Prêmio | Avaliados | Potencial mediano | Potencial acima de zero | Preço justo, na mediana, contra o motor | Postos contra o motor |
+|---|---:|---:|---:|---:|---:|
+| **Média de 10 anos — o motor (1,21%)** | **108** | **−36,6%** | **28 de 108** | — | 1,000 |
+| 5,5% (até a decisão 142) | 97 | −45,4% | 15 de 97 | −25,5% | 0,980 |
+| Implícito de hoje (−1,14%) | 109 | −27,7% | 36 de 109 | +22,7% | 0,989 |
+| Média de 5 anos (1,57%) | 108 | −37,8% | 25 de 108 | −2,9% | 0,999 |
+
+Os cinco casos do guia de estudo:
+
+| Prêmio | WEGE3 | ITUB4 | VALE3 | SAPR11 | RENT3 |
+|---|---:|---:|---:|---:|---|
+| **Média de 10 anos — o motor (1,21%)** | **R$ 16,22** | **R$ 29,21** | **R$ 88,74** | **R$ 46,05** | recusada |
+| 5,5% (até a decisão 142) | R$ 12,53 | R$ 21,76 | R$ 70,25 | R$ 36,74 | recusada |
+| Implícito de hoje (−1,14%) | R$ 19,42 | R$ 35,67 | R$ 103,10 | R$ 52,96 | recusada |
+| Média de 5 anos (1,57%) | R$ 15,82 | R$ 28,40 | R$ 86,84 | R$ 45,12 | recusada |
+| **Preço de mercado** | R$ 50,74 | R$ 42,35 | R$ 75,48 | R$ 34,74 | R$ 35,59 |
+
+A conta da montagem do aplicativo foi conferida contra o gabarito da cascata
+antes de comparar: ela bate com o gabarito ativo a ativo, avaliados e recusados.
+
+### 10.4 A sensibilidade ao crescimento, na forma do motor
+
+| | `g` − 1 p.p. | Central | `g` + 1 p.p. |
+|---|---:|---:|---:|
+| Implícito de hoje | −2,20% | −1,14% | −0,08% |
+| Média de 5 anos | 0,50% | 1,57% | 2,65% |
+| **Média de 10 anos** | 0,16% | **1,21%** | 2,27% |
+
+### 10.5 O backtest com o prêmio normalizado
+
+As 31 coortes foram refeitas com o prêmio de cada uma igual à média de dez anos
+até a data dela (de 0,91% a 1,62%), com a contagem conferida e os proventos dos
+emissores com barra:
+
+| | Com 5,5% (28/09/2026) | **Com a média de dez anos (01/10/2026)** |
+|---|---:|---:|
+| Observações | 10.792 | 10.840 |
+| Avaliadas | 3.070 | **3.199** |
+| Potencial mediano das avaliadas | −54,4% | **−39,1%** |
+| Avaliadas com potencial acima de zero | 438 | **855** |
+| Faixa calibrada de 90%, fora da amostra (12 e 36 meses) | 87,6% e 88,0% | **87,9% e 88,3%** |
+| Critério do R3 (potencial dado o B/M, 36 meses) | 0,069, `t` 0,40 | **0,032, `t` 0,18** |
+| Book-to-market (IC, 36 meses) | `t` 2,03 | **`t` 2,27** |
+
+**A faixa calibrada continua cobrindo**, com desvios máximos de 2,1 e 1,7 p.p.
+([cobertura_banda.md](cobertura_banda.md) §14), **e o R3 continua não
+passando** ([habilidade_trimestral.md](habilidade_trimestral.md) §12). O prêmio
+menor aproxima o nível do preço justo do preço de mercado, como no aplicativo,
+e quase não mexe na ordem — que é o que a §8 previa: um prêmio igual para todos
+os ativos move o nível, e não a ordenação.

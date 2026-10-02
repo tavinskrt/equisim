@@ -7,8 +7,8 @@
 >
 > **Data:** 14/09/2026 ([dados/SAPR11.json](dados/SAPR11.json)).
 >
-> **Resultado:** preço justo **R$ 36,74 por unit** (R$ 7,35 por ação), contra
-> R$ 34,74 de mercado — upside de **+5,8%**. Ressalva: **prazo determinado**.
+> **Resultado:** preço justo **R$ 46,05 por unit** (R$ 9,21 por ação), contra
+> R$ 34,74 de mercado — upside de **+32,6%**. Ressalva: **prazo determinado**.
 
 ---
 
@@ -44,7 +44,7 @@ milhões daria um preço justo quase três vezes maior, e um "upside" falso de
 
 - Setor "utilidade pública", subsetor "água e saneamento"; NOPAT positivo em
   ≥ 60% dos anos → **via da firma**.
-- `Ke = 14,09% + 0,6562 × 5,5% = 17,70%` (beta baixo: saneamento oscila pouco
+- `Ke = 14,09% + 0,6562 × 1,21% = 14,88%` (beta baixo: saneamento oscila pouco
   com o mercado).
 
 ---
@@ -96,9 +96,9 @@ maior que o EBIT (cobertura de 0,76). Quando o lucro operacional não cobre os
 juros, não há imposto suficiente para abater, e o motor reduz o escudo na
 proporção: 34% × 0,76 = 25,8%.
 
-**WACC de hoje:** `0,8547 × 17,70% + 0,6018 × 15,39% × (1 − 25,8%) − 0,4565 ×
-14,09% × (1 − 34%) = 17,75%`. Resolvido ano a ano (30 iterações): WACC de
-16,69% a 17,35%, **Ke de 17,35% a 17,98%**.
+**WACC de hoje:** `0,8547 × 14,88% + 0,6018 × 15,39% × (1 − 25,8%) − 0,4565 ×
+14,09% × (1 − 34%) = 15,34%`. Resolvido ano a ano (30 iterações): WACC de
+14,21% a 14,86%, **Ke de 14,43% a 15,09%**.
 
 ---
 
@@ -109,7 +109,7 @@ A vantagem residual é barrada por dois motivos:
 1. **concessão**: a tarifa remunera o capital ao custo dele, e um negócio que
    será relicitado não preserva excedente sobre capital novo (decisão 50);
 2. **sem excedente**: o ROIC do ciclo (13,47%) está abaixo do custo de
-   equilíbrio (17,95%).
+   equilíbrio (14,86%).
 
 **E o prazo do contrato?** Quando o motor consegue ler o prazo da concessão no
 Formulário de Referência, o terminal passa a ser "capital devolvido + excedente
@@ -121,24 +121,24 @@ o terminal fica perpétuo, com retorno neutro, e a tela mostra a ressalva
 
 ## 7. Os dez anos
 
-Aqui o ROIC **sobe** do de partida (13,5%) para o WACC do ano (17,3%): a
+Aqui o ROIC **sobe** do de partida (13,5%) para o WACC do ano (14,9%): a
 convergência ao custo de capital funciona nos dois sentidos. Com o retorno
 subindo e o crescimento caindo, a retenção cai de 74% para 39%, e o fluxo livre
 cresce muito ao longo da projeção.
 
 | Ano | g | ROIC | Retenção | NOPAT (R$ mi) | Fluxo da firma (R$ mi) | Serviço da dívida (R$ mi) | Fluxo do acionista (R$ mi) | Ke | Fator acumulado | Meio de ano | Valor presente (R$ mi) |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | 10,0% | 13,5% | 74,4% | 2.321,1 | 593,5 | 44,9 | 548,5 | 17,3% | 1,1735 | 1,0833 | 506,3 |
-| 2 | 9,7% | 13,9% | 69,6% | 2.545,4 | 773,1 | 63,0 | 710,0 | 17,8% | 1,3829 | 1,0856 | 557,4 |
-| 3 | 9,3% | 14,4% | 64,8% | 2.782,3 | 980,0 | 81,6 | 898,3 | 18,2% | 1,6341 | 1,0871 | 597,6 |
-| 4 | 8,9% | 14,8% | 60,3% | 3.031,2 | 1.203,0 | 98,5 | 1.104,4 | 18,2% | 1,9318 | 1,0873 | 621,6 |
-| 5 | 8,6% | 15,3% | 56,0% | 3.291,3 | 1.449,1 | 118,6 | 1.330,5 | 18,3% | 2,2860 | 1,0878 | 633,1 |
-| 6 | 8,2% | 15,8% | 52,2% | 3.562,0 | 1.702,4 | 137,1 | 1.565,4 | 18,2% | 2,7027 | 1,0873 | 629,8 |
-| 7 | 7,9% | 16,1% | 48,7% | 3.842,0 | 1.970,5 | 157,1 | 1.813,4 | 18,1% | 3,1924 | 1,0868 | 617,4 |
-| 8 | 7,5% | 16,6% | 45,3% | 4.130,2 | 2.260,5 | 180,7 | 2.079,8 | 18,1% | 3,7701 | 1,0867 | 599,5 |
-| 9 | 7,1% | 16,9% | 42,1% | 4.425,1 | 2.560,0 | 204,9 | 2.355,1 | 18,0% | 4,4491 | 1,0863 | 575,0 |
-| 10 | 6,8% | 17,3% | 39,1% | 4.725,0 | 2.878,5 | 232,3 | 2.646,2 | 18,0% | 5,2491 | 1,0862 | 547,6 |
-| **Soma** | | | | | | | | | | | **5.885,3** |
+| 1 | 10,0% | 13,5% | 74,4% | 2.321,1 | 593,5 | 44,9 | 548,5 | 14,4% | 1,1443 | 1,0697 | 512,8 |
+| 2 | 9,7% | 13,6% | 71,0% | 2.545,4 | 737,3 | 63,0 | 674,3 | 14,9% | 1,3151 | 1,0720 | 549,6 |
+| 3 | 9,3% | 13,8% | 67,4% | 2.782,3 | 908,3 | 81,6 | 826,7 | 15,3% | 1,5158 | 1,0736 | 585,5 |
+| 4 | 8,9% | 14,0% | 63,9% | 3.031,2 | 1.095,2 | 98,5 | 996,7 | 15,3% | 1,7480 | 1,0738 | 612,3 |
+| 5 | 8,6% | 14,2% | 60,3% | 3.291,3 | 1.306,5 | 118,6 | 1.187,9 | 15,4% | 2,0177 | 1,0744 | 632,5 |
+| 6 | 8,2% | 14,4% | 57,2% | 3.562,0 | 1.524,0 | 137,1 | 1.387,0 | 15,3% | 2,3271 | 1,0739 | 640,1 |
+| 7 | 7,9% | 14,5% | 54,3% | 3.842,0 | 1.756,5 | 157,1 | 1.599,4 | 15,2% | 2,6814 | 1,0734 | 640,3 |
+| 8 | 7,5% | 14,6% | 51,2% | 4.130,2 | 2.013,6 | 180,7 | 1.832,9 | 15,2% | 3,0892 | 1,0733 | 636,9 |
+| 9 | 7,1% | 14,7% | 48,5% | 4.425,1 | 2.280,1 | 204,9 | 2.075,2 | 15,1% | 3,5562 | 1,0729 | 626,1 |
+| 10 | 6,8% | 14,9% | 45,6% | 4.725,0 | 2.569,5 | 232,3 | 2.337,1 | 15,1% | 4,0929 | 1,0728 | 612,6 |
+| **Soma** | | | | | | | | | | | **6.048,6** |
 
 ---
 
@@ -147,15 +147,15 @@ cresce muito ao longo da projeção.
 Retorno neutro (o crescimento sai da conta da firma):
 
 ```
-VT da firma            = NOPAT₁₀ × 1,0678 ÷ 17,35% = 4.725,0 × 1,0678 ÷ 0,1735 = R$ 29.085,6 mi
-fluxo da firma ano 11  = 29.085,6 × (17,35% − 6,78%)  = 3.073,7
-fluxo do acionista     = 3.073,7 − 248,1 (serviço da dívida) = 2.825,6
-VT do acionista        = 2.825,6 ÷ (17,98% − 6,78%) = 25.225,5
-VP do terminal         = 25.225,5 × 1,0862 ÷ 5,2491 = R$ 5.219,9 mi
+VT da firma            = NOPAT₁₀ × 1,0678 ÷ 14,86% = 4.725,0 × 1,0678 ÷ 0,1486 = R$ 33.954,1 mi
+fluxo da firma ano 11  = 33.954,1 × (14,86% − 6,78%)  = 2.743,6
+fluxo do acionista     = 2.743,6 − 248,1 (serviço da dívida) = 2.495,6
+VT do acionista        = 2.495,6 ÷ (15,09% − 6,78%) = 30.024,8
+VP do terminal         = 30.024,8 × 1,0728 ÷ 4,0929 = R$ 7.869,9 mi
 ```
 
-O terminal é 47% do capital próprio. O capital que já existe rende 14,2% na
-perpetuidade, contra 17,3% de custo: esse déficit vale −R$ 1,26 bi a valor
+O terminal é 56,5% do capital próprio. O capital que já existe rende 13,6% na
+perpetuidade, contra 14,9% de custo: esse déficit vale −R$ 0,80 bi a valor
 presente, e já está dentro do terminal (item B12).
 
 ---
@@ -163,21 +163,21 @@ presente, e já está dentro do terminal (item B12).
 ## 9. O preço justo
 
 ```
-capital próprio = 5.885,3 + 5.219,9 − 0 (minoritários) = R$ 11.105,2 mi
-preço justo     = 11.105,2 mi ÷ 302.241.104 units = R$ 36,74 por unit
-                  (÷ 5 = R$ 7,35 por ação)
-upside          = (36,74 − 34,74) ÷ 34,74 = +5,8%
+capital próprio = 6.048,6 + 7.869,9 − 0 (minoritários) = R$ 13.918,6 mi
+preço justo     = 13.918,6 mi ÷ 302.241.104 units = R$ 46,05 por unit
+                  (÷ 5 = R$ 9,21 por ação)
+upside          = (46,05 − 34,74) ÷ 34,74 = +32,6%
 ```
 
 ---
 
 ## 10. Os números em volta
 
-**Cenários:** R$ 32,63 / R$ 36,74 / R$ 43,30. **Monte Carlo:** P5 R$ 32,75,
-mediana R$ 36,72, P95 R$ 41,40.
+**Cenários:** R$ 39,10 / R$ 46,05 / R$ 57,25. **Monte Carlo:** P5 R$ 40,34,
+mediana R$ 46,02, P95 R$ 52,93.
 
-**Faixa calibrada (80%):** 12 meses, R$ 26,42 a R$ 55,89; 36 meses, R$ 23,88 a
-R$ 76,24.
+**Faixa calibrada (80%):** 12 meses, R$ 26,07 a R$ 55,17; 36 meses, R$ 23,15 a
+R$ 74,32.
 
 **Múltiplos de pares.** O subsetor "água e saneamento" não tem cinco outras
 companhias, e a mediana vem do setor de utilidade pública (energia elétrica,
@@ -190,15 +190,16 @@ gás, saneamento):
 | EV/EBITDA | 7,27 (32) | EBITDA R$ 2,96 bi, dívida líq. R$ 1,78 bi | R$ 65,38 |
 | **Consolidada** | | | **R$ 67,83** |
 
-**Divergência de +84,6%** — acima do limite de 50%, e a tela avisa. O preço justo
-**não muda**: a leitura por pares é teste de sanidade, e a divergência fica
+**Divergência de +47,3%** — abaixo do limite de 50%, e a tela não avisa (com o
+prêmio de 5,5%, até 01/10/2026, o preço justo era R$ 36,74 e a divergência,
++84,6%, avisava). O preço justo **não muda**: a leitura por pares é teste de sanidade, e a divergência fica
 declarada (decisão 118).
 
 **Por que tanta diferença.** O setor de utilidade pública, dominado por energia
 elétrica, negocia a múltiplos maiores que a Sanepar (o próprio mercado paga só
 0,85 vez o patrimônio dela, contra 1,87 da mediana do setor). O fluxo descontado
-diz que a Sanepar rende 13,5% sobre o capital, abaixo dos 17–18% que o motor
-exige — e o mercado parece concordar mais com o fluxo descontado do que com os
+diz que a Sanepar rende 13,5% sobre o capital, abaixo dos 15% que o motor
+exige — e o preço justo fica entre o mercado e os
 pares.
 
 > **Uma correção feita durante esta documentação (item B41):** até 28/09/2026 a

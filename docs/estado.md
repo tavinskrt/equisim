@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-01, a partir de `1325e49`.
+Gerado em 2026-10-02, a partir de `dbf225f`.
 
 ## Decisões registradas
 
-**115** aceita · **2** cumprida · **6** substituída
+**117** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -112,7 +112,7 @@ Gerado em 2026-10-01, a partir de `1325e49`.
 | 113 | O caixa rende a taxa livre de risco, e não o custo de empréstimo | aceita | lente | 2026-09-21 |
 | 114 | O motor é nominal em todo o caminho, e as três não neutralidades de unidade ficam medidas | aceita | voce | 2026-09-21 |
 | 115 | O horizonte fica em dez anos, e agora por medição — o nível não depende dele, e o peso do terminal sim | aceita | voce | 2026-09-21 |
-| 116 | O prêmio de mercado fica em 5,5%, por medição das duas alternativas — e o implícito de −3,9% diz que o desacordo de nível não é dele | aceita | voce | 2026-09-21 |
+| 116 | O prêmio de mercado fica em 5,5%, por medição das duas alternativas — e o implícito de −3,9% diz que o desacordo de nível não é dele | substituída pela 142 | voce | 2026-09-21 |
 | 117 | Risco-país e ajuste por tamanho são recusados, com medição — o R_f brasileiro já contém um, e o beta já cobra o outro | aceita | voce | 2026-09-21 |
 | 118 | A triangulação por múltiplos de pares entra como segunda leitura declarada, e não entra no preço | aceita | voce | 2026-09-21 |
 | 119 | A rota derivada também remunera o caixa pela taxa livre de risco — o defeito da decisão 113 tinha um segundo lugar, e era o caminho de produção | aceita | lente | 2026-09-21 |
@@ -138,6 +138,9 @@ Gerado em 2026-10-01, a partir de `1325e49`.
 | 139 | Os proventos da mesma data ex entram juntos no fator de retorno total | aceita | voce | 2026-09-25 |
 | 140 | O R3 é «habilidade testada, com o poder declarado», e o motor de referência não autoriza decisão sozinho | aceita | voce | 2026-09-27 |
 | 141 | A documentação do motor e do aplicativo é refeita do zero contra o código, e o guia de estudo passa a ser documento do projeto | aceita | voce | 2026-09-28 |
+| 142 | O prêmio de mercado do CAPM passa a ser a média de dez anos do prêmio implícito no preço da bolsa | aceita | voce | 2026-10-01 |
+| 143 | A contagem de ações por data é conferida contra o salto do preço, com âncora na mais recente | aceita | voce | 2026-10-01 |
+| 144 | O nome de pregão da consulta de proventos da B3 vai sem barra, e os nove emissores que ficaram sem histórico são consultados de novo | aceita | voce | 2026-10-01 |
 
 ### Caminhos retirados
 
@@ -164,16 +167,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 65 | 22.838 |
-| Apresentacao | 37 | 16.507 |
-| Camada de dados | 25 | 3.768 |
-| Testes do app | 49 | 9.326 |
+| Nucleo de dominio | 65 | 22.880 |
+| Apresentacao | 37 | 16.515 |
+| Camada de dados | 25 | 3.782 |
+| Testes do app | 49 | 9.383 |
 | Testes do nucleo | 49 | 16.409 |
-| Ferramentas de QA | 20 | 6.807 |
+| Ferramentas de QA | 20 | 6.817 |
 
 ## Histórico recente
 
 ```
+2026-10-01  dbf225f  Analisando alternativas para o crescimento (g)
 2026-09-29  1325e49  Prêmio de risco
 2026-09-29  5551a7a  Documentação do motor de valuation (parte 1)
 2026-09-27  6827219  Refino do motor de valuation (parte 26)
@@ -188,5 +192,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-20  bb57462  Regerado estado
 2026-09-16  d7fa781  Refino do motor de valuation (parte 17)
 2026-09-15  5ee27e5  Refino do motor de valuation (parte 15)
-2026-09-15  e1077f2  Refino do motor de valuation (parte 15)
 ```

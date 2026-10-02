@@ -41,7 +41,7 @@
 // sobreviventes — declarado no relatório.
 //
 //   dart run tool/premio_implicito.dart              # grava premio_implicito.json
-//   dart run tool/premio_implicito.dart --so-serie   # só a série, sem gravar
+//   dart run tool/premio_implicito.dart --so-serie   # só a série e o pacote
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -50,6 +50,7 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'b3/proventos.dart';
 import 'coortes/base_da_data.dart';
+import 'coortes/contagem_conferida.dart';
 import 'coortes/eventos_de_acoes.dart';
 import 'curva_ligar.dart' show lerTesouro;
 import 'cvm/codigos_fca.dart';
@@ -59,6 +60,9 @@ import 'validation/ibovespa_longo.dart';
 import 'validation/regression.dart';
 
 const _saida = 'docs/validacao/premio_implicito.json';
+
+/// O pacote que o aplicativo e o backtest leem (decisão 142).
+const _pacote = 'assets/mercado/premio_implicito.json';
 const _referencia = CapmInputs.defaultMarketPremium;
 
 /// Fração mínima de trimestres presentes para uma média normalizada valer.
@@ -75,18 +79,7 @@ double? _mediana(List<double> v) {
   return o.length.isOdd ? o[m] : (o[m - 1] + o[m]) / 2;
 }
 
-/// Mudança de contagem, em vezes, a partir da qual o preço tem de confirmá-la.
-const _mudancaGrande = 3.0;
-
-/// Dias depois da contagem nova em que o salto do preço ainda a confirma: a
-/// aprovação do desdobramento vem meses antes da data ex (a da PRIO, de
-/// 28/01/2021, para a data ex de 06/05/2021). É o prazo do B30.
-const _prazoDoSalto = 400;
-
-/// Folga, em vezes, entre o salto do preço e o inverso da mudança da contagem.
-const _toleranciaDoSalto = 1.4;
-
-/// Uma entrada da contagem que o preço não confirmou.
+/// Uma entrada da contagem que o preço não confirmou, com a companhia.
 typedef _Descartada = ({
   String cnpj,
   DateTime desde,
@@ -94,23 +87,6 @@ typedef _Descartada = ({
   double anterior,
   String? fonte,
 });
-
-/// Se a consulta de proventos da B3 de [raiz] falhou sem erro.
-///
-/// A consulta é pelo nome de pregão, e o nome com barra — `AMBEV S/A`,
-/// `KLABIN S/A` — volta vazio: os nove emissores com barra no nome vieram sem
-/// provento nenhum, e nenhum com barra veio com provento. Vazio, ali, é falta
-/// do dado, e não companhia que não pagou: somá-la com caixa zero derrubaria o
-/// rendimento.
-bool _consultaFalhou(String raiz) {
-  final f = File('data/b3/complemento/$raiz.json');
-  if (!f.existsSync()) return true;
-  final j = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
-  final nome =
-      ((j['detalhe'] as Map<String, dynamic>?)?['tradingName'] as String?) ??
-      '';
-  return ((j['proventos'] as List?) ?? const []).isEmpty && nome.contains('/');
-}
 
 /// A contagem por data de uma listada, como veio de
 /// `data/b3/listadas_contagem.json`, com a fonte de cada entrada.
@@ -149,114 +125,6 @@ class _Contagem {
   }
 }
 
-/// O primeiro pregão entre [de] e [ate] em que o preço bruto de algum papel
-/// saltou [fator] vezes, com folga de [_toleranciaDoSalto].
-DateTime? _saltoDoPreco(
-  Map<String, List<Pregao>> papeis,
-  double fator,
-  DateTime de,
-  DateTime ate,
-) {
-  final alvo = math.log(fator);
-  final folga = math.log(_toleranciaDoSalto);
-  DateTime? primeiro;
-  for (final s in papeis.values) {
-    for (var i = 1; i < s.length; i++) {
-      final a = s[i - 1], b = s[i];
-      if (b.date.isBefore(de) || b.date.isAfter(ate)) continue;
-      if (b.date.difference(a.date).inDays > 30) continue;
-      if (!(a.close > 0) || !(b.close > 0)) continue;
-      if ((math.log(b.close / a.close) - alvo).abs() >= folga) continue;
-      if (primeiro == null || b.date.isBefore(primeiro)) primeiro = b.date;
-      break;
-    }
-  }
-  return primeiro;
-}
-
-/// A contagem conferida contra o preço, em ordem de data.
-///
-/// **Por que conferir.** A contagem do formulário erra de escala nos dois
-/// sentidos. A correção reenviada às vezes repete a contagem de antes de um
-/// grupamento: a Ampla agrupou 40.000 para 1 em dezembro de 2015, e a correção
-/// de maio de 2016 volta aos 3,9 trilhões de ações — vezes o preço de depois,
-/// R$ 142 trilhões de valor de mercado. E às vezes a correção é o **único**
-/// registro de um grupamento de verdade: a Magazine Luiza agrupou 10 para 1 em
-/// 2024, e a contagem só cai de 7,39 bilhões para 739 milhões na correção de
-/// maio de 2025. A fonte da entrada não separa os dois casos; o preço separa.
-///
-/// **A regra.** Parte da contagem mais recente até [ate] e anda para trás. Cada
-/// entrada é comparada com a última aceita depois dela: a diferença de até
-/// [_mudancaGrande] vezes vale como veio (emissão, recompra, conversão); a
-/// maior só vale se o preço bruto deu o salto correspondente — grupamento de
-/// dez para um, preço dez vezes maior — entre a data da entrada e
-/// [_prazoDoSalto] dias depois da aceita, e a aceita passa a valer **no dia do
-/// salto**, para que ação e preço mudem de base juntos. Se o salto veio antes da
-/// entrada, ela repete a contagem de antes do evento, e não vale. Sem o salto, a entrada vai para
-/// [descartadas] e o trecho dela fica com a contagem anterior a ela.
-///
-/// A âncora é a contagem mais recente porque é a que o formulário de hoje
-/// confirma: a primeira da série não tem com quem ser comparada, e a da TIM
-/// começa em julho de 2020 com 423 milhões — a da TIM S.A. antes da
-/// incorporação —, contra os 2,42 bilhões que a ação tem desde então.
-List<({DateTime desde, double acoes})> _conferida(
-  String cnpj,
-  _Contagem contagem,
-  Map<String, List<Pregao>> papeis,
-  DateTime ate,
-  List<_Descartada> descartadas,
-) {
-  final entradas = [
-    for (final p in contagem.bruta)
-      if (p.acoes > 0 && !p.desde.isAfter(ate)) p,
-  ];
-  // Da mais recente para a mais antiga; `desde` da aceita pode recuar ao dia
-  // do salto do preço.
-  final aceitas = <({DateTime desde, double acoes})>[];
-  DateTime? dataDaAceita;
-  for (final p in entradas.reversed) {
-    if (aceitas.isEmpty || dataDaAceita == null) {
-      aceitas.add((desde: p.desde, acoes: p.acoes));
-      dataDaAceita = p.desde;
-      continue;
-    }
-    final posterior = aceitas.last;
-    final mudanca = posterior.acoes / p.acoes;
-    if (mudanca <= _mudancaGrande && mudanca >= 1 / _mudancaGrande) {
-      aceitas.add((desde: p.desde, acoes: p.acoes));
-      dataDaAceita = p.desde;
-      continue;
-    }
-    final salto = _saltoDoPreco(
-      papeis,
-      1 / mudanca,
-      p.desde,
-      dataDaAceita.add(const Duration(days: _prazoDoSalto)),
-    );
-    if (salto == null) {
-      descartadas.add((
-        cnpj: cnpj,
-        desde: p.desde,
-        acoes: p.acoes,
-        anterior: posterior.acoes,
-        fonte: p.fonte,
-      ));
-      continue;
-    }
-    // As entradas da contagem nova anteriores ao salto — a aprovação costuma
-    // vir antes da data ex — passam a valer no dia dele.
-    var daNova = posterior.acoes;
-    while (aceitas.isNotEmpty && aceitas.last.desde.isBefore(salto)) {
-      daNova = aceitas.removeLast().acoes;
-    }
-    aceitas
-      ..add((desde: salto, acoes: daNova))
-      ..add((desde: p.desde, acoes: p.acoes));
-    dataDaAceita = p.desde;
-  }
-  return aceitas.reversed.toList();
-}
-
 /// Uma companhia listada, com o que a conta precisa dela.
 class _Companhia {
   _Companhia(
@@ -273,7 +141,7 @@ class _Companhia {
   /// Raiz de quatro letras de hoje: é por ela que os proventos são lidos.
   final String raiz;
 
-  /// A contagem conferida contra o preço, de [_conferida].
+  /// A contagem conferida contra o preço, de `conferirContagem` (item B43).
   final List<({DateTime desde, double acoes})> aceitas;
 
   /// A data da primeira contagem do formulário, conferida ou não.
@@ -500,7 +368,7 @@ Future<void> main(List<String> args) async {
       final raiz = [
         for (final t in e.value.toList()..sort()) t.substring(0, 4),
       ].where(proventos.containsKey).firstOrNull;
-      if (raiz == null || _consultaFalhou(raiz)) {
+      if (raiz == null) {
         semProvento++;
         continue;
       }
@@ -518,21 +386,29 @@ Future<void> main(List<String> args) async {
         ticker: principal,
         brutos: encadear(principal, codigos, bruto),
       );
+      final conferida = conferirContagem(
+        contagem.bruta,
+        papeis.values,
+        ate: DateTime.utc(
+          hojeCongelado.year,
+          hojeCongelado.month,
+          hojeCongelado.day,
+        ),
+      );
+      for (final d in conferida.descartadas) {
+        descartadas.add((
+          cnpj: cnpj,
+          desde: d.desde,
+          acoes: d.acoes,
+          anterior: d.posterior,
+          fonte: d.fonte,
+        ));
+      }
       companhias.add(
         _Companhia(
           cnpj,
           raiz,
-          _conferida(
-            cnpj,
-            contagem,
-            papeis,
-            DateTime.utc(
-              hojeCongelado.year,
-              hojeCongelado.month,
-              hojeCongelado.day,
-            ),
-            descartadas,
-          ),
+          conferida.aceitas,
           contagem.bruta.firstOrNull?.desde,
           contagem.classes,
           papeis,
@@ -556,8 +432,8 @@ Future<void> main(List<String> args) async {
         final a = c.aceitas;
         final grandes = [
           for (var i = 1; i < a.length; i++)
-            if (a[i].acoes / a[i - 1].acoes > _mudancaGrande ||
-                a[i - 1].acoes / a[i].acoes > _mudancaGrande)
+            if (a[i].acoes / a[i - 1].acoes > mudancaGrandeDaContagem ||
+                a[i - 1].acoes / a[i].acoes > mudancaGrandeDaContagem)
               '${a[i].desde.toIso8601String().substring(0, 10)} ${a[i].acoes.toStringAsExponential(3)}',
         ];
         if (grandes.isNotEmpty) {
@@ -590,7 +466,7 @@ Future<void> main(List<String> args) async {
     stdout.writeln('-- o prêmio implícito, data a data --');
     stdout.writeln(
       '  data        companhias  valor (R\$ bi)  rendimento  '
-      'g nominal   r implícito  prefixado 10a   prêmio   maior     fora',
+      'g nominal   r implícito  prefixado 10a   prêmio    r − Rf   maior     fora',
     );
     final serie = <Map<String, Object?>>[];
     final soAsDatas = [
@@ -644,6 +520,7 @@ Future<void> main(List<String> args) async {
         '${_pct(a.rendimento).padLeft(10)}  ${_pct(g).padLeft(9)}   '
         '${_pct(r).padLeft(11)}  ${(rf == null ? '—' : _pct(rf)).padLeft(13)}   '
         '${(premio == null ? '—' : _pct(premio)).padLeft(7)}   '
+        '${(rf == null ? '—' : _pct(r - rf)).padLeft(7)}   '
         '${a.maior?.raiz} ${_pct(a.maior!.valor / a.valorDeMercado, 0)}   '
         '${a.foraPelaContagem.length}',
       );
@@ -684,16 +561,65 @@ Future<void> main(List<String> args) async {
       }
     }
 
+    // -------------------------------------------------------------------
+    // O pacote: a série trimestral que o aplicativo e o backtest leem
+    // (decisão 142). A média que o motor usa sai do núcleo, sobre `r − Rf`.
+    // -------------------------------------------------------------------
+    final diaDaEntrada = hoje.toIso8601String().substring(0, 10);
+    final pacote = ImpliedPremiumPackage(
+      geradoEm: DateTime.utc(hoje.year, hoje.month, hoje.day),
+      quarters: [
+        for (final l in serie)
+          if (l['data'] != diaDaEntrada &&
+              l['retornoImplicito'] != null &&
+              l['prefixado10'] != null)
+            ImpliedPremiumQuarter(
+              date: DateTime.parse('${l['data']}T00:00:00Z'),
+              impliedReturn: l['retornoImplicito'] as double,
+              riskFree: l['prefixado10'] as double,
+            ),
+      ],
+    );
+    for (final linha in serie) {
+      final t = DateTime.parse(linha['data'] as String);
+      final r = linha['retornoImplicito'] as double?;
+      final rf = linha['prefixado10'] as double?;
+      linha['premioSomado'] = (r == null || rf == null) ? null : r - rf;
+      linha['premioDoMotor'] = pacote.normalizedAt(t);
+      linha['trimestresDoMotor'] = pacote.window(t).length;
+      // A média de cinco anos na mesma forma, só para comparação.
+      final cinco = [
+        for (final q in pacote.quarters)
+          if (q.date.isAfter(DateTime.utc(t.year - 5, t.month, t.day)) &&
+              !q.date.isAfter(DateTime.utc(t.year, t.month, t.day)))
+            q.premium,
+      ];
+      linha['premioSomado5'] = cinco.length >= 20 * _coberturaMinima
+          ? cinco.reduce((x, y) => x + y) / cinco.length
+          : null;
+    }
+    if (soAsDatas.isEmpty) {
+      File(_pacote).writeAsStringSync(
+        jsonEncode(ImpliedPremiumCodec.encode(pacote)),
+      );
+      stdout.writeln(
+        'escrito $_pacote: ${pacote.quarters.length} trimestres; o prêmio do '
+        'motor em $diaDaEntrada é ${_pct(pacote.normalizedAt(hoje) ?? double.nan)}',
+      );
+    }
+
     stdout.writeln('');
-    stdout.writeln('-- implícito e normalizado nas datas das coortes --');
-    stdout.writeln('  data        implícito   média 5 anos   média 10 anos');
+    // Na forma que o motor soma (`r − Rf`); as médias da forma de Fisher
+    // ficam no JSON (`normalizado5`, `normalizado10`).
+    stdout.writeln('-- implícito e normalizado nas datas das coortes (r − Rf) --');
+    stdout.writeln('  data        implícito   média 5 anos   média 10 anos (o motor)');
     for (final l in serie) {
       final d = DateTime.parse(l['data'] as String);
       if (d.year < 2018) continue;
       String f(Object? v) => v == null ? '—' : _pct(v as double);
       stdout.writeln(
-        '  ${l['data']}  ${f(l['premio']).padLeft(9)}   '
-        '${f(l['normalizado5']).padLeft(12)}   ${f(l['normalizado10']).padLeft(13)}',
+        '  ${l['data']}  ${f(l['premioSomado']).padLeft(9)}   '
+        '${f(l['premioSomado5']).padLeft(12)}   ${f(l['premioDoMotor']).padLeft(13)}',
       );
     }
 
@@ -702,18 +628,43 @@ Future<void> main(List<String> args) async {
     // -------------------------------------------------------------------
     // O que cada um faz ao aplicativo, sobre a entrada congelada
     // -------------------------------------------------------------------
-    final daEntrada = serie.lastWhere(
-      (l) => l['data'] == hoje.toIso8601String().substring(0, 10),
-    );
-    final candidatos = <(String, double)>[
-      ('5,5% fixo', _referencia),
-      if (daEntrada['premio'] case final double p) ('implícito', p),
-      if (daEntrada['normalizado5'] case final double p) ('média 5 anos', p),
-      if (daEntrada['normalizado10'] case final double p) ('média 10 anos', p),
+    final daEntrada = serie.lastWhere((l) => l['data'] == diaDaEntrada);
+    final doMotor = pacote.normalizedAt(hoje);
+    if (doMotor == null) {
+      stderr.writeln('ERRO: a série não tem trimestres para a média de dez anos');
+      exitCode = 1;
+      return;
+    }
+    // A montagem do aplicativo lê o pacote que estava em disco quando a
+    // entrada congelada foi montada; se a série medida agora for outra, a
+    // conferência contra o gabarito compararia montagens diferentes.
+    if ((c.premio.valor - doMotor).abs() > 1e-12) {
+      stderr.writeln(
+        'ERRO: o pacote em disco dava ${_pct(c.premio.valor)} e a série medida '
+        'agora dá ${_pct(doMotor)}. O pacote foi regravado: rode de novo, e '
+        'regrave o gabarito antes (tool/gabarito_cascata.dart).',
+      );
+      exitCode = 1;
+      return;
+    }
+    // A média de cinco anos, na mesma forma `r − Rf`, para comparação.
+    final cincoAnos = [
+      for (final q in pacote.quarters)
+        if (q.date.isAfter(DateTime.utc(hoje.year - 5, hoje.month, hoje.day)))
+          q.premium,
+    ];
+    final candidatos = <(String, double?)>[
+      // A primeira é a do aplicativo (`premio` nulo: o do pacote), e é a que
+      // se confere contra o gabarito.
+      ('média de 10 anos — o motor', null),
+      ('5,5% (até a decisão 142)', _referencia),
+      if (daEntrada['premioSomado'] case final double p) ('implícito', p),
+      if (cincoAnos.length >= 20)
+        ('média de 5 anos', cincoAnos.reduce((a, b) => a + b) / cincoAnos.length),
     ];
     final leituras = <_Leitura>[];
     for (final (rotulo, premio) in candidatos) {
-      final l = _Leitura(rotulo, premio);
+      final l = _Leitura(rotulo, premio ?? doMotor);
       final avaliadas = <Ticker, ValuationResult?>{};
       var i = 0;
       for (final t in c.universo) {
@@ -735,7 +686,7 @@ Future<void> main(List<String> args) async {
         final div = await c.conferirContraGabarito(avaliadas);
         if (div != null && div.isNotEmpty) {
           stderr.writeln(
-            'ERRO: a montagem de 5,5% diverge do gabarito em '
+            'ERRO: a montagem do aplicativo diverge do gabarito em '
             '${div.length}: ${div.take(8).join(', ')}',
           );
           exitCode = 1;
@@ -752,7 +703,7 @@ Future<void> main(List<String> args) async {
     stdout.writeln('-- o universo reavaliado sobre a entrada congelada --');
     stdout.writeln(
       '  prêmio                  avaliados   potencial mediano   '
-      'acima de zero   preço justo vs 5,5%   postos',
+      'acima de zero   preço justo vs o motor   postos',
     );
     for (final l in leituras) {
       final pots = l.potencial.values.toList();

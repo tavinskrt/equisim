@@ -286,6 +286,23 @@ Future<void> main(List<String> args) async {
           jsonDecode(File('assets/mercado/beta_prior.json').readAsStringSync())
               as Map<String, dynamic>)
       : null;
+  // O prêmio de mercado do pacote (decisão 142): a média de dez anos do
+  // prêmio implícito na data do gabarito, que é o que o aplicativo lê. As
+  // montagens `doisPontos` e `curva` ficam com os 5,5% parametrizados — são o
+  // registro das montagens antigas, e não o aplicativo.
+  final pacoteDoPremio =
+      File('assets/mercado/premio_implicito.json').existsSync()
+          ? ImpliedPremiumCodec.decode(jsonDecode(
+                  File('assets/mercado/premio_implicito.json')
+                      .readAsStringSync()) as Map<String, dynamic>)
+          : null;
+  final premioDoPacote = pacoteDoPremio?.normalizedAt(_hoje);
+  if (premioDoPacote == null) {
+    stderr.writeln('sem assets/mercado/premio_implicito.json utilizável: rode '
+        'dart run tool/premio_implicito.dart --so-serie');
+    exitCode = 2;
+    return;
+  }
   // Os eventos de capital do pacote (itens B28 e B29): a montagem do
   // aplicativo completa o ajuste da série e soma a emissão declarada.
   final capital = File('assets/cvm/capital.json').existsSync()
@@ -405,6 +422,10 @@ Future<void> main(List<String> args) async {
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
         asOf: _hoje,
+        marketPremium: app ? premioDoPacote : CapmInputs.defaultMarketPremium,
+        premiumSource: app
+            ? MarketPremiumSource.impliedNormalized
+            : MarketPremiumSource.parameterized,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,

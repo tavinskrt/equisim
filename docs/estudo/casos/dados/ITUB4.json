@@ -8,8 +8,8 @@
   "rf": 0.14086384141758157,
   "beta": 0.9777493973571714,
   "origemBeta": "shrunk",
-  "premio": 0.055,
-  "ke": 0.194640058272226,
+  "premio": 0.012107652198573262,
+  "ke": 0.1527020910581468,
   "betaDesalavancado": 0.9777493973571714
  },
  "ancoras": {
@@ -489,23 +489,23 @@
  "recusa": null,
  "resultado": {
   "modelo": "dcfEarnings",
-  "justo": 21.76,
+  "justo": 29.21,
   "preco": 42.35,
-  "potencial": -0.48618654073199524,
-  "descontoAno1": 0.1900131181593249,
+  "potencial": -0.310271546635183,
+  "descontoAno1": 0.1480751509452457,
   "cenarios": {
-   "bear": 19.44,
-   "base": 21.76,
-   "bull": 25.03
+   "bear": 24.04,
+   "base": 29.21,
+   "bull": 38.73
   },
   "monteCarlo": {
-   "p5": 20.066332870703647,
-   "p10": 20.36947208811741,
-   "p25": 20.995809723307712,
-   "p50": 21.744580875257597,
-   "p75": 22.5615355366918,
-   "p90": 23.352363326227877,
-   "p95": 23.751503392179462,
+   "p5": 25.636911174842773,
+   "p10": 26.23191819214764,
+   "p25": 27.52470921840385,
+   "p50": 29.18934314139182,
+   "p75": 31.131092537919553,
+   "p90": 33.19522403527365,
+   "p95": 34.22286074027336,
    "n": 10000
   },
   "volatilidade": 0.24635346688324664,
@@ -513,79 +513,79 @@
    {
     "meses": 12,
     "nominal": 0.5,
-    "coberturaForaDaAmostra": 0.506,
-    "a": 0.085157,
-    "b": 0.028943,
-    "zInf": -0.551587,
-    "zSup": 0.643749,
+    "coberturaForaDaAmostra": 0.507,
+    "a": 0.07287,
+    "b": 0.02054,
+    "zInf": -0.554189,
+    "zSup": 0.648064,
     "faixa": [
-     39.49,
-     53.01
+     39.44,
+     53.03
     ]
    },
    {
     "meses": 12,
     "nominal": 0.8,
-    "coberturaForaDaAmostra": 0.794,
-    "a": 0.085157,
-    "b": 0.028943,
-    "zInf": -1.162597,
-    "zSup": 1.253547,
+    "coberturaForaDaAmostra": 0.797,
+    "a": 0.07287,
+    "b": 0.02054,
+    "zInf": -1.179908,
+    "zSup": 1.237941,
     "faixa": [
-     33.97,
-     61.6
+     33.8,
+     61.32
     ]
    },
    {
     "meses": 12,
     "nominal": 0.9,
-    "coberturaForaDaAmostra": 0.876,
-    "a": 0.085157,
-    "b": 0.028943,
-    "zInf": -1.573458,
-    "zSup": 1.676248,
+    "coberturaForaDaAmostra": 0.879,
+    "a": 0.07287,
+    "b": 0.02054,
+    "zInf": -1.598456,
+    "zSup": 1.64849,
     "faixa": [
-     30.7,
-     68.36
+     30.49,
+     67.85
     ]
    },
    {
     "meses": 36,
     "nominal": 0.5,
-    "coberturaForaDaAmostra": 0.528,
-    "a": 0.160895,
-    "b": 0.091625,
-    "zInf": -0.706173,
-    "zSup": 0.990088,
+    "coberturaForaDaAmostra": 0.516,
+    "a": 0.121719,
+    "b": 0.065823,
+    "zInf": -0.711967,
+    "zSup": 0.992765,
     "faixa": [
-     39.33,
-     59.73
+     39.17,
+     59.61
     ]
    },
    {
     "meses": 36,
     "nominal": 0.8,
-    "coberturaForaDaAmostra": 0.799,
-    "a": 0.160895,
-    "b": 0.091625,
-    "zInf": -1.744731,
-    "zSup": 1.999746,
+    "coberturaForaDaAmostra": 0.796,
+    "a": 0.121719,
+    "b": 0.065823,
+    "zInf": -1.761396,
+    "zSup": 2.000561,
     "faixa": [
-     30.45,
-     76.59
+     30.24,
+     76.41
     ]
    },
    {
     "meses": 36,
     "nominal": 0.9,
-    "coberturaForaDaAmostra": 0.88,
-    "a": 0.160895,
-    "b": 0.091625,
-    "zInf": -2.570209,
-    "zSup": 2.645817,
+    "coberturaForaDaAmostra": 0.883,
+    "a": 0.121719,
+    "b": 0.065823,
+    "zInf": -2.591264,
+    "zSup": 2.662884,
     "faixa": [
-     24.85,
-     89.81
+     24.65,
+     89.95
     ]
    }
   ],
@@ -593,11 +593,12 @@
   "avisos": [
    "Instituição financeira: depósito, captação e passivo oneroso são insumo do negócio, não financiamento. A avaliação é do fluxo do acionista, descontada ao custo do capital próprio e sem ponte de dívida líquida — subtrair a captação do valor da firma trataria a matéria-prima do negócio como estrutura de capital.",
    "O retorno sobre o capital do exercício mais recente (20.7%) destoa da mediana de 8 exercícios (18.4%); a base converge para o ciclo ao longo da projeção, fator de 0.89x.",
-   "A taxa livre de risco segue a curva dos títulos prefixados do Tesouro de 10/09/2026: 13.6% a.a. no primeiro ano, 14.3% a.a. no ano 10 e 14.3% a.a. na perpetuidade. É a taxa que o mercado de títulos atribui a cada prazo, e não uma previsão do motor."
+   "A taxa livre de risco segue a curva dos títulos prefixados do Tesouro de 10/09/2026: 13.6% a.a. no primeiro ano, 14.3% a.a. no ano 10 e 14.3% a.a. na perpetuidade. É a taxa que o mercado de títulos atribui a cada prazo, e não uma previsão do motor.",
+   "Vantagem competitiva residual: retorno do ciclo de 18.4% contra custo de capital de equilíbrio de 15.5%, com excedente decaindo 58.9% ao ano — persistência medida na própria série do ativo, sobre 14 pares. Em 10 anos sobram 0.0% do excedente, e o retorno terminal fica em 15.5% em vez do estado estacionário. O valor terminal volta a depender do crescimento perpétuo."
   ],
   "triangulacao": {
    "consolidado": 23.765376892992176,
-   "divergencia": 0.09223585557938385,
+   "divergencia": -0.1864309397630185,
    "leituras": [
     {
      "tipo": "precoLucro",
@@ -627,8 +628,8 @@
   }
  },
  "rastro": {
-  "transactionId": "71acc67a-b765-4a7a-9b78-07c535d8c9f4",
-  "timestamp": "2026-09-28T09:58:22.815881Z",
+  "transactionId": "c3e581e1-6f9a-4918-afce-ba790750b541",
+  "timestamp": "2026-10-02T00:27:36.433146Z",
   "endpoint": "/core/valuation/ITUB4",
   "inputPayload": {
    "ticker": "ITUB4",
@@ -637,9 +638,9 @@
    "capm": {
     "riskFreeRate": 0.140864,
     "beta": 0.9777,
-    "marketPremium": 0.055,
+    "marketPremium": 0.012108,
     "betaSource": "shrunk",
-    "premiumSource": "parameterized"
+    "premiumSource": "impliedNormalized"
    },
    "marginOfSafety": 0.0,
    "projectionYears": 10,
@@ -814,36 +815,36 @@
    "status": "ok",
    "ticker": "ITUB4",
    "model": "DCF sobre lucro distribuível",
-   "fairValue": 21.76,
-   "safetyPrice": 21.76,
+   "fairValue": 29.21,
+   "safetyPrice": 29.21,
    "marketPrice": 42.35,
-   "upside": -0.486187,
-   "discountRate": 0.190013,
+   "upside": -0.310272,
+   "discountRate": 0.148075,
    "marginOfSafety": 0.0,
    "isUndervalued": false,
    "scenarioMode": "discrete",
    "discreteScenarios": {
-    "bear": 19.44,
-    "base": 21.76,
-    "bull": 25.03
+    "bear": 24.04,
+    "base": 29.21,
+    "bull": 38.73
    },
    "diagnostics": {
-    "terminalShare": 0.37,
+    "terminalShare": 0.4916,
     "equityShare": 1.0,
     "baseFactor": 0.8893,
     "growthIdentified": true,
-    "moatApplied": false,
+    "moatApplied": true,
     "caveats": [],
-    "terminalRetainedSpread": 0.0,
+    "terminalRetainedSpread": 0.000137,
     "growthRate": 0.097853,
-    "terminalReturnOnCapital": null,
+    "terminalReturnOnCapital": 0.154728,
     "firmTaxRate": null,
     "returnOnCapital": 0.184266,
-    "terminalDiscountRate": 0.196662,
+    "terminalDiscountRate": 0.154724,
     "terminalCostOfEquity": null,
-    "costOfEquity": 0.19464,
-    "terminalExcessShare": -0.0246,
-    "impliedTerminalReturn": 0.18442,
+    "costOfEquity": 0.152702,
+    "terminalExcessShare": null,
+    "impliedTerminalReturn": 0.171964,
     "terminalEquityShare": null,
     "growthPath": [
      0.097853,
@@ -859,22 +860,22 @@
     ],
     "retentionPath": [
      0.531045,
-     0.509608,
-     0.486515,
-     0.464378,
-     0.441678,
-     0.421559,
-     0.402264,
-     0.382286,
-     0.363756,
-     0.344693
+     0.522742,
+     0.511976,
+     0.50144,
+     0.489359,
+     0.479607,
+     0.470233,
+     0.459173,
+     0.449438,
+     0.438123
     ]
    },
    "priceVolatility": 0.246353,
    "triangulation": {
     "asOf": "14/09/2026",
     "consolidated": 23.77,
-    "divergence": 0.0922,
+    "divergence": -0.1864,
     "readings": [
      {
       "kind": "precoLucro",
@@ -906,7 +907,8 @@
    "warnings": [
     "Instituição financeira: depósito, captação e passivo oneroso são insumo do negócio, não financiamento. A avaliação é do fluxo do acionista, descontada ao custo do capital próprio e sem ponte de dívida líquida — subtrair a captação do valor da firma trataria a matéria-prima do negócio como estrutura de capital.",
     "O retorno sobre o capital do exercício mais recente (20.7%) destoa da mediana de 8 exercícios (18.4%); a base converge para o ciclo ao longo da projeção, fator de 0.89x.",
-    "A taxa livre de risco segue a curva dos títulos prefixados do Tesouro de 10/09/2026: 13.6% a.a. no primeiro ano, 14.3% a.a. no ano 10 e 14.3% a.a. na perpetuidade. É a taxa que o mercado de títulos atribui a cada prazo, e não uma previsão do motor."
+    "A taxa livre de risco segue a curva dos títulos prefixados do Tesouro de 10/09/2026: 13.6% a.a. no primeiro ano, 14.3% a.a. no ano 10 e 14.3% a.a. na perpetuidade. É a taxa que o mercado de títulos atribui a cada prazo, e não uma previsão do motor.",
+    "Vantagem competitiva residual: retorno do ciclo de 18.4% contra custo de capital de equilíbrio de 15.5%, com excedente decaindo 58.9% ao ano — persistência medida na própria série do ativo, sobre 14 pares. Em 10 anos sobram 0.0% do excedente, e o retorno terminal fica em 15.5% em vez do estado estacionário. O valor terminal volta a depender do crescimento perpétuo."
    ]
   },
   "executionTimeMs": 2,
@@ -935,16 +937,18 @@
     "mappedVariables": {
      "R_f (% a.a.)": 14.09,
      "beta": 0.9777,
-     "R_m - R_f (% a.a.)": 5.5,
+     "R_m - R_f (% a.a.)": 1.21,
+     "origem do prêmio": "impliedNormalized",
      "origem do beta": "shrunk",
      "retorno do beta": "total, 81 proventos reinvestidos"
     },
     "intermediateSteps": [
-     "Passo 1: prêmio ajustado ao risco sistemático → 0.9777 × 5.5% = 5.4%",
-     "Passo 2: soma à taxa livre de risco → 14.1% + 5.4% = 19.5%",
+     "Passo 0: o prêmio de mercado → 1.2%, a média de dez anos do prêmio implícito no preço da bolsa: o retorno que o valor de mercado das listadas embute, dado o dinheiro que elas distribuem, menos o prefixado de dez anos (decisão 142)",
+     "Passo 1: prêmio ajustado ao risco sistemático → 0.9777 × 1.2% = 1.2%",
+     "Passo 2: soma à taxa livre de risco → 14.1% + 1.2% = 15.3%",
      "Passo 3: este é o K_e sobre o CDI de hoje — o do WACC do dia e o do retorno esperado da tela de metas. O desconto de cada ano usa a taxa livre de risco daquele ano, da curva do Tesouro, e a alavancagem que a avaliação produz: ver a estrutura a termo e o desconto do período explícito."
     ],
-    "finalValue": 19.46,
+    "finalValue": 15.27,
     "unit": "% a.a."
    },
    {
@@ -1114,18 +1118,18 @@
      "R_f do ano 1 (% a.a.)": 13.62,
      "R_f do ano N (% a.a.)": 14.29,
      "R_f da perpetuidade (% a.a.)": 14.29,
-     "r_1 (% a.a.)": 19.0,
-     "r_N (% a.a.)": 19.67,
-     "r_inf (% a.a.)": 19.67,
+     "r_1 (% a.a.)": 14.81,
+     "r_N (% a.a.)": 15.47,
+     "r_inf (% a.a.)": 15.47,
      "N (anos)": 10
     },
     "intermediateSteps": [
      "Passo 1: a taxa livre de risco de cada ano é o forward de um ano da curva dos prefixados de 10/09/2026 → ano 1: 13.6%; ano 2: 14.1%; ano 3: 14.5%; ano 4: 14.5%; ano 5: 14.6%; ano 6: 14.5%; ano 7: 14.4%; ano 8: 14.4%; ano 9: 14.3%; ano 10: 14.3%",
-     "Passo 2: o custo de capital de cada ano é remontado sobre ela, com o beta, o prêmio e a estrutura de capital de hoje → ano 1: 19.0%; ano 2: 19.5%; ano 3: 19.8%; ano 4: 19.9%; ano 5: 20.0%; ano 6: 19.9%; ano 7: 19.8%; ano 8: 19.8%; ano 9: 19.7%; ano 10: 19.7%",
-     "Passo 3: a perpetuidade usa o forward depois do ano 10, 14.3%, e é descontada a 19.7%",
+     "Passo 2: o custo de capital de cada ano é remontado sobre ela, com o beta, o prêmio e a estrutura de capital de hoje → ano 1: 14.8%; ano 2: 15.3%; ano 3: 15.6%; ano 4: 15.7%; ano 5: 15.8%; ano 6: 15.7%; ano 7: 15.6%; ano 8: 15.6%; ano 9: 15.5%; ano 10: 15.5%",
+     "Passo 3: a perpetuidade usa o forward depois do ano 10, 14.3%, e é descontada a 15.5%",
      "Passo 4: quando o custo de capital é resolvido ano a ano contra a alavancagem que a própria avaliação produz, este caminho é o ponto de partida, e o resolvido o substitui — ver o desconto do período explícito"
     ],
-    "finalValue": 19.67,
+    "finalValue": 15.47,
     "unit": "% a.a."
    },
    {
@@ -1133,27 +1137,25 @@
     "latexRepresentation": "ROIC_\\infty = WACC_\\infty + \\varphi^{N}(ROIC_{ciclo} - WACC_\\infty)",
     "mappedVariables": {
      "ROIC do ciclo (% a.a.)": 18.43,
-     "WACC de equilíbrio (% a.a.)": 19.67,
-     "excedente do ciclo (p.p.)": -1.24,
+     "WACC de equilíbrio (% a.a.)": 15.47,
+     "excedente do ciclo (p.p.)": 2.95,
      "Phi": 0.0,
      "exercícios": 16,
      "phi cru (AR(1))": 0.411,
      "phi aplicado": 0.411,
      "pares na regressão": 14,
-     "lambda": null,
-     "condição que barrou": "semExcedente",
-     "condições que barraram": [
-      "semExcedente"
-     ]
+     "lambda": 0.0001,
+     "condição que barrou": "nenhuma",
+     "condições que barraram": []
     },
     "intermediateSteps": [
      "Passo 1: crescimento orgânico? Phi = 0.0 <= 0.6",
      "Passo 2: histórico longo? 16 exercícios contra 8 exigidos",
-     "Passo 3: excedente positivo? ROIC do ciclo de 18.4% contra WACC de equilíbrio de 19.7%",
-     "Passo 4: persistência do excedente por AR(1) sobre 14 pares — phi cru 0.411, confinado em 0.411; lambda = phi^N = —",
-     "Passo 5: barrado por retorno do ciclo não supera o custo de capital — vale o estado estacionário, ROIC_inf = WACC_inf, e o valor terminal não depende de g_inf"
+     "Passo 3: excedente positivo? ROIC do ciclo de 18.4% contra WACC de equilíbrio de 15.5%",
+     "Passo 4: persistência do excedente por AR(1) sobre 14 pares — phi cru 0.411, confinado em 0.411; lambda = phi^N = 0.0001",
+     "Passo 5: há excedente e ele persiste — ROIC_inf = 15.5%, e o valor terminal volta a depender de g_inf, que é o preço declarado da exceção"
     ],
-    "finalValue": 19.67,
+    "finalValue": 15.47,
     "unit": "% a.a."
    },
    {
@@ -1163,78 +1165,77 @@
      "F_0": 3.7,
      "g_1 (% a.a.)": 9.79,
      "g_N (% a.a.)": 6.78,
-     "K_e,1 (% a.a.)": 19.0,
-     "K_e,N (% a.a.)": 19.67,
+     "K_e,1 (% a.a.)": 14.81,
+     "K_e,N (% a.a.)": 15.47,
      "ROIC_1 (% a.a.)": 18.43,
      "N (anos)": 10
     },
     "intermediateSteps": [
      "Passo 0: a taxa de cada ano sai do caminho ano a ano — o resolvido contra a alavancagem, ou o montado sobre a curva do Tesouro (ver a estrutura a termo). O fator de desconto **acumula** a taxa de cada ano em vez de elevar uma só a t, e o fluxo do ano é o lucro menos a retenção que financia o crescimento daquele mesmo ano.",
      "Passo 0b: o caixa do exercício chega ao longo do ano, e não no último dia dele. Cada fluxo é levantado por raiz de (1 + K_e do ano) — a convenção de meio de ano da decisão 48.",
-     "Passo 1: ano 1 → g = 9.8%, retenção = 53.1%, K_e = 19.0%; lucro 4.06 × (1 − retenção) = 1.9 ÷ fator acumulado 1.190013 × levantamento 1.090877 → valor presente 1.75",
-     "Passo 2: ano 2 → g = 9.5%, retenção = 51.0%, K_e = 19.5%; lucro 4.44 × (1 − retenção) = 2.18 ÷ fator acumulado 1.4221 × levantamento 1.093174 → valor presente 1.68",
-     "Passo 3: ano 3 → g = 9.1%, retenção = 48.7%, K_e = 19.8%; lucro 4.85 × (1 − retenção) = 2.49 ÷ fator acumulado 1.704195 × levantamento 1.094698 → valor presente 1.6",
-     "Passo 4: ano 4 → g = 8.8%, retenção = 46.4%, K_e = 19.9%; lucro 5.27 × (1 − retenção) = 2.83 ÷ fator acumulado 2.04313 × levantamento 1.094935 → valor presente 1.51",
-     "Passo 5: ano 5 → g = 8.4%, retenção = 44.2%, K_e = 20.0%; lucro 5.72 × (1 − retenção) = 3.19 ÷ fator acumulado 2.451926 × levantamento 1.095483 → valor presente 1.43",
-     "Passo 6: ano 6 → g = 8.1%, retenção = 42.2%, K_e = 19.9%; lucro 6.18 × (1 − retenção) = 3.58 ÷ fator acumulado 2.940078 × levantamento 1.095029 → valor presente 1.33",
-     "Passo 7: ano 7 → g = 7.8%, retenção = 40.2%, K_e = 19.8%; lucro 6.67 × (1 − retenção) = 3.98 ÷ fator acumulado 3.522248 × levantamento 1.094537 → valor presente 1.24",
-     "Passo 8: ano 8 → g = 7.4%, retenção = 38.2%, K_e = 19.8%; lucro 7.16 × (1 − retenção) = 4.42 ÷ fator acumulado 4.218983 × levantamento 1.094445 → valor presente 1.15",
-     "Passo 9: ano 9 → g = 7.1%, retenção = 36.4%, K_e = 19.7%; lucro 7.67 × (1 − retenção) = 4.88 ÷ fator acumulado 5.049907 × levantamento 1.094052 → valor presente 1.06",
-     "Passo 10: ano 10 → g = 6.8%, retenção = 34.5%, K_e = 19.7%; lucro 8.19 × (1 − retenção) = 5.37 ÷ fator acumulado 6.043032 × levantamento 1.093921 → valor presente 0.97",
-     "Passo 11: soma dos valores presentes do período explícito → 13.71"
+     "Passo 1: ano 1 → g = 9.8%, retenção = 53.1%, K_e = 14.8%; lucro 4.06 × (1 − retenção) = 1.9 ÷ fator acumulado 1.148075 × levantamento 1.071483 → valor presente 1.78",
+     "Passo 2: ano 2 → g = 9.5%, retenção = 52.3%, K_e = 15.3%; lucro 4.44 × (1 − retenção) = 2.12 ÷ fator acumulado 1.323835 × levantamento 1.073821 → valor presente 1.72",
+     "Passo 3: ano 3 → g = 9.1%, retenção = 51.2%, K_e = 15.6%; lucro 4.85 × (1 − retenção) = 2.37 ÷ fator acumulado 1.530918 × levantamento 1.075373 → valor presente 1.66",
+     "Passo 4: ano 4 → g = 8.8%, retenção = 50.1%, K_e = 15.7%; lucro 5.27 × (1 − retenção) = 2.63 ÷ fator acumulado 1.771188 × levantamento 1.075614 → valor presente 1.6",
+     "Passo 5: ano 5 → g = 8.4%, retenção = 48.9%, K_e = 15.8%; lucro 5.72 × (1 − retenção) = 2.92 ÷ fator acumulado 2.051293 × levantamento 1.076172 → valor presente 1.53",
+     "Passo 6: ano 6 → g = 8.1%, retenção = 48.0%, K_e = 15.7%; lucro 6.18 × (1 − retenção) = 3.22 ÷ fator acumulado 2.373657 × levantamento 1.07571 → valor presente 1.46",
+     "Passo 7: ano 7 → g = 7.8%, retenção = 47.0%, K_e = 15.6%; lucro 6.67 × (1 − retenção) = 3.53 ÷ fator acumulado 2.744122 × levantamento 1.075209 → valor presente 1.38",
+     "Passo 8: ano 8 → g = 7.4%, retenção = 45.9%, K_e = 15.6%; lucro 7.16 × (1 − retenção) = 3.87 ÷ fator acumulado 3.171853 × levantamento 1.075115 → valor presente 1.31",
+     "Passo 9: ano 9 → g = 7.1%, retenção = 44.9%, K_e = 15.5%; lucro 7.67 × (1 − retenção) = 4.22 ÷ fator acumulado 3.663525 × levantamento 1.074714 → valor presente 1.24",
+     "Passo 10: ano 10 → g = 6.8%, retenção = 43.8%, K_e = 15.5%; lucro 8.19 × (1 − retenção) = 4.6 ÷ fator acumulado 4.230361 × levantamento 1.074581 → valor presente 1.17",
+     "Passo 11: soma dos valores presentes do período explícito → 14.85"
     ],
-    "finalValue": 13.707536690528443,
+    "finalValue": 14.851462697802141,
     "unit": "R$ por papel"
    },
    {
-    "formulaName": "Valor terminal (retorno neutro, RONIC_inf = r_inf)",
-    "latexRepresentation": "VT = \\frac{L_{N+1}}{r_\\infty}\\quad;\\quad VP(VT) = \\frac{VT\\,\\sqrt{1 + r_\\infty}}{\\prod_{s=1}^{N}(1+k_s)}",
+    "formulaName": "Valor terminal (Gordon com reinvestimento)",
+    "latexRepresentation": "VT = \\frac{L_{N+1}\\,(1 - b_\\infty)}{r_\\infty - g_\\infty}\\quad;\\quad VP(VT) = \\frac{VT\\,\\sqrt{1 + r_\\infty}}{\\prod_{s=1}^{N}(1+k_s)}",
     "mappedVariables": {
      "L_N": 8.19,
      "g_inf (% a.a.)": 6.78,
-     "r_inf (% a.a.)": 19.67,
-     "ROIC_inf (% a.a.)": null,
-     "ROIC implícito do instalado (% a.a.)": 18.44,
+     "r_inf (% a.a.)": 15.47,
+     "ROIC_inf (% a.a.)": 15.47,
+     "ROIC implícito do instalado (% a.a.)": 17.2,
      "N (anos)": 10,
      "M (anos de contrato além de N)": null
     },
     "intermediateSteps": [
-     "Passo 1: com RONIC_inf = r_inf — o **capital novo** sem valor — a álgebra colapsa e o crescimento perpétuo sai da perpetuidade: VT = L_(N+1) ÷ r_inf, sem spread",
-     "Passo 2: valor terminal no ano 10 → 44.47",
-     "Passo 3: trazido a presente pelo fator acumulado 6.043032, levantado por 1.093921 de meio de ano → 8.05",
-     "Passo 4: participação do valor terminal no total → 37.0%",
-     "Passo 5: o retorno neutro vale para o capital **novo**; o instalado rende 18.4% na perpetuidade, contra 19.7% de custo de capital. Reagrupando, VT = capital_N + EVA_(N+1) ÷ r_inf, e a segunda parcela vale -0.53 a valor presente — déficit mantido para sempre"
+     "Passo 1: spread da perpetuidade → 15.5% − 6.8% = 8.7%; retenção perpétua = 43.8%",
+     "Passo 2: valor terminal no ano 10 → 56.53",
+     "Passo 3: trazido a presente pelo fator acumulado 4.230361, levantado por 1.074581 de meio de ano → 14.36",
+     "Passo 4: participação do valor terminal no total → 49.2%"
     ],
-    "finalValue": 8.050929460892368,
+    "finalValue": 14.359796744720967,
     "unit": "R$ por papel"
    },
    {
     "formulaName": "Preço justo por papel (DCF sobre o lucro)",
     "latexRepresentation": "P_0 = VP_{explícito} + VP(VT)",
     "mappedVariables": {
-     "VP_explícito (R$)": 13.71,
-     "VP(VT) (R$)": 8.05
+     "VP_explícito (R$)": 14.85,
+     "VP(VT) (R$)": 14.36
     },
     "intermediateSteps": [
-     "Passo único: soma das duas parcelas → 13.71 + 8.05 = 21.76"
+     "Passo único: soma das duas parcelas → 14.85 + 14.36 = 29.21"
     ],
-    "finalValue": 21.758466151420812,
+    "finalValue": 29.211259442523108,
     "unit": "R$ por papel"
    },
    {
     "formulaName": "Margem de segurança e potencial de valorização",
     "latexRepresentation": "P_{seg} = P_0\\,(1 - s) \\quad;\\quad upside = \\frac{P_0 - P_{mkt}}{P_{mkt}}",
     "mappedVariables": {
-     "P_0 (R$)": 21.76,
+     "P_0 (R$)": 29.21,
      "s (%)": 0.0,
      "P_mkt (R$)": 42.35
     },
     "intermediateSteps": [
-     "Passo 1: preço justo com margem de segurança → 21.76 × (1 − 0.0) = 21.76",
-     "Passo 2: potencial de valorização total → (21.76 − 42.35) ÷ 42.35 = -48.6%",
+     "Passo 1: preço justo com margem de segurança → 29.21 × (1 − 0.0) = 29.21",
+     "Passo 2: potencial de valorização total → (29.21 − 42.35) ÷ 42.35 = -31.0%",
      "Passo 3: veredito → o preço de mercado não está abaixo do preço com margem de segurança"
     ],
-    "finalValue": -48.62,
+    "finalValue": -31.03,
     "unit": "% (total, sem prazo)"
    }
   ]

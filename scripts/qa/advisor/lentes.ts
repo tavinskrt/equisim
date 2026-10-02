@@ -66,6 +66,28 @@ export interface Lente {
 const GERADOS = ['*.g.dart', '*.freezed.dart', '*.mocks.dart'];
 
 /**
+ * O que a lente `metodo` le antes de tudo, na ordem do que mais pesa no preco
+ * justo: a cascata, o custo de capital, o premio de mercado, a realavancagem,
+ * o DCF e as guardas do crescimento, e so depois o resto.
+ */
+const METODO_PRIMEIRO = [
+  'packages/equisim_core/lib/src/usecases/compute_valuation.dart',
+  'packages/equisim_core/lib/src/services/valuation/cost_of_capital.dart',
+  'packages/equisim_core/lib/src/services/valuation/implied_premium.dart',
+  'packages/equisim_core/lib/src/services/valuation/levered_rates.dart',
+  'packages/equisim_core/lib/src/services/valuation/dcf.dart',
+  'packages/equisim_core/lib/src/services/valuation/growth_guards.dart',
+  'packages/equisim_core/lib/src/usecases/prepare_valuation_inputs.dart',
+  'packages/equisim_core/lib/src/services/valuation/yield_curve.dart',
+  'packages/equisim_core/lib/src/services/valuation/growth_estimator.dart',
+  'packages/equisim_core/lib/src/services/valuation/capital_base.dart',
+  'packages/equisim_core/lib/src/services/valuation/moat_fixed_point.dart',
+  'packages/equisim_core/lib/src/services/valuation/scenario_engine.dart',
+  'packages/equisim_core/lib/src/usecases/resolve_beta_prior.dart',
+  'packages/equisim_core/lib/src/usecases/portfolio_usecases.dart',
+];
+
+/**
  * Diretorios de plataforma, gerados pelo `flutter create` e quase nunca
  * tocados a mao. Sao 120 dos 326 arquivos versionados e nao carregam decisao
  * alguma deste projeto.
@@ -346,15 +368,25 @@ export const LENTES: Record<LenteId, Lente> = {
       '  Levantado e recusado em 28/09/2026; tambem nao e tema desta lente,',
       '  que questiona premissa financeira, e nao tipo.',
     ],
+    // **A ordem e a do corte.** O payload tem teto, e o corte e por arquivo
+    // inteiro, do fim para o comeco. Ate 01/10/2026 esta lente lia
+    // `usecases/` e `services/` em ordem alfabetica, e o corte caia antes de
+    // `services/valuation/` -- o custo de capital, a realavancagem, o DCF e o
+    // premio de mercado da decisao 142 nunca chegavam a ela, que respondia
+    // "nenhuma tensao" sobre o metodo sem te-lo lido. Primeiro o que define o
+    // preco justo; dados da CVM, backtest e meta ficam de fora, porque nao sao
+    // metodo de DCF nem de CAPM.
     materiais: [
+      ...METODO_PRIMEIRO.map((caminho) => ({ tipo: 'arquivo' as const, caminho })),
       {
         tipo: 'diretorio',
-        caminho: 'packages/equisim_core/lib/src/usecases',
+        caminho: 'packages/equisim_core/lib/src/services/valuation',
         extensoes: ['.dart'],
+        excluir: METODO_PRIMEIRO,
       },
       {
         tipo: 'diretorio',
-        caminho: 'packages/equisim_core/lib/src/services',
+        caminho: 'packages/equisim_core/lib/src/services/metrics',
         extensoes: ['.dart'],
       },
       { tipo: 'arquivo', caminho: 'docs/AUDITORIA_DE_CALCULOS.md' },
@@ -382,6 +414,16 @@ export const LENTES: Record<LenteId, Lente> = {
       'NAO peca cobertura por cobertura. Codigo trivial sem teste nao e risco;',
       '  caminho de dinheiro ou de erro sem teste, e.',
       'NAO conte testes. Numero de testes nao e medida de risco coberto.',
+      'O `compute` do Flutter roda sobre `Isolate.run`, que completa o Future',
+      '  com erro quando a isolate morre sem responder. Isolate morta em',
+      '  silencio NAO trava quem espera um `compute`; nao peca `onExit` em volta',
+      '  dele (em 01/10/2026 esta lente pediu, sobre o `ValuationRunner`).',
+      'A tolerancia da fonte a JSON de forma errada numa rota -- as outras rotas',
+      '  continuam entregando os exercicios -- e escolha registrada no plano',
+      '  (item D6 e historico de 25/09/2026), e o cache nao grava nulo por cima',
+      '  de valor bom. Reporta-la de novo contra a decisao 68 so com evidencia',
+      '  NOVA: um caminho em que a serie sem a demonstracao chega a um preco',
+      '  justo, e nao so ao cache.',
     ],
     materiais: [
       {

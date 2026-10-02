@@ -107,13 +107,14 @@ class PriceRepositoryImpl implements PriceRepository {
 
     final vieram = fetched.unwrap();
     for (final entry in vieram.entries) {
-      await _persist(entry.key, entry.value);
+      final gravou = await _persist(entry.key, entry.value);
       // **O que sai é o disco, e não o que a rede trouxe.** A gravação é
       // aditiva e a fonte devolve uma janela fixa de dez anos: quando o banco
       // já acumulou mais do que ela, devolver o recorte da resposta encurtaria
       // a série no caminho de SUCESSO — pior do que o caminho degradado, que
-      // lê o disco. Sem cache, o recorte da resposta é tudo o que há.
-      out[entry.key] = await _seriesFromCache(entry.key, range) ??
+      // lê o disco. Sem cache, o recorte da resposta é tudo o que há; e sem a
+      // gravação, também — o disco ficou com o que tinha, talvez noutra base.
+      out[entry.key] = (gravou ? await _seriesFromCache(entry.key, range) : null) ??
           _slice(entry.value, range);
     }
     // O lote pode responder e deixar um ativo de fora — série corrompida
@@ -207,9 +208,16 @@ class PriceRepositoryImpl implements PriceRepository {
     return false;
   }
 
-  Future<void> _persist(Ticker ticker, PriceSeries series) async {
+  /// Grava a resposta no disco e diz se o disco ficou com ela.
+  ///
+  /// `false` sem cache, quando a gravação falha e quando a base mudou e o
+  /// apagamento falhou: gravar por cima, nesse caso, deixaria as duas bases no
+  /// disco — o defeito da decisão 134 por outro caminho (lente `dados`,
+  /// 01/10/2026). Sem a gravação o carimbo de validade também não é renovado,
+  /// e a próxima busca tenta de novo.
+  Future<bool> _persist(Ticker ticker, PriceSeries series) async {
     final db = cache;
-    if (db == null) return;
+    if (db == null) return false;
     // **Duas bases não se somam.** Quando um pregão que a fonte devolve já
     // está em disco com outro preço, todo o disco daquele ativo é de outra base
     // e sai — perder profundidade é menos grave que servir uma série com degrau
@@ -217,9 +225,13 @@ class PriceRepositoryImpl implements PriceRepository {
     // `dados`, decisão 134): o pregão que a resposta omite no meio da janela
     // ficava em disco na escala velha, e o upsert não o alcançava.
     if (await _mudouDeBase(ticker, series)) {
-      await _tryCache(() => db.deletePricesOf(ticker.value));
+      final apagou = await _tryCache(() async {
+        await db.deletePricesOf(ticker.value);
+        return true;
+      });
+      if (apagou != true) return false;
     }
-    await _tryCache(() async {
+    final gravou = await _tryCache(() async {
       await db.upsertPrices([
         for (final p in series.points)
           CachedPricesCompanion.insert(
@@ -231,7 +243,9 @@ class PriceRepositoryImpl implements PriceRepository {
           ),
       ]);
       await db.touch(CachePolicy.pricesKey(ticker.value));
+      return true;
     });
+    return gravou == true;
   }
 
   PriceSeries _slice(PriceSeries series, DateRange range) => PriceSeries(

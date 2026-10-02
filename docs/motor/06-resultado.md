@@ -35,10 +35,11 @@ a avaliação roda fora da linha da interface ([valuation_runner.dart](../../lib
 | **São sensibilidade, não probabilidade**: a banda pessimista–otimista conteve 8% dos resultados nas coortes, contra 90% nominais | subtítulo do cartão | decisão 92 |
 
 **Pendente (item B38):** o otimista soma crescimento, e crescer destrói valor
-quando o retorno fica abaixo do custo. Medido em 14/09/2026: só o crescimento
-+3 p.p. baixa o preço justo em 53 dos 97 avaliados; combinado com o desconto, o
-otimista sai abaixo do pessimista em 17 dos 77 da via da firma. O desconto
-sozinho nunca inverte. A conta está certa; o rótulo supõe que crescer é bom.
+quando o retorno fica abaixo do custo. Com o motor de 01/10/2026, o otimista
+sai abaixo do pessimista em 15 dos 88 da via da firma e em nenhum dos 20 da via
+do acionista (com o prêmio de 5,5%, eram 17 de 77, e só o crescimento +3 p.p.
+baixava o preço justo em 53 dos 97). O desconto sozinho nunca inverte. A conta
+está certa; o rótulo supõe que crescer é bom.
 
 ---
 
@@ -53,8 +54,8 @@ P = preço de hoje;  V = preço justo;  σ = volatilidade anual do papel
 |---|---|---|
 | `σ` = desvio-padrão amostral dos retornos log diários dos últimos 252 pregões × √252 (≥ 120 retornos) | [calibrated_band.dart, `trailingVolatility`](../../packages/equisim_core/lib/src/services/valuation/calibrated_band.dart) | — |
 | `a`, `b`, `z` por horizonte e nominal, do pacote [banda_calibrada.json](../../assets/validacao/banda_calibrada.json), medidos nas coortes trimestrais (12 meses: 2018–2025; 36 meses: 2018–2023) | `VolatilityBandTable`, [tool/cobertura_banda.py](../../tool/cobertura_banda.py) | decisões 100 e 124 |
-| 12 meses: `a = 0,0852`, `b = 0,0289`; 36 meses: `a = 0,1609`, `b = 0,0916` — o preço converge pouco ao justo | pacote | [cobertura_banda.md](../validacao/cobertura_banda.md) |
-| A tela afirma "8 de cada 10" só se a cobertura fora da amostra estiver a até 5 p.p. de 80% nos dois horizontes (medida em 28/09/2026: 79,4% e 79,9%) | `_CalibratedBandCard.folgaDoCriterio` | critério do R2 |
+| 12 meses: `a = 0,0729`, `b = 0,0205`; 36 meses: `a = 0,1217`, `b = 0,0658` — o preço converge pouco ao justo | pacote | [cobertura_banda.md](../validacao/cobertura_banda.md) |
+| A tela afirma "8 de cada 10" só se a cobertura fora da amostra estiver a até 5 p.p. de 80% nos dois horizontes (medida em 01/10/2026: 79,7% e 79,6%) | `_CalibratedBandCard.folgaDoCriterio` | critério do R2 |
 
 ---
 

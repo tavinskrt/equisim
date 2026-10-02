@@ -225,7 +225,7 @@ senão o teste só veria as sobreviventes (**viés de sobrevivência**).
 Se você ajusta um modelo olhando os dados, ele sempre parece bom nesses dados.
 O teste honesto é **fora da amostra**: medir em dados que não foram usados para
 ajustar. A faixa calibrada foi ajustada numa parte das coortes e medida na
-outra (79,4% de cobertura para 80% prometidos, em 12 meses).
+outra (79,7% de cobertura para 80% prometidos, em 12 meses).
 
 ### Cobertura e calibração
 
@@ -254,8 +254,8 @@ limiar próprio, obtido por simulação (2,70 para 22 coortes; decisão 96).
 O **poder** é a chance de um teste detectar um efeito que existe. Com poucas
 coortes, o poder é baixo: um efeito real pode passar despercebido. O Equisim
 mediu isso: com a série brasileira disponível, o menor efeito que o teste
-enxerga com 80% de chance é 0,62, e o efeito medido foi 0,069 (decisão 140;
-remedição de 28/09/2026).
+enxerga com 80% de chance é 0,65, e o efeito medido foi 0,032 (decisão 140;
+remedição de 01/10/2026).
 Leitura correta:
 
 > "O teste não encontrou habilidade de ordenação, **e** não teria poder para

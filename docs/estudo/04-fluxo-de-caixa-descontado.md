@@ -377,12 +377,12 @@ faixa = preço de hoje × exp(a + b × ln(justo ÷ preço) + σ × z)
 
 - `σ` é a volatilidade do papel no último ano (capítulo 3, seção 3.1);
 - `a` e `b` foram medidos nas coortes trimestrais do backtest (de 2018 a 2025
-  em 12 meses, de 2018 a 2023 em 36): `b` é pequeno (0,03 em 12 meses, 0,09 em
+  em 12 meses, de 2018 a 2023 em 36): `b` é pequeno (0,02 em 12 meses, 0,07 em
   36), o que quer dizer que **o preço converge pouco ao preço justo**;
 - `z` são os limites que, fora da amostra, contiveram 80% dos casos.
 
 Medida fora da amostra, a faixa de 80% conteve o preço mais os proventos em
-79,4% dos casos em 12 meses e 79,9% em 36. Por isso a tela diz "8 de cada 10".
+79,7% dos casos em 12 meses e 79,6% em 36. Por isso a tela diz "8 de cada 10".
 O preço justo entra com peso pequeno porque essa é a evidência: ele explica
 pouco do preço futuro.
 
@@ -433,11 +433,12 @@ dado público e regra fixa. Ele **não** é previsão de preço. Três fatos med
 para ter em mente:
 
 1. **O motor é sistematicamente mais pessimista que o mercado.** Com os dados
-   de 14/09/2026 e o motor de 28/09/2026, o upside mediano dos 97 avaliados é −45%, e só 15 tinham upside positivo. O
-   prêmio de mercado que faria o upside mediano ser zero sai negativo (decisão
-   116): o desacordo de nível é com o conjunto das premissas — juros de 14% na
-   curva inteira, retorno convergindo ao custo em dez anos —, e não com um
-   parâmetro isolado.
+   de 14/09/2026 e o motor de 01/10/2026, o upside mediano dos 108 avaliados é
+   −37%, e só 28 tinham upside positivo. Com o prêmio de mercado tirado do
+   próprio preço da bolsa (1,21%, decisão 142) o desacordo diminuiu — com os 5,5%
+   de antes eram −45% —, mas não acabou: ele é com o conjunto das premissas —
+   juros de 14% na curva inteira, retorno convergindo ao custo em dez anos —, e
+   não com um parâmetro isolado.
 2. **A ordenação não está comprovada.** Comprar os de maior upside não bateu os
    de menor upside de forma estatisticamente clara nas coortes de 2018 a 2023
    (decisão 140). O motor serve para **entender** uma empresa, e não para

@@ -43,10 +43,10 @@ refeitas e o porquê de cada uma.
 
 | Caso | O que ele mostra | Resultado |
 |---|---|---|
-| [WEGE3 — WEG](casos/wege3.md) | a via da firma completa, com caixa líquido e vantagem competitiva residual | R$ 12,53 (mercado: R$ 50,74) |
-| [ITUB4 — Itaú](casos/itub4.md) | a via do acionista de um banco, e o que não é calculado nela | R$ 21,76 (mercado: R$ 42,35) |
-| [VALE3 — Vale](casos/vale3.md) | normalização pelo ciclo em commodity | R$ 70,25 (mercado: R$ 75,48) |
-| [SAPR11 — Sanepar](casos/sapr11.md) | unit (5 ações por papel) e concessão | R$ 36,74 (mercado: R$ 34,74) |
+| [WEGE3 — WEG](casos/wege3.md) | a via da firma completa, com caixa líquido e vantagem competitiva residual | R$ 16,22 (mercado: R$ 50,74) |
+| [ITUB4 — Itaú](casos/itub4.md) | a via do acionista de um banco, e o que não é calculado nela | R$ 29,21 (mercado: R$ 42,35) |
+| [VALE3 — Vale](casos/vale3.md) | normalização pelo ciclo em commodity | R$ 88,74 (mercado: R$ 75,48) |
+| [SAPR11 — Sanepar](casos/sapr11.md) | unit (5 ações por papel) e concessão | R$ 46,05 (mercado: R$ 34,74) |
 | [RENT3 — Localiza](casos/rent3.md) | a recusa: quando a conta não fecha | recusada |
 
 Os dados de cada caso — insumos, resultado, cenários, Monte Carlo, faixa
@@ -67,5 +67,6 @@ acontecer, rode de novo e confira os números dos casos.
   `valor presente = fluxo ÷ (1 + taxa)^anos`.
 - "No código:" aponta o arquivo que faz a conta, para quem quiser conferir.
 - Toda afirmação sobre o que o motor faz foi conferida no código em
-  28/09/2026. Se o código mudar, a [documentação do motor](../motor/README.md)
+  28/09/2026, e de novo em 01/10/2026 no que o prêmio de mercado mudou (decisão
+  142). Se o código mudar, a [documentação do motor](../motor/README.md)
   muda junto, e este guia deve ser relido.

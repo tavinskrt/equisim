@@ -68,7 +68,8 @@ calma.
 | **Ponto fixo** | Repetir uma conta até que o resultado pare de mudar; usado no custo de capital (cap. 3). |
 | **Porta** | Cada decisão da cascata: elegibilidade, setor, fluxo operacional, premissas (cap. 4). |
 | **Prêmio de crédito (*spread*)** | O quanto a empresa paga acima da taxa livre de risco para se endividar (cap. 3). |
-| **Prêmio de risco de mercado** | Quanto o investidor exige acima da renda fixa para ficar em ações: 5,5% no motor (cap. 3). |
+| **Prêmio de risco de mercado** | Quanto o investidor exige acima da renda fixa para ficar em ações. No motor, a média de dez anos do prêmio implícito: 1,21% em 14/09/2026 (cap. 3). |
+| **Prêmio implícito** | O prêmio que o preço da bolsa embute: o retorno que iguala o valor de mercado das companhias aos dividendos que elas pagam, menos a taxa do Tesouro (cap. 3). |
 | **Preço justo** | O valor por ação que as premissas do motor implicam (cap. 4). |
 | **Regressão linear** | A reta que melhor passa por pontos (cap. 6). |
 | **Ressalva** | Aviso estruturado de que o número é frágil num ponto específico (cap. 4). |

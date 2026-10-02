@@ -102,3 +102,14 @@ corrigido de 0,40). O efeito mínimo detectável com 80% de poder fica em
 **0,617**, e o limite superior que a amostra sustenta em 0,532. O
 book-to-market continua pedindo 66 coortes, disponíveis em 30/06/2037.
 
+## Remedido em 01/10/2026
+
+Com o backtest refeito depois das decisões 142, 143 e 144 (o prêmio de mercado
+de cada coorte tirado do preço da bolsa, a contagem de ações conferida contra o
+preço e os proventos que faltavam), o critério do R3 vai a 0,032 (`t` corrigido
+de 0,18). O efeito mínimo detectável com 80% de poder fica em **0,651**, e o
+limite superior que a amostra sustenta em 0,521. O book-to-market, com IC de
+0,166 e poder de 45% no próprio efeito, passa a pedir **54 coortes**,
+disponíveis em 30/06/2034 (eram 66, em 2037); o composto pediria 158. Em 12
+meses, a amostra descarta coeficiente condicionado acima de 0,17.
+

@@ -43,13 +43,13 @@ financiado em grande parte com dívida; o lucro líquido não acompanhou.
 | Unit | 1 ação por papel |
 | Contagem | oficial da B3: 1.095.040.871 papéis (a fonte divergia: 1,13 bi pelo mercado, 2,0 bi pelas demonstrações) |
 | Portas | não financeira; NOPAT positivo em ≥ 60% dos anos → **via da firma** |
-| CAPM | `Ke = 14,09% + 1,45 × 5,5% = 22,06%` — beta alto (1,45; desalavancado 1,23) |
+| CAPM | `Ke = 14,09% + 1,45 × 1,21% = 15,84%` — beta alto (1,45; desalavancado 1,23) |
 | Base | ROIC atual 9,69% contra 13,83% do ciclo, mas com **tendência de queda** significante (−0,58 p.p./ano, `t` = −2,65): **base mantida** |
 | Capital externo | Φ = 5,64: o capital cresceu 5,6 vezes a base inicial com dinheiro de fora — **crescimento inorgânico** declarado |
 | Crescimento | mediana 15,33% × regressão 28,70%: discordam 5,8 erros-padrão → **não identificado**; a âncora de inflação (4,92%) é financiável (exige reter 36%, e a empresa retém 100%) → g = 4,92% |
 | Custo da dívida | alavancagem 2,4× daria prêmio de 2,4%; a cobertura (EBIT ÷ juros = 1,24) está na faixa em que fala, e dá **9,0%**; vale o maior → Kd = 23,09% |
-| WACC de hoje | 0,5415 × 22,06% + 0,6057 × 23,09% × 0,66 − 0,1472 × 14,09% × 0,66 = **19,8%** |
-| Perpetuidade | barrada: crescimento inorgânico, e retorno do ciclo (13,83%) abaixo do custo (19,98%) |
+| WACC de hoje | 0,5415 × 15,84% + 0,6057 × 23,09% × 0,66 − 0,1472 × 14,09% × 0,66 = **16,4%** |
+| Perpetuidade | barrada: crescimento inorgânico, e retorno do ciclo (13,83%) abaixo do custo de equilíbrio (16,6%) |
 
 ---
 
@@ -73,15 +73,15 @@ não fechou. Recusa.
 alíquota estrutural ≈ 26%;  NOPAT 2025 ≈ 7,81 × 0,74 ≈ R$ 5,8 bi
 ROIC ≈ 9,7%;  para crescer 4,9% é preciso reter 4,9 ÷ 9,7 ≈ 51% do NOPAT
 fluxo livre do ano 1 ≈ 5,8 × 1,049 × (1 − 0,51) ≈ R$ 3,0 bi
-valor da operação ≈ 3,0 ÷ (0,20 − 0,049) ≈ R$ 20 bi
-dívida líquida = R$ 33 bi   →   capital próprio ≈ 20 − 33 < 0
+valor da operação ≈ 3,0 ÷ (0,164 − 0,049) ≈ R$ 26 bi
+dívida líquida = R$ 33 bi   →   capital próprio ≈ 26 − 33 < 0
 ```
 
 (A conta do motor é mais completa — dez anos, retorno convergindo, meio de ano,
 realavancagem —, mas a conclusão é a mesma.)
 
 **Traduzindo:** a operação da Localiza rende cerca de 10% sobre o capital, e o
-motor diz que esse capital custa cerca de 20%. Nessa conta, cada real investido
+motor diz que esse capital custa cerca de 16,4%. Nessa conta, cada real investido
 vale menos que um real, e a empresa inteira vale menos que o que ela deve.
 
 ---
@@ -125,7 +125,7 @@ não dá preço.
 
 ## 6. O que este caso ensina
 
-- **Recusar é um resultado.** Em 14/09/2026, o motor recusou 279 dos 376 ativos
+- **Recusar é um resultado.** Em 14/09/2026, o motor recusou 268 dos 376 ativos
   que chegaram a ele — a maioria por liquidez ou falta de histórico, e algumas,
   como a Localiza, porque a conta não fecha.
 - **Alavancagem alta torna o preço por ação frágil.** Quando o capital próprio é

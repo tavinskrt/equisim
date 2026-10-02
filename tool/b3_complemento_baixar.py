@@ -12,7 +12,7 @@ Duas consultas do mesmo portal de empresas listadas que o
   1.082 que ele listava era de 12/09/2025.
 
 Lê o `codeCVM` e o `tradingName` de `data/b3/companhias/`, que tem de existir
-antes. O nome de pregão entra sem espaços, que é como a consulta o aceita.
+antes. O nome de pregão entra sem espaços e sem barra, que é como a consulta o aceita.
 
 **As deslistadas também.** A consulta de proventos é por nome de pregão, e
 responde para companhia que já saiu da bolsa — CIELO e SOUZACRUZ trazem o
@@ -67,6 +67,19 @@ def consultar(metodo: str, carga: dict) -> object | None:
     return None
 
 
+def nome_da_consulta(nome_pregao: str) -> str:
+    """O nome de pregão como a consulta de proventos o aceita: sem espaços e sem barra.
+
+    Com a barra, a consulta volta vazia sem erro: `AMBEVS/A` devolvia zero
+    proventos, e `AMBEVSA` devolve os 40 da Ambev S.A. (item B44). Os nove
+    emissores com barra no nome — Ambev, Klabin, Cury, Light, IMC, Ourofino,
+    Embpar, Haga e Wetzel — tinham ficado sem histórico. Sem a barra, o nome
+    não se confunde com outro: `AMBEV` sozinho é a antiga Companhia de Bebidas,
+    incorporada em 2013.
+    """
+    return nome_pregao.replace(" ", "").replace("/", "")
+
+
 def proventos(nome_pregao: str) -> list | None:
     """Todas as páginas; `None` se alguma falhar — série parcial não é série."""
     pagina, total, linhas = 1, None, []
@@ -118,7 +131,7 @@ def deslistadas(so_faltantes: bool = False) -> int:
             continue
         registros = []
         for nome in sorted(candidatos):
-            historico = proventos(nome.replace(" ", ""))
+            historico = proventos(nome_da_consulta(nome))
             if historico is None:
                 falhas.append(f"{cnpj} {nome}")
                 continue
@@ -224,7 +237,7 @@ def main() -> int:
             continue
         emissor = arquivo.stem
         codigo_cvm = (resposta[0].get("codeCVM") or "").strip()
-        nome_pregao = (resposta[0].get("tradingName") or "").replace(" ", "")
+        nome_pregao = nome_da_consulta(resposta[0].get("tradingName") or "")
         if not codigo_cvm or not nome_pregao:
             sem_nome.append(emissor)
             continue

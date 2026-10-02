@@ -20,6 +20,7 @@ import '../data/datasources/remote/tesouro_datasource.dart';
 import '../data/repositories/b3_registry_repository.dart';
 import '../data/repositories/peer_multiples_repository.dart';
 import '../data/repositories/beta_prior_repository.dart';
+import '../data/repositories/market_premium_repository.dart';
 import '../data/repositories/unit_composition_repository.dart';
 import '../data/repositories/cash_dividends_repository.dart';
 import '../data/repositories/calibrated_band_repository.dart';
@@ -206,6 +207,10 @@ const String betaPriorAsset = 'assets/mercado/beta_prior.json';
 /// Pacote das medianas de múltiplos por grupo de pares (item B5, decisão 118).
 const String peerMultiplesAsset = 'assets/mercado/multiplos_setoriais.json';
 
+/// A série do prêmio implícito, de onde sai o prêmio de mercado do CAPM
+/// (decisão 142).
+const String marketPremiumAsset = 'assets/mercado/premio_implicito.json';
+
 /// Caminho da composição declarada das units, da FCA da CVM (item B16).
 const String unitCompositionAsset = 'assets/cvm/units.json';
 
@@ -307,6 +312,29 @@ final betaPriorReadingProvider =
     return await ref.watch(betaPriorRepositoryProvider).reading();
   } on Object {
     return (prior: null, note: null);
+  }
+});
+
+final marketPremiumRepositoryProvider = Provider<MarketPremiumRepository>(
+  (ref) => MarketPremiumRepository(
+    carregarPacote: () => rootBundle.loadString(marketPremiumAsset),
+  ),
+);
+
+/// O prêmio de mercado do pacote, de onde ele veio e a ressalva (decisão 142).
+///
+/// É o mesmo prêmio no desconto e no retorno esperado da tela de estudo: as
+/// duas pontas do trabalho não podem adotar prêmios diferentes.
+final marketPremiumReadingProvider = FutureProvider<
+    ({double premium, MarketPremiumSource source, String? note})>((ref) async {
+  try {
+    return await ref.watch(marketPremiumRepositoryProvider).reading();
+  } on Object {
+    return (
+      premium: CapmInputs.defaultMarketPremium,
+      source: MarketPremiumSource.parameterized,
+      note: null,
+    );
   }
 });
 

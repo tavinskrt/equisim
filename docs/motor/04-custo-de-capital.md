@@ -12,7 +12,8 @@ estrutura recusada na [RENT3](../estudo/casos/rent3.md).
 | Regra | Código | Fundamento | Evidência |
 |---|---|---|---|
 | `Ke = Rf + β × prêmio` | [cost_of_capital.dart, `CapmInputs.costOfEquity`](../../packages/equisim_core/lib/src/services/valuation/cost_of_capital.dart) | Sharpe (1964), Lintner (1965) | — |
-| Prêmio de mercado **5,5%**, fixo | `CapmInputs`, `MarketPremiumSource` | histórico e implícito foram tentados: o histórico tem erro de 7,85 p.p. e o encolhimento devolve 5,49%; o implícito sai −3,9% | decisão 116, [premio_de_mercado.md](../validacao/premio_de_mercado.md); remedidos do mercado em 29/09/2026, sem ligar nada (B42): [premio_historico.md](../validacao/premio_historico.md), [premio_implicito.md](../validacao/premio_implicito.md) |
+| Prêmio de mercado = **média de dez anos do prêmio implícito** no preço da bolsa: 1,21% em 14/09/2026 | [implied_premium.dart, `ImpliedPremiumPackage.normalizedAt`](../../packages/equisim_core/lib/src/services/valuation/implied_premium.dart); `MarketPremiumSource.impliedNormalized` | em cada trimestre, `r = rendimento × (1 + g) + g` (Gordon/Damodaran: o valor de mercado somado das listadas igualado aos dividendos e JCP de doze meses, crescendo com a economia nominal); o prêmio do trimestre é `r − Rf`, com `Rf` o prefixado de dez anos — a forma que o CAPM soma; a média é a dos trimestres com fim em `(data − 10 anos, data]`, com pelo menos 20 | decisão 142, [premio_implicito.md](../validacao/premio_implicito.md); a média fica positiva em todas as coortes e concorda com o prêmio histórico de dez anos |
+| A série chega por pacote (`assets/mercado/premio_implicito.json`, gerado por `tool/premio_implicito.dart`); sem pacote, o prêmio é o parametrizado de 5,5% (`CapmInputs.defaultMarketPremium`) e a avaliação diz isso; pacote com mais de 183 dias continua valendo, com ressalva da data | [market_premium_repository.dart](../../lib/data/repositories/market_premium_repository.dart) | a média de dez anos anda um quadragésimo por trimestre: trocá-la pelos 5,5% seria salto maior que a defasagem | decisão 142 |
 | O Ke "do dia" (CDI corrente) serve ao WACC estático e à tela de metas; o de cada ano da projeção usa o forward daquele ano | `_premissas`, `_auditCapm` | a curva dá a taxa que o mercado atribui a cada prazo | decisões 74 e 103; rastro explica desde 28/09/2026 |
 
 ---
@@ -83,7 +84,7 @@ circularidades juntas.
 |---|---|
 | Dívida e caixa crescem a `g_t` (alavancagem constante na projeção) | `LeveredCostOfCapital.solve` |
 | Valor da firma por acumulação regressiva: `V_{t−1} = (FCFF_t × √(1+WACC_t) + V_t) ÷ (1 + WACC_t)`, terminal levantado por meio ano | idem |
-| `E_t = V_t − D_t`; `β_L,t = β_U × (1 + 0,66 × D_{t−1}/E_{t−1})`; `Ke_t = Rf_t + β_L,t × 5,5%`; `Kd_t = Rf_t + prêmio`; WACC_t com os pesos do início do ano | idem |
+| `E_t = V_t − D_t`; `β_L,t = β_U × (1 + 0,66 × D_{t−1}/E_{t−1})`; `Ke_t = Rf_t + β_L,t × prêmio`; `Kd_t = Rf_t + prêmio`; WACC_t com os pesos do início do ano | idem |
 | Amortecimento de 0,5 no capital próprio, tolerância de 10⁻¹⁰ na variação relativa de E₀, até 100 iterações | idem |
 | Duas partidas: o caminho sem realavancagem e o custo desalavancado `Rf_t + β_U × prêmio`; se as duas convergem e divergem mais de 0,1%, aviso; se só uma converge, vale ela, com aviso; se nenhuma, recusa "do método, e não do chute" | `LeveredCostOfCapital.solve` (decisão 110) |
 | Capital próprio ≤ 0 em algum ano, ou valor da firma ≤ 0: **estrutura de capital recusada**, e o ativo é recusado (não muda de via) | decisões 45 e 102 |
@@ -96,8 +97,14 @@ exata com as taxas resolvidas; ela está travada por teste (decisão 43,
 
 ## Limitações deste capítulo
 
-- Prêmio de mercado único e fixo no tempo; abaixo do prêmio total que Damodaran
-  publica para o Brasil.
+- Prêmio de mercado único para todos os ativos, como o CAPM manda; ele muda a
+  cada trimestre da série, mas a média de dez anos o faz andar devagar. É o
+  prêmio sobre o prefixado brasileiro, que já carrega o risco do país, e por
+  isso fica muito abaixo do prêmio total que Damodaran publica para o Brasil.
+- O prêmio implícito supõe que os dividendos crescem com a economia nominal (um
+  ponto a mais ou a menos de crescimento move o prêmio em cerca de um ponto),
+  não conta a recompra de ações e soma só as companhias listadas hoje
+  ([premio_implicito.md](../validacao/premio_implicito.md)).
 - Custo da dívida sintético, não de crédito observado.
 - Hamada com D/E limitado a 3, e escudo a 34% (bancos pagam 45%, mas não passam
   por aqui).

@@ -314,6 +314,53 @@ void main() {
       expect(serie.points.first.close, closeTo(41.66, 1e-9));
     });
 
+    test('se a base velha não sai do disco, a nova não entra por cima', () async {
+      // Lente `dados`, 01/10/2026. O apagamento e a gravação eram dois passos
+      // independentes, cada um engolindo a própria falha: se o apagamento
+      // falhasse, a gravação seguia e o disco ficava com as duas bases — o
+      // defeito da decisão 134 por outro caminho. E o que saía era o disco.
+      final banco = _ApagamentoQuebrado();
+      addTearDown(banco.close);
+      await banco.upsertPrices([
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2001-03-15',
+          close: 6.42,
+          volume: const Value(1000),
+        ),
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2026-07-21',
+          close: 83.32,
+          volume: const Value(1000),
+        ),
+      ]);
+      final repository = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: banco,
+      );
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+
+      final serie = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
+          .unwrap()[Ticker.parse('PETR4')]!;
+
+      expect(serie.points.first.close, closeTo(41.66, 1e-9),
+          reason: 'sem gravar, o que sai é a resposta, e não o disco velho');
+      expect(serie.points.any((p) => p.date.year == 2001), isFalse);
+      final emDisco = await banco.pricesIn('PETR4', '2000-01-01', '2030-01-01');
+      expect(emDisco.map((r) => r.date), ['2001-03-15', '2026-07-21'],
+          reason: 'nada da base nova entra ao lado da velha');
+      expect(emDisco.last.close, 83.32);
+      expect(
+        await banco.isFresh(
+            CachePolicy.pricesKey('PETR4'), CachePolicy.historicalPrices),
+        isFalse,
+        reason: 'sem carimbo, a próxima busca tenta de novo',
+      );
+    });
+
     test('a mudança de base é vista no primeiro pregão em comum', () async {
       // O primeiro dia da resposta, 21/07/2026, não está no disco; o segundo
       // está, no dobro. Comparar só o primeiro dia da resposta dava "sem
@@ -872,4 +919,14 @@ void main() {
       expect(adapter.callCount['/v2/stocks/historical'], 2);
     });
   });
+}
+
+/// Um banco que lê e grava, mas não consegue apagar — o disco que trava no meio
+/// da troca de base.
+class _ApagamentoQuebrado extends CacheDatabase {
+  _ApagamentoQuebrado() : super(NativeDatabase.memory());
+
+  @override
+  Future<void> deletePricesOf(String ticker) =>
+      Future.error(StateError('o disco recusou o apagamento'));
 }

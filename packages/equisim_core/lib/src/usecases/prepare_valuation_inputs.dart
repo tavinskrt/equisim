@@ -48,6 +48,10 @@ abstract final class PrepareValuationInputs {
   ///   sempre que o resultado precisar ser reproduzível.
   /// - [marketPremium], [marginOfSafety], [projectionYears],
   ///   [perpetualGrowthCap]: parâmetros declarados do modelo.
+  /// - [premiumSource]: de onde veio [marketPremium]. O aplicativo passa a média
+  ///   de dez anos do prêmio implícito, com
+  ///   [MarketPremiumSource.impliedNormalized] (decisão 142); o padrão
+  ///   parametrizado é o recuo, quando a série não chega.
   ///
   /// Propaga a falha do histórico de fundamentos e a de cotações; devolve
   /// [InsufficientData] quando a série de preços vem vazia na janela.
@@ -109,6 +113,7 @@ abstract final class PrepareValuationInputs {
     required double riskFreeRate,
     DateTime? asOf,
     double marketPremium = CapmInputs.defaultMarketPremium,
+    MarketPremiumSource premiumSource = MarketPremiumSource.parameterized,
     PeerMultipleSet? peerMultiples,
     double marginOfSafety = 0.0,
     int projectionYears = 10,
@@ -232,6 +237,7 @@ abstract final class PrepareValuationInputs {
         beta: betaFinal,
         marketPremium: marketPremium,
         betaSource: origemBeta,
+        premiumSource: premiumSource,
       ),
       marginOfSafety: marginOfSafety,
       projectionYears: projectionYears,

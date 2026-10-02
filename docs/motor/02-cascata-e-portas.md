@@ -75,6 +75,6 @@ etc.) existem só para medição e testes; o aplicativo não as usa.
 Na entrada congelada de 14/09/2026 (gabarito, montagem do aplicativo), de 376
 ativos: 189 recusados por liquidez, 34 por histórico, 4 por patrimônio negativo;
 os demais recusados por falta de demonstrativo, por dado que não sustenta via ou
-por estrutura de capital. **97 avaliados**: 77 pela via da firma, 20 pela do
-acionista (19 financeiras e uma não financeira). Ver o [caso RENT3](../estudo/casos/rent3.md)
+por estrutura de capital. **108 avaliados** (motor de 01/10/2026): 88 pela via
+da firma, 20 pela do acionista (19 financeiras e uma não financeira). Ver o [caso RENT3](../estudo/casos/rent3.md)
 para uma recusa por estrutura de capital.

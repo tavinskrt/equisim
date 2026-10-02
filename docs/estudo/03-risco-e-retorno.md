@@ -204,24 +204,55 @@ reta.
 
 Quanto um investidor exige, a mais que a taxa livre de risco, para ficar no
 mercado de ações em vez da renda fixa? Esse adicional é o **prêmio de risco de
-mercado**. O Equisim usa **5,5% ao ano** (decisão 116).
+mercado**. É uma das premissas mais discutidas de finanças, e o Equisim o tira
+do próprio preço da bolsa (decisão 142).
 
-Esse número é uma das premissas mais discutidas de finanças. O projeto tentou
-medi-lo das duas formas que a literatura oferece:
+**A ideia, com um título de renda fixa.** Se um título paga R$ 100 por ano para
+sempre e custa R$ 1.000, quem o compra está aceitando ganhar 10% ao ano: a taxa
+está escondida no preço. Com a bolsa é igual. O valor de mercado de todas as
+companhias juntas é o preço; os dividendos e juros sobre capital próprio que
+elas pagam são o "cupom", que cresce com a economia. Dá para descobrir a taxa
+que o preço embute — o **retorno implícito** — com a fórmula de Gordon:
 
-- **pelo passado**: o Ibovespa rendeu só 0,39% ao ano acima do CDI em cinco anos,
-  com erro-padrão de 7,85 pontos — seriam precisos 308 anos de dados para um
-  erro de um ponto. Encolhido na direção da faixa usual (5% a 6%), o resultado
-  volta a 5,49%;
-- **pelos preços de hoje** (o prêmio "implícito"): o prêmio que faria o
-  potencial mediano das ações ser zero sai **negativo** (−3,9%), o que não
-  descreve mercado nenhum.
+```
+retorno implícito = rendimento × (1 + crescimento) + crescimento
+```
 
-5,5% ficou por ser o resultado das duas tentativas, e não por convenção
+Em 14/09/2026: as listadas pagaram 6,05% do valor delas nos doze meses
+anteriores, e a economia cresce 6,78% ao ano em termos nominais; o retorno que o
+preço embute é 6,05% × 1,0678 + 6,78% = **13,24%**. O título prefixado de dez
+anos do Tesouro pagava 14,38%. O **prêmio implícito** daquele dia é a
+diferença: 13,24% − 14,38% = **−1,14%**. O mercado estava pagando menos na bolsa
+que no Tesouro.
+
+**Por que a média de dez anos.** O prêmio de um trimestre pula: fica negativo
+quando os juros do Tesouro disparam, como em 2015, em 2024 e em 2026. Prêmio
+negativo não faz sentido no CAPM — diria que a ação mais arriscada exige
+*menos* retorno. Por isso o motor usa a **média dos últimos dez anos** de
+trimestres: **1,21%** em 14/09/2026. Essa média ficou positiva, entre 0,9% e 1,6%,
+em todas as datas testadas desde 2018, e bate com o que o Ibovespa rendeu acima
+do CDI em dez anos (+1,85%) — dois caminhos independentes dando a mesma ordem
+de grandeza ([premio_implicito.md](../validacao/premio_implicito.md)).
+
+**Antes era 5,5%.** Até 01/10/2026 o prêmio era um parâmetro fixo, o meio da
+faixa de 5% a 6% que os livros costumam usar
 ([decisão 116](../decisoes/116-o-premio-de-mercado-fica-em-5-5-por-cento-por-medicao-das-duas-alternativas.md)).
-É um número abaixo do prêmio total que Damodaran publica para o Brasil (prêmio
-de mercado maduro mais risco-país); a escolha e o efeito dela estão nas
-[limitações](../validacao/limitacoes.md).
+O orientador perguntou se dava para capturá-lo do mercado em vez de fixá-lo;
+medido, o mercado brasileiro paga muito menos que 5,5% acima do prefixado — o
+título do Tesouro já rende tanto que sobra pouco prêmio para a bolsa. Os 5,5%
+continuam no código só como recuo, se a série do prêmio implícito não chegar ao
+aplicativo.
+
+**O que o número carrega:** supõe que os dividendos crescem com a economia (um
+ponto a mais de crescimento sobe o prêmio em cerca de um ponto), não conta a
+recompra de ações e soma só as companhias listadas hoje. E é bem menor que o
+prêmio que Damodaran publica para o Brasil, porque o dele é medido em dólar
+contra o título americano; o do Equisim é contra o prefixado brasileiro, que já
+carrega o risco do país. Ver as [limitações](../validacao/limitacoes.md).
+
+**No código:** [implied_premium.dart](../../packages/equisim_core/lib/src/services/valuation/implied_premium.dart)
+(a média) e [tool/premio_implicito.dart](../../tool/premio_implicito.dart) (a
+série, medida trimestre a trimestre).
 
 ---
 
@@ -240,11 +271,12 @@ ficar com aquela ação.
 Exemplo, com os números da WEG em 14/09/2026:
 
 ```
-Ke = 14,09% + 0,714 × 5,5% = 14,09% + 3,93% = 18,01%
+Ke = 14,09% + 0,714 × 1,21% = 14,09% + 0,86% = 14,95%
 ```
 
-Quem compra WEG exige, em média, 18% ao ano. Uma empresa com β = 1,3 exigiria
-14,09% + 7,15% = 21,24%.
+Quem compra WEG exige, em média, 15% ao ano. Uma empresa com β = 1,3 exigiria
+14,09% + 1,57% = 15,66%. Com um prêmio pequeno, o beta muda pouco o Ke: quase
+todo ele é a taxa do Tesouro.
 
 **Dois usos do mesmo Ke:**
 
@@ -351,10 +383,10 @@ dívida é matéria-prima, e o beta medido já carrega a alavancagem de sempre
 | Beta encolhido | média ponderada pela precisão | peso mediano 0,98 |
 | Hamada | `β_L = β_U × (1 + 0,66 × D/E)` | D/E limitado a 3 |
 | Taxa livre de risco | forward da curva, ano a ano | 13,6% a 14,6% |
-| Prêmio de mercado | fixo | 5,5% |
-| CAPM | `Ke = Rf + β × prêmio` | 16% a 23% |
+| Prêmio de mercado | média de dez anos do prêmio implícito | 1,21% |
+| CAPM | `Ke = Rf + β × prêmio` | 15% a 16% (de 10% a 90% dos avaliados) |
 | Custo da dívida | `Rf + prêmio de crédito` | 15% a 24% |
-| WACC | média ponderada, caixa a `Rf` | 14% a 19% |
+| WACC | média ponderada, caixa a `Rf` | 13% a 17% |
 
 ## Para estudar mais
 

@@ -18,10 +18,10 @@ As limitações estão em ordem de importância para quem lê um preço justo.
 
 ### 1.1 O motor é mais pessimista que o mercado, de forma sistemática
 
-**O que é.** Com os dados congelados de 14/09/2026 e o motor de 28/09/2026, dos
-97 ativos avaliados, o upside mediano é **−45%**,
-e só 15 tinham upside positivo. A WEG sai a R$ 12,53 contra R$ 50,74; o Itaú a
-R$ 21,76 contra R$ 42,35.
+**O que é.** Com os dados congelados de 14/09/2026 e o motor de 01/10/2026, dos
+108 ativos avaliados, o upside mediano é **−37%**, e só 28 tinham upside
+positivo. A WEG sai a R$ 16,18 contra R$ 50,74; o Itaú a R$ 29,14 contra
+R$ 42,35. Com o prêmio de 5,5% de antes da decisão 142, eram −45% e 15.
 
 **Por que importa.** Um preço justo abaixo do mercado não quer dizer "ação cara"
 no sentido de uma recomendação: quer dizer que as premissas do motor são mais
@@ -30,9 +30,9 @@ conservadoras que as que o mercado usa.
 **De onde vem.** Do conjunto das premissas, e não de um parâmetro isolado: taxa
 livre de risco de 13,6% a 14,6% ao ano na curva inteira, retorno sobre o capital
 convergindo ao custo em dez anos, retorno neutro na perpetuidade, crescimento
-perpétuo limitado ao da economia. O prêmio de mercado que zeraria o upside
-mediano seria **negativo** (−3,9%): não é ele que desloca o nível
-([decisão 116](../decisoes/116-o-premio-de-mercado-fica-em-5-5-por-cento-por-medicao-das-duas-alternativas.md);
+perpétuo limitado ao da economia. O prêmio de mercado já é o que o preço da
+bolsa embute (1,21%, decisão 142), e o desacordo continua: não é o prêmio que
+desloca o nível ([premio_implicito.md](premio_implicito.md);
 [dcf_reverso.md](dcf_reverso.md)).
 
 **O que o projeto faz.** Declara; a tela mostra a faixa calibrada (que parte do
@@ -44,16 +44,18 @@ pendente (item B33; [selic_focus.md](selic_focus.md)).
 ### 1.2 A habilidade de escolher ações não está comprovada
 
 **O que é.** O teste pré-registrado (as ações de maior upside, controlando pelo
-book-to-market, renderam mais em 36 meses?) deu `t` corrigido de 0,40 contra o
-crítico de 2,70. Não passou.
+book-to-market, renderam mais em 36 meses?) deu `t` corrigido de 0,18 contra o
+crítico de 2,70, remedido em 01/10/2026. Não passou. Nem o book-to-market
+sozinho passou (`t` de 2,27), e por isso o retorno esperado não leva prêmio de
+ordenação (decisão 103).
 
 **Por que importa.** Não há evidência de que ordenar por upside ajude a escolher
 ações.
 
 **E o teste não teria poder para passar.** O menor efeito que ele detecta com
-80% de chance é 0,62, nove vezes o medido (0,069, remedido em 28/09/2026); nem o
-book-to-market passaria
-no próprio efeito antes de 2037
+80% de chance é 0,65, vinte vezes o medido (0,032, remedido em
+01/10/2026); o book-to-market só teria esse poder no efeito dele com 54
+coortes, em 2034
 ([poder_r3.md](poder_r3.md), [habilidade_trimestral.md](habilidade_trimestral.md)).
 
 **O que o projeto faz.** O critério passou a ser "habilidade testada, com o
@@ -80,9 +82,10 @@ que a evidência sustenta, e a tela diz isso (decisões 100 e 124;
 ±2 p.p.) contiveram o que de fato aconteceu em só 8% dos casos, contra 90% que
 um intervalo de confiança prometeria (decisão 92). E o otimista soma
 crescimento: quando o retorno da empresa fica abaixo do custo de capital,
-crescer destrói valor, e o "otimista" sai abaixo do "pessimista". Em 14/09/2026
-isso acontecia em 17 dos 77 ativos da via da firma; só o crescimento +3 p.p.
-baixava o preço justo em 53 dos 97 avaliados.
+crescer destrói valor, e o "otimista" sai abaixo do "pessimista". Com o motor de
+01/10/2026, isso acontece em 15 dos 88 ativos da via da firma (com o prêmio de
+5,5%, eram 17 de 77, e só o crescimento +3 p.p. baixava o preço justo em 53 dos
+97 avaliados).
 
 **Por que importa.** O rótulo "Otimista" supõe que crescer é sempre bom.
 
@@ -154,11 +157,24 @@ evento de ações não localizado ou salto de preço (por exemplo, 11 na coorte 
 avaliadas como se a concorrência chegasse no prazo padrão. A vantagem residual
 (seção 3.4) atenua isso só quando a persistência medida é alta.
 
-### 3.2 Prêmio de mercado fixo
+### 3.2 Prêmio de mercado tirado do preço da bolsa
 
-5,5% em toda data e para todo ativo. Medido, não convencionado (decisão 116),
-mas abaixo do prêmio total que Damodaran publica para o Brasil (maduro mais
-risco-país), e sem variação no tempo.
+O prêmio é a média de dez anos do prêmio implícito: o retorno que o valor de
+mercado das listadas embute, dados os dividendos e JCP que elas pagam, menos o
+prefixado de dez anos — 1,21% em 14/09/2026 (decisão 142,
+[premio_implicito.md](premio_implicito.md)). O mesmo para todo ativo, como o
+CAPM manda. O que ele carrega:
+
+- **Uma premissa de crescimento**: os dividendos crescem com a economia nominal.
+  Um ponto a mais ou a menos move o prêmio em cerca de um ponto.
+- **Sem recompra de ações** no dinheiro distribuído, o que o deixa um pouco
+  abaixo do que seria com ela.
+- **Só as companhias listadas hoje** nas datas antigas da série.
+- **Uma circularidade**: um prêmio tirado do preço do mercado inteiro calibra o
+  **nível** do motor pelo mercado. O teste de **ordem** entre as ações (R3) não
+  é afetado, porque o prêmio é igual para todas.
+- **Muito abaixo do prêmio total que Damodaran publica para o Brasil**, porque é
+  medido contra o prefixado brasileiro, que já carrega o risco do país.
 
 ### 3.3 Beta, dívida e imposto
 

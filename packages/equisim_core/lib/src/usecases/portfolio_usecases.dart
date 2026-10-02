@@ -13,6 +13,7 @@ import '../services/metrics/returns.dart';
 import '../services/portfolio/expected_return.dart';
 import '../services/portfolio/sector_concentration.dart';
 import '../services/portfolio/transversal_ordering.dart';
+import '../services/valuation/cost_of_capital.dart';
 import '../value_objects/date_range.dart';
 import '../value_objects/ticker.dart';
 
@@ -152,6 +153,9 @@ abstract final class EvaluateGoalAlignment {
   ///   Com [ordering] nula e [signals] informados, não há prêmio. Sem
   ///   [signals], vale o estimador do potencial sozinho, que é o que as
   ///   ferramentas de validação antigas medem.
+  /// - [riskPremium]: o prêmio de mercado do escore — o mesmo que desconta o
+  ///   fluxo: a média de dez anos do prêmio implícito, no aplicativo
+  ///   (decisão 142).
   static Result<GoalAlignment> call({
     required Portfolio portfolio,
     required FinancialGoal goal,
@@ -160,6 +164,7 @@ abstract final class EvaluateGoalAlignment {
     Iterable<double>? crossSection,
     TransversalOrdering? ordering,
     Map<Ticker, TransversalSignals>? signals,
+    double riskPremium = CapmInputs.defaultMarketPremium,
   }) {
     final solved = RequiredReturnSolver.solve(goal);
     if (solved.isErr) return Err(solved.failureOrNull!);
@@ -178,6 +183,7 @@ abstract final class EvaluateGoalAlignment {
               valuations: valuations,
               spotRiskFree: anchors.currentRiskFreeRate,
               reference: crossSection,
+              riskPremium: riskPremium,
             )
           : ExpectedReturn.forPortfolioOrdered(
               portfolio: portfolio,
@@ -185,6 +191,7 @@ abstract final class EvaluateGoalAlignment {
               signals: signals,
               ordering: ordering,
               spotRiskFree: anchors.currentRiskFreeRate,
+              riskPremium: riskPremium,
             ),
       valuationCoverage: ExpectedReturn.coverage(
         portfolio: portfolio,

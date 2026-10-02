@@ -52,7 +52,9 @@ Quatro abas e um painel.
    retorno típico do ciclo quando o ano destoa; o crescimento que a história da
    própria empresa sustenta.
 4. **A que taxa:** o custo do capital próprio (CAPM) sobre a curva de juros do
-   Tesouro, ano a ano, com o risco recalculado conforme a dívida projetada.
+   Tesouro, ano a ano, com o risco recalculado conforme a dívida projetada. O
+   prêmio de risco do mercado é o que o próprio preço da bolsa embute: a média
+   de dez anos do prêmio implícito, 1,21% em 14/09/2026 (decisão 142).
 5. **Depois de dez anos:** o retorno do capital novo converge ao custo dele, a
    menos que a história mostre uma vantagem competitiva que persiste.
 
@@ -63,12 +65,12 @@ passo; o [caso WEGE3](docs/estudo/casos/wege3.md) mostra todas as contas.
 
 | | Condição | Situação |
 |---|---|---|
-| **R1** | nenhum defeito conhecido | ver o [plano](docs/plano-motor-de-referencia.md): a rodada de 28/09/2026 achou e corrigiu seis defeitos, e um (B38, o rótulo do cenário otimista) aguarda decisão |
-| **R2** | incerteza calibrada | **atingida**: a faixa de 80% conteve 79,4% (12 meses) e 79,9% (36 meses) dos casos fora da amostra |
-| **R3** | habilidade testada, com o poder declarado | **atingida nessa definição**: o teste fixado antes não passou, e o registro diz que ele não teria poder para passar com a série brasileira disponível |
+| **R1** | nenhum defeito conhecido | ver o [plano](docs/plano-motor-de-referencia.md): a rodada de 01/10/2026 fechou os dois defeitos de dado que a medição do prêmio achou (B43 e B44); o B38, o rótulo do cenário otimista, aguarda decisão |
+| **R2** | incerteza calibrada | **atingida**: a faixa de 80% conteve 79,7% (12 meses) e 79,6% (36 meses) dos casos fora da amostra (remedida em 01/10/2026) |
+| **R3** | habilidade testada, com o poder declarado | **atingida nessa definição**: o teste fixado antes não passou (0,032, `t` de 0,18 contra 2,70), e o registro diz que ele não teria poder para passar com a série brasileira disponível; nem o book-to-market sozinho passou |
 
 Dois fatos que qualquer leitor deve ter em mente: o motor é **sistematicamente
-mais pessimista que o mercado** (upside mediano de −45%, medido em 28/09/2026 sobre os dados de 14/09/2026), e **não
+mais pessimista que o mercado** (upside mediano de −37%, medido em 01/10/2026 sobre os dados de 14/09/2026), e **não
 se comprovou** que comprar as ações de maior upside rende mais.
 
 ---
@@ -208,11 +210,11 @@ dart run build_runner build
 | Demonstrações anuais | CVM (dados abertos, pacote `assets/cvm/`) e brapi |
 | Cotações e índice | brapi |
 | Contagem de ações e setor | registro de emissores da B3 (`assets/b3/emissores.json`) |
-| Proventos | B3 (`assets/b3/proventos.json`) — só no retorno total do beta e da validação |
+| Proventos | B3 (`assets/b3/proventos.json`) — no retorno total do beta e da validação; somados na bolsa inteira, na série do prêmio implícito (decisão 142) |
 | Eventos de capital, units, concessões | CVM, formulários cadastral e de referência (`assets/cvm/`) |
 | Curva de juros | Tesouro Direto (`assets/tesouro/curva.json` na web) |
 | CDI, IPCA, IBC-Br | Banco Central, SGS 12, 433 e 24364 |
-| Múltiplos de pares, prior do beta, faixa calibrada | pacotes medidos pelo próprio projeto (`assets/mercado/`, `assets/validacao/`) |
+| Prêmio de mercado, múltiplos de pares, prior do beta, faixa calibrada | pacotes medidos pelo próprio projeto (`assets/mercado/`, `assets/validacao/`) |
 
 Detalhes e regras de cada fonte no
 [capítulo 1 da documentação do motor](docs/motor/01-insumos-e-dados.md).

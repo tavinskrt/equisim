@@ -8,8 +8,8 @@
   "rf": 0.14086384141758157,
   "beta": 0.6562468420786218,
   "origemBeta": "shrunk",
-  "premio": 0.055,
-  "ke": 0.17695741773190576,
+  "premio": 0.012107652198573262,
+  "ke": 0.14880944993788156,
   "betaDesalavancado": 0.6124686979101583
  },
  "ancoras": {
@@ -489,23 +489,23 @@
  "recusa": null,
  "resultado": {
   "modelo": "dcfFcff",
-  "justo": 36.74,
+  "justo": 46.05,
   "preco": 34.74,
-  "potencial": 0.05757052389176741,
-  "descontoAno1": 0.16685558041859466,
+  "potencial": 0.3255613126079446,
+  "descontoAno1": 0.14214866704668597,
   "cenarios": {
-   "bear": 32.63,
-   "base": 36.74,
-   "bull": 43.3
+   "bear": 39.1,
+   "base": 46.05,
+   "bull": 57.25
   },
   "monteCarlo": {
-   "p5": 32.74924320618435,
-   "p10": 33.4849727059802,
-   "p25": 34.97697601661895,
-   "p50": 36.722223249880486,
-   "p75": 38.610573728737585,
-   "p90": 40.34905873886356,
-   "p95": 41.401381114747196,
+   "p5": 40.34319095310307,
+   "p10": 41.42344443627596,
+   "p25": 43.500077419572214,
+   "p50": 46.01695395519663,
+   "p75": 48.815072001060095,
+   "p90": 51.516216220065274,
+   "p95": 52.933402587070276,
    "n": 10000
   },
   "volatilidade": 0.31005204000020625,
@@ -513,79 +513,79 @@
    {
     "meses": 12,
     "nominal": 0.5,
-    "coberturaForaDaAmostra": 0.506,
-    "a": 0.085157,
-    "b": 0.028943,
-    "zInf": -0.551587,
-    "zSup": 0.643749,
+    "coberturaForaDaAmostra": 0.507,
+    "a": 0.07287,
+    "b": 0.02054,
+    "zInf": -0.554189,
+    "zSup": 0.648064,
     "faixa": [
-     31.93,
-     46.26
+     31.65,
+     45.95
     ]
    },
    {
     "meses": 12,
     "nominal": 0.8,
-    "coberturaForaDaAmostra": 0.794,
-    "a": 0.085157,
-    "b": 0.028943,
-    "zInf": -1.162597,
-    "zSup": 1.253547,
+    "coberturaForaDaAmostra": 0.797,
+    "a": 0.07287,
+    "b": 0.02054,
+    "zInf": -1.179908,
+    "zSup": 1.237941,
     "faixa": [
-     26.42,
-     55.89
+     26.07,
+     55.17
     ]
    },
    {
     "meses": 12,
     "nominal": 0.9,
-    "coberturaForaDaAmostra": 0.876,
-    "a": 0.085157,
-    "b": 0.028943,
-    "zInf": -1.573458,
-    "zSup": 1.676248,
+    "coberturaForaDaAmostra": 0.879,
+    "a": 0.07287,
+    "b": 0.02054,
+    "zInf": -1.598456,
+    "zSup": 1.64849,
     "faixa": [
-     23.26,
-     63.71
+     22.9,
+     62.66
     ]
    },
    {
     "meses": 36,
     "nominal": 0.5,
-    "coberturaForaDaAmostra": 0.528,
-    "a": 0.160895,
-    "b": 0.091625,
-    "zInf": -0.706173,
-    "zSup": 0.990088,
+    "coberturaForaDaAmostra": 0.516,
+    "a": 0.121719,
+    "b": 0.065823,
+    "zInf": -0.711967,
+    "zSup": 0.992765,
     "faixa": [
-     32.95,
-     55.75
+     32.05,
+     54.38
     ]
    },
    {
     "meses": 36,
     "nominal": 0.8,
-    "coberturaForaDaAmostra": 0.799,
-    "a": 0.160895,
-    "b": 0.091625,
-    "zInf": -1.744731,
-    "zSup": 1.999746,
+    "coberturaForaDaAmostra": 0.796,
+    "a": 0.121719,
+    "b": 0.065823,
+    "zInf": -1.761396,
+    "zSup": 2.000561,
     "faixa": [
-     23.88,
-     76.24
+     23.15,
+     74.32
     ]
    },
    {
     "meses": 36,
     "nominal": 0.9,
-    "coberturaForaDaAmostra": 0.88,
-    "a": 0.160895,
-    "b": 0.091625,
-    "zInf": -2.570209,
-    "zSup": 2.645817,
+    "coberturaForaDaAmostra": 0.883,
+    "a": 0.121719,
+    "b": 0.065823,
+    "zInf": -2.591264,
+    "zSup": 2.662884,
     "faixa": [
-     18.49,
-     93.15
+     17.9,
+     91.27
     ]
    }
   ],
@@ -601,13 +601,12 @@
    "O custo da dívida implícito nos demonstrativos deu 41.7% a.a., e o adotado é 15.4% a.a. O desconto usa sempre a taxa livre de risco mais o prêmio da classificação sintética: o custo de capital pede o de captar hoje, e a despesa publicada carrega dívida antiga, arrendamento e variação cambial. A razão observada caiu fora da faixa defensável de 14.1% a 24.1%, e por isso mede outra coisa — arrendamento, variação cambial —: a cobertura sai da conta, e o prêmio é o da alavancagem de 0.60x de dívida líquida sobre EBITDA, de 1.3%.",
    "A taxa livre de risco segue a curva dos títulos prefixados do Tesouro de 10/09/2026: 13.6% a.a. no primeiro ano, 14.3% a.a. no ano 10 e 14.3% a.a. na perpetuidade. É a taxa que o mercado de títulos atribui a cada prazo, e não uma previsão do motor.",
    "O lucro operacional é tributado à alíquota estrutural do ativo, 25.2%, e não aos 34.0% estatutários que a fonte embute em todo NOPAT publicado. É a mediana dos exercícios, não a do último: JCP, incentivo regional e lucro presumido são regime no Brasil, e regime é o que se projeta. O escudo fiscal do WACC continua na estatutária, que é a alíquota da margem.",
-   "O custo de capital é resolvido ano a ano contra a alavancagem que a própria avaliação produz: o WACC vai de 16.7% no primeiro ano a 17.3% no ano 10, e a perpetuidade é descontada a 17.3%. A participação do capital próprio sai de 86.2% para 87.3% no mesmo intervalo — e é justamente o que a taxa única não enxergava. Ponto fixo em 30 iterações, e o veredito da perpetuidade fechou em 1 passe.",
-   "O negócio opera sob concessão, e o prazo não foi lido do Formulário de Referência. O valor terminal supõe o excedente de retorno sobre o capital existente para sempre; num contrato que acaba, ele acaba junto, e o preço justo fica abaixo do publicado — acima, se o capital rende menos que o custo dele. O excedente de retorno do capital novo é recusado, como em toda concessão: a tarifa remunera o capital ao custo dele.",
-   "A leitura por múltiplos de pares diverge do fluxo descontado: R$ 67.83 contra R$ 36.74, 84.6% de diferença. Saiu de P/L 9.86× (27 pares, utilidade-publica); P/VP 1.87× (32 pares, utilidade-publica); EV/EBITDA 7.27× (32 pares, utilidade-publica). **O preço justo continua sendo o do fluxo descontado** — a segunda leitura é teste de sanidade sobre o nível, e a divergência fica declarada em vez de reconciliada."
+   "O custo de capital é resolvido ano a ano contra a alavancagem que a própria avaliação produz: o WACC vai de 14.2% no primeiro ano a 14.9% no ano 10, e a perpetuidade é descontada a 14.9%. A participação do capital próprio sai de 88.7% para 89.0% no mesmo intervalo — e é justamente o que a taxa única não enxergava. Ponto fixo em 30 iterações, e o veredito da perpetuidade fechou em 1 passe.",
+   "O negócio opera sob concessão, e o prazo não foi lido do Formulário de Referência. O valor terminal supõe o excedente de retorno sobre o capital existente para sempre; num contrato que acaba, ele acaba junto, e o preço justo fica abaixo do publicado — acima, se o capital rende menos que o custo dele. O excedente de retorno do capital novo é recusado, como em toda concessão: a tarifa remunera o capital ao custo dele."
   ],
   "triangulacao": {
    "consolidado": 67.82809516932004,
-   "divergencia": 0.8460261613538624,
+   "divergencia": 0.472884850081835,
    "leituras": [
     {
      "tipo": "precoLucro",
@@ -637,8 +636,8 @@
   }
  },
  "rastro": {
-  "transactionId": "abe2f8da-8b42-45f5-973a-e6b136584969",
-  "timestamp": "2026-09-28T09:58:23.059418Z",
+  "transactionId": "39375674-b2d1-468d-a456-3e2b5e5ad7a5",
+  "timestamp": "2026-10-02T00:27:36.710906Z",
   "endpoint": "/core/valuation/SAPR11",
   "inputPayload": {
    "ticker": "SAPR11",
@@ -647,9 +646,9 @@
    "capm": {
     "riskFreeRate": 0.140864,
     "beta": 0.6562,
-    "marketPremium": 0.055,
+    "marketPremium": 0.012108,
     "betaSource": "shrunk",
-    "premiumSource": "parameterized"
+    "premiumSource": "impliedNormalized"
    },
    "marginOfSafety": 0.0,
    "projectionYears": 10,
@@ -824,22 +823,22 @@
    "status": "ok",
    "ticker": "SAPR11",
    "model": "DCF por fluxo da firma",
-   "fairValue": 36.74,
-   "safetyPrice": 36.74,
+   "fairValue": 46.05,
+   "safetyPrice": 46.05,
    "marketPrice": 34.74,
-   "upside": 0.057571,
-   "discountRate": 0.166856,
+   "upside": 0.325561,
+   "discountRate": 0.142149,
    "marginOfSafety": 0.0,
    "isUndervalued": true,
    "scenarioMode": "discrete",
    "discreteScenarios": {
-    "bear": 32.63,
-    "base": 36.74,
-    "bull": 43.3
+    "bear": 39.1,
+    "base": 46.05,
+    "bull": 57.25
    },
    "diagnostics": {
-    "terminalShare": 0.47,
-    "equityShare": 0.8616,
+    "terminalShare": 0.5654,
+    "equityShare": 0.8864,
     "baseFactor": 1.2067,
     "growthIdentified": true,
     "moatApplied": false,
@@ -851,12 +850,12 @@
     "terminalReturnOnCapital": null,
     "firmTaxRate": 0.252128,
     "returnOnCapital": 0.134716,
-    "terminalDiscountRate": 0.173465,
-    "terminalCostOfEquity": 0.179802,
-    "costOfEquity": 0.176957,
-    "terminalExcessShare": -0.113,
-    "impliedTerminalReturn": 0.142064,
-    "terminalEquityShare": 0.8731,
+    "terminalDiscountRate": 0.148593,
+    "terminalCostOfEquity": 0.150905,
+    "costOfEquity": 0.148809,
+    "terminalExcessShare": -0.0576,
+    "impliedTerminalReturn": 0.135991,
+    "terminalEquityShare": 0.8902,
     "growthPath": [
      0.100271,
      0.096662,
@@ -871,22 +870,22 @@
     ],
     "retentionPath": [
      0.744319,
-     0.696295,
-     0.647775,
-     0.603134,
-     0.559718,
-     0.522055,
-     0.48712,
-     0.452675,
-     0.421474,
-     0.390789
+     0.710345,
+     0.673543,
+     0.638685,
+     0.603038,
+     0.572139,
+     0.542822,
+     0.512462,
+     0.484723,
+     0.456202
     ]
    },
    "priceVolatility": 0.310052,
    "triangulation": {
     "asOf": "14/09/2026",
     "consolidated": 67.83,
-    "divergence": 0.846,
+    "divergence": 0.4729,
     "readings": [
      {
       "kind": "precoLucro",
@@ -929,9 +928,8 @@
     "O custo da dívida implícito nos demonstrativos deu 41.7% a.a., e o adotado é 15.4% a.a. O desconto usa sempre a taxa livre de risco mais o prêmio da classificação sintética: o custo de capital pede o de captar hoje, e a despesa publicada carrega dívida antiga, arrendamento e variação cambial. A razão observada caiu fora da faixa defensável de 14.1% a 24.1%, e por isso mede outra coisa — arrendamento, variação cambial —: a cobertura sai da conta, e o prêmio é o da alavancagem de 0.60x de dívida líquida sobre EBITDA, de 1.3%.",
     "A taxa livre de risco segue a curva dos títulos prefixados do Tesouro de 10/09/2026: 13.6% a.a. no primeiro ano, 14.3% a.a. no ano 10 e 14.3% a.a. na perpetuidade. É a taxa que o mercado de títulos atribui a cada prazo, e não uma previsão do motor.",
     "O lucro operacional é tributado à alíquota estrutural do ativo, 25.2%, e não aos 34.0% estatutários que a fonte embute em todo NOPAT publicado. É a mediana dos exercícios, não a do último: JCP, incentivo regional e lucro presumido são regime no Brasil, e regime é o que se projeta. O escudo fiscal do WACC continua na estatutária, que é a alíquota da margem.",
-    "O custo de capital é resolvido ano a ano contra a alavancagem que a própria avaliação produz: o WACC vai de 16.7% no primeiro ano a 17.3% no ano 10, e a perpetuidade é descontada a 17.3%. A participação do capital próprio sai de 86.2% para 87.3% no mesmo intervalo — e é justamente o que a taxa única não enxergava. Ponto fixo em 30 iterações, e o veredito da perpetuidade fechou em 1 passe.",
-    "O negócio opera sob concessão, e o prazo não foi lido do Formulário de Referência. O valor terminal supõe o excedente de retorno sobre o capital existente para sempre; num contrato que acaba, ele acaba junto, e o preço justo fica abaixo do publicado — acima, se o capital rende menos que o custo dele. O excedente de retorno do capital novo é recusado, como em toda concessão: a tarifa remunera o capital ao custo dele.",
-    "A leitura por múltiplos de pares diverge do fluxo descontado: R$ 67.83 contra R$ 36.74, 84.6% de diferença. Saiu de P/L 9.86× (27 pares, utilidade-publica); P/VP 1.87× (32 pares, utilidade-publica); EV/EBITDA 7.27× (32 pares, utilidade-publica). **O preço justo continua sendo o do fluxo descontado** — a segunda leitura é teste de sanidade sobre o nível, e a divergência fica declarada em vez de reconciliada."
+    "O custo de capital é resolvido ano a ano contra a alavancagem que a própria avaliação produz: o WACC vai de 14.2% no primeiro ano a 14.9% no ano 10, e a perpetuidade é descontada a 14.9%. A participação do capital próprio sai de 88.7% para 89.0% no mesmo intervalo — e é justamente o que a taxa única não enxergava. Ponto fixo em 30 iterações, e o veredito da perpetuidade fechou em 1 passe.",
+    "O negócio opera sob concessão, e o prazo não foi lido do Formulário de Referência. O valor terminal supõe o excedente de retorno sobre o capital existente para sempre; num contrato que acaba, ele acaba junto, e o preço justo fica abaixo do publicado — acima, se o capital rende menos que o custo dele. O excedente de retorno do capital novo é recusado, como em toda concessão: a tarifa remunera o capital ao custo dele."
    ]
   },
   "executionTimeMs": 2,
@@ -960,16 +958,18 @@
     "mappedVariables": {
      "R_f (% a.a.)": 14.09,
      "beta": 0.6562,
-     "R_m - R_f (% a.a.)": 5.5,
+     "R_m - R_f (% a.a.)": 1.21,
+     "origem do prêmio": "impliedNormalized",
      "origem do beta": "shrunk",
      "retorno do beta": "total, 10 proventos reinvestidos"
     },
     "intermediateSteps": [
-     "Passo 1: prêmio ajustado ao risco sistemático → 0.6562 × 5.5% = 3.6%",
-     "Passo 2: soma à taxa livre de risco → 14.1% + 3.6% = 17.7%",
+     "Passo 0: o prêmio de mercado → 1.2%, a média de dez anos do prêmio implícito no preço da bolsa: o retorno que o valor de mercado das listadas embute, dado o dinheiro que elas distribuem, menos o prefixado de dez anos (decisão 142)",
+     "Passo 1: prêmio ajustado ao risco sistemático → 0.6562 × 1.2% = 0.8%",
+     "Passo 2: soma à taxa livre de risco → 14.1% + 0.8% = 14.9%",
      "Passo 3: este é o K_e sobre o CDI de hoje — o do WACC do dia e o do retorno esperado da tela de metas. O desconto de cada ano usa a taxa livre de risco daquele ano, da curva do Tesouro, e a alavancagem que a avaliação produz: ver a estrutura a termo e o desconto do período explícito."
     ],
-    "finalValue": 17.7,
+    "finalValue": 14.88,
     "unit": "% a.a."
    },
    {
@@ -1126,7 +1126,7 @@
      "D líquida (R$)": 1784533000.0,
      "D bruta (R$)": 7392664000.0,
      "C — caixa (R$)": 5608131000.0,
-     "K_e (% a.a.)": 17.7,
+     "K_e (% a.a.)": 14.88,
      "K_d (% a.a.)": 15.39,
      "R_f (% a.a.)": 14.09,
      "t (%)": 25.8
@@ -1136,10 +1136,10 @@
      "Passo 2: participação da dívida bruta → 7392664000.0 ÷ 12284388946.01 = 0.6018; e do caixa → 5608131000.0 ÷ 12284388946.01 = 0.4565. A diferença das duas é a participação da dívida líquida, 0.1453 — o que a separação muda é a **taxa** de cada metade, e não o peso",
      "Passo 3: K_d = R_f + prêmio sintético → prêmio pela alavancagem (0.6× dívida líquida ÷ EBITDA) = 1.3%; a despesa observada (41.7% da dívida) está fora da banda e mede outra coisa, e a cobertura sai da conta → 14.1% + 1.3% = 15.4%. O observado não entra na taxa",
      "Passo 4: benefício fiscal da dívida → 15.4% × (1 − 0.258) = 11.4%",
-     "Passo 5: o caixa rende a taxa livre de risco, tributada → 14.1% × (1 − 0.34) = 9.3%. Soma ponderada → 0.8547 × 17.7% + 0.6018 × 11.4% − 0.4565 × 9.3% = 15.1% + 2.6% = 17.8%",
+     "Passo 5: o caixa rende a taxa livre de risco, tributada → 14.1% × (1 − 0.34) = 9.3%. Soma ponderada → 0.8547 × 14.9% + 0.6018 × 11.4% − 0.4565 × 9.3% = 12.7% + 2.6% = 15.3%",
      "Passo 6: WACC acima da taxa livre de risco; nenhum piso aplicado"
     ],
-    "finalValue": 17.75,
+    "finalValue": 15.34,
     "unit": "% a.a."
    },
    {
@@ -1164,18 +1164,18 @@
      "R_f do ano 1 (% a.a.)": 13.62,
      "R_f do ano N (% a.a.)": 14.29,
      "R_f da perpetuidade (% a.a.)": 14.29,
-     "r_1 (% a.a.)": 17.29,
-     "r_N (% a.a.)": 17.95,
-     "r_inf (% a.a.)": 17.95,
+     "r_1 (% a.a.)": 14.88,
+     "r_N (% a.a.)": 15.55,
+     "r_inf (% a.a.)": 15.55,
      "N (anos)": 10
     },
     "intermediateSteps": [
      "Passo 1: a taxa livre de risco de cada ano é o forward de um ano da curva dos prefixados de 10/09/2026 → ano 1: 13.6%; ano 2: 14.1%; ano 3: 14.5%; ano 4: 14.5%; ano 5: 14.6%; ano 6: 14.5%; ano 7: 14.4%; ano 8: 14.4%; ano 9: 14.3%; ano 10: 14.3%",
-     "Passo 2: o custo de capital de cada ano é remontado sobre ela, com o beta, o prêmio e a estrutura de capital de hoje → ano 1: 17.3%; ano 2: 17.8%; ano 3: 18.1%; ano 4: 18.2%; ano 5: 18.3%; ano 6: 18.2%; ano 7: 18.1%; ano 8: 18.1%; ano 9: 18.0%; ano 10: 18.0%",
-     "Passo 3: a perpetuidade usa o forward depois do ano 10, 14.3%, e é descontada a 18.0%",
+     "Passo 2: o custo de capital de cada ano é remontado sobre ela, com o beta, o prêmio e a estrutura de capital de hoje → ano 1: 14.9%; ano 2: 15.4%; ano 3: 15.7%; ano 4: 15.8%; ano 5: 15.9%; ano 6: 15.8%; ano 7: 15.7%; ano 8: 15.7%; ano 9: 15.6%; ano 10: 15.5%",
+     "Passo 3: a perpetuidade usa o forward depois do ano 10, 14.3%, e é descontada a 15.5%",
      "Passo 4: quando o custo de capital é resolvido ano a ano contra a alavancagem que a própria avaliação produz, este caminho é o ponto de partida, e o resolvido o substitui — ver o desconto do período explícito"
     ],
-    "finalValue": 17.95,
+    "finalValue": 15.55,
     "unit": "% a.a."
    },
    {
@@ -1183,8 +1183,8 @@
     "latexRepresentation": "ROIC_\\infty = WACC_\\infty + \\varphi^{N}(ROIC_{ciclo} - WACC_\\infty)",
     "mappedVariables": {
      "ROIC do ciclo (% a.a.)": 13.47,
-     "WACC de equilíbrio (% a.a.)": 17.95,
-     "excedente do ciclo (p.p.)": -4.48,
+     "WACC de equilíbrio (% a.a.)": 15.55,
+     "excedente do ciclo (p.p.)": -2.08,
      "Phi": 0.05,
      "exercícios": 16,
      "phi cru (AR(1))": 0.3062,
@@ -1200,11 +1200,11 @@
     "intermediateSteps": [
      "Passo 1: crescimento orgânico? Phi = 0.05 <= 0.6",
      "Passo 2: histórico longo? 16 exercícios contra 8 exigidos",
-     "Passo 3: excedente positivo? ROIC do ciclo de 13.5% contra WACC de equilíbrio de 18.0%",
+     "Passo 3: excedente positivo? ROIC do ciclo de 13.5% contra WACC de equilíbrio de 15.5%",
      "Passo 4: persistência do excedente por AR(1) sobre 14 pares — phi cru 0.3062, confinado em 0.3062; lambda = phi^N = —",
      "Passo 5: barrado por o negócio opera sob contrato de prazo determinado, retorno do ciclo não supera o custo de capital — vale o estado estacionário, ROIC_inf = WACC_inf, e o valor terminal não depende de g_inf"
     ],
-    "finalValue": 17.95,
+    "finalValue": 15.55,
     "unit": "% a.a."
    },
    {
@@ -1215,51 +1215,51 @@
      "g_1 (% a.a.)": 10.03,
      "g_N (% a.a.)": 6.78,
      "ROIC_1 (% a.a.)": 13.47,
-     "WACC_1 (% a.a.)": 16.69,
-     "WACC_N (% a.a.)": 17.35,
+     "WACC_1 (% a.a.)": 14.21,
+     "WACC_N (% a.a.)": 14.86,
      "N (anos)": 10
     },
     "intermediateSteps": [
      "Passo 0: o crescimento decai em linha reta até o perpétuo, e o retorno sobre o capital converge do observado ao WACC do ano, que sai do caminho ano a ano — o resolvido contra a alavancagem, ou o montado sobre a curva do Tesouro (ver a estrutura a termo). A retenção b = g ÷ ROIC é o que a firma reinveste para crescer g; o resto é o fluxo livre. O WACC aqui não desconta nada: ele é o destino do retorno, e o desconto é do fluxo do acionista, no passo seguinte (decisão 102).",
      "Passo 1: ano 1 → g = 10.0%, ROIC = 13.5%, retenção = 74.4%; NOPAT 2321079367.41 × (1 − retenção) → fluxo da firma 593455415.8",
-     "Passo 2: ano 2 → g = 9.7%, ROIC = 13.9%, retenção = 69.6%; NOPAT 2545440062.35 × (1 − retenção) → fluxo da firma 773061758.02",
-     "Passo 3: ano 3 → g = 9.3%, ROIC = 14.4%, retenção = 64.8%; NOPAT 2782300813.82 × (1 − retenção) → fluxo da firma 979994686.78",
-     "Passo 4: ano 4 → g = 8.9%, ROIC = 14.8%, retenção = 60.3%; NOPAT 3031160122.45 × (1 − retenção) → fluxo da firma 1202964717.88",
-     "Passo 5: ano 5 → g = 8.6%, ROIC = 15.3%, retenção = 56.0%; NOPAT 3291338095.2 × (1 − retenção) → fluxo da firma 1449116258.01",
-     "Passo 6: ano 6 → g = 8.2%, ROIC = 15.8%, retenção = 52.2%; NOPAT 3561969017.05 × (1 − retenção) → fluxo da firma 1702424797.92",
-     "Passo 7: ano 7 → g = 7.9%, ROIC = 16.1%, retenção = 48.7%; NOPAT 3841996558.08 × (1 − retenção) → fluxo da firma 1970481408.46",
-     "Passo 8: ano 8 → g = 7.5%, ROIC = 16.6%, retenção = 45.3%; NOPAT 4130171974.44 × (1 − retenção) → fluxo da firma 2260547049.77",
-     "Passo 9: ano 9 → g = 7.1%, ROIC = 16.9%, retenção = 42.1%; NOPAT 4425055620.73 × (1 − retenção) → fluxo da firma 2560010608.03",
-     "Passo 10: ano 10 → g = 6.8%, ROIC = 17.3%, retenção = 39.1%; NOPAT 4725022037.3 × (1 − retenção) → fluxo da firma 2878534958.01"
+     "Passo 2: ano 2 → g = 9.7%, ROIC = 13.6%, retenção = 71.0%; NOPAT 2545440062.35 × (1 − retenção) → fluxo da firma 737298444.7",
+     "Passo 3: ano 3 → g = 9.3%, ROIC = 13.8%, retenção = 67.4%; NOPAT 2782300813.82 × (1 − retenção) → fluxo da firma 908300787.8",
+     "Passo 4: ano 4 → g = 8.9%, ROIC = 14.0%, retenção = 63.9%; NOPAT 3031160122.45 × (1 − retenção) → fluxo da firma 1095202232.11",
+     "Passo 5: ano 5 → g = 8.6%, ROIC = 14.2%, retenção = 60.3%; NOPAT 3291338095.2 × (1 − retenção) → fluxo da firma 1306535585.77",
+     "Passo 6: ano 6 → g = 8.2%, ROIC = 14.4%, retenção = 57.2%; NOPAT 3561969017.05 × (1 − retenção) → fluxo da firma 1524029029.15",
+     "Passo 7: ano 7 → g = 7.9%, ROIC = 14.5%, retenção = 54.3%; NOPAT 3841996558.08 × (1 − retenção) → fluxo da firma 1756474974.99",
+     "Passo 8: ano 8 → g = 7.5%, ROIC = 14.6%, retenção = 51.2%; NOPAT 4130171974.44 × (1 − retenção) → fluxo da firma 2013614183.22",
+     "Passo 9: ano 9 → g = 7.1%, ROIC = 14.7%, retenção = 48.5%; NOPAT 4425055620.73 × (1 − retenção) → fluxo da firma 2280127813.45",
+     "Passo 10: ano 10 → g = 6.8%, ROIC = 14.9%, retenção = 45.6%; NOPAT 4725022037.3 × (1 − retenção) → fluxo da firma 2569458771.87"
     ],
-    "finalValue": 2878534958.008483,
+    "finalValue": 2569458771.8730054,
     "unit": "R$"
    },
    {
     "formulaName": "Fluxo do acionista e desconto ao K_e (período explícito)",
     "latexRepresentation": "FCFE_t = FCFF_t - S_t\\quad;\\quad S_t = D^b_{t-1} K_{d,t}(1-\\tau) - C_{t-1} R_{f,t}(1-\\tau) - D_{t-1}\\,g_t\\quad;\\quad VP = \\sum_{t=1}^{N} \\frac{FCFE_t\\,\\sqrt{1 + k_t}}{\\prod_{s=1}^{t}(1 + k_s)},\\; k_t = K_{e,t}",
     "mappedVariables": {
-     "K_e,1 (% a.a.)": 17.35,
-     "K_e,N (% a.a.)": 17.98,
+     "K_e,1 (% a.a.)": 14.43,
+     "K_e,N (% a.a.)": 15.09,
      "τ (escudo fiscal)": 0.34,
      "N (anos)": 10
     },
     "intermediateSteps": [
      "Passo 0: o acionista recebe o fluxo da firma menos o serviço da dívida — o juro da dívida bruta depois do imposto, menos o que o caixa rende depois do imposto, menos a dívida nova que mantém a alavancagem crescendo a g. O resultado é descontado ao custo do capital próprio de cada ano, e não ao WACC.",
      "Passo 0b: o caixa do exercício chega ao longo do ano, e não no último dia dele. Cada fluxo é levantado por raiz de (1 + K_e do ano) — a convenção de meio de ano da decisão 48.",
-     "Passo 1: ano 1 → fluxo da firma 593455415.8 − serviço da dívida 44949991.91 = fluxo do acionista 548505423.89; K_e = 17.3%, fator acumulado 1.173481, levantamento 1.083273 → valor presente 506340742.93",
-     "Passo 2: ano 2 → fluxo da firma 773061758.02 − serviço da dívida 63044100.7 = fluxo do acionista 710017657.32; K_e = 17.8%, fator acumulado 1.382871, levantamento 1.085557 → valor presente 557365824.84",
-     "Passo 3: ano 3 → fluxo da firma 979994686.78 − serviço da dívida 81649800.07 = fluxo do acionista 898344886.71; K_e = 18.2%, fator acumulado 1.634149, levantamento 1.087064 → valor presente 597594428.65",
-     "Passo 4: ano 4 → fluxo da firma 1202964717.88 − serviço da dívida 98547717.25 = fluxo do acionista 1104417000.63; K_e = 18.2%, fator acumulado 1.931841, levantamento 1.087276 → valor presente 621586541.87",
-     "Passo 5: ano 5 → fluxo da firma 1449116258.01 − serviço da dívida 118648113.49 = fluxo do acionista 1330468144.51; K_e = 18.3%, fator acumulado 2.285994, levantamento 1.087807 → valor presente 633113022.22",
-     "Passo 6: ano 6 → fluxo da firma 1702424797.92 − serviço da dívida 137055004.36 = fluxo do acionista 1565369793.57; K_e = 18.2%, fator acumulado 2.702713, levantamento 1.087333 → valor presente 629766302.49",
-     "Passo 7: ano 7 → fluxo da firma 1970481408.46 − serviço da dívida 157056622.67 = fluxo do acionista 1813424785.8; K_e = 18.1%, fator acumulado 3.19241, levantamento 1.086824 → valor presente 617362516.88",
-     "Passo 8: ano 8 → fluxo da firma 2260547049.77 − serviço da dívida 180700787.62 = fluxo do acionista 2079846262.15; K_e = 18.1%, fator acumulado 3.770129, levantamento 1.086723 → valor presente 599506362.99",
-     "Passo 9: ano 9 → fluxo da firma 2560010608.03 − serviço da dívida 204879834.0 = fluxo do acionista 2355130774.03; K_e = 18.0%, fator acumulado 4.449107, levantamento 1.086321 → valor presente 575043233.67",
-     "Passo 10: ano 10 → fluxo da firma 2878534958.01 − serviço da dívida 232309705.81 = fluxo do acionista 2646225252.2; K_e = 18.0%, fator acumulado 5.249065, levantamento 1.086187 → valor presente 547582354.37",
-     "Passo 11: soma dos valores presentes do período explícito → 5885261330.92"
+     "Passo 1: ano 1 → fluxo da firma 593455415.8 − serviço da dívida 44949991.91 = fluxo do acionista 548505423.89; K_e = 14.4%, fator acumulado 1.144276, levantamento 1.069709 → valor presente 512761535.23",
+     "Passo 2: ano 2 → fluxo da firma 737298444.7 − serviço da dívida 63044100.7 = fluxo do acionista 674254344.0; K_e = 14.9%, fator acumulado 1.315107, levantamento 1.07205 → valor presente 549639189.89",
+     "Passo 3: ano 3 → fluxo da firma 908300787.8 − serviço da dívida 81649800.07 = fluxo do acionista 826650987.72; K_e = 15.3%, fator acumulado 1.515824, levantamento 1.073603 → valor presente 585487022.4",
+     "Passo 4: ano 4 → fluxo da firma 1095202232.11 − serviço da dívida 98547717.25 = fluxo do acionista 996654514.87; K_e = 15.3%, fator acumulado 1.747954, levantamento 1.073843 → valor presente 612287366.56",
+     "Passo 5: ano 5 → fluxo da firma 1306535585.77 − serviço da dívida 118648113.49 = fluxo do acionista 1187887472.27; K_e = 15.4%, fator acumulado 2.017724, levantamento 1.0744 → valor presente 632527473.05",
+     "Passo 6: ano 6 → fluxo da firma 1524029029.15 − serviço da dívida 137055004.36 = fluxo do acionista 1386974024.8; K_e = 15.3%, fator acumulado 2.327118, levantamento 1.073936 → valor presente 640071145.75",
+     "Passo 7: ano 7 → fluxo da firma 1756474974.99 − serviço da dívida 157056622.67 = fluxo do acionista 1599418352.33; K_e = 15.2%, fator acumulado 2.681439, levantamento 1.073433 → valor presente 640278484.88",
+     "Passo 8: ano 8 → fluxo da firma 2013614183.22 − serviço da dívida 180700787.62 = fluxo do acionista 1832913395.6; K_e = 15.2%, fator acumulado 3.089164, levantamento 1.073338 → valor presente 636850456.95",
+     "Passo 9: ano 9 → fluxo da firma 2280127813.45 − serviço da dívida 204879834.0 = fluxo do acionista 2075247979.45; K_e = 15.1%, fator acumulado 3.556223, levantamento 1.072936 → valor presente 626116347.48",
+     "Passo 10: ano 10 → fluxo da firma 2569458771.87 − serviço da dívida 232309705.81 = fluxo do acionista 2337149066.07; K_e = 15.1%, fator acumulado 4.092876, levantamento 1.072803 → valor presente 612600919.02",
+     "Passo 11: soma dos valores presentes do período explícito → 6048619941.2"
     ],
-    "finalValue": 5885261330.916124,
+    "finalValue": 6048619941.203543,
     "unit": "R$"
    },
    {
@@ -1268,31 +1268,31 @@
     "mappedVariables": {
      "NOPAT_N": 4725022037.3,
      "g_inf (% a.a.)": 6.78,
-     "r_inf = WACC de equilíbrio (% a.a.)": 17.35,
-     "K_e,inf (% a.a.)": 17.98,
+     "r_inf = WACC de equilíbrio (% a.a.)": 14.86,
+     "K_e,inf (% a.a.)": 15.09,
      "ROIC_inf (% a.a.)": null,
-     "ROIC implícito do instalado (% a.a.)": 14.21,
+     "ROIC implícito do instalado (% a.a.)": 13.6,
      "N (anos)": 10,
      "M (anos de contrato além de N)": null
     },
     "intermediateSteps": [
-     "Passo 1: valor terminal da firma no ano 10, ao WACC de equilíbrio — com RONIC_inf = r_inf — o **capital novo** sem valor — a álgebra colapsa e o crescimento perpétuo sai da perpetuidade: VT = L_(N+1) ÷ r_inf, sem spread → 29085563114.17",
-     "Passo 2: o fluxo da firma do ano N+1 que essa perpetuidade supõe → × (17.3% − 6.8%) = 3073665571.12",
-     "Passo 3: menos o serviço da dívida do ano N+1 → 3073665571.12 − 248057555.31 = fluxo do acionista 2825608015.8",
-     "Passo 4: capitalizado ao K_e de equilíbrio menos o crescimento perpétuo → 2825608015.8 ÷ (18.0% − 6.8%) = 25225538710.28",
-     "Passo 5: trazido a presente pelo fator acumulado do K_e 5.249065, levantado por 1.086187 de meio de ano → 5219910839.34",
-     "Passo 6: participação do valor terminal no capital próprio → 47.0%",
-     "Passo 7: o retorno neutro vale para o capital **novo**; o instalado rende 14.2% na perpetuidade, contra 17.3% de custo de capital. Reagrupando, VT = capital_N + EVA_(N+1) ÷ r_inf, e a segunda parcela vale -1255056183.28 a valor presente — déficit mantido para sempre"
+     "Passo 1: valor terminal da firma no ano 10, ao WACC de equilíbrio — com RONIC_inf = r_inf — o **capital novo** sem valor — a álgebra colapsa e o crescimento perpétuo sai da perpetuidade: VT = L_(N+1) ÷ r_inf, sem spread → 33954080754.92",
+     "Passo 2: o fluxo da firma do ano N+1 que essa perpetuidade supõe → × (14.9% − 6.8%) = 2743637676.36",
+     "Passo 3: menos o serviço da dívida do ano N+1 → 2743637676.36 − 248057555.31 = fluxo do acionista 2495580121.05",
+     "Passo 4: capitalizado ao K_e de equilíbrio menos o crescimento perpétuo → 2495580121.05 ÷ (15.1% − 6.8%) = 30024810554.84",
+     "Passo 5: trazido a presente pelo fator acumulado do K_e 4.092876, levantado por 1.072803 de meio de ano → 7869941548.17",
+     "Passo 6: participação do valor terminal no capital próprio → 56.5%",
+     "Passo 7: o retorno neutro vale para o capital **novo**; o instalado rende 13.6% na perpetuidade, contra 14.9% de custo de capital. Reagrupando, VT = capital_N + EVA_(N+1) ÷ r_inf, e a segunda parcela vale -801773165.33 a valor presente — déficit mantido para sempre"
     ],
-    "finalValue": 5219910839.337336,
+    "finalValue": 7869941548.167272,
     "unit": "R$"
    },
    {
     "formulaName": "Capital próprio pelo fluxo do acionista derivado",
     "latexRepresentation": "P_0 = \\frac{VP_{explícito} + VP(VT_{acionista}) - M}{N_{papéis}}",
     "mappedVariables": {
-     "VP do fluxo explícito do acionista (R$)": 5885261330.92,
-     "VP do terminal do acionista (R$)": 5219910839.34,
+     "VP do fluxo explícito do acionista (R$)": 6048619941.2,
+     "VP do terminal do acionista (R$)": 7869941548.17,
      "minoritários M (R$)": 0.0,
      "dívida líquida inicial D_0 (R$)": 1784533000.0,
      "N_papéis": 302241104,
@@ -1300,28 +1300,28 @@
     },
     "intermediateSteps": [
      "Passo 1: a dívida líquida de 1784533000.0 não é subtraída aqui — ela já saiu do fluxo, ano a ano, no serviço da dívida dos dois passos anteriores",
-     "Passo 2: valor presente do fluxo explícito → 5885261330.92",
-     "Passo 3: valor presente do terminal do acionista → 5219910839.34",
-     "Passo 4: menos a parte dos não controladores → 5885261330.92 + 5219910839.34 − 0.0 = 11105172170.25",
-     "Passo 5: divisão pelo número de papéis negociados → 11105172170.25 ÷ 302241104 = 36.74"
+     "Passo 2: valor presente do fluxo explícito → 6048619941.2",
+     "Passo 3: valor presente do terminal do acionista → 7869941548.17",
+     "Passo 4: menos a parte dos não controladores → 6048619941.2 + 7869941548.17 − 0.0 = 13918561489.37",
+     "Passo 5: divisão pelo número de papéis negociados → 13918561489.37 ÷ 302241104 = 46.05"
     ],
-    "finalValue": 36.74275944148884,
+    "finalValue": 46.05118666646034,
     "unit": "R$ por papel"
    },
    {
     "formulaName": "Margem de segurança e potencial de valorização",
     "latexRepresentation": "P_{seg} = P_0\\,(1 - s) \\quad;\\quad upside = \\frac{P_0 - P_{mkt}}{P_{mkt}}",
     "mappedVariables": {
-     "P_0 (R$)": 36.74,
+     "P_0 (R$)": 46.05,
      "s (%)": 0.0,
      "P_mkt (R$)": 34.74
     },
     "intermediateSteps": [
-     "Passo 1: preço justo com margem de segurança → 36.74 × (1 − 0.0) = 36.74",
-     "Passo 2: potencial de valorização total → (36.74 − 34.74) ÷ 34.74 = 5.8%",
+     "Passo 1: preço justo com margem de segurança → 46.05 × (1 − 0.0) = 46.05",
+     "Passo 2: potencial de valorização total → (46.05 − 34.74) ÷ 34.74 = 32.6%",
      "Passo 3: veredito → o preço de mercado está abaixo do preço com margem de segurança"
     ],
-    "finalValue": 5.76,
+    "finalValue": 32.56,
     "unit": "% (total, sem prazo)"
    }
   ]

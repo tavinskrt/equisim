@@ -72,7 +72,7 @@ acontece. Os números de exemplo vêm dos casos de 14/09/2026.
 | **Crescimento `g`** | mediana do crescimento do capital investido | mediana do crescimento do PL |
 | **Beta** | medido e encolhido para o setor; **desalavancado** (Hamada) | medido e encolhido; **não se desalavanca** |
 | **Taxa livre de risco** | forward de cada ano da curva | igual |
-| **Custo do capital próprio** | Ke recalculado ano a ano com a dívida projetada (ponto fixo) | Ke = forward do ano + β × 5,5%, com o beta medido |
+| **Custo do capital próprio** | Ke recalculado ano a ano com a dívida projetada (ponto fixo) | Ke = forward do ano + β × prêmio de mercado, com o beta medido |
 | **Custo da dívida** | Rf + prêmio sintético (alavancagem, cobertura) | não existe |
 | **WACC** | calculado; é o **alvo** para onde o ROIC converge | não existe; o ROE converge para o Ke |
 | **Projeção** | NOPAT cresce `g_t`; retenção `g_t ÷ ROIC_t` | LPA cresce `g_t`; retenção `g_t ÷ ROE_t` |
@@ -123,7 +123,7 @@ para ela: o NOPAT não sustenta uma projeção, mas o lucro líquido pode susten
 (uma holding com resultado de participações, por exemplo). Diferente do banco,
 ela **tem** dívida de estrutura de capital, e por isso o motor recalcula o Ke
 ano a ano com a alavancagem projetada, como faz na via da firma (decisão 46).
-Em 14/09/2026 era um único caso entre os 97 avaliados.
+Em 14/09/2026 era um único caso entre os 108 avaliados (a AZEV4).
 
 ---
 

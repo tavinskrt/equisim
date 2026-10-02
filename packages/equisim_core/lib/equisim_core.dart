@@ -78,6 +78,7 @@ export 'src/services/valuation/inference.dart';
 export 'src/services/valuation/cost_of_capital.dart';
 export 'src/services/valuation/dcf.dart';
 export 'src/services/valuation/growth_estimator.dart';
+export 'src/services/valuation/implied_premium.dart';
 export 'src/services/valuation/scenario_engine.dart';
 export 'src/services/valuation/yield_curve.dart';
 

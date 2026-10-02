@@ -11,6 +11,69 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O prêmio de mercado ligado — B42, B43 e B44 fechados (01/10/2026)
+
+**O pedido.** «Depois de analisar todas essas variáveis, decidimos implementar
+somente a mudança no prêmio de risco para implementar a média dos 10 anos.»
+Com a B3 consultada de novo, o backtest com o prêmio normalizado e as lentes; o
+crescimento (B45) fica de lado. Apontamento de 01/10.
+
+**O que entrou no motor** ([decisão 142](decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md)).
+O prêmio de mercado é a média de dez anos do prêmio implícito, na forma que o
+CAPM soma (`r − Rf`, e não a razão de Fisher da medição de 29/09): **1,21%** em
+14/09/2026. O núcleo ganhou `ImpliedPremiumPackage` (a série trimestral e a
+média, com pelo menos 20 trimestres) e a origem `impliedNormalized`, que o
+rastro do CAPM diz no Passo 0. O aplicativo lê o pacote
+`assets/mercado/premio_implicito.json`; sem ele, volta aos 5,5% e diz isso, e
+com mais de 183 dias continua valendo, com ressalva. A tela de estudo e a de
+metas usam o mesmo prêmio no retorno esperado. O backtest usa, em cada coorte, a
+média só com os trimestres até a data dela: de 0,91% a 1,62%.
+
+**B43 fechado** ([decisão 143](decisoes/143-a-contagem-da-coorte-e-conferida-contra-o-salto-do-preco.md)).
+A conferência da contagem saiu da ferramenta do prêmio para
+`tool/coortes/contagem_conferida.dart` e entrou nas listadas e nas deslistadas
+do backtest. **A regra foi refinada no caminho**: a primeira versão descartava
+toda mudança de mais de três vezes sem o salto do preço, e com isso tirava das
+coortes, antes da emissão, as companhias que se capitalizaram em crise ou se
+fundiram — Dasa, Light, Azul, Gol, Sequoia —, 283 entradas no prêmio. Um viés de
+seleção na validação. A que ficou só descarta a **correção** de formulário sem o
+salto, que é a que repete a contagem de antes do evento: 36 entradas na série do
+prêmio, 29 em 26 das 276 listadas do backtest e 24 nas deslistadas.
+
+**B44 fechado** ([decisão 144](decisoes/144-o-nome-de-pregao-da-consulta-de-proventos-vai-sem-barra.md)).
+A consulta de proventos da B3 vai sem espaço e sem barra. Testado antes: o nome
+com barra devolve zero, `AMBEVSA` devolve os 40 da Ambev S.A., e `AMBEV`
+sozinho devolve os 134 da antiga Companhia de Bebidas. Sete dos nove voltaram
+com histórico; Haga e Wetzel não pagaram.
+
+**O efeito.** No aplicativo, sobre a entrada congelada: 108 avaliados (eram
+97), potencial mediano de −36,6% (era −45,4%), 28 acima de zero (eram 15),
+postos de 0,980 contra a montagem de 5,5%. No backtest: 10.840 observações, 3.199 avaliadas (eram 3.070), potencial mediano de −39,1% (era −54,4%), 855 acima de zero (eram 438); 138 observações mudam de valor de mercado em mais de 1,5 vez pela contagem conferida, quatro delas avaliadas — a MGLU3 de 31/03/2025 sai de R$ 2,46 para R$ 37,04. A faixa
+calibrada: 87,9/79,7/50,7% em 12 meses e 88,3/79,6/51,6% em 36, desvios máximos de 2,1 e 1,7 p.p., com a mesma forma — o R2 continua atingido. O R3: 0,032 com `t` corrigido de 0,18 contra 2,70, Newey-West de 0,44, e efeito mínimo detectável de 0,65 — não passa, e o registro declara o poder. O book-to-market sobe de 2,03 para 2,27 e também não passa, e o retorno esperado continua sem prêmio de ordenação. **Uma leitura intermediária ficou registrada** ([habilidade_trimestral.md](validacao/habilidade_trimestral.md) §12): com a primeira versão da conferência da contagem, o book-to-market chegou a 2,83 e passou; a regra foi refinada por viés de seleção, e com a amostra corrigida não passa. A passagem dele depende de quais companhias ficam na amostra.
+
+**As lentes.** Rodaram as sete. A `nucleo` não achou tensão. A `dados` achou o
+**D7** — com a base do papel mudando e o apagamento do disco falhando, a
+gravação seguia e o disco ficava com as duas bases, e era ele que saía —, aberto
+e fechado na rodada, com teste que reprova o código antigo; as outras duas
+(a meta que um `update` sem o campo não apaga, documentada no código e sem
+caminho na tela; a leitura do pacote da CVM na isolate principal) são
+preexistentes e de polimento. A `risco` pediu duas coisas que não se sustentam:
+um `onExit` em volta do `compute`, que já devolve erro quando a isolate morre, e
+reabrir a tolerância da fonte a JSON de forma errada, escolha registrada no D6;
+a disciplina dela passou a dizer as duas coisas. A `tela` não achou tensão, com
+o modelo rebaixado um degrau. A `metodo` não achou tensão — na segunda rodada: na
+primeira, o corte do material por tamanho caía antes de
+`services/valuation/`, e ela respondia sobre o método sem ter lido o custo de
+capital, a realavancagem nem o prêmio. A ordem do material dela passou a pôr
+primeiro o que define o preço justo. A `registro` repetiu o apontamento de
+09/09/2026 sobre o cartão de preço da tela de avaliação, já inventariado e à
+espera de decisão do usuário. A `rumo` não achou tensão.
+
+**A auditoria.** As ferramentas (`tool/`) e o código do aplicativo e do
+núcleo foram auditados em dois grupos, com índice temporário: **0 FAIL / 0 WARN**
+nos dois. A lente nova da `risco` mexeu só em `scripts/`, e passou no
+`typecheck`. Núcleo com 860 testes e aplicativo com 492, verdes.
+
 ## O crescimento pela retenção e pelo PIB do setor — B45 (01/10/2026)
 
 **A pergunta.** «Por que utilizamos g como mediana de um fator temporal ao

@@ -8,8 +8,8 @@
 >
 > **Data:** 14/09/2026 ([dados/VALE3.json](dados/VALE3.json)).
 >
-> **Resultado:** preço justo **R$ 70,25**, contra R$ 75,48 de mercado — upside
-> de **−6,9%**. Ressalva: **base normalizada forte**.
+> **Resultado:** preço justo **R$ 88,74**, contra R$ 75,48 de mercado — upside
+> de **+17,6%**. Ressalva: **base normalizada forte**.
 
 ---
 
@@ -38,7 +38,7 @@ proporção: mudou o preço do minério.
   desconta a tesouraria e arbitra a divergência).
 - **Caminho:** setor "materiais básicos", NOPAT positivo em ≥ 60% dos anos →
   **via da firma**.
-- **CAPM:** `Ke = 14,09% + 0,8655 × 5,5% = 18,85%` (beta com 19 proventos
+- **CAPM:** `Ke = 14,09% + 0,8655 × 1,21% = 15,13%` (beta com 19 proventos
   reinvestidos, encolhido; beta desalavancado 0,79).
 
 ---
@@ -110,25 +110,26 @@ todos os dez anos.
 | Kd | 14,09% + 1,8% = 15,89% |
 
 ```
-WACC = 0,836 × 18,85% + 0,2745 × 15,89% × 0,66 − 0,1104 × 14,09% × 0,66
-     = 15,76% + 2,88% − 1,03% = 17,61%
+WACC = 0,836 × 15,13% + 0,2745 × 15,89% × 0,66 − 0,1104 × 14,09% × 0,66
+     = 12,65% + 2,88% − 1,03% = 14,50%
 ```
 
 A despesa financeira publicada daria custo de dívida de 7,8% — abaixo da taxa
 livre de risco, impossível para captação nova: é dívida antiga e em dólar. O
 motor usa o custo de captar hoje.
 
-**Resolvido ano a ano** (26 iterações): WACC de 17,27% no ano 1 a 17,88% no ano
-10; **Ke de 18,57% a 19,24%**. O capital próprio fica em 83% do valor da firma.
+**Resolvido ano a ano** (27 iterações): WACC de 14,16% no ano 1 a 14,78% no ano
+10; **Ke de 14,69% a 15,35%**. O capital próprio vai de 85,9% a 85,4% do valor da firma
+projetado (hoje, a preço de mercado, é 83,6%).
 
 ---
 
 ## 6. A perpetuidade
 
 ```
-excedente do ciclo = 20,35% − 17,88% = 2,47 p.p.
+excedente do ciclo = 20,35% − 14,78% = 5,57 p.p.
 φ (AR(1), 14 pares) = 0,4105  →  λ = 0,4105¹⁰ = 0,0001
-ROIC∞ = 17,88% + 0,0001 × 2,47% = 17,89%
+ROIC∞ = 14,78% + 0,0001 × 5,57% = 14,78%
 ```
 
 Há excedente, mas ele **não persiste**: com φ = 0,41, de cada ponto de excedente
@@ -142,17 +143,17 @@ concedido.
 
 | Ano | g | ROIC | Retenção | NOPAT (R$ mi) | Fluxo da firma (R$ mi) | Serviço da dívida (R$ mi) | Fluxo do acionista (R$ mi) | Ke | Fator acumulado | Meio de ano | Valor presente (R$ mi) |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1 | 3,3% | 20,4% | 16,3% | 58.607,6 | 49.042,1 | 4.734,8 | 44.307,3 | 18,6% | 1,1857 | 1,0889 | 40.690,0 |
-| 2 | 3,3% | 20,1% | 16,6% | 60.554,3 | 50.527,9 | 5.103,6 | 45.424,3 | 19,1% | 1,4119 | 1,0912 | 35.107,5 |
-| 3 | 3,3% | 19,8% | 16,7% | 62.565,6 | 52.090,5 | 5.418,4 | 46.672,2 | 19,4% | 1,6860 | 1,0928 | 30.250,3 |
-| 4 | 3,3% | 19,6% | 16,9% | 64.643,7 | 53.688,1 | 5.621,7 | 48.066,5 | 19,5% | 2,0142 | 1,0930 | 26.083,4 |
-| 5 | 3,3% | 19,4% | 17,1% | 66.790,8 | 55.354,2 | 5.864,2 | 49.490,0 | 19,6% | 2,4087 | 1,0936 | 22.468,6 |
-| 6 | 3,3% | 19,1% | 17,4% | 69.009,3 | 57.013,5 | 6.011,2 | 51.002,2 | 19,5% | 2,8781 | 1,0931 | 19.370,7 |
-| 7 | 3,3% | 18,8% | 17,7% | 71.301,4 | 58.698,7 | 6.157,4 | 52.541,3 | 19,4% | 3,4358 | 1,0926 | 16.708,3 |
-| 8 | 3,3% | 18,5% | 17,9% | 73.669,7 | 60.455,1 | 6.351,6 | 54.103,5 | 19,4% | 4,1010 | 1,0925 | 14.413,3 |
-| 9 | 3,3% | 18,2% | 18,3% | 76.116,6 | 62.212,3 | 6.516,9 | 55.695,4 | 19,3% | 4,8914 | 1,0921 | 12.435,3 |
-| 10 | 3,3% | 17,9% | 18,6% | 78.644,8 | 64.039,2 | 6.717,7 | 57.321,5 | 19,2% | 5,8327 | 1,0920 | 10.731,6 |
-| **Soma** | | | | | | | | | | | **228.258,9** |
+| 1 | 3,3% | 20,4% | 16,3% | 58.607,6 | 49.042,1 | 4.734,8 | 44.307,3 | 14,7% | 1,1469 | 1,0709 | 41.373,4 |
+| 2 | 3,3% | 19,7% | 16,8% | 60.554,3 | 50.352,8 | 5.103,6 | 45.249,2 | 15,2% | 1,3210 | 1,0733 | 36.762,0 |
+| 3 | 3,3% | 19,2% | 17,3% | 62.565,6 | 51.714,2 | 5.418,4 | 46.295,8 | 15,5% | 1,5261 | 1,0748 | 32.605,6 |
+| 4 | 3,3% | 18,6% | 17,9% | 64.643,7 | 53.079,1 | 5.621,7 | 47.457,4 | 15,6% | 1,7638 | 1,0751 | 28.926,0 |
+| 5 | 3,3% | 18,0% | 18,4% | 66.790,8 | 54.481,0 | 5.864,2 | 48.616,8 | 15,7% | 2,0406 | 1,0756 | 25.625,9 |
+| 6 | 3,3% | 17,4% | 19,1% | 69.009,3 | 55.825,9 | 6.011,2 | 49.814,6 | 15,6% | 2,3589 | 1,0752 | 22.705,0 |
+| 7 | 3,3% | 16,7% | 19,9% | 71.301,4 | 57.141,2 | 6.157,4 | 50.983,8 | 15,5% | 2,7243 | 1,0747 | 20.111,9 |
+| 8 | 3,3% | 16,1% | 20,6% | 73.669,7 | 58.475,9 | 6.351,6 | 52.124,3 | 15,5% | 3,1457 | 1,0746 | 17.805,7 |
+| 9 | 3,3% | 15,4% | 21,5% | 76.116,6 | 59.726,2 | 6.516,9 | 53.209,3 | 15,4% | 3,6296 | 1,0742 | 15.747,2 |
+| 10 | 3,3% | 14,8% | 22,5% | 78.644,8 | 60.972,8 | 6.717,7 | 54.255,2 | 15,4% | 4,1869 | 1,0740 | 13.917,8 |
+| **Soma** | | | | | | | | | | | **255.580,5** |
 
 Aqui o serviço da dívida é positivo e grande (R$ 4,7 a 6,7 bi por ano): a Vale
 tem dívida líquida de verdade, e o acionista paga os juros dela depois do
@@ -160,19 +161,19 @@ imposto, menos a dívida nova que a manutenção da alavancagem permite tomar.
 
 **Diferente da WEGE3:** com crescimento baixo, a retenção é pequena (16–19%) e
 a maior parte do NOPAT vira fluxo livre. Por isso o valor está concentrado no
-período explícito: o terminal é só 23,7% do capital próprio.
+período explícito: o terminal é só 32,3% do capital próprio.
 
 ---
 
 ## 8. O terminal, convertido para o acionista
 
 ```
-VT da firma = NOPAT₁₀ × (1 + 3,32%) × (1 − 3,32% ÷ 17,89%) ÷ (17,88% − 3,32%)
-            = R$ 454.338,3 mi
-fluxo da firma ano 11  = 454.338,3 × (17,88% − 3,32%) = 66.166,5
-fluxo do acionista     = 66.166,5 − 6.940,8 (serviço da dívida) = 59.225,8
-VT do acionista        = 59.225,8 ÷ (19,24% − 3,32%) = 371.943,8
-VP do terminal         = 371.943,8 × 1,0920 ÷ 5,8327 = R$ 69.634,4 mi
+VT da firma = NOPAT₁₀ × (1 + 3,32%) × (1 − 3,32% ÷ 14,78%) ÷ (14,78% − 3,32%)
+            = R$ 549.729,6 mi
+fluxo da firma ano 11  = 549.729,6 × (14,78% − 3,32%) = 62.999,0
+fluxo do acionista     = 62.999,0 − 6.940,8 (serviço da dívida) = 56.058,2
+VT do acionista        = 56.058,2 ÷ (15,35% − 3,32%) = 465.875,4
+VP do terminal         = 465.875,4 × 1,0740 ÷ 4,1869 = R$ 119.508,4 mi
 ```
 
 ---
@@ -180,20 +181,20 @@ VP do terminal         = 371.943,8 × 1,0920 ÷ 5,8327 = R$ 69.634,4 mi
 ## 9. O preço justo
 
 ```
-capital próprio = 228.258,9 + 69.634,4 − 4.627,0 (minoritários) = R$ 293.266,3 mi
-preço justo     = 293.266,3 mi ÷ 4.174.876.130 = R$ 70,25
-upside          = (70,25 − 75,48) ÷ 75,48 = −6,9%
+capital próprio = 255.580,5 + 119.508,4 − 4.627,0 (minoritários) = R$ 370.462,0 mi
+preço justo     = 370.462,0 mi ÷ 4.174.876.130 = R$ 88,74
+upside          = (88,74 − 75,48) ÷ 75,48 = +17,6%
 ```
 
 ---
 
 ## 10. Os números em volta
 
-**Cenários:** R$ 61,61 / R$ 70,25 / R$ 82,63. **Monte Carlo:** P5 R$ 64,95,
-mediana R$ 70,21, P95 R$ 76,70.
+**Cenários:** R$ 74,55 / R$ 88,74 / R$ 110,87. **Monte Carlo:** P5 R$ 80,09,
+mediana R$ 88,69, P95 R$ 99,96.
 
-**Faixa calibrada (80%):** 12 meses, R$ 60,23 a R$ 114,41; 36 meses, R$ 55,42 a
-R$ 149,78. Larga: a Vale oscila 26,6% ao ano.
+**Faixa calibrada (80%):** 12 meses, R$ 59,55 a R$ 113,16; 36 meses, R$ 53,98 a
+R$ 146,56. Larga: a Vale oscila 26,6% ao ano.
 
 **Múltiplos de pares.** O subsetor de mineração não tem cinco **outras**
 companhias (até 28/09/2026 a conta chegava a cinco contando classes de ação da
@@ -206,7 +207,9 @@ mesma empresa; item B41), e a mediana vem do setor de materiais básicos:
 | EV/EBITDA | 6,44 (21) | R$ 61,23 |
 | **Consolidada** | | **R$ 38,36** |
 
-Divergência de −45,4%: grande, mas abaixo do limite de 50% que dispara o aviso.
+Divergência de −56,8%: acima do limite de 50%, e o aviso aparece na avaliação.
+(Até 01/10/2026, com o prêmio de 5,5%, o preço justo era R$ 70,25 e a
+divergência ficava em −45,4%, abaixo do limite.)
 Os pares do setor (siderúrgicas, papel e celulose, químicas) negociam a
 múltiplos menores que os da Vale, e o lucro que o P/L e o P/VP multiplicam é o
 de 2025, no fundo do ciclo — que é exatamente o que a normalização corrige no

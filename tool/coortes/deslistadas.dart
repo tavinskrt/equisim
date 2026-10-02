@@ -20,6 +20,7 @@ import '../b3/proventos.dart';
 import '../cvm/documentos.dart';
 import '../cvm/setor_cvm.dart';
 import 'base_da_data.dart';
+import 'contagem_conferida.dart';
 
 /// Um papel de companhia deslistada.
 class PapelDeslistado {
@@ -97,11 +98,13 @@ class PapelDeslistado {
         if (p.date.isBefore(e.exDate)) c /= e.factor;
       }
       final fin = p.financeiro;
-      pontos.add(PricePoint(
-        date: p.date,
-        close: c,
-        volume: (fin == null || c <= 0) ? null : fin / c,
-      ));
+      pontos.add(
+        PricePoint(
+          date: p.date,
+          close: c,
+          volume: (fin == null || c <= 0) ? null : fin / c,
+        ),
+      );
     }
     return PriceSeries(ticker: ticker, points: pontos);
   }
@@ -123,9 +126,10 @@ class PapelDeslistado {
   /// pregões antes da data ex pelo mesmo fator, então a razão entre vizinhos
   /// não depende da base: a lista vale para qualquer data de coorte.
   late final List<DateTime> saltos = () {
-    final s = serie(DateRange(DateTime.utc(1990), DateTime.utc(2100)),
-            ate: DateTime.utc(2100))
-        .points;
+    final s = serie(
+      DateRange(DateTime.utc(1990), DateTime.utc(2100)),
+      ate: DateTime.utc(2100),
+    ).points;
     return [
       for (var i = 1; i < s.length; i++)
         if (s[i - 1].close > 0 &&
@@ -149,7 +153,16 @@ class PapelDeslistado {
 }
 
 class Deslistadas {
-  Deslistadas._(this.papeis, this.documentos, this.setorCvm);
+  Deslistadas._(
+    this.papeis,
+    this.documentos,
+    this.setorCvm,
+    this.contagensDescartadas,
+  );
+
+  /// Entradas da contagem descartadas pela conferência contra o salto do preço
+  /// (item B43), somadas nas companhias.
+  final int contagensDescartadas;
 
   final Map<String, PapelDeslistado> papeis;
 
@@ -184,20 +197,29 @@ class Deslistadas {
 
   final SetorCvm? setorCvm;
 
-  static DateTime _dia(String s) => DateTime.parse('${s.substring(0, 10)}T00:00:00Z');
+  static DateTime _dia(String s) =>
+      DateTime.parse('${s.substring(0, 10)}T00:00:00Z');
 
   /// Lê as deslistadas. `null` sem os arquivos do A3.4.
   ///
   /// - [classificacaoListadas]: CNPJ da listada → classificação da B3, para
   ///   medir o setor da CVM.
-  static Deslistadas? ler(Map<String, B3Classification> classificacaoListadas) {
+  ///
+  /// - [ate]: a data de corte da conferência da contagem (item B43) — a âncora
+  ///   é a contagem mais recente até ela.
+  static Deslistadas? ler(
+    Map<String, B3Classification> classificacaoListadas, {
+    required DateTime ate,
+  }) {
     final ponteArq = File('data/b3/ponte_deslistadas.json');
     final contagemArq = File('data/b3/deslistadas_contagem.json');
     if (!ponteArq.existsSync() || !contagemArq.existsSync()) return null;
-    final ponte = (jsonDecode(ponteArq.readAsStringSync()) as Map<String, dynamic>)
-        .cast<String, Map<String, dynamic>>();
-    final a34 = (jsonDecode(contagemArq.readAsStringSync()) as Map<String, dynamic>)
-        .cast<String, Map<String, dynamic>>();
+    final ponte =
+        (jsonDecode(ponteArq.readAsStringSync()) as Map<String, dynamic>)
+            .cast<String, Map<String, dynamic>>();
+    final a34 =
+        (jsonDecode(contagemArq.readAsStringSync()) as Map<String, dynamic>)
+            .cast<String, Map<String, dynamic>>();
     final setorCvm = SetorCvm.ler(classificacaoListadas);
 
     final isins = <String, String>{};
@@ -211,42 +233,69 @@ class Deslistadas {
       }
     }
     final cotahist = lerCotahistBruto(isins.keys.toSet(), isins: isins);
-    final documentos = carregarDocumentos('data/cvm_exercicios.json',
-        soTickers: isins.keys.toSet(),
-        tickersPorCnpj: tickersPorCnpj,
-        comVersoesAntigas: true);
+    final documentos = carregarDocumentos(
+      'data/cvm_exercicios.json',
+      soTickers: isins.keys.toSet(),
+      tickersPorCnpj: tickersPorCnpj,
+      comVersoesAntigas: true,
+    );
 
     final papeis = <String, PapelDeslistado>{};
+    var descartadas = 0;
     for (final e in tickersPorCnpj.entries) {
       final cnpj = e.key;
       final registro = a34[cnpj];
       if (registro == null) continue;
-      final contagem = [
-        for (final p in (registro['contagem'] as List).cast<Map<String, dynamic>>())
-          (desde: _dia(p['desde'] as String), acoes: (p['acoes'] as num).toDouble()),
-      ]..sort((a, b) => a.desde.compareTo(b.desde));
+      // A contagem do formulário conferida contra o salto do preço dos papéis
+      // da companhia (item B43, decisão 143): a correção que repete a contagem
+      // de antes de um grupamento sai.
+      final conferida = conferirContagem(
+        [
+          for (final p
+              in (registro['contagem'] as List).cast<Map<String, dynamic>>())
+            (
+              desde: _dia(p['desde'] as String),
+              acoes: (p['acoes'] as num).toDouble(),
+              fonte: p['fonte'] as String?,
+            ),
+        ],
+        [
+          for (final t in e.value)
+            if (cotahist[t] case final s? when s.length > 1) s,
+        ],
+        ate: ate,
+      );
+      descartadas += conferida.descartadas.length;
+      final contagem = conferida.aceitas;
       if (contagem.isEmpty) continue;
 
-      final arquivo = File('data/b3/complemento_deslistadas/'
-          '${cnpj.replaceAll(RegExp(r'[./-]'), '')}.json');
+      final arquivo = File(
+        'data/b3/complemento_deslistadas/'
+        '${cnpj.replaceAll(RegExp(r'[./-]'), '')}.json',
+      );
       final complemento = arquivo.existsSync()
           ? jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>
           : const <String, dynamic>{};
       final daB3 = B3Classification.parse(
-          (complemento['detalhe'] as Map<String, dynamic>?)?['industryClassification']);
+        (complemento['detalhe']
+            as Map<String, dynamic>?)?['industryClassification'],
+      );
       final daCvm = daB3 == null ? setorCvm?.classificacaoDe(cnpj) : null;
 
       for (final t in e.value) {
-        final dados = (registro['papeis'] as Map<String, dynamic>)[t]
-            as Map<String, dynamic>?;
+        final dados =
+            (registro['papeis'] as Map<String, dynamic>)[t]
+                as Map<String, dynamic>?;
         final pregoes = cotahist[t];
         if (dados == null || pregoes == null || pregoes.length < 2) continue;
 
         // Eventos de mesma data ex: fica o que o preço observado explica.
         final porData = <DateTime, List<double>>{};
-        for (final ev in (dados['eventos'] as List).cast<Map<String, dynamic>>()) {
-          (porData[_dia(ev['dataEx'] as String)] ??= [])
-              .add((ev['fator'] as num).toDouble());
+        for (final ev
+            in (dados['eventos'] as List).cast<Map<String, dynamic>>()) {
+          (porData[_dia(ev['dataEx'] as String)] ??= []).add(
+            (ev['fator'] as num).toDouble(),
+          );
         }
         var duplicados = 0;
         final eventos = <ShareEvent>[];
@@ -262,22 +311,29 @@ class Deslistadas {
             }
           }
           duplicados += d.value.length - 1;
-          eventos.add(ShareEvent(
-              exDate: d.key, factor: melhor, observedRatio: observado ?? melhor));
+          eventos.add(
+            ShareEvent(
+              exDate: d.key,
+              factor: melhor,
+              observedRatio: observado ?? melhor,
+            ),
+          );
         }
         eventos.sort((a, b) => a.exDate.compareTo(b.exDate));
 
         final classe = B3CashDividends.shareClassOf(t);
         final proventos = <CashDividend>[
-          for (final p in (dados['proventos'] as List).cast<Map<String, dynamic>>())
+          for (final p
+              in (dados['proventos'] as List).cast<Map<String, dynamic>>())
             if (classe != null)
               CashDividend(
                 shareClass: classe,
                 kind: CashDividendKind.values.byName(p['tipo'] as String),
                 // A data com é o pregão anterior à ex; a conta do retorno total
                 // só usa a data ex e o preço com direito.
-                lastDateWithRights:
-                    _dia(p['dataEx'] as String).subtract(const Duration(days: 1)),
+                lastDateWithRights: _dia(
+                  p['dataEx'] as String,
+                ).subtract(const Duration(days: 1)),
                 exDate: _dia(p['dataEx'] as String),
                 amount: (p['valor'] as num).toDouble(),
                 closeWithRights: (p['precoComDireito'] as num?)?.toDouble(),
@@ -291,19 +347,22 @@ class Deslistadas {
           pregoes: pregoes,
           eventos: eventos,
           naoLocalizados: [
-            for (final d in (dados['eventosNaoLocalizados'] as List).cast<String>())
+            for (final d
+                in (dados['eventosNaoLocalizados'] as List).cast<String>())
               _dia(d),
           ],
           contagem: contagem,
           proventos: proventos,
           classificacao: daB3 ?? daCvm,
-          origemDoSetor: daB3 != null ? 'b3' : (daCvm != null ? 'cvm' : 'nenhuma'),
+          origemDoSetor: daB3 != null
+              ? 'b3'
+              : (daCvm != null ? 'cvm' : 'nenhuma'),
           eventosDuplicados: duplicados,
           classes: ClassesDoCapital.fromJson(registro['classes'] as List?),
         );
       }
     }
-    return Deslistadas._(papeis, documentos, setorCvm);
+    return Deslistadas._(papeis, documentos, setorCvm, descartadas);
   }
 
   /// `P_anterior / P_ex` na data ex: o fator que o preço observou.
@@ -331,8 +390,14 @@ class Deslistadas {
 /// `contagem × preço do papel`, que dava razão de unidade 1 por construção. Sem
 /// ele, recua para o produto.
 class FundamentosDeslistada implements FundamentalsRepository {
-  FundamentosDeslistada(this.papel, this.documentos, this.data, this.preco,
-      {this.valorDeMercado, this.ancorada = false});
+  FundamentosDeslistada(
+    this.papel,
+    this.documentos,
+    this.data,
+    this.preco, {
+    this.valorDeMercado,
+    this.ancorada = false,
+  });
 
   final PapelDeslistado papel;
   final List<CvmPeriodDocument> documentos;
@@ -352,8 +417,12 @@ class FundamentosDeslistada implements FundamentalsRepository {
     final publicado = PointInTimeView(data).isPublished;
     final hoje = papel.acoesEm(data);
     if (hoje == null || hoje <= 0) {
-      return Err(InsufficientData('sem contagem de ${t.value} na data',
-          subject: t.value));
+      return Err(
+        InsufficientData(
+          'sem contagem de ${t.value} na data',
+          subject: t.value,
+        ),
+      );
     }
     final mercado = <FundamentalsSnapshot>[
       for (final d in CvmSeries.vigentes(documentos, publicado))
@@ -366,26 +435,30 @@ class FundamentosDeslistada implements FundamentalsRepository {
             marketCap: valorDeMercado ?? hoje * preco,
           ),
     ];
-    return Ok(CvmSeries.build(
-      documentos: documentos,
-      mercado: mercado,
-      asOf: data,
-      publicado: publicado,
-      ancorada: ancorada,
-    ).series);
+    return Ok(
+      CvmSeries.build(
+        documentos: documentos,
+        mercado: mercado,
+        asOf: data,
+        publicado: publicado,
+        ancorada: ancorada,
+      ).series,
+    );
   }
 
   @override
   Future<Result<Asset>> profile(Ticker t) async {
     final c = papel.classificacao;
-    return Ok(Asset(
-      ticker: t,
-      name: papel.nome,
-      sector: c == null
-          ? Sector.fromKey('', label: '')
-          : Sector(key: c.sectorKey, label: c.sector),
-      industry: (c == null || c.industry.isEmpty) ? null : c.industry,
-    ));
+    return Ok(
+      Asset(
+        ticker: t,
+        name: papel.nome,
+        sector: c == null
+            ? Sector.fromKey('', label: '')
+            : Sector(key: c.sectorKey, label: c.sector),
+        industry: (c == null || c.industry.isEmpty) ? null : c.industry,
+      ),
+    );
   }
 
   @override
@@ -405,8 +478,9 @@ class PrecosDeslistada implements PriceRepository {
 
   @override
   Future<Result<Map<Ticker, PriceSeries>>> dailyBatch(
-          List<Ticker> tickers, DateRange range) async =>
-      Ok({for (final t in tickers) t: papel.serie(range, ate: ate)});
+    List<Ticker> tickers,
+    DateRange range,
+  ) async => Ok({for (final t in tickers) t: papel.serie(range, ate: ate)});
 
   @override
   Future<Result<PriceSeries>> adjustedCloseRaw(Ticker t, DateRange range) =>

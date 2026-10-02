@@ -8,8 +8,8 @@
   "rf": 0.14086384141758157,
   "beta": 1.4500113861985664,
   "origemBeta": "shrunk",
-  "premio": 0.055,
-  "ke": 0.22061446765850273,
+  "premio": 0.012107652198573262,
+  "ke": 0.15842007496564492,
   "betaDesalavancado": 1.2303798454651647
  },
  "ancoras": {
@@ -486,11 +486,11 @@
    "nopatPublicado": 5155693000.0
   }
  ],
- "recusa": "A estrutura de capital de RENT3 não sustenta a via da firma: O capital próprio desaparece dentro da projeção (ano 0, iteração 1): a realavancagem não tem sentido econômico, e o ativo não é avaliável por fluxo descontado nesta estrutura de capital. O ponto fixo foi tentado também a partir do custo de capital desalavancado, e não fecha de nenhuma das duas partidas: a recusa é do método, e não do chute. A avaliação não muda de via: a do acionista é outro modelo, e trocar de modelo porque este recusou faria o preço justo depender de qual dos dois a conta alcançou.",
+ "recusa": "O fluxo do acionista de RENT3, derivado do da firma, não sustenta capital próprio positivo: a dívida líquida consome o valor que a operação gera. O ativo não é avaliável por fluxo descontado nesta estrutura de capital.",
  "resultado": null,
  "rastro": {
-  "transactionId": "56bf5839-cefe-4bfb-8da3-03c97def6bdd",
-  "timestamp": "2026-09-28T09:58:23.164262Z",
+  "transactionId": "34982766-9074-4fa1-9d07-53560e284aa7",
+  "timestamp": "2026-10-02T00:27:36.868444Z",
   "endpoint": "/core/valuation/RENT3",
   "inputPayload": {
    "ticker": "RENT3",
@@ -499,9 +499,9 @@
    "capm": {
     "riskFreeRate": 0.140864,
     "beta": 1.45,
-    "marketPremium": 0.055,
+    "marketPremium": 0.012108,
     "betaSource": "shrunk",
-    "premiumSource": "parameterized"
+    "premiumSource": "impliedNormalized"
    },
    "marginOfSafety": 0.0,
    "projectionYears": 10,
@@ -687,7 +687,7 @@
   },
   "outputPayload": {
    "status": "falha",
-   "motivo": "A estrutura de capital de RENT3 não sustenta a via da firma: O capital próprio desaparece dentro da projeção (ano 0, iteração 1): a realavancagem não tem sentido econômico, e o ativo não é avaliável por fluxo descontado nesta estrutura de capital. O ponto fixo foi tentado também a partir do custo de capital desalavancado, e não fecha de nenhuma das duas partidas: a recusa é do método, e não do chute. A avaliação não muda de via: a do acionista é outro modelo, e trocar de modelo porque este recusou faria o preço justo depender de qual dos dois a conta alcançou.",
+   "motivo": "O fluxo do acionista de RENT3, derivado do da firma, não sustenta capital próprio positivo: a dívida líquida consome o valor que a operação gera. O ativo não é avaliável por fluxo descontado nesta estrutura de capital.",
    "viaTentada": "firma",
    "exerciciosPublicados": 16
   },
@@ -717,16 +717,18 @@
     "mappedVariables": {
      "R_f (% a.a.)": 14.09,
      "beta": 1.45,
-     "R_m - R_f (% a.a.)": 5.5,
+     "R_m - R_f (% a.a.)": 1.21,
+     "origem do prêmio": "impliedNormalized",
      "origem do beta": "shrunk",
      "retorno do beta": "total, 21 proventos reinvestidos"
     },
     "intermediateSteps": [
-     "Passo 1: prêmio ajustado ao risco sistemático → 1.45 × 5.5% = 8.0%",
-     "Passo 2: soma à taxa livre de risco → 14.1% + 8.0% = 22.1%",
+     "Passo 0: o prêmio de mercado → 1.2%, a média de dez anos do prêmio implícito no preço da bolsa: o retorno que o valor de mercado das listadas embute, dado o dinheiro que elas distribuem, menos o prefixado de dez anos (decisão 142)",
+     "Passo 1: prêmio ajustado ao risco sistemático → 1.45 × 1.2% = 1.8%",
+     "Passo 2: soma à taxa livre de risco → 14.1% + 1.8% = 15.8%",
      "Passo 3: este é o K_e sobre o CDI de hoje — o do WACC do dia e o do retorno esperado da tela de metas. O desconto de cada ano usa a taxa livre de risco daquele ano, da curva do Tesouro, e a alavancagem que a avaliação produz: ver a estrutura a termo e o desconto do período explícito."
     ],
-    "finalValue": 22.06,
+    "finalValue": 15.84,
     "unit": "% a.a."
    },
    {
@@ -884,7 +886,7 @@
      "D líquida (R$)": 33002533000.0,
      "D bruta (R$)": 43595338000.0,
      "C — caixa (R$)": 10592805000.0,
-     "K_e (% a.a.)": 22.06,
+     "K_e (% a.a.)": 15.84,
      "K_d (% a.a.)": 23.09,
      "R_f (% a.a.)": 14.09,
      "t (%)": 34.0
@@ -894,10 +896,10 @@
      "Passo 2: participação da dívida bruta → 43595338000.0 ÷ 71975037598.89 = 0.6057; e do caixa → 10592805000.0 ÷ 71975037598.89 = 0.1472. A diferença das duas é a participação da dívida líquida, 0.4585 — o que a separação muda é a **taxa** de cada metade, e não o peso",
      "Passo 3: K_d = R_f + prêmio sintético → prêmio pela alavancagem (2.4× dívida líquida ÷ EBITDA) = 2.4%; a despesa observada (14.5% da dívida) está na banda, e a cobertura fala → prêmio pela cobertura = 9.0%, vale o maior → 14.1% + 9.0% = 23.1%. O observado não entra na taxa",
      "Passo 4: benefício fiscal da dívida → 23.1% × (1 − 0.34) = 15.2%",
-     "Passo 5: o caixa rende a taxa livre de risco, tributada → 14.1% × (1 − 0.34) = 9.3%. Soma ponderada → 0.5415 × 22.1% + 0.6057 × 15.2% − 0.1472 × 9.3% = 11.9% + 7.9% = 19.8%",
+     "Passo 5: o caixa rende a taxa livre de risco, tributada → 14.1% × (1 − 0.34) = 9.3%. Soma ponderada → 0.5415 × 15.8% + 0.6057 × 15.2% − 0.1472 × 9.3% = 8.6% + 7.9% = 16.4%",
      "Passo 6: WACC acima da taxa livre de risco; nenhum piso aplicado"
     ],
-    "finalValue": 19.81,
+    "finalValue": 16.44,
     "unit": "% a.a."
    },
    {
@@ -922,18 +924,18 @@
      "R_f do ano 1 (% a.a.)": 13.62,
      "R_f do ano N (% a.a.)": 14.29,
      "R_f da perpetuidade (% a.a.)": 14.29,
-     "r_1 (% a.a.)": 19.42,
-     "r_N (% a.a.)": 19.98,
-     "r_inf (% a.a.)": 19.98,
+     "r_1 (% a.a.)": 16.05,
+     "r_N (% a.a.)": 16.61,
+     "r_inf (% a.a.)": 16.61,
      "N (anos)": 10
     },
     "intermediateSteps": [
      "Passo 1: a taxa livre de risco de cada ano é o forward de um ano da curva dos prefixados de 10/09/2026 → ano 1: 13.6%; ano 2: 14.1%; ano 3: 14.5%; ano 4: 14.5%; ano 5: 14.6%; ano 6: 14.5%; ano 7: 14.4%; ano 8: 14.4%; ano 9: 14.3%; ano 10: 14.3%",
-     "Passo 2: o custo de capital de cada ano é remontado sobre ela, com o beta, o prêmio e a estrutura de capital de hoje → ano 1: 19.4%; ano 2: 19.8%; ano 3: 20.1%; ano 4: 20.2%; ano 5: 20.3%; ano 6: 20.2%; ano 7: 20.1%; ano 8: 20.1%; ano 9: 20.0%; ano 10: 20.0%",
-     "Passo 3: a perpetuidade usa o forward depois do ano 10, 14.3%, e é descontada a 20.0%",
+     "Passo 2: o custo de capital de cada ano é remontado sobre ela, com o beta, o prêmio e a estrutura de capital de hoje → ano 1: 16.0%; ano 2: 16.5%; ano 3: 16.8%; ano 4: 16.8%; ano 5: 16.9%; ano 6: 16.8%; ano 7: 16.7%; ano 8: 16.7%; ano 9: 16.6%; ano 10: 16.6%",
+     "Passo 3: a perpetuidade usa o forward depois do ano 10, 14.3%, e é descontada a 16.6%",
      "Passo 4: quando o custo de capital é resolvido ano a ano contra a alavancagem que a própria avaliação produz, este caminho é o ponto de partida, e o resolvido o substitui — ver o desconto do período explícito"
     ],
-    "finalValue": 19.98,
+    "finalValue": 16.61,
     "unit": "% a.a."
    },
    {
@@ -941,8 +943,8 @@
     "latexRepresentation": "ROIC_\\infty = WACC_\\infty + \\varphi^{N}(ROIC_{ciclo} - WACC_\\infty)",
     "mappedVariables": {
      "ROIC do ciclo (% a.a.)": 13.83,
-     "WACC de equilíbrio (% a.a.)": 19.98,
-     "excedente do ciclo (p.p.)": -6.15,
+     "WACC de equilíbrio (% a.a.)": 16.61,
+     "excedente do ciclo (p.p.)": -2.78,
      "Phi": 5.64,
      "exercícios": 16,
      "phi cru (AR(1))": 0.3566,
@@ -958,11 +960,11 @@
     "intermediateSteps": [
      "Passo 1: crescimento orgânico? Phi = 5.64 > 0.6",
      "Passo 2: histórico longo? 16 exercícios contra 8 exigidos",
-     "Passo 3: excedente positivo? ROIC do ciclo de 13.8% contra WACC de equilíbrio de 20.0%",
+     "Passo 3: excedente positivo? ROIC do ciclo de 13.8% contra WACC de equilíbrio de 16.6%",
      "Passo 4: persistência do excedente por AR(1) sobre 14 pares — phi cru 0.3566, confinado em 0.3566; lambda = phi^N = —",
      "Passo 5: barrado por crescimento inorgânico, retorno do ciclo não supera o custo de capital — vale o estado estacionário, ROIC_inf = WACC_inf, e o valor terminal não depende de g_inf"
     ],
-    "finalValue": 19.98,
+    "finalValue": 16.61,
     "unit": "% a.a."
    }
   ]

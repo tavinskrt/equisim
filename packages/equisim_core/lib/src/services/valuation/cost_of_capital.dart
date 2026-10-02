@@ -20,11 +20,16 @@ enum BetaSource {
 
 /// Como o prêmio de risco de mercado foi definido.
 enum MarketPremiumSource {
-  /// Parametrizado (padrão do sistema: 5–6% a.a.).
+  /// Parametrizado: os 5,5% de [CapmInputs.defaultMarketPremium]. Desde a
+  /// decisão 142 é o recuo, quando a série do prêmio implícito não chega.
   parameterized,
 
   /// Média histórica do índice na janela declarada.
   historical,
+
+  /// Média de dez anos do prêmio implícito no preço da bolsa — o padrão desde
+  /// a decisão 142. Ver `ImpliedPremiumPackage`.
+  impliedNormalized,
 }
 
 /// Insumos do CAPM.
@@ -54,8 +59,13 @@ class CapmInputs {
     this.premiumSource = MarketPremiumSource.parameterized,
   });
 
-  /// Prêmio padrão para o Brasil: 5,5% a.a., ponto médio da faixa de 5–6%
-  /// adotada como parâmetro do projeto.
+  /// Prêmio parametrizado: 5,5% a.a., ponto médio da faixa de 5–6% que foi o
+  /// parâmetro do projeto até a decisão 142.
+  ///
+  /// **Desde ela, é recuo e referência**, e não o prêmio do aplicativo: o
+  /// prêmio é a média de dez anos do prêmio implícito no preço da bolsa
+  /// (`ImpliedPremiumPackage`), e este valor só entra quando a série não
+  /// chega — declarado — e nas medições que comparam com a montagem antiga.
   static const double defaultMarketPremium = 0.055;
 
   /// Ke = Rf + β · (Rm − Rf)

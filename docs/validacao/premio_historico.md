@@ -137,4 +137,5 @@ distribui, pelo método de Damodaran), que olha para a frente em vez de para
 trás. Não foi medido aqui: está em [premio_implicito.md](premio_implicito.md),
 medido no mesmo dia. A média de cinco ou de dez anos dele fica positiva em
 todas as coortes, entre 0,1% e 2,0%, e hoje em 1,55% e 1,23%, perto do
-histórico de dez anos.
+histórico de dez anos. A média de dez anos virou o prêmio do motor em
+01/10/2026 (decisão 142).

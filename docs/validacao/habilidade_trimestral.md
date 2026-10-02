@@ -1,8 +1,11 @@
 # O instrumento da habilidade, pronto — itens C1c, C1d e C3
 
-> **A leitura mais recente é a §11**, de 25/09/2026, com o capital posterior, as
-> bonificações não ajustadas, a contagem atrasada e os proventos do mesmo dia
-> corrigidos (itens B28 a B31). As seções anteriores registram as leituras de
+> **A leitura mais recente é a §12**, de 01/10/2026, com o prêmio de mercado da
+> decisão 142 em cada coorte, a contagem de ações conferida contra o preço
+> (decisão 143) e os proventos dos nove emissores que faltavam (decisão 144). A
+> §11, de 25/09/2026, é a de antes, com o capital posterior, as bonificações não
+> ajustadas, a contagem atrasada e os proventos do mesmo dia corrigidos (itens
+> B28 a B31). As seções anteriores registram as leituras de
 > antes, das mais novas para as mais antigas depois da §6, e ficam porque a
 > comparação entre instrumentos é parte do que este documento serve para mostrar.
 
@@ -170,6 +173,60 @@ O backtest trimestral inteiro foi refeito com o motor corrigido.
 
 **Nenhum veredito muda.** O efeito mínimo detectável segue em 0,62
 ([poder_r3.md](poder_r3.md)).
+
+## 12. Com o prêmio de mercado do mercado — remedido em 01/10/2026
+
+**Três mudanças entraram juntas**, todas da medição do prêmio implícito
+([premio_implicito.md](premio_implicito.md)):
+
+- **O prêmio de mercado** ([decisão 142](../decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md))
+  deixa de ser 5,5% e passa a ser, em cada coorte, a média de dez anos do prêmio
+  implícito só com os trimestres até a data dela: de 0,91% a 1,62%. Ele muda o
+  `Ke` de todo ativo, e com ele o preço justo, a via e a recusa por estrutura.
+- **A contagem de ações** ([decisão 143](../decisoes/143-a-contagem-da-coorte-e-conferida-contra-o-salto-do-preco.md))
+  é conferida contra o salto do preço: 29 entradas descartadas em 26 das 276
+  companhias listadas e 24 nas deslistadas. 138 observações mudam de valor de
+  mercado em mais de 1,5 vez — a HAPV3 de 2025 caía de R$ 278 bilhões para R$ 18
+  bilhões, a IRBR3 de 2024 de R$ 78 a 110 bilhões para R$ 2,6 a 3,7 bilhões —,
+  e quatro delas são avaliadas; a MGLU3 de 31/03/2025 sai de R$ 2,46 para
+  R$ 37,04 de preço justo, com as 739 milhões de ações que tinha.
+- **Os proventos** ([decisão 144](../decisoes/144-o-nome-de-pregao-da-consulta-de-proventos-vai-sem-barra.md))
+  dos sete emissores com barra no nome que pagaram entram no retorno total e no
+  beta.
+
+O backtest tem 10.840 observações (eram 10.792), **3.199 avaliadas** (eram
+3.070), com potencial mediano de **−39,1%** (era −54,4%) e 855 acima de zero
+(eram 438). O prêmio menor baixa o custo de capital, e mais companhias passam
+pela estrutura de capital.
+
+| 36 meses, trimestral, com deslistadas (n = 2.259) | 28/09 | **01/10** | `t` corrigido / crítico | Newey-West | passa |
+|---|---:|---:|---:|---:|---|
+| **potencial dado o B/M (critério do R3)** | 0,069 | **0,032** | **0,18 / 2,70** | 0,44 | não |
+| IC do potencial | 0,121 | 0,092 | 0,55 / 2,70 | 1,24 | não |
+| IC do book-to-market | 0,160 | 0,166 | 2,27 / 2,70 | 5,13 | não |
+| IC do lucro sobre o preço | 0,134 | 0,130 | 1,04 / 2,70 | 2,90 | não |
+| IC do composto | 0,163 | 0,151 | 1,22 / 2,70 | 2,82 | não |
+
+**Nenhum veredito muda.** O critério do R3 cai de 0,069 para 0,032, com `t`
+corrigido de 0,18 — longe do crítico e do efeito mínimo detectável, que fica em
+0,65 ([poder_r3.md](poder_r3.md)). Em 12 meses, 0,030 com `t` corrigido de
+0,47 contra 2,24. **O book-to-market sobe de 2,03 para 2,27 e continua abaixo
+do crítico**, e por isso a regra da decisão 103 continua sem prêmio de
+ordenação no retorno esperado: o pacote `assets/validacao/habilidade.json` diz
+que nenhuma ordenação passou.
+
+**Uma leitura intermediária, registrada para não sumir.** Na mesma rodada, uma
+primeira versão da conferência da contagem descartava também a emissão e a
+fusão grandes sem salto no preço (Dasa, Light, Azul, Gol, Sequoia). Com aquela
+amostra, e a série do prêmio medida com ela, o book-to-market chegou a `t` corrigido de 2,83 e passou, e o critério
+do R3 deu 0,021. A regra foi refinada porque aquele descarte era viés de
+seleção (decisão 143), e com a amostra corrigida o book-to-market não passa.
+**A passagem do book-to-market depende de quais companhias ficam na amostra** —
+o que é, de novo, o retrato do poder baixo que a §11 e o C6 já declaravam.
+
+**A faixa calibrada, remedida**, com a mesma forma: 90% nominal cobre **87,9%**
+em 12 meses e **88,3%** em 36, desvios máximos de 2,1 e 1,7 p.p. contra o limite
+de 5 ([cobertura_banda.md](cobertura_banda.md) §14). **O R2 continua atingido.**
 
 ## 11. Com o dado das coortes corrigido — remedido em 25/09/2026
 

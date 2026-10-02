@@ -470,3 +470,29 @@ de 5. Coeficientes do pacote: 12 meses `a = 0,0852`, `b = 0,0289`; 36 meses
 `a = 0,1609`, `b = 0,0916`. A banda de cenários, pessimista a otimista, cobre
 9,3% em 36 meses.
 
+## 14. Remedido em 01/10/2026 — com o prêmio de mercado do mercado
+
+Sem reescolher a forma, com o backtest refeito depois das decisões 142 (o
+prêmio de mercado de cada coorte é a média de dez anos do prêmio implícito até
+a data dela, de 0,91% a 1,62%), 143 (a contagem de ações conferida contra o
+preço) e 144 (os proventos dos emissores com barra no nome):
+
+| fora da amostra | 12 meses: 90 / 80 / 50% | desvio | 36 meses: 90 / 80 / 50% | desvio |
+|---|---|---:|---|---:|
+| **convergência na escala da volatilidade** | **87,9 / 79,7 / 50,7** | **2,1 p.p.** | **88,3 / 79,6 / 51,6** | **1,7 p.p.** |
+| em torno do justo, mesmas observações | 85,0 / 74,3 / 45,0 | 5,7 p.p. | 87,1 / 77,9 / 47,9 | 2,9 p.p. |
+
+Sobre 2.760 observações de teste em 12 meses e 1.102 em 36. Por tercil de
+potencial, a de 90% cobre 88,5 / 87,7 / 87,5% em 12 meses e 83,0 / 92,0 / 90,7%
+em 36; nas listadas, 88,4% e 87,7%, e nas deslistadas, 84,3% e 93,3%. **A forma
+continua cobrindo, e a regra continua mandando-a ao aplicativo**: o pacote
+`assets/validacao/banda_calibrada.json` foi regerado com `a = 0,0729` e
+`b = 0,0205` em 12 meses, `a = 0,1217` e `b = 0,0658` em 36. A banda de
+cenários, pessimista a otimista, cobre 13,3% em 12 meses e 14,9% em 36.
+
+**O preço justo mais alto não aproximou a faixa do justo.** Com o prêmio menor,
+o preço realizado ainda fica, na mediana, 1,82 vez o justo em 12 meses e 1,97
+vez em 36; a faixa em torno do justo continua fora do critério em 12 meses
+(5,7 p.p.), e o peso que a convergência dá ao justo continua pequeno (`b` de
+0,02 e 0,07).
+

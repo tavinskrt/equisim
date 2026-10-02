@@ -4167,6 +4167,22 @@ abstract final class ValuationCascade {
     );
   }
 
+  /// De onde veio o prêmio de mercado, em texto (decisão 142).
+  static String _origemDoPremio(CapmInputs capm) => switch (capm.premiumSource) {
+        MarketPremiumSource.impliedNormalized =>
+          '${_pct(capm.marketPremium)}, a média de dez anos do prêmio implícito '
+              'no preço da bolsa: o retorno que o valor de mercado das listadas '
+              'embute, dado o dinheiro que elas distribuem, menos o prefixado de '
+              'dez anos (decisão 142)',
+        MarketPremiumSource.parameterized =>
+          '${_pct(capm.marketPremium)}, o prêmio parametrizado: a série do '
+              'prêmio implícito não chegou a esta avaliação, e o recuo é o '
+              'parâmetro anterior à decisão 142',
+        MarketPremiumSource.historical =>
+          '${_pct(capm.marketPremium)}, a média histórica do índice na janela '
+              'declarada',
+      };
+
   static void _auditCapm(
       AuditTransaction? audit, CapmInputs capm, int proventosNoBeta,
       {bool comCurva = false}) {
@@ -4179,12 +4195,14 @@ abstract final class ValuationCascade {
         'R_f (% a.a.)': _r(capm.riskFreeRate * 100),
         'beta': _r(capm.beta, 4),
         'R_m - R_f (% a.a.)': _r(capm.marketPremium * 100),
+        'origem do prêmio': capm.premiumSource.name,
         'origem do beta': capm.betaSource.name,
         'retorno do beta': proventosNoBeta > 0
             ? 'total, $proventosNoBeta proventos reinvestidos'
             : 'de preço',
       },
       steps: [
+        'Passo 0: o prêmio de mercado → ${_origemDoPremio(capm)}',
         'Passo 1: prêmio ajustado ao risco sistemático → ${_r(capm.beta, 4)} × '
             '${_pct(capm.marketPremium)} = ${_pct(risk)}',
         'Passo 2: soma à taxa livre de risco → ${_pct(capm.riskFreeRate)} + '

@@ -45,7 +45,7 @@ recusa para no passo em que a conta parou.
 | # | Nome no painel | O que calcula | Onde estudar | Onde está a regra |
 |---:|---|---|---|---|
 | 1 | **Razão da unidade negociada** | quantas ações há em cada papel negociado (1, ou 5 numa unit como a SAPR11) | [guia 2.8](estudo/02-a-empresa-em-numeros.md) | [motor 1.4](motor/01-insumos-e-dados.md) |
-| 2 | **Custo do capital próprio (CAPM)** | `Ke = Rf + β × 5,5%` com o CDI de hoje; o passo 3 do rastro avisa que cada ano da projeção usa o forward daquele ano | [guia 3.8](estudo/03-risco-e-retorno.md) | [motor 4.1](motor/04-custo-de-capital.md) |
+| 2 | **Custo do capital próprio (CAPM)** | `Ke = Rf + β × prêmio` com o CDI de hoje; o passo 0 diz de onde vem o prêmio (a média de dez anos do prêmio implícito, 1,21% em 14/09/2026, ou os 5,5% de recuo, sem pacote); o passo 3 avisa que cada ano da projeção usa o forward daquele ano | [guia 3.8](estudo/03-risco-e-retorno.md) | [motor 4.1](motor/04-custo-de-capital.md) |
 | 3 | **Contagem de papéis da ponte** | por quantos papéis o capital próprio é dividido: mercado, demonstrações, registro oficial da B3 | [guia 2.8](estudo/02-a-empresa-em-numeros.md) | [motor 1.4](motor/01-insumos-e-dados.md) |
 | 4 | **Roteamento por porta** | financeira? NOPAT positivo em 60% dos anos? → via da firma ou do acionista | [guia 4.2](estudo/04-fluxo-de-caixa-descontado.md) | [motor 2](motor/02-cascata-e-portas.md) |
 | 5 | **Base do fluxo: normalização pelo ciclo** | retorno atual × ciclo; as três guardas; fator de normalização (e "queda no triênio": negativa quer dizer que o lucro subiu) | [guia 4.4](estudo/04-fluxo-de-caixa-descontado.md), [6.2](estudo/06-estatistica.md), [6.5](estudo/06-estatistica.md) | [motor 3.2](motor/03-base-e-crescimento.md) |
@@ -73,7 +73,7 @@ ações) aparecem como eventos próprios, de [prepare_valuation_inputs.dart](../
 2. As parcelas vêm do resultado do passo **11b** (ou **11**) e do passo **12**.
 3. Em **11b**, cada linha diz `fluxo × meio de ano ÷ fator = valor presente`;
    refaça uma com calculadora.
-4. O Ke de cada ano em **11b** é o forward do ano (passo 9) mais beta × 5,5%, com
+4. O Ke de cada ano em **11b** é o forward do ano (passo 9) mais beta × prêmio (passo 2), com
    o beta recalculado pela dívida do ano quando há ponto fixo.
 5. As premissas de 11a — `g` e ROIC — vêm dos passos 5, 6 e 10.
 

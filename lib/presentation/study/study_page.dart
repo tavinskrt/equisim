@@ -149,6 +149,8 @@ class _StudyHeader extends ConsumerWidget {
     final anchors = ref.watch(marketAnchorsProvider);
     final habilidade = ref.watch(skillReadingProvider);
     final sinais = ref.watch(portfolioSignalsProvider);
+    // O prêmio do escore é o mesmo do desconto (decisão 142).
+    final premio = ref.watch(marketPremiumReadingProvider);
 
     // O mesmo estimador do cartao de meta: `Ke + z x premio`, com `z` da
     // ordenacao que a validacao escolheu (item B1). Duas telas que dizem
@@ -167,6 +169,8 @@ class _StudyHeader extends ConsumerWidget {
         ordering: ordenacao,
         spotRiskFree:
             (anchors.value ?? MarketAnchors.fallback2026).currentRiskFreeRate,
+        riskPremium:
+            premio.value?.premium ?? CapmInputs.defaultMarketPremium,
       );
       coverage = ExpectedReturn.coverage(
         portfolio: state.study.principal,

@@ -31,6 +31,9 @@ const _pasta = 'data/gabarito';
 const _cache = '$_pasta/cache.sqlite';
 const _ibovespa = '$_pasta/ibovespa.json';
 const _universo = '$_pasta/universo.json';
+
+/// O pacote do prêmio implícito (decisão 142).
+const _pacoteDoPremio = 'assets/mercado/premio_implicito.json';
 const _gabarito = 'docs/validacao/gabarito_cascata.json';
 
 /// O Ibovespa gravado pelo gabarito. Janela não gravada é recusada — ir à rede
@@ -110,6 +113,10 @@ class Congelado {
     required this.proventos,
     required this.units,
     this.capital = const {},
+    this.premio = (
+      valor: CapmInputs.defaultMarketPremium,
+      origem: MarketPremiumSource.parameterized,
+    ),
   });
 
   final ValidationContext ctx;
@@ -131,6 +138,10 @@ class Congelado {
 
   /// Emissões e eventos de ações do pacote do aplicativo (itens B28 e B29).
   final Map<String, CapitalEvents> capital;
+
+  /// O prêmio de mercado da montagem do aplicativo, e de onde ele veio
+  /// (decisão 142).
+  final ({double valor, MarketPremiumSource origem}) premio;
 
   /// O Ibovespa da janela do beta, já congelado.
   late final DateRange janelaDoBeta = DateRange(
@@ -177,6 +188,24 @@ class Congelado {
     final units = File('assets/cvm/units.json').existsSync()
         ? UnitCompositionCodec.decodePackage(ler('assets/cvm/units.json'))
         : const <String, List<UnitComposition>>{};
+    // O prêmio de mercado do aplicativo (decisão 142): a média de dez anos da
+    // série do pacote, na data congelada. Sem pacote, o recuo do aplicativo —
+    // os 5,5% parametrizados —, dito no terminal.
+    final pacoteDoPremio = File(_pacoteDoPremio).existsSync()
+        ? ImpliedPremiumCodec.decode(ler(_pacoteDoPremio))
+        : null;
+    final media = pacoteDoPremio?.normalizedAt(hojeCongelado);
+    final premio = media == null
+        ? (
+            valor: CapmInputs.defaultMarketPremium,
+            origem: MarketPremiumSource.parameterized,
+          )
+        : (valor: media, origem: MarketPremiumSource.impliedNormalized);
+    if (media == null) {
+      stderr.writeln('sem $_pacoteDoPremio utilizável: o prêmio é o '
+          'parametrizado de 5,5% (rode dart run tool/premio_implicito.dart '
+          '--so-serie)');
+    }
 
     final ctx0 = ValidationContext.create(
         outputDir: 'docs/validacao', cacheFile: _cache, frozenCache: true);
@@ -217,6 +246,7 @@ class Congelado {
       proventos: proventos,
       units: units,
       capital: capital,
+      premio: premio,
     );
   }
 
@@ -226,8 +256,10 @@ class Congelado {
   /// padrão de 10 é o do gabarito, e passar outro valor produz uma montagem que
   /// não é a dele — quem varre precisa dizer isso ao imprimir número.
   ///
-  /// [premio] existe para a varredura do prêmio de risco de mercado (item B3),
-  /// e tem a mesma ressalva: o padrão é o do gabarito.
+  /// [premio] existe para a varredura do prêmio de risco de mercado (itens B3
+  /// e B42), e tem a mesma ressalva: ausente, é o do aplicativo — a média de
+  /// dez anos do prêmio implícito, do pacote (decisão 142) —, que é o do
+  /// gabarito; informado, entra como parametrizado.
   ///
   /// [taxa] troca a fonte da taxa livre de risco, para a medição da Selic
   /// prevista (`tool/selic_focus.dart`): `curva` no lugar da do Tesouro — nula,
@@ -236,7 +268,7 @@ class Congelado {
   Future<Result<ValuationInputs>> preparar(
     Ticker t, {
     int anos = 10,
-    double premio = CapmInputs.defaultMarketPremium,
+    double? premio,
     ({YieldCurve? curva, double? estrutural})? taxa,
   }) {
     final e = emissor(t);
@@ -252,7 +284,10 @@ class Congelado {
       terminalRiskFreeRate: taxa?.estrutural ?? anchors.riskFreeCagr,
       riskFreeCurve: taxa == null ? curva : taxa.curva,
       projectionYears: anos,
-      marketPremium: premio,
+      marketPremium: premio ?? this.premio.valor,
+      premiumSource: premio == null
+          ? this.premio.origem
+          : MarketPremiumSource.parameterized,
       officialShares: e?.totalShares != null
           ? OfficialShareCount(total: e!.totalShares!, asOf: e.consultedOn)
           : null,

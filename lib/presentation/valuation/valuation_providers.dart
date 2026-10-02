@@ -43,9 +43,6 @@ class ValuationSettings {
   /// unidade: um é total, o outro é por período.
   final int convergenceHorizonMonths;
 
-  /// Prêmio de risco de mercado do CAPM, em fração ao ano.
-  final double marketPremium;
-
   /// Declara os ajustes. **Só [monteCarlo] tem controle na interface**; os
   /// demais ficam nos padrões — parâmetros declarados do modelo, não
   /// configuráveis em tempo de execução.
@@ -55,7 +52,6 @@ class ValuationSettings {
     this.marginOfSafety = 0.0,
     this.projectionYears = 10,
     this.convergenceHorizonMonths = ExpectedReturn.defaultHorizonMonths,
-    this.marketPremium = CapmInputs.defaultMarketPremium,
   });
 
   /// Cópia com os campos informados substituídos.
@@ -65,7 +61,6 @@ class ValuationSettings {
     double? marginOfSafety,
     int? projectionYears,
     int? convergenceHorizonMonths,
-    double? marketPremium,
   }) => ValuationSettings(
     monteCarlo: monteCarlo ?? this.monteCarlo,
     samples: samples ?? this.samples,
@@ -73,7 +68,6 @@ class ValuationSettings {
     projectionYears: projectionYears ?? this.projectionYears,
     convergenceHorizonMonths:
         convergenceHorizonMonths ?? this.convergenceHorizonMonths,
-    marketPremium: marketPremium ?? this.marketPremium,
   );
 }
 
@@ -105,6 +99,9 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
   final settings = ref.watch(valuationSettingsProvider);
   final anchors = await ref.watch(marketAnchorsProvider.future);
   final capital = await ref.watch(capitalEventsProvider(ticker).future);
+  // O prêmio de mercado é a média de dez anos do prêmio implícito no preço da
+  // bolsa, do pacote do build (decisão 142); sem pacote, os 5,5%, ressalvados.
+  final premio = await ref.watch(marketPremiumReadingProvider.future);
 
   final inputs = await PrepareValuationInputs.call(
     ticker: ticker,
@@ -114,7 +111,8 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     // CAPM olha para frente: a taxa livre de risco do desconto é a corrente,
     // não a média decenal usada para julgar a viabilidade da meta.
     riskFreeRate: anchors.currentRiskFreeRate,
-    marketPremium: settings.marketPremium,
+    marketPremium: premio.premium,
+    premiumSource: premio.source,
     marginOfSafety: settings.marginOfSafety,
     projectionYears: settings.projectionYears,
     // Desconto nominal exige crescimento perpétuo nominal. O teto sai do IPCA
@@ -176,6 +174,9 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     // Sem prior do beta o motor é outro — beta cru e WACC estático —, e quem
     // lê o preço justo tem de saber qual dos dois rodou (item B11).
     (await ref.watch(betaPriorReadingProvider.future)).note,
+    // O prêmio de mercado que não é a média de dez anos do pacote, ou que é
+    // de um pacote velho (decisão 142).
+    premio.note,
   ].nonNulls.toList();
 
   final preparados = inputs.unwrap();
@@ -242,6 +243,8 @@ final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
   // de medir (item B1); sem pacote, ou sem ordenação que passe, não há prêmio.
   final habilidade = await ref.watch(skillReadingProvider.future);
   final sinais = await ref.watch(portfolioSignalsProvider.future);
+  // O prêmio do escore é o mesmo do desconto (decisão 142).
+  final premio = await ref.watch(marketPremiumReadingProvider.future);
 
   // A seção transversal é a das avaliações carregadas, que aqui são as da
   // carteira. É estreita, e o resultado declara o tamanho — ver
@@ -254,6 +257,7 @@ final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
     anchors: anchors,
     ordering: habilidade?.premiumOrdering,
     signals: sinais,
+    riskPremium: premio.premium,
   );
   return result.valueOrNull;
 });

@@ -60,8 +60,8 @@ coortes que não foram usadas para ajustá-la):
 
 | Horizonte | Prometido | Medido | Critério (±5 pontos) |
 |---|---:|---:|---|
-| 12 meses | 80% | 79,4% | cumprido |
-| 36 meses | 80% | 79,9% | cumprido |
+| 12 meses | 80% | 79,7% | cumprido |
+| 36 meses | 80% | 79,6% | cumprido |
 
 A faixa sai da volatilidade do papel e do preço de hoje, e o preço justo entra
 com o peso pequeno que a evidência deu (capítulo 4, seção 4.12). **R2 está
@@ -79,12 +79,18 @@ pela sobreposição das janelas, contra um limiar de 2,70, e Newey-West acima de
 2. Fixar antes impede o erro mais comum de validação: testar vários critérios e
 relatar o que passou.
 
-**Resultado (remedição de 28/09/2026):** inclinação de 0,069, com `t` corrigido
-de 0,40 contra 2,70. **Não passou.**
+**Resultado (remedição de 01/10/2026, com o prêmio de mercado novo):** inclinação
+de 0,032, com `t` corrigido de 0,18 contra 2,70. **Não passou.** (Com o prêmio de
+5,5%, em 28/09/2026, era 0,069, com `t` de 0,40.)
+
+**Nem o book-to-market sozinho passou**: na mesma remedição, o IC dele em 36
+meses é 0,17, com `t` corrigido de 2,27 contra 2,70 (era 2,03 em 28/09). Pela
+regra fixada antes de medir (decisão 103), sem ordenação que passe, o retorno
+esperado da tela de metas fica só no custo do capital próprio.
 
 **E o poder:** com a série brasileira disponível, o menor efeito que o teste
-detectaria com 80% de chance é 0,62 — nove vezes o medido. Nem o próprio
-book-to-market passaria no próprio efeito antes de 2037. Ou seja, o teste
+detectaria com 80% de chance é 0,65 — vinte vezes o medido. O próprio
+book-to-market só teria esse poder no efeito dele com 54 coortes, em 2034. Ou seja, o teste
 **não teria como** confirmar uma habilidade do tamanho que a literatura costuma
 achar.
 
@@ -126,7 +132,7 @@ leituras previstas são em 2029 e 2031.
   converge pouco ao justo);
 - que comprar os de maior upside dá retorno maior (não comprovado);
 - que o nível do preço justo está "certo": ele é sistematicamente mais baixo que
-  o mercado (upside mediano de −45% com os dados de 14/09/2026), e isso está declarado nas
+  o mercado (upside mediano de −37% com os dados de 14/09/2026), e isso está declarado nas
   [limitações](../validacao/limitacoes.md).
 
 A frase da decisão 140 resume a posição do projeto: o motor "não atinge nossos
