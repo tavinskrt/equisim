@@ -79,8 +79,9 @@ que a evidência sustenta, e a tela diz isso (decisões 100 e 124;
 ### 1.4 Os cenários são sensibilidade, e o "otimista" pode valer menos
 
 **O que é.** Os cenários pessimista e otimista (crescimento ±3 p.p., desconto
-±2 p.p.) contiveram o que de fato aconteceu em só 8% dos casos, contra 90% que
-um intervalo de confiança prometeria (decisão 92). E o otimista soma
+±2 p.p.) contiveram o que de fato aconteceu em 13% a 15% dos casos, e a faixa
+de 90% do Monte Carlo em 9%, contra 90% que um intervalo de confiança
+prometeria (decisão 92; remedido em 01/10/2026). E o otimista soma
 crescimento: quando o retorno da empresa fica abaixo do custo de capital,
 crescer destrói valor, e o "otimista" sai abaixo do "pessimista". Com o motor de
 01/10/2026, isso acontece em 15 dos 88 ativos da via da firma (com o prêmio de

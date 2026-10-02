@@ -104,7 +104,10 @@ hoje e da volatilidade ([cap. 4, seção 4.12](04-fluxo-de-caixa-descontado.md))
 
 **13. E os cenários pessimista e otimista?**
 São sensibilidade: mostram quanto o número depende das premissas. Nas coortes,
-contiveram o resultado em só 8% dos casos (decisão 92). E o "otimista" pode sair
+contiveram o resultado em 13% a 15% dos casos, e o Monte Carlo em 9% (decisão
+92; remedido em 01/10/2026). Não é taxa de acerto do motor: é uma faixa estreita
+em torno do preço justo, que nunca prometeu conter o preço futuro — quem promete
+isso é a faixa calibrada, e ela entrega 8 de cada 10. E o "otimista" pode sair
 abaixo do "pessimista" quando a empresa rende abaixo do custo — crescer destrói
 valor (item B38, aguardando decisão).
 

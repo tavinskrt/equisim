@@ -350,13 +350,24 @@ distribuição triangular com o pico na premissa do motor. A tela mostra os
 percentis 5, 50 e 95 e a fração de sorteios acima do preço de mercado.
 
 **O que eles não são.** Nas coortes históricas, a faixa entre pessimista e
-otimista conteve o que de fato aconteceu com o preço em só 8% dos casos, contra
-90% que um intervalo de confiança prometeria (decisão 92). Os cenários dizem
+otimista conteve o preço mais os proventos de 12 e 36 meses depois em 13% a 15%
+dos casos, e a faixa de 90% do Monte Carlo em 9%, contra 90% que um intervalo de
+confiança prometeria (decisão 92; remedido em 01/10/2026). Os cenários dizem
 **quanto o número depende das premissas**, e não onde o preço vai estar.
+
+**Por que erram tanto.** Por dois motivos, medidos. O motor é pessimista: o
+preço terminou acima da faixa em sete de cada dez casos. E a faixa é estreita:
+do sorteio de 5% ao de 95%, o preço justo muda cerca de 1,35 vez, e para
+conter nove de cada dez preços reais em torno do preço justo ela precisaria ir
+de um valor a 33 vezes ele, em 12 meses. Tirar o pessimismo não resolve:
+recentrada no preço que de fato veio, a faixa do Monte Carlo passa a conter só
+13%. O preço justo diz pouco sobre onde o preço vai estar em um a três anos —
+por isso a incerteza da tela é a faixa calibrada da seção seguinte, que parte do
+preço de hoje.
 
 **O rótulo que engana (item B38).** O otimista soma crescimento. Quando a
 empresa rende abaixo do custo de capital, crescer destrói valor, e o "Otimista"
-pode sair abaixo do "Pessimista" — aconteceu em 17 dos 77 ativos da via da
+pode sair abaixo do "Pessimista" — aconteceu em 15 dos 88 ativos da via da
 firma em 14/09/2026. A conta está certa; o nome do cenário é que supõe que
 crescer é sempre bom. A correção depende de decisão
 ([limitações](../validacao/limitacoes.md)).
