@@ -383,6 +383,10 @@ Os cinco casos do guia de estudo:
 A conta da montagem do aplicativo foi conferida contra o gabarito da cascata
 antes de comparar: ela bate com o gabarito ativo a ativo, avaliados e recusados.
 
+**Remedido em 02/10/2026**, com a base de patrimônio corrigida (item B47,
+decisão 146): o motor avalia 110 (potencial mediano de −36,9%, 28 acima de
+zero); com os 5,5%, 99 (−46,9%, 15); postos de 0,976.
+
 ### 10.4 A sensibilidade ao crescimento, na forma do motor
 
 | | `g` − 1 p.p. | Central | `g` + 1 p.p. |
@@ -409,7 +413,28 @@ emissores com barra:
 
 **A faixa calibrada continua cobrindo**, com desvios máximos de 2,1 e 1,7 p.p.
 ([cobertura_banda.md](cobertura_banda.md) §14), **e o R3 continua não
-passando** ([habilidade_trimestral.md](habilidade_trimestral.md) §12). O prêmio
+passando** ([habilidade_trimestral.md](habilidade_trimestral.md) §12).
+Remedido em 02/10/2026, com a base de patrimônio corrigida (decisão 146) e o
+mesmo pacote do prêmio: 3.253 observações avaliadas, potencial mediano de
+−40,5%, faixa de 87,9% e 88,1%, critério do R3 de 0,010 com `t` de 0,05. O prêmio
 menor aproxima o nível do preço justo do preço de mercado, como no aplicativo,
 e quase não mexe na ordem — que é o que a §8 previa: um prêmio igual para todos
 os ativos move o nível, e não a ordenação.
+
+### 10.6 O passado da série não muda em silêncio (02/10/2026)
+
+Remedindo o universo em 02/10/2026, a ferramenta regravou o pacote com os
+trimestres de 2011 até o terceiro de 2012 cerca de 3 pontos mais baixos, e o resto igual. A
+causa: a âncora de crescimento dessas datas pede uma janela de dez anos que
+começa antes de 2003, quando o IBC-Br começa; o repositório vai à rede pelo
+pedaço que falta, e sem resposta o crescimento real cai no valor de 2026 —
+conhecimento futuro, e de outra década. Em 01/10 a rede respondeu, e o
+crescimento de 2011 saiu do IBC-Br de 2003 a 2011 (11,5% nominal, contra 8,3%
+do recuo). **O pacote versionado em 01/10 é o certo**, e foi restaurado.
+
+Desde então a ferramenta compara a série nova com a gravada e **recusa regravar
+um trimestre que mudou**, a menos de `--aceitar-mudanca-do-passado` (item B48).
+A média do aplicativo, cuja janela começa em 2016, não depende dessas datas.
+As das coortes de 2018 a 2022 dependem — a de 30/06/2018 iria de 1,50% para
+0,78% —, e é por isso que o passado da série tem de ficar protegido.
+

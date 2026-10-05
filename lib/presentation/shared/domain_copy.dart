@@ -48,6 +48,8 @@ extension ValuationCaveatRotulo on ValuationCaveat {
       'o fluxo-base vem do ciclo, e não do exercício observado',
     ValuationCaveat.prazoDeterminado =>
       'o negócio opera sob contrato de prazo determinado',
+    ValuationCaveat.controleEstatal =>
+      'o controle é estatal, e o risco do controlador público não está na taxa',
   };
 }
 

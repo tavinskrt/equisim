@@ -513,79 +513,79 @@
    {
     "meses": 12,
     "nominal": 0.5,
-    "coberturaForaDaAmostra": 0.507,
-    "a": 0.07287,
-    "b": 0.02054,
-    "zInf": -0.554189,
-    "zSup": 0.648064,
+    "coberturaForaDaAmostra": 0.509,
+    "a": 0.07808,
+    "b": 0.020198,
+    "zInf": -0.543877,
+    "zSup": 0.647474,
     "faixa": [
-     39.44,
-     53.03
+     39.75,
+     53.31
     ]
    },
    {
     "meses": 12,
     "nominal": 0.8,
     "coberturaForaDaAmostra": 0.797,
-    "a": 0.07287,
-    "b": 0.02054,
-    "zInf": -1.179908,
-    "zSup": 1.237941,
+    "a": 0.07808,
+    "b": 0.020198,
+    "zInf": -1.179494,
+    "zSup": 1.240397,
     "faixa": [
-     33.8,
-     61.32
+     33.99,
+     61.69
     ]
    },
    {
     "meses": 12,
     "nominal": 0.9,
     "coberturaForaDaAmostra": 0.879,
-    "a": 0.07287,
-    "b": 0.02054,
-    "zInf": -1.598456,
-    "zSup": 1.64849,
+    "a": 0.07808,
+    "b": 0.020198,
+    "zInf": -1.60803,
+    "zSup": 1.668198,
     "faixa": [
-     30.49,
-     67.85
+     30.58,
+     68.55
     ]
    },
    {
     "meses": 36,
     "nominal": 0.5,
-    "coberturaForaDaAmostra": 0.516,
-    "a": 0.121719,
-    "b": 0.065823,
-    "zInf": -0.711967,
-    "zSup": 0.992765,
+    "coberturaForaDaAmostra": 0.503,
+    "a": 0.131838,
+    "b": 0.061521,
+    "zInf": -0.729987,
+    "zSup": 0.989521,
     "faixa": [
-     39.17,
-     59.61
+     39.45,
+     60.26
     ]
    },
    {
     "meses": 36,
     "nominal": 0.8,
-    "coberturaForaDaAmostra": 0.796,
-    "a": 0.121719,
-    "b": 0.065823,
-    "zInf": -1.761396,
-    "zSup": 2.000561,
+    "coberturaForaDaAmostra": 0.787,
+    "a": 0.131838,
+    "b": 0.061521,
+    "zInf": -1.797151,
+    "zSup": 2.015375,
     "faixa": [
-     30.24,
-     76.41
+     30.33,
+     77.59
     ]
    },
    {
     "meses": 36,
     "nominal": 0.9,
-    "coberturaForaDaAmostra": 0.883,
-    "a": 0.121719,
-    "b": 0.065823,
-    "zInf": -2.591264,
-    "zSup": 2.662884,
+    "coberturaForaDaAmostra": 0.881,
+    "a": 0.131838,
+    "b": 0.061521,
+    "zInf": -2.61931,
+    "zSup": 2.698896,
     "faixa": [
-     24.65,
-     89.95
+     24.77,
+     91.82
     ]
    }
   ],
@@ -628,8 +628,8 @@
   }
  },
  "rastro": {
-  "transactionId": "c3e581e1-6f9a-4918-afce-ba790750b541",
-  "timestamp": "2026-10-02T00:27:36.433146Z",
+  "transactionId": "60a181d6-d984-4ea9-ab28-d8dc4181fd2c",
+  "timestamp": "2026-10-02T23:47:54.766786Z",
   "endpoint": "/core/valuation/ITUB4",
   "inputPayload": {
    "ticker": "ITUB4",
@@ -737,6 +737,7 @@
    "sectorKey": "financeiro",
    "industry": "Intermediários Financeiros / Bancos",
    "isDistressed": false,
+   "stateControlled": false,
    "inflation": 0.049208,
    "terminalRiskFreeRate": 0.142886,
    "riskFreeCurve": {

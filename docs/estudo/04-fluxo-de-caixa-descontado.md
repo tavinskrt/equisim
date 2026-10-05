@@ -350,9 +350,9 @@ distribuição triangular com o pico na premissa do motor. A tela mostra os
 percentis 5, 50 e 95 e a fração de sorteios acima do preço de mercado.
 
 **O que eles não são.** Nas coortes históricas, a faixa entre pessimista e
-otimista conteve o preço mais os proventos de 12 e 36 meses depois em 13% a 15%
+otimista conteve o preço mais os proventos de 12 e 36 meses depois em 13% a 14%
 dos casos, e a faixa de 90% do Monte Carlo em 9%, contra 90% que um intervalo de
-confiança prometeria (decisão 92; remedido em 01/10/2026). Os cenários dizem
+confiança prometeria (decisão 92; remedido em 02/10/2026). Os cenários dizem
 **quanto o número depende das premissas**, e não onde o preço vai estar.
 
 **Por que erram tanto.** Por dois motivos, medidos. O motor é pessimista: o
@@ -367,7 +367,7 @@ preço de hoje.
 
 **O rótulo que engana (item B38).** O otimista soma crescimento. Quando a
 empresa rende abaixo do custo de capital, crescer destrói valor, e o "Otimista"
-pode sair abaixo do "Pessimista" — aconteceu em 15 dos 88 ativos da via da
+pode sair abaixo do "Pessimista" — aconteceu em 14 dos 90 ativos da via da
 firma em 14/09/2026. A conta está certa; o nome do cenário é que supõe que
 crescer é sempre bom. A correção depende de decisão
 ([limitações](../validacao/limitacoes.md)).
@@ -388,12 +388,12 @@ faixa = preço de hoje × exp(a + b × ln(justo ÷ preço) + σ × z)
 
 - `σ` é a volatilidade do papel no último ano (capítulo 3, seção 3.1);
 - `a` e `b` foram medidos nas coortes trimestrais do backtest (de 2018 a 2025
-  em 12 meses, de 2018 a 2023 em 36): `b` é pequeno (0,02 em 12 meses, 0,07 em
+  em 12 meses, de 2018 a 2023 em 36): `b` é pequeno (0,02 em 12 meses, 0,06 em
   36), o que quer dizer que **o preço converge pouco ao preço justo**;
 - `z` são os limites que, fora da amostra, contiveram 80% dos casos.
 
 Medida fora da amostra, a faixa de 80% conteve o preço mais os proventos em
-79,7% dos casos em 12 meses e 79,6% em 36. Por isso a tela diz "8 de cada 10".
+79,7% dos casos em 12 meses e 78,7% em 36. Por isso a tela diz "8 de cada 10".
 O preço justo entra com peso pequeno porque essa é a evidência: ele explica
 pouco do preço futuro.
 
@@ -431,6 +431,7 @@ preço justo em mais de 50%, a tela avisa — **mas o preço justo não muda**
 | Prazo determinado | concessão com contrato | o valor depende do prazo lido nas outorgas |
 | Base reconstruída | o último ano deu prejuízo e a base veio do ciclo | a partida é uma estimativa, não um lucro publicado |
 | Ponte frágil | o capital próprio é menos de 35% do valor da firma | o valor por ação é resíduo de uma subtração frágil |
+| Controle estatal | a companhia é controlada pelo governo, pelo cadastro da CVM | o motor não cobra o risco de o controlador decidir por outros objetivos que o lucro, e a medição diz por quê ([estatais.md](../validacao/estatais.md)); o preço não muda |
 
 ([compute_valuation.dart, `_diagnose`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart);
 [domain_copy.dart](../../lib/presentation/shared/domain_copy.dart).)
@@ -444,7 +445,7 @@ dado público e regra fixa. Ele **não** é previsão de preço. Três fatos med
 para ter em mente:
 
 1. **O motor é sistematicamente mais pessimista que o mercado.** Com os dados
-   de 14/09/2026 e o motor de 01/10/2026, o upside mediano dos 108 avaliados é
+   de 14/09/2026 e o motor de 01/10/2026, o upside mediano dos 110 avaliados é
    −37%, e só 28 tinham upside positivo. Com o prêmio de mercado tirado do
    próprio preço da bolsa (1,21%, decisão 142) o desacordo diminuiu — com os 5,5%
    de antes eram −45% —, mas não acabou: ele é com o conjunto das premissas —

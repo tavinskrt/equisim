@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-02, a partir de `dbf225f`.
+Gerado em 2026-10-02, a partir de `51705aa`.
 
 ## Decisões registradas
 
-**117** aceita · **2** cumprida · **7** substituída
+**119** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -141,6 +141,8 @@ Gerado em 2026-10-02, a partir de `dbf225f`.
 | 142 | O prêmio de mercado do CAPM passa a ser a média de dez anos do prêmio implícito no preço da bolsa | aceita | voce | 2026-10-01 |
 | 143 | A contagem de ações por data é conferida contra o salto do preço, com âncora na mais recente | aceita | voce | 2026-10-01 |
 | 144 | O nome de pregão da consulta de proventos da B3 vai sem barra, e os nove emissores que ficaram sem histórico são consultados de novo | aceita | voce | 2026-10-01 |
+| 145 | A avaliação declara o controle estatal, com a fonte do Formulário Cadastral, sem mudar o preço justo | aceita | voce | 2026-10-02 |
+| 146 | Sem o par VPA e contagem do exercício, a base de patrimônio é o PL da demonstração | aceita | voce | 2026-10-02 |
 
 ### Caminhos retirados
 
@@ -153,13 +155,14 @@ Decisões cujo `afeta` cita caminho que uma decisão posterior apagou (campo `re
 
 ## Caixa de entrada
 
-5 apontamento(s) não convertidos em decisão:
+6 apontamento(s) não convertidos em decisão:
 
 - `2026-09-09-voce.md`
 - `2026-09-27-voce.md`
 - `2026-09-28-voce.md`
 - `2026-09-29-voce.md`
 - `2026-10-01-voce.md`
+- `2026-10-02-voce.md`
 
 ## Superfície medida
 
@@ -167,16 +170,18 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 65 | 22.880 |
-| Apresentacao | 37 | 16.515 |
-| Camada de dados | 25 | 3.782 |
-| Testes do app | 49 | 9.383 |
-| Testes do nucleo | 49 | 16.409 |
-| Ferramentas de QA | 20 | 6.817 |
+| Nucleo de dominio | 66 | 23.099 |
+| Apresentacao | 37 | 16.520 |
+| Camada de dados | 26 | 3.873 |
+| Testes do app | 50 | 9.487 |
+| Testes do nucleo | 50 | 16.598 |
+| Ferramentas de QA | 20 | 6.849 |
 
 ## Histórico recente
 
 ```
+2026-10-02  51705aa  Instruções para o build
+2026-10-01  b92876c  Refino do motor de valuation (parte 27)
 2026-10-01  dbf225f  Analisando alternativas para o crescimento (g)
 2026-09-29  1325e49  Prêmio de risco
 2026-09-29  5551a7a  Documentação do motor de valuation (parte 1)
@@ -190,6 +195,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-21  0ec1ec1  Refino do motor de valuation (parte 19)
 2026-09-20  ec063b9  Refino do motor de valuation (parte 18)
 2026-09-20  bb57462  Regerado estado
-2026-09-16  d7fa781  Refino do motor de valuation (parte 17)
-2026-09-15  5ee27e5  Refino do motor de valuation (parte 15)
 ```

@@ -69,6 +69,19 @@ preço justo, porque crescer só vale mais quando o ROE passa o custo de capital
 ([crescimento_fundamental.md](../validacao/crescimento_fundamental.md); item B45
 do plano).
 
+**7c. As estatais não deveriam ter taxa de desconto maior?**
+A intuição tem base na teoria de agência: o controlador público decide por
+outros objetivos que o lucro, e o minoritário paga. Mas o lugar desse risco,
+pela teoria, é o fluxo que o minoritário espera receber, e não a taxa — o CAPM
+só cobra o risco que anda com o mercado. Medido em 02/10/2026: o beta das
+estatais é menor que o das privadas (0,83 contra 1,00 nas que passam a
+liquidez), e a exposição delas ao risco do país, o "lambda" de Damodaran, fica
+em cerca de 0,7, abaixo de 1. As duas teorias que poriam o risco na taxa dizem
+que ela sairia **menor**. O motor não cobra um prêmio a mais e declara o
+controle estatal na tela; cobrar um prêmio continua sendo decisão em aberto,
+com o efeito medido ([estatais.md](../validacao/estatais.md); item B46 do
+plano).
+
 **8. O que é o "moat" e quando ele vale?**
 É o retorno acima do custo que sobrevive depois de dez anos, medido pela
 persistência φ do próprio histórico (φ¹⁰ do excedente sobrevive). Só com oito
@@ -82,7 +95,7 @@ Toda avaliação tem data, e só entram exercícios já entregues à CVM naquela
 ### Sobre os resultados
 
 **10. Por que os preços justos são tão menores que os preços de mercado?**
-É o viés de nível, medido e declarado: upside mediano de −37% nos 108 avaliados
+É o viés de nível, medido e declarado: upside mediano de −37% nos 110 avaliados
 com os dados de 14/09/2026 (com o motor de 01/10/2026; com o prêmio de 5,5% de
 antes, eram −45%). As causas são o conjunto das premissas conservadoras — juros
 de 14% na curva inteira, retorno convergindo ao custo em dez anos, terminal
@@ -98,13 +111,13 @@ mostrou que o teste não teria poder para mostrar
 
 **12. O que a faixa calibrada garante?**
 Que, medida em coortes que não foram usadas para ajustá-la, a faixa de 80%
-conteve o preço mais os proventos em 79,7% dos casos em 12 meses e 79,6% em 36.
+conteve o preço mais os proventos em 79,7% dos casos em 12 meses e 78,7% em 36.
 Ela **não** é um intervalo em torno do preço justo: sai sobretudo do preço de
 hoje e da volatilidade ([cap. 4, seção 4.12](04-fluxo-de-caixa-descontado.md)).
 
 **13. E os cenários pessimista e otimista?**
 São sensibilidade: mostram quanto o número depende das premissas. Nas coortes,
-contiveram o resultado em 13% a 15% dos casos, e o Monte Carlo em 9% (decisão
+contiveram o resultado em 13% a 14% dos casos, e o Monte Carlo em 9% (decisão
 92; remedido em 01/10/2026). Não é taxa de acerto do motor: é uma faixa estreita
 em torno do preço justo, que nunca prometeu conter o preço futuro — quem promete
 isso é a faixa calibrada, e ela entrega 8 de cada 10. E o "otimista" pode sair

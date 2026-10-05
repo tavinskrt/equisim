@@ -105,6 +105,12 @@ exata com as taxas resolvidas; ela está travada por teste (decisão 43,
   ponto a mais ou a menos de crescimento move o prêmio em cerca de um ponto),
   não conta a recompra de ações e soma só as companhias listadas hoje
   ([premio_implicito.md](../validacao/premio_implicito.md)).
+- **Nenhum prêmio a mais para as estatais**, e isso está medido (item B46,
+  [estatais.md](../validacao/estatais.md)): o beta delas é menor que o das
+  privadas, o encolhimento ao setor quase não o mexe, e a exposição ao risco
+  soberano além do Ibovespa não é maior. O risco do controlador público fica no
+  fluxo do minoritário, e a avaliação declara o controle com a ressalva
+  `controleEstatal` (decisão 145).
 - Custo da dívida sintético, não de crédito observado.
 - Hamada com D/E limitado a 3, e escudo a 34% (bancos pagam 45%, mas não passam
   por aqui).

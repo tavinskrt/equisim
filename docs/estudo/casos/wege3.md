@@ -342,9 +342,9 @@ R$ 19,60. Nenhum sorteio chega perto de R$ 50,74.
 **Faixa calibrada (80%)** — onde o preço mais os proventos costumam estar:
 
 ```
-12 meses: 50,74 × exp(0,0729 + 0,0205 × ln(16,22 ÷ 50,74) + 0,2907 × z)
-          com z entre −1,180 e +1,238  →  R$ 37,83 a R$ 76,40
-36 meses: com a = 0,1217, b = 0,0658, z entre −1,761 e +2,001  →  R$ 31,86 a R$ 95,09
+12 meses: 50,74 × exp(0,0781 + 0,0202 × ln(16,22 ÷ 50,74) + 0,2907 × z)
+          com z entre −1,179 e +1,240  →  R$ 38,05 a R$ 76,88
+36 meses: com a = 0,1318, b = 0,0615, z entre −1,797 e +2,015  →  R$ 32,01 a R$ 96,95
 ```
 
 Note que a faixa fica **em torno do preço de mercado**, e não do preço justo:
@@ -386,7 +386,7 @@ mercado paga por algo que o motor, por construção, não supõe:
    (6,78%).
 
 Nada disso é erro de conta: são premissas **declaradas** e conservadoras, e o
-desacordo de nível com o mercado é sistemático (upside mediano de −37% nos 108
+desacordo de nível com o mercado é sistemático (upside mediano de −37% nos 110
 avaliados; [limitações](../../validacao/limitacoes.md)). Para uma empresa como a
 WEG, o motor responde "quanto ela vale se a concorrência fizer o que costuma
 fazer" — e não "quanto o mercado espera".

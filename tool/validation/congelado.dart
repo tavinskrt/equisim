@@ -113,6 +113,7 @@ class Congelado {
     required this.proventos,
     required this.units,
     this.capital = const {},
+    this.controle = const {},
     this.premio = (
       valor: CapmInputs.defaultMarketPremium,
       origem: MarketPremiumSource.parameterized,
@@ -138,6 +139,17 @@ class Congelado {
 
   /// Emissões e eventos de ações do pacote do aplicativo (itens B28 e B29).
   final Map<String, CapitalEvents> capital;
+
+  /// O controle acionário de cada emissor, pela raiz do código (item B46).
+  final Map<String, List<ShareholderControlPeriod>> controle;
+
+  /// `true` quando o emissor de [t] é de controle estatal na data congelada.
+  bool estatal(Ticker t) {
+    final p = controle[t.value.substring(0, 4)];
+    return p != null &&
+        ShareholderControlHistory.at(p, hojeCongelado) ==
+            ShareholderControl.state;
+  }
 
   /// O prêmio de mercado da montagem do aplicativo, e de onde ele veio
   /// (decisão 142).
@@ -188,6 +200,12 @@ class Congelado {
     final units = File('assets/cvm/units.json').existsSync()
         ? UnitCompositionCodec.decodePackage(ler('assets/cvm/units.json'))
         : const <String, List<UnitComposition>>{};
+    // O controle acionário (item B46), como o aplicativo o lê.
+    final controle = File('assets/cvm/controle.json').existsSync()
+        ? ShareholderControlHistory.decode(ler('assets/cvm/controle.json'))
+                ?.porEmissor ??
+            const <String, List<ShareholderControlPeriod>>{}
+        : const <String, List<ShareholderControlPeriod>>{};
     // O prêmio de mercado do aplicativo (decisão 142): a média de dez anos da
     // série do pacote, na data congelada. Sem pacote, o recuo do aplicativo —
     // os 5,5% parametrizados —, dito no terminal.
@@ -245,6 +263,7 @@ class Congelado {
       prazos: prazos,
       proventos: proventos,
       units: units,
+      controle: controle,
       capital: capital,
       premio: premio,
     );
@@ -265,11 +284,16 @@ class Congelado {
   /// prevista (`tool/selic_focus.dart`): `curva` no lugar da do Tesouro — nula,
   /// o motor usa os dois pontos do CDI — e `estrutural` no lugar da média
   /// decenal. Ausente, é a montagem do gabarito.
+  ///
+  /// [comPrior] falso tira o prior do beta, e o beta fica o medido, sem
+  /// encolhimento — para a medição do item B46, que compara os dois. Com o
+  /// padrão, é a montagem do gabarito.
   Future<Result<ValuationInputs>> preparar(
     Ticker t, {
     int anos = 10,
     double? premio,
     ({YieldCurve? curva, double? estrutural})? taxa,
+    bool comPrior = true,
   }) {
     final e = emissor(t);
     return PrepareValuationInputs.call(
@@ -293,12 +317,13 @@ class Congelado {
           : null,
       concessionEnd: prazos[t.value]?.end,
       dividends: proventosDe(t),
-      betaPrior: prior,
+      betaPrior: comPrior ? prior : null,
       declaredSharesPerUnit:
           UnitCompositionCodec.at(units[t.value] ?? const [], hojeCongelado)
               ?.shares,
       shareEvents: capital[t.value]?.shareEvents ?? const [],
       shareIssues: capital[t.value]?.issues ?? const [],
+      stateControlled: estatal(t),
     );
   }
 

@@ -61,7 +61,7 @@ coortes que não foram usadas para ajustá-la):
 | Horizonte | Prometido | Medido | Critério (±5 pontos) |
 |---|---:|---:|---|
 | 12 meses | 80% | 79,7% | cumprido |
-| 36 meses | 80% | 79,6% | cumprido |
+| 36 meses | 80% | 78,7% | cumprido |
 
 A faixa sai da volatilidade do papel e do preço de hoje, e o preço justo entra
 com o peso pequeno que a evidência deu (capítulo 4, seção 4.12). **R2 está
@@ -80,17 +80,17 @@ pela sobreposição das janelas, contra um limiar de 2,70, e Newey-West acima de
 relatar o que passou.
 
 **Resultado (remedição de 01/10/2026, com o prêmio de mercado novo):** inclinação
-de 0,032, com `t` corrigido de 0,18 contra 2,70. **Não passou.** (Com o prêmio de
+de 0,010, com `t` corrigido de 0,05 contra 2,70. **Não passou.** (Com o prêmio de
 5,5%, em 28/09/2026, era 0,069, com `t` de 0,40.)
 
 **Nem o book-to-market sozinho passou**: na mesma remedição, o IC dele em 36
-meses é 0,17, com `t` corrigido de 2,27 contra 2,70 (era 2,03 em 28/09). Pela
+meses é 0,18, com `t` corrigido de 2,40 contra 2,70 (era 2,03 em 28/09). Pela
 regra fixada antes de medir (decisão 103), sem ordenação que passe, o retorno
 esperado da tela de metas fica só no custo do capital próprio.
 
 **E o poder:** com a série brasileira disponível, o menor efeito que o teste
-detectaria com 80% de chance é 0,65 — vinte vezes o medido. O próprio
-book-to-market só teria esse poder no efeito dele com 54 coortes, em 2034. Ou seja, o teste
+detectaria com 80% de chance é 0,70 — setenta vezes o medido. O próprio
+book-to-market só teria esse poder no efeito dele com 50 coortes, em 2033. Ou seja, o teste
 **não teria como** confirmar uma habilidade do tamanho que a literatura costuma
 achar.
 

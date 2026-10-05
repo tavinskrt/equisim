@@ -132,6 +132,12 @@ export const LENTES: Record<LenteId, Lente> = {
     disciplina: [
       'Esta lente e DIFERENCA DE CONJUNTOS, nao opiniao. Toda divergencia',
       '  nomeia os DOIS lados: o que o registro diz e o que o repositorio tem.',
+      'Apontamento com secao "## Destino" que diz o que ele virou -- decisao,',
+      '  item do plano ou descarte -- esta TRATADO, e fica na pasta de',
+      '  proposito: e a proveniencia das decisoes (README de docs/apontamentos).',
+      '  So reporte apontamento SEM destino, ou com destino que cite decisao ou',
+      '  item inexistente. Em 02/10/2026 esta lente pediu para apagar os',
+      '  apontamentos ja convertidos, o que quebraria a citacao das decisoes.',
       'PROIBIDO INFERIR DECISAO A PARTIR DE CODIGO. Raciocinar de tras para',
       '  frente -- da implementacao para a decisao que "deve ter" existido --',
       '  FABRICA registro, e registro fabricado e pior que registro ausente,',

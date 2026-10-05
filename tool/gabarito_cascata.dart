@@ -315,6 +315,19 @@ Future<void> main(List<String> args) async {
           jsonDecode(File('assets/cvm/units.json').readAsStringSync())
               as Map<String, dynamic>)
       : const <String, List<UnitComposition>>{};
+  // O controle acionário (item B46): a montagem do aplicativo leva a ressalva.
+  final controle = File('assets/cvm/controle.json').existsSync()
+      ? ShareholderControlHistory.decode(
+                  jsonDecode(File('assets/cvm/controle.json').readAsStringSync())
+                      as Map<String, dynamic>)
+              ?.porEmissor ??
+          const <String, List<ShareholderControlPeriod>>{}
+      : const <String, List<ShareholderControlPeriod>>{};
+  bool estatal(Ticker t) {
+    final p = controle[t.value.substring(0, 4)];
+    return p != null &&
+        ShareholderControlHistory.at(p, _hoje) == ShareholderControl.state;
+  }
 
   // O rastro de cada avaliação é capturado no fim da transação dela.
   AuditEvent? ultimo;
@@ -444,6 +457,7 @@ Future<void> main(List<String> args) async {
             : null,
         shareEvents: app ? capital[t.value]?.shareEvents ?? const [] : const [],
         shareIssues: app ? capital[t.value]?.issues ?? const [] : const [],
+        stateControlled: app && estatal(t),
       );
     }
 

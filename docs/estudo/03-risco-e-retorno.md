@@ -286,6 +286,19 @@ todo ele é a taxa do Tesouro.
 - **na tela de metas**, o retorno esperado de cada ação é o Ke calculado com o
   CDI de hoje (decisão 103).
 
+**E as estatais? Não deveriam pagar uma taxa maior?** A intuição é boa: o
+governo controlador pode segurar o preço do combustível, a tarifa da água ou o
+crédito por motivos que não são o lucro, e quem paga é o acionista minoritário.
+O mercado sabe disso e paga menos pelas estatais — o "desconto de estatal". Mas
+o CAPM só cobra na taxa o risco que **anda junto com o mercado** (seção 3.2), e
+foi isso que o projeto mediu em 02/10/2026: o beta das estatais é **menor** que
+o das privadas, e elas também são **menos** sensíveis ao risco do país — o
+"lambda" de Damodaran, que é a teoria que permitiria somar um prêmio a mais,
+deu cerca de 0,7, abaixo de 1. Pela teoria, o risco do controlador está em
+outro lugar: no lucro que o minoritário pode esperar receber, e não na taxa.
+Por isso o motor não cobra um prêmio a mais, e a tela mostra a ressalva
+**controle estatal** ([estatais.md](../validacao/estatais.md); item B46).
+
 ---
 
 ## 3.9 O custo da dívida e o escudo fiscal

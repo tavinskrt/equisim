@@ -254,8 +254,8 @@ limiar próprio, obtido por simulação (2,70 para 22 coortes; decisão 96).
 O **poder** é a chance de um teste detectar um efeito que existe. Com poucas
 coortes, o poder é baixo: um efeito real pode passar despercebido. O Equisim
 mediu isso: com a série brasileira disponível, o menor efeito que o teste
-enxerga com 80% de chance é 0,65, e o efeito medido foi 0,032 (decisão 140;
-remedição de 01/10/2026).
+enxerga com 80% de chance é 0,70, e o efeito medido foi 0,010 (decisão 140;
+remedição de 02/10/2026).
 Leitura correta:
 
 > "O teste não encontrou habilidade de ordenação, **e** não teria poder para

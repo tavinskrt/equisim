@@ -132,6 +132,9 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     officialShares: await ref.watch(officialSharesProvider(ticker).future),
     isDistressed: (await ref.watch(distressedRegistryProvider.future))
         .contains(ticker.value),
+    // O controle estatal, da FCA da CVM: só a ressalva, sem mudar o preço
+    // (item B46).
+    stateControlled: await ref.watch(stateControlledProvider(ticker).future),
     // Prazo da concessão, do Formulário de Referência: só encurta a projeção
     // quando o contrato acaba dentro dela (decisão 88).
     concessionEnd: await ref.watch(concessionEndProvider(ticker).future),

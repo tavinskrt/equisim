@@ -1,9 +1,10 @@
 # O instrumento da habilidade, pronto — itens C1c, C1d e C3
 
-> **A leitura mais recente é a §12**, de 01/10/2026, com o prêmio de mercado da
-> decisão 142 em cada coorte, a contagem de ações conferida contra o preço
-> (decisão 143) e os proventos dos nove emissores que faltavam (decisão 144). A
-> §11, de 25/09/2026, é a de antes, com o capital posterior, as bonificações não
+> **A leitura mais recente é a §13**, de 02/10/2026, com a base de patrimônio
+> corrigida (item B47, decisão 146). A §12, de 01/10/2026, trouxe o prêmio de
+> mercado da decisão 142 em cada coorte, a contagem de ações conferida contra o
+> preço (decisão 143) e os proventos dos nove emissores que faltavam (decisão
+> 144). A §11, de 25/09/2026, é a de antes deles, com o capital posterior, as bonificações não
 > ajustadas, a contagem atrasada e os proventos do mesmo dia corrigidos (itens
 > B28 a B31). As seções anteriores registram as leituras de
 > antes, das mais novas para as mais antigas depois da §6, e ficam porque a
@@ -173,6 +174,36 @@ O backtest trimestral inteiro foi refeito com o motor corrigido.
 
 **Nenhum veredito muda.** O efeito mínimo detectável segue em 0,62
 ([poder_r3.md](poder_r3.md)).
+
+## 13. Com a base de patrimônio corrigida — remedido em 02/10/2026
+
+**O defeito** (item B47, [decisão 146](../decisoes/146-sem-o-par-vpa-e-contagem-a-base-e-o-pl-da-demonstracao.md)):
+a base de patrimônio é `VPA × contagem do exercício`, e a fonte de mercado
+devolve a contagem zerada para algumas companhias e anos. Sem o par, a base
+sumia: companhias com patrimônio positivo saíam recusadas como insolventes, e a
+série de capital de outras tinha buracos. Agora, sem o par, vale o PL da
+demonstração.
+
+O backtest tem 10.843 observações, **3.253 avaliadas** (eram 3.199), potencial
+mediano de −40,5% (era −39,1%). 75 observações passam a ser avaliadas, de 11
+papéis — Copasa, Fleury, EGIE3, ALOS3, Sabesp, Tupy, Natura, entre outros —, e
+20 deixam de ser, de 6; o potencial muda em 371 observações de 82 papéis. Entram
+também as 16 observações da MAPT4, que o universo passou a listar. O prêmio de
+cada coorte é o do pacote de 01/10, que a medição do B48 protegeu.
+
+| 36 meses, trimestral, com deslistadas (n = 2.293) | 01/10 | **02/10** | `t` corrigido / crítico | Newey-West | passa |
+|---|---:|---:|---:|---:|---|
+| **potencial dado o B/M (critério do R3)** | 0,032 | **0,010** | **0,05 / 2,70** | 0,14 | não |
+| IC do potencial | 0,092 | 0,080 | 0,44 / 2,70 | 1,05 | não |
+| IC do book-to-market | 0,166 | 0,179 | 2,40 / 2,70 | 5,07 | não |
+| IC do lucro sobre o preço | 0,130 | 0,125 | 1,06 / 2,70 | 2,85 | não |
+| IC do composto | 0,151 | 0,150 | 1,17 / 2,70 | 2,72 | não |
+
+**Nenhum veredito muda.** Em 12 meses, o critério dá 0,021 com `t` corrigido de
+0,32 contra 2,24. O book-to-market sobe a 2,40 e continua abaixo do crítico, e o
+retorno esperado continua sem prêmio de ordenação. A faixa calibrada, remedida,
+cobre 87,9% em 12 meses e 88,1% em 36 ([cobertura_banda.md](cobertura_banda.md)
+§15).
 
 ## 12. Com o prêmio de mercado do mercado — remedido em 01/10/2026
 

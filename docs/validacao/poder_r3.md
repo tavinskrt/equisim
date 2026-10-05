@@ -113,3 +113,10 @@ limite superior que a amostra sustenta em 0,521. O book-to-market, com IC de
 disponíveis em 30/06/2034 (eram 66, em 2037); o composto pediria 158. Em 12
 meses, a amostra descarta coeficiente condicionado acima de 0,17.
 
+## Remedido em 02/10/2026
+
+Com a base de patrimônio corrigida (decisão 146), o critério do R3 vai a 0,010
+(`t` corrigido de 0,05). O efeito mínimo detectável com 80% de poder fica em
+**0,704**, e o limite superior que a amostra sustenta em 0,540. O
+book-to-market, com IC de 0,179 e poder de 49% no próprio efeito, pede **50
+coortes**, disponíveis em 30/06/2033.

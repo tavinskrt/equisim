@@ -65,12 +65,12 @@ passo; o [caso WEGE3](docs/estudo/casos/wege3.md) mostra todas as contas.
 
 | | Condição | Situação |
 |---|---|---|
-| **R1** | nenhum defeito conhecido | ver o [plano](docs/plano-motor-de-referencia.md): a rodada de 01/10/2026 fechou os dois defeitos de dado que a medição do prêmio achou (B43 e B44); o B38, o rótulo do cenário otimista, aguarda decisão |
-| **R2** | incerteza calibrada | **atingida**: a faixa de 80% conteve 79,7% (12 meses) e 79,6% (36 meses) dos casos fora da amostra (remedida em 01/10/2026) |
-| **R3** | habilidade testada, com o poder declarado | **atingida nessa definição**: o teste fixado antes não passou (0,032, `t` de 0,18 contra 2,70), e o registro diz que ele não teria poder para passar com a série brasileira disponível; nem o book-to-market sozinho passou |
+| **R1** | nenhum defeito conhecido | ver o [plano](docs/plano-motor-de-referencia.md): a rodada de 02/10/2026 achou e fechou mais um — companhias com patrimônio positivo recusadas como insolventes (B47); o B38, o rótulo do cenário otimista, aguarda decisão |
+| **R2** | incerteza calibrada | **atingida**: a faixa de 80% conteve 79,7% (12 meses) e 78,7% (36 meses) dos casos fora da amostra (remedida em 02/10/2026) |
+| **R3** | habilidade testada, com o poder declarado | **atingida nessa definição**: o teste fixado antes não passou (0,010, `t` de 0,05 contra 2,70), e o registro diz que ele não teria poder para passar com a série brasileira disponível; nem o book-to-market sozinho passou |
 
 Dois fatos que qualquer leitor deve ter em mente: o motor é **sistematicamente
-mais pessimista que o mercado** (upside mediano de −37%, medido em 01/10/2026 sobre os dados de 14/09/2026), e **não
+mais pessimista que o mercado** (upside mediano de −37%, remedido em 02/10/2026 sobre os dados de 14/09/2026), e **não
 se comprovou** que comprar as ações de maior upside rende mais.
 
 ---
@@ -222,6 +222,7 @@ dos casos de estudo.
 | `cvm/capital.json` | emissões e eventos de ações | `cvm_baixar.py --docs FRE` e `b3_baixar.py` → `capital_empacotar.dart` | FRE e COTAHIST |
 | `cvm/outorgas.json` | prazo das concessões | `cvm_baixar.py --docs FRE` → `fre_outorgas.dart` | FRE |
 | `cvm/units.json` | composição das units | `cvm_baixar.py --docs FCA` → `unit_empacotar.dart` | FCA |
+| `cvm/controle.json` | espécie do controle acionário, para a ressalva de controle estatal | `cvm_baixar.py --docs FCA` → `controle_empacotar.dart` | FCA |
 | `b3/emissores.json` | contagem oficial de ações e setor | `b3_companhias_baixar.py` e `b3_complemento_baixar.py` → `b3_empacotar.dart` | internet |
 | `b3/proventos.json` | proventos, para o beta de retorno total | `b3_complemento_baixar.py` → `b3_proventos_empacotar.dart` | internet |
 | `mercado/beta_prior.json` | prior do beta por setor | `beta_prior_empacotar.dart` | entrada congelada |
@@ -253,7 +254,8 @@ Sem mexer na entrada congelada:
 gabarito e dos casos mudam. **Hoje não é só rodar comandos.** A data 14/09/2026
 está fixa no código de `tool/validation/congelado.dart`,
 `tool/gabarito_cascata.dart`, `tool/beta_prior_empacotar.dart`,
-`tool/unit_empacotar.dart`, `tool/b3_deslistadas_contagem.dart` e
+`tool/unit_empacotar.dart`, `tool/controle_empacotar.dart`,
+`tool/b3_deslistadas_contagem.dart` e
 `tool/backtest_valuation.dart`, e `tool/premio_implicito.dart` mede os
 trimestres até 30/06/2026. Avançá-la é mudança de código. Depois disso, a ordem
 segue as dependências declaradas no cabeçalho de cada ferramenta:
@@ -262,9 +264,9 @@ segue as dependências declaradas no cabeçalho de cada ferramenta:
 |---|---|
 | 1. Bases brutas, em `data/` | `python tool/cvm_baixar.py`; `python tool/cvm_baixar.py --docs FRE --destino data/cvm/fre`; `python tool/cvm_baixar.py --docs FCA`; `python tool/b3_baixar.py`; `python tool/b3_companhias_baixar.py`; `python tool/b3_complemento_baixar.py`; `python tool/b3_complemento_baixar.py --deslistadas`; `python tool/b3_ponte.py`; `python tool/tesouro_baixar.py` |
 | 2. Ingestão e contagens por data | `dart run tool/cvm_ingerir.dart data/cvm`; `dart run tool/b3_deslistadas_contagem.dart` |
-| 3. Pacotes de dado | `cvm_empacotar.dart`, `b3_empacotar.dart`, `b3_proventos_empacotar.dart`, `capital_empacotar.dart --agora`, `fre_outorgas.dart`, `unit_empacotar.dart --agora` e `curva_empacotar.dart` |
+| 3. Pacotes de dado | `cvm_empacotar.dart`, `b3_empacotar.dart`, `b3_proventos_empacotar.dart`, `capital_empacotar.dart --agora`, `fre_outorgas.dart`, `unit_empacotar.dart --agora`, `controle_empacotar.dart --agora` e `curva_empacotar.dart` |
 | 4. Congelar a entrada nova | `dart run tool/gabarito_cascata.dart`, sem `--regravar`: copia o cache do dia para `data/gabarito/` |
-| 5. Pacotes medidos sobre ela | `beta_prior_empacotar.dart`, `multiplos_empacotar.dart` e `premio_implicito.dart --so-serie` |
+| 5. Pacotes medidos sobre ela | `beta_prior_empacotar.dart`, `multiplos_empacotar.dart` e `premio_implicito.dart --so-serie` — que recusa regravar trimestre já gravado que tenha mudado; confira a causa antes de usar `--aceitar-mudanca-do-passado` (item B48) |
 | 6. O gabarito com os pacotes novos | `dart run tool/gabarito_cascata.dart --regravar` |
 | 7. Validação, casos e conferência | os passos 2 a 6 de "Depois de mudar o motor" |
 

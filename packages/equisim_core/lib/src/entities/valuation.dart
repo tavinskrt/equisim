@@ -190,7 +190,20 @@ enum ValuationCaveat {
   ///
   /// O tamanho está medido: se o contrato acabasse em dez anos, o preço justo
   /// mediano dos expostos ficaria em 0,80 do publicado; em vinte, 0,90.
-  prazoDeterminado;
+  prazoDeterminado,
+
+  /// A companhia é de controle estatal, pelo Formulário Cadastral da CVM, e o
+  /// motor não cobra prêmio por isso (item B46).
+  ///
+  /// **A ressalva informa, e não corrige.** O controlador público persegue
+  /// objetivos além do lucro — preço, tarifa, crédito, indicação —, e quem paga
+  /// é o minoritário: é o "desconto de estatal" que o mercado aplica. Medido
+  /// em 02/10/2026, esse risco não aparece onde o CAPM o cobraria: o beta das
+  /// estatais é menor que o das privadas, e a exposição delas ao risco soberano,
+  /// além do que o Ibovespa explica, não é maior. Ele está no fluxo que o
+  /// minoritário pode esperar receber, que o motor projeta pelo histórico da
+  /// companhia. Ver [`estatais.md`](../../../../../docs/validacao/estatais.md).
+  controleEstatal;
 }
 
 /// Fatos medidos que qualificam o preço justo.

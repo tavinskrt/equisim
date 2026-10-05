@@ -73,8 +73,11 @@ etc.) existem só para medição e testes; o aplicativo não as usa.
 ## 2.6 As recusas, contadas
 
 Na entrada congelada de 14/09/2026 (gabarito, montagem do aplicativo), de 376
-ativos: 189 recusados por liquidez, 34 por histórico, 4 por patrimônio negativo;
-os demais recusados por falta de demonstrativo, por dado que não sustenta via ou
-por estrutura de capital. **108 avaliados** (motor de 01/10/2026): 88 pela via
-da firma, 20 pela do acionista (19 financeiras e uma não financeira). Ver o [caso RENT3](../estudo/casos/rent3.md)
+ativos: 191 recusados por liquidez, 35 por histórico, 2 por patrimônio negativo;
+os outros 38 recusados por falta de demonstrativo, por dado que não sustenta via
+ou por estrutura de capital. **110 avaliados** (motor de 02/10/2026): 90 pela via
+da firma, 20 pela do acionista (19 financeiras e uma não financeira). Até
+02/10/2026, cinco companhias com patrimônio positivo na CVM saíam recusadas como
+insolventes, porque a fonte de mercado devolvia a contagem do exercício zerada
+(item B47, decisão 146). Ver o [caso RENT3](../estudo/casos/rent3.md)
 para uma recusa por estrutura de capital.

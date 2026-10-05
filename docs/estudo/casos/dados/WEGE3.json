@@ -513,79 +513,79 @@
    {
     "meses": 12,
     "nominal": 0.5,
-    "coberturaForaDaAmostra": 0.507,
-    "a": 0.07287,
-    "b": 0.02054,
-    "zInf": -0.554189,
-    "zSup": 0.648064,
+    "coberturaForaDaAmostra": 0.509,
+    "a": 0.07808,
+    "b": 0.020198,
+    "zInf": -0.543877,
+    "zSup": 0.647474,
     "faixa": [
-     45.38,
-     64.36
+     45.77,
+     64.71
     ]
    },
    {
     "meses": 12,
     "nominal": 0.8,
     "coberturaForaDaAmostra": 0.797,
-    "a": 0.07287,
-    "b": 0.02054,
-    "zInf": -1.179908,
-    "zSup": 1.237941,
+    "a": 0.07808,
+    "b": 0.020198,
+    "zInf": -1.179494,
+    "zSup": 1.240397,
     "faixa": [
-     37.83,
-     76.4
+     38.05,
+     76.88
     ]
    },
    {
     "meses": 12,
     "nominal": 0.9,
     "coberturaForaDaAmostra": 0.879,
-    "a": 0.07287,
-    "b": 0.02054,
-    "zInf": -1.598456,
-    "zSup": 1.64849,
+    "a": 0.07808,
+    "b": 0.020198,
+    "zInf": -1.60803,
+    "zSup": 1.668198,
     "faixa": [
-     33.5,
-     86.08
+     33.59,
+     87.06
     ]
    },
    {
     "meses": 36,
     "nominal": 0.5,
-    "coberturaForaDaAmostra": 0.516,
-    "a": 0.121719,
-    "b": 0.065823,
-    "zInf": -0.711967,
-    "zSup": 0.992765,
+    "coberturaForaDaAmostra": 0.503,
+    "a": 0.131838,
+    "b": 0.061521,
+    "zInf": -0.729987,
+    "zSup": 0.989521,
     "faixa": [
-     43.23,
-     70.95
+     43.65,
+     71.95
     ]
    },
    {
     "meses": 36,
     "nominal": 0.8,
-    "coberturaForaDaAmostra": 0.796,
-    "a": 0.121719,
-    "b": 0.065823,
-    "zInf": -1.761396,
-    "zSup": 2.000561,
+    "coberturaForaDaAmostra": 0.787,
+    "a": 0.131838,
+    "b": 0.061521,
+    "zInf": -1.797151,
+    "zSup": 2.015375,
     "faixa": [
-     31.86,
-     95.09
+     32.01,
+     96.95
     ]
    },
    {
     "meses": 36,
     "nominal": 0.9,
-    "coberturaForaDaAmostra": 0.883,
-    "a": 0.121719,
-    "b": 0.065823,
-    "zInf": -2.591264,
-    "zSup": 2.662884,
+    "coberturaForaDaAmostra": 0.881,
+    "a": 0.131838,
+    "b": 0.061521,
+    "zInf": -2.61931,
+    "zSup": 2.698896,
     "faixa": [
-     25.03,
-     115.28
+     25.21,
+     118.26
     ]
    }
   ],
@@ -631,8 +631,8 @@
   }
  },
  "rastro": {
-  "transactionId": "8040a7a2-ce4c-44f0-8901-ecd66f0cdfe9",
-  "timestamp": "2026-10-02T00:27:36.136055Z",
+  "transactionId": "0753fd59-d46a-481a-932a-908fcf050b64",
+  "timestamp": "2026-10-02T23:47:54.479458Z",
   "endpoint": "/core/valuation/WEGE3",
   "inputPayload": {
    "ticker": "WEGE3",
@@ -740,6 +740,7 @@
    "sectorKey": "bens-industriais",
    "industry": "Máquinas e Equipamentos / Motores . Compressores e Outros",
    "isDistressed": false,
+   "stateControlled": false,
    "inflation": 0.049208,
    "terminalRiskFreeRate": 0.142886,
    "riskFreeCurve": {
@@ -922,7 +923,7 @@
     "Vantagem competitiva residual: retorno do ciclo de 32.0% contra custo de capital de equilíbrio de 15.5%, com excedente decaindo 16.1% ao ano — persistência medida na própria série do ativo, sobre 14 pares. Em 10 anos sobram 17.2% do excedente, e o retorno terminal fica em 18.3% em vez do estado estacionário. O valor terminal volta a depender do crescimento perpétuo."
    ]
   },
-  "executionTimeMs": 70,
+  "executionTimeMs": 61,
   "calculations": [
    {
     "formulaName": "Razão da unidade negociada",

@@ -123,6 +123,13 @@ class ValuationInputs {
   /// com ele verdadeiro.
   final bool isDistressed;
 
+  /// `true` quando a companhia é de controle estatal na data, pelo Formulário
+  /// Cadastral da CVM (item B46).
+  ///
+  /// **Não muda o preço justo.** Entra como ressalva: o motor não cobra prêmio
+  /// pelo controle público, e a medição do item diz por quê.
+  final bool stateControlled;
+
   /// Inflação anual observada, em fração.
   ///
   /// É a âncora *top-down* da Saída 2, adotada quando o crescimento fundamental
@@ -378,6 +385,7 @@ class ValuationInputs {
     this.officialShares,
     this.prices,
     this.isDistressed = false,
+    this.stateControlled = false,
     this.terminalReturnOverride,
     this.laneOverride,
     this.growthOverride,
@@ -450,6 +458,7 @@ class ValuationInputs {
       officialShares: officialShares,
       prices: ou(prices, this.prices),
       isDistressed: isDistressed,
+      stateControlled: stateControlled,
       terminalReturnOverride:
           ou(terminalReturnOverride, this.terminalReturnOverride),
       laneOverride: ou(laneOverride, this.laneOverride),
@@ -2198,6 +2207,7 @@ abstract final class ValuationCascade {
         // competitiva reconhecida.
         moatApplied: d.custo.moatVerificado != null,
         finiteTerm: d.premissas.prazoDeterminado,
+        stateControlled: inputs.stateControlled,
         rebuiltBase: d.baseReconstruida,
         // `Rf + β·prêmio` sobre a taxa corrente: o retorno esperado
         // incondicional do papel, que a camada de carteira ancora.
@@ -2631,6 +2641,22 @@ abstract final class ValuationCascade {
         '${_pct(inputs.terminalRiskFreeRate)}: sem curva de juros observada, '
         'descontar perpetuidade pelo CDI de um dia casaria durações '
         'incompatíveis.',
+      );
+    }
+
+    // **O controle estatal é declarado, e não cobrado** (item B46): medido, o
+    // risco do controlador público não aparece no beta nem na exposição ao
+    // risco soberano além do mercado — está no fluxo do minoritário.
+    if (inputs.stateControlled) {
+      local.add(
+        'A companhia é de controle estatal, pelo Formulário Cadastral da CVM. '
+        'O motor não cobra prêmio por esse controle: medido sobre as estatais '
+        'do universo em 02/10/2026, o beta delas é menor que o das privadas e '
+        'a exposição ao risco soberano, além do que o Ibovespa explica, não é '
+        'maior. O risco do controlador público — preço, tarifa, crédito e '
+        'indicação decididos por outros objetivos que o lucro — está no fluxo '
+        'que o minoritário pode esperar receber, e o motor o projeta pelo '
+        'histórico da companhia.',
       );
     }
 
@@ -3186,6 +3212,7 @@ abstract final class ValuationCascade {
     required GrowthOrigin growthOrigin,
     required bool moatApplied,
     required bool finiteTerm,
+    required bool stateControlled,
     required bool rebuiltBase,
     required double costOfEquity,
     required double terminalDiscountRate,
@@ -3216,6 +3243,7 @@ abstract final class ValuationCascade {
     }
     if (finiteTerm) caveats.add(ValuationCaveat.prazoDeterminado);
     if (rebuiltBase) caveats.add(ValuationCaveat.baseReconstruida);
+    if (stateControlled) caveats.add(ValuationCaveat.controleEstatal);
     if (outcome.equityShare < ValuationDiagnostics.fragileEquityShare) {
       caveats.add(ValuationCaveat.ponteFragil);
     }
@@ -3895,6 +3923,7 @@ abstract final class ValuationCascade {
       'sectorKey': inputs.sectorKey,
       'industry': inputs.industry,
       'isDistressed': inputs.isDistressed,
+      'stateControlled': inputs.stateControlled,
       'inflation': _r(inputs.inflation, 6),
       'terminalRiskFreeRate': _r(inputs.terminalRiskFreeRate, 6),
       if (inputs.riskFreeCurve case final curva?)

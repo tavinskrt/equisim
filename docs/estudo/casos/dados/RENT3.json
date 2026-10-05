@@ -489,8 +489,8 @@
  "recusa": "O fluxo do acionista de RENT3, derivado do da firma, não sustenta capital próprio positivo: a dívida líquida consome o valor que a operação gera. O ativo não é avaliável por fluxo descontado nesta estrutura de capital.",
  "resultado": null,
  "rastro": {
-  "transactionId": "34982766-9074-4fa1-9d07-53560e284aa7",
-  "timestamp": "2026-10-02T00:27:36.868444Z",
+  "transactionId": "3e641ddc-36c6-4729-ac50-1099f4e2658c",
+  "timestamp": "2026-10-02T23:47:55.133151Z",
   "endpoint": "/core/valuation/RENT3",
   "inputPayload": {
    "ticker": "RENT3",
@@ -598,6 +598,7 @@
    "sectorKey": "consumo-ciclico",
    "industry": "Diversos / Aluguel de carros",
    "isDistressed": false,
+   "stateControlled": false,
    "inflation": 0.049208,
    "terminalRiskFreeRate": 0.142886,
    "riskFreeCurve": {

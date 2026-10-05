@@ -123,7 +123,7 @@ para ela: o NOPAT não sustenta uma projeção, mas o lucro líquido pode susten
 (uma holding com resultado de participações, por exemplo). Diferente do banco,
 ela **tem** dívida de estrutura de capital, e por isso o motor recalcula o Ke
 ano a ano com a alavancagem projetada, como faz na via da firma (decisão 46).
-Em 14/09/2026 era um único caso entre os 108 avaliados (a AZEV4).
+Em 14/09/2026 era um único caso entre os 110 avaliados (a AZEV4).
 
 ---
 

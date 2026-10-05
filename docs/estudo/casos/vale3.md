@@ -193,8 +193,8 @@ upside          = (88,74 − 75,48) ÷ 75,48 = +17,6%
 **Cenários:** R$ 74,55 / R$ 88,74 / R$ 110,87. **Monte Carlo:** P5 R$ 80,09,
 mediana R$ 88,69, P95 R$ 99,96.
 
-**Faixa calibrada (80%):** 12 meses, R$ 59,55 a R$ 113,16; 36 meses, R$ 53,98 a
-R$ 146,56. Larga: a Vale oscila 26,6% ao ano.
+**Faixa calibrada (80%):** 12 meses, R$ 59,86 a R$ 113,81; 36 meses, R$ 53,97 a
+R$ 148,53. Larga: a Vale oscila 26,6% ao ano.
 
 **Múltiplos de pares.** O subsetor de mineração não tem cinco **outras**
 companhias (até 28/09/2026 a conta chegava a cinco contando classes de ação da

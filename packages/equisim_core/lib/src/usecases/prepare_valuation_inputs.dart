@@ -65,6 +65,8 @@ abstract final class PrepareValuationInputs {
   /// - [declaredSharesPerUnit]: ações na unit, como a companhia declara no
   ///   formulário cadastral da CVM (item B16). Sem ela, a razão continua sendo
   ///   inferida do valor de mercado, e a avaliação diz que foi.
+  /// - [stateControlled]: controle estatal na data, do Formulário Cadastral da
+  ///   CVM (item B46). Só acrescenta a ressalva; o preço justo não muda.
   /// - [betaPrior]: prior transversal do beta, de `ResolveBetaPrior`. Sem ele
   ///   vale a regressão crua, que é o comportamento anterior — e o que expõe o
   ///   motor ao caso da AZUL3, cujo `β = 109.108` tem erro-padrão de 83.228.
@@ -123,6 +125,7 @@ abstract final class PrepareValuationInputs {
     YieldCurve? riskFreeCurve,
     OfficialShareCount? officialShares,
     bool isDistressed = false,
+    bool stateControlled = false,
     BetaPrior? betaPrior,
     DateTime? concessionEnd,
     List<CashDividend>? dividends,
@@ -252,6 +255,7 @@ abstract final class PrepareValuationInputs {
       // Porta 0 — não há segunda busca.
       prices: series,
       isDistressed: isDistressed,
+      stateControlled: stateControlled,
       unleveredBeta: betaDesalavancado,
       concessionEnd: concessionEnd,
       dividendsInBeta: beta.dividends,

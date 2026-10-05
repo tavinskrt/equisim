@@ -11,6 +11,75 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## As estatais e a taxa de desconto — B46, e o B47 e o B48 achados no caminho (02/10/2026)
+
+**A pergunta.** «Ainda sim achamos que o preço das estatais está um pouco
+inflado pois a taxa de desconto para essas empresas, na teoria, deveria ser um
+pouco maior do que para as demais.» Depois do parecer, que propôs quatro
+passos, o usuário autorizou os quatro e o download do prêmio-país. Apontamento
+de 02/10, que registra também a pergunta sobre os «8%» da seção 4.11 e o
+README da regeração dos pacotes, feitos no mesmo dia.
+
+**O controle.** A espécie do controle acionário vem do Formulário Cadastral da
+CVM, ano a ano, com a data da privatização tirada da coluna que a companhia
+declara quando ela é plausível (`ShareholderControlHistory`,
+`tool/controle_empacotar.dart`, `assets/cvm/controle.json`): 17 emissores
+estatais em 14/09/2026, e Eletrobras, Copel, Sabesp, EMAE e BR Distribuidora
+datadas.
+
+**O que foi medido** ([estatais.md](validacao/estatais.md), `tool/estatais.dart`).
+O motor dá às estatais potencial muito acima do das privadas, dentro do mesmo
+setor também. Mas o risco do controle não aparece onde o CAPM o cobraria: o
+encolhimento ao setor quase não mexe no beta, e o beta das estatais é menor
+(0,83 contra 1,00 entre as que passam a liquidez); o lambda de Damodaran,
+medido pela sensibilidade ao EMBI+ (2019–2024, do IPEADATA, que o J.P. Morgan
+descontinuou) e ao prefixado de dez anos (2021–2026), fica em 0,70 e 0,71, e
+além do Ibovespa não há diferença. No preço de hoje, o primeiro ponto a mais no
+Ke tira cerca de 6 pontos do potencial mediano delas. No backtest, a posição média das estatais se acerta com 1 a 2,5 pontos a mais no Ke, mas o IC do universo cai com qualquer prêmio — de 0,086 para 0,081 com 1 ponto e 0,077 com 3, em 36 meses —, porque elas renderam acima das privadas. A ressalva informa; o prêmio pioraria a ordenação.
+
+**A ressalva** ([decisão 145](decisoes/145-a-avaliacao-declara-o-controle-estatal-sem-mudar-o-preco.md)).
+A avaliação de uma estatal leva a ressalva `controleEstatal` e um aviso com o
+porquê, sem mudar o preço; a entrada congelada, o gabarito e o backtest levam a
+mesma. Cobrar um prêmio continua aberto, com o usuário e o orientador.
+
+**B47 — patrimônio positivo recusado como insolvente**
+([decisão 146](decisoes/146-sem-o-par-vpa-e-contagem-a-base-e-o-pl-da-demonstracao.md)).
+A Copasa saía recusada com R$ 8,6 bi de patrimônio: a fonte de mercado devolve
+a contagem do exercício zerada para algumas companhias e anos, e a base
+`VPA × contagem` da decisão 81 não se formava. Cinco recusadas como
+insolventes e buracos na série de capital de outras. Sem o par, a base passa a
+ser o PL da demonstração. O universo vai a 110 avaliados, potencial mediano de
+−36,9%. No backtest, 3.253 observações avaliadas (eram 3.199); a faixa cobre 87,9% e 88,1%, e o R3 dá 0,010 com `t` de 0,05 — nenhum veredito muda.
+
+**B48 — o passado da série do prêmio.** Remedindo o universo, a ferramenta do
+prêmio regravou o pacote com os trimestres de 2011 e 2012 cerca de 3 pontos
+mais baixos: as âncoras dessas datas dependem de a rede devolver o IBC-Br
+anterior à entrada congelada, e sem ela o crescimento cai no recuo de 2026. O
+backtest já tinha começado com o pacote novo — a coorte de 30/06/2018 saía com
+prêmio de 0,78% em vez de 1,50% — e foi interrompido; o pacote versionado foi
+restaurado, e a ferramenta passou a recusar regravar trimestre que mudou.
+
+**As lentes.** Rodaram as sete. A `risco` e a `dados` não acharam tensão. A
+`nucleo` apontou como estrutural a margem de segurança em `double`, sem faixa
+garantida por tipo — preexistente, sem efeito em preço justo ou potencial —, e
+a `metodo`, três locais preexistentes: o ponto fixo das taxas sem o caixa da
+emissão posterior ao balanço (B28), a segunda leitura por múltiplos sem esse
+caixa e a tradução `taxaLivreDeRisco` do cenário, que não move o Kd. Os quatro
+foram inventariados no plano. A `rumo` não achou tensão. A `tela` também não, mas
+respondeu pelo último degrau da cascata, o modelo mais fraco, e lista vazia
+dali vale pouco. A `registro` apontou o `estado.md` parado na decisão 144 — ela
+leu o arquivo antes de ele ser regerado na mesma rodada — e pediu para apagar
+os apontamentos já convertidos em decisão; eles ficam, porque são a
+proveniência das decisões, e o README da caixa de entrada e a disciplina da
+lente passaram a dizer que apontamento com «Destino» está tratado.
+
+**A auditoria.** Dois grupos, com índice temporário. A primeira passada
+reprovou um em cada: no núcleo, o limite de um ano somado em dias corridos
+sobre data local (agora calendário, em UTC); nas ferramentas, preço `double`
+comparado com `!=` (agora com tolerância), com três avisos de divisão sem
+guarda, corrigidos junto. A segunda passada: **0 FAIL / 0 WARN** nos dois.
+Núcleo com 870 testes e aplicativo com 495, verdes; 30 capturas de tela.
+
 ## O prêmio de mercado ligado — B42, B43 e B44 fechados (01/10/2026)
 
 **O pedido.** «Depois de analisar todas essas variáveis, decidimos implementar

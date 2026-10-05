@@ -201,8 +201,8 @@ valor. No banco cujo retorno fica abaixo do custo, o crescimento +3 p.p.
 
 **Monte Carlo:** P5 = R$ 25,64; mediana = R$ 29,19; P95 = R$ 34,22.
 
-**Faixa calibrada (80%):** 12 meses, R$ 33,80 a R$ 61,32; 36 meses, R$ 30,24 a
-R$ 76,41.
+**Faixa calibrada (80%):** 12 meses, R$ 33,99 a R$ 61,69; 36 meses, R$ 30,33 a
+R$ 77,59.
 
 **Múltiplos de pares** (16 bancos, cada um uma vez, sem o Itaú):
 

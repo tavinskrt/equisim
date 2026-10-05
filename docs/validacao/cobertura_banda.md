@@ -496,3 +496,19 @@ vez em 36; a faixa em torno do justo continua fora do critério em 12 meses
 (5,7 p.p.), e o peso que a convergência dá ao justo continua pequeno (`b` de
 0,02 e 0,07).
 
+## 15. Remedido em 02/10/2026 — com a base de patrimônio corrigida
+
+Sem reescolher a forma, com o backtest refeito depois da decisão 146 (sem o par
+VPA e contagem do exercício, a base de patrimônio é o PL da demonstração):
+
+| fora da amostra | 12 meses: 90 / 80 / 50% | desvio | 36 meses: 90 / 80 / 50% | desvio |
+|---|---|---:|---|---:|
+| **convergência na escala da volatilidade** | **87,9 / 79,7 / 50,9** | **2,1 p.p.** | **88,1 / 78,7 / 50,3** | **1,9 p.p.** |
+| em torno do justo, mesmas observações | 85,1 / 74,9 / 45,1 | 5,1 p.p. | 87,3 / 77,7 / 47,9 | 2,7 p.p. |
+
+Sobre 2.807 observações de teste em 12 meses e 1.122 em 36. Por tercil de
+potencial, a de 90% cobre 88,1 / 88,6 / 86,9% em 12 meses e 83,9 / 90,5 / 90,5%
+em 36; nas listadas, 88,2% e 87,6%, e nas deslistadas, 84,7% e 91,8%. O pacote
+foi regerado com `a = 0,0781` e `b = 0,0202` em 12 meses, `a = 0,1318` e
+`b = 0,0615` em 36. A banda de cenários cobre 13,0% em 12 meses e 13,9% em 36, e
+a de 90% do Monte Carlo, 9,6% e 8,6%.

@@ -19,7 +19,7 @@ As limitações estão em ordem de importância para quem lê um preço justo.
 ### 1.1 O motor é mais pessimista que o mercado, de forma sistemática
 
 **O que é.** Com os dados congelados de 14/09/2026 e o motor de 01/10/2026, dos
-108 ativos avaliados, o upside mediano é **−37%**, e só 28 tinham upside
+110 ativos avaliados, o upside mediano é **−37%**, e só 28 tinham upside
 positivo. A WEG sai a R$ 16,18 contra R$ 50,74; o Itaú a R$ 29,14 contra
 R$ 42,35. Com o prêmio de 5,5% de antes da decisão 142, eram −45% e 15.
 
@@ -44,18 +44,18 @@ pendente (item B33; [selic_focus.md](selic_focus.md)).
 ### 1.2 A habilidade de escolher ações não está comprovada
 
 **O que é.** O teste pré-registrado (as ações de maior upside, controlando pelo
-book-to-market, renderam mais em 36 meses?) deu `t` corrigido de 0,18 contra o
+book-to-market, renderam mais em 36 meses?) deu `t` corrigido de 0,05 contra o
 crítico de 2,70, remedido em 01/10/2026. Não passou. Nem o book-to-market
-sozinho passou (`t` de 2,27), e por isso o retorno esperado não leva prêmio de
+sozinho passou (`t` de 2,40), e por isso o retorno esperado não leva prêmio de
 ordenação (decisão 103).
 
 **Por que importa.** Não há evidência de que ordenar por upside ajude a escolher
 ações.
 
 **E o teste não teria poder para passar.** O menor efeito que ele detecta com
-80% de chance é 0,65, vinte vezes o medido (0,032, remedido em
-01/10/2026); o book-to-market só teria esse poder no efeito dele com 54
-coortes, em 2034
+80% de chance é 0,70, setenta vezes o medido (0,010, remedido em
+02/10/2026); o book-to-market só teria esse poder no efeito dele com 50
+coortes, em 2033
 ([poder_r3.md](poder_r3.md), [habilidade_trimestral.md](habilidade_trimestral.md)).
 
 **O que o projeto faz.** O critério passou a ser "habilidade testada, com o
@@ -79,12 +79,12 @@ que a evidência sustenta, e a tela diz isso (decisões 100 e 124;
 ### 1.4 Os cenários são sensibilidade, e o "otimista" pode valer menos
 
 **O que é.** Os cenários pessimista e otimista (crescimento ±3 p.p., desconto
-±2 p.p.) contiveram o que de fato aconteceu em 13% a 15% dos casos, e a faixa
+±2 p.p.) contiveram o que de fato aconteceu em 13% a 14% dos casos, e a faixa
 de 90% do Monte Carlo em 9%, contra 90% que um intervalo de confiança
-prometeria (decisão 92; remedido em 01/10/2026). E o otimista soma
+prometeria (decisão 92; remedido em 02/10/2026). E o otimista soma
 crescimento: quando o retorno da empresa fica abaixo do custo de capital,
 crescer destrói valor, e o "otimista" sai abaixo do "pessimista". Com o motor de
-01/10/2026, isso acontece em 15 dos 88 ativos da via da firma (com o prêmio de
+02/10/2026, isso acontece em 14 dos 90 ativos da via da firma (com o prêmio de
 5,5%, eram 17 de 77, e só o crescimento +3 p.p. baixava o preço justo em 53 dos
 97 avaliados).
 

@@ -310,6 +310,26 @@ double? _prefixado10(YieldCurve? curva) {
   return math.pow(fator, 1 / fw.length).toDouble() - 1;
 }
 
+/// Os trimestres do pacote gravado que a série medida agora devolve diferentes.
+///
+/// Compara o retorno implícito e o prefixado de cada trimestre presente nos
+/// dois, com folga de 1e-9; sem pacote gravado, nada mudou.
+List<String> _trimestresQueMudaram(ImpliedPremiumPackage novo) {
+  final arquivo = File(_pacote);
+  if (!arquivo.existsSync()) return const [];
+  final gravado = ImpliedPremiumCodec.decode(
+      jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>);
+  if (gravado == null) return const [];
+  final porData = {for (final q in gravado.quarters) q.date: q};
+  return [
+    for (final q in novo.quarters)
+      if (porData[q.date] case final g?)
+        if ((g.impliedReturn - q.impliedReturn).abs() > 1e-9 ||
+            (g.riskFree - q.riskFree).abs() > 1e-9)
+          q.date.toIso8601String().substring(0, 10),
+  ];
+}
+
 /// As datas: o último dia de cada trimestre, de 31/03/2011 a 30/06/2026, e a
 /// data da entrada congelada.
 List<DateTime> _datas() => [
@@ -599,6 +619,23 @@ Future<void> main(List<String> args) async {
           : null;
     }
     if (soAsDatas.isEmpty) {
+      // **O passado não muda em silêncio** (item B48). Um trimestre já gravado
+      // é fato histórico; se a série medida agora o devolve diferente, a causa
+      // é dado que mudou por baixo — em 02/10/2026, as âncoras de 2011 e 2012
+      // dependiam de a rede devolver o IBC-Br anterior à entrada congelada, e
+      // sem ela o crescimento caía no recuo de 2026. Só regrava com
+      // `--aceitar-mudanca-do-passado`, depois de entender a diferença.
+      final mudou = _trimestresQueMudaram(pacote);
+      if (mudou.isNotEmpty && !args.contains('--aceitar-mudanca-do-passado')) {
+        stderr.writeln(
+          'ERRO: ${mudou.length} trimestre(s) já gravado(s) em $_pacote mudaram '
+          '(${mudou.take(6).join(', ')}${mudou.length > 6 ? '…' : ''}); o pacote '
+          'não foi regravado. Confira a causa e, se a mudança for intencional, '
+          'rode de novo com --aceitar-mudanca-do-passado.',
+        );
+        exitCode = 1;
+        return;
+      }
       File(_pacote).writeAsStringSync(
         jsonEncode(ImpliedPremiumCodec.encode(pacote)),
       );

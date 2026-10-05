@@ -415,19 +415,35 @@ class FundamentalsSnapshot {
 
   /// Patrimônio líquido reconstituído: `VPA × ações do exercício`.
   ///
-  /// **Não** usa [totalStockholderEquity], que a fonte deixa nulo em todos os 16
-  /// exercícios do BBAS3 e só preenche a partir de 2020 no campo do controlador.
+  /// **Não** usa [totalStockholderEquity] como primeira opção: a fonte de
+  /// mercado o deixa nulo em todos os 16 exercícios do BBAS3 e só o preenche a
+  /// partir de 2020 no campo do controlador.
   /// E **não** usa [sharesOutstanding], que é a contagem de hoje: o produto teria
   /// escalas misturadas em qualquer empresa que tenha desdobrado.
   ///
   /// Base da via B e imune a desdobramento e bonificação por construção, ao
   /// contrário de qualquer série por ação.
+  ///
+  /// **Sem o par, vale o patrimônio da demonstração** (item B47). A fonte de
+  /// mercado devolve, para algumas companhias, o VPA vazio e a contagem do
+  /// exercício zerada — Fleury, Copasa e Armac em todos os exercícios recentes
+  /// —, e a mescla da decisão 81, que deriva o VPA do PL da CVM pela contagem,
+  /// não tinha por onde dividir. O produto não se formava, e a elegibilidade
+  /// lia a ausência como insolvência com R$ 5 bi de patrimônio publicado. O PL
+  /// é grandeza total, sem escala por ação, e é a base que a decisão 81 pede:
+  /// sem o par, ele entra como veio. **O VPA negativo continua sendo
+  /// insolvência**: o recuo só vale quando o par falta, e não quando ele diz
+  /// que o patrimônio é negativo.
   double? get equityBookValue {
     final vpa = bookValuePerShare;
     final n = sharesOutstandingAsOf;
-    if (vpa == null || n == null || vpa <= 0 || n <= 0) return null;
-    final pl = vpa * n;
-    return pl.isFinite ? pl : null;
+    if (vpa != null && vpa <= 0) return null;
+    if (vpa != null && n != null && n > 0) {
+      final pl = vpa * n;
+      return pl.isFinite ? pl : null;
+    }
+    final pl = totalStockholderEquity;
+    return (pl != null && pl.isFinite && pl > 0) ? pl : null;
   }
 
   /// Capital investido pelo lado do financiamento: `PL + dívida bruta − caixa`.

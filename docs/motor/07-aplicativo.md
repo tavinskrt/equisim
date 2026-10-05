@@ -33,7 +33,7 @@ com o rastro de cada avaliação ([AUDITORIA_DE_CALCULOS.md](../AUDITORIA_DE_CAL
 
 | Regra | Código | Evidência |
 |---|---|---|
-| Retorno esperado de cada ativo = **Ke** (CDI corrente + β × prêmio de mercado) + escore da ordenação comprovada × prêmio de mercado; **na remedição de 01/10/2026 nenhuma ordenação passou** — o book-to-market chega a `t` corrigido de 2,27 contra 2,70, e o potencial do motor a 0,55 —, então é só o Ke. O prêmio é o mesmo do desconto, a média de dez anos do prêmio implícito do pacote | `ExpectedReturn.forPortfolioOrdered`, `marketPremiumReadingProvider` | decisões 103 e 142; [habilidade.json](../../assets/validacao/habilidade.json) |
+| Retorno esperado de cada ativo = **Ke** (CDI corrente + β × prêmio de mercado) + escore da ordenação comprovada × prêmio de mercado; **na remedição de 02/10/2026 nenhuma ordenação passou** — o book-to-market chega a `t` corrigido de 2,40 contra 2,70, e o potencial do motor a 0,44 —, então é só o Ke. O prêmio é o mesmo do desconto, a média de dez anos do prêmio implícito do pacote | `ExpectedReturn.forPortfolioOrdered`, `marketPremiumReadingProvider` | decisões 103 e 142; [habilidade.json](../../assets/validacao/habilidade.json) |
 | Antes a âncora era o CDI, o que tirava o prêmio de risco inteiro de uma carteira de ações | idem | decisão 58 |
 | A tela diz que o prêmio do potencial não está comprovado | [skill_copy.dart](../../lib/presentation/goals/skill_copy.dart) | decisão 99 |
 | Conversão de upside em taxa anual, `(1 + upside)^(1/3) − 1` (36 meses), só para ferramentas de validação | `annualizedFromUpside` | decisão 26 |

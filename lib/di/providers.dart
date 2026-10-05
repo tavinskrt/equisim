@@ -22,6 +22,7 @@ import '../data/repositories/peer_multiples_repository.dart';
 import '../data/repositories/beta_prior_repository.dart';
 import '../data/repositories/market_premium_repository.dart';
 import '../data/repositories/unit_composition_repository.dart';
+import '../data/repositories/shareholder_control_repository.dart';
 import '../data/repositories/cash_dividends_repository.dart';
 import '../data/repositories/calibrated_band_repository.dart';
 import '../data/repositories/skill_reading_repository.dart';
@@ -214,6 +215,9 @@ const String marketPremiumAsset = 'assets/mercado/premio_implicito.json';
 /// Caminho da composição declarada das units, da FCA da CVM (item B16).
 const String unitCompositionAsset = 'assets/cvm/units.json';
 
+/// Caminho da espécie do controle acionário, da FCA da CVM (item B46).
+const String shareholderControlAsset = 'assets/cvm/controle.json';
+
 /// Caminho dos proventos da B3 empacotados (item A4).
 const String cashDividendsAsset = 'assets/b3/proventos.json';
 
@@ -378,6 +382,27 @@ final declaredSharesPerUnitProvider =
         .sharesPerUnitFor(ticker);
   } on Object {
     return null;
+  }
+});
+
+final shareholderControlRepositoryProvider =
+    Provider<ShareholderControlRepository>(
+  (ref) => ShareholderControlRepository(
+    carregarPacote: () => rootBundle.loadString(shareholderControlAsset),
+    hoje: DateTime.now,
+  ),
+);
+
+/// `true` quando o emissor de um ativo é de controle estatal hoje, pela FCA da
+/// CVM (item B46). Sem pacote, `false` — e a avaliação sai sem a ressalva.
+final stateControlledProvider =
+    FutureProvider.family<bool, Ticker>((ref, ticker) async {
+  try {
+    return await ref
+        .watch(shareholderControlRepositoryProvider)
+        .isStateControlled(ticker);
+  } on Object {
+    return false;
   }
 });
 

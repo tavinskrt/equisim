@@ -66,6 +66,21 @@
 // `--amostra N` limita o universo e as deslistadas aos N primeiros, para
 // conferir a montagem em minutos antes da execução inteira; a saída vai para
 // `docs/validacao/backtest_amostra.json` e não substitui nenhuma medição.
+//
+// **A medição do item B46**, sobre a montagem do aplicativo:
+//
+//   dart run tool/backtest_valuation.dart --montagem aplicativo \
+//       --com-deslistadas --trimestral --premio-estatal 0.005,0.01,0.02,0.03
+//   python tool/estatais_backtest.py
+//
+// `--premio-estatal` avalia de novo cada observação de companhia de controle
+// estatal na data (`assets/cvm/controle.json`) com cada prêmio a mais no custo
+// do capital próprio, e grava o potencial de cada um no campo
+// `potencialComPremioEstatal`; o resto da observação é o da montagem padrão.
+// Para conferir em minutos, `--so-estatais` observa só elas — o prior do beta
+// continua resolvido sobre o universo inteiro — e não lê deslistadas; exige
+// `--saida`, que troca o arquivo de destino, para não sobrescrever a medição
+// oficial.
 import 'dart:convert';
 import 'dart:io';
 
@@ -450,6 +465,14 @@ Future<void> main(List<String> args) async {
   final contrafactualBase = args.contains('--contrafactual-base');
   final iAmostra = args.indexOf('--amostra');
   final amostra = iAmostra >= 0 ? int.parse(args[iAmostra + 1]) : null;
+  // A medição do item B46: prêmios a mais no Ke das estatais.
+  final iPremioEstatal = args.indexOf('--premio-estatal');
+  final premiosEstatais = iPremioEstatal >= 0
+      ? [for (final x in args[iPremioEstatal + 1].split(',')) double.parse(x)]
+      : const <double>[];
+  final soEstatais = args.contains('--so-estatais');
+  final iSaida = args.indexOf('--saida');
+  final saida = iSaida >= 0 ? args[iSaida + 1] : null;
   // **A réplica fora da amostra** (item C7, decisões 129 e 133): as coortes a
   // partir de 31/12/2025, que nenhuma decisão do motor viu, na mesma montagem
   // da amostra do R3. Saem em `data/c7/coortes.json`, e quem as sela é
@@ -466,6 +489,14 @@ Future<void> main(List<String> args) async {
     stderr.writeln(
       '--com-deslistadas, --trimestral e --contrafactual-base '
       'exigem --montagem aplicativo',
+    );
+    exit(2);
+  }
+  if ((premiosEstatais.isNotEmpty || soEstatais) && !app ||
+      soEstatais && saida == null) {
+    stderr.writeln(
+      '--premio-estatal e --so-estatais exigem --montagem aplicativo, e '
+      '--so-estatais exige --saida',
     );
     exit(2);
   }
@@ -514,6 +545,20 @@ Future<void> main(List<String> args) async {
     );
     exit(2);
   }
+  // O controle acionário de cada emissor, do FCA (item B46): a ressalva da
+  // montagem do aplicativo, na data de cada coorte, e a medição do item.
+  final controle = app && File('assets/cvm/controle.json').existsSync()
+      ? ShareholderControlHistory.decode(
+          jsonDecode(File('assets/cvm/controle.json').readAsStringSync())
+              as Map<String, dynamic>,
+        )?.porEmissor
+      : null;
+  bool estatalNaData(Ticker x, DateTime d) {
+    final p = controle?[x.value.substring(0, 4)];
+    return p != null &&
+        ShareholderControlHistory.at(p, d) == ShareholderControl.state;
+  }
+
   final pacoteDeProventos = app
       ? CashDividendsCodec.decode(
           jsonDecode(File('assets/b3/proventos.json').readAsStringSync())
@@ -764,34 +809,57 @@ Future<void> main(List<String> args) async {
         Future<Map<String, Object?>> Function()? contrafactual,
         List<ShareIssue> emissoes = const [],
       }) async {
-        final prep = await PrepareValuationInputs.call(
-          ticker: ticker,
-          prices: precos,
-          fundamentals: fonte,
-          benchmark: benchmark,
-          riskFreeRate: anchors.currentRiskFreeRate,
-          asOf: t,
-          marketPremium: premio,
-          premiumSource: origemDoPremio,
-          perpetualGrowthCap: anchors.nominalEconomyGrowth,
-          inflation: anchors.inflationCagr,
-          terminalRiskFreeRate: anchors.riskFreeCagr,
-          projectionYears: 10,
-          riskFreeCurve: curvaDaCoorte,
-          officialShares: contagemOficial,
-          concessionEnd: fimDoContrato,
-          dividends: proventosDoBeta,
-          betaPrior: priorDaCoorte,
-          declaredSharesPerUnit: acoesNaUnit,
-          // As emissões por valor do FRE conhecidas na data (item B28).
-          shareIssues: emissoes,
-        );
+        Future<Result<ValuationInputs>> preparar(double premioDeMercado) =>
+            PrepareValuationInputs.call(
+              ticker: ticker,
+              prices: precos,
+              fundamentals: fonte,
+              benchmark: benchmark,
+              riskFreeRate: anchors.currentRiskFreeRate,
+              asOf: t,
+              marketPremium: premioDeMercado,
+              premiumSource: origemDoPremio,
+              perpetualGrowthCap: anchors.nominalEconomyGrowth,
+              inflation: anchors.inflationCagr,
+              terminalRiskFreeRate: anchors.riskFreeCagr,
+              projectionYears: 10,
+              riskFreeCurve: curvaDaCoorte,
+              officialShares: contagemOficial,
+              concessionEnd: fimDoContrato,
+              dividends: proventosDoBeta,
+              betaPrior: priorDaCoorte,
+              declaredSharesPerUnit: acoesNaUnit,
+              // As emissões por valor do FRE conhecidas na data (item B28).
+              shareIssues: emissoes,
+              // O controle estatal na data: só a ressalva (item B46).
+              stateControlled: estatalNaData(ticker, t),
+            );
+        final prep = await preparar(premio);
         if (prep.isErr) return;
         final insumos = prep.unwrap();
 
         final r = ValuationCascade.evaluate(insumos);
         final upside = r.isOk ? r.unwrap().upside : null;
         if (upside != null) contar();
+
+        // **O prêmio a mais das estatais** (item B46). Soma-se ao prêmio de
+        // mercado na proporção do beta — `β × (prêmio + x ÷ β) = β × prêmio +
+        // x` —, o que é exato no Ke de hoje; no caminho realavancado, o
+        // acréscimo anda com `β_t ÷ β`.
+        final comPremioEstatal = <String, double?>{};
+        // Beta perto de zero faria `x ÷ β` explodir: a observação fica sem
+        // a variante, e não com um prêmio infinito.
+        if (premiosEstatais.isNotEmpty &&
+            estatalNaData(ticker, t) &&
+            insumos.capm.beta.abs() > 0.01) {
+          for (final x in premiosEstatais) {
+            final outra = await preparar(premio + x / insumos.capm.beta);
+            final ro = outra.isErr
+                ? null
+                : ValuationCascade.evaluate(outra.unwrap());
+            comPremioEstatal['$x'] = ro?.valueOrNull?.upside;
+          }
+        }
 
         // Banda de Monte Carlo com os sorteios do aplicativo — só nas
         // coortes de 30/09, as que o C2 mediu —, e o potencial do recusado
@@ -961,6 +1029,8 @@ Future<void> main(List<String> args) async {
           ...extras,
           'preco': precoNaData,
           'upside': upside,
+          if (comPremioEstatal.isNotEmpty)
+            'potencialComPremioEstatal': comPremioEstatal,
           'setor': setor,
           'porta1': porta1,
           'fluxoSustentado': sustentado,
@@ -1056,6 +1126,7 @@ Future<void> main(List<String> args) async {
         if (i % 50 == 0) {
           stderr.write('  ${_dia(t)}: $i/${universe.length}   \r');
         }
+        if (soEstatais && !estatalNaData(ticker, t)) continue;
 
         final serieRes = await prices.daily(
           ticker,
@@ -1297,7 +1368,9 @@ Future<void> main(List<String> args) async {
       final papeisDeslistados =
           deslistadas?.papeis.values ?? const <PapelDeslistado>[];
       for (final papel
-          in amostra == null
+          in soEstatais
+              ? const <PapelDeslistado>[]
+              : amostra == null
               ? papeisDeslistados
               : papeisDeslistados.take(amostra)) {
         final pregao = pregaoAte(papel.pregoes, t, folgaDias: folgaDoPregao);
@@ -1395,17 +1468,19 @@ Future<void> main(List<String> args) async {
       );
     }
 
-    final destino = c7
-        ? 'data/c7/coortes.json'
-        : amostra != null
-        ? 'docs/validacao/backtest_amostra.json'
-        : !app
-        ? 'docs/validacao/backtest_valuation.json'
-        : trimestral
-        ? 'docs/validacao/backtest_trimestral.json'
-        : comDeslistadas
-        ? 'docs/validacao/backtest_aplicativo_deslistadas.json'
-        : 'docs/validacao/backtest_aplicativo.json';
+    final destino =
+        saida ??
+        (c7
+            ? 'data/c7/coortes.json'
+            : amostra != null
+            ? 'docs/validacao/backtest_amostra.json'
+            : !app
+            ? 'docs/validacao/backtest_valuation.json'
+            : trimestral
+            ? 'docs/validacao/backtest_trimestral.json'
+            : comDeslistadas
+            ? 'docs/validacao/backtest_aplicativo_deslistadas.json'
+            : 'docs/validacao/backtest_aplicativo.json');
     File(destino)
       ..parent.createSync(recursive: true)
       ..writeAsStringSync(
@@ -1414,7 +1489,12 @@ Future<void> main(List<String> args) async {
             : const JsonEncoder.withIndent(' ').convert(linhas),
       );
     stderr.writeln('escrito $destino (${linhas.length} observações)');
-    if (app && trimestral && comDeslistadas && amostra == null && !c7) {
+    if (app &&
+        trimestral &&
+        comDeslistadas &&
+        amostra == null &&
+        !c7 &&
+        saida == null) {
       // O universo que as coortes observam como listado: é o que a ponte das
       // deslistadas (`tool/b3_ponte.py`) exclui, para não dar duas pontas à
       // mesma companhia (item C1d).

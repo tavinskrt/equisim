@@ -18,6 +18,7 @@ calma.
 | **Capital investido** | Patrimônio líquido + dívida líquida: o dinheiro posto na operação (cap. 2). |
 | **Capital posterior** | Ações emitidas depois do último balanço; entram na contagem e são somadas ao capital próprio (cap. 4). |
 | **CAPM** | Ke = taxa livre de risco + β × prêmio de mercado (cap. 3). |
+| **Controle estatal** | Companhia controlada pela União, por um estado ou por um município, como ela declara no cadastro da CVM. A tela mostra a ressalva, e o motor não cobra prêmio a mais na taxa (cap. 3). |
 | **Cascata** | A sequência de portas que decide se e como a empresa é avaliada (cap. 4). |
 | **CDI** | Taxa dos empréstimos de um dia entre bancos, colada à Selic (cap. 3). |
 | **Cenários** | Três conjuntos fixos de premissas (pessimista, base, otimista): sensibilidade, não probabilidade (cap. 4). |
@@ -50,6 +51,7 @@ calma.
 | **IC (*information coefficient*)** | Correlação entre as posições do upside e as do retorno realizado (cap. 6). |
 | **Ke** | Custo do capital próprio: o retorno que o sócio exige (cap. 3). |
 | **Kd** | Custo da dívida: taxa livre de risco + prêmio de crédito (cap. 3). |
+| **Lambda (λ)** | Quanto uma companhia está exposta ao risco do país, comparada à média: 1 é a média; acima de 1, mais exposta (Damodaran, 2003). As estatais deram cerca de 0,7 (cap. 3). |
 | **LPA** | Lucro por ação (cap. 5). |
 | **Mediana** | O valor do meio de uma lista ordenada; resiste a extremos (cap. 6). |
 | **Minoritários** | A parte das controladas que não pertence ao acionista da controladora (cap. 4). |

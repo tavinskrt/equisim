@@ -8,7 +8,8 @@
 > **Data:** 14/09/2026 ([dados/SAPR11.json](dados/SAPR11.json)).
 >
 > **Resultado:** preço justo **R$ 46,05 por unit** (R$ 9,21 por ação), contra
-> R$ 34,74 de mercado — upside de **+32,6%**. Ressalva: **prazo determinado**.
+> R$ 34,74 de mercado — upside de **+32,6%**. Ressalvas: **prazo determinado** e
+> **controle estatal**.
 
 ---
 
@@ -176,8 +177,8 @@ upside          = (46,05 − 34,74) ÷ 34,74 = +32,6%
 **Cenários:** R$ 39,10 / R$ 46,05 / R$ 57,25. **Monte Carlo:** P5 R$ 40,34,
 mediana R$ 46,02, P95 R$ 52,93.
 
-**Faixa calibrada (80%):** 12 meses, R$ 26,07 a R$ 55,17; 36 meses, R$ 23,15 a
-R$ 74,32.
+**Faixa calibrada (80%):** 12 meses, R$ 26,21 a R$ 55,49; 36 meses, R$ 23,10 a
+R$ 75,33.
 
 **Múltiplos de pares.** O subsetor "água e saneamento" não tem cinco outras
 companhias, e a mediana vem do setor de utilidade pública (energia elétrica,
@@ -218,3 +219,9 @@ pares.
   sem ele, a ressalva avisa.
 - **Duas leituras independentes podem discordar muito**, e o motor não escolhe
   uma: mostra as duas e mantém o preço do fluxo descontado.
+- **Estatal não paga taxa maior no motor, e a tela diz isso.** A Sanepar é
+  controlada pelo governo do Paraná, e a avaliação leva a ressalva **controle
+  estatal**. O motor não soma prêmio ao custo de capital: medido, o beta das
+  estatais é menor que o das privadas, e a exposição delas ao risco do país não
+  é maior; o risco de o controlador decidir por outros objetivos que o lucro
+  fica no fluxo do minoritário ([estatais.md](../../validacao/estatais.md)).
