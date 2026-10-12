@@ -12,6 +12,7 @@ import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
 import '../study/study_notifier.dart';
 import '../theme/fin_colors.dart';
+import 'manual_valuation_page.dart';
 import 'valuation_providers.dart';
 import '../shared/domain_copy.dart';
 
@@ -361,6 +362,39 @@ class _PriceCard extends StatelessWidget {
               style: context.finType.caption.copyWith(
                 color: context.fin.textSecondary,
               ),
+            ),
+          ],
+          // **O cálculo do usuário** (decisão 147): a conta do motor, aberta
+          // para quem discorda dela. Fica no cartão do preço porque é o preço
+          // que ele refaz, e só aparece quando a cascata congelou a conta.
+          if (result.manual != null) ...[
+            const Gap.md(),
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: FinSpace.md,
+              runSpacing: FinSpace.sm,
+              children: [
+                FilledButton.icon(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => ManualValuationPage(result: result),
+                    ),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: context.fin.brand,
+                    foregroundColor: context.fin.textOnBrand,
+                  ),
+                  icon: const Icon(Icons.tune, size: 18),
+                  label: const Text('Editar valuation'),
+                ),
+                Text(
+                  'Discorda do motor? Refaça a conta com os seus números.',
+                  style: context.finType.caption.copyWith(
+                    color: context.fin.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ],
         ],

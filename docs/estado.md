@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-02, a partir de `51705aa`.
+Gerado em 2026-10-11, a partir de `5809ca4`.
 
 ## Decisões registradas
 
-**119** aceita · **2** cumprida · **7** substituída
+**120** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -143,6 +143,7 @@ Gerado em 2026-10-02, a partir de `51705aa`.
 | 144 | O nome de pregão da consulta de proventos da B3 vai sem barra, e os nove emissores que ficaram sem histórico são consultados de novo | aceita | voce | 2026-10-01 |
 | 145 | A avaliação declara o controle estatal, com a fonte do Formulário Cadastral, sem mudar o preço justo | aceita | voce | 2026-10-02 |
 | 146 | Sem o par VPA e contagem do exercício, a base de patrimônio é o PL da demonstração | aceita | voce | 2026-10-02 |
+| 147 | O usuário refaz a conta do motor com os números dele, e o preço do motor continua o validado | aceita | voce | 2026-10-11 |
 
 ### Caminhos retirados
 
@@ -155,7 +156,7 @@ Decisões cujo `afeta` cita caminho que uma decisão posterior apagou (campo `re
 
 ## Caixa de entrada
 
-6 apontamento(s) não convertidos em decisão:
+7 apontamento(s) não convertidos em decisão:
 
 - `2026-09-09-voce.md`
 - `2026-09-27-voce.md`
@@ -163,6 +164,7 @@ Decisões cujo `afeta` cita caminho que uma decisão posterior apagou (campo `re
 - `2026-09-29-voce.md`
 - `2026-10-01-voce.md`
 - `2026-10-02-voce.md`
+- `2026-10-11-voce.md`
 
 ## Superfície medida
 
@@ -170,16 +172,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 66 | 23.099 |
-| Apresentacao | 37 | 16.520 |
-| Camada de dados | 26 | 3.873 |
-| Testes do app | 50 | 9.487 |
-| Testes do nucleo | 50 | 16.598 |
-| Ferramentas de QA | 20 | 6.849 |
+| Nucleo de dominio | 67 | 23.608 |
+| Apresentacao | 37 | 16.576 |
+| Camada de dados | 27 | 3.926 |
+| Testes do app | 51 | 9.677 |
+| Testes do nucleo | 52 | 16.780 |
+| Ferramentas de QA | 20 | 6.946 |
 
 ## Histórico recente
 
 ```
+2026-10-05  5809ca4  Refino do motor de valuation (parte 28)
 2026-10-02  51705aa  Instruções para o build
 2026-10-01  b92876c  Refino do motor de valuation (parte 27)
 2026-10-01  dbf225f  Analisando alternativas para o crescimento (g)
@@ -194,5 +197,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-21  80866a8  Refino do motor de valuation (parte 20)
 2026-09-21  0ec1ec1  Refino do motor de valuation (parte 19)
 2026-09-20  ec063b9  Refino do motor de valuation (parte 18)
-2026-09-20  bb57462  Regerado estado
 ```

@@ -11,6 +11,66 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O cálculo do usuário — Editar valuation (11/10/2026)
+
+**O pedido.** «Tiramos toda a parte manual que aplicativos que auxiliam no
+cálculo do valuation que é inserir taxa de desconto, lucro líquido, crescimento
+e a perpetuidade [...] criando um botão para editar o valuation [...] e fazer os
+cálculos em tempo real.» O primeiro protótipo travava campos pelo método — taxa
+montada e não digitada, teto na perpetuidade, crescimento preso ao retorno —, e
+o usuário recusou: «A ideia de poder deixar manual é justamente permitir que o
+usuário discorde do motor». O segundo, com os campos livres, foi aprovado, com
+o pedido de mais destaque para cada campo e da linha visual das outras telas.
+Apontamento de 11/10; [decisão 147](decisoes/147-o-usuario-refaz-a-conta-do-motor-com-os-numeros-dele.md).
+
+**A arquitetura.** A conta do usuário não reimplementa o fluxo descontado: a
+cascata congela, ao concluir a via, o fluxo-base, as premissas finais, a taxa
+que descontou cada ano e a rota da dívida (`ManualValuation`, em
+`ValuationResult.manual`), e o usuário a refaz pela mesma calculadora. A rota da
+firma virou objeto (`FirmDiscountRoute`), descontado pela cascata e pelo
+cálculo do usuário na mesma chamada. As premissas do DCF ganharam duas costuras
+desligadas na produção — a parcela fixa e o caminho de crescimento — e a saída
+do DCF passou a expor o lucro, o reinvestimento, o crescimento e o fator de
+cada ano, para a tabela da tela mostrar a conta sem recalculá-la.
+
+**O que foi medido.**
+
+- **O motor não mudou**: o gabarito saiu idêntico nos 376 ativos e nas nove
+  montagens, saída e rastro bit a bit; o núcleo passou nos 870 testes de antes.
+- **Sem troca, o preço do motor, bit a bit**: nas sete rotas da cascata
+  (`manual_valuation_test.dart`, 41 testes) e nos 110 avaliados da entrada
+  congelada (`tool/conferir_calculo_manual.dart`).
+- **A conferência do universo achou um defeito antes da entrega.** Com a taxa
+  digitada movendo também o custo médio do capital, pela tradução dos cenários
+  (decisão 121), **subir a taxa subia o preço em 12 dos 90 ativos da via da
+  firma** — AMER3, ECOR3, ENEV3, ENGI11, LOGG3, MOTV3, MYPK3, PNVL3, RAIL3,
+  UGPA3, VBBR3 e YDUQ3. O retorno convergindo a um custo maior pede menos
+  reinvestimento, e na companhia endividada isso supera o desconto. A taxa
+  digitada passou a só descontar; com isso a taxa mais alta dá preço mais baixo
+  nos 110, e a taxa que "o preço de hoje supõe" passou de 71 para 103 ativos
+  com solução, devolvendo o preço de mercado a menos de R$ 10⁻¹³.
+- **A tela** coube nas 18 combinações de largura e escala, aberta e editada
+  (matriz de estouro), e passou nos 7 testes de widget; o aplicativo, nos 520.
+
+**A auditoria do gate.** O gate local barrou um `==` contra literal de ponto
+flutuante num teste novo, trocado por tolerância. A auditoria com o
+`gemini-3.1-pro-high` aprovou: 0 FAIL, 0 WARN, 0 INFO.
+
+**As lentes.** A `nucleo`, a `risco` e a `metodo` responderam "nenhuma tensão"
+na primeira rodada **sem ter lido o código novo**: o material de cada uma é
+cortado no teto, e o corte caía antes do módulo e dos testes novos. Corrigido no
+equipamento, e não na leitura: a `nucleo` lê primeiro o modelo do valuation e a
+tela que o consome, e a `risco` e a `metodo` leem primeiro o que mudou contra o
+último commit (`tipo: 'alterados'`, novo no coletor, que também passou a não
+mandar o mesmo arquivo duas vezes). Refeitas, as três leram o cálculo do
+usuário e não acharam tensão. A `tela` rodou duas vezes no último degrau da
+cascata (`flash-lite`), sem o topo disponível, e não descreveu a tela nova —
+**inconclusiva**, a refazer com o topo. A `registro` apontou, como local, o
+apontamento de 09/09/2026 sem destino, que o plano já inventaria como à espera
+do usuário.
+
+---
+
 ## As estatais e a taxa de desconto — B46, e o B47 e o B48 achados no caminho (02/10/2026)
 
 **A pergunta.** «Ainda sim achamos que o preço das estatais está um pouco

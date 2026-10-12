@@ -1,3 +1,4 @@
+import '../services/valuation/manual_valuation.dart';
 import '../services/valuation/peer_multiples.dart';
 import '../value_objects/money.dart';
 import '../value_objects/ticker.dart';
@@ -524,6 +525,15 @@ class ValuationResult {
   /// medianas setoriais não está presente.
   final PeerTriangulation? triangulation;
 
+  /// A conta do motor congelada, para o usuário refazê-la com os números dele
+  /// (decisão 147).
+  ///
+  /// **Não muda [fairValue].** O preço justo continua sendo o do motor, e é
+  /// dele que a faixa calibrada e a validação falam; isto é o ponto de partida
+  /// de quem discorda. `null` quando o resultado é montado à mão, fora da
+  /// cascata.
+  final ManualValuation? manual;
+
   /// Agrupa o resultado já apurado. Não calcula nada — o cálculo vive em
   /// `ValuationCascade.evaluate`.
   const ValuationResult({
@@ -541,6 +551,7 @@ class ValuationResult {
     this.diagnostics,
     this.priceVolatility,
     this.triangulation,
+    this.manual,
   });
 
   /// Ressalvas estruturadas do cálculo, vazias quando não há diagnóstico.
@@ -569,6 +580,7 @@ class ValuationResult {
           diagnostics: diagnostics,
           priceVolatility: priceVolatility,
           triangulation: triangulation,
+          manual: manual,
         );
 
   /// Preço justo já descontado da margem de segurança.

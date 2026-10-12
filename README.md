@@ -36,7 +36,7 @@ Quatro abas e um painel.
 | Aba | Para quê |
 |---|---|
 | **Estudo** | montar a carteira **Principal** (até 15 ações, com pesos) e a **Reserva** (candidatas); ver o potencial de cada ação e o retorno esperado da carteira; salvar e reabrir estudos |
-| **Valuation** | a avaliação de uma ação: preço justo, upside, faixa calibrada de 12 e 36 meses, cenários ou Monte Carlo, múltiplos de pares e ressalvas |
+| **Valuation** | a avaliação de uma ação: preço justo, upside, faixa calibrada de 12 e 36 meses, cenários ou Monte Carlo, múltiplos de pares e ressalvas; e o botão **Editar valuation**, que abre a conta do motor para o usuário trocar lucro, crescimento, taxa e perpetuidade e ver o preço mudar na hora (decisão 147) |
 | **Meta** | a rentabilidade anual que um plano (aporte inicial, aporte mensal, valor desejado, prazo) exige, comparada ao CDI e ao Ibovespa da década, e à carteira |
 | **Simulação** | a história das duas carteiras sob o mesmo plano de aportes, de 1 a 10 anos para trás: patrimônio, TWR, XIRR, volatilidade, drawdown, Sharpe, Sortino, Calmar |
 | **Painel de logs** (menu do perfil) | cada passo de cada avaliação, com a fórmula, os números e o resultado |
@@ -247,6 +247,7 @@ Sem mexer na entrada congelada:
 | 4. A faixa calibrada | `python tool/cobertura_banda.py` |
 | 5. A habilidade e o poder | `dart run tool/regressao_condicional.dart --trimestral`, depois `dart run tool/poder_r3.dart` |
 | 6. Conferir | `flutter test`, `dart test --directory packages/equisim_core` e `npm run qa:gemini` |
+| 7. O cálculo do usuário continua reproduzindo o motor | `dart run tool/conferir_calculo_manual.dart` |
 
 ### Atualizar o conjunto inteiro (avançar a entrada congelada)
 
@@ -295,6 +296,7 @@ Os testes do aplicativo rodam offline, sobre respostas reais em
 | `.githooks/pre-push` e `npm run qa:gemini` | todo push, e antes de concluir tarefa | auditor de defeitos de correção; **FAIL bloqueia** |
 | `npm run conselho -- --lente <id>` | depois de mudanças | conselheiro por lentes; nunca bloqueia |
 | `dart run tool/gabarito_cascata.dart --conferir` | mudança no motor | confere ao bit a saída de 376 ativos |
+| `dart run tool/conferir_calculo_manual.dart` | mudança no motor ou na tela Editar valuation | confere que, sem troca, o cálculo do usuário dá o preço do motor em cada avaliado |
 
 Detalhes no [CLAUDE.md](CLAUDE.md) e no
 [capítulo 8 da documentação do motor](docs/motor/08-verificacao-e-validacao.md).

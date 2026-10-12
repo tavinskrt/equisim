@@ -191,6 +191,30 @@ function blocosDeMaterial(root: string, material: Material): Bloco[] {
       ];
     }
 
+    case 'alterados': {
+      // O que a rodada mexeu: o modificado contra o ultimo commit e o novo que
+      // o `.gitignore` nao exclui. Vem antes do resto na lente que o pede,
+      // porque o corte e na ordem dos blocos -- ver [collectLente].
+      const existentes = material.raizes.filter((c) => existsSync(join(root, c)));
+      if (existentes.length === 0) return [];
+      const modificados = git(['diff', '--name-only', 'HEAD', '--', ...existentes], root);
+      const novos = git(
+        ['ls-files', '--others', '--exclude-standard', '--', ...existentes],
+        root,
+      );
+      const extensoes = material.extensoes;
+      const excluir = material.excluir ?? [];
+      const arquivos = [...new Set([...modificados.split('\n'), ...novos.split('\n')])]
+        .map((l) => l.trim())
+        .filter((l) => l !== '' && existsSync(join(root, l)))
+        .filter((f) => !extensoes || extensoes.some((e) => f.endsWith(e)))
+        .filter((f) => !excluido(f, excluir))
+        .sort();
+      return arquivos
+        .map((f) => blocoDeArquivo(root, f))
+        .filter((b): b is Bloco => b !== null);
+    }
+
     case 'git-log': {
       const log = git(
         [
@@ -234,8 +258,13 @@ export function collectLente(root: string, lente: Lente): AdvisorTarget {
   const incluidos: string[] = [];
   const omitidos: string[] = [];
   let payload = '';
+  // Um arquivo que dois descritores pedem -- o alterado e o diretorio dele --
+  // vai uma vez so, na posicao do primeiro.
+  const vistos = new Set<string>();
 
   for (const bloco of blocos) {
+    if (vistos.has(bloco.origem)) continue;
+    vistos.add(bloco.origem);
     // O corte e por bloco INTEIRO, nunca no meio de um: arquivo pela metade
     // faria o modelo apontar tensao em codigo que ele nao viu terminar.
     if (payload.length + bloco.texto.length > MAX_PAYLOAD_CHARS) {

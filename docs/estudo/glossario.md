@@ -30,11 +30,13 @@ calma.
 | **Curva de juros** | As taxas dos títulos prefixados para cada prazo (cap. 3). |
 | **CVM** | Comissão de Valores Mobiliários, que recebe os balanços oficiais (cap. 2). |
 | **DCF** | Fluxo de caixa descontado: somar os fluxos futuros trazidos a valor de hoje (cap. 1 e 4). |
+| **DCF reverso** | A conta ao contrário: em vez de calcular o preço a partir das premissas, achar a premissa que dá o preço de hoje. Na tela, "O que o preço de hoje supõe?" (cap. 4). |
 | **Desconto (taxa de)** | A taxa usada para trazer o futuro para hoje (cap. 1). |
 | **Determinístico** | A mesma entrada dá sempre a mesma saída. Exigência do projeto (cap. 6). |
 | **Dívida bruta / líquida** | Bruta: todos os empréstimos. Líquida: bruta menos o caixa (cap. 2). |
 | **DRE** | Demonstração do resultado do exercício (cap. 2). |
 | **EBIT / EBITDA** | Resultado operacional, antes de juros e imposto; o EBITDA também antes da depreciação (cap. 2). |
+| **Editar valuation** | A tela que abre a conta do motor com os números dele, para você trocar o que discordar e ver o preço mudar na hora. Sem troca, dá o preço do motor; o preço que você calcula não é validado (cap. 4). |
 | **Encolhimento (*shrinkage*)** | Puxar uma estimativa imprecisa na direção de uma referência, ponderando pela precisão (cap. 3 e 6). |
 | **Erro-padrão** | Quanto uma estimativa varia de amostra para amostra (cap. 6). |
 | **Escudo fiscal** | A economia de imposto que a dedução dos juros gera: juro × 34% (cap. 3). |

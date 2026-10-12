@@ -20,6 +20,7 @@ import '../services/valuation/eligibility.dart';
 import '../services/valuation/growth_estimator.dart';
 import '../services/valuation/growth_guards.dart';
 import '../services/valuation/levered_rates.dart';
+import '../services/valuation/manual_valuation.dart';
 import '../services/valuation/moat_fixed_point.dart';
 import '../services/valuation/scenario_engine.dart';
 import '../services/valuation/yield_curve.dart';
@@ -1995,8 +1996,6 @@ abstract final class ValuationCascade {
           : a.copyWith(discountRatePath: [for (final r in caminho) r + desvio]);
       return DcfCalculator.shareholder(baseProfit: base, assumptions: deslocada);
     }
-    final taxas = custo.taxas;
-    final latest = via.latest;
     // **O centro é a premissa que produziu o preço justo**, e não a
     // interpolada (item B11). O cenário move o desconto da firma em relação ao
     // centro, e o mesmo deslocamento é aplicado ao `Ke` — que é a taxa que esta
@@ -2015,11 +2014,75 @@ abstract final class ValuationCascade {
     final dKeTerminal =
         (a.terminalDiscountRate - centro.terminalDiscountRate) *
             fatorDoCenario;
-    // O divisor é a contagem de unidades que forma a cotação — ver
-    // [ValuationCascade.quotedShares]. Com ela, o potencial é `E ÷ VM − 1` e
-    // nenhuma contagem de ação sobra na comparação com o preço de tela.
-    final shares = via.divisor.count;
-    final minoritarios = latest.minorityInterest ?? 0;
+    final r = _rotaDaFirma(via, custo, premissas);
+    final caminhoKe = r.caminhoKe;
+    return r.rota.discount(
+      baseProfit: base,
+      assumptions: a,
+      equityDiscountRate: r.ke + dKe,
+      terminalEquityDiscountRate: r.keTerminal + dKeTerminal,
+      equityDiscountRatePath:
+          caminhoKe == null ? null : [for (final k in caminhoKe) k + dKe],
+    );
+  }
+
+  /// **A conta da via congelada, para o cálculo do usuário** (decisão 147).
+  ///
+  /// Guarda o que a cascata decidiu — o fluxo-base, as premissas finais, a taxa
+  /// que descontou cada ano e a rota da dívida — para que o usuário refaça a
+  /// conta pela mesma calculadora. As taxas saem do **desconto que produziu o
+  /// preço justo**, e não das premissas: na via da firma é o `Ke` que desconta
+  /// o fluxo do acionista, e as premissas carregam o `WACC`.
+  static ManualValuation? _congelar(_Via via, _ViaDescontada d) {
+    final taxas = d.outcome.discountRates;
+    final taxaTerminal = d.outcome.terminalDiscountRateUsed;
+    if (taxas == null || taxas.isEmpty || taxaTerminal == null) return null;
+    final firma = via.lane == ValuationLane.firm
+        ? _rotaDaFirma(via, d.custo, d.premissas)
+        : null;
+    final publicado = _baseProfitFor(
+      via.lane,
+      via.latest,
+      via.divisor,
+      1.0,
+      d.saida1.aliquota,
+    );
+    final escala =
+        via.lane == ValuationLane.shareholder ? via.divisor.count : 1.0;
+    return ManualValuation(
+      lane: via.lane,
+      shares: via.divisor.count,
+      marketPrice: via.inputs.marketPrice,
+      motorFairValue: d.outcome.fairValuePerShare,
+      motorBase: d.base,
+      publishedBase: publicado == null ? null : publicado * escala,
+      baseFactor: d.saida1.fator,
+      rebuiltBase: d.baseReconstruida,
+      motorAssumptions: d.custo.assumptions,
+      motorRates: List.unmodifiable(taxas),
+      motorTerminalRate: taxaTerminal,
+      firmRoute: firma?.rota,
+      motorEquityRate: firma?.ke,
+      motorTerminalEquityRate: firma?.keTerminal,
+      motorEquityRatePath: firma?.caminhoKe,
+      postStatementCapital: via.capitalPosterior,
+    );
+  }
+
+  /// **A rota derivada da firma, e o `Ke` do centro que a desconta** (decisão
+  /// 147).
+  ///
+  /// Sai de uma função porque a cascata e o cálculo do usuário precisam da
+  /// **mesma** rota: a cascata a desconta sob as premissas dela e os cenários
+  /// de sensibilidade; o cálculo do usuário, sob as que ele digitou.
+  static ({
+    FirmDiscountRoute rota,
+    double ke,
+    double keTerminal,
+    List<double>? caminhoKe,
+  }) _rotaDaFirma(_Via via, _Custo custo, _Premissas premissas) {
+    final taxas = custo.taxas;
+    final latest = via.latest;
     // O custo da dívida é **sempre o sintético que o WACC aplica** — nas duas
     // rotas (item B11). O observado, `despesa financeira ÷ dívida bruta`, a
     // decisão 31 já descartou: ele carrega arrendamento e variação cambial, e
@@ -2028,68 +2091,55 @@ abstract final class ValuationCascade {
     // **O caixa rende a taxa livre de risco** (decisão 119, que estende a 113
     // à rota derivada).
     final rendimentoDoCaixa = via.inputs.capm.riskFreeRate;
-    // **Com o caminho de taxas resolvido, o juro e o rendimento seguem a
-    // curva** (item B24, decisão 127). O ponto fixo fecha o WACC com
-    // `K_d,t = Rf_t + spread` e o caixa a `Rf_t`, e o `Ke` que desconta este
-    // fluxo sai desse mesmo caminho. Projetar o juro com o `K_d` do primeiro
-    // ano parado e descontar pelo `Ke` que se move quebrava a identidade entre
-    // as duas rotas (lente `metodo`, 22/09/2026).
-    final caminhoRf = custo.caminhoRf;
     final spread = premissas.spreadDeCredito;
+    final terminalRf = via.inputs.terminalRiskFreeRate;
+    // O divisor é a contagem de unidades que forma a cotação — ver
+    // [ValuationCascade.quotedShares]. Com ela, o potencial é `E ÷ VM − 1` e
+    // nenhuma contagem de ação sobra na comparação com o preço de tela.
+    FirmDiscountRoute rota(List<double>? caminhoRf) => FirmDiscountRoute(
+          netDebt: latest.netDebt,
+          sharesOutstanding: via.divisor.count,
+          costOfDebt: kd,
+          taxRate: ValuationParameters.statutoryTaxRate,
+          minorityInterest: latest.minorityInterest ?? 0,
+          cash: latest.totalCash,
+          cashYield: rendimentoDoCaixa,
+          costOfDebtPath: caminhoRf == null
+              ? null
+              : [for (final rf in caminhoRf) rf + spread],
+          cashYieldPath: caminhoRf,
+          terminalCostOfDebt: caminhoRf == null ? null : terminalRf + spread,
+          terminalCashYield: caminhoRf == null ? null : terminalRf,
+        );
     if (taxas == null) {
       // Sem caminho resolvido, e com curva, o `Ke`, o juro e o rendimento do
       // caixa de cada ano seguem o forward daquele ano (item B37), como o
       // desconto da firma segue.
       final fw = via.inputs.riskFreeCurve
           ?.annualForwards(via.inputs.projectionYears);
-      return DcfCalculator.equityFromFirm(
-        baseProfit: base,
-        assumptions: a,
-        netDebt: latest.netDebt,
-        sharesOutstanding: shares,
-        costOfDebt: kd,
-        taxRate: ValuationParameters.statutoryTaxRate,
-        equityDiscountRate: premissas.keCorrente + dKe,
-        terminalEquityDiscountRate: premissas.keTerminal + dKeTerminal,
-        equityDiscountRatePath: fw == null
+      return (
+        rota: rota(fw),
+        ke: premissas.keCorrente,
+        keTerminal: premissas.keTerminal,
+        caminhoKe: fw == null
             ? null
             : [
                 for (final rf in fw)
-                  via.inputs.capm.withRiskFree(rf).costOfEquity + dKe,
+                  via.inputs.capm.withRiskFree(rf).costOfEquity,
               ],
-        minorityInterest: minoritarios,
-        cash: latest.totalCash,
-        cashYield: rendimentoDoCaixa,
-        costOfDebtPath: fw == null ? null : [for (final rf in fw) rf + spread],
-        cashYieldPath: fw,
-        terminalCostOfDebt:
-            fw == null ? null : via.inputs.terminalRiskFreeRate + spread,
-        terminalCashYield: fw == null ? null : via.inputs.terminalRiskFreeRate,
       );
     }
-    return DcfCalculator.equityFromFirm(
-      baseProfit: base,
-      assumptions: a,
-      netDebt: latest.netDebt,
-      sharesOutstanding: shares,
-      costOfDebt: kd,
-      taxRate: ValuationParameters.statutoryTaxRate,
-      equityDiscountRate: taxas.costOfEquity.first + dKe,
-      terminalEquityDiscountRate: taxas.terminalCostOfEquity + dKeTerminal,
-      equityDiscountRatePath: [
-        for (final k in taxas.costOfEquity) k + dKe,
-      ],
-      minorityInterest: minoritarios,
-      cash: latest.totalCash,
-      cashYield: rendimentoDoCaixa,
-      costOfDebtPath:
-          caminhoRf == null ? null : [for (final rf in caminhoRf) rf + spread],
-      cashYieldPath: caminhoRf,
-      terminalCostOfDebt: caminhoRf == null
-          ? null
-          : via.inputs.terminalRiskFreeRate + spread,
-      terminalCashYield:
-          caminhoRf == null ? null : via.inputs.terminalRiskFreeRate,
+    // **Com o caminho de taxas resolvido, o juro e o rendimento seguem a
+    // curva** (item B24, decisão 127). O ponto fixo fecha o WACC com
+    // `K_d,t = Rf_t + spread` e o caixa a `Rf_t`, e o `Ke` que desconta este
+    // fluxo sai desse mesmo caminho. Projetar o juro com o `K_d` do primeiro
+    // ano parado e descontar pelo `Ke` que se move quebrava a identidade entre
+    // as duas rotas (lente `metodo`, 22/09/2026).
+    return (
+      rota: rota(custo.caminhoRf),
+      ke: taxas.costOfEquity.first,
+      keTerminal: taxas.terminalCostOfEquity,
+      caminhoKe: taxas.costOfEquity,
     );
   }
 
@@ -2191,6 +2241,7 @@ abstract final class ValuationCascade {
       assumptions: assumptions,
       baseValue: outcome.fairValuePerShare,
       triangulation: triangulacao,
+      manual: _congelar(via, d),
       valuate: (a) => _descontarFluxo(via, d.base, d.custo, a, d.premissas)
           .map((o) => o.fairValuePerShare),
       scenarioBuilder: scenarioBuilder,
@@ -3762,6 +3813,7 @@ abstract final class ValuationCascade {
     required List<String> warnings,
     required ValuationDiagnostics diagnostics,
     PeerTriangulation? triangulation,
+    ManualValuation? manual,
   }) {
     final source = (scenarioBuilder ?? DiscreteScenarios.around)(assumptions);
     final volatilidade = inputs.prices == null
@@ -3794,6 +3846,7 @@ abstract final class ValuationCascade {
         diagnostics: diagnostics,
         priceVolatility: volatilidade,
         triangulation: triangulation,
+        manual: manual,
       );
     }
 
@@ -3826,6 +3879,7 @@ abstract final class ValuationCascade {
       diagnostics: diagnostics,
       priceVolatility: volatilidade,
       triangulation: triangulation,
+      manual: manual,
     );
   }
 

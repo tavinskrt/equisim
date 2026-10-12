@@ -8,6 +8,7 @@ import 'package:equisim/presentation/shell/app_shell.dart';
 import 'package:equisim/presentation/study/study_notifier.dart';
 import 'package:equisim/presentation/study/study_page.dart';
 import 'package:equisim/presentation/theme/fin_theme.dart';
+import 'package:equisim/presentation/valuation/manual_valuation_page.dart';
 import 'package:equisim/presentation/valuation/valuation_page.dart';
 import 'package:equisim/presentation/valuation/valuation_providers.dart';
 import 'package:equisim_core/equisim_core.dart';
@@ -22,6 +23,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'populated_state.dart'
     show
         assetOf,
+        avaliacaoDaCascata,
         carteiraDemo,
         comparisonOf,
         metaDemo,
@@ -188,6 +190,32 @@ void main() {
     'GoalPage': (build: GoalPage.new, comAtivos: false),
     'ValuationPage': (
       build: () => ValuationPage(ticker: Ticker.parse('PETR4')),
+      comAtivos: false,
+    ),
+    // A edição do valuation (decisão 147) abre já preenchida — a conta
+    // congelada vem da cascata —, então a matriz mede a tela cheia, e não o
+    // esqueleto. A versão editada acrescenta o que só aparece com troca: o
+    // selo de cada campo, os degraus da decomposição e a recusa.
+    'ManualValuationPage': (
+      build: () => ManualValuationPage(result: avaliacaoDaCascata()),
+      comAtivos: false,
+    ),
+    'ManualValuationPage editada': (
+      build: () {
+        final r = avaliacaoDaCascata(firma: false);
+        final m = r.manual!.motorPremises;
+        return ManualValuationPage(
+          result: r,
+          inicial: m.copyWith(
+            baseProfit: m.baseProfit * 1.25,
+            growth: m.growth + 0.03,
+            growthPath: ManualGrowthPath.constante,
+            discountRate: m.discountRate - 0.01,
+            ratePath: ManualRatePath.constante,
+            terminalReturn: m.discountRate + 0.04,
+          ),
+        );
+      },
       comAtivos: false,
     ),
   };

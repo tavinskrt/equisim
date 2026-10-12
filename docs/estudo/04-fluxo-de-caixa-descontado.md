@@ -457,6 +457,61 @@ para ter em mente:
    decidir sozinho.
 3. **A incerteza é grande e está medida**: é a faixa calibrada.
 
+## 4.16 Faça a conta você mesmo: o botão "Editar valuation"
+
+Tudo o que este capítulo descreveu — o lucro de partida, o crescimento, a taxa,
+a perpetuidade — é decidido pelo motor sozinho. O botão **Editar valuation**, no
+cartão do preço, abre a mesma conta para você discordar dela (decisão 147).
+
+**Como funciona.** A tela abre com um cartão para cada número que o motor
+escolheu, já preenchido com o valor dele. Você digita outro número (ou usa os
+botões − e +, ou arrasta o controle), e o preço justo muda na hora. O motor não
+some: ao lado de cada campo fica o número dele e de onde ele saiu, e um botão
+"Usar o do motor" desfaz a troca.
+
+**A conta não é outra.** A tela não reimplementa o fluxo descontado: ela
+guarda a conta que o motor fez — o lucro normalizado, a dívida, as ações, a taxa
+de cada ano — e refaz só o pedaço que você trocou. Por isso, sem nenhuma troca,
+o preço é o do motor ao centavo. Isso foi conferido nos 110 ativos avaliados.
+
+**Um exemplo, com os dados de 14/09/2026.** A WEGE3 é avaliada pela via da
+firma. O motor parte de um lucro operacional de R$ 6.718,7 milhões, crescendo
+10,84% no primeiro ano. O desconto é de 14,49% no primeiro ano e de 15,15% na
+perpetuidade. Os dez anos valem R$ 36,2 bilhões hoje, e a perpetuidade, R$ 33,0
+bilhões; tirada a parte dos minoritários das controladas, o patrimônio vale
+R$ 68,0 bilhões. Dividido por 4,2 bilhões de ações, o preço justo é R$ 16,22,
+contra R$ 50,74 na bolsa. O que acontece quando se discorda:
+
+| Troca | Preço justo |
+|---|---|
+| Nenhuma (o motor) | R$ 16,22 |
+| Taxa 1 ponto mais baixa em todos os anos | R$ 18,39 |
+| Taxa 1 ponto mais alta | R$ 14,51 |
+| Uma taxa só de 14,49%, sem a curva | R$ 17,62 |
+| Crescimento 2 pontos maior no início | R$ 16,93 |
+
+E o botão **"O que o preço de hoje supõe?"** faz a pergunta ao contrário: que
+número faria o preço justo bater com os R$ 50,74 da bolsa? Para a WEGE3, uma
+taxa de desconto de **8,78%** em vez de 14,49% — ou um lucro de partida de
+R$ 20,8 bilhões, três vezes o do último exercício. Nenhum crescimento no
+início chega lá, porque crescer exige reinvestir, e o motor limita o
+reinvestimento a 95% do lucro. É um jeito de ler o preço da bolsa: ele está
+apostando num juro muito mais baixo do que o de hoje, ou numa empresa muito
+maior.
+
+**O que a tela recusa.** Só o que não tem conta: lucro negativo, taxa negativa,
+reinvestir 100% do lucro para sempre, e — quando a perpetuidade é de Gordon —
+taxa a menos de meio ponto do crescimento perpétuo, onde a perpetuidade vira
+infinita. O resto é opinião sua, e a tela aceita.
+
+**Dois cuidados.** Primeiro: na via da firma, a taxa que você digita é a que
+desconta o dinheiro do acionista; o custo médio do capital, que guia quanto a
+empresa reinveste, fica o do motor. Se mudasse junto, em 12 dos 90 ativos dessa
+via subir a taxa **subiria** o preço — o contrário do que se espera. Quem
+discorda do retorno da empresa tem um campo próprio para isso. Segundo: **o
+preço que você calcula não é validado.** A faixa calibrada (4.12) e o teste de
+habilidade são do preço do motor; o seu é a conta do motor com a sua opinião.
+
 ## Para estudar mais
 
 - **Koller, Goedhart e Wessels (McKinsey), *Valuation*** — capítulos "Frameworks

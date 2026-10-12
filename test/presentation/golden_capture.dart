@@ -45,6 +45,7 @@ import 'package:equisim/presentation/shell/app_shell.dart';
 import 'package:equisim/presentation/study/study_notifier.dart';
 import 'package:equisim/presentation/study/study_page.dart';
 import 'package:equisim/presentation/theme/fin_theme.dart';
+import 'package:equisim/presentation/valuation/manual_valuation_page.dart';
 import 'package:equisim/presentation/valuation/valuation_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -122,21 +123,55 @@ Future<bool> _carregarFontes() async {
   return true;
 }
 
-/// Um alvo de captura: como montar e como se chama no disco.
-typedef Alvo = ({String nome, Widget Function() build, bool comAtivos});
+/// Um alvo de captura: como montar, como se chama no disco e a altura.
+///
+/// A altura é por alvo porque a edição do valuation é mais longa que as
+/// outras telas: com 1600 px, no celular, a captura parava nos campos e a
+/// lente não via o resultado que eles produzem.
+typedef Alvo = ({
+  String nome,
+  Widget Function() build,
+  bool comAtivos,
+  double altura,
+});
+
+/// A edição do valuation já editada: os selos, os degraus da decomposição e a
+/// perpetuidade com retorno próprio só aparecem com troca (decisão 147).
+Widget _edicaoAlterada() {
+  final r = avaliacaoDaCascata();
+  final m = r.manual!.motorPremises;
+  return ManualValuationPage(
+    result: r,
+    inicial: m.copyWith(
+      baseProfit: m.baseProfit * 1.2,
+      growth: m.growth + 0.02,
+      discountRate: m.discountRate - 0.01,
+      terminalReturn: m.discountRate + 0.04,
+    ),
+  );
+}
 
 final _alvos = <Alvo>[
   // A casca vem PRIMEIRO e importa mais que as telas soltas: e nela que vivem
   // os rotulos das abas e a relacao entre as frentes de trabalho, que e
   // exatamente o objeto da lente `tela`.
-  (nome: 'shell', build: AppShell.new, comAtivos: true),
-  (nome: 'estudo', build: StudyPage.new, comAtivos: true),
-  (nome: 'backtest', build: BacktestPage.new, comAtivos: true),
-  (nome: 'meta', build: GoalPage.new, comAtivos: false),
+  (nome: 'shell', build: AppShell.new, comAtivos: true, altura: _altura),
+  (nome: 'estudo', build: StudyPage.new, comAtivos: true, altura: _altura),
+  (nome: 'backtest', build: BacktestPage.new, comAtivos: true, altura: _altura),
+  (nome: 'meta', build: GoalPage.new, comAtivos: false, altura: _altura),
   // A ABA, e nao a tela empilhada: e o caminho que o pacote UI-1 abriu, e e
   // ele que a lente precisa examinar. `comAtivos` porque sem carteira montada
   // a aba mostra so o estado vazio.
-  (nome: 'valuation', build: ValuationTab.new, comAtivos: true),
+  (nome: 'valuation', build: ValuationTab.new, comAtivos: true, altura: _altura),
+  // A edição do valuation (decisão 147), aberta nos números do motor e já
+  // editada. A conta congelada vem de uma avaliação de verdade da cascata.
+  (
+    nome: 'editar',
+    build: () => ManualValuationPage(result: avaliacaoDaCascata()),
+    comAtivos: false,
+    altura: 2600,
+  ),
+  (nome: 'editar-alterado', build: _edicaoAlterada, comAtivos: false, altura: 2600),
 ];
 
 Future<void> _montar(
@@ -146,7 +181,7 @@ Future<void> _montar(
   required bool claro,
 }) async {
   tester.view.devicePixelRatio = 1.0;
-  tester.view.physicalSize = Size(largura, _altura);
+  tester.view.physicalSize = Size(largura, alvo.altura);
   addTearDown(tester.view.reset);
 
   final container = ProviderContainer(overrides: populatedOverrides());
@@ -173,7 +208,7 @@ Future<void> _montar(
         theme: buildFinTheme(isLight: claro),
         home: MediaQuery(
           data: MediaQueryData(
-            size: Size(largura, _altura),
+            size: Size(largura, alvo.altura),
             textScaler: const TextScaler.linear(_escala),
           ),
           // A casca ja traz o proprio Scaffold; embrulhar de novo criaria uma

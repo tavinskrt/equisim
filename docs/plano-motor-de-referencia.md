@@ -7,27 +7,24 @@ mesma régua, onde cada objetivo está. O que cada rodada encontrou, o que as
 lentes disseram e o que a auditoria reprovou ficam no
 [histórico](plano-motor-de-referencia-historico.md).
 
-> **Última atualização: 02/10/2026 — as estatais e a taxa de desconto** (B46).
-> O usuário perguntou se a taxa das estatais não deveria ser maior. Medido: o
-> motor dá a elas potencial muito acima do das privadas (−5,0% contra −41,6% na
-> mediana), mas o risco do controle não aparece onde o CAPM o cobraria — o beta
-> delas é **menor**, e o lambda de Damodaran, pelo EMBI+ e pelo prefixado de dez
-> anos, fica em 0,7, abaixo de 1. No backtest, cobrar um prêmio acerta a posição
-> média delas com 1 a 2,5 pontos, mas **piora a ordenação do universo** com
-> qualquer prêmio, porque elas renderam acima das privadas. A avaliação passa a
-> declarar o **controle estatal** numa ressalva, sem mudar o preço
-> ([decisão 145](decisoes/145-a-avaliacao-declara-o-controle-estatal-sem-mudar-o-preco.md));
-> cobrar o prêmio, ou levar o risco ao fluxo, fica para o usuário e o
-> orientador. **Medir achou o B47** — cinco companhias com patrimônio positivo,
-> a Copasa e a Fleury entre elas, recusadas como insolventes porque a fonte
-> devolvia a contagem do exercício zerada —, fechado na rodada
-> ([decisão 146](decisoes/146-sem-o-par-vpa-e-contagem-a-base-e-o-pl-da-demonstracao.md)):
-> 110 avaliados, a faixa calibrada continua cobrindo (87,9% e 88,1%) e o R3
-> continua não passando (0,010, `t` de 0,05). E o **B48**, de prevenção: a
-> ferramenta do prêmio não regrava mais em silêncio o passado da série. **O R1
-> continua marcado**, e o motor continua motor de referência pela definição da
-> decisão 140. Seguem abertos, para o usuário, o B33, o B34, o B38, o B45 e o
-> B46. As rodadas anteriores estão no [histórico](plano-motor-de-referencia-historico.md).
+> **Última atualização: 11/10/2026 — o cálculo do usuário** (decisão 147). O
+> usuário pediu de volta a parte manual das calculadoras de valuation — taxa,
+> lucro, crescimento e perpetuidade digitados, com o preço recalculado na hora —
+> e recusou campos travados pelo método: a tela existe para quem discorda do
+> motor. O botão **Editar valuation** abre a conta do motor **congelada** — o
+> fluxo-base, as premissas finais, a taxa de cada ano e a ponte da dívida — e a
+> refaz pela mesma calculadora, trocando só o que o usuário digitou
+> ([decisão 147](decisoes/147-o-usuario-refaz-a-conta-do-motor-com-os-numeros-dele.md)).
+> **Sem troca, o preço do motor, bit a bit**, nas sete rotas da cascata e nos
+> 110 avaliados da entrada congelada (`tool/conferir_calculo_manual.dart`); e
+> **o motor não mudou**: o gabarito saiu idêntico nos 376 ativos e nas nove
+> montagens, de modo que o R1, o R2 e o R3 continuam como medidos em
+> 02/10/2026. Conferir o universo achou e fechou, antes de entregar, a taxa que
+> subia o preço em 12 dos 90 ativos da via da firma quando movia o custo médio
+> do capital junto: a taxa digitada só desconta. O preço do usuário não herda a
+> faixa calibrada nem a habilidade, e a tela o diz. Seguem abertos, para o
+> usuário, o B33, o B34, o B38, o B45 e o B46. As rodadas anteriores estão no
+> [histórico](plano-motor-de-referencia-historico.md).
 
 ## Os dois objetivos
 
@@ -1640,13 +1637,26 @@ justo, ordenação, incerteza nem a correção do motor:
   (`valuation_page.dart`, que está no `afeta` da decisão 32) ou é descartado com
   registro: **quem escolhe é o usuário**, pela regra da caixa de entrada.
 
+- **o cálculo do usuário** (decisão 147, 11/10/2026): o botão Editar
+  valuation refaz a conta do motor com os números de quem discorda dele. Não
+  muda preço justo, ordenação nem incerteza do motor — o gabarito saiu idêntico
+  —, e o critério que o mantém honesto está travado em teste e conferido no
+  universo: sem troca, o preço do motor, bit a bit, em 110 de 110 avaliados;
+  taxa mais alta, preço mais baixo em todos; a decomposição soma a diferença
+  inteira; a taxa que o preço de hoje supõe devolve o preço de mercado. A
+  lente `tela` sobre a tela nova ficou **inconclusiva** em 11/10/2026 — rodou
+  no último degrau da cascata, sem o topo disponível — e se refaz quando ele
+  responder.
+
 Se um deles passar a afetar número, entra na tabela com *serve a* `R1`.
 
 ---
 
 ## 7. Critério de parada
 
-Conferido contra o código e as medições em 02/10/2026, com a Fase 4 fechada, o
+Conferido contra o código e as medições em 02/10/2026 — e de novo em
+11/10/2026, quando o cálculo do usuário (decisão 147) entrou sem mudar o
+gabarito —, com a Fase 4 fechada, o
 B28 medido e decidido, o C7 finalizado, o C8 decidido pelo usuário, a
 documentação refeita contra o código (decisão 141), o prêmio de mercado tirado
 do preço da bolsa (B42, decisão 142), o B43, o B44 e o B47 fechados, a faixa e

@@ -92,3 +92,25 @@ extension PortfolioKindRotulo on PortfolioKind {
     PortfolioKind.reserva => 'Reserva',
   };
 }
+
+/// O grupo de premissas, como degrau de «onde você discorda do motor».
+extension ManualGroupRotulo on ManualGroup {
+  String get rotulo => switch (this) {
+    ManualGroup.lucro => 'Lucro de partida',
+    ManualGroup.crescimento => 'Crescimento',
+    ManualGroup.reinvestimento => 'Reinvestimento',
+    ManualGroup.taxa => 'Taxa de desconto',
+    ManualGroup.perpetuidade => 'Crescimento na perpetuidade',
+    ManualGroup.capitalNovo => 'Retorno do capital novo',
+  };
+}
+
+/// Como a perpetuidade do cálculo do usuário foi formada, como fórmula lida.
+extension ManualTerminalRotulo on ManualTerminal {
+  String get rotulo => switch (this) {
+    ManualTerminal.neutro => 'lucro do ano 11 ÷ taxa',
+    ManualTerminal.vantagem => 'Gordon com o retorno do capital novo',
+    ManualTerminal.parcelaFixa => 'Gordon com a parcela fixa',
+    ManualTerminal.contrato => 'capital devolvido no fim do contrato',
+  };
+}

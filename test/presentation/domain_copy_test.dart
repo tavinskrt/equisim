@@ -26,6 +26,8 @@ void main() {
     confere(MultipleKind.values, (v) => v.rotulo);
     confere(MultipleRefusal.values, (v) => v.rotulo);
     confere(PortfolioKind.values, (v) => v.rotulo);
+    confere(ManualGroup.values, (v) => v.rotulo);
+    confere(ManualTerminal.values, (v) => v.rotulo);
   });
 
   test('a tela lê o que lia antes da mudança', () {

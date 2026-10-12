@@ -41,6 +41,17 @@ export type Material =
       recentesPrimeiro?: boolean;
     }
   | { tipo: 'arvore'; raizes: string[] }
+  /**
+   * O que mudou contra o ultimo commit, e o novo ainda sem commit, sob
+   * [raizes]. Posto primeiro, garante que a lente leia o que a rodada mexeu
+   * antes do corte do teto -- que e onde o codigo e o teste novos se perdiam.
+   */
+  | {
+      tipo: 'alterados';
+      raizes: string[];
+      extensoes?: string[];
+      excluir?: string[];
+    }
   | { tipo: 'git-log'; quantidade: number };
 
 export interface Lente {
@@ -85,6 +96,26 @@ const METODO_PRIMEIRO = [
   'packages/equisim_core/lib/src/services/valuation/scenario_engine.dart',
   'packages/equisim_core/lib/src/usecases/resolve_beta_prior.dart',
   'packages/equisim_core/lib/src/usecases/portfolio_usecases.dart',
+];
+
+/**
+ * O que a lente `nucleo` le antes do resto do nucleo: o modelo do valuation e a
+ * tela que o consome.
+ *
+ * **A ordem e a do corte**, como em [METODO_PRIMEIRO]. Ate 11/10/2026 a lente
+ * lia `packages/equisim_core/lib` em ordem alfabetica, e o corte caia antes de
+ * `services/valuation/`: a conta congelada do calculo do usuario (decisao 147)
+ * nunca chegava a ela, que respondia "nenhuma tensao" sem a ter lido. E a
+ * pergunta dela -- que regra de negocio vazou para a apresentacao -- nao tinha
+ * como ser respondida sem a tela: a do valuation e a que mais monta numero a
+ * partir do dominio.
+ */
+const NUCLEO_PRIMEIRO = [
+  'packages/equisim_core/lib/src/entities/valuation.dart',
+  'packages/equisim_core/lib/src/services/valuation/manual_valuation.dart',
+  'lib/presentation/valuation/manual_copy.dart',
+  'lib/presentation/valuation/manual_valuation_page.dart',
+  'lib/presentation/shared/domain_copy.dart',
 ];
 
 /**
@@ -265,13 +296,14 @@ export const LENTES: Record<LenteId, Lente> = {
       '  mude.',
     ],
     materiais: [
+      ...NUCLEO_PRIMEIRO.map((caminho) => ({ tipo: 'arquivo' as const, caminho })),
+      { tipo: 'arquivo', caminho: 'packages/equisim_core/test/purity_test.dart' },
       {
         tipo: 'diretorio',
         caminho: 'packages/equisim_core/lib',
         extensoes: ['.dart'],
-        excluir: GERADOS,
+        excluir: [...GERADOS, ...NUCLEO_PRIMEIRO],
       },
-      { tipo: 'arquivo', caminho: 'packages/equisim_core/test/purity_test.dart' },
       { tipo: 'diretorio', caminho: 'docs/decisoes', extensoes: ['.md'], opcional: true },
     ],
   },
@@ -382,7 +414,18 @@ export const LENTES: Record<LenteId, Lente> = {
     // "nenhuma tensao" sobre o metodo sem te-lo lido. Primeiro o que define o
     // preco justo; dados da CVM, backtest e meta ficam de fora, porque nao sao
     // metodo de DCF nem de CAPM.
+    //
+    // **O que a rodada mexeu no metodo vem antes** (11/10/2026): o teto ja
+    // estava cheio com a lista acima, e o calculo do usuario (decisao 147),
+    // novo em `services/valuation/`, ficava fora -- a lente nao tinha como
+    // julgar a metodologia dele. O alterado entra uma vez so, na primeira
+    // posicao em que aparece.
     materiais: [
+      {
+        tipo: 'alterados',
+        raizes: ['packages/equisim_core/lib/src/services/valuation'],
+        extensoes: ['.dart'],
+      },
       ...METODO_PRIMEIRO.map((caminho) => ({ tipo: 'arquivo' as const, caminho })),
       {
         tipo: 'diretorio',
@@ -431,10 +474,29 @@ export const LENTES: Record<LenteId, Lente> = {
       '  NOVA: um caminho em que a serie sem a demonstracao chega a um preco',
       '  justo, e nao so ao cache.',
     ],
+    // **O que a rodada mexeu vem primeiro** (11/10/2026). A lente lia os dois
+    // diretorios de teste em ordem alfabetica, e o corte do teto caia antes do
+    // teste e do codigo novos: ela respondia "nenhum caminho sem teste" sobre o
+    // calculo do usuario (decisao 147) sem ter lido nem um nem outro.
     materiais: [
       {
         tipo: 'arvore',
         raizes: ['lib', 'packages/equisim_core/lib', 'test', 'packages/equisim_core/test'],
+      },
+      // Os testes alterados antes do codigo alterado: o material desta lente e
+      // o teste, e o arquivo de codigo grande -- `compute_valuation.dart` tem
+      // um quarto do teto -- nao pode empurrar o teste novo para fora.
+      {
+        tipo: 'alterados',
+        raizes: ['test', 'packages/equisim_core/test'],
+        extensoes: ['.dart'],
+        excluir: GERADOS,
+      },
+      {
+        tipo: 'alterados',
+        raizes: ['lib', 'packages/equisim_core/lib', 'tool'],
+        extensoes: ['.dart'],
+        excluir: GERADOS,
       },
       { tipo: 'diretorio', caminho: 'test', extensoes: ['.dart'], excluir: GERADOS },
       {

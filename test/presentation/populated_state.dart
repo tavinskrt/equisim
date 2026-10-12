@@ -110,7 +110,65 @@ List<double> _curva({required double inicio, required double fim, int n = 120}) 
   });
 }
 
+/// Uma avaliacao de VERDADE, saida da cascata (decisao 147).
+///
+/// A tela de edicao do valuation precisa da conta congelada, e ela so existe no
+/// resultado da cascata -- uma fabrica que monta `ValuationResult` a mao nao a
+/// tem. A cascata e Dart puro e deterministica: a mesma entrada da sempre a
+/// mesma conta, e nada aqui vai a rede.
+///
+/// [firma] escolhe a via: companhia operacional (via da firma) ou com
+/// resultado operacional negativo e lucro liquido positivo (via do acionista).
+ValuationResult avaliacaoDaCascata({bool firma = true}) {
+  final ticker = Ticker.parse(firma ? 'WEGE3' : 'ITUB4');
+  final serie = <FundamentalsSnapshot>[];
+  var e = 1.0;
+  for (var i = 12; i >= 0; i--) {
+    final y = 2025 - i;
+    serie.add(FundamentalsSnapshot(
+      ticker: ticker,
+      fiscalPeriodEnd: DateTime(y, 12, 31),
+      totalRevenue: 10000e6 * e,
+      ebit: (firma ? 1800e6 : -200e6) * e,
+      ebitda: (firma ? 2400e6 : 300e6) * e,
+      netIncome: 900e6 * e,
+      incomeBeforeTax: (firma ? 1300e6 : 1200e6) * e,
+      incomeTaxExpense: (firma ? -400e6 : -300e6) * e,
+      interestExpense: firma ? 400e6 : 50e6,
+      earningsPerShare: 0.9 * e,
+      cash: firma ? 200e6 : 2000e6 * e,
+      shortTermDebt: firma ? 1000e6 : 500e6,
+      longTermDebt: firma ? 3000e6 : 500e6,
+      totalStockholderEquity: 6000e6 * e,
+      bookValuePerShare: 6.0 * e,
+      operatingCashFlow: firma ? 2000e6 * e : null,
+      nopat: firma ? 1188e6 * e : null,
+      sharesOutstanding: 1000e6,
+      sharesOutstandingAsOf: 1000e6,
+      marketCap: 12000e6,
+    ));
+    e *= i.isEven ? 1.04 : 1.06;
+  }
+  final r = ValuationCascade.evaluate(ValuationInputs(
+    ticker: ticker,
+    asOf: DateTime(2026, 9, 9),
+    fundamentals: serie,
+    marketPrice: 12.0,
+    capm: const CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+    declaredTerminalRiskFreeRate: 0.10,
+    unleveredBeta: firma ? 0.8 : 0.9,
+  ));
+  return r.fold(
+    (v) => v,
+    (f) => throw StateError('a fixture da cascata nao avaliou: $f'),
+  );
+}
+
 /// Avaliacao com os tres cenarios discretos preenchidos.
+///
+/// Leva a conta congelada da cascata para que o botao "Editar valuation"
+/// apareca na captura: a fabrica monta o resto a mao, e sem a conta o botao
+/// some -- o que a lente `tela` leria como ausencia da funcao.
 ValuationResult valuationOf(
   String symbol, {
   double justo = 42.80,
@@ -134,6 +192,7 @@ ValuationResult valuationOf(
       // A faixa calibrada da tela de avaliacao sai do preco de hoje, do justo e
       // desta volatilidade (item C2b): sem ela o cartao nao se forma.
       priceVolatility: 0.42,
+      manual: avaliacaoDaCascata().manual,
     );
 
 /// Veredito de meta no nivel `demanding`: o unico que exercita ao mesmo tempo

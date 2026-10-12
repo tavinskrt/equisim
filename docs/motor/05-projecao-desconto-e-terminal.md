@@ -27,6 +27,14 @@ peso do terminal sim). `t` vai de 1 a N.
 `ROIC_base` é o retorno do último exercício × fator de normalização (ou o do
 ciclo, quando a base é reconstruída).
 
+**Duas costuras das premissas não são da produção** (decisão 147): o caminho
+de crescimento explícito (`growthPath`, um `g_t` por ano no lugar do
+decaimento) e a parcela fixa de reinvestimento (`ReinvestmentPolicy.parcelaFixa`:
+`b_t = b` em todo ano, o crescimento sem o limite de `0,95·ROIC_t`, e o terminal
+de Gordon com a mesma parcela, `lucro_{N+1}·(1 − b) ÷ (r∞ − g∞)`). Elas existem
+para o cálculo do usuário (capítulo 7, seção 7.5); desligadas, a cascata é a
+mesma — o gabarito saiu idêntico, bit a bit, em 11/10/2026.
+
 ---
 
 ## 5.2 A projeção

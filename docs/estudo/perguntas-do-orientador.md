@@ -149,3 +149,12 @@ Não lê proventos na avaliação, não prevê preço de commodity, não modela
 aquisições, não usa análise de crédito real (o custo da dívida é sintético), não
 tem prêmio variável no tempo. A lista completa está nas
 [limitações](../validacao/limitacoes.md).
+
+**18. Se o usuário pode trocar todas as premissas, para que serve o motor?**
+Para dar o ponto de partida e a conta. O botão "Editar valuation" abre a
+avaliação do motor com cada premissa preenchida e explicada, e quem discorda
+troca o número; a conta que refaz o preço é a mesma do motor — sem troca, dá o
+preço do motor ao centavo, conferido nos 110 avaliados. O preço do motor
+continua sendo o validado, com faixa calibrada e teste de habilidade; o do
+usuário é a opinião dele aplicada à mesma conta, e a tela diz isso
+([cap. 4, seção 4.16](04-fluxo-de-caixa-descontado.md); decisão 147).
