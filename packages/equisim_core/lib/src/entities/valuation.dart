@@ -1,3 +1,4 @@
+import '../services/valuation/base_normalization.dart';
 import '../services/valuation/manual_valuation.dart';
 import '../services/valuation/peer_multiples.dart';
 import '../value_objects/money.dart';
@@ -379,6 +380,16 @@ class ValuationDiagnostics {
   /// este valor dividido pela contagem de hoje, por papel.
   final double? postStatementCapital;
 
+  /// A decisão da normalização do lucro de partida, com o que a decidiu: o
+  /// retorno do último exercício contra o típico, o teste de desvio, as travas
+  /// e o fator.
+  ///
+  /// **Explica, e não recalcula.** É o que o rastro de auditoria e a tela de
+  /// edição do valuation mostram quando alguém pergunta por que o motor não
+  /// partiu do lucro publicado — ou por que partiu. `null` quando o resultado é
+  /// montado à mão.
+  final BaseNormalization? baseNormalization;
+
   final List<ValuationCaveat> caveats;
 
   const ValuationDiagnostics({
@@ -401,6 +412,7 @@ class ValuationDiagnostics {
     this.impliedTerminalReturn,
     this.terminalEquityShare,
     this.postStatementCapital,
+    this.baseNormalization,
     this.caveats = const [],
   });
 

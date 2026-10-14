@@ -295,7 +295,16 @@ export const LENTES: Record<LenteId, Lente> = {
       '  Recusado em 25/09/2026. So reaponte com um preco justo que a fracao',
       '  mude.',
     ],
+    // O que a rodada mexeu vem antes até da lista acima (14/10/2026): o
+    // registro da normalização e o painel que o explica não estavam nela, e a
+    // lente respondeu "nenhuma tensão" sem lê-los.
     materiais: [
+      {
+        tipo: 'alterados',
+        raizes: ['packages/equisim_core/lib', 'lib/presentation'],
+        extensoes: ['.dart'],
+        excluir: GERADOS,
+      },
       ...NUCLEO_PRIMEIRO.map((caminho) => ({ tipo: 'arquivo' as const, caminho })),
       { tipo: 'arquivo', caminho: 'packages/equisim_core/test/purity_test.dart' },
       {

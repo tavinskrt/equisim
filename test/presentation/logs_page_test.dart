@@ -228,6 +228,13 @@ void main() {
     expect(find.text('observado · normalizado'), findsOneWidget);
     expect(find.textContaining('migra para o fluxo do acionista'), findsNothing);
 
+    // **O porquê da normalização, em linguagem corrente** (orientador,
+    // 14/10/2026): o quadro vem antes das variáveis e diz a direção.
+    expect(find.text('POR QUÊ'), findsOneWidget);
+    expect(find.textContaining('Por que normalizar: um ano só pode'),
+        findsOneWidget);
+    expect(find.textContaining('O teste de destoar'), findsOneWidget);
+
     // Em tela estreita a etiqueta desce para a segunda linha em vez de
     // disputar espaço com o número: numa única linha ela espremia o valor até
     // zero e estourava a lateral.

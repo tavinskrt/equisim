@@ -7,7 +7,7 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-11, a partir de `5809ca4`.
+Gerado em 2026-10-14, a partir de `1aec46b`.
 
 ## Decisões registradas
 
@@ -156,7 +156,7 @@ Decisões cujo `afeta` cita caminho que uma decisão posterior apagou (campo `re
 
 ## Caixa de entrada
 
-7 apontamento(s) não convertidos em decisão:
+8 apontamento(s) não convertidos em decisão:
 
 - `2026-09-09-voce.md`
 - `2026-09-27-voce.md`
@@ -165,6 +165,7 @@ Decisões cujo `afeta` cita caminho que uma decisão posterior apagou (campo `re
 - `2026-10-01-voce.md`
 - `2026-10-02-voce.md`
 - `2026-10-11-voce.md`
+- `2026-10-14-orientador.md`
 
 ## Superfície medida
 
@@ -172,16 +173,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 67 | 23.608 |
-| Apresentacao | 37 | 16.576 |
+| Nucleo de dominio | 68 | 24.937 |
+| Apresentacao | 39 | 18.624 |
 | Camada de dados | 27 | 3.926 |
-| Testes do app | 51 | 9.677 |
-| Testes do nucleo | 52 | 16.780 |
+| Testes do app | 52 | 9.896 |
+| Testes do nucleo | 53 | 17.353 |
 | Ferramentas de QA | 20 | 6.946 |
 
 ## Histórico recente
 
 ```
+2026-10-12  1aec46b  Personalização do valuation
 2026-10-05  5809ca4  Refino do motor de valuation (parte 28)
 2026-10-02  51705aa  Instruções para o build
 2026-10-01  b92876c  Refino do motor de valuation (parte 27)
@@ -196,5 +198,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-21  5345767  Refino do motor de valuation (parte 21)
 2026-09-21  80866a8  Refino do motor de valuation (parte 20)
 2026-09-21  0ec1ec1  Refino do motor de valuation (parte 19)
-2026-09-20  ec063b9  Refino do motor de valuation (parte 18)
 ```

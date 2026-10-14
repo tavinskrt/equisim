@@ -9,6 +9,7 @@ import '../theme/fin_colors.dart';
 import '../theme/fin_space.dart';
 import '../theme/fin_theme.dart';
 import 'manual_copy.dart';
+import 'normalization_panel.dart';
 
 /// Largura a partir da qual os campos e o resultado ficam lado a lado, em dp.
 ///
@@ -85,6 +86,7 @@ class _ManualValuationPageState extends State<ManualValuationPage> {
       falha: falha,
       saida: saida,
       alterado: alterado,
+      normalizacao: widget.result.diagnostics?.baseNormalization,
       onChanged: _trocar,
     );
     final resultado = <Widget>[
@@ -304,6 +306,9 @@ class _Campos extends StatelessWidget {
   final Failure? falha;
   final ManualOutcome? saida;
   final bool alterado;
+
+  /// Por que o motor normalizou o lucro de partida — o painel do cartão dele.
+  final BaseNormalization? normalizacao;
   final ValueChanged<ManualPremises> onChanged;
 
   const _Campos({
@@ -312,6 +317,7 @@ class _Campos extends StatelessWidget {
     required this.falha,
     required this.saida,
     required this.alterado,
+    required this.normalizacao,
     required this.onChanged,
   });
 
@@ -349,7 +355,8 @@ class _Campos extends StatelessWidget {
     } else if (publicado != null && (m.baseFactor - 1).abs() > 0.005) {
       refBase = 'Motor: ${_Unidade.reais.referencia(motor.baseProfit)} — o '
           'último exercício, ${_Unidade.reais.referencia(publicado)}, '
-          'normalizado pelo ciclo (×${Fmt.ratio(m.baseFactor, decimals: 2)}).';
+          'normalizado ${m.baseFactor > 1 ? 'para cima' : 'para baixo'} pelo '
+          'ciclo (×${Fmt.ratio(m.baseFactor, decimals: 2)}).';
     } else {
       refBase = 'Motor: ${_Unidade.reais.referencia(motor.baseProfit)} — o '
           'último exercício publicado.';
@@ -436,6 +443,9 @@ class _Campos extends StatelessWidget {
                 onPressed: () => onChanged(p.copyWith(baseProfit: publicado)),
               ),
           ],
+          detalhe: normalizacao == null
+              ? null
+              : NormalizationPanel(normalization: normalizacao!),
         ),
         const Gap.md(),
         _CampoNumerico(
@@ -792,6 +802,9 @@ class _CampoNumerico extends StatefulWidget {
   final VoidCallback? onVoltarAoMotor;
   final Widget? modos;
   final List<Widget> extras;
+
+  /// Conteúdo a mais no pé do cartão — o porquê da normalização, no do lucro.
+  final Widget? detalhe;
   final bool alteradoForcado;
 
   const _CampoNumerico({
@@ -812,6 +825,7 @@ class _CampoNumerico extends StatefulWidget {
     this.onVoltarAoMotor,
     this.modos,
     this.extras = const [],
+    this.detalhe,
     this.alteradoForcado = false,
   });
 
@@ -1014,6 +1028,10 @@ class _CampoNumericoState extends State<_CampoNumerico> {
         if (widget.extras.isNotEmpty) ...[
           const Gap.xs(),
           Wrap(spacing: FinSpace.sm, children: widget.extras),
+        ],
+        if (widget.detalhe != null) ...[
+          const Gap.md(),
+          widget.detalhe!,
         ],
       ],
     );

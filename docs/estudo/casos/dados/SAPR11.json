@@ -597,7 +597,7 @@
    "SAPR11 é negociada em unit de 5 ações, pela composição que a companhia declara no formulário cadastral da CVM. Os demonstrativos vêm por ação e a cotação é por unit: o valor justo é convertido para a unit antes de ser comparado ao preço.",
    "A contagem oficial da B3, de 14/09/2026, é de 302241104 papéis líquidos de tesouraria, e a fonte de preços diverge dela além da banda de conciliação: 103850066 implícitas no valor de mercado. Foi adotada a oficial.",
    "As duas contagens de ações publicadas pela fonte discordam: 503735170 correntes contra 1511205500 do exercício. As bases contábeis usam a do exercício, que reconstrói o patrimônio publicado; a ponte por papel usa a contagem oficial da B3, líquida de tesouraria, 302241104 papéis.",
-   "O retorno sobre o capital do exercício mais recente (11.2%) destoa da mediana de 8 exercícios (13.5%); a base converge para o ciclo ao longo da projeção, fator de 1.21x.",
+   "O retorno sobre o capital do exercício mais recente (11.2%) destoa do retorno típico da empresa, a mediana dos 8 exercícios anteriores (13.5%): a base foi normalizada para cima, partindo do lucro que a empresa teria rendendo o típico — fator de 1.21x sobre o lucro publicado.",
    "A alíquota efetiva do exercício foi de 9.7%, distante da alíquota marginal estatutária de 34.0% usada no escudo fiscal do WACC. O escudo desconta despesa financeira **futura**, que se realiza à alíquota legal; a efetiva de um exercício carrega incentivo, JCP, prejuízo compensado e diferimento.",
    "O custo da dívida implícito nos demonstrativos deu 41.7% a.a., e o adotado é 15.4% a.a. O desconto usa sempre a taxa livre de risco mais o prêmio da classificação sintética: o custo de capital pede o de captar hoje, e a despesa publicada carrega dívida antiga, arrendamento e variação cambial. A razão observada caiu fora da faixa defensável de 14.1% a 24.1%, e por isso mede outra coisa — arrendamento, variação cambial —: a cobertura sai da conta, e o prêmio é o da alavancagem de 0.60x de dívida líquida sobre EBITDA, de 1.3%.",
    "A taxa livre de risco segue a curva dos títulos prefixados do Tesouro de 10/09/2026: 13.6% a.a. no primeiro ano, 14.3% a.a. no ano 10 e 14.3% a.a. na perpetuidade. É a taxa que o mercado de títulos atribui a cada prazo, e não uma previsão do motor.",
@@ -638,8 +638,8 @@
   }
  },
  "rastro": {
-  "transactionId": "8973b8ae-25c8-4da0-8d9d-429011ac0209",
-  "timestamp": "2026-10-02T23:47:54.999029Z",
+  "transactionId": "a4dc11a9-99aa-4642-84be-744fb2302c92",
+  "timestamp": "2026-10-14T19:58:58.906209Z",
   "endpoint": "/core/valuation/SAPR11",
   "inputPayload": {
    "ticker": "SAPR11",
@@ -927,7 +927,7 @@
     "SAPR11 é negociada em unit de 5 ações, pela composição que a companhia declara no formulário cadastral da CVM. Os demonstrativos vêm por ação e a cotação é por unit: o valor justo é convertido para a unit antes de ser comparado ao preço.",
     "A contagem oficial da B3, de 14/09/2026, é de 302241104 papéis líquidos de tesouraria, e a fonte de preços diverge dela além da banda de conciliação: 103850066 implícitas no valor de mercado. Foi adotada a oficial.",
     "As duas contagens de ações publicadas pela fonte discordam: 503735170 correntes contra 1511205500 do exercício. As bases contábeis usam a do exercício, que reconstrói o patrimônio publicado; a ponte por papel usa a contagem oficial da B3, líquida de tesouraria, 302241104 papéis.",
-    "O retorno sobre o capital do exercício mais recente (11.2%) destoa da mediana de 8 exercícios (13.5%); a base converge para o ciclo ao longo da projeção, fator de 1.21x.",
+    "O retorno sobre o capital do exercício mais recente (11.2%) destoa do retorno típico da empresa, a mediana dos 8 exercícios anteriores (13.5%): a base foi normalizada para cima, partindo do lucro que a empresa teria rendendo o típico — fator de 1.21x sobre o lucro publicado.",
     "A alíquota efetiva do exercício foi de 9.7%, distante da alíquota marginal estatutária de 34.0% usada no escudo fiscal do WACC. O escudo desconta despesa financeira **futura**, que se realiza à alíquota legal; a efetiva de um exercício carrega incentivo, JCP, prejuízo compensado e diferimento.",
     "O custo da dívida implícito nos demonstrativos deu 41.7% a.a., e o adotado é 15.4% a.a. O desconto usa sempre a taxa livre de risco mais o prêmio da classificação sintética: o custo de capital pede o de captar hoje, e a despesa publicada carrega dívida antiga, arrendamento e variação cambial. A razão observada caiu fora da faixa defensável de 14.1% a 24.1%, e por isso mede outra coisa — arrendamento, variação cambial —: a cobertura sai da conta, e o prêmio é o da alavancagem de 0.60x de dívida líquida sobre EBITDA, de 1.3%.",
     "A taxa livre de risco segue a curva dos títulos prefixados do Tesouro de 10/09/2026: 13.6% a.a. no primeiro ano, 14.3% a.a. no ano 10 e 14.3% a.a. na perpetuidade. É a taxa que o mercado de títulos atribui a cada prazo, e não uma previsão do motor.",
@@ -1029,13 +1029,16 @@
      "fator saturado": false,
      "queda no triênio (%)": -33.38,
      "teto travado pela saúde": false,
-     "isento da trava por setor cíclico": false
+     "isento da trava por setor cíclico": false,
+     "resultado da normalização": "paraCima",
+     "razão último ÷ típico": 0.829,
+     "desvios robustos": 1.58
     },
     "intermediateSteps": [
      "Guarda 1 — tendência: sem tendência",
      "Guarda 2 — comparabilidade (declara, não barra): expansão orgânica, base comparável",
      "Guarda 3 — desvio do ciclo: o exercício destoa",
-     "Base normalizada por 1.21x, convergindo ao longo da projeção"
+     "Base normalizada por 1.21x (para cima): o lucro publicado vezes o fator, já no ano zero; o que converge ao longo da projeção é o retorno sobre o capital, até o custo do capital"
     ],
     "finalValue": 1.207,
     "unit": "fator sobre o lucro observado",
@@ -1103,7 +1106,13 @@
      "upperBound": null,
      "selected": 13.47,
      "unit": "%"
-    }
+    },
+    "explanation": [
+     "Por que normalizar: um ano só pode ter sido um pico ou um vale, e o preço justo é proporcional ao lucro de partida. O motor compara o retorno sobre o capital investido do último exercício com o retorno típico da empresa — a mediana dos 8 exercícios anteriores, de 2017 a 2024 — e só parte de outro lucro quando os dois destoam.",
+     "Para cima: em 2025 a empresa rendeu 11.2%, abaixo do típico de 13.5%. O motor lê o último ano como um vale e parte do lucro que a empresa de hoje teria rendendo o típico: fator de 1.21x sobre o lucro publicado.",
+     "O teste de destoar: o último ano sobre o típico dá 0.83 (o normal vai de 0.75 a 1.33), e a distância entre os dois é de 1.58 desvios típicos da janela (o normal vai até 1.5). Destoou pela distância.",
+     "A conta: R$ 1748.2 milhões × 1.21 = R$ 2109.6 milhões — o mesmo que o capital com que a empresa começou 2025 rendendo o típico de 13.5%."
+    ]
    },
    {
     "formulaName": "Crescimento explícito",

@@ -53,6 +53,30 @@ base  = lucro do exercício × fator
 A base da via do acionista é por papel: lucro líquido ÷ papéis da ponte × fator
 (recuo: lucro por ação publicado × razão da unit) (`_earningsPerQuotedUnit`).
 
+**O fator vale já no ano zero.** O lucro de partida é o publicado vezes o fator;
+o que converge ao longo da projeção é o retorno sobre o capital, até o custo do
+capital (capítulo 5). O aviso e o rastro diziam até 14/10/2026 que "a base
+converge para o ciclo ao longo da projeção", o que o código não faz.
+
+### 3.2.1 Por que normalizou, e para que lado
+
+A pergunta do orientador, em 14/10/2026, foi o porquê de cada normalização e a
+direção dela. A Saída 1 guarda a decisão inteira num registro, com os valores
+que a decidiram — nada é recalculado para explicar:
+
+| O que | Código | Onde aparece |
+|---|---|---|
+| O registro: retorno do último exercício, os anos e a mediana do ciclo, razão e desvios robustos, tendência, precedência do ciclo, queda no triênio e travas, fator bruto e aplicado, saturação, reconstrução, lucro publicado e de partida | [base_normalization.dart, `BaseNormalization`](../../packages/equisim_core/lib/src/services/valuation/base_normalization.dart); `ValuationDiagnostics.baseNormalization` | — |
+| O resultado em uma palavra, pela ordem em que a cascata decide: imposto, reconstruído, sem ciclo, dentro do normal, tendência, travado pela queda, para cima, para baixo | `BaseNormalization.outcome` | variável "resultado da normalização" no rastro |
+| As duas medidas da Guarda 3, sem mudar a regra | `GrowthGuards.cycleDeviation` | — |
+| O porquê em linguagem corrente, com os números | `ValuationCascade._porQueDaBase`; `CalculationTrace.explanation` | painel de logs, quadro "Por quê" do passo "Base do fluxo" |
+| O mesmo porquê na tela, com os anos do ciclo em barras | [normalization_panel.dart](../../lib/presentation/valuation/normalization_panel.dart), [normalization_copy.dart](../../lib/presentation/valuation/normalization_copy.dart) | Editar valuation, cartão do lucro de partida |
+| O porquê de cada ativo do universo | [tool/normalizacoes.dart](../../tool/normalizacoes.dart) | [normalizacoes.md](../validacao/normalizacoes.md): 18 para cima, 27 para baixo, 47 dentro do normal, 14 por tendência, 3 reconstruídos, 1 sem ciclo, nos 110 avaliados de 14/09/2026 |
+
+**Nenhum número mudou.** O gabarito de 14/10/2026 saiu igual em preço, cenários e
+diagnósticos nos 376 ativos e nas nove montagens; mudaram só o texto do aviso e
+o rastro do passo da base.
+
 ---
 
 ## 3.3 Saída 2 — crescimento

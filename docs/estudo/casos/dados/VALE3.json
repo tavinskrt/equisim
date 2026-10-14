@@ -593,7 +593,7 @@
    "baseNormalizadaForte"
   ],
   "avisos": [
-   "O retorno sobre o capital do exercício mais recente (9.3%) destoa da mediana de 8 exercícios (20.4%); a base converge para o ciclo ao longo da projeção, fator de 2.18x.",
+   "O retorno sobre o capital do exercício mais recente (9.3%) destoa do retorno típico da empresa, a mediana dos 8 exercícios anteriores (20.4%): a base foi normalizada para cima, partindo do lucro que a empresa teria rendendo o típico — fator de 2.18x sobre o lucro publicado.",
    "O lucro ou o EBITDA recuou 87.7% no triênio, acima do máximo de 50.0%, mas o ativo é de setor de commodity: ali a queda entre pico e vale é oscilação do preço do insumo, não quebra de modelo de negócio. A trava de saúde não se aplica à base, e a convergência ao ciclo opera nos dois sentidos. A vantagem competitiva residual não tem trava de saúde desde a decisão 36: quem decide é a persistência medida do excedente.",
    "A alíquota efetiva do exercício foi de 50.0%, distante da alíquota marginal estatutária de 34.0% usada no escudo fiscal do WACC. O escudo desconta despesa financeira **futura**, que se realiza à alíquota legal; a efetiva de um exercício carrega incentivo, JCP, prejuízo compensado e diferimento.",
    "O custo da dívida implícito nos demonstrativos deu 7.8% a.a., e o adotado é 15.9% a.a. O desconto usa sempre a taxa livre de risco mais o prêmio da classificação sintética: o custo de capital pede o de captar hoje, e a despesa publicada carrega dívida antiga, arrendamento e variação cambial. A razão observada caiu fora da faixa defensável de 14.1% a 24.1%, e por isso mede outra coisa — arrendamento, variação cambial —: a cobertura sai da conta, e o prêmio é o da alavancagem de 1.25x de dívida líquida sobre EBITDA, de 1.8%.",
@@ -635,8 +635,8 @@
   }
  },
  "rastro": {
-  "transactionId": "7799e719-fac8-452a-a54c-1f05171fc660",
-  "timestamp": "2026-10-02T23:47:54.882598Z",
+  "transactionId": "435e8c3b-4be3-444a-a6c5-d10bf3871ec9",
+  "timestamp": "2026-10-14T19:58:58.755097Z",
   "endpoint": "/core/valuation/VALE3",
   "inputPayload": {
    "ticker": "VALE3",
@@ -921,7 +921,7 @@
     ]
    },
    "warnings": [
-    "O retorno sobre o capital do exercício mais recente (9.3%) destoa da mediana de 8 exercícios (20.4%); a base converge para o ciclo ao longo da projeção, fator de 2.18x.",
+    "O retorno sobre o capital do exercício mais recente (9.3%) destoa do retorno típico da empresa, a mediana dos 8 exercícios anteriores (20.4%): a base foi normalizada para cima, partindo do lucro que a empresa teria rendendo o típico — fator de 2.18x sobre o lucro publicado.",
     "O lucro ou o EBITDA recuou 87.7% no triênio, acima do máximo de 50.0%, mas o ativo é de setor de commodity: ali a queda entre pico e vale é oscilação do preço do insumo, não quebra de modelo de negócio. A trava de saúde não se aplica à base, e a convergência ao ciclo opera nos dois sentidos. A vantagem competitiva residual não tem trava de saúde desde a decisão 36: quem decide é a persistência medida do excedente.",
     "A alíquota efetiva do exercício foi de 50.0%, distante da alíquota marginal estatutária de 34.0% usada no escudo fiscal do WACC. O escudo desconta despesa financeira **futura**, que se realiza à alíquota legal; a efetiva de um exercício carrega incentivo, JCP, prejuízo compensado e diferimento.",
     "O custo da dívida implícito nos demonstrativos deu 7.8% a.a., e o adotado é 15.9% a.a. O desconto usa sempre a taxa livre de risco mais o prêmio da classificação sintética: o custo de capital pede o de captar hoje, e a despesa publicada carrega dívida antiga, arrendamento e variação cambial. A razão observada caiu fora da faixa defensável de 14.1% a 24.1%, e por isso mede outra coisa — arrendamento, variação cambial —: a cobertura sai da conta, e o prêmio é o da alavancagem de 1.25x de dívida líquida sobre EBITDA, de 1.8%.",
@@ -1024,13 +1024,16 @@
      "fator saturado": false,
      "queda no triênio (%)": 87.74,
      "teto travado pela saúde": false,
-     "isento da trava por setor cíclico": true
+     "isento da trava por setor cíclico": true,
+     "resultado da normalização": "paraCima",
+     "razão último ÷ típico": 0.459,
+     "desvios robustos": 1.38
     },
     "intermediateSteps": [
      "Guarda 1 — tendência: sem tendência",
      "Guarda 2 — comparabilidade (declara, não barra): expansão orgânica, base comparável",
      "Guarda 3 — desvio do ciclo: o exercício destoa",
-     "Base normalizada por 2.18x, convergindo ao longo da projeção",
+     "Base normalizada por 2.18x (para cima): o lucro publicado vezes o fator, já no ano zero; o que converge ao longo da projeção é o retorno sobre o capital, até o custo do capital",
      "Saúde operacional: queda de 87.7% no triênio, mas o setor é cíclico — isento da trava na Porta 2a. A vantagem residual não tem trava de saúde (decisão 36; item B39)"
     ],
     "finalValue": 2.18,
@@ -1099,7 +1102,14 @@
      "upperBound": null,
      "selected": 20.35,
      "unit": "%"
-    }
+    },
+    "explanation": [
+     "Por que normalizar: um ano só pode ter sido um pico ou um vale, e o preço justo é proporcional ao lucro de partida. O motor compara o retorno sobre o capital investido do último exercício com o retorno típico da empresa — a mediana dos 8 exercícios anteriores, de 2017 a 2024 — e só parte de outro lucro quando os dois destoam.",
+     "Para cima: em 2025 a empresa rendeu 9.3%, abaixo do típico de 20.4%. O motor lê o último ano como um vale e parte do lucro que a empresa de hoje teria rendendo o típico: fator de 2.18x sobre o lucro publicado.",
+     "O teste de destoar: o último ano sobre o típico dá 0.46 (o normal vai de 0.75 a 1.33), e a distância entre os dois é de 1.38 desvios típicos da janela (o normal vai até 1.5). Destoou pela razão.",
+     "A conta: R$ 26025.2 milhões × 2.18 = R$ 56723.6 milhões — o mesmo que o capital com que a empresa começou 2025 rendendo o típico de 20.4%.",
+     "O lucro ou o EBITDA caiu 87.7% em 3 anos, mas em commodity a queda entre pico e vale é do preço do insumo, e não mudança de patamar: a trava que impede subir não se aplica (decisão 30)."
+    ]
    },
    {
     "formulaName": "Crescimento explícito",

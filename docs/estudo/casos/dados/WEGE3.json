@@ -631,8 +631,8 @@
   }
  },
  "rastro": {
-  "transactionId": "0753fd59-d46a-481a-932a-908fcf050b64",
-  "timestamp": "2026-10-02T23:47:54.479458Z",
+  "transactionId": "2e84c2f5-8ed9-4428-a723-9f1cb26cdfaf",
+  "timestamp": "2026-10-14T19:58:58.361298Z",
   "endpoint": "/core/valuation/WEGE3",
   "inputPayload": {
    "ticker": "WEGE3",
@@ -923,7 +923,7 @@
     "Vantagem competitiva residual: retorno do ciclo de 32.0% contra custo de capital de equilíbrio de 15.5%, com excedente decaindo 16.1% ao ano — persistência medida na própria série do ativo, sobre 14 pares. Em 10 anos sobram 17.2% do excedente, e o retorno terminal fica em 18.3% em vez do estado estacionário. O valor terminal volta a depender do crescimento perpétuo."
    ]
   },
-  "executionTimeMs": 61,
+  "executionTimeMs": 64,
   "calculations": [
    {
     "formulaName": "Razão da unidade negociada",
@@ -1015,7 +1015,10 @@
      "fator saturado": false,
      "queda no triênio (%)": -58.58,
      "teto travado pela saúde": false,
-     "isento da trava por setor cíclico": false
+     "isento da trava por setor cíclico": false,
+     "resultado da normalização": "dentroDoNormal",
+     "razão último ÷ típico": 1.122,
+     "desvios robustos": 0.27
     },
     "intermediateSteps": [
      "Guarda 1 — tendência: domina a reversão, base mantida",
@@ -1089,7 +1092,12 @@
      "upperBound": null,
      "selected": 35.88,
      "unit": "%"
-    }
+    },
+    "explanation": [
+     "Por que normalizar: um ano só pode ter sido um pico ou um vale, e o preço justo é proporcional ao lucro de partida. O motor compara o retorno sobre o capital investido do último exercício com o retorno típico da empresa — a mediana dos 8 exercícios anteriores, de 2017 a 2024 — e só parte de outro lucro quando os dois destoam.",
+     "Sem normalização: em 2025 a empresa rendeu 35.9%, contra o típico de 32.0% — dentro do normal dela. A base é o lucro publicado.",
+     "O teste de destoar: o último ano sobre o típico dá 1.12 (o normal vai de 0.75 a 1.33), e a distância entre os dois é de 0.27 desvios típicos da janela (o normal vai até 1.5). Não destoou."
+    ]
    },
    {
     "formulaName": "Crescimento explícito",

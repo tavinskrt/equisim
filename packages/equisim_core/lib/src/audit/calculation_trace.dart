@@ -216,6 +216,16 @@ class CalculationTrace {
   /// Nula na maioria das fórmulas — só existe onde há agregação a auditar.
   final TraceSample? sample;
 
+  /// **Por que** o cálculo deu o que deu, em linguagem corrente, um parágrafo
+  /// por linha.
+  ///
+  /// [intermediateSteps] é a aritmética, para quem confere a conta; isto é o
+  /// motivo, para quem precisa entender a decisão sem conhecer o nome das
+  /// guardas. Nasceu do pedido do orientador, em 14/10/2026, de
+  /// entender por que a base foi normalizada e em que direção. Vazio na maioria
+  /// das fórmulas, e omitido do JSON quando vazio.
+  final List<String> explanation;
+
   /// Declara o rastro. Construído no ponto do cálculo, a partir dos mesmos
   /// objetos que produzem o resultado apresentado.
   const CalculationTrace({
@@ -226,6 +236,7 @@ class CalculationTrace {
     this.finalValue,
     this.unit = '',
     this.sample,
+    this.explanation = const [],
   });
 
   /// Serializa o rastro. A chave `sample` é **omitida** quando não há amostra,
@@ -238,6 +249,7 @@ class CalculationTrace {
         'finalValue': AuditJson.safe(finalValue),
         'unit': unit,
         if (sample != null) 'sample': sample!.toJson(),
+        if (explanation.isNotEmpty) 'explanation': explanation,
       };
 
   /// Reconstrói o rastro, tolerante a payload malformado como as demais
@@ -260,6 +272,10 @@ class CalculationTrace {
             ? TraceSample.fromJson(
                 (json['sample'] as Map).map((k, v) => MapEntry('$k', v)))
             : null,
+        explanation: [
+          for (final linha in (json['explanation'] as List? ?? const []))
+            '$linha',
+        ],
       );
 }
 

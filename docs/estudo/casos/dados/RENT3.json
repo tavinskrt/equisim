@@ -489,8 +489,8 @@
  "recusa": "O fluxo do acionista de RENT3, derivado do da firma, não sustenta capital próprio positivo: a dívida líquida consome o valor que a operação gera. O ativo não é avaliável por fluxo descontado nesta estrutura de capital.",
  "resultado": null,
  "rastro": {
-  "transactionId": "3e641ddc-36c6-4729-ac50-1099f4e2658c",
-  "timestamp": "2026-10-02T23:47:55.133151Z",
+  "transactionId": "a7386dbd-44e8-4ed8-bce0-2dabc3293ed0",
+  "timestamp": "2026-10-14T19:58:59.048825Z",
   "endpoint": "/core/valuation/RENT3",
   "inputPayload": {
    "ticker": "RENT3",
@@ -784,7 +784,10 @@
      "fator saturado": false,
      "queda no triênio (%)": -1.59,
      "teto travado pela saúde": false,
-     "isento da trava por setor cíclico": false
+     "isento da trava por setor cíclico": false,
+     "resultado da normalização": "tendencia",
+     "razão último ÷ típico": 0.701,
+     "desvios robustos": 0.73
     },
     "intermediateSteps": [
      "Guarda 1 — tendência: domina a reversão, base mantida",
@@ -858,7 +861,12 @@
      "upperBound": null,
      "selected": 9.69,
      "unit": "%"
-    }
+    },
+    "explanation": [
+     "Por que normalizar: um ano só pode ter sido um pico ou um vale, e o preço justo é proporcional ao lucro de partida. O motor compara o retorno sobre o capital investido do último exercício com o retorno típico da empresa — a mediana dos 8 exercícios anteriores, de 2017 a 2024 — e só parte de outro lucro quando os dois destoam.",
+     "Sem normalização: 9.7% em 2025 destoa do típico de 13.8%, mas o retorno vem mudando de patamar — -0.58 ponto ao ano, com t de -2.65 contra o crítico de 1.77 —, e em 8 anos essa tendência anda mais do que a volta ao típico. O último ano é lido como o novo normal, e a base é o lucro publicado.",
+     "O teste de destoar: o último ano sobre o típico dá 0.70 (o normal vai de 0.75 a 1.33), e a distância entre os dois é de 0.73 desvios típicos da janela (o normal vai até 1.5). Destoou pela razão."
+    ]
    },
    {
     "formulaName": "Crescimento explícito",

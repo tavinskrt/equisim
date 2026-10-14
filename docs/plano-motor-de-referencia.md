@@ -7,23 +7,22 @@ mesma régua, onde cada objetivo está. O que cada rodada encontrou, o que as
 lentes disseram e o que a auditoria reprovou ficam no
 [histórico](plano-motor-de-referencia-historico.md).
 
-> **Última atualização: 11/10/2026 — o cálculo do usuário** (decisão 147). O
-> usuário pediu de volta a parte manual das calculadoras de valuation — taxa,
-> lucro, crescimento e perpetuidade digitados, com o preço recalculado na hora —
-> e recusou campos travados pelo método: a tela existe para quem discorda do
-> motor. O botão **Editar valuation** abre a conta do motor **congelada** — o
-> fluxo-base, as premissas finais, a taxa de cada ano e a ponte da dívida — e a
-> refaz pela mesma calculadora, trocando só o que o usuário digitou
-> ([decisão 147](decisoes/147-o-usuario-refaz-a-conta-do-motor-com-os-numeros-dele.md)).
-> **Sem troca, o preço do motor, bit a bit**, nas sete rotas da cascata e nos
-> 110 avaliados da entrada congelada (`tool/conferir_calculo_manual.dart`); e
-> **o motor não mudou**: o gabarito saiu idêntico nos 376 ativos e nas nove
-> montagens, de modo que o R1, o R2 e o R3 continuam como medidos em
-> 02/10/2026. Conferir o universo achou e fechou, antes de entregar, a taxa que
-> subia o preço em 12 dos 90 ativos da via da firma quando movia o custo médio
-> do capital junto: a taxa digitada só desconta. O preço do usuário não herda a
-> faixa calibrada nem a habilidade, e a tela o diz. Seguem abertos, para o
-> usuário, o B33, o B34, o B38, o B45 e o B46. As rodadas anteriores estão no
+> **Última atualização: 14/10/2026 — o porquê das normalizações.** O orientador
+> refez os valuations por Gordon e chegou aos preços do motor por centavos;
+> pediu que se detalhasse o motivo das normalizações do lucro de partida — por
+> que acontecem, e por que para cima ou para baixo —, sem retirá-las. A Saída 1
+> passou a guardar a decisão num registro com os valores que a tomaram
+> (`BaseNormalization`), e o porquê aparece em linguagem corrente no **painel de
+> logs** (quadro "Por quê" do passo "Base do fluxo") e na tela **Editar
+> valuation** (cartão do lucro de partida); o de cada um dos 110 avaliados está
+> em [normalizacoes.md](validacao/normalizacoes.md) — 18 para cima, 27 para
+> baixo, 47 dentro do normal, 14 por tendência, 3 reconstruídos e 1 sem ciclo.
+> **Nenhum número mudou**: o gabarito saiu igual em preço, cenários e
+> diagnósticos, e o R1, o R2 e o R3 continuam como medidos em 02/10/2026.
+> Conferir a explicação contra o código achou e corrigiu uma frase do aviso e do
+> rastro — a base não "converge para o ciclo ao longo da projeção"; o fator vale
+> já no ano zero. Seguem abertos, para o usuário, o B33, o B34, o B38, o B45 e o
+> B46. As rodadas anteriores estão no
 > [histórico](plano-motor-de-referencia-historico.md).
 
 ## Os dois objetivos
@@ -1648,6 +1647,13 @@ justo, ordenação, incerteza nem a correção do motor:
   no último degrau da cascata, sem o topo disponível — e se refaz quando ele
   responder.
 
+- **a explicação das normalizações** (apontamento do orientador, 14/10/2026):
+  o porquê e a direção de cada normalização do lucro de partida, no painel de
+  logs, na tela Editar valuation e, ativo a ativo, em
+  [normalizacoes.md](validacao/normalizacoes.md). Não muda preço, ordenação nem
+  incerteza — o gabarito saiu igual em tudo menos no texto do aviso e do
+  rastro da base.
+
 Se um deles passar a afetar número, entra na tabela com *serve a* `R1`.
 
 ---
@@ -1656,7 +1662,8 @@ Se um deles passar a afetar número, entra na tabela com *serve a* `R1`.
 
 Conferido contra o código e as medições em 02/10/2026 — e de novo em
 11/10/2026, quando o cálculo do usuário (decisão 147) entrou sem mudar o
-gabarito —, com a Fase 4 fechada, o
+gabarito, e em 14/10/2026, quando a explicação das normalizações entrou sem
+mudar número —, com a Fase 4 fechada, o
 B28 medido e decidido, o C7 finalizado, o C8 decidido pelo usuário, a
 documentação refeita contra o código (decisão 141), o prêmio de mercado tirado
 do preço da bolsa (B42, decisão 142), o B43, o B44 e o B47 fechados, a faixa e

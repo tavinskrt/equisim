@@ -592,7 +592,7 @@
   "ressalvas": [],
   "avisos": [
    "Instituição financeira: depósito, captação e passivo oneroso são insumo do negócio, não financiamento. A avaliação é do fluxo do acionista, descontada ao custo do capital próprio e sem ponte de dívida líquida — subtrair a captação do valor da firma trataria a matéria-prima do negócio como estrutura de capital.",
-   "O retorno sobre o capital do exercício mais recente (20.7%) destoa da mediana de 8 exercícios (18.4%); a base converge para o ciclo ao longo da projeção, fator de 0.89x.",
+   "O retorno sobre o capital do exercício mais recente (20.7%) destoa do retorno típico da empresa, a mediana dos 8 exercícios anteriores (18.4%): a base foi normalizada para baixo, partindo do lucro que a empresa teria rendendo o típico — fator de 0.89x sobre o lucro publicado.",
    "A taxa livre de risco segue a curva dos títulos prefixados do Tesouro de 10/09/2026: 13.6% a.a. no primeiro ano, 14.3% a.a. no ano 10 e 14.3% a.a. na perpetuidade. É a taxa que o mercado de títulos atribui a cada prazo, e não uma previsão do motor.",
    "Vantagem competitiva residual: retorno do ciclo de 18.4% contra custo de capital de equilíbrio de 15.5%, com excedente decaindo 58.9% ao ano — persistência medida na própria série do ativo, sobre 14 pares. Em 10 anos sobram 0.0% do excedente, e o retorno terminal fica em 15.5% em vez do estado estacionário. O valor terminal volta a depender do crescimento perpétuo."
   ],
@@ -628,8 +628,8 @@
   }
  },
  "rastro": {
-  "transactionId": "60a181d6-d984-4ea9-ab28-d8dc4181fd2c",
-  "timestamp": "2026-10-02T23:47:54.766786Z",
+  "transactionId": "ad2b4923-7fa2-4bba-ac3a-64017e77ad7d",
+  "timestamp": "2026-10-14T19:58:58.640874Z",
   "endpoint": "/core/valuation/ITUB4",
   "inputPayload": {
    "ticker": "ITUB4",
@@ -907,7 +907,7 @@
    },
    "warnings": [
     "Instituição financeira: depósito, captação e passivo oneroso são insumo do negócio, não financiamento. A avaliação é do fluxo do acionista, descontada ao custo do capital próprio e sem ponte de dívida líquida — subtrair a captação do valor da firma trataria a matéria-prima do negócio como estrutura de capital.",
-    "O retorno sobre o capital do exercício mais recente (20.7%) destoa da mediana de 8 exercícios (18.4%); a base converge para o ciclo ao longo da projeção, fator de 0.89x.",
+    "O retorno sobre o capital do exercício mais recente (20.7%) destoa do retorno típico da empresa, a mediana dos 8 exercícios anteriores (18.4%): a base foi normalizada para baixo, partindo do lucro que a empresa teria rendendo o típico — fator de 0.89x sobre o lucro publicado.",
     "A taxa livre de risco segue a curva dos títulos prefixados do Tesouro de 10/09/2026: 13.6% a.a. no primeiro ano, 14.3% a.a. no ano 10 e 14.3% a.a. na perpetuidade. É a taxa que o mercado de títulos atribui a cada prazo, e não uma previsão do motor.",
     "Vantagem competitiva residual: retorno do ciclo de 18.4% contra custo de capital de equilíbrio de 15.5%, com excedente decaindo 58.9% ao ano — persistência medida na própria série do ativo, sobre 14 pares. Em 10 anos sobram 0.0% do excedente, e o retorno terminal fica em 15.5% em vez do estado estacionário. O valor terminal volta a depender do crescimento perpétuo."
    ]
@@ -1003,13 +1003,16 @@
      "fator saturado": false,
      "queda no triênio (%)": -49.17,
      "teto travado pela saúde": false,
-     "isento da trava por setor cíclico": false
+     "isento da trava por setor cíclico": false,
+     "resultado da normalização": "paraBaixo",
+     "razão último ÷ típico": 1.124,
+     "desvios robustos": 2.81
     },
     "intermediateSteps": [
      "Guarda 1 — tendência: sem tendência",
      "Guarda 2 — comparabilidade (declara, não barra): expansão orgânica, base comparável",
      "Guarda 3 — desvio do ciclo: o exercício destoa",
-     "Base normalizada por 0.89x, convergindo ao longo da projeção"
+     "Base normalizada por 0.89x (para baixo): o lucro publicado vezes o fator, já no ano zero; o que converge ao longo da projeção é o retorno sobre o capital, até o custo do capital"
     ],
     "finalValue": 0.889,
     "unit": "fator sobre o lucro observado",
@@ -1077,7 +1080,13 @@
      "upperBound": null,
      "selected": 18.43,
      "unit": "%"
-    }
+    },
+    "explanation": [
+     "Por que normalizar: um ano só pode ter sido um pico ou um vale, e o preço justo é proporcional ao lucro de partida. O motor compara o retorno sobre o patrimônio do último exercício com o retorno típico da empresa — a mediana dos 8 exercícios anteriores, de 2017 a 2024 — e só parte de outro lucro quando os dois destoam.",
+     "Para baixo: em 2025 a empresa rendeu 20.7%, acima do típico de 18.4%. O motor lê o último ano como um pico e parte do lucro que a empresa de hoje teria rendendo o típico: fator de 0.89x sobre o lucro publicado.",
+     "O teste de destoar: o último ano sobre o típico dá 1.12 (o normal vai de 0.75 a 1.33), e a distância entre os dois é de 2.81 desvios típicos da janela (o normal vai até 1.5). Destoou pela distância.",
+     "A conta: R$ 45849.0 milhões × 0.89 = R$ 40775.0 milhões — o mesmo que o capital com que a empresa começou 2025 rendendo o típico de 18.4%."
+    ]
    },
    {
     "formulaName": "Crescimento explícito",

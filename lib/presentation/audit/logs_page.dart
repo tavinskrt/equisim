@@ -4,6 +4,8 @@ import 'dart:math' as math;
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
 
+import '../theme/fin_space.dart';
+import '../theme/fin_typography.dart';
 import 'console_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
@@ -869,6 +871,14 @@ class _SubstitutionBlock extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+          // **O porquê vem antes da conta** (pedido do orientador, 14/10/2026):
+          // quem abre o passo da base quer saber por que o lucro de partida
+          // não é o publicado — e em que direção — antes de conferir a
+          // aritmética.
+          if (trace.explanation.isNotEmpty) ...[
+            const Gap.sm(),
+            _ExplanationBox(theme: theme, lines: trace.explanation),
+          ],
           if (trace.sample != null && trace.sample!.points.isNotEmpty) ...[
             const SizedBox(height: 12),
             _SampleChart(theme: theme, sample: trace.sample!),
@@ -985,6 +995,64 @@ class _SubstitutionBlock extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// --------------------------------------------------------------- O porquê --
+
+/// O motivo de um cálculo em linguagem corrente, um parágrafo por linha.
+///
+/// Fonte proporcional, e não a monoespaçada do resto do console: isto é texto
+/// para ler, e não valor para alinhar. A borda à esquerda na cor de destaque o
+/// separa da decomposição, que é a aritmética.
+class _ExplanationBox extends StatelessWidget {
+  const _ExplanationBox({required this.theme, required this.lines});
+
+  final ConsoleTheme theme;
+  final List<String> lines;
+
+  /// A escala tipográfica do aplicativo, sem o tema: a janela de auditoria é
+  /// uma instância à parte, e o `MaterialApp` dela não carrega `FinTheme`.
+  static final _tipo = FinTypography.standard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: FinSpace.md,
+        vertical: FinSpace.sm,
+      ),
+      decoration: BoxDecoration(
+        color: theme.accent.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(6),
+        border: Border(left: BorderSide(color: theme.accent, width: 3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'POR QUÊ',
+            style: _tipo.label.copyWith(color: theme.accent),
+          ),
+          const Gap.xs(),
+          for (final (i, linha) in lines.indexed)
+            Padding(
+              padding: i == 0
+                  ? EdgeInsets.zero
+                  : const EdgeInsets.only(top: FinSpace.sm),
+              child: SelectableText(
+                linha,
+                style: _tipo.bodySm.copyWith(
+                  color: theme.text,
+                  height: 1.5,
+                  fontWeight: i == 1 ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+            ),
         ],
       ),
     );

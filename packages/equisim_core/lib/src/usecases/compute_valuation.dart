@@ -8,6 +8,7 @@ import '../entities/share_issue.dart';
 import '../entities/valuation.dart';
 import '../failures/failure.dart';
 import '../failures/result.dart';
+import '../services/valuation/base_normalization.dart';
 import '../services/valuation/calibrated_band.dart';
 import '../services/valuation/capital_base.dart';
 import '../services/valuation/concession_sectors.dart';
@@ -799,6 +800,15 @@ class _Base {
   /// Fator de normalização aplicado ao fluxo-base.
   final double fator;
 
+  /// A reconstrução do fluxo-base pelo ciclo (decisão 53), ou `null` quando
+  /// ela não se aplica. Decidida aqui, uma vez, para que o fluxo-base e a
+  /// explicação da normalização leiam a mesma resposta.
+  final ({double total, double fracao})? reconstrucao;
+
+  /// A decisão da normalização, com o que a decidiu — o que o rastro e a tela
+  /// de edição do valuation explicam.
+  final BaseNormalization normalizacao;
+
   const _Base({
     required this.aliquota,
     required this.series,
@@ -807,6 +817,8 @@ class _Base {
     required this.phi,
     required this.travaDeSaude,
     required this.fator,
+    required this.reconstrucao,
+    required this.normalizacao,
   });
 }
 
@@ -2260,6 +2272,7 @@ abstract final class ValuationCascade {
         finiteTerm: d.premissas.prazoDeterminado,
         stateControlled: inputs.stateControlled,
         rebuiltBase: d.baseReconstruida,
+        baseNormalization: d.saida1.normalizacao,
         // `Rf + β·prêmio` sobre a taxa corrente: o retorno esperado
         // incondicional do papel, que a camada de carteira ancora.
         costOfEquity: inputs.capm.costOfEquity,
@@ -2871,7 +2884,8 @@ abstract final class ValuationCascade {
     // [ValuationParameters.trendDriftWindow].
     final tendencia = GrowthGuards.trend(series);
     final phi = GrowthGuards.externalCapitalRatio(series);
-    final destoa = GrowthGuards.deviatesFromCycle(series);
+    final desvio = GrowthGuards.cycleDeviation(series);
+    final destoa = desvio?.deviates;
 
     final comparavel =
         phi == null || phi <= ValuationParameters.maxExternalCapital;
@@ -2956,6 +2970,54 @@ abstract final class ValuationCascade {
         (fatorBruto > ValuationParameters.baseFactorCeiling ||
             fatorBruto < ValuationParameters.baseFactorFloor);
 
+    final reconstrucao =
+        _reconstrucao(series, retornoAtual, retornoCiclo, travaDeSaude);
+    // O lucro publicado e o de partida, em reais nas duas vias: a explicação
+    // fala do lucro que se lê no balanço, e não do lucro por papel.
+    final escala =
+        lane == ValuationLane.shareholder ? via.divisor.count : 1.0;
+    final publicado = _baseProfitFor(
+      lane,
+      via.latest,
+      via.divisor,
+      1.0,
+      aliquotaEstrutural,
+    );
+    final retornos = series.returns;
+    final inicio = retornos.length - 1 - ValuationParameters.cycleWindow;
+    final normalizacao = BaseNormalization(
+      lane: lane,
+      latestYear: retornos.isEmpty ? null : retornos.last.year,
+      latestReturn: retornoAtual,
+      cycleWindow: retornos.length < 2
+          ? const []
+          : List.unmodifiable(
+              retornos.sublist(inicio < 0 ? 0 : inicio, retornos.length - 1),
+            ),
+      cycleReturn: retornoCiclo,
+      ratio: desvio?.ratio,
+      robustZ: desvio?.z,
+      deviates: destoa == true,
+      trendSlope: tendencia?.slope,
+      trendT: tendencia?.tStatistic,
+      trendCriticalT: tendencia?.criticalT,
+      trendDominates: tendencia?.dominates == true,
+      cyclicalPrecedence: precedenciaDoCiclo,
+      operationalDecline: queda,
+      healthCapped: travadoPelaSaude,
+      healthExempt: saudeReprovada && precedenciaDoCiclo,
+      rawFactor: fatorBruto,
+      factor: fatorBase,
+      saturated: saturou,
+      rebuilt: reconstrucao != null,
+      rebuiltPositiveShare: reconstrucao?.fracao,
+      imposed: inputs.baseFactorOverride != null,
+      publishedProfit: publicado == null ? null : publicado * escala,
+      baseProfit: reconstrucao != null
+          ? reconstrucao.total
+          : (publicado == null ? null : publicado * escala * fatorBase),
+    );
+
     _auditBaseGuards(audit, retornoAtual, retornoCiclo, tendencia, phi,
         destoa == true, normaliza, fatorBase, series,
         precedenciaDoCiclo: precedenciaDoCiclo,
@@ -2963,15 +3025,18 @@ abstract final class ValuationCascade {
         saturated: saturou,
         operationalDecline: queda,
         healthCapped: travadoPelaSaude,
-        healthExempt: saudeReprovada && precedenciaDoCiclo);
+        healthExempt: saudeReprovada && precedenciaDoCiclo,
+        normalizacao: normalizacao);
 
     if (normaliza) {
       local.add(
         'O retorno sobre o capital do exercício mais recente '
-        '(${_pct(retornoAtual)}) destoa da mediana de '
-        '${ValuationParameters.cycleWindow} exercícios (${_pct(retornoCiclo)}); '
-        'a base converge para o ciclo ao longo da projeção, fator de '
-        '${fatorBase.toStringAsFixed(2)}x.',
+        '(${_pct(retornoAtual)}) destoa do retorno típico da empresa, a mediana '
+        'dos ${normalizacao.cycleWindow.length} exercícios anteriores '
+        '(${_pct(retornoCiclo)}): a base foi normalizada '
+        '${fatorBase > 1 ? 'para cima' : fatorBase < 1 ? 'para baixo' : 'sem mudança'}, '
+        'partindo do lucro que a empresa teria rendendo o típico — fator de '
+        '${fatorBase.toStringAsFixed(2)}x sobre o lucro publicado.',
       );
       if (precedenciaDoCiclo && tendencia?.dominates == true) {
         local.add(
@@ -3036,7 +3101,41 @@ abstract final class ValuationCascade {
       phi: phi,
       travaDeSaude: travaDeSaude,
       fator: fatorBase,
+      reconstrucao: reconstrucao,
+      normalizacao: normalizacao,
     );
+  }
+
+  /// **A reconstrução do fluxo-base pelo ciclo** (decisão 53): o retorno do
+  /// ciclo sobre o capital de hoje, quando o último exercício veio no prejuízo.
+  ///
+  /// As condições são as de [_fluxoBase], escritas uma vez: o último retorno
+  /// não é positivo, o ciclo é, a trava de saúde não reprova, e ao menos
+  /// [ValuationParameters.minPositiveFlow] da janela é positiva. Devolve o
+  /// fluxo em reais e a fração positiva, ou `null`.
+  static ({double total, double fracao})? _reconstrucao(
+    CapitalSeries series,
+    double? retornoAtual,
+    double? retornoCiclo,
+    bool travaDeSaude,
+  ) {
+    if (retornoAtual == null ||
+        retornoAtual > 0 ||
+        retornoCiclo == null ||
+        retornoCiclo <= 0 ||
+        travaDeSaude) {
+      return null;
+    }
+    final fracao =
+        series.positiveShare(window: ValuationParameters.cycleWindow);
+    final capital = series.latestBase;
+    if (fracao == null ||
+        fracao < ValuationParameters.minPositiveFlow ||
+        capital == null ||
+        capital <= 0) {
+      return null;
+    }
+    return (total: retornoCiclo * capital, fracao: fracao);
   }
 
   /// **O fluxo-base da via**: o exercício mais recente vezes o fator do ciclo,
@@ -3082,39 +3181,27 @@ abstract final class ValuationCascade {
     final lane = via.lane;
     final latest = via.latest;
     final divisor = via.divisor;
-    final series = b.series;
     final retornoAtual = b.retornoAtual;
     final retornoCiclo = b.retornoCiclo;
     final fatorBase = b.fator;
     double? baseDoCiclo;
-    if (retornoAtual != null &&
-        retornoAtual <= 0 &&
-        retornoCiclo != null &&
-        retornoCiclo > 0 &&
-        !b.travaDeSaude) {
-      final fracao =
-          series.positiveShare(window: ValuationParameters.cycleWindow);
-      final capital = series.latestBase;
-      if (fracao != null &&
-          fracao >= ValuationParameters.minPositiveFlow &&
-          capital != null &&
-          capital > 0) {
-        final total = retornoCiclo * capital;
-        final porUnidade = lane == ValuationLane.firm
-            ? total
-            : (divisor.count > 0 ? total / divisor.count : null);
-        if (porUnidade != null && porUnidade.isFinite && porUnidade > 0) {
-          baseDoCiclo = porUnidade;
-          local.add(
-            'O exercício-base veio no prejuízo — retorno de '
-            '${_pct(retornoAtual)} sobre o capital —, e o fluxo-base foi '
-            'reconstruído do ciclo: ${_pct(retornoCiclo)} de retorno mediano '
-            'sobre o capital de hoje, com ${_pct(fracao)} da janela positiva. '
-            '**O preço justo não repousa em nenhum exercício recente '
-            'observado**: repousa na afirmação de que a empresa volta ao que '
-            'já foi.',
-          );
-        }
+    final reconstrucao = b.reconstrucao;
+    if (reconstrucao != null && retornoAtual != null && retornoCiclo != null) {
+      final total = reconstrucao.total;
+      final porUnidade = lane == ValuationLane.firm
+          ? total
+          : (divisor.count > 0 ? total / divisor.count : null);
+      if (porUnidade != null && porUnidade.isFinite && porUnidade > 0) {
+        baseDoCiclo = porUnidade;
+        local.add(
+          'O exercício-base veio no prejuízo — retorno de '
+          '${_pct(retornoAtual)} sobre o capital —, e o fluxo-base foi '
+          'reconstruído do ciclo: ${_pct(retornoCiclo)} de retorno mediano '
+          'sobre o capital de hoje, com ${_pct(reconstrucao.fracao)} da janela '
+          'positiva. **O preço justo não repousa em nenhum exercício recente '
+          'observado**: repousa na afirmação de que a empresa volta ao que '
+          'já foi.',
+        );
       }
     }
 
@@ -3277,6 +3364,7 @@ abstract final class ValuationCascade {
     double? postStatementCapital,
     required List<double> retentionPath,
     required List<double> growthPath,
+    BaseNormalization? baseNormalization,
   }) {
     final caveats = <ValuationCaveat>[];
     if (outcome.terminalShare > ValuationDiagnostics.terminalShareLimit) {
@@ -3312,6 +3400,7 @@ abstract final class ValuationCascade {
       impliedTerminalReturn: outcome.impliedTerminalReturn,
       terminalEquityShare: terminalEquityShare,
       postStatementCapital: postStatementCapital,
+      baseNormalization: baseNormalization,
       equityShare: outcome.equityShare,
       costOfEquity: costOfEquity,
       baseFactor: baseFactor,
@@ -4426,11 +4515,13 @@ abstract final class ValuationCascade {
     required double? operationalDecline,
     required bool healthCapped,
     required bool healthExempt,
+    required BaseNormalization normalizacao,
   }) {
     if (audit == null) return;
     audit.step(
       sample: _returnSample(series, retornoCiclo, retornoAtual, normaliza),
       formulaName: 'Base do fluxo: normalização pelo ciclo',
+      explanation: _porQueDaBase(normalizacao),
       latex: r'fluxo_0 = NOPAT_{atual} \cdot \frac{r_{ciclo}}{r_{atual}}',
       variables: {
         'retorno atual (% a.a.)': _r((retornoAtual ?? 0) * 100),
@@ -4454,6 +4545,14 @@ abstract final class ValuationCascade {
             operationalDecline == null ? null : _r(operationalDecline * 100),
         'teto travado pela saúde': healthCapped,
         'isento da trava por setor cíclico': healthExempt,
+        // A decisão em uma palavra, para filtrar o painel e os relatórios.
+        'resultado da normalização': normalizacao.outcome.name,
+        'razão último ÷ típico': normalizacao.ratio == null
+            ? 'n/d'
+            : _r(normalizacao.ratio!, 3),
+        'desvios robustos': normalizacao.robustZ == null
+            ? 'n/d'
+            : _r(normalizacao.robustZ!, 2),
       },
       steps: [
         'Guarda 1 — tendência: '
@@ -4463,7 +4562,11 @@ abstract final class ValuationCascade {
         'Guarda 3 — desvio do ciclo: '
             '${destoa ? "o exercício destoa" : "dentro da banda e do desvio robusto"}',
         normaliza
-            ? 'Base normalizada por ${fator.toStringAsFixed(2)}x, convergindo ao longo da projeção'
+            ? 'Base normalizada por ${fator.toStringAsFixed(2)}x '
+                '(${fator > 1 ? 'para cima' : fator < 1 ? 'para baixo' : 'sem mudança'}): '
+                'o lucro publicado vezes o fator, já no ano zero; o que converge '
+                'ao longo da projeção é o retorno sobre o capital, até o custo '
+                'do capital'
             : 'Base mantida como observada',
         if (healthCapped)
           'Saúde operacional: queda de '
@@ -4484,6 +4587,164 @@ abstract final class ValuationCascade {
       result: _r(fator, 3).toDouble(),
       unit: 'fator sobre o lucro observado',
     );
+  }
+
+  /// **Por que a base foi normalizada, ou não, e em que direção**, em
+  /// linguagem corrente — a seção "por quê" do passo da base no rastro.
+  ///
+  /// Pedido do orientador em 14/10/2026: entender o porquê das normalizações,
+  /// e não retirá-las. Cada frase sai de [BaseNormalization], que guarda os
+  /// valores que a Saída 1 usou; nada aqui recalcula a guarda.
+  static List<String> _porQueDaBase(BaseNormalization n) {
+    final retorno = n.lane == ValuationLane.firm
+        ? 'retorno sobre o capital investido'
+        : 'retorno sobre o patrimônio';
+    final anos = n.windowYears;
+    final janela = anos == null ? '' : ', de ${anos.first} a ${anos.last}';
+    final atual = n.latestReturn;
+    final ciclo = n.cycleReturn;
+    final ano = n.latestYear;
+    final f = n.factor.toStringAsFixed(2);
+    String pct(double? v) => v == null ? 'n/d' : _pct(v);
+    final linhas = <String>[
+      'Por que normalizar: um ano só pode ter sido um pico ou um vale, e o '
+          'preço justo é proporcional ao lucro de partida. O motor compara o '
+          '$retorno do último exercício com o retorno típico da empresa — a '
+          'mediana dos ${n.cycleWindow.length} exercícios anteriores$janela — e '
+          'só parte de outro lucro quando os dois destoam.',
+    ];
+    switch (n.outcome) {
+      case BaseNormalizationOutcome.paraCima:
+        linhas.add(
+          'Para cima: em $ano a empresa rendeu ${pct(atual)}, abaixo do típico '
+          'de ${pct(ciclo)}. O motor lê o último ano como um vale e parte do '
+          'lucro que a empresa de hoje teria rendendo o típico: fator de '
+          '${f}x sobre o lucro publicado.',
+        );
+      case BaseNormalizationOutcome.paraBaixo:
+        linhas.add(
+          'Para baixo: em $ano a empresa rendeu ${pct(atual)}, acima do típico '
+          'de ${pct(ciclo)}. O motor lê o último ano como um pico e parte do '
+          'lucro que a empresa de hoje teria rendendo o típico: fator de '
+          '${f}x sobre o lucro publicado.',
+        );
+      case BaseNormalizationOutcome.dentroDoNormal:
+        linhas.add(
+          'Sem normalização: em $ano a empresa rendeu ${pct(atual)}, contra o '
+          'típico de ${pct(ciclo)} — dentro do normal dela. A base é o lucro '
+          'publicado.',
+        );
+      case BaseNormalizationOutcome.tendencia:
+        linhas.add(
+          'Sem normalização: ${pct(atual)} em $ano destoa do típico de '
+          '${pct(ciclo)}, mas o retorno vem mudando de patamar — '
+          '${n.trendSlope == null ? 'n/d' : (n.trendSlope! * 100).toStringAsFixed(2)} '
+          'ponto ao ano, com t de '
+          '${n.trendT == null ? 'n/d' : n.trendT!.toStringAsFixed(2)} contra '
+          'o crítico de '
+          '${n.trendCriticalT == null ? 'n/d' : n.trendCriticalT!.toStringAsFixed(2)} '
+          '—, e em ${ValuationParameters.trendDriftWindow} anos essa tendência '
+          'anda mais do que a volta ao típico. O último ano é lido como o novo '
+          'normal, e a base é o lucro publicado.',
+        );
+      case BaseNormalizationOutcome.travadaPelaSaude:
+        linhas.add(
+          'Sem normalização para cima: ${pct(atual)} em $ano está abaixo do '
+          'típico de ${pct(ciclo)}, e o fator seria de '
+          '${n.rawFactor.toStringAsFixed(2)}x, mas o lucro ou o EBITDA caiu '
+          '${pct(n.operationalDecline)} em '
+          '${ValuationParameters.operationalHealthWindow} anos, acima do '
+          'limite de ${_pct(ValuationParameters.maxOperationalDecline)}. Uma '
+          'empresa que perdeu mais da metade do resultado mudou de patamar, e '
+          'trazê-la de volta ao típico lhe daria um retorno que ela não vai '
+          'repetir. A base é o lucro publicado; para baixo a normalização '
+          'continuaria valendo.',
+        );
+      case BaseNormalizationOutcome.reconstruida:
+        linhas.add(
+          'Base reconstruída: o último exercício deu prejuízo '
+          '(${pct(atual)}), e não há fator que corrija um lucro negativo. Com o '
+          'típico positivo (${pct(ciclo)}) e '
+          '${pct(n.rebuiltPositiveShare)} da janela no lucro, o motor parte do '
+          'típico sobre o capital de hoje — a afirmação de que a empresa volta '
+          'ao que já foi (decisão 53).',
+        );
+      case BaseNormalizationOutcome.semCiclo:
+        linhas.add(
+          'Sem normalização: a série não tem um retorno típico positivo para '
+          'comparar, e a base é o lucro publicado.',
+        );
+      case BaseNormalizationOutcome.imposta:
+        linhas.add(
+          'Fator imposto de fora, por varredura de diagnóstico: ${f}x.',
+        );
+    }
+    final razao = n.ratio;
+    final z = n.robustZ;
+    final comparou = razao != null &&
+        z != null &&
+        n.outcome != BaseNormalizationOutcome.reconstruida &&
+        n.outcome != BaseNormalizationOutcome.semCiclo &&
+        n.outcome != BaseNormalizationOutcome.imposta;
+    if (comparou) {
+      final pelaRazao = razao < ValuationParameters.bandLow ||
+          razao > ValuationParameters.bandHigh;
+      final pelaDistancia = z > ValuationParameters.robustZ;
+      final motivo = pelaRazao && pelaDistancia
+          ? 'pelos dois critérios'
+          : pelaRazao
+              ? 'pela razão'
+              : 'pela distância';
+      linhas.add(
+        'O teste de destoar: o último ano sobre o típico dá '
+        '${razao.toStringAsFixed(2)} (o normal vai de '
+        '${ValuationParameters.bandLow.toStringAsFixed(2)} a '
+        '${ValuationParameters.bandHigh.toStringAsFixed(2)}), e a distância '
+        'entre os dois é de ${z.toStringAsFixed(2)} desvios típicos da janela '
+        '(o normal vai até ${ValuationParameters.robustZ.toStringAsFixed(1)}). '
+        '${n.deviates ? 'Destoou $motivo.' : 'Não destoou.'}',
+      );
+    }
+    final publicado = n.publishedProfit;
+    final base = n.baseProfit;
+    if ((n.outcome == BaseNormalizationOutcome.paraCima ||
+            n.outcome == BaseNormalizationOutcome.paraBaixo) &&
+        publicado != null &&
+        base != null) {
+      linhas.add(
+        'A conta: R\$ ${_milhoes(publicado)} × $f = R\$ ${_milhoes(base)}'
+        '${n.saturated ? '' : ' — o mesmo que o capital com que a empresa começou $ano rendendo o típico de ${pct(ciclo)}'}.',
+      );
+    }
+    if (n.saturated) {
+      linhas.add(
+        'Limite: a razão pedia um fator de ${n.rawFactor.toStringAsFixed(2)}x, '
+        'e ele foi limitado a ${f}x. O fator fica entre '
+        '${ValuationParameters.baseFactorFloor.toStringAsFixed(2)} e '
+        '${ValuationParameters.baseFactorCeiling.toStringAsFixed(2)} porque a '
+        'normalização corrige um ano, e não inventa uma empresa.',
+      );
+    }
+    if (n.cyclicalPrecedence &&
+        n.trendDominates &&
+        (n.outcome == BaseNormalizationOutcome.paraCima ||
+            n.outcome == BaseNormalizationOutcome.paraBaixo)) {
+      linhas.add(
+        'O retorno tem tendência, mas o setor é de commodity ou cíclico '
+        'pesado: ali a perna de alta do ciclo tem cara de tendência, e o ciclo '
+        'tem precedência (decisão 28).',
+      );
+    }
+    if (n.healthExempt && n.factor > 1) {
+      linhas.add(
+        'O lucro ou o EBITDA caiu ${pct(n.operationalDecline)} em '
+        '${ValuationParameters.operationalHealthWindow} anos, mas em '
+        'commodity a queda entre pico e vale é do preço do insumo, e não '
+        'mudança de patamar: a trava que impede subir não se aplica '
+        '(decisão 30).',
+      );
+    }
+    return linhas;
   }
 
   /// Amostra de retorno que sustenta a mediana do ciclo.

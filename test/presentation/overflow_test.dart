@@ -196,8 +196,11 @@ void main() {
     // congelada vem da cascata —, então a matriz mede a tela cheia, e não o
     // esqueleto. A versão editada acrescenta o que só aparece com troca: o
     // selo de cada campo, os degraus da decomposição e a recusa.
+    // Com o último ano deprimido, o motor normaliza a base para cima e o
+    // painel do porquê abre dentro do cartão do lucro (orientador,
+    // 14/10/2026): a matriz mede o cartão aberto, que é o mais alto.
     'ManualValuationPage': (
-      build: () => ManualValuationPage(result: avaliacaoDaCascata()),
+      build: () => ManualValuationPage(result: avaliacaoDaCascata(choque: 0.6)),
       comAtivos: false,
     ),
     'ManualValuationPage editada': (

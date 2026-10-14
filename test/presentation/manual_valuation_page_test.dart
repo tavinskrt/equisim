@@ -15,9 +15,10 @@ void main() {
     WidgetTester tester, {
     bool firma = true,
     double largura = 390,
+    double choque = 1.0,
     ManualPremises Function(ManualPremises motor)? inicial,
   }) async {
-    final r = avaliacaoDaCascata(firma: firma);
+    final r = avaliacaoDaCascata(firma: firma, choque: choque);
     tester.view.devicePixelRatio = 1.0;
     // Alta o bastante para a lista construir todos os cartões: o teste confere
     // o resultado, e não a rolagem.
@@ -147,5 +148,53 @@ void main() {
     // O título do resumo aparece no cartão, e não há barra fixa.
     expect(find.text('SEU PREÇO JUSTO'), findsOneWidget);
     expect(find.text('Seu preço justo'), findsNothing);
+  });
+
+  // ---------------------------------------------------------------------
+  // Por que o motor normalizou o lucro de partida (orientador, 14/10/2026)
+  // ---------------------------------------------------------------------
+
+  testWidgets('o último ano deprimido: o painel abre dizendo que subiu, e por '
+      'quê', (tester) async {
+    final r = await montar(tester, choque: 0.6);
+    final n = r.diagnostics!.baseNormalization!;
+    expect(n.outcome, BaseNormalizationOutcome.paraCima);
+    expect(find.text('Por que o motor subiu o lucro de partida?'),
+        findsOneWidget);
+    expect(find.textContaining('Para cima, ×'), findsOneWidget);
+    // Aberto: a resposta com os números do ativo, os anos do ciclo, o teste e
+    // a conta.
+    expect(find.textContaining('abaixo do seu típico'), findsOneWidget);
+    expect(find.text('${n.latestYear}'), findsWidgets);
+    expect(find.textContaining('O teste: o último ano dividido pelo típico'),
+        findsOneWidget);
+    expect(find.textContaining('A conta:'), findsOneWidget);
+    // A referência do campo diz a direção.
+    expect(find.textContaining('normalizado para cima pelo ciclo'),
+        findsOneWidget);
+  });
+
+  testWidgets('o último ano de pico: o painel diz que baixou', (tester) async {
+    final r = await montar(tester, choque: 1.8);
+    expect(r.diagnostics!.baseNormalization!.outcome,
+        BaseNormalizationOutcome.paraBaixo);
+    expect(find.text('Por que o motor baixou o lucro de partida?'),
+        findsOneWidget);
+    expect(find.textContaining('acima do seu típico'), findsOneWidget);
+  });
+
+  testWidgets('sem normalização, o painel fica fechado e abre com o toque',
+      (tester) async {
+    final r = await montar(tester);
+    final n = r.diagnostics!.baseNormalization!;
+    expect(n.factor, 1.0);
+    final pergunta = find.text('Por que o motor usou o lucro publicado?');
+    expect(pergunta, findsOneWidget);
+    expect(find.textContaining('O teste: o último ano'), findsNothing);
+    await tester.ensureVisible(pergunta);
+    await tester.tap(pergunta);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Um ano só pode ter sido um pico ou um vale'),
+        findsOneWidget);
   });
 }

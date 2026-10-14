@@ -248,6 +248,7 @@ Sem mexer na entrada congelada:
 | 5. A habilidade e o poder | `dart run tool/regressao_condicional.dart --trimestral`, depois `dart run tool/poder_r3.dart` |
 | 6. Conferir | `flutter test`, `dart test --directory packages/equisim_core` e `npm run qa:gemini` |
 | 7. O cálculo do usuário continua reproduzindo o motor | `dart run tool/conferir_calculo_manual.dart` |
+| 8. O porquê das normalizações, ativo a ativo | `dart run tool/normalizacoes.dart` (grava `docs/validacao/normalizacoes.md`) |
 
 ### Atualizar o conjunto inteiro (avançar a entrada congelada)
 

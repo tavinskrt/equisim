@@ -11,6 +11,63 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## O porquê das normalizações (14/10/2026)
+
+**O pedido.** O orientador parabenizou o trabalho, refez os valuations por
+Gordon padrão e chegou aos preços do motor por centavos. Pediu que se
+detalhasse o motivo das normalizações: «Ele quer entender o porquê das
+normalizações (e não retirar), e também o motivo de ter normalizado pra cima ou
+pra baixo.» O usuário pediu a mudança no painel de logs e na tela de edição do
+valuation. Apontamento de 14/10.
+
+**O que foi feito.** A Saída 1 já decidia com todos os números à mão; faltava
+guardá-los. O registro `BaseNormalization` traz o retorno do último exercício,
+os oito anos e a mediana do ciclo, a razão e os desvios robustos da Guarda 3
+(`GrowthGuards.cycleDeviation`, sem mudar a regra), a tendência, a precedência
+do ciclo, a queda no triênio e as travas, o fator bruto e o aplicado, a
+reconstrução e os lucros publicado e de partida, e diz o resultado em uma
+palavra. A reconstrução pelo ciclo (decisão 53) passou a ser decidida uma vez,
+para o fluxo-base e a explicação lerem a mesma resposta. Dele saem:
+
+- no **rastro**, um campo novo, `explanation`, que o painel de logs mostra como
+  o quadro "Por quê" do passo "Base do fluxo", antes das variáveis — por que
+  normalizar, a direção com os números do ativo, o teste e a conta;
+- na tela **Editar valuation**, o painel do cartão do lucro de partida, com a
+  pergunta, o selo da direção, os anos do ciclo em barras com a mediana marcada,
+  o teste, a conta e as travas; abre sozinho quando o motor partiu de outro
+  lucro;
+- e `tool/normalizacoes.dart`, que grava o porquê de cada avaliado em
+  [normalizacoes.md](validacao/normalizacoes.md): 18 para cima, 27 para baixo,
+  47 dentro do normal, 14 por tendência, 3 reconstruídos, 1 sem ciclo.
+
+**O que a conferência achou.** O aviso e o rastro diziam que "a base converge
+para o ciclo ao longo da projeção"; o código aplica o fator inteiro ao lucro de
+partida, já no ano zero, e o que converge é o retorno sobre o capital, até o
+custo do capital. A frase foi corrigida, e o aviso passou a dizer a direção.
+
+**O que não mudou.** O gabarito, refeito, saiu igual em preço, cenários e
+diagnósticos nos 376 ativos e nas nove montagens; o rastro mudou só no passo
+da base — três variáveis e o porquê, conferido linha a linha na PETR4 — e o
+aviso só no texto. Os dados dos casos de estudo foram refeitos e mudaram só
+nesses textos. O núcleo passou nos 911 testes de antes e nos 13 novos; o
+aplicativo, nos 523; a tela coube nas 36 combinações de direção, largura e
+escala com o painel aberto e fechado.
+
+**O gate e as lentes.** O gate local barrou seis linhas novas do painel de logs
+fora da escala de espaçamento e da tipografia inteira, trocadas pelos passos de
+`FinSpace` e pela `FinTypography`. **A auditoria não rodou no modelo padrão**: o
+`gemini-3.1-pro-high`, fixado em `scripts/qa/providers/agy.ts`, saiu do catálogo
+da assinatura, que hoje só oferece o Gemini 3.8 Flash — código 2, de
+infraestrutura. Rodada com o modelo escolhido explicitamente
+(`--model gemini-3.8-flash-high`), aprovou: 0 FAIL, 0 WARN, 0 INFO. A troca do
+padrão fica com o usuário. As lentes `nucleo`, `risco` e `metodo` leram o
+registro, o painel e os testes novos e não acharam tensão — a `nucleo` depois de
+passar a ler primeiro o que mudou, como a `risco` e a `metodo` já liam. A
+`registro` repetiu o apontamento de 09/09/2026, à espera do usuário. A `tela`
+caiu no último degrau da cascata da API e ficou inconclusiva.
+
+---
+
 ## O cálculo do usuário — Editar valuation (11/10/2026)
 
 **O pedido.** «Tiramos toda a parte manual que aplicativos que auxiliam no

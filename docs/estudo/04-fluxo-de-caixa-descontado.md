@@ -136,6 +136,32 @@ E um caso de borda: se o último ano deu **prejuízo** mas o ciclo é lucrativo,
 base é **reconstruída** como retorno do ciclo × capital de hoje (decisão 53), e
 isso vira ressalva na tela.
 
+**Por que normalizar, e para que lado.** Um ano só pode ter sido um pico ou um
+vale, e o preço justo é proporcional ao lucro de partida: partir de um ano
+atípico levaria o pico, ou o vale, à perpetuidade. A normalização troca o lucro
+do último ano pelo lucro que **a empresa de hoje teria rendendo o retorno
+típico dela**. Daí a direção:
+
+- **para cima** quando o último ano rendeu **menos** que o típico — o motor o lê
+  como um vale. A VALE3, com os dados de 14/09/2026, rendeu 9,3% sobre o capital
+  em 2025 contra o típico de 20,4% de 2017 a 2024: fator de 2,18;
+- **para baixo** quando rendeu **mais** — o motor o lê como um pico. O ITUB4
+  rendeu 20,7% sobre o patrimônio contra o típico de 18,4%: fator de 0,89;
+- **nenhuma** quando o último ano está dentro do normal da empresa — a WEGE3,
+  com 35,9% contra 32,0%, está — ou quando o retorno vem mudando de patamar e o
+  último ano é o novo normal.
+
+Dos 110 avaliados, 18 foram normalizados para cima, 27 para baixo, 47 ficaram
+no lucro publicado por estarem dentro do normal, 14 por tendência, 3 tiveram a
+base reconstruída e 1 não tinha ciclo medível. O porquê de cada um, com os
+números, está em [normalizacoes.md](../validacao/normalizacoes.md).
+
+**Onde ver no aplicativo.** No **painel de logs**, o passo "Base do fluxo" abre
+com um quadro **"Por quê"**, em texto corrido, antes das variáveis e da conta. Na
+tela **Editar valuation**, o cartão do lucro de partida traz a pergunta "Por
+que o motor subiu (ou baixou) o lucro de partida?", com o retorno de cada ano
+do ciclo em barras, o típico marcado, o teste que decidiu e a conta.
+
 ([compute_valuation.dart, `_saida1` e `_fluxoBase`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart);
 [growth_guards.dart](../../packages/equisim_core/lib/src/services/valuation/growth_guards.dart).)
 

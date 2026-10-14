@@ -606,7 +606,22 @@ abstract final class GrowthGuards {
   /// fora, e apenas 1,05 desvio, porque oscila 36,6 pontos.
   ///
   /// Devolve `null` quando não há ciclo medível.
-  static bool? deviatesFromCycle(CapitalSeries series) {
+  static bool? deviatesFromCycle(CapitalSeries series) =>
+      cycleDeviation(series)?.deviates;
+
+  /// A Guarda 3 com as duas medidas que a decidem, para quem precisa dizer
+  /// **por que** o exercício destoou ou não — a explicação da normalização no
+  /// rastro e na tela de edição do valuation.
+  ///
+  /// - `z`: a distância entre o exercício e o ciclo, em desvios robustos — o
+  ///   MAD escalado da janela —, ou zero quando a janela não tem dispersão
+  ///   medível;
+  /// - `ratio`: o exercício sobre o ciclo.
+  ///
+  /// Devolve `null` nos mesmos casos de [deviatesFromCycle].
+  static ({double z, double ratio, bool deviates})? cycleDeviation(
+    CapitalSeries series,
+  ) {
     final atual = series.latestReturn;
     final ciclo = series.cycleReturn(window: ValuationParameters.cycleWindow);
     if (atual == null || ciclo == null || ciclo <= 0) return null;
@@ -619,9 +634,13 @@ abstract final class GrowthGuards {
     final z = escala == null ? 0.0 : (atual - ciclo).abs() / escala;
     final razao = atual / ciclo;
 
-    return z > ValuationParameters.robustZ ||
-        razao < ValuationParameters.bandLow ||
-        razao > ValuationParameters.bandHigh;
+    return (
+      z: z,
+      ratio: razao,
+      deviates: z > ValuationParameters.robustZ ||
+          razao < ValuationParameters.bandLow ||
+          razao > ValuationParameters.bandHigh,
+    );
   }
 
   /// Saída 2, primeira perna — o crescimento é identificável?

@@ -62,7 +62,7 @@ calma.
 | **Múltiplos de pares** | P/L, P/VP e EV/EBITDA medianos de empresas parecidas, usados como segunda leitura (cap. 4). |
 | **Newey-West** | Erro-padrão que considera que os erros de uma série no tempo se parecem entre si (cap. 6). |
 | **NOPAT** | Lucro operacional depois do imposto, como se não houvesse dívida (cap. 2). |
-| **Normalização** | Ajustar o lucro de partida pelo retorno típico do ciclo (cap. 4). |
+| **Normalização** | Trocar o lucro do último ano pelo lucro que a empresa teria rendendo o seu retorno típico — a mediana dos oito anos anteriores —, quando o último ano destoa dele. **Para cima** se o último ano foi um vale (rendeu menos que o típico), **para baixo** se foi um pico (cap. 4). |
 | **Painel de logs** | A tela que mostra cada passo de cada avaliação ([AUDITORIA_DE_CALCULOS.md](../AUDITORIA_DE_CALCULOS.md)). |
 | **Patrimônio líquido (PL)** | O que sobra para os sócios: ativos menos passivos (cap. 2). |
 | **Percentil** | O valor abaixo do qual está uma fração dos dados (P5 = 5%) (cap. 6). |

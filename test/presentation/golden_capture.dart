@@ -167,7 +167,9 @@ final _alvos = <Alvo>[
   // editada. A conta congelada vem de uma avaliação de verdade da cascata.
   (
     nome: 'editar',
-    build: () => ManualValuationPage(result: avaliacaoDaCascata()),
+    // Último ano deprimido: a base é normalizada para cima, e o painel do
+    // porquê abre no cartão do lucro (orientador, 14/10/2026).
+    build: () => ManualValuationPage(result: avaliacaoDaCascata(choque: 0.6)),
     comAtivos: false,
     altura: 2600,
   ),

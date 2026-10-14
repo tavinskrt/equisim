@@ -119,30 +119,36 @@ List<double> _curva({required double inicio, required double fim, int n = 120}) 
 ///
 /// [firma] escolhe a via: companhia operacional (via da firma) ou com
 /// resultado operacional negativo e lucro liquido positivo (via do acionista).
-ValuationResult avaliacaoDaCascata({bool firma = true}) {
+///
+/// [choque] multiplica o lucro do ultimo exercicio -- o operacional na via da
+/// firma, o liquido na do acionista. Abaixo de 1 ele faz o ultimo ano destoar
+/// para baixo do retorno tipico, e o motor normaliza a base PARA CIMA: e o que
+/// a explicacao da normalizacao precisa mostrar.
+ValuationResult avaliacaoDaCascata({bool firma = true, double choque = 1.0}) {
   final ticker = Ticker.parse(firma ? 'WEGE3' : 'ITUB4');
   final serie = <FundamentalsSnapshot>[];
   var e = 1.0;
   for (var i = 12; i >= 0; i--) {
     final y = 2025 - i;
+    final k = i == 0 ? choque : 1.0;
     serie.add(FundamentalsSnapshot(
       ticker: ticker,
       fiscalPeriodEnd: DateTime(y, 12, 31),
       totalRevenue: 10000e6 * e,
-      ebit: (firma ? 1800e6 : -200e6) * e,
+      ebit: (firma ? 1800e6 * k : -200e6) * e,
       ebitda: (firma ? 2400e6 : 300e6) * e,
-      netIncome: 900e6 * e,
+      netIncome: 900e6 * e * (firma ? 1.0 : k),
       incomeBeforeTax: (firma ? 1300e6 : 1200e6) * e,
       incomeTaxExpense: (firma ? -400e6 : -300e6) * e,
       interestExpense: firma ? 400e6 : 50e6,
-      earningsPerShare: 0.9 * e,
+      earningsPerShare: 0.9 * e * (firma ? 1.0 : k),
       cash: firma ? 200e6 : 2000e6 * e,
       shortTermDebt: firma ? 1000e6 : 500e6,
       longTermDebt: firma ? 3000e6 : 500e6,
       totalStockholderEquity: 6000e6 * e,
       bookValuePerShare: 6.0 * e,
       operatingCashFlow: firma ? 2000e6 * e : null,
-      nopat: firma ? 1188e6 * e : null,
+      nopat: firma ? 1188e6 * e * k : null,
       sharesOutstanding: 1000e6,
       sharesOutstandingAsOf: 1000e6,
       marketCap: 12000e6,
