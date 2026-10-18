@@ -9,8 +9,8 @@
 /// vale para representação em ponto flutuante, não para esta. Comparar dois
 /// `Money` é comparar dois `int`.
 ///
-/// **Regra de arredondamento.** [operator *] e [operator /] arredondam por
-/// `num.round()`, e [Money.fromReais] pelo decimal escrito (ver lá) — nos dois
+/// **Regra de arredondamento.** [operator *] arredonda por `num.round()`, e
+/// [Money.fromReais] pelo decimal escrito (ver lá) — nos dois
 /// casos *meio afastado de zero*, e não *meio para cima*. Verificado: `(-2.5).round() == -3`, enquanto meio para
 /// cima devolveria `-2`. A diferença só aparece em valores negativos exatamente
 /// no meio (estornos, fatias de aporte negativo), e é simétrica: o mesmo módulo
@@ -110,32 +110,11 @@ class Money implements Comparable<Money> {
   /// Lança [UnsupportedError] se [factor] for `NaN` ou infinito.
   Money operator *(num factor) => Money((cents * factor).round());
 
-  /// Divide por um escalar, arredondando o resultado.
-  ///
-  /// - [divisor]: divisor adimensional.
-  ///
-  /// Lança [UnsupportedError] quando [divisor] é `0`: a divisão inteira em
-  /// Dart devolve `double`, então `cents / 0` produz `Infinity` (ou `NaN` se
-  /// [cents] também for zero) e `round()` recusa convertê-lo. Verificado — o
-  /// erro é `Unsupported operation: Infinity or NaN toInt`. **Não há retorno
-  /// silencioso**: a falha é visível no ponto da divisão, e por isso o chamador
-  /// precisa garantir `divisor != 0` em vez de conferir o resultado depois.
-  Money operator /(num divisor) => Money((cents / divisor).round());
-
   /// Inverte o sinal. Exato.
   Money operator -() => Money(-cents);
 
-  /// Estritamente menor que [other].
-  bool operator <(Money other) => cents < other.cents;
-
   /// Menor ou igual a [other].
   bool operator <=(Money other) => cents <= other.cents;
-
-  /// Estritamente maior que [other].
-  bool operator >(Money other) => cents > other.cents;
-
-  /// Maior ou igual a [other].
-  bool operator >=(Money other) => cents >= other.cents;
 
   @override
   int compareTo(Money other) => cents.compareTo(other.cents);

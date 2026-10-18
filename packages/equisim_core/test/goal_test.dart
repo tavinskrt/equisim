@@ -78,10 +78,9 @@ void main() {
       expect(fv, closeTo(2200.0, 1e-9));
     });
 
-    test('converte taxa mensal para anual e semestral', () {
-      const required = RequiredReturn(monthly: 0.01, iterations: 3);
+    test('converte taxa mensal para anual', () {
+      const required = RequiredReturn(monthly: 0.01);
       expect(required.annual, closeTo(0.12682503, 1e-7));
-      expect(required.semiAnnual, closeTo(0.0615201, 1e-6));
     });
   });
 
@@ -138,7 +137,7 @@ void main() {
     FeasibilityVerdict verdictFor(double annualRate) {
       final monthly = _monthlyFromAnnual(annualRate);
       return GoalFeasibility.assess(
-        required: RequiredReturn(monthly: monthly, iterations: 1),
+        required: RequiredReturn(monthly: monthly),
         anchors: anchors,
       );
     }
@@ -180,7 +179,7 @@ void main() {
         targetWealth: Money.fromReais(5000),
       );
       final verdict = GoalFeasibility.assess(
-        required: const RequiredReturn(monthly: 0.0, iterations: 0),
+        required: const RequiredReturn(monthly: 0.0),
         anchors: anchors,
         goal: goal,
       );
@@ -194,7 +193,7 @@ double _monthlyFromAnnual(double annual) {
   var hi = 1.0;
   for (var i = 0; i < 200; i++) {
     final mid = (lo + hi) / 2;
-    final candidate = RequiredReturn(monthly: mid, iterations: 0).annual;
+    final candidate = RequiredReturn(monthly: mid).annual;
     if (candidate < annual) {
       lo = mid;
     } else {

@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/portfolio_repository.dart';
 import '../../di/providers.dart';
 import '../components/fin_amount.dart';
-import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
 import '../theme/fin_colors.dart';
 import '../theme/fin_space.dart';
@@ -28,7 +27,6 @@ class StudyPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isLight = ref.watch(isLightModeProvider);
     final state = ref.watch(studyProvider);
     final concentration = ref.watch(concentrationProvider);
 
@@ -73,13 +71,11 @@ class StudyPage extends ConsumerWidget {
         final principal = _PortfolioColumn(
           portfolio: state.study.principal,
           isPrincipal: true,
-          isLight: isLight,
           columnWidth: columnWidth,
         );
         final reserva = _PortfolioColumn(
           portfolio: state.study.reserva,
           isPrincipal: false,
-          isLight: isLight,
           columnWidth: columnWidth,
         );
 
@@ -92,7 +88,7 @@ class StudyPage extends ConsumerWidget {
               padding: const EdgeInsets.all(FinSpace.lg),
               sliver: SliverList.list(
                 children: [
-                  _StudyHeader(isLight: isLight),
+                  const _StudyHeader(),
                   const Gap.md(),
                   if (concentration.hasAlert) ...[
                     NoticeBanner(
@@ -139,8 +135,7 @@ class StudyPage extends ConsumerWidget {
 }
 
 class _StudyHeader extends ConsumerWidget {
-  final bool isLight;
-  const _StudyHeader({required this.isLight});
+  const _StudyHeader();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -218,7 +213,7 @@ class _StudyHeader extends ConsumerWidget {
                   size: 19,
                   color: context.fin.textSecondary,
                 ),
-                onPressed: () => showSavedStudies(context, isLight: isLight),
+                onPressed: () => showSavedStudies(context),
               ),
               state.isSaving
                   ? const Padding(
@@ -304,7 +299,7 @@ class _StudyHeader extends ConsumerWidget {
 ///
 /// Salvar sem poder reabrir não resolveria o problema que motivou a
 /// funcionalidade — remontar carteiras de nove ativos a cada sessão.
-Future<void> showSavedStudies(BuildContext context, {required bool isLight}) {
+Future<void> showSavedStudies(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -312,14 +307,12 @@ Future<void> showSavedStudies(BuildContext context, {required bool isLight}) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
     ),
-    builder: (_) => _SavedStudiesSheet(isLight: isLight),
+    builder: (_) => const _SavedStudiesSheet(),
   );
 }
 
 class _SavedStudiesSheet extends ConsumerWidget {
-  final bool isLight;
-
-  const _SavedStudiesSheet({required this.isLight});
+  const _SavedStudiesSheet();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -379,7 +372,7 @@ class _SavedStudiesSheet extends ConsumerWidget {
                           separatorBuilder: (_, _) =>
                               Divider(height: 1, color: context.fin.divider),
                           itemBuilder: (_, i) =>
-                              _SavedStudyTile(study: list[i], isLight: isLight),
+                              _SavedStudyTile(study: list[i]),
                         ),
                 ),
               ),
@@ -393,9 +386,8 @@ class _SavedStudiesSheet extends ConsumerWidget {
 
 class _SavedStudyTile extends ConsumerWidget {
   final PortfolioStudy study;
-  final bool isLight;
 
-  const _SavedStudyTile({required this.study, required this.isLight});
+  const _SavedStudyTile({required this.study});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -469,7 +461,6 @@ class _SavedStudyTile extends ConsumerWidget {
 class _PortfolioColumn extends ConsumerWidget {
   final Portfolio portfolio;
   final bool isPrincipal;
-  final bool isLight;
 
   /// Largura util dentro do cartao, ja descontados os paddings.
   final double columnWidth;
@@ -477,7 +468,6 @@ class _PortfolioColumn extends ConsumerWidget {
   const _PortfolioColumn({
     required this.portfolio,
     required this.isPrincipal,
-    required this.isLight,
     required this.columnWidth,
   });
 
@@ -615,14 +605,12 @@ class _PortfolioColumn extends ConsumerWidget {
                 )
               else ...[
                 _AssetColumnHeader(
-                  isLight: isLight,
                   weightWidth: widths.weight,
                   upsideWidth: widths.upside,
                   compact: compact,
                 ),
                 ...portfolio.entries.values.map(
                   (entry) => _AssetRow(
-                    isLight: isLight,
                     entry: entry,
                     isPrincipal: isPrincipal,
                     weightWidth: widths.weight,
@@ -722,8 +710,6 @@ TextStyle _columnLabelStyle(BuildContext context) =>
 /// não dava para saber que o de cima era o peso e o de baixo a distância até o
 /// preço justo. Nomear a coluna uma vez custa uma linha e resolve.
 class _AssetColumnHeader extends StatelessWidget {
-  final bool isLight;
-
   /// Larguras medidas pela coluna, iguais as das linhas abaixo.
   final double weightWidth;
   final double upsideWidth;
@@ -733,7 +719,6 @@ class _AssetColumnHeader extends StatelessWidget {
   final bool compact;
 
   const _AssetColumnHeader({
-    required this.isLight,
     required this.weightWidth,
     required this.upsideWidth,
     required this.compact,
@@ -793,7 +778,6 @@ class _AssetColumnHeader extends StatelessWidget {
 class _AssetRow extends ConsumerWidget {
   final PortfolioEntry entry;
   final bool isPrincipal;
-  final bool isLight;
 
   /// Larguras medidas pela coluna, iguais para todas as linhas dela.
   ///
@@ -814,7 +798,6 @@ class _AssetRow extends ConsumerWidget {
   const _AssetRow({
     required this.entry,
     required this.isPrincipal,
-    required this.isLight,
     required this.weightWidth,
     required this.upsideWidth,
     required this.compact,
@@ -955,7 +938,6 @@ class _AssetRow extends ConsumerWidget {
                             model: valuation?.model,
                             isOutlier: isOutlier,
                             hasWarnings: hasWarnings,
-                            isLight: isLight,
                           ),
                   ),
                 ],
@@ -1050,7 +1032,6 @@ class _AssetRow extends ConsumerWidget {
                                   model: valuation?.model,
                                   isOutlier: isOutlier,
                                   hasWarnings: hasWarnings,
-                                  isLight: isLight,
                                 ),
                         ),
                       ],
@@ -1186,7 +1167,6 @@ class _UpsideCell extends StatelessWidget {
   final ValuationModel? model;
   final bool isOutlier;
   final bool hasWarnings;
-  final bool isLight;
 
   const _UpsideCell({
     required this.upside,
@@ -1194,7 +1174,6 @@ class _UpsideCell extends StatelessWidget {
     required this.model,
     required this.isOutlier,
     required this.hasWarnings,
-    required this.isLight,
   });
 
   @override
@@ -1215,7 +1194,7 @@ class _UpsideCell extends StatelessWidget {
     final color = context.fin.forTrend(trend);
 
     return Tooltip(
-      message: _tooltip(value),
+      message: _tooltip(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
@@ -1254,7 +1233,7 @@ class _UpsideCell extends StatelessWidget {
     );
   }
 
-  String _tooltip(double value) {
+  String _tooltip() {
     final buffer = StringBuffer()
       ..write('Distância entre o preço de mercado e o preço justo estimado')
       ..write(model == null ? '' : ' por ${model!.rotulo}')

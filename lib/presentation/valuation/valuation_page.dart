@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../di/providers.dart';
 import '../components/fin_amount.dart';
 import '../shared/charts.dart';
-import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
 import '../study/study_notifier.dart';
 import '../theme/fin_colors.dart';
@@ -27,14 +26,10 @@ class ValuationView extends ConsumerWidget {
   /// Ativo avaliado.
   final Ticker ticker;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Declara o corpo da avaliação.
   const ValuationView({
     super.key,
     required this.ticker,
-    required this.isLight,
   });
 
   @override
@@ -56,7 +51,7 @@ class ValuationView extends ConsumerWidget {
                   'Os dados disponíveis para ${ticker.value} não sustentam '
                   'nenhum modelo de avaliação.',
             )
-          : _ValuationBody(result: result, isLight: isLight),
+          : _ValuationBody(result: result),
     );
   }
 }
@@ -72,15 +67,14 @@ class ValuationPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isLight = ref.watch(isLightModeProvider);
 
     return Scaffold(
       body: ScreenBackground(
         child: SafeArea(
           child: Column(
             children: [
-              _Header(ticker: ticker, isLight: isLight),
-              Expanded(child: ValuationView(ticker: ticker, isLight: isLight)),
+              _Header(ticker: ticker),
+              Expanded(child: ValuationView(ticker: ticker)),
             ],
           ),
         ),
@@ -114,7 +108,6 @@ class _ValuationTabState extends ConsumerState<ValuationTab> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = ref.watch(isLightModeProvider);
     final study = ref.watch(studyProvider).study;
 
     final disponiveis = <Ticker>[
@@ -191,7 +184,7 @@ class _ValuationTabState extends ConsumerState<ValuationTab> {
             ),
           ),
         ),
-        Expanded(child: ValuationView(ticker: ticker, isLight: isLight)),
+        Expanded(child: ValuationView(ticker: ticker)),
       ],
     );
   }
@@ -199,8 +192,7 @@ class _ValuationTabState extends ConsumerState<ValuationTab> {
 
 class _Header extends StatelessWidget {
   final Ticker ticker;
-  final bool isLight;
-  const _Header({required this.ticker, required this.isLight});
+  const _Header({required this.ticker});
 
   @override
   Widget build(BuildContext context) {
@@ -235,9 +227,8 @@ class _Header extends StatelessWidget {
 
 class _ValuationBody extends ConsumerWidget {
   final ValuationResult result;
-  final bool isLight;
 
-  const _ValuationBody({required this.result, required this.isLight});
+  const _ValuationBody({required this.result});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -252,15 +243,14 @@ class _ValuationBody extends ConsumerWidget {
           padding: const EdgeInsets.all(FinSpace.lg),
           sliver: SliverList.list(
             children: [
-              _PriceCard(result: result, isLight: isLight),
+              _PriceCard(result: result),
               const Gap.md(),
-              _ModelCard(result: result, isLight: isLight),
+              _ModelCard(result: result),
               const Gap.md(),
               _CalibratedBandCard(result: result),
               _SensitivityCard(
                 result: result,
                 settings: settings,
-                isLight: isLight,
               ),
               if (result.triangulation != null) ...[
                 const Gap.md(),
@@ -316,8 +306,7 @@ class _ValuationBody extends ConsumerWidget {
 
 class _PriceCard extends StatelessWidget {
   final ValuationResult result;
-  final bool isLight;
-  const _PriceCard({required this.result, required this.isLight});
+  const _PriceCard({required this.result});
 
   @override
   Widget build(BuildContext context) {
@@ -403,8 +392,7 @@ class _PriceCard extends StatelessWidget {
 
 class _ModelCard extends StatelessWidget {
   final ValuationResult result;
-  final bool isLight;
-  const _ModelCard({required this.result, required this.isLight});
+  const _ModelCard({required this.result});
 
   ValuationDiagnostics? get diagnostics => result.diagnostics;
 
@@ -706,12 +694,10 @@ class _CalibratedBandCard extends ConsumerWidget {
 class _SensitivityCard extends ConsumerWidget {
   final ValuationResult result;
   final ValuationSettings settings;
-  final bool isLight;
 
   const _SensitivityCard({
     required this.result,
     required this.settings,
-    required this.isLight,
   });
 
   /// Largura por unidade de escala de texto abaixo da qual o alternador sai do
@@ -802,12 +788,11 @@ class _SensitivityCard extends ConsumerWidget {
               const Gap.md(),
               if (distribuicao != null)
                 _DistributionView(
-                  isLight: isLight,
                   distribution: distribuicao,
                   marketPrice: result.marketPrice.reais,
                 )
               else if (cenarios != null)
-                _DiscreteView(isLight: isLight, scenarios: cenarios, base: base)
+                _DiscreteView(scenarios: cenarios, base: base)
               else
                 Text(
                   'Só o preço justo do motor pôde ser calculado.',
@@ -825,7 +810,7 @@ class _SensitivityCard extends ConsumerWidget {
               ],
               if (bars.isNotEmpty) ...[
                 const Gap.md(),
-                TornadoChart(isLight: isLight, bars: bars, baseValue: base),
+                TornadoChart(bars: bars, baseValue: base),
               ],
               const Gap.sm(),
               Text(
@@ -850,12 +835,10 @@ class _SensitivityCard extends ConsumerWidget {
 class _DiscreteView extends StatelessWidget {
   final Map<ScenarioBand, Money> scenarios;
   final double base;
-  final bool isLight;
 
   const _DiscreteView({
     required this.scenarios,
     required this.base,
-    required this.isLight,
   });
 
   @override
@@ -892,12 +875,10 @@ class _DiscreteView extends StatelessWidget {
 class _DistributionView extends StatelessWidget {
   final ValueDistribution distribution;
   final double marketPrice;
-  final bool isLight;
 
   const _DistributionView({
     required this.distribution,
     required this.marketPrice,
-    required this.isLight,
   });
 
   @override

@@ -15,12 +15,6 @@ import 'failure.dart';
 sealed class Result<T> {
   const Result();
 
-  /// Sucesso carregando [value].
-  const factory Result.ok(T value) = Ok<T>;
-
-  /// Falha carregando [failure].
-  const factory Result.err(Failure failure) = Err<T>;
-
   /// `true` quando é [Ok].
   bool get isOk => this is Ok<T>;
 

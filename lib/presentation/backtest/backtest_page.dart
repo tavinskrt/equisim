@@ -6,7 +6,6 @@ import '../components/balance_summary_card.dart';
 import '../components/fin_amount.dart';
 import '../export/csv_export.dart';
 import '../shared/charts.dart';
-import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
 import '../study/study_notifier.dart';
 import '../valuation/valuation_providers.dart';
@@ -52,7 +51,6 @@ class BacktestPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isLight = ref.watch(isLightModeProvider);
     final comparison = ref.watch(comparisonProvider);
     final settings = ref.watch(backtestSettingsProvider);
     final study = ref.watch(studyProvider).study;
@@ -67,7 +65,6 @@ class BacktestPage extends ConsumerWidget {
                 child: _SettingsCard(
                   settings: settings,
                   goal: study.goal,
-                  isLight: isLight,
                 ),
               ),
               const SliverToBoxAdapter(child: Gap.md()),
@@ -112,7 +109,6 @@ class BacktestPage extends ConsumerWidget {
                   return _ComparisonBody(
                     result: result,
                     studyName: study.name,
-                    isLight: isLight,
                   );
                 },
               ),
@@ -133,12 +129,9 @@ class _SettingsCard extends ConsumerWidget {
   /// simulação percorre o plano inteiro.
   final FinancialGoal? goal;
 
-  final bool isLight;
-
   const _SettingsCard({
     required this.settings,
     required this.goal,
-    required this.isLight,
   });
 
   static DateTime _windowStart(int years) {
@@ -279,12 +272,10 @@ class _ComparisonSkeletonState extends State<_ComparisonSkeleton>
 class _ComparisonBody extends ConsumerWidget {
   final PortfolioComparison result;
   final String studyName;
-  final bool isLight;
 
   const _ComparisonBody({
     required this.result,
     required this.studyName,
-    required this.isLight,
   });
 
   @override
@@ -346,7 +337,6 @@ class _ComparisonBody extends ConsumerWidget {
               ),
               const Gap.md(),
               Base100Chart(
-                isLight: isLight,
                 dates: axis,
                 series: [
                   if (principal != null)
@@ -438,7 +428,6 @@ class _ComparisonBody extends ConsumerWidget {
             _MetricsCard(
               title: 'Carteira Principal',
               outcome: principal,
-              isLight: isLight,
             ),
           ],
           if (reserva != null) ...[
@@ -446,17 +435,16 @@ class _ComparisonBody extends ConsumerWidget {
             _MetricsCard(
               title: 'Carteira Reserva',
               outcome: reserva,
-              isLight: isLight,
             ),
             const Gap.sm(),
             const _ReservaHipotetica(),
           ],
         ],
         const Gap.md(),
-        _PerAssetCard(principal: principal, reserva: reserva, isLight: isLight),
+        _PerAssetCard(principal: principal, reserva: reserva),
         if (result.riskReturn.isNotEmpty) ...[
           const Gap.md(),
-          _RiskReturnCard(result: result, isLight: isLight),
+          _RiskReturnCard(result: result),
         ],
         correlation.maybeWhen(
           data: (data) => data == null
@@ -474,7 +462,6 @@ class _ComparisonBody extends ConsumerWidget {
                         ),
                         const Gap.md(),
                         CorrelationHeatmap(
-                          isLight: isLight,
                           tickers: data.tickers,
                           matrix: data.matrix,
                         ),
@@ -906,10 +893,9 @@ class _TabelaComparativa extends StatelessWidget {
       builder: (context, restricoes) {
         final preciso = rotuloW + colunas.length * (valorW + _gap);
         if (preciso > restricoes.maxWidth) {
-          return _empilhado(context, rotuloStyle, notaStyle);
+          return _empilhado();
         }
         return _ladoALado(
-          context,
           rotuloW: rotuloW,
           valorW: valorW,
           rotuloStyle: rotuloStyle,
@@ -921,8 +907,7 @@ class _TabelaComparativa extends StatelessWidget {
     );
   }
 
-  Widget _ladoALado(
-    BuildContext context, {
+  Widget _ladoALado({
     required double rotuloW,
     required double valorW,
     required TextStyle rotuloStyle,
@@ -1006,11 +991,7 @@ class _TabelaComparativa extends StatelessWidget {
   ///
   /// `LabelValueRow` de propósito: ele não estoura em largura nenhuma, porque
   /// o valor desce de linha em vez de disputar espaço com o rótulo.
-  Widget _empilhado(
-    BuildContext context,
-    TextStyle rotuloStyle,
-    TextStyle notaStyle,
-  ) {
+  Widget _empilhado() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1233,12 +1214,10 @@ String _legendaDeCapital(BacktestOutcome outcome) {
 class _MetricsCard extends StatelessWidget {
   final String title;
   final BacktestOutcome outcome;
-  final bool isLight;
 
   const _MetricsCard({
     required this.title,
     required this.outcome,
-    required this.isLight,
   });
 
   @override
@@ -1313,12 +1292,10 @@ class _MetricsCard extends StatelessWidget {
 class _PerAssetCard extends StatelessWidget {
   final BacktestOutcome? principal;
   final BacktestOutcome? reserva;
-  final bool isLight;
 
   const _PerAssetCard({
     required this.principal,
     required this.reserva,
-    required this.isLight,
   });
 
   /// Ativos da carteira, do melhor para o pior retorno no período.
@@ -1361,7 +1338,6 @@ class _PerAssetCard extends StatelessWidget {
           const Gap.sm(),
           if (principalAssets.isNotEmpty)
             _AssetGroup(
-              isLight: isLight,
               label: 'Principal',
               color: context.fin.brand,
               assets: principalAssets,
@@ -1382,7 +1358,6 @@ class _PerAssetCard extends StatelessWidget {
           ],
           if (reservaAssets.isNotEmpty)
             _AssetGroup(
-              isLight: isLight,
               label: 'Reserva',
               // Este `color` pinta TEXTO -- o rotulo do grupo. Por isso vem do
               // token medido em contraste, e nao da variante de marca.
@@ -1469,13 +1444,11 @@ class _AssetGroup extends StatelessWidget {
   final String label;
   final Color color;
   final List<AssetPerformance> assets;
-  final bool isLight;
 
   const _AssetGroup({
     required this.label,
     required this.color,
     required this.assets,
-    required this.isLight,
   });
 
   /// Largura da coluna de ticker e da coluna de valor, medidas do conteudo
@@ -1547,7 +1520,6 @@ class _AssetGroup extends StatelessWidget {
             for (final asset in assets)
               _AssetRow(
                 asset: asset,
-                isLight: isLight,
                 tickerWidth: widths.ticker,
                 valueWidth: widths.value,
                 empilhado: empilhado,
@@ -1573,7 +1545,6 @@ class _AssetGroup extends StatelessWidget {
 /// preserva os dois dígitos e a barra ao mesmo tempo.
 class _AssetRow extends StatelessWidget {
   final AssetPerformance asset;
-  final bool isLight;
 
   /// Larguras medidas pelo grupo, iguais para todas as linhas dele.
   ///
@@ -1587,7 +1558,6 @@ class _AssetRow extends StatelessWidget {
 
   const _AssetRow({
     required this.asset,
-    required this.isLight,
     required this.tickerWidth,
     required this.valueWidth,
     required this.empilhado,
@@ -1730,9 +1700,8 @@ class _AssetRow extends StatelessWidget {
 
 class _RiskReturnCard extends StatelessWidget {
   final PortfolioComparison result;
-  final bool isLight;
 
-  const _RiskReturnCard({required this.result, required this.isLight});
+  const _RiskReturnCard({required this.result});
 
   bool _has(RiskReturnKind kind) =>
       result.riskReturn.any((point) => point.kind == kind);
@@ -1767,7 +1736,6 @@ class _RiskReturnCard extends StatelessWidget {
           ),
           const Gap.md(),
           RiskReturnScatter(
-            isLight: isLight,
             points: points,
             assetLegend: [
               if (_has(RiskReturnKind.principalAsset))

@@ -417,7 +417,6 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                 isObscured: !controller.showCurrentPassword,
                                 onToggle: controller.toggleShowCurrentPassword,
                                 onChanged: controller.setCurrentPassword,
-                                isLight: isLight,
                                 placeholder: '••••••••',
                               ),
                               const SizedBox(height: 14),
@@ -432,7 +431,6 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                 isObscured: !controller.showNewPassword,
                                 onToggle: controller.toggleShowNewPassword,
                                 onChanged: controller.setNewPassword,
-                                isLight: isLight,
                                 placeholder: 'Mínimo 8 caracteres',
                               ),
 
@@ -489,7 +487,6 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
                                 isObscured: !controller.showConfirmPassword,
                                 onToggle: controller.toggleShowConfirmPassword,
                                 onChanged: controller.setConfirmPassword,
-                                isLight: isLight,
                                 placeholder: 'Repita a nova senha',
                               ),
 
@@ -666,7 +663,6 @@ class _ChangePasswordScreenContentState extends State<_ChangePasswordScreenConte
     required bool isObscured,
     required VoidCallback onToggle,
     required Function(String) onChanged,
-    required bool isLight,
     required String placeholder,
   }) {
     final hasFocus = focusNode.hasFocus;

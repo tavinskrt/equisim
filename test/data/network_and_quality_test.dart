@@ -224,16 +224,6 @@ void main() {
   });
 
   group('ApiConfig', () {
-    test('diagnóstico nunca revela o token completo', () {
-      const config = ApiConfig(
-        mode: BrapiMode.direct,
-        brapiBaseUrl: 'https://brapi.dev/api',
-        brapiToken: 'wmvstKEWAuQa1Pex2BQXXb',
-        bcbBaseUrl: '',
-      );
-      expect(config.diagnostics, isNot(contains('wmvstKEWAuQa1Pex2BQXXb')));
-      expect(config.diagnostics, contains('****'));
-    });
 
     test('modo proxy é considerado credenciado sem token local', () {
       const config = ApiConfig(

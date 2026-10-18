@@ -131,7 +131,7 @@ void main() {
     test('ativo idêntico ao mercado tem beta 1 e correlação 1', () {
       final market = List.generate(60, (i) => (i % 5 - 2) * 0.01);
       final result = BetaCalculator.estimate(
-        returns: PairedReturns.of(asset: market, market: market).unwrap(),
+        returns: _par(market, market),
       );
       expect(result.isOk, isTrue);
       expect(result.unwrap().beta, closeTo(1.0, 1e-12));
@@ -142,33 +142,17 @@ void main() {
       final market = List.generate(60, (i) => (i % 5 - 2) * 0.01);
       final asset = market.map((r) => r * 2).toList();
       final result = BetaCalculator.estimate(
-        returns: PairedReturns.of(asset: asset, market: market).unwrap(),
+        returns: _par(asset, market),
       );
       expect(result.unwrap().beta, closeTo(2.0, 1e-12));
     });
 
     test('exige observações suficientes', () {
       final result = BetaCalculator.estimate(
-        returns: PairedReturns.of(
-          asset: [0.01, 0.02],
-          market: [0.01, 0.02],
-        ).unwrap(),
+        returns: _par([0.01, 0.02], [0.01, 0.02]),
       );
       expect(result.isErr, isTrue);
       expect(result.failureOrNull, isA<InsufficientData>());
-    });
-
-    test('par de tamanhos diferentes é recusado na CONSTRUÇÃO, não no cálculo',
-        () {
-      // A conferência de dimensão saiu de dentro de `estimate` e virou
-      // invariante do tipo: quem tem um `PairedReturns` em mãos já sabe que as
-      // duas pontas casam, e o cálculo não abre com um `if` de estrutura.
-      final par = PairedReturns.of(
-        asset: [0.01, 0.02, 0.03],
-        market: [0.01, 0.02],
-      );
-      expect(par.isErr, isTrue);
-      expect(par.failureOrNull, isA<InvalidInput>());
     });
 
     test('trajetória de patrimônio desalinhada também não é construtível', () {
@@ -203,4 +187,14 @@ void main() {
       expect(aligned.asset.first, closeTo(0.21, 1e-12));
     });
   });
+}
+
+/// Par de retornos montado como a produção monta: um período por vez, pelo
+/// acumulador — o desalinhamento não é exprimível.
+PairedReturns _par(List<double> asset, List<double> market) {
+  final b = PairedReturnsBuilder();
+  for (var i = 0; i < asset.length; i++) {
+    b.add(asset: asset[i], market: market[i]);
+  }
+  return b.build();
 }

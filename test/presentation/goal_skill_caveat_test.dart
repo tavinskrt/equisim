@@ -66,13 +66,7 @@ void main() {
           isLightModeProvider.overrideWith(() => IsLightMode(inicial: false)),
           goalFeasibilityProvider.overrideWith((ref) async => null),
           goalAlignmentProvider.overrideWith((ref) async => GoalAlignment(
-                required: const RequiredReturn(monthly: 0.0142, iterations: 24),
-                verdict: FeasibilityVerdict(
-                  level: FeasibilityLevel.demanding,
-                  reason: FeasibilityReason.aboveMarket,
-                  requiredAnnualRate: 0.1844,
-                  anchors: MarketAnchors.fallback2026,
-                ),
+                required: const RequiredReturn(monthly: 0.0142),
                 expectedReturn: 0.1495,
                 valuationCoverage: 1,
               )),

@@ -261,11 +261,11 @@ class _ProfileScreenContentState extends State<_ProfileScreenContent> {
                     _SuccessToast(controller: controller),
 
                     // Segurança Card (Trocar Senha, sem 2FA)
-                    _SecurityCard(controller: controller),
+                    const _SecurityCard(),
                     const SizedBox(height: 12),
 
                     // Sessão Atual Card
-                    _SessionCard(controller: controller),
+                    const _SessionCard(),
                     const SizedBox(height: 16),
 
                     // Excluir conta Button
@@ -725,9 +725,7 @@ class _PersonalDataCard extends StatelessWidget {
 }
 
 class _SecurityCard extends StatelessWidget {
-  final ProfileController controller;
-
-  const _SecurityCard({required this.controller});
+  const _SecurityCard();
 
   @override
   Widget build(BuildContext context) {
@@ -844,9 +842,7 @@ class _SecurityCard extends StatelessWidget {
 }
 
 class _SessionCard extends StatelessWidget {
-  final ProfileController controller;
-
-  const _SessionCard({required this.controller});
+  const _SessionCard();
 
   @override
   Widget build(BuildContext context) {

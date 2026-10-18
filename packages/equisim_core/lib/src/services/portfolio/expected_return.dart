@@ -7,30 +7,6 @@ import '../valuation/cost_of_capital.dart';
 import '../valuation/inference.dart';
 import 'transversal_ordering.dart';
 
-/// Retorno anual esperado de um ativo, decomposto.
-class ExpectedAssetReturn {
-  final Ticker ticker;
-
-  /// Valorização total até o preço justo, sem prazo, em fração.
-  final double upside;
-
-  /// Parcela anualizada da convergência de preço.
-  final double priceConvergence;
-
-  const ExpectedAssetReturn({
-    required this.ticker,
-    required this.upside,
-    required this.priceConvergence,
-  });
-
-  /// Retorno esperado ao ano.
-  ///
-  /// É a convergência de preço e nada mais: o modelo não distribui provento
-  /// (ver `docs/decisoes/023-remocao-de-proventos.md`), então somar um *yield*
-  /// aqui embutiria um retorno que nenhuma outra tela do trabalho apura.
-  double get annual => priceConvergence;
-}
-
 /// Converte *upside* de valuation em taxa anual comparável à meta.
 ///
 /// **Problema de unidade que isto resolve**: o upside do DCF é uma valorização
@@ -67,47 +43,6 @@ abstract final class ExpectedReturn {
     if (growth <= 0) return -1.0;
     final years = horizonMonths / 12.0;
     return math.pow(growth, 1.0 / years).toDouble() - 1.0;
-  }
-
-  /// Retorno esperado de um ativo.
-  static ExpectedAssetReturn forAsset({
-    required Ticker ticker,
-    required double upside,
-    int horizonMonths = defaultHorizonMonths,
-  }) =>
-      ExpectedAssetReturn(
-        ticker: ticker,
-        upside: upside,
-        priceConvergence:
-            annualizedFromUpside(upside, horizonMonths: horizonMonths),
-      );
-
-  /// Retorno esperado da carteira: média dos ativos ponderada pelos pesos.
-  ///
-  /// Ativos sem valuation disponível são ignorados, e os pesos remanescentes
-  /// reescalados — reportar o peso faltante é responsabilidade da interface.
-  static double forPortfolio({
-    required Portfolio portfolio,
-    required Map<Ticker, ValuationResult> valuations,
-    int horizonMonths = defaultHorizonMonths,
-  }) {
-    var weighted = 0.0;
-    var covered = 0.0;
-
-    for (final entry in portfolio.entries.values) {
-      final valuation = valuations[entry.ticker];
-      if (valuation == null) continue;
-      final expected = forAsset(
-        ticker: entry.ticker,
-        upside: valuation.upside,
-        horizonMonths: horizonMonths,
-      );
-      weighted += entry.weight.value * expected.annual;
-      covered += entry.weight.value;
-    }
-
-    if (covered <= 0) return 0.0;
-    return weighted / covered;
   }
 
   // ------------------------------------------ Retorno esperado transversal --
@@ -175,8 +110,7 @@ abstract final class ExpectedReturn {
   /// - [reference]: seção transversal que define mediana e escala. **Quanto mais
   ///   larga, mais significativo o escore** — medir uma carteira de cinco ativos
   ///   contra ela mesma centra a carteira no CDI por construção. Omitida, cai
-  ///   para os próprios [upsides], e o resultado declara isso em
-  ///   [CrossSectionalReturn.referenceSize].
+  ///   para os próprios [upsides].
   /// - [zCap]: teto do escore em desvios robustos.
   static Map<Ticker, CrossSectionalReturn> crossSection({
     required Map<Ticker, double> upsides,
@@ -207,12 +141,9 @@ abstract final class ExpectedReturn {
       final ancora = temKe ? ke : spotRiskFree;
       final bruto = ancora + z * riskPremium;
       saida[e.key] = CrossSectionalReturn(
-        ticker: e.key,
-        upside: e.value,
         z: z,
         expected: bruto < 0 ? 0.0 : bruto,
         floored: bruto < 0,
-        referenceSize: secao.length,
         anchoredOnCostOfEquity: temKe,
       );
     }
@@ -223,7 +154,7 @@ abstract final class ExpectedReturn {
   ///
   /// Média dos ativos ponderada pelos pesos, com os pesos sem avaliação
   /// descartados e os remanescentes reescalados — a mesma convenção de
-  /// [forPortfolio], para que a cobertura continue significando o mesmo.
+  /// [coverage], para que a cobertura continue significando o mesmo.
   ///
   /// - [reference]: seção transversal de referência. Ver [crossSection].
   static double forPortfolioCrossSectional({
@@ -335,11 +266,6 @@ abstract final class ExpectedReturn {
 
 /// Retorno esperado de um ativo pelo estimador transversal.
 class CrossSectionalReturn {
-  final Ticker ticker;
-
-  /// Potencial de valorização que entrou na conta, em fração.
-  final double upside;
-
   /// Escore robusto do potencial contra a seção, já confinado ao teto.
   final double z;
 
@@ -354,12 +280,6 @@ class CrossSectionalReturn {
   /// resultado precisa saber disso em vez de deduzir de empates suspeitos.
   final bool floored;
 
-  /// Tamanho da seção transversal que definiu mediana e escala.
-  ///
-  /// Faz parte do resultado: um escore medido contra cinco ativos e outro
-  /// contra cento e vinte não sustentam a mesma conclusão.
-  final int referenceSize;
-
   /// `true` quando a âncora foi o custo de capital próprio do ativo, e não o
   /// CDI de recuo.
   ///
@@ -368,12 +288,9 @@ class CrossSectionalReturn {
   final bool anchoredOnCostOfEquity;
 
   const CrossSectionalReturn({
-    required this.ticker,
-    required this.upside,
     required this.z,
     required this.expected,
     required this.floored,
-    required this.referenceSize,
     this.anchoredOnCostOfEquity = false,
   });
 }

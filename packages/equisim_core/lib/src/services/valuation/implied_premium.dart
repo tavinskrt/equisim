@@ -88,17 +88,6 @@ class ImpliedPremiumPackage {
     }
     return soma / janela.length;
   }
-
-  /// O último trimestre medido até [asOf], ou `null`.
-  ImpliedPremiumQuarter? latestAt(DateTime asOf) {
-    final fim = DateTime.utc(asOf.year, asOf.month, asOf.day);
-    ImpliedPremiumQuarter? ultimo;
-    for (final q in quarters) {
-      if (q.date.isAfter(fim)) break;
-      ultimo = q;
-    }
-    return ultimo;
-  }
 }
 
 /// Serialização da série do prêmio implícito.

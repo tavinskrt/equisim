@@ -41,7 +41,6 @@ void main() {
     final r = CvmSeries.build(
       documentos: [for (var a = 2019; a <= 2022; a++) _dfp(a)],
       mercado: mercado,
-      asOf: _d(2023, 4, 1),
       publicado: _todos,
       ancorada: false,
     );
@@ -69,7 +68,6 @@ void main() {
     final r = CvmSeries.build(
       documentos: docs,
       mercado: mercado,
-      asOf: asOf,
       publicado: PointInTimeView(asOf).isPublished,
       ancorada: false,
     );
@@ -87,7 +85,6 @@ void main() {
     final r = CvmSeries.build(
       documentos: docs,
       mercado: mercado,
-      asOf: _d(2023, 9, 1),
       publicado: _todos,
       ancorada: true,
     );
@@ -103,7 +100,6 @@ void main() {
     final r = CvmSeries.build(
       documentos: docs,
       mercado: mercado,
-      asOf: _d(2023, 9, 1),
       publicado: _todos,
       ancorada: true,
     );
@@ -130,7 +126,6 @@ void main() {
     final ancorada = CvmSeries.build(
       documentos: docs,
       mercado: comJuros,
-      asOf: _d(2023, 9, 1),
       publicado: _todos,
       ancorada: true,
     );
@@ -142,7 +137,6 @@ void main() {
     final anual = CvmSeries.build(
       documentos: docs,
       mercado: comJuros,
-      asOf: _d(2023, 9, 1),
       publicado: _todos,
       ancorada: false,
     );
@@ -159,14 +153,12 @@ void main() {
     final ancorada = CvmSeries.build(
       documentos: docs,
       mercado: mercado,
-      asOf: _d(2023, 9, 1),
       publicado: _todos,
       ancorada: true,
     );
     final anual = CvmSeries.build(
       documentos: docs,
       mercado: mercado,
-      asOf: _d(2023, 9, 1),
       publicado: _todos,
       ancorada: false,
     );
@@ -178,7 +170,6 @@ void main() {
     final r = CvmSeries.build(
       documentos: const [],
       mercado: mercado,
-      asOf: _d(2023, 9, 1),
       publicado: _todos,
       ancorada: true,
     );
@@ -190,7 +181,6 @@ void main() {
     final r = CvmSeries.build(
       documentos: [for (var a = 2019; a <= 2022; a++) _dfp(a)],
       mercado: mercado,
-      asOf: _d(2023, 4, 1),
       publicado: _todos,
       ancorada: false,
     );
@@ -214,7 +204,6 @@ void main() {
     FundamentalsSnapshot doAno2021(DateTime asOf) => CvmSeries.build(
           documentos: docs,
           mercado: mercado,
-          asOf: asOf,
           publicado: PointInTimeView(asOf).isPublished,
           ancorada: false,
         ).series.lastWhere((s) => s.fiscalPeriodEnd.year == 2021);
@@ -231,7 +220,6 @@ void main() {
       final r = CvmSeries.build(
         documentos: docs,
         mercado: mercado,
-        asOf: _d(2023, 9, 30),
         publicado: _todos,
         ancorada: false,
       );

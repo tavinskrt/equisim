@@ -35,13 +35,6 @@ class ContributionPlan {
     this.contributionDay = 5,
   });
 
-  /// Plano sem aporte algum. Usado para simular a evolução de uma posição já
-  /// constituída — recusado por [PortfolioBacktest.run], que exige capital.
-  static const ContributionPlan none = ContributionPlan(
-    initial: Money.zero,
-    monthly: Money.zero,
-  );
-
   /// `true` quando há aporte mensal estritamente positivo.
   bool get hasMonthly => monthly.isPositive;
 }
@@ -216,10 +209,6 @@ class BacktestOutcome {
   /// curva de patrimônio salta no dia do aporte.
   final List<double> base100;
 
-  /// Fluxos datados na convenção da TIR: aportes negativos, e o valor final
-  /// da carteira como último fluxo positivo.
-  final List<CashFlow> cashFlows;
-
   /// Capital aportado no período, somando inicial e mensais.
   final Money totalContributed;
 
@@ -260,7 +249,6 @@ class BacktestOutcome {
     required this.dates,
     required this.wealth,
     required this.base100,
-    required this.cashFlows,
     required this.totalContributed,
     required this.totalAllocated,
     required this.transactionCosts,
@@ -526,7 +514,6 @@ abstract final class PortfolioBacktest {
       dates: dates,
       wealth: wealth,
       base100: base100,
-      cashFlows: cashFlows,
       totalContributed: totalContributed,
       totalAllocated: totalContributed - Money(totalCostCents) - residualCash,
       transactionCosts: Money(totalCostCents),

@@ -33,12 +33,6 @@ class Weight implements Comparable<Weight> {
     return Weight._(v.clamp(0.0, 1.0));
   }
 
-  /// Constrói a partir de um percentual (`25.0` para 25%).
-  ///
-  /// Lança [ArgumentError] nas mesmas condições de [Weight.fraction], aplicadas
-  /// a `pct / 100`.
-  factory Weight.percent(double pct) => Weight.fraction(pct / 100.0);
-
   /// Alocação nula. Usado como valor inicial antes de reequiponderar.
   static const Weight zero = Weight._(0.0);
 
@@ -109,36 +103,6 @@ abstract final class Weights {
       accumulated += share;
     }
     result[tickers.first] = Weight.fraction(1.0 - accumulated);
-    return result;
-  }
-
-  /// Reescala pesos arbitrários para somarem exatamente 1,0.
-  /// Útil quando o usuário edita percentuais manualmente.
-  ///
-  /// Segue a mesma disciplina de [equal]: o resíduo vai para o primeiro
-  /// elemento, e a soma fecha exata.
-  ///
-  /// - [raw]: pesos brutos por ativo, em qualquer escala positiva. Valores
-  ///   individuais negativos são admitidos aqui e recusados adiante por
-  ///   [Weight.fraction].
-  ///
-  /// Lança [ArgumentError] se a soma de [raw] não for positiva — sem massa
-  /// total não há como reescalar. Propaga [ArgumentError] de [Weight.fraction]
-  /// se alguma fração normalizada cair fora de `[0, 1]`.
-  static Map<Ticker, Weight> normalize(Map<Ticker, double> raw) {
-    final total = raw.values.fold<double>(0.0, (a, b) => a + b);
-    if (total <= 0) {
-      throw ArgumentError('Soma dos pesos deve ser positiva; recebido $total');
-    }
-    final entries = raw.entries.toList();
-    final result = <Ticker, Weight>{};
-    var accumulated = 0.0;
-    for (var i = 1; i < entries.length; i++) {
-      final w = entries[i].value / total;
-      result[entries[i].key] = Weight.fraction(w);
-      accumulated += w;
-    }
-    result[entries.first.key] = Weight.fraction(1.0 - accumulated);
     return result;
   }
 }

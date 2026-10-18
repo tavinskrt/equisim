@@ -65,7 +65,7 @@ abstract final class BetaCalculator {
   ///
   /// - [returns]: par já alinhado por data. O tipo garante o casamento de
   ///   comprimento, então **não há validação de dimensão aqui** — construa o
-  ///   par com [alignReturns] ou com `PairedReturns.of`.
+  ///   par com [alignReturns] ou com `PairedReturnsBuilder`.
   /// - [minimumObservations]: mínimo de pares exigido. Padrão `30`, abaixo do
   ///   qual a estimativa não é reportável.
   ///

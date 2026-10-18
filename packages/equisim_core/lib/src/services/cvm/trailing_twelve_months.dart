@@ -187,9 +187,9 @@ abstract final class TrailingTwelveMonths {
   /// A série anual ancorada no documento mais recente publicado em [asOf].
   ///
   /// - [documentos]: DFPs e ITRs da companhia, em qualquer ordem.
-  /// - [asOf]: data da avaliação.
-  /// - [publicado]: se o documento já era público em [asOf]. Recebido pela
-  ///   própria cascata, para que a regra de publicidade seja uma só.
+  /// - [publicado]: se o documento já era público na data da avaliação.
+  ///   Recebido pela própria cascata, para que a regra de publicidade seja uma
+  ///   só.
   ///
   /// **Ancorada em DFP, devolve as DFPs** — é a série que o motor já usava.
   /// **Ancorada em ITR**, devolve os doze meses terminados na mesma data de
@@ -209,7 +209,6 @@ abstract final class TrailingTwelveMonths {
   /// não é anual, e nenhum número que saia dela descreve a companhia.
   static List<FundamentalsSnapshot> serieAncorada(
     List<CvmPeriodDocument> documentos, {
-    required DateTime asOf,
     required bool Function(FundamentalsSnapshot) publicado,
   }) {
     final visiveis = [

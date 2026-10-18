@@ -42,7 +42,6 @@ void main() {
             _host(
               // Menos de duas datas é o caminho do estado vazio.
               const Base100Chart(
-                isLight: true,
                 series: [],
                 dates: [],
               ),
@@ -77,7 +76,7 @@ void main() {
 
           await tester.pumpWidget(
             _host(
-              const RiskReturnScatter(isLight: true, points: []),
+              const RiskReturnScatter(points: []),
               escala: escala,
               largura: largura,
             ),

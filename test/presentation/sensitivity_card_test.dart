@@ -52,7 +52,7 @@ void main() {
             textScaler: TextScaler.linear(escala),
           ),
           child: Scaffold(
-            body: ValuationView(ticker: Ticker.parse('PETR4'), isLight: true),
+            body: ValuationView(ticker: Ticker.parse('PETR4')),
           ),
         ),
       ),

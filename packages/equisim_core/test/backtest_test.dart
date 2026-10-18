@@ -145,7 +145,6 @@ void main() {
       );
       // E o retorno tem de ser zero, apesar dos aportes.
       expect(result.metrics.timeWeightedReturn, closeTo(0.0, 1e-9));
-      expect(result.cashFlows.length, greaterThan(2));
     });
 
     // ----------------------------------------- Ações inteiras e caixa --
@@ -444,7 +443,7 @@ void main() {
         costs: TransactionCosts.none,
         portfolio: portfolio,
         prices: {Ticker.parse('PETR4'): seriesOf('PETR4', start, [10, 11])},
-        plan: ContributionPlan.none,
+        plan: const ContributionPlan(initial: Money.zero, monthly: Money.zero),
         range: DateRange(start, DateTime(2024, 12, 31)),
       );
       expect(result.isErr, isTrue);

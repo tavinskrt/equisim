@@ -75,20 +75,4 @@ class PointInTimeView {
   List<FundamentalsSnapshot> published(List<FundamentalsSnapshot> all) =>
       all.where(isPublished).toList()
         ..sort((a, b) => a.fiscalPeriodEnd.compareTo(b.fiscalPeriodEnd));
-
-  /// Exercício mais recente já divulgado, ou `null` se nenhum.
-  FundamentalsSnapshot? latestPublished(List<FundamentalsSnapshot> all) {
-    final visible = published(all);
-    return visible.isEmpty ? null : visible.last;
-  }
-
-  /// Os [n] exercícios mais recentes já divulgados, do mais antigo ao mais novo.
-  List<FundamentalsSnapshot> latestPublishedRange(
-    List<FundamentalsSnapshot> all,
-    int n,
-  ) {
-    final visible = published(all);
-    if (visible.length <= n) return visible;
-    return visible.sublist(visible.length - n);
-  }
 }

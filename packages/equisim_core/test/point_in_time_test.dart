@@ -18,14 +18,14 @@ void main() {
     test('exercício recém-encerrado ainda não é público', () {
       // Em 15/01/2026 o balanço de 31/12/2025 não foi divulgado à CVM.
       final view = PointInTimeView(DateTime(2026, 1, 15));
-      final latest = view.latestPublished(history);
-      expect(latest, isNotNull);
-      expect(latest!.fiscalPeriodEnd.year, 2024);
+      final visiveis = view.published(history);
+      expect(visiveis, isNotEmpty);
+      expect(visiveis.last.fiscalPeriodEnd.year, 2024);
     });
 
     test('após a defasagem de 90 dias o exercício passa a ser visível', () {
       final view = PointInTimeView(DateTime(2026, 6, 30));
-      expect(view.latestPublished(history)!.fiscalPeriodEnd.year, 2025);
+      expect(view.published(history).last.fiscalPeriodEnd.year, 2025);
     });
 
     test('defasagem é parâmetro declarado e altera o recorte', () {
@@ -33,17 +33,17 @@ void main() {
         DateTime(2026, 1, 15),
         publicationLag: Duration.zero,
       );
-      expect(semDefasagem.latestPublished(history)!.fiscalPeriodEnd.year, 2025);
+      expect(semDefasagem.published(history).last.fiscalPeriodEnd.year, 2025);
     });
 
     test('devolve nada quando nenhum exercício era público', () {
       final view = PointInTimeView(DateTime(2020, 1, 1));
-      expect(view.latestPublished(history), isNull);
+      expect(view.published(history), isEmpty);
     });
 
-    test('recorte dos N mais recentes respeita a barreira', () {
+    test('o recorte respeita a barreira', () {
       final view = PointInTimeView(DateTime(2026, 1, 15));
-      final range = view.latestPublishedRange(history, 5);
+      final range = view.published(history);
       expect(range.length, 2);
       expect(range.last.fiscalPeriodEnd.year, 2024);
       expect(range.every(view.isPublished), isTrue);
@@ -139,7 +139,6 @@ void main() {
       expect(vazio.depreciationAndAmortization, isNull);
       expect(vazio.effectiveTaxRate, isNull);
       expect(vazio.costOfDebt, isNull);
-      expect(vazio.approximateCapex, isNull);
     });
   });
 }

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../theme/fin_space.dart';
 import '../../di/providers.dart';
-import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
 import '../theme/fin_theme.dart';
 import 'study_notifier.dart';
@@ -40,7 +39,6 @@ class _AssetPickerSheetState extends ConsumerState<_AssetPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = ref.watch(isLightModeProvider);
     final universe = ref.watch(universeProvider);
     final study = ref.watch(studyProvider).study;
 
@@ -141,7 +139,6 @@ class _AssetPickerSheetState extends ConsumerState<_AssetPickerSheet> {
                       return _AssetOption(
                         ticker: ticker,
                         isUsed: isUsed,
-                        isLight: isLight,
                         onTap: isUsed ? null : () => _add(ticker),
                       );
                     },
@@ -174,13 +171,11 @@ class _AssetPickerSheetState extends ConsumerState<_AssetPickerSheet> {
 class _AssetOption extends StatelessWidget {
   final Ticker ticker;
   final bool isUsed;
-  final bool isLight;
   final VoidCallback? onTap;
 
   const _AssetOption({
     required this.ticker,
     required this.isUsed,
-    required this.isLight,
     this.onTap,
   });
 

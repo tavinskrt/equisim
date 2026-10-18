@@ -19,7 +19,13 @@ void main() {
         beta: 1.0,
         marketPremium: 0.055,
       );
-      final unlevered = CostOfCapital.unlevered(capm);
+      final unlevered = CostOfCapital(
+        capm: capm,
+        costOfDebt: 0.0,
+        taxRate: 0.0,
+        equityValue: 1.0,
+        debtValue: 0.0,
+      );
       expect(unlevered.wacc, closeTo(capm.costOfEquity, 1e-12));
     });
 
@@ -349,19 +355,6 @@ void main() {
       final r = DcfCalculator.shareholder(baseProfit: 0, assumptions: a);
       expect(r.isErr, isTrue);
       expect(r.failureOrNull, isA<InsufficientData>());
-    });
-
-    test('retentionFor devolve a retenção que gerou o crescimento', () {
-      // O laço da decisão 25: alimentada com g = retorno × b, devolve b.
-      const roe = 0.15, b = 0.40;
-      final g = roe * b;
-      expect(DcfCalculator.retentionFor(growth: g, returnOnCapital: roe),
-          closeTo(b, 1e-12));
-    });
-
-    test('crescimento que exigiria reter todo o lucro não é financiável', () {
-      expect(DcfCalculator.retentionFor(growth: 0.30, returnOnCapital: 0.20),
-          isNull);
     });
   });
 

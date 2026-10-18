@@ -1139,14 +1139,14 @@ void main() {
       List<({int year, double excess})>? excedentes,
       int anos = 10,
     }) =>
-        GrowthGuards.residualMoatReturn(
+        GrowthGuards.residualMoat(
           cycleReturn: retorno,
           terminalDiscountRate: desconto,
           externalCapitalRatio: phi,
           periods: exercicios,
           excessReturns: excedentes ?? geometrica(0.18, 0.5, 9),
           projectionYears: anos,
-        );
+        ).terminalReturn;
 
     test('o AR(1) recupera a persistência crua de uma série geométrica', () {
       final p = GrowthGuards.excessPersistence(geometrica(0.18, 0.5, 9))!;
@@ -1323,8 +1323,8 @@ void main() {
         excessReturns: geometrica(0.18, 0.5, 9),
         projectionYears: 10,
       );
-      expect(v.blocks, contains(MoatBlock.semExcedente));
-      expect(v.blockedOnlyByNoSpread, isTrue);
+      expect(v.blocks, [MoatBlock.semExcedente],
+          reason: 'só a ausência de excedente barrou');
     });
 
     test('o veredito nomeia todas as condições que barraram', () {
@@ -1347,7 +1347,6 @@ void main() {
         ]),
         reason: 'avaliar em curto-circuito esconderia as demais recusas',
       );
-      expect(v.blockedOnlyByNoSpread, isFalse);
     });
 
     test('o veredito carrega phi cru e phi aplicado lado a lado', () {
@@ -1818,7 +1817,6 @@ void main() {
         returnOnCapital: 0.15,
         terminalReturnOnCapital: null,
       );
-      expect(d.hasCaveats, isFalse);
       expect(d.caveats, isEmpty);
     });
 

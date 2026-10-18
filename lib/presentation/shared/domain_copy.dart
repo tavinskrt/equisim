@@ -92,14 +92,6 @@ extension MultipleRefusalRotulo on MultipleRefusal {
   };
 }
 
-/// O nome da carteira.
-extension PortfolioKindRotulo on PortfolioKind {
-  String get rotulo => switch (this) {
-    PortfolioKind.principal => 'Principal',
-    PortfolioKind.reserva => 'Reserva',
-  };
-}
-
 /// O grupo de premissas, como degrau de «onde você discorda do motor».
 extension ManualGroupRotulo on ManualGroup {
   String get rotulo => switch (this) {

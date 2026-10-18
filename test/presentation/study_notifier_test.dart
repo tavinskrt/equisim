@@ -5,7 +5,6 @@ import 'package:equisim/presentation/study/study_notifier.dart';
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:equisim/presentation/shared/domain_copy.dart';
 
 Asset assetOf(String symbol, [String sector = 'financeiro']) => Asset(
       ticker: Ticker.parse(symbol),
@@ -19,7 +18,10 @@ Portfolio portfolioOf(
 }) =>
     Portfolio.equalWeighted(
       id: kind.name,
-      name: kind.rotulo,
+      name: switch (kind) {
+        PortfolioKind.principal => 'Principal',
+        PortfolioKind.reserva => 'Reserva',
+      },
       kind: kind,
       assets: assets,
     ).unwrap();
@@ -121,41 +123,28 @@ void main() {
       expect(container.read(studyProvider).lastError, contains('15'));
     });
 
-    test('pesos customizados exigem soma de 100%', () {
+    test('equalizar restaura pesos iguais num estudo salvo desigual', () {
       final container = containerWith();
       final notifier = container.read(studyProvider.notifier);
-      notifier.addAsset(assetOf('PETR4', 'energia'), toPrincipal: true);
-      notifier.addAsset(assetOf('VALE3', 'materiais'), toPrincipal: true);
-
-      notifier.setWeights(
-        {Ticker.parse('PETR4'): 0.6, Ticker.parse('VALE3'): 0.3},
-        onPrincipal: true,
-      );
-      // Virgula, e nao ponto: a mensagem passou a sair por `Fmt.percent`, que
-      // respeita o locale pt-BR. A expectativa antiga fixava o defeito.
-      expect(container.read(studyProvider).lastError, contains('90,00%'));
-
-      notifier.setWeights(
-        {Ticker.parse('PETR4'): 0.7, Ticker.parse('VALE3'): 0.3},
-        onPrincipal: true,
-      );
-      final state = container.read(studyProvider);
-      expect(state.lastError, isNull);
-      expect(
-        state.study.principal.entries[Ticker.parse('PETR4')]!.weight.value,
-        closeTo(0.7, 1e-9),
-      );
-    });
-
-    test('equalizar restaura pesos iguais após edição manual', () {
-      final container = containerWith();
-      final notifier = container.read(studyProvider.notifier);
-      notifier.addAsset(assetOf('PETR4', 'energia'), toPrincipal: true);
-      notifier.addAsset(assetOf('VALE3', 'materiais'), toPrincipal: true);
-      notifier.setWeights(
-        {Ticker.parse('PETR4'): 0.9, Ticker.parse('VALE3'): 0.1},
-        onPrincipal: true,
-      );
+      // Pesos desiguais chegam por estudo salvo: a tela não edita peso.
+      final atual = container.read(studyProvider).study;
+      notifier.load(atual.copyWith(
+        principal: Portfolio(
+          id: atual.principal.id,
+          name: atual.principal.name,
+          kind: atual.principal.kind,
+          entries: {
+            Ticker.parse('PETR4'): PortfolioEntry(
+              asset: assetOf('PETR4', 'energia'),
+              weight: Weight.fraction(0.9),
+            ),
+            Ticker.parse('VALE3'): PortfolioEntry(
+              asset: assetOf('VALE3', 'materiais'),
+              weight: Weight.fraction(0.1),
+            ),
+          },
+        ),
+      ));
 
       notifier.equalize(onPrincipal: true);
 

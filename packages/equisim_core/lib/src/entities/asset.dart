@@ -24,8 +24,7 @@ class Sector implements Comparable<Sector> {
       Sector(key: key.trim().toLowerCase(), label: label ?? key.trim());
 
   /// Setor ausente. Ativos assim entram na carteira mas ficam **fora** da
-  /// análise de concentração, contabilizados em
-  /// `ConcentrationReport.unclassifiedWeight`.
+  /// análise de concentração.
   static const Sector unknown = Sector(key: '', label: 'Não classificado');
 
   /// `true` para [Sector.unknown] e para qualquer setor de chave vazia.

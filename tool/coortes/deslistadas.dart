@@ -48,10 +48,6 @@ class PapelDeslistado {
   /// `b3`, `cvm` ou `nenhuma`.
   final String origemDoSetor;
 
-  /// Eventos descartados por dividirem a data ex com outro mais próximo do
-  /// preço observado.
-  final int eventosDuplicados;
-
   /// Divisão do capital entre ordinárias e preferenciais (item C3).
   final ClassesDoCapital classes;
 
@@ -66,7 +62,6 @@ class PapelDeslistado {
     required this.proventos,
     required this.classificacao,
     required this.origemDoSetor,
-    required this.eventosDuplicados,
     required this.classes,
   });
 
@@ -297,7 +292,6 @@ class Deslistadas {
             (ev['fator'] as num).toDouble(),
           );
         }
-        var duplicados = 0;
         final eventos = <ShareEvent>[];
         for (final d in porData.entries) {
           final observado = _razaoNaData(pregoes, d.key);
@@ -310,7 +304,6 @@ class Deslistadas {
               }
             }
           }
-          duplicados += d.value.length - 1;
           eventos.add(
             ShareEvent(
               exDate: d.key,
@@ -357,7 +350,6 @@ class Deslistadas {
           origemDoSetor: daB3 != null
               ? 'b3'
               : (daCvm != null ? 'cvm' : 'nenhuma'),
-          eventosDuplicados: duplicados,
           classes: ClassesDoCapital.fromJson(registro['classes'] as List?),
         );
       }
@@ -439,7 +431,6 @@ class FundamentosDeslistada implements FundamentalsRepository {
       CvmSeries.build(
         documentos: documentos,
         mercado: mercado,
-        asOf: data,
         publicado: publicado,
         ancorada: ancorada,
       ).series,

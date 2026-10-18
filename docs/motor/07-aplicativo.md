@@ -21,7 +21,7 @@ com o rastro de cada avaliação ([AUDITORIA_DE_CALCULOS.md](../AUDITORIA_DE_CAL
 
 | Regra | Código | Evidência |
 |---|---|---|
-| **Principal**: a carteira vigente, até 15 ativos, com pesos que somam 100% | [portfolio.dart, `Portfolio.maxAssets`, `Portfolio.weighted`](../../packages/equisim_core/lib/src/entities/portfolio.dart) | — |
+| **Principal**: a carteira vigente, até 15 ativos, com pesos que somam 100% | [portfolio.dart, `Portfolio.maxAssets`, `Portfolio.equalWeighted`, `Portfolio.hasValidWeights`](../../packages/equisim_core/lib/src/entities/portfolio.dart) | — |
 | **Reserva**: candidatos a entrar na Principal; na simulação, vira carteira inteira sob os mesmos aportes, para comparação | [backtest_page.dart](../../lib/presentation/backtest/backtest_page.dart) | — |
 | Coluna "potencial": o upside do preço justo de cada ativo | `valuationProvider` | — |
 | "Esperado da carteira": média, pelos pesos, do retorno esperado de cada ativo com avaliação (7.2) | [expected_return.dart](../../packages/equisim_core/lib/src/services/portfolio/expected_return.dart) | decisões 58 e 103 |

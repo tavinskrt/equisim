@@ -104,9 +104,6 @@ class AuditTransaction {
         explanation: explanation,
       ));
 
-  /// Anexa um rastro já montado, para quem o constrói fora do ponto de uso.
-  void add(CalculationTrace trace) => _calculations.add(trace);
-
   /// Encerra a transação com sucesso e emite o evento.
   ///
   /// **Idempotente**: chamadas após o primeiro encerramento não fazem nada e

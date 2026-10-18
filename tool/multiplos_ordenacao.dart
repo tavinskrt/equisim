@@ -56,8 +56,6 @@ double _mediana(List<double> v) {
 class _Obs {
   _Obs({
     required this.coorte,
-    required this.ticker,
-    required this.setor,
     required this.potencial,
     required this.bookToMarket,
     required this.earningsYield,
@@ -65,8 +63,6 @@ class _Obs {
     required this.retorno,
   });
   final String coorte;
-  final String ticker;
-  final String setor;
   final double potencial;
   final double bookToMarket;
   final double earningsYield;
@@ -209,8 +205,6 @@ void main(List<String> args) {
         }
         obs.add(_Obs(
           coorte: '${m['coorte']}',
-          ticker: m['ticker'] as String,
-          setor: setor,
           potencial: pot,
           bookToMarket: bm,
           earningsYield: ey,

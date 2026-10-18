@@ -249,7 +249,6 @@ void main() {
       // minY == maxY, e a conversão de valor para pixel dividia por zero.
       await tester.pumpWidget(harness(
         child: const RiskReturnScatter(
-          isLight: false,
           points: [
             (
               label: 'Principal',
@@ -274,7 +273,6 @@ void main() {
         (tester) async {
       await tester.pumpWidget(harness(
         child: const RiskReturnScatter(
-          isLight: false,
           points: [
             (
               label: 'PETR4',
@@ -325,7 +323,6 @@ void main() {
 
       await tester.pumpWidget(harness(
         child: Base100Chart(
-          isLight: false,
           dates: calendario,
           series: [
             ChartSeries(
@@ -1116,13 +1113,7 @@ void main() {
                 anchors: MarketAnchors.fallback2026,
               )),
           goalAlignmentProvider.overrideWith((ref) async => GoalAlignment(
-                required: const RequiredReturn(monthly: 0.0142, iterations: 24),
-                verdict: FeasibilityVerdict(
-                  level: FeasibilityLevel.demanding,
-                  reason: FeasibilityReason.aboveMarket,
-                  requiredAnnualRate: 0.1844,
-                  anchors: MarketAnchors.fallback2026,
-                ),
+                required: const RequiredReturn(monthly: 0.0142),
                 expectedReturn: 0.1495,
                 valuationCoverage: 0.75,
               )),

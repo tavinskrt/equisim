@@ -42,14 +42,6 @@ import {
  * repetir uma auditoria exatamente, passe essa versao em `--model`.
  */
 export const API_DEFAULT_MODEL = 'gemini-flash-latest';
-/**
- * Modelo Pro, disponivel apenas por `--model`.
- *
- * No tier gratuito a cota da familia Pro e **zero**: usa-lo com API key sem
- * billing falha na primeira chamada. Mantido porque quem tem billing ativo se
- * beneficia, e porque o backend `agy` alcanca a familia Pro pela assinatura.
- */
-export const API_PRO_MODEL = 'gemini-3.1-pro-preview';
 
 /**
  * Cascata de modelos: do mais capaz ao de maior cota.

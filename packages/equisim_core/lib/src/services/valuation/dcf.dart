@@ -1358,27 +1358,6 @@ abstract final class DcfCalculator {
     return v.isFinite ? v : null;
   }
 
-  /// Taxa de retenção implícita num crescimento, pela relação `g = retorno × b`.
-  ///
-  /// Continua existindo, mas o sentido de uso se inverteu com a decisão 25:
-  /// antes derivava a retenção de um crescimento estimado por regressão; agora
-  /// serve de conferência, porque o crescimento já **sai** da retenção
-  /// observada. Alimentado com `g = retorno × b`, devolve exatamente o `b` que
-  /// entrou — é o laço se fechando.
-  ///
-  /// Devolve `null` quando a relação não se sustenta: sem retorno utilizável, ou
-  /// com crescimento que exigiria reter todo o lucro.
-  static double? retentionFor({
-    required double growth,
-    required double? returnOnCapital,
-  }) {
-    if (returnOnCapital == null || returnOnCapital <= 0) return null;
-    if (!returnOnCapital.isFinite) return null;
-    if (growth <= 0) return 0.0;
-    final b = growth / returnOnCapital;
-    return b >= 1.0 ? null : b;
-  }
-
   static Result<_Projection> _project(
     double baseProfit,
     DcfAssumptions a,

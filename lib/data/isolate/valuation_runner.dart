@@ -103,33 +103,4 @@ abstract final class ValuationRunner {
         monteCarloSamples: request.samples,
         seed: request.seed,
       );
-
-  /// Avalia vários ativos em sequência.
-  ///
-  /// A sequência é deliberada: com 15 ativos no teto e ~2,6 ms por avaliação,
-  /// o total fica em dezenas de milissegundos. Paralelizar exigiria um pool de
-  /// isolates e cópia de payload para cada uma, trocando simplicidade por um
-  /// ganho que não existe nesta escala.
-  ///
-  /// - [requests]: pedidos, um por ativo.
-  /// - [onFailure]: notificado por ativo que falhou, com a falha. Sem ele, as
-  ///   falhas são **silenciosamente omitidas** do mapa.
-  ///
-  /// Retorna apenas os ativos avaliados com sucesso — o mapa pode ser menor
-  /// que [requests], e comparar os tamanhos é a forma de detectar omissões
-  /// quando [onFailure] não é informado.
-  static Future<Map<Ticker, ValuationResult>> runAll(
-    List<ValuationRequest> requests, {
-    void Function(Ticker ticker, Failure failure)? onFailure,
-  }) async {
-    final out = <Ticker, ValuationResult>{};
-    for (final request in requests) {
-      final result = await run(request);
-      result.fold(
-        (valuation) => out[valuation.ticker] = valuation,
-        (failure) => onFailure?.call(request.inputs.ticker, failure),
-      );
-    }
-    return out;
-  }
 }

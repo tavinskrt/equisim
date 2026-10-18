@@ -128,7 +128,7 @@ void main() {
         carregarPacote: () async => jsonEncode(TreasuryQuotesCodec.encode(
             dia(DateTime.utc(2026, 9, 1)), geradoEm: DateTime.utc(2026, 9, 1))),
       );
-      final c = await repo.curveAt(DateTime(2026, 9, 11));
+      final c = (await repo.readAt(DateTime(2026, 9, 11))).curve;
       expect(c!.referenceDate, DateTime.utc(2026, 9, 10));
     });
 
@@ -138,7 +138,7 @@ void main() {
         carregarPacote: () async => jsonEncode(TreasuryQuotesCodec.encode(
             dia(DateTime.utc(2026, 9, 8)), geradoEm: DateTime.utc(2026, 9, 8))),
       );
-      final c = await repo.curveAt(DateTime(2026, 9, 11));
+      final c = (await repo.readAt(DateTime(2026, 9, 11))).curve;
       expect(c!.referenceDate, DateTime.utc(2026, 9, 8));
     });
 
@@ -148,7 +148,7 @@ void main() {
         carregarPacote: () async => jsonEncode(TreasuryQuotesCodec.encode(
             dia(DateTime.utc(2026, 6, 1)), geradoEm: DateTime.utc(2026, 6, 1))),
       );
-      expect(await repo.curveAt(DateTime(2026, 9, 11)), isNull);
+      expect((await repo.readAt(DateTime(2026, 9, 11))).curve, isNull);
     });
 
     test('falha da busca não fica guardada: a próxima avaliação tenta de novo',
@@ -163,8 +163,8 @@ void main() {
         }),
         carregarPacote: () async => throw StateError('sem pacote'),
       );
-      expect(await repo.curveAt(DateTime(2026, 9, 11)), isNull);
-      expect(await repo.curveAt(DateTime(2026, 9, 11)), isNotNull);
+      expect((await repo.readAt(DateTime(2026, 9, 11))).curve, isNull);
+      expect((await repo.readAt(DateTime(2026, 9, 11))).curve, isNotNull);
       expect(chamadas, 2);
     });
 
@@ -177,10 +177,10 @@ void main() {
         }),
         carregarPacote: () async => throw StateError('sem pacote'),
       );
-      await repo.curveAt(DateTime(2026, 9, 11, 9));
-      await repo.curveAt(DateTime(2026, 9, 11, 18));
+      await repo.readAt(DateTime(2026, 9, 11, 9));
+      await repo.readAt(DateTime(2026, 9, 11, 18));
       expect(chamadas, 1, reason: 'o mesmo dia usa a mesma busca');
-      await repo.curveAt(DateTime(2026, 9, 12));
+      await repo.readAt(DateTime(2026, 9, 12));
       expect(chamadas, 2);
     });
 

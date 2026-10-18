@@ -134,14 +134,10 @@ class ShrunkBeta {
   /// `WACC`, e por isso sai junto.
   final double? unlevered;
 
-  /// Prior alavancado para a estrutura de capital do ativo.
-  final double prior;
-
   const ShrunkBeta({
     required this.beta,
     required this.weight,
     required this.unlevered,
-    required this.prior,
   });
 }
 
@@ -264,7 +260,6 @@ abstract final class BetaShrinkage {
           beta: beta,
           weight: peso,
           unlevered: desalavancar(beta),
-          prior: priorAlavancado,
         );
 
     if (!priorAlavancado.isFinite || prior.dispersion <= 0) {

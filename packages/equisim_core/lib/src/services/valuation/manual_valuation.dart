@@ -355,10 +355,6 @@ class ManualOutcome {
     required this.years,
     required this.notices,
   });
-
-  /// Parcela do patrimônio que vem da perpetuidade.
-  double get terminalShare =>
-      equityValue != 0 ? terminalPresentValue / equityValue : 0.0;
 }
 
 /// Um degrau de "onde você discorda do motor".

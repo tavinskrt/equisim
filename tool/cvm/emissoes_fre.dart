@@ -50,15 +50,11 @@ import 'csv.dart';
 class _Registro {
   _Registro({
     required this.documento,
-    required this.recebido,
-    required this.versao,
     required this.data,
     required this.valor,
     required this.acoes,
   });
   final String documento;
-  final DateTime recebido;
-  final int versao;
   final DateTime data;
   final double valor;
   final double acoes;
@@ -92,9 +88,6 @@ class EmissoesFre {
   /// Toda versão com o quadro preenchido — inclusive só com capitalização sem
   /// ação nova —, por CNPJ, com o recebimento.
   final Map<String, Map<String, DateTime>> _documentos;
-
-  /// Quantas companhias têm alguma emissão lida.
-  int get companhias => _porCnpj.length;
 
   /// Forma de integralização que é bonificação ou capitalização de reserva.
   static final RegExp _semValor = RegExp(
@@ -179,8 +172,6 @@ class EmissoesFre {
         if (data == null) continue;
         (porCnpj[cnpj] ??= []).add(_Registro(
           documento: documento,
-          recebido: recebido,
-          versao: int.tryParse(r['Versao'] ?? '') ?? 0,
           data: data,
           valor: valor,
           acoes: acoes,

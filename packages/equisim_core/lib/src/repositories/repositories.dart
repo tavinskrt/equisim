@@ -77,11 +77,6 @@ class RateSeries {
             ..sort((RatePoint a, RatePoint b) => a.date.compareTo(b.date)),
         );
 
-  /// Série vazia, para recuo de chamador sem dado.
-  /// A série vazia. **`final`, e não `const`**: o construtor ordena, e ordenar
-  /// não é operação de tempo de compilação.
-  static final RateSeries empty = RateSeries(const []);
-
   /// Datas dos períodos. **Vista derivada** — a fonte da verdade é [points].
   List<DateTime> get dates => [for (final p in points) p.date];
 

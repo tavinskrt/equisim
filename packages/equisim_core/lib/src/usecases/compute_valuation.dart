@@ -794,9 +794,6 @@ class _Base {
   /// Φ — capital externo em múltiplos da base inicial da janela.
   final double? phi;
 
-  /// `true` quando a trava de saúde operacional vale para o ativo.
-  final bool travaDeSaude;
-
   /// Fator de normalização aplicado ao fluxo-base.
   final double fator;
 
@@ -815,7 +812,6 @@ class _Base {
     required this.retornoAtual,
     required this.retornoCiclo,
     required this.phi,
-    required this.travaDeSaude,
     required this.fator,
     required this.reconstrucao,
     required this.normalizacao,
@@ -824,14 +820,8 @@ class _Base {
 
 /// As premissas de uma via, antes do ponto fixo das taxas (D1).
 class _Premissas {
-  /// Taxa de desconto corrente: WACC na via da firma, Ke na do acionista.
-  final double desconto;
-
   /// Taxa de equilíbrio, sobre a taxa livre de risco estrutural.
   final double descontoTerminal;
-
-  /// Crescimento na perpetuidade.
-  final double perpetuo;
 
   /// `true` quando o ativo é concessão.
   final bool prazoDeterminado;
@@ -870,9 +860,7 @@ class _Premissas {
   final double spreadDeCredito;
 
   const _Premissas({
-    required this.desconto,
     required this.descontoTerminal,
-    required this.perpetuo,
     required this.prazoDeterminado,
     required this.veredito,
     required this.moatVerificado,
@@ -905,9 +893,6 @@ class _Custo {
   /// Retorno terminal que o veredito final concede, ou `null`.
   final double? moatVerificado;
 
-  /// Retorno terminal aplicado ao fim.
-  final double? moat;
-
   /// O caminho da taxa livre de risco contra o qual [taxas] foram resolvidas,
   /// ou `null` sem elas. A rota derivada precisa dele para o `K_d` e o
   /// rendimento do caixa de cada ano (item B24, decisão 127).
@@ -920,7 +905,6 @@ class _Custo {
     required this.estruturaRejeitada,
     required this.veredito,
     required this.moatVerificado,
-    required this.moat,
   });
 }
 
@@ -2565,7 +2549,6 @@ abstract final class ValuationCascade {
       estruturaRejeitada: estruturaRejeitada,
       veredito: moatVeredito,
       moatVerificado: moatVerificado,
-      moat: moat,
     );
   }
 
@@ -2810,9 +2793,7 @@ abstract final class ValuationCascade {
     }
 
     return _Premissas(
-      desconto: desconto,
       descontoTerminal: descontoTerminal,
-      perpetuo: perpetuo,
       prazoDeterminado: prazoDeterminado,
       veredito: moatVeredito,
       moatVerificado: moatVerificado,
@@ -3099,7 +3080,6 @@ abstract final class ValuationCascade {
       retornoAtual: retornoAtual,
       retornoCiclo: retornoCiclo,
       phi: phi,
-      travaDeSaude: travaDeSaude,
       fator: fatorBase,
       reconstrucao: reconstrucao,
       normalizacao: normalizacao,

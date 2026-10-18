@@ -172,7 +172,6 @@ double _financeiro(List<Pregao> s, DateTime data) {
 /// O agregado de uma data.
 class _Agregado {
   _Agregado(
-    this.data,
     this.valorEmCentavos,
     this.caixaEmCentavos,
     this.companhias,
@@ -181,7 +180,6 @@ class _Agregado {
     this.porCompanhia,
     this.foraPelaContagem,
   );
-  final DateTime data;
 
   /// Valor de mercado somado, em centavos.
   final int valorEmCentavos;
@@ -287,7 +285,6 @@ _Agregado _agregar(
     if (rendimento > 0) comProvento++;
   }
   return _Agregado(
-    t,
     valor,
     caixa,
     n,

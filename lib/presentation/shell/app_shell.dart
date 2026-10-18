@@ -60,7 +60,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             children: [
               Column(
                 children: [
-                  _buildHeader(isLight),
+                  _buildHeader(),
                   Expanded(
                     child: IndexedStack(
                       index: _index,
@@ -79,7 +79,7 @@ class _AppShellState extends ConsumerState<AppShell> {
           ),
         ),
       ),
-      bottomNavigationBar: _buildNavBar(isLight),
+      bottomNavigationBar: _buildNavBar(),
     );
   }
 
@@ -97,7 +97,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
-  Widget _buildHeader(bool isLight) {
+  Widget _buildHeader() {
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
@@ -172,7 +172,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (auditEnabled) ...[
-                    _AuditButton(isLight: isLight, onTap: _openAuditPanel),
+                    _AuditButton(onTap: _openAuditPanel),
                     const Gap.sm(axis: Axis.horizontal),
                   ],
                   GestureDetector(
@@ -204,7 +204,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
-  Widget _buildNavBar(bool isLight) {
+  Widget _buildNavBar() {
     return Container(
       decoration: BoxDecoration(
         color: context.fin.surfaceRaised,
@@ -293,7 +293,6 @@ class _AppShellState extends ConsumerState<AppShell> {
               _menuItem(
                 icon: Icons.person_outline,
                 label: 'Meu perfil',
-                isLight: isLight,
                 onTap: () {
                   setState(() => _menuOpen = false);
                   Navigator.push(
@@ -308,7 +307,6 @@ class _AppShellState extends ConsumerState<AppShell> {
                     ? Icons.dark_mode_outlined
                     : Icons.light_mode_outlined,
                 label: isLight ? 'Modo escuro' : 'Modo claro',
-                isLight: isLight,
                 onTap: () async {
                   final user = FirebaseAuth.instance.currentUser;
                   await ref
@@ -324,7 +322,6 @@ class _AppShellState extends ConsumerState<AppShell> {
                 _menuItem(
                   icon: Icons.terminal,
                   label: 'Abrir Painel de Logs de Cálculo',
-                  isLight: isLight,
                   onTap: () {
                     setState(() => _menuOpen = false);
                     _openAuditPanel();
@@ -335,7 +332,6 @@ class _AppShellState extends ConsumerState<AppShell> {
               _menuItem(
                 icon: Icons.logout,
                 label: 'Sair',
-                isLight: isLight,
                 danger: true,
                 onTap: () async {
                   setState(() => _menuOpen = false);
@@ -358,7 +354,6 @@ class _AppShellState extends ConsumerState<AppShell> {
   Widget _menuItem({
     required IconData icon,
     required String label,
-    required bool isLight,
     required VoidCallback onTap,
     bool danger = false,
   }) {
@@ -395,9 +390,8 @@ class _AppShellState extends ConsumerState<AppShell> {
 /// recurso do produto: é o instrumento de demonstração da apuração, e ficaria
 /// deslocado numa build entregue a um usuário final.
 class _AuditButton extends StatelessWidget {
-  const _AuditButton({required this.isLight, required this.onTap});
+  const _AuditButton({required this.onTap});
 
-  final bool isLight;
   final VoidCallback onTap;
 
   @override

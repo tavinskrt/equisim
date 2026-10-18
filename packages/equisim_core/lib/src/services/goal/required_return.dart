@@ -80,7 +80,7 @@ abstract final class RequiredReturnSolver {
     for (var i = 0; i < _maxIterations; i++) {
       final value = f(rate);
       if (value.abs() < _tolerance) {
-        return Ok(RequiredReturn(monthly: rate, iterations: i));
+        return Ok(RequiredReturn(monthly: rate));
       }
       const h = 1e-7;
       final derivative = (f(rate + h) - f(rate - h)) / (2 * h);
@@ -88,7 +88,7 @@ abstract final class RequiredReturnSolver {
       final next = rate - value / derivative;
       if (!next.isFinite || next <= _lowerBound || next > _upperBound) break;
       if ((next - rate).abs() < _tolerance) {
-        return Ok(RequiredReturn(monthly: next, iterations: i));
+        return Ok(RequiredReturn(monthly: next));
       }
       rate = next;
     }
@@ -103,7 +103,7 @@ abstract final class RequiredReturnSolver {
     if (fLow > 0) {
       // Mesmo com perda quase total o patrimônio supera a meta: só ocorre
       // com meta abaixo do próprio aporte, já tratado como taxa nula.
-      return Ok(const RequiredReturn(monthly: 0.0, iterations: 0));
+      return Ok(const RequiredReturn(monthly: 0.0));
     }
     if (fHigh < 0) {
       return Err(ComputationFailure(
@@ -118,8 +118,6 @@ abstract final class RequiredReturnSolver {
       if (fMid.abs() < _tolerance || (high - low) / 2 < _tolerance) {
         return Ok(RequiredReturn(
           monthly: mid,
-          iterations: i,
-          usedBisection: true,
         ));
       }
       if (fMid < 0) {
@@ -131,8 +129,6 @@ abstract final class RequiredReturnSolver {
 
     return Ok(RequiredReturn(
       monthly: (low + high) / 2,
-      iterations: _maxIterations,
-      usedBisection: true,
     ));
   }
 }

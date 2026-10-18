@@ -324,9 +324,6 @@ class PeerTriangulation {
 /// aplicativo, e as duas pontas precisam da mesma leitura. O codec não toca
 /// disco — recebe o mapa já decodificado.
 abstract final class PeerMultipleCodec {
-  /// Versão do formato do pacote.
-  static const int versao = 1;
-
   /// Decodifica o pacote inteiro, indexado por ticker.
   ///
   /// Devolve mapa vazio quando o pacote não tem a seção esperada: pacote

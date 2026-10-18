@@ -126,7 +126,6 @@ class _CvmNaData implements FundamentalsRepository {
       CvmSeries.build(
         documentos: meus,
         mercado: hist,
-        asOf: data,
         publicado: PointInTimeView(data).isPublished,
         ancorada: ancorada,
       ).series,

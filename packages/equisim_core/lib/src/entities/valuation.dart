@@ -456,25 +456,24 @@ class ValuationDiagnostics {
   /// esta ressalva cobre.
   static const double fragileEquityShare = 0.35;
 
-  /// **Não existe nota de confiança aqui, e a ausência é medida.**
-  ///
-  /// A primeira versão destes diagnósticos trazia uma nota ordinal — alta,
-  /// média, baixa — derivada da contagem de ressalvas. A validação preditiva da
-  /// decisão 32 a desmentiu: no horizonte de 36 meses, o grupo **sem ressalva
-  /// alguma** teve coeficiente de informação de **−0,007**, positivo em 2 de 5
-  /// coortes, enquanto o grupo com uma ou duas ressalvas teve **0,206**,
-  /// positivo em 5 de 5. A nota ordenava ao contrário do que prometia.
-  ///
-  /// A explicação plausível — não medida — é que o ativo sem ressalva é o
-  /// estável e previsível, que é justamente o que o mercado já precifica bem;
-  /// a discordância informativa aparece onde o modelo faz algo que o preço não
-  /// fez. Seja qual for a causa, apresentar uma nota que ordena ao contrário
-  /// seria falsa precisão num número destinado a decisão patrimonial.
-  ///
-  /// O que fica são os **fatos**: eles descrevem o que a conta fez, e isso
-  /// continua verdadeiro e continua útil. O que saiu foi a promessa de que eles
-  /// medem confiabilidade.
-  bool get hasCaveats => caveats.isNotEmpty;
+  // **Não existe nota de confiança aqui, e a ausência é medida.**
+  //
+  // A primeira versão destes diagnósticos trazia uma nota ordinal — alta,
+  // média, baixa — derivada da contagem de ressalvas. A validação preditiva da
+  // decisão 32 a desmentiu: no horizonte de 36 meses, o grupo **sem ressalva
+  // alguma** teve coeficiente de informação de **−0,007**, positivo em 2 de 5
+  // coortes, enquanto o grupo com uma ou duas ressalvas teve **0,206**,
+  // positivo em 5 de 5. A nota ordenava ao contrário do que prometia.
+  //
+  // A explicação plausível — não medida — é que o ativo sem ressalva é o
+  // estável e previsível, que é justamente o que o mercado já precifica bem;
+  // a discordância informativa aparece onde o modelo faz algo que o preço não
+  // fez. Seja qual for a causa, apresentar uma nota que ordena ao contrário
+  // seria falsa precisão num número destinado a decisão patrimonial.
+  //
+  // O que fica são os **fatos**: eles descrevem o que a conta fez, e isso
+  // continua verdadeiro e continua útil. O que saiu foi a promessa de que eles
+  // medem confiabilidade.
 }
 
 /// Resultado de uma avaliação de valor intrínseco.

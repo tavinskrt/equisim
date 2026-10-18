@@ -352,17 +352,11 @@ class CvmChart {
   /// Ativo circulante — `1.01`.
   double? get ativoCirculante => porCodigo('1.01')?.value;
 
-  /// Ativo não circulante — `1.02`.
-  double? get ativoNaoCirculante => porCodigo('1.02')?.value;
-
   /// Passivo total — `2`.
   double? get passivoTotal => porCodigo('2')?.value;
 
   /// Passivo circulante — `2.01`.
   double? get passivoCirculante => porCodigo('2.01')?.value;
-
-  /// Passivo não circulante — `2.02`.
-  double? get passivoNaoCirculante => porCodigo('2.02')?.value;
 
   /// Patrimônio líquido consolidado.
   ///

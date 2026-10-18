@@ -261,11 +261,3 @@ export function instrucoesVisuais(rotulos: string[]): string {
     '',
   ].join('\n');
 }
-
-/** Prompt completo, com o material embutido. */
-export function buildAdvisorPrompt(target: AdvisorTarget): string {
-  return (
-    `${buildAdvisorInstructions(target)}\n` +
-    `--- INICIO DO MATERIAL ---\n${target.payload}\n--- FIM DO MATERIAL ---\n`
-  );
-}
