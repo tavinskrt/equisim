@@ -20,8 +20,12 @@ class DefaultFirebaseOptions {
       case TargetPlatform.windows:
         return windows;
       case TargetPlatform.linux:
+        // Não é falta de configuração: firebase_core, firebase_auth e
+        // cloud_firestore não têm implementação para Linux desktop, e
+        // nenhuma FirebaseOptions faria a inicialização funcionar aqui.
         throw UnsupportedError(
-          'O DefaultFirebaseOptions não foi configurado para a plataforma Linux nas configurações atuais.',
+          'O Firebase não tem suporte a Linux desktop. '
+          'Rode no navegador: flutter run -d chrome.',
         );
       default:
         throw UnsupportedError(

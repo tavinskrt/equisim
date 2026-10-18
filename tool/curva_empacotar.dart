@@ -9,6 +9,7 @@
 // Uso:
 //   python tool/tesouro_baixar.py
 //   dart run tool/curva_empacotar.dart
+
 import 'dart:convert';
 import 'dart:io';
 
