@@ -12,7 +12,7 @@ final _ticker = Ticker.parse('ABCD3');
 /// Companhia não financeira cujo resultado operacional é negativo na maioria
 /// dos exercícios — a Porta 3 a manda para a via do acionista —, e cujo lucro
 /// líquido é positivo e cresce.
-List<FundamentalsSnapshot> _serie() {
+List<FundamentalsSnapshot> _series() {
   final out = <FundamentalsSnapshot>[];
   var e = 1.0;
   for (var i = 12; i >= 0; i--) {
@@ -43,10 +43,10 @@ List<FundamentalsSnapshot> _serie() {
   return out;
 }
 
-ValuationInputs _insumos() => ValuationInputs(
+ValuationInputs _inputs() => ValuationInputs(
       ticker: _ticker,
       asOf: DateTime(2026, 9, 9),
-      fundamentals: _serie(),
+      fundamentals: _series(),
       marketPrice: 12.0,
       capm: const CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
       declaredTerminalRiskFreeRate: 0.10,
@@ -56,7 +56,7 @@ ValuationInputs _insumos() => ValuationInputs(
 
 /// Só o desconto se move, e de dois jeitos: o cenário inteiro, e só a taxa de
 /// equilíbrio.
-AssumptionSource Function(DcfAssumptions) _cenarios() => (c) =>
+AssumptionSource Function(DcfAssumptions) _scenarios() => (c) =>
     DiscreteScenarios({
       ScenarioBand.bear: c.copyWith(
         discountRate: c.discountRate + 0.02,
@@ -70,7 +70,7 @@ AssumptionSource Function(DcfAssumptions) _cenarios() => (c) =>
 
 void main() {
   test('a premissa: o ativo vai para a via do acionista, com Ke resolvido', () {
-    final r = ValuationCascade.evaluate(_insumos());
+    final r = ValuationCascade.evaluate(_inputs());
     expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
     expect(r.unwrap().model, ValuationModel.dcfEarnings);
     expect(
@@ -81,18 +81,18 @@ void main() {
 
   test('deslocar o desconto inteiro pesa mais que deslocar só a perpetuidade',
       () {
-    final r = ValuationCascade.evaluate(_insumos(), scenarioBuilder: _cenarios())
+    final r = ValuationCascade.evaluate(_inputs(), scenarioBuilder: _scenarios())
         .unwrap();
-    final inteiro = r.discreteScenarios![ScenarioBand.bear]!.reais;
-    final soPerpetuidade = r.discreteScenarios![ScenarioBand.bull]!.reais;
+    final whole = r.discreteScenarios![ScenarioBand.bear]!.reais;
+    final perpetuityOnly = r.discreteScenarios![ScenarioBand.bull]!.reais;
     final base = r.discreteScenarios![ScenarioBand.base]!.reais;
-    expect(soPerpetuidade, lessThan(base));
-    expect(inteiro, lessThan(soPerpetuidade - 0.01),
+    expect(perpetuityOnly, lessThan(base));
+    expect(whole, lessThan(perpetuityOnly - 0.01),
         reason: 'o +2 p.p. do período explícito precisa chegar à conta');
   });
 
   test('o cenário base continua sendo o preço justo', () {
-    final r = ValuationCascade.evaluate(_insumos()).unwrap();
+    final r = ValuationCascade.evaluate(_inputs()).unwrap();
     expect(r.discreteScenarios![ScenarioBand.base], r.fairValue);
   });
 }

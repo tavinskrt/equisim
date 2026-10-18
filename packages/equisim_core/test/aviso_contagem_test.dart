@@ -14,7 +14,7 @@ final _ticker = Ticker.parse('CONT3');
 
 /// As duas contagens publicadas discordam por 3x: 1.000 correntes contra 3.000
 /// do exercício. O valor de mercado, a R$ 10, implica 3.000.
-FundamentalsSnapshot _ano(int y, double e) => FundamentalsSnapshot(
+FundamentalsSnapshot _year(int y, double e) => FundamentalsSnapshot(
       ticker: _ticker,
       fiscalPeriodEnd: DateTime(y, 12, 31),
       totalRevenue: 10000 * e,
@@ -36,39 +36,39 @@ FundamentalsSnapshot _ano(int y, double e) => FundamentalsSnapshot(
       marketCap: 30000,
     );
 
-ValuationResult _avaliar({OfficialShareCount? oficial}) {
+ValuationResult _evaluate({OfficialShareCount? official}) {
   final r = ValuationCascade.evaluate(ValuationInputs(
     ticker: _ticker,
     asOf: DateTime(2026, 9, 9),
     fundamentals: [
       for (var i = 15; i >= 0; i--)
-        _ano(2025 - i, math.pow(1.05, 15 - i).toDouble()),
+        _year(2025 - i, math.pow(1.05, 15 - i).toDouble()),
     ],
     marketPrice: 10.0,
     capm: const CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
     declaredTerminalRiskFreeRate: 0.094,
-    officialShares: oficial,
+    officialShares: official,
   ));
   expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
   return r.unwrap();
 }
 
-String _aviso(ValuationResult v) =>
+String _warning(ValuationResult v) =>
     v.warnings.singleWhere((w) => w.contains('As duas contagens de ações'));
 
 void main() {
   test('com a contagem oficial adotada, o aviso nomeia a oficial', () {
-    final v = _avaliar(
-        oficial: OfficialShareCount(total: 3000, asOf: DateTime(2026, 9, 1)));
-    final aviso = _aviso(v);
-    expect(aviso, contains('contagem oficial da B3'));
-    expect(aviso, isNot(contains('implícita no valor de mercado')));
-    expect(aviso, contains('3000 papéis'));
+    final v = _evaluate(
+        official: OfficialShareCount(total: 3000, asOf: DateTime(2026, 9, 1)));
+    final warning = _warning(v);
+    expect(warning, contains('contagem oficial da B3'));
+    expect(warning, isNot(contains('implícita no valor de mercado')));
+    expect(warning, contains('3000 papéis'));
   });
 
   test('sem a oficial, o aviso nomeia a que a ponte usou', () {
-    final aviso = _aviso(_avaliar());
-    expect(aviso, contains('a ponte por papel usa a implícita no valor'));
-    expect(aviso, contains('3000 papéis'));
+    final warning = _warning(_evaluate());
+    expect(warning, contains('a ponte por papel usa a implícita no valor'));
+    expect(warning, contains('3000 papéis'));
   });
 }

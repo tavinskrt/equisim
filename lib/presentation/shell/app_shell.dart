@@ -314,7 +314,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                       .toggleTheme(user?.uid);
                   ref
                       .read(isLightModeProvider.notifier)
-                      .definir(ref.read(themeControllerProvider).isLightMode);
+                      .setValue(ref.read(themeControllerProvider).isLightMode);
                 },
               ),
               if (auditEnabled) ...[

@@ -28,8 +28,8 @@ a avaliação roda fora da linha da interface ([valuation_runner.dart](../../lib
 |---|---|---|
 | Fixos: pessimista `g − 3 p.p.` e desconto `+2 p.p.` nas duas taxas; otimista `g + 3 p.p.` e `−2 p.p.` (a taxa terminal não desce abaixo de `g∞ + 0,5 p.p.`) | [scenario_engine.dart, `DiscreteScenarios.around`](../../packages/equisim_core/lib/src/services/valuation/scenario_engine.dart) | deslocar as duas taxas: com a terminal parada a banda ficava metade |
 | Monte Carlo: 10.000 sorteios triangulares — `g ± 4 p.p.`, desconto `± 2 p.p.` (em paralelo nas duas taxas), `g∞ ± 1 p.p.` (piso 0) —, semente fixa | `StochasticScenarios.around`; `ValuationSettings.samples` | determinismo |
-| Via do acionista: o deslocamento alcança o caminho de Ke inteiro | `_descontarDoBalanco` | item B36 |
-| Via da firma: o deslocamento vai ao Ke um a um (e ao desconto do terminal da firma); o alvo do retorno sobre o capital fica parado | `_descontarDoBalanco`, `_fatorDoCenario` | decisão 121 (as três traduções medidas) |
+| Via do acionista: o deslocamento alcança o caminho de Ke inteiro | `_discountFromBalanceSheet` | item B36 |
+| Via da firma: o deslocamento vai ao Ke um a um (e ao desconto do terminal da firma); o alvo do retorno sobre o capital fica parado | `_discountFromBalanceSheet`, `_scenarioFactor` | decisão 121 (as três traduções medidas) |
 | O cenário base é sempre o preço justo | teste `cenario_via_acionista_test.dart` | decisão 105 |
 | **São sensibilidade, não probabilidade**: a banda entre as premissas mais duras e as mais brandas conteve 8% dos resultados nas coortes, contra 90% nominais | título e rodapé do cartão | decisão 92 |
 | **Nomeados pelas premissas, e não pelo resultado**: a nota sai de `DiscreteScenarios.defaultGrowthDelta` e `defaultDiscountDelta`; a cor de cada valor, da posição dele contra o preço justo | [domain_copy.dart](../../lib/presentation/shared/domain_copy.dart), [valuation_page.dart, `_SensitivityCard`](../../lib/presentation/valuation/valuation_page.dart) | decisão 148 |
@@ -56,7 +56,7 @@ P = preço de hoje;  V = preço justo;  σ = volatilidade anual do papel
 | `σ` = desvio-padrão amostral dos retornos log diários dos últimos 252 pregões × √252 (≥ 120 retornos) | [calibrated_band.dart, `trailingVolatility`](../../packages/equisim_core/lib/src/services/valuation/calibrated_band.dart) | — |
 | `a`, `b`, `z` por horizonte e nominal, do pacote [banda_calibrada.json](../../assets/validacao/banda_calibrada.json), medidos nas coortes trimestrais (12 meses: 2018–2025; 36 meses: 2018–2023) | `VolatilityBandTable`, [tool/cobertura_banda.py](../../tool/cobertura_banda.py) | decisões 100 e 124 |
 | 12 meses: `a = 0,0781`, `b = 0,0202`; 36 meses: `a = 0,1318`, `b = 0,0615` — o preço converge pouco ao justo | pacote | [cobertura_banda.md](../validacao/cobertura_banda.md) |
-| A tela afirma "8 de cada 10" só se a cobertura fora da amostra estiver a até 5 p.p. de 80% nos dois horizontes (medida em 02/10/2026: 79,7% e 78,7%) | `_CalibratedBandCard.folgaDoCriterio` | critério do R2 |
+| A tela afirma "8 de cada 10" só se a cobertura fora da amostra estiver a até 5 p.p. de 80% nos dois horizontes (medida em 02/10/2026: 79,7% e 78,7%) | `_CalibratedBandCard.criterionMargin` | critério do R2 |
 
 ---
 

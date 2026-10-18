@@ -162,7 +162,7 @@ tela **Editar valuation**, o cartão do lucro de partida traz a pergunta "Por
 que o motor subiu (ou baixou) o lucro de partida?", com o retorno de cada ano
 do ciclo em barras, o típico marcado, o teste que decidiu e a conta.
 
-([compute_valuation.dart, `_saida1` e `_fluxoBase`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart);
+([compute_valuation.dart, `_output1` e `_baseFlow`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart);
 [growth_guards.dart](../../packages/equisim_core/lib/src/services/valuation/growth_guards.dart).)
 
 ---

@@ -35,17 +35,17 @@ import 'package:equisim_core/equisim_core.dart';
 import '../b3/proventos.dart';
 
 /// Espécie de um papel pelo número do ticker.
-enum Especie { ordinaria, preferencial, unit }
+enum ShareKind { common, preferred, unit }
 
-/// `ordinaria` para 3, `preferencial` de 4 a 8, `unit` para 11; `null` para o
+/// `common` para 3, `preferred` de 4 a 8, `unit` para 11; `null` para o
 /// resto — recibo, bônus, BDR.
-Especie? especieDo(String ticker) {
+ShareKind? kindOf(String ticker) {
   if (ticker.length < 5) return null;
   final n = int.tryParse(ticker.substring(4));
   if (n == null) return null;
-  if (n == 3) return Especie.ordinaria;
-  if (n >= 4 && n <= 8) return Especie.preferencial;
-  if (n == 11) return Especie.unit;
+  if (n == 3) return ShareKind.common;
+  if (n >= 4 && n <= 8) return ShareKind.preferred;
+  if (n == 11) return ShareKind.unit;
   return null;
 }
 
@@ -55,8 +55,8 @@ Especie? especieDo(String ticker) {
 /// A FCA nem sempre declara o código de cada espécie: a Alupar declara só a
 /// ALUP11, e a ALUP3 e a ALUP4 negociam. O papel que não existe simplesmente
 /// não tem pregão no COTAHIST.
-Set<String> codigosDaCompanhia(Iterable<String> conhecidos) => {
-      for (final c in conhecidos) ...{
+Set<String> companyCodes(Iterable<String> known) => {
+      for (final c in known) ...{
         c,
         if (c.length > 4)
           for (final n in const ['3', '4', '5', '6', '7', '8', '11'])
@@ -70,80 +70,80 @@ Set<String> codigosDaCompanhia(Iterable<String> conhecidos) => {
 /// cada época. Entram os códigos que a companhia declarou na FCA com o mesmo
 /// número de classe — `VVAR3` para a `BHIA3`. No pregão em que dois códigos
 /// negociam, fica o de hoje.
-List<Pregao> encadear(
+List<TradingDay> chain(
   String ticker,
-  Iterable<String> codigosDaCompanhia,
-  Map<String, List<Pregao>> cotahist,
+  Iterable<String> companyCodes,
+  Map<String, List<TradingDay>> cotahist,
 ) {
-  final classe = ticker.length > 4 ? ticker.substring(4) : '';
-  final porDia = <DateTime, Pregao>{};
-  final anteriores = [
-    for (final c in codigosDaCompanhia)
-      if (c != ticker && c.length > 4 && c.substring(4) == classe) c,
+  final shareClass = ticker.length > 4 ? ticker.substring(4) : '';
+  final byDay = <DateTime, TradingDay>{};
+  final previousOnes = [
+    for (final c in companyCodes)
+      if (c != ticker && c.length > 4 && c.substring(4) == shareClass) c,
   ]..sort();
-  for (final c in [...anteriores, ticker]) {
-    for (final p in cotahist[c] ?? const <Pregao>[]) {
-      porDia[p.date] = p;
+  for (final c in [...previousOnes, ticker]) {
+    for (final p in cotahist[c] ?? const <TradingDay>[]) {
+      byDay[p.date] = p;
     }
   }
-  return porDia.values.toList()..sort((a, b) => a.date.compareTo(b.date));
+  return byDay.values.toList()..sort((a, b) => a.date.compareTo(b.date));
 }
 
 /// Folga, em dias corridos, entre a data da coorte e o último pregão: além
 /// disso o papel não negociava, e não há preço da data.
-const int folgaDoPregao = 10;
+const int sessionMargin = 10;
 
-/// O fator que leva a série da fonte à base de ações de [data].
+/// O fator que leva a série da fonte à base de ações de [date].
 ///
 /// `fechamento bruto ÷ fechamento da fonte` no último pregão do COTAHIST até
-/// [data], medido no mesmo dia da fonte. Não se reconstrói pelos eventos do
+/// [date], medido no mesmo dia da fonte. Não se reconstrói pelos eventos do
 /// registro: o fator é o que a fonte aplicou, e o registro da B3 repete evento
 /// — a BBAS3 de 2018 tem fator 2 no preço e produto 8 no registro.
 ///
-/// Devolve `null` sem pregão a até [folgaDoPregao] dias, ou sem fechamento da
+/// Devolve `null` sem pregão a até [sessionMargin] dias, ou sem fechamento da
 /// fonte naquele dia.
-({double fator, Pregao pregao})? fatorDeBase({
-  required PriceSeries fonte,
-  required List<Pregao> brutos,
-  required DateTime data,
+({double factor, TradingDay tradingDay})? baseFactorOf({
+  required PriceSeries source,
+  required List<TradingDay> rawSessions,
+  required DateTime date,
 }) {
-  final pregao = pregaoAte(brutos, data, folgaDias: folgaDoPregao);
-  if (pregao == null || !(pregao.close > 0)) return null;
-  final dia = DateTime.utc(pregao.date.year, pregao.date.month, pregao.date.day);
-  for (final p in fonte.points.reversed) {
+  final tradingDay = tradingDayUntil(rawSessions, date, marginDays: sessionMargin);
+  if (tradingDay == null || !(tradingDay.close > 0)) return null;
+  final day = DateTime.utc(tradingDay.date.year, tradingDay.date.month, tradingDay.date.day);
+  for (final p in source.points.reversed) {
     final d = DateTime.utc(p.date.year, p.date.month, p.date.day);
-    if (d.isAfter(dia)) continue;
-    if (d.isBefore(dia)) return null;
+    if (d.isAfter(day)) continue;
+    if (d.isBefore(day)) return null;
     if (!(p.close > 0)) return null;
-    final f = pregao.close / p.close;
-    return f.isFinite && f > 0 ? (fator: f, pregao: pregao) : null;
+    final f = tradingDay.close / p.close;
+    return f.isFinite && f > 0 ? (factor: f, tradingDay: tradingDay) : null;
   }
   return null;
 }
 
-/// A série da fonte na base de ações da data, pelo [fator] de [fatorDeBase].
+/// A série da fonte na base de ações da data, pelo [factor] de [baseFactorOf].
 ///
 /// O fechamento é multiplicado pelo fator. O volume é refeito do financeiro do
 /// COTAHIST no mesmo dia — `financeiro ÷ fechamento na base da data` —, para que
 /// `fechamento × volume` continue sendo o financeiro que a Porta 0 mede: o
 /// volume da fonte não é ajustado, e o fechamento é. Dia sem COTAHIST mantém o
 /// volume da fonte, que nesse caso só erra se houve evento entre ele e a data.
-PriceSeries serieNaBaseDaData(
-  PriceSeries fonte,
-  List<Pregao> brutos,
-  double fator,
+PriceSeries seriesOnDateBasis(
+  PriceSeries source,
+  List<TradingDay> rawSessions,
+  double factor,
 ) {
-  final financeiro = <DateTime, double>{
-    for (final p in brutos)
-      if (p.financeiro != null) p.date: p.financeiro!,
+  final tradedValue = <DateTime, double>{
+    for (final p in rawSessions)
+      if (p.tradedValue != null) p.date: p.tradedValue!,
   };
   return PriceSeries(
-    ticker: fonte.ticker,
+    ticker: source.ticker,
     points: [
-      for (final p in fonte.points)
+      for (final p in source.points)
         () {
-          final close = p.close * fator;
-          final f = financeiro[DateTime.utc(p.date.year, p.date.month, p.date.day)];
+          final close = p.close * factor;
+          final f = tradedValue[DateTime.utc(p.date.year, p.date.month, p.date.day)];
           return PricePoint(
             date: p.date,
             close: close,
@@ -156,49 +156,49 @@ PriceSeries serieNaBaseDaData(
 }
 
 /// Valor de mercado da companhia em [data], espécie a espécie.
-class ValorDeMercado {
+class MarketValue {
   /// Em reais.
-  final double valor;
+  final double value;
 
   /// Como saiu: `especies` com as duas espécies pelo preço delas,
   /// `umaEspecie` com a companhia de uma espécie só ou a espécie sem pregão
   /// pelo preço da outra, e `semDivisao` sem a divisão entre espécies.
-  final String origem;
+  final String origin;
 
-  const ValorDeMercado(this.valor, this.origem);
+  const MarketValue(this.value, this.origin);
 
   /// Pregões considerados no financeiro que escolhe o papel de cada espécie.
-  static const int pregoesDoFinanceiro = 21;
+  static const int tradedValueSessions = 21;
 
-  /// - [acoes]: contagem total da data, somadas as espécies.
-  /// - [fracaoOrdinarias]: ordinárias ÷ total na data, ou `null` sem divisão.
-  /// - [papeis]: pregões brutos de cada papel da companhia, já encadeados.
+  /// - [shares]: contagem total da data, somadas as espécies.
+  /// - [commonFraction]: ordinárias ÷ total na data, ou `null` sem divisão.
+  /// - [securities]: pregões brutos de cada papel da companhia, já encadeados.
   ///
   /// A preferencial com mais de uma classe listada — PNA e PNB — vai toda pelo
   /// preço da mais negociada: o formulário não separa a contagem entre elas. A
   /// unit não entra: ela é cesta das outras duas.
   ///
-  /// Devolve `null` quando nenhum papel de espécie negociou até [folgaDoPregao]
+  /// Devolve `null` quando nenhum papel de espécie negociou até [sessionMargin]
   /// dias antes da data.
-  static ValorDeMercado? naData({
-    required double acoes,
-    required double? fracaoOrdinarias,
-    required Map<String, List<Pregao>> papeis,
-    required DateTime data,
+  static MarketValue? atDate({
+    required double shares,
+    required double? commonFraction,
+    required Map<String, List<TradingDay>> securities,
+    required DateTime date,
   }) {
-    if (!(acoes > 0)) return null;
-    ({double preco, double financeiro})? melhor(Especie e) {
-      ({double preco, double financeiro})? m;
-      for (final entrada in papeis.entries) {
-        if (especieDo(entrada.key) != e) continue;
-        final s = entrada.value;
-        final ultimo = pregaoAte(s, data, folgaDias: folgaDoPregao);
-        if (ultimo == null || !(ultimo.close > 0)) continue;
+    if (!(shares > 0)) return null;
+    ({double price, double tradedValue})? best(ShareKind e) {
+      ({double price, double tradedValue})? m;
+      for (final entry in securities.entries) {
+        if (kindOf(entry.key) != e) continue;
+        final s = entry.value;
+        final last = tradingDayUntil(s, date, marginDays: sessionMargin);
+        if (last == null || !(last.close > 0)) continue;
         // Posição do último pregão, por busca binária: a série é ordenada.
         var lo = 0, hi = s.length;
         while (lo < hi) {
           final m = (lo + hi) ~/ 2;
-          if (s[m].date.isAfter(ultimo.date)) {
+          if (s[m].date.isAfter(last.date)) {
             hi = m;
           } else {
             lo = m + 1;
@@ -206,35 +206,35 @@ class ValorDeMercado {
         }
         final i = lo - 1;
         var fin = 0.0;
-        for (var k = math.max(0, i - pregoesDoFinanceiro + 1); k <= i; k++) {
-          fin += s[k].financeiro ?? 0;
+        for (var k = math.max(0, i - tradedValueSessions + 1); k <= i; k++) {
+          fin += s[k].tradedValue ?? 0;
         }
-        if (m == null || fin > m.financeiro) {
-          m = (preco: ultimo.close, financeiro: fin);
+        if (m == null || fin > m.tradedValue) {
+          m = (price: last.close, tradedValue: fin);
         }
       }
       return m;
     }
 
-    final on = melhor(Especie.ordinaria);
-    final pn = melhor(Especie.preferencial);
+    final on = best(ShareKind.common);
+    final pn = best(ShareKind.preferred);
     if (on == null && pn == null) return null;
-    final f = fracaoOrdinarias;
+    final f = commonFraction;
     if (f == null || !f.isFinite || f < 0 || f > 1) {
-      final p = (on == null || (pn != null && pn.financeiro > on.financeiro))
-          ? pn!.preco
-          : on.preco;
-      return ValorDeMercado(acoes * p, 'semDivisao');
+      final p = (on == null || (pn != null && pn.tradedValue > on.tradedValue))
+          ? pn!.price
+          : on.price;
+      return MarketValue(shares * p, 'semDivisao');
     }
-    final pOn = on?.preco ?? pn!.preco;
-    final pPn = pn?.preco ?? on!.preco;
+    final pOn = on?.price ?? pn!.price;
+    final pPn = pn?.price ?? on!.price;
     // A fração vem de uma razão de contagens: a espécie única é a fração a
     // uma folga de 0 ou de 1, e não a igualdade exata.
-    const folga = 1e-9;
-    final umaSo = f >= 1 - folga || f <= folga || on == null || pn == null;
-    return ValorDeMercado(
-      acoes * (f * pOn + (1 - f) * pPn),
-      umaSo ? 'umaEspecie' : 'especies',
+    const margin = 1e-9;
+    final singleClass = f >= 1 - margin || f <= margin || on == null || pn == null;
+    return MarketValue(
+      shares * (f * pOn + (1 - f) * pPn),
+      singleClass ? 'umaEspecie' : 'especies',
     );
   }
 }
@@ -245,78 +245,78 @@ class ValorDeMercado {
 /// A mesma regra de data da contagem (`ShareCountHistory`): cada aprovação de
 /// capital vale pela **primeira** declaração dela. Desdobramento e grupamento
 /// não mudam a fração, e por isso a série é só das aprovações.
-class ClassesDoCapital {
-  ClassesDoCapital._(this.pontos);
+class CapitalClasses {
+  CapitalClasses._(this.points);
 
   /// `(desde, fração de ordinárias)`, em ordem de data.
-  final List<({DateTime desde, double fracao})> pontos;
+  final List<({DateTime since, double fraction})> points;
 
-  static ClassesDoCapital fromFre(Iterable<Map<String, String>> linhas) {
-    for (final tipo in ShareCountHistory.tipos) {
-      final porReferencia = <String, List<Map<String, String>>>{};
-      for (final r in linhas) {
-        if (r['Tipo_Capital']?.trim() != tipo) continue;
-        (porReferencia['${r['Data_Referencia']}'] ??= []).add(r);
+  static CapitalClasses fromFre(Iterable<Map<String, String>> rows) {
+    for (final kind in ShareCountHistory.kinds) {
+      final byReference = <String, List<Map<String, String>>>{};
+      for (final r in rows) {
+        if (r['Tipo_Capital']?.trim() != kind) continue;
+        (byReference['${r['Data_Referencia']}'] ??= []).add(r);
       }
-      if (porReferencia.isEmpty) continue;
+      if (byReference.isEmpty) continue;
       // A maior versão de cada referência, em ordem de referência.
-      final referencias = porReferencia.keys.toList()..sort();
-      final pontos = <({DateTime desde, double fracao})>[];
-      final vistas = <DateTime>[];
-      for (final ref in referencias) {
-        final doc = porReferencia[ref]!;
-        final versao = doc
+      final references = byReference.keys.toList()..sort();
+      final points = <({DateTime since, double fraction})>[];
+      final seen = <DateTime>[];
+      for (final ref in references) {
+        final doc = byReference[ref]!;
+        final version = doc
             .map((r) => int.tryParse(r['Versao'] ?? '') ?? 0)
             .fold<int>(0, math.max);
         for (final r in doc) {
-          if ((int.tryParse(r['Versao'] ?? '') ?? 0) != versao) continue;
+          if ((int.tryParse(r['Versao'] ?? '') ?? 0) != version) continue;
           final v = r['Data_Autorizacao_Aprovacao'];
-          final aprovacao = (v == null || v.length < 10)
+          final approval = (v == null || v.length < 10)
               ? null
               : DateTime.tryParse('${v.substring(0, 10)}T00:00:00Z');
           final on = double.tryParse(r['Quantidade_Acoes_Ordinarias'] ?? '');
           final pn = double.tryParse(r['Quantidade_Acoes_Preferenciais'] ?? '');
-          if (aprovacao == null || on == null || pn == null) continue;
+          if (approval == null || on == null || pn == null) continue;
           if (on < 0 || pn < 0 || on + pn <= 0) continue;
-          if (vistas.any((a) => a.isAtSameMomentAs(aprovacao))) continue;
-          vistas.add(aprovacao);
-          pontos.add((desde: aprovacao, fracao: on / (on + pn)));
+          if (seen.any((a) => a.isAtSameMomentAs(approval))) continue;
+          seen.add(approval);
+          points.add((since: approval, fraction: on / (on + pn)));
         }
       }
-      pontos.sort((a, b) => a.desde.compareTo(b.desde));
-      return ClassesDoCapital._(List.unmodifiable(pontos));
+      points.sort((a, b) => a.since.compareTo(b.since));
+      return CapitalClasses._(List.unmodifiable(points));
     }
-    return ClassesDoCapital._(const []);
+    return CapitalClasses._(const []);
   }
 
   /// Lê a série gravada por `b3_deslistadas_contagem.dart`.
-  static ClassesDoCapital fromJson(List<Object?>? lista) => ClassesDoCapital._([
-        for (final p in (lista ?? const []).cast<Map<String, dynamic>>())
+  static CapitalClasses fromJson(List<Object?>? list) => CapitalClasses._([
+        for (final p in (list ?? const []).cast<Map<String, dynamic>>())
           (
-            desde: DateTime.parse('${(p['desde'] as String).substring(0, 10)}T00:00:00Z'),
-            fracao: (p['fracaoOrdinarias'] as num).toDouble(),
+            since: DateTime.parse('${(p['desde'] as String).substring(0, 10)}T00:00:00Z'),
+            fraction: (p['fracaoOrdinarias'] as num).toDouble(),
           ),
       ]);
 
   List<Map<String, Object>> toJson() => [
-        for (final p in pontos)
+        for (final p in points)
           {
-            'desde': p.desde.toIso8601String().substring(0, 10),
-            'fracaoOrdinarias': p.fracao,
+            'desde': p.since.toIso8601String().substring(0, 10),
+            'fracaoOrdinarias': p.fraction,
           },
       ];
 
-  /// Fração de ordinárias em vigor em [data], ou a primeira declarada quando a
+  /// Fração de ordinárias em vigor em [date], ou a primeira declarada quando a
   /// data vem antes dela — a divisão entre espécies muda pouco, e sem ela o
   /// valor de mercado perde a espécie. `null` sem ponto nenhum.
-  double? at(DateTime data) {
-    if (pontos.isEmpty) return null;
-    final d = DateTime.utc(data.year, data.month, data.day);
-    var vigente = pontos.first.fracao;
-    for (final p in pontos) {
-      if (p.desde.isAfter(d)) break;
-      vigente = p.fracao;
+  double? at(DateTime date) {
+    if (points.isEmpty) return null;
+    final d = DateTime.utc(date.year, date.month, date.day);
+    var current = points.first.fraction;
+    for (final p in points) {
+      if (p.since.isAfter(d)) break;
+      current = p.fraction;
     }
-    return vigente;
+    return current;
   }
 }

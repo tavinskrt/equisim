@@ -68,7 +68,7 @@ forma a cotação.
 | Contagem oficial da B3, líquida de tesouraria, quando recente, arbitra | `ValuationCascade.quotedShares` | decisão 83 |
 | Sem oficial: valor de mercado ÷ preço; se divergir da contagem das demonstrações além de 1,5×, vale a **maior** (menor preço por papel) | idem | decisão 66, confirmada por contrafactual |
 | O aviso de contagens discordantes nomeia a contagem que a ponte usou | `_evaluate` | item B40, corrigido em 28/09/2026 |
-| Capital emitido depois do balanço entra na contagem e é somado ao capital próprio | `_comCapitalPosterior` | item B28 |
+| Capital emitido depois do balanço entra na contagem e é somado ao capital próprio | `_withPosteriorCapital` | item B28 |
 
 ---
 

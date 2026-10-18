@@ -16,7 +16,7 @@ import 'package:equisim_core/equisim_core.dart';
 import 'validation/context.dart';
 
 /// Palavras que denunciam um termo de ponte no nome do campo.
-const _pistas = [
+const _clues = [
   'minor',
   'noncontrol',
   'controlling',
@@ -34,24 +34,24 @@ const _pistas = [
 ];
 
 Future<void> main(List<String> args) async {
-  final alvos = args.isEmpty
+  final targets = args.isEmpty
       ? ['PETR4', 'VALE3', 'ITUB4', 'MGLU3', 'RENT3', 'CSNA3']
       : args;
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
   try {
-    for (final t in alvos) {
+    for (final t in targets) {
       final r = await ctx.brapi.rawFundamentals(Ticker.parse(t));
       if (r.isErr) {
         stdout.writeln('$t: ${r.failureOrNull?.message}');
         continue;
       }
-      final linhas = r.unwrap();
-      if (linhas.isEmpty) {
+      final rows = r.unwrap();
+      if (rows.isEmpty) {
         stdout.writeln('$t: sem exercícios');
         continue;
       }
       stdout.writeln('  --- série de equivalência ÷ EBIT ---');
-      for (final l in linhas) {
+      for (final l in rows) {
         final e = l['equityIncomeResult'];
         final b = l['ebit'];
         if (e is num && b is num && b > 0 && e.abs() > 0) {
@@ -60,44 +60,44 @@ Future<void> main(List<String> args) async {
               '${(e / b * 100).toStringAsFixed(1)}%');
         }
       }
-      final ultimo = linhas.last;
-      stdout.writeln('\n=== $t — ${linhas.length} exercícios, '
-          '${ultimo.length} campos no último ===');
-      final chaves = ultimo.keys.toList()..sort();
-      final suspeitas = [
-        for (final k in chaves)
-          if (_pistas.any((p) => k.toLowerCase().contains(p))) k
+      final last = rows.last;
+      stdout.writeln('\n=== $t — ${rows.length} exercícios, '
+          '${last.length} campos no último ===');
+      final keys = last.keys.toList()..sort();
+      final suspicious = [
+        for (final k in keys)
+          if (_clues.any((p) => k.toLowerCase().contains(p))) k
       ];
-      for (final k in suspeitas) {
-        stdout.writeln('  ${k.padRight(38)} ${ultimo[k]}');
+      for (final k in suspicious) {
+        stdout.writeln('  ${k.padRight(38)} ${last[k]}');
       }
-      if (suspeitas.isEmpty) stdout.writeln('  (nenhum campo de ponte)');
+      if (suspicious.isEmpty) stdout.writeln('  (nenhum campo de ponte)');
 
       double? n(String k) {
-        final v = ultimo[k];
+        final v = last[k];
         if (v is num) return v.toDouble();
         return null;
       }
 
-      final vm = n('marketCap');
-      final divida = (n('shortLongTermDebt') ?? n('loansAndFinancing') ?? 0) +
+      final marketValue = n('marketCap');
+      final debt = (n('shortLongTermDebt') ?? n('loansAndFinancing') ?? 0) +
           (n('longTermDebt') ?? n('longTermLoansAndFinancing') ?? 0);
-      final arrend =
+      final leases =
           (n('leaseFinancing') ?? 0) + (n('longTermLeaseFinancing') ?? 0);
       final minor = n('minorityInterest') ?? 0;
-      final coligada = n('longTermInvestments') ?? 0;
+      final affiliates = n('longTermInvestments') ?? 0;
       String pct(double x) =>
-          vm == null || vm <= 0 ? '—' : '${(x / vm * 100).toStringAsFixed(1)}%';
+          marketValue == null || marketValue <= 0 ? '—' : '${(x / marketValue * 100).toStringAsFixed(1)}%';
       stdout.writeln('  --- tamanho contra o valor de mercado ---');
-      stdout.writeln('  valor de mercado      ${vm?.toStringAsFixed(0)}');
-      stdout.writeln('  dívida (empréstimos)  ${divida.toStringAsFixed(0)}  '
-          '${pct(divida)}');
-      stdout.writeln('  arrendamento          ${arrend.toStringAsFixed(0)}  '
-          '${pct(arrend)}');
+      stdout.writeln('  valor de mercado      ${marketValue?.toStringAsFixed(0)}');
+      stdout.writeln('  dívida (empréstimos)  ${debt.toStringAsFixed(0)}  '
+          '${pct(debt)}');
+      stdout.writeln('  arrendamento          ${leases.toStringAsFixed(0)}  '
+          '${pct(leases)}');
       stdout.writeln('  não controladores     ${minor.toStringAsFixed(0)}  '
           '${pct(minor)}');
-      stdout.writeln('  coligadas             ${coligada.toStringAsFixed(0)}  '
-          '${pct(coligada)}');
+      stdout.writeln('  coligadas             ${affiliates.toStringAsFixed(0)}  '
+          '${pct(affiliates)}');
       stdout.writeln('  --- o arrendamento já está na dívida? ---');
       for (final k in [
         'shortLongTermDebt',
@@ -136,7 +136,7 @@ Future<void> main(List<String> args) async {
         'operatingIncome',
         'incomeFromOperations',
       ]) {
-        stdout.writeln('  ${k.padRight(30)} ${ultimo[k]}');
+        stdout.writeln('  ${k.padRight(30)} ${last[k]}');
       }
     }
   } finally {

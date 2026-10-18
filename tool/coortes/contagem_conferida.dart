@@ -14,11 +14,11 @@
 //
 // **A regra.** Parte da contagem mais recente até a data de corte e anda para
 // trás. Cada entrada é comparada com a última aceita depois dela: a diferença de
-// até [mudancaGrandeDaContagem] vezes vale como veio (emissão, recompra,
+// até [largeCountChange] vezes vale como veio (emissão, recompra,
 // conversão). Na maior, o preço decide:
 //
 // - com o salto correspondente no preço bruto de algum papel da companhia,
-//   entre a data da entrada e [prazoDoSaltoDoPreco] dias depois da aceita, a
+//   entre a data da entrada e [priceJumpWindow] dias depois da aceita, a
 //   mudança é grupamento ou desdobramento, e a aceita passa a valer **no dia do
 //   salto**, para que ação e preço mudem de base juntos;
 // - sem o salto, a mudança não é evento de ações: é emissão ou incorporação
@@ -39,127 +39,127 @@
 // evento de ações registrado, sem salto no preço, e fica como veio.
 import 'dart:math' as math;
 
-import '../b3/proventos.dart' show Pregao;
+import '../b3/proventos.dart' show TradingDay;
 
 /// Mudança, em vezes, a partir da qual o preço tem de confirmar a contagem.
-const mudancaGrandeDaContagem = 3.0;
+const largeCountChange = 3.0;
 
 /// Dias depois da contagem nova em que o salto do preço ainda a confirma: a
 /// aprovação do desdobramento vem meses antes da data ex (a da PRIO, de
 /// 28/01/2021, para a data ex de 06/05/2021). É o prazo do item B30.
-const prazoDoSaltoDoPreco = 400;
+const priceJumpWindow = 400;
 
 /// Folga, em vezes, entre o salto do preço e o inverso da mudança da contagem.
-const toleranciaDoSaltoDoPreco = 1.4;
+const priceJumpTolerance = 1.4;
 
 /// Pregões consecutivos mais distantes que isto não formam um salto.
-const _maiorIntervaloDoSalto = 30;
+const _largestJumpGap = 30;
 
 /// Uma entrada da contagem. [fonte] é a do arquivo, quando ele a traz.
-typedef EntradaDaContagem = ({DateTime desde, double acoes, String? fonte});
+typedef CountEntry = ({DateTime since, double shares, String? source});
 
 /// Uma entrada que o preço não confirmou, e a contagem aceita depois dela.
-typedef ContagemDescartada = ({
-  DateTime desde,
-  double acoes,
-  double posterior,
-  String? fonte,
+typedef DiscardedCount = ({
+  DateTime since,
+  double shares,
+  double acceptedAfter,
+  String? source,
 });
 
-/// O primeiro pregão entre [de] e [ate] em que o preço bruto de alguma das
-/// [series] saltou [fator] vezes, com folga de [toleranciaDoSaltoDoPreco].
-DateTime? saltoDoPreco(
-  Iterable<List<Pregao>> series,
-  double fator,
-  DateTime de,
-  DateTime ate,
+/// O primeiro pregão entre [from] e [until] em que o preço bruto de alguma das
+/// [series] saltou [factor] vezes, com folga de [priceJumpTolerance].
+DateTime? priceJump(
+  Iterable<List<TradingDay>> series,
+  double factor,
+  DateTime from,
+  DateTime until,
 ) {
-  final alvo = math.log(fator);
-  final folga = math.log(toleranciaDoSaltoDoPreco);
-  DateTime? primeiro;
+  final target = math.log(factor);
+  final margin = math.log(priceJumpTolerance);
+  DateTime? first;
   for (final s in series) {
     for (var i = 1; i < s.length; i++) {
       final a = s[i - 1], b = s[i];
-      if (b.date.isBefore(de) || b.date.isAfter(ate)) continue;
-      if (b.date.difference(a.date).inDays > _maiorIntervaloDoSalto) continue;
+      if (b.date.isBefore(from) || b.date.isAfter(until)) continue;
+      if (b.date.difference(a.date).inDays > _largestJumpGap) continue;
       if (!(a.close > 0) || !(b.close > 0)) continue;
-      if ((math.log(b.close / a.close) - alvo).abs() >= folga) continue;
-      if (primeiro == null || b.date.isBefore(primeiro)) primeiro = b.date;
+      if ((math.log(b.close / a.close) - target).abs() >= margin) continue;
+      if (first == null || b.date.isBefore(first)) first = b.date;
       break;
     }
   }
-  return primeiro;
+  return first;
 }
 
 /// A contagem conferida contra o preço, em ordem de data, e as entradas
 /// descartadas.
 ///
-/// - [contagem]: as entradas do formulário, em qualquer ordem;
+/// - [count]: as entradas do formulário, em qualquer ordem;
 /// - [series]: os pregões brutos de cada papel de espécie da companhia;
-/// - [ate]: a data de corte — entrada posterior a ela não entra, nem como
+/// - [until]: a data de corte — entrada posterior a ela não entra, nem como
 ///   âncora (o arquivo traz datas no futuro, de digitação).
 ({
-  List<({DateTime desde, double acoes})> aceitas,
-  List<ContagemDescartada> descartadas,
+  List<({DateTime since, double shares})> accepted,
+  List<DiscardedCount> discarded,
 })
-conferirContagem(
-  List<EntradaDaContagem> contagem,
-  Iterable<List<Pregao>> series, {
-  required DateTime ate,
+checkCount(
+  List<CountEntry> count,
+  Iterable<List<TradingDay>> series, {
+  required DateTime until,
 }) {
-  final entradas = [
-    for (final p in contagem)
-      if (p.acoes > 0 && !p.desde.isAfter(ate)) p,
-  ]..sort((a, b) => a.desde.compareTo(b.desde));
-  final descartadas = <ContagemDescartada>[];
+  final entries = [
+    for (final p in count)
+      if (p.shares > 0 && !p.since.isAfter(until)) p,
+  ]..sort((a, b) => a.since.compareTo(b.since));
+  final discarded = <DiscardedCount>[];
   // Da mais recente para a mais antiga; o `desde` da aceita pode recuar ao dia
   // do salto do preço.
-  final aceitas = <({DateTime desde, double acoes})>[];
-  DateTime? dataDaAceita;
-  for (final p in entradas.reversed) {
-    if (aceitas.isEmpty || dataDaAceita == null) {
-      aceitas.add((desde: p.desde, acoes: p.acoes));
-      dataDaAceita = p.desde;
+  final accepted = <({DateTime since, double shares})>[];
+  DateTime? acceptedDate;
+  for (final p in entries.reversed) {
+    if (accepted.isEmpty || acceptedDate == null) {
+      accepted.add((since: p.since, shares: p.shares));
+      acceptedDate = p.since;
       continue;
     }
-    final posterior = aceitas.last;
-    final mudanca = posterior.acoes / p.acoes;
-    if (mudanca <= mudancaGrandeDaContagem &&
-        mudanca >= 1 / mudancaGrandeDaContagem) {
-      aceitas.add((desde: p.desde, acoes: p.acoes));
-      dataDaAceita = p.desde;
+    final acceptedAfter = accepted.last;
+    final change = acceptedAfter.shares / p.shares;
+    if (change <= largeCountChange &&
+        change >= 1 / largeCountChange) {
+      accepted.add((since: p.since, shares: p.shares));
+      acceptedDate = p.since;
       continue;
     }
-    final salto = saltoDoPreco(
+    final jump = priceJump(
       series,
-      1 / mudanca,
-      p.desde,
-      dataDaAceita.add(const Duration(days: prazoDoSaltoDoPreco)),
+      1 / change,
+      p.since,
+      acceptedDate.add(const Duration(days: priceJumpWindow)),
     );
-    if (salto == null && p.fonte != 'filingCorrection') {
-      aceitas.add((desde: p.desde, acoes: p.acoes));
-      dataDaAceita = p.desde;
+    if (jump == null && p.source != 'filingCorrection') {
+      accepted.add((since: p.since, shares: p.shares));
+      acceptedDate = p.since;
       continue;
     }
-    if (salto == null) {
-      descartadas.add((
-        desde: p.desde,
-        acoes: p.acoes,
-        posterior: posterior.acoes,
-        fonte: p.fonte,
+    if (jump == null) {
+      discarded.add((
+        since: p.since,
+        shares: p.shares,
+        acceptedAfter: acceptedAfter.shares,
+        source: p.source,
       ));
       continue;
     }
     // As entradas da contagem nova anteriores ao salto — a aprovação costuma
     // vir antes da data ex — passam a valer no dia dele.
-    var daNova = posterior.acoes;
-    while (aceitas.isNotEmpty && aceitas.last.desde.isBefore(salto)) {
-      daNova = aceitas.removeLast().acoes;
+    var fromNew = acceptedAfter.shares;
+    while (accepted.isNotEmpty && accepted.last.since.isBefore(jump)) {
+      fromNew = accepted.removeLast().shares;
     }
-    aceitas
-      ..add((desde: salto, acoes: daNova))
-      ..add((desde: p.desde, acoes: p.acoes));
-    dataDaAceita = p.desde;
+    accepted
+      ..add((since: jump, shares: fromNew))
+      ..add((since: p.since, shares: p.shares));
+    acceptedDate = p.since;
   }
-  return (aceitas: aceitas.reversed.toList(), descartadas: descartadas);
+  return (accepted: accepted.reversed.toList(), discarded: discarded);
 }

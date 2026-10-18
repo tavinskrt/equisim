@@ -18,7 +18,7 @@ import 'dart:io';
 
 import 'package:equisim_core/equisim_core.dart';
 
-const _saida = 'assets/b3/emissores.json';
+const _output = 'assets/b3/emissores.json';
 
 void main() {
   final dir = Directory('data/b3/companhias');
@@ -26,42 +26,42 @@ void main() {
     stderr.writeln('sem data/b3/companhias — rode tool/b3_companhias_baixar.py');
     exit(2);
   }
-  final emissores = <B3Issuer>[];
-  var eventos = 0, semContagem = 0, semClassificacao = 0;
-  DateTime? maisAntiga;
-  final arquivos = dir.listSync().whereType<File>().toList()
+  final issuers = <B3Issuer>[];
+  var events = 0, withoutCount = 0, withoutClassification = 0;
+  DateTime? oldest;
+  final files = dir.listSync().whereType<File>().toList()
     ..sort((a, b) => a.path.compareTo(b.path));
-  for (final f in arquivos) {
-    final bruto = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
-    final consultado = DateTime.parse(bruto['consultadoEm'] as String);
+  for (final f in files) {
+    final raw = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
+    final consultedAt = DateTime.parse(raw['consultadoEm'] as String);
     // A classificação setorial vem do detalhe do mesmo emissor (item A5).
-    final complemento = File(
+    final supplement = File(
         'data/b3/complemento/${f.uri.pathSegments.last}');
-    final detalhe = complemento.existsSync()
-        ? (jsonDecode(complemento.readAsStringSync())
+    final detail = supplement.existsSync()
+        ? (jsonDecode(supplement.readAsStringSync())
             as Map<String, dynamic>)['detalhe'] as Map<String, dynamic>?
         : null;
-    for (final c in (bruto['resposta'] as List).cast<Map<String, dynamic>>()) {
-      final e = B3Registry.issuer(c, consultedOn: consultado, detail: detalhe);
+    for (final c in (raw['resposta'] as List).cast<Map<String, dynamic>>()) {
+      final e = B3Registry.issuer(c, consultedOn: consultedAt, detail: detail);
       if (e == null) continue;
-      emissores.add(e);
-      eventos += e.events.length;
-      if (e.totalShares == null) semContagem++;
-      if (e.classification == null) semClassificacao++;
-      if (maisAntiga == null || consultado.isBefore(maisAntiga)) {
-        maisAntiga = consultado;
+      issuers.add(e);
+      events += e.events.length;
+      if (e.totalShares == null) withoutCount++;
+      if (e.classification == null) withoutClassification++;
+      if (oldest == null || consultedAt.isBefore(oldest)) {
+        oldest = consultedAt;
       }
     }
   }
-  final pacote = B3RegistryCodec.encodePackage(emissores,
-      geradoEm: maisAntiga ?? DateTime.utc(2000));
-  File(_saida)
+  final package = B3RegistryCodec.encodePackage(issuers,
+      generatedAt: oldest ?? DateTime.utc(2000));
+  File(_output)
     ..parent.createSync(recursive: true)
-    ..writeAsStringSync(jsonEncode(pacote));
-  stdout.writeln('  emissores: ${emissores.length}  sem contagem: $semContagem  '
-      'sem classificação: $semClassificacao');
-  stdout.writeln('  eventos de ações compostos: $eventos');
-  stdout.writeln('  consulta mais antiga: ${maisAntiga?.toIso8601String().substring(0, 10)}');
-  stdout.writeln('  tamanho: ${(File(_saida).lengthSync() / 1024).toStringAsFixed(0)} KB');
-  stdout.writeln('  gravado $_saida');
+    ..writeAsStringSync(jsonEncode(package));
+  stdout.writeln('  emissores: ${issuers.length}  sem contagem: $withoutCount  '
+      'sem classificação: $withoutClassification');
+  stdout.writeln('  eventos de ações compostos: $events');
+  stdout.writeln('  consulta mais antiga: ${oldest?.toIso8601String().substring(0, 10)}');
+  stdout.writeln('  tamanho: ${(File(_output).lengthSync() / 1024).toStringAsFixed(0)} KB');
+  stdout.writeln('  gravado $_output');
 }

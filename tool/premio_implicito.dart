@@ -27,7 +27,7 @@
 //
 // - valor de mercado: a contagem de ações do Formulário de Referência na data,
 //   corrigida pelos eventos que ele não absorveu (B30), vezes o fechamento
-//   bruto do COTAHIST de cada espécie — `ValorDeMercado.naData`, o mesmo do
+//   bruto do COTAHIST de cada espécie — `MarketValue.atDate`, o mesmo do
 //   backtest;
 // - caixa distribuído: os proventos em dinheiro da B3 (`data/b3/complemento`),
 //   pela soma dos rendimentos de cada provento na classe mais negociada
@@ -52,27 +52,27 @@ import 'b3/proventos.dart';
 import 'coortes/base_da_data.dart';
 import 'coortes/contagem_conferida.dart';
 import 'coortes/eventos_de_acoes.dart';
-import 'curva_ligar.dart' show lerTesouro;
+import 'curva_ligar.dart' show readTreasury;
 import 'cvm/codigos_fca.dart';
 import 'cvm/emissoes_fre.dart';
 import 'validation/congelado.dart';
 import 'validation/ibovespa_longo.dart';
 import 'validation/regression.dart';
 
-const _saida = 'docs/validacao/premio_implicito.json';
+const _output = 'docs/validacao/premio_implicito.json';
 
 /// O pacote que o aplicativo e o backtest leem (decisão 142).
-const _pacote = 'assets/mercado/premio_implicito.json';
-const _referencia = CapmInputs.defaultMarketPremium;
+const _package = 'assets/mercado/premio_implicito.json';
+const _reference = CapmInputs.defaultMarketPremium;
 
 /// Fração mínima de trimestres presentes para uma média normalizada valer.
-const _coberturaMinima = 0.8;
+const _minCoverage = 0.8;
 
-String _pct(double v, [int casas = 2]) =>
-    '${(v * 100).toStringAsFixed(casas)}%';
+String _pct(double v, [int decimals = 2]) =>
+    '${(v * 100).toStringAsFixed(decimals)}%';
 
 /// A mediana de [v], ou `null` sem valor — o JSON não grava NaN.
-double? _mediana(List<double> v) {
+double? _median(List<double> v) {
   final o = [...v]..sort();
   if (o.isEmpty) return null;
   final m = o.length ~/ 2;
@@ -80,22 +80,22 @@ double? _mediana(List<double> v) {
 }
 
 /// Uma entrada da contagem que o preço não confirmou, com a companhia.
-typedef _Descartada = ({
+typedef _Discarded = ({
   String cnpj,
-  DateTime desde,
-  double acoes,
-  double anterior,
-  String? fonte,
+  DateTime since,
+  double shares,
+  double previous,
+  String? source,
 });
 
 /// A contagem por data de uma listada, como veio de
 /// `data/b3/listadas_contagem.json`, com a fonte de cada entrada.
-class _Contagem {
-  _Contagem(this.bruta, this.classes);
-  final List<({DateTime desde, double acoes, String? fonte})> bruta;
-  final ClassesDoCapital classes;
+class _Count {
+  _Count(this.raw, this.classes);
+  final List<({DateTime since, double shares, String? source})> raw;
+  final CapitalClasses classes;
 
-  static Map<String, _Contagem> ler() {
+  static Map<String, _Count> read() {
     final f = File('data/b3/listadas_contagem.json');
     if (!f.existsSync()) {
       throw StateError(
@@ -106,18 +106,18 @@ class _Contagem {
     return {
       for (final e
           in (jsonDecode(f.readAsStringSync()) as Map<String, dynamic>).entries)
-        e.key: _Contagem(
+        e.key: _Count(
           [
             for (final p
                 in ((e.value as Map<String, dynamic>)['contagem'] as List)
                     .cast<Map<String, dynamic>>())
               (
-                desde: DateTime.parse('${p['desde']}T00:00:00Z'),
-                acoes: (p['acoes'] as num).toDouble(),
-                fonte: p['fonte'] as String?,
+                since: DateTime.parse('${p['desde']}T00:00:00Z'),
+                shares: (p['acoes'] as num).toDouble(),
+                source: p['fonte'] as String?,
               ),
-          ]..sort((a, b) => a.desde.compareTo(b.desde)),
-          ClassesDoCapital.fromJson(
+          ]..sort((a, b) => a.since.compareTo(b.since)),
+          CapitalClasses.fromJson(
             (e.value as Map<String, dynamic>)['classes'] as List?,
           ),
         ),
@@ -126,201 +126,201 @@ class _Contagem {
 }
 
 /// Uma companhia listada, com o que a conta precisa dela.
-class _Companhia {
-  _Companhia(
+class _Company {
+  _Company(
     this.cnpj,
-    this.raiz,
-    this.aceitas,
-    this.primeiraBruta,
+    this.root,
+    this.accepted,
+    this.firstRaw,
     this.classes,
-    this.papeis,
-    this.eventos,
+    this.securities,
+    this.events,
   );
   final String cnpj;
 
   /// Raiz de quatro letras de hoje: é por ela que os proventos são lidos.
-  final String raiz;
+  final String root;
 
-  /// A contagem conferida contra o preço, de `conferirContagem` (item B43).
-  final List<({DateTime desde, double acoes})> aceitas;
+  /// A contagem conferida contra o preço, de `checkCount` (item B43).
+  final List<({DateTime since, double shares})> accepted;
 
   /// A data da primeira contagem do formulário, conferida ou não.
-  final DateTime? primeiraBruta;
-  final ClassesDoCapital classes;
+  final DateTime? firstRaw;
+  final CapitalClasses classes;
 
   /// Pregões brutos de cada código de espécie, já encadeados.
-  final Map<String, List<Pregao>> papeis;
-  final List<ShareEvent> eventos;
+  final Map<String, List<TradingDay>> securities;
+  final List<ShareEvent> events;
 }
 
-/// O último pregão de [s] até [data], a até [folgaDoPregao] dias.
-Pregao? _pregaoAte(List<Pregao> s, DateTime data) =>
-    pregaoAte(s, data, folgaDias: folgaDoPregao);
+/// O último pregão de [s] até [date], a até [sessionMargin] dias.
+TradingDay? _tradingDayUntil(List<TradingDay> s, DateTime date) =>
+    tradingDayUntil(s, date, marginDays: sessionMargin);
 
-/// Volume financeiro dos 21 pregões até [data].
-double _financeiro(List<Pregao> s, DateTime data) {
-  var soma = 0.0;
+/// Volume financeiro dos 21 pregões até [date].
+double _tradedValue(List<TradingDay> s, DateTime date) {
+  var sum = 0.0;
   var n = 0;
   for (var i = s.length - 1; i >= 0 && n < 21; i--) {
-    if (s[i].date.isAfter(data)) continue;
-    soma += s[i].financeiro ?? 0;
+    if (s[i].date.isAfter(date)) continue;
+    sum += s[i].tradedValue ?? 0;
     n++;
   }
-  return soma;
+  return sum;
 }
 
 /// O agregado de uma data.
-class _Agregado {
-  _Agregado(
-    this.valorEmCentavos,
-    this.caixaEmCentavos,
-    this.companhias,
-    this.comProvento,
-    this.maior,
-    this.porCompanhia,
-    this.foraPelaContagem,
+class _Aggregate {
+  _Aggregate(
+    this.valueInCents,
+    this.cashInCents,
+    this.companies,
+    this.withDividend,
+    this.isGreater,
+    this.byCompany,
+    this.excludedByCount,
   );
 
   /// Valor de mercado somado, em centavos.
-  final int valorEmCentavos;
+  final int valueInCents;
 
   /// Dinheiro distribuído nos doze meses, somado, em centavos.
-  final int caixaEmCentavos;
+  final int cashInCents;
 
   /// Em reais, só para a saída.
-  double get valorDeMercado => valorEmCentavos / 100;
-  double get caixa => caixaEmCentavos / 100;
-  final int companhias;
-  final int comProvento;
+  double get marketValueOf => valueInCents / 100;
+  double get cash => cashInCents / 100;
+  final int companies;
+  final int withDividend;
 
   /// A companhia de maior valor na data, para conferir a escala.
-  final ({String raiz, double valor})? maior;
+  final ({String root, double value})? isGreater;
 
   /// Valor e rendimento de cada companhia, para a conferência de `--datas`.
-  final List<({String raiz, double valor, double rendimento})> porCompanhia;
+  final List<({String root, double value, double income})> byCompany;
 
   /// Raízes das companhias fora da soma porque a contagem da data não
   /// concorda com o preço.
-  final List<String> foraPelaContagem;
-  double get rendimento => caixaEmCentavos / valorEmCentavos;
+  final List<String> excludedByCount;
+  double get income => cashInCents / valueInCents;
 }
 
 /// O agregado da data [t].
 ///
 /// Proventos, contagem e pregões vêm em meia-noite UTC; a data do trimestre é
 /// local, como a do motor (a curva e as âncoras leem [t]). As comparações com
-/// os dados da ferramenta usam o mesmo dia em UTC, [dia].
-_Agregado _agregar(
+/// os dados da ferramenta usam o mesmo dia em UTC, [day].
+_Aggregate _aggregate(
   DateTime t,
-  List<_Companhia> companhias,
-  Map<String, List<CashDividend>> proventos,
+  List<_Company> companies,
+  Map<String, List<CashDividend>> dividends,
 ) {
-  final dia = DateTime.utc(t.year, t.month, t.day);
+  final day = DateTime.utc(t.year, t.month, t.day);
   // As somas em centavos inteiros: o valor de uma companhia cabe com folga
   // num `int` de 64 bits (R$ 1 trilhão são 10¹⁴ centavos).
-  var valor = 0, caixa = 0;
-  var n = 0, comProvento = 0;
-  ({String raiz, double valor})? maior;
-  final porCompanhia = <({String raiz, double valor, double rendimento})>[];
-  final foraPelaContagem = <String>[];
+  var value = 0, cash = 0;
+  var n = 0, withDividend = 0;
+  ({String root, double value})? isGreater;
+  final byCompany = <({String root, double value, double income})>[];
+  final excludedByCount = <String>[];
   // Doze meses de calendário, e não 365 dias: no ano bissexto o dia do ano
   // anterior sairia da janela.
-  final inicio = DateTime.utc(dia.year - 1, dia.month, dia.day);
-  for (final c in companhias) {
-    final acoes = acoesComEventos(c.aceitas, dia, c.eventos).acoes;
-    if (acoes == null || !(acoes > 0)) {
+  final start = DateTime.utc(day.year - 1, day.month, day.day);
+  for (final c in companies) {
+    final shares = sharesWithEvents(c.accepted, day, c.events).shares;
+    if (shares == null || !(shares > 0)) {
       // Havia contagem no formulário, e nenhuma que o preço confirmasse.
-      if (c.primeiraBruta != null &&
-          !c.primeiraBruta!.isAfter(dia) &&
-          c.papeis.values.any((s) => _pregaoAte(s, dia) != null)) {
-        foraPelaContagem.add(c.raiz);
+      if (c.firstRaw != null &&
+          !c.firstRaw!.isAfter(day) &&
+          c.securities.values.any((s) => _tradingDayUntil(s, day) != null)) {
+        excludedByCount.add(c.root);
       }
       continue;
     }
-    final vm = ValorDeMercado.naData(
-      acoes: acoes,
-      fracaoOrdinarias: c.classes.at(dia),
-      papeis: c.papeis,
-      data: dia,
+    final marketValue = MarketValue.atDate(
+      shares: shares,
+      commonFraction: c.classes.at(day),
+      securities: c.securities,
+      date: day,
     );
-    if (vm == null || !(vm.valor > 0)) continue;
+    if (marketValue == null || !(marketValue.value > 0)) continue;
 
     // A classe mais negociada na data é a que dá o rendimento: dividendo por
     // ação dividido pelo preço daquela ação.
     String? principal;
-    var melhor = -1.0;
-    for (final e in c.papeis.entries) {
-      if (_pregaoAte(e.value, dia) == null) continue;
-      final f = _financeiro(e.value, dia);
-      if (f > melhor) {
-        melhor = f;
+    var best = -1.0;
+    for (final e in c.securities.entries) {
+      if (_tradingDayUntil(e.value, day) == null) continue;
+      final f = _tradedValue(e.value, day);
+      if (f > best) {
+        best = f;
         principal = e.key;
       }
     }
     if (principal == null) continue;
-    final classe = principal.substring(4);
-    final eventos = proventosDo(proventos, '${c.raiz}$classe');
-    var rendimento = 0.0;
-    for (final p in eventos) {
-      if (!p.exDate.isAfter(inicio) || p.exDate.isAfter(dia)) continue;
+    final shareClass = principal.substring(4);
+    final events = dividendsOf(dividends, '${c.root}$shareClass');
+    var income = 0.0;
+    for (final p in events) {
+      if (!p.exDate.isAfter(start) || p.exDate.isAfter(day)) continue;
       // Preço com direito publicado pela B3; sem ele, o fechamento bruto do
       // último pregão antes da data ex — as duas grandezas na base de ações
       // da época, como o valor do provento.
-      final preco =
+      final price =
           p.closeWithRights ??
-          _pregaoAte(
-            c.papeis[principal]!,
+          _tradingDayUntil(
+            c.securities[principal]!,
             p.exDate.subtract(const Duration(days: 1)),
           )?.close;
-      if (preco == null || !(preco > 0) || !(p.amount > 0)) continue;
-      rendimento += p.amount / preco;
+      if (price == null || !(price > 0) || !(p.amount > 0)) continue;
+      income += p.amount / price;
     }
-    valor += (vm.valor * 100).round();
-    caixa += (rendimento * vm.valor * 100).round();
-    porCompanhia.add((raiz: c.raiz, valor: vm.valor, rendimento: rendimento));
-    if (maior == null || vm.valor > maior.valor) {
-      maior = (raiz: c.raiz, valor: vm.valor);
+    value += (marketValue.value * 100).round();
+    cash += (income * marketValue.value * 100).round();
+    byCompany.add((root: c.root, value: marketValue.value, income: income));
+    if (isGreater == null || marketValue.value > isGreater.value) {
+      isGreater = (root: c.root, value: marketValue.value);
     }
     n++;
-    if (rendimento > 0) comProvento++;
+    if (income > 0) withDividend++;
   }
-  return _Agregado(
-    valor,
-    caixa,
+  return _Aggregate(
+    value,
+    cash,
     n,
-    comProvento,
-    maior,
-    porCompanhia,
-    foraPelaContagem,
+    withDividend,
+    isGreater,
+    byCompany,
+    excludedByCount,
   );
 }
 
 /// O prefixado de dez anos da curva: a média geométrica dos forwards anuais.
-double? _prefixado10(YieldCurve? curva) {
-  if (curva == null) return null;
-  final fw = curva.annualForwards(10);
+double? _fixedRate10(YieldCurve? curve) {
+  if (curve == null) return null;
+  final fw = curve.annualForwards(10);
   if (fw.isEmpty) return null;
-  var fator = 1.0;
+  var factor = 1.0;
   for (final f in fw) {
-    fator *= 1 + f;
+    factor *= 1 + f;
   }
-  return math.pow(fator, 1 / fw.length).toDouble() - 1;
+  return math.pow(factor, 1 / fw.length).toDouble() - 1;
 }
 
 /// Os trimestres do pacote gravado que a série medida agora devolve diferentes.
 ///
 /// Compara o retorno implícito e o prefixado de cada trimestre presente nos
 /// dois, com folga de 1e-9; sem pacote gravado, nada mudou.
-List<String> _trimestresQueMudaram(ImpliedPremiumPackage novo) {
-  final arquivo = File(_pacote);
-  if (!arquivo.existsSync()) return const [];
-  final gravado = ImpliedPremiumCodec.decode(
-      jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>);
-  if (gravado == null) return const [];
-  final porData = {for (final q in gravado.quarters) q.date: q};
+List<String> _changedQuarters(ImpliedPremiumPackage newPackage) {
+  final file = File(_package);
+  if (!file.existsSync()) return const [];
+  final saved = ImpliedPremiumCodec.decode(
+      jsonDecode(file.readAsStringSync()) as Map<String, dynamic>);
+  if (saved == null) return const [];
+  final byDate = {for (final q in saved.quarters) q.date: q};
   return [
-    for (final q in novo.quarters)
-      if (porData[q.date] case final g?)
+    for (final q in newPackage.quarters)
+      if (byDate[q.date] case final g?)
         if ((g.impliedReturn - q.impliedReturn).abs() > 1e-9 ||
             (g.riskFree - q.riskFree).abs() > 1e-9)
           q.date.toIso8601String().substring(0, 10),
@@ -329,151 +329,151 @@ List<String> _trimestresQueMudaram(ImpliedPremiumPackage novo) {
 
 /// As datas: o último dia de cada trimestre, de 31/03/2011 a 30/06/2026, e a
 /// data da entrada congelada.
-List<DateTime> _datas() => [
-  for (var ano = 2011; ano <= 2026; ano++)
-    for (final mes in const [3, 6, 9, 12])
-      if (!(ano == 2026 && mes > 6)) DateTime(ano, mes + 1, 0),
-  hojeCongelado,
+List<DateTime> _dates() => [
+  for (var year = 2011; year <= 2026; year++)
+    for (final month in const [3, 6, 9, 12])
+      if (!(year == 2026 && month > 6)) DateTime(year, month + 1, 0),
+  frozenToday,
 ];
 
-class _Leitura {
-  _Leitura(this.rotulo, this.premio);
-  final String rotulo;
-  final double premio;
-  final Map<String, int> justo = {};
-  final Map<String, double> potencial = {};
+class _Reading {
+  _Reading(this.label, this.premium);
+  final String label;
+  final double premium;
+  final Map<String, int> fairValue = {};
+  final Map<String, double> upside = {};
 }
 
 Future<void> main(List<String> args) async {
-  final c = await Congelado.montar();
+  final c = await Frozen.build();
   try {
     // -------------------------------------------------------------------
     // As companhias
     // -------------------------------------------------------------------
-    final ponte =
+    final bridge =
         ((jsonDecode(File('docs/validacao/ponte_cvm.json').readAsStringSync())
                     as Map<String, dynamic>)['ponte']
                 as Map<String, dynamic>)
             .cast<String, String>();
-    final descartadas = <_Descartada>[];
-    final contagens = _Contagem.ler();
-    final fca = CodigosFca.ler();
-    final proventos = lerProventos();
-    final eventosDeAcoes = EventosDeAcoes.ler(emissoes: EmissoesFre.ler());
+    final discarded = <_Discarded>[];
+    final counts = _Count.read();
+    final fca = FcaCodes.read();
+    final dividends = readDividends();
+    final shareEvents = ShareEvents.read(issuances: FreIssuances.read());
 
-    final tickersDoCnpj = <String, Set<String>>{};
-    for (final e in ponte.entries) {
-      (tickersDoCnpj[e.value] ??= <String>{}).add(e.key);
+    final tickersOfCnpj = <String, Set<String>>{};
+    for (final e in bridge.entries) {
+      (tickersOfCnpj[e.value] ??= <String>{}).add(e.key);
     }
-    final codigosDo = <String, Set<String>>{
-      for (final e in tickersDoCnpj.entries)
-        e.key: codigosDaCompanhia({...e.value, ...?fca.porCnpj[e.key]}),
+    final codesOf = <String, Set<String>>{
+      for (final e in tickersOfCnpj.entries)
+        e.key: companyCodes({...e.value, ...?fca.byCnpj[e.key]}),
     };
-    final bruto = lerCotahistBruto({for (final s in codigosDo.values) ...s});
+    final raw = readRawCotahist({for (final s in codesOf.values) ...s});
 
-    final companhias = <_Companhia>[];
-    var semProvento = 0, semContagem = 0;
-    for (final e in tickersDoCnpj.entries) {
+    final companies = <_Company>[];
+    var withoutDividend = 0, withoutCount = 0;
+    for (final e in tickersOfCnpj.entries) {
       final cnpj = e.key;
-      final contagem = contagens[cnpj];
-      if (contagem == null) {
-        semContagem++;
+      final count = counts[cnpj];
+      if (count == null) {
+        withoutCount++;
         continue;
       }
       // A raiz dos proventos é a de hoje: entre os códigos da companhia, a que
       // tem arquivo na B3.
-      final raiz = [
+      final root = [
         for (final t in e.value.toList()..sort()) t.substring(0, 4),
-      ].where(proventos.containsKey).firstOrNull;
-      if (raiz == null) {
-        semProvento++;
+      ].where(dividends.containsKey).firstOrNull;
+      if (root == null) {
+        withoutDividend++;
         continue;
       }
-      final codigos = codigosDo[cnpj]!;
-      final papeis = <String, List<Pregao>>{
-        for (final cod in codigos)
-          if (especieDo(cod) == Especie.ordinaria ||
-              especieDo(cod) == Especie.preferencial)
-            cod: encadear(cod, codigos, bruto),
+      final codes = codesOf[cnpj]!;
+      final securities = <String, List<TradingDay>>{
+        for (final code in codes)
+          if (kindOf(code) == ShareKind.common ||
+              kindOf(code) == ShareKind.preferred)
+            code: chain(code, codes, raw),
       }..removeWhere((_, v) => v.isEmpty);
-      if (papeis.isEmpty) continue;
+      if (securities.isEmpty) continue;
       final principal = (e.value.toList()..sort()).first;
-      final eventos = eventosDeAcoes.doPapel(
+      final events = shareEvents.ofSecurity(
         cnpj: cnpj,
         ticker: principal,
-        brutos: encadear(principal, codigos, bruto),
+        rawSessions: chain(principal, codes, raw),
       );
-      final conferida = conferirContagem(
-        contagem.bruta,
-        papeis.values,
-        ate: DateTime.utc(
-          hojeCongelado.year,
-          hojeCongelado.month,
-          hojeCongelado.day,
+      final checked = checkCount(
+        count.raw,
+        securities.values,
+        until: DateTime.utc(
+          frozenToday.year,
+          frozenToday.month,
+          frozenToday.day,
         ),
       );
-      for (final d in conferida.descartadas) {
-        descartadas.add((
+      for (final d in checked.discarded) {
+        discarded.add((
           cnpj: cnpj,
-          desde: d.desde,
-          acoes: d.acoes,
-          anterior: d.posterior,
-          fonte: d.fonte,
+          since: d.since,
+          shares: d.shares,
+          previous: d.acceptedAfter,
+          source: d.source,
         ));
       }
-      companhias.add(
-        _Companhia(
+      companies.add(
+        _Company(
           cnpj,
-          raiz,
-          conferida.aceitas,
-          contagem.bruta.firstOrNull?.desde,
-          contagem.classes,
-          papeis,
-          eventos,
+          root,
+          checked.accepted,
+          count.raw.firstOrNull?.since,
+          count.classes,
+          securities,
+          events,
         ),
       );
     }
     stderr.writeln(
-      'contagem: ${descartadas.length} entradas sem o salto do preço',
+      'contagem: ${discarded.length} entradas sem o salto do preço',
     );
     if (args.contains('--contagens')) {
-      final raizDo = {for (final c in companhias) c.cnpj: c.raiz};
-      for (final d in descartadas) {
+      final rootOf = {for (final c in companies) c.cnpj: c.root};
+      for (final d in discarded) {
         stdout.writeln(
-          '  ${raizDo[d.cnpj]}  ${d.desde.toIso8601String().substring(0, 10)}  '
-          '${d.anterior.toStringAsExponential(3)} -> '
-          '${d.acoes.toStringAsExponential(3)}  ${d.fonte}',
+          '  ${rootOf[d.cnpj]}  ${d.since.toIso8601String().substring(0, 10)}  '
+          '${d.previous.toStringAsExponential(3)} -> '
+          '${d.shares.toStringAsExponential(3)}  ${d.source}',
         );
       }
-      for (final c in companhias) {
-        final a = c.aceitas;
-        final grandes = [
+      for (final c in companies) {
+        final a = c.accepted;
+        final large = [
           for (var i = 1; i < a.length; i++)
-            if (a[i].acoes / a[i - 1].acoes > mudancaGrandeDaContagem ||
-                a[i - 1].acoes / a[i].acoes > mudancaGrandeDaContagem)
-              '${a[i].desde.toIso8601String().substring(0, 10)} ${a[i].acoes.toStringAsExponential(3)}',
+            if (a[i].shares / a[i - 1].shares > largeCountChange ||
+                a[i - 1].shares / a[i].shares > largeCountChange)
+              '${a[i].since.toIso8601String().substring(0, 10)} ${a[i].shares.toStringAsExponential(3)}',
         ];
-        if (grandes.isNotEmpty) {
+        if (large.isNotEmpty) {
           stdout.writeln(
-            '  aceita pelo salto: ${c.raiz}  ${grandes.join('; ')}',
+            '  aceita pelo salto: ${c.root}  ${large.join('; ')}',
           );
         }
       }
       return;
     }
     stderr.writeln(
-      'companhias: ${companhias.length} '
-      '($semProvento sem o histórico de proventos da B3, '
-      '$semContagem sem contagem por data)',
+      'companhias: ${companies.length} '
+      '($withoutDividend sem o histórico de proventos da B3, '
+      '$withoutCount sem contagem por data)',
     );
 
-    final tesouro = lerTesouro('data/tesouro/precotaxatesourodireto.csv');
-    final hoje = hojeCongelado;
-    final indice = await IbovespaLongo.montar(
+    final treasury = readTreasury('data/tesouro/precotaxatesourodireto.csv');
+    final today = frozenToday;
+    final index = await LongIbovespa.build(
       c.ctx.benchmark,
-      janelaDaFonte: DateRange(
-        DateTime(hoje.year - 10, hoje.month, hoje.day),
-        hoje,
+      sourceWindow: DateRange(
+        DateTime(today.year - 10, today.month, today.day),
+        today,
       ),
     );
 
@@ -485,69 +485,69 @@ Future<void> main(List<String> args) async {
       '  data        companhias  valor (R\$ bi)  rendimento  '
       'g nominal   r implícito  prefixado 10a   prêmio    r − Rf   maior     fora',
     );
-    final serie = <Map<String, Object?>>[];
-    final soAsDatas = [
+    final series = <Map<String, Object?>>[];
+    final datesOnly = [
       for (final a in args)
         if (a.startsWith('--datas='))
           for (final d in a.substring(8).split(',')) DateTime.parse(d),
     ];
-    for (final t in soAsDatas.isEmpty ? _datas() : soAsDatas) {
-      final a = _agregar(t, companhias, proventos);
-      if (a.companhias == 0 || !(a.valorDeMercado > 0)) {
+    for (final t in datesOnly.isEmpty ? _dates() : datesOnly) {
+      final a = _aggregate(t, companies, dividends);
+      if (a.companies == 0 || !(a.marketValueOf > 0)) {
         stdout.writeln('  ${t.toIso8601String().substring(0, 10)}  sem dado');
         continue;
       }
-      final ancoras = (await ResolveMarketAnchors.call(
+      final anchors = (await ResolveMarketAnchors.call(
         macro: c.ctx.macro,
-        benchmark: indice,
+        benchmark: index,
         asOf: t,
       )).unwrap();
-      final g = ancoras.nominalEconomyGrowth;
-      final curva = TreasuryCurve.at(tesouro, t);
-      final rf = _prefixado10(curva);
-      final r = a.rendimento * (1 + g) + g;
-      final premio = rf == null ? null : (1 + r) / (1 + rf) - 1;
-      serie.add({
+      final g = anchors.nominalEconomyGrowth;
+      final curve = TreasuryCurve.at(treasury, t);
+      final rf = _fixedRate10(curve);
+      final r = a.income * (1 + g) + g;
+      final premium = rf == null ? null : (1 + r) / (1 + rf) - 1;
+      series.add({
         'data': t.toIso8601String().substring(0, 10),
-        'companhias': a.companhias,
-        'companhiasComProvento': a.comProvento,
-        'valorDeMercado': a.valorDeMercado,
-        'caixaDistribuido': a.caixa,
-        'rendimento': a.rendimento,
+        'companhias': a.companies,
+        'companhiasComProvento': a.withDividend,
+        'valorDeMercado': a.marketValueOf,
+        'caixaDistribuido': a.cash,
+        'rendimento': a.income,
         'crescimentoNominal': g,
         'retornoImplicito': r,
         'prefixado10': rf,
-        'premio': premio,
-        'foraPelaContagem': a.foraPelaContagem,
-        'maiorCompanhia': a.maior?.raiz,
-        'fatiaDaMaior': a.maior == null
+        'premio': premium,
+        'foraPelaContagem': a.excludedByCount,
+        'maiorCompanhia': a.isGreater?.root,
+        'fatiaDaMaior': a.isGreater == null
             ? null
-            : a.maior!.valor / a.valorDeMercado,
+            : a.isGreater!.value / a.marketValueOf,
         'premioComGMenos1': rf == null
             ? null
-            : (1 + a.rendimento * (1 + g - 0.01) + g - 0.01) / (1 + rf) - 1,
+            : (1 + a.income * (1 + g - 0.01) + g - 0.01) / (1 + rf) - 1,
         'premioComGMais1': rf == null
             ? null
-            : (1 + a.rendimento * (1 + g + 0.01) + g + 0.01) / (1 + rf) - 1,
+            : (1 + a.income * (1 + g + 0.01) + g + 0.01) / (1 + rf) - 1,
       });
       stdout.writeln(
         '  ${t.toIso8601String().substring(0, 10)}  '
-        '${a.companhias.toString().padLeft(10)}  '
-        '${(a.valorDeMercado / 1e9).toStringAsFixed(0).padLeft(13)}  '
-        '${_pct(a.rendimento).padLeft(10)}  ${_pct(g).padLeft(9)}   '
+        '${a.companies.toString().padLeft(10)}  '
+        '${(a.marketValueOf / 1e9).toStringAsFixed(0).padLeft(13)}  '
+        '${_pct(a.income).padLeft(10)}  ${_pct(g).padLeft(9)}   '
         '${_pct(r).padLeft(11)}  ${(rf == null ? '—' : _pct(rf)).padLeft(13)}   '
-        '${(premio == null ? '—' : _pct(premio)).padLeft(7)}   '
+        '${(premium == null ? '—' : _pct(premium)).padLeft(7)}   '
         '${(rf == null ? '—' : _pct(r - rf)).padLeft(7)}   '
-        '${a.maior?.raiz} ${_pct(a.maior!.valor / a.valorDeMercado, 0)}   '
-        '${a.foraPelaContagem.length}',
+        '${a.isGreater?.root} ${_pct(a.isGreater!.value / a.marketValueOf, 0)}   '
+        '${a.excludedByCount.length}',
       );
-      if (soAsDatas.isNotEmpty) {
-        final ordem = [...a.porCompanhia]
-          ..sort((x, y) => y.valor.compareTo(x.valor));
-        for (final p in ordem.take(12)) {
+      if (datesOnly.isNotEmpty) {
+        final order = [...a.byCompany]
+          ..sort((x, y) => y.value.compareTo(x.value));
+        for (final p in order.take(12)) {
           stdout.writeln(
-            '      ${p.raiz}  R\$ ${(p.valor / 1e9).toStringAsFixed(1)} bi  '
-            '${_pct(p.valor / a.valorDeMercado, 1)}  rendimento ${_pct(p.rendimento)}',
+            '      ${p.root}  R\$ ${(p.value / 1e9).toStringAsFixed(1)} bi  '
+            '${_pct(p.value / a.marketValueOf, 1)}  rendimento ${_pct(p.income)}',
           );
         }
       }
@@ -556,25 +556,25 @@ Future<void> main(List<String> args) async {
     // -------------------------------------------------------------------
     // A versão normalizada: médias de cinco e de dez anos
     // -------------------------------------------------------------------
-    for (final linha in serie) {
-      final t = DateTime.parse(linha['data'] as String);
-      for (final anos in const [5, 10]) {
-        final inicio = DateTime(t.year - anos, t.month, t.day);
-        final janela = [
-          for (final l in serie)
-            if (DateTime.parse(l['data'] as String).isAfter(inicio) &&
+    for (final row in series) {
+      final t = DateTime.parse(row['data'] as String);
+      for (final years in const [5, 10]) {
+        final start = DateTime(t.year - years, t.month, t.day);
+        final window = [
+          for (final l in series)
+            if (DateTime.parse(l['data'] as String).isAfter(start) &&
                 !DateTime.parse(l['data'] as String).isAfter(t) &&
                 l['premio'] != null &&
                 // A data congelada não é trimestre: não entra na média dos
                 // trimestres, só a recebe.
-                l['data'] != hoje.toIso8601String().substring(0, 10))
+                l['data'] != today.toIso8601String().substring(0, 10))
               l['premio'] as double,
         ];
-        final esperado = anos * 4;
-        linha['normalizado$anos'] = janela.length >= esperado * _coberturaMinima
-            ? janela.reduce((x, y) => x + y) / janela.length
+        final expected = years * 4;
+        row['normalizado$years'] = window.length >= expected * _minCoverage
+            ? window.reduce((x, y) => x + y) / window.length
             : null;
-        linha['trimestresNaMedia$anos'] = janela.length;
+        row['trimestresNaMedia$years'] = window.length;
       }
     }
 
@@ -582,12 +582,12 @@ Future<void> main(List<String> args) async {
     // O pacote: a série trimestral que o aplicativo e o backtest leem
     // (decisão 142). A média que o motor usa sai do núcleo, sobre `r − Rf`.
     // -------------------------------------------------------------------
-    final diaDaEntrada = hoje.toIso8601String().substring(0, 10);
-    final pacote = ImpliedPremiumPackage(
-      geradoEm: DateTime.utc(hoje.year, hoje.month, hoje.day),
+    final entryDay = today.toIso8601String().substring(0, 10);
+    final package = ImpliedPremiumPackage(
+      generatedAt: DateTime.utc(today.year, today.month, today.day),
       quarters: [
-        for (final l in serie)
-          if (l['data'] != diaDaEntrada &&
+        for (final l in series)
+          if (l['data'] != entryDay &&
               l['retornoImplicito'] != null &&
               l['prefixado10'] != null)
             ImpliedPremiumQuarter(
@@ -597,48 +597,48 @@ Future<void> main(List<String> args) async {
             ),
       ],
     );
-    for (final linha in serie) {
-      final t = DateTime.parse(linha['data'] as String);
-      final r = linha['retornoImplicito'] as double?;
-      final rf = linha['prefixado10'] as double?;
-      linha['premioSomado'] = (r == null || rf == null) ? null : r - rf;
-      linha['premioDoMotor'] = pacote.normalizedAt(t);
-      linha['trimestresDoMotor'] = pacote.window(t).length;
+    for (final row in series) {
+      final t = DateTime.parse(row['data'] as String);
+      final r = row['retornoImplicito'] as double?;
+      final rf = row['prefixado10'] as double?;
+      row['premioSomado'] = (r == null || rf == null) ? null : r - rf;
+      row['premioDoMotor'] = package.normalizedAt(t);
+      row['trimestresDoMotor'] = package.window(t).length;
       // A média de cinco anos na mesma forma, só para comparação.
-      final cinco = [
-        for (final q in pacote.quarters)
+      final five = [
+        for (final q in package.quarters)
           if (q.date.isAfter(DateTime.utc(t.year - 5, t.month, t.day)) &&
               !q.date.isAfter(DateTime.utc(t.year, t.month, t.day)))
             q.premium,
       ];
-      linha['premioSomado5'] = cinco.length >= 20 * _coberturaMinima
-          ? cinco.reduce((x, y) => x + y) / cinco.length
+      row['premioSomado5'] = five.length >= 20 * _minCoverage
+          ? five.reduce((x, y) => x + y) / five.length
           : null;
     }
-    if (soAsDatas.isEmpty) {
+    if (datesOnly.isEmpty) {
       // **O passado não muda em silêncio** (item B48). Um trimestre já gravado
       // é fato histórico; se a série medida agora o devolve diferente, a causa
       // é dado que mudou por baixo — em 02/10/2026, as âncoras de 2011 e 2012
       // dependiam de a rede devolver o IBC-Br anterior à entrada congelada, e
       // sem ela o crescimento caía no recuo de 2026. Só regrava com
       // `--aceitar-mudanca-do-passado`, depois de entender a diferença.
-      final mudou = _trimestresQueMudaram(pacote);
-      if (mudou.isNotEmpty && !args.contains('--aceitar-mudanca-do-passado')) {
+      final changed = _changedQuarters(package);
+      if (changed.isNotEmpty && !args.contains('--aceitar-mudanca-do-passado')) {
         stderr.writeln(
-          'ERRO: ${mudou.length} trimestre(s) já gravado(s) em $_pacote mudaram '
-          '(${mudou.take(6).join(', ')}${mudou.length > 6 ? '…' : ''}); o pacote '
+          'ERRO: ${changed.length} trimestre(s) já gravado(s) em $_package mudaram '
+          '(${changed.take(6).join(', ')}${changed.length > 6 ? '…' : ''}); o pacote '
           'não foi regravado. Confira a causa e, se a mudança for intencional, '
           'rode de novo com --aceitar-mudanca-do-passado.',
         );
         exitCode = 1;
         return;
       }
-      File(_pacote).writeAsStringSync(
-        jsonEncode(ImpliedPremiumCodec.encode(pacote)),
+      File(_package).writeAsStringSync(
+        jsonEncode(ImpliedPremiumCodec.encode(package)),
       );
       stdout.writeln(
-        'escrito $_pacote: ${pacote.quarters.length} trimestres; o prêmio do '
-        'motor em $diaDaEntrada é ${_pct(pacote.normalizedAt(hoje) ?? double.nan)}',
+        'escrito $_package: ${package.quarters.length} trimestres; o prêmio do '
+        'motor em $entryDay é ${_pct(package.normalizedAt(today) ?? double.nan)}',
       );
     }
 
@@ -647,7 +647,7 @@ Future<void> main(List<String> args) async {
     // ficam no JSON (`normalizado5`, `normalizado10`).
     stdout.writeln('-- implícito e normalizado nas datas das coortes (r − Rf) --');
     stdout.writeln('  data        implícito   média 5 anos   média 10 anos (o motor)');
-    for (final l in serie) {
+    for (final l in series) {
       final d = DateTime.parse(l['data'] as String);
       if (d.year < 2018) continue;
       String f(Object? v) => v == null ? '—' : _pct(v as double);
@@ -662,9 +662,9 @@ Future<void> main(List<String> args) async {
     // -------------------------------------------------------------------
     // O que cada um faz ao aplicativo, sobre a entrada congelada
     // -------------------------------------------------------------------
-    final daEntrada = serie.lastWhere((l) => l['data'] == diaDaEntrada);
-    final doMotor = pacote.normalizedAt(hoje);
-    if (doMotor == null) {
+    final ofEntry = series.lastWhere((l) => l['data'] == entryDay);
+    final fromEngine = package.normalizedAt(today);
+    if (fromEngine == null) {
       stderr.writeln('ERRO: a série não tem trimestres para a média de dez anos');
       exitCode = 1;
       return;
@@ -672,52 +672,52 @@ Future<void> main(List<String> args) async {
     // A montagem do aplicativo lê o pacote que estava em disco quando a
     // entrada congelada foi montada; se a série medida agora for outra, a
     // conferência contra o gabarito compararia montagens diferentes.
-    if ((c.premio.valor - doMotor).abs() > 1e-12) {
+    if ((c.premium.value - fromEngine).abs() > 1e-12) {
       stderr.writeln(
-        'ERRO: o pacote em disco dava ${_pct(c.premio.valor)} e a série medida '
-        'agora dá ${_pct(doMotor)}. O pacote foi regravado: rode de novo, e '
+        'ERRO: o pacote em disco dava ${_pct(c.premium.value)} e a série medida '
+        'agora dá ${_pct(fromEngine)}. O pacote foi regravado: rode de novo, e '
         'regrave o gabarito antes (tool/gabarito_cascata.dart).',
       );
       exitCode = 1;
       return;
     }
     // A média de cinco anos, na mesma forma `r − Rf`, para comparação.
-    final cincoAnos = [
-      for (final q in pacote.quarters)
-        if (q.date.isAfter(DateTime.utc(hoje.year - 5, hoje.month, hoje.day)))
+    final fiveYears = [
+      for (final q in package.quarters)
+        if (q.date.isAfter(DateTime.utc(today.year - 5, today.month, today.day)))
           q.premium,
     ];
-    final candidatos = <(String, double?)>[
+    final candidates = <(String, double?)>[
       // A primeira é a do aplicativo (`premio` nulo: o do pacote), e é a que
       // se confere contra o gabarito.
       ('média de 10 anos — o motor', null),
-      ('5,5% (até a decisão 142)', _referencia),
-      if (daEntrada['premioSomado'] case final double p) ('implícito', p),
-      if (cincoAnos.length >= 20)
-        ('média de 5 anos', cincoAnos.reduce((a, b) => a + b) / cincoAnos.length),
+      ('5,5% (até a decisão 142)', _reference),
+      if (ofEntry['premioSomado'] case final double p) ('implícito', p),
+      if (fiveYears.length >= 20)
+        ('média de 5 anos', fiveYears.reduce((a, b) => a + b) / fiveYears.length),
     ];
-    final leituras = <_Leitura>[];
-    for (final (rotulo, premio) in candidatos) {
-      final l = _Leitura(rotulo, premio ?? doMotor);
-      final avaliadas = <Ticker, ValuationResult?>{};
+    final readings = <_Reading>[];
+    for (final (label, premium) in candidates) {
+      final l = _Reading(label, premium ?? fromEngine);
+      final evaluated = <Ticker, ValuationResult?>{};
       var i = 0;
-      for (final t in c.universo) {
+      for (final t in c.universe) {
         i++;
         if (i % 50 == 0) {
-          stderr.write('  $rotulo: $i/${c.universo.length}   \r');
+          stderr.write('  $label: $i/${c.universe.length}   \r');
         }
-        final prep = await c.preparar(t, premio: premio);
+        final prep = await c.prepare(t, premium: premium);
         if (prep.isErr) continue;
         final r = ValuationCascade.evaluate(prep.unwrap());
-        if (identical(rotulo, candidatos.first.$1)) {
-          avaliadas[t] = r.valueOrNull;
+        if (identical(label, candidates.first.$1)) {
+          evaluated[t] = r.valueOrNull;
         }
         if (r.isErr) continue;
-        l.justo[t.value] = r.unwrap().fairValue.cents;
-        l.potencial[t.value] = r.unwrap().upside;
+        l.fairValue[t.value] = r.unwrap().fairValue.cents;
+        l.upside[t.value] = r.unwrap().upside;
       }
-      if (identical(rotulo, candidatos.first.$1)) {
-        final div = await c.conferirContraGabarito(avaliadas);
+      if (identical(label, candidates.first.$1)) {
+        final div = await c.checkAgainstAnswerKey(evaluated);
         if (div != null && div.isNotEmpty) {
           stderr.writeln(
             'ERRO: a montagem do aplicativo diverge do gabarito em '
@@ -727,79 +727,79 @@ Future<void> main(List<String> args) async {
           return;
         }
       }
-      leituras.add(l);
+      readings.add(l);
     }
     stderr.write('                                        \r');
 
-    final base = leituras.first;
-    final efeitos = <Map<String, Object?>>[];
+    final base = readings.first;
+    final effects = <Map<String, Object?>>[];
     stdout.writeln('');
     stdout.writeln('-- o universo reavaliado sobre a entrada congelada --');
     stdout.writeln(
       '  prêmio                  avaliados   potencial mediano   '
       'acima de zero   preço justo vs o motor   postos',
     );
-    for (final l in leituras) {
-      final pots = l.potencial.values.toList();
-      final comuns = l.justo.keys.where(base.justo.containsKey).toList()
+    for (final l in readings) {
+      final upsideValues = l.upside.values.toList();
+      final common = l.fairValue.keys.where(base.fairValue.containsKey).toList()
         ..sort();
-      final variacao = <double>[
-        for (final k in comuns)
-          if (base.justo[k]! != 0) l.justo[k]! / base.justo[k]! - 1,
+      final changeList = <double>[
+        for (final k in common)
+          if (base.fairValue[k]! != 0) l.fairValue[k]! / base.fairValue[k]! - 1,
       ];
-      final rho = comuns.length < 3
+      final rho = common.length < 3
           ? null
           : Regression.spearman(
-              [for (final k in comuns) base.potencial[k]!],
-              [for (final k in comuns) l.potencial[k]!],
+              [for (final k in common) base.upside[k]!],
+              [for (final k in common) l.upside[k]!],
             );
-      final acima = pots.where((p) => p > 0).length;
-      final medPot = _mediana(pots);
-      final medVar = _mediana(variacao);
+      final above = upsideValues.where((p) => p > 0).length;
+      final medianUpside = _median(upsideValues);
+      final medVar = _median(changeList);
       stdout.writeln(
-        '  ${'${l.rotulo} (${_pct(l.premio)})'.padRight(24)}'
-        '${l.justo.length.toString().padLeft(9)}   '
-        '${(medPot == null ? '—' : _pct(medPot)).padLeft(17)}   '
-        '${'$acima de ${pots.length}'.padLeft(13)}   '
+        '  ${'${l.label} (${_pct(l.premium)})'.padRight(24)}'
+        '${l.fairValue.length.toString().padLeft(9)}   '
+        '${(medianUpside == null ? '—' : _pct(medianUpside)).padLeft(17)}   '
+        '${'$above de ${upsideValues.length}'.padLeft(13)}   '
         '${(medVar == null ? '—' : _pct(medVar)).padLeft(19)}   '
         '${rho == null ? '—' : rho.toStringAsFixed(3)}',
       );
-      efeitos.add({
-        'rotulo': l.rotulo,
-        'premio': l.premio,
-        'avaliados': l.justo.length,
-        'potencialMediano': medPot,
-        'acimaDeZero': acima,
+      effects.add({
+        'rotulo': l.label,
+        'premio': l.premium,
+        'avaliados': l.fairValue.length,
+        'potencialMediano': medianUpside,
+        'acimaDeZero': above,
         'precoJustoMedianoContraReferencia': medVar,
         'spearmanContraReferencia': rho,
         'casos': {
           for (final t in const ['WEGE3', 'ITUB4', 'VALE3', 'SAPR11', 'RENT3'])
-            t: {'justoCentavos': l.justo[t], 'potencial': l.potencial[t]},
+            t: {'justoCentavos': l.fairValue[t], 'potencial': l.upside[t]},
         },
       });
     }
 
-    File(_saida).writeAsStringSync(
+    File(_output).writeAsStringSync(
       const JsonEncoder.withIndent(' ').convert({
         'geradoPor': 'tool/premio_implicito.dart',
-        'dataDaEntrada': hoje.toIso8601String().substring(0, 10),
-        'companhias': companhias.length,
+        'dataDaEntrada': today.toIso8601String().substring(0, 10),
+        'companhias': companies.length,
         'contagensSemSalto': [
-          for (final d in descartadas)
+          for (final d in discarded)
             {
               'cnpj': d.cnpj,
-              'desde': d.desde.toIso8601String().substring(0, 10),
-              'acoes': d.acoes,
-              'anterior': d.anterior,
-              'fonte': d.fonte,
+              'desde': d.since.toIso8601String().substring(0, 10),
+              'acoes': d.shares,
+              'anterior': d.previous,
+              'fonte': d.source,
             },
         ],
-        'serie': serie,
-        'efeitos': efeitos,
+        'serie': series,
+        'efeitos': effects,
       }),
     );
     stdout.writeln('');
-    stdout.writeln('escrito $_saida');
+    stdout.writeln('escrito $_output');
   } finally {
     await c.ctx.dispose();
   }

@@ -22,11 +22,11 @@ import '../value_objects/ticker.dart';
 /// da troca, para a interface repintar sem recalcular nada por conta própria.
 class RebalanceOutcome {
   final Portfolio principal;
-  final Portfolio reserva;
+  final Portfolio reserve;
 
   const RebalanceOutcome({
     required this.principal,
-    required this.reserva,
+    required this.reserve,
   });
 }
 
@@ -38,12 +38,12 @@ class RebalanceOutcome {
 abstract final class SwapAssetBetweenPortfolios {
   static Result<RebalanceOutcome> call({
     required Portfolio principal,
-    required Portfolio reserva,
+    required Portfolio reserve,
     required Ticker ticker,
     required bool toPrincipal,
   }) {
-    final source = toPrincipal ? reserva : principal;
-    final target = toPrincipal ? principal : reserva;
+    final source = toPrincipal ? reserve : principal;
+    final target = toPrincipal ? principal : reserve;
 
     final entry = source.entries[ticker];
     if (entry == null) {
@@ -64,11 +64,11 @@ abstract final class SwapAssetBetweenPortfolios {
     if (removed.isErr) return Err(removed.failureOrNull!);
 
     final newPrincipal = toPrincipal ? added.unwrap() : removed.unwrap();
-    final newReserva = toPrincipal ? removed.unwrap() : added.unwrap();
+    final newReserve = toPrincipal ? removed.unwrap() : added.unwrap();
 
     return Ok(RebalanceOutcome(
       principal: newPrincipal,
-      reserva: newReserva,
+      reserve: newReserve,
     ));
   }
 }
@@ -314,28 +314,28 @@ abstract final class ResolveMarketAnchors {
         : indexEndWindowDays;
     if (n < 1) return MarketAnchors.fallback2026.marketCagr;
 
-    double media(Iterable<PricePoint> xs) {
-      var soma = 0.0;
-      var quantos = 0;
+    double mean(Iterable<PricePoint> xs) {
+      var sum = 0.0;
+      var howMany = 0;
       for (final x in xs) {
-        soma += x.close;
-        quantos++;
+        sum += x.close;
+        howMany++;
       }
-      return quantos == 0 ? 0 : soma / quantos;
+      return howMany == 0 ? 0 : sum / howMany;
     }
 
-    final inicio = media(p.take(n));
-    final fim = media(p.skip(p.length - n));
-    if (inicio <= 0 || fim <= 0) {
+    final start = mean(p.take(n));
+    final end = mean(p.skip(p.length - n));
+    if (start <= 0 || end <= 0) {
       return MarketAnchors.fallback2026.marketCagr;
     }
 
-    final centroInicial = p[(n - 1) ~/ 2].date;
-    final centroFinal = p[p.length - 1 - (n - 1) ~/ 2].date;
-    final years = DateRange(centroInicial, centroFinal).years;
+    final initialCenter = p[(n - 1) ~/ 2].date;
+    final finalCenter = p[p.length - 1 - (n - 1) ~/ 2].date;
+    final years = DateRange(initialCenter, finalCenter).years;
     if (years <= 0) return MarketAnchors.fallback2026.marketCagr;
 
-    return Returns.annualize(fim / inicio - 1, years);
+    return Returns.annualize(end / start - 1, years);
   }
 
   /// Crescimento real anual a partir do índice de atividade.
@@ -353,28 +353,28 @@ abstract final class ResolveMarketAnchors {
   /// Devolve `null` quando não há 12 meses em cada ponta ou quando a janela
   /// efetiva é curta demais, para que o chamador decida o fallback.
   static double? _activityCagrOf(RateSeries series) {
-    const janela = 12;
+    const window = 12;
     final v = series.rates;
-    if (v.length < janela * 2) return null;
+    if (v.length < window * 2) return null;
 
-    double media(int fim) {
-      var soma = 0.0;
-      for (var i = fim - janela + 1; i <= fim; i++) {
-        soma += v[i];
+    double mean(int end) {
+      var sum = 0.0;
+      for (var i = end - window + 1; i <= end; i++) {
+        sum += v[i];
       }
-      return soma / janela;
+      return sum / window;
     }
 
-    final inicio = media(janela - 1);
-    final fim = media(v.length - 1);
-    if (inicio <= 0 || fim <= 0) return null;
+    final start = mean(window - 1);
+    final end = mean(v.length - 1);
+    if (start <= 0 || end <= 0) return null;
 
     // Anos entre os centros das duas médias móveis, não entre as pontas cruas.
-    final meses = v.length - janela;
-    final anos = meses / 12.0;
-    if (anos < 1) return null;
+    final months = v.length - window;
+    final years = months / 12.0;
+    if (years < 1) return null;
 
-    final g = math.pow(fim / inicio, 1 / anos).toDouble() - 1;
+    final g = math.pow(end / start, 1 / years).toDouble() - 1;
     return g.isFinite ? g : null;
   }
 }

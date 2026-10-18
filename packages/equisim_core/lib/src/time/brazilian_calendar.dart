@@ -32,7 +32,7 @@ abstract final class BrazilianCalendar {
   ///
   /// A lei é de 21/12/2023; o preço do Tesouro de 22/12/2023 ainda não o
   /// descontava, e o de 26/12/2023 já.
-  static final DateTime conscienciaNegraConhecidaDesde = DateTime.utc(2023, 12, 26);
+  static final DateTime blackConsciousnessKnownSince = DateTime.utc(2023, 12, 26);
 
   /// Domingo de Páscoa, pelo algoritmo anônimo do calendário gregoriano.
   static DateTime easter(int year) {
@@ -48,39 +48,39 @@ abstract final class BrazilianCalendar {
     final k = c % 4;
     final l = (32 + 2 * e + 2 * i - h - k) % 7;
     final m = (a + 11 * h + 22 * l) ~/ 451;
-    final mes = (h + l - 7 * m + 114) ~/ 31;
-    final dia = (h + l - 7 * m + 114) % 31 + 1;
-    return DateTime.utc(year, mes, dia);
+    final month = (h + l - 7 * m + 114) ~/ 31;
+    final day = (h + l - 7 * m + 114) % 31 + 1;
+    return DateTime.utc(year, month, day);
   }
 
-  static final Map<int, Set<int>> _porAno = {};
-  static final Map<int, Set<int>> _porAnoSemConscienciaNegra = {};
+  static final Map<int, Set<int>> _byYear = {};
+  static final Map<int, Set<int>> _byYearWithoutBlackConsciousness = {};
 
-  static int _chave(DateTime d) => d.year * 10000 + d.month * 100 + d.day;
+  static int _key(DateTime d) => d.year * 10000 + d.month * 100 + d.day;
 
-  static DateTime _dia(DateTime d) => DateTime.utc(d.year, d.month, d.day);
+  static DateTime _day(DateTime d) => DateTime.utc(d.year, d.month, d.day);
 
-  static Set<int> _feriados(int ano, {required bool comConscienciaNegra}) {
+  static Set<int> _holidays(int year, {required bool withBlackConsciousness}) {
     final cache =
-        comConscienciaNegra ? _porAno : _porAnoSemConscienciaNegra;
-    return cache.putIfAbsent(ano, () {
-      final p = easter(ano);
-      DateTime rel(int dias) => DateTime.utc(p.year, p.month, p.day + dias);
+        withBlackConsciousness ? _byYear : _byYearWithoutBlackConsciousness;
+    return cache.putIfAbsent(year, () {
+      final p = easter(year);
+      DateTime rel(int days) => DateTime.utc(p.year, p.month, p.day + days);
       return {
-        _chave(DateTime.utc(ano, 1, 1)), // Confraternização Universal
-        _chave(rel(-48)), // Carnaval, segunda
-        _chave(rel(-47)), // Carnaval, terça
-        _chave(rel(-2)), // Sexta-feira da Paixão
-        _chave(DateTime.utc(ano, 4, 21)), // Tiradentes
-        _chave(DateTime.utc(ano, 5, 1)), // Dia do Trabalho
-        _chave(rel(60)), // Corpus Christi
-        _chave(DateTime.utc(ano, 9, 7)), // Independência
-        _chave(DateTime.utc(ano, 10, 12)), // Nossa Senhora Aparecida
-        _chave(DateTime.utc(ano, 11, 2)), // Finados
-        _chave(DateTime.utc(ano, 11, 15)), // Proclamação da República
-        if (comConscienciaNegra && ano >= 2024)
-          _chave(DateTime.utc(ano, 11, 20)), // Consciência Negra
-        _chave(DateTime.utc(ano, 12, 25)), // Natal
+        _key(DateTime.utc(year, 1, 1)), // Confraternização Universal
+        _key(rel(-48)), // Carnaval, segunda
+        _key(rel(-47)), // Carnaval, terça
+        _key(rel(-2)), // Sexta-feira da Paixão
+        _key(DateTime.utc(year, 4, 21)), // Tiradentes
+        _key(DateTime.utc(year, 5, 1)), // Dia do Trabalho
+        _key(rel(60)), // Corpus Christi
+        _key(DateTime.utc(year, 9, 7)), // Independência
+        _key(DateTime.utc(year, 10, 12)), // Nossa Senhora Aparecida
+        _key(DateTime.utc(year, 11, 2)), // Finados
+        _key(DateTime.utc(year, 11, 15)), // Proclamação da República
+        if (withBlackConsciousness && year >= 2024)
+          _key(DateTime.utc(year, 11, 20)), // Consciência Negra
+        _key(DateTime.utc(year, 12, 25)), // Natal
       };
     });
   }
@@ -89,14 +89,14 @@ abstract final class BrazilianCalendar {
   ///
   /// Sem [knownAt], vale o calendário de hoje.
   static bool isBusinessDay(DateTime day, {DateTime? knownAt}) {
-    final d = _dia(day);
+    final d = _day(day);
     if (d.weekday == DateTime.saturday || d.weekday == DateTime.sunday) {
       return false;
     }
-    final comConscienciaNegra = knownAt == null ||
-        !_dia(knownAt).isBefore(conscienciaNegraConhecidaDesde);
-    return !_feriados(d.year, comConscienciaNegra: comConscienciaNegra)
-        .contains(_chave(d));
+    final withBlackConsciousness = knownAt == null ||
+        !_day(knownAt).isBefore(blackConsciousnessKnownSince);
+    return !_holidays(d.year, withBlackConsciousness: withBlackConsciousness)
+        .contains(_key(d));
   }
 
   /// Dias úteis em `[from, to)` — o primeiro conta, o último não.
@@ -107,11 +107,11 @@ abstract final class BrazilianCalendar {
     DateTime to, {
     DateTime? knownAt,
   }) {
-    final inicio = _dia(from);
-    final fim = _dia(to);
+    final start = _day(from);
+    final end = _day(to);
     var n = 0;
-    for (var d = inicio;
-        d.isBefore(fim);
+    for (var d = start;
+        d.isBefore(end);
         d = DateTime.utc(d.year, d.month, d.day + 1)) {
       if (isBusinessDay(d, knownAt: knownAt)) n++;
     }
@@ -128,7 +128,7 @@ abstract final class BrazilianCalendar {
   /// As duas datas são dias úteis bancários e não têm pregão. A data ex de um
   /// evento com data-com em 30/12 é o primeiro pregão de janeiro, e não 31/12.
   static bool isTradingDay(DateTime day, {DateTime? knownAt}) {
-    final d = _dia(day);
+    final d = _day(day);
     if (d.month == 12 && (d.day == 24 || d.day == 31)) return false;
     return isBusinessDay(d, knownAt: knownAt);
   }
@@ -136,7 +136,7 @@ abstract final class BrazilianCalendar {
   /// Primeiro pregão depois de [day] — a data ex de quem tem data-com em
   /// [day], e a liquidação D+1 de quem negociou nele.
   static DateTime nextTradingSession(DateTime day) {
-    var d = _dia(day);
+    var d = _day(day);
     do {
       d = DateTime.utc(d.year, d.month, d.day + 1);
     } while (!isTradingDay(d, knownAt: day));

@@ -18,63 +18,63 @@ import 'package:test/test.dart';
 
 final _ticker = Ticker.parse('ABCD3');
 
-FundamentalsSnapshot _ano(int y, double escala) => FundamentalsSnapshot(
+FundamentalsSnapshot _year(int y, double scale) => FundamentalsSnapshot(
       ticker: _ticker,
       fiscalPeriodEnd: DateTime(y, 12, 31),
-      totalRevenue: 10000 * escala,
-      ebit: 1800 * escala,
-      ebitda: 2400 * escala,
-      netIncome: 900 * escala,
-      incomeBeforeTax: 1300 * escala,
-      incomeTaxExpense: -400 * escala,
+      totalRevenue: 10000 * scale,
+      ebit: 1800 * scale,
+      ebitda: 2400 * scale,
+      netIncome: 900 * scale,
+      incomeBeforeTax: 1300 * scale,
+      incomeTaxExpense: -400 * scale,
       interestExpense: 400,
-      earningsPerShare: 0.9 * escala,
+      earningsPerShare: 0.9 * scale,
       cash: 200,
       shortTermDebt: 1000,
       longTermDebt: 3000,
-      totalStockholderEquity: 6000 * escala,
-      bookValuePerShare: 6.0 * escala,
-      operatingCashFlow: 2000 * escala,
-      nopat: 1188 * escala,
+      totalStockholderEquity: 6000 * scale,
+      bookValuePerShare: 6.0 * scale,
+      operatingCashFlow: 2000 * scale,
+      nopat: 1188 * scale,
       sharesOutstanding: 1000,
       sharesOutstandingAsOf: 1000,
       marketCap: 12000,
     );
 
-List<FundamentalsSnapshot> _serie() {
+List<FundamentalsSnapshot> _series() {
   final out = <FundamentalsSnapshot>[];
-  var escala = 1.0;
+  var scale = 1.0;
   for (var i = 12; i >= 0; i--) {
-    out.add(_ano(2025 - i, escala));
-    escala *= 1.05;
+    out.add(_year(2025 - i, scale));
+    scale *= 1.05;
   }
   return out;
 }
 
-ValuationInputs _insumos({List<String> notas = const []}) => ValuationInputs(
+ValuationInputs _inputs({List<String> notes = const []}) => ValuationInputs(
       ticker: _ticker,
       asOf: DateTime(2026, 9, 9),
-      fundamentals: _serie(),
+      fundamentals: _series(),
       marketPrice: 12.0,
       capm: const CapmInputs(
           riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
       declaredTerminalRiskFreeRate: 0.094,
       peerMultiples: PeerMultipleSet(byKind: const {
-        MultipleKind.precoLucro: PeerMultiple(median: 9, peers: 8, group: 'g'),
-        MultipleKind.precoPatrimonio:
+        MultipleKind.priceToEarnings: PeerMultiple(median: 9, peers: 8, group: 'g'),
+        MultipleKind.priceToBook:
             PeerMultiple(median: 1.4, peers: 8, group: 'g'),
-        MultipleKind.firmaEbitda:
+        MultipleKind.evToEbitda:
             PeerMultiple(median: 6, peers: 8, group: 'g'),
       }, asOf: DateTime(2026, 9, 1)),
-      contextNotes: notas,
+      contextNotes: notes,
     );
 
-/// Captura os eventos emitidos durante [corpo].
-List<AuditEvent> _eventos(void Function() corpo) {
+/// Captura os eventos emitidos durante [body].
+List<AuditEvent> _events(void Function() body) {
   final out = <AuditEvent>[];
   AuditRecorder.attach(out.add);
   try {
-    corpo();
+    body();
   } finally {
     AuditRecorder.detach();
   }
@@ -89,7 +89,7 @@ void main() {
         'inf': double.infinity,
         'menosInf': double.negativeInfinity,
         'data': DateTime.utc(2026, 9, 24),
-        'enum': CashTiming.fimDeAno,
+        'enum': CashTiming.endOfYear,
         'objeto': Ticker.parse('PETR4'),
         'lista': [1, 2.5, double.nan],
         1: 'chave numérica',
@@ -110,7 +110,7 @@ void main() {
     });
 
     test('um passo degenerado não derruba a exportação, e volta como NaN', () {
-      final eventos = _eventos(() {
+      final events = _events(() {
         AuditRecorder.begin('/core/teste', inputPayload: {'x': double.nan})!
           ..step(
             formulaName: 'conta degenerada',
@@ -120,54 +120,54 @@ void main() {
           )
           ..complete({'saida': double.negativeInfinity});
       });
-      final texto = jsonEncode(eventos.single.toJson());
-      final volta = AuditEvent.fromJson(
-          jsonDecode(texto) as Map<String, dynamic>);
-      expect(volta.calculations.single.finalValue!.isNaN, isTrue);
-      expect(volta.calculations.single.mappedVariables['b'], 'Infinity');
-      expect(volta.inputPayload['x'], 'NaN');
-      expect(volta.outputPayload['saida'], '-Infinity');
+      final text = jsonEncode(events.single.toJson());
+      final roundTrip = AuditEvent.fromJson(
+          jsonDecode(text) as Map<String, dynamic>);
+      expect(roundTrip.calculations.single.finalValue!.isNaN, isTrue);
+      expect(roundTrip.calculations.single.mappedVariables['b'], 'Infinity');
+      expect(roundTrip.inputPayload['x'], 'NaN');
+      expect(roundTrip.outputPayload['saida'], '-Infinity');
     });
 
     test('o JSON de um rastro sem valor degenerado não muda um byte', () {
-      final e = _eventos(() => ValuationCascade.evaluate(_insumos())).single;
-      final cru = jsonEncode({
+      final e = _events(() => ValuationCascade.evaluate(_inputs())).single;
+      final raw = jsonEncode({
         'entrada': e.inputPayload,
         'saida': e.outputPayload,
         'calculos': [for (final c in e.calculations) c.toJson()],
       });
       final j = e.toJson();
-      final seguro = jsonEncode({
+      final safe = jsonEncode({
         'entrada': j['inputPayload'],
         'saida': j['outputPayload'],
         'calculos': j['calculations'],
       });
-      expect(seguro, cru);
+      expect(safe, raw);
     });
   });
 
   group('completo', () {
     test('o evento reproduz o resultado que a tela mostra', () {
       late Result<ValuationResult> r;
-      final e = _eventos(() {
+      final e = _events(() {
         r = ValuationCascade.evaluate(
-            _insumos(notas: const ['CVM defasada', 'curva de 12/09']));
+            _inputs(notes: const ['CVM defasada', 'curva de 12/09']));
       }).single;
       final v = r.unwrap();
-      final evento = jsonDecode(jsonEncode(e.toJson())) as Map<String, dynamic>;
-      final saida = evento['outputPayload'] as Map<String, dynamic>;
+      final event = jsonDecode(jsonEncode(e.toJson())) as Map<String, dynamic>;
+      final output = event['outputPayload'] as Map<String, dynamic>;
 
-      expect(saida['status'], 'ok');
-      expect(saida['fairValue'], v.fairValue.reais);
-      expect(saida['marketPrice'], v.marketPrice.reais);
-      expect((saida['discountRate'] as num).toDouble(),
+      expect(output['status'], 'ok');
+      expect(output['fairValue'], v.fairValue.reais);
+      expect(output['marketPrice'], v.marketPrice.reais);
+      expect((output['discountRate'] as num).toDouble(),
           closeTo(v.discountRate, 1e-6));
-      expect(saida['warnings'], v.warnings,
+      expect(output['warnings'], v.warnings,
           reason: 'a tela e o arquivo leem as mesmas ressalvas');
       expect(v.warnings, containsAll(['CVM defasada', 'curva de 12/09']));
-      expect(saida.containsKey('priceVolatility'), isTrue);
+      expect(output.containsKey('priceVolatility'), isTrue);
 
-      final d = saida['diagnostics'] as Map<String, dynamic>;
+      final d = output['diagnostics'] as Map<String, dynamic>;
       expect(
           d.keys.toSet(),
           containsAll(<String>{
@@ -186,80 +186,80 @@ void main() {
 
       final tri = v.triangulation;
       if (tri != null) {
-        final t = saida['triangulation'] as Map<String, dynamic>;
+        final t = output['triangulation'] as Map<String, dynamic>;
         expect((t['readings'] as List).length, tri.readings.length);
       }
     });
 
     test('a entrada diz com que insumo a cascata rodou', () {
-      final e = _eventos(() => ValuationCascade.evaluate(
-            _insumos(notas: const ['nota']).withOverrides(
-                lane: ValuationLane.firm, cashTiming: CashTiming.fimDeAno),
+      final e = _events(() => ValuationCascade.evaluate(
+            _inputs(notes: const ['nota']).withOverrides(
+                lane: ValuationLane.firm, cashTiming: CashTiming.endOfYear),
           )).single;
-      final entrada = e.toJson()['inputPayload'] as Map<String, dynamic>;
-      expect(entrada['fundamentalsPeriods'], 13);
-      expect(entrada['fundamentalsOmitted'], 7,
+      final entry = e.toJson()['inputPayload'] as Map<String, dynamic>;
+      expect(entry['fundamentalsPeriods'], 13);
+      expect(entry['fundamentalsOmitted'], 7,
           reason: 'o resumo tem seis exercícios, e diz que resumiu');
-      expect(entrada['terminalRiskFreeRate'], 0.094);
-      expect((entrada['peerMultiples'] as Map)['precoLucro'],
+      expect(entry['terminalRiskFreeRate'], 0.094);
+      expect((entry['peerMultiples'] as Map)['precoLucro'],
           {'median': 9, 'peers': 8, 'group': 'g'});
-      expect(entrada['overrides'], {'lane': 'firm', 'cashTiming': 'fimDeAno'});
-      expect(entrada['contextNotes'], ['nota']);
+      expect(entry['overrides'], {'lane': 'firm', 'cashTiming': 'fimDeAno'});
+      expect(entry['contextNotes'], ['nota']);
     });
   });
 
   group('toda saída emite, e uma vez só', () {
     test('sucesso', () {
-      expect(_eventos(() => ValuationCascade.evaluate(_insumos())).length, 1);
+      expect(_events(() => ValuationCascade.evaluate(_inputs())).length, 1);
     });
 
     test('recusa antes do primeiro passo', () {
-      final eventos = _eventos(() => ValuationCascade.evaluate(ValuationInputs(
+      final events = _events(() => ValuationCascade.evaluate(ValuationInputs(
             ticker: _ticker,
             asOf: DateTime(2026, 9, 9),
-            fundamentals: _serie(),
+            fundamentals: _series(),
             marketPrice: 0,
             capm: const CapmInputs(
                 riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
           )));
-      expect(eventos.single.outputPayload['status'], 'falha');
-      expect(eventos.single.endpoint, '/core/valuation/ABCD3');
+      expect(events.single.outputPayload['status'], 'falha');
+      expect(events.single.endpoint, '/core/valuation/ABCD3');
     });
 
     test('uma exceção no meio da cascata fecha a transação e continua subindo',
         () {
-      final eventos = <AuditEvent>[];
-      AuditRecorder.attach(eventos.add);
+      final events = <AuditEvent>[];
+      AuditRecorder.attach(events.add);
       addTearDown(AuditRecorder.detach);
       expect(
         () => ValuationCascade.evaluate(
-          _insumos(),
+          _inputs(),
           scenarioBuilder: (_) => throw StateError('fonte de cenários quebrada'),
         ),
         throwsStateError,
       );
-      expect(eventos, hasLength(1));
-      final saida = eventos.single.outputPayload;
-      expect(saida['status'], 'falha');
-      expect(saida['motivo'], contains('fonte de cenários quebrada'));
-      expect(saida['excecao'], 'StateError');
-      expect(saida['pilha'], isNotEmpty);
+      expect(events, hasLength(1));
+      final output = events.single.outputPayload;
+      expect(output['status'], 'falha');
+      expect(output['motivo'], contains('fonte de cenários quebrada'));
+      expect(output['excecao'], 'StateError');
+      expect(output['pilha'], isNotEmpty);
     });
 
     test('a falha de preparo deixa evento no endpoint da avaliação', () async {
-      final eventos = <AuditEvent>[];
-      AuditRecorder.attach(eventos.add);
+      final events = <AuditEvent>[];
+      AuditRecorder.attach(events.add);
       addTearDown(AuditRecorder.detach);
       final r = await PrepareValuationInputs.call(
         ticker: _ticker,
-        prices: _Nada(),
-        fundamentals: _SemExercicios(),
-        benchmark: _Nada(),
+        prices: _Nothing(),
+        fundamentals: _NoFiscalYears(),
+        benchmark: _Nothing(),
         riskFreeRate: 0.14,
         asOf: DateTime(2026, 9, 9),
       );
       expect(r.isErr, isTrue);
-      final e = eventos.single;
+      final e = events.single;
       expect(e.endpoint, '/core/valuation/ABCD3');
       expect(e.outputPayload['etapa'], 'preparo');
       expect(e.outputPayload['fonte'], 'exercícios');
@@ -268,7 +268,7 @@ void main() {
   });
 }
 
-class _SemExercicios implements FundamentalsRepository {
+class _NoFiscalYears implements FundamentalsRepository {
   @override
   Future<Result<List<FundamentalsSnapshot>>> history(Ticker t) async =>
       const Err(InsufficientData('fonte fora'));
@@ -278,7 +278,7 @@ class _SemExercicios implements FundamentalsRepository {
       throw UnimplementedError('${invocation.memberName}');
 }
 
-class _Nada implements PriceRepository, BenchmarkRepository {
+class _Nothing implements PriceRepository, BenchmarkRepository {
   @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName}');

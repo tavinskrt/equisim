@@ -21,7 +21,7 @@ a partir de `ValuationCascade.evaluate`.
 | 5 | Razão da unit e contagem de papéis | `quotedUnitRatio`, `quotedShares` | contagem indisponível |
 | 6 | **Portas 1 e 3** — roteamento | `_route` | — |
 | 7 | **Porta 2** — premissas e desconto na via escolhida | `_evaluateLane` | dado não sustenta a via; estrutura de capital recusada; preço justo ≤ 0 |
-| 8 | Resultado, cenários, diagnósticos | `_concluir`, `_withScenarios`, `_diagnose` | — |
+| 8 | Resultado, cenários, diagnósticos | `_conclude`, `_withScenarios`, `_diagnose` | — |
 
 ---
 

@@ -7,40 +7,40 @@ import 'dart:io';
 import 'package:equisim_core/equisim_core.dart';
 
 /// Proventos por emissor de quatro letras, de `data/b3/complemento/`.
-Map<String, List<CashDividend>> lerProventos({String dir = 'data/b3/complemento'}) {
-  final pasta = Directory(dir);
-  if (!pasta.existsSync()) {
+Map<String, List<CashDividend>> readDividends({String dir = 'data/b3/complemento'}) {
+  final folder = Directory(dir);
+  if (!folder.existsSync()) {
     stderr.writeln('sem $dir — rode: python tool/b3_complemento_baixar.py');
     exit(2);
   }
   final out = <String, List<CashDividend>>{};
-  for (final f in pasta.listSync().whereType<File>()) {
+  for (final f in folder.listSync().whereType<File>()) {
     if (!f.path.endsWith('.json')) continue;
-    final bruto = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
-    final emissor = f.uri.pathSegments.last.replaceAll('.json', '');
-    out[emissor] = B3CashDividends.parse(
-        (bruto['proventos'] as List?)?.cast<Object?>() ?? const []);
+    final raw = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
+    final issuer = f.uri.pathSegments.last.replaceAll('.json', '');
+    out[issuer] = B3CashDividends.parse(
+        (raw['proventos'] as List?)?.cast<Object?>() ?? const []);
   }
   return out;
 }
 
 /// Os proventos da classe de [ticker], ou lista vazia.
-List<CashDividend> proventosDo(
-    Map<String, List<CashDividend>> proventos, String ticker) {
-  return CashDividendsCodec.forTicker(proventos, ticker);
+List<CashDividend> dividendsOf(
+    Map<String, List<CashDividend>> dividends, String ticker) {
+  return CashDividendsCodec.forTicker(dividends, ticker);
 }
 
 /// Um pregão do COTAHIST: fechamento bruto por ação e número de distribuição.
-class Pregao {
+class TradingDay {
   final DateTime date;
   final double close;
-  final int distribuicao;
+  final int distribution;
 
   /// Volume financeiro do dia, em reais. `null` quando o arquivo não o traz.
-  final double? financeiro;
-  const Pregao(this.date, this.close, this.distribuicao, [this.financeiro]);
+  final double? tradedValue;
+  const TradingDay(this.date, this.close, this.distribution, [this.tradedValue]);
 
-  RawQuote get raw => RawQuote(date, close, distribuicao);
+  RawQuote get raw => RawQuote(date, close, distribution);
 }
 
 /// Fechamento **bruto por ação** do COTAHIST, por ticker, em ordem de data.
@@ -50,35 +50,35 @@ class Pregao {
 ///
 /// - [isins]: quando dado, só entra o pregão do ISIN do ticker. Um ticker pode
 ///   ter sido de mais de um papel ao longo dos anos.
-Map<String, List<Pregao>> lerCotahistBruto(Set<String> tickers,
+Map<String, List<TradingDay>> readRawCotahist(Set<String> tickers,
     {Map<String, String>? isins}) {
-  final out = <String, List<Pregao>>{};
-  final arquivos = Directory('data/b3')
+  final out = <String, List<TradingDay>>{};
+  final files = Directory('data/b3')
       .listSync()
       .whereType<File>()
       .where((f) => RegExp(r'avista_\d{4}\.csv$').hasMatch(f.path))
       .toList()
     ..sort((a, b) => a.path.compareTo(b.path));
-  for (final f in arquivos) {
-    var cabecalho = true;
-    for (final linha in f.readAsLinesSync()) {
-      if (cabecalho) {
-        cabecalho = false;
+  for (final f in files) {
+    var header = true;
+    for (final row in f.readAsLinesSync()) {
+      if (header) {
+        header = false;
         continue;
       }
-      final c = linha.split(';');
+      final c = row.split(';');
       if (c.length < 8 || !tickers.contains(c[1])) continue;
       final isin = isins?[c[1]];
       if (isin != null && c[2] != isin) continue;
-      final data = DateTime.tryParse('${c[0]}T00:00:00Z');
-      final centavos = double.tryParse(c[5]);
-      final fator = double.tryParse(c[6]);
-      final distribuicao = int.tryParse(c[7]) ?? 0;
-      if (data == null || centavos == null || fator == null || fator <= 0) {
+      final date = DateTime.tryParse('${c[0]}T00:00:00Z');
+      final cents = double.tryParse(c[5]);
+      final factor = double.tryParse(c[6]);
+      final distribution = int.tryParse(c[7]) ?? 0;
+      if (date == null || cents == null || factor == null || factor <= 0) {
         continue;
       }
       final volume = c.length > 8 ? double.tryParse(c[8]) : null;
-      (out[c[1]] ??= []).add(Pregao(data, centavos / 100 / fator, distribuicao,
+      (out[c[1]] ??= []).add(TradingDay(date, cents / 100 / factor, distribution,
           volume == null ? null : volume / 100));
     }
   }
@@ -88,40 +88,40 @@ Map<String, List<Pregao>> lerCotahistBruto(Set<String> tickers,
   return out;
 }
 
-/// Primeiro pregão em ou depois de [data], até [folgaDias] dias corridos.
-Pregao? pregaoApartir(List<Pregao> serie, DateTime dia,
-    {int folgaDias = 10}) {
+/// Primeiro pregão em ou depois de [data], até [marginDays] dias corridos.
+TradingDay? tradingDayFrom(List<TradingDay> series, DateTime day,
+    {int marginDays = 10}) {
   // O COTAHIST é lido em UTC; uma data local à meia-noite cairia três horas
   // depois do pregão do mesmo dia e o pularia.
-  final data = DateTime.utc(dia.year, dia.month, dia.day);
-  var lo = 0, hi = serie.length;
+  final date = DateTime.utc(day.year, day.month, day.day);
+  var lo = 0, hi = series.length;
   while (lo < hi) {
     final m = (lo + hi) ~/ 2;
-    if (serie[m].date.isBefore(data)) {
+    if (series[m].date.isBefore(date)) {
       lo = m + 1;
     } else {
       hi = m;
     }
   }
-  if (lo >= serie.length) return null;
-  final p = serie[lo];
-  return p.date.difference(data).inDays <= folgaDias ? p : null;
+  if (lo >= series.length) return null;
+  final p = series[lo];
+  return p.date.difference(date).inDays <= marginDays ? p : null;
 }
 
-/// Último pregão em ou antes de [data], até [folgaDias] dias corridos.
-Pregao? pregaoAte(List<Pregao> serie, DateTime dia,
-    {int folgaDias = 10}) {
-  final data = DateTime.utc(dia.year, dia.month, dia.day);
-  var lo = 0, hi = serie.length;
+/// Último pregão em ou antes de [data], até [marginDays] dias corridos.
+TradingDay? tradingDayUntil(List<TradingDay> series, DateTime day,
+    {int marginDays = 10}) {
+  final date = DateTime.utc(day.year, day.month, day.day);
+  var lo = 0, hi = series.length;
   while (lo < hi) {
     final m = (lo + hi) ~/ 2;
-    if (serie[m].date.isAfter(data)) {
+    if (series[m].date.isAfter(date)) {
       hi = m;
     } else {
       lo = m + 1;
     }
   }
   if (lo == 0) return null;
-  final p = serie[lo - 1];
-  return data.difference(p.date).inDays <= folgaDias ? p : null;
+  final p = series[lo - 1];
+  return date.difference(p.date).inDays <= marginDays ? p : null;
 }

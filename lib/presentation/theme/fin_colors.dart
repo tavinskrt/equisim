@@ -26,7 +26,7 @@ enum FinInkToken {
   caution,
   pending,
   blocked,
-  reserva,
+  reserve,
 }
 
 /// Paleta do produto, exposta como extensao de tema.
@@ -125,16 +125,16 @@ class FinColors extends ThemeExtension<FinColors> {
   /// `#3B82F6` no ponto de uso, que sobre superfície clara dá 3,25:1 --
   /// reprovado em AA. Era o mesmo defeito da paleta anterior, num token que
   /// nunca havia sido medido porque não existia.
-  final Color reserva;
+  final Color reserve;
 
   /// Fundo tonal da Reserva.
-  final Color reservaSurface;
+  final Color reserveSurface;
 
   /// Variante para MARCA de gráfico -- ponto de dispersão, traço de série.
   ///
   /// Não carrega texto, então responde ao piso de 3:1 de elemento gráfico e
   /// não ao de 4,5:1 de texto. Por isso fica fora de [FinInkToken].
-  final Color reservaMuted;
+  final Color reserveMuted;
 
   /// Fundo tonal de [positive]. Da um segundo canal alem do matiz.
   final Color positiveSurface;
@@ -180,9 +180,9 @@ class FinColors extends ThemeExtension<FinColors> {
     required this.caution,
     required this.pending,
     required this.blocked,
-    required this.reserva,
-    required this.reservaSurface,
-    required this.reservaMuted,
+    required this.reserve,
+    required this.reserveSurface,
+    required this.reserveMuted,
     required this.positiveSurface,
     required this.negativeSurface,
     required this.cautionSurface,
@@ -204,7 +204,7 @@ class FinColors extends ThemeExtension<FinColors> {
     FinInkToken.caution => caution,
     FinInkToken.pending => pending,
     FinInkToken.blocked => blocked,
-    FinInkToken.reserva => reserva,
+    FinInkToken.reserve => reserve,
   };
 
   /// Toda superficie sobre a qual [token] pode ser pintado.
@@ -224,7 +224,7 @@ class FinColors extends ThemeExtension<FinColors> {
       FinInkToken.negative => negativeSurface,
       FinInkToken.caution => cautionSurface,
       FinInkToken.pending => pendingSurface,
-      FinInkToken.reserva => reservaSurface,
+      FinInkToken.reserve => reserveSurface,
       _ => surface,
     },
   ];
@@ -318,9 +318,9 @@ class FinColors extends ThemeExtension<FinColors> {
     caution: Color(0xFF6F4800), //  7,12:1  AAA
     pending: Color(0xFF3E5AA8), //  5,59:1  AA
     blocked: Color(0xFF5A5F6B), //  5,64:1  AA
-    reserva: Color(0xFF0B62EF), //  4,54:1  AA (pior caso: sobre reservaSurface)
-    reservaSurface: Color(0xFFE8EFFD),
-    reservaMuted: Color(0xFF4A86F0),
+    reserve: Color(0xFF0B62EF), //  4,54:1  AA (pior caso: sobre reserveSurface)
+    reserveSurface: Color(0xFFE8EFFD),
+    reserveMuted: Color(0xFF4A86F0),
     positiveSurface: Color(0xFFE4F1EC),
     negativeSurface: Color(0xFFFBE9E7),
     cautionSurface: Color(0xFFFBF0DC),
@@ -350,9 +350,9 @@ class FinColors extends ThemeExtension<FinColors> {
     caution: Color(0xFFF2B544), //  8,73:1  AAA
     pending: Color(0xFF8FB4FF), //  8,15:1  AAA
     blocked: Color(0xFF9AA5B1), //  7,01:1  AAA
-    reserva: Color(0xFF3B82F6), //  4,84:1  AA (pior caso: sobre reservaSurface)
-    reservaSurface: Color(0xFF0F1826),
-    reservaMuted: Color(0xFF60A5FA),
+    reserve: Color(0xFF3B82F6), //  4,84:1  AA (pior caso: sobre reserveSurface)
+    reserveSurface: Color(0xFF0F1826),
+    reserveMuted: Color(0xFF60A5FA),
     positiveSurface: Color(0xFF122A24),
     negativeSurface: Color(0xFF2C1614),
     cautionSurface: Color(0xFF2A2011),
@@ -408,9 +408,9 @@ class FinColors extends ThemeExtension<FinColors> {
         other.caution == caution &&
         other.pending == pending &&
         other.blocked == blocked &&
-        other.reserva == reserva &&
-        other.reservaSurface == reservaSurface &&
-        other.reservaMuted == reservaMuted &&
+        other.reserve == reserve &&
+        other.reserveSurface == reserveSurface &&
+        other.reserveMuted == reserveMuted &&
         other.positiveSurface == positiveSurface &&
         other.negativeSurface == negativeSurface &&
         other.cautionSurface == cautionSurface &&
@@ -440,9 +440,9 @@ class FinColors extends ThemeExtension<FinColors> {
     caution,
     pending,
     blocked,
-    reserva,
-    reservaSurface,
-    reservaMuted,
+    reserve,
+    reserveSurface,
+    reserveMuted,
     positiveSurface,
     negativeSurface,
     cautionSurface,

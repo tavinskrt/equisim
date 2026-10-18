@@ -24,49 +24,49 @@ import 'dart:io';
 import 'c7/protocolo.dart';
 
 Future<void> main(List<String> args) async {
-  String? valor(String flag) {
+  String? value(String flag) {
     final i = args.indexOf(flag);
     return i >= 0 && i + 1 < args.length ? args[i + 1] : null;
   }
 
-  final fonte = File('data/c7/coortes.json');
-  if (!fonte.existsSync()) {
-    stderr.writeln('Falta ${fonte.path}. Rode antes: dart run '
+  final source = File('data/c7/coortes.json');
+  if (!source.existsSync()) {
+    stderr.writeln('Falta ${source.path}. Rode antes: dart run '
         'tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas '
         '--trimestral --c7');
     exit(2);
   }
-  final linhas = (jsonDecode(fonte.readAsStringSync()) as List)
+  final rows = (jsonDecode(source.readAsStringSync()) as List)
       .cast<Map<String, dynamic>>();
-  final motor = await motorAtual();
+  final engine = await currentEngine();
   // A data do selo é injetável, como na leitura: o relógio só entra quando
   // `--hoje` não vem. O que prova quando o selo foi feito é o commit dele.
-  final hoje =
-      valor('--hoje') ?? DateTime.now().toIso8601String().substring(0, 10);
+  final today =
+      value('--hoje') ?? DateTime.now().toIso8601String().substring(0, 10);
   try {
-    final r = await selar(
-      linhas: linhas,
-      motor: motor,
-      pasta: Directory(pastaDosSelos),
-      hoje: hoje,
+    final r = await seal(
+      rows: rows,
+      engine: engine,
+      folder: Directory(sealsDir),
+      today: today,
     );
-    stdout.writeln('== Selagem do C7 — série ${r.serie} ==');
-    stdout.writeln('  motor: ${motor.impressao}'
-        '${motor.limpo ? '' : '  (núcleo com mudança não commitada sobre '
-            '${motor.commit?.substring(0, 7)})'}');
-    stdout.writeln('  seladas agora: ${r.seladas.isEmpty ? 'nenhuma' : r.seladas.join(', ')}');
+    stdout.writeln('== Selagem do C7 — série ${r.series} ==');
+    stdout.writeln('  motor: ${engine.fingerprint}'
+        '${engine.clean ? '' : '  (núcleo com mudança não commitada sobre '
+            '${engine.commit?.substring(0, 7)})'}');
+    stdout.writeln('  seladas agora: ${r.sealedCohorts.isEmpty ? 'nenhuma' : r.sealedCohorts.join(', ')}');
     stdout.writeln('  já seladas, conferidas: '
-        '${r.jaSeladas.isEmpty ? 'nenhuma' : r.jaSeladas.join(', ')}');
-    for (final e in r.divergentes.entries) {
+        '${r.alreadySealed.isEmpty ? 'nenhuma' : r.alreadySealed.join(', ')}');
+    for (final e in r.divergent.entries) {
       stdout.writeln('  ! ${e.key}: ${e.value} previsões refeitas divergem do '
           'selo — o selo não muda, e a divergência precisa de explicação');
     }
-    if (r.serie != 'preRegistrado') {
+    if (r.series != 'preRegistrado') {
       stdout.writeln('  ! o motor mudou desde o pré-registrado: a série dele '
           'para estas coortes sai do commit registrado no índice — rode '
           '`dart run tool/c7_preregistrado.dart` (decisão 138)');
     }
-  } on ProtocoloViolado catch (e) {
+  } on ProtocolViolated catch (e) {
     stderr.writeln(e);
     exit(1);
   }

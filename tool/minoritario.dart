@@ -28,12 +28,12 @@ import 'package:equisim_core/equisim_core.dart';
 import 'validation/congelado.dart';
 import 'validation/regression.dart';
 
-const _saida = 'docs/validacao/minoritario.json';
+const _output = 'docs/validacao/minoritario.json';
 
 /// Fração do patrimônio consolidado a partir da qual o minoritário é
 /// **material**. Abaixo de 1% qualquer tratamento dele muda o terceiro decimal
 /// da taxa, e a pergunta não é sobre esses.
-const _materialidade = 0.01;
+const _materiality = 0.01;
 
 double _q(List<double> v, double p) {
   if (v.isEmpty) return double.nan;
@@ -41,14 +41,14 @@ double _q(List<double> v, double p) {
   return o[(o.length * p).floor().clamp(0, o.length - 1)];
 }
 
-double _mediana(List<double> v) => _q(v, 0.5);
+double _median(List<double> v) => _q(v, 0.5);
 
-enum _Forma implements WireKeyed {
-  hoje('hoje'),
-  contabil('contabil'),
-  pelaRazao('pelaRazao');
+enum _Form implements WireKeyed {
+  today('hoje'),
+  book('contabil'),
+  byRatio('pelaRazao');
 
-  const _Forma(this.key);
+  const _Form(this.key);
 
   /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
   /// relatório. É dado, e não nome de código: renomear o valor não a muda.
@@ -56,73 +56,73 @@ enum _Forma implements WireKeyed {
   final String key;
 }
 
-class _Leitura {
-  final Map<String, int> justoCentavos = {};
-  final Map<String, double> potencial = {};
-  final Map<String, double> desconto = {};
+class _Reading {
+  final Map<String, int> fairValueCents = {};
+  final Map<String, double> upside = {};
+  final Map<String, double> discount = {};
 }
 
 Future<void> main(List<String> args) async {
-  final c = await Congelado.montar();
+  final c = await Frozen.build();
   try {
-    final fatia = <String, double>{};
-    final estatico = <String>{};
-    final viaDaFirma = <String>{};
-    final leituras = {for (final f in _Forma.values) f: _Leitura()};
-    final avaliadas = <Ticker, ValuationResult?>{};
+    final slice = <String, double>{};
+    final staticSet = <String>{};
+    final firmLane = <String>{};
+    final readings = {for (final f in _Form.values) f: _Reading()};
+    final evaluated = <Ticker, ValuationResult?>{};
 
     var i = 0;
-    for (final t in c.universo) {
+    for (final t in c.universe) {
       i++;
-      if (i % 50 == 0) stderr.write('  $i/${c.universo.length}   \r');
-      final prep = await c.preparar(t);
+      if (i % 50 == 0) stderr.write('  $i/${c.universe.length}   \r');
+      final prep = await c.prepare(t);
       if (prep.isErr) continue;
       final b = prep.unwrap();
       if (b.fundamentals.isEmpty) continue;
       final f = b.fundamentals.last;
 
-      final plControlador = f.totalStockholderEquity;
-      final minoritario = f.minorityInterest;
-      final consolidado = (plControlador ?? 0) + (minoritario ?? 0);
-      final razao = (minoritario == null ||
-              minoritario <= 0 ||
-              plControlador == null ||
-              plControlador <= 0 ||
-              consolidado <= 0)
+      final controllingEquity = f.totalStockholderEquity;
+      final minority = f.minorityInterest;
+      final consolidated = (controllingEquity ?? 0) + (minority ?? 0);
+      final ratio = (minority == null ||
+              minority <= 0 ||
+              controllingEquity == null ||
+              controllingEquity <= 0 ||
+              consolidated <= 0)
           ? null
-          : minoritario / consolidado;
+          : minority / consolidated;
 
-      for (final forma in _Forma.values) {
+      for (final form in _Form.values) {
         final r = ValuationCascade.evaluate(
-            _com(b, forma, minoritario, plControlador));
-        if (forma == _Forma.hoje) avaliadas[t] = r.valueOrNull;
+            _withInput(b, form, minority, controllingEquity));
+        if (form == _Form.today) evaluated[t] = r.valueOrNull;
         if (r.isErr) continue;
         final v = r.unwrap();
-        leituras[forma]!.justoCentavos[t.value] = v.fairValue.cents;
-        leituras[forma]!.potencial[t.value] = v.upside;
-        leituras[forma]!.desconto[t.value] = v.discountRate;
+        readings[form]!.fairValueCents[t.value] = v.fairValue.cents;
+        readings[form]!.upside[t.value] = v.upside;
+        readings[form]!.discount[t.value] = v.discountRate;
         // **Quem usa o WACC estático é quem não resolveu as taxas**, e é só
         // nele que o peso do minoritário falta. O aviso da avaliação é o que
         // separa os dois caminhos sem reimplementar a cascata.
-        if (forma == _Forma.hoje) {
+        if (form == _Form.today) {
           if (!v.warnings.any((w) => w.contains('resolvido ano a ano'))) {
-            estatico.add(t.value);
+            staticSet.add(t.value);
           }
           // **E a via do acionista não tem WACC nenhum**: o fluxo dela é do
           // acionista da controladora, descontado ao `Ke`, e o minoritário não
           // entra em peso porque não há peso. Sem este corte, a contagem de
           // expostos junta banco com companhia operacional.
-          if (v.model == ValuationModel.dcfFcff) viaDaFirma.add(t.value);
+          if (v.model == ValuationModel.dcfFcff) firmLane.add(t.value);
         }
       }
-      if (razao != null &&
-          leituras[_Forma.hoje]!.justoCentavos.containsKey(t.value)) {
-        fatia[t.value] = razao;
+      if (ratio != null &&
+          readings[_Form.today]!.fairValueCents.containsKey(t.value)) {
+        slice[t.value] = ratio;
       }
     }
     stderr.write('                              \r');
 
-    final div = await c.conferirContraGabarito(avaliadas);
+    final div = await c.checkAgainstAnswerKey(evaluated);
     if (div == null) {
       stderr.writeln('AVISO: gabarito ausente; montagem não conferida.');
     } else if (div.isNotEmpty) {
@@ -135,135 +135,135 @@ Future<void> main(List<String> args) async {
           'divergências.');
     }
 
-    final base = leituras[_Forma.hoje]!;
-    final materiais =
-        fatia.entries.where((e) => e.value >= _materialidade).map((e) => e.key);
+    final base = readings[_Form.today]!;
+    final material =
+        slice.entries.where((e) => e.value >= _materiality).map((e) => e.key);
     // **O conjunto exposto é a interseção das três condições**: via da firma
     // (tem WACC), recuo estático (o peso é de mercado da controladora) e
     // minoritário material.
-    final expostos = materiais
-        .where(estatico.contains)
-        .where(viaDaFirma.contains)
+    final exposed = material
+        .where(staticSet.contains)
+        .where(firmLane.contains)
         .toSet();
 
     stdout.writeln('');
     stdout.writeln('-- o escopo do defeito --');
     stdout.writeln('  avaliados                          '
-        '${base.justoCentavos.length}');
+        '${base.fairValueCents.length}');
     stdout.writeln('  pela via da firma (têm WACC)       '
-        '${viaDaFirma.length}');
-    stdout.writeln('  usam o WACC estático               ${estatico.length}');
+        '${firmLane.length}');
+    stdout.writeln('  usam o WACC estático               ${staticSet.length}');
     stdout.writeln('  via da firma E estático            '
-        '${viaDaFirma.where(estatico.contains).length}');
-    stdout.writeln('  têm minoritário publicado          ${fatia.length}');
-    stdout.writeln('  com fatia ≥ ${(_materialidade * 100).toStringAsFixed(0)}%'
-        '                     ${materiais.length}');
-    stdout.writeln('  **firma, estático E material**     ${expostos.length}'
-        '${expostos.isEmpty ? "" : "  (${expostos.take(10).join(", ")})"}');
-    final fatias = fatia.values.toList();
-    if (fatias.isNotEmpty) {
-      stdout.writeln('  fatia do minoritário: p50 ${_pct(_mediana(fatias))}  '
-          'p90 ${_pct(_q(fatias, 0.90))}  '
-          'máx ${_pct(fatias.reduce((a, b) => a > b ? a : b))}');
+        '${firmLane.where(staticSet.contains).length}');
+    stdout.writeln('  têm minoritário publicado          ${slice.length}');
+    stdout.writeln('  com fatia ≥ ${(_materiality * 100).toStringAsFixed(0)}%'
+        '                     ${material.length}');
+    stdout.writeln('  **firma, estático E material**     ${exposed.length}'
+        '${exposed.isEmpty ? "" : "  (${exposed.take(10).join(", ")})"}');
+    final slices = slice.values.toList();
+    if (slices.isNotEmpty) {
+      stdout.writeln('  fatia do minoritário: p50 ${_pct(_median(slices))}  '
+          'p90 ${_pct(_q(slices, 0.90))}  '
+          'máx ${_pct(slices.reduce((a, b) => a > b ? a : b))}');
     }
 
-    final linhas = <Map<String, Object?>>[];
+    final rows = <Map<String, Object?>>[];
     stdout.writeln('');
     stdout.writeln('-- o efeito de pôr o minoritário no peso --');
     stdout.writeln('  forma         avaliados   justo (todos)   '
         'justo (expostos)   Δ desconto (expostos)   postos');
 
-    for (final forma in _Forma.values) {
-      if (forma == _Forma.hoje) continue;
-      final l = leituras[forma]!;
-      final comuns = l.justoCentavos.keys
-          .where(base.justoCentavos.containsKey)
+    for (final form in _Form.values) {
+      if (form == _Form.today) continue;
+      final l = readings[form]!;
+      final common = l.fairValueCents.keys
+          .where(base.fairValueCents.containsKey)
           .toList()
         ..sort();
-      double? varDe(Iterable<String> chaves) {
+      double? varianceOf(Iterable<String> keys) {
         final v = <double>[
-          for (final k in chaves)
-            if (base.justoCentavos[k] != null &&
-                base.justoCentavos[k] != 0 &&
-                l.justoCentavos[k] != null)
-              l.justoCentavos[k]! / base.justoCentavos[k]! - 1,
+          for (final k in keys)
+            if (base.fairValueCents[k] != null &&
+                base.fairValueCents[k] != 0 &&
+                l.fairValueCents[k] != null)
+              l.fairValueCents[k]! / base.fairValueCents[k]! - 1,
         ];
-        return v.isEmpty ? null : _mediana(v);
+        return v.isEmpty ? null : _median(v);
       }
 
-      final dDesconto = <double>[
-        for (final k in comuns)
-          if (expostos.contains(k)) l.desconto[k]! - base.desconto[k]!,
+      final discountDelta = <double>[
+        for (final k in common)
+          if (exposed.contains(k)) l.discount[k]! - base.discount[k]!,
       ];
-      final rho = comuns.length < 3
+      final rho = common.length < 3
           ? null
           : Regression.spearman(
-              [for (final k in comuns) base.potencial[k]!],
-              [for (final k in comuns) l.potencial[k]!],
+              [for (final k in common) base.upside[k]!],
+              [for (final k in common) l.upside[k]!],
             );
-      final saem = base.justoCentavos.keys
-          .where((k) => !l.justoCentavos.containsKey(k))
+      final leaving = base.fairValueCents.keys
+          .where((k) => !l.fairValueCents.containsKey(k))
           .toList()
         ..sort();
 
-      stdout.writeln('  ${forma.key.padRight(12)}  '
-          '${l.justoCentavos.length.toString().padLeft(9)}   '
-          '${_pct(varDe(comuns) ?? double.nan).padLeft(13)}   '
-          '${_pct(varDe(expostos) ?? double.nan).padLeft(16)}   '
-          '${dDesconto.isEmpty ? "         —      " : "${(_mediana(dDesconto) * 100).toStringAsFixed(2).padLeft(13)} p.p."}   '
+      stdout.writeln('  ${form.key.padRight(12)}  '
+          '${l.fairValueCents.length.toString().padLeft(9)}   '
+          '${_pct(varianceOf(common) ?? double.nan).padLeft(13)}   '
+          '${_pct(varianceOf(exposed) ?? double.nan).padLeft(16)}   '
+          '${discountDelta.isEmpty ? "         —      " : "${(_median(discountDelta) * 100).toStringAsFixed(2).padLeft(13)} p.p."}   '
           '${rho == null ? "  —   " : rho.toStringAsFixed(4)}');
 
-      linhas.add({
-        'forma': forma.key,
-        'avaliados': l.justoCentavos.length,
-        'justoMedianoTodos': varDe(comuns),
-        'justoMedianoExpostos': varDe(expostos),
+      rows.add({
+        'forma': form.key,
+        'avaliados': l.fairValueCents.length,
+        'justoMedianoTodos': varianceOf(common),
+        'justoMedianoExpostos': varianceOf(exposed),
         'deltaDescontoMedianoExpostos':
-            dDesconto.isEmpty ? null : _mediana(dDesconto),
+            discountDelta.isEmpty ? null : _median(discountDelta),
         'spearmanPotencial': rho,
-        'saem': saem,
+        'saem': leaving,
       });
     }
 
-    File(_saida).writeAsStringSync(const JsonEncoder.withIndent('  ').convert({
-      'materialidade': _materialidade,
-      'avaliados': base.justoCentavos.length,
-      'usamWaccEstatico': estatico.length,
-      'viaDaFirma': viaDaFirma.length,
+    File(_output).writeAsStringSync(const JsonEncoder.withIndent('  ').convert({
+      'materialidade': _materiality,
+      'avaliados': base.fairValueCents.length,
+      'usamWaccEstatico': staticSet.length,
+      'viaDaFirma': firmLane.length,
       'viaDaFirmaEEstatico':
-          (viaDaFirma.where(estatico.contains).toList()..sort()),
-      'comMinoritario': fatia.length,
-      'comFatiaMaterial': materiais.length,
-      'estaticoEMaterial': expostos.toList()..sort(),
+          (firmLane.where(staticSet.contains).toList()..sort()),
+      'comMinoritario': slice.length,
+      'comFatiaMaterial': material.length,
+      'estaticoEMaterial': exposed.toList()..sort(),
       'fatia': {
-        'p50': fatias.isEmpty ? null : _mediana(fatias),
-        'p90': fatias.isEmpty ? null : _q(fatias, 0.90),
+        'p50': slices.isEmpty ? null : _median(slices),
+        'p90': slices.isEmpty ? null : _q(slices, 0.90),
         'maximo':
-            fatias.isEmpty ? null : fatias.reduce((a, b) => a > b ? a : b),
+            slices.isEmpty ? null : slices.reduce((a, b) => a > b ? a : b),
       },
       'maioresFatias': Map.fromEntries(
-        (fatia.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
+        (slice.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
             .take(15),
       ),
-      'formas': linhas,
+      'formas': rows,
     }));
     stdout.writeln('');
-    stdout.writeln('escrito $_saida');
+    stdout.writeln('escrito $_output');
   } finally {
     await c.ctx.dispose();
   }
 }
 
 /// Os mesmos insumos, com o minoritário somado ao peso do capital próprio.
-ValuationInputs _com(
+ValuationInputs _withInput(
   ValuationInputs b,
-  _Forma forma,
-  double? minoritario,
-  double? plControlador,
+  _Form form,
+  double? minority,
+  double? controllingEquity,
 ) {
-  if (forma == _Forma.hoje) return b;
-  if (minoritario == null || minoritario <= 0) return b;
-  if (plControlador == null || plControlador <= 0) return b;
+  if (form == _Form.today) return b;
+  if (minority == null || minority <= 0) return b;
+  if (controllingEquity == null || controllingEquity <= 0) return b;
 
   // O valor de mercado da controladora, pela mesma contagem que a ponte
   // arbitra — é o que está no denominador hoje.
@@ -276,15 +276,15 @@ ValuationInputs _com(
     asOf: b.asOf,
   );
   if (divisor == null || divisor.count <= 0) return b;
-  final mercado = divisor.count * b.marketPrice;
+  final market = divisor.count * b.marketPrice;
 
-  final valor = switch (forma) {
-    _Forma.hoje => 0.0,
+  final value = switch (form) {
+    _Form.today => 0.0,
     // Contábil puro: o valor de livro entra num denominador de mercado.
-    _Forma.contabil => minoritario,
+    _Form.book => minority,
     // Pelo `P/VP` do controlador: `PL_min × (E_mercado ÷ PL_contr)`. Coincide
     // com a contábil quando o `P/VP` é 1, e difere dela exatamente por ele.
-    _Forma.pelaRazao => minoritario * (mercado / plControlador),
+    _Form.byRatio => minority * (market / controllingEquity),
   };
 
   return ValuationInputs(
@@ -310,7 +310,7 @@ ValuationInputs _com(
     creditReferenceRiskFree: b.creditReferenceRiskFree,
     declaredSharesPerUnit: b.declaredSharesPerUnit,
     betaWindowYears: b.betaWindowYears,
-    minorityEquityValue: valor,
+    minorityEquityValue: value,
   );
 }
 

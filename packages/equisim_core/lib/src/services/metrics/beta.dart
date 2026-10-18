@@ -94,11 +94,11 @@ abstract final class BetaCalculator {
     var marketVariance = 0.0;
     var assetVariance = 0.0;
     for (var i = 0; i < n; i++) {
-      final da = assetReturns[i] - meanAsset;
-      final dm = marketReturns[i] - meanMarket;
-      covariance += da * dm;
-      marketVariance += dm * dm;
-      assetVariance += da * da;
+      final assetDeviation = assetReturns[i] - meanAsset;
+      final marketDeviation = marketReturns[i] - meanMarket;
+      covariance += assetDeviation * marketDeviation;
+      marketVariance += marketDeviation * marketDeviation;
+      assetVariance += assetDeviation * assetDeviation;
     }
     covariance /= n - 1;
     marketVariance /= n - 1;

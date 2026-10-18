@@ -17,44 +17,44 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'b3/proventos.dart';
 
-const _saida = 'assets/b3/proventos.json';
-final _desde = DateTime.utc(2015, 1, 1);
+const _output = 'assets/b3/proventos.json';
+final _since = DateTime.utc(2015, 1, 1);
 
 void main() {
-  final todos = lerProventos();
-  final pacote = <String, List<CashDividend>>{};
-  var entram = 0, semPreco = 0, antigos = 0;
-  for (final e in todos.entries) {
-    final lista = <CashDividend>[];
+  final all = readDividends();
+  final package = <String, List<CashDividend>>{};
+  var included = 0, withoutPrice = 0, old = 0;
+  for (final e in all.entries) {
+    final list = <CashDividend>[];
     for (final p in e.value) {
-      if (p.exDate.isBefore(_desde)) {
-        antigos++;
+      if (p.exDate.isBefore(_since)) {
+        old++;
         continue;
       }
       if (p.closeWithRights == null) {
-        semPreco++;
+        withoutPrice++;
         continue;
       }
-      lista.add(p);
+      list.add(p);
     }
-    if (lista.isNotEmpty) {
-      pacote[e.key] = lista;
-      entram += lista.length;
+    if (list.isNotEmpty) {
+      package[e.key] = list;
+      included += list.length;
     }
   }
-  final consulta = Directory('data/b3/complemento')
+  final queryDir = Directory('data/b3/complemento')
       .listSync()
       .whereType<File>()
       .map((f) => (jsonDecode(f.readAsStringSync())
           as Map<String, dynamic>)['consultadoEm'] as String)
       .fold<String>('9999-12-31', (a, b) => b.compareTo(a) < 0 ? b : a);
-  File(_saida)
+  File(_output)
     ..parent.createSync(recursive: true)
-    ..writeAsStringSync(jsonEncode(CashDividendsCodec.encode(pacote,
-        geradoEm: DateTime.parse('${consulta}T00:00:00Z'))));
-  stdout.writeln('  emissores: ${pacote.length}  proventos: $entram');
-  stdout.writeln('  fora: $antigos antes de 2015, $semPreco sem preço com direito');
-  stdout.writeln('  consulta mais antiga: $consulta');
-  stdout.writeln('  tamanho: ${(File(_saida).lengthSync() / 1024).toStringAsFixed(0)} KB');
-  stdout.writeln('  gravado $_saida');
+    ..writeAsStringSync(jsonEncode(CashDividendsCodec.encode(package,
+        generatedAt: DateTime.parse('${queryDir}T00:00:00Z'))));
+  stdout.writeln('  emissores: ${package.length}  proventos: $included');
+  stdout.writeln('  fora: $old antes de 2015, $withoutPrice sem preço com direito');
+  stdout.writeln('  consulta mais antiga: $queryDir');
+  stdout.writeln('  tamanho: ${(File(_output).lengthSync() / 1024).toStringAsFixed(0)} KB');
+  stdout.writeln('  gravado $_output');
 }

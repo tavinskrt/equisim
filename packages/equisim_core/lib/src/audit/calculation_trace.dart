@@ -276,8 +276,8 @@ class CalculationTrace {
                 (json['sample'] as Map).map((k, v) => MapEntry('$k', v)))
             : null,
         explanation: [
-          for (final linha in (json['explanation'] as List? ?? const []))
-            '$linha',
+          for (final row in (json['explanation'] as List? ?? const []))
+            '$row',
         ],
       );
 }

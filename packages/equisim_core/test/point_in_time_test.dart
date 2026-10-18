@@ -18,9 +18,9 @@ void main() {
     test('exercício recém-encerrado ainda não é público', () {
       // Em 15/01/2026 o balanço de 31/12/2025 não foi divulgado à CVM.
       final view = PointInTimeView(DateTime(2026, 1, 15));
-      final visiveis = view.published(history);
-      expect(visiveis, isNotEmpty);
-      expect(visiveis.last.fiscalPeriodEnd.year, 2024);
+      final visibleOnes = view.published(history);
+      expect(visibleOnes, isNotEmpty);
+      expect(visibleOnes.last.fiscalPeriodEnd.year, 2024);
     });
 
     test('após a defasagem de 90 dias o exercício passa a ser visível', () {
@@ -29,11 +29,11 @@ void main() {
     });
 
     test('defasagem é parâmetro declarado e altera o recorte', () {
-      final semDefasagem = PointInTimeView(
+      final withoutLag = PointInTimeView(
         DateTime(2026, 1, 15),
         publicationLag: Duration.zero,
       );
-      expect(semDefasagem.published(history).last.fiscalPeriodEnd.year, 2025);
+      expect(withoutLag.published(history).last.fiscalPeriodEnd.year, 2025);
     });
 
     test('devolve nada quando nenhum exercício era público', () {
@@ -75,35 +75,35 @@ void main() {
       );
       expect(normal.effectiveTaxRate, closeTo(0.34, 1e-12));
 
-      final atipico = FundamentalsSnapshot(
+      final atypical = FundamentalsSnapshot(
         ticker: Ticker.parse('PETR4'),
         fiscalPeriodEnd: DateTime(2025, 12, 31),
         incomeBeforeTax: 100,
         incomeTaxExpense: -900,
       );
-      expect(atipico.effectiveTaxRate, 0.5);
+      expect(atypical.effectiveTaxRate, 0.5);
     });
 
     test('crédito tributário produz alíquota nula, não imposto a pagar', () {
       // Campo positivo é crédito. Com o módulo, isto devolvia 0,20 e cobrava
       // imposto de quem recuperou imposto.
-      final credito = FundamentalsSnapshot(
+      final credit = FundamentalsSnapshot(
         ticker: Ticker.parse('PETR4'),
         fiscalPeriodEnd: DateTime(2025, 12, 31),
         incomeBeforeTax: 1000,
         incomeTaxExpense: 200,
       );
-      expect(credito.effectiveTaxRate, 0.0);
+      expect(credit.effectiveTaxRate, 0.0);
     });
 
     test('prejuízo antes de impostos não produz alíquota', () {
-      final prejuizo = FundamentalsSnapshot(
+      final loss = FundamentalsSnapshot(
         ticker: Ticker.parse('PETR4'),
         fiscalPeriodEnd: DateTime(2025, 12, 31),
         incomeBeforeTax: -500,
         incomeTaxExpense: 10,
       );
-      expect(prejuizo.effectiveTaxRate, isNull);
+      expect(loss.effectiveTaxRate, isNull);
     });
 
     test('dívida líquida desconta caixa e aplicações', () {
@@ -132,13 +132,13 @@ void main() {
     });
 
     test('campos ausentes devolvem nulo em vez de zero silencioso', () {
-      final vazio = FundamentalsSnapshot(
+      final isEmptyValue = FundamentalsSnapshot(
         ticker: Ticker.parse('PETR4'),
         fiscalPeriodEnd: DateTime(2025, 12, 31),
       );
-      expect(vazio.depreciationAndAmortization, isNull);
-      expect(vazio.effectiveTaxRate, isNull);
-      expect(vazio.costOfDebt, isNull);
+      expect(isEmptyValue.depreciationAndAmortization, isNull);
+      expect(isEmptyValue.effectiveTaxRate, isNull);
+      expect(isEmptyValue.costOfDebt, isNull);
     });
   });
 }

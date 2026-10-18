@@ -172,17 +172,17 @@ const String cvmPackageAsset = 'assets/cvm/documentos.json';
 final fundamentalsRepositoryProvider = Provider<FundamentalsRepository>(
   (ref) => OfficialSectorFundamentalsRepository(
     inner: CvmFundamentalsRepository(
-      mercado: FundamentalsRepositoryImpl(
+      market: FundamentalsRepositoryImpl(
         remote: ref.watch(brapiDatasourceProvider),
         cache: ref.watch(cacheDatabaseProvider),
       ),
-      carregarPacote: () => rootBundle.loadString(cvmPackageAsset),
+      loadPackage: () => rootBundle.loadString(cvmPackageAsset),
       // A data da avaliação é a do dia, e a camada de aplicativo é o lugar de
       // perguntá-la: o núcleo recebe a data pronta.
-      hoje: DateTime.now,
+      today: DateTime.now,
     ),
     // O setor é o da B3, por emissor (item A5, decisão 87).
-    classificacao: ref.watch(b3RegistryRepositoryProvider).classificationFor,
+    classification: ref.watch(b3RegistryRepositoryProvider).classificationFor,
   ),
 );
 
@@ -192,10 +192,10 @@ final fundamentalsRepositoryProvider = Provider<FundamentalsRepository>(
 /// substitui por um falso não ganha ressalva de pacote que ele não usa.
 final cvmCoverageNoteProvider =
     FutureProvider.family<String?, Ticker>((ref, ticker) async {
-  final externo = ref.watch(fundamentalsRepositoryProvider);
-  final repo = externo is OfficialSectorFundamentalsRepository
-      ? externo.inner
-      : externo;
+  final externalRepository = ref.watch(fundamentalsRepositoryProvider);
+  final repo = externalRepository is OfficialSectorFundamentalsRepository
+      ? externalRepository.inner
+      : externalRepository;
   return repo is CvmFundamentalsRepository ? repo.coverageNote(ticker) : null;
 });
 
@@ -223,7 +223,7 @@ const String cashDividendsAsset = 'assets/b3/proventos.json';
 
 final cashDividendsRepositoryProvider = Provider<CashDividendsRepository>(
   (ref) => CashDividendsRepository(
-    carregarPacote: () => rootBundle.loadString(cashDividendsAsset),
+    loadPackage: () => rootBundle.loadString(cashDividendsAsset),
   ),
 );
 
@@ -237,7 +237,7 @@ const String concessionTermsAsset = 'assets/cvm/outorgas.json';
 
 final concessionTermRepositoryProvider = Provider<ConcessionTermRepository>(
   (ref) => ConcessionTermRepository(
-    carregarPacote: () => rootBundle.loadString(concessionTermsAsset),
+    loadPackage: () => rootBundle.loadString(concessionTermsAsset),
   ),
 );
 
@@ -251,7 +251,7 @@ const String capitalEventsAsset = 'assets/cvm/capital.json';
 
 final capitalEventsRepositoryProvider = Provider<CapitalEventsRepository>(
   (ref) => CapitalEventsRepository(
-    carregarPacote: () => rootBundle.loadString(capitalEventsAsset),
+    loadPackage: () => rootBundle.loadString(capitalEventsAsset),
   ),
 );
 
@@ -266,7 +266,7 @@ const String calibratedBandAsset = 'assets/validacao/banda_calibrada.json';
 
 final calibratedBandRepositoryProvider = Provider<CalibratedBandRepository>(
   (ref) => CalibratedBandRepository(
-    carregarPacote: () => rootBundle.loadString(calibratedBandAsset),
+    loadPackage: () => rootBundle.loadString(calibratedBandAsset),
   ),
 );
 
@@ -280,7 +280,7 @@ const String skillReadingAsset = 'assets/validacao/habilidade.json';
 
 final skillReadingRepositoryProvider = Provider<SkillReadingRepository>(
   (ref) => SkillReadingRepository(
-    carregarPacote: () => rootBundle.loadString(skillReadingAsset),
+    loadPackage: () => rootBundle.loadString(skillReadingAsset),
   ),
 );
 
@@ -290,17 +290,17 @@ final skillReadingProvider = FutureProvider<SkillReading?>(
     (ref) => ref.watch(skillReadingRepositoryProvider).reading());
 
 /// Caminho das cotações recentes do Tesouro empacotadas (item A2.1).
-const String tesouroQuotesAsset = 'assets/tesouro/curva.json';
+const String treasuryQuotesAsset = 'assets/tesouro/curva.json';
 
 final b3RegistryRepositoryProvider = Provider<B3RegistryRepository>(
   (ref) => B3RegistryRepository(
-    carregarPacote: () => rootBundle.loadString(b3RegistryAsset),
+    loadPackage: () => rootBundle.loadString(b3RegistryAsset),
   ),
 );
 
 final betaPriorRepositoryProvider = Provider<BetaPriorRepository>(
   (ref) => BetaPriorRepository(
-    carregarPacote: () => rootBundle.loadString(betaPriorAsset),
+    loadPackage: () => rootBundle.loadString(betaPriorAsset),
   ),
 );
 
@@ -321,7 +321,7 @@ final betaPriorReadingProvider =
 
 final marketPremiumRepositoryProvider = Provider<MarketPremiumRepository>(
   (ref) => MarketPremiumRepository(
-    carregarPacote: () => rootBundle.loadString(marketPremiumAsset),
+    loadPackage: () => rootBundle.loadString(marketPremiumAsset),
   ),
 );
 
@@ -349,7 +349,7 @@ final marketPremiumReadingProvider = FutureProvider<
 /// pacote, a triangulação some e a avaliação sai como sempre saiu.
 final peerMultiplesRepositoryProvider = Provider<PeerMultiplesRepository>(
   (ref) => PeerMultiplesRepository(
-    carregarPacote: () => rootBundle.loadString(peerMultiplesAsset),
+    loadPackage: () => rootBundle.loadString(peerMultiplesAsset),
   ),
 );
 
@@ -365,10 +365,10 @@ final peerMultiplesProvider =
 
 final unitCompositionRepositoryProvider = Provider<UnitCompositionRepository>(
   (ref) => UnitCompositionRepository(
-    carregarPacote: () => rootBundle.loadString(unitCompositionAsset),
+    loadPackage: () => rootBundle.loadString(unitCompositionAsset),
     // A data da avaliação é a do dia, e a camada de aplicativo é o lugar de
     // perguntá-la — a mesma convenção do pacote da CVM.
-    hoje: DateTime.now,
+    today: DateTime.now,
   ),
 );
 
@@ -388,8 +388,8 @@ final declaredSharesPerUnitProvider =
 final shareholderControlRepositoryProvider =
     Provider<ShareholderControlRepository>(
   (ref) => ShareholderControlRepository(
-    carregarPacote: () => rootBundle.loadString(shareholderControlAsset),
-    hoje: DateTime.now,
+    loadPackage: () => rootBundle.loadString(shareholderControlAsset),
+    today: DateTime.now,
   ),
 );
 
@@ -411,16 +411,16 @@ final officialSharesProvider =
     FutureProvider.family<OfficialShareCount?, Ticker>((ref, ticker) =>
         ref.watch(b3RegistryRepositoryProvider).officialSharesFor(ticker));
 
-final tesouroDatasourceProvider = Provider<TesouroDatasource>(
-  (ref) => TesouroDatasource(ref.watch(apiClientProvider)),
+final treasuryDatasourceProvider = Provider<TreasuryDatasource>(
+  (ref) => TreasuryDatasource(ref.watch(apiClientProvider)),
 );
 
 final riskFreeCurveRepositoryProvider = Provider<RiskFreeCurveRepository>(
   (ref) => RiskFreeCurveRepository(
     // Na web o navegador não lê o arquivo do Tesouro, e o aplicativo nem tenta:
     // a curva vem só do pacote do build (decisão 86).
-    remote: kIsWeb ? null : ref.watch(tesouroDatasourceProvider),
-    carregarPacote: () => rootBundle.loadString(tesouroQuotesAsset),
+    remote: kIsWeb ? null : ref.watch(treasuryDatasourceProvider),
+    loadPackage: () => rootBundle.loadString(treasuryQuotesAsset),
   ),
 );
 
@@ -493,9 +493,9 @@ final riskFreeRateProvider = FutureProvider<double>((ref) async {
 /// Recua para o decenal quando a série da janela não vem — sem rede, cache
 /// vazio, janela sem pregão.
 final riskFreeRateForWindowProvider =
-    FutureProvider.family<double, DateRange>((ref, janela) async {
-  final serie = await ref.watch(macroRepositoryProvider).riskFreeDaily(janela);
-  if (serie.isOk && !serie.unwrap().isEmpty) return serie.unwrap().annualized();
+    FutureProvider.family<double, DateRange>((ref, window) async {
+  final series = await ref.watch(macroRepositoryProvider).riskFreeDaily(window);
+  if (series.isOk && !series.unwrap().isEmpty) return series.unwrap().annualized();
   return ref.watch(riskFreeRateProvider.future);
 });
 

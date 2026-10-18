@@ -8,38 +8,38 @@
 import 'package:equisim_core/equisim_core.dart';
 import 'package:test/test.dart';
 
-FundamentalsSnapshot _ano({
+FundamentalsSnapshot _year({
   required int y,
-  double? vpa,
-  double? contagem,
+  double? bookValuePerShare,
+  double? count,
   double? pl,
 }) =>
     FundamentalsSnapshot(
       ticker: Ticker.parse('BASE3'),
       fiscalPeriodEnd: DateTime(y, 12, 31),
-      bookValuePerShare: vpa,
-      sharesOutstandingAsOf: contagem,
+      bookValuePerShare: bookValuePerShare,
+      sharesOutstandingAsOf: count,
       totalStockholderEquity: pl,
     );
 
 void main() {
   test('com o par, vale o produto, como antes', () {
-    expect(_ano(y: 2025, vpa: 4, contagem: 100, pl: 999).equityBookValue, 400);
+    expect(_year(y: 2025, bookValuePerShare: 4, count: 100, pl: 999).equityBookValue, 400);
   });
 
   test('sem o par, vale o PL da demonstração', () {
     expect(
-        _ano(y: 2025, contagem: 0, pl: 5096268000).equityBookValue, 5096268000);
-    expect(_ano(y: 2025, vpa: 4, pl: 800).equityBookValue, 800);
+        _year(y: 2025, count: 0, pl: 5096268000).equityBookValue, 5096268000);
+    expect(_year(y: 2025, bookValuePerShare: 4, pl: 800).equityBookValue, 800);
   });
 
   test('VPA negativo continua sendo insolvência, mesmo com PL publicado', () {
-    expect(_ano(y: 2025, vpa: -1, contagem: 100, pl: 500).equityBookValue,
+    expect(_year(y: 2025, bookValuePerShare: -1, count: 100, pl: 500).equityBookValue,
         isNull);
   });
 
   test('sem nada, continua sem base', () {
-    expect(_ano(y: 2025, contagem: 0).equityBookValue, isNull);
-    expect(_ano(y: 2025, pl: -300).equityBookValue, isNull);
+    expect(_year(y: 2025, count: 0).equityBookValue, isNull);
+    expect(_year(y: 2025, pl: -300).equityBookValue, isNull);
   });
 }

@@ -24,10 +24,10 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
 /// Réplica da reescala do backtest, para conferir o que ela faz ao divisor.
-FundamentalsSnapshot _comoNoBacktest(FundamentalsSnapshot s, double preco) =>
+FundamentalsSnapshot _asInBacktest(FundamentalsSnapshot s, double price) =>
     FundamentalsSnapshot(
       ticker: s.ticker,
       fiscalPeriodEnd: s.fiscalPeriodEnd,
@@ -59,8 +59,8 @@ FundamentalsSnapshot _comoNoBacktest(FundamentalsSnapshot s, double preco) =>
       sharesOutstandingAsOf: s.sharesOutstandingAsOf,
       marketCap: (s.sharesOutstandingAsOf != null &&
               s.sharesOutstandingAsOf! > 0 &&
-              preco > 0)
-          ? s.sharesOutstandingAsOf! * preco
+              price > 0)
+          ? s.sharesOutstandingAsOf! * price
           : null,
       enterpriseToEbitda: null,
     );
@@ -74,13 +74,13 @@ Future<void> main(List<String> args) async {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
     final universe = (await ctx.fundamentals.universe()).unwrap();
 
-    final linhas = <Map<String, Object?>>[];
-    var colapsados = 0, conferidos = 0;
+    final rows = <Map<String, Object?>>[];
+    var collapsed = 0, checked = 0;
 
     var i = 0;
     for (final ticker in universe) {
@@ -93,7 +93,7 @@ Future<void> main(List<String> args) async {
         fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
@@ -101,41 +101,41 @@ Future<void> main(List<String> args) async {
       );
       if (prep.isErr) continue;
       final inputs = prep.unwrap();
-      final pub = PointInTimeView(_hoje).published(inputs.fundamentals);
+      final pub = PointInTimeView(_today).published(inputs.fundamentals);
       if (pub.isEmpty) continue;
       final latest = pub.last;
-      final preco = inputs.marketPrice;
+      final price = inputs.marketPrice;
 
       // -- Pergunta 2: a reescala do backtest colapsa as candidatas? --------
-      final reescalado = _comoNoBacktest(latest, preco);
+      final rescaled = _asInBacktest(latest, price);
       final uBack = ValuationCascade.quotedUnitRatio(
-        sharesOutstanding: reescalado.sharesOutstanding,
-        marketCap: reescalado.marketCap,
-        marketPrice: preco,
+        sharesOutstanding: rescaled.sharesOutstanding,
+        marketCap: rescaled.marketCap,
+        marketPrice: price,
       );
       final qBack = ValuationCascade.quotedShares(
-        latest: reescalado,
-        marketPrice: preco,
+        latest: rescaled,
+        marketPrice: price,
         sharesPerQuote: uBack,
-        published: [for (final s in pub) _comoNoBacktest(s, preco)],
+        published: [for (final s in pub) _asInBacktest(s, price)],
       );
       if (qBack != null) {
-        conferidos++;
+        checked++;
         // Tolerância, e não `== 1.0`: este contador é o número que a
         // ferramenta existe para produzir, e uma razão que voltasse
         // 1,0000000000000002 o omitiria em silêncio.
-        if (!qBack.diverge && (uBack - 1.0).abs() < 1e-9) colapsados++;
+        if (!qBack.diverge && (uBack - 1.0).abs() < 1e-9) collapsed++;
       }
 
       // -- Pergunta 1: o custo da regra do maior, hoje ----------------------
       final u = ValuationCascade.quotedUnitRatio(
         sharesOutstanding: latest.sharesOutstanding,
         marketCap: latest.marketCap,
-        marketPrice: preco,
+        marketPrice: price,
       );
       final q = ValuationCascade.quotedShares(
         latest: latest,
-        marketPrice: preco,
+        marketPrice: price,
         sharesPerQuote: u,
         published: pub,
       );
@@ -147,41 +147,41 @@ Future<void> main(List<String> args) async {
 
       // O potencial é `E ÷ (P × N) − 1`. Trocar o divisor por N' reescala o
       // preço justo por N/N', e o potencial acompanha por identidade.
-      final adotado = q.count;
-      final mercado = q.fromMarketCap;
-      final justo = res.fairValue.reais;
-      final justoPeloMercado =
-          (mercado != null && mercado > 0) ? justo * adotado / mercado : null;
+      final adopted = q.count;
+      final market = q.fromMarketCap;
+      final fairValue = res.fairValue.reais;
+      final fairByMarket =
+          (market != null && market > 0) ? fairValue * adopted / market : null;
 
-      linhas.add({
+      rows.add({
         'ticker': ticker.value,
-        'preco': preco,
+        'preco': price,
         'fonte': q.source.name,
         'diverge': q.diverge,
-        'divisorAdotado': adotado,
-        'divisorDeMercado': mercado,
-        'razao': (mercado != null && mercado > 0) ? adotado / mercado : null,
-        'justoAdotado': justo,
-        'justoPeloMercado': justoPeloMercado,
+        'divisorAdotado': adopted,
+        'divisorDeMercado': market,
+        'razao': (market != null && market > 0) ? adopted / market : null,
+        'justoAdotado': fairValue,
+        'justoPeloMercado': fairByMarket,
         'potencialAdotado': res.upside,
         'potencialPeloMercado':
-            justoPeloMercado == null ? null : justoPeloMercado / preco - 1,
+            fairByMarket == null ? null : fairByMarket / price - 1,
       });
     }
     stderr.writeln('');
 
     stdout.writeln('== 2. O que a validação fora da amostra enxerga ==');
     stdout.writeln('');
-    stdout.writeln('  Sob a reescala do backtest, em $conferidos ativos:');
+    stdout.writeln('  Sob a reescala do backtest, em $checked ativos:');
     stdout.writeln('    candidatas colapsadas (u = 1 e sem divergência): '
-        '$colapsados de $conferidos');
+        '$collapsed de $checked');
     stdout.writeln('  Ou seja: a razão de unidade e a regra do maior não são');
     stdout.writeln('  exercitadas por coorte nenhuma. O potencial medido fora');
     stdout.writeln('  da amostra não é o potencial que a tela mostra, para os');
     stdout.writeln('  ativos em que essas duas peças decidem algo.');
 
-    final afetados =
-        linhas.where((l) => l['fonte'] == 'reconciled' && l['diverge'] == true)
+    final affected =
+        rows.where((l) => l['fonte'] == 'reconciled' && l['diverge'] == true)
             .toList()
       ..sort((a, b) =>
           (b['razao']! as double).compareTo(a['razao']! as double));
@@ -190,12 +190,12 @@ Future<void> main(List<String> args) async {
     stdout.writeln('');
     stdout.writeln('== 1. O custo da regra do maior, hoje ==');
     stdout.writeln('');
-    stdout.writeln('  ${linhas.length} avaliados; '
-        '${afetados.length} com a contábil vencendo a divergência.');
+    stdout.writeln('  ${rows.length} avaliados; '
+        '${affected.length} com a contábil vencendo a divergência.');
     stdout.writeln('');
     stdout.writeln('  ticker    divisor/merc   justo adotado   justo p/ merc'
         '    pot. adotado   pot. p/ merc');
-    for (final l in afetados) {
+    for (final l in affected) {
       stdout.writeln('  ${(l['ticker']! as String).padRight(8)} '
           '${(l['razao']! as double).toStringAsFixed(2).padLeft(11)}x   '
           '${(l['justoAdotado']! as double).toStringAsFixed(2).padLeft(13)}   '
@@ -205,16 +205,16 @@ Future<void> main(List<String> args) async {
     }
 
     // Onde os afetados caem na ordenação que o usuário lê.
-    final comPot = linhas
+    final withUpside = rows
         .where((l) => l['potencialAdotado'] != null)
         .toList()
       ..sort((a, b) => (b['potencialAdotado']! as double)
           .compareTo(a['potencialAdotado']! as double));
     stdout.writeln('');
     stdout.writeln('  posição dos afetados na ordenação por potencial '
-        '(${comPot.length} avaliados):');
-    for (var k = 0; k < comPot.length; k++) {
-      final l = comPot[k];
+        '(${withUpside.length} avaliados):');
+    for (var k = 0; k < withUpside.length; k++) {
+      final l = withUpside[k];
       if (l['fonte'] != 'reconciled' || l['diverge'] != true) continue;
       stdout.writeln('    ${(k + 1).toString().padLeft(3)}º  '
           '${(l['ticker']! as String).padRight(8)} '
@@ -223,7 +223,7 @@ Future<void> main(List<String> args) async {
     }
 
     File('docs/validacao/divisor_contrafactual.json').writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(linhas),
+      const JsonEncoder.withIndent(' ').convert(rows),
     );
     stdout.writeln('');
     stdout.writeln('  gravado em docs/validacao/divisor_contrafactual.json');

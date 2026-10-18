@@ -20,16 +20,16 @@ abstract final class FailureCopy {
   /// **A unidade vem do núcleo, e o formato é daqui.** Deduzir o formato pelo
   /// nome do campo seria acoplamento por convenção de string, e quebraria
   /// calado no dia em que alguém renomeasse o campo.
-  static String _grandeza(double actual, double? limit, QuantityUnit unit) {
-    String escrever(double v) => switch (unit) {
+  static String _quantity(double actual, double? limit, QuantityUnit unit) {
+    String write(double v) => switch (unit) {
           QuantityUnit.fraction => Fmt.percent(v, decimals: 1),
           // Contagem é grandeza inteira: escrevê-la com casa decimal seria
           // sugerir meio ativo.
           QuantityUnit.count => v.round().toString(),
           QuantityUnit.currency => Fmt.money(v),
         };
-    final informado = 'Informado: ${escrever(actual)}.';
-    return limit == null ? informado : '$informado Limite: ${escrever(limit)}.';
+    final reported = 'Informado: ${write(actual)}.';
+    return limit == null ? reported : '$reported Limite: ${write(limit)}.';
   }
 
   /// Rótulo curto da natureza da falha, para cabeçalho de banner.
@@ -62,7 +62,7 @@ abstract final class FailureCopy {
       // decimais, ordem e palavras é a tela.
       InvalidInput(:final actual, :final limit, :final unit)
           when actual != null && unit != null =>
-        '${failure.message} ${_grandeza(actual, limit, unit)}',
+        '${failure.message} ${_quantity(actual, limit, unit)}',
       _ => failure.message,
     };
 

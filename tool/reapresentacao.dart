@@ -31,170 +31,170 @@ import 'dart:io';
 
 import 'package:equisim_core/equisim_core.dart';
 
-const _pacote = 'assets/cvm/documentos.json';
-const _saida = 'docs/validacao/reapresentacao.json';
+const _package = 'assets/cvm/documentos.json';
+const _output = 'docs/validacao/reapresentacao.json';
 
 /// Prazo regulamentar de entrega, em dias corridos depois do fecho.
 ///
 /// A DFP vence em três meses; o ITR, em 45 dias. Os números são de calendário,
 /// e a folga de alguns dias não muda a leitura: o que este corte separa é
 /// entrega no prazo de documento que chegou meses — ou anos — depois.
-const _prazoDfp = 92;
-const _prazoItr = 45;
+const _dfpDeadline = 92;
+const _itrDeadline = 45;
 
 /// As datas de coorte da validação trimestral (C1c): fim de cada trimestre de
 /// 31/03/2018 a 30/09/2025.
-List<DateTime> _coortes() {
+List<DateTime> _cohorts() {
   final out = <DateTime>[];
-  for (var ano = 2018; ano <= 2025; ano++) {
-    for (final mes in [3, 6, 9, 12]) {
-      final fim = DateTime(ano, mes + 1, 0);
-      if (fim.isBefore(DateTime(2018, 3, 31))) continue;
-      if (fim.isAfter(DateTime(2025, 9, 30))) continue;
-      out.add(fim);
+  for (var year = 2018; year <= 2025; year++) {
+    for (final month in [3, 6, 9, 12]) {
+      final end = DateTime(year, month + 1, 0);
+      if (end.isBefore(DateTime(2018, 3, 31))) continue;
+      if (end.isAfter(DateTime(2025, 9, 30))) continue;
+      out.add(end);
     }
   }
   return out;
 }
 
-double? _mediana(List<double> v) {
+double? _median(List<double> v) {
   if (v.isEmpty) return null;
   final s = [...v]..sort();
   final m = s.length ~/ 2;
   return s.length.isOdd ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-double? _quantil(List<double> v, double p) {
+double? _quantile(List<double> v, double p) {
   if (v.isEmpty) return null;
   final s = [...v]..sort();
   return s[(p * (s.length - 1)).round()];
 }
 
-String _dia(DateTime d) => d.toIso8601String().substring(0, 10);
+String _day(DateTime d) => d.toIso8601String().substring(0, 10);
 
 void main() {
-  final arquivo = File(_pacote);
-  if (!arquivo.existsSync()) {
-    stderr.writeln('$_pacote não existe. Rode antes:');
+  final file = File(_package);
+  if (!file.existsSync()) {
+    stderr.writeln('$_package não existe. Rode antes:');
     stderr.writeln('  dart run tool/cvm_empacotar.dart');
     exitCode = 2;
     return;
   }
   final docs = CvmDocumentCodec.decodePackage(
-      jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>);
+      jsonDecode(file.readAsStringSync()) as Map<String, dynamic>);
 
   // --- O atraso de cada documento ------------------------------------------
-  final atrasoDfp = <double>[];
-  final atrasoItr = <double>[];
-  var semData = 0;
-  var foraDoPrazoDfp = 0;
-  var foraDoPrazoItr = 0;
-  final piores = <({String ticker, String fim, String recebido, int dias})>[];
+  final dfpDelay = <double>[];
+  final itrDelay = <double>[];
+  var withoutDate = 0;
+  var lateDfp = 0;
+  var lateItr = 0;
+  final worst = <({String ticker, String end, String received, int days})>[];
 
   for (final e in docs.entries) {
     for (final d in e.value) {
-      final recebido = d.current.receiptDate;
-      if (recebido == null) {
-        semData++;
+      final received = d.current.receiptDate;
+      if (received == null) {
+        withoutDate++;
         continue;
       }
-      final dias = recebido.difference(d.periodEnd).inDays;
+      final days = received.difference(d.periodEnd).inDays;
       final dfp = d.kind == CvmDocumentKind.dfp;
-      (dfp ? atrasoDfp : atrasoItr).add(dias.toDouble());
-      if (dias > (dfp ? _prazoDfp : _prazoItr)) {
+      (dfp ? dfpDelay : itrDelay).add(days.toDouble());
+      if (days > (dfp ? _dfpDeadline : _itrDeadline)) {
         if (dfp) {
-          foraDoPrazoDfp++;
+          lateDfp++;
         } else {
-          foraDoPrazoItr++;
+          lateItr++;
         }
-        piores.add((
+        worst.add((
           ticker: e.key,
-          fim: _dia(d.periodEnd),
-          recebido: _dia(recebido),
-          dias: dias,
+          end: _day(d.periodEnd),
+          received: _day(received),
+          days: days,
         ));
       }
     }
   }
-  piores.sort((a, b) => b.dias.compareTo(a.dias));
+  worst.sort((a, b) => b.days.compareTo(a.days));
 
   // --- Quanto cada coorte perde --------------------------------------------
   //
   // Um exercício "devia estar público" na coorte quando o prazo regulamentar
   // dele já venceu antes dela. Some quando a **única** versão que o pacote tem
   // chegou depois — e é exatamente o que a versão original teria evitado.
-  final porCoorte = <Map<String, dynamic>>[];
-  for (final data in _coortes()) {
-    var deviaEstar = 0;
-    var perdidos = 0;
-    final tickersPerdidos = <String>{};
+  final byCohort = <Map<String, dynamic>>[];
+  for (final date in _cohorts()) {
+    var shouldBe = 0;
+    var lost = 0;
+    final lostTickers = <String>{};
     for (final e in docs.entries) {
       for (final d in e.value) {
-        final recebido = d.current.receiptDate;
-        if (recebido == null) continue;
-        final prazo = d.periodEnd.add(Duration(
-          days: d.kind == CvmDocumentKind.dfp ? _prazoDfp : _prazoItr,
+        final received = d.current.receiptDate;
+        if (received == null) continue;
+        final term = d.periodEnd.add(Duration(
+          days: d.kind == CvmDocumentKind.dfp ? _dfpDeadline : _itrDeadline,
         ));
-        if (!prazo.isBefore(data)) continue;
-        deviaEstar++;
-        if (recebido.isAfter(data)) {
-          perdidos++;
-          tickersPerdidos.add(e.key);
+        if (!term.isBefore(date)) continue;
+        shouldBe++;
+        if (received.isAfter(date)) {
+          lost++;
+          lostTickers.add(e.key);
         }
       }
     }
-    porCoorte.add({
-      'coorte': _dia(data),
-      'deviamEstarPublicos': deviaEstar,
-      'perdidosPelaVersaoTardia': perdidos,
-      'fracao': deviaEstar == 0 ? null : perdidos / deviaEstar,
-      'tickersAtingidos': tickersPerdidos.length,
+    byCohort.add({
+      'coorte': _day(date),
+      'deviamEstarPublicos': shouldBe,
+      'perdidosPelaVersaoTardia': lost,
+      'fracao': shouldBe == 0 ? null : lost / shouldBe,
+      'tickersAtingidos': lostTickers.length,
     });
   }
 
-  final resultado = {
-    'medidoEm': _dia(DateTime(2026, 9, 14)),
-    'fonte': _pacote,
-    'documentos': atrasoDfp.length + atrasoItr.length,
-    'semDataDeRecebimento': semData,
+  final result = {
+    'medidoEm': _day(DateTime(2026, 9, 14)),
+    'fonte': _package,
+    'documentos': dfpDelay.length + itrDelay.length,
+    'semDataDeRecebimento': withoutDate,
     'atrasoEmDias': {
       'dfp': {
-        'n': atrasoDfp.length,
-        'p50': _mediana(atrasoDfp),
-        'p90': _quantil(atrasoDfp, 0.9),
-        'max': atrasoDfp.isEmpty ? null : atrasoDfp.reduce((a, b) => a > b ? a : b),
-        'foraDoPrazo': foraDoPrazoDfp,
-        'prazoEmDias': _prazoDfp,
+        'n': dfpDelay.length,
+        'p50': _median(dfpDelay),
+        'p90': _quantile(dfpDelay, 0.9),
+        'max': dfpDelay.isEmpty ? null : dfpDelay.reduce((a, b) => a > b ? a : b),
+        'foraDoPrazo': lateDfp,
+        'prazoEmDias': _dfpDeadline,
       },
       'itr': {
-        'n': atrasoItr.length,
-        'p50': _mediana(atrasoItr),
-        'p90': _quantil(atrasoItr, 0.9),
-        'max': atrasoItr.isEmpty ? null : atrasoItr.reduce((a, b) => a > b ? a : b),
-        'foraDoPrazo': foraDoPrazoItr,
-        'prazoEmDias': _prazoItr,
+        'n': itrDelay.length,
+        'p50': _median(itrDelay),
+        'p90': _quantile(itrDelay, 0.9),
+        'max': itrDelay.isEmpty ? null : itrDelay.reduce((a, b) => a > b ? a : b),
+        'foraDoPrazo': lateItr,
+        'prazoEmDias': _itrDeadline,
       },
     },
-    'porCoorte': porCoorte,
+    'porCoorte': byCohort,
     'pioresAtrasos': [
-      for (final p in piores.take(15))
+      for (final p in worst.take(15))
         {
           'ticker': p.ticker,
-          'fimDoExercicio': p.fim,
-          'recebidoEm': p.recebido,
-          'diasDeAtraso': p.dias,
+          'fimDoExercicio': p.end,
+          'recebidoEm': p.received,
+          'diasDeAtraso': p.days,
         },
     ],
   };
 
-  File(_saida).writeAsStringSync(
-    const JsonEncoder.withIndent(' ').convert(resultado),
+  File(_output).writeAsStringSync(
+    const JsonEncoder.withIndent(' ').convert(result),
   );
-  _imprimir(resultado);
-  stderr.writeln('\nescrito $_saida');
+  _printReport(result);
+  stderr.writeln('\nescrito $_output');
 }
 
-void _imprimir(Map<String, dynamic> r) {
+void _printReport(Map<String, dynamic> r) {
   String n(Object? v, [int c = 0]) =>
       v == null ? '—' : (v as num).toDouble().toStringAsFixed(c);
 

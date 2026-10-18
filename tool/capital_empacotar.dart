@@ -30,83 +30,83 @@ import 'coortes/eventos_de_acoes.dart';
 import 'cvm/codigos_fca.dart';
 import 'cvm/emissoes_fre.dart';
 
-const _saida = 'assets/cvm/capital.json';
+const _output = 'assets/cvm/capital.json';
 
 /// A data de referência do pacote: o dia em que o FRE e o COTAHIST em disco
 /// foram conferidos.
-final _referencia = DateTime.utc(2026, 9, 24);
+final _reference = DateTime.utc(2026, 9, 24);
 
 /// Desde quando entram as emissões: o balanço mais antigo que o aplicativo usa
 /// é o do exercício anterior ao último, e o de 2023 cobre com folga.
-final _emissoesDesde = DateTime.utc(2023, 1, 1);
+final _issuancesSince = DateTime.utc(2023, 1, 1);
 
 /// Desde quando entram os eventos: a janela do beta tem cinco anos.
-final _eventosDesde = DateTime.utc(2019, 1, 1);
+final _eventsSince = DateTime.utc(2019, 1, 1);
 
 void main(List<String> args) {
-  final agora = DateTime.now();
-  final data = args.contains('--agora')
-      ? DateTime.utc(agora.year, agora.month, agora.day)
-      : _referencia;
-  final emissoes = EmissoesFre.ler();
-  if (emissoes == null) {
+  final now = DateTime.now();
+  final date = args.contains('--agora')
+      ? DateTime.utc(now.year, now.month, now.day)
+      : _reference;
+  final issuances = FreIssuances.read();
+  if (issuances == null) {
     stderr.writeln('sem data/cvm/fre. Rode antes:');
     stderr.writeln('  python tool/cvm_baixar.py --docs FRE --destino data/cvm/fre');
     exitCode = 2;
     return;
   }
-  final universo = (jsonDecode(
+  final universe = (jsonDecode(
           File('docs/validacao/universo.json').readAsStringSync()) as List)
       .map((e) => (e as Map<String, dynamic>)['ticker'] as String)
       .toList();
-  final ponte = ((jsonDecode(File('docs/validacao/ponte_cvm.json')
+  final bridge = ((jsonDecode(File('docs/validacao/ponte_cvm.json')
           .readAsStringSync()) as Map<String, dynamic>)['ponte']
           as Map<String, dynamic>)
       .map((k, v) => MapEntry(k, v as String));
-  final fca = CodigosFca.ler();
-  final codigos = <String, Set<String>>{
-    for (final t in universo)
-      t: codigosDaCompanhia({t, ...?fca.porCnpj[ponte[t]]}),
+  final fca = FcaCodes.read();
+  final codes = <String, Set<String>>{
+    for (final t in universe)
+      t: companyCodes({t, ...?fca.byCnpj[bridge[t]]}),
   };
-  final bruto = lerCotahistBruto({for (final c in codigos.values) ...c});
-  final eventos = EventosDeAcoes.ler(emissoes: emissoes);
+  final raw = readRawCotahist({for (final c in codes.values) ...c});
+  final events = ShareEvents.read(issuances: issuances);
 
-  final pacote = <String, CapitalEvents>{};
-  var comEmissao = 0, comEvento = 0, nEmissoes = 0, nEventos = 0;
-  for (final t in universo) {
-    final cnpj = ponte[t];
-    final brutos = encadear(t, codigos[t] ?? {t}, bruto);
-    final todos = eventos.doPapel(cnpj: cnpj, ticker: t, brutos: brutos);
+  final package = <String, CapitalEvents>{};
+  var withIssuance = 0, withEvent = 0, issuanceCount = 0, eventCount = 0;
+  for (final t in universe) {
+    final cnpj = bridge[t];
+    final rawSessions = chain(t, codes[t] ?? {t}, raw);
+    final all = events.ofSecurity(cnpj: cnpj, ticker: t, rawSessions: rawSessions);
     // O quadro de aumentos do FRE, até 2023, e a variação do capital
     // integralizado que nenhum evento confirmado no preço explica, depois.
-    final daEmissao = cnpj == null
+    final ofIssuance = cnpj == null
         ? const <ShareIssue>[]
         : [
             for (final i in [
-              ...emissoes.conhecidas(cnpj, data),
-              ...emissoesSemEvento(
-                  emissoes.pelaVariacaoDoCapital(cnpj, data),
-                  brutos,
-                  eventos.doPapel(
-                      cnpj: cnpj, ticker: t, brutos: brutos, comContagem: false)),
+              ...issuances.known(cnpj, date),
+              ...issuancesWithoutEvent(
+                  issuances.byCapitalChange(cnpj, date),
+                  rawSessions,
+                  events.ofSecurity(
+                      cnpj: cnpj, ticker: t, rawSessions: rawSessions, withCount: false)),
             ])
-              if (!i.date.isBefore(_emissoesDesde)) i,
+              if (!i.date.isBefore(_issuancesSince)) i,
           ];
-    final doPapel = [
-      for (final e in todos)
-        if (!e.exDate.isBefore(_eventosDesde)) e,
+    final ofSecurity = [
+      for (final e in all)
+        if (!e.exDate.isBefore(_eventsSince)) e,
     ];
-    final c = CapitalEvents(issues: daEmissao, shareEvents: doPapel);
+    final c = CapitalEvents(issues: ofIssuance, shareEvents: ofSecurity);
     if (c.isEmpty) continue;
-    pacote[t] = c;
-    if (daEmissao.isNotEmpty) comEmissao++;
-    if (doPapel.isNotEmpty) comEvento++;
-    nEmissoes += daEmissao.length;
-    nEventos += doPapel.length;
+    package[t] = c;
+    if (ofIssuance.isNotEmpty) withIssuance++;
+    if (ofSecurity.isNotEmpty) withEvent++;
+    issuanceCount += ofIssuance.length;
+    eventCount += ofSecurity.length;
   }
-  File(_saida).writeAsStringSync(
-      '${const JsonEncoder.withIndent(' ').convert(CapitalEventsCodec.encodePackage(pacote, geradoEm: data))}\n');
-  stdout.writeln('${universo.length} ativos: $comEmissao com emissão por valor '
-      '($nEmissoes), $comEvento com evento de ações ($nEventos)');
-  stdout.writeln('escrito $_saida');
+  File(_output).writeAsStringSync(
+      '${const JsonEncoder.withIndent(' ').convert(CapitalEventsCodec.encodePackage(package, generatedAt: date))}\n');
+  stdout.writeln('${universe.length} ativos: $withIssuance com emissão por valor '
+      '($issuanceCount), $withEvent com evento de ações ($eventCount)');
+  stdout.writeln('escrito $_output');
 }

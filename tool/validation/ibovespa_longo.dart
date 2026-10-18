@@ -21,79 +21,79 @@ import 'dart:io';
 import 'package:equisim_core/equisim_core.dart';
 
 /// O arquivo gravado por `tool/ibovespa_sgs_baixar.py`.
-const arquivoSgs7 = 'data/indices/ibovespa_sgs7.json';
+const sgs7File = 'data/indices/ibovespa_sgs7.json';
 
 /// Distância máxima entre a razão mediana da sobreposição e 1.
-const toleranciaDaEmenda = 0.002;
+const spliceTolerance = 0.002;
 
 /// Série do Ibovespa que emenda o SGS 7 à fonte de mercado.
-class IbovespaLongo implements BenchmarkRepository {
-  IbovespaLongo._(this._pontos, this.inicioDaFonte, this.razaoNaSobreposicao);
+class LongIbovespa implements BenchmarkRepository {
+  LongIbovespa._(this._points, this.sourceStart, this.overlapRatio);
 
-  final List<PricePoint> _pontos;
+  final List<PricePoint> _points;
 
   /// Primeiro pregão da fonte de mercado: antes dele, os pontos são do SGS.
-  final DateTime inicioDaFonte;
+  final DateTime sourceStart;
 
   /// Razão mediana `fonte ÷ SGS` nos pregões comuns.
-  final double razaoNaSobreposicao;
+  final double overlapRatio;
 
-  /// Monta a série com a fonte de mercado [mercado].
+  /// Monta a série com a fonte de mercado [market].
   ///
-  /// [janelaDaFonte] é a janela pedida a ela: por padrão tudo o que ela tiver;
+  /// [sourceWindow] é a janela pedida a ela: por padrão tudo o que ela tiver;
   /// a entrada congelada só serve as janelas que gravou, e aí vai a gravada.
-  static Future<IbovespaLongo> montar(
-    BenchmarkRepository mercado, {
-    DateRange? janelaDaFonte,
+  static Future<LongIbovespa> build(
+    BenchmarkRepository market, {
+    DateRange? sourceWindow,
   }) async {
-    final arquivo = File(arquivoSgs7);
-    if (!arquivo.existsSync()) {
-      throw StateError('Falta $arquivoSgs7. Rode antes: '
+    final file = File(sgs7File);
+    if (!file.existsSync()) {
+      throw StateError('Falta $sgs7File. Rode antes: '
           'python tool/ibovespa_sgs_baixar.py');
     }
-    final json = jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>;
+    final json = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
     final sgs = <DateTime, double>{
       for (final p in json['pontos'] as List)
         DateTime.parse((p as List)[0] as String): (p[1] as num).toDouble(),
     };
-    final r = await mercado.ibovespa(
-      janelaDaFonte ?? DateRange(DateTime(2000, 1, 1), DateTime(2100, 1, 1)),
+    final r = await market.ibovespa(
+      sourceWindow ?? DateRange(DateTime(2000, 1, 1), DateTime(2100, 1, 1)),
     );
     if (r.isErr) {
       throw StateError('Ibovespa da fonte de mercado: ${r.failureOrNull?.message}');
     }
-    final fonte = r.unwrap().points;
-    if (fonte.isEmpty) throw StateError('Ibovespa da fonte de mercado vazio.');
-    final inicioDaFonte = fonte.first.date;
+    final source = r.unwrap().points;
+    if (source.isEmpty) throw StateError('Ibovespa da fonte de mercado vazio.');
+    final sourceStart = source.first.date;
 
-    final razoes = <double>[
-      for (final p in fonte)
+    final ratios = <double>[
+      for (final p in source)
         if (sgs[p.date] case final s? when s > 0 && p.close > 0) p.close / s,
     ];
-    if (razoes.isEmpty) {
+    if (ratios.isEmpty) {
       throw StateError('SGS 7 e fonte de mercado sem pregão em comum: a emenda '
           'não pode ser conferida.');
     }
-    final razao = Inference.median(razoes)!;
-    if ((razao - 1).abs() > toleranciaDaEmenda) {
+    final ratio = Inference.median(ratios)!;
+    if ((ratio - 1).abs() > spliceTolerance) {
       throw StateError('A razão mediana entre a fonte de mercado e o SGS 7 é '
-          '${razao.toStringAsFixed(6)}: uma das duas mudou de escala.');
+          '${ratio.toStringAsFixed(6)}: uma das duas mudou de escala.');
     }
 
-    final pontos = <PricePoint>[
+    final points = <PricePoint>[
       for (final e in sgs.entries)
-        if (e.key.isBefore(inicioDaFonte))
+        if (e.key.isBefore(sourceStart))
           PricePoint(date: e.key, close: e.value),
-      ...fonte,
+      ...source,
     ]..sort((a, b) => a.date.compareTo(b.date));
-    return IbovespaLongo._(pontos, inicioDaFonte, razao);
+    return LongIbovespa._(points, sourceStart, ratio);
   }
 
   @override
   Future<Result<PriceSeries>> ibovespa(DateRange range) async => Ok(PriceSeries(
         ticker: Ticker.parse('IBOV11'),
         points: [
-          for (final p in _pontos)
+          for (final p in _points)
             if (range.contains(p.date)) p,
         ],
       ));
@@ -105,5 +105,5 @@ class IbovespaLongo implements BenchmarkRepository {
 /// janela de [ResolveMarketAnchors] — o índice entre as médias de 63 pregões
 /// das pontas, e o CDI composto. É Fisher, e não subtração: o prêmio é razão de
 /// fatores brutos, como na medição da decisão 116.
-double premioDasAncoras(MarketAnchors a) =>
+double premiumOfAnchors(MarketAnchors a) =>
     (1 + a.marketCagr) / (1 + a.riskFreeCagr) - 1;

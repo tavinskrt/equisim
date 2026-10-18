@@ -8,7 +8,7 @@ que mantém a base em [WEGE3](../estudo/casos/wege3.md).
 
 Parâmetros em [growth_guards.dart, `ValuationParameters`](../../packages/equisim_core/lib/src/services/valuation/growth_guards.dart);
 série em [capital_base.dart](../../packages/equisim_core/lib/src/services/valuation/capital_base.dart);
-orquestração em [compute_valuation.dart, `_saida1`, `_fluxoBase`, `_saida2`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart).
+orquestração em [compute_valuation.dart, `_output1`, `_baseFlow`, `_output2`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart).
 
 ---
 
@@ -45,10 +45,10 @@ base  = lucro do exercício × fator
 |---|---|---|
 | **Precedência do ciclo** em commodity e cíclico pesado (setor "materiais básicos" ou subsetor de petróleo, refino, mineração, siderurgia, papel e celulose, petroquímicos): normaliza mesmo com tendência significante | [cyclical_sectors.dart](../../packages/equisim_core/lib/src/services/valuation/cyclical_sectors.dart), `CyclicalSectors.hasCyclePrecedence` | decisão 28: a perna de alta do ciclo tem forma de tendência |
 | **Trava de saúde**: se o pior entre lucro líquido e EBITDA caiu mais de 50% em três anos, o fator não passa de 1,00 (não normaliza para cima) | `recentOperationalDecline`, `maxOperationalDecline = 0,50`, `operationalHealthWindow = 3` | decisões 28 e 29 (caso QUAL3: +477% vinha da base normalizada) |
-| **Commodity é isenta da trava** (só na base) | `_saida1` | decisão 30 |
+| **Commodity é isenta da trava** (só na base) | `_output1` | decisão 30 |
 | A vantagem competitiva residual **não** tem trava de saúde | `GrowthGuards.residualMoat` | decisão 36 tirou os cortes de nível; texto corrigido em 28/09/2026 (item B39) |
-| **Base reconstruída**: retorno atual ≤ 0, ciclo > 0, sem trava e fluxo positivo em ≥ 60% da janela → base = retorno do ciclo × capital de hoje | `_fluxoBase` | decisão 53: o vale do ciclo não descarta a empresa; vira ressalva |
-| Base ≤ 0 depois de tudo: a via não se aplica | `_fluxoBase` | — |
+| **Base reconstruída**: retorno atual ≤ 0, ciclo > 0, sem trava e fluxo positivo em ≥ 60% da janela → base = retorno do ciclo × capital de hoje | `_baseFlow` | decisão 53: o vale do ciclo não descarta a empresa; vira ressalva |
+| Base ≤ 0 depois de tudo: a via não se aplica | `_baseFlow` | — |
 
 A base da via do acionista é por papel: lucro líquido ÷ papéis da ponte × fator
 (recuo: lucro por ação publicado × razão da unit) (`_earningsPerQuotedUnit`).
@@ -69,7 +69,7 @@ que a decidiram — nada é recalculado para explicar:
 | O registro: retorno do último exercício, os anos e a mediana do ciclo, razão e desvios robustos, tendência, precedência do ciclo, queda no triênio e travas, fator bruto e aplicado, saturação, reconstrução, lucro publicado e de partida | [base_normalization.dart, `BaseNormalization`](../../packages/equisim_core/lib/src/services/valuation/base_normalization.dart); `ValuationDiagnostics.baseNormalization` | — |
 | O resultado em uma palavra, pela ordem em que a cascata decide: imposto, reconstruído, sem ciclo, dentro do normal, tendência, travado pela queda, para cima, para baixo | `BaseNormalization.outcome` | variável "resultado da normalização" no rastro |
 | As duas medidas da Guarda 3, sem mudar a regra | `GrowthGuards.cycleDeviation` | — |
-| O porquê em linguagem corrente, com os números | `ValuationCascade._porQueDaBase`; `CalculationTrace.explanation` | painel de logs, quadro "Por quê" do passo "Base do fluxo" |
+| O porquê em linguagem corrente, com os números | `ValuationCascade._whyTheBase`; `CalculationTrace.explanation` | painel de logs, quadro "Por quê" do passo "Base do fluxo" |
 | O mesmo porquê na tela, com os anos do ciclo em barras | [normalization_panel.dart](../../lib/presentation/valuation/normalization_panel.dart), [normalization_copy.dart](../../lib/presentation/valuation/normalization_copy.dart) | Editar valuation, cartão do lucro de partida |
 | O porquê de cada ativo do universo | [tool/normalizacoes.dart](../../tool/normalizacoes.dart) | [normalizacoes.md](../validacao/normalizacoes.md): 18 para cima, 27 para baixo, 47 dentro do normal, 14 por tendência, 3 reconstruídos, 1 sem ciclo, nos 110 avaliados de 14/09/2026 |
 
@@ -87,7 +87,7 @@ o rastro do passo da base.
 | Conferência: crescimento de uma regressão de `ln(base)` contra o ano, `e^b − 1`, erro pelo método delta `(1 + g) × erro(b)` | idem | Wooldridge; método delta | [crescimento_log_linear.md](../validacao/crescimento_log_linear.md) |
 | **Não identificado** se o erro passa de 3 p.p., **ou** se `|mediana − regressão| ÷ erro` passa do crítico de Student **e** a diferença passa de `max(2 p.p.; 25% × |mediana|)` | `maxGrowthStdError = 0,03`, `dispersionFloor = 0,02`, `dispersionRelative = 0,25` | a série não diz um crescimento só | decisão 27 |
 | Não identificado, mas a inflação é **financiável** (retenção exigida `inflação ÷ ROIC do ciclo` < 1 e ≤ retenção mediana observada) → `g` = inflação, com ressalva | `anchorIsFundable` | crescer com a inflação é o mínimo de uma empresa em continuidade | — |
-| Nem isso → `g` = 0, com ressalva e aviso | `_saida2` | direção conservadora, declarada | — |
+| Nem isso → `g` = 0, com ressalva e aviso | `_output2` | direção conservadora, declarada | — |
 | Crescimento de cada ano limitado ao que o retorno financia: `g_t ≤ 0,95 × ROIC_t` | [dcf.dart, `sustainable`](../../packages/equisim_core/lib/src/services/valuation/dcf.dart) | reter 100% para sempre não é plano | decisão 47 |
 
 ---

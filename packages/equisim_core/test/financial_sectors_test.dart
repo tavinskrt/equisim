@@ -1,8 +1,8 @@
 import 'package:equisim_core/equisim_core.dart';
 import 'package:test/test.dart';
 
-bool _fin(String? chave, [String? sub]) =>
-    FinancialSectors.isFinancial(sectorKey: chave, industry: sub);
+bool _fin(String? key, [String? sub]) =>
+    FinancialSectors.isFinancial(sectorKey: key, industry: sub);
 
 void main() {
   group('Porta 1 pela taxonomia oficial — item A5', () {

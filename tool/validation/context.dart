@@ -130,7 +130,7 @@ class ValidationContext {
   /// Existe para a entrada congelada: o Ibovespa vem sem cache da fonte, e
   /// medir sobre ele em duas execuções dá dois números. Quem congela grava a
   /// série e a serve por aqui — ver `tool/validation/congelado.dart`.
-  ValidationContext comBenchmark(BenchmarkRepository outro) =>
+  ValidationContext withBenchmark(BenchmarkRepository other) =>
       ValidationContext._(
         client: client,
         brapi: brapi,
@@ -138,7 +138,7 @@ class ValidationContext {
         cache: cache,
         prices: prices,
         fundamentals: fundamentals,
-        benchmark: outro,
+        benchmark: other,
         macro: macro,
       );
 

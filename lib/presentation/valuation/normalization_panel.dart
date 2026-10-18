@@ -30,15 +30,15 @@ class NormalizationPanel extends StatefulWidget {
 }
 
 class _NormalizationPanelState extends State<NormalizationPanel> {
-  late bool _aberto;
+  late bool _open;
 
   @override
   void initState() {
     super.initState();
-    _aberto = switch (widget.normalization.outcome) {
-      BaseNormalizationOutcome.paraCima ||
-      BaseNormalizationOutcome.paraBaixo ||
-      BaseNormalizationOutcome.reconstruida =>
+    _open = switch (widget.normalization.outcome) {
+      BaseNormalizationOutcome.upward ||
+      BaseNormalizationOutcome.downward ||
+      BaseNormalizationOutcome.rebuilt =>
         true,
       _ => false,
     };
@@ -49,14 +49,14 @@ class _NormalizationPanelState extends State<NormalizationPanel> {
     final c = context.fin;
     final t = context.finType;
     final n = widget.normalization;
-    final teste = NormalizationCopy.teste(n);
-    final conta = NormalizationCopy.conta(n);
-    final avisos = NormalizationCopy.avisos(n);
-    final tendencia = switch (n.outcome) {
-      BaseNormalizationOutcome.paraCima => FinTrend.positive,
-      BaseNormalizationOutcome.paraBaixo => FinTrend.negative,
-      BaseNormalizationOutcome.travadaPelaSaude ||
-      BaseNormalizationOutcome.reconstruida =>
+    final test = NormalizationCopy.test(n);
+    final account = NormalizationCopy.account(n);
+    final warnings = NormalizationCopy.warnings(n);
+    final trend = switch (n.outcome) {
+      BaseNormalizationOutcome.upward => FinTrend.positive,
+      BaseNormalizationOutcome.downward => FinTrend.negative,
+      BaseNormalizationOutcome.healthLocked ||
+      BaseNormalizationOutcome.rebuilt =>
         FinTrend.caution,
       _ => FinTrend.neutral,
     };
@@ -76,7 +76,7 @@ class _NormalizationPanelState extends State<NormalizationPanel> {
             type: MaterialType.transparency,
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
-              onTap: () => setState(() => _aberto = !_aberto),
+              onTap: () => setState(() => _open = !_open),
               child: Padding(
                 padding: const EdgeInsets.all(FinSpace.md),
                 child: Row(
@@ -88,31 +88,31 @@ class _NormalizationPanelState extends State<NormalizationPanel> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            NormalizationCopy.pergunta(n),
+                            NormalizationCopy.question(n),
                             style: t.bodySm.copyWith(
                               color: c.textPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           const Gap.xs(),
-                          _Selo(
-                            texto: NormalizationCopy.selo(n),
-                            tendencia: tendencia,
+                          _Badge(
+                            text: NormalizationCopy.badge(n),
+                            trend: trend,
                           ),
                         ],
                       ),
                     ),
                     Icon(
-                      _aberto ? Icons.expand_less : Icons.expand_more,
+                      _open ? Icons.expand_less : Icons.expand_more,
                       color: c.textSecondary,
-                      semanticLabel: _aberto ? 'Recolher' : 'Expandir',
+                      semanticLabel: _open ? 'Recolher' : 'Expandir',
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          if (_aberto)
+          if (_open)
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 FinSpace.md,
@@ -124,29 +124,29 @@ class _NormalizationPanelState extends State<NormalizationPanel> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    NormalizationCopy.resposta(n),
+                    NormalizationCopy.answer(n),
                     style: t.bodySm.copyWith(color: c.textPrimary),
                   ),
                   const Gap.sm(),
                   Text(
-                    NormalizationCopy.regra(n),
+                    NormalizationCopy.rule(n),
                     style: t.caption.copyWith(color: c.textSecondary),
                   ),
                   if (n.cycleWindow.isNotEmpty && n.latestReturn != null) ...[
                     const Gap.md(),
-                    _BarrasDoCiclo(n: n),
+                    _CycleBars(n: n),
                   ],
-                  if (teste != null) ...[
+                  if (test != null) ...[
                     const Gap.md(),
-                    Text(teste, style: t.caption.copyWith(color: c.textPrimary)),
+                    Text(test, style: t.caption.copyWith(color: c.textPrimary)),
                   ],
-                  if (conta != null) ...[
+                  if (account != null) ...[
                     const Gap.sm(),
-                    Text(conta, style: t.caption.copyWith(color: c.textPrimary)),
+                    Text(account, style: t.caption.copyWith(color: c.textPrimary)),
                   ],
-                  for (final aviso in avisos) ...[
+                  for (final warning in warnings) ...[
                     const Gap.sm(),
-                    NoticeBanner(message: aviso),
+                    NoticeBanner(message: warning),
                   ],
                   const Gap.sm(),
                   Text(
@@ -164,30 +164,30 @@ class _NormalizationPanelState extends State<NormalizationPanel> {
 }
 
 /// O selo do resultado da normalização, na cor da direção.
-class _Selo extends StatelessWidget {
-  final String texto;
-  final FinTrend tendencia;
+class _Badge extends StatelessWidget {
+  final String text;
+  final FinTrend trend;
 
-  const _Selo({required this.texto, required this.tendencia});
+  const _Badge({required this.text, required this.trend});
 
   @override
   Widget build(BuildContext context) {
     final c = context.fin;
-    final cor = c.forTrend(tendencia);
+    final color = c.forTrend(trend);
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: FinSpace.sm,
         vertical: FinSpace.xxs,
       ),
       decoration: BoxDecoration(
-        color: c.surfaceForTrend(tendencia),
+        color: c.surfaceForTrend(trend),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: cor.withValues(alpha: 0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Text(
-        texto,
+        text,
         style: context.finType.caption.copyWith(
-          color: cor,
+          color: color,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -200,42 +200,42 @@ class _Selo extends StatelessWidget {
 ///
 /// Uma fila por ano, e não um gráfico de colunas: a fila aguenta 320 dp sob
 /// fonte ampliada sem cortar rótulo, e cada ano diz o próprio número.
-class _BarrasDoCiclo extends StatelessWidget {
+class _CycleBars extends StatelessWidget {
   final BaseNormalization n;
 
-  const _BarrasDoCiclo({required this.n});
+  const _CycleBars({required this.n});
 
   @override
   Widget build(BuildContext context) {
     final c = context.fin;
     final t = context.finType;
-    final tipico = n.cycleReturn;
-    final ultimo = n.latestReturn!;
-    final valores = [
+    final typical = n.cycleReturn;
+    final last = n.latestReturn!;
+    final values = [
       for (final p in n.cycleWindow) p.value,
-      ultimo,
-      ?tipico,
+      last,
+      ?typical,
     ];
     // As colunas de rótulo crescem com a fonte: em 2,0x, `2024` e `13,2%` não
     // cabem nas larguras de 1,0x.
-    final escala = MediaQuery.textScalerOf(context).scale(1);
-    final lo = valores.fold(0.0, (a, b) => a < b ? a : b);
-    final hi = valores.fold(lo + 1e-9, (a, b) => a > b ? a : b) * 1.08;
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    final lo = values.fold(0.0, (a, b) => a < b ? a : b);
+    final hi = values.fold(lo + 1e-9, (a, b) => a > b ? a : b) * 1.08;
     double pos(double v) => ((v - lo) / (hi - lo)).clamp(0.0, 1.0);
 
-    Widget fila(String rotulo, double valor, {required bool destaque}) {
+    Widget tableRow(String label, double value, {required bool highlight}) {
       return Padding(
         padding: const EdgeInsets.only(bottom: FinSpace.xs),
         child: Row(
           children: [
             SizedBox(
-              width: 40 * escala,
+              width: 40 * scale,
               child: Text(
-                rotulo,
-                style: (destaque ? t.captionNum.copyWith(
+                label,
+                style: (highlight ? t.captionNum.copyWith(
                   fontWeight: FontWeight.w700,
                 ) : t.captionNum).copyWith(
-                  color: destaque ? c.textPrimary : c.textSecondary,
+                  color: highlight ? c.textPrimary : c.textSecondary,
                 ),
               ),
             ),
@@ -244,32 +244,32 @@ class _BarrasDoCiclo extends StatelessWidget {
                 builder: (context, k) {
                   final w = k.maxWidth;
                   final zero = pos(0) * w;
-                  final ponta = pos(valor) * w;
-                  final esquerda = zero < ponta ? zero : ponta;
-                  final largura = (ponta - zero).abs().clamp(2.0, w);
+                  final tip = pos(value) * w;
+                  final left = zero < tip ? zero : tip;
+                  final width = (tip - zero).abs().clamp(2.0, w);
                   return SizedBox(
                     height: 14,
                     child: Stack(
                       children: [
                         Positioned(
-                          left: esquerda,
-                          width: largura,
+                          left: left,
+                          width: width,
                           top: 2,
                           bottom: 2,
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                              color: destaque
+                              color: highlight
                                   ? c.brand
-                                  : valor < 0
+                                  : value < 0
                                       ? c.negative.withValues(alpha: 0.6)
                                       : c.borderStrong,
                               borderRadius: BorderRadius.circular(3),
                             ),
                           ),
                         ),
-                        if (tipico != null)
+                        if (typical != null)
                           Positioned(
-                            left: (pos(tipico) * w - 1).clamp(0.0, w - 2),
+                            left: (pos(typical) * w - 1).clamp(0.0, w - 2),
                             width: 2,
                             top: 0,
                             bottom: 0,
@@ -283,13 +283,13 @@ class _BarrasDoCiclo extends StatelessWidget {
             ),
             const Gap.sm(axis: Axis.horizontal),
             SizedBox(
-              width: 52 * escala,
+              width: 52 * scale,
               child: Text(
-                Fmt.percent(valor, decimals: 1),
+                Fmt.percent(value, decimals: 1),
                 textAlign: TextAlign.right,
                 style: t.captionNum.copyWith(
-                  color: destaque ? c.textPrimary : c.textSecondary,
-                  fontWeight: destaque ? FontWeight.w700 : null,
+                  color: highlight ? c.textPrimary : c.textSecondary,
+                  fontWeight: highlight ? FontWeight.w700 : null,
                 ),
               ),
             ),
@@ -298,38 +298,38 @@ class _BarrasDoCiclo extends StatelessWidget {
       );
     }
 
-    final retornoNome = NormalizationCopy.retorno(n.lane);
+    final returnName = NormalizationCopy.returnRate(n.lane);
     return Semantics(
-      label: 'O $retornoNome de cada ano: '
+      label: 'O $returnName de cada ano: '
           '${[for (final p in n.cycleWindow) '${p.year}, ${Fmt.percent(p.value, decimals: 1)}'].join('; ')}; '
-          'último exercício, ${n.latestYear}, ${Fmt.percent(ultimo, decimals: 1)}; '
-          'típico, ${tipico == null ? 'sem medida' : Fmt.percent(tipico, decimals: 1)}.',
+          'último exercício, ${n.latestYear}, ${Fmt.percent(last, decimals: 1)}; '
+          'típico, ${typical == null ? 'sem medida' : Fmt.percent(typical, decimals: 1)}.',
       child: ExcludeSemantics(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '${retornoNome[0].toUpperCase()}${retornoNome.substring(1)}, ano '
+              '${returnName[0].toUpperCase()}${returnName.substring(1)}, ano '
               'a ano',
               style: t.caption.copyWith(color: c.textSecondary),
             ),
             const Gap.xs(),
             for (final p in n.cycleWindow)
-              fila('${p.year}', p.value, destaque: false),
+              tableRow('${p.year}', p.value, highlight: false),
             const Gap.xs(),
-            fila('${n.latestYear}', ultimo, destaque: true),
+            tableRow('${n.latestYear}', last, highlight: true),
             const Gap.xs(),
             Wrap(
               spacing: FinSpace.md,
               runSpacing: FinSpace.xxs,
               children: [
-                _Legenda(cor: c.borderStrong, texto: 'anos do ciclo'),
-                _Legenda(cor: c.brand, texto: 'último exercício'),
-                if (tipico != null)
-                  _Legenda(
-                    cor: c.positive,
-                    texto: 'típico (mediana): ${Fmt.percent(tipico, decimals: 1)}',
-                    linha: true,
+                _Legend(color: c.borderStrong, text: 'anos do ciclo'),
+                _Legend(color: c.brand, text: 'último exercício'),
+                if (typical != null)
+                  _Legend(
+                    color: c.positive,
+                    text: 'típico (mediana): ${Fmt.percent(typical, decimals: 1)}',
+                    row: true,
                   ),
               ],
             ),
@@ -340,29 +340,29 @@ class _BarrasDoCiclo extends StatelessWidget {
   }
 }
 
-class _Legenda extends StatelessWidget {
-  final Color cor;
-  final String texto;
-  final bool linha;
+class _Legend extends StatelessWidget {
+  final Color color;
+  final String text;
+  final bool row;
 
-  const _Legenda({required this.cor, required this.texto, this.linha = false});
+  const _Legend({required this.color, required this.text, this.row = false});
 
   @override
   Widget build(BuildContext context) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: linha ? 2 : 10,
+            width: row ? 2 : 10,
             height: 10,
             decoration: BoxDecoration(
-              color: cor,
-              borderRadius: BorderRadius.circular(linha ? 0 : 2),
+              color: color,
+              borderRadius: BorderRadius.circular(row ? 0 : 2),
             ),
           ),
           const Gap.xs(axis: Axis.horizontal),
           Flexible(
             child: Text(
-              texto,
+              text,
               style: context.finType.caption.copyWith(
                 color: context.fin.textSecondary,
               ),

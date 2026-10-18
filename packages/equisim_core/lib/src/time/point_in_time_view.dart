@@ -52,9 +52,9 @@ class PointInTimeView {
   /// admitiria em 31/03. Numa coorte de 31/03 isso é a diferença entre avaliar
   /// com o exercício mais recente e avaliar com o anterior.
   bool isPublished(FundamentalsSnapshot snapshot) {
-    final recebido = snapshot.receiptDate;
-    if (recebido != null) return !_depoisDe(recebido, asOf);
-    return !_depoisDe(snapshot.fiscalPeriodEnd, cutoff);
+    final received = snapshot.receiptDate;
+    if (received != null) return !_isAfter(received, asOf);
+    return !_isAfter(snapshot.fiscalPeriodEnd, cutoff);
   }
 
   /// `a` é um dia civil posterior a `b`?
@@ -65,7 +65,7 @@ class PointInTimeView {
   /// UTC do mesmo dia civil são instantes distintos. Comparar com `isAfter`
   /// faria a publicidade de um exercício depender do fuso da máquina, que é
   /// o mesmo defeito que a contagem de pregões de `MarketLeverage` corrigiu.
-  static bool _depoisDe(DateTime a, DateTime b) {
+  static bool _isAfter(DateTime a, DateTime b) {
     if (a.year != b.year) return a.year > b.year;
     if (a.month != b.month) return a.month > b.month;
     return a.day > b.day;

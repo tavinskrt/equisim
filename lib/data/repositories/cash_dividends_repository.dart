@@ -9,16 +9,16 @@ import 'package:equisim_core/equisim_core.dart';
 /// transparente**: sem proventos, o beta sai do fechamento, que é o de antes.
 class CashDividendsRepository {
   /// Lê o conteúdo do pacote.
-  final Future<String> Function() carregarPacote;
+  final Future<String> Function() loadPackage;
 
   /// Declara o repositório.
-  CashDividendsRepository({required this.carregarPacote});
+  CashDividendsRepository({required this.loadPackage});
 
-  Future<Map<String, List<CashDividend>>>? _proventos;
+  Future<Map<String, List<CashDividend>>>? _dividends;
 
-  Future<Map<String, List<CashDividend>>> _ler() async {
+  Future<Map<String, List<CashDividend>>> _read() async {
     try {
-      final json = jsonDecode(await carregarPacote());
+      final json = jsonDecode(await loadPackage());
       return json is Map<String, dynamic>
           ? CashDividendsCodec.decode(json)
           : const {};
@@ -29,5 +29,5 @@ class CashDividendsRepository {
 
   /// Proventos da classe de [ticker], em ordem de data ex.
   Future<List<CashDividend>> dividendsFor(Ticker ticker) async =>
-      CashDividendsCodec.forTicker(await (_proventos ??= _ler()), ticker.value);
+      CashDividendsCodec.forTicker(await (_dividends ??= _read()), ticker.value);
 }

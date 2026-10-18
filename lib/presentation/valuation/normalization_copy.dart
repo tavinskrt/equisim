@@ -14,85 +14,85 @@ import '../shared/ui_kit.dart';
 /// direção de cada uma, e não retirá-las.
 abstract final class NormalizationCopy {
   /// O nome do retorno da via, como se diz.
-  static String retorno(ValuationLane via) => via == ValuationLane.firm
+  static String returnRate(ValuationLane lane) => lane == ValuationLane.firm
       ? 'retorno sobre o capital investido'
       : 'retorno sobre o patrimônio';
 
   static String _pct(double? v) => v == null ? '—' : Fmt.percent(v, decimals: 1);
 
-  static String _mi(double v) =>
+  static String _inMillions(double v) =>
       'R\$ ${Fmt.ratio(v / 1e6, decimals: 1)} mi';
 
   static String _x(double v) => '×${Fmt.ratio(v, decimals: 2)}';
 
   /// A pergunta que abre a explicação.
-  static String pergunta(BaseNormalization n) => switch (n.outcome) {
-        BaseNormalizationOutcome.paraCima =>
+  static String question(BaseNormalization n) => switch (n.outcome) {
+        BaseNormalizationOutcome.upward =>
           'Por que o motor subiu o lucro de partida?',
-        BaseNormalizationOutcome.paraBaixo =>
+        BaseNormalizationOutcome.downward =>
           'Por que o motor baixou o lucro de partida?',
-        BaseNormalizationOutcome.reconstruida =>
+        BaseNormalizationOutcome.rebuilt =>
           'Por que o motor reconstruiu o lucro de partida?',
-        BaseNormalizationOutcome.imposta => 'Por que este fator?',
-        BaseNormalizationOutcome.dentroDoNormal ||
-        BaseNormalizationOutcome.tendencia ||
-        BaseNormalizationOutcome.travadaPelaSaude ||
-        BaseNormalizationOutcome.semCiclo =>
+        BaseNormalizationOutcome.imposed => 'Por que este fator?',
+        BaseNormalizationOutcome.withinNormal ||
+        BaseNormalizationOutcome.trend ||
+        BaseNormalizationOutcome.healthLocked ||
+        BaseNormalizationOutcome.noCycle =>
           'Por que o motor usou o lucro publicado?',
       };
 
   /// O resumo em duas ou três palavras, para o selo.
-  static String selo(BaseNormalization n) => switch (n.outcome) {
-        BaseNormalizationOutcome.paraCima => 'Para cima, ${_x(n.factor)}',
-        BaseNormalizationOutcome.paraBaixo => 'Para baixo, ${_x(n.factor)}',
-        BaseNormalizationOutcome.dentroDoNormal => 'Dentro do normal',
-        BaseNormalizationOutcome.tendencia => 'Novo patamar',
-        BaseNormalizationOutcome.travadaPelaSaude => 'Travada pela queda',
-        BaseNormalizationOutcome.reconstruida => 'Reconstruído do ciclo',
-        BaseNormalizationOutcome.semCiclo => 'Sem ciclo medível',
-        BaseNormalizationOutcome.imposta => 'Imposto, ${_x(n.factor)}',
+  static String badge(BaseNormalization n) => switch (n.outcome) {
+        BaseNormalizationOutcome.upward => 'Para cima, ${_x(n.factor)}',
+        BaseNormalizationOutcome.downward => 'Para baixo, ${_x(n.factor)}',
+        BaseNormalizationOutcome.withinNormal => 'Dentro do normal',
+        BaseNormalizationOutcome.trend => 'Novo patamar',
+        BaseNormalizationOutcome.healthLocked => 'Travada pela queda',
+        BaseNormalizationOutcome.rebuilt => 'Reconstruído do ciclo',
+        BaseNormalizationOutcome.noCycle => 'Sem ciclo medível',
+        BaseNormalizationOutcome.imposed => 'Imposto, ${_x(n.factor)}',
       };
 
   /// A regra, que vale para todo ativo.
-  static String regra(BaseNormalization n) {
-    final anos = n.windowYears;
-    final janela = anos == null ? '' : ', de ${anos.first} a ${anos.last}';
+  static String rule(BaseNormalization n) {
+    final years = n.windowYears;
+    final window = years == null ? '' : ', de ${years.first} a ${years.last}';
     return 'Um ano só pode ter sido um pico ou um vale, e o preço justo é '
         'proporcional ao lucro de partida. Por isso o motor compara o '
-        '${retorno(n.lane)} do último exercício com o retorno típico da '
+        '${returnRate(n.lane)} do último exercício com o retorno típico da '
         'empresa — a mediana dos ${n.cycleWindow.length} exercícios '
-        'anteriores$janela — e só parte de outro lucro quando os dois '
+        'anteriores$window — e só parte de outro lucro quando os dois '
         'destoam.';
   }
 
   /// A resposta para este ativo, com os números dele.
-  static String resposta(BaseNormalization n) {
-    final ano = n.latestYear;
-    final atual = _pct(n.latestReturn);
-    final tipico = _pct(n.cycleReturn);
+  static String answer(BaseNormalization n) {
+    final year = n.latestYear;
+    final current = _pct(n.latestReturn);
+    final typical = _pct(n.cycleReturn);
     return switch (n.outcome) {
-      BaseNormalizationOutcome.paraCima =>
-        'Em $ano a empresa rendeu $atual, abaixo do seu típico de $tipico. O '
+      BaseNormalizationOutcome.upward =>
+        'Em $year a empresa rendeu $current, abaixo do seu típico de $typical. O '
             'motor lê o último ano como um vale e parte do lucro que a empresa '
             'de hoje teria rendendo o típico: ${_x(n.factor)} sobre o lucro '
             'publicado.',
-      BaseNormalizationOutcome.paraBaixo =>
-        'Em $ano a empresa rendeu $atual, acima do seu típico de $tipico. O '
+      BaseNormalizationOutcome.downward =>
+        'Em $year a empresa rendeu $current, acima do seu típico de $typical. O '
             'motor lê o último ano como um pico e parte do lucro que a empresa '
             'de hoje teria rendendo o típico: ${_x(n.factor)} sobre o lucro '
             'publicado.',
-      BaseNormalizationOutcome.dentroDoNormal =>
-        'Em $ano a empresa rendeu $atual, contra o seu típico de $tipico — '
+      BaseNormalizationOutcome.withinNormal =>
+        'Em $year a empresa rendeu $current, contra o seu típico de $typical — '
             'dentro do normal dela. Não há o que corrigir, e a base é o lucro '
             'publicado.',
-      BaseNormalizationOutcome.tendencia =>
-        '$atual em $ano destoa do típico de $tipico, mas o retorno vem mudando '
+      BaseNormalizationOutcome.trend =>
+        '$current em $year destoa do típico de $typical, mas o retorno vem mudando '
             'de patamar ano a ano, e em '
             '${ValuationParameters.trendDriftWindow} anos essa tendência anda '
             'mais do que a volta ao típico. O motor lê o último ano como o novo '
             'normal, e a base é o lucro publicado.',
-      BaseNormalizationOutcome.travadaPelaSaude =>
-        '$atual em $ano está abaixo do típico de $tipico, e o motor subiria a '
+      BaseNormalizationOutcome.healthLocked =>
+        '$current em $year está abaixo do típico de $typical, e o motor subiria a '
             'base ${_x(n.rawFactor)}. Não subiu porque o lucro ou o EBITDA caiu '
             '${_pct(n.operationalDecline)} em '
             '${ValuationParameters.operationalHealthWindow} anos, mais que o '
@@ -101,71 +101,71 @@ abstract final class NormalizationCopy {
             'quem perdeu mais da metade do resultado mudou de patamar, e '
             'trazê-lo de volta ao típico lhe daria um retorno que não vai se '
             'repetir. A base é o lucro publicado.',
-      BaseNormalizationOutcome.reconstruida =>
-        'Em $ano a empresa deu prejuízo ($atual), e não há fator que corrija um '
-            'lucro negativo. Com o típico positivo ($tipico) e '
+      BaseNormalizationOutcome.rebuilt =>
+        'Em $year a empresa deu prejuízo ($current), e não há fator que corrija um '
+            'lucro negativo. Com o típico positivo ($typical) e '
             '${_pct(n.rebuiltPositiveShare)} da janela no lucro, o motor parte '
             'do típico sobre o capital de hoje: a afirmação de que a empresa '
             'volta ao que já foi.',
-      BaseNormalizationOutcome.semCiclo =>
+      BaseNormalizationOutcome.noCycle =>
         'A série não tem um retorno típico positivo com que comparar o último '
             'ano, e a base é o lucro publicado.',
-      BaseNormalizationOutcome.imposta =>
+      BaseNormalizationOutcome.imposed =>
         'O fator foi imposto de fora, por varredura de diagnóstico.',
     };
   }
 
   /// O teste de destoar, com os dois critérios, ou `null` quando ele não foi
   /// o que decidiu.
-  static String? teste(BaseNormalization n) {
-    final razao = n.ratio;
+  static String? test(BaseNormalization n) {
+    final ratio = n.ratio;
     final z = n.robustZ;
-    if (razao == null || z == null) return null;
-    if (n.outcome == BaseNormalizationOutcome.reconstruida ||
-        n.outcome == BaseNormalizationOutcome.semCiclo ||
-        n.outcome == BaseNormalizationOutcome.imposta) {
+    if (ratio == null || z == null) return null;
+    if (n.outcome == BaseNormalizationOutcome.rebuilt ||
+        n.outcome == BaseNormalizationOutcome.noCycle ||
+        n.outcome == BaseNormalizationOutcome.imposed) {
       return null;
     }
-    final pelaRazao = razao < ValuationParameters.bandLow ||
-        razao > ValuationParameters.bandHigh;
-    final pelaDistancia = z > ValuationParameters.robustZ;
-    final veredito = !n.deviates
+    final byRatio = ratio < ValuationParameters.bandLow ||
+        ratio > ValuationParameters.bandHigh;
+    final byDistance = z > ValuationParameters.robustZ;
+    final verdict = !n.deviates
         ? 'Os dois dentro do normal: não destoou.'
-        : pelaRazao && pelaDistancia
+        : byRatio && byDistance
             ? 'Destoou pelos dois critérios.'
-            : pelaRazao
+            : byRatio
                 ? 'Destoou pela razão.'
                 : 'Destoou pela distância.';
     return 'O teste: o último ano dividido pelo típico dá '
-        '${Fmt.ratio(razao, decimals: 2)} — o normal vai de '
+        '${Fmt.ratio(ratio, decimals: 2)} — o normal vai de '
         '${Fmt.ratio(ValuationParameters.bandLow, decimals: 2)} a '
         '${Fmt.ratio(ValuationParameters.bandHigh, decimals: 2)} —, e a '
         'distância entre os dois é de ${Fmt.ratio(z, decimals: 1)} desvios '
         'típicos da janela — o normal vai até '
-        '${Fmt.ratio(ValuationParameters.robustZ, decimals: 1)}. $veredito';
+        '${Fmt.ratio(ValuationParameters.robustZ, decimals: 1)}. $verdict';
   }
 
   /// A conta da base, ou `null` quando a base é o lucro publicado.
-  static String? conta(BaseNormalization n) {
-    final publicado = n.publishedProfit;
+  static String? account(BaseNormalization n) {
+    final published = n.publishedProfit;
     final base = n.baseProfit;
-    if (publicado == null || base == null) return null;
+    if (published == null || base == null) return null;
     return switch (n.outcome) {
-      BaseNormalizationOutcome.paraCima ||
-      BaseNormalizationOutcome.paraBaixo ||
-      BaseNormalizationOutcome.imposta =>
-        'A conta: ${_mi(publicado)} × ${Fmt.ratio(n.factor, decimals: 2)} = '
-            '${_mi(base)}'
+      BaseNormalizationOutcome.upward ||
+      BaseNormalizationOutcome.downward ||
+      BaseNormalizationOutcome.imposed =>
+        'A conta: ${_inMillions(published)} × ${Fmt.ratio(n.factor, decimals: 2)} = '
+            '${_inMillions(base)}'
             '${n.saturated ? '' : ' — o mesmo que o capital com que a empresa começou ${n.latestYear} rendendo o típico de ${_pct(n.cycleReturn)}'}.',
-      BaseNormalizationOutcome.reconstruida =>
+      BaseNormalizationOutcome.rebuilt =>
         'A conta: o típico de ${_pct(n.cycleReturn)} sobre o capital de hoje '
-            'dá ${_mi(base)}, no lugar do prejuízo de ${_mi(publicado)}.',
+            'dá ${_inMillions(base)}, no lugar do prejuízo de ${_inMillions(published)}.',
       _ => null,
     };
   }
 
   /// O que mais pesou na decisão, além do teste.
-  static List<String> avisos(BaseNormalization n) {
+  static List<String> warnings(BaseNormalization n) {
     final out = <String>[];
     if (n.saturated) {
       out.add(
@@ -178,8 +178,8 @@ abstract final class NormalizationCopy {
     }
     if (n.cyclicalPrecedence &&
         n.trendDominates &&
-        (n.outcome == BaseNormalizationOutcome.paraCima ||
-            n.outcome == BaseNormalizationOutcome.paraBaixo)) {
+        (n.outcome == BaseNormalizationOutcome.upward ||
+            n.outcome == BaseNormalizationOutcome.downward)) {
       out.add(
         'O retorno tem tendência, mas a empresa é de commodity ou de setor '
         'cíclico pesado: ali a alta do ciclo tem cara de tendência, e o ciclo '

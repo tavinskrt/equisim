@@ -29,13 +29,13 @@ import 'package:equisim_core/equisim_core.dart';
 import 'validation/congelado.dart';
 import 'validation/regression.dart';
 
-const _referencia = 0.055;
+const _reference = 0.055;
 
 /// O prêmio a somar no tercil menor, na medição do efeito. Dois pontos é a
 /// ordem de grandeza do prêmio por tamanho na literatura de fatores — e é
 /// grande o bastante para que, se nada se mover aqui, nada se mova nunca.
-const _premioDeTamanho = 0.02;
-const _saida = 'docs/validacao/tamanho.json';
+const _sizePremium = 0.02;
+const _output = 'docs/validacao/tamanho.json';
 
 double _q(List<double> v, double p) {
   if (v.isEmpty) return double.nan;
@@ -43,61 +43,61 @@ double _q(List<double> v, double p) {
   return o[(o.length * p).floor().clamp(0, o.length - 1)];
 }
 
-double _mediana(List<double> v) => _q(v, 0.5);
+double _median(List<double> v) => _q(v, 0.5);
 
-class _Ativo {
-  _Ativo({
+class _Asset {
+  _Asset({
     required this.ticker,
-    required this.valorDeMercado,
+    required this.marketValueOf,
     required this.beta,
-    required this.desconto,
-    required this.potencial,
-    required this.justoCentavos,
+    required this.discount,
+    required this.upside,
+    required this.fairValueCents,
   });
   final String ticker;
-  final double valorDeMercado;
+  final double marketValueOf;
   final double beta;
-  final double desconto;
-  final double potencial;
-  final int justoCentavos;
+  final double discount;
+  final double upside;
+  final int fairValueCents;
 }
 
 Future<void> main(List<String> args) async {
-  final c = await Congelado.montar();
+  final c = await Frozen.build();
   try {
-    final ativos = <_Ativo>[];
-    final avaliadas = <Ticker, ValuationResult?>{};
+    final assets = <_Asset>[];
+    final evaluated = <Ticker, ValuationResult?>{};
     var i = 0;
-    for (final t in c.universo) {
+    for (final t in c.universe) {
       i++;
-      if (i % 50 == 0) stderr.write('  $i/${c.universo.length}   \r');
-      final prep = await c.preparar(t);
+      if (i % 50 == 0) stderr.write('  $i/${c.universe.length}   \r');
+      final prep = await c.prepare(t);
       if (prep.isErr) continue;
-      final insumos = prep.unwrap();
-      final r = ValuationCascade.evaluate(insumos);
-      avaliadas[t] = r.valueOrNull;
+      final inputs = prep.unwrap();
+      final r = ValuationCascade.evaluate(inputs);
+      evaluated[t] = r.valueOrNull;
       if (r.isErr) continue;
       final v = r.unwrap();
       // O valor de mercado da fonte, que é o que existe na data congelada. Ele
       // erra em alguns tickers (decisão 83) e por isso **não entra em conta de
       // dinheiro** aqui: entra só na **ordenação** por tamanho, onde um erro de
       // escala não troca tercil.
-      final vm = insumos.fundamentals.isEmpty
+      final marketValue = inputs.fundamentals.isEmpty
           ? null
-          : insumos.fundamentals.last.marketCap;
-      if (vm == null || vm <= 0) continue;
-      ativos.add(_Ativo(
+          : inputs.fundamentals.last.marketCap;
+      if (marketValue == null || marketValue <= 0) continue;
+      assets.add(_Asset(
         ticker: t.value,
-        valorDeMercado: vm,
-        beta: insumos.capm.beta,
-        desconto: v.discountRate,
-        potencial: v.upside,
-        justoCentavos: v.fairValue.cents,
+        marketValueOf: marketValue,
+        beta: inputs.capm.beta,
+        discount: v.discountRate,
+        upside: v.upside,
+        fairValueCents: v.fairValue.cents,
       ));
     }
     stderr.write('                              \r');
 
-    final div = await c.conferirContraGabarito(avaliadas);
+    final div = await c.checkAgainstAnswerKey(evaluated);
     if (div == null) {
       stderr.writeln('AVISO: gabarito ausente; montagem não conferida.');
     } else if (div.isNotEmpty) {
@@ -110,122 +110,122 @@ Future<void> main(List<String> args) async {
           'divergências.');
     }
 
-    ativos.sort((a, b) => a.valorDeMercado.compareTo(b.valorDeMercado));
-    final n = ativos.length;
-    final logVm = [for (final a in ativos) math.log(a.valorDeMercado)];
+    assets.sort((a, b) => a.marketValueOf.compareTo(b.marketValueOf));
+    final n = assets.length;
+    final logMarketValue = [for (final a in assets) math.log(a.marketValueOf)];
 
     stdout.writeln('');
     stdout.writeln('-- o tamanho contra o que o motor já cobra ($n avaliados) --');
     final rhoBeta =
-        Regression.spearman(logVm, [for (final a in ativos) a.beta]);
-    final rhoDesconto =
-        Regression.spearman(logVm, [for (final a in ativos) a.desconto]);
-    final rhoPotencial =
-        Regression.spearman(logVm, [for (final a in ativos) a.potencial]);
+        Regression.spearman(logMarketValue, [for (final a in assets) a.beta]);
+    final rhoDiscount =
+        Regression.spearman(logMarketValue, [for (final a in assets) a.discount]);
+    final rhoUpside =
+        Regression.spearman(logMarketValue, [for (final a in assets) a.upside]);
     stdout.writeln('  postos de log(valor de mercado) contra');
     stdout.writeln('    beta                ${_f(rhoBeta)}');
-    stdout.writeln('    taxa de desconto    ${_f(rhoDesconto)}');
-    stdout.writeln('    potencial           ${_f(rhoPotencial)}');
+    stdout.writeln('    taxa de desconto    ${_f(rhoDiscount)}');
+    stdout.writeln('    potencial           ${_f(rhoUpside)}');
 
     // Tercis, do menor para o maior.
-    final corte = [0, n ~/ 3, 2 * n ~/ 3, n];
-    final nomes = ['menor', 'meio', 'maior'];
-    final tercis = <Map<String, dynamic>>[];
+    final cut = [0, n ~/ 3, 2 * n ~/ 3, n];
+    final names = ['menor', 'meio', 'maior'];
+    final terciles = <Map<String, dynamic>>[];
     stdout.writeln('');
     stdout.writeln('-- o perfil por tercil de tamanho --');
     stdout.writeln('  tercil   n   valor de mercado mediano   beta   desconto '
         '  potencial');
     for (var k = 0; k < 3; k++) {
-      final faixa = ativos.sublist(corte[k], corte[k + 1]);
-      final vmMed = _mediana([for (final a in faixa) a.valorDeMercado]);
-      final betaMed = _mediana([for (final a in faixa) a.beta]);
-      final descMed = _mediana([for (final a in faixa) a.desconto]);
-      final potMed = _mediana([for (final a in faixa) a.potencial]);
-      stdout.writeln('  ${nomes[k].padRight(6)} ${faixa.length.toString().padLeft(3)}   '
-          '${_bilhoes(vmMed).padLeft(22)}   ${betaMed.toStringAsFixed(3)}   '
-          '${_pct(descMed).padLeft(7)}   ${_pct(potMed).padLeft(8)}');
-      tercis.add({
-        'tercil': nomes[k],
-        'n': faixa.length,
-        'valorDeMercadoMediano': vmMed,
+      final band = assets.sublist(cut[k], cut[k + 1]);
+      final medianMarketValue = _median([for (final a in band) a.marketValueOf]);
+      final betaMed = _median([for (final a in band) a.beta]);
+      final descMed = _median([for (final a in band) a.discount]);
+      final medianUpside = _median([for (final a in band) a.upside]);
+      stdout.writeln('  ${names[k].padRight(6)} ${band.length.toString().padLeft(3)}   '
+          '${_billions(medianMarketValue).padLeft(22)}   ${betaMed.toStringAsFixed(3)}   '
+          '${_pct(descMed).padLeft(7)}   ${_pct(medianUpside).padLeft(8)}');
+      terciles.add({
+        'tercil': names[k],
+        'n': band.length,
+        'valorDeMercadoMediano': medianMarketValue,
         'betaMediano': betaMed,
         'descontoMediano': descMed,
-        'potencialMediano': potMed,
-        'tickers': [for (final a in faixa) a.ticker],
+        'potencialMediano': medianUpside,
+        'tickers': [for (final a in band) a.ticker],
       });
     }
 
     // ---------------------------------------------------------------------
     // O efeito de um prêmio explícito de tamanho no tercil menor
     // ---------------------------------------------------------------------
-    final menores = {for (final a in ativos.sublist(0, corte[1])) a.ticker};
-    final comPremio = <String, int>{};
-    final potencialComPremio = <String, double>{};
+    final smallest = {for (final a in assets.sublist(0, cut[1])) a.ticker};
+    final withPremium = <String, int>{};
+    final upsideWithPremium = <String, double>{};
     i = 0;
-    for (final t in c.universo) {
+    for (final t in c.universe) {
       i++;
-      if (i % 50 == 0) stderr.write('  com prêmio: $i/${c.universo.length}   \r');
-      final premio =
-          menores.contains(t.value) ? _referencia + _premioDeTamanho : _referencia;
-      final prep = await c.preparar(t, premio: premio);
+      if (i % 50 == 0) stderr.write('  com prêmio: $i/${c.universe.length}   \r');
+      final premium =
+          smallest.contains(t.value) ? _reference + _sizePremium : _reference;
+      final prep = await c.prepare(t, premium: premium);
       if (prep.isErr) continue;
       final r = ValuationCascade.evaluate(prep.unwrap());
       if (r.isErr) continue;
-      comPremio[t.value] = r.unwrap().fairValue.cents;
-      potencialComPremio[t.value] = r.unwrap().upside;
+      withPremium[t.value] = r.unwrap().fairValue.cents;
+      upsideWithPremium[t.value] = r.unwrap().upside;
     }
     stderr.write('                                   \r');
 
-    final antes = {for (final a in ativos) a.ticker: a};
-    final comuns = comPremio.keys.where(antes.containsKey).toList()..sort();
-    final variacao = <double>[
-      for (final k in comuns)
-        if (antes[k]!.justoCentavos != 0)
-          comPremio[k]! / antes[k]!.justoCentavos - 1,
+    final before = {for (final a in assets) a.ticker: a};
+    final common = withPremium.keys.where(before.containsKey).toList()..sort();
+    final changeList = <double>[
+      for (final k in common)
+        if (before[k]!.fairValueCents != 0)
+          withPremium[k]! / before[k]!.fairValueCents - 1,
     ];
-    final variacaoMenores = <double>[
-      for (final k in comuns)
-        if (menores.contains(k) && antes[k]!.justoCentavos != 0)
-          comPremio[k]! / antes[k]!.justoCentavos - 1,
+    final smallestChange = <double>[
+      for (final k in common)
+        if (smallest.contains(k) && before[k]!.fairValueCents != 0)
+          withPremium[k]! / before[k]!.fairValueCents - 1,
     ];
-    final rhoComPremio = Regression.spearman(
-      [for (final k in comuns) antes[k]!.potencial],
-      [for (final k in comuns) potencialComPremio[k]!],
+    final rhoWithPremium = Regression.spearman(
+      [for (final k in common) before[k]!.upside],
+      [for (final k in common) upsideWithPremium[k]!],
     );
-    final saem = antes.keys.where((k) => !comPremio.containsKey(k)).toList()
+    final leaving = before.keys.where((k) => !withPremium.containsKey(k)).toList()
       ..sort();
 
     stdout.writeln('');
-    stdout.writeln('-- o efeito de ${_pct(_premioDeTamanho)} no tercil menor --');
+    stdout.writeln('-- o efeito de ${_pct(_sizePremium)} no tercil menor --');
     stdout.writeln('  preço justo, no tercil menor   mediana '
-        '${_pct(_mediana(variacaoMenores))}  (p25 '
-        '${_pct(_q(variacaoMenores, 0.25))}, p75 '
-        '${_pct(_q(variacaoMenores, 0.75))})');
+        '${_pct(_median(smallestChange))}  (p25 '
+        '${_pct(_q(smallestChange, 0.25))}, p75 '
+        '${_pct(_q(smallestChange, 0.75))})');
     stdout.writeln('  preço justo, no universo       mediana '
-        '${_pct(_mediana(variacao))}');
-    stdout.writeln('  postos do potencial            ${_f(rhoComPremio)}');
-    stdout.writeln('  deixam de ser avaliáveis       ${saem.length}'
-        '${saem.isEmpty ? "" : " (${saem.take(6).join(", ")})"}');
+        '${_pct(_median(changeList))}');
+    stdout.writeln('  postos do potencial            ${_f(rhoWithPremium)}');
+    stdout.writeln('  deixam de ser avaliáveis       ${leaving.length}'
+        '${leaving.isEmpty ? "" : " (${leaving.take(6).join(", ")})"}');
 
-    File(_saida).writeAsStringSync(const JsonEncoder.withIndent('  ').convert({
+    File(_output).writeAsStringSync(const JsonEncoder.withIndent('  ').convert({
       'avaliados': n,
       'spearmanLogValorDeMercado': {
         'beta': rhoBeta,
-        'desconto': rhoDesconto,
-        'potencial': rhoPotencial,
+        'desconto': rhoDiscount,
+        'potencial': rhoUpside,
       },
-      'tercis': tercis,
+      'tercis': terciles,
       'premioDeTamanho': {
-        'premio': _premioDeTamanho,
-        'aplicadoEm': menores.length,
-        'precoJustoMedianoNoTercilMenor': _mediana(variacaoMenores),
-        'precoJustoMedianoNoUniverso': _mediana(variacao),
-        'spearmanPotencial': rhoComPremio,
-        'saem': saem,
+        'premio': _sizePremium,
+        'aplicadoEm': smallest.length,
+        'precoJustoMedianoNoTercilMenor': _median(smallestChange),
+        'precoJustoMedianoNoUniverso': _median(changeList),
+        'spearmanPotencial': rhoWithPremium,
+        'saem': leaving,
       },
     }));
     stdout.writeln('');
-    stdout.writeln('escrito $_saida');
+    stdout.writeln('escrito $_output');
   } finally {
     await c.ctx.dispose();
   }
@@ -234,5 +234,5 @@ Future<void> main(List<String> args) async {
 String _f(double? v) => v == null ? '—' : v.toStringAsFixed(4);
 String _pct(double v) =>
     v.isNaN ? '  —  ' : '${(v * 100).toStringAsFixed(2)}%';
-String _bilhoes(double v) =>
+String _billions(double v) =>
     v.isFinite ? 'R\$ ${(v / 1e9).toStringAsFixed(2)} bi' : '   —  ';

@@ -6,24 +6,24 @@
 import 'package:equisim_core/equisim_core.dart';
 import 'package:test/test.dart';
 
-/// Trimestres de 2011 a 2026, com `r − Rf` igual a [premio] de cada um.
-ImpliedPremiumPackage _pacote(double Function(DateTime) premio) {
+/// Trimestres de 2011 a 2026, com `r − Rf` igual a [premium] de cada um.
+ImpliedPremiumPackage _package(double Function(DateTime) premium) {
   final q = <ImpliedPremiumQuarter>[];
-  for (var ano = 2011; ano <= 2026; ano++) {
-    for (final mes in const [3, 6, 9, 12]) {
-      final d = DateTime.utc(ano, mes + 1, 0);
+  for (var year = 2011; year <= 2026; year++) {
+    for (final month in const [3, 6, 9, 12]) {
+      final d = DateTime.utc(year, month + 1, 0);
       if (d.isAfter(DateTime.utc(2026, 6, 30))) continue;
       q.add(
         ImpliedPremiumQuarter(
           date: d,
-          impliedReturn: 0.13 + premio(d),
+          impliedReturn: 0.13 + premium(d),
           riskFree: 0.13,
         ),
       );
     }
   }
   return ImpliedPremiumPackage(
-    geradoEm: DateTime.utc(2026, 9, 14),
+    generatedAt: DateTime.utc(2026, 9, 14),
     quarters: q,
   );
 }
@@ -41,16 +41,16 @@ void main() {
   test('a média é a dos trimestres em (data − dez anos, data]', () {
     // Prêmio de 1% até 2016 e de 2% depois: em 14/09/2026 a janela começa no
     // trimestre de 30/09/2016, e tem 40 trimestres, 39 deles de 2%.
-    final p = _pacote((d) => d.year <= 2016 && d.month <= 6 ? 0.01 : 0.02);
-    final janela = p.window(DateTime(2026, 9, 14));
-    expect(janela.length, 40);
-    expect(janela.first.date, DateTime.utc(2016, 9, 30));
-    expect(janela.last.date, DateTime.utc(2026, 6, 30));
+    final p = _package((d) => d.year <= 2016 && d.month <= 6 ? 0.01 : 0.02);
+    final window = p.window(DateTime(2026, 9, 14));
+    expect(window.length, 40);
+    expect(window.first.date, DateTime.utc(2016, 9, 30));
+    expect(window.last.date, DateTime.utc(2026, 6, 30));
     expect(p.normalizedAt(DateTime(2026, 9, 14)), closeTo(0.02, 1e-12));
   });
 
   test('a ponta final entra, e a inicial não', () {
-    final p = _pacote((d) => d == DateTime.utc(2016, 6, 30) ? 1.0 : 0.0);
+    final p = _package((d) => d == DateTime.utc(2016, 6, 30) ? 1.0 : 0.0);
     // Em 30/06/2026 a janela é (30/06/2016, 30/06/2026]: o trimestre de
     // 30/06/2016 fica fora, e o de 30/06/2026 entra.
     expect(p.normalizedAt(DateTime(2026, 6, 30)), 0.0);
@@ -66,7 +66,7 @@ void main() {
   });
 
   test('com menos de vinte trimestres não há média, e com vinte há', () {
-    final p = _pacote((_) => 0.015);
+    final p = _package((_) => 0.015);
     // A série começa em 31/03/2011: em 31/12/2015 há 20 trimestres.
     expect(p.window(DateTime(2015, 12, 31)).length, 20);
     expect(p.normalizedAt(DateTime(2015, 12, 31)), closeTo(0.015, 1e-12));
@@ -77,27 +77,27 @@ void main() {
 
   group('codec', () {
     test('ida e volta preservam a série', () {
-      final p = _pacote((d) => d.year / 100000);
-      final lido = ImpliedPremiumCodec.decode(ImpliedPremiumCodec.encode(p))!;
-      expect(lido.geradoEm, p.geradoEm);
-      expect(lido.quarters.length, p.quarters.length);
+      final p = _package((d) => d.year / 100000);
+      final parsed = ImpliedPremiumCodec.decode(ImpliedPremiumCodec.encode(p))!;
+      expect(parsed.generatedAt, p.generatedAt);
+      expect(parsed.quarters.length, p.quarters.length);
       expect(
-        lido.normalizedAt(DateTime(2026, 9, 14)),
+        parsed.normalizedAt(DateTime(2026, 9, 14)),
         closeTo(p.normalizedAt(DateTime(2026, 9, 14))!, 1e-15),
       );
     });
 
     test('recusa versão diferente, série vazia e número não finito', () {
-      final bom = ImpliedPremiumCodec.encode(_pacote((_) => 0.01));
-      expect(ImpliedPremiumCodec.decode({...bom, 'versao': 99}), isNull);
+      final valid = ImpliedPremiumCodec.encode(_package((_) => 0.01));
+      expect(ImpliedPremiumCodec.decode({...valid, 'versao': 99}), isNull);
       expect(
-        ImpliedPremiumCodec.decode({...bom, 'trimestres': <Object>[]}),
+        ImpliedPremiumCodec.decode({...valid, 'trimestres': <Object>[]}),
         isNull,
       );
-      expect(ImpliedPremiumCodec.decode({...bom, 'geradoEm': 'ontem'}), isNull);
+      expect(ImpliedPremiumCodec.decode({...valid, 'geradoEm': 'ontem'}), isNull);
       expect(
         ImpliedPremiumCodec.decode({
-          ...bom,
+          ...valid,
           'trimestres': [
             {
               'data': '2020-03-31',
@@ -110,7 +110,7 @@ void main() {
       );
       expect(
         ImpliedPremiumCodec.decode({
-          ...bom,
+          ...valid,
           'trimestres': [
             {'data': '2020-03-31', 'prefixado10': 0.1},
           ],
@@ -121,17 +121,17 @@ void main() {
   });
 
   test('o rastro do CAPM diz de onde veio o prêmio', () {
-    final capturados = <AuditEvent>[];
-    AuditRecorder.attach(capturados.add);
+    final captured = <AuditEvent>[];
+    AuditRecorder.attach(captured.add);
     addTearDown(AuditRecorder.detach);
-    for (final (origem, trecho) in const [
+    for (final (origin, excerpt) in const [
       (
         MarketPremiumSource.impliedNormalized,
         'média de dez anos do prêmio implícito',
       ),
       (MarketPremiumSource.parameterized, 'o prêmio parametrizado'),
     ]) {
-      capturados.clear();
+      captured.clear();
       ValuationCascade.evaluate(
         ValuationInputs(
           ticker: Ticker.parse('PREM3'),
@@ -165,16 +165,16 @@ void main() {
             riskFreeRate: 0.105,
             beta: 1.2,
             marketPremium: 0.0136,
-            premiumSource: origem,
+            premiumSource: origin,
           ),
           projectionYears: 5,
         ),
       );
-      final capm = capturados.single.calculations.firstWhere(
+      final capm = captured.single.calculations.firstWhere(
         (c) => c.formulaName.contains('CAPM'),
       );
-      expect(capm.mappedVariables['origem do prêmio'], origem.name);
-      expect(capm.intermediateSteps.first, contains(trecho));
+      expect(capm.mappedVariables['origem do prêmio'], origin.name);
+      expect(capm.intermediateSteps.first, contains(excerpt));
     }
   });
 }

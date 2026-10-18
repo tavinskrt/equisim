@@ -34,18 +34,18 @@ import 'dart:math' as math;
 
 import 'validation/regression.dart';
 
-const _fonte = 'docs/validacao/habilidade_trimestral.json';
-const _saida = 'docs/validacao/poder_r3.json';
+const _source = 'docs/validacao/habilidade_trimestral.json';
+const _output = 'docs/validacao/poder_r3.json';
 
 /// Sorteios por avaliação de poder.
-const _sorteios = 4000;
-const _semente = 20260922;
+const _draws = 4000;
+const _seed = 20260922;
 
 /// Primeira coorte trimestral do backtest.
-final _primeira = DateTime.utc(2018, 3, 31);
+final _first = DateTime.utc(2018, 3, 31);
 
 /// Ordenações medidas, com o campo por coorte em `habilidade_trimestral.json`.
-const _ordenacoes = {
+const _orderings = {
   'potencialDadoBm': 'coefPotencialDadoBm',
   'icPotencial': 'icPotencial',
   'icBookToMarket': 'icBookToMarket',
@@ -65,51 +65,51 @@ class _Normal {
 }
 
 /// Fração de séries simuladas em que o critério do R3 passa.
-double poder({
+double power({
   required double mu,
-  required double desvio,
+  required double deviation,
   required int k,
   required int overlap,
-  required double critico,
-  int seed = _semente,
+  required double critical,
+  int seed = _seed,
 }) {
   final z = _Normal(seed);
-  final escala = desvio / math.sqrt(overlap + 1);
-  final choques = List<double>.filled(k + overlap, 0);
-  var passa = 0;
-  for (var s = 0; s < _sorteios; s++) {
-    for (var i = 0; i < choques.length; i++) {
-      choques[i] = z.next();
+  final scale = deviation / math.sqrt(overlap + 1);
+  final shocks = List<double>.filled(k + overlap, 0);
+  var passes = 0;
+  for (var s = 0; s < _draws; s++) {
+    for (var i = 0; i < shocks.length; i++) {
+      shocks[i] = z.next();
     }
-    final serie = <double>[
+    final series = <double>[
       for (var t = 0; t < k; t++)
         mu +
-            escala *
-                [for (var m = t; m <= t + overlap; m++) choques[m]]
+            scale *
+                [for (var m = t; m <= t + overlap; m++) shocks[m]]
                     .fold<double>(0, (a, b) => a + b),
     ];
-    final sob = Regression.overlapAdjustedT(serie, overlap);
-    final nw = Regression.neweyWestMean(serie, overlap);
-    if (sob != null && nw != null && sob.t > critico && nw.t > 2) passa++;
+    final overlapT = Regression.overlapAdjustedT(series, overlap);
+    final nw = Regression.neweyWestMean(series, overlap);
+    if (overlapT != null && nw != null && overlapT.t > critical && nw.t > 2) passes++;
   }
-  return passa / _sorteios;
+  return passes / _draws;
 }
 
-/// O menor `μ` com poder de pelo menos [alvo], por bisseção. O poder é
+/// O menor `μ` com poder de pelo menos [target], por bisseção. O poder é
 /// monótono em `μ` porque a mesma semente reusa os mesmos choques.
-double efeitoMinimo({
-  required double desvio,
+double minimumEffect({
+  required double deviation,
   required int k,
   required int overlap,
-  required double critico,
-  double alvo = 0.8,
+  required double critical,
+  double target = 0.8,
 }) {
-  var lo = 0.0, hi = 4 * desvio;
+  var lo = 0.0, hi = 4 * deviation;
   for (var i = 0; i < 30; i++) {
     final m = (lo + hi) / 2;
-    final p = poder(
-        mu: m, desvio: desvio, k: k, overlap: overlap, critico: critico);
-    if (p < alvo) {
+    final p = power(
+        mu: m, deviation: deviation, k: k, overlap: overlap, critical: critical);
+    if (p < target) {
       lo = m;
     } else {
       hi = m;
@@ -119,48 +119,48 @@ double efeitoMinimo({
 }
 
 /// Data em que a coorte de índice [k] (base 1) tem o retorno do horizonte.
-DateTime disponivelEm(int k, int meses) {
-  final trimestres = k - 1 + meses ~/ 3;
-  final ano = _primeira.year + (_primeira.month - 1 + 3 * trimestres) ~/ 12;
-  final mes = (_primeira.month - 1 + 3 * trimestres) % 12 + 1;
-  return DateTime.utc(ano, mes + 1, 0);
+DateTime availableAt(int k, int months) {
+  final quarters = k - 1 + months ~/ 3;
+  final year = _first.year + (_first.month - 1 + 3 * quarters) ~/ 12;
+  final month = (_first.month - 1 + 3 * quarters) % 12 + 1;
+  return DateTime.utc(year, month + 1, 0);
 }
 
-Map<String, Object?> horizonte(
-    Map<String, dynamic> amostra, int meses, int overlap) {
-  final porCoorte =
-      (amostra['porCoorte'] as List).cast<Map<String, dynamic>>();
+Map<String, Object?> horizon(
+    Map<String, dynamic> sample, int months, int overlap) {
+  final byCohort =
+      (sample['porCoorte'] as List).cast<Map<String, dynamic>>();
   final out = <String, Object?>{};
-  for (final e in _ordenacoes.entries) {
-    final serie = [
-      for (final c in porCoorte)
+  for (final e in _orderings.entries) {
+    final series = [
+      for (final c in byCohort)
         if (c[e.value] is num) (c[e.value] as num).toDouble(),
     ];
-    final base = Regression.summarize(serie);
-    final sob = Regression.overlapAdjustedT(serie, overlap);
-    if (base == null || sob == null) continue;
+    final base = Regression.summarize(series);
+    final overlapT = Regression.overlapAdjustedT(series, overlap);
+    if (base == null || overlapT == null) continue;
     final k = base.n;
-    final critico = Regression.overlapCritical(k, overlap);
+    final critical = Regression.overlapCritical(k, overlap);
     // Erro da média corrigido pela sobreposição: t_corrigido = média ÷ erro.
-    final erro = base.sd / math.sqrt(k) * math.sqrt(sob.f / sob.c);
+    final error = base.sd / math.sqrt(k) * math.sqrt(overlapT.f / overlapT.c);
     // σ da série sob a sobreposição: o `s` observado tem esperança `σ·√c`.
-    final sigma = base.sd / math.sqrt(sob.c);
+    final sigma = base.sd / math.sqrt(overlapT.c);
     final mde =
-        efeitoMinimo(desvio: sigma, k: k, overlap: overlap, critico: critico);
+        minimumEffect(deviation: sigma, k: k, overlap: overlap, critical: critical);
 
     // Quantas coortes para ver, a 80%, um efeito igual à média observada.
-    int? coortesNecessarias;
+    int? requiredCohorts;
     if (base.mean > 0) {
       for (var kk = k; kk <= k + 4 * 40; kk += 4) {
         final c = Regression.overlapCritical(kk, overlap);
-        final p = poder(
+        final p = power(
             mu: base.mean,
-            desvio: sigma,
+            deviation: sigma,
             k: kk,
             overlap: overlap,
-            critico: c);
+            critical: c);
         if (p >= 0.8) {
-          coortesNecessarias = kk;
+          requiredCohorts = kk;
           break;
         }
       }
@@ -169,25 +169,25 @@ Map<String, Object?> horizonte(
       'coortes': k,
       'media': base.mean,
       'desvioPorCoorte': base.sd,
-      'erroCorrigido': erro,
-      'tCorrigido': sob.t,
-      'critico': critico,
+      'erroCorrigido': error,
+      'tCorrigido': overlapT.t,
+      'critico': critical,
       'sigmaCorrigido': sigma,
       // Conferência: com efeito zero o poder é o nível do teste.
-      'poderSemEfeito': poder(
-          mu: 0, desvio: sigma, k: k, overlap: overlap, critico: critico),
-      'poderNoEfeitoObservado': poder(
+      'poderSemEfeito': power(
+          mu: 0, deviation: sigma, k: k, overlap: overlap, critical: critical),
+      'poderNoEfeitoObservado': power(
           mu: base.mean,
-          desvio: sigma,
+          deviation: sigma,
           k: k,
           overlap: overlap,
-          critico: critico),
+          critical: critical),
       'efeitoMinimoDetectavel80': mde,
-      'limiteSuperior': base.mean + critico * erro,
-      'coortesPara80NoEfeitoObservado': coortesNecessarias,
-      'retornosDisponiveisEm': coortesNecessarias == null
+      'limiteSuperior': base.mean + critical * error,
+      'coortesPara80NoEfeitoObservado': requiredCohorts,
+      'retornosDisponiveisEm': requiredCohorts == null
           ? null
-          : disponivelEm(coortesNecessarias, meses)
+          : availableAt(requiredCohorts, months)
               .toIso8601String()
               .substring(0, 10),
     };
@@ -196,36 +196,36 @@ Map<String, Object?> horizonte(
 }
 
 void main() {
-  final f = File(_fonte);
+  final f = File(_source);
   if (!f.existsSync()) {
-    stderr.writeln('Falta $_fonte. Rode antes: dart run '
+    stderr.writeln('Falta $_source. Rode antes: dart run '
         'tool/regressao_condicional.dart --trimestral');
     exit(2);
   }
   final d = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
-  Map<String, dynamic> amostra(String h) =>
+  Map<String, dynamic> sample(String h) =>
       ((d[h] as Map<String, dynamic>)['trimestral']
           as Map<String, dynamic>)['comDeslistadas'] as Map<String, dynamic>;
 
-  final resultado = {
-    'fonte': _fonte,
-    'sorteios': _sorteios,
-    'semente': _semente,
+  final result = {
+    'fonte': _source,
+    'sorteios': _draws,
+    'semente': _seed,
     'modelo': 'série de coorte = μ + soma de L+1 choques normais iid, desvio '
         'observado; poder = P(t corrigido > crítico e Newey-West > 2)',
-    'h36': horizonte(amostra('h36'), 36, 11),
-    'h12': horizonte(amostra('h12'), 12, 3),
+    'h36': horizon(sample('h36'), 36, 11),
+    'h12': horizon(sample('h12'), 12, 3),
   };
-  File(_saida).writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(resultado));
+  File(_output).writeAsStringSync(
+      const JsonEncoder.withIndent(' ').convert(result));
 
-  String n(Object? v, [int casas = 3]) =>
-      v == null ? '—' : (v as num).toStringAsFixed(casas);
+  String n(Object? v, [int decimals = 3]) =>
+      v == null ? '—' : (v as num).toStringAsFixed(decimals);
   for (final h in ['h36', 'h12']) {
     stdout.writeln('\n== $h ==');
     stdout.writeln('ordenação          média  σ      erro   nível  poder  '
         'MDE80  lim.sup  coortes  disponível');
-    final r = resultado[h] as Map<String, Object?>;
+    final r = result[h] as Map<String, Object?>;
     for (final e in r.entries) {
       final v = e.value as Map<String, Object?>;
       stdout.writeln('${e.key.padRight(17)}  ${n(v['media'])}  '
@@ -235,5 +235,5 @@ void main() {
           '      ${v['retornosDisponiveisEm'] ?? '—'}');
     }
   }
-  stderr.writeln('\nescrito $_saida');
+  stderr.writeln('\nescrito $_output');
 }

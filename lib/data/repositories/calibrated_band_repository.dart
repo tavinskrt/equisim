@@ -10,16 +10,16 @@ import 'package:equisim_core/equisim_core.dart';
 /// sensibilidade às premissas.
 class CalibratedBandRepository {
   /// Lê o conteúdo do pacote.
-  final Future<String> Function() carregarPacote;
+  final Future<String> Function() loadPackage;
 
   /// Declara o repositório.
-  CalibratedBandRepository({required this.carregarPacote});
+  CalibratedBandRepository({required this.loadPackage});
 
-  Future<List<CalibratedBandTable>>? _faixas;
+  Future<List<CalibratedBandTable>>? _bands;
 
-  Future<List<CalibratedBandTable>> _ler() async {
+  Future<List<CalibratedBandTable>> _read() async {
     try {
-      final json = jsonDecode(await carregarPacote());
+      final json = jsonDecode(await loadPackage());
       return json is Map<String, dynamic>
           ? CalibratedBandCodec.decode(json)
           : const [];
@@ -29,5 +29,5 @@ class CalibratedBandRepository {
   }
 
   /// Todas as faixas do pacote, ou vazio.
-  Future<List<CalibratedBandTable>> tables() => _faixas ??= _ler();
+  Future<List<CalibratedBandTable>> tables() => _bands ??= _read();
 }

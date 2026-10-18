@@ -24,17 +24,17 @@ typedef CurveReading = ({YieldCurve? curve, String? note});
 /// depois dela. Um pacote velho **não** vira curva — vira recuo declarado.
 class RiskFreeCurveRepository {
   /// Fonte do dia, ou `null` onde ela não alcança o Tesouro: a web.
-  final TesouroDatasource? remote;
+  final TreasuryDatasource? remote;
 
   /// Lê o pacote de cotações do build.
-  final Future<String> Function() carregarPacote;
+  final Future<String> Function() loadPackage;
 
   /// Declara o repositório.
-  RiskFreeCurveRepository({required this.remote, required this.carregarPacote});
+  RiskFreeCurveRepository({required this.remote, required this.loadPackage});
 
-  Future<List<TreasuryQuote>>? _doDia;
-  DateTime? _diaDaBusca;
-  Future<List<TreasuryQuote>>? _doPacote;
+  Future<List<TreasuryQuote>>? _dailyQuotes;
+  DateTime? _fetchDay;
+  Future<List<TreasuryQuote>>? _packagedQuotes;
 
   /// Curva para [asOf] e, quando não há, a ressalva que diz por quê.
   ///
@@ -42,37 +42,37 @@ class RiskFreeCurveRepository {
   /// um dia para o outro busca de novo, em vez de envelhecer a curva até o
   /// recuo.
   Future<CurveReading> readAt(DateTime asOf) async {
-    final fonte = remote;
-    if (fonte != null) {
-      final dia = DateTime.utc(asOf.year, asOf.month, asOf.day);
-      if (_diaDaBusca != dia) {
-        _diaDaBusca = dia;
-        _doDia = null;
+    final source = remote;
+    if (source != null) {
+      final day = DateTime.utc(asOf.year, asOf.month, asOf.day);
+      if (_fetchDay != day) {
+        _fetchDay = day;
+        _dailyQuotes = null;
       }
-      final remota =
-          TreasuryCurve.at(await (_doDia ??= _buscarDoDia(fonte)), asOf);
-      if (remota != null) return (curve: remota, note: null);
+      final remoteReading =
+          TreasuryCurve.at(await (_dailyQuotes ??= _fetchToday(source)), asOf);
+      if (remoteReading != null) return (curve: remoteReading, note: null);
     }
-    final pacote = await (_doPacote ??= _lerPacote());
-    final doPacote = TreasuryCurve.at(pacote, asOf);
-    if (doPacote != null) return (curve: doPacote, note: null);
-    return (curve: null, note: _ressalva(pacote, semFonteDoDia: fonte == null));
+    final package = await (_packagedQuotes ??= _readPackage());
+    final packagedQuotes = TreasuryCurve.at(package, asOf);
+    if (packagedQuotes != null) return (curve: packagedQuotes, note: null);
+    return (curve: null, note: _caveat(package, noDailySource: source == null));
   }
 
-  Future<List<TreasuryQuote>> _buscarDoDia(TesouroDatasource fonte) async {
-    final r = await fonte.latest();
+  Future<List<TreasuryQuote>> _fetchToday(TreasuryDatasource source) async {
+    final r = await source.latest();
     // Falha da busca não é guardada para a sessão inteira: a próxima avaliação
     // tenta de novo. Só o sucesso fica.
     if (r.isErr) {
-      _doDia = null;
+      _dailyQuotes = null;
       return const [];
     }
     return r.unwrap();
   }
 
-  Future<List<TreasuryQuote>> _lerPacote() async {
+  Future<List<TreasuryQuote>> _readPackage() async {
     try {
-      final json = jsonDecode(await carregarPacote());
+      final json = jsonDecode(await loadPackage());
       return json is Map<String, dynamic>
           ? TreasuryQuotesCodec.decode(json)
           : const [];
@@ -81,26 +81,26 @@ class RiskFreeCurveRepository {
     }
   }
 
-  static String _ressalva(List<TreasuryQuote> pacote,
-      {required bool semFonteDoDia}) {
-    final origem = semFonteDoDia
+  static String _caveat(List<TreasuryQuote> package,
+      {required bool noDailySource}) {
+    final origin = noDailySource
         ? 'Na web, a curva do Tesouro vem só do pacote do build'
         : 'O Tesouro não trouxe hoje curva de até '
-            '${TreasuryCurve.diasDeRecuo} dias, e o recuo é o pacote do build';
-    final DateTime? maisRecente = pacote.isEmpty
+            '${TreasuryCurve.fallbackDays} dias, e o recuo é o pacote do build';
+    final DateTime? latest = package.isEmpty
         ? null
-        : pacote
+        : package
             .map((q) => q.baseDate)
             .reduce((a, b) => a.isAfter(b) ? a : b);
-    final estado = maisRecente == null
+    final status = latest == null
         ? 'que este build não trouxe ou não pôde ser lido'
-        : 'cuja data-base mais recente, ${_fmt(maisRecente)}, está fora dos '
-            '${TreasuryCurve.diasDeRecuo} dias que a curva aceita';
-    final remedio = semFonteDoDia
+        : 'cuja data-base mais recente, ${_fmt(latest)}, está fora dos '
+            '${TreasuryCurve.fallbackDays} dias que a curva aceita';
+    final remedy = noDailySource
         ? ' Um build novo, com o pacote regerado, traz a curva de volta.'
         : '';
-    return '$origem, $estado. A taxa livre de risco recuou para os dois '
-        'pontos do CDI.$remedio';
+    return '$origin, $status. A taxa livre de risco recuou para os dois '
+        'pontos do CDI.$remedy';
   }
 
   static String _fmt(DateTime d) =>

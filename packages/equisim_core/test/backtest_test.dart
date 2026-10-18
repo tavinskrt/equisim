@@ -259,9 +259,9 @@ void main() {
 
       // Em CENTAVOS e com `==`: o contrato é identidade, não aproximação.
       // `Money` é inteiro, então comparar por igualdade aqui é exato.
-      final somaDestinada = result.perAsset.values
+      final allocatedSum = result.perAsset.values
           .fold(0, (total, asset) => total + asset.invested.cents);
-      expect(somaDestinada, result.totalContributed.cents);
+      expect(allocatedSum, result.totalContributed.cents);
 
       // O alocado é o que virou ação; o resto está em caixa, e os dois juntos
       // reconstituem o aportado sem sobra nem falta.
@@ -270,9 +270,9 @@ void main() {
         result.totalContributed,
       );
 
-      final somaCaixa = result.perAsset.values
+      final cashSum = result.perAsset.values
           .fold(0, (total, asset) => total + asset.cash.cents);
-      expect(somaCaixa, result.residualCash.cents);
+      expect(cashSum, result.residualCash.cents);
     });
 
     test('o patrimônio final é a soma exata das posições e do caixa', () {
@@ -306,11 +306,11 @@ void main() {
         range: DateRange(start, DateTime(2024, 12, 31)),
       ).unwrap();
 
-      final soma = result.perAsset.values.fold(
+      final sum = result.perAsset.values.fold(
         0,
         (total, asset) => total + asset.finalValue.cents + asset.cash.cents,
       );
-      expect(soma, result.finalValue.cents);
+      expect(sum, result.finalValue.cents);
     });
 
     test('a fatia de ativo sem cotação no dia fica em caixa e é usada depois',
@@ -463,9 +463,9 @@ void main() {
       assets: [assetOf('PETR4')],
     ).unwrap();
 
-    int aportes(int dia) {
+    int contributions(int day) {
       // Ano bissexto de propósito: fevereiro de 2024 acaba no dia 29.
-      final serie = seriesOf(
+      final series = seriesOf(
         'PETR4',
         DateTime(2024, 1, 2),
         List<double>.filled(90, 10.0),
@@ -473,11 +473,11 @@ void main() {
       final r = PortfolioBacktest.run(
         costs: TransactionCosts.none,
         portfolio: portfolio,
-        prices: {Ticker.parse('PETR4'): serie},
+        prices: {Ticker.parse('PETR4'): series},
         plan: ContributionPlan(
           initial: Money.zero,
           monthly: const Money(100000),
-          contributionDay: dia,
+          contributionDay: day,
         ),
         range: DateRange(DateTime(2024, 1, 2), DateTime(2024, 4, 30)),
       );
@@ -486,13 +486,13 @@ void main() {
     }
 
     test('dia 5 e dia 30 aportam o mesmo número de vezes', () {
-      expect(aportes(30), equals(aportes(5)));
+      expect(contributions(30), equals(contributions(5)));
     });
 
     test('nenhum mês da janela fica sem aporte', () {
       // Janeiro, fevereiro, março e abril: quatro meses, quatro aportes.
-      expect(aportes(30), equals(4));
-      expect(aportes(31), equals(4));
+      expect(contributions(30), equals(4));
+      expect(contributions(31), equals(4));
     });
   });
 
@@ -502,35 +502,35 @@ void main() {
     // custariam R$ 1.000,30, e a simulação compra 99.
     final t = Ticker.parse('ABCD3');
     final asset = Asset(ticker: t, name: 'ABCD', sector: Sector.unknown);
-    final carteira = Portfolio.equalWeighted(
+    final portfolio = Portfolio.equalWeighted(
       id: 'p',
       name: 'P',
       kind: PortfolioKind.principal,
       assets: [asset],
     ).unwrap();
-    final dias = [
+    final days = [
       for (var d = 2; d <= 31; d++) DateTime(2024, 1, d),
     ];
-    final precos = {
+    final prices = {
       t: PriceSeries(ticker: t, points: [
-        for (final d in dias) PricePoint(date: d, close: 10.0),
+        for (final d in days) PricePoint(date: d, close: 10.0),
       ]),
     };
-    final plano = ContributionPlan(
+    final plan = ContributionPlan(
       initial: const Money(100000),
       monthly: Money.zero,
       contributionDay: 1,
     );
-    BacktestOutcome rodar(TransactionCosts c) => PortfolioBacktest.run(
-          portfolio: carteira,
-          prices: precos,
-          plan: plano,
-          range: DateRange(dias.first, dias.last),
+    BacktestOutcome run(TransactionCosts c) => PortfolioBacktest.run(
+          portfolio: portfolio,
+          prices: prices,
+          plan: plan,
+          range: DateRange(days.first, days.last),
           costs: c,
         ).unwrap();
 
     test('a tarifa sai do caixa e a compra respeita o que sobra', () {
-      final r = rodar(TransactionCosts.b3);
+      final r = run(TransactionCosts.b3);
       expect(r.perAsset[t]!.shares, 99);
       // 99 × R$ 10,00 = R$ 990,00; tarifa de 0,030% = R$ 0,297 → R$ 0,30.
       expect(r.transactionCosts, const Money(30));
@@ -545,7 +545,7 @@ void main() {
         const TransactionCosts(
             feePartsPerMillion: 2500, brokeragePerOrder: Money(490)),
       ]) {
-        final r = rodar(c);
+        final r = run(c);
         expect(r.totalAllocated + r.transactionCosts + r.residualCash,
             r.totalContributed,
             reason: '$c');
@@ -554,14 +554,14 @@ void main() {
     });
 
     test('sem custo, a simulação é a de antes do C4', () {
-      final r = rodar(TransactionCosts.none);
+      final r = run(TransactionCosts.none);
       expect(r.perAsset[t]!.shares, 100);
       expect(r.transactionCosts, Money.zero);
     });
 
     test('a corretagem só é cobrada em ordem que compra', () {
       // R$ 1.000,00 de corretagem não deixa comprar nada — e não é cobrada.
-      final r = rodar(const TransactionCosts(brokeragePerOrder: Money(100000)));
+      final r = run(const TransactionCosts(brokeragePerOrder: Money(100000)));
       expect(r.perAsset[t]!.shares, 0);
       expect(r.transactionCosts, Money.zero);
       expect(r.residualCash, const Money(100000));

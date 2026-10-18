@@ -6,58 +6,58 @@ final _t = Ticker.parse('TEST3');
 DateTime _d(int y, int m, int d) => DateTime.utc(y, m, d);
 
 FundamentalsSnapshot _s(
-  DateTime fim, {
-  double? receita,
-  double? lucro,
+  DateTime end, {
+  double? revenue,
+  double? profit,
   double? ebit,
   double? ebitda,
-  double? caixa,
-  DateTime? recebido,
+  double? cash,
+  DateTime? received,
 }) =>
     FundamentalsSnapshot(
       ticker: _t,
-      fiscalPeriodEnd: fim,
-      totalRevenue: receita,
-      netIncome: lucro,
+      fiscalPeriodEnd: end,
+      totalRevenue: revenue,
+      netIncome: profit,
       ebit: ebit,
       ebitda: ebitda,
-      cash: caixa,
-      receiptDate: recebido,
+      cash: cash,
+      receiptDate: received,
     );
 
-CvmPeriodDocument _dfp(int ano, {double receita = 30, double lucro = 3}) =>
+CvmPeriodDocument _dfp(int year, {double revenue = 30, double profit = 3}) =>
     CvmPeriodDocument(
       kind: CvmDocumentKind.dfp,
-      periodStart: _d(ano, 1, 1),
-      periodEnd: _d(ano, 12, 31),
-      current: _s(_d(ano, 12, 31),
-          receita: receita, lucro: lucro, recebido: _d(ano + 1, 3, 1)),
+      periodStart: _d(year, 1, 1),
+      periodEnd: _d(year, 12, 31),
+      current: _s(_d(year, 12, 31),
+          revenue: revenue, profit: profit, received: _d(year + 1, 3, 1)),
     );
 
-CvmPeriodDocument _itrJun(
-  int ano, {
-  double receita = 16,
-  double lucro = 2,
-  double receitaAnt = 14,
-  double lucroAnt = 1,
-  double? caixa = 5,
+CvmPeriodDocument _itrJune(
+  int year, {
+  double revenue = 16,
+  double profit = 2,
+  double previousRevenue = 14,
+  double previousProfit = 1,
+  double? cash = 5,
 }) =>
     CvmPeriodDocument(
       kind: CvmDocumentKind.itr,
-      periodStart: _d(ano, 1, 1),
-      periodEnd: _d(ano, 6, 30),
-      current: _s(_d(ano, 6, 30),
-          receita: receita, lucro: lucro, caixa: caixa,
-          recebido: _d(ano, 8, 10)),
-      prior: _s(_d(ano - 1, 6, 30), receita: receitaAnt, lucro: lucroAnt),
-      priorStart: _d(ano - 1, 1, 1),
+      periodStart: _d(year, 1, 1),
+      periodEnd: _d(year, 6, 30),
+      current: _s(_d(year, 6, 30),
+          revenue: revenue, profit: profit, cash: cash,
+          received: _d(year, 8, 10)),
+      prior: _s(_d(year - 1, 6, 30), revenue: previousRevenue, profit: previousProfit),
+      priorStart: _d(year - 1, 1, 1),
     );
 
 void main() {
   group('Doze meses', () {
     test('anual + acumulado − anterior', () {
       // FY22 = 30; 1S23 = 16; 1S22 = 14 -> jul/22 a jun/23 = 32.
-      final t = TrailingTwelveMonths.build(anual: _dfp(2022), itr: _itrJun(2023))!;
+      final t = TrailingTwelveMonths.build(annual: _dfp(2022), itr: _itrJune(2023))!;
       expect(t.totalRevenue, 32);
       expect(t.netIncome, 4);
       expect(t.fiscalPeriodEnd, _d(2023, 6, 30));
@@ -67,22 +67,22 @@ void main() {
         () {
       // Se o "trimestral" cobre o exercicio inteiro, a soma tem de reproduzir
       // a DFP dele. E a prova de que a aritmetica soma os periodos certos.
-      final fy22 = _dfp(2022, receita: 30, lucro: 3);
-      final comoItr = CvmPeriodDocument(
+      final fy22 = _dfp(2022, revenue: 30, profit: 3);
+      final asItr = CvmPeriodDocument(
         kind: CvmDocumentKind.itr,
         periodStart: _d(2023, 1, 1),
         periodEnd: _d(2023, 12, 31),
-        current: _s(_d(2023, 12, 31), receita: 37, lucro: 5),
-        prior: _s(_d(2022, 12, 31), receita: 30, lucro: 3),
+        current: _s(_d(2023, 12, 31), revenue: 37, profit: 5),
+        prior: _s(_d(2022, 12, 31), revenue: 30, profit: 3),
         priorStart: _d(2022, 1, 1),
       );
-      final t = TrailingTwelveMonths.build(anual: fy22, itr: comoItr)!;
+      final t = TrailingTwelveMonths.build(annual: fy22, itr: asItr)!;
       expect(t.totalRevenue, 37);
       expect(t.netIncome, 5);
     });
 
     test('estoque vem da data do trimestre, e a publicidade também', () {
-      final t = TrailingTwelveMonths.build(anual: _dfp(2022), itr: _itrJun(2023))!;
+      final t = TrailingTwelveMonths.build(annual: _dfp(2022), itr: _itrJune(2023))!;
       expect(t.cash, 5);
       expect(t.receiptDate, _d(2023, 8, 10));
     });
@@ -94,17 +94,17 @@ void main() {
         kind: CvmDocumentKind.dfp,
         periodStart: _d(2022, 4, 1),
         periodEnd: _d(2023, 3, 31),
-        current: _s(_d(2023, 3, 31), receita: 100),
+        current: _s(_d(2023, 3, 31), revenue: 100),
       );
       final itr = CvmPeriodDocument(
         kind: CvmDocumentKind.itr,
         periodStart: _d(2023, 4, 1),
         periodEnd: _d(2023, 6, 30),
-        current: _s(_d(2023, 6, 30), receita: 28),
-        prior: _s(_d(2022, 6, 30), receita: 25),
+        current: _s(_d(2023, 6, 30), revenue: 28),
+        prior: _s(_d(2022, 6, 30), revenue: 25),
         priorStart: _d(2022, 4, 1),
       );
-      expect(TrailingTwelveMonths.build(anual: fy, itr: itr)!.totalRevenue, 103);
+      expect(TrailingTwelveMonths.build(annual: fy, itr: itr)!.totalRevenue, 103);
     });
 
     test('EBITDA sai de EBIT e D&A somados, não do EBITDA de um período só', () {
@@ -122,7 +122,7 @@ void main() {
         prior: _s(_d(2022, 6, 30), ebit: 5, ebitda: 7),
         priorStart: _d(2022, 1, 1),
       );
-      final t = TrailingTwelveMonths.build(anual: fy, itr: itr)!;
+      final t = TrailingTwelveMonths.build(annual: fy, itr: itr)!;
       expect(t.ebit, 11);
       expect(t.ebitda, 11 + (4 + 2 - 2));
     });
@@ -134,15 +134,15 @@ void main() {
         kind: CvmDocumentKind.itr,
         periodStart: _d(2023, 2, 15),
         periodEnd: _d(2023, 6, 30),
-        current: _s(_d(2023, 6, 30), receita: 16),
-        prior: _s(_d(2022, 6, 30), receita: 14),
+        current: _s(_d(2023, 6, 30), revenue: 16),
+        prior: _s(_d(2022, 6, 30), revenue: 14),
         priorStart: _d(2022, 1, 1),
       );
-      expect(TrailingTwelveMonths.build(anual: _dfp(2022), itr: itr), isNull);
+      expect(TrailingTwelveMonths.build(annual: _dfp(2022), itr: itr), isNull);
     });
 
     test('DFP de outro ano', () {
-      expect(TrailingTwelveMonths.build(anual: _dfp(2021), itr: _itrJun(2023)),
+      expect(TrailingTwelveMonths.build(annual: _dfp(2021), itr: _itrJune(2023)),
           isNull);
     });
 
@@ -151,13 +151,13 @@ void main() {
         kind: CvmDocumentKind.itr,
         periodStart: _d(2023, 1, 1),
         periodEnd: _d(2023, 6, 30),
-        current: _s(_d(2023, 6, 30), receita: 16),
+        current: _s(_d(2023, 6, 30), revenue: 16),
       );
-      expect(TrailingTwelveMonths.build(anual: _dfp(2022), itr: itr), isNull);
+      expect(TrailingTwelveMonths.build(annual: _dfp(2022), itr: itr), isNull);
     });
 
     test('tipos trocados', () {
-      expect(TrailingTwelveMonths.build(anual: _itrJun(2023), itr: _dfp(2022)),
+      expect(TrailingTwelveMonths.build(annual: _itrJune(2023), itr: _dfp(2022)),
           isNull);
     });
 
@@ -166,27 +166,27 @@ void main() {
         kind: CvmDocumentKind.itr,
         periodStart: _d(2023, 1, 1),
         periodEnd: _d(2023, 6, 30),
-        current: _s(_d(2023, 6, 30), receita: 16, lucro: 2),
-        prior: _s(_d(2022, 6, 30), receita: 14), // sem lucro
+        current: _s(_d(2023, 6, 30), revenue: 16, profit: 2),
+        prior: _s(_d(2022, 6, 30), revenue: 14), // sem lucro
         priorStart: _d(2022, 1, 1),
       );
-      final t = TrailingTwelveMonths.build(anual: _dfp(2022), itr: itr)!;
+      final t = TrailingTwelveMonths.build(annual: _dfp(2022), itr: itr)!;
       expect(t.totalRevenue, 32);
       expect(t.netIncome, isNull);
     });
   });
 
   group('Série ancorada', () {
-    bool todos(FundamentalsSnapshot _) => true;
+    bool all(FundamentalsSnapshot _) => true;
 
-    final documentos = [
+    final documents = [
       for (var a = 2018; a <= 2022; a++) _dfp(a),
-      for (var a = 2019; a <= 2023; a++) _itrJun(a),
+      for (var a = 2019; a <= 2023; a++) _itrJune(a),
     ];
 
     test('ancorada em ITR, todos os pontos terminam na mesma data, a um ano', () {
-      final s = TrailingTwelveMonths.serieAncorada(documentos,
-          publicado: todos);
+      final s = TrailingTwelveMonths.anchoredSeries(documents,
+          published: all);
       expect(s.length, 5);
       for (final p in s) {
         expect(p.fiscalPeriodEnd.month, 6);
@@ -200,62 +200,62 @@ void main() {
 
     test('ancorada em DFP, devolve as DFPs', () {
       // Sem ITR publicado depois da ultima DFP, a serie e a de sempre.
-      final soDfp = [for (var a = 2018; a <= 2022; a++) _dfp(a)];
-      final s = TrailingTwelveMonths.serieAncorada(soDfp, publicado: todos);
+      final onlyDfp = [for (var a = 2018; a <= 2022; a++) _dfp(a)];
+      final s = TrailingTwelveMonths.anchoredSeries(onlyDfp, published: all);
       expect(s.map((p) => p.fiscalPeriodEnd.month).toSet(), {12});
       expect(s.length, 5);
     });
 
     test('a âncora troca quando o ITR é recebido, e só então', () {
-      bool ate(DateTime dia, FundamentalsSnapshot snap) =>
-          snap.receiptDate == null || !snap.receiptDate!.isAfter(dia);
+      bool until(DateTime day, FundamentalsSnapshot snap) =>
+          snap.receiptDate == null || !snap.receiptDate!.isAfter(day);
 
       // Em 01/05/2023 o mais recente publicado e a DFP 2022, recebida em
       // marco: a serie e a das DFPs.
-      final antes = TrailingTwelveMonths.serieAncorada(documentos,
-          publicado: (s) => ate(_d(2023, 5, 1), s));
-      expect(antes.last.fiscalPeriodEnd, _d(2022, 12, 31));
+      final before = TrailingTwelveMonths.anchoredSeries(documents,
+          published: (s) => until(_d(2023, 5, 1), s));
+      expect(before.last.fiscalPeriodEnd, _d(2022, 12, 31));
 
       // O ITR de jun/23 e recebido em 10/08/2023. Em 15/08 a ancora e ele, e a
       // serie inteira passa a terminar em junho.
-      final depois = TrailingTwelveMonths.serieAncorada(documentos,
-          publicado: (s) => ate(_d(2023, 8, 15), s));
-      expect(depois.last.fiscalPeriodEnd, _d(2023, 6, 30));
-      expect(depois.map((p) => p.fiscalPeriodEnd.month).toSet(), {6});
+      final after = TrailingTwelveMonths.anchoredSeries(documents,
+          published: (s) => until(_d(2023, 8, 15), s));
+      expect(after.last.fiscalPeriodEnd, _d(2023, 6, 30));
+      expect(after.map((p) => p.fiscalPeriodEnd.month).toSet(), {6});
     });
 
     test('série com buraco recua INTEIRA para a âncora de DFP — decisão 73', () {
       // Em 14/09/2026 a CVM nao publica o ITR de 2025. A primeira versao
       // montou jun/24 seguido de jun/26, e as guardas anuais leram dois anos
       // como um: QUAL3 de -22% a +908%.
-      final semItr2021 = [
-        for (final d in documentos)
+      final withoutItr2021 = [
+        for (final d in documents)
           if (!(d.kind == CvmDocumentKind.itr && d.periodEnd.year == 2021)) d,
       ];
-      final s = TrailingTwelveMonths.serieAncorada(semItr2021,
-          publicado: todos);
+      final s = TrailingTwelveMonths.anchoredSeries(withoutItr2021,
+          published: all);
       expect(s.map((p) => p.fiscalPeriodEnd.month).toSet(), {12},
           reason: 'nem buraco, nem mistura de âncoras');
       for (var i = 1; i < s.length; i++) {
         expect(s[i].fiscalPeriodEnd.year - s[i - 1].fiscalPeriodEnd.year, 1);
       }
-      expect(TrailingTwelveMonths.isAnchoredOnQuarter(s, semItr2021), isFalse);
+      expect(TrailingTwelveMonths.isAnchoredOnQuarter(s, withoutItr2021), isFalse);
     });
 
     test('sem a DFP anterior à âncora, também recua', () {
-      final semDfp2022 = [
-        for (final d in documentos)
+      final withoutDfp2022 = [
+        for (final d in documents)
           if (!(d.kind == CvmDocumentKind.dfp && d.periodEnd.year == 2022)) d,
       ];
-      final s = TrailingTwelveMonths.serieAncorada(semDfp2022,
-          publicado: todos);
+      final s = TrailingTwelveMonths.anchoredSeries(withoutDfp2022,
+          published: all);
       expect(s.map((p) => p.fiscalPeriodEnd.month).toSet(), {12});
     });
 
     test('série contígua é reconhecida como ancorada em trimestre', () {
-      final s = TrailingTwelveMonths.serieAncorada(documentos,
-          publicado: todos);
-      expect(TrailingTwelveMonths.isAnchoredOnQuarter(s, documentos), isTrue);
+      final s = TrailingTwelveMonths.anchoredSeries(documents,
+          published: all);
+      expect(TrailingTwelveMonths.isAnchoredOnQuarter(s, documents), isTrue);
     });
   });
 }

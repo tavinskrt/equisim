@@ -84,8 +84,8 @@ abstract final class Inference {
     if (values.length < 3) return null;
     final m = median(values);
     if (m == null) return null;
-    final desvios = [for (final v in values) (v - m).abs()];
-    final mad = median(desvios);
+    final deviations = [for (final v in values) (v - m).abs()];
+    final mad = median(deviations);
     if (mad == null || mad <= 0) return null;
     final s = 1.4826 * mad;
     return s.isFinite && s > 0 ? s : null;
@@ -179,11 +179,11 @@ abstract final class Inference {
     }
     for (var j = 1; j <= l && j < n; j++) {
       final w = 1.0 - j / (l + 1.0);
-      var soma = 0.0;
+      var sum = 0.0;
       for (var t = j; t < n; t++) {
-        soma += x[t] * e[t] * x[t - j] * e[t - j];
+        sum += x[t] * e[t] * x[t - j] * e[t - j];
       }
-      omega += 2.0 * w * soma;
+      omega += 2.0 * w * sum;
     }
     omega *= n / (n - 2.0);
 

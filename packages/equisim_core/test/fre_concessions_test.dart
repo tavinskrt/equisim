@@ -60,16 +60,16 @@ void main() {
         'até Dezembro/2035',
         'Prazo indeterminado',
       ], _d(2019, 1, 1));
-      expect(r.contratos, 4);
-      expect(r.lidos, 3);
-      expect(r.vigentes, 2);
+      expect(r.contracts, 4);
+      expect(r.readCount, 3);
+      expect(r.inForceCount, 2);
       expect(r.end, _d(2035, 12, 31), reason: 'mediana baixa de dois');
     });
 
     test('sem contrato vigente, sem fim', () {
       final r = FreConcessionTerm.summarize(['Vide item 9.1'], _d(2022, 1, 1));
       expect(r.end, isNull);
-      expect(r.lidos, 0);
+      expect(r.readCount, 0);
     });
   });
 }

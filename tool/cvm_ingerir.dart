@@ -37,7 +37,7 @@
 //                             `tool/cvm_versoes_baixar.py`, cada uma com a data
 //                             de recebimento **dela**
 //
-// O backtest lê os dois, e `CvmSeries.vigentes` escolhe, em cada coorte, a
+// O backtest lê os dois, e `CvmSeries.inForceAt` escolhe, em cada coorte, a
 // versão que era pública naquela data.
 //
 // Uso:
@@ -52,83 +52,83 @@ import 'package:equisim_core/equisim_core.dart';
 // ------------------------------------------------------------------ leitura
 
 /// Lê um CSV da CVM: `latin-1`, separador `;`, aspas respeitadas.
-List<Map<String, String>> lerCsv(File f) {
-  final linhas =
+List<Map<String, String>> readCsv(File f) {
+  final rows =
       const LineSplitter().convert(latin1.decode(f.readAsBytesSync()));
-  if (linhas.isEmpty) return const [];
-  final cab = _campos(linhas.first);
+  if (rows.isEmpty) return const [];
+  final headerRow = _fields(rows.first);
   final out = <Map<String, String>>[];
-  for (var i = 1; i < linhas.length; i++) {
-    if (linhas[i].trim().isEmpty) continue;
-    final c = _campos(linhas[i]);
-    if (c.length != cab.length) continue;
-    out.add({for (var j = 0; j < cab.length; j++) cab[j]: c[j]});
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i].trim().isEmpty) continue;
+    final c = _fields(rows[i]);
+    if (c.length != headerRow.length) continue;
+    out.add({for (var j = 0; j < headerRow.length; j++) headerRow[j]: c[j]});
   }
   return out;
 }
 
-List<String> _campos(String l) {
+List<String> _fields(String l) {
   final out = <String>[];
-  final atual = StringBuffer();
-  var aspas = false;
+  final current = StringBuffer();
+  var quoted = false;
   for (var i = 0; i < l.length; i++) {
     final ch = l[i];
     if (ch == '"') {
-      aspas = !aspas;
-    } else if (ch == ';' && !aspas) {
-      out.add(atual.toString());
-      atual.clear();
+      quoted = !quoted;
+    } else if (ch == ';' && !quoted) {
+      out.add(current.toString());
+      current.clear();
     } else {
-      atual.write(ch);
+      current.write(ch);
     }
   }
-  out.add(atual.toString());
+  out.add(current.toString());
   return out;
 }
 
-int _escala(String? e) => (e ?? '').toUpperCase() == 'MIL' ? 1000 : 1;
+int _scale(String? e) => (e ?? '').toUpperCase() == 'MIL' ? 1000 : 1;
 
-String _dia(String? s) => (s == null || s.length < 10) ? '' : s.substring(0, 10);
+String _day(String? s) => (s == null || s.length < 10) ? '' : s.substring(0, 10);
 
 /// Chave de um documento: companhia, data de referência e tipo.
 typedef _Doc = ({String cnpj, String refer, String doc});
 
 /// Chave de uma versão de documento.
-typedef _Versao = ({String cnpj, String refer, String doc, int versao});
+typedef _Version = ({String cnpj, String refer, String doc, int version});
 
 /// Metadados de um documento entregue à CVM.
 class _Meta {
   final String denom;
-  final int versao;
-  final String? recebido;
-  _Meta(this.denom, this.versao, this.recebido);
+  final int version;
+  final String? received;
+  _Meta(this.denom, this.version, this.received);
 }
 
 /// Linhas de uma demonstração, com o início do período das contas de fluxo.
-class _Demonstracao {
-  final Map<String, ({String ini, CvmAccountLine linha})> porConta = {};
+class _Statement {
+  final Map<String, ({String ini, CvmAccountLine row})> byAccount = {};
 
   /// Quantas contas chegaram com mais de uma linha — o trimestre e o
   /// acumulado, na DRE do ITR.
-  int duplicadas = 0;
+  int duplicates = 0;
 
   /// Fica com a linha de **menor** início de período para cada conta — o
   /// acumulado do exercício. Balanço não tem início, e passa direto.
-  void acrescentar(String ini, CvmAccountLine linha) {
-    final atual = porConta[linha.code];
-    if (atual != null) duplicadas++;
-    if (atual == null || (ini.isNotEmpty && ini.compareTo(atual.ini) < 0)) {
-      porConta[linha.code] = (ini: ini, linha: linha);
+  void append(String ini, CvmAccountLine row) {
+    final current = byAccount[row.code];
+    if (current != null) duplicates++;
+    if (current == null || (ini.isNotEmpty && ini.compareTo(current.ini) < 0)) {
+      byAccount[row.code] = (ini: ini, row: row);
     }
   }
 
-  List<CvmAccountLine> get linhas =>
-      [for (final v in porConta.values) v.linha];
+  List<CvmAccountLine> get rows =>
+      [for (final v in byAccount.values) v.row];
 
   /// Início do período acumulado, pela receita ou pelo lucro.
-  String? get inicio {
+  String? get start {
     for (final c in const ['3.01', '3.11', '3.09', '3.13', '6.01']) {
-      final v = porConta[c];
+      final v = byAccount[c];
       if (v != null && v.ini.isNotEmpty) return v.ini;
     }
     return null;
@@ -143,346 +143,346 @@ void main(List<String> args) {
     stderr.writeln('  python tool/cvm_baixar.py --de 2010 --ate 2026');
     exit(2);
   }
-  final porNome = <String, File>{
+  final byName = <String, File>{
     for (final f in d.listSync().whereType<File>())
       f.path.replaceAll('\\', '/').split('/').last: f,
   };
 
-  final anos = <int>{};
-  for (final n in porNome.keys) {
+  final years = <int>{};
+  for (final n in byName.keys) {
     final m = RegExp(r'_(\d{4})\.csv$').firstMatch(n);
-    if (m != null) anos.add(int.parse(m.group(1)!));
+    if (m != null) years.add(int.parse(m.group(1)!));
   }
-  final anosOrdenados = anos.toList()..sort();
+  final sortedYears = years.toList()..sort();
   stdout.writeln('== Ingestão da CVM ==');
-  stdout.writeln('  anos encontrados: ${anosOrdenados.first}–'
-      '${anosOrdenados.last}\n');
+  stdout.writeln('  anos encontrados: ${sortedYears.first}–'
+      '${sortedYears.last}\n');
 
   // --- Metadados: recebimento de cada versão, e a vigente -----------------
   final meta = <_Doc, _Meta>{};
-  final porVersao = <_Versao, _Meta>{};
-  for (final ano in anosOrdenados) {
+  final byVersion = <_Version, _Meta>{};
+  for (final year in sortedYears) {
     for (final doc in ['dfp', 'itr']) {
-      final f = porNome['${doc}_cia_aberta_$ano.csv'];
+      final f = byName['${doc}_cia_aberta_$year.csv'];
       if (f == null) continue;
-      for (final r in lerCsv(f)) {
+      for (final r in readCsv(f)) {
         final k = (
           cnpj: r['CNPJ_CIA'] ?? '',
-          refer: _dia(r['DT_REFER']),
+          refer: _day(r['DT_REFER']),
           doc: doc.toUpperCase(),
         );
         final v = int.tryParse(r['VERSAO'] ?? '') ?? 1;
-        final m = _Meta(r['DENOM_CIA'] ?? '', v, _dia(r['DT_RECEB']));
+        final m = _Meta(r['DENOM_CIA'] ?? '', v, _day(r['DT_RECEB']));
         // A mesma versão aparece, às vezes, no índice de dois anos com datas
         // diferentes; vale a primeira lida, que é a regra de antes do B8.
-        porVersao.putIfAbsent(
-            (cnpj: k.cnpj, refer: k.refer, doc: k.doc, versao: v), () => m);
-        final atual = meta[k];
-        if (atual == null || v > atual.versao) meta[k] = m;
+        byVersion.putIfAbsent(
+            (cnpj: k.cnpj, refer: k.refer, doc: k.doc, version: v), () => m);
+        final current = meta[k];
+        if (current == null || v > current.version) meta[k] = m;
       }
     }
   }
-  final porTipo = <String, int>{};
+  final byKind = <String, int>{};
   for (final k in meta.keys) {
-    porTipo[k.doc] = (porTipo[k.doc] ?? 0) + 1;
+    byKind[k.doc] = (byKind[k.doc] ?? 0) + 1;
   }
-  stdout.writeln('  documentos: ${meta.length} $porTipo');
-  final reapresentados = meta.values.where((m) => m.versao > 1).length;
-  stdout.writeln('  reapresentados (VERSAO > 1): $reapresentados '
-      '(${(100 * reapresentados / meta.length).toStringAsFixed(1)}%)');
+  stdout.writeln('  documentos: ${meta.length} $byKind');
+  final restated = meta.values.where((m) => m.version > 1).length;
+  stdout.writeln('  reapresentados (VERSAO > 1): $restated '
+      '(${(100 * restated / meta.length).toStringAsFixed(1)}%)');
 
   // As versões antigas, no layout dos anuais, quando foram baixadas.
-  final dirVersoes = Directory('$dir/versoes');
-  final porNomeVersoes = <String, File>{
-    if (dirVersoes.existsSync())
-      for (final f in dirVersoes.listSync().whereType<File>())
+  final versionsDir = Directory('$dir/versoes');
+  final versionsByName = <String, File>{
+    if (versionsDir.existsSync())
+      for (final f in versionsDir.listSync().whereType<File>())
         f.path.replaceAll('\\', '/').split('/').last: f,
   };
 
   /// Arquivos de um demonstrativo: os anuais, ou o das versões antigas.
-  Iterable<(String, File)> arquivos(String sufixo,
-      {required bool antigas}) sync* {
+  Iterable<(String, File)> files(String suffix,
+      {required bool oldVersions}) sync* {
     for (final doc in ['dfp', 'itr']) {
-      if (antigas) {
-        final f = porNomeVersoes['${doc}_cia_aberta_${sufixo}_versoes.csv'];
+      if (oldVersions) {
+        final f = versionsByName['${doc}_cia_aberta_${suffix}_versoes.csv'];
         if (f != null) yield (doc, f);
       } else {
-        for (final ano in anosOrdenados) {
-          final f = porNome['${doc}_cia_aberta_${sufixo}_$ano.csv'];
+        for (final year in sortedYears) {
+          final f = byName['${doc}_cia_aberta_${suffix}_$year.csv'];
           if (f != null) yield (doc, f);
         }
       }
     }
   }
 
-  _Versao chave(Map<String, String> r, String doc) => (
+  _Version key(Map<String, String> r, String doc) => (
         cnpj: r['CNPJ_CIA'] ?? '',
-        refer: _dia(r['DT_REFER']),
+        refer: _day(r['DT_REFER']),
         doc: doc.toUpperCase(),
-        versao: int.tryParse(r['VERSAO'] ?? '') ?? 1,
+        version: int.tryParse(r['VERSAO'] ?? '') ?? 1,
       );
 
   // --- Composição de capital -----------------------------------------------
-  Map<_Versao, ({double integralizadas, double tesouraria})> carregarCapital(
-      {required bool antigas}) {
-    final out = <_Versao, ({double integralizadas, double tesouraria})>{};
-    for (final (doc, f) in arquivos('composicao_capital', antigas: antigas)) {
-      for (final r in lerCsv(f)) {
+  Map<_Version, ({double paidInShares, double treasury})> loadCapital(
+      {required bool oldVersions}) {
+    final out = <_Version, ({double paidInShares, double treasury})>{};
+    for (final (doc, f) in files('composicao_capital', oldVersions: oldVersions)) {
+      for (final r in readCsv(f)) {
         final tot = double.tryParse(r['QT_ACAO_TOTAL_CAP_INTEGR'] ?? '');
-        final tes = double.tryParse(r['QT_ACAO_TOTAL_TESOURO'] ?? '') ?? 0;
+        final treasuryShares = double.tryParse(r['QT_ACAO_TOTAL_TESOURO'] ?? '') ?? 0;
         if (tot == null || tot <= 0) continue;
-        out[chave(r, doc)] = (integralizadas: tot, tesouraria: tes);
+        out[key(r, doc)] = (paidInShares: tot, treasury: treasuryShares);
       }
     }
     return out;
   }
 
   // --- Demonstrações --------------------------------------------------------
-  /// Lê uma demonstração de todos os anos. [ordem] é `Ú` (exercício do
+  /// Lê uma demonstração de todos os anos. [order] é `Ú` (exercício do
   /// documento) ou `P` (o comparativo que o acompanha).
-  Map<_Versao, _Demonstracao> carregar(String sufixo, String ordem,
-      {required bool antigas}) {
-    final out = <_Versao, _Demonstracao>{};
-    for (final (doc, f) in arquivos(sufixo, antigas: antigas)) {
-      for (final r in lerCsv(f)) {
-        if (!(r['ORDEM_EXERC'] ?? '').startsWith(ordem)) continue;
-        final linha = CvmAccountLine.doTexto(
+  Map<_Version, _Statement> load(String suffix, String order,
+      {required bool oldVersions}) {
+    final out = <_Version, _Statement>{};
+    for (final (doc, f) in files(suffix, oldVersions: oldVersions)) {
+      for (final r in readCsv(f)) {
+        if (!(r['ORDEM_EXERC'] ?? '').startsWith(order)) continue;
+        final row = CvmAccountLine.fromText(
           code: r['CD_CONTA'] ?? '',
           label: r['DS_CONTA'] ?? '',
-          valor: r['VL_CONTA'] ?? '',
-          escala: _escala(r['ESCALA_MOEDA']),
+          value: r['VL_CONTA'] ?? '',
+          scale: _scale(r['ESCALA_MOEDA']),
         );
-        if (linha == null) continue;
+        if (row == null) continue;
         out
-            .putIfAbsent(chave(r, doc), _Demonstracao.new)
-            .acrescentar(_dia(r['DT_INI_EXERC']), linha);
+            .putIfAbsent(key(r, doc), _Statement.new)
+            .append(_day(r['DT_INI_EXERC']), row);
       }
     }
     return out;
   }
 
   // --- Ponte ---------------------------------------------------------------
-  final pontePath = File('docs/validacao/ponte_cvm.json');
-  if (!pontePath.existsSync()) {
+  final bridgePath = File('docs/validacao/ponte_cvm.json');
+  if (!bridgePath.existsSync()) {
     stderr.writeln('Rode antes: dart run tool/cvm_ponte.dart $dir');
     exit(2);
   }
-  final ponte = ((jsonDecode(pontePath.readAsStringSync())
+  final bridge = ((jsonDecode(bridgePath.readAsStringSync())
           as Map<String, dynamic>)['ponte'] as Map<String, dynamic>)
       .map((k, v) => MapEntry(k, v as String));
-  final porCnpj = <String, List<String>>{};
-  for (final e in ponte.entries) {
-    porCnpj.putIfAbsent(e.value, () => []).add(e.key);
+  final byCnpj = <String, List<String>>{};
+  for (final e in bridge.entries) {
+    byCnpj.putIfAbsent(e.value, () => []).add(e.key);
   }
 
-  Map<String, double?> fluxos(CvmChart dreC, CvmChart dfcC) => {
-        'receita': dreC.receita,
-        'ebit': dreC.ebit,
-        'resultadoAntesDosTributos': dreC.resultadoAntesDosTributos,
-        'tributos': dreC.tributos,
-        'lucroLiquido': dreC.lucroLiquido,
-        'caixaOperacional': dfcC.caixaOperacional,
-        'caixaDeInvestimento': dfcC.caixaDeInvestimento,
+  Map<String, double?> flows(CvmChart dreChart, CvmChart dfcC) => {
+        'receita': dreChart.revenue,
+        'ebit': dreChart.ebit,
+        'resultadoAntesDosTributos': dreChart.incomeBeforeTaxes,
+        'tributos': dreChart.taxes,
+        'lucroLiquido': dreChart.netIncome,
+        'caixaOperacional': dfcC.operatingCashFlow,
+        'caixaDeInvestimento': dfcC.investingCashFlow,
         'capex': dfcC.capex,
-        'depreciacaoEAmortizacao': dfcC.depreciacaoEAmortizacao,
+        'depreciacaoEAmortizacao': dfcC.depreciationAndAmortization,
       };
 
   // --- Montagem ------------------------------------------------------------
-  var comRecuo = 0, semDre = 0, balancoOk = 0, balancoN = 0;
-  var duplicadasResolvidas = 0, semRecebimento = 0;
+  var withFallback = 0, withoutDre = 0, balanceOk = 0, balanceN = 0;
+  var resolvedDuplicates = 0, withoutReceipt = 0;
   final layouts = <String, int>{};
 
   /// Monta os exercícios de um conjunto de CSVs — os anuais ou os das versões
   /// antigas. A data de recebimento é a **da versão** que as contas trazem.
-  List<Map<String, Object?>> montar({required bool antigas}) {
+  List<Map<String, Object?>> build({required bool oldVersions}) {
     final dre = {
-      'con': carregar('DRE_con', 'Ú', antigas: antigas),
-      'ind': carregar('DRE_ind', 'Ú', antigas: antigas),
+      'con': load('DRE_con', 'Ú', oldVersions: oldVersions),
+      'ind': load('DRE_ind', 'Ú', oldVersions: oldVersions),
     };
-    final dreAnt = {
-      'con': carregar('DRE_con', 'P', antigas: antigas),
-      'ind': carregar('DRE_ind', 'P', antigas: antigas),
+    final previousDre = {
+      'con': load('DRE_con', 'P', oldVersions: oldVersions),
+      'ind': load('DRE_ind', 'P', oldVersions: oldVersions),
     };
     final dfc = {
-      'con': carregar('DFC_MI_con', 'Ú', antigas: antigas),
-      'ind': carregar('DFC_MI_ind', 'Ú', antigas: antigas),
+      'con': load('DFC_MI_con', 'Ú', oldVersions: oldVersions),
+      'ind': load('DFC_MI_ind', 'Ú', oldVersions: oldVersions),
     };
-    final dfcAnt = {
-      'con': carregar('DFC_MI_con', 'P', antigas: antigas),
-      'ind': carregar('DFC_MI_ind', 'P', antigas: antigas),
+    final dfcPrev = {
+      'con': load('DFC_MI_con', 'P', oldVersions: oldVersions),
+      'ind': load('DFC_MI_ind', 'P', oldVersions: oldVersions),
     };
     final bpa = {
-      'con': carregar('BPA_con', 'Ú', antigas: antigas),
-      'ind': carregar('BPA_ind', 'Ú', antigas: antigas),
+      'con': load('BPA_con', 'Ú', oldVersions: oldVersions),
+      'ind': load('BPA_ind', 'Ú', oldVersions: oldVersions),
     };
     final bpp = {
-      'con': carregar('BPP_con', 'Ú', antigas: antigas),
-      'ind': carregar('BPP_ind', 'Ú', antigas: antigas),
+      'con': load('BPP_con', 'Ú', oldVersions: oldVersions),
+      'ind': load('BPP_ind', 'Ú', oldVersions: oldVersions),
     };
-    final capital = carregarCapital(antigas: antigas);
+    final capital = loadCapital(oldVersions: oldVersions);
 
-    final exercicios = <Map<String, Object?>>[];
-    final chaves = {...dre['con']!.keys, ...dre['ind']!.keys};
-    if (!antigas) {
-      final comDre = {
-        for (final k in chaves) (cnpj: k.cnpj, refer: k.refer, doc: k.doc),
+    final fiscalYears = <Map<String, Object?>>[];
+    final keys = {...dre['con']!.keys, ...dre['ind']!.keys};
+    if (!oldVersions) {
+      final withDre = {
+        for (final k in keys) (cnpj: k.cnpj, refer: k.refer, doc: k.doc),
       };
-      semDre = meta.keys.where((k) => !comDre.contains(k)).length;
+      withoutDre = meta.keys.where((k) => !withDre.contains(k)).length;
     }
-    for (final k in chaves) {
+    for (final k in keys) {
       // A versão das contas dá a data de recebimento. Nos anuais, a versão que
       // o CSV traz é a última, e o índice a confirma; sem ela no índice, fica a
       // vigente, como antes.
-      final m = porVersao[k] ??
-          (antigas ? null : meta[(cnpj: k.cnpj, refer: k.refer, doc: k.doc)]);
+      final m = byVersion[k] ??
+          (oldVersions ? null : meta[(cnpj: k.cnpj, refer: k.refer, doc: k.doc)]);
       if (m == null) {
-        semRecebimento++;
+        withoutReceipt++;
         continue;
       }
-      var origem = 'con';
+      var origin = 'con';
       if (dre['con']![k] == null) {
-        origem = 'ind';
-        if (dre['ind']![k] != null) comRecuo++;
+        origin = 'ind';
+        if (dre['ind']![k] != null) withFallback++;
       }
-      final demDre = dre[origem]![k];
-      if (demDre == null) continue;
+      final dreStatement = dre[origin]![k];
+      if (dreStatement == null) continue;
 
-      final chartDre = CvmChart.of(demDre.linhas);
-      final chartDfc = CvmChart.of(dfc[origem]![k]?.linhas ?? const []);
+      final chartDre = CvmChart.of(dreStatement.rows);
+      final chartDfc = CvmChart.of(dfc[origin]![k]?.rows ?? const []);
       final chartBal = CvmChart.of([
-        ...?bpa[origem]![k]?.linhas,
-        ...?bpp[origem]![k]?.linhas,
+        ...?bpa[origin]![k]?.rows,
+        ...?bpp[origin]![k]?.rows,
       ]);
       layouts[chartDre.layout.key] = (layouts[chartDre.layout.key] ?? 0) + 1;
 
-      final at = chartBal.ativoTotal;
-      final pt = chartBal.passivoTotal;
+      final at = chartBal.totalAssets;
+      final pt = chartBal.totalLiabilities;
       if (at != null && pt != null && at.abs() > 1) {
-        balancoN++;
-        if (((at - pt).abs() / at.abs()) < 1e-6) balancoOk++;
+        balanceN++;
+        if (((at - pt).abs() / at.abs()) < 1e-6) balanceOk++;
       }
 
       // Acumulado do mesmo período no exercício anterior — só o ITR precisa,
       // para os últimos doze meses. A DFP é o ano cheio por si.
-      Map<String, Object?>? anterior;
+      Map<String, Object?>? previous;
       if (k.doc == 'ITR') {
-        final dAnt = dreAnt[origem]![k];
-        if (dAnt != null) {
-          final fAnt = fluxos(
-            CvmChart.of(dAnt.linhas),
-            CvmChart.of(dfcAnt[origem]![k]?.linhas ?? const []),
+        final dPrev = previousDre[origin]![k];
+        if (dPrev != null) {
+          final fPrev = flows(
+            CvmChart.of(dPrev.rows),
+            CvmChart.of(dfcPrev[origin]![k]?.rows ?? const []),
           );
-          anterior = {'inicioDoPeriodo': dAnt.inicio, ...fAnt};
+          previous = {'inicioDoPeriodo': dPrev.start, ...fPrev};
         }
-        if (demDre.duplicadas > 0) duplicadasResolvidas++;
+        if (dreStatement.duplicates > 0) resolvedDuplicates++;
       }
 
       final cap = capital[k];
-      exercicios.add({
+      fiscalYears.add({
         'cnpj': k.cnpj,
         'nome': m.denom,
-        'tickers': porCnpj[k.cnpj] ?? const <String>[],
+        'tickers': byCnpj[k.cnpj] ?? const <String>[],
         'documento': k.doc,
-        'inicioDoPeriodo': demDre.inicio,
+        'inicioDoPeriodo': dreStatement.start,
         'fimDoExercicio': k.refer,
-        'recebidoEm': m.recebido,
-        'versao': m.versao,
-        'origem': origem == 'con' ? 'consolidado' : 'individual',
+        'recebidoEm': m.received,
+        'versao': m.version,
+        'origem': origin == 'con' ? 'consolidado' : 'individual',
         'layout': chartDre.layout.key,
-        ...fluxos(chartDre, chartDfc),
-        'lucroPorAcao': chartDre.lucroPorAcao,
+        ...flows(chartDre, chartDfc),
+        'lucroPorAcao': chartDre.earningsPerShare,
         'ativoTotal': at,
-        'ativoCirculante': chartBal.ativoCirculante,
-        'passivoCirculante': chartBal.passivoCirculante,
-        'patrimonioLiquido': chartBal.patrimonioLiquido,
-        'naoControladores': chartBal.participacaoNaoControladores,
-        'caixa': chartBal.caixa,
-        'aplicacoesFinanceiras': chartBal.aplicacoesFinanceiras,
-        'imobilizado': chartBal.imobilizado,
-        'intangivel': chartBal.intangivel,
-        'dividaDeCurtoPrazo': chartBal.dividaDeCurtoPrazo,
-        'dividaDeLongoPrazo': chartBal.dividaDeLongoPrazo,
-        'acoesIntegralizadas': cap?.integralizadas,
-        'acoesEmTesouraria': cap?.tesouraria,
-        'anterior': anterior,
+        'ativoCirculante': chartBal.currentAssets,
+        'passivoCirculante': chartBal.currentLiabilities,
+        'patrimonioLiquido': chartBal.equity,
+        'naoControladores': chartBal.nonControllingInterests,
+        'caixa': chartBal.cash,
+        'aplicacoesFinanceiras': chartBal.financialInvestments,
+        'imobilizado': chartBal.propertyPlantEquipment,
+        'intangivel': chartBal.intangibleAssets,
+        'dividaDeCurtoPrazo': chartBal.shortTermDebt,
+        'dividaDeLongoPrazo': chartBal.longTermDebt,
+        'acoesIntegralizadas': cap?.paidInShares,
+        'acoesEmTesouraria': cap?.treasury,
+        'anterior': previous,
       });
     }
 
-    exercicios.sort((a, b) {
+    fiscalYears.sort((a, b) {
       final c = (a['cnpj']! as String).compareTo(b['cnpj']! as String);
       if (c != 0) return c;
       final f = (a['fimDoExercicio']! as String)
           .compareTo(b['fimDoExercicio']! as String);
       return f != 0 ? f : (a['versao']! as int).compareTo(b['versao']! as int);
     });
-    return exercicios;
+    return fiscalYears;
   }
 
   // Nos anuais, **uma entrada por documento, a de maior versão**: um
   // documento raro vem com duas versões em arquivos de anos diferentes (a DFP
   // de 2021 da INTER & CO), e a versão menor não é a vigente de hoje.
-  final exercicios = () {
-    final porDoc = <String, Map<String, Object?>>{};
-    for (final e in montar(antigas: false)) {
+  final fiscalYears = () {
+    final byDoc = <String, Map<String, Object?>>{};
+    for (final e in build(oldVersions: false)) {
       final k = '${e['cnpj']}|${e['fimDoExercicio']}|${e['documento']}';
-      final atual = porDoc[k];
-      if (atual == null || (e['versao']! as int) > (atual['versao']! as int)) {
-        porDoc[k] = e;
+      final current = byDoc[k];
+      if (current == null || (e['versao']! as int) > (current['versao']! as int)) {
+        byDoc[k] = e;
       }
     }
-    return [for (final e in porDoc.values) e];
+    return [for (final e in byDoc.values) e];
   }();
   // O recuo, as duplicadas e a identidade descrevem a base vigente; as
   // versões antigas são contadas à parte.
-  final (recuo0, dup0, balOk0, balN0) =
-      (comRecuo, duplicadasResolvidas, balancoOk, balancoN);
-  final antigas = porNomeVersoes.isEmpty
+  final (fallback0, dup0, balanceOk0, balanceN0) =
+      (withFallback, resolvedDuplicates, balanceOk, balanceN);
+  final oldVersions = versionsByName.isEmpty
       ? const <Map<String, Object?>>[]
-      : montar(antigas: true);
-  final balancoAntigasOk = balancoOk - balOk0;
-  final balancoAntigasN = balancoN - balN0;
-  comRecuo = recuo0;
-  duplicadasResolvidas = dup0;
-  balancoOk = balOk0;
-  balancoN = balN0;
+      : build(oldVersions: true);
+  final oldBalanceOk = balanceOk - balanceOk0;
+  final oldBalanceN = balanceN - balanceN0;
+  withFallback = fallback0;
+  resolvedDuplicates = dup0;
+  balanceOk = balanceOk0;
+  balanceN = balanceN0;
 
-  final comTicker =
-      exercicios.where((e) => (e['tickers']! as List).isNotEmpty).length;
+  final withTicker =
+      fiscalYears.where((e) => (e['tickers']! as List).isNotEmpty).length;
   stdout.writeln('');
-  stdout.writeln('  documentos montados : ${exercicios.length}');
-  stdout.writeln('    DFP: ${exercicios.where((e) => e['documento'] == 'DFP').length}'
-      '   ITR: ${exercicios.where((e) => e['documento'] == 'ITR').length}');
+  stdout.writeln('  documentos montados : ${fiscalYears.length}');
+  stdout.writeln('    DFP: ${fiscalYears.where((e) => e['documento'] == 'DFP').length}'
+      '   ITR: ${fiscalYears.where((e) => e['documento'] == 'ITR').length}');
   stdout.writeln('  companhias distintas: '
-      '${exercicios.map((e) => e['cnpj']).toSet().length}');
-  stdout.writeln('  com ticker no universo de hoje: $comTicker');
-  stdout.writeln('  fora do universo de hoje: ${exercicios.length - comTicker}');
-  stdout.writeln('  recuo para individual: $comRecuo');
-  stdout.writeln('  sem DRE: $semDre');
+      '${fiscalYears.map((e) => e['cnpj']).toSet().length}');
+  stdout.writeln('  com ticker no universo de hoje: $withTicker');
+  stdout.writeln('  fora do universo de hoje: ${fiscalYears.length - withTicker}');
+  stdout.writeln('  recuo para individual: $withFallback');
+  stdout.writeln('  sem DRE: $withoutDre');
   stdout.writeln('  ITR em que a DRE trazia trimestre E acumulado: '
-      '$duplicadasResolvidas');
+      '$resolvedDuplicates');
   stdout.writeln('  layouts: $layouts');
-  stdout.writeln('  IDENTIDADE ativo = passivo: $balancoOk / $balancoN');
+  stdout.writeln('  IDENTIDADE ativo = passivo: $balanceOk / $balanceN');
 
-  final saida = File('data/cvm_exercicios.json');
-  saida.writeAsStringSync(jsonEncode(exercicios));
-  stdout.writeln('\n  gravado ${saida.path} '
-      '(${(saida.lengthSync() / 1e6).toStringAsFixed(1)} MB)');
+  final output = File('data/cvm_exercicios.json');
+  output.writeAsStringSync(jsonEncode(fiscalYears));
+  stdout.writeln('\n  gravado ${output.path} '
+      '(${(output.lengthSync() / 1e6).toStringAsFixed(1)} MB)');
 
   // --- Versões antigas (item B8) --------------------------------------------
-  final saidaVersoes = File('data/cvm_versoes.json');
-  if (antigas.isEmpty) {
-    if (saidaVersoes.existsSync()) saidaVersoes.deleteSync();
+  final versionsOutput = File('data/cvm_versoes.json');
+  if (oldVersions.isEmpty) {
+    if (versionsOutput.existsSync()) versionsOutput.deleteSync();
     stdout.writeln('  sem versões antigas em $dir/versoes — rode '
         'tool/cvm_versoes_baixar.py para o point-in-time por versão');
   } else {
-    saidaVersoes.writeAsStringSync(jsonEncode(antigas));
-    stdout.writeln('  versões antigas montadas: ${antigas.length}   '
-        'IDENTIDADE ativo = passivo: $balancoAntigasOk / $balancoAntigasN');
-    stdout.writeln('  gravado ${saidaVersoes.path} '
-        '(${(saidaVersoes.lengthSync() / 1e6).toStringAsFixed(1)} MB)');
+    versionsOutput.writeAsStringSync(jsonEncode(oldVersions));
+    stdout.writeln('  versões antigas montadas: ${oldVersions.length}   '
+        'IDENTIDADE ativo = passivo: $oldBalanceOk / $oldBalanceN');
+    stdout.writeln('  gravado ${versionsOutput.path} '
+        '(${(versionsOutput.lengthSync() / 1e6).toStringAsFixed(1)} MB)');
   }
-  if (semRecebimento > 0) {
+  if (withoutReceipt > 0) {
     stdout.writeln('  versões sem data de recebimento no índice, descartadas: '
-        '$semRecebimento');
+        '$withoutReceipt');
   }
 }

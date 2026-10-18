@@ -16,7 +16,7 @@ import 'normalization_panel.dart';
 /// Abaixo dela o resultado desce para depois dos campos, e o preço justo do
 /// usuário fica numa barra fixa no rodapé: quem edita um campo no celular
 /// precisa ver o número mudar sem rolar a tela.
-const double _larguraDeDuasColunas = 960;
+const double _twoColumnWidth = 960;
 
 /// **Editar valuation: o cálculo do usuário** (decisão 147).
 ///
@@ -35,10 +35,10 @@ class ManualValuationPage extends StatefulWidget {
   /// Premissas com que a tela abre. **O aplicativo não o usa** — a tela abre
   /// nos números do motor —; existe para o teste e para a captura da lente
   /// `tela`, que precisam mostrar a tela já editada.
-  final ManualPremises? inicial;
+  final ManualPremises? initial;
 
   /// Declara a tela. [result] precisa trazer [ValuationResult.manual].
-  const ManualValuationPage({super.key, required this.result, this.inicial});
+  const ManualValuationPage({super.key, required this.result, this.initial});
 
   @override
   State<ManualValuationPage> createState() => _ManualValuationPageState();
@@ -48,78 +48,78 @@ class _ManualValuationPageState extends State<ManualValuationPage> {
   late ManualPremises _p;
 
   /// O campo que "o que o preço de hoje supõe" resolve.
-  ManualField _alvo = ManualField.discountRate;
+  ManualField _target = ManualField.discountRate;
 
   /// A última resposta de "o que o preço de hoje supõe", ou `null`. Qualquer
   /// troca de campo a apaga: ela respondia às premissas de antes.
-  ManualSolution? _resposta;
+  ManualSolution? _answer;
 
   ManualValuation get _m => widget.result.manual!;
 
   @override
   void initState() {
     super.initState();
-    _p = widget.inicial ?? _m.motorPremises;
+    _p = widget.initial ?? _m.enginePremises;
   }
 
-  void _trocar(ManualPremises p) => setState(() {
+  void _swap(ManualPremises p) => setState(() {
         _p = p;
-        _resposta = null;
+        _answer = null;
       });
 
   void _resolver() =>
-      setState(() => _resposta = _m.solve(_alvo, _p));
+      setState(() => _answer = _m.solve(_target, _p));
 
   @override
   Widget build(BuildContext context) {
     final m = _m;
-    final avaliacao = m.evaluate(_p);
-    final degraus = m.attribution(_p);
-    final alterado = degraus.isNotEmpty;
-    final largo = MediaQuery.sizeOf(context).width >= _larguraDeDuasColunas;
-    final saida = avaliacao.valueOrNull;
-    final falha = avaliacao.failureOrNull;
+    final valuation = m.evaluate(_p);
+    final steps = m.attribution(_p);
+    final changed = steps.isNotEmpty;
+    final isWide = MediaQuery.sizeOf(context).width >= _twoColumnWidth;
+    final output = valuation.valueOrNull;
+    final failure = valuation.failureOrNull;
 
-    final campos = _Campos(
+    final fields = _Fields(
       m: m,
       p: _p,
-      falha: falha,
-      saida: saida,
-      alterado: alterado,
-      normalizacao: widget.result.diagnostics?.baseNormalization,
-      onChanged: _trocar,
+      failure: failure,
+      output: output,
+      changed: changed,
+      normalization: widget.result.diagnostics?.baseNormalization,
+      onChanged: _swap,
     );
-    final resultado = <Widget>[
-      _ResumoCard(m: m, saida: saida, falha: falha, alterado: alterado),
+    final result = <Widget>[
+      _SummaryCard(m: m, output: output, failure: failure, changed: changed),
       const Gap.md(),
-      if (saida != null) ...[
-        _ContaCard(m: m, saida: saida),
+      if (output != null) ...[
+        _CalculationCard(m: m, output: output),
         const Gap.md(),
       ],
-      _DiscordanciaCard(m: m, degraus: degraus),
+      _DisagreementCard(m: m, steps: steps),
       const Gap.md(),
-      _ReversoCard(
+      _ReverseCard(
         m: m,
         p: _p,
-        alvo: _alvo,
-        resposta: _resposta,
-        onAlvo: (f) => setState(() {
-          _alvo = f;
-          _resposta = null;
+        target: _target,
+        answer: _answer,
+        onTarget: (f) => setState(() {
+          _target = f;
+          _answer = null;
         }),
         onResolver: _resolver,
-        onUsar: (f, v) => _trocar(_p.withValue(f, v)),
+        onUse: (f, v) => _swap(_p.withValue(f, v)),
       ),
-      if (saida != null) ...[
+      if (output != null) ...[
         const Gap.md(),
-        _AnosCard(m: m, p: _p, saida: saida),
+        _YearsCard(m: m, p: _p, output: output),
       ],
-      if (saida != null && saida.notices.isNotEmpty) ...[
+      if (output != null && output.notices.isNotEmpty) ...[
         const Gap.md(),
-        for (final n in saida.notices)
+        for (final n in output.notices)
           Padding(
             padding: const EdgeInsets.only(bottom: FinSpace.sm),
-            child: NoticeBanner(message: ManualCopy.aviso(n)),
+            child: NoticeBanner(message: ManualCopy.warning(n)),
           ),
       ],
       const Gap.md(),
@@ -137,16 +137,16 @@ class _ManualValuationPageState extends State<ManualValuationPage> {
     return Scaffold(
       body: ScreenBackground(
         child: SafeArea(
-          bottom: largo,
+          bottom: isWide,
           child: Column(
             children: [
-              _Cabecalho(
+              _Header(
                 ticker: widget.result.ticker,
-                alterado: alterado,
-                onVoltarAoMotor: () => _trocar(m.motorPremises),
+                changed: changed,
+                onBackToEngine: () => _swap(m.enginePremises),
               ),
               Expanded(
-                child: largo
+                child: isWide
                     ? Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -159,7 +159,7 @@ class _ManualValuationPageState extends State<ManualValuationPage> {
                                 FinSpace.sm,
                                 FinSpace.xl,
                               ),
-                              children: [campos],
+                              children: [fields],
                             ),
                           ),
                           Expanded(
@@ -171,7 +171,7 @@ class _ManualValuationPageState extends State<ManualValuationPage> {
                                 FinSpace.lg,
                                 FinSpace.xl,
                               ),
-                              children: resultado,
+                              children: result,
                             ),
                           ),
                         ],
@@ -179,9 +179,9 @@ class _ManualValuationPageState extends State<ManualValuationPage> {
                     : ListView(
                         padding: const EdgeInsets.all(FinSpace.lg),
                         children: [
-                          campos,
+                          fields,
                           const Gap.lg(),
-                          ...resultado,
+                          ...result,
                         ],
                       ),
               ),
@@ -189,24 +189,24 @@ class _ManualValuationPageState extends State<ManualValuationPage> {
           ),
         ),
       ),
-      bottomNavigationBar: largo
+      bottomNavigationBar: isWide
           ? null
-          : _BarraDoResultado(m: m, saida: saida, alterado: alterado),
+          : _ResultBar(m: m, output: output, changed: changed),
     );
   }
 }
 
 // ---------------------------------------------------------------- Cabeçalho --
 
-class _Cabecalho extends StatelessWidget {
+class _Header extends StatelessWidget {
   final Ticker ticker;
-  final bool alterado;
-  final VoidCallback onVoltarAoMotor;
+  final bool changed;
+  final VoidCallback onBackToEngine;
 
-  const _Cabecalho({
+  const _Header({
     required this.ticker,
-    required this.alterado,
-    required this.onVoltarAoMotor,
+    required this.changed,
+    required this.onBackToEngine,
   });
 
   @override
@@ -226,11 +226,11 @@ class _Cabecalho extends StatelessWidget {
         IconButton(
           tooltip: 'Voltar aos números do motor',
           constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-          onPressed: alterado ? onVoltarAoMotor : null,
+          onPressed: changed ? onBackToEngine : null,
           icon: Icon(
             Icons.restart_alt,
             size: 20,
-            color: alterado ? c.positive : c.textTertiary,
+            color: changed ? c.positive : c.textTertiary,
           ),
         ),
       ],
@@ -241,27 +241,27 @@ class _Cabecalho extends StatelessWidget {
 // ------------------------------------------------------------------- Campos --
 
 /// Como o valor de um campo se escreve e se lê.
-enum _Unidade {
+enum _Unit {
   /// Reais, escritos em milhões com uma casa.
   reais,
 
   /// Taxa ao ano, em percentual com duas casas.
-  taxa,
+  rate,
 
   /// Parcela do lucro, em percentual com uma casa.
-  parcela;
+  fraction;
 
-  String mostrar(double v) => switch (this) {
-        _Unidade.reais => Fmt.ratio(v / 1e6, decimals: 1),
-        _Unidade.taxa => Fmt.ratio(v * 100, decimals: 2),
-        _Unidade.parcela => Fmt.ratio(v * 100, decimals: 1),
+  String display(double v) => switch (this) {
+        _Unit.reais => Fmt.ratio(v / 1e6, decimals: 1),
+        _Unit.rate => Fmt.ratio(v * 100, decimals: 2),
+        _Unit.fraction => Fmt.ratio(v * 100, decimals: 1),
       };
 
   /// O valor escrito como o motor o lê na referência: `R$ 1.234,5 mi`,
   /// `14,09%`.
-  String referencia(double v) => switch (this) {
-        _Unidade.reais => 'R\$ ${mostrar(v)} mi',
-        _Unidade.taxa || _Unidade.parcela => '${mostrar(v)}%',
+  String reference(double v) => switch (this) {
+        _Unit.reais => 'R\$ ${display(v)} mi',
+        _Unit.rate || _Unit.fraction => '${display(v)}%',
       };
 
   /// Lê o que o usuário digitou, na convenção brasileira, ou `null` quando
@@ -269,8 +269,8 @@ enum _Unidade {
   ///
   /// Vírgula é decimal. Sem vírgula, o ponto é decimal — exceto em reais,
   /// onde `1.234` com três dígitos depois do ponto é milhar.
-  double? ler(String texto) {
-    var s = texto
+  double? read(String text) {
+    var s = text
         .replaceAll(RegExp(r'\s'), '')
         .replaceAll('R\$', '')
         .replaceAll('%', '')
@@ -278,107 +278,107 @@ enum _Unidade {
     if (s.isEmpty || s == '-') return null;
     if (s.contains(',')) {
       s = s.replaceAll('.', '').replaceAll(',', '.');
-    } else if (this == _Unidade.reais &&
+    } else if (this == _Unit.reais &&
         RegExp(r'^-?\d{1,3}(\.\d{3})+$').hasMatch(s)) {
       s = s.replaceAll('.', '');
     }
     final n = double.tryParse(s);
     if (n == null || !n.isFinite) return null;
     return switch (this) {
-      _Unidade.reais => n * 1e6,
-      _Unidade.taxa || _Unidade.parcela => n / 100,
+      _Unit.reais => n * 1e6,
+      _Unit.rate || _Unit.fraction => n / 100,
     };
   }
 
   /// Diferença abaixo da qual o campo continua "igual ao do motor": metade
   /// da última casa exibida.
-  double get tolerancia => switch (this) {
-        _Unidade.reais => 0.05e6,
-        _Unidade.taxa => 0.00005,
-        _Unidade.parcela => 0.0005,
+  double get tolerance => switch (this) {
+        _Unit.reais => 0.05e6,
+        _Unit.rate => 0.00005,
+        _Unit.fraction => 0.0005,
       };
 }
 
 /// Os cartões dos campos, na ordem em que a conta os usa.
-class _Campos extends StatelessWidget {
+class _Fields extends StatelessWidget {
   final ManualValuation m;
   final ManualPremises p;
-  final Failure? falha;
-  final ManualOutcome? saida;
-  final bool alterado;
+  final Failure? failure;
+  final ManualOutcome? output;
+  final bool changed;
 
   /// Por que o motor normalizou o lucro de partida — o painel do cartão dele.
-  final BaseNormalization? normalizacao;
+  final BaseNormalization? normalization;
   final ValueChanged<ManualPremises> onChanged;
 
-  const _Campos({
+  const _Fields({
     required this.m,
     required this.p,
-    required this.falha,
-    required this.saida,
-    required this.alterado,
-    required this.normalizacao,
+    required this.failure,
+    required this.output,
+    required this.changed,
+    required this.normalization,
     required this.onChanged,
   });
 
   /// O campo que a recusa nomeia, quando ela nomeia um.
-  ManualField? get _recusado {
-    final f = falha;
+  ManualField? get _refused {
+    final f = failure;
     if (f is! InvalidInput) return null;
     return ManualField.values.asNameMap()[f.field];
   }
 
-  String? _erro(ManualField campo) {
-    final r = _recusado;
-    final f = falha;
+  String? _error(ManualField field) {
+    final r = _refused;
+    final f = failure;
     if (r == null || f == null) return null;
     // A margem da perpetuidade é relação entre a taxa e o crescimento perpétuo:
     // os dois campos a mostram.
-    final nomeia = r == campo ||
-        (r == ManualField.perpetualGrowth && campo == ManualField.discountRate);
-    return nomeia ? ManualCopy.recusa(f) : null;
+    final namesField = r == field ||
+        (r == ManualField.perpetualGrowth && field == ManualField.discountRate);
+    return namesField ? ManualCopy.refusal(f) : null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final motor = m.motorPremises;
-    final via = m.lane;
+    final engine = m.enginePremises;
+    final lane = m.lane;
     final c = context.fin;
     final t = context.finType;
 
-    final publicado = m.publishedBase;
+    final published = m.publishedBase;
     final String refBase;
     if (m.rebuiltBase) {
-      refBase = 'Motor: ${_Unidade.reais.referencia(motor.baseProfit)} — '
+      refBase = 'Motor: ${_Unit.reais.reference(engine.baseProfit)} — '
           'reconstruído do retorno do ciclo, porque o último exercício veio no '
           'prejuízo.';
-    } else if (publicado != null && (m.baseFactor - 1).abs() > 0.005) {
-      refBase = 'Motor: ${_Unidade.reais.referencia(motor.baseProfit)} — o '
-          'último exercício, ${_Unidade.reais.referencia(publicado)}, '
+    } else if (published != null && (m.baseFactor - 1).abs() > 0.005) {
+      refBase = 'Motor: ${_Unit.reais.reference(engine.baseProfit)} — o '
+          'último exercício, ${_Unit.reais.reference(published)}, '
           'normalizado ${m.baseFactor > 1 ? 'para cima' : 'para baixo'} pelo '
           'ciclo (×${Fmt.ratio(m.baseFactor, decimals: 2)}).';
     } else {
-      refBase = 'Motor: ${_Unidade.reais.referencia(motor.baseProfit)} — o '
+      refBase = 'Motor: ${_Unit.reais.reference(engine.baseProfit)} — o '
           'último exercício publicado.';
     }
 
-    final taxaTerminalDoMotor = m.motorTerminalRate;
-    final refTaxa = 'Motor: ${_Unidade.taxa.referencia(motor.discountRate)} '
-        'no ano 1 e ${_Unidade.taxa.referencia(taxaTerminalDoMotor)} na '
+    final engineTerminalRate = m.engineTerminalRate;
+    final rateRef = 'Motor: ${_Unit.rate.reference(engine.discountRate)} '
+        'no ano 1 e ${_Unit.rate.reference(engineTerminalRate)} na '
         'perpetuidade — a curva de juros do Tesouro mais o beta vezes o prêmio '
         'de mercado.';
-    final wacc = saida?.capitalCostRates;
-    final notaDaFirma = via == ValuationLane.firm && wacc != null
+    final wacc = output?.capitalCostRates;
+    final firmNote = lane == ValuationLane.firm && wacc != null
         ? 'Na via da firma, o custo médio do capital do motor '
-            '(${_Unidade.taxa.referencia(wacc.first)} no ano 1) continua '
+            '(${_Unit.rate.reference(wacc.first)} no ano 1) continua '
             'guiando o retorno e a perpetuidade da operação: a taxa daqui só '
             'desconta.'
         : null;
 
-    final motorNeutro = motor.terminalReturn == null;
-    final refCapitalNovo = motorNeutro
-        ? 'Motor: igual à taxa (${_Unidade.taxa.referencia(taxaTerminalDoMotor)}).'
-        : 'Motor: ${_Unidade.taxa.referencia(motor.terminalReturn!)} — vantagem '
+    final neutralEngine = engine.terminalReturn == null;
+    final newCapitalRef = neutralEngine
+        ? 'Motor: igual à taxa (${_Unit.rate.reference(engineTerminalRate)}).'
+        : 'Motor: ${_Unit.rate.reference(engine.terminalReturn!)} — vantagem '
             'competitiva medida no histórico da empresa.';
 
     return Column(
@@ -395,7 +395,7 @@ class _Campos extends StatelessWidget {
               ),
               const Gap.sm(),
               Text(
-                via == ValuationLane.firm
+                lane == ValuationLane.firm
                     ? 'Este ativo é avaliado pela via da firma: a conta parte do '
                         'lucro da operação, desconta o que sobra ao acionista '
                         'depois da dívida e divide pelas ações.'
@@ -404,14 +404,14 @@ class _Campos extends StatelessWidget {
                         'reinvestir e divide pelas ações.',
                 style: t.bodySm.copyWith(color: c.textSecondary),
               ),
-              if (alterado) ...[
+              if (changed) ...[
                 const Gap.xs(),
                 Align(
                   alignment: AlignmentDirectional.centerStart,
-                  child: _Acao(
-                    texto: 'Voltar aos números do motor',
-                    icone: Icons.restart_alt,
-                    onPressed: () => onChanged(motor),
+                  child: _Action(
+                    text: 'Voltar aos números do motor',
+                    icon: Icons.restart_alt,
+                    onPressed: () => onChanged(engine),
                   ),
                 ),
               ],
@@ -419,125 +419,125 @@ class _Campos extends StatelessWidget {
           ),
         ),
         const Gap.md(),
-        _CampoNumerico(
-          campo: ManualField.baseProfit,
-          rotulo: ManualCopy.rotulo(ManualField.baseProfit, via),
-          explicacao: ManualCopy.explicacao(ManualField.baseProfit, via),
-          referencia: refBase,
-          valor: p.baseProfit,
-          valorDoMotor: motor.baseProfit,
-          unidade: _Unidade.reais,
-          passo: (motor.baseProfit * 0.05).abs(),
-          grade: 1e5,
-          minimo: 0,
-          maximo: motor.baseProfit * 3,
-          erro: _erro(ManualField.baseProfit),
+        _NumericField(
+          field: ManualField.baseProfit,
+          label: ManualCopy.label(ManualField.baseProfit, lane),
+          explanation: ManualCopy.explanation(ManualField.baseProfit, lane),
+          reference: refBase,
+          value: p.baseProfit,
+          engineValue: engine.baseProfit,
+          unit: _Unit.reais,
+          step: (engine.baseProfit * 0.05).abs(),
+          grid: 1e5,
+          minimum: 0,
+          maximum: engine.baseProfit * 3,
+          error: _error(ManualField.baseProfit),
           onChanged: (v) => onChanged(p.copyWith(baseProfit: v)),
           extras: [
-            if (publicado != null &&
-                publicado > 0 &&
-                (publicado - p.baseProfit).abs() > _Unidade.reais.tolerancia)
-              _Acao(
-                texto:
-                    'Usar o último exercício (${_Unidade.reais.referencia(publicado)})',
-                onPressed: () => onChanged(p.copyWith(baseProfit: publicado)),
+            if (published != null &&
+                published > 0 &&
+                (published - p.baseProfit).abs() > _Unit.reais.tolerance)
+              _Action(
+                text:
+                    'Usar o último exercício (${_Unit.reais.reference(published)})',
+                onPressed: () => onChanged(p.copyWith(baseProfit: published)),
               ),
           ],
-          detalhe: normalizacao == null
+          detail: normalization == null
               ? null
-              : NormalizationPanel(normalization: normalizacao!),
+              : NormalizationPanel(normalization: normalization!),
         ),
         const Gap.md(),
-        _CampoNumerico(
-          campo: ManualField.growth,
-          rotulo: ManualCopy.rotulo(ManualField.growth, via),
-          explicacao: ManualCopy.explicacao(ManualField.growth, via),
-          referencia: 'Motor: ${_Unidade.taxa.referencia(motor.growth)} no ano 1, '
+        _NumericField(
+          field: ManualField.growth,
+          label: ManualCopy.label(ManualField.growth, lane),
+          explanation: ManualCopy.explanation(ManualField.growth, lane),
+          reference: 'Motor: ${_Unit.rate.reference(engine.growth)} no ano 1, '
               'caindo em linha reta até o crescimento da perpetuidade.',
-          valor: p.growth,
-          valorDoMotor: motor.growth,
-          unidade: _Unidade.taxa,
-          passo: 0.0025,
-          grade: 0.0025,
-          minimo: -0.20,
-          maximo: 0.40,
-          erro: _erro(ManualField.growth),
+          value: p.growth,
+          engineValue: engine.growth,
+          unit: _Unit.rate,
+          step: 0.0025,
+          grid: 0.0025,
+          minimum: -0.20,
+          maximum: 0.40,
+          error: _error(ManualField.growth),
           onChanged: (v) => onChanged(p.copyWith(growth: v)),
-          alteradoForcado: p.growthPath != motor.growthPath,
-          onVoltarAoMotor: () => onChanged(
-            p.copyWith(growth: motor.growth, growthPath: motor.growthPath),
+          forcedChanged: p.growthPath != engine.growthPath,
+          onBackToEngine: () => onChanged(
+            p.copyWith(growth: engine.growth, growthPath: engine.growthPath),
           ),
-          modos: _Modos<ManualGrowthPath>(
-            valor: p.growthPath,
-            opcoes: const {
-              ManualGrowthPath.decai: 'Cai até a perpetuidade',
-              ManualGrowthPath.constante: 'Constante nos 10 anos',
+          modes: _Modes<ManualGrowthPath>(
+            value: p.growthPath,
+            options: const {
+              ManualGrowthPath.decays: 'Cai até a perpetuidade',
+              ManualGrowthPath.constant: 'Constante nos 10 anos',
             },
             onChanged: (v) => onChanged(p.copyWith(growthPath: v)),
           ),
         ),
         const Gap.md(),
-        _CampoNumerico(
-          campo: ManualField.perpetualGrowth,
-          rotulo: ManualCopy.rotulo(ManualField.perpetualGrowth, via),
-          explicacao: ManualCopy.explicacao(ManualField.perpetualGrowth, via),
-          referencia: 'Motor: '
-              '${_Unidade.taxa.referencia(motor.perpetualGrowth)}.',
-          valor: p.perpetualGrowth,
-          valorDoMotor: motor.perpetualGrowth,
-          unidade: _Unidade.taxa,
-          passo: 0.0025,
-          grade: 0.0025,
-          minimo: -0.02,
-          maximo: 0.12,
-          erro: _erro(ManualField.perpetualGrowth),
+        _NumericField(
+          field: ManualField.perpetualGrowth,
+          label: ManualCopy.label(ManualField.perpetualGrowth, lane),
+          explanation: ManualCopy.explanation(ManualField.perpetualGrowth, lane),
+          reference: 'Motor: '
+              '${_Unit.rate.reference(engine.perpetualGrowth)}.',
+          value: p.perpetualGrowth,
+          engineValue: engine.perpetualGrowth,
+          unit: _Unit.rate,
+          step: 0.0025,
+          grid: 0.0025,
+          minimum: -0.02,
+          maximum: 0.12,
+          error: _error(ManualField.perpetualGrowth),
           onChanged: (v) => onChanged(p.copyWith(perpetualGrowth: v)),
         ),
         const Gap.md(),
-        _CampoNumerico(
-          campo: ManualField.discountRate,
-          rotulo: ManualCopy.rotulo(ManualField.discountRate, via),
-          explicacao: ManualCopy.explicacao(ManualField.discountRate, via),
-          referencia: refTaxa,
-          nota: notaDaFirma,
-          valor: p.discountRate,
-          valorDoMotor: motor.discountRate,
-          unidade: _Unidade.taxa,
-          passo: 0.0025,
-          grade: 0.0025,
-          minimo: 0.04,
-          maximo: 0.30,
-          erro: _erro(ManualField.discountRate),
+        _NumericField(
+          field: ManualField.discountRate,
+          label: ManualCopy.label(ManualField.discountRate, lane),
+          explanation: ManualCopy.explanation(ManualField.discountRate, lane),
+          reference: rateRef,
+          note: firmNote,
+          value: p.discountRate,
+          engineValue: engine.discountRate,
+          unit: _Unit.rate,
+          step: 0.0025,
+          grid: 0.0025,
+          minimum: 0.04,
+          maximum: 0.30,
+          error: _error(ManualField.discountRate),
           onChanged: (v) => onChanged(p.copyWith(discountRate: v)),
-          alteradoForcado: p.ratePath != motor.ratePath,
-          onVoltarAoMotor: () => onChanged(
-            p.copyWith(discountRate: motor.discountRate, ratePath: motor.ratePath),
+          forcedChanged: p.ratePath != engine.ratePath,
+          onBackToEngine: () => onChanged(
+            p.copyWith(discountRate: engine.discountRate, ratePath: engine.ratePath),
           ),
-          modos: _Modos<ManualRatePath>(
-            valor: p.ratePath,
-            opcoes: const {
-              ManualRatePath.motor: 'Segue a curva, como no motor',
-              ManualRatePath.constante: 'Uma taxa só, em todos os anos',
+          modes: _Modes<ManualRatePath>(
+            value: p.ratePath,
+            options: const {
+              ManualRatePath.engine: 'Segue a curva, como no motor',
+              ManualRatePath.constant: 'Uma taxa só, em todos os anos',
             },
             onChanged: (v) => onChanged(p.copyWith(ratePath: v)),
           ),
         ),
         const Gap.md(),
-        _ReinvestimentoCard(
+        _ReinvestmentCard(
           m: m,
           p: p,
-          motor: motor,
-          erro: _erro,
+          engine: engine,
+          error: _error,
           onChanged: onChanged,
         ),
-        if (p.reinvestment == ManualReinvestment.peloRetorno) ...[
+        if (p.reinvestment == ManualReinvestment.byReturn) ...[
           const Gap.md(),
-          _CapitalNovoCard(
+          _NewCapitalCard(
             m: m,
             p: p,
-            motor: motor,
-            referencia: refCapitalNovo,
-            erro: _erro(ManualField.terminalReturn),
+            engine: engine,
+            reference: newCapitalRef,
+            error: _error(ManualField.terminalReturn),
             onChanged: onChanged,
           ),
         ],
@@ -548,132 +548,132 @@ class _Campos extends StatelessWidget {
 
 /// O reinvestimento: pelo retorno sobre o capital, como o motor, ou uma
 /// parcela fixa do lucro.
-class _ReinvestimentoCard extends StatelessWidget {
+class _ReinvestmentCard extends StatelessWidget {
   final ManualValuation m;
   final ManualPremises p;
-  final ManualPremises motor;
-  final String? Function(ManualField) erro;
+  final ManualPremises engine;
+  final String? Function(ManualField) error;
   final ValueChanged<ManualPremises> onChanged;
 
-  const _ReinvestimentoCard({
+  const _ReinvestmentCard({
     required this.m,
     required this.p,
-    required this.motor,
-    required this.erro,
+    required this.engine,
+    required this.error,
     required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final via = m.lane;
-    final modos = _Modos<ManualReinvestment>(
-      valor: p.reinvestment,
-      opcoes: const {
-        ManualReinvestment.peloRetorno: 'Pelo retorno, como no motor',
-        ManualReinvestment.parcelaFixa: 'Uma parcela fixa do lucro',
+    final lane = m.lane;
+    final modes = _Modes<ManualReinvestment>(
+      value: p.reinvestment,
+      options: const {
+        ManualReinvestment.byReturn: 'Pelo retorno, como no motor',
+        ManualReinvestment.fixedFraction: 'Uma parcela fixa do lucro',
       },
       onChanged: (v) => onChanged(p.copyWith(reinvestment: v)),
     );
-    if (p.reinvestment == ManualReinvestment.parcelaFixa) {
-      return _CampoNumerico(
-        campo: ManualField.retention,
-        rotulo: ManualCopy.rotulo(ManualField.retention, via),
-        explicacao: ManualCopy.explicacao(ManualField.retention, via),
-        referencia: 'Ponto de partida: a parcela do ano 1 no motor, '
-            '${_Unidade.parcela.referencia(motor.retention)}. Com ela fixa, o '
+    if (p.reinvestment == ManualReinvestment.fixedFraction) {
+      return _NumericField(
+        field: ManualField.retention,
+        label: ManualCopy.label(ManualField.retention, lane),
+        explanation: ManualCopy.explanation(ManualField.retention, lane),
+        reference: 'Ponto de partida: a parcela do ano 1 no motor, '
+            '${_Unit.fraction.reference(engine.retention)}. Com ela fixa, o '
             'crescimento deixa de depender do retorno, e a perpetuidade é '
             'Gordon com a mesma parcela.',
-        valor: p.retention,
-        valorDoMotor: motor.retention,
-        unidade: _Unidade.parcela,
-        passo: 0.01,
-        grade: 0.01,
-        minimo: 0,
-        maximo: 0.95,
-        erro: erro(ManualField.retention),
+        value: p.retention,
+        engineValue: engine.retention,
+        unit: _Unit.fraction,
+        step: 0.01,
+        grid: 0.01,
+        minimum: 0,
+        maximum: 0.95,
+        error: error(ManualField.retention),
         onChanged: (v) => onChanged(p.copyWith(retention: v)),
-        modos: modos,
+        modes: modes,
         // A parcela é do usuário, e o motor não a usa: o selo de alterado é o
         // do modo, e não o do valor — e voltar ao motor é voltar ao modo dele.
-        alteradoForcado: true,
-        onVoltarAoMotor: () => onChanged(p.copyWith(
-          reinvestment: motor.reinvestment,
-          returnOnCapital: motor.returnOnCapital,
-          retention: motor.retention,
+        forcedChanged: true,
+        onBackToEngine: () => onChanged(p.copyWith(
+          reinvestment: engine.reinvestment,
+          returnOnCapital: engine.returnOnCapital,
+          retention: engine.retention,
         )),
       );
     }
-    return _CampoNumerico(
-      campo: ManualField.returnOnCapital,
-      rotulo: ManualCopy.rotulo(ManualField.returnOnCapital, via),
-      explicacao: ManualCopy.explicacao(ManualField.returnOnCapital, via),
-      referencia: motor.returnOnCapital > 0
-          ? 'Motor: ${_Unidade.taxa.referencia(motor.returnOnCapital)} no ano 1.'
+    return _NumericField(
+      field: ManualField.returnOnCapital,
+      label: ManualCopy.label(ManualField.returnOnCapital, lane),
+      explanation: ManualCopy.explanation(ManualField.returnOnCapital, lane),
+      reference: engine.returnOnCapital > 0
+          ? 'Motor: ${_Unit.rate.reference(engine.returnOnCapital)} no ano 1.'
           : 'Motor: sem retorno medido — o motor não reinveste nada para '
               'crescer, e o resultado declara isso.',
-      valor: p.returnOnCapital,
-      valorDoMotor: motor.returnOnCapital,
-      unidade: _Unidade.taxa,
-      passo: 0.0025,
-      grade: 0.0025,
-      minimo: 0,
-      maximo: 0.60,
-      erro: erro(ManualField.returnOnCapital),
+      value: p.returnOnCapital,
+      engineValue: engine.returnOnCapital,
+      unit: _Unit.rate,
+      step: 0.0025,
+      grid: 0.0025,
+      minimum: 0,
+      maximum: 0.60,
+      error: error(ManualField.returnOnCapital),
       onChanged: (v) => onChanged(p.copyWith(returnOnCapital: v)),
-      modos: modos,
+      modes: modes,
     );
   }
 }
 
 /// O retorno do capital novo na perpetuidade: igual à taxa, como o motor sem
 /// vantagem competitiva, ou o que o usuário disser.
-class _CapitalNovoCard extends StatelessWidget {
+class _NewCapitalCard extends StatelessWidget {
   final ManualValuation m;
   final ManualPremises p;
-  final ManualPremises motor;
-  final String referencia;
-  final String? erro;
+  final ManualPremises engine;
+  final String reference;
+  final String? error;
   final ValueChanged<ManualPremises> onChanged;
 
-  const _CapitalNovoCard({
+  const _NewCapitalCard({
     required this.m,
     required this.p,
-    required this.motor,
-    required this.referencia,
-    required this.erro,
+    required this.engine,
+    required this.reference,
+    required this.error,
     required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final via = m.lane;
-    final proprio = p.terminalReturn != null;
+    final lane = m.lane;
+    final ownTerminal = p.terminalReturn != null;
     // Quem sai do "igual à taxa" parte do retorno do motor, quando há, ou da
     // taxa da perpetuidade mais cinco pontos — um número que já muda a conta.
-    final partida = motor.terminalReturn ?? (m.motorTerminalRate + 0.05);
-    final modos = _Modos<bool>(
-      valor: proprio,
-      opcoes: const {
+    final starting = engine.terminalReturn ?? (m.engineTerminalRate + 0.05);
+    final modes = _Modes<bool>(
+      value: ownTerminal,
+      options: const {
         false: 'Igual à taxa: crescer não cria valor',
         true: 'Outro retorno',
       },
       onChanged: (v) =>
-          onChanged(p.copyWith(terminalReturn: v ? partida : null)),
+          onChanged(p.copyWith(terminalReturn: v ? starting : null)),
     );
-    if (!proprio) {
-      return _CartaoDeCampo(
-        rotulo: ManualCopy.rotulo(ManualField.terminalReturn, via),
-        explicacao: ManualCopy.explicacao(ManualField.terminalReturn, via),
-        alterado: motor.terminalReturn != null,
-        erro: erro,
-        onVoltarAoMotor: motor.terminalReturn == null
+    if (!ownTerminal) {
+      return _FieldCard(
+        label: ManualCopy.label(ManualField.terminalReturn, lane),
+        explanation: ManualCopy.explanation(ManualField.terminalReturn, lane),
+        changed: engine.terminalReturn != null,
+        error: error,
+        onBackToEngine: engine.terminalReturn == null
             ? null
-            : () => onChanged(p.copyWith(terminalReturn: motor.terminalReturn)),
+            : () => onChanged(p.copyWith(terminalReturn: engine.terminalReturn)),
         children: [
-          modos,
+          modes,
           const Gap.sm(),
           Text(
-            referencia,
+            reference,
             style: context.finType.caption.copyWith(
               color: context.fin.textSecondary,
             ),
@@ -681,23 +681,23 @@ class _CapitalNovoCard extends StatelessWidget {
         ],
       );
     }
-    return _CampoNumerico(
-      campo: ManualField.terminalReturn,
-      rotulo: ManualCopy.rotulo(ManualField.terminalReturn, via),
-      explicacao: ManualCopy.explicacao(ManualField.terminalReturn, via),
-      referencia: referencia,
-      valor: p.terminalReturn!,
-      valorDoMotor: motor.terminalReturn ?? double.nan,
-      unidade: _Unidade.taxa,
-      passo: 0.0025,
-      grade: 0.0025,
-      minimo: 0.02,
-      maximo: 0.50,
-      erro: erro,
+    return _NumericField(
+      field: ManualField.terminalReturn,
+      label: ManualCopy.label(ManualField.terminalReturn, lane),
+      explanation: ManualCopy.explanation(ManualField.terminalReturn, lane),
+      reference: reference,
+      value: p.terminalReturn!,
+      engineValue: engine.terminalReturn ?? double.nan,
+      unit: _Unit.rate,
+      step: 0.0025,
+      grid: 0.0025,
+      minimum: 0.02,
+      maximum: 0.50,
+      error: error,
       onChanged: (v) => onChanged(p.copyWith(terminalReturn: v)),
-      onVoltarAoMotor: () =>
-          onChanged(p.copyWith(terminalReturn: motor.terminalReturn)),
-      modos: modos,
+      onBackToEngine: () =>
+          onChanged(p.copyWith(terminalReturn: engine.terminalReturn)),
+      modes: modes,
     );
   }
 }
@@ -708,20 +708,20 @@ class _CapitalNovoCard extends StatelessWidget {
 /// editada, e um campo agrupado com outros num cartão só se lia como resumo.
 /// A borda passa à cor da marca quando o valor deixa o do motor — é o que diz,
 /// de longe, onde o usuário discorda.
-class _CartaoDeCampo extends StatelessWidget {
-  final String rotulo;
-  final String explicacao;
-  final bool alterado;
-  final String? erro;
-  final VoidCallback? onVoltarAoMotor;
+class _FieldCard extends StatelessWidget {
+  final String label;
+  final String explanation;
+  final bool changed;
+  final String? error;
+  final VoidCallback? onBackToEngine;
   final List<Widget> children;
 
-  const _CartaoDeCampo({
-    required this.rotulo,
-    required this.explicacao,
-    required this.alterado,
-    required this.erro,
-    required this.onVoltarAoMotor,
+  const _FieldCard({
+    required this.label,
+    required this.explanation,
+    required this.changed,
+    required this.error,
+    required this.onBackToEngine,
     required this.children,
   });
 
@@ -730,9 +730,9 @@ class _CartaoDeCampo extends StatelessWidget {
     final c = context.fin;
     final t = context.finType;
     return GlassCard(
-      borderColor: erro != null
+      borderColor: error != null
           ? c.negative
-          : alterado
+          : changed
               ? c.brand
               : null,
       child: Column(
@@ -743,34 +743,34 @@ class _CartaoDeCampo extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  rotulo,
+                  label,
                   style: t.titleSm.copyWith(color: c.textPrimary),
                 ),
               ),
-              if (alterado) ...[
+              if (changed) ...[
                 const Gap.sm(axis: Axis.horizontal),
-                _Selo(texto: 'Seu número'),
+                _Badge(text: 'Seu número'),
               ],
             ],
           ),
           const Gap.xs(),
-          Text(explicacao, style: t.caption.copyWith(color: c.textSecondary)),
+          Text(explanation, style: t.caption.copyWith(color: c.textSecondary)),
           const Gap.md(),
           ...children,
-          if (alterado && onVoltarAoMotor != null) ...[
+          if (changed && onBackToEngine != null) ...[
             const Gap.xs(),
             Align(
               alignment: AlignmentDirectional.centerStart,
-              child: _Acao(
-                texto: 'Usar o do motor',
-                icone: Icons.undo,
-                onPressed: onVoltarAoMotor!,
+              child: _Action(
+                text: 'Usar o do motor',
+                icon: Icons.undo,
+                onPressed: onBackToEngine!,
               ),
             ),
           ],
-          if (erro != null) ...[
+          if (error != null) ...[
             const Gap.sm(),
-            Text(erro!, style: t.bodySm.copyWith(color: c.negative)),
+            Text(error!, style: t.bodySm.copyWith(color: c.negative)),
           ],
         ],
       ),
@@ -783,165 +783,165 @@ class _CartaoDeCampo extends StatelessWidget {
 ///
 /// Segue a afordância do campo da Meta — preenchimento rebaixado, borda, lápis
 /// e foco na cor da marca —, maior, porque aqui o campo é o assunto da tela.
-class _CampoNumerico extends StatefulWidget {
+class _NumericField extends StatefulWidget {
   /// O campo, que dá a chave do texto para os testes.
-  final ManualField campo;
-  final String rotulo;
-  final String explicacao;
-  final String referencia;
-  final String? nota;
-  final double valor;
-  final double valorDoMotor;
-  final _Unidade unidade;
-  final double passo;
-  final double grade;
-  final double minimo;
-  final double maximo;
-  final String? erro;
+  final ManualField field;
+  final String label;
+  final String explanation;
+  final String reference;
+  final String? note;
+  final double value;
+  final double engineValue;
+  final _Unit unit;
+  final double step;
+  final double grid;
+  final double minimum;
+  final double maximum;
+  final String? error;
   final ValueChanged<double> onChanged;
-  final VoidCallback? onVoltarAoMotor;
-  final Widget? modos;
+  final VoidCallback? onBackToEngine;
+  final Widget? modes;
   final List<Widget> extras;
 
   /// Conteúdo a mais no pé do cartão — o porquê da normalização, no do lucro.
-  final Widget? detalhe;
-  final bool alteradoForcado;
+  final Widget? detail;
+  final bool forcedChanged;
 
-  const _CampoNumerico({
-    required this.campo,
-    required this.rotulo,
-    required this.explicacao,
-    required this.referencia,
-    this.nota,
-    required this.valor,
-    required this.valorDoMotor,
-    required this.unidade,
-    required this.passo,
-    required this.grade,
-    required this.minimo,
-    required this.maximo,
-    required this.erro,
+  const _NumericField({
+    required this.field,
+    required this.label,
+    required this.explanation,
+    required this.reference,
+    this.note,
+    required this.value,
+    required this.engineValue,
+    required this.unit,
+    required this.step,
+    required this.grid,
+    required this.minimum,
+    required this.maximum,
+    required this.error,
     required this.onChanged,
-    this.onVoltarAoMotor,
-    this.modos,
+    this.onBackToEngine,
+    this.modes,
     this.extras = const [],
-    this.detalhe,
-    this.alteradoForcado = false,
+    this.detail,
+    this.forcedChanged = false,
   });
 
   @override
-  State<_CampoNumerico> createState() => _CampoNumericoState();
+  State<_NumericField> createState() => _NumericFieldState();
 }
 
-class _CampoNumericoState extends State<_CampoNumerico> {
-  late final TextEditingController _texto;
-  final FocusNode _foco = FocusNode();
+class _NumericFieldState extends State<_NumericField> {
+  late final TextEditingController _text;
+  final FocusNode _focus = FocusNode();
 
   /// `true` enquanto o texto digitado não é número.
-  bool _ilegivel = false;
+  bool _unreadable = false;
 
   @override
   void initState() {
     super.initState();
-    _texto = TextEditingController(text: widget.unidade.mostrar(widget.valor));
-    _foco.addListener(() {
+    _text = TextEditingController(text: widget.unit.display(widget.value));
+    _focus.addListener(() {
       // Ao sair do campo, o texto volta à forma canônica do valor que valeu.
-      if (!_foco.hasFocus) {
-        setState(() => _ilegivel = false);
-        _texto.text = widget.unidade.mostrar(widget.valor);
+      if (!_focus.hasFocus) {
+        setState(() => _unreadable = false);
+        _text.text = widget.unit.display(widget.value);
       }
     });
   }
 
   @override
-  void didUpdateWidget(covariant _CampoNumerico antigo) {
-    super.didUpdateWidget(antigo);
+  void didUpdateWidget(covariant _NumericField oldWidget) {
+    super.didUpdateWidget(oldWidget);
     // O valor mudou por fora — menos e mais, controle deslizante, "usar o do
     // motor", a resposta do cálculo reverso. Enquanto o usuário digita, o
     // texto é dele: reescrevê-lo moveria o cursor no meio da digitação.
-    final lido = widget.unidade.ler(_texto.text);
-    final mudou = lido == null ||
-        (lido - widget.valor).abs() > widget.unidade.tolerancia / 10;
-    if (mudou && !_foco.hasFocus) {
-      _texto.text = widget.unidade.mostrar(widget.valor);
+    final parsed = widget.unit.read(_text.text);
+    final changed = parsed == null ||
+        (parsed - widget.value).abs() > widget.unit.tolerance / 10;
+    if (changed && !_focus.hasFocus) {
+      _text.text = widget.unit.display(widget.value);
     }
   }
 
   @override
   void dispose() {
-    _texto.dispose();
-    _foco.dispose();
+    _text.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
-  double _naGrade(double v) =>
-      widget.grade > 0 ? (v / widget.grade).roundToDouble() * widget.grade : v;
+  double _onGrid(double v) =>
+      widget.grid > 0 ? (v / widget.grid).roundToDouble() * widget.grid : v;
 
-  void _passo(int sentido) {
-    final v = _naGrade(widget.valor + sentido * widget.passo);
-    _texto.text = widget.unidade.mostrar(v);
+  void _step(int direction) {
+    final v = _onGrid(widget.value + direction * widget.step);
+    _text.text = widget.unit.display(v);
     widget.onChanged(v);
   }
 
-  bool get _alterado =>
-      widget.alteradoForcado ||
-      !widget.valorDoMotor.isFinite ||
-      (widget.valor - widget.valorDoMotor).abs() > widget.unidade.tolerancia;
+  bool get _changed =>
+      widget.forcedChanged ||
+      !widget.engineValue.isFinite ||
+      (widget.value - widget.engineValue).abs() > widget.unit.tolerance;
 
   @override
   Widget build(BuildContext context) {
     final c = context.fin;
     final t = context.finType;
-    final u = widget.unidade;
+    final u = widget.unit;
     // A faixa do controle deslizante sempre contém o valor do motor e o
     // corrente; o campo de texto aceita qualquer número.
     final lo = [
-      widget.minimo,
-      widget.valor,
-      if (widget.valorDoMotor.isFinite) widget.valorDoMotor,
+      widget.minimum,
+      widget.value,
+      if (widget.engineValue.isFinite) widget.engineValue,
     ].reduce((a, b) => a < b ? a : b);
     var hi = [
-      widget.maximo,
-      widget.valor,
-      if (widget.valorDoMotor.isFinite) widget.valorDoMotor,
+      widget.maximum,
+      widget.value,
+      if (widget.engineValue.isFinite) widget.engineValue,
     ].reduce((a, b) => a > b ? a : b);
-    if (hi <= lo) hi = lo + (widget.passo > 0 ? widget.passo * 10 : 1);
+    if (hi <= lo) hi = lo + (widget.step > 0 ? widget.step * 10 : 1);
 
-    OutlineInputBorder contorno(Color cor, {double espessura = 1}) =>
+    OutlineInputBorder outline(Color color, {double thickness = 1}) =>
         OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: cor, width: espessura),
+          borderSide: BorderSide(color: color, width: thickness),
         );
-    final erro = widget.erro != null || _ilegivel;
+    final error = widget.error != null || _unreadable;
 
-    return _CartaoDeCampo(
-      rotulo: widget.rotulo,
-      explicacao: widget.explicacao,
-      alterado: _alterado,
-      erro: widget.erro ??
-          (_ilegivel ? 'Escreva um número, como 12,5.' : null),
-      onVoltarAoMotor: widget.valorDoMotor.isFinite
-          ? (widget.onVoltarAoMotor ??
+    return _FieldCard(
+      label: widget.label,
+      explanation: widget.explanation,
+      changed: _changed,
+      error: widget.error ??
+          (_unreadable ? 'Escreva um número, como 12,5.' : null),
+      onBackToEngine: widget.engineValue.isFinite
+          ? (widget.onBackToEngine ??
               () {
-                _texto.text = u.mostrar(widget.valorDoMotor);
-                widget.onChanged(widget.valorDoMotor);
+                _text.text = u.display(widget.engineValue);
+                widget.onChanged(widget.engineValue);
               })
-          : widget.onVoltarAoMotor,
+          : widget.onBackToEngine,
       children: [
-        if (widget.modos != null) ...[widget.modos!, const Gap.md()],
+        if (widget.modes != null) ...[widget.modes!, const Gap.md()],
         Row(
           children: [
-            _BotaoPasso(
-              icone: Icons.remove,
-              dica: 'Diminuir ${widget.rotulo.toLowerCase()}',
-              onPressed: () => _passo(-1),
+            _StepButton(
+              icon: Icons.remove,
+              hint: 'Diminuir ${widget.label.toLowerCase()}',
+              onPressed: () => _step(-1),
             ),
             const Gap.sm(axis: Axis.horizontal),
             Expanded(
               child: TextField(
-                key: ValueKey('campo-${widget.campo.name}'),
-                controller: _texto,
-                focusNode: _foco,
+                key: ValueKey('campo-${widget.field.name}'),
+                controller: _text,
+                focusNode: _focus,
                 textAlign: TextAlign.center,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
@@ -952,20 +952,20 @@ class _CampoNumericoState extends State<_CampoNumerico> {
                 ],
                 style: t.numLg.copyWith(color: c.textPrimary),
                 onChanged: (s) {
-                  final v = u.ler(s);
-                  setState(() => _ilegivel = v == null);
+                  final v = u.read(s);
+                  setState(() => _unreadable = v == null);
                   if (v != null) widget.onChanged(v);
                 },
                 decoration: InputDecoration(
                   isDense: true,
                   filled: true,
                   fillColor: c.surfaceSunken,
-                  prefixText: u == _Unidade.reais ? 'R\$ ' : null,
+                  prefixText: u == _Unit.reais ? 'R\$ ' : null,
                   prefixStyle: t.bodySm.copyWith(color: c.textSecondary),
                   suffixText: switch (u) {
-                    _Unidade.reais => 'mi',
-                    _Unidade.taxa => '% a.a.',
-                    _Unidade.parcela => '%',
+                    _Unit.reais => 'mi',
+                    _Unit.rate => '% a.a.',
+                    _Unit.fraction => '%',
                   },
                   suffixStyle: t.bodySm.copyWith(color: c.textSecondary),
                   // O lápis é a marca de edição, como no campo da Meta: o
@@ -983,18 +983,18 @@ class _CampoNumericoState extends State<_CampoNumerico> {
                     horizontal: FinSpace.sm,
                     vertical: FinSpace.md,
                   ),
-                  border: contorno(c.border),
-                  enabledBorder: contorno(erro ? c.negative : c.border),
+                  border: outline(c.border),
+                  enabledBorder: outline(error ? c.negative : c.border),
                   focusedBorder:
-                      contorno(erro ? c.negative : c.brand, espessura: 2),
+                      outline(error ? c.negative : c.brand, thickness: 2),
                 ),
               ),
             ),
             const Gap.sm(axis: Axis.horizontal),
-            _BotaoPasso(
-              icone: Icons.add,
-              dica: 'Aumentar ${widget.rotulo.toLowerCase()}',
-              onPressed: () => _passo(1),
+            _StepButton(
+              icon: Icons.add,
+              hint: 'Aumentar ${widget.label.toLowerCase()}',
+              onPressed: () => _step(1),
             ),
           ],
         ),
@@ -1004,34 +1004,34 @@ class _CampoNumericoState extends State<_CampoNumerico> {
         Material(
           type: MaterialType.transparency,
           child: Slider(
-            value: widget.valor.clamp(lo, hi),
+            value: widget.value.clamp(lo, hi),
             min: lo,
             max: hi,
             activeColor: c.brand,
             inactiveColor: c.border,
-            semanticFormatterCallback: u.referencia,
+            semanticFormatterCallback: u.reference,
             onChanged: (v) {
-              final r = _naGrade(v);
-              _texto.text = u.mostrar(r);
+              final r = _onGrid(v);
+              _text.text = u.display(r);
               widget.onChanged(r);
             },
           ),
         ),
         Text(
-          widget.referencia,
+          widget.reference,
           style: t.caption.copyWith(color: c.textSecondary),
         ),
-        if (widget.nota != null) ...[
+        if (widget.note != null) ...[
           const Gap.xs(),
-          Text(widget.nota!, style: t.caption.copyWith(color: c.textTertiary)),
+          Text(widget.note!, style: t.caption.copyWith(color: c.textTertiary)),
         ],
         if (widget.extras.isNotEmpty) ...[
           const Gap.xs(),
           Wrap(spacing: FinSpace.sm, children: widget.extras),
         ],
-        if (widget.detalhe != null) ...[
+        if (widget.detail != null) ...[
           const Gap.md(),
-          widget.detalhe!,
+          widget.detail!,
         ],
       ],
     );
@@ -1039,14 +1039,14 @@ class _CampoNumericoState extends State<_CampoNumerico> {
 }
 
 /// Botão de menos e mais, com alvo de 48 dp.
-class _BotaoPasso extends StatelessWidget {
-  final IconData icone;
-  final String dica;
+class _StepButton extends StatelessWidget {
+  final IconData icon;
+  final String hint;
   final VoidCallback onPressed;
 
-  const _BotaoPasso({
-    required this.icone,
-    required this.dica,
+  const _StepButton({
+    required this.icon,
+    required this.hint,
     required this.onPressed,
   });
 
@@ -1054,7 +1054,7 @@ class _BotaoPasso extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.fin;
     return IconButton(
-      tooltip: dica,
+      tooltip: hint,
       onPressed: onPressed,
       constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
       style: IconButton.styleFrom(
@@ -1062,42 +1062,42 @@ class _BotaoPasso extends StatelessWidget {
         side: BorderSide(color: c.border),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      icon: Icon(icone, size: 20, color: c.textPrimary),
+      icon: Icon(icon, size: 20, color: c.textPrimary),
     );
   }
 }
 
 /// Uma ação de texto pequena, na cor de texto positiva.
-class _Acao extends StatelessWidget {
-  final String texto;
-  final IconData? icone;
+class _Action extends StatelessWidget {
+  final String text;
+  final IconData? icon;
   final VoidCallback onPressed;
 
-  const _Acao({required this.texto, required this.onPressed, this.icone});
+  const _Action({required this.text, required this.onPressed, this.icon});
 
   @override
   Widget build(BuildContext context) {
     final c = context.fin;
-    final rotulo = Text(
-      texto,
+    final label = Text(
+      text,
       style: context.finType.bodySm.copyWith(color: c.positive),
     );
     // `positive`, e não `brand`: é texto, e a cor de marca não tem contraste
     // garantido para texto.
-    return icone == null
-        ? TextButton(onPressed: onPressed, child: rotulo)
+    return icon == null
+        ? TextButton(onPressed: onPressed, child: label)
         : TextButton.icon(
             onPressed: onPressed,
-            icon: Icon(icone, size: 16, color: c.positive),
-            label: rotulo,
+            icon: Icon(icon, size: 16, color: c.positive),
+            label: label,
           );
   }
 }
 
 /// O selo de campo alterado.
-class _Selo extends StatelessWidget {
-  final String texto;
-  const _Selo({required this.texto});
+class _Badge extends StatelessWidget {
+  final String text;
+  const _Badge({required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -1113,7 +1113,7 @@ class _Selo extends StatelessWidget {
         border: Border.all(color: c.brand),
       ),
       child: Text(
-        texto,
+        text,
         style: context.finType.caption.copyWith(
           color: c.positive,
           fontWeight: FontWeight.w600,
@@ -1125,14 +1125,14 @@ class _Selo extends StatelessWidget {
 
 /// As opções de modo de um campo, como fichas — as mesmas da escolha de ativo
 /// na aba Valuation.
-class _Modos<T> extends StatelessWidget {
-  final T valor;
-  final Map<T, String> opcoes;
+class _Modes<T> extends StatelessWidget {
+  final T value;
+  final Map<T, String> options;
   final ValueChanged<T> onChanged;
 
-  const _Modos({
-    required this.valor,
-    required this.opcoes,
+  const _Modes({
+    required this.value,
+    required this.options,
     required this.onChanged,
   });
 
@@ -1145,13 +1145,13 @@ class _Modos<T> extends StatelessWidget {
         spacing: FinSpace.sm,
         runSpacing: FinSpace.sm,
         children: [
-          for (final MapEntry(key: k, value: rotulo) in opcoes.entries)
+          for (final MapEntry(key: k, value: label) in options.entries)
             ChoiceChip(
-              label: Text(rotulo),
-              selected: k == valor,
+              label: Text(label),
+              selected: k == value,
               onSelected: (_) => onChanged(k),
               labelStyle: context.finType.bodySm.copyWith(
-                color: k == valor ? c.textOnBrand : c.textSecondary,
+                color: k == value ? c.textOnBrand : c.textSecondary,
               ),
               selectedColor: c.brand,
               backgroundColor: c.surfaceSunken,
@@ -1167,52 +1167,52 @@ class _Modos<T> extends StatelessWidget {
 // ---------------------------------------------------------------- Resultado --
 
 /// O preço do usuário contra o do motor e o de mercado.
-class _ResumoCard extends StatelessWidget {
+class _SummaryCard extends StatelessWidget {
   final ManualValuation m;
-  final ManualOutcome? saida;
-  final Failure? falha;
-  final bool alterado;
+  final ManualOutcome? output;
+  final Failure? failure;
+  final bool changed;
 
-  const _ResumoCard({
+  const _SummaryCard({
     required this.m,
-    required this.saida,
-    required this.falha,
-    required this.alterado,
+    required this.output,
+    required this.failure,
+    required this.changed,
   });
 
   /// Largura por coluna abaixo da qual as três métricas se empilham, em dp.
-  static const double larguraPorColuna = 120;
+  static const double widthPerColumn = 120;
 
   @override
   Widget build(BuildContext context) {
     final c = context.fin;
     final t = context.finType;
-    final seu = saida?.fairValuePerShare;
-    final delta = seu == null ? null : seu - m.motorFairValue;
-    final potencial = seu == null ? null : seu / m.marketPrice - 1;
+    final yours = output?.fairValuePerShare;
+    final delta = yours == null ? null : yours - m.engineFairValue;
+    final upside = yours == null ? null : yours / m.marketPrice - 1;
     final tiles = [
       MetricTile(
         label: 'Preço justo do motor',
-        value: Fmt.money(m.motorFairValue),
+        value: Fmt.money(m.engineFairValue),
       ),
       MetricTile(label: 'Preço de mercado', value: Fmt.money(m.marketPrice)),
       MetricTile(
         label: 'Seu potencial',
-        value: potencial == null
+        value: upside == null
             ? '—'
-            : Fmt.percent(potencial, decimals: 1, signed: true),
+            : Fmt.percent(upside, decimals: 1, signed: true),
         hint: 'total, sem prazo',
-        trend: FinAmount.trendOf(potencial),
+        trend: FinAmount.trendOf(upside),
       ),
     ];
     return GlassCard(
-      borderColor: alterado ? c.brand : null,
+      borderColor: changed ? c.brand : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
             title: 'Seu preço justo',
-            subtitle: alterado
+            subtitle: changed
                 ? 'A conta do motor com os seus números'
                 : 'Igual ao do motor: nenhum campo foi trocado',
           ),
@@ -1224,18 +1224,18 @@ class _ResumoCard extends StatelessWidget {
           Align(
             alignment: AlignmentDirectional.centerStart,
             child: FinAmount(
-              text: seu == null ? '—' : Fmt.money(seu),
+              text: yours == null ? '—' : Fmt.money(yours),
               style: t.numHero,
               align: TextAlign.left,
             ),
           ),
-          if (delta != null && alterado) ...[
+          if (delta != null && changed) ...[
             const Gap.xs(),
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: FinAmount(
                 text: '${delta >= 0 ? '+' : '−'}${Fmt.money(delta.abs())} '
-                    '(${Fmt.percent(delta / m.motorFairValue, decimals: 1, signed: true)}) '
+                    '(${Fmt.percent(delta / m.engineFairValue, decimals: 1, signed: true)}) '
                     'contra o motor',
                 style: t.numSm,
                 trend: FinAmount.trendOf(delta),
@@ -1247,9 +1247,9 @@ class _ResumoCard extends StatelessWidget {
           const Gap.lg(),
           LayoutBuilder(
             builder: (context, constraints) {
-              final escala = MediaQuery.textScalerOf(context).scale(1);
+              final scale = MediaQuery.textScalerOf(context).scale(1);
               if (constraints.maxWidth <
-                  larguraPorColuna * escala * tiles.length) {
+                  widthPerColumn * scale * tiles.length) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -1263,12 +1263,12 @@ class _ResumoCard extends StatelessWidget {
               return MetricTileRow(tiles: tiles);
             },
           ),
-          if (falha != null) ...[
+          if (failure != null) ...[
             const Gap.md(),
             NoticeBanner(
               trend: FinTrend.negative,
               icon: Icons.error_outline,
-              message: ManualCopy.recusa(falha!),
+              message: ManualCopy.refusal(failure!),
             ),
           ],
         ],
@@ -1278,28 +1278,28 @@ class _ResumoCard extends StatelessWidget {
 }
 
 /// A barra fixa do rodapé, no celular: o preço do usuário sempre à vista.
-class _BarraDoResultado extends StatelessWidget {
+class _ResultBar extends StatelessWidget {
   final ManualValuation m;
-  final ManualOutcome? saida;
-  final bool alterado;
+  final ManualOutcome? output;
+  final bool changed;
 
-  const _BarraDoResultado({
+  const _ResultBar({
     required this.m,
-    required this.saida,
-    required this.alterado,
+    required this.output,
+    required this.changed,
   });
 
   @override
   Widget build(BuildContext context) {
     final c = context.fin;
     final t = context.finType;
-    final seu = saida?.fairValuePerShare;
-    final potencial = seu == null ? null : seu / m.marketPrice - 1;
+    final yours = output?.fairValuePerShare;
+    final upside = yours == null ? null : yours / m.marketPrice - 1;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: c.surfaceRaised,
         border: Border(
-          top: BorderSide(color: alterado ? c.brand : c.border),
+          top: BorderSide(color: changed ? c.brand : c.border),
         ),
       ),
       child: SafeArea(
@@ -1324,7 +1324,7 @@ class _BarraDoResultado extends StatelessWidget {
                     style: t.caption.copyWith(color: c.textSecondary),
                   ),
                   FinAmount(
-                    text: seu == null ? '—' : Fmt.money(seu),
+                    text: yours == null ? '—' : Fmt.money(yours),
                     style: t.numLg,
                     align: TextAlign.left,
                   ),
@@ -1335,17 +1335,17 @@ class _BarraDoResultado extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Motor ${Fmt.money(m.motorFairValue)} · mercado '
+                    'Motor ${Fmt.money(m.engineFairValue)} · mercado '
                     '${Fmt.money(m.marketPrice)}',
                     style: t.caption.copyWith(color: c.textSecondary),
                   ),
                   FinAmount(
-                    text: potencial == null
+                    text: upside == null
                         ? '—'
-                        : '${Fmt.percent(potencial, decimals: 1, signed: true)} '
+                        : '${Fmt.percent(upside, decimals: 1, signed: true)} '
                             'de potencial',
                     style: t.numSm,
-                    trend: FinAmount.trendOf(potencial),
+                    trend: FinAmount.trendOf(upside),
                     align: TextAlign.left,
                   ),
                 ],
@@ -1359,26 +1359,26 @@ class _BarraDoResultado extends StatelessWidget {
 }
 
 /// Reais em milhões, para as linhas da conta.
-String _milhoes(double v) =>
+String _millions(double v) =>
     '${v < 0 ? '−' : ''}R\$ ${Fmt.ratio(v.abs() / 1e6, decimals: 1)} mi';
 
 /// A conta inteira: o valor presente dos anos, o da perpetuidade, a ponte e o
 /// preço por ação.
-class _ContaCard extends StatelessWidget {
+class _CalculationCard extends StatelessWidget {
   final ManualValuation m;
-  final ManualOutcome saida;
+  final ManualOutcome output;
 
-  const _ContaCard({required this.m, required this.saida});
+  const _CalculationCard({required this.m, required this.output});
 
   @override
   Widget build(BuildContext context) {
     final c = context.fin;
     final t = context.finType;
-    final s = saida;
-    final explicito = s.explicitPresentValue;
-    final perpetuo = s.terminalPresentValue;
-    final total = explicito.abs() + perpetuo.abs();
-    final pesoExplicito = total > 0 ? explicito.abs() / total : 0.5;
+    final s = output;
+    final explicitValue = s.explicitPresentValue;
+    final perpetual = s.terminalPresentValue;
+    final total = explicitValue.abs() + perpetual.abs();
+    final explicitWeight = total > 0 ? explicitValue.abs() / total : 0.5;
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1394,31 +1394,31 @@ class _ContaCard extends StatelessWidget {
           const Gap.md(),
           LabelValueRow(
             label: 'Valor presente dos 10 anos',
-            value: _milhoes(explicito),
+            value: _millions(explicitValue),
           ),
           const Gap.xs(),
           LabelValueRow(
             label: 'Valor presente da perpetuidade',
-            value: _milhoes(perpetuo),
+            value: _millions(perpetual),
           ),
           if (s.minorityInterest > 0) ...[
             const Gap.xs(),
             LabelValueRow(
               label: '− Parte dos acionistas minoritários das controladas',
-              value: _milhoes(-s.minorityInterest),
+              value: _millions(-s.minorityInterest),
             ),
           ],
           if (s.postStatementCapital > 0) ...[
             const Gap.xs(),
             LabelValueRow(
               label: '+ Ações emitidas depois do balanço',
-              value: _milhoes(s.postStatementCapital),
+              value: _millions(s.postStatementCapital),
             ),
           ],
           const Divider(height: FinSpace.lg),
           LabelValueRow(
             label: 'Valor do patrimônio (VPL)',
-            value: _milhoes(s.equityValue),
+            value: _millions(s.equityValue),
           ),
           const Gap.xs(),
           LabelValueRow(
@@ -1444,11 +1444,11 @@ class _ContaCard extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    flex: (pesoExplicito * 1000).round().clamp(1, 999),
+                    flex: (explicitWeight * 1000).round().clamp(1, 999),
                     child: ColoredBox(color: c.brand),
                   ),
                   Expanded(
-                    flex: ((1 - pesoExplicito) * 1000).round().clamp(1, 999),
+                    flex: ((1 - explicitWeight) * 1000).round().clamp(1, 999),
                     child: ColoredBox(color: c.borderStrong),
                   ),
                 ],
@@ -1460,15 +1460,15 @@ class _ContaCard extends StatelessWidget {
             spacing: FinSpace.md,
             runSpacing: FinSpace.xs,
             children: [
-              _Legenda(
-                cor: c.brand,
-                texto: '10 anos: ${Fmt.percent(pesoExplicito, decimals: 0)}',
+              _Legend(
+                color: c.brand,
+                text: '10 anos: ${Fmt.percent(explicitWeight, decimals: 0)}',
               ),
-              _Legenda(
-                cor: c.borderStrong,
-                texto: 'Perpetuidade: '
-                    '${Fmt.percent(1 - pesoExplicito, decimals: 0)} — '
-                    '${s.terminalKind.rotulo}',
+              _Legend(
+                color: c.borderStrong,
+                text: 'Perpetuidade: '
+                    '${Fmt.percent(1 - explicitWeight, decimals: 0)} — '
+                    '${s.terminalKind.label}',
               ),
             ],
           ),
@@ -1478,10 +1478,10 @@ class _ContaCard extends StatelessWidget {
   }
 }
 
-class _Legenda extends StatelessWidget {
-  final Color cor;
-  final String texto;
-  const _Legenda({required this.cor, required this.texto});
+class _Legend extends StatelessWidget {
+  final Color color;
+  final String text;
+  const _Legend({required this.color, required this.text});
 
   @override
   Widget build(BuildContext context) => Row(
@@ -1491,14 +1491,14 @@ class _Legenda extends StatelessWidget {
             width: 10,
             height: 10,
             decoration: BoxDecoration(
-              color: cor,
+              color: color,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           const Gap.xs(axis: Axis.horizontal),
           Flexible(
             child: Text(
-              texto,
+              text,
               style: context.finType.caption.copyWith(
                 color: context.fin.textSecondary,
               ),
@@ -1510,28 +1510,28 @@ class _Legenda extends StatelessWidget {
 
 /// "Onde você discorda do motor": do preço do motor ao do usuário, um grupo
 /// de premissas de cada vez.
-class _DiscordanciaCard extends StatelessWidget {
+class _DisagreementCard extends StatelessWidget {
   final ManualValuation m;
-  final List<ManualStep> degraus;
+  final List<ManualStep> steps;
 
-  const _DiscordanciaCard({required this.m, required this.degraus});
+  const _DisagreementCard({required this.m, required this.steps});
 
   @override
   Widget build(BuildContext context) {
     final c = context.fin;
     final t = context.finType;
-    final valores = [
-      m.motorFairValue,
-      for (final d in degraus) ...[d.from, if (d.to != null) d.to!],
+    final values = [
+      m.engineFairValue,
+      for (final d in steps) ...[d.from, if (d.to != null) d.to!],
     ].where((v) => v.isFinite).toList();
-    final lo = valores.fold(0.0, (a, b) => a < b ? a : b);
-    final hi = valores.fold(lo + 1e-9, (a, b) => a > b ? a : b) * 1.05;
+    final lo = values.fold(0.0, (a, b) => a < b ? a : b);
+    final hi = values.fold(lo + 1e-9, (a, b) => a > b ? a : b) * 1.05;
     double pos(double v) => ((v - lo) / (hi - lo)).clamp(0.0, 1.0);
 
-    Widget barra(double de, double para, Color cor) => LayoutBuilder(
+    Widget bar(double from, double to, Color color) => LayoutBuilder(
           builder: (context, k) {
-            final a = pos(de < para ? de : para) * k.maxWidth;
-            final b = pos(de < para ? para : de) * k.maxWidth;
+            final a = pos(from < to ? from : to) * k.maxWidth;
+            final b = pos(from < to ? to : from) * k.maxWidth;
             return SizedBox(
               height: 10,
               child: Stack(
@@ -1551,7 +1551,7 @@ class _DiscordanciaCard extends StatelessWidget {
                     bottom: 0,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: cor,
+                        color: color,
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
@@ -1562,20 +1562,20 @@ class _DiscordanciaCard extends StatelessWidget {
           },
         );
 
-    Widget linha(String rotulo, String valor, FinTrend tendencia, Widget b) =>
+    Widget row(String label, String value, FinTrend trend, Widget b) =>
         Padding(
           padding: const EdgeInsets.only(bottom: FinSpace.sm),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              LabelValueRow(label: rotulo, value: valor, trend: tendencia),
+              LabelValueRow(label: label, value: value, trend: trend),
               const Gap.xs(),
               b,
             ],
           ),
         );
 
-    final ultimo = degraus.isEmpty ? null : degraus.last.to;
+    final last = steps.isEmpty ? null : steps.last.to;
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1586,39 +1586,39 @@ class _DiscordanciaCard extends StatelessWidget {
                 'as usa',
           ),
           const Gap.md(),
-          linha(
+          row(
             'Preço justo do motor',
-            Fmt.money(m.motorFairValue),
+            Fmt.money(m.engineFairValue),
             FinTrend.neutral,
-            barra(lo, m.motorFairValue, c.borderStrong),
+            bar(lo, m.engineFairValue, c.borderStrong),
           ),
-          if (degraus.isEmpty)
+          if (steps.isEmpty)
             Text(
               'Troque um campo para ver quanto cada discordância move o preço.',
               style: t.bodySm.copyWith(color: c.textSecondary),
             ),
-          for (final d in degraus)
+          for (final d in steps)
             if (d.to == null)
-              linha(
-                d.groups.map((g) => g.rotulo).join(' e '),
+              row(
+                d.groups.map((g) => g.label).join(' e '),
                 'sem valor finito',
                 FinTrend.blocked,
-                barra(d.from, d.from, c.negative),
+                bar(d.from, d.from, c.negative),
               )
             else
-              linha(
-                d.groups.map((g) => g.rotulo).join(' e '),
+              row(
+                d.groups.map((g) => g.label).join(' e '),
                 '${d.delta! >= 0 ? '+' : '−'}${Fmt.money(d.delta!.abs())}',
                 FinAmount.trendOf(d.delta),
-                barra(d.from, d.to!, d.delta! >= 0 ? c.positive : c.negative),
+                bar(d.from, d.to!, d.delta! >= 0 ? c.positive : c.negative),
               ),
-          if (ultimo != null) ...[
+          if (last != null) ...[
             const Divider(height: FinSpace.lg),
-            linha(
+            row(
               'Seu preço justo',
-              Fmt.money(ultimo),
+              Fmt.money(last),
               FinTrend.neutral,
-              barra(lo, ultimo, c.brand),
+              bar(lo, last, c.brand),
             ),
           ],
         ],
@@ -1629,63 +1629,63 @@ class _DiscordanciaCard extends StatelessWidget {
 
 /// "O que o preço de hoje supõe?": o valor de um campo que leva o preço justo
 /// ao de mercado, com os outros como estão.
-class _ReversoCard extends StatelessWidget {
+class _ReverseCard extends StatelessWidget {
   final ManualValuation m;
   final ManualPremises p;
-  final ManualField alvo;
-  final ManualSolution? resposta;
-  final ValueChanged<ManualField> onAlvo;
+  final ManualField target;
+  final ManualSolution? answer;
+  final ValueChanged<ManualField> onTarget;
   final VoidCallback onResolver;
-  final void Function(ManualField, double) onUsar;
+  final void Function(ManualField, double) onUse;
 
-  const _ReversoCard({
+  const _ReverseCard({
     required this.m,
     required this.p,
-    required this.alvo,
-    required this.resposta,
-    required this.onAlvo,
+    required this.target,
+    required this.answer,
+    required this.onTarget,
     required this.onResolver,
-    required this.onUsar,
+    required this.onUse,
   });
 
-  static _Unidade _unidade(ManualField f) => switch (f) {
-        ManualField.baseProfit => _Unidade.reais,
-        ManualField.retention => _Unidade.parcela,
-        _ => _Unidade.taxa,
+  static _Unit _unit(ManualField f) => switch (f) {
+        ManualField.baseProfit => _Unit.reais,
+        ManualField.retention => _Unit.fraction,
+        _ => _Unit.rate,
       };
 
   @override
   Widget build(BuildContext context) {
     final c = context.fin;
     final t = context.finType;
-    final opcoes = <ManualField>[
+    final options = <ManualField>[
       ManualField.discountRate,
       ManualField.growth,
       ManualField.baseProfit,
-      if (p.reinvestment == ManualReinvestment.peloRetorno)
+      if (p.reinvestment == ManualReinvestment.byReturn)
         ManualField.returnOnCapital
       else
         ManualField.retention,
       if (p.terminalReturn != null) ManualField.terminalReturn,
     ];
-    final escolhido = opcoes.contains(alvo) ? alvo : opcoes.first;
-    final r = resposta;
-    final nome = ManualCopy.rotulo(escolhido, m.lane).toLowerCase();
-    final u = _unidade(escolhido);
-    String? frase;
-    if (r != null && r.field == escolhido) {
+    final chosen = options.contains(target) ? target : options.first;
+    final r = answer;
+    final name = ManualCopy.label(chosen, m.lane).toLowerCase();
+    final u = _unit(chosen);
+    String? sentence;
+    if (r != null && r.field == chosen) {
       final v = r.value;
       if (v != null) {
-        frase = 'Para valer ${Fmt.money(r.target)}, com os outros campos como '
-            'estão, $nome teria de ser ${u.referencia(v)}. Hoje está em '
-            '${u.referencia(p.valueOf(escolhido) ?? double.nan)}.';
+        sentence = 'Para valer ${Fmt.money(r.target)}, com os outros campos como '
+            'estão, $name teria de ser ${u.reference(v)}. Hoje está em '
+            '${u.reference(p.valueOf(chosen) ?? double.nan)}.';
       } else if (r.closestValue != null && r.closestPrice != null) {
-        frase = 'Com os outros campos como estão, nenhum valor de $nome leva o '
+        sentence = 'Com os outros campos como estão, nenhum valor de $name leva o '
             'preço justo a ${Fmt.money(r.target)}: o mais perto é '
-            '${Fmt.money(r.closestPrice!)}, com ${u.referencia(r.closestValue!)}.';
+            '${Fmt.money(r.closestPrice!)}, com ${u.reference(r.closestValue!)}.';
       } else {
-        frase = 'Com os outros campos como estão, a conta não fecha para '
-            'nenhum valor de $nome.';
+        sentence = 'Com os outros campos como estão, a conta não fecha para '
+            'nenhum valor de $name.';
       }
     }
     return GlassCard(
@@ -1698,10 +1698,10 @@ class _ReversoCard extends StatelessWidget {
                 'mercado (${Fmt.money(m.marketPrice)})',
           ),
           const Gap.md(),
-          _Modos<ManualField>(
-            valor: escolhido,
-            opcoes: {for (final f in opcoes) f: ManualCopy.rotulo(f, m.lane)},
-            onChanged: onAlvo,
+          _Modes<ManualField>(
+            value: chosen,
+            options: {for (final f in options) f: ManualCopy.label(f, m.lane)},
+            onChanged: onTarget,
           ),
           const Gap.md(),
           Align(
@@ -1716,17 +1716,17 @@ class _ReversoCard extends StatelessWidget {
               label: const Text('Calcular'),
             ),
           ),
-          if (frase != null) ...[
+          if (sentence != null) ...[
             const Gap.md(),
-            Text(frase, style: t.bodySm.copyWith(color: c.textPrimary)),
+            Text(sentence, style: t.bodySm.copyWith(color: c.textPrimary)),
             if (r?.value != null) ...[
               const Gap.xs(),
               Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: _Acao(
-                  texto: 'Usar este valor',
-                  icone: Icons.check,
-                  onPressed: () => onUsar(escolhido, r!.value!),
+                child: _Action(
+                  text: 'Usar este valor',
+                  icon: Icons.check,
+                  onPressed: () => onUse(chosen, r!.value!),
                 ),
               ),
             ],
@@ -1738,64 +1738,64 @@ class _ReversoCard extends StatelessWidget {
 }
 
 /// Ano a ano: a projeção que a conta fez, em milhões de reais.
-class _AnosCard extends StatelessWidget {
+class _YearsCard extends StatelessWidget {
   final ManualValuation m;
   final ManualPremises p;
-  final ManualOutcome saida;
+  final ManualOutcome output;
 
-  const _AnosCard({required this.m, required this.p, required this.saida});
+  const _YearsCard({required this.m, required this.p, required this.output});
 
   @override
   Widget build(BuildContext context) {
     final c = context.fin;
     final t = context.finType;
-    final firma = m.lane == ValuationLane.firm;
-    final cab = <String>[
+    final firm = m.lane == ValuationLane.firm;
+    final headerRow = <String>[
       'Ano',
       'Crescimento',
-      firma ? 'Lucro operacional' : 'Lucro líquido',
+      firm ? 'Lucro operacional' : 'Lucro líquido',
       'Reinvestido',
-      if (firma) ...['Fluxo da firma', 'Dívida'],
-      firma ? 'Fluxo do acionista' : 'Fluxo',
+      if (firm) ...['Fluxo da firma', 'Dívida'],
+      firm ? 'Fluxo do acionista' : 'Fluxo',
       'Taxa',
       'Fator',
       'Valor presente',
     ];
-    String mi(double? v) => v == null || !v.isFinite
+    String inMillions(double? v) => v == null || !v.isFinite
         ? '—'
         : '${v < 0 ? '−' : ''}${Fmt.ratio(v.abs() / 1e6, decimals: 1)}';
-    final linhas = <List<String>>[
-      for (final y in saida.years)
+    final rows = <List<String>>[
+      for (final y in output.years)
         [
           '${y.year}',
           Fmt.percent(y.growth, decimals: 1),
-          mi(y.profit),
+          inMillions(y.profit),
           Fmt.percent(y.retention, decimals: 0),
-          if (firma) ...[mi(y.firmFlow), mi(y.debtService)],
-          mi(y.flow),
+          if (firm) ...[inMillions(y.firmFlow), inMillions(y.debtService)],
+          inMillions(y.flow),
           Fmt.percent(y.rate, decimals: 2),
           Fmt.ratio(y.discountFactor, decimals: 3),
-          mi(y.presentValue),
+          inMillions(y.presentValue),
         ],
       [
         'Perpetuidade',
         Fmt.percent(p.perpetualGrowth, decimals: 1),
         '',
         '',
-        if (firma) ...['', ''],
-        '${mi(saida.terminalValue)} no ano 10',
-        Fmt.percent(saida.terminalRate, decimals: 2),
-        Fmt.ratio(saida.years.last.discountFactor, decimals: 3),
-        mi(saida.terminalPresentValue),
+        if (firm) ...['', ''],
+        '${inMillions(output.terminalValue)} no ano 10',
+        Fmt.percent(output.terminalRate, decimals: 2),
+        Fmt.ratio(output.years.last.discountFactor, decimals: 3),
+        inMillions(output.terminalPresentValue),
       ],
     ];
-    final estiloCab = t.caption.copyWith(color: c.textSecondary);
-    final estilo = t.captionNum.copyWith(color: c.textPrimary);
-    TableRow fila(List<String> celulas, TextStyle s, {Color? fundo}) =>
+    final headerStyle = t.caption.copyWith(color: c.textSecondary);
+    final style = t.captionNum.copyWith(color: c.textPrimary);
+    TableRow tableRow(List<String> cells, TextStyle s, {Color? background}) =>
         TableRow(
-          decoration: fundo == null ? null : BoxDecoration(color: fundo),
+          decoration: background == null ? null : BoxDecoration(color: background),
           children: [
-            for (final (i, v) in celulas.indexed)
+            for (final (i, v) in cells.indexed)
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: FinSpace.sm,
@@ -1827,24 +1827,24 @@ class _AnosCard extends StatelessWidget {
                 horizontalInside: BorderSide(color: c.divider),
               ),
               children: [
-                fila(cab, estiloCab),
-                for (final (i, l) in linhas.indexed)
-                  fila(
+                tableRow(headerRow, headerStyle),
+                for (final (i, l) in rows.indexed)
+                  tableRow(
                     l,
-                    estilo,
-                    fundo: i == linhas.length - 1 ? c.surfaceSunken : null,
+                    style,
+                    background: i == rows.length - 1 ? c.surfaceSunken : null,
                   ),
-                fila([
+                tableRow([
                   'VPL',
-                  for (var i = 1; i < cab.length - 1; i++) '',
-                  mi(saida.explicitPresentValue + saida.terminalPresentValue),
-                ], estilo.copyWith(fontWeight: FontWeight.w700)),
+                  for (var i = 1; i < headerRow.length - 1; i++) '',
+                  inMillions(output.explicitPresentValue + output.terminalPresentValue),
+                ], style.copyWith(fontWeight: FontWeight.w700)),
               ],
             ),
           ),
           const Gap.sm(),
           Text(
-            firma
+            firm
                 ? 'Fluxo do acionista = fluxo da firma − serviço da dívida '
                     '(juros depois do imposto, menos o rendimento do caixa, '
                     'menos a dívida nova que acompanha o crescimento).'

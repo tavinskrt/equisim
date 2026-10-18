@@ -66,21 +66,21 @@ class BcbDatasource {
         ));
       }
 
-      final pontos = <RatePoint>[];
+      final points = <RatePoint>[];
       for (final item in body) {
         if (item is! Map<String, dynamic>) continue;
         final date = _parseBrDate(BrapiJson.asString(item['data']));
         final percent = BrapiJson.asDouble(item['valor']);
         if (date == null || percent == null) continue;
-        pontos.add(RatePoint(date: date, rate: percent / 100.0));
+        points.add(RatePoint(date: date, rate: percent / 100.0));
       }
 
-      if (pontos.isEmpty) {
+      if (points.isEmpty) {
         return Err(InsufficientData(
           'Série SGS $seriesId sem dados no período solicitado.',
         ));
       }
-      return Ok(RateSeries(pontos, basis: basisOf(seriesId)));
+      return Ok(RateSeries(points, basis: basisOf(seriesId)));
     });
   }
 

@@ -114,10 +114,10 @@ class SkillReading {
 /// `tool/regressao_condicional.dart --trimestral` e lido pelo aplicativo.
 abstract final class SkillReadingCodec {
   /// Versão do formato: a 2 traz as ordenações lado a lado (item B1).
-  static const int versao = 2;
+  static const int version = 2;
 
   /// A chave de cada ordenação no pacote.
-  static String chave(TransversalOrdering o) => switch (o) {
+  static String key(TransversalOrdering o) => switch (o) {
         TransversalOrdering.composite => 'composto',
         TransversalOrdering.bookToMarket => 'bookToMarket',
         TransversalOrdering.potential => 'potencial',
@@ -125,27 +125,27 @@ abstract final class SkillReadingCodec {
 
   /// Lê o pacote, ou `null` se ele estiver malformado — leitura inventada
   /// esconderia a ressalva.
-  static SkillReading? decode(Map<String, dynamic> pacote) {
-    if (pacote['versao'] != versao) return null;
-    final meses = pacote['horizonteMeses'];
-    final coortes = pacote['coortes'];
-    final dado = pacote['potencialDadoBookToMarket'];
-    final ordenacoes = pacote['ordenacoes'];
-    if (meses is! int || coortes is! int || dado is! Map || ordenacoes is! Map) {
+  static SkillReading? decode(Map<String, dynamic> package) {
+    if (package['versao'] != version) return null;
+    final months = package['horizonteMeses'];
+    final cohorts = package['coortes'];
+    final datum = package['potencialDadoBookToMarket'];
+    final orderings = package['ordenacoes'];
+    if (months is! int || cohorts is! int || datum is! Map || orderings is! Map) {
       return null;
     }
-    final coeficiente = dado['coeficiente'];
-    final t = dado['tCorrigido'];
-    final critico = dado['critico'];
-    final nw = dado['tNeweyWest'];
-    if (coeficiente is! num || t is! num || critico is! num || nw is! num) {
+    final coefficient = datum['coeficiente'];
+    final t = datum['tCorrigido'];
+    final critical = datum['critico'];
+    final nw = datum['tNeweyWest'];
+    if (coefficient is! num || t is! num || critical is! num || nw is! num) {
       return null;
     }
-    if (![coeficiente, t, critico, nw].every((v) => v.isFinite)) return null;
+    if (![coefficient, t, critical, nw].every((v) => v.isFinite)) return null;
 
-    final lidas = <TransversalOrdering, OrderingReading>{};
+    final readings = <TransversalOrdering, OrderingReading>{};
     for (final o in TransversalOrdering.values) {
-      final m = ordenacoes[chave(o)];
+      final m = orderings[key(o)];
       if (m is! Map) return null;
       final ic = m['ic'];
       final tc = m['tCorrigido'];
@@ -153,7 +153,7 @@ abstract final class SkillReadingCodec {
       final tn = m['tNeweyWest'];
       if (ic is! num || tc is! num || cr is! num || tn is! num) return null;
       if (![ic, tc, cr, tn].every((v) => v.isFinite)) return null;
-      lidas[o] = OrderingReading(
+      readings[o] = OrderingReading(
         ic: ic.toDouble(),
         overlapT: tc.toDouble(),
         overlapCritical: cr.toDouble(),
@@ -161,13 +161,13 @@ abstract final class SkillReadingCodec {
       );
     }
     return SkillReading(
-      months: meses,
-      cohorts: coortes,
-      conditionalCoefficient: coeficiente.toDouble(),
+      months: months,
+      cohorts: cohorts,
+      conditionalCoefficient: coefficient.toDouble(),
       overlapT: t.toDouble(),
-      overlapCritical: critico.toDouble(),
+      overlapCritical: critical.toDouble(),
       neweyWestT: nw.toDouble(),
-      orderings: Map.unmodifiable(lidas),
+      orderings: Map.unmodifiable(readings),
     );
   }
 }

@@ -93,7 +93,7 @@ import 'coortes/base_da_data.dart';
 import 'coortes/contagem_conferida.dart';
 import 'coortes/deslistadas.dart';
 import 'coortes/eventos_de_acoes.dart';
-import 'curva_ligar.dart' show lerTesouro;
+import 'curva_ligar.dart' show readTreasury;
 import 'cvm/codigos_fca.dart';
 import 'cvm/documentos.dart';
 import 'cvm/emissoes_fre.dart';
@@ -102,32 +102,32 @@ import 'validation/context.dart';
 
 /// CVM mesclada à série de mercado já reescalada, com o que era público na
 /// data da coorte.
-class _CvmNaData implements FundamentalsRepository {
-  _CvmNaData(
+class _CvmAtDate implements FundamentalsRepository {
+  _CvmAtDate(
     this.inner,
     this.hist,
     this.docs,
-    this.data, {
-    this.ancorada = false,
+    this.date, {
+    this.anchored = false,
   });
   final FundamentalsRepository inner;
   final List<FundamentalsSnapshot> hist;
   final List<CvmPeriodDocument>? docs;
-  final DateTime data;
+  final DateTime date;
 
   /// Série de doze meses ancorada no trimestre mais recente (A1.8, C1c).
-  final bool ancorada;
+  final bool anchored;
 
   @override
   Future<Result<List<FundamentalsSnapshot>>> history(Ticker t) async {
-    final meus = docs;
-    if (meus == null || meus.isEmpty) return Ok(hist);
+    final ownDocs = docs;
+    if (ownDocs == null || ownDocs.isEmpty) return Ok(hist);
     return Ok(
       CvmSeries.build(
-        documentos: meus,
-        mercado: hist,
-        publicado: PointInTimeView(data).isPublished,
-        ancorada: ancorada,
+        documents: ownDocs,
+        market: hist,
+        published: PointInTimeView(date).isPublished,
+        anchored: anchored,
       ).series,
     );
   }
@@ -140,7 +140,7 @@ class _CvmNaData implements FundamentalsRepository {
 }
 
 /// Sorteios da distribuição, iguais ao padrão do aplicativo.
-const _sorteios = 10000;
+const _draws = 10000;
 
 /// Índice buscado uma vez e reaproveitado.
 ///
@@ -242,24 +242,24 @@ class _MemoPrices implements PriceRepository {
 
 /// Uma série já montada — a da fonte na base da data da coorte —, recortada
 /// pela janela pedida.
-class _SerieFixa implements PriceRepository {
-  _SerieFixa(this.serie);
-  final PriceSeries serie;
+class _FixedSeries implements PriceRepository {
+  _FixedSeries(this.series);
+  final PriceSeries series;
 
-  PriceSeries _recorte(DateRange range) => PriceSeries(
-    ticker: serie.ticker,
-    points: serie.points.where((p) => range.contains(p.date)).toList(),
+  PriceSeries _slice(DateRange range) => PriceSeries(
+    ticker: series.ticker,
+    points: series.points.where((p) => range.contains(p.date)).toList(),
   );
 
   @override
   Future<Result<PriceSeries>> daily(Ticker t, DateRange range) async =>
-      Ok(_recorte(range));
+      Ok(_slice(range));
 
   @override
   Future<Result<Map<Ticker, PriceSeries>>> dailyBatch(
     List<Ticker> tickers,
     DateRange range,
-  ) async => Ok({for (final t in tickers) t: _recorte(range)});
+  ) async => Ok({for (final t in tickers) t: _slice(range)});
 
   @override
   Future<Result<PriceSeries>> adjustedCloseRaw(Ticker t, DateRange range) =>
@@ -276,18 +276,18 @@ class _SerieFixa implements PriceRepository {
 ///
 /// **Carrega o defeito de base do item C3**: o preço da fonte está na base de
 /// ações de hoje, e a contagem, na do exercício. Fica assim para reproduzir as
-/// medições de 11/09/2026; a montagem `aplicativo` usa [_reescalaNaData].
-List<FundamentalsSnapshot> _reescala(
+/// medições de 11/09/2026; a montagem `aplicativo` usa [_rescaleAtDate].
+List<FundamentalsSnapshot> _rescale(
   List<FundamentalsSnapshot> snaps,
-  double precoNaData,
-) => _comMercado(
+  double priceAtDate,
+) => _withMarket(
   snaps,
-  corrente: (s) => s.sharesOutstandingAsOf,
-  valor: (s) =>
+  current: (s) => s.sharesOutstandingAsOf,
+  value: (s) =>
       (s.sharesOutstandingAsOf != null &&
           s.sharesOutstandingAsOf! > 0 &&
-          precoNaData > 0)
-      ? s.sharesOutstandingAsOf! * precoNaData
+          priceAtDate > 0)
+      ? s.sharesOutstandingAsOf! * priceAtDate
       : null,
 );
 
@@ -296,25 +296,25 @@ List<FundamentalsSnapshot> _reescala(
 /// companhia espécie a espécie. Sem contagem da data, recua para a contagem do
 /// exercício vezes o preço bruto da data — na base certa, e com a razão de
 /// unidade de volta a 1 por construção, o que a linha declara.
-List<FundamentalsSnapshot> _reescalaNaData(
+List<FundamentalsSnapshot> _rescaleAtDate(
   List<FundamentalsSnapshot> snaps, {
-  required double? acoesNaData,
-  required double? valorDeMercado,
-  required double precoBruto,
-}) => _comMercado(
+  required double? sharesAtDate,
+  required double? marketValueOf,
+  required double rawPrice,
+}) => _withMarket(
   snaps,
-  corrente: (s) => acoesNaData ?? s.sharesOutstandingAsOf,
-  valor: (s) {
-    if (valorDeMercado != null) return valorDeMercado;
+  current: (s) => sharesAtDate ?? s.sharesOutstandingAsOf,
+  value: (s) {
+    if (marketValueOf != null) return marketValueOf;
     final n = s.sharesOutstandingAsOf;
-    return (n != null && n > 0 && precoBruto > 0) ? n * precoBruto : null;
+    return (n != null && n > 0 && rawPrice > 0) ? n * rawPrice : null;
   },
 );
 
-List<FundamentalsSnapshot> _comMercado(
+List<FundamentalsSnapshot> _withMarket(
   List<FundamentalsSnapshot> snaps, {
-  required double? Function(FundamentalsSnapshot) corrente,
-  required double? Function(FundamentalsSnapshot) valor,
+  required double? Function(FundamentalsSnapshot) current,
+  required double? Function(FundamentalsSnapshot) value,
 }) {
   return [
     for (final s in snaps)
@@ -347,71 +347,71 @@ List<FundamentalsSnapshot> _comMercado(
         freeCashFlow: s.freeCashFlow,
         // A contagem corrente da fonte sai: ela é de hoje, e na coorte não
         // existia.
-        sharesOutstanding: corrente(s),
+        sharesOutstanding: current(s),
         sharesOutstandingAsOf: s.sharesOutstandingAsOf,
-        marketCap: valor(s),
+        marketCap: value(s),
         enterpriseToEbitda: null,
       ),
   ];
 }
 
-double? _precoEm(PriceSeries s, DateTime data) {
-  double? ultimo;
+double? _priceAt(PriceSeries s, DateTime date) {
+  double? last;
   for (final p in s.points) {
-    if (p.date.isAfter(data)) break;
-    ultimo = p.close;
+    if (p.date.isAfter(date)) break;
+    last = p.close;
   }
-  return ultimo;
+  return last;
 }
 
-double? _ajustadoEm(PriceSeries s, DateTime data) {
-  double? ultimo;
+double? _adjustedAt(PriceSeries s, DateTime date) {
+  double? last;
   for (final p in s.points) {
-    if (p.date.isAfter(data)) break;
-    ultimo = p.adjustedClose ?? p.close;
+    if (p.date.isAfter(date)) break;
+    last = p.adjustedClose ?? p.close;
   }
-  return ultimo;
+  return last;
 }
 
 /// Contagem por data e divisão entre espécies de cada listada, gravadas por
 /// `tool/b3_deslistadas_contagem.dart` (item C3), com a conferência contra o
 /// salto do preço (item B43, decisão 143).
-class _ContagemListada {
-  _ContagemListada(this.bruta, this.classes);
-  final List<EntradaDaContagem> bruta;
-  final ClassesDoCapital classes;
+class _ListedCount {
+  _ListedCount(this.raw, this.classes);
+  final List<CountEntry> raw;
+  final CapitalClasses classes;
 
   ({
-    List<({DateTime desde, double acoes})> aceitas,
-    List<ContagemDescartada> descartadas,
+    List<({DateTime since, double shares})> accepted,
+    List<DiscardedCount> discarded,
   })?
-  _conferida;
+  _checked;
 
-  /// A contagem conferida contra o salto do preço dos [papeis] da companhia,
-  /// com âncora na mais recente até [ate]. A primeira chamada fixa o
+  /// A contagem conferida contra o salto do preço dos [securities] da companhia,
+  /// com âncora na mais recente até [until]. A primeira chamada fixa o
   /// resultado: os papéis de uma companhia são os mesmos em toda coorte.
   ({
-    List<({DateTime desde, double acoes})> aceitas,
-    List<ContagemDescartada> descartadas,
+    List<({DateTime since, double shares})> accepted,
+    List<DiscardedCount> discarded,
   })
-  conferida(Iterable<List<Pregao>> papeis, DateTime ate) =>
-      _conferida ??= conferirContagem(bruta, papeis, ate: ate);
+  checked(Iterable<List<TradingDay>> securities, DateTime until) =>
+      _checked ??= checkCount(raw, securities, until: until);
 
-  static Map<String, _ContagemListada>? ler() {
+  static Map<String, _ListedCount>? read() {
     final f = File('data/b3/listadas_contagem.json');
     if (!f.existsSync()) return null;
-    final out = <String, _ContagemListada>{};
+    final out = <String, _ListedCount>{};
     for (final e
         in (jsonDecode(f.readAsStringSync()) as Map<String, dynamic>).entries) {
       final v = e.value as Map<String, dynamic>;
-      out[e.key] = _ContagemListada([
+      out[e.key] = _ListedCount([
         for (final p in (v['contagem'] as List).cast<Map<String, dynamic>>())
           (
-            desde: DateTime.parse('${p['desde']}T00:00:00Z'),
-            acoes: (p['acoes'] as num).toDouble(),
-            fonte: p['fonte'] as String?,
+            since: DateTime.parse('${p['desde']}T00:00:00Z'),
+            shares: (p['acoes'] as num).toDouble(),
+            source: p['fonte'] as String?,
           ),
-      ], ClassesDoCapital.fromJson(v['classes'] as List?));
+      ], CapitalClasses.fromJson(v['classes'] as List?));
     }
     return out;
   }
@@ -419,59 +419,59 @@ class _ContagemListada {
 
 /// A data `meses` depois de [t], no mesmo dia — ou no último dia do mês, quando
 /// ele não existe: 31/03 mais três meses é 30/06, e não 01/07.
-DateTime _somaMeses(DateTime t, int meses) {
-  final total = t.month - 1 + meses;
-  final ano = t.year + total ~/ 12;
-  final mes = total % 12 + 1;
-  final ultimoDia = DateTime(ano, mes + 1, 0).day;
-  return DateTime(ano, mes, t.day > ultimoDia ? ultimoDia : t.day);
+DateTime _addMonths(DateTime t, int months) {
+  final total = t.month - 1 + months;
+  final year = t.year + total ~/ 12;
+  final month = total % 12 + 1;
+  final lastDay = DateTime(year, month + 1, 0).day;
+  return DateTime(year, month, t.day > lastDay ? lastDay : t.day);
 }
 
-String _dia(DateTime d) => d.toIso8601String().substring(0, 10);
+String _day(DateTime d) => d.toIso8601String().substring(0, 10);
 
 /// Arredonda os `double` a seis algarismos significativos, para que a saída
 /// trimestral caiba no repositório; nenhuma medição usa mais que isso.
-Object? _compacto(Object? v) {
+Object? _compact(Object? v) {
   if (v is double) {
     // Zero passa pelo mesmo caminho: `toStringAsPrecision` o devolve zero.
     if (!v.isFinite) return v;
     return double.parse(v.toStringAsPrecision(6));
   }
-  if (v is List) return [for (final x in v) _compacto(x)];
-  if (v is Map) return {for (final e in v.entries) e.key: _compacto(e.value)};
+  if (v is List) return [for (final x in v) _compact(x)];
+  if (v is Map) return {for (final e in v.entries) e.key: _compact(e.value)};
   return v;
 }
 
 /// Primeira coorte da réplica fora da amostra (decisão 129).
-final primeiraCoorteDoC7 = DateTime(2025, 12, 31);
+final firstC7Cohort = DateTime(2025, 12, 31);
 
 /// As coortes do C7: o último dia de cada trimestre, de 31/12/2025 até o
 /// último que o fim dos dados cobre.
-List<DateTime> coortesDoC7(DateTime fimDosDados) => [
+List<DateTime> c7Cohorts(DateTime dataEnd) => [
   for (
-    var d = primeiraCoorteDoC7;
-    !d.isAfter(fimDosDados);
+    var d = firstC7Cohort;
+    !d.isAfter(dataEnd);
     d = DateTime(d.year, d.month + 4, 0)
   )
     d,
 ];
 
 Future<void> main(List<String> args) async {
-  final iMontagem = args.indexOf('--montagem');
-  final app = iMontagem >= 0 && args[iMontagem + 1] == 'aplicativo';
-  final comDeslistadas = args.contains('--com-deslistadas');
-  final trimestral = args.contains('--trimestral');
-  final contrafactualBase = args.contains('--contrafactual-base');
-  final iAmostra = args.indexOf('--amostra');
-  final amostra = iAmostra >= 0 ? int.parse(args[iAmostra + 1]) : null;
+  final assemblyIndex = args.indexOf('--montagem');
+  final app = assemblyIndex >= 0 && args[assemblyIndex + 1] == 'aplicativo';
+  final withDelisted = args.contains('--com-deslistadas');
+  final quarterly = args.contains('--trimestral');
+  final counterfactualBase = args.contains('--contrafactual-base');
+  final sampleIndex = args.indexOf('--amostra');
+  final sample = sampleIndex >= 0 ? int.parse(args[sampleIndex + 1]) : null;
   // A medição do item B46: prêmios a mais no Ke das estatais.
-  final iPremioEstatal = args.indexOf('--premio-estatal');
-  final premiosEstatais = iPremioEstatal >= 0
-      ? [for (final x in args[iPremioEstatal + 1].split(',')) double.parse(x)]
+  final stateOwnedPremiumIndex = args.indexOf('--premio-estatal');
+  final stateOwnedPremiums = stateOwnedPremiumIndex >= 0
+      ? [for (final x in args[stateOwnedPremiumIndex + 1].split(',')) double.parse(x)]
       : const <double>[];
-  final soEstatais = args.contains('--so-estatais');
-  final iSaida = args.indexOf('--saida');
-  final saida = iSaida >= 0 ? args[iSaida + 1] : null;
+  final stateOwnedOnly = args.contains('--so-estatais');
+  final outputIndex = args.indexOf('--saida');
+  final output = outputIndex >= 0 ? args[outputIndex + 1] : null;
   // **A réplica fora da amostra** (item C7, decisões 129 e 133): as coortes a
   // partir de 31/12/2025, que nenhuma decisão do motor viu, na mesma montagem
   // da amostra do R3. Saem em `data/c7/coortes.json`, e quem as sela é
@@ -480,27 +480,27 @@ Future<void> main(List<String> args) async {
   // O fim dos dados é o da base restaurada; a leitura do C7, anos depois,
   // passa a data da base de então para que os retornos das coortes novas
   // existam.
-  final iFim = args.indexOf('--fim-dos-dados');
-  final fimDosDados = iFim >= 0
-      ? DateTime.parse(args[iFim + 1])
+  final endIndex = args.indexOf('--fim-dos-dados');
+  final dataEnd = endIndex >= 0
+      ? DateTime.parse(args[endIndex + 1])
       : DateTime(2026, 9, 4);
-  if ((comDeslistadas || trimestral || contrafactualBase) && !app) {
+  if ((withDelisted || quarterly || counterfactualBase) && !app) {
     stderr.writeln(
       '--com-deslistadas, --trimestral e --contrafactual-base '
       'exigem --montagem aplicativo',
     );
     exit(2);
   }
-  if ((premiosEstatais.isNotEmpty || soEstatais) && !app ||
-      soEstatais && saida == null) {
+  if ((stateOwnedPremiums.isNotEmpty || stateOwnedOnly) && !app ||
+      stateOwnedOnly && output == null) {
     stderr.writeln(
       '--premio-estatal e --so-estatais exigem --montagem aplicativo, e '
       '--so-estatais exige --saida',
     );
     exit(2);
   }
-  if (c7 && !(app && trimestral && comDeslistadas) ||
-      c7 && (contrafactualBase || amostra != null)) {
+  if (c7 && !(app && quarterly && withDelisted) ||
+      c7 && (counterfactualBase || sample != null)) {
     stderr.writeln(
       '--c7 é a montagem da amostra do R3: exige --montagem '
       'aplicativo --com-deslistadas --trimestral, e nada mais',
@@ -513,13 +513,13 @@ Future<void> main(List<String> args) async {
   final benchmark = _MemoBenchmark(ctx.benchmark);
 
   // Peças da montagem do aplicativo, lidas uma vez.
-  final tesouro = app
-      ? lerTesouro('data/tesouro/precotaxatesourodireto.csv')
+  final treasury = app
+      ? readTreasury('data/tesouro/precotaxatesourodireto.csv')
       : null;
-  final docsCvm = app
-      ? carregarDocumentos('data/cvm_exercicios.json', comVersoesAntigas: true)
+  final cvmDocs = app
+      ? loadDocuments('data/cvm_exercicios.json', withOldVersions: true)
       : null;
-  final registro = app
+  final registry = app
       ? B3RegistryCodec.decodePackage(
           jsonDecode(File('assets/b3/emissores.json').readAsStringSync())
               as Map<String, dynamic>,
@@ -529,7 +529,7 @@ Future<void> main(List<String> args) async {
   // do prêmio implícito, do pacote que o aplicativo lê. A série é medida
   // trimestre a trimestre, cada um com o dado da data dele, e a média de cada
   // coorte usa só os trimestres até ela.
-  final pacoteDoPremio = app
+  final premiumPackage = app
       ? ImpliedPremiumCodec.decode(
           jsonDecode(
                 File('assets/mercado/premio_implicito.json').readAsStringSync(),
@@ -537,7 +537,7 @@ Future<void> main(List<String> args) async {
               as Map<String, dynamic>,
         )
       : null;
-  if (app && pacoteDoPremio == null) {
+  if (app && premiumPackage == null) {
     stderr.writeln(
       'sem assets/mercado/premio_implicito.json utilizável: rode '
       'dart run tool/premio_implicito.dart --so-serie',
@@ -546,26 +546,26 @@ Future<void> main(List<String> args) async {
   }
   // O controle acionário de cada emissor, do FCA (item B46): a ressalva da
   // montagem do aplicativo, na data de cada coorte, e a medição do item.
-  final controle = app && File('assets/cvm/controle.json').existsSync()
+  final control = app && File('assets/cvm/controle.json').existsSync()
       ? ShareholderControlHistory.decode(
           jsonDecode(File('assets/cvm/controle.json').readAsStringSync())
               as Map<String, dynamic>,
-        )?.porEmissor
+        )?.byIssuer
       : null;
-  bool estatalNaData(Ticker x, DateTime d) {
-    final p = controle?[x.value.substring(0, 4)];
+  bool stateOwnedAtDate(Ticker x, DateTime d) {
+    final p = control?[x.value.substring(0, 4)];
     return p != null &&
         ShareholderControlHistory.at(p, d) == ShareholderControl.state;
   }
 
-  final pacoteDeProventos = app
+  final dividendsPackage = app
       ? CashDividendsCodec.decode(
           jsonDecode(File('assets/b3/proventos.json').readAsStringSync())
               as Map<String, dynamic>,
         )
       : null;
-  final outorgas = app ? OutorgasPorData.ler() : null;
-  if (app && outorgas == null) {
+  final grants = app ? GrantsByDate.read() : null;
+  if (app && grants == null) {
     stderr.writeln(
       'sem data/cvm/fre: rode python tool/cvm_baixar.py --docs FRE',
     );
@@ -573,37 +573,37 @@ Future<void> main(List<String> args) async {
   }
   if (app) {
     // O prazo lido na data de montagem do pacote tem de ser o do pacote.
-    final pacote = ConcessionTermsCodec.decode(
+    final package = ConcessionTermsCodec.decode(
       jsonDecode(File('assets/cvm/outorgas.json').readAsStringSync())
           as Map<String, dynamic>,
     );
-    var iguais = 0;
-    for (final e in pacote.entries) {
-      final lido = outorgas!.naData(e.key, DateTime(2026, 9, 14));
-      if (lido != null && lido.end == e.value.end) iguais++;
+    var equal = 0;
+    for (final e in package.entries) {
+      final parsed = grants!.atDate(e.key, DateTime(2026, 9, 14));
+      if (parsed != null && parsed.end == e.value.end) equal++;
     }
     stderr.writeln(
-      'outorgas por data contra o pacote: $iguais de '
-      '${pacote.length} iguais em 14/09/2026',
+      'outorgas por data contra o pacote: $equal de '
+      '${package.length} iguais em 14/09/2026',
     );
   }
-  B3Classification? classe(Ticker t) =>
-      registro?[t.value.length >= 4 ? t.value.substring(0, 4) : '']
+  B3Classification? shareClass(Ticker t) =>
+      registry?[t.value.length >= 4 ? t.value.substring(0, 4) : '']
           ?.classification;
 
   // A base da data das listadas (item C3): a ponte ticker → CNPJ, os códigos
   // que a FCA declara e a contagem por data do Formulário de Referência.
-  final ponteListadas = app
+  final listedBridge = app
       ? ((jsonDecode(File('docs/validacao/ponte_cvm.json').readAsStringSync())
                     as Map<String, dynamic>)['ponte']
                 as Map<String, dynamic>)
             .cast<String, String>()
       : const <String, String>{};
-  final fca = app ? CodigosFca.ler() : null;
-  final contagemListadas = app ? _ContagemListada.ler() : null;
+  final fca = app ? FcaCodes.read() : null;
+  final listedCounts = app ? _ListedCount.read() : null;
   // Entradas descartadas pela conferência da contagem, por companhia (B43).
-  final descartadasPorCnpj = <String, int>{};
-  if (app && contagemListadas == null) {
+  final discardedByCnpj = <String, int>{};
+  if (app && listedCounts == null) {
     stderr.writeln(
       'sem data/b3/listadas_contagem.json: rode '
       'dart run tool/b3_deslistadas_contagem.dart',
@@ -613,379 +613,379 @@ Future<void> main(List<String> args) async {
 
   // As deslistadas (item C1b), com o setor da B3 ou o representante do setor da
   // CVM, medido nas listadas.
-  Deslistadas? deslistadas;
-  if (comDeslistadas) {
-    final porCnpj = <String, B3Classification>{};
-    for (final e in ponteListadas.entries) {
-      final c = registro![e.key.length >= 4 ? e.key.substring(0, 4) : '']
+  Delisted? delisted;
+  if (withDelisted) {
+    final byCnpj = <String, B3Classification>{};
+    for (final e in listedBridge.entries) {
+      final c = registry![e.key.length >= 4 ? e.key.substring(0, 4) : '']
           ?.classification;
-      if (c != null) porCnpj[e.value] = c;
+      if (c != null) byCnpj[e.value] = c;
     }
-    deslistadas = Deslistadas.ler(porCnpj, ate: fimDosDados);
-    if (deslistadas == null) {
+    delisted = Delisted.read(byCnpj, until: dataEnd);
+    if (delisted == null) {
       stderr.writeln(
         'sem data/b3/deslistadas_contagem.json: rode '
         'dart run tool/b3_deslistadas_contagem.dart',
       );
       exit(2);
     }
-    final origem = <String, int>{};
-    for (final p in deslistadas.papeis.values) {
-      origem[p.origemDoSetor] = (origem[p.origemDoSetor] ?? 0) + 1;
+    final origin = <String, int>{};
+    for (final p in delisted.securities.values) {
+      origin[p.sectorOrigin] = (origin[p.sectorOrigin] ?? 0) + 1;
     }
-    final c = deslistadas.setorCvm?.concordancia();
+    final c = delisted.cvmSector?.agreement();
     stderr.writeln(
-      'deslistadas: ${deslistadas.papeis.length} papéis; setor $origem; '
-      '${deslistadas.contagensDescartadas} entradas da contagem descartadas '
+      'deslistadas: ${delisted.securities.length} papéis; setor $origin; '
+      '${delisted.discardedCounts} entradas da contagem descartadas '
       'pela conferência contra o preço (B43)',
     );
     if (c != null) {
       stderr.writeln(
         'setor da CVM nas listadas, sem a companhia: '
-        '${c.listadas} listadas, ${c.semReferencia} sem referência; '
-        'Porta 1 ${c.financeira}, ciclo ${c.ciclica}, '
-        'concessão ${c.concessao}, as três ${c.todas}',
+        '${c.listed} listadas, ${c.withoutReference} sem referência; '
+        'Porta 1 ${c.financial}, ciclo ${c.cyclical}, '
+        'concessão ${c.concession}, as três ${c.totalCount}',
       );
     }
   }
 
-  final coortes = c7
-      ? coortesDoC7(fimDosDados)
-      : trimestral
+  final cohorts = c7
+      ? c7Cohorts(dataEnd)
+      : quarterly
       ? [
-          for (var ano = 2018; ano <= 2025; ano++)
-            for (final mes in const [3, 6, 9, 12])
-              if (!(ano == 2025 && mes > 9)) DateTime(ano, mes + 1, 0),
+          for (var year = 2018; year <= 2025; year++)
+            for (final month in const [3, 6, 9, 12])
+              if (!(year == 2025 && month > 9)) DateTime(year, month + 1, 0),
         ]
-      : [for (var ano = 2018; ano <= 2025; ano++) DateTime(ano, 9, 30)];
+      : [for (var year = 2018; year <= 2025; year++) DateTime(year, 9, 30)];
 
   try {
-    final universoInteiro = (await fundamentals.universe()).unwrap();
-    final universe = amostra == null
-        ? universoInteiro
-        : universoInteiro.take(amostra).toList();
+    final wholeUniverse = (await fundamentals.universe()).unwrap();
+    final universe = sample == null
+        ? wholeUniverse
+        : wholeUniverse.take(sample).toList();
     stderr.writeln(
       'universo: ${universe.length} ativos, '
-      '${coortes.length} coortes',
+      '${cohorts.length} coortes',
     );
     // Proventos da B3 e fechamento bruto do COTAHIST: o retorno total (A4) e,
     // na montagem do aplicativo, a base da data de cada papel e de cada espécie
     // da companhia (C3).
-    final proventos = lerProventos();
+    final dividends = readDividends();
     // Os códigos de cada companhia: os tickers do universo ligados ao CNPJ, os
     // que a FCA declara e as espécies da raiz de cada um.
-    final tickersDoCnpj = <String, Set<String>>{};
-    for (final e in ponteListadas.entries) {
-      (tickersDoCnpj[e.value] ??= <String>{}).add(e.key);
+    final tickersOfCnpj = <String, Set<String>>{};
+    for (final e in listedBridge.entries) {
+      (tickersOfCnpj[e.value] ??= <String>{}).add(e.key);
     }
-    final codigosDoTicker = <String, Set<String>>{
+    final tickerCodes = <String, Set<String>>{
       for (final t in universe)
-        t.value: codigosDaCompanhia({
+        t.value: companyCodes({
           t.value,
-          ...?tickersDoCnpj[ponteListadas[t.value]],
-          ...?fca?.porCnpj[ponteListadas[t.value]],
+          ...?tickersOfCnpj[listedBridge[t.value]],
+          ...?fca?.byCnpj[listedBridge[t.value]],
         }),
     };
-    final bruto = lerCotahistBruto({
-      for (final c in codigosDoTicker.values) ...c,
+    final raw = readRawCotahist({
+      for (final c in tickerCodes.values) ...c,
     });
     // Pregões de cada código encadeados pelos códigos anteriores da companhia.
-    final encadeados = <String, List<Pregao>>{};
-    List<Pregao> brutosDe(String codigo, Set<String> daCompanhia) =>
-        encadeados[codigo] ??= encadear(codigo, daCompanhia, bruto);
+    final chained = <String, List<TradingDay>>{};
+    List<TradingDay> rawOf(String code, Set<String> ofCompany) =>
+        chained[code] ??= chain(code, ofCompany, raw);
 
     // **Os eventos de ações e as emissões por valor** (itens B28, B29 e B30).
     // Os eventos corrigem a série da fonte onde ela não ajustou e a contagem
     // do FRE onde ela não absorveu; as emissões entram no patrimônio da ponte.
-    final emissoesFre = app ? EmissoesFre.ler() : null;
-    final eventosDeAcoes = app
-        ? EventosDeAcoes.ler(emissoes: emissoesFre)
+    final freIssuances = app ? FreIssuances.read() : null;
+    final shareEvents = app
+        ? ShareEvents.read(issuances: freIssuances)
         : null;
-    if (app && emissoesFre == null) {
+    if (app && freIssuances == null) {
       stderr.writeln(
         'sem data/cvm/fre: as emissões por valor ficam de fora — '
         'rode python tool/cvm_baixar.py --docs FRE --destino data/cvm/fre',
       );
     }
-    final eventosDo = <String, List<ShareEvent>>{};
-    List<ShareEvent> eventosDoPapel(String ticker) =>
-        eventosDo[ticker] ??= eventosDeAcoes!.doPapel(
-          cnpj: ponteListadas[ticker],
+    final eventsOf = <String, List<ShareEvent>>{};
+    List<ShareEvent> securityEvents(String ticker) =>
+        eventsOf[ticker] ??= shareEvents!.ofSecurity(
+          cnpj: listedBridge[ticker],
           ticker: ticker,
-          brutos: brutosDe(ticker, codigosDoTicker[ticker] ?? {ticker}),
+          rawSessions: rawOf(ticker, tickerCodes[ticker] ?? {ticker}),
         );
-    final serieCompleta = <String, PriceSeries>{};
-    final semAjusteDo = <String, List<ShareEvent>>{};
+    final completeSeries = <String, PriceSeries>{};
+    final unadjustedOf = <String, List<ShareEvent>>{};
     // As emissões por valor conhecidas na data: o quadro de aumentos do FRE,
     // até 2023, e a variação do capital integralizado que nenhum evento de
     // ações explica no preço, depois (item B28).
-    List<ShareIssue> emissoesDe(
+    List<ShareIssue> issuancesOf(
       String? cnpj,
       DateTime t, {
-      required List<Pregao> brutos,
-      required List<ShareEvent> eventos,
+      required List<TradingDay> rawSessions,
+      required List<ShareEvent> events,
     }) {
-      if (cnpj == null || emissoesFre == null) return const [];
+      if (cnpj == null || freIssuances == null) return const [];
       return [
-        ...emissoesFre.conhecidas(cnpj, t),
-        ...emissoesSemEvento(
-          emissoesFre.pelaVariacaoDoCapital(cnpj, t),
-          brutos,
-          eventos,
+        ...freIssuances.known(cnpj, t),
+        ...issuancesWithoutEvent(
+          freIssuances.byCapitalChange(cnpj, t),
+          rawSessions,
+          events,
         ),
       ];
     }
 
-    final eventosDeclaradosDo = <String, List<ShareEvent>>{};
+    final declaredEventsOf = <String, List<ShareEvent>>{};
 
-    final linhas = <Map<String, dynamic>>[];
-    final tickersListados = <String>{};
-    final semBase = <String, int>{};
-    for (final t in coortes) {
-      final anual = t.month == 9;
+    final rows = <Map<String, dynamic>>[];
+    final listedTickers = <String>{};
+    final withoutBase = <String, int>{};
+    for (final t in cohorts) {
+      final annual = t.month == 9;
       final anchors = (await ResolveMarketAnchors.call(
         macro: ctx.macro,
         benchmark: benchmark,
         asOf: t,
       )).getOrElse(MarketAnchors.fallback2026);
-      final curvaDaCoorte = app ? TreasuryCurve.at(tesouro!, t) : null;
-      if (app && curvaDaCoorte == null) {
-        stderr.writeln('  ${_dia(t)}: sem curva do Tesouro na data');
+      final cohortCurve = app ? TreasuryCurve.at(treasury!, t) : null;
+      if (app && cohortCurve == null) {
+        stderr.writeln('  ${_day(t)}: sem curva do Tesouro na data');
       }
-      final premioDaCoorte = pacoteDoPremio?.normalizedAt(t);
-      if (app && premioDaCoorte == null) {
+      final cohortPremium = premiumPackage?.normalizedAt(t);
+      if (app && cohortPremium == null) {
         stderr.writeln(
-          '  ${_dia(t)}: sem a média do prêmio implícito; '
+          '  ${_day(t)}: sem a média do prêmio implícito; '
           'vale o parametrizado de 5,5%',
         );
       }
-      final premio = premioDaCoorte ?? CapmInputs.defaultMarketPremium;
-      final origemDoPremio = premioDaCoorte == null
+      final premium = cohortPremium ?? CapmInputs.defaultMarketPremium;
+      final premiumOrigin = cohortPremium == null
           ? MarketPremiumSource.parameterized
           : MarketPremiumSource.impliedNormalized;
 
-      var avaliados = 0, avaliadasDeslistadas = 0;
-      final valorPorCnpj = <String, ValorDeMercado?>{};
+      var evaluated = 0, evaluatedDelisted = 0;
+      final valueByCnpj = <String, MarketValue?>{};
 
       // **O prior transversal do beta da coorte** (item B11). Sem ele não há
       // beta desalavancado, e a montagem padrão media um motor — beta cru e
       // WACC estático — que não é o que as decisões 40 a 46 descrevem. É
       // resolvido **na data da coorte**, sobre o universo listado dela: um
       // prior de hoje seria conhecimento futuro.
-      final priorDaCoorte = app
+      final cohortPrior = app
           ? await ResolveBetaPrior.call(
               tickers: universe,
               prices: prices,
               fundamentals: fundamentals,
               benchmark: benchmark,
               asOf: t,
-              dividendsFor: (x) => proventosDo(proventos, x.value),
+              dividendsFor: (x) => dividendsOf(dividends, x.value),
             )
           : null;
-      if (app && priorDaCoorte == null) {
-        stderr.writeln('  ${_dia(t)}: sem prior do beta');
+      if (app && cohortPrior == null) {
+        stderr.writeln('  ${_day(t)}: sem prior do beta');
       }
 
       // A medição de uma observação, para listada e deslistada: o que muda
       // entre as duas é de onde vêm o preço, os fundamentos e os proventos.
-      Future<void> observar({
+      Future<void> observe({
         required Ticker ticker,
-        required PriceSeries serie,
+        required PriceSeries series,
         required double p0,
-        required double precoNaData,
-        required FundamentalsRepository fonte,
-        required FundamentalsRepository? fonteAncorada,
-        required PriceRepository precos,
-        required List<Pregao>? brutoDoPapel,
-        required List<CashDividend> proventosDoPapel,
-        required List<CashDividend>? proventosDoBeta,
-        required DateTime? fimDoContrato,
-        required OfficialShareCount? contagemOficial,
-        required int? acoesNaUnit,
-        required void Function() contar,
-        bool Function(DateTime de, DateTime ate)? janelaInvalida,
+        required double priceAtDate,
+        required FundamentalsRepository source,
+        required FundamentalsRepository? anchoredSource,
+        required PriceRepository prices,
+        required List<TradingDay>? securityRaw,
+        required List<CashDividend> securityDividendsList,
+        required List<CashDividend>? betaDividends,
+        required DateTime? contractEnd,
+        required OfficialShareCount? officialCount,
+        required int? sharesInUnit,
+        required void Function() count,
+        bool Function(DateTime from, DateTime until)? invalidWindow,
         Map<String, Object?> extras = const {},
-        Future<Map<String, Object?>> Function()? contrafactual,
-        List<ShareIssue> emissoes = const [],
+        Future<Map<String, Object?>> Function()? counterfactual,
+        List<ShareIssue> issuances = const [],
       }) async {
-        Future<Result<ValuationInputs>> preparar(double premioDeMercado) =>
+        Future<Result<ValuationInputs>> prepare(double marketPremium) =>
             PrepareValuationInputs.call(
               ticker: ticker,
-              prices: precos,
-              fundamentals: fonte,
+              prices: prices,
+              fundamentals: source,
               benchmark: benchmark,
               riskFreeRate: anchors.currentRiskFreeRate,
               asOf: t,
-              marketPremium: premioDeMercado,
-              premiumSource: origemDoPremio,
+              marketPremium: marketPremium,
+              premiumSource: premiumOrigin,
               perpetualGrowthCap: anchors.nominalEconomyGrowth,
               inflation: anchors.inflationCagr,
               terminalRiskFreeRate: anchors.riskFreeCagr,
               projectionYears: 10,
-              riskFreeCurve: curvaDaCoorte,
-              officialShares: contagemOficial,
-              concessionEnd: fimDoContrato,
-              dividends: proventosDoBeta,
-              betaPrior: priorDaCoorte,
-              declaredSharesPerUnit: acoesNaUnit,
+              riskFreeCurve: cohortCurve,
+              officialShares: officialCount,
+              concessionEnd: contractEnd,
+              dividends: betaDividends,
+              betaPrior: cohortPrior,
+              declaredSharesPerUnit: sharesInUnit,
               // As emissões por valor do FRE conhecidas na data (item B28).
-              shareIssues: emissoes,
+              shareIssues: issuances,
               // O controle estatal na data: só a ressalva (item B46).
-              stateControlled: estatalNaData(ticker, t),
+              stateControlled: stateOwnedAtDate(ticker, t),
             );
-        final prep = await preparar(premio);
+        final prep = await prepare(premium);
         if (prep.isErr) return;
-        final insumos = prep.unwrap();
+        final inputs = prep.unwrap();
 
-        final r = ValuationCascade.evaluate(insumos);
+        final r = ValuationCascade.evaluate(inputs);
         final upside = r.isOk ? r.unwrap().upside : null;
-        if (upside != null) contar();
+        if (upside != null) count();
 
         // **O prêmio a mais das estatais** (item B46). Soma-se ao prêmio de
         // mercado na proporção do beta — `β × (prêmio + x ÷ β) = β × prêmio +
         // x` —, o que é exato no Ke de hoje; no caminho realavancado, o
         // acréscimo anda com `β_t ÷ β`.
-        final comPremioEstatal = <String, double?>{};
+        final withStateOwnedPremium = <String, double?>{};
         // Beta perto de zero faria `x ÷ β` explodir: a observação fica sem
         // a variante, e não com um prêmio infinito.
-        if (premiosEstatais.isNotEmpty &&
-            estatalNaData(ticker, t) &&
-            insumos.capm.beta.abs() > 0.01) {
-          for (final x in premiosEstatais) {
-            final outra = await preparar(premio + x / insumos.capm.beta);
-            final ro = outra.isErr
+        if (stateOwnedPremiums.isNotEmpty &&
+            stateOwnedAtDate(ticker, t) &&
+            inputs.capm.beta.abs() > 0.01) {
+          for (final x in stateOwnedPremiums) {
+            final other = await prepare(premium + x / inputs.capm.beta);
+            final otherResult = other.isErr
                 ? null
-                : ValuationCascade.evaluate(outra.unwrap());
-            comPremioEstatal['$x'] = ro?.valueOrNull?.upside;
+                : ValuationCascade.evaluate(other.unwrap());
+            withStateOwnedPremium['$x'] = otherResult?.valueOrNull?.upside;
           }
         }
 
         // Banda de Monte Carlo com os sorteios do aplicativo — só nas
         // coortes de 30/09, as que o C2 mediu —, e o potencial do recusado
         // sem o corte de liquidez.
-        List<double>? quantis;
-        if (app && anual && r.isOk) {
+        List<double>? quantiles;
+        if (app && annual && r.isOk) {
           final mc = ValuationCascade.evaluate(
-            insumos,
+            inputs,
             scenarioBuilder: StochasticScenarios.around,
-            monteCarloSamples: _sorteios,
+            monteCarloSamples: _draws,
           );
           final dist = mc.isOk ? mc.unwrap().distribution : null;
           if (dist != null && !dist.isEmpty) {
-            quantis = [for (var q = 0; q <= 100; q++) dist.percentile(q / 100)];
+            quantiles = [for (var q = 0; q <= 100; q++) dist.percentile(q / 100)];
           }
         }
-        final cenarios = r.isOk ? r.unwrap().discreteScenarios : null;
-        double? semLiquidez;
+        final scenarios = r.isOk ? r.unwrap().discreteScenarios : null;
+        double? withoutLiquidity;
         if (app && r.isErr) {
-          final contra = ValuationCascade.evaluate(_semSerie(insumos));
-          if (contra.isOk) semLiquidez = contra.unwrap().upside;
+          final counter = ValuationCascade.evaluate(_withoutSeries(inputs));
+          if (counter.isOk) withoutLiquidity = counter.unwrap().upside;
         }
-        final serieDaJanela = insumos.prices;
-        final liquidez = serieDaJanela == null
+        final windowSeries = inputs.prices;
+        final liquidity = windowSeries == null
             ? null
-            : EligibilityGate.medianTradedValue(serieDaJanela);
+            : EligibilityGate.medianTradedValue(windowSeries);
         // Fração dos últimos pregões da janela de liquidez sem negócio.
-        double? semNegocio;
-        if (serieDaJanela != null && serieDaJanela.points.length >= 20) {
-          final pts = serieDaJanela.points;
+        double? withoutTrading;
+        if (windowSeries != null && windowSeries.points.length >= 20) {
+          final pts = windowSeries.points;
           final ini = pts.length > EligibilityGate.liquidityWindowDays
               ? pts.length - EligibilityGate.liquidityWindowDays
               : 0;
-          final janela = pts.sublist(ini);
-          semNegocio =
-              janela.where((p) => (p.volume ?? 0) <= 0).length / janela.length;
+          final window = pts.sublist(ini);
+          withoutTrading =
+              window.where((p) => (p.volume ?? 0) <= 0).length / window.length;
         }
 
         // Fatores ingênuos, sobre o mesmo exercício que o motor usou — na
         // montagem do aplicativo, a série mesclada com a CVM.
         final view = PointInTimeView(t);
-        ({double? bm, double? ey, FundamentalsSnapshot? ultimo}) fatores(
-          List<FundamentalsSnapshot> serieFundamentos,
+        ({double? bm, double? ey, FundamentalsSnapshot? last}) factors(
+          List<FundamentalsSnapshot> fundamentalsSeries,
         ) {
-          final pub = view.published(serieFundamentos);
-          final ultimo = pub.isEmpty ? null : pub.last;
-          final pl = ultimo?.equityBookValue;
-          final vm = ultimo?.marketCap;
+          final pub = view.published(fundamentalsSeries);
+          final last = pub.isEmpty ? null : pub.last;
+          final pl = last?.equityBookValue;
+          final marketValue = last?.marketCap;
           return (
-            bm: (pl != null && vm != null && vm > 0) ? pl / vm : null,
-            ey: (ultimo?.netIncome != null && vm != null && vm > 0)
-                ? ultimo!.netIncome! / vm
+            bm: (pl != null && marketValue != null && marketValue > 0) ? pl / marketValue : null,
+            ey: (last?.netIncome != null && marketValue != null && marketValue > 0)
+                ? last!.netIncome! / marketValue
                 : null,
-            ultimo: ultimo,
+            last: last,
           );
         }
 
-        final ingenuos = fatores(insumos.fundamentals);
-        final pub = view.published(insumos.fundamentals);
+        final naiveFactors = factors(inputs.fundamentals);
+        final pub = view.published(inputs.fundamentals);
 
         // A ponte por papel como o motor a faz, pelas funções públicas dele
         // (item C3): a razão de unidade e a origem do divisor.
-        double? razaoDeUnidade;
+        double? unitRatio;
         QuotedShares? divisor;
-        final ultimo = ingenuos.ultimo;
-        if (app && ultimo != null) {
-          razaoDeUnidade = ValuationCascade.quotedUnitRatio(
-            sharesOutstanding: ultimo.sharesOutstanding,
-            marketCap: ultimo.marketCap,
-            marketPrice: insumos.marketPrice,
+        final last = naiveFactors.last;
+        if (app && last != null) {
+          unitRatio = ValuationCascade.quotedUnitRatio(
+            sharesOutstanding: last.sharesOutstanding,
+            marketCap: last.marketCap,
+            marketPrice: inputs.marketPrice,
           );
           divisor = ValuationCascade.quotedShares(
-            latest: ultimo,
-            marketPrice: insumos.marketPrice,
-            sharesPerQuote: razaoDeUnidade,
+            latest: last,
+            marketPrice: inputs.marketPrice,
+            sharesPerQuote: unitRatio,
             published: pub,
-            official: insumos.officialShares,
+            official: inputs.officialShares,
             asOf: t,
           );
         }
 
         // A série ancorada no trimestre, sobre os mesmos insumos (item C1c).
-        Map<String, Object?> ancorada = const {};
-        if (fonteAncorada != null) {
-          final h = await fonteAncorada.history(ticker);
+        Map<String, Object?> anchored = const {};
+        if (anchoredSource != null) {
+          final h = await anchoredSource.history(ticker);
           if (h.isOk) {
-            final serieAncorada = h.unwrap();
-            final ia = _comFundamentos(insumos, serieAncorada);
-            final ra = ValuationCascade.evaluate(ia);
-            final fa = fatores(serieAncorada);
-            final pubA = view.published(serieAncorada);
-            ancorada = {
-              'upsideAncorada': ra.isOk ? ra.unwrap().upside : null,
-              'justoAncorada': ra.isOk ? ra.unwrap().fairValue.reais : null,
-              'recusaAncorada': ra.isOk ? null : ra.failureOrNull?.message,
+            final anchoredSeries = h.unwrap();
+            final anchoredInputs = _withFundamentals(inputs, anchoredSeries);
+            final anchoredResult = ValuationCascade.evaluate(anchoredInputs);
+            final anchoredFactors = factors(anchoredSeries);
+            final pubA = view.published(anchoredSeries);
+            anchored = {
+              'upsideAncorada': anchoredResult.isOk ? anchoredResult.unwrap().upside : null,
+              'justoAncorada': anchoredResult.isOk ? anchoredResult.unwrap().fairValue.reais : null,
+              'recusaAncorada': anchoredResult.isOk ? null : anchoredResult.failureOrNull?.message,
               'fimDoExercicioAncorada': pubA.isEmpty
                   ? null
-                  : _dia(pubA.last.fiscalPeriodEnd),
-              'bookToMarketAncorada': fa.bm,
-              'earningsYieldAncorada': fa.ey,
+                  : _day(pubA.last.fiscalPeriodEnd),
+              'bookToMarketAncorada': anchoredFactors.bm,
+              'earningsYieldAncorada': anchoredFactors.ey,
             };
           }
         }
 
-        double? retorno(int meses, {bool ajustado = false}) {
-          final d = _somaMeses(t, meses);
-          if (d.isAfter(fimDosDados)) return null;
-          if (janelaInvalida != null && janelaInvalida(t, d)) return null;
-          final pa = ajustado ? _ajustadoEm(serie, t) : p0;
-          final pf = ajustado ? _ajustadoEm(serie, d) : _precoEm(serie, d);
-          if (pa == null || pf == null || pa <= 0) return null;
-          return pf / pa - 1;
+        double? returnRate(int months, {bool adjusted = false}) {
+          final d = _addMonths(t, months);
+          if (d.isAfter(dataEnd)) return null;
+          if (invalidWindow != null && invalidWindow(t, d)) return null;
+          final priceStart = adjusted ? _adjustedAt(series, t) : p0;
+          final priceEnd = adjusted ? _adjustedAt(series, d) : _priceAt(series, d);
+          if (priceStart == null || priceEnd == null || priceStart <= 0) return null;
+          return priceEnd / priceStart - 1;
         }
 
         // Retorno de preço vezes o reinvestimento dos proventos da classe no
         // fechamento bruto da data ex. Sem COTAHIST do papel, não há total.
-        double? total(int meses) {
-          final preco = retorno(meses);
-          if (preco == null || brutoDoPapel == null) return null;
+        double? total(int months) {
+          final price = returnRate(months);
+          if (price == null || securityRaw == null) return null;
           final r = TotalReturn.factor(
-            dividends: proventosDoPapel,
-            de: t,
-            ate: _somaMeses(t, meses),
+            dividends: securityDividendsList,
+            from: t,
+            until: _addMonths(t, months),
             closeOnExDate: (d) =>
-                pregaoApartir(brutoDoPapel, d, folgaDias: 5)?.close,
+                tradingDayFrom(securityRaw, d, marginDays: 5)?.close,
           );
-          return (1 + preco) * r.factor - 1;
+          return (1 + price) * r.factor - 1;
         }
 
         // O mesmo retorno total **começando um mês depois** da coorte (C0). O
@@ -994,54 +994,54 @@ Future<void> main(List<String> args) async {
         // fechamento é ruído: quem saiu barato por acaso volta, e qualquer sinal
         // que dependa do preço "prevê" a volta. Pular o mês separa a reversão do
         // fechamento do que o sinal sabe.
-        double? totalPulandoUmMes(int meses) {
-          if (brutoDoPapel == null) return null;
-          final de = _somaMeses(t, 1);
-          final ate = _somaMeses(t, meses);
-          if (ate.isAfter(fimDosDados)) return null;
-          if (janelaInvalida != null && janelaInvalida(t, ate)) return null;
-          final pa = _precoEm(serie, de);
-          final pf = _precoEm(serie, ate);
-          if (pa == null || pf == null || pa <= 0) return null;
+        double? totalSkippingOneMonth(int months) {
+          if (securityRaw == null) return null;
+          final from = _addMonths(t, 1);
+          final until = _addMonths(t, months);
+          if (until.isAfter(dataEnd)) return null;
+          if (invalidWindow != null && invalidWindow(t, until)) return null;
+          final priceStart = _priceAt(series, from);
+          final priceEnd = _priceAt(series, until);
+          if (priceStart == null || priceEnd == null || priceStart <= 0) return null;
           final r = TotalReturn.factor(
-            dividends: proventosDoPapel,
-            de: de,
-            ate: ate,
+            dividends: securityDividendsList,
+            from: from,
+            until: until,
             closeOnExDate: (d) =>
-                pregaoApartir(brutoDoPapel, d, folgaDias: 5)?.close,
+                tradingDayFrom(securityRaw, d, marginDays: 5)?.close,
           );
-          return pf / pa * r.factor - 1;
+          return priceEnd / priceStart * r.factor - 1;
         }
 
         // Roteamento, para separar quem chegou ao acionista por qual porta.
         // A Porta 1 é setorial; a Porta 3 é o fluxo da firma não sustentado.
-        final setor = insumos.sectorKey;
-        final porta1 = FinancialSectors.isFinancial(
-          sectorKey: setor,
-          industry: insumos.industry,
+        final sector = inputs.sectorKey;
+        final gate1 = FinancialSectors.isFinancial(
+          sectorKey: sector,
+          industry: inputs.industry,
         );
-        final sustentado = GrowthGuards.firmFlowIsSustained(pub);
+        final sustained = GrowthGuards.firmFlowIsSustained(pub);
 
-        linhas.add({
-          'coorte': app ? _dia(t) : t.year,
+        rows.add({
+          'coorte': app ? _day(t) : t.year,
           'ticker': ticker.value,
           ...extras,
-          'preco': precoNaData,
+          'preco': priceAtDate,
           'upside': upside,
-          if (comPremioEstatal.isNotEmpty)
-            'potencialComPremioEstatal': comPremioEstatal,
-          'setor': setor,
-          'porta1': porta1,
-          'fluxoSustentado': sustentado,
-          'porta3': !porta1 && !sustentado,
+          if (withStateOwnedPremium.isNotEmpty)
+            'potencialComPremioEstatal': withStateOwnedPremium,
+          'setor': sector,
+          'porta1': gate1,
+          'fluxoSustentado': sustained,
+          'porta3': !gate1 && !sustained,
           'ressalvas': r.isOk
               ? [for (final c in r.unwrap().diagnostics!.caveats) c.key]
               : null,
           'pesoTerminal': r.isOk ? r.unwrap().diagnostics!.terminalShare : null,
           'modelo': r.isOk ? r.unwrap().model.name : null,
           'recusa': r.isOk ? null : r.failureOrNull?.message,
-          'bookToMarket': ingenuos.bm,
-          'earningsYield': ingenuos.ey,
+          'bookToMarket': naiveFactors.bm,
+          'earningsYield': naiveFactors.ey,
           // **Os ingredientes do múltiplo de pares** (item B22, decisão 123).
           // `bookToMarket` é `1 ÷ (P/VP)` e `earningsYield` é `1 ÷ (P/L)`:
           // dois dos três já estavam aqui, e faltava a firma sobre EBITDA.
@@ -1052,245 +1052,245 @@ Future<void> main(List<String> args) async {
           // pela porta da frente. Por isso o que a coorte grava é o
           // ingrediente, e `regressao_condicional.dart` monta a mediana.
           'firmaSobreEbitda': () {
-            final u = ingenuos.ultimo;
-            final vm = u?.marketCap;
+            final u = naiveFactors.last;
+            final marketValue = u?.marketCap;
             final ebitda = u?.ebitda;
-            if (u == null || vm == null || vm <= 0) return null;
+            if (u == null || marketValue == null || marketValue <= 0) return null;
             if (ebitda == null || ebitda <= 0) return null;
-            return (vm + u.netDebt) / ebitda;
+            return (marketValue + u.netDebt) / ebitda;
           }(),
-          'ebitda': ingenuos.ultimo?.ebitda,
-          'dividaLiquida': ingenuos.ultimo?.netDebt,
-          'lucro': ingenuos.ultimo?.netIncome,
-          'patrimonio': ingenuos.ultimo?.equityBookValue,
-          'valorDeMercado': ingenuos.ultimo?.marketCap,
-          'ret12': retorno(12),
-          'ret36': retorno(36),
-          'ret12aj': retorno(12, ajustado: true),
-          'ret36aj': retorno(36, ajustado: true),
+          'ebitda': naiveFactors.last?.ebitda,
+          'dividaLiquida': naiveFactors.last?.netDebt,
+          'lucro': naiveFactors.last?.netIncome,
+          'patrimonio': naiveFactors.last?.equityBookValue,
+          'valorDeMercado': naiveFactors.last?.marketCap,
+          'ret12': returnRate(12),
+          'ret36': returnRate(36),
+          'ret12aj': returnRate(12, adjusted: true),
+          'ret36aj': returnRate(36, adjusted: true),
           'ret12tot': total(12),
           'ret36tot': total(36),
           if (app) ...{
             'justo': r.isOk ? r.unwrap().fairValue.reais : null,
-            'pessimista': cenarios == null
+            'pessimista': scenarios == null
                 ? null
-                : cenarios[ScenarioBand.bear]?.reais,
-            'otimista': cenarios == null
+                : scenarios[ScenarioBand.bear]?.reais,
+            'otimista': scenarios == null
                 ? null
-                : cenarios[ScenarioBand.bull]?.reais,
+                : scenarios[ScenarioBand.bull]?.reais,
             'ke': r.isOk ? r.unwrap().diagnostics!.costOfEquity : null,
-            'premioDeMercado': insumos.capm.marketPremium,
-            'mcQuantis': quantis,
+            'premioDeMercado': inputs.capm.marketPremium,
+            'mcQuantis': quantiles,
             // A janela que a série de fato deu ao beta (item B17): a fonte
             // devolve dez anos, e a coorte de 2018 pede cinco que ela não
             // tem. Sem isto, a janela curta entrava sem aparecer.
-            'janelaDoBeta': insumos.betaWindowYears,
-            'liquidez': liquidez,
-            'upsideSemLiquidez': semLiquidez,
-            'semNegocio': semNegocio,
+            'janelaDoBeta': inputs.betaWindowYears,
+            'liquidez': liquidity,
+            'upsideSemLiquidez': withoutLiquidity,
+            'semNegocio': withoutTrading,
             // A escala da forma do C2b, pela mesma função que o aplicativo
             // usa sobre a mesma janela (`cobertura_banda.md` §9).
-            'volatilidade': serieDaJanela == null
+            'volatilidade': windowSeries == null
                 ? null
-                : CalibratedBand.trailingVolatility(serieDaJanela),
-            'ret12totPulo': totalPulandoUmMes(12),
-            'ret36totPulo': totalPulandoUmMes(36),
-            'fimDoContrato': insumos.concessionEnd?.toIso8601String().substring(
+                : CalibratedBand.trailingVolatility(windowSeries),
+            'ret12totPulo': totalSkippingOneMonth(12),
+            'ret36totPulo': totalSkippingOneMonth(36),
+            'fimDoContrato': inputs.concessionEnd?.toIso8601String().substring(
               0,
               10,
             ),
             'fimDoExercicio': pub.isEmpty
                 ? null
-                : _dia(pub.last.fiscalPeriodEnd),
-            'acoesNaData': contagemOficial?.total,
+                : _day(pub.last.fiscalPeriodEnd),
+            'acoesNaData': officialCount?.total,
             // O capital emitido depois do balanço que entrou na ponte (B28).
             'capitalPosterior': r.isOk
                 ? r.unwrap().diagnostics?.postStatementCapital
                 : null,
-            'valorDeMercado': ultimo?.marketCap,
-            'razaoDeUnidade': razaoDeUnidade,
+            'valorDeMercado': last?.marketCap,
+            'razaoDeUnidade': unitRatio,
             'origemDoDivisor': divisor?.source.name,
             'divisorDiverge': divisor?.diverge,
-            ...ancorada,
-            if (contrafactual != null) ...await contrafactual(),
+            ...anchored,
+            if (counterfactual != null) ...await counterfactual(),
           },
         });
       }
 
-      final cnpjsListadosNaData = <String>{};
-      final tickersNaData = <String>{};
+      final listedCnpjsAtDate = <String>{};
+      final tickersAtDate = <String>{};
       var i = 0;
       for (final ticker in universe) {
         i++;
         if (i % 50 == 0) {
-          stderr.write('  ${_dia(t)}: $i/${universe.length}   \r');
+          stderr.write('  ${_day(t)}: $i/${universe.length}   \r');
         }
-        if (soEstatais && !estatalNaData(ticker, t)) continue;
+        if (stateOwnedOnly && !stateOwnedAtDate(ticker, t)) continue;
 
-        final serieRes = await prices.daily(
+        final seriesResult = await prices.daily(
           ticker,
-          DateRange(DateTime(2010, 1, 1), fimDosDados),
+          DateRange(DateTime(2010, 1, 1), dataEnd),
         );
-        if (serieRes.isErr) continue;
+        if (seriesResult.isErr) continue;
         // **O ajuste que a fonte deixou de fazer** (item B29): a bonificação
         // que ela não ajustou é uma queda que não aconteceu, e entrava no
         // retorno de toda janela que a atravessa, no beta e na volatilidade. O
         // fator entre o bruto e a fonte diz, sem ruído, quais ficaram assim.
-        final serieDaFonte = serieRes.unwrap();
-        final serie = !app
-            ? serieDaFonte
-            : serieCompleta[ticker.value] ??= () {
-                final sem = naoAjustadosPelaFonte(
-                  serieDaFonte,
-                  brutosDe(
+        final sourceSeries = seriesResult.unwrap();
+        final series = !app
+            ? sourceSeries
+            : completeSeries[ticker.value] ??= () {
+                final without = notAdjustedBySource(
+                  sourceSeries,
+                  rawOf(
                     ticker.value,
-                    codigosDoTicker[ticker.value] ?? {ticker.value},
+                    tickerCodes[ticker.value] ?? {ticker.value},
                   ),
-                  eventosDoPapel(ticker.value),
+                  securityEvents(ticker.value),
                 );
-                semAjusteDo[ticker.value] = sem;
-                return CorporateEvents.applyToSeries(serieDaFonte, sem);
+                unadjustedOf[ticker.value] = without;
+                return CorporateEvents.applyToSeries(sourceSeries, without);
               }();
-        final p0 = _precoEm(serie, t);
+        final p0 = _priceAt(series, t);
         if (p0 == null || p0 <= 0) continue;
 
-        final histRes = await fundamentals.history(ticker);
-        if (histRes.isErr) continue;
+        final historyResult = await fundamentals.history(ticker);
+        if (historyResult.isErr) continue;
 
         if (!app) {
-          final hist = _reescala(histRes.unwrap(), p0);
-          await observar(
+          final hist = _rescale(historyResult.unwrap(), p0);
+          await observe(
             ticker: ticker,
-            serie: serie,
+            series: series,
             p0: p0,
-            precoNaData: p0,
-            fonte: _EscaladoFundamentals(fundamentals, hist),
-            fonteAncorada: null,
-            precos: prices,
-            brutoDoPapel: bruto[ticker.value],
-            proventosDoPapel: proventosDo(proventos, ticker.value),
-            proventosDoBeta: null,
-            fimDoContrato: null,
-            contagemOficial: null,
+            priceAtDate: p0,
+            source: _ScaledFundamentals(fundamentals, hist),
+            anchoredSource: null,
+            prices: prices,
+            securityRaw: raw[ticker.value],
+            securityDividendsList: dividendsOf(dividends, ticker.value),
+            betaDividends: null,
+            contractEnd: null,
+            officialCount: null,
             // A montagem antiga não passa pela FCA, e a razão de unidade dela
             // continua sendo a medida — é o ponto de comparação.
-            acoesNaUnit: null,
-            contar: () => avaliados++,
+            sharesInUnit: null,
+            count: () => evaluated++,
           );
           continue;
         }
 
         // A base da data (item C3). Sem pregão do papel no COTAHIST até dez
         // dias antes, não há preço da data, e a observação sai.
-        final daCompanhia = codigosDoTicker[ticker.value] ?? {ticker.value};
-        final brutos = brutosDe(ticker.value, daCompanhia);
-        final base = fatorDeBase(fonte: serie, brutos: brutos, data: t);
+        final ofCompany = tickerCodes[ticker.value] ?? {ticker.value};
+        final rawSessions = rawOf(ticker.value, ofCompany);
+        final base = baseFactorOf(source: series, rawSessions: rawSessions, date: t);
         if (base == null) {
-          semBase[_dia(t)] = (semBase[_dia(t)] ?? 0) + 1;
+          withoutBase[_day(t)] = (withoutBase[_day(t)] ?? 0) + 1;
           continue;
         }
-        final precoBruto = base.pregao.close;
-        final serieNaData = serieNaBaseDaData(serie, brutos, base.fator);
-        final cnpj = ponteListadas[ticker.value];
-        final contagem = cnpj == null ? null : contagemListadas![cnpj];
-        final papeisDaCompanhia = {
-          for (final c in daCompanhia)
-            if (especieDo(c) == Especie.ordinaria ||
-                especieDo(c) == Especie.preferencial)
-              c: brutosDe(c, daCompanhia),
+        final rawPrice = base.tradingDay.close;
+        final seriesAtDate = seriesOnDateBasis(series, rawSessions, base.factor);
+        final cnpj = listedBridge[ticker.value];
+        final count = cnpj == null ? null : listedCounts![cnpj];
+        final companySecurities = {
+          for (final c in ofCompany)
+            if (kindOf(c) == ShareKind.common ||
+                kindOf(c) == ShareKind.preferred)
+              c: rawOf(c, ofCompany),
         };
         // A contagem do FRE conferida contra o salto do preço (B43): a
         // correção que repete a contagem de antes de um grupamento sai, e o
         // grupamento que só a correção registrou passa a valer no dia do salto.
-        final conferida = contagem?.conferida(
-          papeisDaCompanhia.values,
-          fimDosDados,
+        final checked = count?.checked(
+          companySecurities.values,
+          dataEnd,
         );
-        if (cnpj != null && conferida != null) {
-          descartadasPorCnpj[cnpj] = conferida.descartadas.length;
+        if (cnpj != null && checked != null) {
+          discardedByCnpj[cnpj] = checked.discarded.length;
         }
         // A contagem com o evento que o FRE ainda não absorveu (B30): o quadro
         // de eventos parou em 2022, e o desdobramento de 2024 do BB só entrou
         // no formulário em 2025.
-        final comEventos = conferida == null
+        final withEvents = checked == null
             ? null
-            : acoesComEventos(
-                conferida.aceitas,
+            : sharesWithEvents(
+                checked.accepted,
                 t,
-                eventosDoPapel(ticker.value),
+                securityEvents(ticker.value),
               );
-        final acoes = comEventos?.acoes;
-        final valor = (cnpj == null || acoes == null)
+        final shares = withEvents?.shares;
+        final value = (cnpj == null || shares == null)
             ? null
-            : valorPorCnpj.putIfAbsent(
+            : valueByCnpj.putIfAbsent(
                 cnpj,
-                () => ValorDeMercado.naData(
-                  acoes: acoes,
-                  fracaoOrdinarias: contagem!.classes.at(t),
-                  papeis: papeisDaCompanhia,
-                  data: t,
+                () => MarketValue.atDate(
+                  shares: shares,
+                  commonFraction: count!.classes.at(t),
+                  securities: companySecurities,
+                  date: t,
                 ),
               );
-        final hist = _reescalaNaData(
-          histRes.unwrap(),
-          acoesNaData: acoes,
-          valorDeMercado: valor?.valor,
-          precoBruto: precoBruto,
+        final hist = _rescaleAtDate(
+          historyResult.unwrap(),
+          sharesAtDate: shares,
+          marketValueOf: value?.value,
+          rawPrice: rawPrice,
         );
-        final docs = docsCvm![ticker.value];
-        FundamentalsRepository fonteDe({required bool ancorada}) =>
+        final docs = cvmDocs![ticker.value];
+        FundamentalsRepository sourceOf({required bool anchored}) =>
             OfficialSectorFundamentalsRepository(
-              inner: _CvmNaData(
+              inner: _CvmAtDate(
                 fundamentals,
                 hist,
                 docs,
                 t,
-                ancorada: ancorada,
+                anchored: anchored,
               ),
-              classificacao: (x) async => classe(x),
+              classification: (x) async => shareClass(x),
             );
-        final proventosDoBeta = CashDividendsCodec.forTicker(
-          pacoteDeProventos!,
+        final betaDividends = CashDividendsCodec.forTicker(
+          dividendsPackage!,
           ticker.value,
         );
-        final fimDoContrato = outorgas!.naData(ticker.value, t)?.end;
+        final contractEnd = grants!.atDate(ticker.value, t)?.end;
 
         // O contrafactual da base (item C3): a montagem da rodada anterior —
         // preço e volume da fonte, contagem do exercício, sem contagem oficial —
         // sobre o mesmo ativo e a mesma data, só nas coortes de 30/09.
-        Future<Map<String, Object?>> contrafactual() async {
-          final antiga = _reescala(histRes.unwrap(), p0);
+        Future<Map<String, Object?>> counterfactual() async {
+          final oldSeries = _rescale(historyResult.unwrap(), p0);
           final prep = await PrepareValuationInputs.call(
             ticker: ticker,
             prices: prices,
             fundamentals: OfficialSectorFundamentalsRepository(
-              inner: _CvmNaData(fundamentals, antiga, docs, t),
-              classificacao: (x) async => classe(x),
+              inner: _CvmAtDate(fundamentals, oldSeries, docs, t),
+              classification: (x) async => shareClass(x),
             ),
             benchmark: benchmark,
             riskFreeRate: anchors.currentRiskFreeRate,
             asOf: t,
-            marketPremium: premio,
-            premiumSource: origemDoPremio,
+            marketPremium: premium,
+            premiumSource: premiumOrigin,
             perpetualGrowthCap: anchors.nominalEconomyGrowth,
             inflation: anchors.inflationCagr,
             terminalRiskFreeRate: anchors.riskFreeCagr,
             projectionYears: 10,
-            riskFreeCurve: curvaDaCoorte,
-            concessionEnd: fimDoContrato,
-            dividends: proventosDoBeta,
+            riskFreeCurve: cohortCurve,
+            concessionEnd: contractEnd,
+            dividends: betaDividends,
           );
           if (prep.isErr) return const {'recusaBaseAntiga': 'sem insumos'};
           final ins = prep.unwrap();
           final r = ValuationCascade.evaluate(ins);
           final pub = PointInTimeView(t).published(ins.fundamentals);
           final u = pub.isEmpty ? null : pub.last;
-          final pl = u?.equityBookValue, vm = u?.marketCap;
+          final pl = u?.equityBookValue, marketValue = u?.marketCap;
           return {
             'upsideBaseAntiga': r.isOk ? r.unwrap().upside : null,
             'recusaBaseAntiga': r.isOk ? null : r.failureOrNull?.message,
-            'bookToMarketBaseAntiga': (pl != null && vm != null && vm > 0)
-                ? pl / vm
+            'bookToMarketBaseAntiga': (pl != null && marketValue != null && marketValue > 0)
+                ? pl / marketValue
                 : null,
             'liquidezBaseAntiga': ins.prices == null
                 ? null
@@ -1298,63 +1298,63 @@ Future<void> main(List<String> args) async {
           };
         }
 
-        tickersListados.add(ticker.value);
-        tickersNaData.add(ticker.value);
-        if (cnpj != null) cnpjsListadosNaData.add(cnpj);
-        await observar(
+        listedTickers.add(ticker.value);
+        tickersAtDate.add(ticker.value);
+        if (cnpj != null) listedCnpjsAtDate.add(cnpj);
+        await observe(
           ticker: ticker,
-          serie: serie,
+          series: series,
           p0: p0,
-          precoNaData: precoBruto,
-          fonte: fonteDe(ancorada: false),
-          fonteAncorada: trimestral ? fonteDe(ancorada: true) : null,
-          precos: _SerieFixa(serieNaData),
-          brutoDoPapel: brutos,
-          proventosDoPapel: proventosDo(proventos, ticker.value),
-          proventosDoBeta: proventosDoBeta,
-          fimDoContrato: fimDoContrato,
-          contagemOficial: acoes == null
+          priceAtDate: rawPrice,
+          source: sourceOf(anchored: false),
+          anchoredSource: quarterly ? sourceOf(anchored: true) : null,
+          prices: _FixedSeries(seriesAtDate),
+          securityRaw: rawSessions,
+          securityDividendsList: dividendsOf(dividends, ticker.value),
+          betaDividends: betaDividends,
+          contractEnd: contractEnd,
+          officialCount: shares == null
               ? null
-              : OfficialShareCount(total: acoes, asOf: t),
+              : OfficialShareCount(total: shares, asOf: t),
           // A composição declarada da unit na FCA vigente na data (item B16).
-          acoesNaUnit: cnpj == null
+          sharesInUnit: cnpj == null
               ? null
               : UnitCompositionCodec.at(
-                  fca?.unitsPorCnpj[cnpj] ?? const [],
+                  fca?.unitsByCnpj[cnpj] ?? const [],
                   t,
                 )?.shares,
-          contar: () => avaliados++,
-          emissoes: emissoesDe(
+          count: () => evaluated++,
+          issuances: issuancesOf(
             cnpj,
             t,
-            brutos: brutos,
-            eventos: eventosDeclaradosDo[ticker.value] ??= eventosDeAcoes!
-                .doPapel(
+            rawSessions: rawSessions,
+            events: declaredEventsOf[ticker.value] ??= shareEvents!
+                .ofSecurity(
                   cnpj: cnpj,
                   ticker: ticker.value,
-                  brutos: brutos,
-                  comContagem: false,
+                  rawSessions: rawSessions,
+                  withCount: false,
                 ),
           ),
           extras: {
-            if (deslistadas != null) 'deslistada': false,
-            'fatorDeBase': base.fator,
+            if (delisted != null) 'deslistada': false,
+            'fatorDeBase': base.factor,
             // Os eventos que a fonte não ajustou e foram ajustados (B29), e se
             // a contagem da data recebeu evento que o FRE não tinha (B30).
-            'eventosSemAjusteNaFonte': semAjusteDo[ticker.value]?.length ?? 0,
-            if (comEventos != null && comEventos.aplicados.isNotEmpty)
+            'eventosSemAjusteNaFonte': unadjustedOf[ticker.value]?.length ?? 0,
+            if (withEvents != null && withEvents.applied.isNotEmpty)
               'contagemComEvento': [
-                for (final e in comEventos.aplicados)
-                  '${_dia(e.exDate)}×${e.factor}',
+                for (final e in withEvents.applied)
+                  '${_day(e.exDate)}×${e.factor}',
               ],
             // O pregão da data veio de um código anterior da companhia.
-            if (!(bruto[ticker.value]?.contains(base.pregao) ?? false))
+            if (!(raw[ticker.value]?.contains(base.tradingDay) ?? false))
               'pregaoDeOutroCodigo': true,
             'origemDoValorDeMercado':
-                valor?.origem ??
-                (acoes == null ? 'contagemDoExercicio' : 'semPregaoDeEspecie'),
+                value?.origin ??
+                (shares == null ? 'contagemDoExercicio' : 'semPregaoDeEspecie'),
           },
-          contrafactual: contrafactualBase && anual ? contrafactual : null,
+          counterfactual: counterfactualBase && annual ? counterfactual : null,
         );
       }
 
@@ -1363,144 +1363,144 @@ Future<void> main(List<String> args) async {
       // não explica, na janela do beta — ela não estaria ajustada por eles. No
       // horizonte do retorno, a janela que os atravessa fica sem retorno. O
       // papel que já entrou como listado nesta coorte não entra de novo.
-      var excluidasPorEvento = 0, deslistadasNaData = 0, repetidas = 0;
-      final papeisDeslistados =
-          deslistadas?.papeis.values ?? const <PapelDeslistado>[];
-      for (final papel
-          in soEstatais
-              ? const <PapelDeslistado>[]
-              : amostra == null
-              ? papeisDeslistados
-              : papeisDeslistados.take(amostra)) {
-        final pregao = pregaoAte(papel.pregoes, t, folgaDias: folgaDoPregao);
-        if (pregao == null || pregao.close <= 0) continue;
-        if (tickersNaData.contains(papel.ticker.value) ||
-            cnpjsListadosNaData.contains(papel.cnpj)) {
-          repetidas++;
+      var excludedByEvent = 0, delistedAtDate = 0, repeated = 0;
+      final delistedSecurities =
+          delisted?.securities.values ?? const <DelistedSecurity>[];
+      for (final security
+          in stateOwnedOnly
+              ? const <DelistedSecurity>[]
+              : sample == null
+              ? delistedSecurities
+              : delistedSecurities.take(sample)) {
+        final tradingDay = tradingDayUntil(security.tradingDays, t, marginDays: sessionMargin);
+        if (tradingDay == null || tradingDay.close <= 0) continue;
+        if (tickersAtDate.contains(security.ticker.value) ||
+            listedCnpjsAtDate.contains(security.cnpj)) {
+          repeated++;
           continue;
         }
-        deslistadasNaData++;
-        if (papel.janelaSuspeita(DateTime.utc(t.year - 5, t.month, t.day), t)) {
-          excluidasPorEvento++;
+        delistedAtDate++;
+        if (security.suspiciousWindow(DateTime.utc(t.year - 5, t.month, t.day), t)) {
+          excludedByEvent++;
           continue;
         }
-        final serieFinal = papel.serie(
-          DateRange(DateTime(2010, 1, 1), fimDosDados),
-          ate: fimDosDados,
+        final finalSeries = security.series(
+          DateRange(DateTime(2010, 1, 1), dataEnd),
+          until: dataEnd,
         );
-        final p0 = _precoEm(serieFinal, t);
+        final p0 = _priceAt(finalSeries, t);
         if (p0 == null || p0 <= 0) continue;
-        final valor = deslistadas!.valorDeMercado(papel, t);
-        final acoes = papel.acoesEm(t);
-        final docs = deslistadas.documentos[papel.ticker.value] ?? const [];
-        await observar(
-          ticker: papel.ticker,
-          serie: serieFinal,
+        final value = delisted!.marketValueOf(security, t);
+        final shares = security.sharesAt(t);
+        final docs = delisted.documents[security.ticker.value] ?? const [];
+        await observe(
+          ticker: security.ticker,
+          series: finalSeries,
           p0: p0,
-          precoNaData: pregao.close,
-          fonte: FundamentosDeslistada(
-            papel,
+          priceAtDate: tradingDay.close,
+          source: DelistedFundamentals(
+            security,
             docs,
             t,
-            pregao.close,
-            valorDeMercado: valor?.valor,
+            tradingDay.close,
+            marketValueOf: value?.value,
           ),
-          fonteAncorada: trimestral
-              ? FundamentosDeslistada(
-                  papel,
+          anchoredSource: quarterly
+              ? DelistedFundamentals(
+                  security,
                   docs,
                   t,
-                  pregao.close,
-                  valorDeMercado: valor?.valor,
-                  ancorada: true,
+                  tradingDay.close,
+                  marketValueOf: value?.value,
+                  anchored: true,
                 )
               : null,
-          precos: PrecosDeslistada(papel, t),
-          brutoDoPapel: papel.pregoes,
-          proventosDoPapel: papel.proventos,
-          proventosDoBeta: papel.proventos,
-          fimDoContrato: outorgas!.naDataPorCnpj(papel.cnpj, t)?.end,
-          contagemOficial: acoes == null
+          prices: DelistedPrices(security, t),
+          securityRaw: security.tradingDays,
+          securityDividendsList: security.dividends,
+          betaDividends: security.dividends,
+          contractEnd: grants!.atDateByCnpj(security.cnpj, t)?.end,
+          officialCount: shares == null
               ? null
-              : OfficialShareCount(total: acoes, asOf: t),
-          acoesNaUnit: UnitCompositionCodec.at(
-            fca?.unitsPorCnpj[papel.cnpj] ?? const [],
+              : OfficialShareCount(total: shares, asOf: t),
+          sharesInUnit: UnitCompositionCodec.at(
+            fca?.unitsByCnpj[security.cnpj] ?? const [],
             t,
           )?.shares,
-          contar: () => avaliadasDeslistadas++,
-          janelaInvalida: papel.janelaSuspeita,
-          emissoes: emissoesDe(
-            papel.cnpj,
+          count: () => evaluatedDelisted++,
+          invalidWindow: security.suspiciousWindow,
+          issuances: issuancesOf(
+            security.cnpj,
             t,
-            brutos: papel.pregoes,
-            eventos: papel.eventos,
+            rawSessions: security.tradingDays,
+            events: security.events,
           ),
           extras: {
             'deslistada': true,
-            'cnpj': papel.cnpj,
-            'origemDoSetor': papel.origemDoSetor,
-            'origemDoValorDeMercado': valor?.origem ?? 'contagemVezesPreco',
+            'cnpj': security.cnpj,
+            'origemDoSetor': security.sectorOrigin,
+            'origemDoValorDeMercado': value?.origin ?? 'contagemVezesPreco',
           },
         );
       }
-      if (deslistadas != null) {
+      if (delisted != null) {
         stderr.writeln(
-          '  ${_dia(t)}: deslistadas negociando $deslistadasNaData, '
-          '$excluidasPorEvento fora por evento não localizado ou salto, '
-          '$repetidas já listadas, $avaliadasDeslistadas avaliadas',
+          '  ${_day(t)}: deslistadas negociando $delistedAtDate, '
+          '$excludedByEvent fora por evento não localizado ou salto, '
+          '$repeated já listadas, $evaluatedDelisted avaliadas',
         );
       }
       stderr.writeln(
-        '  ${_dia(t)}: $avaliados avaliados de ${universe.length}'
-        '${app ? ', ${semBase[_dia(t)] ?? 0} sem pregão na data' : ''}'
+        '  ${_day(t)}: $evaluated avaliados de ${universe.length}'
+        '${app ? ', ${withoutBase[_day(t)] ?? 0} sem pregão na data' : ''}'
         '   (rf=${(anchors.currentRiskFreeRate * 100).toStringAsFixed(2)}%, '
         'rf_inf=${(anchors.riskFreeCagr * 100).toStringAsFixed(2)}%, '
-        'prêmio=${(premio * 100).toStringAsFixed(2)}%)',
+        'prêmio=${(premium * 100).toStringAsFixed(2)}%)',
       );
     }
-    if (descartadasPorCnpj.isNotEmpty) {
-      final comDescarte = descartadasPorCnpj.values.where((n) => n > 0);
+    if (discardedByCnpj.isNotEmpty) {
+      final withDiscard = discardedByCnpj.values.where((n) => n > 0);
       stderr.writeln(
         'contagem conferida contra o preço (B43): '
-        '${comDescarte.length} de ${descartadasPorCnpj.length} listadas com '
-        '${comDescarte.fold(0, (a, b) => a + b)} entradas descartadas',
+        '${withDiscard.length} de ${discardedByCnpj.length} listadas com '
+        '${withDiscard.fold(0, (a, b) => a + b)} entradas descartadas',
       );
     }
 
-    final destino =
-        saida ??
+    final destination =
+        output ??
         (c7
             ? 'data/c7/coortes.json'
-            : amostra != null
+            : sample != null
             ? 'docs/validacao/backtest_amostra.json'
             : !app
             ? 'docs/validacao/backtest_valuation.json'
-            : trimestral
+            : quarterly
             ? 'docs/validacao/backtest_trimestral.json'
-            : comDeslistadas
+            : withDelisted
             ? 'docs/validacao/backtest_aplicativo_deslistadas.json'
             : 'docs/validacao/backtest_aplicativo.json');
-    File(destino)
+    File(destination)
       ..parent.createSync(recursive: true)
       ..writeAsStringSync(
         app
-            ? jsonEncode(_compacto(linhas))
-            : const JsonEncoder.withIndent(' ').convert(linhas),
+            ? jsonEncode(_compact(rows))
+            : const JsonEncoder.withIndent(' ').convert(rows),
       );
-    stderr.writeln('escrito $destino (${linhas.length} observações)');
+    stderr.writeln('escrito $destination (${rows.length} observações)');
     if (app &&
-        trimestral &&
-        comDeslistadas &&
-        amostra == null &&
+        quarterly &&
+        withDelisted &&
+        sample == null &&
         !c7 &&
-        saida == null) {
+        output == null) {
       // O universo que as coortes observam como listado: é o que a ponte das
       // deslistadas (`tool/b3_ponte.py`) exclui, para não dar duas pontas à
       // mesma companhia (item C1d).
       File('docs/validacao/universo_coortes.json').writeAsStringSync(
         const JsonEncoder.withIndent(' ').convert({
           'geradoPor': 'tool/backtest_valuation.dart',
-          'tickers': tickersListados.toList()..sort(),
+          'tickers': listedTickers.toList()..sort(),
         }),
       );
     }
@@ -1515,18 +1515,18 @@ Future<void> main(List<String> args) async {
 /// **Pela cópia do núcleo** (item B27): a versão à mão perdia a composição
 /// declarada da unit, a taxa de referência do crédito e a janela do beta, e a
 /// leitura ancorada saía com outro divisor nas units.
-ValuationInputs _comFundamentos(
+ValuationInputs _withFundamentals(
   ValuationInputs b,
-  List<FundamentalsSnapshot> fundamentos,
-) => b.withFundamentals(fundamentos);
+  List<FundamentalsSnapshot> fundamentals,
+) => b.withFundamentals(fundamentals);
 
 /// Os mesmos insumos sem a série de cotações: a Porta 0 omite o corte de
 /// liquidez sem ela, e nada mais na cascata lê a série.
-ValuationInputs _semSerie(ValuationInputs b) => b.withoutPrices();
+ValuationInputs _withoutSeries(ValuationInputs b) => b.withoutPrices();
 
 /// Devolve o histórico já reescalado, mantendo o resto do repositório.
-class _EscaladoFundamentals implements FundamentalsRepository {
-  _EscaladoFundamentals(this.inner, this.hist);
+class _ScaledFundamentals implements FundamentalsRepository {
+  _ScaledFundamentals(this.inner, this.hist);
   final FundamentalsRepository inner;
   final List<FundamentalsSnapshot> hist;
 

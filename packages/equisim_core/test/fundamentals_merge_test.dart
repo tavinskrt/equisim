@@ -16,7 +16,7 @@ FundamentalsSnapshot _cvm() => FundamentalsSnapshot(
       // A CVM nao publica mercado.
     );
 
-FundamentalsSnapshot _mercado() => FundamentalsSnapshot(
+FundamentalsSnapshot _market() => FundamentalsSnapshot(
       ticker: _t,
       fiscalPeriodEnd: DateTime(2024, 12, 31),
       totalRevenue: 999, // divergente de proposito
@@ -28,13 +28,13 @@ FundamentalsSnapshot _mercado() => FundamentalsSnapshot(
       enterpriseToEbitda: 7.5,
     );
 
-FundamentalsSnapshot _cvmSemPl() => FundamentalsSnapshot(
+FundamentalsSnapshot _cvmWithoutEquity() => FundamentalsSnapshot(
       ticker: _t,
       fiscalPeriodEnd: DateTime(2024, 12, 31),
       netIncome: 140,
     );
 
-FundamentalsSnapshot _mercado2() => FundamentalsSnapshot(
+FundamentalsSnapshot _market2() => FundamentalsSnapshot(
       ticker: _t,
       fiscalPeriodEnd: DateTime(2024, 12, 31),
       bookValuePerShare: 6.18,
@@ -44,7 +44,7 @@ FundamentalsSnapshot _mercado2() => FundamentalsSnapshot(
 void main() {
   group('Mescla', () {
     test('a CVM vence no que ela publica', () {
-      final m = FundamentalsMerge.merge(cvm: _cvm(), mercado: _mercado())!;
+      final m = FundamentalsMerge.merge(cvm: _cvm(), market: _market())!;
       expect(m.snapshot.totalRevenue, 1000);
       expect(m.snapshot.ebit, 250);
       expect(m.snapshot.netIncome, 140);
@@ -53,22 +53,22 @@ void main() {
     });
 
     test('o mercado preenche o que a CVM não tem', () {
-      final m = FundamentalsMerge.merge(cvm: _cvm(), mercado: _mercado())!;
+      final m = FundamentalsMerge.merge(cvm: _cvm(), market: _market())!;
       expect(m.snapshot.ebitda, 300);
-      expect(m.provenance.of('ebitda'), FieldSource.mercado);
+      expect(m.provenance.of('ebitda'), FieldSource.market);
     });
 
     test('exercício de outra data não empresta fluxo — decisão 78',
         () {
       // Doze meses até junho de 2025 contra o dezembro de 2024 do mercado.
-      final junho = FundamentalsSnapshot(
+      final june = FundamentalsSnapshot(
         ticker: _t,
         fiscalPeriodEnd: DateTime.utc(2025, 6, 30),
         receiptDate: DateTime.utc(2025, 8, 10),
         ebit: 260,
         netIncome: 150,
       );
-      final dezembro = FundamentalsSnapshot(
+      final december = FundamentalsSnapshot(
         ticker: _t,
         fiscalPeriodEnd: DateTime.utc(2024, 12, 31),
         receiptDate: DateTime.utc(2025, 2, 19),
@@ -82,7 +82,7 @@ void main() {
         sharesOutstanding: 1e9,
         enterpriseToEbitda: 7.5,
       );
-      final m = FundamentalsMerge.merge(cvm: junho, mercado: dezembro)!;
+      final m = FundamentalsMerge.merge(cvm: june, market: december)!;
       final s = m.snapshot;
       expect(s.interestExpense, isNull,
           reason: 'juros de outra janela no custo da dívida');
@@ -98,8 +98,8 @@ void main() {
       expect(s.sharesOutstanding, 1e9);
       expect(s.enterpriseToEbitda, 7.5);
       expect(s.ebit, 260);
-      expect(m.provenance.of('interestExpense'), FieldSource.ausente);
-      expect(m.provenance.of('marketCap'), FieldSource.mercado);
+      expect(m.provenance.of('interestExpense'), FieldSource.missing);
+      expect(m.provenance.of('marketCap'), FieldSource.market);
     });
 
     group('A base de patrimônio é o PL da CVM — decisão 81', () {
@@ -110,32 +110,32 @@ void main() {
           totalStockholderEquity: 48.25e9,
         );
         // HAPV3: a base de mercado dava R$ 373 bi.
-        final mercado = FundamentalsSnapshot(
+        final market = FundamentalsSnapshot(
           ticker: _t,
           fiscalPeriodEnd: DateTime.utc(2025, 12, 31),
           bookValuePerShare: 49.7,
           sharesOutstandingAsOf: 7.507e9,
         );
-        final m = FundamentalsMerge.merge(cvm: cvm, mercado: mercado)!;
+        final m = FundamentalsMerge.merge(cvm: cvm, market: market)!;
         expect(m.snapshot.equityBookValue, closeTo(48.25e9, 1e-3));
         expect(m.snapshot.sharesOutstandingAsOf, 7.507e9,
             reason: 'a contagem continua sendo a do mercado — decisão 70');
-        expect(m.provenance.of('bookValuePerShare'), FieldSource.derivado);
+        expect(m.provenance.of('bookValuePerShare'), FieldSource.derived);
       });
 
       test('no ponto de junho, o PL é o de junho', () {
-        final junho = FundamentalsSnapshot(
+        final june = FundamentalsSnapshot(
           ticker: _t,
           fiscalPeriodEnd: DateTime.utc(2025, 6, 30),
           totalStockholderEquity: 2100,
         );
-        final dezembro = FundamentalsSnapshot(
+        final december = FundamentalsSnapshot(
           ticker: _t,
           fiscalPeriodEnd: DateTime.utc(2024, 12, 31),
           bookValuePerShare: 20,
           sharesOutstandingAsOf: 100,
         );
-        final m = FundamentalsMerge.merge(cvm: junho, mercado: dezembro)!;
+        final m = FundamentalsMerge.merge(cvm: june, market: december)!;
         expect(m.snapshot.equityBookValue, closeTo(2100, 1e-9),
             reason: 'e não os 2.000 de dezembro, que a decisão 78 declarava');
       });
@@ -146,32 +146,32 @@ void main() {
           fiscalPeriodEnd: DateTime.utc(2025, 12, 31),
           totalStockholderEquity: -500,
         );
-        final mercado = FundamentalsSnapshot(
+        final market = FundamentalsSnapshot(
           ticker: _t,
           fiscalPeriodEnd: DateTime.utc(2025, 12, 31),
           bookValuePerShare: 3,
           sharesOutstandingAsOf: 100,
         );
-        final m = FundamentalsMerge.merge(cvm: cvm, mercado: mercado)!;
+        final m = FundamentalsMerge.merge(cvm: cvm, market: market)!;
         expect(m.snapshot.equityBookValue, isNull);
         expect(m.snapshot.bookValuePerShare, -5);
       });
 
       test('sem PL na CVM, o VPA do mercado segue', () {
-        final m = FundamentalsMerge.merge(cvm: _cvmSemPl(), mercado: _mercado2())!;
+        final m = FundamentalsMerge.merge(cvm: _cvmWithoutEquity(), market: _market2())!;
         expect(m.snapshot.bookValuePerShare, 6.18);
-        expect(m.provenance.of('bookValuePerShare'), FieldSource.mercado);
+        expect(m.provenance.of('bookValuePerShare'), FieldSource.market);
       });
     });
 
     test('fevereiro bissexto é a mesma janela', () {
       expect(
-        FundamentalsMerge.mesmaJanela(
+        FundamentalsMerge.sameWindow(
             DateTime.utc(2024, 2, 29), DateTime.utc(2024, 2, 28)),
         isTrue,
       );
       expect(
-        FundamentalsMerge.mesmaJanela(
+        FundamentalsMerge.sameWindow(
             DateTime.utc(2024, 6, 30), DateTime.utc(2023, 12, 31)),
         isFalse,
       );
@@ -182,28 +182,28 @@ void main() {
       // 34,5% em milhares. Importar o absoluto levou a MILS3 a +14.037%.
       // A ferramenta de ingestao ja deixou de preenche-lo; a regra fica na
       // mescla para que outra montagem nao o reintroduza.
-      final cvmComContagem = FundamentalsSnapshot(
+      final cvmWithCount = FundamentalsSnapshot(
         ticker: _t,
         fiscalPeriodEnd: DateTime(2024, 12, 31),
         sharesOutstandingAsOf: 234178, // em milhares, e errado
         bookValuePerShare: 9999,
       );
-      final mercado = FundamentalsSnapshot(
+      final market = FundamentalsSnapshot(
         ticker: _t,
         fiscalPeriodEnd: DateTime(2024, 12, 31),
         sharesOutstandingAsOf: 234178210,
         bookValuePerShare: 6.18,
       );
-      final m = FundamentalsMerge.merge(cvm: cvmComContagem, mercado: mercado)!;
+      final m = FundamentalsMerge.merge(cvm: cvmWithCount, market: market)!;
       expect(m.snapshot.sharesOutstandingAsOf, 234178210);
       expect(m.snapshot.bookValuePerShare, 6.18);
-      expect(m.provenance.of('sharesOutstandingAsOf'), FieldSource.mercado);
+      expect(m.provenance.of('sharesOutstandingAsOf'), FieldSource.market);
     });
 
     test('valor de mercado e contagem corrente NUNCA vêm da CVM', () {
       // Mesmo que a CVM trouxesse — e ela nao traz —, estes descrevem o hoje
       // do papel, e nao o exercicio.
-      final cvmComMercado = FundamentalsSnapshot(
+      final cvmWithMarket = FundamentalsSnapshot(
         ticker: _t,
         fiscalPeriodEnd: DateTime(2024, 12, 31),
         marketCap: 1.0,
@@ -211,44 +211,44 @@ void main() {
         enterpriseToEbitda: 3.0,
       );
       final m = FundamentalsMerge.merge(
-          cvm: cvmComMercado, mercado: _mercado())!;
+          cvm: cvmWithMarket, market: _market())!;
       expect(m.snapshot.marketCap, 9e9);
       expect(m.snapshot.sharesOutstanding, 1e9);
       expect(m.snapshot.enterpriseToEbitda, 7.5);
       // Só os que o exemplar de mercado preenche; os demais de
-      // `somenteDeMercado` têm teste próprio acima.
+      // `marketOnly` têm teste próprio acima.
       for (final c in const [
         'marketCap',
         'sharesOutstanding',
         'enterpriseToEbitda',
       ]) {
-        expect(m.provenance.of(c), FieldSource.mercado, reason: c);
+        expect(m.provenance.of(c), FieldSource.market, reason: c);
       }
     });
 
     test('a data de recebimento é da CVM', () {
-      final m = FundamentalsMerge.merge(cvm: _cvm(), mercado: _mercado())!;
+      final m = FundamentalsMerge.merge(cvm: _cvm(), market: _market())!;
       expect(m.snapshot.receiptDate, DateTime(2025, 2, 19));
       expect(m.provenance.of('receiptDate'), FieldSource.cvm);
     });
 
     test('campos que só a CVM tem chegam ao resultado', () {
-      final m = FundamentalsMerge.merge(cvm: _cvm(), mercado: _mercado())!;
+      final m = FundamentalsMerge.merge(cvm: _cvm(), market: _market())!;
       expect(m.snapshot.totalAssets, 5000);
       expect(m.snapshot.treasuryShares, 1e6);
       expect(m.provenance.of('totalAssets'), FieldSource.cvm);
     });
 
     test('fonte única não perde nada, e a procedência diz qual', () {
-      final soCvm = FundamentalsMerge.merge(cvm: _cvm())!;
-      expect(soCvm.snapshot.netIncome, 140);
-      expect(soCvm.provenance.of('netIncome'), FieldSource.cvm);
-      expect(soCvm.provenance.of('marketCap'), FieldSource.ausente);
+      final cvmOnly = FundamentalsMerge.merge(cvm: _cvm())!;
+      expect(cvmOnly.snapshot.netIncome, 140);
+      expect(cvmOnly.provenance.of('netIncome'), FieldSource.cvm);
+      expect(cvmOnly.provenance.of('marketCap'), FieldSource.missing);
 
-      final soMercado = FundamentalsMerge.merge(mercado: _mercado())!;
-      expect(soMercado.snapshot.marketCap, 9e9);
-      expect(soMercado.provenance.of('marketCap'), FieldSource.mercado);
-      expect(soMercado.provenance.of('totalAssets'), FieldSource.ausente);
+      final marketOnlyMerge = FundamentalsMerge.merge(market: _market())!;
+      expect(marketOnlyMerge.snapshot.marketCap, 9e9);
+      expect(marketOnlyMerge.provenance.of('marketCap'), FieldSource.market);
+      expect(marketOnlyMerge.provenance.of('totalAssets'), FieldSource.missing);
     });
 
     test('sem nenhuma das duas, devolve nulo', () {
@@ -256,23 +256,23 @@ void main() {
     });
 
     test('campo ausente nas duas fica ausente, e não zero', () {
-      final m = FundamentalsMerge.merge(cvm: _cvm(), mercado: _mercado())!;
+      final m = FundamentalsMerge.merge(cvm: _cvm(), market: _market())!;
       expect(m.snapshot.freeCashFlow, isNull);
-      expect(m.provenance.of('freeCashFlow'), FieldSource.ausente);
+      expect(m.provenance.of('freeCashFlow'), FieldSource.missing);
     });
   });
 
   group('Procedência', () {
     test('conta por fonte', () {
-      final m = FundamentalsMerge.merge(cvm: _cvm(), mercado: _mercado())!;
-      final c = m.provenance.contagem;
+      final m = FundamentalsMerge.merge(cvm: _cvm(), market: _market())!;
+      final c = m.provenance.count;
       expect(c[FieldSource.cvm], greaterThan(0));
-      expect(c[FieldSource.mercado], greaterThan(0));
+      expect(c[FieldSource.market], greaterThan(0));
     });
 
     test('o mapa é imutável', () {
       final p = FundamentalsProvenance({'x': FieldSource.cvm});
-      expect(() => p.byField['y'] = FieldSource.mercado, throwsUnsupportedError);
+      expect(() => p.byField['y'] = FieldSource.market, throwsUnsupportedError);
     });
   });
 }

@@ -59,9 +59,9 @@ class LogsPage extends StatefulWidget {
 }
 
 enum _Filter implements WireKeyed {
-  todos('todos'),
-  calculos('calculos'),
-  rede('rede');
+  all('todos'),
+  calculations('calculos'),
+  network('rede');
 
   const _Filter(this.key);
 
@@ -78,7 +78,7 @@ class _LogsPageState extends State<LogsPage> {
 
   bool _autoScroll = true;
   bool _dark = true;
-  _Filter _filter = _Filter.todos;
+  _Filter _filter = _Filter.all;
   int _lastCount = 0;
 
   @override
@@ -122,12 +122,12 @@ class _LogsPageState extends State<LogsPage> {
   }
 
   bool _matchesFilter(AuditEvent event) => switch (_filter) {
-    _Filter.todos => true,
+    _Filter.all => true,
     // **Pela origem, e não pela presença de passos** (item D4): a avaliação
     // recusada antes do primeiro passo não tem fórmula decomposta, e a regra
     // antiga a filtrava como ida à rede.
-    _Filter.calculos => AuditBus.isCalculation(event),
-    _Filter.rede => !AuditBus.isCalculation(event),
+    _Filter.calculations => AuditBus.isCalculation(event),
+    _Filter.network => !AuditBus.isCalculation(event),
   };
 
   bool _matchesQuery(AuditEvent event, String query) {
@@ -207,9 +207,9 @@ class _LogsPageState extends State<LogsPage> {
 
   void _export() {
     final events = _visible;
-    final busca = _search.text.trim();
-    final descartadosCalculos = _bus.discardedCalculations;
-    final descartadosRede = _bus.discardedNetwork;
+    final query = _search.text.trim();
+    final discardedCalculations = _bus.discardedCalculations;
+    final discardedNetwork = _bus.discardedNetwork;
     final document = const JsonEncoder.withIndent('  ').convert({
       'aplicacao': 'Equisim',
       'documento': 'Auditoria de cálculos',
@@ -227,12 +227,12 @@ class _LogsPageState extends State<LogsPage> {
       ),
       'totalNoHistorico': _bus.history.length,
       'filtroAplicado': _filter.key,
-      'buscaAplicada': busca.isEmpty ? null : busca,
+      'buscaAplicada': query.isEmpty ? null : query,
       'descartados': {
-        'calculos': descartadosCalculos,
-        'rede': descartadosRede,
+        'calculos': discardedCalculations,
+        'rede': discardedNetwork,
       },
-      if (descartadosCalculos > 0 || descartadosRede > 0)
+      if (discardedCalculations > 0 || discardedNetwork > 0)
         'aviso': 'O histórico descartou eventos antigos por falta de espaço: '
             'este arquivo não tem a sessão inteira.',
       'eventos': [for (final e in events) e.toJson()],
@@ -427,9 +427,9 @@ class _Header extends StatelessWidget {
                 _FilterChip(
                   theme: theme,
                   label: switch (f) {
-                    _Filter.todos => 'Todos',
-                    _Filter.calculos => 'Cálculos',
-                    _Filter.rede => 'Rede',
+                    _Filter.all => 'Todos',
+                    _Filter.calculations => 'Cálculos',
+                    _Filter.network => 'Rede',
                   },
                   selected: filter == f,
                   onTap: () => onFilter(f),
@@ -1027,7 +1027,7 @@ class _ExplanationBox extends StatelessWidget {
 
   /// A escala tipográfica do aplicativo, sem o tema: a janela de auditoria é
   /// uma instância à parte, e o `MaterialApp` dela não carrega `FinTheme`.
-  static final _tipo = FinTypography.standard();
+  static final _typography = FinTypography.standard();
 
   @override
   Widget build(BuildContext context) {
@@ -1047,17 +1047,17 @@ class _ExplanationBox extends StatelessWidget {
         children: [
           Text(
             'POR QUÊ',
-            style: _tipo.label.copyWith(color: theme.accent),
+            style: _typography.label.copyWith(color: theme.accent),
           ),
           const Gap.xs(),
-          for (final (i, linha) in lines.indexed)
+          for (final (i, row) in lines.indexed)
             Padding(
               padding: i == 0
                   ? EdgeInsets.zero
                   : const EdgeInsets.only(top: FinSpace.sm),
               child: SelectableText(
-                linha,
-                style: _tipo.bodySm.copyWith(
+                row,
+                style: _typography.bodySm.copyWith(
                   color: theme.text,
                   height: 1.5,
                   fontWeight: i == 1 ? FontWeight.w600 : FontWeight.normal,
@@ -1221,7 +1221,7 @@ class _SampleChart extends StatelessWidget {
   /// espaço com o número.
   Widget _row(TraceSamplePoint point) {
     final tag = _tagOf(point);
-    final valor = SelectableText(
+    final value = SelectableText(
       _formatNumber(point.value),
       style: theme.mono(
         color: point.definesResult ? theme.accent : theme.text,
@@ -1229,7 +1229,7 @@ class _SampleChart extends StatelessWidget {
         bold: point.definesResult,
       ),
     );
-    final rotulo = SizedBox(
+    final label = SizedBox(
       width: 64,
       child: SelectableText(
         point.label,
@@ -1245,8 +1245,8 @@ class _SampleChart extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  rotulo,
-                  Expanded(child: valor),
+                  label,
+                  Expanded(child: value),
                 ],
               ),
               if (tag.isNotEmpty)
@@ -1266,8 +1266,8 @@ class _SampleChart extends StatelessWidget {
         // que é o texto de comprimento variável.
         return Row(
           children: [
-            rotulo,
-            valor,
+            label,
+            value,
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -1507,18 +1507,18 @@ class _SampleChartPainter extends CustomPainter {
     var top = values.reduce(math.max);
 
     if (low != null && high != null) {
-      final folga = (high - low) * 0.55;
-      final limiteAlto = high + folga;
-      final limiteBaixo = math.min(0.0, low - folga);
+      final margin = (high - low) * 0.55;
+      final upperLimit = high + margin;
+      final lowerLimit = math.min(0.0, low - margin);
       // Só corta se houver o que cortar: com a série toda dentro da banda,
       // apertar a escala inventaria um corte que não existe.
       top = math.min(
         top,
-        math.max(limiteAlto, _largestUpTo(values, limiteAlto)),
+        math.max(upperLimit, _largestUpTo(values, upperLimit)),
       );
       bottom = math.max(
         bottom,
-        math.min(limiteBaixo, _smallestFrom(values, limiteBaixo)),
+        math.min(lowerLimit, _smallestFrom(values, lowerLimit)),
       );
     }
 
@@ -1530,22 +1530,22 @@ class _SampleChartPainter extends CustomPainter {
     if (top - bottom < 1e-12) {
       // Série constante: sem folga artificial, a conversão de valor para pixel
       // dividiria por zero e o gráfico sairia em branco.
-      final unidade = top.abs() < 1e-12 ? 1.0 : top.abs() * 0.1;
-      top += unidade;
-      bottom -= unidade;
+      final unit = top.abs() < 1e-12 ? 1.0 : top.abs() * 0.1;
+      top += unit;
+      bottom -= unit;
     }
     final span = top - bottom;
     return (bottom - span * 0.06, top + span * 0.14);
   }
 
   static double _largestUpTo(List<double> values, double limit) {
-    final dentro = values.where((v) => v <= limit);
-    return dentro.isEmpty ? limit : dentro.reduce(math.max);
+    final within = values.where((v) => v <= limit);
+    return within.isEmpty ? limit : within.reduce(math.max);
   }
 
   static double _smallestFrom(List<double> values, double limit) {
-    final dentro = values.where((v) => v >= limit);
-    return dentro.isEmpty ? limit : dentro.reduce(math.min);
+    final within = values.where((v) => v >= limit);
+    return within.isEmpty ? limit : within.reduce(math.min);
   }
 
   /// Zigue-zague na ponta da barra cortada — a convenção de eixo interrompido.

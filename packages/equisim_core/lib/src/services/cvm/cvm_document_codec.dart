@@ -18,10 +18,10 @@ import 'trailing_twelve_months.dart';
 /// Leitura e escrita do formato compacto.
 abstract final class CvmDocumentCodec {
   /// Versão do formato. Muda quando uma chave muda de significado.
-  static const int versao = 1;
+  static const int version = 1;
 
   /// Chave curta → leitor do campo no snapshot.
-  static final Map<String, double? Function(FundamentalsSnapshot)> _leitores = {
+  static final Map<String, double? Function(FundamentalsSnapshot)> _readers = {
     'rev': (s) => s.totalRevenue,
     'ebit': (s) => s.ebit,
     'ebitda': (s) => s.ebitda,
@@ -44,12 +44,12 @@ abstract final class CvmDocumentCodec {
     'tf': (s) => s.treasuryFraction,
   };
 
-  static String _dia(DateTime d) =>
+  static String _day(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-'
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
 
-  static DateTime? _data(Object? v) {
+  static DateTime? _date(Object? v) {
     if (v is! String || v.length < 10) return null;
     final p = v.substring(0, 10).split('-');
     if (p.length != 3) return null;
@@ -64,30 +64,30 @@ abstract final class CvmDocumentCodec {
   /// milhares, e a ingestão multiplica. Um bilionésimo de real fica ordens de
   /// grandeza abaixo do centavo, e absorve o resíduo de ponto flutuante da
   /// multiplicação sem comparar `double` por igualdade.
-  static const double toleranciaInteiro = 1e-9;
+  static const double integerTolerance = 1e-9;
 
   /// Número compacto: inteiro quando é inteiro, e com casas só quando precisa.
   static Object _num(double v) =>
-      v.abs() < 9e15 && (v - v.roundToDouble()).abs() < toleranciaInteiro
+      v.abs() < 9e15 && (v - v.roundToDouble()).abs() < integerTolerance
           ? v.round()
           : v;
 
-  static Map<String, Object> _campos(FundamentalsSnapshot s) => {
-        for (final e in _leitores.entries)
+  static Map<String, Object> _fields(FundamentalsSnapshot s) => {
+        for (final e in _readers.entries)
           if (e.value(s) case final double v when v.isFinite) e.key: _num(v),
       };
 
   static FundamentalsSnapshot _snapshot(
     Ticker t,
-    DateTime fim,
+    DateTime end,
     Map<String, dynamic> c, {
-    DateTime? recebido,
+    DateTime? received,
   }) {
     double? n(String k) => (c[k] as num?)?.toDouble();
     return FundamentalsSnapshot(
       ticker: t,
-      fiscalPeriodEnd: fim,
-      receiptDate: recebido,
+      fiscalPeriodEnd: end,
+      receiptDate: received,
       totalRevenue: n('rev'),
       ebit: n('ebit'),
       ebitda: n('ebitda'),
@@ -114,20 +114,20 @@ abstract final class CvmDocumentCodec {
   /// Um documento no formato compacto.
   static Map<String, Object> encode(CvmPeriodDocument d) => {
         'k': d.kind == CvmDocumentKind.dfp ? 'D' : 'I',
-        's': _dia(d.periodStart),
-        'e': _dia(d.periodEnd),
-        if (d.current.receiptDate != null) 'r': _dia(d.current.receiptDate!),
-        'c': _campos(d.current),
-        if (d.prior != null) 'p': _campos(d.prior!),
-        if (d.priorStart != null) 'ps': _dia(d.priorStart!),
+        's': _day(d.periodStart),
+        'e': _day(d.periodEnd),
+        if (d.current.receiptDate != null) 'r': _day(d.current.receiptDate!),
+        'c': _fields(d.current),
+        if (d.prior != null) 'p': _fields(d.prior!),
+        if (d.priorStart != null) 'ps': _day(d.priorStart!),
       };
 
   /// Lê um documento, ou `null` quando ele não tem o mínimo para existir.
   static CvmPeriodDocument? decode(Ticker t, Map<String, dynamic> m) {
-    final ini = _data(m['s']);
-    final fim = _data(m['e']);
+    final ini = _date(m['s']);
+    final end = _date(m['e']);
     final c = m['c'];
-    if (ini == null || fim == null || c is! Map<String, dynamic>) return null;
+    if (ini == null || end == null || c is! Map<String, dynamic>) return null;
     final kind = switch (m['k']) {
       'D' => CvmDocumentKind.dfp,
       'I' => CvmDocumentKind.itr,
@@ -138,25 +138,25 @@ abstract final class CvmDocumentCodec {
     return CvmPeriodDocument(
       kind: kind,
       periodStart: ini,
-      periodEnd: fim,
-      current: _snapshot(t, fim, c, recebido: _data(m['r'])),
+      periodEnd: end,
+      current: _snapshot(t, end, c, received: _date(m['r'])),
       prior: p is Map<String, dynamic>
-          ? _snapshot(t, DateTime.utc(fim.year - 1, fim.month, fim.day), p)
+          ? _snapshot(t, DateTime.utc(end.year - 1, end.month, end.day), p)
           : null,
-      priorStart: _data(m['ps']),
+      priorStart: _date(m['ps']),
     );
   }
 
   /// O pacote inteiro: versão, data de geração e documentos por ticker.
   static Map<String, Object> encodePackage(
-    Map<String, List<CvmPeriodDocument>> porTicker, {
-    required DateTime geradoEm,
+    Map<String, List<CvmPeriodDocument>> byTicker, {
+    required DateTime generatedAt,
   }) =>
       {
-        'versao': versao,
-        'geradoEm': _dia(geradoEm),
+        'versao': version,
+        'geradoEm': _day(generatedAt),
         'tickers': {
-          for (final e in porTicker.entries)
+          for (final e in byTicker.entries)
             e.key: [for (final d in e.value) encode(d)],
         },
       };
@@ -164,10 +164,10 @@ abstract final class CvmDocumentCodec {
   /// Lê o pacote. Devolve mapa vazio para versão desconhecida — um formato que
   /// o leitor não entende não é lido pela metade.
   static Map<String, List<CvmPeriodDocument>> decodePackage(
-    Map<String, dynamic> pacote,
+    Map<String, dynamic> package,
   ) {
-    if (pacote['versao'] != versao) return const {};
-    final tickers = pacote['tickers'];
+    if (package['versao'] != version) return const {};
+    final tickers = package['tickers'];
     if (tickers is! Map<String, dynamic>) return const {};
     final out = <String, List<CvmPeriodDocument>>{};
     for (final e in tickers.entries) {

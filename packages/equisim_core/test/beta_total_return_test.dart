@@ -5,39 +5,39 @@ import 'package:test/test.dart';
 
 final _ticker = Ticker.parse('TAEE3');
 
-/// Pregões de segunda a sexta, de [inicio] a [fim].
-List<DateTime> _pregoes(DateTime inicio, DateTime fim) => [
-      for (var d = inicio; !d.isAfter(fim); d = DateTime(d.year, d.month, d.day + 1))
+/// Pregões de segunda a sexta, de [start] a [end].
+List<DateTime> _tradingDays(DateTime start, DateTime end) => [
+      for (var d = start; !d.isAfter(end); d = DateTime(d.year, d.month, d.day + 1))
         if (d.weekday <= DateTime.friday) d,
     ];
 
-class _Precos implements PriceRepository {
-  final PriceSeries serie;
-  _Precos(this.serie);
+class _Prices implements PriceRepository {
+  final PriceSeries series;
+  _Prices(this.series);
 
   @override
   Future<Result<PriceSeries>> daily(Ticker ticker, DateRange range) async =>
-      Ok(serie);
+      Ok(series);
 
   @override
   Future<Result<Map<Ticker, PriceSeries>>> dailyBatch(
           List<Ticker> tickers, DateRange range) async =>
-      Ok({_ticker: serie});
+      Ok({_ticker: series});
 
   @override
   Future<Result<PriceSeries>> adjustedCloseRaw(Ticker ticker, DateRange range) async =>
-      Ok(serie);
+      Ok(series);
 }
 
-class _Indice implements BenchmarkRepository {
-  final PriceSeries serie;
-  _Indice(this.serie);
+class _Index implements BenchmarkRepository {
+  final PriceSeries series;
+  _Index(this.series);
 
   @override
-  Future<Result<PriceSeries>> ibovespa(DateRange range) async => Ok(serie);
+  Future<Result<PriceSeries>> ibovespa(DateRange range) async => Ok(series);
 }
 
-class _Fundamentos implements FundamentalsRepository {
+class _Fundamentals implements FundamentalsRepository {
   @override
   Future<Result<List<FundamentalsSnapshot>>> history(Ticker t) async => Ok([
         FundamentalsSnapshot(
@@ -58,56 +58,56 @@ void main() {
     // O ativo anda exatamente com o índice, e paga 4% nos dias de alta forte.
     // Pelo fechamento, a queda da data ex coincide com a alta do mercado e
     // derruba o beta; pelo retorno total, ele é 1.
-    final dias = _pregoes(DateTime(2021, 1, 4), DateTime(2025, 12, 30));
-    final mercado = <double>[1000];
-    final ativo = <double>[50];
-    final proventos = <CashDividend>[];
-    for (var i = 1; i < dias.length; i++) {
+    final days = _tradingDays(DateTime(2021, 1, 4), DateTime(2025, 12, 30));
+    final market = <double>[1000];
+    final asset = <double>[50];
+    final dividends = <CashDividend>[];
+    for (var i = 1; i < days.length; i++) {
       final m = 0.012 * math.sin(i * 0.7) + 0.004 * math.cos(i * 1.3);
-      mercado.add(mercado[i - 1] * (1 + m));
+      market.add(market[i - 1] * (1 + m));
       final ex = m > 0.013 && i % 3 == 0;
       if (ex) {
-        final d = ativo[i - 1] * 0.04;
-        proventos.add(CashDividend(
+        final d = asset[i - 1] * 0.04;
+        dividends.add(CashDividend(
           shareClass: 'ON',
-          kind: CashDividendKind.dividendo,
-          lastDateWithRights: DateTime.utc(dias[i - 1].year, dias[i - 1].month, dias[i - 1].day),
-          exDate: DateTime.utc(dias[i].year, dias[i].month, dias[i].day),
+          kind: CashDividendKind.dividend,
+          lastDateWithRights: DateTime.utc(days[i - 1].year, days[i - 1].month, days[i - 1].day),
+          exDate: DateTime.utc(days[i].year, days[i].month, days[i].day),
           amount: d,
-          closeWithRights: ativo[i - 1],
+          closeWithRights: asset[i - 1],
         ));
-        ativo.add(ativo[i - 1] * (1 + m) - d);
+        asset.add(asset[i - 1] * (1 + m) - d);
       } else {
-        ativo.add(ativo[i - 1] * (1 + m));
+        asset.add(asset[i - 1] * (1 + m));
       }
     }
-    expect(proventos.length, greaterThan(20),
+    expect(dividends.length, greaterThan(20),
         reason: 'o cenário precisa de datas ex suficientes para medir algo');
 
-    PriceSeries serie(List<double> v) => PriceSeries(ticker: _ticker, points: [
-          for (var i = 0; i < dias.length; i++)
-            PricePoint(date: dias[i], close: v[i]),
+    PriceSeries series(List<double> v) => PriceSeries(ticker: _ticker, points: [
+          for (var i = 0; i < days.length; i++)
+            PricePoint(date: days[i], close: v[i]),
         ]);
 
-    Future<ValuationInputs> preparar(List<CashDividend>? d) async =>
+    Future<ValuationInputs> prepare(List<CashDividend>? d) async =>
         (await PrepareValuationInputs.call(
           ticker: _ticker,
-          prices: _Precos(serie(ativo)),
-          fundamentals: _Fundamentos(),
-          benchmark: _Indice(serie(mercado)),
+          prices: _Prices(series(asset)),
+          fundamentals: _Fundamentals(),
+          benchmark: _Index(series(market)),
           riskFreeRate: 0.10,
           asOf: DateTime(2025, 12, 31),
           dividends: d,
         ))
             .unwrap();
 
-    final preco = await preparar(null);
-    final total = await preparar(proventos);
+    final price = await prepare(null);
+    final total = await prepare(dividends);
 
     expect(total.capm.beta, closeTo(1.0, 1e-9));
-    expect(total.dividendsInBeta, proventos.length);
-    expect(preco.dividendsInBeta, 0);
-    expect(preco.capm.beta, lessThan(0.99),
+    expect(total.dividendsInBeta, dividends.length);
+    expect(price.dividendsInBeta, 0);
+    expect(price.capm.beta, lessThan(0.99),
         reason: 'pelo fechamento, a data ex entra como risco');
   });
 }

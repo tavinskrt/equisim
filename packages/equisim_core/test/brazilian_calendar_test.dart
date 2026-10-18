@@ -4,10 +4,10 @@ import 'package:test/test.dart';
 DateTime _d(int y, int m, int d) => DateTime.utc(y, m, d);
 
 /// Dias úteis da liquidação ao vencimento, como o Tesouro conta.
-int _duDoTesouro(DateTime base, DateTime vencimento) =>
+int _treasuryBusinessDays(DateTime base, DateTime maturity) =>
     BrazilianCalendar.businessDaysBetween(
       BrazilianCalendar.treasurySettlement(base),
-      vencimento,
+      maturity,
       knownAt: base,
     );
 
@@ -75,20 +75,20 @@ void main() {
     // `du` implícito = 252 · ln(1000 ÷ PU) ÷ ln(1 + taxa), das LTN do arquivo
     // de preços do Tesouro Direto. Arredondado ao dia.
     test('data-base de hoje', () {
-      expect(_duDoTesouro(_d(2026, 9, 10), _d(2027, 1, 1)), 76);
-      expect(_duDoTesouro(_d(2026, 9, 10), _d(2029, 1, 1)), 575);
-      expect(_duDoTesouro(_d(2026, 9, 10), _d(2032, 1, 1)), 1328);
+      expect(_treasuryBusinessDays(_d(2026, 9, 10), _d(2027, 1, 1)), 76);
+      expect(_treasuryBusinessDays(_d(2026, 9, 10), _d(2029, 1, 1)), 575);
+      expect(_treasuryBusinessDays(_d(2026, 9, 10), _d(2032, 1, 1)), 1328);
     });
 
     test('virada de ano, onde a liquidação importa', () {
-      expect(_duDoTesouro(_d(2025, 12, 23), _d(2026, 1, 1)), 4);
-      expect(_duDoTesouro(_d(2025, 12, 30), _d(2027, 1, 1)), 249);
+      expect(_treasuryBusinessDays(_d(2025, 12, 23), _d(2026, 1, 1)), 4);
+      expect(_treasuryBusinessDays(_d(2025, 12, 30), _d(2027, 1, 1)), 249);
     });
 
     test('antes da lei, o 20 de novembro dos anos futuros ainda era útil', () {
-      expect(_duDoTesouro(_d(2022, 6, 9), _d(2025, 1, 1)), 644);
-      expect(_duDoTesouro(_d(2022, 6, 9), _d(2029, 1, 1)), 1647);
-      expect(_duDoTesouro(_d(2019, 3, 15), _d(2025, 1, 1)), 1458);
+      expect(_treasuryBusinessDays(_d(2022, 6, 9), _d(2025, 1, 1)), 644);
+      expect(_treasuryBusinessDays(_d(2022, 6, 9), _d(2029, 1, 1)), 1647);
+      expect(_treasuryBusinessDays(_d(2019, 3, 15), _d(2025, 1, 1)), 1458);
     });
   });
 

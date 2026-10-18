@@ -8,12 +8,12 @@ import 'dart:math' as math;
 import 'package:equisim_core/equisim_core.dart';
 import 'package:test/test.dart';
 
-ShareholderControlFiling _fca(int ano, String especie, [DateTime? data]) =>
-    (reference: DateTime(ano), species: especie, speciesDate: data);
+ShareholderControlFiling _fca(int year, String shareKind, [DateTime? date]) =>
+    (reference: DateTime(year), species: shareKind, speciesDate: date);
 
 final _ticker = Ticker.parse('ESTA3');
 
-FundamentalsSnapshot _ano(int y, double e) => FundamentalsSnapshot(
+FundamentalsSnapshot _year(int y, double e) => FundamentalsSnapshot(
       ticker: _ticker,
       fiscalPeriodEnd: DateTime(y, 12, 31),
       totalRevenue: 10000 * e,
@@ -35,18 +35,18 @@ FundamentalsSnapshot _ano(int y, double e) => FundamentalsSnapshot(
       marketCap: 30000,
     );
 
-ValuationResult _avaliar({required bool estatal}) {
+ValuationResult _evaluate({required bool stateOwned}) {
   final r = ValuationCascade.evaluate(ValuationInputs(
     ticker: _ticker,
     asOf: DateTime(2026, 9, 9),
     fundamentals: [
       for (var i = 15; i >= 0; i--)
-        _ano(2025 - i, math.pow(1.05, 15 - i).toDouble()),
+        _year(2025 - i, math.pow(1.05, 15 - i).toDouble()),
     ],
     marketPrice: 10.0,
     capm: const CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.012),
     declaredTerminalRiskFreeRate: 0.094,
-    stateControlled: estatal,
+    stateControlled: stateOwned,
   ));
   expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
   return r.unwrap();
@@ -108,10 +108,10 @@ void main() {
         ]),
       };
       final json = ShareholderControlHistory.encode(h,
-          geradoEm: DateTime(2026, 9, 14));
-      final lido = ShareholderControlHistory.decode(json)!;
-      expect(lido.geradoEm, DateTime.utc(2026, 9, 14));
-      expect(lido.porEmissor['AXIA']!.map((p) => p.since),
+          generatedAt: DateTime(2026, 9, 14));
+      final parsed = ShareholderControlHistory.decode(json)!;
+      expect(parsed.generatedAt, DateTime.utc(2026, 9, 14));
+      expect(parsed.byIssuer['AXIA']!.map((p) => p.since),
           [DateTime.utc(2021), DateTime.utc(2022, 6, 17)]);
       expect(ShareholderControlHistory.decode({...json, 'versao': 99}), isNull);
     });
@@ -119,16 +119,16 @@ void main() {
 
   group('a avaliação', () {
     test('a estatal ganha a ressalva e o aviso, e o preço não muda', () {
-      final privada = _avaliar(estatal: false);
-      final estatal = _avaliar(estatal: true);
-      expect(estatal.fairValue, privada.fairValue);
-      expect(estatal.diagnostics!.caveats,
-          contains(ValuationCaveat.controleEstatal));
-      expect(privada.diagnostics!.caveats,
-          isNot(contains(ValuationCaveat.controleEstatal)));
-      expect(estatal.warnings.where((w) => w.contains('controle estatal')),
+      final privatelyOwned = _evaluate(stateOwned: false);
+      final stateOwned = _evaluate(stateOwned: true);
+      expect(stateOwned.fairValue, privatelyOwned.fairValue);
+      expect(stateOwned.diagnostics!.caveats,
+          contains(ValuationCaveat.stateControl));
+      expect(privatelyOwned.diagnostics!.caveats,
+          isNot(contains(ValuationCaveat.stateControl)));
+      expect(stateOwned.warnings.where((w) => w.contains('controle estatal')),
           hasLength(1));
-      expect(privada.warnings.where((w) => w.contains('controle estatal')),
+      expect(privatelyOwned.warnings.where((w) => w.contains('controle estatal')),
           isEmpty);
     });
   });

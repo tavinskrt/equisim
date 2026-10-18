@@ -21,29 +21,29 @@ import 'package:equisim_core/equisim_core.dart';
 
 Future<void> main() async {
   // Emissores oficiais e seus eventos, por ISIN.
-  final oficiais = <String, List<OfficialShareEvent>>{};
+  final officialEvents = <String, List<OfficialShareEvent>>{};
   for (final f in Directory('data/b3/companhias').listSync().whereType<File>()) {
-    final bruto = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
-    final consulta = DateTime.parse(bruto['consultadoEm'] as String);
-    for (final c in (bruto['resposta'] as List).cast<Map<String, dynamic>>()) {
-      final e = B3Registry.issuer(c, consultedOn: consulta);
+    final raw = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
+    final queryDir = DateTime.parse(raw['consultadoEm'] as String);
+    for (final c in (raw['resposta'] as List).cast<Map<String, dynamic>>()) {
+      final e = B3Registry.issuer(c, consultedOn: queryDir);
       if (e == null) continue;
       for (final ev in e.events) {
         if (ev.exDate.year < 2010) continue;
-        oficiais.putIfAbsent(ev.isin, () => []).add(ev);
+        officialEvents.putIfAbsent(ev.isin, () => []).add(ev);
       }
     }
   }
 
   // Séries brutas do COTAHIST, só dos ISINs que o registro cobre.
   final series = <String, List<RawQuote>>{};
-  final arquivos = Directory('data/b3')
+  final files = Directory('data/b3')
       .listSync()
       .whereType<File>()
       .where((f) => RegExp(r'avista_\d{4}\.csv$').hasMatch(f.path))
       .toList()
     ..sort((a, b) => a.path.compareTo(b.path));
-  final isinsDoRegistro = <String>{
+  final registryIsins = <String>{
     for (final f in Directory('data/b3/companhias').listSync().whereType<File>())
       for (final c in ((jsonDecode(f.readAsStringSync())
               as Map<String, dynamic>)['resposta'] as List)
@@ -52,7 +52,7 @@ Future<void> main() async {
             .cast<Map<String, dynamic>>())
           e['isinCode'] as String,
   };
-  for (final f in arquivos) {
+  for (final f in files) {
     await for (final l in f
         .openRead()
         .transform(utf8.decoder)
@@ -64,27 +64,27 @@ Future<void> main() async {
       // Só papéis com algum evento declarado no registro. A precisão é medida
       // sobre eles: papel sem evento declarado nunca entra, e um falso
       // positivo nele não é contado.
-      if (!isinsDoRegistro.contains(isin)) continue;
+      if (!registryIsins.contains(isin)) continue;
       // Em UTC: data em hora local cruza o horário de verão e perde uma hora.
-      final data = DateTime.tryParse('${c[0]}T00:00:00Z');
-      final fech = int.tryParse(c[5]);
-      final fator = int.tryParse(c[6]);
-      final dis = int.tryParse(c[7]);
-      if (data == null || fech == null || fator == null || dis == null) continue;
+      final date = DateTime.tryParse('${c[0]}T00:00:00Z');
+      final close = int.tryParse(c[5]);
+      final factor = int.tryParse(c[6]);
+      final distributionCode = int.tryParse(c[7]);
+      if (date == null || close == null || factor == null || distributionCode == null) continue;
       series.putIfAbsent(isin, () => []).add(
-          RawQuote(data, fech / 100 / (fator == 0 ? 1 : fator), dis));
+          RawQuote(date, close / 100 / (factor == 0 ? 1 : factor), distributionCode));
     }
   }
 
-  bool casa(ShareEvent inferido, OfficialShareEvent oficial) =>
-      inferido.exDate.difference(oficial.exDate).inDays.abs() <= 3 &&
-      (math.log(inferido.factor / oficial.factor)).abs() <= math.log(1.06);
+  bool matchesEvent(ShareEvent inferred, OfficialShareEvent official) =>
+      inferred.exDate.difference(official.exDate).inDays.abs() <= 3 &&
+      (math.log(inferred.factor / official.factor)).abs() <= math.log(1.06);
 
-  var oficiaisComPreco = 0, encontrados = 0, inferidos = 0, confirmados = 0;
-  final perdidosPorTamanho = <String, int>{};
-  final encontradosPorTamanho = <String, int>{};
-  final falsos = <String>[];
-  String faixa(double f) {
+  var officialWithPrice = 0, found = 0, inferred = 0, confirmed = 0;
+  final missedBySize = <String, int>{};
+  final foundBySize = <String, int>{};
+  final falsePositives = <String>[];
+  String band(double f) {
     final a = f >= 1 ? f : 1 / f;
     if (a < 1.21) return 'até 20% (bonificação pequena)';
     if (a < 1.6) return '21% a 60%';
@@ -94,29 +94,29 @@ Future<void> main() async {
 
   for (final e in series.entries) {
     final quotes = e.value..sort((a, b) => a.date.compareTo(b.date));
-    final primeiro = quotes.first.date, ultimo = quotes.last.date;
-    final doIsin = [
-      for (final o in oficiais[e.key] ?? const <OfficialShareEvent>[])
-        if (!o.exDate.isBefore(primeiro) && !o.exDate.isAfter(ultimo)) o,
+    final first = quotes.first.date, last = quotes.last.date;
+    final ofIsin = [
+      for (final o in officialEvents[e.key] ?? const <OfficialShareEvent>[])
+        if (!o.exDate.isBefore(first) && !o.exDate.isAfter(last)) o,
     ];
-    final detectados = CorporateEvents.detect(quotes);
-    inferidos += detectados.length;
-    for (final d in detectados) {
-      if (doIsin.any((o) => casa(d, o))) {
-        confirmados++;
-      } else if (falsos.length < 25) {
-        falsos.add('${e.key} ${d.exDate.toIso8601String().substring(0, 10)} '
+    final detected = CorporateEvents.detect(quotes);
+    inferred += detected.length;
+    for (final d in detected) {
+      if (ofIsin.any((o) => matchesEvent(d, o))) {
+        confirmed++;
+      } else if (falsePositives.length < 25) {
+        falsePositives.add('${e.key} ${d.exDate.toIso8601String().substring(0, 10)} '
             '×${d.factor.toStringAsFixed(3)} (razão ${d.observedRatio.toStringAsFixed(3)})');
       }
     }
-    for (final o in doIsin) {
-      oficiaisComPreco++;
-      final k = faixa(o.factor);
-      if (detectados.any((d) => casa(d, o))) {
-        encontrados++;
-        encontradosPorTamanho[k] = (encontradosPorTamanho[k] ?? 0) + 1;
+    for (final o in ofIsin) {
+      officialWithPrice++;
+      final k = band(o.factor);
+      if (detected.any((d) => matchesEvent(d, o))) {
+        found++;
+        foundBySize[k] = (foundBySize[k] ?? 0) + 1;
       } else {
-        perdidosPorTamanho[k] = (perdidosPorTamanho[k] ?? 0) + 1;
+        missedBySize[k] = (missedBySize[k] ?? 0) + 1;
       }
     }
   }
@@ -124,11 +124,11 @@ Future<void> main() async {
   String pc(int a, int b) => b == 0 ? '—' : '${(100 * a / b).toStringAsFixed(1)}%';
   stdout.writeln('== Registro da B3 × inferência pelo preço, 2010 em diante ==\n');
   stdout.writeln('  ISINs com evento declarado e pregão: ${series.length}');
-  stdout.writeln('  eventos oficiais dentro da série de preço: $oficiaisComPreco');
+  stdout.writeln('  eventos oficiais dentro da série de preço: $officialWithPrice');
   stdout.writeln('  cobertura — oficiais que a inferência encontrou: '
-      '$encontrados (${pc(encontrados, oficiaisComPreco)})');
+      '$found (${pc(found, officialWithPrice)})');
   stdout.writeln('  precisão — inferidos que o registro confirma: '
-      '$confirmados de $inferidos (${pc(confirmados, inferidos)})');
+      '$confirmed de $inferred (${pc(confirmed, inferred)})');
   stdout.writeln('\n  cobertura por tamanho do fator:');
   for (final k in [
     'até 20% (bonificação pequena)',
@@ -136,11 +136,11 @@ Future<void> main() async {
     '1,6x a 2,5x',
     'acima de 2,5x',
   ]) {
-    final a = encontradosPorTamanho[k] ?? 0, p = perdidosPorTamanho[k] ?? 0;
+    final a = foundBySize[k] ?? 0, p = missedBySize[k] ?? 0;
     stdout.writeln('    ${k.padRight(32)} ${pc(a, a + p).padLeft(6)}  ($a de ${a + p})');
   }
   stdout.writeln('\n  inferidos sem evento oficial (amostra):');
-  for (final f in falsos) {
+  for (final f in falsePositives) {
     stdout.writeln('    $f');
   }
 }

@@ -52,26 +52,26 @@ class Money implements Comparable<Money> {
   ///
   /// Lança [UnsupportedError] se [reais] for `NaN` ou infinito — não há
   /// centavo para devolver.
-  factory Money.fromReais(num reais) => Money(_centavos(reais));
+  factory Money.fromReais(num reais) => Money(_cents(reais));
 
   /// Centavos de [reais], arredondando o decimal escrito meio afastado de zero.
-  static int _centavos(num reais) {
+  static int _cents(num reais) {
     if (reais is int) return reais * 100;
     final d = reais.toDouble();
     if (!d.isFinite) {
       throw UnsupportedError('Infinity or NaN toInt');
     }
-    final modulo = d.abs();
+    final magnitude = d.abs();
     // Acima de 1e15 o `double` já não tem casa de centavo, e o produto é
     // inteiro; abaixo de 1e-6 `toString` usa notação científica, e o valor é
     // menos de meio centavo.
-    if (modulo >= 1e15) return (d * 100).round();
-    if (modulo < 1e-6) return 0;
-    final partes = modulo.toString().split('.');
-    final fracao = (partes.length > 1 ? partes[1] : '').padRight(3, '0');
-    var c = int.parse(partes[0]) * 100 + int.parse(fracao.substring(0, 2));
+    if (magnitude >= 1e15) return (d * 100).round();
+    if (magnitude < 1e-6) return 0;
+    final parts = magnitude.toString().split('.');
+    final fraction = (parts.length > 1 ? parts[1] : '').padRight(3, '0');
+    var c = int.parse(parts[0]) * 100 + int.parse(fraction.substring(0, 2));
     // O terceiro dígito decide: 5 ou mais é meio centavo ou além.
-    if (fracao.codeUnitAt(2) >= 0x35) c += 1;
+    if (fraction.codeUnitAt(2) >= 0x35) c += 1;
     return d < 0 ? -c : c;
   }
 

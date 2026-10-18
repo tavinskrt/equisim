@@ -23,17 +23,17 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _inicio = DateTime(2019, 9, 30);
-final _fim = DateTime(2026, 9, 4);
+final _start = DateTime(2019, 9, 30);
+final _end = DateTime(2026, 9, 4);
 
 /// Retorno de preço do ativo no período — a medida que **não** depende do
 /// cronograma de aportes.
-double? _retornoDePreco(PriceSeries s, DateTime de, DateTime ate) {
+double? _priceReturn(PriceSeries s, DateTime from, DateTime until) {
   double? p0, p1;
   for (final p in s.points) {
-    if (p.date.isBefore(de)) continue;
+    if (p.date.isBefore(from)) continue;
     p0 ??= p.close;
-    if (!p.date.isAfter(ate)) p1 = p.close;
+    if (!p.date.isAfter(until)) p1 = p.close;
   }
   if (p0 == null || p1 == null || p0 <= 0) return null;
   return p1 / p0 - 1;
@@ -45,24 +45,24 @@ double? _retornoDePreco(PriceSeries s, DateTime de, DateTime ate) {
 /// saem de somas diferentes de centavos podem diferir no último bit e
 /// receberiam postos distintos, o que muda o Spearman sem que nada tenha
 /// mudado no dado.
-bool _empatam(double a, double b) {
-  final escala = a.abs() > b.abs() ? a.abs() : b.abs();
-  return (a - b).abs() <= (escala > 1 ? escala : 1) * 1e-12;
+bool _tie(double a, double b) {
+  final scale = a.abs() > b.abs() ? a.abs() : b.abs();
+  return (a - b).abs() <= (scale > 1 ? scale : 1) * 1e-12;
 }
 
-List<double> _postos(List<double> v) {
+List<double> _ranks(List<double> v) {
   final idx = List.generate(v.length, (i) => i)
     ..sort((x, y) => v[x].compareTo(v[y]));
   final r = List<double>.filled(v.length, 0);
   var i = 0;
   while (i < idx.length) {
     var j = i;
-    while (j + 1 < idx.length && _empatam(v[idx[j + 1]], v[idx[i]])) {
+    while (j + 1 < idx.length && _tie(v[idx[j + 1]], v[idx[i]])) {
       j++;
     }
-    final medio = (i + j) / 2 + 1;
+    final middle = (i + j) / 2 + 1;
     for (var k = i; k <= j; k++) {
-      r[idx[k]] = medio;
+      r[idx[k]] = middle;
     }
     i = j + 1;
   }
@@ -71,21 +71,21 @@ List<double> _postos(List<double> v) {
 
 double _spearman(List<double> a, List<double> b) {
   if (a.length < 2) return 0.0;
-  final ra = _postos(a), rb = _postos(b);
-  final ma = ra.reduce((x, y) => x + y) / ra.length;
-  final mb = rb.reduce((x, y) => x + y) / rb.length;
-  var num = 0.0, da = 0.0, db = 0.0;
-  for (var i = 0; i < ra.length; i++) {
-    num += (ra[i] - ma) * (rb[i] - mb);
-    da += math.pow(ra[i] - ma, 2);
-    db += math.pow(rb[i] - mb, 2);
+  final ranksA = _ranks(a), ranksB = _ranks(b);
+  final meanA = ranksA.reduce((x, y) => x + y) / ranksA.length;
+  final meanB = ranksB.reduce((x, y) => x + y) / ranksB.length;
+  var num = 0.0, sumSqA = 0.0, sumSqB = 0.0;
+  for (var i = 0; i < ranksA.length; i++) {
+    num += (ranksA[i] - meanA) * (ranksB[i] - meanB);
+    sumSqA += math.pow(ranksA[i] - meanA, 2);
+    sumSqB += math.pow(ranksB[i] - meanB, 2);
   }
-  return (da <= 0 || db <= 0) ? 0.0 : num / math.sqrt(da * db);
+  return (sumSqA <= 0 || sumSqB <= 0) ? 0.0 : num / math.sqrt(sumSqA * sumSqB);
 }
 
 // ------------------------------------------------------- caso sintético --
 
-void _sintetico() {
+void _synthetic() {
   stdout.writeln('== 1. O mecanismo, isolado ==');
   stdout.writeln('');
   stdout.writeln('Dois ativos que começam e terminam no MESMO preço — retorno');
@@ -93,44 +93,44 @@ void _sintetico() {
   stdout.writeln('volta. Mesmo peso, mesmo aporte mensal, mesma janela.');
   stdout.writeln('');
 
-  final dias = <DateTime>[
+  final days = <DateTime>[
     for (var i = 0; i < 84; i++) DateTime(2019, 1 + i, 1),
   ];
 
   // Vale e pico, simétricos: ambos partem de 100 e voltam a 100.
-  double vale(int i) => 100 - 40 * math.sin(math.pi * i / (dias.length - 1));
-  double pico(int i) => 100 + 40 * math.sin(math.pi * i / (dias.length - 1));
+  double vale(int i) => 100 - 40 * math.sin(math.pi * i / (days.length - 1));
+  double peak(int i) => 100 + 40 * math.sin(math.pi * i / (days.length - 1));
 
-  PriceSeries serie(String t, double Function(int) f) => PriceSeries(
+  PriceSeries series(String t, double Function(int) f) => PriceSeries(
         ticker: Ticker.parse(t),
         points: [
-          for (var i = 0; i < dias.length; i++)
-            PricePoint(date: dias[i], close: f(i)),
+          for (var i = 0; i < days.length; i++)
+            PricePoint(date: days[i], close: f(i)),
         ],
       );
 
-  final caiu = Ticker.parse('VALE4');
-  final subiu = Ticker.parse('PICO4');
-  const setor = Sector(key: 's', label: 'S');
-  final carteira = Portfolio.equalWeighted(
+  final fell = Ticker.parse('VALE4');
+  final rose = Ticker.parse('PICO4');
+  const sector = Sector(key: 's', label: 'S');
+  final portfolio = Portfolio.equalWeighted(
     id: 'x',
     name: 'x',
     kind: PortfolioKind.principal,
     assets: [
-      Asset(ticker: caiu, name: 'Vale', sector: setor),
-      Asset(ticker: subiu, name: 'Pico', sector: setor),
+      Asset(ticker: fell, name: 'Vale', sector: sector),
+      Asset(ticker: rose, name: 'Pico', sector: sector),
     ],
   ).unwrap();
 
   final r = PortfolioBacktest.run(
-    portfolio: carteira,
-    prices: {caiu: serie('VALE4', vale), subiu: serie('PICO4', pico)},
+    portfolio: portfolio,
+    prices: {fell: series('VALE4', vale), rose: series('PICO4', peak)},
     plan: ContributionPlan(
       initial: Money.fromReais(1000),
       monthly: Money.fromReais(1000),
       contributionDay: 1,
     ),
-    range: DateRange(dias.first, dias.last),
+    range: DateRange(days.first, days.last),
     // A demonstração é de TWR contra XIRR, e não de custo (item C4).
     costs: TransactionCosts.none,
   );
@@ -140,7 +140,7 @@ void _sintetico() {
   }
   final o = r.unwrap();
   stdout.writeln('  período efetivo: ${o.effectivePeriod}');
-  for (final t in [caiu, subiu]) {
+  for (final t in [fell, rose]) {
     final a = o.perAsset[t];
     if (a == null) continue;
     stdout.writeln('  ${t.value}: totalReturn = '
@@ -149,8 +149,8 @@ void _sintetico() {
         'aportado ${(a.invested.cents / 100).toStringAsFixed(0)}   '
         'final ${(a.finalValue.cents / 100).toStringAsFixed(0)}');
   }
-  final va = o.perAsset[caiu]?.totalReturn;
-  final nv = o.perAsset[subiu]?.totalReturn;
+  final va = o.perAsset[fell]?.totalReturn;
+  final nv = o.perAsset[rose]?.totalReturn;
   if (va != null && nv != null) {
     stdout.writeln('');
     stdout.writeln('  distância entre dois ativos de retorno de preço IGUAL '
@@ -162,25 +162,25 @@ void _sintetico() {
 
   // E o canal que a lente teme — datas de listagem diferentes — é fechado
   // pelo próprio backtest: o período recua para o ativo mais novo.
-  final novoPapel = Ticker.parse('NOVO3');
+  final newSecurity = Ticker.parse('NOVO3');
   final c2 = Portfolio.equalWeighted(
     id: 'y',
     name: 'y',
     kind: PortfolioKind.principal,
     assets: [
-      Asset(ticker: caiu, name: 'Vale', sector: setor),
-      Asset(ticker: novoPapel, name: 'Novo', sector: setor),
+      Asset(ticker: fell, name: 'Vale', sector: sector),
+      Asset(ticker: newSecurity, name: 'Novo', sector: sector),
     ],
   ).unwrap();
   final r2 = PortfolioBacktest.run(
     portfolio: c2,
     prices: {
-      caiu: serie('VALE4', vale),
-      novoPapel: PriceSeries(
-        ticker: novoPapel,
+      fell: series('VALE4', vale),
+      newSecurity: PriceSeries(
+        ticker: newSecurity,
         points: [
-          for (var i = 60; i < dias.length; i++)
-            PricePoint(date: dias[i], close: vale(i)),
+          for (var i = 60; i < days.length; i++)
+            PricePoint(date: days[i], close: vale(i)),
         ],
       ),
     },
@@ -189,7 +189,7 @@ void _sintetico() {
       monthly: Money.fromReais(1000),
       contributionDay: 1,
     ),
-    range: DateRange(dias.first, dias.last),
+    range: DateRange(days.first, days.last),
   );
   stdout.writeln('');
   if (r2.isOk) {
@@ -199,8 +199,8 @@ void _sintetico() {
     for (final w in o2.warnings) {
       stdout.writeln('    aviso: $w');
     }
-    final a = o2.perAsset[caiu]?.totalReturn;
-    final b = o2.perAsset[novoPapel]?.totalReturn;
+    final a = o2.perAsset[fell]?.totalReturn;
+    final b = o2.perAsset[newSecurity]?.totalReturn;
     if (a != null && b != null) {
       stdout.writeln('    VALE4 ${(a * 100).toStringAsFixed(1)}%  '
           'NOVO3 ${(b * 100).toStringAsFixed(1)}%  — medidos na mesma janela');
@@ -217,26 +217,26 @@ Future<void> _real(ValidationContext ctx) async {
   stdout.writeln('');
 
   final universe = (await ctx.fundamentals.universe()).unwrap();
-  final escolhidos = <Ticker>[];
+  final chosen = <Ticker>[];
   final series = <Ticker, PriceSeries>{};
   for (final t in universe) {
-    if (escolhidos.length >= Portfolio.maxAssets) break;
-    final r = await ctx.prices.daily(t, DateRange(_inicio, _fim));
+    if (chosen.length >= Portfolio.maxAssets) break;
+    final r = await ctx.prices.daily(t, DateRange(_start, _end));
     if (r.isErr) continue;
     final s = r.unwrap();
     if (s.points.length < 1000) continue;
-    escolhidos.add(t);
+    chosen.add(t);
     series[t] = s;
   }
-  if (escolhidos.length < 5) {
+  if (chosen.length < 5) {
     stdout.writeln('  ativos insuficientes com histórico completo.');
     return;
   }
 
-  final ativos = <Asset>[];
-  for (final t in escolhidos) {
+  final assets = <Asset>[];
+  for (final t in chosen) {
     final p = await ctx.fundamentals.profile(t);
-    ativos.add(p.isOk
+    assets.add(p.isOk
         ? p.unwrap()
         : Asset(
             ticker: t,
@@ -244,22 +244,22 @@ Future<void> _real(ValidationContext ctx) async {
             sector: const Sector(key: 'x', label: 'X'),
           ));
   }
-  final carteira = Portfolio.equalWeighted(
+  final portfolio = Portfolio.equalWeighted(
     id: 'r',
     name: 'r',
     kind: PortfolioKind.principal,
-    assets: ativos,
+    assets: assets,
   ).unwrap();
 
   final r = PortfolioBacktest.run(
-    portfolio: carteira,
+    portfolio: portfolio,
     prices: series,
     plan: ContributionPlan(
       initial: Money.fromReais(10000),
       monthly: Money.fromReais(1000),
       contributionDay: 5,
     ),
-    range: DateRange(_inicio, _fim),
+    range: DateRange(_start, _end),
   );
   if (r.isErr) {
     stdout.writeln('  falhou: ${r.failureOrNull?.message}');
@@ -267,65 +267,65 @@ Future<void> _real(ValidationContext ctx) async {
   }
   final o = r.unwrap();
 
-  final linhas = <Map<String, Object?>>[];
-  for (final t in escolhidos) {
+  final rows = <Map<String, Object?>>[];
+  for (final t in chosen) {
     final a = o.perAsset[t];
     if (a == null) continue;
-    final preco = _retornoDePreco(series[t]!, _inicio, _fim);
-    if (preco == null) continue;
-    linhas.add({
+    final price = _priceReturn(series[t]!, _start, _end);
+    if (price == null) continue;
+    rows.add({
       'ticker': t.value,
       'totalReturn': a.totalReturn,
-      'retornoDePreco': preco,
+      'retornoDePreco': price,
       'aportado': a.invested.cents / 100,
       'caixa': a.cash.cents / 100,
       'pregoes': series[t]!.points.length,
     });
   }
-  linhas.sort((a, b) =>
+  rows.sort((a, b) =>
       (b['totalReturn']! as double).compareTo(a['totalReturn']! as double));
 
-  final tr = [for (final l in linhas) l['totalReturn']! as double];
-  final rp = [for (final l in linhas) l['retornoDePreco']! as double];
-  final ordemPreco = List.generate(linhas.length, (i) => i)
-    ..sort((x, y) => rp[y].compareTo(rp[x]));
-  final postoPreco = <int, int>{};
-  for (var i = 0; i < ordemPreco.length; i++) {
-    postoPreco[ordemPreco[i]] = i + 1;
+  final tr = [for (final l in rows) l['totalReturn']! as double];
+  final priceReturns = [for (final l in rows) l['retornoDePreco']! as double];
+  final priceOrder = List.generate(rows.length, (i) => i)
+    ..sort((x, y) => priceReturns[y].compareTo(priceReturns[x]));
+  final priceRank = <int, int>{};
+  for (var i = 0; i < priceOrder.length; i++) {
+    priceRank[priceOrder[i]] = i + 1;
   }
 
   stdout.writeln('  ticker    totalReturn   retorno de preço   posto tR   '
       'posto preço   pregões');
-  var maiorDeslocamento = 0;
-  for (var i = 0; i < linhas.length; i++) {
-    final d = (postoPreco[i]! - (i + 1)).abs();
-    if (d > maiorDeslocamento) maiorDeslocamento = d;
-    stdout.writeln('  ${(linhas[i]['ticker']! as String).padRight(8)} '
+  var largestShift = 0;
+  for (var i = 0; i < rows.length; i++) {
+    final d = (priceRank[i]! - (i + 1)).abs();
+    if (d > largestShift) largestShift = d;
+    stdout.writeln('  ${(rows[i]['ticker']! as String).padRight(8)} '
         '${(tr[i] * 100).toStringAsFixed(1).padLeft(11)}%   '
-        '${(rp[i] * 100).toStringAsFixed(1).padLeft(15)}%   '
+        '${(priceReturns[i] * 100).toStringAsFixed(1).padLeft(15)}%   '
         '${(i + 1).toString().padLeft(8)}   '
-        '${postoPreco[i].toString().padLeft(11)}   '
-        '${(linhas[i]['pregoes']! as int).toString().padLeft(7)}');
+        '${priceRank[i].toString().padLeft(11)}   '
+        '${(rows[i]['pregoes']! as int).toString().padLeft(7)}');
   }
   stdout.writeln('');
   stdout.writeln('  Spearman entre as duas medidas: '
-      '${_spearman(tr, rp).toStringAsFixed(4)}');
-  stdout.writeln('  maior deslocamento de posto: $maiorDeslocamento '
-      'de ${linhas.length}');
+      '${_spearman(tr, priceReturns).toStringAsFixed(4)}');
+  stdout.writeln('  maior deslocamento de posto: $largestShift '
+      'de ${rows.length}');
   final xirr = o.metrics.moneyWeightedReturn;
   stdout.writeln('  TWR da carteira: '
       '${(o.metrics.timeWeightedReturn * 100).toStringAsFixed(1)}%   '
       'XIRR: ${xirr == null ? "—" : "${(xirr * 100).toStringAsFixed(1)}%"}');
 
   File('docs/validacao/retorno_por_ativo.json').writeAsStringSync(
-    const JsonEncoder.withIndent(' ').convert(linhas),
+    const JsonEncoder.withIndent(' ').convert(rows),
   );
   stdout.writeln('');
   stdout.writeln('  gravado em docs/validacao/retorno_por_ativo.json');
 }
 
 Future<void> main(List<String> args) async {
-  _sintetico();
+  _synthetic();
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
   try {
     await _real(ctx);

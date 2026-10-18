@@ -17,64 +17,64 @@ import 'dart:io';
 import 'c7/protocolo.dart';
 
 Future<void> main(List<String> args) async {
-  String? valor(String flag) {
+  String? value(String flag) {
     final i = args.indexOf(flag);
     return i >= 0 && i + 1 < args.length ? args[i + 1] : null;
   }
 
-  final hoje = DateTime.parse(
-      valor('--hoje') ?? DateTime.now().toIso8601String().substring(0, 10));
-  final fimDosDados = DateTime.parse(valor('--fim-dos-dados') ?? '2026-09-04');
-  final pasta = Directory(pastaDosSelos);
-  final ler = valor('--ler');
+  final today = DateTime.parse(
+      value('--hoje') ?? DateTime.now().toIso8601String().substring(0, 10));
+  final dataEnd = DateTime.parse(value('--fim-dos-dados') ?? '2026-09-04');
+  final folder = Directory(sealsDir);
+  final read = value('--ler');
 
-  if (ler == null) {
+  if (read == null) {
     stdout.writeln(const JsonEncoder.withIndent('  ').convert(
-        situacao(pasta: pasta, hoje: hoje, fimDosDados: fimDosDados)));
+        situation(folder: folder, today: today, dataEnd: dataEnd)));
     return;
   }
-  final fonte = File('data/c7/coortes.json');
-  if (!fonte.existsSync()) {
-    stderr.writeln('Falta ${fonte.path}, com os retornos: rode o backtest em '
+  final source = File('data/c7/coortes.json');
+  if (!source.existsSync()) {
+    stderr.writeln('Falta ${source.path}, com os retornos: rode o backtest em '
         'modo --c7 com --fim-dos-dados da base de hoje.');
     exit(2);
   }
   try {
-    final meses = int.parse(ler);
-    final leitura = await lerDoArquivo(meses, pasta, hoje, fonte);
-    final saida = File('${pasta.path}/leitura_${meses}m.json');
-    saida.writeAsStringSync(
-        '${const JsonEncoder.withIndent(' ').convert(leitura)}\n');
-    final fm = ((leitura['leitura'] as Map)['famaMacBeth']
+    final months = int.parse(read);
+    final reading = await readFromFile(months, folder, today, source);
+    final output = File('${folder.path}/leitura_${months}m.json');
+    output.writeAsStringSync(
+        '${const JsonEncoder.withIndent(' ').convert(reading)}\n');
+    final fm = ((reading['leitura'] as Map)['famaMacBeth']
         as Map)['potencialDadoBm'] as Map?;
-    stdout.writeln('== C7, $meses meses ==');
+    stdout.writeln('== C7, $months meses ==');
     stdout.writeln('  potencial dado o B/M: ${fm?['media']}  t corrigido '
         '${fm?['tSobreposicao']} / ${fm?['criticoSobreposicao']}  '
         'Newey-West ${fm?['tNeweyWest']}  passa: ${fm?['passaR3'] ?? false}');
     stdout.writeln('  previsões refeitas que divergem do selo: '
-        '${leitura['previsoesRefeitasQueDivergem']}');
+        '${reading['previsoesRefeitasQueDivergem']}');
     // A leitura é a do pré-registrado; a de cada motor posterior vem ao lado,
     // sem decidir nada (decisão 129).
-    for (final e in (leitura['motoresDaData'] as Map).entries) {
+    for (final e in (reading['motoresDaData'] as Map).entries) {
       final m = (((e.value as Map)['famaMacBeth'] as Map)['potencialDadoBm'])
           as Map?;
       stdout.writeln('  motor da data ${(e.key as String).substring(0, 8)}: '
           '${m?['media']}  t corrigido ${m?['tSobreposicao']}  '
           '(referência, não a leitura)');
     }
-    stdout.writeln('  escrito ${saida.path}');
-  } on ProtocoloViolado catch (e) {
+    stdout.writeln('  escrito ${output.path}');
+  } on ProtocolViolated catch (e) {
     stderr.writeln(e);
     exit(1);
   }
 }
 
-Future<Map<String, dynamic>> lerDoArquivo(
-        int meses, Directory pasta, DateTime hoje, File fonte) =>
-    ler(
-      meses: meses,
-      pasta: pasta,
-      hoje: hoje,
-      linhas: (jsonDecode(fonte.readAsStringSync()) as List)
+Future<Map<String, dynamic>> readFromFile(
+        int months, Directory folder, DateTime today, File source) =>
+    read(
+      months: months,
+      folder: folder,
+      today: today,
+      rows: (jsonDecode(source.readAsStringSync()) as List)
           .cast<Map<String, dynamic>>(),
     );

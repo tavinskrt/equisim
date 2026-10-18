@@ -22,93 +22,93 @@ import 'dart:io';
 
 import 'package:equisim_core/equisim_core.dart';
 
-const _saida = 'assets/cvm/controle.json';
+const _output = 'assets/cvm/controle.json';
 
 /// A data de referência dos pacotes versionados.
-final _referencia = DateTime(2026, 9, 14);
+final _reference = DateTime(2026, 9, 14);
 
 void main(List<String> args) {
-  final data = args.contains('--agora') ? DateTime.now() : _referencia;
-  final arquivos = Directory('data/cvm')
+  final date = args.contains('--agora') ? DateTime.now() : _reference;
+  final files = Directory('data/cvm')
       .listSync()
       .whereType<File>()
       .where((f) => RegExp(r'fca_cia_aberta_geral_\d{4}\.csv$').hasMatch(f.path))
       .toList()
     ..sort((a, b) => a.path.compareTo(b.path));
-  if (arquivos.isEmpty) {
+  if (files.isEmpty) {
     stderr.writeln('sem FCA em data/cvm. Rode antes:');
     stderr.writeln('  python tool/cvm_baixar.py --docs FCA');
     exitCode = 2;
     return;
   }
 
-  final porCnpj = <String, List<ShareholderControlFiling>>{};
-  for (final f in arquivos) {
-    final linhas = latin1.decode(f.readAsBytesSync()).split('\n');
-    final cabecalho = linhas.first.trim().split(';');
-    final iCnpj = cabecalho.indexOf('CNPJ_Companhia');
-    final iRef = cabecalho.indexOf('Data_Referencia');
-    final iEspecie = cabecalho.indexOf('Especie_Controle_Acionario');
-    final iData = cabecalho.indexOf('Data_Especie_Controle_Acionario');
-    if ([iCnpj, iRef, iEspecie, iData].contains(-1)) {
+  final byCnpj = <String, List<ShareholderControlFiling>>{};
+  for (final f in files) {
+    final rows = latin1.decode(f.readAsBytesSync()).split('\n');
+    final header = rows.first.trim().split(';');
+    final cnpjIndex = header.indexOf('CNPJ_Companhia');
+    final iRef = header.indexOf('Data_Referencia');
+    final kindIndex = header.indexOf('Especie_Controle_Acionario');
+    final iDate = header.indexOf('Data_Especie_Controle_Acionario');
+    if ([cnpjIndex, iRef, kindIndex, iDate].contains(-1)) {
       stderr.writeln('${f.path}: colunas do FCA não encontradas');
       exitCode = 1;
       return;
     }
-    for (final linha in linhas.skip(1)) {
-      final c = linha.trim().split(';');
-      if (c.length <= iData) continue;
+    for (final row in rows.skip(1)) {
+      final c = row.trim().split(';');
+      if (c.length <= iDate) continue;
       final ref = DateTime.tryParse(c[iRef]);
-      if (ref == null || c[iEspecie].trim().isEmpty) continue;
-      porCnpj.putIfAbsent(c[iCnpj], () => []).add((
+      if (ref == null || c[kindIndex].trim().isEmpty) continue;
+      byCnpj.putIfAbsent(c[cnpjIndex], () => []).add((
         reference: ref,
-        species: c[iEspecie],
-        speciesDate: DateTime.tryParse(c[iData]),
+        species: c[kindIndex],
+        speciesDate: DateTime.tryParse(c[iDate]),
       ));
     }
   }
 
-  final ponte = ((jsonDecode(File('docs/validacao/ponte_cvm.json')
+  final bridge = ((jsonDecode(File('docs/validacao/ponte_cvm.json')
               .readAsStringSync()) as Map<String, dynamic>)['ponte']
           as Map<String, dynamic>)
       .map((k, v) => MapEntry(k, v as String));
-  final pacote = <String, List<ShareholderControlPeriod>>{};
-  final semFca = <String>[];
-  var mudancas = 0;
-  for (final e in ponte.entries) {
-    final raiz = e.key.length >= 4 ? e.key.substring(0, 4) : e.key;
-    if (pacote.containsKey(raiz)) continue;
-    final historico =
-        ShareholderControlHistory.fromFilings(porCnpj[e.value] ?? const []);
-    if (historico.isEmpty) {
-      semFca.add(raiz);
+  final package = <String, List<ShareholderControlPeriod>>{};
+  final withoutFca = <String>[];
+  var changes = 0;
+  for (final e in bridge.entries) {
+    final root = e.key.length >= 4 ? e.key.substring(0, 4) : e.key;
+    if (package.containsKey(root)) continue;
+    final history =
+        ShareholderControlHistory.fromFilings(byCnpj[e.value] ?? const []);
+    if (history.isEmpty) {
+      withoutFca.add(root);
       continue;
     }
-    pacote[raiz] = historico;
-    mudancas += historico.length - 1;
+    package[root] = history;
+    changes += history.length - 1;
   }
 
-  File(_saida).writeAsStringSync(
-      jsonEncode(ShareholderControlHistory.encode(pacote, geradoEm: data)));
-  final hoje = {
+  File(_output).writeAsStringSync(
+      jsonEncode(ShareholderControlHistory.encode(package, generatedAt: date)));
+  final today = {
     for (final c in ShareholderControl.values)
-      c: pacote.values
-          .where((p) => ShareholderControlHistory.at(p, data) == c)
+      c: package.values
+          .where((p) => ShareholderControlHistory.at(p, date) == c)
           .length,
   };
-  stdout.writeln('  emissores: ${pacote.length} '
-      '(${semFca.length} sem FCA: ${semFca.join(' ')})');
-  stdout.writeln('  em ${data.toIso8601String().substring(0, 10)}: '
-      'estatal ${hoje[ShareholderControl.state]}, '
-      'privado ${hoje[ShareholderControl.private]}, '
-      'estrangeiro ${hoje[ShareholderControl.foreign]}');
-  stdout.writeln('  mudanças de espécie no histórico: $mudancas');
-  for (final e in pacote.entries) {
+  stdout.writeln('  emissores: ${package.length} '
+      '(${withoutFca.length} sem FCA: ${withoutFca.join(' ')})');
+  stdout.writeln('  em ${date.toIso8601String().substring(0, 10)}: '
+      'estatal ${today[ShareholderControl.state]}, '
+      'privado ${today[ShareholderControl.private]}, '
+      'estrangeiro ${today[ShareholderControl.foreign]}');
+  stdout.writeln('  mudanças de espécie no histórico: $changes');
+  for (final e in package.entries) {
     if (e.value.length < 2) continue;
     stdout.writeln('    ${e.key}: ${[
       for (final p in e.value)
         '${p.control.name} desde ${p.since.toIso8601String().substring(0, 10)}'
     ].join(' → ')}');
   }
-  stdout.writeln('  gravado $_saida');
+  stdout.writeln('  gravado $_output');
 }

@@ -120,34 +120,34 @@ abstract final class ExpectedReturn {
     Iterable<double>? reference,
     double zCap = defaultZCap,
   }) {
-    final secao = [...(reference ?? upsides.values)];
-    final centro = Inference.median(secao);
-    final escala = Inference.scaledMad(secao);
+    final crossSection = [...(reference ?? upsides.values)];
+    final center = Inference.median(crossSection);
+    final scale = Inference.scaledMad(crossSection);
 
-    final saida = <Ticker, CrossSectionalReturn>{};
+    final output = <Ticker, CrossSectionalReturn>{};
     for (final e in upsides.entries) {
       // Sem escala estimável — seção curta demais ou colapsada num ponto — não
       // há distância a medir, e todo mundo recebe a âncora. É a leitura neutra:
       // afirmar ordenação onde a seção não a sustenta seria inventar prêmio.
-      final z = (centro == null || escala == null)
+      final z = (center == null || scale == null)
           ? 0.0
-          : ((e.value - centro) / escala).clamp(-zCap, zCap);
+          : ((e.value - center) / scale).clamp(-zCap, zCap);
       // **A bandeira sai de haver `Ke`, e não de comparar as duas âncoras.**
       // Um `Ke` numericamente igual ao CDI é possível — beta zero, ou
       // coincidência de arredondamento — e compará-los declararia recuo onde
       // não houve.
       final ke = costOfEquity?[e.key];
-      final temKe = ke != null && ke.isFinite && ke > 0;
-      final ancora = temKe ? ke : spotRiskFree;
-      final bruto = ancora + z * riskPremium;
-      saida[e.key] = CrossSectionalReturn(
+      final hasKe = ke != null && ke.isFinite && ke > 0;
+      final anchor = hasKe ? ke : spotRiskFree;
+      final raw = anchor + z * riskPremium;
+      output[e.key] = CrossSectionalReturn(
         z: z,
-        expected: bruto < 0 ? 0.0 : bruto,
-        floored: bruto < 0,
-        anchoredOnCostOfEquity: temKe,
+        expected: raw < 0 ? 0.0 : raw,
+        floored: raw < 0,
+        anchoredOnCostOfEquity: hasKe,
       );
     }
-    return saida;
+    return output;
   }
 
   /// Retorno esperado da carteira pelo estimador transversal.
@@ -172,7 +172,7 @@ abstract final class ExpectedReturn {
     }
     if (upsides.isEmpty) return 0.0;
 
-    final estimado = crossSection(
+    final estimated = crossSection(
       upsides: upsides,
       spotRiskFree: spotRiskFree,
       costOfEquity: {
@@ -188,7 +188,7 @@ abstract final class ExpectedReturn {
     var weighted = 0.0;
     var covered = 0.0;
     for (final entry in portfolio.entries.values) {
-      final r = estimado[entry.ticker];
+      final r = estimated[entry.ticker];
       if (r == null) continue;
       weighted += entry.weight.value * r.expected;
       covered += entry.weight.value;
@@ -219,21 +219,21 @@ abstract final class ExpectedReturn {
     required double spotRiskFree,
     double riskPremium = CapmInputs.defaultMarketPremium,
   }) {
-    final secao = <Ticker, TransversalSignals>{};
+    final crossSection = <Ticker, TransversalSignals>{};
     for (final entry in portfolio.entries.values) {
       final v = valuations[entry.ticker];
       if (v == null) continue;
       final s = signals[entry.ticker];
-      secao[entry.ticker] = TransversalSignals(
+      crossSection[entry.ticker] = TransversalSignals(
         potential: s?.potential ?? v.upside,
         bookToMarket: s?.bookToMarket,
         earningsYield: s?.earningsYield,
       );
     }
-    if (secao.isEmpty) return 0.0;
-    final escores = ordering == null
+    if (crossSection.isEmpty) return 0.0;
+    final scores = ordering == null
         ? const <Ticker, double>{}
-        : TransversalScore.scores(secao, ordering);
+        : TransversalScore.scores(crossSection, ordering);
 
     var weighted = 0.0;
     var covered = 0.0;
@@ -241,9 +241,9 @@ abstract final class ExpectedReturn {
       final v = valuations[entry.ticker];
       if (v == null) continue;
       final ke = v.diagnostics?.costOfEquity;
-      final ancora = (ke != null && ke.isFinite && ke > 0) ? ke : spotRiskFree;
-      final bruto = ancora + (escores[entry.ticker] ?? 0.0) * riskPremium;
-      weighted += entry.weight.value * (bruto < 0 ? 0.0 : bruto);
+      final anchor = (ke != null && ke.isFinite && ke > 0) ? ke : spotRiskFree;
+      final raw = anchor + (scores[entry.ticker] ?? 0.0) * riskPremium;
+      weighted += entry.weight.value * (raw < 0 ? 0.0 : raw);
       covered += entry.weight.value;
     }
     return covered <= 0 ? 0.0 : weighted / covered;

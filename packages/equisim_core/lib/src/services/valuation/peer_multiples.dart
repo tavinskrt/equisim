@@ -5,13 +5,13 @@ import '../../audit/wire_keyed.dart';
 /// Qual múltiplo produziu uma leitura.
 enum MultipleKind implements WireKeyed {
   /// Preço sobre lucro por ação.
-  precoLucro('precoLucro'),
+  priceToEarnings('precoLucro'),
 
   /// Preço sobre valor patrimonial por ação.
-  precoPatrimonio('precoPatrimonio'),
+  priceToBook('precoPatrimonio'),
 
   /// Valor da firma sobre EBITDA.
-  firmaEbitda('firmaEbitda');
+  evToEbitda('firmaEbitda');
 
   const MultipleKind(this.key);
 
@@ -24,19 +24,19 @@ enum MultipleKind implements WireKeyed {
 /// Por que um múltiplo não se aplicou a um ativo.
 enum MultipleRefusal implements WireKeyed {
   /// O grupo de pares não tem observações suficientes.
-  paresInsuficientes('paresInsuficientes'),
+  insufficientPeers('paresInsuficientes'),
 
   /// A grandeza de baixo não é positiva — lucro, patrimônio ou EBITDA.
-  baseNaoPositiva('baseNaoPositiva'),
+  nonPositiveBase('baseNaoPositiva'),
 
   /// A grandeza de baixo não está publicada.
-  baseAusente('baseAusente'),
+  missingBase('baseAusente'),
 
   /// EBITDA de instituição financeira não descreve geração operacional.
-  instituicaoFinanceira('instituicaoFinanceira'),
+  financialInstitution('instituicaoFinanceira'),
 
   /// A ponte de dívida líquida não fecha em valor positivo do acionista.
-  ponteNaoPositiva('ponteNaoPositiva');
+  nonPositiveBridge('ponteNaoPositiva');
 
   const MultipleRefusal(this.key);
 
@@ -160,7 +160,7 @@ class PeerValuation {
   }) {
     final out = <MultipleReading>[];
     for (final kind in MultipleKind.values) {
-      out.add(_uma(
+      out.add(_single(
         kind: kind,
         latest: latest,
         shares: shares,
@@ -172,7 +172,7 @@ class PeerValuation {
     return out;
   }
 
-  static MultipleReading _uma({
+  static MultipleReading _single({
     required MultipleKind kind,
     required FundamentalsSnapshot latest,
     required double shares,
@@ -180,59 +180,59 @@ class PeerValuation {
     String? sectorKey,
     String? industry,
   }) {
-    MultipleReading recusa(MultipleRefusal r, [PeerMultiple? p]) =>
+    MultipleReading refusal(MultipleRefusal r, [PeerMultiple? p]) =>
         MultipleReading(kind: kind, refusal: r, peer: p);
 
-    final financeira = FinancialSectors.isFinancial(
+    final financial = FinancialSectors.isFinancial(
       sectorKey: sectorKey,
       industry: industry,
     );
-    if (kind == MultipleKind.firmaEbitda && financeira) {
-      return recusa(MultipleRefusal.instituicaoFinanceira);
+    if (kind == MultipleKind.evToEbitda && financial) {
+      return refusal(MultipleRefusal.financialInstitution);
     }
 
     final p = peers.byKind[kind];
     if (p == null || p.peers < minimumPeers || !p.median.isFinite) {
-      return recusa(MultipleRefusal.paresInsuficientes, p);
+      return refusal(MultipleRefusal.insufficientPeers, p);
     }
-    if (p.median <= 0) return recusa(MultipleRefusal.baseNaoPositiva, p);
+    if (p.median <= 0) return refusal(MultipleRefusal.nonPositiveBase, p);
     if (shares <= 0 || !shares.isFinite) {
-      return recusa(MultipleRefusal.baseAusente, p);
+      return refusal(MultipleRefusal.missingBase, p);
     }
 
     switch (kind) {
-      case MultipleKind.precoLucro:
-        final lucro = latest.netIncome;
-        if (lucro == null) return recusa(MultipleRefusal.baseAusente, p);
-        if (lucro <= 0) return recusa(MultipleRefusal.baseNaoPositiva, p);
+      case MultipleKind.priceToEarnings:
+        final profit = latest.netIncome;
+        if (profit == null) return refusal(MultipleRefusal.missingBase, p);
+        if (profit <= 0) return refusal(MultipleRefusal.nonPositiveBase, p);
         // **Pelo lucro total dividido pelo divisor**, e não pelo `LPA` da
         // fonte: o `LPA` publicado usa a contagem da companhia, e a ponte já
         // arbitrou outra. Misturar as duas mede a ponte.
         return MultipleReading(
           kind: kind,
-          fairValuePerShare: p.median * lucro / shares,
+          fairValuePerShare: p.median * profit / shares,
           peer: p,
         );
 
-      case MultipleKind.precoPatrimonio:
+      case MultipleKind.priceToBook:
         final pl = latest.totalStockholderEquity;
-        if (pl == null) return recusa(MultipleRefusal.baseAusente, p);
-        if (pl <= 0) return recusa(MultipleRefusal.baseNaoPositiva, p);
+        if (pl == null) return refusal(MultipleRefusal.missingBase, p);
+        if (pl <= 0) return refusal(MultipleRefusal.nonPositiveBase, p);
         return MultipleReading(
           kind: kind,
           fairValuePerShare: p.median * pl / shares,
           peer: p,
         );
 
-      case MultipleKind.firmaEbitda:
+      case MultipleKind.evToEbitda:
         final ebitda = latest.ebitda;
-        if (ebitda == null) return recusa(MultipleRefusal.baseAusente, p);
-        if (ebitda <= 0) return recusa(MultipleRefusal.baseNaoPositiva, p);
+        if (ebitda == null) return refusal(MultipleRefusal.missingBase, p);
+        if (ebitda <= 0) return refusal(MultipleRefusal.nonPositiveBase, p);
         // O valor da firma vira valor do acionista pela **mesma ponte** do DCF:
         // menos a dívida líquida. Caixa líquido soma, e é legítimo.
         final equity = p.median * ebitda - latest.netDebt;
         if (equity <= 0) {
-          return recusa(MultipleRefusal.ponteNaoPositiva, p);
+          return refusal(MultipleRefusal.nonPositiveBridge, p);
         }
         return MultipleReading(
           kind: kind,
@@ -252,8 +252,8 @@ class PeerValuation {
         if (r.fairValuePerShare != null) r.fairValuePerShare!,
     ]..sort();
     if (v.isEmpty) return null;
-    final meio = v.length ~/ 2;
-    return v.length.isOdd ? v[meio] : (v[meio - 1] + v[meio]) / 2;
+    final mid = v.length ~/ 2;
+    return v.length.isOdd ? v[mid] : (v[mid - 1] + v[mid]) / 2;
   }
 
   /// Distância relativa do consolidado contra o preço justo do fluxo
@@ -344,13 +344,13 @@ abstract final class PeerMultipleCodec {
   /// Devolve mapa vazio quando o pacote não tem a seção esperada: pacote
   /// ilegível desliga a triangulação, e a avaliação sai como sempre saiu.
   static Map<String, PeerMultipleSet> decode(Map<String, Object?> json) {
-    final porTicker = json['porTicker'];
-    if (porTicker is! Map) return const {};
-    final data = DateTime.tryParse(json['geradoEm'] as String? ?? '');
-    if (data == null) return const {};
+    final byTicker = json['porTicker'];
+    if (byTicker is! Map) return const {};
+    final date = DateTime.tryParse(json['geradoEm'] as String? ?? '');
+    if (date == null) return const {};
 
     final out = <String, PeerMultipleSet>{};
-    for (final e in porTicker.entries) {
+    for (final e in byTicker.entries) {
       final ticker = e.key;
       final v = e.value;
       if (ticker is! String || v is! Map) continue;
@@ -358,19 +358,19 @@ abstract final class PeerMultipleCodec {
       for (final k in MultipleKind.values) {
         final m = v[k.key];
         if (m is! Map) continue;
-        final mediana = (m['mediana'] as num?)?.toDouble();
-        final pares = (m['pares'] as num?)?.toInt();
-        final grupo = m['grupo'] as String?;
-        if (mediana == null || pares == null || grupo == null) continue;
-        if (!mediana.isFinite || mediana <= 0) continue;
+        final median = (m['mediana'] as num?)?.toDouble();
+        final pairs = (m['pares'] as num?)?.toInt();
+        final group = m['grupo'] as String?;
+        if (median == null || pairs == null || group == null) continue;
+        if (!median.isFinite || median <= 0) continue;
         byKind[k] = PeerMultiple(
-          median: mediana,
-          peers: pares,
-          group: grupo,
+          median: median,
+          peers: pairs,
+          group: group,
         );
       }
       if (byKind.isNotEmpty) {
-        out[ticker] = PeerMultipleSet(byKind: byKind, asOf: data);
+        out[ticker] = PeerMultipleSet(byKind: byKind, asOf: date);
       }
     }
     return out;

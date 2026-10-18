@@ -19,41 +19,41 @@ import 'package:equisim_core/equisim_core.dart';
 import 'validation/congelado.dart';
 
 Future<void> main(List<String> args) async {
-  final saida = args.isEmpty ? 'docs/estudo/casos/dados' : args.first;
-  final alvos =
+  final output = args.isEmpty ? 'docs/estudo/casos/dados' : args.first;
+  final targets =
       (args.length > 1
               ? args.skip(1)
               : const ['WEGE3', 'ITUB4', 'VALE3', 'SAPR11', 'RENT3'])
           .map(Ticker.parse)
           .toList();
-  final c = await Congelado.montar();
-  Map<String, dynamic> ler(String p) =>
+  final c = await Frozen.build();
+  Map<String, dynamic> read(String p) =>
       jsonDecode(File(p).readAsStringSync()) as Map<String, dynamic>;
-  final pares = PeerMultipleCodec.decode(
-    ler('assets/mercado/multiplos_setoriais.json'),
+  final pairs = PeerMultipleCodec.decode(
+    read('assets/mercado/multiplos_setoriais.json'),
   );
-  final faixas = CalibratedBandCodec.decode(
-    ler('assets/validacao/banda_calibrada.json'),
+  final bands = CalibratedBandCodec.decode(
+    read('assets/validacao/banda_calibrada.json'),
   );
-  Directory(saida).createSync(recursive: true);
+  Directory(output).createSync(recursive: true);
 
-  for (final t in alvos) {
-    final prep = await c.preparar(t);
+  for (final t in targets) {
+    final prep = await c.prepare(t);
     if (prep.isErr) {
       stdout.writeln(
         '${t.value}: preparo falhou ${prep.failureOrNull?.message}',
       );
       continue;
     }
-    final insumos = prep.unwrap().withPeerMultiples(pares[t.value]);
+    final inputs = prep.unwrap().withPeerMultiples(pairs[t.value]);
     AuditEvent? ev;
     AuditRecorder.attach((e) => ev = e);
-    final r = ValuationCascade.evaluate(insumos);
+    final r = ValuationCascade.evaluate(inputs);
     AuditRecorder.detach();
     Map<String, dynamic>? mc;
     if (r.isOk) {
       final m = ValuationCascade.evaluate(
-        insumos,
+        inputs,
         scenarioBuilder: StochasticScenarios.around,
       );
       final d = m.valueOrNull?.distribution;
@@ -65,43 +65,43 @@ Future<void> main(List<String> args) async {
         };
       }
     }
-    final curva = insumos.riskFreeCurve;
-    final ultimos = insumos.fundamentals
-        .where((f) => PointInTimeView(insumos.asOf).isPublished(f))
+    final curve = inputs.riskFreeCurve;
+    final lastOnes = inputs.fundamentals
+        .where((f) => PointInTimeView(inputs.asOf).isPublished(f))
         .toList();
     final res = r.valueOrNull;
     final json = <String, dynamic>{
       'ticker': t.value,
-      'asOf': insumos.asOf.toIso8601String().substring(0, 10),
-      'preco': insumos.marketPrice,
-      'setor': insumos.sectorKey,
-      'subsetor': insumos.industry,
+      'asOf': inputs.asOf.toIso8601String().substring(0, 10),
+      'preco': inputs.marketPrice,
+      'setor': inputs.sectorKey,
+      'subsetor': inputs.industry,
       'capm': {
-        'rf': insumos.capm.riskFreeRate,
-        'beta': insumos.capm.beta,
-        'origemBeta': insumos.capm.betaSource.name,
-        'premio': insumos.capm.marketPremium,
-        'ke': insumos.capm.costOfEquity,
-        'betaDesalavancado': insumos.unleveredBeta,
+        'rf': inputs.capm.riskFreeRate,
+        'beta': inputs.capm.beta,
+        'origemBeta': inputs.capm.betaSource.name,
+        'premio': inputs.capm.marketPremium,
+        'ke': inputs.capm.costOfEquity,
+        'betaDesalavancado': inputs.unleveredBeta,
       },
       'ancoras': {
-        'inflacao': insumos.inflation,
-        'tetoCrescimentoNominal': insumos.perpetualGrowthCap,
-        'rfEstruturalDeclarada': insumos.declaredTerminalRiskFreeRate,
-        'rfTerminal': insumos.terminalRiskFreeRate,
+        'inflacao': inputs.inflation,
+        'tetoCrescimentoNominal': inputs.perpetualGrowthCap,
+        'rfEstruturalDeclarada': inputs.declaredTerminalRiskFreeRate,
+        'rfTerminal': inputs.terminalRiskFreeRate,
       },
-      'curva': curva == null
+      'curva': curve == null
           ? null
           : {
-              'data': curva.referenceDate.toIso8601String().substring(0, 10),
-              'forwards': curva.annualForwards(insumos.projectionYears),
-              'terminal': curva.terminalRate(insumos.projectionYears),
+              'data': curve.referenceDate.toIso8601String().substring(0, 10),
+              'forwards': curve.annualForwards(inputs.projectionYears),
+              'terminal': curve.terminalRate(inputs.projectionYears),
               'vertices': [
-                for (final v in curva.vertices) [v.years, v.rate],
+                for (final v in curve.vertices) [v.years, v.rate],
               ],
             },
       'exercicios': [
-        for (final f in ultimos)
+        for (final f in lastOnes)
           {
             'ano': f.fiscalPeriodEnd.year,
             'receita': f.totalRevenue,
@@ -144,16 +144,16 @@ Future<void> main(List<String> args) async {
               'monteCarlo': mc,
               'volatilidade': res.priceVolatility,
               'faixas': [
-                for (final meses in const [12, 36])
+                for (final months in const [12, 36])
                   for (final nominal in const [0.5, 0.8, 0.9])
                     if (CalibratedBand.select(
-                          faixas,
-                          months: meses,
+                          bands,
+                          months: months,
                           nominal: nominal,
                         )
                         case final tab?)
                       {
-                        'meses': meses,
+                        'meses': months,
                         'nominal': nominal,
                         'coberturaForaDaAmostra': tab.outOfSampleCoverage,
                         if (tab is VolatilityBandTable) ...{
@@ -196,7 +196,7 @@ Future<void> main(List<String> args) async {
       'rastro': ev == null ? null : AuditJson.safe(ev!.toJson()),
     };
     File(
-      '$saida/${t.value}.json',
+      '$output/${t.value}.json',
     ).writeAsStringSync(const JsonEncoder.withIndent(' ').convert(json));
     stdout.writeln(
       '${t.value}: ${res == null ? 'recusa' : 'justo ${res.fairValue} potencial ${res.upside.toStringAsFixed(3)}'}',

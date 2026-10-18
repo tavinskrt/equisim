@@ -146,7 +146,7 @@ void main() {
     // caso VALE3, que a decisão 25 passou a tratar por convergência ao ciclo em
     // vez de winsorização do fluxo absoluto.
     final ticker = Ticker.parse('SAPR11');
-    const lucro = {
+    const profit = {
       2016: 700.0,
       2017: 750.0,
       2018: 820.0,
@@ -162,7 +162,7 @@ void main() {
       ticker: ticker,
       asOf: DateTime(2026, 8, 20),
       fundamentals: [
-        for (final entry in lucro.entries)
+        for (final entry in profit.entries)
           FundamentalsSnapshot(
             ticker: ticker,
             fiscalPeriodEnd: DateTime(entry.key, 12, 31),
@@ -247,10 +247,10 @@ void main() {
     expect(tester.takeException(), isNull,
         reason: 'nenhuma faixa de estouro em 320 px, no painel inteiro');
 
-    final etiqueta = find.text('define a mediana do ciclo').first;
-    expect(etiqueta, findsOneWidget);
+    final tag = find.text('define a mediana do ciclo').first;
+    expect(tag, findsOneWidget);
     expect(
-      tester.getBottomRight(etiqueta).dx,
+      tester.getBottomRight(tag).dx,
       lessThanOrEqualTo(320.0),
       reason: 'a etiqueta precisa caber na largura da tela',
     );
@@ -311,8 +311,8 @@ void main() {
 
     expect(tester.takeException(), isNull);
 
-    final cabecalho = tester.getSize(find.byType(SingleChildScrollView).first);
-    expect(cabecalho.height, lessThanOrEqualTo(284.0),
+    final header = tester.getSize(find.byType(SingleChildScrollView).first);
+    expect(header.height, lessThanOrEqualTo(284.0),
         reason: 'metade de 568; acima disso o cabeçalho rola por dentro');
 
     // E o que sobra continua sendo do conteúdo.
@@ -347,7 +347,7 @@ void main() {
 
   // ------------------------------------------------------------------ D4 --
 
-  AuditEvent rede(int i) => AuditEvent(
+  AuditEvent network(int i) => AuditEvent(
         transactionId: 'rede-$i',
         timestamp: DateTime.now(),
         endpoint: '/v2/stocks/quote',
@@ -381,7 +381,7 @@ void main() {
       (tester) async {
     emitValuation();
     for (var i = 0; i < AuditBus.networkLimit + 50; i++) {
-      AuditRecorder.emit(rede(i));
+      AuditRecorder.emit(network(i));
     }
     final bus = AuditBus.instance;
     expect(bus.history.where(AuditBus.isCalculation), hasLength(1),
@@ -417,12 +417,12 @@ void main() {
 
   testWidgets('a exportação é íntegra: completa, declarada e serializável (D4)',
       (tester) async {
-    String? exportado;
+    String? exported;
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (call) async {
         if (call.method == 'Clipboard.setData') {
-          exportado = (call.arguments as Map)['text'] as String;
+          exported = (call.arguments as Map)['text'] as String;
         }
         return null;
       },
@@ -447,22 +447,22 @@ void main() {
     await tester.tap(find.text('Exportar Auditoria (JSON)'));
     await tester.pumpAndSettle();
 
-    final doc = jsonDecode(exportado!) as Map<String, dynamic>;
+    final doc = jsonDecode(exported!) as Map<String, dynamic>;
     expect(doc['formato'], 2);
     expect(doc['totalDeAvaliacoes'], 2);
     expect(doc['buscaAplicada'], isNull);
     expect(doc['descartados'], {'calculos': 0, 'rede': 0});
-    final eventos = (doc['eventos'] as List).cast<Map<String, dynamic>>();
-    final petr = eventos.firstWhere(
+    final events = (doc['eventos'] as List).cast<Map<String, dynamic>>();
+    final petr = events.firstWhere(
         (e) => e['endpoint'] == '/core/valuation/PETR4');
     final original = AuditBus.instance.history.firstWhere(
         (e) => e.endpoint == '/core/valuation/PETR4');
     expect(jsonEncode(petr), jsonEncode(original.toJson()),
         reason: 'o arquivo leva o evento inteiro, sem corte');
-    final nan = eventos.firstWhere(
+    final nan = events.firstWhere(
         (e) => e['endpoint'] == '/core/valuation/NAN3');
-    final passo = (nan['calculations'] as List).single as Map<String, dynamic>;
-    expect(passo['finalValue'], 'NaN');
+    final step = (nan['calculations'] as List).single as Map<String, dynamic>;
+    expect(step['finalValue'], 'NaN');
   });
 
   testWidgets('limpar esvazia a lista', (tester) async {

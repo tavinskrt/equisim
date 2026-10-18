@@ -17,9 +17,9 @@ import 'populated_state.dart' show valuationOf;
 /// o pacote, some sem ele, diz de quantos pares saiu cada múltiplo, e **não
 /// estoura em celular pequeno**.
 void main() {
-  final hoje = DateTime(2026, 9, 14);
+  final today = DateTime(2026, 9, 14);
 
-  FundamentalsSnapshot exercicio() => FundamentalsSnapshot(
+  FundamentalsSnapshot fiscalYear() => FundamentalsSnapshot(
         ticker: Ticker.parse('PETR4'),
         fiscalPeriodEnd: DateTime(2025, 12, 31),
         totalRevenue: 12000,
@@ -41,29 +41,29 @@ void main() {
         marketCap: 10000,
       );
 
-  PeerMultipleSet pares({bool comEbitda = true}) => PeerMultipleSet(
-        asOf: hoje,
+  PeerMultipleSet pairs({bool withEbitda = true}) => PeerMultipleSet(
+        asOf: today,
         byKind: {
-          MultipleKind.precoLucro: const PeerMultiple(
+          MultipleKind.priceToEarnings: const PeerMultiple(
               median: 11.4, peers: 8, group: 'petroleo-gas-e-biocombustiveis'),
-          MultipleKind.precoPatrimonio: const PeerMultiple(
+          MultipleKind.priceToBook: const PeerMultiple(
               median: 1.6, peers: 10, group: 'petroleo-gas-e-biocombustiveis'),
-          if (comEbitda)
-            MultipleKind.firmaEbitda: const PeerMultiple(
+          if (withEbitda)
+            MultipleKind.evToEbitda: const PeerMultiple(
                 median: 7.1, peers: 10, group: 'petroleo-gas-e-biocombustiveis'),
         },
       );
 
-  ValuationResult comTriangulacao({
-    double justo = 42.80,
-    bool comEbitda = true,
+  ValuationResult withTriangulation({
+    double fairValue = 42.80,
+    bool withEbitda = true,
   }) {
-    final base = valuationOf('PETR4', justo: justo);
+    final base = valuationOf('PETR4', fairValue: fairValue);
     final t = PeerTriangulation.build(
-      latest: exercicio(),
+      latest: fiscalYear(),
       shares: 1000,
-      peers: pares(comEbitda: comEbitda),
-      dcfFairValue: justo,
+      peers: pairs(withEbitda: withEbitda),
+      dcfFairValue: fairValue,
     );
     return ValuationResult(
       ticker: base.ticker,
@@ -81,13 +81,13 @@ void main() {
     );
   }
 
-  Widget tela(ValuationResult? resultado) => ProviderScope(
+  Widget screen(ValuationResult? result) => ProviderScope(
         overrides: [
           currentUserIdProvider.overrideWithValue('usuario-1'),
           marketAnchorsProvider
               .overrideWith((ref) async => MarketAnchors.fallback2026),
-          valuationProvider.overrideWith((ref, ticker) async => resultado),
-          isLightModeProvider.overrideWith(() => IsLightMode(inicial: false)),
+          valuationProvider.overrideWith((ref, ticker) async => result),
+          isLightModeProvider.overrideWith(() => IsLightMode(initial: false)),
         ],
         child: MaterialApp(
           theme: buildFinTheme(isLight: false),
@@ -102,20 +102,20 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(tela(valuationOf('PETR4')));
+    await tester.pumpWidget(screen(valuationOf('PETR4')));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('MÚLTIPLOS DE PARES'), findsNothing);
   });
 
-  for (final largura in const [320.0, 1024.0]) {
+  for (final width in const [320.0, 1024.0]) {
     testWidgets('com o pacote, mostra as três leituras sem estouro em '
-        '${largura.toInt()} dp', (tester) async {
-      tester.view.physicalSize = Size(largura, 2400);
+        '${width.toInt()} dp', (tester) async {
+      tester.view.physicalSize = Size(width, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(tela(comTriangulacao()));
+      await tester.pumpWidget(screen(withTriangulation()));
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
@@ -135,7 +135,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(tela(comTriangulacao()));
+    await tester.pumpWidget(screen(withTriangulation()));
     await tester.pumpAndSettle();
 
     expect(
@@ -152,7 +152,7 @@ void main() {
 
     // P/L 11,4 × R$ 1,00 = R$ 11,40; P/VP 1,6 × R$ 8,00 = R$ 12,80;
     // EV/EBITDA 7,1 × 2.400 − 2.500 = R$ 14,54. A mediana é R$ 12,80.
-    await tester.pumpWidget(tela(comTriangulacao(justo: 12.60)));
+    await tester.pumpWidget(screen(withTriangulation(fairValue: 12.60)));
     await tester.pumpAndSettle();
     expect(find.textContaining('as duas leituras concordam'), findsOneWidget);
     expect(find.textContaining('as duas leituras discordam'), findsNothing);
@@ -164,7 +164,7 @@ void main() {
     addTearDown(tester.view.reset);
 
     // Mediana dos múltiplos em R$ 12,80 contra um DCF de R$ 42,80: −70%.
-    await tester.pumpWidget(tela(comTriangulacao()));
+    await tester.pumpWidget(screen(withTriangulation()));
     await tester.pumpAndSettle();
     expect(find.textContaining('as duas leituras discordam'), findsOneWidget);
   });
@@ -174,7 +174,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(tela(comTriangulacao(comEbitda: false)));
+    await tester.pumpWidget(screen(withTriangulation(withEbitda: false)));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Fora: EV/EBITDA'), findsOneWidget);
@@ -184,15 +184,15 @@ void main() {
     // A conferência que impede o pacote de sair do build quebrado: se a
     // ferramenta mudar de formato e o codec não, a tela fica sem a segunda
     // leitura **em silêncio**.
-    final arquivo = File(peerMultiplesAsset);
-    expect(arquivo.existsSync(), isTrue,
+    final file = File(peerMultiplesAsset);
+    expect(file.existsSync(), isTrue,
         reason: 'rode tool/multiplos_empacotar.dart');
-    final lido = PeerMultipleCodec.decode(
-        jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>);
-    expect(lido, isNotEmpty);
-    final algum = lido.values.first;
-    expect(algum.byKind, isNotEmpty);
-    for (final m in algum.byKind.values) {
+    final parsed = PeerMultipleCodec.decode(
+        jsonDecode(file.readAsStringSync()) as Map<String, dynamic>);
+    expect(parsed, isNotEmpty);
+    final any = parsed.values.first;
+    expect(any.byKind, isNotEmpty);
+    for (final m in any.byKind.values) {
       expect(m.median, greaterThan(0));
       expect(m.peers, greaterThanOrEqualTo(PeerValuation.minimumPeers));
       expect(m.group, isNotEmpty);

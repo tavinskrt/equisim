@@ -11,7 +11,7 @@ import 'package:equisim_core/equisim_core.dart';
 import 'package:test/test.dart';
 
 void main() {
-  const spread = 0.02, tax = 0.30, premio = 0.055, betaU = 0.60;
+  const spread = 0.02, tax = 0.30, premium = 0.055, betaU = 0.60;
   const rf = 0.09;
   // O `K_d` aplicado é `Rf + spread` — a classificação sintética, a mesma do
   // WACC estático (item B11). Com a taxa livre de risco constante nestes
@@ -24,17 +24,17 @@ void main() {
   // **sua** taxa — `√(1+WACC)` de um lado, `√(1+Ke)` do outro —, e o vão que
   // sobra é o termo de spread, medido no próprio arquivo. O que estes testes
   // provam é a álgebra do ponto fixo, e ela se prova onde é exata.
-  DcfAssumptions premissas({
+  DcfAssumptions assumptions({
     required double g,
-    double? taxa,
-    CashTiming timing = CashTiming.fimDeAno,
+    double? rate,
+    CashTiming timing = CashTiming.endOfYear,
   }) =>
       DcfAssumptions(
         projectionYears: 10,
         growthRate: g,
         perpetualGrowth: g,
-        discountRate: taxa ?? 0.13,
-        terminalDiscountRate: taxa ?? 0.13,
+        discountRate: rate ?? 0.13,
+        terminalDiscountRate: rate ?? 0.13,
         returnOnCapital: 0.0,
         cashTiming: timing,
       );
@@ -42,27 +42,27 @@ void main() {
   const base = 1000.0;
   Result<LeveredRates> resolver({
     required double g,
-    required double divida,
+    required double debt,
     double base = base,
-    CashTiming timing = CashTiming.fimDeAno,
-    double? caixa,
+    CashTiming timing = CashTiming.endOfYear,
+    double? cash,
   }) =>
       LeveredCostOfCapital.solve(
         baseProfit: base,
-        assumptions: premissas(g: g, timing: timing),
-        netDebt: divida,
+        assumptions: assumptions(g: g, timing: timing),
+        netDebt: debt,
         unleveredBeta: betaU,
         riskFreePath: List<double>.filled(10, rf),
         terminalRiskFree: rf,
-        marketPremium: premio,
+        marketPremium: premium,
         creditSpread: spread,
         taxRate: tax,
-        cash: caixa,
+        cash: cash,
       );
 
   group('Ponto fixo do custo de capital', () {
     test('converge, e o caminho de taxas acompanha a alavancagem', () {
-      final r = resolver(g: 0.05, divida: 3000);
+      final r = resolver(g: 0.05, debt: 3000);
       expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
       final v = r.unwrap();
 
@@ -94,13 +94,13 @@ void main() {
       // levantado — de modo que `D/E` sai inflado e o `Ke` com ele, sem que
       // nada acuse.
       for (final timing in CashTiming.values) {
-        final r = resolver(g: 0.05, divida: 3000, timing: timing);
+        final r = resolver(g: 0.05, debt: 3000, timing: timing);
         expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
         final v = r.unwrap();
 
-        final direto = DcfCalculator.firm(
+        final direct = DcfCalculator.firm(
           baseProfit: base,
-          assumptions: premissas(g: 0.05, timing: timing).copyWith(
+          assumptions: assumptions(g: 0.05, timing: timing).copyWith(
             discountRatePath: v.wacc,
             terminalDiscountRate: v.terminalWacc,
           ),
@@ -108,7 +108,7 @@ void main() {
           sharesOutstanding: 1,
         ).unwrap();
 
-        expect(v.enterpriseValue.first / direto.enterpriseValue,
+        expect(v.enterpriseValue.first / direct.enterpriseValue,
             closeTo(1.0, 1e-9),
             reason: 'sob ${timing.key} a acumulação regressiva não reproduz '
                 'o valor descontado');
@@ -117,44 +117,44 @@ void main() {
 
     test('AS DUAS ROTAS COINCIDEM COM CRESCIMENTO — o critério de D1', () {
       const g = 0.05;
-      const divida = 3000.0;
-      const papeis = 100.0;
-      final r = resolver(g: g, divida: divida).unwrap();
+      const debt = 3000.0;
+      const securities = 100.0;
+      final r = resolver(g: g, debt: debt).unwrap();
 
-      final comCaminho = premissas(g: g).copyWith(
+      final withPath = assumptions(g: g).copyWith(
         discountRatePath: v(r.wacc),
         terminalDiscountRate: r.terminalWacc,
       );
 
-      final firma = DcfCalculator.firm(
+      final firm = DcfCalculator.firm(
         baseProfit: 1000,
-        assumptions: comCaminho,
-        netDebt: divida,
-        sharesOutstanding: papeis,
+        assumptions: withPath,
+        netDebt: debt,
+        sharesOutstanding: securities,
       );
-      expect(firma.isOk, isTrue, reason: firma.failureOrNull?.message);
+      expect(firm.isOk, isTrue, reason: firm.failureOrNull?.message);
 
-      final acionista = DcfCalculator.equityFromFirm(
+      final shareholder = DcfCalculator.equityFromFirm(
         baseProfit: 1000,
-        assumptions: comCaminho,
-        netDebt: divida,
-        sharesOutstanding: papeis,
+        assumptions: withPath,
+        netDebt: debt,
+        sharesOutstanding: securities,
         costOfDebt: kd,
         taxRate: tax,
         equityDiscountRate: r.costOfEquity.first,
         terminalEquityDiscountRate: r.terminalCostOfEquity,
         equityDiscountRatePath: v(r.costOfEquity),
       );
-      expect(acionista.isOk, isTrue, reason: acionista.failureOrNull?.message);
+      expect(shareholder.isOk, isTrue, reason: shareholder.failureOrNull?.message);
 
-      final a = firma.unwrap().fairValuePerShare;
-      final b = acionista.unwrap().fairValuePerShare;
-      final divergencia = (b / a - 1).abs();
+      final a = firm.unwrap().fairValuePerShare;
+      final b = shareholder.unwrap().fairValuePerShare;
+      final divergence = (b / a - 1).abs();
 
       // Sob a interpolação de dois pontos esta divergência era de 4,2%.
-      expect(divergencia, lessThan(1e-6),
+      expect(divergence, lessThan(1e-6),
           reason: 'firma R\$ $a contra acionista R\$ $b '
-              '(${(divergencia * 100).toStringAsFixed(2)}%)');
+              '(${(divergence * 100).toStringAsFixed(2)}%)');
     });
 
     test('a dívida cresce ao ritmo do lucro, e o prêmio de crédito não tem '
@@ -162,30 +162,30 @@ void main() {
       // O prêmio sintético sai de dívida ÷ EBITDA. Com a dívida crescendo a
       // `g_t` como o lucro projetado, a razão fica parada — e é essa a
       // premissa que torna correto um prêmio só para o caminho inteiro.
-      final a = premissas(g: 0.06);
-      final r = resolver(g: 0.06, divida: 3000).unwrap();
+      final a = assumptions(g: 0.06);
+      final r = resolver(g: 0.06, debt: 3000).unwrap();
       for (var t = 1; t < r.debt.length; t++) {
         expect(r.debt[t] / r.debt[t - 1] - 1, closeTo(a.growthAt(t), 1e-12));
       }
     });
 
     test('sem dívida o caminho é plano e igual ao CAPM sem alavancagem', () {
-      final v = resolver(g: 0.04, divida: 0).unwrap();
-      final esperado = rf + betaU * premio;
+      final v = resolver(g: 0.04, debt: 0).unwrap();
+      final expected = rf + betaU * premium;
       for (final k in v.costOfEquity) {
-        expect(k, closeTo(esperado, 1e-9));
+        expect(k, closeTo(expected, 1e-9));
       }
       for (final w in v.wacc) {
-        expect(w, closeTo(esperado, 1e-9),
+        expect(w, closeTo(expected, 1e-9),
             reason: 'sem dívida o WACC é o próprio Ke');
       }
-      expect(v.terminalCostOfEquity, closeTo(esperado, 1e-9));
+      expect(v.terminalCostOfEquity, closeTo(expected, 1e-9));
     });
 
     test('capital próprio que desaparece vira recusa nomeada', () {
       // Dívida grande demais para o fluxo sustentar: em vez de devolver um
       // preço por papel que é resíduo de subtração, recusa.
-      final r = resolver(g: 0.02, divida: 500000, base: 100);
+      final r = resolver(g: 0.02, debt: 500000, base: 100);
       expect(r.isErr, isTrue);
       expect(r.failureOrNull!.message, contains('capital próprio'));
       // **A recusa diz quando aconteceu**, e é disso que a cascata precisa
@@ -200,7 +200,7 @@ void main() {
       // `netDebt` negativo é empresa de caixa líquido, e `E + D` fica menor
       // que `E`. Sem guarda o peso divide por zero quando o caixa se aproxima
       // do próprio valor.
-      final r = resolver(g: 0.03, divida: -2000);
+      final r = resolver(g: 0.03, debt: -2000);
       expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
       final v = r.unwrap();
       for (final w in v.wacc) {
@@ -209,8 +209,8 @@ void main() {
       }
       // Sem dívida líquida positiva não há alavancagem: o fator de Hamada é
       // confinado no piso, e o `Ke` é o desalavancado puro.
-      final esperado = rf + betaU * premio;
-      expect(v.costOfEquity.first, closeTo(esperado, 1e-9));
+      final expected = rf + betaU * premium;
+      expect(v.costOfEquity.first, closeTo(expected, 1e-9));
     });
 
     test('caixa líquido extremo mantém as taxas finitas', () {
@@ -218,7 +218,7 @@ void main() {
       // não positivo — a guarda contra isso é rede de segurança, não caminho
       // alcançável daqui. O que se trava é que caixa de ordem de grandeza
       // maior que o próprio negócio não produz taxa infinita nem NaN.
-      final r = resolver(g: 0.01, divida: -1e9, base: 100);
+      final r = resolver(g: 0.01, debt: -1e9, base: 100);
       expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
       final v = r.unwrap();
       for (final w in v.wacc) {
@@ -242,12 +242,12 @@ void main() {
       const terminalRf = 0.06;
       final r = LeveredCostOfCapital.solve(
         baseProfit: base,
-        assumptions: premissas(g: 0.04),
+        assumptions: assumptions(g: 0.04),
         netDebt: 3000,
         unleveredBeta: betaU,
         riskFreePath: List<double>.filled(10, rf),
         terminalRiskFree: terminalRf,
-        marketPremium: premio,
+        marketPremium: premium,
         creditSpread: spread,
         taxRate: tax,
       );
@@ -257,14 +257,14 @@ void main() {
       // O `K_d` implícito sai da própria identidade do WACC do ano, com o peso
       // que o ponto fixo fixou: é o número que a conta usou, e não um número
       // remontado por outro caminho.
-      double kdImplicito(double wacc, double ke, double pesoE) =>
-          (wacc - ke * pesoE) / ((1 - pesoE) * (1 - tax));
+      double impliedKd(double wacc, double ke, double equityWeight) =>
+          (wacc - ke * equityWeight) / ((1 - equityWeight) * (1 - tax));
 
       expect(
-          kdImplicito(v.wacc.first, v.costOfEquity.first, v.equityShareAt(0)!),
+          impliedKd(v.wacc.first, v.costOfEquity.first, v.equityShareAt(0)!),
           closeTo(rf + spread, 1e-9));
       expect(
-          kdImplicito(v.terminalWacc, v.terminalCostOfEquity,
+          impliedKd(v.terminalWacc, v.terminalCostOfEquity,
               v.equityShareAt(10)!),
           closeTo(terminalRf + spread, 1e-9),
           reason: 'o prêmio de crédito é da empresa; a taxa base é do ano');
@@ -273,12 +273,12 @@ void main() {
     test('exige beta desalavancado, e recusa sem ele', () {
       final r = LeveredCostOfCapital.solve(
         baseProfit: 1000,
-        assumptions: premissas(g: 0.04),
+        assumptions: assumptions(g: 0.04),
         netDebt: 1000,
         unleveredBeta: double.nan,
         riskFreePath: List<double>.filled(10, rf),
         terminalRiskFree: rf,
-        marketPremium: premio,
+        marketPremium: premium,
         creditSpread: spread,
         taxRate: tax,
       );
@@ -289,12 +289,12 @@ void main() {
     test('caminho de taxa livre de risco com tamanho errado é recusado', () {
       final r = LeveredCostOfCapital.solve(
         baseProfit: 1000,
-        assumptions: premissas(g: 0.04),
+        assumptions: assumptions(g: 0.04),
         netDebt: 1000,
         unleveredBeta: betaU,
         riskFreePath: List<double>.filled(3, rf),
         terminalRiskFree: rf,
-        marketPremium: premio,
+        marketPremium: premium,
         creditSpread: spread,
         taxRate: tax,
       );
@@ -328,17 +328,17 @@ void main() {
         discountRate: 0.13,
         returnOnCapital: 0.0,
       );
-      final semCaminho =
+      final withoutPath =
           DcfCalculator.firm(baseProfit: 100, assumptions: a, netDebt: 0, sharesOutstanding: 1);
-      final comCaminho = DcfCalculator.firm(
+      final withPath = DcfCalculator.firm(
         baseProfit: 100,
         assumptions: a.copyWith(discountRatePath: List<double>.filled(10, 0.13)),
         netDebt: 0,
         sharesOutstanding: 1,
       );
       expect(
-        comCaminho.unwrap().fairValuePerShare,
-        closeTo(semCaminho.unwrap().fairValuePerShare, 1e-12),
+        withPath.unwrap().fairValuePerShare,
+        closeTo(withoutPath.unwrap().fairValuePerShare, 1e-12),
       );
     });
   });
@@ -349,23 +349,23 @@ void main() {
     // fixo: os 14 ativos que saíram do aplicativo em 20/09/2026 foram
     // recusados todos na primeira iteração. Agora o ponto fixo é tentado de
     // duas partidas, e um ponto fixo é um ponto fixo.
-    Result<LeveredRates> comChute(double taxa, {double divida = 3000}) =>
+    Result<LeveredRates> withGuess(double rate, {double debt = 3000}) =>
         LeveredCostOfCapital.solve(
           baseProfit: base,
           assumptions: DcfAssumptions(
             projectionYears: 10,
             growthRate: 0.05,
             perpetualGrowth: 0.05,
-            discountRate: taxa,
-            terminalDiscountRate: taxa,
+            discountRate: rate,
+            terminalDiscountRate: rate,
             returnOnCapital: 0.0,
-            cashTiming: CashTiming.fimDeAno,
+            cashTiming: CashTiming.endOfYear,
           ),
-          netDebt: divida,
+          netDebt: debt,
           unleveredBeta: betaU,
           riskFreePath: List<double>.filled(10, rf),
           terminalRiskFree: rf,
-          marketPremium: premio,
+          marketPremium: premium,
           creditSpread: spread,
           taxRate: tax,
         );
@@ -373,19 +373,19 @@ void main() {
     test('dois chutes bem diferentes chegam ao mesmo lugar', () {
       // O chute só semeia: dentro do laço o caminho é reescrito. Se a resposta
       // dependesse dele, ela seria do chute.
-      final baixo = comChute(0.10).unwrap();
-      final alto = comChute(0.30).unwrap();
-      expect(baixo.converged && alto.converged, isTrue);
-      expect((alto.equity.first / baixo.equity.first - 1).abs(),
+      final low = withGuess(0.10).unwrap();
+      final high = withGuess(0.30).unwrap();
+      expect(low.converged && high.converged, isTrue);
+      expect((high.equity.first / low.equity.first - 1).abs(),
           lessThan(LeveredCostOfCapital.startIndependence),
           reason: 'o mesmo ponto fixo, por caminhos diferentes');
-      expect(alto.terminalWacc, closeTo(baixo.terminalWacc, 1e-6));
+      expect(high.terminalWacc, closeTo(low.terminalWacc, 1e-6));
     });
 
     test('chute que mata o capital próprio não decide a recusa', () {
       // Com o chute alto o capital próprio some no ano zero da primeira
       // iteração; a partida desalavancada fecha, e é ela que vale.
-      final avisos = <String>[];
+      final warnings = <String>[];
       final r = LeveredCostOfCapital.solve(
         baseProfit: base,
         assumptions: const DcfAssumptions(
@@ -396,19 +396,19 @@ void main() {
           discountRate: 0.90,
           terminalDiscountRate: 0.90,
           returnOnCapital: 0.0,
-          cashTiming: CashTiming.fimDeAno,
+          cashTiming: CashTiming.endOfYear,
         ),
         netDebt: 6000,
         unleveredBeta: 0.30,
         riskFreePath: List<double>.filled(10, rf),
         terminalRiskFree: rf,
-        marketPremium: premio,
+        marketPremium: premium,
         creditSpread: spread,
         taxRate: tax,
-        warnings: avisos,
+        warnings: warnings,
       );
       expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
-      expect(avisos.any((a) => a.contains('não fecha a partir do caminho sem realavancagem')),
+      expect(warnings.any((a) => a.contains('não fecha a partir do caminho sem realavancagem')),
           isTrue,
           reason: 'quando as duas partidas discordam sobre existir solução, a '
               'avaliação precisa dizer de onde veio a que valeu');
@@ -424,14 +424,14 @@ void main() {
           discountRate: 0.13,
           terminalDiscountRate: 0.13,
           returnOnCapital: 0.0,
-          cashTiming: CashTiming.fimDeAno,
+          cashTiming: CashTiming.endOfYear,
         ),
         // Dívida de ordem de grandeza acima do que o fluxo sustenta.
         netDebt: 1e9,
         unleveredBeta: betaU,
         riskFreePath: List<double>.filled(10, rf),
         terminalRiskFree: rf,
-        marketPremium: premio,
+        marketPremium: premium,
         creditSpread: spread,
         taxRate: tax,
       );
@@ -446,65 +446,65 @@ void main() {
     // deles a via da firma produz caminho de taxas para emprestar: ou o `Ke`
     // sai dos fluxos dela mesma, ou continua supondo a alavancagem de hoje
     // perene. Decisão 46.
-    Result<LeveredRates> resolverAcionista({
+    Result<LeveredRates> resolveShareholder({
       required double g,
-      required double dividaPorPapel,
-      double lpa = 1.0,
-      double taxa = 0.13,
+      required double debtPerShare,
+      double eps = 1.0,
+      double rate = 0.13,
     }) =>
         LeveredCostOfCapital.solveEquity(
-          baseProfit: lpa,
-          assumptions: premissas(g: g, taxa: taxa),
-          netDebtPerShare: dividaPorPapel,
+          baseProfit: eps,
+          assumptions: assumptions(g: g, rate: rate),
+          netDebtPerShare: debtPerShare,
           unleveredBeta: betaU,
           riskFreePath: List<double>.filled(10, rf),
           terminalRiskFree: rf,
-          marketPremium: premio,
+          marketPremium: premium,
           taxRate: tax,
         );
 
     test('sem dívida, o caminho é plano e igual ao CAPM desalavancado', () {
-      final r = resolverAcionista(g: 0.04, dividaPorPapel: 0);
+      final r = resolveShareholder(g: 0.04, debtPerShare: 0);
       expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
       final v = r.unwrap();
       expect(v.converged, isTrue);
-      final esperado = rf + betaU * premio;
+      final expected = rf + betaU * premium;
       for (final ke in v.costOfEquity) {
-        expect(ke, closeTo(esperado, 1e-12));
+        expect(ke, closeTo(expected, 1e-12));
       }
-      expect(v.terminalCostOfEquity, closeTo(esperado, 1e-12));
+      expect(v.terminalCostOfEquity, closeTo(expected, 1e-12));
       // Não há custo médio nesta via: `wacc` repete `Ke`, por contrato.
       expect(v.wacc, v.costOfEquity);
       expect(v.terminalWacc, v.terminalCostOfEquity);
     });
 
     test('mais dívida por papel eleva o Ke, e é monótono', () {
-      double? keDe(double d) {
-        final r = resolverAcionista(g: 0.04, dividaPorPapel: d);
+      double? keOf(double d) {
+        final r = resolveShareholder(g: 0.04, debtPerShare: d);
         return r.isOk ? r.unwrap().costOfEquity.first : null;
       }
 
-      double? anterior;
-      var avaliados = 0;
-      for (var passo = 0; passo <= 8; passo++) {
-        final ke = keDe(passo * 1.5);
+      double? previous;
+      var evaluated = 0;
+      for (var step = 0; step <= 8; step++) {
+        final ke = keOf(step * 1.5);
         if (ke == null) continue;
-        avaliados++;
-        if (anterior != null) {
-          expect(ke, greaterThanOrEqualTo(anterior - 1e-12),
+        evaluated++;
+        if (previous != null) {
+          expect(ke, greaterThanOrEqualTo(previous - 1e-12),
               reason: 'alavancar mais não pode baratear o capital próprio');
         }
-        anterior = ke;
+        previous = ke;
       }
-      expect(avaliados, greaterThan(5));
-      expect(anterior, greaterThan(rf + betaU * premio),
+      expect(evaluated, greaterThan(5));
+      expect(previous, greaterThan(rf + betaU * premium),
           reason: 'no topo da varredura a realavancagem tem de ter mordido');
     });
 
     test('a escala não muda nada: D/E é razão', () {
       // Dobrar lucro e dívida por papel é a mesma empresa com metade das ações.
-      final a = resolverAcionista(g: 0.04, lpa: 1.0, dividaPorPapel: 4.0);
-      final b = resolverAcionista(g: 0.04, lpa: 3.0, dividaPorPapel: 12.0);
+      final a = resolveShareholder(g: 0.04, eps: 1.0, debtPerShare: 4.0);
+      final b = resolveShareholder(g: 0.04, eps: 3.0, debtPerShare: 12.0);
       expect(a.isOk && b.isOk, isTrue);
       for (var t = 0; t < 10; t++) {
         expect(b.unwrap().costOfEquity[t],
@@ -515,7 +515,7 @@ void main() {
     });
 
     test('a alavancagem se move ao longo da projeção, e o Ke com ela', () {
-      final r = resolverAcionista(g: 0.06, dividaPorPapel: 6.0);
+      final r = resolveShareholder(g: 0.06, debtPerShare: 6.0);
       expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
       final v = r.unwrap();
       expect(v.converged, isTrue);
@@ -536,13 +536,13 @@ void main() {
       // superar `g`.
       final r = LeveredCostOfCapital.solveEquity(
         baseProfit: 1.0,
-        assumptions: premissas(g: 0.14, taxa: 0.10)
+        assumptions: assumptions(g: 0.14, rate: 0.10)
             .copyWith(terminalReturnOnCapital: 0.20),
         netDebtPerShare: 1.0,
         unleveredBeta: betaU,
         riskFreePath: List<double>.filled(10, rf),
         terminalRiskFree: rf,
-        marketPremium: premio,
+        marketPremium: premium,
         taxRate: tax,
       );
       expect(r.isErr, isTrue);
@@ -556,7 +556,7 @@ void main() {
       // deixa de ter significado. O sentinela de ponto flutuante atravessava a
       // formatação e chegava ao aviso do usuário como `NaN%` — a auditoria
       // pegou, e o nulo obriga quem lê a decidir o que dizer.
-      final r = resolverAcionista(g: 0.02, dividaPorPapel: -1e6);
+      final r = resolveShareholder(g: 0.02, debtPerShare: -1e6);
       expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
       final v = r.unwrap();
       expect(v.enterpriseValue.first, lessThanOrEqualTo(0),
@@ -575,12 +575,12 @@ void main() {
       // `Ke` mais alto sem receber nada pela dívida nova.
       final r = LeveredCostOfCapital.solveEquity(
         baseProfit: 1.0,
-        assumptions: premissas(g: 0.08),
+        assumptions: assumptions(g: 0.08),
         netDebtPerShare: 3.0,
         unleveredBeta: betaU,
         riskFreePath: List<double>.filled(10, rf),
         terminalRiskFree: rf,
-        marketPremium: premio,
+        marketPremium: premium,
         taxRate: tax,
       );
       expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
@@ -588,9 +588,9 @@ void main() {
 
       expect(v.debt, everyElement(closeTo(3.0, 1e-12)),
           reason: 'a dívida fica parada em termos nominais');
-      final de0 = v.debt.first / v.equity.first;
-      final deN = v.debt.last / v.equity.last;
-      expect(deN, lessThan(de0),
+      final debtToEquity0 = v.debt.first / v.equity.first;
+      final debtToEquityN = v.debt.last / v.equity.last;
+      expect(debtToEquityN, lessThan(debtToEquity0),
           reason: 'o capital próprio cresce pelo lucro retido e a dívida não: '
               'a alavancagem cai');
       expect(v.costOfEquity.last, lessThan(v.costOfEquity.first),
@@ -600,12 +600,12 @@ void main() {
     test('sem beta desalavancado, recusa', () {
       final r = LeveredCostOfCapital.solveEquity(
         baseProfit: 1.0,
-        assumptions: premissas(g: 0.04),
+        assumptions: assumptions(g: 0.04),
         netDebtPerShare: 2.0,
         unleveredBeta: double.nan,
         riskFreePath: List<double>.filled(10, rf),
         terminalRiskFree: rf,
-        marketPremium: premio,
+        marketPremium: premium,
         taxRate: tax,
       );
       expect(r.isErr, isTrue);
@@ -621,12 +621,12 @@ void main() {
     // as duas metades crescem com o mesmo fator, e a diferença delas é a
     // mesma série líquida de antes.
     test('a mesma dívida líquida, com caixa conhecido, custa mais', () {
-      final sem = resolver(g: 0.05, divida: 3000);
-      final com = resolver(g: 0.05, divida: 3000, caixa: 2000);
-      expect(sem.isOk, isTrue, reason: sem.failureOrNull?.message);
-      expect(com.isOk, isTrue, reason: com.failureOrNull?.message);
-      final a = sem.unwrap();
-      final b = com.unwrap();
+      final without = resolver(g: 0.05, debt: 3000);
+      final withInput = resolver(g: 0.05, debt: 3000, cash: 2000);
+      expect(without.isOk, isTrue, reason: without.failureOrNull?.message);
+      expect(withInput.isOk, isTrue, reason: withInput.failureOrNull?.message);
+      final a = without.unwrap();
+      final b = withInput.unwrap();
       for (var t = 0; t < a.wacc.length; t++) {
         expect(b.wacc[t], greaterThan(a.wacc[t]),
             reason: 'ano ${t + 1}: o caixa deixa de render prêmio de crédito');
@@ -637,41 +637,41 @@ void main() {
     });
 
     test('a dívida projetada é a mesma: o que muda é a taxa', () {
-      final sem = resolver(g: 0.05, divida: 3000).unwrap();
-      final com = resolver(g: 0.05, divida: 3000, caixa: 2000).unwrap();
-      for (var t = 0; t < sem.debt.length; t++) {
-        expect(com.debt[t], closeTo(sem.debt[t], 1e-9));
+      final without = resolver(g: 0.05, debt: 3000).unwrap();
+      final withInput = resolver(g: 0.05, debt: 3000, cash: 2000).unwrap();
+      for (var t = 0; t < without.debt.length; t++) {
+        expect(withInput.debt[t], closeTo(without.debt[t], 1e-9));
       }
     });
 
     test('o WACC do ano 1 fecha na forma de três pernas', () {
-      final r = resolver(g: 0.05, divida: 3000, caixa: 2000).unwrap();
-      const caixa = 2000.0;
+      final r = resolver(g: 0.05, debt: 3000, cash: 2000).unwrap();
+      const cash = 2000.0;
       final v0 = r.equity.first + r.debt.first;
-      final pesoE = r.equity.first / v0;
-      final wBruta = (r.debt.first + caixa) / v0;
-      final wCaixa = caixa / v0;
-      final juro = (rf + spread) * (1 - tax);
-      final rendimento = rf * (1 - tax);
+      final equityWeight = r.equity.first / v0;
+      final wGross = (r.debt.first + cash) / v0;
+      final wCash = cash / v0;
+      final interest = (rf + spread) * (1 - tax);
+      final income = rf * (1 - tax);
       expect(
         r.wacc.first,
         closeTo(
-          r.costOfEquity.first * pesoE + juro * wBruta - rendimento * wCaixa,
+          r.costOfEquity.first * equityWeight + interest * wGross - income * wCash,
           1e-9,
         ),
       );
       // E a soma dos dois pesos da perna é a participação da líquida: a
       // separação redistribui a mesma perna entre duas taxas.
-      expect(wBruta - wCaixa, closeTo(1 - pesoE, 1e-12));
+      expect(wGross - wCash, closeTo(1 - equityWeight, 1e-12));
     });
 
     test('caixa zero é a forma anterior, bit a bit', () {
-      final sem = resolver(g: 0.05, divida: 3000).unwrap();
-      final com = resolver(g: 0.05, divida: 3000, caixa: 0).unwrap();
-      for (var t = 0; t < sem.wacc.length; t++) {
-        expect(com.wacc[t], closeTo(sem.wacc[t], 1e-12));
+      final without = resolver(g: 0.05, debt: 3000).unwrap();
+      final withInput = resolver(g: 0.05, debt: 3000, cash: 0).unwrap();
+      for (var t = 0; t < without.wacc.length; t++) {
+        expect(withInput.wacc[t], closeTo(without.wacc[t], 1e-12));
       }
-      expect(com.terminalWacc, closeTo(sem.terminalWacc, 1e-12));
+      expect(withInput.terminalWacc, closeTo(without.terminalWacc, 1e-12));
     });
   });
 }

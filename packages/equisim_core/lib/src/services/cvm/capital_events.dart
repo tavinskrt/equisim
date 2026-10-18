@@ -34,20 +34,20 @@ class CapitalEvents {
 abstract final class CapitalEventsCodec {
   /// Versão do formato do pacote. A 2 grava o valor da emissão em centavos
   /// inteiros, e não em reais.
-  static const int versao = 2;
+  static const int version = 2;
 
   /// Grava o pacote.
   static Map<String, Object> encodePackage(
-    Map<String, CapitalEvents> porTicker, {
-    required DateTime geradoEm,
+    Map<String, CapitalEvents> byTicker, {
+    required DateTime generatedAt,
   }) {
-    String dia(DateTime d) => d.toIso8601String().substring(0, 10);
+    String day(DateTime d) => d.toIso8601String().substring(0, 10);
     return {
-      'versao': versao,
-      'geradoEm': dia(geradoEm),
+      'versao': version,
+      'geradoEm': day(generatedAt),
       'ativos': {
         for (final e
-            in (porTicker.entries.toList()
+            in (byTicker.entries.toList()
               ..sort((a, b) => a.key.compareTo(b.key))))
           if (!e.value.isEmpty)
             e.key: {
@@ -56,7 +56,7 @@ abstract final class CapitalEventsCodec {
                     in (e.value.issues.toList()
                       ..sort((a, b) => a.date.compareTo(b.date))))
                   {
-                    'data': dia(i.date),
+                    'data': day(i.date),
                     'centavos': i.amount.cents,
                     'acoes': i.shares,
                     if (!i.declared) 'declarada': false,
@@ -66,7 +66,7 @@ abstract final class CapitalEventsCodec {
                 for (final v
                     in (e.value.shareEvents.toList()
                       ..sort((a, b) => a.exDate.compareTo(b.exDate))))
-                  {'dataEx': dia(v.exDate), 'fator': v.factor},
+                  {'dataEx': day(v.exDate), 'fator': v.factor},
               ],
             },
       },
@@ -76,51 +76,51 @@ abstract final class CapitalEventsCodec {
   /// Lê o pacote. Entrada malformada é **pulada**, e não derruba a leitura: um
   /// ativo sem emissão lida é avaliado com o patrimônio do balanço, que é o
   /// comportamento anterior.
-  static Map<String, CapitalEvents> decodePackage(Map<String, dynamic> pacote) {
+  static Map<String, CapitalEvents> decodePackage(Map<String, dynamic> package) {
     final out = <String, CapitalEvents>{};
-    final ativos = pacote['ativos'];
-    if (ativos is! Map) return out;
-    DateTime? data(Object? x) => x is String ? DateTime.tryParse(x) : null;
-    double? numero(Object? x) => x is num ? x.toDouble() : null;
+    final assets = package['ativos'];
+    if (assets is! Map) return out;
+    DateTime? date(Object? x) => x is String ? DateTime.tryParse(x) : null;
+    double? number(Object? x) => x is num ? x.toDouble() : null;
     // Quantidade de ação é inteira: fração na fonte é entrada malformada.
-    int? inteiro(Object? x) => x is int
+    int? whole(Object? x) => x is int
         ? x
         : x is double && x.isFinite && (x - x.roundToDouble()).abs() < 1e-9
         ? x.round()
         : null;
-    for (final e in ativos.entries) {
+    for (final e in assets.entries) {
       final v = e.value;
       if (v is! Map) continue;
-      final emissoes = <ShareIssue>[];
-      final lista = v['emissoes'];
-      if (lista is List) {
-        for (final x in lista) {
+      final issuances = <ShareIssue>[];
+      final list = v['emissoes'];
+      if (list is List) {
+        for (final x in list) {
           if (x is! Map) continue;
-          final d = data(x['data']);
-          final centavos = x['centavos'];
-          final acoes = inteiro(x['acoes']);
-          if (d == null || centavos is! int || acoes == null) continue;
+          final d = date(x['data']);
+          final cents = x['centavos'];
+          final shares = whole(x['acoes']);
+          if (d == null || cents is! int || shares == null) continue;
           final i = ShareIssue(
             date: d,
-            amount: Money(centavos),
-            shares: acoes,
+            amount: Money(cents),
+            shares: shares,
             declared: x['declarada'] != false,
           );
-          if (i.isUsable) emissoes.add(i);
+          if (i.isUsable) issuances.add(i);
         }
       }
-      final eventos = <ShareEvent>[];
-      final lista2 = v['eventos'];
-      if (lista2 is List) {
-        for (final x in lista2) {
+      final events = <ShareEvent>[];
+      final eventList = v['eventos'];
+      if (eventList is List) {
+        for (final x in eventList) {
           if (x is! Map) continue;
-          final d = data(x['dataEx']);
-          final f = numero(x['fator']);
+          final d = date(x['dataEx']);
+          final f = number(x['fator']);
           if (d == null || f == null || !f.isFinite || f <= 0) continue;
-          eventos.add(ShareEvent(exDate: d, factor: f, observedRatio: 1 / f));
+          events.add(ShareEvent(exDate: d, factor: f, observedRatio: 1 / f));
         }
       }
-      final c = CapitalEvents(issues: emissoes, shareEvents: eventos);
+      final c = CapitalEvents(issues: issuances, shareEvents: events);
       if (!c.isEmpty) out['${e.key}'] = c;
     }
     return out;

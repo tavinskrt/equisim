@@ -24,8 +24,8 @@ abstract final class FeasibilityCopy {
   static String of(FeasibilityVerdict verdict) {
     // A taxa só falta no caso `unsolvable`, cuja frase não a cita; o travessão
     // existe para que o `switch` continue exaustivo sem ramo condicional.
-    final taxa = verdict.requiredAnnualRate;
-    final required = taxa == null ? '—' : Fmt.percent(taxa, decimals: 2);
+    final rate = verdict.requiredAnnualRate;
+    final required = rate == null ? '—' : Fmt.percent(rate, decimals: 2);
     final cdi = Fmt.percent(verdict.anchors.riskFreeCagr, decimals: 2);
     final market = Fmt.percent(verdict.anchors.marketCagr, decimals: 2);
     final years = verdict.anchors.observedYears;
@@ -68,11 +68,11 @@ abstract final class FeasibilityCopy {
     required String market,
     required double? multiple,
   }) {
-    final vezes = multiple == null
+    final times = multiple == null
         ? ''
         : ' — ${Fmt.ratio(multiple)} vezes o retorno histórico do Ibovespa '
             '($market a.a.)';
-    return 'A meta exige $required a.a.$vezes. Nenhuma carteira diversificada '
+    return 'A meta exige $required a.a.$times. Nenhuma carteira diversificada '
         'sustentou esse patamar na janela observada. Ajuste prazo, aporte '
         'mensal ou valor desejado.';
   }

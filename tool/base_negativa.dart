@@ -24,7 +24,7 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
 String _pc(double? v) => v == null ? '—' : '${(v * 100).toStringAsFixed(1)}%';
 
@@ -34,7 +34,7 @@ Future<void> main(List<String> args) async {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
     final universe = (await ctx.fundamentals.universe()).unwrap();
@@ -43,10 +43,10 @@ Future<void> main(List<String> args) async {
       prices: ctx.prices,
       fundamentals: ctx.fundamentals,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     );
 
-    final saida = <Map<String, dynamic>>[];
+    final output = <Map<String, dynamic>>[];
     var i = 0;
     for (final ticker in universe) {
       i++;
@@ -57,7 +57,7 @@ Future<void> main(List<String> args) async {
         fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
@@ -67,52 +67,52 @@ Future<void> main(List<String> args) async {
       if (prep.isErr) continue;
       final inputs = prep.unwrap();
 
-      final divulgados = PointInTimeView(inputs.asOf)
+      final disclosed = PointInTimeView(inputs.asOf)
           .published(inputs.fundamentals)
           .where((s) => s.hasIncomeStatement)
           .toList();
-      if (divulgados.isEmpty) continue;
+      if (disclosed.isEmpty) continue;
 
-      final aliquota = CapitalSeries.structuralTaxRate(
-        divulgados,
+      final taxRate = CapitalSeries.structuralTaxRate(
+        disclosed,
         statutoryRate: ValuationParameters.statutoryTaxRate,
       );
 
-      for (final via in ValuationLane.values) {
-        final serie = CapitalSeries.build(
-          divulgados,
-          via,
-          firmTaxRate: via == ValuationLane.firm ? aliquota : null,
+      for (final lane in ValuationLane.values) {
+        final series = CapitalSeries.build(
+          disclosed,
+          lane,
+          firmTaxRate: lane == ValuationLane.firm ? taxRate : null,
         );
-        if (serie.isTooShort) continue;
-        final atual = serie.latestReturn;
-        if (atual == null || atual > 0) continue;
+        if (series.isTooShort) continue;
+        final current = series.latestReturn;
+        if (current == null || current > 0) continue;
 
-        final ciclo = serie.cycleReturn(window: ValuationParameters.cycleWindow);
-        final queda = GrowthGuards.recentOperationalDecline(divulgados);
-        final ciclico = CyclicalSectors.hasCyclePrecedence(
+        final cycle = series.cycleReturn(window: ValuationParameters.cycleWindow);
+        final decline = GrowthGuards.recentOperationalDecline(disclosed);
+        final cyclical = CyclicalSectors.hasCyclePrecedence(
           sectorKey: inputs.sectorKey,
           industry: inputs.industry,
         );
         final r = ValuationCascade.evaluate(inputs);
 
-        saida.add({
+        output.add({
           'ticker': ticker.value,
-          'via': via.name,
+          'via': lane.name,
           'setor': inputs.sectorKey,
           'subsetor': inputs.industry,
-          'ciclico': ciclico,
-          'retornoAtual': atual,
-          'retornoCiclo': ciclo,
-          'quedaOperacional': queda,
-          'exercicios': divulgados.length,
+          'ciclico': cyclical,
+          'retornoAtual': current,
+          'retornoCiclo': cycle,
+          'quedaOperacional': decline,
+          'exercicios': disclosed.length,
           // Quantos dos últimos oito exercícios vieram no prejuízo: um vale é
           // um; quatro seguidos é outra empresa.
           'fracaoPositiva':
-              serie.positiveShare(window: ValuationParameters.cycleWindow),
-          'capitalAtual': serie.latestBase,
-          'anosNegativos': serie.returns
-              .skip(serie.returns.length > 8 ? serie.returns.length - 8 : 0)
+              series.positiveShare(window: ValuationParameters.cycleWindow),
+          'capitalAtual': series.latestBase,
+          'anosNegativos': series.returns
+              .skip(series.returns.length > 8 ? series.returns.length - 8 : 0)
               .where((x) => x.value <= 0)
               .length,
           'avaliado': r.isOk,
@@ -123,33 +123,33 @@ Future<void> main(List<String> args) async {
     stderr.writeln('');
 
     File('docs/validacao/base_negativa.json').writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(saida),
+      const JsonEncoder.withIndent(' ').convert(output),
     );
-    _imprimir(saida);
+    _printReport(output);
     stderr.writeln('\nescrito docs/validacao/base_negativa.json '
-        '(${saida.length})');
+        '(${output.length})');
   } finally {
     await ctx.dispose();
   }
 }
 
-void _imprimir(List<Map<String, dynamic>> l) {
+void _printReport(List<Map<String, dynamic>> l) {
   stdout.writeln('\n=== EXERCÍCIO-BASE NO PREJUÍZO ===\n');
   final tickers = {for (final e in l) e['ticker'] as String};
   stdout.writeln('  ativos com retorno corrente não positivo: '
       '${tickers.length}');
-  final recusados = {
+  final refusedCount = {
     for (final e in l)
       if (e['avaliado'] != true) e['ticker'] as String
   };
-  stdout.writeln('  destes, recusados pelo motor: ${recusados.length}');
+  stdout.writeln('  destes, recusados pelo motor: ${refusedCount.length}');
 
-  final comCicloPositivo = l
+  final withPositiveCycle = l
       .where((e) =>
           e['retornoCiclo'] != null && (e['retornoCiclo'] as num) > 0)
       .toList();
   stdout.writeln('  linhas com ciclo positivo medível: '
-      '${comCicloPositivo.length} de ${l.length}');
+      '${withPositiveCycle.length} de ${l.length}');
 
   stdout.writeln('\n  ${"ativo".padRight(8)}${"via".padRight(13)}'
       '${"atual".padLeft(8)}${"ciclo".padLeft(9)}${"queda".padLeft(9)}'
@@ -157,13 +157,13 @@ void _imprimir(List<Map<String, dynamic>> l) {
   final ord = [...l]..sort((a, b) =>
       (a['ticker'] as String).compareTo(b['ticker'] as String));
   for (final e in ord) {
-    final atual = (e['retornoAtual'] as num?)?.toDouble();
-    final ciclo = (e['retornoCiclo'] as num?)?.toDouble();
-    final queda = (e['quedaOperacional'] as num?)?.toDouble();
+    final current = (e['retornoAtual'] as num?)?.toDouble();
+    final cycle = (e['retornoCiclo'] as num?)?.toDouble();
+    final decline = (e['quedaOperacional'] as num?)?.toDouble();
     stdout.writeln('  ${(e['ticker'] as String).padRight(8)}'
         '${(e['via'] as String).padRight(13)}'
-        '${_pc(atual).padLeft(8)}${_pc(ciclo).padLeft(9)}'
-        '${_pc(queda).padLeft(9)}'
+        '${_pc(current).padLeft(8)}${_pc(cycle).padLeft(9)}'
+        '${_pc(decline).padLeft(9)}'
         '${(e['anosNegativos'] as int).toString().padLeft(7)}'
         '  ${(e['ciclico'] == true ? "sim" : "não").padRight(7)}'
         '  ${e['avaliado'] == true ? "avaliado" : "RECUSADO"}');

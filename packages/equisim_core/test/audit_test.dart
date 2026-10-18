@@ -52,8 +52,8 @@ void main() {
     // arbitra —, o peso do capital próprio não pode readquirir o erro: o
     // divisor é conciliado pelas demonstrações, e o WACC tem de ser o mesmo do
     // caso consistente.
-    final consistente = ValuationCascade.evaluate(_inputs(ticker)).unwrap();
-    final corrompido = ValuationCascade.evaluate(ValuationInputs(
+    final consistent = ValuationCascade.evaluate(_inputs(ticker)).unwrap();
+    final corrupted = ValuationCascade.evaluate(ValuationInputs(
       ticker: ticker,
       asOf: DateTime(2026, 8, 20),
       fundamentals: [
@@ -88,7 +88,7 @@ void main() {
       ),
       projectionYears: 5,
     )).unwrap();
-    expect(corrompido.discountRate, closeTo(consistente.discountRate, 1e-12));
+    expect(corrupted.discountRate, closeTo(consistent.discountRate, 1e-12));
   });
 
   setUp(AuditRecorder.detach);
@@ -99,16 +99,16 @@ void main() {
     // A ponte `EV − D` saiu do preço, e o rastro continuava mostrando-a: a
     // lente `metodo` apontou em 16/09/2026. O passo do capital próprio precisa
     // somar ao preço justo que a avaliação devolve.
-    final eventos = <AuditEvent>[];
-    AuditRecorder.attach(eventos.add);
+    final events = <AuditEvent>[];
+    AuditRecorder.attach(events.add);
     final r = ValuationCascade.evaluate(_inputs(ticker)).unwrap();
     expect(r.model, ValuationModel.dcfFcff);
-    final calculos = eventos.last.calculations;
-    expect(calculos.map((c) => c.formulaName),
+    final calculations = events.last.calculations;
+    expect(calculations.map((c) => c.formulaName),
         isNot(contains('Ponte do valor da firma ao preço justo por papel')));
-    final passo = calculos.singleWhere(
+    final step = calculations.singleWhere(
         (c) => c.formulaName == 'Capital próprio pelo fluxo do acionista derivado');
-    expect(passo.finalValue, closeTo(r.fairValue.reais, 0.005));
+    expect(step.finalValue, closeTo(r.fairValue.reais, 0.005));
   });
 
   group('AuditRecorder', () {
@@ -247,63 +247,63 @@ void main() {
 
   group('Instrumentação da cascata', () {
     test('sem coletor acoplado, o resultado é idêntico', () {
-      final semAuditoria = ValuationCascade.evaluate(_inputs(ticker));
+      final withoutAudit = ValuationCascade.evaluate(_inputs(ticker));
 
-      final capturados = <AuditEvent>[];
-      AuditRecorder.attach(capturados.add);
-      final comAuditoria = ValuationCascade.evaluate(_inputs(ticker));
+      final captured = <AuditEvent>[];
+      AuditRecorder.attach(captured.add);
+      final withAudit = ValuationCascade.evaluate(_inputs(ticker));
       AuditRecorder.detach();
 
-      expect(semAuditoria.isOk, isTrue);
-      expect(comAuditoria.isOk, isTrue);
+      expect(withoutAudit.isOk, isTrue);
+      expect(withAudit.isOk, isTrue);
       // O ponto do teste: instrumentar não pode mover o número. Se mexer, a
       // auditoria estaria documentando um cálculo que não é o de produção.
       expect(
-        comAuditoria.unwrap().fairValue.cents,
-        semAuditoria.unwrap().fairValue.cents,
+        withAudit.unwrap().fairValue.cents,
+        withoutAudit.unwrap().fairValue.cents,
       );
       expect(
-        comAuditoria.unwrap().discountRate,
-        semAuditoria.unwrap().discountRate,
+        withAudit.unwrap().discountRate,
+        withoutAudit.unwrap().discountRate,
       );
-      expect(comAuditoria.unwrap().model, semAuditoria.unwrap().model);
+      expect(withAudit.unwrap().model, withoutAudit.unwrap().model);
     });
 
     test('uma avaliação bem-sucedida emite um evento com as fórmulas', () {
-      final capturados = <AuditEvent>[];
-      AuditRecorder.attach(capturados.add);
+      final captured = <AuditEvent>[];
+      AuditRecorder.attach(captured.add);
 
       final result = ValuationCascade.evaluate(_inputs(ticker));
 
       expect(result.isOk, isTrue);
-      expect(capturados, hasLength(1));
+      expect(captured, hasLength(1));
 
-      final event = capturados.single;
+      final event = captured.single;
       expect(event.endpoint, '/core/valuation/PETR4');
       expect(event.outputPayload['status'], 'ok');
       expect(event.inputPayload['ticker'], 'PETR4');
 
-      final nomes = [for (final c in event.calculations) c.formulaName];
-      expect(nomes, contains('Custo do capital próprio (CAPM)'));
+      final names = [for (final c in event.calculations) c.formulaName];
+      expect(names, contains('Custo do capital próprio (CAPM)'));
       expect(
-        nomes.any((n) => n.contains('WACC') || n.contains('degeneração')),
+        names.any((n) => n.contains('WACC') || n.contains('degeneração')),
         isTrue,
         reason: 'a taxa de desconto precisa estar documentada',
       );
-      expect(nomes.any((n) => n.contains('perpetuidade')), isTrue);
+      expect(names.any((n) => n.contains('perpetuidade')), isTrue);
       expect(
-        nomes.last,
+        names.last,
         'Margem de segurança e potencial de valorização',
         reason: 'o veredito fecha a cadeia de raciocínio',
       );
     });
 
     test('cada fórmula traz símbolos, etapas e resultado', () {
-      final capturados = <AuditEvent>[];
-      AuditRecorder.attach(capturados.add);
+      final captured = <AuditEvent>[];
+      AuditRecorder.attach(captured.add);
       ValuationCascade.evaluate(_inputs(ticker));
 
-      for (final trace in capturados.single.calculations) {
+      for (final trace in captured.single.calculations) {
         expect(trace.latexRepresentation, isNotEmpty,
             reason: '${trace.formulaName} sem expressão em LaTeX');
         expect(trace.intermediateSteps, isNotEmpty,
@@ -316,11 +316,11 @@ void main() {
     });
 
     test('a convergência ao ciclo publica a amostra de retorno, por ano', () {
-      final capturados = <AuditEvent>[];
-      AuditRecorder.attach(capturados.add);
+      final captured = <AuditEvent>[];
+      AuditRecorder.attach(captured.add);
       ValuationCascade.evaluate(_inputs(ticker));
 
-      final base = capturados.single.calculations
+      final base = captured.single.calculations
           .firstWhere((c) => c.formulaName.contains('Base do fluxo'));
       final sample = base.sample!;
 
@@ -343,38 +343,38 @@ void main() {
 
       // A mediana publicada é a dos pontos publicados, exceto o observado —
       // que é justamente o que se compara contra o ciclo.
-      final janela = [
+      final window = [
         for (final p in sample.points)
           if (!p.isObserved) p.value
       ]..sort();
-      final meio = janela.length ~/ 2;
-      final mediana = janela.length.isOdd
-          ? janela[meio]
-          : (janela[meio - 1] + janela[meio]) / 2;
-      expect(sample.summary, closeTo(mediana, 0.02));
+      final mid = window.length ~/ 2;
+      final median = window.length.isOdd
+          ? window[mid]
+          : (window[mid - 1] + window[mid]) / 2;
+      expect(sample.summary, closeTo(median, 0.02));
     });
 
     test('o CAPM registrado reproduz o Ke usado no desconto', () {
-      final capturados = <AuditEvent>[];
-      AuditRecorder.attach(capturados.add);
+      final captured = <AuditEvent>[];
+      AuditRecorder.attach(captured.add);
       final inputs = _inputs(ticker);
       ValuationCascade.evaluate(inputs);
 
-      final capm = capturados.single.calculations
+      final capm = captured.single.calculations
           .firstWhere((c) => c.formulaName.contains('CAPM'));
 
       // A conferência que a banca faria à mão, feita no teste.
       final rf = capm.mappedVariables['R_f (% a.a.)']! as num;
       final beta = capm.mappedVariables['beta']! as num;
-      final premio = capm.mappedVariables['R_m - R_f (% a.a.)']! as num;
+      final premium = capm.mappedVariables['R_m - R_f (% a.a.)']! as num;
 
-      expect(rf + beta * premio, closeTo(capm.finalValue!, 0.01));
+      expect(rf + beta * premium, closeTo(capm.finalValue!, 0.01));
       expect(capm.finalValue! / 100, closeTo(inputs.capm.costOfEquity, 1e-4));
     });
 
     test('avaliação recusada também emite evento, com o motivo', () {
-      final capturados = <AuditEvent>[];
-      AuditRecorder.attach(capturados.add);
+      final captured = <AuditEvent>[];
+      AuditRecorder.attach(captured.add);
 
       final result = ValuationCascade.evaluate(ValuationInputs(
         ticker: ticker,
@@ -389,9 +389,9 @@ void main() {
       ));
 
       expect(result.isErr, isTrue);
-      expect(capturados, hasLength(1));
-      expect(capturados.single.outputPayload['status'], 'falha');
-      expect(capturados.single.outputPayload['motivo'], isA<String>());
+      expect(captured, hasLength(1));
+      expect(captured.single.outputPayload['status'], 'falha');
+      expect(captured.single.outputPayload['motivo'], isA<String>());
     });
   });
 }

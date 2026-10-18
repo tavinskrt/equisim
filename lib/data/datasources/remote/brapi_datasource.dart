@@ -120,8 +120,8 @@ class BrapiDatasource {
     final r = await _mergedStatements(ticker);
     if (r.isErr) return Err(r.failureOrNull!);
     final merged = r.unwrap();
-    final chaves = merged.keys.toList()..sort();
-    return Ok([for (final k in chaves) merged[k]!]);
+    final keys = merged.keys.toList()..sort();
+    return Ok([for (final k in keys) merged[k]!]);
   }
 
   Future<Result<Map<String, Map<String, dynamic>>>> _mergedStatements(
@@ -259,12 +259,12 @@ class BrapiDatasource {
       // hoje, e ausência não é o valor errado. **Campo a campo**, e não só com
       // o snapshot inteiro ausente: um corrente que traga a contagem e omita o
       // valor de mercado deixava o anual no lugar (lente `dados`, 15/09/2026).
-      for (final campo in const [
+      for (final field in const [
         'sharesOutstanding',
         'enterpriseToEbitda',
         'marketCap',
       ]) {
-        if (currentData?[campo] == null) fields.remove(campo);
+        if (currentData?[field] == null) fields.remove(field);
       }
       snapshots.add(
         BrapiFundamentalsDto(fiscalPeriodEnd: date, fields: fields)

@@ -41,8 +41,8 @@ void main() {
   );
 
   test('a avaliação que migra de isolate chega ao painel com o rastro', () async {
-    final eventos = <AuditEvent>[];
-    AuditRecorder.attach(eventos.add);
+    final events = <AuditEvent>[];
+    AuditRecorder.attach(events.add);
     addTearDown(AuditRecorder.detach);
 
     final r = await ValuationRunner.run(ValuationRequest(
@@ -52,10 +52,10 @@ void main() {
     ));
 
     expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
-    expect(eventos, hasLength(1));
-    expect(eventos.single.endpoint, '/core/valuation/PETR4');
-    expect(eventos.single.calculations, isNotEmpty);
-    expect(eventos.single.outputPayload['fairValue'],
+    expect(events, hasLength(1));
+    expect(events.single.endpoint, '/core/valuation/PETR4');
+    expect(events.single.calculations, isNotEmpty);
+    expect(events.single.outputPayload['fairValue'],
         r.unwrap().fairValue.reais);
     expect(AuditRecorder.isActive, isTrue,
         reason: 'o coletor desta isolate continua ligado');
@@ -66,8 +66,8 @@ void main() {
     // Lente `risco`, 25/09/2026: o teste cobria só o caminho feliz. Sem
     // exercícios não há via, e a cascata recusa — dentro da outra isolate. A
     // falha tem de voltar como `Err`, com o evento de recusa no painel.
-    final eventos = <AuditEvent>[];
-    AuditRecorder.attach(eventos.add);
+    final events = <AuditEvent>[];
+    AuditRecorder.attach(events.add);
     addTearDown(AuditRecorder.detach);
 
     final r = await ValuationRunner.run(ValuationRequest(
@@ -77,8 +77,8 @@ void main() {
     )).timeout(const Duration(seconds: 30));
 
     expect(r.isErr, isTrue);
-    expect(eventos, hasLength(1));
-    expect(eventos.single.endpoint, '/core/valuation/PETR4');
+    expect(events, hasLength(1));
+    expect(events.single.endpoint, '/core/valuation/PETR4');
   });
 
   test('sem ninguém ouvindo, a isolate não monta rastro', () async {

@@ -12,43 +12,43 @@ import 'package:flutter_test/flutter_test.dart';
 /// muda preço; mas um build sem ele deixaria de declarar o que a medição
 /// mandou declarar, e isso reprova a suíte.
 void main() {
-  final arquivo = File(shareholderControlAsset);
+  final file = File(shareholderControlAsset);
 
   test('o pacote existe e está declarado como asset', () {
-    expect(arquivo.existsSync(), isTrue,
+    expect(file.existsSync(), isTrue,
         reason: 'gerar com `dart run tool/controle_empacotar.dart` e versionar');
     expect(File('pubspec.yaml').readAsStringSync(), contains('- assets/cvm/'));
   });
 
   test('o pacote é legível, e as estatais conhecidas estão onde devem', () {
-    final lido = ShareholderControlHistory.decode(
-        jsonDecode(arquivo.readAsStringSync()) as Map<String, dynamic>);
-    expect(lido, isNotNull,
+    final parsed = ShareholderControlHistory.decode(
+        jsonDecode(file.readAsStringSync()) as Map<String, dynamic>);
+    expect(parsed, isNotNull,
         reason: 'o codec mudou de versão e o pacote não foi regerado');
-    ShareholderControl? em(String raiz, DateTime d) =>
-        ShareholderControlHistory.at(lido!.porEmissor[raiz]!, d);
-    final hoje = DateTime(2026, 9, 14);
-    expect(em('PETR', hoje), ShareholderControl.state);
-    expect(em('BBAS', hoje), ShareholderControl.state);
-    expect(em('ITUB', hoje), ShareholderControl.private);
+    ShareholderControl? at(String root, DateTime d) =>
+        ShareholderControlHistory.at(parsed!.byIssuer[root]!, d);
+    final today = DateTime(2026, 9, 14);
+    expect(at('PETR', today), ShareholderControl.state);
+    expect(at('BBAS', today), ShareholderControl.state);
+    expect(at('ITUB', today), ShareholderControl.private);
     // A Sabesp foi privatizada em 22/07/2024: estatal antes, privada depois.
-    expect(em('SBSP', DateTime(2024, 6, 30)), ShareholderControl.state);
-    expect(em('SBSP', hoje), ShareholderControl.private);
+    expect(at('SBSP', DateTime(2024, 6, 30)), ShareholderControl.state);
+    expect(at('SBSP', today), ShareholderControl.private);
   });
 
   test('o repositório responde pela raiz do código, e sem pacote diz que não',
       () async {
-    final pacote = jsonEncode(ShareholderControlHistory.encode({
+    final package = jsonEncode(ShareholderControlHistory.encode({
       'SBSP': [
         ShareholderControlPeriod(
             since: DateTime(2010), control: ShareholderControl.state),
         ShareholderControlPeriod(
             since: DateTime(2024, 7, 22), control: ShareholderControl.private),
       ],
-    }, geradoEm: DateTime(2026, 9, 14)));
+    }, generatedAt: DateTime(2026, 9, 14)));
     final repo = ShareholderControlRepository(
-      carregarPacote: () async => pacote,
-      hoje: () => DateTime(2026, 9, 14),
+      loadPackage: () async => package,
+      today: () => DateTime(2026, 9, 14),
     );
     expect(await repo.isStateControlled(Ticker.parse('SBSP3')), isFalse);
     expect(
@@ -57,9 +57,9 @@ void main() {
         isTrue);
     expect(await repo.isStateControlled(Ticker.parse('PETR4')), isFalse);
 
-    final semPacote = ShareholderControlRepository(
-      carregarPacote: () async => throw const FileSystemException('ausente'),
+    final noPackage = ShareholderControlRepository(
+      loadPackage: () async => throw const FileSystemException('ausente'),
     );
-    expect(await semPacote.isStateControlled(Ticker.parse('PETR4')), isFalse);
+    expect(await noPackage.isStateControlled(Ticker.parse('PETR4')), isFalse);
   });
 }

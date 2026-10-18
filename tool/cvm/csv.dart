@@ -4,51 +4,51 @@ import 'dart:io';
 
 /// CSV da CVM: `;`, aspas duplas, e quebra de linha dentro de campo aspado —
 /// o quadro de intangíveis tem 24.543 linhas físicas e 24.540 registros.
-List<Map<String, String>> lerCsvCvm(File f) {
-  final texto = latin1.decode(f.readAsBytesSync());
-  final registros = <List<String>>[];
-  var campo = StringBuffer();
-  var linha = <String>[];
-  var aspas = false;
-  for (var i = 0; i < texto.length; i++) {
-    final c = texto[i];
-    if (aspas) {
+List<Map<String, String>> readCvmCsv(File f) {
+  final text = latin1.decode(f.readAsBytesSync());
+  final records = <List<String>>[];
+  var field = StringBuffer();
+  var row = <String>[];
+  var quoted = false;
+  for (var i = 0; i < text.length; i++) {
+    final c = text[i];
+    if (quoted) {
       if (c == '"') {
-        if (i + 1 < texto.length && texto[i + 1] == '"') {
-          campo.write('"');
+        if (i + 1 < text.length && text[i + 1] == '"') {
+          field.write('"');
           i++;
         } else {
-          aspas = false;
+          quoted = false;
         }
       } else {
-        campo.write(c);
+        field.write(c);
       }
     } else if (c == '"') {
-      aspas = true;
+      quoted = true;
     } else if (c == ';') {
-      linha.add(campo.toString());
-      campo = StringBuffer();
+      row.add(field.toString());
+      field = StringBuffer();
     } else if (c == '\n' || c == '\r') {
-      if (c == '\r' && i + 1 < texto.length && texto[i + 1] == '\n') i++;
-      linha.add(campo.toString());
-      campo = StringBuffer();
-      if (linha.length > 1 || linha.first.isNotEmpty) registros.add(linha);
-      linha = <String>[];
+      if (c == '\r' && i + 1 < text.length && text[i + 1] == '\n') i++;
+      row.add(field.toString());
+      field = StringBuffer();
+      if (row.length > 1 || row.first.isNotEmpty) records.add(row);
+      row = <String>[];
     } else {
-      campo.write(c);
+      field.write(c);
     }
   }
-  if (campo.isNotEmpty || linha.isNotEmpty) {
-    linha.add(campo.toString());
-    registros.add(linha);
+  if (field.isNotEmpty || row.isNotEmpty) {
+    row.add(field.toString());
+    records.add(row);
   }
-  if (registros.isEmpty) return const [];
-  final cabecalho = registros.first;
+  if (records.isEmpty) return const [];
+  final header = records.first;
   return [
-    for (final r in registros.skip(1))
+    for (final r in records.skip(1))
       {
-        for (var k = 0; k < cabecalho.length && k < r.length; k++)
-          cabecalho[k]: r[k],
+        for (var k = 0; k < header.length && k < r.length; k++)
+          header[k]: r[k],
       },
   ];
 }

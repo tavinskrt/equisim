@@ -29,93 +29,93 @@ import '../cvm/csv.dart';
 import '../cvm/emissoes_fre.dart';
 
 /// Os eventos de ações declarados e registrados, prontos para localizar.
-class EventosDeAcoes {
-  EventosDeAcoes._(this._declarados, this._registro, this._contagem,
-      this._emissoes);
+class ShareEvents {
+  ShareEvents._(this._declared, this._registry, this._count,
+      this._issuances);
 
   /// Eventos do quadro do FRE, por CNPJ: aprovação e fator, distintos.
-  final Map<String, List<({DateTime aprovacao, double fator})>> _declarados;
+  final Map<String, List<({DateTime approval, double factor})>> _declared;
 
   /// Registro da B3, por raiz do código.
-  final Map<String, B3Issuer> _registro;
+  final Map<String, B3Issuer> _registry;
 
   /// Mudanças da contagem do FRE, por CNPJ: data e razão.
-  final Map<String, List<({DateTime data, double razao, double antes})>> _contagem;
+  final Map<String, List<({DateTime date, double ratio, double before})>> _count;
 
   /// Emissões por valor do FRE, para separar a mudança de contagem que é
   /// emissão da que é evento de ações.
-  final EmissoesFre? _emissoes;
+  final FreIssuances? _issuances;
 
   /// Lê o quadro de eventos do FRE e o registro da B3.
   ///
   /// Sem o FRE em disco, segue só com o registro e o `DISMES`: um evento a
   /// menos localizado é um ajuste a menos, e não um ajuste errado.
-  static EventosDeAcoes ler({
-    String pastaFre = 'data/cvm/fre',
-    String registro = 'assets/b3/emissores.json',
-    String contagemListadas = 'data/b3/listadas_contagem.json',
-    EmissoesFre? emissoes,
+  static ShareEvents read({
+    String freDir = 'data/cvm/fre',
+    String registry = 'assets/b3/emissores.json',
+    String listedCounts = 'data/b3/listadas_contagem.json',
+    FreIssuances? issuances,
   }) {
-    final declarados = <String, List<({DateTime aprovacao, double fator})>>{};
-    final pasta = Directory(pastaFre);
-    if (pasta.existsSync()) {
-      final vistos = <String>{};
-      final arquivos = pasta
+    final declared = <String, List<({DateTime approval, double factor})>>{};
+    final folder = Directory(freDir);
+    if (folder.existsSync()) {
+      final seen = <String>{};
+      final files = folder
           .listSync()
           .whereType<File>()
           .where((f) => RegExp(r'^fre_cia_aberta_capital_social_desdobramento_\d{4}\.csv$')
               .hasMatch(f.uri.pathSegments.last))
           .toList()
         ..sort((a, b) => a.path.compareTo(b.path));
-      for (final f in arquivos) {
-        for (final r in lerCsvCvm(f)) {
+      for (final f in files) {
+        for (final r in readCvmCsv(f)) {
           final cnpj = r['CNPJ_Companhia'];
-          final aprov = DateTime.tryParse('${r['Data_Aprovacao']}T00:00:00Z');
-          final antes =
+          final approval = DateTime.tryParse('${r['Data_Aprovacao']}T00:00:00Z');
+          final before =
               double.tryParse(r['Quantidade_Total_Acoes_Antes_Aprovacao'] ?? '');
-          final depois =
+          final after =
               double.tryParse(r['Quantidade_Total_Acoes_Depois_Aprovacao'] ?? '');
-          if (cnpj == null || aprov == null || antes == null || depois == null) {
+          if (cnpj == null || approval == null || before == null || after == null) {
             continue;
           }
-          if (antes <= 0 || depois <= 0) continue;
+          if (before <= 0 || after <= 0) continue;
           // Fator de 1 não é evento de ações: é o formulário repetindo a
           // contagem. E o mesmo evento se repete em toda versão do formulário.
-          if (math.log(depois / antes).abs() < 1e-6) continue;
-          if (!vistos.add('$cnpj|${_dia(aprov)}|$antes|$depois')) continue;
-          (declarados[cnpj] ??= []).add((aprovacao: aprov, fator: depois / antes));
+          if (math.log(after / before).abs() < 1e-6) continue;
+          if (!seen.add('$cnpj|${_day(approval)}|$before|$after')) continue;
+          (declared[cnpj] ??= []).add((approval: approval, factor: after / before));
         }
       }
     }
-    final arq = File(registro);
-    final b3 = arq.existsSync()
+    final file = File(registry);
+    final b3 = file.existsSync()
         ? B3RegistryCodec.decodePackage(
-            jsonDecode(arq.readAsStringSync()) as Map<String, dynamic>)
+            jsonDecode(file.readAsStringSync()) as Map<String, dynamic>)
         : const <String, B3Issuer>{};
-    final contagem = <String, List<({DateTime data, double razao, double antes})>>{};
-    final arqContagem = File(contagemListadas);
-    if (arqContagem.existsSync()) {
-      final json = jsonDecode(arqContagem.readAsStringSync()) as Map<String, dynamic>;
+    final count = <String, List<({DateTime date, double ratio, double before})>>{};
+    final countFile = File(listedCounts);
+    if (countFile.existsSync()) {
+      final json = jsonDecode(countFile.readAsStringSync()) as Map<String, dynamic>;
       for (final e in json.entries) {
-        final pontos = [
+        final points = [
           for (final p in ((e.value as Map<String, dynamic>)['contagem'] as List)
               .cast<Map<String, dynamic>>())
             (
-              desde: DateTime.parse('${p['desde']}T00:00:00Z'),
-              acoes: (p['acoes'] as num).toDouble(),
+              since: DateTime.parse('${p['desde']}T00:00:00Z'),
+              shares: (p['acoes'] as num).toDouble(),
             ),
-        ]..sort((a, b) => a.desde.compareTo(b.desde));
-        final mudancas = <({DateTime data, double razao, double antes})>[];
-        for (var i = 1; i < pontos.length; i++) {
-          final a = pontos[i - 1].acoes, b = pontos[i].acoes;
+        ]..sort((a, b) => a.since.compareTo(b.since));
+        final changes = <({DateTime date, double ratio, double before})>[];
+        for (var i = 1; i < points.length; i++) {
+          final a = points[i - 1].shares, b = points[i].shares;
           if (a > 0 && b > 0 && math.log(b / a).abs() > 1e-6) {
-            mudancas.add((data: pontos[i].desde, razao: b / a, antes: a));
+            changes.add((date: points[i].since, ratio: b / a, before: a));
           }
         }
-        if (mudancas.isNotEmpty) contagem[e.key] = mudancas;
+        if (changes.isNotEmpty) count[e.key] = changes;
       }
     }
-    return EventosDeAcoes._(declarados, b3, contagem, emissoes);
+    return ShareEvents._(declared, b3, count, issuances);
   }
 
   /// Os eventos de ações de [ticker], localizados no fechamento bruto dele.
@@ -127,24 +127,24 @@ class EventosDeAcoes {
   /// Vale a fonte que chegou antes: o quadro do FRE e o registro da B3 dão a
   /// data ex; a contagem, só uma aproximação.
   ///
-  /// [comContagem] falso deixa de fora a quarta fonte — a mudança de contagem
+  /// [withCount] falso deixa de fora a quarta fonte — a mudança de contagem
   /// do FRE —, para quem quer explicar justamente a contagem.
-  List<ShareEvent> doPapel({
+  List<ShareEvent> ofSecurity({
     required String? cnpj,
     required String ticker,
-    required List<Pregao> brutos,
-    bool comContagem = true,
+    required List<TradingDay> rawSessions,
+    bool withCount = true,
   }) {
-    final raw = [for (final p in brutos) p.raw];
+    final raw = [for (final p in rawSessions) p.raw];
     final out = <ShareEvent>[];
-    void junta(ShareEvent e) {
-      final repetido = out.any((x) {
-        final dias = x.exDate.difference(e.exDate).inDays.abs();
-        return dias <= 15 ||
-            (dias <= 120 &&
+    void merge(ShareEvent e) {
+      final repeatedEvent = out.any((x) {
+        final days = x.exDate.difference(e.exDate).inDays.abs();
+        return days <= 15 ||
+            (days <= 120 &&
                 (math.log(x.factor) - math.log(e.factor)).abs() < 0.02);
       });
-      if (!repetido) out.add(e);
+      if (!repeatedEvent) out.add(e);
     }
 
     // **Cada fonte com a sua prova** (decisão 136). O quadro do FRE declara o
@@ -152,18 +152,18 @@ class EventosDeAcoes {
     // confirma — a primeira troca de `DISMES` depois da aprovação, que é o que
     // `CorporateEvents.locate` devolve para fator pequeno, é muitas vezes um
     // provento, e a ASAI3 ganhava um evento de 0,935 num dia qualquer.
-    for (final d in _declarados[cnpj] ?? const <({DateTime aprovacao, double fator})>[]) {
-      final ev = _localizarNoPreco(brutos, d.aprovacao, d.fator);
-      if (ev != null) junta(ev);
+    for (final d in _declared[cnpj] ?? const <({DateTime approval, double factor})>[]) {
+      final ev = _locateInPrice(rawSessions, d.approval, d.factor);
+      if (ev != null) merge(ev);
     }
     // O registro repete o evento por classe e por consulta — a BBAS3 de 2018
     // tem fator 2 no preço e produto 8 no registro: um por data.
-    final raiz = ticker.length >= 4 ? ticker.substring(0, 4) : ticker;
-    final datas = <String>{};
-    for (final e in _registro[raiz]?.events ?? const <OfficialShareEvent>[]) {
+    final root = ticker.length >= 4 ? ticker.substring(0, 4) : ticker;
+    final dates = <String>{};
+    for (final e in _registry[root]?.events ?? const <OfficialShareEvent>[]) {
       if (!(e.factor > 0) || !e.factor.isFinite) continue;
-      if (!datas.add(_dia(e.exDate))) continue;
-      junta(ShareEvent(
+      if (!dates.add(_day(e.exDate))) continue;
+      merge(ShareEvent(
           exDate: DateTime.utc(e.exDate.year, e.exDate.month, e.exDate.day),
           factor: e.factor,
           observedRatio: 1 / e.factor));
@@ -173,13 +173,13 @@ class EventosDeAcoes {
     // redução de capital com devolução em dinheiro — e a contagem do FRE não
     // se moveu. Tomada por desdobramento, ela dobrava o retorno de quem a
     // atravessava.
-    final mudancas = _contagem[cnpj] ??
-        const <({DateTime data, double razao, double antes})>[];
+    final changes = _count[cnpj] ??
+        const <({DateTime date, double ratio, double before})>[];
     for (final ev in CorporateEvents.detect(raw)) {
-      final contagemMudou = mudancas.any((m) =>
-          m.data.difference(ev.exDate).inDays.abs() <= 400 &&
-          (math.log(m.razao) - math.log(ev.factor)).abs() < 0.1);
-      if (contagemMudou) junta(ev);
+      final countChanged = changes.any((m) =>
+          m.date.difference(ev.exDate).inDays.abs() <= 400 &&
+          (math.log(m.ratio) - math.log(ev.factor)).abs() < 0.1);
+      if (countChanged) merge(ev);
     }
     // A mudança de contagem que nenhuma emissão por valor explica: aumento de
     // 3% ou mais — bonificação, desdobramento —, ou redução à metade ou menos
@@ -188,22 +188,22 @@ class EventosDeAcoes {
     // salto do fator —, e não pelo primeiro salto parecido: a AMER3 caiu 38%
     // em 16/01/2023, na semana da fraude, e isso casava com uma mudança de
     // contagem de 1,62.
-    if (!comContagem) {
+    if (!withCount) {
       out.sort((a, b) => a.exDate.compareTo(b.exDate));
       return out;
     }
-    final emitidas = cnpj == null || _emissoes == null
+    final issued = cnpj == null || _issuances == null
         ? const <ShareIssue>[]
-        : _emissoes.conhecidas(cnpj, DateTime.utc(2100));
-    for (final m in mudancas) {
-      if (!(m.razao >= 1.03 || m.razao <= 0.5)) continue;
-      final novas = m.antes * (m.razao - 1);
-      final ehEmissao = emitidas.any((i) =>
-          i.date.difference(m.data).inDays.abs() <= 60 &&
-          (i.shares / novas - 1).abs() < 0.05);
-      if (ehEmissao) continue;
-      final ev = _localizarNoPreco(brutos, m.data, m.razao);
-      if (ev != null) junta(ev);
+        : _issuances.known(cnpj, DateTime.utc(2100));
+    for (final m in changes) {
+      if (!(m.ratio >= 1.03 || m.ratio <= 0.5)) continue;
+      final newShares = m.before * (m.ratio - 1);
+      final isIssuance = issued.any((i) =>
+          i.date.difference(m.date).inDays.abs() <= 60 &&
+          (i.shares / newShares - 1).abs() < 0.05);
+      if (isIssuance) continue;
+      final ev = _locateInPrice(rawSessions, m.date, m.ratio);
+      if (ev != null) merge(ev);
     }
     out.sort((a, b) => a.exDate.compareTo(b.exDate));
     return out;
@@ -218,51 +218,51 @@ class EventosDeAcoes {
 /// fator, a fonte ajustou; se fica parado, não ajustou, e o evento sai com esse
 /// dia. Sem pregão que case — evento mal localizado, papel suspenso —, o evento
 /// não sai: ajustar num dia errado inventaria o salto que se quer tirar.
-List<ShareEvent> naoAjustadosPelaFonte(
-  PriceSeries fonte,
-  List<Pregao> brutos,
-  List<ShareEvent> eventos,
+List<ShareEvent> notAdjustedBySource(
+  PriceSeries source,
+  List<TradingDay> rawSessions,
+  List<ShareEvent> events,
 ) {
-  if (eventos.isEmpty || brutos.length < 2 || fonte.isEmpty) return const [];
-  final daFonte = <String, double>{
-    for (final p in fonte.points)
-      if (p.close > 0) _dia(p.date): p.close,
+  if (events.isEmpty || rawSessions.length < 2 || source.isEmpty) return const [];
+  final fromSource = <String, double>{
+    for (final p in source.points)
+      if (p.close > 0) _day(p.date): p.close,
   };
   final out = <ShareEvent>[];
-  for (final e in eventos) {
+  for (final e in events) {
     final q = e.factor;
     // Abaixo de 2% o salto do evento não se separa de um pregão comum, e o
     // efeito dele na série é desse tamanho.
     if (!(q > 0) || !q.isFinite || math.log(q).abs() < 0.02) continue;
-    final folga = math.log(q).abs() < math.log(1.6) ? 0.04 : 0.08;
-    var ajustado = false;
-    DateTime? diaSemAjuste;
-    for (var i = 1; i < brutos.length; i++) {
-      final b = brutos[i], a = brutos[i - 1];
-      final dias = b.date.difference(e.exDate).inDays;
-      if (dias < -10) continue;
-      if (dias > 10) break;
+    final margin = math.log(q).abs() < math.log(1.6) ? 0.04 : 0.08;
+    var adjusted = false;
+    DateTime? unadjustedDay;
+    for (var i = 1; i < rawSessions.length; i++) {
+      final b = rawSessions[i], a = rawSessions[i - 1];
+      final days = b.date.difference(e.exDate).inDays;
+      if (days < -10) continue;
+      if (days > 10) break;
       if (b.date.difference(a.date).inDays > 7) continue;
-      final fa = daFonte[_dia(a.date)], fb = daFonte[_dia(b.date)];
+      final fa = fromSource[_day(a.date)], fb = fromSource[_day(b.date)];
       if (fa == null || fb == null || !(a.close > 0) || !(b.close > 0)) continue;
-      final saltoDoBruto = math.log(b.close / a.close);
-      final passoDoFator = math.log((b.close / fb) / (a.close / fa));
-      if ((passoDoFator + math.log(q)).abs() < 0.01) {
-        ajustado = true;
+      final rawJump = math.log(b.close / a.close);
+      final factorStep = math.log((b.close / fb) / (a.close / fa));
+      if ((factorStep + math.log(q)).abs() < 0.01) {
+        adjusted = true;
         break;
       }
       // Sem ajuste: o fator parado, o bruto caindo pelo fator e o `DISMES`
       // trocando no dia — sem a troca, uma queda comum de mercado passaria.
-      if (passoDoFator.abs() < 0.005 &&
-          b.distribuicao != a.distribuicao &&
-          (saltoDoBruto + math.log(q)).abs() < folga) {
-        diaSemAjuste ??= b.date;
+      if (factorStep.abs() < 0.005 &&
+          b.distribution != a.distribution &&
+          (rawJump + math.log(q)).abs() < margin) {
+        unadjustedDay ??= b.date;
       }
     }
-    if (!ajustado && diaSemAjuste != null) {
+    if (!adjusted && unadjustedDay != null) {
       out.add(ShareEvent(
           exDate: DateTime.utc(
-              diaSemAjuste.year, diaSemAjuste.month, diaSemAjuste.day),
+              unadjustedDay.year, unadjustedDay.month, unadjustedDay.day),
           factor: q,
           observedRatio: e.observedRatio));
     }
@@ -283,84 +283,84 @@ List<ShareEvent> naoAjustadosPelaFonte(
 /// nenhum, de 400 dias antes do evento até a data. Se ela mudou, o formulário
 /// tratou o evento — a aprovação costuma vir antes da data ex, e às vezes
 /// junto com outra operação —, e a contagem fica como veio.
-({double? acoes, List<ShareEvent> aplicados}) acoesComEventos(
-  List<({DateTime desde, double acoes})> contagem,
+({double? shares, List<ShareEvent> applied}) sharesWithEvents(
+  List<({DateTime since, double shares})> count,
   DateTime t,
-  List<ShareEvent> eventos,
+  List<ShareEvent> events,
 ) {
-  final dia = DateTime.utc(t.year, t.month, t.day);
-  if (contagem.isEmpty) return (acoes: null, aplicados: const []);
+  final day = DateTime.utc(t.year, t.month, t.day);
+  if (count.isEmpty) return (shares: null, applied: const []);
   // A contagem precisa cobrir a data do evento: um evento anterior ao primeiro
   // formulário — o registro da B3 guarda eventos de 1989 — já está nela.
-  final inicio = contagem.first.desde;
-  double? acoes;
-  double? anterior;
-  final mudancas = <({DateTime data, double razao})>[];
-  for (final p in contagem) {
-    if (p.desde.isAfter(dia)) break;
-    if (anterior != null && anterior > 0 && p.acoes > 0) {
-      final r = p.acoes / anterior;
+  final start = count.first.since;
+  double? shares;
+  double? previous;
+  final changes = <({DateTime date, double ratio})>[];
+  for (final p in count) {
+    if (p.since.isAfter(day)) break;
+    if (previous != null && previous > 0 && p.shares > 0) {
+      final r = p.shares / previous;
       if (math.log(r).abs() > 1e-6) {
-        mudancas.add((data: p.desde, razao: r));
+        changes.add((date: p.since, ratio: r));
       }
     }
-    anterior = p.acoes;
-    acoes = p.acoes;
+    previous = p.shares;
+    shares = p.shares;
   }
-  if (acoes == null) return (acoes: null, aplicados: const []);
-  final aplicados = <ShareEvent>[];
-  var ajustada = acoes;
-  for (final e in eventos) {
+  if (shares == null) return (shares: null, applied: const []);
+  final applied = <ShareEvent>[];
+  var adjusted = shares;
+  for (final e in events) {
     final ex = DateTime.utc(e.exDate.year, e.exDate.month, e.exDate.day);
-    if (ex.isAfter(dia)) continue;
+    if (ex.isAfter(day)) continue;
     if (!(e.factor > 0) || math.log(e.factor).abs() < 0.02) continue;
     // Só evento recente: a contagem do FRE começa em 2010, e o valor dela já
     // traz os eventos anteriores — uma data de aprovação antiga no primeiro
     // ponto não quer dizer contagem de antes do evento. Três anos cobrem com
     // folga o atraso de correção medido.
     if (ex.isBefore(DateTime.utc(2011)) ||
-        ex.isBefore(DateTime.utc(dia.year - 3, dia.month, dia.day))) {
+        ex.isBefore(DateTime.utc(day.year - 3, day.month, day.day))) {
       continue;
     }
-    if (!inicio.isBefore(ex)) continue;
+    if (!start.isBefore(ex)) continue;
     // **Parada de verdade**: nenhuma mudança da contagem, por fator nenhum, de
     // 400 dias antes do evento até a data. Se ela mudou, o formulário tratou o
     // evento, ainda que junto com outra coisa — a AERI3 registrou o grupamento
     // de 20 para 1 antes da data ex e junto com uma emissão, com razão 0,081,
     // e aplicar o evento de novo tirava 95% do valor de mercado.
-    final mexeu = mudancas.any((m) =>
-        m.data.isAfter(ex.subtract(const Duration(days: 400))));
-    if (mexeu) continue;
-    ajustada *= e.factor;
-    aplicados.add(e);
+    final moved = changes.any((m) =>
+        m.date.isAfter(ex.subtract(const Duration(days: 400))));
+    if (moved) continue;
+    adjusted *= e.factor;
+    applied.add(e);
   }
-  return (acoes: ajustada, aplicados: aplicados);
+  return (shares: adjusted, applied: applied);
 }
 
 /// O pregão, de 30 dias antes de [d] a 150 depois, em que o `DISMES` troca e o
 /// fechamento bruto se divide pelo fator [q]; `null` sem ele.
-ShareEvent? _localizarNoPreco(List<Pregao> brutos, DateTime d, double q) {
-  final folga = math.log(q).abs() < math.log(1.6) ? 0.06 : 0.08;
-  for (var i = 1; i < brutos.length; i++) {
-    final b = brutos[i], a = brutos[i - 1];
-    final dias = b.date.difference(d).inDays;
-    if (dias < -30) continue;
-    if (dias > 150) break;
+ShareEvent? _locateInPrice(List<TradingDay> rawSessions, DateTime d, double q) {
+  final margin = math.log(q).abs() < math.log(1.6) ? 0.06 : 0.08;
+  for (var i = 1; i < rawSessions.length; i++) {
+    final b = rawSessions[i], a = rawSessions[i - 1];
+    final days = b.date.difference(d).inDays;
+    if (days < -30) continue;
+    if (days > 150) break;
     if (b.date.difference(a.date).inDays > 7) continue;
-    if (b.distribuicao == a.distribuicao) continue;
+    if (b.distribution == a.distribution) continue;
     if (!(a.close > 0) || !(b.close > 0)) continue;
-    final razao = b.close / a.close;
-    if ((math.log(razao) + math.log(q)).abs() < folga) {
+    final ratio = b.close / a.close;
+    if ((math.log(ratio) + math.log(q)).abs() < margin) {
       return ShareEvent(
           exDate: DateTime.utc(b.date.year, b.date.month, b.date.day),
           factor: q,
-          observedRatio: razao);
+          observedRatio: ratio);
     }
   }
   return null;
 }
 
-String _dia(DateTime d) => d.toIso8601String().substring(0, 10);
+String _day(DateTime d) => d.toIso8601String().substring(0, 10);
 
 /// As variações de capital do FRE que nenhum evento de ações explica, como
 /// emissões **sem valor declarado** (item B28): a cascata não as soma, e diz
@@ -377,40 +377,40 @@ String _dia(DateTime d) => d.toIso8601String().substring(0, 10);
 /// é a bonificação de 07/05/2024, com o bruto caindo 7,6% e o `DISMES` trocando
 /// no dia, e fica de fora.
 ///
-/// - [eventos]: os eventos do quadro do FRE, do registro da B3 e do `DISMES` —
+/// - [events]: os eventos do quadro do FRE, do registro da B3 e do `DISMES` —
 ///   **sem** a mudança de contagem, que se explicaria a si mesma.
-List<ShareIssue> emissoesSemEvento(
-  List<({ShareIssue emissao, double razao})> candidatas,
-  List<Pregao> brutos,
-  List<ShareEvent> eventos,
+List<ShareIssue> issuancesWithoutEvent(
+  List<({ShareIssue issuance, double ratio})> candidates,
+  List<TradingDay> rawSessions,
+  List<ShareEvent> events,
 ) =>
     [
-      for (final c in candidatas)
-        if (!_saltoDeEvento(brutos, c.emissao.date, c.razao) &&
-            !eventos.any((e) =>
-                e.exDate.difference(c.emissao.date).inDays.abs() <= 150 &&
-                (math.log(e.factor) - math.log(c.razao)).abs() < 0.03))
+      for (final c in candidates)
+        if (!_eventJump(rawSessions, c.issuance.date, c.ratio) &&
+            !events.any((e) =>
+                e.exDate.difference(c.issuance.date).inDays.abs() <= 150 &&
+                (math.log(e.factor) - math.log(c.ratio)).abs() < 0.03))
           ShareIssue(
-            date: c.emissao.date,
-            amount: c.emissao.amount,
-            shares: c.emissao.shares,
+            date: c.issuance.date,
+            amount: c.issuance.amount,
+            shares: c.issuance.shares,
             declared: false,
           ),
     ];
 
-bool _saltoDeEvento(List<Pregao> brutos, DateTime d, double q) {
+bool _eventJump(List<TradingDay> rawSessions, DateTime d, double q) {
   // Com a troca de `DISMES` exigida, a folga pode ser a da detecção: a
   // bonificação de 20% da POMO4 caiu 20% no dia ex, e não 16,7%.
-  final folga = math.log(q).abs() < math.log(1.6) ? 0.06 : 0.08;
-  for (var i = 1; i < brutos.length; i++) {
-    final b = brutos[i], a = brutos[i - 1];
-    final dias = b.date.difference(d).inDays;
-    if (dias < -30) continue;
-    if (dias > 150) break;
+  final margin = math.log(q).abs() < math.log(1.6) ? 0.06 : 0.08;
+  for (var i = 1; i < rawSessions.length; i++) {
+    final b = rawSessions[i], a = rawSessions[i - 1];
+    final days = b.date.difference(d).inDays;
+    if (days < -30) continue;
+    if (days > 150) break;
     if (b.date.difference(a.date).inDays > 7) continue;
-    if (b.distribuicao == a.distribuicao) continue;
+    if (b.distribution == a.distribution) continue;
     if (!(a.close > 0) || !(b.close > 0)) continue;
-    if ((math.log(b.close / a.close) + math.log(q)).abs() < folga) return true;
+    if ((math.log(b.close / a.close) + math.log(q)).abs() < margin) return true;
   }
   return false;
 }

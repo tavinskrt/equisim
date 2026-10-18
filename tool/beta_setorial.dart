@@ -36,13 +36,13 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
 /// Erro-padrão da inclinação, pela identidade com a correlação.
 ///
 /// `SE(β) = |β| · √((1 − ρ²) / (ρ² · (n − 2)))`. Devolve `null` sem correlação
 /// utilizável ou com amostra curta demais.
-double? _erroPadrao(double beta, double rho, int n) {
+double? _standardError(double beta, double rho, int n) {
   if (n <= 2) return null;
   final r2 = rho * rho;
   if (r2 <= 0 || r2 >= 1) return null;
@@ -50,7 +50,7 @@ double? _erroPadrao(double beta, double rho, int n) {
   return v.isFinite ? v : null;
 }
 
-double? _mediana(List<double> v) {
+double? _median(List<double> v) {
   if (v.isEmpty) return null;
   final s = [...v]..sort();
   final m = s.length ~/ 2;
@@ -61,98 +61,98 @@ double? _mediana(List<double> v) {
 double? _mad(List<double> v) => Inference.scaledMad(v);
 
 Future<void> main(List<String> args) async {
-  final limiteIdx = args.indexOf('--limit');
-  final limite = limiteIdx >= 0 ? int.tryParse(args[limiteIdx + 1]) ?? 0 : 0;
+  final limitIndex = args.indexOf('--limit');
+  final limit = limitIndex >= 0 ? int.tryParse(args[limitIndex + 1]) ?? 0 : 0;
 
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
   try {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
 
     var universe = (await ctx.fundamentals.universe()).unwrap();
-    if (limite > 0 && universe.length > limite) {
-      universe = universe.sublist(0, limite);
+    if (limit > 0 && universe.length > limit) {
+      universe = universe.sublist(0, limit);
     }
 
     final ibov = await ctx.benchmark.ibovespa(DateRange(
-      DateTime(_hoje.year - PrepareValuationInputs.betaWindowYears,
-          _hoje.month, _hoje.day),
-      _hoje,
+      DateTime(_today.year - PrepareValuationInputs.betaWindowYears,
+          _today.month, _today.day),
+      _today,
     ));
     if (ibov.isErr) {
       stderr.writeln('sem Ibovespa: ${ibov.failureOrNull?.message}');
       exit(2);
     }
-    final indice = ibov.unwrap();
+    final index = ibov.unwrap();
 
-    final saida = <Map<String, dynamic>>[];
+    final output = <Map<String, dynamic>>[];
     var i = 0;
     for (final ticker in universe) {
       i++;
       if (i % 25 == 0) stderr.write('  $i/${universe.length}   \r');
 
-      final precos = await ctx.prices.daily(
+      final prices = await ctx.prices.daily(
         ticker,
         DateRange(
-          DateTime(_hoje.year - PrepareValuationInputs.betaWindowYears,
-              _hoje.month, _hoje.day),
-          _hoje,
+          DateTime(_today.year - PrepareValuationInputs.betaWindowYears,
+              _today.month, _today.day),
+          _today,
         ),
       );
-      if (precos.isErr) continue;
+      if (prices.isErr) continue;
 
-      final pontos = precos.unwrap().points;
-      final alinhado = BetaCalculator.alignReturns(
-        assetDates: [for (final p in pontos) p.date],
-        assetIndex: [for (final p in pontos) p.close],
-        marketDates: indice.dates,
-        marketIndex: indice.points.map((p) => p.close).toList(),
+      final points = prices.unwrap().points;
+      final aligned = BetaCalculator.alignReturns(
+        assetDates: [for (final p in points) p.date],
+        assetIndex: [for (final p in points) p.close],
+        marketDates: index.dates,
+        marketIndex: index.points.map((p) => p.close).toList(),
       );
-      final estRes = BetaCalculator.estimate(returns: alinhado);
-      if (estRes.isErr) continue;
-      final est = estRes.unwrap();
+      final estimateResult = BetaCalculator.estimate(returns: aligned);
+      if (estimateResult.isErr) continue;
+      final est = estimateResult.unwrap();
 
-      final histRes = await ctx.fundamentals.history(ticker);
-      if (histRes.isErr) continue;
-      final pub = PointInTimeView(_hoje).published(histRes.unwrap());
+      final historyResult = await ctx.fundamentals.history(ticker);
+      if (historyResult.isErr) continue;
+      final pub = PointInTimeView(_today).published(historyResult.unwrap());
       if (pub.isEmpty) continue;
       final latest = pub.last;
 
-      final perfil = await ctx.fundamentals.profile(ticker);
+      final profile = await ctx.fundamentals.profile(ticker);
       // A chave, não o rótulo: é ela que agrupa de forma estável. Chave vazia
       // é ausência de setor, não um setor chamado "".
-      final chave = perfil.isOk ? perfil.unwrap().sector.key.trim() : '';
-      final setor = chave.isEmpty ? null : chave;
+      final key = profile.isOk ? profile.unwrap().sector.key.trim() : '';
+      final sector = key.isEmpty ? null : key;
 
-      final dividaBruta = latest.totalDebt;
-      final equityMercado = latest.marketCap;
-      if (equityMercado == null || equityMercado <= 0) continue;
-      final de = dividaBruta / equityMercado;
+      final grossDebt = latest.totalDebt;
+      final marketEquity = latest.marketCap;
+      if (marketEquity == null || marketEquity <= 0) continue;
+      final debtToEquity = grossDebt / marketEquity;
 
-      final aliquota = CapitalSeries.structuralTaxRate(
+      final taxRate = CapitalSeries.structuralTaxRate(
             pub,
             statutoryRate: ValuationParameters.statutoryTaxRate,
           ) ??
           ValuationParameters.statutoryTaxRate;
 
       // Hamada: β_L = β_U · (1 + (1 − t)·D/E)
-      final fatorHamada = 1 + (1 - aliquota) * de;
-      final betaU = fatorHamada > 0 ? est.beta / fatorHamada : null;
+      final hamadaFactor = 1 + (1 - taxRate) * debtToEquity;
+      final betaU = hamadaFactor > 0 ? est.beta / hamadaFactor : null;
 
-      saida.add({
+      output.add({
         'ticker': ticker.value,
-        'setor': setor,
+        'setor': sector,
         'betaRegressao': est.beta,
         'correlacao': est.correlation,
         'observacoes': est.observations,
-        'erroPadrao': _erroPadrao(est.beta, est.correlation, est.observations),
-        'dividaSobreEquity': de,
-        'aliquotaEstrutural': aliquota,
-        'fatorHamada': fatorHamada,
+        'erroPadrao': _standardError(est.beta, est.correlation, est.observations),
+        'dividaSobreEquity': debtToEquity,
+        'aliquotaEstrutural': taxRate,
+        'fatorHamada': hamadaFactor,
         'betaDesalavancado': betaU,
         'rfCorrente': anchors.currentRiskFreeRate,
       });
@@ -160,37 +160,37 @@ Future<void> main(List<String> args) async {
     stderr.writeln('');
 
     // --- Medianas setoriais do beta desalavancado ---
-    final porSetor = <String, List<double>>{};
-    for (final e in saida) {
+    final bySector = <String, List<double>>{};
+    for (final e in output) {
       final s = e['setor'] as String?;
       final b = e['betaDesalavancado'] as double?;
       if (s == null || b == null || !b.isFinite) continue;
-      (porSetor[s] ??= []).add(b);
+      (bySector[s] ??= []).add(b);
     }
-    final medianaSetor = <String, double>{
-      for (final e in porSetor.entries)
-        if (e.value.length >= 3) e.key: _mediana(e.value)!,
+    final sectorMedian = <String, double>{
+      for (final e in bySector.entries)
+        if (e.value.length >= 3) e.key: _median(e.value)!,
     };
 
     // Dispersão transversal dos betas de regressão — é a variância do
     // **prior** no encolhimento de Vasicek. Sem ela não há como pesar o
     // estimador individual contra o do grupo.
-    final dispersaoPrior = _mad([
-          for (final e in saida)
+    final priorDispersion = _mad([
+          for (final e in output)
             if ((e['betaRegressao'] as double).isFinite)
               e['betaRegressao'] as double,
         ]) ??
         0.5;
-    final medianaUniverso = _mediana([
-          for (final e in saida)
+    final universeMedian = _median([
+          for (final e in output)
             if ((e['betaDesalavancado'] as double?)?.isFinite ?? false)
               e['betaDesalavancado'] as double,
         ]) ??
         0.5;
 
-    for (final e in saida) {
+    for (final e in output) {
       final s = e['setor'] as String?;
-      final mu = s == null ? null : medianaSetor[s];
+      final mu = s == null ? null : sectorMedian[s];
       e['betaUSetor'] = mu;
 
       // --- Encolhimento de Vasicek ---
@@ -200,29 +200,29 @@ Future<void> main(List<String> args) async {
       // fica com 98% de si mesmo, e um com 83.228 fica com nada. Nenhum limiar
       // decide — a precisão decide, e é contínua.
       final se = e['erroPadrao'] as double?;
-      final fator = e['fatorHamada'] as double;
-      final priorU = mu ?? medianaUniverso;
-      final priorL = priorU * fator;
+      final factor = e['fatorHamada'] as double;
+      final priorU = mu ?? universeMedian;
+      final priorL = priorU * factor;
       final individual = e['betaRegressao'] as double;
-      if (se != null && se > 0 && dispersaoPrior > 0) {
-        final precisaoIndividual = 1 / (se * se);
-        final precisaoPrior = 1 / (dispersaoPrior * dispersaoPrior);
-        final w = precisaoIndividual / (precisaoIndividual + precisaoPrior);
-        final encolhido = w * individual + (1 - w) * priorL;
+      if (se != null && se > 0 && priorDispersion > 0) {
+        final individualPrecision = 1 / (se * se);
+        final priorPrecision = 1 / (priorDispersion * priorDispersion);
+        final w = individualPrecision / (individualPrecision + priorPrecision);
+        final shrunk = w * individual + (1 - w) * priorL;
         e['pesoVasicek'] = w;
-        e['betaEncolhido'] = encolhido;
-        e['variacaoVasicek'] = encolhido - individual;
+        e['betaEncolhido'] = shrunk;
+        e['variacaoVasicek'] = shrunk - individual;
         e['variacaoKeVasicek'] =
-            (encolhido - individual) * CapmInputs.defaultMarketPremium;
+            (shrunk - individual) * CapmInputs.defaultMarketPremium;
       }
-      e['ativosNoSetor'] = s == null ? 0 : (porSetor[s]?.length ?? 0);
+      e['ativosNoSetor'] = s == null ? 0 : (bySector[s]?.length ?? 0);
       if (mu != null) {
-        final novo = mu * (e['fatorHamada'] as double);
-        e['betaRealavancado'] = novo;
-        e['variacaoBeta'] = novo - (e['betaRegressao'] as double);
+        final newPackage = mu * (e['fatorHamada'] as double);
+        e['betaRealavancado'] = newPackage;
+        e['variacaoBeta'] = newPackage - (e['betaRegressao'] as double);
         // Efeito direto no Ke, ao prêmio parametrizado.
         e['variacaoKe'] =
-            (novo - (e['betaRegressao'] as double)) * CapmInputs.defaultMarketPremium;
+            (newPackage - (e['betaRegressao'] as double)) * CapmInputs.defaultMarketPremium;
       }
     }
 
@@ -231,7 +231,7 @@ Future<void> main(List<String> args) async {
     // O prior sai das mesmas observações que este utilitário já coletou, pelo
     // agregador do núcleo — não por uma segunda implementação aqui.
     final prior = ResolveBetaPrior.fromObservations([
-      for (final e in saida)
+      for (final e in output)
         BetaObservation(
           leveredBeta: e['betaRegressao'] as double,
           sectorKey: e['setor'] as String?,
@@ -244,21 +244,21 @@ Future<void> main(List<String> args) async {
           'universo=${prior.unleveredUniverse.toStringAsFixed(3)}, '
           'dispersão=${prior.dispersion.toStringAsFixed(3)}');
       var j = 0;
-      for (final e in saida) {
+      for (final e in output) {
         j++;
         if (j % 25 == 0) {
-          stderr.write('  produção $j/${saida.length}   \r');
+          stderr.write('  produção $j/${output.length}   \r');
         }
         final t = Ticker.parse(e['ticker'] as String);
 
-        Future<double?> justo({BetaPrior? p}) async {
+        Future<double?> fairValue({BetaPrior? p}) async {
           final prep = await PrepareValuationInputs.call(
             ticker: t,
             prices: ctx.prices,
             fundamentals: ctx.fundamentals,
             benchmark: ctx.benchmark,
             riskFreeRate: anchors.currentRiskFreeRate,
-            asOf: _hoje,
+            asOf: _today,
             perpetualGrowthCap: anchors.nominalEconomyGrowth,
             inflation: anchors.inflationCagr,
             terminalRiskFreeRate: anchors.riskFreeCagr,
@@ -270,32 +270,32 @@ Future<void> main(List<String> args) async {
           return r.isOk ? r.unwrap().fairValue.reais : null;
         }
 
-        final sem = await justo();
-        final com = await justo(p: prior);
-        e['justoSemPrior'] = sem;
-        e['justoComPrior'] = com;
-        if (sem != null && com != null && sem > 0) {
-          e['variacaoJusto'] = com / sem - 1;
+        final without = await fairValue();
+        final withInput = await fairValue(p: prior);
+        e['justoSemPrior'] = without;
+        e['justoComPrior'] = withInput;
+        if (without != null && withInput != null && without > 0) {
+          e['variacaoJusto'] = withInput / without - 1;
         }
       }
       stderr.writeln('');
     }
 
     File('docs/validacao/beta_setorial.json').writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(saida),
+      const JsonEncoder.withIndent(' ').convert(output),
     );
-    _imprimir(saida, porSetor, medianaSetor);
+    _printReport(output, bySector, sectorMedian);
     stderr.writeln('\nescrito docs/validacao/beta_setorial.json '
-        '(${saida.length})');
+        '(${output.length})');
   } finally {
     await ctx.dispose();
   }
 }
 
-void _imprimir(
+void _printReport(
   List<Map<String, dynamic>> l,
-  Map<String, List<double>> porSetor,
-  Map<String, double> medianaSetor,
+  Map<String, List<double>> bySector,
+  Map<String, double> sectorMedian,
 ) {
   List<double> col(String k) => [
         for (final e in l)
@@ -312,43 +312,43 @@ void _imprimir(
   final se = col('erroPadrao');
   final betas = col('betaRegressao');
   stdout.writeln('-- ruído do beta de regressão --');
-  stdout.writeln('  β: mediana=${n2(_mediana(betas))}  '
+  stdout.writeln('  β: mediana=${n2(_median(betas))}  '
       'dispersão robusta=${n2(_mad(betas))}');
   if (se.isNotEmpty) {
     final s = [...se]..sort();
-    stdout.writeln('  erro-padrão: mediana=${n2(_mediana(s))}  '
+    stdout.writeln('  erro-padrão: mediana=${n2(_median(s))}  '
         'p75=${n2(s[3 * s.length ~/ 4])}  p90=${n2(s[9 * s.length ~/ 10])}');
-    var cobreUm = 0, seMaiorQue03 = 0;
+    var coversOne = 0, seAbove03 = 0;
     for (final e in l) {
       final b = e['betaRegressao'] as double?;
       final err = e['erroPadrao'] as double?;
       if (b == null || err == null) continue;
-      if ((b - 1).abs() < 1.96 * err) cobreUm++;
-      if (err > 0.3) seMaiorQue03++;
+      if ((b - 1).abs() < 1.96 * err) coversOne++;
+      if (err > 0.3) seAbove03++;
     }
-    stdout.writeln('  intervalo de 95% cobre 1,0 em $cobreUm de ${se.length}'
+    stdout.writeln('  intervalo de 95% cobre 1,0 em $coversOne de ${se.length}'
         '  (o beta não distingue o ativo do mercado)');
-    stdout.writeln('  erro-padrão acima de 0,30: $seMaiorQue03 de ${se.length}');
+    stdout.writeln('  erro-padrão acima de 0,30: $seAbove03 de ${se.length}');
   }
 
   // --- 2. O setor explica? ---
   final bu = col('betaDesalavancado');
-  final dispersaoUniverso = _mad(bu);
-  final dentro = <double>[];
-  for (final e in porSetor.entries) {
+  final universeDispersion = _mad(bu);
+  final within = <double>[];
+  for (final e in bySector.entries) {
     if (e.value.length < 3) continue;
     final m = _mad(e.value);
-    if (m != null && m.isFinite) dentro.add(m);
+    if (m != null && m.isFinite) within.add(m);
   }
   stdout.writeln('\n-- o setor explica risco de negócio? --');
-  stdout.writeln('  β desalavancado: mediana=${n2(_mediana(bu))}  '
-      'dispersão robusta do universo=${n2(dispersaoUniverso)}');
+  stdout.writeln('  β desalavancado: mediana=${n2(_median(bu))}  '
+      'dispersão robusta do universo=${n2(universeDispersion)}');
   stdout.writeln('  dispersão robusta MEDIANA dentro do setor='
-      '${n2(_mediana(dentro))}  (${dentro.length} setores com 3+ ativos)');
-  if (dispersaoUniverso != null && _mediana(dentro) != null) {
-    final reducao = 1 - _mediana(dentro)! / dispersaoUniverso;
+      '${n2(_median(within))}  (${within.length} setores com 3+ ativos)');
+  if (universeDispersion != null && _median(within) != null) {
+    final reduction = 1 - _median(within)! / universeDispersion;
     stdout.writeln('  redução de dispersão ao agrupar: '
-        '${(reducao * 100).toStringAsFixed(1)}%');
+        '${(reduction * 100).toStringAsFixed(1)}%');
   }
   stdout.writeln('  ativos sem setor com 3+ pares: '
       '${l.where((e) => e['betaUSetor'] == null).length} de ${l.length}');
@@ -359,15 +359,15 @@ void _imprimir(
   stdout.writeln('\n-- efeito de trocar regressão por setorial realavancado --');
   if (dBeta.isNotEmpty) {
     final s = [...dBeta.map((x) => x.abs())]..sort();
-    stdout.writeln('  |Δβ|: mediana=${n2(_mediana(s))}  '
+    stdout.writeln('  |Δβ|: mediana=${n2(_median(s))}  '
         'p90=${n2(s[9 * s.length ~/ 10])}  máx=${n2(s.last)}');
-    stdout.writeln('  Δβ mediano com sinal: ${n2(_mediana(dBeta))}');
+    stdout.writeln('  Δβ mediano com sinal: ${n2(_median(dBeta))}');
   }
   if (dKe.isNotEmpty) {
     final s = [...dKe.map((x) => x.abs())]..sort();
-    stdout.writeln('  |ΔKe|: mediana=${pc(_mediana(s))}  '
+    stdout.writeln('  |ΔKe|: mediana=${pc(_median(s))}  '
         'p90=${pc(s[9 * s.length ~/ 10])}');
-    stdout.writeln('  ΔKe mediano com sinal: ${pc(_mediana(dKe))}');
+    stdout.writeln('  ΔKe mediano com sinal: ${pc(_median(dKe))}');
   }
 
   // --- 3b. Encolhimento de Vasicek ---
@@ -378,17 +378,17 @@ void _imprimir(
   if (w.isNotEmpty) {
     final s = [...w]..sort();
     stdout.writeln('  peso do estimador individual: '
-        'mediana=${n2(_mediana(s))}  p10=${n2(s[s.length ~/ 10])}  '
+        'mediana=${n2(_median(s))}  p10=${n2(s[s.length ~/ 10])}  '
         'mín=${n2(s.first)}');
     stdout.writeln('  abaixo de 0,90 (o prior pesa): '
         '${w.where((x) => x < 0.90).length} de ${w.length}');
   }
   if (dv.isNotEmpty) {
     final s = [...dv.map((x) => x.abs())]..sort();
-    stdout.writeln('  |Δβ|: mediana=${n2(_mediana(s))}  '
+    stdout.writeln('  |Δβ|: mediana=${n2(_median(s))}  '
         'p90=${n2(s[9 * s.length ~/ 10])}  máx=${n2(s.last)}');
     stdout.writeln('  |ΔKe|: mediana='
-        '${pc(_mediana([...dkv.map((x) => x.abs())]))}');
+        '${pc(_median([...dkv.map((x) => x.abs())]))}');
   }
 
   // --- 3c. Efeito em produção ---
@@ -399,7 +399,7 @@ void _imprimir(
   } else {
     final s = [...dj.map((x) => x.abs())]..sort();
     stdout.writeln('  avaliados nos dois modos: ${dj.length}');
-    stdout.writeln('  |Δ preço justo|: mediana=${pc(_mediana(s))}  '
+    stdout.writeln('  |Δ preço justo|: mediana=${pc(_median(s))}  '
         'p90=${pc(s[9 * s.length ~/ 10])}  máx=${pc(s.last)}');
     stdout.writeln('  alterados além de 0,5%: '
         '${dj.where((x) => x.abs() > 0.005).length} de ${dj.length}');
@@ -407,11 +407,11 @@ void _imprimir(
 
   // --- 4. Os setores ---
   stdout.writeln('\n-- mediana desalavancada por setor (3+ ativos) --');
-  final ordenado = medianaSetor.entries.toList()
+  final sortedEntries = sectorMedian.entries.toList()
     ..sort((a, b) => a.value.compareTo(b.value));
-  for (final e in ordenado) {
+  for (final e in sortedEntries) {
     stdout.writeln('  ${e.key.padRight(34)} β_U=${n2(e.value)}  '
-        'n=${porSetor[e.key]!.length}  '
-        'dispersão=${n2(_mad(porSetor[e.key]!))}');
+        'n=${bySector[e.key]!.length}  '
+        'dispersão=${n2(_mad(bySector[e.key]!))}');
   }
 }

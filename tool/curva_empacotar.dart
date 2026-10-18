@@ -3,7 +3,7 @@
 // No nativo, o aplicativo busca a curva do dia em tempo de execução, lendo só o
 // começo do arquivo do Tesouro, e o pacote é o recuo sem rede. **Na web o pacote
 // é a única fonte** (decisão 86): rode os dois comandos abaixo antes de cada
-// `flutter build web`. Com mais de `TreasuryCurve.diasDeRecuo` dias, o pacote
+// `flutter build web`. Com mais de `TreasuryCurve.fallbackDays` dias, o pacote
 // não serve, e a avaliação recua para os dois pontos, declarando por quê.
 //
 // Uso:
@@ -14,26 +14,26 @@ import 'dart:io';
 
 import 'package:equisim_core/equisim_core.dart';
 
-import 'curva_ligar.dart' show lerTesouro;
+import 'curva_ligar.dart' show readTreasury;
 
-const _saida = 'assets/tesouro/curva.json';
+const _output = 'assets/tesouro/curva.json';
 
 /// Datas-base guardadas: as dez mais recentes cobrem duas semanas de pregão.
-const _datasBase = 10;
+const _baseDates = 10;
 
 void main() {
-  final todas = lerTesouro('data/tesouro/precotaxatesourodireto.csv');
-  final bases = {for (final q in todas) q.baseDate}.toList()
+  final allRows = readTreasury('data/tesouro/precotaxatesourodireto.csv');
+  final bases = {for (final q in allRows) q.baseDate}.toList()
     ..sort((a, b) => b.compareTo(a));
-  final guardar = bases.take(_datasBase).toSet();
-  final cotacoes = [for (final q in todas) if (guardar.contains(q.baseDate)) q];
-  final pacote = TreasuryQuotesCodec.encode(cotacoes, geradoEm: bases.first);
-  File(_saida)
+  final store = bases.take(_baseDates).toSet();
+  final quotes = [for (final q in allRows) if (store.contains(q.baseDate)) q];
+  final package = TreasuryQuotesCodec.encode(quotes, generatedAt: bases.first);
+  File(_output)
     ..parent.createSync(recursive: true)
-    ..writeAsStringSync(jsonEncode(pacote));
-  stdout.writeln('  datas-base: ${guardar.length}, de '
-      '${guardar.reduce((a, b) => a.isBefore(b) ? a : b).toIso8601String().substring(0, 10)} a '
+    ..writeAsStringSync(jsonEncode(package));
+  stdout.writeln('  datas-base: ${store.length}, de '
+      '${store.reduce((a, b) => a.isBefore(b) ? a : b).toIso8601String().substring(0, 10)} a '
       '${bases.first.toIso8601String().substring(0, 10)}');
-  stdout.writeln('  cotações: ${cotacoes.length}');
-  stdout.writeln('  gravado $_saida');
+  stdout.writeln('  cotações: ${quotes.length}');
+  stdout.writeln('  gravado $_output');
 }

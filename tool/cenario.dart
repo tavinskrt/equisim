@@ -25,7 +25,7 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/congelado.dart';
 
-const _saida = 'docs/validacao/cenario.json';
+const _output = 'docs/validacao/cenario.json';
 
 double _q(List<double> v, double p) {
   if (v.isEmpty) return double.nan;
@@ -33,58 +33,58 @@ double _q(List<double> v, double p) {
   return o[(o.length * p).floor().clamp(0, o.length - 1)];
 }
 
-double _mediana(List<double> v) => _q(v, 0.5);
+double _median(List<double> v) => _q(v, 0.5);
 
-class _Leitura {
-  final Map<String, int> justoCentavos = {};
-  final Map<String, double> largura = {};
-  final Map<String, double> assimetria = {};
-  int baseForaDoJusto = 0;
+class _Reading {
+  final Map<String, int> fairValueCents = {};
+  final Map<String, double> width = {};
+  final Map<String, double> asymmetry = {};
+  int baseOutsideFair = 0;
 }
 
 Future<void> main(List<String> args) async {
-  final c = await Congelado.montar();
+  final c = await Frozen.build();
   try {
-    final leituras = {
-      for (final t in ScenarioTranslation.values) t: _Leitura(),
+    final readings = {
+      for (final t in ScenarioTranslation.values) t: _Reading(),
     };
-    final avaliadas = <Ticker, ValuationResult?>{};
-    final naViaDaFirma = <String>{};
+    final evaluated = <Ticker, ValuationResult?>{};
+    final onFirmLane = <String>{};
 
     var i = 0;
-    for (final t in c.universo) {
+    for (final t in c.universe) {
       i++;
-      if (i % 50 == 0) stderr.write('  $i/${c.universo.length}   \r');
-      final prep = await c.preparar(t);
+      if (i % 50 == 0) stderr.write('  $i/${c.universe.length}   \r');
+      final prep = await c.prepare(t);
       if (prep.isErr) continue;
       final b = prep.unwrap();
 
-      for (final leitura in ScenarioTranslation.values) {
-        final r = ValuationCascade.evaluate(_com(b, leitura));
-        if (leitura == ScenarioTranslation.umPorUm) {
-          avaliadas[t] = r.valueOrNull;
+      for (final reading in ScenarioTranslation.values) {
+        final r = ValuationCascade.evaluate(_withInput(b, reading));
+        if (reading == ScenarioTranslation.oneToOne) {
+          evaluated[t] = r.valueOrNull;
         }
         if (r.isErr) continue;
         final v = r.unwrap();
-        final l = leituras[leitura]!;
-        l.justoCentavos[t.value] = v.fairValue.cents;
-        if (leitura == ScenarioTranslation.umPorUm &&
+        final l = readings[reading]!;
+        l.fairValueCents[t.value] = v.fairValue.cents;
+        if (reading == ScenarioTranslation.oneToOne &&
             v.model == ValuationModel.dcfFcff) {
-          naViaDaFirma.add(t.value);
+          onFirmLane.add(t.value);
         }
 
-        final cenarios = v.discreteScenarios;
-        final justo = v.fairValue.cents;
-        if (cenarios == null || justo <= 0) continue;
-        final bear = cenarios[ScenarioBand.bear]?.cents;
-        final baseC = cenarios[ScenarioBand.base]?.cents;
-        final bull = cenarios[ScenarioBand.bull]?.cents;
+        final scenarios = v.discreteScenarios;
+        final fairValue = v.fairValue.cents;
+        if (scenarios == null || fairValue <= 0) continue;
+        final bear = scenarios[ScenarioBand.bear]?.cents;
+        final baseC = scenarios[ScenarioBand.base]?.cents;
+        final bull = scenarios[ScenarioBand.bull]?.cents;
         if (bear == null || baseC == null || bull == null) continue;
         // **A pós-condição da decisão 105**: o cenário base é o preço justo.
         // Nenhuma tradução pode quebrá-la — se quebrar, a faixa cerca outro
         // número, e a medição de largura não quer dizer nada.
-        if (baseC != justo) l.baseForaDoJusto++;
-        l.largura[t.value] = (bull - bear) / justo;
+        if (baseC != fairValue) l.baseOutsideFair++;
+        l.width[t.value] = (bull - bear) / fairValue;
         // Quanto da faixa fica de cada lado do preço justo. Tradução que só
         // multiplica o deslocamento não pode mover isto muito — se mover, o
         // efeito não é de escala.
@@ -94,15 +94,15 @@ Future<void> main(List<String> args) async {
         // devolveria `Infinity`, que o `JsonEncoder` recusa e a mediana
         // contamina. O ativo sai da conta em vez de entrar com um número
         // inventado.
-        final abaixo = justo - bear;
-        if (abaixo > 0) {
-          l.assimetria[t.value] = (bull - justo) / abaixo;
+        final below = fairValue - bear;
+        if (below > 0) {
+          l.asymmetry[t.value] = (bull - fairValue) / below;
         }
       }
     }
     stderr.write('                              \r');
 
-    final div = await c.conferirContraGabarito(avaliadas);
+    final div = await c.checkAgainstAnswerKey(evaluated);
     if (div == null) {
       stderr.writeln('AVISO: gabarito ausente; montagem não conferida.');
     } else if (div.isNotEmpty) {
@@ -119,8 +119,8 @@ Future<void> main(List<String> args) async {
       );
     }
 
-    final base = leituras[ScenarioTranslation.umPorUm]!;
-    final linhas = <Map<String, Object?>>[];
+    final base = readings[ScenarioTranslation.oneToOne]!;
+    final rows = <Map<String, Object?>>[];
 
     stdout.writeln('');
     stdout.writeln('-- a largura da faixa sob cada leitura --');
@@ -129,86 +129,86 @@ Future<void> main(List<String> args) async {
       '  vs um a um   base ≠ justo   preço justo muda',
     );
 
-    for (final leitura in ScenarioTranslation.values) {
-      final l = leituras[leitura]!;
+    for (final reading in ScenarioTranslation.values) {
+      final l = readings[reading]!;
       // **Só a via da firma importa**: na do acionista o campo perturbado já é
       // o `Ke`, e as três leituras devolvem o mesmo número.
-      final chaves = l.largura.keys.where(naViaDaFirma.contains).toList()
+      final keys = l.width.keys.where(onFirmLane.contains).toList()
         ..sort();
-      final larguras = [for (final k in chaves) l.largura[k]!];
-      final razao = <double>[
-        for (final k in chaves)
-          if (base.largura[k] != null && base.largura[k]! > 0)
-            l.largura[k]! / base.largura[k]!,
+      final widths = [for (final k in keys) l.width[k]!];
+      final ratio = <double>[
+        for (final k in keys)
+          if (base.width[k] != null && base.width[k]! > 0)
+            l.width[k]! / base.width[k]!,
       ];
-      final mudam = chaves
+      final changing = keys
           .where(
             (k) =>
-                base.justoCentavos[k] != null &&
-                l.justoCentavos[k] != base.justoCentavos[k],
+                base.fairValueCents[k] != null &&
+                l.fairValueCents[k] != base.fairValueCents[k],
           )
           .length;
 
-      final vsUmPorUm = razao.isEmpty
+      final vsOneToOne = ratio.isEmpty
           ? '   —  '
-          : '${_mediana(razao).toStringAsFixed(3)}×';
+          : '${_median(ratio).toStringAsFixed(3)}×';
       stdout.writeln(
-        '  ${leitura.key.padRight(18)}  '
-        '${chaves.length.toString().padLeft(9)}   '
-        '${_pct(_q(larguras, 0.25))} / ${_pct(_mediana(larguras))} / '
-        '${_pct(_q(larguras, 0.75))}   '
-        '${vsUmPorUm.padLeft(12)}   '
-        '${l.baseForaDoJusto.toString().padLeft(12)}   '
-        '${mudam.toString().padLeft(16)}',
+        '  ${reading.key.padRight(18)}  '
+        '${keys.length.toString().padLeft(9)}   '
+        '${_pct(_q(widths, 0.25))} / ${_pct(_median(widths))} / '
+        '${_pct(_q(widths, 0.75))}   '
+        '${vsOneToOne.padLeft(12)}   '
+        '${l.baseOutsideFair.toString().padLeft(12)}   '
+        '${changing.toString().padLeft(16)}',
       );
 
       // `_q` devolve `NaN` sobre lista vazia, e `NaN` não é JSON: onde não há
       // largura a declarar, o campo é `null`.
-      double? ouNulo(double v) => v.isFinite ? v : null;
+      double? orNull(double v) => v.isFinite ? v : null;
 
-      linhas.add({
-        'leitura': leitura.key,
-        'comFaixa': chaves.length,
-        'larguraP25': ouNulo(_q(larguras, 0.25)),
-        'larguraMediana': ouNulo(_mediana(larguras)),
-        'larguraP75': ouNulo(_q(larguras, 0.75)),
-        'razaoMedianaContraUmPorUm': razao.isEmpty ? null : _mediana(razao),
-        'baseForaDoJusto': l.baseForaDoJusto,
-        'precoJustoMuda': mudam,
+      rows.add({
+        'leitura': reading.key,
+        'comFaixa': keys.length,
+        'larguraP25': orNull(_q(widths, 0.25)),
+        'larguraMediana': orNull(_median(widths)),
+        'larguraP75': orNull(_q(widths, 0.75)),
+        'razaoMedianaContraUmPorUm': ratio.isEmpty ? null : _median(ratio),
+        'baseForaDoJusto': l.baseOutsideFair,
+        'precoJustoMuda': changing,
         // Só quem tem assimetria medida entra na mediana dela — e o `null`
         // diz que nenhum tinha, em vez de um `NaN` que o JSON não carrega.
         'assimetriaMediana': () {
           final v = <double>[
-            for (final k in chaves)
-              if (l.assimetria[k] != null) l.assimetria[k]!,
+            for (final k in keys)
+              if (l.asymmetry[k] != null) l.asymmetry[k]!,
           ];
-          return v.isEmpty ? null : _mediana(v);
+          return v.isEmpty ? null : _median(v);
         }(),
         // Quem tinha faixa no um a um e perde com esta leitura: amplificar o
         // deslocamento empurra o cenário otimista para uma perpetuidade que
         // diverge, e o ativo fica sem faixa.
         'perdemAFaixa':
-            (naViaDaFirma
-                .where(base.largura.containsKey)
-                .where((k) => !l.largura.containsKey(k))
+            (onFirmLane
+                .where(base.width.containsKey)
+                .where((k) => !l.width.containsKey(k))
                 .toList()
               ..sort()),
       });
     }
 
-    File(_saida).writeAsStringSync(
+    File(_output).writeAsStringSync(
       const JsonEncoder.withIndent(
         '  ',
-      ).convert({'naViaDaFirma': naViaDaFirma.length, 'leituras': linhas}),
+      ).convert({'naViaDaFirma': onFirmLane.length, 'leituras': rows}),
     );
     stdout.writeln('');
-    stdout.writeln('escrito $_saida');
+    stdout.writeln('escrito $_output');
   } finally {
     await c.ctx.dispose();
   }
 }
 
-ValuationInputs _com(ValuationInputs b, ScenarioTranslation leitura) =>
+ValuationInputs _withInput(ValuationInputs b, ScenarioTranslation reading) =>
     ValuationInputs(
       ticker: b.ticker,
       asOf: b.asOf,
@@ -232,7 +232,7 @@ ValuationInputs _com(ValuationInputs b, ScenarioTranslation leitura) =>
       creditReferenceRiskFree: b.creditReferenceRiskFree,
       declaredSharesPerUnit: b.declaredSharesPerUnit,
       betaWindowYears: b.betaWindowYears,
-      scenarioTranslation: leitura,
+      scenarioTranslation: reading,
     );
 
 String _pct(double v) =>

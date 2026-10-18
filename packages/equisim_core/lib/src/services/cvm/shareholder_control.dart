@@ -19,8 +19,8 @@ enum ShareholderControl {
   foreign;
 
   /// A classe do texto do FCA, ou `null` quando ele não diz.
-  static ShareholderControl? fromFca(String texto) {
-    final t = texto.trim().toLowerCase();
+  static ShareholderControl? fromFca(String text) {
+    final t = text.trim().toLowerCase();
     if (t.startsWith('estatal')) return ShareholderControl.state;
     if (t.startsWith('privad')) return ShareholderControl.private;
     if (t.startsWith('estrangeir')) return ShareholderControl.foreign;
@@ -49,7 +49,7 @@ typedef ShareholderControlFiling = ({
 /// O histórico do controle, montado das linhas do FCA, e o pacote.
 abstract final class ShareholderControlHistory {
   /// Versão do formato do pacote.
-  static const int versao = 1;
+  static const int version = 1;
 
   /// O histórico de uma companhia, a partir das linhas do FCA de todos os anos.
   ///
@@ -71,40 +71,40 @@ abstract final class ShareholderControlHistory {
   static List<ShareholderControlPeriod> fromFilings(
     List<ShareholderControlFiling> filings,
   ) {
-    final linhas = [
+    final rows = [
       for (final f in filings)
         if (ShareholderControl.fromFca(f.species) case final c?)
           (
-            reference: _diaUtc(f.reference),
+            reference: _utcDay(f.reference),
             control: c,
-            speciesDate: f.speciesDate == null ? null : _diaUtc(f.speciesDate!),
+            speciesDate: f.speciesDate == null ? null : _utcDay(f.speciesDate!),
           ),
     ]..sort((a, b) => a.reference.compareTo(b.reference));
-    if (linhas.isEmpty) return const [];
-    final periodos = <ShareholderControlPeriod>[
+    if (rows.isEmpty) return const [];
+    final periods = <ShareholderControlPeriod>[
       ShareholderControlPeriod(
-          since: linhas.first.reference, control: linhas.first.control),
+          since: rows.first.reference, control: rows.first.control),
     ];
-    for (var i = 1; i < linhas.length; i++) {
-      final antes = linhas[i - 1];
-      final agora = linhas[i];
-      if (agora.control == antes.control) continue;
+    for (var i = 1; i < rows.length; i++) {
+      final before = rows[i - 1];
+      final now = rows[i];
+      if (now.control == before.control) continue;
       // Um ano de calendário depois, e não 366 dias corridos.
-      final ref = agora.reference;
-      final ate = DateTime.utc(ref.year + 1, ref.month, ref.day);
-      final candidatas = [
-        for (final l in linhas)
-          if (l.control == agora.control && l.speciesDate != null)
-            if (!l.speciesDate!.isBefore(antes.reference) &&
-                !l.speciesDate!.isAfter(ate))
+      final ref = now.reference;
+      final until = DateTime.utc(ref.year + 1, ref.month, ref.day);
+      final candidates = [
+        for (final l in rows)
+          if (l.control == now.control && l.speciesDate != null)
+            if (!l.speciesDate!.isBefore(before.reference) &&
+                !l.speciesDate!.isAfter(until))
               l.speciesDate!,
       ]..sort();
-      periodos.add(ShareholderControlPeriod(
-        since: candidatas.isEmpty ? agora.reference : candidatas.first,
-        control: agora.control,
+      periods.add(ShareholderControlPeriod(
+        since: candidates.isEmpty ? now.reference : candidates.first,
+        control: now.control,
       ));
     }
-    return periodos;
+    return periods;
   }
 
   /// A espécie de controle no dia de [asOf], ou `null` antes do primeiro
@@ -113,10 +113,10 @@ abstract final class ShareholderControlHistory {
     List<ShareholderControlPeriod> periods,
     DateTime asOf,
   ) {
-    final dia = _diaUtc(asOf);
+    final day = _utcDay(asOf);
     ShareholderControl? vale;
     for (final p in periods) {
-      if (_diaUtc(p.since).isAfter(dia)) break;
+      if (_utcDay(p.since).isAfter(day)) break;
       vale = p.control;
     }
     return vale;
@@ -125,54 +125,54 @@ abstract final class ShareholderControlHistory {
   /// O pacote: o histórico de cada emissor, pela raiz do código de
   /// negociação — a mesma chave do registro da B3.
   static Map<String, Object?> encode(
-    Map<String, List<ShareholderControlPeriod>> porEmissor, {
-    required DateTime geradoEm,
+    Map<String, List<ShareholderControlPeriod>> byIssuer, {
+    required DateTime generatedAt,
   }) =>
       {
-        'versao': versao,
-        'geradoEm': _dia(geradoEm),
+        'versao': version,
+        'geradoEm': _day(generatedAt),
         'fonte': 'Formulário Cadastral da CVM, Especie_Controle_Acionario',
         'emissores': {
-          for (final e in (porEmissor.keys.toList()..sort()))
+          for (final e in (byIssuer.keys.toList()..sort()))
             e: [
-              for (final p in porEmissor[e]!)
-                {'desde': _dia(p.since), 'controle': p.control.name},
+              for (final p in byIssuer[e]!)
+                {'desde': _day(p.since), 'controle': p.control.name},
             ],
         },
       };
 
   /// Lê o pacote; `null` quando a versão ou a forma não são as esperadas.
-  static ({DateTime geradoEm, Map<String, List<ShareholderControlPeriod>> porEmissor})?
+  static ({DateTime generatedAt, Map<String, List<ShareholderControlPeriod>> byIssuer})?
       decode(Map<String, dynamic> json) {
-    if (json['versao'] != versao) return null;
-    final lido = DateTime.tryParse(json['geradoEm'] as String? ?? '');
-    final gerado = lido == null ? null : _diaUtc(lido);
-    final emissores = json['emissores'];
-    if (gerado == null || emissores is! Map<String, dynamic>) return null;
-    final saida = <String, List<ShareholderControlPeriod>>{};
-    for (final e in emissores.entries) {
-      final lista = e.value;
-      if (lista is! List) return null;
-      final periodos = <ShareholderControlPeriod>[];
-      for (final p in lista) {
+    if (json['versao'] != version) return null;
+    final parsed = DateTime.tryParse(json['geradoEm'] as String? ?? '');
+    final generated = parsed == null ? null : _utcDay(parsed);
+    final issuers = json['emissores'];
+    if (generated == null || issuers is! Map<String, dynamic>) return null;
+    final output = <String, List<ShareholderControlPeriod>>{};
+    for (final e in issuers.entries) {
+      final list = e.value;
+      if (list is! List) return null;
+      final periods = <ShareholderControlPeriod>[];
+      for (final p in list) {
         if (p is! Map<String, dynamic>) return null;
-        final lida = DateTime.tryParse(p['desde'] as String? ?? '');
-        final desde = lida == null ? null : _diaUtc(lida);
-        final controle = ShareholderControl.values
+        final readOrdering = DateTime.tryParse(p['desde'] as String? ?? '');
+        final since = readOrdering == null ? null : _utcDay(readOrdering);
+        final control = ShareholderControl.values
             .where((c) => c.name == p['controle'])
             .firstOrNull;
-        if (desde == null || controle == null) return null;
-        periodos.add(ShareholderControlPeriod(since: desde, control: controle));
+        if (since == null || control == null) return null;
+        periods.add(ShareholderControlPeriod(since: since, control: control));
       }
-      periodos.sort((a, b) => a.since.compareTo(b.since));
-      saida[e.key] = periodos;
+      periods.sort((a, b) => a.since.compareTo(b.since));
+      output[e.key] = periods;
     }
-    return (geradoEm: gerado, porEmissor: saida);
+    return (generatedAt: generated, byIssuer: output);
   }
 
-  static String _dia(DateTime d) => _diaUtc(d).toIso8601String().substring(0, 10);
+  static String _day(DateTime d) => _utcDay(d).toIso8601String().substring(0, 10);
 
   /// O dia civil de [d], à meia-noite em UTC: a data do formulário não tem
   /// hora, e o fuso da máquina não pode movê-la.
-  static DateTime _diaUtc(DateTime d) => DateTime.utc(d.year, d.month, d.day);
+  static DateTime _utcDay(DateTime d) => DateTime.utc(d.year, d.month, d.day);
 }

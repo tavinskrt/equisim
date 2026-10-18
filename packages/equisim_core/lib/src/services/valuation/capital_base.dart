@@ -77,13 +77,13 @@ class CapitalSeries {
     ValuationLane lane, {
     double? firmTaxRate,
   }) {
-    final brutos = <CapitalPoint>[];
+    final rawSessions = <CapitalPoint>[];
     for (final s in snapshots) {
       final base = lane == ValuationLane.firm
           ? s.investedCapital
           : s.equityBookValue;
       if (base == null || base <= 0) continue;
-      brutos.add(CapitalPoint(
+      rawSessions.add(CapitalPoint(
         year: s.fiscalPeriodEnd.year,
         base: base,
         profit: lane == ValuationLane.firm
@@ -91,7 +91,7 @@ class CapitalSeries {
             : s.netIncome,
       ));
     }
-    return CapitalSeries(points: _cleanByNeighbour(brutos), lane: lane);
+    return CapitalSeries(points: _cleanByNeighbour(rawSessions), lane: lane);
   }
 
   /// Exercícios mínimos com alíquota medível para a estrutural ser usada.
@@ -120,13 +120,13 @@ class CapitalSeries {
     List<FundamentalsSnapshot> snapshots, {
     required double statutoryRate,
   }) {
-    final taxas = <double>[];
+    final rates = <double>[];
     for (final s in snapshots) {
       final t = s.effectiveTaxRate;
-      if (t != null && t.isFinite) taxas.add(t);
+      if (t != null && t.isFinite) rates.add(t);
     }
-    if (taxas.length < minTaxObservations) return null;
-    final m = Inference.median(taxas);
+    if (rates.length < minTaxObservations) return null;
+    final m = Inference.median(rates);
     if (m == null || !m.isFinite) return null;
     return m.clamp(0.0, statutoryRate).toDouble();
   }
@@ -144,26 +144,26 @@ class CapitalSeries {
     if (s.length < 4) return s;
     final ok = <CapitalPoint>[];
     for (var i = 0; i < s.length; i++) {
-      final vizinhos = <double>[];
+      final neighbors = <double>[];
       for (var j = i - neighbourRadius; j <= i + neighbourRadius; j++) {
         if (j == i || j < 0 || j >= s.length) continue;
-        vizinhos.add(s[j].base);
+        neighbors.add(s[j].base);
       }
-      if (vizinhos.length < 2) {
+      if (neighbors.length < 2) {
         ok.add(s[i]);
         continue;
       }
-      vizinhos.sort();
-      final m = vizinhos.length ~/ 2;
-      final referencia = vizinhos.length.isOdd
-          ? vizinhos[m]
-          : (vizinhos[m - 1] + vizinhos[m]) / 2;
-      if (referencia <= 0) {
+      neighbors.sort();
+      final m = neighbors.length ~/ 2;
+      final reference = neighbors.length.isOdd
+          ? neighbors[m]
+          : (neighbors[m - 1] + neighbors[m]) / 2;
+      if (reference <= 0) {
         ok.add(s[i]);
         continue;
       }
-      final razao = s[i].base / referencia;
-      if (razao < 1 / neighbourFactor || razao > neighbourFactor) continue;
+      final ratio = s[i].base / reference;
+      if (ratio < 1 / neighbourFactor || ratio > neighbourFactor) continue;
       ok.add(s[i]);
     }
     return ok;
@@ -252,9 +252,9 @@ class CapitalSeries {
     final r = returns;
     if (r.length < 4) return null;
     final ini = r.length - 1 - window;
-    final janela = r.sublist(ini < 0 ? 0 : ini, r.length - 1);
-    if (janela.length < 3) return null;
-    return Inference.median([for (final x in janela) x.value]);
+    final windowValues = r.sublist(ini < 0 ? 0 : ini, r.length - 1);
+    if (windowValues.length < 3) return null;
+    return Inference.median([for (final x in windowValues) x.value]);
   }
 
   /// Fração dos retornos da janela do ciclo que são positivos.
@@ -271,9 +271,9 @@ class CapitalSeries {
     final r = returns;
     if (r.length < 4) return null;
     final ini = r.length - 1 - window;
-    final janela = r.sublist(ini < 0 ? 0 : ini, r.length - 1);
-    if (janela.length < 3) return null;
-    return janela.where((x) => x.value > 0).length / janela.length;
+    final windowValues = r.sublist(ini < 0 ? 0 : ini, r.length - 1);
+    if (windowValues.length < 3) return null;
+    return windowValues.where((x) => x.value > 0).length / windowValues.length;
   }
 
   /// Retorno do exercício mais recente.

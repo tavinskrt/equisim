@@ -21,7 +21,7 @@ class PortfolioStudy {
   final Portfolio principal;
 
   /// Candidatos a substituição.
-  final Portfolio reserva;
+  final Portfolio reserve;
 
   /// Meta patrimonial. `null` enquanto o usuário não a declarou.
   final FinancialGoal? goal;
@@ -35,7 +35,7 @@ class PortfolioStudy {
     this.id,
     required this.name,
     required this.principal,
-    required this.reserva,
+    required this.reserve,
     this.goal,
     this.updatedAt,
   });
@@ -50,14 +50,14 @@ class PortfolioStudy {
     String? id,
     String? name,
     Portfolio? principal,
-    Portfolio? reserva,
+    Portfolio? reserve,
     FinancialGoal? goal,
   }) =>
       PortfolioStudy(
         id: id ?? this.id,
         name: name ?? this.name,
         principal: principal ?? this.principal,
-        reserva: reserva ?? this.reserva,
+        reserve: reserve ?? this.reserve,
         goal: goal ?? this.goal,
         updatedAt: updatedAt,
       );
@@ -145,7 +145,7 @@ class PortfolioRepository {
         'userId': userId,
         'name': study.name,
         'principal': PortfolioStudyCodec.encodePortfolio(study.principal),
-        'reserva': PortfolioStudyCodec.encodePortfolio(study.reserva),
+        'reserva': PortfolioStudyCodec.encodePortfolio(study.reserve),
         if (study.goal != null) 'goal': PortfolioStudyCodec.encodeGoal(study.goal!),
         'updatedAt': FieldValue.serverTimestamp(),
       };
@@ -211,11 +211,11 @@ class PortfolioRepository {
         name: 'Principal',
         kind: PortfolioKind.principal,
       ),
-      reserva: PortfolioStudyCodec.decodePortfolio(
+      reserve: PortfolioStudyCodec.decodePortfolio(
         data['reserva'],
         id: '${doc.id}-reserva',
         name: 'Reserva',
-        kind: PortfolioKind.reserva,
+        kind: PortfolioKind.reserve,
       ),
       goal: PortfolioStudyCodec.decodeGoal(data['goal']),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),

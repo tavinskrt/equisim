@@ -20,7 +20,7 @@ void main() {
     /// Monta o par consistente: dado `E`, `D`, `Ke` e `Kd`, devolve o `WACC`
     /// que a estrutura de capital implica. É a única forma de a identidade
     /// poder valer — com peso de mercado ela não vale, e é esse o achado.
-    double waccDe({
+    double waccOf({
       required double equity,
       required double debt,
       required double ke,
@@ -40,19 +40,19 @@ void main() {
       const kd = 0.11, tax = 0.30, ke = 0.155;
       const g = 0.0;
       const base = 1000.0;
-      const divida = 3000.0;
-      const papeis = 100.0;
+      const debt = 3000.0;
+      const securities = 100.0;
 
       // Ponto fixo: parte de um `E` arbitrário, calcula o WACC que ele implica,
       // avalia, e repete até o `E` do modelo ser o `E` do peso. É a
       // circularidade do WACC resolvida por iteração — três dezenas de passos
       // bastam para o resíduo cair abaixo de um centavo.
       var equity = 5000.0;
-      late DcfOutcome firma;
+      late DcfOutcome firm;
       for (var i = 0; i < 60; i++) {
-        final wacc = waccDe(
+        final wacc = waccOf(
           equity: equity,
-          debt: divida,
+          debt: debt,
           ke: ke,
           kd: kd,
           tax: tax,
@@ -66,24 +66,24 @@ void main() {
             discountRate: wacc,
             terminalDiscountRate: wacc,
             returnOnCapital: 0.0,
-            cashTiming: CashTiming.fimDeAno,
+            cashTiming: CashTiming.endOfYear,
           ),
-          netDebt: divida,
-          sharesOutstanding: papeis,
+          netDebt: debt,
+          sharesOutstanding: securities,
         );
         expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
-        firma = r.unwrap();
-        equity = firma.equityValue;
+        firm = r.unwrap();
+        equity = firm.equityValue;
       }
 
-      final wacc = waccDe(
+      final wacc = waccOf(
         equity: equity,
-        debt: divida,
+        debt: debt,
         ke: ke,
         kd: kd,
         tax: tax,
       );
-      final acionista = DcfCalculator.equityFromFirm(
+      final shareholder = DcfCalculator.equityFromFirm(
         baseProfit: base,
         assumptions: DcfAssumptions(
           projectionYears: 10,
@@ -92,25 +92,25 @@ void main() {
           discountRate: wacc,
           terminalDiscountRate: wacc,
           returnOnCapital: 0.0,
-          cashTiming: CashTiming.fimDeAno,
+          cashTiming: CashTiming.endOfYear,
         ),
-        netDebt: divida,
-        sharesOutstanding: papeis,
+        netDebt: debt,
+        sharesOutstanding: securities,
         costOfDebt: kd,
         taxRate: tax,
         equityDiscountRate: ke,
         terminalEquityDiscountRate: ke,
       );
-      expect(acionista.isOk, isTrue, reason: acionista.failureOrNull?.message);
+      expect(shareholder.isOk, isTrue, reason: shareholder.failureOrNull?.message);
 
-      final porFirma = firma.fairValuePerShare;
-      final porAcionista = acionista.unwrap().fairValuePerShare;
+      final byFirm = firm.fairValuePerShare;
+      final byShareholder = shareholder.unwrap().fairValuePerShare;
       // Uma parte em dez mil: o que sobra é o ponto fixo não ter convergido a
       // zero absoluto, não discordância de método.
       expect(
-        (porAcionista / porFirma - 1).abs(),
+        (byShareholder / byFirm - 1).abs(),
         lessThan(1e-4),
-        reason: 'firma R\$ $porFirma contra acionista R\$ $porAcionista',
+        reason: 'firma R\$ $byFirm contra acionista R\$ $byShareholder',
       );
     });
 
@@ -124,13 +124,13 @@ void main() {
         terminalDiscountRate: ke,
         returnOnCapital: 0.0,
       );
-      final firma = DcfCalculator.firm(
+      final firm = DcfCalculator.firm(
         baseProfit: 500,
         assumptions: a,
         netDebt: 0,
         sharesOutstanding: 50,
       ).unwrap();
-      final acionista = DcfCalculator.equityFromFirm(
+      final shareholder = DcfCalculator.equityFromFirm(
         baseProfit: 500,
         assumptions: a,
         netDebt: 0,
@@ -141,8 +141,8 @@ void main() {
         terminalEquityDiscountRate: ke,
       ).unwrap();
       expect(
-        acionista.fairValuePerShare,
-        closeTo(firma.fairValuePerShare, 1e-9),
+        shareholder.fairValuePerShare,
+        closeTo(firm.fairValuePerShare, 1e-9),
       );
     });
 
@@ -161,19 +161,19 @@ void main() {
       // o `Ke` ano a ano — que é onde o beta desalavancado da decisão 40 passa
       // a ser indispensável.
       const kd = 0.11, tax = 0.30, ke = 0.155, g = 0.05;
-      const divida = 3000.0;
+      const debt = 3000.0;
 
-      double waccDe(double equity) {
-        final v = equity + divida;
-        return ke * (equity / v) + kd * (1 - tax) * (divida / v);
+      double waccOf(double equity) {
+        final v = equity + debt;
+        return ke * (equity / v) + kd * (1 - tax) * (debt / v);
       }
 
       var equity = 5000.0;
-      late DcfOutcome firma;
+      late DcfOutcome firm;
       var wacc = 0.0;
       for (var i = 0; i < 80; i++) {
-        wacc = waccDe(equity);
-        firma = DcfCalculator.firm(
+        wacc = waccOf(equity);
+        firm = DcfCalculator.firm(
           baseProfit: 1000,
           assumptions: DcfAssumptions(
             projectionYears: 10,
@@ -182,15 +182,15 @@ void main() {
             discountRate: wacc,
             terminalDiscountRate: wacc,
             returnOnCapital: 0.0,
-            cashTiming: CashTiming.fimDeAno,
+            cashTiming: CashTiming.endOfYear,
           ),
-          netDebt: divida,
+          netDebt: debt,
           sharesOutstanding: 100,
         ).unwrap();
-        equity = firma.equityValue;
+        equity = firm.equityValue;
       }
 
-      final acionista = DcfCalculator.equityFromFirm(
+      final shareholder = DcfCalculator.equityFromFirm(
         baseProfit: 1000,
         assumptions: DcfAssumptions(
           projectionYears: 10,
@@ -199,9 +199,9 @@ void main() {
           discountRate: wacc,
           terminalDiscountRate: wacc,
           returnOnCapital: 0.0,
-          cashTiming: CashTiming.fimDeAno,
+          cashTiming: CashTiming.endOfYear,
         ),
-        netDebt: divida,
+        netDebt: debt,
         sharesOutstanding: 100,
         costOfDebt: kd,
         taxRate: tax,
@@ -209,13 +209,13 @@ void main() {
         terminalEquityDiscountRate: ke,
       ).unwrap();
 
-      final divergencia =
-          acionista.fairValuePerShare / firma.fairValuePerShare - 1;
+      final divergence =
+          shareholder.fairValuePerShare / firm.fairValuePerShare - 1;
       // Trava a ordem de grandeza, não o número: o que importa é que a
       // divergência existe e é material, e que ela some no teste anterior.
-      expect(divergencia.abs(), greaterThan(0.01),
+      expect(divergence.abs(), greaterThan(0.01),
           reason: 'sem alavancagem constante a identidade não fecha');
-      expect(divergencia.abs(), lessThan(0.10),
+      expect(divergence.abs(), lessThan(0.10),
           reason: 'e o desvio é de poucos por cento, não de método');
     });
 
@@ -229,7 +229,7 @@ void main() {
           discountRate: 0.14,
           terminalDiscountRate: 0.12,
           returnOnCapital: 0.0,
-          cashTiming: CashTiming.fimDeAno,
+          cashTiming: CashTiming.endOfYear,
         ),
         netDebt: 100,
         sharesOutstanding: 10,
@@ -250,13 +250,13 @@ void main() {
       discountRate: 0.12,
       terminalDiscountRate: 0.12,
       returnOnCapital: 0.0,
-      cashTiming: CashTiming.fimDeAno,
+      cashTiming: CashTiming.endOfYear,
     );
-    Result<DcfOutcome> rodar({
+    Result<DcfOutcome> run({
       List<double>? kd,
-      List<double>? caixa,
+      List<double>? cash,
       double? kdInf,
-      double? caixaInf,
+      double? cashInf,
     }) =>
         DcfCalculator.equityFromFirm(
           baseProfit: 1000,
@@ -270,41 +270,41 @@ void main() {
           cash: 500,
           cashYield: 0.10,
           costOfDebtPath: kd,
-          cashYieldPath: caixa,
+          cashYieldPath: cash,
           terminalCostOfDebt: kdInf,
-          terminalCashYield: caixaInf,
+          terminalCashYield: cashInf,
         );
 
     test('caminho constante é a taxa única', () {
-      final unica = rodar().unwrap().equityValue;
-      final caminho = rodar(
+      final single = run().unwrap().equityValue;
+      final path = run(
         kd: List.filled(5, 0.12),
-        caixa: List.filled(5, 0.10),
+        cash: List.filled(5, 0.10),
         kdInf: 0.12,
-        caixaInf: 0.10,
+        cashInf: 0.10,
       ).unwrap().equityValue;
-      expect(caminho, closeTo(unica, 1e-6));
+      expect(path, closeTo(single, 1e-6));
     });
 
     test('juro mais alto no caminho baixa o capital próprio', () {
-      final unica = rodar().unwrap().equityValue;
-      final alto = rodar(
+      final single = run().unwrap().equityValue;
+      final high = run(
         kd: [0.15, 0.14, 0.13, 0.12, 0.12],
-        caixa: List.filled(5, 0.10),
+        cash: List.filled(5, 0.10),
         kdInf: 0.12,
-        caixaInf: 0.10,
+        cashInf: 0.10,
       ).unwrap().equityValue;
-      expect(alto, lessThan(unica));
+      expect(high, lessThan(single));
     });
 
     test('o terminal usa a taxa de equilíbrio, e não a do ano 1', () {
-      final unica = rodar().unwrap().equityValue;
-      final terminalBaixo = rodar(kdInf: 0.09).unwrap().equityValue;
-      expect(terminalBaixo, greaterThan(unica));
+      final single = run().unwrap().equityValue;
+      final lowTerminal = run(kdInf: 0.09).unwrap().equityValue;
+      expect(lowTerminal, greaterThan(single));
     });
 
     test('caminho de tamanho errado é recusado', () {
-      expect(rodar(kd: [0.12, 0.12]).isErr, isTrue);
+      expect(run(kd: [0.12, 0.12]).isErr, isTrue);
     });
   });
 }

@@ -21,16 +21,16 @@ import '../../audit/wire_keyed.dart';
 /// Natureza do provento, pelo rótulo da B3.
 enum CashDividendKind implements WireKeyed {
   /// `DIVIDENDO` — isento para a pessoa física.
-  dividendo('dividendo'),
+  dividend('dividendo'),
 
   /// `JRS CAP PROPRIO` — juros sobre capital próprio, com 15% retidos na fonte.
-  jurosSobreCapital('jurosSobreCapital'),
+  interestOnEquity('jurosSobreCapital'),
 
   /// `RENDIMENTO` — isento, como o dividendo.
-  rendimento('rendimento'),
+  income('rendimento'),
 
   /// `REST CAP DIN` — restituição de capital em dinheiro.
-  restituicaoDeCapital('restituicaoDeCapital');
+  capitalRefund('restituicaoDeCapital');
 
   const CashDividendKind(this.key);
 
@@ -82,7 +82,7 @@ class CashDividend {
 
   /// Valor que chega ao acionista pessoa física: o juro sobre capital próprio
   /// perde os 15% retidos, e o resto é isento.
-  double get netAmount => kind == CashDividendKind.jurosSobreCapital
+  double get netAmount => kind == CashDividendKind.interestOnEquity
       ? amount * (1 - B3CashDividends.jcpWithholding)
       : amount;
 }
@@ -92,11 +92,11 @@ abstract final class B3CashDividends {
   /// Imposto retido na fonte sobre juros sobre capital próprio.
   static const double jcpWithholding = 0.15;
 
-  static const Map<String, CashDividendKind> _rotulos = {
-    'DIVIDENDO': CashDividendKind.dividendo,
-    'JRS CAP PROPRIO': CashDividendKind.jurosSobreCapital,
-    'RENDIMENTO': CashDividendKind.rendimento,
-    'REST CAP DIN': CashDividendKind.restituicaoDeCapital,
+  static const Map<String, CashDividendKind> _labels = {
+    'DIVIDENDO': CashDividendKind.dividend,
+    'JRS CAP PROPRIO': CashDividendKind.interestOnEquity,
+    'RENDIMENTO': CashDividendKind.income,
+    'REST CAP DIN': CashDividendKind.capitalRefund,
   };
 
   /// Lê a lista `results` do `GetListedCashDividends`.
@@ -107,23 +107,23 @@ abstract final class B3CashDividends {
     final out = <CashDividend>[];
     for (final r in results) {
       if (r is! Map<String, dynamic>) continue;
-      final classe = (r['typeStock'] as String?)?.trim();
-      final kind = _rotulos[(r['corporateAction'] as String?)?.trim()];
-      final com = B3Registry.parseDate(r['lastDatePriorEx']);
-      final lote = B3Registry.parseNumber(r['quotedPerShares']) ?? 1;
-      final valor = B3Registry.parseNumber(r['valueCash']);
-      if (classe == null || classe.isEmpty || kind == null || com == null) {
+      final shareClass = (r['typeStock'] as String?)?.trim();
+      final kind = _labels[(r['corporateAction'] as String?)?.trim()];
+      final withInput = B3Registry.parseDate(r['lastDatePriorEx']);
+      final lot = B3Registry.parseNumber(r['quotedPerShares']) ?? 1;
+      final value = B3Registry.parseNumber(r['valueCash']);
+      if (shareClass == null || shareClass.isEmpty || kind == null || withInput == null) {
         continue;
       }
-      if (valor == null || !(valor > 0) || !(lote > 0)) continue;
-      final preco = B3Registry.parseNumber(r['closingPricePriorExDate']);
+      if (value == null || !(value > 0) || !(lot > 0)) continue;
+      final price = B3Registry.parseNumber(r['closingPricePriorExDate']);
       out.add(CashDividend(
-        shareClass: classe,
+        shareClass: shareClass,
         kind: kind,
-        lastDateWithRights: com,
-        exDate: BrazilianCalendar.nextTradingSession(com),
-        amount: valor / lote,
-        closeWithRights: preco != null && preco > 0 ? preco / lote : null,
+        lastDateWithRights: withInput,
+        exDate: BrazilianCalendar.nextTradingSession(withInput),
+        amount: value / lot,
+        closeWithRights: price != null && price > 0 ? price / lot : null,
       ));
     }
     out.sort((a, b) => a.exDate.compareTo(b.exDate));
@@ -178,61 +178,61 @@ abstract final class TotalReturn {
   static ({double factor, int applied, int approximated, int withoutPrice})
       factor({
     required Iterable<CashDividend> dividends,
-    required DateTime de,
-    required DateTime ate,
+    required DateTime from,
+    required DateTime until,
     required double? Function(DateTime exDate) closeOnExDate,
     bool net = true,
   }) {
-    final d = DateTime.utc(de.year, de.month, de.day);
-    final a = DateTime.utc(ate.year, ate.month, ate.day);
-    final porDia = <DateTime, List<CashDividend>>{};
+    final d = DateTime.utc(from.year, from.month, from.day);
+    final a = DateTime.utc(until.year, until.month, until.day);
+    final byDay = <DateTime, List<CashDividend>>{};
     for (final x in dividends) {
       if (!x.exDate.isAfter(d) || x.exDate.isAfter(a)) continue;
-      final dia = DateTime.utc(x.exDate.year, x.exDate.month, x.exDate.day);
-      (porDia[dia] ??= []).add(x);
+      final day = DateTime.utc(x.exDate.year, x.exDate.month, x.exDate.day);
+      (byDay[day] ??= []).add(x);
     }
-    var fator = 1.0;
-    var aplicados = 0;
-    var aproximados = 0;
-    var semPreco = 0;
-    for (final grupo in porDia.values) {
-      final preco = closeOnExDate(grupo.first.exDate);
+    var factor = 1.0;
+    var applied = 0;
+    var approximated = 0;
+    var withoutPrice = 0;
+    for (final group in byDay.values) {
+      final price = closeOnExDate(group.first.exDate);
       // O rendimento do dia sobre o preço ex; sem o pregão, sobre o preço com
       // direito, e o preço ex sai dele menos os proventos do dia: `D/P_ex` é
       // `(D/P_com) / (1 − ΣD/P_com)`.
-      var sobreEx = 0.0;
-      if (preco != null && preco > 0) {
-        for (final x in grupo) {
-          sobreEx += (net ? x.netAmount : x.amount) / preco;
+      var overEx = 0.0;
+      if (price != null && price > 0) {
+        for (final x in group) {
+          overEx += (net ? x.netAmount : x.amount) / price;
         }
       } else {
-        double? com;
-        for (final x in grupo) {
-          com ??= x.closeWithRights;
+        double? withInput;
+        for (final x in group) {
+          withInput ??= x.closeWithRights;
         }
-        var queda = 0.0;
-        var pago = 0.0;
-        if (com != null && com > 0) {
-          for (final x in grupo) {
-            queda += x.amount / com;
-            pago += (net ? x.netAmount : x.amount) / com;
+        var decline = 0.0;
+        var paid = 0.0;
+        if (withInput != null && withInput > 0) {
+          for (final x in group) {
+            decline += x.amount / withInput;
+            paid += (net ? x.netAmount : x.amount) / withInput;
           }
         }
-        if (com == null || !(com > 0) || !(queda < 1)) {
-          semPreco += grupo.length;
+        if (withInput == null || !(withInput > 0) || !(decline < 1)) {
+          withoutPrice += group.length;
           continue;
         }
-        sobreEx = pago / (1 - queda);
-        aproximados += grupo.length;
+        overEx = paid / (1 - decline);
+        approximated += group.length;
       }
-      fator *= 1 + sobreEx;
-      aplicados += grupo.length;
+      factor *= 1 + overEx;
+      applied += group.length;
     }
     return (
-      factor: fator,
-      applied: aplicados,
-      approximated: aproximados,
-      withoutPrice: semPreco,
+      factor: factor,
+      applied: applied,
+      approximated: approximated,
+      withoutPrice: withoutPrice,
     );
   }
 }
@@ -255,36 +255,36 @@ abstract final class TotalReturnIndex {
     bool net = true,
   }) {
     final n = dates.length < closes.length ? dates.length : closes.length;
-    final proventos = [...dividends]..sort((a, b) => a.exDate.compareTo(b.exDate));
-    final indice = List<double>.filled(n, 1.0);
-    var aplicados = 0;
-    var semPreco = 0;
+    final sortedDividends = [...dividends]..sort((a, b) => a.exDate.compareTo(b.exDate));
+    final index = List<double>.filled(n, 1.0);
+    var applied = 0;
+    var withoutPrice = 0;
     var k = 0;
-    DateTime dia(DateTime d) => DateTime.utc(d.year, d.month, d.day);
+    DateTime day(DateTime d) => DateTime.utc(d.year, d.month, d.day);
     // Proventos anteriores ao primeiro pregão não pertencem à série.
-    while (k < proventos.length &&
+    while (k < sortedDividends.length &&
         n > 0 &&
-        !proventos[k].exDate.isAfter(dia(dates[0]))) {
+        !sortedDividends[k].exDate.isAfter(day(dates[0]))) {
       k++;
     }
     for (var i = 1; i < n; i++) {
-      final hoje = dia(dates[i]);
-      var rendimento = 0.0;
-      while (k < proventos.length && !proventos[k].exDate.isAfter(hoje)) {
-        final p = proventos[k++];
-        final com = p.closeWithRights;
-        if (com == null || !(com > 0)) {
-          semPreco++;
+      final today = day(dates[i]);
+      var income = 0.0;
+      while (k < sortedDividends.length && !sortedDividends[k].exDate.isAfter(today)) {
+        final p = sortedDividends[k++];
+        final withInput = p.closeWithRights;
+        if (withInput == null || !(withInput > 0)) {
+          withoutPrice++;
           continue;
         }
-        rendimento += (net ? p.netAmount : p.amount) / com;
-        aplicados++;
+        income += (net ? p.netAmount : p.amount) / withInput;
+        applied++;
       }
-      final anterior = closes[i - 1];
-      final r = anterior > 0 ? closes[i] / anterior + rendimento : 1.0;
-      indice[i] = indice[i - 1] * r;
+      final previous = closes[i - 1];
+      final r = previous > 0 ? closes[i] / previous + income : 1.0;
+      index[i] = index[i - 1] * r;
     }
-    return (index: indice, applied: aplicados, withoutPrice: semPreco);
+    return (index: index, applied: applied, withoutPrice: withoutPrice);
   }
 }
 
@@ -294,14 +294,14 @@ abstract final class TotalReturnIndex {
 /// e o repositório que lê precisam concordar sobre o formato.
 abstract final class CashDividendsCodec {
   /// Versão do formato.
-  static const int versao = 1;
+  static const int version = 1;
 
-  static String _dia(DateTime d) =>
+  static String _day(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-'
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
 
-  static DateTime? _data(Object? v) {
+  static DateTime? _date(Object? v) {
     if (v is! String || v.length < 10) return null;
     final p = v.substring(0, 10).split('-');
     if (p.length != 3) return null;
@@ -311,20 +311,20 @@ abstract final class CashDividendsCodec {
   }
 
   /// O pacote inteiro, por emissor de quatro letras.
-  static Map<String, Object> encode(Map<String, List<CashDividend>> porEmissor,
-          {required DateTime geradoEm}) =>
+  static Map<String, Object> encode(Map<String, List<CashDividend>> byIssuer,
+          {required DateTime generatedAt}) =>
       {
-        'versao': versao,
-        'geradoEm': _dia(geradoEm),
+        'versao': version,
+        'geradoEm': _day(generatedAt),
         'emissores': {
-          for (final e in porEmissor.entries)
+          for (final e in byIssuer.entries)
             e.key: [
               for (final p in e.value)
                 {
                   'classe': p.shareClass,
                   'tipo': p.kind.key,
-                  'dataCom': _dia(p.lastDateWithRights),
-                  'dataEx': _dia(p.exDate),
+                  'dataCom': _day(p.lastDateWithRights),
+                  'dataEx': _day(p.exDate),
                   'valor': p.amount,
                   if (p.closeWithRights != null) 'precoComDireito': p.closeWithRights!,
                 },
@@ -333,53 +333,53 @@ abstract final class CashDividendsCodec {
       };
 
   /// Lê o pacote. Versão desconhecida devolve mapa vazio.
-  static Map<String, List<CashDividend>> decode(Map<String, dynamic> pacote) {
-    if (pacote['versao'] != versao) return const {};
-    final emissores = pacote['emissores'];
-    if (emissores is! Map<String, dynamic>) return const {};
+  static Map<String, List<CashDividend>> decode(Map<String, dynamic> package) {
+    if (package['versao'] != version) return const {};
+    final issuers = package['emissores'];
+    if (issuers is! Map<String, dynamic>) return const {};
     final out = <String, List<CashDividend>>{};
-    for (final e in emissores.entries) {
-      final lista = e.value;
-      if (lista is! List) continue;
-      final proventos = <CashDividend>[];
-      for (final x in lista) {
+    for (final e in issuers.entries) {
+      final list = e.value;
+      if (list is! List) continue;
+      final dividends = <CashDividend>[];
+      for (final x in list) {
         if (x is! Map<String, dynamic>) continue;
-        final classe = x['classe'];
-        final tipo = CashDividendKind.values
+        final shareClass = x['classe'];
+        final kind = CashDividendKind.values
             .where((k) => k.key == x['tipo'])
             .firstOrNull;
-        final com = _data(x['dataCom']);
-        final ex = _data(x['dataEx']);
-        final valor = (x['valor'] as num?)?.toDouble();
-        final preco = (x['precoComDireito'] as num?)?.toDouble();
-        if (classe is! String || tipo == null || com == null || ex == null) {
+        final withInput = _date(x['dataCom']);
+        final ex = _date(x['dataEx']);
+        final value = (x['valor'] as num?)?.toDouble();
+        final price = (x['precoComDireito'] as num?)?.toDouble();
+        if (shareClass is! String || kind == null || withInput == null || ex == null) {
           continue;
         }
-        if (valor == null || !(valor > 0)) continue;
-        proventos.add(CashDividend(
-          shareClass: classe,
-          kind: tipo,
-          lastDateWithRights: com,
+        if (value == null || !(value > 0)) continue;
+        dividends.add(CashDividend(
+          shareClass: shareClass,
+          kind: kind,
+          lastDateWithRights: withInput,
           exDate: ex,
-          amount: valor,
-          closeWithRights: preco != null && preco > 0 ? preco : null,
+          amount: value,
+          closeWithRights: price != null && price > 0 ? price : null,
         ));
       }
-      proventos.sort((a, b) => a.exDate.compareTo(b.exDate));
-      out[e.key] = List.unmodifiable(proventos);
+      dividends.sort((a, b) => a.exDate.compareTo(b.exDate));
+      out[e.key] = List.unmodifiable(dividends);
     }
     return out;
   }
 
-  /// Os proventos da classe de [ticker], dentro de [porEmissor].
+  /// Os proventos da classe de [ticker], dentro de [byIssuer].
   static List<CashDividend> forTicker(
-      Map<String, List<CashDividend>> porEmissor, String ticker) {
+      Map<String, List<CashDividend>> byIssuer, String ticker) {
     if (ticker.length < 5) return const [];
-    final classe = B3CashDividends.shareClassOf(ticker);
-    if (classe == null) return const [];
+    final shareClass = B3CashDividends.shareClassOf(ticker);
+    if (shareClass == null) return const [];
     return [
-      for (final p in porEmissor[ticker.substring(0, 4)] ?? const <CashDividend>[])
-        if (p.shareClass == classe) p,
+      for (final p in byIssuer[ticker.substring(0, 4)] ?? const <CashDividend>[])
+        if (p.shareClass == shareClass) p,
     ];
   }
 }

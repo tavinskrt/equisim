@@ -19,28 +19,28 @@ import 'package:equisim_core/equisim_core.dart';
 /// a defasagem. A ressalva só diz de quando ela é.
 class MarketPremiumRepository {
   /// Lê o conteúdo do pacote.
-  final Future<String> Function() carregarPacote;
+  final Future<String> Function() loadPackage;
 
   /// Data de referência, para medir a defasagem do pacote.
-  final DateTime Function() hoje;
+  final DateTime Function() today;
 
   /// Declara o repositório.
   MarketPremiumRepository({
-    required this.carregarPacote,
-    DateTime Function()? hoje,
-  }) : hoje = hoje ?? DateTime.now;
+    required this.loadPackage,
+    DateTime Function()? today,
+  }) : today = today ?? DateTime.now;
 
   /// Defasagem a partir da qual a ressalva aparece, em dias.
   ///
   /// **Seis meses**: o pacote ganha um trimestre a cada três meses, e com dois
   /// trimestres sem regravação a média já deixou de ser a da série publicada.
-  static const int diasSemRessalva = 183;
+  static const int daysWithoutCaveat = 183;
 
-  Future<ImpliedPremiumPackage?>? _pacote;
+  Future<ImpliedPremiumPackage?>? _package;
 
-  Future<ImpliedPremiumPackage?> _ler() async {
+  Future<ImpliedPremiumPackage?> _read() async {
     try {
-      final json = jsonDecode(await carregarPacote());
+      final json = jsonDecode(await loadPackage());
       return json is Map<String, dynamic>
           ? ImpliedPremiumCodec.decode(json)
           : null;
@@ -52,37 +52,37 @@ class MarketPremiumRepository {
   /// O prêmio, de onde ele veio e a ressalva, quando há o que ressalvar.
   Future<({double premium, MarketPremiumSource source, String? note})>
       reading() async {
-    const semPacote = (
+    const noPackage = (
       premium: CapmInputs.defaultMarketPremium,
       source: MarketPremiumSource.parameterized,
       note: 'A série do prêmio implícito não veio no pacote do build: o '
           'prêmio de mercado é o parametrizado de 5,5%, e não a média de dez '
           'anos do prêmio implícito no preço da bolsa (decisão 142).',
     );
-    final p = await (_pacote ??= _ler());
-    if (p == null) return semPacote;
+    final p = await (_package ??= _read());
+    if (p == null) return noPackage;
     // **Dia civil, e não instante**, pelo mesmo motivo do prior do beta: no
     // salto do horário de verão `difference().inDays` erra um dia, e a data do
     // pacote é um dia em UTC.
-    final agora = hoje();
-    final dia = DateTime.utc(agora.year, agora.month, agora.day);
+    final now = today();
+    final day = DateTime.utc(now.year, now.month, now.day);
     // A média é a da data do pacote. Calculada até hoje, com o pacote
     // defasado, a janela perderia os trimestres antigos sem ganhar os novos.
-    final media = p.normalizedAt(dia.isBefore(p.geradoEm) ? dia : p.geradoEm);
-    if (media == null) return semPacote;
-    final dias = dia.difference(p.geradoEm).inDays;
-    if (dias > diasSemRessalva) {
+    final mean = p.normalizedAt(day.isBefore(p.generatedAt) ? day : p.generatedAt);
+    if (mean == null) return noPackage;
+    final days = day.difference(p.generatedAt).inDays;
+    if (days > daysWithoutCaveat) {
       return (
-        premium: media,
+        premium: mean,
         source: MarketPremiumSource.impliedNormalized,
         note: 'O prêmio de mercado é a média de dez anos do prêmio implícito '
-            'medida em ${p.geradoEm.toIso8601String().substring(0, 10)}, mais '
-            'de $diasSemRessalva dias atrás: os trimestres seguintes ainda não '
+            'medida em ${p.generatedAt.toIso8601String().substring(0, 10)}, mais '
+            'de $daysWithoutCaveat dias atrás: os trimestres seguintes ainda não '
             'entraram nela.',
       );
     }
     return (
-      premium: media,
+      premium: mean,
       source: MarketPremiumSource.impliedNormalized,
       note: null,
     );

@@ -36,105 +36,105 @@ import 'package:equisim_core/equisim_core.dart';
 import 'validation/congelado.dart';
 import 'validation/regression.dart';
 
-const _saida = 'docs/validacao/selic_focus.json';
+const _output = 'docs/validacao/selic_focus.json';
 
 /// As variantes, na ordem em que são impressas; a primeira é a referência.
-const _variantes = ['curva', 'orientador', 'trajetoria', 'passado'];
+const _variants = ['curva', 'orientador', 'trajetoria', 'passado'];
 
 /// As expectativas anuais da Selic (fim de ano, em fração) na última data do
-/// Focus até [ate].
-Future<({String data, Map<int, double> porAno})> _focus(DateTime ate) async {
-  final dia = ate.toIso8601String().substring(0, 10);
+/// Focus até [until].
+Future<({String date, Map<int, double> byYear})> _focus(DateTime until) async {
+  final day = until.toIso8601String().substring(0, 10);
   final url = Uri.parse(
       'https://olinda.bcb.gov.br/olinda/servico/Expectativas/versao/v1/odata/'
       'ExpectativasMercadoAnuais?\$top=20'
       "&\$filter=Indicador%20eq%20'Selic'%20and%20baseCalculo%20eq%200"
-      "%20and%20Data%20le%20'$dia'"
+      "%20and%20Data%20le%20'$day'"
       '&\$orderby=Data%20desc&\$format=json'
       '&\$select=Data,DataReferencia,Mediana');
-  final cliente = HttpClient()..connectionTimeout = const Duration(seconds: 30);
+  final client = HttpClient()..connectionTimeout = const Duration(seconds: 30);
   try {
-    final req = await cliente.getUrl(url);
-    final resp = await req.close();
-    if (resp.statusCode != 200) {
-      throw HttpException('Focus respondeu ${resp.statusCode}', uri: url);
+    final req = await client.getUrl(url);
+    final response = await req.close();
+    if (response.statusCode != 200) {
+      throw HttpException('Focus respondeu ${response.statusCode}', uri: url);
     }
-    final corpo = await resp.transform(utf8.decoder).join();
-    final linhas = ((jsonDecode(corpo) as Map)['value'] as List)
+    final body = await response.transform(utf8.decoder).join();
+    final rows = ((jsonDecode(body) as Map)['value'] as List)
         .cast<Map<String, dynamic>>();
-    if (linhas.isEmpty) throw StateError('Focus sem expectativa até $dia');
-    final data = linhas.first['Data'] as String;
+    if (rows.isEmpty) throw StateError('Focus sem expectativa até $day');
+    final date = rows.first['Data'] as String;
     return (
-      data: data,
-      porAno: {
-        for (final l in linhas)
-          if (l['Data'] == data)
+      date: date,
+      byYear: {
+        for (final l in rows)
+          if (l['Data'] == date)
             int.parse(l['DataReferencia'] as String):
                 (l['Mediana'] as num).toDouble() / 100,
       },
     );
   } finally {
-    cliente.close();
+    client.close();
   }
 }
 
 /// A curva de uma trajetória de taxas anuais: vértices à vista nos anos
 /// inteiros, compostos dos forwards; depois do último, a curva segue no último
 /// forward, que é a extrapolação da `YieldCurve`.
-YieldCurve curvaDosForwards(DateTime ref, List<double> forwards) {
-  var fator = 1.0;
+YieldCurve forwardsCurve(DateTime ref, List<double> forwards) {
+  var factor = 1.0;
   final vertices = <CurveVertex>[];
   for (var k = 1; k <= forwards.length; k++) {
-    fator *= 1 + forwards[k - 1];
-    vertices.add(CurveVertex(k.toDouble(), math.pow(fator, 1 / k) - 1.0));
+    factor *= 1 + forwards[k - 1];
+    vertices.add(CurveVertex(k.toDouble(), math.pow(factor, 1 / k) - 1.0));
   }
   return YieldCurve.of(ref, vertices)!;
 }
 
-/// A Selic média esperada em cada um dos [n] anos seguintes a [hoje].
+/// A Selic média esperada em cada um dos [n] anos seguintes a [today].
 ///
-/// A trajetória liga, por segmentos de reta, a taxa corrente em [hoje] à
+/// A trajetória liga, por segmentos de reta, a taxa corrente em [today] à
 /// expectativa de cada fim de ano, e segue plana na última. A taxa do ano é a
 /// média composta da trajetória nele — `exp(média de ln(1 + S))` —, que é o que
 /// o CDI acumularia.
-List<double> forwardsDoFocus(
-    DateTime hoje, double corrente, Map<int, double> porAno, int n) {
+List<double> focusForwards(
+    DateTime today, double current, Map<int, double> byYear, int n) {
   // Em UTC: diferença entre datas locais perde um dia na troca de horário.
-  final hojeUtc = DateTime.utc(hoje.year, hoje.month, hoje.day);
-  double anos(DateTime d) =>
-      DateTime.utc(d.year, d.month, d.day).difference(hojeUtc).inDays / 365.25;
-  final pontos = <(double, double)>[
-    (0.0, corrente),
-    for (final a in porAno.keys.toList()..sort())
-      if (anos(DateTime(a, 12, 31)) > 0) (anos(DateTime(a, 12, 31)), porAno[a]!),
+  final todayUtc = DateTime.utc(today.year, today.month, today.day);
+  double years(DateTime d) =>
+      DateTime.utc(d.year, d.month, d.day).difference(todayUtc).inDays / 365.25;
+  final points = <(double, double)>[
+    (0.0, current),
+    for (final a in byYear.keys.toList()..sort())
+      if (years(DateTime(a, 12, 31)) > 0) (years(DateTime(a, 12, 31)), byYear[a]!),
   ];
-  double taxa(double t) {
-    if (t >= pontos.last.$1) return pontos.last.$2;
-    for (var i = 1; i < pontos.length; i++) {
-      if (t <= pontos[i].$1) {
-        final (t0, s0) = pontos[i - 1];
-        final (t1, s1) = pontos[i];
+  double rate(double t) {
+    if (t >= points.last.$1) return points.last.$2;
+    for (var i = 1; i < points.length; i++) {
+      if (t <= points[i].$1) {
+        final (t0, s0) = points[i - 1];
+        final (t1, s1) = points[i];
         return s0 + (s1 - s0) * (t - t0) / (t1 - t0);
       }
     }
-    return pontos.last.$2;
+    return points.last.$2;
   }
 
-  const passos = 360;
+  const stepCount = 360;
   return [
     for (var k = 1; k <= n; k++)
       () {
-        var soma = 0.0;
-        for (var j = 0; j < passos; j++) {
-          soma += math.log(1 + taxa(k - 1 + (j + 0.5) / passos));
+        var sum = 0.0;
+        for (var j = 0; j < stepCount; j++) {
+          sum += math.log(1 + rate(k - 1 + (j + 0.5) / stepCount));
         }
-        return math.exp(soma / passos) - 1;
+        return math.exp(sum / stepCount) - 1;
       }(),
   ];
 }
 
 /// A mediana, ou `null` para lista vazia — `NaN` derrubaria o JSON.
-double? _mediana(List<double> v) {
+double? _median(List<double> v) {
   if (v.isEmpty) return null;
   final o = [...v]..sort();
   final m = o.length ~/ 2;
@@ -146,87 +146,87 @@ String _pct(double? v) => v == null || !v.isFinite
     : '${(v * 100).toStringAsFixed(2).padLeft(6)}%';
 
 Future<void> main(List<String> args) async {
-  final c = await Congelado.montar();
-  final ({String data, Map<int, double> porAno}) focus;
+  final c = await Frozen.build();
+  final ({String date, Map<int, double> byYear}) focus;
   try {
-    focus = await _focus(hojeCongelado);
+    focus = await _focus(frozenToday);
   } on Object catch (e) {
     stderr.writeln('sem o Focus do Banco Central: $e');
     exitCode = 2;
     return;
   }
-  final anosFocus = focus.porAno.keys.toList()..sort();
-  final expectativas = [for (final a in anosFocus) focus.porAno[a]!];
+  final focusYears = focus.byYear.keys.toList()..sort();
+  final expectations = [for (final a in focusYears) focus.byYear[a]!];
   // `_focus` recusa resposta sem expectativa: a lista não é vazia.
-  final medianaFocus = _mediana(expectativas)!;
-  final corrente = c.anchors.currentRiskFreeRate;
-  final forwards = forwardsDoFocus(hojeCongelado, corrente, focus.porAno, 10);
-  final trajetoria = curvaDosForwards(hojeCongelado, forwards);
+  final focusMedian = _median(expectations)!;
+  final current = c.anchors.currentRiskFreeRate;
+  final forwards = focusForwards(frozenToday, current, focus.byYear, 10);
+  final trajectory = forwardsCurve(frozenToday, forwards);
 
-  final taxas = <String, ({YieldCurve? curva, double? estrutural})?>{
+  final rates = <String, ({YieldCurve? curve, double? structural})?>{
     'curva': null,
-    'orientador': (curva: null, estrutural: medianaFocus),
+    'orientador': (curve: null, structural: focusMedian),
     // Com curva, a perpetuidade é o forward terminal dela (a última
     // expectativa); a estrutural só vale sem curva, e é dita aqui por clareza.
-    'trajetoria': (curva: trajetoria, estrutural: forwards.last),
-    'passado': (curva: null, estrutural: c.anchors.riskFreeCagr),
+    'trajetoria': (curve: trajectory, structural: forwards.last),
+    'passado': (curve: null, structural: c.anchors.riskFreeCagr),
   };
 
-  stdout.writeln('-- as taxas, em ${hojeCongelado.toIso8601String().substring(0, 10)} --');
-  stdout.writeln('  Focus de ${focus.data}: '
-      '${[for (final a in anosFocus) '$a ${_pct(focus.porAno[a]!)}'].join('  ')}');
-  stdout.writeln('  mediana das expectativas anuais   ${_pct(medianaFocus)}');
-  stdout.writeln('  CDI corrente                      ${_pct(corrente)}');
+  stdout.writeln('-- as taxas, em ${frozenToday.toIso8601String().substring(0, 10)} --');
+  stdout.writeln('  Focus de ${focus.date}: '
+      '${[for (final a in focusYears) '$a ${_pct(focus.byYear[a]!)}'].join('  ')}');
+  stdout.writeln('  mediana das expectativas anuais   ${_pct(focusMedian)}');
+  stdout.writeln('  CDI corrente                      ${_pct(current)}');
   stdout.writeln('  média decenal do CDI              ${_pct(c.anchors.riskFreeCagr)}');
 
-  final caminhos = <String, Map<String, dynamic>>{};
-  final justos = <String, Map<String, int>>{};
-  final potenciais = <String, Map<String, double>>{};
-  for (final v in _variantes) {
-    justos[v] = {};
-    potenciais[v] = {};
-    final referencia = <Ticker, ValuationResult?>{};
+  final paths = <String, Map<String, dynamic>>{};
+  final fairValues = <String, Map<String, int>>{};
+  final upsideByTicker = <String, Map<String, double>>{};
+  for (final v in _variants) {
+    fairValues[v] = {};
+    upsideByTicker[v] = {};
+    final reference = <Ticker, ValuationResult?>{};
     var i = 0;
-    for (final t in c.universo) {
+    for (final t in c.universe) {
       i++;
-      if (i % 50 == 0) stderr.write('  $v: $i/${c.universo.length}   \r');
-      final prep = await c.preparar(t, taxa: taxas[v]);
+      if (i % 50 == 0) stderr.write('  $v: $i/${c.universe.length}   \r');
+      final prep = await c.prepare(t, rate: rates[v]);
       if (prep.isErr) continue;
-      final insumos = prep.unwrap();
-      if (!caminhos.containsKey(v)) {
-        final curva = insumos.riskFreeCurve;
-        final n = insumos.projectionYears;
-        final fw = curva != null
-            ? curva.annualForwards(n)
+      final inputs = prep.unwrap();
+      if (!paths.containsKey(v)) {
+        final curve = inputs.riskFreeCurve;
+        final n = inputs.projectionYears;
+        final fw = curve != null
+            ? curve.annualForwards(n)
             : [
                 for (var k = 1; k <= n; k++)
                   n <= 1
-                      ? insumos.capm.riskFreeRate
-                      : insumos.capm.riskFreeRate +
-                          (insumos.terminalRiskFreeRate -
-                                  insumos.capm.riskFreeRate) *
+                      ? inputs.capm.riskFreeRate
+                      : inputs.capm.riskFreeRate +
+                          (inputs.terminalRiskFreeRate -
+                                  inputs.capm.riskFreeRate) *
                               (k - 1) /
                               (n - 1),
               ];
-        caminhos[v] = {
+        paths[v] = {
           'ano1': fw.first,
           'ano5': fw.length >= 5 ? fw[4] : null,
           'ano10': fw.last,
-          'perpetuidade': insumos.terminalRiskFreeRate,
+          'perpetuidade': inputs.terminalRiskFreeRate,
           // Média composta, e não aritmética: taxa se compõe (regra R3).
           'mediaDosDezAnos': math.pow(
                   fw.map((r) => 1 + r).reduce((a, b) => a * b), 1 / fw.length) -
               1.0,
         };
       }
-      final r = ValuationCascade.evaluate(insumos);
-      if (v == 'curva') referencia[t] = r.valueOrNull;
+      final r = ValuationCascade.evaluate(inputs);
+      if (v == 'curva') reference[t] = r.valueOrNull;
       if (r.isErr) continue;
-      justos[v]![t.value] = r.unwrap().fairValue.cents;
-      potenciais[v]![t.value] = r.unwrap().upside;
+      fairValues[v]![t.value] = r.unwrap().fairValue.cents;
+      upsideByTicker[v]![t.value] = r.unwrap().upside;
     }
     if (v == 'curva') {
-      final div = await c.conferirContraGabarito(referencia);
+      final div = await c.checkAgainstAnswerKey(reference);
       if (div == null) {
         stderr.writeln('AVISO: gabarito ausente; montagem não conferida.');
       } else if (div.isNotEmpty) {
@@ -242,78 +242,78 @@ Future<void> main(List<String> args) async {
   }
   stderr.write('                                        \r');
 
-  final base = potenciais['curva']!;
-  final baseJusto = justos['curva']!;
-  final linhas = <Map<String, dynamic>>[];
+  final base = upsideByTicker['curva']!;
+  final baseFairValue = fairValues['curva']!;
+  final rows = <Map<String, dynamic>>[];
   stdout.writeln('');
   stdout.writeln('-- o que cada fonte de taxa faz, sobre a entrada congelada --');
   stdout.writeln('  fonte        ano 1   ano 10  perpet.  avaliados  potencial '
       'mediano  acima de zero  justo vs curva  postos');
-  for (final v in _variantes) {
-    final pots = potenciais[v]!.values.toList();
-    final comuns = justos[v]!.keys.where(baseJusto.containsKey).toList()..sort();
-    final variacao = [
-      for (final k in comuns)
-        if (baseJusto[k]! != 0) justos[v]![k]! / baseJusto[k]! - 1,
+  for (final v in _variants) {
+    final upsideValues = upsideByTicker[v]!.values.toList();
+    final common = fairValues[v]!.keys.where(baseFairValue.containsKey).toList()..sort();
+    final changeList = [
+      for (final k in common)
+        if (baseFairValue[k]! != 0) fairValues[v]![k]! / baseFairValue[k]! - 1,
     ];
-    final rho = comuns.length < 3
+    final rho = common.length < 3
         ? null
-        : Regression.spearman([for (final k in comuns) base[k]!],
-            [for (final k in comuns) potenciais[v]![k]!]);
-    final ganhos = justos[v]!.keys.where((k) => !baseJusto.containsKey(k)).toList()
+        : Regression.spearman([for (final k in common) base[k]!],
+            [for (final k in common) upsideByTicker[v]![k]!]);
+    final gains = fairValues[v]!.keys.where((k) => !baseFairValue.containsKey(k)).toList()
       ..sort();
-    final perdidos =
-        baseJusto.keys.where((k) => !justos[v]!.containsKey(k)).toList()..sort();
-    final cam = caminhos[v]!;
-    final acima = pots.where((p) => p > 0).length;
-    stdout.writeln('  ${v.padRight(11)} ${_pct(cam['ano1'] as double)} '
-        '${_pct(cam['ano10'] as double)} ${_pct(cam['perpetuidade'] as double)}  '
-        '${pots.length.toString().padLeft(9)}   ${_pct(_mediana(pots)).padLeft(14)}  '
-        '${acima.toString().padLeft(6)} de ${pots.length}   '
-        '${_pct(_mediana(variacao)).padLeft(13)}   '
+    final lost =
+        baseFairValue.keys.where((k) => !fairValues[v]!.containsKey(k)).toList()..sort();
+    final selectedPath = paths[v]!;
+    final above = upsideValues.where((p) => p > 0).length;
+    stdout.writeln('  ${v.padRight(11)} ${_pct(selectedPath['ano1'] as double)} '
+        '${_pct(selectedPath['ano10'] as double)} ${_pct(selectedPath['perpetuidade'] as double)}  '
+        '${upsideValues.length.toString().padLeft(9)}   ${_pct(_median(upsideValues)).padLeft(14)}  '
+        '${above.toString().padLeft(6)} de ${upsideValues.length}   '
+        '${_pct(_median(changeList)).padLeft(13)}   '
         '${rho == null ? '  —  ' : rho.toStringAsFixed(4)}');
-    if (ganhos.isNotEmpty || perdidos.isNotEmpty) {
-      stdout.writeln('               ganha ${ganhos.join(', ')}; perde ${perdidos.join(', ')}');
+    if (gains.isNotEmpty || lost.isNotEmpty) {
+      stdout.writeln('               ganha ${gains.join(', ')}; perde ${lost.join(', ')}');
     }
-    linhas.add({
+    rows.add({
       'fonte': v,
-      'taxas': cam,
-      'avaliados': pots.length,
-      'potencialMediano': _mediana(pots),
-      'acimaDeZero': acima,
-      'justoMedianoContraCurva': _mediana(variacao),
+      'taxas': selectedPath,
+      'avaliados': upsideValues.length,
+      'potencialMediano': _median(upsideValues),
+      'acimaDeZero': above,
+      'justoMedianoContraCurva': _median(changeList),
       'spearmanContraCurva': rho,
-      'ganha': ganhos,
-      'perde': perdidos,
+      'ganha': gains,
+      'perde': lost,
     });
   }
 
-  File(_saida).writeAsStringSync('${const JsonEncoder.withIndent(' ').convert({
-        'dataDaEntrada': hojeCongelado.toIso8601String().substring(0, 10),
+  File(_output).writeAsStringSync('${const JsonEncoder.withIndent(' ').convert({
+        'dataDaEntrada': frozenToday.toIso8601String().substring(0, 10),
         'focus': {
-          'data': focus.data,
+          'data': focus.date,
           'expectativas': {
-            for (final a in anosFocus) '$a': focus.porAno[a],
+            for (final a in focusYears) '$a': focus.byYear[a],
           },
-          'mediana': medianaFocus,
+          'mediana': focusMedian,
           'forwardsDaTrajetoria': forwards,
         },
-        'cdiCorrente': corrente,
+        'cdiCorrente': current,
         'mediaDecenalDoCdi': c.anchors.riskFreeCagr,
-        'fontes': linhas,
+        'fontes': rows,
         'porAtivo': {
-          for (final k in (baseJusto.keys.toSet()
-                ..addAll(justos['orientador']!.keys)
-                ..addAll(justos['trajetoria']!.keys))
+          for (final k in (baseFairValue.keys.toSet()
+                ..addAll(fairValues['orientador']!.keys)
+                ..addAll(fairValues['trajetoria']!.keys))
               .toList()
             ..sort())
             k: {
-              for (final v in _variantes)
-                if (justos[v]!.containsKey(k))
-                  v: {'justoCentavos': justos[v]![k], 'potencial': potenciais[v]![k]},
+              for (final v in _variants)
+                if (fairValues[v]!.containsKey(k))
+                  v: {'justoCentavos': fairValues[v]![k], 'potencial': upsideByTicker[v]![k]},
             },
         },
       })}\n');
   stdout.writeln('');
-  stdout.writeln('escrito $_saida');
+  stdout.writeln('escrito $_output');
 }

@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// caber nas larguras suportadas.
 Future<Widget> _host({
   required bool isLight,
-  double escala = 1.0,
+  double scale = 1.0,
 }) async {
   SharedPreferences.setMockInitialValues({ThemeController.prefsKey: isLight});
   final theme = await ThemeController.load();
@@ -28,7 +28,7 @@ Future<Widget> _host({
         builder: (context) => MediaQuery(
           data: MediaQuery.of(
             context,
-          ).copyWith(textScaler: TextScaler.linear(escala)),
+          ).copyWith(textScaler: TextScaler.linear(scale)),
           child: const ProfilePage(),
         ),
       ),
@@ -69,26 +69,26 @@ void main() {
   });
 
   group('ProfilePage — layout', () {
-    for (final largura in <double>[320, 390, 1024]) {
-      for (final escala in <double>[1.0, 1.3, 2.0]) {
-        testWidgets('cabe em ${largura.toInt()} dp sob ${escala}x', (
+    for (final width in <double>[320, 390, 1024]) {
+      for (final scale in <double>[1.0, 1.3, 2.0]) {
+        testWidgets('cabe em ${width.toInt()} dp sob ${scale}x', (
           tester,
         ) async {
           tester.view.devicePixelRatio = 1.0;
           // Altura generosa: a tela é longa e rolável, e o alvo aqui é a
           // LARGURA. Sem isso o teste mediria o corte vertical do viewport,
           // que não é defeito.
-          tester.view.physicalSize = Size(largura, 4000);
+          tester.view.physicalSize = Size(width, 4000);
           addTearDown(tester.view.reset);
 
-          await tester.pumpWidget(await _host(isLight: true, escala: escala));
+          await tester.pumpWidget(await _host(isLight: true, scale: scale));
           await tester.pumpAndSettle();
 
           expect(
             tester.takeException(),
             isNull,
-            reason: 'ProfilePage estourou em ${largura.toInt()} dp sob '
-                'escala ${escala}x.',
+            reason: 'ProfilePage estourou em ${width.toInt()} dp sob '
+                'escala ${scale}x.',
           );
         });
       }

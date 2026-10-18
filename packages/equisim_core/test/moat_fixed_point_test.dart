@@ -9,16 +9,16 @@ import 'package:test/test.dart';
 /// solucionador.
 void main() {
   // A "taxa" que cada retorno terminal produz: alta com moat, baixa sem.
-  double taxaDe(double? moat) => moat == null ? 0.10 : 0.12;
+  double rateOf(double? moat) => moat == null ? 0.10 : 0.12;
 
   test('estabiliza quando o veredito refeito repete o anterior', () {
     final r = MoatFixedPoint.iterate<double?, double>(
       verdict: 0.15,
       moat: 0.15,
-      rates: taxaDe(0.15),
+      rates: rateOf(0.15),
       reassess: (_) => 0.15,
       moatOf: (v) => v,
-      solve: taxaDe,
+      solve: rateOf,
     );
     expect(r.stable, isTrue);
     expect(r.passes, 1);
@@ -29,17 +29,17 @@ void main() {
     // O veredito sobe até 0,15 e para: 0,12 → 0,14 → 0,15 → 0,15. A escada
     // é indexada pelo passe, e não pelo valor: `double` não serve de chave
     // (regra R6).
-    const escada = [0.14, 0.15, 0.15];
-    var passe = 0;
+    const ladder = [0.14, 0.15, 0.15];
+    var pass = 0;
     final r = MoatFixedPoint.iterate<double?, double>(
       verdict: 0.12,
       moat: 0.12,
-      rates: taxaDe(0.12),
-      reassess: (_) => escada[passe],
+      rates: rateOf(0.12),
+      reassess: (_) => ladder[pass],
       moatOf: (v) => v,
       solve: (m) {
-        passe++;
-        return taxaDe(m);
+        pass++;
+        return rateOf(m);
       },
     );
     expect(r.stable, isTrue);
@@ -55,10 +55,10 @@ void main() {
     final r = MoatFixedPoint.iterate<double?, double>(
       verdict: 0.15,
       moat: 0.15,
-      rates: taxaDe(0.15),
-      reassess: (taxa) => taxa > 0.11 ? null : 0.15,
+      rates: rateOf(0.15),
+      reassess: (rate) => rate > 0.11 ? null : 0.15,
       moatOf: (v) => v,
-      solve: taxaDe,
+      solve: rateOf,
       maxPasses: 5,
     );
     expect(r.stable, isFalse);
@@ -66,32 +66,32 @@ void main() {
     expect(r.passes, 5);
     // Consistência: a taxa devolvida é a do moat devolvido, e não a do passe
     // seguinte — que nunca foi adotado.
-    expect(r.rates, taxaDe(r.moat));
+    expect(r.rates, rateOf(r.moat));
     expect(r.verdict, r.moat);
   });
 
   test('o teto padrão é o da cascata', () {
-    var chamadas = 0;
+    var calls = 0;
     final r = MoatFixedPoint.iterate<double?, double>(
       verdict: 0.15,
       moat: 0.15,
-      rates: taxaDe(0.15),
-      reassess: (taxa) {
-        chamadas++;
-        return taxa > 0.11 ? null : 0.15;
+      rates: rateOf(0.15),
+      reassess: (rate) {
+        calls++;
+        return rate > 0.11 ? null : 0.15;
       },
       moatOf: (v) => v,
-      solve: taxaDe,
+      solve: rateOf,
     );
     expect(r.passes, ValuationParameters.moatMaxPasses);
-    expect(chamadas, ValuationParameters.moatMaxPasses - 1);
+    expect(calls, ValuationParameters.moatMaxPasses - 1);
   });
 
   test('o solucionador que não fecha para a volta no último par válido', () {
     final r = MoatFixedPoint.iterate<double?, double>(
       verdict: 0.15,
       moat: 0.15,
-      rates: taxaDe(0.15),
+      rates: rateOf(0.15),
       reassess: (_) => null,
       moatOf: (v) => v,
       solve: (_) => null,
@@ -102,7 +102,7 @@ void main() {
     // O veredito que pedia a taxa inexistente não foi adotado.
     expect(r.moat, 0.15);
     expect(r.verdict, 0.15);
-    expect(r.rates, taxaDe(0.15));
+    expect(r.rates, rateOf(0.15));
   });
 
   test('a imposição externa vale sobre o veredito refeito', () {
@@ -111,10 +111,10 @@ void main() {
     final r = MoatFixedPoint.iterate<double?, double>(
       verdict: 0.15,
       moat: 0.20,
-      rates: taxaDe(0.20),
-      reassess: (taxa) => taxa > 0.11 ? null : 0.15,
+      rates: rateOf(0.20),
+      reassess: (rate) => rate > 0.11 ? null : 0.15,
       moatOf: (_) => 0.20,
-      solve: taxaDe,
+      solve: rateOf,
     );
     expect(r.stable, isTrue);
     expect(r.moat, 0.20);

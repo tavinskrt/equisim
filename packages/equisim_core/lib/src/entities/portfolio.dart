@@ -11,7 +11,7 @@ enum PortfolioKind implements WireKeyed {
   principal('principal'),
 
   /// Candidatos a substituição.
-  reserva('reserva');
+  reserve('reserva');
 
   const PortfolioKind(this.key);
 

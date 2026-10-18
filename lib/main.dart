@@ -90,7 +90,7 @@ Future<void> main() async {
         // conhecido. Sem isto, elas montariam no padrão do provider (escuro) e
         // só acertariam no quadro seguinte — o mesmo flash, um nível abaixo.
         isLightModeProvider.overrideWith(
-          () => IsLightMode(inicial: themeController.isLightMode),
+          () => IsLightMode(initial: themeController.isLightMode),
         ),
       ],
       child: _ThemeSync(
@@ -134,7 +134,7 @@ class _ThemeSyncState extends ConsumerState<_ThemeSync> {
     if (!mounted) return;
     final isLight = widget.controller.isLightMode;
     if (ref.read(isLightModeProvider) != isLight) {
-      ref.read(isLightModeProvider.notifier).definir(isLight);
+      ref.read(isLightModeProvider.notifier).setValue(isLight);
     }
   }
 

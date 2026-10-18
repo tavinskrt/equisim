@@ -39,7 +39,7 @@
 // e aí não aparece. E **não distingue bonificação**, que também aumenta o
 // capital, por capitalização de reserva: quem a separa é o preço, e por isso
 // quem usa esta fonte descarta a variação que um evento de ações explica
-// ([pelaVariacaoDoCapital]).
+// ([byCapitalChange]).
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -47,138 +47,138 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'csv.dart';
 
-class _Registro {
-  _Registro({
-    required this.documento,
-    required this.data,
-    required this.valor,
-    required this.acoes,
+class _Record {
+  _Record({
+    required this.document,
+    required this.date,
+    required this.value,
+    required this.shares,
   });
-  final String documento;
-  final DateTime data;
-  final double valor;
-  final double acoes;
+  final String document;
+  final DateTime date;
+  final double value;
+  final double shares;
 }
 
 /// Uma versão do quadro de capital social: o capital integralizado e a
 /// contagem, com a aprovação que a produziu.
 class _Capital {
-  _Capital(this.recebido, this.aprovacao, this.valor, this.acoes, this.documento);
-  final DateTime recebido;
-  final DateTime aprovacao;
-  final double valor;
-  final double acoes;
-  final String documento;
+  _Capital(this.received, this.approval, this.value, this.shares, this.document);
+  final DateTime received;
+  final DateTime approval;
+  final double value;
+  final double shares;
+  final String document;
 }
 
 /// As emissões por valor do FRE, por CNPJ.
-class EmissoesFre {
-  EmissoesFre._(this._porCnpj, this._documentos, this._capital);
+class FreIssuances {
+  FreIssuances._(this._byCnpj, this._documents, this._capital);
 
   /// Desde quando vale a variação do capital: o quadro de aumentos cobre até
   /// aqui, e somar as duas fontes antes disso contaria a emissão duas vezes.
-  static final DateTime inicioDoCapital = DateTime.utc(2023, 7, 1);
+  static final DateTime capitalStart = DateTime.utc(2023, 7, 1);
 
   /// Versões do quadro de capital integralizado, por CNPJ.
   final Map<String, List<_Capital>> _capital;
 
   /// Emissões com valor, por CNPJ, de todas as versões.
-  final Map<String, List<_Registro>> _porCnpj;
+  final Map<String, List<_Record>> _byCnpj;
 
   /// Toda versão com o quadro preenchido — inclusive só com capitalização sem
   /// ação nova —, por CNPJ, com o recebimento.
-  final Map<String, Map<String, DateTime>> _documentos;
+  final Map<String, Map<String, DateTime>> _documents;
 
   /// Forma de integralização que é bonificação ou capitalização de reserva.
-  static final RegExp _semValor = RegExp(
+  static final RegExp _noValue = RegExp(
       r'bonific|reserva|lucros? acumulad|lucros? retid',
       caseSensitive: false);
 
-  /// Lê os formulários de [pasta], ou devolve `null` sem eles.
-  static EmissoesFre? ler({String pasta = 'data/cvm/fre'}) {
-    final dir = Directory(pasta);
+  /// Lê os formulários de [folder], ou devolve `null` sem eles.
+  static FreIssuances? read({String folder = 'data/cvm/fre'}) {
+    final dir = Directory(folder);
     if (!dir.existsSync()) return null;
-    final arquivos = dir.listSync().whereType<File>().toList()
+    final files = dir.listSync().whereType<File>().toList()
       ..sort((a, b) => a.path.compareTo(b.path));
-    final recebidos = <String, DateTime>{};
-    for (final f in arquivos) {
+    final receivedInputs = <String, DateTime>{};
+    for (final f in files) {
       if (!RegExp(r'^fre_cia_aberta_\d{4}\.csv$')
           .hasMatch(f.uri.pathSegments.last)) {
         continue;
       }
-      for (final r in lerCsvCvm(f)) {
+      for (final r in readCvmCsv(f)) {
         final id = r['ID_DOC'];
-        final dia = DateTime.tryParse('${r['DT_RECEB']}T00:00:00Z');
-        if (id != null && dia != null) recebidos[id] = dia;
+        final day = DateTime.tryParse('${r['DT_RECEB']}T00:00:00Z');
+        if (id != null && day != null) receivedInputs[id] = day;
       }
     }
     final capital = <String, List<_Capital>>{};
-    for (final f in arquivos) {
+    for (final f in files) {
       if (!RegExp(r'^fre_cia_aberta_capital_social_\d{4}\.csv$')
           .hasMatch(f.uri.pathSegments.last)) {
         continue;
       }
-      for (final r in lerCsvCvm(f)) {
+      for (final r in readCvmCsv(f)) {
         if (r['Tipo_Capital'] != 'Capital Integralizado') continue;
         final cnpj = r['CNPJ_Companhia'];
-        final documento = r['ID_Documento'];
-        final recebido = recebidos[documento ?? ''];
-        final aprovacao =
+        final document = r['ID_Documento'];
+        final received = receivedInputs[document ?? ''];
+        final approval =
             DateTime.tryParse('${r['Data_Autorizacao_Aprovacao']}T00:00:00Z');
-        final valor = double.tryParse(r['Valor_Capital'] ?? '');
-        final acoes = double.tryParse(r['Quantidade_Total_Acoes'] ?? '');
-        if (cnpj == null || documento == null || recebido == null) continue;
-        if (aprovacao == null || valor == null || acoes == null) continue;
-        if (!(valor > 0) || !(acoes > 0)) continue;
+        final value = double.tryParse(r['Valor_Capital'] ?? '');
+        final shares = double.tryParse(r['Quantidade_Total_Acoes'] ?? '');
+        if (cnpj == null || document == null || received == null) continue;
+        if (approval == null || value == null || shares == null) continue;
+        if (!(value > 0) || !(shares > 0)) continue;
         (capital[cnpj] ??= [])
-            .add(_Capital(recebido, aprovacao, valor, acoes, documento));
+            .add(_Capital(received, approval, value, shares, document));
       }
     }
     for (final v in capital.values) {
       v.sort((a, b) {
-        final c = a.recebido.compareTo(b.recebido);
-        return c != 0 ? c : a.documento.compareTo(b.documento);
+        final c = a.received.compareTo(b.received);
+        return c != 0 ? c : a.document.compareTo(b.document);
       });
     }
-    final porCnpj = <String, List<_Registro>>{};
-    final documentos = <String, Map<String, DateTime>>{};
-    for (final f in arquivos) {
+    final byCnpj = <String, List<_Record>>{};
+    final documents = <String, Map<String, DateTime>>{};
+    for (final f in files) {
       if (!RegExp(r'^fre_cia_aberta_capital_social_aumento_\d{4}\.csv$')
           .hasMatch(f.uri.pathSegments.last)) {
         continue;
       }
-      for (final r in lerCsvCvm(f)) {
+      for (final r in readCvmCsv(f)) {
         final cnpj = r['CNPJ_Companhia'];
-        final documento = r['ID_Documento'];
-        final recebido = recebidos[documento ?? ''];
-        if (cnpj == null || documento == null || recebido == null) continue;
-        (documentos[cnpj] ??= {})[documento] = recebido;
+        final document = r['ID_Documento'];
+        final received = receivedInputs[document ?? ''];
+        if (cnpj == null || document == null || received == null) continue;
+        (documents[cnpj] ??= {})[document] = received;
         if ((r['Tipo_Subscricao'] ?? '').toLowerCase().contains('sem emiss')) {
           continue;
         }
-        if (_semValor.hasMatch(r['Forma_Integralizacao'] ?? '') ||
-            _semValor.hasMatch(r['Tipo_Subscricao'] ?? '')) {
+        if (_noValue.hasMatch(r['Forma_Integralizacao'] ?? '') ||
+            _noValue.hasMatch(r['Tipo_Subscricao'] ?? '')) {
           continue;
         }
-        final valor = double.tryParse(r['Valor_Total_Emissao'] ?? '');
-        final acoes = double.tryParse(r['Quantidade_Total_Acoes'] ?? '');
-        final preco = double.tryParse(r['Preco_Emissao'] ?? '');
-        if (valor == null || acoes == null || !(valor > 0) || !(acoes > 0)) {
+        final value = double.tryParse(r['Valor_Total_Emissao'] ?? '');
+        final shares = double.tryParse(r['Quantidade_Total_Acoes'] ?? '');
+        final price = double.tryParse(r['Preco_Emissao'] ?? '');
+        if (value == null || shares == null || !(value > 0) || !(shares > 0)) {
           continue;
         }
-        if (preco == null || !(preco > 0)) continue;
-        final data = DateTime.tryParse('${r['Data_Emissao']}T00:00:00Z') ??
+        if (price == null || !(price > 0)) continue;
+        final date = DateTime.tryParse('${r['Data_Emissao']}T00:00:00Z') ??
             DateTime.tryParse('${r['Data_Deliberacao']}T00:00:00Z');
-        if (data == null) continue;
-        (porCnpj[cnpj] ??= []).add(_Registro(
-          documento: documento,
-          data: data,
-          valor: valor,
-          acoes: acoes,
+        if (date == null) continue;
+        (byCnpj[cnpj] ??= []).add(_Record(
+          document: document,
+          date: date,
+          value: value,
+          shares: shares,
         ));
       }
     }
-    return EmissoesFre._(porCnpj, documentos, capital);
+    return FreIssuances._(byCnpj, documents, capital);
   }
 
   /// As emissões de [cnpj] no formulário mais recente recebido até [t] que
@@ -186,63 +186,63 @@ class EmissoesFre {
   ///
   /// Dentro do mesmo formulário, a mesma emissão repetida — mesma data, mesma
   /// quantidade — entra uma vez.
-  List<ShareIssue> conhecidas(String cnpj, DateTime t) {
-    final dia = DateTime.utc(t.year, t.month, t.day);
-    String? ultimo;
-    DateTime? quando;
-    for (final e in (_documentos[cnpj] ?? const <String, DateTime>{}).entries) {
-      if (e.value.isAfter(dia)) continue;
-      if (quando == null ||
-          e.value.isAfter(quando) ||
-          (!e.value.isBefore(quando) && e.key.compareTo(ultimo!) > 0)) {
-        ultimo = e.key;
-        quando = e.value;
+  List<ShareIssue> known(String cnpj, DateTime t) {
+    final day = DateTime.utc(t.year, t.month, t.day);
+    String? last;
+    DateTime? asOfDate;
+    for (final e in (_documents[cnpj] ?? const <String, DateTime>{}).entries) {
+      if (e.value.isAfter(day)) continue;
+      if (asOfDate == null ||
+          e.value.isAfter(asOfDate) ||
+          (!e.value.isBefore(asOfDate) && e.key.compareTo(last!) > 0)) {
+        last = e.key;
+        asOfDate = e.value;
       }
     }
-    if (ultimo == null) return const [];
-    final vistos = <String>{};
+    if (last == null) return const [];
+    final seen = <String>{};
     return [
-      for (final r in (_porCnpj[cnpj] ?? const <_Registro>[])
-          .where((r) => r.documento == ultimo)
+      for (final r in (_byCnpj[cnpj] ?? const <_Record>[])
+          .where((r) => r.document == last)
           .toList()
-        ..sort((a, b) => a.data.compareTo(b.data)))
-        if (vistos.add('${r.data.toIso8601String()}|${r.acoes}'))
+        ..sort((a, b) => a.date.compareTo(b.date)))
+        if (seen.add('${r.date.toIso8601String()}|${r.shares}'))
           ShareIssue(
-              date: r.data,
-              amount: Money.fromReais(r.valor),
-              shares: r.acoes.round()),
+              date: r.date,
+              amount: Money.fromReais(r.value),
+              shares: r.shares.round()),
     ];
   }
 
   /// As variações do capital integralizado entre versões do FRE recebidas até
-  /// [t], com a aprovação a partir de [inicioDoCapital]: cada aumento de
+  /// [t], com a aprovação a partir de [capitalStart]: cada aumento de
   /// contagem de 1% ou mais com capital maior sai como emissão pelo capital
   /// que entrou, e com a razão entre as contagens.
   ///
   /// **Quem usa descarta a que um evento de ações explica** — a bonificação
   /// também aumenta o capital —, pela razão e pela data. Ver o comentário do
   /// arquivo.
-  List<({ShareIssue emissao, double razao})> pelaVariacaoDoCapital(
+  List<({ShareIssue issuance, double ratio})> byCapitalChange(
       String cnpj, DateTime t) {
-    final dia = DateTime.utc(t.year, t.month, t.day);
-    final versoes = [
+    final day = DateTime.utc(t.year, t.month, t.day);
+    final versions = [
       for (final c in _capital[cnpj] ?? const <_Capital>[])
-        if (!c.recebido.isAfter(dia)) c,
+        if (!c.received.isAfter(day)) c,
     ];
-    final out = <({ShareIssue emissao, double razao})>[];
-    for (var i = 1; i < versoes.length; i++) {
-      final a = versoes[i - 1], b = versoes[i];
-      if (b.aprovacao.isBefore(inicioDoCapital)) continue;
-      if (!b.aprovacao.isAfter(a.aprovacao)) continue;
-      final razao = b.acoes / a.acoes;
-      final entrou = Money.fromReais(b.valor) - Money.fromReais(a.valor);
-      if (math.log(razao) < math.log(1.01) || !entrou.isPositive) continue;
+    final out = <({ShareIssue issuance, double ratio})>[];
+    for (var i = 1; i < versions.length; i++) {
+      final a = versions[i - 1], b = versions[i];
+      if (b.approval.isBefore(capitalStart)) continue;
+      if (!b.approval.isAfter(a.approval)) continue;
+      final ratio = b.shares / a.shares;
+      final inflow = Money.fromReais(b.value) - Money.fromReais(a.value);
+      if (math.log(ratio) < math.log(1.01) || !inflow.isPositive) continue;
       out.add((
-        emissao: ShareIssue(
-            date: b.aprovacao,
-            amount: entrou,
-            shares: (b.acoes - a.acoes).round()),
-        razao: razao,
+        issuance: ShareIssue(
+            date: b.approval,
+            amount: inflow,
+            shares: (b.shares - a.shares).round()),
+        ratio: ratio,
       ));
     }
     return out;

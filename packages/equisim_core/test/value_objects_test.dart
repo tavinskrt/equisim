@@ -32,12 +32,12 @@ void main() {
     });
 
     test('o double do balanço não perde centavo (B21, decisão 125)', () {
-      // A CVM é lida em centavos exatos (`CvmAccountLine.doTexto`), e o
+      // A CVM é lida em centavos exatos (`CvmAccountLine.fromText`), e o
       // `FundamentalsSnapshot` a guarda em reais `double`. A ida e volta
       // centavo → double → Money é exata em toda a faixa de um balanço: o
       // maior ativo total do universo passa pouco de R$ 1,5 trilhão, e o
       // double tem casa de centavo até R$ 90 trilhões.
-      final casos = <int>[
+      final cases = <int>[
         1, 99, 12345, 123456789,
         150000000000037, // R$ 1,5 trilhão e 37 centavos
         987654321098765, // R$ 9,9 trilhões
@@ -45,10 +45,10 @@ void main() {
       ];
       final rnd = math.Random(7);
       for (var i = 0; i < 20000; i++) {
-        casos.add(rnd.nextInt(1 << 32) * rnd.nextInt(1 << 20) *
+        cases.add(rnd.nextInt(1 << 32) * rnd.nextInt(1 << 20) *
             (rnd.nextBool() ? 1 : -1));
       }
-      for (final c in casos) {
+      for (final c in cases) {
         if (c.abs() >= 1e17) continue; // fora do alcance de centavo do double
         expect(Money.fromReais(c / 100).cents, c, reason: '$c centavos');
       }

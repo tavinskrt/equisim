@@ -165,14 +165,14 @@ class AuditBus extends ChangeNotifier {
   void _record(AuditEvent event) {
     if (!_seen.add(event.transactionId)) return;
     _buffer.add(event);
-    final calculo = isCalculation(event);
-    final teto = calculo ? calculationLimit : networkLimit;
-    var mesmos = _buffer.where((e) => isCalculation(e) == calculo).length;
-    while (mesmos > teto) {
-      final i = _buffer.indexWhere((e) => isCalculation(e) == calculo);
+    final isCalculationEvent = isCalculation(event);
+    final cap = isCalculationEvent ? calculationLimit : networkLimit;
+    var sameKind = _buffer.where((e) => isCalculation(e) == isCalculationEvent).length;
+    while (sameKind > cap) {
+      final i = _buffer.indexWhere((e) => isCalculation(e) == isCalculationEvent);
       _seen.remove(_buffer.removeAt(i).transactionId);
-      mesmos--;
-      if (calculo) {
+      sameKind--;
+      if (isCalculationEvent) {
         _discardedCalculations++;
       } else {
         _discardedNetwork++;

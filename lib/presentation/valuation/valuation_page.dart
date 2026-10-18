@@ -104,18 +104,18 @@ class _ValuationTabState extends ConsumerState<ValuationTab> {
   /// Escolha explícita do usuário. `null` enquanto ele não escolheu — aí a
   /// aba mostra o primeiro ativo da carteira, para não abrir vazia tendo o
   /// que mostrar.
-  Ticker? _escolhido;
+  Ticker? _chosen;
 
   @override
   Widget build(BuildContext context) {
     final study = ref.watch(studyProvider).study;
 
-    final disponiveis = <Ticker>[
+    final available = <Ticker>[
       ...study.principal.tickers,
-      ...study.reserva.tickers,
+      ...study.reserve.tickers,
     ];
 
-    if (disponiveis.isEmpty) {
+    if (available.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(FinSpace.lg),
         child: GlassCard(
@@ -133,9 +133,9 @@ class _ValuationTabState extends ConsumerState<ValuationTab> {
     // A escolha anterior pode ter saído da carteira enquanto a aba estava em
     // outra tela. Cair para o primeiro ativo é melhor que avaliar um ticker
     // que já não está no estudo.
-    final ticker = disponiveis.contains(_escolhido)
-        ? _escolhido!
-        : disponiveis.first;
+    final ticker = available.contains(_chosen)
+        ? _chosen!
+        : available.first;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -163,11 +163,11 @@ class _ValuationTabState extends ConsumerState<ValuationTab> {
                   spacing: FinSpace.sm,
                   runSpacing: FinSpace.sm,
                   children: [
-                    for (final t in disponiveis)
+                    for (final t in available)
                       ChoiceChip(
                         label: Text(t.value),
                         selected: t == ticker,
-                        onSelected: (_) => setState(() => _escolhido = t),
+                        onSelected: (_) => setState(() => _chosen = t),
                         labelStyle: context.finType.bodySm.copyWith(
                           color: t == ticker
                               ? context.fin.textOnBrand
@@ -279,7 +279,7 @@ class _ValuationBody extends ConsumerWidget {
                             padding:
                                 const EdgeInsets.only(bottom: FinSpace.xs),
                             child: Text(
-                              '• ${c.rotulo}',
+                              '• ${c.label}',
                               style: context.finType.bodySm.copyWith(
                                 color: context.fin.textSecondary,
                               ),
@@ -412,7 +412,7 @@ class _ModelCard extends StatelessWidget {
               Expanded(
                 child: MetricTile(
                   label: 'Método',
-                  value: result.model.rotulo,
+                  value: result.model.label,
                   // O "valor" aqui e nome, nao numero: `DCF simplificado (LPA)`
                   // nao cabe em uma linha ao lado da taxa de desconto, e a
                   // sigla cortada e o que distingue um modelo do outro.
@@ -464,7 +464,7 @@ class _PeerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = result.triangulation!;
-    final aplicadas = [for (final r in t.readings) if (r.applied) r];
+    final applied = [for (final r in t.readings) if (r.applied) r];
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -475,10 +475,10 @@ class _PeerCard extends StatelessWidget {
                 'sendo o do fluxo descontado',
           ),
           const Gap.md(),
-          if (aplicadas.isEmpty)
+          if (applied.isEmpty)
             Text(
               'Nenhum múltiplo se aplicou a este ativo. '
-              '${[for (final r in t.readings) '${r.kind.rotulo}: ${r.refusal?.rotulo ?? "—"}'].join("; ")}.',
+              '${[for (final r in t.readings) '${r.kind.label}: ${r.refusal?.label ?? "—"}'].join("; ")}.',
               style: context.finType.bodySm.copyWith(
                 color: context.fin.textSecondary,
               ),
@@ -486,10 +486,10 @@ class _PeerCard extends StatelessWidget {
           else ...[
             Row(
               children: [
-                for (final r in aplicadas)
+                for (final r in applied)
                   Expanded(
                     child: MetricTile(
-                      label: r.kind.rotulo,
+                      label: r.kind.label,
                       value: Fmt.money(r.fairValuePerShare!),
                       hint: '${r.peer!.median.toStringAsFixed(1)}× em '
                           '${r.peer!.peers} pares',
@@ -524,10 +524,10 @@ class _PeerCard extends StatelessWidget {
           // As recusas ficam listadas mesmo quando alguma leitura se aplicou:
           // saber que o `EV/EBITDA` não entrou, e por quê, é parte de ler o
           // número que entrou.
-          if (aplicadas.isNotEmpty && aplicadas.length < t.readings.length) ...[
+          if (applied.isNotEmpty && applied.length < t.readings.length) ...[
             const Gap.sm(),
             Text(
-              'Fora: ${[for (final r in t.readings) if (!r.applied) '${r.kind.rotulo} (${r.refusal?.rotulo ?? "—"})'].join("; ")}.',
+              'Fora: ${[for (final r in t.readings) if (!r.applied) '${r.kind.label} (${r.refusal?.label ?? "—"})'].join("; ")}.',
               style: context.finType.bodySm.copyWith(
                 color: context.fin.textSecondary,
               ),
@@ -564,17 +564,17 @@ class _CalibratedBandCard extends ConsumerWidget {
   /// amostra fica a até esta distância da nominal nos dois horizontes; senão,
   /// diz a cobertura e que a faixa não está calibrada. Na forma fixada antes de
   /// medir no C2b (decisão 100) ela fica: 79,0% em 12 meses e 80,4% em 36.
-  static const double folgaDoCriterio = 0.05;
+  static const double criterionMargin = 0.05;
 
   /// Largura abaixo da qual cada horizonte ganha linha própria, em dp.
-  static const double larguraMinimaPorColuna = 220;
+  static const double minWidthPerColumn = 220;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabelas = ref.watch(calibratedBandsProvider).value ?? const [];
-    final faixas = [
-      for (final meses in const [12, 36])
-        if (CalibratedBand.select(tabelas, months: meses, nominal: nominal)
+    final tables = ref.watch(calibratedBandsProvider).value ?? const [];
+    final bands = [
+      for (final months in const [12, 36])
+        if (CalibratedBand.select(tables, months: months, nominal: nominal)
             case final t?)
           if (CalibratedBand.of(
                 result.fairValue,
@@ -583,39 +583,39 @@ class _CalibratedBandCard extends ConsumerWidget {
                 volatility: result.priceVolatility,
               )
               case final b?)
-            (tabela: t, faixa: b),
+            (table: t, band: b),
     ];
-    if (faixas.isEmpty) return const SizedBox.shrink();
+    if (bands.isEmpty) return const SizedBox.shrink();
 
-    final coberturas = [
-      for (final f in faixas)
-        if (f.tabela.outOfSampleCoverage case final c?)
-          '${Fmt.percent(c, decimals: 1)} em ${f.tabela.months} meses',
+    final coverages = [
+      for (final f in bands)
+        if (f.table.outOfSampleCoverage case final c?)
+          '${Fmt.percent(c, decimals: 1)} em ${f.table.months} meses',
     ];
-    final calibrada = faixas.every((f) => switch (f.tabela.outOfSampleCoverage) {
-          final c? => (c - nominal).abs() <= folgaDoCriterio,
+    final calibrated = bands.every((f) => switch (f.table.outOfSampleCoverage) {
+          final c? => (c - nominal).abs() <= criterionMargin,
           null => false,
         });
     // A forma diz de onde a faixa sai, e as duas dizem coisas diferentes: a do
     // justo é a razão entre o realizado e ele; a da volatilidade parte do preço
     // de hoje e usa o justo com o peso medido. Prometer "em torno do preço
     // justo" na segunda seria o rótulo velho sobre o número novo.
-    final daVolatilidade = faixas.any((f) => f.tabela is VolatilityBandTable);
-    final origem = daVolatilidade
+    final fromVolatility = bands.any((f) => f.table is VolatilityBandTable);
+    final origin = fromVolatility
         ? 'Ela sai do preço de hoje, da volatilidade do papel e do preço justo, '
             'que entra com o peso que a validação mediu — pequeno, porque o '
             'preço converge pouco ao justo.'
         : 'Ela é a razão entre o realizado e o preço justo nas coortes.';
-    final leitura = calibrada
+    final reading = calibrated
         ? 'Em 8 de cada 10 avaliações passadas, o preço mais os proventos '
             'terminaram nesta faixa'
-            '${coberturas.isEmpty ? '' : ' — ${coberturas.join(' e ')}, '
-                'medidos fora da amostra'}. $origem'
+            '${coverages.isEmpty ? '' : ' — ${coverages.join(' e ')}, '
+                'medidos fora da amostra'}. $origin'
         : 'Faixa central de 80% das avaliações passadas. Medida fora da '
             'amostra, ela conteve o preço mais os proventos em '
-            '${coberturas.isEmpty ? 'uma fração não medida' : coberturas.join(' e ')}'
+            '${coverages.isEmpty ? 'uma fração não medida' : coverages.join(' e ')}'
             ' dos casos — a mais de 5 pontos dos 80% que a nomeiam, e por isso '
-            'não está calibrada. $origem';
+            'não está calibrada. $origin';
     return Padding(
       padding: const EdgeInsets.only(bottom: FinSpace.md),
       child: GlassCard(
@@ -628,23 +628,23 @@ class _CalibratedBandCard extends ConsumerWidget {
             ),
             const Gap.md(),
             // Cada faixa são dois valores em reais: abaixo de
-            // [larguraMinimaPorColuna] por horizonte, elas se empilham em vez
+            // [minWidthPerColumn] por horizonte, elas se empilham em vez
             // de espremer os dois números numa coluna estreita.
             LayoutBuilder(
               builder: (context, constraints) {
                 final tiles = [
-                  for (final f in faixas)
+                  for (final f in bands)
                     MetricTile(
-                      label: 'Em ${f.tabela.months} meses',
-                      value: '${Fmt.money(f.faixa.low.reais)} a '
-                          '${Fmt.money(f.faixa.high.reais)}',
-                      hint: 'coortes de ${f.tabela.firstCohort} a '
-                          '${f.tabela.lastCohort}',
+                      label: 'Em ${f.table.months} meses',
+                      value: '${Fmt.money(f.band.low.reais)} a '
+                          '${Fmt.money(f.band.high.reais)}',
+                      hint: 'coortes de ${f.table.firstCohort} a '
+                          '${f.table.lastCohort}',
                       valueMaxLines: 2,
                     ),
                 ];
                 if (constraints.maxWidth <
-                    larguraMinimaPorColuna * tiles.length) {
+                    minWidthPerColumn * tiles.length) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -662,7 +662,7 @@ class _CalibratedBandCard extends ConsumerWidget {
             ),
             const Gap.sm(),
             Text(
-              '$leitura A largura é o tamanho do erro medido contra o que '
+              '$reading A largura é o tamanho do erro medido contra o que '
               'aconteceu: não é previsão.',
               style: context.finType.caption.copyWith(
                 color: context.fin.textSecondary,
@@ -702,23 +702,23 @@ class _SensitivityCard extends ConsumerWidget {
 
   /// Largura por unidade de escala de texto abaixo da qual o alternador sai do
   /// lado do título: em 320 dp sob 2,0x ele estourava 51 px.
-  static const double larguraDoCabecalho = 300;
+  static const double headerWidth = 300;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.fin;
     final t = context.finType;
     final base = result.fairValue.reais;
-    final cenarios = result.discreteScenarios;
-    final distribuicao = result.distribution;
-    final duras = cenarios?[ScenarioBand.bear]?.reais;
-    final brandas = cenarios?[ScenarioBand.bull]?.reais;
+    final scenarios = result.discreteScenarios;
+    final distribution = result.distribution;
+    final harsh = scenarios?[ScenarioBand.bear]?.reais;
+    final mild = scenarios?[ScenarioBand.bull]?.reais;
 
     // Empilhado, o rótulo cede e quebra linha: em 320 dp sob 2,0x nem a linha
     // própria cabia o texto ao lado do `Switch`. Ao lado do título ele não pode
     // ser flexível — ali a largura que o `Row` recebe não é limitada.
-    Widget alternador({required bool empilhado}) {
-      final rotulo = Text(
+    Widget toggle({required bool stacked}) {
+      final label = Text(
         'Monte Carlo',
         textAlign: TextAlign.right,
         style: t.caption.copyWith(color: c.textSecondary),
@@ -726,7 +726,7 @@ class _SensitivityCard extends ConsumerWidget {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          empilhado ? Flexible(child: rotulo) : rotulo,
+          stacked ? Flexible(child: label) : label,
           // O `Switch` pinta o respingo de tinta no `Material` mais próximo, e
           // o `GlassCard` interpõe um fundo próprio entre os dois. Sem este
           // `Material` transparente o toque não devolve retorno visual e o
@@ -747,27 +747,27 @@ class _SensitivityCard extends ConsumerWidget {
     // O tornado desenha do menor ao maior: com a ordem invertida, os
     // extremos trocam de lado, e a barra continua sendo a faixa.
     final bars = <({String label, double low, double high})>[
-      if (duras != null && brandas != null)
+      if (harsh != null && mild != null)
         (
           // Uma linha: o tornado corta o rótulo na primeira, e o
           // «Crescimento\ne desconto» de antes aparecia só como «Crescimento».
           label: 'Crescimento e taxa',
-          low: duras < brandas ? duras : brandas,
-          high: duras < brandas ? brandas : duras,
+          low: harsh < mild ? harsh : mild,
+          high: harsh < mild ? mild : harsh,
         ),
-      if (distribuicao != null)
+      if (distribution != null)
         (
           label: 'Faixa sorteada',
-          low: distribuicao.p5,
-          high: distribuicao.p95,
+          low: distribution.p5,
+          high: distribution.p95,
         ),
     ];
 
     return GlassCard(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final escala = MediaQuery.textScalerOf(context).scale(1);
-          final empilha = constraints.maxWidth < larguraDoCabecalho * escala;
+          final scale = MediaQuery.textScalerOf(context).scale(1);
+          final stacks = constraints.maxWidth < headerWidth * scale;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -778,27 +778,27 @@ class _SensitivityCard extends ConsumerWidget {
                         'sorteios de crescimento, taxa e perpetuidade'
                     : 'Quanto o preço justo se move se o crescimento e a taxa '
                         'mudarem juntos',
-                trailing: empilha ? null : alternador(empilhado: false),
+                trailing: stacks ? null : toggle(stacked: false),
               ),
-              if (empilha)
+              if (stacks)
                 Align(
                   alignment: Alignment.centerRight,
-                  child: alternador(empilhado: true),
+                  child: toggle(stacked: true),
                 ),
               const Gap.md(),
-              if (distribuicao != null)
+              if (distribution != null)
                 _DistributionView(
-                  distribution: distribuicao,
+                  distribution: distribution,
                   marketPrice: result.marketPrice.reais,
                 )
-              else if (cenarios != null)
-                _DiscreteView(scenarios: cenarios, base: base)
+              else if (scenarios != null)
+                _DiscreteView(scenarios: scenarios, base: base)
               else
                 Text(
                   'Só o preço justo do motor pôde ser calculado.',
                   style: t.caption.copyWith(color: c.textSecondary),
                 ),
-              if (duras != null && brandas != null && brandas < duras) ...[
+              if (harsh != null && mild != null && mild < harsh) ...[
                 const Gap.md(),
                 NoticeBanner(
                   message: 'Aqui as premissas mais brandas dão preço menor que '
@@ -849,7 +849,7 @@ class _DiscreteView extends StatelessWidget {
     // Espaço fixo entre o número e a unidade: em coluna estreita a quebra
     // separava "−3" de "p.p.".
     const e = ' ';
-    String nota(ScenarioBand band) => switch (band) {
+    String note(ScenarioBand band) => switch (band) {
           ScenarioBand.bear => 'crescimento −$g${e}p.p., taxa +$d${e}p.p.',
           ScenarioBand.base => 'o preço justo',
           ScenarioBand.bull => 'crescimento +$g${e}p.p., taxa −$d${e}p.p.',
@@ -857,14 +857,14 @@ class _DiscreteView extends StatelessWidget {
     return MetricTileRow(
       tiles: [
         for (final band in ScenarioBand.values)
-          if (scenarios[band] case final valor?)
+          if (scenarios[band] case final value?)
             MetricTile(
-              label: band.rotulo,
-              value: Fmt.money(valor.reais),
-              hint: nota(band),
+              label: band.label,
+              value: Fmt.money(value.reais),
+              hint: note(band),
               trend: band == ScenarioBand.base
                   ? FinTrend.neutral
-                  : FinAmount.trendOf(valor.reais - base),
+                  : FinAmount.trendOf(value.reais - base),
             ),
       ],
     );

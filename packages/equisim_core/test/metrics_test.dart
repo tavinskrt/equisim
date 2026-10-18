@@ -131,7 +131,7 @@ void main() {
     test('ativo idêntico ao mercado tem beta 1 e correlação 1', () {
       final market = List.generate(60, (i) => (i % 5 - 2) * 0.01);
       final result = BetaCalculator.estimate(
-        returns: _par(market, market),
+        returns: _pair(market, market),
       );
       expect(result.isOk, isTrue);
       expect(result.unwrap().beta, closeTo(1.0, 1e-12));
@@ -142,14 +142,14 @@ void main() {
       final market = List.generate(60, (i) => (i % 5 - 2) * 0.01);
       final asset = market.map((r) => r * 2).toList();
       final result = BetaCalculator.estimate(
-        returns: _par(asset, market),
+        returns: _pair(asset, market),
       );
       expect(result.unwrap().beta, closeTo(2.0, 1e-12));
     });
 
     test('exige observações suficientes', () {
       final result = BetaCalculator.estimate(
-        returns: _par([0.01, 0.02], [0.01, 0.02]),
+        returns: _pair([0.01, 0.02], [0.01, 0.02]),
       );
       expect(result.isErr, isTrue);
       expect(result.failureOrNull, isA<InsufficientData>());
@@ -191,7 +191,7 @@ void main() {
 
 /// Par de retornos montado como a produção monta: um período por vez, pelo
 /// acumulador — o desalinhamento não é exprimível.
-PairedReturns _par(List<double> asset, List<double> market) {
+PairedReturns _pair(List<double> asset, List<double> market) {
   final b = PairedReturnsBuilder();
   for (var i = 0; i < asset.length; i++) {
     b.add(asset: asset[i], market: market[i]);

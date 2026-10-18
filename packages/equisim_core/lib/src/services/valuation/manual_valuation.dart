@@ -42,30 +42,30 @@ enum ManualRatePath {
   /// O caminho do motor — a curva de juros, e na via da firma a estrutura de
   /// capital de cada ano —, deslocado em paralelo pela diferença entre a taxa
   /// digitada e a do primeiro ano do motor.
-  motor,
+  engine,
 
   /// Uma taxa só, do primeiro ano à perpetuidade.
-  constante,
+  constant,
 }
 
 /// Como o crescimento evolui nos anos explícitos.
 enum ManualGrowthPath {
   /// Do crescimento digitado ao da perpetuidade, em linha reta até o último
   /// ano explícito. É o que o motor faz.
-  decai,
+  decays,
 
   /// O mesmo crescimento em todos os anos explícitos.
-  constante,
+  constant,
 }
 
 /// De onde sai a parcela do lucro reinvestida.
 enum ManualReinvestment {
   /// `b_t = g_t ÷ retorno_t`, com o retorno convergindo à taxa de desconto até
   /// o último ano explícito. É o que o motor faz.
-  peloRetorno,
+  byReturn,
 
   /// Uma parcela fixa do lucro, em todos os anos e na perpetuidade.
-  parcelaFixa,
+  fixedFraction,
 }
 
 /// As premissas de um cálculo do usuário (decisão 147).
@@ -96,10 +96,10 @@ class ManualPremises {
   final ManualReinvestment reinvestment;
 
   /// Retorno sobre o capital do primeiro ano, usado sob
-  /// [ManualReinvestment.peloRetorno].
+  /// [ManualReinvestment.byReturn].
   final double returnOnCapital;
 
-  /// Parcela reinvestida, usada sob [ManualReinvestment.parcelaFixa].
+  /// Parcela reinvestida, usada sob [ManualReinvestment.fixedFraction].
   final double retention;
 
   /// Retorno do capital novo na perpetuidade, ou `null` para igual à taxa de
@@ -111,17 +111,17 @@ class ManualPremises {
   const ManualPremises({
     required this.baseProfit,
     required this.growth,
-    this.growthPath = ManualGrowthPath.decai,
+    this.growthPath = ManualGrowthPath.decays,
     required this.discountRate,
-    this.ratePath = ManualRatePath.motor,
+    this.ratePath = ManualRatePath.engine,
     required this.perpetualGrowth,
-    this.reinvestment = ManualReinvestment.peloRetorno,
+    this.reinvestment = ManualReinvestment.byReturn,
     required this.returnOnCapital,
     required this.retention,
     this.terminalReturn,
   });
 
-  static const Object _mantem = Object();
+  static const Object _keep = Object();
 
   /// Cópia com os campos informados trocados. [terminalReturn] aceita `null`
   /// explícito — é como se volta ao estado estacionário.
@@ -135,7 +135,7 @@ class ManualPremises {
     ManualReinvestment? reinvestment,
     double? returnOnCapital,
     double? retention,
-    Object? terminalReturn = _mantem,
+    Object? terminalReturn = _keep,
   }) => ManualPremises(
     baseProfit: baseProfit ?? this.baseProfit,
     growth: growth ?? this.growth,
@@ -146,7 +146,7 @@ class ManualPremises {
     reinvestment: reinvestment ?? this.reinvestment,
     returnOnCapital: returnOnCapital ?? this.returnOnCapital,
     retention: retention ?? this.retention,
-    terminalReturn: identical(terminalReturn, _mantem)
+    terminalReturn: identical(terminalReturn, _keep)
         ? this.terminalReturn
         : terminalReturn as double?,
   );
@@ -179,58 +179,58 @@ class ManualPremises {
 /// os aplica.
 enum ManualGroup {
   /// O lucro de partida.
-  lucro,
+  profit,
 
   /// O crescimento e o caminho dele.
-  crescimento,
+  growth,
 
   /// O modo de reinvestir, o retorno e a parcela.
-  reinvestimento,
+  reinvestment,
 
   /// A taxa de desconto e o caminho dela.
-  taxa,
+  rate,
 
   /// O crescimento na perpetuidade.
-  perpetuidade,
+  perpetuity,
 
   /// O retorno do capital novo na perpetuidade.
-  capitalNovo,
+  newCapital,
 }
 
 /// Como o valor terminal foi formado.
 enum ManualTerminal {
   /// Capital novo rendendo a própria taxa: `lucro_{N+1} ÷ taxa`, e o
   /// crescimento perpétuo quase não pesa.
-  neutro,
+  neutral,
 
   /// Retorno do capital novo acima (ou abaixo) da taxa: Gordon com
   /// reinvestimento, `lucro_{N+1}·(1 − g/retorno) ÷ (taxa − g)`.
-  vantagem,
+  advantage,
 
   /// Gordon com a parcela fixa: `lucro_{N+1}·(1 − b) ÷ (taxa − g)`.
-  parcelaFixa,
+  fixedFraction,
 
   /// Concessão: o capital volta no fim do contrato, e o excedente sobre ele só
   /// dura até lá (decisão 88).
-  contrato,
+  contract,
 }
 
 /// Algo que a conta fez e que o usuário precisa saber para ler o número.
 enum ManualNoticeKind {
   /// O crescimento digitado não coube no que o retorno financia: com
   /// reinvestimento acima de 95% do lucro, o motor o confina.
-  crescimentoConfinado,
+  confinedGrowth,
 
   /// O fluxo de algum ano ficou negativo: a empresa reinveste mais do que
   /// lucra.
-  fluxoNegativo,
+  negativeFlow,
 
   /// A empresa é concessão, e a perpetuidade deixou de acabar no contrato.
-  concessaoPerpetua,
+  perpetualConcession,
 
   /// Crescimento perpétuo trocado com o capital novo rendendo a própria taxa:
   /// ele quase não muda a perpetuidade.
-  perpetuidadeNeutra,
+  neutralPerpetuity,
 }
 
 /// Um aviso do cálculo do usuário, com os anos a que se refere.
@@ -433,11 +433,11 @@ class ManualValuation {
   final double marketPrice;
 
   /// Preço justo do motor por papel, antes do arredondamento ao centavo.
-  final double motorFairValue;
+  final double engineFairValue;
 
   /// Fluxo-base do motor, na unidade da via: `NOPAT` em reais na da firma,
   /// lucro por papel na do acionista.
-  final double motorBase;
+  final double engineBase;
 
   /// Lucro do último exercício publicado, em reais e sem a normalização pelo
   /// ciclo, ou `null` quando ele não é medível.
@@ -450,19 +450,19 @@ class ManualValuation {
   final bool rebuiltBase;
 
   /// Premissas finais do motor — as que produziram o preço justo.
-  final DcfAssumptions motorAssumptions;
+  final DcfAssumptions engineAssumptions;
 
   /// Taxa que descontou o fluxo do acionista em cada ano, e a da
   /// perpetuidade: o custo do capital próprio, nas duas vias.
-  final List<double> motorRates;
-  final double motorTerminalRate;
+  final List<double> engineRates;
+  final double engineTerminalRate;
 
   /// A rota derivada da firma e o `Ke` do centro que a desconta — só na via da
   /// firma.
   final FirmDiscountRoute? firmRoute;
-  final double? motorEquityRate;
-  final double? motorTerminalEquityRate;
-  final List<double>? motorEquityRatePath;
+  final double? engineEquityRate;
+  final double? engineTerminalEquityRate;
+  final List<double>? engineEquityRatePath;
 
   /// Capital das emissões depois do balanço, em reais (item B28).
   final double postStatementCapital;
@@ -472,60 +472,60 @@ class ManualValuation {
     required this.lane,
     required this.shares,
     required this.marketPrice,
-    required this.motorFairValue,
-    required this.motorBase,
+    required this.engineFairValue,
+    required this.engineBase,
     this.publishedBase,
     this.baseFactor = 1.0,
     this.rebuiltBase = false,
-    required this.motorAssumptions,
-    required this.motorRates,
-    required this.motorTerminalRate,
+    required this.engineAssumptions,
+    required this.engineRates,
+    required this.engineTerminalRate,
     this.firmRoute,
-    this.motorEquityRate,
-    this.motorTerminalEquityRate,
-    this.motorEquityRatePath,
+    this.engineEquityRate,
+    this.engineTerminalEquityRate,
+    this.engineEquityRatePath,
     this.postStatementCapital = 0.0,
   });
 
   /// Anos de projeção explícita.
-  int get projectionYears => motorAssumptions.projectionYears;
+  int get projectionYears => engineAssumptions.projectionYears;
 
   /// `true` quando a empresa é concessão com prazo.
-  bool get isConcession => motorAssumptions.contractYearsAfterHorizon != null;
+  bool get isConcession => engineAssumptions.contractYearsAfterHorizon != null;
 
   /// Quanto um real de lucro por papel vale em reais agregados.
-  double get _escala => lane == ValuationLane.shareholder ? shares : 1.0;
+  double get _scale => lane == ValuationLane.shareholder ? shares : 1.0;
 
   /// As premissas do motor, no vocabulário do usuário: é de onde os campos
   /// partem.
-  ManualPremises get motorPremises => ManualPremises(
-    baseProfit: motorBase * _escala,
-    growth: motorAssumptions.growthRate,
-    discountRate: motorRates.first,
-    perpetualGrowth: motorAssumptions.perpetualGrowth,
-    returnOnCapital: motorAssumptions.returnOnCapital,
+  ManualPremises get enginePremises => ManualPremises(
+    baseProfit: engineBase * _scale,
+    growth: engineAssumptions.growthRate,
+    discountRate: engineRates.first,
+    perpetualGrowth: engineAssumptions.perpetualGrowth,
+    returnOnCapital: engineAssumptions.returnOnCapital,
     // A parcela do primeiro ano do motor é o ponto de partida de quem troca
     // o reinvestimento pelo retorno pela parcela fixa.
-    retention: motorAssumptions.retentionAt(1),
-    terminalReturn: motorAssumptions.terminalReturnOnCapital,
+    retention: engineAssumptions.retentionAt(1),
+    terminalReturn: engineAssumptions.terminalReturnOnCapital,
   );
 
   /// `true` quando a taxa das premissas é exatamente a do motor.
-  bool _taxaDoMotor(ManualPremises p) =>
-      p.ratePath == ManualRatePath.motor && p.discountRate == motorRates.first;
+  bool _isEngineRate(ManualPremises p) =>
+      p.ratePath == ManualRatePath.engine && p.discountRate == engineRates.first;
 
   /// A taxa de cada ano e a da perpetuidade, sob as premissas.
-  ({List<double> anos, double terminal}) _taxas(ManualPremises p) {
+  ({List<double> years, double terminal}) _rates(ManualPremises p) {
     switch (p.ratePath) {
-      case ManualRatePath.motor:
-        final d = p.discountRate - motorRates.first;
+      case ManualRatePath.engine:
+        final d = p.discountRate - engineRates.first;
         return (
-          anos: [for (final r in motorRates) r + d],
-          terminal: motorTerminalRate + d,
+          years: [for (final r in engineRates) r + d],
+          terminal: engineTerminalRate + d,
         );
-      case ManualRatePath.constante:
+      case ManualRatePath.constant:
         return (
-          anos: List.filled(projectionYears, p.discountRate),
+          years: List.filled(projectionYears, p.discountRate),
           terminal: p.discountRate,
         );
     }
@@ -536,12 +536,12 @@ class ManualValuation {
   /// Cada troca só acontece quando o campo difere do motor, de modo que a
   /// conta sem troca use **as mesmas** premissas da cascata, e não uma cópia
   /// delas.
-  DcfAssumptions _premissas(
+  DcfAssumptions _assumptions(
     ManualPremises p,
-    ({List<double> anos, double terminal}) taxas,
+    ({List<double> years, double terminal}) rates,
   ) {
-    final m = motorPremises;
-    var a = motorAssumptions;
+    final m = enginePremises;
+    var a = engineAssumptions;
     // **Na via do acionista a taxa das premissas é o `Ke`**, e a do usuário
     // entra nela. **Na da firma, não**: as premissas carregam o `WACC`, que lá
     // não desconta nada — é o alvo para onde o retorno sobre o capital
@@ -555,15 +555,15 @@ class ManualValuation {
     // ativos da via da firma, **subir a taxa subia o preço**. Quem digita a
     // taxa de desconto está dizendo quanto exige, e não quanto a empresa rende:
     // o retorno tem campo próprio.
-    if (!_taxaDoMotor(p) && lane == ValuationLane.shareholder) {
+    if (!_isEngineRate(p) && lane == ValuationLane.shareholder) {
       a = a.copyWith(
-        discountRatePath: taxas.anos,
-        discountRate: taxas.anos.first,
-        terminalDiscountRate: taxas.terminal,
+        discountRatePath: rates.years,
+        discountRate: rates.years.first,
+        terminalDiscountRate: rates.terminal,
       );
     }
     if (p.growth != m.growth) a = a.copyWith(growthRate: p.growth);
-    if (p.growthPath == ManualGrowthPath.constante) {
+    if (p.growthPath == ManualGrowthPath.constant) {
       a = a.copyWith(growthPath: List.filled(projectionYears, p.growth));
     }
     if (p.perpetualGrowth != m.perpetualGrowth) {
@@ -572,11 +572,11 @@ class ManualValuation {
     if (p.returnOnCapital != m.returnOnCapital) {
       a = a.copyWith(returnOnCapital: p.returnOnCapital);
     }
-    if (p.reinvestment == ManualReinvestment.parcelaFixa) {
+    if (p.reinvestment == ManualReinvestment.fixedFraction) {
       // O terminal neutro sai: com a parcela fixa, é Gordon com ela, e a
       // concessão deixa de cortar o excedente — ver [ManualNoticeKind].
       a = a.copyWith(
-        reinvestmentPolicy: ReinvestmentPolicy.parcelaFixa,
+        reinvestmentPolicy: ReinvestmentPolicy.fixedFraction,
         fixedRetention: p.retention,
         neutralTerminalReturn: false,
       );
@@ -607,7 +607,7 @@ class ManualValuation {
         ),
       );
     }
-    if (p.reinvestment == ManualReinvestment.parcelaFixa &&
+    if (p.reinvestment == ManualReinvestment.fixedFraction &&
         (!p.retention.isFinite || p.retention < 0 || p.retention >= 1)) {
       return Err(
         InvalidInput(
@@ -662,173 +662,173 @@ class ManualValuation {
         ),
       );
     }
-    final taxas = _taxas(p);
-    final menorTaxa = [
-      ...taxas.anos,
-      taxas.terminal,
+    final rates = _rates(p);
+    final lowestRate = [
+      ...rates.years,
+      rates.terminal,
     ].reduce((x, y) => x < y ? x : y);
-    if (!menorTaxa.isFinite || menorTaxa <= 0) {
+    if (!lowestRate.isFinite || lowestRate <= 0) {
       return Err(
         InvalidInput(
           'Taxa de desconto não positiva em algum ano.',
           field: ManualField.discountRate.name,
-          actual: menorTaxa,
+          actual: lowestRate,
           limit: 0,
           unit: QuantityUnit.fraction,
         ),
       );
     }
 
-    final a = _premissas(p, taxas);
-    final base = p.baseProfit == motorPremises.baseProfit
-        ? motorBase
-        : p.baseProfit / _escala;
-    final Result<DcfOutcome> descontado;
+    final a = _assumptions(p, rates);
+    final base = p.baseProfit == enginePremises.baseProfit
+        ? engineBase
+        : p.baseProfit / _scale;
+    final Result<DcfOutcome> discountedOutcome;
     if (lane == ValuationLane.shareholder) {
-      descontado = DcfCalculator.shareholder(baseProfit: base, assumptions: a);
+      discountedOutcome = DcfCalculator.shareholder(baseProfit: base, assumptions: a);
     } else {
-      final rota = firmRoute;
-      if (rota == null) {
+      final route = firmRoute;
+      if (route == null) {
         return const Err(
           ComputationFailure(
             'Avaliação da via da firma sem a rota da dívida congelada.',
           ),
         );
       }
-      final doMotor = _taxaDoMotor(p);
-      descontado = rota.discount(
+      final fromEngine = _isEngineRate(p);
+      discountedOutcome = route.discount(
         baseProfit: base,
         assumptions: a,
-        equityDiscountRate: doMotor
-            ? (motorEquityRate ?? taxas.anos.first)
-            : taxas.anos.first,
-        terminalEquityDiscountRate: doMotor
-            ? (motorTerminalEquityRate ?? taxas.terminal)
-            : taxas.terminal,
-        equityDiscountRatePath: doMotor ? motorEquityRatePath : taxas.anos,
+        equityDiscountRate: fromEngine
+            ? (engineEquityRate ?? rates.years.first)
+            : rates.years.first,
+        terminalEquityDiscountRate: fromEngine
+            ? (engineTerminalEquityRate ?? rates.terminal)
+            : rates.terminal,
+        equityDiscountRatePath: fromEngine ? engineEquityRatePath : rates.years,
       );
     }
 
-    return descontado.fold(
-      (o) => Ok(_resultado(p, a, o, taxas)),
-      (falha) => Err(_traduzir(falha, p, a, taxas)),
+    return discountedOutcome.fold(
+      (o) => Ok(_result(p, a, o, rates)),
+      (failure) => Err(_translate(failure, p, a, rates)),
     );
   }
 
   /// A recusa da calculadora, nomeando o campo quando é a margem da
   /// perpetuidade — o único caso em que ela recusa premissa que passou pelas
   /// conferências de [evaluate].
-  Failure _traduzir(
-    Failure falha,
+  Failure _translate(
+    Failure failure,
     ManualPremises p,
     DcfAssumptions a,
-    ({List<double> anos, double terminal}) taxas,
+    ({List<double> years, double terminal}) rates,
   ) {
-    final margens = [
-      taxas.terminal - p.perpetualGrowth,
+    final margins = [
+      rates.terminal - p.perpetualGrowth,
       if (lane == ValuationLane.firm)
         a.terminalDiscountRate - p.perpetualGrowth,
     ];
-    final menor = margens.reduce((x, y) => x < y ? x : y);
-    if (menor < DcfCalculator.minimumSpread) {
+    final smaller = margins.reduce((x, y) => x < y ? x : y);
+    if (smaller < DcfCalculator.minimumSpread) {
       return InvalidInput(
         'A taxa de desconto da perpetuidade não supera o crescimento perpétuo '
         'pela margem mínima: a perpetuidade não tem valor finito.',
         field: ManualField.perpetualGrowth.name,
-        actual: menor,
+        actual: smaller,
         limit: DcfCalculator.minimumSpread,
         unit: QuantityUnit.fraction,
       );
     }
-    return falha;
+    return failure;
   }
 
-  ManualOutcome _resultado(
+  ManualOutcome _result(
     ManualPremises p,
     DcfAssumptions a,
     DcfOutcome o,
-    ({List<double> anos, double terminal}) taxas,
+    ({List<double> years, double terminal}) rates,
   ) {
-    final e = _escala;
+    final e = _scale;
     final n = o.projectedFlows.length;
-    final lucros = o.projectedProfits;
-    final retencoes = o.retentions;
-    final crescimentos = o.growthRates;
-    final fatores = o.discountFactors;
-    final anos = <ManualYear>[
+    final profits = o.projectedProfits;
+    final retentions = o.retentions;
+    final growthRates = o.growthRates;
+    final factors = o.discountFactors;
+    final years = <ManualYear>[
       for (var i = 0; i < n; i++)
         ManualYear(
           year: i + 1,
-          growth: crescimentos?[i] ?? a.growthAt(i + 1),
+          growth: growthRates?[i] ?? a.growthAt(i + 1),
           plannedGrowth: a.plannedGrowthAt(i + 1),
-          profit: (lucros?[i] ?? double.nan) * e,
-          retention: retencoes?[i] ?? a.retentionAt(i + 1),
+          profit: (profits?[i] ?? double.nan) * e,
+          retention: retentions?[i] ?? a.retentionAt(i + 1),
           firmFlow: o.firmFlows?[i],
           debtService: o.debtService?[i],
           flow: o.projectedFlows[i] * e,
-          rate: o.discountRates?[i] ?? taxas.anos[i],
-          discountFactor: fatores?[i] ?? double.nan,
+          rate: o.discountRates?[i] ?? rates.years[i],
+          discountFactor: factors?[i] ?? double.nan,
           presentValue: o.discountedFlows[i] * e,
         ),
     ];
-    final explicito = o.discountedFlows.fold(0.0, (s, v) => s + v) * e;
+    final explicitValue = o.discountedFlows.fold(0.0, (s, v) => s + v) * e;
     final terminalPv = o.discountedTerminalValue * e;
-    final rota = firmRoute;
-    final minoritarios = lane == ValuationLane.firm && rota != null
-        ? _naoNegativo(rota.minorityInterest)
+    final route = firmRoute;
+    final minorityValue = lane == ValuationLane.firm && route != null
+        ? _nonNegative(route.minorityInterest)
         : 0.0;
     final capital = postStatementCapital > 0 && shares > 0
         ? postStatementCapital
         : 0.0;
-    final porPapel = o.fairValuePerShare + (shares > 0 ? capital / shares : 0);
+    final perShare = o.fairValuePerShare + (shares > 0 ? capital / shares : 0);
 
-    final ManualTerminal tipo;
-    if (a.reinvestmentPolicy == ReinvestmentPolicy.parcelaFixa) {
-      tipo = ManualTerminal.parcelaFixa;
+    final ManualTerminal kind;
+    if (a.reinvestmentPolicy == ReinvestmentPolicy.fixedFraction) {
+      kind = ManualTerminal.fixedFraction;
     } else if (a.terminalReturnOnCapital != null) {
-      tipo = ManualTerminal.vantagem;
+      kind = ManualTerminal.advantage;
     } else if (a.contractYearsAfterHorizon != null && a.returnOnCapital > 0) {
-      tipo = ManualTerminal.contrato;
+      kind = ManualTerminal.contract;
     } else {
-      tipo = ManualTerminal.neutro;
+      kind = ManualTerminal.neutral;
     }
 
-    final avisos = <ManualNotice>[];
-    final confinados = [
-      for (final y in anos)
+    final warnings = <ManualNotice>[];
+    final confinedValues = [
+      for (final y in years)
         if (y.plannedGrowth - y.growth > 1e-9) y.year,
     ];
-    if (confinados.isNotEmpty) {
-      avisos.add(
-        ManualNotice(ManualNoticeKind.crescimentoConfinado, years: confinados),
+    if (confinedValues.isNotEmpty) {
+      warnings.add(
+        ManualNotice(ManualNoticeKind.confinedGrowth, years: confinedValues),
       );
     }
-    final negativos = [
-      for (final y in anos)
+    final negatives = [
+      for (final y in years)
         if (y.flow < 0) y.year,
     ];
-    if (negativos.isNotEmpty) {
-      avisos.add(
-        ManualNotice(ManualNoticeKind.fluxoNegativo, years: negativos),
+    if (negatives.isNotEmpty) {
+      warnings.add(
+        ManualNotice(ManualNoticeKind.negativeFlow, years: negatives),
       );
     }
-    if (isConcession && tipo != ManualTerminal.contrato) {
-      avisos.add(const ManualNotice(ManualNoticeKind.concessaoPerpetua));
+    if (isConcession && kind != ManualTerminal.contract) {
+      warnings.add(const ManualNotice(ManualNoticeKind.perpetualConcession));
     }
-    if (tipo == ManualTerminal.neutro &&
-        p.perpetualGrowth != motorPremises.perpetualGrowth) {
-      avisos.add(const ManualNotice(ManualNoticeKind.perpetuidadeNeutra));
+    if (kind == ManualTerminal.neutral &&
+        p.perpetualGrowth != enginePremises.perpetualGrowth) {
+      warnings.add(const ManualNotice(ManualNoticeKind.neutralPerpetuity));
     }
 
     return ManualOutcome(
-      fairValuePerShare: porPapel,
-      equityValue: explicito + terminalPv - minoritarios + capital,
-      explicitPresentValue: explicito,
+      fairValuePerShare: perShare,
+      equityValue: explicitValue + terminalPv - minorityValue + capital,
+      explicitPresentValue: explicitValue,
       terminalValue: o.terminalValue * e,
       terminalPresentValue: terminalPv,
-      minorityInterest: minoritarios,
+      minorityInterest: minorityValue,
       postStatementCapital: capital,
-      terminalRate: o.terminalDiscountRateUsed ?? taxas.terminal,
+      terminalRate: o.terminalDiscountRateUsed ?? rates.terminal,
       capitalCostRates: lane == ValuationLane.firm
           ? List.unmodifiable([
               for (var t = 1; t <= n; t++) a.discountRateAt(t),
@@ -837,58 +837,58 @@ class ManualValuation {
       terminalCapitalCost: lane == ValuationLane.firm
           ? a.terminalDiscountRate
           : null,
-      terminalKind: tipo,
-      years: List.unmodifiable(anos),
-      notices: List.unmodifiable(avisos),
+      terminalKind: kind,
+      years: List.unmodifiable(years),
+      notices: List.unmodifiable(warnings),
     );
   }
 
   /// O mesmo tratamento que a rota derivada dá aos minoritários: negativo não
   /// soma valor ao controlador.
-  static double _naoNegativo(double v) => v.isFinite && v > 0 ? v : 0.0;
+  static double _nonNegative(double v) => v.isFinite && v > 0 ? v : 0.0;
 
   /// `true` quando o grupo [g] difere entre [a] e [b].
-  static bool _difere(ManualGroup g, ManualPremises a, ManualPremises b) =>
+  static bool _differs(ManualGroup g, ManualPremises a, ManualPremises b) =>
       switch (g) {
-        ManualGroup.lucro => a.baseProfit != b.baseProfit,
-        ManualGroup.crescimento =>
+        ManualGroup.profit => a.baseProfit != b.baseProfit,
+        ManualGroup.growth =>
           a.growth != b.growth || a.growthPath != b.growthPath,
-        ManualGroup.reinvestimento =>
+        ManualGroup.reinvestment =>
           a.reinvestment != b.reinvestment ||
               a.returnOnCapital != b.returnOnCapital ||
-              (b.reinvestment == ManualReinvestment.parcelaFixa &&
+              (b.reinvestment == ManualReinvestment.fixedFraction &&
                   a.retention != b.retention),
-        ManualGroup.taxa =>
+        ManualGroup.rate =>
           a.discountRate != b.discountRate || a.ratePath != b.ratePath,
-        ManualGroup.perpetuidade => a.perpetualGrowth != b.perpetualGrowth,
-        ManualGroup.capitalNovo => a.terminalReturn != b.terminalReturn,
+        ManualGroup.perpetuity => a.perpetualGrowth != b.perpetualGrowth,
+        ManualGroup.newCapital => a.terminalReturn != b.terminalReturn,
       };
 
-  /// [atual] com os campos do grupo [g] trocados pelos de [alvo].
-  static ManualPremises _aplicar(
+  /// [current] com os campos do grupo [g] trocados pelos de [target].
+  static ManualPremises _apply(
     ManualGroup g,
-    ManualPremises atual,
-    ManualPremises alvo,
+    ManualPremises current,
+    ManualPremises target,
   ) => switch (g) {
-    ManualGroup.lucro => atual.copyWith(baseProfit: alvo.baseProfit),
-    ManualGroup.crescimento => atual.copyWith(
-      growth: alvo.growth,
-      growthPath: alvo.growthPath,
+    ManualGroup.profit => current.copyWith(baseProfit: target.baseProfit),
+    ManualGroup.growth => current.copyWith(
+      growth: target.growth,
+      growthPath: target.growthPath,
     ),
-    ManualGroup.reinvestimento => atual.copyWith(
-      reinvestment: alvo.reinvestment,
-      returnOnCapital: alvo.returnOnCapital,
-      retention: alvo.retention,
+    ManualGroup.reinvestment => current.copyWith(
+      reinvestment: target.reinvestment,
+      returnOnCapital: target.returnOnCapital,
+      retention: target.retention,
     ),
-    ManualGroup.taxa => atual.copyWith(
-      discountRate: alvo.discountRate,
-      ratePath: alvo.ratePath,
+    ManualGroup.rate => current.copyWith(
+      discountRate: target.discountRate,
+      ratePath: target.ratePath,
     ),
-    ManualGroup.perpetuidade => atual.copyWith(
-      perpetualGrowth: alvo.perpetualGrowth,
+    ManualGroup.perpetuity => current.copyWith(
+      perpetualGrowth: target.perpetualGrowth,
     ),
-    ManualGroup.capitalNovo => atual.copyWith(
-      terminalReturn: alvo.terminalReturn,
+    ManualGroup.newCapital => current.copyWith(
+      terminalReturn: target.terminalReturn,
     ),
   };
 
@@ -900,41 +900,41 @@ class ManualValuation {
   /// degraus. Um grupo que, aplicado sozinho, deixa a conta sem valor finito é
   /// somado ao seguinte, e o degrau diz os dois.
   List<ManualStep> attribution(ManualPremises p) {
-    final m = motorPremises;
-    final inicio = evaluate(m).valueOrNull?.fairValuePerShare ?? motorFairValue;
-    var atual = m;
-    var anterior = inicio;
-    final pendentes = <ManualGroup>[];
-    final degraus = <ManualStep>[];
+    final m = enginePremises;
+    final start = evaluate(m).valueOrNull?.fairValuePerShare ?? engineFairValue;
+    var current = m;
+    var previous = start;
+    final pending = <ManualGroup>[];
+    final steps = <ManualStep>[];
     for (final g in ManualGroup.values) {
-      if (!_difere(g, m, p)) continue;
-      atual = _aplicar(g, atual, p);
-      pendentes.add(g);
-      final r = evaluate(atual).valueOrNull;
+      if (!_differs(g, m, p)) continue;
+      current = _apply(g, current, p);
+      pending.add(g);
+      final r = evaluate(current).valueOrNull;
       if (r == null) continue;
-      degraus.add(
+      steps.add(
         ManualStep(
-          groups: List.unmodifiable(pendentes),
-          from: anterior,
+          groups: List.unmodifiable(pending),
+          from: previous,
           to: r.fairValuePerShare,
         ),
       );
-      anterior = r.fairValuePerShare;
-      pendentes.clear();
+      previous = r.fairValuePerShare;
+      pending.clear();
     }
-    if (pendentes.isNotEmpty) {
-      degraus.add(
-        ManualStep(groups: List.unmodifiable(pendentes), from: anterior),
+    if (pending.isNotEmpty) {
+      steps.add(
+        ManualStep(groups: List.unmodifiable(pending), from: previous),
       );
     }
-    return List.unmodifiable(degraus);
+    return List.unmodifiable(steps);
   }
 
   /// Faixa examinada por [solve] para cada campo.
-  (double, double) _faixa(ManualField f) => switch (f) {
+  (double, double) _band(ManualField f) => switch (f) {
     ManualField.baseProfit => (
-      motorPremises.baseProfit * 0.001,
-      motorPremises.baseProfit * 50,
+      enginePremises.baseProfit * 0.001,
+      enginePremises.baseProfit * 50,
     ),
     ManualField.growth => (-0.5, 1.0),
     ManualField.discountRate => (0.001, 0.6),
@@ -957,27 +957,27 @@ class ManualValuation {
     ManualPremises from, {
     double? target,
   }) {
-    final alvo = target ?? marketPrice;
-    double? desvio(double v) {
+    final targetValue = target ?? marketPrice;
+    double? deviation(double v) {
       final r = evaluate(from.withValue(field, v)).valueOrNull;
       if (r == null || !r.fairValuePerShare.isFinite) return null;
-      return r.fairValuePerShare - alvo;
+      return r.fairValuePerShare - targetValue;
     }
 
-    final (lo, hi) = _faixa(field);
-    const pontos = 400;
+    final (lo, hi) = _band(field);
+    const points = 400;
     double? a;
     double? fa;
     double? b;
-    double? melhor;
-    double? melhorDesvio;
-    for (var i = 0; i <= pontos; i++) {
-      final v = lo + (hi - lo) * i / pontos;
-      final fv = desvio(v);
+    double? best;
+    double? bestDeviation;
+    for (var i = 0; i <= points; i++) {
+      final v = lo + (hi - lo) * i / points;
+      final fv = deviation(v);
       if (fv == null) continue;
-      if (melhorDesvio == null || fv.abs() < melhorDesvio.abs()) {
-        melhor = v;
-        melhorDesvio = fv;
+      if (bestDeviation == null || fv.abs() < bestDeviation.abs()) {
+        best = v;
+        bestDeviation = fv;
       }
       if (fa != null && (fa <= 0) != (fv <= 0)) {
         b = v;
@@ -989,25 +989,25 @@ class ManualValuation {
     if (a == null || fa == null || b == null) {
       return ManualSolution(
         field: field,
-        target: alvo,
-        closestValue: melhor,
-        closestPrice: melhorDesvio == null ? null : melhorDesvio + alvo,
+        target: targetValue,
+        closestValue: best,
+        closestPrice: bestDeviation == null ? null : bestDeviation + targetValue,
       );
     }
-    var esq = a;
+    var left = a;
     var dir = b;
-    var fEsq = fa;
+    var fLeft = fa;
     for (var i = 0; i < 80; i++) {
-      final meio = (esq + dir) / 2;
-      final fm = desvio(meio);
+      final mid = (left + dir) / 2;
+      final fm = deviation(mid);
       if (fm == null) break;
-      if ((fEsq <= 0) == (fm <= 0)) {
-        esq = meio;
-        fEsq = fm;
+      if ((fLeft <= 0) == (fm <= 0)) {
+        left = mid;
+        fLeft = fm;
       } else {
-        dir = meio;
+        dir = mid;
       }
     }
-    return ManualSolution(field: field, target: alvo, value: (esq + dir) / 2);
+    return ManualSolution(field: field, target: targetValue, value: (left + dir) / 2);
   }
 }

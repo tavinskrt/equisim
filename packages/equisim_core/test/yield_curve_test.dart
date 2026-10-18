@@ -5,13 +5,13 @@ import 'package:test/test.dart';
 
 final _ref = DateTime.utc(2026, 9, 10);
 
-YieldCurve _curva(List<List<double>> pts) =>
+YieldCurve _curve(List<List<double>> pts) =>
     YieldCurve.of(_ref, [for (final p in pts) CurveVertex(p[0], p[1])])!;
 
 void main() {
   group('Curva', () {
     test('plana devolve a mesma taxa em todo prazo e todo forward', () {
-      final c = _curva([
+      final c = _curve([
         [0.5, 0.10],
         [2, 0.10],
         [5, 0.10],
@@ -27,7 +27,7 @@ void main() {
     });
 
     test('reproduz a taxa de cada vértice', () {
-      final c = _curva([
+      final c = _curve([
         [0.3, 0.1356],
         [2.3, 0.1393],
         [5.3, 0.1429],
@@ -40,19 +40,19 @@ void main() {
 
     test('o forward entre dois vértices fecha o fator composto', () {
       // (1+z2)^t2 = (1+z1)^t1 · (1+f)^(t2−t1)
-      final c = _curva([
+      final c = _curve([
         [1, 0.10],
         [3, 0.12],
         [5, 0.13],
       ]);
       final f = c.forwardRate(1, 3);
-      final esquerda = math.pow(1.12, 3);
-      final direita = math.pow(1.10, 1) * math.pow(1 + f, 2);
-      expect(direita, closeTo(esquerda, 1e-12));
+      final left = math.pow(1.12, 3);
+      final right = math.pow(1.10, 1) * math.pow(1 + f, 2);
+      expect(right, closeTo(left, 1e-12));
     });
 
     test('curva inclinada: forward acima da taxa à vista', () {
-      final c = _curva([
+      final c = _curve([
         [1, 0.05],
         [5, 0.08],
         [10, 0.10],
@@ -63,18 +63,18 @@ void main() {
     });
 
     test('além do último vértice segue o forward do último segmento', () {
-      final c = _curva([
+      final c = _curve([
         [1, 0.10],
         [5, 0.11],
         [10, 0.12],
       ]);
-      final ultimo = c.forwardRate(5, 10);
-      expect(c.forwardRate(10, 11), closeTo(ultimo, 1e-12));
-      expect(c.terminalRate(15), closeTo(ultimo, 1e-12));
+      final last = c.forwardRate(5, 10);
+      expect(c.forwardRate(10, 11), closeTo(last, 1e-12));
+      expect(c.terminalRate(15), closeTo(last, 1e-12));
     });
 
     test('antes do primeiro vértice, taxa à vista plana', () {
-      final c = _curva([
+      final c = _curve([
         [1, 0.10],
         [5, 0.11],
         [10, 0.12],
@@ -116,49 +116,49 @@ void main() {
   });
 
   group('Tesouro Direto', () {
-    TreasuryQuote q(String tipo, DateTime venc, DateTime base, double taxa) =>
-        TreasuryQuote(type: tipo, maturity: venc, baseDate: base, rate: taxa);
+    TreasuryQuote q(String kind, DateTime maturity, DateTime base, double rate) =>
+        TreasuryQuote(type: kind, maturity: maturity, baseDate: base, rate: rate);
 
-    final sexta = DateTime.utc(2026, 9, 11);
-    final quinta = DateTime.utc(2026, 9, 10);
-    List<TreasuryQuote> dia(DateTime base, double deslocamento) => [
-          q(TreasuryCurve.ltn, DateTime.utc(2027, 1, 1), base, 0.1356 + deslocamento),
-          q(TreasuryCurve.ltn, DateTime.utc(2029, 1, 1), base, 0.1393 + deslocamento),
-          q(TreasuryCurve.ntnF, DateTime.utc(2029, 1, 1), base, 0.1373 + deslocamento),
-          q(TreasuryCurve.ntnF, DateTime.utc(2037, 1, 1), base, 0.1433 + deslocamento),
+    final friday = DateTime.utc(2026, 9, 11);
+    final thursday = DateTime.utc(2026, 9, 10);
+    List<TreasuryQuote> day(DateTime base, double shift) => [
+          q(TreasuryCurve.ltn, DateTime.utc(2027, 1, 1), base, 0.1356 + shift),
+          q(TreasuryCurve.ltn, DateTime.utc(2029, 1, 1), base, 0.1393 + shift),
+          q(TreasuryCurve.ntnF, DateTime.utc(2029, 1, 1), base, 0.1373 + shift),
+          q(TreasuryCurve.ntnF, DateTime.utc(2037, 1, 1), base, 0.1433 + shift),
           q('Tesouro Selic', DateTime.utc(2030, 1, 1), base, 0.0001),
         ];
 
     test('usa a data-base mais recente até a avaliação', () {
-      final c = TreasuryCurve.at([...dia(quinta, 0), ...dia(sexta, 0.01)],
+      final c = TreasuryCurve.at([...day(thursday, 0), ...day(friday, 0.01)],
           DateTime.utc(2026, 9, 13))!;
-      expect(c.referenceDate, sexta);
+      expect(c.referenceDate, friday);
     });
 
     test('NUNCA olha para a frente', () {
       // Avaliando na quinta, a curva de sexta ainda nao existia.
-      final c = TreasuryCurve.at([...dia(quinta, 0), ...dia(sexta, 0.01)],
-          quinta)!;
-      expect(c.referenceDate, quinta);
+      final c = TreasuryCurve.at([...day(thursday, 0), ...day(friday, 0.01)],
+          thursday)!;
+      expect(c.referenceDate, thursday);
       expect(c.vertices.first.rate, closeTo(0.1356, 1e-12));
     });
 
     test('sem data-base na última semana, não inventa curva', () {
-      expect(TreasuryCurve.at(dia(quinta, 0), DateTime.utc(2026, 9, 30)),
+      expect(TreasuryCurve.at(day(thursday, 0), DateTime.utc(2026, 9, 30)),
           isNull);
     });
 
     test('LTN vence a NTN-F no mesmo vencimento, e a Selic não entra', () {
-      final c = TreasuryCurve.at(dia(quinta, 0), quinta)!;
+      final c = TreasuryCurve.at(day(thursday, 0), thursday)!;
       expect(c.vertices.length, 3,
           reason: 'duas LTN e uma NTN-F longa; a NTN-F de 2029 e a Selic saem');
-      final dois = c.vertices.firstWhere((v) => v.years > 2 && v.years < 3);
-      expect(dois.rate, closeTo(0.1393, 1e-12));
+      final two = c.vertices.firstWhere((v) => v.years > 2 && v.years < 3);
+      expect(two.rate, closeTo(0.1393, 1e-12));
     });
 
     test('o prazo é em dias úteis ÷ 252, como o PU do Tesouro — decisão 79',
         () {
-      final c = TreasuryCurve.at(dia(quinta, 0), quinta)!;
+      final c = TreasuryCurve.at(day(thursday, 0), thursday)!;
       // `du` conferido contra o PU das LTN de 10/09/2026: 76 e 575.
       expect(c.vertices[0].years, closeTo(76 / 252, 1e-12));
       expect(c.vertices[1].years, closeTo(575 / 252, 1e-12));
@@ -191,18 +191,18 @@ void main() {
         baseDate: DateTime.utc(2026, 9, 10),
         rate: 0.1433,
       );
-      final json = TreasuryQuotesCodec.encode([q], geradoEm: DateTime.utc(2026, 9, 10));
-      final lido = TreasuryQuotesCodec.decode(json).single;
-      expect(lido.type, q.type);
-      expect(lido.maturity, q.maturity);
-      expect(lido.baseDate, q.baseDate);
-      expect(lido.rate, q.rate);
+      final json = TreasuryQuotesCodec.encode([q], generatedAt: DateTime.utc(2026, 9, 10));
+      final parsed = TreasuryQuotesCodec.decode(json).single;
+      expect(parsed.type, q.type);
+      expect(parsed.maturity, q.maturity);
+      expect(parsed.baseDate, q.baseDate);
+      expect(parsed.rate, q.rate);
       expect(TreasuryQuotesCodec.decode({...json, 'versao': 99}), isEmpty);
     });
 
     test('taxa corrompida no pacote fica de fora', () {
       final json = {
-        'versao': TreasuryQuotesCodec.versao,
+        'versao': TreasuryQuotesCodec.version,
         'cotacoes': [
           {'tipo': TreasuryCurve.ltn, 'vencimento': '2027-01-01', 'dataBase': '2026-09-10', 'taxa': 13.56},
         ],
