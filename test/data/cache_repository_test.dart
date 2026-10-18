@@ -902,22 +902,6 @@ void main() {
   });
 
   group('Reprodutibilidade', () {
-    test('cache limpo devolve o sistema ao estado inicial', () async {
-      final adapter = FixtureAdapter(routes: {
-        '/v2/stocks/historical': 'brapi_historical_batch',
-      });
-      final repository = PriceRepositoryImpl(
-        remote: BrapiDatasource(clientWith(adapter)),
-        cache: db,
-      );
-      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
-
-      await repository.dailyBatch([Ticker.parse('PETR4')], range);
-      await db.clearAll();
-      await repository.dailyBatch([Ticker.parse('PETR4')], range);
-
-      expect(adapter.callCount['/v2/stocks/historical'], 2);
-    });
   });
 }
 

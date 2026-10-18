@@ -4,9 +4,6 @@ enum BetaSource {
   /// Calculado pelo próprio domínio contra o ^BVSP, janela declarada.
   computed,
 
-  /// Informado pela fonte externa (janela e índice não documentados).
-  apiProvided,
-
   /// Arbitrado pelo usuário.
   manual,
 
@@ -482,13 +479,4 @@ class CostOfCapital {
 
   /// `true` quando o piso de [wacc] precisou agir.
   bool get waccWasFloored => rawWacc < capm.riskFreeRate;
-
-  /// Empresa sem dívida: WACC degenera para Ke.
-  factory CostOfCapital.unlevered(CapmInputs capm) => CostOfCapital(
-        capm: capm,
-        costOfDebt: 0.0,
-        taxRate: 0.0,
-        equityValue: 1.0,
-        debtValue: 0.0,
-      );
 }

@@ -200,34 +200,6 @@ void main() {
       expect(m.provenance.of('sharesOutstandingAsOf'), FieldSource.mercado);
     });
 
-    test('a tesouraria entra pela fração, e devolve contagem INTEIRA', () {
-      final s = FundamentalsSnapshot(
-        ticker: _t,
-        fiscalPeriodEnd: DateTime(2024, 12, 31),
-        treasuryFraction: 7250 / 234178,
-      );
-      // MILS3 em 2024: 7.250 de 234.178 em tesouraria — 3,096%. A base de
-      // mercado sao 234.178.210 papeis, e a liquida, 226.928.203.
-      final liquida = s.sharesNetOfTreasury(234178210)!;
-      expect(liquida, liquida.roundToDouble(),
-          reason: 'contagem de acao e inteira');
-      expect(liquida, 226928203.0);
-      // A tolerancia e o proprio arredondamento: meia acao em 234.178.210
-      // desloca a fracao em 2,1e-9. Exigir mais que isso seria exigir que a
-      // contagem NAO fosse inteira.
-      expect(1 - liquida / 234178210, closeTo(7250 / 234178, 1e-8),
-          reason: 'a fracao se preserva, e a escala nao entra');
-    });
-
-    test('sem fração, a contagem absoluta ainda serve', () {
-      final s = FundamentalsSnapshot(
-        ticker: _t,
-        fiscalPeriodEnd: DateTime(2024, 12, 31),
-        treasuryShares: 1000,
-      );
-      expect(s.sharesNetOfTreasury(10000), 9000);
-    });
-
     test('valor de mercado e contagem corrente NUNCA vêm da CVM', () {
       // Mesmo que a CVM trouxesse — e ela nao traz —, estes descrevem o hoje
       // do papel, e nao o exercicio.
@@ -291,17 +263,11 @@ void main() {
   });
 
   group('Procedência', () {
-    test('conta por fonte e lista o que veio da CVM', () {
+    test('conta por fonte', () {
       final m = FundamentalsMerge.merge(cvm: _cvm(), mercado: _mercado())!;
       final c = m.provenance.contagem;
       expect(c[FieldSource.cvm], greaterThan(0));
       expect(c[FieldSource.mercado], greaterThan(0));
-      expect(m.provenance.daCvm, contains('netIncome'));
-      expect(m.provenance.daCvm, contains('totalAssets'));
-      expect(m.provenance.daCvm, isNot(contains('marketCap')));
-      // A lista sai ordenada, para o relatorio nao mudar entre execucoes.
-      final ordenada = [...m.provenance.daCvm]..sort();
-      expect(m.provenance.daCvm, ordenada);
     });
 
     test('o mapa é imutável', () {

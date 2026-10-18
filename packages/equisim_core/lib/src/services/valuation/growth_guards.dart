@@ -486,17 +486,6 @@ class MoatVerdict {
   /// relatório agrupa.
   MoatBlock? get primaryBlock => blocks.isEmpty ? null : blocks.first;
 
-  /// `true` quando **só** a ausência de excedente barrou — o ativo tem dado
-  /// suficiente, mas não rende acima do próprio custo de capital.
-  ///
-  /// Substitui o `blockedOnlyByReturn` da era do degrau: aquele media distância
-  /// a um limiar de rentabilidade que não existe mais, e este mede a única
-  /// fronteira que restou no nível, que é a do excedente ser positivo. É
-  /// fronteira sem degrau — atravessá-la concede `λ · e₀` com `e₀` próximo de
-  /// zero, e portanto valor próximo de zero.
-  bool get blockedOnlyByNoSpread =>
-      blocks.length == 1 && blocks.first == MoatBlock.semExcedente;
-
   /// Excedente do ciclo sobre o custo de capital de equilíbrio, em fração.
   double? get spread =>
       cycleReturn == null ? null : cycleReturn! - terminalDiscountRate;
@@ -962,22 +951,4 @@ abstract final class GrowthGuards {
     }
     return r;
   }
-
-  /// O retorno terminal do veredito, para quem só precisa do número.
-  static double? residualMoatReturn({
-    required double? cycleReturn,
-    required double terminalDiscountRate,
-    required double? externalCapitalRatio,
-    required int periods,
-    required List<({int year, double excess})> excessReturns,
-    required int projectionYears,
-  }) =>
-      residualMoat(
-        cycleReturn: cycleReturn,
-        terminalDiscountRate: terminalDiscountRate,
-        externalCapitalRatio: externalCapitalRatio,
-        periods: periods,
-        excessReturns: excessReturns,
-        projectionYears: projectionYears,
-      ).terminalReturn;
 }

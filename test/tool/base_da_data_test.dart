@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/b3/proventos.dart';
 import '../../tool/coortes/base_da_data.dart';
-import '../../tool/cvm/codigos_fca.dart';
 
 DateTime _d(int a, int m, int d) => DateTime.utc(a, m, d);
 

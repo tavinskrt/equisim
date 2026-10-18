@@ -157,14 +157,12 @@ void main() {
 
     test('pacote ausente vira ressalva, e a série continua', () async {
       final repo = comPacote(() async => throw StateError('asset ausente'));
-      expect(await repo.coverageOf(_t), CvmCoverage.pacoteAusente);
       expect(await repo.coverageNote(_t), contains('não trouxe o pacote'));
       expect((await repo.history(_t)).isOk, isTrue);
     });
 
     test('JSON inválido é ilegível, e diz por quê', () async {
       final repo = comPacote(() async => '{isto não é json');
-      expect(await repo.coverageOf(_t), CvmCoverage.pacoteIlegivel);
       expect(await repo.coverageNote(_t), contains('JSON é inválido'));
     });
 
@@ -174,7 +172,6 @@ void main() {
             'geradoEm': '2026-09-14',
             'tickers': {},
           }));
-      expect(await repo.coverageOf(_t), CvmCoverage.pacoteIlegivel);
       expect(await repo.coverageNote(_t), contains('versão'));
     });
 
@@ -184,19 +181,17 @@ void main() {
             'geradoEm': '2026-09-14',
             'tickers': {},
           }));
-      expect(await repo.coverageOf(_t), CvmCoverage.pacoteIlegivel);
+      expect(await repo.coverageNote(_t), contains('não traz ativo nenhum'));
     });
 
     test('ativo fora do pacote é declarado, com a data do pacote', () async {
       final repo = comPacote(() async => _pacote());
       final outro = Ticker.parse('PETR4');
-      expect(await repo.coverageOf(outro), CvmCoverage.semDocumentos);
       expect(await repo.coverageNote(outro), contains('14/09/2026'));
     });
 
     test('ativo coberto por pacote recente não leva ressalva', () async {
       final repo = comPacote(() async => _pacote());
-      expect(await repo.coverageOf(_t), CvmCoverage.coberto);
       expect(await repo.coverageNote(_t), isNull);
     });
 

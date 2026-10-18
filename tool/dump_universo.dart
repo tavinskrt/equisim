@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:equisim_core/equisim_core.dart';
 import 'validation/context.dart';
 
 Future<void> main(List<String> a) async {

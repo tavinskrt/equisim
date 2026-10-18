@@ -89,7 +89,6 @@ abstract final class CvmSeries {
   static CvmSeriesResult build({
     required List<CvmPeriodDocument> documentos,
     required List<FundamentalsSnapshot> mercado,
-    required DateTime asOf,
     required bool Function(FundamentalsSnapshot) publicado,
     required bool ancorada,
   }) {
@@ -97,7 +96,7 @@ abstract final class CvmSeries {
       ..sort((a, b) => a.fiscalPeriodEnd.compareTo(b.fiscalPeriodEnd));
 
     // **Só documento publicado na data**, nas duas séries. A DFP recebida
-    // depois de [asOf] ocupava o ano na mescla: o exercício de mercado daquele
+    // depois da data ocupava o ano na mescla: o exercício de mercado daquele
     // ano, publicado de fato, era descartado, e a cascata depois removia o
     // ponto mesclado por ser do futuro — o ano sumia. USIM3 em 04/09/2024:
     // DFP de 2023 reapresentada, com a versão ingerida recebida em 16/01/2025,
@@ -108,8 +107,7 @@ abstract final class CvmSeries {
     // reapresentado depois.
     final emVigor = vigentes(documentos, publicado);
     final daCvm = ancorada
-        ? TrailingTwelveMonths.serieAncorada(emVigor,
-            asOf: asOf, publicado: publicado)
+        ? TrailingTwelveMonths.serieAncorada(emVigor, publicado: publicado)
         : [
             for (final d in emVigor)
               if (d.kind == CvmDocumentKind.dfp) d.current,

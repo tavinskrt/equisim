@@ -74,7 +74,6 @@ class AuditBus extends ChangeNotifier {
   int _discardedNetwork = 0;
   int _originDiscardedCalculations = 0;
   int _originDiscardedNetwork = 0;
-  int _untransmitted = 0;
 
   AuditChannel? _channel;
   StreamSubscription<String>? _subscription;
@@ -96,10 +95,6 @@ class AuditBus extends ChangeNotifier {
   int get discardedNetwork => _discardedNetwork > _originDiscardedNetwork
       ? _discardedNetwork
       : _originDiscardedNetwork;
-
-  /// Eventos que não puderam ser transmitidos à outra janela. Com a
-  /// serialização segura do núcleo, deve ser sempre zero.
-  int get untransmitted => _untransmitted;
 
   /// Papel assumido pelo barramento, ou `null` enquanto ele não foi ligado.
   AuditRole? get role => _role;
@@ -163,7 +158,6 @@ class AuditBus extends ChangeNotifier {
         'descartados': _discardedPayload,
       }));
     } catch (error) {
-      _untransmitted++;
       debugPrint('⚠️  Evento de auditoria não transmitido: $error');
     }
   }

@@ -61,62 +61,6 @@ List<FundamentalsSnapshot> growingHistory({
 
 void main() {
   group('GrowthEstimator', () {
-    test('recupera exatamente a taxa de uma série geométrica', () {
-      final history = growingHistory(rate: 0.10);
-      final estimate = GrowthEstimator.fromHistory(
-        history,
-        (s) => s.freeCashFlow,
-        metricName: 'FCF',
-      );
-      expect(estimate.rate, closeTo(0.10, 1e-9));
-      expect(estimate.periodsUsed, 10);
-      expect(estimate.clamped, isFalse);
-    });
-
-    test('limita crescimento implausível e registra o valor bruto', () {
-      final estimate = GrowthEstimator.fromHistory(
-        growingHistory(rate: 0.50),
-        (s) => s.freeCashFlow,
-      );
-      expect(estimate.rate, GrowthEstimator.ceilingRate);
-      expect(estimate.clamped, isTrue);
-      expect(estimate.basis, contains('limitado'));
-    });
-
-    test('impõe piso a séries em queda acentuada', () {
-      final estimate = GrowthEstimator.fromHistory(
-        growingHistory(rate: -0.30),
-        (s) => s.freeCashFlow,
-      );
-      expect(estimate.rate, GrowthEstimator.floorRate);
-      expect(estimate.clamped, isTrue);
-    });
-
-    test('cai para taxa conservadora com histórico curto demais', () {
-      final estimate = GrowthEstimator.fromHistory(
-        [complete(2024), complete(2025)],
-        (s) => s.freeCashFlow,
-      );
-      expect(estimate.rate, GrowthEstimator.fallbackRate);
-      expect(estimate.periodsUsed, 0);
-    });
-
-    test('ignora exercícios com valor não positivo', () {
-      final history = [
-        complete(2020),
-        FundamentalsSnapshot(
-          ticker: ticker,
-          fiscalPeriodEnd: DateTime(2021, 12, 31),
-          freeCashFlow: -500, // prejuízo não informa crescimento
-        ),
-        complete(2022, scale: 1.21),
-        complete(2023, scale: 1.331),
-      ];
-      final estimate =
-          GrowthEstimator.fromHistory(history, (s) => s.freeCashFlow);
-      expect(estimate.periodsUsed, 3);
-      expect(estimate.rate, greaterThan(0));
-    });
 
     test('perpetuidade nunca supera o crescimento da economia', () {
       // O teto passa a ser informado, não constante: 6,52% é a composição do
@@ -866,18 +810,6 @@ void main() {
       expect(outcome.reserva.length, 2);
     });
 
-    test('recalcula a concentração setorial na mesma operação', () {
-      final result = SwapAssetBetweenPortfolios.call(
-        principal: principalWith([assetOf('ITUB4', 'financeiro')]),
-        reserva: reservaWith([assetOf('BBAS3', 'financeiro')]),
-        ticker: Ticker.parse('BBAS3'),
-        toPrincipal: true,
-      );
-      final outcome = result.unwrap();
-      expect(outcome.concentration.hasAlert, isTrue);
-      expect(outcome.concentration.concentrated.first.sector.key, 'financeiro');
-    });
-
     test('rejeita ativo ausente na origem', () {
       final result = SwapAssetBetweenPortfolios.call(
         principal: principalWith([assetOf('PETR4', 'energia')]),
@@ -1081,22 +1013,6 @@ void main() {
         anchors: MarketAnchors.fallback2026,
       );
       expect(result.isErr, isTrue);
-    });
-
-    test('veredito de viabilidade acompanha o alinhamento', () {
-      final goal = FinancialGoal.unvalidated(
-        initialContribution: Money.fromReais(1000),
-        monthlyContribution: Money.fromReais(100),
-        months: 24,
-        targetWealth: Money.fromReais(100000),
-      );
-      final alignment = EvaluateGoalAlignment.call(
-        portfolio: portfolio,
-        goal: goal,
-        valuations: const {},
-        anchors: MarketAnchors.fallback2026,
-      ).unwrap();
-      expect(alignment.verdict.level, FeasibilityLevel.unrealistic);
     });
   });
 }

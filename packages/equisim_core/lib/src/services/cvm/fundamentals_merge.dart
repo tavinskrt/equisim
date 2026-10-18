@@ -47,9 +47,6 @@ class FundamentalsProvenance {
   FundamentalsProvenance(Map<String, FieldSource> byField)
       : byField = Map.unmodifiable(byField);
 
-  /// Procedência vazia — tudo ausente até que alguém informe.
-  static final FundamentalsProvenance vazia = FundamentalsProvenance(const {});
-
   /// De onde veio [campo]. [FieldSource.ausente] quando ninguém informou.
   FieldSource of(String campo) => byField[campo] ?? FieldSource.ausente;
 
@@ -61,12 +58,6 @@ class FundamentalsProvenance {
     }
     return out;
   }
-
-  /// Campos que vieram da CVM, em ordem alfabética.
-  List<String> get daCvm => [
-        for (final e in byField.entries)
-          if (e.value == FieldSource.cvm) e.key,
-      ]..sort();
 }
 
 /// Um exercício mesclado, com o que veio de onde.

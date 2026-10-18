@@ -75,12 +75,6 @@ void main() {
     expect(p.window(DateTime(2018, 3, 31)).length, 29);
   });
 
-  test('o último trimestre medido até a data', () {
-    final p = _pacote((_) => 0.0);
-    expect(p.latestAt(DateTime(2026, 9, 14))!.date, DateTime.utc(2026, 6, 30));
-    expect(p.latestAt(DateTime(2010, 1, 1)), isNull);
-  });
-
   group('codec', () {
     test('ida e volta preservam a série', () {
       final p = _pacote((d) => d.year / 100000);

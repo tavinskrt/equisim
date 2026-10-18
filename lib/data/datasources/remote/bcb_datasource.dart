@@ -84,24 +84,6 @@ class BcbDatasource {
     });
   }
 
-  /// Atalho para a série do CDI no intervalo.
-  ///
-  /// A taxa vem **diária em base 252 dias úteis**; anualizar exige composição
-  /// por `RateSeries.annualized()`, nunca multiplicação.
-  ///
-  /// Nenhum caminho de produção passa por aqui — `MarketMacroRepository` chama
-  /// [series] com [seriesCdiDaily] direto, para aplicar cache na mesma etapa.
-  /// Preservado como API legível do datasource e exercitado pelos testes.
-  Future<Result<RateSeries>> cdi(DateRange range) =>
-      series(seriesCdiDaily, range);
-
-  /// Atalho para a série do IPCA no intervalo.
-  ///
-  /// A taxa vem **mensal**: anualizar exige `annualized(periodsPerYear: 12)`.
-  /// Como [cdi], é contornado em produção pelo repositório.
-  Future<Result<RateSeries>> ipca(DateRange range) =>
-      series(seriesIpcaMonthly, range);
-
   static String _brDate(DateTime date) =>
       '${date.day.toString().padLeft(2, '0')}/'
       '${date.month.toString().padLeft(2, '0')}/${date.year}';

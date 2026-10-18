@@ -174,22 +174,6 @@ class B3Issuer {
     required this.events,
     this.classification,
   });
-
-  /// Eventos com data ex em `(depois, ate]`, compostos num fator só — o que
-  /// transforma uma contagem de [depois] na base de [ate].
-  ///
-  /// Só eventos do [isin] informado: classes do mesmo emissor podem ter
-  /// eventos diferentes.
-  double factorBetween(String isin, DateTime depois, DateTime ate) {
-    final d = DateTime.utc(depois.year, depois.month, depois.day);
-    final a = DateTime.utc(ate.year, ate.month, ate.day);
-    var f = 1.0;
-    for (final e in events) {
-      if (e.isin != isin) continue;
-      if (e.exDate.isAfter(d) && !e.exDate.isAfter(a)) f *= e.factor;
-    }
-    return f;
-  }
 }
 
 /// Leitura do registro.

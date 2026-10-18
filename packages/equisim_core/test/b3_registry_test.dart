@@ -111,14 +111,6 @@ void main() {
       expect(e.events.first.exDate.isBefore(e.events.last.exDate), isTrue);
     });
 
-    test('fator entre duas datas compõe só os eventos no intervalo', () {
-      final e = B3Registry.issuer(json, consultedOn: _d(2026, 9, 14))!;
-      expect(e.factorBetween('BRBBASACNOR3', _d(2023, 12, 31), _d(2026, 9, 14)), 2);
-      expect(e.factorBetween('BRBBASACNOR3', _d(2024, 12, 31), _d(2026, 9, 14)), 1);
-      expect(e.factorBetween('BRBBASACNPR0', _d(2023, 12, 31), _d(2026, 9, 14)), 1,
-          reason: 'outro ISIN');
-    });
-
     test('sem código não é emissor', () {
       expect(B3Registry.issuer({'code': ''}, consultedOn: _d(2026, 9, 14)), isNull);
     });

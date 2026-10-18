@@ -77,8 +77,6 @@ double _q(List<double> v, double p) {
 double _mediana(List<double> v) => _q(v, 0.5);
 
 class _Leitura {
-  _Leitura(this.premio);
-  final double premio;
   final Map<String, int> justoCentavos = {};
   final Map<String, double> potencial = {};
 }
@@ -165,7 +163,7 @@ Future<void> main(List<String> args) async {
     final leituras = <int, _Leitura>{};
     for (var iPremio = 0; iPremio < _premios.length; iPremio++) {
       final premio = _premios[iPremio];
-      final l = _Leitura(premio);
+      final l = _Leitura();
       final avaliadas = <Ticker, ValuationResult?>{};
       var i = 0;
       for (final t in c.universo) {

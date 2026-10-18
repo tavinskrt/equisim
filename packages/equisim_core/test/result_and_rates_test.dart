@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 void main() {
   group('Result', () {
     test('Ok carrega valor e não carrega falha', () {
-      const result = Result<int>.ok(42);
+      const Result<int> result = Ok(42);
       expect(result.isOk, isTrue);
       expect(result.isErr, isFalse);
       expect(result.valueOrNull, 42);
@@ -13,7 +13,7 @@ void main() {
     });
 
     test('Err carrega falha e não carrega valor', () {
-      const result = Result<int>.err(InvalidInput('erro'));
+      const Result<int> result = Err(InvalidInput('erro'));
       expect(result.isErr, isTrue);
       expect(result.valueOrNull, isNull);
       expect(result.failureOrNull, isA<InvalidInput>());
@@ -21,36 +21,36 @@ void main() {
     });
 
     test('map transforma apenas o sucesso', () {
-      expect(const Result<int>.ok(2).map((v) => v * 3).unwrap(), 6);
-      const failure = Result<int>.err(InvalidInput('x'));
+      expect(const Ok<int>(2).map((v) => v * 3).unwrap(), 6);
+      const Result<int> failure = Err(InvalidInput('x'));
       expect(failure.map((v) => v * 3).isErr, isTrue);
     });
 
     test('flatMap encadeia sem aninhar', () {
-      final chained = const Result<int>.ok(2)
-          .flatMap((v) => Result<String>.ok('valor $v'));
+      final chained = const Ok<int>(2)
+          .flatMap((v) => Ok<String>('valor $v'));
       expect(chained.unwrap(), 'valor 2');
 
-      final shortCircuit = const Result<int>.err(InvalidInput('x'))
-          .flatMap((v) => Result<String>.ok('nunca'));
+      final shortCircuit = const Err<int>(InvalidInput('x'))
+          .flatMap((v) => Ok<String>('nunca'));
       expect(shortCircuit.isErr, isTrue);
     });
 
     test('fold trata os dois lados', () {
       expect(
-        const Result<int>.ok(5).fold((v) => 'ok $v', (f) => 'erro'),
+        const Ok<int>(5).fold((v) => 'ok $v', (f) => 'erro'),
         'ok 5',
       );
       expect(
-        const Result<int>.err(InvalidInput('x'))
+        const Err<int>(InvalidInput('x'))
             .fold((v) => 'ok', (f) => 'erro: ${f.message}'),
         'erro: x',
       );
     });
 
     test('getOrElse devolve o padrão em caso de falha', () {
-      expect(const Result<int>.ok(1).getOrElse(99), 1);
-      expect(const Result<int>.err(InvalidInput('x')).getOrElse(99), 99);
+      expect(const Ok<int>(1).getOrElse(99), 1);
+      expect(const Err<int>(InvalidInput('x')).getOrElse(99), 99);
     });
 
     test('falhas carregam contexto tipado', () {
@@ -122,9 +122,7 @@ void main() {
     });
 
     test('série vazia não quebra', () {
-      // `final`, e não `const`: o construtor ordena desde a lente `nucleo` de
-      // 21/09/2026, e ordenar não é operação de tempo de compilação.
-      final empty = RateSeries.empty;
+      final empty = RateSeries(const []);
       expect(empty.isEmpty, isTrue);
       expect(empty.accumulated, 0.0);
       expect(empty.annualized(), 0.0);
@@ -150,7 +148,7 @@ void main() {
         ],
       );
       expect(series.firstDate, DateTime(2024, 1, 1));
-      expect(series.lastDate, DateTime(2024, 1, 3));
+      expect(series.points.last.date, DateTime(2024, 1, 3));
       expect(series.points.map((p) => p.close).toList(), [10, 11, 12]);
     });
 

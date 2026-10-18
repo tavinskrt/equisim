@@ -89,9 +89,6 @@ class FinancialGoal {
     ));
   }
 
-  /// Prazo em anos, derivado de [months]. Fração exata, sem arredondar.
-  double get years => months / 12.0;
-
   /// Capital que o próprio investidor aporta ao longo do plano, sem
   /// rendimento algum.
   Money get totalContributed =>
@@ -106,17 +103,9 @@ class RequiredReturn {
   /// Taxa mensal, em fração.
   final double monthly;
 
-  /// Iterações consumidas pelo solver.
-  final int iterations;
-
-  /// `true` quando a raiz veio da bisseção de resguardo, não de Newton.
-  final bool usedBisection;
-
-  /// Agrupa a taxa resolvida e o diagnóstico do solver.
+  /// Declara a taxa resolvida.
   const RequiredReturn({
     required this.monthly,
-    required this.iterations,
-    this.usedBisection = false,
   });
 
   /// Taxa anual equivalente: `(1 + i)¹² − 1`.
@@ -124,11 +113,4 @@ class RequiredReturn {
   /// Conversão por **composição**, nunca por multiplicação: `i × 12` erra por
   /// dezenas de pontos percentuais nas taxas que uma meta agressiva exige.
   double get annual => math.pow(1 + monthly, 12).toDouble() - 1;
-
-  /// Taxa semestral equivalente: `(1 + anual)^(1/2) − 1`, ou seja
-  /// `(1 + mensal)⁶ − 1`.
-  ///
-  /// Também por composição. Existe para exibição em prazos intermediários;
-  /// nenhum cálculo do pacote a consome.
-  double get semiAnnual => math.pow(1 + annual, 0.5).toDouble() - 1;
 }

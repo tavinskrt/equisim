@@ -123,13 +123,4 @@ class ApiConfig {
   /// `true` quando a credencial veio por via que a expõe no bundle.
   bool get credentialIsExposed =>
       mode == BrapiMode.direct && credentialSource.contains('.env');
-
-  /// Descrição segura para log e diagnóstico — nunca expõe o token.
-  String get diagnostics => switch (mode) {
-        BrapiMode.proxied => 'brapi via proxy ($brapiBaseUrl)',
-        BrapiMode.direct => brapiToken == null
-            ? 'brapi direta, SEM credencial'
-            : 'brapi direta, token ****${brapiToken!.length > 4 ? brapiToken!.substring(brapiToken!.length - 4) : ''} '
-                '[$credentialSource]',
-      };
 }

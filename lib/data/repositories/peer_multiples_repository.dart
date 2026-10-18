@@ -43,10 +43,4 @@ class PeerMultiplesRepository {
   /// mediana do grupo.
   Future<PeerMultipleSet?> forTicker(Ticker ticker) async =>
       (await _medianas())[ticker.value];
-
-  /// Data em que as medianas foram apuradas, ou `null` sem pacote.
-  Future<DateTime?> get asOf async {
-    final m = await _medianas();
-    return m.isEmpty ? null : m.values.first.asOf;
-  }
 }

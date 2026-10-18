@@ -30,17 +30,10 @@ class TriangularRange {
     required this.max,
   });
 
-  /// Faixa degenerada: valor certo.
-  const TriangularRange.fixed(double value)
-      : min = value,
-        mode = value,
-        max = value;
-
   /// `true` quando a faixa colapsou num único ponto e [sample] é constante.
   ///
   /// Comparação exata de `double` é correta aqui: o interesse é saber se as
-  /// pontas são o **mesmo** valor — tipicamente por [TriangularRange.fixed] —,
-  /// não se estão próximas. Uma faixa estreitíssima porém não degenerada
+  /// pontas são o **mesmo** valor, não se estão próximas. Uma faixa estreitíssima porém não degenerada
   /// continua sendo amostrada, e é isso que se quer.
   bool get isDegenerate => min == max;
 

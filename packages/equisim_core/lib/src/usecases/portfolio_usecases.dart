@@ -11,7 +11,6 @@ import '../services/goal/feasibility.dart';
 import '../services/goal/required_return.dart';
 import '../services/metrics/returns.dart';
 import '../services/portfolio/expected_return.dart';
-import '../services/portfolio/sector_concentration.dart';
 import '../services/portfolio/transversal_ordering.dart';
 import '../services/valuation/cost_of_capital.dart';
 import '../value_objects/date_range.dart';
@@ -24,12 +23,10 @@ import '../value_objects/ticker.dart';
 class RebalanceOutcome {
   final Portfolio principal;
   final Portfolio reserva;
-  final ConcentrationReport concentration;
 
   const RebalanceOutcome({
     required this.principal,
     required this.reserva,
-    required this.concentration,
   });
 }
 
@@ -72,7 +69,6 @@ abstract final class SwapAssetBetweenPortfolios {
     return Ok(RebalanceOutcome(
       principal: newPrincipal,
       reserva: newReserva,
-      concentration: SectorConcentration.analyze(newPrincipal),
     ));
   }
 }
@@ -80,7 +76,6 @@ abstract final class SwapAssetBetweenPortfolios {
 /// Situação da carteira frente à meta patrimonial.
 class GoalAlignment {
   final RequiredReturn required;
-  final FeasibilityVerdict verdict;
 
   /// Retorno anual esperado da carteira, pelo **estimador transversal**:
   /// `Ke_i + z(potencial) · prêmio`, ponderado pelos pesos.
@@ -112,7 +107,6 @@ class GoalAlignment {
 
   const GoalAlignment({
     required this.required,
-    required this.verdict,
     required this.expectedReturn,
     required this.valuationCoverage,
   });
@@ -172,11 +166,6 @@ abstract final class EvaluateGoalAlignment {
     final required = solved.unwrap();
     return Ok(GoalAlignment(
       required: required,
-      verdict: GoalFeasibility.assess(
-        required: required,
-        anchors: anchors,
-        goal: goal,
-      ),
       expectedReturn: signals == null
           ? ExpectedReturn.forPortfolioCrossSectional(
               portfolio: portfolio,
@@ -255,7 +244,7 @@ abstract final class ResolveMarketAnchors {
     // Parcela real do teto da perpetuidade, medida em vez de arbitrada. Sem a
     // série, cai no valor observado em 10 anos, declarado como fallback.
     final realGrowth = ibc.isOk
-        ? _activityCagrOf(ibc.unwrap(), windowYears) ??
+        ? _activityCagrOf(ibc.unwrap()) ??
             MarketAnchors.fallback2026.realEconomyGrowth
         : MarketAnchors.fallback2026.realEconomyGrowth;
 
@@ -363,7 +352,7 @@ abstract final class ResolveMarketAnchors {
   ///
   /// Devolve `null` quando não há 12 meses em cada ponta ou quando a janela
   /// efetiva é curta demais, para que o chamador decida o fallback.
-  static double? _activityCagrOf(RateSeries series, int windowYears) {
+  static double? _activityCagrOf(RateSeries series) {
     const janela = 12;
     final v = series.rates;
     if (v.length < janela * 2) return null;

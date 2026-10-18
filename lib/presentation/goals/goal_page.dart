@@ -1,7 +1,6 @@
 import '../../di/providers.dart';
 import '../theme/fin_space.dart';
 import '../components/fin_amount.dart';
-import '../shared/theme_bridge.dart';
 import 'feasibility_copy.dart';
 import 'skill_copy.dart';
 import '../shared/ui_kit.dart';
@@ -86,7 +85,6 @@ class _GoalPageState extends ConsumerState<GoalPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = ref.watch(isLightModeProvider);
     final feasibility = ref.watch(goalFeasibilityProvider);
     final alignment = ref.watch(goalAlignmentProvider);
     // Enquanto o pacote carrega não há ressalva a mostrar; carregado, a falta
@@ -117,21 +115,18 @@ class _GoalPageState extends ConsumerState<GoalPage> {
                     ),
                     const Gap.md(),
                     _MoneyField(
-                      isLight: isLight,
                       controller: _initial,
                       label: 'Aporte inicial',
                       onChanged: _apply,
                     ),
                     const Gap.sm(),
                     _MoneyField(
-                      isLight: isLight,
                       controller: _monthly,
                       label: 'Aporte mensal',
                       onChanged: _apply,
                     ),
                     const Gap.sm(),
                     _MoneyField(
-                      isLight: isLight,
                       controller: _target,
                       label: 'Valor desejado ao final',
                       onChanged: _apply,
@@ -169,7 +164,7 @@ class _GoalPageState extends ConsumerState<GoalPage> {
                 ),
                 data: (verdict) => verdict == null
                     ? const SizedBox.shrink()
-                    : _FeasibilityCard(verdict: verdict, isLight: isLight),
+                    : _FeasibilityCard(verdict: verdict),
               ),
               const Gap.md(),
               alignment.when(
@@ -187,7 +182,6 @@ class _GoalPageState extends ConsumerState<GoalPage> {
                       )
                     : _AlignmentCard(
                         alignment: value,
-                        isLight: isLight,
                         skillCaveat: ressalvaDaHabilidade,
                         withPremium: comPremio,
                       ),
@@ -269,13 +263,11 @@ class _VerdictSkeleton extends StatelessWidget {
 class _MoneyField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
-  final bool isLight;
   final VoidCallback onChanged;
 
   const _MoneyField({
     required this.controller,
     required this.label,
-    required this.isLight,
     required this.onChanged,
   });
 
@@ -327,9 +319,8 @@ class _MoneyField extends StatelessWidget {
 /// observados — não em números arbitrários.
 class _FeasibilityCard extends StatelessWidget {
   final FeasibilityVerdict verdict;
-  final bool isLight;
 
-  const _FeasibilityCard({required this.verdict, required this.isLight});
+  const _FeasibilityCard({required this.verdict});
 
   /// Veredito traduzido em direcao semantica.
   ///
@@ -440,7 +431,6 @@ class _FeasibilityCard extends StatelessWidget {
 /// Confronto entre o exigido e o esperado.
 class _AlignmentCard extends StatelessWidget {
   final GoalAlignment alignment;
-  final bool isLight;
 
   /// O que a validação diz do prêmio, ou `null` (itens B1.0 e B1).
   final String? skillCaveat;
@@ -450,7 +440,6 @@ class _AlignmentCard extends StatelessWidget {
 
   const _AlignmentCard({
     required this.alignment,
-    required this.isLight,
     required this.skillCaveat,
     required this.withPremium,
   });

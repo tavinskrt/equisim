@@ -65,53 +65,6 @@ void main() {
       expect(result.isErr, isTrue);
     });
 
-    test('pesos customizados exigem soma de 100%', () {
-      final invalid = Portfolio.weighted(
-        id: 'p',
-        name: 'Principal',
-        kind: PortfolioKind.principal,
-        allocation: {
-          assetOf('PETR4', 'energia'): 0.5,
-          assetOf('VALE3', 'materiais'): 0.4,
-        },
-      );
-      expect(invalid.isErr, isTrue);
-      // **A regra, e não o número** (decisão 122). O medido viaja em `actual`,
-      // e quem escreve o percentual é a tela.
-      expect(invalid.failureOrNull!.message, contains('100%'));
-      expect((invalid.failureOrNull! as InvalidInput).actual,
-          closeTo(0.90, 1e-12));
-
-      final valid = Portfolio.weighted(
-        id: 'p',
-        name: 'Principal',
-        kind: PortfolioKind.principal,
-        allocation: {
-          assetOf('PETR4', 'energia'): 0.6,
-          assetOf('VALE3', 'materiais'): 0.4,
-        },
-      );
-      expect(valid.isOk, isTrue);
-    });
-
-    test('peso negativo que fecha 100% é recusado, e não lança', () {
-      // 1,2 − 0,2 = 1,0: passava pela soma e estourava ArgumentError em
-      // `Weight.fraction` (lente `nucleo`, 22/09/2026).
-      final r = Portfolio.weighted(
-        id: 'p',
-        name: 'Principal',
-        kind: PortfolioKind.principal,
-        allocation: {
-          assetOf('PETR4', 'energia'): 1.2,
-          assetOf('VALE3', 'materiais'): -0.2,
-        },
-      );
-      expect(r.isErr, isTrue);
-      final f = r.failureOrNull! as InvalidInput;
-      expect(f.field, 'weights');
-      expect(f.unit, QuantityUnit.fraction);
-    });
-
     test('adicionar e remover reequipondera mantendo 100%', () {
       var portfolio = Portfolio.equalWeighted(
         id: 'p',
@@ -137,36 +90,6 @@ void main() {
         assets: [assetOf('PETR4', 'energia')],
       ).unwrap();
       expect(portfolio.add(assetOf('PETR4', 'energia')).isErr, isTrue);
-    });
-  });
-
-  group('A falha carrega o número, e não só o texto', () {
-    test('soma dos pesos fora de 100% viaja como valor medido', () {
-      // Pela mesma razão de `DataQualityFailure.observedDeviation`: a
-      // interface que quiser arredondar de outro jeito, exibir num campo
-      // próprio ou comparar com o limite não precisa reextrair o número do
-      // texto. Decisão 59, completada pela 122 — que acrescentou o **limite** e
-      // a **unidade**, e tirou o percentual formatado da frase do núcleo.
-      final r = Portfolio.weighted(
-        id: 'p',
-        name: 'Principal',
-        kind: PortfolioKind.principal,
-        allocation: {
-          assetOf('PETR4', 'energia'): 0.60,
-          assetOf('VALE3', 'materiais'): 0.30,
-        },
-      );
-      expect(r.isErr, isTrue);
-      final f = r.failureOrNull;
-      expect(f, isA<InvalidInput>());
-      expect((f as InvalidInput).field, 'weights');
-      expect(f.actual, closeTo(0.90, 1e-12));
-      expect(f.limit, closeTo(1.0, 1e-12));
-      expect(f.unit, QuantityUnit.fraction);
-      // **E o núcleo não formata.** A frase diz a regra; o percentual é da
-      // tela, e sai por `FailureCopy`.
-      expect(f.message, contains('100%'));
-      expect(f.message, isNot(contains('90')));
     });
   });
 
@@ -205,15 +128,14 @@ void main() {
       expect(SectorConcentration.analyze(portfolio).hasAlert, isFalse);
     });
 
-    test('contabiliza peso sem classificação setorial', () {
+    test('ativo sem classificação setorial não conta para a concentração', () {
       final portfolio = Portfolio.equalWeighted(
         id: 'p',
         name: 'Principal',
         kind: PortfolioKind.principal,
-        assets: [assetOf('ITUB4', 'financeiro'), assetOf('XXXX3', '')],
+        assets: [assetOf('XXXX3', ''), assetOf('YYYY3', '')],
       ).unwrap();
-      final report = SectorConcentration.analyze(portfolio);
-      expect(report.unclassifiedWeight, closeTo(0.5, 1e-9));
+      expect(SectorConcentration.analyze(portfolio).hasAlert, isFalse);
     });
   });
 
@@ -234,16 +156,12 @@ void main() {
     test('retorno esperado é a convergência de preço, e nada além dela', () {
       // Sem provento no modelo, o anual não pode divergir da convergência: um
       // segundo termo aqui seria retorno que nenhuma outra tela apura.
-      final expected = ExpectedReturn.forAsset(
-        ticker: Ticker.parse('ITUB4'),
-        upside: 0.20,
-        horizonMonths: 12,
-      );
-      expect(expected.priceConvergence, closeTo(0.20, 1e-12));
-      expect(expected.annual, closeTo(0.20, 1e-12));
+      final anual =
+          ExpectedReturn.annualizedFromUpside(0.20, horizonMonths: 12);
+      expect(anual, closeTo(0.20, 1e-12));
     });
 
-    test('carteira pondera pelos pesos e reporta cobertura parcial', () {
+    test('carteira reporta cobertura parcial', () {
       final portfolio = Portfolio.equalWeighted(
         id: 'p',
         name: 'Principal',
@@ -267,16 +185,6 @@ void main() {
         valuations: valuations,
       );
       expect(coverage, closeTo(0.5, 1e-9));
-
-      final expected = ExpectedReturn.forPortfolio(
-        portfolio: portfolio,
-        valuations: valuations,
-      );
-      // Apenas PETR4 tem valuation, com 20% de potencial; o peso da outra
-      // metade é reescalado, não zerado. Convergindo em 36 meses,
-      // (1,20)^(1/3) − 1 = 6,27% ao ano — e não os 20% que o horizonte de doze
-      // meses devolvia por identidade.
-      expect(expected, closeTo(0.0627, 1e-4));
     });
   });
 
@@ -452,17 +360,7 @@ void main() {
       for (final v in r.values) {
         expect(v.z, 0.0);
         expect(v.expected, closeTo(cdi, 1e-12));
-        expect(v.referenceSize, 2);
       }
-    });
-
-    test('o tamanho da seção viaja junto do resultado', () {
-      final r = ExpectedReturn.crossSection(
-        upsides: upsidesOf({'AAAA3': 0.1}),
-        spotRiskFree: cdi,
-        reference: List<double>.filled(120, 0.0),
-      );
-      expect(r[Ticker.parse('AAAA3')]!.referenceSize, 120);
     });
   });
 

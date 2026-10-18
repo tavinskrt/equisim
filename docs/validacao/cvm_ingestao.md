@@ -145,6 +145,10 @@ Na amostra de dois anos, **1.677 exercícios** têm tesouraria maior que zero.
 O método nunca devolve resultado não positivo: tesouraria maior que a base é
 dado corrompido, e devolver zero produziria divisão por zero adiante.
 
+> **18/10/2026:** o método saiu na faxina de código morto — nenhum caminho o
+> chamava. A regra que vale é a da fração de tesouraria, aplicada à contagem
+> cotada em `compute_valuation.dart`.
+
 **O que ainda não foi feito:** ligar essa contagem ao divisor da ponte por
 papel. Isso depende do A3 — a contagem que forma o preço vem do valor de
 mercado, e cruzá-la com a da CVM é o que fecha a §1.7.

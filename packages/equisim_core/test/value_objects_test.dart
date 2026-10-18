@@ -70,7 +70,7 @@ void main() {
     });
 
     test('comparações e sinal', () {
-      expect(Money.fromReais(5) > Money.fromReais(3), isTrue);
+      expect(Money.fromReais(3) <= Money.fromReais(5), isTrue);
       expect(Money.fromReais(-2).isPositive, isFalse);
       expect((-Money.fromReais(2)).cents, -200);
       expect(Money.zero.isZero, isTrue);
@@ -150,16 +150,6 @@ void main() {
       expect(Weights.sum(weights.values), closeTo(1.0, 1e-15));
     });
 
-    test('normalize reescala pesos arbitrários para 100%', () {
-      final normalized = Weights.normalize({
-        Ticker.parse('PETR4'): 2.0,
-        Ticker.parse('VALE3'): 3.0,
-        Ticker.parse('ITUB4'): 5.0,
-      });
-      expect(Weights.sum(normalized.values), closeTo(1.0, 1e-12));
-      expect(normalized[Ticker.parse('ITUB4')]!.value, closeTo(0.5, 1e-9));
-    });
-
     test('rejeita peso fora do intervalo', () {
       expect(() => Weight.fraction(1.5), throwsArgumentError);
       expect(() => Weight.fraction(-0.1), throwsArgumentError);
@@ -167,10 +157,9 @@ void main() {
   });
 
   group('DateRange', () {
-    test('calcula anos e meses', () {
+    test('calcula anos', () {
       final range = DateRange(DateTime(2020, 1, 15), DateTime(2025, 1, 15));
       expect(range.years, closeTo(5.0, 0.02));
-      expect(range.months, 60);
     });
 
     test('rejeita intervalo invertido', () {

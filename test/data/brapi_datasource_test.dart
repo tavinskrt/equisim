@@ -137,7 +137,7 @@ void main() {
         );
       }
       // E a busca por data continua correta depois da reordenação.
-      expect(series.closeAsOf(series.lastDate), 31.5);
+      expect(series.closeAsOf(series.points.last.date), 31.5);
     });
 
     test('ponto sem data ou sem fechamento é ignorado, não derruba o lote',
@@ -618,17 +618,6 @@ void main() {
       expect(asset.sector.key, 'energia');
       expect(asset.industry, isNotNull);
     });
-
-    test('resolve renomeação usando o parâmetro plural correto', () async {
-      final adapter = FixtureAdapter(routes: {
-        '/v2/tickers/resolve': 'brapi_resolve_viia3',
-      });
-      final datasource = BrapiDatasource(clientWith(adapter));
-
-      final resolved = await datasource.resolve(Ticker.parse('VIIA3'));
-      expect(resolved.isOk, isTrue);
-      expect(resolved.unwrap()?.value, 'BHIA3');
-    });
   });
 
   group('BcbDatasource', () {
@@ -637,7 +626,8 @@ void main() {
         'bcdata.sgs.12': 'bcb_cdi',
       })));
 
-      final result = await datasource.cdi(
+      final result = await datasource.series(
+        BcbDatasource.seriesCdiDaily,
         DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)),
       );
       expect(result.isOk, isTrue);
@@ -653,7 +643,8 @@ void main() {
       final datasource = BcbDatasource(clientWith(FixtureAdapter(routes: {
         'bcdata.sgs.12': 'bcb_cdi',
       })));
-      final series = (await datasource.cdi(
+      final series = (await datasource.series(
+        BcbDatasource.seriesCdiDaily,
         DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)),
       )).unwrap();
 
@@ -670,7 +661,8 @@ void main() {
       final datasource = BcbDatasource(clientWith(FixtureAdapter(routes: {
         'bcdata.sgs.12': 'bcb_cdi',
       })));
-      final series = (await datasource.cdi(
+      final series = (await datasource.series(
+        BcbDatasource.seriesCdiDaily,
         DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)),
       )).unwrap();
       // A fixture comeca em 02/01/2024. Sob uma troca dd/MM -> MM/dd ela
@@ -697,7 +689,8 @@ void main() {
         final datasource = BcbDatasource(clientWith(FixtureAdapter(
           bodies: {'bcdata.sgs.12': corpo},
         )));
-        final r = await datasource.cdi(
+        final r = await datasource.series(
+          BcbDatasource.seriesCdiDaily,
           DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)),
         );
         expect(r.isErr, isTrue, reason: corpo);

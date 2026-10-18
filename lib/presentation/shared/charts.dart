@@ -83,9 +83,6 @@ class Base100Chart extends StatelessWidget {
   /// Eixo temporal comum, em ordem cronológica.
   final List<DateTime> dates;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Altura do gráfico em pixels lógicos.
   final double height;
 
@@ -97,7 +94,6 @@ class Base100Chart extends StatelessWidget {
     super.key,
     required this.series,
     required this.dates,
-    required this.isLight,
     this.height = 240,
   });
 
@@ -155,7 +151,7 @@ class Base100Chart extends StatelessWidget {
           runSpacing: 4,
           children: [
             for (final s in series)
-              _LegendDot(label: s.label, color: s.color, isLight: isLight),
+              _LegendDot(label: s.label, color: s.color),
           ],
         ),
         const Gap.sm(),
@@ -311,9 +307,6 @@ class TornadoChart extends StatelessWidget {
   /// linha dela.
   static const double minBarWidth = 48;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Declara o gráfico de tornado.
   ///
   /// A ordenação das barras é responsabilidade do chamador — o gráfico desenha
@@ -323,7 +316,6 @@ class TornadoChart extends StatelessWidget {
     super.key,
     required this.bars,
     required this.baseValue,
-    required this.isLight,
   });
 
   @override
@@ -581,14 +573,10 @@ class RiskReturnScatter extends StatelessWidget {
   /// entraram na dispersão e com que cor cada nuvem foi desenhada.
   final List<RiskReturnLegend> assetLegend;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Declara a dispersão.
   const RiskReturnScatter({
     super.key,
     required this.points,
-    required this.isLight,
     this.assetLegend = const [],
   });
 
@@ -786,12 +774,11 @@ class RiskReturnScatter extends StatelessWidget {
           runSpacing: 4,
           children: [
             for (final p in points.where((p) => p.highlight))
-              _LegendDot(label: p.label, color: p.color, isLight: isLight),
+              _LegendDot(label: p.label, color: p.color),
             for (final entry in assetLegend)
               _LegendDot(
                 label: entry.label,
                 color: entry.color,
-                isLight: isLight,
               ),
           ],
         ),
@@ -813,9 +800,6 @@ class CorrelationHeatmap extends StatefulWidget {
   /// Matriz de correlação `n × n`, simétrica, com valores em `[-1, 1]`.
   final List<List<double>> matrix;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Declara o mapa de calor.
   ///
   /// [matrix] precisa ter a mesma dimensão de [tickers]; a construção fica com
@@ -824,7 +808,6 @@ class CorrelationHeatmap extends StatefulWidget {
     super.key,
     required this.tickers,
     required this.matrix,
-    required this.isLight,
   });
 
   @override
@@ -842,7 +825,6 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
 
   List<Ticker> get tickers => widget.tickers;
   List<List<double>> get matrix => widget.matrix;
-  bool get isLight => widget.isLight;
 
   Color _cellColor(double rho) {
     // Verde para correlação baixa (diversificação) e vermelho para alta.
@@ -964,12 +946,10 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
 class _LegendDot extends StatelessWidget {
   final String label;
   final Color color;
-  final bool isLight;
 
   const _LegendDot({
     required this.label,
     required this.color,
-    required this.isLight,
   });
 
   @override

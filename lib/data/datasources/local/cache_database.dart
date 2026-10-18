@@ -319,18 +319,4 @@ class CacheDatabase extends _$CacheDatabase {
   /// Insere ou atualiza taxas macro em lote, pela chave `(seriesId, date)`.
   Future<void> upsertMacro(List<CachedMacroRatesCompanion> rows) =>
       batch((b) => b.insertAllOnConflictUpdate(cachedMacroRates, rows));
-
-  /// Limpa tudo. Usado em testes e na opção de reset do usuário.
-  ///
-  /// **Irreversível.** Apaga as linhas e as marcas de validade, de modo que a
-  /// próxima consulta de cada recurso vá à rede.
-  Future<void> clearAll() async {
-    await batch((b) {
-      b.deleteWhere(cachedPrices, (_) => const Constant(true));
-      b.deleteWhere(cachedFundamentalsTable, (_) => const Constant(true));
-      b.deleteWhere(cachedProfiles, (_) => const Constant(true));
-      b.deleteWhere(cachedMacroRates, (_) => const Constant(true));
-      b.deleteWhere(cacheEntries, (_) => const Constant(true));
-    });
-  }
 }

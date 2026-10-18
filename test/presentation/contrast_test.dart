@@ -200,17 +200,4 @@ void main() {
       );
     });
   });
-
-  group('Pontos de quebra', () {
-    test('classificam as larguras alvo', () {
-      expect(FinBreakpoint.of(320), FinBreakpoint.compact);
-      expect(FinBreakpoint.of(375), FinBreakpoint.compact);
-      expect(FinBreakpoint.of(599), FinBreakpoint.compact);
-      expect(FinBreakpoint.of(600), FinBreakpoint.medium);
-      expect(FinBreakpoint.of(768), FinBreakpoint.medium);
-      expect(FinBreakpoint.of(899), FinBreakpoint.medium);
-      expect(FinBreakpoint.of(900), FinBreakpoint.expanded);
-      expect(FinBreakpoint.of(1440), FinBreakpoint.expanded);
-    });
-  });
 }

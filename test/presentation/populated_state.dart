@@ -213,10 +213,7 @@ FeasibilityVerdict feasibilidade() => FeasibilityVerdict(
 GoalAlignment alinhamento() => GoalAlignment(
       required: const RequiredReturn(
         monthly: 0.0142,
-        iterations: 24,
-        usedBisection: false,
       ),
-      verdict: feasibilidade(),
       expectedReturn: 0.1495,
       valuationCoverage: 0.75,
     );

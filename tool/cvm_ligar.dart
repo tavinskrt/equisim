@@ -53,7 +53,6 @@ class _DaCvm implements FundamentalsRepository {
     final r = CvmSeries.build(
       documentos: meus,
       mercado: base.unwrap(),
-      asOf: _hoje,
       publicado: PointInTimeView(_hoje).isPublished,
       ancorada: ancorada,
     );

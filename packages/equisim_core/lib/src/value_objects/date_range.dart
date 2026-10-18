@@ -40,19 +40,6 @@ class DateRange {
   /// serviço.
   double get years => days / 365.25;
 
-  /// Diferença em meses de **calendário**, ignorando o dia do mês.
-  ///
-  /// Não é "meses inteiros decorridos". A conta é
-  /// `(anoFim − anoInício)·12 + mêsFim − mêsInício`, então o dia não entra.
-  /// Verificado: `31/01/2026 → 01/02/2026` devolve **1**, embora tenha passado
-  /// um único dia; `01/01/2026 → 31/01/2026` devolve **0**, embora tenham
-  /// passado trinta.
-  ///
-  /// Serve para rotular eixos e contar competências mensais. **Não use para
-  /// prazo de meta** — ali o prazo é declarado pelo usuário em
-  /// `FinancialGoal.months`, não derivado de um intervalo.
-  int get months => (end.year - start.year) * 12 + end.month - start.month;
-
   /// `true` se [d] cai dentro do intervalo, com as duas pontas incluídas.
   ///
   /// [d] é truncada para o dia antes da comparação, então a hora informada

@@ -567,12 +567,3 @@ export function buildInstructions(target: AuditTarget): string {
 
   return `${header}${truncationNote}${sourceNote}\n`;
 }
-
-/** Prompt completo, com o material embutido. */
-export function buildUserPrompt(target: AuditTarget): string {
-  return (
-    `${buildInstructions(target)}\n` +
-    `--- INICIO DO MATERIAL AUDITADO ---\n${target.payload}\n` +
-    '--- FIM DO MATERIAL AUDITADO ---\n'
-  );
-}

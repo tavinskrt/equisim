@@ -154,8 +154,8 @@ void main() {
             _insumos(notas: const ['CVM defasada', 'curva de 12/09']));
       }).single;
       final v = r.unwrap();
-      final saida = jsonDecode(jsonEncode(e.toJson()))['outputPayload']
-          as Map<String, dynamic>;
+      final evento = jsonDecode(jsonEncode(e.toJson())) as Map<String, dynamic>;
+      final saida = evento['outputPayload'] as Map<String, dynamic>;
 
       expect(saida['status'], 'ok');
       expect(saida['fairValue'], v.fairValue.reais);

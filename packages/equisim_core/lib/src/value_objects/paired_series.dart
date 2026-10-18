@@ -21,37 +21,8 @@ class PairedReturns {
 
   const PairedReturns._(this.asset, this.market);
 
-  /// Par vazio. Ponto de partida de quem acumula, e resposta natural de um
-  /// pareamento sem data em comum.
-  static const PairedReturns empty = PairedReturns._([], []);
-
-  /// Constrói o par a partir de duas séries prontas.
-  ///
-  /// - [asset], [market]: retornos já pareados por data.
-  ///
-  /// Devolve [InvalidInput] quando os comprimentos divergem — é o único jeito
-  /// de construir um par inválido, e ele é fechado aqui em vez de adiante.
-  static Result<PairedReturns> of({
-    required List<double> asset,
-    required List<double> market,
-  }) {
-    if (asset.length != market.length) {
-      return Err(InvalidInput(
-        'Séries de retorno com tamanhos diferentes (${asset.length} × '
-        '${market.length}); pareie por data antes.',
-      ));
-    }
-    return Ok(PairedReturns._(
-      List<double>.unmodifiable(asset),
-      List<double>.unmodifiable(market),
-    ));
-  }
-
   /// Quantidade de pares.
   int get length => asset.length;
-
-  /// `true` quando nenhum par sobreviveu ao pareamento.
-  bool get isEmpty => asset.isEmpty;
 }
 
 /// Acumulador de [PairedReturns], um par por vez.
@@ -97,9 +68,6 @@ class WealthPath {
 
   const WealthPath._(this.values, this.externalFlows);
 
-  /// Trajetória vazia.
-  static const WealthPath empty = WealthPath._([], []);
-
   /// Constrói a partir de duas séries prontas.
   ///
   /// Devolve [InvalidInput] quando os comprimentos divergem.
@@ -118,12 +86,6 @@ class WealthPath {
       List<double>.unmodifiable(externalFlows),
     ));
   }
-
-  /// Quantidade de períodos.
-  int get length => values.length;
-
-  /// `true` quando não há período algum.
-  bool get isEmpty => values.isEmpty;
 }
 
 /// Acumulador de [WealthPath], um período por vez.
@@ -136,12 +98,6 @@ class WealthPathBuilder {
     _values.add(value);
     _flows.add(externalFlow);
   }
-
-  /// Patrimônio do último período fechado. Lança [StateError] se nenhum foi.
-  double get last => _values.last;
-
-  /// Quantos períodos já foram fechados.
-  int get length => _values.length;
 
   /// Fecha o acumulado, copiando as listas.
   WealthPath build() => WealthPath._(

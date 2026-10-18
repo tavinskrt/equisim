@@ -40,18 +40,6 @@ abstract final class FinSpace {
 
   /// Padding padrao de cartao.
   static const EdgeInsets cardPadding = EdgeInsets.all(lg);
-
-  /// Padding padrao de tela.
-  static const EdgeInsets screenPadding = EdgeInsets.symmetric(
-    horizontal: lg,
-    vertical: md,
-  );
-
-  /// Padding de linha de lista ou de tabela.
-  static const EdgeInsets rowPadding = EdgeInsets.symmetric(
-    horizontal: md,
-    vertical: sm,
-  );
 }
 
 /// Espacador do grid, no lugar de `SizedBox(height: 12)` e afins.

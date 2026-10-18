@@ -36,10 +36,6 @@ class RiskFreeCurveRepository {
   DateTime? _diaDaBusca;
   Future<List<TreasuryQuote>>? _doPacote;
 
-  /// Curva para [asOf], ou `null` quando nenhuma fonte tem data-base recente.
-  Future<YieldCurve?> curveAt(DateTime asOf) async =>
-      (await readAt(asOf)).curve;
-
   /// Curva para [asOf] e, quando não há, a ressalva que diz por quê.
   ///
   /// A busca do dia vale **pelo dia da avaliação**: o aplicativo aberto de

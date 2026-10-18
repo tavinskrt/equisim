@@ -82,7 +82,7 @@ Future<void> main(List<String> args) async {
     if (n != null) linhas.add((t: t, n: n));
   }
 
-  final ordem = BaseNormalizationOutcome.values;
+  const ordem = BaseNormalizationOutcome.values;
   linhas.sort((a, b) {
     final o = ordem.indexOf(a.n.outcome).compareTo(ordem.indexOf(b.n.outcome));
     if (o != 0) return o;

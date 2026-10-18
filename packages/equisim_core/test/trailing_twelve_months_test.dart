@@ -186,7 +186,7 @@ void main() {
 
     test('ancorada em ITR, todos os pontos terminam na mesma data, a um ano', () {
       final s = TrailingTwelveMonths.serieAncorada(documentos,
-          asOf: _d(2023, 9, 1), publicado: todos);
+          publicado: todos);
       expect(s.length, 5);
       for (final p in s) {
         expect(p.fiscalPeriodEnd.month, 6);
@@ -201,8 +201,7 @@ void main() {
     test('ancorada em DFP, devolve as DFPs', () {
       // Sem ITR publicado depois da ultima DFP, a serie e a de sempre.
       final soDfp = [for (var a = 2018; a <= 2022; a++) _dfp(a)];
-      final s = TrailingTwelveMonths.serieAncorada(soDfp,
-          asOf: _d(2023, 4, 1), publicado: todos);
+      final s = TrailingTwelveMonths.serieAncorada(soDfp, publicado: todos);
       expect(s.map((p) => p.fiscalPeriodEnd.month).toSet(), {12});
       expect(s.length, 5);
     });
@@ -214,13 +213,13 @@ void main() {
       // Em 01/05/2023 o mais recente publicado e a DFP 2022, recebida em
       // marco: a serie e a das DFPs.
       final antes = TrailingTwelveMonths.serieAncorada(documentos,
-          asOf: _d(2023, 5, 1), publicado: (s) => ate(_d(2023, 5, 1), s));
+          publicado: (s) => ate(_d(2023, 5, 1), s));
       expect(antes.last.fiscalPeriodEnd, _d(2022, 12, 31));
 
       // O ITR de jun/23 e recebido em 10/08/2023. Em 15/08 a ancora e ele, e a
       // serie inteira passa a terminar em junho.
       final depois = TrailingTwelveMonths.serieAncorada(documentos,
-          asOf: _d(2023, 8, 15), publicado: (s) => ate(_d(2023, 8, 15), s));
+          publicado: (s) => ate(_d(2023, 8, 15), s));
       expect(depois.last.fiscalPeriodEnd, _d(2023, 6, 30));
       expect(depois.map((p) => p.fiscalPeriodEnd.month).toSet(), {6});
     });
@@ -234,7 +233,7 @@ void main() {
           if (!(d.kind == CvmDocumentKind.itr && d.periodEnd.year == 2021)) d,
       ];
       final s = TrailingTwelveMonths.serieAncorada(semItr2021,
-          asOf: _d(2023, 9, 1), publicado: todos);
+          publicado: todos);
       expect(s.map((p) => p.fiscalPeriodEnd.month).toSet(), {12},
           reason: 'nem buraco, nem mistura de âncoras');
       for (var i = 1; i < s.length; i++) {
@@ -249,13 +248,13 @@ void main() {
           if (!(d.kind == CvmDocumentKind.dfp && d.periodEnd.year == 2022)) d,
       ];
       final s = TrailingTwelveMonths.serieAncorada(semDfp2022,
-          asOf: _d(2023, 9, 1), publicado: todos);
+          publicado: todos);
       expect(s.map((p) => p.fiscalPeriodEnd.month).toSet(), {12});
     });
 
     test('série contígua é reconhecida como ancorada em trimestre', () {
       final s = TrailingTwelveMonths.serieAncorada(documentos,
-          asOf: _d(2023, 9, 1), publicado: todos);
+          publicado: todos);
       expect(TrailingTwelveMonths.isAnchoredOnQuarter(s, documentos), isTrue);
     });
   });

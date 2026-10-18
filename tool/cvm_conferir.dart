@@ -20,11 +20,9 @@ import 'package:equisim_core/equisim_core.dart';
 
 /// Uma linha crua do CSV, antes de virar [CvmAccountLine].
 class _Linha {
-  final String cnpj;
   final String denom;
-  final String ordem;
   final CvmAccountLine conta;
-  _Linha(this.cnpj, this.denom, this.ordem, this.conta);
+  _Linha(this.denom, this.conta);
 }
 
 /// Lê um CSV da CVM: `latin-1`, separador `;`, primeira linha de cabeçalho.
@@ -82,7 +80,7 @@ Map<String, List<_Linha>> _porCnpj(File f, {String? ordemDesejada}) {
     );
     if (conta == null) continue;
     out.putIfAbsent(r['CNPJ_CIA'] ?? '', () => []).add(
-        _Linha(r['CNPJ_CIA'] ?? '', r['DENOM_CIA'] ?? '', ordem, conta));
+        _Linha(r['DENOM_CIA'] ?? '', conta));
   }
   return out;
 }

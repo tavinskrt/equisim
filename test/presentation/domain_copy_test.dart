@@ -25,7 +25,6 @@ void main() {
     confere(TransversalOrdering.values, (v) => v.rotulo);
     confere(MultipleKind.values, (v) => v.rotulo);
     confere(MultipleRefusal.values, (v) => v.rotulo);
-    confere(PortfolioKind.values, (v) => v.rotulo);
     confere(ManualGroup.values, (v) => v.rotulo);
     confere(ManualTerminal.values, (v) => v.rotulo);
   });
@@ -38,6 +37,5 @@ void main() {
     expect(ScenarioBand.bear.rotulo, 'Premissas mais duras');
     expect(ScenarioBand.bull.rotulo, 'Premissas mais brandas');
     expect(MultipleKind.firmaEbitda.rotulo, 'EV/EBITDA');
-    expect(PortfolioKind.reserva.rotulo, 'Reserva');
   });
 }

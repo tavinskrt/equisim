@@ -13,12 +13,6 @@ abstract final class Fmt {
   /// Moeda em pt-BR por extenso: `R$ 1.234,56`.
   static final currency = NumberFormat.currency(locale: 'pt_BR', symbol: r'R$');
 
-  /// Moeda abreviada: `R$ 1,2 mi`. Para eixo de gráfico e espaço estreito.
-  static final compactCurrency = NumberFormat.compactCurrency(
-    locale: 'pt_BR',
-    symbol: r'R$',
-  );
-
   /// Data por extenso: `31/12/2026`.
   static final date = DateFormat('dd/MM/yyyy');
 

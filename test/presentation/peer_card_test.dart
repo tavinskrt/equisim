@@ -92,7 +92,7 @@ void main() {
         child: MaterialApp(
           theme: buildFinTheme(isLight: false),
           home: Scaffold(
-            body: ValuationView(ticker: Ticker.parse('PETR4'), isLight: false),
+            body: ValuationView(ticker: Ticker.parse('PETR4')),
           ),
         ),
       );

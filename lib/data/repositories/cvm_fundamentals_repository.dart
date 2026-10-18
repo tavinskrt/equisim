@@ -2,22 +2,6 @@ import 'dart:convert';
 
 import 'package:equisim_core/equisim_core.dart';
 
-/// Situação do pacote da CVM para um ativo.
-enum CvmCoverage {
-  /// O pacote foi lido e traz documentos do ativo.
-  coberto,
-
-  /// O pacote foi lido, e não traz o ativo — sem ponte ticker↔CNPJ.
-  semDocumentos,
-
-  /// O pacote existe e não pôde ser lido: JSON inválido ou versão que este
-  /// leitor não conhece.
-  pacoteIlegivel,
-
-  /// O build não trouxe o pacote.
-  pacoteAusente,
-}
-
 /// Fundamentos do aplicativo com a demonstração da CVM mesclada (item A1.9).
 ///
 /// **Decora** o repositório de mercado em vez de substituí-lo: preço, valor de
@@ -105,17 +89,6 @@ class CvmFundamentalsRepository implements FundamentalsRepository {
     }
   }
 
-  /// Situação do pacote para [ticker].
-  Future<CvmCoverage> coverageOf(Ticker ticker) async {
-    final p = await _lido();
-    if (p.ausente) return CvmCoverage.pacoteAusente;
-    if (p.motivo != null) return CvmCoverage.pacoteIlegivel;
-    final docs = p.documentos[ticker.value];
-    return docs == null || docs.isEmpty
-        ? CvmCoverage.semDocumentos
-        : CvmCoverage.coberto;
-  }
-
   /// A ressalva que a avaliação de [ticker] deve levar, ou `null`.
   ///
   /// Texto de narrativa, como os avisos da cascata: é o que a tela de
@@ -161,12 +134,10 @@ class CvmFundamentalsRepository implements FundamentalsRepository {
     final documentos = (await _lido()).documentos[ticker.value];
     if (documentos == null || documentos.isEmpty) return base;
 
-    final asOf = hoje();
     final montada = CvmSeries.build(
       documentos: documentos,
       mercado: base.unwrap(),
-      asOf: asOf,
-      publicado: PointInTimeView(asOf).isPublished,
+      publicado: PointInTimeView(hoje()).isPublished,
       ancorada: ancorada,
     );
     return Ok(montada.series);

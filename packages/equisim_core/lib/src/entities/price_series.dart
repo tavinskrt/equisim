@@ -76,14 +76,8 @@ class PriceSeries {
   /// `true` quando não há nenhum pregão na série.
   bool get isEmpty => points.isEmpty;
 
-  /// `true` quando há ao menos um pregão.
-  bool get isNotEmpty => points.isNotEmpty;
-
   /// Data do primeiro pregão. Lança [StateError] se a série estiver vazia.
   DateTime get firstDate => points.first.date;
-
-  /// Data do último pregão. Lança [StateError] se a série estiver vazia.
-  DateTime get lastDate => points.last.date;
 
   /// Índice por data, construído sob demanda.
   late final Map<DateTime, double> _byDate = {

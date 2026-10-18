@@ -86,7 +86,6 @@ class FundamentosDaCvm implements FundamentalsRepository {
     return Ok(CvmSeries.build(
       documentos: meus,
       mercado: base.unwrap(),
-      asOf: hoje,
       publicado: PointInTimeView(hoje).isPublished,
       ancorada: ancorada,
     ).series);

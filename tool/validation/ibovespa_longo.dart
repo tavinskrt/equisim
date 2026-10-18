@@ -38,9 +38,6 @@ class IbovespaLongo implements BenchmarkRepository {
   /// Razão mediana `fonte ÷ SGS` nos pregões comuns.
   final double razaoNaSobreposicao;
 
-  /// Primeiro pregão da série emendada.
-  DateTime get inicio => _pontos.first.date;
-
   /// Monta a série com a fonte de mercado [mercado].
   ///
   /// [janelaDaFonte] é a janela pedida a ela: por padrão tudo o que ela tiver;
