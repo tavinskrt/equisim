@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import '../../entities/fundamentals.dart';
 import 'capital_base.dart';
 import 'inference.dart';
+import '../../audit/wire_keyed.dart';
 
 /// Parâmetros homologados das portas e guardas.
 ///
@@ -369,22 +370,22 @@ class DispersionVerdict {
 /// condição que reprovou, um universo em que quase ninguém passa é
 /// indistinguível de um universo em que quase ninguém merece passar. É a
 /// diferença entre calibrar um parâmetro e adivinhar qual deles está apertado.
-enum MoatBlock {
+enum MoatBlock implements WireKeyed {
   /// Sem retorno do ciclo medível — série curta ou lucro não publicado.
-  semRetornoDoCiclo,
+  semRetornoDoCiclo('semRetornoDoCiclo'),
 
   /// Custo de capital de equilíbrio não positivo: nada a comparar.
-  semCustoDeCapital,
+  semCustoDeCapital('semCustoDeCapital'),
 
   /// Histórico mais curto que [ValuationParameters.moatMinPeriods].
-  historicoCurto,
+  historicoCurto('historicoCurto'),
 
   /// Φ não medido. Ausência não é aprovação: sem saber quanto da expansão veio
   /// de fora, não há como afirmar que o crescimento foi orgânico.
-  capitalExternoNaoMedido,
+  capitalExternoNaoMedido('capitalExternoNaoMedido'),
 
   /// Φ acima de [ValuationParameters.moatMaxExternalCapital].
-  crescimentoInorganico,
+  crescimentoInorganico('crescimentoInorganico'),
 
   /// Excedente com menos de [ValuationParameters.moatMinPersistencePairs]
   /// pares de anos adjacentes: a persistência não é estimável, e sem ela não
@@ -396,16 +397,16 @@ enum MoatBlock {
   /// contempla de forma contínua: excedente pequeno produz preservação
   /// pequena, sem precisar de degrau. Deterioração, do mesmo modo, aparece na
   /// própria série que estima `φ`.
-  persistenciaNaoEstimavel,
+  persistenciaNaoEstimavel('persistenciaNaoEstimavel'),
 
   /// O excedente do ciclo não é positivo: não há vantagem a preservar, e
   /// `λ · e₀` seria uma penalidade em vez de uma preservação.
-  semExcedente,
+  semExcedente('semExcedente'),
 
   /// A persistência medida não deixa excedente algum sobreviver ao horizonte,
   /// e o retorno terminal resultante não supera o próprio custo de capital.
   /// Sem conteúdo econômico, e por isso tratado como estado estacionário.
-  excedenteDegenerado,
+  excedenteDegenerado('excedenteDegenerado'),
 
   /// O negócio opera sob contrato de prazo determinado — concessão de energia,
   /// saneamento, rodovia, ferrovia, aeroporto.
@@ -416,7 +417,14 @@ enum MoatBlock {
   /// excedente **sobrevive para sempre** num negócio que será relicitado é
   /// afirmação que o próprio contrato nega. A tarifa é fixada para remunerar o
   /// capital ao custo dele, e não acima.
-  prazoDeterminado;
+  prazoDeterminado('prazoDeterminado');
+
+  const MoatBlock(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 }
 
 /// Veredito da vantagem competitiva residual, com o porquê da recusa.

@@ -3,6 +3,7 @@ import '../services/valuation/manual_valuation.dart';
 import '../services/valuation/peer_multiples.dart';
 import '../value_objects/money.dart';
 import '../value_objects/ticker.dart';
+import '../audit/wire_keyed.dart';
 
 /// Modelo efetivamente aplicado no cálculo.
 ///
@@ -117,29 +118,29 @@ class ValueDistribution {
 /// cascata já os apura para decidir a conta, e antes eles só existiam diluídos
 /// no texto dos avisos. Estruturá-los é o que permite ao consumidor ponderar o
 /// preço justo em vez de tratar todos como igualmente firmes.
-enum ValuationCaveat {
+enum ValuationCaveat implements WireKeyed {
   /// O valor terminal responde por mais que
   /// [ValuationDiagnostics.terminalShareLimit] do total: o número é sobretudo
   /// premissa, e a parte apoiada em exercício observado decide pouco.
-  terminalPesado,
+  terminalPesado('terminalPesado'),
 
   /// A taxa de crescimento não veio do próprio ativo — foi a âncora de
   /// inflação ou a ausência de crescimento.
-  crescimentoNaoIdentificado,
+  crescimentoNaoIdentificado('crescimentoNaoIdentificado'),
 
   /// As duas contagens de papéis publicadas divergem além de uma ação
   /// societária plausível, e a escolha do divisor foi por conservadorismo.
-  escalaIncerta,
+  escalaIncerta('escalaIncerta'),
 
   /// Um único exercício foi multiplicado por mais de
   /// [ValuationDiagnostics.baseFactorLimit] para virar o fluxo-base.
-  baseNormalizadaForte,
+  baseNormalizadaForte('baseNormalizadaForte'),
 
   /// A avaliação começou na via da firma e migrou para a do acionista.
   ///
   /// **Não é mais emitida desde a decisão 102**: nenhuma avaliação muda de via.
   /// Fica para ler resultados gravados antes dela.
-  viaMigrada,
+  viaMigrada('viaMigrada'),
 
   /// O capital próprio responde por pouco do valor da firma, e o preço por
   /// papel é resíduo de subtração entre números próximos.
@@ -150,7 +151,7 @@ enum ValuationCaveat {
   /// decisão 31, e não mais um recuo. Ressalva que vale para a maioria não
   /// distingue nada; a substituição continua declarada nos avisos, que é onde
   /// ela informa.
-  ponteFragil,
+  ponteFragil('ponteFragil'),
 
   /// O preço justo é combinação das duas vias, na faixa em que nenhuma domina.
   ///
@@ -164,7 +165,7 @@ enum ValuationCaveat {
   /// **Não é mais emitida desde a decisão 102**: a mistura continuava subindo
   /// com a taxa, e as duas vias deixaram de se combinar. Fica para ler
   /// resultados gravados antes dela.
-  viasMescladas,
+  viasMescladas('viasMescladas'),
 
   /// O fluxo-base não veio do exercício observado: ele foi reconstruído do
   /// retorno mediano do ciclo sobre o capital de hoje.
@@ -178,7 +179,7 @@ enum ValuationCaveat {
   /// **É a ressalva mais forte da lista.** O preço justo aqui não repousa em
   /// nenhum exercício observado recente: repousa na afirmação de que a empresa
   /// volta ao que já foi.
-  baseReconstruida,
+  baseReconstruida('baseReconstruida'),
 
   /// O negócio opera sob contrato de prazo determinado, e o valor terminal
   /// supõe perpetuidade.
@@ -192,7 +193,7 @@ enum ValuationCaveat {
   ///
   /// O tamanho está medido: se o contrato acabasse em dez anos, o preço justo
   /// mediano dos expostos ficaria em 0,80 do publicado; em vinte, 0,90.
-  prazoDeterminado,
+  prazoDeterminado('prazoDeterminado'),
 
   /// A companhia é de controle estatal, pelo Formulário Cadastral da CVM, e o
   /// motor não cobra prêmio por isso (item B46).
@@ -205,7 +206,14 @@ enum ValuationCaveat {
   /// além do que o Ibovespa explica, não é maior. Ele está no fluxo que o
   /// minoritário pode esperar receber, que o motor projeta pelo histórico da
   /// companhia. Ver [`estatais.md`](../../../../../docs/validacao/estatais.md).
-  controleEstatal;
+  controleEstatal('controleEstatal');
+
+  const ValuationCaveat(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 }
 
 /// Fatos medidos que qualificam o preço justo.

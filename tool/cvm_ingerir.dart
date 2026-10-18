@@ -353,7 +353,7 @@ void main(List<String> args) {
         ...?bpa[origem]![k]?.linhas,
         ...?bpp[origem]![k]?.linhas,
       ]);
-      layouts[chartDre.layout.name] = (layouts[chartDre.layout.name] ?? 0) + 1;
+      layouts[chartDre.layout.key] = (layouts[chartDre.layout.key] ?? 0) + 1;
 
       final at = chartBal.ativoTotal;
       final pt = chartBal.passivoTotal;
@@ -388,7 +388,7 @@ void main(List<String> args) {
         'recebidoEm': m.recebido,
         'versao': m.versao,
         'origem': origem == 'con' ? 'consolidado' : 'individual',
-        'layout': chartDre.layout.name,
+        'layout': chartDre.layout.key,
         ...fluxos(chartDre, chartDfc),
         'lucroPorAcao': chartDre.lucroPorAcao,
         'ativoTotal': at,

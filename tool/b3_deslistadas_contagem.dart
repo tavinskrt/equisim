@@ -360,7 +360,7 @@ void main() {
             {
               'dataEx': _dia(p.exDate),
               'valor': p.amount,
-              'tipo': p.kind.name,
+              'tipo': p.kind.key,
               if (p.closeWithRights != null) 'precoComDireito': p.closeWithRights,
             },
         ],

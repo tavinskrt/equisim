@@ -17,7 +17,7 @@ Portfolio portfolioOf(
   PortfolioKind kind = PortfolioKind.principal,
 }) =>
     Portfolio.equalWeighted(
-      id: kind.name,
+      id: kind.key,
       name: switch (kind) {
         PortfolioKind.principal => 'Principal',
         PortfolioKind.reserva => 'Reserva',

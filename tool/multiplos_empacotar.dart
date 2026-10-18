@@ -172,7 +172,7 @@ Future<void> main(List<String> args) async {
       final m = <String, Object?>{};
       for (final k in MultipleKind.values) {
         final r = medianaDe(grupo, k, chave);
-        if (r != null) m[k.name] = r;
+        if (r != null) m[k.key] = r;
       }
       if (m.isNotEmpty) grupos[chave] = m;
     }
@@ -203,7 +203,7 @@ Future<void> main(List<String> args) async {
           if (chave == null || membros == null) continue;
           final m = medianaDe(membros, k, chave, sem: sem);
           if (m != null) {
-            escolhido[k.name] = m;
+            escolhido[k.key] = m;
             break;
           }
         }
@@ -228,7 +228,7 @@ Future<void> main(List<String> args) async {
     stdout.writeln('');
     stdout.writeln('  o mercado inteiro:');
     for (final k in MultipleKind.values) {
-      final m = grupos[_mercado]?[k.name] as Map<String, Object?>?;
+      final m = grupos[_mercado]?[k.key] as Map<String, Object?>?;
       if (m == null) {
         stdout.writeln('    ${k.rotulo.padRight(10)} —');
       } else {
@@ -245,7 +245,7 @@ Future<void> main(List<String> args) async {
       if (g == null) continue;
       final linha = <String>[];
       for (final k in MultipleKind.values) {
-        final m = g[k.name] as Map<String, Object?>?;
+        final m = g[k.key] as Map<String, Object?>?;
         if (m == null) continue;
         final mediana = (m['mediana'] as double).toStringAsFixed(1);
         linha.add('${k.rotulo} $mediana× (${m['pares']})');

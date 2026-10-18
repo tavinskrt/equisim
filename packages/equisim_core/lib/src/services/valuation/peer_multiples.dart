@@ -1,34 +1,49 @@
 import '../../entities/fundamentals.dart';
 import 'financial_sectors.dart';
+import '../../audit/wire_keyed.dart';
 
 /// Qual múltiplo produziu uma leitura.
-enum MultipleKind {
+enum MultipleKind implements WireKeyed {
   /// Preço sobre lucro por ação.
-  precoLucro,
+  precoLucro('precoLucro'),
 
   /// Preço sobre valor patrimonial por ação.
-  precoPatrimonio,
+  precoPatrimonio('precoPatrimonio'),
 
   /// Valor da firma sobre EBITDA.
-  firmaEbitda;
+  firmaEbitda('firmaEbitda');
+
+  const MultipleKind(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 }
 
 /// Por que um múltiplo não se aplicou a um ativo.
-enum MultipleRefusal {
+enum MultipleRefusal implements WireKeyed {
   /// O grupo de pares não tem observações suficientes.
-  paresInsuficientes,
+  paresInsuficientes('paresInsuficientes'),
 
   /// A grandeza de baixo não é positiva — lucro, patrimônio ou EBITDA.
-  baseNaoPositiva,
+  baseNaoPositiva('baseNaoPositiva'),
 
   /// A grandeza de baixo não está publicada.
-  baseAusente,
+  baseAusente('baseAusente'),
 
   /// EBITDA de instituição financeira não descreve geração operacional.
-  instituicaoFinanceira,
+  instituicaoFinanceira('instituicaoFinanceira'),
 
   /// A ponte de dívida líquida não fecha em valor positivo do acionista.
-  ponteNaoPositiva;
+  ponteNaoPositiva('ponteNaoPositiva');
+
+  const MultipleRefusal(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 }
 
 /// A mediana de um múltiplo num grupo de pares, com o tamanho do grupo.
@@ -341,7 +356,7 @@ abstract final class PeerMultipleCodec {
       if (ticker is! String || v is! Map) continue;
       final byKind = <MultipleKind, PeerMultiple>{};
       for (final k in MultipleKind.values) {
-        final m = v[k.name];
+        final m = v[k.key];
         if (m is! Map) continue;
         final mediana = (m['mediana'] as num?)?.toDouble();
         final pares = (m['pares'] as num?)?.toInt();

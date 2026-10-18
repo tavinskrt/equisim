@@ -153,7 +153,7 @@ Future<void> main(List<String> args) async {
           ? '   —  '
           : '${_mediana(razao).toStringAsFixed(3)}×';
       stdout.writeln(
-        '  ${leitura.name.padRight(18)}  '
+        '  ${leitura.key.padRight(18)}  '
         '${chaves.length.toString().padLeft(9)}   '
         '${_pct(_q(larguras, 0.25))} / ${_pct(_mediana(larguras))} / '
         '${_pct(_q(larguras, 0.75))}   '
@@ -167,7 +167,7 @@ Future<void> main(List<String> args) async {
       double? ouNulo(double v) => v.isFinite ? v : null;
 
       linhas.add({
-        'leitura': leitura.name,
+        'leitura': leitura.key,
         'comFaixa': chaves.length,
         'larguraP25': ouNulo(_q(larguras, 0.25)),
         'larguraMediana': ouNulo(_mediana(larguras)),

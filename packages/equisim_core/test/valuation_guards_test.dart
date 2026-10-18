@@ -1825,7 +1825,7 @@ void main() {
       // para a maioria não distingue nada, e a classificação sintética virou
       // método pela decisão 31 — não é mais um recuo a declarar aqui.
       expect(
-        ValuationCaveat.values.map((c) => c.name),
+        ValuationCaveat.values.map((c) => c.key),
         isNot(contains('custoDaDividaEstimado')),
       );
     });

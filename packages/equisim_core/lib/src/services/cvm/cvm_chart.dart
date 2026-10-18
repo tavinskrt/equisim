@@ -26,6 +26,8 @@
 /// Ver `docs/validacao/cvm_conferencia.md`.
 library;
 
+import '../../audit/wire_keyed.dart';
+
 /// Uma linha de demonstração, como a CVM a publica.
 ///
 /// **O valor é guardado em centavos inteiros**, e não em `double`. O CSV traz
@@ -143,20 +145,27 @@ class CvmAccountLine {
 /// **Não é setor** — é a forma da demonstração que a companhia entregou. Uma
 /// mesma empresa pode mudar de layout entre exercícios, e por isso a detecção
 /// é feita por documento e não guardada por CNPJ.
-enum CvmLayout {
+enum CvmLayout implements WireKeyed {
   /// Plano padrão: `3.01 = Receita de Venda de Bens e/ou Serviços`.
-  corporativo,
+  corporativo('corporativo'),
 
   /// Intermediação financeira. **Não tem EBIT** — a estrutura não separa
   /// resultado operacional de resultado financeiro, porque o financeiro *é* a
   /// operação.
-  intermediacaoFinanceira,
+  intermediacaoFinanceira('intermediacaoFinanceira'),
 
   /// Atividades seguradoras e resseguradoras. Também sem EBIT.
-  seguradora,
+  seguradora('seguradora'),
 
   /// Nenhum padrão reconhecido. Tudo que dependa de layout devolve `null`.
-  desconhecido;
+  desconhecido('desconhecido');
+
+  const CvmLayout(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 
   /// `true` quando a estrutura separa resultado operacional do financeiro.
   ///

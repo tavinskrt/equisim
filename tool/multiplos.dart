@@ -73,14 +73,14 @@ Future<void> main(List<String> args) async {
         'aplicadas': tri?.applied ?? 0,
         'leituras': {
           for (final leitura in tri?.readings ?? const <MultipleReading>[])
-            leitura.kind.name: leitura.applied
+            leitura.kind.key: leitura.applied
                 ? {
                     'justo': leitura.fairValuePerShare,
                     'mediana': leitura.peer!.median,
                     'pares': leitura.peer!.peers,
                     'grupo': leitura.peer!.group,
                   }
-                : {'recusa': leitura.refusal?.name},
+                : {'recusa': leitura.refusal?.key},
         },
       });
     }

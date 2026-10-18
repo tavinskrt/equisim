@@ -321,7 +321,7 @@ class Deslistadas {
             if (classe != null)
               CashDividend(
                 shareClass: classe,
-                kind: CashDividendKind.values.byName(p['tipo'] as String),
+                kind: CashDividendKind.fromKey(p['tipo'] as String),
                 // A data com é o pregão anterior à ex; a conta do retorno total
                 // só usa a data ex e o preço com direito.
                 lastDateWithRights: _dia(

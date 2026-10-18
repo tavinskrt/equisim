@@ -3,14 +3,22 @@ import '../failures/result.dart';
 import '../value_objects/ticker.dart';
 import '../value_objects/weight.dart';
 import 'asset.dart';
+import '../audit/wire_keyed.dart';
 
 /// Papel da carteira na dupla gestão.
-enum PortfolioKind {
+enum PortfolioKind implements WireKeyed {
   /// Portfólio vigente.
-  principal,
+  principal('principal'),
 
   /// Candidatos a substituição.
-  reserva;
+  reserva('reserva');
+
+  const PortfolioKind(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 }
 
 /// Posição de um ativo dentro da carteira.

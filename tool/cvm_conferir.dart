@@ -178,7 +178,7 @@ Future<void> main(List<String> args) async {
       'cnpj': cnpj,
       'nome': linhasDre.first.denom,
       'origem': origem,
-      'layout': chartDre.layout.name,
+      'layout': chartDre.layout.key,
       'receita': chartDre.receita,
       'ebit': ebit,
       'lucro': lucro,
@@ -193,7 +193,7 @@ Future<void> main(List<String> args) async {
   stdout.writeln('  companhias lidas: $n   (recuo para individual: $recuouInd)');
   stdout.writeln('  layouts detectados:');
   for (final e in porLayout.entries) {
-    stdout.writeln('    ${e.value.toString().padLeft(4)}  ${e.key.name}');
+    stdout.writeln('    ${e.value.toString().padLeft(4)}  ${e.key.key}');
   }
   stdout.writeln('');
   stdout.writeln('  lucro líquido resolvido : $comLucro / $n  ${_pc(comLucro, n)}');

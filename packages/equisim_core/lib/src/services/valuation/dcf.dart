@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import '../../entities/valuation.dart';
 import '../../failures/failure.dart';
 import '../../failures/result.dart';
+import '../../audit/wire_keyed.dart';
 
 /// Como o freio de reinvestimento é formado, em cada rodada.
 ///
@@ -14,30 +15,30 @@ import '../../failures/result.dart';
 /// laço do utilitário usava o teto da economia como crescimento perpétuo em 78
 /// dos 120 ativos e reinterpolava a taxa em vez de usar o caminho resolvido, e
 /// nada acusava porque a conferência comparava o laço contra si mesmo.
-enum ReinvestmentPolicy {
+enum ReinvestmentPolicy implements WireKeyed {
   /// `b_t = g_t / ROIC_t`, confinado em `[0; 0,95]`. O que a produção faz.
-  medido,
+  medido('medido'),
 
   /// Sem freio: todo o lucro é distribuível.
-  nenhum,
+  nenhum('nenhum'),
 
   /// `b_t = g_real,t / ROIC_t` — só o crescimento **real** exige capital novo.
   ///
   /// A hipótese: crescer nominalmente ao lado da inflação não pede
   /// investimento líquido, pede reposição a preço maior. Exige
   /// [DcfAssumptions.inflation].
-  crescimentoReal,
+  crescimentoReal('crescimentoReal'),
 
   /// `b_t = g_t / ROIC_base`, sem a convergência do retorno ao custo de
   /// capital. Isola quanto do freio vem da convergência e quanto do nível.
-  semConvergencia,
+  semConvergencia('semConvergencia'),
 
   /// `b_t = g_t / ROIC_t` **sem o teto de 0,95**, de modo que a retenção pode
   /// passar de 100% e o fluxo do ano ficar negativo.
   ///
   /// É o que acontece de verdade com quem cresce mais do que o retorno
   /// financia: o capital novo vem de fora. O teto de produção esconde isso.
-  semTeto,
+  semTeto('semTeto'),
 
   /// `b_t = b` para todo `t`, inclusive na perpetuidade, com `b` em
   /// [DcfAssumptions.fixedRetention].
@@ -47,17 +48,31 @@ enum ReinvestmentPolicy {
   /// quanto ela rende, e aí o crescimento deixa de ser confinado pelo retorno:
   /// as duas premissas viram independentes, como na planilha de quem as digita.
   /// O valor terminal passa a ser o de Gordon com a mesma parcela.
-  parcelaFixa,
+  parcelaFixa('parcelaFixa');
+
+  const ReinvestmentPolicy(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 }
 
 /// Quando o caixa do exercício chega, para efeito de desconto.
-enum CashTiming {
+enum CashTiming implements WireKeyed {
   /// Tudo no último dia do ano. É a convenção que o motor usava até 10/09/2026,
   /// e sob a qual `FCFF/WACC ≡ FCFE/Ke` é **identidade algébrica exata**.
-  fimDeAno,
+  fimDeAno('fimDeAno'),
 
   /// Distribuído ao longo do ano, representado pelo meio dele. Produção.
-  meioDeAno,
+  meioDeAno('meioDeAno');
+
+  const CashTiming(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 }
 
 /// Premissas de uma rodada de DCF.

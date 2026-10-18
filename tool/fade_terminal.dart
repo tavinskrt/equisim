@@ -189,7 +189,7 @@ Future<void> main(List<String> args) async {
         'lambdaAplicado': base.diagnostics!.terminalRetainedSpread,
         'phiCru': veredito.rawPersistence,
         'phiAplicado': veredito.persistence,
-        'bloqueios': [for (final b in veredito.blocks) b.name],
+        'bloqueios': [for (final b in veredito.blocks) b.key],
         // A única fronteira de nível que restou: o excedente ser positivo.
         'folgaPorExcedente': e0,
         'curva': curva,

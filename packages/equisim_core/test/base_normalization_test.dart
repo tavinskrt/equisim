@@ -190,7 +190,7 @@ void main() {
         expect(passo.explanation.first, startsWith('Por que normalizar'));
         expect(
           passo.mappedVariables['resultado da normalização'],
-          esperado.name,
+          esperado.key,
         );
       });
     }

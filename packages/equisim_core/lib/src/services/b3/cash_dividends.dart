@@ -16,20 +16,38 @@ library;
 
 import '../../time/brazilian_calendar.dart';
 import 'b3_registry.dart';
+import '../../audit/wire_keyed.dart';
 
 /// Natureza do provento, pelo rótulo da B3.
-enum CashDividendKind {
+enum CashDividendKind implements WireKeyed {
   /// `DIVIDENDO` — isento para a pessoa física.
-  dividendo,
+  dividendo('dividendo'),
 
   /// `JRS CAP PROPRIO` — juros sobre capital próprio, com 15% retidos na fonte.
-  jurosSobreCapital,
+  jurosSobreCapital('jurosSobreCapital'),
 
   /// `RENDIMENTO` — isento, como o dividendo.
-  rendimento,
+  rendimento('rendimento'),
 
   /// `REST CAP DIN` — restituição de capital em dinheiro.
-  restituicaoDeCapital,
+  restituicaoDeCapital('restituicaoDeCapital');
+
+  const CashDividendKind(this.key);
+
+  /// O valor cuja [key] é [key] — o que `values.byName` fazia com o nome.
+  ///
+  /// Lança [ArgumentError], como `byName`, quando nenhum valor tem a chave.
+  static CashDividendKind fromKey(String key) {
+    for (final k in values) {
+      if (k.key == key) return k;
+    }
+    throw ArgumentError.value(key, 'name', 'Nenhum valor do enum com essa chave');
+  }
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 }
 
 /// Um provento em dinheiro, por ação.
@@ -304,7 +322,7 @@ abstract final class CashDividendsCodec {
               for (final p in e.value)
                 {
                   'classe': p.shareClass,
-                  'tipo': p.kind.name,
+                  'tipo': p.kind.key,
                   'dataCom': _dia(p.lastDateWithRights),
                   'dataEx': _dia(p.exDate),
                   'valor': p.amount,
@@ -328,7 +346,7 @@ abstract final class CashDividendsCodec {
         if (x is! Map<String, dynamic>) continue;
         final classe = x['classe'];
         final tipo = CashDividendKind.values
-            .where((k) => k.name == x['tipo'])
+            .where((k) => k.key == x['tipo'])
             .firstOrNull;
         final com = _data(x['dataCom']);
         final ex = _data(x['dataEx']);

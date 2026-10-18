@@ -110,7 +110,7 @@ void main() {
 
         expect(v.enterpriseValue.first / direto.enterpriseValue,
             closeTo(1.0, 1e-9),
-            reason: 'sob ${timing.name} a acumulação regressiva não reproduz '
+            reason: 'sob ${timing.key} a acumulação regressiva não reproduz '
                 'o valor descontado');
       }
     });

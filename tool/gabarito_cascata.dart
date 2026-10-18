@@ -183,7 +183,7 @@ Map<String, Object?> _serializar(Result<ValuationResult> r) {
         'ke': d.costOfEquity.toString(),
         'caminhoCrescimento': [for (final x in d.growthPath) x.toString()],
         'caminhoRetencao': [for (final x in d.retentionPath) x.toString()],
-        'ressalvas': [for (final c in d.caveats) c.name],
+        'ressalvas': [for (final c in d.caveats) c.key],
       },
   };
 }
@@ -774,7 +774,7 @@ void _abrirGrade(ValuationInputs base) {
         '  g ${pc(g?.growthRate)}  base ${g?.baseFactor.toStringAsFixed(3)}'
         '  moat ${g?.moatApplied}  retido ${pc(g?.terminalRetainedSpread)}'
         '  rTerm ${pc(g?.terminalReturnOnCapital)}  equity ${pc(g?.equityShare)}'
-        '  ressalvas ${g?.caveats.map((c) => c.name).join(',')}');
+        '  ressalvas ${g?.caveats.map((c) => c.key).join(',')}');
     // Os avisos que entram ou saem de um ponto para o outro: é onde está o
     // degrau, quando há um.
     final avisos = [

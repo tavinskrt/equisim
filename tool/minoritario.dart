@@ -43,7 +43,18 @@ double _q(List<double> v, double p) {
 
 double _mediana(List<double> v) => _q(v, 0.5);
 
-enum _Forma { hoje, contabil, pelaRazao }
+enum _Forma implements WireKeyed {
+  hoje('hoje'),
+  contabil('contabil'),
+  pelaRazao('pelaRazao');
+
+  const _Forma(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
+}
 
 class _Leitura {
   final Map<String, int> justoCentavos = {};
@@ -195,7 +206,7 @@ Future<void> main(List<String> args) async {
           .toList()
         ..sort();
 
-      stdout.writeln('  ${forma.name.padRight(12)}  '
+      stdout.writeln('  ${forma.key.padRight(12)}  '
           '${l.justoCentavos.length.toString().padLeft(9)}   '
           '${_pct(varDe(comuns) ?? double.nan).padLeft(13)}   '
           '${_pct(varDe(expostos) ?? double.nan).padLeft(16)}   '
@@ -203,7 +214,7 @@ Future<void> main(List<String> args) async {
           '${rho == null ? "  —   " : rho.toStringAsFixed(4)}');
 
       linhas.add({
-        'forma': forma.name,
+        'forma': forma.key,
         'avaliados': l.justoCentavos.length,
         'justoMedianoTodos': varDe(comuns),
         'justoMedianoExpostos': varDe(expostos),

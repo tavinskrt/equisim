@@ -259,7 +259,7 @@ Future<void> main(List<String> args) async {
           d['modelo$n'] = v.model.name;
           d['desconto$n'] = v.discountRate;
           d['avisos$n'] = v.warnings;
-          d['ressalvas$n'] = [for (final c in v.diagnostics!.caveats) c.name];
+          d['ressalvas$n'] = [for (final c in v.diagnostics!.caveats) c.key];
           d['pesoTerminal$n'] = v.diagnostics!.terminalShare;
           d['equityShare$n'] = v.diagnostics!.equityShare;
           d['moat$n'] = v.diagnostics!.moatApplied;

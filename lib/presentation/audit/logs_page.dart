@@ -58,7 +58,18 @@ class LogsPage extends StatefulWidget {
   State<LogsPage> createState() => _LogsPageState();
 }
 
-enum _Filter { todos, calculos, rede }
+enum _Filter implements WireKeyed {
+  todos('todos'),
+  calculos('calculos'),
+  rede('rede');
+
+  const _Filter(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
+}
 
 class _LogsPageState extends State<LogsPage> {
   final AuditBus _bus = AuditBus.instance;
@@ -215,7 +226,7 @@ class _LogsPageState extends State<LogsPage> {
         (sum, e) => sum + e.calculations.length,
       ),
       'totalNoHistorico': _bus.history.length,
-      'filtroAplicado': _filter.name,
+      'filtroAplicado': _filter.key,
       'buscaAplicada': busca.isEmpty ? null : busca,
       'descartados': {
         'calculos': descartadosCalculos,

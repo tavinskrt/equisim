@@ -28,6 +28,7 @@ import '../services/valuation/yield_curve.dart';
 import '../time/point_in_time_view.dart';
 import '../value_objects/money.dart';
 import '../value_objects/ticker.dart';
+import '../audit/wire_keyed.dart';
 
 /// Insumos já resolvidos para uma avaliação.
 ///
@@ -596,19 +597,26 @@ enum QuotedSharesSource {
 /// campo **é** o `Ke`, e o deslocamento é um a um por construção. Na via da
 /// firma ele é o WACC, e a rota derivada desconta ao `Ke`: traduzir exige
 /// escolher **o que o cenário está perturbando**, e ele não diz.
-enum ScenarioTranslation {
+enum ScenarioTranslation implements WireKeyed {
   /// `ΔK_e = ΔWACC`. O cenário perturba **a taxa aplicada ao fluxo**, que é a
   /// que esta rota usa — e é o que faz as duas vias quererem dizer a mesma
   /// coisa.
-  umPorUm,
+  umPorUm('umPorUm'),
 
   /// `ΔK_e = ΔWACC ÷ w_E`. O cenário perturba **o custo de capital da firma**
   /// com `K_d` e os pesos parados.
-  estruturaFixa,
+  estruturaFixa('estruturaFixa'),
 
   /// `ΔK_e = ΔWACC ÷ (1 − w_D·t)`. O cenário perturba **a taxa livre de
   /// risco**, que move `K_e` e `K_d` juntos.
-  taxaLivreDeRisco,
+  taxaLivreDeRisco('taxaLivreDeRisco');
+
+  const ScenarioTranslation(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 }
 
 /// Contagem de ações de um emissor no registro oficial da B3.
@@ -2778,7 +2786,7 @@ abstract final class ValuationCascade {
     if (inputs.cashTimingOverride != null) {
       local.add(
         'Convenção de caixa imposta em '
-        '"${inputs.cashTimingOverride!.name}" por varredura externa, no lugar '
+        '"${inputs.cashTimingOverride!.key}" por varredura externa, no lugar '
         'do meio de ano. Este resultado é instrumento de diagnóstico, não '
         'avaliação.',
       );
@@ -2786,7 +2794,7 @@ abstract final class ValuationCascade {
     if (inputs.reinvestmentOverride != null) {
       local.add(
         'Freio de reinvestimento imposto em '
-        '"${inputs.reinvestmentOverride!.name}" por varredura externa, no '
+        '"${inputs.reinvestmentOverride!.key}" por varredura externa, no '
         'lugar do `b = g/ROIC` medido. Este resultado é instrumento de '
         'diagnóstico, não avaliação.',
       );
@@ -4042,7 +4050,7 @@ abstract final class ValuationCascade {
       // o prior do beta e as imposições de diagnóstico mudam o preço justo e
       // não apareciam — depurar pelo JSON exigia adivinhar com que insumo a
       // cascata tinha rodado.
-      'scenarioTranslation': inputs.scenarioTranslation.name,
+      'scenarioTranslation': inputs.scenarioTranslation.key,
       'sectorKey': inputs.sectorKey,
       'industry': inputs.industry,
       'isDistressed': inputs.isDistressed,
@@ -4085,7 +4093,7 @@ abstract final class ValuationCascade {
         'peerMultiples': {
           'asOf': _fmt(pares.asOf),
           for (final e in pares.byKind.entries)
-            e.key.name: {
+            e.key.key: {
               'median': _r(e.value.median, 4),
               'peers': e.value.peers,
               'group': e.value.group,
@@ -4108,8 +4116,8 @@ abstract final class ValuationCascade {
           'terminalReturn': _r(v, 6),
         if (inputs.growthOverride case final v?) 'growth': _r(v, 6),
         if (inputs.baseFactorOverride case final v?) 'baseFactor': _r(v, 4),
-        if (inputs.reinvestmentOverride case final v?) 'reinvestment': v.name,
-        if (inputs.cashTimingOverride case final v?) 'cashTiming': v.name,
+        if (inputs.reinvestmentOverride case final v?) 'reinvestment': v.key,
+        if (inputs.cashTimingOverride case final v?) 'cashTiming': v.key,
         if (inputs.terminalBetaWeightOverride case final v?)
           'terminalBetaWeight': _r(v, 4),
         if (inputs.terminalLeverageOverride case final v?)
@@ -4160,7 +4168,7 @@ abstract final class ValuationCascade {
             'baseFactor': _r(d.baseFactor, 4),
             'growthIdentified': d.growthIdentified,
             'moatApplied': d.moatApplied,
-            'caveats': [for (final c in d.caveats) c.name],
+            'caveats': [for (final c in d.caveats) c.key],
             'terminalRetainedSpread': _r(d.terminalRetainedSpread, 6),
             'growthRate': _r(d.growthRate, 6),
             'terminalReturnOnCapital': d.terminalReturnOnCapital == null
@@ -4202,11 +4210,11 @@ abstract final class ValuationCascade {
             'readings': [
               for (final r in t.readings)
                 {
-                  'kind': r.kind.name,
+                  'kind': r.kind.key,
                   'fairValuePerShare': r.fairValuePerShare == null
                       ? null
                       : _r(r.fairValuePerShare!),
-                  'refusal': r.refusal?.name,
+                  'refusal': r.refusal?.key,
                   if (r.peer case final p?)
                     'peer': {
                       'median': _r(p.median, 4),
@@ -4526,7 +4534,7 @@ abstract final class ValuationCascade {
         'teto travado pela saúde': healthCapped,
         'isento da trava por setor cíclico': healthExempt,
         // A decisão em uma palavra, para filtrar o painel e os relatórios.
-        'resultado da normalização': normalizacao.outcome.name,
+        'resultado da normalização': normalizacao.outcome.key,
         'razão último ÷ típico': normalizacao.ratio == null
             ? 'n/d'
             : _r(normalizacao.ratio!, 3),
@@ -4941,8 +4949,8 @@ abstract final class ValuationCascade {
         'lambda': v.retainedFraction == null
             ? null
             : _r(v.retainedFraction!, 4),
-        'condição que barrou': v.primaryBlock?.name ?? 'nenhuma',
-        'condições que barraram': [for (final b in v.blocks) b.name],
+        'condição que barrou': v.primaryBlock?.key ?? 'nenhuma',
+        'condições que barraram': [for (final b in v.blocks) b.key],
       },
       steps: [
         'Passo 1: crescimento orgânico? Phi = '

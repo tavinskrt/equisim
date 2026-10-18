@@ -173,7 +173,7 @@ Future<void> main(List<String> args) async {
                         },
                       },
               ],
-              'ressalvas': [for (final x in res.caveats) x.name],
+              'ressalvas': [for (final x in res.caveats) x.key],
               'avisos': res.warnings,
               'triangulacao': res.triangulation == null
                   ? null
@@ -183,9 +183,9 @@ Future<void> main(List<String> args) async {
                       'leituras': [
                         for (final l in res.triangulation!.readings)
                           {
-                            'tipo': l.kind.name,
+                            'tipo': l.kind.key,
                             'justo': l.fairValuePerShare,
-                            'recusa': l.refusal?.name,
+                            'recusa': l.refusal?.key,
                             'mediana': l.peer?.median,
                             'pares': l.peer?.peers,
                             'grupo': l.peer?.group,

@@ -1035,7 +1035,7 @@ Future<void> main(List<String> args) async {
           'fluxoSustentado': sustentado,
           'porta3': !porta1 && !sustentado,
           'ressalvas': r.isOk
-              ? [for (final c in r.unwrap().diagnostics!.caveats) c.name]
+              ? [for (final c in r.unwrap().diagnostics!.caveats) c.key]
               : null,
           'pesoTerminal': r.isOk ? r.unwrap().diagnostics!.terminalShare : null,
           'modelo': r.isOk ? r.unwrap().model.name : null,
