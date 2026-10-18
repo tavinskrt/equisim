@@ -46,7 +46,7 @@ import {
  * medimos 13s com `gemini-3.1-pro-low` contra 32-115s pela API. Sobra orcamento
  * de tempo para comprar profundidade.
  */
-export const AGY_DEFAULT_MODEL = 'gemini-3.1-pro-high';
+export const AGY_DEFAULT_MODEL = 'gemini-4-argon-high';
 
 /** Teto local. O `--print-timeout` do proprio CLI e de 5 min por padrao. */
 const TIMEOUT_MS = 600_000;
@@ -128,7 +128,7 @@ export class AgyProvider implements QaProvider {
     if (request.screenshots && request.screenshots.length > 0) {
       throw new ProviderError(
         'O backend `agy` ainda nao transmite imagem. Para auditoria visual:\n' +
-          '    npm run qa:visual -- <img> --backend api',
+        '    npm run qa:visual -- <img> --backend api',
       );
     }
 
@@ -218,7 +218,7 @@ export class AgyProvider implements QaProvider {
         reject(
           new ProviderError(
             `Falha ao executar o agy: ${error.message}\n` +
-              'Confirme a instalacao com: agy --version',
+            'Confirme a instalacao com: agy --version',
           ),
         );
       });
@@ -331,7 +331,7 @@ export function extractResult(stdout: string, stderr = ''): AgyOutcome {
   if (!last) {
     throw new ProviderError(
       'O agy nao emitiu evento `result`.\n' +
-        `stderr: ${stderr.trim().slice(0, 500) || '(vazio)'}`,
+      `stderr: ${stderr.trim().slice(0, 500) || '(vazio)'}`,
       true,
     );
   }
@@ -341,9 +341,9 @@ export function extractResult(stdout: string, stderr = ''): AgyOutcome {
     if (isQuotaError(detail)) {
       throw new ProviderError(
         'Cota da assinatura esgotada no agy.\n' +
-          '  Isso NAO e defeito do codigo. O trabalho segue; a auditoria fica\n' +
-          '  pendente e sera refeita quando a cota voltar.\n\n' +
-          detail,
+        '  Isso NAO e defeito do codigo. O trabalho segue; a auditoria fica\n' +
+        '  pendente e sera refeita quando a cota voltar.\n\n' +
+        detail,
         true,
         true,
       );
