@@ -21,60 +21,60 @@ import time
 import urllib.request
 from pathlib import Path
 
-SERIE = 7
-PRIMEIRO_ANO = 2000
-ULTIMO_ANO = 2019
-SAIDA = Path('data/indices/ibovespa_sgs7.json')
+SERIES = 7
+FIRST_YEAR = 2000
+LAST_YEAR = 2019
+OUTPUT = Path('data/indices/ibovespa_sgs7.json')
 URL = ('https://api.bcb.gov.br/dados/serie/bcdata.sgs.{serie}/dados'
        '?formato=json&dataInicial=01/01/{ano}&dataFinal=31/12/{ano}')
 
 
-def baixar_ano(ano: int) -> list:
-    url = URL.format(serie=SERIE, ano=ano)
-    for tentativa in range(4):
+def download_year(year: int) -> list:
+    url = URL.format(serie=SERIES, ano=year)
+    for attempt in range(4):
         try:
             with urllib.request.urlopen(url, timeout=60) as r:
-                dados = json.loads(r.read().decode('utf-8'))
-            if isinstance(dados, dict):
+                data = json.loads(r.read().decode('utf-8'))
+            if isinstance(data, dict):
                 # O SGS responde {"erro": ...} quando o ano não tem valor.
                 return []
-            return dados
+            return data
         except Exception as e:  # rede instável: repete com espera crescente
-            if tentativa == 3:
-                raise RuntimeError(f'SGS {SERIE}, ano {ano}: {e}') from e
-            time.sleep(2 * (tentativa + 1))
+            if attempt == 3:
+                raise RuntimeError(f'SGS {SERIES}, ano {year}: {e}') from e
+            time.sleep(2 * (attempt + 1))
     return []
 
 
 def main() -> None:
-    pontos = []
-    for ano in range(PRIMEIRO_ANO, ULTIMO_ANO + 1):
-        linhas = baixar_ano(ano)
-        vazios = 0
-        for l in linhas:
+    points = []
+    for year in range(FIRST_YEAR, LAST_YEAR + 1):
+        lines = download_year(year)
+        empty = 0
+        for l in lines:
             # O SGS devolve alguns dias com valor nulo ou vazio: sem fechamento
             # não há ponto, e inventar um (zero, repetir o anterior) mediria
             # outra coisa.
-            valor = l.get('valor')
-            if valor in (None, ''):
-                vazios += 1
+            value = l.get('valor')
+            if value in (None, ''):
+                empty += 1
                 continue
-            dia, mes, a = l['data'].split('/')
-            pontos.append([f'{a}-{mes}-{dia}', float(valor)])
-        print(f'{ano}: {len(linhas) - vazios} pregões'
-              f'{f", {vazios} sem valor" if vazios else ""}')
-    pontos.sort(key=lambda p: p[0])
-    datas = [p[0] for p in pontos]
-    if len(datas) != len(set(datas)):
+            day, month, a = l['data'].split('/')
+            points.append([f'{a}-{month}-{day}', float(value)])
+        print(f'{year}: {len(lines) - empty} pregões'
+              f'{f", {empty} sem valor" if empty else ""}')
+    points.sort(key=lambda p: p[0])
+    dates = [p[0] for p in points]
+    if len(dates) != len(set(dates)):
         raise RuntimeError('datas repetidas na série baixada')
-    SAIDA.parent.mkdir(parents=True, exist_ok=True)
-    SAIDA.write_text(json.dumps({
-        'fonte': f'Banco Central, SGS {SERIE} (Ibovespa, fechamento diário)',
-        'primeiro': datas[0],
-        'ultimo': datas[-1],
-        'pontos': pontos,
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT.write_text(json.dumps({
+        'fonte': f'Banco Central, SGS {SERIES} (Ibovespa, fechamento diário)',
+        'primeiro': dates[0],
+        'ultimo': dates[-1],
+        'pontos': points,
     }), encoding='utf-8')
-    print(f'gravado {SAIDA}: {len(pontos)} pregões, {datas[0]} a {datas[-1]}')
+    print(f'gravado {OUTPUT}: {len(points)} pregões, {dates[0]} a {dates[-1]}')
 
 
 if __name__ == '__main__':

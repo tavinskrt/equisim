@@ -31,93 +31,93 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-RAIZ = "https://bvmf.bmfbovespa.com.br/InstDados/SerHist"
-CABECALHO = "data;ticker;isin;especificacao;nome;fechamento;fatorCotacao;distribuicao;volume\n"
+ROOT = "https://bvmf.bmfbovespa.com.br/InstDados/SerHist"
+HEADER = "data;ticker;isin;especificacao;nome;fechamento;fatorCotacao;distribuicao;volume\n"
 # Máxima e mínima do pregão, para a estimativa de spread de Corwin e Schultz
 # (item C4). Arquivo à parte, e não colunas a mais em `avista_*.csv`: os
 # leitores de lá são posicionais, e baixar de novo por cima misturaria uma
 # revisão eventual da fonte à medição que estiver em curso.
-CABECALHO_EXTREMOS = "data;ticker;isin;maxima;minima;fechamento;fatorCotacao\n"
+EXTREMES_HEADER = "data;ticker;isin;maxima;minima;fechamento;fatorCotacao\n"
 
 
-def baixar(ano: int, destino: Path, extremos: bool = False) -> tuple[int, int] | None:
+def download(year: int, destination: Path, extremes: bool = False) -> tuple[int, int] | None:
     """Baixa um ano e grava `avista_{ano}.csv` — ou `extremos_{ano}.csv`, com
-    [extremos]. Devolve (linhas, bytes do ZIP)."""
-    url = f"{RAIZ}/COTAHIST_A{ano}.ZIP"
+    [extremes]. Devolve (linhas, bytes do ZIP)."""
+    url = f"{ROOT}/COTAHIST_A{year}.ZIP"
     # O servidor da B3 devolve 403 ao User-Agent padrão do urllib.
-    pedido = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (equisim)"})
+    request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (equisim)"})
     try:
-        with urllib.request.urlopen(pedido, timeout=600) as r:
-            bruto = r.read()
+        with urllib.request.urlopen(request, timeout=600) as r:
+            raw = r.read()
     except urllib.error.HTTPError as e:
         if e.code == 404:
-            print(f"  {ano}: NÃO PUBLICADO (404)")
+            print(f"  {year}: NÃO PUBLICADO (404)")
             return None
         raise
 
-    destino.mkdir(parents=True, exist_ok=True)
-    saida = destino / (f"extremos_{ano}.csv" if extremos else f"avista_{ano}.csv")
+    destination.mkdir(parents=True, exist_ok=True)
+    output = destination / (f"extremos_{year}.csv" if extremes else f"avista_{year}.csv")
     n = 0
-    with zipfile.ZipFile(io.BytesIO(bruto)) as z, saida.open("w", encoding="utf-8") as out:
-        out.write(CABECALHO_EXTREMOS if extremos else CABECALHO)
-        nome = next(x for x in z.namelist() if x.upper().endswith(".TXT"))
-        with z.open(nome) as f:
-            for linha in io.TextIOWrapper(f, encoding="latin-1"):
-                if not linha.startswith("01") or len(linha) < 245:
+    with zipfile.ZipFile(io.BytesIO(raw)) as z, output.open("w", encoding="utf-8") as out:
+        out.write(EXTREMES_HEADER if extremes else HEADER)
+        name = next(x for x in z.namelist() if x.upper().endswith(".TXT"))
+        with z.open(name) as f:
+            for line in io.TextIOWrapper(f, encoding="latin-1"):
+                if not line.startswith("01") or len(line) < 245:
                     continue
-                if linha[24:27] != "010" or linha[10:12] != "02":
+                if line[24:27] != "010" or line[10:12] != "02":
                     continue
-                data = f"{linha[2:6]}-{linha[6:8]}-{linha[8:10]}"
-                if extremos:
+                date = f"{line[2:6]}-{line[6:8]}-{line[8:10]}"
+                if extremes:
                     out.write(";".join((
-                        data,
-                        linha[12:24].strip(),
-                        linha[230:242].strip(),
-                        str(int(linha[69:82])),   # PREMAX, em centavos
-                        str(int(linha[82:95])),   # PREMIN
-                        str(int(linha[108:121])),
-                        str(int(linha[210:217])),
+                        date,
+                        line[12:24].strip(),
+                        line[230:242].strip(),
+                        str(int(line[69:82])),   # PREMAX, em centavos
+                        str(int(line[82:95])),   # PREMIN
+                        str(int(line[108:121])),
+                        str(int(line[210:217])),
                     )) + "\n")
                     n += 1
                     continue
-                campos = (
-                    data,
-                    linha[12:24].strip(),
-                    linha[230:242].strip(),
-                    linha[39:49].strip(),
-                    linha[27:39].strip().replace(";", ","),
-                    str(int(linha[108:121])),
-                    str(int(linha[210:217])),
-                    str(int(linha[242:245])),
-                    str(int(linha[170:188])),
+                fields = (
+                    date,
+                    line[12:24].strip(),
+                    line[230:242].strip(),
+                    line[39:49].strip(),
+                    line[27:39].strip().replace(";", ","),
+                    str(int(line[108:121])),
+                    str(int(line[210:217])),
+                    str(int(line[242:245])),
+                    str(int(line[170:188])),
                 )
-                out.write(";".join(campos) + "\n")
+                out.write(";".join(fields) + "\n")
                 n += 1
-    print(f"  {ano}: {n} pregões à vista, ZIP de {len(bruto) / 1e6:.1f} MB")
-    return (n, len(bruto))
+    print(f"  {year}: {n} pregões à vista, ZIP de {len(raw) / 1e6:.1f} MB")
+    return (n, len(raw))
 
 
 def main() -> int:
-    hoje = dt.date.today()
+    today = dt.date.today()
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--de", type=int, default=2010)
-    ap.add_argument("--ate", type=int, default=hoje.year)
+    ap.add_argument("--ate", type=int, default=today.year)
     ap.add_argument("--destino", type=Path, default=Path("data/b3"))
     ap.add_argument("--extremos", action="store_true",
                     help="grava máxima e mínima em extremos_{ano}.csv (item C4)")
     a = ap.parse_args()
 
-    ausentes = []
+    missing = []
     total = 0
-    for ano in range(a.de, a.ate + 1):
-        r = baixar(ano, a.destino, extremos=a.extremos)
+    for year in range(a.de, a.ate + 1):
+        r = download(year, a.destino, extremes=a.extremos)
         if r is None:
-            ausentes.append(ano)
+            missing.append(year)
         else:
             total += r[0]
     print(f"\n{total} pregões à vista em {a.destino}")
-    if ausentes:
-        print("!! ANOS NÃO PUBLICADOS: " + ", ".join(map(str, ausentes)))
+    if missing:
+        print("!! ANOS NÃO PUBLICADOS: " + ", ".join(map(str, missing)))
     return 0
 
 

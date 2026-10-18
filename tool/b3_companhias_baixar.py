@@ -29,52 +29,52 @@ ENDPOINT = (
     "https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/"
     "CompanyCall/GetListedSupplementCompany/"
 )
-DESTINO = Path("data/b3/companhias")
-PAUSA = 0.6
+DESTINATION = Path("data/b3/companhias")
+PAUSE = 0.6
 
 
-def consultar(emissor: str) -> object | None:
-    carga = json.dumps({"issuingCompany": emissor, "language": "pt-br"})
-    url = ENDPOINT + base64.b64encode(carga.encode()).decode()
-    for tentativa in range(3):
+def query(issuer: str) -> object | None:
+    load = json.dumps({"issuingCompany": issuer, "language": "pt-br"})
+    url = ENDPOINT + base64.b64encode(load.encode()).decode()
+    for attempt in range(3):
         try:
             with urllib.request.urlopen(url, timeout=60) as r:
                 return json.load(r)
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
-            print(f"  {emissor}: tentativa {tentativa + 1} falhou ({e})")
-            time.sleep(3 * (tentativa + 1))
+            print(f"  {issuer}: tentativa {attempt + 1} falhou ({e})")
+            time.sleep(3 * (attempt + 1))
     return None
 
 
 def main() -> int:
     if len(sys.argv) > 1:
-        emissores = sorted({a.upper()[:4] for a in sys.argv[1:]})
+        issuers = sorted({a.upper()[:4] for a in sys.argv[1:]})
     else:
-        universo = json.loads(Path("docs/validacao/universo.json").read_text(encoding="utf-8"))
-        emissores = sorted({e["ticker"][:4] for e in universo})
+        universe = json.loads(Path("docs/validacao/universo.json").read_text(encoding="utf-8"))
+        issuers = sorted({e["ticker"][:4] for e in universe})
 
-    DESTINO.mkdir(parents=True, exist_ok=True)
-    falhas, vazios = [], []
-    for i, emissor in enumerate(emissores, 1):
-        dado = consultar(emissor)
-        if dado is None:
-            falhas.append(emissor)
-        elif not dado:
-            vazios.append(emissor)
+    DESTINATION.mkdir(parents=True, exist_ok=True)
+    failures, empty = [], []
+    for i, issuer in enumerate(issuers, 1):
+        payload = query(issuer)
+        if payload is None:
+            failures.append(issuer)
+        elif not payload:
+            empty.append(issuer)
         else:
-            registro = {"consultadoEm": dt.date.today().isoformat(), "resposta": dado}
-            (DESTINO / f"{emissor}.json").write_text(
-                json.dumps(registro, ensure_ascii=False), encoding="utf-8"
+            record = {"consultadoEm": dt.date.today().isoformat(), "resposta": payload}
+            (DESTINATION / f"{issuer}.json").write_text(
+                json.dumps(record, ensure_ascii=False), encoding="utf-8"
             )
         if i % 25 == 0:
-            print(f"  {i}/{len(emissores)}")
-        time.sleep(PAUSA)
+            print(f"  {i}/{len(issuers)}")
+        time.sleep(PAUSE)
 
-    print(f"\n{len(emissores) - len(falhas) - len(vazios)} emissores gravados em {DESTINO}")
-    if vazios:
-        print("sem registro na B3: " + " ".join(vazios))
-    if falhas:
-        print("!! FALHARAM: " + " ".join(falhas))
+    print(f"\n{len(issuers) - len(failures) - len(empty)} emissores gravados em {DESTINATION}")
+    if empty:
+        print("sem registro na B3: " + " ".join(empty))
+    if failures:
+        print("!! FALHARAM: " + " ".join(failures))
     return 0
 
 

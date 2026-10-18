@@ -22,30 +22,30 @@ import json
 import urllib.request
 from pathlib import Path
 
-SERIE = 'JPM366_EMBI366'
+SERIES = 'JPM366_EMBI366'
 URL = ('http://www.ipeadata.gov.br/api/odata4/'
-       f"ValoresSerie(SERCODIGO='{SERIE}')")
-SAIDA = Path('data/indices/embi_brasil.json')
+       f"ValoresSerie(SERCODIGO='{SERIES}')")
+OUTPUT = Path('data/indices/embi_brasil.json')
 
 
 def main() -> int:
     with urllib.request.urlopen(URL, timeout=120) as r:
-        dados = json.loads(r.read().decode('utf-8'))
-    pontos = []
-    for v in dados.get('value', []):
-        valor = v.get('VALVALOR')
-        data = (v.get('VALDATA') or '')[:10]
-        if valor is None or len(data) != 10:
+        data = json.loads(r.read().decode('utf-8'))
+    points = []
+    for v in data.get('value', []):
+        value = v.get('VALVALOR')
+        date = (v.get('VALDATA') or '')[:10]
+        if value is None or len(date) != 10:
             continue
-        pontos.append([data, float(valor)])
-    pontos.sort()
-    if not pontos:
-        print('o IPEADATA não devolveu valor para', SERIE)
+        points.append([date, float(value)])
+    points.sort()
+    if not points:
+        print('o IPEADATA não devolveu valor para', SERIES)
         return 2
-    SAIDA.parent.mkdir(parents=True, exist_ok=True)
-    SAIDA.write_text(json.dumps(pontos), encoding='utf-8')
-    print(f'{SAIDA}: {len(pontos)} dias, de {pontos[0][0]} a {pontos[-1][0]}; '
-          f'último {pontos[-1][1]:.0f} pontos-base')
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT.write_text(json.dumps(points), encoding='utf-8')
+    print(f'{OUTPUT}: {len(points)} dias, de {points[0][0]} a {points[-1][0]}; '
+          f'último {points[-1][1]:.0f} pontos-base')
     return 0
 
 

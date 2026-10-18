@@ -53,21 +53,21 @@ import statistics as st
 import sys
 from pathlib import Path
 
-TARIFA_B3 = 0.0003          # negociação 0,005% + liquidação 0,025%, por ponta
-JANELA = 63                 # pregões: um trimestre
-MINIMO_DE_PARES = 20        # abaixo disso, o papel não tem spread estimável
-SALTO = 0.4                 # |ln(C₂/C₁)| acima disso é evento, não pregão
+B3_FEE = 0.0003          # negociação 0,005% + liquidação 0,025%, por ponta
+WINDOW = 63                 # pregões: um trimestre
+MIN_PAIRS = 20        # abaixo disso, o papel não tem spread estimável
+JUMP = 0.4                 # |ln(C₂/C₁)| acima disso é evento, não pregão
 
 
-def ler_extremos(tickers: set[str]) -> dict[str, list[tuple]]:
+def read_extremes(tickers: set[str]) -> dict[str, list[tuple]]:
     """Pregões por ticker: (data, máxima, mínima, fechamento, fator)."""
     out: dict[str, list[tuple]] = {}
-    arquivos = sorted(Path("data/b3").glob("extremos_*.csv"))
-    if not arquivos:
+    files = sorted(Path("data/b3").glob("extremos_*.csv"))
+    if not files:
         print("Faltam data/b3/extremos_*.csv. Rode antes:\n"
               "  python tool/b3_baixar.py --extremos --de 2017", file=sys.stderr)
         sys.exit(2)
-    for f in arquivos:
+    for f in files:
         with f.open(encoding="utf-8") as h:
             for r in csv.DictReader(h, delimiter=";"):
                 if r["ticker"] not in tickers:
@@ -82,123 +82,123 @@ def ler_extremos(tickers: set[str]) -> dict[str, list[tuple]]:
     return out
 
 
-def termo(a: tuple, b: tuple) -> float | None:
+def term(a: tuple, b: tuple) -> float | None:
     """`(c_t − η_t)(c_t − η_{t+1})` para dois pregões consecutivos."""
     _, h1, l1, c1, f1 = a
     _, h2, l2, c2, f2 = b
-    if f1 != f2 or abs(math.log(c2 / c1)) > SALTO:
+    if f1 != f2 or abs(math.log(c2 / c1)) > JUMP:
         return None
     c = math.log(c1)
     return ((c - (math.log(h1) + math.log(l1)) / 2)
             * (c - (math.log(h2) + math.log(l2)) / 2))
 
 
-def spread_ate(pregoes: list[tuple], datas: list[str], ate: str) -> float | None:
-    """Spread de Abdi e Ranaldo nos `JANELA` pregões até [ate], inclusive."""
-    fim = bisect.bisect_right(datas, ate)
-    ini = max(0, fim - JANELA)
-    termos = [termo(pregoes[i - 1], pregoes[i]) for i in range(ini + 1, fim)]
-    termos = [x for x in termos if x is not None]
-    if len(termos) < MINIMO_DE_PARES:
+def spread_until(sessions: list[tuple], dates: list[str], until: str) -> float | None:
+    """Spread de Abdi e Ranaldo nos `WINDOW` pregões até [until], inclusive."""
+    end = bisect.bisect_right(dates, until)
+    start = max(0, end - WINDOW)
+    terms = [term(sessions[i - 1], sessions[i]) for i in range(start + 1, end)]
+    terms = [x for x in terms if x is not None]
+    if len(terms) < MIN_PAIRS:
         return None
-    return math.sqrt(max(4 * st.mean(termos), 0.0))
+    return math.sqrt(max(4 * st.mean(terms), 0.0))
 
 
-def somar_meses(iso: str, meses: int) -> str:
+def add_months(iso: str, months: int) -> str:
     d = dt.date.fromisoformat(iso)
-    ano, mes = divmod(d.month - 1 + meses, 12)
-    ano, mes = d.year + ano, mes + 1
-    return dt.date(ano, mes, min(d.day, calendar.monthrange(ano, mes)[1])).isoformat()
+    year, month = divmod(d.month - 1 + months, 12)
+    year, month = d.year + year, month + 1
+    return dt.date(year, month, min(d.day, calendar.monthrange(year, month)[1])).isoformat()
 
 
 def main() -> int:
-    fonte = Path("docs/validacao/backtest_trimestral.json")
-    obs = json.loads(fonte.read_text(encoding="utf-8"))
-    extremos = ler_extremos({o["ticker"] for o in obs})
-    datas = {t: [p[0] for p in v] for t, v in extremos.items()}
+    source = Path("docs/validacao/backtest_trimestral.json")
+    obs = json.loads(source.read_text(encoding="utf-8"))
+    extremes = read_extremes({o["ticker"] for o in obs})
+    dates = {t: [p[0] for p in v] for t, v in extremes.items()}
 
-    bruto: dict[str, dict] = {}
+    raw: dict[str, dict] = {}
     for o in obs:
         t, c = o["ticker"], o["coorte"]
-        pregoes = extremos.get(t)
-        linha = {"compra": None, "venda12": None, "venda36": None}
-        if pregoes:
-            linha["compra"] = spread_ate(pregoes, datas[t], c)
-            for h, meses in (("venda12", 12), ("venda36", 36)):
-                linha[h] = spread_ate(pregoes, datas[t], somar_meses(c, meses))
-        bruto[f"{c}|{t}"] = linha
+        sessions = extremes.get(t)
+        line = {"compra": None, "venda12": None, "venda36": None}
+        if sessions:
+            line["compra"] = spread_until(sessions, dates[t], c)
+            for h, months in (("venda12", 12), ("venda36", 36)):
+                line[h] = spread_until(sessions, dates[t], add_months(c, months))
+        raw[f"{c}|{t}"] = line
 
     # Recuo: sem spread numa ponta, o da outra; sem nas duas, a mediana do
     # tercil de liquidez da mesma coorte.
-    por_coorte: dict[str, list] = {}
+    by_cohort: dict[str, list] = {}
     for o in obs:
-        por_coorte.setdefault(o["coorte"], []).append(o)
-    mediana_do_tercil: dict[str, float] = {}
-    for c, g in por_coorte.items():
+        by_cohort.setdefault(o["coorte"], []).append(o)
+    tercile_median: dict[str, float] = {}
+    for c, g in by_cohort.items():
         com = sorted((o for o in g if o.get("liquidez")), key=lambda o: o["liquidez"])
         for i, o in enumerate(com):
             o["_tercil"] = min(2, 3 * i // max(len(com), 1))
         for k in range(3):
-            xs = [bruto[f"{c}|{o['ticker']}"]["compra"] for o in com
-                  if o["_tercil"] == k and bruto[f"{c}|{o['ticker']}"]["compra"] is not None]
+            xs = [raw[f"{c}|{o['ticker']}"]["compra"] for o in com
+                  if o["_tercil"] == k and raw[f"{c}|{o['ticker']}"]["compra"] is not None]
             if xs:
-                mediana_do_tercil[f"{c}|{k}"] = st.median(xs)
-    geral = st.median([v["compra"] for v in bruto.values() if v["compra"] is not None])
+                tercile_median[f"{c}|{k}"] = st.median(xs)
+    overall = st.median([v["compra"] for v in raw.values() if v["compra"] is not None])
 
-    saida: dict[str, dict] = {}
-    recuos = {"outraPonta": 0, "tercil": 0, "geral": 0}
+    output: dict[str, dict] = {}
+    fallbacks = {"outraPonta": 0, "tercil": 0, "geral": 0}
     for o in obs:
         k = f"{o['coorte']}|{o['ticker']}"
-        v = bruto[k]
-        linha = {}
+        v = raw[k]
+        line = {}
         for h in ("12", "36"):
-            compra, venda = v["compra"], v[f"venda{h}"]
-            if compra is None and venda is None:
-                m = mediana_do_tercil.get(f"{o['coorte']}|{o.get('_tercil')}")
-                recuos["tercil" if m is not None else "geral"] += 1
-                compra = venda = m if m is not None else geral
-            elif compra is None or venda is None:
-                recuos["outraPonta"] += 1
-                compra = venda = compra if compra is not None else venda
-            fator = (1 - TARIFA_B3 - compra / 2) * (1 - TARIFA_B3 - venda / 2)
-            linha[f"fator{h}"] = round(fator, 6)
-        linha.update({kk: (None if vv is None else round(vv, 6)) for kk, vv in v.items()})
-        saida[k] = linha
+            buy, sell = v["compra"], v[f"venda{h}"]
+            if buy is None and sell is None:
+                m = tercile_median.get(f"{o['coorte']}|{o.get('_tercil')}")
+                fallbacks["tercil" if m is not None else "geral"] += 1
+                buy = sell = m if m is not None else overall
+            elif buy is None or sell is None:
+                fallbacks["outraPonta"] += 1
+                buy = sell = buy if buy is not None else sell
+            factor = (1 - B3_FEE - buy / 2) * (1 - B3_FEE - sell / 2)
+            line[f"fator{h}"] = round(factor, 6)
+        line.update({kk: (None if vv is None else round(vv, 6)) for kk, vv in v.items()})
+        output[k] = line
 
     # --- resumo -------------------------------------------------------------
-    compra = [v["compra"] for v in bruto.values() if v["compra"] is not None]
-    por_liquidez: dict[str, list[float]] = {"alta": [], "media": [], "baixa": []}
+    buy = [v["compra"] for v in raw.values() if v["compra"] is not None]
+    by_liquidity: dict[str, list[float]] = {"alta": [], "media": [], "baixa": []}
     liq = sorted(o["liquidez"] for o in obs if o.get("liquidez"))
     t1, t2 = liq[len(liq) // 3], liq[2 * len(liq) // 3]
     for o in obs:
-        v = saida.get(f"{o['coorte']}|{o['ticker']}", {}).get("compra")
+        v = output.get(f"{o['coorte']}|{o['ticker']}", {}).get("compra")
         if v is None or not o.get("liquidez"):
             continue
-        grupo = "baixa" if o["liquidez"] < t1 else "media" if o["liquidez"] < t2 else "alta"
-        por_liquidez[grupo].append(v)
+        group = "baixa" if o["liquidez"] < t1 else "media" if o["liquidez"] < t2 else "alta"
+        by_liquidity[group].append(v)
 
     def q(xs, p):
         xs = sorted(xs)
         return xs[int(p * (len(xs) - 1))] if xs else None
 
-    resumo = {
+    summary = {
         "observacoes": len(obs),
-        "comSpreadNaCompra": len(compra),
-        "spreadNaCompra": {"p25": q(compra, .25), "mediana": q(compra, .5),
-                           "p75": q(compra, .75), "p90": q(compra, .9)},
-        "medianaPorTercilDeLiquidez": {k: q(v, .5) for k, v in por_liquidez.items()},
-        "recuos": recuos,
+        "comSpreadNaCompra": len(buy),
+        "spreadNaCompra": {"p25": q(buy, .25), "mediana": q(buy, .5),
+                           "p75": q(buy, .75), "p90": q(buy, .9)},
+        "medianaPorTercilDeLiquidez": {k: q(v, .5) for k, v in by_liquidity.items()},
+        "recuos": fallbacks,
         "custoIdaEVoltaMediano": {
-            h: round(1 - st.median(v[f"fator{h}"] for v in saida.values()), 6)
+            h: round(1 - st.median(v[f"fator{h}"] for v in output.values()), 6)
             for h in ("12", "36")},
-        "tarifaB3PorPonta": TARIFA_B3,
-        "janelaEmPregoes": JANELA,
+        "tarifaB3PorPonta": B3_FEE,
+        "janelaEmPregoes": WINDOW,
     }
     Path("docs/validacao/custos_spread.json").write_text(
-        json.dumps({"medidoEm": dt.date.today().isoformat(), "resumo": resumo,
-                    "porObservacao": saida}, ensure_ascii=False),
+        json.dumps({"medidoEm": dt.date.today().isoformat(), "resumo": summary,
+                    "porObservacao": output}, ensure_ascii=False),
         encoding="utf-8")
-    print(json.dumps(resumo, ensure_ascii=False, indent=1))
+    print(json.dumps(summary, ensure_ascii=False, indent=1))
     return 0
 
 
