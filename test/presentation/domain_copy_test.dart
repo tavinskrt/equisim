@@ -34,7 +34,9 @@ void main() {
     // O texto não mudou de lugar para mudar de redação: quem decide a
     // redação agora é a tela, e esta é a de 22/09/2026.
     expect(ValuationModel.dcfFcff.rotulo, 'DCF por fluxo da firma');
-    expect(ScenarioBand.bear.rotulo, 'Pessimista');
+    // Pelas premissas, e não pelo resultado (decisão 148, item B38).
+    expect(ScenarioBand.bear.rotulo, 'Premissas mais duras');
+    expect(ScenarioBand.bull.rotulo, 'Premissas mais brandas');
     expect(MultipleKind.firmaEbitda.rotulo, 'EV/EBITDA');
     expect(PortfolioKind.reserva.rotulo, 'Reserva');
   });

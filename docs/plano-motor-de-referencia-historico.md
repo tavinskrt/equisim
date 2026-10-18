@@ -11,6 +11,33 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## A sensibilidade nomeada pelas premissas — o B38 fechado (14/10/2026)
+
+**O pedido.** «Já que não são calculados cenários pessimista e otimista, qual
+sua sugestão para mudarmos esses rótulos?» Os dois valores são calculados, mas
+como deslocamento de premissa — crescimento do primeiro ano 3 pontos e as duas
+taxas 2 pontos, em sentidos opostos —, e não como cenário econômico; a decisão
+92 já os chama de sensibilidade. Depois da sugestão: «Pode implementar os
+rótulos e juntar os cartões.»
+
+**O que foi feito** ([decisão 148](decisoes/148-a-sensibilidade-e-nomeada-pelas-premissas-num-cartao-so.md)).
+Um cartão "Sensibilidade" só, no lugar de "Cenários" e "Sensibilidade": os
+conjuntos fixos nomeados pelas premissas — «Premissas mais duras», «do motor»,
+«mais brandas» —, com «crescimento −3 p.p., taxa +2 p.p.» e o contrário em nota,
+tirados das constantes que a conta usa (`DiscreteScenarios.defaultGrowthDelta` e
+`defaultDiscountDelta`); a cor de cada valor pela posição contra o preço justo;
+o aviso quando as premissas mais brandas dão preço menor; a barra do menor ao
+maior; e, no Monte Carlo, «5% dos sorteios abaixo» e «acima» no lugar de
+«pessimista» e «otimista». É o segundo caminho que o B38 deixava ao usuário, e o
+fecha; a definição dos conjuntos não mudou.
+
+**Verificado.** Os testes novos do cartão conferem os rótulos, as notas e o
+aviso, e que ele cabe em 320 dp sob 2,0x também invertido; o guia de estudo, o
+capítulo 6 do motor, as limitações e as perguntas do orientador citam os
+rótulos novos.
+
+---
+
 ## O porquê das normalizações (14/10/2026)
 
 **O pedido.** O orientador parabenizou o trabalho, refez os valuations por

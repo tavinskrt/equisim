@@ -229,8 +229,9 @@ Uma consequência que vale entender: **crescer mais nem sempre vale mais.** Se o
 retorno sobre o capital está abaixo do custo, cada real reinvestido rende menos
 do que custa, e mais crescimento *reduz* o valor. Isso acontece em mais da
 metade dos 97 ativos avaliados em 14/09/2026 (item B38 do
-[plano](../plano-motor-de-referencia.md)) e explica por que o cenário
-"Otimista" da tela às vezes sai abaixo do "Pessimista" (seção 4.11).
+[plano](../plano-motor-de-referencia.md)) e explica por que as "premissas mais
+brandas" do cartão de sensibilidade às vezes dão preço menor que as "mais
+duras" (seção 4.11).
 
 ---
 
@@ -353,8 +354,7 @@ uma pergunta diferente:
 | **Margem de segurança** | a que preço eu compraria com folga? | `justo × (1 − margem)`; zero por padrão |
 | **Taxa de desconto** | que taxa desconta o ano 1? | o custo do capital próprio do ano 1 |
 | **Faixa calibrada** | onde o preço costuma estar daqui a 12 e 36 meses? | seção 4.12 |
-| **Cenários** | quanto o justo muda se eu errar a premissa? | seção 4.11 |
-| **Sensibilidade** | idem, em barra | os mesmos cenários |
+| **Sensibilidade** | quanto o justo muda se eu errar a premissa? | seção 4.11: três conjuntos fixos (ou Monte Carlo) e a barra, num cartão só |
 | **Múltiplos de pares** | o nível faz sentido perto dos concorrentes? | seção 4.13 |
 | **Ressalvas** | onde este número é frágil? | seção 4.14 |
 
@@ -362,21 +362,25 @@ uma pergunta diferente:
 
 ## 4.11 Cenários e Monte Carlo: sensibilidade, não probabilidade
 
-**Cenários fixos** (padrão). Três conjuntos de premissas:
+**Conjuntos fixos** (padrão). O cartão "Sensibilidade" mostra três conjuntos
+de premissas, nomeados pelo que foi mexido (decisão 148):
 
-| Cenário | Crescimento inicial | Desconto (todos os anos e perpetuidade) |
+| Na tela | Crescimento inicial | Desconto (todos os anos e perpetuidade) |
 |---|---|---|
-| Pessimista | −3 pontos | +2 pontos |
-| Base | o do motor | o do motor |
-| Otimista | +3 pontos | −2 pontos |
+| Premissas mais duras | −3 pontos | +2 pontos |
+| Premissas do motor | o do motor | o do motor |
+| Premissas mais brandas | +3 pontos | −2 pontos |
+
+Até 14/10/2026 eles se chamavam "Pessimista", "Base" e "Otimista", e ficavam
+num cartão "Cenários" separado da barra.
 
 **Monte Carlo** (chave na tela). 10.000 sorteios: crescimento em ±4 pontos,
 desconto em ±2 pontos e crescimento perpétuo em ±1 ponto, cada um numa
 distribuição triangular com o pico na premissa do motor. A tela mostra os
 percentis 5, 50 e 95 e a fração de sorteios acima do preço de mercado.
 
-**O que eles não são.** Nas coortes históricas, a faixa entre pessimista e
-otimista conteve o preço mais os proventos de 12 e 36 meses depois em 13% a 14%
+**O que eles não são.** Nas coortes históricas, a faixa entre as premissas
+mais duras e as mais brandas conteve o preço mais os proventos de 12 e 36 meses depois em 13% a 14%
 dos casos, e a faixa de 90% do Monte Carlo em 9%, contra 90% que um intervalo de
 confiança prometeria (decisão 92; remedido em 02/10/2026). Os cenários dizem
 **quanto o número depende das premissas**, e não onde o preço vai estar.
@@ -391,12 +395,14 @@ recentrada no preço que de fato veio, a faixa do Monte Carlo passa a conter só
 por isso a incerteza da tela é a faixa calibrada da seção seguinte, que parte do
 preço de hoje.
 
-**O rótulo que engana (item B38).** O otimista soma crescimento. Quando a
-empresa rende abaixo do custo de capital, crescer destrói valor, e o "Otimista"
-pode sair abaixo do "Pessimista" — aconteceu em 14 dos 90 ativos da via da
-firma em 14/09/2026. A conta está certa; o nome do cenário é que supõe que
-crescer é sempre bom. A correção depende de decisão
-([limitações](../validacao/limitacoes.md)).
+**Quando as premissas mais brandas valem menos (item B38).** O conjunto mais
+brando soma crescimento. Quando a empresa rende abaixo do custo de capital,
+crescer destrói valor, e as premissas mais brandas dão preço **menor** que as
+mais duras — aconteceu em 14 dos 90 ativos da via da firma em 14/09/2026. A
+conta está certa. O rótulo antigo, "Otimista", supunha que crescer é sempre
+bom; o novo diz o que foi mexido, a cor de cada valor sai da posição dele
+contra o preço justo, e o cartão avisa quando a ordem se inverte (decisão
+148).
 
 ([scenario_engine.dart](../../packages/equisim_core/lib/src/services/valuation/scenario_engine.dart).)
 

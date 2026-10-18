@@ -412,12 +412,16 @@ class TornadoChart extends StatelessWidget {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(child: rotulo(bar.label)),
-                              const SizedBox(width: FinSpace.sm),
-                              Flexible(child: faixa(bar)),
-                            ],
+                          // `Wrap`, e não `Row` com os dois flexíveis: a fila
+                          // dividia a largura ao meio, e com «Crescimento e
+                          // taxa» o par de valores saía cortado em 320 dp.
+                          // Assim cada um fica inteiro, e o par desce de linha
+                          // quando não cabe ao lado do rótulo.
+                          Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            spacing: FinSpace.sm,
+                            runSpacing: FinSpace.xxs,
+                            children: [rotulo(bar.label), faixa(bar)],
                           ),
                           const SizedBox(height: FinSpace.xs),
                           barra(bar),

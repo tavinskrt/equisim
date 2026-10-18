@@ -22,12 +22,19 @@ extension ValuationModelRotulo on ValuationModel {
   };
 }
 
-/// O nome da faixa de cenário.
+/// O nome da faixa de cenário, **pelas premissas, e não pelo resultado**
+/// (decisão 148).
+///
+/// Era «Pessimista», «Base» e «Otimista», e o nome prometia um mundo ruim e um
+/// bom. A faixa é sensibilidade (decisão 92): crescimento e taxa deslocados
+/// juntos. E o «Otimista» podia valer menos que o «Pessimista» — com a empresa
+/// rendendo abaixo do custo de capital, crescer destrói valor (item B38).
+/// Nomear pelas premissas diz o que foi mexido, e o valor diz o que deu.
 extension ScenarioBandRotulo on ScenarioBand {
   String get rotulo => switch (this) {
-    ScenarioBand.bear => 'Pessimista',
-    ScenarioBand.base => 'Base',
-    ScenarioBand.bull => 'Otimista',
+    ScenarioBand.bear => 'Premissas mais duras',
+    ScenarioBand.base => 'Premissas do motor',
+    ScenarioBand.bull => 'Premissas mais brandas',
   };
 }
 

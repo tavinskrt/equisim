@@ -21,7 +21,7 @@ calma.
 | **Controle estatal** | Companhia controlada pela União, por um estado ou por um município, como ela declara no cadastro da CVM. A tela mostra a ressalva, e o motor não cobra prêmio a mais na taxa (cap. 3). |
 | **Cascata** | A sequência de portas que decide se e como a empresa é avaliada (cap. 4). |
 | **CDI** | Taxa dos empréstimos de um dia entre bancos, colada à Selic (cap. 3). |
-| **Cenários** | Três conjuntos fixos de premissas (pessimista, base, otimista): sensibilidade, não probabilidade (cap. 4). |
+| **Cenários** | Três conjuntos fixos de premissas — na tela, "premissas mais duras", "do motor" e "mais brandas", no cartão "Sensibilidade": sensibilidade, não probabilidade (cap. 4). |
 | **Ciclo (retorno do ciclo)** | A mediana do retorno sobre o capital nos oito exercícios anteriores (cap. 4). |
 | **Cobertura (de juros)** | EBIT ÷ despesa financeira. Quantas vezes o lucro operacional paga os juros (cap. 3). |
 | **Coorte** | Uma data de avaliação no backtest (cap. 6). |

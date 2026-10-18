@@ -76,23 +76,26 @@ faixa de "8 em 10" sai sobretudo do preço de hoje e da volatilidade do papel.
 que a evidência sustenta, e a tela diz isso (decisões 100 e 124;
 [cobertura_banda.md](cobertura_banda.md)).
 
-### 1.4 Os cenários são sensibilidade, e o "otimista" pode valer menos
+### 1.4 Os cenários são sensibilidade, e as premissas mais brandas podem valer menos
 
-**O que é.** Os cenários pessimista e otimista (crescimento ±3 p.p., desconto
-±2 p.p.) contiveram o que de fato aconteceu em 13% a 14% dos casos, e a faixa
+**O que é.** Os conjuntos fixos de premissas — na tela, "mais duras" e "mais
+brandas" (crescimento ±3 p.p., desconto ±2 p.p.) — contiveram o que de fato aconteceu em 13% a 14% dos casos, e a faixa
 de 90% do Monte Carlo em 9%, contra 90% que um intervalo de confiança
-prometeria (decisão 92; remedido em 02/10/2026). E o otimista soma
-crescimento: quando o retorno da empresa fica abaixo do custo de capital,
-crescer destrói valor, e o "otimista" sai abaixo do "pessimista". Com o motor de
+prometeria (decisão 92; remedido em 02/10/2026). E o conjunto mais brando
+soma crescimento: quando o retorno da empresa fica abaixo do custo de capital,
+crescer destrói valor, e ele sai abaixo do mais duro. Com o motor de
 02/10/2026, isso acontece em 14 dos 90 ativos da via da firma (com o prêmio de
 5,5%, eram 17 de 77, e só o crescimento +3 p.p. baixava o preço justo em 53 dos
 97 avaliados).
 
-**Por que importa.** O rótulo "Otimista" supõe que crescer é sempre bom.
+**Por que importa.** O rótulo antigo, "Otimista", supunha que crescer é
+sempre bom.
 
-**O que o projeto faz.** A tela diz "sensibilidade". A conta está certa; o
-rótulo e a definição do cenário dependem de decisão (item B38 do
-[plano](../plano-motor-de-referencia.md)).
+**O que o projeto faz.** O cartão se chama "Sensibilidade", os conjuntos são
+nomeados pelas premissas, a cor de cada valor sai da posição dele contra o
+preço justo, e a inversão é declarada na tela (decisão 148; item B38 do
+[plano](../plano-motor-de-referencia.md)). A definição dos conjuntos não
+mudou: separá-los por premissa seria mudança de método.
 
 ---
 

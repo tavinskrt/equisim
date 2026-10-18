@@ -50,7 +50,8 @@ de logs descrevia uma conta diferente da feita na via da firma; o cenário de
 desconto não alcançava todos os anos em um caso; a taxa dos bancos não seguia a
 curva ano a ano; e dois textos (um aviso e um rastro) diziam que uma regra
 retirada ainda valia. Quatro foram corrigidos na mesma rodada; o B38 (o nome
-"Otimista" num cenário que pode valer menos) depende de decisão.
+"Otimista" num cenário que pode valer menos) fechou em 14/10/2026, com os
+conjuntos nomeados pelas premissas e a inversão declarada (decisão 148).
 
 ### R2 — incerteza calibrada
 

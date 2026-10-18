@@ -7,22 +7,20 @@ mesma régua, onde cada objetivo está. O que cada rodada encontrou, o que as
 lentes disseram e o que a auditoria reprovou ficam no
 [histórico](plano-motor-de-referencia-historico.md).
 
-> **Última atualização: 14/10/2026 — o porquê das normalizações.** O orientador
-> refez os valuations por Gordon e chegou aos preços do motor por centavos;
-> pediu que se detalhasse o motivo das normalizações do lucro de partida — por
-> que acontecem, e por que para cima ou para baixo —, sem retirá-las. A Saída 1
-> passou a guardar a decisão num registro com os valores que a tomaram
-> (`BaseNormalization`), e o porquê aparece em linguagem corrente no **painel de
-> logs** (quadro "Por quê" do passo "Base do fluxo") e na tela **Editar
-> valuation** (cartão do lucro de partida); o de cada um dos 110 avaliados está
-> em [normalizacoes.md](validacao/normalizacoes.md) — 18 para cima, 27 para
-> baixo, 47 dentro do normal, 14 por tendência, 3 reconstruídos e 1 sem ciclo.
-> **Nenhum número mudou**: o gabarito saiu igual em preço, cenários e
-> diagnósticos, e o R1, o R2 e o R3 continuam como medidos em 02/10/2026.
-> Conferir a explicação contra o código achou e corrigiu uma frase do aviso e do
-> rastro — a base não "converge para o ciclo ao longo da projeção"; o fator vale
-> já no ano zero. Seguem abertos, para o usuário, o B33, o B34, o B38, o B45 e o
-> B46. As rodadas anteriores estão no
+> **Última atualização: 14/10/2026 — a sensibilidade nomeada pelas premissas, e
+> o porquê das normalizações.** O cartão de cenários e o de sensibilidade
+> viraram um só, "Sensibilidade", e os conjuntos fixos passaram de «Pessimista»
+> e «Otimista» a «Premissas mais duras» e «Premissas mais brandas», com o quanto
+> foi mexido em nota, a cor de cada valor pela posição contra o preço justo e o
+> aviso quando as mais brandas valem menos — o que **fecha o B38**
+> ([decisão 148](decisoes/148-a-sensibilidade-e-nomeada-pelas-premissas-num-cartao-so.md)).
+> No mesmo dia, a pedido do orientador, o porquê de cada normalização do lucro
+> de partida passou a aparecer no painel de logs e na tela Editar valuation, e o
+> de cada um dos 110 avaliados em [normalizacoes.md](validacao/normalizacoes.md)
+> — 18 para cima, 27 para baixo, 47 dentro do normal, 14 por tendência, 3
+> reconstruídos e 1 sem ciclo. **Nenhum número mudou**: o R1, o R2 e o R3
+> continuam como medidos em 02/10/2026. Seguem abertos, para o usuário, o B33, o
+> B34, o B45 e o B46. As rodadas anteriores estão no
 > [histórico](plano-motor-de-referencia-historico.md).
 
 ## Os dois objetivos
@@ -1514,7 +1512,7 @@ o instrumento sob as duas medições.
 | B35 | O rastro da via da firma descrevia outra conta | R1 | ✅ | o painel de logs da via da firma mostra a conta que foi feita — a projeção do fluxo da firma, o fluxo do acionista descontado ao Ke de cada ano e o terminal convertido —, e a soma das parcelas fecha com o preço justo, com teste — **aberto e fechado em 28/09/2026**, achado ao refazer a documentação ([decisão 141](decisoes/141-a-documentacao-do-motor-e-refeita-do-zero-contra-o-codigo.md)). O rastro montava o fator de desconto com o WACC e escrevia ao lado o valor presente do fluxo do acionista, descontado ao Ke desde a decisão 102: «fluxo ÷ fator» não dava o valor escrito, e a soma mostrada era `EV − VT` e não a das parcelas — na WEGE3, 30,7 bi contra 33,4 bi. O `DcfOutcome` passou a expor as taxas, o fluxo da firma e o serviço da dívida de cada ano; o rastro da estrutura a termo passou a descrever a curva, o do CAPM a dizer que cada ano usa o forward, e o do crescimento perpétuo o piso de −5% da decisão 56. Nenhum preço muda |
 | B36 | O cenário de desconto não alcançava o caminho de Ke resolvido | R1 | ✅ | na via do acionista com o Ke resolvido ano a ano, o deslocamento do cenário alcança todos os anos, e não só a perpetuidade, com teste — **aberto e fechado em 28/09/2026**. O cenário é uma cópia do centro com `discountRate` deslocado, e herdava o caminho parado: o `+2 p.p.` do pessimista só chegava ao terminal, e a AZEV4 saía com o pessimista acima do otimista. Na via da firma o caminho é o do WACC, que é só o alvo do retorno, e o cenário chega ao Ke pela decisão 121; ali o caminho fica parado, como estava — deslocá-lo mudaria a sensibilidade de 77 ativos, e é o assunto do B38 |
 | B37 | Sem resolução, a taxa não seguia a curva ano a ano | R1 | ✅ | sem o custo de capital resolvido — os bancos, e o recuo de quem não tem beta desalavancado —, a taxa de cada ano é o custo de hoje remontado sobre o forward daquele ano, e o Ke, o juro e o rendimento do caixa da rota derivada seguem a curva, com teste — **aberto e fechado em 28/09/2026**. Interpolava em linha reta do CDI de hoje até o forward depois do ano N, enquanto o aviso dizia que a taxa seguia a curva. **No aplicativo, os 19 financeiros mudam de −0,4% a −0,5%**; nenhuma via da firma muda (já era resolvida). Nas coortes, o critério do R3 vai de 0,058 a 0,069 (`t` de 0,34 a 0,40) e a faixa calibrada de 79,5/80,0% a 79,4/79,9% em 80% nominal |
-| B38 | O cenário «Otimista» pode valer menos que o «Pessimista» | E | 👤 | o usuário decide o que os cenários fixos da tela nomeiam quando crescer destrói valor — manter os rótulos e declarar, nomear pelas premissas («crescimento +3 p.p., desconto −2 p.p.»), ou separar as duas sensibilidades —, com o efeito medido — **aberto em 28/09/2026**, achado ao refazer a documentação. O otimista soma crescimento; com o retorno sobre o capital abaixo do custo, reinvestir para crescer destrói valor, e o preço cai. **Medido sobre a entrada congelada: só o crescimento +3 p.p. baixa o preço justo em 53 dos 97 avaliados** (10 dos 19 financeiros); **só o desconto nunca inverte**; combinados, o otimista sai abaixo do pessimista em 17 dos 77 da via da firma — **com o prêmio de 1,21% da decisão 142, em 15 dos 88 da via da firma, e em nenhum dos 20 da via do acionista**, e em 14 dos 90 com a base de patrimônio da decisão 146 (a contagem do crescimento sozinho é a dos 5,5%). A conta está certa (McKinsey: crescer só cria valor com ROIC acima do custo); o rótulo supõe o contrário. Mudar os rótulos é mudança de tela; mudar a definição do cenário é mudança de método — as duas pedem decisão |
+| B38 | O cenário «Otimista» pode valer menos que o «Pessimista» | E | ✅ | o usuário decide o que os cenários fixos da tela nomeiam quando crescer destrói valor — manter os rótulos e declarar, nomear pelas premissas («crescimento +3 p.p., desconto −2 p.p.»), ou separar as duas sensibilidades —, com o efeito medido — **aberto em 28/09/2026**, achado ao refazer a documentação. O otimista soma crescimento; com o retorno sobre o capital abaixo do custo, reinvestir para crescer destrói valor, e o preço cai. **Medido sobre a entrada congelada: só o crescimento +3 p.p. baixa o preço justo em 53 dos 97 avaliados** (10 dos 19 financeiros); **só o desconto nunca inverte**; combinados, o otimista sai abaixo do pessimista em 17 dos 77 da via da firma — **com o prêmio de 1,21% da decisão 142, em 15 dos 88 da via da firma, e em nenhum dos 20 da via do acionista**, e em 14 dos 90 com a base de patrimônio da decisão 146 (a contagem do crescimento sozinho é a dos 5,5%). A conta está certa (McKinsey: crescer só cria valor com ROIC acima do custo); o rótulo supõe o contrário. Mudar os rótulos é mudança de tela; mudar a definição do cenário é mudança de método — as duas pedem decisão — **fechado em 14/10/2026 pelo segundo caminho** ([decisão 148](decisoes/148-a-sensibilidade-e-nomeada-pelas-premissas-num-cartao-so.md)): os conjuntos se chamam «Premissas mais duras», «do motor» e «mais brandas», com «crescimento −3 p.p., taxa +2 p.p.» e o contrário em nota, num cartão "Sensibilidade" só; a cor de cada valor sai da posição dele contra o preço justo, e o cartão declara a inversão. A definição dos conjuntos não mudou |
 | B39 | Aviso e rastro citavam a trava de saúde retirada do moat | R1 | ✅ | o aviso e o rastro da isenção cíclica dizem que a vantagem residual não tem trava de saúde desde a decisão 36, com teste — **aberto e fechado em 28/09/2026**. Diziam que ela «segue barrada» pela trava — na VALE3, ao lado de um veredito que a concedia (com λ de 0,0001). A decisão 36 tirou os dois cortes de nível do moat. Também em `tool/validation/out_of_sample.dart`. Nenhum preço muda |
 | B40 | O aviso das contagens nomeava a contagem errada | R1 | ✅ | o aviso de contagens discordantes nomeia a contagem que a ponte usou, com teste — **aberto e fechado em 28/09/2026**. Dizia sempre «a ponte por papel usa a implícita no valor de mercado», e desde a decisão 83 ela pode ser a oficial da B3: na SAPR11 o aviso nomeava as 103.850.066 do valor de mercado ao lado de uma ponte de 302.241.104. Nenhum preço muda |
 | B41 | A mediana dos pares incluía a própria companhia | R1 | ✅ | a mediana de cada ativo é a de **outras** companhias — uma por companhia, com a mediana das classes dela, sem a do ativo —, e o mínimo de cinco pares vale sobre elas — **aberto e fechado em 28/09/2026**. Os sete «pares» de saneamento da SAPR11 eram SAPR3, SAPR4, SAPR11 e mais quatro; a mediana caía na Sanepar, e as leituras de P/VP e EV/EBITDA devolviam, as duas, R$ 38,15 — o preço dela na data do pacote. Os bancos passam de 31 «pares» a 16 companhias; a SAPR11 e a VALE3 descem ao setor. **O preço justo não muda** (a segunda leitura não entra nele); a divergência mediana contra o fluxo descontado vai de +73,4% a **+87,4%**, com 59 de 97 acima de 50% ([multiplos.md](validacao/multiplos.md)) |
@@ -1779,7 +1777,8 @@ condição cita os itens da §6 que a fecham.
   taxa dos bancos fora da curva (**B37**), a trava retirada que um aviso ainda
   citava (**B39**), a contagem errada num aviso (**B40**) e a própria companhia
   entre os pares (**B41**). O **B38** — o rótulo «Otimista» num cenário que pode
-  valer menos — é de apresentação e depende de decisão, e fica no exemplar.
+  valer menos — era de apresentação, e fechou em 14/10/2026 com os conjuntos
+  nomeados pelas premissas e a inversão declarada (decisão 148).
 - [x] **R2. Incerteza calibrada** — **atingida em 15/09/2026, desfeita no mesmo dia
   e refeita por outra forma.** A banda de cenários cobria 8% contra 90%, e a
   incerteza que o aplicativo mostra passou a ser a faixa calibrada (C2, decisão 92),

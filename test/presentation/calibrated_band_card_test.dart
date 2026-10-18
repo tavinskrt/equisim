@@ -181,6 +181,6 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('FAIXA CALIBRADA'), findsNothing);
-    expect(find.textContaining('Sensibilidade:'), findsOneWidget);
+    expect(find.text('SENSIBILIDADE'), findsOneWidget);
   });
 }

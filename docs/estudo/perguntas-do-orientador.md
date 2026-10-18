@@ -115,14 +115,16 @@ conteve o preço mais os proventos em 79,7% dos casos em 12 meses e 78,7% em 36.
 Ela **não** é um intervalo em torno do preço justo: sai sobretudo do preço de
 hoje e da volatilidade ([cap. 4, seção 4.12](04-fluxo-de-caixa-descontado.md)).
 
-**13. E os cenários pessimista e otimista?**
+**13. E os cenários pessimista e otimista?** (hoje "premissas mais duras" e
+"mais brandas", no cartão "Sensibilidade")
 São sensibilidade: mostram quanto o número depende das premissas. Nas coortes,
 contiveram o resultado em 13% a 14% dos casos, e o Monte Carlo em 9% (decisão
 92; remedido em 01/10/2026). Não é taxa de acerto do motor: é uma faixa estreita
 em torno do preço justo, que nunca prometeu conter o preço futuro — quem promete
-isso é a faixa calibrada, e ela entrega 8 de cada 10. E o "otimista" pode sair
-abaixo do "pessimista" quando a empresa rende abaixo do custo — crescer destrói
-valor (item B38, aguardando decisão).
+isso é a faixa calibrada, e ela entrega 8 de cada 10. E as premissas mais
+brandas podem dar preço menor que as mais duras quando a empresa rende abaixo
+do custo — crescer destrói valor. Por isso os rótulos passaram a dizer o que foi
+mexido, e não o resultado, e o cartão avisa a inversão (decisão 148).
 
 **14. O motor tem habilidade?**
 "Habilidade testada, com o poder declarado" (decisão 140): o teste fixado antes

@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-14, a partir de `1aec46b`.
+Gerado em 2026-10-14, a partir de `1d0c6f6`.
 
 ## Decisões registradas
 
-**120** aceita · **2** cumprida · **7** substituída
+**121** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -144,6 +144,7 @@ Gerado em 2026-10-14, a partir de `1aec46b`.
 | 145 | A avaliação declara o controle estatal, com a fonte do Formulário Cadastral, sem mudar o preço justo | aceita | voce | 2026-10-02 |
 | 146 | Sem o par VPA e contagem do exercício, a base de patrimônio é o PL da demonstração | aceita | voce | 2026-10-02 |
 | 147 | O usuário refaz a conta do motor com os números dele, e o preço do motor continua o validado | aceita | voce | 2026-10-11 |
+| 148 | A sensibilidade é nomeada pelas premissas, num cartão só, e a inversão é declarada | aceita | voce | 2026-10-14 |
 
 ### Caminhos retirados
 
@@ -156,7 +157,7 @@ Decisões cujo `afeta` cita caminho que uma decisão posterior apagou (campo `re
 
 ## Caixa de entrada
 
-8 apontamento(s) não convertidos em decisão:
+9 apontamento(s) não convertidos em decisão:
 
 - `2026-09-09-voce.md`
 - `2026-09-27-voce.md`
@@ -166,6 +167,7 @@ Decisões cujo `afeta` cita caminho que uma decisão posterior apagou (campo `re
 - `2026-10-02-voce.md`
 - `2026-10-11-voce.md`
 - `2026-10-14-orientador.md`
+- `2026-10-14-voce.md`
 
 ## Superfície medida
 
@@ -173,16 +175,17 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 68 | 24.937 |
-| Apresentacao | 39 | 18.624 |
+| Nucleo de dominio | 69 | 25.133 |
+| Apresentacao | 41 | 19.206 |
 | Camada de dados | 27 | 3.926 |
-| Testes do app | 52 | 9.896 |
-| Testes do nucleo | 53 | 17.353 |
-| Ferramentas de QA | 20 | 6.946 |
+| Testes do app | 52 | 9.898 |
+| Testes do nucleo | 54 | 17.586 |
+| Ferramentas de QA | 20 | 6.955 |
 
 ## Histórico recente
 
 ```
+2026-10-14  1d0c6f6  Normalização destrinchada
 2026-10-12  1aec46b  Personalização do valuation
 2026-10-05  5809ca4  Refino do motor de valuation (parte 28)
 2026-10-02  51705aa  Instruções para o build
@@ -197,5 +200,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-09-22  2a19372  Refino do motor de valuation (parte 21)
 2026-09-21  5345767  Refino do motor de valuation (parte 21)
 2026-09-21  80866a8  Refino do motor de valuation (parte 20)
-2026-09-21  0ec1ec1  Refino do motor de valuation (parte 19)
 ```

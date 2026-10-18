@@ -99,6 +99,16 @@ class DiscreteScenarios implements AssumptionSource {
   /// use [DiscreteScenarios.around].
   const DiscreteScenarios(this.scenarios);
 
+  /// Deslocamento padrão do crescimento do primeiro ano, em fração: 3 p.p.
+  ///
+  /// Constante nomeada, e não só valor de parâmetro, para que a tela diga o
+  /// mesmo número que a conta usa — a nota "crescimento −3 p.p." sob os
+  /// valores da sensibilidade (decisão 148).
+  static const double defaultGrowthDelta = 0.03;
+
+  /// Deslocamento padrão das duas taxas de desconto, em fração: 2 p.p.
+  static const double defaultDiscountDelta = 0.02;
+
   /// Constrói as três faixas a partir de um cenário central, deslocando
   /// crescimento e desconto em direções opostas.
   ///
@@ -119,8 +129,8 @@ class DiscreteScenarios implements AssumptionSource {
   /// não participa daquele quociente.
   factory DiscreteScenarios.around(
     DcfAssumptions center, {
-    double growthDelta = 0.03,
-    double discountDelta = 0.02,
+    double growthDelta = defaultGrowthDelta,
+    double discountDelta = defaultDiscountDelta,
   }) =>
       DiscreteScenarios({
         ScenarioBand.bear: center.copyWith(

@@ -257,13 +257,11 @@ class _ValuationBody extends ConsumerWidget {
               _ModelCard(result: result, isLight: isLight),
               const Gap.md(),
               _CalibratedBandCard(result: result),
-              _ScenarioCard(
+              _SensitivityCard(
                 result: result,
                 settings: settings,
                 isLight: isLight,
               ),
-              const Gap.md(),
-              _SensitivityCard(result: result, isLight: isLight),
               if (result.triangulation != null) ...[
                 const Gap.md(),
                 _PeerCard(result: result),
@@ -339,7 +337,7 @@ class _PriceCard extends StatelessWidget {
                 child: MetricTile(
                   label: 'Preço justo',
                   value: Fmt.money(result.fairValue.reais),
-                  hint: 'cenário base',
+                  hint: 'pelas premissas do motor',
                 ),
               ),
               Expanded(
@@ -553,110 +551,6 @@ class _PeerCard extends StatelessWidget {
   }
 }
 
-/// Cenários: três faixas nomeadas ou distribuição sorteada.
-///
-/// O alternador existe porque os dois modos compartilham o mesmo caminho de
-/// código — trocar é configuração, não refatoração.
-class _ScenarioCard extends ConsumerWidget {
-  final ValuationResult result;
-  final ValuationSettings settings;
-  final bool isLight;
-
-  const _ScenarioCard({
-    required this.result,
-    required this.settings,
-    required this.isLight,
-  });
-
-  /// Largura por unidade de escala de texto abaixo da qual o alternador sai do
-  /// lado do título: em 320 dp sob 2,0x ele estourava 51 px.
-  static const double larguraDoCabecalho = 300;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Empilhado, o rótulo cede e quebra linha: em 320 dp sob 2,0x nem a linha
-    // própria cabia o texto ao lado do `Switch`. Ao lado do título ele não pode
-    // ser flexível — ali a largura que o `Row` recebe não é limitada.
-    Widget alternador({required bool empilhado}) {
-      final rotulo = Text(
-        'Monte Carlo',
-        textAlign: TextAlign.right,
-        style: context.finType.caption.copyWith(
-          color: context.fin.textSecondary,
-        ),
-      );
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          empilhado ? Flexible(child: rotulo) : rotulo,
-          // Mesmo motivo do alternador de IR na tela de análise: o
-          // `Switch` pinta o respingo de tinta no `Material` mais
-          // próximo, e o `GlassCard` interpõe um fundo próprio entre os
-          // dois. Sem este `Material` transparente o toque não devolve
-          // retorno visual e o framework acusa em tempo de execução.
-          Material(
-            type: MaterialType.transparency,
-            child: Switch(
-              value: settings.monteCarlo,
-              activeThumbColor: context.fin.brand,
-              onChanged:
-                  ref.read(valuationSettingsProvider.notifier).setMonteCarlo,
-            ),
-          ),
-        ],
-      );
-    }
-
-    return GlassCard(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final escala = MediaQuery.textScalerOf(context).scale(1);
-          final empilha = constraints.maxWidth < larguraDoCabecalho * escala;
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SectionHeader(
-                title: 'Cenários',
-                // Sensibilidade, e não probabilidade: a banda de cenários
-                // cobriu 8% do que aconteceu nas coortes, contra 90% nominais
-                // (decisão 92).
-                subtitle: settings.monteCarlo
-                    ? 'Sensibilidade: ${settings.samples} sorteios de premissas'
-                    : 'Sensibilidade: três conjuntos fixos de premissas',
-                trailing: empilha ? null : alternador(empilhado: false),
-              ),
-              if (empilha)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: alternador(empilhado: true),
-                ),
-              const Gap.md(),
-              if (result.distribution != null)
-                _DistributionView(
-                  isLight: isLight,
-                  distribution: result.distribution!,
-                  marketPrice: result.marketPrice.reais,
-                )
-              else if (result.discreteScenarios != null)
-                _DiscreteView(
-                  isLight: isLight,
-                  scenarios: result.discreteScenarios!,
-                )
-              else
-                Text(
-                  'Apenas o cenário base pôde ser calculado.',
-                  style: context.finType.caption.copyWith(
-                    color: context.fin.textSecondary,
-                  ),
-                ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
 /// Onde o preço mais os proventos caíram, nas coortes (itens C2 e C2b).
 ///
 /// **É a incerteza medida, e não a sensibilidade.** A banda de cenários desloca
@@ -793,34 +687,208 @@ class _CalibratedBandCard extends ConsumerWidget {
   }
 }
 
-class _DiscreteView extends StatelessWidget {
-  final Map<ScenarioBand, Money> scenarios;
+/// **Sensibilidade: quanto o preço justo se move com as premissas** (decisão
+/// 148).
+///
+/// Era dois cartões — "Cenários", com os três valores, e "Sensibilidade", com
+/// os mesmos dois extremos em barra —, e o primeiro chamava de «Pessimista» e
+/// «Otimista» o que é deslocamento de premissa. **É sensibilidade, e não
+/// cenário** (decisão 92): a faixa cobriu 8% do que aconteceu nas coortes, e a
+/// incerteza medida é a faixa calibrada, logo acima.
+///
+/// Os rótulos dizem **o que foi mexido**, e o valor diz o que deu. Quando as
+/// premissas mais brandas dão preço menor que as mais duras — a empresa rende
+/// abaixo do custo de capital, e crescer destrói valor (item B38) —, o cartão
+/// diz isso em vez de deixar o leitor supor um erro.
+///
+/// O alternador existe porque os dois modos compartilham o mesmo caminho de
+/// código — trocar é configuração, não refatoração.
+class _SensitivityCard extends ConsumerWidget {
+  final ValuationResult result;
+  final ValuationSettings settings;
   final bool isLight;
 
-  const _DiscreteView({required this.scenarios, required this.isLight});
+  const _SensitivityCard({
+    required this.result,
+    required this.settings,
+    required this.isLight,
+  });
+
+  /// Largura por unidade de escala de texto abaixo da qual o alternador sai do
+  /// lado do título: em 320 dp sob 2,0x ele estourava 51 px.
+  static const double larguraDoCabecalho = 300;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.fin;
+    final t = context.finType;
+    final base = result.fairValue.reais;
+    final cenarios = result.discreteScenarios;
+    final distribuicao = result.distribution;
+    final duras = cenarios?[ScenarioBand.bear]?.reais;
+    final brandas = cenarios?[ScenarioBand.bull]?.reais;
+
+    // Empilhado, o rótulo cede e quebra linha: em 320 dp sob 2,0x nem a linha
+    // própria cabia o texto ao lado do `Switch`. Ao lado do título ele não pode
+    // ser flexível — ali a largura que o `Row` recebe não é limitada.
+    Widget alternador({required bool empilhado}) {
+      final rotulo = Text(
+        'Monte Carlo',
+        textAlign: TextAlign.right,
+        style: t.caption.copyWith(color: c.textSecondary),
+      );
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          empilhado ? Flexible(child: rotulo) : rotulo,
+          // O `Switch` pinta o respingo de tinta no `Material` mais próximo, e
+          // o `GlassCard` interpõe um fundo próprio entre os dois. Sem este
+          // `Material` transparente o toque não devolve retorno visual e o
+          // framework acusa em tempo de execução.
+          Material(
+            type: MaterialType.transparency,
+            child: Switch(
+              value: settings.monteCarlo,
+              activeThumbColor: c.brand,
+              onChanged:
+                  ref.read(valuationSettingsProvider.notifier).setMonteCarlo,
+            ),
+          ),
+        ],
+      );
+    }
+
+    // O tornado desenha do menor ao maior: com a ordem invertida, os
+    // extremos trocam de lado, e a barra continua sendo a faixa.
+    final bars = <({String label, double low, double high})>[
+      if (duras != null && brandas != null)
+        (
+          // Uma linha: o tornado corta o rótulo na primeira, e o
+          // «Crescimento\ne desconto» de antes aparecia só como «Crescimento».
+          label: 'Crescimento e taxa',
+          low: duras < brandas ? duras : brandas,
+          high: duras < brandas ? brandas : duras,
+        ),
+      if (distribuicao != null)
+        (
+          label: 'Faixa sorteada',
+          low: distribuicao.p5,
+          high: distribuicao.p95,
+        ),
+    ];
+
+    return GlassCard(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final escala = MediaQuery.textScalerOf(context).scale(1);
+          final empilha = constraints.maxWidth < larguraDoCabecalho * escala;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SectionHeader(
+                title: 'Sensibilidade',
+                subtitle: settings.monteCarlo
+                    ? 'Quanto o preço justo se move em ${settings.samples} '
+                        'sorteios de crescimento, taxa e perpetuidade'
+                    : 'Quanto o preço justo se move se o crescimento e a taxa '
+                        'mudarem juntos',
+                trailing: empilha ? null : alternador(empilhado: false),
+              ),
+              if (empilha)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: alternador(empilhado: true),
+                ),
+              const Gap.md(),
+              if (distribuicao != null)
+                _DistributionView(
+                  isLight: isLight,
+                  distribution: distribuicao,
+                  marketPrice: result.marketPrice.reais,
+                )
+              else if (cenarios != null)
+                _DiscreteView(isLight: isLight, scenarios: cenarios, base: base)
+              else
+                Text(
+                  'Só o preço justo do motor pôde ser calculado.',
+                  style: t.caption.copyWith(color: c.textSecondary),
+                ),
+              if (duras != null && brandas != null && brandas < duras) ...[
+                const Gap.md(),
+                NoticeBanner(
+                  message: 'Aqui as premissas mais brandas dão preço menor que '
+                      'as mais duras. A empresa rende abaixo do custo de '
+                      'capital, e crescer mais pede reinvestir num negócio que '
+                      'não paga o que custa: o crescimento destrói valor em vez '
+                      'de criar. Não é erro da conta.',
+                ),
+              ],
+              if (bars.isNotEmpty) ...[
+                const Gap.md(),
+                TornadoChart(isLight: isLight, bars: bars, baseValue: base),
+              ],
+              const Gap.sm(),
+              Text(
+                'A linha central é o preço justo do motor '
+                '(${Fmt.money(base)}). Isto é sensibilidade, e não '
+                'probabilidade: a incerteza medida é a faixa calibrada.',
+                style: t.caption.copyWith(color: c.textTertiary),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Os três conjuntos fixos de premissas, com o que cada um mexeu.
+///
+/// A cor sai da posição do valor contra o preço justo, e não do nome: com o
+/// crescimento destruindo valor, as premissas mais brandas dão preço menor, e
+/// pintá-las de verde diria o contrário.
+class _DiscreteView extends StatelessWidget {
+  final Map<ScenarioBand, Money> scenarios;
+  final double base;
+  final bool isLight;
+
+  const _DiscreteView({
+    required this.scenarios,
+    required this.base,
+    required this.isLight,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
+    final g = Fmt.ratio(DiscreteScenarios.defaultGrowthDelta * 100, decimals: 0);
+    final d =
+        Fmt.ratio(DiscreteScenarios.defaultDiscountDelta * 100, decimals: 0);
+    // Espaço fixo entre o número e a unidade: em coluna estreita a quebra
+    // separava "−3" de "p.p.".
+    const e = ' ';
+    String nota(ScenarioBand band) => switch (band) {
+          ScenarioBand.bear => 'crescimento −$g${e}p.p., taxa +$d${e}p.p.',
+          ScenarioBand.base => 'o preço justo',
+          ScenarioBand.bull => 'crescimento +$g${e}p.p., taxa −$d${e}p.p.',
+        };
+    return MetricTileRow(
+      tiles: [
         for (final band in ScenarioBand.values)
-          if (scenarios[band] != null)
-            Expanded(
-              child: MetricTile(
-                label: band.rotulo,
-                value: Fmt.money(scenarios[band]!.reais),
-                trend: switch (band) {
-                  ScenarioBand.bear => FinTrend.negative,
-                  ScenarioBand.base => FinTrend.neutral,
-                  ScenarioBand.bull => FinTrend.positive,
-                },
-              ),
+          if (scenarios[band] case final valor?)
+            MetricTile(
+              label: band.rotulo,
+              value: Fmt.money(valor.reais),
+              hint: nota(band),
+              trend: band == ScenarioBand.base
+                  ? FinTrend.neutral
+                  : FinAmount.trendOf(valor.reais - base),
             ),
       ],
     );
   }
 }
 
+/// A distribuição sorteada: os percentis e a fração acima do preço de hoje.
 class _DistributionView extends StatelessWidget {
   final ValueDistribution distribution;
   final double marketPrice;
@@ -839,29 +907,22 @@ class _DistributionView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: MetricTile(
-                label: 'P5',
-                value: Fmt.money(distribution.p5),
-                hint: 'pessimista',
-                trend: FinTrend.negative,
-              ),
+        MetricTileRow(
+          tiles: [
+            MetricTile(
+              label: 'P5',
+              value: Fmt.money(distribution.p5),
+              hint: '5% dos sorteios abaixo',
             ),
-            Expanded(
-              child: MetricTile(
-                label: 'Mediana',
-                value: Fmt.money(distribution.median),
-              ),
+            MetricTile(
+              label: 'Mediana',
+              value: Fmt.money(distribution.median),
+              hint: 'metade abaixo, metade acima',
             ),
-            Expanded(
-              child: MetricTile(
-                label: 'P95',
-                value: Fmt.money(distribution.p95),
-                hint: 'otimista',
-                trend: FinTrend.positive,
-              ),
+            MetricTile(
+              label: 'P95',
+              value: Fmt.money(distribution.p95),
+              hint: '5% dos sorteios acima',
             ),
           ],
         ),
@@ -876,66 +937,6 @@ class _DistributionView extends StatelessWidget {
               'probabilidade de preço.',
         ),
       ],
-    );
-  }
-}
-
-/// Sensibilidade: qual premissa mais move o preço justo.
-class _SensitivityCard extends StatelessWidget {
-  final ValuationResult result;
-  final bool isLight;
-
-  const _SensitivityCard({required this.result, required this.isLight});
-
-  @override
-  Widget build(BuildContext context) {
-    final scenarios = result.discreteScenarios;
-    final distribution = result.distribution;
-
-    final bars = <({String label, double low, double high})>[];
-    if (scenarios != null &&
-        scenarios[ScenarioBand.bear] != null &&
-        scenarios[ScenarioBand.bull] != null) {
-      bars.add((
-        label: 'Crescimento\ne desconto',
-        low: scenarios[ScenarioBand.bear]!.reais,
-        high: scenarios[ScenarioBand.bull]!.reais,
-      ));
-    }
-    if (distribution != null) {
-      bars.add((
-        label: 'Faixa\nsorteada',
-        low: distribution.p5,
-        high: distribution.p95,
-      ));
-    }
-
-    if (bars.isEmpty) return const SizedBox.shrink();
-
-    return GlassCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SectionHeader(
-            title: 'Sensibilidade',
-            subtitle: 'Quanto o preço justo se move com as premissas',
-          ),
-          const Gap.md(),
-          TornadoChart(
-            isLight: isLight,
-            bars: bars,
-            baseValue: result.fairValue.reais,
-          ),
-          const Gap.sm(),
-          Text(
-            'A linha central é o cenário base '
-            '(${Fmt.money(result.fairValue.reais)}).',
-            style: context.finType.caption.copyWith(
-              color: context.fin.textTertiary,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

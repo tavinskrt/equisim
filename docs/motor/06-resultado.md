@@ -13,11 +13,10 @@ a avaliação roda fora da linha da interface ([valuation_runner.dart](../../lib
 
 | Cartão | Conteúdo | Origem |
 |---|---|---|
-| Preço | preço de mercado, preço justo (cenário base), upside total sem prazo, preço com margem | `ValuationResult` |
+| Preço | preço de mercado, preço justo (pelas premissas do motor), upside total sem prazo, e o botão Editar valuation, preço com margem | `ValuationResult` |
 | Modelo aplicado | "DCF sobre fluxo da firma" ou "DCF sobre lucro distribuível"; taxa de desconto do ano 1 (WACC ou custo do capital próprio) | `ValuationResult.model`, `discountRate` |
 | Faixa calibrada | 80% nominal, em 12 e 36 meses, com a cobertura fora da amostra | 6.3 |
-| Cenários | três fixos, ou Monte Carlo (chave) | 6.2 |
-| Sensibilidade | barra do pessimista ao otimista, com o base marcado | 6.2 |
+| Sensibilidade | os três conjuntos fixos — "Premissas mais duras", "Premissas do motor", "Premissas mais brandas", com o quanto foi mexido em nota — ou o Monte Carlo (chave), e a barra do menor ao maior com o preço justo marcado; um cartão só desde a decisão 148 | 6.2 |
 | Múltiplos de pares | as três leituras e a consolidada | 6.4 |
 | Ressalvas | ressalvas estruturadas e avisos em texto | 6.5 |
 
@@ -32,14 +31,16 @@ a avaliação roda fora da linha da interface ([valuation_runner.dart](../../lib
 | Via do acionista: o deslocamento alcança o caminho de Ke inteiro | `_descontarDoBalanco` | item B36 |
 | Via da firma: o deslocamento vai ao Ke um a um (e ao desconto do terminal da firma); o alvo do retorno sobre o capital fica parado | `_descontarDoBalanco`, `_fatorDoCenario` | decisão 121 (as três traduções medidas) |
 | O cenário base é sempre o preço justo | teste `cenario_via_acionista_test.dart` | decisão 105 |
-| **São sensibilidade, não probabilidade**: a banda pessimista–otimista conteve 8% dos resultados nas coortes, contra 90% nominais | subtítulo do cartão | decisão 92 |
+| **São sensibilidade, não probabilidade**: a banda entre as premissas mais duras e as mais brandas conteve 8% dos resultados nas coortes, contra 90% nominais | título e rodapé do cartão | decisão 92 |
+| **Nomeados pelas premissas, e não pelo resultado**: a nota sai de `DiscreteScenarios.defaultGrowthDelta` e `defaultDiscountDelta`; a cor de cada valor, da posição dele contra o preço justo | [domain_copy.dart](../../lib/presentation/shared/domain_copy.dart), [valuation_page.dart, `_SensitivityCard`](../../lib/presentation/valuation/valuation_page.dart) | decisão 148 |
+| **A inversão é declarada**: quando as premissas mais brandas dão preço menor que as mais duras, o cartão diz que a empresa rende abaixo do custo e que crescer destrói valor | `_SensitivityCard` | item B38, fechado pela decisão 148 |
 
-**Pendente (item B38):** o otimista soma crescimento, e crescer destrói valor
-quando o retorno fica abaixo do custo. Com o motor de 02/10/2026, o otimista
-sai abaixo do pessimista em 14 dos 90 da via da firma e em nenhum dos 20 da via
-do acionista (com o prêmio de 5,5%, eram 17 de 77, e só o crescimento +3 p.p.
-baixava o preço justo em 53 dos 97). O desconto sozinho nunca inverte. A conta
-está certa; o rótulo supõe que crescer é bom.
+O conjunto mais brando soma crescimento, e crescer destrói valor quando o
+retorno fica abaixo do custo. Com o motor de 02/10/2026, ele sai abaixo do mais
+duro em 14 dos 90 da via da firma e em nenhum dos 20 da via do acionista (com o
+prêmio de 5,5%, eram 17 de 77, e só o crescimento +3 p.p. baixava o preço justo
+em 53 dos 97). O desconto sozinho nunca inverte. A conta está certa; até
+14/10/2026 o rótulo "Otimista" supunha que crescer é bom.
 
 ---
 
