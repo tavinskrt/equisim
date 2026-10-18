@@ -88,16 +88,21 @@ void main() {
       // Lente `risco`, 20/09/2026. O arquivo do Tesouro é publicação em massa
       // com cabeçalho em texto: coluna renomeada, separador trocado ou taxa
       // ilegível têm de virar `Result.err`, e não estourar na leitura.
+
+      // Cabeçalho certo e taxa ilegível na única linha do dia.
+      const taxaIlegivel = 'Tipo Titulo;Data Vencimento;Data Base;'
+          'Taxa Compra Manha;Taxa Venda Manha;'
+          'PU Compra Manha;PU Venda Manha;PU Base Manha\n'
+          'Tesouro Prefixado;01/01/2027;10/09/2026;;;;;\n';
+      // Separador de vírgula no lugar do ponto e vírgula.
+      const separadorVirgula =
+          'Tipo Titulo,Data Vencimento,Data Base,Taxa Compra Manha\n'
+          'Tesouro Prefixado,01/01/2027,10/09/2026,13.56\n';
       const quebrados = [
         '', // arquivo vazio
         'coisa;outra;terceira\n1;2;3\n', // sem as colunas que a curva lê
-        // Cabeçalho certo e taxa ilegível na única linha do dia.
-        'Tipo Titulo;Data Vencimento;Data Base;Taxa Compra Manha;'
-            'Taxa Venda Manha;PU Compra Manha;PU Venda Manha;PU Base Manha\n'
-            'Tesouro Prefixado;01/01/2027;10/09/2026;;;;;\n',
-        // Separador de vírgula no lugar do ponto e vírgula.
-        'Tipo Titulo,Data Vencimento,Data Base,Taxa Compra Manha\n'
-            'Tesouro Prefixado,01/01/2027,10/09/2026,13.56\n',
+        taxaIlegivel,
+        separadorVirgula,
       ];
       for (final csv in quebrados) {
         final fonte = TesouroDatasource(_cliente(FixtureAdapter(bodies: {

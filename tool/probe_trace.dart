@@ -1,5 +1,7 @@
 // Inspeciona o rastro de auditoria de uma avaliação sintética, para conferir
 // quantas etapas carregam amostra e por qual via passaram.
+import 'dart:io';
+
 import 'package:equisim_core/equisim_core.dart';
 
 void main() {
@@ -18,11 +20,9 @@ void main() {
   };
 
   AuditRecorder.attach((e) {
-    // ignore: avoid_print
-    print('evento ${e.endpoint} · etapas=${e.calculations.length}');
+    stdout.writeln('evento ${e.endpoint} · etapas=${e.calculations.length}');
     for (final c in e.calculations) {
-      // ignore: avoid_print
-      print('   - ${c.formulaName}'
+      stdout.writeln('   - ${c.formulaName}'
           '${c.sample == null ? '' : '  [amostra: ${c.sample!.title}]'}');
     }
   });
@@ -62,14 +62,11 @@ void main() {
     ),
   ));
 
-  // ignore: avoid_print
-  print('resultado: ${r.isOk ? r.unwrap().model.name : r.failureOrNull?.message}');
+  stdout.writeln('resultado: ${r.isOk ? r.unwrap().model.name : r.failureOrNull?.message}');
   if (r.isOk) {
-    // ignore: avoid_print
-    print('preço justo ${r.unwrap().fairValue.reais}');
+    stdout.writeln('preço justo ${r.unwrap().fairValue.reais}');
     for (final w in r.unwrap().warnings) {
-      // ignore: avoid_print
-      print('   aviso: $w');
+      stdout.writeln('   aviso: $w');
     }
   }
   AuditRecorder.detach();

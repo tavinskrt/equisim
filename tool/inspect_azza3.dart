@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:equisim_core/equisim_core.dart';
@@ -19,17 +18,17 @@ Future<void> main(List<String> args) async {
     );
     final anchors = anchorsResult.getOrElse(MarketAnchors.fallback2026);
 
-    print('=== MARKET ANCHORS ===');
-    print('CDI Corrente (Rf): ${anchors.currentRiskFreeRate}');
-    print('CDI Estrutural (Rf_inf): ${anchors.riskFreeCagr}');
-    print('IPCA: ${anchors.inflationCagr}');
-    print('PIB Real: ${anchors.realEconomyGrowth}');
-    print('Teto Nominal: ${anchors.nominalEconomyGrowth}');
+    stdout.writeln('=== MARKET ANCHORS ===');
+    stdout.writeln('CDI Corrente (Rf): ${anchors.currentRiskFreeRate}');
+    stdout.writeln('CDI Estrutural (Rf_inf): ${anchors.riskFreeCagr}');
+    stdout.writeln('IPCA: ${anchors.inflationCagr}');
+    stdout.writeln('PIB Real: ${anchors.realEconomyGrowth}');
+    stdout.writeln('Teto Nominal: ${anchors.nominalEconomyGrowth}');
 
     final auditEvents = <AuditEvent>[];
-    AuditRecorder.attach((e) => auditEvents.add(e));
+    AuditRecorder.attach(auditEvents.add);
 
-    print('\n=== PREPARING VALUATION INPUTS FOR $tickerStr ===');
+    stdout.writeln('\n=== PREPARING VALUATION INPUTS FOR $tickerStr ===');
     final prepResult = await PrepareValuationInputs.call(
       ticker: ticker,
       prices: ctx.prices,
@@ -43,74 +42,76 @@ Future<void> main(List<String> args) async {
     );
 
     if (prepResult.isErr) {
-      print('FAILED to prepare inputs: ${prepResult.failureOrNull?.message}');
+      stdout.writeln('FAILED to prepare inputs: ${prepResult.failureOrNull?.message}');
       return;
     }
 
     final inputs = prepResult.unwrap();
-    print('Market Price: ${inputs.marketPrice}');
-    print('Sector Key: ${inputs.sectorKey}');
-    print('Industry: ${inputs.industry}');
-    print('Beta: ${inputs.capm.beta} (${inputs.capm.betaSource})');
-    print('Ke: ${inputs.capm.costOfEquity}');
-    print('Fundamentals periods: ${inputs.fundamentals.length}');
+    stdout.writeln('Market Price: ${inputs.marketPrice}');
+    stdout.writeln('Sector Key: ${inputs.sectorKey}');
+    stdout.writeln('Industry: ${inputs.industry}');
+    stdout.writeln('Beta: ${inputs.capm.beta} (${inputs.capm.betaSource})');
+    stdout.writeln('Ke: ${inputs.capm.costOfEquity}');
+    stdout.writeln('Fundamentals periods: ${inputs.fundamentals.length}');
 
-    print('\n--- SNAPSHOTS DETAIL ---');
+    stdout.writeln('\n--- SNAPSHOTS DETAIL ---');
     for (final s in inputs.fundamentals) {
       final y = s.fiscalPeriodEnd.year;
-      print('Year $y:');
-      print('  NetIncome: ${s.netIncome}, EBIT: ${s.ebit}, EBITDA: ${s.ebitda}, NOPAT: ${s.nopat}, NOPAT_derived: ${s.nopatOrDerived}');
-      print('  TotalDebt: ${s.totalDebt}, TotalCash: ${s.totalCash}, NetDebt: ${s.netDebt}');
-      print('  SharesOut: ${s.sharesOutstanding}, SharesAsOf: ${s.sharesOutstandingAsOf}, Reconciled: ${s.reconciledShares}');
-      print('  MarketCap: ${s.marketCap}, BVPS: ${s.bookValuePerShare}');
-      print('  EquityBookValue (PL): ${s.equityBookValue}, InvestedCapital: ${s.investedCapital}');
+      stdout.writeln('Year $y:');
+      stdout.writeln('  NetIncome: ${s.netIncome}, EBIT: ${s.ebit}, EBITDA: ${s.ebitda}, NOPAT: ${s.nopat}, NOPAT_derived: ${s.nopatOrDerived}');
+      stdout.writeln('  TotalDebt: ${s.totalDebt}, TotalCash: ${s.totalCash}, NetDebt: ${s.netDebt}');
+      stdout.writeln('  SharesOut: ${s.sharesOutstanding}, SharesAsOf: ${s.sharesOutstandingAsOf}, Reconciled: ${s.reconciledShares}');
+      stdout.writeln('  MarketCap: ${s.marketCap}, BVPS: ${s.bookValuePerShare}');
+      stdout.writeln('  EquityBookValue (PL): ${s.equityBookValue}, InvestedCapital: ${s.investedCapital}');
     }
 
-    print('\n--- CAPITAL SERIES VIA FIRM ---');
+    stdout.writeln('\n--- CAPITAL SERIES VIA FIRM ---');
     final seriesFirm = CapitalSeries.build(inputs.fundamentals, ValuationLane.firm);
-    print('Firm Points count: ${seriesFirm.points.length}');
+    stdout.writeln('Firm Points count: ${seriesFirm.points.length}');
     for (final p in seriesFirm.points) {
-      print('  ${p.year}: base=${p.base}, profit=${p.profit}');
+      stdout.writeln('  ${p.year}: base=${p.base}, profit=${p.profit}');
     }
-    print('Annual Variations: ${seriesFirm.annualVariations}');
-    print('Returns: ${seriesFirm.returns.map((r) => '${r.year}: ${(r.value * 100).toStringAsFixed(2)}%').toList()}');
-    print('Retentions: ${seriesFirm.retentions.map((b) => (b * 100).toStringAsFixed(1) + '%').toList()}');
-    print('Latest Return: ${seriesFirm.latestReturn}');
-    print('Cycle Return (w=8): ${seriesFirm.cycleReturn(window: ValuationParameters.cycleWindow)}');
-    print('Median Retention: ${seriesFirm.medianRetention}');
+    stdout.writeln('Annual Variations: ${seriesFirm.annualVariations}');
+    stdout.writeln('Returns: ${seriesFirm.returns.map((r) => '${r.year}: ${(r.value * 100).toStringAsFixed(2)}%').toList()}');
+    stdout.writeln('Retentions: ${seriesFirm.retentions.map((b) => '${(b * 100).toStringAsFixed(1)}%').toList()}');
+    stdout.writeln('Latest Return: ${seriesFirm.latestReturn}');
+    stdout.writeln('Cycle Return (w=8): ${seriesFirm.cycleReturn(window: ValuationParameters.cycleWindow)}');
+    stdout.writeln('Median Retention: ${seriesFirm.medianRetention}');
 
-    print('\n--- GUARDS EVALUATION ---');
+    stdout.writeln('\n--- GUARDS EVALUATION ---');
     final trend = GrowthGuards.trend(seriesFirm);
-    print('Trend: slope=${trend?.slope}, t=${trend?.tStatistic}, tc=${trend?.criticalT}, dominance=${trend?.dominance}, dominates=${trend?.dominates}');
+    stdout.writeln('Trend: slope=${trend?.slope}, t=${trend?.tStatistic}, tc=${trend?.criticalT}, dominance=${trend?.dominance}, dominates=${trend?.dominates}');
     final phi = GrowthGuards.externalCapitalRatio(seriesFirm);
-    print('Phi (external capital): $phi');
+    stdout.writeln('Phi (external capital): $phi');
     final destoa = GrowthGuards.deviatesFromCycle(seriesFirm);
-    print('Deviates from cycle: $destoa');
+    stdout.writeln('Deviates from cycle: $destoa');
     final queda = GrowthGuards.recentOperationalDecline(inputs.fundamentals);
-    print('Recent Operational Decline: $queda');
+    stdout.writeln('Recent Operational Decline: $queda');
     final disp = GrowthGuards.dispersion(seriesFirm);
-    print('Dispersion: isIdentified=${disp?.isIdentified}, gMed=${disp?.medianGrowth}, gReg=${disp?.regressionGrowth}, se=${disp?.stdError}, failure=${disp?.failure}');
+    stdout.writeln('Dispersion: isIdentified=${disp?.isIdentified}, gMed=${disp?.medianGrowth}, gReg=${disp?.regressionGrowth}, se=${disp?.stdError}, failure=${disp?.failure}');
     final fundable = GrowthGuards.anchorIsFundable(
       inflation: inputs.inflation,
       cycleReturn: seriesFirm.cycleReturn(window: ValuationParameters.cycleWindow),
       observedRetention: seriesFirm.medianRetention,
     );
-    print('Anchor is fundable: $fundable');
+    stdout.writeln('Anchor is fundable: $fundable');
 
-    print('\n================ RESULTS SUMMARY ================');
+    stdout.writeln('\n================ RESULTS SUMMARY ================');
     final evalResult = ValuationCascade.evaluate(inputs);
     if (evalResult.isErr) {
-      print('EVALUATION 10y FAILED: ${evalResult.failureOrNull?.message}');
+      stdout.writeln('EVALUATION 10y FAILED: ${evalResult.failureOrNull?.message}');
     } else {
       final res = evalResult.unwrap();
-      print('10-YEAR PROJECTION (Cascade default):');
-      print('  Model: ${res.model.rotulo}');
-      print('  Fair Value: R\$ ${res.fairValue.reais.toStringAsFixed(2)}');
-      print('  Market Price: R\$ ${res.marketPrice.reais.toStringAsFixed(2)}');
-      print('  Upside: ${(res.upside * 100).toStringAsFixed(2)}%');
-      print('  Discount Rate: ${(res.discountRate * 100).toStringAsFixed(2)}%');
-      print('  Warnings:');
-      for (final w in res.warnings) print('    * $w');
+      stdout.writeln('10-YEAR PROJECTION (Cascade default):');
+      stdout.writeln('  Model: ${res.model.rotulo}');
+      stdout.writeln('  Fair Value: R\$ ${res.fairValue.reais.toStringAsFixed(2)}');
+      stdout.writeln('  Market Price: R\$ ${res.marketPrice.reais.toStringAsFixed(2)}');
+      stdout.writeln('  Upside: ${(res.upside * 100).toStringAsFixed(2)}%');
+      stdout.writeln('  Discount Rate: ${(res.discountRate * 100).toStringAsFixed(2)}%');
+      stdout.writeln('  Warnings:');
+      for (final w in res.warnings) {
+        stdout.writeln('    * $w');
+      }
     }
 
     final inputs5 = ValuationInputs(
@@ -131,27 +132,29 @@ Future<void> main(List<String> args) async {
     );
     final evalResult5 = ValuationCascade.evaluate(inputs5);
     if (evalResult5.isErr) {
-      print('EVALUATION 5y FAILED: ${evalResult5.failureOrNull?.message}');
+      stdout.writeln('EVALUATION 5y FAILED: ${evalResult5.failureOrNull?.message}');
     } else {
       final res5 = evalResult5.unwrap();
-      print('\n5-YEAR PROJECTION (ValuationSettings in Flutter App UI!):');
-      print('  Model: ${res5.model.rotulo}');
-      print('  Fair Value: R\$ ${res5.fairValue.reais.toStringAsFixed(2)}');
-      print('  Market Price: R\$ ${res5.marketPrice.reais.toStringAsFixed(2)}');
-      print('  Upside: ${(res5.upside * 100).toStringAsFixed(2)}%');
-      print('  Discount Rate: ${(res5.discountRate * 100).toStringAsFixed(2)}%');
-      print('  Warnings:');
-      for (final w in res5.warnings) print('    * $w');
+      stdout.writeln('\n5-YEAR PROJECTION (ValuationSettings in Flutter App UI!):');
+      stdout.writeln('  Model: ${res5.model.rotulo}');
+      stdout.writeln('  Fair Value: R\$ ${res5.fairValue.reais.toStringAsFixed(2)}');
+      stdout.writeln('  Market Price: R\$ ${res5.marketPrice.reais.toStringAsFixed(2)}');
+      stdout.writeln('  Upside: ${(res5.upside * 100).toStringAsFixed(2)}%');
+      stdout.writeln('  Discount Rate: ${(res5.discountRate * 100).toStringAsFixed(2)}%');
+      stdout.writeln('  Warnings:');
+      for (final w in res5.warnings) {
+        stdout.writeln('    * $w');
+      }
     }
 
-    print('\n=== AUDIT EVENTS LOG (${auditEvents.length} events) ===');
+    stdout.writeln('\n=== AUDIT EVENTS LOG (${auditEvents.length} events) ===');
     for (final e in auditEvents) {
-      print('EVENT endpoint: ${e.endpoint}');
-      print('  outputPayload: ${e.outputPayload}');
+      stdout.writeln('EVENT endpoint: ${e.endpoint}');
+      stdout.writeln('  outputPayload: ${e.outputPayload}');
       for (final c in e.calculations) {
-        print('  CALC [${c.formulaName}]: finalValue=${c.finalValue} ${c.unit}');
-        print('    vars: ${c.mappedVariables}');
-        print('    steps: ${c.intermediateSteps}');
+        stdout.writeln('  CALC [${c.formulaName}]: finalValue=${c.finalValue} ${c.unit}');
+        stdout.writeln('    vars: ${c.mappedVariables}');
+        stdout.writeln('    steps: ${c.intermediateSteps}');
       }
     }
   } finally {

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:equisim_core/equisim_core.dart';
 import 'validation/context.dart';
@@ -73,12 +72,12 @@ Future<void> main(List<String> args) async {
 
     final universeRes = await ctx.fundamentals.universe();
     if (universeRes.isErr) {
-      print('Failed to load universe: ${universeRes.failureOrNull?.message}');
+      stdout.writeln('Failed to load universe: ${universeRes.failureOrNull?.message}');
       return;
     }
 
     final universe = universeRes.unwrap();
-    print('Loaded universe of ${universe.length} tickers.');
+    stdout.writeln('Loaded universe of ${universe.length} tickers.');
 
     final results = <AssetAuditResult>[];
 
@@ -178,7 +177,7 @@ Future<void> main(List<String> args) async {
       ));
     }
 
-    print('\n\nProcessed ${results.length} tickers.');
+    stdout.writeln('\n\nProcessed ${results.length} tickers.');
 
     // Save JSON of all results for analysis
     final jsonList = results.map((r) => {
@@ -210,7 +209,7 @@ Future<void> main(List<String> args) async {
     File('docs/validacao/audit_universe_comparison.json')
         .writeAsStringSync(const JsonEncoder.withIndent('  ').convert(jsonList));
 
-    print('Wrote audit_universe_comparison.json');
+    stdout.writeln('Wrote audit_universe_comparison.json');
 
   } finally {
     await ctx.dispose();
