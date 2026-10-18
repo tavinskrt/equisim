@@ -121,7 +121,7 @@ abstract final class TransversalScore {
   ) {
     Map<K, double> de(double? Function(TransversalSignals) campo) => {
           for (final e in signals.entries)
-            if (campo(e.value) case final v?) e.key: v,
+            e.key: ?campo(e.value),
         };
     final zPotencial = robustZ(de((s) => s.potential));
     final zBm = robustZ(de((s) => s.bookToMarket));
