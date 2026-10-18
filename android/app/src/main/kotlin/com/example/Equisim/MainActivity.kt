@@ -15,7 +15,7 @@ class MainActivity : FlutterActivity() {
             if (call.method == "playSuccessSound") {
                 try {
                     val toneGen = ToneGenerator(AudioManager.STREAM_MUSIC, 85)
-                    // TONE_PROP_ACK plays a pleasant double beep
+                    // TONE_PROP_ACK toca um bipe duplo suave
                     toneGen.startTone(ToneGenerator.TONE_PROP_ACK, 220)
                     result.success(null)
                 } catch (e: Exception) {

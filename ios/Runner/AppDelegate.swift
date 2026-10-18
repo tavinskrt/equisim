@@ -16,7 +16,7 @@ import AudioToolbox
       audioChannel.setMethodCallHandler({
         (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
         if call.method == "playSuccessSound" {
-          // Plays system sound ID 1057 (Tink) which is a soft success chime
+          // Toca o som de sistema de ID 1057 (Tink), um aviso suave de sucesso
           AudioServicesPlaySystemSound(1057)
           result(nil)
         } else {
