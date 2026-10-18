@@ -19,10 +19,10 @@
  */
 import { PROJECT_CONTEXT } from '../rules.ts';
 import type { AdvisorTarget } from './collect.ts';
-import type { Lente } from './lentes.ts';
-import { blocoDePostura, type Fronteira } from './postura.ts';
+import type { Lens } from './lentes.ts';
+import { postureBlock, type Boundary } from './postura.ts';
 
-const PAPEL = `
+const ROLE = `
 ## Seu papel
 
 Voce e um consultor tecnico senior lendo um projeto que NAO escreveu. Seu
@@ -49,7 +49,7 @@ O que voce NAO e, e a distincao importa:
  * Vale para toda lente; cada lente acrescenta as suas em `lentes.ts`. A ordem
  * nao e arbitraria: a regra da ancora vem primeiro porque e a que mais corta.
  */
-const DISCIPLINA = `
+const DISCIPLINE = `
 ## Disciplina (obrigatoria)
 
 1. ANCORA. Todo item de \`inventory\` e toda \`tension\` precisa de \`evidence\`
@@ -117,7 +117,7 @@ const DISCIPLINA = `
     Na duvida entre a palavra tecnica e a palavra comum, use a comum.
 `;
 
-const GRAVIDADE = `
+const SEVERITY_GUIDE = `
 ## Como escolher a gravidade
 
 Nenhuma gravidade bloqueia coisa alguma. A escala governa ATENCAO: uma rodada
@@ -139,7 +139,7 @@ Na duvida entre dois niveis, escolha o MENOR. Uma tensao subestimada aparece de
 novo na proxima rodada; uma superestimada rouba a rodada inteira.
 `;
 
-const CONTRATO = `
+const CONTRACT = `
 ## Contrato de saida
 
 Responda EXCLUSIVAMENTE com o JSON do schema fornecido. Sem markdown, sem cerca
@@ -156,37 +156,37 @@ de codigo, sem texto fora do JSON.
 
 /** Instrucao de sistema, montada para uma lente. */
 export function buildAdvisorSystem(
-  lente: Lente,
-  fronteiras: Fronteira[] = [],
+  lens: Lens,
+  boundaries: Boundary[] = [],
 ): string {
   return [
     'Voce e um consultor tecnico senior. Voce e conservador na afirmacao e',
     'implacavel na evidencia: prefere dizer "nao ha tensao aqui" a produzir uma',
     'lista que soa util e nao sustenta verificacao.',
-    PAPEL,
+    ROLE,
     PROJECT_CONTEXT,
-    DISCIPLINA,
-    `\n## Disciplina especifica da lente "${lente.id}"\n\n` +
-      lente.disciplina.map((d) => `- ${d}`).join('\n') +
+    DISCIPLINE,
+    `\n## Disciplina especifica da lente "${lens.id}"\n\n` +
+      lens.discipline.map((d) => `- ${d}`).join('\n') +
       '\n',
-    GRAVIDADE,
+    SEVERITY_GUIDE,
     // Vem DEPOIS da gravidade de proposito: a postura modifica como julgar o
     // que ja existe, entao precisa ser lida com a escala de gravidade fresca.
     // Vazio quando nao ha reconstrucao aberta, que e o caso normal.
-    blocoDePostura(fronteiras),
-    CONTRATO,
+    postureBlock(boundaries),
+    CONTRACT,
   ].join('\n');
 }
 
 /** Instrucoes da tarefa, SEM o material. Separadas para o `--dry-run` exibi-las. */
 export function buildAdvisorInstructions(target: AdvisorTarget): string {
-  const { lente } = target;
+  const { lens } = target;
   return [
-    `# Lente: ${lente.id} -- ${lente.titulo}`,
+    `# Lente: ${lens.id} -- ${lens.title}`,
     '',
     '## A pergunta',
     '',
-    lente.pergunta,
+    lens.question,
     '',
     target.truncated
       ? 'AVISO: o material foi cortado por limite de tamanho. Leia o bloco de\n' +
@@ -206,12 +206,12 @@ export function buildAdvisorInstructions(target: AdvisorTarget): string {
  * conselheiro nao tem. Aqui a ancora e outra -- `subject` nomeia a tela e
  * `evidence` descreve o que se ve e ONDE.
  */
-export function instrucoesVisuais(rotulos: string[]): string {
+export function visualInstructions(labels: string[]): string {
   return [
     '',
     '## As capturas',
     '',
-    `Voce recebeu ${rotulos.length} captura(s): ${rotulos.join(', ')}.`,
+    `Voce recebeu ${labels.length} captura(s): ${labels.join(', ')}.`,
     'Sao as telas reais do aplicativo, renderizadas com dados de exemplo.',
     '',
     'ANCORA NESTA LENTE. Nao ha trecho de codigo a copiar. Em `evidence`,',

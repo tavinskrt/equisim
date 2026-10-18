@@ -26,11 +26,11 @@ import { Type, type Schema } from '@google/genai';
  * `POLIMENTO` provavelmente nunca sera endereçado, o que e resultado aceito e
  * nao perda.
  */
-export const SEVERIDADES = ['ESTRUTURAL', 'LOCAL', 'POLIMENTO'] as const;
-export type Severidade = (typeof SEVERIDADES)[number];
+export const SEVERITY_LEVELS = ['ESTRUTURAL', 'LOCAL', 'POLIMENTO'] as const;
+export type AdvisorSeverity = (typeof SEVERITY_LEVELS)[number];
 
-/** Identificadores das lentes. Espelha `LENTES` em `lentes.ts`. */
-export const LENTES_IDS = [
+/** Identificadores das lentes. Espelha `LENSES` em `lentes.ts`. */
+export const LENS_IDS = [
   'registro',
   'nucleo',
   'dados',
@@ -39,7 +39,7 @@ export const LENTES_IDS = [
   'rumo',
   'tela',
 ] as const;
-export type LenteId = (typeof LENTES_IDS)[number];
+export type LensId = (typeof LENS_IDS)[number];
 
 /**
  * Um elemento do dominio, descrito ANTES de qualquer juizo.
@@ -48,7 +48,7 @@ export type LenteId = (typeof LENTES_IDS)[number];
  * ela o modelo abre direto na opiniao, e a opiniao sem inventario e exatamente
  * o backlog generico que este agente precisa nao produzir.
  */
-export interface Observacao {
+export interface Observation {
   /** Do que se fala: arquivo, modulo, tela, ou "decisao no 9". */
   subject: string;
   /**
@@ -73,7 +73,7 @@ export interface Observacao {
  * decreta escolha. Quem decide e humano, e uma decisao so e defensavel em banca
  * se as alternativas descartadas forem conhecidas.
  */
-export interface Tensao {
+export interface Tension {
   subject: string;
   /** O que se observa. Precisa ser verificavel no material enviado. */
   observation: string;
@@ -83,11 +83,11 @@ export interface Tensao {
   why_it_hurts: string;
   /** Dois a tres caminhos possiveis. Nunca um so. */
   options: string[];
-  severity: Severidade;
+  severity: AdvisorSeverity;
 }
 
 /** Um passo isolavel do caminho ate o alvo. */
-export interface Passo {
+export interface Step {
   order: number;
   /** O que fazer, no imperativo. */
   action: string;
@@ -99,16 +99,16 @@ export interface Passo {
 
 /** O relatorio completo de uma execucao de lente. */
 export interface AdvisorReport {
-  lente: LenteId;
-  inventory: Observacao[];
-  tensions: Tensao[];
+  lente: LensId;
+  inventory: Observation[];
+  tensions: Tension[];
   /** O estado-alvo, em prosa curta. Vazio quando nao ha tensao a resolver. */
   proposal: string;
-  sequence: Passo[];
+  sequence: Step[];
   summary: string;
 }
 
-const observacaoSchema: Schema = {
+const observationSchema: Schema = {
   type: Type.OBJECT,
   required: ['subject', 'evidence', 'what_exists', 'purpose', 'competing'],
   propertyOrdering: [
@@ -153,7 +153,7 @@ const observacaoSchema: Schema = {
   },
 };
 
-const tensaoSchema: Schema = {
+const tensionSchema: Schema = {
   type: Type.OBJECT,
   required: [
     'subject',
@@ -201,11 +201,11 @@ const tensaoSchema: Schema = {
         'caminho so: quem decide e humano.',
       items: { type: Type.STRING },
     },
-    severity: { type: Type.STRING, enum: [...SEVERIDADES] },
+    severity: { type: Type.STRING, enum: [...SEVERITY_LEVELS] },
   },
 };
 
-const passoSchema: Schema = {
+const stepSchema: Schema = {
   type: Type.OBJECT,
   required: ['order', 'action', 'touches', 'done_when'],
   propertyOrdering: ['order', 'action', 'touches', 'done_when'],
@@ -239,20 +239,20 @@ export const ADVISOR_RESPONSE_SCHEMA: Schema = {
     'summary',
   ],
   properties: {
-    lente: { type: Type.STRING, enum: [...LENTES_IDS] },
+    lente: { type: Type.STRING, enum: [...LENS_IDS] },
     inventory: {
       type: Type.ARRAY,
       description:
         'O que existe no dominio, descrito antes de julgado. Preencha esta ' +
         'lista ANTES de pensar em tensions.',
-      items: observacaoSchema,
+      items: observationSchema,
     },
     tensions: {
       type: Type.ARRAY,
       description:
         'Onde o que existe briga com o proposito de existir. Lista vazia e ' +
         'resposta legitima: um dominio que cumpre seu proposito esta pronto.',
-      items: tensaoSchema,
+      items: tensionSchema,
     },
     proposal: {
       type: Type.STRING,
@@ -265,7 +265,7 @@ export const ADVISOR_RESPONSE_SCHEMA: Schema = {
       description:
         'Caminho ate o alvo, cada passo isolavel e verificavel. Lista vazia ' +
         'quando nao ha tensao a resolver.',
-      items: passoSchema,
+      items: stepSchema,
     },
     summary: {
       type: Type.STRING,
@@ -286,68 +286,68 @@ export const ADVISOR_RESPONSE_SCHEMA: Schema = {
  */
 export function validateAdvisorReport(
   value: unknown,
-  lenteEsperada: LenteId,
+  expectedLens: LensId,
 ): AdvisorReport {
   if (typeof value !== 'object' || value === null) {
     throw new Error('A resposta nao e um objeto JSON.');
   }
   const raw = value as Record<string, unknown>;
 
-  const lista = (campo: unknown): Record<string, unknown>[] =>
-    Array.isArray(campo)
-      ? campo.filter(
+  const list = (field: unknown): Record<string, unknown>[] =>
+    Array.isArray(field)
+      ? field.filter(
           (i): i is Record<string, unknown> => typeof i === 'object' && i !== null,
         )
       : [];
 
-  const texto = (v: unknown, padrao = ''): string =>
-    typeof v === 'string' ? v : padrao;
+  const text = (v: unknown, fallback = ''): string =>
+    typeof v === 'string' ? v : fallback;
 
-  const textos = (v: unknown): string[] =>
+  const texts = (v: unknown): string[] =>
     Array.isArray(v) ? v.map((i) => String(i)).filter((s) => s.trim() !== '') : [];
 
-  const inventory: Observacao[] = lista(raw.inventory).map((o) => ({
-    subject: texto(o.subject, '(sem sujeito)'),
-    evidence: texto(o.evidence),
-    what_exists: texto(o.what_exists),
-    purpose: texto(o.purpose),
-    competing: textos(o.competing),
+  const inventory: Observation[] = list(raw.inventory).map((o) => ({
+    subject: text(o.subject, '(sem sujeito)'),
+    evidence: text(o.evidence),
+    what_exists: text(o.what_exists),
+    purpose: text(o.purpose),
+    competing: texts(o.competing),
   }));
 
-  const tensions: Tensao[] = lista(raw.tensions).map((t) => {
-    const sev = texto(t.severity, 'POLIMENTO').toUpperCase();
+  const tensions: Tension[] = list(raw.tensions).map((t) => {
+    const sev = text(t.severity, 'POLIMENTO').toUpperCase();
     return {
-      subject: texto(t.subject, '(sem sujeito)'),
-      observation: texto(t.observation),
-      evidence: texto(t.evidence),
-      why_it_hurts: texto(t.why_it_hurts),
-      options: textos(t.options),
+      subject: text(t.subject, '(sem sujeito)'),
+      observation: text(t.observation),
+      evidence: text(t.evidence),
+      why_it_hurts: text(t.why_it_hurts),
+      options: texts(t.options),
       // Gravidade desconhecida cai para POLIMENTO: na duvida, NAO compete pela
       // atencao da rodada. O erro barato aqui e adiar, nao inflar a fila.
-      severity: (SEVERIDADES as readonly string[]).includes(sev)
-        ? (sev as Severidade)
+      severity: (SEVERITY_LEVELS as readonly string[]).includes(sev)
+        ? (sev as AdvisorSeverity)
         : 'POLIMENTO',
     };
   });
 
-  const sequence: Passo[] = lista(raw.sequence).map((p, i) => ({
+  const sequence: Step[] = list(raw.sequence).map((p, i) => ({
     order: Number.isFinite(Number(p.order)) ? Math.trunc(Number(p.order)) : i + 1,
-    action: texto(p.action),
-    touches: textos(p.touches),
-    done_when: texto(p.done_when),
+    action: text(p.action),
+    touches: texts(p.touches),
+    done_when: text(p.done_when),
   }));
 
-  const lenteDita = texto(raw.lente);
+  const statedLens = text(raw.lente);
   return {
     // A lente do runner prevalece: ele sabe qual executou, o modelo apenas
     // repete. Divergencia aqui e sintoma de prompt trocado, nao de dado novo.
-    lente: (LENTES_IDS as readonly string[]).includes(lenteDita)
-      ? (lenteDita as LenteId)
-      : lenteEsperada,
+    lente: (LENS_IDS as readonly string[]).includes(statedLens)
+      ? (statedLens as LensId)
+      : expectedLens,
     inventory,
     tensions,
-    proposal: texto(raw.proposal),
+    proposal: text(raw.proposal),
     sequence,
-    summary: texto(raw.summary, '(sem resumo)'),
+    summary: text(raw.summary, '(sem resumo)'),
   };
 }

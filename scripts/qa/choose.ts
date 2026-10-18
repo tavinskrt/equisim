@@ -21,7 +21,7 @@ import { latestChoices, listAgyModels, type ModelChoice } from './models.ts';
  * o alvo do conselheiro tambem satisfaz isto, e a pergunta "Flash ou Pro?" e a
  * mesma para os dois agentes.
  */
-export interface AlvoMensuravel {
+export interface MeasurableTarget {
   /** Descricao legivel da origem, exibida na pergunta. */
   label: string;
   /** Texto que sera enviado; so o tamanho e consultado. */
@@ -56,7 +56,7 @@ function estimateTokens(chars: number): number {
   return Math.round(chars / CHARS_PER_TOKEN);
 }
 
-function describeTarget(target: AlvoMensuravel): string {
+function describeTarget(target: MeasurableTarget): string {
   const material = estimateTokens(target.payload.length);
   const total = material + FIXED_OVERHEAD_TOKENS;
   const k = (n: number): string => `${Math.round(n / 1000)}k`;
@@ -81,7 +81,7 @@ export interface ChooseOptions {
  * o padrao dele.
  */
 export async function chooseModel(
-  target: AlvoMensuravel,
+  target: MeasurableTarget,
   opts: ChooseOptions,
 ): Promise<string | undefined> {
   if (opts.explicitModel) return opts.explicitModel;
