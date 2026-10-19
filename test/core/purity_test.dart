@@ -10,6 +10,15 @@ import 'package:test/test.dart';
 ///
 /// Também é o que permite ao CLI de validação reusar exatamente o mesmo motor
 /// que roda no aplicativo.
+///
+/// Os caminhos partem da raiz do repositório, de onde o `flutter test` roda.
+/// O teste morava dentro do pacote, e lia `lib/` e `pubspec.yaml` relativos a
+/// ele; daqui, esses mesmos nomes seriam os do aplicativo — que importa
+/// Flutter e declara dependências —, e a guarda passaria a vigiar o pacote
+/// errado. Por isso o caminho é explícito, e o primeiro teste confere que o
+/// pubspec lido é mesmo o do núcleo.
+const _core = 'packages/equisim_core';
+
 void main() {
   group('Pureza do núcleo de domínio', () {
     final forbidden = <String, String>{
@@ -25,9 +34,14 @@ void main() {
       'package:shared_preferences': 'Persistência pertence à camada de dados.',
     };
 
+    test('o pacote lido é o núcleo', () {
+      final pubspec = File('$_core/pubspec.yaml').readAsStringSync();
+      expect(pubspec, contains('name: equisim_core'));
+    });
+
     test('nenhum arquivo importa dependência proibida', () {
-      final libDir = Directory('lib');
-      expect(libDir.existsSync(), isTrue, reason: 'lib/ não encontrado');
+      final libDir = Directory('$_core/lib');
+      expect(libDir.existsSync(), isTrue, reason: '$_core/lib não encontrado');
 
       final violations = <String>[];
 
@@ -58,7 +72,7 @@ void main() {
     });
 
     test('pubspec não declara dependências de runtime', () {
-      final pubspec = File('pubspec.yaml').readAsStringSync();
+      final pubspec = File('$_core/pubspec.yaml').readAsStringSync();
       final dependenciesBlock =
           RegExp(r'^dependencies:\s*$', multiLine: true).firstMatch(pubspec);
       expect(
@@ -73,7 +87,7 @@ void main() {
       // Student e a beta incompleta. Antes era `dcf.dart`, que deixou de
       // importar a biblioteca quando o desconto passou a acumular fator ano a
       // ano em vez de elevar uma taxa única a t.
-      final file = File('lib/src/services/valuation/inference.dart');
+      final file = File('$_core/lib/src/services/valuation/inference.dart');
       expect(file.readAsStringSync(), contains("import 'dart:math'"));
     });
   });

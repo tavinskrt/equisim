@@ -214,7 +214,7 @@ void main() {
         roic: roic,
         inConstantCurrency: true,
       );
-      final bNominal = g / roic;
+      const bNominal = g / roic;
       final bReal = real(g, pi) / real(roic, pi);
       expect(bReal, lessThan(bNominal),
           reason: 'crescer em termos reais parece exigir menos retenção — e é '

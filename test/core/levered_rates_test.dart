@@ -171,7 +171,7 @@ void main() {
 
     test('sem dívida o caminho é plano e igual ao CAPM sem alavancagem', () {
       final v = resolver(g: 0.04, debt: 0).unwrap();
-      final expected = rf + betaU * premium;
+      const expected = rf + betaU * premium;
       for (final k in v.costOfEquity) {
         expect(k, closeTo(expected, 1e-9));
       }
@@ -209,7 +209,7 @@ void main() {
       }
       // Sem dívida líquida positiva não há alavancagem: o fator de Hamada é
       // confinado no piso, e o `Ke` é o desalavancado puro.
-      final expected = rf + betaU * premium;
+      const expected = rf + betaU * premium;
       expect(v.costOfEquity.first, closeTo(expected, 1e-9));
     });
 
@@ -468,7 +468,7 @@ void main() {
       expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
       final v = r.unwrap();
       expect(v.converged, isTrue);
-      final expected = rf + betaU * premium;
+      const expected = rf + betaU * premium;
       for (final ke in v.costOfEquity) {
         expect(ke, closeTo(expected, 1e-12));
       }
@@ -651,8 +651,8 @@ void main() {
       final equityWeight = r.equity.first / v0;
       final wGross = (r.debt.first + cash) / v0;
       final wCash = cash / v0;
-      final interest = (rf + spread) * (1 - tax);
-      final income = rf * (1 - tax);
+      const interest = (rf + spread) * (1 - tax);
+      const income = rf * (1 - tax);
       expect(
         r.wacc.first,
         closeTo(

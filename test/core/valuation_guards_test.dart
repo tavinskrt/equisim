@@ -4504,7 +4504,7 @@ void main() {
       const tau = 0.34;
       final before = derivedOutcome(cash: cash);
       final after = derivedOutcome(cash: cash, income: rf);
-      final expected = cash * (kd - rf) * (1 - tau);
+      const expected = cash * (kd - rf) * (1 - tau);
       expect(before.projectedFlows.first - after.projectedFlows.first,
           closeTo(expected, 1e-9));
     });

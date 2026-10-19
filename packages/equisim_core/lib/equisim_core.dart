@@ -2,8 +2,8 @@
 ///
 /// Pacote **Dart puro**: sem Flutter, sem rede, sem I/O. A ausência dessas
 /// dependências não é convenção — é verificada automaticamente por
-/// `test/purity_test.dart`, que falha o build se alguém importar
-/// `package:flutter` ou um cliente HTTP aqui dentro.
+/// `test/core/purity_test.dart`, na raiz do repositório, que falha o build se
+/// alguém importar `package:flutter` ou um cliente HTTP aqui dentro.
 ///
 /// Consequência prática: todo o motor financeiro é testável de forma
 /// determinística e pode ser executado fora do aplicativo, o que garante que

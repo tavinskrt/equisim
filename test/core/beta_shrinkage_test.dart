@@ -346,7 +346,7 @@ void main() {
       // Encolher em espaço alavancado e desalavancar o resultado é idêntico a
       // encolher em espaço desalavancado.
       final betaU = 1.75 / factor;
-      final priorU = 0.30; // o prior setorial de energia no fixture
+      const priorU = 0.30; // o prior setorial de energia no fixture
       expect(r.unlevered,
           closeTo(r.weight * betaU + (1 - r.weight) * priorU, 1e-12));
     });

@@ -156,8 +156,8 @@ const SURFACE = [
   ['Nucleo de dominio', ['packages/equisim_core/lib']],
   ['Apresentacao', ['lib/presentation', 'lib/views', 'lib/controllers']],
   ['Camada de dados', ['lib/data']],
-  ['Testes do app', ['test']],
-  ['Testes do nucleo', ['packages/equisim_core/test']],
+  ['Testes do app', ['test/data', 'test/ui', 'test/tool']],
+  ['Testes do nucleo', ['test/core']],
   ['Ferramentas de QA', ['scripts']],
 ];
 

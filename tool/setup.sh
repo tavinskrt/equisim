@@ -113,8 +113,7 @@ echo '  pre-push:   auditoria com o Gemini (requer GEMINI_API_KEY em .env.qa)'
 # --- 6. Verificação (opcional) ---------------------------------------------
 if [ "$VERIFICAR" -eq 1 ]; then
   passo 'Análise estática';            flutter analyze
-  passo 'Testes do aplicativo';        flutter test
-  passo 'Testes do núcleo de domínio'; dart test --directory packages/equisim_core
+  passo 'Testes (núcleo, dados, telas e ferramentas)'; flutter test
 fi
 
 printf '\n%sPronto.%s\n' "$VERDE" "$FIM"

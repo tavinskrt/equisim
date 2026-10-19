@@ -110,7 +110,7 @@ schema forçado pelo servidor e `temperature: 0`, portanto é o mais reproduzív
 ### 3.1 `packages/equisim_core` é Dart puro
 
 **Zero dependências de runtime**, por decisão deliberada, travada pelo teste
-`packages/equisim_core/test/purity_test.dart`.
+`test/core/purity_test.dart`.
 
 - **Não adicione pacote algum** ao `pubspec.yaml` desse módulo — nem
   `decimal`, nem `rational`, nem utilitário "só dessa vez".
@@ -232,7 +232,7 @@ npm run ui:capturar   # 42 PNGs em docs/telas/, ignorado pelo git
 npm run conselho -- --lente tela --largura 1024 --tema escuro
 ```
 
-O arquivo de captura é [test/presentation/golden_capture.dart](test/presentation/golden_capture.dart)
+O arquivo de captura é [test/ui/golden_capture.dart](test/ui/golden_capture.dart)
 — **sem** sufixo `_test`, de propósito: assim ele fica fora do `flutter test` e
 uma alteração intencional de UI não deixa a suíte vermelha.
 
