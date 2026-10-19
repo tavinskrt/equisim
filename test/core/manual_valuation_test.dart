@@ -111,7 +111,7 @@ final _curve = YieldCurve.of(_today, const [
 /// As rotas da cascata que a conta congelada precisa reproduzir.
 final _routes = <String, ValuationInputs Function()>{
   'firma, taxas resolvidas': () => _inputs(unlevered: 0.8),
-  'firma, interpolação de dois pontos': () => _inputs(),
+  'firma, interpolação de dois pontos': _inputs,
   'firma, sobre a curva sem resolução': () => _inputs(curve: _curve),
   'firma, com emissão depois do balanço': () => _inputs(
         issuances: [

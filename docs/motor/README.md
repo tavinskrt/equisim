@@ -46,7 +46,7 @@ seguido até a linha que o produziu e até o livro ou artigo que o justifica.
 O núcleo (`packages/equisim_core`) é **Dart puro, sem nenhuma dependência de
 execução**, sem rede, sem arquivo, sem relógio: a mesma entrada dá a mesma saída
 hoje e daqui a um ano. Isso é travado por teste
-([purity_test.dart](../../packages/equisim_core/test/purity_test.dart)) e é o que
+([purity_test.dart](../../test/core/purity_test.dart)) e é o que
 torna o gabarito possível.
 
 ## Como ler as tabelas

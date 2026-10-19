@@ -185,13 +185,9 @@ if ($Verificar) {
     flutter analyze
     Exigir-Sucesso 'flutter analyze'
 
-    Passo 'Testes do aplicativo'
+    Passo 'Testes (núcleo, dados, telas e ferramentas)'
     flutter test
     Exigir-Sucesso 'flutter test'
-
-    Passo 'Testes do núcleo de domínio'
-    dart test --directory packages/equisim_core
-    Exigir-Sucesso 'dart test'
 }
 
 Write-Host "`nPronto." -ForegroundColor Green

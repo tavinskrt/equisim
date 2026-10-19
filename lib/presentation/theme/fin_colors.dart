@@ -297,7 +297,7 @@ class FinColors extends ThemeExtension<FinColors> {
   /// As razoes anotadas sao o PIOR caso entre as superficies de
   /// [surfacesFor], nao a medida contra branco -- que e otimista em cerca de
   /// meio ponto. Alterar um valor sem remedir faz
-  /// `test/presentation/contrast_test.dart` falhar, que e o ponto.
+  /// `test/ui/contrast_test.dart` falhar, que e o ponto.
   static const light = FinColors(
     canvas: Color(0xFFF4F6F8),
     surface: Color(0xFFFFFFFF),

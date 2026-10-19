@@ -246,7 +246,7 @@ Sem mexer na entrada congelada:
 | 3. Se a mudança afeta a validação: o backtest (cerca de 1 hora) | `dart run tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas --trimestral` |
 | 4. A faixa calibrada | `python tool/cobertura_banda.py` |
 | 5. A habilidade e o poder | `dart run tool/regressao_condicional.dart --trimestral`, depois `dart run tool/poder_r3.dart` |
-| 6. Conferir | `flutter test`, `dart test --directory packages/equisim_core` e `npm run qa:gemini` |
+| 6. Conferir | `flutter test` e `npm run qa:gemini` |
 | 7. O cálculo do usuário continua reproduzindo o motor | `dart run tool/conferir_calculo_manual.dart` |
 | 8. O porquê das normalizações, ativo a ativo | `dart run tool/normalizacoes.dart` (grava `docs/validacao/normalizacoes.md`) |
 
@@ -277,11 +277,11 @@ segue as dependências declaradas no cabeçalho de cada ferramenta:
 ## Testes e qualidade
 
 ```bash
-flutter test
+flutter test            # a suíte inteira: núcleo, dados, telas e ferramentas
 ```
 
 ```bash
-dart test --directory packages/equisim_core
+dart test test/core     # só o núcleo, na VM do Dart puro, em segundos
 ```
 
 ```bash
@@ -337,12 +337,18 @@ packages/equisim_core/   o núcleo: Dart puro, sem dependência, sem rede, sem r
                          múltiplos, beta, métricas, meta, simulação
   lib/src/entities/      fundamentos, carteira, resultado da avaliação
   lib/src/audit/         o rastro de cálculo
-  test/                  a suíte do núcleo, inclusive o teste de pureza
 lib/                     o aplicativo Flutter
   data/                  fontes (brapi, Banco Central, Tesouro), cache, repositórios
   presentation/          as telas (study, valuation, goals, backtest, audit)
   audit/                 o barramento do painel de logs
 tool/                    medições, backtest, gabarito, empacotadores, casos de estudo
+test/                    toda a suíte de testes, separada pelo que ela testa
+  core/                  o núcleo, inclusive o teste de pureza
+  data/                  fontes, cache e repositórios do aplicativo
+  ui/                    telas, componentes e controladores
+  tool/                  os scripts de tool/
+  fixtures/              respostas reais das fontes, para os testes rodarem offline
+  qa_fixtures/           casos financeiros conferidos, consultados pelo auditor
 scripts/                 a cadeia de QA (auditor, conselheiro, gate local, estado)
 docs/estudo/             o guia de estudo
 docs/motor/              a documentação do motor
@@ -354,5 +360,5 @@ functions/               proxy opcional da credencial
 
 A regra de dependência é `presentation → domínio ← data`, e o domínio não
 conhece ninguém:
-[purity_test.dart](packages/equisim_core/test/purity_test.dart) falha se Flutter,
+[purity_test.dart](test/core/purity_test.dart) falha se Flutter,
 rede, Firebase, Drift ou `dart:js` entrarem no núcleo.

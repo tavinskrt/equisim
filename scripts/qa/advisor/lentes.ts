@@ -306,7 +306,7 @@ export const LENSES: Record<LensId, Lens> = {
         exclude: GENERATED,
       },
       ...CORE_FIRST.map((filePath) => ({ kind: 'arquivo' as const, filePath })),
-      { kind: 'arquivo', filePath: 'packages/equisim_core/test/purity_test.dart' },
+      { kind: 'arquivo', filePath: 'test/core/purity_test.dart' },
       {
         kind: 'diretorio',
         filePath: 'packages/equisim_core/lib',
@@ -490,14 +490,14 @@ export const LENSES: Record<LensId, Lens> = {
     materials: [
       {
         kind: 'arvore',
-        roots: ['lib', 'packages/equisim_core/lib', 'test', 'packages/equisim_core/test'],
+        roots: ['lib', 'packages/equisim_core/lib', 'test'],
       },
       // Os testes alterados antes do codigo alterado: o material desta lente e
       // o teste, e o arquivo de codigo grande -- `compute_valuation.dart` tem
       // um quarto do teto -- nao pode empurrar o teste novo para fora.
       {
         kind: 'alterados',
-        roots: ['test', 'packages/equisim_core/test'],
+        roots: ['test'],
         extensions: ['.dart'],
         exclude: GENERATED,
       },
@@ -507,12 +507,12 @@ export const LENSES: Record<LensId, Lens> = {
         extensions: ['.dart'],
         exclude: GENERATED,
       },
-      { kind: 'diretorio', filePath: 'test', extensions: ['.dart'], exclude: GENERATED },
-      {
-        kind: 'diretorio',
-        filePath: 'packages/equisim_core/test',
-        extensions: ['.dart'],
-      },
+      // Os testes do aplicativo antes dos do nucleo, na mesma ordem de quando
+      // moravam em `test/` e `packages/equisim_core/test/`: e a ordem do corte.
+      { kind: 'diretorio', filePath: 'test/data', extensions: ['.dart'], exclude: GENERATED },
+      { kind: 'diretorio', filePath: 'test/ui', extensions: ['.dart'], exclude: GENERATED },
+      { kind: 'diretorio', filePath: 'test/tool', extensions: ['.dart'], exclude: GENERATED },
+      { kind: 'diretorio', filePath: 'test/core', extensions: ['.dart'] },
     ],
   },
 
