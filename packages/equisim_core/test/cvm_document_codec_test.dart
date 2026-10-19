@@ -33,19 +33,19 @@ void main() {
     final original = _itr();
     // Pelo JSON de verdade, e não só pelo mapa: é o que o aplicativo lê.
     final json = jsonEncode(CvmDocumentCodec.encode(original));
-    final volta = CvmDocumentCodec.decode(
+    final roundTrip = CvmDocumentCodec.decode(
         _t, jsonDecode(json) as Map<String, dynamic>)!;
-    expect(volta.kind, CvmDocumentKind.itr);
-    expect(volta.periodStart, original.periodStart);
-    expect(volta.periodEnd, original.periodEnd);
-    expect(volta.priorStart, original.priorStart);
-    expect(volta.current.receiptDate, original.current.receiptDate);
-    expect(volta.current.totalRevenue, original.current.totalRevenue);
-    expect(volta.current.netIncome, original.current.netIncome);
-    expect(volta.current.cash, original.current.cash);
-    expect(volta.current.treasuryFraction, original.current.treasuryFraction);
-    expect(volta.prior!.netIncome, original.prior!.netIncome);
-    expect(volta.current.ebit, isNull, reason: 'nulo continua nulo');
+    expect(roundTrip.kind, CvmDocumentKind.itr);
+    expect(roundTrip.periodStart, original.periodStart);
+    expect(roundTrip.periodEnd, original.periodEnd);
+    expect(roundTrip.priorStart, original.priorStart);
+    expect(roundTrip.current.receiptDate, original.current.receiptDate);
+    expect(roundTrip.current.totalRevenue, original.current.totalRevenue);
+    expect(roundTrip.current.netIncome, original.current.netIncome);
+    expect(roundTrip.current.cash, original.current.cash);
+    expect(roundTrip.current.treasuryFraction, original.current.treasuryFraction);
+    expect(roundTrip.prior!.netIncome, original.prior!.netIncome);
+    expect(roundTrip.current.ebit, isNull, reason: 'nulo continua nulo');
   });
 
   test('a soma de doze meses dá o mesmo resultado antes e depois do codec', () {
@@ -56,11 +56,11 @@ void main() {
       current: FundamentalsSnapshot(
           ticker: _t, fiscalPeriodEnd: _d(2022, 12, 31), totalRevenue: 29904000000),
     );
-    CvmPeriodDocument ida(CvmPeriodDocument d) => CvmDocumentCodec.decode(_t,
+    CvmPeriodDocument roundTrip(CvmPeriodDocument d) => CvmDocumentCodec.decode(_t,
         jsonDecode(jsonEncode(CvmDocumentCodec.encode(d))) as Map<String, dynamic>)!;
-    final direto = TrailingTwelveMonths.build(anual: dfp, itr: _itr())!;
-    final pelo = TrailingTwelveMonths.build(anual: ida(dfp), itr: ida(_itr()))!;
-    expect(pelo.totalRevenue, direto.totalRevenue);
+    final direct = TrailingTwelveMonths.build(annual: dfp, itr: _itr())!;
+    final withGrowth = TrailingTwelveMonths.build(annual: roundTrip(dfp), itr: roundTrip(_itr()))!;
+    expect(withGrowth.totalRevenue, direct.totalRevenue);
   });
 
   test('omite nulo e grava inteiro sem casas', () {
@@ -72,15 +72,15 @@ void main() {
   });
 
   test('pacote de versão desconhecida não é lido pela metade', () {
-    final pacote = CvmDocumentCodec.encodePackage(
-        {'WEGE3': [_itr()]}, geradoEm: _d(2026, 9, 14));
+    final package = CvmDocumentCodec.encodePackage(
+        {'WEGE3': [_itr()]}, generatedAt: _d(2026, 9, 14));
     final ok = CvmDocumentCodec.decodePackage(
-        jsonDecode(jsonEncode(pacote)) as Map<String, dynamic>);
+        jsonDecode(jsonEncode(package)) as Map<String, dynamic>);
     expect(ok['WEGE3'], hasLength(1));
 
-    final futuro = {...pacote, 'versao': CvmDocumentCodec.versao + 1};
+    final future = {...package, 'versao': CvmDocumentCodec.version + 1};
     expect(CvmDocumentCodec.decodePackage(
-        jsonDecode(jsonEncode(futuro)) as Map<String, dynamic>), isEmpty);
+        jsonDecode(jsonEncode(future)) as Map<String, dynamic>), isEmpty);
   });
 
   test('documento sem período ou de tipo desconhecido é descartado', () {

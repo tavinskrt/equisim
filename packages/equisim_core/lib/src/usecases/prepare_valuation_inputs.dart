@@ -86,10 +86,10 @@ abstract final class PrepareValuationInputs {
   /// ativo sem exercícios ou sem cotação saía da avaliação sem deixar evento, e
   /// o painel não tinha como dizer por que ele não foi avaliado. Agora a falha
   /// sai no mesmo endpoint da avaliação, com a etapa e a fonte que faltou.
-  static Result<ValuationInputs> _falha(
+  static Result<ValuationInputs> _failure(
     Ticker ticker,
     DateTime asOf,
-    String fonte,
+    String source,
     Failure failure,
   ) {
     AuditRecorder.begin(
@@ -101,7 +101,7 @@ abstract final class PrepareValuationInputs {
       },
     )?.abort(failure.message, extra: {
       'etapa': 'preparo',
-      'fonte': fonte,
+      'fonte': source,
       'falha': failure.runtimeType.toString(),
     });
     return Err(failure);
@@ -141,7 +141,7 @@ abstract final class PrepareValuationInputs {
 
     final historyResult = await fundamentals.history(ticker);
     if (historyResult.isErr) {
-      return _falha(ticker, today, 'exercícios', historyResult.failureOrNull!);
+      return _failure(ticker, today, 'exercícios', historyResult.failureOrNull!);
     }
 
     // O perfil alimenta a Porta 1. Falha dele **não** interrompe: sem setor a
@@ -157,17 +157,17 @@ abstract final class PrepareValuationInputs {
 
     final priceResult = await prices.daily(ticker, window);
     if (priceResult.isErr) {
-      return _falha(ticker, today, 'cotações', priceResult.failureOrNull!);
+      return _failure(ticker, today, 'cotações', priceResult.failureOrNull!);
     }
 
     // **O ajuste que a fonte deixou de fazer** (item B29): uma bonificação não
     // ajustada é uma queda que não aconteceu, e ela entraria no beta, no corte
     // de liquidez e na volatilidade da faixa.
-    final ajuste =
+    final adjustment =
         CorporateEvents.completeAdjustment(priceResult.unwrap(), shareEvents);
-    final series = ajuste.series;
+    final series = adjustment.series;
     if (series.isEmpty) {
-      return _falha(
+      return _failure(
         ticker,
         today,
         'cotações',
@@ -188,17 +188,17 @@ abstract final class PrepareValuationInputs {
     // Encolhimento por precisão. Sem prior, ou sem valor de mercado para medir
     // a alavancagem, vale a regressão crua — e o resultado diz qual dos dois
     // caminhos valeu, por [BetaSource].
-    final publicados = PointInTimeView(today).published(historyResult.unwrap());
-    final ultimo = publicados.isEmpty ? null : publicados.last;
-    final equityMercado = ultimo?.marketCap;
+    final published = PointInTimeView(today).published(historyResult.unwrap());
+    final last = published.isEmpty ? null : published.last;
+    final marketEquity = last?.marketCap;
     var betaFinal = beta.beta;
-    var origemBeta = beta.source;
-    double? betaDesalavancado;
+    var betaOrigin = beta.source;
+    double? unleveredBeta;
     if (betaPrior != null &&
-        ultimo != null &&
-        equityMercado != null &&
-        equityMercado > 0) {
-      final encolhido = BetaShrinkage.shrink(
+        last != null &&
+        marketEquity != null &&
+        marketEquity > 0) {
+      final shrunk = BetaShrinkage.shrink(
         leveredBeta: beta.beta,
         standardError: beta.standardError,
         prior: betaPrior,
@@ -210,11 +210,11 @@ abstract final class PrepareValuationInputs {
         // comportamento anterior. Ver [MarketLeverage.overWindow] e
         // [FundamentalsSnapshot.debtToMarketEquity].
         debtToEquity: MarketLeverage.overWindow(
-              snapshots: publicados,
+              snapshots: published,
               prices: series.points,
               window: window,
             ) ??
-            ultimo.debtToMarketEquity(equityMercado) ??
+            last.debtToMarketEquity(marketEquity) ??
             0.0,
         // **A estatutária, e é a mesma que a realavancagem usa** (decisão 55).
         // O `(1 − τ)` de Hamada é o escudo fiscal do juro, e a
@@ -225,9 +225,9 @@ abstract final class PrepareValuationInputs {
         // realavancava por outro.
         taxRate: ValuationParameters.statutoryTaxRate,
       );
-      betaFinal = encolhido.beta;
-      betaDesalavancado = encolhido.unlevered;
-      if (encolhido.weight < 1.0) origemBeta = BetaSource.shrunk;
+      betaFinal = shrunk.beta;
+      unleveredBeta = shrunk.unlevered;
+      if (shrunk.weight < 1.0) betaOrigin = BetaSource.shrunk;
     }
 
     return Ok(ValuationInputs(
@@ -239,7 +239,7 @@ abstract final class PrepareValuationInputs {
         riskFreeRate: riskFreeRate,
         beta: betaFinal,
         marketPremium: marketPremium,
-        betaSource: origemBeta,
+        betaSource: betaOrigin,
         premiumSource: premiumSource,
       ),
       marginOfSafety: marginOfSafety,
@@ -256,7 +256,7 @@ abstract final class PrepareValuationInputs {
       prices: series,
       isDistressed: isDistressed,
       stateControlled: stateControlled,
-      unleveredBeta: betaDesalavancado,
+      unleveredBeta: unleveredBeta,
       concessionEnd: concessionEnd,
       dividendsInBeta: beta.dividends,
       // A taxa da data arbitra a despesa financeira, e não a do cenário (B10).
@@ -268,26 +268,26 @@ abstract final class PrepareValuationInputs {
       peerMultiples: peerMultiples,
       // A janela que a série de fato cobriu, para a cascata declarar quando
       // ela é curta demais para os cinco anos pedidos (item B17).
-      betaWindowYears: beta.janelaEmAnos,
+      betaWindowYears: beta.windowInYears,
       // As emissões por valor: a cascata soma as posteriores ao balanço (B28).
       shareIssues: shareIssues,
       contextNotes: [
-        if (ajuste.applied.isNotEmpty) _notaDoAjuste(ajuste.applied),
+        if (adjustment.applied.isNotEmpty) _adjustmentNote(adjustment.applied),
       ],
     ));
   }
 
   /// A ressalva do ajuste que o preparo completou na série (item B29).
-  static String _notaDoAjuste(List<ShareEvent> aplicados) {
-    String dia(DateTime d) => '${d.day.toString().padLeft(2, '0')}/'
+  static String _adjustmentNote(List<ShareEvent> applied) {
+    String day(DateTime d) => '${d.day.toString().padLeft(2, '0')}/'
         '${d.month.toString().padLeft(2, '0')}/${d.year}';
-    String fator(double f) => f >= 1
+    String factor(double f) => f >= 1
         ? '${((f - 1) * 100).toStringAsFixed(0)}% de ações novas'
         : 'grupamento de ${(1 / f).toStringAsFixed(0)} para 1';
-    final lista = [for (final e in aplicados) '${dia(e.exDate)} (${fator(e.factor)})'];
+    final list = [for (final e in applied) '${day(e.exDate)} (${factor(e.factor)})'];
     return 'A série de preços da fonte não trazia '
-        '${aplicados.length == 1 ? 'ajustado o evento de ações de' : 'ajustados os eventos de ações de'} '
-        '${lista.join(', ')}: a data ex aparecia como queda de preço que não '
+        '${applied.length == 1 ? 'ajustado o evento de ações de' : 'ajustados os eventos de ações de'} '
+        '${list.join(', ')}: a data ex aparecia como queda de preço que não '
         'aconteceu. A série foi ajustada antes do beta, do corte de liquidez e '
         'da volatilidade da faixa.';
   }
@@ -310,7 +310,7 @@ abstract final class PrepareValuationInputs {
         BetaSource source,
         double? standardError,
         int dividends,
-        double janelaEmAnos,
+        double windowInYears,
       })> _estimateBeta({
     required PriceSeries series,
     required BenchmarkRepository benchmark,
@@ -324,7 +324,7 @@ abstract final class PrepareValuationInputs {
         source: BetaSource.manual,
         standardError: null,
         dividends: 0,
-        janelaEmAnos: 0.0,
+        windowInYears: 0.0,
       );
     }
 
@@ -335,7 +335,7 @@ abstract final class PrepareValuationInputs {
         source: BetaSource.manual,
         standardError: null,
         dividends: 0,
-        janelaEmAnos: 0.0,
+        windowInYears: 0.0,
       );
     }
 
@@ -347,52 +347,52 @@ abstract final class PrepareValuationInputs {
         source: BetaSource.manual,
         standardError: null,
         dividends: 0,
-        janelaEmAnos: 0.0,
+        windowInYears: 0.0,
       );
     }
 
     // **Retorno total dos dois lados** (decisão 89). O Ibovespa reinveste
     // provento por construção, e o ativo pelo fechamento não: a regressão
     // misturava as duas convenções, e a queda da data ex entrava como risco.
-    final datas = [for (final p in assetPoints) p.date];
-    final fechamentos = [for (final p in assetPoints) p.close];
+    final dates = [for (final p in assetPoints) p.date];
+    final closes = [for (final p in assetPoints) p.close];
     final total = dividends == null || dividends.isEmpty
         ? null
         : TotalReturnIndex.build(
-            dates: datas, closes: fechamentos, dividends: dividends);
+            dates: dates, closes: closes, dividends: dividends);
 
     final aligned = BetaCalculator.alignReturns(
-      assetDates: datas,
-      assetIndex: total?.index ?? fechamentos,
+      assetDates: dates,
+      assetIndex: total?.index ?? closes,
       marketDates: market.dates,
       marketIndex: market.points.map((p) => p.close).toList(),
     );
 
     final estimate = BetaCalculator.estimate(returns: aligned);
-    final reinvestidos = total?.applied ?? 0;
+    final reinvested = total?.applied ?? 0;
     // **A janela que a série de fato cobriu** (item B17). A fonte de cotações
     // devolve uma janela fixa de dez anos, e a coorte datada de 2018 pede cinco
     // anos que a série não tem: o beta sai de 383 pregões em vez de 1.240, e
     // saía sem dizer. Medir a extensão da série, e não a contagem de pares,
     // separa janela curta de pregão faltando no meio.
-    final janelaEfetiva = datas.length < 2
+    final effectiveWindow = dates.length < 2
         ? 0.0
-        : datas.last.difference(datas.first).inDays / 365.25;
+        : dates.last.difference(dates.first).inDays / 365.25;
 
     return estimate.fold(
       (value) => (
         beta: value.beta,
         source: BetaSource.computed,
         standardError: value.standardError,
-        dividends: reinvestidos,
-        janelaEmAnos: janelaEfetiva,
+        dividends: reinvested,
+        windowInYears: effectiveWindow,
       ),
       (_) => (
         beta: 1.0,
         source: BetaSource.manual,
         standardError: null,
         dividends: 0,
-        janelaEmAnos: janelaEfetiva,
+        windowInYears: effectiveWindow,
       ),
     );
   }

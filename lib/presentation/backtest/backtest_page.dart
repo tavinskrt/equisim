@@ -25,22 +25,22 @@ import 'backtest_providers.dart';
 String? _horizonNotice(BacktestSettings settings, FinancialGoal? goal) {
   if (goal == null) return null;
 
-  final janela = settings.windowYears;
-  final prazo = (goal.months / 12).ceil();
-  if (janela >= prazo) return null;
+  final window = settings.windowYears;
+  final term = (goal.months / 12).ceil();
+  if (window >= term) return null;
 
   // "A janela", e nao "a janela simulada": a simulada pode ser MENOR que a
   // pedida quando algum ativo não tem histórico desde o início, e aí dizer que
   // ela cobre cinco anos exageraria a cobertura. O encurtamento tem faixa
   // própria; esta aqui fala do parâmetro, que é o que o leitor acabou de ver.
-  final aviso =
-      'A janela cobre $janela dos $prazo anos da meta. Compare a '
+  final warning =
+      'A janela cobre $window dos $term anos da meta. Compare a '
       'RENTABILIDADE, não o patrimônio: o valor final abaixo acumula só parte '
       'do plano de aportes, não o prazo inteiro.';
 
-  if (prazo <= BacktestSettings.maxWindowYears) return aviso;
+  if (term <= BacktestSettings.maxWindowYears) return warning;
 
-  return '$aviso A fonte de cotações entrega no máximo '
+  return '$warning A fonte de cotações entrega no máximo '
       '${BacktestSettings.maxWindowYears} anos, então nenhuma posição do '
       'controle alcança o prazo da meta.';
 }
@@ -71,11 +71,11 @@ class BacktestPage extends ConsumerWidget {
               // O descasamento de horizonte é ressalva do PARÂMETRO, não do
               // resultado: aparece mesmo enquanto a simulação roda, porque é
               // ele que decide como o número que vem abaixo deve ser lido.
-              if (_horizonNotice(settings, study.goal) case final aviso?) ...[
+              if (_horizonNotice(settings, study.goal) case final warning?) ...[
                 SliverToBoxAdapter(
                   child: NoticeBanner(
                     icon: Icons.straighten,
-                    message: aviso,
+                    message: warning,
                   ),
                 ),
                 const SliverToBoxAdapter(child: Gap.md()),
@@ -215,12 +215,12 @@ class _ComparisonSkeletonState extends State<_ComparisonSkeleton>
       vsync: this,
       duration: const Duration(milliseconds: 1100),
     );
-    final reduzido = WidgetsBinding
+    final reduced = WidgetsBinding
         .instance
         .platformDispatcher
         .accessibilityFeatures
         .disableAnimations;
-    if (!reduzido) _pulse.repeat(reverse: true);
+    if (!reduced) _pulse.repeat(reverse: true);
   }
 
   @override
@@ -233,9 +233,9 @@ class _ComparisonSkeletonState extends State<_ComparisonSkeleton>
   Widget build(BuildContext context) {
     final c = context.fin;
 
-    Widget barra(double largura, double altura) => Container(
-      width: largura,
-      height: altura,
+    Widget bar(double width, double height) => Container(
+      width: width,
+      height: height,
       decoration: BoxDecoration(
         color: c.surfaceSunken,
         borderRadius: BorderRadius.circular(4),
@@ -251,15 +251,15 @@ class _ComparisonSkeletonState extends State<_ComparisonSkeleton>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                barra(160, 12),
+                bar(160, 12),
                 const Gap.md(),
                 // Mesma altura declarada do `Base100Chart`, que e o que ocupa
                 // este lugar quando o resultado chega.
-                barra(double.infinity, 240),
+                bar(double.infinity, 240),
                 const Gap.lg(),
-                barra(120, 12),
+                bar(120, 12),
                 const Gap.sm(),
-                barra(double.infinity, 64),
+                bar(double.infinity, 64),
               ],
             ),
           ),
@@ -281,10 +281,10 @@ class _ComparisonBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final principal = result.principal;
-    final reserva = result.reserva;
+    final reserve = result.reserve;
     final correlation = ref.watch(correlationProvider);
 
-    if (principal == null && reserva == null) {
+    if (principal == null && reserve == null) {
       return SliverToBoxAdapter(
         child: GlassCard(
           child: EmptyState(
@@ -294,18 +294,18 @@ class _ComparisonBody extends ConsumerWidget {
             // cotação no período, e o nome dele está na mensagem da falha.
             message:
                 result.principalFailure ??
-                result.reservaFailure ??
+                result.reserveFailure ??
                 'Não foi possível carregar as cotações do período.',
           ),
         ),
       );
     }
 
-    final reference = principal ?? reserva!;
+    final reference = principal ?? reserve!;
     // As duas carteiras compartilham a janela, então qualquer uma serve de
     // eixo; cada curva ainda leva as próprias datas, para que nenhuma seja
     // desenhada fora de lugar caso um pregão falte a uma delas.
-    final axis = <DateTime>{...?principal?.dates, ...?reserva?.dates}.toList()
+    final axis = <DateTime>{...?principal?.dates, ...?reserve?.dates}.toList()
       ..sort();
 
     // `SliverList.list`, e nao `Column`: os oito cartoes abaixo carregam
@@ -346,12 +346,12 @@ class _ComparisonBody extends ConsumerWidget {
                       dates: principal.dates,
                       color: context.fin.brand,
                     ),
-                  if (reserva != null)
+                  if (reserve != null)
                     ChartSeries(
                       label: 'Reserva',
-                      values: reserva.base100,
-                      dates: reserva.dates,
-                      color: context.fin.reserva,
+                      values: reserve.base100,
+                      dates: reserve.dates,
+                      color: context.fin.reserve,
                     ),
                 ],
               ),
@@ -393,12 +393,12 @@ class _ComparisonBody extends ConsumerWidget {
             message: 'Principal não simulada — ${result.principalFailure}',
           ),
         ],
-        if (reserva == null && result.reservaFailure != null) ...[
+        if (reserve == null && result.reserveFailure != null) ...[
           const Gap.md(),
           NoticeBanner(
             trend: FinTrend.negative,
             icon: Icons.error_outline,
-            message: 'Reserva não simulada — ${result.reservaFailure}',
+            message: 'Reserva não simulada — ${result.reserveFailure}',
           ),
         ],
         if (reference.warnings.isNotEmpty) ...[
@@ -411,7 +411,7 @@ class _ComparisonBody extends ConsumerWidget {
         ],
         if (principal != null) ...[
           const Gap.md(),
-          _GoalConfrontationCard(principal: principal, reserva: reserva),
+          _GoalConfrontationCard(principal: principal, reserve: reserve),
         ],
         // COM AS DUAS carteiras, um cartão comparativo; com uma só, o painel
         // de sempre. A comparação lado a lado é o que a tela existe para
@@ -419,9 +419,9 @@ class _ComparisonBody extends ConsumerWidget {
         // carteira já resolve esse caso há tempo, medido em contraste e em
         // estouro. Manter os dois caminhos custa menos que forçar um layout
         // de comparação a fingir que compara.
-        if (principal != null && reserva != null) ...[
+        if (principal != null && reserve != null) ...[
           const Gap.md(),
-          _CarteirasLadoALado(principal: principal, reserva: reserva),
+          _SideBySidePortfolios(principal: principal, reserve: reserve),
         ] else ...[
           if (principal != null) ...[
             const Gap.md(),
@@ -430,18 +430,18 @@ class _ComparisonBody extends ConsumerWidget {
               outcome: principal,
             ),
           ],
-          if (reserva != null) ...[
+          if (reserve != null) ...[
             const Gap.md(),
             _MetricsCard(
               title: 'Carteira Reserva',
-              outcome: reserva,
+              outcome: reserve,
             ),
             const Gap.sm(),
-            const _ReservaHipotetica(),
+            const _HypotheticalReserve(),
           ],
         ],
         const Gap.md(),
-        _PerAssetCard(principal: principal, reserva: reserva),
+        _PerAssetCard(principal: principal, reserve: reserve),
         if (result.riskReturn.isNotEmpty) ...[
           const Gap.md(),
           _RiskReturnCard(result: result),
@@ -517,9 +517,9 @@ class _GoalConfrontationCard extends ConsumerWidget {
 
   /// Resultado da Reserva, quando houve. Rende uma linha subordinada: a
   /// pergunta "e se eu tivesse montado a outra?" é a razão de a aba existir.
-  final BacktestOutcome? reserva;
+  final BacktestOutcome? reserve;
 
-  const _GoalConfrontationCard({required this.principal, required this.reserva});
+  const _GoalConfrontationCard({required this.principal, required this.reserve});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -531,12 +531,12 @@ class _GoalConfrontationCard extends ConsumerWidget {
         // Taxa ausente é meta que o solver não resolveu. A aba Meta já
         // explica o porquê; repetir aqui um travessão sem contexto só ocuparia
         // espaço.
-        final exigido = v?.requiredAnnualRate;
-        if (exigido == null || !exigido.isFinite) {
+        final requiredText = v?.requiredAnnualRate;
+        if (requiredText == null || !requiredText.isFinite) {
           return const SizedBox.shrink();
         }
-        final realizado = principal.metrics.moneyWeightedReturn;
-        final folga = realizado == null ? null : (realizado - exigido) * 100;
+        final realized = principal.metrics.moneyWeightedReturn;
+        final margin = realized == null ? null : (realized - requiredText) * 100;
 
         return GlassCard(
           child: Column(
@@ -557,22 +557,22 @@ class _GoalConfrontationCard extends ConsumerWidget {
               MetricTileRow(
                 tiles: [
                   MetricTile(
-                    label: Lexico.exigido,
-                    value: Fmt.percent(exigido),
-                    hint: Lexico.exigidoAoAno,
+                    label: Lexicon.requiredText,
+                    value: Fmt.percent(requiredText),
+                    hint: Lexicon.requiredPerYear,
                   ),
                   MetricTile(
-                    label: Lexico.realizado,
-                    value: realizado == null
+                    label: Lexicon.realized,
+                    value: realized == null
                         ? '—'
-                        : Fmt.percent(realizado, signed: true),
-                    hint: Lexico.realizadoXirr,
-                    trend: FinAmount.trendOf(realizado),
+                        : Fmt.percent(realized, signed: true),
+                    hint: Lexicon.realizedXirr,
+                    trend: FinAmount.trendOf(realized),
                   ),
                   MetricTile(
-                    label: Lexico.folga,
-                    value: folga == null ? '—' : Fmt.points(folga),
-                    trend: FinAmount.trendOf(folga),
+                    label: Lexicon.margin,
+                    value: margin == null ? '—' : Fmt.points(margin),
+                    trend: FinAmount.trendOf(margin),
                   ),
                 ],
               ),
@@ -586,19 +586,19 @@ class _GoalConfrontationCard extends ConsumerWidget {
                   color: context.fin.textTertiary,
                 ),
               ),
-              if (reserva != null) ...[
+              if (reserve != null) ...[
                 const Gap.sm(),
                 Builder(
                   builder: (context) {
-                    final alternativa = reserva!.metrics.moneyWeightedReturn;
-                    if (alternativa == null) return const SizedBox.shrink();
-                    final folgaAlternativa = (alternativa - exigido) * 100;
+                    final alternative = reserve!.metrics.moneyWeightedReturn;
+                    if (alternative == null) return const SizedBox.shrink();
+                    final alternativeMargin = (alternative - requiredText) * 100;
                     // Sem ponto final: `Fmt.points` termina em "p.p.", e a
                     // abreviação já carrega o ponto que fecha a frase.
                     return Text(
                       'A Reserva, sob os mesmos aportes, teria rendido '
-                      '${Fmt.percent(alternativa, signed: true)} ao ano — '
-                      'folga de ${Fmt.points(folgaAlternativa)}',
+                      '${Fmt.percent(alternative, signed: true)} ao ano — '
+                      'folga de ${Fmt.points(alternativeMargin)}',
                       style: context.finType.caption.copyWith(
                         color: context.fin.textSecondary,
                       ),
@@ -728,8 +728,8 @@ const List<HintEntry> _perAssetGlossary = [
 ///
 /// Sem dizê-lo onde o número aparece, ler "Carteira Reserva · R$ 1.193,66"
 /// como dinheiro que se teria é imediato — e é falso.
-class _ReservaHipotetica extends StatelessWidget {
-  const _ReservaHipotetica();
+class _HypotheticalReserve extends StatelessWidget {
+  const _HypotheticalReserve();
 
   @override
   Widget build(BuildContext context) => Text(
@@ -741,34 +741,34 @@ class _ReservaHipotetica extends StatelessWidget {
 }
 
 /// Uma carteira na comparação: o nome que a identifica e a cor do selo.
-typedef _Coluna = ({String nome, Color cor});
+typedef _Column = ({String name, Color color});
 
 /// Nome da carteira sob o ponto colorido dela.
 ///
 /// Um widget só para os dois lugares que o desenham — o cabeçalho das tabelas
 /// comparativas e o grupo do cartão de desempenho por ativo. Eram duas cópias
 /// do mesmo `Row`, e o ponto saía com diâmetro literal em cada uma.
-class _SeloCarteira extends StatelessWidget {
-  final String nome;
+class _PortfolioBadge extends StatelessWidget {
+  final String name;
 
   /// Cor do ponto **e do texto**. Pinta tinta, então vem do token medido em
   /// contraste, nunca da variante de marca.
-  final Color cor;
+  final Color color;
 
   /// Encosta o conteúdo na direita, para o selo alinhar com a coluna de
   /// números que ele encabeça.
-  final bool aDireita;
+  final bool alignRight;
 
-  const _SeloCarteira({
-    required this.nome,
-    required this.cor,
-    this.aDireita = false,
+  const _PortfolioBadge({
+    required this.name,
+    required this.color,
+    this.alignRight = false,
   });
 
   @override
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
-    mainAxisAlignment: aDireita
+    mainAxisAlignment: alignRight
         ? MainAxisAlignment.end
         : MainAxisAlignment.start,
     children: [
@@ -777,16 +777,16 @@ class _SeloCarteira extends StatelessWidget {
         // e diâmetro solto é a porta por onde a grade se perde.
         width: FinSpace.sm,
         height: FinSpace.sm,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: cor),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       ),
       const Gap.xs(axis: Axis.horizontal),
       Flexible(
         child: Text(
-          nome.toUpperCase(),
+          name.toUpperCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.finType.caption.copyWith(
-            color: cor,
+            color: color,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.6,
           ),
@@ -797,19 +797,19 @@ class _SeloCarteira extends StatelessWidget {
 }
 
 /// O valor de uma carteira numa linha da comparação.
-typedef _Celula = ({String texto, FinTrend trend});
+typedef _Cell = ({String text, FinTrend trend});
 
 /// Uma linha da comparação: o indicador, sua ressalva, e um valor por carteira.
 ///
-/// [destaque] marca a grandeza principal do cartão. Sem ele todas as linhas
+/// [highlight] marca a grandeza principal do cartão. Sem ele todas as linhas
 /// dividiriam o mesmo peso tipográfico, e o patrimônio final se leria com a
 /// mesma voz do índice de Calmar — o defeito que o `BalanceSummaryCard` foi
 /// construído para resolver, reintroduzido pela porta da tabela.
-typedef _Linha = ({
-  String rotulo,
-  String? nota,
-  bool destaque,
-  List<_Celula> celulas,
+typedef _Row = ({
+  String label,
+  String? note,
+  bool highlight,
+  List<_Cell> cells,
 });
 
 /// Tabela de indicadores com uma coluna por carteira.
@@ -829,11 +829,11 @@ typedef _Linha = ({
 /// em nenhuma disposição lado a lado: dois valores de `R$ 1.300,62` sozinhos
 /// passam da largura da tela. Empilhar devolve o percurso antigo, que é ruim —
 /// mas truncar o número seria pior, e estourar o layout, inaceitável.
-class _TabelaComparativa extends StatelessWidget {
-  final List<_Coluna> colunas;
-  final List<_Linha> linhas;
+class _ComparisonTable extends StatelessWidget {
+  final List<_Column> columns;
+  final List<_Row> rows;
 
-  const _TabelaComparativa({required this.colunas, required this.linhas});
+  const _ComparisonTable({required this.columns, required this.rows});
 
   static const double _gap = FinSpace.sm;
 
@@ -842,14 +842,14 @@ class _TabelaComparativa extends StatelessWidget {
     final t = context.finType;
     final c = context.fin;
 
-    final rotuloStyle = t.caption.copyWith(color: c.textSecondary);
-    final notaStyle = t.caption.copyWith(color: c.textTertiary);
-    final valorStyle = t.numSm;
+    final labelStyle = t.caption.copyWith(color: c.textSecondary);
+    final noteStyle = t.caption.copyWith(color: c.textTertiary);
+    final valueStyle = t.numSm;
     // A linha em destaque pinta em `numMd`, e a coluna precisa caber o mais
     // largo dos DOIS papéis -- medir só o menor truncaria justamente o número
     // que se quis destacar.
-    final destaqueStyle = t.numMd;
-    final seloStyle = t.caption.copyWith(
+    final highlightStyle = t.numMd;
+    final badgeStyle = t.caption.copyWith(
       fontWeight: FontWeight.bold,
       letterSpacing: 0.6,
     );
@@ -858,62 +858,62 @@ class _TabelaComparativa extends StatelessWidget {
     // teto -- a coluna recebe o que sobra e o texto quebra em duas linhas se
     // precisar; o que a medida garante é que ela nunca comece apertada demais
     // para caber uma palavra.
-    var rotuloW = 0.0;
-    for (final linha in linhas) {
-      final r = FinAmount.measure(context, linha.rotulo, rotuloStyle);
-      if (r > rotuloW) rotuloW = r;
-      final nota = linha.nota;
-      if (nota != null) {
-        final n = FinAmount.measure(context, nota, notaStyle);
-        if (n > rotuloW) rotuloW = n;
+    var labelWidth = 0.0;
+    for (final row in rows) {
+      final r = FinAmount.measure(context, row.label, labelStyle);
+      if (r > labelWidth) labelWidth = r;
+      final note = row.note;
+      if (note != null) {
+        final n = FinAmount.measure(context, note, noteStyle);
+        if (n > labelWidth) labelWidth = n;
       }
     }
 
     // Largura do valor: o mais largo da tabela inteira, e não da coluna. Medir
     // por coluna daria larguras diferentes para grandezas iguais, e a
     // comparação depende justamente de os dois números começarem no mesmo x.
-    var valorW = 0.0;
-    for (final linha in linhas) {
-      final estilo = linha.destaque ? destaqueStyle : valorStyle;
-      for (final celula in linha.celulas) {
-        final v = FinAmount.measure(context, celula.texto, estilo);
-        if (v > valorW) valorW = v;
+    var valueWidth = 0.0;
+    for (final row in rows) {
+      final style = row.highlight ? highlightStyle : valueStyle;
+      for (final cell in row.cells) {
+        final v = FinAmount.measure(context, cell.text, style);
+        if (v > valueWidth) valueWidth = v;
       }
     }
-    for (final coluna in colunas) {
+    for (final column in columns) {
       // O selo ocupa a coluna como qualquer valor: ponto, respiro e nome.
       final w =
-          FinAmount.measure(context, coluna.nome.toUpperCase(), seloStyle) +
+          FinAmount.measure(context, column.name.toUpperCase(), badgeStyle) +
           FinSpace.sm +
           FinSpace.xs;
-      if (w > valorW) valorW = w;
+      if (w > valueWidth) valueWidth = w;
     }
 
     return LayoutBuilder(
-      builder: (context, restricoes) {
-        final preciso = rotuloW + colunas.length * (valorW + _gap);
-        if (preciso > restricoes.maxWidth) {
-          return _empilhado();
+      builder: (context, constraints) {
+        final requiredWidth = labelWidth + columns.length * (valueWidth + _gap);
+        if (requiredWidth > constraints.maxWidth) {
+          return _stacked();
         }
-        return _ladoALado(
-          rotuloW: rotuloW,
-          valorW: valorW,
-          rotuloStyle: rotuloStyle,
-          notaStyle: notaStyle,
-          valorStyle: valorStyle,
-          destaqueStyle: destaqueStyle,
+        return _sideBySide(
+          labelWidth: labelWidth,
+          valueWidth: valueWidth,
+          labelStyle: labelStyle,
+          noteStyle: noteStyle,
+          valueStyle: valueStyle,
+          highlightStyle: highlightStyle,
         );
       },
     );
   }
 
-  Widget _ladoALado({
-    required double rotuloW,
-    required double valorW,
-    required TextStyle rotuloStyle,
-    required TextStyle notaStyle,
-    required TextStyle valorStyle,
-    required TextStyle destaqueStyle,
+  Widget _sideBySide({
+    required double labelWidth,
+    required double valueWidth,
+    required TextStyle labelStyle,
+    required TextStyle noteStyle,
+    required TextStyle valueStyle,
+    required TextStyle highlightStyle,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -921,15 +921,15 @@ class _TabelaComparativa extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            SizedBox(width: rotuloW),
-            for (final coluna in colunas) ...[
+            SizedBox(width: labelWidth),
+            for (final column in columns) ...[
               const Gap.sm(axis: Axis.horizontal),
               SizedBox(
-                width: valorW,
-                child: _SeloCarteira(
-                  nome: coluna.nome,
-                  cor: coluna.cor,
-                  aDireita: true,
+                width: valueWidth,
+                child: _PortfolioBadge(
+                  name: column.name,
+                  color: column.color,
+                  alignRight: true,
                 ),
               ),
             ],
@@ -941,7 +941,7 @@ class _TabelaComparativa extends StatelessWidget {
           ],
         ),
         const Gap.sm(),
-        for (final linha in linhas)
+        for (final row in rows)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: FinSpace.xs),
             child: Row(
@@ -949,20 +949,20 @@ class _TabelaComparativa extends StatelessWidget {
               children: [
                 SizedBox(
                   // Medida, e não flexível: ver o `Spacer` do cabeçalho.
-                  width: rotuloW,
+                  width: labelWidth,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(linha.rotulo, style: rotuloStyle),
-                      if (linha.nota case final nota?)
-                        Text(nota, style: notaStyle),
+                      Text(row.label, style: labelStyle),
+                      if (row.note case final note?)
+                        Text(note, style: noteStyle),
                     ],
                   ),
                 ),
-                for (final celula in linha.celulas) ...[
+                for (final cell in row.cells) ...[
                   const Gap.sm(axis: Axis.horizontal),
                   SizedBox(
-                    width: valorW,
+                    width: valueWidth,
                     // O `Align` não é decorativo: `FinAmount` embrulha o texto
                     // num `AnimatedSwitcher`, que CENTRALIZA o filho na caixa
                     // recebida. Sem ele, "2,86" ficava centrado sob "14,68" e
@@ -972,9 +972,9 @@ class _TabelaComparativa extends StatelessWidget {
                     child: Align(
                       alignment: AlignmentDirectional.centerEnd,
                       child: FinAmount(
-                        text: celula.texto,
-                        style: linha.destaque ? destaqueStyle : valorStyle,
-                        trend: celula.trend,
+                        text: cell.text,
+                        style: row.highlight ? highlightStyle : valueStyle,
+                        trend: cell.trend,
                       ),
                     ),
                   ),
@@ -991,19 +991,19 @@ class _TabelaComparativa extends StatelessWidget {
   ///
   /// `LabelValueRow` de propósito: ele não estoura em largura nenhuma, porque
   /// o valor desce de linha em vez de disputar espaço com o rótulo.
-  Widget _empilhado() {
+  Widget _stacked() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (var i = 0; i < colunas.length; i++) ...[
+        for (var i = 0; i < columns.length; i++) ...[
           if (i > 0) const Gap.md(),
-          _SeloCarteira(nome: colunas[i].nome, cor: colunas[i].cor),
+          _PortfolioBadge(name: columns[i].name, color: columns[i].color),
           const Gap.xs(),
-          for (final linha in linhas)
+          for (final row in rows)
             LabelValueRow(
-              label: linha.rotulo,
-              value: linha.celulas[i].texto,
-              trend: linha.celulas[i].trend,
+              label: row.label,
+              value: row.cells[i].text,
+              trend: row.cells[i].trend,
             ),
         ],
       ],
@@ -1012,32 +1012,32 @@ class _TabelaComparativa extends StatelessWidget {
 }
 
 /// Percentual de uma métrica como célula da comparação.
-_Celula _pct(double valor, {bool signed = false, FinTrend? trend}) => (
-  texto: Fmt.percent(valor, signed: signed),
-  trend: trend ?? (signed ? FinAmount.trendOf(valor) : FinTrend.neutral),
+_Cell _pct(double value, {bool signed = false, FinTrend? trend}) => (
+  text: Fmt.percent(value, signed: signed),
+  trend: trend ?? (signed ? FinAmount.trendOf(value) : FinTrend.neutral),
 );
 
 /// Razão adimensional como célula da comparação.
-_Celula _razao(double valor) => (texto: Fmt.ratio(valor), trend: FinTrend.neutral);
+_Cell _ratio(double value) => (text: Fmt.ratio(value), trend: FinTrend.neutral);
 
 /// Dinheiro como célula da comparação.
-_Celula _dinheiro(double reais, {FinTrend trend = FinTrend.neutral}) => (
-  texto: Fmt.money(reais),
+_Cell _money(double reais, {FinTrend trend = FinTrend.neutral}) => (
+  text: Fmt.money(reais),
   trend: trend,
 );
 
 /// Indicadores das duas carteiras em colunas, no lugar de um cartão para cada.
 ///
 /// Só entra em cena com as DUAS simuladas. Ver a justificativa no ponto de uso.
-class _CarteirasLadoALado extends StatelessWidget {
+class _SideBySidePortfolios extends StatelessWidget {
   final BacktestOutcome principal;
-  final BacktestOutcome reserva;
+  final BacktestOutcome reserve;
 
-  const _CarteirasLadoALado({required this.principal, required this.reserva});
+  const _SideBySidePortfolios({required this.principal, required this.reserve});
 
   @override
   Widget build(BuildContext context) {
-    final carteiras = [principal, reserva];
+    final portfolios = [principal, reserve];
 
     return GlassCard(
       child: Column(
@@ -1058,117 +1058,117 @@ class _CarteirasLadoALado extends StatelessWidget {
             ),
           ),
           const Gap.md(),
-          _TabelaComparativa(
-            colunas: [
-              (nome: 'Principal', cor: context.fin.brand),
-              (nome: 'Reserva', cor: context.fin.reserva),
+          _ComparisonTable(
+            columns: [
+              (name: 'Principal', color: context.fin.brand),
+              (name: 'Reserva', color: context.fin.reserve),
             ],
-            linhas: [
+            rows: [
               (
-                rotulo: 'Patrimônio final',
-                destaque: true,
-                nota: 'posições mais caixa',
-                celulas: [
-                  for (final o in carteiras) _dinheiro(o.finalValue.reais),
+                label: 'Patrimônio final',
+                highlight: true,
+                note: 'posições mais caixa',
+                cells: [
+                  for (final o in portfolios) _money(o.finalValue.reais),
                 ],
               ),
               (
-                rotulo: 'Aportado',
-                destaque: false,
-                nota: 'capital do investidor',
-                celulas: [
-                  for (final o in carteiras) _dinheiro(o.totalContributed.reais),
+                label: 'Aportado',
+                highlight: false,
+                note: 'capital do investidor',
+                cells: [
+                  for (final o in portfolios) _money(o.totalContributed.reais),
                 ],
               ),
               (
-                rotulo: 'Alocado',
-                destaque: false,
-                nota: 'do aportado, o que virou ação',
-                celulas: [
-                  for (final o in carteiras) _dinheiro(o.totalAllocated.reais),
+                label: 'Alocado',
+                highlight: false,
+                note: 'do aportado, o que virou ação',
+                cells: [
+                  for (final o in portfolios) _money(o.totalAllocated.reais),
                 ],
               ),
               (
-                rotulo: 'Custos',
-                destaque: false,
-                nota: 'tarifa da B3 nas compras',
-                celulas: [
-                  for (final o in carteiras) _dinheiro(o.transactionCosts.reais),
+                label: 'Custos',
+                highlight: false,
+                note: 'tarifa da B3 nas compras',
+                cells: [
+                  for (final o in portfolios) _money(o.transactionCosts.reais),
                 ],
               ),
               (
-                rotulo: 'Em caixa',
-                destaque: false,
-                nota: 'sobra à espera do próximo aporte',
-                celulas: [
-                  for (final o in carteiras) _dinheiro(o.residualCash.reais),
+                label: 'Em caixa',
+                highlight: false,
+                note: 'sobra à espera do próximo aporte',
+                cells: [
+                  for (final o in portfolios) _money(o.residualCash.reais),
                 ],
               ),
               (
-                rotulo: 'TWR',
-                destaque: false,
-                nota: 'da composição',
-                celulas: [
-                  for (final o in carteiras)
+                label: 'TWR',
+                highlight: false,
+                note: 'da composição',
+                cells: [
+                  for (final o in portfolios)
                     _pct(o.metrics.timeWeightedReturn, signed: true),
                 ],
               ),
               (
-                rotulo: 'XIRR',
-                destaque: false,
-                nota: 'retorno do investidor',
-                celulas: [
-                  for (final o in carteiras)
+                label: 'XIRR',
+                highlight: false,
+                note: 'retorno do investidor',
+                cells: [
+                  for (final o in portfolios)
                     o.metrics.moneyWeightedReturn == null
-                        ? (texto: '—', trend: FinTrend.blocked)
+                        ? (text: '—', trend: FinTrend.blocked)
                         : _pct(o.metrics.moneyWeightedReturn!, signed: true),
                 ],
               ),
               (
-                rotulo: 'CAGR',
-                destaque: false,
-                nota: null,
-                celulas: [
-                  for (final o in carteiras) _pct(o.metrics.cagr, signed: true),
+                label: 'CAGR',
+                highlight: false,
+                note: null,
+                cells: [
+                  for (final o in portfolios) _pct(o.metrics.cagr, signed: true),
                 ],
               ),
               (
-                rotulo: 'Volatilidade',
-                destaque: false,
-                nota: 'anualizada',
-                celulas: [for (final o in carteiras) _pct(o.metrics.volatility)],
+                label: 'Volatilidade',
+                highlight: false,
+                note: 'anualizada',
+                cells: [for (final o in portfolios) _pct(o.metrics.volatility)],
               ),
               (
-                rotulo: 'Máx. drawdown',
-                destaque: false,
-                nota: null,
-                celulas: [
-                  for (final o in carteiras)
+                label: 'Máx. drawdown',
+                highlight: false,
+                note: null,
+                cells: [
+                  for (final o in portfolios)
                     _pct(o.metrics.maxDrawdown, trend: FinTrend.negative),
                 ],
               ),
               (
-                rotulo: 'Sharpe',
-                destaque: false,
-                nota: 'vs CDI observado',
-                celulas: [for (final o in carteiras) _razao(o.metrics.sharpe)],
+                label: 'Sharpe',
+                highlight: false,
+                note: 'vs CDI observado',
+                cells: [for (final o in portfolios) _ratio(o.metrics.sharpe)],
               ),
               (
-                rotulo: 'Sortino',
-                destaque: false,
-                nota: null,
-                celulas: [for (final o in carteiras) _razao(o.metrics.sortino)],
+                label: 'Sortino',
+                highlight: false,
+                note: null,
+                cells: [for (final o in portfolios) _ratio(o.metrics.sortino)],
               ),
               (
-                rotulo: 'Calmar',
-                destaque: false,
-                nota: null,
-                celulas: [for (final o in carteiras) _razao(o.metrics.calmar)],
+                label: 'Calmar',
+                highlight: false,
+                note: null,
+                cells: [for (final o in portfolios) _ratio(o.metrics.calmar)],
               ),
             ],
           ),
           const Gap.md(),
-          const _ReservaHipotetica(),
+          const _HypotheticalReserve(),
         ],
       ),
     );
@@ -1193,16 +1193,16 @@ class _CarteirasLadoALado extends StatelessWidget {
 /// resto e a fatia de um ativo sem cotação no dia fica no caixa dele, de modo
 /// que aportado = alocado + custos + caixa exatamente — a tarifa da B3 sai do
 /// caixa antes da compra (item C4).
-String _legendaDeCapital(BacktestOutcome outcome) {
+String _capitalCaption(BacktestOutcome outcome) {
   final base =
       'aportado ${Fmt.money(outcome.totalContributed.reais)} · '
       'alocado ${Fmt.money(outcome.totalAllocated.reais)} · '
       'custos ${Fmt.money(outcome.transactionCosts.reais)}';
 
-  final caixa = outcome.residualCash;
-  if (caixa.cents < 100) return base;
+  final cash = outcome.residualCash;
+  if (cash.cents < 100) return base;
 
-  return '$base — ${Fmt.money(caixa.reais)} em caixa';
+  return '$base — ${Fmt.money(cash.reais)} em caixa';
 }
 
 /// Indicadores de uma carteira na janela simulada.
@@ -1230,7 +1230,7 @@ class _MetricsCard extends StatelessWidget {
         balance: Fmt.money(outcome.finalValue.reais),
         balanceSemantics:
             'Patrimônio final ${Fmt.money(outcome.finalValue.reais)}',
-        caption: _legendaDeCapital(outcome),
+        caption: _capitalCaption(outcome),
         changeLabel: Fmt.percent(m.timeWeightedReturn, signed: true),
         changeTrend: FinAmount.trendOf(m.timeWeightedReturn),
         trailing: HintIcon(
@@ -1291,11 +1291,11 @@ class _MetricsCard extends StatelessWidget {
 /// mediriam períodos diferentes.
 class _PerAssetCard extends StatelessWidget {
   final BacktestOutcome? principal;
-  final BacktestOutcome? reserva;
+  final BacktestOutcome? reserve;
 
   const _PerAssetCard({
     required this.principal,
-    required this.reserva,
+    required this.reserve,
   });
 
   /// Ativos da carteira, do melhor para o pior retorno no período.
@@ -1308,12 +1308,12 @@ class _PerAssetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final principalAssets = _ranked(principal);
-    final reservaAssets = _ranked(reserva);
-    if (principalAssets.isEmpty && reservaAssets.isEmpty) {
+    final reserveAssets = _ranked(reserve);
+    if (principalAssets.isEmpty && reserveAssets.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final hasBoth = principalAssets.isNotEmpty && reservaAssets.isNotEmpty;
+    final hasBoth = principalAssets.isNotEmpty && reserveAssets.isNotEmpty;
 
     return GlassCard(
       child: Column(
@@ -1350,19 +1350,19 @@ class _PerAssetCard extends StatelessWidget {
             // A frase mora ENTRE os grupos porque é a junção que ela descreve.
             // Acima ou abaixo do cartão, ela viraria comentário geral; aqui,
             // aponta para as duas linhas que o leitor tem diante dos olhos.
-            _ParEncostado(
-              piorDetido: principalAssets.last,
-              melhorCandidato: reservaAssets.first,
+            _AdjacentPair(
+              worstHolding: principalAssets.last,
+              bestCandidate: reserveAssets.first,
             ),
             const Gap.sm(),
           ],
-          if (reservaAssets.isNotEmpty)
+          if (reserveAssets.isNotEmpty)
             _AssetGroup(
               label: 'Reserva',
               // Este `color` pinta TEXTO -- o rotulo do grupo. Por isso vem do
               // token medido em contraste, e nao da variante de marca.
-              color: context.fin.reserva,
-              assets: reservaAssets,
+              color: context.fin.reserve,
+              assets: reserveAssets,
             ),
         ],
       ),
@@ -1382,46 +1382,46 @@ class _PerAssetCard extends StatelessWidget {
 /// carteira trocada foi calculada. O que se afirma é a distância entre dois
 /// retornos observados, e a ressalva diz isso com todas as letras — um número
 /// que parece conselho é pior que número nenhum.
-class _ParEncostado extends StatelessWidget {
+class _AdjacentPair extends StatelessWidget {
   /// Último da Principal na ordenação: o pior retorno entre os detidos.
-  final AssetPerformance piorDetido;
+  final AssetPerformance worstHolding;
 
   /// Primeiro da Reserva: o melhor retorno entre os candidatos.
-  final AssetPerformance melhorCandidato;
+  final AssetPerformance bestCandidate;
 
-  const _ParEncostado({
-    required this.piorDetido,
-    required this.melhorCandidato,
+  const _AdjacentPair({
+    required this.worstHolding,
+    required this.bestCandidate,
   });
 
   static String _pct(double v) => Fmt.percent(v, decimals: 1, signed: true);
 
   @override
   Widget build(BuildContext context) {
-    final diferenca =
-        (melhorCandidato.totalReturn - piorDetido.totalReturn) * 100;
+    final difference =
+        (bestCandidate.totalReturn - worstHolding.totalReturn) * 100;
 
     // Candidato que não superou ninguém também é resposta, e das úteis: diz
     // que não há troca sugerida pelo período. Silenciar aqui faria a frase
     // aparecer só quando conveniente, e uma observação que só fala a favor
     // deixa de ser observação.
-    final frase = diferenca > 0
-        ? 'No encontro das duas listas: ${piorDetido.ticker.value} é o pior '
-              'retorno da Principal (${_pct(piorDetido.totalReturn)}) e '
-              '${melhorCandidato.ticker.value} o melhor da Reserva '
-              '(${_pct(melhorCandidato.totalReturn)}) — '
-              '${Fmt.points(diferenca)} de diferença.'
+    final sentence = difference > 0
+        ? 'No encontro das duas listas: ${worstHolding.ticker.value} é o pior '
+              'retorno da Principal (${_pct(worstHolding.totalReturn)}) e '
+              '${bestCandidate.ticker.value} o melhor da Reserva '
+              '(${_pct(bestCandidate.totalReturn)}) — '
+              '${Fmt.points(difference)} de diferença.'
         : 'Nenhum candidato da Reserva superou o pior ativo da Principal no '
-              'período: ${piorDetido.ticker.value} rendeu '
-              '${_pct(piorDetido.totalReturn)} e '
-              '${melhorCandidato.ticker.value}, o melhor da Reserva, '
-              '${_pct(melhorCandidato.totalReturn)}.';
+              'período: ${worstHolding.ticker.value} rendeu '
+              '${_pct(worstHolding.totalReturn)} e '
+              '${bestCandidate.ticker.value}, o melhor da Reserva, '
+              '${_pct(bestCandidate.totalReturn)}.';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          frase,
+          sentence,
           style: context.finType.caption.copyWith(
             color: context.fin.textSecondary,
           ),
@@ -1498,7 +1498,7 @@ class _AssetGroup extends StatelessWidget {
   ///
   /// Ela carrega os pesos e a barra de deriva. Abaixo disto a barra deixa de
   /// comunicar proporção e vira um risco colorido — melhor empilhar.
-  static const double _minimoDoMeio = FinSpace.xxxl;
+  static const double _middleMinimum = FinSpace.xxxl;
 
   @override
   Widget build(BuildContext context) {
@@ -1508,21 +1508,21 @@ class _AssetGroup extends StatelessWidget {
     // vizinhas em disposições diferentes destruiriam a coluna que as larguras
     // medidas existem para manter.
     return LayoutBuilder(
-      builder: (context, restricoes) {
-        final preciso =
-            widths.ticker + FinSpace.sm + widths.value + _minimoDoMeio;
-        final empilhado = preciso > restricoes.maxWidth;
+      builder: (context, constraints) {
+        final requiredWidth =
+            widths.ticker + FinSpace.sm + widths.value + _middleMinimum;
+        final stacked = requiredWidth > constraints.maxWidth;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _SeloCarteira(nome: label, cor: color),
+            _PortfolioBadge(name: label, color: color),
             for (final asset in assets)
               _AssetRow(
                 asset: asset,
                 tickerWidth: widths.ticker,
                 valueWidth: widths.value,
-                empilhado: empilhado,
+                stacked: stacked,
               ),
           ],
         );
@@ -1554,13 +1554,13 @@ class _AssetRow extends StatelessWidget {
   final double valueWidth;
 
   /// Disposição escolhida pelo grupo. Ver a justificativa na classe.
-  final bool empilhado;
+  final bool stacked;
 
   const _AssetRow({
     required this.asset,
     required this.tickerWidth,
     required this.valueWidth,
-    required this.empilhado,
+    required this.stacked,
   });
 
   // As peças saem de métodos porque as DUAS disposições usam as mesmas. Se
@@ -1577,7 +1577,7 @@ class _AssetRow extends StatelessWidget {
     ),
   );
 
-  Widget _pesos(BuildContext context) => Text(
+  Widget _weights(BuildContext context) => Text(
     // O alvo passa pelo formatador em vez de sair do `toString()` do
     // domínio: aquele usa `toStringAsFixed`, que ignora locale e escrevia
     // `100.00%` com PONTO ao lado de um `100,0%` com vírgula, na mesma frase.
@@ -1588,7 +1588,7 @@ class _AssetRow extends StatelessWidget {
     style: context.finType.caption.copyWith(color: context.fin.textSecondary),
   );
 
-  Widget _barra(BuildContext context) => ClipRRect(
+  Widget _bar(BuildContext context) => ClipRRect(
     borderRadius: BorderRadius.circular(3),
     child: LinearProgressIndicator(
       value: asset.currentWeight.clamp(0.0, 1.0),
@@ -1611,7 +1611,7 @@ class _AssetRow extends StatelessWidget {
   /// couber em lotes de uma ao preço do dia. O dinheiro ao lado é o que foi
   /// DESTINADO ao ativo, e não o que virou posição — a diferença está no caixa
   /// dele, esperando o aporte seguinte.
-  Widget _posicao(BuildContext context) => Text(
+  Widget _position(BuildContext context) => Text(
     '${asset.shares} cotas · '
     '${Fmt.money(asset.invested.reais)} destinados',
     maxLines: 1,
@@ -1619,13 +1619,13 @@ class _AssetRow extends StatelessWidget {
     style: context.finType.caption.copyWith(color: context.fin.textTertiary),
   );
 
-  Widget _retorno(BuildContext context) => FinAmount(
+  Widget _returnRate(BuildContext context) => FinAmount(
     text: Fmt.percent(asset.totalReturn, decimals: 1, signed: true),
     style: context.finType.numSm,
     trend: FinAmount.trendOf(asset.totalReturn),
   );
 
-  Widget _deriva(BuildContext context) => Text(
+  Widget _drift(BuildContext context) => Text(
     Fmt.points(asset.drift),
     maxLines: 1,
     overflow: TextOverflow.ellipsis,
@@ -1637,22 +1637,22 @@ class _AssetRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: FinSpace.sm),
-    child: empilhado ? _emPilha(context) : _emColunas(context),
+    child: stacked ? _asStack(context) : _asColumns(context),
   );
 
   /// Três colunas: ticker, pesos com a barra, e os dois números à direita.
-  Widget _emColunas(BuildContext context) => Row(
+  Widget _asColumns(BuildContext context) => Row(
     children: [
       SizedBox(width: tickerWidth, child: _ticker(context)),
       Expanded(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _pesos(context),
+            _weights(context),
             const Gap.xs(),
-            _barra(context),
+            _bar(context),
             const Gap.xs(),
-            _posicao(context),
+            _position(context),
           ],
         ),
       ),
@@ -1661,7 +1661,7 @@ class _AssetRow extends StatelessWidget {
         width: valueWidth,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: [_retorno(context), _deriva(context)],
+          children: [_returnRate(context), _drift(context)],
         ),
       ),
     ],
@@ -1672,28 +1672,28 @@ class _AssetRow extends StatelessWidget {
   /// Cada faixa põe o texto num `Expanded` e o número na largura natural dele:
   /// assim é sempre o TEXTO que cede, e o número — que é o dado — sai inteiro
   /// em qualquer largura.
-  Widget _emPilha(BuildContext context) => Column(
+  Widget _asStack(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       Row(
         children: [
           Expanded(child: _ticker(context)),
           const Gap.sm(axis: Axis.horizontal),
-          _retorno(context),
+          _returnRate(context),
         ],
       ),
       const Gap.xs(),
       Row(
         children: [
-          Expanded(child: _pesos(context)),
+          Expanded(child: _weights(context)),
           const Gap.sm(axis: Axis.horizontal),
-          _deriva(context),
+          _drift(context),
         ],
       ),
       const Gap.xs(),
-      _barra(context),
+      _bar(context),
       const Gap.xs(),
-      _posicao(context),
+      _position(context),
     ],
   );
 }
@@ -1716,9 +1716,9 @@ class _RiskReturnCard extends StatelessWidget {
           ret: p.ret,
           color: switch (p.kind) {
             RiskReturnKind.principal => context.fin.brand,
-            RiskReturnKind.reserva => context.fin.reserva,
+            RiskReturnKind.reserve => context.fin.reserve,
             RiskReturnKind.principalAsset => context.fin.textSecondary,
-            RiskReturnKind.reservaAsset => context.fin.reservaMuted,
+            RiskReturnKind.reserveAsset => context.fin.reserveMuted,
           },
           highlight: p.isPortfolio,
         ),
@@ -1743,8 +1743,8 @@ class _RiskReturnCard extends StatelessWidget {
                   label: 'Ativos da Principal',
                   color: context.fin.textSecondary,
                 ),
-              if (_has(RiskReturnKind.reservaAsset))
-                (label: 'Ativos da Reserva', color: context.fin.reservaMuted),
+              if (_has(RiskReturnKind.reserveAsset))
+                (label: 'Ativos da Reserva', color: context.fin.reserveMuted),
             ],
           ),
         ],

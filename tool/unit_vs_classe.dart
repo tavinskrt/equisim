@@ -12,35 +12,35 @@ import 'dart:io';
 import 'package:equisim_core/equisim_core.dart';
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
 Future<void> main(List<String> args) async {
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
   try {
     final anchors = (await ResolveMarketAnchors.call(
-      macro: ctx.macro, benchmark: ctx.benchmark, asOf: _hoje,
+      macro: ctx.macro, benchmark: ctx.benchmark, asOf: _today,
     )).getOrElse(MarketAnchors.fallback2026);
     final universe = (await ctx.fundamentals.universe()).unwrap();
 
     // Agrupa por raiz de quatro letras.
-    final porRaiz = <String, List<Ticker>>{};
+    final byRoot = <String, List<Ticker>>{};
     for (final t in universe) {
-      final raiz = t.value.length >= 4 ? t.value.substring(0, 4) : t.value;
-      porRaiz.putIfAbsent(raiz, () => []).add(t);
+      final root = t.value.length >= 4 ? t.value.substring(0, 4) : t.value;
+      byRoot.putIfAbsent(root, () => []).add(t);
     }
-    final comUnit = {
-      for (final e in porRaiz.entries)
+    final withUnit = {
+      for (final e in byRoot.entries)
         if (e.value.any((t) => t.value.endsWith('11')) && e.value.length > 1)
           e.key: e.value
     };
 
     final cache = <Ticker, double?>{};
-    Future<double?> potencial(Ticker t) async {
+    Future<double?> upside(Ticker t) async {
       if (cache.containsKey(t)) return cache[t];
       final prep = await PrepareValuationInputs.call(
         ticker: t, prices: ctx.prices, fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark, riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje, perpetualGrowthCap: anchors.nominalEconomyGrowth,
+        asOf: _today, perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr, projectionYears: 10,
       );
@@ -53,30 +53,30 @@ Future<void> main(List<String> args) async {
       return v;
     }
 
-    stdout.writeln('== ${comUnit.length} raízes com unit e ao menos outra classe ==\n');
-    var maiorGap = 0.0;
-    String? pior;
-    for (final raiz in comUnit.keys.toList()..sort()) {
-      final tickers = comUnit[raiz]!..sort();
+    stdout.writeln('== ${withUnit.length} raízes com unit e ao menos outra classe ==\n');
+    var largestGap = 0.0;
+    String? worst;
+    for (final root in withUnit.keys.toList()..sort()) {
+      final tickers = withUnit[root]!..sort();
       final unit = tickers.firstWhere((t) => t.value.endsWith('11'));
-      final pu = await potencial(unit);
-      final linha = StringBuffer('  $raiz: ');
+      final unitUpside = await upside(unit);
+      final row = StringBuffer('  $root: ');
       for (final t in tickers) {
-        final p = await potencial(t);
-        linha.write('${t.value}=${p == null ? "—" : "${(p * 100).toStringAsFixed(1)}%"}  ');
+        final p = await upside(t);
+        row.write('${t.value}=${p == null ? "—" : "${(p * 100).toStringAsFixed(1)}%"}  ');
       }
-      if (pu != null) {
+      if (unitUpside != null) {
         for (final t in tickers) {
           if (t == unit) continue;
-          final p = await potencial(t);
+          final p = await upside(t);
           if (p == null) continue;
-          final gap = (p - pu).abs();
-          if (gap > maiorGap) { maiorGap = gap; pior = '$raiz (${t.value} contra ${unit.value})'; }
+          final gap = (p - unitUpside).abs();
+          if (gap > largestGap) { largestGap = gap; worst = '$root (${t.value} contra ${unit.value})'; }
         }
       }
-      stdout.writeln(linha.toString().trimRight());
+      stdout.writeln(row.toString().trimRight());
     }
     stdout.writeln('\n  maior distância unit↔classe: '
-        '${(maiorGap * 100).toStringAsFixed(1)} p.p. em ${pior ?? "—"}');
+        '${(largestGap * 100).toStringAsFixed(1)} p.p. em ${worst ?? "—"}');
   } finally { await ctx.dispose(); }
 }

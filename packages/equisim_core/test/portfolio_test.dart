@@ -156,9 +156,9 @@ void main() {
     test('retorno esperado é a convergência de preço, e nada além dela', () {
       // Sem provento no modelo, o anual não pode divergir da convergência: um
       // segundo termo aqui seria retorno que nenhuma outra tela apura.
-      final anual =
+      final annual =
           ExpectedReturn.annualizedFromUpside(0.20, horizonMonths: 12);
-      expect(anual, closeTo(0.20, 1e-12));
+      expect(annual, closeTo(0.20, 1e-12));
     });
 
     test('carteira reporta cobertura parcial', () {
@@ -193,7 +193,7 @@ void main() {
         {for (final e in m.entries) Ticker.parse(e.key): e.value};
 
     const cdi = 0.1415;
-    const premio = 0.055;
+    const premium = 0.055;
 
     test('o ativo mediano da seção recebe a âncora, e nada além dela', () {
       final r = ExpectedReturn.crossSection(
@@ -307,14 +307,14 @@ void main() {
         upsides: upsidesOf({'AAAA3': -0.8, 'BBBB3': -0.4, 'CCCC3': 0.0, 'DDDD3': 0.5}),
         spotRiskFree: cdi,
       );
-      final ordenado = [
+      final sortedEntries = [
         r[Ticker.parse('AAAA3')]!.expected,
         r[Ticker.parse('BBBB3')]!.expected,
         r[Ticker.parse('CCCC3')]!.expected,
         r[Ticker.parse('DDDD3')]!.expected,
       ];
-      for (var i = 1; i < ordenado.length; i++) {
-        expect(ordenado[i], greaterThan(ordenado[i - 1]));
+      for (var i = 1; i < sortedEntries.length; i++) {
+        expect(sortedEntries[i], greaterThan(sortedEntries[i - 1]));
       }
     });
 
@@ -329,10 +329,10 @@ void main() {
         spotRiskFree: cdi,
         reference: const [-0.95, -0.8, -0.65, -0.4, -0.15, 0.4, 4.8],
       );
-      final ruim = r[Ticker.parse('RUIM3')]!;
-      expect(ruim.expected, greaterThan(0));
-      expect(ruim.floored, isFalse);
-      expect(ruim.expected, lessThan(cdi));
+      final bad = r[Ticker.parse('RUIM3')]!;
+      expect(bad.expected, greaterThan(0));
+      expect(bad.floored, isFalse);
+      expect(bad.expected, lessThan(cdi));
     });
 
     test('a cauda é confinada, e o teto é o do escore', () {
@@ -343,10 +343,10 @@ void main() {
         spotRiskFree: cdi,
         reference: const [-0.95, -0.8, -0.65, -0.4, -0.15, 0.4, 4.773],
       );
-      final cauda = r[Ticker.parse('CAUD3')]!;
-      expect(cauda.z, closeTo(ExpectedReturn.defaultZCap, 1e-12));
-      expect(cauda.expected,
-          closeTo(cdi + ExpectedReturn.defaultZCap * premio, 1e-12));
+      final tail = r[Ticker.parse('CAUD3')]!;
+      expect(tail.z, closeTo(ExpectedReturn.defaultZCap, 1e-12));
+      expect(tail.expected,
+          closeTo(cdi + ExpectedReturn.defaultZCap * premium, 1e-12));
     });
 
     test('seção sem escala estimável devolve a âncora a todos', () {
@@ -391,13 +391,13 @@ void main() {
         marginOfSafety: 0.20,
         warnings: const ['da cascata'],
       );
-      final com = base.withWarnings(['sem a CVM']);
-      expect(com.warnings, ['da cascata', 'sem a CVM']);
-      expect(com.fairValue, base.fairValue);
-      expect(com.discountRate, base.discountRate);
-      expect(com.marginOfSafety, base.marginOfSafety);
+      final withInput = base.withWarnings(['sem a CVM']);
+      expect(withInput.warnings, ['da cascata', 'sem a CVM']);
+      expect(withInput.fairValue, base.fairValue);
+      expect(withInput.discountRate, base.discountRate);
+      expect(withInput.marginOfSafety, base.marginOfSafety);
       expect(identical(base.withWarnings(const []), base), isTrue);
-      expect(() => com.warnings.add('x'), throwsUnsupportedError);
+      expect(() => withInput.warnings.add('x'), throwsUnsupportedError);
     });
   });
 }

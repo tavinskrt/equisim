@@ -12,18 +12,18 @@ import 'package:equisim_core/equisim_core.dart';
 /// segue a regra da fonte, que é a de antes.
 class B3RegistryRepository {
   /// Lê o conteúdo do pacote.
-  final Future<String> Function() carregarPacote;
+  final Future<String> Function() loadPackage;
 
   /// Declara o repositório.
-  B3RegistryRepository({required this.carregarPacote});
+  B3RegistryRepository({required this.loadPackage});
 
-  Future<Map<String, B3Issuer>>? _emissores;
+  Future<Map<String, B3Issuer>>? _issuers;
 
-  Future<Map<String, B3Issuer>> _lidos() => _emissores ??= _ler();
+  Future<Map<String, B3Issuer>> _loaded() => _issuers ??= _read();
 
-  Future<Map<String, B3Issuer>> _ler() async {
+  Future<Map<String, B3Issuer>> _read() async {
     try {
-      final json = jsonDecode(await carregarPacote());
+      final json = jsonDecode(await loadPackage());
       return json is Map<String, dynamic>
           ? B3RegistryCodec.decodePackage(json)
           : const {};
@@ -39,7 +39,7 @@ class B3RegistryRepository {
   Future<OfficialShareCount?> officialSharesFor(Ticker ticker) async {
     final t = ticker.value;
     if (t.length < 4) return null;
-    final e = (await _lidos())[t.substring(0, 4)];
+    final e = (await _loaded())[t.substring(0, 4)];
     final total = e?.totalShares;
     if (e == null || total == null) return null;
     return OfficialShareCount(total: total, asOf: e.consultedOn);
@@ -50,7 +50,7 @@ class B3RegistryRepository {
   Future<B3Classification?> classificationFor(Ticker ticker) async {
     final t = ticker.value;
     if (t.length < 4) return null;
-    return (await _lidos())[t.substring(0, 4)]?.classification;
+    return (await _loaded())[t.substring(0, 4)]?.classification;
   }
 }
 
@@ -70,12 +70,12 @@ class OfficialSectorFundamentalsRepository implements FundamentalsRepository {
   final FundamentalsRepository inner;
 
   /// De onde vem a classificação.
-  final Future<B3Classification?> Function(Ticker) classificacao;
+  final Future<B3Classification?> Function(Ticker) classification;
 
   /// Declara o repositório.
   OfficialSectorFundamentalsRepository({
     required this.inner,
-    required this.classificacao,
+    required this.classification,
   });
 
   @override
@@ -87,21 +87,21 @@ class OfficialSectorFundamentalsRepository implements FundamentalsRepository {
 
   @override
   Future<Result<Asset>> profile(Ticker ticker) async {
-    final perfil = await inner.profile(ticker);
-    final B3Classification? oficial;
+    final profile = await inner.profile(ticker);
+    final B3Classification? official;
     try {
-      oficial = await classificacao(ticker);
+      official = await classification(ticker);
     } on Object {
-      return perfil;
+      return profile;
     }
-    if (oficial == null) return perfil;
-    final setor = Sector(key: oficial.sectorKey, label: oficial.sector);
-    final industria = oficial.industry.isEmpty ? null : oficial.industry;
+    if (official == null) return profile;
+    final sector = Sector(key: official.sectorKey, label: official.sector);
+    final industry = official.industry.isEmpty ? null : official.industry;
     return Ok(Asset(
       ticker: ticker,
-      name: perfil.isOk ? perfil.unwrap().name : ticker.value,
-      sector: setor,
-      industry: industria,
+      name: profile.isOk ? profile.unwrap().name : ticker.value,
+      sector: sector,
+      industry: industry,
     ));
   }
 }

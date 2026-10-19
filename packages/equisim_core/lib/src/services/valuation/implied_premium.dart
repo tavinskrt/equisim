@@ -48,7 +48,7 @@ class ImpliedPremiumQuarter {
 /// A série trimestral do prêmio implícito, como o pacote a traz.
 class ImpliedPremiumPackage {
   /// Data em que a série foi medida.
-  final DateTime geradoEm;
+  final DateTime generatedAt;
 
   /// Os trimestres, em ordem de data.
   final List<ImpliedPremiumQuarter> quarters;
@@ -64,45 +64,45 @@ class ImpliedPremiumPackage {
   /// trimestres que havia, e a partir de 31/12/2020 a janela está cheia.
   static const int minQuarters = 20;
 
-  const ImpliedPremiumPackage({required this.geradoEm, required this.quarters});
+  const ImpliedPremiumPackage({required this.generatedAt, required this.quarters});
 
   /// Os trimestres que entram na média de [asOf]: fim em
   /// `(asOf − dez anos, asOf]`.
   List<ImpliedPremiumQuarter> window(DateTime asOf) {
-    final fim = DateTime.utc(asOf.year, asOf.month, asOf.day);
-    final inicio = DateTime.utc(asOf.year - windowYears, asOf.month, asOf.day);
+    final end = DateTime.utc(asOf.year, asOf.month, asOf.day);
+    final start = DateTime.utc(asOf.year - windowYears, asOf.month, asOf.day);
     return [
       for (final q in quarters)
-        if (q.date.isAfter(inicio) && !q.date.isAfter(fim)) q,
+        if (q.date.isAfter(start) && !q.date.isAfter(end)) q,
     ];
   }
 
   /// A média de dez anos do prêmio implícito até [asOf], ou `null` com menos
   /// de [minQuarters] trimestres na janela.
   double? normalizedAt(DateTime asOf) {
-    final janela = window(asOf);
-    if (janela.length < minQuarters) return null;
-    var soma = 0.0;
-    for (final q in janela) {
-      soma += q.premium;
+    final windowQuarters = window(asOf);
+    if (windowQuarters.length < minQuarters) return null;
+    var sum = 0.0;
+    for (final q in windowQuarters) {
+      sum += q.premium;
     }
-    return soma / janela.length;
+    return sum / windowQuarters.length;
   }
 }
 
 /// Serialização da série do prêmio implícito.
 abstract final class ImpliedPremiumCodec {
   /// Versão do formato.
-  static const int versao = 1;
+  static const int version = 1;
 
   /// Grava o pacote.
-  static Map<String, Object> encode(ImpliedPremiumPackage pacote) => {
-        'versao': versao,
-        'geradoEm': _dia(pacote.geradoEm),
+  static Map<String, Object> encode(ImpliedPremiumPackage package) => {
+        'versao': version,
+        'geradoEm': _day(package.generatedAt),
         'trimestres': [
-          for (final q in pacote.quarters)
+          for (final q in package.quarters)
             {
-              'data': _dia(q.date),
+              'data': _day(q.date),
               'retornoImplicito': q.impliedReturn,
               'prefixado10': q.riskFree,
             },
@@ -114,31 +114,31 @@ abstract final class ImpliedPremiumCodec {
   /// Recusa em vez de adivinhar: versão diferente, data ilegível, trimestre
   /// com número não finito ou série vazia devolvem `null`, e quem chama segue
   /// com o prêmio parametrizado — declarado.
-  static ImpliedPremiumPackage? decode(Map<String, dynamic> pacote) {
-    if (pacote['versao'] != versao) return null;
-    final gerado = DateTime.tryParse('${pacote['geradoEm']}');
-    final lista = pacote['trimestres'];
-    if (gerado == null || lista is! List || lista.isEmpty) return null;
+  static ImpliedPremiumPackage? decode(Map<String, dynamic> package) {
+    if (package['versao'] != version) return null;
+    final generated = DateTime.tryParse('${package['geradoEm']}');
+    final list = package['trimestres'];
+    if (generated == null || list is! List || list.isEmpty) return null;
     final quarters = <ImpliedPremiumQuarter>[];
-    for (final item in lista) {
+    for (final item in list) {
       if (item is! Map) return null;
-      final data = DateTime.tryParse('${item['data']}');
+      final date = DateTime.tryParse('${item['data']}');
       final r = (item['retornoImplicito'] as num?)?.toDouble();
       final rf = (item['prefixado10'] as num?)?.toDouble();
-      if (data == null || r == null || rf == null) return null;
+      if (date == null || r == null || rf == null) return null;
       if (!r.isFinite || !rf.isFinite) return null;
       quarters.add(ImpliedPremiumQuarter(
-        date: DateTime.utc(data.year, data.month, data.day),
+        date: DateTime.utc(date.year, date.month, date.day),
         impliedReturn: r,
         riskFree: rf,
       ));
     }
     quarters.sort((a, b) => a.date.compareTo(b.date));
     return ImpliedPremiumPackage(
-      geradoEm: DateTime.utc(gerado.year, gerado.month, gerado.day),
+      generatedAt: DateTime.utc(generated.year, generated.month, generated.day),
       quarters: List.unmodifiable(quarters),
     );
   }
 
-  static String _dia(DateTime d) => d.toIso8601String().substring(0, 10);
+  static String _day(DateTime d) => d.toIso8601String().substring(0, 10);
 }

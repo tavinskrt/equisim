@@ -409,10 +409,10 @@ abstract final class PortfolioBacktest {
       // nele. Sem o segundo caso, dia 30 perde fevereiro **em silêncio**.
       if (plan.hasMonthly) {
         final key = '${today.year}-${today.month}';
-        final ultimoDoMes =
+        final lastOfMonth =
             i + 1 >= dates.length || dates[i + 1].month != today.month;
         if (key != lastContributionKey &&
-            (today.day >= plan.contributionDay || ultimoDoMes)) {
+            (today.day >= plan.contributionDay || lastOfMonth)) {
           _allocate(
             amount: plan.monthly,
             portfolio: portfolio,
@@ -595,9 +595,9 @@ abstract final class PortfolioBacktest {
   /// estimativa uma ação acima ou abaixo do limite.
   static int _affordable(int available, int priceCents, TransactionCosts c) {
     int total(int q) => q * priceCents + c.orderCents(q * priceCents);
-    final livre = available - c.brokeragePerOrder.cents;
-    if (livre < priceCents) return 0;
-    var q = (livre * 1000000) ~/ (priceCents * (1000000 + c.feePartsPerMillion));
+    final free = available - c.brokeragePerOrder.cents;
+    if (free < priceCents) return 0;
+    var q = (free * 1000000) ~/ (priceCents * (1000000 + c.feePartsPerMillion));
     while (total(q + 1) <= available) {
       q++;
     }

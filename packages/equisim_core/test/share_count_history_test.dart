@@ -3,18 +3,18 @@ import 'package:test/test.dart';
 
 DateTime _d(int y, int m, int d) => DateTime.utc(y, m, d);
 
-Map<String, String> _cap(String tipo, String aprovacao, String total,
-        {String referencia = '2022-12-31', String versao = '1', String id = ''}) =>
+Map<String, String> _cap(String kind, String approval, String total,
+        {String reference = '2022-12-31', String version = '1', String id = ''}) =>
     {
       'ID_Documento': id,
-      'Tipo_Capital': tipo,
-      'Data_Autorizacao_Aprovacao': aprovacao,
-      'Data_Referencia': referencia,
-      'Versao': versao,
+      'Tipo_Capital': kind,
+      'Data_Autorizacao_Aprovacao': approval,
+      'Data_Referencia': reference,
+      'Versao': version,
       'Quantidade_Total_Acoes': total,
     };
 
-List<RawQuote> _serie(List<(DateTime, double, int)> v) =>
+List<RawQuote> _series(List<(DateTime, double, int)> v) =>
     [for (final x in v) RawQuote(x.$1, x.$2, x.$3)];
 
 void main() {
@@ -34,16 +34,16 @@ void main() {
     // O caso da CPFL Transmissão: grupamento de 40 para 1 em 2016, sem capital
     // novo. O formulário de 2017 repete a aprovação de 2010 com a contagem de
     // depois do grupamento.
-    final formularios = [
+    final forms = [
       _cap('Capital Integralizado', '2010-04-30', '4000',
-          referencia: '2011-01-01'),
+          reference: '2011-01-01'),
       _cap('Capital Integralizado', '2010-04-30', '100',
-          referencia: '2017-01-01', id: 'doc2017'),
+          reference: '2017-01-01', id: 'doc2017'),
     ];
 
     test('grupamento sem capital novo: a contagem da época vale até o evento',
         () {
-      final h = ShareCountHistory.fromFre(formularios,
+      final h = ShareCountHistory.fromFre(forms,
           events: [(date: _d(2016, 4, 29), totalAfter: 100)]);
       expect(h.at(_d(2012, 12, 31))!.total, closeTo(4000, 1e-9));
       expect(h.at(_d(2016, 5, 2))!.total, closeTo(100, 1e-9));
@@ -52,7 +52,7 @@ void main() {
 
     test('evento não declarado entra no recebimento do formulário que o mostra',
         () {
-      final h = ShareCountHistory.fromFre(formularios,
+      final h = ShareCountHistory.fromFre(forms,
           receivedOn: {'doc2017': _d(2017, 5, 31)});
       expect(h.at(_d(2016, 12, 31))!.total, closeTo(4000, 1e-9));
       expect(h.at(_d(2017, 6, 1))!.total, closeTo(100, 1e-9));
@@ -60,7 +60,7 @@ void main() {
     });
 
     test('formulário que a série explica não corrige nada', () {
-      final h = ShareCountHistory.fromFre(formularios,
+      final h = ShareCountHistory.fromFre(forms,
           events: [(date: _d(2016, 4, 29), totalAfter: 100)],
           receivedOn: {'doc2017': _d(2017, 5, 31)});
       expect(
@@ -70,8 +70,8 @@ void main() {
 
     test('na mesma referência, a maior versão', () {
       final h = ShareCountHistory.fromFre([
-        _cap('Capital Integralizado', '2018-06-15', '205', versao: '1'),
-        _cap('Capital Integralizado', '2018-06-15', '210', versao: '2'),
+        _cap('Capital Integralizado', '2018-06-15', '205', version: '1'),
+        _cap('Capital Integralizado', '2018-06-15', '210', version: '2'),
       ]);
       expect(h.points.single.total, closeTo(210, 1e-9));
     });
@@ -95,7 +95,7 @@ void main() {
   group('Data ex de evento declarado — item A3.4', () {
     test('desdobramento de 1 para 10: o preço se divide no pregão certo', () {
       final ev = CorporateEvents.locate(
-        _serie([
+        _series([
           (_d(2019, 3, 1), 50.0, 100),
           (_d(2019, 3, 29), 51.0, 100),
           (_d(2019, 4, 1), 5.12, 101),
@@ -110,7 +110,7 @@ void main() {
 
     test('salto antes da aprovação não é o evento', () {
       final ev = CorporateEvents.locate(
-        _serie([
+        _series([
           (_d(2019, 3, 1), 50.0, 100),
           (_d(2019, 3, 4), 5.0, 101),
           (_d(2019, 3, 20), 5.0, 101),
@@ -123,7 +123,7 @@ void main() {
 
     test('bonificação pequena sai pela troca de DISMES', () {
       final ev = CorporateEvents.locate(
-        _serie([
+        _series([
           (_d(2020, 5, 4), 20.0, 200),
           (_d(2020, 5, 5), 19.1, 200),
           (_d(2020, 5, 6), 18.3, 201),
@@ -139,7 +139,7 @@ void main() {
       // Grupamento de 25 para 1 com o papel caindo 15% no mesmo pregão: a
       // razão sai 21,25, fora da folga de 6%, e a troca de DISMES localiza.
       final ev = CorporateEvents.locate(
-        _serie([
+        _series([
           (_d(2016, 5, 2), 0.04, 300),
           (_d(2016, 5, 20), 0.04, 300),
           (_d(2016, 5, 23), 0.85, 301),
@@ -152,7 +152,7 @@ void main() {
 
     test('troca de DISMES com razão distante do fator não é o evento', () {
       final ev = CorporateEvents.locate(
-        _serie([
+        _series([
           (_d(2016, 5, 2), 0.04, 300),
           (_d(2016, 5, 3), 0.038, 301),
         ]),
@@ -164,7 +164,7 @@ void main() {
 
     test('fora da janela, não localiza', () {
       final ev = CorporateEvents.locate(
-        _serie([
+        _series([
           (_d(2021, 1, 4), 30.0, 10),
           (_d(2022, 3, 1), 30.0, 10),
           (_d(2022, 3, 2), 15.0, 11),

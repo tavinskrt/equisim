@@ -75,13 +75,13 @@ BacktestOutcome outcomeOf(String symbol, List<double> closes) {
 
 PortfolioComparison comparisonOf({
   BacktestOutcome? principal,
-  BacktestOutcome? reserva,
+  BacktestOutcome? reserve,
 }) =>
     PortfolioComparison(
       window: _range,
       requestedWindow: _range,
       principal: principal,
-      reserva: reserva,
+      reserve: reserve,
     );
 
 // ---------------------------------------------------------------------------
@@ -99,14 +99,14 @@ PortfolioComparison comparisonOf({
 /// monetario de verdade, mas o gate local reprova a forma -- e com razao: o
 /// projeto inteiro segue a convencao de centavo inteiro, e uma fabrica de teste
 /// que a contorna ensina a contorna-la.
-List<double> _curva({required double inicio, required double fim, int n = 120}) {
-  final inicioCents = (inicio * 100).round();
-  final fimCents = (fim * 100).round();
-  final passo = (fimCents - inicioCents) / (n - 1);
+List<double> _curve({required double start, required double end, int n = 120}) {
+  final startCents = (start * 100).round();
+  final endCents = (end * 100).round();
+  final step = (endCents - startCents) / (n - 1);
   return List<double>.generate(n, (i) {
-    final tendencia = inicioCents + passo * i;
-    final onda = (i % 17) * 11 - (i % 7) * 19;
-    return (tendencia.round() + onda) / 100.0;
+    final trend = startCents + step * i;
+    final wave = (i % 17) * 11 - (i % 7) * 19;
+    return (trend.round() + wave) / 100.0;
   });
 }
 
@@ -117,38 +117,38 @@ List<double> _curva({required double inicio, required double fim, int n = 120}) 
 /// tem. A cascata e Dart puro e deterministica: a mesma entrada da sempre a
 /// mesma conta, e nada aqui vai a rede.
 ///
-/// [firma] escolhe a via: companhia operacional (via da firma) ou com
+/// [firm] escolhe a via: companhia operacional (via da firma) ou com
 /// resultado operacional negativo e lucro liquido positivo (via do acionista).
 ///
-/// [choque] multiplica o lucro do ultimo exercicio -- o operacional na via da
+/// [shock] multiplica o lucro do ultimo exercicio -- o operacional na via da
 /// firma, o liquido na do acionista. Abaixo de 1 ele faz o ultimo ano destoar
 /// para baixo do retorno tipico, e o motor normaliza a base PARA CIMA: e o que
 /// a explicacao da normalizacao precisa mostrar.
-ValuationResult avaliacaoDaCascata({bool firma = true, double choque = 1.0}) {
-  final ticker = Ticker.parse(firma ? 'WEGE3' : 'ITUB4');
-  final serie = <FundamentalsSnapshot>[];
+ValuationResult cascadeValuation({bool firm = true, double shock = 1.0}) {
+  final ticker = Ticker.parse(firm ? 'WEGE3' : 'ITUB4');
+  final series = <FundamentalsSnapshot>[];
   var e = 1.0;
   for (var i = 12; i >= 0; i--) {
     final y = 2025 - i;
-    final k = i == 0 ? choque : 1.0;
-    serie.add(FundamentalsSnapshot(
+    final k = i == 0 ? shock : 1.0;
+    series.add(FundamentalsSnapshot(
       ticker: ticker,
       fiscalPeriodEnd: DateTime(y, 12, 31),
       totalRevenue: 10000e6 * e,
-      ebit: (firma ? 1800e6 * k : -200e6) * e,
-      ebitda: (firma ? 2400e6 : 300e6) * e,
-      netIncome: 900e6 * e * (firma ? 1.0 : k),
-      incomeBeforeTax: (firma ? 1300e6 : 1200e6) * e,
-      incomeTaxExpense: (firma ? -400e6 : -300e6) * e,
-      interestExpense: firma ? 400e6 : 50e6,
-      earningsPerShare: 0.9 * e * (firma ? 1.0 : k),
-      cash: firma ? 200e6 : 2000e6 * e,
-      shortTermDebt: firma ? 1000e6 : 500e6,
-      longTermDebt: firma ? 3000e6 : 500e6,
+      ebit: (firm ? 1800e6 * k : -200e6) * e,
+      ebitda: (firm ? 2400e6 : 300e6) * e,
+      netIncome: 900e6 * e * (firm ? 1.0 : k),
+      incomeBeforeTax: (firm ? 1300e6 : 1200e6) * e,
+      incomeTaxExpense: (firm ? -400e6 : -300e6) * e,
+      interestExpense: firm ? 400e6 : 50e6,
+      earningsPerShare: 0.9 * e * (firm ? 1.0 : k),
+      cash: firm ? 200e6 : 2000e6 * e,
+      shortTermDebt: firm ? 1000e6 : 500e6,
+      longTermDebt: firm ? 3000e6 : 500e6,
       totalStockholderEquity: 6000e6 * e,
       bookValuePerShare: 6.0 * e,
-      operatingCashFlow: firma ? 2000e6 * e : null,
-      nopat: firma ? 1188e6 * e * k : null,
+      operatingCashFlow: firm ? 2000e6 * e : null,
+      nopat: firm ? 1188e6 * e * k : null,
       sharesOutstanding: 1000e6,
       sharesOutstandingAsOf: 1000e6,
       marketCap: 12000e6,
@@ -158,11 +158,11 @@ ValuationResult avaliacaoDaCascata({bool firma = true, double choque = 1.0}) {
   final r = ValuationCascade.evaluate(ValuationInputs(
     ticker: ticker,
     asOf: DateTime(2026, 9, 9),
-    fundamentals: serie,
+    fundamentals: series,
     marketPrice: 12.0,
     capm: const CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
     declaredTerminalRiskFreeRate: 0.10,
-    unleveredBeta: firma ? 0.8 : 0.9,
+    unleveredBeta: firm ? 0.8 : 0.9,
   ));
   return r.fold(
     (v) => v,
@@ -177,40 +177,40 @@ ValuationResult avaliacaoDaCascata({bool firma = true, double choque = 1.0}) {
 /// some -- o que a lente `tela` leria como ausencia da funcao.
 ValuationResult valuationOf(
   String symbol, {
-  double justo = 42.80,
-  double mercado = 33.15,
+  double fairValue = 42.80,
+  double market = 33.15,
 }) =>
     ValuationResult(
       ticker: Ticker.parse(symbol),
       asOf: DateTime(2024, 12, 31),
       model: ValuationModel.dcfEarnings,
-      fairValue: Money.fromReais(justo),
-      marketPrice: Money.fromReais(mercado),
+      fairValue: Money.fromReais(fairValue),
+      marketPrice: Money.fromReais(market),
       discountRate: 0.132,
       marginOfSafety: 0.20,
       mode: ScenarioMode.discrete,
       discreteScenarios: {
-        ScenarioBand.bear: Money.fromReais(justo * 0.72),
-        ScenarioBand.base: Money.fromReais(justo),
-        ScenarioBand.bull: Money.fromReais(justo * 1.31),
+        ScenarioBand.bear: Money.fromReais(fairValue * 0.72),
+        ScenarioBand.base: Money.fromReais(fairValue),
+        ScenarioBand.bull: Money.fromReais(fairValue * 1.31),
       },
       warnings: const [],
       // A faixa calibrada da tela de avaliacao sai do preco de hoje, do justo e
       // desta volatilidade (item C2b): sem ela o cartao nao se forma.
       priceVolatility: 0.42,
-      manual: avaliacaoDaCascata().manual,
+      manual: cascadeValuation().manual,
     );
 
 /// Veredito de meta no nivel `demanding`: o unico que exercita ao mesmo tempo
 /// o alerta na interface e a exibicao dos numeros, sem bloquear a tela.
-FeasibilityVerdict feasibilidade() => FeasibilityVerdict(
+FeasibilityVerdict feasibility() => FeasibilityVerdict(
       level: FeasibilityLevel.demanding,
       reason: FeasibilityReason.aboveMarket,
       requiredAnnualRate: 0.1840,
       anchors: MarketAnchors.fallback2026,
     );
 
-GoalAlignment alinhamento() => GoalAlignment(
+GoalAlignment alignment() => GoalAlignment(
       required: const RequiredReturn(
         monthly: 0.0142,
       ),
@@ -228,7 +228,7 @@ GoalAlignment alinhamento() => GoalAlignment(
 /// dois horizontes quando eles diferem, e uma meta de cinco anos deixaria essa
 /// declaracao fora da captura -- que e justamente onde ela precisa ser
 /// conferida.
-const metaDemo = FinancialGoal.unvalidated(
+const demoGoal = FinancialGoal.unvalidated(
   initialContribution: Money(1000000),
   monthlyContribution: Money(100000),
   months: 120,
@@ -237,7 +237,7 @@ const metaDemo = FinancialGoal.unvalidated(
 
 /// Tickers da carteira de demonstracao, com setores distintos para que a
 /// dispersao e a barra de concentracao tenham mais de uma cor.
-const carteiraDemo = <(String, String)>[
+const demoPortfolio = <(String, String)>[
   ('PETR4', 'energia'),
   ('VALE3', 'materiais'),
   ('ITUB4', 'financeiro'),
@@ -250,7 +250,7 @@ const carteiraDemo = <(String, String)>[
 /// la tudo devolve vazio de proposito, para isolar o esqueleto; aqui tudo
 /// devolve conteudo, para a tela encher.
 List<Override> populatedOverrides() {
-  final tickers = [for (final (s, _) in carteiraDemo) Ticker.parse(s)];
+  final tickers = [for (final (s, _) in demoPortfolio) Ticker.parse(s)];
 
   return <Override>[
     currentUserIdProvider.overrideWithValue('captura'),
@@ -286,13 +286,13 @@ List<Override> populatedOverrides() {
 
     comparisonProvider.overrideWith(
       (ref) async => comparisonOf(
-        principal: outcomeOf('PETR4', _curva(inicio: 32.10, fim: 41.75)),
-        reserva: outcomeOf('ITUB4', _curva(inicio: 28.40, fim: 33.90)),
+        principal: outcomeOf('PETR4', _curve(start: 32.10, end: 41.75)),
+        reserve: outcomeOf('ITUB4', _curve(start: 28.40, end: 33.90)),
       ),
     ),
     correlationProvider.overrideWith((ref) async => null),
 
-    goalAlignmentProvider.overrideWith((ref) async => alinhamento()),
-    goalFeasibilityProvider.overrideWith((ref) async => feasibilidade()),
+    goalAlignmentProvider.overrideWith((ref) async => alignment()),
+    goalFeasibilityProvider.overrideWith((ref) async => feasibility()),
   ];
 }

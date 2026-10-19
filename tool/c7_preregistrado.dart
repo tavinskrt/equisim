@@ -23,68 +23,68 @@ import 'c7/protocolo.dart';
 /// O que o backtest lê e o git não versiona: pastas ligadas por junção, e
 /// arquivos copiados — o cache da fonte de mercado é escrito pelo backtest, e
 /// cada árvore precisa do seu.
-const _pastasDaBase = ['data/b3', 'data/cvm', 'data/tesouro', 'data/gabarito'];
-const _arquivosDaBase = [
+const _baseDirs = ['data/b3', 'data/cvm', 'data/tesouro', 'data/gabarito'];
+const _baseFiles = [
   'data/cvm_exercicios.json',
   'data/cvm_versoes.json',
   'docs/validacao/validation_cache.sqlite',
 ];
 
 Future<void> main(List<String> args) async {
-  String? valor(String flag) {
+  String? value(String flag) {
     final i = args.indexOf(flag);
     return i >= 0 && i + 1 < args.length ? args[i + 1] : null;
   }
 
-  final pasta = Directory(pastaDosSelos);
-  final indice = Indice.ler(pasta);
-  final pre = indice.motorPreRegistrado;
-  if (pre == null) {
+  final folder = Directory(sealsDir);
+  final index = Index.read(folder);
+  final preRegistered = index.preRegisteredEngine;
+  if (preRegistered == null) {
     stderr.writeln('Nenhuma coorte selada: rode antes tool/c7_selar.dart.');
     exit(2);
   }
-  final commit = await commitDaImpressao(pre.impressao);
+  final commit = await commitOfFingerprint(preRegistered.fingerprint);
   if (commit == null) {
-    stderr.writeln('O núcleo de impressão ${pre.impressao} ainda não está em '
+    stderr.writeln('O núcleo de impressão ${preRegistered.fingerprint} ainda não está em '
         'commit nenhum. Commite a selagem antes: o worktree precisa do commit.');
     exit(2);
   }
-  stdout.writeln('motor pré-registrado: ${pre.impressao.substring(0, 12)}… '
+  stdout.writeln('motor pré-registrado: ${preRegistered.fingerprint.substring(0, 12)}… '
       'no commit ${commit.substring(0, 7)}');
 
-  final raiz = Directory.current.path;
-  final arvore = Directory(
+  final root = Directory.current.path;
+  final tree = Directory(
       '${Directory.systemTemp.path}${Platform.pathSeparator}equisim_c7_${commit.substring(0, 8)}');
-  if (!arvore.existsSync()) {
-    await _rodar('git', ['worktree', 'add', '--detach', arvore.path, commit], raiz);
+  if (!tree.existsSync()) {
+    await _run('git', ['worktree', 'add', '--detach', tree.path, commit], root);
   }
-  for (final p in _pastasDaBase) {
-    final destino = Directory('$raiz/$p');
-    final link = '${arvore.path}/$p';
-    if (!destino.existsSync() || FileSystemEntity.typeSync(link) != FileSystemEntityType.notFound) {
+  for (final p in _baseDirs) {
+    final destination = Directory('$root/$p');
+    final link = '${tree.path}/$p';
+    if (!destination.existsSync() || FileSystemEntity.typeSync(link) != FileSystemEntityType.notFound) {
       continue;
     }
     Directory(link).parent.createSync(recursive: true);
     if (Platform.isWindows) {
-      await _rodar('cmd', ['/c', 'mklink', '/J', link.replaceAll('/', r'\'),
-          destino.path.replaceAll('/', r'\')], raiz);
+      await _run('cmd', ['/c', 'mklink', '/J', link.replaceAll('/', r'\'),
+          destination.path.replaceAll('/', r'\')], root);
     } else {
-      Link(link).createSync(destino.path);
+      Link(link).createSync(destination.path);
     }
   }
-  for (final a in _arquivosDaBase) {
-    final origem = File('$raiz/$a');
-    if (!origem.existsSync()) continue;
-    final copia = File('${arvore.path}/$a')..parent.createSync(recursive: true);
-    origem.copySync(copia.path);
+  for (final a in _baseFiles) {
+    final origin = File('$root/$a');
+    if (!origin.existsSync()) continue;
+    final copy = File('${tree.path}/$a')..parent.createSync(recursive: true);
+    origin.copySync(copy.path);
   }
 
-  await _rodar('flutter', ['pub', 'get'], arvore.path);
-  final fim = valor('--fim-dos-dados');
+  await _run('flutter', ['pub', 'get'], tree.path);
+  final end = value('--fim-dos-dados');
   // A credencial da fonte de mercado vai pelo ambiente do processo, e não por
   // cópia do `.env`: segredo não se espalha em pasta temporária.
-  final token = _doEnv('$raiz/.env', 'BRAPI_TOKEN');
-  await _rodar(
+  final token = _fromEnv('$root/.env', 'BRAPI_TOKEN');
+  await _run(
     'dart',
     [
       'run',
@@ -94,69 +94,69 @@ Future<void> main(List<String> args) async {
       '--com-deslistadas',
       '--trimestral',
       '--c7',
-      if (fim != null) ...['--fim-dos-dados', fim],
+      if (end != null) ...['--fim-dos-dados', end],
     ],
-    arvore.path,
-    ambiente: {'BRAPI_TOKEN': ?token},
+    tree.path,
+    environment: {'BRAPI_TOKEN': ?token},
   );
 
-  final fonte = File('${arvore.path}/data/c7/coortes.json');
-  final linhas =
-      (jsonDecode(fonte.readAsStringSync()) as List).cast<Map<String, dynamic>>();
-  final hoje =
-      valor('--hoje') ?? DateTime.now().toIso8601String().substring(0, 10);
+  final source = File('${tree.path}/data/c7/coortes.json');
+  final rows =
+      (jsonDecode(source.readAsStringSync()) as List).cast<Map<String, dynamic>>();
+  final today =
+      value('--hoje') ?? DateTime.now().toIso8601String().substring(0, 10);
   try {
-    final r = await selar(
-      linhas: linhas,
-      motor: Motor(impressao: pre.impressao, commit: commit),
-      pasta: pasta,
-      hoje: hoje,
+    final r = await seal(
+      rows: rows,
+      engine: Engine(fingerprint: preRegistered.fingerprint, commit: commit),
+      folder: folder,
+      today: today,
     );
     stdout.writeln('== Série pré-registrada, pelo commit ${commit.substring(0, 7)} ==');
     stdout.writeln('  seladas agora: '
-        '${r.seladas.isEmpty ? 'nenhuma' : r.seladas.join(', ')}');
+        '${r.sealedCohorts.isEmpty ? 'nenhuma' : r.sealedCohorts.join(', ')}');
     stdout.writeln('  já seladas, conferidas: '
-        '${r.jaSeladas.isEmpty ? 'nenhuma' : r.jaSeladas.join(', ')}');
-    if (r.divergentes.isEmpty && r.jaSeladas.isNotEmpty) {
+        '${r.alreadySealed.isEmpty ? 'nenhuma' : r.alreadySealed.join(', ')}');
+    if (r.divergent.isEmpty && r.alreadySealed.isNotEmpty) {
       stdout.writeln('  o selo se reproduz: nenhuma previsão refeita diverge');
     }
-    for (final e in r.divergentes.entries) {
+    for (final e in r.divergent.entries) {
       stdout.writeln('  ! ${e.key}: ${e.value} previsões refeitas divergem do '
           'selo — o selo não muda, e a divergência precisa de explicação');
     }
-  } on ProtocoloViolado catch (e) {
+  } on ProtocolViolated catch (e) {
     stderr.writeln(e);
     exit(1);
   }
-  stdout.writeln('  worktree mantido em ${arvore.path} — '
+  stdout.writeln('  worktree mantido em ${tree.path} — '
       'git worktree remove --force para apagar');
 }
 
-/// O valor de [chave] no arquivo `.env` em [caminho], ou `null`.
-String? _doEnv(String caminho, String chave) {
-  final f = File(caminho);
+/// O valor de [key] no arquivo `.env` em [path], ou `null`.
+String? _fromEnv(String path, String key) {
+  final f = File(path);
   if (!f.existsSync()) return null;
-  for (final linha in f.readAsLinesSync()) {
-    final t = linha.trim();
+  for (final row in f.readAsLinesSync()) {
+    final t = row.trim();
     if (t.isEmpty || t.startsWith('#')) continue;
     final i = t.indexOf('=');
-    if (i <= 0 || t.substring(0, i).trim() != chave) continue;
+    if (i <= 0 || t.substring(0, i).trim() != key) continue;
     final v = t.substring(i + 1).trim();
     return v.isEmpty ? null : v;
   }
   return null;
 }
 
-Future<void> _rodar(String exe, List<String> args, String diretorio,
-    {Map<String, String>? ambiente}) async {
+Future<void> _run(String exe, List<String> args, String directory,
+    {Map<String, String>? environment}) async {
   final p = await Process.start(exe, args,
-      workingDirectory: diretorio, runInShell: true, environment: ambiente);
+      workingDirectory: directory, runInShell: true, environment: environment);
   // As duas saídas ao mesmo tempo: o backtest escreve o progresso no erro, e
   // ler uma depois da outra travaria quando o buffer do erro enchesse.
   await Future.wait([stdout.addStream(p.stdout), stderr.addStream(p.stderr)]);
-  final codigo = await p.exitCode;
-  if (codigo != 0) {
-    stderr.writeln('$exe ${args.join(' ')} falhou ($codigo) em $diretorio');
+  final code = await p.exitCode;
+  if (code != 0) {
+    stderr.writeln('$exe ${args.join(' ')} falhou ($code) em $directory');
     exit(1);
   }
 }

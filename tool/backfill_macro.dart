@@ -30,24 +30,24 @@ Future<void> main() async {
       // O SGS recusa janela maior que dez anos em série diária, então a busca
       // é fatiada. As fatias se sobrepõem em um dia, e o upsert por chave
       // (série, data) torna a duplicata inofensiva.
-      final fatias = <DateRange>[];
-      var inicio = range.start;
-      while (inicio.isBefore(range.end)) {
-        final fim = DateTime(inicio.year + 9, inicio.month, inicio.day);
-        fatias.add(DateRange(inicio, fim.isAfter(range.end) ? range.end : fim));
-        inicio = fim;
+      final slices = <DateRange>[];
+      var start = range.start;
+      while (start.isBefore(range.end)) {
+        final end = DateTime(start.year + 9, start.month, start.day);
+        slices.add(DateRange(start, end.isAfter(range.end) ? range.end : end));
+        start = end;
       }
 
       var total = 0;
-      DateTime? primeira, ultima;
-      var falhou = false;
-      for (final fatia in fatias) {
-        final r = await ctx.bcb.series(e.key, fatia);
+      DateTime? first, last;
+      var failed = false;
+      for (final slice in slices) {
+        final r = await ctx.bcb.series(e.key, slice);
         if (r.isErr) {
           stdout.writeln('${e.value}: FALHA em '
-              '${_iso(fatia.start)}..${_iso(fatia.end)} — '
+              '${_iso(slice.start)}..${_iso(slice.end)} — '
               '${r.failureOrNull?.message}');
-          falhou = true;
+          failed = true;
           continue;
         }
         final s = r.unwrap();
@@ -61,12 +61,12 @@ Future<void> main() async {
             ),
         ]);
         total += s.rates.length;
-        primeira ??= s.dates.first;
-        ultima = s.dates.last;
+        first ??= s.dates.first;
+        last = s.dates.last;
       }
       stdout.writeln('${e.value}: $total observações'
-          '${primeira == null ? '' : ' (${_iso(primeira)} a ${_iso(ultima!)})'}'
-          '${falhou ? '  [com falha parcial]' : ''}');
+          '${first == null ? '' : ' (${_iso(first)} a ${_iso(last!)})'}'
+          '${failed ? '  [com falha parcial]' : ''}');
     }
   } finally {
     await ctx.dispose();

@@ -16,11 +16,11 @@ bool FlutterWindow::OnCreate() {
 
   RECT frame = GetClientArea();
 
-  // The size here must match the window dimensions to avoid unnecessary surface
-  // creation / destruction in the startup path.
+  // O tamanho aqui tem de bater com as dimensoes da janela, para evitar criar e
+  // destruir superficie sem necessidade na inicializacao.
   flutter_controller_ = std::make_unique<flutter::FlutterViewController>(
       frame.right - frame.left, frame.bottom - frame.top, project_);
-  // Ensure that basic setup of the controller was successful.
+  // Confere se a configuracao basica do controlador deu certo.
   if (!flutter_controller_->engine() || !flutter_controller_->view()) {
     return false;
   }
@@ -31,9 +31,9 @@ bool FlutterWindow::OnCreate() {
     this->Show();
   });
 
-  // Flutter can complete the first frame before the "show window" callback is
-  // registered. The following call ensures a frame is pending to ensure the
-  // window is shown. It is a no-op if the first frame hasn't completed yet.
+  // O Flutter pode concluir o primeiro quadro antes de o callback de "mostrar a
+  // janela" ser registrado. A chamada abaixo garante que haja um quadro pendente,
+  // para que a janela apareca. Nao faz nada se o primeiro quadro ainda nao terminou.
   flutter_controller_->ForceRedraw();
 
   return true;
@@ -51,7 +51,7 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
-  // Give Flutter, including plugins, an opportunity to handle window messages.
+  // Da ao Flutter, plugins inclusive, a chance de tratar as mensagens da janela.
   if (flutter_controller_) {
     std::optional<LRESULT> result =
         flutter_controller_->HandleTopLevelWindowProc(hwnd, message, wparam,

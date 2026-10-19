@@ -22,9 +22,9 @@ import sys
 from pathlib import Path
 
 
-def ler(caminho: str) -> dict:
+def read(path: str) -> dict:
     return {(o["coorte"], o["ticker"]): o
-            for o in json.loads(Path(caminho).read_text(encoding="utf-8"))}
+            for o in json.loads(Path(path).read_text(encoding="utf-8"))}
 
 
 def q(xs: list[float], p: float) -> float | None:
@@ -36,70 +36,70 @@ def main() -> int:
     if len(sys.argv) != 3:
         print(__doc__, file=sys.stderr)
         return 2
-    sem, com = ler(sys.argv[1]), ler(sys.argv[2])
-    comuns = sem.keys() & com.keys()
+    without_restatement, with_restatement = read(sys.argv[1]), read(sys.argv[2])
+    common = without_restatement.keys() & with_restatement.keys()
 
-    passou_a_avaliar = [k for k in comuns
-                        if sem[k].get("upside") is None and com[k].get("upside") is not None]
-    deixou_de_avaliar = [k for k in comuns
-                         if sem[k].get("upside") is not None and com[k].get("upside") is None]
-    ambos = [k for k in comuns
-             if sem[k].get("upside") is not None and com[k].get("upside") is not None]
-    exercicio_mudou = [k for k in comuns
-                       if sem[k].get("fimDoExercicio") != com[k].get("fimDoExercicio")]
+    started_evaluating = [k for k in common
+                        if without_restatement[k].get("upside") is None and with_restatement[k].get("upside") is not None]
+    stopped_evaluating = [k for k in common
+                         if without_restatement[k].get("upside") is not None and with_restatement[k].get("upside") is None]
+    both = [k for k in common
+             if without_restatement[k].get("upside") is not None and with_restatement[k].get("upside") is not None]
+    fiscal_year_changed = [k for k in common
+                       if without_restatement[k].get("fimDoExercicio") != with_restatement[k].get("fimDoExercicio")]
 
-    mov_justo, mov_upside, movidos = [], [], []
-    for k in ambos:
-        js, jc = sem[k].get("justo"), com[k].get("justo")
+    fair_move, upside_move, moved = [], [], []
+    for k in both:
+        js, jc = without_restatement[k].get("justo"), with_restatement[k].get("justo")
         if js and jc and js > 0:
             r = jc / js - 1
             if abs(r) > 1e-9:
-                movidos.append(k)
-                mov_justo.append(abs(r))
-        mov_upside.append(abs(com[k]["upside"] - sem[k]["upside"]))
+                moved.append(k)
+                fair_move.append(abs(r))
+        upside_move.append(abs(with_restatement[k]["upside"] - without_restatement[k]["upside"]))
 
-    bm_mudou = [k for k in comuns
-                if sem[k].get("bookToMarket") is not None
-                and com[k].get("bookToMarket") is not None
-                and abs(sem[k]["bookToMarket"] - com[k]["bookToMarket"]) > 1e-9]
+    bm_changed = [k for k in common
+                if without_restatement[k].get("bookToMarket") is not None
+                and with_restatement[k].get("bookToMarket") is not None
+                and abs(without_restatement[k]["bookToMarket"] - with_restatement[k]["bookToMarket"]) > 1e-9]
 
-    por_coorte: dict[str, list[int]] = {}
-    for k in comuns:
-        c = por_coorte.setdefault(k[0], [0, 0])
+    by_cohort: dict[str, list[int]] = {}
+    for k in common:
+        c = by_cohort.setdefault(k[0], [0, 0])
         c[0] += 1
-        if k in movidos or k in passou_a_avaliar or k in deixou_de_avaliar:
+        if k in moved or k in started_evaluating or k in stopped_evaluating:
             c[1] += 1
 
-    maiores = sorted(
-        ((abs(com[k]["justo"] / sem[k]["justo"] - 1), k) for k in movidos),
+    largest = sorted(
+        ((abs(with_restatement[k]["justo"] / without_restatement[k]["justo"] - 1), k) for k in moved),
         reverse=True)[:10]
-    resumo = {
-        "observacoesSemVersoes": len(sem),
-        "observacoesComVersoes": len(com),
-        "emComum": len(comuns),
-        "avaliadasNasDuas": len(ambos),
-        "passaramASerAvaliadas": len(passou_a_avaliar),
-        "deixaramDeSerAvaliadas": len(deixou_de_avaliar),
-        "exercicioMaisRecenteMudou": len(exercicio_mudou),
-        "precoJustoMudou": len(movidos),
-        "fracaoDasAvaliadasQueMudou": len(movidos) / len(ambos) if ambos else None,
+    summary = {
+        "observacoesSemVersoes": len(without_restatement),
+        "observacoesComVersoes": len(with_restatement),
+        "emComum": len(common),
+        "avaliadasNasDuas": len(both),
+        "passaramASerAvaliadas": len(started_evaluating),
+        "deixaramDeSerAvaliadas": len(stopped_evaluating),
+        "exercicioMaisRecenteMudou": len(fiscal_year_changed),
+        "precoJustoMudou": len(moved),
+        "fracaoDasAvaliadasQueMudou": len(moved) / len(both) if both else None,
         "movimentoDoJustoEntreAsQueMudaram": {
-            "mediana": q(mov_justo, .5), "p90": q(mov_justo, .9),
-            "maximo": max(mov_justo) if mov_justo else None},
+            "mediana": q(fair_move, .5), "p90": q(fair_move, .9),
+            "maximo": max(fair_move) if fair_move else None},
         "movimentoDoPotencialEmTodasAsAvaliadas": {
-            "mediana": q(mov_upside, .5), "p90": q(mov_upside, .9)},
-        "bookToMarketMudou": len(bm_mudou),
+            "mediana": q(upside_move, .5), "p90": q(upside_move, .9)},
+        "bookToMarketMudou": len(bm_changed),
         "coorteComMaisMudanca": max(
-            ((c, v[1] / v[0]) for c, v in por_coorte.items() if v[0]),
-            key=lambda x: x[1]) if por_coorte else None,
+            ((c, v[1] / v[0]) for c, v in by_cohort.items() if v[0]),
+            key=lambda x: x[1]) if by_cohort else None,
         "maioresMovimentos": [
             {"coorte": k[0], "ticker": k[1], "movimento": round(m, 4),
-             "justoSem": sem[k]["justo"], "justoCom": com[k]["justo"]}
-            for m, k in maiores],
+             "justoSem": without_restatement[k]["justo"], "justoCom": with_restatement[k]["justo"]}
+            for m, k in largest],
     }
     Path("docs/validacao/reapresentacao_efeito.json").write_text(
-        json.dumps(resumo, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(json.dumps(resumo, ensure_ascii=False, indent=1))
+        json.dumps(summary, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(json.dumps(summary, ensure_ascii=False, indent=1))
     return 0
 
 

@@ -81,16 +81,16 @@ void main() {
       // 10% de bonificação (0,909) e 8,5% de queda em data ex (0,915) estão a
       // 0,6% uma da outra. Separá-las pelo preço é impossível; a régua recusa
       // as duas em vez de acertar uma por sorte.
-      final bonificacao = [
+      final bonusShares = [
         RawQuote(_d(3, 1), 11.0, 7),
         RawQuote(_d(3, 2), 10.0, 8),
       ];
-      final dividendo = [
+      final dividend = [
         RawQuote(_d(3, 1), 10.0, 7),
         RawQuote(_d(3, 2), 9.15, 8),
       ];
-      expect(CorporateEvents.detect(bonificacao), isEmpty);
-      expect(CorporateEvents.detect(dividendo), isEmpty);
+      expect(CorporateEvents.detect(bonusShares), isEmpty);
+      expect(CorporateEvents.detect(dividend), isEmpty);
     });
 
     test('bonificação de 50% é detectada com folga apertada', () {
@@ -109,10 +109,10 @@ void main() {
         RawQuote(_d(4, 16), 27.91, 322),
         RawQuote(_d(4, 17), 28.05, 322),
       ];
-      final ajustada = CorporateEvents.adjust(q, CorporateEvents.detect(q));
-      expect(ajustada[0].close, closeTo(28.23, 1e-12));
-      expect(ajustada[1].close, 27.91);
-      expect(ajustada[2].close, 28.05);
+      final adjusted = CorporateEvents.adjust(q, CorporateEvents.detect(q));
+      expect(adjusted[0].close, closeTo(28.23, 1e-12));
+      expect(adjusted[1].close, 27.91);
+      expect(adjusted[2].close, 28.05);
     });
 
     test('dois eventos se compõem', () {

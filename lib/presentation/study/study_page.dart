@@ -73,8 +73,8 @@ class StudyPage extends ConsumerWidget {
           isPrincipal: true,
           columnWidth: columnWidth,
         );
-        final reserva = _PortfolioColumn(
-          portfolio: state.study.reserva,
+        final reserve = _PortfolioColumn(
+          portfolio: state.study.reserve,
           isPrincipal: false,
           columnWidth: columnWidth,
         );
@@ -104,14 +104,14 @@ class StudyPage extends ConsumerWidget {
                         children: [
                           Expanded(child: principal),
                           const Gap.md(axis: Axis.horizontal),
-                          Expanded(child: reserva),
+                          Expanded(child: reserve),
                         ],
                       ),
                     )
                   else ...[
                     principal,
                     const Gap.md(),
-                    reserva,
+                    reserve,
                   ],
                 ],
               ),
@@ -142,30 +142,30 @@ class _StudyHeader extends ConsumerWidget {
     final state = ref.watch(studyProvider);
     final expected = ref.watch(portfolioValuationsProvider);
     final anchors = ref.watch(marketAnchorsProvider);
-    final habilidade = ref.watch(skillReadingProvider);
-    final sinais = ref.watch(portfolioSignalsProvider);
+    final skill = ref.watch(skillReadingProvider);
+    final signals = ref.watch(portfolioSignalsProvider);
     // O prêmio do escore é o mesmo do desconto (decisão 142).
-    final premio = ref.watch(marketPremiumReadingProvider);
+    final premium = ref.watch(marketPremiumReadingProvider);
 
     // O mesmo estimador do cartao de meta: `Ke + z x premio`, com `z` da
     // ordenacao que a validacao escolheu (item B1). Duas telas que dizem
     // "Esperado da carteira" nao podem mostrar numeros de definicoes diferentes.
-    final ordenacao = habilidade.value?.premiumOrdering;
+    final ordering = skill.value?.premiumOrdering;
     double? weightedUpside;
     var coverage = 0.0;
     if (expected.hasValue &&
         expected.value!.isNotEmpty &&
-        sinais.hasValue &&
-        !habilidade.isLoading) {
+        signals.hasValue &&
+        !skill.isLoading) {
       weightedUpside = ExpectedReturn.forPortfolioOrdered(
         portfolio: state.study.principal,
         valuations: expected.value!,
-        signals: sinais.value!,
-        ordering: ordenacao,
+        signals: signals.value!,
+        ordering: ordering,
         spotRiskFree:
             (anchors.value ?? MarketAnchors.fallback2026).currentRiskFreeRate,
         riskPremium:
-            premio.value?.premium ?? CapmInputs.defaultMarketPremium,
+            premium.value?.premium ?? CapmInputs.defaultMarketPremium,
       );
       coverage = ExpectedReturn.coverage(
         portfolio: state.study.principal,
@@ -247,7 +247,7 @@ class _StudyHeader extends ConsumerWidget {
                     ' / ${Portfolio.maxAssets}',
               ),
               MetricTile(
-                label: Lexico.esperado,
+                label: Lexicon.expected,
                 value: weightedUpside == null
                     ? '—'
                     : Fmt.percent(weightedUpside, decimals: 1, signed: true),
@@ -256,7 +256,7 @@ class _StudyHeader extends ConsumerWidget {
                 // habilidade na validação (item B1).
                 hint: weightedUpside == null
                     ? null
-                    : '${ordenacao == null ? 'Ke dos ativos, sem prêmio' : 'Ke dos ativos + prêmio pela ordenação medida'} · '
+                    : '${ordering == null ? 'Ke dos ativos, sem prêmio' : 'Ke dos ativos + prêmio pela ordenação medida'} · '
                           '${Fmt.percent(coverage, decimals: 0)} da carteira '
                           'avaliada',
                 // O sinal é contra o CDI, não contra zero: o estimador é
@@ -268,7 +268,7 @@ class _StudyHeader extends ConsumerWidget {
               ),
               MetricTile(
                 label: 'Reserva',
-                value: '${state.study.reserva.length}',
+                value: '${state.study.reserve.length}',
                 hint: 'candidatos',
               ),
             ],
@@ -408,7 +408,7 @@ class _SavedStudyTile extends ConsumerWidget {
       ),
       subtitle: Text(
         '${study.principal.length} na Principal · '
-        '${study.reserva.length} na Reserva'
+        '${study.reserve.length} na Reserva'
         '${updatedAt == null ? '' : ' · ${Fmt.date.format(updatedAt)}'}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -488,13 +488,13 @@ class _PortfolioColumn extends ConsumerWidget {
         // Largura minima util para o nome do ativo. Abaixo disto o ticker vira
         // reticencias e a linha deixa de informar -- melhor descer os numeros
         // para uma segunda linha.
-        const nomeMinimo = 96.0;
-        final fixo =
+        const minNameWidth = 96.0;
+        final fixed =
             _dragColumnWidth +
             widths.weight +
             widths.upside +
             _removeColumnWidth;
-        final compact = columnWidth - fixo < nomeMinimo;
+        final compact = columnWidth - fixed < minNameWidth;
         return GlassCard(
           borderColor: isHovered
               ? context.fin.brand
@@ -675,9 +675,9 @@ TextStyle _columnLabelStyle(BuildContext context) =>
 /// nenhuma dessas células chega a ser construída.
 ({double weight, double upside}) _columnWidths(BuildContext context) {
   final t = context.finType;
-  final rotulo = _columnLabelStyle(context);
+  final label = _columnLabelStyle(context);
 
-  double maiorDe(List<(String, TextStyle)> amostras) => amostras
+  double largestOf(List<(String, TextStyle)> samples) => samples
       .map((a) => FinAmount.measure(context, a.$1, a.$2))
       .reduce(math.max);
 
@@ -685,15 +685,15 @@ TextStyle _columnLabelStyle(BuildContext context) =>
     // A amostra vem do PRÓPRIO formatador que a célula usa, e não de um
     // literal: assim a medida não pode divergir do texto desenhado.
     weight:
-        maiorDe([(Fmt.weightCeiling, t.numSm), ('PESO', rotulo)]) +
+        largestOf([(Fmt.weightCeiling, t.numSm), ('PESO', label)]) +
         FinSpace.xs,
     // A coluna empilha três conteúdos de larguras diferentes. O preço justo
     // usa uma amostra folgada para a B3 — acima disso a elipse volta, e é o
     // comportamento aceito: o percentual acima continua legível.
     upside:
-        maiorDe([
+        largestOf([
           ('-1.000%', t.numSm),
-          ('POTENCIAL', rotulo),
+          ('POTENCIAL', label),
           // `captionNum`, o mesmo estilo que a celula desenha. Cifra tabular
           // muda a largura do digito, entao medir com `caption` erraria a
           // conta -- que e a divergencia entre medida e desenho que esta
@@ -1077,12 +1077,12 @@ class _UpsideSkeletonState extends State<_UpsideSkeleton>
     );
     // Respeita "reduzir movimento" do sistema: sem esta guarda o esqueleto
     // pulsa para quem pediu explicitamente que nada pulse.
-    final reduzido = WidgetsBinding
+    final reduced = WidgetsBinding
         .instance
         .platformDispatcher
         .accessibilityFeatures
         .disableAnimations;
-    if (!reduzido) _pulse.repeat(reverse: true);
+    if (!reduced) _pulse.repeat(reverse: true);
   }
 
   @override
@@ -1097,8 +1097,8 @@ class _UpsideSkeletonState extends State<_UpsideSkeleton>
     final t = context.finType;
     final scaler = MediaQuery.textScalerOf(context);
 
-    final alturaValor = scaler.scale(t.numSm.fontSize!) * t.numSm.height!;
-    final alturaNota = scaler.scale(t.caption.fontSize!) * t.caption.height!;
+    final valueHeight = scaler.scale(t.numSm.fontSize!) * t.numSm.height!;
+    final noteHeight = scaler.scale(t.caption.fontSize!) * t.caption.height!;
 
     return Semantics(
       label: 'Calculando o potencial',
@@ -1113,15 +1113,15 @@ class _UpsideSkeletonState extends State<_UpsideSkeleton>
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                _Barra(
+                _Bar(
                   width: widget.width * 0.6,
-                  height: alturaValor,
+                  height: valueHeight,
                   color: c.surfaceSunken,
                 ),
                 const Gap.xs(),
-                _Barra(
+                _Bar(
                   width: widget.width * 0.85,
-                  height: alturaNota,
+                  height: noteHeight,
                   color: c.surfaceSunken,
                 ),
               ],
@@ -1133,12 +1133,12 @@ class _UpsideSkeletonState extends State<_UpsideSkeleton>
   }
 }
 
-class _Barra extends StatelessWidget {
+class _Bar extends StatelessWidget {
   final double width;
   final double height;
   final Color color;
 
-  const _Barra({
+  const _Bar({
     required this.width,
     required this.height,
     required this.color,
@@ -1236,7 +1236,7 @@ class _UpsideCell extends StatelessWidget {
   String _tooltip() {
     final buffer = StringBuffer()
       ..write('Distância entre o preço de mercado e o preço justo estimado')
-      ..write(model == null ? '' : ' por ${model!.rotulo}')
+      ..write(model == null ? '' : ' por ${model!.label}')
       ..write(
         '. Não é previsão de retorno: só se realiza se o mercado '
         'convergir para essa estimativa, e não há prazo para isso.',

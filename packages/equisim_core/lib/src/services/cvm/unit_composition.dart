@@ -41,7 +41,7 @@ class UnitComposition {
 /// Leitura do texto livre e serialização do pacote.
 abstract final class UnitCompositionCodec {
   /// Versão do formato do pacote.
-  static const int versao = 1;
+  static const int version = 1;
 
   /// Teto de ações por unit, o mesmo de `ValuationCascade.maxSharesPerUnit`.
   ///
@@ -54,7 +54,7 @@ abstract final class UnitCompositionCodec {
   ///
   /// O código de negociação entra com **três ou quatro letras**: a ENGI11 de
   /// 2018 declara "1 ENG3 e 4 ENGI4", e exigir quatro letras somava só o 4.
-  static final RegExp _termo = RegExp(
+  static final RegExp _term = RegExp(
       r'(\d+)\s*(?:A[CÇ][OÕ]ES\s+|A[CÇ][AÃ]O\s+)?'
       r'(?:ON\b|PN[A-Z]?\b|ORDIN[AÁ]RIAS?|PREFERENCIA(?:IS|L)|[A-Z]{3,4}[3-8]\b)');
 
@@ -67,13 +67,13 @@ abstract final class UnitCompositionCodec {
   /// Subscrição" e tem uma ação. Devolve `null` quando o texto não tem
   /// quantidade de espécie reconhecível, e quando a soma passa de [maxShares] —
   /// nos dois casos quem chama recua para a razão medida, declarando.
-  static int? parse(String texto) {
-    var soma = 0;
-    for (final m in _termo.allMatches(texto.toUpperCase())) {
-      soma += int.parse(m.group(1)!);
+  static int? parse(String text) {
+    var sum = 0;
+    for (final m in _term.allMatches(text.toUpperCase())) {
+      sum += int.parse(m.group(1)!);
     }
-    if (soma < 1 || soma > maxShares) return null;
-    return soma;
+    if (sum < 1 || sum > maxShares) return null;
+    return sum;
   }
 
   /// A composição declarada mais recente **até** [asOf], ou `null`.
@@ -82,25 +82,25 @@ abstract final class UnitCompositionCodec {
   /// composição de 2024 seria conhecimento futuro. Ano do formulário contra ano
   /// da avaliação, e não data contra data, porque a FCA é anual e a entrega
   /// varia de mês.
-  static UnitComposition? at(List<UnitComposition> declaradas, DateTime asOf) {
-    UnitComposition? melhor;
-    for (final c in declaradas) {
+  static UnitComposition? at(List<UnitComposition> declared, DateTime asOf) {
+    UnitComposition? best;
+    for (final c in declared) {
       if (c.year > asOf.year) continue;
-      if (melhor == null || c.year > melhor.year) melhor = c;
+      if (best == null || c.year > best.year) best = c;
     }
-    return melhor;
+    return best;
   }
 
   /// Grava o pacote: composições por código de unit, por ano.
   static Map<String, Object> encodePackage(
-    Map<String, List<UnitComposition>> porTicker, {
-    required DateTime geradoEm,
+    Map<String, List<UnitComposition>> byTicker, {
+    required DateTime generatedAt,
   }) =>
       {
-        'versao': versao,
-        'geradoEm': geradoEm.toIso8601String().substring(0, 10),
+        'versao': version,
+        'geradoEm': generatedAt.toIso8601String().substring(0, 10),
         'units': {
-          for (final e in porTicker.entries)
+          for (final e in byTicker.entries)
             e.key: [
               for (final c in (e.value.toList()
                     ..sort((a, b) => a.year.compareTo(b.year))))
@@ -113,29 +113,29 @@ abstract final class UnitCompositionCodec {
   /// unit sem composição recua para a razão medida, que é o comportamento
   /// anterior.
   static Map<String, List<UnitComposition>> decodePackage(
-    Map<String, dynamic> pacote,
+    Map<String, dynamic> package,
   ) {
     final out = <String, List<UnitComposition>>{};
-    final units = pacote['units'];
+    final units = package['units'];
     if (units is! Map) return out;
     for (final e in units.entries) {
-      final lista = e.value;
-      if (lista is! List) continue;
-      final composicoes = <UnitComposition>[];
-      for (final x in lista) {
+      final list = e.value;
+      if (list is! List) continue;
+      final compositions = <UnitComposition>[];
+      for (final x in list) {
         if (x is! Map) continue;
-        final ano = (x['ano'] as num?)?.toInt();
-        final acoes = (x['acoes'] as num?)?.toInt();
-        if (ano == null || acoes == null || acoes < 1 || acoes > maxShares) {
+        final year = (x['ano'] as num?)?.toInt();
+        final shares = (x['acoes'] as num?)?.toInt();
+        if (year == null || shares == null || shares < 1 || shares > maxShares) {
           continue;
         }
-        composicoes.add(UnitComposition(
-          year: ano,
-          shares: acoes,
+        compositions.add(UnitComposition(
+          year: year,
+          shares: shares,
           declared: (x['texto'] as String?) ?? '',
         ));
       }
-      if (composicoes.isNotEmpty) out['${e.key}'] = composicoes;
+      if (compositions.isNotEmpty) out['${e.key}'] = compositions;
     }
     return out;
   }

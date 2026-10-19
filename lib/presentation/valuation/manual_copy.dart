@@ -11,14 +11,14 @@ import '../shared/ui_kit.dart';
 /// a frase é montada aqui.
 abstract final class ManualCopy {
   /// O nome do campo, na via da avaliação.
-  static String rotulo(ManualField campo, ValuationLane via) => switch (campo) {
-        ManualField.baseProfit => via == ValuationLane.firm
+  static String label(ManualField field, ValuationLane lane) => switch (field) {
+        ManualField.baseProfit => lane == ValuationLane.firm
             ? 'Lucro operacional de partida'
             : 'Lucro líquido de partida',
         ManualField.growth => 'Crescimento nos primeiros anos',
         ManualField.discountRate => 'Taxa de desconto',
         ManualField.perpetualGrowth => 'Crescimento na perpetuidade',
-        ManualField.returnOnCapital => via == ValuationLane.firm
+        ManualField.returnOnCapital => lane == ValuationLane.firm
             ? 'Retorno sobre o capital investido'
             : 'Retorno sobre o patrimônio',
         ManualField.retention => 'Parcela do lucro reinvestida',
@@ -26,9 +26,9 @@ abstract final class ManualCopy {
       };
 
   /// O que o campo é, em uma ou duas frases para quem não sabe finanças.
-  static String explicacao(ManualField campo, ValuationLane via) =>
-      switch (campo) {
-        ManualField.baseProfit => via == ValuationLane.firm
+  static String explanation(ManualField field, ValuationLane lane) =>
+      switch (field) {
+        ManualField.baseProfit => lane == ValuationLane.firm
             ? 'O lucro da operação depois do imposto e antes dos juros (NOPAT). '
                 'A dívida entra depois, no que sobra ao acionista.'
             : 'O lucro do ano de onde a projeção parte.',
@@ -40,7 +40,7 @@ abstract final class ManualCopy {
               'capital próprio. Traz cada fluxo futuro a valor de hoje.',
         ManualField.perpetualGrowth =>
           'Quanto o lucro cresce depois do ano 10, para sempre.',
-        ManualField.returnOnCapital => via == ValuationLane.firm
+        ManualField.returnOnCapital => lane == ValuationLane.firm
             ? 'Quanto cada real investido na operação rende por ano. É dele que '
                 'sai quanto do lucro precisa ser reinvestido para crescer; até o '
                 'ano 10 ele converge ao custo médio do capital do motor.'
@@ -57,34 +57,34 @@ abstract final class ManualCopy {
       };
 
   /// Uma lista de anos como se diz: «3», «3 e 4», «3, 5 e 8», «2 a 10».
-  static String anos(List<int> anos) {
-    if (anos.isEmpty) return '';
-    if (anos.length == 1) return 'no ano ${anos.first}';
-    final seguidos = anos.last - anos.first == anos.length - 1;
-    if (seguidos && anos.length > 2) {
-      return 'do ano ${anos.first} ao ${anos.last}';
+  static String years(List<int> years) {
+    if (years.isEmpty) return '';
+    if (years.length == 1) return 'no ano ${years.first}';
+    final consecutive = years.last - years.first == years.length - 1;
+    if (consecutive && years.length > 2) {
+      return 'do ano ${years.first} ao ${years.last}';
     }
-    final todos = anos.map((a) => '$a').toList();
-    return 'nos anos ${todos.sublist(0, todos.length - 1).join(', ')} e '
-        '${todos.last}';
+    final all = years.map((a) => '$a').toList();
+    return 'nos anos ${all.sublist(0, all.length - 1).join(', ')} e '
+        '${all.last}';
   }
 
   /// O aviso, como frase.
-  static String aviso(ManualNotice n) => switch (n.kind) {
-        ManualNoticeKind.crescimentoConfinado =>
-          '${_maiuscula(anos(n.years))}, o crescimento ficou abaixo do que você '
+  static String warning(ManualNotice n) => switch (n.kind) {
+        ManualNoticeKind.confinedGrowth =>
+          '${_capitalize(years(n.years))}, o crescimento ficou abaixo do que você '
               'pediu: com o retorno sobre o capital desses anos, crescer mais '
               'exigiria reinvestir mais de 95% do lucro, e o motor não deixa. '
               'Suba o retorno ou escolha reinvestir uma parcela fixa.',
-        ManualNoticeKind.fluxoNegativo =>
-          '${_maiuscula(anos(n.years))}, o fluxo do acionista é negativo: a '
+        ManualNoticeKind.negativeFlow =>
+          '${_capitalize(years(n.years))}, o fluxo do acionista é negativo: a '
               'empresa reinveste, ou paga de dívida, mais do que lucra, e '
               'precisaria de dinheiro de fora.',
-        ManualNoticeKind.concessaoPerpetua =>
+        ManualNoticeKind.perpetualConcession =>
           'Esta empresa é concessão: no motor, o excedente sobre o capital acaba '
               'no fim do contrato. Com a perpetuidade que você escolheu, ele '
               'passa a durar para sempre.',
-        ManualNoticeKind.perpetuidadeNeutra =>
+        ManualNoticeKind.neutralPerpetuity =>
           'Com o capital novo rendendo a própria taxa, o crescimento na '
               'perpetuidade quase não muda o valor da perpetuidade — ele só guia '
               'o crescimento dos dez anos. Para ele pesar, dê ao capital novo um '
@@ -93,10 +93,10 @@ abstract final class ManualCopy {
 
   /// A recusa da conta, como frase. A grandeza vem do núcleo, e o formato é
   /// daqui.
-  static String recusa(Failure f) {
+  static String refusal(Failure f) {
     if (f is! InvalidInput) return FailureCopy.of(f);
-    final campo = ManualField.values.asNameMap()[f.field];
-    return switch (campo) {
+    final field = ManualField.values.asNameMap()[f.field];
+    return switch (field) {
       ManualField.baseProfit =>
         'O lucro de partida precisa ser positivo: o fluxo descontado parte dele.',
       ManualField.retention =>
@@ -120,6 +120,6 @@ abstract final class ManualCopy {
     };
   }
 
-  static String _maiuscula(String s) =>
+  static String _capitalize(String s) =>
       s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
 }

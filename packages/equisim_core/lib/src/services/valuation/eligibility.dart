@@ -46,7 +46,7 @@ class EligibilityVerdict {
   String? get message {
     if (isEligible) return null;
     return 'Ativo fora do universo analisável: '
-        '${reasons.map((r) => r.diagnostico).join('; ')}.';
+        '${reasons.map((r) => r.diagnostic).join('; ')}.';
   }
 }
 
@@ -95,28 +95,28 @@ abstract final class EligibilityGate {
     double minTradedValue = minAverageDailyTradedValue,
     int minPeriods = minPublishedPeriods,
   }) {
-    final motivos = <IneligibilityReason>[];
+    final reasons = <IneligibilityReason>[];
 
     final adtv = prices == null ? null : medianTradedValue(prices);
     if (adtv != null && adtv < minTradedValue) {
-      motivos.add(IneligibilityReason.illiquid);
+      reasons.add(IneligibilityReason.illiquid);
     }
 
     if (snapshots.length < minPeriods) {
-      motivos.add(IneligibilityReason.shortHistory);
+      reasons.add(IneligibilityReason.shortHistory);
     }
 
     if (_insolvent(snapshots)) {
-      motivos.add(IneligibilityReason.insolvent);
+      reasons.add(IneligibilityReason.insolvent);
     }
 
     if (isDistressed) {
-      motivos.add(IneligibilityReason.distressed);
+      reasons.add(IneligibilityReason.distressed);
     }
 
     return EligibilityVerdict(
-      isEligible: motivos.isEmpty,
-      reasons: motivos,
+      isEligible: reasons.isEmpty,
+      reasons: reasons,
       publishedPeriods: snapshots.length,
       averageDailyTradedValue: adtv,
     );
@@ -134,18 +134,18 @@ abstract final class EligibilityGate {
     PriceSeries series, {
     int window = liquidityWindowDays,
   }) {
-    final pontos = series.points;
-    if (pontos.length < 20) return null;
+    final points = series.points;
+    if (points.length < 20) return null;
 
-    final ini = pontos.length > window ? pontos.length - window : 0;
-    final financeiro = <double>[];
-    for (var i = ini; i < pontos.length; i++) {
-      final v = pontos[i].volume;
+    final ini = points.length > window ? points.length - window : 0;
+    final tradedValue = <double>[];
+    for (var i = ini; i < points.length; i++) {
+      final v = points[i].volume;
       if (v == null || v < 0) continue;
-      financeiro.add(pontos[i].close * v);
+      tradedValue.add(points[i].close * v);
     }
-    if (financeiro.length < 20) return null;
-    return Inference.median(financeiro);
+    if (tradedValue.length < 20) return null;
+    return Inference.median(tradedValue);
   }
 
   /// Patrimônio não positivo no exercício mais recente **e** no anterior.
@@ -156,16 +156,16 @@ abstract final class EligibilityGate {
   /// crescimento fundamental, e as duas vias perdem o denominador.
   static bool _insolvent(List<FundamentalsSnapshot> s) {
     if (s.length < 2) return false;
-    final ultimo = s.last.equityBookValue;
-    final penultimo = s[s.length - 2].equityBookValue;
-    bool ruim(double? v) => v == null || v <= 0;
-    return ruim(ultimo) && ruim(penultimo);
+    final last = s.last.equityBookValue;
+    final penultimate = s[s.length - 2].equityBookValue;
+    bool bad(double? v) => v == null || v <= 0;
+    return bad(last) && bad(penultimate);
   }
 }
 
 /// Fraseado de **diagnóstico** — rastro de cálculo e mensagem de falha, que a decisão 122 mantém no núcleo. O rótulo de tela, quando há, mora na apresentação (decisão 125).
-extension _IneligibilityReasonDiagnostico on IneligibilityReason {
-  String get diagnostico => switch (this) {
+extension _IneligibilityReasonDiagnostic on IneligibilityReason {
+  String get diagnostic => switch (this) {
         IneligibilityReason.illiquid => 'liquidez insuficiente para formar preço confiável',
         IneligibilityReason.shortHistory => 'histórico curto demais para os testes das guardas',
         IneligibilityReason.insolvent => 'patrimônio líquido não positivo em exercícios consecutivos',

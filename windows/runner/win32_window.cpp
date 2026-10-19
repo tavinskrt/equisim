@@ -7,38 +7,38 @@
 
 namespace {
 
-/// Window attribute that enables dark mode window decorations.
+/// Atributo de janela que liga as decoracoes do modo escuro.
 ///
-/// Redefined in case the developer's machine has a Windows SDK older than
-/// version 10.0.22000.0.
-/// See: https://docs.microsoft.com/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute
+/// Redefinido para o caso de a maquina de quem desenvolve ter um Windows SDK
+/// anterior a versao 10.0.22000.0.
+/// Ver: https://docs.microsoft.com/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute
 #ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #endif
 
 constexpr const wchar_t kWindowClassName[] = L"FLUTTER_RUNNER_WIN32_WINDOW";
 
-/// Registry key for app theme preference.
+/// Chave do registro com a preferencia de tema dos aplicativos.
 ///
-/// A value of 0 indicates apps should use dark mode. A non-zero or missing
-/// value indicates apps should use light mode.
+/// O valor 0 indica que os aplicativos devem usar o modo escuro. Valor diferente
+/// de zero, ou ausente, indica o modo claro.
 constexpr const wchar_t kGetPreferredBrightnessRegKey[] =
   L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
 constexpr const wchar_t kGetPreferredBrightnessRegValue[] = L"AppsUseLightTheme";
 
-// The number of Win32Window objects that currently exist.
+// Quantos objetos Win32Window existem agora.
 static int g_active_window_count = 0;
 
 using EnableNonClientDpiScaling = BOOL __stdcall(HWND hwnd);
 
-// Scale helper to convert logical scaler values to physical using passed in
-// scale factor
+// Auxiliar de escala que converte valores logicos em fisicos pelo fator de
+// escala recebido
 int Scale(int source, double scale_factor) {
   return static_cast<int>(source * scale_factor);
 }
 
-// Dynamically loads the |EnableNonClientDpiScaling| from the User32 module.
-// This API is only needed for PerMonitor V1 awareness mode.
+// Carrega dinamicamente |EnableNonClientDpiScaling| do modulo User32.
+// Esta API so e necessaria no modo de reconhecimento PerMonitor V1.
 void EnableFullDpiSupportIfAvailable(HWND hwnd) {
   HMODULE user32_module = LoadLibraryA("User32.dll");
   if (!user32_module) {
@@ -55,12 +55,12 @@ void EnableFullDpiSupportIfAvailable(HWND hwnd) {
 
 }  // namespace
 
-// Manages the Win32Window's window class registration.
+// Gerencia o registro da classe de janela da Win32Window.
 class WindowClassRegistrar {
  public:
   ~WindowClassRegistrar() = default;
 
-  // Returns the singleton registrar instance.
+  // Devolve a instancia unica do registrador.
   static WindowClassRegistrar* GetInstance() {
     if (!instance_) {
       instance_ = new WindowClassRegistrar();
@@ -68,12 +68,12 @@ class WindowClassRegistrar {
     return instance_;
   }
 
-  // Returns the name of the window class, registering the class if it hasn't
-  // previously been registered.
+  // Devolve o nome da classe de janela, registrando a classe se ela ainda nao
+  // tiver sido registrada.
   const wchar_t* GetWindowClass();
 
-  // Unregisters the window class. Should only be called if there are no
-  // instances of the window.
+  // Cancela o registro da classe de janela. So deve ser chamado quando nao houver
+  // instancias da janela.
   void UnregisterWindowClass();
 
  private:
@@ -200,7 +200,7 @@ Win32Window::MessageHandler(HWND hwnd,
     case WM_SIZE: {
       RECT rect = GetClientArea();
       if (child_content_ != nullptr) {
-        // Size and position the child window.
+        // Dimensiona e posiciona a janela filha.
         MoveWindow(child_content_, rect.left, rect.top, rect.right - rect.left,
                    rect.bottom - rect.top, TRUE);
       }
@@ -264,12 +264,12 @@ void Win32Window::SetQuitOnClose(bool quit_on_close) {
 }
 
 bool Win32Window::OnCreate() {
-  // No-op; provided for subclasses.
+  // Nao faz nada; existe para as subclasses.
   return true;
 }
 
 void Win32Window::OnDestroy() {
-  // No-op; provided for subclasses.
+  // Nao faz nada; existe para as subclasses.
 }
 
 void Win32Window::UpdateTheme(HWND const window) {

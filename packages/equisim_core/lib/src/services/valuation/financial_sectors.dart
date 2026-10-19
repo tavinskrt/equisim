@@ -40,9 +40,9 @@ abstract final class FinancialSectors {
   /// - [industry]: subsetor, como publicado — na taxonomia oficial,
   ///   "Subsetor / Segmento".
   static bool isFinancial({String? sectorKey, String? industry}) {
-    final chave = sectorKey?.trim().toLowerCase();
-    if (chave == sourceKey) return true;
-    if (chave != officialSectorKey) return false;
+    final key = sectorKey?.trim().toLowerCase();
+    if (key == sourceKey) return true;
+    if (key != officialSectorKey) return false;
     final sub = CyclicalSectors.normalize(industry);
     for (final s in officialSubsectors) {
       if (sub.startsWith(s)) return true;

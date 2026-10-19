@@ -31,9 +31,9 @@ List<FundamentalsSnapshot> _history(Ticker ticker) => [
 
 ValuationInputs _inputs(
   Ticker ticker, {
-  DateTime? fim,
-  String? setor = 'utilidade-publica',
-  String? subsetor = 'Energia Elétrica / Energia Elétrica',
+  DateTime? end,
+  String? sector = 'utilidade-publica',
+  String? subsector = 'Energia Elétrica / Energia Elétrica',
 }) =>
     ValuationInputs(
       ticker: ticker,
@@ -46,27 +46,27 @@ ValuationInputs _inputs(
         marketPremium: 0.055,
       ),
       projectionYears: 10,
-      sectorKey: setor,
-      industry: subsetor,
-      concessionEnd: fim,
+      sectorKey: sector,
+      industry: subsector,
+      concessionEnd: end,
     );
 
 void main() {
   final ticker = Ticker.parse('TAEE11');
 
   group('O terminal do contrato — decisão 88', () {
-    DcfAssumptions premissas({required double retorno, int? contrato}) =>
+    DcfAssumptions assumptions({required double returnRate, int? contract}) =>
         DcfAssumptions(
           growthRate: 0.045,
           perpetualGrowth: 0.045,
           discountRate: 0.12,
-          returnOnCapital: retorno,
-          cashTiming: CashTiming.fimDeAno,
-          contractYearsAfterHorizon: contrato,
+          returnOnCapital: returnRate,
+          cashTiming: CashTiming.endOfYear,
+          contractYearsAfterHorizon: contract,
         );
-    double firma(double retorno, int? contrato) => DcfCalculator.firm(
+    double firm(double returnRate, int? contract) => DcfCalculator.firm(
           baseProfit: 1000,
-          assumptions: premissas(retorno: retorno, contrato: contrato),
+          assumptions: assumptions(returnRate: returnRate, contract: contract),
           netDebt: 0,
           sharesOutstanding: 1,
         ).unwrap().fairValuePerShare;
@@ -76,38 +76,38 @@ void main() {
     for (final m in [0, 15, 40]) {
       test('capital que rende o custo dele: contrato de $m anos além = perpétuo',
           () {
-        final perpetuo = firma(0.12, null);
-        expect(firma(0.12, m), closeTo(perpetuo, perpetuo * 1e-9));
+        final perpetual = firm(0.12, null);
+        expect(firm(0.12, m), closeTo(perpetual, perpetual * 1e-9));
       });
     }
 
     test('capital que rende mais que o custo: o contrato corta o excedente', () {
       // O que a lente `metodo` apontou: `lucro_{N+1}/r` perpetua o excedente do
       // capital existente, e o contrato que acaba não o paga para sempre.
-      final perpetuo = firma(0.24, null);
-      final noFim = firma(0.24, 0);
-      final longe = firma(0.24, 15);
-      final muitoLonge = firma(0.24, 400);
-      expect(noFim, lessThan(longe));
-      expect(longe, lessThan(perpetuo));
-      expect(muitoLonge, closeTo(perpetuo, perpetuo * 1e-6),
+      final perpetual = firm(0.24, null);
+      final atEnd = firm(0.24, 0);
+      final far = firm(0.24, 15);
+      final veryFar = firm(0.24, 400);
+      expect(atEnd, lessThan(far));
+      expect(far, lessThan(perpetual));
+      expect(veryFar, closeTo(perpetual, perpetual * 1e-6),
           reason: 'contrato sem fim à vista é a perpetuidade');
     });
 
     test('capital que rende menos que o custo: o contrato devolve mais', () {
-      expect(firma(0.08, 0), greaterThan(firma(0.08, null)));
+      expect(firm(0.08, 0), greaterThan(firm(0.08, null)));
     });
 
     test('sem retorno utilizável, não há capital, e o terminal fica perpétuo',
         () {
-      expect(firma(0.0, 0), closeTo(firma(0.0, null), 1e-9));
+      expect(firm(0.0, 0), closeTo(firm(0.0, null), 1e-9));
     });
 
     test('na rota derivada, o contrato longo tende à perpetuidade do acionista, '
         'e fica entre ela e o capital devolvido', () {
-      double terminal(int? contrato) => DcfCalculator.equityFromFirm(
+      double terminal(int? contract) => DcfCalculator.equityFromFirm(
             baseProfit: 1000,
-            assumptions: premissas(retorno: 0.24, contrato: contrato),
+            assumptions: assumptions(returnRate: 0.24, contract: contract),
             netDebt: 2000,
             sharesOutstanding: 1,
             costOfDebt: 0.10,
@@ -115,28 +115,28 @@ void main() {
             equityDiscountRate: 0.15,
             terminalEquityDiscountRate: 0.15,
           ).unwrap().terminalValue;
-      final perpetuo = terminal(null);
-      final devolvido = terminal(0);
-      expect(terminal(400), closeTo(perpetuo, perpetuo.abs() * 1e-6));
-      final menor = devolvido < perpetuo ? devolvido : perpetuo;
-      final maior = devolvido < perpetuo ? perpetuo : devolvido;
-      var anterior = devolvido;
+      final perpetual = terminal(null);
+      final returned = terminal(0);
+      expect(terminal(400), closeTo(perpetual, perpetual.abs() * 1e-6));
+      final smaller = returned < perpetual ? returned : perpetual;
+      final isGreater = returned < perpetual ? perpetual : returned;
+      var previous = returned;
       for (final m in [5, 15, 30, 60]) {
         final v = terminal(m);
-        expect(v, inInclusiveRange(menor, maior), reason: '$m anos');
+        expect(v, inInclusiveRange(smaller, isGreater), reason: '$m anos');
         // Monótono no prazo, na direção do perpétuo.
-        expect((v - anterior) * (perpetuo - devolvido), greaterThanOrEqualTo(0));
-        anterior = v;
+        expect((v - previous) * (perpetual - returned), greaterThanOrEqualTo(0));
+        previous = v;
       }
     });
 
     test('na rota derivada, no contrato que acaba no horizonte, o terminal do '
         'acionista é o da firma menos a dívida', () {
-      final a = premissas(retorno: 0.24, contrato: 0);
-      final firmaR = DcfCalculator.firm(
+      final a = assumptions(returnRate: 0.24, contract: 0);
+      final firmR = DcfCalculator.firm(
               baseProfit: 1000, assumptions: a, netDebt: 2000, sharesOutstanding: 1)
           .unwrap();
-      final derivada = DcfCalculator.equityFromFirm(
+      final derivedOutcome = DcfCalculator.equityFromFirm(
         baseProfit: 1000,
         assumptions: a,
         netDebt: 2000,
@@ -146,9 +146,9 @@ void main() {
         equityDiscountRate: 0.15,
         terminalEquityDiscountRate: 0.15,
       ).unwrap();
-      final dividaEmN = 2000 * math.pow(1.045, 10);
-      expect(derivada.terminalValue,
-          closeTo(firmaR.terminalValue - dividaEmN, 1e-6));
+      final debtAtN = 2000 * math.pow(1.045, 10);
+      expect(derivedOutcome.terminalValue,
+          closeTo(firmR.terminalValue - debtAtN, 1e-6));
     });
   });
 
@@ -156,46 +156,46 @@ void main() {
     test('anos até o fim, arredondados, e nunca abaixo de um', () {
       expect(
           ValuationCascade.contractYears(
-              _inputs(ticker, fim: DateTime(2030, 9, 14))),
+              _inputs(ticker, end: DateTime(2030, 9, 14))),
           4);
       expect(
           ValuationCascade.contractYears(
-              _inputs(ticker, fim: DateTime(2026, 10, 1))),
+              _inputs(ticker, end: DateTime(2026, 10, 1))),
           1);
       expect(ValuationCascade.contractYears(_inputs(ticker)), isNull);
       expect(
           ValuationCascade.contractYears(
-              _inputs(ticker, fim: DateTime(2016, 2, 29))),
+              _inputs(ticker, end: DateTime(2016, 2, 29))),
           isNull,
           reason: 'contrato vencido no formulário não impõe horizonte');
       expect(
           ValuationCascade.contractYears(_inputs(ticker,
-              fim: DateTime(2030, 9, 14),
-              setor: 'bens-industriais',
-              subsetor: 'Máquinas e Equipamentos')),
+              end: DateTime(2030, 9, 14),
+              sector: 'bens-industriais',
+              subsector: 'Máquinas e Equipamentos')),
           isNull,
           reason: 'só concessão tem contrato');
     });
 
     test('dentro da projeção, o preço muda e o aviso diz até quando', () {
-      final cheio = ValuationCascade.evaluate(_inputs(ticker)).unwrap();
-      final curto = ValuationCascade.evaluate(
-              _inputs(ticker, fim: DateTime(2030, 9, 14)))
+      final full = ValuationCascade.evaluate(_inputs(ticker)).unwrap();
+      final short = ValuationCascade.evaluate(
+              _inputs(ticker, end: DateTime(2030, 9, 14)))
           .unwrap();
-      expect((curto.fairValue.cents - cheio.fairValue.cents).abs(),
+      expect((short.fairValue.cents - full.fairValue.cents).abs(),
           greaterThan(0));
-      expect(curto.warnings.join(' '), contains('14/09/2030'));
-      expect(curto.warnings.join(' '), contains('vai até lá, 4 anos'));
+      expect(short.warnings.join(' '), contains('14/09/2030'));
+      expect(short.warnings.join(' '), contains('vai até lá, 4 anos'));
     });
 
     test('depois da projeção, o preço fica entre o do contrato curto e o perpétuo',
         () {
-      final cheio = ValuationCascade.evaluate(_inputs(ticker)).unwrap();
-      final curto = ValuationCascade.evaluate(
-              _inputs(ticker, fim: DateTime(2036, 9, 14)))
+      final full = ValuationCascade.evaluate(_inputs(ticker)).unwrap();
+      final short = ValuationCascade.evaluate(
+              _inputs(ticker, end: DateTime(2036, 9, 14)))
           .unwrap();
-      final longo = ValuationCascade.evaluate(
-              _inputs(ticker, fim: DateTime(2047, 8, 11)))
+      final longTerm = ValuationCascade.evaluate(
+              _inputs(ticker, end: DateTime(2047, 8, 11)))
           .unwrap();
       // **Entre os dois, na direção que o excedente do acionista dá** (decisão
       // 102). O capital próprio sai do fluxo do acionista derivado, ao `Ke`, e
@@ -206,35 +206,35 @@ void main() {
       // do CAPM, o capital devolvido vale mais que a perpetuidade, embora a
       // firma renda acima do WACC: sem taxas resolvidas, WACC e `Ke` não
       // conversam, e a ordem da firma não é a do acionista.
-      final menor = curto.fairValue.cents < cheio.fairValue.cents
-          ? curto.fairValue.cents
-          : cheio.fairValue.cents;
-      final maior = curto.fairValue.cents < cheio.fairValue.cents
-          ? cheio.fairValue.cents
-          : curto.fairValue.cents;
-      expect(longo.fairValue.cents, inInclusiveRange(menor, maior));
-      expect(curto.fairValue.cents, isNot(cheio.fairValue.cents));
-      expect(longo.warnings.join(' '), contains('anos depois da projeção'));
+      final smaller = short.fairValue.cents < full.fairValue.cents
+          ? short.fairValue.cents
+          : full.fairValue.cents;
+      final isGreater = short.fairValue.cents < full.fairValue.cents
+          ? full.fairValue.cents
+          : short.fairValue.cents;
+      expect(longTerm.fairValue.cents, inInclusiveRange(smaller, isGreater));
+      expect(short.fairValue.cents, isNot(full.fairValue.cents));
+      expect(longTerm.warnings.join(' '), contains('anos depois da projeção'));
     });
 
     test('fora de concessão, o fim declarado não faz nada', () {
-      ValuationResult avaliar(DateTime? fim) => ValuationCascade.evaluate(
+      ValuationResult evaluate(DateTime? end) => ValuationCascade.evaluate(
               _inputs(ticker,
-                  fim: fim,
-                  setor: 'bens-industriais',
-                  subsetor: 'Máquinas e Equipamentos / Motores'))
+                  end: end,
+                  sector: 'bens-industriais',
+                  subsector: 'Máquinas e Equipamentos / Motores'))
           .unwrap();
-      expect(avaliar(DateTime(2028, 1, 1)).fairValue.cents,
-          avaliar(null).fairValue.cents);
+      expect(evaluate(DateTime(2028, 1, 1)).fairValue.cents,
+          evaluate(null).fairValue.cents);
     });
 
     test('sem prazo lido, o aviso diz o que se supõe e o que acontece se não',
         () {
       final r = ValuationCascade.evaluate(_inputs(ticker)).unwrap();
-      final aviso = r.warnings.join(' ');
-      expect(aviso, contains('o prazo não foi lido'));
-      expect(aviso, contains('excedente de retorno sobre o capital existente'));
-      expect(aviso, isNot(contains('0,80')),
+      final warning = r.warnings.join(' ');
+      expect(warning, contains('o prazo não foi lido'));
+      expect(warning, contains('excedente de retorno sobre o capital existente'));
+      expect(warning, isNot(contains('0,80')),
           reason: 'a truncagem sem indenização não é a conta certa');
     });
   });
@@ -245,33 +245,33 @@ void main() {
     // perpetuidade de Gordon — a mesma forma de defeito que a ponte `EV − D`
     // tinha antes da decisão 102: rastro que descreve outra conta é pior que
     // nenhum.
-    List<CalculationTrace> rastroDe(DateTime? fim) {
-      final capturadas = <CalculationTrace>[];
-      AuditRecorder.attach((e) => capturadas.addAll(e.calculations));
+    List<CalculationTrace> traceOf(DateTime? end) {
+      final captured = <CalculationTrace>[];
+      AuditRecorder.attach((e) => captured.addAll(e.calculations));
       try {
-        ValuationCascade.evaluate(_inputs(Ticker.parse('TEST3'), fim: fim));
+        ValuationCascade.evaluate(_inputs(Ticker.parse('TEST3'), end: end));
       } finally {
         AuditRecorder.detach();
       }
-      return capturadas;
+      return captured;
     }
 
     test('com prazo, o rastro traz o capital devolvido e a anuidade', () {
-      final passo = rastroDe(DateTime(2040, 6, 30))
+      final step = traceOf(DateTime(2040, 6, 30))
           .firstWhere((c) => c.formulaName.contains('Valor terminal'));
-      expect(passo.formulaName, contains('contrato com prazo'));
-      expect(passo.latexRepresentation, contains('K_N'));
-      expect(passo.mappedVariables['M (anos de contrato além de N)'], isNotNull);
-      expect(passo.intermediateSteps.first, contains('o capital volta'));
-      expect(passo.latexRepresentation, isNot(contains(r'\frac{L_{N+1}}{r_\infty}')),
+      expect(step.formulaName, contains('contrato com prazo'));
+      expect(step.latexRepresentation, contains('K_N'));
+      expect(step.mappedVariables['M (anos de contrato além de N)'], isNotNull);
+      expect(step.intermediateSteps.first, contains('o capital volta'));
+      expect(step.latexRepresentation, isNot(contains(r'\frac{L_{N+1}}{r_\infty}')),
           reason: 'a perpetuidade não é a conta que foi feita aqui');
     });
 
     test('sem prazo, continua sendo a perpetuidade de retorno neutro', () {
-      final passo = rastroDe(null)
+      final step = traceOf(null)
           .firstWhere((c) => c.formulaName.contains('Valor terminal'));
-      expect(passo.formulaName, contains('retorno neutro'));
-      expect(passo.mappedVariables['M (anos de contrato além de N)'], isNull);
+      expect(step.formulaName, contains('retorno neutro'));
+      expect(step.mappedVariables['M (anos de contrato além de N)'], isNull);
     });
   });
 }

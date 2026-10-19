@@ -67,7 +67,7 @@ export const API_DEFAULT_MODEL = 'gemini-flash-latest';
  * menos usado seria mais eficiente e menos previsivel; o custo de comecar pelo
  * topo e uma tentativa perdida quando ele ja esta cheio.
  */
-export const API_CASCATA_FLASH: readonly string[] = [
+export const API_FLASH_CASCADE: readonly string[] = [
   'gemini-3.7-flash',
   'gemini-3.6-flash',
   'gemini-3.5-flash',
@@ -125,7 +125,7 @@ export class ApiProvider implements QaProvider {
   private key?: ApiKeyResolution;
 
   /** O que sugerir a quem estourou o teto. Ver `timeoutMessage`. */
-  private readonly saidasDeTimeout: readonly string[];
+  private readonly timeoutOutputs: readonly string[];
 
   /**
    * Modelos a tentar, em ordem, quando o primeiro nao responde.
@@ -135,20 +135,20 @@ export class ApiProvider implements QaProvider {
    * relatorios do mesmo diff poderiam vir de modelos diferentes sem que a
    * diferenca fosse escolha de ninguem. Quem quiser a cascata pede por ela.
    */
-  private readonly cascata: readonly string[];
+  private readonly cascade: readonly string[];
 
   constructor(
     repoRoot: string,
     thinkingBudget = DEFAULT_THINKING_BUDGET,
     timeoutMs = DEFAULT_TIMEOUT_MS,
-    saidasDeTimeout: readonly string[] = SAIDAS_TIMEOUT_AUDITOR,
-    cascata: readonly string[] = [],
+    timeoutOutputs: readonly string[] = AUDITOR_TIMEOUT_OUTPUTS,
+    cascade: readonly string[] = [],
   ) {
     this.repoRoot = repoRoot;
     this.thinkingBudget = thinkingBudget;
     this.timeoutMs = timeoutMs;
-    this.saidasDeTimeout = saidasDeTimeout;
-    this.cascata = cascata;
+    this.timeoutOutputs = timeoutOutputs;
+    this.cascade = cascade;
   }
 
   describeAuth(): string {
@@ -174,21 +174,21 @@ export class ApiProvider implements QaProvider {
   async run(request: ProviderRequest): Promise<ProviderResult> {
     if (!this.key) this.preflight();
 
-    const degraus =
-      request.model !== undefined || this.cascata.length === 0
+    const rungs =
+      request.model !== undefined || this.cascade.length === 0
         ? [request.model ?? API_DEFAULT_MODEL]
-        : this.cascata;
+        : this.cascade;
 
-    let ultimo: unknown;
-    for (const [i, modelo] of degraus.entries()) {
+    let last: unknown;
+    for (const [i, model] of rungs.entries()) {
       try {
-        return await this.chamar(request, modelo);
-      } catch (erro) {
-        ultimo = erro;
-        const vale = erro instanceof ProviderError && (erro.transient || erro.quota);
-        if (!vale || i === degraus.length - 1) break;
+        return await this.call(request, model);
+      } catch (error) {
+        last = error;
+        const canCascade = error instanceof ProviderError && (error.transient || error.quota);
+        if (!canCascade || i === rungs.length - 1) break;
         process.stderr.write(
-          `  ${modelo} indisponivel; descendo para ${degraus[i + 1]}\n`,
+          `  ${model} indisponivel; descendo para ${rungs[i + 1]}\n`,
         );
         // O tier limita tambem por MINUTO (5 rpm nos Flash). Descer a cascata
         // em rajada esbarraria nesse teto e o degrau seguinte falharia por um
@@ -196,16 +196,16 @@ export class ApiProvider implements QaProvider {
         await new Promise((r) => setTimeout(r, 1500));
       }
     }
-    if (ultimo instanceof ProviderError && degraus.length > 1) {
+    if (last instanceof ProviderError && rungs.length > 1) {
       throw new ProviderError(
-        `Nenhum modelo da cascata respondeu (${degraus.join(' -> ')}).\n` +
-          `  Ultimo erro: ${ultimo.message}`,
+        `Nenhum modelo da cascata respondeu (${rungs.join(' -> ')}).\n` +
+          `  Ultimo erro: ${last.message}`,
       );
     }
-    throw ultimo;
+    throw last;
   }
 
-  private async chamar(
+  private async call(
     request: ProviderRequest,
     model: string,
   ): Promise<ProviderResult> {
@@ -256,7 +256,7 @@ export class ApiProvider implements QaProvider {
       // O aborto e nosso, nao da API: traduzimos para a instrucao de escopo.
       if (controller.signal.aborted) {
         throw new ProviderError(
-          timeoutMessage(this.timeoutMs, request, this.saidasDeTimeout),
+          timeoutMessage(this.timeoutMs, request, this.timeoutOutputs),
         );
       }
       if (error instanceof ProviderError) throw error;
@@ -293,25 +293,25 @@ export class ApiProvider implements QaProvider {
 function timeoutMessage(
   timeoutMs: number,
   request: ProviderRequest,
-  saidas: readonly string[],
+  outputs: readonly string[],
 ): string {
   const kb = Math.round(request.material.length / 1024);
-  const imagens = request.screenshots?.length ?? 0;
+  const images = request.screenshots?.length ?? 0;
   return (
     `A consulta excedeu ${timeoutMs / 1000}s e foi cancelada.\n` +
     `Material enviado: ${kb} KB` +
-    (imagens > 0 ? `, mais ${imagens} imagem(ns).` : '.') +
+    (images > 0 ? `, mais ${images} imagem(ns).` : '.') +
     '\n\n' +
-    (imagens > 0
+    (images > 0
       ? 'Requisicao multimodal custa bem mais tempo que a mesma em texto.\n'
       : 'Material grande com raciocinio irrestrito nao termina em tempo util.\n') +
     'Opcoes, da melhor para a pior:\n' +
-    saidas.map((s, i) => `  ${i + 1}. ${s}`).join('\n')
+    outputs.map((s, i) => `  ${i + 1}. ${s}`).join('\n')
   );
 }
 
 /** Saidas do auditor. Outro agente passa as suas ao construir o provider. */
-export const SAIDAS_TIMEOUT_AUDITOR: readonly string[] = [
+export const AUDITOR_TIMEOUT_OUTPUTS: readonly string[] = [
   'reduza o escopo:      --base HEAD~1  (em vez de varios commits)',
   'audite por arquivo:   --file <caminho>',
   'limite o raciocinio:  --thinking 4096\n' +

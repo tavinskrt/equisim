@@ -157,28 +157,28 @@ class ApiClient {
     required bool Function(String line) stop,
     Encoding encoding = latin1,
   }) async {
-    final cancelar = CancelToken();
+    final cancelToken = CancelToken();
     try {
       final response = await _dio.get<ResponseBody>(
         url,
         options: Options(responseType: ResponseType.stream),
-        cancelToken: cancelar,
+        cancelToken: cancelToken,
       );
       final status = response.statusCode ?? 0;
-      final corpo = response.data;
-      if (status != 200 || corpo == null) {
+      final body = response.data;
+      if (status != 200 || body == null) {
         return Err(_failureFor(status, ''));
       }
-      final linhas = <String>[];
-      await for (final linha in corpo.stream
+      final rows = <String>[];
+      await for (final row in body.stream
           .cast<List<int>>()
           .transform(encoding.decoder)
           .transform(const LineSplitter())) {
-        if (stop(linha)) break;
-        linhas.add(linha);
+        if (stop(row)) break;
+        rows.add(row);
       }
-      if (!cancelar.isCancelled) cancelar.cancel('leitura encerrada');
-      return Ok(linhas);
+      if (!cancelToken.isCancelled) cancelToken.cancel('leitura encerrada');
+      return Ok(rows);
     } on DioException catch (e) {
       if (CancelToken.isCancel(e)) {
         return const Err(ComputationFailure('Leitura cancelada.'));

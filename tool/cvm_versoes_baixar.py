@@ -50,42 +50,42 @@ RAD = ("https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx"
 
 # As coortes de `tool/backtest_valuation.dart --trimestral`: o último dia de
 # cada trimestre, de 31/03/2018 a 30/09/2025. Mudar lá exige mudar aqui.
-COORTES = [
-    dt.date(ano, mes, dia).isoformat()
-    for ano in range(2018, 2026)
-    for mes, dia in ((3, 31), (6, 30), (9, 30), (12, 31))
-    if dt.date(ano, mes, dia) <= dt.date(2025, 9, 30)
+COHORTS = [
+    dt.date(year, month, day).isoformat()
+    for year in range(2018, 2026)
+    for month, day in ((3, 31), (6, 30), (9, 30), (12, 31))
+    if dt.date(year, month, day) <= dt.date(2025, 9, 30)
 ]
 
 # Código do demonstrativo no `InfoFinaDFin.xml` → sufixo do CSV da CVM.
 # Conferido contra os CSVs em 22/09/2026 (docstring do módulo).
-DEMONSTRATIVO = {"2": "BPA", "3": "BPP", "4": "DRE", "7": "DFC_MI"}
-INFORMACAO = {"1": "ind", "2": "con"}
-ESCALA = {"1": "UNIDADE", "2": "MIL"}
-BALANCO = {"BPA", "BPP"}
+STATEMENT = {"2": "BPA", "3": "BPP", "4": "DRE", "7": "DFC_MI"}
+INFORMATION = {"1": "ind", "2": "con"}
+SCALE = {"1": "UNIDADE", "2": "MIL"}
+BALANCE_SHEET = {"BPA", "BPP"}
 
-_destino = "data/cvm/versoes"
+_destination = "data/cvm/versoes"
 
-CAMPOS = ["CNPJ_CIA", "DT_REFER", "VERSAO", "DENOM_CIA", "ESCALA_MOEDA",
+FIELDS = ["CNPJ_CIA", "DT_REFER", "VERSAO", "DENOM_CIA", "ESCALA_MOEDA",
           "ORDEM_EXERC", "DT_INI_EXERC", "DT_FIM_EXERC", "CD_CONTA",
           "DS_CONTA", "VL_CONTA"]
-CAMPOS_CAPITAL = ["CNPJ_CIA", "DT_REFER", "VERSAO", "DENOM_CIA",
+CAPITAL_FIELDS = ["CNPJ_CIA", "DT_REFER", "VERSAO", "DENOM_CIA",
                   "QT_ACAO_TOTAL_CAP_INTEGR", "QT_ACAO_TOTAL_TESOURO"]
 
 
-def _tag(bloco: str, nome: str) -> str | None:
-    m = re.search(rf"<{nome}>([^<]*)</{nome}>", bloco)
+def _tag(block: str, name: str) -> str | None:
+    m = re.search(rf"<{name}>([^<]*)</{name}>", block)
     return m.group(1) if m else None
 
 
-def _sem_formulario(xml: str) -> str:
+def _without_form(xml: str) -> str:
     """Tira o `FormularioDemonstracaoFinanceira` que o RAD repete em todo bloco."""
     return re.sub(
         r"<FormularioDemonstracaoFinanceira>.*?</FormularioDemonstracaoFinanceira>",
         "", xml, flags=re.S)
 
 
-def indice(cvm: Path, cnpjs: set[str]) -> dict:
+def index(cvm: Path, cnpjs: set[str]) -> dict:
     """Versões de cada documento: (cnpj, refer, doc) → [(versao, receb, id, nome)]."""
     out: dict = {}
     for f in sorted(cvm.glob("*_cia_aberta_20??.csv")):
@@ -102,258 +102,258 @@ def indice(cvm: Path, cnpjs: set[str]) -> dict:
     return out
 
 
-def vigentes_antigas(versoes: dict) -> list:
+def old_in_force(versions: dict) -> list:
     """As versões que não são a última e estavam vigentes em alguma coorte."""
-    alvo = set()
-    for k, vs in versoes.items():
+    target = set()
+    for k, vs in versions.items():
         vs = sorted(set(vs))
         if len(vs) < 2:
             continue
-        ultima = max(vs, key=lambda v: (v[1], v[0]))
-        for c in COORTES:
-            antes = [v for v in vs if v[1] <= c]
-            if not antes:
+        latest = max(vs, key=lambda v: (v[1], v[0]))
+        for c in COHORTS:
+            before = [v for v in vs if v[1] <= c]
+            if not before:
                 continue
-            v = max(antes, key=lambda v: (v[1], v[0]))
-            if v != ultima:
-                alvo.add((k, v))
-    return sorted(alvo)
+            v = max(before, key=lambda v: (v[1], v[0]))
+            if v != latest:
+                target.add((k, v))
+    return sorted(target)
 
 
-def converter(pacote: bytes, cnpj: str, refer: str, versao: int, nome: str):
+def convert(package: bytes, cnpj: str, refer: str, version: int, name: str):
     """Do pacote do RAD para linhas no layout dos CSVs da CVM.
 
     Devolve ``(linhas por demonstrativo, linha de capital, motivo)``; o motivo
     é ``None`` quando deu certo.
     """
-    z = zipfile.ZipFile(io.BytesIO(pacote))
-    interno = [n for n in z.namelist() if n.lower().endswith((".dfp", ".itr"))]
-    if not interno:
+    z = zipfile.ZipFile(io.BytesIO(package))
+    internal = [n for n in z.namelist() if n.lower().endswith((".dfp", ".itr"))]
+    if not internal:
         # A partir de 2023 o pacote traz um XML único no lugar do .dfp/.itr.
-        unico = [n for n in z.namelist()
+        single = [n for n in z.namelist()
                  if re.fullmatch(r"\d+(DFP|ITR)[\d-]+v\d+\.xml", n)]
-        if unico:
-            return converter_xml_unico(z.read(unico[0]), cnpj, refer, versao,
-                                       nome)
+        if single:
+            return convert_single_xml(z.read(single[0]), cnpj, refer, version,
+                                       name)
         return None, None, "pacote sem .dfp/.itr"
-    z2 = zipfile.ZipFile(io.BytesIO(z.read(interno[0])))
-    nomes = set(z2.namelist())
-    if "InfoFinaDFin.xml" not in nomes:
+    z2 = zipfile.ZipFile(io.BytesIO(z.read(internal[0])))
+    names = set(z2.namelist())
+    if "InfoFinaDFin.xml" not in names:
         return None, None, "sem InfoFinaDFin.xml"
 
-    form = next((n for n in nomes if n.startswith("FormularioDemonstracao")), None)
-    escala = ESCALA.get(_tag(z2.read(form).decode("utf-8", "replace"),
+    form = next((n for n in names if n.startswith("FormularioDemonstracao")), None)
+    scale = SCALE.get(_tag(z2.read(form).decode("utf-8", "replace"),
                              "CodigoEscalaMoeda") or "") if form else None
-    if escala is None:
+    if scale is None:
         return None, None, "escala desconhecida"
 
     # Coluna N do XML é o período N declarado no pacote.
-    periodos = {}
-    pxml = _sem_formulario(
+    periods = {}
+    pxml = _without_form(
         z2.read("PeriodoDemonstracaoFinanceira.xml").decode("utf-8", "replace"))
     for b in pxml.split("<PeriodoDemonstracaoFinanceira>")[1:]:
         n = _tag(b, "NumeroIdentificacaoPeriodo")
-        ini = (_tag(b, "DataInicioPeriodo") or "")[:10]
-        fim = (_tag(b, "DataFimPeriodo") or "")[:10]
-        if n and fim and not fim.startswith("0001"):
-            periodos[int(n)] = (ini, fim)
-    ano_ref = int(refer[:4])
-    anterior = f"{ano_ref - 1}{refer[4:]}"
+        start = (_tag(b, "DataInicioPeriodo") or "")[:10]
+        end = (_tag(b, "DataFimPeriodo") or "")[:10]
+        if n and end and not end.startswith("0001"):
+            periods[int(n)] = (start, end)
+    ref_year = int(refer[:4])
+    previous = f"{ref_year - 1}{refer[4:]}"
     # No ITR, dois períodos terminam na data: o trimestre e o acumulado. O
     # saldo do balanço está na coluna do primeiro; a DFC só tem o acumulado,
     # que é o de início mais cedo.
-    saldo = min((n for n, p in periodos.items() if p[1] == refer), default=None)
-    acumulado = {
-        fim: min(p[0] for p in periodos.values() if p[1] == fim)
-        for fim in (refer, anterior)
-        if any(p[1] == fim for p in periodos.values())
+    balance = min((n for n, p in periods.items() if p[1] == refer), default=None)
+    accumulated = {
+        end: min(p[0] for p in periods.values() if p[1] == end)
+        for end in (refer, previous)
+        if any(p[1] == end for p in periods.values())
     }
 
-    linhas: dict[str, list] = {}
+    lines: dict[str, list] = {}
     xml = z2.read("InfoFinaDFin.xml").decode("utf-8", "replace")
     for b in xml.split("<InfoFinaDFin>")[1:]:
         b = re.sub(r"<PeriodoDemonstracaoFinanceira>.*?</PeriodoDemonstracaoFinanceira>",
                    "", b, flags=re.S)
-        dem = DEMONSTRATIVO.get(_tag(b, "CodigoTipoDemonstracaoFinanceira") or "")
-        inf = INFORMACAO.get(_tag(b, "CodigoTipoInformacaoFinanceira") or "")
-        conta = _tag(b, "NumeroConta")
-        if dem is None or inf is None or not conta:
+        statement = STATEMENT.get(_tag(b, "CodigoTipoDemonstracaoFinanceira") or "")
+        inf = INFORMATION.get(_tag(b, "CodigoTipoInformacaoFinanceira") or "")
+        account = _tag(b, "NumeroConta")
+        if statement is None or inf is None or not account:
             continue
-        rotulo = _tag(b, "DescricaoConta1") or ""
-        for n, (ini, fim) in periodos.items():
-            bruto = _tag(b, f"ValorConta{n}")
-            if bruto is None:
+        label = _tag(b, "DescricaoConta1") or ""
+        for n, (start, end) in periods.items():
+            raw = _tag(b, f"ValorConta{n}")
+            if raw is None:
                 continue
-            if dem in BALANCO:
+            if statement in BALANCE_SHEET:
                 # A ingestão lê do balanço só o saldo na data do documento; o
                 # comparativo não é gravado.
-                if n != saldo:
+                if n != balance:
                     continue
-                ordem, ini_csv = "ÚLTIMO", ""
+                order, start_csv = "ÚLTIMO", ""
             else:
-                if dem == "DFC_MI" and ini != acumulado.get(fim):
+                if statement == "DFC_MI" and start != accumulated.get(end):
                     continue
-                if fim == refer:
-                    ordem = "ÚLTIMO"
-                elif fim == anterior:
-                    ordem = "PENÚLTIMO"
+                if end == refer:
+                    order = "ÚLTIMO"
+                elif end == previous:
+                    order = "PENÚLTIMO"
                 else:
                     continue
-                ini_csv = ini
-            linhas.setdefault(f"{dem}_{inf}", []).append({
-                "CNPJ_CIA": cnpj, "DT_REFER": refer, "VERSAO": versao,
-                "DENOM_CIA": nome, "ESCALA_MOEDA": escala,
-                "ORDEM_EXERC": ordem, "DT_INI_EXERC": ini_csv,
-                "DT_FIM_EXERC": fim, "CD_CONTA": conta, "DS_CONTA": rotulo,
-                "VL_CONTA": bruto,
+                start_csv = start
+            lines.setdefault(f"{statement}_{inf}", []).append({
+                "CNPJ_CIA": cnpj, "DT_REFER": refer, "VERSAO": version,
+                "DENOM_CIA": name, "ESCALA_MOEDA": scale,
+                "ORDEM_EXERC": order, "DT_INI_EXERC": start_csv,
+                "DT_FIM_EXERC": end, "CD_CONTA": account, "DS_CONTA": label,
+                "VL_CONTA": raw,
             })
 
     capital = None
-    cap = next((n for n in nomes if n.startswith("ComposicaoCapitalSocial")), None)
+    cap = next((n for n in names if n.startswith("ComposicaoCapitalSocial")), None)
     if cap:
-        c = _sem_formulario(z2.read(cap).decode("utf-8", "replace"))
+        c = _without_form(z2.read(cap).decode("utf-8", "replace"))
         tot = _tag(c, "QuantidadeTotalAcaoCapitalIntegralizado")
-        tes = _tag(c, "QuantidadeTotalAcaoTesouraria")
+        treasury = _tag(c, "QuantidadeTotalAcaoTesouraria")
         if tot:
-            capital = {"CNPJ_CIA": cnpj, "DT_REFER": refer, "VERSAO": versao,
-                       "DENOM_CIA": nome, "QT_ACAO_TOTAL_CAP_INTEGR": tot,
-                       "QT_ACAO_TOTAL_TESOURO": tes or "0"}
-    return linhas, capital, None
+            capital = {"CNPJ_CIA": cnpj, "DT_REFER": refer, "VERSAO": version,
+                       "DENOM_CIA": name, "QT_ACAO_TOTAL_CAP_INTEGR": tot,
+                       "QT_ACAO_TOTAL_TESOURO": treasury or "0"}
+    return lines, capital, None
 
 
 # Formato do XML único (2023 em diante): seção → demonstrativo, e a coluna de
 # cada valor → (ordem, início, fim) em função das datas do cabeçalho.
-SECAO = {"BalancoPatrimonialAtivo": "BPA", "BalancoPatrimonialPassivo": "BPP",
+SECTION = {"BalancoPatrimonialAtivo": "BPA", "BalancoPatrimonialPassivo": "BPP",
          "DemonstracaoResultado": "DRE", "DemonstracaoFluxoCaixa": "DFC_MI"}
-BLOCO = {"DfIndividuais": "ind", "DfConsolidadas": "con"}
+BLOCK = {"DfIndividuais": "ind", "DfConsolidadas": "con"}
 
 
-def _numero_br(texto: str | None) -> str | None:
+def _number_br(text: str | None) -> str | None:
     """«19.976.556» e «-1.234,5» para o texto que os CSVs da CVM usam."""
-    if texto is None or not texto.strip():
+    if text is None or not text.strip():
         return None
-    return texto.strip().replace(".", "").replace(",", ".")
+    return text.strip().replace(".", "").replace(",", ".")
 
 
-def _texto_zero(valor: str) -> bool:
+def _zero_text(value: str) -> bool:
     """O texto é um zero («0», «-0», «0.0000»)? Pelo texto, e não por `float`."""
-    return re.fullmatch(r"[+-]?0*(\.0*)?", valor.strip()) is not None
+    return re.fullmatch(r"[+-]?0*(\.0*)?", value.strip()) is not None
 
 
-def _data_br(texto: str | None) -> str:
-    if not texto or len(texto) < 10:
+def _date_br(text: str | None) -> str:
+    if not text or len(text) < 10:
         return ""
-    d, m, a = texto[:10].split("/")
+    d, m, a = text[:10].split("/")
     return f"{a}-{m}-{d}"
 
 
-def _ano_antes(iso: str) -> str:
+def _year_before(iso: str) -> str:
     return f"{int(iso[:4]) - 1}{iso[4:]}" if iso else ""
 
 
-def converter_xml_unico(bruto: bytes, cnpj: str, refer: str, versao: int,
-                        nome: str):
+def convert_single_xml(raw: bytes, cnpj: str, refer: str, version: int,
+                        name: str):
     """O XML único do RAD, de 2023 em diante, para o layout dos CSVs."""
-    x = bruto.decode("utf-8", "replace")
+    x = raw.decode("utf-8", "replace")
     x = re.sub(r"<ImagemObjetoArquivoPdf>.*?</ImagemObjetoArquivoPdf>", "", x,
                flags=re.S)
-    escala = ESCALA.get(_tag(x, "EscalaMoeda") or "")
-    if escala is None:
+    scale = SCALE.get(_tag(x, "EscalaMoeda") or "")
+    if scale is None:
         return None, None, "escala desconhecida"
-    ref = _data_br(_tag(x, "DataReferencia"))
+    ref = _date_br(_tag(x, "DataReferencia"))
     if ref != refer:
         return None, None, f"data de referência {ref} ≠ {refer}"
-    ref_ant = _ano_antes(refer)
+    ref_ant = _year_before(refer)
     if "<DadosDFP>" in x:
-        ini_ult = _data_br(_tag(x, "DtInicioUltimoExercicioSocial"))
-        ini_pen = _data_br(_tag(x, "DtInicioPenultimoExercicioSocial"))
-        fim_pen = _data_br(_tag(x, "DtFimPenultimoExercicioSocial"))
-        balanco = {"UltimoExercicio": refer}
-        fluxo = {"UltimoExercicio": ("ÚLTIMO", ini_ult, refer),
-                 "PenultimoExercicio": ("PENÚLTIMO", ini_pen, fim_pen)}
-        fluxo_dfc = fluxo
+        start_last = _date_br(_tag(x, "DtInicioUltimoExercicioSocial"))
+        start_prev = _date_br(_tag(x, "DtInicioPenultimoExercicioSocial"))
+        end_prev = _date_br(_tag(x, "DtFimPenultimoExercicioSocial"))
+        balance_sheet = {"UltimoExercicio": refer}
+        flow = {"UltimoExercicio": ("ÚLTIMO", start_last, refer),
+                 "PenultimoExercicio": ("PENÚLTIMO", start_prev, end_prev)}
+        dfc_flow = flow
     else:
-        ini_tri = _data_br(_tag(x, "DtInicioTrimestreAtual"))
-        ini_exe = _data_br(_tag(x, "DtInicioExercicioSocialCurso"))
-        ini_ant = _data_br(_tag(x, "DtInicioExercicioSocialAnterior"))
-        balanco = {"TrimestreAtual": refer}
-        fluxo = {
-            "TrimestreAtual": ("ÚLTIMO", ini_tri, refer),
-            "AcumuladoExercicioAtual": ("ÚLTIMO", ini_exe, refer),
-            "TrimestreAnterior": ("PENÚLTIMO", _ano_antes(ini_tri), ref_ant),
-            "AcumuladoExercicioAnterior": ("PENÚLTIMO", ini_ant, ref_ant),
+        start_quarter = _date_br(_tag(x, "DtInicioTrimestreAtual"))
+        start_fiscal_year = _date_br(_tag(x, "DtInicioExercicioSocialCurso"))
+        start_prior_year = _date_br(_tag(x, "DtInicioExercicioSocialAnterior"))
+        balance_sheet = {"TrimestreAtual": refer}
+        flow = {
+            "TrimestreAtual": ("ÚLTIMO", start_quarter, refer),
+            "AcumuladoExercicioAtual": ("ÚLTIMO", start_fiscal_year, refer),
+            "TrimestreAnterior": ("PENÚLTIMO", _year_before(start_quarter), ref_ant),
+            "AcumuladoExercicioAnterior": ("PENÚLTIMO", start_prior_year, ref_ant),
         }
-        fluxo_dfc = {
-            "AcumuladoAtualExercicio": ("ÚLTIMO", ini_exe, refer),
-            "AcumuladoExercicioAnterior": ("PENÚLTIMO", ini_ant, ref_ant),
+        dfc_flow = {
+            "AcumuladoAtualExercicio": ("ÚLTIMO", start_fiscal_year, refer),
+            "AcumuladoExercicioAnterior": ("PENÚLTIMO", start_prior_year, ref_ant),
         }
 
-    linhas: dict[str, list] = {}
-    for bloco, inf in BLOCO.items():
-        mb = re.search(rf"<{bloco}>(.*?)</{bloco}>", x, flags=re.S)
+    lines: dict[str, list] = {}
+    for block, inf in BLOCK.items():
+        mb = re.search(rf"<{block}>(.*?)</{block}>", x, flags=re.S)
         if not mb:
             continue
-        for secao, dem in SECAO.items():
-            ms = re.search(rf"<{secao}>(.*?)</{secao}>", mb.group(1), flags=re.S)
+        for section, statement in SECTION.items():
+            ms = re.search(rf"<{section}>(.*?)</{section}>", mb.group(1), flags=re.S)
             if not ms:
                 continue
             for c in re.findall(r"<Conta>(.*?)</Conta>", ms.group(1), flags=re.S):
-                conta = _tag(c, "CodigoConta")
-                if not conta:
+                account = _tag(c, "CodigoConta")
+                if not account:
                     continue
-                if dem == "DFC_MI" and (_tag(c, "Metodo") or "").lower() == "direto":
+                if statement == "DFC_MI" and (_tag(c, "Metodo") or "").lower() == "direto":
                     continue
-                colunas = (
-                    {k: ("ÚLTIMO", "", v) for k, v in balanco.items()}
-                    if dem in ("BPA", "BPP")
-                    else (fluxo_dfc if dem == "DFC_MI" else fluxo))
+                columns = (
+                    {k: ("ÚLTIMO", "", v) for k, v in balance_sheet.items()}
+                    if statement in ("BPA", "BPP")
+                    else (dfc_flow if statement == "DFC_MI" else flow))
                 # O XML traz o plano de contas inteiro, com as linhas não
                 # usadas vazias ou zeradas e sem descrição; o CSV da CVM traz a
                 # conta descrita sempre (zerada, se fixa e vazia) e omite a
                 # zerada sem descrição. Conferido conta a conta na WEG de 2023 e 2024.
-                fixa = (_tag(c, "ContaFixa") or "").lower() == "true"
-                rotulo = _tag(c, "DescricaoConta") or ""
-                for coluna, (ordem, ini, fim) in colunas.items():
-                    valor = _numero_br(_tag(c, coluna))
-                    if valor is None and fixa:
-                        valor = "0"
-                    if valor is None or (not rotulo and _texto_zero(valor)):
+                fixed = (_tag(c, "ContaFixa") or "").lower() == "true"
+                label = _tag(c, "DescricaoConta") or ""
+                for column, (order, start, end) in columns.items():
+                    value = _number_br(_tag(c, column))
+                    if value is None and fixed:
+                        value = "0"
+                    if value is None or (not label and _zero_text(value)):
                         continue
-                    linhas.setdefault(f"{dem}_{inf}", []).append({
-                        "CNPJ_CIA": cnpj, "DT_REFER": refer, "VERSAO": versao,
-                        "DENOM_CIA": nome, "ESCALA_MOEDA": escala,
-                        "ORDEM_EXERC": ordem, "DT_INI_EXERC": ini,
-                        "DT_FIM_EXERC": fim, "CD_CONTA": conta,
-                        "DS_CONTA": rotulo,
-                        "VL_CONTA": valor,
+                    lines.setdefault(f"{statement}_{inf}", []).append({
+                        "CNPJ_CIA": cnpj, "DT_REFER": refer, "VERSAO": version,
+                        "DENOM_CIA": name, "ESCALA_MOEDA": scale,
+                        "ORDEM_EXERC": order, "DT_INI_EXERC": start,
+                        "DT_FIM_EXERC": end, "CD_CONTA": account,
+                        "DS_CONTA": label,
+                        "VL_CONTA": value,
                     })
 
     capital = None
-    mi = re.search(r"<CaptalIntegralizado>(.*?)</CaptalIntegralizado>", x, re.S)
+    paid_in = re.search(r"<CaptalIntegralizado>(.*?)</CaptalIntegralizado>", x, re.S)
     mt = re.search(r"<Tesouraria>(.*?)</Tesouraria>", x, re.S)
-    tot = _numero_br(_tag(mi.group(1), "QtdeTotalAcoes")) if mi else None
+    tot = _number_br(_tag(paid_in.group(1), "QtdeTotalAcoes")) if paid_in else None
     if tot:
-        capital = {"CNPJ_CIA": cnpj, "DT_REFER": refer, "VERSAO": versao,
-                   "DENOM_CIA": nome, "QT_ACAO_TOTAL_CAP_INTEGR": tot,
+        capital = {"CNPJ_CIA": cnpj, "DT_REFER": refer, "VERSAO": version,
+                   "DENOM_CIA": name, "QT_ACAO_TOTAL_CAP_INTEGR": tot,
                    "QT_ACAO_TOTAL_TESOURO":
-                       (_numero_br(_tag(mt.group(1), "QtdeTotalAcoes"))
+                       (_number_br(_tag(mt.group(1), "QtdeTotalAcoes"))
                         if mt else None) or "0"}
-    if not linhas:
+    if not lines:
         return None, None, "XML único sem demonstrativo"
-    return linhas, capital, None
+    return lines, capital, None
 
 
-def baixar(id_doc: str, tentativas: int = 5) -> bytes | None:
-    pedido = urllib.request.Request(RAD.format(id=id_doc),
+def download(doc_id: str, attempts: int = 5) -> bytes | None:
+    request = urllib.request.Request(RAD.format(id=doc_id),
                                     headers={"User-Agent": "Mozilla/5.0"})
-    for i in range(tentativas):
+    for i in range(attempts):
         try:
-            with urllib.request.urlopen(pedido, timeout=300) as r:
-                corpo = r.read()
-            if corpo[:2] != b"PK":
+            with urllib.request.urlopen(request, timeout=300) as r:
+                body = r.read()
+            if body[:2] != b"PK":
                 return None  # o RAD devolveu página, e não pacote
-            zipfile.ZipFile(io.BytesIO(corpo))  # truncado não abre
-            return corpo
+            zipfile.ZipFile(io.BytesIO(body))  # truncado não abre
+            return body
         except (urllib.error.URLError, TimeoutError, ConnectionError,
                 zipfile.BadZipFile, OSError):
             time.sleep(5 * (i + 1))
@@ -369,82 +369,82 @@ def main() -> int:
     a = ap.parse_args()
 
     cvm = Path(a.cvm)
-    ponte = Path("docs/validacao/ponte_cvm.json")
-    deslistadas = Path("data/b3/ponte_deslistadas.json")
-    for p in (ponte, deslistadas):
+    bridge = Path("docs/validacao/ponte_cvm.json")
+    delisted_list = Path("data/b3/ponte_deslistadas.json")
+    for p in (bridge, delisted_list):
         if not p.exists():
             print(f"{p} não existe — rode antes a sequência do item C5.",
                   file=sys.stderr)
             return 2
-    cnpjs = set(json.loads(ponte.read_text(encoding="utf-8"))["ponte"].values())
-    cnpjs |= set(json.loads(deslistadas.read_text(encoding="utf-8")).keys())
+    cnpjs = set(json.loads(bridge.read_text(encoding="utf-8"))["ponte"].values())
+    cnpjs |= set(json.loads(delisted_list.read_text(encoding="utf-8")).keys())
 
-    alvo = vigentes_antigas(indice(cvm, cnpjs))
-    global _destino
-    destino = cvm / "versoes"
-    destino.mkdir(parents=True, exist_ok=True)
-    _destino = str(destino)
-    feitos_arq = destino / "baixados.json"
-    feitos = (json.loads(feitos_arq.read_text(encoding="utf-8"))
-              if feitos_arq.exists() else {})
+    target = old_in_force(index(cvm, cnpjs))
+    global _destination
+    destination = cvm / "versoes"
+    destination.mkdir(parents=True, exist_ok=True)
+    _destination = str(destination)
+    done_file = destination / "baixados.json"
+    done = (json.loads(done_file.read_text(encoding="utf-8"))
+              if done_file.exists() else {})
     # Download que falhou volta à fila; pacote que não converte, não.
-    faltam = [x for x in alvo
-              if feitos.get(x[1][2], {}).get("motivo", "download falhou")
+    still_missing = [x for x in target
+              if done.get(x[1][2], {}).get("motivo", "download falhou")
               == "download falhou"]
-    print(f"== Versões antigas vigentes em coorte: {len(alvo)} "
-          f"({len(alvo) - len(faltam)} já baixadas, {len(faltam)} faltam) ==")
+    print(f"== Versões antigas vigentes em coorte: {len(target)} "
+          f"({len(target) - len(still_missing)} já baixadas, {len(still_missing)} faltam) ==")
     if a.contar:
         return 0
 
-    def buscar(item):
-        (cnpj, refer, doc), (versao, receb, id_doc, nome) = item
+    def fetch(item):
+        (cnpj, refer, doc), (version, received, doc_id, name) = item
         time.sleep(a.pausa)
-        pacote = baixar(id_doc)
-        if pacote is None:
+        package = download(doc_id)
+        if package is None:
             return item, (None, None, "download falhou")
         try:
-            return item, converter(pacote, cnpj, refer, versao, nome)
+            return item, convert(package, cnpj, refer, version, name)
         except (zipfile.BadZipFile, KeyError, ValueError) as e:
             return item, (None, None, f"conversão falhou: {e}")
 
     # Poucas conexões ao mesmo tempo: o RAD reseta a transferência longa, e o
     # pacote passa de 15 MB por causa do PDF. A escrita fica neste fio.
     with ThreadPoolExecutor(max_workers=a.conexoes) as pool:
-        resultados = pool.map(buscar, faltam)
-        for i, (item, (linhas, capital, motivo)) in enumerate(resultados):
-            (cnpj, refer, doc), (versao, receb, id_doc, nome) = item
-            registrar(doc, linhas, capital)
-            feitos[id_doc] = {"cnpj": cnpj, "refer": refer, "doc": doc,
-                              "versao": versao, "recebidoEm": receb,
-                              "motivo": motivo or "ok"}
-            feitos_arq.write_text(
-                json.dumps(feitos, ensure_ascii=False, indent=0),
+        results = pool.map(fetch, still_missing)
+        for i, (item, (lines, capital, reason)) in enumerate(results):
+            (cnpj, refer, doc), (version, received, doc_id, name) = item
+            register(doc, lines, capital)
+            done[doc_id] = {"cnpj": cnpj, "refer": refer, "doc": doc,
+                              "versao": version, "recebidoEm": received,
+                              "motivo": reason or "ok"}
+            done_file.write_text(
+                json.dumps(done, ensure_ascii=False, indent=0),
                 encoding="utf-8")
-            print(f"  [{i + 1}/{len(faltam)}] {doc} {refer} v{versao} "
-                  f"{nome[:30]}: {motivo or 'ok'}", flush=True)
+            print(f"  [{i + 1}/{len(still_missing)}] {doc} {refer} v{version} "
+                  f"{name[:30]}: {reason or 'ok'}", flush=True)
     return 0
 
 
-def registrar(doc: str, linhas, capital) -> None:
+def register(doc: str, lines, capital) -> None:
     """Acrescenta as linhas de uma versão aos CSVs de `data/cvm/versoes/`."""
-    destino = Path(_destino)
-    if linhas:
-        for dem, rows in linhas.items():
-            arq = destino / f"{doc.lower()}_cia_aberta_{dem}_versoes.csv"
-            novo = not arq.exists()
-            with arq.open("a", encoding="latin-1", errors="replace",
+    destination = Path(_destination)
+    if lines:
+        for statement, rows in lines.items():
+            out_path = destination / f"{doc.lower()}_cia_aberta_{statement}_versoes.csv"
+            new = not out_path.exists()
+            with out_path.open("a", encoding="latin-1", errors="replace",
                           newline="") as h:
-                w = csv.DictWriter(h, fieldnames=CAMPOS, delimiter=";")
-                if novo:
+                w = csv.DictWriter(h, fieldnames=FIELDS, delimiter=";")
+                if new:
                     w.writeheader()
                 w.writerows(rows)
         if capital:
-            arq = destino / f"{doc.lower()}_cia_aberta_composicao_capital_versoes.csv"
-            novo = not arq.exists()
-            with arq.open("a", encoding="latin-1", errors="replace",
+            out_path = destination / f"{doc.lower()}_cia_aberta_composicao_capital_versoes.csv"
+            new = not out_path.exists()
+            with out_path.open("a", encoding="latin-1", errors="replace",
                           newline="") as h:
-                w = csv.DictWriter(h, fieldnames=CAMPOS_CAPITAL, delimiter=";")
-                if novo:
+                w = csv.DictWriter(h, fieldnames=CAPITAL_FIELDS, delimiter=";")
+                if new:
                     w.writeheader()
                 w.writerow(capital)
 

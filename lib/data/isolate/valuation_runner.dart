@@ -71,9 +71,9 @@ abstract final class ValuationRunner {
     // `compute` já fazia no navegador.
     if (!needsIsolate || kIsWeb) return _evaluate(request);
     if (!AuditRecorder.isActive) return compute(_evaluate, request);
-    final (resultado, evento) = await compute(_evaluateWithTrace, request);
-    if (evento != null) AuditRecorder.emit(evento);
-    return resultado;
+    final (result, event) = await compute(_evaluateWithTrace, request);
+    if (event != null) AuditRecorder.emit(event);
+    return result;
   }
 
   /// Ponto de entrada da isolate quando há alguém ouvindo do lado de cá: a
@@ -85,10 +85,10 @@ abstract final class ValuationRunner {
   static (Result<ValuationResult>, AuditEvent?) _evaluateWithTrace(
     ValuationRequest request,
   ) {
-    AuditEvent? evento;
-    AuditRecorder.attach((e) => evento = e);
+    AuditEvent? event;
+    AuditRecorder.attach((e) => event = e);
     try {
-      return (_evaluate(request), evento);
+      return (_evaluate(request), event);
     } finally {
       AuditRecorder.detach();
     }

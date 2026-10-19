@@ -30,11 +30,11 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
 /// Quantos passes o veredito da perpetuidade consumiu, lido do aviso.
-int? _passes(List<String> avisos) {
-  for (final a in avisos) {
+int? _passes(List<String> warnings) {
+  for (final a in warnings) {
     final m = RegExp(r'fechou em (\d+) passe').firstMatch(a);
     if (m != null) return int.tryParse(m.group(1)!);
     final i = RegExp(r'estabilizaram em (\d+) passes').firstMatch(a);
@@ -43,7 +43,7 @@ int? _passes(List<String> avisos) {
   return null;
 }
 
-double? _mediana(List<double> v) {
+double? _median(List<double> v) {
   if (v.isEmpty) return null;
   final s = [...v]..sort();
   final m = s.length ~/ 2;
@@ -54,21 +54,21 @@ String _pc(double v) => '${(v * 100).toStringAsFixed(1)}%';
 String _mx(double v) => '${v.toStringAsFixed(2)}x';
 
 Future<void> main(List<String> args) async {
-  final limiteIdx = args.indexOf('--limit');
-  final limite = limiteIdx >= 0 ? int.tryParse(args[limiteIdx + 1]) ?? 0 : 0;
+  final limitIndex = args.indexOf('--limit');
+  final limit = limitIndex >= 0 ? int.tryParse(args[limitIndex + 1]) ?? 0 : 0;
 
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
   try {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
 
     var universe = (await ctx.fundamentals.universe()).unwrap();
-    if (limite > 0 && universe.length > limite) {
-      universe = universe.sublist(0, limite);
+    if (limit > 0 && universe.length > limit) {
+      universe = universe.sublist(0, limit);
     }
 
     final prior = await ResolveBetaPrior.call(
@@ -76,10 +76,10 @@ Future<void> main(List<String> args) async {
       prices: ctx.prices,
       fundamentals: ctx.fundamentals,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     );
 
-    final saida = <Map<String, dynamic>>[];
+    final output = <Map<String, dynamic>>[];
     var i = 0;
     for (final ticker in universe) {
       i++;
@@ -91,7 +91,7 @@ Future<void> main(List<String> args) async {
         fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
@@ -105,12 +105,12 @@ Future<void> main(List<String> args) async {
       if (res.isErr) continue;
       final v = res.unwrap();
       final d = v.diagnostics!;
-      final justo = v.fairValue.reais;
-      final preco = inputs.marketPrice;
-      if (justo <= 0 || preco <= 0) continue;
+      final fairValue = v.fairValue.reais;
+      final price = inputs.marketPrice;
+      if (fairValue <= 0 || price <= 0) continue;
 
       /// O mesmo ativo, pela mesma cascata, com o freio trocado.
-      double? sob(ReinvestmentPolicy politica) {
+      double? under(ReinvestmentPolicy policy) {
         final r = ValuationCascade.evaluate(ValuationInputs(
           ticker: inputs.ticker,
           asOf: inputs.asOf,
@@ -127,22 +127,22 @@ Future<void> main(List<String> args) async {
           prices: inputs.prices,
           isDistressed: inputs.isDistressed,
           unleveredBeta: inputs.unleveredBeta,
-          reinvestmentOverride: politica,
+          reinvestmentOverride: policy,
         ));
         if (r.isErr) return null;
         final x = r.unwrap().fairValue.reais;
-        return x > 0 ? x / justo : null;
+        return x > 0 ? x / fairValue : null;
       }
 
-      final mNecessario = preco / justo;
-      double? fracaoFechada(double? m) {
+      final mRequired = price / fairValue;
+      double? closedFraction(double? m) {
         if (m == null || !m.isFinite) return null;
-        if ((mNecessario - 1).abs() < 1e-9) return null;
-        return (m - 1) / (mNecessario - 1);
+        if ((mRequired - 1).abs() < 1e-9) return null;
+        return (m - 1) / (mRequired - 1);
       }
 
       /// O mesmo ativo com a convenção de caixa de antes da decisão 48.
-      double? sobFimDeAno() {
+      double? underEndOfYear() {
         final r = ValuationCascade.evaluate(ValuationInputs(
           ticker: inputs.ticker,
           asOf: inputs.asOf,
@@ -159,27 +159,27 @@ Future<void> main(List<String> args) async {
           prices: inputs.prices,
           isDistressed: inputs.isDistressed,
           unleveredBeta: inputs.unleveredBeta,
-          cashTimingOverride: CashTiming.fimDeAno,
+          cashTimingOverride: CashTiming.endOfYear,
         ));
         if (r.isErr) return null;
         final x = r.unwrap().fairValue.reais;
-        return x > 0 ? x / justo : null;
+        return x > 0 ? x / fairValue : null;
       }
 
-      final mFimDeAno = sobFimDeAno();
-      final mSemFreio = sob(ReinvestmentPolicy.nenhum);
-      final mReal = sob(ReinvestmentPolicy.crescimentoReal);
-      final mSemConv = sob(ReinvestmentPolicy.semConvergencia);
-      final mSemTeto = sob(ReinvestmentPolicy.semTeto);
+      final mEndOfYear = underEndOfYear();
+      final mNoBrake = under(ReinvestmentPolicy.none);
+      final mReal = under(ReinvestmentPolicy.realGrowth);
+      final mNoConvergence = under(ReinvestmentPolicy.noConvergence);
+      final mUncapped = under(ReinvestmentPolicy.uncapped);
 
-      final retencao = d.retentionPath;
+      final retention = d.retentionPath;
 
-      saida.add({
+      output.add({
         'ticker': ticker.value,
         'setor': inputs.sectorKey,
         'via': v.model.name,
-        'preco': preco,
-        'justo': justo,
+        'preco': price,
+        'justo': fairValue,
         'potencial': v.upside,
         'participacaoEquity': d.equityShare,
         'pesoTerminal': d.terminalShare,
@@ -196,35 +196,35 @@ Future<void> main(List<String> args) async {
             v.warnings.any((w) => w.contains('não se estabilizaram em')),
         // O freio, ano a ano, como a cascata o aplicou — inclusive com o
         // caminho de taxas resolvido dentro do `ROIC_t`.
-        'retencaoAno1': retencao.isNotEmpty ? retencao.first : null,
-        'retencaoAnoN': retencao.isNotEmpty ? retencao.last : null,
-        'noTetoAno1': retencao.isNotEmpty && retencao.first >= 0.9499,
-        'mNecessario': mNecessario,
-        'mSemFreio': mSemFreio,
+        'retencaoAno1': retention.isNotEmpty ? retention.first : null,
+        'retencaoAnoN': retention.isNotEmpty ? retention.last : null,
+        'noTetoAno1': retention.isNotEmpty && retention.first >= 0.9499,
+        'mNecessario': mRequired,
+        'mSemFreio': mNoBrake,
         'mCrescimentoReal': mReal,
-        'mSemConvergencia': mSemConv,
-        'mSemTeto': mSemTeto,
-        'mFimDeAno': mFimDeAno,
-        'fechaSemFreio': fracaoFechada(mSemFreio),
-        'fechaCrescimentoReal': fracaoFechada(mReal),
-        'fechaSemConvergencia': fracaoFechada(mSemConv),
-        'fechaSemTeto': fracaoFechada(mSemTeto),
+        'mSemConvergencia': mNoConvergence,
+        'mSemTeto': mUncapped,
+        'mFimDeAno': mEndOfYear,
+        'fechaSemFreio': closedFraction(mNoBrake),
+        'fechaCrescimentoReal': closedFraction(mReal),
+        'fechaSemConvergencia': closedFraction(mNoConvergence),
+        'fechaSemTeto': closedFraction(mUncapped),
       });
     }
     stderr.writeln('');
 
     File('docs/validacao/fluxo_explicito.json').writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(saida),
+      const JsonEncoder.withIndent(' ').convert(output),
     );
-    _imprimir(saida);
+    _printReport(output);
     stderr.writeln('\nescrito docs/validacao/fluxo_explicito.json '
-        '(${saida.length} ativos)');
+        '(${output.length} ativos)');
   } finally {
     await ctx.dispose();
   }
 }
 
-void _imprimir(List<Map<String, dynamic>> l) {
+void _printReport(List<Map<String, dynamic>> l) {
   List<double> col(String k) => [
         for (final e in l)
           if (e[k] != null && (e[k] as num).toDouble().isFinite)
@@ -236,109 +236,109 @@ void _imprimir(List<Map<String, dynamic>> l) {
 
   final r1 = col('retencaoAno1'), rn = col('retencaoAnoN');
   stdout.writeln('-- retenção imposta pelo freio --');
-  stdout.writeln('  ano 1: mediana=${_pc(_mediana(r1)!)}   '
-      'ano N: mediana=${_pc(_mediana(rn)!)}');
+  stdout.writeln('  ano 1: mediana=${_pc(_median(r1)!)}   '
+      'ano N: mediana=${_pc(_median(rn)!)}');
   stdout.writeln('  no teto de 95% no ano 1: '
       '${l.where((e) => e['noTetoAno1'] == true).length} de ${l.length}');
 
   final need = col('mNecessario')..sort();
   stdout.writeln('\n-- quanto o preço justo teria de subir --');
   stdout.writeln('  p25=${_mx(need[need.length ~/ 4])}  '
-      'mediana=${_mx(_mediana(need)!)}  '
+      'mediana=${_mx(_median(need)!)}  '
       'p75=${_mx(need[3 * need.length ~/ 4])}');
   stdout.writeln('  já acima do preço: '
       '${need.where((x) => x <= 1).length} de ${need.length}');
-  final so = need.where((x) => x > 1).toList();
+  final stillBelow = need.where((x) => x > 1).toList();
   stdout.writeln('  entre os que têm vão a fechar: '
-      'mediana=${_mx(_mediana(so)!)}  (n=${so.length})');
+      'mediana=${_mx(_median(stillBelow)!)}  (n=${stillBelow.length})');
 
   // **Só quem tem vão a fechar.** Trinta dos 120 já saem acima do preço de
   // mercado, e para eles todo contrafactual "fecha tudo" por vacuidade — a
   // mediana com eles dentro elogia qualquer coisa.
-  final comVao = [
+  final withGap = [
     for (final e in l)
       if (e['mNecessario'] != null && (e['mNecessario'] as num) > 1.0) e
   ];
   stdout.writeln('\n-- contrafactuais, rodados pela cascata '
-      '(${comVao.length} com vão a fechar) --');
-  void linha(String nome, String chaveM, String chaveF) {
+      '(${withGap.length} com vão a fechar) --');
+  void row(String name, String engineKey, String firmKey) {
     final ms = [
-      for (final e in comVao)
-        if (e[chaveM] != null && (e[chaveM] as num).toDouble().isFinite)
-          (e[chaveM] as num).toDouble()
+      for (final e in withGap)
+        if (e[engineKey] != null && (e[engineKey] as num).toDouble().isFinite)
+          (e[engineKey] as num).toDouble()
     ];
     final fs = [
-      for (final e in comVao)
-        if (e[chaveF] != null && (e[chaveF] as num).toDouble().isFinite)
-          (e[chaveF] as num).toDouble()
+      for (final e in withGap)
+        if (e[firmKey] != null && (e[firmKey] as num).toDouble().isFinite)
+          (e[firmKey] as num).toDouble()
     ];
     if (ms.isEmpty) {
-      stdout.writeln('  ${nome.padRight(28)} — sem medida');
+      stdout.writeln('  ${name.padRight(28)} — sem medida');
       return;
     }
-    final fecha = comVao
+    final closes = withGap
         .where((e) =>
-            e[chaveM] != null &&
-            (e[chaveM] as num) >= (e['mNecessario'] as num))
+            e[engineKey] != null &&
+            (e[engineKey] as num) >= (e['mNecessario'] as num))
         .length;
-    stdout.writeln('  ${nome.padRight(28)} m=${_mx(_mediana(ms)!)}  '
-        'fecha ${_pc(_mediana(fs) ?? 0).padLeft(7)} do vão  '
-        '(fecha tudo em $fecha de ${ms.length})');
+    stdout.writeln('  ${name.padRight(28)} m=${_mx(_median(ms)!)}  '
+        'fecha ${_pc(_median(fs) ?? 0).padLeft(7)} do vão  '
+        '(fecha tudo em $closes de ${ms.length})');
   }
 
-  linha('freio desligado', 'mSemFreio', 'fechaSemFreio');
-  linha('freio só no crescimento real', 'mCrescimentoReal',
+  row('freio desligado', 'mSemFreio', 'fechaSemFreio');
+  row('freio só no crescimento real', 'mCrescimentoReal',
       'fechaCrescimentoReal');
-  linha('sem convergência do ROIC', 'mSemConvergencia', 'fechaSemConvergencia');
-  linha('freio sem o teto de 95%', 'mSemTeto', 'fechaSemTeto');
+  row('sem convergência do ROIC', 'mSemConvergencia', 'fechaSemConvergencia');
+  row('freio sem o teto de 95%', 'mSemTeto', 'fechaSemTeto');
 
   // Quantos passes a volta veredito-taxa consumiu (decisão 51).
   final passes = <int, int>{};
-  var instaveis = 0;
+  var unstable = 0;
   for (final e in l) {
     final p = e['passesDoVeredito'];
     if (p is int) passes[p] = (passes[p] ?? 0) + 1;
-    if (e['vereditoInstavel'] == true) instaveis++;
+    if (e['vereditoInstavel'] == true) unstable++;
   }
   if (passes.isNotEmpty) {
-    final chaves = passes.keys.toList()..sort();
+    final keys = passes.keys.toList()..sort();
     stdout.writeln('\n-- passes do veredito da perpetuidade --');
-    for (final k in chaves) {
+    for (final k in keys) {
       stdout.writeln('  $k ${k == 1 ? "passe" : "passes"}: ${passes[k]}');
     }
-    stdout.writeln('  não estabilizaram no teto: $instaveis');
+    stdout.writeln('  não estabilizaram no teto: $unstable');
   }
 
   // A convenção de caixa não é contrafactual de freio: é a de **antes** da
   // decisão 48, e mede o que o meio de ano vale no universo. Vai como razão
   // pura, sem "fração fechada", porque ela já entrou em produção.
-  final fim = [
+  final end = [
     for (final e in l)
       if (e['mFimDeAno'] != null && (e['mFimDeAno'] as num).toDouble().isFinite)
         (e['mFimDeAno'] as num).toDouble()
   ];
-  if (fim.isNotEmpty) {
-    final ordenado = [...fim]..sort();
+  if (end.isNotEmpty) {
+    final sortedEntries = [...end]..sort();
     stdout.writeln('\n-- o que a convenção de meio de ano vale --');
     stdout.writeln('  justo(fim de ano) ÷ justo(produção): '
-        'p10=${_mx(ordenado[(ordenado.length * 0.1).floor()])}  '
-        'mediana=${_mx(_mediana(fim)!)}  '
-        'p90=${_mx(ordenado[(ordenado.length * 0.9).floor()])}  '
-        '(n=${fim.length})');
+        'p10=${_mx(sortedEntries[(sortedEntries.length * 0.1).floor()])}  '
+        'mediana=${_mx(_median(end)!)}  '
+        'p90=${_mx(sortedEntries[(sortedEntries.length * 0.9).floor()])}  '
+        '(n=${end.length})');
     stdout.writeln('  ou seja, o meio de ano levanta o preço justo em '
-        '${_pc(1 / _mediana(fim)! - 1)} na mediana');
+        '${_pc(1 / _median(end)! - 1)} na mediana');
   }
 
   // O teto de retenção é o único contrafactual que pode DERRUBAR o valor: sem
   // ele a retenção passa de 100% e o fluxo do ano fica negativo.
-  final semTeto = l
+  final uncapped = l
       .where((e) => e['mSemTeto'] != null && (e['mSemTeto'] as num) < 0.995)
       .toList();
   stdout.writeln('\n-- quem o teto de 95% está segurando --');
-  stdout.writeln('  ativos que perdem valor sem o teto: ${semTeto.length}');
-  semTeto.sort((a, b) =>
+  stdout.writeln('  ativos que perdem valor sem o teto: ${uncapped.length}');
+  uncapped.sort((a, b) =>
       (a['mSemTeto'] as num).compareTo(b['mSemTeto'] as num));
-  for (final e in semTeto.take(10)) {
+  for (final e in uncapped.take(10)) {
     stdout.writeln('    ${(e['ticker'] as String).padRight(7)} '
         'm=${_mx((e['mSemTeto'] as num).toDouble()).padLeft(7)}  '
         'retenção ano 1=${_pc((e['retencaoAno1'] as num).toDouble())}  '
@@ -346,11 +346,11 @@ void _imprimir(List<Map<String, dynamic>> l) {
         'g=${_pc((e['crescimento'] as num).toDouble())}');
   }
 
-  final aliq = col('aliquotaEstrutural');
-  if (aliq.isNotEmpty) {
+  final taxRateColumn = col('aliquotaEstrutural');
+  if (taxRateColumn.isNotEmpty) {
     stdout.writeln('\n-- alíquota estrutural aplicada (via da firma) --');
-    stdout.writeln('  mediana=${_pc(_mediana(aliq)!)} contra '
+    stdout.writeln('  mediana=${_pc(_median(taxRateColumn)!)} contra '
         '${_pc(ValuationParameters.statutoryTaxRate)} estatutários  '
-        '(n=${aliq.length})');
+        '(n=${taxRateColumn.length})');
   }
 }

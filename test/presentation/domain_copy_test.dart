@@ -8,34 +8,34 @@ import 'package:flutter_test/flutter_test.dart';
 /// o rótulo é texto de gente — não vazio, não o `name` cru, e sem dois valores
 /// do mesmo enum lidos igual na tela.
 void main() {
-  void confere<T extends Enum>(List<T> valores, String Function(T) rotulo) {
-    final lidos = [for (final v in valores) rotulo(v)];
-    for (var i = 0; i < valores.length; i++) {
-      expect(lidos[i].trim(), isNotEmpty, reason: '${valores[i]}');
-      expect(lidos[i], isNot(valores[i].name), reason: '${valores[i]}');
+  void check<T extends Enum>(List<T> values, String Function(T) label) {
+    final readLabels = [for (final v in values) label(v)];
+    for (var i = 0; i < values.length; i++) {
+      expect(readLabels[i].trim(), isNotEmpty, reason: '${values[i]}');
+      expect(readLabels[i], isNot(values[i].name), reason: '${values[i]}');
     }
-    expect(lidos.toSet().length, valores.length,
+    expect(readLabels.toSet().length, values.length,
         reason: 'dois valores de ${T.toString()} com o mesmo rótulo');
   }
 
   test('todo valor tem rótulo próprio', () {
-    confere(ValuationModel.values, (v) => v.rotulo);
-    confere(ScenarioBand.values, (v) => v.rotulo);
-    confere(ValuationCaveat.values, (v) => v.rotulo);
-    confere(TransversalOrdering.values, (v) => v.rotulo);
-    confere(MultipleKind.values, (v) => v.rotulo);
-    confere(MultipleRefusal.values, (v) => v.rotulo);
-    confere(ManualGroup.values, (v) => v.rotulo);
-    confere(ManualTerminal.values, (v) => v.rotulo);
+    check(ValuationModel.values, (v) => v.label);
+    check(ScenarioBand.values, (v) => v.label);
+    check(ValuationCaveat.values, (v) => v.label);
+    check(TransversalOrdering.values, (v) => v.label);
+    check(MultipleKind.values, (v) => v.label);
+    check(MultipleRefusal.values, (v) => v.label);
+    check(ManualGroup.values, (v) => v.label);
+    check(ManualTerminal.values, (v) => v.label);
   });
 
   test('a tela lê o que lia antes da mudança', () {
     // O texto não mudou de lugar para mudar de redação: quem decide a
     // redação agora é a tela, e esta é a de 22/09/2026.
-    expect(ValuationModel.dcfFcff.rotulo, 'DCF por fluxo da firma');
+    expect(ValuationModel.dcfFcff.label, 'DCF por fluxo da firma');
     // Pelas premissas, e não pelo resultado (decisão 148, item B38).
-    expect(ScenarioBand.bear.rotulo, 'Premissas mais duras');
-    expect(ScenarioBand.bull.rotulo, 'Premissas mais brandas');
-    expect(MultipleKind.firmaEbitda.rotulo, 'EV/EBITDA');
+    expect(ScenarioBand.bear.label, 'Premissas mais duras');
+    expect(ScenarioBand.bull.label, 'Premissas mais brandas');
+    expect(MultipleKind.evToEbitda.label, 'EV/EBITDA');
   });
 }

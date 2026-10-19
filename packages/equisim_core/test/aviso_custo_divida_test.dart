@@ -9,8 +9,8 @@ import 'package:test/test.dart';
 final _ticker = Ticker.parse('ABCD3');
 
 /// Dívida bruta de 4.000 e EBIT de 1.800 no primeiro exercício, crescendo 5%
-/// ao ano; [juro] é a despesa financeira, constante.
-List<FundamentalsSnapshot> _serie(double juro) {
+/// ao ano; [interest] é a despesa financeira, constante.
+List<FundamentalsSnapshot> _series(double interest) {
   final out = <FundamentalsSnapshot>[];
   var e = 1.0;
   for (var i = 12; i >= 0; i--) {
@@ -23,7 +23,7 @@ List<FundamentalsSnapshot> _serie(double juro) {
       netIncome: 900 * e,
       incomeBeforeTax: 1300 * e,
       incomeTaxExpense: -400 * e,
-      interestExpense: juro,
+      interestExpense: interest,
       earningsPerShare: 0.9 * e,
       cash: 200,
       shortTermDebt: 1000,
@@ -41,19 +41,19 @@ List<FundamentalsSnapshot> _serie(double juro) {
   return out;
 }
 
-String? _aviso(double juro) {
+String? _warning(double interest) {
   final r = ValuationCascade.evaluate(ValuationInputs(
     ticker: _ticker,
     asOf: DateTime(2026, 9, 9),
-    fundamentals: _serie(juro),
+    fundamentals: _series(interest),
     marketPrice: 12.0,
     capm: const CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
     declaredTerminalRiskFreeRate: 0.094,
   ));
   expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
-  final avisos = r.unwrap().warnings
+  final warnings = r.unwrap().warnings
       .where((w) => w.startsWith('O custo da dívida implícito'));
-  return avisos.isEmpty ? null : avisos.single;
+  return warnings.isEmpty ? null : warnings.single;
 }
 
 void main() {
@@ -61,7 +61,7 @@ void main() {
       'prêmio veio dela', () {
     // 960 ÷ 4.000 = 24%, dentro de [14%, 24%]; a cobertura de 3,4x dá 2,4
     // p.p., e a alavancagem de 0,9x, 1,3 p.p.
-    final w = _aviso(960)!;
+    final w = _warning(960)!;
     expect(w, contains('deu 24.0% a.a., e o adotado é 16.4% a.a.'));
     expect(w, contains('dentro da faixa defensável de 14.0% a 24.0%'));
     expect(w, contains('o da cobertura, de 2.4%'));
@@ -71,7 +71,7 @@ void main() {
   test('observado fora da faixa: a cobertura sai, e o prêmio é o da '
       'alavancagem', () {
     // 400 ÷ 4.000 = 10%, abaixo da taxa livre de risco.
-    final w = _aviso(400)!;
+    final w = _warning(400)!;
     expect(w, contains('deu 10.0% a.a., e o adotado é 15.3% a.a.'));
     expect(w, contains('fora da faixa defensável de 14.0% a 24.0%'));
     expect(w, contains('prêmio é o da alavancagem de 0.88x'));
@@ -80,6 +80,6 @@ void main() {
 
   test('observado perto do adotado não gera aviso', () {
     // 16,4% observado contra 16,4% adotado.
-    expect(_aviso(656), isNull);
+    expect(_warning(656), isNull);
   });
 }

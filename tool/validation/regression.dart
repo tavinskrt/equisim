@@ -69,9 +69,9 @@ class Regression {
       while (j + 1 < n && values[idx[j + 1]].compareTo(values[idx[i]]) == 0) {
         j++;
       }
-      final media = (i + j) / 2 + 1;
+      final mean = (i + j) / 2 + 1;
       for (var k = i; k <= j; k++) {
-        out[idx[k]] = media;
+        out[idx[k]] = mean;
       }
       i = j + 1;
     }
@@ -281,22 +281,22 @@ class Regression {
       s += x;
     }
     final m = s / k;
-    double gama(int j) {
-      var soma = 0.0;
+    double gamma(int j) {
+      var sum = 0.0;
       for (var t = j; t < k; t++) {
-        soma += (v[t] - m) * (v[t - j] - m);
+        sum += (v[t] - m) * (v[t - j] - m);
       }
-      return soma / k;
+      return sum / k;
     }
 
     final l = lags < k ? lags : k - 1;
-    var lrv = gama(0);
+    var lrv = gamma(0);
     for (var j = 1; j <= l; j++) {
-      lrv += 2 * (1 - j / (l + 1)) * gama(j);
+      lrv += 2 * (1 - j / (l + 1)) * gamma(j);
     }
-    final variancia = lrv / k * k / (k - 1);
-    if (!(variancia > 0) || !variancia.isFinite) return null;
-    final se = math.sqrt(variancia);
+    final variance = lrv / k * k / (k - 1);
+    if (!(variance > 0) || !variance.isFinite) return null;
+    final se = math.sqrt(variance);
     return (mean: m, se: se, t: m / se, n: k, lags: l);
   }
 
@@ -332,14 +332,14 @@ class Regression {
     if (base == null || overlap < 0 || !base.t.isFinite) return null;
     final k = base.n;
     final l = overlap < k ? overlap : k - 1;
-    var somaC = 0.0, somaF = 0.0;
+    var sumC = 0.0, sumF = 0.0;
     for (var j = 1; j <= l; j++) {
       final rho = 1 - j / (l + 1);
-      somaC += (k - j) * rho;
-      somaF += (1 - j / k) * rho;
+      sumC += (k - j) * rho;
+      sumF += (1 - j / k) * rho;
     }
-    final c = 1 - 2 / (k * (k - 1)) * somaC;
-    final f = 1 + 2 * somaF;
+    final c = 1 - 2 / (k * (k - 1)) * sumC;
+    final f = 1 + 2 * sumF;
     if (!(c > 0) || !(f > 0)) return null;
     return (t: base.t * math.sqrt(c / f), c: c, f: f, n: k, overlap: l);
   }
@@ -348,7 +348,7 @@ class Regression {
   /// do R3 pede, escrito como probabilidade.
   static const double r3Tail = 0.022750131948179195;
 
-  static final Map<String, List<double>> _nulas = {};
+  static final Map<String, List<double>> _nullDistributions = {};
 
   /// Distribuição, sob a hipótese nula, do `t` de [overlapAdjustedT] para `k`
   /// coortes com `L` sobreposições: [draws] séries de somas sobrepostas de
@@ -363,7 +363,7 @@ class Regression {
   static List<double> overlapNull(int k, int overlap,
       {int draws = 20000, int seed = 20260915}) {
     final l = overlap < k ? overlap : k - 1;
-    return _nulas['$k|$l|$draws|$seed'] ??= () {
+    return _nullDistributions['$k|$l|$draws|$seed'] ??= () {
       final rng = SplitMix64(seed);
       double normal() {
         // Box-Muller: u em (0, 1] para o logaritmo.
@@ -373,17 +373,17 @@ class Regression {
       }
 
       final out = <double>[];
-      final choques = List<double>.filled(k + l, 0);
+      final shocks = List<double>.filled(k + l, 0);
       while (out.length < draws) {
-        for (var i = 0; i < choques.length; i++) {
-          choques[i] = normal();
+        for (var i = 0; i < shocks.length; i++) {
+          shocks[i] = normal();
         }
-        final serie = [
+        final series = [
           for (var t = 0; t < k; t++)
-            [for (var m = t; m <= t + l; m++) choques[m]]
+            [for (var m = t; m <= t + l; m++) shocks[m]]
                 .fold<double>(0, (a, b) => a + b),
         ];
-        final r = overlapAdjustedT(serie, l);
+        final r = overlapAdjustedT(series, l);
         if (r != null && r.t.isFinite) out.add(r.t);
       }
       return out..sort();
@@ -393,25 +393,25 @@ class Regression {
   /// Crítico unilateral do `t` corrigido com o nível de [tail] — por padrão, o
   /// de `t > 2` sob a normal.
   static double overlapCritical(int k, int overlap, {double tail = r3Tail}) {
-    final nula = overlapNull(k, overlap);
-    final i = ((1 - tail) * nula.length).floor().clamp(0, nula.length - 1);
-    return nula[i];
+    final nullDistribution = overlapNull(k, overlap);
+    final i = ((1 - tail) * nullDistribution.length).floor().clamp(0, nullDistribution.length - 1);
+    return nullDistribution[i];
   }
 
   /// Probabilidade unilateral, sob a nula da sobreposição, de um `t` corrigido
   /// pelo menos tão alto quanto [t].
   static double overlapPValue(double t, int k, int overlap) {
-    final nula = overlapNull(k, overlap);
-    var lo = 0, hi = nula.length;
+    final nullDistribution = overlapNull(k, overlap);
+    var lo = 0, hi = nullDistribution.length;
     while (lo < hi) {
       final m = (lo + hi) ~/ 2;
-      if (nula[m] < t) {
+      if (nullDistribution[m] < t) {
         lo = m + 1;
       } else {
         hi = m;
       }
     }
-    return (nula.length - lo) / nula.length;
+    return (nullDistribution.length - lo) / nullDistribution.length;
   }
 
   /// Inversa por Gauss-Jordan com pivoteamento parcial. `null` se singular.
@@ -461,13 +461,13 @@ class Regression {
 /// chegar ao mesmo número: `math.Random` e o `random` do Python são geradores
 /// diferentes. Este é pequeno, de período 2⁶⁴ e com a mesma sequência nos dois.
 class SplitMix64 {
-  SplitMix64(int seed) : _estado = seed;
-  int _estado;
+  SplitMix64(int seed) : _state = seed;
+  int _state;
 
   /// Próximo inteiro de 64 bits, com a aritmética modular do inteiro nativo.
   int nextInt() {
-    _estado += 0x9E3779B97F4A7C15;
-    var z = _estado;
+    _state += 0x9E3779B97F4A7C15;
+    var z = _state;
     z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9;
     z = (z ^ (z >>> 27)) * 0x94D049BB133111EB;
     return z ^ (z >>> 31);

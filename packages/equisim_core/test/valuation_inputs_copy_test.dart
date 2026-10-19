@@ -15,20 +15,20 @@ final _snap = FundamentalsSnapshot(
   fiscalPeriodEnd: DateTime(2025, 12, 31),
   netIncome: 100,
 );
-final _curva = YieldCurve.of(DateTime(2026, 9, 1), const [
+final _curve = YieldCurve.of(DateTime(2026, 9, 1), const [
   CurveVertex(1, 0.14),
   CurveVertex(5, 0.135),
   CurveVertex(10, 0.13),
 ])!;
-final _precos = PriceSeries(ticker: _t, points: [
+final _prices = PriceSeries(ticker: _t, points: [
   PricePoint(date: DateTime(2026, 9, 1), close: 10, volume: 100),
 ]);
-final _pares = PeerMultipleSet(byKind: const {
-  MultipleKind.precoLucro: PeerMultiple(median: 9, peers: 5, group: 'g'),
+final _pairs = PeerMultipleSet(byKind: const {
+  MultipleKind.priceToEarnings: PeerMultiple(median: 9, peers: 5, group: 'g'),
 }, asOf: DateTime(2026, 9, 1));
-final _oficial = OfficialShareCount(total: 1000, asOf: DateTime(2026, 9, 1));
+final _official = OfficialShareCount(total: 1000, asOf: DateTime(2026, 9, 1));
 const _capm = CapmInputs(riskFreeRate: 0.14, beta: 1.2, marketPremium: 0.06);
-final _emissoes = [
+final _issuances = [
   ShareIssue(
       date: DateTime(2026, 3, 1),
       amount: Money.fromReais(1e6),
@@ -36,7 +36,7 @@ final _emissoes = [
 ];
 
 /// Todo campo preenchido, e nenhum com o valor padrão.
-final _completo = ValuationInputs(
+final _complete = ValuationInputs(
   ticker: _t,
   asOf: DateTime(2026, 9, 9),
   fundamentals: [_snap],
@@ -49,9 +49,9 @@ final _completo = ValuationInputs(
   industry: 'transmissão',
   inflation: 0.045,
   declaredTerminalRiskFreeRate: 0.095,
-  riskFreeCurve: _curva,
-  officialShares: _oficial,
-  prices: _precos,
+  riskFreeCurve: _curve,
+  officialShares: _official,
+  prices: _prices,
   isDistressed: true,
   stateControlled: true,
   terminalReturnOverride: 0.13,
@@ -59,8 +59,8 @@ final _completo = ValuationInputs(
   growthOverride: 0.06,
   baseFactorOverride: 1.1,
   unleveredBeta: 0.8,
-  reinvestmentOverride: ReinvestmentPolicy.crescimentoReal,
-  cashTimingOverride: CashTiming.fimDeAno,
+  reinvestmentOverride: ReinvestmentPolicy.realGrowth,
+  cashTimingOverride: CashTiming.endOfYear,
   concessionEnd: DateTime(2030, 1, 1),
   dividendsInBeta: 7,
   creditReferenceRiskFree: 0.15,
@@ -68,15 +68,15 @@ final _completo = ValuationInputs(
   terminalBetaWeightOverride: 0.5,
   terminalLeverageOverride: 0.4,
   betaWindowYears: 3.5,
-  peerMultiples: _pares,
+  peerMultiples: _pairs,
   minorityEquityValue: 321,
-  scenarioTranslation: ScenarioTranslation.estruturaFixa,
+  scenarioTranslation: ScenarioTranslation.fixedStructure,
   contextNotes: const ['nota'],
-  shareIssues: _emissoes,
+  shareIssues: _issuances,
 );
 
 /// Os campos, por nome — para comparar e para dizer qual se perdeu.
-Map<String, Object?> _campos(ValuationInputs i) => {
+Map<String, Object?> _fields(ValuationInputs i) => {
       'ticker': i.ticker,
       'asOf': i.asOf,
       'fundamentals': i.fundamentals,
@@ -115,10 +115,10 @@ Map<String, Object?> _campos(ValuationInputs i) => {
       'shareIssues': i.shareIssues,
     };
 
-void _preserva(ValuationInputs copia, {Set<String> exceto = const {}}) {
-  final a = _campos(_completo), b = _campos(copia);
+void _preserves(ValuationInputs copy, {Set<String> except = const {}}) {
+  final a = _fields(_complete), b = _fields(copy);
   for (final k in a.keys) {
-    if (exceto.contains(k)) continue;
+    if (except.contains(k)) continue;
     expect(b[k], equals(a[k]), reason: 'a cópia perdeu `$k`');
   }
 }
@@ -126,14 +126,14 @@ void _preserva(ValuationInputs copia, {Set<String> exceto = const {}}) {
 void main() {
   test('nenhum campo do teste está no valor padrão', () {
     // Se um campo ficasse no padrão, a cópia que o perdesse passaria igual.
-    final padrao = ValuationInputs(
+    final pattern = ValuationInputs(
       ticker: _t,
       asOf: DateTime(2026, 9, 9),
       fundamentals: const [],
       marketPrice: 12,
       capm: _capm,
     );
-    final a = _campos(_completo), p = _campos(padrao);
+    final a = _fields(_complete), p = _fields(pattern);
     for (final k in a.keys) {
       if (const {'ticker', 'asOf', 'marketPrice', 'capm'}.contains(k)) continue;
       expect(a[k], isNot(equals(p[k])), reason: '`$k` está no padrão');
@@ -141,42 +141,42 @@ void main() {
   });
 
   test('withProjectionYears preserva todo campo — a concessão em produção', () {
-    final c = _completo.withProjectionYears(4);
+    final c = _complete.withProjectionYears(4);
     expect(c.projectionYears, 4);
-    _preserva(c, exceto: {'projectionYears'});
+    _preserves(c, except: {'projectionYears'});
   });
 
   test('withFundamentals troca só a série', () {
-    final nova = [_snap, _snap];
-    final c = _completo.withFundamentals(nova);
-    expect(c.fundamentals, same(nova));
-    _preserva(c, exceto: {'fundamentals'});
+    final newList = [_snap, _snap];
+    final c = _complete.withFundamentals(newList);
+    expect(c.fundamentals, same(newList));
+    _preserves(c, except: {'fundamentals'});
   });
 
   test('withoutPrices tira só a série de cotações', () {
-    final c = _completo.withoutPrices();
+    final c = _complete.withoutPrices();
     expect(c.prices, isNull);
-    _preserva(c, exceto: {'prices'});
+    _preserves(c, except: {'prices'});
   });
 
   test('withPeerMultiples troca só os pares', () {
-    final c = _completo.withPeerMultiples(null);
+    final c = _complete.withPeerMultiples(null);
     expect(c.peerMultiples, isNull);
-    _preserva(c, exceto: {'peerMultiples'});
+    _preserves(c, except: {'peerMultiples'});
   });
 
   test('withContextNotes troca só as ressalvas', () {
-    final c = _completo.withContextNotes(const ['a', 'b']);
+    final c = _complete.withContextNotes(const ['a', 'b']);
     expect(c.contextNotes, ['a', 'b']);
-    _preserva(c, exceto: {'contextNotes'});
+    _preserves(c, except: {'contextNotes'});
   });
 
   test('withOverrides troca só as seis imposições', () {
-    final c = _completo.withOverrides(lane: ValuationLane.firm);
+    final c = _complete.withOverrides(lane: ValuationLane.firm);
     expect(c.laneOverride, ValuationLane.firm);
     expect(c.terminalReturnOverride, isNull);
     expect(c.cashTimingOverride, isNull);
-    _preserva(c, exceto: {
+    _preserves(c, except: {
       'laneOverride',
       'terminalReturnOverride',
       'growthOverride',
@@ -187,11 +187,11 @@ void main() {
   });
 
   test('withRiskFreeShift desloca as taxas e preserva o resto', () {
-    final c = _completo.withRiskFreeShift(0.01);
+    final c = _complete.withRiskFreeShift(0.01);
     expect(c.capm.riskFreeRate, closeTo(0.15, 1e-12));
     expect(c.declaredTerminalRiskFreeRate, closeTo(0.105, 1e-12));
     expect(c.riskFreeCurve!.vertices.first.rate, closeTo(0.15, 1e-12));
-    _preserva(c, exceto: {
+    _preserves(c, except: {
       'capm',
       'declaredTerminalRiskFreeRate',
       'riskFreeCurve',

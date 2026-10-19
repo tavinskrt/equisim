@@ -12,30 +12,30 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 /// Aqui os widgets sao montados direto, com dado insuficiente de proposito,
 /// que e o caminho que renderiza o `EmptyState`.
-Widget _host(Widget child, {required double escala, required double largura}) =>
+Widget _host(Widget child, {required double scale, required double width}) =>
     MaterialApp(
       theme: buildFinTheme(isLight: true),
       home: MediaQuery(
         data: MediaQueryData(
-          size: Size(largura, 900),
-          textScaler: TextScaler.linear(escala),
+          size: Size(width, 900),
+          textScaler: TextScaler.linear(scale),
         ),
         child: Scaffold(body: SingleChildScrollView(child: child)),
       ),
     );
 
 void main() {
-  const larguras = <double>[320, 390];
-  const escalas = <double>[1.0, 1.3, 2.0];
+  const widths = <double>[320, 390];
+  const scales = <double>[1.0, 1.3, 2.0];
 
   group('Base100Chart — sem série', () {
-    for (final largura in larguras) {
-      for (final escala in escalas) {
-        testWidgets('cabe em ${largura.toInt()} dp sob ${escala}x', (
+    for (final width in widths) {
+      for (final scale in scales) {
+        testWidgets('cabe em ${width.toInt()} dp sob ${scale}x', (
           tester,
         ) async {
           tester.view.devicePixelRatio = 1.0;
-          tester.view.physicalSize = Size(largura, 900);
+          tester.view.physicalSize = Size(width, 900);
           addTearDown(tester.view.reset);
 
           await tester.pumpWidget(
@@ -45,8 +45,8 @@ void main() {
                 series: [],
                 dates: [],
               ),
-              escala: escala,
-              largura: largura,
+              scale: scale,
+              width: width,
             ),
           );
           await tester.pumpAndSettle();
@@ -55,7 +55,7 @@ void main() {
             tester.takeException(),
             isNull,
             reason: 'O estado vazio do gráfico estourou em '
-                '${largura.toInt()} dp sob ${escala}x. A altura declarada é a '
+                '${width.toInt()} dp sob ${scale}x. A altura declarada é a '
                 'do gráfico; o texto que ocupa o lugar dele precisa de piso, '
                 'não de teto.',
           );
@@ -65,20 +65,20 @@ void main() {
   });
 
   group('RiskReturnScatter — sem pontos', () {
-    for (final largura in larguras) {
-      for (final escala in escalas) {
-        testWidgets('cabe em ${largura.toInt()} dp sob ${escala}x', (
+    for (final width in widths) {
+      for (final scale in scales) {
+        testWidgets('cabe em ${width.toInt()} dp sob ${scale}x', (
           tester,
         ) async {
           tester.view.devicePixelRatio = 1.0;
-          tester.view.physicalSize = Size(largura, 900);
+          tester.view.physicalSize = Size(width, 900);
           addTearDown(tester.view.reset);
 
           await tester.pumpWidget(
             _host(
               const RiskReturnScatter(points: []),
-              escala: escala,
-              largura: largura,
+              scale: scale,
+              width: width,
             ),
           );
           await tester.pumpAndSettle();

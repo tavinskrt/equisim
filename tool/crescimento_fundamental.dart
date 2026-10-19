@@ -51,33 +51,33 @@ import 'validation/congelado.dart';
 import 'validation/ibovespa_longo.dart';
 import 'validation/regression.dart';
 
-const _saida = 'docs/validacao/crescimento_fundamental.json';
+const _output = 'docs/validacao/crescimento_fundamental.json';
 
 /// Payout a partir do qual a companhia é alta pagadora.
-const _payoutAlto = 0.75;
+const _highPayout = 0.75;
 
 /// Receita ÷ capital investido a partir da qual o negócio é de pouco capital.
-const _vendasSobreCapital = 2.0;
+const _salesToCapital = 2.0;
 
 /// Exercícios somados no payout, e o mínimo presente.
-const _anosDoPayout = 5;
-const _minimoDoPayout = 3;
+const _payoutYears = 5;
+const _minPayoutYears = 3;
 
 /// Retornos na mediana do ROE normalizado, e o mínimo.
-const _janelaDoRoe = 8;
-const _minimoDoRoe = 4;
+const _roeWindow = 8;
+const _minRoeYears = 4;
 
 /// Anos do crescimento do setor.
-const _anosDoSetor = 10;
+const _sectorYears = 10;
 
 /// Dias entre o fim do trimestre e a publicação das Contas Nacionais.
-const _defasagemDoPib = 70;
+const _gdpLag = 70;
 
 /// Exercícios do crescimento realizado.
-const _anosRealizados = 3;
+const _realizedYears = 3;
 
 /// A atividade do IBGE de cada setor e subsetor da B3, fixada antes de medir.
-const Map<String, String> _atividade = {
+const Map<String, String> _activity = {
   'Bens Industriais|Comércio': 'Comércio',
   'Bens Industriais|Construção e Engenharia': 'Construção',
   'Bens Industriais|Material de Transporte': 'Indústrias de transformação',
@@ -136,23 +136,23 @@ const Map<String, String> _atividade = {
 };
 
 /// Sem subsetor mapeado, o valor adicionado da economia inteira.
-const _economia = 'Valor adicionado a preços básicos';
+const _economy = 'Valor adicionado a preços básicos';
 
-String _pct(double? v, [int casas = 2]) =>
-    v == null ? '—' : '${(v * 100).toStringAsFixed(casas)}%';
+String _pct(double? v, [int decimals = 2]) =>
+    v == null ? '—' : '${(v * 100).toStringAsFixed(decimals)}%';
 
-double? _mediana(List<double> v) => v.isEmpty ? null : Inference.median(v);
+double? _median(List<double> v) => v.isEmpty ? null : Inference.median(v);
 
 // ---------------------------------------------------------------------------
 // Fontes
 // ---------------------------------------------------------------------------
 
 /// O valor adicionado por atividade, de `tool/pib_setorial_baixar.py`.
-class _PibSetorial {
-  _PibSetorial(this._series);
+class _SectorGdp {
+  _SectorGdp(this._series);
   final Map<String, Map<DateTime, double>> _series;
 
-  static _PibSetorial ler() {
+  static _SectorGdp read() {
     final f = File('data/indices/pib_setorial.json');
     if (!f.existsSync()) {
       throw StateError(
@@ -161,55 +161,55 @@ class _PibSetorial {
       );
     }
     final j = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
-    return _PibSetorial({
+    return _SectorGdp({
       for (final e in (j['atividades'] as Map<String, dynamic>).entries)
         e.key: {
           for (final p in (e.value as List).cast<List>())
-            _fimDoTrimestre(p[0] as String): (p[1] as num).toDouble(),
+            _endOfQuarter(p[0] as String): (p[1] as num).toDouble(),
         },
     });
   }
 
   /// `201904` é o quarto trimestre de 2019; devolve o último dia dele, em UTC.
-  static DateTime _fimDoTrimestre(String codigo) {
-    final ano = int.parse(codigo.substring(0, 4));
-    final t = int.parse(codigo.substring(4));
-    return DateTime.utc(ano, t * 3 + 1, 0);
+  static DateTime _endOfQuarter(String code) {
+    final year = int.parse(code.substring(0, 4));
+    final t = int.parse(code.substring(4));
+    return DateTime.utc(year, t * 3 + 1, 0);
   }
 
   /// Crescimento anual composto das quatro últimas leituras publicadas até
-  /// [data] contra as mesmas quatro, [anos] antes.
-  double? crescimento(
-    String atividade,
-    DateTime data, {
-    int anos = _anosDoSetor,
+  /// [date] contra as mesmas quatro, [years] antes.
+  double? growth(
+    String activity,
+    DateTime date, {
+    int years = _sectorYears,
   }) {
-    final s = _series[atividade];
+    final s = _series[activity];
     if (s == null) return null;
-    final limite = DateTime.utc(
-      data.year,
-      data.month,
-      data.day,
-    ).subtract(const Duration(days: _defasagemDoPib));
-    final publicados = s.keys.where((d) => !d.isAfter(limite)).toList()..sort();
-    if (publicados.length < 4) return null;
-    final ultimos = publicados.sublist(publicados.length - 4);
-    var hoje = 0.0, antes = 0.0;
-    for (final d in ultimos) {
-      final velho = DateTime.utc(d.year - anos, d.month + 1, 0);
-      final v = s[velho];
+    final limit = DateTime.utc(
+      date.year,
+      date.month,
+      date.day,
+    ).subtract(const Duration(days: _gdpLag));
+    final published = s.keys.where((d) => !d.isAfter(limit)).toList()..sort();
+    if (published.length < 4) return null;
+    final lastOnes = published.sublist(published.length - 4);
+    var today = 0.0, before = 0.0;
+    for (final d in lastOnes) {
+      final old = DateTime.utc(d.year - years, d.month + 1, 0);
+      final v = s[old];
       if (v == null) return null;
-      hoje += s[d]!;
-      antes += v;
+      today += s[d]!;
+      before += v;
     }
-    if (!(antes > 0) || !(hoje > 0)) return null;
-    return math.pow(hoje / antes, 1 / anos).toDouble() - 1;
+    if (!(before > 0) || !(today > 0)) return null;
+    return math.pow(today / before, 1 / years).toDouble() - 1;
   }
 }
 
 /// Dividendos e JCP pagos por CNPJ e exercício, em centavos, de
 /// `tool/cvm/dividendos_pagos.py`.
-Map<String, Map<int, int>> _lerDividendos() {
+Map<String, Map<int, int>> _readDividends() {
   final f = File('data/cvm/dividendos_pagos.json');
   if (!f.existsSync()) {
     throw StateError(
@@ -234,155 +234,155 @@ Map<String, Map<int, int>> _lerDividendos() {
 // As grandezas de cada regra, com os dados até o exercício [ano]
 // ---------------------------------------------------------------------------
 
-/// Os exercícios até [ano], um por ano (o de fim mais tardio).
-List<FundamentalsSnapshot> _ate(List<FundamentalsSnapshot> fs, int ano) {
-  final porAno = <int, FundamentalsSnapshot>{};
+/// Os exercícios até [year], um por ano (o de fim mais tardio).
+List<FundamentalsSnapshot> _until(List<FundamentalsSnapshot> fs, int year) {
+  final byYear = <int, FundamentalsSnapshot>{};
   for (final s in fs) {
     final y = s.fiscalPeriodEnd.year;
-    if (y > ano) continue;
-    final atual = porAno[y];
-    if (atual == null || s.fiscalPeriodEnd.isAfter(atual.fiscalPeriodEnd)) {
-      porAno[y] = s;
+    if (y > year) continue;
+    final current = byYear[y];
+    if (current == null || s.fiscalPeriodEnd.isAfter(current.fiscalPeriodEnd)) {
+      byYear[y] = s;
     }
   }
-  return [for (final y in porAno.keys.toList()..sort()) porAno[y]!];
+  return [for (final y in byYear.keys.toList()..sort()) byYear[y]!];
 }
 
-/// Mediana dos últimos [_janelaDoRoe] retornos sobre o patrimônio de abertura.
-double? _roeNormalizado(List<FundamentalsSnapshot> ate) {
-  final r = CapitalSeries.build(ate, ValuationLane.shareholder).returns;
-  if (r.length < _minimoDoRoe) return null;
-  final janela = r.sublist(math.max(0, r.length - _janelaDoRoe));
-  return _mediana([for (final x in janela) x.value]);
+/// Mediana dos últimos [_roeWindow] retornos sobre o patrimônio de abertura.
+double? _normalizedRoe(List<FundamentalsSnapshot> until) {
+  final r = CapitalSeries.build(until, ValuationLane.shareholder).returns;
+  if (r.length < _minRoeYears) return null;
+  final window = r.sublist(math.max(0, r.length - _roeWindow));
+  return _median([for (final x in window) x.value]);
 }
 
-/// Dividendos pagos ÷ lucro, somados nos últimos [_anosDoPayout] exercícios.
-double? _payout(List<FundamentalsSnapshot> ate, Map<int, int>? pagos, int ano) {
-  if (pagos == null) return null;
-  var pago = 0, lucro = 0, n = 0;
-  for (final s in ate) {
+/// Dividendos pagos ÷ lucro, somados nos últimos [_payoutYears] exercícios.
+double? _payout(List<FundamentalsSnapshot> until, Map<int, int>? paidByYear, int year) {
+  if (paidByYear == null) return null;
+  var paid = 0, profit = 0, n = 0;
+  for (final s in until) {
     final y = s.fiscalPeriodEnd.year;
-    if (y <= ano - _anosDoPayout || y > ano) continue;
-    final d = pagos[y];
+    if (y <= year - _payoutYears || y > year) continue;
+    final d = paidByYear[y];
     final l = s.netIncome;
     if (d == null || l == null || !l.isFinite) continue;
-    pago += d;
-    lucro += (l * 100).round();
+    paid += d;
+    profit += (l * 100).round();
     n++;
   }
-  if (n < _minimoDoPayout || lucro <= 0) return null;
-  return pago / lucro;
+  if (n < _minPayoutYears || profit <= 0) return null;
+  return paid / profit;
 }
 
 /// Receita ÷ capital investido, mediana dos três últimos exercícios.
-double? _vendasPorCapital(List<FundamentalsSnapshot> ate) {
+double? _salesPerCapital(List<FundamentalsSnapshot> until) {
   final v = <double>[
-    for (final s in ate.sublist(math.max(0, ate.length - 3)))
+    for (final s in until.sublist(math.max(0, until.length - 3)))
       if ((s.totalRevenue ?? 0) > 0 && (s.investedCapital ?? 0) > 0)
         s.totalRevenue! / s.investedCapital!,
   ];
-  return v.length < 2 ? null : _mediana(v);
+  return v.length < 2 ? null : _median(v);
 }
 
-enum _Grupo { commodity, altaPagadora, poucoCapital, fundamental, semDado }
+enum _Group { commodity, highPayer, lowCapital, fundamental, noData }
 
-String _nomeDo(_Grupo g) => switch (g) {
-  _Grupo.commodity => 'commodity',
-  _Grupo.altaPagadora => 'alta pagadora',
-  _Grupo.poucoCapital => 'pouco capital',
-  _Grupo.fundamental => 'ROE × retenção',
-  _Grupo.semDado => 'sem dado',
+String _nameOf(_Group g) => switch (g) {
+  _Group.commodity => 'commodity',
+  _Group.highPayer => 'alta pagadora',
+  _Group.lowCapital => 'pouco capital',
+  _Group.fundamental => 'ROE × retenção',
+  _Group.noData => 'sem dado',
 };
 
 /// O que as duas propostas dão para uma companhia num exercício.
-class _Leitura {
-  _Leitura({
+class _Reading {
+  _Reading({
     required this.roe,
     required this.payout,
-    required this.vendasPorCapital,
+    required this.salesPerCapital,
     required this.gFundamental,
-    required this.gSetor,
-    required this.atividade,
-    required this.grupo,
-    required this.gRegra,
+    required this.gSector,
+    required this.activity,
+    required this.group,
+    required this.gRule,
   });
   final double? roe;
   final double? payout;
-  final double? vendasPorCapital;
+  final double? salesPerCapital;
   final double? gFundamental;
-  final double? gSetor;
-  final String atividade;
-  final _Grupo grupo;
-  final double? gRegra;
+  final double? gSector;
+  final String activity;
+  final _Group group;
+  final double? gRule;
 }
 
-_Leitura _ler({
+_Reading _read({
   required List<FundamentalsSnapshot> fs,
-  required int ano,
-  required Map<int, int>? pagos,
+  required int year,
+  required Map<int, int>? paidByYear,
   required bool commodity,
-  required String atividade,
-  required _PibSetorial pib,
-  required DateTime data,
-  required double inflacao,
+  required String activity,
+  required _SectorGdp gdp,
+  required DateTime date,
+  required double inflation,
 }) {
-  final ate = _ate(fs, ano);
-  final roe = _roeNormalizado(ate);
-  final payout = _payout(ate, pagos, ano);
-  final vpc = _vendasPorCapital(ate);
+  final until = _until(fs, year);
+  final roe = _normalizedRoe(until);
+  final payout = _payout(until, paidByYear, year);
+  final salesPerCapitalValue = _salesPerCapital(until);
   final gFund = (roe == null || payout == null)
       ? null
       : roe * (1 - payout).clamp(0.0, 1.0);
-  final gSetor = pib.crescimento(atividade, data);
-  final _Grupo grupo;
-  final double? gRegra;
+  final gSector = gdp.growth(activity, date);
+  final _Group group;
+  final double? gRule;
   if (commodity) {
-    grupo = _Grupo.commodity;
-    gRegra = inflacao;
-  } else if ((payout ?? 0) >= _payoutAlto) {
-    grupo = _Grupo.altaPagadora;
-    gRegra = gSetor;
-  } else if ((vpc ?? 0) >= _vendasSobreCapital) {
-    grupo = _Grupo.poucoCapital;
-    gRegra = gSetor;
+    group = _Group.commodity;
+    gRule = inflation;
+  } else if ((payout ?? 0) >= _highPayout) {
+    group = _Group.highPayer;
+    gRule = gSector;
+  } else if ((salesPerCapitalValue ?? 0) >= _salesToCapital) {
+    group = _Group.lowCapital;
+    gRule = gSector;
   } else if (gFund != null) {
-    grupo = _Grupo.fundamental;
-    gRegra = gFund;
+    group = _Group.fundamental;
+    gRule = gFund;
   } else {
-    grupo = _Grupo.semDado;
-    gRegra = null;
+    group = _Group.noData;
+    gRule = null;
   }
-  return _Leitura(
+  return _Reading(
     roe: roe,
     payout: payout,
-    vendasPorCapital: vpc,
+    salesPerCapital: salesPerCapitalValue,
     gFundamental: gFund,
-    gSetor: gSetor,
-    atividade: atividade,
-    grupo: grupo,
-    gRegra: gRegra,
+    gSector: gSector,
+    activity: activity,
+    group: group,
+    gRule: gRule,
   );
 }
 
-/// O `g` que a regra do motor dá com os dados até [ano], na via [via]: a
+/// O `g` que a regra do motor dá com os dados até [ano], na via [lane]: a
 /// mediana das variações da base quando a dispersão a identifica; a inflação
-/// quando não identifica e a retenção a financia; zero no resto (`_saida2`).
-double? _gDoMotor(
-  List<FundamentalsSnapshot> ate,
-  ValuationLane via,
-  double inflacao,
+/// quando não identifica e a retenção a financia; zero no resto (`_output2`).
+double? _engineG(
+  List<FundamentalsSnapshot> until,
+  ValuationLane lane,
+  double inflation,
 ) {
-  final serie = CapitalSeries.build(ate, via);
-  final d = GrowthGuards.dispersion(serie);
+  final series = CapitalSeries.build(until, lane);
+  final d = GrowthGuards.dispersion(series);
   if (d == null) return null;
   if (d.isIdentified) return d.medianGrowth;
-  final ciclo = serie.cycleReturn(window: ValuationParameters.cycleWindow);
+  final cycle = series.cycleReturn(window: ValuationParameters.cycleWindow);
   return GrowthGuards.anchorIsFundable(
-        inflation: inflacao,
-        cycleReturn: ciclo,
-        observedRetention: serie.medianRetention,
+        inflation: inflation,
+        cycleReturn: cycle,
+        observedRetention: series.medianRetention,
       )
-      ? inflacao
+      ? inflation
       : 0.0;
 }
 
@@ -390,31 +390,31 @@ double? _gDoMotor(
 /// projeta a partir de [g]: decai em linha reta até `g∞ = min(g, teto)`, em
 /// [−5%; teto]. Composto, e não média das taxas, porque o realizado contra o
 /// qual se compara também é composto.
-double? _mediaDoCaminho(double g, double teto, {int anos = 10}) {
+double? _pathMean(double g, double cap, {int years = 10}) {
   final gInf = GrowthEstimator.perpetual(
     explicitGrowth: g,
-    economyGrowth: teto,
+    economyGrowth: cap,
   );
-  var fator = 1.0;
-  for (var t = 1; t <= _anosRealizados; t++) {
-    fator *= 1 + g - (g - gInf) * ((t - 1) / (anos - 1));
+  var factor = 1.0;
+  for (var t = 1; t <= _realizedYears; t++) {
+    factor *= 1 + g - (g - gInf) * ((t - 1) / (years - 1));
   }
   // Taxa abaixo de −100% num ano não tem caminho composto: fica sem leitura.
-  if (!(fator > 0)) return null;
-  return math.pow(fator, 1 / _anosRealizados).toDouble() - 1;
+  if (!(factor > 0)) return null;
+  return math.pow(factor, 1 / _realizedYears).toDouble() - 1;
 }
 
-/// Crescimento realizado do lucro: da média dos três exercícios até [ano] à
+/// Crescimento realizado do lucro: da média dos três exercícios até [year] à
 /// dos três seguintes, anualizado em três anos. `null` se uma média não é
 /// positiva ou falta exercício.
-double? _realizadoDoLucro(List<FundamentalsSnapshot> fs, int ano) {
-  final porAno = {
-    for (final s in _ate(fs, ano + _anosRealizados)) s.fiscalPeriodEnd.year: s,
+double? _realizedProfit(List<FundamentalsSnapshot> fs, int year) {
+  final byYear = {
+    for (final s in _until(fs, year + _realizedYears)) s.fiscalPeriodEnd.year: s,
   };
-  double? media(int de, int ate) {
+  double? mean(int from, int until) {
     final v = <double>[];
-    for (var y = de; y <= ate; y++) {
-      final l = porAno[y]?.netIncome;
+    for (var y = from; y <= until; y++) {
+      final l = byYear[y]?.netIncome;
       if (l == null || !l.isFinite) return null;
       v.add(l);
     }
@@ -422,155 +422,155 @@ double? _realizadoDoLucro(List<FundamentalsSnapshot> fs, int ano) {
     return m > 0 ? m : null;
   }
 
-  final antes = media(ano - 2, ano);
-  final depois = media(ano + 1, ano + _anosRealizados);
-  if (antes == null || depois == null) return null;
-  return math.pow(depois / antes, 1 / _anosRealizados).toDouble() - 1;
+  final before = mean(year - 2, year);
+  final after = mean(year + 1, year + _realizedYears);
+  if (before == null || after == null) return null;
+  return math.pow(after / before, 1 / _realizedYears).toDouble() - 1;
 }
 
 /// Crescimento realizado do patrimônio em três exercícios.
-double? _realizadoDoPatrimonio(List<FundamentalsSnapshot> fs, int ano) {
-  final porAno = {
-    for (final s in _ate(fs, ano + _anosRealizados)) s.fiscalPeriodEnd.year: s,
+double? _realizedEquity(List<FundamentalsSnapshot> fs, int year) {
+  final byYear = {
+    for (final s in _until(fs, year + _realizedYears)) s.fiscalPeriodEnd.year: s,
   };
-  final a = porAno[ano]?.equityBookValue;
-  final b = porAno[ano + _anosRealizados]?.equityBookValue;
+  final a = byYear[year]?.equityBookValue;
+  final b = byYear[year + _realizedYears]?.equityBookValue;
   if (a == null || b == null || !(a > 0) || !(b > 0)) return null;
-  return math.pow(b / a, 1 / _anosRealizados).toDouble() - 1;
+  return math.pow(b / a, 1 / _realizedYears).toDouble() - 1;
 }
 
 // ---------------------------------------------------------------------------
 
-class _Ativo {
-  _Ativo(this.ticker, this.setor, this.leitura);
+class _Asset {
+  _Asset(this.ticker, this.sector, this.reading);
   final String ticker;
-  final String setor;
-  final _Leitura leitura;
+  final String sector;
+  final _Reading reading;
   double? g0;
-  ValuationLane? via;
-  final Map<String, int?> justo = {};
-  final Map<String, double?> potencial = {};
-  double? preco;
+  ValuationLane? lane;
+  final Map<String, int?> fairValue = {};
+  final Map<String, double?> upside = {};
+  double? price;
 }
 
 Future<void> main(List<String> args) async {
-  final c = await Congelado.montar();
+  final c = await Frozen.build();
   try {
-    final ponte =
+    final bridge =
         ((jsonDecode(File('docs/validacao/ponte_cvm.json').readAsStringSync())
                     as Map<String, dynamic>)['ponte']
                 as Map<String, dynamic>)
             .cast<String, String>();
-    final dividendos = _lerDividendos();
-    final pib = _PibSetorial.ler();
-    final hoje = hojeCongelado;
-    final diaDeHoje = DateTime.utc(hoje.year, hoje.month, hoje.day);
-    final inflacaoHoje = c.anchors.inflationCagr;
-    final tetoHoje = c.anchors.nominalEconomyGrowth;
+    final dividendTotals = _readDividends();
+    final gdp = _SectorGdp.read();
+    final today = frozenToday;
+    final todayDate = DateTime.utc(today.year, today.month, today.day);
+    final currentInflation = c.anchors.inflationCagr;
+    final currentCap = c.anchors.nominalEconomyGrowth;
 
     // -----------------------------------------------------------------------
     // 1. A entrada congelada
     // -----------------------------------------------------------------------
-    final ativos = <_Ativo>[];
-    final historicos = <String, List<FundamentalsSnapshot>>{};
-    final cnpjDo = <String, String?>{};
-    final commodityDo = <String, bool>{};
-    final atividadeDo = <String, String>{};
-    final avaliadasBase = <Ticker, ValuationResult?>{};
-    final semMapa = <String>[];
+    final assets = <_Asset>[];
+    final histories = <String, List<FundamentalsSnapshot>>{};
+    final cnpjOf = <String, String?>{};
+    final commodityOf = <String, bool>{};
+    final activityOf = <String, String>{};
+    final baseEvaluated = <Ticker, ValuationResult?>{};
+    final withoutMap = <String>[];
     var i = 0;
-    for (final t in c.universo) {
+    for (final t in c.universe) {
       i++;
-      if (i % 50 == 0) stderr.write('  $i/${c.universo.length}   \r');
-      final prep = await c.preparar(t);
+      if (i % 50 == 0) stderr.write('  $i/${c.universe.length}   \r');
+      final prep = await c.prepare(t);
       if (prep.isErr) continue;
       final inputs = prep.unwrap();
       final r0 = ValuationCascade.evaluate(inputs);
-      avaliadasBase[t] = r0.valueOrNull;
+      baseEvaluated[t] = r0.valueOrNull;
 
-      final classif = c.emissor(t)?.classification;
-      final chave = classif == null || classif.subsector == null
+      final classification = c.issuer(t)?.classification;
+      final key = classification == null || classification.subsector == null
           ? ''
-          : '${classif.sector}|${classif.subsector}';
-      final atividade = _atividade[chave] ?? _economia;
-      if (!_atividade.containsKey(chave)) semMapa.add('${t.value} «$chave»');
+          : '${classification.sector}|${classification.subsector}';
+      final activity = _activity[key] ?? _economy;
+      if (!_activity.containsKey(key)) withoutMap.add('${t.value} «$key»');
       final commodity = CyclicalSectors.hasCyclePrecedence(
         sectorKey: inputs.sectorKey,
         industry: inputs.industry,
       );
-      final cnpj = ponte[t.value];
-      final ultimoAno = _ate(
+      final cnpj = bridge[t.value];
+      final lastYear = _until(
         inputs.fundamentals,
-        hoje.year,
+        today.year,
       ).lastOrNull?.fiscalPeriodEnd.year;
-      if (ultimoAno == null) continue;
-      final leitura = _ler(
+      if (lastYear == null) continue;
+      final reading = _read(
         fs: inputs.fundamentals,
-        ano: ultimoAno,
-        pagos: cnpj == null ? null : dividendos[cnpj],
+        year: lastYear,
+        paidByYear: cnpj == null ? null : dividendTotals[cnpj],
         commodity: commodity,
-        atividade: atividade,
-        pib: pib,
-        data: diaDeHoje,
-        inflacao: inflacaoHoje,
+        activity: activity,
+        gdp: gdp,
+        date: todayDate,
+        inflation: currentInflation,
       );
-      final a = _Ativo(t.value, chave.replaceAll('|', ' / '), leitura);
-      historicos[t.value] = inputs.fundamentals;
-      cnpjDo[t.value] = cnpj;
-      commodityDo[t.value] = commodity;
-      atividadeDo[t.value] = atividade;
-      a.preco = inputs.marketPrice;
+      final a = _Asset(t.value, key.replaceAll('|', ' / '), reading);
+      histories[t.value] = inputs.fundamentals;
+      cnpjOf[t.value] = cnpj;
+      commodityOf[t.value] = commodity;
+      activityOf[t.value] = activity;
+      a.price = inputs.marketPrice;
 
-      void guardar(String rotulo, Result<ValuationResult> r) {
+      void store(String label, Result<ValuationResult> r) {
         final v = r.valueOrNull;
-        a.justo[rotulo] = v?.fairValue.cents;
-        a.potencial[rotulo] = v?.upside;
+        a.fairValue[label] = v?.fairValue.cents;
+        a.upside[label] = v?.upside;
       }
 
-      guardar('motor', r0);
+      store('motor', r0);
       a.g0 = r0.valueOrNull?.diagnostics?.growthRate;
-      a.via = switch (r0.valueOrNull?.model) {
+      a.lane = switch (r0.valueOrNull?.model) {
         ValuationModel.dcfFcff => ValuationLane.firm,
         ValuationModel.dcfEarnings => ValuationLane.shareholder,
         null => null,
       };
-      final gF = leitura.gFundamental;
-      guardar(
+      final gF = reading.gFundamental;
+      store(
         'fundamental',
         gF == null
             ? r0
             : ValuationCascade.evaluate(inputs.withOverrides(growth: gF)),
       );
-      final gR = leitura.gRegra;
-      guardar(
+      final gR = reading.gRule;
+      store(
         'combinada',
         gR == null
             ? r0
             : ValuationCascade.evaluate(inputs.withOverrides(growth: gR)),
       );
-      ativos.add(a);
+      assets.add(a);
     }
     stderr.write('                    \r');
-    if (semMapa.isNotEmpty) {
+    if (withoutMap.isNotEmpty) {
       stderr.writeln(
         'sem atividade mapeada (vai a economia inteira): '
-        '${semMapa.join(', ')}',
+        '${withoutMap.join(', ')}',
       );
     }
 
-    final divergentes = await c.conferirContraGabarito(avaliadasBase);
-    if (divergentes != null && divergentes.isNotEmpty) {
+    final divergent = await c.checkAgainstAnswerKey(baseEvaluated);
+    if (divergent != null && divergent.isNotEmpty) {
       stderr.writeln(
         'ERRO: a montagem diverge do gabarito em '
-        '${divergentes.length}: ${divergentes.take(8).join(', ')}',
+        '${divergent.length}: ${divergent.take(8).join(', ')}',
       );
       exitCode = 1;
       return;
     }
 
-    final variantes = ['motor', 'fundamental', 'combinada'];
-    final avaliados =
-        ativos.where((a) => variantes.any((v) => a.justo[v] != null)).toList()
+    final variants = ['motor', 'fundamental', 'combinada'];
+    final evaluated =
+        assets.where((a) => variants.any((v) => a.fairValue[v] != null)).toList()
           ..sort((x, y) => x.ticker.compareTo(y.ticker));
 
     stdout.writeln('-- a entrada congelada: o g de cada regra --');
@@ -578,74 +578,74 @@ Future<void> main(List<String> args) async {
       '  ticker   grupo            payout   ROE norm  g motor  '
       'g fund   g setor  g regra   justo motor  justo fund  justo regra   preço',
     );
-    String r$(int? centavos) =>
-        centavos == null ? 'recusada' : (centavos / 100).toStringAsFixed(2);
-    for (final a in avaliados) {
-      final l = a.leitura;
+    String r$(int? cents) =>
+        cents == null ? 'recusada' : (cents / 100).toStringAsFixed(2);
+    for (final a in evaluated) {
+      final l = a.reading;
       stdout.writeln(
         '  ${a.ticker.padRight(7)}  '
-        '${_nomeDo(l.grupo).padRight(15)}  ${_pct(l.payout, 0).padLeft(6)}  '
+        '${_nameOf(l.group).padRight(15)}  ${_pct(l.payout, 0).padLeft(6)}  '
         '${_pct(l.roe, 1).padLeft(8)}  ${_pct(a.g0, 1).padLeft(7)}  '
-        '${_pct(l.gFundamental, 1).padLeft(6)}  ${_pct(l.gSetor, 1).padLeft(7)}  '
-        '${_pct(l.gRegra, 1).padLeft(7)}   ${r$(a.justo['motor']).padLeft(11)}  '
-        '${r$(a.justo['fundamental']).padLeft(10)}  '
-        '${r$(a.justo['combinada']).padLeft(11)}  '
-        '${a.preco?.toStringAsFixed(2)}',
+        '${_pct(l.gFundamental, 1).padLeft(6)}  ${_pct(l.gSector, 1).padLeft(7)}  '
+        '${_pct(l.gRule, 1).padLeft(7)}   ${r$(a.fairValue['motor']).padLeft(11)}  '
+        '${r$(a.fairValue['fundamental']).padLeft(10)}  '
+        '${r$(a.fairValue['combinada']).padLeft(11)}  '
+        '${a.price?.toStringAsFixed(2)}',
       );
     }
 
-    final resumo = <Map<String, Object?>>[];
+    final summary = <Map<String, Object?>>[];
     stdout.writeln('');
     stdout.writeln('-- o universo com cada regra --');
     stdout.writeln(
       '  regra         avaliados  potencial mediano  acima de zero  '
       'distância mediana ao preço  justo vs motor  postos',
     );
-    for (final v in variantes) {
-      final com = [
-        for (final a in avaliados)
-          if (a.justo[v] != null) a,
+    for (final v in variants) {
+      final withInput = [
+        for (final a in evaluated)
+          if (a.fairValue[v] != null) a,
       ];
-      final pots = [for (final a in com) ?a.potencial[v]];
+      final upsideValues = [for (final a in withInput) ?a.upside[v]];
       // O logaritmo só existe com as duas pontas positivas.
       final dist = [
-        for (final a in com)
-          if ((a.preco ?? 0) > 0 && a.justo[v]! > 0)
-            (math.log(a.justo[v]! / 100 / a.preco!)).abs(),
+        for (final a in withInput)
+          if ((a.price ?? 0) > 0 && a.fairValue[v]! > 0)
+            (math.log(a.fairValue[v]! / 100 / a.price!)).abs(),
       ];
-      final comuns = [
-        for (final a in avaliados)
-          if (a.justo[v] != null &&
-              a.justo['motor'] != null &&
-              a.potencial[v] != null &&
-              a.potencial['motor'] != null)
+      final common = [
+        for (final a in evaluated)
+          if (a.fairValue[v] != null &&
+              a.fairValue['motor'] != null &&
+              a.upside[v] != null &&
+              a.upside['motor'] != null)
             a,
       ];
-      final variacao = [
-        for (final a in comuns)
-          if (a.justo['motor']! != 0) a.justo[v]! / a.justo['motor']! - 1,
+      final changeList = [
+        for (final a in common)
+          if (a.fairValue['motor']! != 0) a.fairValue[v]! / a.fairValue['motor']! - 1,
       ];
-      final rho = comuns.length < 3
+      final rho = common.length < 3
           ? null
           : Regression.spearman(
-              [for (final a in comuns) a.potencial['motor']!],
-              [for (final a in comuns) a.potencial[v]!],
+              [for (final a in common) a.upside['motor']!],
+              [for (final a in common) a.upside[v]!],
             );
-      final medPot = _mediana(pots);
-      final medDist = _mediana(dist);
-      final medVar = _mediana(variacao);
-      final acima = pots.where((p) => p > 0).length;
+      final medianUpside = _median(upsideValues);
+      final medDist = _median(dist);
+      final medVar = _median(changeList);
+      final above = upsideValues.where((p) => p > 0).length;
       stdout.writeln(
-        '  ${v.padRight(12)}  ${com.length.toString().padLeft(9)}  '
-        '${_pct(medPot, 1).padLeft(17)}  ${'$acima de ${com.length}'.padLeft(13)}  '
+        '  ${v.padRight(12)}  ${withInput.length.toString().padLeft(9)}  '
+        '${_pct(medianUpside, 1).padLeft(17)}  ${'$above de ${withInput.length}'.padLeft(13)}  '
         '${(medDist == null ? '—' : medDist.toStringAsFixed(3)).padLeft(26)}  '
         '${_pct(medVar, 1).padLeft(14)}  ${rho?.toStringAsFixed(3) ?? '—'}',
       );
-      resumo.add({
+      summary.add({
         'regra': v,
-        'avaliados': com.length,
-        'potencialMediano': medPot,
-        'acimaDeZero': acima,
+        'avaliados': withInput.length,
+        'potencialMediano': medianUpside,
+        'acimaDeZero': above,
         'distanciaMedianaAoPreco': medDist,
         'justoMedianoContraMotor': medVar,
         'spearmanContraMotor': rho,
@@ -653,95 +653,95 @@ Future<void> main(List<String> args) async {
     }
 
     // Por grupo da regra combinada.
-    final porGrupo = <Map<String, Object?>>[];
+    final byGroup = <Map<String, Object?>>[];
     stdout.writeln('');
     stdout.writeln('-- por grupo da regra combinada --');
-    for (final g in _Grupo.values) {
-      final doGrupo = [
-        for (final a in avaliados)
-          if (a.leitura.grupo == g) a,
+    for (final g in _Group.values) {
+      final ofGroup = [
+        for (final a in evaluated)
+          if (a.reading.group == g) a,
       ];
-      if (doGrupo.isEmpty) continue;
-      double? med(double? Function(_Ativo) f) =>
-          _mediana([for (final a in doGrupo) ?f(a)]);
-      final linha = {
-        'grupo': _nomeDo(g),
-        'ativos': doGrupo.length,
+      if (ofGroup.isEmpty) continue;
+      double? med(double? Function(_Asset) f) =>
+          _median([for (final a in ofGroup) ?f(a)]);
+      final row = {
+        'grupo': _nameOf(g),
+        'ativos': ofGroup.length,
         'gMotor': med((a) => a.g0),
-        'gFundamental': med((a) => a.leitura.gFundamental),
-        'gRegra': med((a) => a.leitura.gRegra),
-        'potencialMotor': med((a) => a.potencial['motor']),
-        'potencialFundamental': med((a) => a.potencial['fundamental']),
-        'potencialCombinada': med((a) => a.potencial['combinada']),
+        'gFundamental': med((a) => a.reading.gFundamental),
+        'gRegra': med((a) => a.reading.gRule),
+        'potencialMotor': med((a) => a.upside['motor']),
+        'potencialFundamental': med((a) => a.upside['fundamental']),
+        'potencialCombinada': med((a) => a.upside['combinada']),
       };
-      porGrupo.add(linha);
+      byGroup.add(row);
       stdout.writeln(
-        '  ${_nomeDo(g).padRight(15)} ${doGrupo.length.toString().padLeft(3)}  '
-        'g motor ${_pct(linha['gMotor'] as double?, 1)}  '
-        'g fund ${_pct(linha['gFundamental'] as double?, 1)}  '
-        'g regra ${_pct(linha['gRegra'] as double?, 1)}  '
-        'potencial ${_pct(linha['potencialMotor'] as double?, 1)} → '
-        '${_pct(linha['potencialFundamental'] as double?, 1)} / '
-        '${_pct(linha['potencialCombinada'] as double?, 1)}',
+        '  ${_nameOf(g).padRight(15)} ${ofGroup.length.toString().padLeft(3)}  '
+        'g motor ${_pct(row['gMotor'] as double?, 1)}  '
+        'g fund ${_pct(row['gFundamental'] as double?, 1)}  '
+        'g regra ${_pct(row['gRegra'] as double?, 1)}  '
+        'potencial ${_pct(row['potencialMotor'] as double?, 1)} → '
+        '${_pct(row['potencialFundamental'] as double?, 1)} / '
+        '${_pct(row['potencialCombinada'] as double?, 1)}',
       );
     }
 
     // -----------------------------------------------------------------------
     // 2. O histórico: qual g acertou o crescimento seguinte
     // -----------------------------------------------------------------------
-    final indice = await IbovespaLongo.montar(
+    final index = await LongIbovespa.build(
       c.ctx.benchmark,
-      janelaDaFonte: DateRange(
-        DateTime(hoje.year - 10, hoje.month, hoje.day),
-        hoje,
+      sourceWindow: DateRange(
+        DateTime(today.year - 10, today.month, today.day),
+        today,
       ),
     );
-    final painel = <Map<String, Object?>>[];
-    for (var ano = 2014; ano <= 2022; ano++) {
-      final ancoras = (await ResolveMarketAnchors.call(
+    final panel = <Map<String, Object?>>[];
+    for (var year = 2014; year <= 2022; year++) {
+      final anchors = (await ResolveMarketAnchors.call(
         macro: c.ctx.macro,
-        benchmark: indice,
-        asOf: DateTime(ano, 12, 31),
+        benchmark: index,
+        asOf: DateTime(year, 12, 31),
       )).unwrap();
-      final inflacao = ancoras.inflationCagr;
-      final teto = ancoras.nominalEconomyGrowth;
-      final data = DateTime.utc(ano + 1, 3, 31);
-      for (final a in avaliados) {
-        final fs = historicos[a.ticker]!;
-        final via = a.via ?? ValuationLane.shareholder;
-        final ate = _ate(fs, ano);
-        if (ate.isEmpty || ate.last.fiscalPeriodEnd.year != ano) continue;
-        final gMotor = _gDoMotor(ate, via, inflacao);
-        final l = _ler(
+      final inflation = anchors.inflationCagr;
+      final cap = anchors.nominalEconomyGrowth;
+      final date = DateTime.utc(year + 1, 3, 31);
+      for (final a in evaluated) {
+        final fs = histories[a.ticker]!;
+        final lane = a.lane ?? ValuationLane.shareholder;
+        final until = _until(fs, year);
+        if (until.isEmpty || until.last.fiscalPeriodEnd.year != year) continue;
+        final gEngine = _engineG(until, lane, inflation);
+        final l = _read(
           fs: fs,
-          ano: ano,
-          pagos: cnpjDo[a.ticker] == null ? null : dividendos[cnpjDo[a.ticker]],
-          commodity: commodityDo[a.ticker]!,
-          atividade: atividadeDo[a.ticker]!,
-          pib: pib,
-          data: data,
-          inflacao: inflacao,
+          year: year,
+          paidByYear: cnpjOf[a.ticker] == null ? null : dividendTotals[cnpjOf[a.ticker]],
+          commodity: commodityOf[a.ticker]!,
+          activity: activityOf[a.ticker]!,
+          gdp: gdp,
+          date: date,
+          inflation: inflation,
         );
-        final lucro = _realizadoDoLucro(fs, ano);
-        final patrimonio = _realizadoDoPatrimonio(fs, ano);
-        painel.add({
+        final profit = _realizedProfit(fs, year);
+        final equity = _realizedEquity(fs, year);
+        panel.add({
           'ticker': a.ticker,
-          'ano': ano,
-          'grupo': _nomeDo(l.grupo),
-          'gMotor': gMotor == null ? null : _mediaDoCaminho(gMotor, teto),
+          'ano': year,
+          'grupo': _nameOf(l.group),
+          'gMotor': gEngine == null ? null : _pathMean(gEngine, cap),
           'gFundamental': l.gFundamental == null
               ? null
-              : _mediaDoCaminho(l.gFundamental!, teto),
-          'gCombinada': l.gRegra == null
+              : _pathMean(l.gFundamental!, cap),
+          'gCombinada': l.gRule == null
               ? null
-              : _mediaDoCaminho(l.gRegra!, teto),
-          'realizadoLucro': lucro,
-          'realizadoPatrimonio': patrimonio,
+              : _pathMean(l.gRule!, cap),
+          'realizadoLucro': profit,
+          'realizadoPatrimonio': equity,
         });
       }
     }
 
-    final testes = <Map<String, Object?>>[];
+    final tests = <Map<String, Object?>>[];
     stdout.writeln('');
     stdout.writeln(
       '-- o histórico: o g de cada regra contra o crescimento dos três '
@@ -751,86 +751,86 @@ Future<void> main(List<String> args) async {
       '  alvo         regra         pares  erro absoluto mediano  '
       'viés mediano  postos',
     );
-    for (final alvo in ['realizadoLucro', 'realizadoPatrimonio']) {
+    for (final target in ['realizadoLucro', 'realizadoPatrimonio']) {
       // Só os pares em que as três regras existem: a comparação é no mesmo
       // conjunto.
-      final pares = [
-        for (final p in painel)
-          if (p[alvo] != null &&
+      final pairs = [
+        for (final p in panel)
+          if (p[target] != null &&
               p['gMotor'] != null &&
               p['gFundamental'] != null &&
               p['gCombinada'] != null)
             p,
       ];
-      for (final regra in ['gMotor', 'gFundamental', 'gCombinada']) {
-        final erros = [
-          for (final p in pares) (p[regra] as double) - (p[alvo] as double),
+      for (final rule in ['gMotor', 'gFundamental', 'gCombinada']) {
+        final errors = [
+          for (final p in pairs) (p[rule] as double) - (p[target] as double),
         ];
-        final abs = [for (final e in erros) e.abs()];
-        final rho = pares.length < 3
+        final abs = [for (final e in errors) e.abs()];
+        final rho = pairs.length < 3
             ? null
             : Regression.spearman(
-                [for (final p in pares) p[regra] as double],
-                [for (final p in pares) p[alvo] as double],
+                [for (final p in pairs) p[rule] as double],
+                [for (final p in pairs) p[target] as double],
               );
-        final linha = {
-          'alvo': alvo,
-          'regra': regra,
-          'pares': pares.length,
-          'erroAbsolutoMediano': _mediana(abs),
-          'viesMediano': _mediana(erros),
+        final row = {
+          'alvo': target,
+          'regra': rule,
+          'pares': pairs.length,
+          'erroAbsolutoMediano': _median(abs),
+          'viesMediano': _median(errors),
           'spearman': rho,
         };
-        testes.add(linha);
+        tests.add(row);
         stdout.writeln(
-          '  ${alvo.padRight(11)}  ${regra.padRight(12)}  '
-          '${pares.length.toString().padLeft(5)}  '
-          '${_pct(linha['erroAbsolutoMediano'] as double?).padLeft(21)}  '
-          '${_pct(linha['viesMediano'] as double?).padLeft(12)}  '
+          '  ${target.padRight(11)}  ${rule.padRight(12)}  '
+          '${pairs.length.toString().padLeft(5)}  '
+          '${_pct(row['erroAbsolutoMediano'] as double?).padLeft(21)}  '
+          '${_pct(row['viesMediano'] as double?).padLeft(12)}  '
           '${rho?.toStringAsFixed(3) ?? '—'}',
         );
       }
     }
 
-    File(_saida).writeAsStringSync(
+    File(_output).writeAsStringSync(
       const JsonEncoder.withIndent(' ').convert({
         'geradoPor': 'tool/crescimento_fundamental.dart',
-        'dataDaEntrada': hoje.toIso8601String().substring(0, 10),
-        'inflacao': inflacaoHoje,
-        'teto': tetoHoje,
+        'dataDaEntrada': today.toIso8601String().substring(0, 10),
+        'inflacao': currentInflation,
+        'teto': currentCap,
         'regras': {
-          'payoutAlto': _payoutAlto,
-          'vendasSobreCapital': _vendasSobreCapital,
-          'anosDoPayout': _anosDoPayout,
-          'janelaDoRoe': _janelaDoRoe,
-          'anosDoSetor': _anosDoSetor,
+          'payoutAlto': _highPayout,
+          'vendasSobreCapital': _salesToCapital,
+          'anosDoPayout': _payoutYears,
+          'janelaDoRoe': _roeWindow,
+          'anosDoSetor': _sectorYears,
         },
         'ativos': [
-          for (final a in avaliados)
+          for (final a in evaluated)
             {
               'ticker': a.ticker,
-              'setor': a.setor,
-              'atividade': a.leitura.atividade,
-              'grupo': _nomeDo(a.leitura.grupo),
-              'payout': a.leitura.payout,
-              'roeNormalizado': a.leitura.roe,
-              'vendasPorCapital': a.leitura.vendasPorCapital,
+              'setor': a.sector,
+              'atividade': a.reading.activity,
+              'grupo': _nameOf(a.reading.group),
+              'payout': a.reading.payout,
+              'roeNormalizado': a.reading.roe,
+              'vendasPorCapital': a.reading.salesPerCapital,
               'gMotor': a.g0,
-              'gFundamental': a.leitura.gFundamental,
-              'gSetor': a.leitura.gSetor,
-              'gRegra': a.leitura.gRegra,
-              'preco': a.preco,
-              'justoCentavos': a.justo,
-              'potencial': a.potencial,
+              'gFundamental': a.reading.gFundamental,
+              'gSetor': a.reading.gSector,
+              'gRegra': a.reading.gRule,
+              'preco': a.price,
+              'justoCentavos': a.fairValue,
+              'potencial': a.upside,
             },
         ],
-        'resumo': resumo,
-        'porGrupo': porGrupo,
-        'historico': {'testes': testes, 'painel': painel},
+        'resumo': summary,
+        'porGrupo': byGroup,
+        'historico': {'testes': tests, 'painel': panel},
       }),
     );
     stdout.writeln('');
-    stdout.writeln('escrito $_saida');
+    stdout.writeln('escrito $_output');
   } finally {
     await c.ctx.dispose();
   }

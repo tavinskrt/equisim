@@ -10,19 +10,19 @@ void main() {
   group('Leitura do texto declarado', () {
     test('as nove units do universo saem com a composição certa', () {
       // Cada string é a linha da FCA da companhia, com o ano em comentário.
-      const declaradas = <String, ({String texto, int acoes})>{
-        'ALUP11': (texto: '1 ON E 2 PN', acoes: 3),
-        'BPAC11': (texto: '1 ON E 2 PNA', acoes: 3),
-        'BRBI11': (texto: '2 ações preferenciais e 1 ação ordinária', acoes: 3),
-        'ENGI11': (texto: '1 ação ordinária e 4 ações preferenciais', acoes: 5),
-        'IGTI11': (texto: '1 ON e 2 PN', acoes: 3),
-        'KLBN11': (texto: '1 KLBN3 + 4 KLBN4', acoes: 5),
-        'SANB11': (texto: '1 ON + 1 PN', acoes: 2),
-        'SAPR11': (texto: '1 ON e 4 PN', acoes: 5),
-        'TAEE11': (texto: '1 ON / 2 PN', acoes: 3),
+      const declared = <String, ({String text, int shares})>{
+        'ALUP11': (text: '1 ON E 2 PN', shares: 3),
+        'BPAC11': (text: '1 ON E 2 PNA', shares: 3),
+        'BRBI11': (text: '2 ações preferenciais e 1 ação ordinária', shares: 3),
+        'ENGI11': (text: '1 ação ordinária e 4 ações preferenciais', shares: 5),
+        'IGTI11': (text: '1 ON e 2 PN', shares: 3),
+        'KLBN11': (text: '1 KLBN3 + 4 KLBN4', shares: 5),
+        'SANB11': (text: '1 ON + 1 PN', shares: 2),
+        'SAPR11': (text: '1 ON e 4 PN', shares: 5),
+        'TAEE11': (text: '1 ON / 2 PN', shares: 3),
       };
-      for (final e in declaradas.entries) {
-        expect(UnitCompositionCodec.parse(e.value.texto), e.value.acoes,
+      for (final e in declared.entries) {
+        expect(UnitCompositionCodec.parse(e.value.text), e.value.shares,
             reason: e.key);
       }
     });
@@ -53,45 +53,45 @@ void main() {
   });
 
   group('O formulário vigente na data', () {
-    final serie = [
+    final series = [
       const UnitComposition(year: 2018, shares: 4, declared: '1 ON + 3 PN'),
       const UnitComposition(year: 2021, shares: 5, declared: '1 ON + 4 PN'),
       const UnitComposition(year: 2024, shares: 3, declared: '1 ON + 2 PN'),
     ];
 
     test('vale o mais recente até a data, e nunca um posterior', () {
-      expect(UnitCompositionCodec.at(serie, DateTime(2019, 6, 30))?.shares, 4);
-      expect(UnitCompositionCodec.at(serie, DateTime(2021, 1, 1))?.shares, 5);
-      expect(UnitCompositionCodec.at(serie, DateTime(2023, 12, 31))?.shares, 5,
+      expect(UnitCompositionCodec.at(series, DateTime(2019, 6, 30))?.shares, 4);
+      expect(UnitCompositionCodec.at(series, DateTime(2021, 1, 1))?.shares, 5);
+      expect(UnitCompositionCodec.at(series, DateTime(2023, 12, 31))?.shares, 5,
           reason: 'o formulário de 2024 seria conhecimento futuro em 2023');
-      expect(UnitCompositionCodec.at(serie, DateTime(2026, 9, 14))?.shares, 3);
+      expect(UnitCompositionCodec.at(series, DateTime(2026, 9, 14))?.shares, 3);
     });
 
     test('antes do primeiro formulário não há composição', () {
-      expect(UnitCompositionCodec.at(serie, DateTime(2017, 12, 31)), isNull);
+      expect(UnitCompositionCodec.at(series, DateTime(2017, 12, 31)), isNull);
     });
   });
 
   group('Pacote', () {
     test('ida e volta preserva ano, contagem e texto', () {
-      final pacote = UnitCompositionCodec.encodePackage(
+      final package = UnitCompositionCodec.encodePackage(
         {
           'SAPR11': [
             const UnitComposition(year: 2025, shares: 5, declared: '1 ON e 4 PN'),
           ],
         },
-        geradoEm: DateTime(2026, 9, 14),
+        generatedAt: DateTime(2026, 9, 14),
       );
-      final lido = UnitCompositionCodec.decodePackage(pacote);
-      expect(lido['SAPR11'], hasLength(1));
-      expect(lido['SAPR11']!.single.shares, 5);
-      expect(lido['SAPR11']!.single.year, 2025);
-      expect(lido['SAPR11']!.single.declared, '1 ON e 4 PN');
+      final parsed = UnitCompositionCodec.decodePackage(package);
+      expect(parsed['SAPR11'], hasLength(1));
+      expect(parsed['SAPR11']!.single.shares, 5);
+      expect(parsed['SAPR11']!.single.year, 2025);
+      expect(parsed['SAPR11']!.single.declared, '1 ON e 4 PN');
     });
 
     test('entrada malformada é pulada, e não derruba a leitura', () {
-      final lido = UnitCompositionCodec.decodePackage({
-        'versao': UnitCompositionCodec.versao,
+      final parsed = UnitCompositionCodec.decodePackage({
+        'versao': UnitCompositionCodec.version,
         'units': {
           'AAAA11': [
             {'ano': 2025, 'acoes': 0},
@@ -101,8 +101,8 @@ void main() {
           'BBBB11': 'lixo',
         },
       });
-      expect(lido.keys, ['AAAA11']);
-      expect(lido['AAAA11']!.single.shares, 3);
+      expect(parsed.keys, ['AAAA11']);
+      expect(parsed['AAAA11']!.single.shares, 3);
     });
 
     test('pacote sem units devolve mapa vazio', () {

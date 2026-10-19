@@ -19,9 +19,9 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
-double? _mediana(List<double> v) {
+double? _median(List<double> v) {
   if (v.isEmpty) return null;
   final s = [...v]..sort();
   final m = s.length ~/ 2;
@@ -36,7 +36,7 @@ Future<void> main(List<String> args) async {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
     final universe = (await ctx.fundamentals.universe()).unwrap();
@@ -45,10 +45,10 @@ Future<void> main(List<String> args) async {
       prices: ctx.prices,
       fundamentals: ctx.fundamentals,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     );
 
-    final avaliacoes = <Ticker, ValuationResult>{};
+    final valuations = <Ticker, ValuationResult>{};
     var i = 0;
     for (final ticker in universe) {
       i++;
@@ -59,7 +59,7 @@ Future<void> main(List<String> args) async {
         fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
@@ -68,44 +68,44 @@ Future<void> main(List<String> args) async {
       );
       if (prep.isErr) continue;
       final r = ValuationCascade.evaluate(prep.unwrap());
-      if (r.isOk) avaliacoes[ticker] = r.unwrap();
+      if (r.isOk) valuations[ticker] = r.unwrap();
     }
     stderr.writeln('');
 
     final upsides = {
-      for (final e in avaliacoes.entries) e.key: e.value.upside,
+      for (final e in valuations.entries) e.key: e.value.upside,
     };
     final kes = {
-      for (final e in avaliacoes.entries)
+      for (final e in valuations.entries)
         if (e.value.diagnostics != null)
           e.key: e.value.diagnostics!.costOfEquity,
     };
 
-    final comCdi = ExpectedReturn.crossSection(
+    final withCdi = ExpectedReturn.crossSection(
       upsides: upsides,
       spotRiskFree: anchors.currentRiskFreeRate,
     );
-    final comKe = ExpectedReturn.crossSection(
+    final withKe = ExpectedReturn.crossSection(
       upsides: upsides,
       spotRiskFree: anchors.currentRiskFreeRate,
       costOfEquity: kes,
     );
 
-    final saida = [
+    final output = [
       for (final t in upsides.keys)
         {
           'ticker': t.value,
           'potencial': upsides[t],
           'custoDoCapitalProprio': kes[t],
-          'esperadoNoCdi': comCdi[t]!.expected,
-          'esperadoNoKe': comKe[t]!.expected,
-          'z': comKe[t]!.z,
-          'ancoradoNoKe': comKe[t]!.anchoredOnCostOfEquity,
-          'pisado': comKe[t]!.floored,
+          'esperadoNoCdi': withCdi[t]!.expected,
+          'esperadoNoKe': withKe[t]!.expected,
+          'z': withKe[t]!.z,
+          'ancoradoNoKe': withKe[t]!.anchoredOnCostOfEquity,
+          'pisado': withKe[t]!.floored,
         }
     ];
     File('docs/validacao/retorno_esperado.json').writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(saida),
+      const JsonEncoder.withIndent(' ').convert(output),
     );
 
     stdout.writeln('\n=== RETORNO ESPERADO TRANSVERSAL — '
@@ -113,41 +113,41 @@ Future<void> main(List<String> args) async {
     stdout.writeln('  CDI corrente: ${_pc(anchors.currentRiskFreeRate)}');
     final kesL = kes.values.toList();
     stdout.writeln('  custo do capital próprio: mediana='
-        '${_pc(_mediana(kesL)!)}  n=${kesL.length}');
+        '${_pc(_median(kesL)!)}  n=${kesL.length}');
 
-    for (final caso in [
+    for (final caseTicker in [
       ('âncora no CDI (antes)', 'esperadoNoCdi'),
       ('âncora no Ke (agora)', 'esperadoNoKe'),
     ]) {
       final v = [
-        for (final e in saida) (e[caso.$2] as num).toDouble()
+        for (final e in output) (e[caseTicker.$2] as num).toDouble()
       ]..sort();
-      stdout.writeln('  ${caso.$1.padRight(24)} '
+      stdout.writeln('  ${caseTicker.$1.padRight(24)} '
           'p10=${_pc(v[(v.length * 0.1).floor()])}  '
-          'mediana=${_pc(_mediana(v)!)}  '
+          'mediana=${_pc(_median(v)!)}  '
           'p90=${_pc(v[(v.length * 0.9).floor()])}');
     }
 
-    final pisados = saida.where((e) => e['pisado'] == true).length;
-    stdout.writeln('  pisados em zero: $pisados');
-    final semKe = saida.where((e) => e['ancoradoNoKe'] != true).length;
-    stdout.writeln('  sem Ke, ancorados no CDI: $semKe');
+    final floored = output.where((e) => e['pisado'] == true).length;
+    stdout.writeln('  pisados em zero: $floored');
+    final withoutKe = output.where((e) => e['ancoradoNoKe'] != true).length;
+    stdout.writeln('  sem Ke, ancorados no CDI: $withoutKe');
 
     // O que isso faz com uma carteira igualmente ponderada do universo.
-    final mediaCdi = [
-      for (final e in saida) (e['esperadoNoCdi'] as num).toDouble()
+    final cdiMean = [
+      for (final e in output) (e['esperadoNoCdi'] as num).toDouble()
     ].reduce((a, b) => a + b) /
-        saida.length;
-    final mediaKe = [
-      for (final e in saida) (e['esperadoNoKe'] as num).toDouble()
+        output.length;
+    final keMean = [
+      for (final e in output) (e['esperadoNoKe'] as num).toDouble()
     ].reduce((a, b) => a + b) /
-        saida.length;
+        output.length;
     stdout.writeln('\n-- carteira igualmente ponderada do universo --');
-    stdout.writeln('  antes: ${_pc(mediaCdi)}   agora: ${_pc(mediaKe)}   '
-        'diferença: ${_pc(mediaKe - mediaCdi)}');
+    stdout.writeln('  antes: ${_pc(cdiMean)}   agora: ${_pc(keMean)}   '
+        'diferença: ${_pc(keMean - cdiMean)}');
     stdout.writeln('  o CDI é ${_pc(anchors.currentRiskFreeRate)}: antes a '
         'carteira de ações esperava '
-        '${mediaCdi < anchors.currentRiskFreeRate ? "MENOS" : "mais"} que a '
+        '${cdiMean < anchors.currentRiskFreeRate ? "MENOS" : "mais"} que a '
         'renda fixa');
 
     stderr.writeln('\nescrito docs/validacao/retorno_esperado.json');

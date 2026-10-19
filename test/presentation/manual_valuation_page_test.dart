@@ -11,24 +11,24 @@ import 'populated_state.dart';
 /// motor, cada troca recalcula o preço na hora, e a conta recusa com o campo
 /// nomeado quando a premissa não tem conta.
 void main() {
-  Future<ValuationResult> montar(
+  Future<ValuationResult> build(
     WidgetTester tester, {
-    bool firma = true,
-    double largura = 390,
-    double choque = 1.0,
-    ManualPremises Function(ManualPremises motor)? inicial,
+    bool firm = true,
+    double width = 390,
+    double shock = 1.0,
+    ManualPremises Function(ManualPremises engine)? initial,
   }) async {
-    final r = avaliacaoDaCascata(firma: firma, choque: choque);
+    final r = cascadeValuation(firm: firm, shock: shock);
     tester.view.devicePixelRatio = 1.0;
     // Alta o bastante para a lista construir todos os cartões: o teste confere
     // o resultado, e não a rolagem.
-    tester.view.physicalSize = Size(largura, 7000);
+    tester.view.physicalSize = Size(width, 7000);
     addTearDown(tester.view.reset);
     await tester.pumpWidget(MaterialApp(
       theme: buildFinTheme(isLight: true),
       home: ManualValuationPage(
         result: r,
-        inicial: inicial?.call(r.manual!.motorPremises),
+        initial: initial?.call(r.manual!.enginePremises),
       ),
     ));
     await tester.pumpAndSettle();
@@ -36,17 +36,17 @@ void main() {
   }
 
   /// O preço do usuário, como a barra do rodapé o escreve.
-  String precoDaBarra(WidgetTester tester) {
-    final barra = find.ancestor(
+  String barPrice(WidgetTester tester) {
+    final bar = find.ancestor(
       of: find.text('Seu preço justo').last,
       matching: find.byType(Column),
     ).first;
-    final textos = find.descendant(of: barra, matching: find.byType(Text));
-    return tester.widget<Text>(textos.at(1)).data!;
+    final texts = find.descendant(of: bar, matching: find.byType(Text));
+    return tester.widget<Text>(texts.at(1)).data!;
   }
 
   testWidgets('abre nos números do motor, com o preço do motor', (tester) async {
-    final r = await montar(tester);
+    final r = await build(tester);
     expect(find.text('Editar valuation'), findsOneWidget);
     expect(
       find.text('Igual ao do motor: nenhum campo foi trocado'),
@@ -57,25 +57,25 @@ void main() {
           'preço.'),
       findsOneWidget,
     );
-    expect(precoDaBarra(tester), Fmt.money(r.fairValue.reais));
+    expect(barPrice(tester), Fmt.money(r.fairValue.reais));
     expect(find.text('Seu número'), findsNothing);
     // A via da firma parte do lucro da operação.
     expect(find.text('Lucro operacional de partida'), findsWidgets);
   });
 
   testWidgets('digitar a taxa recalcula o preço na hora', (tester) async {
-    final r = await montar(tester);
+    final r = await build(tester);
     final m = r.manual!;
-    final taxa = find.byKey(const ValueKey('campo-discountRate'));
-    await tester.ensureVisible(taxa);
-    await tester.enterText(taxa, '20');
+    final rate = find.byKey(const ValueKey('campo-discountRate'));
+    await tester.ensureVisible(rate);
+    await tester.enterText(rate, '20');
     await tester.pumpAndSettle();
-    final esperado = m
-        .evaluate(m.motorPremises.copyWith(discountRate: 0.20))
+    final expected = m
+        .evaluate(m.enginePremises.copyWith(discountRate: 0.20))
         .unwrap()
         .fairValuePerShare;
-    expect(precoDaBarra(tester), Fmt.money(esperado));
-    expect(esperado, lessThan(m.motorFairValue));
+    expect(barPrice(tester), Fmt.money(expected));
+    expect(expected, lessThan(m.engineFairValue));
     expect(find.text('Seu número'), findsOneWidget);
     expect(find.text('A conta do motor com os seus números'), findsOneWidget);
     // A decomposição tem um degrau só: a taxa.
@@ -85,35 +85,35 @@ void main() {
 
   testWidgets('o mais da taxa sobe um quarto de ponto, e voltar ao motor '
       'desfaz tudo', (tester) async {
-    final r = await montar(tester);
+    final r = await build(tester);
     final m = r.manual!;
-    final mais = find.byTooltip('Aumentar taxa de desconto');
-    await tester.ensureVisible(mais);
-    await tester.tap(mais);
+    final plus = find.byTooltip('Aumentar taxa de desconto');
+    await tester.ensureVisible(plus);
+    await tester.tap(plus);
     await tester.pumpAndSettle();
-    final campo = tester.widget<TextField>(
+    final field = tester.widget<TextField>(
       find.byKey(const ValueKey('campo-discountRate')),
     );
-    final taxa = m.motorPremises.discountRate;
-    final esperada = ((taxa + 0.0025) / 0.0025).roundToDouble() * 0.0025;
-    expect(campo.controller!.text, Fmt.ratio(esperada * 100, decimals: 2));
+    final rate = m.enginePremises.discountRate;
+    final expectedRate = ((rate + 0.0025) / 0.0025).roundToDouble() * 0.0025;
+    expect(field.controller!.text, Fmt.ratio(expectedRate * 100, decimals: 2));
 
     await tester.tap(find.text('Voltar aos números do motor'));
     await tester.pumpAndSettle();
-    expect(precoDaBarra(tester), Fmt.money(r.fairValue.reais));
+    expect(barPrice(tester), Fmt.money(r.fairValue.reais));
     expect(find.text('Seu número'), findsNothing);
   });
 
   testWidgets('a recusa nomeia o campo, e o preço some', (tester) async {
-    await montar(
+    await build(
       tester,
-      inicial: (m) => m.copyWith(
-        reinvestment: ManualReinvestment.parcelaFixa,
+      initial: (m) => m.copyWith(
+        reinvestment: ManualReinvestment.fixedFraction,
         retention: 0.3,
         perpetualGrowth: 0.40,
       ),
     );
-    expect(precoDaBarra(tester), '—');
+    expect(barPrice(tester), '—');
     expect(
       find.textContaining('precisa superar o crescimento perpétuo'),
       findsWidgets,
@@ -121,22 +121,22 @@ void main() {
   });
 
   testWidgets('o que o preço de hoje supõe, e usar o valor', (tester) async {
-    final r = await montar(tester);
-    final calcular = find.text('Calcular');
-    await tester.ensureVisible(calcular);
-    await tester.tap(calcular);
+    final r = await build(tester);
+    final calculateButton = find.text('Calcular');
+    await tester.ensureVisible(calculateButton);
+    await tester.tap(calculateButton);
     await tester.pumpAndSettle();
     expect(find.textContaining('teria de ser'), findsOneWidget);
-    final usar = find.text('Usar este valor');
-    await tester.ensureVisible(usar);
-    await tester.tap(usar);
+    final useButton = find.text('Usar este valor');
+    await tester.ensureVisible(useButton);
+    await tester.tap(useButton);
     await tester.pumpAndSettle();
     // O preço justo passa a ser o de mercado.
-    expect(precoDaBarra(tester), Fmt.money(r.marketPrice.reais));
+    expect(barPrice(tester), Fmt.money(r.marketPrice.reais));
   });
 
   testWidgets('a via do acionista parte do lucro líquido', (tester) async {
-    final r = await montar(tester, firma: false);
+    final r = await build(tester, firm: false);
     expect(r.manual!.lane, ValuationLane.shareholder);
     expect(find.text('Lucro líquido de partida'), findsWidgets);
     expect(find.text('Retorno sobre o patrimônio'), findsWidgets);
@@ -144,7 +144,7 @@ void main() {
 
   testWidgets('em tela larga, o resultado fica ao lado e sem barra no rodapé',
       (tester) async {
-    await montar(tester, largura: 1200);
+    await build(tester, width: 1200);
     // O título do resumo aparece no cartão, e não há barra fixa.
     expect(find.text('SEU PREÇO JUSTO'), findsOneWidget);
     expect(find.text('Seu preço justo'), findsNothing);
@@ -156,9 +156,9 @@ void main() {
 
   testWidgets('o último ano deprimido: o painel abre dizendo que subiu, e por '
       'quê', (tester) async {
-    final r = await montar(tester, choque: 0.6);
+    final r = await build(tester, shock: 0.6);
     final n = r.diagnostics!.baseNormalization!;
-    expect(n.outcome, BaseNormalizationOutcome.paraCima);
+    expect(n.outcome, BaseNormalizationOutcome.upward);
     expect(find.text('Por que o motor subiu o lucro de partida?'),
         findsOneWidget);
     expect(find.textContaining('Para cima, ×'), findsOneWidget);
@@ -175,9 +175,9 @@ void main() {
   });
 
   testWidgets('o último ano de pico: o painel diz que baixou', (tester) async {
-    final r = await montar(tester, choque: 1.8);
+    final r = await build(tester, shock: 1.8);
     expect(r.diagnostics!.baseNormalization!.outcome,
-        BaseNormalizationOutcome.paraBaixo);
+        BaseNormalizationOutcome.downward);
     expect(find.text('Por que o motor baixou o lucro de partida?'),
         findsOneWidget);
     expect(find.textContaining('acima do seu típico'), findsOneWidget);
@@ -185,14 +185,14 @@ void main() {
 
   testWidgets('sem normalização, o painel fica fechado e abre com o toque',
       (tester) async {
-    final r = await montar(tester);
+    final r = await build(tester);
     final n = r.diagnostics!.baseNormalization!;
     expect(n.factor, 1.0);
-    final pergunta = find.text('Por que o motor usou o lucro publicado?');
-    expect(pergunta, findsOneWidget);
+    final question = find.text('Por que o motor usou o lucro publicado?');
+    expect(question, findsOneWidget);
     expect(find.textContaining('O teste: o último ano'), findsNothing);
-    await tester.ensureVisible(pergunta);
-    await tester.tap(pergunta);
+    await tester.ensureVisible(question);
+    await tester.tap(question);
     await tester.pumpAndSettle();
     expect(find.textContaining('Um ano só pode ter sido um pico ou um vale'),
         findsOneWidget);

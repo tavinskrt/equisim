@@ -44,43 +44,43 @@ except ImportError:
     sys.exit("Instale as dependências: pip install pandas numpy")
 
 BASE = Path(__file__).parent
-TOLERANCIA_RELATIVA = 1e-6
-PREGOES_POR_ANO = 252
+RELATIVE_TOLERANCE = 1e-6
+SESSIONS_PER_YEAR = 252
 
 
-def carregar_parametros() -> dict[str, str]:
-    caminho = BASE / "parametros.csv"
-    if not caminho.exists():
-        sys.exit(f"Arquivo ausente: {caminho}. Rode 'dart run tool/validate.dart exportar'.")
-    df = pd.read_csv(caminho)
+def load_parameters() -> dict[str, str]:
+    path = BASE / "parametros.csv"
+    if not path.exists():
+        sys.exit(f"Arquivo ausente: {path}. Rode 'dart run tool/validate.dart exportar'.")
+    df = pd.read_csv(path)
     return dict(zip(df["parametro"], df["valor"]))
 
 
-def retornos_diarios(indice: pd.Series) -> pd.Series:
+def daily_returns(index: pd.Series) -> pd.Series:
     """Retornos simples de uma série de índice de retorno total."""
-    return indice.dropna().pct_change().dropna()
+    return index.dropna().pct_change().dropna()
 
 
-def volatilidade_anual(retornos: pd.Series) -> float:
+def annual_volatility(returns: pd.Series) -> float:
     """Desvio-padrão AMOSTRAL (ddof=1) anualizado — mesma convenção do motor."""
-    return float(retornos.std(ddof=1) * np.sqrt(PREGOES_POR_ANO))
+    return float(returns.std(ddof=1) * np.sqrt(SESSIONS_PER_YEAR))
 
 
-def max_drawdown(indice: pd.Series) -> float:
-    serie = indice.dropna()
-    pico = serie.cummax()
-    return float(((serie - pico) / pico).min())
+def max_drawdown(index: pd.Series) -> float:
+    series = index.dropna()
+    peak = series.cummax()
+    return float(((series - peak) / peak).min())
 
 
-def cagr(indice: pd.Series, dias_corridos: float) -> float:
-    serie = indice.dropna()
-    if len(serie) < 2 or dias_corridos <= 0:
+def cagr(index: pd.Series, calendar_days: float) -> float:
+    series = index.dropna()
+    if len(series) < 2 or calendar_days <= 0:
         return 0.0
-    anos = dias_corridos / 365.25
-    return float((serie.iloc[-1] / serie.iloc[0]) ** (1 / anos) - 1)
+    years = calendar_days / 365.25
+    return float((series.iloc[-1] / series.iloc[0]) ** (1 / years) - 1)
 
 
-def beta_e_correlacao(indice_ativo: pd.Series, indice_mercado: pd.Series) -> tuple[float, float, int]:
+def beta_and_correlation(asset_index: pd.Series, market_index: pd.Series) -> tuple[float, float, int]:
     """Beta = Cov(Ra, Rm) / Var(Rm).
 
     Convencao de pareamento: os retornos sao calculados entre datas em que
@@ -90,20 +90,20 @@ def beta_e_correlacao(indice_ativo: pd.Series, indice_mercado: pd.Series) -> tup
     mercado cobre um. O beta resultante mistura co-movimento com ruido de
     calendario.
     """
-    niveis = pd.concat([indice_ativo, indice_mercado], axis=1, join="inner").dropna()
-    if len(niveis) < 31:
-        return (float("nan"), float("nan"), len(niveis))
-    pareado = niveis.pct_change().dropna()
-    ra = pareado.iloc[:, 0]
-    rm = pareado.iloc[:, 1]
-    covariancia = float(np.cov(ra, rm, ddof=1)[0, 1])
-    variancia = float(np.var(rm, ddof=1))
-    beta = covariancia / variancia if variancia > 0 else float("nan")
-    correlacao = float(np.corrcoef(ra, rm)[0, 1])
-    return (beta, correlacao, len(pareado))
+    levels = pd.concat([asset_index, market_index], axis=1, join="inner").dropna()
+    if len(levels) < 31:
+        return (float("nan"), float("nan"), len(levels))
+    paired = levels.pct_change().dropna()
+    ra = paired.iloc[:, 0]
+    rm = paired.iloc[:, 1]
+    covariance = float(np.cov(ra, rm, ddof=1)[0, 1])
+    variance = float(np.var(rm, ddof=1))
+    beta = covariance / variance if variance > 0 else float("nan")
+    correlation = float(np.corrcoef(ra, rm)[0, 1])
+    return (beta, correlation, len(paired))
 
 
-def semidesvio_anual(retornos: pd.Series, alvo: float = 0.0) -> float:
+def annual_semideviation(returns: pd.Series, target: float = 0.0) -> float:
     """Semidesvio de Sortino e Satchell.
 
         DD = sqrt( (1/N) * soma( min(r - alvo, 0)^2 ) )
@@ -111,74 +111,74 @@ def semidesvio_anual(retornos: pd.Series, alvo: float = 0.0) -> float:
     O divisor e o total de observacoes, nao a contagem de negativos, e os
     desvios sao medidos a partir do alvo, nao da media dos negativos.
     """
-    shortfall = np.minimum(retornos.to_numpy() - alvo, 0.0)
+    shortfall = np.minimum(returns.to_numpy() - target, 0.0)
     if len(shortfall) < 2:
         return 0.0
-    variancia = float(np.sum(shortfall**2) / len(shortfall))
-    return float(np.sqrt(variancia) * np.sqrt(PREGOES_POR_ANO))
+    variance = float(np.sum(shortfall**2) / len(shortfall))
+    return float(np.sqrt(variance) * np.sqrt(SESSIONS_PER_YEAR))
 
 
-def sortino(retornos: pd.Series, cagr_valor: float, taxa_livre: float) -> float:
-    desvio = semidesvio_anual(retornos)
-    return (cagr_valor - taxa_livre) / desvio if desvio > 0 else 0.0
+def sortino(returns: pd.Series, cagr_value: float, risk_free: float) -> float:
+    deviation = annual_semideviation(returns)
+    return (cagr_value - risk_free) / deviation if deviation > 0 else 0.0
 
 
-def comparar(nome: str, dart: float, python: float) -> tuple[str, bool]:
+def compare(name: str, dart: float, python: float) -> tuple[str, bool]:
     """Compara e devolve (linha formatada, passou)."""
     if pd.isna(dart) or pd.isna(python):
-        return (f"| {nome} | {dart} | {python} | — | ⚪ sem dado |", True)
-    escala = max(abs(dart), abs(python), 1e-9)
-    desvio = abs(dart - python) / escala
-    passou = desvio < 1e-4
-    marca = "✅" if passou else "❌"
+        return (f"| {name} | {dart} | {python} | — | ⚪ sem dado |", True)
+    scale = max(abs(dart), abs(python), 1e-9)
+    deviation = abs(dart - python) / scale
+    passed = deviation < 1e-4
+    mark = "✅" if passed else "❌"
     return (
-        f"| {nome} | {dart:.8f} | {python:.8f} | {desvio:.2e} | {marca} |",
-        passou,
+        f"| {name} | {dart:.8f} | {python:.8f} | {deviation:.2e} | {mark} |",
+        passed,
     )
 
 
 def main() -> None:
-    parametros = carregar_parametros()
-    taxa_livre = float(parametros["taxa_livre_risco_anual"])
+    parameters = load_parameters()
+    risk_free = float(parameters["taxa_livre_risco_anual"])
 
-    precos = pd.read_csv(BASE / "precos.csv", parse_dates=["date"]).set_index("date")
-    metricas_dart = pd.read_csv(BASE / "metricas_equisim.csv").set_index("ticker")
+    prices = pd.read_csv(BASE / "precos.csv", parse_dates=["date"]).set_index("date")
+    dart_metrics = pd.read_csv(BASE / "metricas_equisim.csv").set_index("ticker")
 
-    if "IBOV" not in precos.columns:
+    if "IBOV" not in prices.columns:
         sys.exit("precos.csv não contém a coluna IBOV; refaça a exportação.")
-    indice_mercado = precos["IBOV"].dropna()
+    market_index = prices["IBOV"].dropna()
 
-    linhas: list[str] = []
+    lines: list[str] = []
     total = 0
-    aprovados = 0
+    approved = 0
 
-    for ticker in precos.columns:
-        if ticker not in metricas_dart.index:
+    for ticker in prices.columns:
+        if ticker not in dart_metrics.index:
             continue
 
         # Indice de preco em base 1,0 no primeiro pregao da janela. Era o
         # `retorno_total.csv` que entrava aqui, construido pelo motor de
         # retorno total; ele saiu com a decisao 023, e a trajetoria de um
         # ativo passou a ser a propria serie de fechamentos.
-        serie = precos[ticker].dropna()
-        if len(serie) < 30 or serie.iloc[0] <= 0:
+        series = prices[ticker].dropna()
+        if len(series) < 30 or series.iloc[0] <= 0:
             continue
-        indice = serie / serie.iloc[0]
+        index = series / series.iloc[0]
 
-        retornos = retornos_diarios(indice)
-        dias = (indice.index[-1] - indice.index[0]).days
+        returns = daily_returns(index)
+        days = (index.index[-1] - index.index[0]).days
 
-        py_retorno_total = float(indice.iloc[-1] / indice.iloc[0] - 1)
-        py_cagr = cagr(indice, dias)
-        py_vol = volatilidade_anual(retornos)
-        py_mdd = max_drawdown(indice)
-        py_sharpe = (py_cagr - taxa_livre) / py_vol if py_vol > 0 else 0.0
-        py_sortino = sortino(retornos, py_cagr, taxa_livre)
-        py_beta, py_corr, py_obs = beta_e_correlacao(indice, indice_mercado)
+        py_total_return = float(index.iloc[-1] / index.iloc[0] - 1)
+        py_cagr = cagr(index, days)
+        py_vol = annual_volatility(returns)
+        py_mdd = max_drawdown(index)
+        py_sharpe = (py_cagr - risk_free) / py_vol if py_vol > 0 else 0.0
+        py_sortino = sortino(returns, py_cagr, risk_free)
+        py_beta, py_corr, py_obs = beta_and_correlation(index, market_index)
 
-        d = metricas_dart.loc[ticker]
-        comparacoes = [
-            ("retorno total", float(d["retorno_total"]), py_retorno_total),
+        d = dart_metrics.loc[ticker]
+        comparisons = [
+            ("retorno total", float(d["retorno_total"]), py_total_return),
             ("CAGR", float(d["cagr"]), py_cagr),
             ("volatilidade", float(d["volatilidade_anual"]), py_vol),
             ("max drawdown", float(d["max_drawdown"]), py_mdd),
@@ -192,38 +192,38 @@ def main() -> None:
             ),
         ]
 
-        linhas.append(f"\n### {ticker}\n")
-        linhas.append("| Métrica | Equisim (Dart) | Python | Desvio relativo | |")
-        linhas.append("|---|---|---|---|---|")
-        for nome, valor_dart, valor_python in comparacoes:
-            linha, passou = comparar(nome, valor_dart, valor_python)
-            linhas.append(linha)
-            if not (pd.isna(valor_dart) or pd.isna(valor_python)):
+        lines.append(f"\n### {ticker}\n")
+        lines.append("| Métrica | Equisim (Dart) | Python | Desvio relativo | |")
+        lines.append("|---|---|---|---|---|")
+        for name, dart_value, python_value in comparisons:
+            line, passed = compare(name, dart_value, python_value)
+            lines.append(line)
+            if not (pd.isna(dart_value) or pd.isna(python_value)):
                 total += 1
-                aprovados += int(passou)
+                approved += int(passed)
 
-    cabecalho = [
+    header_lines = [
         "# Conferência cruzada — Equisim × Python",
         "",
-        f"Janela: {parametros['janela_inicio']} a {parametros['janela_fim']}  ",
-        f"Taxa livre de risco: {taxa_livre:.4%} a.a. (CDI observado)  ",
-        f"Desvio-padrão: {parametros['desvio_padrao']}  ",
-        f"Pregões por ano: {parametros['pregoes_por_ano']}",
+        f"Janela: {parameters['janela_inicio']} a {parameters['janela_fim']}  ",
+        f"Taxa livre de risco: {risk_free:.4%} a.a. (CDI observado)  ",
+        f"Desvio-padrão: {parameters['desvio_padrao']}  ",
+        f"Pregões por ano: {parameters['pregoes_por_ano']}",
         "",
         "As métricas da coluna *Python* foram recalculadas de forma independente "
         "com `pandas` e `numpy` a partir das séries exportadas. Um desvio "
         "relativo acima de 1e-4 indica divergência entre as implementações.",
         "",
-        f"**Resultado: {aprovados} de {total} comparações dentro da tolerância.**",
+        f"**Resultado: {approved} de {total} comparações dentro da tolerância.**",
     ]
 
-    saida = "\n".join(cabecalho + linhas) + "\n"
-    destino = BASE / "conferencia_python.md"
-    destino.write_text(saida, encoding="utf-8")
+    output = "\n".join(header_lines + lines) + "\n"
+    destination = BASE / "conferencia_python.md"
+    destination.write_text(output, encoding="utf-8")
 
-    print(f"{aprovados}/{total} comparações dentro da tolerância.")
-    print(f"-> {destino}")
-    if aprovados < total:
+    print(f"{approved}/{total} comparações dentro da tolerância.")
+    print(f"-> {destination}")
+    if approved < total:
         sys.exit(1)
 
 

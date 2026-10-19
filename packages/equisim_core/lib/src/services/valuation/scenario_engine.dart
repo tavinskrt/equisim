@@ -241,8 +241,8 @@ class StochasticScenarios implements AssumptionSource {
       // que desconta a perpetuidade, e congelá-la deixaria de fora a parcela
       // que mais pesa no valor. O deslocamento é paralelo — a estrutura a termo
       // é premissa do modelo, não fonte de incerteza sorteada aqui.
-      final deslocamento = r - base.discountRate;
-      final rInf = base.terminalDiscountRate + deslocamento;
+      final shift = r - base.discountRate;
+      final rInf = base.terminalDiscountRate + shift;
       final gp = perpetual.sample(rng);
       out.add(base.copyWith(
         growthRate: growth.sample(rng),

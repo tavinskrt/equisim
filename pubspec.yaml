@@ -1,6 +1,6 @@
 name: equisim
-description: "A new Flutter project."
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+description: "Um novo projeto Flutter."
+publish_to: 'none' # Remova esta linha se quiser publicar no pub.dev
 version: 1.0.0+1
 
 environment:

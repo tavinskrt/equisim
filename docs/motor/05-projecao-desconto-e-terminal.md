@@ -7,7 +7,7 @@ fórmula abaixo é refeita com números nos [casos](../estudo/casos/).
 
 Código: [dcf.dart](../../packages/equisim_core/lib/src/services/valuation/dcf.dart)
 (`DcfAssumptions`, `DcfCalculator`) e
-[compute_valuation.dart, `_premissas`, `_descontarDoBalanco`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart).
+[compute_valuation.dart, `_assumptions`, `_discountFromBalanceSheet`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart).
 
 ---
 

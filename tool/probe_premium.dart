@@ -20,15 +20,15 @@ Future<void> main() async {
     ))
         .getOrElse(MarketAnchors.fallback2026);
 
-    final medido = anchors.marketCagr - anchors.riskFreeCagr;
-    final premios = <String, double>{
+    final measured = anchors.marketCagr - anchors.riskFreeCagr;
+    final premiums = <String, double>{
       'usado_5.50': CapmInputs.defaultMarketPremium,
-      'medido': medido,
+      'medido': measured,
       'meio_4.00': 0.04,
       'damodaran_7.00': 0.07,
     };
     stderr.writeln('prêmio medido na janela: '
-        '${(medido * 100).toStringAsFixed(2)} p.p.');
+        '${(measured * 100).toStringAsFixed(2)} p.p.');
 
     final universe = (await ctx.fundamentals.universe()).unwrap();
     final out = <Map<String, dynamic>>[];
@@ -50,11 +50,11 @@ Future<void> main() async {
       );
       if (prep.isErr) continue;
       final base = prep.unwrap();
-      final linha = <String, dynamic>{
+      final row = <String, dynamic>{
         'ticker': ticker.value,
         'beta': base.capm.beta,
       };
-      for (final e in premios.entries) {
+      for (final e in premiums.entries) {
         final v = ValuationInputs(
           ticker: base.ticker,
           asOf: base.asOf,
@@ -76,9 +76,9 @@ Future<void> main() async {
           isDistressed: base.isDistressed,
         );
         final r = ValuationCascade.evaluate(v);
-        linha[e.key] = r.isOk ? r.unwrap().upside : null;
+        row[e.key] = r.isOk ? r.unwrap().upside : null;
       }
-      out.add(linha);
+      out.add(row);
     }
     File('docs/validacao/sensibilidade_premio.json')
         .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(out));

@@ -7,9 +7,9 @@
 #include <memory>
 #include <string>
 
-// A class abstraction for a high DPI-aware Win32 Window. Intended to be
-// inherited from by classes that wish to specialize with custom
-// rendering and input handling
+// Abstracao de uma janela Win32 ciente de DPI alto. Feita para ser herdada
+// por classes que queiram especializar a renderizacao e o tratamento de
+// entrada
 class Win32Window {
  public:
   struct Point {
@@ -28,74 +28,73 @@ class Win32Window {
   Win32Window();
   virtual ~Win32Window();
 
-  // Creates a win32 window with |title| that is positioned and sized using
-  // |origin| and |size|. New windows are created on the default monitor. Window
-  // sizes are specified to the OS in physical pixels, hence to ensure a
-  // consistent size this function will scale the inputted width and height as
-  // as appropriate for the default monitor. The window is invisible until
-  // |Show| is called. Returns true if the window was created successfully.
+  // Cria uma janela win32 com |title|, posicionada e dimensionada por |origin| e
+  // |size|. Janelas novas sao criadas no monitor padrao. O tamanho da janela e
+  // informado ao sistema em pixels fisicos; para manter o tamanho consistente,
+  // esta funcao escala a largura e a altura recebidas conforme o monitor padrao.
+  // A janela fica invisivel ate |Show| ser chamado. Devolve true se a janela foi
+  // criada.
   bool Create(const std::wstring& title, const Point& origin, const Size& size);
 
-  // Show the current window. Returns true if the window was successfully shown.
+  // Mostra a janela atual. Devolve true se a janela foi mostrada.
   bool Show();
 
-  // Release OS resources associated with window.
+  // Libera os recursos do sistema associados a janela.
   void Destroy();
 
-  // Inserts |content| into the window tree.
+  // Insere |content| na arvore de janelas.
   void SetChildContent(HWND content);
 
-  // Returns the backing Window handle to enable clients to set icon and other
-  // window properties. Returns nullptr if the window has been destroyed.
+  // Devolve o handle da janela, para que o cliente defina icone e outras
+  // propriedades. Devolve nullptr se a janela ja foi destruida.
   HWND GetHandle();
 
-  // If true, closing this window will quit the application.
+  // Se true, fechar esta janela encerra o aplicativo.
   void SetQuitOnClose(bool quit_on_close);
 
-  // Return a RECT representing the bounds of the current client area.
+  // Devolve um RECT com os limites da area cliente atual.
   RECT GetClientArea();
 
  protected:
-  // Processes and route salient window messages for mouse handling,
-  // size change and DPI. Delegates handling of these to member overloads that
-  // inheriting classes can handle.
+  // Processa e encaminha as mensagens de janela relevantes de mouse, mudanca de
+  // tamanho e DPI. Delega o tratamento a sobrecargas de membro que as classes
+  // herdeiras podem tratar.
   virtual LRESULT MessageHandler(HWND window,
                                  UINT const message,
                                  WPARAM const wparam,
                                  LPARAM const lparam) noexcept;
 
-  // Called when CreateAndShow is called, allowing subclass window-related
-  // setup. Subclasses should return false if setup fails.
+  // Chamado quando CreateAndShow e chamado, para a subclasse configurar a janela.
+  // A subclasse deve devolver false se a configuracao falhar.
   virtual bool OnCreate();
 
-  // Called when Destroy is called.
+  // Chamado quando Destroy e chamado.
   virtual void OnDestroy();
 
  private:
   friend class WindowClassRegistrar;
 
-  // OS callback called by message pump. Handles the WM_NCCREATE message which
-  // is passed when the non-client area is being created and enables automatic
-  // non-client DPI scaling so that the non-client area automatically
-  // responds to changes in DPI. All other messages are handled by
-  // MessageHandler.
+  // Callback do sistema chamado pelo laco de mensagens. Trata a mensagem
+  // WM_NCCREATE, enviada quando a area nao cliente esta sendo criada, e liga a
+  // escala automatica de DPI dessa area, para que ela responda sozinha a
+  // mudancas de DPI. Todas as outras mensagens ficam com o MessageHandler.
   static LRESULT CALLBACK WndProc(HWND const window,
                                   UINT const message,
                                   WPARAM const wparam,
                                   LPARAM const lparam) noexcept;
 
-  // Retrieves a class instance pointer for |window|
+  // Obtem o ponteiro da instancia da classe para |window|
   static Win32Window* GetThisFromHandle(HWND const window) noexcept;
 
-  // Update the window frame's theme to match the system theme.
+  // Atualiza o tema da moldura da janela para acompanhar o tema do sistema.
   static void UpdateTheme(HWND const window);
 
   bool quit_on_close_ = false;
 
-  // window handle for top level window.
+  // handle da janela de nivel superior.
   HWND window_handle_ = nullptr;
 
-  // window handle for hosted content.
+  // handle da janela do conteudo hospedado.
   HWND child_content_ = nullptr;
 };
 

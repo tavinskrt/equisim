@@ -22,45 +22,45 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/congelado.dart';
 
-const _saida = 'docs/validacao/normalizacoes.md';
+const _output = 'docs/validacao/normalizacoes.md';
 
 String _pct(double? v) =>
     v == null ? '—' : '${(v * 100).toStringAsFixed(1).replaceAll('.', ',')}%';
 
-String _num(double? v, [int casas = 2]) =>
-    v == null ? '—' : v.toStringAsFixed(casas).replaceAll('.', ',');
+String _num(double? v, [int decimals = 2]) =>
+    v == null ? '—' : v.toStringAsFixed(decimals).replaceAll('.', ',');
 
-String _resultado(BaseNormalizationOutcome o) => switch (o) {
-      BaseNormalizationOutcome.paraCima => 'para cima',
-      BaseNormalizationOutcome.paraBaixo => 'para baixo',
-      BaseNormalizationOutcome.dentroDoNormal => 'dentro do normal',
-      BaseNormalizationOutcome.tendencia => 'novo patamar (tendência)',
-      BaseNormalizationOutcome.travadaPelaSaude => 'travada pela queda',
-      BaseNormalizationOutcome.reconstruida => 'reconstruída do ciclo',
-      BaseNormalizationOutcome.semCiclo => 'sem ciclo medível',
-      BaseNormalizationOutcome.imposta => 'imposta',
+String _result(BaseNormalizationOutcome o) => switch (o) {
+      BaseNormalizationOutcome.upward => 'para cima',
+      BaseNormalizationOutcome.downward => 'para baixo',
+      BaseNormalizationOutcome.withinNormal => 'dentro do normal',
+      BaseNormalizationOutcome.trend => 'novo patamar (tendência)',
+      BaseNormalizationOutcome.healthLocked => 'travada pela queda',
+      BaseNormalizationOutcome.rebuilt => 'reconstruída do ciclo',
+      BaseNormalizationOutcome.noCycle => 'sem ciclo medível',
+      BaseNormalizationOutcome.imposed => 'imposta',
     };
 
 /// Por que destoou: pela razão, pela distância ou pelos dois.
-String _criterio(BaseNormalization n) {
+String _criterion(BaseNormalization n) {
   final r = n.ratio;
   final z = n.robustZ;
   if (r == null || z == null) return '—';
-  final pelaRazao =
+  final byRatio =
       r < ValuationParameters.bandLow || r > ValuationParameters.bandHigh;
-  final pelaDistancia = z > ValuationParameters.robustZ;
+  final byDistance = z > ValuationParameters.robustZ;
   if (!n.deviates) return 'não destoou';
-  if (pelaRazao && pelaDistancia) return 'razão e distância';
-  return pelaRazao ? 'razão' : 'distância';
+  if (byRatio && byDistance) return 'razão e distância';
+  return byRatio ? 'razão' : 'distância';
 }
 
-String _observacao(BaseNormalization n) => [
+String _observation(BaseNormalization n) => [
       if (n.saturated)
         'fator limitado (pedia ${_num(n.rawFactor)}×)',
       if (n.cyclicalPrecedence &&
           n.trendDominates &&
-          (n.outcome == BaseNormalizationOutcome.paraCima ||
-              n.outcome == BaseNormalizationOutcome.paraBaixo))
+          (n.outcome == BaseNormalizationOutcome.upward ||
+              n.outcome == BaseNormalizationOutcome.downward))
         'commodity: ciclo antes da tendência',
       if (n.healthCapped)
         'queda de ${_pct(n.operationalDecline)} em 3 anos (pedia ${_num(n.rawFactor)}×)',
@@ -71,25 +71,25 @@ String _observacao(BaseNormalization n) => [
     ].join('; ');
 
 Future<void> main(List<String> args) async {
-  final c = await Congelado.montar();
-  final linhas = <({Ticker t, BaseNormalization n})>[];
-  for (final t in c.universo) {
-    final prep = await c.preparar(t);
+  final c = await Frozen.build();
+  final rows = <({Ticker t, BaseNormalization n})>[];
+  for (final t in c.universe) {
+    final prep = await c.prepare(t);
     if (prep.isErr) continue;
     final r = ValuationCascade.evaluate(prep.unwrap());
     if (r.isErr) continue;
     final n = r.unwrap().diagnostics?.baseNormalization;
-    if (n != null) linhas.add((t: t, n: n));
+    if (n != null) rows.add((t: t, n: n));
   }
 
-  const ordem = BaseNormalizationOutcome.values;
-  linhas.sort((a, b) {
-    final o = ordem.indexOf(a.n.outcome).compareTo(ordem.indexOf(b.n.outcome));
+  const order = BaseNormalizationOutcome.values;
+  rows.sort((a, b) {
+    final o = order.indexOf(a.n.outcome).compareTo(order.indexOf(b.n.outcome));
     if (o != 0) return o;
     return b.n.factor.compareTo(a.n.factor);
   });
-  final contagem = <BaseNormalizationOutcome, int>{
-    for (final o in ordem) o: linhas.where((l) => l.n.outcome == o).length,
+  final count = <BaseNormalizationOutcome, int>{
+    for (final o in order) o: rows.where((l) => l.n.outcome == o).length,
   };
 
   final md = StringBuffer()
@@ -136,12 +136,12 @@ Future<void> main(List<String> args) async {
         '"Base do fluxo", e na tela Editar valuation, no cartão do lucro de '
         'partida.')
     ..writeln()
-    ..writeln('## Quantos, de ${linhas.length} avaliados')
+    ..writeln('## Quantos, de ${rows.length} avaliados')
     ..writeln()
     ..writeln('| Resultado | Ativos |')
     ..writeln('|---|---|');
-  for (final o in ordem) {
-    if (contagem[o]! > 0) md.writeln('| ${_resultado(o)} | ${contagem[o]} |');
+  for (final o in order) {
+    if (count[o]! > 0) md.writeln('| ${_result(o)} | ${count[o]} |');
   }
   md
     ..writeln()
@@ -154,28 +154,28 @@ Future<void> main(List<String> args) async {
     ..writeln('| Ativo | Via | Resultado | Último | Típico (anos) | Razão | '
         'Desvios | Destoou por | Fator | Observação |')
     ..writeln('|---|---|---|---|---|---|---|---|---|---|');
-  for (final l in linhas) {
+  for (final l in rows) {
     final n = l.n;
-    final anos = n.windowYears;
+    final years = n.windowYears;
     md.writeln(
       '| ${l.t.value} '
       '| ${n.lane == ValuationLane.firm ? 'firma' : 'acionista'} '
-      '| ${_resultado(n.outcome)} '
+      '| ${_result(n.outcome)} '
       '| ${_pct(n.latestReturn)} (${n.latestYear ?? '—'}) '
       '| ${_pct(n.cycleReturn)} '
-      '(${anos == null ? '—' : '${anos.first}–${anos.last}'}) '
+      '(${years == null ? '—' : '${years.first}–${years.last}'}) '
       '| ${_num(n.ratio)} '
       '| ${_num(n.robustZ, 1)} '
-      '| ${_criterio(n)} '
+      '| ${_criterion(n)} '
       '| ${_num(n.factor)}× '
-      '| ${_observacao(n)} |',
+      '| ${_observation(n)} |',
     );
   }
-  File(_saida).writeAsStringSync(md.toString());
+  File(_output).writeAsStringSync(md.toString());
 
-  stdout.writeln('avaliados: ${linhas.length}');
-  for (final o in ordem) {
-    if (contagem[o]! > 0) stdout.writeln('  ${_resultado(o)}: ${contagem[o]}');
+  stdout.writeln('avaliados: ${rows.length}');
+  for (final o in order) {
+    if (count[o]! > 0) stdout.writeln('  ${_result(o)}: ${count[o]}');
   }
-  stdout.writeln('gravado $_saida');
+  stdout.writeln('gravado $_output');
 }

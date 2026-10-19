@@ -4,36 +4,36 @@ import 'package:test/test.dart';
 /// Item B5 — a segunda leitura, por múltiplos de pares.
 void main() {
   final ticker = Ticker.parse('PETR4');
-  final hoje = DateTime(2026, 9, 14);
+  final today = DateTime(2026, 9, 14);
 
-  PeerMultipleSet pares({
+  PeerMultipleSet pairs({
     double? pl,
-    double? pvp,
+    double? priceToBookMedian,
     double? evEbitda,
     int n = 12,
-    String grupo = 'petroleo-gas-e-biocombustiveis',
+    String group = 'petroleo-gas-e-biocombustiveis',
   }) =>
       PeerMultipleSet(
-        asOf: hoje,
+        asOf: today,
         byKind: {
           if (pl != null)
-            MultipleKind.precoLucro:
-                PeerMultiple(median: pl, peers: n, group: grupo),
-          if (pvp != null)
-            MultipleKind.precoPatrimonio:
-                PeerMultiple(median: pvp, peers: n, group: grupo),
+            MultipleKind.priceToEarnings:
+                PeerMultiple(median: pl, peers: n, group: group),
+          if (priceToBookMedian != null)
+            MultipleKind.priceToBook:
+                PeerMultiple(median: priceToBookMedian, peers: n, group: group),
           if (evEbitda != null)
-            MultipleKind.firmaEbitda:
-                PeerMultiple(median: evEbitda, peers: n, group: grupo),
+            MultipleKind.evToEbitda:
+                PeerMultiple(median: evEbitda, peers: n, group: group),
         },
       );
 
-  FundamentalsSnapshot exercicio({
-    double? lucro = 1000,
-    double? patrimonio = 8000,
+  FundamentalsSnapshot fiscalYear({
+    double? profit = 1000,
+    double? equity = 8000,
     double? ebitda = 2400,
-    double caixa = 500,
-    double divida = 3000,
+    double cash = 500,
+    double debt = 3000,
   }) =>
       FundamentalsSnapshot(
         ticker: ticker,
@@ -41,16 +41,16 @@ void main() {
         totalRevenue: 12000,
         ebit: 1800,
         ebitda: ebitda,
-        netIncome: lucro,
+        netIncome: profit,
         incomeBeforeTax: 1400,
         incomeTaxExpense: -400,
         interestExpense: 300,
-        earningsPerShare: lucro == null ? null : lucro / 1000,
-        cash: caixa,
-        shortTermDebt: divida * 0.25,
-        longTermDebt: divida * 0.75,
-        totalStockholderEquity: patrimonio,
-        bookValuePerShare: patrimonio == null ? null : patrimonio / 1000,
+        earningsPerShare: profit == null ? null : profit / 1000,
+        cash: cash,
+        shortTermDebt: debt * 0.25,
+        longTermDebt: debt * 0.75,
+        totalStockholderEquity: equity,
+        bookValuePerShare: equity == null ? null : equity / 1000,
         operatingCashFlow: 2000,
         sharesOutstanding: 1000,
         sharesOutstandingAsOf: 1000,
@@ -60,10 +60,10 @@ void main() {
   group('Cada múltiplo devolve o preço que ele implica', () {
     test('P/L é o múltiplo vezes o lucro, pelo divisor da ponte', () {
       final r = PeerValuation.readings(
-        latest: exercicio(),
+        latest: fiscalYear(),
         shares: 1000,
-        peers: pares(pl: 9.0),
-      ).firstWhere((r) => r.kind == MultipleKind.precoLucro);
+        peers: pairs(pl: 9.0),
+      ).firstWhere((r) => r.kind == MultipleKind.priceToEarnings);
       expect(r.applied, isTrue);
       expect(r.fairValuePerShare, closeTo(9.0 * 1000 / 1000, 1e-12));
       expect(r.peer!.group, 'petroleo-gas-e-biocombustiveis');
@@ -75,14 +75,14 @@ void main() {
       // de dividir por 1.500 — ou a divergência contra o DCF mediria a ponte
       // (decisão 83).
       final a = PeerValuation.readings(
-        latest: exercicio(),
+        latest: fiscalYear(),
         shares: 1000,
-        peers: pares(pl: 9.0),
+        peers: pairs(pl: 9.0),
       ).first;
       final b = PeerValuation.readings(
-        latest: exercicio(),
+        latest: fiscalYear(),
         shares: 1500,
-        peers: pares(pl: 9.0),
+        peers: pairs(pl: 9.0),
       ).first;
       expect(b.fairValuePerShare! / a.fairValuePerShare!,
           closeTo(1000 / 1500, 1e-12));
@@ -90,20 +90,20 @@ void main() {
 
     test('EV/EBITDA passa pela mesma ponte de dívida líquida do DCF', () {
       final r = PeerValuation.readings(
-        latest: exercicio(),
+        latest: fiscalYear(),
         shares: 1000,
-        peers: pares(evEbitda: 6.0),
-      ).firstWhere((r) => r.kind == MultipleKind.firmaEbitda);
+        peers: pairs(evEbitda: 6.0),
+      ).firstWhere((r) => r.kind == MultipleKind.evToEbitda);
       // 6 × 2.400 = 14.400 de firma; menos 2.500 de dívida líquida = 11.900.
       expect(r.fairValuePerShare, closeTo(11.9, 1e-12));
     });
 
     test('caixa líquido soma, e é legítimo', () {
       final r = PeerValuation.readings(
-        latest: exercicio(caixa: 6000, divida: 1000),
+        latest: fiscalYear(cash: 6000, debt: 1000),
         shares: 1000,
-        peers: pares(evEbitda: 6.0),
-      ).firstWhere((r) => r.kind == MultipleKind.firmaEbitda);
+        peers: pairs(evEbitda: 6.0),
+      ).firstWhere((r) => r.kind == MultipleKind.evToEbitda);
       // 14.400 − (1.000 − 6.000) = 19.400.
       expect(r.fairValuePerShare, closeTo(19.4, 1e-12));
     });
@@ -112,64 +112,64 @@ void main() {
   group('Cada recusa diz por que o múltiplo não se aplica', () {
     test('prejuízo tira o P/L, e não o inverte', () {
       final r = PeerValuation.readings(
-        latest: exercicio(lucro: -500),
+        latest: fiscalYear(profit: -500),
         shares: 1000,
-        peers: pares(pl: 9.0, pvp: 1.2),
-      ).firstWhere((r) => r.kind == MultipleKind.precoLucro);
+        peers: pairs(pl: 9.0, priceToBookMedian: 1.2),
+      ).firstWhere((r) => r.kind == MultipleKind.priceToEarnings);
       expect(r.applied, isFalse);
-      expect(r.refusal, MultipleRefusal.baseNaoPositiva);
+      expect(r.refusal, MultipleRefusal.nonPositiveBase);
     });
 
     test('patrimônio negativo tira o P/VP', () {
       final r = PeerValuation.readings(
-        latest: exercicio(patrimonio: -200),
+        latest: fiscalYear(equity: -200),
         shares: 1000,
-        peers: pares(pvp: 1.2),
-      ).firstWhere((r) => r.kind == MultipleKind.precoPatrimonio);
-      expect(r.refusal, MultipleRefusal.baseNaoPositiva);
+        peers: pairs(priceToBookMedian: 1.2),
+      ).firstWhere((r) => r.kind == MultipleKind.priceToBook);
+      expect(r.refusal, MultipleRefusal.nonPositiveBase);
     });
 
     test('instituição financeira não usa EV/EBITDA', () {
       // Depósito e captação são insumo do negócio, e não financiamento
       // (decisão 102): a ponte de dívida líquida não descreve banco.
       final r = PeerValuation.readings(
-        latest: exercicio(),
+        latest: fiscalYear(),
         shares: 1000,
-        peers: pares(evEbitda: 6.0),
+        peers: pairs(evEbitda: 6.0),
         sectorKey: 'financeiro',
         industry: 'Intermediários Financeiros',
-      ).firstWhere((r) => r.kind == MultipleKind.firmaEbitda);
-      expect(r.refusal, MultipleRefusal.instituicaoFinanceira);
+      ).firstWhere((r) => r.kind == MultipleKind.evToEbitda);
+      expect(r.refusal, MultipleRefusal.financialInstitution);
 
       // E o setor econômico sozinho **não** basta: na taxonomia oficial da B3
       // ele reúne banco, seguradora e administradora, e quem separa é o
       // subsetor (decisão 87). Sem ele, o múltiplo entra.
-      final semSubsetor = PeerValuation.readings(
-        latest: exercicio(),
+      final withoutSubsector = PeerValuation.readings(
+        latest: fiscalYear(),
         shares: 1000,
-        peers: pares(evEbitda: 6.0),
+        peers: pairs(evEbitda: 6.0),
         sectorKey: 'financeiro',
-      ).firstWhere((r) => r.kind == MultipleKind.firmaEbitda);
-      expect(semSubsetor.applied, isTrue);
+      ).firstWhere((r) => r.kind == MultipleKind.evToEbitda);
+      expect(withoutSubsector.applied, isTrue);
     });
 
     test('grupo pequeno demais não produz mediana usável', () {
       final r = PeerValuation.readings(
-        latest: exercicio(),
+        latest: fiscalYear(),
         shares: 1000,
-        peers: pares(pl: 9.0, n: PeerValuation.minimumPeers - 1),
+        peers: pairs(pl: 9.0, n: PeerValuation.minimumPeers - 1),
       ).first;
-      expect(r.refusal, MultipleRefusal.paresInsuficientes);
+      expect(r.refusal, MultipleRefusal.insufficientPeers);
     });
 
     test('a ponte que deixa o acionista negativo é recusada, e não invertida',
         () {
       final r = PeerValuation.readings(
-        latest: exercicio(ebitda: 100, divida: 9000, caixa: 0),
+        latest: fiscalYear(ebitda: 100, debt: 9000, cash: 0),
         shares: 1000,
-        peers: pares(evEbitda: 6.0),
-      ).firstWhere((r) => r.kind == MultipleKind.firmaEbitda);
-      expect(r.refusal, MultipleRefusal.ponteNaoPositiva);
+        peers: pairs(evEbitda: 6.0),
+      ).firstWhere((r) => r.kind == MultipleKind.evToEbitda);
+      expect(r.refusal, MultipleRefusal.nonPositiveBridge);
       expect(r.fairValuePerShare, isNull);
     });
   });
@@ -177,9 +177,9 @@ void main() {
   group('O consolidado é mediana, e a divergência é declarada', () {
     test('mediana das aplicadas, e o fora da curva não arrasta', () {
       final rs = PeerValuation.readings(
-        latest: exercicio(),
+        latest: fiscalYear(),
         shares: 1000,
-        peers: pares(pl: 9.0, pvp: 1.2, evEbitda: 60.0),
+        peers: pairs(pl: 9.0, priceToBookMedian: 1.2, evEbitda: 60.0),
       );
       // 9,00 / 9,60 / 141,90 — a mediana é 9,60, e a média seria 53,50.
       expect(PeerValuation.consolidated(rs), closeTo(9.6, 1e-9));
@@ -187,9 +187,9 @@ void main() {
 
     test('a divergência é múltiplos ÷ DCF − 1', () {
       final rs = PeerValuation.readings(
-        latest: exercicio(),
+        latest: fiscalYear(),
         shares: 1000,
-        peers: pares(pl: 9.0),
+        peers: pairs(pl: 9.0),
       );
       expect(
         PeerValuation.divergence(readings: rs, dcfFairValue: 6.0),
@@ -199,9 +199,9 @@ void main() {
 
     test('DCF não positivo não produz divergência inventada', () {
       final rs = PeerValuation.readings(
-        latest: exercicio(),
+        latest: fiscalYear(),
         shares: 1000,
-        peers: pares(pl: 9.0),
+        peers: pairs(pl: 9.0),
       );
       expect(PeerValuation.divergence(readings: rs, dcfFairValue: 0),
           isNull);
@@ -209,9 +209,9 @@ void main() {
 
     test('sem leitura aplicável, não há consolidado nem divergência', () {
       final rs = PeerValuation.readings(
-        latest: exercicio(lucro: -1, patrimonio: -1, ebitda: -1),
+        latest: fiscalYear(profit: -1, equity: -1, ebitda: -1),
         shares: 1000,
-        peers: pares(pl: 9.0, pvp: 1.2, evEbitda: 6.0),
+        peers: pairs(pl: 9.0, priceToBookMedian: 1.2, evEbitda: 6.0),
       );
       expect(PeerValuation.consolidated(rs), isNull);
       expect(PeerValuation.divergence(readings: rs, dcfFairValue: 6.0),
@@ -219,21 +219,21 @@ void main() {
     });
 
     test('o limite de divergência separa concordar de discordar', () {
-      PeerTriangulation com(double dcf) => PeerTriangulation.build(
-            latest: exercicio(),
+      PeerTriangulation withInput(double dcf) => PeerTriangulation.build(
+            latest: fiscalYear(),
             shares: 1000,
-            peers: pares(pl: 9.0),
+            peers: pairs(pl: 9.0),
             dcfFairValue: dcf,
           )!;
       // 9,00 contra 6,20 é +45%; contra 5,80 é +55%.
-      expect(com(6.2).diverges, isFalse);
-      expect(com(5.8).diverges, isTrue);
+      expect(withInput(6.2).diverges, isFalse);
+      expect(withInput(5.8).diverges, isTrue);
     });
 
     test('sem pacote de pares não há triangulação', () {
       expect(
         PeerTriangulation.build(
-          latest: exercicio(),
+          latest: fiscalYear(),
           shares: 1000,
           peers: null,
           dcfFairValue: 6.0,
@@ -246,7 +246,7 @@ void main() {
   group('O pacote versionado vai e volta', () {
     test('o codec lê o que a ferramenta grava', () {
       final json = <String, Object?>{
-        'geradoEm': hoje.toIso8601String(),
+        'geradoEm': today.toIso8601String(),
         'porTicker': {
           'PETR4': {
             'precoLucro': {'mediana': 9.0, 'pares': 12, 'grupo': 'petroleo'},
@@ -258,13 +258,13 @@ void main() {
           },
         },
       };
-      final lido = PeerMultipleCodec.decode(json);
-      expect(lido.keys, ['PETR4']);
-      final s = lido['PETR4']!;
-      expect(s.asOf, hoje);
-      expect(s.byKind[MultipleKind.precoLucro]!.median, 9.0);
-      expect(s.byKind[MultipleKind.precoLucro]!.peers, 12);
-      expect(s.byKind.containsKey(MultipleKind.firmaEbitda), isFalse);
+      final parsed = PeerMultipleCodec.decode(json);
+      expect(parsed.keys, ['PETR4']);
+      final s = parsed['PETR4']!;
+      expect(s.asOf, today);
+      expect(s.byKind[MultipleKind.priceToEarnings]!.median, 9.0);
+      expect(s.byKind[MultipleKind.priceToEarnings]!.peers, 12);
+      expect(s.byKind.containsKey(MultipleKind.evToEbitda), isFalse);
     });
 
     test('pacote ilegível desliga a triangulação em vez de explodir', () {
@@ -280,8 +280,8 @@ void main() {
     });
 
     test('mediana não positiva no pacote é descartada, e não usada', () {
-      final lido = PeerMultipleCodec.decode({
-        'geradoEm': hoje.toIso8601String(),
+      final parsed = PeerMultipleCodec.decode({
+        'geradoEm': today.toIso8601String(),
         'porTicker': {
           'PETR4': {
             'precoLucro': {'mediana': -3.0, 'pares': 12, 'grupo': 'x'},
@@ -289,9 +289,9 @@ void main() {
           },
         },
       });
-      expect(lido['PETR4']!.byKind.containsKey(MultipleKind.precoLucro),
+      expect(parsed['PETR4']!.byKind.containsKey(MultipleKind.priceToEarnings),
           isFalse);
-      expect(lido['PETR4']!.byKind.containsKey(MultipleKind.precoPatrimonio),
+      expect(parsed['PETR4']!.byKind.containsKey(MultipleKind.priceToBook),
           isTrue);
     });
   });

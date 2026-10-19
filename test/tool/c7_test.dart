@@ -7,26 +7,26 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/c7/protocolo.dart';
 
-const _motor = Motor(impressao: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
-const _outro = Motor(impressao: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+const _engine = Engine(fingerprint: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+const _other = Engine(fingerprint: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
 
 /// As coortes do C7 de 31/12/2025 em diante, [n] trimestres.
-List<String> _coortes(int n) => [
+List<String> _cohorts(int n) => [
       for (var i = 0; i < n; i++)
         DateTime(2025, 12 + 3 * i + 1, 0).toIso8601String().substring(0, 10),
     ];
 
 /// Observações sintéticas: o retorno segue o potencial com ruído, para a
 /// leitura ter o que medir.
-List<Map<String, dynamic>> _linhas(List<String> coortes,
-    {int ativos = 40, bool comRetorno = false, int semente = 7}) {
-  final rnd = math.Random(semente);
+List<Map<String, dynamic>> _rows(List<String> cohorts,
+    {int assets = 40, bool withReturn = false, int seed = 7}) {
+  final rnd = math.Random(seed);
   // Gerador próprio para o desfecho: as previsões são as mesmas com ou sem
   // retorno, como num backtest refeito com a base de depois.
-  final ruido = math.Random(semente + 1);
+  final noise = math.Random(seed + 1);
   return [
-    for (final c in coortes)
-      for (var a = 0; a < ativos; a++)
+    for (final c in cohorts)
+      for (var a = 0; a < assets; a++)
         () {
           final up = rnd.nextDouble() * 2 - 1;
           return <String, dynamic>{
@@ -38,126 +38,126 @@ List<Map<String, dynamic>> _linhas(List<String> coortes,
             'earningsYield': rnd.nextDouble() * 0.2,
             'justo': 10 + up,
             'preco': 10.0,
-            if (comRetorno) 'ret12tot': 0.3 * up + ruido.nextDouble() * 0.2,
-            if (comRetorno) 'ret36tot': 0.5 * up + ruido.nextDouble() * 0.4,
+            if (withReturn) 'ret12tot': 0.3 * up + noise.nextDouble() * 0.2,
+            if (withReturn) 'ret36tot': 0.5 * up + noise.nextDouble() * 0.4,
           };
         }(),
   ];
 }
 
 void main() {
-  late Directory pasta;
-  setUp(() => pasta = Directory.systemTemp.createTempSync('c7_'));
-  tearDown(() => pasta.deleteSync(recursive: true));
+  late Directory folder;
+  setUp(() => folder = Directory.systemTemp.createTempSync('c7_'));
+  tearDown(() => folder.deleteSync(recursive: true));
 
   group('selagem', () {
     test('sela uma vez por coorte, sem campo de desfecho, com o hash no índice',
         () async {
-      final linhas = _linhas(_coortes(3), comRetorno: true);
-      final r = await selar(
-          linhas: linhas, motor: _motor, pasta: pasta, hoje: '2026-09-24');
-      expect(r.seladas, _coortes(3));
-      expect(r.serie, 'preRegistrado');
+      final rows = _rows(_cohorts(3), withReturn: true);
+      final r = await seal(
+          rows: rows, engine: _engine, folder: folder, today: '2026-09-24');
+      expect(r.sealedCohorts, _cohorts(3));
+      expect(r.series, 'preRegistrado');
 
-      final indice = Indice.ler(pasta);
-      expect(indice.motorPreRegistrado!.impressao, _motor.impressao);
-      expect(indice.selos, hasLength(3));
-      final selado = jsonDecode(
-          File('${pasta.path}/previsoes_2025-12-31.json').readAsStringSync())
+      final index = Index.read(folder);
+      expect(index.preRegisteredEngine!.fingerprint, _engine.fingerprint);
+      expect(index.seals, hasLength(3));
+      final sealedJson = jsonDecode(
+          File('${folder.path}/previsoes_2025-12-31.json').readAsStringSync())
           as Map<String, dynamic>;
-      final p = (selado['previsoes'] as List).first as Map<String, dynamic>;
+      final p = (sealedJson['previsoes'] as List).first as Map<String, dynamic>;
       expect(p.keys.where((k) => k.startsWith('ret')), isEmpty,
           reason: 'o selo guarda previsão, e não desfecho');
-      expect(indice.selos.first['hash'],
-          await hashDoArquivo('${pasta.path}/previsoes_2025-12-31.json'));
+      expect(index.seals.first['hash'],
+          await fileHash('${folder.path}/previsoes_2025-12-31.json'));
     });
 
     test('selar de novo não reescreve: confere, e relata divergência', () async {
-      final linhas = _linhas(_coortes(2));
-      await selar(linhas: linhas, motor: _motor, pasta: pasta, hoje: 'd1');
-      final antes =
-          File('${pasta.path}/previsoes_2025-12-31.json').readAsStringSync();
-      final mexidas = [
-        for (final l in linhas)
+      final rows = _rows(_cohorts(2));
+      await seal(rows: rows, engine: _engine, folder: folder, today: 'd1');
+      final before =
+          File('${folder.path}/previsoes_2025-12-31.json').readAsStringSync();
+      final changed = [
+        for (final l in rows)
           {...l, if (l['ticker'] == 'T0003') 'upside': 9.0},
       ];
-      final r = await selar(
-          linhas: mexidas, motor: _motor, pasta: pasta, hoje: 'd2');
-      expect(r.seladas, isEmpty);
-      expect(r.jaSeladas, _coortes(2));
-      expect(r.divergentes, {'2025-12-31': 1, '2026-03-31': 1});
-      expect(File('${pasta.path}/previsoes_2025-12-31.json').readAsStringSync(),
-          antes);
+      final r = await seal(
+          rows: changed, engine: _engine, folder: folder, today: 'd2');
+      expect(r.sealedCohorts, isEmpty);
+      expect(r.alreadySealed, _cohorts(2));
+      expect(r.divergent, {'2025-12-31': 1, '2026-03-31': 1});
+      expect(File('${folder.path}/previsoes_2025-12-31.json').readAsStringSync(),
+          before);
     });
 
     test('um selo alterado depois de selado interrompe tudo', () async {
-      await selar(
-          linhas: _linhas(_coortes(1)), motor: _motor, pasta: pasta, hoje: 'd');
-      final f = File('${pasta.path}/previsoes_2025-12-31.json');
+      await seal(
+          rows: _rows(_cohorts(1)), engine: _engine, folder: folder, today: 'd');
+      final f = File('${folder.path}/previsoes_2025-12-31.json');
       f.writeAsStringSync(f.readAsStringSync().replaceFirst('10.0', '11.0'));
       expect(
-        () => selar(
-            linhas: _linhas(_coortes(2)), motor: _motor, pasta: pasta, hoje: 'd'),
-        throwsA(isA<ProtocoloViolado>()),
+        () => seal(
+            rows: _rows(_cohorts(2)), engine: _engine, folder: folder, today: 'd'),
+        throwsA(isA<ProtocolViolated>()),
       );
     });
 
     test('coorte anterior a 31/12/2025 não é da réplica', () {
       expect(
-        () => selar(
-            linhas: _linhas(['2025-09-30']), motor: _motor, pasta: pasta, hoje: 'd'),
-        throwsA(isA<ProtocoloViolado>()),
+        () => seal(
+            rows: _rows(['2025-09-30']), engine: _engine, folder: folder, today: 'd'),
+        throwsA(isA<ProtocolViolated>()),
       );
     });
 
     test('motor diferente do pré-registrado sela em série própria', () async {
-      await selar(
-          linhas: _linhas(_coortes(1)), motor: _motor, pasta: pasta, hoje: 'd');
-      final r = await selar(
-          linhas: _linhas(_coortes(1)), motor: _outro, pasta: pasta, hoje: 'd');
-      expect(r.serie, 'motorDaData');
-      expect(r.seladas, ['2025-12-31']);
-      expect(File('${pasta.path}/previsoes_2025-12-31_bbbbbbbb.json').existsSync(),
+      await seal(
+          rows: _rows(_cohorts(1)), engine: _engine, folder: folder, today: 'd');
+      final r = await seal(
+          rows: _rows(_cohorts(1)), engine: _other, folder: folder, today: 'd');
+      expect(r.series, 'motorDaData');
+      expect(r.sealedCohorts, ['2025-12-31']);
+      expect(File('${folder.path}/previsoes_2025-12-31_bbbbbbbb.json').existsSync(),
           isTrue);
-      expect(Indice.ler(pasta).motorPreRegistrado!.impressao, _motor.impressao,
+      expect(Index.read(folder).preRegisteredEngine!.fingerprint, _engine.fingerprint,
           reason: 'o pré-registrado não muda');
     });
   });
 
   group('leitura', () {
     test('antes da data, a situação — e nenhuma estatística', () async {
-      await selar(
-          linhas: _linhas(_coortes(3)), motor: _motor, pasta: pasta, hoje: 'd');
-      final s = situacao(
-          pasta: pasta,
-          hoje: DateTime(2026, 9, 24),
-          fimDosDados: DateTime(2027, 3, 30));
-      expect(s['coortesSeladas'], _coortes(3));
+      await seal(
+          rows: _rows(_cohorts(3)), engine: _engine, folder: folder, today: 'd');
+      final s = situation(
+          folder: folder,
+          today: DateTime(2026, 9, 24),
+          dataEnd: DateTime(2027, 3, 30));
+      expect(s['coortesSeladas'], _cohorts(3));
       expect((s['12m'] as Map)['aberta'], isFalse);
       expect((s['12m'] as Map)['coortesMaduras'], 1,
           reason: 'só 31/12/2025 tem doze meses até 30/03/2027');
       expect(s.toString(), isNot(contains('media')));
 
       expect(
-        () => ler(
-            meses: 12,
-            pasta: pasta,
-            hoje: DateTime(2029, 9, 29),
-            linhas: _linhas(_coortes(3), comRetorno: true)),
-        throwsA(isA<ProtocoloViolado>()),
+        () => read(
+            months: 12,
+            folder: folder,
+            today: DateTime(2029, 9, 29),
+            rows: _rows(_cohorts(3), withReturn: true)),
+        throwsA(isA<ProtocolViolated>()),
       );
     });
 
     test('na data, o instrumento do R3 sobre as previsões seladas', () async {
-      final coortes = _coortes(12);
-      await selar(
-          linhas: _linhas(coortes), motor: _motor, pasta: pasta, hoje: 'd');
+      final cohorts = _cohorts(12);
+      await seal(
+          rows: _rows(cohorts), engine: _engine, folder: folder, today: 'd');
       // Os retornos chegam de um backtest posterior, com as mesmas previsões.
-      final r = await ler(
-        meses: 12,
-        pasta: pasta,
-        hoje: DateTime(2029, 9, 30),
-        linhas: _linhas(coortes, comRetorno: true),
+      final r = await read(
+        months: 12,
+        folder: folder,
+        today: DateTime(2029, 9, 30),
+        rows: _rows(cohorts, withReturn: true),
       );
       expect(r['previsoesRefeitasQueDivergem'], 0);
       final fm = ((r['leitura'] as Map)['famaMacBeth'] as Map)['potencialDadoBm']
@@ -170,36 +170,36 @@ void main() {
 
     test('as duas versões: a pré-registrada é a leitura, a do motor da data '
         'vem ao lado', () async {
-      final coortes = _coortes(12);
-      await selar(
-          linhas: _linhas(coortes), motor: _motor, pasta: pasta, hoje: 'd');
+      final cohorts = _cohorts(12);
+      await seal(
+          rows: _rows(cohorts), engine: _engine, folder: folder, today: 'd');
       // O motor posterior prevê outra coisa (outra semente) e sela à parte.
-      await selar(
-          linhas: _linhas(coortes, semente: 99),
-          motor: _outro,
-          pasta: pasta,
-          hoje: 'd');
-      final s = situacao(
-          pasta: pasta,
-          hoje: DateTime(2026, 9, 24),
-          fimDosDados: DateTime(2027, 3, 30));
-      expect((s['motoresDaData'] as Map)[_outro.impressao], coortes);
-      expect(s['coortesSeladas'], coortes,
+      await seal(
+          rows: _rows(cohorts, seed: 99),
+          engine: _other,
+          folder: folder,
+          today: 'd');
+      final s = situation(
+          folder: folder,
+          today: DateTime(2026, 9, 24),
+          dataEnd: DateTime(2027, 3, 30));
+      expect((s['motoresDaData'] as Map)[_other.fingerprint], cohorts);
+      expect(s['coortesSeladas'], cohorts,
           reason: 'as coortes da leitura são as do pré-registrado');
 
-      final r = await ler(
-        meses: 12,
-        pasta: pasta,
-        hoje: DateTime(2029, 9, 30),
-        linhas: _linhas(coortes, comRetorno: true),
+      final r = await read(
+        months: 12,
+        folder: folder,
+        today: DateTime(2029, 9, 30),
+        rows: _rows(cohorts, withReturn: true),
       );
-      final pre = ((r['leitura'] as Map)['famaMacBeth']
+      final preRegistered = ((r['leitura'] as Map)['famaMacBeth']
           as Map)['potencialDadoBm'] as Map;
-      final daData = (((r['motoresDaData'] as Map)[_outro.impressao]
+      final ofDate = (((r['motoresDaData'] as Map)[_other.fingerprint]
           as Map)['famaMacBeth'] as Map)['potencialDadoBm'] as Map;
-      expect(pre['coortes'], 12);
-      expect(daData['coortes'], 12);
-      expect((pre['media'] as num) - (daData['media'] as num), isNot(0),
+      expect(preRegistered['coortes'], 12);
+      expect(ofDate['coortes'], 12);
+      expect((preRegistered['media'] as num) - (ofDate['media'] as num), isNot(0),
           reason: 'cada série lê as próprias previsões seladas');
       expect(r['previsoesRefeitasQueDivergem'], 0,
           reason: 'a divergência é medida contra o pré-registrado');
@@ -207,26 +207,26 @@ void main() {
 
     test('juntar as coortes antigas às novas é recusado, e não filtrado',
         () async {
-      await selar(
-          linhas: _linhas(_coortes(2)), motor: _motor, pasta: pasta, hoje: 'd');
+      await seal(
+          rows: _rows(_cohorts(2)), engine: _engine, folder: folder, today: 'd');
       expect(
-        () => ler(
-          meses: 12,
-          pasta: pasta,
-          hoje: DateTime(2030, 1, 1),
-          linhas: [
-            ..._linhas(_coortes(2), comRetorno: true),
-            ..._linhas(['2025-09-30'], comRetorno: true),
+        () => read(
+          months: 12,
+          folder: folder,
+          today: DateTime(2030, 1, 1),
+          rows: [
+            ..._rows(_cohorts(2), withReturn: true),
+            ..._rows(['2025-09-30'], withReturn: true),
           ],
         ),
-        throwsA(isA<ProtocoloViolado>()),
+        throwsA(isA<ProtocolViolated>()),
       );
     });
   });
 
   test('a impressão do motor é estável e é a do git', () async {
-    final a = await impressaoDoMotor();
-    final b = await impressaoDoMotor();
+    final a = await engineFingerprint();
+    final b = await engineFingerprint();
     expect(a, b);
     expect(a, matches(RegExp(r'^[0-9a-f]{40}$')));
   });
@@ -236,10 +236,10 @@ void main() {
     // A série pré-registrada das coortes novas sai de um worktree desse commit
     // (decisão 138): se a impressão do índice não fosse achável no histórico,
     // não haveria de onde refazê-la.
-    final pre = Indice.ler(Directory(pastaDosSelos)).motorPreRegistrado;
-    expect(pre, isNotNull, reason: 'o C7 tem selo desde 24/09/2026');
-    final commit = await commitDaImpressao(pre!.impressao);
+    final preRegistered = Index.read(Directory(sealsDir)).preRegisteredEngine;
+    expect(preRegistered, isNotNull, reason: 'o C7 tem selo desde 24/09/2026');
+    final commit = await commitOfFingerprint(preRegistered!.fingerprint);
     expect(commit, isNotNull);
-    expect(await impressaoDoCommit(commit!), pre.impressao);
+    expect(await commitFingerprint(commit!), preRegistered.fingerprint);
   });
 }

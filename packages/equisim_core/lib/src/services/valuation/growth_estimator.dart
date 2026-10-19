@@ -38,7 +38,7 @@ abstract final class GrowthEstimator {
     required double explicitGrowth,
     required double economyGrowth,
   }) =>
-      _confinar(math.min(explicitGrowth, economyGrowth), economyGrowth);
+      _confine(math.min(explicitGrowth, economyGrowth), economyGrowth);
 
   /// Confina em `[floorRate, economyGrowth]`, com o teto tendo precedência.
   ///
@@ -47,8 +47,8 @@ abstract final class GrowthEstimator {
   /// constrói premissas à mão alcança. Ali o teto vence — nenhuma empresa
   /// cresce acima da economia para sempre, e essa é a regra mais forte das
   /// duas.
-  static double _confinar(double g, double teto) {
-    if (teto <= floorRate) return teto;
-    return g.clamp(floorRate, teto).toDouble();
+  static double _confine(double g, double cap) {
+    if (cap <= floorRate) return cap;
+    return g.clamp(floorRate, cap).toDouble();
   }
 }

@@ -23,10 +23,10 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
 /// Avalia o ativo forçando uma via, sem roteamento e sem migração.
-ValuationResult? _porVia(ValuationInputs base, ValuationLane via) {
+ValuationResult? _byLane(ValuationInputs base, ValuationLane lane) {
   final r = ValuationCascade.evaluate(ValuationInputs(
     ticker: base.ticker,
     asOf: base.asOf,
@@ -43,12 +43,12 @@ ValuationResult? _porVia(ValuationInputs base, ValuationLane via) {
     prices: base.prices,
     isDistressed: base.isDistressed,
     unleveredBeta: base.unleveredBeta,
-    laneOverride: via,
+    laneOverride: lane,
   ));
   return r.isOk ? r.unwrap() : null;
 }
 
-double? _mediana(List<double> v) {
+double? _median(List<double> v) {
   if (v.isEmpty) return null;
   final s = [...v]..sort();
   final m = s.length ~/ 2;
@@ -59,21 +59,21 @@ String _pc(double v) => '${(v * 100).toStringAsFixed(1)}%';
 String _pp(double v) => '${(v * 100).toStringAsFixed(2)} p.p.';
 
 Future<void> main(List<String> args) async {
-  final limiteIdx = args.indexOf('--limit');
-  final limite = limiteIdx >= 0 ? int.tryParse(args[limiteIdx + 1]) ?? 0 : 0;
+  final limitIndex = args.indexOf('--limit');
+  final limit = limitIndex >= 0 ? int.tryParse(args[limitIndex + 1]) ?? 0 : 0;
 
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
   try {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
 
     var universe = (await ctx.fundamentals.universe()).unwrap();
-    if (limite > 0 && universe.length > limite) {
-      universe = universe.sublist(0, limite);
+    if (limit > 0 && universe.length > limit) {
+      universe = universe.sublist(0, limit);
     }
 
     final prior = await ResolveBetaPrior.call(
@@ -81,12 +81,12 @@ Future<void> main(List<String> args) async {
       prices: ctx.prices,
       fundamentals: ctx.fundamentals,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     );
 
-    final saida = <Map<String, dynamic>>[];
+    final output = <Map<String, dynamic>>[];
     var i = 0;
-    var recusados = 0;
+    var refusedCount = 0;
     for (final ticker in universe) {
       i++;
       if (i % 25 == 0) stderr.write('  $i/${universe.length}   \r');
@@ -96,7 +96,7 @@ Future<void> main(List<String> args) async {
         fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
@@ -106,112 +106,112 @@ Future<void> main(List<String> args) async {
       if (prep.isErr) continue;
       final inputs = prep.unwrap();
 
-      final producao = ValuationCascade.evaluate(inputs);
-      if (producao.isErr) {
-        recusados++;
+      final production = ValuationCascade.evaluate(inputs);
+      if (production.isErr) {
+        refusedCount++;
         continue;
       }
-      final p = producao.unwrap();
+      final p = production.unwrap();
 
       // Qual porta mandou o ativo para a via do acionista.
-      final financeira =
+      final financial =
           p.warnings.any((w) => w.startsWith('Instituição financeira:'));
-      final fluxoFraco = p.warnings
+      final weakFlow = p.warnings
           .any((w) => w.startsWith('O lucro operacional não se sustenta'));
-      final estruturaRecusada =
+      final refusedStructure =
           p.warnings.any((w) => w.contains('não sustenta a via da firma'));
 
       // O `Ke` que cada via usa, para o mesmo ativo.
-      final firma = _porVia(inputs, ValuationLane.firm);
-      final acionista = _porVia(inputs, ValuationLane.shareholder);
+      final firm = _byLane(inputs, ValuationLane.firm);
+      final shareholder = _byLane(inputs, ValuationLane.shareholder);
 
-      saida.add({
+      output.add({
         'ticker': ticker.value,
         'setor': inputs.sectorKey,
         'preco': inputs.marketPrice,
         'viaProducao': p.model.name,
         'justoProducao': p.fairValue.reais,
         'potencial': p.upside,
-        'porta1Financeira': financeira,
-        'porta3FluxoFraco': fluxoFraco,
-        'estruturaRecusada': estruturaRecusada,
+        'porta1Financeira': financial,
+        'porta3FluxoFraco': weakFlow,
+        'estruturaRecusada': refusedStructure,
         'temBetaU': inputs.unleveredBeta != null,
         // Desde a decisão 46 a via do acionista resolve o próprio `Ke` contra
         // a alavancagem — menos em instituição financeira, onde a captação é
         // insumo do negócio e a realavancagem não teria sentido. Onde não
         // resolve, o `Ke` abaixo é o do CAPM sobre o beta alavancado de hoje,
         // suposto perene.
-        'keAcionistaResolvido': acionista?.warnings
+        'keAcionistaResolvido': shareholder?.warnings
                 .any((w) => w.contains('resolvido ano a ano')) ??
             false,
-        'keAcionistaAno1': acionista?.discountRate,
-        'keAcionistaTerminal': acionista?.diagnostics?.terminalDiscountRate,
+        'keAcionistaAno1': shareholder?.discountRate,
+        'keAcionistaTerminal': shareholder?.diagnostics?.terminalDiscountRate,
         // `Ke` resolvido contra a alavancagem, quando a via da firma o produz.
-        'keResolvidoTerminal': firma?.diagnostics?.terminalCostOfEquity,
-        'waccResolvidoTerminal': firma?.diagnostics?.terminalDiscountRate,
-        'justoFirma': firma?.fairValue.reais,
-        'justoAcionista': acionista?.fairValue.reais,
+        'keResolvidoTerminal': firm?.diagnostics?.terminalCostOfEquity,
+        'waccResolvidoTerminal': firm?.diagnostics?.terminalDiscountRate,
+        'justoFirma': firm?.fairValue.reais,
+        'justoAcionista': shareholder?.fairValue.reais,
       });
     }
     stderr.writeln('');
 
     File('docs/validacao/via_acionista.json').writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(saida),
+      const JsonEncoder.withIndent(' ').convert(output),
     );
-    _imprimir(saida, recusados);
+    _printReport(output, refusedCount);
     stderr.writeln(
-        '\nescrito docs/validacao/via_acionista.json (${saida.length})');
+        '\nescrito docs/validacao/via_acionista.json (${output.length})');
   } finally {
     await ctx.dispose();
   }
 }
 
-void _imprimir(List<Map<String, dynamic>> l, int recusados) {
+void _printReport(List<Map<String, dynamic>> l, int refusedCount) {
   stdout.writeln('\n=== D2b — A VIA DO ACIONISTA — ${l.length} avaliados '
-      '($recusados recusados) ===\n');
+      '($refusedCount recusados) ===\n');
 
-  final porAcionista =
+  final byShareholder =
       l.where((e) => e['viaProducao'] == 'dcfEarnings').toList();
-  final p1 = porAcionista.where((e) => e['porta1Financeira'] == true).length;
-  final p3 = porAcionista.where((e) => e['porta3FluxoFraco'] == true).length;
-  final rec = porAcionista.where((e) => e['estruturaRecusada'] == true).length;
+  final p1 = byShareholder.where((e) => e['porta1Financeira'] == true).length;
+  final p3 = byShareholder.where((e) => e['porta3FluxoFraco'] == true).length;
+  final rec = byShareholder.where((e) => e['estruturaRecusada'] == true).length;
 
   stdout.writeln('-- quem a via do acionista avalia em produção --');
   stdout.writeln(
-      '  pela via do acionista: ${porAcionista.length} de ${l.length}');
+      '  pela via do acionista: ${byShareholder.length} de ${l.length}');
   stdout.writeln('    Porta 1 (instituição financeira): $p1');
   stdout.writeln('    Porta 3 (lucro operacional não sustentado): $p3');
   stdout.writeln('    estrutura de capital recusada: $rec');
   stdout.writeln(
-      '    sem porta declarada: ${porAcionista.length - p1 - p3 - rec}');
+      '    sem porta declarada: ${byShareholder.length - p1 - p3 - rec}');
 
   // A inconsistência: dois `Ke` para o mesmo ativo.
-  final comOsDois = [
+  final withBoth = [
     for (final e in l)
       if (e['keAcionistaTerminal'] != null && e['keResolvidoTerminal'] != null)
         e
   ];
-  final resolvidosAcionista =
+  final resolvedShareholder =
       l.where((e) => e['keAcionistaResolvido'] == true).length;
   stdout.writeln('\n-- a via do acionista resolve o próprio Ke? --');
-  stdout.writeln('  resolvem: $resolvidosAcionista de ${l.length}');
+  stdout.writeln('  resolvem: $resolvedShareholder de ${l.length}');
   stdout.writeln('    entre os que ela avalia em produção: '
-      '${porAcionista.where((e) => e['keAcionistaResolvido'] == true).length} '
-      'de ${porAcionista.length}');
+      '${byShareholder.where((e) => e['keAcionistaResolvido'] == true).length} '
+      'de ${byShareholder.length}');
   stdout.writeln('    instituição financeira (exceção declarada): $p1');
 
   stdout.writeln('\n-- dois custos de capital próprio para o mesmo ativo --');
-  stdout.writeln('  ativos com os dois medidos: ${comOsDois.length}');
-  if (comOsDois.isNotEmpty) {
+  stdout.writeln('  ativos com os dois medidos: ${withBoth.length}');
+  if (withBoth.isNotEmpty) {
     final delta = [
-      for (final e in comOsDois)
+      for (final e in withBoth)
         (e['keResolvidoTerminal'] as num).toDouble() -
             (e['keAcionistaTerminal'] as num).toDouble()
     ];
-    final ordenado = [...delta]..sort();
-    double q(double f) => ordenado[((ordenado.length - 1) * f).round()];
+    final sortedEntries = [...delta]..sort();
+    double q(double f) => sortedEntries[((sortedEntries.length - 1) * f).round()];
     stdout.writeln('  Ke resolvido − Ke do CAPM (equilíbrio):');
-    stdout.writeln('    p10=${_pp(q(0.10))}  mediana=${_pp(_mediana(delta)!)}  '
+    stdout.writeln('    p10=${_pp(q(0.10))}  mediana=${_pp(_median(delta)!)}  '
         'p90=${_pp(q(0.90))}');
     stdout.writeln('    |dif| > 1 p.p. em '
         '${delta.where((d) => d.abs() > 0.01).length} de ${delta.length}   '
@@ -221,18 +221,18 @@ void _imprimir(List<Map<String, dynamic>> l, int recusados) {
   }
 
   // Nos que a via do acionista decide sozinha, o Ke resolvido existe?
-  final decideSozinha =
-      porAcionista.where((e) => e['porta1Financeira'] != true).toList();
-  final comResolvido =
-      decideSozinha.where((e) => e['keResolvidoTerminal'] != null).length;
+  final decidesAlone =
+      byShareholder.where((e) => e['porta1Financeira'] != true).toList();
+  final withResolved =
+      decidesAlone.where((e) => e['keResolvidoTerminal'] != null).length;
   stdout.writeln(
       '\n-- onde a via do acionista decide sozinha, fora da Porta 1 --');
-  stdout.writeln('  ativos: ${decideSozinha.length}');
+  stdout.writeln('  ativos: ${decidesAlone.length}');
   stdout.writeln('  com Ke resolvido disponível (a via da firma o produz): '
-      '$comResolvido');
-  if (decideSozinha.isNotEmpty) {
+      '$withResolved');
+  if (decidesAlone.isNotEmpty) {
     final d = [
-      for (final e in decideSozinha)
+      for (final e in decidesAlone)
         if (e['keResolvidoTerminal'] != null &&
             e['keAcionistaTerminal'] != null)
           (e['keResolvidoTerminal'] as num).toDouble() -
@@ -240,19 +240,19 @@ void _imprimir(List<Map<String, dynamic>> l, int recusados) {
     ];
     if (d.isNotEmpty) {
       stdout.writeln('  Ke resolvido − Ke do CAPM: mediana='
-          '${_pp(_mediana(d)!)}   |dif| > 1 p.p. em '
+          '${_pp(_median(d)!)}   |dif| > 1 p.p. em '
           '${d.where((x) => x.abs() > 0.01).length} de ${d.length}');
     }
     stdout.writeln('  os que decide sozinha:');
-    final ord = [...decideSozinha]..sort((a, b) => ((b['potencial'] as num?) ?? 0)
+    final ord = [...decidesAlone]..sort((a, b) => ((b['potencial'] as num?) ?? 0)
         .compareTo((a['potencial'] as num?) ?? 0));
     for (final e in ord.take(15)) {
       final ke = e['keAcionistaTerminal'] as num?;
-      final kr = e['keResolvidoTerminal'] as num?;
+      final resolvedKe = e['keResolvidoTerminal'] as num?;
       stdout.writeln('    ${(e['ticker'] as String).padRight(7)} '
           'potencial=${_pc(((e['potencial'] as num?) ?? 0).toDouble()).padLeft(8)}  '
           'Ke=${ke == null ? "  —  " : _pc(ke.toDouble()).padLeft(6)}  '
-          'Ke*=${kr == null ? "  —  " : _pc(kr.toDouble()).padLeft(6)}  '
+          'Ke*=${resolvedKe == null ? "  —  " : _pc(resolvedKe.toDouble()).padLeft(6)}  '
           '${e['porta3FluxoFraco'] == true ? "porta3" : ""}'
           '${e['estruturaRecusada'] == true ? "recusada" : ""}');
     }

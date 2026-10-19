@@ -23,9 +23,9 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOT = process.cwd();
-const DECISOES = join(ROOT, 'docs', 'decisoes');
-const APONTAMENTOS = join(ROOT, 'docs', 'apontamentos');
-const SAIDA = join(ROOT, 'docs', 'estado.md');
+const DECISIONS = join(ROOT, 'docs', 'decisoes');
+const REMARKS = join(ROOT, 'docs', 'apontamentos');
+const OUTPUT = join(ROOT, 'docs', 'estado.md');
 
 function git(args) {
   return execFileSync('git', args, {
@@ -42,100 +42,100 @@ function git(args) {
  * (`>`) e lista de `- `. Um formato que exigisse mais que isso ja seria formato
  * demais para um registro que precisa ser escrito a mao sob pressao.
  */
-function lerFrontmatter(texto) {
-  const m = texto.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+function readFrontmatter(text) {
+  const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!m) return null;
 
-  const campos = {};
-  const linhas = m[1].split(/\r?\n/);
-  let chaveAtual = null;
-  let modo = null; // 'lista' | 'bloco'
+  const fields = {};
+  const lines = m[1].split(/\r?\n/);
+  let currentKey = null;
+  let mode = null; // 'lista' | 'bloco'
 
-  for (const linha of linhas) {
-    const item = linha.match(/^\s+-\s+(.*)$/);
-    if (item && modo === 'lista' && chaveAtual) {
-      campos[chaveAtual].push(item[1].trim());
+  for (const line of lines) {
+    const item = line.match(/^\s+-\s+(.*)$/);
+    if (item && mode === 'lista' && currentKey) {
+      fields[currentKey].push(item[1].trim());
       continue;
     }
-    const continuacao = linha.match(/^\s{2,}(\S.*)$/);
-    if (continuacao && modo === 'bloco' && chaveAtual) {
-      campos[chaveAtual] = (campos[chaveAtual] + ' ' + continuacao[1]).trim();
+    const continuation = line.match(/^\s{2,}(\S.*)$/);
+    if (continuation && mode === 'bloco' && currentKey) {
+      fields[currentKey] = (fields[currentKey] + ' ' + continuation[1]).trim();
       continue;
     }
 
-    const par = linha.match(/^([a-z_]+):\s*(.*)$/i);
-    if (!par) continue;
-    const [, chave, valor] = par;
-    chaveAtual = chave;
+    const pair = line.match(/^([a-z_]+):\s*(.*)$/i);
+    if (!pair) continue;
+    const [, key, value] = pair;
+    currentKey = key;
 
-    if (valor === '' ) {
-      campos[chave] = [];
-      modo = 'lista';
-    } else if (valor === '>' || valor === '|') {
-      campos[chave] = '';
-      modo = 'bloco';
-    } else if (valor === '[]' || valor === '[ ]') {
-      campos[chave] = [];
-      modo = null;
+    if (value === '' ) {
+      fields[key] = [];
+      mode = 'lista';
+    } else if (value === '>' || value === '|') {
+      fields[key] = '';
+      mode = 'bloco';
+    } else if (value === '[]' || value === '[ ]') {
+      fields[key] = [];
+      mode = null;
     } else {
-      campos[chave] = valor.trim();
-      modo = null;
+      fields[key] = value.trim();
+      mode = null;
     }
   }
-  return campos;
+  return fields;
 }
 
-function lerDecisoes() {
-  if (!existsSync(DECISOES)) return [];
-  const lidas = readdirSync(DECISOES)
+function readDecisions() {
+  if (!existsSync(DECISIONS)) return [];
+  const parsed = readdirSync(DECISIONS)
     .filter((f) => /^\d{3}-.*\.md$/.test(f))
     .sort()
-    .map((arquivo) => ({
-      arquivo,
-      campos: lerFrontmatter(readFileSync(join(DECISOES, arquivo), 'utf8')),
+    .map((file) => ({
+      file,
+      fields: readFrontmatter(readFileSync(join(DECISIONS, file), 'utf8')),
     }));
   // **Caminho retirado não é caminho quebrado.** Decisão aceita não se edita,
   // e a que apaga um documento declara isso em `retira`: quem o tinha em
   // `afeta` perde esse objeto sem ser tocada, e o caminho sai da lista de
   // quebrados para a de retirados, com a decisão que o apagou.
-  const retirados = new Map();
-  for (const { campos } of lidas) {
-    if (!campos || !Array.isArray(campos.retira)) continue;
-    for (const p of campos.retira) retirados.set(p, Number(campos.numero));
+  const retired = new Map();
+  for (const { fields } of parsed) {
+    if (!fields || !Array.isArray(fields.retira)) continue;
+    for (const p of fields.retira) retired.set(p, Number(fields.numero));
   }
-  return lidas.map(({ arquivo, campos }) => {
-      if (!campos) return { arquivo, invalida: true };
-      const afeta = Array.isArray(campos.afeta) ? campos.afeta : [];
-      const substitui = (Array.isArray(campos.substitui) ? campos.substitui : [])
+  return parsed.map(({ file, fields }) => {
+      if (!fields) return { file, invalid: true };
+      const affects = Array.isArray(fields.afeta) ? fields.afeta : [];
+      const supersedes = (Array.isArray(fields.substitui) ? fields.substitui : [])
         .map(Number)
         .filter((n) => Number.isFinite(n));
       return {
-        arquivo,
-        numero: Number(campos.numero),
-        titulo: campos.titulo ?? '(sem titulo)',
-        status: campos.status ?? '(sem status)',
-        origem: campos.origem ?? '(sem origem)',
-        data: campos.data ?? '',
-        afeta,
-        substitui,
+        file,
+        number: Number(fields.numero),
+        title: fields.titulo ?? '(sem titulo)',
+        status: fields.status ?? '(sem status)',
+        origin: fields.origem ?? '(sem origem)',
+        date: fields.data ?? '',
+        affects,
+        supersedes,
         // O unico teste que uma maquina consegue fazer sozinha: o caminho
         // existe? Se a decisao e RESPEITADA e semantico, e cabe a lente.
-        quebrados: afeta.filter(
-          (p) => !existsSync(join(ROOT, p)) && !retirados.has(p),
+        broken: affects.filter(
+          (p) => !existsSync(join(ROOT, p)) && !retired.has(p),
         ),
-        retirados: afeta
-          .filter((p) => !existsSync(join(ROOT, p)) && retirados.has(p))
-          .map((p) => ({ caminho: p, por: retirados.get(p) })),
+        retired: affects
+          .filter((p) => !existsSync(join(ROOT, p)) && retired.has(p))
+          .map((p) => ({ path: p, retiredBy: retired.get(p) })),
       };
     });
 }
 
-function contarLinhas(caminhos, excluirSufixos = []) {
-  const existentes = caminhos.filter((c) => existsSync(join(ROOT, c)));
-  if (existentes.length === 0) return { arquivos: 0, linhas: 0 };
-  const lista = git(['ls-files', '--', ...existentes])
+function countLines(filePaths, excludeSuffixes = []) {
+  const existing = filePaths.filter((c) => existsSync(join(ROOT, c)));
+  if (existing.length === 0) return { files: 0, lines: 0 };
+  const list = git(['ls-files', '--', ...existing])
     .split('\n')
-    .filter((f) => f !== '' && !excluirSufixos.some((s) => f.endsWith(s)))
+    .filter((f) => f !== '' && !excludeSuffixes.some((s) => f.endsWith(s)))
     // `git ls-files` lista o INDICE, que nem sempre bate com o disco: um
     // arquivo renomeado no diretorio de trabalho e ainda nao encenado aparece
     // aqui com o nome antigo. Ler sem conferir derrubava o gerador inteiro por
@@ -143,16 +143,16 @@ function contarLinhas(caminhos, excluirSufixos = []) {
     // `golden_capture` da suite. Contar so o que existe e o comportamento
     // certo: este arquivo mede o repositorio, nao valida o indice.
     .filter((f) => existsSync(join(ROOT, f)));
-  let linhas = 0;
-  for (const f of lista) {
-    linhas += readFileSync(join(ROOT, f), 'utf8').split('\n').length;
+  let lines = 0;
+  for (const f of list) {
+    lines += readFileSync(join(ROOT, f), 'utf8').split('\n').length;
   }
-  return { arquivos: lista.length, linhas };
+  return { files: list.length, lines };
 }
 
-const GERADOS = ['.g.dart', '.freezed.dart', '.mocks.dart'];
+const GENERATED = ['.g.dart', '.freezed.dart', '.mocks.dart'];
 
-const SUPERFICIE = [
+const SURFACE = [
   ['Nucleo de dominio', ['packages/equisim_core/lib']],
   ['Apresentacao', ['lib/presentation', 'lib/views', 'lib/controllers']],
   ['Camada de dados', ['lib/data']],
@@ -161,14 +161,14 @@ const SUPERFICIE = [
   ['Ferramentas de QA', ['scripts']],
 ];
 
-function gerar() {
-  const decisoes = lerDecisoes();
-  const apontamentos = existsSync(APONTAMENTOS)
-    ? readdirSync(APONTAMENTOS).filter((f) => f.endsWith('.md') && f !== 'README.md')
+function generate() {
+  const decisions = readDecisions();
+  const remarks = existsSync(REMARKS)
+    ? readdirSync(REMARKS).filter((f) => f.endsWith('.md') && f !== 'README.md')
     : [];
 
   const commit = git(['rev-parse', '--short', 'HEAD']);
-  const agora = new Date().toISOString().slice(0, 10);
+  const now = new Date().toISOString().slice(0, 10);
 
   const L = [];
   L.push('# Estado do projeto');
@@ -180,30 +180,30 @@ function gerar() {
   L.push('> problema que ele existe para resolver: estado escrito à mão apodrece');
   L.push('> porque muda a cada commit.');
   L.push('');
-  L.push(`Gerado em ${agora}, a partir de \`${commit}\`.`);
+  L.push(`Gerado em ${now}, a partir de \`${commit}\`.`);
   L.push('');
 
   // --- Decisões -----------------------------------------------------------
   L.push('## Decisões registradas');
   L.push('');
-  if (decisoes.length === 0) {
+  if (decisions.length === 0) {
     L.push('Nenhuma decisão registrada em `docs/decisoes/`.');
     L.push('');
     L.push('Isso não significa que o projeto não tenha decisões — significa que');
     L.push('elas ainda vivem em prosa dentro do parecer, que é exatamente a');
     L.push('condição que a lente `registro` do conselheiro existe para corrigir.');
   } else {
-    const substituidas = new Set();
-    for (const d of decisoes) {
-      for (const alvo of d.substitui ?? []) substituidas.add(alvo);
+    const superseded = new Set();
+    for (const d of decisions) {
+      for (const target of d.supersedes ?? []) superseded.add(target);
     }
-    const porStatus = {};
-    for (const d of decisoes) {
-      const chave = substituidas.has(d.numero) ? 'substituída' : d.status;
-      porStatus[chave] = (porStatus[chave] ?? 0) + 1;
+    const byStatus = {};
+    for (const d of decisions) {
+      const key = superseded.has(d.number) ? 'substituída' : d.status;
+      byStatus[key] = (byStatus[key] ?? 0) + 1;
     }
     L.push(
-      Object.entries(porStatus)
+      Object.entries(byStatus)
         .map(([s, n]) => `**${n}** ${s}`)
         .join(' · '),
     );
@@ -214,27 +214,27 @@ function gerar() {
     // constando como `aceita`. Quem lesse o estado — pessoa ou lente — via
     // decisão morta como viva, e a lente `rumo` reabriu o mesmo item duas
     // rodadas seguidas por causa disto.
-    const substituidaPor = new Map();
-    for (const d of decisoes) {
-      for (const alvo of d.substitui ?? []) {
-        const lista = substituidaPor.get(alvo) ?? [];
-        lista.push(d.numero);
-        substituidaPor.set(alvo, lista);
+    const supersededBy = new Map();
+    for (const d of decisions) {
+      for (const target of d.supersedes ?? []) {
+        const list = supersededBy.get(target) ?? [];
+        list.push(d.number);
+        supersededBy.set(target, list);
       }
     }
 
     L.push('| # | Título | Status | Origem | Data |');
     L.push('|---|---|---|---|---|');
-    for (const d of decisoes) {
-      const por = substituidaPor.get(d.numero);
-      const status = por
-        ? `substituída pela ${por.sort((a, b) => a - b).join(', ')}`
+    for (const d of decisions) {
+      const supersedingList = supersededBy.get(d.number);
+      const status = supersedingList
+        ? `substituída pela ${supersedingList.sort((a, b) => a - b).join(', ')}`
         : d.status;
-      L.push(`| ${d.numero} | ${d.titulo} | ${status} | ${d.origem} | ${d.data} |`);
+      L.push(`| ${d.number} | ${d.title} | ${status} | ${d.origin} | ${d.date} |`);
     }
 
-    const comRetirado = decisoes.filter((d) => d.retirados?.length > 0);
-    if (comRetirado.length > 0) {
+    const withRetired = decisions.filter((d) => d.retired?.length > 0);
+    if (withRetired.length > 0) {
       L.push('');
       L.push('### Caminhos retirados');
       L.push('');
@@ -243,23 +243,23 @@ function gerar() {
           '(campo `retira`). A decisão antiga não se edita; perdeu esse objeto.',
       );
       L.push('');
-      for (const d of comRetirado) {
-        for (const r of d.retirados) {
-          L.push(`- decisão ${d.numero} → \`${r.caminho}\`, retirado pela ${r.por}`);
+      for (const d of withRetired) {
+        for (const r of d.retired) {
+          L.push(`- decisão ${d.number} → \`${r.path}\`, retirado pela ${r.retiredBy}`);
         }
       }
     }
 
-    const comQuebra = decisoes.filter((d) => d.quebrados?.length > 0);
-    if (comQuebra.length > 0) {
+    const withBreak = decisions.filter((d) => d.broken?.length > 0);
+    if (withBreak.length > 0) {
       L.push('');
       L.push('### Referências quebradas');
       L.push('');
       L.push('Decisões cujo `afeta` aponta para caminho que não existe mais.');
       L.push('');
-      for (const d of comQuebra) {
-        for (const p of d.quebrados) {
-          L.push(`- decisão ${d.numero} → \`${p}\``);
+      for (const d of withBreak) {
+        for (const p of d.broken) {
+          L.push(`- decisão ${d.number} → \`${p}\``);
         }
       }
     }
@@ -270,10 +270,10 @@ function gerar() {
   L.push('## Caixa de entrada');
   L.push('');
   L.push(
-    apontamentos.length === 0
+    remarks.length === 0
       ? 'Vazia.'
-      : `${apontamentos.length} apontamento(s) não convertidos em decisão:\n\n` +
-          apontamentos.map((a) => `- \`${a}\``).join('\n'),
+      : `${remarks.length} apontamento(s) não convertidos em decisão:\n\n` +
+          remarks.map((a) => `- \`${a}\``).join('\n'),
   );
   L.push('');
 
@@ -284,9 +284,9 @@ function gerar() {
   L.push('');
   L.push('| Domínio | Arquivos | Linhas |');
   L.push('|---|---:|---:|');
-  for (const [nome, caminhos] of SUPERFICIE) {
-    const { arquivos, linhas } = contarLinhas(caminhos, GERADOS);
-    L.push(`| ${nome} | ${arquivos} | ${linhas.toLocaleString('pt-BR')} |`);
+  for (const [name, filePaths] of SURFACE) {
+    const { files, lines } = countLines(filePaths, GENERATED);
+    L.push(`| ${name} | ${files} | ${lines.toLocaleString('pt-BR')} |`);
   }
   L.push('');
 
@@ -298,11 +298,11 @@ function gerar() {
   L.push('```');
   L.push('');
 
-  writeFileSync(SAIDA, L.join('\n'), 'utf8');
+  writeFileSync(OUTPUT, L.join('\n'), 'utf8');
   process.stdout.write(
-    `docs/estado.md gerado -- ${decisoes.length} decisao(oes), ` +
-      `${apontamentos.length} apontamento(s).\n`,
+    `docs/estado.md gerado -- ${decisions.length} decisao(oes), ` +
+      `${remarks.length} apontamento(s).\n`,
   );
 }
 
-gerar();
+generate();

@@ -3,23 +3,23 @@ import 'package:test/test.dart';
 
 DateTime _d(int y, int m, int d) => DateTime.utc(y, m, d);
 
-Map<String, dynamic> _linha({
-  String classe = 'PN',
-  String rotulo = 'DIVIDENDO',
-  String com = '20/12/2007',
-  String valor = '0,32',
-  String lote = '1',
-  String preco = '11,60',
+Map<String, dynamic> _row({
+  String shareClass = 'PN',
+  String label = 'DIVIDENDO',
+  String withInput = '20/12/2007',
+  String value = '0,32',
+  String lot = '1',
+  String price = '11,60',
 }) =>
     {
-      'typeStock': classe,
+      'typeStock': shareClass,
       'dateApproval': '20/12/2007',
-      'valueCash': valor,
-      'ratio': lote,
-      'corporateAction': rotulo,
-      'lastDatePriorEx': com,
-      'closingPricePriorExDate': preco,
-      'quotedPerShares': lote,
+      'valueCash': value,
+      'ratio': lot,
+      'corporateAction': label,
+      'lastDatePriorEx': withInput,
+      'closingPricePriorExDate': price,
+      'quotedPerShares': lot,
     };
 
 void main() {
@@ -27,9 +27,9 @@ void main() {
     test('lê valor, classe, rótulo e as duas datas', () {
       // ABCB4, 20/12/2007: JCP de R$ 0,32 sobre fechamento de R$ 11,60 — os
       // 2,758621% que a própria B3 publica em `corporateActionPrice`.
-      final p = B3CashDividends.parse([_linha(rotulo: 'JRS CAP PROPRIO')]).single;
+      final p = B3CashDividends.parse([_row(label: 'JRS CAP PROPRIO')]).single;
       expect(p.shareClass, 'PN');
-      expect(p.kind, CashDividendKind.jurosSobreCapital);
+      expect(p.kind, CashDividendKind.interestOnEquity);
       expect(p.lastDateWithRights, _d(2007, 12, 20));
       expect(p.exDate, _d(2007, 12, 21));
       expect(p.amount, closeTo(0.32, 1e-12));
@@ -37,40 +37,40 @@ void main() {
     });
 
     test('a data ex pula fim de semana e feriado', () {
-      final sexta = B3CashDividends.parse([_linha(com: '12/09/2025')]).single;
-      expect(sexta.exDate, _d(2025, 9, 15));
-      final vespera = B3CashDividends.parse([_linha(com: '30/12/2014')]).single;
-      expect(vespera.exDate, _d(2015, 1, 2),
+      final friday = B3CashDividends.parse([_row(withInput: '12/09/2025')]).single;
+      expect(friday.exDate, _d(2025, 9, 15));
+      final dayBefore = B3CashDividends.parse([_row(withInput: '30/12/2014')]).single;
+      expect(dayBefore.exDate, _d(2015, 1, 2),
           reason: '31/12 não tem pregão e 1º/01 é feriado');
     });
 
     test('lote de mil vira valor por ação', () {
       final p = B3CashDividends.parse(
-          [_linha(valor: '320,00', lote: '1000', preco: '11.600,00')]).single;
+          [_row(value: '320,00', lot: '1000', price: '11.600,00')]).single;
       expect(p.amount, closeTo(0.32, 1e-12));
       expect(p.closeWithRights, closeTo(11.6, 1e-12));
     });
 
     test('preço zerado não é preço', () {
-      final p = B3CashDividends.parse([_linha(preco: '0,00')]).single;
+      final p = B3CashDividends.parse([_row(price: '0,00')]).single;
       expect(p.closeWithRights, isNull);
     });
 
     test('recusa o que inventaria provento', () {
       expect(
           B3CashDividends.parse([
-            _linha(valor: '0,00'),
-            _linha(rotulo: 'BONIFICACAO'),
-            _linha(com: ''),
-            _linha(classe: ''),
+            _row(value: '0,00'),
+            _row(label: 'BONIFICACAO'),
+            _row(withInput: ''),
+            _row(shareClass: ''),
             'isto não é linha',
           ]),
           isEmpty);
     });
 
     test('só o juro sobre capital próprio perde o imposto retido', () {
-      final jcp = B3CashDividends.parse([_linha(rotulo: 'JRS CAP PROPRIO')]).single;
-      final div = B3CashDividends.parse([_linha()]).single;
+      final jcp = B3CashDividends.parse([_row(label: 'JRS CAP PROPRIO')]).single;
+      final div = B3CashDividends.parse([_row()]).single;
       expect(jcp.netAmount, closeTo(0.32 * 0.85, 1e-12));
       expect(div.netAmount, closeTo(0.32, 1e-12));
     });
@@ -85,17 +85,17 @@ void main() {
   });
 
   group('Retorno total', () {
-    final proventos = [
+    final dividends = [
       CashDividend(
         shareClass: 'PN',
-        kind: CashDividendKind.dividendo,
+        kind: CashDividendKind.dividend,
         lastDateWithRights: _d(2024, 3, 1),
         exDate: _d(2024, 3, 4),
         amount: 1.0,
       ),
       CashDividend(
         shareClass: 'PN',
-        kind: CashDividendKind.jurosSobreCapital,
+        kind: CashDividendKind.interestOnEquity,
         lastDateWithRights: _d(2024, 9, 2),
         exDate: _d(2024, 9, 3),
         amount: 2.0,
@@ -104,9 +104,9 @@ void main() {
 
     test('reinveste no fechamento da data ex, provento a provento', () {
       final r = TotalReturn.factor(
-        dividends: proventos,
-        de: _d(2024, 1, 1),
-        ate: _d(2024, 12, 31),
+        dividends: dividends,
+        from: _d(2024, 1, 1),
+        until: _d(2024, 12, 31),
         closeOnExDate: (d) => d.month == 3 ? 20.0 : 40.0,
       );
       expect(r.factor, closeTo((1 + 1 / 20) * (1 + 2 * 0.85 / 40), 1e-12));
@@ -115,9 +115,9 @@ void main() {
 
     test('a janela é (de, ate]: data ex no primeiro dia não entra', () {
       final r = TotalReturn.factor(
-        dividends: proventos,
-        de: _d(2024, 3, 4),
-        ate: _d(2024, 9, 3),
+        dividends: dividends,
+        from: _d(2024, 3, 4),
+        until: _d(2024, 9, 3),
         closeOnExDate: (_) => 40.0,
         net: false,
       );
@@ -128,9 +128,9 @@ void main() {
     test('provento sem pregão nem preço com direito fica de fora e é contado',
         () {
       final r = TotalReturn.factor(
-        dividends: proventos,
-        de: _d(2024, 1, 1),
-        ate: _d(2024, 12, 31),
+        dividends: dividends,
+        from: _d(2024, 1, 1),
+        until: _d(2024, 12, 31),
         closeOnExDate: (d) => d.month == 3 ? null : 40.0,
       );
       expect(r.applied, 1);
@@ -138,10 +138,10 @@ void main() {
     });
 
     test('sem pregão, o preço com direito da B3 menos o provento', () {
-      final comPreco = [
+      final withPrice = [
         CashDividend(
           shareClass: 'ON',
-          kind: CashDividendKind.dividendo,
+          kind: CashDividendKind.dividend,
           lastDateWithRights: _d(2019, 3, 1),
           exDate: _d(2019, 3, 5),
           amount: 1.0,
@@ -149,9 +149,9 @@ void main() {
         ),
       ];
       final r = TotalReturn.factor(
-        dividends: comPreco,
-        de: _d(2019, 1, 1),
-        ate: _d(2019, 12, 31),
+        dividends: withPrice,
+        from: _d(2019, 1, 1),
+        until: _d(2019, 12, 31),
         closeOnExDate: (_) => null,
       );
       expect(r.factor, closeTo(1 + 1 / 20, 1e-12));
@@ -163,24 +163,24 @@ void main() {
   group('proventos da mesma data ex', () {
     // Dividendo e juro sobre capital próprio no mesmo dia: o fator é o do
     // total, sem o termo cruzado de um rendendo sobre o outro.
-    CashDividend prov(double valor, CashDividendKind kind) => CashDividend(
+    CashDividend dividend(double value, CashDividendKind kind) => CashDividend(
           shareClass: 'PN',
           kind: kind,
           lastDateWithRights: _d(2024, 6, 3),
           exDate: _d(2024, 6, 4),
-          amount: valor,
+          amount: value,
           closeWithRights: 24.0,
         );
-    final dia = [
-      prov(2.0, CashDividendKind.dividendo),
-      prov(2.0, CashDividendKind.jurosSobreCapital),
+    final day = [
+      dividend(2.0, CashDividendKind.dividend),
+      dividend(2.0, CashDividendKind.interestOnEquity),
     ];
 
     test('com o pregão ex, 1 + (D₁ + D₂)/P_ex', () {
       final r = TotalReturn.factor(
-        dividends: dia,
-        de: _d(2024, 1, 1),
-        ate: _d(2024, 12, 31),
+        dividends: day,
+        from: _d(2024, 1, 1),
+        until: _d(2024, 12, 31),
         closeOnExDate: (_) => 20.0,
         net: false,
       );
@@ -191,9 +191,9 @@ void main() {
 
     test('sem o pregão, o preço ex sai do com direito menos os dois', () {
       final r = TotalReturn.factor(
-        dividends: dia,
-        de: _d(2024, 1, 1),
-        ate: _d(2024, 12, 31),
+        dividends: day,
+        from: _d(2024, 1, 1),
+        until: _d(2024, 12, 31),
         closeOnExDate: (_) => null,
         net: false,
       );
@@ -204,9 +204,9 @@ void main() {
 
     test('o imposto do juro sai do que se recebe, não da queda do preço', () {
       final r = TotalReturn.factor(
-        dividends: dia,
-        de: _d(2024, 1, 1),
-        ate: _d(2024, 12, 31),
+        dividends: day,
+        from: _d(2024, 1, 1),
+        until: _d(2024, 12, 31),
         closeOnExDate: (_) => 20.0,
       );
       expect(r.factor, closeTo(1 + (2 + 2 * 0.85) / 20, 1e-12));
@@ -214,15 +214,15 @@ void main() {
   });
 
   group('Índice de retorno total — o beta da decisão 89', () {
-    CashDividend div(DateTime ex, double valor, double com,
-            {CashDividendKind kind = CashDividendKind.dividendo}) =>
+    CashDividend div(DateTime ex, double value, double withInput,
+            {CashDividendKind kind = CashDividendKind.dividend}) =>
         CashDividend(
           shareClass: 'ON',
           kind: kind,
           lastDateWithRights: ex.subtract(const Duration(days: 1)),
           exDate: ex,
-          amount: valor,
-          closeWithRights: com,
+          amount: value,
+          closeWithRights: withInput,
         );
 
     test('na data ex, o retorno é o do preço mais o rendimento com direito', () {
@@ -240,17 +240,17 @@ void main() {
     test('a série ajustada por desdobramento dá o mesmo índice', () {
       // Desdobramento de 1 para 2 depois do período: a fonte divide o passado
       // por dois, e o rendimento, que é bruto sobre bruto, não muda.
-      final bruto = TotalReturnIndex.build(
+      final raw = TotalReturnIndex.build(
         dates: [_d(2024, 3, 1), _d(2024, 3, 4)],
         closes: [20.0, 19.0],
         dividends: [div(_d(2024, 3, 4), 1.0, 20.0)],
       );
-      final ajustado = TotalReturnIndex.build(
+      final adjusted = TotalReturnIndex.build(
         dates: [_d(2024, 3, 1), _d(2024, 3, 4)],
         closes: [10.0, 9.5],
         dividends: [div(_d(2024, 3, 4), 1.0, 20.0)],
       );
-      expect(ajustado.index.last, closeTo(bruto.index.last, 1e-12));
+      expect(adjusted.index.last, closeTo(raw.index.last, 1e-12));
     });
 
     test('data ex sem pregão cai no pregão seguinte; antes da série, fora', () {
@@ -273,7 +273,7 @@ void main() {
         dividends: [
           CashDividend(
             shareClass: 'ON',
-            kind: CashDividendKind.dividendo,
+            kind: CashDividendKind.dividend,
             lastDateWithRights: _d(2024, 3, 1),
             exDate: _d(2024, 3, 4),
             amount: 1.0,
@@ -287,17 +287,17 @@ void main() {
 
   group('Pacote de proventos', () {
     test('ida e volta, e a classe separa os papéis do emissor', () {
-      final on = B3CashDividends.parse([_linha(classe: 'ON')]);
+      final on = B3CashDividends.parse([_row(shareClass: 'ON')]);
       final pn = B3CashDividends.parse(
-          [_linha(classe: 'PN', rotulo: 'JRS CAP PROPRIO', preco: '0,00')]);
-      final lido = CashDividendsCodec.decode(CashDividendsCodec.encode(
-          {'ABCB': [...on, ...pn]}, geradoEm: _d(2026, 9, 14)));
-      final doPn = CashDividendsCodec.forTicker(lido, 'ABCB4');
-      expect(doPn.single.kind, CashDividendKind.jurosSobreCapital);
-      expect(doPn.single.closeWithRights, isNull);
-      expect(CashDividendsCodec.forTicker(lido, 'ABCB3').single.amount,
+          [_row(shareClass: 'PN', label: 'JRS CAP PROPRIO', price: '0,00')]);
+      final parsed = CashDividendsCodec.decode(CashDividendsCodec.encode(
+          {'ABCB': [...on, ...pn]}, generatedAt: _d(2026, 9, 14)));
+      final ofPn = CashDividendsCodec.forTicker(parsed, 'ABCB4');
+      expect(ofPn.single.kind, CashDividendKind.interestOnEquity);
+      expect(ofPn.single.closeWithRights, isNull);
+      expect(CashDividendsCodec.forTicker(parsed, 'ABCB3').single.amount,
           closeTo(0.32, 1e-12));
-      expect(CashDividendsCodec.forTicker(lido, 'PETR4'), isEmpty);
+      expect(CashDividendsCodec.forTicker(parsed, 'PETR4'), isEmpty);
     });
 
     test('versão desconhecida não é lida', () {

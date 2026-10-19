@@ -44,7 +44,7 @@ class _AssetPickerSheetState extends ConsumerState<_AssetPickerSheet> {
 
     final already = <Ticker>{
       ...study.principal.tickers,
-      ...study.reserva.tickers,
+      ...study.reserve.tickers,
     };
 
     return DraggableScrollableSheet(

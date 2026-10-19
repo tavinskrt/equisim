@@ -22,63 +22,63 @@ import time
 import urllib.request
 from pathlib import Path
 
-TABELA = 1846
-SAIDA = Path('data/indices/pib_setorial.json')
-URL = (f'https://apisidra.ibge.gov.br/values/t/{TABELA}/n1/all/v/all/p/all'
+TABLE = 1846
+OUTPUT = Path('data/indices/pib_setorial.json')
+URL = (f'https://apisidra.ibge.gov.br/values/t/{TABLE}/n1/all/v/all/p/all'
        '/c11255/all?formato=json')
 
 
-def baixar() -> list:
-    for tentativa in range(4):
+def download() -> list:
+    for attempt in range(4):
         try:
             with urllib.request.urlopen(URL, timeout=120) as r:
                 return json.loads(r.read().decode('utf-8'))
         except Exception as e:  # rede instável: repete com espera crescente
-            if tentativa == 3:
-                raise RuntimeError(f'SIDRA {TABELA}: {e}') from e
-            time.sleep(3 * (tentativa + 1))
+            if attempt == 3:
+                raise RuntimeError(f'SIDRA {TABLE}: {e}') from e
+            time.sleep(3 * (attempt + 1))
     return []
 
 
 def main() -> None:
-    linhas = baixar()
-    if not linhas or not isinstance(linhas, list):
-        raise RuntimeError(f'SIDRA {TABELA}: resposta vazia')
+    lines = download()
+    if not lines or not isinstance(lines, list):
+        raise RuntimeError(f'SIDRA {TABLE}: resposta vazia')
     # A primeira linha é o cabeçalho: os nomes de cada coluna `D1C`, `V`...
-    cabecalho, dados = linhas[0], linhas[1:]
-    coluna_atividade = next(k for k, v in cabecalho.items()
+    header_lines, data = lines[0], lines[1:]
+    activity_column = next(k for k, v in header_lines.items()
                             if v.startswith('Setores e subsetores') and k.endswith('N'))
-    coluna_trimestre = next(k for k, v in cabecalho.items()
+    quarter_column = next(k for k, v in header_lines.items()
                             if v.startswith('Trimestre') and k.endswith('C'))
-    atividades: dict[str, list] = {}
-    vazios = 0
-    for l in dados:
-        valor = l.get('V')
+    activities: dict[str, list] = {}
+    empty = 0
+    for l in data:
+        value = l.get('V')
         # O SIDRA marca valor ausente com '-', '..' ou 'X': sem valor não há
         # ponto, e inventar um mediria outra coisa.
         try:
-            v = float(valor)
+            v = float(value)
         except (TypeError, ValueError):
-            vazios += 1
+            empty += 1
             continue
-        atividades.setdefault(l[coluna_atividade], []).append(
-            [l[coluna_trimestre], v])
-    for serie in atividades.values():
-        serie.sort(key=lambda p: p[0])
-        trimestres = [p[0] for p in serie]
-        if len(trimestres) != len(set(trimestres)):
+        activities.setdefault(l[activity_column], []).append(
+            [l[quarter_column], v])
+    for series in activities.values():
+        series.sort(key=lambda p: p[0])
+        quarters = [p[0] for p in series]
+        if len(quarters) != len(set(quarters)):
             raise RuntimeError('trimestres repetidos na série baixada')
-    SAIDA.parent.mkdir(parents=True, exist_ok=True)
-    SAIDA.write_text(json.dumps({
-        'fonte': f'IBGE, SIDRA tabela {TABELA} (Contas Nacionais Trimestrais, '
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT.write_text(json.dumps({
+        'fonte': f'IBGE, SIDRA tabela {TABLE} (Contas Nacionais Trimestrais, '
                  'valores a preços correntes, milhões de reais)',
-        'atividades': atividades,
+        'atividades': activities,
     }, ensure_ascii=False), encoding='utf-8')
-    for nome, serie in sorted(atividades.items()):
-        print(f'{nome}: {len(serie)} trimestres, {serie[0][0]} a {serie[-1][0]}')
-    if vazios:
-        print(f'{vazios} valores ausentes ignorados')
-    print(f'gravado {SAIDA}')
+    for name, series in sorted(activities.items()):
+        print(f'{name}: {len(series)} trimestres, {series[0][0]} a {series[-1][0]}')
+    if empty:
+        print(f'{empty} valores ausentes ignorados')
+    print(f'gravado {OUTPUT}')
 
 
 if __name__ == '__main__':

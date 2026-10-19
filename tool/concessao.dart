@@ -27,9 +27,9 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
-double? _mediana(List<double> v) {
+double? _median(List<double> v) {
   if (v.isEmpty) return null;
   final s = [...v]..sort();
   final m = s.length ~/ 2;
@@ -38,7 +38,7 @@ double? _mediana(List<double> v) {
 
 String _pc(double v) => '${(v * 100).toStringAsFixed(1)}%';
 
-/// Fração do valor terminal perpétuo que sobra ao truncá-lo em [anos].
+/// Fração do valor terminal perpétuo que sobra ao truncá-lo em [years].
 ///
 /// ```
 /// VT_finito / VT_perpétuo = 1 − ((1 + g) / (1 + r))^anos
@@ -46,15 +46,15 @@ String _pc(double v) => '${(v * 100).toStringAsFixed(1)}%';
 ///
 /// É a soma de uma progressão geométrica: a perpetuidade é a série infinita, e
 /// truncá-la remove a cauda, que vale `((1+g)/(1+r))^anos` do total.
-double fracaoQueSobra({
-  required double anos,
+double remainingFraction({
+  required double years,
   required double g,
   required double r,
 }) {
-  if (!anos.isFinite || anos <= 0) return 0.0;
+  if (!years.isFinite || years <= 0) return 0.0;
   if (r <= g) return 1.0;
-  final cauda = math.pow((1 + g) / (1 + r), anos).toDouble();
-  final v = 1 - cauda;
+  final tail = math.pow((1 + g) / (1 + r), years).toDouble();
+  final v = 1 - tail;
   return v.isFinite ? v.clamp(0.0, 1.0).toDouble() : 1.0;
 }
 
@@ -64,7 +64,7 @@ Future<void> main(List<String> args) async {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
 
@@ -74,10 +74,10 @@ Future<void> main(List<String> args) async {
       prices: ctx.prices,
       fundamentals: ctx.fundamentals,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     );
 
-    final saida = <Map<String, dynamic>>[];
+    final output = <Map<String, dynamic>>[];
     var i = 0;
     for (final ticker in universe) {
       i++;
@@ -88,7 +88,7 @@ Future<void> main(List<String> args) async {
         fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
@@ -107,16 +107,16 @@ Future<void> main(List<String> args) async {
 
       // Vida remanescente da base, medida na mediana dos exercícios: um ano
       // isolado com baixa/reavaliação distorce a razão.
-      final vidas = <double>[];
+      final lives = <double>[];
       for (final s in pub) {
         final base = (s.propertyPlantEquipment ?? 0) + (s.intangibleAssets ?? 0);
-        final da = s.depreciationAndAmortization;
-        if (da == null || da <= 0 || base <= 0) continue;
-        final anos = base / da;
-        if (anos.isFinite && anos > 0 && anos < 200) vidas.add(anos);
+        final dAndA = s.depreciationAndAmortization;
+        if (dAndA == null || dAndA <= 0 || base <= 0) continue;
+        final years = base / dAndA;
+        if (years.isFinite && years > 0 && years < 200) lives.add(years);
       }
 
-      saida.add({
+      output.add({
         'ticker': ticker.value,
         'setor': inputs.sectorKey,
         'subsetor': inputs.industry,
@@ -126,8 +126,8 @@ Future<void> main(List<String> args) async {
         'pesoTerminal': d.terminalShare,
         'crescimentoPerpetuo': d.growthRate,
         'descontoTerminal': d.terminalDiscountRate,
-        'vidaRemanescente': _mediana(vidas),
-        'exerciciosComVida': vidas.length,
+        'vidaRemanescente': _median(lives),
+        'exerciciosComVida': lives.length,
         'intangivel': pub.last.intangibleAssets,
         'imobilizado': pub.last.propertyPlantEquipment,
         // O que o terminal promete: excedente de retorno preservado na
@@ -141,10 +141,10 @@ Future<void> main(List<String> args) async {
     stderr.writeln('');
 
     File('docs/validacao/concessao.json').writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(saida),
+      const JsonEncoder.withIndent(' ').convert(output),
     );
-    _imprimir(saida);
-    stderr.writeln('\nescrito docs/validacao/concessao.json (${saida.length})');
+    _printReport(output);
+    stderr.writeln('\nescrito docs/validacao/concessao.json (${output.length})');
   } finally {
     await ctx.dispose();
   }
@@ -155,7 +155,7 @@ Future<void> main(List<String> args) async {
 /// **É classificação, não parâmetro.** Nenhum número sai daqui; o que sai é a
 /// pergunta "este negócio tem data para acabar?", e ela se responde pelo
 /// rótulo da fonte.
-const _termosDeConcessao = [
+const _concessionTerms = [
   'energia eletrica',
   'agua e saneamento',
   'exploracao de rodovias',
@@ -165,76 +165,76 @@ const _termosDeConcessao = [
   'servicos de transporte',
 ];
 
-bool _souConcessao(Map<String, dynamic> e) {
-  final sub = _normalizar((e['subsetor'] as String?) ?? '');
-  final setor = _normalizar((e['setor'] as String?) ?? '');
-  if (setor == 'saneamento' || setor == 'infraestrutura') return true;
-  for (final t in _termosDeConcessao) {
+bool _isConcession(Map<String, dynamic> e) {
+  final sub = _normalize((e['subsetor'] as String?) ?? '');
+  final sector = _normalize((e['setor'] as String?) ?? '');
+  if (sector == 'saneamento' || sector == 'infraestrutura') return true;
+  for (final t in _concessionTerms) {
     if (sub.contains(t)) return true;
   }
   return false;
 }
 
-String _normalizar(String v) {
-  const de = 'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ';
-  const para = 'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC';
+String _normalize(String v) {
+  const accented = 'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ';
+  const plain = 'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC';
   final b = StringBuffer();
   for (final c in v.toLowerCase().runes) {
     final ch = String.fromCharCode(c);
-    final i = de.indexOf(ch);
-    b.write(i >= 0 ? para[i].toLowerCase() : ch);
+    final i = accented.indexOf(ch);
+    b.write(i >= 0 ? plain[i].toLowerCase() : ch);
   }
   return b.toString();
 }
 
-void _imprimir(List<Map<String, dynamic>> l) {
+void _printReport(List<Map<String, dynamic>> l) {
   stdout.writeln('\n=== D8 — A PERPETUIDADE SOBRE CONTRATO COM PRAZO — '
       '${l.length} ===\n');
 
   // --- 1. O indicador que parecia servir, e não serve ---------------------
-  final concessoes = l.where(_souConcessao).toList();
-  final resto = l.where((e) => !_souConcessao(e)).toList();
-  List<double> vidas(List<Map<String, dynamic>> xs) => [
+  final concessions = l.where(_isConcession).toList();
+  final remainder = l.where((e) => !_isConcession(e)).toList();
+  List<double> lives(List<Map<String, dynamic>> xs) => [
         for (final e in xs)
           if (e['vidaRemanescente'] != null)
             (e['vidaRemanescente'] as num).toDouble()
       ];
-  final vc = vidas(concessoes)..sort();
-  final vr = vidas(resto)..sort();
+  final vc = lives(concessions)..sort();
+  final vr = lives(remainder)..sort();
   stdout.writeln('-- (imobilizado + intangível) ÷ D&A identifica concessão? --');
   if (vc.isNotEmpty && vr.isNotEmpty) {
-    stdout.writeln('  concessionárias: mediana=${_mediana(vc)!.toStringAsFixed(1)} '
+    stdout.writeln('  concessionárias: mediana=${_median(vc)!.toStringAsFixed(1)} '
         'anos  p10=${vc[(vc.length * 0.1).floor()].toStringAsFixed(1)}  '
         'p90=${vc[(vc.length * 0.9).floor()].toStringAsFixed(1)}  (n=${vc.length})');
-    stdout.writeln('  as demais:       mediana=${_mediana(vr)!.toStringAsFixed(1)} '
+    stdout.writeln('  as demais:       mediana=${_median(vr)!.toStringAsFixed(1)} '
         'anos  p10=${vr[(vr.length * 0.1).floor()].toStringAsFixed(1)}  '
         'p90=${vr[(vr.length * 0.9).floor()].toStringAsFixed(1)}  (n=${vr.length})');
     // Sobreposição: fração das concessionárias dentro do intervalo central das
     // demais. Alta sobreposição = o indicador não distingue.
     final q1 = vr[(vr.length * 0.25).floor()];
     final q3 = vr[(vr.length * 0.75).floor()];
-    final dentro = vc.where((x) => x >= q1 && x <= q3).length;
+    final within = vc.where((x) => x >= q1 && x <= q3).length;
     stdout.writeln('  concessionárias dentro do miolo das demais '
         '(${q1.toStringAsFixed(1)}–${q3.toStringAsFixed(1)} anos): '
-        '$dentro de ${vc.length}');
+        '$within de ${vc.length}');
   }
 
   // --- 2. A exposição, que existe independentemente do indicador ----------
   stdout.writeln('\n-- exposição: quem opera sob prazo --');
-  stdout.writeln('  ativos em setor de concessão: ${concessoes.length} de '
+  stdout.writeln('  ativos em setor de concessão: ${concessions.length} de '
       '${l.length}');
-  final pesos = [
-    for (final e in concessoes)
+  final weights = [
+    for (final e in concessions)
       if (e['pesoTerminal'] != null) (e['pesoTerminal'] as num).toDouble()
   ];
-  if (pesos.isNotEmpty) {
-    stdout.writeln('  peso do terminal neles: mediana=${_pc(_mediana(pesos)!)}  '
-        'acima de 50%: ${pesos.where((x) => x > 0.5).length}');
+  if (weights.isNotEmpty) {
+    stdout.writeln('  peso do terminal neles: mediana=${_pc(_median(weights)!)}  '
+        'acima de 50%: ${weights.where((x) => x > 0.5).length}');
   }
-  final comMoat = concessoes.where((e) => e['moat'] == true).toList();
+  final withMoat = concessions.where((e) => e['moat'] == true).toList();
   stdout.writeln('  **com excedente de retorno preservado na perpetuidade: '
-      '${comMoat.length}**');
-  for (final e in comMoat) {
+      '${withMoat.length}**');
+  for (final e in withMoat) {
     stdout.writeln('    ${(e['ticker'] as String).padRight(7)} '
         'λ=${((e['lambda'] as num?) ?? 0).toStringAsFixed(4)}  '
         'terminal=${_pc(((e['pesoTerminal'] as num?) ?? 0).toDouble())}  '
@@ -244,23 +244,23 @@ void _imprimir(List<Map<String, dynamic>> l) {
   // --- 3. O tamanho do que não se pode corrigir sem o prazo ---------------
   stdout.writeln('\n-- se o contrato acabasse em N anos, quanto do preço '
       'justo sobraria --');
-  for (final anos in [10.0, 20.0, 30.0]) {
-    final efeitos = <double>[];
-    for (final e in concessoes) {
+  for (final years in [10.0, 20.0, 30.0]) {
+    final effects = <double>[];
+    for (final e in concessions) {
       final g = e['crescimentoPerpetuo'] as num?;
       final r = e['descontoTerminal'] as num?;
-      final peso = e['pesoTerminal'] as num?;
-      if (g == null || r == null || peso == null) continue;
-      final sobra = fracaoQueSobra(
-        anos: anos,
+      final weight = e['pesoTerminal'] as num?;
+      if (g == null || r == null || weight == null) continue;
+      final remaining = remainingFraction(
+        years: years,
         g: g.toDouble(),
         r: r.toDouble(),
       );
-      efeitos.add(1 + peso.toDouble() * (sobra - 1));
+      effects.add(1 + weight.toDouble() * (remaining - 1));
     }
-    if (efeitos.isEmpty) continue;
-    stdout.writeln('  ${anos.toStringAsFixed(0).padLeft(2)} anos → '
-        'preço justo × ${_mediana(efeitos)!.toStringAsFixed(2)} na mediana  '
-        '(n=${efeitos.length})');
+    if (effects.isEmpty) continue;
+    stdout.writeln('  ${years.toStringAsFixed(0).padLeft(2)} anos → '
+        'preço justo × ${_median(effects)!.toStringAsFixed(2)} na mediana  '
+        '(n=${effects.length})');
   }
 }

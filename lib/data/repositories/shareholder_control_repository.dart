@@ -13,25 +13,25 @@ import 'package:equisim_core/equisim_core.dart';
 /// sai sem a ressalva, como antes dela.
 class ShareholderControlRepository {
   /// Lê o conteúdo do pacote.
-  final Future<String> Function() carregarPacote;
+  final Future<String> Function() loadPackage;
 
   /// Data da avaliação. **Recebida por função**, e não lida do relógio no
   /// ponto de uso — a mesma convenção de `UnitCompositionRepository`.
-  final DateTime Function() hoje;
+  final DateTime Function() today;
 
   /// Declara o repositório.
   ShareholderControlRepository({
-    required this.carregarPacote,
-    DateTime Function()? hoje,
-  }) : hoje = hoje ?? DateTime.now;
+    required this.loadPackage,
+    DateTime Function()? today,
+  }) : today = today ?? DateTime.now;
 
-  Future<Map<String, List<ShareholderControlPeriod>>>? _emissores;
+  Future<Map<String, List<ShareholderControlPeriod>>>? _issuers;
 
-  Future<Map<String, List<ShareholderControlPeriod>>> _ler() async {
+  Future<Map<String, List<ShareholderControlPeriod>>> _read() async {
     try {
-      final json = jsonDecode(await carregarPacote());
+      final json = jsonDecode(await loadPackage());
       return json is Map<String, dynamic>
-          ? ShareholderControlHistory.decode(json)?.porEmissor ?? const {}
+          ? ShareholderControlHistory.decode(json)?.byIssuer ?? const {}
           : const {};
     } on Object {
       return const {};
@@ -39,14 +39,14 @@ class ShareholderControlRepository {
   }
 
   /// `true` quando o emissor de [ticker] é de controle estatal em [asOf] —
-  /// ou na data de [hoje], sem ela.
+  /// ou na data de [today], sem ela.
   Future<bool> isStateControlled(Ticker ticker, {DateTime? asOf}) async {
-    final raiz = ticker.value.length >= 4
+    final root = ticker.value.length >= 4
         ? ticker.value.substring(0, 4)
         : ticker.value;
-    final periodos = (await (_emissores ??= _ler()))[raiz];
-    if (periodos == null) return false;
-    return ShareholderControlHistory.at(periodos, asOf ?? hoje()) ==
+    final periods = (await (_issuers ??= _read()))[root];
+    if (periods == null) return false;
+    return ShareholderControlHistory.at(periods, asOf ?? today()) ==
         ShareholderControl.state;
   }
 }

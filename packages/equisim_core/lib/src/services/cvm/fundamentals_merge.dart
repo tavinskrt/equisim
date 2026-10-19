@@ -25,13 +25,13 @@ enum FieldSource {
   cvm,
 
   /// Fonte de cotações e dados de mercado.
-  mercado,
+  market,
 
   /// Calculado a partir de outros campos, e não publicado por ninguém.
-  derivado,
+  derived,
 
   /// Nenhuma fonte forneceu.
-  ausente;
+  missing;
 }
 
 /// Origem de cada campo de um exercício mesclado.
@@ -47,11 +47,11 @@ class FundamentalsProvenance {
   FundamentalsProvenance(Map<String, FieldSource> byField)
       : byField = Map.unmodifiable(byField);
 
-  /// De onde veio [campo]. [FieldSource.ausente] quando ninguém informou.
-  FieldSource of(String campo) => byField[campo] ?? FieldSource.ausente;
+  /// De onde veio [field]. [FieldSource.missing] quando ninguém informou.
+  FieldSource of(String field) => byField[field] ?? FieldSource.missing;
 
   /// Quantos campos vieram de cada fonte.
-  Map<FieldSource, int> get contagem {
+  Map<FieldSource, int> get count {
     final out = <FieldSource, int>{};
     for (final v in byField.values) {
       out[v] = (out[v] ?? 0) + 1;
@@ -79,7 +79,7 @@ abstract final class FundamentalsMerge {
   /// Estão nomeados porque a regra "CVM ganha" precisa de exceção explícita:
   /// valor de mercado e contagem corrente descrevem o **hoje** do papel, não o
   /// exercício, e a CVM não os publica.
-  static const Set<String> somenteDeMercado = {
+  static const Set<String> marketOnly = {
     'marketCap',
     'sharesOutstanding',
     'enterpriseToEbitda',
@@ -88,7 +88,7 @@ abstract final class FundamentalsMerge {
     // exercícios vêm em unidades e 34,5% em milhares. Importá-lo levou a
     // MILS3 a +14.037% de potencial. A ferramenta de ingestão já deixou de
     // preenchê-lo; a regra fica **aqui** para que outra montagem não o
-    // reintroduza, que é a lição do veto de `CvmBridge.semPonte`.
+    // reintroduza, que é a lição do veto de `CvmBridge.withoutBridge`.
     'sharesOutstandingAsOf',
     // O VPA **da CVM** também nunca entra. Desde a decisão 81 o VPA do
     // exercício mesclado é derivado — PL da CVM sobre a contagem do mercado —,
@@ -119,7 +119,7 @@ abstract final class FundamentalsMerge {
   ///
   /// **Fluxo nunca é emprestado**, e o LPA é fluxo por ação: com ele, o
   /// árbitro `lucro ÷ LPA` dividiria o lucro de uma janela pelo LPA de outra.
-  static const Set<String> emprestaveis = {
+  static const Set<String> borrowable = {
     'marketCap',
     'sharesOutstanding',
     'enterpriseToEbitda',
@@ -130,20 +130,20 @@ abstract final class FundamentalsMerge {
   /// Folga, em dias, para dois exercícios serem da mesma janela. Cobre o
   /// fevereiro bissexto — a CAML3 encerra em 28 ou 29 — e fim de mês em dia
   /// não útil.
-  static const int folgaDeJanelaDias = 4;
+  static const int windowMarginDays = 4;
 
   /// `true` quando os dois exercícios terminam na mesma data, dentro da folga.
-  static bool mesmaJanela(DateTime a, DateTime b) {
-    final da = DateTime.utc(a.year, a.month, a.day);
-    final db = DateTime.utc(b.year, b.month, b.day);
-    return da.difference(db).inDays.abs() <= folgaDeJanelaDias;
+  static bool sameWindow(DateTime a, DateTime b) {
+    final dayA = DateTime.utc(a.year, a.month, a.day);
+    final dayB = DateTime.utc(b.year, b.month, b.day);
+    return dayA.difference(dayB).inDays.abs() <= windowMarginDays;
   }
 
-  /// Mescla [cvm] sobre [mercado], preferindo a CVM onde ela tem o campo.
+  /// Mescla [cvm] sobre [market], preferindo a CVM onde ela tem o campo.
   ///
   /// - [cvm]: exercício montado da demonstração. `null` quando não há
   ///   documento para aquele período.
-  /// - [mercado]: exercício da fonte de cotações. `null` quando ela não cobre.
+  /// - [market]: exercício da fonte de cotações. `null` quando ela não cobre.
   ///
   /// **A preferência é por campo, não por exercício.** A CVM pode ter o lucro
   /// e não ter o EBITDA; o mercado pode ter o valor de mercado e não ter o
@@ -153,39 +153,39 @@ abstract final class FundamentalsMerge {
   /// de doze meses até junho completado pelo exercício de dezembro anterior
   /// levaria a despesa de juros de outra janela para o custo da dívida, e o
   /// LPA de outro lucro para o árbitro `lucro ÷ LPA` da contagem. Quando as
-  /// datas diferem além de [folgaDeJanelaDias], do mercado vêm só os campos
-  /// [emprestaveis]; o resto fica com a CVM, ou ausente.
+  /// datas diferem além de [windowMarginDays], do mercado vêm só os campos
+  /// [borrowable]; o resto fica com a CVM, ou ausente.
   ///
   /// Devolve `null` quando as duas faltam.
   static MergedFundamentals? merge({
     FundamentalsSnapshot? cvm,
-    FundamentalsSnapshot? mercado,
+    FundamentalsSnapshot? market,
   }) {
-    if (cvm == null && mercado == null) return null;
+    if (cvm == null && market == null) return null;
     if (cvm == null) {
-      return MergedFundamentals(mercado!, _todaDe(mercado, FieldSource.mercado));
+      return MergedFundamentals(market!, _allFrom(market, FieldSource.market));
     }
-    if (mercado == null) {
-      return MergedFundamentals(cvm, _todaDe(cvm, FieldSource.cvm));
+    if (market == null) {
+      return MergedFundamentals(cvm, _allFrom(cvm, FieldSource.cvm));
     }
 
-    final origem = <String, FieldSource>{};
-    final completa = mesmaJanela(cvm.fiscalPeriodEnd, mercado.fiscalPeriodEnd);
+    final origin = <String, FieldSource>{};
+    final complete = sameWindow(cvm.fiscalPeriodEnd, market.fiscalPeriodEnd);
 
     /// Escolhe entre as duas e registra de onde veio.
-    double? campo(String nome, double? daCvm, double? doMercadoBruto) {
-      final doMercado =
-          completa || emprestaveis.contains(nome) ? doMercadoBruto : null;
-      if (somenteDeMercado.contains(nome)) {
-        if (doMercado != null) origem[nome] = FieldSource.mercado;
-        return doMercado;
+    double? field(String name, double? fromCvm, double? rawMarketValue) {
+      final marketMedians =
+          complete || borrowable.contains(name) ? rawMarketValue : null;
+      if (marketOnly.contains(name)) {
+        if (marketMedians != null) origin[name] = FieldSource.market;
+        return marketMedians;
       }
-      if (daCvm != null) {
-        origem[nome] = FieldSource.cvm;
-        return daCvm;
+      if (fromCvm != null) {
+        origin[name] = FieldSource.cvm;
+        return fromCvm;
       }
-      if (doMercado != null) origem[nome] = FieldSource.mercado;
-      return doMercado;
+      if (marketMedians != null) origin[name] = FieldSource.market;
+      return marketMedians;
     }
 
     // **A base de patrimônio é o PL da CVM** (decisão 81). A cascata a
@@ -196,134 +196,134 @@ abstract final class FundamentalsMerge {
     // o PL consolidado da CVM em 99,4% dos 4.443 exercícios anuais, a 0,5%;
     // o que muda é o resto — a HAPV3 com R$ 373 bi contra R$ 48 bi —, e o
     // ponto de doze meses até junho, que deixa de levar o PL de dezembro.
-    final contagemDoExercicio = campo('sharesOutstandingAsOf',
-        cvm.sharesOutstandingAsOf, mercado.sharesOutstandingAsOf);
-    final plDaCvm = cvm.totalStockholderEquity;
-    final double? vpa;
-    if (plDaCvm != null &&
-        plDaCvm.isFinite &&
-        contagemDoExercicio != null &&
-        contagemDoExercicio > 0) {
-      vpa = plDaCvm / contagemDoExercicio;
-      origem['bookValuePerShare'] = FieldSource.derivado;
+    final fiscalYearCount = field('sharesOutstandingAsOf',
+        cvm.sharesOutstandingAsOf, market.sharesOutstandingAsOf);
+    final cvmEquity = cvm.totalStockholderEquity;
+    final double? bookValuePerShare;
+    if (cvmEquity != null &&
+        cvmEquity.isFinite &&
+        fiscalYearCount != null &&
+        fiscalYearCount > 0) {
+      bookValuePerShare = cvmEquity / fiscalYearCount;
+      origin['bookValuePerShare'] = FieldSource.derived;
     } else {
-      vpa = campo(
-          'bookValuePerShare', cvm.bookValuePerShare, mercado.bookValuePerShare);
+      bookValuePerShare = field(
+          'bookValuePerShare', cvm.bookValuePerShare, market.bookValuePerShare);
     }
 
-    final montado = FundamentalsSnapshot(
-      ticker: mercado.ticker,
+    final assembled = FundamentalsSnapshot(
+      ticker: market.ticker,
       fiscalPeriodEnd: cvm.fiscalPeriodEnd,
-      totalRevenue: campo('totalRevenue', cvm.totalRevenue, mercado.totalRevenue),
-      ebit: campo('ebit', cvm.ebit, mercado.ebit),
-      ebitda: campo('ebitda', cvm.ebitda, mercado.ebitda),
-      netIncome: campo('netIncome', cvm.netIncome, mercado.netIncome),
+      totalRevenue: field('totalRevenue', cvm.totalRevenue, market.totalRevenue),
+      ebit: field('ebit', cvm.ebit, market.ebit),
+      ebitda: field('ebitda', cvm.ebitda, market.ebitda),
+      netIncome: field('netIncome', cvm.netIncome, market.netIncome),
       incomeBeforeTax:
-          campo('incomeBeforeTax', cvm.incomeBeforeTax, mercado.incomeBeforeTax),
-      incomeTaxExpense: campo(
-          'incomeTaxExpense', cvm.incomeTaxExpense, mercado.incomeTaxExpense),
+          field('incomeBeforeTax', cvm.incomeBeforeTax, market.incomeBeforeTax),
+      incomeTaxExpense: field(
+          'incomeTaxExpense', cvm.incomeTaxExpense, market.incomeTaxExpense),
       interestExpense:
-          campo('interestExpense', cvm.interestExpense, mercado.interestExpense),
+          field('interestExpense', cvm.interestExpense, market.interestExpense),
       earningsPerShare:
-          campo('earningsPerShare', cvm.earningsPerShare, mercado.earningsPerShare),
-      nopat: campo('nopat', cvm.nopat, mercado.nopat),
-      cash: campo('cash', cvm.cash, mercado.cash),
-      shortTermInvestments: campo(
-          'shortTermInvestments', cvm.shortTermInvestments, mercado.shortTermInvestments),
-      shortTermDebt: campo('shortTermDebt', cvm.shortTermDebt, mercado.shortTermDebt),
-      longTermDebt: campo('longTermDebt', cvm.longTermDebt, mercado.longTermDebt),
-      totalStockholderEquity: campo('totalStockholderEquity',
-          cvm.totalStockholderEquity, mercado.totalStockholderEquity),
-      bookValuePerShare: vpa,
-      propertyPlantEquipment: campo('propertyPlantEquipment',
-          cvm.propertyPlantEquipment, mercado.propertyPlantEquipment),
+          field('earningsPerShare', cvm.earningsPerShare, market.earningsPerShare),
+      nopat: field('nopat', cvm.nopat, market.nopat),
+      cash: field('cash', cvm.cash, market.cash),
+      shortTermInvestments: field(
+          'shortTermInvestments', cvm.shortTermInvestments, market.shortTermInvestments),
+      shortTermDebt: field('shortTermDebt', cvm.shortTermDebt, market.shortTermDebt),
+      longTermDebt: field('longTermDebt', cvm.longTermDebt, market.longTermDebt),
+      totalStockholderEquity: field('totalStockholderEquity',
+          cvm.totalStockholderEquity, market.totalStockholderEquity),
+      bookValuePerShare: bookValuePerShare,
+      propertyPlantEquipment: field('propertyPlantEquipment',
+          cvm.propertyPlantEquipment, market.propertyPlantEquipment),
       intangibleAssets:
-          campo('intangibleAssets', cvm.intangibleAssets, mercado.intangibleAssets),
-      totalCurrentAssets: campo(
-          'totalCurrentAssets', cvm.totalCurrentAssets, mercado.totalCurrentAssets),
-      currentLiabilities: campo(
-          'currentLiabilities', cvm.currentLiabilities, mercado.currentLiabilities),
-      realizedShareCapital: campo(
-          'realizedShareCapital', cvm.realizedShareCapital, mercado.realizedShareCapital),
+          field('intangibleAssets', cvm.intangibleAssets, market.intangibleAssets),
+      totalCurrentAssets: field(
+          'totalCurrentAssets', cvm.totalCurrentAssets, market.totalCurrentAssets),
+      currentLiabilities: field(
+          'currentLiabilities', cvm.currentLiabilities, market.currentLiabilities),
+      realizedShareCapital: field(
+          'realizedShareCapital', cvm.realizedShareCapital, market.realizedShareCapital),
       profitReserves:
-          campo('profitReserves', cvm.profitReserves, mercado.profitReserves),
+          field('profitReserves', cvm.profitReserves, market.profitReserves),
       operatingCashFlow:
-          campo('operatingCashFlow', cvm.operatingCashFlow, mercado.operatingCashFlow),
-      investmentCashFlow: campo(
-          'investmentCashFlow', cvm.investmentCashFlow, mercado.investmentCashFlow),
-      freeCashFlow: campo('freeCashFlow', cvm.freeCashFlow, mercado.freeCashFlow),
+          field('operatingCashFlow', cvm.operatingCashFlow, market.operatingCashFlow),
+      investmentCashFlow: field(
+          'investmentCashFlow', cvm.investmentCashFlow, market.investmentCashFlow),
+      freeCashFlow: field('freeCashFlow', cvm.freeCashFlow, market.freeCashFlow),
       sharesOutstanding:
-          campo('sharesOutstanding', cvm.sharesOutstanding, mercado.sharesOutstanding),
-      sharesOutstandingAsOf: contagemDoExercicio,
-      marketCap: campo('marketCap', cvm.marketCap, mercado.marketCap),
-      enterpriseToEbitda: campo(
-          'enterpriseToEbitda', cvm.enterpriseToEbitda, mercado.enterpriseToEbitda),
+          field('sharesOutstanding', cvm.sharesOutstanding, market.sharesOutstanding),
+      sharesOutstandingAsOf: fiscalYearCount,
+      marketCap: field('marketCap', cvm.marketCap, market.marketCap),
+      enterpriseToEbitda: field(
+          'enterpriseToEbitda', cvm.enterpriseToEbitda, market.enterpriseToEbitda),
       minorityInterest:
-          campo('minorityInterest', cvm.minorityInterest, mercado.minorityInterest),
-      equityIncomeResult: campo(
-          'equityIncomeResult', cvm.equityIncomeResult, mercado.equityIncomeResult),
-      totalAssets: campo('totalAssets', cvm.totalAssets, mercado.totalAssets),
+          field('minorityInterest', cvm.minorityInterest, market.minorityInterest),
+      equityIncomeResult: field(
+          'equityIncomeResult', cvm.equityIncomeResult, market.equityIncomeResult),
+      totalAssets: field('totalAssets', cvm.totalAssets, market.totalAssets),
       treasuryShares:
-          campo('treasuryShares', cvm.treasuryShares, mercado.treasuryShares),
-      treasuryFraction: campo(
-          'treasuryFraction', cvm.treasuryFraction, mercado.treasuryFraction),
+          field('treasuryShares', cvm.treasuryShares, market.treasuryShares),
+      treasuryFraction: field(
+          'treasuryFraction', cvm.treasuryFraction, market.treasuryFraction),
       // A data de recebimento é da CVM por natureza: é ela que registra o
       // protocolo. Quando falta, a publicidade volta a ser presumida.
-      receiptDate: cvm.receiptDate ?? (completa ? mercado.receiptDate : null),
+      receiptDate: cvm.receiptDate ?? (complete ? market.receiptDate : null),
     );
-    if (montado.receiptDate != null) {
-      origem['receiptDate'] =
-          cvm.receiptDate != null ? FieldSource.cvm : FieldSource.mercado;
+    if (assembled.receiptDate != null) {
+      origin['receiptDate'] =
+          cvm.receiptDate != null ? FieldSource.cvm : FieldSource.market;
     }
 
-    return MergedFundamentals(montado, FundamentalsProvenance(origem));
+    return MergedFundamentals(assembled, FundamentalsProvenance(origin));
   }
 
   /// Procedência de um exercício de fonte única: todo campo preenchido veio
   /// dela.
-  static FundamentalsProvenance _todaDe(
+  static FundamentalsProvenance _allFrom(
     FundamentalsSnapshot s,
-    FieldSource fonte,
+    FieldSource source,
   ) {
     final out = <String, FieldSource>{};
-    void marca(String nome, double? v) {
-      if (v != null) out[nome] = fonte;
+    void mark(String name, double? v) {
+      if (v != null) out[name] = source;
     }
 
-    marca('totalRevenue', s.totalRevenue);
-    marca('ebit', s.ebit);
-    marca('ebitda', s.ebitda);
-    marca('netIncome', s.netIncome);
-    marca('incomeBeforeTax', s.incomeBeforeTax);
-    marca('incomeTaxExpense', s.incomeTaxExpense);
-    marca('interestExpense', s.interestExpense);
-    marca('earningsPerShare', s.earningsPerShare);
-    marca('nopat', s.nopat);
-    marca('cash', s.cash);
-    marca('shortTermInvestments', s.shortTermInvestments);
-    marca('shortTermDebt', s.shortTermDebt);
-    marca('longTermDebt', s.longTermDebt);
-    marca('totalStockholderEquity', s.totalStockholderEquity);
-    marca('bookValuePerShare', s.bookValuePerShare);
-    marca('propertyPlantEquipment', s.propertyPlantEquipment);
-    marca('intangibleAssets', s.intangibleAssets);
-    marca('totalCurrentAssets', s.totalCurrentAssets);
-    marca('currentLiabilities', s.currentLiabilities);
-    marca('realizedShareCapital', s.realizedShareCapital);
-    marca('profitReserves', s.profitReserves);
-    marca('operatingCashFlow', s.operatingCashFlow);
-    marca('investmentCashFlow', s.investmentCashFlow);
-    marca('freeCashFlow', s.freeCashFlow);
-    marca('sharesOutstanding', s.sharesOutstanding);
-    marca('sharesOutstandingAsOf', s.sharesOutstandingAsOf);
-    marca('marketCap', s.marketCap);
-    marca('enterpriseToEbitda', s.enterpriseToEbitda);
-    marca('minorityInterest', s.minorityInterest);
-    marca('equityIncomeResult', s.equityIncomeResult);
-    marca('totalAssets', s.totalAssets);
-    marca('treasuryShares', s.treasuryShares);
-    marca('treasuryFraction', s.treasuryFraction);
-    if (s.receiptDate != null) out['receiptDate'] = fonte;
+    mark('totalRevenue', s.totalRevenue);
+    mark('ebit', s.ebit);
+    mark('ebitda', s.ebitda);
+    mark('netIncome', s.netIncome);
+    mark('incomeBeforeTax', s.incomeBeforeTax);
+    mark('incomeTaxExpense', s.incomeTaxExpense);
+    mark('interestExpense', s.interestExpense);
+    mark('earningsPerShare', s.earningsPerShare);
+    mark('nopat', s.nopat);
+    mark('cash', s.cash);
+    mark('shortTermInvestments', s.shortTermInvestments);
+    mark('shortTermDebt', s.shortTermDebt);
+    mark('longTermDebt', s.longTermDebt);
+    mark('totalStockholderEquity', s.totalStockholderEquity);
+    mark('bookValuePerShare', s.bookValuePerShare);
+    mark('propertyPlantEquipment', s.propertyPlantEquipment);
+    mark('intangibleAssets', s.intangibleAssets);
+    mark('totalCurrentAssets', s.totalCurrentAssets);
+    mark('currentLiabilities', s.currentLiabilities);
+    mark('realizedShareCapital', s.realizedShareCapital);
+    mark('profitReserves', s.profitReserves);
+    mark('operatingCashFlow', s.operatingCashFlow);
+    mark('investmentCashFlow', s.investmentCashFlow);
+    mark('freeCashFlow', s.freeCashFlow);
+    mark('sharesOutstanding', s.sharesOutstanding);
+    mark('sharesOutstandingAsOf', s.sharesOutstandingAsOf);
+    mark('marketCap', s.marketCap);
+    mark('enterpriseToEbitda', s.enterpriseToEbitda);
+    mark('minorityInterest', s.minorityInterest);
+    mark('equityIncomeResult', s.equityIncomeResult);
+    mark('totalAssets', s.totalAssets);
+    mark('treasuryShares', s.treasuryShares);
+    mark('treasuryFraction', s.treasuryFraction);
+    if (s.receiptDate != null) out['receiptDate'] = source;
     return FundamentalsProvenance(out);
   }
 }

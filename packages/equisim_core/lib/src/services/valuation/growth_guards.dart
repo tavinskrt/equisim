@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import '../../entities/fundamentals.dart';
 import 'capital_base.dart';
 import 'inference.dart';
+import '../../audit/wire_keyed.dart';
 
 /// Parâmetros homologados das portas e guardas.
 ///
@@ -369,22 +370,22 @@ class DispersionVerdict {
 /// condição que reprovou, um universo em que quase ninguém passa é
 /// indistinguível de um universo em que quase ninguém merece passar. É a
 /// diferença entre calibrar um parâmetro e adivinhar qual deles está apertado.
-enum MoatBlock {
+enum MoatBlock implements WireKeyed {
   /// Sem retorno do ciclo medível — série curta ou lucro não publicado.
-  semRetornoDoCiclo,
+  noCycleReturn('semRetornoDoCiclo'),
 
   /// Custo de capital de equilíbrio não positivo: nada a comparar.
-  semCustoDeCapital,
+  noCostOfCapital('semCustoDeCapital'),
 
   /// Histórico mais curto que [ValuationParameters.moatMinPeriods].
-  historicoCurto,
+  shortHistory('historicoCurto'),
 
   /// Φ não medido. Ausência não é aprovação: sem saber quanto da expansão veio
   /// de fora, não há como afirmar que o crescimento foi orgânico.
-  capitalExternoNaoMedido,
+  externalCapitalUnmeasured('capitalExternoNaoMedido'),
 
   /// Φ acima de [ValuationParameters.moatMaxExternalCapital].
-  crescimentoInorganico,
+  inorganicGrowth('crescimentoInorganico'),
 
   /// Excedente com menos de [ValuationParameters.moatMinPersistencePairs]
   /// pares de anos adjacentes: a persistência não é estimável, e sem ela não
@@ -396,16 +397,16 @@ enum MoatBlock {
   /// contempla de forma contínua: excedente pequeno produz preservação
   /// pequena, sem precisar de degrau. Deterioração, do mesmo modo, aparece na
   /// própria série que estima `φ`.
-  persistenciaNaoEstimavel,
+  persistenceNotEstimable('persistenciaNaoEstimavel'),
 
   /// O excedente do ciclo não é positivo: não há vantagem a preservar, e
   /// `λ · e₀` seria uma penalidade em vez de uma preservação.
-  semExcedente,
+  noExcess('semExcedente'),
 
   /// A persistência medida não deixa excedente algum sobreviver ao horizonte,
   /// e o retorno terminal resultante não supera o próprio custo de capital.
   /// Sem conteúdo econômico, e por isso tratado como estado estacionário.
-  excedenteDegenerado,
+  degenerateExcess('excedenteDegenerado'),
 
   /// O negócio opera sob contrato de prazo determinado — concessão de energia,
   /// saneamento, rodovia, ferrovia, aeroporto.
@@ -416,7 +417,14 @@ enum MoatBlock {
   /// excedente **sobrevive para sempre** num negócio que será relicitado é
   /// afirmação que o próprio contrato nega. A tarifa é fixada para remunerar o
   /// capital ao custo dele, e não acima.
-  prazoDeterminado;
+  fixedTerm('prazoDeterminado');
+
+  const MoatBlock(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 }
 
 /// Veredito da vantagem competitiva residual, com o porquê da recusa.
@@ -529,21 +537,21 @@ abstract final class GrowthGuards {
       fit.degreesOfFreedom,
     );
 
-    final atual = series.latestReturn;
-    final ciclo = series.cycleReturn(window: ValuationParameters.cycleWindow);
-    if (atual == null || ciclo == null) return null;
+    final current = series.latestReturn;
+    final cycle = series.cycleReturn(window: ValuationParameters.cycleWindow);
+    if (current == null || cycle == null) return null;
 
-    final correcao = (atual - ciclo).abs();
-    final deriva = fit.slope.abs() * driftWindow;
-    final rho = correcao > 1e-12 ? deriva / correcao : double.infinity;
+    final correction = (current - cycle).abs();
+    final drift = fit.slope.abs() * driftWindow;
+    final rho = correction > 1e-12 ? drift / correction : double.infinity;
 
-    final significante = t.abs() >= tc;
+    final significant = t.abs() >= tc;
     return TrendVerdict(
       slope: fit.slope,
       tStatistic: t,
       criticalT: tc,
       dominance: rho,
-      dominates: significante && rho >= ValuationParameters.minTrendDominance,
+      dominates: significant && rho >= ValuationParameters.minTrendDominance,
     );
   }
 
@@ -569,20 +577,20 @@ abstract final class GrowthGuards {
     const w = ValuationParameters.cycleWindow;
     if (p.length < w + 1) return null;
 
-    final janela = p.sublist(p.length - w - 1);
-    final inicial = janela.first.base;
-    if (inicial <= 0) return null;
+    final window = p.sublist(p.length - w - 1);
+    final initial = window.first.base;
+    if (initial <= 0) return null;
 
-    var externo = 0.0;
-    for (var i = 1; i < janela.length; i++) {
-      final a = janela[i - 1], b = janela[i];
+    var externalRepository = 0.0;
+    for (var i = 1; i < window.length; i++) {
+      final a = window[i - 1], b = window[i];
       if (b.year - a.year != 1) continue;
       final delta = b.base - a.base;
-      final lucro = b.profit ?? 0.0;
-      final excesso = delta - lucro;
-      if (excesso > 0) externo += excesso;
+      final profit = b.profit ?? 0.0;
+      final excess = delta - profit;
+      if (excess > 0) externalRepository += excess;
     }
-    final phi = externo / inicial;
+    final phi = externalRepository / initial;
     return phi.isFinite ? phi : null;
   }
 
@@ -611,24 +619,24 @@ abstract final class GrowthGuards {
   static ({double z, double ratio, bool deviates})? cycleDeviation(
     CapitalSeries series,
   ) {
-    final atual = series.latestReturn;
-    final ciclo = series.cycleReturn(window: ValuationParameters.cycleWindow);
-    if (atual == null || ciclo == null || ciclo <= 0) return null;
+    final current = series.latestReturn;
+    final cycle = series.cycleReturn(window: ValuationParameters.cycleWindow);
+    if (current == null || cycle == null || cycle <= 0) return null;
 
     final r = series.returns;
     final ini = r.length - 1 - ValuationParameters.cycleWindow;
-    final janela = r.sublist(ini < 0 ? 0 : ini, r.length - 1);
-    final escala = Inference.scaledMad([for (final x in janela) x.value]);
+    final window = r.sublist(ini < 0 ? 0 : ini, r.length - 1);
+    final scale = Inference.scaledMad([for (final x in window) x.value]);
 
-    final z = escala == null ? 0.0 : (atual - ciclo).abs() / escala;
-    final razao = atual / ciclo;
+    final z = scale == null ? 0.0 : (current - cycle).abs() / scale;
+    final ratio = current / cycle;
 
     return (
       z: z,
-      ratio: razao,
+      ratio: ratio,
       deviates: z > ValuationParameters.robustZ ||
-          razao < ValuationParameters.bandLow ||
-          razao > ValuationParameters.bandHigh,
+          ratio < ValuationParameters.bandLow ||
+          ratio > ValuationParameters.bandHigh,
     );
   }
 
@@ -645,51 +653,51 @@ abstract final class GrowthGuards {
   ///
   /// Devolve `null` quando a série não sustenta nenhum dos dois estimadores.
   static DispersionVerdict? dispersion(CapitalSeries series) {
-    final variacoes = series.annualVariations;
-    if (variacoes.length < 4) return null;
-    final gMediana = Inference.median(variacoes);
-    if (gMediana == null) return null;
+    final changes = series.annualVariations;
+    if (changes.length < 4) return null;
+    final gMedian = Inference.median(changes);
+    if (gMedian == null) return null;
 
     final xs = [for (final p in series.points) p.year.toDouble()];
     final ys = [for (final p in series.points) math.log(p.base)];
     final fit = Inference.ols(xs, ys);
     if (fit == null) return null;
 
-    final gRegressao = math.exp(fit.slope) - 1;
+    final gRegression = math.exp(fit.slope) - 1;
     // Método delta sobre g = e^b − 1: se(ĝ) = e^b · se(b̂).
-    final se = (1 + gRegressao) * fit.slopeStdError;
+    final se = (1 + gRegression) * fit.slopeStdError;
     if (!se.isFinite || se <= 0) return null;
 
-    final diferenca = (gMediana - gRegressao).abs();
-    final d = diferenca / se;
+    final difference = (gMedian - gRegression).abs();
+    final d = difference / se;
     final dc = Inference.studentT(
       1 - ValuationParameters.alpha / 2,
       fit.degreesOfFreedom,
     );
     final delta = math.max(
       ValuationParameters.dispersionFloor,
-      ValuationParameters.dispersionRelative * gMediana.abs(),
+      ValuationParameters.dispersionRelative * gMedian.abs(),
     );
 
-    String? falha;
+    String? failure;
     if (se > ValuationParameters.maxGrowthStdError) {
-      falha = 'estimador impreciso: erro-padrão de '
+      failure = 'estimador impreciso: erro-padrão de '
           '${(se * 100).toStringAsFixed(1)} pontos percentuais, acima do '
           'máximo de ${(ValuationParameters.maxGrowthStdError * 100).toStringAsFixed(0)}';
-    } else if (d > dc && diferenca > delta) {
-      falha = 'os dois estimadores discordam em '
-          '${(diferenca * 100).toStringAsFixed(1)} pontos percentuais '
+    } else if (d > dc && difference > delta) {
+      failure = 'os dois estimadores discordam em '
+          '${(difference * 100).toStringAsFixed(1)} pontos percentuais '
           '(${d.toStringAsFixed(1)} erros-padrão), acima do que a série sustenta';
     }
 
     return DispersionVerdict(
-      medianGrowth: gMediana,
-      regressionGrowth: gRegressao,
+      medianGrowth: gMedian,
+      regressionGrowth: gRegression,
       stdError: se,
       d: d,
       criticalD: dc,
-      isIdentified: falha == null,
-      failure: falha,
+      isIdentified: failure == null,
+      failure: failure,
     );
   }
 
@@ -708,8 +716,8 @@ abstract final class GrowthGuards {
   }) {
     if (cycleReturn == null || cycleReturn <= 0) return false;
     if (observedRetention == null) return false;
-    final exigida = inflation / cycleReturn;
-    return exigida < 1.0 && exigida <= observedRetention;
+    final requiredValue = inflation / cycleReturn;
+    return requiredValue < 1.0 && requiredValue <= observedRetention;
   }
 
   /// Porta 3 — o fluxo da firma sustenta uma perpetuidade?
@@ -729,8 +737,8 @@ abstract final class GrowthGuards {
       if (n != null) v.add(n);
     }
     if (v.length < 4) return false;
-    final positivos = v.where((x) => x > 0).length;
-    return positivos / v.length >= ValuationParameters.minPositiveFlow;
+    final positives = v.where((x) => x > 0).length;
+    return positives / v.length >= ValuationParameters.minPositiveFlow;
   }
 
   /// Queda de lucro ou de EBITDA no triênio recente, em fração.
@@ -752,25 +760,25 @@ abstract final class GrowthGuards {
     const w = ValuationParameters.operationalHealthWindow;
     if (snapshots.length < w + 1) return null;
 
-    final atual = snapshots.last;
-    final referencia = snapshots[snapshots.length - 1 - w];
+    final current = snapshots.last;
+    final reference = snapshots[snapshots.length - 1 - w];
     // O triênio precisa ser mesmo de três anos: buraco na série compararia
     // pontas de distâncias diferentes e o limiar deixaria de significar o mesmo.
-    if (atual.fiscalPeriodEnd.year - referencia.fiscalPeriodEnd.year != w) {
+    if (current.fiscalPeriodEnd.year - reference.fiscalPeriodEnd.year != w) {
       return null;
     }
 
-    double? queda(double? recente, double? base) {
-      if (recente == null || base == null || base <= 0) return null;
-      final q = 1 - recente / base;
+    double? decline(double? recent, double? base) {
+      if (recent == null || base == null || base <= 0) return null;
+      final q = 1 - recent / base;
       return q.isFinite ? q : null;
     }
 
-    final porLucro = queda(atual.netIncome, referencia.netIncome);
-    final porEbitda = queda(atual.ebitda, referencia.ebitda);
-    if (porLucro == null) return porEbitda;
-    if (porEbitda == null) return porLucro;
-    return porLucro > porEbitda ? porLucro : porEbitda;
+    final byProfit = decline(current.netIncome, reference.netIncome);
+    final byEbitda = decline(current.ebitda, reference.ebitda);
+    if (byProfit == null) return byEbitda;
+    if (byEbitda == null) return byProfit;
+    return byProfit > byEbitda ? byProfit : byEbitda;
   }
 
   /// Persistência anual do excedente de retorno, por AR(1).
@@ -820,23 +828,23 @@ abstract final class GrowthGuards {
     final x = <double>[];
     final y = <double>[];
     for (var i = 1; i < excessReturns.length; i++) {
-      final anterior = excessReturns[i - 1];
-      final atual = excessReturns[i];
-      if (atual.year - anterior.year != 1) continue;
-      if (!anterior.excess.isFinite || !atual.excess.isFinite) continue;
-      x.add(anterior.excess);
-      y.add(atual.excess);
+      final previous = excessReturns[i - 1];
+      final current = excessReturns[i];
+      if (current.year - previous.year != 1) continue;
+      if (!previous.excess.isFinite || !current.excess.isFinite) continue;
+      x.add(previous.excess);
+      y.add(current.excess);
     }
     if (x.length < ValuationParameters.moatMinPersistencePairs) return null;
 
     final fit = Inference.ols(x, y);
     if (fit == null || !fit.slope.isFinite) return null;
 
-    final cru = fit.slope;
-    final confinado =
-        cru.clamp(0.0, ValuationParameters.moatMaxPersistence).toDouble();
+    final raw = fit.slope;
+    final confined =
+        raw.clamp(0.0, ValuationParameters.moatMaxPersistence).toDouble();
 
-    return (phi: confinado, rawPhi: cru, pairs: x.length);
+    return (phi: confined, rawPhi: raw, pairs: x.length);
   }
 
   /// Retorno terminal que a persistência medida do excedente sustenta, com o
@@ -874,26 +882,26 @@ abstract final class GrowthGuards {
     required int projectionYears,
     bool finiteTerm = false,
   }) {
-    final retorno =
+    final returnRate =
         (cycleReturn != null && cycleReturn.isFinite) ? cycleReturn : null;
-    final persistencia = excessPersistence(excessReturns);
+    final persistence = excessPersistence(excessReturns);
 
     final blocks = <MoatBlock>[];
-    if (finiteTerm) blocks.add(MoatBlock.prazoDeterminado);
-    if (retorno == null) blocks.add(MoatBlock.semRetornoDoCiclo);
-    if (terminalDiscountRate <= 0) blocks.add(MoatBlock.semCustoDeCapital);
+    if (finiteTerm) blocks.add(MoatBlock.fixedTerm);
+    if (returnRate == null) blocks.add(MoatBlock.noCycleReturn);
+    if (terminalDiscountRate <= 0) blocks.add(MoatBlock.noCostOfCapital);
     if (periods < ValuationParameters.moatMinPeriods) {
-      blocks.add(MoatBlock.historicoCurto);
+      blocks.add(MoatBlock.shortHistory);
     }
     if (externalCapitalRatio == null) {
-      blocks.add(MoatBlock.capitalExternoNaoMedido);
+      blocks.add(MoatBlock.externalCapitalUnmeasured);
     } else if (externalCapitalRatio >
         ValuationParameters.moatMaxExternalCapital) {
-      blocks.add(MoatBlock.crescimentoInorganico);
+      blocks.add(MoatBlock.inorganicGrowth);
     }
-    if (persistencia == null) blocks.add(MoatBlock.persistenciaNaoEstimavel);
-    if (retorno != null && retorno <= terminalDiscountRate) {
-      blocks.add(MoatBlock.semExcedente);
+    if (persistence == null) blocks.add(MoatBlock.persistenceNotEstimable);
+    if (returnRate != null && returnRate <= terminalDiscountRate) {
+      blocks.add(MoatBlock.noExcess);
     }
 
     double? lambda;
@@ -905,28 +913,28 @@ abstract final class GrowthGuards {
       // projeção com menos de um ano (dcf.dart), então este piso nunca é
       // alcançado por caminho de produção; ele existe para que a função não
       // dependa dessa recusa para estar certa.
-      final horizonte = projectionYears < 1 ? 1 : projectionYears;
-      lambda = _potencia(persistencia!.phi, horizonte);
+      final horizon = projectionYears < 1 ? 1 : projectionYears;
+      lambda = _power(persistence!.phi, horizon);
       final t = terminalDiscountRate +
-          lambda * (retorno! - terminalDiscountRate);
+          lambda * (returnRate! - terminalDiscountRate);
       if (t.isFinite && t > terminalDiscountRate) {
         terminal = t;
       } else {
-        blocks.add(MoatBlock.excedenteDegenerado);
+        blocks.add(MoatBlock.degenerateExcess);
       }
     }
 
     return MoatVerdict(
       terminalReturn: terminal,
       blocks: List.unmodifiable(blocks),
-      cycleReturn: retorno,
+      cycleReturn: returnRate,
       terminalDiscountRate: terminalDiscountRate,
       externalCapitalRatio: externalCapitalRatio,
       periods: periods,
-      rawPersistence: persistencia?.rawPhi,
-      persistence: persistencia?.phi,
+      rawPersistence: persistence?.rawPhi,
+      persistence: persistence?.phi,
       retainedFraction: lambda,
-      persistencePoints: persistencia?.pairs ?? 0,
+      persistencePoints: persistence?.pairs ?? 0,
     );
   }
 
@@ -942,11 +950,11 @@ abstract final class GrowthGuards {
   /// erro é o mais silencioso possível, porque produz um preço justo menor e
   /// plausível. Expoente negativo devolve 0: não é caso deste cálculo, e
   /// devolver a potência real seria inventar amplificação.
-  static double _potencia(double base, int expoente) {
-    if (expoente == 0) return 1;
-    if (expoente < 0 || base <= 0) return 0;
+  static double _power(double base, int exponent) {
+    if (exponent == 0) return 1;
+    if (exponent < 0 || base <= 0) return 0;
     var r = 1.0;
-    for (var i = 0; i < expoente; i++) {
+    for (var i = 0; i < exponent; i++) {
       r *= base;
     }
     return r;

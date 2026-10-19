@@ -25,50 +25,50 @@ import 'package:equisim_core/equisim_core.dart';
 import 'validation/congelado.dart';
 import 'package:equisim/presentation/shared/domain_copy.dart';
 
-const _saida = 'assets/mercado/multiplos_setoriais.json';
+const _output = 'assets/mercado/multiplos_setoriais.json';
 
 /// Mínimo de pares para que um grupo produza mediana. O mesmo corte que a
 /// cascata cobra em `PeerValuation.minimumPeers` — duas cópias divergiriam.
-const _minimoDePares = PeerValuation.minimumPeers;
+const _minPeers = PeerValuation.minimumPeers;
 
 /// A chave do grupo de mercado, quando nem o setor reúne pares.
-const _mercado = 'mercado';
+const _market = 'mercado';
 
 /// Um par observado: o múltiplo que ele negocia, com o grupo a que pertence.
-class _Par {
-  _Par({
+class _Peer {
+  _Peer({
     required this.ticker,
-    required this.setor,
-    required this.subsetor,
-    required this.precoLucro,
-    required this.precoPatrimonio,
-    required this.firmaEbitda,
+    required this.sector,
+    required this.subsector,
+    required this.priceToEarnings,
+    required this.priceToBook,
+    required this.evToEbitda,
   });
   final String ticker;
-  final String setor;
-  final String? subsetor;
-  final double? precoLucro;
-  final double? precoPatrimonio;
-  final double? firmaEbitda;
+  final String sector;
+  final String? subsector;
+  final double? priceToEarnings;
+  final double? priceToBook;
+  final double? evToEbitda;
 
   double? mult(MultipleKind k) => switch (k) {
-        MultipleKind.precoLucro => precoLucro,
-        MultipleKind.precoPatrimonio => precoPatrimonio,
-        MultipleKind.firmaEbitda => firmaEbitda,
+        MultipleKind.priceToEarnings => priceToEarnings,
+        MultipleKind.priceToBook => priceToBook,
+        MultipleKind.evToEbitda => evToEbitda,
       };
 }
 
-double _mediana(List<double> v) {
+double _median(List<double> v) {
   final o = [...v]..sort();
-  final meio = o.length ~/ 2;
-  return o.length.isOdd ? o[meio] : (o[meio - 1] + o[meio]) / 2;
+  final mid = o.length ~/ 2;
+  return o.length.isOdd ? o[mid] : (o[mid - 1] + o[mid]) / 2;
 }
 
 /// A companhia do papel: as quatro letras que as classes compartilham.
-String _companhia(String ticker) =>
+String _company(String ticker) =>
     ticker.length >= 4 ? ticker.substring(0, 4) : ticker;
 
-/// Os múltiplos do grupo, **um por companhia**, sem a companhia [sem].
+/// Os múltiplos do grupo, **um por companhia**, sem a companhia [without].
 ///
 /// **Par é outra companhia** (item B41). A mediana contava cada classe como um
 /// par e incluía o próprio ativo: os sete «pares» de saneamento da SAPR11 eram
@@ -76,72 +76,72 @@ String _companhia(String ticker) =>
 /// leitura de P/VP e a de EV/EBITDA devolviam, as duas, o preço da Sanepar na
 /// data do pacote — R$ 38,15 ao centavo. Cada companhia entra com a mediana
 /// das classes dela, e a do ativo avaliado não entra.
-List<double> _valores(List<_Par> grupo, MultipleKind k, {String? sem}) {
-  final porCompanhia = <String, List<double>>{};
-  for (final p in grupo) {
-    final c = _companhia(p.ticker);
-    if (c == sem) continue;
+List<double> _values(List<_Peer> group, MultipleKind k, {String? without}) {
+  final byCompany = <String, List<double>>{};
+  for (final p in group) {
+    final c = _company(p.ticker);
+    if (c == without) continue;
     final m = p.mult(k);
     if (m != null && m.isFinite && m > 0) {
-      porCompanhia.putIfAbsent(c, () => []).add(m);
+      byCompany.putIfAbsent(c, () => []).add(m);
     }
   }
-  return [for (final v in porCompanhia.values) _mediana(v)];
+  return [for (final v in byCompany.values) _median(v)];
 }
 
 Future<void> main(List<String> args) async {
-  final c = await Congelado.montar();
+  final c = await Frozen.build();
   try {
-    final pares = <_Par>[];
+    final pairs = <_Peer>[];
     var i = 0;
-    for (final t in c.universo) {
+    for (final t in c.universe) {
       i++;
-      if (i % 50 == 0) stderr.write('  $i/${c.universo.length}   \r');
-      final prep = await c.preparar(t);
+      if (i % 50 == 0) stderr.write('  $i/${c.universe.length}   \r');
+      final prep = await c.prepare(t);
       if (prep.isErr) continue;
-      final insumos = prep.unwrap();
-      if (insumos.fundamentals.isEmpty) continue;
-      final f = insumos.fundamentals.last;
-      final setor = insumos.sectorKey;
-      if (setor == null) continue;
+      final inputs = prep.unwrap();
+      if (inputs.fundamentals.isEmpty) continue;
+      final f = inputs.fundamentals.last;
+      final sector = inputs.sectorKey;
+      if (sector == null) continue;
 
       // **O divisor da ponte, e não a contagem da fonte.** O múltiplo
       // observado tem de sair da mesma contagem que a cascata usa do outro
       // lado, ou a mediana e a leitura medem pontes diferentes (decisão 83).
       final divisor = ValuationCascade.quotedShares(
         latest: f,
-        marketPrice: insumos.marketPrice,
-        sharesPerQuote: insumos.declaredSharesPerUnit?.toDouble() ?? 1.0,
-        published: insumos.fundamentals,
-        official: insumos.officialShares,
-        asOf: insumos.asOf,
+        marketPrice: inputs.marketPrice,
+        sharesPerQuote: inputs.declaredSharesPerUnit?.toDouble() ?? 1.0,
+        published: inputs.fundamentals,
+        official: inputs.officialShares,
+        asOf: inputs.asOf,
       );
       if (divisor == null || divisor.count <= 0) continue;
-      final valorDeMercado = divisor.count * insumos.marketPrice;
+      final marketValueOf = divisor.count * inputs.marketPrice;
 
-      final lucro = f.netIncome;
+      final profit = f.netIncome;
       final pl = f.totalStockholderEquity;
       final ebitda = f.ebitda;
-      final financeira = FinancialSectors.isFinancial(
-        sectorKey: setor,
-        industry: insumos.industry,
+      final financial = FinancialSectors.isFinancial(
+        sectorKey: sector,
+        industry: inputs.industry,
       );
 
-      pares.add(_Par(
+      pairs.add(_Peer(
         ticker: t.value,
-        setor: setor,
-        subsetor: insumos.industry,
+        sector: sector,
+        subsector: inputs.industry,
         // Só múltiplo com a grandeza de baixo **positiva** entra na mediana:
         // P/L de prejuízo é negativo e não descreve quanto o mercado paga por
         // lucro — incluí-lo puxaria a mediana do setor para baixo por um
         // motivo que não é preço.
-        precoLucro:
-            lucro != null && lucro > 0 ? valorDeMercado / lucro : null,
-        precoPatrimonio: pl != null && pl > 0 ? valorDeMercado / pl : null,
+        priceToEarnings:
+            profit != null && profit > 0 ? marketValueOf / profit : null,
+        priceToBook: pl != null && pl > 0 ? marketValueOf / pl : null,
         // EBITDA de instituição financeira não descreve geração operacional
         // (decisão 102): ela não entra nem como par.
-        firmaEbitda: !financeira && ebitda != null && ebitda > 0
-            ? (valorDeMercado + f.netDebt) / ebitda
+        evToEbitda: !financial && ebitda != null && ebitda > 0
+            ? (marketValueOf + f.netDebt) / ebitda
             : null,
       ));
     }
@@ -150,110 +150,110 @@ Future<void> main(List<String> args) async {
     // ---------------------------------------------------------------------
     // As medianas, por grupo
     // ---------------------------------------------------------------------
-    final porSubsetor = <String, List<_Par>>{};
-    final porSetor = <String, List<_Par>>{};
-    for (final p in pares) {
-      porSetor.putIfAbsent(p.setor, () => []).add(p);
-      final sub = p.subsetor;
+    final bySubsector = <String, List<_Peer>>{};
+    final bySector = <String, List<_Peer>>{};
+    for (final p in pairs) {
+      bySector.putIfAbsent(p.sector, () => []).add(p);
+      final sub = p.subsector;
       if (sub != null && sub.isNotEmpty) {
-        porSubsetor.putIfAbsent(sub, () => []).add(p);
+        bySubsector.putIfAbsent(sub, () => []).add(p);
       }
     }
 
-    Map<String, Object?>? medianaDe(List<_Par> grupo, MultipleKind k,
-        String nome, {String? sem}) {
-      final v = _valores(grupo, k, sem: sem);
-      if (v.length < _minimoDePares) return null;
-      return {'mediana': _mediana(v), 'pares': v.length, 'grupo': nome};
+    Map<String, Object?>? medianOf(List<_Peer> group, MultipleKind k,
+        String name, {String? without}) {
+      final v = _values(group, k, without: without);
+      if (v.length < _minPeers) return null;
+      return {'mediana': _median(v), 'pares': v.length, 'grupo': name};
     }
 
-    final grupos = <String, Map<String, Object?>>{};
-    void registrar(String chave, List<_Par> grupo) {
+    final groups = <String, Map<String, Object?>>{};
+    void register(String key, List<_Peer> group) {
       final m = <String, Object?>{};
       for (final k in MultipleKind.values) {
-        final r = medianaDe(grupo, k, chave);
-        if (r != null) m[k.name] = r;
+        final r = medianOf(group, k, key);
+        if (r != null) m[k.key] = r;
       }
-      if (m.isNotEmpty) grupos[chave] = m;
+      if (m.isNotEmpty) groups[key] = m;
     }
 
-    for (final e in porSubsetor.entries) {
-      registrar(e.key, e.value);
+    for (final e in bySubsector.entries) {
+      register(e.key, e.value);
     }
-    for (final e in porSetor.entries) {
-      registrar(e.key, e.value);
+    for (final e in bySector.entries) {
+      register(e.key, e.value);
     }
-    registrar(_mercado, pares);
+    register(_market, pairs);
 
     // A ligação de cada ticker ao grupo que vale para ele: subsetor, setor,
     // mercado — na ordem, e **por múltiplo**, porque um subsetor pode ter pares
     // bastantes para P/VP e não para EV/EBITDA. A mediana de cada ticker é a
     // do grupo **sem a companhia dele** (item B41), e o mínimo de pares vale
     // sobre as outras companhias.
-    final porTicker = <String, Map<String, Object?>>{};
-    for (final p in pares) {
-      final escolhido = <String, Object?>{};
-      final sem = _companhia(p.ticker);
+    final byTicker = <String, Map<String, Object?>>{};
+    for (final p in pairs) {
+      final chosen = <String, Object?>{};
+      final without = _company(p.ticker);
       for (final k in MultipleKind.values) {
-        for (final (chave, membros) in [
-          (p.subsetor, porSubsetor[p.subsetor]),
-          (p.setor, porSetor[p.setor]),
-          (_mercado, pares),
+        for (final (key, members) in [
+          (p.subsector, bySubsector[p.subsector]),
+          (p.sector, bySector[p.sector]),
+          (_market, pairs),
         ]) {
-          if (chave == null || membros == null) continue;
-          final m = medianaDe(membros, k, chave, sem: sem);
+          if (key == null || members == null) continue;
+          final m = medianOf(members, k, key, without: without);
           if (m != null) {
-            escolhido[k.name] = m;
+            chosen[k.key] = m;
             break;
           }
         }
       }
-      if (escolhido.isNotEmpty) porTicker[p.ticker] = escolhido;
+      if (chosen.isNotEmpty) byTicker[p.ticker] = chosen;
     }
 
     final json = <String, Object?>{
-      'geradoEm': hojeCongelado.toIso8601String(),
-      'minimoDePares': _minimoDePares,
-      'observados': pares.length,
-      'grupos': grupos,
-      'porTicker': porTicker,
+      'geradoEm': frozenToday.toIso8601String(),
+      'minimoDePares': _minPeers,
+      'observados': pairs.length,
+      'grupos': groups,
+      'porTicker': byTicker,
     };
-    File(_saida).writeAsStringSync(
+    File(_output).writeAsStringSync(
         const JsonEncoder.withIndent('  ').convert(json));
 
     stdout.writeln('-- múltiplos de pares, sobre a entrada congelada --');
-    stdout.writeln('  observados                 ${pares.length}');
-    stdout.writeln('  grupos com alguma mediana  ${grupos.length}');
-    stdout.writeln('  tickers ligados            ${porTicker.length}');
+    stdout.writeln('  observados                 ${pairs.length}');
+    stdout.writeln('  grupos com alguma mediana  ${groups.length}');
+    stdout.writeln('  tickers ligados            ${byTicker.length}');
     stdout.writeln('');
     stdout.writeln('  o mercado inteiro:');
     for (final k in MultipleKind.values) {
-      final m = grupos[_mercado]?[k.name] as Map<String, Object?>?;
+      final m = groups[_market]?[k.key] as Map<String, Object?>?;
       if (m == null) {
-        stdout.writeln('    ${k.rotulo.padRight(10)} —');
+        stdout.writeln('    ${k.label.padRight(10)} —');
       } else {
-        stdout.writeln('    ${k.rotulo.padRight(10)} '
+        stdout.writeln('    ${k.label.padRight(10)} '
             '${(m['mediana'] as double).toStringAsFixed(2).padLeft(7)}×   '
             '${m['pares']} pares');
       }
     }
     stdout.writeln('');
     stdout.writeln('  por setor econômico:');
-    final chaves = porSetor.keys.toList()..sort();
-    for (final chave in chaves) {
-      final g = grupos[chave];
+    final keys = bySector.keys.toList()..sort();
+    for (final key in keys) {
+      final g = groups[key];
       if (g == null) continue;
-      final linha = <String>[];
+      final row = <String>[];
       for (final k in MultipleKind.values) {
-        final m = g[k.name] as Map<String, Object?>?;
+        final m = g[k.key] as Map<String, Object?>?;
         if (m == null) continue;
-        final mediana = (m['mediana'] as double).toStringAsFixed(1);
-        linha.add('${k.rotulo} $mediana× (${m['pares']})');
+        final median = (m['mediana'] as double).toStringAsFixed(1);
+        row.add('${k.label} $median× (${m['pares']})');
       }
-      stdout.writeln('    ${chave.padRight(32)} ${linha.join("  ")}');
+      stdout.writeln('    ${key.padRight(32)} ${row.join("  ")}');
     }
     stdout.writeln('');
-    stdout.writeln('escrito $_saida');
+    stdout.writeln('escrito $_output');
   } finally {
     await c.ctx.dispose();
   }

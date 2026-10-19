@@ -8,21 +8,21 @@ import 'package:test/test.dart';
 
 final _t = Ticker.parse('ABCD3');
 
-/// Série diária de dias úteis com [preco] constante, salvo o [salto] aplicado a
+/// Série diária de dias úteis com [price] constante, salvo o [jump] aplicado a
 /// partir de [ex].
-PriceSeries _serie({required double salto, DateTime? ex, double preco = 10}) {
+PriceSeries _series({required double jump, DateTime? ex, double price = 10}) {
   final pts = <PricePoint>[];
   // O laço anda em UTC, que não tem horário de verão; o ponto trunca para o
   // dia local, como a fonte.
   var d = DateTime.utc(2024, 3, 1);
   while (d.isBefore(DateTime.utc(2024, 5, 1))) {
     if (d.weekday <= 5) {
-      final dia = DateTime(d.year, d.month, d.day);
-      final depois = ex != null && !dia.isBefore(ex);
+      final day = DateTime(d.year, d.month, d.day);
+      final after = ex != null && !day.isBefore(ex);
       pts.add(
         PricePoint(
-          date: dia,
-          close: depois ? preco * salto : preco,
+          date: day,
+          close: after ? price * jump : price,
           volume: 1000,
         ),
       );
@@ -32,43 +32,43 @@ PriceSeries _serie({required double salto, DateTime? ex, double preco = 10}) {
   return PriceSeries(ticker: _t, points: pts);
 }
 
-ShareEvent _evento(DateTime ex, double fator) =>
-    ShareEvent(exDate: ex, factor: fator, observedRatio: 1 / fator);
+ShareEvent _event(DateTime ex, double factor) =>
+    ShareEvent(exDate: ex, factor: factor, observedRatio: 1 / factor);
 
 void main() {
   final ex = DateTime(2024, 4, 2);
 
   group('completeAdjustment', () {
     test('bonificação de 10% sem ajuste: a queda sai e o volume sobe', () {
-      final s = _serie(salto: 1 / 1.1, ex: ex);
-      final r = CorporateEvents.completeAdjustment(s, [_evento(ex, 1.1)]);
+      final s = _series(jump: 1 / 1.1, ex: ex);
+      final r = CorporateEvents.completeAdjustment(s, [_event(ex, 1.1)]);
       expect(r.applied, hasLength(1));
-      final antes = r.series.points.firstWhere(
+      final before = r.series.points.firstWhere(
         (p) => p.date == DateTime(2024, 4, 1),
       );
-      final depois = r.series.points.firstWhere((p) => p.date == ex);
+      final after = r.series.points.firstWhere((p) => p.date == ex);
       expect(
-        depois.close / antes.close,
+        after.close / before.close,
         closeTo(1, 1e-9),
         reason: 'a série fica contínua na data ex',
       );
       expect(
-        antes.volume! * antes.close,
+        before.volume! * before.close,
         closeTo(1000 * 10, 1e-6),
         reason: 'o financeiro do dia não muda',
       );
     });
 
     test('evento que a fonte já ajustou não muda nada', () {
-      final s = _serie(salto: 1.0);
-      final r = CorporateEvents.completeAdjustment(s, [_evento(ex, 1.1)]);
+      final s = _series(jump: 1.0);
+      final r = CorporateEvents.completeAdjustment(s, [_event(ex, 1.1)]);
       expect(r.applied, isEmpty);
       expect(identical(r.series, s), isTrue);
     });
 
     test('desdobramento de 2 para 1 sem ajuste também sai', () {
-      final s = _serie(salto: 0.5, ex: ex);
-      final r = CorporateEvents.completeAdjustment(s, [_evento(ex, 2)]);
+      final s = _series(jump: 0.5, ex: ex);
+      final r = CorporateEvents.completeAdjustment(s, [_event(ex, 2)]);
       expect(r.applied, hasLength(1));
       expect(r.series.points.first.close, closeTo(5, 1e-9));
     });
@@ -77,35 +77,35 @@ void main() {
         'está', () {
       // Com a folga de 6% ele passaria por bonificação não ajustada, e o
       // ajuste inventaria uma alta de 10% no lugar da queda.
-      final s = _serie(salto: 0.95, ex: ex);
-      final r = CorporateEvents.completeAdjustment(s, [_evento(ex, 1.1)]);
+      final s = _series(jump: 0.95, ex: ex);
+      final r = CorporateEvents.completeAdjustment(s, [_event(ex, 1.1)]);
       expect(r.applied, isEmpty);
     });
 
     test('bonificação não ajustada com o mercado andando 2% no dia sai', () {
-      final s = _serie(salto: 0.98 / 1.1, ex: ex);
-      final r = CorporateEvents.completeAdjustment(s, [_evento(ex, 1.1)]);
+      final s = _series(jump: 0.98 / 1.1, ex: ex);
+      final r = CorporateEvents.completeAdjustment(s, [_event(ex, 1.1)]);
       expect(r.applied, hasLength(1));
     });
 
     test('evento sem pregão vizinho na série não ajusta nada', () {
-      final s = _serie(salto: 1 / 1.1, ex: ex);
+      final s = _series(jump: 1 / 1.1, ex: ex);
       final r = CorporateEvents.completeAdjustment(s, [
-        _evento(DateTime(2023, 1, 10), 1.1),
+        _event(DateTime(2023, 1, 10), 1.1),
       ]);
       expect(r.applied, isEmpty);
     });
   });
 
   test('applyToSeries ajusta sem perguntar', () {
-    final s = _serie(salto: 1.0);
-    final a = CorporateEvents.applyToSeries(s, [_evento(ex, 1.1)]);
+    final s = _series(jump: 1.0);
+    final a = CorporateEvents.applyToSeries(s, [_event(ex, 1.1)]);
     expect(a.points.first.close, closeTo(10 / 1.1, 1e-9));
     expect(a.points.last.close, closeTo(10, 1e-9));
   });
 
   test('o pacote de eventos de capital vai e volta, e pula o malformado', () {
-    final pacote = CapitalEventsCodec.encodePackage({
+    final package = CapitalEventsCodec.encodePackage({
       'ABCD3': CapitalEvents(
         issues: [
           ShareIssue(
@@ -114,15 +114,15 @@ void main() {
             shares: 270000000,
           ),
         ],
-        shareEvents: [_evento(DateTime(2024, 4, 16), 2)],
+        shareEvents: [_event(DateTime(2024, 4, 16), 2)],
       ),
       'VAZI3': const CapitalEvents(),
-    }, geradoEm: DateTime(2026, 9, 24));
-    expect((pacote['ativos'] as Map).containsKey('VAZI3'), isFalse);
-    final lido = CapitalEventsCodec.decodePackage({
-      ...pacote,
+    }, generatedAt: DateTime(2026, 9, 24));
+    expect((package['ativos'] as Map).containsKey('VAZI3'), isFalse);
+    final parsed = CapitalEventsCodec.decodePackage({
+      ...package,
       'ativos': {
-        ...(pacote['ativos'] as Map),
+        ...(package['ativos'] as Map),
         'RUIM3': {
           'emissoes': [
             {'data': 'não é data', 'centavos': 100, 'acoes': 1},
@@ -137,9 +137,9 @@ void main() {
         },
       },
     });
-    expect(lido.keys, ['ABCD3']);
-    expect(lido['ABCD3']!.issues.single.amount, Money.fromReais(5.4e9));
-    expect(lido['ABCD3']!.issues.single.shares, 270000000);
-    expect(lido['ABCD3']!.shareEvents.single.factor, 2);
+    expect(parsed.keys, ['ABCD3']);
+    expect(parsed['ABCD3']!.issues.single.amount, Money.fromReais(5.4e9));
+    expect(parsed['ABCD3']!.issues.single.shares, 270000000);
+    expect(parsed['ABCD3']!.shareEvents.single.factor, 2);
   });
 }

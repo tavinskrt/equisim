@@ -23,14 +23,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'populated_state.dart'
     show
         assetOf,
-        avaliacaoDaCascata,
-        carteiraDemo,
+        cascadeValuation,
+        demoPortfolio,
         comparisonOf,
-        metaDemo,
+        demoGoal,
         outcomeOf,
         populatedOverrides,
         valuationOf;
-import 'ui_test.dart' show serieLonga;
+import 'ui_test.dart' show longSeries;
 
 /// Regressao de layout: nenhuma tela pode estourar em largura suportada nem
 /// sob escala de texto ampliada.
@@ -41,8 +41,8 @@ import 'ui_test.dart' show serieLonga;
 ///
 /// Escrito ANTES das correcoes, e reprovou 13 das 36 combinacoes na primeira
 /// execucao. Um teste de regressao que nasce verde nao provou nada.
-const _larguras = <double>[320, 390, 1024];
-const _escalas = <double>[1.0, 1.3, 2.0];
+const _widths = <double>[320, 390, 1024];
+const _scales = <double>[1.0, 1.3, 2.0];
 
 /// Combinacoes que o codigo ainda nao sustenta.
 ///
@@ -53,11 +53,11 @@ const _escalas = <double>[1.0, 1.3, 2.0];
 /// Historico: nasceu com 13 das 36 combinacoes reprovando. A UI-06 zerou as
 /// sete da StudyPage; a UI-16 zerou as seis restantes. Se uma entrada voltar a
 /// aparecer, ela e regressao, nao heranca.
-const _pendentes = <String, String>{};
+const _pendingTargets = <String, String>{};
 
-/// Divida MEDIDA da BacktestPage populada, no mesmo formato de [_pendentes].
+/// Divida MEDIDA da BacktestPage populada, no mesmo formato de [_pendingTargets].
 ///
-/// **Vazio, e essa e a meta -- mesmo criterio de [_pendentes].**
+/// **Vazio, e essa e a meta -- mesmo criterio de [_pendingTargets].**
 ///
 /// Historico: nasceu com duas entradas, as duas do `_AssetRow` no cartao de
 /// desempenho por ativo -- 7 px em 320 dp @ 1,3x e 65 px em 390 dp @ 2,0x.
@@ -65,10 +65,10 @@ const _pendentes = <String, String>{};
 /// entao o estouro existia sem nunca ter sido medido. Foram removidas quando
 /// `_AssetRow` ganhou a disposicao empilhada, que preserva os dois numeros
 /// inteiros onde as tres colunas nao cabem.
-const _pendentesPopulada = <String, String>{};
+const _pendingPopulated = <String, String>{};
 
-String _chave(String tela, double largura, double escala) =>
-    '$tela|${largura.toInt()}|$escala';
+String _key(String screen, double width, double scale) =>
+    '$screen|${width.toInt()}|$scale';
 
 Asset _asset(String symbol, String sector) => Asset(
   ticker: Ticker.parse(symbol),
@@ -94,20 +94,20 @@ Asset _asset(String symbol, String sector) => Asset(
 /// A ValuationPage populada entrou depois, e a StudyPage e a GoalPage
 /// populadas entraram em 22/09/2026 (item D3), com os providers de
 /// `populatedOverrides` — os mesmos da captura das telas.
-/// [comparacao] entra pelo parametro, e nao por um override adicional na
+/// [comparison] entra pelo parametro, e nao por um override adicional na
 /// chamada: `comparisonProvider` ja e sobrescrito aqui, e o Riverpod recusa o
 /// mesmo provider duas vezes no mesmo container. `null` reproduz o estado
 /// vazio, que e o padrao da matriz.
 List<Override> _overrides({
-  PortfolioComparison? comparacao,
-  ValuationResult? avaliacao,
-  List<CalibratedBandTable> faixas = const [],
+  PortfolioComparison? comparison,
+  ValuationResult? valuation,
+  List<CalibratedBandTable> bands = const [],
 }) => <Override>[
   currentUserIdProvider.overrideWithValue(null),
   marketAnchorsProvider.overrideWith((ref) async => MarketAnchors.fallback2026),
   savedStudiesProvider.overrideWith((ref) async => const <PortfolioStudy>[]),
-  valuationProvider.overrideWith((ref, ticker) async => avaliacao),
-  calibratedBandsProvider.overrideWith((ref) async => faixas),
+  valuationProvider.overrideWith((ref, ticker) async => valuation),
+  calibratedBandsProvider.overrideWith((ref) async => bands),
   portfolioValuationsProvider.overrideWith(
     (ref) async => const <Ticker, ValuationResult>{},
   ),
@@ -115,7 +115,7 @@ List<Override> _overrides({
   portfolioSignalsProvider.overrideWith(
     (ref) async => const <Ticker, TransversalSignals>{},
   ),
-  comparisonProvider.overrideWith((ref) async => comparacao),
+  comparisonProvider.overrideWith((ref) async => comparison),
   correlationProvider.overrideWith((ref) async => null),
   goalAlignmentProvider.overrideWith((ref) async => null),
   goalFeasibilityProvider.overrideWith((ref) async => null),
@@ -124,25 +124,25 @@ List<Override> _overrides({
 Future<void> _pump(
   WidgetTester tester,
   Widget page, {
-  required double largura,
-  required double escala,
-  bool comAtivos = false,
-  PortfolioComparison? comparacao,
-  ValuationResult? avaliacao,
-  List<CalibratedBandTable> faixas = const [],
+  required double width,
+  required double scale,
+  bool withAssets = false,
+  PortfolioComparison? comparison,
+  ValuationResult? valuation,
+  List<CalibratedBandTable> bands = const [],
 }) async {
   tester.view.devicePixelRatio = 1.0;
   // Altura generosa quando a tela vem populada: o `SliverList` so infla os
   // cartoes que entram na viewport, e um estouro fora dela nao seria visto.
-  final populada = comparacao != null || avaliacao != null;
-  tester.view.physicalSize = Size(largura, populada ? 6000 : 900);
+  final populated = comparison != null || valuation != null;
+  tester.view.physicalSize = Size(width, populated ? 6000 : 900);
   addTearDown(tester.view.reset);
 
   final container = ProviderContainer(
     overrides: _overrides(
-      comparacao: comparacao,
-      avaliacao: avaliacao,
-      faixas: faixas,
+      comparison: comparison,
+      valuation: valuation,
+      bands: bands,
     ),
   );
   addTearDown(container.dispose);
@@ -150,9 +150,9 @@ Future<void> _pump(
   // O provider de tema e um StateProvider comum; sem semear, a tela monta no
   // padrao e o teste ainda vale -- mas semear mantem o par tema/paleta
   // coerente com o que `buildFinTheme` entrega.
-  container.read(isLightModeProvider.notifier).definir(true);
+  container.read(isLightModeProvider.notifier).setValue(true);
 
-  if (comAtivos) {
+  if (withAssets) {
     final notifier = container.read(studyProvider.notifier);
     notifier.addAsset(_asset('PETR4', 'energia'), toPrincipal: true);
     notifier.addAsset(_asset('VALE3', 'materiais'), toPrincipal: true);
@@ -166,8 +166,8 @@ Future<void> _pump(
         theme: buildFinTheme(isLight: true),
         home: MediaQuery(
           data: MediaQueryData(
-            size: Size(largura, 900),
-            textScaler: TextScaler.linear(escala),
+            size: Size(width, 900),
+            textScaler: TextScaler.linear(scale),
           ),
           child: Scaffold(body: page),
         ),
@@ -179,18 +179,18 @@ Future<void> _pump(
 }
 
 void main() {
-  final telas = <String, ({Widget Function() build, bool comAtivos})>{
+  final screens = <String, ({Widget Function() build, bool withAssets})>{
     // A casca entrou na matriz quando o pacote UI-1 lhe deu uma QUARTA aba:
     // cada rotulo passou a ter um quarto da largura, e "Simulacao" em 320 dp
     // sob escala ampliada e o caso limite. Sem cobertura, a barra seria o
     // unico componente da tela que ninguem mede.
-    'AppShell': (build: AppShell.new, comAtivos: true),
-    'StudyPage': (build: StudyPage.new, comAtivos: true),
-    'BacktestPage': (build: BacktestPage.new, comAtivos: true),
-    'GoalPage': (build: GoalPage.new, comAtivos: false),
+    'AppShell': (build: AppShell.new, withAssets: true),
+    'StudyPage': (build: StudyPage.new, withAssets: true),
+    'BacktestPage': (build: BacktestPage.new, withAssets: true),
+    'GoalPage': (build: GoalPage.new, withAssets: false),
     'ValuationPage': (
       build: () => ValuationPage(ticker: Ticker.parse('PETR4')),
-      comAtivos: false,
+      withAssets: false,
     ),
     // A edição do valuation (decisão 147) abre já preenchida — a conta
     // congelada vem da cascata —, então a matriz mede a tela cheia, e não o
@@ -200,48 +200,48 @@ void main() {
     // painel do porquê abre dentro do cartão do lucro (orientador,
     // 14/10/2026): a matriz mede o cartão aberto, que é o mais alto.
     'ManualValuationPage': (
-      build: () => ManualValuationPage(result: avaliacaoDaCascata(choque: 0.6)),
-      comAtivos: false,
+      build: () => ManualValuationPage(result: cascadeValuation(shock: 0.6)),
+      withAssets: false,
     ),
     'ManualValuationPage editada': (
       build: () {
-        final r = avaliacaoDaCascata(firma: false);
-        final m = r.manual!.motorPremises;
+        final r = cascadeValuation(firm: false);
+        final m = r.manual!.enginePremises;
         return ManualValuationPage(
           result: r,
-          inicial: m.copyWith(
+          initial: m.copyWith(
             baseProfit: m.baseProfit * 1.25,
             growth: m.growth + 0.03,
-            growthPath: ManualGrowthPath.constante,
+            growthPath: ManualGrowthPath.constant,
             discountRate: m.discountRate - 0.01,
-            ratePath: ManualRatePath.constante,
+            ratePath: ManualRatePath.constant,
             terminalReturn: m.discountRate + 0.04,
           ),
         );
       },
-      comAtivos: false,
+      withAssets: false,
     ),
   };
 
-  for (final entry in telas.entries) {
+  for (final entry in screens.entries) {
     group(entry.key, () {
-      for (final largura in _larguras) {
-        for (final escala in _escalas) {
-          final pendente = _pendentes[_chave(entry.key, largura, escala)];
+      for (final width in _widths) {
+        for (final scale in _scales) {
+          final pending = _pendingTargets[_key(entry.key, width, scale)];
 
           testWidgets(
             // O motivo vai no NOME porque `testWidgets.skip` e booleano, ao
             // contrario de `test.skip`. Assim a saida da suite diz qual tarefa
             // destrava cada combinacao, em vez de so contar pulos.
-            'cabe em ${largura.toInt()} dp sob ${escala}x'
-            '${pendente == null ? '' : '  [PENDENTE: $pendente]'}',
+            'cabe em ${width.toInt()} dp sob ${scale}x'
+            '${pending == null ? '' : '  [PENDENTE: $pending]'}',
             (tester) async {
               await _pump(
                 tester,
                 entry.value.build(),
-                largura: largura,
-                escala: escala,
-                comAtivos: entry.value.comAtivos,
+                width: width,
+                scale: scale,
+                withAssets: entry.value.withAssets,
               );
 
               expect(
@@ -249,10 +249,10 @@ void main() {
                 isNull,
                 reason:
                     '${entry.key} estourou o layout em '
-                    '${largura.toInt()} dp sob escala ${escala}x.',
+                    '${width.toInt()} dp sob escala ${scale}x.',
               );
             },
-            skip: pendente != null,
+            skip: pending != null,
           );
         }
       }
@@ -262,34 +262,34 @@ void main() {
   // ---------------------------------------------------------------------
   // BacktestPage POPULADA
   //
-  // A tela vazia nao constroi `_CarteirasLadoALado` nem `_PerAssetCard`,
+  // A tela vazia nao constroi `_SideBySidePortfolios` nem `_PerAssetCard`,
   // que sao onde vivem as colunas numericas. Sem este grupo, a tabela
   // comparativa entraria no repositorio sem prova nenhuma de que cabe.
   //
-  // Nao ha entrada esperada em `_pendentes`: a tabela CAI PARA BLOCOS
+  // Nao ha entrada esperada em `_pendingTargets`: a tabela CAI PARA BLOCOS
   // EMPILHADOS quando a largura nao sustenta as colunas, entao nenhuma
   // combinacao deve estourar. Se alguma estourar, o degrau nao esta
   // funcionando -- e e defeito, nao heranca.
   // ---------------------------------------------------------------------
   group('BacktestPage populada', () {
-    for (final largura in _larguras) {
-      for (final escala in _escalas) {
-        final pendente =
-            _pendentesPopulada[_chave('BacktestPage', largura, escala)];
+    for (final width in _widths) {
+      for (final scale in _scales) {
+        final pending =
+            _pendingPopulated[_key('BacktestPage', width, scale)];
 
-        testWidgets('cabe em ${largura.toInt()} dp sob ${escala}x'
-            '${pendente == null ? '' : '  [PENDENTE: $pendente]'}', (
+        testWidgets('cabe em ${width.toInt()} dp sob ${scale}x'
+            '${pending == null ? '' : '  [PENDENTE: $pending]'}', (
           tester,
         ) async {
           await _pump(
             tester,
             const BacktestPage(),
-            largura: largura,
-            escala: escala,
-            comAtivos: true,
-            comparacao: comparisonOf(
-              principal: outcomeOf('PETR4', serieLonga(0.05)),
-              reserva: outcomeOf('ITUB4', serieLonga(0.12)),
+            width: width,
+            scale: scale,
+            withAssets: true,
+            comparison: comparisonOf(
+              principal: outcomeOf('PETR4', longSeries(0.05)),
+              reserve: outcomeOf('ITUB4', longSeries(0.12)),
             ),
           );
 
@@ -298,9 +298,9 @@ void main() {
             isNull,
             reason:
                 'BacktestPage populada estourou o layout em '
-                '${largura.toInt()} dp sob escala ${escala}x.',
+                '${width.toInt()} dp sob escala ${scale}x.',
           );
-        }, skip: pendente != null);
+        }, skip: pending != null);
       }
     }
   });
@@ -315,10 +315,10 @@ void main() {
   // que aquele teste deixou de fora: 1,3x e 2,0x.
   // ---------------------------------------------------------------------
   group('ValuationPage populada', () {
-    final faixas = CalibratedBandCodec.decode(
+    final bands = CalibratedBandCodec.decode(
         jsonDecode(File(calibratedBandAsset).readAsStringSync())
             as Map<String, dynamic>);
-    final avaliacao = valuationOf('PETR4', justo: 1234.56, mercado: 987.65)
+    final valuation = valuationOf('PETR4', fairValue: 1234.56, market: 987.65)
         .withWarnings(const [
       ('O capital proprio responde por 27,4% do valor da firma, dentro da '
           'faixa em que nenhuma das duas vias domina. O preco justo combina as '
@@ -327,22 +327,22 @@ void main() {
           'de 10/09/2026: 14,2% a.a. no primeiro ano, 12,9% a.a. no ano 10 e '
           '12,6% a.a. na perpetuidade.'),
     ]);
-    for (final largura in _larguras) {
-      for (final escala in _escalas) {
-        final pendente =
-            _pendentesPopulada[_chave('ValuationPage', largura, escala)];
+    for (final width in _widths) {
+      for (final scale in _scales) {
+        final pending =
+            _pendingPopulated[_key('ValuationPage', width, scale)];
 
-        testWidgets('cabe em ${largura.toInt()} dp sob ${escala}x'
-            '${pendente == null ? '' : '  [PENDENTE: $pendente]'}', (
+        testWidgets('cabe em ${width.toInt()} dp sob ${scale}x'
+            '${pending == null ? '' : '  [PENDENTE: $pending]'}', (
           tester,
         ) async {
           await _pump(
             tester,
             ValuationPage(ticker: Ticker.parse('PETR4')),
-            largura: largura,
-            escala: escala,
-            avaliacao: avaliacao,
-            faixas: faixas,
+            width: width,
+            scale: scale,
+            valuation: valuation,
+            bands: bands,
           );
 
           expect(
@@ -350,9 +350,9 @@ void main() {
             isNull,
             reason:
                 'ValuationPage populada estourou o layout em '
-                '${largura.toInt()} dp sob escala ${escala}x.',
+                '${width.toInt()} dp sob escala ${scale}x.',
           );
-        }, skip: pendente != null);
+        }, skip: pending != null);
       }
     }
   });
@@ -372,27 +372,27 @@ void main() {
     'GoalPage': GoalPage.new,
   }.entries) {
     group('${entry.key} populada', () {
-      for (final largura in _larguras) {
-        for (final escala in _escalas) {
-          final pendente =
-              _pendentesPopulada[_chave(entry.key, largura, escala)];
+      for (final width in _widths) {
+        for (final scale in _scales) {
+          final pending =
+              _pendingPopulated[_key(entry.key, width, scale)];
 
-          testWidgets('cabe em ${largura.toInt()} dp sob ${escala}x'
-              '${pendente == null ? '' : '  [PENDENTE: $pendente]'}', (
+          testWidgets('cabe em ${width.toInt()} dp sob ${scale}x'
+              '${pending == null ? '' : '  [PENDENTE: $pending]'}', (
             tester,
           ) async {
             tester.view.devicePixelRatio = 1.0;
-            tester.view.physicalSize = Size(largura, 6000);
+            tester.view.physicalSize = Size(width, 6000);
             addTearDown(tester.view.reset);
 
             final container = ProviderContainer(overrides: populatedOverrides());
             addTearDown(container.dispose);
-            container.read(isLightModeProvider.notifier).definir(true);
+            container.read(isLightModeProvider.notifier).setValue(true);
             final notifier = container.read(studyProvider.notifier);
-            for (final (simbolo, setor) in carteiraDemo) {
-              notifier.addAsset(assetOf(simbolo, setor), toPrincipal: true);
+            for (final (symbol, sector) in demoPortfolio) {
+              notifier.addAsset(assetOf(symbol, sector), toPrincipal: true);
             }
-            notifier.setGoal(metaDemo);
+            notifier.setGoal(demoGoal);
 
             await tester.pumpWidget(
               UncontrolledProviderScope(
@@ -401,8 +401,8 @@ void main() {
                   theme: buildFinTheme(isLight: true),
                   home: MediaQuery(
                     data: MediaQueryData(
-                      size: Size(largura, 6000),
-                      textScaler: TextScaler.linear(escala),
+                      size: Size(width, 6000),
+                      textScaler: TextScaler.linear(scale),
                     ),
                     child: Scaffold(body: entry.value()),
                   ),
@@ -416,9 +416,9 @@ void main() {
               isNull,
               reason:
                   '${entry.key} populada estourou o layout em '
-                  '${largura.toInt()} dp sob escala ${escala}x.',
+                  '${width.toInt()} dp sob escala ${scale}x.',
             );
-          }, skip: pendente != null);
+          }, skip: pending != null);
         }
       }
     });

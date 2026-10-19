@@ -21,15 +21,15 @@ import 'package:equisim_core/equisim_core.dart';
 /// (item A1.10): [coverageNote] devolve a ressalva que a tela mostra.
 class CvmFundamentalsRepository implements FundamentalsRepository {
   /// Repositório de mercado decorado.
-  final FundamentalsRepository mercado;
+  final FundamentalsRepository market;
 
   /// Lê o conteúdo do pacote. No aplicativo, `rootBundle.loadString`; em teste,
   /// uma string fixa.
-  final Future<String> Function() carregarPacote;
+  final Future<String> Function() loadPackage;
 
   /// Data da avaliação. Recebida por função para que o repositório não chame
   /// o relógio por conta própria.
-  final DateTime Function() hoje;
+  final DateTime Function() today;
 
   /// Usa a série ancorada no trimestre (decisão 73).
   ///
@@ -37,55 +37,55 @@ class CvmFundamentalsRepository implements FundamentalsRepository {
   /// ordenação de metade do universo (correlação de postos de 0,683 contra a
   /// anual, decisão 78), e se isso é informação ou ruído só a coorte
   /// trimestral dirá.
-  final bool ancorada;
+  final bool anchored;
 
   /// Idade, em dias, a partir da qual o pacote é declarado defasado.
   ///
   /// A DFP sai até o fim de março e o ITR até 45 dias depois do trimestre: um
   /// pacote com mais de cem dias perdeu, com certeza, um ciclo de entrega.
-  static const int idadeMaximaDias = 100;
+  static const int maxAgeDays = 100;
 
   /// Declara o repositório.
   CvmFundamentalsRepository({
-    required this.mercado,
-    required this.carregarPacote,
-    required this.hoje,
-    this.ancorada = false,
+    required this.market,
+    required this.loadPackage,
+    required this.today,
+    this.anchored = false,
   });
 
   /// A **leitura em curso**, e não o resultado dela: avaliações pedidas ao
   /// mesmo tempo esperam a mesma leitura, em vez de cada uma decodificar os
   /// 9 MB do pacote na thread da interface.
-  Future<_Pacote>? _pacote;
+  Future<_Package>? _package;
 
-  Future<_Pacote> _lido() => _pacote ??= _ler();
+  Future<_Package> _loaded() => _package ??= _read();
 
-  Future<_Pacote> _ler() async {
-    final String bruto;
+  Future<_Package> _read() async {
+    final String raw;
     try {
-      bruto = await carregarPacote();
+      raw = await loadPackage();
     } on Object {
-      return const _Pacote.ausente();
+      return const _Package.missing();
     }
     try {
-      final json = jsonDecode(bruto);
+      final json = jsonDecode(raw);
       if (json is! Map<String, dynamic>) {
-        return const _Pacote.ilegivel('o conteúdo não é um objeto JSON');
+        return const _Package.unreadable('o conteúdo não é um objeto JSON');
       }
-      if (json['versao'] != CvmDocumentCodec.versao) {
-        return _Pacote.ilegivel(
+      if (json['versao'] != CvmDocumentCodec.version) {
+        return _Package.unreadable(
           'versão ${json['versao']}, e este leitor conhece a '
-          '${CvmDocumentCodec.versao}',
+          '${CvmDocumentCodec.version}',
         );
       }
-      final documentos = CvmDocumentCodec.decodePackage(json);
-      if (documentos.isEmpty) {
-        return const _Pacote.ilegivel('o pacote não traz ativo nenhum');
+      final documents = CvmDocumentCodec.decodePackage(json);
+      if (documents.isEmpty) {
+        return const _Package.unreadable('o pacote não traz ativo nenhum');
       }
-      final gerado = DateTime.tryParse('${json['geradoEm']}');
-      return _Pacote(documentos, gerado);
+      final generated = DateTime.tryParse('${json['geradoEm']}');
+      return _Package(documents, generated);
     } on FormatException {
-      return const _Pacote.ilegivel('o JSON é inválido');
+      return const _Package.unreadable('o JSON é inválido');
     }
   }
 
@@ -94,81 +94,81 @@ class CvmFundamentalsRepository implements FundamentalsRepository {
   /// Texto de narrativa, como os avisos da cascata: é o que a tela de
   /// avaliação mostra no cartão de ressalvas.
   Future<String?> coverageNote(Ticker ticker) async {
-    final p = await _lido();
+    final p = await _loaded();
     final t = ticker.value;
-    if (p.ausente) {
+    if (p.missing) {
       return 'Este build não trouxe o pacote de demonstrações da CVM: os '
           'fundamentos de $t vêm só da fonte de mercado, sem a data de '
           'recebimento observada nem a ação em tesouraria.';
     }
-    if (p.motivo != null) {
+    if (p.reason != null) {
       return 'O pacote de demonstrações da CVM deste build não pôde ser lido '
-          '— ${p.motivo}. Os fundamentos de $t vêm só da fonte de mercado.';
+          '— ${p.reason}. Os fundamentos de $t vêm só da fonte de mercado.';
     }
-    final docs = p.documentos[t];
-    final data = p.geradoEm == null ? null : _fmt(p.geradoEm!);
+    final docs = p.documents[t];
+    final date = p.generatedAt == null ? null : _fmt(p.generatedAt!);
     if (docs == null || docs.isEmpty) {
-      return 'O pacote da CVM${data == null ? '' : ' de $data'} não traz '
+      return 'O pacote da CVM${date == null ? '' : ' de $date'} não traz '
           'demonstração de $t: os fundamentos vêm só da fonte de mercado.';
     }
-    final gerado = p.geradoEm;
-    if (gerado != null) {
-      final idade = _dia(hoje()).difference(_dia(gerado)).inDays;
-      if (idade > idadeMaximaDias) {
-        return 'O pacote da CVM é de $data, há $idade dias: demonstrações de '
+    final generated = p.generatedAt;
+    if (generated != null) {
+      final age = _day(today()).difference(_day(generated)).inDays;
+      if (age > maxAgeDays) {
+        return 'O pacote da CVM é de $date, há $age dias: demonstrações de '
             '$t entregues depois disso não entram nesta avaliação.';
       }
     }
     return null;
   }
 
-  static DateTime _dia(DateTime d) => DateTime.utc(d.year, d.month, d.day);
+  static DateTime _day(DateTime d) => DateTime.utc(d.year, d.month, d.day);
 
   static String _fmt(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
 
   @override
   Future<Result<List<FundamentalsSnapshot>>> history(Ticker ticker) async {
-    final base = await mercado.history(ticker);
+    final base = await market.history(ticker);
     if (base.isErr) return base;
-    final documentos = (await _lido()).documentos[ticker.value];
-    if (documentos == null || documentos.isEmpty) return base;
+    final documents = (await _loaded()).documents[ticker.value];
+    if (documents == null || documents.isEmpty) return base;
 
-    final montada = CvmSeries.build(
-      documentos: documentos,
-      mercado: base.unwrap(),
-      publicado: PointInTimeView(hoje()).isPublished,
-      ancorada: ancorada,
+    final assembled = CvmSeries.build(
+      documents: documents,
+      market: base.unwrap(),
+      published: PointInTimeView(today()).isPublished,
+      anchored: anchored,
     );
-    return Ok(montada.series);
+    return Ok(assembled.series);
   }
 
   @override
-  Future<Result<Asset>> profile(Ticker ticker) => mercado.profile(ticker);
+  Future<Result<Asset>> profile(Ticker ticker) => market.profile(ticker);
 
   @override
-  Future<Result<List<Ticker>>> universe() => mercado.universe();
+  Future<Result<List<Ticker>>> universe() => market.universe();
 }
 
 /// O pacote lido, ou o motivo de não ter sido.
-class _Pacote {
-  final Map<String, List<CvmPeriodDocument>> documentos;
-  final DateTime? geradoEm;
-  final bool ausente;
-  final String? motivo;
+class _Package {
+  final Map<String, List<CvmPeriodDocument>> documents;
+  final DateTime? generatedAt;
+  final bool missing;
+  final String? reason;
 
-  const _Pacote(this.documentos, this.geradoEm)
-      : ausente = false,
-        motivo = null;
+  const _Package(this.documents, this.generatedAt)
+      : missing = false,
+        reason = null;
 
-  const _Pacote.ausente()
-      : documentos = const {},
-        geradoEm = null,
-        ausente = true,
-        motivo = null;
+  const _Package.missing()
+      : documents = const {},
+        generatedAt = null,
+        missing = true,
+        reason = null;
 
-  const _Pacote.ilegivel(String this.motivo)
-      : documentos = const {},
-        geradoEm = null,
-        ausente = false;
+  const _Package.unreadable(String this.reason)
+      : documents = const {},
+        generatedAt = null,
+        missing = false;
 }

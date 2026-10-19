@@ -101,7 +101,7 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
   final capital = await ref.watch(capitalEventsProvider(ticker).future);
   // O prêmio de mercado é a média de dez anos do prêmio implícito no preço da
   // bolsa, do pacote do build (decisão 142); sem pacote, os 5,5%, ressalvados.
-  final premio = await ref.watch(marketPremiumReadingProvider.future);
+  final premium = await ref.watch(marketPremiumReadingProvider.future);
 
   final inputs = await PrepareValuationInputs.call(
     ticker: ticker,
@@ -111,8 +111,8 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     // CAPM olha para frente: a taxa livre de risco do desconto é a corrente,
     // não a média decenal usada para julgar a viabilidade da meta.
     riskFreeRate: anchors.currentRiskFreeRate,
-    marketPremium: premio.premium,
-    premiumSource: premio.source,
+    marketPremium: premium.premium,
+    premiumSource: premium.source,
     marginOfSafety: settings.marginOfSafety,
     projectionYears: settings.projectionYears,
     // Desconto nominal exige crescimento perpétuo nominal. O teto sai do IPCA
@@ -171,7 +171,7 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
   // **Entram antes da cascata, e não depois** (item D4): acrescentadas ao
   // resultado pronto, elas apareciam na tela e faltavam no rastro que o painel
   // de logs exporta — o arquivo de depuração não dizia o que a tela dizia.
-  final notas = [
+  final notes = [
     await ref.watch(cvmCoverageNoteProvider(ticker).future),
     (await ref.watch(riskFreeCurveReadingProvider.future)).note,
     // Sem prior do beta o motor é outro — beta cru e WACC estático —, e quem
@@ -179,16 +179,16 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     (await ref.watch(betaPriorReadingProvider.future)).note,
     // O prêmio de mercado que não é a média de dez anos do pacote, ou que é
     // de um pacote velho (decisão 142).
-    premio.note,
+    premium.note,
   ].nonNulls.toList();
 
-  final preparados = inputs.unwrap();
+  final prepared = inputs.unwrap();
   final result = await ValuationRunner.run(
     ValuationRequest(
       // As do preparo primeiro — o ajuste que ele completou na série —, e as
       // da camada de dados depois.
-      inputs: preparados
-          .withContextNotes([...preparados.contextNotes, ...notas]),
+      inputs: prepared
+          .withContextNotes([...prepared.contextNotes, ...notes]),
       monteCarlo: settings.monteCarlo,
       samples: settings.samples,
     ),
@@ -223,13 +223,13 @@ final portfolioValuationsProvider =
 final portfolioSignalsProvider =
     FutureProvider<Map<Ticker, TransversalSignals>>((ref) async {
   final tickers = ref.watch(studyProvider).study.principal.tickers;
-  final fundamentos = ref.watch(fundamentalsRepositoryProvider);
+  final fundamentals = ref.watch(fundamentalsRepositoryProvider);
   final out = <Ticker, TransversalSignals>{};
   for (final t in tickers) {
-    final historico = await fundamentos.history(t);
-    if (historico.isErr) continue;
+    final history = await fundamentals.history(t);
+    if (history.isErr) continue;
     // O exercício publicado na data da avaliação, que o núcleo resolve.
-    out[t] = TransversalSignals.fromHistory(historico.unwrap());
+    out[t] = TransversalSignals.fromHistory(history.unwrap());
   }
   return out;
 });
@@ -244,10 +244,10 @@ final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
   final valuations = await ref.watch(portfolioValuationsProvider.future);
   // A ordenação do prêmio é a que a validação escolheu pela regra fixada antes
   // de medir (item B1); sem pacote, ou sem ordenação que passe, não há prêmio.
-  final habilidade = await ref.watch(skillReadingProvider.future);
-  final sinais = await ref.watch(portfolioSignalsProvider.future);
+  final skill = await ref.watch(skillReadingProvider.future);
+  final signals = await ref.watch(portfolioSignalsProvider.future);
   // O prêmio do escore é o mesmo do desconto (decisão 142).
-  final premio = await ref.watch(marketPremiumReadingProvider.future);
+  final premium = await ref.watch(marketPremiumReadingProvider.future);
 
   // A seção transversal é a das avaliações carregadas, que aqui são as da
   // carteira. É estreita, e o resultado declara o tamanho — ver
@@ -258,9 +258,9 @@ final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
     goal: goal,
     valuations: valuations,
     anchors: anchors,
-    ordering: habilidade?.premiumOrdering,
-    signals: sinais,
-    riskPremium: premio.premium,
+    ordering: skill?.premiumOrdering,
+    signals: signals,
+    riskPremium: premium.premium,
   );
   return result.valueOrNull;
 });

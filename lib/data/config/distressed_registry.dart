@@ -49,10 +49,10 @@ class DistressedRegistry {
     try {
       final json = jsonDecode(raw);
       if (json is! Map<String, dynamic>) return empty;
-      final lista = json['emRecuperacao'];
-      if (lista is! List) return empty;
+      final list = json['emRecuperacao'];
+      if (list is! List) return empty;
       return DistressedRegistry({
-        for (final item in lista)
+        for (final item in list)
           if (item is String && item.trim().isNotEmpty)
             item.trim().toUpperCase()
           else if (item is Map && item['ticker'] is String)

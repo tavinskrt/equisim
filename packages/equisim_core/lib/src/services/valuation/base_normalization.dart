@@ -2,43 +2,51 @@
 library;
 
 import 'capital_base.dart';
+import '../../audit/wire_keyed.dart';
 
 /// O que a normalização fez com o lucro de partida.
 ///
 /// Cada valor responde à pergunta de quem lê a avaliação: **o motor partiu do
 /// lucro publicado, ou de outro, e por quê?**
-enum BaseNormalizationOutcome {
+enum BaseNormalizationOutcome implements WireKeyed {
   /// O último exercício rendeu **menos** que o retorno típico da empresa — a
   /// mediana do ciclo —, e destoou o bastante: a base subiu até o lucro que a
   /// empresa teria rendendo o típico.
-  paraCima,
+  upward('paraCima'),
 
   /// O último exercício rendeu **mais** que o típico, e destoou o bastante: a
   /// base desceu até o lucro que a empresa teria rendendo o típico.
-  paraBaixo,
+  downward('paraBaixo'),
 
   /// O último exercício está dentro do normal da empresa: a base é o lucro
   /// publicado.
-  dentroDoNormal,
+  withinNormal('dentroDoNormal'),
 
   /// Destoou, mas o retorno tem tendência que domina a reversão ao ciclo: o
   /// último exercício é lido como o novo patamar, e a base é o publicado.
-  tendencia,
+  trend('tendencia'),
 
   /// Subiria, mas o lucro ou o EBITDA caiu mais da metade em três anos: a
   /// empresa mudou de patamar, e a base fica no publicado.
-  travadaPelaSaude,
+  healthLocked('travadaPelaSaude'),
 
   /// O último exercício deu prejuízo: não há fator a aplicar, e a base é o
   /// retorno típico sobre o capital de hoje (decisão 53).
-  reconstruida,
+  rebuilt('reconstruida'),
 
   /// Sem ciclo medível — série curta, ou ciclo que não é positivo —: a base é o
   /// publicado.
-  semCiclo,
+  noCycle('semCiclo'),
 
   /// Fator imposto de fora, por varredura de diagnóstico.
-  imposta,
+  imposed('imposta');
+
+  const BaseNormalizationOutcome(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 }
 
 /// **A decisão da normalização do lucro de partida, com tudo o que a decidiu**
@@ -161,21 +169,21 @@ class BaseNormalization {
 
   /// O que a normalização fez, pela ordem em que a cascata decide.
   BaseNormalizationOutcome get outcome {
-    if (imposed) return BaseNormalizationOutcome.imposta;
-    if (rebuilt) return BaseNormalizationOutcome.reconstruida;
-    final atual = latestReturn;
-    final ciclo = cycleReturn;
-    if (atual == null || ciclo == null || ciclo <= 0 || atual <= 0) {
-      return BaseNormalizationOutcome.semCiclo;
+    if (imposed) return BaseNormalizationOutcome.imposed;
+    if (rebuilt) return BaseNormalizationOutcome.rebuilt;
+    final current = latestReturn;
+    final cycle = cycleReturn;
+    if (current == null || cycle == null || cycle <= 0 || current <= 0) {
+      return BaseNormalizationOutcome.noCycle;
     }
-    if (!deviates) return BaseNormalizationOutcome.dentroDoNormal;
+    if (!deviates) return BaseNormalizationOutcome.withinNormal;
     if (trendDominates && !cyclicalPrecedence) {
-      return BaseNormalizationOutcome.tendencia;
+      return BaseNormalizationOutcome.trend;
     }
-    if (healthCapped) return BaseNormalizationOutcome.travadaPelaSaude;
-    if (factor > 1) return BaseNormalizationOutcome.paraCima;
-    if (factor < 1) return BaseNormalizationOutcome.paraBaixo;
-    return BaseNormalizationOutcome.dentroDoNormal;
+    if (healthCapped) return BaseNormalizationOutcome.healthLocked;
+    if (factor > 1) return BaseNormalizationOutcome.upward;
+    if (factor < 1) return BaseNormalizationOutcome.downward;
+    return BaseNormalizationOutcome.withinNormal;
   }
 
   /// O primeiro e o último ano da janela do ciclo, ou `null` sem janela.

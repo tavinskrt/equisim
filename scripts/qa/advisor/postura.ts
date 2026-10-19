@@ -26,13 +26,13 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 /** Uma fronteira de reconstrucao aberta. */
-export interface Fronteira {
+export interface Boundary {
   /** Numero da decisao que a abriu. */
-  numero: number;
-  titulo: string;
-  data: string;
+  number: number;
+  title: string;
+  date: string;
   /** Caminhos sob reconstrucao, relativos a raiz. */
-  escopo: string[];
+  scope: string[];
 }
 
 /**
@@ -41,37 +41,37 @@ export interface Fronteira {
  * Nao e YAML e nao pretende ser -- entende escalar e lista de `- `. Um formato
  * que exigisse mais ja seria formato demais para um registro escrito a mao.
  */
-function lerCampos(texto: string): Record<string, string | string[]> {
-  const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(texto);
+function readFields(text: string): Record<string, string | string[]> {
+  const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text);
   if (!m) return {};
 
-  const campos: Record<string, string | string[]> = {};
-  let lista: string[] | null = null;
+  const fields: Record<string, string | string[]> = {};
+  let list: string[] | null = null;
 
-  for (const linha of (m[1] ?? '').split(/\r?\n/)) {
-    const item = /^\s+-\s+(.+?)\s*$/.exec(linha);
-    if (item && lista !== null) {
-      lista.push((item[1] ?? '').replace(/^["']|["']$/g, ''));
+  for (const line of (m[1] ?? '').split(/\r?\n/)) {
+    const item = /^\s+-\s+(.+?)\s*$/.exec(line);
+    if (item && list !== null) {
+      list.push((item[1] ?? '').replace(/^["']|["']$/g, ''));
       continue;
     }
-    const par = /^([a-z_]+):\s*(.*)$/i.exec(linha);
-    if (!par) continue;
+    const pair = /^([a-z_]+):\s*(.*)$/i.exec(line);
+    if (!pair) continue;
 
-    const chave = par[1] ?? '';
-    const valor = (par[2] ?? '').trim();
-    if (valor === '' || valor === '[]' || valor === '[ ]') {
+    const key = pair[1] ?? '';
+    const value = (pair[2] ?? '').trim();
+    if (value === '' || value === '[]' || value === '[ ]') {
       // Guarda a referencia da lista em vez de reindexar a cada item: e o que
       // dispensa a checagem de tipo a cada linha e evita que um `- ` orfao,
       // antes de qualquer chave, seja anexado a coisa nenhuma.
-      const nova: string[] = [];
-      campos[chave] = nova;
-      lista = valor === '' ? nova : null;
+      const fresh: string[] = [];
+      fields[key] = fresh;
+      list = value === '' ? fresh : null;
     } else {
-      campos[chave] = valor;
-      lista = null;
+      fields[key] = value;
+      list = null;
     }
   }
-  return campos;
+  return fields;
 }
 
 /**
@@ -81,27 +81,27 @@ function lerCampos(texto: string): Record<string, string | string[]> {
  * reconstrucao que ja aconteceu -- reabri-la por engano faria a lente tratar
  * como acionavel uma superficie que voltou a ser preservada.
  */
-export function fronteirasAbertas(root: string): Fronteira[] {
+export function openBoundaries(root: string): Boundary[] {
   const dir = join(root, 'docs', 'decisoes');
   if (!existsSync(dir)) return [];
 
-  const out: Fronteira[] = [];
-  for (const arquivo of readdirSync(dir).filter((f) => /^\d{3}-.*\.md$/.test(f))) {
-    const campos = lerCampos(readFileSync(join(dir, arquivo), 'utf8'));
-    if (campos.postura !== 'reconstrucao') continue;
-    if (campos.status !== 'aceita') continue;
+  const out: Boundary[] = [];
+  for (const file of readdirSync(dir).filter((f) => /^\d{3}-.*\.md$/.test(f))) {
+    const fields = readFields(readFileSync(join(dir, file), 'utf8'));
+    if (fields.postura !== 'reconstrucao') continue;
+    if (fields.status !== 'aceita') continue;
 
-    const escopo = Array.isArray(campos.afeta) ? campos.afeta : [];
-    if (escopo.length === 0) continue; // fronteira sem escopo nao e fronteira
+    const scope = Array.isArray(fields.afeta) ? fields.afeta : [];
+    if (scope.length === 0) continue; // fronteira sem escopo nao e fronteira
 
     out.push({
-      numero: Number(campos.numero),
-      titulo: String(campos.titulo ?? '(sem titulo)'),
-      data: String(campos.data ?? ''),
-      escopo,
+      number: Number(fields.numero),
+      title: String(fields.titulo ?? '(sem titulo)'),
+      date: String(fields.data ?? ''),
+      scope,
     });
   }
-  return out.sort((a, b) => a.numero - b.numero);
+  return out.sort((a, b) => a.number - b.number);
 }
 
 /**
@@ -111,10 +111,10 @@ export function fronteirasAbertas(root: string): Fronteira[] {
  * um bloco dizendo "nao ha reconstrucao aberta" so gastaria contexto para
  * lembrar o modelo de nao fazer o que ele nao ia fazer.
  */
-export function blocoDePostura(fronteiras: Fronteira[]): string {
-  if (fronteiras.length === 0) return '';
+export function postureBlock(boundaries: Boundary[]): string {
+  if (boundaries.length === 0) return '';
 
-  const linhas = [
+  const lines = [
     '',
     '## Postura: RECONSTRUCAO DECLARADA',
     '',
@@ -134,10 +134,10 @@ export function blocoDePostura(fronteiras: Fronteira[]): string {
     'Fronteira aberta:',
   ];
 
-  for (const f of fronteiras) {
-    linhas.push(`  decisao no ${f.numero} (${f.data}) -- ${f.titulo}`);
-    for (const caminho of f.escopo) linhas.push(`    ${caminho}`);
+  for (const f of boundaries) {
+    lines.push(`  decisao no ${f.number} (${f.date}) -- ${f.title}`);
+    for (const filePath of f.scope) lines.push(`    ${filePath}`);
   }
-  linhas.push('');
-  return linhas.join('\n');
+  lines.push('');
+  return lines.join('\n');
 }

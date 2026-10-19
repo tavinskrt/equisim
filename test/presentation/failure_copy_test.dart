@@ -19,10 +19,10 @@ void main() {
         limit: 1.0,
         unit: QuantityUnit.fraction,
       );
-      final texto = FailureCopy.of(f);
-      expect(texto, contains('Entrada inválida'));
-      expect(texto, contains('70,0%'));
-      expect(texto, contains('100,0%'));
+      final text = FailureCopy.of(f);
+      expect(text, contains('Entrada inválida'));
+      expect(text, contains('70,0%'));
+      expect(text, contains('100,0%'));
     });
 
     test('contagem vira inteiro, sem casa decimal', () {
@@ -33,27 +33,27 @@ void main() {
         limit: 15,
         unit: QuantityUnit.count,
       );
-      final texto = FailureCopy.of(f);
-      expect(texto, contains('Informado: 18.'));
-      expect(texto, contains('Limite: 15.'));
-      expect(texto, isNot(contains('18,0')),
+      final text = FailureCopy.of(f);
+      expect(text, contains('Informado: 18.'));
+      expect(text, contains('Limite: 15.'));
+      expect(text, isNot(contains('18,0')),
           reason: 'meio ativo não existe');
     });
 
     test('sem unidade declarada, a tela não inventa número', () {
       const f = InvalidInput('O prazo deve ser de ao menos um mês.',
           field: 'months');
-      final texto = FailureCopy.of(f);
-      expect(texto, contains('O prazo deve ser de ao menos um mês.'));
-      expect(texto, isNot(contains('Informado')));
+      final text = FailureCopy.of(f);
+      expect(text, contains('O prazo deve ser de ao menos um mês.'));
+      expect(text, isNot(contains('Informado')));
     });
 
     test('sem limite, escreve só o medido', () {
       const f = InvalidInput('Regra qualquer.',
           actual: 0.42, unit: QuantityUnit.fraction);
-      final texto = FailureCopy.of(f);
-      expect(texto, contains('Informado: 42,0%.'));
-      expect(texto, isNot(contains('Limite')));
+      final text = FailureCopy.of(f);
+      expect(text, contains('Informado: 42,0%.'));
+      expect(text, isNot(contains('Limite')));
     });
   });
 }

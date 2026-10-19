@@ -263,8 +263,8 @@ class CostOfCapital {
   /// sustenta o próprio endividamento.
   static double leverageSpread(double? leverage) {
     if (leverage == null || !leverage.isFinite) return maxCreditSpread;
-    for (final faixa in creditSpreads) {
-      if (leverage <= faixa.maxLeverage) return faixa.spread;
+    for (final band in creditSpreads) {
+      if (leverage <= band.maxLeverage) return band.spread;
     }
     return maxCreditSpread;
   }
@@ -291,8 +291,8 @@ class CostOfCapital {
   /// Prêmio de crédito para a cobertura informada.
   static double coverageSpread(double? coverage) {
     if (coverage == null || !coverage.isFinite) return maxCreditSpread;
-    for (final faixa in coverageSpreads) {
-      if (coverage >= faixa.minCoverage) return faixa.spread;
+    for (final band in coverageSpreads) {
+      if (coverage >= band.minCoverage) return band.spread;
     }
     return maxCreditSpread;
   }
@@ -336,13 +336,13 @@ class CostOfCapital {
     required double? observedCostOfDebt,
     required double riskFreeRate,
   }) {
-    final porAlavancagem = leverageSpread(leverage);
-    final despesaUtilizavel = observedCostOfDebt != null &&
+    final leverageSpreadValue = leverageSpread(leverage);
+    final usableExpense = observedCostOfDebt != null &&
         observedCostOfDebt >= riskFreeRate &&
         observedCostOfDebt <= riskFreeRate + maxCreditSpread;
-    if (!despesaUtilizavel) return porAlavancagem;
-    final porCobertura = coverageSpread(coverage);
-    return porCobertura > porAlavancagem ? porCobertura : porAlavancagem;
+    if (!usableExpense) return leverageSpreadValue;
+    final coverageSpreadValue = coverageSpread(coverage);
+    return coverageSpreadValue > leverageSpreadValue ? coverageSpreadValue : leverageSpreadValue;
   }
 
   /// Custo da dívida efetivamente aplicado: `Rf + spread(cobertura)`.
@@ -385,8 +385,8 @@ class CostOfCapital {
   /// própria tabela de prêmios: abaixo dele os dois números diriam a mesma
   /// coisa.
   bool get costOfDebtWasClamped {
-    final observado = costOfDebt;
-    return observado != null && (effectiveCostOfDebt - observado).abs() > 0.01;
+    final observed = costOfDebt;
+    return observed != null && (effectiveCostOfDebt - observed).abs() > 0.01;
   }
 
   /// Capital total: equity mais dívida. Denominador dos pesos do WACC.
@@ -425,17 +425,17 @@ class CostOfCapital {
   /// `null` sem [cashValue]: sem saber quanto é caixa, a bruta não é
   /// separável da líquida.
   double? get grossDebtShare {
-    final caixa = cashValue;
-    if (caixa == null || totalCapital <= 0) return null;
-    return (debtValue + caixa) / totalCapital;
+    final cash = cashValue;
+    if (cash == null || totalCapital <= 0) return null;
+    return (debtValue + cash) / totalCapital;
   }
 
   /// Participação do caixa, sobre o mesmo capital total. `null` sem
   /// [cashValue].
   double? get cashShare {
-    final caixa = cashValue;
-    if (caixa == null || totalCapital <= 0) return null;
-    return caixa / totalCapital;
+    final cash = cashValue;
+    if (cash == null || totalCapital <= 0) return null;
+    return cash / totalCapital;
   }
 
   /// O que o caixa rende, líquido de imposto: a taxa livre de risco.
@@ -458,12 +458,12 @@ class CostOfCapital {
   double get rawWacc {
     final wD = grossDebtShare;
     final wC = cashShare;
-    final juro = effectiveCostOfDebt * (1.0 - effectiveTaxShield);
+    final interest = effectiveCostOfDebt * (1.0 - effectiveTaxShield);
     if (wD == null || wC == null) {
-      return equityShare * costOfEquity + debtShare * juro;
+      return equityShare * costOfEquity + debtShare * interest;
     }
     return equityShare * costOfEquity +
-        wD * juro -
+        wD * interest -
         wC * afterTaxCashYield;
   }
 

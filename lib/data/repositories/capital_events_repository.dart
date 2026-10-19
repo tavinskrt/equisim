@@ -15,16 +15,16 @@ import 'package:equisim_core/equisim_core.dart';
 /// comportamento anterior.
 class CapitalEventsRepository {
   /// Lê o conteúdo do pacote.
-  final Future<String> Function() carregarPacote;
+  final Future<String> Function() loadPackage;
 
   /// Declara o repositório.
-  CapitalEventsRepository({required this.carregarPacote});
+  CapitalEventsRepository({required this.loadPackage});
 
-  Future<Map<String, CapitalEvents>>? _pacote;
+  Future<Map<String, CapitalEvents>>? _package;
 
-  Future<Map<String, CapitalEvents>> _ler() async {
+  Future<Map<String, CapitalEvents>> _read() async {
     try {
-      final json = jsonDecode(await carregarPacote());
+      final json = jsonDecode(await loadPackage());
       return json is Map<String, dynamic>
           ? CapitalEventsCodec.decodePackage(json)
           : const {};
@@ -35,5 +35,5 @@ class CapitalEventsRepository {
 
   /// Emissões e eventos de ações de [ticker]; vazio sem entrada no pacote.
   Future<CapitalEvents> eventsFor(Ticker ticker) async =>
-      (await (_pacote ??= _ler()))[ticker.value] ?? const CapitalEvents();
+      (await (_package ??= _read()))[ticker.value] ?? const CapitalEvents();
 }

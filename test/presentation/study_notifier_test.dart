@@ -17,10 +17,10 @@ Portfolio portfolioOf(
   PortfolioKind kind = PortfolioKind.principal,
 }) =>
     Portfolio.equalWeighted(
-      id: kind.name,
+      id: kind.key,
       name: switch (kind) {
         PortfolioKind.principal => 'Principal',
-        PortfolioKind.reserva => 'Reserva',
+        PortfolioKind.reserve => 'Reserva',
       },
       kind: kind,
       assets: assets,
@@ -64,7 +64,7 @@ void main() {
       final container = containerWith();
       final state = container.read(studyProvider);
       expect(state.study.principal.isEmpty, isTrue);
-      expect(state.study.reserva.isEmpty, isTrue);
+      expect(state.study.reserve.isEmpty, isTrue);
       expect(state.lastError, isNull);
     });
 
@@ -95,7 +95,7 @@ void main() {
 
       final study = container.read(studyProvider).study;
       expect(study.principal.length, 3);
-      expect(study.reserva.length, 0);
+      expect(study.reserve.length, 0);
       expect(Weights.sumsToOne(study.principal.weights), isTrue);
     });
 
@@ -127,12 +127,12 @@ void main() {
       final container = containerWith();
       final notifier = container.read(studyProvider.notifier);
       // Pesos desiguais chegam por estudo salvo: a tela não edita peso.
-      final atual = container.read(studyProvider).study;
-      notifier.load(atual.copyWith(
+      final current = container.read(studyProvider).study;
+      notifier.load(current.copyWith(
         principal: Portfolio(
-          id: atual.principal.id,
-          name: atual.principal.name,
-          kind: atual.principal.kind,
+          id: current.principal.id,
+          name: current.principal.name,
+          kind: current.principal.kind,
           entries: {
             Ticker.parse('PETR4'): PortfolioEntry(
               asset: assetOf('PETR4', 'energia'),

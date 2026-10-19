@@ -58,10 +58,10 @@ void main() {
     // capital **novo** — é o que faz o crescimento sair da fórmula —, e não o
     // do capital que já existe. A mesma expressão reagrupada é
     // `VT = capital_N + EVA_(N+1)/r`, e a segunda parcela é perpétua.
-    DcfAssumptions premissas({
+    DcfAssumptions assumptions({
       required double roic,
       double g = 0.04,
-      int? contrato,
+      int? contract,
     }) =>
         DcfAssumptions(
           projectionYears: 10,
@@ -71,14 +71,14 @@ void main() {
           terminalDiscountRate: 0.15,
           returnOnCapital: roic,
           neutralTerminalReturn: true,
-          contractYearsAfterHorizon: contrato,
-          cashTiming: CashTiming.fimDeAno,
+          contractYearsAfterHorizon: contract,
+          cashTiming: CashTiming.endOfYear,
         );
 
-    DcfOutcome firma({required double roic, int? contrato}) =>
+    DcfOutcome firm({required double roic, int? contract}) =>
         DcfCalculator.firm(
           baseProfit: 1000,
-          assumptions: premissas(roic: roic, contrato: contrato),
+          assumptions: assumptions(roic: roic, contract: contract),
           netDebt: 0,
           sharesOutstanding: 100,
         ).unwrap();
@@ -86,20 +86,20 @@ void main() {
     test('o retorno implícito do instalado é o ROIC, e não o custo', () {
       // O capital parte de `lucro_1/ROIC` e acumula a retenção; o retorno
       // médio caminha do ROIC observado em direção ao marginal, sem chegar.
-      final baixo = firma(roic: 0.08);
-      final alto = firma(roic: 0.25);
-      expect(baixo.impliedTerminalReturn!, lessThan(0.15),
+      final low = firm(roic: 0.08);
+      final high = firm(roic: 0.25);
+      expect(low.impliedTerminalReturn!, lessThan(0.15),
           reason: 'quem rende abaixo do custo continua rendendo abaixo');
-      expect(alto.impliedTerminalReturn!, greaterThan(0.15));
-      expect(baixo.impliedTerminalReturn!, greaterThan(0.08),
+      expect(high.impliedTerminalReturn!, greaterThan(0.15));
+      expect(low.impliedTerminalReturn!, greaterThan(0.08),
           reason: 'o capital novo entra ao custo e puxa a média para cima');
     });
 
     test('o excedente é negativo quando o instalado rende abaixo do custo', () {
-      final baixo = firma(roic: 0.08);
-      final alto = firma(roic: 0.25);
-      expect(baixo.discountedTerminalExcess!, lessThan(0));
-      expect(alto.discountedTerminalExcess!, greaterThan(0));
+      final low = firm(roic: 0.08);
+      final high = firm(roic: 0.25);
+      expect(low.discountedTerminalExcess!, lessThan(0));
+      expect(high.discountedTerminalExcess!, greaterThan(0));
     });
 
     test('tirar o excedente é o mesmo que cortar o contrato em zero ano', () {
@@ -108,11 +108,11 @@ void main() {
       // centavo**, porque as duas contas são a mesma álgebra por caminhos
       // diferentes — é o que impede a parcela declarada de ser aproximação.
       for (final roic in [0.08, 0.15, 0.25]) {
-        final neutro = firma(roic: roic);
-        final semExcedente = firma(roic: roic, contrato: 0);
-        final excedentePorPapel = neutro.discountedTerminalExcess! / 100;
-        expect(semExcedente.fairValuePerShare,
-            closeTo(neutro.fairValuePerShare - excedentePorPapel, 1e-9),
+        final neutral = firm(roic: roic);
+        final noExcess = firm(roic: roic, contract: 0);
+        final excessPerShare = neutral.discountedTerminalExcess! / 100;
+        expect(noExcess.fairValuePerShare,
+            closeTo(neutral.fairValuePerShare - excessPerShare, 1e-9),
             reason: 'ROIC $roic');
       }
     });
@@ -120,13 +120,13 @@ void main() {
     test('com o instalado rendendo o custo, o excedente é zero', () {
       // O caso em que o rótulo "sem lucro econômico na perpetuidade" é
       // verdadeiro: o terminal vale exatamente o capital.
-      final r = firma(roic: 0.15);
+      final r = firm(roic: 0.15);
       expect(r.impliedTerminalReturn!, closeTo(0.15, 1e-9));
       expect(r.discountedTerminalExcess!, closeTo(0, 1e-9));
     });
 
     test('vantagem competitiva concedida não tem decomposição', () {
-      final comMoat = DcfCalculator.firm(
+      final withMoat = DcfCalculator.firm(
         baseProfit: 1000,
         assumptions: DcfAssumptions(
           projectionYears: 10,
@@ -140,7 +140,7 @@ void main() {
         netDebt: 0,
         sharesOutstanding: 100,
       ).unwrap();
-      expect(comMoat.discountedTerminalExcess, isNull,
+      expect(withMoat.discountedTerminalExcess, isNull,
           reason: 'ali o terminal é outro, e a álgebra não é esta');
     });
   });
@@ -177,13 +177,13 @@ void main() {
       // descontá-lo inteiro no dia 31 de dezembro cobra doze meses de espera
       // por dinheiro que em média chegou no sexto. Com taxa plana o fator é o
       // mesmo em todo o valor, e a conta manual o carrega para fora.
-      final meioDeAno = math.sqrt(1.10);
+      final midYear = math.sqrt(1.10);
       var vp = 0.0;
       for (var t = 1; t <= 3; t++) {
         vp += 100 * math.pow(1.05, t) / math.pow(1.10, t);
       }
       vp += o.terminalValue / math.pow(1.10, 3);
-      expect(o.fairValuePerShare, closeTo(vp * meioDeAno / 10, 1e-6));
+      expect(o.fairValuePerShare, closeTo(vp * midYear / 10, 1e-6));
     });
 
     test('o terminal neutro não depende do crescimento perpétuo', () {
@@ -209,24 +209,24 @@ void main() {
           netDebt: 0,
           sharesOutstanding: 10,
         ).unwrap();
-        final lucroFinal = o.projectedFlows.last; // retenção nula: fluxo = lucro
-        expect(o.terminalValue, closeTo(lucroFinal * (1 + gInf) / 0.10, 1e-6),
+        final finalProfit = o.projectedFlows.last; // retenção nula: fluxo = lucro
+        expect(o.terminalValue, closeTo(finalProfit * (1 + gInf) / 0.10, 1e-6),
             reason: 'o denominador é o desconto, não o spread');
       }
       // E o valor terminal continua finito quando g_∞ se aproxima de r, que é
       // onde a perpetuidade de Gordon explodiria.
-      final quaseNoDesconto = terminal(0.0999);
-      expect(quaseNoDesconto.isFinite, isTrue);
+      final nearDiscount = terminal(0.0999);
+      expect(nearDiscount.isFinite, isTrue);
     });
 
     test('o freio de reinvestimento reduz o fluxo distribuído', () {
-      final semFreio = DcfCalculator.firm(
+      final withoutBrake = DcfCalculator.firm(
         baseProfit: 100,
         assumptions: flat,
         netDebt: 0,
         sharesOutstanding: 10,
       ).unwrap();
-      final comFreio = DcfCalculator.firm(
+      final withBrake = DcfCalculator.firm(
         baseProfit: 100,
         assumptions: flat.copyWith(returnOnCapital: 0.125),
         netDebt: 0,
@@ -234,8 +234,8 @@ void main() {
       ).unwrap();
 
       // g₁ = 5% e retorno de 12,5% → b₁ = 40%.
-      expect(comFreio.projectedFlows[0], closeTo(105.0 * 0.60, 1e-9));
-      expect(comFreio.fairValuePerShare, lessThan(semFreio.fairValuePerShare),
+      expect(withBrake.projectedFlows[0], closeTo(105.0 * 0.60, 1e-9));
+      expect(withBrake.fairValuePerShare, lessThan(withoutBrake.fairValuePerShare),
           reason: 'crescer exige reinvestir; descontar o lucro inteiro e '
               'fazê-lo crescer conta o mesmo dinheiro duas vezes');
     });
@@ -254,21 +254,21 @@ void main() {
     });
 
     test('dívida líquida reduz o valor do equity', () {
-      final semDivida = DcfCalculator.firm(
+      final withoutDebt = DcfCalculator.firm(
         baseProfit: 100,
         assumptions: flat,
         netDebt: 0,
         sharesOutstanding: 10,
       ).unwrap();
-      final comDivida = DcfCalculator.firm(
+      final withDebt = DcfCalculator.firm(
         baseProfit: 100,
         assumptions: flat,
         netDebt: 500,
         sharesOutstanding: 10,
       ).unwrap();
-      expect(comDivida.equityValue,
-          closeTo(semDivida.equityValue - 500, 1e-6));
-      expect(comDivida.equityShare, lessThan(semDivida.equityShare));
+      expect(withDebt.equityValue,
+          closeTo(withoutDebt.equityValue - 500, 1e-6));
+      expect(withDebt.equityShare, lessThan(withoutDebt.equityShare));
     });
 
     test('a participação do equity expõe a ponte fina', () {
@@ -281,14 +281,14 @@ void main() {
       // Dívida a 95% do valor da firma deixa 5% de equity — abaixo dos 35% em
       // que a ressalva `ponteFragil` avisa; é o caso RENT3, em que o preço por
       // papel vira resíduo.
-      final fino = DcfCalculator.firm(
+      final thin = DcfCalculator.firm(
         baseProfit: 100,
         assumptions: flat,
         netDebt: o.enterpriseValue * 0.95,
         sharesOutstanding: 10,
       ).unwrap();
-      expect(fino.equityShare, closeTo(0.05, 1e-6));
-      expect(fino.equityShare, lessThan(ValuationDiagnostics.fragileEquityShare));
+      expect(thin.equityShare, closeTo(0.05, 1e-6));
+      expect(thin.equityShare, lessThan(ValuationDiagnostics.fragileEquityShare));
     });
 
     test('lucro operacional negativo não é avaliável pela via da firma', () {
@@ -332,14 +332,14 @@ void main() {
     });
 
     test('sem retenção, o terminal é LPA ÷ Ke', () {
-      const semCrescimento = DcfAssumptions(
+      const noGrowth = DcfAssumptions(
         projectionYears: 1,
         growthRate: 0.0,
         perpetualGrowth: 0.0,
         discountRate: 0.10,
       );
       final o =
-          DcfCalculator.shareholder(baseProfit: 10, assumptions: semCrescimento)
+          DcfCalculator.shareholder(baseProfit: 10, assumptions: noGrowth)
               .unwrap();
       expect(o.terminalValue, closeTo(100.0, 1e-9));
     });

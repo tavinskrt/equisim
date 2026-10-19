@@ -1,4 +1,4 @@
-# Auto detect text files and perform LF normalization
+# Detecta arquivos de texto e normaliza o fim de linha para LF
 * text=auto
 
 # Scripts de instalacao: o fim de linha errado quebra o interpretador:

@@ -31,7 +31,7 @@ double _minimumRatio(FinInkToken token) => switch (token) {
       // do grupo de ativos. Como literal no ponto de uso, `#3B82F6` dava
       // 3,25:1 sobre superficie clara -- reprovado. O valor claro foi
       // escurecido para #0B62EF ate cruzar o piso.
-      FinInkToken.reserva => 4.5,
+      FinInkToken.reserve => 4.5,
     };
 
 /// Razao de contraste WCAG 2.1 entre duas cores opacas.

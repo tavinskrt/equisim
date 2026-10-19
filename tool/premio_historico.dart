@@ -38,119 +38,119 @@ import 'validation/congelado.dart';
 import 'validation/ibovespa_longo.dart';
 import 'validation/regression.dart';
 
-const _saida = 'docs/validacao/premio_historico.json';
-const _janelas = [5, 10, 15, 20];
-const _janelasDasCoortes = [5, 10];
-const _referencia = CapmInputs.defaultMarketPremium;
-const _casos = ['WEGE3', 'ITUB4', 'VALE3', 'SAPR11', 'RENT3'];
+const _output = 'docs/validacao/premio_historico.json';
+const _windows = [5, 10, 15, 20];
+const _cohortWindows = [5, 10];
+const _reference = CapmInputs.defaultMarketPremium;
+const _cases = ['WEGE3', 'ITUB4', 'VALE3', 'SAPR11', 'RENT3'];
 
-String _pct(double v, [int casas = 2]) =>
-    '${(v * 100).toStringAsFixed(casas)}%';
+String _pct(double v, [int decimals = 2]) =>
+    '${(v * 100).toStringAsFixed(decimals)}%';
 
-double _mediana(List<double> v) {
+double _median(List<double> v) {
   final o = [...v]..sort();
   if (o.isEmpty) return double.nan;
   final m = o.length ~/ 2;
   return o.length.isOdd ? o[m] : (o[m - 1] + o[m]) / 2;
 }
 
-/// O prêmio de uma janela terminada em [fim], com a barra de erro.
-Future<Map<String, Object?>> _medir({
+/// O prêmio de uma janela terminada em [end], com a barra de erro.
+Future<Map<String, Object?>> _measure({
   required MacroRepository macro,
-  required IbovespaLongo indice,
-  required DateTime fim,
-  required int anos,
+  required LongIbovespa index,
+  required DateTime end,
+  required int years,
 }) async {
-  final janela = DateRange(DateTime(fim.year - anos, fim.month, fim.day), fim);
-  final ancoras = (await ResolveMarketAnchors.call(
+  final window = DateRange(DateTime(end.year - years, end.month, end.day), end);
+  final anchors = (await ResolveMarketAnchors.call(
     macro: macro,
-    benchmark: indice,
-    asOf: fim,
-    windowYears: anos,
+    benchmark: index,
+    asOf: end,
+    windowYears: years,
   ))
       .unwrap();
   // O CDI da janela precisa estar inteiro: sem ele, as âncoras recuam para o
   // valor de 2026 e o prêmio mediria outra coisa.
-  final cdi = (await macro.riskFreeDaily(janela)).unwrap();
-  final cdiCompleto = cdi.points.isNotEmpty &&
-      cdi.points.first.date.difference(janela.start).inDays.abs() <= 10;
-  final pontos = (await indice.ibovespa(janela)).unwrap().points;
-  final indiceCompleto = pontos.isNotEmpty &&
-      pontos.first.date.difference(janela.start).inDays.abs() <= 10;
+  final cdi = (await macro.riskFreeDaily(window)).unwrap();
+  final cdiComplete = cdi.points.isNotEmpty &&
+      cdi.points.first.date.difference(window.start).inDays.abs() <= 10;
+  final points = (await index.ibovespa(window)).unwrap().points;
+  final indexComplete = points.isNotEmpty &&
+      points.first.date.difference(window.start).inDays.abs() <= 10;
 
   // Erro-padrão da média de um prêmio: `σ ÷ √T`, com a volatilidade anual dos
   // retornos diários do índice e `T` em anos. É a conta que diz quanto a
   // janela sabe.
-  final retornos = <double>[
-    for (var i = 1; i < pontos.length; i++)
-      if (pontos[i - 1].close > 0) pontos[i].close / pontos[i - 1].close - 1,
+  final returns = <double>[
+    for (var i = 1; i < points.length; i++)
+      if (points[i - 1].close > 0) points[i].close / points[i - 1].close - 1,
   ];
-  double? erro;
-  if (retornos.length > 1) {
-    final media = retornos.reduce((a, b) => a + b) / retornos.length;
-    final variancia = retornos
-            .map((r) => (r - media) * (r - media))
+  double? error;
+  if (returns.length > 1) {
+    final mean = returns.reduce((a, b) => a + b) / returns.length;
+    final variance = returns
+            .map((r) => (r - mean) * (r - mean))
             .reduce((a, b) => a + b) /
-        (retornos.length - 1);
-    erro = math.sqrt(variancia) * math.sqrt(252.0) / math.sqrt(anos.toDouble());
+        (returns.length - 1);
+    error = math.sqrt(variance) * math.sqrt(252.0) / math.sqrt(years.toDouble());
   }
   return {
-    'fim': fim.toIso8601String().substring(0, 10),
-    'anos': anos,
-    'ibovespa': ancoras.marketCagr,
-    'cdi': ancoras.riskFreeCagr,
-    'premio': premioDasAncoras(ancoras),
-    'erroPadrao': erro,
-    'completa': cdiCompleto && indiceCompleto,
+    'fim': end.toIso8601String().substring(0, 10),
+    'anos': years,
+    'ibovespa': anchors.marketCagr,
+    'cdi': anchors.riskFreeCagr,
+    'premio': premiumOfAnchors(anchors),
+    'erroPadrao': error,
+    'completa': cdiComplete && indexComplete,
   };
 }
 
 /// As datas das coortes trimestrais do backtest: o último dia de cada
 /// trimestre, de 31/03/2018 a 30/09/2025.
-List<DateTime> _datasDasCoortes() => [
-      for (var ano = 2018; ano <= 2025; ano++)
-        for (final mes in const [3, 6, 9, 12])
-          if (!(ano == 2025 && mes == 12)) DateTime(ano, mes + 1, 0),
+List<DateTime> _cohortDates() => [
+      for (var year = 2018; year <= 2025; year++)
+        for (final month in const [3, 6, 9, 12])
+          if (!(year == 2025 && month == 12)) DateTime(year, month + 1, 0),
     ];
 
-class _Leitura {
-  _Leitura(this.rotulo, this.premio);
-  final String rotulo;
-  final double premio;
-  final Map<String, int> justo = {};
-  final Map<String, double> potencial = {};
+class _Reading {
+  _Reading(this.label, this.premium);
+  final String label;
+  final double premium;
+  final Map<String, int> fairValue = {};
+  final Map<String, double> upside = {};
 }
 
 Future<void> main(List<String> args) async {
-  final c = await Congelado.montar();
+  final c = await Frozen.build();
   try {
-    final hoje = hojeCongelado;
-    final indice = await IbovespaLongo.montar(
+    final today = frozenToday;
+    final index = await LongIbovespa.build(
       c.ctx.benchmark,
-      janelaDaFonte: DateRange(DateTime(hoje.year - 10, hoje.month, hoje.day), hoje),
+      sourceWindow: DateRange(DateTime(today.year - 10, today.month, today.day), today),
     );
     stdout.writeln('-- Ibovespa emendado: SGS 7 até '
-        '${indice.inicioDaFonte.toIso8601String().substring(0, 10)}, fonte de '
+        '${index.sourceStart.toIso8601String().substring(0, 10)}, fonte de '
         'mercado depois; razão mediana na sobreposição '
-        '${indice.razaoNaSobreposicao.toStringAsFixed(6)} --');
+        '${index.overlapRatio.toStringAsFixed(6)} --');
 
     // -------------------------------------------------------------------
     // 1) Sobre a entrada congelada
     // -------------------------------------------------------------------
-    final doAplicativo = premioDasAncoras(c.anchors);
+    final fromApp = premiumOfAnchors(c.anchors);
     stdout.writeln('');
     stdout.writeln('-- o prêmio histórico em 14/09/2026, por janela --');
     stdout.writeln('  o do aplicativo (âncoras congeladas, dez anos): '
-        '${_pct(doAplicativo)} = (1 + ${_pct(c.anchors.marketCagr)}) ÷ '
+        '${_pct(fromApp)} = (1 + ${_pct(c.anchors.marketCagr)}) ÷ '
         '(1 + ${_pct(c.anchors.riskFreeCagr)}) − 1');
-    final porJanela = <Map<String, Object?>>[];
-    for (final anos in _janelas) {
-      final m = await _medir(
-          macro: c.ctx.macro, indice: indice, fim: hoje, anos: anos);
-      porJanela.add(m);
+    final byWindow = <Map<String, Object?>>[];
+    for (final years in _windows) {
+      final m = await _measure(
+          macro: c.ctx.macro, index: index, end: today, years: years);
+      byWindow.add(m);
       final e = m['erroPadrao'] as double?;
       final p = m['premio'] as double;
-      stdout.writeln('  ${anos.toString().padLeft(2)} anos   Ibovespa '
+      stdout.writeln('  ${years.toString().padLeft(2)} anos   Ibovespa '
           '${_pct(m['ibovespa'] as double)}   CDI ${_pct(m['cdi'] as double)}   '
           'prêmio ${_pct(p)}   erro-padrão ${e == null ? '—' : _pct(e)}   '
           '95%: ${e == null ? '—' : '${_pct(p - 1.96 * e)} a ${_pct(p + 1.96 * e)}'}'
@@ -158,29 +158,29 @@ Future<void> main(List<String> args) async {
     }
 
     // O universo reavaliado com cada prêmio.
-    final candidatos = <(String, double)>[
-      ('5,5% fixo', _referencia),
-      for (final m in porJanela)
+    final candidates = <(String, double)>[
+      ('5,5% fixo', _reference),
+      for (final m in byWindow)
         ('${m['anos']} anos', m['premio'] as double),
     ];
-    final leituras = <_Leitura>[];
-    for (final (rotulo, premio) in candidatos) {
-      final l = _Leitura(rotulo, premio);
-      final avaliadas = <Ticker, ValuationResult?>{};
+    final readings = <_Reading>[];
+    for (final (label, premium) in candidates) {
+      final l = _Reading(label, premium);
+      final evaluated = <Ticker, ValuationResult?>{};
       var i = 0;
-      for (final t in c.universo) {
+      for (final t in c.universe) {
         i++;
-        if (i % 50 == 0) stderr.write('  $rotulo: $i/${c.universo.length}   \r');
-        final prep = await c.preparar(t, premio: premio);
+        if (i % 50 == 0) stderr.write('  $label: $i/${c.universe.length}   \r');
+        final prep = await c.prepare(t, premium: premium);
         if (prep.isErr) continue;
         final r = ValuationCascade.evaluate(prep.unwrap());
-        if (identical(rotulo, candidatos.first.$1)) avaliadas[t] = r.valueOrNull;
+        if (identical(label, candidates.first.$1)) evaluated[t] = r.valueOrNull;
         if (r.isErr) continue;
-        l.justo[t.value] = r.unwrap().fairValue.cents;
-        l.potencial[t.value] = r.unwrap().upside;
+        l.fairValue[t.value] = r.unwrap().fairValue.cents;
+        l.upside[t.value] = r.unwrap().upside;
       }
-      if (identical(rotulo, candidatos.first.$1)) {
-        final div = await c.conferirContraGabarito(avaliadas);
+      if (identical(label, candidates.first.$1)) {
+        final div = await c.checkAgainstAnswerKey(evaluated);
         if (div == null) {
           stderr.writeln('AVISO: gabarito ausente; montagem não conferida.');
         } else if (div.isNotEmpty) {
@@ -190,51 +190,51 @@ Future<void> main(List<String> args) async {
           return;
         }
       }
-      leituras.add(l);
+      readings.add(l);
     }
     stderr.write('                                        \r');
 
-    final base = leituras.first;
-    final efeitos = <Map<String, Object?>>[];
+    final base = readings.first;
+    final effects = <Map<String, Object?>>[];
     stdout.writeln('');
     stdout.writeln('-- o universo reavaliado --');
     stdout.writeln('  prêmio              avaliados   potencial mediano   acima '
         'de zero   preço justo vs 5,5%   postos');
-    for (final l in leituras) {
-      final pots = l.potencial.values.toList();
-      final comuns = l.justo.keys.where(base.justo.containsKey).toList()..sort();
-      final variacao = <double>[
-        for (final k in comuns)
-          if (base.justo[k]! != 0) l.justo[k]! / base.justo[k]! - 1,
+    for (final l in readings) {
+      final upsideValues = l.upside.values.toList();
+      final common = l.fairValue.keys.where(base.fairValue.containsKey).toList()..sort();
+      final changeList = <double>[
+        for (final k in common)
+          if (base.fairValue[k]! != 0) l.fairValue[k]! / base.fairValue[k]! - 1,
       ];
-      final rho = comuns.length < 3
+      final rho = common.length < 3
           ? null
           : Regression.spearman(
-              [for (final k in comuns) base.potencial[k]!],
-              [for (final k in comuns) l.potencial[k]!],
+              [for (final k in common) base.upside[k]!],
+              [for (final k in common) l.upside[k]!],
             );
-      final acima = pots.where((p) => p > 0).length;
-      final medPot = _mediana(pots);
-      final medVar = variacao.isEmpty ? null : _mediana(variacao);
-      stdout.writeln('  ${'${l.rotulo} (${_pct(l.premio)})'.padRight(20)}'
-          '${l.justo.length.toString().padLeft(9)}   '
-          '${_pct(medPot).padLeft(17)}   '
-          '${'$acima de ${pots.length}'.padLeft(13)}   '
+      final above = upsideValues.where((p) => p > 0).length;
+      final medianUpside = _median(upsideValues);
+      final medVar = changeList.isEmpty ? null : _median(changeList);
+      stdout.writeln('  ${'${l.label} (${_pct(l.premium)})'.padRight(20)}'
+          '${l.fairValue.length.toString().padLeft(9)}   '
+          '${_pct(medianUpside).padLeft(17)}   '
+          '${'$above de ${upsideValues.length}'.padLeft(13)}   '
           '${(medVar == null ? '—' : _pct(medVar)).padLeft(19)}   '
           '${rho == null ? '—' : rho.toStringAsFixed(3)}');
-      efeitos.add({
-        'rotulo': l.rotulo,
-        'premio': l.premio,
-        'avaliados': l.justo.length,
-        'potencialMediano': medPot,
-        'acimaDeZero': acima,
+      effects.add({
+        'rotulo': l.label,
+        'premio': l.premium,
+        'avaliados': l.fairValue.length,
+        'potencialMediano': medianUpside,
+        'acimaDeZero': above,
         'precoJustoMedianoContraReferencia': medVar,
         'spearmanContraReferencia': rho,
         'casos': {
-          for (final t in _casos)
+          for (final t in _cases)
             t: {
-              'justoCentavos': l.justo[t],
-              'potencial': l.potencial[t],
+              'justoCentavos': l.fairValue[t],
+              'potencial': l.upside[t],
             },
         },
       });
@@ -246,51 +246,51 @@ Future<void> main(List<String> args) async {
     stdout.writeln('');
     stdout.writeln('-- o prêmio histórico em cada data de coorte --');
     stdout.writeln('  data          5 anos (erro)         10 anos (erro)');
-    final porCoorte = <Map<String, Object?>>[];
-    for (final t in _datasDasCoortes()) {
-      final linha = <String, Object?>{'data': t.toIso8601String().substring(0, 10)};
-      final partes = <String>[];
-      for (final anos in _janelasDasCoortes) {
+    final byCohort = <Map<String, Object?>>[];
+    for (final t in _cohortDates()) {
+      final row = <String, Object?>{'data': t.toIso8601String().substring(0, 10)};
+      final parts = <String>[];
+      for (final years in _cohortWindows) {
         final m =
-            await _medir(macro: c.ctx.macro, indice: indice, fim: t, anos: anos);
-        linha['janela$anos'] = m;
+            await _measure(macro: c.ctx.macro, index: index, end: t, years: years);
+        row['janela$years'] = m;
         final e = m['erroPadrao'] as double?;
-        partes.add('${_pct(m['premio'] as double).padLeft(7)} '
+        parts.add('${_pct(m['premio'] as double).padLeft(7)} '
             '(${e == null ? '—' : _pct(e, 1)})'
             '${m['completa'] == true ? '' : '*'}');
       }
-      porCoorte.add(linha);
-      stdout.writeln('  ${linha['data']}    ${partes.join('      ')}');
+      byCohort.add(row);
+      stdout.writeln('  ${row['data']}    ${parts.join('      ')}');
     }
     final p10 = [
-      for (final l in porCoorte)
+      for (final l in byCohort)
         ((l['janela10'] as Map)['premio'] as double),
     ];
     final p5 = [
-      for (final l in porCoorte) ((l['janela5'] as Map)['premio'] as double),
+      for (final l in byCohort) ((l['janela5'] as Map)['premio'] as double),
     ];
     stdout.writeln('  10 anos: de ${_pct(p10.reduce(math.min))} a '
-        '${_pct(p10.reduce(math.max))}, mediana ${_pct(_mediana(p10))}; '
+        '${_pct(p10.reduce(math.max))}, mediana ${_pct(_median(p10))}; '
         'negativos: ${p10.where((p) => p <= 0).length} de ${p10.length}');
     stdout.writeln('   5 anos: de ${_pct(p5.reduce(math.min))} a '
-        '${_pct(p5.reduce(math.max))}, mediana ${_pct(_mediana(p5))}; '
+        '${_pct(p5.reduce(math.max))}, mediana ${_pct(_median(p5))}; '
         'negativos: ${p5.where((p) => p <= 0).length} de ${p5.length}');
 
-    File(_saida).writeAsStringSync(const JsonEncoder.withIndent(' ').convert({
+    File(_output).writeAsStringSync(const JsonEncoder.withIndent(' ').convert({
       'geradoPor': 'tool/premio_historico.dart',
-      'dataDaEntrada': hoje.toIso8601String().substring(0, 10),
+      'dataDaEntrada': today.toIso8601String().substring(0, 10),
       'emenda': {
         'inicioDaFonteDeMercado':
-            indice.inicioDaFonte.toIso8601String().substring(0, 10),
-        'razaoMedianaNaSobreposicao': indice.razaoNaSobreposicao,
+            index.sourceStart.toIso8601String().substring(0, 10),
+        'razaoMedianaNaSobreposicao': index.overlapRatio,
       },
-      'premioDoAplicativoDezAnos': doAplicativo,
-      'porJanela': porJanela,
-      'efeitos': efeitos,
-      'porCoorte': porCoorte,
+      'premioDoAplicativoDezAnos': fromApp,
+      'porJanela': byWindow,
+      'efeitos': effects,
+      'porCoorte': byCohort,
     }));
     stdout.writeln('');
-    stdout.writeln('escrito $_saida');
+    stdout.writeln('escrito $_output');
   } finally {
     await c.ctx.dispose();
   }

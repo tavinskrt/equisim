@@ -26,13 +26,13 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'cvm/csv.dart';
 
-const _saida = 'assets/cvm/outorgas.json';
-const _relatorio = 'docs/validacao/outorgas.json';
+const _output = 'assets/cvm/outorgas.json';
+const _report = 'docs/validacao/outorgas.json';
 
 /// Referência mínima do formulário: antes disso, o prazo é velho demais.
-final _referenciaMinima = DateTime.utc(2020, 1, 1);
+final _minReference = DateTime.utc(2020, 1, 1);
 
-DateTime? _dia(String? v) {
+DateTime? _day(String? v) {
   if (v == null || v.length < 10) return null;
   return DateTime.tryParse('${v.substring(0, 10)}T00:00:00Z');
 }
@@ -46,107 +46,107 @@ void main() {
         '--docs FRE --destino data/cvm/fre');
     exit(2);
   }
-  final ponte = <String, List<String>>{};
-  final pares = (jsonDecode(File('docs/validacao/ponte_cvm.json')
+  final bridge = <String, List<String>>{};
+  final pairs = (jsonDecode(File('docs/validacao/ponte_cvm.json')
           .readAsStringSync()) as Map<String, dynamic>)['ponte']
       as Map<String, dynamic>;
-  for (final p in pares.entries) {
-    (ponte[p.value as String] ??= []).add(p.key);
+  for (final p in pairs.entries) {
+    (bridge[p.value as String] ??= []).add(p.key);
   }
-  final registro = B3RegistryCodec.decodePackage(
+  final registry = B3RegistryCodec.decodePackage(
       jsonDecode(File('assets/b3/emissores.json').readAsStringSync())
           as Map<String, dynamic>);
 
   // CNPJ → documento mais recente com concessão: maior referência, e nela a
   // maior versão.
-  final porCnpj = <String, ({DateTime ref, int versao, List<String> duracoes})>{};
-  final arquivos = dir
+  final byCnpj = <String, ({DateTime ref, int version, List<String> durations})>{};
+  final files = dir
       .listSync()
       .whereType<File>()
       .where((f) => f.path.contains('fre_cia_aberta_ativo_intangivel_'))
       .toList()
     ..sort((a, b) => a.path.compareTo(b.path));
-  for (final f in arquivos) {
-    for (final r in lerCsvCvm(f)) {
+  for (final f in files) {
+    for (final r in readCvmCsv(f)) {
       if (!(r['Tipo_Ativo'] ?? '').startsWith('Concess')) continue;
       final cnpj = r['CNPJ_Companhia'];
-      final ref = _dia(r['Data_Referencia']);
-      final versao = int.tryParse(r['Versao'] ?? '');
-      if (cnpj == null || ref == null || versao == null) continue;
-      final atual = porCnpj[cnpj];
-      if (atual == null ||
-          ref.isAfter(atual.ref) ||
-          (ref.isAtSameMomentAs(atual.ref) && versao > atual.versao)) {
-        porCnpj[cnpj] = (ref: ref, versao: versao, duracoes: [r['Duracao'] ?? '']);
-      } else if (ref.isAtSameMomentAs(atual.ref) && versao == atual.versao) {
-        atual.duracoes.add(r['Duracao'] ?? '');
+      final ref = _day(r['Data_Referencia']);
+      final version = int.tryParse(r['Versao'] ?? '');
+      if (cnpj == null || ref == null || version == null) continue;
+      final current = byCnpj[cnpj];
+      if (current == null ||
+          ref.isAfter(current.ref) ||
+          (ref.isAtSameMomentAs(current.ref) && version > current.version)) {
+        byCnpj[cnpj] = (ref: ref, version: version, durations: [r['Duracao'] ?? '']);
+      } else if (ref.isAtSameMomentAs(current.ref) && version == current.version) {
+        current.durations.add(r['Duracao'] ?? '');
       }
     }
   }
 
-  final pacote = <String, ConcessionTerm>{};
-  final linhas = <Map<String, Object?>>[];
-  for (final e in porCnpj.entries) {
-    final tickers = ponte[e.key];
+  final package = <String, ConcessionTerm>{};
+  final rows = <Map<String, Object?>>[];
+  for (final e in byCnpj.entries) {
+    final tickers = bridge[e.key];
     if (tickers == null) continue;
-    final resumo = FreConcessionTerm.summarize(e.value.duracoes, e.value.ref);
-    final recente = !e.value.ref.isBefore(_referenciaMinima);
-    final entra = recente && resumo.end != null;
+    final summary = FreConcessionTerm.summarize(e.value.durations, e.value.ref);
+    final recent = !e.value.ref.isBefore(_minReference);
+    final enters = recent && summary.end != null;
     for (final t in tickers) {
-      final emissor = registro[t.length >= 4 ? t.substring(0, 4) : ''];
-      final c = emissor?.classification;
-      final concessao = c != null &&
+      final issuer = registry[t.length >= 4 ? t.substring(0, 4) : ''];
+      final c = issuer?.classification;
+      final concession = c != null &&
           ConcessionSectors.hasFiniteTerm(
               sectorKey: c.sectorKey, industry: c.industry);
-      linhas.add({
+      rows.add({
         'ticker': t,
         'cnpj': e.key,
-        'concessao': concessao,
+        'concessao': concession,
         'classificacao': c?.label,
         'referencia': _fmt(e.value.ref),
-        'versao': e.value.versao,
-        'contratos': resumo.contratos,
-        'lidos': resumo.lidos,
-        'vigentes': resumo.vigentes,
-        'fim': resumo.end == null ? null : _fmt(resumo.end!),
-        'entra': entra,
-        'motivo': entra
+        'versao': e.value.version,
+        'contratos': summary.contracts,
+        'lidos': summary.readCount,
+        'vigentes': summary.inForceCount,
+        'fim': summary.end == null ? null : _fmt(summary.end!),
+        'entra': enters,
+        'motivo': enters
             ? null
-            : !recente
+            : !recent
                 ? 'formulário de ${e.value.ref.year}, antes de 2020'
                 : 'nenhuma outorga vigente com data legível',
       });
-      if (entra) {
-        pacote[t] = ConcessionTerm(
-          end: resumo.end!,
-          contracts: resumo.contratos,
-          parsed: resumo.lidos,
-          active: resumo.vigentes,
+      if (enters) {
+        package[t] = ConcessionTerm(
+          end: summary.end!,
+          contracts: summary.contracts,
+          parsed: summary.readCount,
+          active: summary.inForceCount,
           reference: e.value.ref,
         );
       }
     }
   }
-  linhas.sort((a, b) => (a['ticker']! as String).compareTo(b['ticker']! as String));
+  rows.sort((a, b) => (a['ticker']! as String).compareTo(b['ticker']! as String));
 
-  final maisRecente = porCnpj.values
+  final latest = byCnpj.values
       .map((v) => v.ref)
       .fold<DateTime>(DateTime.utc(2000), (a, b) => b.isAfter(a) ? b : a);
-  File(_saida)
+  File(_output)
     ..parent.createSync(recursive: true)
     ..writeAsStringSync(
-        jsonEncode(ConcessionTermsCodec.encode(pacote, geradoEm: maisRecente)));
-  File(_relatorio)
-      .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(linhas));
+        jsonEncode(ConcessionTermsCodec.encode(package, generatedAt: latest)));
+  File(_report)
+      .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(rows));
 
-  final concessoes = linhas.where((l) => l['concessao'] == true).toList();
-  stdout.writeln('  companhias com concessão no FRE: ${porCnpj.length}');
-  stdout.writeln('  tickers ligados: ${linhas.length}, no pacote: ${pacote.length}');
-  stdout.writeln('  concessões pela classificação da B3: ${concessoes.length}');
-  for (final l in concessoes) {
+  final concessions = rows.where((l) => l['concessao'] == true).toList();
+  stdout.writeln('  companhias com concessão no FRE: ${byCnpj.length}');
+  stdout.writeln('  tickers ligados: ${rows.length}, no pacote: ${package.length}');
+  stdout.writeln('  concessões pela classificação da B3: ${concessions.length}');
+  for (final l in concessions) {
     stdout.writeln('    ${(l['ticker']! as String).padRight(7)} '
         'ref ${l['referencia']}  ${l['vigentes']}/${l['contratos']} vigentes  '
         'fim ${l['fim'] ?? '—'}  ${l['entra'] == true ? 'ENTRA' : l['motivo']}');
   }
-  stdout.writeln('  gravado $_saida e $_relatorio');
+  stdout.writeln('  gravado $_output e $_report');
 }

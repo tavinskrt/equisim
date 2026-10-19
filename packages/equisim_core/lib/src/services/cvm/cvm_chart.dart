@@ -26,13 +26,15 @@
 /// Ver `docs/validacao/cvm_conferencia.md`.
 library;
 
+import '../../audit/wire_keyed.dart';
+
 /// Uma linha de demonstração, como a CVM a publica.
 ///
 /// **O valor é guardado em centavos inteiros**, e não em `double`. O CSV traz
 /// `VL_CONTA` como texto — `265438605.0000000000` — e uma escala em
 /// `ESCALA_MOEDA`, quase sempre MIL. Converter o texto para `double` e depois
 /// de volta para centavos presume que o `double` esteja limpo, o que é
-/// presunção desnecessária quando a origem é texto. [CvmAccountLine.doTexto]
+/// presunção desnecessária quando a origem é texto. [CvmAccountLine.fromText]
 /// vai do texto ao inteiro sem passar por ponto flutuante.
 class CvmAccountLine {
   /// `CD_CONTA` — o código do plano, com níveis separados por ponto.
@@ -45,7 +47,7 @@ class CvmAccountLine {
   final int cents;
 
   /// Declara a linha a partir dos centavos.
-  const CvmAccountLine.emCentavos({
+  const CvmAccountLine.inCents({
     required this.code,
     required this.label,
     required this.cents,
@@ -57,9 +59,9 @@ class CvmAccountLine {
   /// decimal, e converter de volta para centavos arredonda. Serve para teste
   /// e para quem já tem o número pronto de outra fonte.
   ///
-  /// **A ingestão da CVM não usa isto** — usa [CvmAccountLine.doTexto], que
+  /// **A ingestão da CVM não usa isto** — usa [CvmAccountLine.fromText], que
   /// vai do texto do CSV ao inteiro sem ponto flutuante no caminho.
-  CvmAccountLine.aproximada({
+  CvmAccountLine.approximate({
     required this.code,
     required this.label,
     required double value,
@@ -67,21 +69,21 @@ class CvmAccountLine {
 
   /// Declara a linha a partir do texto do CSV, **sem ponto flutuante**.
   ///
-  /// - [valor]: `VL_CONTA` como veio, com ou sem sinal e casas decimais.
-  /// - [escala]: 1000 para `ESCALA_MOEDA` igual a MIL, 1 caso contrário.
+  /// - [value]: `VL_CONTA` como veio, com ou sem sinal e casas decimais.
+  /// - [scale]: 1000 para `ESCALA_MOEDA` igual a MIL, 1 caso contrário.
   ///
   /// Devolve `null` para texto que não seja número — o que é resposta, e não
   /// falha: linha ilegível não entra na demonstração.
-  static CvmAccountLine? doTexto({
+  static CvmAccountLine? fromText({
     required String code,
     required String label,
-    required String valor,
-    int escala = 1,
+    required String value,
+    int scale = 1,
   }) {
-    final c = _centavos(valor, escala);
+    final c = _cents(value, scale);
     return c == null
         ? null
-        : CvmAccountLine.emCentavos(code: code, label: label, cents: c);
+        : CvmAccountLine.inCents(code: code, label: label, cents: c);
   }
 
   /// Texto decimal para centavos, com a escala aplicada, em aritmética
@@ -96,38 +98,38 @@ class CvmAccountLine {
   /// Usa [BigInt] no caminho: o ativo total de uma companhia grande em
   /// centavos passa de 1e14, e a escala MIL o multiplica de novo. O resultado
   /// é recusado se não couber em `int`, em vez de estourar em silêncio.
-  static int? _centavos(String bruto, int escala) {
-    var s = bruto.trim();
-    if (s.isEmpty || escala <= 0) return null;
-    var negativo = false;
+  static int? _cents(String raw, int scale) {
+    var s = raw.trim();
+    if (s.isEmpty || scale <= 0) return null;
+    var negative = false;
     if (s.startsWith('-')) {
-      negativo = true;
+      negative = true;
       s = s.substring(1);
     } else if (s.startsWith('+')) {
       s = s.substring(1);
     }
-    final partes = s.split('.');
-    if (partes.length > 2) return null;
-    final inteira = partes[0].isEmpty ? '0' : partes[0];
-    final decimais = partes.length == 2 ? partes[1] : '';
-    if (!RegExp(r'^\d+$').hasMatch(inteira)) return null;
-    if (decimais.isNotEmpty && !RegExp(r'^\d+$').hasMatch(decimais)) {
+    final parts = s.split('.');
+    if (parts.length > 2) return null;
+    final whole = parts[0].isEmpty ? '0' : parts[0];
+    final decimals = parts.length == 2 ? parts[1] : '';
+    if (!RegExp(r'^\d+$').hasMatch(whole)) return null;
+    if (decimals.isNotEmpty && !RegExp(r'^\d+$').hasMatch(decimals)) {
       return null;
     }
 
     // `bruto` = mantissa / 10^casas. Os centavos são
     // `mantissa × escala × 100 / 10^casas`, arredondados meio para cima —
     // tudo em inteiro, sem passar por ponto flutuante.
-    final mantissa = BigInt.parse('$inteira$decimais');
-    final divisor = BigInt.from(10).pow(decimais.length);
-    final numerador = mantissa * BigInt.from(escala) * BigInt.from(100);
-    var v = numerador ~/ divisor;
-    final resto = numerador.remainder(divisor);
-    if (resto * BigInt.two >= divisor) v += BigInt.one;
-    if (negativo) v = -v;
+    final mantissa = BigInt.parse('$whole$decimals');
+    final divisor = BigInt.from(10).pow(decimals.length);
+    final numerator = mantissa * BigInt.from(scale) * BigInt.from(100);
+    var v = numerator ~/ divisor;
+    final remainder = numerator.remainder(divisor);
+    if (remainder * BigInt.two >= divisor) v += BigInt.one;
+    if (negative) v = -v;
 
-    final teto = BigInt.parse('9223372036854775807');
-    if (v > teto || v < -teto) return null;
+    final cap = BigInt.parse('9223372036854775807');
+    if (v > cap || v < -cap) return null;
     return v.toInt();
   }
 
@@ -143,27 +145,34 @@ class CvmAccountLine {
 /// **Não é setor** — é a forma da demonstração que a companhia entregou. Uma
 /// mesma empresa pode mudar de layout entre exercícios, e por isso a detecção
 /// é feita por documento e não guardada por CNPJ.
-enum CvmLayout {
+enum CvmLayout implements WireKeyed {
   /// Plano padrão: `3.01 = Receita de Venda de Bens e/ou Serviços`.
-  corporativo,
+  corporate('corporativo'),
 
   /// Intermediação financeira. **Não tem EBIT** — a estrutura não separa
   /// resultado operacional de resultado financeiro, porque o financeiro *é* a
   /// operação.
-  intermediacaoFinanceira,
+  financialIntermediation('intermediacaoFinanceira'),
 
   /// Atividades seguradoras e resseguradoras. Também sem EBIT.
-  seguradora,
+  insurer('seguradora'),
 
   /// Nenhum padrão reconhecido. Tudo que dependa de layout devolve `null`.
-  desconhecido;
+  unknown('desconhecido');
+
+  const CvmLayout(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 
   /// `true` quando a estrutura separa resultado operacional do financeiro.
   ///
   /// É a condição para que exista EBIT. Banco e seguradora não a satisfazem, e
   /// [CvmChart.ebit] devolve `null` para eles — o que é o certo: a via da
   /// firma já os recusa pela Porta 1.
-  bool get temResultadoOperacional => this == CvmLayout.corporativo;
+  bool get hasOperatingResult => this == CvmLayout.corporate;
 }
 
 /// Um documento de demonstração já lido, com as contas resolvidas por
@@ -186,7 +195,7 @@ class CvmChart {
   ///   filtradas por `ORDEM_EXERC`. Misturar exercícios aqui produz resolução
   ///   silenciosamente errada, porque a busca é por descrição.
   factory CvmChart.of(List<CvmAccountLine> lines) =>
-      CvmChart._(List.unmodifiable(lines), _detectar(lines));
+      CvmChart._(List.unmodifiable(lines), _detect(lines));
 
   // ----------------------------------------------------------- normalização
 
@@ -195,74 +204,74 @@ class CvmChart {
   /// Os CSVs da CVM vêm em `latin-1` e as descrições carregam acentuação
   /// inconsistente entre companhias. Comparar sem normalizar faz o mesmo
   /// rótulo casar num documento e não casar no seguinte.
-  static String normalizar(String s) {
-    const de = 'áàâãäéèêëíìîïóòôõöúùûüçñ';
-    const para = 'aaaaaeeeeiiiiooooouuuucn';
+  static String normalize(String s) {
+    const accented = 'áàâãäéèêëíìîïóòôõöúùûüçñ';
+    const plain = 'aaaaaeeeeiiiiooooouuuucn';
     final b = StringBuffer();
     for (final c in s.toLowerCase().runes) {
       final ch = String.fromCharCode(c);
-      final i = de.indexOf(ch);
-      b.write(i >= 0 ? para[i] : ch);
+      final i = accented.indexOf(ch);
+      b.write(i >= 0 ? plain[i] : ch);
     }
     return b.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
-  static CvmLayout _detectar(List<CvmAccountLine> lines) {
+  static CvmLayout _detect(List<CvmAccountLine> lines) {
     for (final l in lines) {
       if (l.code != '3.01') continue;
-      final d = normalizar(l.label);
+      final d = normalize(l.label);
       if (d.contains('intermediacao financeira')) {
-        return CvmLayout.intermediacaoFinanceira;
+        return CvmLayout.financialIntermediation;
       }
       if (d.contains('segurador') || d.contains('ressegurador')) {
-        return CvmLayout.seguradora;
+        return CvmLayout.insurer;
       }
-      if (d.contains('receita')) return CvmLayout.corporativo;
+      if (d.contains('receita')) return CvmLayout.corporate;
     }
     // Sem DRE no documento — é balanço puro. O ativo e o passivo não dependem
     // de layout, então isto não impede a leitura deles.
-    final temBalanco = lines.any((l) => l.code == '1' || l.code == '2');
-    return temBalanco ? CvmLayout.corporativo : CvmLayout.desconhecido;
+    final hasBalanceSheet = lines.any((l) => l.code == '1' || l.code == '2');
+    return hasBalanceSheet ? CvmLayout.corporate : CvmLayout.unknown;
   }
 
   // -------------------------------------------------------------- resolução
 
-  /// Linhas de nível até [ateNivel], que é onde o plano é padronizado.
+  /// Linhas de nível até [upToLevel], que é onde o plano é padronizado.
   ///
   /// Abaixo do nível 2 a descrição é texto livre da companhia — a conferência
   /// encontrou 26 grafias distintas de "Caixa e Equivalentes" no nível 4 — e
   /// nada aqui deve descer até lá.
-  Iterable<CvmAccountLine> rasas([int ateNivel = 2]) =>
-      lines.where((l) => l.depth <= ateNivel);
+  Iterable<CvmAccountLine> shallow([int upToLevel = 2]) =>
+      lines.where((l) => l.depth <= upToLevel);
 
   /// A linha de código exatamente [code], se existir.
-  CvmAccountLine? porCodigo(String code) {
+  CvmAccountLine? byCode(String code) {
     for (final l in lines) {
       if (l.code == code) return l;
     }
     return null;
   }
 
-  /// Procura entre as linhas rasas a que casa [padrao], preferindo o **maior**
+  /// Procura entre as linhas rasas a que casa [pattern], preferindo o **maior**
   /// código.
   ///
   /// O maior código é o mais abaixo na demonstração, e a linha de resultado
   /// que interessa é sempre a última — no layout de banco "de Intermediação",
   /// tanto `3.07` ("Operações Continuadas") quanto `3.11` ("Líquido
   /// Consolidado do Período") casam com "lucro", e o certo é o segundo.
-  CvmAccountLine? _buscar(
-    RegExp padrao, {
-    RegExp? excluindo,
-    int ateNivel = 2,
+  CvmAccountLine? _find(
+    RegExp pattern, {
+    RegExp? excluding,
+    int upToLevel = 2,
   }) {
-    CvmAccountLine? melhor;
-    for (final l in rasas(ateNivel)) {
-      final d = normalizar(l.label);
-      if (!padrao.hasMatch(d)) continue;
-      if (excluindo != null && excluindo.hasMatch(d)) continue;
-      if (melhor == null || _maior(l.code, melhor.code)) melhor = l;
+    CvmAccountLine? best;
+    for (final l in shallow(upToLevel)) {
+      final d = normalize(l.label);
+      if (!pattern.hasMatch(d)) continue;
+      if (excluding != null && excluding.hasMatch(d)) continue;
+      if (best == null || _isGreater(l.code, best.code)) best = l;
     }
-    return melhor;
+    return best;
   }
 
   /// `true` quando [a] vem depois de [b] na ordem do plano de contas.
@@ -270,31 +279,31 @@ class CvmChart {
   /// Comparação **segmento a segmento como número**, e não como texto: `3.9`
   /// contra `3.11` daria a resposta errada em ordem lexicográfica, e o plano
   /// da CVM chega a dois dígitos por nível.
-  static bool _maior(String a, String b) {
-    final pa = a.split('.');
-    final pb = b.split('.');
-    for (var i = 0; i < pa.length && i < pb.length; i++) {
-      final na = int.tryParse(pa[i]) ?? -1;
-      final nb = int.tryParse(pb[i]) ?? -1;
-      if (na != nb) return na > nb;
+  static bool _isGreater(String a, String b) {
+    final partsA = a.split('.');
+    final partsB = b.split('.');
+    for (var i = 0; i < partsA.length && i < partsB.length; i++) {
+      final numA = int.tryParse(partsA[i]) ?? -1;
+      final numB = int.tryParse(partsB[i]) ?? -1;
+      if (numA != numB) return numA > numB;
     }
-    return pa.length > pb.length;
+    return partsA.length > partsB.length;
   }
 
   // ------------------------------------------------------ contas semânticas
 
-  static final _reLucro = RegExp(r'(lucro|prejuizo)');
-  static final _rePorAcao = RegExp(r'por acao');
-  static final _reContinuadas = RegExp(r'(des)?continuada');
-  static final _reAntesTributos = RegExp(r'antes.*(tributa|tributos|imposto)');
-  static final _reTributos =
+  static final _reProfit = RegExp(r'(lucro|prejuizo)');
+  static final _rePerShare = RegExp(r'por acao');
+  static final _reContinued = RegExp(r'(des)?continuada');
+  static final _reBeforeTaxes = RegExp(r'antes.*(tributa|tributos|imposto)');
+  static final _reTaxes =
       RegExp(r'(imposto de renda|provisao para ir|tributos sobre o lucro)');
   static final _reEbit = RegExp(
     r'antes do resultado financeiro',
   );
 
   /// Receita do período. `3.01` em todos os layouts conferidos.
-  double? get receita => porCodigo('3.01')?.value;
+  double? get revenue => byCode('3.01')?.value;
 
   /// Resultado antes do resultado financeiro e dos tributos — o **EBIT**.
   ///
@@ -303,27 +312,27 @@ class CvmChart {
   /// dos Tributos" — devolvê-lo como EBIT erraria 13% no Itaú e daria à via da
   /// firma um número que ela não deve receber.
   double? get ebit {
-    if (!layout.temResultadoOperacional) return null;
-    final porDescricao = _buscar(_reEbit);
-    if (porDescricao != null) return porDescricao.value;
+    if (!layout.hasOperatingResult) return null;
+    final byDescription = _find(_reEbit);
+    if (byDescription != null) return byDescription.value;
     // Recuo pelo código, conferindo que a descrição não desminta.
-    final l = porCodigo('3.05');
+    final l = byCode('3.05');
     if (l == null) return null;
-    final d = normalizar(l.label);
-    if (_reAntesTributos.hasMatch(d) && !_reEbit.hasMatch(d)) return null;
+    final d = normalize(l.label);
+    if (_reBeforeTaxes.hasMatch(d) && !_reEbit.hasMatch(d)) return null;
     return l.value;
   }
 
   /// Resultado antes dos tributos sobre o lucro.
-  double? get resultadoAntesDosTributos =>
-      _buscar(_reAntesTributos, excluindo: _rePorAcao)?.value;
+  double? get incomeBeforeTaxes =>
+      _find(_reBeforeTaxes, excluding: _rePerShare)?.value;
 
   /// Imposto de renda e contribuição social.
   ///
   /// O sinal é o que a CVM publica — despesa vem **negativa** —, e quem
   /// consome deve preservá-lo. A `effectiveTaxRate` do motor já nega em vez de
   /// modular, pela correção de 10/09/2026 registrada na §2.1-b.
-  double? get tributos => _buscar(_reTributos, excluindo: _rePorAcao)?.value;
+  double? get taxes => _find(_reTaxes, excluding: _rePerShare)?.value;
 
   /// Lucro líquido do período.
   ///
@@ -331,39 +340,39 @@ class CvmChart {
   /// operações continuadas e descontinuadas, que casam com "lucro" e não são o
   /// resultado final. Entre as que sobram vence o maior código, que é o fundo
   /// da demonstração.
-  double? get lucroLiquido =>
-      _buscar(_reLucro, excluindo: RegExp('${_rePorAcao.pattern}|'
-              '${_reContinuadas.pattern}|reversao|juros sobre'))
+  double? get netIncome =>
+      _find(_reProfit, excluding: RegExp('${_rePerShare.pattern}|'
+              '${_reContinued.pattern}|reversao|juros sobre'))
           ?.value;
 
   /// Lucro por ação, quando publicado. `3.99` nos quatro layouts.
-  double? get lucroPorAcao {
-    final l = porCodigo('3.99');
+  double? get earningsPerShare {
+    final l = byCode('3.99');
     if (l == null) return null;
-    return _rePorAcao.hasMatch(normalizar(l.label)) ? l.value : null;
+    return _rePerShare.hasMatch(normalize(l.label)) ? l.value : null;
   }
 
   // --- Balanço: não depende de layout, os códigos de topo são universais ---
 
   /// Ativo total — `1`. **Existe em 100% do universo conferido**, e é o que
   /// torna possível a conferência analítica que a §2.17 dizia não haver.
-  double? get ativoTotal => porCodigo('1')?.value;
+  double? get totalAssets => byCode('1')?.value;
 
   /// Ativo circulante — `1.01`.
-  double? get ativoCirculante => porCodigo('1.01')?.value;
+  double? get currentAssets => byCode('1.01')?.value;
 
   /// Passivo total — `2`.
-  double? get passivoTotal => porCodigo('2')?.value;
+  double? get totalLiabilities => byCode('2')?.value;
 
   /// Passivo circulante — `2.01`.
-  double? get passivoCirculante => porCodigo('2.01')?.value;
+  double? get currentLiabilities => byCode('2.01')?.value;
 
   /// Patrimônio líquido consolidado.
   ///
   /// `2.03` no layout corporativo e `2.07` ou `2.08` no de banco — por isso a
   /// busca é por descrição entre os três.
-  double? get patrimonioLiquido =>
-      _buscar(RegExp(r'patrimonio liquido'), excluindo: RegExp(r'controlador'))
+  double? get equity =>
+      _find(RegExp(r'patrimonio liquido'), excluding: RegExp(r'controlador'))
           ?.value;
 
   /// Participação dos não controladores no patrimônio.
@@ -371,8 +380,8 @@ class CvmChart {
   /// `2.03.09` no layout corporativo, `2.07.02` no de banco — nível 3, que é a
   /// única exceção ao limite de nível 2, e ela é segura porque a descrição
   /// "não controladores" é padronizada.
-  double? get participacaoNaoControladores {
-    final l = _buscar(RegExp(r'nao controlador'), ateNivel: 3);
+  double? get nonControllingInterests {
+    final l = _find(RegExp(r'nao controlador'), upToLevel: 3);
     if (l == null) return null;
     // "Patrimônio Líquido Atribuído aos Não Controladores" e "Participação dos
     // Acionistas Não Controladores" descrevem a mesma coisa; ambas servem.
@@ -388,44 +397,44 @@ class CvmChart {
   // para elas estes campos devolvem `null`, que é o certo.
 
   /// Caixa e equivalentes — `1.01.01`.
-  double? get caixa => _nivel3('1.01.01', RegExp(r'caixa'));
+  double? get cash => _level3('1.01.01', RegExp(r'caixa'));
 
   /// Aplicações financeiras de curto prazo — `1.01.02`.
-  double? get aplicacoesFinanceiras =>
-      _nivel3('1.01.02', RegExp(r'aplicaco(es|ns) financeira'));
+  double? get financialInvestments =>
+      _level3('1.01.02', RegExp(r'aplicaco(es|ns) financeira'));
 
   /// Imobilizado — `1.02.03`.
-  double? get imobilizado => _nivel3('1.02.03', RegExp(r'imobilizado'));
+  double? get propertyPlantEquipment => _level3('1.02.03', RegExp(r'imobilizado'));
 
   /// Intangível — `1.02.04`.
-  double? get intangivel => _nivel3('1.02.04', RegExp(r'intangivel'));
+  double? get intangibleAssets => _level3('1.02.04', RegExp(r'intangivel'));
 
   /// Empréstimos e financiamentos no circulante — `2.01.04`.
-  double? get dividaDeCurtoPrazo =>
-      _nivel3('2.01.04', RegExp(r'emprestimos e financiamentos'));
+  double? get shortTermDebt =>
+      _level3('2.01.04', RegExp(r'emprestimos e financiamentos'));
 
   /// Empréstimos e financiamentos no não circulante — `2.02.01`.
-  double? get dividaDeLongoPrazo =>
-      _nivel3('2.02.01', RegExp(r'emprestimos e financiamentos'));
+  double? get longTermDebt =>
+      _level3('2.02.01', RegExp(r'emprestimos e financiamentos'));
 
   /// Lê um código de nível 3 **conferindo a descrição**.
   ///
   /// O código sozinho não basta: `2.01.04` é "Empréstimos e Financiamentos" na
   /// estrutura corporativa e outra coisa na de banco. Discordando o rótulo, a
   /// resposta é `null` — a mesma disciplina do [ebit].
-  double? _nivel3(String code, RegExp esperado) {
-    final l = porCodigo(code);
+  double? _level3(String code, RegExp expected) {
+    final l = byCode(code);
     if (l == null) return null;
-    return esperado.hasMatch(normalizar(l.label)) ? l.value : null;
+    return expected.hasMatch(normalize(l.label)) ? l.value : null;
   }
 
   // --- Fluxo de caixa: códigos de topo universais no método indireto ---
 
   /// Caixa líquido das atividades operacionais — `6.01`.
-  double? get caixaOperacional => porCodigo('6.01')?.value;
+  double? get operatingCashFlow => byCode('6.01')?.value;
 
   /// Caixa líquido das atividades de investimento — `6.02`.
-  double? get caixaDeInvestimento => porCodigo('6.02')?.value;
+  double? get investingCashFlow => byCode('6.02')?.value;
 
   /// Depreciação e amortização, da reconciliação do fluxo operacional.
   ///
@@ -435,19 +444,19 @@ class CvmChart {
   ///
   /// Devolve `null` quando nenhuma casa: o motor deriva D&A de
   /// `EBITDA − EBIT` quando isto falta, e um zero aqui apagaria essa rota.
-  double? get depreciacaoEAmortizacao {
-    var centavos = 0;
-    var achou = false;
+  double? get depreciationAndAmortization {
+    var cents = 0;
+    var found = false;
     for (final l in lines) {
       if (!l.code.startsWith('6.01.')) continue;
-      final d = normalizar(l.label);
+      final d = normalize(l.label);
       if (!d.contains('deprecia') && !d.contains('amortiza')) continue;
-      centavos += l.cents;
-      achou = true;
+      cents += l.cents;
+      found = true;
     }
     // A reconciliação soma a despesa de volta ao lucro, então ela vem
     // **positiva**. O domínio a quer positiva também.
-    return achou ? (centavos.abs()) / 100.0 : null;
+    return found ? (cents.abs()) / 100.0 : null;
   }
 
   /// Aquisição de imobilizado e intangível, somada — o **CapEx**.
@@ -464,15 +473,15 @@ class CvmChart {
     // **Soma os centavos inteiros da própria linha**, sem passar por reais:
     // acumular ponto flutuante deixaria resíduo que reaparece na taxa de
     // reinvestimento, e a linha já guarda o inteiro exato vindo do texto.
-    var centavos = 0;
-    var achou = false;
+    var cents = 0;
+    var found = false;
     for (final l in lines) {
       if (!l.code.startsWith('6.02.') || l.depth != 3) continue;
-      final d = normalizar(l.label);
+      final d = normalize(l.label);
       if (!d.contains('imobiliz') && !d.contains('intangivel')) continue;
-      centavos += l.cents;
-      achou = true;
+      cents += l.cents;
+      found = true;
     }
-    return achou ? centavos / 100.0 : null;
+    return found ? cents / 100.0 : null;
   }
 }

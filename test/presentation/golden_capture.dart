@@ -56,11 +56,11 @@ import 'populated_state.dart';
 
 /// Larguras capturadas. As mesmas de `overflow_test.dart`, de proposito: se
 /// uma tela estoura em 320 la, a captura daqui mostra COMO ela estoura.
-const _larguras = <double>[320, 390, 1024];
+const _widths = <double>[320, 390, 1024];
 
 /// Altura generosa: a captura pega a tela inteira, nao a dobra visivel. Cortar
 /// no rodape esconderia justamente o que costuma ficar mal resolvido.
-const _altura = 1600.0;
+const _height = 1600.0;
 
 /// Escala de texto fixa em 1.0.
 ///
@@ -68,7 +68,7 @@ const _altura = 1600.0;
 /// cobre com assercao -- que e a ferramenta certa: uma assercao diz "estourou",
 /// uma imagem exige alguem olhar. Multiplicar as capturas por tres escalas
 /// triplicaria o material do conselheiro sem acrescentar pergunta de direcao.
-const _escala = 1.0;
+const _scale = 1.0;
 
 /// Carrega Roboto do proprio SDK do Flutter.
 ///
@@ -78,7 +78,7 @@ const _escala = 1.0;
 ///
 /// Se a variavel nao existir, GRITA e segue. Falhar em silencio aqui produziria
 /// trinta imagens de caixinhas com aparencia de sucesso.
-Future<bool> _carregarFontes() async {
+Future<bool> _loadFonts() async {
   final root = Platform.environment['FLUTTER_ROOT'];
   if (root == null || root.isEmpty) {
     stderr.writeln(
@@ -97,23 +97,23 @@ Future<bool> _carregarFontes() async {
 
   // O aplicativo usa a familia padrao da plataforma, que em teste resolve para
   // "Roboto". Registrar sob esse nome faz o texto renderizar sem tocar no tema.
-  final texto = FontLoader('Roboto');
-  for (final peso in ['regular', 'medium', 'bold']) {
-    final arquivo = File('${dir.path}/roboto-$peso.ttf');
-    if (arquivo.existsSync()) {
-      texto.addFont(Future.value(arquivo.readAsBytesSync().buffer.asByteData()));
+  final text = FontLoader('Roboto');
+  for (final weight in ['regular', 'medium', 'bold']) {
+    final file = File('${dir.path}/roboto-$weight.ttf');
+    if (file.existsSync()) {
+      text.addFont(Future.value(file.readAsBytesSync().buffer.asByteData()));
     }
   }
-  await texto.load();
+  await text.load();
 
   // MaterialIcons e tao necessario quanto o texto. Sem ele todo icone vira
   // caixa vazia, e a lente `tela` reportaria "caixas por toda parte" como
   // achado -- artefato da captura, nao defeito da interface. E a mesma classe
   // de erro que material incompleto ja produziu na lente `registro`.
-  final icones = File('${dir.path}/materialicons-regular.otf');
-  if (icones.existsSync()) {
+  final iconFont = File('${dir.path}/materialicons-regular.otf');
+  if (iconFont.existsSync()) {
     final loader = FontLoader('MaterialIcons')
-      ..addFont(Future.value(icones.readAsBytesSync().buffer.asByteData()));
+      ..addFont(Future.value(iconFont.readAsBytesSync().buffer.asByteData()));
     await loader.load();
   } else {
     stderr.writeln('\n!!! MaterialIcons ausente -- icones sairao em caixas.\n');
@@ -128,21 +128,21 @@ Future<bool> _carregarFontes() async {
 /// A altura é por alvo porque a edição do valuation é mais longa que as
 /// outras telas: com 1600 px, no celular, a captura parava nos campos e a
 /// lente não via o resultado que eles produzem.
-typedef Alvo = ({
-  String nome,
+typedef CaptureTarget = ({
+  String name,
   Widget Function() build,
-  bool comAtivos,
-  double altura,
+  bool withAssets,
+  double height,
 });
 
 /// A edição do valuation já editada: os selos, os degraus da decomposição e a
 /// perpetuidade com retorno próprio só aparecem com troca (decisão 147).
-Widget _edicaoAlterada() {
-  final r = avaliacaoDaCascata();
-  final m = r.manual!.motorPremises;
+Widget _changedEdit() {
+  final r = cascadeValuation();
+  final m = r.manual!.enginePremises;
   return ManualValuationPage(
     result: r,
-    inicial: m.copyWith(
+    initial: m.copyWith(
       baseProfit: m.baseProfit * 1.2,
       growth: m.growth + 0.02,
       discountRate: m.discountRate - 0.01,
@@ -151,55 +151,55 @@ Widget _edicaoAlterada() {
   );
 }
 
-final _alvos = <Alvo>[
+final _targets = <CaptureTarget>[
   // A casca vem PRIMEIRO e importa mais que as telas soltas: e nela que vivem
   // os rotulos das abas e a relacao entre as frentes de trabalho, que e
   // exatamente o objeto da lente `tela`.
-  (nome: 'shell', build: AppShell.new, comAtivos: true, altura: _altura),
-  (nome: 'estudo', build: StudyPage.new, comAtivos: true, altura: _altura),
-  (nome: 'backtest', build: BacktestPage.new, comAtivos: true, altura: _altura),
-  (nome: 'meta', build: GoalPage.new, comAtivos: false, altura: _altura),
+  (name: 'shell', build: AppShell.new, withAssets: true, height: _height),
+  (name: 'estudo', build: StudyPage.new, withAssets: true, height: _height),
+  (name: 'backtest', build: BacktestPage.new, withAssets: true, height: _height),
+  (name: 'meta', build: GoalPage.new, withAssets: false, height: _height),
   // A ABA, e nao a tela empilhada: e o caminho que o pacote UI-1 abriu, e e
-  // ele que a lente precisa examinar. `comAtivos` porque sem carteira montada
+  // ele que a lente precisa examinar. `withAssets` porque sem carteira montada
   // a aba mostra so o estado vazio.
-  (nome: 'valuation', build: ValuationTab.new, comAtivos: true, altura: _altura),
+  (name: 'valuation', build: ValuationTab.new, withAssets: true, height: _height),
   // A edição do valuation (decisão 147), aberta nos números do motor e já
   // editada. A conta congelada vem de uma avaliação de verdade da cascata.
   (
-    nome: 'editar',
+    name: 'editar',
     // Último ano deprimido: a base é normalizada para cima, e o painel do
     // porquê abre no cartão do lucro (orientador, 14/10/2026).
-    build: () => ManualValuationPage(result: avaliacaoDaCascata(choque: 0.6)),
-    comAtivos: false,
-    altura: 2600,
+    build: () => ManualValuationPage(result: cascadeValuation(shock: 0.6)),
+    withAssets: false,
+    height: 2600,
   ),
-  (nome: 'editar-alterado', build: _edicaoAlterada, comAtivos: false, altura: 2600),
+  (name: 'editar-alterado', build: _changedEdit, withAssets: false, height: 2600),
 ];
 
-Future<void> _montar(
+Future<void> _build(
   WidgetTester tester,
-  Alvo alvo, {
-  required double largura,
-  required bool claro,
+  CaptureTarget target, {
+  required double width,
+  required bool isLight,
 }) async {
   tester.view.devicePixelRatio = 1.0;
-  tester.view.physicalSize = Size(largura, alvo.altura);
+  tester.view.physicalSize = Size(width, target.height);
   addTearDown(tester.view.reset);
 
   final container = ProviderContainer(overrides: populatedOverrides());
   addTearDown(container.dispose);
-  container.read(isLightModeProvider.notifier).definir(claro);
+  container.read(isLightModeProvider.notifier).setValue(isLight);
 
-  if (alvo.comAtivos) {
+  if (target.withAssets) {
     final notifier = container.read(studyProvider.notifier);
-    for (final (simbolo, setor) in carteiraDemo) {
-      notifier.addAsset(assetOf(simbolo, setor), toPrincipal: true);
+    for (final (symbol, sector) in demoPortfolio) {
+      notifier.addAsset(assetOf(symbol, sector), toPrincipal: true);
     }
     // A meta tambem, e nao so os ativos: sem ela a aba Analise nao tem prazo
     // com que confrontar a janela, e a captura mostraria a tela com o
     // confronto de horizontes ausente -- exatamente o estado que a lente
     // leria como "a interface nao declara a relacao".
-    notifier.setGoal(metaDemo);
+    notifier.setGoal(demoGoal);
   }
 
   await tester.pumpWidget(
@@ -207,17 +207,17 @@ Future<void> _montar(
       container: container,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: buildFinTheme(isLight: claro),
+        theme: buildFinTheme(isLight: isLight),
         home: MediaQuery(
           data: MediaQueryData(
-            size: Size(largura, alvo.altura),
-            textScaler: const TextScaler.linear(_escala),
+            size: Size(width, target.height),
+            textScaler: const TextScaler.linear(_scale),
           ),
           // A casca ja traz o proprio Scaffold; embrulhar de novo criaria uma
           // segunda barra e falsearia a captura.
-          child: alvo.nome == 'shell'
-              ? alvo.build()
-              : Scaffold(body: alvo.build()),
+          child: target.name == 'shell'
+              ? target.build()
+              : Scaffold(body: target.build()),
         ),
       ),
     ),
@@ -231,28 +231,28 @@ Future<void> _montar(
 }
 
 void main() {
-  late bool comFonte;
+  late bool withFont;
 
   setUpAll(() async {
-    comFonte = await _carregarFontes();
+    withFont = await _loadFonts();
   });
 
-  for (final alvo in _alvos) {
-    group(alvo.nome, () {
-      for (final claro in [true, false]) {
-        final tema = claro ? 'claro' : 'escuro';
-        for (final largura in _larguras) {
-          testWidgets('$tema @ ${largura.toInt()}dp', (tester) async {
+  for (final target in _targets) {
+    group(target.name, () {
+      for (final isLight in [true, false]) {
+        final theme = isLight ? 'claro' : 'escuro';
+        for (final width in _widths) {
+          testWidgets('$theme @ ${width.toInt()}dp', (tester) async {
             expect(
-              comFonte,
+              withFont,
               isTrue,
               reason: 'Sem fonte real a captura sai em caixas e nao serve.',
             );
-            await _montar(tester, alvo, largura: largura, claro: claro);
+            await _build(tester, target, width: width, isLight: isLight);
             await expectLater(
               find.byType(MaterialApp),
               matchesGoldenFile(
-                '../../docs/telas/$tema/${alvo.nome}@${largura.toInt()}.png',
+                '../../docs/telas/$theme/${target.name}@${width.toInt()}.png',
               ),
             );
           });

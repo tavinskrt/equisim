@@ -73,11 +73,11 @@ abstract final class TrailingTwelveMonths {
   ///
   /// Fim de semana e encerramento em dia útil deslocam a data de referência
   /// por poucos dias; mais que isso é período diferente, e a soma recusa.
-  static const int toleranciaDias = 4;
+  static const int toleranceDays = 4;
 
   /// Doze meses terminados em `itr.periodEnd`: `anual + acumulado − anterior`.
   ///
-  /// - [anual]: a DFP do exercício que terminou **imediatamente antes** do
+  /// - [annual]: a DFP do exercício que terminou **imediatamente antes** do
   ///   acumulado começar.
   /// - [itr]: o documento trimestral, com o comparativo do ano anterior.
   ///
@@ -95,46 +95,46 @@ abstract final class TrailingTwelveMonths {
   /// inteiros em milhares de reais, e a soma de três inteiros abaixo de 2⁵³
   /// não arredonda.
   static FundamentalsSnapshot? build({
-    required CvmPeriodDocument anual,
+    required CvmPeriodDocument annual,
     required CvmPeriodDocument itr,
   }) {
-    if (anual.kind != CvmDocumentKind.dfp) return null;
+    if (annual.kind != CvmDocumentKind.dfp) return null;
     if (itr.kind != CvmDocumentKind.itr) return null;
     final prior = itr.prior;
     final priorStart = itr.priorStart;
     if (prior == null || priorStart == null) return null;
 
     // 1. O acumulado começa no dia seguinte ao fim do exercício anual.
-    if (!_perto(itr.periodStart, anual.periodEnd.add(const Duration(days: 1)))) {
+    if (!_close(itr.periodStart, annual.periodEnd.add(const Duration(days: 1)))) {
       return null;
     }
     // 2. O comparativo começa onde o exercício anual começou.
-    if (!_perto(priorStart, anual.periodStart)) return null;
+    if (!_close(priorStart, annual.periodStart)) return null;
     // 3. Os dois acumulados têm o mesmo comprimento.
-    final lenAtual = itr.periodEnd.difference(itr.periodStart).inDays;
-    final fimAnterior = DateTime.utc(
+    final currentLength = itr.periodEnd.difference(itr.periodStart).inDays;
+    final previousEnd = DateTime.utc(
       itr.periodEnd.year - 1,
       itr.periodEnd.month,
       itr.periodEnd.day,
     );
-    final lenAnterior = fimAnterior
+    final previousLength = previousEnd
         .difference(DateTime.utc(
             priorStart.year, priorStart.month, priorStart.day))
         .inDays;
-    if ((lenAtual - lenAnterior).abs() > toleranciaDias) return null;
+    if ((currentLength - previousLength).abs() > toleranceDays) return null;
 
-    final a = anual.current;
+    final a = annual.current;
     final y = itr.current;
     final p = prior;
 
-    double? soma(double? fa, double? fy, double? fp) {
+    double? sum(double? fa, double? fy, double? fp) {
       if (fa == null || fy == null || fp == null) return null;
       final v = fa + fy - fp;
       return v.isFinite ? v : null;
     }
 
-    final ebitTtm = soma(a.ebit, y.ebit, p.ebit);
-    final daTtm = soma(
+    final ebitTtm = sum(a.ebit, y.ebit, p.ebit);
+    final fromTtm = sum(
       a.depreciationAndAmortization,
       y.depreciationAndAmortization,
       p.depreciationAndAmortization,
@@ -145,23 +145,23 @@ abstract final class TrailingTwelveMonths {
       fiscalPeriodEnd: itr.periodEnd,
       receiptDate: y.receiptDate,
       // --- fluxo: doze meses ---
-      totalRevenue: soma(a.totalRevenue, y.totalRevenue, p.totalRevenue),
+      totalRevenue: sum(a.totalRevenue, y.totalRevenue, p.totalRevenue),
       ebit: ebitTtm,
-      ebitda: (ebitTtm != null && daTtm != null) ? ebitTtm + daTtm : null,
-      netIncome: soma(a.netIncome, y.netIncome, p.netIncome),
+      ebitda: (ebitTtm != null && fromTtm != null) ? ebitTtm + fromTtm : null,
+      netIncome: sum(a.netIncome, y.netIncome, p.netIncome),
       incomeBeforeTax:
-          soma(a.incomeBeforeTax, y.incomeBeforeTax, p.incomeBeforeTax),
+          sum(a.incomeBeforeTax, y.incomeBeforeTax, p.incomeBeforeTax),
       incomeTaxExpense:
-          soma(a.incomeTaxExpense, y.incomeTaxExpense, p.incomeTaxExpense),
+          sum(a.incomeTaxExpense, y.incomeTaxExpense, p.incomeTaxExpense),
       interestExpense:
-          soma(a.interestExpense, y.interestExpense, p.interestExpense),
-      nopat: soma(a.nopat, y.nopat, p.nopat),
+          sum(a.interestExpense, y.interestExpense, p.interestExpense),
+      nopat: sum(a.nopat, y.nopat, p.nopat),
       operatingCashFlow:
-          soma(a.operatingCashFlow, y.operatingCashFlow, p.operatingCashFlow),
-      investmentCashFlow: soma(
+          sum(a.operatingCashFlow, y.operatingCashFlow, p.operatingCashFlow),
+      investmentCashFlow: sum(
           a.investmentCashFlow, y.investmentCashFlow, p.investmentCashFlow),
-      freeCashFlow: soma(a.freeCashFlow, y.freeCashFlow, p.freeCashFlow),
-      equityIncomeResult: soma(
+      freeCashFlow: sum(a.freeCashFlow, y.freeCashFlow, p.freeCashFlow),
+      equityIncomeResult: sum(
           a.equityIncomeResult, y.equityIncomeResult, p.equityIncomeResult),
       // LPA não se soma: é por ação, e a contagem muda entre os períodos.
       earningsPerShare: null,
@@ -186,8 +186,8 @@ abstract final class TrailingTwelveMonths {
 
   /// A série anual ancorada no documento mais recente publicado em [asOf].
   ///
-  /// - [documentos]: DFPs e ITRs da companhia, em qualquer ordem.
-  /// - [publicado]: se o documento já era público na data da avaliação.
+  /// - [documents]: DFPs e ITRs da companhia, em qualquer ordem.
+  /// - [published]: se o documento já era público na data da avaliação.
   ///   Recebido pela própria cascata, para que a regra de publicidade seja uma
   ///   só.
   ///
@@ -207,83 +207,83 @@ abstract final class TrailingTwelveMonths {
   /// anos como um: a QUAL3 foi de −22% a +908% de potencial, e a mediana do
   /// movimento no universo foi de 25,3%. Uma série anual com um ano faltando
   /// não é anual, e nenhum número que saia dela descreve a companhia.
-  static List<FundamentalsSnapshot> serieAncorada(
-    List<CvmPeriodDocument> documentos, {
-    required bool Function(FundamentalsSnapshot) publicado,
+  static List<FundamentalsSnapshot> anchoredSeries(
+    List<CvmPeriodDocument> documents, {
+    required bool Function(FundamentalsSnapshot) published,
   }) {
-    final visiveis = [
-      for (final d in documentos)
-        if (publicado(d.current)) d,
+    final visibleOnes = [
+      for (final d in documents)
+        if (published(d.current)) d,
     ]..sort((x, y) => x.periodEnd.compareTo(y.periodEnd));
-    if (visiveis.isEmpty) return const [];
+    if (visibleOnes.isEmpty) return const [];
 
-    final ancora = visiveis.last;
+    final anchor = visibleOnes.last;
     final dfps = [
-      for (final d in visiveis)
+      for (final d in visibleOnes)
         if (d.kind == CvmDocumentKind.dfp) d,
     ];
-    if (ancora.kind == CvmDocumentKind.dfp) {
+    if (anchor.kind == CvmDocumentKind.dfp) {
       return [for (final d in dfps) d.current];
     }
 
     final out = <FundamentalsSnapshot>[];
-    for (final itr in visiveis) {
+    for (final itr in visibleOnes) {
       if (itr.kind != CvmDocumentKind.itr) continue;
-      if (itr.periodEnd.month != ancora.periodEnd.month) continue;
-      if ((itr.periodEnd.day - ancora.periodEnd.day).abs() > toleranciaDias) {
+      if (itr.periodEnd.month != anchor.periodEnd.month) continue;
+      if ((itr.periodEnd.day - anchor.periodEnd.day).abs() > toleranceDays) {
         continue;
       }
-      CvmPeriodDocument? anual;
+      CvmPeriodDocument? annual;
       for (final dfp in dfps) {
-        if (_perto(
+        if (_close(
           itr.periodStart,
           dfp.periodEnd.add(const Duration(days: 1)),
         )) {
-          anual = dfp;
+          annual = dfp;
         }
       }
-      if (anual == null) continue;
-      final ttm = build(anual: anual, itr: itr);
+      if (annual == null) continue;
+      final ttm = build(annual: annual, itr: itr);
       if (ttm != null) out.add(ttm);
     }
 
     // A âncora tem de ser o último ponto: sem ele a série ancorada não
     // descreve o documento que a escolheu.
     if (out.isEmpty ||
-        out.last.fiscalPeriodEnd.year != ancora.periodEnd.year) {
+        out.last.fiscalPeriodEnd.year != anchor.periodEnd.year) {
       return [for (final d in dfps) d.current];
     }
     for (var i = 1; i < out.length; i++) {
-      final salto =
+      final jump =
           out[i].fiscalPeriodEnd.year - out[i - 1].fiscalPeriodEnd.year;
-      if (salto != 1) return [for (final d in dfps) d.current];
+      if (jump != 1) return [for (final d in dfps) d.current];
     }
     return out;
   }
 
-  /// `true` quando [serie] é ancorada em trimestre — ao menos um ponto não
+  /// `true` quando [series] é ancorada em trimestre — ao menos um ponto não
   /// termina onde uma DFP terminaria.
   ///
   /// Serve para quem monta a série saber se a âncora de ITR vingou ou se
   /// houve recuo para a DFP.
   static bool isAnchoredOnQuarter(
-    List<FundamentalsSnapshot> serie,
-    List<CvmPeriodDocument> documentos,
+    List<FundamentalsSnapshot> series,
+    List<CvmPeriodDocument> documents,
   ) {
-    if (serie.isEmpty) return false;
-    final fimDfp = {
-      for (final d in documentos)
+    if (series.isEmpty) return false;
+    final dfpEnd = {
+      for (final d in documents)
         if (d.kind == CvmDocumentKind.dfp)
           DateTime.utc(d.periodEnd.year, d.periodEnd.month, d.periodEnd.day),
     };
-    final ultimo = serie.last.fiscalPeriodEnd;
-    return !fimDfp.contains(DateTime.utc(ultimo.year, ultimo.month, ultimo.day));
+    final last = series.last.fiscalPeriodEnd;
+    return !dfpEnd.contains(DateTime.utc(last.year, last.month, last.day));
   }
 
-  /// Duas datas no mesmo dia civil, dentro de [toleranciaDias].
-  static bool _perto(DateTime a, DateTime b) {
-    final da = DateTime.utc(a.year, a.month, a.day);
-    final db = DateTime.utc(b.year, b.month, b.day);
-    return da.difference(db).inDays.abs() <= toleranciaDias;
+  /// Duas datas no mesmo dia civil, dentro de [toleranceDays].
+  static bool _close(DateTime a, DateTime b) {
+    final dayA = DateTime.utc(a.year, a.month, a.day);
+    final dayB = DateTime.utc(b.year, b.month, b.day);
+    return dayA.difference(dayB).inDays.abs() <= toleranceDays;
   }
 }

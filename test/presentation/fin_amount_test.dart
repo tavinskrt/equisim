@@ -126,7 +126,7 @@ void main() {
   group('FinAmount.measure', () {
     testWidgets('acompanha a escala de texto do usuario', (tester) async {
       late double normal;
-      late double ampliado;
+      late double scaled;
 
       await tester.pumpWidget(host(
         Builder(
@@ -145,7 +145,7 @@ void main() {
         textScale: 2.0,
         Builder(
           builder: (context) {
-            ampliado = FinAmount.measure(
+            scaled = FinAmount.measure(
               context,
               r'R$ 1.234.567,89',
               context.finType.numSm,
@@ -158,43 +158,43 @@ void main() {
       // O ponto do metodo: uma coluna dimensionada por ele acompanha a fonte
       // do usuario, onde uma largura em constante -- como o antigo
       // `_upsideColumnWidth = 78` -- truncaria em 1,3x.
-      expect(ampliado, greaterThan(normal * 1.8));
+      expect(scaled, greaterThan(normal * 1.8));
     });
 
     testWidgets('valor mais largo mede mais que o mais estreito',
         (tester) async {
-      late double estreito;
-      late double largo;
+      late double narrowWidth;
+      late double isWide;
 
       await tester.pumpWidget(host(
         Builder(
           builder: (context) {
             final style = context.finType.numSm;
-            estreito = FinAmount.measure(context, r'R$ 0,00', style);
-            largo = FinAmount.measure(context, r'R$ 1.234.567,89', style);
+            narrowWidth = FinAmount.measure(context, r'R$ 0,00', style);
+            isWide = FinAmount.measure(context, r'R$ 1.234.567,89', style);
             return const SizedBox.shrink();
           },
         ),
       ));
 
-      expect(largo, greaterThan(estreito));
+      expect(isWide, greaterThan(narrowWidth));
     });
 
     testWidgets('coluna medida nao trunca, nem sob escala 2,0x',
         (tester) async {
-      const valor = '-1.234,5%';
+      const value = '-1.234,5%';
 
-      for (final escala in <double>[1.0, 1.3, 2.0]) {
-        late double largura;
+      for (final scale in <double>[1.0, 1.3, 2.0]) {
+        late double width;
 
         // Passo 1: medir sob a escala corrente, como faz `_columnWidths`.
         await tester.pumpWidget(host(
-          textScale: escala,
+          textScale: scale,
           Builder(
             builder: (context) {
-              largura = FinAmount.measure(
+              width = FinAmount.measure(
                 context,
-                valor,
+                value,
                 context.finType.numSm,
               );
               return const SizedBox.shrink();
@@ -204,11 +204,11 @@ void main() {
 
         // Passo 2: renderizar numa coluna daquela largura exata.
         await tester.pumpWidget(host(
-          textScale: escala,
+          textScale: scale,
           Builder(
             builder: (context) => SizedBox(
-              width: largura,
-              child: FinAmount(text: valor, style: context.finType.numSm),
+              width: width,
+              child: FinAmount(text: value, style: context.finType.numSm),
             ),
           ),
         ));
@@ -216,12 +216,12 @@ void main() {
         expect(tester.takeException(), isNull);
 
         final paragraph = tester.renderObject<RenderParagraph>(
-          find.text(valor),
+          find.text(value),
         );
         expect(
           paragraph.didExceedMaxLines,
           isFalse,
-          reason: 'Em ${escala}x a coluna medida deveria caber o valor '
+          reason: 'Em ${scale}x a coluna medida deveria caber o valor '
               'inteiro. Se truncou, `measure` e a renderizacao divergiram.',
         );
       }
@@ -229,14 +229,14 @@ void main() {
 
     testWidgets('coluna estreita demais trunca de forma VISIVEL',
         (tester) async {
-      const valor = '-1.234,5%';
+      const value = '-1.234,5%';
 
       await tester.pumpWidget(host(
         Builder(
           builder: (context) => const SizedBox(
             width: 24,
             child: FinAmount(
-              text: valor,
+              text: value,
               style: TextStyle(fontSize: 13),
             ),
           ),
@@ -244,7 +244,7 @@ void main() {
       ));
 
       final paragraph = tester.renderObject<RenderParagraph>(
-        find.text(valor),
+        find.text(value),
       );
 
       // O que este teste protege: com `TextOverflow.clip` -- o padrao -- o

@@ -51,10 +51,10 @@ class TransversalSignals {
     DateTime? asOf,
     double? potential,
   }) {
-    final hoje = asOf ?? DateTime.now();
-    final publicados = PointInTimeView(hoje).published(history);
+    final today = asOf ?? DateTime.now();
+    final published = PointInTimeView(today).published(history);
     return TransversalSignals.of(
-      publicados.isEmpty ? null : publicados.last,
+      published.isEmpty ? null : published.last,
       potential: potential,
     );
   }
@@ -65,14 +65,14 @@ class TransversalSignals {
   /// nenhum dos dois — a mesma conta que as coortes da validação fazem, para que
   /// o aplicativo ordene pelo que foi medido.
   factory TransversalSignals.of(FundamentalsSnapshot? latest, {double? potential}) {
-    final vm = latest?.marketCap;
-    final temVm = vm != null && vm.isFinite && vm > 0;
+    final marketValue = latest?.marketCap;
+    final hasMarketValue = marketValue != null && marketValue.isFinite && marketValue > 0;
     final pl = latest?.equityBookValue;
-    final lucro = latest?.netIncome;
+    final profit = latest?.netIncome;
     return TransversalSignals(
       potential: potential,
-      bookToMarket: temVm && pl != null && pl.isFinite ? pl / vm : null,
-      earningsYield: temVm && lucro != null && lucro.isFinite ? lucro / vm : null,
+      bookToMarket: hasMarketValue && pl != null && pl.isFinite ? pl / marketValue : null,
+      earningsYield: hasMarketValue && profit != null && profit.isFinite ? profit / marketValue : null,
     );
   }
 }
@@ -92,21 +92,21 @@ abstract final class TransversalScore {
   /// valores. Seção sem escala estimável — curta ou colapsada — dá zero a todos,
   /// que é a leitura neutra.
   static Map<K, double> robustZ<K>(Map<K, double> values) {
-    final finitos = {
+    final finite = {
       for (final e in values.entries)
         if (e.value.isFinite) e.key: e.value,
     };
-    final secao = finitos.values.toList();
-    final centro = Inference.median(secao);
-    final escala = Inference.scaledMad(secao);
+    final crossSection = finite.values.toList();
+    final center = Inference.median(crossSection);
+    final scale = Inference.scaledMad(crossSection);
     // `Inference.scaledMad` já devolve `null` com MAD zero; a guarda repete a
     // condição aqui para que a divisão abaixo seja segura por inspeção local.
-    final semEscala = centro == null || escala == null || escala <= 0;
+    final noScale = center == null || scale == null || scale <= 0;
     return {
-      for (final e in finitos.entries)
-        e.key: semEscala
+      for (final e in finite.entries)
+        e.key: noScale
             ? 0.0
-            : ((e.value - centro) / escala).clamp(-cap, cap).toDouble(),
+            : ((e.value - center) / scale).clamp(-cap, cap).toDouble(),
     };
   }
 
@@ -119,22 +119,22 @@ abstract final class TransversalScore {
     Map<K, TransversalSignals> signals,
     TransversalOrdering ordering,
   ) {
-    Map<K, double> de(double? Function(TransversalSignals) campo) => {
+    Map<K, double> byField(double? Function(TransversalSignals) field) => {
           for (final e in signals.entries)
-            e.key: ?campo(e.value),
+            if (field(e.value) case final v?) e.key: v,
         };
-    final zPotencial = robustZ(de((s) => s.potential));
-    final zBm = robustZ(de((s) => s.bookToMarket));
+    final upsideZ = robustZ(byField((s) => s.potential));
+    final zBm = robustZ(byField((s) => s.bookToMarket));
     switch (ordering) {
       case TransversalOrdering.potential:
-        return zPotencial;
+        return upsideZ;
       case TransversalOrdering.bookToMarket:
         return zBm;
       case TransversalOrdering.composite:
-        final zEy = robustZ(de((s) => s.earningsYield));
+        final zEy = robustZ(byField((s) => s.earningsYield));
         final out = <K, double>{};
         for (final k in signals.keys) {
-          final zs = [zPotencial[k], zBm[k], zEy[k]].nonNulls.toList();
+          final zs = [upsideZ[k], zBm[k], zEy[k]].nonNulls.toList();
           if (zs.isEmpty) continue;
           out[k] = zs.reduce((a, b) => a + b) / zs.length;
         }

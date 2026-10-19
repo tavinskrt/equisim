@@ -13,10 +13,10 @@ import json
 import math
 import os
 
-SAIDA = 'docs/estudo/img/'
-os.makedirs(SAIDA, exist_ok=True)
+OUTPUT = 'docs/estudo/img/'
+os.makedirs(OUTPUT, exist_ok=True)
 
-ESTILO = """<style>
+STYLE = """<style>
   .fundo{fill:#fcfcfb}
   .t1{fill:#0b0b0b;font:600 15px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
   .t2{fill:#52514e;font:12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
@@ -53,40 +53,40 @@ ESTILO = """<style>
 </style>"""
 
 
-def br(x, casas=0):
-    s = f'{x:,.{casas}f}'
+def br(x, decimals=0):
+    s = f'{x:,.{decimals}f}'
     return s.replace(',', 'X').replace('.', ',').replace('X', '.')
 
 
-def svg(nome, largura, altura, titulo, desc, corpo):
-    texto = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {largura} {altura}" '
-             f'width="{largura}" height="{altura}" role="img" aria-labelledby="t d">'
-             f'<title id="t">{titulo}</title><desc id="d">{desc}</desc>{ESTILO}'
-             f'<rect class="fundo" width="{largura}" height="{altura}" rx="8"/>{corpo}</svg>\n')
-    with open(SAIDA + nome, 'w', encoding='utf-8', newline='\n') as f:
-        f.write(texto)
-    print('gravado', nome)
+def svg(name, width, height, title, desc, body):
+    text = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
+             f'width="{width}" height="{height}" role="img" aria-labelledby="t d">'
+             f'<title id="t">{title}</title><desc id="d">{desc}</desc>{STYLE}'
+             f'<rect class="fundo" width="{width}" height="{height}" rx="8"/>{body}</svg>\n')
+    with open(OUTPUT + name, 'w', encoding='utf-8', newline='\n') as f:
+        f.write(text)
+    print('gravado', name)
 
 
-def barra(x, y0, y1, w, classe, raio=4):
+def bar(x, y0, y1, w, share_class, radius=4):
     """Coluna com topo arredondado de 4px e base reta, de y0 (base) a y1 (topo)."""
-    topo, base = min(y0, y1), max(y0, y1)
-    h = base - topo
-    r = min(raio, h / 2, w / 2)
+    top_y, base = min(y0, y1), max(y0, y1)
+    h = base - top_y
+    r = min(radius, h / 2, w / 2)
     if y1 <= y0:  # para cima
-        d = (f'M{x},{base} L{x},{topo + r} Q{x},{topo} {x + r},{topo} '
-             f'L{x + w - r},{topo} Q{x + w},{topo} {x + w},{topo + r} L{x + w},{base} Z')
+        d = (f'M{x},{base} L{x},{top_y + r} Q{x},{top_y} {x + r},{top_y} '
+             f'L{x + w - r},{top_y} Q{x + w},{top_y} {x + w},{top_y + r} L{x + w},{base} Z')
     else:  # para baixo: ponta arredondada embaixo
-        d = (f'M{x},{topo} L{x},{base - r} Q{x},{base} {x + r},{base} '
-             f'L{x + w - r},{base} Q{x + w},{base} {x + w},{base - r} L{x + w},{topo} Z')
-    return f'<path class="{classe}" d="{d}" stroke="none"/>'
+        d = (f'M{x},{top_y} L{x},{base - r} Q{x},{base} {x + r},{base} '
+             f'L{x + w - r},{base} Q{x + w},{base} {x + w},{base - r} L{x + w},{top_y} Z')
+    return f'<path class="{share_class}" d="{d}" stroke="none"/>'
 
 
 # ---------------------------------------------------------------- 1 -------
-def valor_presente():
+def present_value():
     W, H = 720, 400
     x0, x1, y0, y1 = 70, 580, 340, 96
-    taxas = [(0.08, 's1', '8% a.a.'), (0.12, 's2', '12% a.a.'), (0.16, 's3', '16% a.a.')]
+    rates = [(0.08, 's1', '8% a.a.'), (0.12, 's2', '12% a.a.'), (0.16, 's3', '16% a.a.')]
 
     def X(t): return x0 + (x1 - x0) * t / 10
     def Y(v): return y0 - (y0 - y1) * v / 1000
@@ -99,24 +99,24 @@ def valor_presente():
         c.append(f'<text class="t2" x="{X(t)}" y="{y0 + 20}" text-anchor="middle">{t}</text>')
     c.append(f'<text class="t2" x="{(x0 + x1) / 2}" y="{y0 + 40}" text-anchor="middle">anos até receber</text>')
     c.append(f'<line class="eixo" x1="{x0}" x2="{x1}" y1="{y0}" y2="{y0}"/>')
-    for i, (r, cl, rot) in enumerate(taxas):
+    for i, (r, cl, label) in enumerate(rates):
         pts = ' '.join(f'{X(t):.1f},{Y(1000 / (1 + r) ** t):.1f}' for t in range(11))
         c.append(f'<polyline class="{cl}" points="{pts}" style="fill:none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>')
         v10 = 1000 / (1 + r) ** 10
         c.append(f'<circle class="{cl} anel" cx="{X(10)}" cy="{Y(v10)}" r="4.5"/>')
-        c.append(f'<text class="t3" x="{X(10) + 10}" y="{Y(v10) + 4}">{rot}: R$ {br(v10, 2)}</text>')
+        c.append(f'<text class="t3" x="{X(10) + 10}" y="{Y(v10) + 4}">{label}: R$ {br(v10, 2)}</text>')
     # legenda
     lx = 24
-    for i, (r, cl, rot) in enumerate(taxas):
+    for i, (r, cl, label) in enumerate(rates):
         c.append(f'<line class="{cl}" x1="{lx + i * 100}" x2="{lx + i * 100 + 18}" y1="70" y2="70" stroke-width="3"/>')
-        c.append(f'<text class="t2" x="{lx + i * 100 + 24}" y="74">{rot}</text>')
+        c.append(f'<text class="t2" x="{lx + i * 100 + 24}" y="74">{label}</text>')
     svg('valor-presente.svg', W, H, 'Valor presente de R$ 1.000 por ano e taxa',
         'Três curvas decrescentes: a 8%, 12% e 16% ao ano, R$ 1.000 no ano 10 valem hoje R$ 463,19, R$ 321,97 e R$ 226,68.',
         ''.join(c))
 
 
 # ---------------------------------------------------------------- 2 -------
-def curva():
+def curve():
     d = json.load(open('docs/estudo/casos/dados/WEGE3.json', encoding='utf-8'))
     fw = d['curva']['forwards']
     term = d['curva']['terminal']
@@ -134,8 +134,8 @@ def curva():
         c.append(f'<line class="grade" x1="{x0}" x2="{x1}" y1="{Y(v):.1f}" y2="{Y(v):.1f}"/>')
         c.append(f'<text class="t2" x="{x0 - 8}" y="{Y(v) + 4:.1f}" text-anchor="end">{br(v * 100, 1)}%</text>')
     pts = [(X(i + 1), Y(v)) for i, v in enumerate(fw)] + [(X(11), Y(term))]
-    rot = [str(i + 1) for i in range(10)] + ['∞']
-    for (x, _), r in zip(pts, rot):
+    label = [str(i + 1) for i in range(10)] + ['∞']
+    for (x, _), r in zip(pts, label):
         c.append(f'<text class="t2" x="{x:.1f}" y="{y0 + 20}" text-anchor="middle">{r}</text>')
     c.append(f'<text class="t2" x="{(x0 + x1) / 2}" y="{y0 + 40}" text-anchor="middle">ano da projeção (∞ = perpetuidade)</text>')
     c.append(f'<line class="neutro" x1="{x0}" x2="{x1}" y1="{Y(cdi):.1f}" y2="{Y(cdi):.1f}" stroke-width="1.5"/>')
@@ -202,46 +202,46 @@ def triangular():
 
 
 # ---------------------------------------------------------------- 5 -------
-def cascata():
+def cascade():
     W, H = 760, 560
     c = ['<text class="t1" x="24" y="32">A cascata de avaliação do Equisim</text>',
          '<text class="t2" x="24" y="52">Cada ativo passa pelas portas, em ordem; a via escolhida não muda depois</text>']
 
-    def caixa(x, y, w, h, titulo, sub, cl='caixa'):
+    def box(x, y, w, h, title, sub, cl='caixa'):
         s = f'<rect class="{cl}" x="{x}" y="{y}" width="{w}" height="{h}" rx="8"/>'
-        s += f'<text class="tb" x="{x + w / 2}" y="{y + 22}" text-anchor="middle">{titulo}</text>'
-        for i, linha in enumerate(sub):
-            s += f'<text class="t2" x="{x + w / 2}" y="{y + 40 + i * 16}" text-anchor="middle">{linha}</text>'
+        s += f'<text class="tb" x="{x + w / 2}" y="{y + 22}" text-anchor="middle">{title}</text>'
+        for i, line in enumerate(sub):
+            s += f'<text class="t2" x="{x + w / 2}" y="{y + 40 + i * 16}" text-anchor="middle">{line}</text>'
         return s
 
-    def seta(x1_, y1_, x2_, y2_, rot=None, lado='right'):
+    def seta(x1_, y1_, x2_, y2_, label=None, side='right'):
         s = f'<path class="seta" d="M{x1_},{y1_} L{x2_},{y2_}" marker-end="url(#ponta)"/>'
-        if rot:
+        if label:
             mx, my = (x1_ + x2_) / 2, (y1_ + y2_) / 2
             if y1_ == y2_:  # horizontal: rótulo centrado acima da linha
-                s += f'<text class="t2" x="{mx}" y="{my - 7}" text-anchor="middle">{rot}</text>'
+                s += f'<text class="t2" x="{mx}" y="{my - 7}" text-anchor="middle">{label}</text>'
             else:
-                anc = 'start' if lado == 'right' else 'end'
-                dx = 8 if lado == 'right' else -8
-                s += f'<text class="t2" x="{mx + dx}" y="{my + 4}" text-anchor="{anc}">{rot}</text>'
+                anchor = 'start' if side == 'right' else 'end'
+                dx = 8 if side == 'right' else -8
+                s += f'<text class="t2" x="{mx + dx}" y="{my + 4}" text-anchor="{anchor}">{label}</text>'
         return s
 
     c.append('<defs><marker id="ponta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 Z" class="neutro" stroke="none"/></marker></defs>')
-    c.append(caixa(250, 72, 260, 64, 'Dados na data da avaliação', ['exercícios já publicados, preço, curva, beta']))
+    c.append(box(250, 72, 260, 64, 'Dados na data da avaliação', ['exercícios já publicados, preço, curva, beta']))
     c.append(seta(380, 136, 380, 166))
-    c.append(caixa(250, 166, 260, 74, 'Porta 0 — elegibilidade', ['liquidez ≥ R$ 2 mi/dia; ≥ 8 exercícios;', 'PL positivo; sem recuperação judicial']))
-    c.append(caixa(560, 172, 170, 60, 'Recusa', ['com o motivo'], 'caixa4'))
+    c.append(box(250, 166, 260, 74, 'Porta 0 — elegibilidade', ['liquidez ≥ R$ 2 mi/dia; ≥ 8 exercícios;', 'PL positivo; sem recuperação judicial']))
+    c.append(box(560, 172, 170, 60, 'Recusa', ['com o motivo'], 'caixa4'))
     c.append(seta(510, 203, 558, 203, 'não', 'right'))
     c.append(seta(380, 240, 380, 270, 'sim'))
-    c.append(caixa(250, 270, 260, 64, 'Porta 1 — é financeira?', ['banco, seguradora, bolsa…']))
+    c.append(box(250, 270, 260, 64, 'Porta 1 — é financeira?', ['banco, seguradora, bolsa…']))
     c.append(seta(380, 334, 380, 364, 'não'))
-    c.append(caixa(250, 364, 260, 64, 'Porta 3 — NOPAT positivo', ['em ≥ 60% dos exercícios?']))
-    c.append(caixa(24, 364, 190, 64, 'Via do acionista', ['lucro por papel, ao Ke'], 'caixa3'))
+    c.append(box(250, 364, 260, 64, 'Porta 3 — NOPAT positivo', ['em ≥ 60% dos exercícios?']))
+    c.append(box(24, 364, 190, 64, 'Via do acionista', ['lucro por papel, ao Ke'], 'caixa3'))
     c.append(seta(250, 302, 120, 362, 'sim', 'left'))
     c.append(seta(250, 396, 216, 396, 'não', 'left'))
-    c.append(caixa(546, 364, 190, 64, 'Via da firma', ['NOPAT → fluxo do acionista'], 'caixa2'))
+    c.append(box(546, 364, 190, 64, 'Via da firma', ['NOPAT → fluxo do acionista'], 'caixa2'))
     c.append(seta(510, 396, 544, 396, 'sim'))
-    c.append(caixa(160, 462, 440, 74, 'Porta 2 — premissas', ['base (normalização pelo ciclo) e crescimento;', 'desconto; perpetuidade; preço justo e ressalvas']))
+    c.append(box(160, 462, 440, 74, 'Porta 2 — premissas', ['base (normalização pelo ciclo) e crescimento;', 'desconto; perpetuidade; preço justo e ressalvas']))
     c.append(seta(120, 428, 250, 460))
     c.append(seta(640, 428, 510, 460))
     svg('cascata.svg', W, H, 'Cascata de avaliação',
@@ -252,11 +252,11 @@ def cascata():
 # ---------------------------------------------------------------- 6 -------
 def wege3():
     d = json.load(open('docs/estudo/casos/dados/WEGE3.json', encoding='utf-8'))
-    passo = next(x for x in d['rastro']['calculations'] if x['formulaName'].startswith('Fluxo do acionista'))
+    step = next(x for x in d['rastro']['calculations'] if x['formulaName'].startswith('Fluxo do acionista'))
     import re
     rx = re.compile(r'fluxo do acionista ([\d.\-e]+); .* valor presente ([\d.\-e]+)')
     fl, vp = [], []
-    for s in passo['intermediateSteps']:
+    for s in step['intermediateSteps']:
         m = rx.search(s)
         if m:
             fl.append(float(m.group(1)) / 1e9)
@@ -271,18 +271,18 @@ def wege3():
     for v in range(0, 13, 3):
         c.append(f'<line class="grade" x1="{x0}" x2="{x1}" y1="{Y(v):.1f}" y2="{Y(v):.1f}"/>')
         c.append(f'<text class="t2" x="{x0 - 8}" y="{Y(v) + 4:.1f}" text-anchor="end">{v}</text>')
-    banda = (x1 - x0) / 10
+    band = (x1 - x0) / 10
     w = 22
     for i in range(10):
-        xc = x0 + banda * (i + 0.5)
-        c.append(barra(xc - w - 1, y0, Y(fl[i]), w, 's1'))
-        c.append(barra(xc + 1, y0, Y(vp[i]), w, 's2'))
+        xc = x0 + band * (i + 0.5)
+        c.append(bar(xc - w - 1, y0, Y(fl[i]), w, 's1'))
+        c.append(bar(xc + 1, y0, Y(vp[i]), w, 's2'))
         c.append(f'<text class="t2" x="{xc:.1f}" y="{y0 + 18}" text-anchor="middle">{i + 1}</text>')
     c.append(f'<line class="eixo" x1="{x0}" x2="{x1}" y1="{y0}" y2="{y0}"/>')
     c.append(f'<text class="t2" x="{(x0 + x1) / 2}" y="{y0 + 38}" text-anchor="middle">ano da projeção</text>')
     # rótulos seletivos: ano 1 e ano 10
     for i in (0, 9):
-        xc = x0 + banda * (i + 0.5)
+        xc = x0 + band * (i + 0.5)
         c.append(f'<text class="t3" x="{xc - w / 2 - 1:.1f}" y="{Y(fl[i]) - 6:.1f}" text-anchor="middle">{br(fl[i], 1)}</text>')
         c.append(f'<text class="t3" x="{xc + w / 2 + 1:.1f}" y="{Y(vp[i]) - 6:.1f}" text-anchor="middle">{br(vp[i], 1)}</text>')
     c.append('<rect class="s1" x="24" y="64" width="12" height="12" rx="2" stroke="none"/><text class="t2" x="42" y="75">fluxo do acionista</text>')
@@ -292,12 +292,12 @@ def wege3():
         ''.join(c))
 
     # composição (cascata de valores)
-    ponte = next(x for x in d['rastro']['calculations'] if x['formulaName'].startswith('Capital próprio'))
-    v = ponte['mappedVariables']
+    bridge = next(x for x in d['rastro']['calculations'] if x['formulaName'].startswith('Capital próprio'))
+    v = bridge['mappedVariables']
     exp_ = v['VP do fluxo explícito do acionista (R$)'] / 1e9
-    ter = v['VP do terminal do acionista (R$)'] / 1e9
-    mino = v['minoritários M (R$)'] / 1e9
-    tot = exp_ + ter - mino
+    equity_terminal = v['VP do terminal do acionista (R$)'] / 1e9
+    minority = v['minoritários M (R$)'] / 1e9
+    tot = exp_ + equity_terminal - minority
     W, H = 720, 380
     x0, x1, y0, y1 = 70, 680, 310, 80
     top = 60.0
@@ -308,28 +308,28 @@ def wege3():
     for k in range(0, 61, 20):
         c.append(f'<line class="grade" x1="{x0}" x2="{x1}" y1="{Y2(k):.1f}" y2="{Y2(k):.1f}"/>')
         c.append(f'<text class="t2" x="{x0 - 8}" y="{Y2(k) + 4:.1f}" text-anchor="end">{k}</text>')
-    etapas = [('VP dos 10 anos', 0, exp_, 's1'), ('VP do terminal', exp_, exp_ + ter, 's1'),
-              ('Minoritários', exp_ + ter, tot, 's2'), ('Capital próprio', 0, tot, 'neutro')]
-    banda = (x1 - x0) / 4
+    stages = [('VP dos 10 anos', 0, exp_, 's1'), ('VP do terminal', exp_, exp_ + equity_terminal, 's1'),
+              ('Minoritários', exp_ + equity_terminal, tot, 's2'), ('Capital próprio', 0, tot, 'neutro')]
+    band = (x1 - x0) / 4
     w = 24 * 2
-    for i, (rot, a, b, cl) in enumerate(etapas):
-        xc = x0 + banda * (i + 0.5)
+    for i, (label, a, b, cl) in enumerate(stages):
+        xc = x0 + band * (i + 0.5)
         if b >= a:
-            c.append(barra(xc - w / 2, Y2(a), Y2(b), w, cl))
+            c.append(bar(xc - w / 2, Y2(a), Y2(b), w, cl))
         else:
-            c.append(barra(xc - w / 2, Y2(a), Y2(b), w, cl))
+            c.append(bar(xc - w / 2, Y2(a), Y2(b), w, cl))
         val = b - a if i < 3 else tot
         c.append(f'<text class="t3" x="{xc:.1f}" y="{Y2(max(a, b)) - 8:.1f}" text-anchor="middle">{"−" if val < 0 else ("+" if 0 < i < 3 else "")}{br(abs(val), 2)}</text>')
-        c.append(f'<text class="t2" x="{xc:.1f}" y="{y0 + 20}" text-anchor="middle">{rot}</text>')
+        c.append(f'<text class="t2" x="{xc:.1f}" y="{y0 + 20}" text-anchor="middle">{label}</text>')
     c.append(f'<line class="eixo" x1="{x0}" x2="{x1}" y1="{y0}" y2="{y0}"/>')
     svg('wege3-composicao.svg', W, H, 'Composição do preço justo da WEGE3',
-        f'VP explícito {br(exp_, 2)} bi, mais VP terminal {br(ter, 2)} bi, menos minoritários {br(mino, 2)} bi, igual a capital próprio de {br(tot, 2)} bi.',
+        f'VP explícito {br(exp_, 2)} bi, mais VP terminal {br(equity_terminal, 2)} bi, menos minoritários {br(minority, 2)} bi, igual a capital próprio de {br(tot, 2)} bi.',
         ''.join(c))
 
 
-valor_presente()
-curva()
+present_value()
+curve()
 beta()
 triangular()
-cascata()
+cascade()
 wege3()

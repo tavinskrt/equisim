@@ -206,25 +206,25 @@ void main() {
     // era o caminho sem cobertura. Exceção crua atravessando a camada de dados
     // quebraria o contrato `Result` inteiro.
 
-    Future<void> viraFalha(DioExceptionType tipo) async {
+    Future<void> becomesFailure(DioExceptionType kind) async {
       final datasource = BrapiDatasource(clientWith(FixtureAdapter(
-        transportErrors: {'/v2/stocks/historical': tipo},
+        transportErrors: {'/v2/stocks/historical': kind},
       )));
       final result = await datasource.historicalBatch([Ticker.parse('PETR4')]);
-      expect(result.isErr, isTrue, reason: '$tipo deveria virar Result.err');
+      expect(result.isErr, isTrue, reason: '$kind deveria virar Result.err');
       expect(result.failureOrNull, isA<InsufficientData>());
     }
 
     test('tempo de conexão esgotado vira falha de domínio', () async {
-      await viraFalha(DioExceptionType.connectionTimeout);
+      await becomesFailure(DioExceptionType.connectionTimeout);
     });
 
     test('tempo de recepção esgotado vira falha de domínio', () async {
-      await viraFalha(DioExceptionType.receiveTimeout);
+      await becomesFailure(DioExceptionType.receiveTimeout);
     });
 
     test('conexão perdida vira falha de domínio', () async {
-      await viraFalha(DioExceptionType.connectionError);
+      await becomesFailure(DioExceptionType.connectionError);
     });
 
     test('erro de transporte desconhecido também não escapa', () async {
@@ -275,7 +275,7 @@ void main() {
       // estatística** (lente `risco`, 24/09/2026): o histórico e o corrente
       // trazem a contagem de ações e o valor de mercado, que dividem o preço
       // justo — a rota que mais pesa era a que o laço deixava de fora.
-      const rotas = {
+      const routes = {
         '/v2/stocks/statistics?symbols=PETR4&mode=history':
             'brapi_statistics_history_petr4',
         '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
@@ -284,7 +284,7 @@ void main() {
         '/v2/stocks/statistics?symbols=PETR4&mode=current':
             'brapi_statistics_current_petr4',
       };
-      const quebrados = {
+      const brokenCases = {
         '/v2/stocks/income-statement': [
           '{"results":[{"incomeStatementHistory":"não é lista"}]}',
           ('{"results":[{"incomeStatementHistory":[{"endDate":"2024-12-31",'
@@ -311,23 +311,23 @@ void main() {
               '"marketCap":{"x":1},"enterpriseToEbitda":"quatro"}}]}'),
         ],
       };
-      final casos = [
-        for (final rota in rotas.keys)
-          for (final corpo in [
-            ...quebrados[rota]!,
+      final cases = [
+        for (final route in routes.keys)
+          for (final body in [
+            ...brokenCases[route]!,
             '{"results":"nem objeto"}',
             '[]',
             'isto não é json',
           ])
-            (rota, corpo),
+            (route, body),
       ];
-      for (final (rota, corpo) in casos) {
+      for (final (route, body) in cases) {
         final datasource = BrapiDatasource(clientWith(FixtureAdapter(
           routes: {
-            for (final e in rotas.entries)
-              if (e.key != rota) e.key: e.value,
+            for (final e in routes.entries)
+              if (e.key != route) e.key: e.value,
           },
-          bodies: {rota: corpo},
+          bodies: {route: body},
         )));
         // O contrato é `Result`: ou vem erro, ou vem série — e nunca uma
         // exceção atravessando a camada de dados. **Quem cobra isso é o
@@ -340,12 +340,12 @@ void main() {
         // 25/09/2026): o que nem é JSON é recusa, em toda rota; o JSON de
         // forma errada numa rota é tolerado, e as outras rotas continuam
         // entregando os exercícios — tolerar não é devolver série vazia.
-        if (corpo == 'isto não é json') {
-          expect(r.isErr, isTrue, reason: '$rota $corpo');
+        if (body == 'isto não é json') {
+          expect(r.isErr, isTrue, reason: '$route $body');
           continue;
         }
         expect(r.isOk && r.unwrap().isNotEmpty, isTrue,
-            reason: 'um corpo ruim numa rota não apaga as outras: $rota $corpo');
+            reason: 'um corpo ruim numa rota não apaga as outras: $route $body');
         if (r.isOk) {
           // Tolerar o corpo é legítimo; **inventar número** não. Nenhum
           // exercício pode sair com lucro lido de um literal que não é número.
@@ -359,7 +359,7 @@ void main() {
               s.marketCap,
               s.enterpriseToEbitda,
             ]) {
-              expect(v == null || v.isFinite, isTrue, reason: '$rota $corpo');
+              expect(v == null || v.isFinite, isTrue, reason: '$route $body');
             }
           }
         }
@@ -496,16 +496,16 @@ void main() {
       // Lente `risco`, 27/09/2026: o teste acima olha um exercício só, e uma
       // fusão por posição acertaria nele por coincidência. Aqui o fluxo de
       // caixa perde 2020, e cada exercício é conferido contra a fixture.
-      Map<String, dynamic> fixture(String nome) => jsonDecode(File(
-                  'test/fixtures/$nome.json')
+      Map<String, dynamic> fixture(String name) => jsonDecode(File(
+                  'test/fixtures/$name.json')
               .readAsStringSync()
               .replaceFirst('\uFEFF', '')) as Map<String, dynamic>;
-      List<Map<String, dynamic>> anos(Map<String, dynamic> j) =>
+      List<Map<String, dynamic>> years(Map<String, dynamic> j) =>
           (((j['results'] as List).first as Map)['data'] as List)
               .cast<Map<String, dynamic>>();
-      final dre = anos(fixture('brapi_income_statement_history_petr4'));
+      final dre = years(fixture('brapi_income_statement_history_petr4'));
       final dfcJson = fixture('brapi_cash_flow_history_petr4');
-      final dfc = anos(dfcJson);
+      final dfc = years(dfcJson);
       ((dfcJson['results'] as List).first as Map)['data'] =
           dfc.where((x) => x['endDate'] != '2020-12-31').toList();
 
@@ -521,20 +521,20 @@ void main() {
         bodies: {'/v2/stocks/cash-flow': jsonEncode(dfcJson)},
       ))).fundamentalsHistory(Ticker.parse('PETR4')))
           .unwrap();
-      final porAno = {
+      final byYear = {
         for (final s in snapshots) s.fiscalPeriodEnd.year: s,
       };
       for (final x in dre) {
-        final ano = DateTime.parse(x['endDate'] as String).year;
-        final s = porAno[ano];
-        expect(s, isNotNull, reason: 'exercício $ano');
+        final year = DateTime.parse(x['endDate'] as String).year;
+        final s = byYear[year];
+        expect(s, isNotNull, reason: 'exercício $year');
         expect(s!.totalRevenue, (x['totalRevenue'] as num?)?.toDouble(),
-            reason: 'receita de $ano');
-        final caixa = dfc.firstWhere((y) => y['endDate'] == x['endDate']);
+            reason: 'receita de $year');
+        final cash = dfc.firstWhere((y) => y['endDate'] == x['endDate']);
         expect(
           s.operatingCashFlow,
-          ano == 2020 ? isNull : (caixa['operatingCashFlow'] as num?)?.toDouble(),
-          reason: 'fluxo de caixa de $ano',
+          year == 2020 ? isNull : (cash['operatingCashFlow'] as num?)?.toDouble(),
+          reason: 'fluxo de caixa de $year',
         );
       }
     });
@@ -679,7 +679,7 @@ void main() {
       // Lente `risco`, 20/09/2026. A fonte de cotações já tinha este teste; a
       // do Banco Central não, e a troca de layout dela escapava como exceção
       // nativa em vez de `Result.err`.
-      for (final corpo in [
+      for (final body in [
         '[{"valor":"0,04"}]', // sem `data`
         '[{"data":"02/01/2024"}]', // sem `valor`
         '[{"data":"02/01/2024","valor":"não é número"}]',
@@ -687,13 +687,13 @@ void main() {
         'isto não é json',
       ]) {
         final datasource = BcbDatasource(clientWith(FixtureAdapter(
-          bodies: {'bcdata.sgs.12': corpo},
+          bodies: {'bcdata.sgs.12': body},
         )));
         final r = await datasource.series(
           BcbDatasource.seriesCdiDaily,
           DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)),
         );
-        expect(r.isErr, isTrue, reason: corpo);
+        expect(r.isErr, isTrue, reason: body);
       }
     });
   });

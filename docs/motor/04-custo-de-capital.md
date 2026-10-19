@@ -14,7 +14,7 @@ estrutura recusada na [RENT3](../estudo/casos/rent3.md).
 | `Ke = Rf + β × prêmio` | [cost_of_capital.dart, `CapmInputs.costOfEquity`](../../packages/equisim_core/lib/src/services/valuation/cost_of_capital.dart) | Sharpe (1964), Lintner (1965) | — |
 | Prêmio de mercado = **média de dez anos do prêmio implícito** no preço da bolsa: 1,21% em 14/09/2026 | [implied_premium.dart, `ImpliedPremiumPackage.normalizedAt`](../../packages/equisim_core/lib/src/services/valuation/implied_premium.dart); `MarketPremiumSource.impliedNormalized` | em cada trimestre, `r = rendimento × (1 + g) + g` (Gordon/Damodaran: o valor de mercado somado das listadas igualado aos dividendos e JCP de doze meses, crescendo com a economia nominal); o prêmio do trimestre é `r − Rf`, com `Rf` o prefixado de dez anos — a forma que o CAPM soma; a média é a dos trimestres com fim em `(data − 10 anos, data]`, com pelo menos 20 | decisão 142, [premio_implicito.md](../validacao/premio_implicito.md); a média fica positiva em todas as coortes e concorda com o prêmio histórico de dez anos |
 | A série chega por pacote (`assets/mercado/premio_implicito.json`, gerado por `tool/premio_implicito.dart`); sem pacote, o prêmio é o parametrizado de 5,5% (`CapmInputs.defaultMarketPremium`) e a avaliação diz isso; pacote com mais de 183 dias continua valendo, com ressalva da data | [market_premium_repository.dart](../../lib/data/repositories/market_premium_repository.dart) | a média de dez anos anda um quadragésimo por trimestre: trocá-la pelos 5,5% seria salto maior que a defasagem | decisão 142 |
-| O Ke "do dia" (CDI corrente) serve ao WACC estático e à tela de metas; o de cada ano da projeção usa o forward daquele ano | `_premissas`, `_auditCapm` | a curva dá a taxa que o mercado atribui a cada prazo | decisões 74 e 103; rastro explica desde 28/09/2026 |
+| O Ke "do dia" (CDI corrente) serve ao WACC estático e à tela de metas; o de cada ano da projeção usa o forward daquele ano | `_assumptions`, `_auditCapm` | a curva dá a taxa que o mercado atribui a cada prazo | decisões 74 e 103; rastro explica desde 28/09/2026 |
 
 ---
 
@@ -25,7 +25,7 @@ estrutura recusada na [RENT3](../estudo/casos/rent3.md).
 | Peso da medida `w = (1/SE²) ÷ (1/SE² + 1/σ²)`; `β = w·β_medido + (1 − w)·β_prior` | [beta_shrinkage.dart, `BetaShrinkage.shrink`](../../packages/equisim_core/lib/src/services/metrics/beta_shrinkage.dart) | encolhimento bayesiano (Vasicek, 1973) | decisão 40; peso mediano 0,98 |
 | `β_prior` = beta desalavancado mediano do setor (recuo: universo), realavancado pela estrutura do ativo; `σ` = dispersão robusta dos betas do universo (0,53) | [resolve_beta_prior.dart](../../packages/equisim_core/lib/src/usecases/resolve_beta_prior.dart), [assets/mercado/beta_prior.json](../../assets/mercado/) | "bottom-up beta" (Damodaran) | [beta_setorial.md](../validacao/beta_setorial.md) |
 | Hamada: `fator = 1 + (1 − 34%) × D/E`, com D/E limitado a [0; 3]; `β_U = β_L ÷ fator` | `BetaShrinkage.leverageFactor` | Hamada (1972) | decisões 54 e 55 (D/E da janela do beta) |
-| Financeiras não se desalavancam nem realavancam | `_resolverCusto` | a alavancagem do banco é permanente e regulada, e o beta medido a contém | decisão 46 |
+| Financeiras não se desalavancam nem realavancam | `_resolveCost` | a alavancagem do banco é permanente e regulada, e o beta medido a contém | decisão 46 |
 
 ---
 
@@ -37,7 +37,7 @@ estrutura recusada na [RENT3](../estudo/casos/rent3.md).
 | Prêmio pela alavancagem (dívida líquida ÷ EBITDA): ≤ 0 → 1,0%; ≤ 1 → 1,3%; ≤ 2 → 1,8%; ≤ 2,5 → 2,4%; ≤ 3 → 3,1%; ≤ 3,5 → 4,0%; ≤ 4 → 5,5%; ≤ 5 → 7,5%; acima, ou EBITDA ≤ 0 → 10% | `CostOfCapital.leverageSpread` | tabela no estilo das agências (Damodaran, "synthetic rating") |
 | Prêmio pela cobertura (EBIT ÷ despesa): ≥ 8,5 → 1,0% … < 0,8 → 10%; **só fala** quando despesa ÷ dívida bruta cai em [Rf; Rf + 10 p.p.], e aí vale o maior dos dois | `coverageSpread`, `syntheticSpread` | decisão 130 |
 | Sem dívida contratada: `Kd = Rf` | `effectiveCostOfDebt` | — |
-| Aviso quando o Kd adotado se afasta mais de 1 p.p. do observado, com a regra aplicada | `costOfDebtWasClamped`, `_avisoDoCustoDaDivida` | item B32 |
+| Aviso quando o Kd adotado se afasta mais de 1 p.p. do observado, com a regra aplicada | `costOfDebtWasClamped`, `_costOfDebtWarning` | item B32 |
 | Escudo fiscal: 34% (estatutária), reduzido proporcionalmente quando a cobertura é menor que 1 | `effectiveTaxShield` | decisão 37: a dedução vale na margem, que é a alíquota cheia no Lucro Real |
 
 ---
@@ -64,8 +64,8 @@ V = E + D_líquida;   E = papéis da ponte × preço
 
 | Situação | Taxa do ano t | Código | Evidência |
 |---|---|---|---|
-| Com beta desalavancado e não financeira: **resolvida** (4.6) | WACC_t e Ke_t do ponto fixo, sobre o forward do ano | `_resolverCusto`, [levered_rates.dart](../../packages/equisim_core/lib/src/services/valuation/levered_rates.dart) | decisões 41, 42, 46, 105 |
-| Banco, ou sem beta desalavancado, **com curva** | o custo de hoje (beta, prêmio, estrutura de hoje) remontado sobre o forward do ano | `_premissas` (`caminhoPelaCurva`), `_descontarDoBalanco` | **item B37, corrigido em 28/09/2026**: antes interpolava em linha reta do CDI de hoje à perpetuidade |
+| Com beta desalavancado e não financeira: **resolvida** (4.6) | WACC_t e Ke_t do ponto fixo, sobre o forward do ano | `_resolveCost`, [levered_rates.dart](../../packages/equisim_core/lib/src/services/valuation/levered_rates.dart) | decisões 41, 42, 46, 105 |
+| Banco, ou sem beta desalavancado, **com curva** | o custo de hoje (beta, prêmio, estrutura de hoje) remontado sobre o forward do ano | `_assumptions` (`curvePath`), `_discountFromBalanceSheet` | **item B37, corrigido em 28/09/2026**: antes interpolava em linha reta do CDI de hoje à perpetuidade |
 | Sem curva | linha reta do custo sobre o CDI corrente ao custo sobre o CDI de dez anos | `DcfAssumptions.discountRateAt` | recuo |
 | Perpetuidade | custo sobre o forward depois do ano N (ou o CDI de dez anos, sem curva), com a estrutura do ano N quando resolvida | `terminalCapm`, `_wacc(terminal: true)` | decisão 105 |
 

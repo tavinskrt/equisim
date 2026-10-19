@@ -11,19 +11,19 @@ import '../presentation/theme/fin_colors.dart';
 /// O controlador devolve significado; a tela decide como pintá-lo.
 enum PasswordStrength {
   /// Nada digitado ainda.
-  vazia(0, ''),
+  empty(0, ''),
 
   /// Curta demais.
-  fraca(1, 'Fraca'),
+  weak(1, 'Fraca'),
 
   /// Aceitável, mas sem dígito ou sem comprimento.
-  media(2, 'Média'),
+  medium(2, 'Média'),
 
   /// Boa; falta só caractere especial.
-  boa(3, 'Boa'),
+  good(3, 'Boa'),
 
   /// Atende a tudo que se cobra.
-  forte(4, 'Forte');
+  strong(4, 'Forte');
 
   /// Quantas barras do medidor acendem.
   final int level;
@@ -39,10 +39,10 @@ enum PasswordStrength {
   /// mostram o medidor precisam concordar — quando estava espalhado, uma delas
   /// tinha quatro níveis e a outra três, com azul numa e não na outra.
   FinTrend get trend => switch (this) {
-    PasswordStrength.vazia => FinTrend.blocked,
-    PasswordStrength.fraca => FinTrend.negative,
-    PasswordStrength.media => FinTrend.caution,
-    PasswordStrength.boa => FinTrend.pending,
-    PasswordStrength.forte => FinTrend.positive,
+    PasswordStrength.empty => FinTrend.blocked,
+    PasswordStrength.weak => FinTrend.negative,
+    PasswordStrength.medium => FinTrend.caution,
+    PasswordStrength.good => FinTrend.pending,
+    PasswordStrength.strong => FinTrend.positive,
   };
 }

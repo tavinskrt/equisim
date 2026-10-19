@@ -63,8 +63,8 @@ abstract final class CyclicalSectors {
     if (normalize(sectorKey) == normalize(heavySectorKey)) return true;
     final sub = normalize(industry);
     if (sub.isEmpty) return false;
-    for (final termo in heavyIndustryTerms) {
-      if (sub.contains(termo)) return true;
+    for (final term in heavyIndustryTerms) {
+      if (sub.contains(term)) return true;
     }
     return false;
   }
@@ -97,7 +97,7 @@ abstract final class CyclicalSectors {
   /// Devolve a letra sem acento, o dígito como está, ou `null` para qualquer
   /// outro caractere — que o chamador trata como separador.
   static String? _fold(String ch) {
-    const acentos = {
+    const accents = {
       'á': 'a', 'à': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a',
       'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
       'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i',
@@ -105,11 +105,11 @@ abstract final class CyclicalSectors {
       'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u',
       'ç': 'c', 'ñ': 'n',
     };
-    final semAcento = acentos[ch] ?? ch;
-    if (semAcento.length != 1) return null;
-    final code = semAcento.codeUnitAt(0);
+    final unaccented = accents[ch] ?? ch;
+    if (unaccented.length != 1) return null;
+    final code = unaccented.codeUnitAt(0);
     final isLetter = code >= 0x61 && code <= 0x7A;
     final isDigit = code >= 0x30 && code <= 0x39;
-    return (isLetter || isDigit) ? semAcento : null;
+    return (isLetter || isDigit) ? unaccented : null;
   }
 }

@@ -21,32 +21,32 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
 /// `true` quando o exercício não traz resultado algum.
 ///
 /// Os quatro juntos: receita, resultado operacional, lucro líquido e lucro por
 /// ação. Zerar **um** deles é possível — holding sem receita, empresa no
 /// zero a zero. Zerar os quatro, não.
-bool _semResultado(FundamentalsSnapshot s) {
-  bool vazio(double? v) => v == null || v == 0;
-  return vazio(s.totalRevenue) &&
-      vazio(s.ebit) &&
-      vazio(s.netIncome) &&
-      vazio(s.earningsPerShare);
+bool _withoutResult(FundamentalsSnapshot s) {
+  bool isEmptyValue(double? v) => v == null || v == 0;
+  return isEmptyValue(s.totalRevenue) &&
+      isEmptyValue(s.ebit) &&
+      isEmptyValue(s.netIncome) &&
+      isEmptyValue(s.earningsPerShare);
 }
 
 /// `true` quando o balanço do mesmo exercício tem conteúdo.
 ///
 /// É o que separa "a empresa não existia" de "a demonstração de resultado não
 /// veio": o exercício está lá, com patrimônio e ativo, e só o resultado falta.
-bool _comBalanco(FundamentalsSnapshot s) {
+bool _withBalanceSheet(FundamentalsSnapshot s) {
   final pl = s.totalStockholderEquity;
-  final imob = s.propertyPlantEquipment;
-  final ativo = s.totalCurrentAssets;
+  final fixedAssets = s.propertyPlantEquipment;
+  final asset = s.totalCurrentAssets;
   return (pl != null && pl != 0) ||
-      (imob != null && imob != 0) ||
-      (ativo != null && ativo != 0);
+      (fixedAssets != null && fixedAssets != 0) ||
+      (asset != null && asset != 0);
 }
 
 Future<void> main(List<String> args) async {
@@ -55,7 +55,7 @@ Future<void> main(List<String> args) async {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
     final universe = (await ctx.fundamentals.universe()).unwrap();
@@ -64,24 +64,24 @@ Future<void> main(List<String> args) async {
       prices: ctx.prices,
       fundamentals: ctx.fundamentals,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     );
 
-    final saida = <Map<String, dynamic>>[];
+    final output = <Map<String, dynamic>>[];
     var i = 0;
     for (final ticker in universe) {
       i++;
       if (i % 25 == 0) stderr.write('  $i/${universe.length}   \r');
-      final serie = await ctx.fundamentals.history(ticker);
-      if (serie.isErr) continue;
-      final pub = PointInTimeView(_hoje).published(serie.unwrap());
+      final series = await ctx.fundamentals.history(ticker);
+      if (series.isErr) continue;
+      final pub = PointInTimeView(_today).published(series.unwrap());
       if (pub.isEmpty) continue;
 
-      final vazios = [
+      final emptyCount = [
         for (final s in pub)
-          if (_semResultado(s)) s
+          if (_withoutResult(s)) s
       ];
-      if (vazios.isEmpty) continue;
+      if (emptyCount.isEmpty) continue;
 
       final prep = await PrepareValuationInputs.call(
         ticker: ticker,
@@ -89,70 +89,70 @@ Future<void> main(List<String> args) async {
         fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
         projectionYears: 10,
         betaPrior: prior,
       );
-      String? recusa;
-      double? justo;
+      String? refusal;
+      double? fairValue;
       if (prep.isErr) {
-        recusa = 'insumo: ${prep.failureOrNull?.message}';
+        refusal = 'insumo: ${prep.failureOrNull?.message}';
       } else {
         final r = ValuationCascade.evaluate(prep.unwrap());
         if (r.isErr) {
-          recusa = r.failureOrNull!.message;
+          refusal = r.failureOrNull!.message;
         } else {
-          justo = r.unwrap().fairValue.reais;
+          fairValue = r.unwrap().fairValue.reais;
         }
       }
 
-      saida.add({
+      output.add({
         'ticker': ticker.value,
         'exercicios': pub.length,
-        'vazios': vazios.length,
-        'anosVazios': [for (final s in vazios) s.fiscalPeriodEnd.year],
-        'ultimoVazio': _semResultado(pub.last),
-        'comBalanco': vazios.where(_comBalanco).length,
-        'justo': justo,
-        'recusa': recusa,
+        'vazios': emptyCount.length,
+        'anosVazios': [for (final s in emptyCount) s.fiscalPeriodEnd.year],
+        'ultimoVazio': _withoutResult(pub.last),
+        'comBalanco': emptyCount.where(_withBalanceSheet).length,
+        'justo': fairValue,
+        'recusa': refusal,
       });
     }
     stderr.writeln('');
 
     File('docs/validacao/exercicio_vazio.json').writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(saida),
+      const JsonEncoder.withIndent(' ').convert(output),
     );
-    _imprimir(saida, universe.length);
+    _printReport(output, universe.length);
     stderr.writeln('\nescrito docs/validacao/exercicio_vazio.json '
-        '(${saida.length})');
+        '(${output.length})');
   } finally {
     await ctx.dispose();
   }
 }
 
-void _imprimir(List<Map<String, dynamic>> l, int universo) {
+void _printReport(List<Map<String, dynamic>> l, int universe) {
   stdout.writeln('\n=== EXERCÍCIO SEM DEMONSTRAÇÃO DE RESULTADO ===\n');
-  stdout.writeln('  ativos com ao menos um: ${l.length} de $universo');
-  final comBalanco =
+  stdout.writeln('  ativos com ao menos um: ${l.length} de $universe');
+  final withBalanceSheet =
       l.where((e) => (e['comBalanco'] as int) > 0).length;
   stdout.writeln('  destes, com balanço preenchido no mesmo exercício: '
-      '$comBalanco');
-  final noUltimo = l.where((e) => e['ultimoVazio'] == true).toList();
-  stdout.writeln('  **com o exercício-base vazio: ${noUltimo.length}**');
-  final recusados = l.where((e) => e['recusa'] != null).length;
-  stdout.writeln('  recusados pelo motor: $recusados');
+      '$withBalanceSheet');
+  final inLast = l.where((e) => e['ultimoVazio'] == true).toList();
+  stdout.writeln('  **com o exercício-base vazio: ${inLast.length}**');
+  final refusedCount = l.where((e) => e['recusa'] != null).length;
+  stdout.writeln('  recusados pelo motor: $refusedCount');
 
-  final totalVazios = l.fold<int>(0, (a, e) => a + (e['vazios'] as int));
-  final totalExercicios = l.fold<int>(0, (a, e) => a + (e['exercicios'] as int));
-  stdout.writeln('  exercícios vazios: $totalVazios de $totalExercicios '
+  final totalEmpty = l.fold<int>(0, (a, e) => a + (e['vazios'] as int));
+  final totalFiscalYears = l.fold<int>(0, (a, e) => a + (e['exercicios'] as int));
+  stdout.writeln('  exercícios vazios: $totalEmpty de $totalFiscalYears '
       'publicados nesses ativos');
 
-  if (noUltimo.isNotEmpty) {
+  if (inLast.isNotEmpty) {
     stdout.writeln('\n-- os que têm o exercício-base vazio --');
-    for (final e in noUltimo) {
+    for (final e in inLast) {
       stdout.writeln('  ${(e['ticker'] as String).padRight(7)} '
           'vazios=${e['vazios']}/${e['exercicios']}  '
           'anos=${e['anosVazios']}  '
@@ -160,15 +160,15 @@ void _imprimir(List<Map<String, dynamic>> l, int universo) {
     }
   }
 
-  final noMeio = l.where((e) => e['ultimoVazio'] != true).toList();
-  if (noMeio.isNotEmpty) {
+  final inMiddle = l.where((e) => e['ultimoVazio'] != true).toList();
+  if (inMiddle.isNotEmpty) {
     stdout.writeln('\n-- vazio no meio da série (envenena crescimento e '
         'retorno, não a base) --');
-    for (final e in noMeio.take(20)) {
+    for (final e in inMiddle.take(20)) {
       stdout.writeln('  ${(e['ticker'] as String).padRight(7)} '
           'vazios=${e['vazios']}/${e['exercicios']}  anos=${e['anosVazios']}  '
           '${e['recusa'] != null ? "RECUSADO" : "justo=${e['justo']}"}');
     }
-    if (noMeio.length > 20) stdout.writeln('  … e mais ${noMeio.length - 20}');
+    if (inMiddle.length > 20) stdout.writeln('  … e mais ${inMiddle.length - 20}');
   }
 }

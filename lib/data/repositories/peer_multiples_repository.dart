@@ -16,18 +16,18 @@ import 'package:equisim_core/equisim_core.dart';
 /// pode derrubar a primeira.
 class PeerMultiplesRepository {
   /// Lê o conteúdo do pacote.
-  final Future<String> Function() carregarPacote;
+  final Future<String> Function() loadPackage;
 
   /// Declara o repositório.
-  PeerMultiplesRepository({required this.carregarPacote});
+  PeerMultiplesRepository({required this.loadPackage});
 
-  Future<Map<String, PeerMultipleSet>>? _lido;
+  Future<Map<String, PeerMultipleSet>>? _parsed;
 
-  Future<Map<String, PeerMultipleSet>> _medianas() => _lido ??= _ler();
+  Future<Map<String, PeerMultipleSet>> _medians() => _parsed ??= _read();
 
-  Future<Map<String, PeerMultipleSet>> _ler() async {
+  Future<Map<String, PeerMultipleSet>> _read() async {
     try {
-      final json = jsonDecode(await carregarPacote());
+      final json = jsonDecode(await loadPackage());
       return json is Map<String, dynamic>
           ? PeerMultipleCodec.decode(json)
           : const {};
@@ -42,5 +42,5 @@ class PeerMultiplesRepository {
   /// negociam múltiplos diferentes, e é o múltiplo negociado que entra na
   /// mediana do grupo.
   Future<PeerMultipleSet?> forTicker(Ticker ticker) async =>
-      (await _medianas())[ticker.value];
+      (await _medians())[ticker.value];
 }

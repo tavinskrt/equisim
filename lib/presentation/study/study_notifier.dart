@@ -59,10 +59,10 @@ class StudyNotifier extends Notifier<StudyState> {
       kind: PortfolioKind.principal,
       entries: const {},
     ),
-    reserva: Portfolio(
+    reserve: Portfolio(
       id: 'reserva',
       name: 'Reserva',
-      kind: PortfolioKind.reserva,
+      kind: PortfolioKind.reserve,
       entries: const {},
     ),
   );
@@ -102,7 +102,7 @@ class StudyNotifier extends Notifier<StudyState> {
   void swap({required Ticker ticker, required bool toPrincipal}) {
     final result = SwapAssetBetweenPortfolios.call(
       principal: state.study.principal,
-      reserva: state.study.reserva,
+      reserve: state.study.reserve,
       ticker: ticker,
       toPrincipal: toPrincipal,
     );
@@ -111,7 +111,7 @@ class StudyNotifier extends Notifier<StudyState> {
       (outcome) => state = state.copyWith(
         study: state.study.copyWith(
           principal: outcome.principal,
-          reserva: outcome.reserva,
+          reserve: outcome.reserve,
         ),
         clearError: true,
       ),
@@ -127,14 +127,14 @@ class StudyNotifier extends Notifier<StudyState> {
   /// Recusa via [StudyState.lastError] se o ativo já estiver presente ou se a
   /// carteira estiver no teto. Descarta pesos customizados.
   void addAsset(Asset asset, {required bool toPrincipal}) {
-    final target = toPrincipal ? state.study.principal : state.study.reserva;
+    final target = toPrincipal ? state.study.principal : state.study.reserve;
     final result = target.add(asset);
 
     result.fold(
       (updated) => state = state.copyWith(
         study: toPrincipal
             ? state.study.copyWith(principal: updated)
-            : state.study.copyWith(reserva: updated),
+            : state.study.copyWith(reserve: updated),
         clearError: true,
       ),
       (failure) => state = state.copyWith(lastError: FailureCopy.of(failure)),
@@ -150,14 +150,14 @@ class StudyNotifier extends Notifier<StudyState> {
   /// Remover o último ativo deixa a carteira **vazia**, não é erro. Descarta
   /// pesos customizados.
   void removeAsset(Ticker ticker, {required bool fromPrincipal}) {
-    final target = fromPrincipal ? state.study.principal : state.study.reserva;
+    final target = fromPrincipal ? state.study.principal : state.study.reserve;
     final result = target.remove(ticker);
 
     result.fold(
       (updated) => state = state.copyWith(
         study: fromPrincipal
             ? state.study.copyWith(principal: updated)
-            : state.study.copyWith(reserva: updated),
+            : state.study.copyWith(reserve: updated),
         clearError: true,
       ),
       (failure) => state = state.copyWith(lastError: FailureCopy.of(failure)),
@@ -173,7 +173,7 @@ class StudyNotifier extends Notifier<StudyState> {
     state = state.copyWith(
       study: onPrincipal
           ? state.study.copyWith(principal: state.study.principal.equalize())
-          : state.study.copyWith(reserva: state.study.reserva.equalize()),
+          : state.study.copyWith(reserve: state.study.reserve.equalize()),
       clearError: true,
     );
   }
@@ -269,7 +269,7 @@ class StudyNotifier extends Notifier<StudyState> {
   static PortfolioStudy _detach(PortfolioStudy study) => PortfolioStudy(
     name: study.name,
     principal: study.principal,
-    reserva: study.reserva,
+    reserve: study.reserve,
     goal: study.goal,
   );
 

@@ -23,7 +23,7 @@ void main() {
   });
 
   group('Ordenações', () {
-    final sinais = {
+    final signals = {
       'A': const TransversalSignals(potential: -0.5, bookToMarket: 0.2, earningsYield: 0.02),
       'B': const TransversalSignals(potential: 0.1, bookToMarket: 0.6, earningsYield: 0.08),
       'C': const TransversalSignals(potential: 0.4, bookToMarket: 1.4, earningsYield: 0.15),
@@ -31,18 +31,18 @@ void main() {
     };
 
     test('a de um sinal só é o escore dele, e quem não tem o sinal fica fora', () {
-      final bm = TransversalScore.scores(sinais, TransversalOrdering.bookToMarket);
+      final bm = TransversalScore.scores(signals, TransversalOrdering.bookToMarket);
       expect(bm.keys, unorderedEquals(['A', 'B', 'C']));
       expect(bm, TransversalScore.robustZ({'A': 0.2, 'B': 0.6, 'C': 1.4}));
-      final pot = TransversalScore.scores(sinais, TransversalOrdering.potential);
-      expect(pot.keys, unorderedEquals(['A', 'B', 'C', 'D']));
+      final upsides = TransversalScore.scores(signals, TransversalOrdering.potential);
+      expect(upsides.keys, unorderedEquals(['A', 'B', 'C', 'D']));
     });
 
     test('o composto é a média dos escores que o ativo tem, com pesos iguais', () {
-      final comp = TransversalScore.scores(sinais, TransversalOrdering.composite);
-      final zP = TransversalScore.robustZ({for (final e in sinais.entries) e.key: e.value.potential!});
+      final comp = TransversalScore.scores(signals, TransversalOrdering.composite);
+      final zP = TransversalScore.robustZ({for (final e in signals.entries) e.key: e.value.potential!});
       final zB = TransversalScore.robustZ({'A': 0.2, 'B': 0.6, 'C': 1.4});
-      final zE = TransversalScore.robustZ({for (final e in sinais.entries) e.key: e.value.earningsYield!});
+      final zE = TransversalScore.robustZ({for (final e in signals.entries) e.key: e.value.earningsYield!});
       expect(comp['B'], closeTo((zP['B']! + zB['B']! + zE['B']!) / 3, 1e-12));
       // Sem book-to-market, a média é dos dois que ele tem.
       expect(comp['D'], closeTo((zP['D']! + zE['D']!) / 2, 1e-12));
@@ -63,33 +63,33 @@ void main() {
       expect(s.potential, -0.2);
       expect(s.bookToMarket, closeTo(0.4, 1e-12));
       expect(s.earningsYield, closeTo(0.08, 1e-12));
-      final semVm = TransversalSignals.of(FundamentalsSnapshot(
+      final withoutMarketValue = TransversalSignals.of(FundamentalsSnapshot(
         ticker: Ticker.parse('PETR4'),
         fiscalPeriodEnd: DateTime(2025, 12, 31),
         bookValuePerShare: 4,
         sharesOutstandingAsOf: 100,
         netIncome: 80,
       ));
-      expect(semVm.bookToMarket, isNull);
-      expect(semVm.earningsYield, isNull);
+      expect(withoutMarketValue.bookToMarket, isNull);
+      expect(withoutMarketValue.earningsYield, isNull);
       expect(TransversalSignals.of(null).bookToMarket, isNull);
     });
 
     test('da série, vale o último exercício publicado na data, e não o último', () {
-      FundamentalsSnapshot exercicio(int ano, double lucro) => FundamentalsSnapshot(
+      FundamentalsSnapshot fiscalYear(int year, double profit) => FundamentalsSnapshot(
             ticker: Ticker.parse('PETR4'),
-            fiscalPeriodEnd: DateTime(ano, 12, 31),
+            fiscalPeriodEnd: DateTime(year, 12, 31),
             marketCap: 1000,
             bookValuePerShare: 4,
             sharesOutstandingAsOf: 100,
-            netIncome: lucro,
+            netIncome: profit,
           );
-      final serie = [exercicio(2024, 50), exercicio(2025, 80)];
+      final series = [fiscalYear(2024, 50), fiscalYear(2025, 80)];
       // Em 30/01/2026 o exercício de 2025 ainda não foi publicado.
-      final antes = TransversalSignals.fromHistory(serie, asOf: DateTime(2026, 1, 30));
-      final depois = TransversalSignals.fromHistory(serie, asOf: DateTime(2026, 9, 16));
-      expect(antes.earningsYield, closeTo(0.05, 1e-12));
-      expect(depois.earningsYield, closeTo(0.08, 1e-12));
+      final before = TransversalSignals.fromHistory(series, asOf: DateTime(2026, 1, 30));
+      final after = TransversalSignals.fromHistory(series, asOf: DateTime(2026, 9, 16));
+      expect(before.earningsYield, closeTo(0.05, 1e-12));
+      expect(after.earningsYield, closeTo(0.08, 1e-12));
     });
   });
 
@@ -97,7 +97,7 @@ void main() {
     final a = Ticker.parse('AAAA3');
     final b = Ticker.parse('BBBB3');
     final c = Ticker.parse('CCCC3');
-    ValuationResult avaliacao(Ticker t, {required double ke, double upside = 0}) =>
+    ValuationResult valuation(Ticker t, {required double ke, double upside = 0}) =>
         ValuationResult(
           ticker: t,
           asOf: DateTime(2026, 9, 16),
@@ -118,7 +118,7 @@ void main() {
             returnOnCapital: 0.15,
           ),
         );
-    Portfolio carteiraDe(List<Ticker> ts) => Portfolio.equalWeighted(
+    Portfolio portfolioOf(List<Ticker> ts) => Portfolio.equalWeighted(
           id: 'p',
           name: 'Principal',
           kind: PortfolioKind.principal,
@@ -127,17 +127,17 @@ void main() {
               Asset(ticker: t, name: t.value, sector: Sector.fromKey('energia', label: 'energia')),
           ],
         ).unwrap();
-    final carteira = carteiraDe([a, b, c]);
-    final avaliacoes = {
-      a: avaliacao(a, ke: 0.14, upside: -0.3),
-      b: avaliacao(b, ke: 0.15, upside: 0.0),
-      c: avaliacao(c, ke: 0.16, upside: 0.3),
+    final portfolio = portfolioOf([a, b, c]);
+    final valuations = {
+      a: valuation(a, ke: 0.14, upside: -0.3),
+      b: valuation(b, ke: 0.15, upside: 0.0),
+      c: valuation(c, ke: 0.16, upside: 0.3),
     };
 
     test('sem ordenação não há prêmio: é a média dos Ke', () {
       final r = ExpectedReturn.forPortfolioOrdered(
-        portfolio: carteira,
-        valuations: avaliacoes,
+        portfolio: portfolio,
+        valuations: valuations,
         signals: const {},
         ordering: null,
         spotRiskFree: 0.14,
@@ -146,9 +146,9 @@ void main() {
     });
 
     test('com o book-to-market, quem é mais barato por ele espera mais', () {
-      double esperado(double bmA) => ExpectedReturn.forPortfolioOrdered(
-            portfolio: carteiraDe([a]),
-            valuations: avaliacoes,
+      double expected(double bmA) => ExpectedReturn.forPortfolioOrdered(
+            portfolio: portfolioOf([a]),
+            valuations: valuations,
             signals: {
               a: TransversalSignals(bookToMarket: bmA),
               b: const TransversalSignals(bookToMarket: 0.5),
@@ -159,11 +159,11 @@ void main() {
           );
       // A seção é a da carteira; com um ativo só não há escala, e o prêmio é
       // zero — a leitura neutra.
-      expect(esperado(2.0), closeTo(0.14, 1e-12));
+      expect(expected(2.0), closeTo(0.14, 1e-12));
 
-      final comTres = ExpectedReturn.forPortfolioOrdered(
-        portfolio: carteira,
-        valuations: avaliacoes,
+      final withThree = ExpectedReturn.forPortfolioOrdered(
+        portfolio: portfolio,
+        valuations: valuations,
         signals: {
           a: const TransversalSignals(bookToMarket: 2.0),
           b: const TransversalSignals(bookToMarket: 0.5),
@@ -173,18 +173,18 @@ void main() {
         spotRiskFree: 0.14,
       );
       final z = TransversalScore.robustZ({a: 2.0, b: 0.5, c: 0.8});
-      const premio = CapmInputs.defaultMarketPremium;
+      const premium = CapmInputs.defaultMarketPremium;
       expect(
-          comTres,
+          withThree,
           closeTo(
-              ((0.14 + z[a]! * premio) + (0.15 + z[b]! * premio) + (0.16 + z[c]! * premio)) / 3,
+              ((0.14 + z[a]! * premium) + (0.15 + z[b]! * premium) + (0.16 + z[c]! * premium)) / 3,
               1e-12));
     });
 
     test('ativo avaliado sem o sinal recebe a âncora, e não sai da conta', () {
       final r = ExpectedReturn.forPortfolioOrdered(
-        portfolio: carteira,
-        valuations: avaliacoes,
+        portfolio: portfolio,
+        valuations: valuations,
         signals: {
           a: const TransversalSignals(bookToMarket: 2.0),
           b: const TransversalSignals(bookToMarket: 0.5),

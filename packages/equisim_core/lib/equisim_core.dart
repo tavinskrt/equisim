@@ -11,6 +11,7 @@
 library;
 
 // --- Auditoria de cálculo ---
+export 'src/audit/wire_keyed.dart';
 export 'src/audit/audit_recorder.dart';
 export 'src/audit/calculation_trace.dart';
 

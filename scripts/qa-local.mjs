@@ -382,10 +382,10 @@ function stagedFiles() {
  * aconteceu -- exatamente o falso positivo que o criterio de admissao deste
  * arquivo proibe.
  */
-const DECISOES_DIR = 'docs/decisoes/';
+const DECISIONS_DIR = 'docs/decisoes/';
 
 /** Le a versao EM STAGING do arquivo, nao a do disco. */
-function conteudoEmStaging(file) {
+function stagedContent(file) {
   try {
     return git(['show', `:${file}`]);
   } catch {
@@ -401,24 +401,24 @@ function conteudoEmStaging(file) {
  * entao o ultimo campo passava sem ser conferido -- um gate que so verifica os
  * campos do meio e pior que nenhum, porque da confianca falsa.
  */
-function listaDe(bloco) {
-  const linhas = bloco.split(/\r?\n/);
-  return (chave) => {
+function listOf(block) {
+  const lines = block.split(/\r?\n/);
+  return (key) => {
     const out = [];
-    let dentro = false;
-    for (const linha of linhas) {
-      if (new RegExp(`^${chave}:\\s*$`).test(linha)) {
-        dentro = true;
+    let inside = false;
+    for (const line of lines) {
+      if (new RegExp(`^${key}:\\s*$`).test(line)) {
+        inside = true;
         continue;
       }
-      if (dentro) {
-        const item = /^\s+-\s+(.+?)\s*$/.exec(linha);
+      if (inside) {
+        const item = /^\s+-\s+(.+?)\s*$/.exec(line);
         if (item) {
           out.push(item[1]);
           continue;
         }
         // Qualquer coisa que nao seja item encerra a lista.
-        dentro = false;
+        inside = false;
       }
     }
     return out;
@@ -431,54 +431,54 @@ function listaDe(bloco) {
 // le-las, `substitui: - 14` era acusado de referencia quebrada, e uma decisao
 // nova ficava impedida de derrubar formalmente uma antiga -- que e exatamente o
 // mecanismo que o registro existe para garantir.
-const PLANO_CONGELADO = 'PLANO_ARQUITETURA.md';
+const FROZEN_PLAN = 'PLANO_ARQUITETURA.md';
 
-function decisoesDoPlanoCongelado() {
-  const numeros = new Set();
-  if (!existsSync(PLANO_CONGELADO)) return numeros;
-  let texto;
+function frozenPlanDecisions() {
+  const numbers = new Set();
+  if (!existsSync(FROZEN_PLAN)) return numbers;
+  let text;
   try {
-    texto = readFileSync(PLANO_CONGELADO, 'utf8');
+    text = readFileSync(FROZEN_PLAN, 'utf8');
   } catch {
-    return numeros;
+    return numbers;
   }
   // Linhas de tabela markdown que abrem com o numero da decisao -- com ou sem
   // negrito, e com ou sem citacao: a tabela grafa `> | **0** |`, `> | 1 |` e
   // `| **18** |`. Sem aceitar os dois, as decisoes 0 a 8 e a 18 ficavam de
   // fora, e a decisao 85 era bloqueada por citar a 18.
-  const linhaDeDecisao = /^(?:>\s*)?\|\s*(?:\*\*)?(\d{1,2})(?:\*\*)?\s*\|/gm;
-  for (const m of texto.matchAll(linhaDeDecisao)) {
-    numeros.add(Number.parseInt(m[1], 10));
+  const decisionLine = /^(?:>\s*)?\|\s*(?:\*\*)?(\d{1,2})(?:\*\*)?\s*\|/gm;
+  for (const m of text.matchAll(decisionLine)) {
+    numbers.add(Number.parseInt(m[1], 10));
   }
-  return numeros;
+  return numbers;
 }
 
-function decisoesConhecidas(staged) {
-  const numeros = decisoesDoPlanoCongelado();
-  const registrar = (nome) => {
-    const m = /(?:^|\/)(\d{3})-[^/]*\.md$/.exec(nome);
-    if (m) numeros.add(Number.parseInt(m[1], 10));
+function knownDecisions(staged) {
+  const numbers = frozenPlanDecisions();
+  const register = (name) => {
+    const m = /(?:^|\/)(\d{3})-[^/]*\.md$/.exec(name);
+    if (m) numbers.add(Number.parseInt(m[1], 10));
   };
-  if (existsSync(DECISOES_DIR)) {
-    for (const f of readdirSync(DECISOES_DIR)) registrar(f);
+  if (existsSync(DECISIONS_DIR)) {
+    for (const f of readdirSync(DECISIONS_DIR)) register(f);
   }
-  for (const f of staged) registrar(f);
-  return numeros;
+  for (const f of staged) register(f);
+  return numbers;
 }
 
-function verificarRegistro(staged) {
-  const alvos = staged.filter(
-    (f) => f.startsWith(DECISOES_DIR) && f.endsWith('.md') && !f.endsWith('README.md'),
+function checkRegistry(staged) {
+  const targets = staged.filter(
+    (f) => f.startsWith(DECISIONS_DIR) && f.endsWith('.md') && !f.endsWith('README.md'),
   );
-  if (alvos.length === 0) return [];
+  if (targets.length === 0) return [];
 
-  const conhecidas = decisoesConhecidas(staged);
+  const known = knownDecisions(staged);
   const findings = [];
 
-  for (const file of alvos) {
-    const texto = conteudoEmStaging(file);
-    if (texto === null) continue;
-    const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(texto);
+  for (const file of targets) {
+    const text = stagedContent(file);
+    if (text === null) continue;
+    const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text);
     if (!fm) {
       findings.push({
         id: 'L12',
@@ -486,7 +486,7 @@ function verificarRegistro(staged) {
         file,
         line: 0,
         title: 'Decisao sem frontmatter',
-        evidence: texto.split(/\r?\n/)[0] ?? '(vazio)',
+        evidence: text.split(/\r?\n/)[0] ?? '(vazio)',
         explain:
           'Toda decisao abre com bloco `---` contendo numero, titulo, status,\n' +
           '  origem, data e afeta. Sem ele a decisao nao e enderecavel, que e a\n' +
@@ -495,21 +495,21 @@ function verificarRegistro(staged) {
       });
       continue;
     }
-    const bloco = fm[1];
-    const itens = listaDe(bloco);
+    const block = fm[1];
+    const items = listOf(block);
 
     // (a) `afeta` apontando para caminho que nao existe.
     {
-      for (const bruto of itens('afeta')) {
-        const caminho = bruto.replace(/^["']|["']$/g, '');
-        if (!existsSync(caminho)) {
+      for (const raw of items('afeta')) {
+        const filePath = raw.replace(/^["']|["']$/g, '');
+        if (!existsSync(filePath)) {
           findings.push({
             id: 'L13',
             category: 'DECISION_BROKEN_PATH',
             file,
             line: 0,
-            title: `Decisao governa caminho inexistente: ${caminho}`,
-            evidence: bruto,
+            title: `Decisao governa caminho inexistente: ${filePath}`,
+            evidence: raw,
             explain:
               'O campo `afeta` lista os caminhos que a decisao governa, e este\n' +
               '  nao existe no repositorio. Ou o caminho esta errado, ou a decisao\n' +
@@ -520,24 +520,24 @@ function verificarRegistro(staged) {
     }
 
     // (b) `status: substituida-por-NNN` e `substitui:` apontando para o vazio.
-    const citados = new Set();
-    const sub = /^status:\s*substituida-por-(\d+)/m.exec(bloco);
-    if (sub) citados.add(Number.parseInt(sub[1], 10));
-    for (const bruto of itens('substitui')) {
-      const n = /^(\d+)/.exec(bruto);
-      if (n) citados.add(Number.parseInt(n[1], 10));
+    const cited = new Set();
+    const sub = /^status:\s*substituida-por-(\d+)/m.exec(block);
+    if (sub) cited.add(Number.parseInt(sub[1], 10));
+    for (const raw of items('substitui')) {
+      const n = /^(\d+)/.exec(raw);
+      if (n) cited.add(Number.parseInt(n[1], 10));
     }
-    for (const numero of citados) {
-      if (!conhecidas.has(numero)) {
+    for (const number of cited) {
+      if (!known.has(number)) {
         findings.push({
           id: 'L14',
           category: 'DECISION_DANGLING_REF',
           file,
           line: 0,
-          title: `Referencia a decisao inexistente: no ${numero}`,
-          evidence: `decisao no ${numero}`,
+          title: `Referencia a decisao inexistente: no ${number}`,
+          evidence: `decisao no ${number}`,
           explain:
-            `Nao ha docs/decisoes/${String(numero).padStart(3, '0')}-*.md. Uma\n` +
+            `Nao ha docs/decisoes/${String(number).padStart(3, '0')}-*.md. Uma\n` +
             '  decisao que substitui ou revoga outra precisa que a outra exista --\n' +
             '  senao a cadeia de substituicao fica sem inicio e ninguem consegue\n' +
             '  reconstruir por que o rumo mudou.',
@@ -583,7 +583,7 @@ function main() {
     }
   }
 
-  findings.push(...verificarRegistro(staged));
+  findings.push(...checkRegistry(staged));
 
   // `requiresTokens` e constante durante a execucao: filtrar uma vez, fora do
   // laco por linha, evita reavaliar a condicao milhares de vezes num diff

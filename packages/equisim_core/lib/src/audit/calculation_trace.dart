@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'wire_keyed.dart';
+
 /// O que o JSON não representa, convertido em algo que ele representa.
 ///
 /// **Por que existe** (item D4). O rastro é serializado com `jsonEncode` em
@@ -30,6 +32,7 @@ abstract final class AuditJson {
     }
     if (value is Iterable) return [for (final v in value) safe(v)];
     if (value is DateTime) return value.toIso8601String();
+    if (value is WireKeyed) return value.key;
     if (value is Enum) return value.name;
     return value.toString();
   }
@@ -273,8 +276,8 @@ class CalculationTrace {
                 (json['sample'] as Map).map((k, v) => MapEntry('$k', v)))
             : null,
         explanation: [
-          for (final linha in (json['explanation'] as List? ?? const []))
-            '$linha',
+          for (final row in (json['explanation'] as List? ?? const []))
+            '$row',
         ],
       );
 }

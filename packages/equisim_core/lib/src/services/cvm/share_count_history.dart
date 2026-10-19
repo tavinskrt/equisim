@@ -66,126 +66,126 @@ class ShareCountHistory {
 
   /// Tipo de capital lido, em ordem de preferência: o integralizado é o que
   /// tem ação emitida e paga; o emitido é o recuo do formulário novo.
-  static const List<String> tipos = ['Capital Integralizado', 'Capital Emitido'];
+  static const List<String> kinds = ['Capital Integralizado', 'Capital Emitido'];
 
   /// Diferença a partir da qual a contagem de um formulário não é explicada
   /// pela série.
-  static const double folgaDoFormulario = 0.01;
+  static const double formMargin = 0.01;
 
   /// Monta a série de **uma** companhia.
   ///
-  /// - [linhas]: quadro de capital social, de qualquer número de formulários.
+  /// - [rows]: quadro de capital social, de qualquer número de formulários.
   /// - [events]: eventos de ações declarados, com a contagem depois.
   /// - [receivedOn]: data de recebimento de cada formulário, por
   ///   `ID_Documento`. Sem ela, o formulário não corrige a série.
   static ShareCountHistory fromFre(
-    Iterable<Map<String, String>> linhas, {
+    Iterable<Map<String, String>> rows, {
     Iterable<DeclaredShareEvent> events = const [],
     Map<String, DateTime> receivedOn = const {},
   }) {
-    for (final tipo in tipos) {
-      final documentos = _documentos(linhas, tipo);
-      if (documentos.isEmpty) continue;
-      return _montar(documentos, events, receivedOn);
+    for (final kind in kinds) {
+      final documents = _documents(rows, kind);
+      if (documents.isEmpty) continue;
+      return _build(documents, events, receivedOn);
     }
     return const ShareCountHistory._([]);
   }
 
-  /// Formulários do [tipo], cada referência na maior versão, em ordem.
-  static List<_Documento> _documentos(
-      Iterable<Map<String, String>> linhas, String tipo) {
-    final porReferencia = <DateTime, _Documento>{};
-    for (final r in linhas) {
-      if (r['Tipo_Capital']?.trim() != tipo) continue;
-      final aprovacao = _dia(r['Data_Autorizacao_Aprovacao']);
-      final referencia = _dia(r['Data_Referencia']);
-      final versao = int.tryParse(r['Versao'] ?? '') ?? 0;
+  /// Formulários do [kind], cada referência na maior versão, em ordem.
+  static List<_Document> _documents(
+      Iterable<Map<String, String>> rows, String kind) {
+    final byReference = <DateTime, _Document>{};
+    for (final r in rows) {
+      if (r['Tipo_Capital']?.trim() != kind) continue;
+      final approval = _day(r['Data_Autorizacao_Aprovacao']);
+      final reference = _day(r['Data_Referencia']);
+      final version = int.tryParse(r['Versao'] ?? '') ?? 0;
       final total = double.tryParse(r['Quantidade_Total_Acoes'] ?? '');
-      if (aprovacao == null || referencia == null) continue;
+      if (approval == null || reference == null) continue;
       if (total == null || !total.isFinite || total <= 0) continue;
-      final atual = porReferencia[referencia];
-      if (atual == null || versao > atual.versao) {
-        porReferencia[referencia] = _Documento(
-            referencia, versao, r['ID_Documento'] ?? '', [(aprovacao, total)]);
-      } else if (versao == atual.versao) {
-        atual.capitais.add((aprovacao, total));
+      final current = byReference[reference];
+      if (current == null || version > current.version) {
+        byReference[reference] = _Document(
+            reference, version, r['ID_Documento'] ?? '', [(approval, total)]);
+      } else if (version == current.version) {
+        current.capitals.add((approval, total));
       }
     }
-    return porReferencia.values.toList()
-      ..sort((a, b) => a.referencia.compareTo(b.referencia));
+    return byReference.values.toList()
+      ..sort((a, b) => a.reference.compareTo(b.reference));
   }
 
-  static ShareCountHistory _montar(
-    List<_Documento> documentos,
-    Iterable<DeclaredShareEvent> eventos,
-    Map<String, DateTime> recebidos,
+  static ShareCountHistory _build(
+    List<_Document> documents,
+    Iterable<DeclaredShareEvent> events,
+    Map<String, DateTime> receivedInputs,
   ) {
-    final pontos = <ShareCountPoint>[];
-    final aprovacoes = <DateTime>[];
-    for (final d in documentos) {
-      for (final (aprovacao, total) in d.capitais) {
-        if (aprovacoes.any((a) => a.isAtSameMomentAs(aprovacao))) continue;
-        aprovacoes.add(aprovacao);
-        pontos.add(ShareCountPoint(
-            date: aprovacao, total: total, source: ShareCountSource.capitalApproval));
+    final points = <ShareCountPoint>[];
+    final approvals = <DateTime>[];
+    for (final d in documents) {
+      for (final (approval, total) in d.capitals) {
+        if (approvals.any((a) => a.isAtSameMomentAs(approval))) continue;
+        approvals.add(approval);
+        points.add(ShareCountPoint(
+            date: approval, total: total, source: ShareCountSource.capitalApproval));
       }
     }
-    for (final e in eventos) {
+    for (final e in events) {
       if (!(e.totalAfter > 0)) continue;
-      pontos.add(ShareCountPoint(
+      points.add(ShareCountPoint(
           date: _utc(e.date), total: e.totalAfter, source: ShareCountSource.shareEvent));
     }
-    _ordenar(pontos);
+    _sort(points);
 
-    for (final d in documentos) {
-      final recebido = recebidos[d.id];
-      if (recebido == null) continue;
+    for (final d in documents) {
+      final received = receivedInputs[d.id];
+      if (received == null) continue;
       // A contagem que o formulário diz vigente: a da aprovação mais recente.
-      final ultima = d.capitais.reduce((a, b) => b.$1.isAfter(a.$1) ? b : a);
-      final hoje = ShareCountHistory._(pontos).at(recebido);
-      if (hoje != null &&
-          (ultima.$2 / hoje.total - 1).abs() <= folgaDoFormulario) {
+      final last = d.capitals.reduce((a, b) => b.$1.isAfter(a.$1) ? b : a);
+      final today = ShareCountHistory._(points).at(received);
+      if (today != null &&
+          (last.$2 / today.total - 1).abs() <= formMargin) {
         continue;
       }
-      pontos.add(ShareCountPoint(
-          date: _utc(recebido),
-          total: ultima.$2,
+      points.add(ShareCountPoint(
+          date: _utc(received),
+          total: last.$2,
           source: ShareCountSource.filingCorrection));
-      _ordenar(pontos);
+      _sort(points);
     }
-    return ShareCountHistory._(List.unmodifiable(pontos));
+    return ShareCountHistory._(List.unmodifiable(points));
   }
 
   /// Por data; na mesma data, aprovação antes de evento antes de correção —
   /// quem vem depois vale.
-  static void _ordenar(List<ShareCountPoint> pontos) => pontos.sort((a, b) {
+  static void _sort(List<ShareCountPoint> points) => points.sort((a, b) {
         final c = a.date.compareTo(b.date);
         return c != 0 ? c : a.source.index.compareTo(b.source.index);
       });
 
-  /// Contagem em vigor em [data], ou `null` antes do primeiro ponto.
-  ShareCountPoint? at(DateTime data) {
-    final d = _utc(data);
-    ShareCountPoint? vigente;
+  /// Contagem em vigor em [date], ou `null` antes do primeiro ponto.
+  ShareCountPoint? at(DateTime date) {
+    final d = _utc(date);
+    ShareCountPoint? current;
     for (final p in points) {
       if (p.date.isAfter(d)) break;
-      vigente = p;
+      current = p;
     }
-    return vigente;
+    return current;
   }
 
   static DateTime _utc(DateTime d) => DateTime.utc(d.year, d.month, d.day);
 
-  static DateTime? _dia(String? v) {
+  static DateTime? _day(String? v) {
     if (v == null || v.length < 10) return null;
     return DateTime.tryParse('${v.substring(0, 10)}T00:00:00Z');
   }
 }
 
-class _Documento {
-  final DateTime referencia;
-  final int versao;
+class _Document {
+  final DateTime reference;
+  final int version;
   final String id;
-  final List<(DateTime, double)> capitais;
-  _Documento(this.referencia, this.versao, this.id, this.capitais);
+  final List<(DateTime, double)> capitals;
+  _Document(this.reference, this.version, this.id, this.capitals);
 }

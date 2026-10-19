@@ -52,21 +52,21 @@ import 'validation/context.dart';
 import 'validation/regression.dart';
 
 /// Data de referência. Fixa, para que a reexecução reproduza o relatório.
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
 /// Grade do retorno terminal, log-espaçada entre 0,5% e 200% ao ano.
 ///
 /// Log e não linear porque a grandeza é um retorno sobre capital: a diferença
 /// entre 8% e 10% importa, entre 150% e 152% não.
-List<double> _gradeRonic() {
+List<double> _gridRonic() {
   const n = 61;
   const lo = 0.005, hi = 2.0;
-  final passo = (math.log(hi) - math.log(lo)) / (n - 1);
-  return [for (var i = 0; i < n; i++) math.exp(math.log(lo) + passo * i)];
+  final step = (math.log(hi) - math.log(lo)) / (n - 1);
+  return [for (var i = 0; i < n; i++) math.exp(math.log(lo) + step * i)];
 }
 
 /// Grade do prêmio de risco, de 0 a 25% em passos de 0,5 p.p.
-List<double> _gradePremio() => [for (var i = 0; i <= 50; i++) i * 0.005];
+List<double> _premiumGrid() => [for (var i = 0; i <= 50; i++) i * 0.005];
 
 /// Grade do deslocamento paralelo da taxa livre de risco, de −13 a +5 p.p.
 ///
@@ -81,25 +81,25 @@ List<double> _gradePremio() => [for (var i = 0; i <= 50; i++) i * 0.005];
 /// O limite inferior chega perto de zerar a taxa de equilíbrio de 9,40%: é
 /// deliberadamente absurdo, porque o interesse é saber **se existe** taxa que
 /// alcance o preço, e não propor uma.
-List<double> _gradeRf() => [for (var i = 0; i <= 72; i++) -0.13 + i * 0.0025];
+List<double> _gridRf() => [for (var i = 0; i <= 72; i++) -0.13 + i * 0.0025];
 
 /// Resultado de uma varredura em um eixo.
-class Varredura {
+class Sweep {
   /// Valor que iguala preço justo a preço de mercado. `null` sem raiz única.
-  final double? implicito;
+  final double? implied;
 
   /// Como o preço justo se comporta ao longo da grade.
-  final String monotonia;
+  final String monotonicity;
 
   /// Quantas vezes `justo − preço` troca de sinal na grade.
-  final int cruzamentos;
+  final int crossings;
 
   /// Preço justo na ponta inferior e na superior da grade.
-  final double? justoMin;
-  final double? justoMax;
+  final double? fairValueMin;
+  final double? fairValueMax;
 
   /// Pontos da grade em que a cascata não devolveu avaliação.
-  final int falhas;
+  final int failures;
 
   /// Por que não houve raiz, quando não houve.
   ///
@@ -107,94 +107,94 @@ class Varredura {
   /// teto` diz que **nem retorno terminal infinito** alcança o preço, e nesse
   /// ativo o terminal está descartado como explicação do vão. `já acima do
   /// preço` é o oposto — o eixo não precisa se mover.
-  final String situacao;
+  final String situation;
 
-  const Varredura({
-    required this.implicito,
-    required this.monotonia,
-    required this.cruzamentos,
-    required this.justoMin,
-    required this.justoMax,
-    required this.falhas,
-    required this.situacao,
+  const Sweep({
+    required this.implied,
+    required this.monotonicity,
+    required this.crossings,
+    required this.fairValueMin,
+    required this.fairValueMax,
+    required this.failures,
+    required this.situation,
   });
 
   Map<String, dynamic> toJson() => {
-        'implicito': implicito,
-        'monotonia': monotonia,
-        'cruzamentos': cruzamentos,
-        'justoMin': justoMin,
-        'justoMax': justoMax,
-        'falhas': falhas,
-        'situacao': situacao,
+        'implicito': implied,
+        'monotonia': monotonicity,
+        'cruzamentos': crossings,
+        'justoMin': fairValueMin,
+        'justoMax': fairValueMax,
+        'falhas': failures,
+        'situacao': situation,
       };
 }
 
 /// Classifica uma varredura sem raiz pela posição da grade contra o preço.
-String _situacao(double? justoMin, double? justoMax, double preco, int cruz) {
-  if (justoMin == null || justoMax == null) return 'sem avaliação';
-  if (cruz == 1) return 'raiz única';
-  if (cruz > 1) return 'múltiplas raízes';
-  final maior = justoMin > justoMax ? justoMin : justoMax;
-  final menor = justoMin > justoMax ? justoMax : justoMin;
-  if (maior < preco) return 'fora da grade — preço acima do teto';
-  if (menor > preco) return 'fora da grade — justo acima do preço em toda a grade';
+String _situation(double? fairValueMin, double? fairValueMax, double price, int crossCount) {
+  if (fairValueMin == null || fairValueMax == null) return 'sem avaliação';
+  if (crossCount == 1) return 'raiz única';
+  if (crossCount > 1) return 'múltiplas raízes';
+  final isGreater = fairValueMin > fairValueMax ? fairValueMin : fairValueMax;
+  final smaller = fairValueMin > fairValueMax ? fairValueMax : fairValueMin;
+  if (isGreater < price) return 'fora da grade — preço acima do teto';
+  if (smaller > price) return 'fora da grade — justo acima do preço em toda a grade';
   return 'sem cruzamento';
 }
 
 /// Avalia e devolve o preço justo, ou `null` quando a cascata recusa.
-double? _justo(ValuationInputs inputs) {
+double? _fairValue(ValuationInputs inputs) {
   final r = ValuationCascade.evaluate(inputs);
   return r.isOk ? r.unwrap().fairValue.reais : null;
 }
 
 /// Varre um eixo pela grade, classifica a monotonia e refina a raiz.
 ///
-/// - [grade]: valores a percorrer, em ordem crescente.
-/// - [monta]: constrói os insumos para um valor da grade.
-/// - [preco]: preço de mercado, o alvo da igualdade.
-Varredura _varrer({
-  required List<double> grade,
-  required ValuationInputs Function(double) monta,
-  required double preco,
+/// - [grid]: valores a percorrer, em ordem crescente.
+/// - [buildInputs]: constrói os insumos para um valor da grade.
+/// - [price]: preço de mercado, o alvo da igualdade.
+Sweep _sweep({
+  required List<double> grid,
+  required ValuationInputs Function(double) buildInputs,
+  required double price,
 }) {
   final xs = <double>[], fs = <double>[];
-  var falhas = 0;
-  for (final x in grade) {
-    final j = _justo(monta(x));
+  var failures = 0;
+  for (final x in grid) {
+    final j = _fairValue(buildInputs(x));
     if (j == null || !j.isFinite) {
-      falhas++;
+      failures++;
       continue;
     }
     xs.add(x);
-    fs.add(j - preco);
+    fs.add(j - price);
   }
   if (xs.length < 3) {
-    return Varredura(
-      implicito: null,
-      monotonia: 'sem avaliação',
-      cruzamentos: 0,
-      justoMin: null,
-      justoMax: null,
-      falhas: falhas,
-      situacao: 'sem avaliação',
+    return Sweep(
+      implied: null,
+      monotonicity: 'sem avaliação',
+      crossings: 0,
+      fairValueMin: null,
+      fairValueMax: null,
+      failures: failures,
+      situation: 'sem avaliação',
     );
   }
 
   // Monotonia medida, com tolerância relativa ao preço: variação abaixo de
   // 0,1% do preço é ruído de ponto flutuante, não direção.
-  final tol = preco * 1e-3;
-  var sobe = false, desce = false;
+  final tol = price * 1e-3;
+  var rises = false, falls = false;
   for (var i = 1; i < fs.length; i++) {
     final d = fs[i] - fs[i - 1];
-    if (d > tol) sobe = true;
-    if (d < -tol) desce = true;
+    if (d > tol) rises = true;
+    if (d < -tol) falls = true;
   }
-  final monotonia = (sobe && desce)
+  final monotonicity = (rises && falls)
       ? 'não monótona'
-      : sobe
+      : rises
           ? 'crescente'
-          : desce
+          : falls
               ? 'decrescente'
               : 'plana';
 
@@ -206,20 +206,20 @@ Varredura _varrer({
     // dispararia, e a bissecção teria de reencontrar por dentro uma raiz que
     // está bem debaixo do ponto.
     if (fs[i - 1].abs() < tol) {
-      return _comRaiz(xs[i - 1], monotonia, 1, fs, preco, falhas);
+      return _withRoot(xs[i - 1], monotonicity, 1, fs, price, failures);
     }
     if ((fs[i - 1] < 0) != (fs[i] < 0)) brackets.add([i - 1, i]);
   }
   if (brackets.length != 1) {
-    return Varredura(
-      implicito: null,
-      monotonia: monotonia,
-      cruzamentos: brackets.length,
-      justoMin: fs.first + preco,
-      justoMax: fs.last + preco,
-      falhas: falhas,
-      situacao:
-          _situacao(fs.first + preco, fs.last + preco, preco, brackets.length),
+    return Sweep(
+      implied: null,
+      monotonicity: monotonicity,
+      crossings: brackets.length,
+      fairValueMin: fs.first + price,
+      fairValueMax: fs.last + price,
+      failures: failures,
+      situation:
+          _situation(fs.first + price, fs.last + price, price, brackets.length),
     );
   }
 
@@ -228,9 +228,9 @@ Varredura _varrer({
   var flo = fs[brackets[0][0]];
   for (var it = 0; it < 60; it++) {
     final mid = (lo + hi) / 2;
-    final j = _justo(monta(mid));
+    final j = _fairValue(buildInputs(mid));
     if (j == null || !j.isFinite) break;
-    final f = j - preco;
+    final f = j - price;
     if ((f < 0) == (flo < 0)) {
       lo = mid;
       flo = f;
@@ -239,29 +239,29 @@ Varredura _varrer({
     }
     if ((hi - lo).abs() < 1e-9) break;
   }
-  return _comRaiz((lo + hi) / 2, monotonia, 1, fs, preco, falhas);
+  return _withRoot((lo + hi) / 2, monotonicity, 1, fs, price, failures);
 }
 
-Varredura _comRaiz(
-  double raiz,
-  String monotonia,
-  int cruzamentos,
+Sweep _withRoot(
+  double root,
+  String monotonicity,
+  int crossings,
   List<double> fs,
-  double preco,
-  int falhas,
+  double price,
+  int failures,
 ) =>
-    Varredura(
-      implicito: raiz,
-      monotonia: monotonia,
-      cruzamentos: cruzamentos,
-      justoMin: fs.first + preco,
-      justoMax: fs.last + preco,
-      falhas: falhas,
-      situacao: 'raiz única',
+    Sweep(
+      implied: root,
+      monotonicity: monotonicity,
+      crossings: crossings,
+      fairValueMin: fs.first + price,
+      fairValueMax: fs.last + price,
+      failures: failures,
+      situation: 'raiz única',
     );
 
 /// Reconstrói os insumos trocando apenas o retorno terminal.
-ValuationInputs _comRonic(ValuationInputs b, double ronic) => ValuationInputs(
+ValuationInputs _withRonic(ValuationInputs b, double ronic) => ValuationInputs(
       ticker: b.ticker,
       asOf: b.asOf,
       fundamentals: b.fundamentals,
@@ -284,7 +284,7 @@ ValuationInputs _comRonic(ValuationInputs b, double ronic) => ValuationInputs(
 /// O prêmio viaja no `capm`, e `CapmInputs.withRiskFree` o preserva — de modo
 /// que trocar aqui desloca **as duas** taxas, a corrente e a de equilíbrio, o
 /// que é a definição de um deslocamento paralelo do custo de capital.
-ValuationInputs _comPremio(ValuationInputs b, double premio) => ValuationInputs(
+ValuationInputs _withPremium(ValuationInputs b, double premium) => ValuationInputs(
       ticker: b.ticker,
       asOf: b.asOf,
       fundamentals: b.fundamentals,
@@ -292,7 +292,7 @@ ValuationInputs _comPremio(ValuationInputs b, double premio) => ValuationInputs(
       capm: CapmInputs(
         riskFreeRate: b.capm.riskFreeRate,
         beta: b.capm.beta,
-        marketPremium: premio,
+        marketPremium: premium,
         betaSource: b.capm.betaSource,
         premiumSource: b.capm.premiumSource,
       ),
@@ -312,31 +312,31 @@ ValuationInputs _comPremio(ValuationInputs b, double premio) => ValuationInputs(
 /// A corrente e a de equilíbrio andam juntas: o interesse é o nível da curva,
 /// e mover só uma delas mudaria a inclinação da estrutura a termo, que é outra
 /// pergunta. O piso de 0,1% evita taxa negativa, que não tem leitura aqui.
-ValuationInputs _comRf(ValuationInputs b, double desloc) {
-  double piso(double x) => x < 0.001 ? 0.001 : x;
+ValuationInputs _withRf(ValuationInputs b, double shift) {
+  double floor(double x) => x < 0.001 ? 0.001 : x;
   return ValuationInputs(
     ticker: b.ticker,
     asOf: b.asOf,
     fundamentals: b.fundamentals,
     marketPrice: b.marketPrice,
-    capm: b.capm.withRiskFree(piso(b.capm.riskFreeRate + desloc)),
+    capm: b.capm.withRiskFree(floor(b.capm.riskFreeRate + shift)),
     marginOfSafety: b.marginOfSafety,
     projectionYears: b.projectionYears,
     perpetualGrowthCap: b.perpetualGrowthCap,
     sectorKey: b.sectorKey,
     industry: b.industry,
     inflation: b.inflation,
-    declaredTerminalRiskFreeRate: piso(b.terminalRiskFreeRate + desloc),
+    declaredTerminalRiskFreeRate: floor(b.terminalRiskFreeRate + shift),
     prices: b.prices,
     isDistressed: b.isDistressed,
   );
 }
 
 Future<void> main(List<String> args) async {
-  final limiteIdx = args.indexOf('--limit');
-  final limite =
-      limiteIdx >= 0 ? int.tryParse(args[limiteIdx + 1]) ?? 0 : 0;
-  final alvos = [
+  final limitIndex = args.indexOf('--limit');
+  final limit =
+      limitIndex >= 0 ? int.tryParse(args[limitIndex + 1]) ?? 0 : 0;
+  final targets = [
     for (final a in args)
       if (!a.startsWith('--') && int.tryParse(a) == null) a,
   ];
@@ -346,7 +346,7 @@ Future<void> main(List<String> args) async {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
 
@@ -355,26 +355,26 @@ Future<void> main(List<String> args) async {
         'gNom=${anchors.nominalEconomyGrowth.toStringAsFixed(4)}');
 
     var universe = (await ctx.fundamentals.universe()).unwrap();
-    if (alvos.isNotEmpty) {
-      universe = universe.where((t) => alvos.contains(t.value)).toList();
+    if (targets.isNotEmpty) {
+      universe = universe.where((t) => targets.contains(t.value)).toList();
     }
-    if (limite > 0 && universe.length > limite) {
-      universe = universe.sublist(0, limite);
+    if (limit > 0 && universe.length > limit) {
+      universe = universe.sublist(0, limit);
     }
     stderr.writeln('universo: ${universe.length} ativos');
 
-    final gradeRonic = _gradeRonic();
-    final gradePremio = _gradePremio();
-    final gradeRf = _gradeRf();
+    final gridRonic = _gridRonic();
+    final premiumGrid = _premiumGrid();
+    final gridRf = _gridRf();
 
-    final saida = <Map<String, dynamic>>[];
-    final cronometro = Stopwatch()..start();
+    final output = <Map<String, dynamic>>[];
+    final stopwatch = Stopwatch()..start();
     var i = 0;
     for (final ticker in universe) {
       i++;
       if (i % 10 == 0) {
         stderr.write('  $i/${universe.length} '
-            '(${cronometro.elapsed.inSeconds}s)      \r');
+            '(${stopwatch.elapsed.inSeconds}s)      \r');
       }
 
       final prep = await PrepareValuationInputs.call(
@@ -383,14 +383,14 @@ Future<void> main(List<String> args) async {
         fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
         projectionYears: 10,
       );
       if (prep.isErr) {
-        saida.add({
+        output.add({
           'ticker': ticker.value,
           'avaliado': false,
           'recusa': prep.failureOrNull?.message,
@@ -399,44 +399,44 @@ Future<void> main(List<String> args) async {
       }
 
       final inputs = prep.unwrap();
-      final baseRes = ValuationCascade.evaluate(inputs);
-      if (baseRes.isErr) {
-        saida.add({
+      final baseResult = ValuationCascade.evaluate(inputs);
+      if (baseResult.isErr) {
+        output.add({
           'ticker': ticker.value,
           'avaliado': false,
-          'recusa': baseRes.failureOrNull?.message,
+          'recusa': baseResult.failureOrNull?.message,
         });
         continue;
       }
-      final base = baseRes.unwrap();
-      final preco = inputs.marketPrice;
+      final base = baseResult.unwrap();
+      final price = inputs.marketPrice;
 
       // Retorno do ciclo na via que a cascata efetivamente escolheu: comparar
       // ROIC com WACC numa e ROE com Ke na outra é a única comparação em que
       // o excedente significa a mesma coisa.
-      final via = base.model == ValuationModel.dcfFcff
+      final lane = base.model == ValuationModel.dcfFcff
           ? ValuationLane.firm
           : ValuationLane.shareholder;
       final pub = PointInTimeView(inputs.asOf).published(inputs.fundamentals);
-      final serie = CapitalSeries.build(pub, via);
-      final retornoCiclo =
-          serie.cycleReturn(window: ValuationParameters.cycleWindow);
+      final series = CapitalSeries.build(pub, lane);
+      final cycleReturn =
+          series.cycleReturn(window: ValuationParameters.cycleWindow);
 
-      final ronic = _varrer(
-        grade: gradeRonic,
-        monta: (x) => _comRonic(inputs, x),
-        preco: preco,
+      final ronic = _sweep(
+        grid: gridRonic,
+        buildInputs: (x) => _withRonic(inputs, x),
+        price: price,
       );
-      final premio = _varrer(
-        grade: gradePremio,
-        monta: (x) => _comPremio(inputs, x),
-        preco: preco,
+      final premium = _sweep(
+        grid: premiumGrid,
+        buildInputs: (x) => _withPremium(inputs, x),
+        price: price,
       );
 
-      final rf = _varrer(
-        grade: gradeRf,
-        monta: (x) => _comRf(inputs, x),
-        preco: preco,
+      final rf = _sweep(
+        grid: gridRf,
+        buildInputs: (x) => _withRf(inputs, x),
+        price: price,
       );
 
       // Quarto eixo, e este sai por identidade em vez de varredura: o DCF é
@@ -450,32 +450,32 @@ Future<void> main(List<String> args) async {
       //
       // Varrer seria mais caro e devolveria o mesmo número.
       final s = base.diagnostics?.equityShare;
-      final justo = base.fairValue.reais;
-      double? multiplicador;
-      if (justo > 0) {
-        if (via == ValuationLane.firm && s != null && s > 0 && s <= 1) {
-          final dividaPorPapel = justo * (1 - s) / s;
-          multiplicador = (preco + dividaPorPapel) / (justo + dividaPorPapel);
+      final fairValue = base.fairValue.reais;
+      double? multiplier;
+      if (fairValue > 0) {
+        if (lane == ValuationLane.firm && s != null && s > 0 && s <= 1) {
+          final debtPerShare = fairValue * (1 - s) / s;
+          multiplier = (price + debtPerShare) / (fairValue + debtPerShare);
         } else {
-          multiplicador = preco / justo;
+          multiplier = price / fairValue;
         }
       }
 
-      final keImplicito = premio.implicito == null
+      final impliedKe = premium.implied == null
           ? null
-          : inputs.capm.riskFreeRate + inputs.capm.beta * premio.implicito!;
-      final rfTerminalImplicito = rf.implicito == null
+          : inputs.capm.riskFreeRate + inputs.capm.beta * premium.implied!;
+      final impliedTerminalRf = rf.implied == null
           ? null
-          : inputs.terminalRiskFreeRate + rf.implicito!;
+          : inputs.terminalRiskFreeRate + rf.implied!;
 
-      saida.add({
+      output.add({
         'ticker': ticker.value,
         'avaliado': true,
         'setor': inputs.sectorKey,
-        'preco': preco,
+        'preco': price,
         'justo': base.fairValue.reais,
         'potencial': base.upside,
-        'via': via.name,
+        'via': lane.name,
         'modelo': base.model.name,
         'desconto': base.discountRate,
         'pesoTerminal': base.diagnostics?.terminalShare,
@@ -487,28 +487,28 @@ Future<void> main(List<String> args) async {
         'premioBase': inputs.capm.marketPremium,
         'rf': inputs.capm.riskFreeRate,
         'rfTerminal': inputs.terminalRiskFreeRate,
-        'retornoCiclo': retornoCiclo,
+        'retornoCiclo': cycleReturn,
         'excedente':
-            retornoCiclo == null ? null : retornoCiclo - base.discountRate,
+            cycleReturn == null ? null : cycleReturn - base.discountRate,
         'ronicImplicito': ronic.toJson(),
-        'premioImplicito': premio.toJson(),
+        'premioImplicito': premium.toJson(),
         'rfImplicito': rf.toJson(),
-        'keImplicito': keImplicito,
-        'rfTerminalImplicito': rfTerminalImplicito,
-        'multiplicadorFluxo': multiplicador,
+        'keImplicito': impliedKe,
+        'rfTerminalImplicito': impliedTerminalRf,
+        'multiplicadorFluxo': multiplier,
       });
     }
-    stderr.writeln('\nvarredura em ${cronometro.elapsed.inSeconds}s');
+    stderr.writeln('\nvarredura em ${stopwatch.elapsed.inSeconds}s');
 
-    final identificacao = _identificar(saida);
+    final identification = _identify(output);
 
     File('docs/validacao/dcf_reverso.json').writeAsStringSync(
       const JsonEncoder.withIndent(' ')
-          .convert({'ativos': saida, 'identificacao': identificacao}),
+          .convert({'ativos': output, 'identificacao': identification}),
     );
     stderr.writeln('escrito docs/validacao/dcf_reverso.json '
-        '(${saida.where((e) => e['avaliado'] == true).length} avaliados)');
-    _imprimir(saida, identificacao);
+        '(${output.where((e) => e['avaliado'] == true).length} avaliados)');
+    _printReport(output, identification);
   } finally {
     await ctx.dispose();
   }
@@ -521,9 +521,9 @@ Future<void> main(List<String> args) async {
 /// **taxa** escala com beta, e é indiferente ao excedente. Regredir o
 /// potencial nos dois de uma vez é o que impede que a correlação de um seja
 /// lida como evidência do outro.
-Map<String, dynamic> _identificar(List<Map<String, dynamic>> linhas) {
+Map<String, dynamic> _identify(List<Map<String, dynamic>> rows) {
   final ok = [
-    for (final e in linhas)
+    for (final e in rows)
       if (e['avaliado'] == true &&
           e['potencial'] != null &&
           e['excedente'] != null &&
@@ -534,48 +534,48 @@ Map<String, dynamic> _identificar(List<Map<String, dynamic>> linhas) {
     return {'n': ok.length, 'erro': 'amostra insuficiente'};
   }
 
-  final pot = [for (final e in ok) (e['potencial'] as num).toDouble()];
+  final upsides = [for (final e in ok) (e['potencial'] as num).toDouble()];
   final exc = [for (final e in ok) (e['excedente'] as num).toDouble()];
   final bet = [for (final e in ok) (e['beta'] as num).toDouble()];
 
   // Postos padronizados: o potencial tem cauda pesada (a QUAL3 sozinha chega a
   // +477%), e regressão de nível sobre ele mede o extremo, não a relação.
-  final zPot = Regression.standardizedRanks(pot);
+  final zUpside = Regression.standardizedRanks(upsides);
   final zExc = Regression.standardizedRanks(exc);
   final zBet = Regression.standardizedRanks(bet);
 
-  final conjunta = Regression.ols([zExc, zBet], zPot);
-  final soExc = Regression.ols([zExc], zPot);
-  final soBet = Regression.ols([zBet], zPot);
+  final joint = Regression.ols([zExc, zBet], zUpside);
+  final onlyExc = Regression.ols([zExc], zUpside);
+  final onlyBet = Regression.ols([zBet], zUpside);
 
   return {
     'n': ok.length,
-    'spearmanPotencialExcedente': Regression.spearman(pot, exc),
-    'spearmanPotencialBeta': Regression.spearman(pot, bet),
+    'spearmanPotencialExcedente': Regression.spearman(upsides, exc),
+    'spearmanPotencialBeta': Regression.spearman(upsides, bet),
     'spearmanExcedenteBeta': Regression.spearman(exc, bet),
-    'conjunta': conjunta == null
+    'conjunta': joint == null
         ? null
         : {
-            'coefExcedente': conjunta.coefficients[1],
-            'tExcedente': conjunta.tStats[1],
-            'coefBeta': conjunta.coefficients[2],
-            'tBeta': conjunta.tStats[2],
-            'r2': conjunta.r2,
+            'coefExcedente': joint.coefficients[1],
+            'tExcedente': joint.tStats[1],
+            'coefBeta': joint.coefficients[2],
+            'tBeta': joint.tStats[2],
+            'r2': joint.r2,
           },
-    'soExcedente': soExc == null
+    'soExcedente': onlyExc == null
         ? null
-        : {'coef': soExc.coefficients[1], 't': soExc.tStats[1], 'r2': soExc.r2},
-    'soBeta': soBet == null
+        : {'coef': onlyExc.coefficients[1], 't': onlyExc.tStats[1], 'r2': onlyExc.r2},
+    'soBeta': onlyBet == null
         ? null
-        : {'coef': soBet.coefficients[1], 't': soBet.tStats[1], 'r2': soBet.r2},
+        : {'coef': onlyBet.coefficients[1], 't': onlyBet.tStats[1], 'r2': onlyBet.r2},
   };
 }
 
-void _imprimir(
-  List<Map<String, dynamic>> linhas,
+void _printReport(
+  List<Map<String, dynamic>> rows,
   Map<String, dynamic> ident,
 ) {
-  final ok = [for (final e in linhas) if (e['avaliado'] == true) e];
+  final ok = [for (final e in rows) if (e['avaliado'] == true) e];
   if (ok.isEmpty) {
     stdout.writeln('nenhum ativo avaliado');
     return;
@@ -593,70 +593,70 @@ void _imprimir(
 
   stdout.writeln('\n=== DCF REVERSO — ${ok.length} avaliados ===\n');
 
-  final pot = [for (final e in ok) (e['potencial'] as num).toDouble()];
-  stdout.writeln('potencial mediano: ${pc(med(pot))}   '
-      'positivos: ${pot.where((p) => p > 0).length}');
+  final upsides = [for (final e in ok) (e['potencial'] as num).toDouble()];
+  stdout.writeln('potencial mediano: ${pc(med(upsides))}   '
+      'positivos: ${upsides.where((p) => p > 0).length}');
 
   // --- Eixo do retorno terminal ---
-  final comRonic = [
+  final withRonic = [
     for (final e in ok)
       if ((e['ronicImplicito'] as Map)['implicito'] != null) e,
   ];
-  void situacoes(String eixo) {
-    final conta = <String, int>{};
+  void situations(String axis) {
+    final account = <String, int>{};
     for (final e in ok) {
-      final s = (e[eixo] as Map)['situacao'] as String;
-      conta[s] = (conta[s] ?? 0) + 1;
+      final s = (e[axis] as Map)['situacao'] as String;
+      account[s] = (account[s] ?? 0) + 1;
     }
-    final ordenado = conta.entries.toList()
+    final sortedEntries = account.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    for (final e in ordenado) {
+    for (final e in sortedEntries) {
       stdout.writeln('  ${e.value.toString().padLeft(4)}  ${e.key}');
     }
   }
 
   stdout.writeln('\n-- RONIC_infinito implícito --');
-  situacoes('ronicImplicito');
-  final naoMono = ok
+  situations('ronicImplicito');
+  final nonMonotonic = ok
       .where((e) => (e['ronicImplicito'] as Map)['monotonia'] == 'não monótona')
       .length;
-  final planos =
+  final flatOnes =
       ok.where((e) => (e['ronicImplicito'] as Map)['monotonia'] == 'plana').length;
-  stdout.writeln('não monótonos: $naoMono   planos (terminal insensível): $planos');
-  if (comRonic.isNotEmpty) {
+  stdout.writeln('não monótonos: $nonMonotonic   planos (terminal insensível): $flatOnes');
+  if (withRonic.isNotEmpty) {
     final r = [
-      for (final e in comRonic)
+      for (final e in withRonic)
         ((e['ronicImplicito'] as Map)['implicito'] as num).toDouble(),
     ];
     stdout.writeln('mediana do RONIC implícito: ${pc(med(r))}');
-    final comCiclo = [
-      for (final e in comRonic)
+    final withCycle = [
+      for (final e in withRonic)
         if (e['retornoCiclo'] != null)
           ((e['ronicImplicito'] as Map)['implicito'] as num).toDouble() /
               (e['retornoCiclo'] as num).toDouble(),
     ];
     stdout.writeln('mediana de RONIC implícito ÷ ROIC do ciclo: '
-        '${med(comCiclo)?.toStringAsFixed(2) ?? '—'}x');
-    final acima = comCiclo.where((x) => x > 1).length;
-    stdout.writeln('acima do ciclo: $acima de ${comCiclo.length}');
+        '${med(withCycle)?.toStringAsFixed(2) ?? '—'}x');
+    final above = withCycle.where((x) => x > 1).length;
+    stdout.writeln('acima do ciclo: $above de ${withCycle.length}');
   }
 
   // --- Eixo do prêmio ---
-  final comPremio = [
+  final withPremium = [
     for (final e in ok)
       if ((e['premioImplicito'] as Map)['implicito'] != null) e,
   ];
   stdout.writeln('\n-- prêmio de risco implícito --');
-  situacoes('premioImplicito');
-  if (comPremio.isNotEmpty) {
+  situations('premioImplicito');
+  if (withPremium.isNotEmpty) {
     final p = [
-      for (final e in comPremio)
+      for (final e in withPremium)
         ((e['premioImplicito'] as Map)['implicito'] as num).toDouble(),
     ];
     stdout.writeln('mediana do prêmio implícito: ${pc(med(p))} '
         '(parametrizado: 5,5%)');
     final ke = [
-      for (final e in comPremio)
+      for (final e in withPremium)
         if (e['keImplicito'] != null) (e['keImplicito'] as num).toDouble(),
     ];
     stdout.writeln('mediana do Ke implícito: ${pc(med(ke))}');
@@ -665,21 +665,21 @@ void _imprimir(
   }
 
   // --- Eixo do nível da taxa livre de risco ---
-  final comRf = [
+  final withRf = [
     for (final e in ok)
       if ((e['rfImplicito'] as Map)['implicito'] != null) e,
   ];
   stdout.writeln('\n-- deslocamento da taxa livre de risco --');
-  situacoes('rfImplicito');
-  if (comRf.isNotEmpty) {
+  situations('rfImplicito');
+  if (withRf.isNotEmpty) {
     final d = [
-      for (final e in comRf)
+      for (final e in withRf)
         ((e['rfImplicito'] as Map)['implicito'] as num).toDouble(),
     ];
     stdout.writeln('mediana do deslocamento: ${pc(med(d))} '
         '(negativo = a curva teria de ser mais baixa)');
     final rt = [
-      for (final e in comRf)
+      for (final e in withRf)
         if (e['rfTerminalImplicito'] != null)
           (e['rfTerminalImplicito'] as num).toDouble(),
     ];
@@ -693,7 +693,7 @@ void _imprimir(
       if (e['multiplicadorFluxo'] != null)
         (e['multiplicadorFluxo'] as num).toDouble(),
   ]..sort();
-  final fatores = [
+  final factors = [
     for (final e in ok)
       if (e['fatorBase'] != null) (e['fatorBase'] as num).toDouble(),
   ];
@@ -706,11 +706,11 @@ void _imprimir(
     stdout.writeln('acima de 1: ${mult.where((x) => x > 1).length} de '
         '${mult.length}');
   }
-  if (fatores.isNotEmpty) {
+  if (factors.isNotEmpty) {
     stdout.writeln('fator de normalização APLICADO: '
-        'mediana=${med(fatores)!.toStringAsFixed(2)}x  '
-        'abaixo de 1: ${fatores.where((x) => x < 0.999).length} de '
-        '${fatores.length}');
+        'mediana=${med(factors)!.toStringAsFixed(2)}x  '
+        'abaixo de 1: ${factors.where((x) => x < 0.999).length} de '
+        '${factors.length}');
   }
   stdout.writeln('desconto corrente mediano: '
       '${pc(med([for (final e in ok) (e['desconto'] as num).toDouble()]))}');
@@ -722,34 +722,34 @@ void _imprimir(
   // alcance da grade inteira. "Múltiplas raízes" não é nenhuma das duas — o
   // eixo alcança o preço, mas não devolve um valor. A assimetria só significa
   // alguma coisa medida contra o inatingível.
-  bool resolve(Map<String, dynamic> e, String eixo) =>
-      (e[eixo] as Map)['implicito'] != null;
-  bool inatingivel(Map<String, dynamic> e, String eixo) =>
-      ((e[eixo] as Map)['situacao'] as String).contains('acima do teto');
+  bool resolve(Map<String, dynamic> e, String axis) =>
+      (e[axis] as Map)['implicito'] != null;
+  bool unreachable(Map<String, dynamic> e, String axis) =>
+      ((e[axis] as Map)['situacao'] as String).contains('acima do teto');
 
-  final taxaResolveTerminalNao = ok
-      .where((e) => resolve(e, 'rfImplicito') && inatingivel(e, 'ronicImplicito'))
+  final rateResolvesButTerminalNot = ok
+      .where((e) => resolve(e, 'rfImplicito') && unreachable(e, 'ronicImplicito'))
       .length;
-  final terminalResolveTaxaNao = ok
-      .where((e) => resolve(e, 'ronicImplicito') && inatingivel(e, 'rfImplicito'))
+  final terminalResolvesButRateNot = ok
+      .where((e) => resolve(e, 'ronicImplicito') && unreachable(e, 'rfImplicito'))
       .length;
-  final nosTres = ok
+  final inAllThree = ok
       .where((e) =>
-          inatingivel(e, 'ronicImplicito') &&
-          inatingivel(e, 'premioImplicito') &&
-          inatingivel(e, 'rfImplicito'))
+          unreachable(e, 'ronicImplicito') &&
+          unreachable(e, 'premioImplicito') &&
+          unreachable(e, 'rfImplicito'))
       .toList();
 
   stdout.writeln('\n-- cruzamento dos eixos --');
   stdout.writeln('  a TAXA resolve e o TERMINAL é inatingível: '
-      '$taxaResolveTerminalNao');
+      '$rateResolvesButTerminalNot');
   stdout.writeln('  o TERMINAL resolve e a TAXA é inatingível: '
-      '$terminalResolveTaxaNao');
+      '$terminalResolvesButRateNot');
   stdout.writeln('  inatingível nos TRÊS eixos:                '
-      '${nosTres.length} de ${ok.length}');
-  if (nosTres.isNotEmpty) {
-    final nomes = [for (final e in nosTres) e['ticker'] as String]..sort();
-    stdout.writeln('    ${nomes.join(', ')}');
+      '${inAllThree.length} de ${ok.length}');
+  if (inAllThree.isNotEmpty) {
+    final names = [for (final e in inAllThree) e['ticker'] as String]..sort();
+    stdout.writeln('    ${names.join(', ')}');
   }
 
   // --- Identificação ---

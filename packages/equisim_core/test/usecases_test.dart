@@ -65,26 +65,26 @@ void main() {
     test('perpetuidade nunca supera o crescimento da economia', () {
       // O teto passa a ser informado, não constante: 6,52% é a composição do
       // crescimento real medido do IBC-Br com o IPCA observado (decisão 25).
-      const teto = 0.0652;
+      const cap = 0.0652;
       expect(
-          GrowthEstimator.perpetual(explicitGrowth: 0.15, economyGrowth: teto),
-          teto);
+          GrowthEstimator.perpetual(explicitGrowth: 0.15, economyGrowth: cap),
+          cap);
       expect(
-          GrowthEstimator.perpetual(explicitGrowth: 0.01, economyGrowth: teto),
+          GrowthEstimator.perpetual(explicitGrowth: 0.01, economyGrowth: cap),
           0.01);
       // **O piso é o da banda de sanidade, e não zero** (decisão 56). O piso
       // em zero afirmava que toda empresa em declínio volta a crescer zero em
       // dez anos, e tornava inalcançável o limite que o projeto já declarara
       // em `floorRate` — com a razão escrita lá.
       expect(
-          GrowthEstimator.perpetual(explicitGrowth: -0.05, economyGrowth: teto),
+          GrowthEstimator.perpetual(explicitGrowth: -0.05, economyGrowth: cap),
           GrowthEstimator.floorRate);
       expect(
-          GrowthEstimator.perpetual(explicitGrowth: -0.02, economyGrowth: teto),
+          GrowthEstimator.perpetual(explicitGrowth: -0.02, economyGrowth: cap),
           -0.02);
       // Abaixo da banda, o piso segura: encolher para sempre tem limite.
       expect(
-          GrowthEstimator.perpetual(explicitGrowth: -0.40, economyGrowth: teto),
+          GrowthEstimator.perpetual(explicitGrowth: -0.40, economyGrowth: cap),
           GrowthEstimator.floorRate);
       // E o teto continua onde estava, mesmo com economia encolhendo.
       expect(
@@ -115,7 +115,7 @@ void main() {
         );
 
     group('Curva de juros observada — decisão 74', () {
-      YieldCurve plana(double r) => YieldCurve.of(DateTime.utc(2026, 9, 10), [
+      YieldCurve flat(double r) => YieldCurve.of(DateTime.utc(2026, 9, 10), [
             CurveVertex(0.5, r),
             CurveVertex(2, r),
             CurveVertex(5, r),
@@ -128,7 +128,7 @@ void main() {
         // prova de que a ligação troca a fonte da taxa e nada mais.
         final rf = capm.riskFreeRate;
         final base = inputsWith(growingHistory(rate: 0.08));
-        final semCurva = ValuationCascade.evaluate(ValuationInputs(
+        final withoutCurve = ValuationCascade.evaluate(ValuationInputs(
           ticker: base.ticker,
           asOf: base.asOf,
           fundamentals: base.fundamentals,
@@ -136,15 +136,15 @@ void main() {
           capm: base.capm,
           declaredTerminalRiskFreeRate: rf,
         )).unwrap();
-        final comCurva = ValuationCascade.evaluate(ValuationInputs(
+        final withCurve = ValuationCascade.evaluate(ValuationInputs(
           ticker: base.ticker,
           asOf: base.asOf,
           fundamentals: base.fundamentals,
           marketPrice: base.marketPrice,
           capm: base.capm,
-          riskFreeCurve: plana(rf),
+          riskFreeCurve: flat(rf),
         )).unwrap();
-        expect(comCurva.upside, closeTo(semCurva.upside, 1e-9));
+        expect(withCurve.upside, closeTo(withoutCurve.upside, 1e-9));
       });
 
       test('a perpetuidade passa a ser o forward longo da curva', () {
@@ -156,7 +156,7 @@ void main() {
           marketPrice: base.marketPrice,
           capm: base.capm,
           declaredTerminalRiskFreeRate: 0.09,
-          riskFreeCurve: plana(0.14),
+          riskFreeCurve: flat(0.14),
         );
         expect(i.terminalRiskFreeRate, closeTo(0.14, 1e-12),
             reason: 'a curva vence a média decenal do CDI');
@@ -165,21 +165,21 @@ void main() {
       test('taxa longa mais alta baixa o preço justo, e o aviso diz de onde veio',
           () {
         final base = inputsWith(growingHistory(rate: 0.08));
-        ValuationResult com(double r) => ValuationCascade.evaluate(ValuationInputs(
+        ValuationResult withInput(double r) => ValuationCascade.evaluate(ValuationInputs(
               ticker: base.ticker,
               asOf: base.asOf,
               fundamentals: base.fundamentals,
               marketPrice: base.marketPrice,
               capm: base.capm,
-              riskFreeCurve: plana(r),
+              riskFreeCurve: flat(r),
             )).unwrap();
-        final baixa = com(0.09), alta = com(0.14);
-        expect(alta.upside, lessThan(baixa.upside));
+        final low = withInput(0.09), high = withInput(0.14);
+        expect(high.upside, lessThan(low.upside));
         expect(
-          alta.warnings.any((w) => w.contains('curva dos títulos prefixados')),
+          high.warnings.any((w) => w.contains('curva dos títulos prefixados')),
           isTrue,
         );
-        expect(alta.warnings.any((w) => w.contains('sem curva de juros')),
+        expect(high.warnings.any((w) => w.contains('sem curva de juros')),
             isFalse);
       });
     });
@@ -471,10 +471,10 @@ void main() {
     test('em ação comum a tolerância não decide nada', () {
       // Aceitar devolve 1,0 e recusar devolve 1,0. É por isso que apertar a
       // banda em u = 1 não tem consequência.
-      for (final bruto in [0.79, 0.95, 1.0, 1.05, 1.21]) {
+      for (final raw in [0.79, 0.95, 1.0, 1.05, 1.21]) {
         expect(
           ValuationCascade.quotedUnitRatio(
-            sharesOutstanding: bruto * 1e9,
+            sharesOutstanding: raw * 1e9,
             marketCap: 1e9,
             marketPrice: 1.0,
           ),
@@ -508,7 +508,7 @@ void main() {
 
     test('o preço justo sai por unit, não por ação', () {
       // Mesma empresa, mesmos demonstrativos: só muda a forma de negociar.
-      final porAcao = ValuationCascade.evaluate(ValuationInputs(
+      final perShareResult = ValuationCascade.evaluate(ValuationInputs(
         ticker: ticker,
         asOf: asOf,
         fundamentals: growingHistory(rate: 0.05),
@@ -517,7 +517,7 @@ void main() {
       ));
       // 100 ações a R$ 30 valem R$ 3.000 de mercado; em units de 5, são 20
       // units a R$ 150.
-      final porUnit = ValuationCascade.evaluate(ValuationInputs(
+      final byUnit = ValuationCascade.evaluate(ValuationInputs(
         ticker: ticker,
         asOf: asOf,
         fundamentals: growingHistory(rate: 0.05),
@@ -525,18 +525,18 @@ void main() {
         capm: capm,
       ));
 
-      expect(porAcao.isOk, isTrue);
-      expect(porUnit.isOk, isTrue);
+      expect(perShareResult.isOk, isTrue);
+      expect(byUnit.isOk, isTrue);
       expect(
-        porUnit.unwrap().fairValue.reais,
-        closeTo(porAcao.unwrap().fairValue.reais * 5, 0.05),
+        byUnit.unwrap().fairValue.reais,
+        closeTo(perShareResult.unwrap().fairValue.reais * 5, 0.05),
         reason: 'o valor da firma é o mesmo; muda o número de papéis',
       );
       // E o que importa para a decisão — a distância até o preço justo — fica
       // igual nos dois casos.
       expect(
-        porUnit.unwrap().upside,
-        closeTo(porAcao.unwrap().upside, 0.01),
+        byUnit.unwrap().upside,
+        closeTo(perShareResult.unwrap().upside, 0.01),
       );
     });
   });
@@ -595,7 +595,7 @@ void main() {
       // variação cambial está no denominador. Medido, ela punia justamente as
       // sólidas — ABEV3 e WEGE3, de caixa líquido, pagavam 2,4 p.p.; a SAPR11,
       // com 0,60x de alavancagem, pagava o teto de 10 p.p.
-      const caixaLiquido = CostOfCapital(
+      const netCash = CostOfCapital(
         capm: capmRf,
         costOfDebt: 0.473,
         taxRate: 0.34,
@@ -604,10 +604,10 @@ void main() {
         interestCoverage: 3.68,
         netDebtToEbitda: -0.30,
       );
-      expect(caixaLiquido.effectiveCostOfDebt, closeTo(rf + 0.010, 1e-12));
-      expect(caixaLiquido.costOfDebtWasClamped, isTrue);
+      expect(netCash.effectiveCostOfDebt, closeTo(rf + 0.010, 1e-12));
+      expect(netCash.costOfDebtWasClamped, isTrue);
 
-      const moderada = CostOfCapital(
+      const moderate = CostOfCapital(
         capm: capmRf,
         costOfDebt: 0.279,
         taxRate: 0.34,
@@ -616,10 +616,10 @@ void main() {
         interestCoverage: 1.26,
         netDebtToEbitda: 1.17,
       );
-      expect(moderada.effectiveCostOfDebt, closeTo(rf + 0.018, 1e-12),
+      expect(moderate.effectiveCostOfDebt, closeTo(rf + 0.018, 1e-12),
           reason: 'alavancagem de 1,17x não é crédito de pré-falência');
 
-      const alavancada = CostOfCapital(
+      const leveraged = CostOfCapital(
         capm: capmRf,
         costOfDebt: 0.20,
         taxRate: 0.34,
@@ -628,13 +628,13 @@ void main() {
         interestCoverage: 2.0,
         netDebtToEbitda: 6.0,
       );
-      expect(alavancada.effectiveCostOfDebt,
+      expect(leveraged.effectiveCostOfDebt,
           closeTo(rf + CostOfCapital.maxCreditSpread, 1e-12));
 
-      expect(caixaLiquido.effectiveCostOfDebt,
-          lessThan(moderada.effectiveCostOfDebt));
-      expect(moderada.effectiveCostOfDebt,
-          lessThan(alavancada.effectiveCostOfDebt),
+      expect(netCash.effectiveCostOfDebt,
+          lessThan(moderate.effectiveCostOfDebt));
+      expect(moderate.effectiveCostOfDebt,
+          lessThan(leveraged.effectiveCostOfDebt),
           reason: 'a ordenação de risco de crédito precisa ser monótona na '
               'alavancagem');
     });
@@ -646,10 +646,10 @@ void main() {
       // `[Rf, Rf + 10 p.p.]`. Medida contra a taxa do CAPM, a resposta mudava com
       // o cenário — com a Rf a 14,5% a cobertura saía da conta e o custo da
       // dívida caía 5,5 p.p. —, e o preço justo subia com a taxa.
-      CostOfCapital com({required double rfSuposta, double? referencia}) =>
+      CostOfCapital withInput({required double assumedRf, double? reference}) =>
           CostOfCapital(
             capm: CapmInputs(
-                riskFreeRate: rfSuposta,
+                riskFreeRate: assumedRf,
                 beta: 1.0,
                 marketPremium: CapmInputs.defaultMarketPremium),
             costOfDebt: 0.14,
@@ -658,18 +658,18 @@ void main() {
             debtValue: 50,
             interestCoverage: 1.3,
             netDebtToEbitda: 0.8,
-            creditReferenceRate: referencia,
+            creditReferenceRate: reference,
           );
       // Sem referência, a faixa anda com a taxa suposta: é o degrau.
-      expect(com(rfSuposta: 0.135).effectiveCostOfDebt, closeTo(0.135 + 0.075, 1e-12));
-      expect(com(rfSuposta: 0.145).effectiveCostOfDebt, closeTo(0.145 + 0.013, 1e-12));
+      expect(withInput(assumedRf: 0.135).effectiveCostOfDebt, closeTo(0.135 + 0.075, 1e-12));
+      expect(withInput(assumedRf: 0.145).effectiveCostOfDebt, closeTo(0.145 + 0.013, 1e-12));
       // Com a referência da data, o veredito é um só, e o custo da dívida sobe
       // com a taxa suposta, sem saltar.
-      final baixo = com(rfSuposta: 0.135, referencia: 0.125).effectiveCostOfDebt;
-      final alto = com(rfSuposta: 0.145, referencia: 0.125).effectiveCostOfDebt;
-      expect(baixo, closeTo(0.135 + 0.075, 1e-12));
-      expect(alto, closeTo(0.145 + 0.075, 1e-12));
-      expect(alto - baixo, closeTo(0.01, 1e-12));
+      final low = withInput(assumedRf: 0.135, reference: 0.125).effectiveCostOfDebt;
+      final high = withInput(assumedRf: 0.145, reference: 0.125).effectiveCostOfDebt;
+      expect(low, closeTo(0.135 + 0.075, 1e-12));
+      expect(high, closeTo(0.145 + 0.075, 1e-12));
+      expect(high - low, closeTo(0.01, 1e-12));
     });
 
     test('sem EBITDA positivo, o prêmio é o do pior caso', () {
@@ -707,7 +707,7 @@ void main() {
     test('o escudo fiscal é limitado pela capacidade de usá-lo', () {
       // Com EBIT abaixo da despesa financeira, a dedução excedente não abate
       // imposto no exercício: o escudo vale 34% × cobertura, não 34%.
-      const semFolga = CostOfCapital(
+      const withoutMargin = CostOfCapital(
         capm: capmRf,
         costOfDebt: 0.18,
         taxRate: 0.34,
@@ -716,9 +716,9 @@ void main() {
         interestCoverage: 0.5,
         netDebtToEbitda: 2.0,
       );
-      expect(semFolga.effectiveTaxShield, closeTo(0.34 * 0.5, 1e-12));
+      expect(withoutMargin.effectiveTaxShield, closeTo(0.34 * 0.5, 1e-12));
 
-      const comFolga = CostOfCapital(
+      const withMargin = CostOfCapital(
         capm: capmRf,
         costOfDebt: 0.18,
         taxRate: 0.34,
@@ -727,8 +727,8 @@ void main() {
         interestCoverage: 4.0,
         netDebtToEbitda: 2.0,
       );
-      expect(comFolga.effectiveTaxShield, 0.34);
-      expect(semFolga.rawWacc, greaterThan(comFolga.rawWacc),
+      expect(withMargin.effectiveTaxShield, 0.34);
+      expect(withoutMargin.rawWacc, greaterThan(withMargin.rawWacc),
           reason: 'menos escudo é mais custo de capital');
     });
 
@@ -767,10 +767,10 @@ void main() {
           assets: assets,
         ).unwrap();
 
-    Portfolio reservaWith(List<Asset> assets) => Portfolio.equalWeighted(
+    Portfolio reserveWith(List<Asset> assets) => Portfolio.equalWeighted(
           id: 'reserva',
           name: 'Reserva',
-          kind: PortfolioKind.reserva,
+          kind: PortfolioKind.reserve,
           assets: assets,
         ).unwrap();
 
@@ -780,7 +780,7 @@ void main() {
           assetOf('PETR4', 'energia'),
           assetOf('VALE3', 'materiais'),
         ]),
-        reserva: reservaWith([assetOf('ITUB4', 'financeiro')]),
+        reserve: reserveWith([assetOf('ITUB4', 'financeiro')]),
         ticker: Ticker.parse('ITUB4'),
         toPrincipal: true,
       );
@@ -788,7 +788,7 @@ void main() {
       expect(result.isOk, isTrue);
       final outcome = result.unwrap();
       expect(outcome.principal.length, 3);
-      expect(outcome.reserva.length, 0);
+      expect(outcome.reserve.length, 0);
       expect(Weights.sumsToOne(outcome.principal.weights), isTrue);
       for (final w in outcome.principal.weights) {
         expect(w.value, closeTo(1 / 3, 1e-9));
@@ -801,19 +801,19 @@ void main() {
           assetOf('PETR4', 'energia'),
           assetOf('VALE3', 'materiais'),
         ]),
-        reserva: reservaWith([assetOf('ITUB4', 'financeiro')]),
+        reserve: reserveWith([assetOf('ITUB4', 'financeiro')]),
         ticker: Ticker.parse('PETR4'),
         toPrincipal: false,
       );
       final outcome = result.unwrap();
       expect(outcome.principal.length, 1);
-      expect(outcome.reserva.length, 2);
+      expect(outcome.reserve.length, 2);
     });
 
     test('rejeita ativo ausente na origem', () {
       final result = SwapAssetBetweenPortfolios.call(
         principal: principalWith([assetOf('PETR4', 'energia')]),
-        reserva: reservaWith([assetOf('ITUB4', 'financeiro')]),
+        reserve: reserveWith([assetOf('ITUB4', 'financeiro')]),
         ticker: Ticker.parse('VALE3'),
         toPrincipal: true,
       );
@@ -821,12 +821,12 @@ void main() {
     });
 
     test('respeita o teto de 15 ativos no destino', () {
-      final cheia = principalWith([
+      final full = principalWith([
         for (var i = 0; i < 15; i++) assetOf('AAAA$i', 'financeiro'),
       ]);
       final result = SwapAssetBetweenPortfolios.call(
-        principal: cheia,
-        reserva: reservaWith([assetOf('ITUB4', 'financeiro')]),
+        principal: full,
+        reserve: reserveWith([assetOf('ITUB4', 'financeiro')]),
         ticker: Ticker.parse('ITUB4'),
         toPrincipal: true,
       );
@@ -899,7 +899,7 @@ void main() {
 
       // Seção larga o bastante para ter escala: potenciais de −50% a +100%,
       // mediana em 0%. A carteira fica acima da mediana e recebe prêmio.
-      const secao = [-0.5, -0.25, 0.0, 0.25, 1.0];
+      const crossSection = [-0.5, -0.25, 0.0, 0.25, 1.0];
 
       GoalAlignment run(double fair) => EvaluateGoalAlignment.call(
             portfolio: portfolio,
@@ -909,7 +909,7 @@ void main() {
               Ticker.parse('VALE3'): valuationWith('VALE3', fair, 40),
             },
             anchors: MarketAnchors.fallback2026,
-            crossSection: secao,
+            crossSection: crossSection,
           ).unwrap();
 
       const cdi = 0.1415;
@@ -922,9 +922,9 @@ void main() {
       // ponto do estimador. Pelo caminho antigo, um preço justo de R$ 4,00
       // contra R$ 40,00 dava (0,10)^(1/3) − 1 = −53,6% ao ano, e nenhuma meta
       // era alcançável por construção.
-      final esticada = run(4).expectedReturn;
-      expect(esticada, lessThan(cdi));
-      expect(esticada, greaterThan(0));
+      final stretched = run(4).expectedReturn;
+      expect(stretched, lessThan(cdi));
+      expect(stretched, greaterThan(0));
     });
 
     test('a lacuna é a distância até o exigido, e nada mais', () {

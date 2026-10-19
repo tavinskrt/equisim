@@ -3,15 +3,15 @@ import 'package:test/test.dart';
 
 DateTime _d(int y, int m, int d) => DateTime.utc(y, m, d);
 
-Map<String, dynamic> _ev(String label, String fator, String dataCom,
-        {String isin = 'BRXXXXACNOR0', String emitido = ''}) =>
+Map<String, dynamic> _ev(String label, String factor, String recordDate,
+        {String isin = 'BRXXXXACNOR0', String issued = ''}) =>
     {
-      'assetIssued': emitido,
-      'factor': fator,
+      'assetIssued': issued,
+      'factor': factor,
       'approvedOn': '01/01/2020',
       'isinCode': isin,
       'label': label,
-      'lastDatePrior': dataCom,
+      'lastDatePrior': recordDate,
       'remarks': '',
     };
 
@@ -66,8 +66,8 @@ void main() {
 
     test('a mesma entrada repetida por papel emitido conta uma vez', () {
       final e = B3Registry.events([
-        _ev('DESDOBRAMENTO', '100,00000000000', '15/04/2024', emitido: 'A'),
-        _ev('DESDOBRAMENTO', '100,00000000000', '15/04/2024', emitido: 'B'),
+        _ev('DESDOBRAMENTO', '100,00000000000', '15/04/2024', issued: 'A'),
+        _ev('DESDOBRAMENTO', '100,00000000000', '15/04/2024', issued: 'B'),
       ]);
       expect(e.single.factor, 2);
     });
@@ -82,11 +82,11 @@ void main() {
 
     test('a data ex é o dia útil seguinte à data-com', () {
       // Sexta 12/09/2025 → segunda 15/09/2025.
-      final sexta = B3Registry.events([_ev('BONIFICACAO', '10', '12/09/2025')]);
-      expect(sexta.single.exDate, _d(2025, 9, 15));
+      final friday = B3Registry.events([_ev('BONIFICACAO', '10', '12/09/2025')]);
+      expect(friday.single.exDate, _d(2025, 9, 15));
       // Sexta antes do Carnaval de 2024 → quarta de cinzas.
-      final carnaval = B3Registry.events([_ev('BONIFICACAO', '10', '09/02/2024')]);
-      expect(carnaval.single.exDate, _d(2024, 2, 14));
+      final carnival = B3Registry.events([_ev('BONIFICACAO', '10', '09/02/2024')]);
+      expect(carnival.single.exDate, _d(2024, 2, 14));
     });
   });
 
@@ -126,12 +126,12 @@ void main() {
           _ev('DESDOBRAMENTO', '7.900,00000000000', '14/04/2025'),
         ],
       }, consultedOn: _d(2026, 9, 14))!;
-      final pacote = B3RegistryCodec.encodePackage([e], geradoEm: _d(2026, 9, 14));
-      final lido = B3RegistryCodec.decodePackage(pacote)['VIVT']!;
-      expect(lido.totalShares, e.totalShares);
-      expect(lido.consultedOn, _d(2026, 9, 14));
-      expect(lido.events.single.factor, closeTo(2, 1e-12));
-      expect(lido.events.single.exDate, e.events.single.exDate);
+      final package = B3RegistryCodec.encodePackage([e], generatedAt: _d(2026, 9, 14));
+      final parsed = B3RegistryCodec.decodePackage(package)['VIVT']!;
+      expect(parsed.totalShares, e.totalShares);
+      expect(parsed.consultedOn, _d(2026, 9, 14));
+      expect(parsed.events.single.factor, closeTo(2, 1e-12));
+      expect(parsed.events.single.exDate, e.events.single.exDate);
     });
 
     test('versão desconhecida não é lida pela metade', () {
@@ -175,28 +175,28 @@ void main() {
         },
       )!;
       expect(e.classification!.sectorKey, 'financeiro');
-      final lido = B3RegistryCodec.decodePackage(
-          B3RegistryCodec.encodePackage([e], geradoEm: _d(2026, 9, 14)))['SANB']!;
-      expect(lido.classification!.label,
+      final parsed = B3RegistryCodec.decodePackage(
+          B3RegistryCodec.encodePackage([e], generatedAt: _d(2026, 9, 14)))['SANB']!;
+      expect(parsed.classification!.label,
           'Financeiro / Intermediários Financeiros / Bancos');
     });
 
     test('pacote da versão 1 continua legível, sem classificação', () {
-      final lido = B3RegistryCodec.decodePackage({
+      final parsed = B3RegistryCodec.decodePackage({
         'versao': 1,
         'geradoEm': '2026-09-14',
         'emissores': {
           'CTKA': {'consultadoEm': '2026-09-14', 'total': 6205375, 'eventos': []},
         },
       });
-      expect(lido['CTKA']!.totalShares, closeTo(6205375, 1e-6));
-      expect(lido['CTKA']!.classification, isNull);
+      expect(parsed['CTKA']!.totalShares, closeTo(6205375, 1e-6));
+      expect(parsed['CTKA']!.classification, isNull);
     });
 
     test('versão futura não é lida pela metade', () {
       expect(
           B3RegistryCodec.decodePackage({
-            'versao': B3RegistryCodec.versao + 1,
+            'versao': B3RegistryCodec.version + 1,
             'emissores': {'CTKA': {'consultadoEm': '2026-09-14'}},
           }),
           isEmpty);
