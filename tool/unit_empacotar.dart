@@ -29,24 +29,24 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'cvm/codigos_fca.dart';
 
-const _saida = 'assets/cvm/units.json';
+const _output = 'assets/cvm/units.json';
 
 /// A data de referência dos pacotes versionados.
-final _referencia = DateTime(2026, 9, 14);
+final _reference = DateTime(2026, 9, 14);
 
 void main(List<String> args) {
-  final data = args.contains('--agora') ? DateTime.now() : _referencia;
-  final universo = (jsonDecode(
+  final date = args.contains('--agora') ? DateTime.now() : _reference;
+  final universe = (jsonDecode(
           File('docs/validacao/universo.json').readAsStringSync()) as List)
       .map((e) => (e as Map<String, dynamic>)['ticker'] as String)
       .toList();
-  final ponte = ((jsonDecode(File('docs/validacao/ponte_cvm.json')
+  final bridge = ((jsonDecode(File('docs/validacao/ponte_cvm.json')
           .readAsStringSync()) as Map<String, dynamic>)['ponte']
           as Map<String, dynamic>)
       .map((k, v) => MapEntry(k, v as String));
 
-  final fca = CodigosFca.ler();
-  if (fca.unitsPorCnpj.isEmpty) {
+  final fca = FcaCodes.read();
+  if (fca.unitsByCnpj.isEmpty) {
     stderr.writeln('sem FCA em data/cvm. Rode antes:');
     stderr.writeln('  python tool/cvm_baixar.py --docs FCA');
     exitCode = 2;
@@ -55,39 +55,39 @@ void main(List<String> args) {
 
   // Unit é a classe 11 da B3. A regra é do formato do código, e não de uma
   // lista: um papel novo não pode depender de alguém lembrar de cadastrá-lo.
-  final units = [for (final t in universo) if (t.endsWith('11')) t];
-  final pacote = <String, List<UnitComposition>>{};
-  final sem = <String>[];
+  final units = [for (final t in universe) if (t.endsWith('11')) t];
+  final package = <String, List<UnitComposition>>{};
+  final without = <String>[];
   for (final t in units) {
-    final cnpj = ponte[t];
-    final declaradas = cnpj == null ? null : fca.unitsPorCnpj[cnpj];
-    if (declaradas == null || declaradas.isEmpty) {
-      sem.add(t);
+    final cnpj = bridge[t];
+    final declared = cnpj == null ? null : fca.unitsByCnpj[cnpj];
+    if (declared == null || declared.isEmpty) {
+      without.add(t);
       continue;
     }
-    pacote[t] = declaradas;
+    package[t] = declared;
   }
 
-  File(_saida)
+  File(_output)
     ..parent.createSync(recursive: true)
     ..writeAsStringSync(jsonEncode(UnitCompositionCodec.encodePackage(
-      pacote,
-      geradoEm: data,
+      package,
+      generatedAt: date,
     )));
 
   stdout.writeln('== composição declarada das units ==');
-  for (final t in pacote.keys.toList()..sort()) {
-    final c = pacote[t]!..sort((a, b) => a.year.compareTo(b.year));
-    final anos = '${c.first.year}–${c.last.year}';
-    final acoes = {for (final x in c) x.shares}.toList()..sort();
-    stdout.writeln('  $t  $anos  ${acoes.join('/')} ações  '
+  for (final t in package.keys.toList()..sort()) {
+    final c = package[t]!..sort((a, b) => a.year.compareTo(b.year));
+    final years = '${c.first.year}–${c.last.year}';
+    final shares = {for (final x in c) x.shares}.toList()..sort();
+    stdout.writeln('  $t  $years  ${shares.join('/')} ações  '
         '"${c.last.declared}"');
   }
-  stdout.writeln('  ${pacote.length} de ${units.length} units do universo');
-  if (sem.isNotEmpty) {
+  stdout.writeln('  ${package.length} de ${units.length} units do universo');
+  if (without.isNotEmpty) {
     // Sem declaração o motor recua para a razão medida — e passa a dizer que
     // ela foi inferida, que é o que o item B16 pede.
-    stdout.writeln('  sem composição declarada: ${sem.join(', ')}');
+    stdout.writeln('  sem composição declarada: ${without.join(', ')}');
   }
-  stdout.writeln('  gravado $_saida');
+  stdout.writeln('  gravado $_output');
 }

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400" role="img" aria-labelledby="t d"><title id="t">Valor presente de R$ 1.000 por ano e taxa</title><desc id="d">Três curvas decrescentes: a 8%, 12% e 16% ao ano, R$ 1.000 no ano 10 valem hoje R$ 463,19, R$ 321,97 e R$ 226,68.</desc><style>
+  .fundo{fill:#fcfcfb}
+  .t1{fill:#0b0b0b;font:600 15px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .t2{fill:#52514e;font:12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .t3{fill:#0b0b0b;font:12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .tb{fill:#0b0b0b;font:600 12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .grade{stroke:#e4e3de;stroke-width:1}
+  .eixo{stroke:#b9b8b1;stroke-width:1}
+  .s1{stroke:#2a78d6;fill:#2a78d6}
+  .s2{stroke:#eb6834;fill:#eb6834}
+  .s3{stroke:#1baf7a;fill:#1baf7a}
+  .neutro{stroke:#8f8e87;fill:#8f8e87}
+  .caixa{fill:#f3f2ee;stroke:#c9c8c1;stroke-width:1}
+  .caixa2{fill:#e7f0fb;stroke:#2a78d6;stroke-width:1.5}
+  .caixa3{fill:#fdeee7;stroke:#eb6834;stroke-width:1.5}
+  .caixa4{fill:#f3f2ee;stroke:#8f8e87;stroke-width:1;stroke-dasharray:0}
+  .seta{stroke:#52514e;stroke-width:1.5;fill:none}
+  .anel{stroke:#fcfcfb;stroke-width:2}
+  @media (prefers-color-scheme: dark){
+    .fundo{fill:#1a1a19}
+    .t1,.t3,.tb{fill:#ffffff}
+    .t2{fill:#c3c2b7}
+    .grade{stroke:#33332f}
+    .eixo{stroke:#5a5953}
+    .s1{stroke:#3987e5;fill:#3987e5}
+    .s2{stroke:#d95926;fill:#d95926}
+    .s3{stroke:#199e70;fill:#199e70}
+    .caixa{fill:#262624;stroke:#4a4944}
+    .caixa2{fill:#16283f;stroke:#3987e5}
+    .caixa3{fill:#3a2016;stroke:#d95926}
+    .caixa4{fill:#262624;stroke:#6d6c66}
+    .seta{stroke:#c3c2b7}
+    .anel{stroke:#1a1a19}
+  }
+</style><rect class="fundo" width="720" height="400" rx="8"/><text class="t1" x="24" y="32">Quanto valem hoje R$ 1.000 recebidos no ano t</text><text class="t2" x="24" y="52">Valor presente = 1.000 ÷ (1 + taxa)^t</text><line class="grade" x1="70" x2="580" y1="340.0" y2="340.0"/><text class="t2" x="62" y="344.0" text-anchor="end">0</text><line class="grade" x1="70" x2="580" y1="279.0" y2="279.0"/><text class="t2" x="62" y="283.0" text-anchor="end">250</text><line class="grade" x1="70" x2="580" y1="218.0" y2="218.0"/><text class="t2" x="62" y="222.0" text-anchor="end">500</text><line class="grade" x1="70" x2="580" y1="157.0" y2="157.0"/><text class="t2" x="62" y="161.0" text-anchor="end">750</text><line class="grade" x1="70" x2="580" y1="96.0" y2="96.0"/><text class="t2" x="62" y="100.0" text-anchor="end">1.000</text><text class="t2" x="70.0" y="360" text-anchor="middle">0</text><text class="t2" x="172.0" y="360" text-anchor="middle">2</text><text class="t2" x="274.0" y="360" text-anchor="middle">4</text><text class="t2" x="376.0" y="360" text-anchor="middle">6</text><text class="t2" x="478.0" y="360" text-anchor="middle">8</text><text class="t2" x="580.0" y="360" text-anchor="middle">10</text><text class="t2" x="325.0" y="380" text-anchor="middle">anos até receber</text><line class="eixo" x1="70" x2="580" y1="340" y2="340"/><polyline class="s1" points="70.0,96.0 121.0,114.1 172.0,130.8 223.0,146.3 274.0,160.7 325.0,173.9 376.0,186.2 427.0,197.6 478.0,208.2 529.0,217.9 580.0,227.0" style="fill:none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle class="s1 anel" cx="580.0" cy="226.98078890733706" r="4.5"/><text class="t3" x="590.0" y="230.98078890733706">8% a.a.: R$ 463,19</text><polyline class="s2" points="70.0,96.0 121.0,122.1 172.0,145.5 223.0,166.3 274.0,184.9 325.0,201.5 376.0,216.4 427.0,229.6 478.0,241.5 529.0,252.0 580.0,261.4" style="fill:none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle class="s2 anel" cx="580.0" cy="261.4385302718702" r="4.5"/><text class="t3" x="590.0" y="265.4385302718702">12% a.a.: R$ 321,97</text><polyline class="s3" points="70.0,96.0 121.0,129.7 172.0,158.7 223.0,183.7 274.0,205.2 325.0,223.8 376.0,239.9 427.0,253.7 478.0,265.6 529.0,275.8 580.0,284.7" style="fill:none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle class="s3 anel" cx="580.0" cy="284.68920075897967" r="4.5"/><text class="t3" x="590.0" y="288.68920075897967">16% a.a.: R$ 226,68</text><line class="s1" x1="24" x2="42" y1="70" y2="70" stroke-width="3"/><text class="t2" x="48" y="74">8% a.a.</text><line class="s2" x1="124" x2="142" y1="70" y2="70" stroke-width="3"/><text class="t2" x="148" y="74">12% a.a.</text><line class="s3" x1="224" x2="242" y1="70" y2="70" stroke-width="3"/><text class="t2" x="248" y="74">16% a.a.</text></svg>

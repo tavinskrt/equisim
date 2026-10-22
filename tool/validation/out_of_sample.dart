@@ -32,12 +32,12 @@ abstract final class OutOfSampleValidation {
     final today = DateTime(2026, 9, 4);
 
     stdout.writeln('Levantando o universo negociável...');
-    final universo = await ctx.fundamentals.universe();
-    if (universo.isErr) {
-      stderr.writeln('Universo indisponível: ${universo.failureOrNull!.message}');
+    final universe = await ctx.fundamentals.universe();
+    if (universe.isErr) {
+      stderr.writeln('Universo indisponível: ${universe.failureOrNull!.message}');
       return;
     }
-    final tickers = universo.unwrap().take(limit).toList();
+    final tickers = universe.unwrap().take(limit).toList();
     stdout.writeln('  ${tickers.length} ativos a avaliar\n');
 
     final anchors = (await ResolveMarketAnchors.call(
@@ -56,14 +56,14 @@ abstract final class OutOfSampleValidation {
     // leitura possível de "dois passaram no critério de vantagem" seria análise
     // de texto dos avisos — e a pergunta aqui é metodológica: qual condição
     // barrou cada um, e quantos estavam a que distância dela.
-    AuditEvent? ultimo;
-    AuditRecorder.attach((e) => ultimo = e);
+    AuditEvent? last;
+    AuditRecorder.attach((e) => last = e);
 
-    final linhas = <_Row>[];
+    final rows = <_Row>[];
     var i = 0;
     for (final ticker in tickers) {
       i++;
-      ultimo = null;
+      last = null;
       if (i % 10 == 0) stdout.write('  $i/${tickers.length}\r');
 
       final prepared = await PrepareValuationInputs.call(
@@ -82,11 +82,11 @@ abstract final class OutOfSampleValidation {
         // motivos de "ativo inexistente" e "sem cotação na janela" existiam no
         // classificador sem que nada os alcançasse, e cinco ativos ficavam num
         // balde genérico tendo motivo perfeitamente nomeável.
-        final motivo = prepared.failureOrNull!.message;
-        linhas.add(_Row(
+        final reason = prepared.failureOrNull!.message;
+        rows.add(_Row(
           ticker: ticker.value,
-          outcome: _classifyRefusal(motivo),
-          detail: motivo,
+          outcome: _classifyRefusal(reason),
+          detail: reason,
         ));
         continue;
       }
@@ -94,7 +94,7 @@ abstract final class OutOfSampleValidation {
       final inputs = prepared.unwrap();
       final result = ValuationCascade.evaluate(inputs);
       if (result.isErr) {
-        linhas.add(_Row(
+        rows.add(_Row(
           ticker: ticker.value,
           outcome: _classifyRefusal(result.failureOrNull!.message),
           detail: result.failureOrNull!.message,
@@ -104,10 +104,10 @@ abstract final class OutOfSampleValidation {
       }
 
       final v = result.unwrap();
-      linhas.add(_Row(
+      rows.add(_Row(
         ticker: ticker.value,
         outcome: 'avaliado',
-        lane: v.model.rotulo,
+        lane: v.model.label,
         sector: inputs.sectorKey,
         fairValue: v.fairValue.reais,
         price: v.marketPrice.reais,
@@ -115,13 +115,13 @@ abstract final class OutOfSampleValidation {
         warnings: v.warnings.length,
         growthOrigin: _growthOriginOf(v.warnings),
         moat: _hasMoat(v.warnings),
-        diagnostics: _Diagnostics.from(ultimo),
+        diagnostics: _Diagnostics.from(last),
       ));
     }
     AuditRecorder.detach();
     stdout.writeln('\n');
 
-    _report(linhas, anchors, outputDir);
+    _report(rows, anchors, outputDir);
   }
 
   /// Classifica a recusa pela mensagem, para agrupar no relatório.
@@ -160,7 +160,7 @@ abstract final class OutOfSampleValidation {
   }
 
   static void _report(
-    List<_Row> linhas,
+    List<_Row> rows,
     MarketAnchors anchors,
     String outputDir,
   ) {
@@ -168,33 +168,33 @@ abstract final class OutOfSampleValidation {
       ..writeln('# Validação fora da amostra — arquitetura de portas')
       ..writeln()
       ..writeln('Executada em ${DateTime.now().toIso8601String().split("T").first} '
-          'sobre ${linhas.length} ativos do universo negociável.')
+          'sobre ${rows.length} ativos do universo negociável.')
       ..writeln();
 
-    final porSaida = <String, int>{};
-    for (final l in linhas) {
-      porSaida[l.outcome] = (porSaida[l.outcome] ?? 0) + 1;
+    final byOutput = <String, int>{};
+    for (final l in rows) {
+      byOutput[l.outcome] = (byOutput[l.outcome] ?? 0) + 1;
     }
     buf
       ..writeln('## Distribuição de saídas')
       ..writeln()
       ..writeln('| Saída | Ativos | Fração |')
       ..writeln('|---|---:|---:|');
-    final ordenado = porSaida.entries.toList()
+    final sortedEntries = byOutput.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    for (final e in ordenado) {
+    for (final e in sortedEntries) {
       buf.writeln('| ${e.key} | ${e.value} | '
-          '${pct(e.value / linhas.length, decimals: 1)} |');
+          '${pct(e.value / rows.length, decimals: 1)} |');
     }
 
-    final avaliados = linhas.where((l) => l.outcome == 'avaliado').toList();
-    if (avaliados.isNotEmpty) {
-      final porVia = <String, int>{};
-      final porOrigem = <String, int>{};
-      for (final l in avaliados) {
-        porVia[l.lane ?? '?'] = (porVia[l.lane ?? '?'] ?? 0) + 1;
-        porOrigem[l.growthOrigin ?? '?'] =
-            (porOrigem[l.growthOrigin ?? '?'] ?? 0) + 1;
+    final evaluated = rows.where((l) => l.outcome == 'avaliado').toList();
+    if (evaluated.isNotEmpty) {
+      final byLane = <String, int>{};
+      final byOrigin = <String, int>{};
+      for (final l in evaluated) {
+        byLane[l.lane ?? '?'] = (byLane[l.lane ?? '?'] ?? 0) + 1;
+        byOrigin[l.growthOrigin ?? '?'] =
+            (byOrigin[l.growthOrigin ?? '?'] ?? 0) + 1;
       }
       buf
         ..writeln()
@@ -202,36 +202,36 @@ abstract final class OutOfSampleValidation {
         ..writeln()
         ..writeln('| Via | Ativos |')
         ..writeln('|---|---:|');
-      for (final e in porVia.entries) {
+      for (final e in byLane.entries) {
         buf.writeln('| ${e.key} | ${e.value} |');
       }
       buf
         ..writeln()
         ..writeln('| Origem do crescimento | Ativos |')
         ..writeln('|---|---:|');
-      for (final e in porOrigem.entries) {
+      for (final e in byOrigin.entries) {
         buf.writeln('| ${e.key} | ${e.value} |');
       }
 
-      final comMoat = avaliados.where((l) => l.moat).toList();
+      final withMoat = evaluated.where((l) => l.moat).toList();
       buf
         ..writeln()
         ..writeln('| Terminal | Ativos |')
         ..writeln('|---|---:|')
         ..writeln('| estado estacionário (ROIC_inf = WACC_inf) | '
-            '${avaliados.length - comMoat.length} |')
-        ..writeln('| vantagem competitiva residual | ${comMoat.length} |');
-      if (comMoat.isNotEmpty) {
+            '${evaluated.length - withMoat.length} |')
+        ..writeln('| vantagem competitiva residual | ${withMoat.length} |');
+      if (withMoat.isNotEmpty) {
         buf
           ..writeln()
           ..writeln('Com vantagem residual: '
-              '${(comMoat.map((l) => l.ticker).toList()..sort()).join(", ")}.');
+              '${(withMoat.map((l) => l.ticker).toList()..sort()).join(", ")}.');
       }
 
-      _moatSection(buf, avaliados);
-      _normalizationSection(buf, avaliados);
+      _moatSection(buf, evaluated);
+      _normalizationSection(buf, evaluated);
 
-      final upsides = [for (final l in avaliados) l.upside!]..sort();
+      final upsides = [for (final l in evaluated) l.upside!]..sort();
       double q(double p) => upsides[(p * (upsides.length - 1)).round()];
       buf
         ..writeln()
@@ -247,7 +247,7 @@ abstract final class OutOfSampleValidation {
         ..writeln('| p90 | ${pct(q(0.90), decimals: 1)} |')
         ..writeln('| máximo | ${pct(upsides.last, decimals: 1)} |');
 
-      _expectedReturnSection(buf, avaliados, anchors);
+      _expectedReturnSection(buf, evaluated, anchors);
     }
 
     buf
@@ -256,8 +256,8 @@ abstract final class OutOfSampleValidation {
       ..writeln()
       ..writeln('| Ativo | Setor | Saída | Via | Crescimento | Justo | Preço | Potencial |')
       ..writeln('|---|---|---|---|---|---:|---:|---:|');
-    final ordenados = [...linhas]..sort((a, b) => a.ticker.compareTo(b.ticker));
-    for (final l in ordenados) {
+    final sortedRows = [...rows]..sort((a, b) => a.ticker.compareTo(b.ticker));
+    for (final l in sortedRows) {
       buf.writeln('| ${l.ticker} | ${l.sector ?? "—"} | ${l.outcome} | '
           '${l.lane ?? "—"} | ${l.growthOrigin ?? "—"} | '
           '${l.fairValue == null ? "—" : num2(l.fairValue!, decimals: 2)} | '
@@ -269,7 +269,7 @@ abstract final class OutOfSampleValidation {
     writeReport(
       '$outputDir/validacao_fora_da_amostra.json',
       const JsonEncoder.withIndent('  ')
-          .convert([for (final l in linhas) l.toJson()]),
+          .convert([for (final l in rows) l.toJson()]),
     );
   }
 }
@@ -280,19 +280,19 @@ abstract final class OutOfSampleValidation {
 /// não diz se o critério está apertado ou se o universo é comum; saber quantos
 /// reprovaram só pela rentabilidade, e a que distância do corte, diz — e é o
 /// que permite mover o parâmetro por medição em vez de por impressão.
-void _moatSection(StringBuffer buf, List<_Row> avaliados) {
-  final comDiagnostico =
-      avaliados.where((l) => l.diagnostics.moatBlocks != null).toList();
-  if (comDiagnostico.isEmpty) return;
+void _moatSection(StringBuffer buf, List<_Row> evaluated) {
+  final withDiagnostic =
+      evaluated.where((l) => l.diagnostics.moatBlocks != null).toList();
+  if (withDiagnostic.isEmpty) return;
 
-  final porCondicao = <String, int>{};
-  final primeira = <String, int>{};
-  for (final l in comDiagnostico) {
-    final blocos = l.diagnostics.moatBlocks!;
-    if (blocos.isEmpty) continue;
-    primeira[blocos.first] = (primeira[blocos.first] ?? 0) + 1;
-    for (final b in blocos) {
-      porCondicao[b] = (porCondicao[b] ?? 0) + 1;
+  final byCondition = <String, int>{};
+  final first = <String, int>{};
+  for (final l in withDiagnostic) {
+    final blocks = l.diagnostics.moatBlocks!;
+    if (blocks.isEmpty) continue;
+    first[blocks.first] = (first[blocks.first] ?? 0) + 1;
+    for (final b in blocks) {
+      byCondition[b] = (byCondition[b] ?? 0) + 1;
     }
   }
 
@@ -307,30 +307,30 @@ void _moatSection(StringBuffer buf, List<_Row> avaliados) {
     ..writeln()
     ..writeln('| Condição | Barrou | Foi a primeira |')
     ..writeln('|---|---:|---:|');
-  final ordenado = porCondicao.entries.toList()
+  final sortedEntries = byCondition.entries.toList()
     ..sort((a, b) => b.value.compareTo(a.value));
-  for (final e in ordenado) {
+  for (final e in sortedEntries) {
     buf.writeln(
-        '| ${_moatLabel(e.key)} | ${e.value} | ${primeira[e.key] ?? 0} |');
+        '| ${_moatLabel(e.key)} | ${e.value} | ${first[e.key] ?? 0} |');
   }
 
-  final porSaude = comDiagnostico
+  final byHealth = withDiagnostic
       .where((l) =>
           l.diagnostics.moatBlocks!.contains('saudeOperacional') &&
           l.diagnostics.operationalDecline != null)
       .toList()
     ..sort((a, b) => b.diagnostics.operationalDecline!
         .compareTo(a.diagnostics.operationalDecline!));
-  if (porSaude.isNotEmpty) {
+  if (byHealth.isNotEmpty) {
     buf
       ..writeln()
-      ..writeln('Os ${porSaude.length} barrados pelo filtro de saúde '
+      ..writeln('Os ${byHealth.length} barrados pelo filtro de saúde '
           'operacional — resultado em queda no triênio, por mais alta que a '
           'mediana do ciclo ainda esteja:')
       ..writeln()
       ..writeln('| Ativo | Queda no triênio | ROIC do ciclo |')
       ..writeln('|---|---:|---:|');
-    for (final l in porSaude.take(10)) {
+    for (final l in byHealth.take(10)) {
       buf.writeln('| ${l.ticker} | '
           '${pct(l.diagnostics.operationalDecline!, decimals: 1)} | '
           '${l.diagnostics.cycleReturn == null ? "—" : pct(l.diagnostics.cycleReturn!, decimals: 1)} |');
@@ -342,24 +342,24 @@ void _moatSection(StringBuffer buf, List<_Row> avaliados) {
   // medido, de modo que `moatBlockedOnlyByReturn` nunca mais é verdadeiro e o
   // retorno antecipado abaixo sempre dispara. Fica como registro do regime
   // anterior; removê-la é limpeza para outra rodada.
-  final soRentabilidade = comDiagnostico
+  final profitabilityOnly = withDiagnostic
       .where((l) => l.diagnostics.moatBlockedOnlyByReturn)
       .toList();
-  if (soRentabilidade.isEmpty) return;
+  if (profitabilityOnly.isEmpty) return;
 
-  final distancias = <double>[
-    for (final l in soRentabilidade)
+  final distances = <double>[
+    for (final l in profitabilityOnly)
       if (l.diagnostics.cycleReturn != null &&
           l.diagnostics.terminalDiscount != null)
         l.diagnostics.cycleReturn! - l.diagnostics.terminalDiscount!,
   ]..sort();
-  if (distancias.isEmpty) return;
+  if (distances.isEmpty) return;
 
-  double q(double p) => distancias[(p * (distancias.length - 1)).round()];
+  double q(double p) => distances[(p * (distances.length - 1)).round()];
   buf
     ..writeln()
-    ..writeln('Dos reprovados, ${soRentabilidade.length} '
-        '${soRentabilidade.length == 1 ? "falhou" : "falharam"} **apenas** na '
+    ..writeln('Dos reprovados, ${profitabilityOnly.length} '
+        '${profitabilityOnly.length == 1 ? "falhou" : "falharam"} **apenas** na '
         'rentabilidade — cumprem crescimento orgânico e histórico. O excedente '
         'do ciclo sobre o custo de capital de equilíbrio nesses casos:')
     ..writeln()
@@ -369,7 +369,7 @@ void _moatSection(StringBuffer buf, List<_Row> avaliados) {
     ..writeln('| mediana | ${pct(q(0.50), decimals: 1)} |')
     ..writeln('| p75 | ${pct(q(0.75), decimals: 1)} |')
     ..writeln('| p90 | ${pct(q(0.90), decimals: 1)} |')
-    ..writeln('| máximo | ${pct(distancias.last, decimals: 1)} |');
+    ..writeln('| máximo | ${pct(distances.last, decimals: 1)} |');
 }
 
 /// Rótulo legível para o nome do `MoatBlock`.
@@ -390,15 +390,15 @@ String _moatLabel(String name) => switch (name) {
 /// Conta quantos ativos tiveram a base normalizada **apesar** de Φ acima do
 /// limiar — o conjunto que, sob a precedência anterior, levava o exercício de
 /// pico à perpetuidade como se fosse patamar.
-void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
-  bool normalizou(_Row l) =>
+void _normalizationSection(StringBuffer buf, List<_Row> evaluated) {
+  bool wasNormalized(_Row l) =>
       l.diagnostics.normalizationFactor != null &&
       (l.diagnostics.normalizationFactor! - 1.0).abs() > 1e-6;
 
-  final destravados =
-      avaliados.where((l) => l.diagnostics.normalizedInorganicBase).toList()
+  final unlocked =
+      evaluated.where((l) => l.diagnostics.normalizedInorganicBase).toList()
         ..sort((a, b) => a.ticker.compareTo(b.ticker));
-  final normalizados = avaliados.where(normalizou).length;
+  final normalizedCount = evaluated.where(wasNormalized).length;
 
   buf
     ..writeln()
@@ -406,23 +406,23 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
     ..writeln()
     ..writeln('| Base | Ativos |')
     ..writeln('|---|---:|')
-    ..writeln('| mantida como observada | ${avaliados.length - normalizados} |')
-    ..writeln('| convergindo ao ciclo | $normalizados |')
-    ..writeln('| das quais, com Φ acima do limiar | ${destravados.length} |');
-  final ciclicos = avaliados.where((l) => l.diagnostics.cyclePrecedence).toList();
-  final destravadosPeloCiclo = ciclicos
-      .where((l) => normalizou(l) && l.diagnostics.trendVerdict == 'domina')
+    ..writeln('| mantida como observada | ${evaluated.length - normalizedCount} |')
+    ..writeln('| convergindo ao ciclo | $normalizedCount |')
+    ..writeln('| das quais, com Φ acima do limiar | ${unlocked.length} |');
+  final cyclicalOnes = evaluated.where((l) => l.diagnostics.cyclePrecedence).toList();
+  final unlockedByCycle = cyclicalOnes
+      .where((l) => wasNormalized(l) && l.diagnostics.trendVerdict == 'domina')
       .toList()
     ..sort((a, b) => a.ticker.compareTo(b.ticker));
-  final saturados = avaliados
+  final saturatedOnes = evaluated
       .where((l) => l.diagnostics.saturated && !l.diagnostics.healthCapped)
       .toList()
     ..sort((a, b) => (b.diagnostics.rawFactor ?? 0)
         .compareTo(a.diagnostics.rawFactor ?? 0));
 
-  final isentos = avaliados.where((l) => l.diagnostics.healthExempt).toList()
+  final exempt = evaluated.where((l) => l.diagnostics.healthExempt).toList()
     ..sort((a, b) => a.ticker.compareTo(b.ticker));
-  final travadosPelaSaude = avaliados
+  final healthLockedOnes = evaluated
       .where((l) => l.diagnostics.healthCapped)
       .toList()
     ..sort((a, b) => (b.diagnostics.rawFactor ?? 0)
@@ -433,26 +433,28 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
     ..writeln('| Trava | Ativos |')
     ..writeln('|---|---:|')
     ..writeln('| em setor cíclico (Guarda 3 com precedência) | '
-        '${ciclicos.length} |')
+        '${cyclicalOnes.length} |')
     ..writeln('| normalizados **por** essa precedência | '
-        '${destravadosPeloCiclo.length} |')
-    ..writeln('| com o fator saturado em [0,33; 3,00] | ${saturados.length} |')
+        '${unlockedByCycle.length} |')
+    ..writeln('| com o fator saturado em [0,33; 3,00] | ${saturatedOnes.length} |')
     ..writeln('| com o teto travado em 1,00 pela saúde operacional | '
-        '${travadosPelaSaude.length} |')
+        '${healthLockedOnes.length} |')
     ..writeln('| reprovados na saúde mas isentos por setor cíclico | '
-        '${isentos.length} |');
+        '${exempt.length} |');
 
-  if (isentos.isNotEmpty) {
+  if (exempt.isNotEmpty) {
     buf
       ..writeln()
       ..writeln('Isentos da trava por serem de setor cíclico. A queda entre o '
           'pico e o vale é oscilação do preço do insumo, e a convergência ao '
           'ciclo opera nos dois sentidos — limitada pela saturação, que vale '
-          'igual. **A vantagem residual segue barrada para eles**, sem isenção.')
+          'igual. A vantagem residual não tem trava de saúde desde a decisão '
+          '36: para eles também, quem decide é a persistência medida do '
+          'excedente.')
       ..writeln()
       ..writeln('| Ativo | Setor | Queda no triênio | Fator | Potencial |')
       ..writeln('|---|---|---:|---:|---:|');
-    for (final l in isentos) {
+    for (final l in exempt) {
       buf.writeln('| ${l.ticker} | ${l.sector ?? "—"} | '
           '${l.diagnostics.operationalDecline == null ? "—" : pct(l.diagnostics.operationalDecline!, decimals: 1)} | '
           '${num2(l.diagnostics.normalizationFactor!, decimals: 2)} | '
@@ -460,7 +462,7 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
     }
   }
 
-  if (travadosPelaSaude.isNotEmpty) {
+  if (healthLockedOnes.isNotEmpty) {
     buf
       ..writeln()
       ..writeln('Onde a saúde operacional proibiu normalizar para cima. **Não é '
@@ -471,7 +473,7 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
       ..writeln()
       ..writeln('| Ativo | Queda no triênio | Fator bruto | Aplicado | Potencial |')
       ..writeln('|---|---:|---:|---:|---:|');
-    for (final l in travadosPelaSaude) {
+    for (final l in healthLockedOnes) {
       buf.writeln('| ${l.ticker} | '
           '${l.diagnostics.operationalDecline == null ? "—" : pct(l.diagnostics.operationalDecline!, decimals: 1)} | '
           '${num2(l.diagnostics.rawFactor!, decimals: 2)} | '
@@ -480,7 +482,7 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
     }
   }
 
-  if (destravadosPeloCiclo.isNotEmpty) {
+  if (unlockedByCycle.isNotEmpty) {
     buf
       ..writeln()
       ..writeln('Em setor cíclico, a tendência deixou de segurar a base nestes '
@@ -489,7 +491,7 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
       ..writeln()
       ..writeln('| Ativo | Setor | Retorno corrente | Ciclo | Fator | Potencial |')
       ..writeln('|---|---|---:|---:|---:|---:|');
-    for (final l in destravadosPeloCiclo) {
+    for (final l in unlockedByCycle) {
       buf.writeln('| ${l.ticker} | ${l.sector ?? "—"} | '
           '${l.diagnostics.latestReturn == null ? "—" : pct(l.diagnostics.latestReturn!, decimals: 1)} | '
           '${l.diagnostics.cycleReturnOfBase == null ? "—" : pct(l.diagnostics.cycleReturnOfBase!, decimals: 1)} | '
@@ -498,7 +500,7 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
     }
   }
 
-  if (saturados.isNotEmpty) {
+  if (saturatedOnes.isNotEmpty) {
     buf
       ..writeln()
       ..writeln('Onde a saturação prendeu, com o fator que teria sido aplicado '
@@ -507,7 +509,7 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
       ..writeln()
       ..writeln('| Ativo | Fator bruto | Aplicado | Potencial |')
       ..writeln('|---|---:|---:|---:|');
-    for (final l in saturados) {
+    for (final l in saturatedOnes) {
       buf.writeln('| ${l.ticker} | '
           '${num2(l.diagnostics.rawFactor!, decimals: 2)} | '
           '${num2(l.diagnostics.normalizationFactor!, decimals: 2)} | '
@@ -515,20 +517,20 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
     }
   }
 
-  final naoNormalizados = avaliados.where((l) => !normalizou(l)).toList();
-  final porGuarda = <String, int>{};
-  for (final l in naoNormalizados) {
+  final notNormalized = evaluated.where((l) => !wasNormalized(l)).toList();
+  final byGuard = <String, int>{};
+  for (final l in notNormalized) {
     final g1 = l.diagnostics.trendVerdict;
     final g3 = l.diagnostics.deviationVerdict;
     if (g1 == null || g3 == null) continue;
-    final motivo = g3 != 'destoa'
+    final reason = g3 != 'destoa'
         ? 'Guarda 3: o exercício não destoa do ciclo'
         : (g1 == 'domina'
             ? 'Guarda 1: a tendência domina a reversão'
             : 'outro impedimento (retorno corrente não positivo ou não medido)');
-    porGuarda[motivo] = (porGuarda[motivo] ?? 0) + 1;
+    byGuard[reason] = (byGuard[reason] ?? 0) + 1;
   }
-  if (porGuarda.isNotEmpty) {
+  if (byGuard.isNotEmpty) {
     buf
       ..writeln()
       ..writeln('Por que a base **não** foi normalizada, nos que ficaram como '
@@ -536,9 +538,9 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
       ..writeln()
       ..writeln('| Guarda que decidiu | Ativos |')
       ..writeln('|---|---:|');
-    final ordem = porGuarda.entries.toList()
+    final order = byGuard.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-    for (final e in ordem) {
+    for (final e in order) {
       buf.writeln('| ${e.key} | ${e.value} |');
     }
   }
@@ -546,7 +548,7 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
   // A classe da SUZB3: destoa do ciclo, mas a tendência domina e a base fica
   // como observada. É a guarda que efetivamente decide esses casos — e não a de
   // comparabilidade, que a §12.5 do refinamento apontava como suspeita.
-  final seguradosPelaTendencia = naoNormalizados
+  final heldByTrend = notNormalized
       .where((l) =>
           l.diagnostics.deviationVerdict == 'destoa' &&
           l.diagnostics.trendVerdict == 'domina' &&
@@ -554,10 +556,10 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
           l.diagnostics.cycleReturnOfBase != null)
       .toList()
     ..sort((a, b) => (b.upside ?? 0).compareTo(a.upside ?? 0));
-  if (seguradosPelaTendencia.isNotEmpty) {
+  if (heldByTrend.isNotEmpty) {
     buf
       ..writeln()
-      ..writeln('Os ${seguradosPelaTendencia.length} que **destoam do ciclo e '
+      ..writeln('Os ${heldByTrend.length} que **destoam do ciclo e '
           'ainda assim ficam como observados** são segurados pela Guarda 1: a '
           'tendência do retorno domina a reversão à média, e o modelo lê o '
           'nível corrente como estrutural em vez de cíclico. Os dez de maior '
@@ -565,7 +567,7 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
       ..writeln()
       ..writeln('| Ativo | Retorno corrente | Ciclo | Φ | Potencial |')
       ..writeln('|---|---:|---:|---:|---:|');
-    for (final l in seguradosPelaTendencia.take(10)) {
+    for (final l in heldByTrend.take(10)) {
       buf.writeln('| ${l.ticker} | '
           '${pct(l.diagnostics.latestReturn!, decimals: 1)} | '
           '${pct(l.diagnostics.cycleReturnOfBase!, decimals: 1)} | '
@@ -579,21 +581,21 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
   // informa nada. Quem carrega a informação agora é a tabela de saturação
   // acima, que mostra o fator **bruto** que teria sido aplicado sem o limite.
 
-  if (destravados.isEmpty) return;
+  if (unlocked.isEmpty) return;
 
   buf
     ..writeln()
-    ..writeln(destravados.length == 1
+    ..writeln(unlocked.length == 1
         ? 'O único de base inorgânica normalizada é o que a precedência '
             'anterior deixava passar com o exercício corrente como patamar '
             'perene. Fator aplicado sobre o lucro observado:'
-        : 'Os ${destravados.length} de base inorgânica normalizada são os que '
+        : 'Os ${unlocked.length} de base inorgânica normalizada são os que '
             'a precedência anterior deixava passar com o exercício corrente '
             'como patamar perene. Fator aplicado sobre o lucro observado:')
     ..writeln()
     ..writeln('| Ativo | Φ | Fator |')
     ..writeln('|---|---:|---:|');
-  for (final l in destravados) {
+  for (final l in unlocked) {
     buf.writeln('| ${l.ticker} | ${num2(l.diagnostics.phi!, decimals: 2)} | '
         '${num2(l.diagnostics.normalizationFactor!, decimals: 3)} |');
   }
@@ -607,27 +609,27 @@ void _normalizationSection(StringBuffer buf, List<_Row> avaliados) {
 /// qual qualquer carteira passa a ser lida.
 void _expectedReturnSection(
   StringBuffer buf,
-  List<_Row> avaliados,
+  List<_Row> evaluated,
   MarketAnchors anchors,
 ) {
   final upsides = <Ticker, double>{
-    for (final l in avaliados) Ticker.parse(l.ticker): l.upside!,
+    for (final l in evaluated) Ticker.parse(l.ticker): l.upside!,
   };
-  final estimado = ExpectedReturn.crossSection(
+  final estimated = ExpectedReturn.crossSection(
     upsides: upsides,
     spotRiskFree: anchors.currentRiskFreeRate,
   );
 
-  final taxas = [for (final r in estimado.values) r.expected]..sort();
-  double q(double p) => taxas[(p * (taxas.length - 1)).round()];
-  final noPiso = estimado.values.where((r) => r.floored).length;
+  final rates = [for (final r in estimated.values) r.expected]..sort();
+  double q(double p) => rates[(p * (rates.length - 1)).round()];
+  final atFloor = estimated.values.where((r) => r.floored).length;
 
   // A comparação que justifica a troca: o mesmo conjunto, pelo caminho antigo.
-  final anuais = [
-    for (final l in avaliados) ExpectedReturn.annualizedFromUpside(l.upside!),
+  final annualReturns = [
+    for (final l in evaluated) ExpectedReturn.annualizedFromUpside(l.upside!),
   ]..sort();
-  double qa(double p) => anuais[(p * (anuais.length - 1)).round()];
-  final negativos = anuais.where((r) => r < 0).length;
+  double qa(double p) => annualReturns[(p * (annualReturns.length - 1)).round()];
+  final negatives = annualReturns.where((r) => r < 0).length;
 
   buf
     ..writeln()
@@ -637,12 +639,12 @@ void _expectedReturnSection(
         '${pct(anchors.currentRiskFreeRate)}, prêmio de '
         '${pct(CapmInputs.defaultMarketPremium)} e escore robusto confinado a '
         '${num2(ExpectedReturn.defaultZCap, decimals: 1)} desvios sobre a '
-        'seção dos ${avaliados.length} avaliados.')
+        'seção dos ${evaluated.length} avaliados.')
     ..writeln()
     ..writeln('| Percentil | Transversal | Anualização do potencial |')
     ..writeln('|---|---:|---:|')
-    ..writeln('| mínimo | ${pct(taxas.first, decimals: 1)} | '
-        '${pct(anuais.first, decimals: 1)} |')
+    ..writeln('| mínimo | ${pct(rates.first, decimals: 1)} | '
+        '${pct(annualReturns.first, decimals: 1)} |')
     ..writeln('| p10 | ${pct(q(0.10), decimals: 1)} | '
         '${pct(qa(0.10), decimals: 1)} |')
     ..writeln('| p25 | ${pct(q(0.25), decimals: 1)} | '
@@ -653,14 +655,14 @@ void _expectedReturnSection(
         '${pct(qa(0.75), decimals: 1)} |')
     ..writeln('| p90 | ${pct(q(0.90), decimals: 1)} | '
         '${pct(qa(0.90), decimals: 1)} |')
-    ..writeln('| máximo | ${pct(taxas.last, decimals: 1)} | '
-        '${pct(anuais.last, decimals: 1)} |')
+    ..writeln('| máximo | ${pct(rates.last, decimals: 1)} | '
+        '${pct(annualReturns.last, decimals: 1)} |')
     ..writeln()
-    ..writeln('Pela anualização do potencial, $negativos dos ${anuais.length} '
+    ..writeln('Pela anualização do potencial, $negatives dos ${annualReturns.length} '
         'avaliados entrariam num otimizador de média-variância com retorno '
         'esperado **negativo** — o que não é ordenação ruim, é ausência de '
         'alocação. Pelo estimador transversal, '
-        '${noPiso == 0 ? "nenhum tocou" : "$noPiso tocaram"} o piso de zero, e '
+        '${atFloor == 0 ? "nenhum tocou" : "$atFloor tocaram"} o piso de zero, e '
         'a ordenação por potencial é preservada em toda a faixa.');
 }
 
@@ -763,28 +765,28 @@ class _Diagnostics {
     // justo é o segundo, e ler o primeiro descreveria uma avaliação
     // descartada.
     CalculationTrace? trace(String name) {
-      CalculationTrace? achado;
+      CalculationTrace? foundValue;
       for (final c in event.calculations) {
-        if (c.formulaName == name) achado = c;
+        if (c.formulaName == name) foundValue = c;
       }
-      return achado;
+      return foundValue;
     }
 
     /// Percentual gravado no rastro, de volta a fração. `null` para 'n/d'.
-    double? fracao(Object? v) {
+    double? fraction(Object? v) {
       final n = v is num ? v.toDouble() : null;
       return n == null ? null : n / 100.0;
     }
 
     final moat = trace('Vantagem competitiva residual na perpetuidade');
     final base = trace('Base do fluxo: normalização pelo ciclo');
-    final bloqueios = moat?.mappedVariables['condições que barraram'];
+    final blockers = moat?.mappedVariables['condições que barraram'];
 
     return _Diagnostics(
-      moatBlocks: bloqueios is List ? [for (final b in bloqueios) '$b'] : null,
-      cycleReturn: fracao(moat?.mappedVariables['ROIC do ciclo (% a.a.)']),
+      moatBlocks: blockers is List ? [for (final b in blockers) '$b'] : null,
+      cycleReturn: fraction(moat?.mappedVariables['ROIC do ciclo (% a.a.)']),
       terminalDiscount:
-          fracao(moat?.mappedVariables['WACC de equilíbrio (% a.a.)']),
+          fraction(moat?.mappedVariables['WACC de equilíbrio (% a.a.)']),
       phi: () {
         final v = base?.mappedVariables['capital externo / base (Φ)'];
         return v is num ? v.toDouble() : null;
@@ -793,9 +795,9 @@ class _Diagnostics {
       trendVerdict: base?.mappedVariables['guarda 1 — tendência'] as String?,
       deviationVerdict:
           base?.mappedVariables['guarda 3 — desvio do ciclo'] as String?,
-      latestReturn: fracao(base?.mappedVariables['retorno atual (% a.a.)']),
+      latestReturn: fraction(base?.mappedVariables['retorno atual (% a.a.)']),
       cycleReturnOfBase:
-          fracao(base?.mappedVariables['mediana do ciclo (% a.a.)']),
+          fraction(base?.mappedVariables['mediana do ciclo (% a.a.)']),
       cyclePrecedence:
           base?.mappedVariables['precedência do ciclo (setor cíclico)'] == true,
       rawFactor: () {
@@ -806,8 +808,8 @@ class _Diagnostics {
       healthCapped: base?.mappedVariables['teto travado pela saúde'] == true,
       healthExempt:
           base?.mappedVariables['isento da trava por setor cíclico'] == true,
-      operationalDecline: fracao(base?.mappedVariables['queda no triênio (%)']) ??
-          fracao(moat?.mappedVariables['queda no triênio (%)']),
+      operationalDecline: fraction(base?.mappedVariables['queda no triênio (%)']) ??
+          fraction(moat?.mappedVariables['queda no triênio (%)']),
     );
   }
 }

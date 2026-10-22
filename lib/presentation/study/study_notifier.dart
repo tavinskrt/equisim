@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/portfolio_repository.dart';
 import '../../di/providers.dart';
 import '../shared/failure_copy.dart';
-import '../shared/ui_kit.dart';
 
 /// Estado editável do estudo, com o erro da última operação recusada.
 class StudyState {
@@ -60,10 +59,10 @@ class StudyNotifier extends Notifier<StudyState> {
       kind: PortfolioKind.principal,
       entries: const {},
     ),
-    reserva: Portfolio(
+    reserve: Portfolio(
       id: 'reserva',
       name: 'Reserva',
-      kind: PortfolioKind.reserva,
+      kind: PortfolioKind.reserve,
       entries: const {},
     ),
   );
@@ -103,7 +102,7 @@ class StudyNotifier extends Notifier<StudyState> {
   void swap({required Ticker ticker, required bool toPrincipal}) {
     final result = SwapAssetBetweenPortfolios.call(
       principal: state.study.principal,
-      reserva: state.study.reserva,
+      reserve: state.study.reserve,
       ticker: ticker,
       toPrincipal: toPrincipal,
     );
@@ -112,7 +111,7 @@ class StudyNotifier extends Notifier<StudyState> {
       (outcome) => state = state.copyWith(
         study: state.study.copyWith(
           principal: outcome.principal,
-          reserva: outcome.reserva,
+          reserve: outcome.reserve,
         ),
         clearError: true,
       ),
@@ -128,14 +127,14 @@ class StudyNotifier extends Notifier<StudyState> {
   /// Recusa via [StudyState.lastError] se o ativo já estiver presente ou se a
   /// carteira estiver no teto. Descarta pesos customizados.
   void addAsset(Asset asset, {required bool toPrincipal}) {
-    final target = toPrincipal ? state.study.principal : state.study.reserva;
+    final target = toPrincipal ? state.study.principal : state.study.reserve;
     final result = target.add(asset);
 
     result.fold(
       (updated) => state = state.copyWith(
         study: toPrincipal
             ? state.study.copyWith(principal: updated)
-            : state.study.copyWith(reserva: updated),
+            : state.study.copyWith(reserve: updated),
         clearError: true,
       ),
       (failure) => state = state.copyWith(lastError: FailureCopy.of(failure)),
@@ -151,68 +150,17 @@ class StudyNotifier extends Notifier<StudyState> {
   /// Remover o último ativo deixa a carteira **vazia**, não é erro. Descarta
   /// pesos customizados.
   void removeAsset(Ticker ticker, {required bool fromPrincipal}) {
-    final target = fromPrincipal ? state.study.principal : state.study.reserva;
+    final target = fromPrincipal ? state.study.principal : state.study.reserve;
     final result = target.remove(ticker);
 
     result.fold(
       (updated) => state = state.copyWith(
         study: fromPrincipal
             ? state.study.copyWith(principal: updated)
-            : state.study.copyWith(reserva: updated),
+            : state.study.copyWith(reserve: updated),
         clearError: true,
       ),
       (failure) => state = state.copyWith(lastError: FailureCopy.of(failure)),
-    );
-  }
-
-  /// Aplica pesos customizados, exigindo soma de 100%.
-  ///
-  /// - [weights]: peso em fração por ativo. Precisa cobrir **todos** os ativos
-  ///   da carteira alvo e somar 1,0 com folga de `1e-6`.
-  /// - [onPrincipal]: `true` para a Principal, `false` para a Reserva.
-  ///
-  /// **Não lança e não devolve nada**: a recusa vira mensagem em
-  /// [StudyState.lastError] e o estado permanece inalterado. É o contrato de
-  /// erro de todo este notifier — a interface reage ao campo, não a exceção.
-  ///
-  /// Recusa quando a soma foge da tolerância ou quando falta o peso de algum
-  /// ativo presente na carteira. Pesos de tickers que não estão na carteira são
-  /// **ignorados em silêncio**.
-  void setWeights(Map<Ticker, double> weights, {required bool onPrincipal}) {
-    final target = onPrincipal ? state.study.principal : state.study.reserva;
-
-    final total = weights.values.fold<double>(0.0, (a, b) => a + b);
-    if ((total - 1.0).abs() > 1e-6) {
-      state = state.copyWith(
-        lastError: 'Os pesos devem somar 100%; somam ${Fmt.percent(total)}.',
-      );
-      return;
-    }
-
-    final entries = <Ticker, PortfolioEntry>{};
-    for (final entry in target.entries.entries) {
-      final weight = weights[entry.key];
-      if (weight == null) {
-        state = state.copyWith(
-          lastError: 'Peso não informado para ${entry.key.value}.',
-        );
-        return;
-      }
-      entries[entry.key] = entry.value.withWeight(Weight.fraction(weight));
-    }
-
-    final updated = Portfolio(
-      id: target.id,
-      name: target.name,
-      kind: target.kind,
-      entries: entries,
-    );
-
-    state = state.copyWith(
-      study: onPrincipal
-          ? state.study.copyWith(principal: updated)
-          : state.study.copyWith(reserva: updated),
-      clearError: true,
     );
   }
 
@@ -225,7 +173,7 @@ class StudyNotifier extends Notifier<StudyState> {
     state = state.copyWith(
       study: onPrincipal
           ? state.study.copyWith(principal: state.study.principal.equalize())
-          : state.study.copyWith(reserva: state.study.reserva.equalize()),
+          : state.study.copyWith(reserve: state.study.reserve.equalize()),
       clearError: true,
     );
   }
@@ -321,7 +269,7 @@ class StudyNotifier extends Notifier<StudyState> {
   static PortfolioStudy _detach(PortfolioStudy study) => PortfolioStudy(
     name: study.name,
     principal: study.principal,
-    reserva: study.reserva,
+    reserve: study.reserve,
     goal: study.goal,
   );
 

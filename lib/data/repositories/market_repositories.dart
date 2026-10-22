@@ -86,12 +86,12 @@ class PriceRepositoryImpl implements PriceRepository {
       // sem os pregões mais recentes, porque a gravação é aditiva (ver
       // `CacheDatabase.isFresh`). A série chega mais curta, e o encurtamento
       // já é anunciado pelo backtest.
-      var recuperados = 0;
+      var recovered = 0;
       for (final ticker in missing) {
         final stale = await _seriesFromCache(ticker, range);
         if (stale != null) {
           out[ticker] = stale;
-          recuperados++;
+          recovered++;
         }
       }
       // **Recuperação parcial não é sucesso** (lente `dados`, 21/09/2026).
@@ -100,20 +100,21 @@ class PriceRepositoryImpl implements PriceRepository {
       // como "ativo sem cotação", que é o sintoma e não a causa. O recuo ao
       // cache vencido vale quando ele cobre **tudo** que faltou; quando não
       // cobre, quem manda é o erro da rede.
-      return recuperados == missing.length
+      return recovered == missing.length
           ? Ok(out)
           : Err(fetched.failureOrNull!);
     }
 
-    final vieram = fetched.unwrap();
-    for (final entry in vieram.entries) {
-      await _persist(entry.key, entry.value);
+    final arrived = fetched.unwrap();
+    for (final entry in arrived.entries) {
+      final saved = await _persist(entry.key, entry.value);
       // **O que sai é o disco, e não o que a rede trouxe.** A gravação é
       // aditiva e a fonte devolve uma janela fixa de dez anos: quando o banco
       // já acumulou mais do que ela, devolver o recorte da resposta encurtaria
       // a série no caminho de SUCESSO — pior do que o caminho degradado, que
-      // lê o disco. Sem cache, o recorte da resposta é tudo o que há.
-      out[entry.key] = await _seriesFromCache(entry.key, range) ??
+      // lê o disco. Sem cache, o recorte da resposta é tudo o que há; e sem a
+      // gravação, também — o disco ficou com o que tinha, talvez noutra base.
+      out[entry.key] = (saved ? await _seriesFromCache(entry.key, range) : null) ??
           _slice(entry.value, range);
     }
     // O lote pode responder e deixar um ativo de fora — série corrompida
@@ -121,7 +122,7 @@ class PriceRepositoryImpl implements PriceRepository {
     // falhou do mesmo jeito, e o histórico em disco serve pela mesma razão
     // do caminho acima (decisão 77).
     for (final ticker in missing) {
-      if (vieram.containsKey(ticker)) continue;
+      if (arrived.containsKey(ticker)) continue;
       final stale = await _seriesFromCache(ticker, range);
       if (stale != null) out[ticker] = stale;
     }
@@ -170,7 +171,7 @@ class PriceRepositoryImpl implements PriceRepository {
   /// de fechamento, é evento societário. O menor desdobramento usual já move a
   /// série por um fator inteiro, de modo que o corte não precisa ser fino — ele
   /// precisa não disparar em ruído.
-  static const double _toleranciaDeBase = 0.005;
+  static const double _baseTolerance = 0.005;
 
   /// O disco e a resposta discordam no mesmo pregão?
   ///
@@ -180,32 +181,57 @@ class PriceRepositoryImpl implements PriceRepository {
   /// deixa as duas metades em bases diferentes, com um degrau exatamente na
   /// borda. Misturar bases é o defeito que a decisão 97 mediu nas coortes; aqui
   /// ele entraria pelo cache.
-  Future<bool> _mudouDeBase(Ticker ticker, PriceSeries vinda) async {
+  ///
+  /// **O primeiro pregão que os dois têm, e não o primeiro da resposta**
+  /// (decisão 134). Comparar só o primeiro dia da resposta dava "sem evento"
+  /// sempre que ele faltasse no disco — um feriado lido de outro jeito, um
+  /// pregão que a busca anterior não trouxe —, e o histórico em outra base
+  /// ficava. Um evento entre duas buscas reajusta todo pregão anterior a ele,
+  /// de modo que o primeiro dia em comum basta para enxergá-lo.
+  Future<bool> _baseChanged(Ticker ticker, PriceSeries incoming) async {
     final db = cache;
-    if (db == null || vinda.points.isEmpty) return false;
-    final primeiro = vinda.points.first;
-    final iso = BrapiJson.isoDay(primeiro.date);
-    final rows = await _tryCache(() => db.pricesIn(ticker.value, iso, iso));
+    if (db == null || incoming.points.isEmpty) return false;
+    final rows = await _tryCache(() => db.pricesIn(
+          ticker.value,
+          BrapiJson.isoDay(incoming.points.first.date),
+          BrapiJson.isoDay(incoming.points.last.date),
+        ));
     if (rows == null || rows.isEmpty) return false;
-    final emDisco = rows.first.close;
-    if (emDisco <= 0 || !primeiro.close.isFinite || primeiro.close <= 0) {
-      return false;
+    final onDisk = {for (final r in rows) r.date: r.close};
+    for (final p in incoming.points) {
+      final before = onDisk[BrapiJson.isoDay(p.date)];
+      if (before == null || before <= 0 || !p.close.isFinite || p.close <= 0) {
+        continue;
+      }
+      return (p.close / before - 1).abs() > _baseTolerance;
     }
-    return (primeiro.close / emDisco - 1).abs() > _toleranciaDeBase;
+    return false;
   }
 
-  Future<void> _persist(Ticker ticker, PriceSeries series) async {
+  /// Grava a resposta no disco e diz se o disco ficou com ela.
+  ///
+  /// `false` sem cache, quando a gravação falha e quando a base mudou e o
+  /// apagamento falhou: gravar por cima, nesse caso, deixaria as duas bases no
+  /// disco — o defeito da decisão 134 por outro caminho (lente `dados`,
+  /// 01/10/2026). Sem a gravação o carimbo de validade também não é renovado,
+  /// e a próxima busca tenta de novo.
+  Future<bool> _persist(Ticker ticker, PriceSeries series) async {
     final db = cache;
-    if (db == null) return;
-    // **Duas bases não se somam.** Quando o pregão mais antigo que a fonte
-    // devolve já está em disco com outro preço, o que está atrás dele é de
-    // outra base e sai — perder profundidade é menos grave que servir uma série
-    // com degrau que ninguém vê.
-    if (await _mudouDeBase(ticker, series) && series.points.isNotEmpty) {
-      final corte = BrapiJson.isoDay(series.points.first.date);
-      await _tryCache(() => db.deletePricesBefore(ticker.value, corte));
+    if (db == null) return false;
+    // **Duas bases não se somam.** Quando um pregão que a fonte devolve já
+    // está em disco com outro preço, todo o disco daquele ativo é de outra base
+    // e sai — perder profundidade é menos grave que servir uma série com degrau
+    // que ninguém vê. **Todo, e não só o que antecede a resposta** (lente
+    // `dados`, decisão 134): o pregão que a resposta omite no meio da janela
+    // ficava em disco na escala velha, e o upsert não o alcançava.
+    if (await _baseChanged(ticker, series)) {
+      final deleted = await _tryCache(() async {
+        await db.deletePricesOf(ticker.value);
+        return true;
+      });
+      if (deleted != true) return false;
     }
-    await _tryCache(() async {
+    final saved = await _tryCache(() async {
       await db.upsertPrices([
         for (final p in series.points)
           CachedPricesCompanion.insert(
@@ -217,7 +243,9 @@ class PriceRepositoryImpl implements PriceRepository {
           ),
       ]);
       await db.touch(CachePolicy.pricesKey(ticker.value));
+      return true;
     });
+    return saved == true;
   }
 
   PriceSeries _slice(PriceSeries series, DateRange range) => PriceSeries(
@@ -227,6 +255,16 @@ class PriceRepositoryImpl implements PriceRepository {
 }
 
 /// Fundamentos e perfil cadastral.
+/// O campo que a resposta trouxe, ou ausente — e o ausente **não apaga** o que
+/// está em disco (lente `risco`, 27/09/2026).
+///
+/// A fonte tolera uma rota com corpo de forma errada e devolve os exercícios
+/// sem aquela demonstração. Gravar `Value(null)` nesses campos trocava o valor
+/// bom do disco por nulo, e o cache — que existe para servir quando a fonte
+/// falha — ficava pior que a resposta. Com `Value.absent()`, o `upsert` só
+/// mexe no que chegou.
+Value<double?> _field(double? v) => v == null ? const Value.absent() : Value(v);
+
 class FundamentalsRepositoryImpl implements FundamentalsRepository {
   /// Fonte remota dos fundamentos e do perfil.
   final BrapiDatasource remote;
@@ -280,36 +318,36 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
         CachedFundamentalsTableCompanion.insert(
           ticker: ticker.value,
           fiscalPeriodEnd: BrapiJson.isoDay(s.fiscalPeriodEnd),
-          totalRevenue: Value(s.totalRevenue),
-          ebit: Value(s.ebit),
-          ebitda: Value(s.ebitda),
-          netIncome: Value(s.netIncome),
-          incomeBeforeTax: Value(s.incomeBeforeTax),
-          incomeTaxExpense: Value(s.incomeTaxExpense),
-          interestExpense: Value(s.interestExpense),
-          earningsPerShare: Value(s.earningsPerShare),
-          cash: Value(s.cash),
-          shortTermInvestments: Value(s.shortTermInvestments),
-          shortTermDebt: Value(s.shortTermDebt),
-          longTermDebt: Value(s.longTermDebt),
-          totalStockholderEquity: Value(s.totalStockholderEquity),
-          bookValuePerShare: Value(s.bookValuePerShare),
-          operatingCashFlow: Value(s.operatingCashFlow),
-          investmentCashFlow: Value(s.investmentCashFlow),
-          freeCashFlow: Value(s.freeCashFlow),
-          sharesOutstanding: Value(s.sharesOutstanding),
-          sharesOutstandingAsOf: Value(s.sharesOutstandingAsOf),
-          nopat: Value(s.nopat),
-          propertyPlantEquipment: Value(s.propertyPlantEquipment),
-          intangibleAssets: Value(s.intangibleAssets),
-          totalCurrentAssets: Value(s.totalCurrentAssets),
-          currentLiabilities: Value(s.currentLiabilities),
-          realizedShareCapital: Value(s.realizedShareCapital),
-          profitReserves: Value(s.profitReserves),
-          marketCap: Value(s.marketCap),
-          enterpriseToEbitda: Value(s.enterpriseToEbitda),
-          minorityInterest: Value(s.minorityInterest),
-          equityIncomeResult: Value(s.equityIncomeResult),
+          totalRevenue: _field(s.totalRevenue),
+          ebit: _field(s.ebit),
+          ebitda: _field(s.ebitda),
+          netIncome: _field(s.netIncome),
+          incomeBeforeTax: _field(s.incomeBeforeTax),
+          incomeTaxExpense: _field(s.incomeTaxExpense),
+          interestExpense: _field(s.interestExpense),
+          earningsPerShare: _field(s.earningsPerShare),
+          cash: _field(s.cash),
+          shortTermInvestments: _field(s.shortTermInvestments),
+          shortTermDebt: _field(s.shortTermDebt),
+          longTermDebt: _field(s.longTermDebt),
+          totalStockholderEquity: _field(s.totalStockholderEquity),
+          bookValuePerShare: _field(s.bookValuePerShare),
+          operatingCashFlow: _field(s.operatingCashFlow),
+          investmentCashFlow: _field(s.investmentCashFlow),
+          freeCashFlow: _field(s.freeCashFlow),
+          sharesOutstanding: _field(s.sharesOutstanding),
+          sharesOutstandingAsOf: _field(s.sharesOutstandingAsOf),
+          nopat: _field(s.nopat),
+          propertyPlantEquipment: _field(s.propertyPlantEquipment),
+          intangibleAssets: _field(s.intangibleAssets),
+          totalCurrentAssets: _field(s.totalCurrentAssets),
+          currentLiabilities: _field(s.currentLiabilities),
+          realizedShareCapital: _field(s.realizedShareCapital),
+          profitReserves: _field(s.profitReserves),
+          marketCap: _field(s.marketCap),
+          enterpriseToEbitda: _field(s.enterpriseToEbitda),
+          minorityInterest: _field(s.minorityInterest),
+          equityIncomeResult: _field(s.equityIncomeResult),
         ),
       ]);
       await db.touch(CachePolicy.fundamentalsKey(ticker.value));
@@ -320,9 +358,9 @@ class FundamentalsRepositoryImpl implements FundamentalsRepository {
     // união um minuto depois faz a mesma chamada ter profundidades diferentes
     // conforme o TTL — e a série de exercícios é o que forma a base de capital
     // e o crescimento. A leitura do cache é a mesma do caminho fresco.
-    final relidos = await _tryCache(() => db.fundamentalsOf(ticker.value));
-    if (relidos != null && relidos.length >= snapshots.length) {
-      return Ok([for (final r in relidos) _toDomain(ticker, r)]);
+    final rereadRows = await _tryCache(() => db.fundamentalsOf(ticker.value));
+    if (rereadRows != null && rereadRows.length >= snapshots.length) {
+      return Ok([for (final r in rereadRows) _toDomain(ticker, r)]);
     }
     return Ok(snapshots);
   }
@@ -469,7 +507,7 @@ class MacroRepositoryImpl implements MacroRepository {
   Future<RateSeries?> _macroFromCache(
     int seriesId,
     DateRange range, {
-    bool exigirCobertura = false,
+    bool requireCoverage = false,
   }) async {
     final db = cache;
     if (db == null) return null;
@@ -480,7 +518,7 @@ class MacroRepositoryImpl implements MacroRepository {
         ));
     if (rows == null || rows.isEmpty) return null;
 
-    final serie = RateSeries([
+    final series = RateSeries([
       for (final r in rows)
         RatePoint(date: DateTime.parse(r.date), rate: r.value),
     ], basis: BcbDatasource.basisOf(seriesId));
@@ -491,8 +529,8 @@ class MacroRepositoryImpl implements MacroRepository {
     // **achando que recebeu dez anos** — e apura o CAGR decenal sobre eles.
     // A ponta final não é exigível: uma série de publicação lenta termina
     // onde o Banco Central parou.
-    if (exigirCobertura && !_cobreOInicio(serie, range, seriesId)) return null;
-    return serie;
+    if (requireCoverage && !_coversStart(series, range, seriesId)) return null;
+    return series;
   }
 
   /// O cache começa cedo o bastante para a janela pedida?
@@ -507,22 +545,22 @@ class MacroRepositoryImpl implements MacroRepository {
   /// código faz. Não é alcançável hoje: as séries que o motor lê — CDI, IPCA —
   /// começam muito antes das janelas de dez anos que ele pede. Resolver pede
   /// guardar o primeiro ponto que a fonte publica, e não inferi-lo da janela.
-  static bool _cobreOInicio(RateSeries s, DateRange range, int seriesId) {
+  static bool _coversStart(RateSeries s, DateRange range, int seriesId) {
     if (s.points.isEmpty) return false;
     // **Compara dia civil, e não instante.** `add(Duration(days: n))` soma
     // horas absolutas, e num dia de mudança de horário de verão o resultado
     // cai uma hora antes ou depois — o bastante para a folga valer 9 ou 11
     // dias conforme a época do ano. As datas aqui são datas, não momentos.
-    final primeiro = s.points.first.date;
-    final dias = BcbDatasource.basisOf(seriesId) == TimeBasis.monthly ? 62 : 10;
-    final limite = DateTime.utc(
+    final first = s.points.first.date;
+    final days = BcbDatasource.basisOf(seriesId) == TimeBasis.monthly ? 62 : 10;
+    final limit = DateTime.utc(
       range.start.year,
       range.start.month,
-      range.start.day + dias,
+      range.start.day + days,
     );
-    final inicio =
-        DateTime.utc(primeiro.year, primeiro.month, primeiro.day);
-    return !inicio.isAfter(limite);
+    final start =
+        DateTime.utc(first.year, first.month, first.day);
+    return !start.isAfter(limit);
   }
 
   Future<Result<RateSeries>> _series(int seriesId, DateRange range) async {
@@ -536,9 +574,9 @@ class MacroRepositoryImpl implements MacroRepository {
             false;
     if (fresh) {
       // No caminho normal a cobertura é exigida: cache curto vai à rede.
-      final vigente =
-          await _macroFromCache(seriesId, range, exigirCobertura: true);
-      if (vigente != null) return Ok(vigente);
+      final current =
+          await _macroFromCache(seriesId, range, requireCoverage: true);
+      if (current != null) return Ok(current);
     }
 
     final fetched = await remote.series(seriesId, range);
@@ -559,7 +597,7 @@ class MacroRepositoryImpl implements MacroRepository {
       // fonte caía, e o CAGR decenal saía sobre eles sem aviso. Sem cache que
       // cubra a janela, a falha da fonte é reportada.
       final stale =
-          await _macroFromCache(seriesId, range, exigirCobertura: true);
+          await _macroFromCache(seriesId, range, requireCoverage: true);
       if (stale != null) return Ok(stale);
       return fetched;
     }
@@ -588,10 +626,10 @@ class MacroRepositoryImpl implements MacroRepository {
     // A cobertura do início **não** é exigida aqui: o que acabou de vir da
     // fonte é o que há, e recusá-lo por não cobrir a janela devolveria a falha
     // no caminho de sucesso.
-    final relida =
-        await _macroFromCache(seriesId, range, exigirCobertura: false);
-    if (relida != null && relida.points.length >= series.points.length) {
-      return Ok(relida);
+    final reread =
+        await _macroFromCache(seriesId, range, requireCoverage: false);
+    if (reread != null && reread.points.length >= series.points.length) {
+      return Ok(reread);
     }
     return Ok(series);
   }

@@ -65,7 +65,7 @@ abstract final class BetaCalculator {
   ///
   /// - [returns]: par já alinhado por data. O tipo garante o casamento de
   ///   comprimento, então **não há validação de dimensão aqui** — construa o
-  ///   par com [alignReturns] ou com `PairedReturns.of`.
+  ///   par com [alignReturns] ou com `PairedReturnsBuilder`.
   /// - [minimumObservations]: mínimo de pares exigido. Padrão `30`, abaixo do
   ///   qual a estimativa não é reportável.
   ///
@@ -94,11 +94,11 @@ abstract final class BetaCalculator {
     var marketVariance = 0.0;
     var assetVariance = 0.0;
     for (var i = 0; i < n; i++) {
-      final da = assetReturns[i] - meanAsset;
-      final dm = marketReturns[i] - meanMarket;
-      covariance += da * dm;
-      marketVariance += dm * dm;
-      assetVariance += da * da;
+      final assetDeviation = assetReturns[i] - meanAsset;
+      final marketDeviation = marketReturns[i] - meanMarket;
+      covariance += assetDeviation * marketDeviation;
+      marketVariance += marketDeviation * marketDeviation;
+      assetVariance += assetDeviation * assetDeviation;
     }
     covariance /= n - 1;
     marketVariance /= n - 1;

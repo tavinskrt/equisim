@@ -12,10 +12,10 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
 /// Agrupa a mensagem de recusa numa família estável.
-String _familia(String m) {
+String _family(String m) {
   if (m.contains('Lucro operacional base não positivo')) {
     return 'lucro operacional base não positivo';
   }
@@ -40,7 +40,7 @@ Future<void> main(List<String> args) async {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
     final universe = (await ctx.fundamentals.universe()).unwrap();
@@ -49,12 +49,12 @@ Future<void> main(List<String> args) async {
       prices: ctx.prices,
       fundamentals: ctx.fundamentals,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     );
 
-    final porFamilia = <String, List<String>>{};
-    var avaliados = 0;
-    var semInsumo = 0;
+    final byFamily = <String, List<String>>{};
+    var evaluated = 0;
+    var withoutInput = 0;
     var i = 0;
     for (final ticker in universe) {
       i++;
@@ -65,7 +65,7 @@ Future<void> main(List<String> args) async {
         fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
@@ -73,29 +73,29 @@ Future<void> main(List<String> args) async {
         betaPrior: prior,
       );
       if (prep.isErr) {
-        semInsumo++;
+        withoutInput++;
         continue;
       }
       final r = ValuationCascade.evaluate(prep.unwrap());
       if (r.isOk) {
-        avaliados++;
+        evaluated++;
         continue;
       }
-      final f = _familia(r.failureOrNull!.message);
-      (porFamilia[f] ??= []).add(ticker.value);
+      final f = _family(r.failureOrNull!.message);
+      (byFamily[f] ??= []).add(ticker.value);
     }
     stderr.writeln('');
 
     stdout.writeln('\n=== POR QUE O MOTOR RECUSA — ${universe.length} do '
         'universo ===\n');
-    stdout.writeln('  avaliados:            $avaliados');
-    stdout.writeln('  sem insumo suficiente: $semInsumo');
-    final total = porFamilia.values.fold(0, (a, b) => a + b.length);
+    stdout.writeln('  avaliados:            $evaluated');
+    stdout.writeln('  sem insumo suficiente: $withoutInput');
+    final total = byFamily.values.fold(0, (a, b) => a + b.length);
     stdout.writeln('  recusados na cascata:  $total\n');
-    final chaves = porFamilia.keys.toList()
-      ..sort((a, b) => porFamilia[b]!.length.compareTo(porFamilia[a]!.length));
-    for (final k in chaves) {
-      final xs = porFamilia[k]!;
+    final keys = byFamily.keys.toList()
+      ..sort((a, b) => byFamily[b]!.length.compareTo(byFamily[a]!.length));
+    for (final k in keys) {
+      final xs = byFamily[k]!;
       stdout.writeln('  ${xs.length.toString().padLeft(4)}  $k');
       stdout.writeln('        ${xs.take(10).join(', ')}'
           '${xs.length > 10 ? ', …' : ''}');

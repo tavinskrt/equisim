@@ -56,24 +56,24 @@ void main() {
     /// Diretório apenas inexistente não serve — o `sqlite3` o cria sozinho, e
     /// o banco abriria normalmente. Foi o que a primeira tentativa deste teste
     /// fez, e ela passava sem exercitar nada.
-    CacheDatabase bancoQuebrado() {
-      final barreira = File('${Directory.systemTemp.path}/equisim-barreira-'
+    CacheDatabase brokenDatabase() {
+      final barrier = File('${Directory.systemTemp.path}/equisim-barreira-'
           '${DateTime.now().microsecondsSinceEpoch}')
         ..createSync();
       addTearDown(() {
-        if (barreira.existsSync()) barreira.deleteSync();
+        if (barrier.existsSync()) barrier.deleteSync();
       });
       return CacheDatabase(
-          NativeDatabase(File('${barreira.path}/cache.sqlite')));
+          NativeDatabase(File('${barrier.path}/cache.sqlite')));
     }
 
     test('a premissa do grupo: o banco realmente falha', () async {
       // **Sem esta conferência os dois testes abaixo passariam vazios.** Um
       // banco que funcionasse faria a gravação dar certo, e eles provariam
       // apenas que o caminho feliz funciona.
-      final quebrado = bancoQuebrado();
+      final broken = brokenDatabase();
       await expectLater(
-        quebrado.isFresh(CachePolicy.pricesKey('PETR4'),
+        broken.isFresh(CachePolicy.pricesKey('PETR4'),
             CachePolicy.historicalPrices),
         throwsA(anything),
       );
@@ -86,7 +86,7 @@ void main() {
         remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
           '/v2/stocks/historical': 'brapi_historical_batch',
         }))),
-        cache: bancoQuebrado(),
+        cache: brokenDatabase(),
       );
 
       final r = await repository.dailyBatch([ticker], range);
@@ -106,7 +106,7 @@ void main() {
       });
       final repository = PriceRepositoryImpl(
         remote: BrapiDatasource(clientWith(adapter)),
-        cache: bancoQuebrado(),
+        cache: brokenDatabase(),
       );
       await repository.dailyBatch([ticker], range);
       expect(adapter.callCount['/v2/stocks/historical'], 1);
@@ -127,7 +127,7 @@ void main() {
           '/v2/stocks/statistics?symbols=PETR4&mode=current':
               'brapi_statistics_current_petr4',
         }))),
-        cache: bancoQuebrado(),
+        cache: brokenDatabase(),
       );
       final r = await repository.history(Ticker.parse('PETR4'));
       expect(r.isOk, isTrue, reason: 'os exercícios vieram da rede');
@@ -138,7 +138,7 @@ void main() {
       final repository = MacroRepositoryImpl(
         remote: BcbDatasource(clientWith(
             FixtureAdapter(routes: {'bcdata.sgs.12': 'bcb_cdi'}))),
-        cache: bancoQuebrado(),
+        cache: brokenDatabase(),
       );
       final r = await repository.riskFreeDaily(
           DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)));
@@ -181,7 +181,7 @@ void main() {
     // histórico mais longo — pior que o caminho degradado, que lê o disco.
     test('a renovação devolve o acumulado, e não só a janela que a fonte trouxe',
         () async {
-      final antigo = DateTime(2001, 3, 15);
+      final oldWidget = DateTime(2001, 3, 15);
       await db.upsertPrices([
         CachedPricesCompanion.insert(
           ticker: 'PETR4',
@@ -198,13 +198,13 @@ void main() {
       );
       final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
 
-      final serie = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
+      final series = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
           .unwrap()[Ticker.parse('PETR4')]!;
 
-      expect(serie.points.first.date, antigo,
+      expect(series.points.first.date, oldWidget,
           reason: 'o pregão que só o disco tem precisa sobreviver à renovação');
-      expect(serie.points.first.close, 3.21);
-      expect(serie.points.length, greaterThan(1));
+      expect(series.points.first.close, 3.21);
+      expect(series.points.length, greaterThan(1));
     });
 
     test('desdobramento entre duas buscas descarta a base velha', () async {
@@ -237,14 +237,14 @@ void main() {
       );
       final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
 
-      final serie = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
+      final series = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
           .unwrap()[Ticker.parse('PETR4')]!;
 
-      expect(serie.points.first.date, DateTime(2026, 7, 21),
+      expect(series.points.first.date, DateTime(2026, 7, 21),
           reason: 'o histórico em outra base sai inteiro — perder profundidade '
               'é menos grave que servir uma série com degrau');
-      expect(serie.points.first.close, closeTo(41.66, 1e-9));
-      expect(serie.points.any((p) => p.date.year == 2001), isFalse);
+      expect(series.points.first.close, closeTo(41.66, 1e-9));
+      expect(series.points.any((p) => p.date.year == 2001), isFalse);
     });
 
     test('sem evento, a profundidade do disco continua sobrevivendo', () async {
@@ -272,11 +272,126 @@ void main() {
       );
       final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
 
-      final serie = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
+      final series = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
           .unwrap()[Ticker.parse('PETR4')]!;
 
-      expect(serie.points.first.date, DateTime(2001, 3, 15),
+      expect(series.points.first.date, DateTime(2001, 3, 15),
           reason: 'diferença de um centavo é ruído, e não mudança de base');
+    });
+
+    test('o pregão que a resposta omite também sai da base velha', () async {
+      // Lente `dados`, decisão 134. A resposta pula 18/08/2026; o disco o tem,
+      // da busca anterior, na escala de antes do grupamento. Apagar só o que
+      // antecede a resposta deixava esse pregão no meio da série nova, com o
+      // dobro do preço dos vizinhos — o upsert não o alcança.
+      await db.upsertPrices([
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2026-07-21',
+          close: 83.32,
+          volume: const Value(1000),
+        ),
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2026-08-18',
+          close: 85.00,
+          volume: const Value(1000),
+        ),
+      ]);
+      final repository = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: db,
+      );
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+
+      final series = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
+          .unwrap()[Ticker.parse('PETR4')]!;
+
+      expect(series.points.any((p) => p.date == DateTime(2026, 8, 18)), isFalse,
+          reason: 'o pregão da base velha no meio da janela é degrau');
+      expect(series.points.first.close, closeTo(41.66, 1e-9));
+    });
+
+    test('se a base velha não sai do disco, a nova não entra por cima', () async {
+      // Lente `dados`, 01/10/2026. O apagamento e a gravação eram dois passos
+      // independentes, cada um engolindo a própria falha: se o apagamento
+      // falhasse, a gravação seguia e o disco ficava com as duas bases — o
+      // defeito da decisão 134 por outro caminho. E o que saía era o disco.
+      final bank = _BrokenDeletion();
+      addTearDown(bank.close);
+      await bank.upsertPrices([
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2001-03-15',
+          close: 6.42,
+          volume: const Value(1000),
+        ),
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2026-07-21',
+          close: 83.32,
+          volume: const Value(1000),
+        ),
+      ]);
+      final repository = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: bank,
+      );
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+
+      final series = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
+          .unwrap()[Ticker.parse('PETR4')]!;
+
+      expect(series.points.first.close, closeTo(41.66, 1e-9),
+          reason: 'sem gravar, o que sai é a resposta, e não o disco velho');
+      expect(series.points.any((p) => p.date.year == 2001), isFalse);
+      final onDisk = await bank.pricesIn('PETR4', '2000-01-01', '2030-01-01');
+      expect(onDisk.map((r) => r.date), ['2001-03-15', '2026-07-21'],
+          reason: 'nada da base nova entra ao lado da velha');
+      expect(onDisk.last.close, 83.32);
+      expect(
+        await bank.isFresh(
+            CachePolicy.pricesKey('PETR4'), CachePolicy.historicalPrices),
+        isFalse,
+        reason: 'sem carimbo, a próxima busca tenta de novo',
+      );
+    });
+
+    test('a mudança de base é vista no primeiro pregão em comum', () async {
+      // O primeiro dia da resposta, 21/07/2026, não está no disco; o segundo
+      // está, no dobro. Comparar só o primeiro dia da resposta dava "sem
+      // evento", e o histórico de 2001 ficava em outra base.
+      await db.upsertPrices([
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2001-03-15',
+          close: 6.42,
+          volume: const Value(1000),
+        ),
+        CachedPricesCompanion.insert(
+          ticker: 'PETR4',
+          date: '2026-07-22',
+          close: 85.16,
+          volume: const Value(1000),
+        ),
+      ]);
+      final repository = PriceRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
+          '/v2/stocks/historical': 'brapi_historical_batch',
+        }))),
+        cache: db,
+      );
+      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
+
+      final series = (await repository.dailyBatch([Ticker.parse('PETR4')], range))
+          .unwrap()[Ticker.parse('PETR4')]!;
+
+      expect(series.points.any((p) => p.date.year == 2001), isFalse);
+      expect(series.points.first.date, DateTime(2026, 7, 21));
     });
 
     test('cache preserva preços e datas fielmente', () async {
@@ -340,7 +455,7 @@ void main() {
       );
       final ticker = Ticker.parse('PETR4');
 
-      final gravada = (await repository.dailyBatch(
+      final saved = (await repository.dailyBatch(
         [ticker],
         DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1)),
       ))
@@ -348,19 +463,19 @@ void main() {
 
       // Segunda leitura, agora pedindo uma janela que começa DÉCADAS antes do
       // que existe em disco. O cache está fresco, então não há ida à rede.
-      final larga = (await repository.dailyBatch(
+      final wide = (await repository.dailyBatch(
         [ticker],
         DateRange(DateTime(1990, 1, 1), DateTime(2030, 1, 1)),
       ))
           .unwrap()[ticker]!;
 
       expect(adapter.callCount['/v2/stocks/historical'], 1);
-      expect(larga.points.length, gravada.points.length);
+      expect(wide.points.length, saved.points.length);
       // A borda da série é a do DADO, e não a da janela pedida: é o que
       // permite ao backtest encurtar o período e avisar, em vez de simular
       // uma década sobre um mês.
-      expect(larga.firstDate, gravada.firstDate);
-      expect(larga.firstDate.isAfter(DateTime(1990, 1, 1)), isTrue);
+      expect(wide.firstDate, saved.firstDate);
+      expect(wide.firstDate.isAfter(DateTime(1990, 1, 1)), isTrue);
     });
 
     test('rede fora recorre ao cache VENCIDO em vez de falhar', () async {
@@ -377,7 +492,7 @@ void main() {
         }))),
         cache: db,
       );
-      final gravada = (await ok.dailyBatch([ticker], range)).unwrap()[ticker]!;
+      final saved = (await ok.dailyBatch([ticker], range)).unwrap()[ticker]!;
 
       // Marca de validade apagada: o cache passa a estar vencido, e a rede
       // devolve erro de servidor.
@@ -393,7 +508,7 @@ void main() {
       final result = await offline.dailyBatch([ticker], range);
       expect(result.isOk, isTrue,
           reason: 'havia dado em disco: falhar aqui desperdiça a contingência');
-      expect(result.unwrap()[ticker]!.points.length, gravada.points.length);
+      expect(result.unwrap()[ticker]!.points.length, saved.points.length);
     });
 
     test('recuperação parcial devolve o erro da rede, e não meio lote',
@@ -406,7 +521,7 @@ void main() {
       final petr = Ticker.parse('PETR4');
       // Papel fora do lote da fixture: ele nunca chega ao disco, e é a metade
       // que o cache vencido não cobre.
-      final ausente = Ticker.parse('BBAS3');
+      final missing = Ticker.parse('BBAS3');
       final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
 
       final ok = PriceRepositoryImpl(
@@ -425,7 +540,7 @@ void main() {
         cache: db,
       );
 
-      final r = await offline.dailyBatch([petr, ausente], range);
+      final r = await offline.dailyBatch([petr, missing], range);
       expect(r.isErr, isTrue,
           reason: 'o cache vencido não cobre a BBAS3: o lote está incompleto');
       expect(r.failureOrNull, isA<DataQualityFailure>(),
@@ -433,9 +548,9 @@ void main() {
               '"ativo sem cotação" três camadas adiante');
 
       // E cobrindo tudo, o recuo continua valendo.
-      final sr = await offline.dailyBatch([petr], range);
-      expect(sr.isOk, isTrue);
-      expect(sr.unwrap().containsKey(petr), isTrue);
+      final fallbackResult = await offline.dailyBatch([petr], range);
+      expect(fallbackResult.isOk, isTrue);
+      expect(fallbackResult.unwrap().containsKey(petr), isTrue);
     });
 
     test('ativo que o lote omite também recorre ao cache vencido', () async {
@@ -453,10 +568,10 @@ void main() {
         }))),
         cache: db,
       );
-      final gravada = (await ok.dailyBatch([petr], range)).unwrap()[petr]!;
+      final saved = (await ok.dailyBatch([petr], range)).unwrap()[petr]!;
       await db.customStatement('DELETE FROM cache_entries');
 
-      final parcial = PriceRepositoryImpl(
+      final partial = PriceRepositoryImpl(
         remote: BrapiDatasource(clientWith(FixtureAdapter(bodies: {
           '/v2/stocks/historical': '''
 {"results":[{"symbol":"VALE3","data":{"historicalDataPrice":[
@@ -467,9 +582,9 @@ void main() {
         cache: db,
       );
 
-      final r = (await parcial.dailyBatch([petr, vale], range)).unwrap();
+      final r = (await partial.dailyBatch([petr, vale], range)).unwrap();
       expect(r[vale], isNotNull, reason: 'o que veio da rede continua vindo');
-      expect(r[petr]?.points.length, gravada.points.length,
+      expect(r[petr]?.points.length, saved.points.length,
           reason: 'havia histórico em disco, e o lote não o substituiu');
     });
 
@@ -539,10 +654,10 @@ void main() {
         }))),
         cache: db,
       );
-      final gravada = (await ok.history(ticker)).unwrap();
+      final saved = (await ok.history(ticker)).unwrap();
       await db.customStatement('DELETE FROM cache_entries');
 
-      final fora = FundamentalsRepositoryImpl(
+      final outside = FundamentalsRepositoryImpl(
         remote: BrapiDatasource(clientWith(FixtureAdapter(routes: {
           '/v2/stocks/statistics?symbols=PETR4&mode=history':
               'brapi_statistics_history_petr4',
@@ -554,19 +669,69 @@ void main() {
         }))),
         cache: db,
       );
-      final r = await fora.history(ticker);
+      final r = await outside.history(ticker);
       expect(r.isOk, isTrue);
-      expect(r.unwrap().length, gravada.length);
+      expect(r.unwrap().length, saved.length);
+    });
+
+    test('resposta parcial não apaga do disco o que ela não trouxe', () async {
+      // Lente `risco`, 27/09/2026. A fonte tolera uma rota com corpo de forma
+      // errada e devolve os exercícios sem aquela demonstração; o `upsert`
+      // gravava nulo por cima do valor bom, e o cache ficava pior que a
+      // resposta.
+      final ticker = Ticker.parse('PETR4');
+      const routes = {
+        '/v2/stocks/statistics?symbols=PETR4&mode=history':
+            'brapi_statistics_history_petr4',
+        '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
+        '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+        '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+        '/v2/stocks/statistics?symbols=PETR4&mode=current':
+            'brapi_statistics_current_petr4',
+      };
+      final whole = (await FundamentalsRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(routes: routes))),
+        cache: db,
+      ).history(ticker))
+          .unwrap();
+      final withRevenue = {
+        for (final s in whole)
+          if (s.totalRevenue != null) s.fiscalPeriodEnd: s.totalRevenue,
+      };
+      expect(withRevenue, isNotEmpty, reason: 'a premissa: o DRE foi gravado');
+      await db.customStatement('DELETE FROM cache_entries');
+
+      final partial = await FundamentalsRepositoryImpl(
+        remote: BrapiDatasource(clientWith(FixtureAdapter(
+          routes: {
+            for (final e in routes.entries)
+              if (e.key != '/v2/stocks/income-statement') e.key: e.value,
+          },
+          bodies: {
+            '/v2/stocks/income-statement':
+                '{"results":[{"incomeStatementHistory":"não é lista"}]}',
+          },
+        ))),
+        cache: db,
+      ).history(ticker);
+      expect(partial.isOk, isTrue);
+      final lidos = {
+        for (final s in partial.unwrap()) s.fiscalPeriodEnd: s.totalRevenue,
+      };
+      for (final e in withRevenue.entries) {
+        expect(lidos[e.key], e.value,
+            reason: 'a receita de ${e.key.year} estava no disco');
+      }
     });
 
     test('sem cache, a falha da fonte é reportada', () async {
-      final fora = FundamentalsRepositoryImpl(
+      final outside = FundamentalsRepositoryImpl(
         remote: BrapiDatasource(clientWith(FixtureAdapter(
           failures: {'/v2/stocks/statistics': 503},
         ))),
         cache: db,
       );
-      expect((await fora.history(Ticker.parse('PETR4'))).isErr, isTrue);
+      expect((await outside.history(Ticker.parse('PETR4'))).isErr, isTrue);
     });
 
     test('a atualização devolve a união do banco, e não só a janela da fonte',
@@ -599,11 +764,11 @@ void main() {
         cache: db,
       );
 
-      final logoDepois = (await repository.history(ticker)).unwrap();
-      final pelaSegundaVez = (await repository.history(ticker)).unwrap();
-      expect(logoDepois.length, pelaSegundaVez.length,
+      final rightAfter = (await repository.history(ticker)).unwrap();
+      final secondTime = (await repository.history(ticker)).unwrap();
+      expect(rightAfter.length, secondTime.length,
           reason: 'a profundidade não pode depender do TTL');
-      expect(logoDepois.any((s) => s.fiscalPeriodEnd.year == 2001), isTrue,
+      expect(rightAfter.any((s) => s.fiscalPeriodEnd.year == 2001), isTrue,
           reason: 'o exercício que só o banco tem precisa voltar na atualização');
     });
   });
@@ -629,12 +794,12 @@ void main() {
       );
       final range = DateRange(DateTime(2010, 1, 1), DateTime(2024, 3, 31));
 
-      final logoDepois = (await repository.riskFreeDaily(range)).unwrap();
-      final pelaSegundaVez = (await repository.riskFreeDaily(range)).unwrap();
+      final rightAfter = (await repository.riskFreeDaily(range)).unwrap();
+      final secondTime = (await repository.riskFreeDaily(range)).unwrap();
 
-      expect(logoDepois.dates.length, pelaSegundaVez.dates.length,
+      expect(rightAfter.dates.length, secondTime.dates.length,
           reason: 'a profundidade não pode depender do TTL');
-      expect(logoDepois.dates.first, DateTime(2010, 1, 4),
+      expect(rightAfter.dates.first, DateTime(2010, 1, 4),
           reason: 'o ponto que só o banco tem precisa voltar na atualização');
     });
 
@@ -666,19 +831,19 @@ void main() {
         cache: db,
       );
 
-      final curta = DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31));
-      await repository.riskFreeDaily(curta);
+      final shortRange = DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31));
+      await repository.riskFreeDaily(shortRange);
       expect(adapter.callCount['bcdata.sgs.12'], 1);
 
-      final longa = DateRange(DateTime(2014, 1, 1), DateTime(2024, 3, 31));
-      await repository.riskFreeDaily(longa);
+      final longRange = DateRange(DateTime(2014, 1, 1), DateTime(2024, 3, 31));
+      await repository.riskFreeDaily(longRange);
       expect(adapter.callCount['bcdata.sgs.12'], 2,
           reason: 'o cache nao cobria o inicio pedido; tem de ir a rede');
     });
 
     test('fonte fora recorre ao cache vencido que cobre a janela', () async {
       final range = DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31));
-      final gravada = (await MacroRepositoryImpl(
+      final saved = (await MacroRepositoryImpl(
         remote: BcbDatasource(clientWith(
             FixtureAdapter(routes: {'bcdata.sgs.12': 'bcb_cdi'}))),
         cache: db,
@@ -687,16 +852,16 @@ void main() {
 
       // Marca de validade apagada, e o Banco Central devolve erro.
       await db.customStatement('DELETE FROM cache_entries');
-      final fora = MacroRepositoryImpl(
+      final outside = MacroRepositoryImpl(
         remote: BcbDatasource(clientWith(
             FixtureAdapter(failures: {'bcdata.sgs.12': 503}))),
         cache: db,
       );
 
-      final r = await fora.riskFreeDaily(range);
+      final r = await outside.riskFreeDaily(range);
       expect(r.isOk, isTrue,
           reason: 'havia dado em disco cobrindo a janela: é a contingência');
-      expect(r.unwrap().rates.length, gravada.rates.length);
+      expect(r.unwrap().rates.length, saved.rates.length);
     });
 
     test('fonte fora não faz cache curto passar por janela longa', () async {
@@ -710,14 +875,14 @@ void main() {
       ).riskFreeDaily(DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)));
 
       await db.customStatement('DELETE FROM cache_entries');
-      final fora = MacroRepositoryImpl(
+      final outside = MacroRepositoryImpl(
         remote: BcbDatasource(clientWith(
             FixtureAdapter(failures: {'bcdata.sgs.12': 503}))),
         cache: db,
       );
 
-      final longa = DateRange(DateTime(2014, 1, 1), DateTime(2024, 3, 31));
-      expect((await fora.riskFreeDaily(longa)).isErr, isTrue,
+      final longRange = DateRange(DateTime(2014, 1, 1), DateTime(2024, 3, 31));
+      expect((await outside.riskFreeDaily(longRange)).isErr, isTrue,
           reason: 'o cache não cobre o início pedido; a falha da fonte vale');
     });
 
@@ -737,21 +902,15 @@ void main() {
   });
 
   group('Reprodutibilidade', () {
-    test('cache limpo devolve o sistema ao estado inicial', () async {
-      final adapter = FixtureAdapter(routes: {
-        '/v2/stocks/historical': 'brapi_historical_batch',
-      });
-      final repository = PriceRepositoryImpl(
-        remote: BrapiDatasource(clientWith(adapter)),
-        cache: db,
-      );
-      final range = DateRange(DateTime(2000, 1, 1), DateTime(2030, 1, 1));
-
-      await repository.dailyBatch([Ticker.parse('PETR4')], range);
-      await db.clearAll();
-      await repository.dailyBatch([Ticker.parse('PETR4')], range);
-
-      expect(adapter.callCount['/v2/stocks/historical'], 2);
-    });
   });
+}
+
+/// Um banco que lê e grava, mas não consegue apagar — o disco que trava no meio
+/// da troca de base.
+class _BrokenDeletion extends CacheDatabase {
+  _BrokenDeletion() : super(NativeDatabase.memory());
+
+  @override
+  Future<void> deletePricesOf(String ticker) =>
+      Future.error(StateError('o disco recusou o apagamento'));
 }

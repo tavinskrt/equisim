@@ -31,12 +31,12 @@ abstract final class InferenceExport {
   ///
   /// - [outputDir]: destino do arquivo.
   static void run({required String outputDir}) {
-    final casos = <Map<String, dynamic>>[];
+    final cases = <Map<String, dynamic>>[];
 
     // Regressões: da quase determinística à quase pura de ruído, mais uma com
     // autocorrelação forte nos resíduos, que é o caso que o HAC existe para
     // tratar. Os tamanhos cobrem a faixa real da série de exercícios (8 a 16).
-    final desenhos = <_Design>[
+    final designs = <_Design>[
       const _Design('tendencia limpa', n: 16, slope: 0.08, noise: 0.01, rho: 0.0),
       const _Design('tendencia ruidosa', n: 16, slope: 0.08, noise: 0.12, rho: 0.0),
       const _Design('serie curta', n: 8, slope: 0.05, noise: 0.06, rho: 0.0),
@@ -47,12 +47,12 @@ abstract final class InferenceExport {
           n: 12, slope: -0.04, noise: 0.05, rho: 0.3),
     ];
 
-    for (final d in desenhos) {
+    for (final d in designs) {
       final xs = [for (var i = 0; i < d.n; i++) i.toDouble()];
       final ys = d.build();
       final fit = Inference.ols(xs, ys);
       if (fit == null) continue;
-      casos.add({
+      cases.add({
         'nome': d.name,
         'x': xs,
         'y': ys,
@@ -70,15 +70,15 @@ abstract final class InferenceExport {
 
     // Mediana e MAD escalado, incluindo amostra contaminada — que é o motivo de
     // o MAD existir no lugar do desvio-padrão.
-    final amostras = <String, List<double>>{
+    final samples = <String, List<double>>{
       'simetrica': [0.10, 0.12, 0.14, 0.16, 0.18],
       'par': [0.10, 0.12, 0.14, 0.16],
       'contaminada': [0.10, 0.12, 0.14, 0.16, 9.90],
       'com negativos': [-0.30, -0.05, 0.02, 0.11, 0.40, 0.55],
       'constante': [0.07, 0.07, 0.07, 0.07],
     };
-    final robustez = <Map<String, dynamic>>[
-      for (final e in amostras.entries)
+    final robustness = <Map<String, dynamic>>[
+      for (final e in samples.entries)
         {
           'nome': e.key,
           'valores': e.value,
@@ -90,7 +90,7 @@ abstract final class InferenceExport {
     ];
 
     // Quantis da t e R² crítico na faixa que as guardas usam.
-    final quantis = <Map<String, dynamic>>[
+    final quantiles = <Map<String, dynamic>>[
       for (final p in [0.90, 0.95, 0.975, 0.995])
         for (final df in [4, 6, 10, 14, 20, 30])
           {'p': p, 'df': df, 'dart': Inference.studentT(p, df)}
@@ -105,9 +105,9 @@ abstract final class InferenceExport {
       'gerado_por': 'tool/validation/inference_export.dart',
       'observacao': 'Dados e resultados do Dart. O Python recalcula sobre os '
           'MESMOS dados — nenhum gerador aleatório é compartilhado.',
-      'regressoes': casos,
-      'robustez': robustez,
-      'quantis_t': quantis,
+      'regressoes': cases,
+      'robustez': robustness,
+      'quantis_t': quantiles,
       'r2_critico': r2crit,
       'bartlett_lag_formula': 'L = floor(4 * (n/100)^(2/9))',
     };
@@ -146,18 +146,18 @@ class _Design {
   /// quatro linhas, escrito no arquivo, torna a série reproduzível para sempre —
   /// e o que se quer provar não tem nada a ver com a qualidade do ruído.
   List<double> build() {
-    var estado = 20260907;
-    double proximo() {
-      estado = (estado * 1103515245 + 12345) & 0x7FFFFFFF;
-      return estado / 0x7FFFFFFF * 2 - 1; // em [-1, 1]
+    var status = 20260907;
+    double next() {
+      status = (status * 1103515245 + 12345) & 0x7FFFFFFF;
+      return status / 0x7FFFFFFF * 2 - 1; // em [-1, 1]
     }
 
     final ys = <double>[];
-    var anterior = 0.0;
+    var previous = 0.0;
     for (var i = 0; i < n; i++) {
-      final choque = proximo() * noise;
-      final e = rho * anterior + choque;
-      anterior = e;
+      final shock = next() * noise;
+      final e = rho * previous + shock;
+      previous = e;
       ys.add(1.0 + slope * i + e);
     }
     return ys;

@@ -27,10 +27,10 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-RAIZ = "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC"
+ROOT = "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC"
 
 # Só o que o motor consome. DMPL e DVA somam 400 MB por ano e nada usa.
-INTERESSAM = (
+RELEVANT = (
     "_BPA_con_", "_BPA_ind_",
     "_BPP_con_", "_BPP_ind_",
     "_DRE_con_", "_DRE_ind_",
@@ -49,45 +49,45 @@ INTERESSAM = (
 )
 
 
-def _e_metadado(nome: str, doc: str) -> bool:
+def _is_metadata(name: str, doc: str) -> bool:
     """O CSV de metadados é `{doc}_cia_aberta_{ano}.csv`, sem sufixo."""
-    return nome.lower() == f"{doc.lower()}_cia_aberta_{nome[-8:-4]}.csv"
+    return name.lower() == f"{doc.lower()}_cia_aberta_{name[-8:-4]}.csv"
 
 
-def baixar(doc: str, ano: int, destino: Path) -> tuple[int, int] | None:
+def download(doc: str, year: int, destination: Path) -> tuple[int, int] | None:
     """Baixa um zip e extrai os CSVs de interesse.
 
     Devolve (extraídos, bytes), ou ``None`` quando a fonte não publica o ano.
     """
-    url = f"{RAIZ}/{doc}/DADOS/{doc.lower()}_cia_aberta_{ano}.zip"
+    url = f"{ROOT}/{doc}/DADOS/{doc.lower()}_cia_aberta_{year}.zip"
     try:
         with urllib.request.urlopen(url, timeout=180) as r:
-            bruto = r.read()
+            raw = r.read()
     except urllib.error.HTTPError as e:
         if e.code == 404:
-            print(f"  {doc} {ano}: NÃO PUBLICADO pela CVM (404)")
+            print(f"  {doc} {year}: NÃO PUBLICADO pela CVM (404)")
             return None
         raise
 
     n = 0
-    with zipfile.ZipFile(io.BytesIO(bruto)) as z:
-        for nome in z.namelist():
-            if not nome.lower().endswith(".csv"):
+    with zipfile.ZipFile(io.BytesIO(raw)) as z:
+        for name in z.namelist():
+            if not name.lower().endswith(".csv"):
                 continue
-            if not (any(s in nome for s in INTERESSAM) or _e_metadado(nome, doc)):
+            if not (any(s in name for s in RELEVANT) or _is_metadata(name, doc)):
                 continue
-            destino.mkdir(parents=True, exist_ok=True)
-            (destino / nome).write_bytes(z.read(nome))
+            destination.mkdir(parents=True, exist_ok=True)
+            (destination / name).write_bytes(z.read(name))
             n += 1
-    print(f"  {doc} {ano}: {n} arquivo(s), {len(bruto)/1e6:.1f} MB baixados")
-    return (n, len(bruto))
+    print(f"  {doc} {year}: {n} arquivo(s), {len(raw)/1e6:.1f} MB baixados")
+    return (n, len(raw))
 
 
 def main() -> int:
-    hoje = dt.date.today()
+    today = dt.date.today()
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--de", type=int, default=2010)
-    ap.add_argument("--ate", type=int, default=hoje.year)
+    ap.add_argument("--ate", type=int, default=today.year)
     ap.add_argument("--destino", type=Path, default=Path("data/cvm"))
     ap.add_argument(
         "--docs",
@@ -97,20 +97,20 @@ def main() -> int:
     a = ap.parse_args()
 
     docs = [d.strip().upper() for d in a.docs.split(",") if d.strip()]
-    total_arq = total_bytes = 0
-    ausentes: list[str] = []
-    for ano in range(a.de, a.ate + 1):
-        print(f"{ano}:")
+    total_files = total_bytes = 0
+    missing: list[str] = []
+    for year in range(a.de, a.ate + 1):
+        print(f"{year}:")
         for doc in docs:
-            r = baixar(doc, ano, a.destino)
+            r = download(doc, year, a.destino)
             if r is None:
-                ausentes.append(f"{doc} {ano}")
+                missing.append(f"{doc} {year}")
                 continue
-            total_arq += r[0]
+            total_files += r[0]
             total_bytes += r[1]
 
     print(
-        f"\n{total_arq} arquivos, {total_bytes/1e6:.0f} MB baixados "
+        f"\n{total_files} arquivos, {total_bytes/1e6:.0f} MB baixados "
         f"para {a.destino}"
     )
     print(
@@ -120,12 +120,12 @@ def main() -> int:
     # O ano corrente da DFP ainda não existe e é esperado; qualquer outro
     # ausente é lacuna da fonte, e tem de ser dito — em 14/09/2026 a CVM não
     # publicava o ITR de 2025, e a série trimestral saiu com buraco por isso.
-    esperados = {f"DFP {hoje.year}"}
-    lacunas = [x for x in ausentes if x not in esperados]
-    if lacunas:
+    expected_docs = {f"DFP {today.year}"}
+    gaps = [x for x in missing if x not in expected_docs]
+    if gaps:
         print()
         print("!! LACUNAS NA FONTE — anos que a CVM não publica:")
-        for x in lacunas:
+        for x in gaps:
             print(f"!!   {x}")
         print("!! A série trimestral recua para DFP onde houver buraco "
               "(decisão 73).")

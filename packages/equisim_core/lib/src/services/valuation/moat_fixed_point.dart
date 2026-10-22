@@ -71,22 +71,22 @@ class MoatFixedPoint<V, R> {
     var stable = false;
     var solverFailed = false;
     while (passes < maxPasses) {
-      final refeito = reassess(rates);
-      final novo = moatOf(refeito);
-      final mudou = (novo == null) != (moat == null) ||
-          (novo != null && moat != null && (novo - moat).abs() > 1e-9);
-      if (!mudou) {
+      final redone = reassess(rates);
+      final newPackage = moatOf(redone);
+      final changed = (newPackage == null) != (moat == null) ||
+          (newPackage != null && moat != null && (newPackage - moat).abs() > 1e-9);
+      if (!changed) {
         stable = true;
         break;
       }
-      final proximo = solve(novo);
-      if (proximo == null) {
+      final next = solve(newPackage);
+      if (next == null) {
         solverFailed = true;
         break;
       }
-      verdict = refeito;
-      moat = novo;
-      rates = proximo;
+      verdict = redone;
+      moat = newPackage;
+      rates = next;
       passes++;
     }
     return MoatFixedPoint._(

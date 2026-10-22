@@ -29,18 +29,18 @@ class IsLightMode extends Notifier<bool> {
   ///
   /// O valor vem por construtor porque `main` já conhece a preferência antes
   /// do primeiro quadro — semear aqui é o que evita a piscada de tema.
-  IsLightMode({bool inicial = false}) : _inicial = inicial;
+  IsLightMode({bool initial = false}) : _initial = initial;
 
-  final bool _inicial;
+  final bool _initial;
 
   @override
-  bool build() => _inicial;
+  bool build() => _initial;
 
   /// Escreve o tema corrente.
   ///
   /// Método em vez de `state` público: em `Notifier` o setter é protegido, e
   /// expor a escrita por um nome próprio deixa explícito quem pode alterá-la.
-  void definir(bool valor) => state = valor;
+  void setValue(bool value) => state = value;
 }
 
 /// `true` quando o modo claro está ativo.

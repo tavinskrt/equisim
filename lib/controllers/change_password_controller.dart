@@ -90,16 +90,16 @@ class ChangePasswordController extends ChangeNotifier {
   /// - Tudo atendido: nível 4, "Forte", verde `#00B37E`
   PasswordStrength get passwordStrength {
     final pass = _newPassword;
-    if (pass.isEmpty) return PasswordStrength.vazia;
-    if (pass.length < 6) return PasswordStrength.fraca;
+    if (pass.isEmpty) return PasswordStrength.empty;
+    if (pass.length < 6) return PasswordStrength.weak;
 
     final hasDigit = pass.contains(RegExp(r'[0-9]'));
-    if (pass.length < 10 || !hasDigit) return PasswordStrength.media;
+    if (pass.length < 10 || !hasDigit) return PasswordStrength.medium;
 
     final hasSpecial = pass.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
-    if (!hasSpecial) return PasswordStrength.boa;
+    if (!hasSpecial) return PasswordStrength.good;
 
-    return PasswordStrength.forte;
+    return PasswordStrength.strong;
   }
 
 
@@ -115,7 +115,7 @@ class ChangePasswordController extends ChangeNotifier {
   /// Retorna se o formulário está preenchido e atende aos critérios mínimos de envio.
   bool get canSubmit {
     return _currentPassword.length >= 6 &&
-        passwordStrength.level >= PasswordStrength.media.level &&
+        passwordStrength.level >= PasswordStrength.medium.level &&
         passwordsMatch;
   }
 

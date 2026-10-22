@@ -9,8 +9,8 @@
 /// vale para representação em ponto flutuante, não para esta. Comparar dois
 /// `Money` é comparar dois `int`.
 ///
-/// **Regra de arredondamento.** [operator *] e [operator /] arredondam por
-/// `num.round()`, e [Money.fromReais] pelo decimal escrito (ver lá) — nos dois
+/// **Regra de arredondamento.** [operator *] arredonda por `num.round()`, e
+/// [Money.fromReais] pelo decimal escrito (ver lá) — nos dois
 /// casos *meio afastado de zero*, e não *meio para cima*. Verificado: `(-2.5).round() == -3`, enquanto meio para
 /// cima devolveria `-2`. A diferença só aparece em valores negativos exatamente
 /// no meio (estornos, fatias de aporte negativo), e é simétrica: o mesmo módulo
@@ -52,26 +52,26 @@ class Money implements Comparable<Money> {
   ///
   /// Lança [UnsupportedError] se [reais] for `NaN` ou infinito — não há
   /// centavo para devolver.
-  factory Money.fromReais(num reais) => Money(_centavos(reais));
+  factory Money.fromReais(num reais) => Money(_cents(reais));
 
   /// Centavos de [reais], arredondando o decimal escrito meio afastado de zero.
-  static int _centavos(num reais) {
+  static int _cents(num reais) {
     if (reais is int) return reais * 100;
     final d = reais.toDouble();
     if (!d.isFinite) {
       throw UnsupportedError('Infinity or NaN toInt');
     }
-    final modulo = d.abs();
+    final magnitude = d.abs();
     // Acima de 1e15 o `double` já não tem casa de centavo, e o produto é
     // inteiro; abaixo de 1e-6 `toString` usa notação científica, e o valor é
     // menos de meio centavo.
-    if (modulo >= 1e15) return (d * 100).round();
-    if (modulo < 1e-6) return 0;
-    final partes = modulo.toString().split('.');
-    final fracao = (partes.length > 1 ? partes[1] : '').padRight(3, '0');
-    var c = int.parse(partes[0]) * 100 + int.parse(fracao.substring(0, 2));
+    if (magnitude >= 1e15) return (d * 100).round();
+    if (magnitude < 1e-6) return 0;
+    final parts = magnitude.toString().split('.');
+    final fraction = (parts.length > 1 ? parts[1] : '').padRight(3, '0');
+    var c = int.parse(parts[0]) * 100 + int.parse(fraction.substring(0, 2));
     // O terceiro dígito decide: 5 ou mais é meio centavo ou além.
-    if (fracao.codeUnitAt(2) >= 0x35) c += 1;
+    if (fraction.codeUnitAt(2) >= 0x35) c += 1;
     return d < 0 ? -c : c;
   }
 
@@ -110,32 +110,11 @@ class Money implements Comparable<Money> {
   /// Lança [UnsupportedError] se [factor] for `NaN` ou infinito.
   Money operator *(num factor) => Money((cents * factor).round());
 
-  /// Divide por um escalar, arredondando o resultado.
-  ///
-  /// - [divisor]: divisor adimensional.
-  ///
-  /// Lança [UnsupportedError] quando [divisor] é `0`: a divisão inteira em
-  /// Dart devolve `double`, então `cents / 0` produz `Infinity` (ou `NaN` se
-  /// [cents] também for zero) e `round()` recusa convertê-lo. Verificado — o
-  /// erro é `Unsupported operation: Infinity or NaN toInt`. **Não há retorno
-  /// silencioso**: a falha é visível no ponto da divisão, e por isso o chamador
-  /// precisa garantir `divisor != 0` em vez de conferir o resultado depois.
-  Money operator /(num divisor) => Money((cents / divisor).round());
-
   /// Inverte o sinal. Exato.
   Money operator -() => Money(-cents);
 
-  /// Estritamente menor que [other].
-  bool operator <(Money other) => cents < other.cents;
-
   /// Menor ou igual a [other].
   bool operator <=(Money other) => cents <= other.cents;
-
-  /// Estritamente maior que [other].
-  bool operator >(Money other) => cents > other.cents;
-
-  /// Maior ou igual a [other].
-  bool operator >=(Money other) => cents >= other.cents;
 
   @override
   int compareTo(Money other) => cents.compareTo(other.cents);

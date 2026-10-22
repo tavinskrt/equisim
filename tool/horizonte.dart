@@ -29,9 +29,9 @@ import 'package:equisim_core/equisim_core.dart';
 import 'validation/congelado.dart';
 import 'validation/regression.dart';
 
-const _horizontes = [5, 6, 7, 8, 9, 10, 12, 15, 20];
-const _referencia = 10;
-const _saida = 'docs/validacao/horizonte.json';
+const _horizons = [5, 6, 7, 8, 9, 10, 12, 15, 20];
+const _reference = 10;
+const _output = 'docs/validacao/horizonte.json';
 
 /// Percentil pelo método do índice truncado, o mesmo do resto das medições.
 double _q(List<double> v, double p) {
@@ -40,170 +40,168 @@ double _q(List<double> v, double p) {
   return o[(o.length * p).floor().clamp(0, o.length - 1)];
 }
 
-double _mediana(List<double> v) => _q(v, 0.5);
+double _median(List<double> v) => _q(v, 0.5);
 
-class _Leitura {
-  _Leitura(this.anos);
-  final int anos;
-  final Map<String, int> justoCentavos = {};
-  final Map<String, double> potencial = {};
-  final Map<String, double> pesoTerminal = {};
-  final Map<String, String> recusa = {};
+class _Reading {
+  final Map<String, int> fairValueCents = {};
+  final Map<String, double> upside = {};
+  final Map<String, double> terminalWeight = {};
+  final Map<String, String> refusal = {};
 }
 
 Future<void> main(List<String> args) async {
-  final c = await Congelado.montar();
+  final c = await Frozen.build();
   try {
-    final leituras = <int, _Leitura>{};
+    final readings = <int, _Reading>{};
 
-    for (final anos in _horizontes) {
-      final leitura = _Leitura(anos);
-      final avaliadas = <Ticker, ValuationResult?>{};
+    for (final years in _horizons) {
+      final reading = _Reading();
+      final evaluated = <Ticker, ValuationResult?>{};
       var i = 0;
-      for (final t in c.universo) {
+      for (final t in c.universe) {
         i++;
         if (i % 50 == 0) {
-          stderr.write('  $anos anos: $i/${c.universo.length}   \r');
+          stderr.write('  $years anos: $i/${c.universe.length}   \r');
         }
-        final prep = await c.preparar(t, anos: anos);
+        final prep = await c.prepare(t, years: years);
         if (prep.isErr) continue;
         final r = ValuationCascade.evaluate(prep.unwrap());
-        if (anos == _referencia) avaliadas[t] = r.valueOrNull;
+        if (years == _reference) evaluated[t] = r.valueOrNull;
         if (r.isErr) {
-          leitura.recusa[t.value] = r.failureOrNull!.message;
+          reading.refusal[t.value] = r.failureOrNull!.message;
           continue;
         }
         final v = r.unwrap();
-        leitura.justoCentavos[t.value] = v.fairValue.cents;
-        leitura.potencial[t.value] = v.upside;
-        final peso = v.diagnostics?.terminalShare;
-        if (peso != null) leitura.pesoTerminal[t.value] = peso;
+        reading.fairValueCents[t.value] = v.fairValue.cents;
+        reading.upside[t.value] = v.upside;
+        final weight = v.diagnostics?.terminalShare;
+        if (weight != null) reading.terminalWeight[t.value] = weight;
       }
-      leituras[anos] = leitura;
+      readings[years] = reading;
 
       // **A conferência é do horizonte de referência, e só dele.** Os outros
       // são, por construção, outra montagem: conferi-los contra o gabarito
       // acusaria divergência que é o próprio objeto da medição.
-      if (anos == _referencia) {
-        final div = await c.conferirContraGabarito(avaliadas);
+      if (years == _reference) {
+        final div = await c.checkAgainstAnswerKey(evaluated);
         if (div == null) {
           stderr.writeln('AVISO: gabarito ausente; a montagem não foi '
               'conferida.');
         } else if (div.isNotEmpty) {
-          stderr.writeln('ERRO: a montagem de $anos anos diverge do gabarito '
+          stderr.writeln('ERRO: a montagem de $years anos diverge do gabarito '
               'em ${div.length} ativo(s): ${div.take(8).join(", ")}');
           exitCode = 1;
           return;
         } else {
-          stdout.writeln('montagem de $_referencia anos conferida contra o '
+          stdout.writeln('montagem de $_reference anos conferida contra o '
               'gabarito: zero divergências.');
         }
       }
     }
     stderr.write('                                        \r');
 
-    final base = leituras[_referencia]!;
-    final linhas = <Map<String, dynamic>>[];
+    final base = readings[_reference]!;
+    final rows = <Map<String, dynamic>>[];
 
     stdout.writeln('');
     stdout.writeln('-- a varredura do horizonte, sobre a entrada congelada --');
     stdout.writeln('  anos  avaliados  entram  saem   preço justo vs 10        '
         'peso do terminal   postos vs 10');
 
-    for (final anos in _horizontes) {
-      final l = leituras[anos]!;
-      final comuns = l.justoCentavos.keys
-          .where(base.justoCentavos.containsKey)
+    for (final years in _horizons) {
+      final l = readings[years]!;
+      final common = l.fairValueCents.keys
+          .where(base.fairValueCents.containsKey)
           .toList()
         ..sort();
 
-      final variacao = <double>[
-        for (final k in comuns)
-          if (base.justoCentavos[k]! != 0)
-            l.justoCentavos[k]! / base.justoCentavos[k]! - 1,
+      final changeList = <double>[
+        for (final k in common)
+          if (base.fairValueCents[k]! != 0)
+            l.fairValueCents[k]! / base.fairValueCents[k]! - 1,
       ];
-      final entram = l.justoCentavos.keys
-          .where((k) => !base.justoCentavos.containsKey(k))
+      final included = l.fairValueCents.keys
+          .where((k) => !base.fairValueCents.containsKey(k))
           .toList()
         ..sort();
-      final saem = base.justoCentavos.keys
-          .where((k) => !l.justoCentavos.containsKey(k))
+      final leaving = base.fairValueCents.keys
+          .where((k) => !l.fairValueCents.containsKey(k))
           .toList()
         ..sort();
 
-      final rho = comuns.length < 3
+      final rho = common.length < 3
           ? null
           : Regression.spearman(
-              [for (final k in comuns) base.potencial[k]!],
-              [for (final k in comuns) l.potencial[k]!],
+              [for (final k in common) base.upside[k]!],
+              [for (final k in common) l.upside[k]!],
             );
 
-      final pesos = <double>[
-        for (final k in l.pesoTerminal.keys) l.pesoTerminal[k]!,
+      final weights = <double>[
+        for (final k in l.terminalWeight.keys) l.terminalWeight[k]!,
       ];
 
-      stdout.writeln('  ${anos.toString().padLeft(4)}  '
-          '${l.justoCentavos.length.toString().padLeft(9)}  '
-          '${entram.length.toString().padLeft(6)}  '
-          '${saem.length.toString().padLeft(4)}   '
-          'p25 ${_pct(_q(variacao, 0.25))}  med ${_pct(_mediana(variacao))}  '
-          'p75 ${_pct(_q(variacao, 0.75))}   '
-          '${(_mediana(pesos) * 100).toStringAsFixed(1).padLeft(6)}%   '
+      stdout.writeln('  ${years.toString().padLeft(4)}  '
+          '${l.fairValueCents.length.toString().padLeft(9)}  '
+          '${included.length.toString().padLeft(6)}  '
+          '${leaving.length.toString().padLeft(4)}   '
+          'p25 ${_pct(_q(changeList, 0.25))}  med ${_pct(_median(changeList))}  '
+          'p75 ${_pct(_q(changeList, 0.75))}   '
+          '${(_median(weights) * 100).toStringAsFixed(1).padLeft(6)}%   '
           '${rho == null ? "   —  " : rho.toStringAsFixed(4)}');
 
-      linhas.add({
-        'anos': anos,
-        'avaliados': l.justoCentavos.length,
-        'comuns': comuns.length,
-        'entram': entram,
-        'saem': saem,
+      rows.add({
+        'anos': years,
+        'avaliados': l.fairValueCents.length,
+        'comuns': common.length,
+        'entram': included,
+        'saem': leaving,
         'precoJusto': {
-          'p10': _q(variacao, 0.10),
-          'p25': _q(variacao, 0.25),
-          'mediana': _mediana(variacao),
-          'p75': _q(variacao, 0.75),
-          'p90': _q(variacao, 0.90),
-          'sobem': variacao.where((v) => v > 0).length,
+          'p10': _q(changeList, 0.10),
+          'p25': _q(changeList, 0.25),
+          'mediana': _median(changeList),
+          'p75': _q(changeList, 0.75),
+          'p90': _q(changeList, 0.90),
+          'sobem': changeList.where((v) => v > 0).length,
         },
-        'pesoTerminalMediano': _mediana(pesos),
+        'pesoTerminalMediano': _median(weights),
         'spearmanPotencialContra10': rho,
-        'formasDeRecusa': l.recusa.values.toSet().length,
+        'formasDeRecusa': l.refusal.values.toSet().length,
       });
     }
 
     // O par mais distante da varredura: se nem ele move a ordenação, nenhum
     // move.
-    final extremos = <String>[
-      for (final k in leituras[_horizontes.first]!.potencial.keys)
-        if (leituras[_horizontes.last]!.potencial.containsKey(k)) k,
+    final extremes = <String>[
+      for (final k in readings[_horizons.first]!.upside.keys)
+        if (readings[_horizons.last]!.upside.containsKey(k)) k,
     ]..sort();
-    final rhoExtremo = extremos.length < 3
+    final extremeRho = extremes.length < 3
         ? null
         : Regression.spearman(
             [
-              for (final k in extremos)
-                leituras[_horizontes.first]!.potencial[k]!
+              for (final k in extremes)
+                readings[_horizons.first]!.upside[k]!
             ],
             [
-              for (final k in extremos)
-                leituras[_horizontes.last]!.potencial[k]!
+              for (final k in extremes)
+                readings[_horizons.last]!.upside[k]!
             ],
           );
     stdout.writeln('');
-    stdout.writeln('  ${_horizontes.first} contra ${_horizontes.last} anos, '
-        'nos ${extremos.length} que os dois avaliam: '
-        'postos ${rhoExtremo?.toStringAsFixed(4) ?? "—"}');
+    stdout.writeln('  ${_horizons.first} contra ${_horizons.last} anos, '
+        'nos ${extremes.length} que os dois avaliam: '
+        'postos ${extremeRho?.toStringAsFixed(4) ?? "—"}');
 
     final json = <String, dynamic>{
-      'referencia': _referencia,
-      'horizontes': linhas,
-      'spearmanExtremos': rhoExtremo,
-      'ativosNosExtremos': extremos.length,
+      'referencia': _reference,
+      'horizontes': rows,
+      'spearmanExtremos': extremeRho,
+      'ativosNosExtremos': extremes.length,
     };
-    File(_saida).writeAsStringSync(
+    File(_output).writeAsStringSync(
         const JsonEncoder.withIndent('  ').convert(json));
     stdout.writeln('');
-    stdout.writeln('escrito $_saida');
+    stdout.writeln('escrito $_output');
   } finally {
     await c.ctx.dispose();
   }

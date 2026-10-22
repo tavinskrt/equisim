@@ -61,39 +61,39 @@ import 'package:equisim/data/repositories/b3_registry_repository.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 14);
-const _arquivo = 'docs/validacao/gabarito_cascata.json';
-const _pasta = 'data/gabarito';
-const _cache = '$_pasta/cache.sqlite';
-const _ibovespa = '$_pasta/ibovespa.json';
-const _universo = '$_pasta/universo.json';
+final _today = DateTime(2026, 9, 14);
+const _file = 'docs/validacao/gabarito_cascata.json';
+const _folder = 'data/gabarito';
+const _cache = '$_folder/cache.sqlite';
+const _ibovespa = '$_folder/ibovespa.json';
+const _universe = '$_folder/universo.json';
 
 /// O Ibovespa servido, por janela: gravado na primeira execução e repetido nas
 /// seguintes. Janela que não foi gravada é recusada, e a divergência aparece.
-class _IbovespaCongelado implements BenchmarkRepository {
-  _IbovespaCongelado(this.rede, this.gravado);
-  final BenchmarkRepository? rede;
-  final Map<String, PriceSeries> gravado;
+class _FrozenIbovespa implements BenchmarkRepository {
+  _FrozenIbovespa(this.network, this.saved);
+  final BenchmarkRepository? network;
+  final Map<String, PriceSeries> saved;
 
-  static String _chave(DateRange r) =>
+  static String _key(DateRange r) =>
       '${r.start.toIso8601String()}|${r.end.toIso8601String()}';
 
   @override
   Future<Result<PriceSeries>> ibovespa(DateRange range) async {
-    final k = _chave(range);
-    final g = gravado[k];
+    final k = _key(range);
+    final g = saved[k];
     if (g != null) return Ok(g);
-    final fonte = rede;
-    if (fonte == null) {
+    final source = network;
+    if (source == null) {
       return Err(InsufficientData('Ibovespa não gravado para $k'));
     }
-    final r = await fonte.ibovespa(range);
-    if (r.isOk) gravado[k] = r.unwrap();
+    final r = await source.ibovespa(range);
+    if (r.isOk) saved[k] = r.unwrap();
     return r;
   }
 
   Map<String, Object?> toJson() => {
-        for (final e in gravado.entries)
+        for (final e in saved.entries)
           e.key: {
             'ticker': e.value.ticker.value,
             'pontos': [
@@ -128,9 +128,9 @@ class _IbovespaCongelado implements BenchmarkRepository {
 /// FNV-1a de 64 bits sobre o texto. O rastro de auditoria do universo inteiro
 /// passa de centenas de megabytes; o gabarito guarda a impressão dele, e o
 /// modo `--rastro TICKER` mostra o rastro de um ativo para achar a diferença.
-String _impressao(String texto) {
+String _fingerprint(String text) {
   var h = 0xcbf29ce484222325;
-  for (final u in utf8.encode(texto)) {
+  for (final u in utf8.encode(text)) {
     h ^= u;
     h = (h * 0x100000001b3) & 0xFFFFFFFFFFFFFFFF;
   }
@@ -139,7 +139,7 @@ String _impressao(String texto) {
 
 /// Tudo o que o resultado expõe. `double.toString()` é a representação mais
 /// curta que volta ao mesmo bit — é o que torna a comparação exata.
-Map<String, Object?> _serializar(Result<ValuationResult> r) {
+Map<String, Object?> _serialize(Result<ValuationResult> r) {
   if (r.isErr) return {'recusa': r.failureOrNull!.message};
   final v = r.unwrap();
   final d = v.diagnostics;
@@ -160,7 +160,7 @@ Map<String, Object?> _serializar(Result<ValuationResult> r) {
         'p5': dist.p5.toString(),
         'mediana': dist.median.toString(),
         'p95': dist.p95.toString(),
-        'impressao': _impressao(dist.sortedValues.join(',')),
+        'impressao': _fingerprint(dist.sortedValues.join(',')),
       },
     'avisos': v.warnings,
     if (d != null)
@@ -183,152 +183,173 @@ Map<String, Object?> _serializar(Result<ValuationResult> r) {
         'ke': d.costOfEquity.toString(),
         'caminhoCrescimento': [for (final x in d.growthPath) x.toString()],
         'caminhoRetencao': [for (final x in d.retentionPath) x.toString()],
-        'ressalvas': [for (final c in d.caveats) c.name],
+        'ressalvas': [for (final c in d.caveats) c.key],
       },
   };
 }
 
-/// Os mesmos insumos com as imposições de diagnóstico. `ValuationInputs` não
-/// tem cópia genérica, e é de propósito: as imposições não são do aplicativo.
-ValuationInputs _impor(
+/// Os mesmos insumos com as imposições de diagnóstico.
+///
+/// **Pela cópia do núcleo** (item B27). A versão à mão perdia a composição
+/// declarada da unit, a taxa de referência do crédito, a janela do beta e os
+/// múltiplos de pares, e as montagens de diagnóstico rodavam outro divisor nas
+/// units.
+ValuationInputs _impose(
   ValuationInputs b, {
-  ValuationLane? via,
-  bool tudo = false,
+  ValuationLane? lane,
+  bool everything = false,
 }) =>
-    ValuationInputs(
-      ticker: b.ticker,
-      asOf: b.asOf,
-      fundamentals: b.fundamentals,
-      marketPrice: b.marketPrice,
-      capm: b.capm,
-      marginOfSafety: b.marginOfSafety,
-      projectionYears: b.projectionYears,
-      perpetualGrowthCap: b.perpetualGrowthCap,
-      sectorKey: b.sectorKey,
-      industry: b.industry,
-      inflation: b.inflation,
-      declaredTerminalRiskFreeRate: b.declaredTerminalRiskFreeRate,
-      riskFreeCurve: b.riskFreeCurve,
-      officialShares: b.officialShares,
-      prices: b.prices,
-      isDistressed: b.isDistressed,
-      unleveredBeta: b.unleveredBeta,
-      concessionEnd: b.concessionEnd,
-      dividendsInBeta: b.dividendsInBeta,
-      laneOverride: via,
-      terminalReturnOverride: tudo ? 0.13 : null,
-      growthOverride: tudo ? 0.06 : null,
-      baseFactorOverride: tudo ? 1.1 : null,
-      reinvestmentOverride: tudo ? ReinvestmentPolicy.crescimentoReal : null,
-      cashTimingOverride: tudo ? CashTiming.fimDeAno : null,
+    b.withOverrides(
+      lane: lane,
+      terminalReturn: everything ? 0.13 : null,
+      growth: everything ? 0.06 : null,
+      baseFactor: everything ? 1.1 : null,
+      reinvestment: everything ? ReinvestmentPolicy.realGrowth : null,
+      cashTiming: everything ? CashTiming.endOfYear : null,
     );
 
-class _DaCvm implements FundamentalsRepository {
-  final FundamentalsRepository mercado;
+class _FromCvm implements FundamentalsRepository {
+  final FundamentalsRepository market;
   final Map<String, List<CvmPeriodDocument>> docs;
-  final bool ancorada;
-  _DaCvm(this.mercado, this.docs, {this.ancorada = false});
+  final bool anchored;
+  _FromCvm(this.market, this.docs, {this.anchored = false});
 
   @override
   Future<Result<List<FundamentalsSnapshot>>> history(Ticker t) async {
-    final base = await mercado.history(t);
+    final base = await market.history(t);
     if (base.isErr) return base;
-    final meus = docs[t.value];
-    if (meus == null || meus.isEmpty) return base;
+    final ownDocs = docs[t.value];
+    if (ownDocs == null || ownDocs.isEmpty) return base;
     return Ok(CvmSeries.build(
-      documentos: meus,
-      mercado: base.unwrap(),
-      asOf: _hoje,
-      publicado: PointInTimeView(_hoje).isPublished,
-      ancorada: ancorada,
+      documents: ownDocs,
+      market: base.unwrap(),
+      published: PointInTimeView(_today).isPublished,
+      anchored: anchored,
     ).series);
   }
 
   @override
-  Future<Result<Asset>> profile(Ticker t) => mercado.profile(t);
+  Future<Result<Asset>> profile(Ticker t) => market.profile(t);
 
   @override
-  Future<Result<List<Ticker>>> universe() => mercado.universe();
+  Future<Result<List<Ticker>>> universe() => market.universe();
 }
 
 Future<void> main(List<String> args) async {
-  final iMonotonia = args.indexOf('--monotonia');
-  final saidaMonotonia = iMonotonia >= 0 ? args[iMonotonia + 1] : null;
-  final iNivel = args.indexOf('--nivel');
-  final soNivel = iNivel >= 0 ? args[iNivel + 1] : null;
-  final conferir = args.contains('--conferir') ||
-      saidaMonotonia != null ||
-      soNivel != null ||
+  final monotonicityIndex = args.indexOf('--monotonia');
+  final monotonicityOutput = monotonicityIndex >= 0 ? args[monotonicityIndex + 1] : null;
+  final levelIndex = args.indexOf('--nivel');
+  final levelOnly = levelIndex >= 0 ? args[levelIndex + 1] : null;
+  final check = args.contains('--conferir') ||
+      monotonicityOutput != null ||
+      levelOnly != null ||
       args.contains('--regravar');
-  final iRastro = args.indexOf('--rastro');
-  final soRastro = iRastro >= 0 ? args[iRastro + 1] : null;
+  final traceIndex = args.indexOf('--rastro');
+  final traceOnly = traceIndex >= 0 ? args[traceIndex + 1] : null;
   // **Regravar sobre a entrada já congelada.** Medir o efeito de uma mudança
   // pede gravar de novo *sem* atualizar cache, Ibovespa e universo — se a
   // entrada se mover junto com o código, a diferença mistura os dois. É o que
   // o `--conferir` já faz para comparar, e o que faltava para quantificar.
-  final iSaida = args.indexOf('--saida');
-  final saidaArquivo = iSaida >= 0 ? args[iSaida + 1] : _arquivo;
-  final regravar = args.contains('--regravar');
+  final outputIndex = args.indexOf('--saida');
+  final outputFile = outputIndex >= 0 ? args[outputIndex + 1] : _file;
+  final rewrite = args.contains('--regravar');
 
   // **A entrada sai dos pacotes versionados, e não da base bruta.** Os
   // pacotes são o que o aplicativo lê, e vêm no clone: o gabarito passou a
   // reproduzir-se sem os 750 MB da CVM nem o arquivo do Tesouro, que não
   // sobrevivem a uma máquina nova. Antes a curva vinha do CSV do Tesouro e os
   // documentos, da base ingerida — as duas fontes de que o pacote é gerado.
-  final curva = TreasuryCurve.at(
+  final curve = TreasuryCurve.at(
       TreasuryQuotesCodec.decode(
           jsonDecode(File('assets/tesouro/curva.json').readAsStringSync())
               as Map<String, dynamic>),
-      _hoje);
-  final registro = B3RegistryCodec.decodePackage(
+      _today);
+  final registry = B3RegistryCodec.decodePackage(
       jsonDecode(File('assets/b3/emissores.json').readAsStringSync())
           as Map<String, dynamic>);
   final docs = CvmDocumentCodec.decodePackage(
       jsonDecode(File('assets/cvm/documentos.json').readAsStringSync())
           as Map<String, dynamic>);
-  final prazos = ConcessionTermsCodec.decode(
+  final terms = ConcessionTermsCodec.decode(
       jsonDecode(File('assets/cvm/outorgas.json').readAsStringSync())
           as Map<String, dynamic>);
-  final proventos = CashDividendsCodec.decode(
+  final dividends = CashDividendsCodec.decode(
       jsonDecode(File('assets/b3/proventos.json').readAsStringSync())
           as Map<String, dynamic>);
   // O prior do pacote e a composição declarada das units: são o que o
   // aplicativo lê, e por isso é deles que a montagem `aplicativo` parte
   // (itens B11 e B16). O prior **resolvido** sobre a entrada congelada continua
   // na montagem `prior`, que é o diagnóstico.
-  final priorDoPacote = File('assets/mercado/beta_prior.json').existsSync()
+  final packagePrior = File('assets/mercado/beta_prior.json').existsSync()
       ? BetaPriorCodec.decode(
           jsonDecode(File('assets/mercado/beta_prior.json').readAsStringSync())
               as Map<String, dynamic>)
       : null;
+  // O prêmio de mercado do pacote (decisão 142): a média de dez anos do
+  // prêmio implícito na data do gabarito, que é o que o aplicativo lê. As
+  // montagens `doisPontos` e `curva` ficam com os 5,5% parametrizados — são o
+  // registro das montagens antigas, e não o aplicativo.
+  final premiumPackage =
+      File('assets/mercado/premio_implicito.json').existsSync()
+          ? ImpliedPremiumCodec.decode(jsonDecode(
+                  File('assets/mercado/premio_implicito.json')
+                      .readAsStringSync()) as Map<String, dynamic>)
+          : null;
+  final packagePremium = premiumPackage?.normalizedAt(_today);
+  if (packagePremium == null) {
+    stderr.writeln('sem assets/mercado/premio_implicito.json utilizável: rode '
+        'dart run tool/premio_implicito.dart --so-serie');
+    exitCode = 2;
+    return;
+  }
+  // Os eventos de capital do pacote (itens B28 e B29): a montagem do
+  // aplicativo completa o ajuste da série e soma a emissão declarada.
+  final capital = File('assets/cvm/capital.json').existsSync()
+      ? CapitalEventsCodec.decodePackage(
+          jsonDecode(File('assets/cvm/capital.json').readAsStringSync())
+              as Map<String, dynamic>)
+      : const <String, CapitalEvents>{};
   final units = File('assets/cvm/units.json').existsSync()
       ? UnitCompositionCodec.decodePackage(
           jsonDecode(File('assets/cvm/units.json').readAsStringSync())
               as Map<String, dynamic>)
       : const <String, List<UnitComposition>>{};
+  // O controle acionário (item B46): a montagem do aplicativo leva a ressalva.
+  final control = File('assets/cvm/controle.json').existsSync()
+      ? ShareholderControlHistory.decode(
+                  jsonDecode(File('assets/cvm/controle.json').readAsStringSync())
+                      as Map<String, dynamic>)
+              ?.byIssuer ??
+          const <String, List<ShareholderControlPeriod>>{}
+      : const <String, List<ShareholderControlPeriod>>{};
+  bool stateOwned(Ticker t) {
+    final p = control[t.value.substring(0, 4)];
+    return p != null &&
+        ShareholderControlHistory.at(p, _today) == ShareholderControl.state;
+  }
 
   // O rastro de cada avaliação é capturado no fim da transação dela.
-  AuditEvent? ultimo;
-  AuditRecorder.attach((e) => ultimo = e);
+  AuditEvent? last;
+  AuditRecorder.attach((e) => last = e);
 
   // A gravação parte de uma cópia do cache da validação; a conferência usa a
   // cópia que a gravação deixou.
-  Directory(_pasta).createSync(recursive: true);
-  if (!conferir && soRastro == null) {
-    final origem = File('docs/validacao/${ValidationContext.cacheFileName}');
-    if (origem.existsSync()) origem.copySync(_cache);
+  Directory(_folder).createSync(recursive: true);
+  if (!check && traceOnly == null) {
+    final origin = File('docs/validacao/${ValidationContext.cacheFileName}');
+    if (origin.existsSync()) origin.copySync(_cache);
     if (File(_ibovespa).existsSync()) File(_ibovespa).deleteSync();
   } else if (!File(_cache).existsSync() || !File(_ibovespa).existsSync()) {
-    stderr.writeln('sem entrada congelada em $_pasta — grave o gabarito antes');
+    stderr.writeln('sem entrada congelada em $_folder — grave o gabarito antes');
     exitCode = 2;
     return;
   }
   final ctx0 = ValidationContext.create(
       outputDir: 'docs/validacao', cacheFile: _cache, frozenCache: true);
-  final ibov = _IbovespaCongelado(
-    conferir || soRastro != null ? null : ctx0.benchmark,
-    conferir || soRastro != null
-        ? _IbovespaCongelado.fromJson(
+  final ibov = _FrozenIbovespa(
+    check || traceOnly != null ? null : ctx0.benchmark,
+    check || traceOnly != null
+        ? _FrozenIbovespa.fromJson(
             jsonDecode(File(_ibovespa).readAsStringSync())
                 as Map<String, dynamic>)
         : {},
@@ -343,54 +364,54 @@ Future<void> main(List<String> args) async {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
     // **O universo também é entrada**, e vem da rede: em 15/09/2026 a fonte
     // passou a listar a EQPA7 e deixou de listar a COCE3, e as duas apareciam
     // como divergência do gabarito sem que o código tivesse mudado. A gravação
     // guarda a lista, e a conferência a repete.
-    final universoGravado = File(_universo);
-    final List<Ticker> universoInteiro;
-    if (!conferir && soRastro == null) {
-      universoInteiro = (await ctx.fundamentals.universe()).unwrap();
-      universoGravado.writeAsStringSync(
-          jsonEncode([for (final t in universoInteiro) t.value]));
-    } else if (universoGravado.existsSync()) {
-      universoInteiro = [
-        for (final s in (jsonDecode(universoGravado.readAsStringSync()) as List)
+    final savedUniverse = File(_universe);
+    final List<Ticker> wholeUniverse;
+    if (!check && traceOnly == null) {
+      wholeUniverse = (await ctx.fundamentals.universe()).unwrap();
+      savedUniverse.writeAsStringSync(
+          jsonEncode([for (final t in wholeUniverse) t.value]));
+    } else if (savedUniverse.existsSync()) {
+      wholeUniverse = [
+        for (final s in (jsonDecode(savedUniverse.readAsStringSync()) as List)
             .cast<String>())
           Ticker.parse(s),
       ];
     } else {
-      universoInteiro = (await ctx.fundamentals.universe()).unwrap();
+      wholeUniverse = (await ctx.fundamentals.universe()).unwrap();
     }
-    var universe = universoInteiro;
-    if (soRastro != null) {
-      universe = [for (final t in universe) if (t.value == soRastro) t];
+    var universe = wholeUniverse;
+    if (traceOnly != null) {
+      universe = [for (final t in universe) if (t.value == traceOnly) t];
     }
 
-    B3Issuer? emissor(Ticker t) =>
-        registro[t.value.length >= 4 ? t.value.substring(0, 4) : ''];
-    Future<B3Classification?> classe(Ticker t) async =>
-        emissor(t)?.classification;
-    final daCvm = _DaCvm(ctx.fundamentals, docs);
-    final comSetor = OfficialSectorFundamentalsRepository(
-        inner: daCvm, classificacao: classe);
-    final ancoradaComSetor = OfficialSectorFundamentalsRepository(
-        inner: _DaCvm(ctx.fundamentals, docs, ancorada: true),
-        classificacao: classe);
-    List<CashDividend> proventosDe(Ticker t) =>
-        CashDividendsCodec.forTicker(proventos, t.value);
+    B3Issuer? issuer(Ticker t) =>
+        registry[t.value.length >= 4 ? t.value.substring(0, 4) : ''];
+    Future<B3Classification?> shareClass(Ticker t) async =>
+        issuer(t)?.classification;
+    final fromCvm = _FromCvm(ctx.fundamentals, docs);
+    final withSector = OfficialSectorFundamentalsRepository(
+        inner: fromCvm, classification: shareClass);
+    final anchoredWithSector = OfficialSectorFundamentalsRepository(
+        inner: _FromCvm(ctx.fundamentals, docs, anchored: true),
+        classification: shareClass);
+    List<CashDividend> dividendsOf(Ticker t) =>
+        CashDividendsCodec.forTicker(dividends, t.value);
 
     // O prior sai do universo inteiro, na montagem do aplicativo.
     final prior = await ResolveBetaPrior.call(
-      tickers: universoInteiro,
+      tickers: wholeUniverse,
       prices: ctx.prices,
-      fundamentals: comSetor,
+      fundamentals: withSector,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
-      dividendsFor: proventosDe,
+      asOf: _today,
+      dividendsFor: dividendsOf,
     );
     if (prior == null) {
       stderr.writeln('sem prior do beta: as montagens com prior não valem');
@@ -398,21 +419,25 @@ Future<void> main(List<String> args) async {
       return;
     }
 
-    Future<Result<ValuationInputs>> preparar(
+    Future<Result<ValuationInputs>> prepare(
       Ticker t, {
-      required FundamentalsRepository fundamentos,
+      required FundamentalsRepository fundamentals,
       YieldCurve? c,
       bool app = false,
-      bool comPrior = false,
+      bool withPrior = false,
     }) {
-      final e = emissor(t);
+      final e = issuer(t);
       return PrepareValuationInputs.call(
         ticker: t,
         prices: ctx.prices,
-        fundamentals: fundamentos,
+        fundamentals: fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
+        marketPremium: app ? packagePremium : CapmInputs.defaultMarketPremium,
+        premiumSource: app
+            ? MarketPremiumSource.impliedNormalized
+            : MarketPremiumSource.parameterized,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
@@ -421,195 +446,201 @@ Future<void> main(List<String> args) async {
         officialShares: app && e?.totalShares != null
             ? OfficialShareCount(total: e!.totalShares!, asOf: e.consultedOn)
             : null,
-        concessionEnd: app ? prazos[t.value]?.end : null,
-        dividends: app ? proventosDe(t) : null,
+        concessionEnd: app ? terms[t.value]?.end : null,
+        dividends: app ? dividendsOf(t) : null,
         // A montagem do aplicativo usa o prior **do pacote**, que é o que ele
         // lê; a montagem `prior` usa o resolvido sobre a entrada congelada.
-        betaPrior: comPrior ? prior : (app ? priorDoPacote?.prior : null),
+        betaPrior: withPrior ? prior : (app ? packagePrior?.prior : null),
         declaredSharesPerUnit: app
-            ? UnitCompositionCodec.at(units[t.value] ?? const [], _hoje)?.shares
+            ? UnitCompositionCodec.at(units[t.value] ?? const [], _today)?.shares
             : null,
+        shareEvents: app ? capital[t.value]?.shareEvents ?? const [] : const [],
+        shareIssues: app ? capital[t.value]?.issues ?? const [] : const [],
+        stateControlled: app && stateOwned(t),
       );
     }
 
-    if (soNivel != null) {
+    if (levelOnly != null) {
       AuditRecorder.detach();
-      for (final (nome, comPrior) in [('aplicativo', false), ('prior', true)]) {
-        final p = await preparar(Ticker.parse(soNivel),
-            fundamentos: comSetor, c: curva, app: true, comPrior: comPrior);
+      for (final (name, withPrior) in [('aplicativo', false), ('prior', true)]) {
+        final p = await prepare(Ticker.parse(levelOnly),
+            fundamentals: withSector, c: curve, app: true, withPrior: withPrior);
         if (p.isErr) continue;
-        stdout.writeln('== $soNivel, $nome');
-        _abrirGrade(p.unwrap());
+        stdout.writeln('== $levelOnly, $name');
+        _openGrid(p.unwrap());
       }
       return;
     }
-    if (saidaMonotonia != null) {
+    if (monotonicityOutput != null) {
       AuditRecorder.detach();
-      await _varrerNivel(
+      await _sweepLevel(
         universe: universe,
-        saida: saidaMonotonia,
-        aplicativo: (t) =>
-            preparar(t, fundamentos: comSetor, c: curva, app: true),
-        prior: (t) => preparar(t,
-            fundamentos: comSetor, c: curva, app: true, comPrior: true),
+        output: monotonicityOutput,
+        app: (t) =>
+            prepare(t, fundamentals: withSector, c: curve, app: true),
+        prior: (t) => prepare(t,
+            fundamentals: withSector, c: curve, app: true, withPrior: true),
       );
       return;
     }
 
-    final rastros = <String, Object?>{};
-    Map<String, Object?> avaliar(ValuationInputs i, {bool sorteio = false}) {
-      ultimo = null;
+    final traces = <String, Object?>{};
+    Map<String, Object?> evaluate(ValuationInputs i, {bool random = false}) {
+      last = null;
       final r = ValuationCascade.evaluate(
         i,
-        scenarioBuilder: sorteio ? StochasticScenarios.around : null,
+        scenarioBuilder: random ? StochasticScenarios.around : null,
         monteCarloSamples: 300,
       );
-      final ev = ultimo;
-      final rastro = ev == null
+      final ev = last;
+      // Pela serialização segura do evento (item D4): um `NaN` no rastro sai
+      // como texto, em vez de derrubar a gravação do gabarito.
+      final j = ev?.toJson();
+      final trace = j == null
           ? null
           : jsonEncode({
-              'entrada': ev.inputPayload,
-              'saida': ev.outputPayload,
-              'calculos': [for (final c in ev.calculations) c.toJson()],
+              'entrada': j['inputPayload'],
+              'saida': j['outputPayload'],
+              'calculos': j['calculations'],
             });
-      if (soRastro != null) rastros['${rastros.length}'] = jsonDecode(rastro ?? 'null');
+      if (traceOnly != null) traces['${traces.length}'] = jsonDecode(trace ?? 'null');
       return {
-        ..._serializar(r),
-        'rastro': rastro == null ? null : _impressao(rastro),
+        ..._serialize(r),
+        'rastro': trace == null ? null : _fingerprint(trace),
       };
     }
 
-    final saida = <String, Object?>{};
-    final cobertura = <String, int>{};
-    void conta(String k) => cobertura[k] = (cobertura[k] ?? 0) + 1;
+    final output = <String, Object?>{};
+    final coverage = <String, int>{};
+    void account(String k) => coverage[k] = (coverage[k] ?? 0) + 1;
     var n = 0;
     for (final t in universe) {
       if (++n % 25 == 0) stderr.write('  $n/${universe.length}   \r');
-      final linha = <String, Object?>{};
+      final row = <String, Object?>{};
 
-      Future<void> montagem(
-        String nome,
+      Future<void> assembly(
+        String name,
         Future<Result<ValuationInputs>> prep,
         Map<String, Object?> Function(ValuationInputs) f,
       ) async {
         final p = await prep;
         if (p.isErr) {
-          linha[nome] = {'preparo': p.failureOrNull!.message};
+          row[name] = {'preparo': p.failureOrNull!.message};
           return;
         }
         final s = f(p.unwrap());
-        linha[nome] = s;
-        final avisos = (s['avisos'] as List?)?.cast<String>() ?? const [];
-        if (s.containsKey('recusa')) conta('$nome: recusa');
-        if (avisos.any((a) => a.contains('resolvido ano a ano'))) {
-          conta('$nome: taxas resolvidas');
+        row[name] = s;
+        final warnings = (s['avisos'] as List?)?.cast<String>() ?? const [];
+        if (s.containsKey('recusa')) account('$name: recusa');
+        if (warnings.any((a) => a.contains('resolvido ano a ano'))) {
+          account('$name: taxas resolvidas');
         }
-        if (avisos.any((a) => a.contains('não sustenta a via'))) {
-          conta('$nome: estrutura recusada e migrada');
+        if (warnings.any((a) => a.contains('não sustenta a via'))) {
+          account('$name: estrutura recusada e migrada');
         }
-        if (avisos.any((a) => a.contains('nenhuma das duas vias domina'))) {
-          conta('$nome: vias mescladas');
+        if (warnings.any((a) => a.contains('nenhuma das duas vias domina'))) {
+          account('$name: vias mescladas');
         }
-        if (avisos.any((a) => a.contains('migra para o fluxo do acionista'))) {
-          conta('$nome: migração');
+        if (warnings.any((a) => a.contains('migra para o fluxo do acionista'))) {
+          account('$name: migração');
         }
-        if (avisos.any((a) => a.contains('não se estabilizaram'))) {
-          conta('$nome: veredito sem ponto fixo');
+        if (warnings.any((a) => a.contains('não se estabilizaram'))) {
+          account('$name: veredito sem ponto fixo');
         }
-        if (avisos.any((a) => a.contains('reconstruído do ciclo'))) {
-          conta('$nome: base reconstruída');
+        if (warnings.any((a) => a.contains('reconstruído do ciclo'))) {
+          account('$name: base reconstruída');
         }
-        if (avisos.any((a) => a.contains('até o fim do contrato'))) {
-          conta('$nome: terminal do contrato');
+        if (warnings.any((a) => a.contains('até o fim do contrato'))) {
+          account('$name: terminal do contrato');
         }
       }
 
-      await montagem('doisPontos',
-          preparar(t, fundamentos: ctx.fundamentals), avaliar);
-      await montagem('curva',
-          preparar(t, fundamentos: ctx.fundamentals, c: curva), avaliar);
-      await montagem('aplicativo',
-          preparar(t, fundamentos: comSetor, c: curva, app: true), avaliar);
-      await montagem(
+      await assembly('doisPontos',
+          prepare(t, fundamentals: ctx.fundamentals), evaluate);
+      await assembly('curva',
+          prepare(t, fundamentals: ctx.fundamentals, c: curve), evaluate);
+      await assembly('aplicativo',
+          prepare(t, fundamentals: withSector, c: curve, app: true), evaluate);
+      await assembly(
           'ancorada',
-          preparar(t, fundamentos: ancoradaComSetor, c: curva, app: true),
-          avaliar);
-      final comPrior =
-          preparar(t, fundamentos: comSetor, c: curva, app: true, comPrior: true);
-      await montagem('prior', comPrior, avaliar);
-      await montagem(
-          'monteCarlo', comPrior, (i) => avaliar(i, sorteio: true));
-      await montagem('viaFirma', comPrior,
-          (i) => avaliar(_impor(i, via: ValuationLane.firm)));
-      await montagem('viaAcionista', comPrior,
-          (i) => avaliar(_impor(i, via: ValuationLane.shareholder)));
-      await montagem(
-          'impostos', comPrior, (i) => avaliar(_impor(i, tudo: true)));
-      saida[t.value] = linha;
+          prepare(t, fundamentals: anchoredWithSector, c: curve, app: true),
+          evaluate);
+      final withPrior =
+          prepare(t, fundamentals: withSector, c: curve, app: true, withPrior: true);
+      await assembly('prior', withPrior, evaluate);
+      await assembly(
+          'monteCarlo', withPrior, (i) => evaluate(i, random: true));
+      await assembly('viaFirma', withPrior,
+          (i) => evaluate(_impose(i, lane: ValuationLane.firm)));
+      await assembly('viaAcionista', withPrior,
+          (i) => evaluate(_impose(i, lane: ValuationLane.shareholder)));
+      await assembly(
+          'impostos', withPrior, (i) => evaluate(_impose(i, everything: true)));
+      output[t.value] = row;
     }
     stderr.writeln('');
 
-    if (soRastro != null) {
-      stdout.writeln(const JsonEncoder.withIndent(' ').convert(rastros));
+    if (traceOnly != null) {
+      stdout.writeln(const JsonEncoder.withIndent(' ').convert(traces));
       return;
     }
 
-    final chaves = cobertura.keys.toList()..sort();
+    final keys = coverage.keys.toList()..sort();
     stdout.writeln('cobertura dos caminhos (ativos por montagem):');
-    for (final k in chaves) {
-      stdout.writeln('  ${k.padRight(44)} ${cobertura[k]}');
+    for (final k in keys) {
+      stdout.writeln('  ${k.padRight(44)} ${coverage[k]}');
     }
-    final recusas = <String>{
-      for (final l in saida.values)
+    final refusals = <String>{
+      for (final l in output.values)
         for (final m in (l! as Map).values)
           if (m is Map && m['recusa'] != null)
             (m['recusa'] as String).replaceAll(RegExp(r'[\d.,]+'), '#'),
     };
-    stdout.writeln('  formas distintas de recusa: ${recusas.length}');
+    stdout.writeln('  formas distintas de recusa: ${refusals.length}');
 
-    final texto = const JsonEncoder.withIndent(' ').convert(saida);
-    if (!conferir) {
+    final text = const JsonEncoder.withIndent(' ').convert(output);
+    if (!check) {
       File(_ibovespa).writeAsStringSync(jsonEncode(ibov.toJson()));
-      File(_arquivo).writeAsStringSync(texto);
-      stdout.writeln('gabarito gravado: ${saida.length} ativos em $_arquivo');
+      File(_file).writeAsStringSync(text);
+      stdout.writeln('gabarito gravado: ${output.length} ativos em $_file');
       return;
     }
-    if (regravar) {
-      File(saidaArquivo).writeAsStringSync(texto);
+    if (rewrite) {
+      File(outputFile).writeAsStringSync(text);
       stdout.writeln('gabarito regravado sobre a entrada congelada: '
-          '${saida.length} ativos em $saidaArquivo');
+          '${output.length} ativos em $outputFile');
       return;
     }
 
-    final gravado = jsonDecode(File(_arquivo).readAsStringSync())
+    final saved = jsonDecode(File(_file).readAsStringSync())
         as Map<String, dynamic>;
-    final agora = jsonDecode(texto) as Map<String, dynamic>;
-    final divergentes = <String>[];
-    for (final k in {...gravado.keys, ...agora.keys}) {
-      final g = gravado[k] as Map<String, dynamic>?;
-      final a = agora[k] as Map<String, dynamic>?;
+    final now = jsonDecode(text) as Map<String, dynamic>;
+    final divergent = <String>[];
+    for (final k in {...saved.keys, ...now.keys}) {
+      final g = saved[k] as Map<String, dynamic>?;
+      final a = now[k] as Map<String, dynamic>?;
       for (final m in {...?g?.keys, ...?a?.keys}) {
-        if (jsonEncode(g?[m]) != jsonEncode(a?[m])) divergentes.add('$k/$m');
+        if (jsonEncode(g?[m]) != jsonEncode(a?[m])) divergent.add('$k/$m');
       }
     }
-    divergentes.sort();
-    if (divergentes.isEmpty) {
-      stdout.writeln('GABARITO IDÊNTICO: ${agora.length} ativos, nove '
+    divergent.sort();
+    if (divergent.isEmpty) {
+      stdout.writeln('GABARITO IDÊNTICO: ${now.length} ativos, nove '
           'montagens cada, saída completa e rastro bit a bit.');
     } else {
-      stdout.writeln('GABARITO DIVERGE em ${divergentes.length} montagem(ns):');
+      stdout.writeln('GABARITO DIVERGE em ${divergent.length} montagem(ns):');
       // Por montagem, primeiro: a entrada da CVM não é congelada, e uma
       // reingestão muda a `ancorada` sem que o código tenha mudado.
-      final porMontagem = <String, int>{};
-      for (final k in divergentes) {
+      final byAssembly = <String, int>{};
+      for (final k in divergent) {
         final m = k.substring(k.indexOf('/') + 1);
-        porMontagem[m] = (porMontagem[m] ?? 0) + 1;
+        byAssembly[m] = (byAssembly[m] ?? 0) + 1;
       }
-      stdout.writeln('  por montagem: $porMontagem');
-      for (final k in divergentes.where((k) => !k.endsWith('/ancorada'))) {
+      stdout.writeln('  por montagem: $byAssembly');
+      for (final k in divergent.where((k) => !k.endsWith('/ancorada'))) {
         stdout.writeln('  $k');
       }
-      for (final k in divergentes.take(30)) {
+      for (final k in divergent.take(30)) {
         stdout.writeln('  $k');
       }
       exitCode = 1;
@@ -621,119 +652,119 @@ Future<void> main(List<String> args) async {
 }
 
 /// Deslocamentos do nível da taxa livre de risco na varredura do B10.
-final _grade = [for (var i = -12; i <= 12; i++) i * 0.0025];
+final _grid = [for (var i = -12; i <= 12; i++) i * 0.0025];
 
 /// A varredura do nível da curva (item B10): em cada ativo e montagem, o preço
 /// justo ao longo da grade, e se ele sobe quando o capital encarece.
 ///
 /// **Tolerância de 0,1% do preço de mercado**, a mesma do `dcf_reverso`:
 /// variação abaixo disso é ruído de ponto flutuante, e não direção.
-Future<void> _varrerNivel({
+Future<void> _sweepLevel({
   required List<Ticker> universe,
-  required String saida,
-  required Future<Result<ValuationInputs>> Function(Ticker) aplicativo,
+  required String output,
+  required Future<Result<ValuationInputs>> Function(Ticker) app,
   required Future<Result<ValuationInputs>> Function(Ticker) prior,
 }) async {
-  final linhas = <String, Object?>{};
-  final resumo = <String, Map<String, int>>{};
-  void conta(String montagem, String k) {
-    final m = resumo[montagem] ??= <String, int>{};
+  final rows = <String, Object?>{};
+  final summary = <String, Map<String, int>>{};
+  void account(String assembly, String k) {
+    final m = summary[assembly] ??= <String, int>{};
     m[k] = (m[k] ?? 0) + 1;
   }
 
-  String estado(ValuationResult v) {
-    final avisos = v.warnings.join(' ');
-    if (avisos.contains('nenhuma das duas vias domina')) return 'mescla';
-    if (avisos.contains('não sustenta a via')) return 'estruturaRecusada';
-    if (avisos.contains('migra para o fluxo do acionista')) return 'migrada';
+  String status(ValuationResult v) {
+    final warnings = v.warnings.join(' ');
+    if (warnings.contains('nenhuma das duas vias domina')) return 'mescla';
+    if (warnings.contains('não sustenta a via')) return 'estruturaRecusada';
+    if (warnings.contains('migra para o fluxo do acionista')) return 'migrada';
     return v.model.name;
   }
 
   var n = 0;
   for (final t in universe) {
     if (++n % 25 == 0) stderr.write('  $n/${universe.length}   \r');
-    final linha = <String, Object?>{};
-    for (final (nome, prep) in [('aplicativo', aplicativo), ('prior', prior)]) {
+    final row = <String, Object?>{};
+    for (final (name, prep) in [('aplicativo', app), ('prior', prior)]) {
       final p = await prep(t);
       if (p.isErr) continue;
       final base = p.unwrap();
       final r0 = ValuationCascade.evaluate(base);
       if (r0.isErr) continue;
-      conta(nome, 'avaliados na base');
-      final preco = base.marketPrice;
-      final justos = <double?>[];
-      final estados = <String?>[];
-      for (final d in _grade) {
+      account(name, 'avaliados na base');
+      final price = base.marketPrice;
+      final fairValues = <double?>[];
+      final states = <String?>[];
+      for (final d in _grid) {
         final r = ValuationCascade.evaluate(base.withRiskFreeShift(d));
-        justos.add(r.isOk ? r.unwrap().fairValue.reais : null);
-        estados.add(r.isOk ? estado(r.unwrap()) : null);
+        fairValues.add(r.isOk ? r.unwrap().fairValue.reais : null);
+        states.add(r.isOk ? status(r.unwrap()) : null);
       }
       // Sobe quando o capital encarece: entre dois pontos avaliados em
       // sequência, o de taxa maior vale mais.
-      final tol = preco * 1e-3;
-      var subidas = 0;
-      var maiorSubida = 0.0;
-      double? anterior;
-      for (final j in justos) {
+      final tol = price * 1e-3;
+      var rises = 0;
+      var largestRise = 0.0;
+      double? previous;
+      for (final j in fairValues) {
         if (j == null) {
-          anterior = null;
+          previous = null;
           continue;
         }
-        if (anterior != null && j - anterior > tol) {
-          subidas++;
-          final rel = anterior > 0 ? (j - anterior) / anterior : double.infinity;
-          if (rel > maiorSubida) maiorSubida = rel;
+        if (previous != null && j - previous > tol) {
+          rises++;
+          final rel = previous > 0 ? (j - previous) / previous : double.infinity;
+          if (rel > largestRise) largestRise = rel;
         }
-        anterior = j;
+        previous = j;
       }
-      final avaliados = [for (var i = 0; i < justos.length; i++) if (justos[i] != null) i];
-      final lacunas = avaliados.isEmpty
+      final evaluated = [for (var i = 0; i < fairValues.length; i++) if (fairValues[i] != null) i];
+      final gaps = evaluated.isEmpty
           ? 0
           : [
-              for (var i = avaliados.first; i <= avaliados.last; i++)
-                if (justos[i] == null) i,
+              for (var i = evaluated.first; i <= evaluated.last; i++)
+                if (fairValues[i] == null) i,
             ].length;
-      final vias = {...estados.nonNulls};
-      if (subidas > 0) conta(nome, 'não monótonos');
-      if (subidas > 0 && vias.length > 1) conta(nome, 'não monótonos com troca de via');
-      if (vias.length > 1) conta(nome, 'trocam de via na grade');
-      if (lacunas > 0) conta(nome, 'recusados no meio da grade');
-      linha[nome] = {
-        'estadoNaBase': estado(r0.unwrap()),
+      final lanes = {...states.nonNulls};
+      if (rises > 0) account(name, 'não monótonos');
+      if (rises > 0 && lanes.length > 1) account(name, 'não monótonos com troca de via');
+      if (lanes.length > 1) account(name, 'trocam de via na grade');
+      if (gaps > 0) account(name, 'recusados no meio da grade');
+      row[name] = {
+        'estadoNaBase': status(r0.unwrap()),
         'justoNaBase': r0.unwrap().fairValue.reais,
-        'preco': preco,
-        'subidas': subidas,
-        'maiorSubidaRelativa': maiorSubida.isFinite ? maiorSubida : null,
-        'lacunas': lacunas,
-        'vias': vias.toList()..sort(),
-        'justos': justos,
+        'preco': price,
+        'subidas': rises,
+        'maiorSubidaRelativa': largestRise.isFinite ? largestRise : null,
+        'lacunas': gaps,
+        'vias': lanes.toList()..sort(),
+        'justos': fairValues,
       };
     }
-    if (linha.isNotEmpty) linhas[t.value] = linha;
+    if (row.isNotEmpty) rows[t.value] = row;
   }
   stderr.writeln('');
-  File(saida).writeAsStringSync(const JsonEncoder.withIndent(' ').convert({
-    'hoje': _hoje.toIso8601String().substring(0, 10),
-    'grade': _grade,
-    'resumo': resumo,
-    'ativos': linhas,
+  File(output).writeAsStringSync(const JsonEncoder.withIndent(' ').convert({
+    'hoje': _today.toIso8601String().substring(0, 10),
+    'grade': _grid,
+    'resumo': summary,
+    'ativos': rows,
   }));
   stdout.writeln('varredura do nível da curva, de −3 a +3 p.p.:');
-  for (final e in resumo.entries) {
+  for (final e in summary.entries) {
     stdout.writeln('  ${e.key}: ${e.value}');
   }
-  stdout.writeln('gravado $saida');
+  stdout.writeln('gravado $output');
 }
 
 /// A grade de um ativo, aberta: o que muda no diagnóstico a cada ponto.
-void _abrirGrade(ValuationInputs base) {
+void _openGrid(ValuationInputs base) {
   String pc(double? x) => x == null ? '—' : '${(x * 100).toStringAsFixed(2)}%';
-  List<String>? avisosAnteriores;
-  for (final d in _grade) {
+  List<String>? previousWarnings;
+  for (final d in _grid) {
     final r = ValuationCascade.evaluate(base.withRiskFreeShift(d));
     if (r.isErr) {
       stdout.writeln('${pc(d).padLeft(7)}  recusa: ${r.failureOrNull!.message}');
-      avisosAnteriores = null;
+      previousWarnings = null;
       continue;
     }
     final v = r.unwrap();
@@ -743,20 +774,20 @@ void _abrirGrade(ValuationInputs base) {
         '  g ${pc(g?.growthRate)}  base ${g?.baseFactor.toStringAsFixed(3)}'
         '  moat ${g?.moatApplied}  retido ${pc(g?.terminalRetainedSpread)}'
         '  rTerm ${pc(g?.terminalReturnOnCapital)}  equity ${pc(g?.equityShare)}'
-        '  ressalvas ${g?.caveats.map((c) => c.name).join(',')}');
+        '  ressalvas ${g?.caveats.map((c) => c.key).join(',')}');
     // Os avisos que entram ou saem de um ponto para o outro: é onde está o
     // degrau, quando há um.
-    final avisos = [
+    final warnings = [
       for (final a in v.warnings) a.replaceAll(RegExp(r'[\d.,]+'), '#'),
     ];
-    if (avisosAnteriores != null) {
-      for (final a in avisos.where((a) => !avisosAnteriores!.contains(a))) {
+    if (previousWarnings != null) {
+      for (final a in warnings.where((a) => !previousWarnings!.contains(a))) {
         stdout.writeln('           + ${a.length > 150 ? a.substring(0, 150) : a}');
       }
-      for (final a in avisosAnteriores.where((a) => !avisos.contains(a))) {
+      for (final a in previousWarnings.where((a) => !warnings.contains(a))) {
         stdout.writeln('           - ${a.length > 150 ? a.substring(0, 150) : a}');
       }
     }
-    avisosAnteriores = avisos;
+    previousWarnings = warnings;
   }
 }

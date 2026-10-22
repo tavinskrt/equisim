@@ -2,8 +2,8 @@
 ///
 /// Pacote **Dart puro**: sem Flutter, sem rede, sem I/O. A ausência dessas
 /// dependências não é convenção — é verificada automaticamente por
-/// `test/purity_test.dart`, que falha o build se alguém importar
-/// `package:flutter` ou um cliente HTTP aqui dentro.
+/// `test/core/purity_test.dart`, na raiz do repositório, que falha o build se
+/// alguém importar `package:flutter` ou um cliente HTTP aqui dentro.
 ///
 /// Consequência prática: todo o motor financeiro é testável de forma
 /// determinística e pode ser executado fora do aplicativo, o que garante que
@@ -11,6 +11,7 @@
 library;
 
 // --- Auditoria de cálculo ---
+export 'src/audit/wire_keyed.dart';
 export 'src/audit/audit_recorder.dart';
 export 'src/audit/calculation_trace.dart';
 
@@ -31,6 +32,7 @@ export 'src/entities/financial_goal.dart';
 export 'src/entities/fundamentals.dart';
 export 'src/entities/portfolio.dart';
 export 'src/entities/price_series.dart';
+export 'src/entities/share_issue.dart';
 export 'src/entities/valuation.dart';
 
 // --- Recorte temporal ---
@@ -49,6 +51,7 @@ export 'src/services/metrics/risk_metrics.dart';
 export 'src/services/portfolio/expected_return.dart';
 export 'src/services/portfolio/sector_concentration.dart';
 export 'src/services/portfolio/transversal_ordering.dart';
+export 'src/services/valuation/base_normalization.dart';
 export 'src/services/valuation/calibrated_band.dart';
 export 'src/services/valuation/skill_reading.dart';
 export 'src/services/valuation/capital_base.dart';
@@ -62,8 +65,10 @@ export 'src/services/b3/corporate_events.dart';
 export 'src/services/b3/cash_dividends.dart';
 export 'src/services/cvm/cvm_chart.dart';
 export 'src/services/cvm/fre_concessions.dart';
+export 'src/services/cvm/capital_events.dart';
 export 'src/services/cvm/share_count_history.dart';
 export 'src/services/cvm/unit_composition.dart';
+export 'src/services/cvm/shareholder_control.dart';
 export 'src/services/valuation/concession_sectors.dart';
 export 'src/services/valuation/financial_sectors.dart';
 export 'src/services/valuation/peer_multiples.dart';
@@ -75,7 +80,10 @@ export 'src/services/valuation/levered_rates.dart';
 export 'src/services/valuation/inference.dart';
 export 'src/services/valuation/cost_of_capital.dart';
 export 'src/services/valuation/dcf.dart';
+export 'src/services/valuation/manual_valuation.dart';
+export 'src/services/valuation/manual_valuation_record.dart';
 export 'src/services/valuation/growth_estimator.dart';
+export 'src/services/valuation/implied_premium.dart';
 export 'src/services/valuation/scenario_engine.dart';
 export 'src/services/valuation/yield_curve.dart';
 

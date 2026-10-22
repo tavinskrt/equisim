@@ -19,14 +19,14 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
 /// A mesma série, sem os dois termos da ponte.
 ///
 /// Reproduz o motor de antes da decisão 49 **sobre o dado de agora**, que é o
 /// que torna a comparação uma medida da correção e não da atualização.
-List<FundamentalsSnapshot> _semOsTermos(List<FundamentalsSnapshot> serie) => [
-      for (final s in serie)
+List<FundamentalsSnapshot> _withoutTerms(List<FundamentalsSnapshot> series) => [
+      for (final s in series)
         FundamentalsSnapshot(
           ticker: s.ticker,
           fiscalPeriodEnd: s.fiscalPeriodEnd,
@@ -62,7 +62,7 @@ List<FundamentalsSnapshot> _semOsTermos(List<FundamentalsSnapshot> serie) => [
         ),
     ];
 
-double? _mediana(List<double> v) {
+double? _median(List<double> v) {
   if (v.isEmpty) return null;
   final s = [...v]..sort();
   final m = s.length ~/ 2;
@@ -77,7 +77,7 @@ Future<void> main(List<String> args) async {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
 
@@ -87,10 +87,10 @@ Future<void> main(List<String> args) async {
       prices: ctx.prices,
       fundamentals: ctx.fundamentals,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     );
 
-    final saida = <Map<String, dynamic>>[];
+    final output = <Map<String, dynamic>>[];
     var i = 0;
     for (final ticker in universe) {
       i++;
@@ -101,7 +101,7 @@ Future<void> main(List<String> args) async {
         fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
@@ -111,11 +111,11 @@ Future<void> main(List<String> args) async {
       if (prep.isErr) continue;
       final inputs = prep.unwrap();
 
-      final comTermos = ValuationCascade.evaluate(inputs);
-      final semTermos = ValuationCascade.evaluate(ValuationInputs(
+      final withTerms = ValuationCascade.evaluate(inputs);
+      final withoutTermsResult = ValuationCascade.evaluate(ValuationInputs(
         ticker: inputs.ticker,
         asOf: inputs.asOf,
-        fundamentals: _semOsTermos(inputs.fundamentals),
+        fundamentals: _withoutTerms(inputs.fundamentals),
         marketPrice: inputs.marketPrice,
         capm: inputs.capm,
         marginOfSafety: inputs.marginOfSafety,
@@ -130,52 +130,52 @@ Future<void> main(List<String> args) async {
         unleveredBeta: inputs.unleveredBeta,
       ));
 
-      final ultimo = PointInTimeView(inputs.asOf)
+      final last = PointInTimeView(inputs.asOf)
           .published(inputs.fundamentals)
           .lastOrNull;
-      final vm = inputs.marketPrice *
-          (ultimo?.sharesOutstanding ?? double.nan);
+      final marketValue = inputs.marketPrice *
+          (last?.sharesOutstanding ?? double.nan);
 
-      saida.add({
+      output.add({
         'ticker': ticker.value,
         'setor': inputs.sectorKey,
-        'via': comTermos.isOk ? comTermos.unwrap().model.name : null,
-        'justoCom': comTermos.isOk ? comTermos.unwrap().fairValue.reais : null,
-        'justoSem': semTermos.isOk ? semTermos.unwrap().fairValue.reais : null,
-        'minoritarios': ultimo?.minorityInterest,
-        'equivalencia': ultimo?.equityIncomeResult,
-        'ebit': ultimo?.ebit,
-        'valorDeMercado': vm.isFinite ? vm : null,
+        'via': withTerms.isOk ? withTerms.unwrap().model.name : null,
+        'justoCom': withTerms.isOk ? withTerms.unwrap().fairValue.reais : null,
+        'justoSem': withoutTermsResult.isOk ? withoutTermsResult.unwrap().fairValue.reais : null,
+        'minoritarios': last?.minorityInterest,
+        'equivalencia': last?.equityIncomeResult,
+        'ebit': last?.ebit,
+        'valorDeMercado': marketValue.isFinite ? marketValue : null,
       });
     }
     stderr.writeln('');
 
     File('docs/validacao/ponte.json').writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(saida),
+      const JsonEncoder.withIndent(' ').convert(output),
     );
-    _imprimir(saida);
-    stderr.writeln('\nescrito docs/validacao/ponte.json (${saida.length})');
+    _printReport(output);
+    stderr.writeln('\nescrito docs/validacao/ponte.json (${output.length})');
   } finally {
     await ctx.dispose();
   }
 }
 
-void _imprimir(List<Map<String, dynamic>> l) {
+void _printReport(List<Map<String, dynamic>> l) {
   stdout.writeln('\n=== D7 — A PONTE COMPLETA — ${l.length} ativos ===\n');
 
-  final comMinor = l
+  final withMinority = l
       .where((e) =>
           e['minoritarios'] != null && (e['minoritarios'] as num).abs() > 0)
       .length;
-  final comEquiv = l
+  final withEquityMethod = l
       .where((e) =>
           e['equivalencia'] != null && (e['equivalencia'] as num) > 0)
       .length;
   stdout.writeln('-- quantos têm cada termo --');
-  stdout.writeln('  com participação de não controladores: $comMinor');
-  stdout.writeln('  com equivalência patrimonial positiva: $comEquiv');
+  stdout.writeln('  com participação de não controladores: $withMinority');
+  stdout.writeln('  com equivalência patrimonial positiva: $withEquityMethod');
 
-  final peso = [
+  final weight = [
     for (final e in l)
       if (e['equivalencia'] != null &&
           e['ebit'] != null &&
@@ -183,54 +183,54 @@ void _imprimir(List<Map<String, dynamic>> l) {
           (e['equivalencia'] as num) > 0)
         ((e['equivalencia'] as num) / (e['ebit'] as num)).toDouble()
   ];
-  if (peso.isNotEmpty) {
-    peso.sort();
-    stdout.writeln('  equivalência ÷ EBIT: mediana=${_pc(_mediana(peso)!)}  '
-        'máx=${_pc(peso.last)}  (n=${peso.length})');
+  if (weight.isNotEmpty) {
+    weight.sort();
+    stdout.writeln('  equivalência ÷ EBIT: mediana=${_pc(_median(weight)!)}  '
+        'máx=${_pc(weight.last)}  (n=${weight.length})');
     stdout.writeln('  acima de 20% do EBIT: '
-        '${peso.where((x) => x > 0.20).length}');
+        '${weight.where((x) => x > 0.20).length}');
   }
 
-  final variacoes = <({String ticker, double delta})>[];
-  var avaliadosCom = 0;
-  var avaliadosSem = 0;
+  final changes = <({String ticker, double delta})>[];
+  var evaluatedWith = 0;
+  var evaluatedWithout = 0;
   for (final e in l) {
-    final com = e['justoCom'] as num?;
-    final sem = e['justoSem'] as num?;
-    if (com != null && com > 0) avaliadosCom++;
-    if (sem != null && sem > 0) avaliadosSem++;
-    if (com == null || sem == null || sem <= 0 || com <= 0) continue;
-    final d = com / sem - 1;
+    final withInput = e['justoCom'] as num?;
+    final without = e['justoSem'] as num?;
+    if (withInput != null && withInput > 0) evaluatedWith++;
+    if (without != null && without > 0) evaluatedWithout++;
+    if (withInput == null || without == null || without <= 0 || withInput <= 0) continue;
+    final d = withInput / without - 1;
     if (d.abs() > 0.005) {
-      variacoes.add((ticker: e['ticker'] as String, delta: d.toDouble()));
+      changes.add((ticker: e['ticker'] as String, delta: d.toDouble()));
     }
   }
-  variacoes.sort((a, b) => a.delta.compareTo(b.delta));
+  changes.sort((a, b) => a.delta.compareTo(b.delta));
 
   stdout.writeln('\n-- o efeito da correção, na mesma série --');
-  stdout.writeln('  avaliados com os termos: $avaliadosCom   '
-      'sem eles: $avaliadosSem');
+  stdout.writeln('  avaliados com os termos: $evaluatedWith   '
+      'sem eles: $evaluatedWithout');
   stdout.writeln('  preços justos alterados além de 0,5%: '
-      '${variacoes.length}');
-  if (variacoes.isNotEmpty) {
-    final ds = [for (final v in variacoes) v.delta];
+      '${changes.length}');
+  if (changes.isNotEmpty) {
+    final ds = [for (final v in changes) v.delta];
     stdout.writeln('  variação mediana dos alterados: '
-        '${_pc(_mediana(ds)!)}');
+        '${_pc(_median(ds)!)}');
     stdout.writeln('  caem: ${ds.where((d) => d < 0).length}   '
         'sobem: ${ds.where((d) => d > 0).length}');
     stdout.writeln('  as maiores quedas:');
-    for (final v in variacoes.take(6)) {
+    for (final v in changes.take(6)) {
       stdout.writeln('    ${v.ticker.padRight(7)} ${_pc(v.delta).padLeft(9)}');
     }
     stdout.writeln('  as maiores altas:');
-    for (final v in variacoes.reversed.take(6)) {
+    for (final v in changes.reversed.take(6)) {
       stdout.writeln('    ${v.ticker.padRight(7)} ${_pc(v.delta).padLeft(9)}');
     }
   }
 
   // O tamanho dos minoritários contra o valor de mercado, que é a régua da
   // materialidade: 24,1% na CSNA3 quando a sonda mediu.
-  final razoes = [
+  final ratios = [
     for (final e in l)
       if (e['minoritarios'] != null &&
           e['valorDeMercado'] != null &&
@@ -241,12 +241,12 @@ void _imprimir(List<Map<String, dynamic>> l) {
           ((e['minoritarios'] as num) / (e['valorDeMercado'] as num)).toDouble()
         )
   ]..sort((a, b) => b.$2.compareTo(a.$2));
-  if (razoes.isNotEmpty) {
+  if (ratios.isNotEmpty) {
     stdout.writeln('\n-- não controladores ÷ valor de mercado --');
-    stdout.writeln('  mediana=${_pc(_mediana([
-          for (final r in razoes) r.$2
-        ])!)}   acima de 10%: ${razoes.where((r) => r.$2 > 0.10).length}');
-    for (final r in razoes.take(8)) {
+    stdout.writeln('  mediana=${_pc(_median([
+          for (final r in ratios) r.$2
+        ])!)}   acima de 10%: ${ratios.where((r) => r.$2 > 0.10).length}');
+    for (final r in ratios.take(8)) {
       stdout.writeln('    ${r.$1.padRight(7)} ${_pc(r.$2).padLeft(7)}');
     }
   }

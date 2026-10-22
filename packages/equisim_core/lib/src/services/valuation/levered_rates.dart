@@ -97,8 +97,8 @@ abstract final class LeveredCostOfCapital {
   /// `β_∞ = w·β_L,N + (1 − w)·1` — o ajuste de Blume. Sem imposição, o beta de
   /// equilíbrio é o realavancado do ano N, sem convergência: é o que a
   /// produção faz, e é a premissa que o B15 existe para declarar.
-  static double _betaDeEquilibrio(double betaLevered, double? peso) =>
-      peso == null ? betaLevered : peso * betaLevered + (1 - peso) * 1.0;
+  static double _equilibriumBeta(double betaLevered, double? weight) =>
+      weight == null ? betaLevered : weight * betaLevered + (1 - weight) * 1.0;
 
   /// A alavancagem imposta do B15 descreve uma estrutura possível?
   ///
@@ -107,8 +107,8 @@ abstract final class LeveredCostOfCapital {
   /// o negócio e o peso fica negativo. Recusar é o certo — a imposição é de
   /// diagnóstico, e uma varredura que peça o impossível precisa ouvir isso em
   /// vez de receber `NaN`.
-  static bool _alavancagemImpossivel(double? de) =>
-      de != null && (!de.isFinite || 1 + de <= 0);
+  static bool _impossibleLeverage(double? debtToEquity) =>
+      debtToEquity != null && (!debtToEquity.isFinite || 1 + debtToEquity <= 0);
 
   /// Teto de iterações do ponto fixo.
   static const int maxIterations = 100;
@@ -145,6 +145,15 @@ abstract final class LeveredCostOfCapital {
   ///   decaía com a curva, de modo que a perpetuidade herdava o juro de hoje
   ///   (item B11).
   ///
+  ///   **O prêmio é constante ao longo da projeção, e não por simplificação.**
+  ///   Ele sai da dívida líquida sobre o EBITDA, e aqui a dívida cresce a
+  ///   `g_t` — o mesmo ritmo do lucro projetado —, de modo que essa razão fica
+  ///   **parada por construção** do ano 1 ao N. O que muda ano a ano é a
+  ///   alavancagem **a mercado**, `D/E`, que move o beta e não a
+  ///   classificação de crédito. Recalcular o prêmio a cada ano devolveria o
+  ///   mesmo número (lente `metodo`, 22/09/2026; o teste
+  ///   «a dívida cresce ao ritmo do lucro» cobra a premissa).
+  ///
   /// - [terminalBetaWeight] e [terminalLeverage]: imposições de diagnóstico do
   ///   item B15, e `null` em produção. A primeira converge o beta **de
   ///   equilíbrio** em direção a 1 — `β_∞ = w·β_L,N + (1 − w)`, o ajuste de
@@ -175,7 +184,9 @@ abstract final class LeveredCostOfCapital {
   ///
   /// Aqui o ponto fixo é tentado de dois lugares:
   ///
-  ///  1. a interpolação de dois pontos, que é o recuo;
+  ///  1. o caminho sem realavancagem, que é o recuo — sobre a curva, com a
+  ///     estrutura de capital de hoje (item B37), ou a interpolação de dois
+  ///     pontos sem curva;
   ///  2. o custo de capital **desalavancado** — `Rf_t + β_U·prêmio` —, que é o
   ///     mesmo caminho no limite de dívida zero, e portanto uma partida tão
   ///     legítima quanto a primeira.
@@ -200,10 +211,10 @@ abstract final class LeveredCostOfCapital {
     double? terminalLeverage,
     List<String>? warnings,
   }) {
-    Result<LeveredRates> de(List<double>? inicial, double? terminalInicial) =>
-        _tentar(
-          waccInicial: inicial,
-          waccTerminalInicial: terminalInicial,
+    Result<LeveredRates> attemptFrom(List<double>? initial, double? initialTerminal) =>
+        _attempt(
+          initialWacc: initial,
+          initialTerminalWacc: initialTerminal,
           baseProfit: baseProfit,
           assumptions: assumptions,
           netDebt: netDebt,
@@ -218,56 +229,56 @@ abstract final class LeveredCostOfCapital {
           terminalLeverage: terminalLeverage,
         );
 
-    final pelaInterpolacao = de(null, null);
+    final byInterpolation = attemptFrom(null, null);
     // O desalavancado: o mesmo caminho de `Ke` com `D/E = 0`, que é o limite
     // inferior de alavancagem do próprio modelo.
-    final desalavancado = [
+    final unlevered = [
       for (final rf in riskFreePath) rf + unleveredBeta * marketPremium,
     ];
-    final peloDesalavancado = de(
-      desalavancado,
+    final byUnlevered = attemptFrom(
+      unlevered,
       terminalRiskFree + unleveredBeta * marketPremium,
     );
 
-    final a = pelaInterpolacao.valueOrNull;
-    final b = peloDesalavancado.valueOrNull;
+    final a = byInterpolation.valueOrNull;
+    final b = byUnlevered.valueOrNull;
     if (a == null && b == null) {
       // **A recusa é do ponto fixo, e o texto precisa dizer isso** (item B18).
       // Dizer só que a interpolação não fechou deixaria em pé a leitura de que
       // o veredito é do chute — que era, e deixou de ser.
-      final motivo = pelaInterpolacao.failureOrNull?.message ?? '';
+      final reason = byInterpolation.failureOrNull?.message ?? '';
       return Err(ComputationFailure(
-        '$motivo O ponto fixo foi tentado também a partir do custo de capital '
+        '$reason O ponto fixo foi tentado também a partir do custo de capital '
         'desalavancado, e não fecha de nenhuma das duas partidas: a recusa é '
         'do método, e não do chute.',
       ));
     }
     if (a == null) {
       warnings?.add(
-        'O ponto fixo do custo de capital não fecha a partir da interpolação '
-        'de dois pontos, e fecha a partir do custo desalavancado. O resultado '
+        'O ponto fixo do custo de capital não fecha a partir do caminho sem '
+        'realavancagem, e fecha a partir do custo desalavancado. O resultado '
         'é o do ponto fixo, e não o do chute — recusar aqui seria recusar por '
         'causa de onde a conta começou (item B18).',
       );
-      return peloDesalavancado;
+      return byUnlevered;
     }
-    if (b == null) return pelaInterpolacao;
+    if (b == null) return byInterpolation;
 
     final va = a.equity.isEmpty ? double.nan : a.equity.first;
     final vb = b.equity.isEmpty ? double.nan : b.equity.first;
-    final distancia = (va.abs() > 0 && va.isFinite && vb.isFinite)
+    final distance = (va.abs() > 0 && va.isFinite && vb.isFinite)
         ? (vb / va - 1).abs()
         : 0.0;
-    if (distancia > startIndependence) {
+    if (distance > startIndependence) {
       warnings?.add(
         'O ponto fixo do custo de capital chega a dois resultados conforme o '
-        'chute de partida — ${(distancia * 100).toStringAsFixed(1)}% de '
+        'chute de partida — ${(distance * 100).toStringAsFixed(1)}% de '
         'diferença no capital próprio do ano zero. Vale o da interpolação, '
         'que é o caminho declarado, e esta divergência é ressalva do método '
         '(item B18).',
       );
     }
-    return pelaInterpolacao;
+    return byInterpolation;
   }
 
   /// Uma tentativa do ponto fixo, a partir de um caminho de partida.
@@ -275,9 +286,9 @@ abstract final class LeveredCostOfCapital {
   /// Separado de [solve] porque **o ponto fixo não pode depender de onde
   /// começa** (item B18): se a resposta muda com o chute, ela é do chute. A
   /// [solve] roda esta função de dois pontos de partida e compara.
-  static Result<LeveredRates> _tentar({
-    required List<double>? waccInicial,
-    required double? waccTerminalInicial,
+  static Result<LeveredRates> _attempt({
+    required List<double>? initialWacc,
+    required double? initialTerminalWacc,
     required double baseProfit,
     required DcfAssumptions assumptions,
     required double netDebt,
@@ -301,7 +312,7 @@ abstract final class LeveredCostOfCapital {
         'projetado.',
       ));
     }
-    if (_alavancagemImpossivel(terminalLeverage)) {
+    if (_impossibleLeverage(terminalLeverage)) {
       return const Err(InvalidInput(
         'Alavancagem de equilíbrio imposta não descreve estrutura possível: '
         'com D/E de −1 ou menos o valor da firma não é positivo.',
@@ -316,50 +327,50 @@ abstract final class LeveredCostOfCapital {
     // A dívida segue a base de capital, que é o que a projeção faz crescer.
     // **É esta a premissa que a rota (b) preserva** — a alternativa seria
     // amarrá-la ao valor, e aí a alavancagem seria constante por construção.
-    final divida = <double>[netDebt];
+    final debt = <double>[netDebt];
     for (var t = 1; t <= n; t++) {
-      divida.add(divida[t - 1] * (1 + assumptions.growthAt(t)));
+      debt.add(debt[t - 1] * (1 + assumptions.growthAt(t)));
     }
     // **O caixa acompanha a mesma base, e por isso a líquida não muda**: as
     // duas metades crescem com o mesmo fator, e a diferença delas é a série de
-    // [divida] acima. O que a separação muda é só a **composição da taxa** —
+    // [debt] acima. O que a separação muda é só a **composição da taxa** —
     // o caixa rende `R_f`, e não `R_f + spread` (lente `metodo`, 21/09/2026).
     // Sem `cash`, vale a forma anterior, que remunera a perna negativa ao
     // custo de empréstimo. Ver `CostOfCapital.rawWacc`.
-    final caixa = cash == null ? null : <double>[cash];
-    if (caixa != null) {
+    final cashPath = cash == null ? null : <double>[cash];
+    if (cashPath != null) {
       for (var t = 1; t <= n; t++) {
-        caixa.add(caixa[t - 1] * (1 + assumptions.growthAt(t)));
+        cashPath.add(cashPath[t - 1] * (1 + assumptions.growthAt(t)));
       }
     }
 
     // `K_d` do ano, líquido do escudo: o prêmio de crédito é constante e a
     // taxa base é a do ano, como em `CostOfCapital.effectiveCostOfDebt`.
-    double kdLiquidoEm(double rf) => (rf + creditSpread) * (1 - taxRate);
-    final kdTerminal = kdLiquidoEm(terminalRiskFree);
+    double netKdAt(double rf) => (rf + creditSpread) * (1 - taxRate);
+    final kdTerminal = netKdAt(terminalRiskFree);
 
     // Chute inicial: o informado, ou as taxas que a interpolação de dois
     // pontos daria — que é o recuo, e o que a versão anterior usava sempre.
-    var ke = waccInicial != null && waccInicial.length == n
-        ? [...waccInicial]
+    var ke = initialWacc != null && initialWacc.length == n
+        ? [...initialWacc]
         : <double>[
             for (var t = 1; t <= n; t++) assumptions.discountRateAt(t),
           ];
     var wacc = [...ke];
-    var keTerminal = waccTerminalInicial ?? assumptions.terminalDiscountRate;
+    var keTerminal = initialTerminalWacc ?? assumptions.terminalDiscountRate;
     var waccTerminal = keTerminal;
-    List<double>? equityAnterior;
+    List<double>? previousEquity;
 
-    var iteracoes = 0;
-    var convergiu = false;
-    var valorAnterior = double.nan;
+    var iterations = 0;
+    var converged = false;
+    var previousValue = double.nan;
     late List<double> ev;
     late List<double> equity;
 
-    while (iteracoes < maxIterations) {
-      iteracoes++;
+    while (iterations < maxIterations) {
+      iterations++;
 
-      final avaliacao = DcfCalculator.firm(
+      final valuation = DcfCalculator.firm(
         baseProfit: baseProfit,
         assumptions: assumptions.copyWith(
           discountRatePath: wacc,
@@ -368,12 +379,12 @@ abstract final class LeveredCostOfCapital {
         netDebt: 0,
         sharesOutstanding: 1,
       );
-      if (avaliacao.isErr) {
+      if (valuation.isErr) {
         return Err(ComputationFailure(
-          '${avaliacao.failureOrNull!.message} (iteração $iteracoes)',
+          '${valuation.failureOrNull!.message} (iteração $iterations)',
         ));
       }
-      final o = avaliacao.unwrap();
+      final o = valuation.unwrap();
 
       // Valor da firma ano a ano, por acumulação regressiva: o valor no início
       // de um ano é o fluxo daquele ano mais o valor no fim, descontado à taxa
@@ -391,50 +402,50 @@ abstract final class LeveredCostOfCapital {
       }
       ev = v;
 
-      final e = <double>[for (var t = 0; t <= n; t++) v[t] - divida[t]];
+      final e = <double>[for (var t = 0; t <= n; t++) v[t] - debt[t]];
       // Amortecimento contra oscilação em ativo muito alavancado.
-      if (equityAnterior != null) {
+      if (previousEquity != null) {
         for (var t = 0; t <= n; t++) {
-          e[t] = damping * e[t] + (1 - damping) * equityAnterior[t];
+          e[t] = damping * e[t] + (1 - damping) * previousEquity[t];
         }
       }
       equity = e;
-      equityAnterior = [...e];
+      previousEquity = [...e];
 
       // Realavancagem: cada ano usa a estrutura do **início** do ano.
-      final novoKe = <double>[];
-      final novoWacc = <double>[];
+      final newKe = <double>[];
+      final newWacc = <double>[];
       for (var t = 1; t <= n; t++) {
-        final eAnterior = e[t - 1];
-        final dAnterior = divida[t - 1];
-        if (!eAnterior.isFinite || eAnterior <= 0) {
+        final previousEquityValue = e[t - 1];
+        final previousDebt = debt[t - 1];
+        if (!previousEquityValue.isFinite || previousEquityValue <= 0) {
           // **O momento importa.** Falhar na primeira iteração diz que a
-          // própria interpolação de dois pontos — que é o recuo — já produz
+          // própria partida sem realavancagem — que é o recuo — já produz
           // capital próprio negativo com esta dívida; falhar depois diz que o
           // ponto fixo passou por um iterado inviável e a conclusão sobre o
           // ativo é mais fraca. Sem essa distinção o recuo parece legítimo nos
           // dois casos.
           return Err(ComputationFailure(
             'O capital próprio desaparece dentro da projeção (ano ${t - 1}, '
-            'iteração $iteracoes): a realavancagem não tem sentido econômico, '
+            'iteração $iterations): a realavancagem não tem sentido econômico, '
             'e o ativo não é avaliável por fluxo descontado nesta estrutura de '
             'capital.',
           ));
         }
-        final de = dAnterior / eAnterior;
-        final fator =
-            BetaShrinkage.leverageFactor(debtToEquity: de, taxRate: taxRate);
-        if (fator == null) {
+        final attemptFrom = previousDebt / previousEquityValue;
+        final factor =
+            BetaShrinkage.leverageFactor(debtToEquity: attemptFrom, taxRate: taxRate);
+        if (factor == null) {
           return const Err(ComputationFailure(
             'Fator de alavancagem não finito na realavancagem.',
           ));
         }
-        final keT = riskFreePath[t - 1] + unleveredBeta * fator * marketPremium;
+        final keT = riskFreePath[t - 1] + unleveredBeta * factor * marketPremium;
         // `D` é dívida **líquida** e pode ser negativa: empresa de caixa
         // líquido tem `E + D` menor que `E`, e no limite não positivo. Sem esta
         // guarda o peso do capital próprio divide por zero, e o `WACC` do ano
         // sai infinito sem que nada acuse.
-        final vT = eAnterior + dAnterior;
+        final vT = previousEquityValue + previousDebt;
         if (!vT.isFinite || vT <= 0) {
           return const Err(ComputationFailure(
             'Valor da firma não positivo dentro da projeção: o caixa líquido '
@@ -448,46 +459,46 @@ abstract final class LeveredCostOfCapital {
         // estático. Confinar devolvia `WACC = Ke` e fazia as duas rotas
         // discordarem no mesmo ativo. O caso sem sentido — `E + D` não
         // positivo — já é recusado acima.
-        final pesoE = eAnterior / vT;
-        final juro = kdLiquidoEm(riskFreePath[t - 1]);
-        novoKe.add(keT);
-        if (caixa == null) {
-          novoWacc.add(keT * pesoE + juro * (1 - pesoE));
+        final equityWeight = previousEquityValue / vT;
+        final interest = netKdAt(riskFreePath[t - 1]);
+        newKe.add(keT);
+        if (cashPath == null) {
+          newWacc.add(keT * equityWeight + interest * (1 - equityWeight));
         } else {
-          // `w_bruta − w_caixa` é exatamente `1 − pesoE`: a separação redistribui
+          // `w_bruta − w_caixa` é exatamente `1 − equityWeight`: a separação redistribui
           // a mesma perna entre duas taxas, e não altera os pesos.
-          final wBruta = (dAnterior + caixa[t - 1]) / vT;
-          final wCaixa = caixa[t - 1] / vT;
-          final rendimento = riskFreePath[t - 1] * (1 - taxRate);
-          novoWacc.add(keT * pesoE + juro * wBruta - rendimento * wCaixa);
+          final wGross = (previousDebt + cashPath[t - 1]) / vT;
+          final wCash = cashPath[t - 1] / vT;
+          final income = riskFreePath[t - 1] * (1 - taxRate);
+          newWacc.add(keT * equityWeight + interest * wGross - income * wCash);
         }
       }
-      ke = novoKe;
-      wacc = novoWacc;
+      ke = newKe;
+      wacc = newWacc;
 
       // Equilíbrio: a estrutura do ano N é a que vale na perpetuidade.
       final eN = e[n];
-      final dN = divida[n];
+      final dN = debt[n];
       if (eN <= 0) {
         return Err(ComputationFailure(
           'Capital próprio não positivo no fim da projeção (iteração '
-          '$iteracoes).',
+          '$iterations).',
         ));
       }
       // **A alavancagem de equilíbrio é a do ano N**, e a imposição do B15 a
       // substitui quando a varredura quer testar outra.
-      final deTerminal = terminalLeverage ?? dN / eN;
-      final fatorN = BetaShrinkage.leverageFactor(
-        debtToEquity: deTerminal,
+      final terminalDebtToEquity = terminalLeverage ?? dN / eN;
+      final factorN = BetaShrinkage.leverageFactor(
+        debtToEquity: terminalDebtToEquity,
         taxRate: taxRate,
       );
-      if (fatorN == null) {
+      if (factorN == null) {
         return const Err(ComputationFailure(
           'Fator de alavancagem terminal não finito.',
         ));
       }
       keTerminal = terminalRiskFree +
-          _betaDeEquilibrio(unleveredBeta * fatorN, terminalBetaWeight) *
+          _equilibriumBeta(unleveredBeta * factorN, terminalBetaWeight) *
               marketPremium;
       final vN = eN + dN;
       if (!vN.isFinite || vN <= 0) {
@@ -496,28 +507,28 @@ abstract final class LeveredCostOfCapital {
           'no custo médio de equilíbrio deixa de ter sentido.',
         ));
       }
-      final pesoEN = terminalLeverage == null
+      final weightEN = terminalLeverage == null
           ? eN / vN
           : 1 / (1 + terminalLeverage);
       // Mesma separação do ano a ano, na estrutura do ano N. Com `D/E`
       // imposto não há separação: a dívida ali é arbitrada, e não observada.
-      if (caixa == null || terminalLeverage != null) {
-        waccTerminal = keTerminal * pesoEN + kdTerminal * (1 - pesoEN);
+      if (cashPath == null || terminalLeverage != null) {
+        waccTerminal = keTerminal * weightEN + kdTerminal * (1 - weightEN);
       } else {
-        waccTerminal = keTerminal * pesoEN +
-            kdTerminal * ((dN + caixa[n]) / vN) -
-            terminalRiskFree * (1 - taxRate) * (caixa[n] / vN);
+        waccTerminal = keTerminal * weightEN +
+            kdTerminal * ((dN + cashPath[n]) / vN) -
+            terminalRiskFree * (1 - taxRate) * (cashPath[n] / vN);
       }
 
-      final valor = e[0];
-      if (valorAnterior.isFinite && valorAnterior.abs() > 0) {
-        if ((valor - valorAnterior).abs() / valorAnterior.abs() < tolerance) {
-          convergiu = true;
-          valorAnterior = valor;
+      final value = e[0];
+      if (previousValue.isFinite && previousValue.abs() > 0) {
+        if ((value - previousValue).abs() / previousValue.abs() < tolerance) {
+          converged = true;
+          previousValue = value;
           break;
         }
       }
-      valorAnterior = valor;
+      previousValue = value;
     }
 
     return Ok(LeveredRates(
@@ -525,11 +536,11 @@ abstract final class LeveredCostOfCapital {
       wacc: List.unmodifiable(wacc),
       enterpriseValue: List.unmodifiable(ev),
       equity: List.unmodifiable(equity),
-      debt: List.unmodifiable(divida),
+      debt: List.unmodifiable(debt),
       terminalCostOfEquity: keTerminal,
       terminalWacc: waccTerminal,
-      iterations: iteracoes,
-      converged: convergiu,
+      iterations: iterations,
+      converged: converged,
     ));
   }
 
@@ -582,10 +593,10 @@ abstract final class LeveredCostOfCapital {
     double? terminalLeverage,
     List<String>? warnings,
   }) {
-    Result<LeveredRates> de(List<double>? inicial, double? terminalInicial) =>
-        _tentarEquity(
-          keInicial: inicial,
-          keTerminalInicial: terminalInicial,
+    Result<LeveredRates> attemptFrom(List<double>? initial, double? initialTerminal) =>
+        _attemptEquity(
+          initialKe: initial,
+          initialTerminalKe: initialTerminal,
           baseProfit: baseProfit,
           assumptions: assumptions,
           netDebtPerShare: netDebtPerShare,
@@ -598,54 +609,54 @@ abstract final class LeveredCostOfCapital {
           terminalLeverage: terminalLeverage,
         );
 
-    final pelaInterpolacao = de(null, null);
-    final desalavancado = [
+    final byInterpolation = attemptFrom(null, null);
+    final unlevered = [
       for (final rf in riskFreePath) rf + unleveredBeta * marketPremium,
     ];
-    final peloDesalavancado = de(
-      desalavancado,
+    final byUnlevered = attemptFrom(
+      unlevered,
       terminalRiskFree + unleveredBeta * marketPremium,
     );
 
-    final a = pelaInterpolacao.valueOrNull;
-    final b = peloDesalavancado.valueOrNull;
+    final a = byInterpolation.valueOrNull;
+    final b = byUnlevered.valueOrNull;
     if (a == null && b == null) {
-      final motivo = pelaInterpolacao.failureOrNull?.message ?? '';
+      final reason = byInterpolation.failureOrNull?.message ?? '';
       return Err(ComputationFailure(
-        '$motivo O ponto fixo foi tentado também a partir do custo de capital '
+        '$reason O ponto fixo foi tentado também a partir do custo de capital '
         'desalavancado, e não fecha de nenhuma das duas partidas: a recusa é '
         'do método, e não do chute.',
       ));
     }
     if (a == null) {
       warnings?.add(
-        'O ponto fixo do custo do capital próprio não fecha a partir da '
-        'interpolação de dois pontos, e fecha a partir do custo desalavancado. '
+        'O ponto fixo do custo do capital próprio não fecha a partir do '
+        'caminho sem realavancagem, e fecha a partir do custo desalavancado. '
         'O resultado é o do ponto fixo, e não o do chute (item B18).',
       );
-      return peloDesalavancado;
+      return byUnlevered;
     }
-    if (b == null) return pelaInterpolacao;
+    if (b == null) return byInterpolation;
 
     final va = a.equity.isEmpty ? double.nan : a.equity.first;
     final vb = b.equity.isEmpty ? double.nan : b.equity.first;
-    final distancia = (va.abs() > 0 && va.isFinite && vb.isFinite)
+    final distance = (va.abs() > 0 && va.isFinite && vb.isFinite)
         ? (vb / va - 1).abs()
         : 0.0;
-    if (distancia > startIndependence) {
+    if (distance > startIndependence) {
       warnings?.add(
         'O ponto fixo do custo do capital próprio chega a dois resultados '
-        'conforme o chute de partida — ${(distancia * 100).toStringAsFixed(1)}% '
+        'conforme o chute de partida — ${(distance * 100).toStringAsFixed(1)}% '
         'de diferença no capital próprio do ano zero. Vale o da interpolação, '
         'e a divergência é ressalva do método (item B18).',
       );
     }
-    return pelaInterpolacao;
+    return byInterpolation;
   }
 
-  static Result<LeveredRates> _tentarEquity({
-    required List<double>? keInicial,
-    required double? keTerminalInicial,
+  static Result<LeveredRates> _attemptEquity({
+    required List<double>? initialKe,
+    required double? initialTerminalKe,
     required double baseProfit,
     required DcfAssumptions assumptions,
     required double netDebtPerShare,
@@ -667,7 +678,7 @@ abstract final class LeveredCostOfCapital {
         'projetado.',
       ));
     }
-    if (_alavancagemImpossivel(terminalLeverage)) {
+    if (_impossibleLeverage(terminalLeverage)) {
       return const Err(InvalidInput(
         'Alavancagem de equilíbrio imposta não descreve estrutura possível: '
         'com D/E de −1 ou menos o valor da firma não é positivo.',
@@ -694,39 +705,39 @@ abstract final class LeveredCostOfCapital {
     // o modelo **re**alavancava, e a leitura da lente `metodo`, de que ele
     // desalavancava, estava invertida. O que sobra agora é desalavancagem de
     // verdade: a dívida parada e o capital próprio crescendo pelo lucro retido.
-    final divida = <double>[
+    final debt = <double>[
       for (var t = 0; t <= n; t++) netDebtPerShare,
     ];
 
-    var ke = keInicial != null && keInicial.length == n
-        ? [...keInicial]
+    var ke = initialKe != null && initialKe.length == n
+        ? [...initialKe]
         : <double>[
             for (var t = 1; t <= n; t++) assumptions.discountRateAt(t),
           ];
-    var keTerminal = keTerminalInicial ?? assumptions.terminalDiscountRate;
-    List<double>? equityAnterior;
+    var keTerminal = initialTerminalKe ?? assumptions.terminalDiscountRate;
+    List<double>? previousEquity;
 
-    var iteracoes = 0;
-    var convergiu = false;
-    var valorAnterior = double.nan;
+    var iterations = 0;
+    var converged = false;
+    var previousValue = double.nan;
     late List<double> equity;
 
-    while (iteracoes < maxIterations) {
-      iteracoes++;
+    while (iterations < maxIterations) {
+      iterations++;
 
-      final avaliacao = DcfCalculator.shareholder(
+      final valuation = DcfCalculator.shareholder(
         baseProfit: baseProfit,
         assumptions: assumptions.copyWith(
           discountRatePath: ke,
           terminalDiscountRate: keTerminal,
         ),
       );
-      if (avaliacao.isErr) {
+      if (valuation.isErr) {
         return Err(ComputationFailure(
-          '${avaliacao.failureOrNull!.message} (iteração $iteracoes)',
+          '${valuation.failureOrNull!.message} (iteração $iterations)',
         ));
       }
-      final o = avaliacao.unwrap();
+      final o = valuation.unwrap();
 
       // Capital próprio ano a ano, por acumulação regressiva — a mesma da via
       // da firma, com o fluxo do acionista no lugar do da firma.
@@ -737,79 +748,79 @@ abstract final class LeveredCostOfCapital {
         e[t - 1] = o.projectedFlows[t - 1] * assumptions.lift(r) / (1 + r) +
             e[t] / (1 + r);
       }
-      if (equityAnterior != null) {
+      if (previousEquity != null) {
         for (var t = 0; t <= n; t++) {
-          e[t] = damping * e[t] + (1 - damping) * equityAnterior[t];
+          e[t] = damping * e[t] + (1 - damping) * previousEquity[t];
         }
       }
       equity = e;
-      equityAnterior = [...e];
+      previousEquity = [...e];
 
-      final novoKe = <double>[];
+      final newKe = <double>[];
       for (var t = 1; t <= n; t++) {
-        final eAnterior = e[t - 1];
-        if (!eAnterior.isFinite || eAnterior <= 0) {
+        final previousEquityValue = e[t - 1];
+        if (!previousEquityValue.isFinite || previousEquityValue <= 0) {
           return Err(ComputationFailure(
             'O capital próprio desaparece dentro da projeção (ano ${t - 1}, '
-            'iteração $iteracoes): a realavancagem não tem sentido econômico.',
+            'iteração $iterations): a realavancagem não tem sentido econômico.',
           ));
         }
-        final fator = BetaShrinkage.leverageFactor(
-          debtToEquity: divida[t - 1] / eAnterior,
+        final factor = BetaShrinkage.leverageFactor(
+          debtToEquity: debt[t - 1] / previousEquityValue,
           taxRate: taxRate,
         );
-        if (fator == null) {
+        if (factor == null) {
           return const Err(ComputationFailure(
             'Fator de alavancagem não finito na realavancagem.',
           ));
         }
-        novoKe.add(riskFreePath[t - 1] + unleveredBeta * fator * marketPremium);
+        newKe.add(riskFreePath[t - 1] + unleveredBeta * factor * marketPremium);
       }
-      ke = novoKe;
+      ke = newKe;
 
       final eN = e[n];
       if (!eN.isFinite || eN <= 0) {
         return Err(ComputationFailure(
           'Capital próprio não positivo no fim da projeção (iteração '
-          '$iteracoes).',
+          '$iterations).',
         ));
       }
-      final fatorN = BetaShrinkage.leverageFactor(
-        debtToEquity: terminalLeverage ?? divida[n] / eN,
+      final factorN = BetaShrinkage.leverageFactor(
+        debtToEquity: terminalLeverage ?? debt[n] / eN,
         taxRate: taxRate,
       );
-      if (fatorN == null) {
+      if (factorN == null) {
         return const Err(ComputationFailure(
           'Fator de alavancagem terminal não finito.',
         ));
       }
       keTerminal = terminalRiskFree +
-          _betaDeEquilibrio(unleveredBeta * fatorN, terminalBetaWeight) *
+          _equilibriumBeta(unleveredBeta * factorN, terminalBetaWeight) *
               marketPremium;
 
-      final valor = e[0];
-      if (valorAnterior.isFinite && valorAnterior.abs() > 0) {
-        if ((valor - valorAnterior).abs() / valorAnterior.abs() < tolerance) {
-          convergiu = true;
-          valorAnterior = valor;
+      final value = e[0];
+      if (previousValue.isFinite && previousValue.abs() > 0) {
+        if ((value - previousValue).abs() / previousValue.abs() < tolerance) {
+          converged = true;
+          previousValue = value;
           break;
         }
       }
-      valorAnterior = valor;
+      previousValue = value;
     }
 
     return Ok(LeveredRates(
       costOfEquity: List.unmodifiable(ke),
       wacc: List.unmodifiable(ke),
       enterpriseValue: List.unmodifiable(
-        [for (var t = 0; t <= n; t++) equity[t] + divida[t]],
+        [for (var t = 0; t <= n; t++) equity[t] + debt[t]],
       ),
       equity: List.unmodifiable(equity),
-      debt: List.unmodifiable(divida),
+      debt: List.unmodifiable(debt),
       terminalCostOfEquity: keTerminal,
       terminalWacc: keTerminal,
-      iterations: iteracoes,
-      converged: convergiu,
+      iterations: iterations,
+      converged: converged,
     ));
   }
 }

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 300" width="560" height="300" role="img" aria-labelledby="t d"><title id="t">Distribuição triangular</title><desc id="d">Triângulo com base do mínimo ao máximo e pico no valor do motor.</desc><style>
+  .fundo{fill:#fcfcfb}
+  .t1{fill:#0b0b0b;font:600 15px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .t2{fill:#52514e;font:12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .t3{fill:#0b0b0b;font:12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .tb{fill:#0b0b0b;font:600 12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .grade{stroke:#e4e3de;stroke-width:1}
+  .eixo{stroke:#b9b8b1;stroke-width:1}
+  .s1{stroke:#2a78d6;fill:#2a78d6}
+  .s2{stroke:#eb6834;fill:#eb6834}
+  .s3{stroke:#1baf7a;fill:#1baf7a}
+  .neutro{stroke:#8f8e87;fill:#8f8e87}
+  .caixa{fill:#f3f2ee;stroke:#c9c8c1;stroke-width:1}
+  .caixa2{fill:#e7f0fb;stroke:#2a78d6;stroke-width:1.5}
+  .caixa3{fill:#fdeee7;stroke:#eb6834;stroke-width:1.5}
+  .caixa4{fill:#f3f2ee;stroke:#8f8e87;stroke-width:1;stroke-dasharray:0}
+  .seta{stroke:#52514e;stroke-width:1.5;fill:none}
+  .anel{stroke:#fcfcfb;stroke-width:2}
+  @media (prefers-color-scheme: dark){
+    .fundo{fill:#1a1a19}
+    .t1,.t3,.tb{fill:#ffffff}
+    .t2{fill:#c3c2b7}
+    .grade{stroke:#33332f}
+    .eixo{stroke:#5a5953}
+    .s1{stroke:#3987e5;fill:#3987e5}
+    .s2{stroke:#d95926;fill:#d95926}
+    .s3{stroke:#199e70;fill:#199e70}
+    .caixa{fill:#262624;stroke:#4a4944}
+    .caixa2{fill:#16283f;stroke:#3987e5}
+    .caixa3{fill:#3a2016;stroke:#d95926}
+    .caixa4{fill:#262624;stroke:#6d6c66}
+    .seta{stroke:#c3c2b7}
+    .anel{stroke:#1a1a19}
+  }
+</style><rect class="fundo" width="560" height="300" rx="8"/><text class="t1" x="24" y="32">Distribuição triangular de uma premissa</text><text class="t2" x="24" y="52">Exemplo: crescimento sorteado entre g − 4 p.p. e g + 4 p.p., mais provável em g</text><path class="s1" d="M60,230 L280.0,70 L500,230 Z" fill-opacity="0.12" stroke-width="2" stroke-linejoin="round"/><line class="eixo" x1="50" x2="510" y1="230" y2="230"/><text class="t3" x="60" y="250" text-anchor="middle">g − 4 p.p.</text><text class="t2" x="60" y="266" text-anchor="middle">(mínimo)</text><text class="t3" x="280.0" y="250" text-anchor="middle">g do motor</text><text class="t2" x="280.0" y="266" text-anchor="middle">(mais provável)</text><text class="t3" x="500" y="250" text-anchor="middle">g + 4 p.p.</text><text class="t2" x="500" y="266" text-anchor="middle">(máximo)</text><line class="grade" x1="280.0" x2="280.0" y1="70" y2="230"/><text class="t2" x="294.0" y="88">chance maior</text></svg>

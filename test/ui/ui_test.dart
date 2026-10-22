@@ -1,0 +1,1514 @@
+import 'package:equisim/di/providers.dart';
+import 'package:equisim/presentation/backtest/backtest_page.dart';
+import 'package:equisim/presentation/backtest/backtest_providers.dart';
+import 'package:equisim/presentation/export/csv_export.dart';
+import 'package:equisim/presentation/goals/goal_page.dart';
+import 'package:equisim/presentation/shared/charts.dart';
+import 'package:equisim/presentation/shared/theme_bridge.dart';
+import 'package:equisim/presentation/shell/app_shell.dart';
+import 'package:equisim/presentation/shared/ui_kit.dart';
+import 'package:equisim/presentation/theme/fin_theme.dart';
+import 'package:equisim/presentation/study/study_notifier.dart';
+import 'package:equisim/presentation/study/study_page.dart';
+import 'package:equisim/presentation/valuation/valuation_page.dart';
+import 'package:equisim/presentation/valuation/valuation_providers.dart';
+import 'package:equisim_core/equisim_core.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+/// Serie longa o bastante para as metricas sairem em ordem de grandeza real.
+///
+/// Tres pregoes NAO bastam, por dois motivos: `moneyWeightedReturn` devolve
+/// `null` quando os fluxos nao sustentam a taxa, e o CAGR anualizado sobre
+/// dois dias vira um numero de quarenta digitos -- que e legitimo, mas empurra
+/// qualquer tabela para o modo empilhado e mede o layout errado.
+List<double> longSeries(double step) =>
+    List<double>.generate(120, (i) => 10 + i * step);
+
+Asset assetOf(String symbol, [String sector = 'financeiro']) => Asset(
+      ticker: Ticker.parse(symbol),
+      name: symbol,
+      sector: Sector.fromKey(sector, label: sector),
+    );
+
+/// Monta a tela isolando a rede: avaliações e universo são fornecidos
+/// diretamente, de modo que o teste exercita a interface, não a API.
+/// [isLight] alimenta ao mesmo tempo o provider legado e o `ThemeData`.
+/// Manter os dois em sincronia importa: as extensões `FinColors`/
+/// `FinTypography` vêm do tema, e um harness sem elas faz `context.fin`
+/// estourar em qualquer widget que use `FinAmount`.
+Widget harness({
+  required Widget child,
+  List<Override> overrides = const [],
+  bool isLight = false,
+}) =>
+    ProviderScope(
+      overrides: [
+        currentUserIdProvider.overrideWithValue('usuario-1'),
+        universeProvider.overrideWith((ref) async => const <Ticker>[]),
+        riskFreeRateProvider.overrideWith((ref) async => 0.094),
+        marketAnchorsProvider
+            .overrideWith((ref) async => MarketAnchors.fallback2026),
+        portfolioValuationsProvider
+            .overrideWith((ref) async => const <Ticker, ValuationResult>{}),
+        // Os sinais do prêmio leem os fundamentos, que iriam à rede (item B1).
+        portfolioSignalsProvider
+            .overrideWith((ref) async => const <Ticker, TransversalSignals>{}),
+        valuationProvider.overrideWith((ref, ticker) async => null),
+        isLightModeProvider.overrideWith(() => IsLightMode(initial: isLight)),
+        ...overrides,
+      ],
+      child: MaterialApp(
+        theme: buildFinTheme(isLight: isLight),
+        home: Scaffold(body: child),
+      ),
+    );
+
+void main() {
+  group('StudyPage — dupla carteira', () {
+    testWidgets('mostra estado vazio nas duas colunas', (tester) async {
+      await tester.pumpWidget(harness(child: const StudyPage()));
+      await tester.pump();
+
+      expect(find.text('CARTEIRA PRINCIPAL'), findsOneWidget);
+      expect(find.text('CARTEIRA RESERVA'), findsOneWidget);
+      expect(find.text('Nenhum ativo'), findsNWidgets(2));
+    });
+
+    testWidgets('ativo adicionado aparece com seu peso', (tester) async {
+      late WidgetRef capturedRef;
+      await tester.pumpWidget(harness(
+        child: Consumer(
+          builder: (context, ref, _) {
+            capturedRef = ref;
+            return const StudyPage();
+          },
+        ),
+      ));
+      await tester.pump();
+
+      capturedRef
+          .read(studyProvider.notifier)
+          .addAsset(assetOf('PETR4', 'energia'), toPrincipal: true);
+      await tester.pump();
+
+      expect(find.text('PETR4'), findsOneWidget);
+      expect(find.text('100,00%'), findsOneWidget);
+    });
+
+    testWidgets('dois ativos dividem o peso igualmente', (tester) async {
+      late WidgetRef capturedRef;
+      await tester.pumpWidget(harness(
+        child: Consumer(
+          builder: (context, ref, _) {
+            capturedRef = ref;
+            return const StudyPage();
+          },
+        ),
+      ));
+      await tester.pump();
+
+      final notifier = capturedRef.read(studyProvider.notifier);
+      notifier.addAsset(assetOf('PETR4', 'energia'), toPrincipal: true);
+      notifier.addAsset(assetOf('VALE3', 'materiais'), toPrincipal: true);
+      await tester.pump();
+
+      expect(find.text('50,00%'), findsNWidgets(2));
+    });
+
+    testWidgets('alerta de concentração aparece e não bloqueia', (tester) async {
+      late WidgetRef capturedRef;
+      await tester.pumpWidget(harness(
+        child: Consumer(
+          builder: (context, ref, _) {
+            capturedRef = ref;
+            return const StudyPage();
+          },
+        ),
+      ));
+      await tester.pump();
+
+      final notifier = capturedRef.read(studyProvider.notifier);
+      notifier.addAsset(assetOf('ITUB4'), toPrincipal: true);
+      await tester.pump();
+      expect(find.textContaining('Concentração setorial'), findsNothing);
+
+      notifier.addAsset(assetOf('BBAS3'), toPrincipal: true);
+      await tester.pump();
+
+      expect(find.textContaining('Concentração setorial'), findsOneWidget);
+      expect(find.textContaining('não um impedimento'), findsOneWidget);
+      // O ativo entrou mesmo assim.
+      expect(
+        capturedRef.read(studyProvider).study.principal.length,
+        2,
+      );
+    });
+
+    testWidgets('arrastar um ativo o move para a outra carteira',
+        (tester) async {
+      late WidgetRef capturedRef;
+      await tester.pumpWidget(harness(
+        child: Consumer(
+          builder: (context, ref, _) {
+            capturedRef = ref;
+            return const StudyPage();
+          },
+        ),
+      ));
+      await tester.pump();
+
+      capturedRef
+          .read(studyProvider.notifier)
+          .addAsset(assetOf('PETR4', 'energia'), toPrincipal: false);
+      await tester.pump();
+
+      expect(capturedRef.read(studyProvider).study.reserve.length, 1);
+      expect(capturedRef.read(studyProvider).study.principal.length, 0);
+
+      // Arrasta da Reserva para a Principal.
+      final origin = tester.getCenter(find.text('PETR4'));
+      final target = tester.getCenter(find.text('CARTEIRA PRINCIPAL'));
+      final gesture = await tester.startGesture(origin);
+      await tester.pump(const Duration(milliseconds: 200));
+      await gesture.moveTo(target);
+      await tester.pump(const Duration(milliseconds: 200));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(capturedRef.read(studyProvider).study.principal.length, 1);
+      expect(capturedRef.read(studyProvider).study.reserve.length, 0);
+    });
+  });
+
+  group('Componentes de interface', () {
+    testWidgets('NoticeBanner exibe a mensagem', (tester) async {
+      await tester.pumpWidget(harness(
+        child: const NoticeBanner(
+          message: 'Aviso de teste',
+        ),
+      ));
+      expect(find.text('Aviso de teste'), findsOneWidget);
+    });
+
+    testWidgets('MetricTile mostra rótulo, valor e dica', (tester) async {
+      await tester.pumpWidget(harness(
+        child: const MetricTile(
+          label: 'Sharpe',
+          value: '1,25',
+          hint: 'vs CDI',
+        ),
+      ));
+      expect(find.text('Sharpe'), findsOneWidget);
+      expect(find.text('1,25'), findsOneWidget);
+      expect(find.text('vs CDI'), findsOneWidget);
+    });
+
+    testWidgets('HintIcon abre o glossário e explica cada indicador',
+        (tester) async {
+      await tester.pumpWidget(harness(
+        child: const HintIcon(
+          title: 'Indicadores da Carteira Principal',
+          intro: 'Todos se referem à janela simulada.',
+          entries: [HintEntry('TWR', 'Neutraliza o cronograma de aportes.')],
+        ),
+      ));
+
+      expect(find.text('TWR'), findsNothing);
+
+      await tester.tap(find.byType(IconButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Todos se referem à janela simulada.'), findsOneWidget);
+      expect(find.text('TWR'), findsOneWidget);
+      expect(
+        find.text('Neutraliza o cronograma de aportes.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('tema claro e escuro renderizam sem erro', (tester) async {
+      for (final isLight in [true, false]) {
+        await tester.pumpWidget(harness(
+          isLight: isLight,
+          child: const StudyPage(),
+        ));
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+      }
+    });
+  });
+
+  group('Gráficos', () {
+    testWidgets('dispersão com um único ponto não degenera os eixos',
+        (tester) async {
+      // Regressão: com um ponto só, o `fl_chart` fazia minX == maxX e
+      // minY == maxY, e a conversão de valor para pixel dividia por zero.
+      await tester.pumpWidget(harness(
+        child: const RiskReturnScatter(
+          points: [
+            (
+              label: 'Principal',
+              risk: 18.4,
+              ret: 12.7,
+              color: Colors.green,
+              highlight: true,
+            ),
+          ],
+        ),
+      ));
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      final chart = tester.widget<ScatterChart>(find.byType(ScatterChart));
+      expect(chart.data.maxX, greaterThan(chart.data.minX));
+      expect(chart.data.maxY, greaterThan(chart.data.minY));
+      expect(chart.data.minX, greaterThanOrEqualTo(0));
+    });
+
+    testWidgets('dispersão desenha um ponto por ativo e rotula todos',
+        (tester) async {
+      await tester.pumpWidget(harness(
+        child: const RiskReturnScatter(
+          points: [
+            (
+              label: 'PETR4',
+              risk: 32.0,
+              ret: 21.0,
+              color: Colors.grey,
+              highlight: false,
+            ),
+            (
+              label: 'ABEV3',
+              risk: 21.0,
+              ret: 4.0,
+              color: Colors.grey,
+              highlight: false,
+            ),
+            (
+              label: 'Principal',
+              risk: 18.0,
+              ret: 13.0,
+              color: Colors.green,
+              highlight: true,
+            ),
+          ],
+        ),
+      ));
+      await tester.pump();
+
+      final chart = tester.widget<ScatterChart>(find.byType(ScatterChart));
+      expect(chart.data.scatterSpots, hasLength(3));
+      expect(chart.data.scatterLabelSettings.showLabel, isTrue);
+      expect(
+        chart.data.scatterLabelSettings.getLabelFunction(
+          0,
+          chart.data.scatterSpots.first,
+        ),
+        'PETR4',
+      );
+    });
+
+    testWidgets('curvas de tamanhos diferentes alinham pela data',
+        (tester) async {
+      // A Principal começa um mês depois da Reserva. Desenhadas por índice,
+      // as duas ficavam encostadas na esquerda e a mais curta parecia acabar
+      // antes do fim do período.
+      final calendar = [
+        for (var i = 0; i < 6; i++) DateTime(2024, 1 + i, 1),
+      ];
+
+      await tester.pumpWidget(harness(
+        child: Base100Chart(
+          dates: calendar,
+          series: [
+            ChartSeries(
+              label: 'Reserva',
+              values: const [100, 101, 102, 103, 104, 105],
+              dates: calendar,
+              color: Colors.blue,
+            ),
+            ChartSeries(
+              label: 'Principal',
+              values: const [100, 99, 98, 97, 96],
+              dates: calendar.skip(1).toList(),
+              color: Colors.green,
+            ),
+          ],
+        ),
+      ));
+      await tester.pump();
+
+      final chart = tester.widget<LineChart>(find.byType(LineChart));
+      final reserve = chart.data.lineBarsData[0].spots;
+      final principal = chart.data.lineBarsData[1].spots;
+
+      expect(reserve.first.x, 0);
+      expect(reserve.last.x, 5);
+      // A curva mais curta começa deslocada e termina na mesma borda.
+      expect(principal.first.x, 1);
+      expect(principal.last.x, 5);
+    });
+  });
+
+
+  group('Formatação', () {
+    test('percentual com sinal usa virgula decimal, como manda o pt_BR', () {
+      // `toStringAsFixed` ignora locale e emitia ponto: `12.34%`. O teste
+      // antigo travava esse defeito, enquanto o de moeda logo abaixo ja exigia
+      // virgula -- as duas convencoes conviviam no mesmo arquivo.
+      expect(Fmt.percent(0.1234), '12,34%');
+      expect(Fmt.percent(0.1234, signed: true), '+12,34%');
+      expect(Fmt.percent(-0.05, signed: true), '-5,00%');
+      expect(Fmt.percent(0.0, signed: true), '0,00%');
+    });
+
+    test('percentual grande recebe separador de milhar', () {
+      expect(Fmt.percent(12.3456), '1.234,56%');
+    });
+
+    test('valor nao finito vira travessao em vez de NaN na tela', () {
+      // NumberFormat nao lanca: devolve 'NaN' e '∞'. Exibir isso ao
+      // investidor e pior que admitir a ausencia do dado.
+      expect(Fmt.percent(double.nan), '—');
+      expect(Fmt.percent(double.infinity), '—');
+      expect(Fmt.ratio(double.nan), '—');
+    });
+
+    test('numero adimensional tambem segue pt_BR', () {
+      expect(Fmt.ratio(0.43), '0,43');
+      expect(Fmt.ratio(1234.5, decimals: 1), '1.234,5');
+    });
+
+    test('moeda em português brasileiro', () {
+      expect(Fmt.money(1234.56), contains('1.234,56'));
+    });
+  });
+
+  group('Exportação CSV', () {
+    test('usa separador e decimal que o Excel brasileiro entende', () {
+      final result = PortfolioComparison(
+        window: _emptyRange,
+        requestedWindow: _emptyRange,
+      );
+      final csv = CsvExport.metrics(result);
+
+      expect(csv, contains(';'));
+      expect(csv.split('\n').first, 'metrica;principal;reserva');
+      // Sem dados, as colunas ficam vazias em vez de zeradas.
+      expect(csv, contains('cagr;;'));
+    });
+
+    test('cabeçalho da série temporal identifica as duas carteiras', () {
+      final result = PortfolioComparison(
+        window: _emptyRange,
+        requestedWindow: _emptyRange,
+      );
+      expect(CsvExport.comparisonSeries(result), isEmpty,
+          reason: 'sem simulação não há série a exportar');
+    });
+  });
+  group('Backtest — desempenho das duas carteiras', () {
+    /// Sobrescreve a comparação inteira: o alvo aqui é a montagem da tela,
+    /// não o motor de simulação, que tem os próprios testes no domínio.
+    List<Override> withComparison(PortfolioComparison comparison) => [
+          comparisonProvider.overrideWith((ref) async => comparison),
+          correlationProvider.overrideWith((ref) async => null),
+        ];
+
+    /// Viewport alto o bastante para conter a tela inteira.
+    ///
+    /// Necessario desde que a tela virou `CustomScrollView`: o `SliverList` so
+    /// infla os cartoes que entram na viewport, entao na altura padrao de teste
+    /// (600 px) os cartoes de baixo simplesmente nao existem na arvore. Isso e
+    /// o ganho da conversao, nao um defeito -- mas o teste precisa trazer o
+    /// alvo para a tela antes de procura-lo.
+    void tallScreen(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    testWidgets('os ativos das duas carteiras aparecem no mesmo cartão',
+        (tester) async {
+      tallScreen(tester);
+      // A troca de ativo se decide comparando o pior detido com o melhor
+      // candidato: sem a Reserva no cartão, metade da decisão fica invisível.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+          reserve: outcomeOf('ITUB4', const [10, 18, 25]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('DESEMPENHO POR ATIVO'), findsOneWidget);
+      // Escopo pelo cartao, e nao pela tela: o selo de carteira passou a
+      // existir tambem nos cabecalhos das tabelas comparativas, entao contar
+      // ocorrencias na tela inteira deixou de dizer o que este teste quer
+      // saber -- que os DOIS grupos moram no MESMO cartao.
+      final card = find
+          .ancestor(
+            of: find.text('DESEMPENHO POR ATIVO'),
+            matching: find.byType(GlassCard),
+          )
+          .first;
+      expect(
+        find.descendant(of: card, matching: find.text('PRINCIPAL')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: card, matching: find.text('RESERVA')),
+        findsOneWidget,
+      );
+      expect(find.text('PETR4'), findsOneWidget);
+      expect(find.text('ITUB4'), findsOneWidget);
+    });
+
+    testWidgets('sem Reserva, o cartão mostra só a Principal', (tester) async {
+      tallScreen(tester);
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('DESEMPENHO POR ATIVO'), findsOneWidget);
+      expect(find.text('PETR4'), findsOneWidget);
+      expect(find.text('RESERVA'), findsNothing);
+    });
+
+    testWidgets('a linha de ativo empilha em vez de estourar', (tester) async {
+      // Em tres colunas as duas laterais tem largura MEDIDA e o miolo e
+      // `Expanded`: quando as laterais somadas passam da largura, o miolo
+      // colapsa a zero e a linha estoura. Empilhar preserva os dois numeros
+      // inteiros -- encolher a coluna truncaria digito sem aviso.
+      tester.view.devicePixelRatio = 1.0;
+      // Viewport alta: em 2,0x a tela inteira cresce, e o `SliverList` so
+      // infla o que entra nela -- com 6000 px o cartao por ativo nem existia
+      // na arvore, e o teste passaria sem ter olhado para ele.
+      tester.view.physicalSize = const Size(320, 14000);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', longSeries(0.05)),
+          reserve: outcomeOf('ITUB4', longSeries(0.12)),
+        )),
+        child: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2.0)),
+          child: const BacktestPage(),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      // Empilhada ou nao, a linha continua nomeando o ativo e a deriva dele.
+      expect(find.text('PETR4'), findsOneWidget);
+      expect(find.textContaining('p.p.'), findsWidgets);
+    });
+
+    testWidgets('a sobra de cada aporte aparece como caixa, não some',
+        (tester) async {
+      tallScreen(tester);
+      // O cartao de proventos que ficava aqui saiu com a decisao 023. O que
+      // ocupou o lugar dele na tabela e a linha do caixa: com compra em lotes
+      // inteiros, parte do aporte espera o proximo em vez de virar acao, e sem
+      // essa linha esse dinheiro sumiria da leitura.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+          reserve: outcomeOf('ITUB4', const [10, 18, 25]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('PROVENTOS NO PERÍODO'), findsNothing);
+
+      final card = find
+          .ancestor(
+            of: find.text('CARTEIRAS LADO A LADO'),
+            matching: find.byType(GlassCard),
+          )
+          .first;
+      // `findsWidgets`, e nao contagem fixa: nesta largura a tabela cai para
+      // um bloco por carteira e repete cada rotulo. O que precisa valer nas
+      // duas disposicoes e que a linha exista.
+      expect(
+        find.descendant(of: card, matching: find.text('Em caixa')),
+        findsWidgets,
+      );
+      // E o indicador que dependia de provento saiu junto.
+      expect(
+        find.descendant(of: card, matching: find.text('DY líquido')),
+        findsNothing,
+      );
+    });
+
+    testWidgets('os cabeçalhos das carteiras trazem o ícone de ajuda',
+        (tester) async {
+      tallScreen(tester);
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+          reserve: outcomeOf('ITUB4', const [10, 18, 25]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      // DOIS, e nao tres: os dois paineis de metricas viraram um cartao
+      // comparativo com um glossario so. O terceiro e o de desempenho por
+      // ativo.
+      expect(find.byType(HintIcon), findsNWidgets(2));
+    });
+  });
+
+  group('Backtest — o capital que virou posição', () {
+    List<Override> withComparison(PortfolioComparison comparison) => [
+          comparisonProvider.overrideWith((ref) async => comparison),
+          correlationProvider.overrideWith((ref) async => null),
+        ];
+
+    void tallScreen(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    testWidgets('a tarifa da B3 aparece, e a legenda fecha a conta (C4)',
+        (tester) async {
+      tallScreen(tester);
+      // Com a tarifa, R$ 1.000,00 a R$ 10,00 compram 99 cotas, e não 100:
+      // cem custariam R$ 1.000,30. A tela diz quanto foi de custo, e a
+      // legenda mostra as três parcelas do aportado.
+      final start = DateTime(2024, 1, 1);
+      final withCost = PortfolioBacktest.run(
+        portfolio: Portfolio.equalWeighted(
+          id: 'PETR4',
+          name: 'PETR4',
+          kind: PortfolioKind.principal,
+          assets: [assetOf('PETR4')],
+        ).unwrap(),
+        prices: {
+          Ticker.parse('PETR4'): seriesOf('PETR4', start, const [10, 12, 14]),
+        },
+        plan: const ContributionPlan(initial: Money(100000), monthly: Money.zero),
+        range: DateRange(start, DateTime(2024, 12, 31)),
+      ).unwrap();
+      expect(withCost.transactionCosts, const Money(30));
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(principal: withCost)),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('custos ${Fmt.money(0.30)}'), findsWidgets);
+      expect(find.text('99 cotas · ${Fmt.money(1000)} destinados'),
+          findsOneWidget);
+    });
+
+    testWidgets('o cartão de uma carteira diz o aportado E o alocado',
+        (tester) async {
+      tallScreen(tester);
+      // O aportado sozinho e o valor que o proprio investidor estipulou na
+      // aba Meta -- ele ja o conhece antes de abrir a tela. O que a simulacao
+      // acrescenta e quanto desse dinheiro virou posicao.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('aportado R\$'), findsOneWidget);
+      expect(find.textContaining('alocado R\$'), findsOneWidget);
+    });
+
+    testWidgets('a tabela comparativa ganha a linha do alocado',
+        (tester) async {
+      tallScreen(tester);
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+          reserve: outcomeOf('ITUB4', const [10, 18, 25]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      final card = find
+          .ancestor(
+            of: find.text('CARTEIRAS LADO A LADO'),
+            matching: find.byType(GlassCard),
+          )
+          .first;
+      final contributed =
+          find.descendant(of: card, matching: find.text('Aportado'));
+      final allocated =
+          find.descendant(of: card, matching: find.text('Alocado'));
+
+      expect(contributed, findsWidgets);
+      // Contagem CASADA, e nao `findsOneWidget`: quando a largura nao sustenta
+      // a tabela lado a lado, ela cai para um bloco por carteira e repete cada
+      // rotulo. Fixar o numero prenderia o teste a uma disposicao; o que
+      // precisa valer nas duas e que o alocado acompanhe o aportado.
+      expect(allocated.evaluate().length, contributed.evaluate().length);
+    });
+
+    testWidgets('cada ativo mostra quantas cotas e quanto capital recebeu',
+        (tester) async {
+      tallScreen(tester);
+      // Peso responde "que fatia da carteira"; sozinho ele nao diz se sao
+      // trinta cotas ou tres mil.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', const [10, 12, 14]),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      final card = find
+          .ancestor(
+            of: find.text('DESEMPENHO POR ATIVO'),
+            matching: find.byType(GlassCard),
+          )
+          .first;
+      // R\$ 1.000,00 aportados num ativo a R\$ 10,00: 100 cotas exatas, SEM
+      // casa decimal -- a quantidade e inteira desde a decisao 023. O numero e
+      // conferido, e nao so a presenca do rotulo: "cotas" na tela com a
+      // quantidade errada passaria por um `textContaining('cotas')`.
+      //
+      // O valor sai de `Fmt.money`, e nao de um literal: o `R\$` do intl vem
+      // seguido de espaco INSEPARAVEL (U+00A0), que um literal digitado a mao
+      // nao reproduz -- e a falha resultante parece ausencia do widget.
+      expect(
+        find.descendant(
+          of: card,
+          matching: find.text('100 cotas · ${Fmt.money(1000)} destinados'),
+        ),
+        findsOneWidget,
+      );
+    });
+  });
+
+  group('Backtest — as duas carteiras lado a lado', () {
+    List<Override> withComparison(PortfolioComparison comparison) => [
+          comparisonProvider.overrideWith((ref) async => comparison),
+          correlationProvider.overrideWith((ref) async => null),
+        ];
+
+    void tallScreen(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    Future<void> build(
+      WidgetTester tester, {
+      required bool withReserve,
+    }) async {
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', longSeries(0.05)),
+          reserve: withReserve ? outcomeOf('ITUB4', longSeries(0.12)) : null,
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('cada indicador aparece uma vez, com um valor por coluna',
+        (tester) async {
+      tallScreen(tester);
+      // "Para comparar o Sharpe da Principal com o da Reserva, o usuario e
+      // forcado a rolar a tela repetidamente" -- lente `tela`. Em coluna, a
+      // mesma comparacao e um movimento de olho.
+      await build(tester, withReserve: true);
+
+      expect(find.text('CARTEIRAS LADO A LADO'), findsOneWidget);
+      final card = find
+          .ancestor(
+            of: find.text('CARTEIRAS LADO A LADO'),
+            matching: find.byType(GlassCard),
+          )
+          .first;
+      for (final indicator in [
+        'Patrimônio final',
+        'Aportado',
+        'Alocado',
+        'Custos',
+        'Em caixa',
+        'TWR',
+        'XIRR',
+        'CAGR',
+        'Volatilidade',
+        'Máx. drawdown',
+        'Sharpe',
+        'Sortino',
+        'Calmar',
+      ]) {
+        expect(
+          find.descendant(of: card, matching: find.text(indicator)),
+          findsOneWidget,
+          reason: '$indicator deveria ter uma linha só, com duas colunas',
+        );
+      }
+      // Os paineis separados de cada carteira sairam de cena.
+      expect(find.text('CARTEIRA PRINCIPAL'), findsNothing);
+      expect(find.text('CARTEIRA RESERVA'), findsNothing);
+    });
+
+    testWidgets('a Reserva declara que o patrimônio dela é hipotético',
+        (tester) async {
+      tallScreen(tester);
+      // Ler "Carteira Reserva - R\$ 1.193,66" como dinheiro que se teria e
+      // imediato, e e falso: ali ela e simulada como carteira inteira.
+      await build(tester, withReserve: true);
+
+      expect(
+        find.textContaining('faz do patrimônio dela um valor hipotético'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('com uma carteira só, volta o painel de sempre',
+        (tester) async {
+      tallScreen(tester);
+      // Comparacao com uma coluna nao compara nada, e o painel de uma
+      // carteira ja resolve esse caso -- medido em contraste e em estouro.
+      await build(tester, withReserve: false);
+
+      expect(find.text('CARTEIRAS LADO A LADO'), findsNothing);
+      expect(find.text('CARTEIRA PRINCIPAL'), findsOneWidget);
+      // E nada de provento junto: o cartao que acompanhava este painel saiu.
+      expect(find.textContaining('PROVENTOS'), findsNothing);
+    });
+
+    testWidgets('largura que não sustenta as colunas empilha sem truncar',
+        (tester) async {
+      // Uma tabela numerica densa nao cabe lado a lado em 320 dp sob escala de
+      // texto 2,0x -- dois valores sozinhos passam da largura da tela.
+      // Empilhar devolve o percurso antigo, que e ruim; truncar o numero seria
+      // pior. O teste fixa a escolha, para que ninguem a troque por engano.
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(320, 6000);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', longSeries(0.05)),
+          reserve: outcomeOf('ITUB4', longSeries(0.12)),
+        )),
+        child: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2.0)),
+          child: const BacktestPage(),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      final card = find
+          .ancestor(
+            of: find.text('CARTEIRAS LADO A LADO'),
+            matching: find.byType(GlassCard),
+          )
+          .first;
+      // Empilhado, cada indicador aparece uma vez POR CARTEIRA -- e as duas
+      // continuam no mesmo cartao, cada uma sob o proprio selo.
+      expect(
+        find.descendant(of: card, matching: find.text('Sharpe')),
+        findsNWidgets(2),
+      );
+      expect(
+        find.descendant(of: card, matching: find.text('PRINCIPAL')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: card, matching: find.text('RESERVA')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('só a Reserva simulada ainda traz a ressalva', (tester) async {
+      tallScreen(tester);
+      // O caminho de uma carteira so tambem precisa da ressalva: e o mesmo
+      // numero, sujeito a mesma leitura errada.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          reserve: outcomeOf('ITUB4', longSeries(0.12)),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('CARTEIRA RESERVA'), findsOneWidget);
+      expect(
+        find.textContaining('faz do patrimônio dela um valor hipotético'),
+        findsOneWidget,
+      );
+    });
+  });
+
+  group('Backtest — a janela declarada contra o prazo da meta', () {
+    void tallScreen(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    /// Monta a tela com uma meta ja definida, pelo mesmo caminho que o usuario
+    /// usaria: o notifier, e nao um override do estado.
+    Future<void> withGoal(WidgetTester tester, int months) async {
+      late WidgetRef capturedRef;
+      await tester.pumpWidget(harness(
+        overrides: [
+          comparisonProvider.overrideWith((ref) async => null),
+          correlationProvider.overrideWith((ref) async => null),
+        ],
+        child: Consumer(builder: (context, ref, _) {
+          capturedRef = ref;
+          return const BacktestPage();
+        }),
+      ));
+      capturedRef.read(studyProvider.notifier).setGoal(FinancialGoal.unvalidated(
+            initialContribution: const Money(1000000),
+            monthlyContribution: const Money(100000),
+            months: months,
+            targetWealth: const Money(50000000),
+          ));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('os dois horizontes aparecem empilhados', (tester) async {
+      tallScreen(tester);
+      // Sem a segunda linha, "5 anos" nao tem com o que ser comparado: o
+      // leitor supoe que a simulacao percorre o plano inteiro.
+      await withGoal(tester, 120);
+
+      expect(find.text('Janela'), findsOneWidget);
+      expect(find.text('Prazo da meta'), findsOneWidget);
+      expect(find.text('10 anos e 0 meses'), findsOneWidget);
+    });
+
+    testWidgets('janela menor que o prazo avisa qual fracao cobre',
+        (tester) async {
+      tallScreen(tester);
+      await withGoal(tester, 120);
+
+      expect(
+        find.textContaining('cobre 5 dos 10 anos da meta'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('prazo acima do teto da fonte diz que nenhuma janela alcanca',
+        (tester) async {
+      tallScreen(tester);
+      await withGoal(tester, 240);
+
+      expect(
+        find.textContaining('nenhuma posição do controle alcança o prazo'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('janela que cobre o prazo inteiro nao avisa nada',
+        (tester) async {
+      tallScreen(tester);
+      // Aviso que aparece sempre deixa de ser aviso.
+      await withGoal(tester, 48);
+
+      expect(find.textContaining('anos da meta'), findsNothing);
+    });
+
+    testWidgets('prazo nao multiplo de doze arredonda para cima',
+        (tester) async {
+      tallScreen(tester);
+      // 66 meses sao 5,5 anos: uma janela de cinco NAO os cobre, e truncar
+      // para 5 diria exatamente que cobre.
+      await withGoal(tester, 66);
+
+      expect(find.textContaining('cobre 5 dos 6 anos da meta'), findsOneWidget);
+    });
+  });
+
+  group('Backtest — confronto com a meta no período simulado', () {
+    void tallScreen(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    FeasibilityVerdict verdict(double annual) => FeasibilityVerdict(
+          level: FeasibilityLevel.demanding,
+          reason: FeasibilityReason.aboveMarket,
+          requiredAnnualRate: annual,
+          anchors: MarketAnchors.fallback2026,
+        );
+
+
+    List<Override> scenario({
+      required PortfolioComparison comparison,
+      FeasibilityVerdict? verdict,
+    }) =>
+        [
+          comparisonProvider.overrideWith((ref) async => comparison),
+          correlationProvider.overrideWith((ref) async => null),
+          goalFeasibilityProvider.overrideWith((ref) async => verdict),
+        ];
+
+    testWidgets('o exigido e o realizado aparecem no mesmo cartao',
+        (tester) async {
+      tallScreen(tester);
+      // O glossario do XIRR sempre disse que "e este o numero a confrontar
+      // com a meta". Este e o cartao em que o confronto acontece.
+      await tester.pumpWidget(harness(
+        overrides: scenario(
+          comparison: comparisonOf(
+            principal: outcomeOf('PETR4', longSeries(0.05)),
+          ),
+          verdict: verdict(0.184),
+        ),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('O REALIZADO FRENTE À META'), findsOneWidget);
+      // Os mesmos tres rotulos da aba Meta -- e a mesma grandeza medida de
+      // outro jeito, e vocabulario divergente esconderia isso.
+      expect(find.text('Exigido'), findsOneWidget);
+      expect(find.text('Realizado'), findsOneWidget);
+      expect(find.text('Folga'), findsOneWidget);
+      // Os tres numeros vem da serie deterministica acima: exigido de 18,40%
+      // contra um XIRR de 180,89% deixa 162,5 pontos de folga.
+      expect(find.text('18,40%'), findsOneWidget);
+      expect(find.text('+162,5 p.p.'), findsOneWidget);
+      // DUAS ocorrencias, e e assim que tem de ser: o mesmo XIRR aparece no
+      // confronto e no painel de indicadores logo abaixo. Os dois leem
+      // `principal.metrics.moneyWeightedReturn`, entao nao ha como divergirem
+      // -- que e a propriedade que faltava aos dois "exigido" da aba Meta.
+      expect(find.text('+180,89%'), findsNWidgets(2));
+    });
+
+    testWidgets('XIRR ausente vira travessao, nao numero inventado',
+        (tester) async {
+      tallScreen(tester);
+      // Tres pregoes nao sustentam a taxa. Admitir a ausencia do dado e a
+      // convencao do projeto -- exibir NaN colorido de verde seria pior.
+      await tester.pumpWidget(harness(
+        overrides: scenario(
+          comparison: comparisonOf(
+            principal: outcomeOf('PETR4', const [10, 12, 14]),
+          ),
+          verdict: verdict(0.184),
+        ),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('O REALIZADO FRENTE À META'), findsOneWidget);
+      expect(find.text('18,40%'), findsOneWidget);
+      // Realizado, a Folga que dele deriva, e o XIRR do painel abaixo.
+      expect(find.text('—'), findsNWidgets(3));
+    });
+
+    testWidgets('sem veredito de viabilidade o cartao nao aparece',
+        (tester) async {
+      tallScreen(tester);
+      await tester.pumpWidget(harness(
+        overrides: scenario(
+          comparison: comparisonOf(
+            principal: outcomeOf('PETR4', const [10, 12, 14]),
+          ),
+        ),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('O REALIZADO FRENTE À META'), findsNothing);
+    });
+
+    testWidgets('taxa exigida nao finita nao rende cartao', (tester) async {
+      tallScreen(tester);
+      // Meta que o solver nao resolveu ja e explicada na aba Meta; repetir um
+      // travessao sem contexto aqui so ocuparia espaco.
+      await tester.pumpWidget(harness(
+        overrides: scenario(
+          comparison: comparisonOf(
+            principal: outcomeOf('PETR4', const [10, 12, 14]),
+          ),
+          verdict: verdict(double.infinity),
+        ),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('O REALIZADO FRENTE À META'), findsNothing);
+    });
+
+    testWidgets('com Reserva simulada, a alternativa ganha a propria linha',
+        (tester) async {
+      tallScreen(tester);
+      // "E se eu tivesse montado a outra?" e a pergunta que faz a aba existir.
+      await tester.pumpWidget(harness(
+        overrides: scenario(
+          comparison: comparisonOf(
+            principal: outcomeOf('PETR4', longSeries(0.05)),
+            reserve: outcomeOf('ITUB4', longSeries(0.12)),
+          ),
+          verdict: verdict(0.184),
+        ),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('A Reserva, sob os mesmos aportes'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('sem Principal simulada nao ha o que confrontar',
+        (tester) async {
+      tallScreen(tester);
+      await tester.pumpWidget(harness(
+        overrides: scenario(
+          comparison: comparisonOf(
+            reserve: outcomeOf('ITUB4', const [10, 18, 25]),
+          ),
+          verdict: verdict(0.184),
+        ),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('O REALIZADO FRENTE À META'), findsNothing);
+    });
+  });
+
+  group('Meta — a rentabilidade exigida sai uma vez so', () {
+    void tallScreen(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    /// Os dois cartoes da tela, alimentados por providers DIFERENTES e com
+    /// taxas de proposito divergentes: 18,40% no veredito contra 18,44% no
+    /// alinhamento. E o cenario que a lente `tela` flagrou.
+    List<Override> twoCards() => [
+          goalFeasibilityProvider.overrideWith((ref) async => FeasibilityVerdict(
+                level: FeasibilityLevel.demanding,
+                reason: FeasibilityReason.aboveMarket,
+                requiredAnnualRate: 0.184,
+                anchors: MarketAnchors.fallback2026,
+              )),
+          goalAlignmentProvider.overrideWith((ref) async => GoalAlignment(
+                required: const RequiredReturn(monthly: 0.0142),
+                expectedReturn: 0.1495,
+                valuationCoverage: 0.75,
+              )),
+        ];
+
+    testWidgets('a taxa aparece em um unico bloco numerico', (tester) async {
+      tallScreen(tester);
+      await tester.pumpWidget(
+        harness(overrides: twoCards(), child: const GoalPage()),
+      );
+      await tester.pumpAndSettle();
+
+      // O bloco do cartao de viabilidade, que e onde a taxa nasce.
+      expect(find.text('18,40%'), findsOneWidget);
+      // O do cartao de confronto saiu. Era ele que exibia 18,44% ao lado do
+      // outro -- dois providers resolvendo a mesma taxa por conta propria.
+      expect(find.text('18,44%'), findsNothing);
+    });
+
+    testWidgets('o confronto mantem esperado e folga', (tester) async {
+      tallScreen(tester);
+      await tester.pumpWidget(
+        harness(overrides: twoCards(), child: const GoalPage()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('CARTEIRA FRENTE À META'), findsOneWidget);
+      expect(find.text('Esperado da carteira'), findsOneWidget);
+      expect(find.text('Folga'), findsOneWidget);
+      // Sem a coluna "Exigido" na fila, a folga precisa dizer contra o que se
+      // mede -- senao o numero fica solto no cartao.
+      expect(find.text('sobre o exigido acima'), findsOneWidget);
+    });
+
+    testWidgets('o rotulo e o mesmo que a aba Analise usa', (tester) async {
+      tallScreen(tester);
+      // Literal de proposito, e nao `Lexicon.requiredText`: e a palavra que o
+      // usuario le, e trocar o valor da constante e mudanca de vocabulario --
+      // deve exigir tocar no teste, nao passar despercebida.
+      await tester.pumpWidget(
+        harness(overrides: twoCards(), child: const GoalPage()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Exigido'), findsOneWidget);
+      expect(find.text('Rentabilidade exigida'), findsNothing);
+    });
+
+    testWidgets('os campos de valor se declaram editáveis', (tester) async {
+      tallScreen(tester);
+      // Pacote UI-2. Os tres campos nasceram como retangulos cinza sem
+      // contorno, e a lente `tela` os leu como blocos de EXIBICAO -- quem usa
+      // concluia que o sistema calculava os valores, mexia so no prazo, e
+      // nunca personalizava o plano. A funcionalidade existia e ficava
+      // invisivel.
+      await tester.pumpWidget(
+        harness(overrides: twoCards(), child: const GoalPage()),
+      );
+      await tester.pumpAndSettle();
+
+      // Uma marca de edicao por campo monetario: aporte inicial, aporte
+      // mensal e valor desejado.
+      expect(find.byIcon(Icons.edit_outlined), findsNWidgets(3));
+
+      // E o contorno, que e a outra metade do sinal. `BorderSide.none` era
+      // exatamente o que fazia o campo parecer contêiner.
+      final fields = tester.widgetList<TextField>(find.byType(TextField));
+      expect(fields.length, 3);
+      for (final field in fields) {
+        final border = field.decoration!.enabledBorder;
+        expect(border, isA<OutlineInputBorder>());
+        expect(border!.borderSide.style, BorderStyle.solid);
+      }
+    });
+
+    testWidgets('a prosa do veredito e composta na interface, em pt-BR',
+        (tester) async {
+      tallScreen(tester);
+      // Era um residuo conhecido: `FeasibilityVerdict.message` chegava do
+      // nucleo com o percentual ja embutido, formatado por `toStringAsFixed`
+      // -- ou seja, com PONTO decimal, na mesma tela em que o cartao acima
+      // escrevia virgula. O nucleo passou a devolver `FeasibilityReason` mais
+      // os numeros, e quem compoe a frase e `FeasibilityCopy`, com a mesma
+      // `Fmt` do resto da interface.
+      await tester.pumpWidget(
+        harness(overrides: twoCards(), child: const GoalPage()),
+      );
+      await tester.pumpAndSettle();
+
+      final prose = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((t) => t.data ?? '')
+          .firstWhere((t) => t.startsWith('A meta exige'), orElse: () => '');
+
+      expect(prose, isNotEmpty, reason: 'o cartao precisa explicar o veredito');
+      // Virgula decimal, nao ponto: e o sinal de que o texto passou pela
+      // formatacao da interface e nao veio pronto do nucleo.
+      expect(prose, contains('18,40%'));
+      expect(prose, isNot(contains('18.40')));
+      // E o veredito citado e o do `reason`, nao uma frase colada no objeto.
+      expect(prose, contains('acima do retorno histórico do Ibovespa'));
+    });
+  });
+
+  group('Backtest — o par que a ordenação encosta', () {
+    List<Override> withComparison(PortfolioComparison comparison) => [
+          comparisonProvider.overrideWith((ref) async => comparison),
+          correlationProvider.overrideWith((ref) async => null),
+        ];
+
+    void tallScreen(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    testWidgets('nomeia o pior detido e o melhor candidato', (tester) async {
+      tallScreen(tester);
+      // O cartao ja ordenava as duas listas para encostar essas duas linhas.
+      // A adjacencia era intencional e ficava implicita: quem nao lesse o
+      // glossario via duas listas ordenadas, nao um par.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', longSeries(0.02)),
+          reserve: outcomeOf('ITUB4', longSeries(0.12)),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('No encontro das duas listas'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('PETR4 é o pior retorno da Principal'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('ITUB4 o melhor da Reserva'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('não promete resultado que a simulação não calculou',
+        (tester) async {
+      tallScreen(tester);
+      // A Principal roda como ela e; nenhuma carteira trocada foi calculada.
+      // Numero que parece conselho e pior que numero nenhum.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', longSeries(0.02)),
+          reserve: outcomeOf('ITUB4', longSeries(0.12)),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('não roda a carteira trocada'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('candidato que não supera ninguém também é dito',
+        (tester) async {
+      tallScreen(tester);
+      // Observacao que so fala a favor deixa de ser observacao.
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', longSeries(0.12)),
+          reserve: outcomeOf('ITUB4', longSeries(0.02)),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('Nenhum candidato da Reserva superou'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('sem Reserva não há par a nomear', (tester) async {
+      tallScreen(tester);
+      await tester.pumpWidget(harness(
+        overrides: withComparison(comparisonOf(
+          principal: outcomeOf('PETR4', longSeries(0.05)),
+        )),
+        child: const BacktestPage(),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('No encontro das duas listas'), findsNothing);
+      expect(find.textContaining('Nenhum candidato'), findsNothing);
+    });
+  });
+
+  group('Valuation — a aba que existe antes da escolha', () {
+    void tallScreen(WidgetTester tester) {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 4000);
+      addTearDown(tester.view.reset);
+    }
+
+    testWidgets('sem ativo na carteira, diz onde montá-la', (tester) async {
+      tallScreen(tester);
+      // Como ABA ela precisa existir antes da escolha. Abrir em branco faria o
+      // rotulo prometer o que a tela nao entrega -- o defeito que UI-1 fecha.
+      await tester.pumpWidget(harness(child: const ValuationTab()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nenhum ativo para avaliar'), findsOneWidget);
+      expect(find.textContaining('aba Estudo'), findsOneWidget);
+    });
+
+    testWidgets('com ativos, oferece a escolha e avalia o primeiro',
+        (tester) async {
+      tallScreen(tester);
+      late WidgetRef capturedRef;
+      await tester.pumpWidget(harness(
+        child: Consumer(builder: (context, ref, _) {
+          capturedRef = ref;
+          return const ValuationTab();
+        }),
+      ));
+      final notifier = capturedRef.read(studyProvider.notifier);
+      notifier.addAsset(assetOf('PETR4', 'energia'), toPrincipal: true);
+      notifier.addAsset(assetOf('ITUB4'), toPrincipal: false);
+      await tester.pumpAndSettle();
+
+      expect(find.text('ATIVO AVALIADO'), findsOneWidget);
+      // A Reserva entra no seletor: e nela que moram os candidatos que se
+      // avalia antes de promover.
+      expect(find.widgetWithText(ChoiceChip, 'PETR4'), findsOneWidget);
+      expect(find.widgetWithText(ChoiceChip, 'ITUB4'), findsOneWidget);
+    });
+  });
+
+  group('Casca — cada aba abre a tela que seu rótulo nomeia', () {
+    testWidgets('quatro frentes, quatro rótulos', (tester) async {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 2000);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(harness(child: const AppShell()));
+      await tester.pump();
+
+      for (final label in ['Estudo', 'Valuation', 'Meta', 'Simulação']) {
+        expect(find.text(label), findsOneWidget, reason: 'aba $label');
+      }
+      // Os dois rotulos que nao descreviam a tela sairam de cena.
+      expect(find.text('Carteiras'), findsNothing);
+      expect(find.text('Análise'), findsNothing);
+    });
+
+    testWidgets('a aba Valuation abre o valuation', (tester) async {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 2000);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(harness(child: const AppShell()));
+      await tester.pump();
+
+      await tester.tap(find.text('Valuation'));
+      await tester.pumpAndSettle();
+
+      // Sem carteira montada, a aba diz o que falta -- e ja e o valuation
+      // falando, nao outra tela.
+      expect(find.text('Nenhum ativo para avaliar'), findsOneWidget);
+    });
+  });
+
+  group('Dispersão risco × retorno', () {
+    test('marca cada ativo pela carteira de origem', () async {
+      final today = DateTime.now();
+      final start = DateTime(today.year - 2, today.month, today.day);
+      final closes = List<double>.generate(300, (i) => 10 + i * 0.02);
+
+      final container = ProviderContainer(overrides: [
+        riskFreeRateProvider.overrideWith((ref) async => 0.10),
+        // O Sharpe usa a taxa **da janela** desde a decisão 58; sem o override
+        // o provedor vai ao repositório macro e, por ele, ao banco em disco.
+        riskFreeRateForWindowProvider.overrideWith((ref, window) async => 0.10),
+        priceRepositoryProvider.overrideWithValue(FakePriceRepository({
+          for (final symbol in ['PETR4', 'VALE3', 'ITUB4'])
+            Ticker.parse(symbol): seriesOf(symbol, start, closes),
+        })),
+      ]);
+      addTearDown(container.dispose);
+
+      final notifier = container.read(studyProvider.notifier);
+      notifier.addAsset(assetOf('PETR4', 'energia'), toPrincipal: true);
+      notifier.addAsset(assetOf('VALE3', 'materiais'), toPrincipal: true);
+      notifier.addAsset(assetOf('ITUB4'), toPrincipal: false);
+      notifier.setGoal(const FinancialGoal.unvalidated(
+        initialContribution: Money(100000),
+        monthlyContribution: Money(50000),
+        months: 120,
+        targetWealth: Money(10000000),
+      ));
+
+      final result = await container.read(comparisonProvider.future);
+      final kinds = {
+        for (final point in result!.riskReturn) point.label: point.kind,
+      };
+
+      expect(kinds['PETR4'], RiskReturnKind.principalAsset);
+      expect(kinds['VALE3'], RiskReturnKind.principalAsset);
+      // Antes, o candidato da Reserva simplesmente não era desenhado.
+      expect(kinds['ITUB4'], RiskReturnKind.reserveAsset);
+      expect(kinds['Principal'], RiskReturnKind.principal);
+      expect(kinds['Reserva'], RiskReturnKind.reserve);
+    });
+  });
+
+}
+
+final _emptyRange = DateRange(DateTime(2024, 1, 1), DateTime(2024, 12, 31));
+
+/// Série diária sintética: um pregão por dia útil a partir de [start].
+PriceSeries seriesOf(String symbol, DateTime start, List<double> closes) {
+  final points = <PricePoint>[];
+  var date = start;
+  for (final close in closes) {
+    while (date.weekday == DateTime.saturday ||
+        date.weekday == DateTime.sunday) {
+      date = date.add(const Duration(days: 1));
+    }
+    points.add(PricePoint(date: date, close: close));
+    date = date.add(const Duration(days: 1));
+  }
+  return PriceSeries(ticker: Ticker.parse(symbol), points: points);
+}
+
+/// Backtest de uma carteira de um ativo só, para alimentar a tela.
+BacktestOutcome outcomeOf(String symbol, List<double> closes) {
+  final start = DateTime(2024, 1, 1);
+  final portfolio = Portfolio.equalWeighted(
+    id: symbol,
+    name: symbol,
+    kind: PortfolioKind.principal,
+    assets: [assetOf(symbol)],
+  ).unwrap();
+
+  return PortfolioBacktest.run(
+    portfolio: portfolio,
+    prices: {Ticker.parse(symbol): seriesOf(symbol, start, closes)},
+    plan: const ContributionPlan(initial: Money(100000), monthly: Money.zero),
+    range: DateRange(start, DateTime(2024, 12, 31)),
+    // Os números conferidos pelas telas são os do cenário sem custo — cem
+    // cotas exatas a R$ 10,00. O custo tem teste próprio (item C4).
+    costs: TransactionCosts.none,
+  ).unwrap();
+}
+
+PortfolioComparison comparisonOf({
+  BacktestOutcome? principal,
+  BacktestOutcome? reserve,
+}) =>
+    PortfolioComparison(
+      window: _emptyRange,
+      requestedWindow: _emptyRange,
+      principal: principal,
+      reserve: reserve,
+    );
+
+/// Cotações servidas de memória, sem rede.
+class FakePriceRepository implements PriceRepository {
+  final Map<Ticker, PriceSeries> series;
+
+  FakePriceRepository(this.series);
+
+  @override
+  Future<Result<PriceSeries>> daily(Ticker ticker, DateRange range) async {
+    final found = series[ticker];
+    return found == null
+        ? Err(InsufficientData('Sem série para ${ticker.value}.'))
+        : Ok(found);
+  }
+
+  @override
+  Future<Result<Map<Ticker, PriceSeries>>> dailyBatch(
+    List<Ticker> tickers,
+    DateRange range,
+  ) async =>
+      Ok({
+        for (final ticker in tickers)
+          if (series[ticker] != null) ticker: series[ticker]!,
+      });
+
+  @override
+  Future<Result<PriceSeries>> adjustedCloseRaw(
+    Ticker ticker,
+    DateRange range,
+  ) =>
+      daily(ticker, range);
+}

@@ -120,8 +120,8 @@ class BrapiDatasource {
     final r = await _mergedStatements(ticker);
     if (r.isErr) return Err(r.failureOrNull!);
     final merged = r.unwrap();
-    final chaves = merged.keys.toList()..sort();
-    return Ok([for (final k in chaves) merged[k]!]);
+    final keys = merged.keys.toList()..sort();
+    return Ok([for (final k in keys) merged[k]!]);
   }
 
   Future<Result<Map<String, Map<String, dynamic>>>> _mergedStatements(
@@ -259,12 +259,12 @@ class BrapiDatasource {
       // hoje, e ausência não é o valor errado. **Campo a campo**, e não só com
       // o snapshot inteiro ausente: um corrente que traga a contagem e omita o
       // valor de mercado deixava o anual no lugar (lente `dados`, 15/09/2026).
-      for (final campo in const [
+      for (final field in const [
         'sharesOutstanding',
         'enterpriseToEbitda',
         'marketCap',
       ]) {
-        if (currentData?[campo] == null) fields.remove(campo);
+        if (currentData?[field] == null) fields.remove(field);
       }
       snapshots.add(
         BrapiFundamentalsDto(fiscalPeriodEnd: date, fields: fields)
@@ -317,29 +317,6 @@ class BrapiDatasource {
         if (ticker != null) tickers.add(ticker);
       }
       return tickers.toList()..sort();
-    });
-  }
-
-  /// Resolve renomeações (ex.: VVAR3 → VIIA3 → BHIA3).
-  ///
-  /// O parâmetro é `symbols` (plural). A implementação anterior usava `symbol`
-  /// e recebia HTTP 400 silenciosamente, deixando a funcionalidade inoperante
-  /// desde sempre.
-  Future<Result<Ticker?>> resolve(Ticker ticker) async {
-    final response = await client.getJson(
-      _url('/v2/tickers/resolve'),
-      query: {'symbols': ticker.value},
-    );
-    return response.map((body) {
-      final results = BrapiJson.results(body);
-      if (results.isEmpty) return null;
-      final first = results.first;
-      if (first is! Map<String, dynamic>) return null;
-      final changed = first['changed'] == true;
-      final resolved = BrapiJson.asString(first['symbol']);
-      if (!changed || resolved == null) return null;
-      final parsed = Ticker.tryParse(resolved);
-      return parsed == ticker ? null : parsed;
     });
   }
 }

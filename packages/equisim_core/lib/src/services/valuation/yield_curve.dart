@@ -73,20 +73,20 @@ class YieldCurve {
   static YieldCurve? of(DateTime referenceDate, Iterable<CurveVertex> vertices) {
     // Chave inteira, em dias úteis: dois títulos de mesmo vencimento caem no
     // mesmo dia, e `double` não serve de chave de mapa.
-    final porPrazo = <int, CurveVertex>{};
+    final byMaturity = <int, CurveVertex>{};
     for (final v in vertices) {
       if (!v.years.isFinite || v.years <= 0) continue;
       if (!v.rate.isFinite || v.rate <= -0.5 || v.rate >= 1.0) continue;
-      porPrazo.putIfAbsent((v.years * 252).round(), () => v);
+      byMaturity.putIfAbsent((v.years * 252).round(), () => v);
     }
-    if (porPrazo.length < minVertices) return null;
-    final ordenados = porPrazo.values.toList()
+    if (byMaturity.length < minVertices) return null;
+    final sortedRows = byMaturity.values.toList()
       ..sort((a, b) => a.years.compareTo(b.years));
-    return YieldCurve._(referenceDate, List.unmodifiable(ordenados));
+    return YieldCurve._(referenceDate, List.unmodifiable(sortedRows));
   }
 
   /// `ln` do fator de desconto até [t] anos.
-  double _lnDesconto(double t) {
+  double _lnDiscount(double t) {
     if (t <= 0) return 0;
     final v = vertices;
     // Antes do primeiro vértice: taxa à vista plana.
@@ -104,14 +104,14 @@ class YieldCurve {
     final a = v[v.length - 2], b = v.last;
     final la = -a.years * math.log(1 + a.rate);
     final lb = -b.years * math.log(1 + b.rate);
-    final inclinacao = (lb - la) / (b.years - a.years);
-    return lb + inclinacao * (t - b.years);
+    final slope = (lb - la) / (b.years - a.years);
+    return lb + slope * (t - b.years);
   }
 
   /// Taxa à vista efetiva anual para o prazo [t], em anos.
   double spotRate(double t) {
     if (t <= 0) return vertices.first.rate;
-    return math.exp(-_lnDesconto(t) / t) - 1;
+    return math.exp(-_lnDiscount(t) / t) - 1;
   }
 
   /// Forward efetivo anual entre [t0] e [t1], em anos.
@@ -120,7 +120,7 @@ class YieldCurve {
   /// `t1`. Para o ano `t` da projeção, `forwardRate(t − 1, t)`.
   double forwardRate(double t0, double t1) {
     if (t1 <= t0) return spotRate(t0);
-    return math.exp((_lnDesconto(t0) - _lnDesconto(t1)) / (t1 - t0)) - 1;
+    return math.exp((_lnDiscount(t0) - _lnDiscount(t1)) / (t1 - t0)) - 1;
   }
 
   /// Taxa de cada ano da projeção: o forward de um ano, do ano 1 ao [n].
@@ -170,7 +170,7 @@ abstract final class TreasuryCurve {
   ///
   /// O Tesouro não publica em fim de semana e feriado; uma avaliação num
   /// domingo usa a curva de sexta.
-  static const int diasDeRecuo = 7;
+  static const int fallbackDays = 7;
 
   /// Curva nominal na data-base mais recente até [asOf].
   ///
@@ -178,17 +178,17 @@ abstract final class TreasuryCurve {
   /// e é isso que permite montar a curva de cada coorte do backtest com o que
   /// era conhecido nela.
   static YieldCurve? at(Iterable<TreasuryQuote> quotes, DateTime asOf) {
-    final dia = DateTime.utc(asOf.year, asOf.month, asOf.day);
+    final day = DateTime.utc(asOf.year, asOf.month, asOf.day);
     DateTime? base;
     for (final q in quotes) {
       final b = DateTime.utc(q.baseDate.year, q.baseDate.month, q.baseDate.day);
-      if (b.isAfter(dia)) continue;
-      if (dia.difference(b).inDays > diasDeRecuo) continue;
+      if (b.isAfter(day)) continue;
+      if (day.difference(b).inDays > fallbackDays) continue;
       if (base == null || b.isAfter(base)) base = b;
     }
     if (base == null) return null;
 
-    final doDia = [
+    final sameDay = [
       for (final q in quotes)
         if (q.baseDate.year == base.year &&
             q.baseDate.month == base.month &&
@@ -197,18 +197,18 @@ abstract final class TreasuryCurve {
     ];
     // Da liquidação ao vencimento, em dias úteis do calendário que se
     // conhecia na data-base — é a conta do PU do próprio Tesouro.
-    final liquidacao = BrazilianCalendar.treasurySettlement(base);
-    double anos(TreasuryQuote q) =>
-        BrazilianCalendar.businessDaysBetween(liquidacao, q.maturity,
+    final settlement = BrazilianCalendar.treasurySettlement(base);
+    double years(TreasuryQuote q) =>
+        BrazilianCalendar.businessDaysBetween(settlement, q.maturity,
             knownAt: base) /
         252;
 
     return YieldCurve.of(base, [
       // LTN primeiro: em prazo repetido, fica o cupom zero.
-      for (final q in doDia)
-        if (q.type == ltn) CurveVertex(anos(q), q.rate),
-      for (final q in doDia)
-        if (q.type == ntnF) CurveVertex(anos(q), q.rate),
+      for (final q in sameDay)
+        if (q.type == ltn) CurveVertex(years(q), q.rate),
+      for (final q in sameDay)
+        if (q.type == ntnF) CurveVertex(years(q), q.rate),
     ]);
   }
 }
@@ -221,7 +221,7 @@ abstract final class TreasuryCurve {
 /// dia mais recente nos primeiros bytes. É o que permite ao aplicativo ler só o
 /// começo do arquivo e parar (item A2.1).
 abstract final class TreasuryCsv {
-  static DateTime? _data(String s) {
+  static DateTime? _date(String s) {
     final p = s.trim().split('/');
     if (p.length != 3) return null;
     final d = int.tryParse(p[0]), m = int.tryParse(p[1]), a = int.tryParse(p[2]);
@@ -231,30 +231,30 @@ abstract final class TreasuryCsv {
 
   /// Uma linha do arquivo, ou `null` quando não é título prefixado ou não se
   /// lê. O cabeçalho cai aqui por não ter data.
-  static TreasuryQuote? parseLine(String linha) {
-    final c = linha.split(';');
+  static TreasuryQuote? parseLine(String row) {
+    final c = row.split(';');
     if (c.length < 4) return null;
-    final tipo = c[0].trim();
-    if (tipo != TreasuryCurve.ltn && tipo != TreasuryCurve.ntnF) return null;
-    final venc = _data(c[1]);
-    final base = _data(c[2]);
-    final taxa = double.tryParse(c[3].trim().replaceAll(',', '.'));
-    if (venc == null || base == null || taxa == null || taxa <= 0) return null;
-    return TreasuryQuote(type: tipo, maturity: venc, baseDate: base, rate: taxa / 100);
+    final kind = c[0].trim();
+    if (kind != TreasuryCurve.ltn && kind != TreasuryCurve.ntnF) return null;
+    final maturity = _date(c[1]);
+    final base = _date(c[2]);
+    final rate = double.tryParse(c[3].trim().replaceAll(',', '.'));
+    if (maturity == null || base == null || rate == null || rate <= 0) return null;
+    return TreasuryQuote(type: kind, maturity: maturity, baseDate: base, rate: rate / 100);
   }
 
-  /// Todos os títulos prefixados das [linhas].
-  static List<TreasuryQuote> parse(Iterable<String> linhas) => [
-        for (final l in linhas)
+  /// Todos os títulos prefixados das [rows].
+  static List<TreasuryQuote> parse(Iterable<String> rows) => [
+        for (final l in rows)
           if (parseLine(l) case final TreasuryQuote q) q,
       ];
 
   /// Data-base de uma linha de **qualquer** título, ou `null`. Serve para
   /// saber onde termina o bloco do dia mais recente, que também tem títulos
   /// que a curva não usa.
-  static DateTime? baseDateOf(String linha) {
-    final c = linha.split(';');
-    return c.length < 3 ? null : _data(c[2]);
+  static DateTime? baseDateOf(String row) {
+    final c = row.split(';');
+    return c.length < 3 ? null : _date(c[2]);
   }
 }
 
@@ -265,25 +265,25 @@ abstract final class TreasuryCsv {
 /// do `CvmDocumentCodec`.
 abstract final class TreasuryQuotesCodec {
   /// Versão do formato.
-  static const int versao = 1;
+  static const int version = 1;
 
-  static String _dia(DateTime d) =>
+  static String _day(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-'
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
 
   /// Grava as cotações.
-  static Map<String, Object> encode(Iterable<TreasuryQuote> cotacoes,
-          {required DateTime geradoEm}) =>
+  static Map<String, Object> encode(Iterable<TreasuryQuote> quotes,
+          {required DateTime generatedAt}) =>
       {
-        'versao': versao,
-        'geradoEm': _dia(geradoEm),
+        'versao': version,
+        'geradoEm': _day(generatedAt),
         'cotacoes': [
-          for (final q in cotacoes)
+          for (final q in quotes)
             {
               'tipo': q.type,
-              'vencimento': _dia(q.maturity),
-              'dataBase': _dia(q.baseDate),
+              'vencimento': _day(q.maturity),
+              'dataBase': _day(q.baseDate),
               'taxa': q.rate,
             },
         ],
@@ -291,27 +291,27 @@ abstract final class TreasuryQuotesCodec {
 
   /// Lê as cotações. Versão desconhecida devolve lista vazia.
   static List<TreasuryQuote> decode(Map<String, dynamic> json) {
-    if (json['versao'] != versao) return const [];
-    final brutas = json['cotacoes'];
-    if (brutas is! List) return const [];
-    DateTime? data(Object? v) {
+    if (json['versao'] != version) return const [];
+    final rawQuotes = json['cotacoes'];
+    if (rawQuotes is! List) return const [];
+    DateTime? date(Object? v) {
       if (v is! String || v.length < 10) return null;
       return DateTime.tryParse('${v.substring(0, 10)}T00:00:00Z');
     }
 
     final out = <TreasuryQuote>[];
-    for (final b in brutas) {
+    for (final b in rawQuotes) {
       if (b is! Map<String, dynamic>) continue;
-      final tipo = b['tipo'];
-      final venc = data(b['vencimento']);
-      final base = data(b['dataBase']);
-      final taxa = b['taxa'];
-      if (tipo is! String || venc == null || base == null || taxa is! num) {
+      final kind = b['tipo'];
+      final maturity = date(b['vencimento']);
+      final base = date(b['dataBase']);
+      final rate = b['taxa'];
+      if (kind is! String || maturity == null || base == null || rate is! num) {
         continue;
       }
-      if (!taxa.isFinite || taxa <= -0.5 || taxa >= 1) continue;
+      if (!rate.isFinite || rate <= -0.5 || rate >= 1) continue;
       out.add(TreasuryQuote(
-          type: tipo, maturity: venc, baseDate: base, rate: taxa.toDouble()));
+          type: kind, maturity: maturity, baseDate: base, rate: rate.toDouble()));
     }
     return out;
   }

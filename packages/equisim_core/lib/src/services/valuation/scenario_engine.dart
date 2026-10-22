@@ -30,17 +30,10 @@ class TriangularRange {
     required this.max,
   });
 
-  /// Faixa degenerada: valor certo.
-  const TriangularRange.fixed(double value)
-      : min = value,
-        mode = value,
-        max = value;
-
   /// `true` quando a faixa colapsou num único ponto e [sample] é constante.
   ///
   /// Comparação exata de `double` é correta aqui: o interesse é saber se as
-  /// pontas são o **mesmo** valor — tipicamente por [TriangularRange.fixed] —,
-  /// não se estão próximas. Uma faixa estreitíssima porém não degenerada
+  /// pontas são o **mesmo** valor, não se estão próximas. Uma faixa estreitíssima porém não degenerada
   /// continua sendo amostrada, e é isso que se quer.
   bool get isDegenerate => min == max;
 
@@ -99,6 +92,16 @@ class DiscreteScenarios implements AssumptionSource {
   /// use [DiscreteScenarios.around].
   const DiscreteScenarios(this.scenarios);
 
+  /// Deslocamento padrão do crescimento do primeiro ano, em fração: 3 p.p.
+  ///
+  /// Constante nomeada, e não só valor de parâmetro, para que a tela diga o
+  /// mesmo número que a conta usa — a nota "crescimento −3 p.p." sob os
+  /// valores da sensibilidade (decisão 148).
+  static const double defaultGrowthDelta = 0.03;
+
+  /// Deslocamento padrão das duas taxas de desconto, em fração: 2 p.p.
+  static const double defaultDiscountDelta = 0.02;
+
   /// Constrói as três faixas a partir de um cenário central, deslocando
   /// crescimento e desconto em direções opostas.
   ///
@@ -119,8 +122,8 @@ class DiscreteScenarios implements AssumptionSource {
   /// não participa daquele quociente.
   factory DiscreteScenarios.around(
     DcfAssumptions center, {
-    double growthDelta = 0.03,
-    double discountDelta = 0.02,
+    double growthDelta = defaultGrowthDelta,
+    double discountDelta = defaultDiscountDelta,
   }) =>
       DiscreteScenarios({
         ScenarioBand.bear: center.copyWith(
@@ -238,8 +241,8 @@ class StochasticScenarios implements AssumptionSource {
       // que desconta a perpetuidade, e congelá-la deixaria de fora a parcela
       // que mais pesa no valor. O deslocamento é paralelo — a estrutura a termo
       // é premissa do modelo, não fonte de incerteza sorteada aqui.
-      final deslocamento = r - base.discountRate;
-      final rInf = base.terminalDiscountRate + deslocamento;
+      final shift = r - base.discountRate;
+      final rInf = base.terminalDiscountRate + shift;
       final gp = perpetual.sample(rng);
       out.add(base.copyWith(
         growthRate: growth.sample(rng),

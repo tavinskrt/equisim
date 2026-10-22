@@ -12,7 +12,9 @@ library;
 /// Foi o que aconteceu com a SUZB3: retorno corrente de 41,5% contra 18,4% de
 /// mediana do ciclo, com `t` significante e deriva maior que a correção. A base
 /// ficou travada no pico de celulose e câmbio, e o preço justo saiu a
-/// +259,1% do de mercado. Ver a §13.2 de `docs/refinamento-do-valuation.md`.
+/// +259,1% do de mercado. A medição estava na §13.2 do documento de
+/// refinamento, que a decisão 141 apagou (no git, commit `6827219`); a regra de
+/// hoje está em `docs/motor/03-base-e-crescimento.md`.
 ///
 /// Aqui a determinação é setorial e vem de fora do dado: **em commodity, preço
 /// reverte à média por definição do produto**, e nenhuma quantidade de anos
@@ -61,8 +63,8 @@ abstract final class CyclicalSectors {
     if (normalize(sectorKey) == normalize(heavySectorKey)) return true;
     final sub = normalize(industry);
     if (sub.isEmpty) return false;
-    for (final termo in heavyIndustryTerms) {
-      if (sub.contains(termo)) return true;
+    for (final term in heavyIndustryTerms) {
+      if (sub.contains(term)) return true;
     }
     return false;
   }
@@ -95,7 +97,7 @@ abstract final class CyclicalSectors {
   /// Devolve a letra sem acento, o dígito como está, ou `null` para qualquer
   /// outro caractere — que o chamador trata como separador.
   static String? _fold(String ch) {
-    const acentos = {
+    const accents = {
       'á': 'a', 'à': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a',
       'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
       'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i',
@@ -103,11 +105,11 @@ abstract final class CyclicalSectors {
       'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u',
       'ç': 'c', 'ñ': 'n',
     };
-    final semAcento = acentos[ch] ?? ch;
-    if (semAcento.length != 1) return null;
-    final code = semAcento.codeUnitAt(0);
+    final unaccented = accents[ch] ?? ch;
+    if (unaccented.length != 1) return null;
+    final code = unaccented.codeUnitAt(0);
     final isLetter = code >= 0x61 && code <= 0x7A;
     final isDigit = code >= 0x30 && code <= 0x39;
-    return (isLetter || isDigit) ? semAcento : null;
+    return (isLetter || isDigit) ? unaccented : null;
   }
 }

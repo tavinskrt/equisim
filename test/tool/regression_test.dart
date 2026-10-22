@@ -27,14 +27,14 @@ void main() {
         2.1, 3.9, 6.2, 7.8, 10.3, 11.9, 14.4, 15.8, 18.1, 20.4, 21.7, 24.2,
       ];
 
-      final referencia = Inference.ols(xs, ys)!;
-      final medido = Regression.ols([xs], ys)!;
+      final reference = Inference.ols(xs, ys)!;
+      final measured = Regression.ols([xs], ys)!;
 
-      expect(medido.coefficients[1], closeTo(referencia.slope, 1e-10));
-      expect(medido.coefficients[0], closeTo(referencia.intercept, 1e-10));
-      expect(medido.stdErrors[1], closeTo(referencia.slopeStdError, 1e-10));
-      expect(medido.r2, closeTo(referencia.r2, 1e-10));
-      expect(medido.n, referencia.n);
+      expect(measured.coefficients[1], closeTo(reference.slope, 1e-10));
+      expect(measured.coefficients[0], closeTo(reference.intercept, 1e-10));
+      expect(measured.stdErrors[1], closeTo(reference.slopeStdError, 1e-10));
+      expect(measured.r2, closeTo(reference.r2, 1e-10));
+      expect(measured.n, reference.n);
     });
 
     test('recupera coeficientes conhecidos sem resíduo', () {
@@ -93,12 +93,12 @@ void main() {
 
     test('postos padronizados têm média zero e desvio um', () {
       final z = Regression.standardizedRanks([3, 1, 4, 1, 5, 9, 2, 6]);
-      final media = z.reduce((a, b) => a + b) / z.length;
+      final mean = z.reduce((a, b) => a + b) / z.length;
       var ss = 0.0;
       for (final v in z) {
-        ss += (v - media) * (v - media);
+        ss += (v - mean) * (v - mean);
       }
-      expect(media, closeTo(0.0, 1e-12));
+      expect(mean, closeTo(0.0, 1e-12));
       expect(ss / (z.length - 1), closeTo(1.0, 1e-12));
     });
   });
@@ -106,15 +106,15 @@ void main() {
   group('Regression.residualize', () {
     test('resíduo é ortogonal aos regressores', () {
       final x1 = <double>[1, 3, 2, 5, 4, 7, 6, 9, 8, 10];
-      final alvo = <double>[2, 5, 3, 9, 6, 14, 11, 20, 15, 21];
-      final r = Regression.residualize(alvo, [x1])!;
-      var produto = 0.0, soma = 0.0;
+      final target = <double>[2, 5, 3, 9, 6, 14, 11, 20, 15, 21];
+      final r = Regression.residualize(target, [x1])!;
+      var product = 0.0, sum = 0.0;
       for (var i = 0; i < r.length; i++) {
-        produto += r[i] * x1[i];
-        soma += r[i];
+        product += r[i] * x1[i];
+        sum += r[i];
       }
-      expect(produto, closeTo(0.0, 1e-9));
-      expect(soma, closeTo(0.0, 1e-9));
+      expect(product, closeTo(0.0, 1e-9));
+      expect(sum, closeTo(0.0, 1e-9));
     });
   });
 
@@ -132,10 +132,10 @@ void main() {
   group('Regression.neweyWestMean — item C1a', () {
     test('sem defasagem é exatamente o t de summarize', () {
       final v = <double>[0.12, -0.03, 0.08, 0.15, 0.02, 0.07];
-      final ingenuo = Regression.summarize(v)!;
+      final naive = Regression.summarize(v)!;
       final nw = Regression.neweyWestMean(v, 0)!;
-      expect(nw.mean, closeTo(ingenuo.mean, 1e-15));
-      expect(nw.t, closeTo(ingenuo.t, 1e-12));
+      expect(nw.mean, closeTo(naive.mean, 1e-15));
+      expect(nw.t, closeTo(naive.t, 1e-12));
     });
 
     test('reproduz a conta à mão com uma defasagem', () {
@@ -148,12 +148,12 @@ void main() {
     });
 
     test('autocorrelação positiva alarga o erro, e a negativa estreita', () {
-      final persistente = <double>[0.1, 0.12, 0.11, 0.3, 0.32, 0.31];
-      final alternada = <double>[0.1, 0.3, 0.1, 0.3, 0.1, 0.3];
-      expect(Regression.neweyWestMean(persistente, 2)!.se,
-          greaterThan(Regression.neweyWestMean(persistente, 0)!.se));
-      expect(Regression.neweyWestMean(alternada, 1)!.se,
-          lessThan(Regression.neweyWestMean(alternada, 0)!.se));
+      final persistent = <double>[0.1, 0.12, 0.11, 0.3, 0.32, 0.31];
+      final alternatingValues = <double>[0.1, 0.3, 0.1, 0.3, 0.1, 0.3];
+      expect(Regression.neweyWestMean(persistent, 2)!.se,
+          greaterThan(Regression.neweyWestMean(persistent, 0)!.se));
+      expect(Regression.neweyWestMean(alternatingValues, 1)!.se,
+          lessThan(Regression.neweyWestMean(alternatingValues, 0)!.se));
     });
 
     test('defasagem além da série é truncada, e uma coorte não tem t', () {
@@ -193,23 +193,23 @@ void main() {
             math.cos(2 * math.pi * rng.nextDouble());
       }
 
-      final critico = Regression.overlapCritical(k, l, tail: 0.05);
-      var rejeita = 0, rejeitaIngenuo = 0;
+      final critical = Regression.overlapCritical(k, l, tail: 0.05);
+      var rejects = 0, naiveRejects = 0;
       for (var s = 0; s < series; s++) {
-        final acumulada = <double>[0];
+        final accumulated = <double>[0];
         for (var i = 0; i < k + l; i++) {
-          acumulada.add(acumulada.last + normal());
+          accumulated.add(accumulated.last + normal());
         }
         final x = [
-          for (var t = 0; t < k; t++) acumulada[t + l + 1] - acumulada[t],
+          for (var t = 0; t < k; t++) accumulated[t + l + 1] - accumulated[t],
         ];
-        if (Regression.overlapAdjustedT(x, l)!.t > critico) rejeita++;
-        if (Regression.summarize(x)!.t > 1.645) rejeitaIngenuo++;
+        if (Regression.overlapAdjustedT(x, l)!.t > critical) rejects++;
+        if (Regression.summarize(x)!.t > 1.645) naiveRejects++;
       }
       // Erro de Monte Carlo de 0,4 p.p.: a banda é de três desvios.
-      expect(rejeita / series, inInclusiveRange(0.038, 0.062));
+      expect(rejects / series, inInclusiveRange(0.038, 0.062));
       // E o t de sempre rejeita a nula verdadeira muito mais que 5%.
-      expect(rejeitaIngenuo / series, greaterThan(0.2));
+      expect(naiveRejects / series, greaterThan(0.2));
     });
 
     test('sem sobreposição, o crítico é o quantil da t de Student', () {
@@ -227,11 +227,11 @@ void main() {
     });
 
     test('o p-valor sobe quando o t cai, e o crítico é o do nível pedido', () {
-      final critico = Regression.overlapCritical(22, 11);
-      expect(Regression.overlapPValue(critico, 22, 11),
+      final critical = Regression.overlapCritical(22, 11);
+      expect(Regression.overlapPValue(critical, 22, 11),
           closeTo(Regression.r3Tail, 0.002));
       expect(Regression.overlapPValue(0, 22, 11), closeTo(0.5, 0.02));
-      expect(critico, greaterThan(2));
+      expect(critical, greaterThan(2));
     });
   });
 }

@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'fixture_adapter.dart';
 
-ApiClient _cliente(FixtureAdapter adapter) {
+ApiClient _client(FixtureAdapter adapter) {
   final dio = Dio(BaseOptions(
     responseType: ResponseType.plain,
     validateStatus: ApiClient.acceptsStatus,
@@ -27,7 +27,7 @@ ApiClient _cliente(FixtureAdapter adapter) {
   );
 }
 
-const _catalogo = '''
+const _catalog = '''
 {"result":{"resources":[
   {"format":"PDF","url":"https://exemplo.gov.br/taxa.pdf"},
   {"format":"CSV","url":"https://exemplo.gov.br/precotaxatesourodireto.csv"}
@@ -48,70 +48,75 @@ void main() {
 
   group('Tesouro direto do arquivo — item A2.1', () {
     test('lê só o dia mais recente, e só os prefixados', () async {
-      final fonte = TesouroDatasource(_cliente(FixtureAdapter(bodies: {
-        'package_show': _catalogo,
+      final source = TreasuryDatasource(_client(FixtureAdapter(bodies: {
+        'package_show': _catalog,
         'precotaxatesourodireto.csv': _csv,
       })));
-      final r = await fonte.latest();
-      final cotacoes = r.unwrap();
-      expect(cotacoes, hasLength(3));
-      expect(cotacoes.map((q) => q.baseDate).toSet(), {DateTime.utc(2026, 9, 10)});
-      expect(cotacoes.every((q) => q.rate < 0.2), isTrue,
+      final r = await source.latest();
+      final quotes = r.unwrap();
+      expect(quotes, hasLength(3));
+      expect(quotes.map((q) => q.baseDate).toSet(), {DateTime.utc(2026, 9, 10)});
+      expect(quotes.every((q) => q.rate < 0.2), isTrue,
           reason: 'a linha de 09/09, com 99,99%, não pode ter sido lida');
       // A taxa exata de cada título, e não só a ordem de grandeza: "13,56" é
       // 13,56% ao ano — a vírgula decimal lida errado passaria pelo teto de 20%
       // e deslocaria a curva inteira (lente `risco`, 16/09/2026).
-      final porVencimento = {
-        for (final q in cotacoes) q.maturity.toIso8601String().substring(0, 10): q.rate,
+      final byMaturityDate = {
+        for (final q in quotes) q.maturity.toIso8601String().substring(0, 10): q.rate,
       };
-      expect(porVencimento['2027-01-01'], closeTo(0.1356, 1e-12));
-      expect(porVencimento['2029-01-01'], closeTo(0.1393, 1e-12));
-      expect(porVencimento['2037-01-01'], closeTo(0.1433, 1e-12));
+      expect(byMaturityDate['2027-01-01'], closeTo(0.1356, 1e-12));
+      expect(byMaturityDate['2029-01-01'], closeTo(0.1393, 1e-12));
+      expect(byMaturityDate['2037-01-01'], closeTo(0.1433, 1e-12));
     });
 
     test('catálogo sem CSV é falha declarada', () async {
-      final fonte = TesouroDatasource(_cliente(FixtureAdapter(bodies: {
+      final source = TreasuryDatasource(_client(FixtureAdapter(bodies: {
         'package_show': '{"result":{"resources":[]}}',
       })));
-      expect((await fonte.latest()).isErr, isTrue);
+      expect((await source.latest()).isErr, isTrue);
     });
 
     test('arquivo fora do ar é falha, e não lista vazia', () async {
-      final fonte = TesouroDatasource(_cliente(FixtureAdapter(
-        bodies: {'package_show': _catalogo},
+      final source = TreasuryDatasource(_client(FixtureAdapter(
+        bodies: {'package_show': _catalog},
         failures: {'precotaxatesourodireto.csv': 503},
       )));
-      expect((await fonte.latest()).isErr, isTrue);
+      expect((await source.latest()).isErr, isTrue);
     });
 
     test('CSV com o formato quebrado é falha, e não exceção crua', () async {
       // Lente `risco`, 20/09/2026. O arquivo do Tesouro é publicação em massa
       // com cabeçalho em texto: coluna renomeada, separador trocado ou taxa
       // ilegível têm de virar `Result.err`, e não estourar na leitura.
-      const quebrados = [
+
+      // Cabeçalho certo e taxa ilegível na única linha do dia.
+      const unreadableRate = 'Tipo Titulo;Data Vencimento;Data Base;'
+          'Taxa Compra Manha;Taxa Venda Manha;'
+          'PU Compra Manha;PU Venda Manha;PU Base Manha\n'
+          'Tesouro Prefixado;01/01/2027;10/09/2026;;;;;\n';
+      // Separador de vírgula no lugar do ponto e vírgula.
+      const commaSeparator =
+          'Tipo Titulo,Data Vencimento,Data Base,Taxa Compra Manha\n'
+          'Tesouro Prefixado,01/01/2027,10/09/2026,13.56\n';
+      const brokenCases = [
         '', // arquivo vazio
         'coisa;outra;terceira\n1;2;3\n', // sem as colunas que a curva lê
-        // Cabeçalho certo e taxa ilegível na única linha do dia.
-        'Tipo Titulo;Data Vencimento;Data Base;Taxa Compra Manha;'
-            'Taxa Venda Manha;PU Compra Manha;PU Venda Manha;PU Base Manha\n'
-            'Tesouro Prefixado;01/01/2027;10/09/2026;;;;;\n',
-        // Separador de vírgula no lugar do ponto e vírgula.
-        'Tipo Titulo,Data Vencimento,Data Base,Taxa Compra Manha\n'
-            'Tesouro Prefixado,01/01/2027,10/09/2026,13.56\n',
+        unreadableRate,
+        commaSeparator,
       ];
-      for (final csv in quebrados) {
-        final fonte = TesouroDatasource(_cliente(FixtureAdapter(bodies: {
-          'package_show': _catalogo,
+      for (final csv in brokenCases) {
+        final source = TreasuryDatasource(_client(FixtureAdapter(bodies: {
+          'package_show': _catalog,
           'precotaxatesourodireto.csv': csv,
         })));
-        final r = await fonte.latest();
+        final r = await source.latest();
         expect(r.isErr, isTrue, reason: csv.isEmpty ? '(vazio)' : csv);
       }
     });
   });
 
   group('Curva do aplicativo — decisão 84', () {
-    List<TreasuryQuote> dia(DateTime base) => [
+    List<TreasuryQuote> day(DateTime base) => [
           TreasuryQuote(type: TreasuryCurve.ltn, maturity: DateTime.utc(2027, 1, 1), baseDate: base, rate: 0.1356),
           TreasuryQuote(type: TreasuryCurve.ltn, maturity: DateTime.utc(2029, 1, 1), baseDate: base, rate: 0.1393),
           TreasuryQuote(type: TreasuryCurve.ntnF, maturity: DateTime.utc(2037, 1, 1), baseDate: base, rate: 0.1433),
@@ -119,73 +124,73 @@ void main() {
 
     test('a do dia vence a do pacote', () async {
       final repo = RiskFreeCurveRepository(
-        remote: _Fonte(() async => Ok(dia(DateTime.utc(2026, 9, 10)))),
-        carregarPacote: () async => jsonEncode(TreasuryQuotesCodec.encode(
-            dia(DateTime.utc(2026, 9, 1)), geradoEm: DateTime.utc(2026, 9, 1))),
+        remote: _Source(() async => Ok(day(DateTime.utc(2026, 9, 10)))),
+        loadPackage: () async => jsonEncode(TreasuryQuotesCodec.encode(
+            day(DateTime.utc(2026, 9, 1)), generatedAt: DateTime.utc(2026, 9, 1))),
       );
-      final c = await repo.curveAt(DateTime(2026, 9, 11));
+      final c = (await repo.readAt(DateTime(2026, 9, 11))).curve;
       expect(c!.referenceDate, DateTime.utc(2026, 9, 10));
     });
 
     test('sem rede, o pacote recente serve', () async {
       final repo = RiskFreeCurveRepository(
-        remote: _Fonte(() async => const Err(InsufficientData('sem rede'))),
-        carregarPacote: () async => jsonEncode(TreasuryQuotesCodec.encode(
-            dia(DateTime.utc(2026, 9, 8)), geradoEm: DateTime.utc(2026, 9, 8))),
+        remote: _Source(() async => const Err(InsufficientData('sem rede'))),
+        loadPackage: () async => jsonEncode(TreasuryQuotesCodec.encode(
+            day(DateTime.utc(2026, 9, 8)), generatedAt: DateTime.utc(2026, 9, 8))),
       );
-      final c = await repo.curveAt(DateTime(2026, 9, 11));
+      final c = (await repo.readAt(DateTime(2026, 9, 11))).curve;
       expect(c!.referenceDate, DateTime.utc(2026, 9, 8));
     });
 
     test('pacote velho não vira curva: a cascata recua, declarando', () async {
       final repo = RiskFreeCurveRepository(
-        remote: _Fonte(() async => const Err(InsufficientData('sem rede'))),
-        carregarPacote: () async => jsonEncode(TreasuryQuotesCodec.encode(
-            dia(DateTime.utc(2026, 6, 1)), geradoEm: DateTime.utc(2026, 6, 1))),
+        remote: _Source(() async => const Err(InsufficientData('sem rede'))),
+        loadPackage: () async => jsonEncode(TreasuryQuotesCodec.encode(
+            day(DateTime.utc(2026, 6, 1)), generatedAt: DateTime.utc(2026, 6, 1))),
       );
-      expect(await repo.curveAt(DateTime(2026, 9, 11)), isNull);
+      expect((await repo.readAt(DateTime(2026, 9, 11))).curve, isNull);
     });
 
     test('falha da busca não fica guardada: a próxima avaliação tenta de novo',
         () async {
-      var chamadas = 0;
+      var calls = 0;
       final repo = RiskFreeCurveRepository(
-        remote: _Fonte(() async {
-          chamadas++;
-          return chamadas == 1
+        remote: _Source(() async {
+          calls++;
+          return calls == 1
               ? const Err(InsufficientData('sem rede'))
-              : Ok(dia(DateTime.utc(2026, 9, 10)));
+              : Ok(day(DateTime.utc(2026, 9, 10)));
         }),
-        carregarPacote: () async => throw StateError('sem pacote'),
+        loadPackage: () async => throw StateError('sem pacote'),
       );
-      expect(await repo.curveAt(DateTime(2026, 9, 11)), isNull);
-      expect(await repo.curveAt(DateTime(2026, 9, 11)), isNotNull);
-      expect(chamadas, 2);
+      expect((await repo.readAt(DateTime(2026, 9, 11))).curve, isNull);
+      expect((await repo.readAt(DateTime(2026, 9, 11))).curve, isNotNull);
+      expect(calls, 2);
     });
 
     test('a busca vale pelo dia: no dia seguinte, busca de novo', () async {
-      var chamadas = 0;
+      var calls = 0;
       final repo = RiskFreeCurveRepository(
-        remote: _Fonte(() async {
-          chamadas++;
-          return Ok(dia(DateTime.utc(2026, 9, 10)));
+        remote: _Source(() async {
+          calls++;
+          return Ok(day(DateTime.utc(2026, 9, 10)));
         }),
-        carregarPacote: () async => throw StateError('sem pacote'),
+        loadPackage: () async => throw StateError('sem pacote'),
       );
-      await repo.curveAt(DateTime(2026, 9, 11, 9));
-      await repo.curveAt(DateTime(2026, 9, 11, 18));
-      expect(chamadas, 1, reason: 'o mesmo dia usa a mesma busca');
-      await repo.curveAt(DateTime(2026, 9, 12));
-      expect(chamadas, 2);
+      await repo.readAt(DateTime(2026, 9, 11, 9));
+      await repo.readAt(DateTime(2026, 9, 11, 18));
+      expect(calls, 1, reason: 'o mesmo dia usa a mesma busca');
+      await repo.readAt(DateTime(2026, 9, 12));
+      expect(calls, 2);
     });
 
-    String pacoteDe(DateTime base) => jsonEncode(
-        TreasuryQuotesCodec.encode(dia(base), geradoEm: base));
+    String packageOf(DateTime base) => jsonEncode(
+        TreasuryQuotesCodec.encode(day(base), generatedAt: base));
 
     test('na web, só o pacote — decisão 86', () async {
       final repo = RiskFreeCurveRepository(
         remote: null,
-        carregarPacote: () async => pacoteDe(DateTime.utc(2026, 9, 8)),
+        loadPackage: () async => packageOf(DateTime.utc(2026, 9, 8)),
       );
       final r = await repo.readAt(DateTime(2026, 9, 11));
       expect(r.curve!.referenceDate, DateTime.utc(2026, 9, 8));
@@ -195,7 +200,7 @@ void main() {
     test('na web, pacote vencido: a ressalva diz a data e o remédio', () async {
       final repo = RiskFreeCurveRepository(
         remote: null,
-        carregarPacote: () async => pacoteDe(DateTime.utc(2026, 6, 1)),
+        loadPackage: () async => packageOf(DateTime.utc(2026, 6, 1)),
       );
       final r = await repo.readAt(DateTime(2026, 9, 11));
       expect(r.curve, isNull);
@@ -207,7 +212,7 @@ void main() {
     test('na web, sem pacote legível, a ressalva diz isso', () async {
       final repo = RiskFreeCurveRepository(
         remote: null,
-        carregarPacote: () async => '{isto não é json',
+        loadPackage: () async => '{isto não é json',
       );
       final r = await repo.readAt(DateTime(2026, 9, 11));
       expect(r.curve, isNull);
@@ -217,8 +222,8 @@ void main() {
     test('no nativo, sem o Tesouro e com pacote vencido, a ressalva não fala '
         'em build', () async {
       final repo = RiskFreeCurveRepository(
-        remote: _Fonte(() async => const Err(InsufficientData('sem rede'))),
-        carregarPacote: () async => pacoteDe(DateTime.utc(2026, 6, 1)),
+        remote: _Source(() async => const Err(InsufficientData('sem rede'))),
+        loadPackage: () async => packageOf(DateTime.utc(2026, 6, 1)),
       );
       final r = await repo.readAt(DateTime(2026, 9, 11));
       expect(r.curve, isNull);
@@ -230,15 +235,15 @@ void main() {
   });
 
   group('Registro da B3 no aplicativo — decisão 83', () {
-    final pacote = jsonEncode(B3RegistryCodec.encodePackage([
+    final package = jsonEncode(B3RegistryCodec.encodePackage([
       B3Registry.issuer({
         'code': 'CTKA',
         'totalNumberShares': '6.205.375',
       }, consultedOn: DateTime.utc(2026, 9, 14))!,
-    ], geradoEm: DateTime.utc(2026, 9, 14)));
+    ], generatedAt: DateTime.utc(2026, 9, 14)));
 
     test('a contagem vem pela raiz do ticker', () async {
-      final repo = B3RegistryRepository(carregarPacote: () async => pacote);
+      final repo = B3RegistryRepository(loadPackage: () async => package);
       final c = await repo.officialSharesFor(Ticker.parse('CTKA4'));
       // **Igualdade, e não tolerância** (lente `risco`, 21/09/2026). A
       // contagem da B3 é inteiro publicado — `6.205.375` —, e o que o teste
@@ -251,15 +256,15 @@ void main() {
 
     test('sem pacote, o repositório é transparente', () async {
       final repo = B3RegistryRepository(
-          carregarPacote: () async => throw StateError('asset ausente'));
+          loadPackage: () async => throw StateError('asset ausente'));
       expect(await repo.officialSharesFor(Ticker.parse('CTKA4')), isNull);
     });
   });
 }
 
-class _Fonte extends TesouroDatasource {
+class _Source extends TreasuryDatasource {
   final Future<Result<List<TreasuryQuote>>> Function() _latest;
-  _Fonte(this._latest)
+  _Source(this._latest)
       : super(ApiClient(const ApiConfig(
           mode: BrapiMode.direct,
           brapiBaseUrl: 'https://brapi.dev/api',

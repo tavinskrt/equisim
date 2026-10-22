@@ -32,24 +32,24 @@ import 'package:equisim/data/repositories/cvm_fundamentals_repository.dart';
 
 import 'validation/context.dart';
 
-const _saida = 'assets/mercado/beta_prior.json';
-const _cacheCongelado = 'data/gabarito/cache.sqlite';
-const _universoCongelado = 'data/gabarito/universo.json';
+const _output = 'assets/mercado/beta_prior.json';
+const _frozenCache = 'data/gabarito/cache.sqlite';
+const _frozenUniverse = 'data/gabarito/universo.json';
 
 /// A data de referência dos pacotes versionados.
-final _hoje = DateTime(2026, 9, 14);
+final _today = DateTime(2026, 9, 14);
 
 /// Datas em que o prior é remedido para a conferência de deriva, em dias antes
 /// da data de referência. Um trimestre, um semestre e um ano.
-const _defasagens = [90, 180, 365];
+const _lags = [90, 180, 365];
 
 Future<void> main(List<String> args) async {
-  final medirDeriva = args.contains('--deriva');
-  final agora = args.contains('--agora');
-  final data = agora ? DateTime.now() : _hoje;
+  final measureDrift = args.contains('--deriva');
+  final now = args.contains('--agora');
+  final date = now ? DateTime.now() : _today;
 
-  if (!agora && !File(_cacheCongelado).existsSync()) {
-    stderr.writeln('sem entrada congelada em $_cacheCongelado. Rode antes:');
+  if (!now && !File(_frozenCache).existsSync()) {
+    stderr.writeln('sem entrada congelada em $_frozenCache. Rode antes:');
     stderr.writeln('  dart run tool/gabarito_cascata.dart');
     exitCode = 2;
     return;
@@ -57,26 +57,26 @@ Future<void> main(List<String> args) async {
 
   final ctx = ValidationContext.create(
     outputDir: 'docs/validacao',
-    cacheFile: agora ? null : _cacheCongelado,
-    frozenCache: !agora,
+    cacheFile: now ? null : _frozenCache,
+    frozenCache: !now,
   );
   try {
     final List<Ticker> tickers;
-    if (!agora && File(_universoCongelado).existsSync()) {
+    if (!now && File(_frozenUniverse).existsSync()) {
       tickers = [
         for (final s
-            in (jsonDecode(File(_universoCongelado).readAsStringSync()) as List)
+            in (jsonDecode(File(_frozenUniverse).readAsStringSync()) as List)
                 .cast<String>())
           Ticker.parse(s),
       ];
     } else {
-      final universo = await ctx.fundamentals.universe();
-      if (universo.isErr) {
-        stderr.writeln('sem universo: ${universo.failureOrNull!.message}');
+      final universe = await ctx.fundamentals.universe();
+      if (universe.isErr) {
+        stderr.writeln('sem universo: ${universe.failureOrNull!.message}');
         exitCode = 2;
         return;
       }
-      tickers = universo.unwrap();
+      tickers = universe.unwrap();
     }
 
     // **A mesma camada de dados do aplicativo**, e não a de mercado crua: o
@@ -84,51 +84,51 @@ Future<void> main(List<String> args) async {
     // saem dos fundamentos. A CVM mesclada e o setor da B3 por emissor são o
     // que o `fundamentalsRepositoryProvider` monta (decisões 80 e 87);
     // resolver o prior sobre outra camada daria um prior de outro motor.
-    final registro = B3RegistryCodec.decodePackage(
+    final registry = B3RegistryCodec.decodePackage(
         jsonDecode(File('assets/b3/emissores.json').readAsStringSync())
             as Map<String, dynamic>);
-    final fundamentos = OfficialSectorFundamentalsRepository(
+    final fundamentals = OfficialSectorFundamentalsRepository(
       inner: CvmFundamentalsRepository(
-        mercado: ctx.fundamentals,
-        carregarPacote: () async =>
+        market: ctx.fundamentals,
+        loadPackage: () async =>
             File('assets/cvm/documentos.json').readAsStringSync(),
-        hoje: () => data,
+        today: () => date,
       ),
-      classificacao: (t) async => t.value.length >= 4
-          ? registro[t.value.substring(0, 4)]?.classification
+      classification: (t) async => t.value.length >= 4
+          ? registry[t.value.substring(0, 4)]?.classification
           : null,
     );
-    final proventos = CashDividendsCodec.decode(
+    final dividends = CashDividendsCodec.decode(
         jsonDecode(File('assets/b3/proventos.json').readAsStringSync())
             as Map<String, dynamic>);
-    List<CashDividend> proventosDe(Ticker t) =>
-        CashDividendsCodec.forTicker(proventos, t.value);
+    List<CashDividend> dividendsOf(Ticker t) =>
+        CashDividendsCodec.forTicker(dividends, t.value);
 
-    Future<BetaPrior?> resolver(DateTime quando) => ResolveBetaPrior.call(
+    Future<BetaPrior?> resolver(DateTime asOfDate) => ResolveBetaPrior.call(
           tickers: tickers,
           prices: ctx.prices,
-          fundamentals: fundamentos,
+          fundamentals: fundamentals,
           benchmark: ctx.benchmark,
-          asOf: quando,
-          dividendsFor: proventosDe,
+          asOf: asOfDate,
+          dividendsFor: dividendsOf,
         );
 
-    final prior = await resolver(data);
+    final prior = await resolver(date);
     if (prior == null) {
       stderr.writeln('prior não resolvido: nenhuma observação utilizável');
       exitCode = 2;
       return;
     }
 
-    File(_saida)
+    File(_output)
       ..parent.createSync(recursive: true)
       ..writeAsStringSync(jsonEncode(BetaPriorCodec.encode(
         prior,
-        geradoEm: data,
+        generatedAt: date,
         observations: tickers.length,
       )));
 
-    stdout.writeln('== prior do beta, em ${_dia(data)} ==');
+    stdout.writeln('== prior do beta, em ${_day(date)} ==');
     stdout.writeln('  universo: ${prior.unleveredUniverse.toStringAsFixed(4)}');
     stdout.writeln('  dispersão: ${prior.dispersion.toStringAsFixed(4)}');
     stdout.writeln('  papéis varridos: ${tickers.length}');
@@ -138,24 +138,24 @@ Future<void> main(List<String> args) async {
       ..sort((a, b) => a.key.compareTo(b.key))) {
       stdout.writeln('    ${e.key.padRight(28)} ${e.value.toStringAsFixed(4)}');
     }
-    stdout.writeln('  gravado $_saida');
+    stdout.writeln('  gravado $_output');
 
-    if (!medirDeriva) return;
+    if (!measureDrift) return;
     stdout.writeln('\n== quanto o prior anda ==');
     stdout.writeln('  defasagem   universo            dispersão   setores');
     stdout.writeln('  na data     '
         '${prior.unleveredUniverse.toStringAsFixed(4)}              '
         '${prior.dispersion.toStringAsFixed(4)}      '
         '${prior.unleveredBySector.length}');
-    for (final dias in _defasagens) {
+    for (final days in _lags) {
       // **Dia civil, e não instante.** `subtract(Duration(days: n))` soma horas
       // absolutas, e no salto do horário de verão o corte *point-in-time* cai
       // um dia antes ou depois. O componente fora da faixa é normalizado pelo
       // próprio `DateTime`.
-      final antes = await resolver(
-          DateTime(data.year, data.month, data.day - dias));
-      if (antes == null) {
-        stdout.writeln('  −$dias dias: não resolvido');
+      final before = await resolver(
+          DateTime(date.year, date.month, date.day - days));
+      if (before == null) {
+        stdout.writeln('  −$days dias: não resolvido');
         continue;
       }
       // O prior é mediana de betas desalavancados e não deveria ser zero; se
@@ -164,16 +164,16 @@ Future<void> main(List<String> args) async {
       // mediana não chega a zero exato, e `== 0` deixaria o divisor passar.
       final du = prior.unleveredUniverse.abs() < 1e-12
           ? double.nan
-          : (antes.unleveredUniverse / prior.unleveredUniverse - 1) * 100;
-      stdout.writeln('  −${'$dias'.padRight(4)} dias  '
-          '${antes.unleveredUniverse.toStringAsFixed(4)} '
+          : (before.unleveredUniverse / prior.unleveredUniverse - 1) * 100;
+      stdout.writeln('  −${'$days'.padRight(4)} dias  '
+          '${before.unleveredUniverse.toStringAsFixed(4)} '
           '(${du.isNaN ? '—' : '${du >= 0 ? '+' : ''}${du.toStringAsFixed(1)}%'})'
-          '      ${antes.dispersion.toStringAsFixed(4)}      '
-          '${antes.unleveredBySector.length}');
+          '      ${before.dispersion.toStringAsFixed(4)}      '
+          '${before.unleveredBySector.length}');
     }
   } finally {
     await ctx.dispose();
   }
 }
 
-String _dia(DateTime d) => d.toIso8601String().substring(0, 10);
+String _day(DateTime d) => d.toIso8601String().substring(0, 10);

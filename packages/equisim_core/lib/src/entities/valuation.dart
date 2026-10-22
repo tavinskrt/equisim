@@ -1,6 +1,9 @@
+import '../services/valuation/base_normalization.dart';
+import '../services/valuation/manual_valuation.dart';
 import '../services/valuation/peer_multiples.dart';
 import '../value_objects/money.dart';
 import '../value_objects/ticker.dart';
+import '../audit/wire_keyed.dart';
 
 /// Modelo efetivamente aplicado no cálculo.
 ///
@@ -115,29 +118,29 @@ class ValueDistribution {
 /// cascata já os apura para decidir a conta, e antes eles só existiam diluídos
 /// no texto dos avisos. Estruturá-los é o que permite ao consumidor ponderar o
 /// preço justo em vez de tratar todos como igualmente firmes.
-enum ValuationCaveat {
+enum ValuationCaveat implements WireKeyed {
   /// O valor terminal responde por mais que
   /// [ValuationDiagnostics.terminalShareLimit] do total: o número é sobretudo
   /// premissa, e a parte apoiada em exercício observado decide pouco.
-  terminalPesado,
+  heavyTerminal('terminalPesado'),
 
   /// A taxa de crescimento não veio do próprio ativo — foi a âncora de
   /// inflação ou a ausência de crescimento.
-  crescimentoNaoIdentificado,
+  unidentifiedGrowth('crescimentoNaoIdentificado'),
 
   /// As duas contagens de papéis publicadas divergem além de uma ação
   /// societária plausível, e a escolha do divisor foi por conservadorismo.
-  escalaIncerta,
+  uncertainScale('escalaIncerta'),
 
   /// Um único exercício foi multiplicado por mais de
   /// [ValuationDiagnostics.baseFactorLimit] para virar o fluxo-base.
-  baseNormalizadaForte,
+  strongNormalizedBase('baseNormalizadaForte'),
 
   /// A avaliação começou na via da firma e migrou para a do acionista.
   ///
   /// **Não é mais emitida desde a decisão 102**: nenhuma avaliação muda de via.
   /// Fica para ler resultados gravados antes dela.
-  viaMigrada,
+  migratedLane('viaMigrada'),
 
   /// O capital próprio responde por pouco do valor da firma, e o preço por
   /// papel é resíduo de subtração entre números próximos.
@@ -148,7 +151,7 @@ enum ValuationCaveat {
   /// decisão 31, e não mais um recuo. Ressalva que vale para a maioria não
   /// distingue nada; a substituição continua declarada nos avisos, que é onde
   /// ela informa.
-  ponteFragil,
+  fragileBridge('ponteFragil'),
 
   /// O preço justo é combinação das duas vias, na faixa em que nenhuma domina.
   ///
@@ -162,7 +165,7 @@ enum ValuationCaveat {
   /// **Não é mais emitida desde a decisão 102**: a mistura continuava subindo
   /// com a taxa, e as duas vias deixaram de se combinar. Fica para ler
   /// resultados gravados antes dela.
-  viasMescladas,
+  mergedLanes('viasMescladas'),
 
   /// O fluxo-base não veio do exercício observado: ele foi reconstruído do
   /// retorno mediano do ciclo sobre o capital de hoje.
@@ -176,7 +179,7 @@ enum ValuationCaveat {
   /// **É a ressalva mais forte da lista.** O preço justo aqui não repousa em
   /// nenhum exercício observado recente: repousa na afirmação de que a empresa
   /// volta ao que já foi.
-  baseReconstruida,
+  rebuiltBase('baseReconstruida'),
 
   /// O negócio opera sob contrato de prazo determinado, e o valor terminal
   /// supõe perpetuidade.
@@ -190,7 +193,27 @@ enum ValuationCaveat {
   ///
   /// O tamanho está medido: se o contrato acabasse em dez anos, o preço justo
   /// mediano dos expostos ficaria em 0,80 do publicado; em vinte, 0,90.
-  prazoDeterminado;
+  fixedTerm('prazoDeterminado'),
+
+  /// A companhia é de controle estatal, pelo Formulário Cadastral da CVM, e o
+  /// motor não cobra prêmio por isso (item B46).
+  ///
+  /// **A ressalva informa, e não corrige.** O controlador público persegue
+  /// objetivos além do lucro — preço, tarifa, crédito, indicação —, e quem paga
+  /// é o minoritário: é o "desconto de estatal" que o mercado aplica. Medido
+  /// em 02/10/2026, esse risco não aparece onde o CAPM o cobraria: o beta das
+  /// estatais é menor que o das privadas, e a exposição delas ao risco soberano,
+  /// além do que o Ibovespa explica, não é maior. Ele está no fluxo que o
+  /// minoritário pode esperar receber, que o motor projeta pelo histórico da
+  /// companhia. Ver [`estatais.md`](../../../../../docs/validacao/estatais.md).
+  stateControl('controleEstatal');
+
+  const ValuationCaveat(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
 }
 
 /// Fatos medidos que qualificam o preço justo.
@@ -307,7 +330,8 @@ class ValuationDiagnostics {
   ///
   /// **Sai porque reconstruí-la de fora mede outro motor.** O `ROIC_t` converge
   /// para a taxa de desconto **daquele ano**, e desde a decisão 42 essa taxa é
-  /// um caminho resolvido por ponto fixo, não uma interpolação de dois pontos.
+  /// um caminho — resolvido por ponto fixo, ou montado sobre a curva —, e não
+  /// uma interpolação de dois pontos.
   /// Quem remontasse o freio a partir de [growthRate], [returnOnCapital] e
   /// [terminalDiscountRate] erraria em todo ativo com alavancagem que se move.
   final List<double> retentionPath;
@@ -357,6 +381,23 @@ class ValuationDiagnostics {
   /// resolvidas, e aí a perpetuidade herda a estrutura de hoje.
   final double? terminalEquityShare;
 
+  /// Capital das emissões de ações por valor **depois** do balanço usado, em
+  /// reais, somado ao patrimônio da ponte (item B28).
+  ///
+  /// `null` sem emissão no intervalo. Presente, o preço justo já o contém: é
+  /// este valor dividido pela contagem de hoje, por papel.
+  final double? postStatementCapital;
+
+  /// A decisão da normalização do lucro de partida, com o que a decidiu: o
+  /// retorno do último exercício contra o típico, o teste de desvio, as travas
+  /// e o fator.
+  ///
+  /// **Explica, e não recalcula.** É o que o rastro de auditoria e a tela de
+  /// edição do valuation mostram quando alguém pergunta por que o motor não
+  /// partiu do lucro publicado — ou por que partiu. `null` quando o resultado é
+  /// montado à mão.
+  final BaseNormalization? baseNormalization;
+
   final List<ValuationCaveat> caveats;
 
   const ValuationDiagnostics({
@@ -378,6 +419,8 @@ class ValuationDiagnostics {
     this.terminalExcessShare,
     this.impliedTerminalReturn,
     this.terminalEquityShare,
+    this.postStatementCapital,
+    this.baseNormalization,
     this.caveats = const [],
   });
 
@@ -421,25 +464,24 @@ class ValuationDiagnostics {
   /// esta ressalva cobre.
   static const double fragileEquityShare = 0.35;
 
-  /// **Não existe nota de confiança aqui, e a ausência é medida.**
-  ///
-  /// A primeira versão destes diagnósticos trazia uma nota ordinal — alta,
-  /// média, baixa — derivada da contagem de ressalvas. A validação preditiva da
-  /// decisão 32 a desmentiu: no horizonte de 36 meses, o grupo **sem ressalva
-  /// alguma** teve coeficiente de informação de **−0,007**, positivo em 2 de 5
-  /// coortes, enquanto o grupo com uma ou duas ressalvas teve **0,206**,
-  /// positivo em 5 de 5. A nota ordenava ao contrário do que prometia.
-  ///
-  /// A explicação plausível — não medida — é que o ativo sem ressalva é o
-  /// estável e previsível, que é justamente o que o mercado já precifica bem;
-  /// a discordância informativa aparece onde o modelo faz algo que o preço não
-  /// fez. Seja qual for a causa, apresentar uma nota que ordena ao contrário
-  /// seria falsa precisão num número destinado a decisão patrimonial.
-  ///
-  /// O que fica são os **fatos**: eles descrevem o que a conta fez, e isso
-  /// continua verdadeiro e continua útil. O que saiu foi a promessa de que eles
-  /// medem confiabilidade.
-  bool get hasCaveats => caveats.isNotEmpty;
+  // **Não existe nota de confiança aqui, e a ausência é medida.**
+  //
+  // A primeira versão destes diagnósticos trazia uma nota ordinal — alta,
+  // média, baixa — derivada da contagem de ressalvas. A validação preditiva da
+  // decisão 32 a desmentiu: no horizonte de 36 meses, o grupo **sem ressalva
+  // alguma** teve coeficiente de informação de **−0,007**, positivo em 2 de 5
+  // coortes, enquanto o grupo com uma ou duas ressalvas teve **0,206**,
+  // positivo em 5 de 5. A nota ordenava ao contrário do que prometia.
+  //
+  // A explicação plausível — não medida — é que o ativo sem ressalva é o
+  // estável e previsível, que é justamente o que o mercado já precifica bem;
+  // a discordância informativa aparece onde o modelo faz algo que o preço não
+  // fez. Seja qual for a causa, apresentar uma nota que ordena ao contrário
+  // seria falsa precisão num número destinado a decisão patrimonial.
+  //
+  // O que fica são os **fatos**: eles descrevem o que a conta fez, e isso
+  // continua verdadeiro e continua útil. O que saiu foi a promessa de que eles
+  // medem confiabilidade.
 }
 
 /// Resultado de uma avaliação de valor intrínseco.
@@ -502,6 +544,15 @@ class ValuationResult {
   /// medianas setoriais não está presente.
   final PeerTriangulation? triangulation;
 
+  /// A conta do motor congelada, para o usuário refazê-la com os números dele
+  /// (decisão 147).
+  ///
+  /// **Não muda [fairValue].** O preço justo continua sendo o do motor, e é
+  /// dele que a faixa calibrada e a validação falam; isto é o ponto de partida
+  /// de quem discorda. `null` quando o resultado é montado à mão, fora da
+  /// cascata.
+  final ManualValuation? manual;
+
   /// Agrupa o resultado já apurado. Não calcula nada — o cálculo vive em
   /// `ValuationCascade.evaluate`.
   const ValuationResult({
@@ -519,6 +570,7 @@ class ValuationResult {
     this.diagnostics,
     this.priceVolatility,
     this.triangulation,
+    this.manual,
   });
 
   /// Ressalvas estruturadas do cálculo, vazias quando não há diagnóstico.
@@ -547,6 +599,7 @@ class ValuationResult {
           diagnostics: diagnostics,
           priceVolatility: priceVolatility,
           triangulation: triangulation,
+          manual: manual,
         );
 
   /// Preço justo já descontado da margem de segurança.

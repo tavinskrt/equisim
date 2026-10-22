@@ -18,28 +18,28 @@ import sys
 import urllib.request
 from pathlib import Path
 
-CATALOGO = (
+CATALOG = (
     "https://www.tesourotransparente.gov.br/ckan/api/3/action/package_show"
     "?id=taxas-dos-titulos-ofertados-pelo-tesouro-direto"
 )
-DESTINO = Path("data/tesouro/precotaxatesourodireto.csv")
+DESTINATION = Path("data/tesouro/precotaxatesourodireto.csv")
 
 
 def main() -> int:
-    with urllib.request.urlopen(CATALOGO, timeout=60) as r:
-        pacote = json.load(r)
+    with urllib.request.urlopen(CATALOG, timeout=60) as r:
+        package = json.load(r)
     csv = [
         rec["url"]
-        for rec in pacote["result"]["resources"]
+        for rec in package["result"]["resources"]
         if (rec.get("format") or "").upper() == "CSV"
     ]
     if not csv:
         print("o catálogo não lista CSV — conferir o conjunto no Tesouro")
         return 2
-    DESTINO.parent.mkdir(parents=True, exist_ok=True)
+    DESTINATION.parent.mkdir(parents=True, exist_ok=True)
     with urllib.request.urlopen(csv[0], timeout=300) as r:
-        DESTINO.write_bytes(r.read())
-    print(f"{DESTINO}: {DESTINO.stat().st_size / 1e6:.1f} MB")
+        DESTINATION.write_bytes(r.read())
+    print(f"{DESTINATION}: {DESTINATION.stat().st_size / 1e6:.1f} MB")
     return 0
 
 

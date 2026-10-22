@@ -28,90 +28,89 @@ import 'cvm/documentos.dart';
 import 'validation/context.dart';
 
 /// Data da avaliação. Primeiro argumento, `AAAA-MM-DD`; padrão 04/09/2026.
-late final DateTime _hoje;
+late final DateTime _today;
 
 /// Repositório que monta a série pelo `CvmSeries` do núcleo — a mesma
 /// montagem que o aplicativo usa (A1.9), e não uma cópia dela.
-class _DaCvm implements FundamentalsRepository {
-  final FundamentalsRepository mercado;
+class _FromCvm implements FundamentalsRepository {
+  final FundamentalsRepository market;
   final Map<String, List<CvmPeriodDocument>> docs;
-  final bool ancorada;
-  final Map<FieldSource, int> procedencia = {};
+  final bool anchored;
+  final Map<FieldSource, int> provenance = {};
 
   /// Tickers cuja série terminou ancorada em trimestre. Conjunto, e não
   /// contador: `history` é chamado mais de uma vez por ativo.
-  final Set<String> ancoradasEmTrimestre = {};
+  final Set<String> quarterAnchoredSet = {};
 
-  _DaCvm(this.mercado, this.docs, {required this.ancorada});
+  _FromCvm(this.market, this.docs, {required this.anchored});
 
   @override
   Future<Result<List<FundamentalsSnapshot>>> history(Ticker t) async {
-    final base = await mercado.history(t);
+    final base = await market.history(t);
     if (base.isErr) return base;
-    final meus = docs[t.value];
-    if (meus == null || meus.isEmpty) return base;
+    final ownDocs = docs[t.value];
+    if (ownDocs == null || ownDocs.isEmpty) return base;
     final r = CvmSeries.build(
-      documentos: meus,
-      mercado: base.unwrap(),
-      asOf: _hoje,
-      publicado: PointInTimeView(_hoje).isPublished,
-      ancorada: ancorada,
+      documents: ownDocs,
+      market: base.unwrap(),
+      published: PointInTimeView(_today).isPublished,
+      anchored: anchored,
     );
-    if (r.anchoredOnQuarter) ancoradasEmTrimestre.add(t.value);
-    r.provenance.forEach((k, v) => procedencia[k] = (procedencia[k] ?? 0) + v);
+    if (r.anchoredOnQuarter) quarterAnchoredSet.add(t.value);
+    r.provenance.forEach((k, v) => provenance[k] = (provenance[k] ?? 0) + v);
     return Ok(r.series);
   }
 
   @override
-  Future<Result<Asset>> profile(Ticker t) => mercado.profile(t);
+  Future<Result<Asset>> profile(Ticker t) => market.profile(t);
 
   @override
-  Future<Result<List<Ticker>>> universe() => mercado.universe();
+  Future<Result<List<Ticker>>> universe() => market.universe();
 }
 
 String _pc(double? v) => v == null ? '—' : '${(v * 100).toStringAsFixed(1)}%';
 
-double? _mediana(List<double> v) {
+double? _median(List<double> v) {
   if (v.isEmpty) return null;
   final s = [...v]..sort();
   final m = s.length ~/ 2;
   return s.length.isOdd ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-void _comparar(
-  String titulo,
-  List<Map<String, Object?>> linhas,
-  String de,
-  String para,
+void _compare(
+  String title,
+  List<Map<String, Object?>> rows,
+  String fromKey,
+  String toKey,
 ) {
-  final ambos = [
-    for (final l in linhas)
-      if (l[de] != null && l[para] != null) l,
+  final both = [
+    for (final l in rows)
+      if (l[fromKey] != null && l[toKey] != null) l,
   ];
-  final ganhos = [
-    for (final l in linhas)
-      if (l[de] == null && l[para] != null) l['ticker'],
+  final gains = [
+    for (final l in rows)
+      if (l[fromKey] == null && l[toKey] != null) l['ticker'],
   ];
-  final perdidos = [
-    for (final l in linhas)
-      if (l[de] != null && l[para] == null) l['ticker'],
+  final lost = [
+    for (final l in rows)
+      if (l[fromKey] != null && l[toKey] == null) l['ticker'],
   ];
-  final dif = [
-    for (final l in ambos) ((l[para]! as double) - (l[de]! as double)).abs(),
+  final diff = [
+    for (final l in both) ((l[toKey]! as double) - (l[fromKey]! as double)).abs(),
   ];
-  stdout.writeln('\n== $titulo ==');
-  stdout.writeln('  avaliados: ${linhas.where((l) => l[de] != null).length} '
-      '→ ${linhas.where((l) => l[para] != null).length}');
-  stdout.writeln('  ganhos  (${ganhos.length}): ${ganhos.take(14).join(" ")}');
-  stdout.writeln('  perdidos (${perdidos.length}): ${perdidos.take(14).join(" ")}');
-  stdout.writeln('  mediana do |Δ potencial|: ${_pc(_mediana(dif))}');
-  stdout.writeln('  |Δ| > 1 p.p.: ${dif.where((d) => d > 0.01).length}   '
-      '|Δ| > 10 p.p.: ${dif.where((d) => d > 0.10).length}');
-  ambos.sort((a, b) => (((b[para]! as double) - (b[de]! as double)).abs())
-      .compareTo(((a[para]! as double) - (a[de]! as double)).abs()));
+  stdout.writeln('\n== $title ==');
+  stdout.writeln('  avaliados: ${rows.where((l) => l[fromKey] != null).length} '
+      '→ ${rows.where((l) => l[toKey] != null).length}');
+  stdout.writeln('  ganhos  (${gains.length}): ${gains.take(14).join(" ")}');
+  stdout.writeln('  perdidos (${lost.length}): ${lost.take(14).join(" ")}');
+  stdout.writeln('  mediana do |Δ potencial|: ${_pc(_median(diff))}');
+  stdout.writeln('  |Δ| > 1 p.p.: ${diff.where((d) => d > 0.01).length}   '
+      '|Δ| > 10 p.p.: ${diff.where((d) => d > 0.10).length}');
+  both.sort((a, b) => (((b[toKey]! as double) - (b[fromKey]! as double)).abs())
+      .compareTo(((a[toKey]! as double) - (a[fromKey]! as double)).abs()));
   stdout.writeln('  os que mais se moveram:');
-  for (final l in ambos.take(12)) {
-    final a = l[de]! as double, d = l[para]! as double;
+  for (final l in both.take(12)) {
+    final a = l[fromKey]! as double, d = l[toKey]! as double;
     stdout.writeln('    ${(l['ticker']! as String).padRight(8)} '
         '${_pc(a).padLeft(9)} → ${_pc(d).padLeft(9)}  '
         '(${_pc(d - a)})  ${l['fimAncora'] ?? ''}');
@@ -119,31 +118,31 @@ void _comparar(
 }
 
 Future<void> main(List<String> args) async {
-  _hoje = args.isEmpty
+  _today = args.isEmpty
       ? DateTime(2026, 9, 4)
       : DateTime.parse(args.first);
-  stdout.writeln('== avaliação em ${_hoje.toIso8601String().substring(0, 10)} ==');
-  final docs = carregarDocumentos('data/cvm_exercicios.json');
+  stdout.writeln('== avaliação em ${_today.toIso8601String().substring(0, 10)} ==');
+  final docs = loadDocuments('data/cvm_exercicios.json');
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
   try {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
     final universe = (await ctx.fundamentals.universe()).unwrap();
-    final anual = _DaCvm(ctx.fundamentals, docs, ancorada: false);
-    final ancorada = _DaCvm(ctx.fundamentals, docs, ancorada: true);
+    final annual = _FromCvm(ctx.fundamentals, docs, anchored: false);
+    final anchored = _FromCvm(ctx.fundamentals, docs, anchored: true);
 
-    Future<ValuationResult?> avaliar(Ticker t, FundamentalsRepository f) async {
+    Future<ValuationResult?> evaluate(Ticker t, FundamentalsRepository f) async {
       final prep = await PrepareValuationInputs.call(
         ticker: t,
         prices: ctx.prices,
         fundamentals: f,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
@@ -154,48 +153,48 @@ Future<void> main(List<String> args) async {
       return r.isOk ? r.unwrap() : null;
     }
 
-    final linhas = <Map<String, Object?>>[];
+    final rows = <Map<String, Object?>>[];
     var i = 0;
     for (final t in universe) {
       if (++i % 25 == 0) stderr.write('  $i/${universe.length}   \r');
-      final m = await avaliar(t, ctx.fundamentals);
-      final a = await avaliar(t, anual);
-      final h = await ancorada.history(t);
-      final z = await avaliar(t, ancorada);
+      final m = await evaluate(t, ctx.fundamentals);
+      final a = await evaluate(t, annual);
+      final h = await anchored.history(t);
+      final z = await evaluate(t, anchored);
       // O fim do último ponto **publicado** na data: a série montada traz
       // todos os exercícios, e o recorte é da cascata.
-      final publicados = h.isOk
-          ? h.unwrap().where(PointInTimeView(_hoje).isPublished).toList()
+      final published = h.isOk
+          ? h.unwrap().where(PointInTimeView(_today).isPublished).toList()
           : const <FundamentalsSnapshot>[];
-      linhas.add({
+      rows.add({
         'ticker': t.value,
         'mercado': m?.upside,
         'anual': a?.upside,
         'ancorada': z?.upside,
-        'fimAncora': publicados.isEmpty
+        'fimAncora': published.isEmpty
             ? null
-            : publicados.last.fiscalPeriodEnd.toIso8601String().substring(0, 10),
+            : published.last.fiscalPeriodEnd.toIso8601String().substring(0, 10),
       });
     }
     stderr.writeln('');
 
     stdout.writeln('  documentos da CVM por ticker: ${docs.length}');
     stdout.writeln('  avaliações com série ancorada em trimestre: '
-        '${ancorada.ancoradasEmTrimestre.length}');
+        '${anchored.quarterAnchoredSet.length}');
 
-    _comparar('A1.7 refeito — mercado → CVM anual', linhas, 'mercado', 'anual');
-    _comparar('A1.8 — CVM anual → CVM ancorada', linhas, 'anual', 'ancorada');
+    _compare('A1.7 refeito — mercado → CVM anual', rows, 'mercado', 'anual');
+    _compare('A1.8 — CVM anual → CVM ancorada', rows, 'anual', 'ancorada');
 
-    stdout.writeln('\n  procedência na montagem ancorada: ${ancorada.procedencia}');
+    stdout.writeln('\n  procedência na montagem ancorada: ${anchored.provenance}');
     // Com data explícita, o arquivo leva a data: sem isso, a medição de
     // outra data sobrescrevia a da data padrão.
-    final saida = args.isEmpty
+    final output = args.isEmpty
         ? 'docs/validacao/cvm_ligacao.json'
         : 'docs/validacao/cvm_ligacao_${args.first}.json';
-    File(saida).writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(linhas),
+    File(output).writeAsStringSync(
+      const JsonEncoder.withIndent(' ').convert(rows),
     );
-    stdout.writeln('  gravado $saida');
+    stdout.writeln('  gravado $output');
   } finally {
     await ctx.dispose();
   }

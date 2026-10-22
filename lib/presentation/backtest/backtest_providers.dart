@@ -79,13 +79,13 @@ enum RiskReturnKind {
   principalAsset,
 
   /// Candidato da Reserva. Distinguir os dois é o que permite ler a troca.
-  reservaAsset,
+  reserveAsset,
 
   /// A carteira Principal consolidada.
   principal,
 
   /// A carteira Reserva consolidada.
-  reserva,
+  reserve,
 }
 
 /// Um ponto da dispersão: volatilidade e retorno anualizados, em **pontos
@@ -113,7 +113,7 @@ class RiskReturnPoint {
 
   /// `true` para os pontos de carteira, `false` para os de ativo.
   bool get isPortfolio =>
-      kind == RiskReturnKind.principal || kind == RiskReturnKind.reserva;
+      kind == RiskReturnKind.principal || kind == RiskReturnKind.reserve;
 }
 
 /// Resultado comparativo das duas carteiras sob o mesmo plano de aportes.
@@ -123,7 +123,7 @@ class PortfolioComparison {
   final BacktestOutcome? principal;
 
   /// Resultado da Reserva, com a mesma convenção de [principal].
-  final BacktestOutcome? reserva;
+  final BacktestOutcome? reserve;
 
   /// Janela **efetivamente simulada**, idêntica nas duas carteiras.
   final DateRange window;
@@ -138,7 +138,7 @@ class PortfolioComparison {
   final String? principalFailure;
 
   /// Por que a Reserva não pôde ser simulada, quando não pôde.
-  final String? reservaFailure;
+  final String? reserveFailure;
 
   /// Dispersão risco × retorno: um ponto por ativo das duas carteiras, mais
   /// as próprias carteiras.
@@ -149,16 +149,16 @@ class PortfolioComparison {
     required this.window,
     required this.requestedWindow,
     this.principal,
-    this.reserva,
+    this.reserve,
     this.limitingTicker,
     this.principalFailure,
-    this.reservaFailure,
+    this.reserveFailure,
     this.riskReturn = const [],
   });
 
   /// `true` quando as duas carteiras foram simuladas — condição para que
   /// [twrGap] exista.
-  bool get hasBoth => principal != null && reserva != null;
+  bool get hasBoth => principal != null && reserve != null;
 
   /// `true` quando a janela simulada ficou menor que a pedida.
   bool get windowWasShortened => window.start.isAfter(requestedWindow.start);
@@ -170,7 +170,7 @@ class PortfolioComparison {
   /// — a composição.
   double? get twrGap => hasBoth
       ? (principal!.metrics.timeWeightedReturn -
-                reserva!.metrics.timeWeightedReturn) *
+                reserve!.metrics.timeWeightedReturn) *
             100
       : null;
 }
@@ -192,7 +192,7 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
   final settings = ref.watch(backtestSettingsProvider);
   final goal = study.goal;
 
-  if (study.principal.isEmpty && study.reserva.isEmpty) return null;
+  if (study.principal.isEmpty && study.reserve.isEmpty) return null;
   if (goal == null) return null;
 
   final today = DateTime.now();
@@ -210,7 +210,7 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
 
   final tickers = <Ticker>{
     ...study.principal.tickers,
-    ...study.reserva.tickers,
+    ...study.reserve.tickers,
   }.toList();
   if (tickers.isEmpty) return null;
 
@@ -222,7 +222,7 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
       window: requested,
       requestedWindow: requested,
       principalFailure: message,
-      reservaFailure: message,
+      reserveFailure: message,
     );
   }
   final priceMap = priceResult.unwrap();
@@ -258,25 +258,25 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
   }
 
   final principalRun = runFor(study.principal);
-  final reservaRun = runFor(study.reserva);
+  final reserveRun = runFor(study.reserve);
   final principal = principalRun?.valueOrNull;
-  final reserva = reservaRun?.valueOrNull;
+  final reserve = reserveRun?.valueOrNull;
 
   return PortfolioComparison(
     window: window,
     requestedWindow: requested,
     limitingTicker: limiting,
     principal: principal,
-    reserva: reserva,
+    reserve: reserve,
     principalFailure: _copyOf(principalRun),
-    reservaFailure: _copyOf(reservaRun),
+    reserveFailure: _copyOf(reserveRun),
     riskReturn: _riskReturnPoints(
       principalPortfolio: study.principal,
-      reservaPortfolio: study.reserva,
+      reservePortfolio: study.reserve,
       prices: priceMap,
       window: window,
       principal: principal,
-      reserva: reserva,
+      reserve: reserve,
     ),
   );
 });
@@ -295,11 +295,11 @@ final comparisonProvider = FutureProvider<PortfolioComparison?>((ref) async {
 /// que rende mais assumindo menos risco fica acima e à esquerda.
 List<RiskReturnPoint> _riskReturnPoints({
   required Portfolio principalPortfolio,
-  required Portfolio reservaPortfolio,
+  required Portfolio reservePortfolio,
   required Map<Ticker, PriceSeries> prices,
   required DateRange window,
   required BacktestOutcome? principal,
-  required BacktestOutcome? reserva,
+  required BacktestOutcome? reserve,
 }) {
   final points = <RiskReturnPoint>[];
   // Um ticker desenhado duas vezes empilharia rótulos no mesmo pixel; a
@@ -337,7 +337,7 @@ List<RiskReturnPoint> _riskReturnPoints({
   }
 
   addAssets(principalPortfolio, RiskReturnKind.principalAsset);
-  addAssets(reservaPortfolio, RiskReturnKind.reservaAsset);
+  addAssets(reservePortfolio, RiskReturnKind.reserveAsset);
 
   void addPortfolio(
     BacktestOutcome? outcome,
@@ -356,7 +356,7 @@ List<RiskReturnPoint> _riskReturnPoints({
   }
 
   addPortfolio(principal, 'Principal', RiskReturnKind.principal);
-  addPortfolio(reserva, 'Reserva', RiskReturnKind.reserva);
+  addPortfolio(reserve, 'Reserva', RiskReturnKind.reserve);
 
   return points;
 }

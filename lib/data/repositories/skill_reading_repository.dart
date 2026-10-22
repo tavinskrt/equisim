@@ -10,16 +10,16 @@ import 'package:equisim_core/equisim_core.dart';
 /// ressalva.
 class SkillReadingRepository {
   /// Lê o conteúdo do pacote.
-  final Future<String> Function() carregarPacote;
+  final Future<String> Function() loadPackage;
 
   /// Declara o repositório.
-  SkillReadingRepository({required this.carregarPacote});
+  SkillReadingRepository({required this.loadPackage});
 
-  Future<SkillReading?>? _leitura;
+  Future<SkillReading?>? _reading;
 
-  Future<SkillReading?> _ler() async {
+  Future<SkillReading?> _read() async {
     try {
-      final json = jsonDecode(await carregarPacote());
+      final json = jsonDecode(await loadPackage());
       return json is Map<String, dynamic>
           ? SkillReadingCodec.decode(json)
           : null;
@@ -29,5 +29,5 @@ class SkillReadingRepository {
   }
 
   /// A leitura do pacote, ou `null`.
-  Future<SkillReading?> reading() => _leitura ??= _ler();
+  Future<SkillReading?> reading() => _reading ??= _read();
 }

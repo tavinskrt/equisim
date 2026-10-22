@@ -1,9 +1,14 @@
 # O instrumento da habilidade, pronto — itens C1c, C1d e C3
 
-> **A leitura mais recente é a §8**, de 21/09/2026, sobre o motor da Fase 3 e
-> as coortes reexecutadas pelo item C5. As seções 1 a 7 registram as anteriores,
-> e ficam porque a comparação entre instrumentos é parte do que este documento
-> serve para mostrar.
+> **A leitura mais recente é a §13**, de 02/10/2026, com a base de patrimônio
+> corrigida (item B47, decisão 146). A §12, de 01/10/2026, trouxe o prêmio de
+> mercado da decisão 142 em cada coorte, a contagem de ações conferida contra o
+> preço (decisão 143) e os proventos dos nove emissores que faltavam (decisão
+> 144). A §11, de 25/09/2026, é a de antes deles, com o capital posterior, as bonificações não
+> ajustadas, a contagem atrasada e os proventos do mesmo dia corrigidos (itens
+> B28 a B31). As seções anteriores registram as leituras de
+> antes, das mais novas para as mais antigas depois da §6, e ficam porque a
+> comparação entre instrumentos é parte do que este documento serve para mostrar.
 
 Medido em 15/09/2026 por `dart run tool/regressao_condicional.dart --trimestral`,
 sobre `docs/validacao/backtest_trimestral.json` (de
@@ -151,30 +156,258 @@ reingestão da CVM.
   ([ponte_por_papel.md](ponte_por_papel.md)).
 - **O motivo de saída das deslistadas** continua não levantado.
 
+## 12. Com a taxa dos financeiros pela curva — remedido em 28/09/2026
+
+**Uma correção mudou o potencial dos financeiros**: sem o custo de capital
+resolvido, a taxa de cada ano interpolava em linha reta do CDI da data até a
+perpetuidade, em vez de seguir a curva (item B37,
+[decisão 141](../decisoes/141-a-documentacao-do-motor-e-refeita-do-zero-contra-o-codigo.md)).
+O backtest trimestral inteiro foi refeito com o motor corrigido.
+
+| 36 meses, trimestral, com deslistadas (n = 2.176) | 25/09 (§11) | **28/09** | `t` corrigido / crítico | Newey-West | passa |
+|---|---:|---:|---:|---:|---|
+| **potencial dado o B/M (critério do R3)** | 0,058 | **0,069** | **0,40 / 2,70** | 1,13 | não |
+| IC do potencial | 0,111 | 0,121 | 0,76 / 2,70 | 1,88 | não |
+| IC do book-to-market | 0,160 | 0,160 | 2,03 / 2,70 | 4,39 | não |
+| IC do lucro sobre o preço | 0,133 | 0,134 | 1,14 / 2,70 | 3,11 | não |
+| IC do composto | 0,158 | 0,163 | 1,37 / 2,70 | 3,37 | não |
+
+**Nenhum veredito muda.** O efeito mínimo detectável segue em 0,62
+([poder_r3.md](poder_r3.md)).
+
+## 13. Com a base de patrimônio corrigida — remedido em 02/10/2026
+
+**O defeito** (item B47, [decisão 146](../decisoes/146-sem-o-par-vpa-e-contagem-a-base-e-o-pl-da-demonstracao.md)):
+a base de patrimônio é `VPA × contagem do exercício`, e a fonte de mercado
+devolve a contagem zerada para algumas companhias e anos. Sem o par, a base
+sumia: companhias com patrimônio positivo saíam recusadas como insolventes, e a
+série de capital de outras tinha buracos. Agora, sem o par, vale o PL da
+demonstração.
+
+O backtest tem 10.843 observações, **3.253 avaliadas** (eram 3.199), potencial
+mediano de −40,5% (era −39,1%). 75 observações passam a ser avaliadas, de 11
+papéis — Copasa, Fleury, EGIE3, ALOS3, Sabesp, Tupy, Natura, entre outros —, e
+20 deixam de ser, de 6; o potencial muda em 371 observações de 82 papéis. Entram
+também as 16 observações da MAPT4, que o universo passou a listar. O prêmio de
+cada coorte é o do pacote de 01/10, que a medição do B48 protegeu.
+
+| 36 meses, trimestral, com deslistadas (n = 2.293) | 01/10 | **02/10** | `t` corrigido / crítico | Newey-West | passa |
+|---|---:|---:|---:|---:|---|
+| **potencial dado o B/M (critério do R3)** | 0,032 | **0,010** | **0,05 / 2,70** | 0,14 | não |
+| IC do potencial | 0,092 | 0,080 | 0,44 / 2,70 | 1,05 | não |
+| IC do book-to-market | 0,166 | 0,179 | 2,40 / 2,70 | 5,07 | não |
+| IC do lucro sobre o preço | 0,130 | 0,125 | 1,06 / 2,70 | 2,85 | não |
+| IC do composto | 0,151 | 0,150 | 1,17 / 2,70 | 2,72 | não |
+
+**Nenhum veredito muda.** Em 12 meses, o critério dá 0,021 com `t` corrigido de
+0,32 contra 2,24. O book-to-market sobe a 2,40 e continua abaixo do crítico, e o
+retorno esperado continua sem prêmio de ordenação. A faixa calibrada, remedida,
+cobre 87,9% em 12 meses e 88,1% em 36 ([cobertura_banda.md](cobertura_banda.md)
+§15).
+
+## 12. Com o prêmio de mercado do mercado — remedido em 01/10/2026
+
+**Três mudanças entraram juntas**, todas da medição do prêmio implícito
+([premio_implicito.md](premio_implicito.md)):
+
+- **O prêmio de mercado** ([decisão 142](../decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md))
+  deixa de ser 5,5% e passa a ser, em cada coorte, a média de dez anos do prêmio
+  implícito só com os trimestres até a data dela: de 0,91% a 1,62%. Ele muda o
+  `Ke` de todo ativo, e com ele o preço justo, a via e a recusa por estrutura.
+- **A contagem de ações** ([decisão 143](../decisoes/143-a-contagem-da-coorte-e-conferida-contra-o-salto-do-preco.md))
+  é conferida contra o salto do preço: 29 entradas descartadas em 26 das 276
+  companhias listadas e 24 nas deslistadas. 138 observações mudam de valor de
+  mercado em mais de 1,5 vez — a HAPV3 de 2025 caía de R$ 278 bilhões para R$ 18
+  bilhões, a IRBR3 de 2024 de R$ 78 a 110 bilhões para R$ 2,6 a 3,7 bilhões —,
+  e quatro delas são avaliadas; a MGLU3 de 31/03/2025 sai de R$ 2,46 para
+  R$ 37,04 de preço justo, com as 739 milhões de ações que tinha.
+- **Os proventos** ([decisão 144](../decisoes/144-o-nome-de-pregao-da-consulta-de-proventos-vai-sem-barra.md))
+  dos sete emissores com barra no nome que pagaram entram no retorno total e no
+  beta.
+
+O backtest tem 10.840 observações (eram 10.792), **3.199 avaliadas** (eram
+3.070), com potencial mediano de **−39,1%** (era −54,4%) e 855 acima de zero
+(eram 438). O prêmio menor baixa o custo de capital, e mais companhias passam
+pela estrutura de capital.
+
+| 36 meses, trimestral, com deslistadas (n = 2.259) | 28/09 | **01/10** | `t` corrigido / crítico | Newey-West | passa |
+|---|---:|---:|---:|---:|---|
+| **potencial dado o B/M (critério do R3)** | 0,069 | **0,032** | **0,18 / 2,70** | 0,44 | não |
+| IC do potencial | 0,121 | 0,092 | 0,55 / 2,70 | 1,24 | não |
+| IC do book-to-market | 0,160 | 0,166 | 2,27 / 2,70 | 5,13 | não |
+| IC do lucro sobre o preço | 0,134 | 0,130 | 1,04 / 2,70 | 2,90 | não |
+| IC do composto | 0,163 | 0,151 | 1,22 / 2,70 | 2,82 | não |
+
+**Nenhum veredito muda.** O critério do R3 cai de 0,069 para 0,032, com `t`
+corrigido de 0,18 — longe do crítico e do efeito mínimo detectável, que fica em
+0,65 ([poder_r3.md](poder_r3.md)). Em 12 meses, 0,030 com `t` corrigido de
+0,47 contra 2,24. **O book-to-market sobe de 2,03 para 2,27 e continua abaixo
+do crítico**, e por isso a regra da decisão 103 continua sem prêmio de
+ordenação no retorno esperado: o pacote `assets/validacao/habilidade.json` diz
+que nenhuma ordenação passou.
+
+**Uma leitura intermediária, registrada para não sumir.** Na mesma rodada, uma
+primeira versão da conferência da contagem descartava também a emissão e a
+fusão grandes sem salto no preço (Dasa, Light, Azul, Gol, Sequoia). Com aquela
+amostra, e a série do prêmio medida com ela, o book-to-market chegou a `t` corrigido de 2,83 e passou, e o critério
+do R3 deu 0,021. A regra foi refinada porque aquele descarte era viés de
+seleção (decisão 143), e com a amostra corrigida o book-to-market não passa.
+**A passagem do book-to-market depende de quais companhias ficam na amostra** —
+o que é, de novo, o retrato do poder baixo que a §11 e o C6 já declaravam.
+
+**A faixa calibrada, remedida**, com a mesma forma: 90% nominal cobre **87,9%**
+em 12 meses e **88,3%** em 36, desvios máximos de 2,1 e 1,7 p.p. contra o limite
+de 5 ([cobertura_banda.md](cobertura_banda.md) §14). **O R2 continua atingido.**
+
+## 11. Com o dado das coortes corrigido — remedido em 25/09/2026
+
+**Quatro correções mudaram o que as coortes medem**, e três delas vieram de
+medir a primeira:
+
+- **B28** ([decisão 135](../decisoes/135-o-capital-emitido-depois-do-balanco-entra-quando-declarado.md)):
+  a emissão com valor declarado depois do balanço entra no patrimônio da ponte.
+  111 observações de 31 papéis, mediana de +0,35 p.p. no potencial; a ALOS3 de
+  2023 tinha o preço justo pela metade.
+- **B29** ([decisão 136](../decisoes/136-o-evento-de-acoes-que-a-fonte-nao-ajustou-e-ajustado.md)):
+  a série de preços de 57 papéis tinha bonificações que a fonte não ajustou. O
+  retorno de 36 meses muda em 509 observações, com mediana de +9,3%, e o beta
+  muda junto.
+- **B30** ([decisão 137](../decisoes/137-a-contagem-da-coorte-recebe-o-evento-que-o-fre-nao-absorveu.md)):
+  a contagem da coorte recebe o evento que o formulário não registrou. 41
+  observações de 10 papéis; o Banco do Brasil de 2024 tinha metade do valor de
+  mercado.
+- **B31** ([decisão 139](../decisoes/139-proventos-da-mesma-data-ex-entram-juntos-no-retorno-total.md)):
+  os proventos da mesma data ex deixam de compor entre si. O retorno de 36 meses
+  muda em 2.189 observações, com mediana de 0,07 p.p. e cauda de 12 p.p. na
+  PETR4.
+
+O B29 e o B31 mudam a **variável de desfecho**, e o B28 e o B30, o **potencial**.
+São as mesmas 10.808 observações da §10.
+
+| 36 meses, trimestral, com deslistadas (n = 2.169) | 24/09 (§10) | **25/09** | `t` corrigido / crítico | Newey-West | passa |
+|---|---:|---:|---:|---:|---|
+| **potencial dado o B/M (critério do R3)** | 0,052 | **0,058** | **0,34 / 2,70** | 0,94 | não |
+| IC do potencial | 0,105 | 0,111 | 0,69 / 2,70 | 1,71 | não |
+| IC do book-to-market | 0,158 | 0,160 | 2,03 / 2,70 | 4,41 | não |
+| IC do lucro sobre o preço | 0,125 | 0,133 | 1,11 / 2,70 | 2,99 | não |
+| IC do composto | 0,152 | 0,158 | 1,30 / 2,70 | 3,21 | não |
+| IC do múltiplo de pares | 0,078 | 0,075 | 1,04 / 2,70 | 3,21 | não |
+
+**Nenhum veredito muda.** O critério do R3 sobe de 0,052 para 0,058, e o `t`
+corrigido, de 0,30 para 0,34: longe do crítico, e longe do efeito mínimo
+detectável de 0,62, que não se mexe ([poder_r3.md](poder_r3.md)). Separando as
+etapas, o B28 ao B30 levaram o critério a 0,0578, e o B31 o levou a 0,0580. Em
+12 meses, 0,046 com `t` corrigido de 0,67 contra 2,24. Líquido de custo de
+transação, a leitura é a mesma ([custos_transacao.md](custos_transacao.md)).
+
+**O B29 corrigia um viés, e o viés quase não pesava na ordenação.** O retorno
+perdido estava em quem bonifica, e quem bonifica é quem retém lucro — o que
+podia favorecer ou desfavorecer um sinal de valor. Corrigido, os ICs sobem um
+pouco, salvo o de pares, que cai 0,003, e nenhum muda de lado do crítico.
+
+**A série ancorada contra a anual**, nas mesmas observações da §10:
+
+| | 36 meses (2.037) | 12 meses (2.768) |
+|---|---:|---:|
+| IC da anual | 0,096 | 0,056 |
+| IC da ancorada | 0,119 | 0,083 |
+| diferença | +0,023 | +0,026 |
+| **`t` corrigido / crítico da diferença** | **0,28 / 2,70** | **0,90 / 2,24** |
+| Newey-West da diferença | 1,32 | 1,62 |
+| anual dado o B/M | 0,029 | 0,022 |
+| ancorada dado o B/M | 0,060 | 0,059 |
+
+**A regra da decisão 98 dá o mesmo veredito**, e a ancorada continua fora do
+padrão.
+
+**A faixa calibrada, remedida sobre o retorno corrigido**, com a mesma forma:
+90% nominal cobre **87,6%** em 12 meses e **88,1%** em 36, desvios máximos de
+2,4 e 3,0 p.p. contra o limite de 5 ([cobertura_banda.md](cobertura_banda.md)
+§12). **O R2 continua atingido.**
+
+**E o R3 mudou de definição em 27/09/2026**: o usuário escolheu «habilidade
+testada, com o poder declarado» ([decisão 140](../decisoes/140-o-r3-e-habilidade-testada-com-o-poder-declarado.md)),
+e é o que esta seção e a §10 entregam — o critério medido, não passando, e o
+poder declarado em [poder_r3.md](poder_r3.md).
+
+## 10. Com a cópia dos insumos corrigida — remedido em 24/09/2026
+
+**O backtest foi reexecutado por causa do item B27** ([decisão 132](../decisoes/132-a-copia-dos-insumos-passa-por-um-lugar-so.md)):
+as cópias que montam a leitura ancorada e o contrafactual sem o corte de
+liquidez perdiam a composição declarada da unit, a taxa de referência do
+crédito e a janela do beta. **A leitura padrão não passa por essas cópias**, e
+por isso o critério do R3 não se move. O que se move são as duas leituras
+secundárias. A SAPR4 de 30/06/2021, por exemplo, tinha justo ancorado de
+R$ 5,94 contra R$ 30,15 do anual, com o divisor da unit aplicado à espécie, e
+agora tem R$ 29,69.
+
+A fonte de mercado renovou o cache na mesma execução. Três papéis saíram do
+universo (PEAB3, SOND5 e CEGR3), a WLMM3 entrou, e o `Ke` mudou na quinta casa
+em parte das observações: **10.808 observações**, contra 10.837.
+
+| 36 meses, trimestral, com deslistadas (n = 2.165) | média | `t` corrigido / crítico | Newey-West | passa |
+|---|---:|---:|---:|---|
+| **potencial dado o B/M (critério do R3)** | **0,052** | **0,30 / 2,70** | 0,83 | não |
+| IC do potencial | 0,105 | 0,65 / 2,70 | 1,61 | não |
+| IC do book-to-market | 0,158 | 2,01 / 2,70 | 4,23 | não |
+| IC do lucro sobre o preço | 0,125 | 1,06 / 2,70 | 2,87 | não |
+| IC do composto | 0,152 | 1,24 / 2,70 | 3,02 | não |
+| IC do múltiplo de pares | 0,078 | 1,15 / 2,70 | 3,52 | não |
+
+**Nenhum veredito muda**, e o critério do R3 fica nos mesmos 0,052 com `t`
+corrigido de 0,30. O Newey-West dele vai de 0,84 a 0,83, e o IC do composto, de
+0,151 a 0,152.
+
+**A série ancorada contra a anual, com a cópia corrigida**, nas mesmas
+observações (o potencial difere entre as duas em 70,2% delas):
+
+| | 36 meses (2.034) | 12 meses (2.765) |
+|---|---:|---:|
+| IC da anual | 0,090 | 0,057 |
+| IC da ancorada | 0,111 | 0,079 |
+| diferença | +0,021 | +0,022 |
+| **`t` corrigido / crítico da diferença** | **0,27 / 2,70** | **0,78 / 2,24** |
+| Newey-West da diferença | 1,22 | 1,37 |
+| anual dado o B/M | 0,022 | 0,024 |
+| ancorada dado o B/M | 0,052 | 0,056 |
+
+**A regra da decisão 98 dá o mesmo veredito**: a diferença em 36 meses é
+positiva e não passa no critério, e a ancorada continua fora do padrão. Os
+números da §4 são de 15/09, anteriores aos três campos que a cópia perdia.
+
 ## 9. Sobre o motor que fecha a Fase 3 — remedido em 22/09/2026
 
-**É a leitura sobre o motor com a Fase 3 inteira fechada**: além do da §8, as
+**É a leitura sobre o motor com as Fases 1 a 3 fechadas**: além do da §8, as
 versões antigas dos documentos da CVM (item B8, decisão 128), o juro da rota
-derivada seguindo a curva (item B24, decisão 127) e a fronteira do dinheiro
-arredondando o decimal escrito (decisão 125). Mesmas 10.919 observações, 31
-coortes.
+derivada seguindo a curva (item B24, decisão 127), a fronteira do dinheiro
+arredondando o decimal escrito (decisão 125) e o prêmio de crédito que não some
+sem a despesa financeira (item B26, decisão 130). 10.837 observações, 31 coortes
+— a fonte de mercado tirou seis papéis pequenos do universo ao renovar o cache.
 
-| 36 meses, trimestral, com deslistadas (n = 2.164) | média | `t` corrigido / crítico | Newey-West | passa |
+| 36 meses, trimestral, com deslistadas (n = 2.165) | média | `t` corrigido / crítico | Newey-West | passa |
 |---|---:|---:|---:|---|
-| **potencial dado o B/M (critério do R3)** | **0,028** | **0,15 / 2,70** | 0,40 | não |
-| IC do potencial | 0,088 | 0,53 / 2,70 | 1,23 | não |
-| IC do book-to-market | 0,160 | 2,07 / 2,70 | 4,36 | não |
-| IC do lucro sobre o preço | 0,123 | 1,04 / 2,70 | 2,82 | não |
-| IC do composto | 0,146 | 1,19 / 2,70 | 2,86 | não |
-| IC do múltiplo de pares | 0,083 | 1,24 / 2,70 | 3,49 | não |
+| **potencial dado o B/M (critério do R3)** | **0,052** | **0,30 / 2,70** | 0,84 | não |
+| IC do potencial | 0,105 | 0,65 / 2,70 | 1,61 | não |
+| IC do book-to-market | 0,158 | 2,01 / 2,70 | 4,23 | não |
+| IC do lucro sobre o preço | 0,125 | 1,06 / 2,70 | 2,87 | não |
+| IC do composto | 0,151 | 1,24 / 2,70 | 3,02 | não |
+| IC do múltiplo de pares | 0,079 | 1,18 / 2,70 | 3,65 | não |
 
-**Nada muda de veredito, e quase nada de número.** O potencial condicionado ao
-B/M vai de 0,027 a 0,028; o book-to-market sobe de `t` corrigido 1,98 para 2,07,
-e continua abaixo do crítico. As versões antigas mexem em 2,8% das observações
-avaliadas, e o juro pela curva move o preço justo em −0,65% na mediana — os dois
-defeitos eram reais, e nenhum deles era o que separava o motor da habilidade.
-**Líquido de custo de transação** (item C4), a leitura é a mesma
-([custos_transacao.md](custos_transacao.md)).
+**Nada muda de veredito.** O B8 e o B24 moveram quase nada — o condicionado foi
+de 0,027 a 0,028 —, e **o B26 foi o que mais mexeu**: as deslistadas das coortes
+são montadas só com dado da CVM, sem despesa financeira, e caíam todas no
+defeito. Com o prêmio de crédito de volta, o preço justo muda em 546 observações
+(mediana de −1,1%), o condicionado vai a **0,052** e a carteira que compra o
+quintil de maior potencial e vende o de menor passa de +0,75% para **+6,0%** em
+36 meses. **O sinal melhorou, e continua longe do crítico.** Líquido de custo de
+transação (item C4), a leitura é a mesma ([custos_transacao.md](custos_transacao.md)).
+
+**É o veredito do C1, e ele vem com o poder medido** ([decisão 129](../decisoes/129-o-r3-nao-passa-e-o-teste-declara-o-poder-que-tem.md),
+[poder_r3.md](poder_r3.md)). Com estas 22 coortes, o menor coeficiente que o
+critério vê com 80% de chance é **0,62**; o book-to-market tem 37% de chance de
+passar no próprio efeito. A reprovação não prova ausência de habilidade — prova
+que o potencial não acrescenta ao book-to-market nada que esta amostra consiga
+distinguir de zero, com estimativa pontual de 0,052 e o dobro da instabilidade.
 
 ## 8. Sobre o motor da Fase 3 — remedido em 21/09/2026, com a base restaurada
 

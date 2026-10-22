@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 380" width="720" height="380" role="img" aria-labelledby="t d"><title id="t">Composição do preço justo da WEGE3</title><desc id="d">VP explícito 36,16 bi, mais VP terminal 33,02 bi, menos minoritários 1,14 bi, igual a capital próprio de 68,04 bi.</desc><style>
+  .fundo{fill:#fcfcfb}
+  .t1{fill:#0b0b0b;font:600 15px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .t2{fill:#52514e;font:12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .t3{fill:#0b0b0b;font:12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .tb{fill:#0b0b0b;font:600 12px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  .grade{stroke:#e4e3de;stroke-width:1}
+  .eixo{stroke:#b9b8b1;stroke-width:1}
+  .s1{stroke:#2a78d6;fill:#2a78d6}
+  .s2{stroke:#eb6834;fill:#eb6834}
+  .s3{stroke:#1baf7a;fill:#1baf7a}
+  .neutro{stroke:#8f8e87;fill:#8f8e87}
+  .caixa{fill:#f3f2ee;stroke:#c9c8c1;stroke-width:1}
+  .caixa2{fill:#e7f0fb;stroke:#2a78d6;stroke-width:1.5}
+  .caixa3{fill:#fdeee7;stroke:#eb6834;stroke-width:1.5}
+  .caixa4{fill:#f3f2ee;stroke:#8f8e87;stroke-width:1;stroke-dasharray:0}
+  .seta{stroke:#52514e;stroke-width:1.5;fill:none}
+  .anel{stroke:#fcfcfb;stroke-width:2}
+  @media (prefers-color-scheme: dark){
+    .fundo{fill:#1a1a19}
+    .t1,.t3,.tb{fill:#ffffff}
+    .t2{fill:#c3c2b7}
+    .grade{stroke:#33332f}
+    .eixo{stroke:#5a5953}
+    .s1{stroke:#3987e5;fill:#3987e5}
+    .s2{stroke:#d95926;fill:#d95926}
+    .s3{stroke:#199e70;fill:#199e70}
+    .caixa{fill:#262624;stroke:#4a4944}
+    .caixa2{fill:#16283f;stroke:#3987e5}
+    .caixa3{fill:#3a2016;stroke:#d95926}
+    .caixa4{fill:#262624;stroke:#6d6c66}
+    .seta{stroke:#c3c2b7}
+    .anel{stroke:#1a1a19}
+  }
+</style><rect class="fundo" width="720" height="380" rx="8"/><text class="t1" x="24" y="32">WEGE3: de onde vem o preço justo (R$ bi)</text><text class="t2" x="24" y="52">R$ 68,04 bi ÷ 4,196 bi de papéis = R$ 12,53 por papel</text><line class="grade" x1="70" x2="680" y1="310.0" y2="310.0"/><text class="t2" x="62" y="314.0" text-anchor="end">0</text><line class="grade" x1="70" x2="680" y1="233.3" y2="233.3"/><text class="t2" x="62" y="237.3" text-anchor="end">20</text><line class="grade" x1="70" x2="680" y1="156.7" y2="156.7"/><text class="t2" x="62" y="160.7" text-anchor="end">40</text><line class="grade" x1="70" x2="680" y1="80.0" y2="80.0"/><text class="t2" x="62" y="84.0" text-anchor="end">60</text><path class="s1" d="M122.25,310.0 L122.25,175.388837441205 Q122.25,171.388837441205 126.25,171.388837441205 L166.25,171.388837441205 Q170.25,171.388837441205 170.25,175.388837441205 L170.25,310.0 Z" stroke="none"/><text class="t3" x="146.2" y="163.4" text-anchor="middle">36,16</text><text class="t2" x="146.2" y="330" text-anchor="middle">VP dos 10 anos</text><path class="s1" d="M274.75,171.388837441205 L274.75,48.80876729759666 Q274.75,44.80876729759666 278.75,44.80876729759666 L318.75,44.80876729759666 Q322.75,44.80876729759666 322.75,48.80876729759666 L322.75,171.388837441205 Z" stroke="none"/><text class="t3" x="298.8" y="36.8" text-anchor="middle">+33,02</text><text class="t2" x="298.8" y="330" text-anchor="middle">VP do terminal</text><path class="s2" d="M427.25,44.80876729759666 L427.25,46.98644371426332 Q427.25,49.16412013092997 429.42767641666666,49.16412013092997 L473.07232358333334,49.16412013092997 Q475.25,49.16412013092997 475.25,46.98644371426332 L475.25,44.80876729759666 Z" stroke="none"/><text class="t3" x="451.2" y="36.8" text-anchor="middle">−1,14</text><text class="t2" x="451.2" y="330" text-anchor="middle">Minoritários</text><path class="neutro" d="M579.75,310.0 L579.75,53.16412013092997 Q579.75,49.16412013092997 583.75,49.16412013092997 L623.75,49.16412013092997 Q627.75,49.16412013092997 627.75,53.16412013092997 L627.75,310.0 Z" stroke="none"/><text class="t3" x="603.8" y="41.2" text-anchor="middle">68,04</text><text class="t2" x="603.8" y="330" text-anchor="middle">Capital próprio</text><line class="eixo" x1="70" x2="680" y1="310" y2="310"/></svg>

@@ -200,7 +200,7 @@ abstract final class SensitivityReports {
       ..writeln('| Modelo | Ocorrências |')
       ..writeln('|---|---|');
     for (final entry in modelCounts.entries) {
-      buffer.writeln('| ${entry.key.rotulo} | ${entry.value} |');
+      buffer.writeln('| ${entry.key.label} | ${entry.value} |');
     }
     if (failures > 0) {
       buffer.writeln('| *(não avaliável)* | $failures |');
@@ -255,7 +255,7 @@ abstract final class SensitivityReports {
       buffer.writeln(
         '| ${point.ticker.value} '
         '| ${point.scenario} '
-        '| ${point.model?.rotulo ?? '—'} '
+        '| ${point.model?.label ?? '—'} '
         '| ${point.fairValue == null ? '—' : num2(point.fairValue!, decimals: 2)} '
         '| ${point.discountRate == null ? '—' : pct(point.discountRate!)} |',
       );

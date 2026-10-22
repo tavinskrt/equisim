@@ -11,6 +11,933 @@ continuam em [decisoes/](decisoes/), e medições em [validacao/](validacao/).
 
 ---
 
+## A sensibilidade nomeada pelas premissas — o B38 fechado (14/10/2026)
+
+**O pedido.** «Já que não são calculados cenários pessimista e otimista, qual
+sua sugestão para mudarmos esses rótulos?» Os dois valores são calculados, mas
+como deslocamento de premissa — crescimento do primeiro ano 3 pontos e as duas
+taxas 2 pontos, em sentidos opostos —, e não como cenário econômico; a decisão
+92 já os chama de sensibilidade. Depois da sugestão: «Pode implementar os
+rótulos e juntar os cartões.»
+
+**O que foi feito** ([decisão 148](decisoes/148-a-sensibilidade-e-nomeada-pelas-premissas-num-cartao-so.md)).
+Um cartão "Sensibilidade" só, no lugar de "Cenários" e "Sensibilidade": os
+conjuntos fixos nomeados pelas premissas — «Premissas mais duras», «do motor»,
+«mais brandas» —, com «crescimento −3 p.p., taxa +2 p.p.» e o contrário em nota,
+tirados das constantes que a conta usa (`DiscreteScenarios.defaultGrowthDelta` e
+`defaultDiscountDelta`); a cor de cada valor pela posição contra o preço justo;
+o aviso quando as premissas mais brandas dão preço menor; a barra do menor ao
+maior; e, no Monte Carlo, «5% dos sorteios abaixo» e «acima» no lugar de
+«pessimista» e «otimista». É o segundo caminho que o B38 deixava ao usuário, e o
+fecha; a definição dos conjuntos não mudou.
+
+**Verificado.** Os testes novos do cartão conferem os rótulos, as notas e o
+aviso, e que ele cabe em 320 dp sob 2,0x também invertido; o guia de estudo, o
+capítulo 6 do motor, as limitações e as perguntas do orientador citam os
+rótulos novos.
+
+---
+
+## O porquê das normalizações (14/10/2026)
+
+**O pedido.** O orientador parabenizou o trabalho, refez os valuations por
+Gordon padrão e chegou aos preços do motor por centavos. Pediu que se
+detalhasse o motivo das normalizações: «Ele quer entender o porquê das
+normalizações (e não retirar), e também o motivo de ter normalizado pra cima ou
+pra baixo.» O usuário pediu a mudança no painel de logs e na tela de edição do
+valuation. Apontamento de 14/10.
+
+**O que foi feito.** A Saída 1 já decidia com todos os números à mão; faltava
+guardá-los. O registro `BaseNormalization` traz o retorno do último exercício,
+os oito anos e a mediana do ciclo, a razão e os desvios robustos da Guarda 3
+(`GrowthGuards.cycleDeviation`, sem mudar a regra), a tendência, a precedência
+do ciclo, a queda no triênio e as travas, o fator bruto e o aplicado, a
+reconstrução e os lucros publicado e de partida, e diz o resultado em uma
+palavra. A reconstrução pelo ciclo (decisão 53) passou a ser decidida uma vez,
+para o fluxo-base e a explicação lerem a mesma resposta. Dele saem:
+
+- no **rastro**, um campo novo, `explanation`, que o painel de logs mostra como
+  o quadro "Por quê" do passo "Base do fluxo", antes das variáveis — por que
+  normalizar, a direção com os números do ativo, o teste e a conta;
+- na tela **Editar valuation**, o painel do cartão do lucro de partida, com a
+  pergunta, o selo da direção, os anos do ciclo em barras com a mediana marcada,
+  o teste, a conta e as travas; abre sozinho quando o motor partiu de outro
+  lucro;
+- e `tool/normalizacoes.dart`, que grava o porquê de cada avaliado em
+  [normalizacoes.md](validacao/normalizacoes.md): 18 para cima, 27 para baixo,
+  47 dentro do normal, 14 por tendência, 3 reconstruídos, 1 sem ciclo.
+
+**O que a conferência achou.** O aviso e o rastro diziam que "a base converge
+para o ciclo ao longo da projeção"; o código aplica o fator inteiro ao lucro de
+partida, já no ano zero, e o que converge é o retorno sobre o capital, até o
+custo do capital. A frase foi corrigida, e o aviso passou a dizer a direção.
+
+**O que não mudou.** O gabarito, refeito, saiu igual em preço, cenários e
+diagnósticos nos 376 ativos e nas nove montagens; o rastro mudou só no passo
+da base — três variáveis e o porquê, conferido linha a linha na PETR4 — e o
+aviso só no texto. Os dados dos casos de estudo foram refeitos e mudaram só
+nesses textos. O núcleo passou nos 911 testes de antes e nos 13 novos; o
+aplicativo, nos 523; a tela coube nas 36 combinações de direção, largura e
+escala com o painel aberto e fechado.
+
+**O gate e as lentes.** O gate local barrou seis linhas novas do painel de logs
+fora da escala de espaçamento e da tipografia inteira, trocadas pelos passos de
+`FinSpace` e pela `FinTypography`. **A auditoria não rodou no modelo padrão**: o
+`gemini-3.1-pro-high`, fixado em `scripts/qa/providers/agy.ts`, saiu do catálogo
+da assinatura, que hoje só oferece o Gemini 3.8 Flash — código 2, de
+infraestrutura. Rodada com o modelo escolhido explicitamente
+(`--model gemini-3.8-flash-high`), aprovou: 0 FAIL, 0 WARN, 0 INFO. A troca do
+padrão fica com o usuário. As lentes `nucleo`, `risco` e `metodo` leram o
+registro, o painel e os testes novos e não acharam tensão — a `nucleo` depois de
+passar a ler primeiro o que mudou, como a `risco` e a `metodo` já liam. A
+`registro` repetiu o apontamento de 09/09/2026, à espera do usuário. A `tela`
+caiu no último degrau da cascata da API e ficou inconclusiva.
+
+---
+
+## O cálculo do usuário — Editar valuation (11/10/2026)
+
+**O pedido.** «Tiramos toda a parte manual que aplicativos que auxiliam no
+cálculo do valuation que é inserir taxa de desconto, lucro líquido, crescimento
+e a perpetuidade [...] criando um botão para editar o valuation [...] e fazer os
+cálculos em tempo real.» O primeiro protótipo travava campos pelo método — taxa
+montada e não digitada, teto na perpetuidade, crescimento preso ao retorno —, e
+o usuário recusou: «A ideia de poder deixar manual é justamente permitir que o
+usuário discorde do motor». O segundo, com os campos livres, foi aprovado, com
+o pedido de mais destaque para cada campo e da linha visual das outras telas.
+Apontamento de 11/10; [decisão 147](decisoes/147-o-usuario-refaz-a-conta-do-motor-com-os-numeros-dele.md).
+
+**A arquitetura.** A conta do usuário não reimplementa o fluxo descontado: a
+cascata congela, ao concluir a via, o fluxo-base, as premissas finais, a taxa
+que descontou cada ano e a rota da dívida (`ManualValuation`, em
+`ValuationResult.manual`), e o usuário a refaz pela mesma calculadora. A rota da
+firma virou objeto (`FirmDiscountRoute`), descontado pela cascata e pelo
+cálculo do usuário na mesma chamada. As premissas do DCF ganharam duas costuras
+desligadas na produção — a parcela fixa e o caminho de crescimento — e a saída
+do DCF passou a expor o lucro, o reinvestimento, o crescimento e o fator de
+cada ano, para a tabela da tela mostrar a conta sem recalculá-la.
+
+**O que foi medido.**
+
+- **O motor não mudou**: o gabarito saiu idêntico nos 376 ativos e nas nove
+  montagens, saída e rastro bit a bit; o núcleo passou nos 870 testes de antes.
+- **Sem troca, o preço do motor, bit a bit**: nas sete rotas da cascata
+  (`manual_valuation_test.dart`, 41 testes) e nos 110 avaliados da entrada
+  congelada (`tool/conferir_calculo_manual.dart`).
+- **A conferência do universo achou um defeito antes da entrega.** Com a taxa
+  digitada movendo também o custo médio do capital, pela tradução dos cenários
+  (decisão 121), **subir a taxa subia o preço em 12 dos 90 ativos da via da
+  firma** — AMER3, ECOR3, ENEV3, ENGI11, LOGG3, MOTV3, MYPK3, PNVL3, RAIL3,
+  UGPA3, VBBR3 e YDUQ3. O retorno convergindo a um custo maior pede menos
+  reinvestimento, e na companhia endividada isso supera o desconto. A taxa
+  digitada passou a só descontar; com isso a taxa mais alta dá preço mais baixo
+  nos 110, e a taxa que "o preço de hoje supõe" passou de 71 para 103 ativos
+  com solução, devolvendo o preço de mercado a menos de R$ 10⁻¹³.
+- **A tela** coube nas 18 combinações de largura e escala, aberta e editada
+  (matriz de estouro), e passou nos 7 testes de widget; o aplicativo, nos 520.
+
+**A auditoria do gate.** O gate local barrou um `==` contra literal de ponto
+flutuante num teste novo, trocado por tolerância. A auditoria com o
+`gemini-3.1-pro-high` aprovou: 0 FAIL, 0 WARN, 0 INFO.
+
+**As lentes.** A `nucleo`, a `risco` e a `metodo` responderam "nenhuma tensão"
+na primeira rodada **sem ter lido o código novo**: o material de cada uma é
+cortado no teto, e o corte caía antes do módulo e dos testes novos. Corrigido no
+equipamento, e não na leitura: a `nucleo` lê primeiro o modelo do valuation e a
+tela que o consome, e a `risco` e a `metodo` leem primeiro o que mudou contra o
+último commit (`tipo: 'alterados'`, novo no coletor, que também passou a não
+mandar o mesmo arquivo duas vezes). Refeitas, as três leram o cálculo do
+usuário e não acharam tensão. A `tela` rodou duas vezes no último degrau da
+cascata (`flash-lite`), sem o topo disponível, e não descreveu a tela nova —
+**inconclusiva**, a refazer com o topo. A `registro` apontou, como local, o
+apontamento de 09/09/2026 sem destino, que o plano já inventaria como à espera
+do usuário.
+
+---
+
+## As estatais e a taxa de desconto — B46, e o B47 e o B48 achados no caminho (02/10/2026)
+
+**A pergunta.** «Ainda sim achamos que o preço das estatais está um pouco
+inflado pois a taxa de desconto para essas empresas, na teoria, deveria ser um
+pouco maior do que para as demais.» Depois do parecer, que propôs quatro
+passos, o usuário autorizou os quatro e o download do prêmio-país. Apontamento
+de 02/10, que registra também a pergunta sobre os «8%» da seção 4.11 e o
+README da regeração dos pacotes, feitos no mesmo dia.
+
+**O controle.** A espécie do controle acionário vem do Formulário Cadastral da
+CVM, ano a ano, com a data da privatização tirada da coluna que a companhia
+declara quando ela é plausível (`ShareholderControlHistory`,
+`tool/controle_empacotar.dart`, `assets/cvm/controle.json`): 17 emissores
+estatais em 14/09/2026, e Eletrobras, Copel, Sabesp, EMAE e BR Distribuidora
+datadas.
+
+**O que foi medido** ([estatais.md](validacao/estatais.md), `tool/estatais.dart`).
+O motor dá às estatais potencial muito acima do das privadas, dentro do mesmo
+setor também. Mas o risco do controle não aparece onde o CAPM o cobraria: o
+encolhimento ao setor quase não mexe no beta, e o beta das estatais é menor
+(0,83 contra 1,00 entre as que passam a liquidez); o lambda de Damodaran,
+medido pela sensibilidade ao EMBI+ (2019–2024, do IPEADATA, que o J.P. Morgan
+descontinuou) e ao prefixado de dez anos (2021–2026), fica em 0,70 e 0,71, e
+além do Ibovespa não há diferença. No preço de hoje, o primeiro ponto a mais no
+Ke tira cerca de 6 pontos do potencial mediano delas. No backtest, a posição média das estatais se acerta com 1 a 2,5 pontos a mais no Ke, mas o IC do universo cai com qualquer prêmio — de 0,086 para 0,081 com 1 ponto e 0,077 com 3, em 36 meses —, porque elas renderam acima das privadas. A ressalva informa; o prêmio pioraria a ordenação.
+
+**A ressalva** ([decisão 145](decisoes/145-a-avaliacao-declara-o-controle-estatal-sem-mudar-o-preco.md)).
+A avaliação de uma estatal leva a ressalva `controleEstatal` e um aviso com o
+porquê, sem mudar o preço; a entrada congelada, o gabarito e o backtest levam a
+mesma. Cobrar um prêmio continua aberto, com o usuário e o orientador.
+
+**B47 — patrimônio positivo recusado como insolvente**
+([decisão 146](decisoes/146-sem-o-par-vpa-e-contagem-a-base-e-o-pl-da-demonstracao.md)).
+A Copasa saía recusada com R$ 8,6 bi de patrimônio: a fonte de mercado devolve
+a contagem do exercício zerada para algumas companhias e anos, e a base
+`VPA × contagem` da decisão 81 não se formava. Cinco recusadas como
+insolventes e buracos na série de capital de outras. Sem o par, a base passa a
+ser o PL da demonstração. O universo vai a 110 avaliados, potencial mediano de
+−36,9%. No backtest, 3.253 observações avaliadas (eram 3.199); a faixa cobre 87,9% e 88,1%, e o R3 dá 0,010 com `t` de 0,05 — nenhum veredito muda.
+
+**B48 — o passado da série do prêmio.** Remedindo o universo, a ferramenta do
+prêmio regravou o pacote com os trimestres de 2011 e 2012 cerca de 3 pontos
+mais baixos: as âncoras dessas datas dependem de a rede devolver o IBC-Br
+anterior à entrada congelada, e sem ela o crescimento cai no recuo de 2026. O
+backtest já tinha começado com o pacote novo — a coorte de 30/06/2018 saía com
+prêmio de 0,78% em vez de 1,50% — e foi interrompido; o pacote versionado foi
+restaurado, e a ferramenta passou a recusar regravar trimestre que mudou.
+
+**As lentes.** Rodaram as sete. A `risco` e a `dados` não acharam tensão. A
+`nucleo` apontou como estrutural a margem de segurança em `double`, sem faixa
+garantida por tipo — preexistente, sem efeito em preço justo ou potencial —, e
+a `metodo`, três locais preexistentes: o ponto fixo das taxas sem o caixa da
+emissão posterior ao balanço (B28), a segunda leitura por múltiplos sem esse
+caixa e a tradução `taxaLivreDeRisco` do cenário, que não move o Kd. Os quatro
+foram inventariados no plano. A `rumo` não achou tensão. A `tela` também não, mas
+respondeu pelo último degrau da cascata, o modelo mais fraco, e lista vazia
+dali vale pouco. A `registro` apontou o `estado.md` parado na decisão 144 — ela
+leu o arquivo antes de ele ser regerado na mesma rodada — e pediu para apagar
+os apontamentos já convertidos em decisão; eles ficam, porque são a
+proveniência das decisões, e o README da caixa de entrada e a disciplina da
+lente passaram a dizer que apontamento com «Destino» está tratado.
+
+**A auditoria.** Dois grupos, com índice temporário. A primeira passada
+reprovou um em cada: no núcleo, o limite de um ano somado em dias corridos
+sobre data local (agora calendário, em UTC); nas ferramentas, preço `double`
+comparado com `!=` (agora com tolerância), com três avisos de divisão sem
+guarda, corrigidos junto. A segunda passada: **0 FAIL / 0 WARN** nos dois.
+Núcleo com 870 testes e aplicativo com 495, verdes; 30 capturas de tela.
+
+## O prêmio de mercado ligado — B42, B43 e B44 fechados (01/10/2026)
+
+**O pedido.** «Depois de analisar todas essas variáveis, decidimos implementar
+somente a mudança no prêmio de risco para implementar a média dos 10 anos.»
+Com a B3 consultada de novo, o backtest com o prêmio normalizado e as lentes; o
+crescimento (B45) fica de lado. Apontamento de 01/10.
+
+**O que entrou no motor** ([decisão 142](decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md)).
+O prêmio de mercado é a média de dez anos do prêmio implícito, na forma que o
+CAPM soma (`r − Rf`, e não a razão de Fisher da medição de 29/09): **1,21%** em
+14/09/2026. O núcleo ganhou `ImpliedPremiumPackage` (a série trimestral e a
+média, com pelo menos 20 trimestres) e a origem `impliedNormalized`, que o
+rastro do CAPM diz no Passo 0. O aplicativo lê o pacote
+`assets/mercado/premio_implicito.json`; sem ele, volta aos 5,5% e diz isso, e
+com mais de 183 dias continua valendo, com ressalva. A tela de estudo e a de
+metas usam o mesmo prêmio no retorno esperado. O backtest usa, em cada coorte, a
+média só com os trimestres até a data dela: de 0,91% a 1,62%.
+
+**B43 fechado** ([decisão 143](decisoes/143-a-contagem-da-coorte-e-conferida-contra-o-salto-do-preco.md)).
+A conferência da contagem saiu da ferramenta do prêmio para
+`tool/coortes/contagem_conferida.dart` e entrou nas listadas e nas deslistadas
+do backtest. **A regra foi refinada no caminho**: a primeira versão descartava
+toda mudança de mais de três vezes sem o salto do preço, e com isso tirava das
+coortes, antes da emissão, as companhias que se capitalizaram em crise ou se
+fundiram — Dasa, Light, Azul, Gol, Sequoia —, 283 entradas no prêmio. Um viés de
+seleção na validação. A que ficou só descarta a **correção** de formulário sem o
+salto, que é a que repete a contagem de antes do evento: 36 entradas na série do
+prêmio, 29 em 26 das 276 listadas do backtest e 24 nas deslistadas.
+
+**B44 fechado** ([decisão 144](decisoes/144-o-nome-de-pregao-da-consulta-de-proventos-vai-sem-barra.md)).
+A consulta de proventos da B3 vai sem espaço e sem barra. Testado antes: o nome
+com barra devolve zero, `AMBEVSA` devolve os 40 da Ambev S.A., e `AMBEV`
+sozinho devolve os 134 da antiga Companhia de Bebidas. Sete dos nove voltaram
+com histórico; Haga e Wetzel não pagaram.
+
+**O efeito.** No aplicativo, sobre a entrada congelada: 108 avaliados (eram
+97), potencial mediano de −36,6% (era −45,4%), 28 acima de zero (eram 15),
+postos de 0,980 contra a montagem de 5,5%. No backtest: 10.840 observações, 3.199 avaliadas (eram 3.070), potencial mediano de −39,1% (era −54,4%), 855 acima de zero (eram 438); 138 observações mudam de valor de mercado em mais de 1,5 vez pela contagem conferida, quatro delas avaliadas — a MGLU3 de 31/03/2025 sai de R$ 2,46 para R$ 37,04. A faixa
+calibrada: 87,9/79,7/50,7% em 12 meses e 88,3/79,6/51,6% em 36, desvios máximos de 2,1 e 1,7 p.p., com a mesma forma — o R2 continua atingido. O R3: 0,032 com `t` corrigido de 0,18 contra 2,70, Newey-West de 0,44, e efeito mínimo detectável de 0,65 — não passa, e o registro declara o poder. O book-to-market sobe de 2,03 para 2,27 e também não passa, e o retorno esperado continua sem prêmio de ordenação. **Uma leitura intermediária ficou registrada** ([habilidade_trimestral.md](validacao/habilidade_trimestral.md) §12): com a primeira versão da conferência da contagem, o book-to-market chegou a 2,83 e passou; a regra foi refinada por viés de seleção, e com a amostra corrigida não passa. A passagem dele depende de quais companhias ficam na amostra.
+
+**As lentes.** Rodaram as sete. A `nucleo` não achou tensão. A `dados` achou o
+**D7** — com a base do papel mudando e o apagamento do disco falhando, a
+gravação seguia e o disco ficava com as duas bases, e era ele que saía —, aberto
+e fechado na rodada, com teste que reprova o código antigo; as outras duas
+(a meta que um `update` sem o campo não apaga, documentada no código e sem
+caminho na tela; a leitura do pacote da CVM na isolate principal) são
+preexistentes e de polimento. A `risco` pediu duas coisas que não se sustentam:
+um `onExit` em volta do `compute`, que já devolve erro quando a isolate morre, e
+reabrir a tolerância da fonte a JSON de forma errada, escolha registrada no D6;
+a disciplina dela passou a dizer as duas coisas. A `tela` não achou tensão, com
+o modelo rebaixado um degrau. A `metodo` não achou tensão — na segunda rodada: na
+primeira, o corte do material por tamanho caía antes de
+`services/valuation/`, e ela respondia sobre o método sem ter lido o custo de
+capital, a realavancagem nem o prêmio. A ordem do material dela passou a pôr
+primeiro o que define o preço justo. A `registro` repetiu o apontamento de
+09/09/2026 sobre o cartão de preço da tela de avaliação, já inventariado e à
+espera de decisão do usuário. A `rumo` não achou tensão.
+
+**A auditoria.** As ferramentas (`tool/`) e o código do aplicativo e do
+núcleo foram auditados em dois grupos, com índice temporário: **0 FAIL / 0 WARN**
+nos dois. A lente nova da `risco` mexeu só em `scripts/`, e passou no
+`typecheck`. Núcleo com 860 testes e aplicativo com 492, verdes.
+
+## O crescimento pela retenção e pelo PIB do setor — B45 (01/10/2026)
+
+**A pergunta.** «Por que utilizamos g como mediana de um fator temporal ao
+invés de usar g = roe * retenção (ou 1 - payout)? E pras asset-lights ou altas
+pagadoras de dividendos, por que não projetamos g utilizando o crescimento do
+pib nominal do setor?», com sugestão pedida para commodities, a medição sobre o
+preço justo e um parecer. O aval do prêmio implícito (B42) ficou para depois.
+Apontamento de 01/10.
+
+**A resposta conceitual.** A mediana das variações da base é o
+`ROE × retenção` realizado ano a ano — a decisão 25 diz `g = ROE × b`, medido
+assim. A proposta é a versão que olha para a frente, e é coerente com a
+projeção do motor: o dividendo projetado sai igual ao payout praticado.
+
+**O que foi medido** ([crescimento_fundamental.md](validacao/crescimento_fundamental.md),
+`tool/crescimento_fundamental.dart`): o payout dos dividendos e JCP pagos do
+fluxo de caixa das DFPs (`tool/cvm/dividendos_pagos.py`), o ROE normalizado
+(mediana de oito anos) e o PIB nominal de dez anos de cada atividade do IBGE
+(`tool/pib_setorial_baixar.py`, download autorizado pelo usuário). Regras e
+limiares fixados antes de medir: payout ≥ 75% é alta pagadora; receita ÷
+capital investido ≥ 2 é pouco capital; commodity é a lista de precedência do
+ciclo, com crescimento real zero. O `g` foi imposto pelo ponto de diagnóstico do
+motor (`withOverrides(growth:)`).
+
+**O resultado.** Na data congelada o nível não se mexe (potencial mediano de
+−45,4% para −45,3%), porque crescer só cria valor com ROE acima do custo de
+capital. No histórico de 2014 a 2022, a regra combinada erra menos o
+crescimento do patrimônio (−1,0 ponto, intervalo inteiro abaixo de zero) e o
+lucro das companhias de pouco capital (6,2% contra 9,7%). Parecer:
+recomendável para as de pouco capital e como substituta da mediana, com teto;
+neutro para altas pagadoras e commodities; não resolve o nível.
+
+**Achado no caminho.** A primeira versão do extrator não reconhecia «Pagamento
+de Proventos» (B3) e «Distribuição de lucros»; corrigido antes do resultado. A
+recompra fica fora do payout, declarado.
+
+## O prêmio de mercado medido do mercado — B42, B43 e B44 (29/09/2026)
+
+**A pergunta.** Conferindo os cálculos com o orientador, ele perguntou de onde
+vem o prêmio de risco e se há como capturá-lo em vez de deixá-lo fixo. O
+usuário pediu para calcular o retorno de mercado pelo Ibovespa e o prêmio a
+partir dele, medindo antes de ligar qualquer coisa. Registrado como apontamento
+de 29/09 e como o item B42.
+
+**O que foi medido** ([premio_historico.md](validacao/premio_historico.md)):
+o prêmio histórico `(1 + Ibovespa) ÷ (1 + CDI) − 1`, na mesma janela e com as
+regras das âncoras do aplicativo. Para as janelas longas e as datas das coortes,
+o Ibovespa antes de 23/09/2016 veio do SGS 7 do Banco Central
+(`tool/ibovespa_sgs_baixar.py`), emendado à brapi com razão mediana de 1,000000
+nos 744 pregões comuns (`tool/validation/ibovespa_longo.dart`).
+
+**O resultado.** Hoje o prêmio vai de −2,17% (20 anos) a +1,85% (10 anos), e só
+a janela de dez anos é positiva; nas datas das coortes, o de dez anos é negativo
+em 25 de 31, e o de cinco em 14 de 31. Com o de dez anos de hoje, o preço justo
+mediano sobe 28,5% e o upside mediano vai a −38,3%; com os negativos, a −18% a
+−22%. A ordem quase não muda com o de dez anos (0,985).
+
+**Uma correção de registro.** O +0,39% de cinco anos da decisão 116 comparava o
+Ibovespa de cinco anos com o CDI de dez; na mesma janela é −1,75%. A conclusão
+daquela decisão não muda.
+
+**O que não foi feito.** O backtest com o prêmio de cada coorte: com prêmio
+negativo em quase todas as datas, ele mediria um CAPM sem sentido econômico.
+Fica para o usuário decidir se quer vê-lo assim, com uma regra (piso em zero),
+ou medir o prêmio implícito do índice, que olha para a frente.
+
+### O prêmio implícito e a versão normalizada — e o B43 e o B44
+
+**O pedido.** «Vamos fazer a medição para o prêmio implícito do índice, também
+faça a medição para a versão normalizada dele (média de 5 a 10 anos do ERP
+implícito).»
+
+**O que foi medido** ([premio_implicito.md](validacao/premio_implicito.md),
+`tool/premio_implicito.dart`): em cada fim de trimestre de 2011 a 2026 e na data
+congelada, o rendimento em dinheiro da bolsa — proventos da B3 dos doze meses
+sobre o valor de mercado somado das listadas —, o crescimento nominal da
+economia das âncoras do aplicativo e o prefixado de dez anos da curva do
+Tesouro; `r = rendimento × (1 + g) + g`, e o prêmio é `(1 + r) ÷ (1 + prefixado)
+− 1`. A versão normalizada é a média dos trimestres de cinco e de dez anos.
+
+**O resultado.** O implícito do trimestre vai de −2,99% a +5,10%, com mediana de
+1,36%, e é negativo em 12 de 62 — quando o prefixado dispara. Hoje é −0,98%. As
+médias de cinco e de dez anos são **1,55% e 1,23%** hoje e positivas em todas as
+coortes, e concordam com o histórico de dez anos de hoje (+1,85%). Com elas, o
+preço justo mediano sobe cerca de um terço, o potencial mediano vai de −45,4% a
+−37,7% e −36,7%, e os postos ficam em 0,984 e 0,980. Um ponto de crescimento
+move o prêmio em um ponto.
+
+**Medir achou dois defeitos de dado, os dois também nas coortes.**
+
+- **B43 — a contagem de ações erra de escala.** A primeira rodada deu R$ 144
+  trilhões de bolsa em 2016: a correção do formulário da Ampla repetia a
+  contagem de antes de um grupamento de 40.000 para 1. A primeira regra
+  (descartar a correção que salta mais de cinco vezes) quebrava a TIMS3 e a
+  MGLU3, cuja correção é o único registro de uma mudança verdadeira. A regra que
+  ficou confere contra o preço: a partir da contagem mais recente, para trás, a
+  mudança de mais de três vezes só vale com o salto correspondente no preço bruto
+  até 400 dias depois, e passa a valer no dia dele (a primeira versão procurava
+  só até trinta dias e recusava o desdobramento da PRIO, aprovado três meses
+  antes da data ex). No backtest, a HAPV3 de 2025, a IRBR3 de 2024, a TIMS3 do
+  fim de 2020 e a MGLU3 de meados de 2024 ao começo de 2025 entram com a escala
+  errada, e a MGLU3 de 31/03/2025 foi avaliada assim (potencial de −75,8% com dez
+  vezes as ações).
+- **B44 — nove emissores sem o histórico de proventos.** A consulta à B3 é pelo
+  nome de pregão, e os nove com barra no nome voltaram vazios. Ambev, Klabin e
+  Cury entre eles; 66 observações avaliadas com retorno total sem dividendo.
+
+**O R1 foi desmarcado** pelos dois, e o motor deixa de ser motor de referência
+pela definição da decisão 140 até que fechem e o R2 e o R3 sejam remedidos.
+
+**O que não foi feito.** O backtest com o prêmio normalizado de cada coorte —
+que existe em todas, só com dado até a data — e a correção do B43 e do B44 no
+backtest: a do B44 pede consultar a B3 de novo, e as duas pedem reexecutar as
+coortes.
+
+## A documentação refeita do zero — B35 a B41 (28/09/2026)
+
+**O pedido.** O usuário pediu para apagar e refazer do zero, conferindo cada
+linha do código, os documentos que dizem descrever o motor e o aplicativo — o
+README e as limitações acima de todos —, e para escrever, à parte, um guia de
+estudo para quem não sabe finanças nem estatística, com casos calculados passo
+a passo, porque a documentação anterior «estava tão difícil que ficou impossível
+até para o orientador ler». O painel de logs não foi tocado: a observação de que
+ele não orienta onde estudar ficou como apontamento, e a ponte entre os passos
+do painel e o guia está em `docs/AUDITORIA_DE_CALCULOS.md`. Registrado na
+decisão 141.
+
+**O que foi feito.** Refeitos, nos mesmos caminhos: `README.md`,
+`docs/validacao/limitacoes.md`, `docs/AUDITORIA_DE_CALCULOS.md` e
+`web/ASSETS.md`. Criados `docs/motor/` (oito capítulos e referências: cada regra
+com código, fórmula, teoria e evidência) e `docs/estudo/` (sete capítulos,
+glossário, roteiro, perguntas do orientador e os casos WEGE3, ITUB4, VALE3,
+SAPR11 e RENT3). Os números dos casos saem de `tool/casos_de_estudo.dart` sobre
+a entrada congelada, as tabelas são reconferidas por `tool/tabelas_casos.py` —
+cada linha refeita pela fórmula tem de bater com o motor — e as figuras saem de
+`tool/figuras_estudo.py`. Apagado `docs/refinamento-do-valuation.md`, com o
+campo novo `retira` para que as decisões 25, 27, 28 e 30, que o tinham em
+`afeta`, apareçam no estado como tendo perdido o objeto, e não como referência
+quebrada (`scripts/gerar-estado.mjs`, README das decisões).
+
+**Conferir cada linha achou sete defeitos.**
+
+- **B35 — o rastro da via da firma descrevia outra conta.** O fator de desconto
+  era montado com o WACC, e o valor presente escrito ao lado era o do fluxo do
+  acionista descontado ao Ke (decisão 102). Na WEGE3, a soma mostrada era
+  30,7 bi, e a das parcelas, 33,4 bi. O rastro passou a ter três passos que
+  fecham: projeção do fluxo da firma, fluxo do acionista ao Ke de cada ano,
+  terminal convertido. Também corrigidos o passo da estrutura a termo (que
+  descrevia a interpolação quando a curva estava em uso), o do crescimento
+  perpétuo (que dizia piso zero, e é −5% pela decisão 56) e uma linha nova no
+  CAPM.
+- **B36 — o cenário de desconto não alcançava o caminho de Ke resolvido** na via
+  do acionista: o `+2 p.p.` só chegava à perpetuidade (AZEV4).
+- **B37 — sem resolução, a taxa não seguia a curva ano a ano**: os bancos
+  interpolavam do CDI de hoje à perpetuidade, enquanto o aviso dizia que a taxa
+  seguia a curva. Os 19 financeiros do aplicativo mudam de −0,4% a −0,5%.
+- **B38 — o «Otimista» pode valer menos que o «Pessimista».** A sonda separou os
+  efeitos: só o crescimento +3 p.p. baixa o preço justo em 53 dos 97; só o
+  desconto nunca inverte; combinados, 17 dos 77 da via da firma saem invertidos.
+  A conta está certa; o rótulo supõe que crescer é bom. **Uma tentativa foi
+  desfeita**: deslocar também o caminho do WACC na via da firma (como no B36)
+  mudava a sensibilidade de 77 ativos e subia as inversões para 23; voltou ao
+  que era, e o assunto ficou para decisão.
+- **B39 — um aviso e um rastro diziam que a vantagem residual «segue barrada»
+  pela trava de saúde**, regra que a decisão 36 retirou; na VALE3, ao lado de um
+  veredito que a concedia.
+- **B40 — o aviso das contagens discordantes nomeava a contagem do valor de
+  mercado** quando a ponte usava a oficial (SAPR11: 103,9 mi contra 302,2 mi).
+- **B41 — a mediana dos pares incluía a própria companhia**, e cada classe de
+  ação contava como um par: as leituras de P/VP e EV/EBITDA da SAPR11 davam
+  R$ 38,15 ao centavo, o preço da própria Sanepar na data do pacote. O pacote de
+  múltiplos foi refeito (uma por companhia, sem a avaliada); a divergência
+  mediana contra o fluxo descontado foi de +73,4% a +87,4%.
+
+**Uma correção de registro minha.** Na rodada de 27/09 escrevi, no B34, que
+a tela não diz nada sobre o preço justo que é resíduo da dívida. Estava errado: a
+ressalva «ponte frágil» aparece abaixo de 35% de capital próprio. O que falta é
+o **tamanho** da fragilidade. O texto do B34 foi corrigido no plano.
+
+**As medições derivadas foram refeitas** com o backtest trimestral inteiro
+(36m40s): a faixa calibrada cobre 87,6/79,4/50,6% em 12 meses e 88,0/79,9/52,8%
+em 36 (antes 87,6/79,5/50,9 e 88,1/80,0/53,0); o critério do R3 vai de 0,058
+(`t` 0,34) a 0,069 (`t` 0,40), Newey-West 1,13; o efeito mínimo detectável fica
+em 0,62. Nenhum veredito muda. O gabarito foi regravado: além dos financeiros,
+mudam só avisos e rastros.
+
+### O que a auditoria reprovou
+
+Um FAIL, legítimo e corrigido: o rastro novo da via da firma refazia o terminal
+do acionista dividindo por `Ke∞ − g∞` sem guarda. A conta nunca chega lá com a
+diferença abaixo de 0,5 p.p. — `equityFromFirm` recusa antes —, mas o rastro não
+pode depender disso: sem contrato ele passou a ler o terminal que a conta
+produziu, e com contrato só divide com diferença positiva. Reauditado: 0 FAIL /
+0 WARN, nos dois grupos (o núcleo com os testes, e o empacotador de múltiplos com
+as ferramentas dos casos).
+
+### O que as lentes disseram
+
+- **`metodo`**: nada sobre as mudanças da rodada. Três observações sobre
+  desenho antigo: o `equityValue` do desfecho muda de escala conforme a via (não
+  produz número errado — os dois consumidores usam razões na mesma escala —, e a
+  escala foi documentada no campo); a cotação e a contagem de papéis em `double`
+  (falso positivo: a regra R1 do auditor diz que o DCF em ponto flutuante,
+  convertido para `Money` na fronteira, é o arranjo certo; a disciplina da lente
+  ganhou a regra).
+- **`risco`**: nenhuma tensão.
+- **`nucleo`**: três observações sobre código anterior à rodada, inventariadas
+  como dívida pela preservação — `Portfolio.weighted` valida a soma dos pesos em
+  vez de receber um objeto que a garanta; `AuditEvent.fromJson` preenche campo
+  ausente com travessão; `RequiredReturn.semiAnnual` existe só para exibição.
+
+## A rodada do C8 — a definição do R3, a RENT3, a Selic prevista, B32 e D6 (27/09/2026)
+
+**O usuário decidiu o C8.** Nas palavras dele: se o projeto mostra que não é
+possível comprovar habilidade com nenhum motor, «não nos resta nada além de
+declarar que a habilidade do motor está testada, com o poder declarado», e o
+motor «não atinge nossos critérios de poder tomar a decisão por si só» e «serve
+para uso pessoal na maioria dos casos». Registrado na decisão 140. **Com ela as
+três condições valem juntas, e o motor é motor de referência pela definição
+escolhida** — não pela de 09/09/2026, que exigia habilidade comprovada e
+continua não atingida. A mensagem trouxe também uma pergunta sobre a RENT3, um
+pedido do orientador e a observação de que os documentos estão, em boa parte,
+desatualizados. Ficou tudo registrado como apontamento de 27/09.
+
+**A RENT3 a R$ 0,10 não era conta errada, e mesmo assim achou um defeito.**
+Reproduzida com os dados de 25/09, ela é recusada pela curva do dia e sai entre
+R$ 0,06 e R$ 1,12 com outras fontes de taxa. A operação vale pouco mais que a
+dívida líquida de R$ 33 bi, com ROIC de 10,8% a 13,8% contra custo de capital de
+17% a 20%, e o capital próprio começa em 4% a 7% do valor da firma: **conta
+certa, informação nenhuma**, e a tela não diz isso. Virou a proposta B34, que
+espera decisão, porque recusar é mudança de método. No rastro dela estava o
+**B32**: o aviso do custo da dívida dizia «14,5%, fora da faixa de 14,0% a
+24,0%» e atribuía os 23,0% à alavancagem, quando o observado estava dentro da
+faixa e os 9 p.p. vinham da cobertura. O texto era o de antes das decisões 31 e
+130. Reescrito com teste para os dois lados da faixa, ele muda em 69 ativos do
+gabarito e contradizia a conta em 14. Nenhum preço mudou.
+
+**O pedido do orientador partia do motor antigo.** «A mediana da Selic do
+passado» foi a taxa estrutural até a decisão 84; desde 14/09 a taxa de cada ano
+é o forward da curva do Tesouro, 4 pontos acima do Focus no longo prazo. Medido
+sobre a entrada congelada: **trocar a curva pelo Focus sobe o preço justo
+mediano em 18% (mediana dos cinco anos) ou 33% (trajetória)**, leva o potencial
+mediano de −45% a −42% ou −40% e mexe pouco na ordenação (postos de 0,99 e
+0,97). Trocar a média do passado pela mediana prevista, que é o que o pedido
+nomeia, os **baixaria**. A recomendação registrada é não trocar a base. O Focus
+é previsão da Selic de curto prazo, sem o prêmio de prazo que o prefixado paga
+hoje, e descontar por ele superavalia os fluxos longos. O caminho que serve ao
+orientador é o Focus como sensibilidade declarada. Virou o B33, que espera
+decisão. **E a medição achou o que o orientador provavelmente viu**: o pacote da
+curva é de 10/09, e a web, que só lê o pacote, está desde 17/09 na média decenal
+— a própria «Selic do passado».
+
+**No meio da rodada, o commit.** O usuário commitou a rodada de 25/09
+(`c375987`) enquanto esta corria, com os selos da série «motor da data»
+`9b5030dd…`. A correção do B32 muda a impressão do núcleo e não muda previsão
+nenhuma; ela entra na próxima selagem trimestral, e nenhum selo foi refeito.
+
+### O que a auditoria reprovou
+
+**A ferramenta nova reprovou três vezes, e as três procediam no código novo**: a
+média de dez forwards era aritmética, a contagem de anos usava datas locais, e a
+última reprovação lia a perpetuidade da trajetória como a média decenal. Esta
+não procedia na conta — com curva, o motor usa o forward terminal dela, e a
+medição mostra 10% —, mas uma linha deixou a intenção explícita no código. Duas
+advertências, mediana vazia e divisão pela projeção de um ano, foram corrigidas
+junto.
+
+### O que as lentes disseram
+
+**A `risco` achou o D6, e ele era pior do que o achado dizia.** Ela apontou que
+o teste da tolerância da brapi, reforçado em 25/09, aceitava resposta parcial.
+O código mostrou a consequência: o `upsert` do cache gravava nulo em todo campo
+ausente, e **a receita de R$ 213 bi da PETR4 virava nula no disco** quando a
+rota do DRE vinha corrompida. Agora o campo ausente não é gravado. O teste novo
+reprova o código antigo, o que foi conferido revertendo a correção. Os dois
+achados locais dela também entraram: a fusão dos demonstrativos conferida
+exercício a exercício, com um ano faltando de propósito, e o pacote da CVM
+exigindo conteúdo em cada documento.
+
+**A `nucleo` devolveu três já inventariados**: o snapshot com o valor de mercado
+de hoje, as listas paralelas do diagnóstico e a unidade em texto no rastro, que
+não é tela. A disciplina dela passou a registrá-los.
+
+**A `metodo` e a `dados` não acharam nada.**
+
+**Com os documentos fechados, a `rumo` não achou nada, e a `registro` achou a
+tabela de fontes do README parada antes da CVM**: cotações «não ajustadas por
+proventos — que o domínio não modela», fundamentos só da brapi, setor da brapi
+e taxa livre de risco pelo CDI. Reescrita com as fontes que os providers leem.
+Ela também reapontou os dois apontamentos pendentes, que esperam as decisões
+do usuário — o de 09/09, sobre o peso do preço justo na tela, e o de hoje, com
+o B33 e o B34. **É uma amostra do que o usuário disse na mensagem**: os
+documentos que nenhuma decisão ligou envelhecem, e só uma rodada de
+reconciliação os pega todos.
+
+---
+
+## A rodada do B28 e do fim do C7 — capital posterior, B29, B30, B31 e a série pré-registrada pelo commit (25/09/2026)
+
+**O usuário aprovou o B28 e a finalização do C7**, deixou o C8 para depois
+("o ideal era ter habilidade comprovada") e pediu as lentes a cada mudança de
+código.
+
+**O B28 começou pela medição errada e foi salvo por ela.** A primeira ideia era
+medir a variação da contagem do FRE entre o balanço e a data. Ela mistura
+emissão com bonificação — e aparecia como emissão de 10% no Bradesco todo ano —
+e com desdobramento que o formulário registrou só como aprovação de capital. **O
+dado bom é o quadro de aumentos do capital social**, emissão por emissão, com
+valor, preço, tipo de subscrição e forma de integralização. Ele tem três
+armadilhas, e cada uma apareceu como um preço justo absurdo antes de virar
+regra: bonificação registrada como subscrição (SHUL4, SLCE3 com preço zero),
+cada versão do formulário relistando os aumentos com identificador novo (ALPA4
+contada cinco vezes) e o fim do quadro em 2023. Depois de 2023 só há a variação
+do capital integralizado, que já apareceu com R$ 49,8 bilhões na BPAC11 sem o
+preço se mexer: **ela é avisada, e não somada** (decisão 135). **No aplicativo
+de hoje nenhum preço muda**, porque nenhuma emissão declarada caiu depois do
+balanço de 2025; nove ativos ganham o aviso. **Nas coortes o efeito é raro e
+grande**: 111 observações de 31 papéis, mediana de +0,35 p.p. no potencial, e a
+ALOS3 de 2023 — o balanço só da Aliansce Sonae, a contagem já com a brMalls —
+saía com o preço justo pela metade.
+
+**Separar emissão de bonificação achou o B29.** Comparando o fechamento bruto do
+COTAHIST com o da fonte de mercado em volta de cada mudança de contagem, **a
+fonte ajusta desdobramento e grupamento, e não toda bonificação**: 67 ajustadas
+e 133 como vieram. Numa série assim o dia ex é uma queda que não aconteceu, e
+ela entrava no retorno das coortes — a variável de desfecho do R2 e do R3 —, no
+beta, na volatilidade e no corte de liquidez. **O retorno perdido estava em quem
+bonifica**, e quem bonifica é quem retém lucro: 57 papéis, o retorno de 36 meses
+muda em 509 observações com mediana de +9,3%. No backtest a correção é exata
+pelo COTAHIST; no aplicativo, pelo salto da série (decisão 136). Quatro regras
+nasceram de casos: a AMER3 caindo 38% na semana da fraude casava com uma
+mudança de contagem (o preço tem de confirmar pela troca de `DISMES`); a SYNE3
+distribuindo caixa parecia desdobramento (o `DISMES` sozinho não basta sem a
+contagem do FRE); o evento do FRE da ASAI3 estava fora do dia (localizar pelo
+preço); fator de menos de 2% não se separa de um pregão comum.
+
+**E conferir a contagem achou o B30.** O quadro de eventos do FRE parou em 2022,
+e a contagem da coorte só muda quando a companhia corrige o formulário. **O
+Banco do Brasil ficou quatro coortes com a contagem de antes do desdobramento de
+2024**, o valor de mercado pela metade e +100% de potencial. A regra é aplicar o
+evento que a contagem não absorveu quando ela está parada; a AERI3, que
+registrou o grupamento junto com uma emissão antes da data ex, mostrou que
+«parada» tem de ser «nenhuma mudança», e não «nenhuma mudança pelo mesmo fator».
+41 observações de 10 papéis (decisão 137).
+
+**As três juntas levam o critério do R3 de 0,052 a 0,058, com `t` corrigido de
+0,30 a 0,34** — não passa —, e a faixa calibrada continua cobrindo. O B31, que a lente `nucleo` achou depois, só mexe
+na quarta casa: 0,0580. A faixa cobre 87,6% em 12 meses e 88,1% em 36 contra 90%
+nominal. **O backtest foi refeito sobre o motor final** — a primeira tentativa
+morreu com o fim da sessão, na coorte de 2021 —, as oito medições que o leem
+foram regeradas, e o gabarito foi regravado e confere idêntico: o preço justo
+muda em oito ativos, de −0,6% (ITSA4) a +0,8% (MDNE3), pelo beta da série
+completada, dez ganham a nota do B29 e nove o aviso do B28.
+
+**O fim do C7 era a máquina que a decisão 133 prometia e não tinha.** A série
+pré-registrada das coortes novas sai agora do commit do motor pré-registrado —
+`e856ec6`, achado pela impressão —, num worktree com a base bruta ligada por
+junção e o backtest daquele commit. **Refeitas por ele, as 1.018 previsões
+seladas não divergem em nenhuma**: o selo se reproduz ao último dígito. A
+primeira execução falhou pela credencial da fonte de mercado, que o worktree não
+tem; ela passou a ir pelo ambiente do processo, e não por cópia do `.env`. O
+motor desta rodada selou as três coortes na série «motor da data», e a leitura
+passou a trazer as duas: a pré-registrada decide, a outra é referência
+(decisão 138). **O C7 fica 🟨 porque a leitura é de 2029 e 2031**; a rotina do
+trimestre roda inteira sem decisão manual.
+
+### O que a auditoria reprovou
+
+**O núcleo reprovou três vezes, e as três eram do código novo.** A emissão
+guardava valor e quantidade em `double` e somava no laço: passou a `Money` e
+`int`, e o pacote grava centavos inteiros (formato 2). O aviso dividia pela
+contagem sem guarda, e formatava dinheiro com `toStringAsFixed`, que perde o meio
+centavo que a decisão 125 corrigiu: guarda e `Money` no texto. As ferramentas
+reprovaram por datas no fuso local e por três anos contados como 1.095 dias:
+UTC e ano de calendário. O teste do núcleo levou um WARN pelo mesmo motivo, e foi
+corrigido.
+
+### O que as lentes disseram
+
+**Duas passadas**: uma depois do B28 ao B30, outra depois das correções da
+auditoria. Na primeira, a `metodo` não achou nada; a `nucleo` devolveu dois
+achados já inventariados no plano (a data de calendário e as listas paralelas do
+índice de retorno total), e a disciplina dela passou a dizê-lo; a `dados`
+apontou a dupla leitura do `PortfolioRepository.delete`, preexistente e
+inventariada; e a `risco` pediu o teste da falha do isolate da avaliação, que
+entrou.
+
+**Na segunda, a `risco` achou um `if (r.isOk)` que escondia a pergunta.** O teste de corpo
+quebrado da brapi aceitava qualquer `Ok`, inclusive série vazia. Medido antes de
+mudar: o que nem é JSON dá erro em toda rota, e o JSON de forma errada numa rota
+deixa as outras entregarem os 16 exercícios. O teste passou a cobrar exatamente
+isso.
+
+**A `nucleo` achou o B31 e errou dois.** O fator de retorno total multiplicava
+os proventos da mesma data ex, e inventava o termo cruzado de um rendendo sobre
+o outro (decisão 139). Os dois recusados: a contagem de ações em `double` — parte
+dela é estimativa contínua, `VM ÷ P` —, e a guarda da alíquota efetiva com
+prejuízo, que a lente leu como defeito e é o que impede um crédito sobre prejuízo
+de sair com 50%; a documentação passou a dizê-lo, e a disciplina da lente
+registra a recusa da contagem.
+
+**A `metodo` reabriu a decisão 37**: o escudo fiscal do WACC na estatutária,
+com o Lucro Presumido como contraexemplo. Recusado — o Presumido tem teto de
+receita que quase nenhuma listada respeita —, e registrado na disciplina.
+
+**A `dados` não achou nada.**
+
+**Com os documentos fechados, a `registro` e a `rumo`.** A `rumo` não achou
+tensão: o que falta depende do calendário do C7 ou de escolha do usuário, e está
+declarado. A `registro` achou uma divergência real e fora da rodada: o README
+manda regenerar as credenciais do Firebase com `flutterfire configure`, e o hook
+de pre-commit barra `google-services.json` em staging. **A regra do hook é
+política de segurança do usuário, e não mudou**; o README passou a dizer o
+caminho que já existe, a válvula `.qa-skip`. E ela reapontou o apontamento de
+09/09/2026, que continua esperando a decisão do usuário. A `tela` não rodou: a
+rodada não mexeu em leiaute, só no texto dos avisos da avaliação.
+
+---
+
+## A rodada do C7 — a réplica selada, o rastro íntegro, B27, D5 e B28 (24/09/2026)
+
+**O usuário aprovou o C7 e deixou o C8 para depois**, e pediu, na mesma janela,
+que o painel de logs recebesse o rastro do motor de forma íntegra, para depurar
+pelo JSON exportado.
+
+**O C7 precisava de um «como» que a decisão 129 não tinha.** Ela fixou a
+amostra, o critério e as datas, mas não o que garante que a previsão lida em
+2029 seja a que existia antes do desfecho. Um backtest rodado na data da
+leitura **refaz** as previsões com o motor e a base daquele dia. A resposta é o
+selo: um arquivo por coorte, com as previsões de todos os ativos e nenhum campo
+de desfecho, o hash do git dele no índice, e nenhuma reescrita. O motor é
+identificado pela impressão das fontes do núcleo, que o git reencontra em
+qualquer commit. A leitura recusa a data antecipada e recusa observação anterior
+a 31/12/2025, em vez de filtrá-la. **As três primeiras coortes foram seladas no
+fim da rodada**, depois de a última mudança no núcleo ter sido conferida no
+gabarito (decisão 133).
+
+**O motor pré-registrado é o de 24/09, e não o de 22/09 que a decisão 129
+nomeou.** Entre os dois só mudaram o rastro e as cópias dos insumos. No gabarito,
+376 ativos em nove montagens, nenhum campo além do rastro e dos avisos das
+montagens de diagnóstico se moveu. O de 22/09 está no commit `e1a843d`, e a
+afirmação pode ser conferida.
+
+**O rastro perdia informação em nove lugares**, e conferir o caminho inteiro
+antes de mexer foi o que os achou. O mais grave: `jsonEncode` lança diante de
+`NaN`, e o evento era serializado dentro do encerramento da transação. Um valor
+degenerado derrubava a exportação e, com ela, a própria avaliação. O mais
+enganoso: o arredondador do rastro transformava `NaN` em zero. O resto era
+falta de completude (5 dos 19 campos do diagnóstico, a entrada resumida sem
+dizer) e de emissão (exceção, falha de preparo e isolate sem evento, e o anel
+único que descartava em silêncio). Fechado como **D4** (decisão 131).
+
+**Conferir a integridade do rastro achou um defeito que não era do rastro**, o
+**B27**. `ValuationInputs` tem 34 campos, e cada cópia repetia a lista à mão.
+As rodadas recentes acrescentaram campos sem lembrar de todas as cópias, e a
+usada em produção pela concessão que acaba dentro da projeção perdia os
+múltiplos de pares. EGIE3, EQTL3, TAEE11 e TAEE4 ficavam sem a segunda leitura
+na tela. Uma cópia só, e um teste que preenche os 34 campos (decisão 132). A
+medição do B5 foi remedida: os 97 avaliados recebem leitura, e a divergência
+mediana passa de +78,2% para +73,4%. Parte dessa mudança vem do B24 e do B26, que
+tinham mexido no preço justo depois da medição de 21/09. 
+
+**E o B27 pedia o backtest de novo**, porque a leitura ancorada e o
+contrafactual sem o corte de liquidez passavam pelas cópias com defeito. A SAPR4
+de 30/06/2021 tinha justo ancorado de R$ 5,94 contra R$ 30,15 do anual, com o
+divisor da unit aplicado à espécie. Reexecutado, o backtest regerou as sete
+medições que o leem. **Nenhum veredito muda.** O critério do R3 não passa por
+essas cópias e fica em 0,052 com 0,30. A ancorada continua fora do padrão pela
+regra da decisão 98, agora com diferença de IC de +0,021 e `t` corrigido de 0,27.
+O C0b mantém a recusa por liquidez, com os soltos em −28,1% contra −54,3%. A faixa
+calibrada fica em 87,8% e 88,9%, e o poder em 0,62. **A fonte de mercado renovou
+o cache na mesma execução**, e três papéis saíram do universo. Por isso o
+backtest tem 10.808 observações, e não 10.837. **Um achado de registro no
+caminho**: o `recusas_custo.md` citava ainda os números de 16/09, embora o JSON
+tivesse sido regravado duas vezes depois. A §9 nova é a primeira atualização
+do texto desde então.
+
+### O que as lentes disseram na rodada do C7
+
+**A `dados` achou o D5, e errou o custo de outros dois achados.** O cache de
+cotações já descartava a base velha depois de um desdobramento, mas só antes da
+resposta. O pregão que a resposta omitia no meio da janela ficava na escala
+velha, e a fixture real da fonte tem um desses, em 18/08/2026. Conferindo, achei
+um segundo furo: a mudança só era vista no primeiro dia da resposta. Os dois
+fecharam com teste (decisão 134). Os outros dois achados da lente descreviam
+dado velho em lugar que ninguém lê: os campos «de hoje» dos exercícios antigos
+e o volume de cotações com mais de dez anos. **A lente não recebe o núcleo, e
+por isso não via o consumidor.** A disciplina dela passou a exigir que o
+consumidor seja citado.
+
+**A `risco` achou um ponto cego real**: o teste de resposta malformada da fonte
+de demonstrativos deixava de fora as duas rotas de estatística, que trazem a
+contagem de ações e o valor de mercado. O laço agora cobre as cinco rotas. O
+código já tolerava todos os corpos quebrados.
+
+**A `nucleo` trouxe quatro tensões de estrutura, e nenhuma é regressão.**
+`viaMigrada`, o construtor sem validação, um tipo de data sem hora e o sufixo
+`AsOf` ficam inventariados. A quarta afirmava que `AuditJson` converte `NaN`
+em texto «em memória», e a conversão está só no `toJson`. A disciplina ganhou a
+distinção.
+
+**A `metodo` achou uma premissa que ninguém tinha escrito**, aberta como
+**B28**. A ponte por papel divide o capital próprio do último balanço pela
+contagem que forma a cotação de hoje. Uma emissão depois do balanço entra no
+divisor e não entra no numerador, porque o caixa captado não está no patrimônio
+publicado. Nenhuma decisão nem comentário do núcleo declara isso, e o efeito
+nunca foi medido. **O exemplar volta a ter uma condição aberta**, e o item mede
+antes de decidir. As outras duas tensões da lente foram recusadas. A tradução do
+cenário foi reaberta pela terceira vez sem evidência nova (decisão 121). E a via
+do acionista com o `Ke` resolvido, em companhia não financeira, atende um ativo
+de 97 (decisão 41). A disciplina da lente passou a nomear as duas.
+
+**A `tela` não rodou, de propósito.** Nenhuma das cinco telas capturadas mudou.
+A única interface mexida é o cabeçalho do painel de logs, e o painel usa fontes
+que a captura não carrega, que é o primeiro limite do equipamento. O cabeçalho
+novo está coberto por teste de widget.
+
+**As duas lentes de registro rodaram em silêncio, e o silêncio era do
+equipamento.** A `registro` e a `rumo` voltaram sem tensão nenhuma, mas a
+`rumo` só tinha visto até a decisão 50, e a `registro`, até a 32. O conselheiro
+tinha dois defeitos, ambos na montagem do material. **Só mandava arquivo
+versionado**, e por isso as decisões 131 a 134, os testes novos e o
+`tool/c7/` não chegavam a lente nenhuma, porque o conselheiro roda antes do
+commit. **E cortava o que vinha por último**: as decisões iam em ordem
+crescente e antes do material pequeno e indispensável, e com 134 delas o
+registro sozinho passa do teto. O `estado.md`, o plano e a árvore, que a
+disciplina das duas lentes exige, nunca chegavam. Agora o material inclui os
+arquivos novos que o `.gitignore` não exclui, e as duas lentes recebem primeiro
+o indispensável e depois as decisões, das recentes para as antigas. A
+`registro`, a `rumo` e a `risco` rodaram de novo depois da correção.
+
+**Com o material inteiro, a `registro` achou duas tensões reais.** A primeira:
+o apontamento de 09/09/2026 está na caixa de entrada há 15 dias sem virar
+decisão nem ser descartado. Ele pergunta por que a tela de avaliação mostra o
+preço justo ao lado do preço de mercado, com o mesmo peso, se o motor não
+prevê nível. **É decisão do usuário**, pela regra da caixa de entrada, e
+ficou registrada no plano como pendente, com as duas saídas. A segunda: o
+`CLAUDE.md` descrevia `docs/eap/` como reconstrução «em curso», e ela está
+cumprida desde a decisão 22. A linha foi corrigida. **A `rumo`, agora com o
+plano, o `estado.md` e as decisões de 71 a 134, não achou nada.** A `risco`
+apontou dois testes antigos que conferem menos do que o nome promete, o do
+cache macroeconômico e o do Tesouro. São código que esta rodada não tocou, e
+ficam inventariados.
+
+**O gate local também tinha um teto**, e esta rodada bateu nele. Regerar o
+backtest e o gabarito juntos dá um diff de 33 MB, e o `qa-local` lia o diff com
+um buffer de 32 MB: o hook caía com `ENOBUFS` antes de verificar qualquer coisa,
+e travaria o commit no GitHub Desktop. O teto foi a 512 MB. Na primeira execução
+depois disso, o gate achou um bloqueio real no código desta rodada: um tamanho
+de fonte literal no aviso de descarte do painel de logs, corrigido para o token
+do tema.
+
+### A auditoria do gate
+
+Em quatro grupos, com índice temporário. O **aplicativo**, o **núcleo** e os
+**testes** aprovaram. O núcleo teve um WARN em código preexistente: o
+arredondador do rastro, `(valor * fator).round() / fator`, que é de
+apresentação e não de dinheiro. As **ferramentas** reprovaram uma vez, com
+razão: `tool/c7_selar.dart` lia o relógio sem parâmetro que o substituísse, e
+ganhou `--hoje`, como a leitura. Reauditadas, aprovaram. A mudança de estilo no
+painel de logs foi reauditada e aprovou.
+
+---
+
+## A Fase 4 — o veredito do C1, e o poder do teste (22/09/2026)
+
+**O R3 não passa.** Com as três primeiras fases fechadas e os dois defeitos que
+a rodada achou corrigidos, o potencial condicionado ao book-to-market em 36
+meses dá 0,052 com `t` corrigido de 0,30 contra 2,70, e nenhuma das cinco
+ordenações passa, bruta ou líquida de custo. O
+C1 pedia exatamente isto — passar, **ou o registro declarar que não passa** —, e
+a decisão 129 o declara.
+
+**Mas «não passa» sozinho não dizia nada, e por isso a rodada abriu o C6.** Um
+teste que só detecta efeitos que nenhum preditor tem reprova qualquer motor. A
+simulação do poder, sobre a mesma estrutura de sobreposição com que o crítico é
+simulado e calibrada no nível nominal, respondeu: **com 22 coortes sobrepostas,
+o menor coeficiente que o critério vê com 80% de chance é 0,62**. Nem o
+book-to-market, a anomalia mais documentada que existe, tem poder para passar
+no próprio efeito — 37% —, e precisaria de 66 coortes, com retornos em 2037.
+
+**E o motor não reprova só por isso.** A estimativa pontual do que o potencial
+acrescenta é pequena, e o sinal dele é duas vezes mais instável que o do
+book-to-market. **As duas coisas são verdade ao mesmo tempo**: o teste não
+aprovaria nenhum motor realista, e este motor, em particular, não mostrou o que
+aprovar.
+
+**A primeira versão da simulação inflava o poder**, e a correção foi antes de
+qualquer número sair daqui: sob a sobreposição o desvio observado tem esperança
+`σ·√c`, e usar o cru subestimava o ruído. Com a correção, o efeito mínimo
+detectável do critério do R3 subiu de 0,49 para 0,64 — e, com o B26, ficou em
+0,62.
+
+**Mais engenharia não muda o veredito, e a decisão diz por quê.** Mexer no motor
+até o potencial passar nas mesmas 31 coortes seria o ajuste ao teste que a
+decisão 103 impede — cinco ordenações já foram testadas nelas. O que pode mudar
+o R3 é dado novo, e a rodada o pré-registrou (C7): as coortes a partir de
+31/12/2025, lidas em 30/09/2029 e 30/09/2031, pelo mesmo critério, sem juntar as
+antigas. **E o que o R3 exige é decisão do usuário** (C8): «comprovada», que a
+série não sustenta, ou «testada com o poder declarado», que está atingida.
+
+**Um defeito de registro que três rodadas deixaram passar**: o aviso de
+«última atualização» no topo do plano ainda descrevia a quinta rodada, e o §7
+mantinha desmarcado o «custo de capital completo» embora B3, B4 e B7 tivessem
+fechado em 21/09. Os dois foram conferidos e corrigidos. **O valuation exemplar
+tem agora as oito condições marcadas.**
+
+### O que as lentes disseram na rodada do C1
+
+**A `metodo` achou um defeito real no rastro, e trouxe uma premissa refutável.**
+O Passo 3 do WACC no rastro de auditoria escrevia «custo observado fora da banda;
+limitado a X» — a regra anterior à decisão 31. Desde ela o `K_d` é sempre `R_f`
+mais o prêmio sintético, e o observado só arbitra se a cobertura pode falar. **A
+própria lente foi enganada pelo rastro**: a segunda tensão dela pedia para
+«descartar o observado integralmente», que é o que a conta já faz. Corrigido como
+**B25**, sem mudar preço; o gabarito foi regravado só no rastro.
+
+**A outra pedia o prêmio de crédito recalculado ano a ano no ponto fixo, e a
+premissa dela era falsa.** Ela supunha que a projeção desalavanca; mas a dívida
+projetada cresce ao ritmo do lucro, e a razão que dá o prêmio — dívida sobre
+EBITDA — fica parada por construção. O que muda ano a ano é o `D/E` a mercado, que
+move o beta. Recusado com prova, e um teste passou a cobrar a premissa.
+
+**E a segunda execução da `metodo` achou o defeito que mais pesou: o B26.**
+Quando a despesa financeira de uma empresa com dívida não estava publicada, o
+WACC estático degenerava para o `Ke`, e o prêmio de crédito do ponto fixo —
+derivado do custo que o estático devolvia — virava zero: o caminho resolvido
+tomava dinheiro à taxa livre de risco. No gabarito só a NATU3 caía nisso
+(−13,3% depois de corrigida). **Nas coortes eram 546 observações**, a maioria
+deslistadas, que são montadas só com dado da CVM e não têm despesa financeira. O
+backtest foi reexecutado — e, com o cache da fonte de mercado vencido, rebuscou
+a fonte; conferido que nenhum insumo de mercado mudou nas 10.837 observações em
+comum, e que só seis papéis pequenos saíram do universo. **Com o B26, o
+potencial melhorou**: o condicionado ao B/M foi de 0,028 a 0,052, e a carteira
+que compra o quintil de maior potencial e vende o de menor, de +0,75% a +6,0%. Não
+é ajuste ao teste: o defeito foi achado por ser defeito, e seria corrigido se
+piorasse o número.
+
+**A `rumo` trouxe três pendências de decisões antigas, e as três estavam
+fechadas**: a divergência das vias (decisão 39, substituída pela 102), a não
+monotonia na curva (decisão 35, fechada pela 105) e o perfil de três papéis
+preferenciais (decisão 30, resolvido pelo setor da B3 pela raiz do emissor). É o
+mesmo erro que a `registro` cometia duas rodadas atrás — ler o que a decisão diz
+que faltava na data como se faltasse hoje —, e o conserto foi o mesmo: disciplina
+nova na lente, e o `docs/estado.md` nos materiais dela.
+
+**A `registro` não achou nada**, e a auditoria da ferramenta e do teste novos
+aprovou os dois sem achado.
+
+---
+
 ## O que a oitava rodada da Fase 3 encontrou — B8, B21, C4, D3 e B24 (22/09/2026)
 
 **A Fase 3 fechou.** Os quatro itens do escopo e um quinto, aberto por uma lente

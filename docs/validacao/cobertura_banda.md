@@ -16,6 +16,8 @@ Medido em 14/09/2026 por `tool/cobertura_banda.py`, sobre
 > antigas dos documentos (item B8) e o juro da rota derivada pela curva (item
 > B24): **87,8%** em 12 meses e **88,4%** em 36, desvio máximo de **2,2** e
 > **2,8 p.p.** A forma não foi reescolhida, e o pacote do aplicativo foi regerado.
+> **Com o item B26** (o prêmio de crédito que sumia sem despesa financeira):
+> **87,8%** e **88,9%**, desvios de 2,2 e **3,5 p.p.** — continua dentro dos 5.
 
 ## 1. A amostra
 
@@ -431,3 +433,82 @@ meses e de 72,0% a 97,1% em 36 — a mesma desigualdade da §10. Só nas coortes
 
 O centro mudou pouco: `a = 0,078` e `b = 0,023` em 12 meses, `a = 0,130` e
 `b = 0,070` em 36. O preço justo continua entrando com peso pequeno.
+
+## 12. Sobre o retorno corrigido — remedido em 25/09/2026
+
+**A variável que a faixa tenta cobrir mudou.** O retorno total das coortes
+perdia o fator das bonificações que a fonte de preços não ajusta (item B29,
+[decisão 136](../decisoes/136-o-evento-de-acoes-que-a-fonte-nao-ajustou-e-ajustado.md))
+e compunha entre si os proventos da mesma data ex (item B31,
+[decisão 139](../decisoes/139-proventos-da-mesma-data-ex-entram-juntos-no-retorno-total.md)).
+A volatilidade do papel, que dá a largura, lê a série completada. `python
+tool/cobertura_banda.py` refez a medição **sem mudar a forma nem a regra**, com o
+centro e os `z` recalibrados.
+
+| fora da amostra | 12 meses: 90 / 80 / 50% | desvio | 36 meses: 90 / 80 / 50% | desvio |
+|---|---|---:|---|---:|
+| **convergência na escala da volatilidade** | **87,6 / 79,5 / 50,9** | **2,4 p.p.** | **88,1 / 80,0 / 53,0** | **3,0 p.p.** |
+| em torno do justo, mesmas observações | 83,1 / 72,9 / 45,0 | 7,1 p.p. | 84,9 / 75,1 / 45,9 | 5,1 p.p. |
+
+Sobre 2.643 observações de teste em 12 meses e 1.044 em 36. Por tercil de
+potencial, a de 90% cobre 88,2 / 86,5 / 87,9% em 12 meses e 82,8 / 90,3 / 91,5% em
+36; nas listadas, 88,1% e 87,5%, e nas deslistadas, 83,4% e 93,3%. **A forma
+continua cobrindo, e a regra continua mandando-a ao aplicativo**: o pacote
+`assets/validacao/banda_calibrada.json` foi regerado com `a = 0,086` e
+`b = 0,029` em 12 meses, `a = 0,161` e `b = 0,093` em 36.
+
+As remedições de 21, 22 e 24/09 — 88,1 e 89,3%, 87,8 e 88,4%, 87,8 e 88,9% — estão
+no item C2c do plano e no histórico do git do JSON, e não ganharam seção aqui. Esta é a
+primeira desde a §11.
+
+## 13. Remedido em 28/09/2026 — com a taxa dos financeiros pela curva
+
+Sem reescolher a forma, com o backtest refeito depois do item B37: **87,6/79,4/50,6%**
+em 12 meses e **88,0/79,9/52,8%** em 36, contra 90/80/50% nominais, fora da
+amostra e com as deslistadas; desvios máximos de 2,4 e 2,8 p.p. contra o limite
+de 5. Coeficientes do pacote: 12 meses `a = 0,0852`, `b = 0,0289`; 36 meses
+`a = 0,1609`, `b = 0,0916`. A banda de cenários, pessimista a otimista, cobre
+9,3% em 36 meses.
+
+## 14. Remedido em 01/10/2026 — com o prêmio de mercado do mercado
+
+Sem reescolher a forma, com o backtest refeito depois das decisões 142 (o
+prêmio de mercado de cada coorte é a média de dez anos do prêmio implícito até
+a data dela, de 0,91% a 1,62%), 143 (a contagem de ações conferida contra o
+preço) e 144 (os proventos dos emissores com barra no nome):
+
+| fora da amostra | 12 meses: 90 / 80 / 50% | desvio | 36 meses: 90 / 80 / 50% | desvio |
+|---|---|---:|---|---:|
+| **convergência na escala da volatilidade** | **87,9 / 79,7 / 50,7** | **2,1 p.p.** | **88,3 / 79,6 / 51,6** | **1,7 p.p.** |
+| em torno do justo, mesmas observações | 85,0 / 74,3 / 45,0 | 5,7 p.p. | 87,1 / 77,9 / 47,9 | 2,9 p.p. |
+
+Sobre 2.760 observações de teste em 12 meses e 1.102 em 36. Por tercil de
+potencial, a de 90% cobre 88,5 / 87,7 / 87,5% em 12 meses e 83,0 / 92,0 / 90,7%
+em 36; nas listadas, 88,4% e 87,7%, e nas deslistadas, 84,3% e 93,3%. **A forma
+continua cobrindo, e a regra continua mandando-a ao aplicativo**: o pacote
+`assets/validacao/banda_calibrada.json` foi regerado com `a = 0,0729` e
+`b = 0,0205` em 12 meses, `a = 0,1217` e `b = 0,0658` em 36. A banda de
+cenários, pessimista a otimista, cobre 13,3% em 12 meses e 14,9% em 36.
+
+**O preço justo mais alto não aproximou a faixa do justo.** Com o prêmio menor,
+o preço realizado ainda fica, na mediana, 1,82 vez o justo em 12 meses e 1,97
+vez em 36; a faixa em torno do justo continua fora do critério em 12 meses
+(5,7 p.p.), e o peso que a convergência dá ao justo continua pequeno (`b` de
+0,02 e 0,07).
+
+## 15. Remedido em 02/10/2026 — com a base de patrimônio corrigida
+
+Sem reescolher a forma, com o backtest refeito depois da decisão 146 (sem o par
+VPA e contagem do exercício, a base de patrimônio é o PL da demonstração):
+
+| fora da amostra | 12 meses: 90 / 80 / 50% | desvio | 36 meses: 90 / 80 / 50% | desvio |
+|---|---|---:|---|---:|
+| **convergência na escala da volatilidade** | **87,9 / 79,7 / 50,9** | **2,1 p.p.** | **88,1 / 78,7 / 50,3** | **1,9 p.p.** |
+| em torno do justo, mesmas observações | 85,1 / 74,9 / 45,1 | 5,1 p.p. | 87,3 / 77,7 / 47,9 | 2,7 p.p. |
+
+Sobre 2.807 observações de teste em 12 meses e 1.122 em 36. Por tercil de
+potencial, a de 90% cobre 88,1 / 88,6 / 86,9% em 12 meses e 83,9 / 90,5 / 90,5%
+em 36; nas listadas, 88,2% e 87,6%, e nas deslistadas, 84,7% e 91,8%. O pacote
+foi regerado com `a = 0,0781` e `b = 0,0202` em 12 meses, `a = 0,1318` e
+`b = 0,0615` em 36. A banda de cenários cobre 13,0% em 12 meses e 13,9% em 36, e
+a de 90% do Monte Carlo, 9,6% e 8,6%.

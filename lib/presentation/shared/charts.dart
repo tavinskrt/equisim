@@ -20,24 +20,24 @@ import 'ui_kit.dart';
 /// como 0, 3, 5, 8, 10 — progressão que parece defeito de arredondamento
 /// porque é exatamente isso.
 ///
-/// [alvo] é quantas divisões se quer, não quantas se obtém: o passo redondo
+/// [target] é quantas divisões se quer, não quantas se obtém: o passo redondo
 /// mais próximo pode render uma a mais ou a menos, e é essa folga que compra a
 /// legibilidade do rótulo.
-double _passoRedondo(double amplitude, {int alvo = 4}) {
+double _roundStep(double amplitude, {int target = 4}) {
   if (!amplitude.isFinite || amplitude <= 0) return 1;
-  final cru = amplitude / alvo;
+  final raw = amplitude / target;
   final magnitude = math
-      .pow(10, (math.log(cru) / math.ln10).floor())
+      .pow(10, (math.log(raw) / math.ln10).floor())
       .toDouble();
-  final normalizado = cru / magnitude;
-  final passo = normalizado < 1.5
+  final normalized = raw / magnitude;
+  final step = normalized < 1.5
       ? 1.0
-      : normalizado < 3
+      : normalized < 3
       ? 2.0
-      : normalizado < 7
+      : normalized < 7
       ? 5.0
       : 10.0;
-  return passo * magnitude;
+  return step * magnitude;
 }
 
 /// Uma curva nomeada.
@@ -83,9 +83,6 @@ class Base100Chart extends StatelessWidget {
   /// Eixo temporal comum, em ordem cronológica.
   final List<DateTime> dates;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Altura do gráfico em pixels lógicos.
   final double height;
 
@@ -97,7 +94,6 @@ class Base100Chart extends StatelessWidget {
     super.key,
     required this.series,
     required this.dates,
-    required this.isLight,
     this.height = 240,
   });
 
@@ -155,7 +151,7 @@ class Base100Chart extends StatelessWidget {
           runSpacing: 4,
           children: [
             for (final s in series)
-              _LegendDot(label: s.label, color: s.color, isLight: isLight),
+              _LegendDot(label: s.label, color: s.color),
           ],
         ),
         const Gap.sm(),
@@ -311,9 +307,6 @@ class TornadoChart extends StatelessWidget {
   /// linha dela.
   static const double minBarWidth = 48;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Declara o gráfico de tornado.
   ///
   /// A ordenação das barras é responsabilidade do chamador — o gráfico desenha
@@ -323,7 +316,6 @@ class TornadoChart extends StatelessWidget {
     super.key,
     required this.bars,
     required this.baseValue,
-    required this.isLight,
   });
 
   @override
@@ -340,23 +332,23 @@ class TornadoChart extends StatelessWidget {
     }
     if (maxSpan <= 0) return const SizedBox.shrink();
 
-    final tipo = context.finType;
-    var rotuloWidth = 0.0;
-    var faixaWidth = 0.0;
+    final kind = context.finType;
+    var labelWidth = 0.0;
+    var bandWidth = 0.0;
     for (final bar in bars) {
-      final r = FinAmount.measure(context, bar.label, tipo.caption);
-      if (r > rotuloWidth) rotuloWidth = r;
+      final r = FinAmount.measure(context, bar.label, kind.caption);
+      if (r > labelWidth) labelWidth = r;
       final f = FinAmount.measure(
         context,
         '${Fmt.money(bar.low)} — ${Fmt.money(bar.high)}',
-        tipo.numSm,
+        kind.numSm,
       );
-      if (f > faixaWidth) faixaWidth = f;
+      if (f > bandWidth) bandWidth = f;
     }
-    rotuloWidth += FinSpace.sm;
-    faixaWidth += FinSpace.xs;
+    labelWidth += FinSpace.sm;
+    bandWidth += FinSpace.xs;
 
-    Widget barra(({String label, double low, double high}) bar) => SizedBox(
+    Widget buildBar(({String label, double low, double high}) bar) => SizedBox(
           height: 18,
           child: RepaintBoundary(
             child: CustomPaint(
@@ -372,7 +364,7 @@ class TornadoChart extends StatelessWidget {
             ),
           ),
         );
-    Text rotulo(String label) => Text(
+    Text label(String label) => Text(
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -380,7 +372,7 @@ class TornadoChart extends StatelessWidget {
             color: context.fin.textSecondary,
           ),
         );
-    Text faixa(({String label, double low, double high}) bar) => Text(
+    Text band(({String label, double low, double high}) bar) => Text(
           '${Fmt.money(bar.low)} — ${Fmt.money(bar.high)}',
           textAlign: TextAlign.right,
           maxLines: 1,
@@ -397,8 +389,8 @@ class TornadoChart extends StatelessWidget {
         // Em 320 dp o rotulo e o par de valores medidos nao deixam espaco para
         // a barra: a linha estourava 134 px com a tela carregada. Abaixo de
         // [minBarWidth] sobrando, rotulo e valores sobem para cima da barra.
-        final empilha =
-            rotuloWidth + faixaWidth + minBarWidth > constraints.maxWidth;
+        final stacks =
+            labelWidth + bandWidth + minBarWidth > constraints.maxWidth;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -408,26 +400,30 @@ class TornadoChart extends StatelessWidget {
             for (final bar in bars)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: FinSpace.xs),
-                child: empilha
+                child: stacks
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(child: rotulo(bar.label)),
-                              const SizedBox(width: FinSpace.sm),
-                              Flexible(child: faixa(bar)),
-                            ],
+                          // `Wrap`, e não `Row` com os dois flexíveis: a fila
+                          // dividia a largura ao meio, e com «Crescimento e
+                          // taxa» o par de valores saía cortado em 320 dp.
+                          // Assim cada um fica inteiro, e o par desce de linha
+                          // quando não cabe ao lado do rótulo.
+                          Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            spacing: FinSpace.sm,
+                            runSpacing: FinSpace.xxs,
+                            children: [label(bar.label), band(bar)],
                           ),
                           const SizedBox(height: FinSpace.xs),
-                          barra(bar),
+                          buildBar(bar),
                         ],
                       )
                     : Row(
                         children: [
-                          SizedBox(width: rotuloWidth, child: rotulo(bar.label)),
-                          Expanded(child: barra(bar)),
-                          SizedBox(width: faixaWidth, child: faixa(bar)),
+                          SizedBox(width: labelWidth, child: label(bar.label)),
+                          Expanded(child: buildBar(bar)),
+                          SizedBox(width: bandWidth, child: band(bar)),
                         ],
                       ),
               ),
@@ -495,9 +491,9 @@ class _TornadoBarPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _TornadoBarPainter old) =>
-      _mudou(old.low, low) ||
-      _mudou(old.high, high) ||
-      _mudou(old.base, base) ||
+      _changed(old.low, low) ||
+      _changed(old.high, high) ||
+      _changed(old.base, base) ||
       old.downColor != downColor ||
       old.upColor != upColor ||
       old.axisColor != axisColor;
@@ -511,8 +507,8 @@ class _TornadoBarPainter extends CustomPainter {
   ///
   /// A transição de/para `NaN` continua contando como mudança, porque aí o
   /// desenho muda de fato; o que se elimina é o `NaN` estacionário.
-  static bool _mudou(double antes, double agora) =>
-      antes.isNaN != agora.isNaN || (antes - agora).abs() > 1e-9;
+  static bool _changed(double before, double now) =>
+      before.isNaN != now.isNaN || (before - now).abs() > 1e-9;
 }
 
 /// Um ponto da dispersão risco × retorno, em pontos percentuais.
@@ -552,19 +548,19 @@ typedef RiskReturnLegend = ({String label, Color color});
 RiskReturnDot? _nearest(List<RiskReturnDot> points, double x, double y) {
   if (points.isEmpty) return null;
 
-  var melhor = points.first;
-  var menor = double.infinity;
+  var best = points.first;
+  var smaller = double.infinity;
 
   for (final p in points) {
     final dx = p.risk - x;
     final dy = p.ret - y;
     final d = dx * dx + dy * dy;
-    if (d < menor) {
-      menor = d;
-      melhor = p;
+    if (d < smaller) {
+      smaller = d;
+      best = p;
     }
   }
-  return melhor;
+  return best;
 }
 
 class RiskReturnScatter extends StatelessWidget {
@@ -577,14 +573,10 @@ class RiskReturnScatter extends StatelessWidget {
   /// entraram na dispersão e com que cor cada nuvem foi desenhada.
   final List<RiskReturnLegend> assetLegend;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Declara a dispersão.
   const RiskReturnScatter({
     super.key,
     required this.points,
-    required this.isLight,
     this.assetLegend = const [],
   });
 
@@ -630,14 +622,14 @@ class RiskReturnScatter extends StatelessWidget {
     // Volatilidade negativa não existe; cortar em zero evita um eixo que
     // sugere o contrário.
     final minX = rawMinX < 0 ? 0.0 : rawMinX;
-    final xInterval = _passoRedondo(maxX - minX).clamp(0.5, double.infinity);
+    final xInterval = _roundStep(maxX - minX).clamp(0.5, double.infinity);
     // Seis divisões no eixo vertical contra quatro no horizontal: a folga
     // vertical é de 28% contra 18%, porque o rótulo do ativo é desenhado
     // acima do ponto. Pedir quatro sobre um intervalo já inflado devolvia três
     // linhas de grade para 250 dp de altura.
-    final yInterval = _passoRedondo(
+    final yInterval = _roundStep(
       maxY - minY,
-      alvo: 6,
+      target: 6,
     ).clamp(0.5, double.infinity);
 
     return Column(
@@ -782,12 +774,11 @@ class RiskReturnScatter extends StatelessWidget {
           runSpacing: 4,
           children: [
             for (final p in points.where((p) => p.highlight))
-              _LegendDot(label: p.label, color: p.color, isLight: isLight),
+              _LegendDot(label: p.label, color: p.color),
             for (final entry in assetLegend)
               _LegendDot(
                 label: entry.label,
                 color: entry.color,
-                isLight: isLight,
               ),
           ],
         ),
@@ -809,9 +800,6 @@ class CorrelationHeatmap extends StatefulWidget {
   /// Matriz de correlação `n × n`, simétrica, com valores em `[-1, 1]`.
   final List<List<double>> matrix;
 
-  /// Tema corrente.
-  final bool isLight;
-
   /// Declara o mapa de calor.
   ///
   /// [matrix] precisa ter a mesma dimensão de [tickers]; a construção fica com
@@ -820,7 +808,6 @@ class CorrelationHeatmap extends StatefulWidget {
     super.key,
     required this.tickers,
     required this.matrix,
-    required this.isLight,
   });
 
   @override
@@ -838,7 +825,6 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
 
   List<Ticker> get tickers => widget.tickers;
   List<List<double>> get matrix => widget.matrix;
-  bool get isLight => widget.isLight;
 
   Color _cellColor(double rho) {
     // Verde para correlação baixa (diversificação) e vermelho para alta.
@@ -860,22 +846,22 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
     // celula, e o usuario nao tinha como saber que faltava letra.
     // `tipo`, e nao `t`: o laco de cabecalho abaixo declara `for (final t in
     // tickers)` e sombrearia a tipografia com um Ticker.
-    final tipo = context.finType;
-    final rotulo = tipo.caption;
-    var nomeWidth = 0.0;
+    final kind = context.finType;
+    final label = kind.caption;
+    var nameWidth = 0.0;
     for (final ticker in tickers) {
-      final w = FinAmount.measure(context, ticker.value, rotulo);
-      if (w > nomeWidth) nomeWidth = w;
+      final w = FinAmount.measure(context, ticker.value, label);
+      if (w > nameWidth) nameWidth = w;
     }
     // Medida no papel NUMERICO, que e o que a celula realmente pinta.
-    final celulaWidth =
-        FinAmount.measure(context, '-0,00', tipo.numSm) + FinSpace.sm;
-    // Passo real de uma coluna: a celula pinta `celulaWidth`, mas ocupa a
-    // margem dos dois lados. O cabecalho reservava `celulaWidth + 2` e por
+    final cellWidth =
+        FinAmount.measure(context, '-0,00', kind.numSm) + FinSpace.sm;
+    // Passo real de uma coluna: a celula pinta `cellWidth`, mas ocupa a
+    // margem dos dois lados. O cabecalho reservava `cellWidth + 2` e por
     // isso andava mais devagar que a matriz -- seis pixels por coluna, que na
     // nona ja eram meia celula de defasagem e faziam o ultimo ticker parecer
     // cortado quando o que estava fora de lugar era o rotulo.
-    final colunaWidth = celulaWidth + FinSpace.xs * 2;
+    final columnWidth = cellWidth + FinSpace.xs * 2;
 
     return Scrollbar(
       controller: _controller,
@@ -892,16 +878,16 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
           children: [
             Row(
               children: [
-                SizedBox(width: nomeWidth + FinSpace.md),
+                SizedBox(width: nameWidth + FinSpace.md),
                 for (final t in tickers)
                   SizedBox(
-                    width: colunaWidth,
+                    width: columnWidth,
                     child: Text(
                       t.value,
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: rotulo.copyWith(color: context.fin.textTertiary),
+                      style: label.copyWith(color: context.fin.textTertiary),
                     ),
                   ),
               ],
@@ -911,12 +897,12 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
               Row(
                 children: [
                   SizedBox(
-                    width: nomeWidth + FinSpace.md,
+                    width: nameWidth + FinSpace.md,
                     child: Text(
                       tickers[i].value,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: rotulo.copyWith(color: context.fin.textTertiary),
+                      style: label.copyWith(color: context.fin.textTertiary),
                     ),
                   ),
                   for (var j = 0; j < tickers.length; j++)
@@ -924,7 +910,7 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
                       builder: (context) {
                         final fill = _cellColor(matrix[i][j]);
                         return Container(
-                          width: celulaWidth,
+                          width: cellWidth,
                           // Padding, e nao altura fixa: a celula cresce com a fonte
                           // do usuario em vez de cortar o numero.
                           padding: const EdgeInsets.symmetric(
@@ -941,7 +927,7 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
                             // A tinta e escolhida pela luminancia do PROPRIO
                             // preenchimento: no tema claro a celula e clara e pede
                             // tinta escura. Branco fixo dava 1,94:1 ali.
-                            style: tipo.numSm.copyWith(
+                            style: kind.numSm.copyWith(
                               color: context.fin.inkOn(fill),
                             ),
                           ),
@@ -960,12 +946,10 @@ class _CorrelationHeatmapState extends State<CorrelationHeatmap> {
 class _LegendDot extends StatelessWidget {
   final String label;
   final Color color;
-  final bool isLight;
 
   const _LegendDot({
     required this.label,
     required this.color,
-    required this.isLight,
   });
 
   @override

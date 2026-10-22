@@ -116,18 +116,18 @@ abstract final class Invariants {
     }
 
     final outcome = backtest.unwrap();
-    final destinado = outcome.perAsset.values
+    final allocated = outcome.perAsset.values
         .fold<int>(0, (total, asset) => total + asset.invested.cents);
-    final aportado = outcome.totalContributed.cents;
-    final reconstituido =
+    final contributed = outcome.totalContributed.cents;
+    final reconstituted =
         outcome.totalAllocated.cents + outcome.residualCash.cents;
 
     return InvariantCheck(
       name: '${ticker.value}: aportado ≡ alocado + caixa',
-      passed: destinado == aportado && reconstituido == aportado,
-      detail: 'aportado $aportado¢ · destinado $destinado¢ · '
+      passed: allocated == contributed && reconstituted == contributed,
+      detail: 'aportado $contributed¢ · destinado $allocated¢ · '
           'alocado ${outcome.totalAllocated.cents}¢ + '
-          'caixa ${outcome.residualCash.cents}¢ = $reconstituido¢',
+          'caixa ${outcome.residualCash.cents}¢ = $reconstituted¢',
     );
   }
 

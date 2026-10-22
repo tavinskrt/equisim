@@ -1,0 +1,263 @@
+/// CAPTURA DE TELA para a lente `tela` do conselheiro.
+///
+///     npm run ui:capturar
+///
+/// Nao e teste de regressao visual. Nao ha golden a comparar e nada aqui
+/// reprova: o objetivo e PRODUZIR as imagens que o conselheiro vai olhar. Por
+/// isso roda sempre com `--update-goldens`, e por isso vive separado de
+/// `overflow_test.dart` -- aquela e suite que passa, e nao deve quebrar porque
+/// um carregamento de fonte mudou.
+///
+/// POR QUE O NOME NAO TERMINA EM `_test.dart`: e o que o mantem FORA do
+/// `flutter test`. A descoberta padrao procura `test/**_test.dart`, entao este
+/// arquivo so roda quando chamado pelo caminho, como faz o `ui:capturar`.
+///
+/// A razao e concreta, nao teorica. Enquanto ele se chamava `_test.dart`,
+/// qualquer alteracao INTENCIONAL de interface deixava `flutter test`
+/// vermelho: a comparacao de golden acusava diferenca contra as capturas
+/// antigas. Aconteceu na correcao do truncamento das colunas -- oito falhas,
+/// nenhuma real, todas resolvidas por regerar as imagens. Um portao que fica
+/// vermelho por trabalho legitimo e um portao que sera arrancado, e a
+/// reconstrucao da UI que vem pela frente mexeria nessas telas a cada rodada.
+///
+/// O que se abre mao: deteccao automatica de regressao visual. Ela tem valor,
+/// mas nao estava sendo usada como tal -- e o conselheiro olha as capturas de
+/// qualquer forma, com julgamento que a comparacao de pixels nao tem.
+///
+/// DUAS COISAS SEM AS QUAIS ESTE ARQUIVO NAO SERVE PARA NADA:
+///
+/// 1. FONTE REAL. `FinTypography._family` e `null`, ou seja, o aplicativo usa a
+///    fonte padrao da plataforma. Em `flutter test` nao ha fonte padrao
+///    carregada e todo texto sai como caixa vazia. Critica de hierarquia
+///    tipografica sobre captura sem texto nao e so inutil: e enganosa.
+///
+/// 2. ESTADO POPULADO. Ver `populated_state.dart`. A matriz de estouro monta as
+///    telas vazias de proposito; capturar assim levaria o conselheiro a
+///    concluir que a interface e limpa porque o conteudo nunca apareceu.
+library;
+
+import 'dart:io';
+
+import 'package:equisim/presentation/backtest/backtest_page.dart';
+import 'package:equisim/presentation/goals/goal_page.dart';
+import 'package:equisim/presentation/shared/theme_bridge.dart';
+import 'package:equisim/presentation/shell/app_shell.dart';
+import 'package:equisim/presentation/study/study_notifier.dart';
+import 'package:equisim/presentation/study/study_page.dart';
+import 'package:equisim/presentation/theme/fin_theme.dart';
+import 'package:equisim/presentation/valuation/manual_valuation_page.dart';
+import 'package:equisim/presentation/valuation/valuation_page.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'populated_state.dart';
+
+/// Larguras capturadas. As mesmas de `overflow_test.dart`, de proposito: se
+/// uma tela estoura em 320 la, a captura daqui mostra COMO ela estoura.
+const _widths = <double>[320, 390, 1024];
+
+/// Altura generosa: a captura pega a tela inteira, nao a dobra visivel. Cortar
+/// no rodape esconderia justamente o que costuma ficar mal resolvido.
+const _height = 1600.0;
+
+/// Escala de texto fixa em 1.0.
+///
+/// 1.3 e 2.0 sao verificacao de ACESSIBILIDADE, e `overflow_test.dart` ja as
+/// cobre com assercao -- que e a ferramenta certa: uma assercao diz "estourou",
+/// uma imagem exige alguem olhar. Multiplicar as capturas por tres escalas
+/// triplicaria o material do conselheiro sem acrescentar pergunta de direcao.
+const _scale = 1.0;
+
+/// Carrega Roboto do proprio SDK do Flutter.
+///
+/// Vem de `FLUTTER_ROOT`, que o `flutter test` injeta, em vez de um TTF
+/// versionado: evita meio megabyte de binario no repositorio e garante que a
+/// fonte usada na captura seja a mesma que o SDK entrega ao aplicativo.
+///
+/// Se a variavel nao existir, GRITA e segue. Falhar em silencio aqui produziria
+/// trinta imagens de caixinhas com aparencia de sucesso.
+Future<bool> _loadFonts() async {
+  final root = Platform.environment['FLUTTER_ROOT'];
+  if (root == null || root.isEmpty) {
+    stderr.writeln(
+      '\n!!! FLUTTER_ROOT ausente -- as fontes NAO foram carregadas.\n'
+      '!!! As capturas sairao com caixas no lugar do texto e nao servem\n'
+      '!!! para analise. Rode via `npm run ui:capturar`.\n',
+    );
+    return false;
+  }
+
+  final dir = Directory('$root/bin/cache/artifacts/material_fonts');
+  if (!dir.existsSync()) {
+    stderr.writeln('\n!!! Fontes do SDK nao encontradas em ${dir.path}\n');
+    return false;
+  }
+
+  // O aplicativo usa a familia padrao da plataforma, que em teste resolve para
+  // "Roboto". Registrar sob esse nome faz o texto renderizar sem tocar no tema.
+  final text = FontLoader('Roboto');
+  for (final weight in ['regular', 'medium', 'bold']) {
+    final file = File('${dir.path}/roboto-$weight.ttf');
+    if (file.existsSync()) {
+      text.addFont(Future.value(file.readAsBytesSync().buffer.asByteData()));
+    }
+  }
+  await text.load();
+
+  // MaterialIcons e tao necessario quanto o texto. Sem ele todo icone vira
+  // caixa vazia, e a lente `tela` reportaria "caixas por toda parte" como
+  // achado -- artefato da captura, nao defeito da interface. E a mesma classe
+  // de erro que material incompleto ja produziu na lente `registro`.
+  final iconFont = File('${dir.path}/materialicons-regular.otf');
+  if (iconFont.existsSync()) {
+    final loader = FontLoader('MaterialIcons')
+      ..addFont(Future.value(iconFont.readAsBytesSync().buffer.asByteData()));
+    await loader.load();
+  } else {
+    stderr.writeln('\n!!! MaterialIcons ausente -- icones sairao em caixas.\n');
+    return false;
+  }
+
+  return true;
+}
+
+/// Um alvo de captura: como montar, como se chama no disco e a altura.
+///
+/// A altura é por alvo porque a edição do valuation é mais longa que as
+/// outras telas: com 1600 px, no celular, a captura parava nos campos e a
+/// lente não via o resultado que eles produzem.
+typedef CaptureTarget = ({
+  String name,
+  Widget Function() build,
+  bool withAssets,
+  double height,
+});
+
+/// A edição do valuation já editada: os selos, os degraus da decomposição e a
+/// perpetuidade com retorno próprio só aparecem com troca (decisão 147).
+Widget _changedEdit() {
+  final r = cascadeValuation();
+  final m = r.manual!.enginePremises;
+  return ManualValuationPage(
+    result: r,
+    initial: m.copyWith(
+      baseProfit: m.baseProfit * 1.2,
+      growth: m.growth + 0.02,
+      discountRate: m.discountRate - 0.01,
+      terminalReturn: m.discountRate + 0.04,
+    ),
+  );
+}
+
+final _targets = <CaptureTarget>[
+  // A casca vem PRIMEIRO e importa mais que as telas soltas: e nela que vivem
+  // os rotulos das abas e a relacao entre as frentes de trabalho, que e
+  // exatamente o objeto da lente `tela`.
+  (name: 'shell', build: AppShell.new, withAssets: true, height: _height),
+  (name: 'estudo', build: StudyPage.new, withAssets: true, height: _height),
+  (name: 'backtest', build: BacktestPage.new, withAssets: true, height: _height),
+  (name: 'meta', build: GoalPage.new, withAssets: false, height: _height),
+  // A ABA, e nao a tela empilhada: e o caminho que o pacote UI-1 abriu, e e
+  // ele que a lente precisa examinar. `withAssets` porque sem carteira montada
+  // a aba mostra so o estado vazio.
+  (name: 'valuation', build: ValuationTab.new, withAssets: true, height: _height),
+  // A edição do valuation (decisão 147), aberta nos números do motor e já
+  // editada. A conta congelada vem de uma avaliação de verdade da cascata.
+  (
+    name: 'editar',
+    // Último ano deprimido: a base é normalizada para cima, e o painel do
+    // porquê abre no cartão do lucro (orientador, 14/10/2026).
+    build: () => ManualValuationPage(result: cascadeValuation(shock: 0.6)),
+    withAssets: false,
+    height: 2600,
+  ),
+  (name: 'editar-alterado', build: _changedEdit, withAssets: false, height: 2600),
+];
+
+Future<void> _build(
+  WidgetTester tester,
+  CaptureTarget target, {
+  required double width,
+  required bool isLight,
+}) async {
+  tester.view.devicePixelRatio = 1.0;
+  tester.view.physicalSize = Size(width, target.height);
+  addTearDown(tester.view.reset);
+
+  final container = ProviderContainer(overrides: populatedOverrides());
+  addTearDown(container.dispose);
+  container.read(isLightModeProvider.notifier).setValue(isLight);
+
+  if (target.withAssets) {
+    final notifier = container.read(studyProvider.notifier);
+    for (final (symbol, sector) in demoPortfolio) {
+      notifier.addAsset(assetOf(symbol, sector), toPrincipal: true);
+    }
+    // A meta tambem, e nao so os ativos: sem ela a aba Analise nao tem prazo
+    // com que confrontar a janela, e a captura mostraria a tela com o
+    // confronto de horizontes ausente -- exatamente o estado que a lente
+    // leria como "a interface nao declara a relacao".
+    notifier.setGoal(demoGoal);
+  }
+
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: buildFinTheme(isLight: isLight),
+        home: MediaQuery(
+          data: MediaQueryData(
+            size: Size(width, target.height),
+            textScaler: const TextScaler.linear(_scale),
+          ),
+          // A casca ja traz o proprio Scaffold; embrulhar de novo criaria uma
+          // segunda barra e falsearia a captura.
+          child: target.name == 'shell'
+              ? target.build()
+              : Scaffold(body: target.build()),
+        ),
+      ),
+    ),
+  );
+
+  // `pumpAndSettle` estoura em tela com animacao perpetua. Um numero fixo de
+  // quadros resolve os `FutureProvider` e nao trava: a captura e best-effort.
+  for (var i = 0; i < 8; i++) {
+    await tester.pump(const Duration(milliseconds: 120));
+  }
+}
+
+void main() {
+  late bool withFont;
+
+  setUpAll(() async {
+    withFont = await _loadFonts();
+  });
+
+  for (final target in _targets) {
+    group(target.name, () {
+      for (final isLight in [true, false]) {
+        final theme = isLight ? 'claro' : 'escuro';
+        for (final width in _widths) {
+          testWidgets('$theme @ ${width.toInt()}dp', (tester) async {
+            expect(
+              withFont,
+              isTrue,
+              reason: 'Sem fonte real a captura sai em caixas e nao serve.',
+            );
+            await _build(tester, target, width: width, isLight: isLight);
+            await expectLater(
+              find.byType(MaterialApp),
+              matchesGoldenFile(
+                '../../docs/telas/$theme/${target.name}@${width.toInt()}.png',
+              ),
+            );
+          });
+        }
+      }
+    });
+  }
+}

@@ -1,0 +1,122 @@
+{
+ "h12_base": {
+  "coortes": 30,
+  "icMedio": 0.0562915733944645,
+  "tIngenuo": 1.8061549049368977,
+  "obsEstatais": 330,
+  "residuoDaPosicao": -0.05856732247281699,
+  "difPotencialMediana": 0.38088170250000003,
+  "difRetornoMediana": 0.140075815,
+  "coortesEstatalAcimaNoPotencial": 28,
+  "coortesEstatalAcimaNoRetorno": 19,
+  "coortesComparadas": 30
+ },
+ "h12_+0.5 p.p.": {
+  "coortes": 30,
+  "icMedio": 0.05441204130857741,
+  "tIngenuo": 1.7633346491858972,
+  "obsEstatais": 330,
+  "residuoDaPosicao": -0.04561546440494514,
+  "difPotencialMediana": 0.3330178025,
+  "difRetornoMediana": 0.140075815,
+  "coortesEstatalAcimaNoPotencial": 28,
+  "coortesEstatalAcimaNoRetorno": 19,
+  "coortesComparadas": 30
+ },
+ "h12_+1.0 p.p.": {
+  "coortes": 30,
+  "icMedio": 0.05255321081054551,
+  "tIngenuo": 1.7118975707413393,
+  "obsEstatais": 330,
+  "residuoDaPosicao": -0.032977686080267056,
+  "difPotencialMediana": 0.28413390000000005,
+  "difRetornoMediana": 0.140075815,
+  "coortesEstatalAcimaNoPotencial": 28,
+  "coortesEstatalAcimaNoRetorno": 19,
+  "coortesComparadas": 30
+ },
+ "h12_+2.0 p.p.": {
+  "coortes": 30,
+  "icMedio": 0.05086312433121203,
+  "tIngenuo": 1.6587014379846097,
+  "obsEstatais": 327,
+  "residuoDaPosicao": -0.01396793770829532,
+  "difPotencialMediana": 0.20992062500000003,
+  "difRetornoMediana": 0.132713315,
+  "coortesEstatalAcimaNoPotencial": 25,
+  "coortesEstatalAcimaNoRetorno": 19,
+  "coortesComparadas": 30
+ },
+ "h12_+3.0 p.p.": {
+  "coortes": 30,
+  "icMedio": 0.04764031840605233,
+  "tIngenuo": 1.5646168355225,
+  "obsEstatais": 326,
+  "residuoDaPosicao": 0.009266329122985783,
+  "difPotencialMediana": 0.145896875,
+  "difRetornoMediana": 0.1309275,
+  "coortesEstatalAcimaNoPotencial": 24,
+  "coortesEstatalAcimaNoRetorno": 19,
+  "coortesComparadas": 30
+ },
+ "h36_base": {
+  "coortes": 22,
+  "icMedio": 0.08596079302231421,
+  "tIngenuo": 1.987920413854858,
+  "obsEstatais": 239,
+  "residuoDaPosicao": -0.0224269770155987,
+  "difPotencialMediana": 0.44369202499999993,
+  "difRetornoMediana": 0.318563375,
+  "coortesEstatalAcimaNoPotencial": 21,
+  "coortesEstatalAcimaNoRetorno": 17,
+  "coortesComparadas": 22
+ },
+ "h36_+0.5 p.p.": {
+  "coortes": 22,
+  "icMedio": 0.0838520513678885,
+  "tIngenuo": 1.9478111344688214,
+  "obsEstatais": 239,
+  "residuoDaPosicao": -0.009895680020907729,
+  "difPotencialMediana": 0.3985307,
+  "difRetornoMediana": 0.318563375,
+  "coortesEstatalAcimaNoPotencial": 21,
+  "coortesEstatalAcimaNoRetorno": 17,
+  "coortesComparadas": 22
+ },
+ "h36_+1.0 p.p.": {
+  "coortes": 22,
+  "icMedio": 0.08116354275107393,
+  "tIngenuo": 1.8915969244635966,
+  "obsEstatais": 239,
+  "residuoDaPosicao": 0.002624919004617747,
+  "difPotencialMediana": 0.35586470000000003,
+  "difRetornoMediana": 0.318563375,
+  "coortesEstatalAcimaNoPotencial": 21,
+  "coortesEstatalAcimaNoRetorno": 17,
+  "coortesComparadas": 22
+ },
+ "h36_+2.0 p.p.": {
+  "coortes": 22,
+  "icMedio": 0.0808149192684334,
+  "tIngenuo": 1.8689203288026857,
+  "obsEstatais": 236,
+  "residuoDaPosicao": 0.017741569970665554,
+  "difPotencialMediana": 0.26452777499999997,
+  "difRetornoMediana": 0.318563375,
+  "coortesEstatalAcimaNoPotencial": 20,
+  "coortesEstatalAcimaNoRetorno": 17,
+  "coortesComparadas": 22
+ },
+ "h36_+3.0 p.p.": {
+  "coortes": 22,
+  "icMedio": 0.07688374161774554,
+  "tIngenuo": 1.7893350279735991,
+  "obsEstatais": 235,
+  "residuoDaPosicao": 0.04062560742622314,
+  "difPotencialMediana": 0.19742725,
+  "difRetornoMediana": 0.318563375,
+  "coortesEstatalAcimaNoPotencial": 20,
+  "coortesEstatalAcimaNoRetorno": 17,
+  "coortesComparadas": 22
+ }
+}

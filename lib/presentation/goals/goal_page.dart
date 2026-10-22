@@ -1,7 +1,6 @@
 import '../../di/providers.dart';
 import '../theme/fin_space.dart';
 import '../components/fin_amount.dart';
-import '../shared/theme_bridge.dart';
 import 'feasibility_copy.dart';
 import 'skill_copy.dart';
 import '../shared/ui_kit.dart';
@@ -86,16 +85,15 @@ class _GoalPageState extends ConsumerState<GoalPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = ref.watch(isLightModeProvider);
     final feasibility = ref.watch(goalFeasibilityProvider);
     final alignment = ref.watch(goalAlignmentProvider);
     // Enquanto o pacote carrega não há ressalva a mostrar; carregado, a falta
     // dele é ressalva também (item B1.0).
-    final habilidade = ref.watch(skillReadingProvider);
-    final ressalvaDaHabilidade = habilidade.isLoading
+    final skill = ref.watch(skillReadingProvider);
+    final skillCaveatText = skill.isLoading
         ? null
-        : SkillCopy.caveat(habilidade.value);
-    final comPremio = habilidade.value?.premiumOrdering != null;
+        : SkillCopy.caveat(skill.value);
+    final withPremium = skill.value?.premiumOrdering != null;
 
     // `CustomScrollView`, e nao `ListView`: cada cartao vira um sliver proprio,
     // entao o framework so infla os que entram na viewport -- e cada um ganha a
@@ -117,21 +115,18 @@ class _GoalPageState extends ConsumerState<GoalPage> {
                     ),
                     const Gap.md(),
                     _MoneyField(
-                      isLight: isLight,
                       controller: _initial,
                       label: 'Aporte inicial',
                       onChanged: _apply,
                     ),
                     const Gap.sm(),
                     _MoneyField(
-                      isLight: isLight,
                       controller: _monthly,
                       label: 'Aporte mensal',
                       onChanged: _apply,
                     ),
                     const Gap.sm(),
                     _MoneyField(
-                      isLight: isLight,
                       controller: _target,
                       label: 'Valor desejado ao final',
                       onChanged: _apply,
@@ -169,7 +164,7 @@ class _GoalPageState extends ConsumerState<GoalPage> {
                 ),
                 data: (verdict) => verdict == null
                     ? const SizedBox.shrink()
-                    : _FeasibilityCard(verdict: verdict, isLight: isLight),
+                    : _FeasibilityCard(verdict: verdict),
               ),
               const Gap.md(),
               alignment.when(
@@ -187,9 +182,8 @@ class _GoalPageState extends ConsumerState<GoalPage> {
                       )
                     : _AlignmentCard(
                         alignment: value,
-                        isLight: isLight,
-                        skillCaveat: ressalvaDaHabilidade,
-                        withPremium: comPremio,
+                        skillCaveat: skillCaveatText,
+                        withPremium: withPremium,
                       ),
               ),
             ],
@@ -212,9 +206,9 @@ class _VerdictSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.fin;
 
-    Widget barra(double largura, double altura) => Container(
-      width: largura,
-      height: altura,
+    Widget bar(double width, double height) => Container(
+      width: width,
+      height: height,
       decoration: BoxDecoration(
         color: c.surfaceSunken,
         borderRadius: BorderRadius.circular(4),
@@ -228,13 +222,13 @@ class _VerdictSkeleton extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              barra(140, 12),
+              bar(140, 12),
               const Gap.md(),
-              barra(double.infinity, 44),
+              bar(double.infinity, 44),
               const Gap.md(),
-              barra(double.infinity, 44),
+              bar(double.infinity, 44),
               const Gap.md(),
-              barra(200, 12),
+              bar(200, 12),
             ],
           ),
         ),
@@ -269,13 +263,11 @@ class _VerdictSkeleton extends StatelessWidget {
 class _MoneyField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
-  final bool isLight;
   final VoidCallback onChanged;
 
   const _MoneyField({
     required this.controller,
     required this.label,
-    required this.isLight,
     required this.onChanged,
   });
 
@@ -284,10 +276,10 @@ class _MoneyField extends StatelessWidget {
   /// Sai de uma função porque `InputDecoration` exige o contorno em três
   /// estados — padrão, habilitado e focado — e três literais divergiriam no
   /// primeiro ajuste de raio.
-  static OutlineInputBorder _contorno(Color cor, {double espessura = 1}) =>
+  static OutlineInputBorder _outline(Color color, {double thickness = 1}) =>
       OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cor, width: espessura),
+        borderSide: BorderSide(color: color, width: thickness),
       );
 
   @override
@@ -315,9 +307,9 @@ class _MoneyField extends StatelessWidget {
           minWidth: 40,
           minHeight: 40,
         ),
-        border: _contorno(c.border),
-        enabledBorder: _contorno(c.border),
-        focusedBorder: _contorno(c.brand, espessura: 2),
+        border: _outline(c.border),
+        enabledBorder: _outline(c.border),
+        focusedBorder: _outline(c.brand, thickness: 2),
       ),
     );
   }
@@ -327,9 +319,8 @@ class _MoneyField extends StatelessWidget {
 /// observados — não em números arbitrários.
 class _FeasibilityCard extends StatelessWidget {
   final FeasibilityVerdict verdict;
-  final bool isLight;
 
-  const _FeasibilityCard({required this.verdict, required this.isLight});
+  const _FeasibilityCard({required this.verdict});
 
   /// Veredito traduzido em direcao semantica.
   ///
@@ -393,13 +384,13 @@ class _FeasibilityCard extends StatelessWidget {
           if (showRates)
             MetricTileRow(
               tiles: [
-                // `Lexico.exigido`, e nao "Rentabilidade exigida": e a
+                // `Lexicon.requiredText`, e nao "Rentabilidade exigida": e a
                 // mesma grandeza que a aba Analise confronta com o XIRR, e
                 // dois nomes faziam o leitor tratar como duas.
                 MetricTile(
-                  label: Lexico.exigido,
+                  label: Lexicon.requiredText,
                   value: Fmt.percent(rate, decimals: 2),
-                  hint: Lexico.exigidoAoAno,
+                  hint: Lexicon.requiredPerYear,
                   trend: _trend,
                 ),
                 MetricTile(
@@ -440,7 +431,6 @@ class _FeasibilityCard extends StatelessWidget {
 /// Confronto entre o exigido e o esperado.
 class _AlignmentCard extends StatelessWidget {
   final GoalAlignment alignment;
-  final bool isLight;
 
   /// O que a validação diz do prêmio, ou `null` (itens B1.0 e B1).
   final String? skillCaveat;
@@ -450,7 +440,6 @@ class _AlignmentCard extends StatelessWidget {
 
   const _AlignmentCard({
     required this.alignment,
-    required this.isLight,
     required this.skillCaveat,
     required this.withPremium,
   });
@@ -479,7 +468,7 @@ class _AlignmentCard extends StatelessWidget {
           MetricTileRow(
             tiles: [
               MetricTile(
-                label: Lexico.esperado,
+                label: Lexicon.expected,
                 value: Fmt.percent(alignment.expectedReturn),
                 // O rótulo dizia "upside anualizado + DY líquido" e estava
                 // errado nas duas metades: o DY saiu pela decisão 23, e a
@@ -497,7 +486,7 @@ class _AlignmentCard extends StatelessWidget {
                 trend: meets ? FinTrend.positive : FinTrend.negative,
               ),
               MetricTile(
-                label: Lexico.folga,
+                label: Lexicon.margin,
                 // `Fmt.points`, e nao interpolacao a mao: a aba Analise exibe
                 // a MESMA grandeza no cartao de confronto, e duas escritas da
                 // mesma folga divergem na primeira vez que uma delas mudar.
@@ -519,9 +508,9 @@ class _AlignmentCard extends StatelessWidget {
           // O prêmio do esperado sai do potencial, e a ressalva diz o que a
           // validação mediu dele. Vem antes da de cobertura porque vale para
           // toda carteira, e a de cobertura só para a que tem pouca avaliação.
-          if (skillCaveat case final ressalva?) ...[
+          if (skillCaveat case final caveat?) ...[
             const Gap.md(),
-            NoticeBanner(icon: Icons.rule_outlined, message: ressalva),
+            NoticeBanner(icon: Icons.rule_outlined, message: caveat),
           ],
           if (alignment.coverageIsWeak) ...[
             const Gap.md(),

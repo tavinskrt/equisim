@@ -148,14 +148,14 @@ abstract final class CalibratedBand {
   /// mesma janela. Par com fechamento não positivo não forma retorno.
   static double? trailingVolatility(PriceSeries prices) {
     final pts = prices.points;
-    final inicio = math.max(1, pts.length - volatilityWindow);
-    final retornos = <double>[
-      for (var i = inicio; i < pts.length; i++)
+    final start = math.max(1, pts.length - volatilityWindow);
+    final returns = <double>[
+      for (var i = start; i < pts.length; i++)
         if (pts[i - 1].close > 0 && pts[i].close > 0)
           math.log(pts[i].close / pts[i - 1].close),
     ];
-    if (retornos.length < volatilityMinimumReturns) return null;
-    final v = RiskMetrics.annualizedVolatility(retornos);
+    if (returns.length < volatilityMinimumReturns) return null;
+    final v = RiskMetrics.annualizedVolatility(returns);
     return v.isFinite ? v : null;
   }
 
@@ -185,9 +185,9 @@ abstract final class CalibratedBand {
           return null;
         }
         if (volatility <= 0) return null;
-        final centro = a + b * math.log(fairValue.reais / p0);
-        final low = p0 * math.exp(centro + volatility * zLower);
-        final high = p0 * math.exp(centro + volatility * zUpper);
+        final center = a + b * math.log(fairValue.reais / p0);
+        final low = p0 * math.exp(center + volatility * zLower);
+        final high = p0 * math.exp(center + volatility * zUpper);
         if (!low.isFinite || !high.isFinite || low <= 0) return null;
         return (low: Money.fromReais(low), high: Money.fromReais(high));
     }
@@ -213,60 +213,60 @@ abstract final class CalibratedBand {
 /// `tool/cobertura_banda.py` e lido pelo aplicativo.
 abstract final class CalibratedBandCodec {
   /// Versão do pacote da faixa em torno do justo (decisão 92).
-  static const int versaoJusto = 1;
+  static const int fairValueVersion = 1;
 
   /// Versão do pacote da faixa na escala da volatilidade (C2b).
-  static const int versaoVolatilidade = 2;
+  static const int volatilityVersion = 2;
 
   /// Lê o pacote. Faixa malformada é descartada, e não inventada.
-  static List<CalibratedBandTable> decode(Map<String, dynamic> pacote) {
-    final versao = pacote['versao'];
-    if (versao != versaoJusto && versao != versaoVolatilidade) return const [];
-    final faixas = pacote['faixas'];
-    if (faixas is! List) return const [];
+  static List<CalibratedBandTable> decode(Map<String, dynamic> package) {
+    final version = package['versao'];
+    if (version != fairValueVersion && version != volatilityVersion) return const [];
+    final bands = package['faixas'];
+    if (bands is! List) return const [];
     final out = <CalibratedBandTable>[];
-    for (final f in faixas) {
+    for (final f in bands) {
       if (f is! Map) continue;
-      final meses = f['meses'];
+      final months = f['meses'];
       final nominal = f['nominal'];
-      final observacoes = f['observacoes'];
-      final primeira = f['primeiraCoorte'];
-      final ultima = f['ultimaCoorte'];
-      final fora = f['coberturaForaDaAmostra'];
-      final nFora = f['observacoesForaDaAmostra'];
-      if (meses is! int ||
+      final observations = f['observacoes'];
+      final first = f['primeiraCoorte'];
+      final last = f['ultimaCoorte'];
+      final outside = f['coberturaForaDaAmostra'];
+      final outOfSampleCount = f['observacoesForaDaAmostra'];
+      if (months is! int ||
           nominal is! num ||
-          observacoes is! int ||
-          primeira is! int ||
-          ultima is! int ||
-          (fora != null && fora is! num) ||
-          nFora is! int) {
+          observations is! int ||
+          first is! int ||
+          last is! int ||
+          (outside != null && outside is! num) ||
+          outOfSampleCount is! int) {
         continue;
       }
-      final comum = (
-        months: meses,
+      final common = (
+        months: months,
         nominal: nominal.toDouble(),
-        observations: observacoes,
-        firstCohort: primeira,
-        lastCohort: ultima,
-        outOfSampleCoverage: (fora as num?)?.toDouble(),
-        outOfSampleObservations: nFora,
+        observations: observations,
+        firstCohort: first,
+        lastCohort: last,
+        outOfSampleCoverage: (outside as num?)?.toDouble(),
+        outOfSampleObservations: outOfSampleCount,
       );
       final CalibratedBandTable t;
-      if (versao == versaoJusto) {
-        final inferior = f['fatorInferior'];
-        final superior = f['fatorSuperior'];
-        if (inferior is! num || superior is! num) continue;
+      if (version == fairValueVersion) {
+        final lower = f['fatorInferior'];
+        final upper = f['fatorSuperior'];
+        if (lower is! num || upper is! num) continue;
         t = FairValueBandTable(
-          months: comum.months,
-          nominal: comum.nominal,
-          lowerFactor: inferior.toDouble(),
-          upperFactor: superior.toDouble(),
-          observations: comum.observations,
-          firstCohort: comum.firstCohort,
-          lastCohort: comum.lastCohort,
-          outOfSampleCoverage: comum.outOfSampleCoverage,
-          outOfSampleObservations: comum.outOfSampleObservations,
+          months: common.months,
+          nominal: common.nominal,
+          lowerFactor: lower.toDouble(),
+          upperFactor: upper.toDouble(),
+          observations: common.observations,
+          firstCohort: common.firstCohort,
+          lastCohort: common.lastCohort,
+          outOfSampleCoverage: common.outOfSampleCoverage,
+          outOfSampleObservations: common.outOfSampleObservations,
         );
       } else {
         final a = f['a'];
@@ -275,17 +275,17 @@ abstract final class CalibratedBandCodec {
         final zs = f['zSuperior'];
         if (a is! num || b is! num || zi is! num || zs is! num) continue;
         t = VolatilityBandTable(
-          months: comum.months,
-          nominal: comum.nominal,
+          months: common.months,
+          nominal: common.nominal,
           a: a.toDouble(),
           b: b.toDouble(),
           zLower: zi.toDouble(),
           zUpper: zs.toDouble(),
-          observations: comum.observations,
-          firstCohort: comum.firstCohort,
-          lastCohort: comum.lastCohort,
-          outOfSampleCoverage: comum.outOfSampleCoverage,
-          outOfSampleObservations: comum.outOfSampleObservations,
+          observations: common.observations,
+          firstCohort: common.firstCohort,
+          lastCohort: common.lastCohort,
+          outOfSampleCoverage: common.outOfSampleCoverage,
+          outOfSampleObservations: common.outOfSampleObservations,
         );
       }
       if (t.isUsable) out.add(t);

@@ -43,9 +43,6 @@ class ValuationSettings {
   /// unidade: um é total, o outro é por período.
   final int convergenceHorizonMonths;
 
-  /// Prêmio de risco de mercado do CAPM, em fração ao ano.
-  final double marketPremium;
-
   /// Declara os ajustes. **Só [monteCarlo] tem controle na interface**; os
   /// demais ficam nos padrões — parâmetros declarados do modelo, não
   /// configuráveis em tempo de execução.
@@ -55,7 +52,6 @@ class ValuationSettings {
     this.marginOfSafety = 0.0,
     this.projectionYears = 10,
     this.convergenceHorizonMonths = ExpectedReturn.defaultHorizonMonths,
-    this.marketPremium = CapmInputs.defaultMarketPremium,
   });
 
   /// Cópia com os campos informados substituídos.
@@ -65,7 +61,6 @@ class ValuationSettings {
     double? marginOfSafety,
     int? projectionYears,
     int? convergenceHorizonMonths,
-    double? marketPremium,
   }) => ValuationSettings(
     monteCarlo: monteCarlo ?? this.monteCarlo,
     samples: samples ?? this.samples,
@@ -73,7 +68,6 @@ class ValuationSettings {
     projectionYears: projectionYears ?? this.projectionYears,
     convergenceHorizonMonths:
         convergenceHorizonMonths ?? this.convergenceHorizonMonths,
-    marketPremium: marketPremium ?? this.marketPremium,
   );
 }
 
@@ -104,6 +98,10 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
 ) async {
   final settings = ref.watch(valuationSettingsProvider);
   final anchors = await ref.watch(marketAnchorsProvider.future);
+  final capital = await ref.watch(capitalEventsProvider(ticker).future);
+  // O prêmio de mercado é a média de dez anos do prêmio implícito no preço da
+  // bolsa, do pacote do build (decisão 142); sem pacote, os 5,5%, ressalvados.
+  final premium = await ref.watch(marketPremiumReadingProvider.future);
 
   final inputs = await PrepareValuationInputs.call(
     ticker: ticker,
@@ -113,7 +111,8 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     // CAPM olha para frente: a taxa livre de risco do desconto é a corrente,
     // não a média decenal usada para julgar a viabilidade da meta.
     riskFreeRate: anchors.currentRiskFreeRate,
-    marketPremium: settings.marketPremium,
+    marketPremium: premium.premium,
+    premiumSource: premium.source,
     marginOfSafety: settings.marginOfSafety,
     projectionYears: settings.projectionYears,
     // Desconto nominal exige crescimento perpétuo nominal. O teto sai do IPCA
@@ -133,6 +132,9 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     officialShares: await ref.watch(officialSharesProvider(ticker).future),
     isDistressed: (await ref.watch(distressedRegistryProvider.future))
         .contains(ticker.value),
+    // O controle estatal, da FCA da CVM: só a ressalva, sem mudar o preço
+    // (item B46).
+    stateControlled: await ref.watch(stateControlledProvider(ticker).future),
     // Prazo da concessão, do Formulário de Referência: só encurta a projeção
     // quando o contrato acaba dentro dela (decisão 88).
     concessionEnd: await ref.watch(concessionEndProvider(ticker).future),
@@ -152,29 +154,46 @@ final valuationProvider = FutureProvider.family<ValuationResult?, Ticker>((
     // Ela não entra no preço justo: fica ao lado dele, e a divergência é
     // declarada em vez de reconciliada.
     peerMultiples: await ref.watch(peerMultiplesProvider(ticker).future),
+    // **Os eventos de capital** (itens B28 e B29): os eventos de ações
+    // completam o ajuste que a fonte de preços não fez, e as emissões com
+    // valor declarado entram no patrimônio da ponte.
+    shareEvents: capital.shareEvents,
+    shareIssues: capital.issues,
   );
+  // A falha do preparo já foi registrada no painel de logs pelo próprio
+  // preparo (item D4); aqui só não há o que mostrar.
   if (inputs.isErr) return null;
 
-  final result = await ValuationRunner.run(
-    ValuationRequest(
-      inputs: inputs.unwrap(),
-      monteCarlo: settings.monteCarlo,
-      samples: settings.samples,
-    ),
-  );
-  final avaliado = result.valueOrNull;
-  if (avaliado == null) return null;
   // O que a cascata não enxerga: a avaliação seguiu sem a CVM, ou com um
   // pacote defasado (item A1.10); ou sem curva, e por quê (decisão 86).
   // Nenhum número muda; a ressalva aparece.
-  final notas = [
+  //
+  // **Entram antes da cascata, e não depois** (item D4): acrescentadas ao
+  // resultado pronto, elas apareciam na tela e faltavam no rastro que o painel
+  // de logs exporta — o arquivo de depuração não dizia o que a tela dizia.
+  final notes = [
     await ref.watch(cvmCoverageNoteProvider(ticker).future),
     (await ref.watch(riskFreeCurveReadingProvider.future)).note,
     // Sem prior do beta o motor é outro — beta cru e WACC estático —, e quem
     // lê o preço justo tem de saber qual dos dois rodou (item B11).
     (await ref.watch(betaPriorReadingProvider.future)).note,
+    // O prêmio de mercado que não é a média de dez anos do pacote, ou que é
+    // de um pacote velho (decisão 142).
+    premium.note,
   ].nonNulls.toList();
-  return notas.isEmpty ? avaliado : avaliado.withWarnings(notas);
+
+  final prepared = inputs.unwrap();
+  final result = await ValuationRunner.run(
+    ValuationRequest(
+      // As do preparo primeiro — o ajuste que ele completou na série —, e as
+      // da camada de dados depois.
+      inputs: prepared
+          .withContextNotes([...prepared.contextNotes, ...notes]),
+      monteCarlo: settings.monteCarlo,
+      samples: settings.samples,
+    ),
+  );
+  return result.valueOrNull;
 });
 
 /// Avaliações de todos os ativos da carteira Principal.
@@ -204,13 +223,13 @@ final portfolioValuationsProvider =
 final portfolioSignalsProvider =
     FutureProvider<Map<Ticker, TransversalSignals>>((ref) async {
   final tickers = ref.watch(studyProvider).study.principal.tickers;
-  final fundamentos = ref.watch(fundamentalsRepositoryProvider);
+  final fundamentals = ref.watch(fundamentalsRepositoryProvider);
   final out = <Ticker, TransversalSignals>{};
   for (final t in tickers) {
-    final historico = await fundamentos.history(t);
-    if (historico.isErr) continue;
+    final history = await fundamentals.history(t);
+    if (history.isErr) continue;
     // O exercício publicado na data da avaliação, que o núcleo resolve.
-    out[t] = TransversalSignals.fromHistory(historico.unwrap());
+    out[t] = TransversalSignals.fromHistory(history.unwrap());
   }
   return out;
 });
@@ -225,8 +244,10 @@ final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
   final valuations = await ref.watch(portfolioValuationsProvider.future);
   // A ordenação do prêmio é a que a validação escolheu pela regra fixada antes
   // de medir (item B1); sem pacote, ou sem ordenação que passe, não há prêmio.
-  final habilidade = await ref.watch(skillReadingProvider.future);
-  final sinais = await ref.watch(portfolioSignalsProvider.future);
+  final skill = await ref.watch(skillReadingProvider.future);
+  final signals = await ref.watch(portfolioSignalsProvider.future);
+  // O prêmio do escore é o mesmo do desconto (decisão 142).
+  final premium = await ref.watch(marketPremiumReadingProvider.future);
 
   // A seção transversal é a das avaliações carregadas, que aqui são as da
   // carteira. É estreita, e o resultado declara o tamanho — ver
@@ -237,8 +258,9 @@ final goalAlignmentProvider = FutureProvider<GoalAlignment?>((ref) async {
     goal: goal,
     valuations: valuations,
     anchors: anchors,
-    ordering: habilidade?.premiumOrdering,
-    signals: sinais,
+    ordering: skill?.premiumOrdering,
+    signals: signals,
+    riskPremium: premium.premium,
   );
   return result.valueOrNull;
 });

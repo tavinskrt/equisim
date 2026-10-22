@@ -1,6 +1,6 @@
 name: equisim
-description: "A new Flutter project."
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+description: "Um novo projeto Flutter."
+publish_to: 'none' # Remova esta linha se quiser publicar no pub.dev
 version: 1.0.0+1
 
 environment:
@@ -15,7 +15,7 @@ dependencies:
     sdk: flutter
 
   # Núcleo de domínio: Dart puro, sem Flutter e sem rede.
-  # A pureza é garantida por teste em packages/equisim_core/test/purity_test.dart.
+  # A pureza é garantida por teste em test/core/purity_test.dart.
   equisim_core:
     path: packages/equisim_core
 
@@ -40,6 +40,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # Os testes do núcleo (test/core/) são Dart puro e usam o `test` do Dart,
+  # não o `flutter_test`: não precisam de nada do Flutter para rodar.
+  test: ^1.25.0
   flutter_lints: ^6.0.0
   drift_dev: ^2.34.5
   build_runner: ^2.15.1

@@ -10,7 +10,7 @@
     "",
     "Dois usos:",
     "  1. referencia de dominio para revisao humana e para o rulebook do agente;",
-    "  2. base para testes Dart em packages/equisim_core/test/.",
+    "  2. base para testes Dart em test/core/.",
     "",
     "Localizacao: a especificacao original pedia `tests/qa-fixtures/`. Ficou em",
     "`test/qa_fixtures/` porque o repositorio ja usa `test/` (convencao do Dart,",

@@ -16,36 +16,53 @@
  * quer por descritores, nao por codigo. Acrescentar lente e, na maioria dos
  * casos, acrescentar entrada nesta tabela.
  */
-import type { LenteId } from './schema.ts';
+import type { LensId } from './schema.ts';
 
 /**
  * Descritor de material.
  *
- * `opcional` existe porque diretorio que ainda nao foi criado e estado normal
+ * `optional` existe porque diretorio que ainda nao foi criado e estado normal
  * durante a migracao do registro -- e nao motivo para abortar a execucao.
  */
 export type Material =
-  | { tipo: 'arquivo'; caminho: string; opcional?: boolean }
-  | { tipo: 'arvore-completa'; excluirPrefixos?: string[] }
+  | { kind: 'arquivo'; filePath: string; optional?: boolean }
+  | { kind: 'arvore-completa'; excludePrefixes?: string[] }
   | {
-      tipo: 'diretorio';
-      caminho: string;
-      extensoes?: string[];
-      excluir?: string[];
-      opcional?: boolean;
+      kind: 'diretorio';
+      filePath: string;
+      extensions?: string[];
+      exclude?: string[];
+      optional?: boolean;
+      /**
+       * Do mais recente ao mais antigo, pela ordem inversa do nome. Serve ao
+       * registro de decisoes, numerado em sequencia: quando o payload bate no
+       * teto, o corte leva as antigas, e nao as que acabaram de ser escritas.
+       */
+      newestFirst?: boolean;
     }
-  | { tipo: 'arvore'; raizes: string[] }
-  | { tipo: 'git-log'; quantidade: number };
+  | { kind: 'arvore'; roots: string[] }
+  /**
+   * O que mudou contra o ultimo commit, e o novo ainda sem commit, sob
+   * [roots]. Posto primeiro, garante que a lente leia o que a rodada mexeu
+   * antes do corte do teto -- que e onde o codigo e o teste novos se perdiam.
+   */
+  | {
+      kind: 'alterados';
+      roots: string[];
+      extensions?: string[];
+      exclude?: string[];
+    }
+  | { kind: 'git-log'; count: number };
 
-export interface Lente {
-  id: LenteId;
+export interface Lens {
+  id: LensId;
   /** Titulo legivel, para o cabecalho do relatorio. */
-  titulo: string;
+  title: string;
   /** O que o modelo esta sendo perguntado. Vai integral para o prompt. */
-  pergunta: string;
+  question: string;
   /** Clausulas de descarte especificas desta lente. */
-  disciplina: string[];
-  materiais: Material[];
+  discipline: string[];
+  materials: Material[];
   /**
    * Depende de capturas de tela.
    *
@@ -53,25 +70,67 @@ export interface Lente {
    * `npm run ui:capturar`) e FORCA o backend `api`, porque o `agy` recusa
    * imagem explicitamente -- ver `agy.ts`.
    */
-  precisaDeCapturas?: boolean;
+  needsScreenshots?: boolean;
 }
 
 /** Artefatos gerados: auditar `.g.dart` so gasta token. Mesmo criterio do auditor. */
-const GERADOS = ['*.g.dart', '*.freezed.dart', '*.mocks.dart'];
+const GENERATED = ['*.g.dart', '*.freezed.dart', '*.mocks.dart'];
+
+/**
+ * O que a lente `metodo` le antes de tudo, na ordem do que mais pesa no preco
+ * justo: a cascata, o custo de capital, o premio de mercado, a realavancagem,
+ * o DCF e as guardas do crescimento, e so depois o resto.
+ */
+const METHOD_FIRST = [
+  'packages/equisim_core/lib/src/usecases/compute_valuation.dart',
+  'packages/equisim_core/lib/src/services/valuation/cost_of_capital.dart',
+  'packages/equisim_core/lib/src/services/valuation/implied_premium.dart',
+  'packages/equisim_core/lib/src/services/valuation/levered_rates.dart',
+  'packages/equisim_core/lib/src/services/valuation/dcf.dart',
+  'packages/equisim_core/lib/src/services/valuation/growth_guards.dart',
+  'packages/equisim_core/lib/src/usecases/prepare_valuation_inputs.dart',
+  'packages/equisim_core/lib/src/services/valuation/yield_curve.dart',
+  'packages/equisim_core/lib/src/services/valuation/growth_estimator.dart',
+  'packages/equisim_core/lib/src/services/valuation/capital_base.dart',
+  'packages/equisim_core/lib/src/services/valuation/moat_fixed_point.dart',
+  'packages/equisim_core/lib/src/services/valuation/scenario_engine.dart',
+  'packages/equisim_core/lib/src/usecases/resolve_beta_prior.dart',
+  'packages/equisim_core/lib/src/usecases/portfolio_usecases.dart',
+];
+
+/**
+ * O que a lente `nucleo` le antes do resto do nucleo: o modelo do valuation e a
+ * tela que o consome.
+ *
+ * **A ordem e a do corte**, como em [METHOD_FIRST]. Ate 11/10/2026 a lente
+ * lia `packages/equisim_core/lib` em ordem alfabetica, e o corte caia antes de
+ * `services/valuation/`: a conta congelada do calculo do usuario (decisao 147)
+ * nunca chegava a ela, que respondia "nenhuma tensao" sem a ter lido. E a
+ * pergunta dela -- que regra de negocio vazou para a apresentacao -- nao tinha
+ * como ser respondida sem a tela: a do valuation e a que mais monta numero a
+ * partir do dominio.
+ */
+const CORE_FIRST = [
+  'packages/equisim_core/lib/src/entities/valuation.dart',
+  'packages/equisim_core/lib/src/services/valuation/manual_valuation.dart',
+  'lib/presentation/valuation/manual_copy.dart',
+  'lib/presentation/valuation/manual_valuation_page.dart',
+  'lib/presentation/shared/domain_copy.dart',
+];
 
 /**
  * Diretorios de plataforma, gerados pelo `flutter create` e quase nunca
  * tocados a mao. Sao 120 dos 326 arquivos versionados e nao carregam decisao
  * alguma deste projeto.
  */
-const PLATAFORMAS = ['android/', 'ios/', 'web/', 'windows/', 'macos/', 'linux/'];
+const PLATFORMS = ['android/', 'ios/', 'web/', 'windows/', 'macos/', 'linux/'];
 
-export const LENTES: Record<LenteId, Lente> = {
+export const LENSES: Record<LensId, Lens> = {
   // -------------------------------------------------------------------------
   registro: {
     id: 'registro',
-    titulo: 'Integridade do registro',
-    pergunta: [
+    title: 'Integridade do registro',
+    question: [
       'Onde o REGISTRO do projeto diverge da REALIDADE do repositorio?',
       '',
       'Classifique cada divergencia em uma destas cinco classes, e diga qual',
@@ -101,9 +160,15 @@ export const LENTES: Record<LenteId, Lente> = {
       'se decidiu X, entao nao ha decisao a inventariar -- ha, no maximo, uma',
       'ESTRUTURA SEM REGISTRO a reportar como tensao.',
     ].join('\n'),
-    disciplina: [
+    discipline: [
       'Esta lente e DIFERENCA DE CONJUNTOS, nao opiniao. Toda divergencia',
       '  nomeia os DOIS lados: o que o registro diz e o que o repositorio tem.',
+      'Apontamento com secao "## Destino" que diz o que ele virou -- decisao,',
+      '  item do plano ou descarte -- esta TRATADO, e fica na pasta de',
+      '  proposito: e a proveniencia das decisoes (README de docs/apontamentos).',
+      '  So reporte apontamento SEM destino, ou com destino que cite decisao ou',
+      '  item inexistente. Em 02/10/2026 esta lente pediu para apagar os',
+      '  apontamentos ja convertidos, o que quebraria a citacao das decisoes.',
       'PROIBIDO INFERIR DECISAO A PARTIR DE CODIGO. Raciocinar de tras para',
       '  frente -- da implementacao para a decisao que "deve ter" existido --',
       '  FABRICA registro, e registro fabricado e pior que registro ausente,',
@@ -115,6 +180,15 @@ export const LENTES: Record<LenteId, Lente> = {
       '  cabe a quem participou da decisao, nao a quem le o repositorio.',
       'Se voce nao consegue copiar do material a frase que DECLARA a decisao,',
       '  a decisao nao esta declarada. Nao a inventarie.',
+      'DECISAO SEM DEFINICAO NAO SE AFIRMA SOBRE REGISTRO CORTADO. As decisoes',
+      '  vem das recentes para as antigas, e o material para no teto: as',
+      '  antigas ficam na lista de omitidas do fim. Dizer que um numero nao tem',
+      '  lugar canonico e afirmar sobre TODAS as decisoes, inclusive as que voce',
+      '  nao leu. Em 29/09/2026 esta lente deu como "sem decisao" o corte de',
+      '  liquidez de R$ 2 milhoes e os oito anos de balanco do README; eles',
+      '  estao nas decisoes 25, 91 e 95, e a 25 era das omitidas. Com material',
+      '  cortado, a classe so vale para numero que o proprio texto atribui a uma',
+      '  decisao cujo arquivo nao existe na arvore.',
       'NAO proponha reescrever o parecer. Ele e documento historico datado; o',
       '  que se propoe e extrair dele o que precisa virar registro enderecavel.',
       'NAO reporte ausencia de documentacao em geral. A pergunta e sobre',
@@ -148,67 +222,111 @@ export const LENTES: Record<LenteId, Lente> = {
       '  aparece em qualquer um dos dois lugares, o arquivo EXISTE e a tensao',
       '  nao existe.',
     ],
-    materiais: [
-      { tipo: 'arquivo', caminho: 'PLANO_ARQUITETURA.md' },
-      { tipo: 'arquivo', caminho: 'README.md' },
-      { tipo: 'arquivo', caminho: 'CLAUDE.md' },
-      { tipo: 'diretorio', caminho: 'docs/decisoes', extensoes: ['.md'], opcional: true },
-      { tipo: 'diretorio', caminho: 'docs/apontamentos', extensoes: ['.md'], opcional: true },
+    // **A ordem e a do corte.** Com 134 decisoes, o registro sozinho passa do
+    // teto do payload, e o que vem depois dele nao chegava ao modelo: em
+    // 24/09/2026 esta lente rodou sem o `estado.md`, sem a arvore e sem o log,
+    // e inventariou so ate a decisao 32. O pequeno e indispensavel vem antes;
+    // as decisoes vem por ultimo, das recentes para as antigas.
+    materials: [
+      { kind: 'arquivo', filePath: 'README.md' },
+      { kind: 'arquivo', filePath: 'CLAUDE.md' },
       // **A tabela de substituicoes, ja resolvida.** O campo `substitui` mora
       // em quem substitui, e refazer o grafo lendo 100 decisoes e trabalho que
       // o modelo faz mal: em 21/09/2026 ele reportou a decisao 23 como viva
       // duas vezes, embora a 101 a substitua parcialmente e diga isso no campo.
       // O estado gerado traz o veredito de cada uma numa linha.
-      { tipo: 'arquivo', caminho: 'docs/estado.md', opcional: true },
+      { kind: 'arquivo', filePath: 'docs/estado.md', optional: true },
       // ARVORE COMPLETA, nao um subconjunto. Esta lente pergunta se o registro
       // bate com a realidade; mandar arvore parcial faz o modelo ver ausencia
       // onde ha apenas material nao enviado, e ele reporta "promessa nao
       // cumprida" com toda a razao, sobre um repositorio que nunca viu inteiro.
       // Aconteceu: `tool/` e `functions/` ficaram de fora de uma lista de
       // raizes e viraram duas tensoes ESTRUTURAL falsas.
-      { tipo: 'arvore-completa', excluirPrefixos: PLATAFORMAS },
-      { tipo: 'git-log', quantidade: 40 },
+      { kind: 'arvore-completa', excludePrefixes: PLATFORMS },
+      { kind: 'git-log', count: 40 },
+      { kind: 'diretorio', filePath: 'docs/apontamentos', extensions: ['.md'], optional: true },
+      { kind: 'arquivo', filePath: 'PLANO_ARQUITETURA.md' },
+      {
+        kind: 'diretorio',
+        filePath: 'docs/decisoes',
+        extensions: ['.md'],
+        optional: true,
+        newestFirst: true,
+      },
     ],
   },
 
   // -------------------------------------------------------------------------
   nucleo: {
     id: 'nucleo',
-    titulo: 'Nucleo de dominio',
-    pergunta: [
+    title: 'Nucleo de dominio',
+    question: [
       'As entidades do nucleo sao coesas? Que regra de negocio vazou para a',
       'camada de apresentacao? Que value object falta para eliminar uma classe',
       'de erro por construcao, em vez de por validacao?',
     ].join('\n'),
-    disciplina: [
+    discipline: [
       'PROIBIDO sugerir pacote de terceiros dentro de `equisim_core`. A pureza',
       '  e travada pelo teste `purity_test.dart` e nao esta em negociacao.',
       'Toda proposta cita arquivo e tipo que EXISTEM no material.',
       'NAO proponha renomear por gosto. Nome so entra em tensao quando ele',
       '  descreve coisa diferente do que o tipo faz.',
+      'Serializacao que acompanha o tipo (`toJson`/`fromJson`) e contrato do',
+      '  proprio tipo, e nao infraestrutura vazada: antes de afirmar que um',
+      '  valor e convertido "em memoria", confira se a conversao esta no',
+      '  construtor ou so no `toJson`. So o primeiro altera o dado que o',
+      '  calculo le.',
+      'JA INVENTARIADO NO PLANO, e voce nao recebe o plano: o tipo de data de',
+      '  calendario no lugar do `DateTime` truncado, as listas paralelas de',
+      '  `TotalReturnIndex.build` e as do diagnostico (`growthPath` e',
+      '  `retentionPath`), e o `FundamentalsSnapshot` que carrega o valor de',
+      '  mercado e a contagem de hoje ao lado do exercicio. Estao na secao',
+      '  "Fora dos dois objetivos" desde 14/09/2026, e voltaram em 21, 25 e',
+      '  27/09/2026 sem fato novo. So reaponte mostrando um numero que um deles',
+      '  erra.',
+      'A `unit` de `CalculationTrace` (`R$`, `%`) e texto do rastro de',
+      '  auditoria, em portugues por construcao, e nao rotulo de tela: a decisao',
+      '  122 governa o que a apresentacao monta, e o rastro nao e tela.',
+      '  Recusado em 27/09/2026.',
+      'Contagem de acoes em `double` no `FundamentalsSnapshot` e no divisor',
+      '  NAO e defeito de tipo: parte das contagens do motor e ESTIMATIVA',
+      '  continua (valor de mercado dividido pelo preco, razao medida da unit),',
+      '  e o dado que chega inteiro da fonte nao ganha fracao em conta nenhuma.',
+      '  Recusado em 25/09/2026. So reaponte com um preco justo que a fracao',
+      '  mude.',
     ],
-    materiais: [
+    // O que a rodada mexeu vem antes até da lista acima (14/10/2026): o
+    // registro da normalização e o painel que o explica não estavam nela, e a
+    // lente respondeu "nenhuma tensão" sem lê-los.
+    materials: [
       {
-        tipo: 'diretorio',
-        caminho: 'packages/equisim_core/lib',
-        extensoes: ['.dart'],
-        excluir: GERADOS,
+        kind: 'alterados',
+        roots: ['packages/equisim_core/lib', 'lib/presentation'],
+        extensions: ['.dart'],
+        exclude: GENERATED,
       },
-      { tipo: 'arquivo', caminho: 'packages/equisim_core/test/purity_test.dart' },
-      { tipo: 'diretorio', caminho: 'docs/decisoes', extensoes: ['.md'], opcional: true },
+      ...CORE_FIRST.map((filePath) => ({ kind: 'arquivo' as const, filePath })),
+      { kind: 'arquivo', filePath: 'test/core/purity_test.dart' },
+      {
+        kind: 'diretorio',
+        filePath: 'packages/equisim_core/lib',
+        extensions: ['.dart'],
+        exclude: [...GENERATED, ...CORE_FIRST],
+      },
+      { kind: 'diretorio', filePath: 'docs/decisoes', extensions: ['.md'], optional: true },
     ],
   },
 
   // -------------------------------------------------------------------------
   dados: {
     id: 'dados',
-    titulo: 'Camada de dados e resiliencia',
-    pergunta: [
+    title: 'Camada de dados e resiliencia',
+    question: [
       'O que acontece quando a API de mercado cai, estoura cota ou devolve',
       'serie incompleta? O cache, o retry e a degradacao entregam a contingencia',
       'que foi decidida -- ou apenas a que foi escrita?',
     ].join('\n'),
-    disciplina: [
+    discipline: [
       'Toda tensao e confrontada com uma DECISAO registrada. Divergencia entre',
       '  decisao e codigo e achado; ausencia de recurso que ninguem decidiu,',
       '  nao e.',
@@ -223,32 +341,40 @@ export const LENTES: Record<LenteId, Lente> = {
       '  429, nao trava" em test/data/network_and_quality_test.dart o prova, e',
       '  reprova quando a liberacao sai. So reaponte mostrando o caminho que',
       '  aquele teste nao cobre.',
+      'O custo de um dado velho no cache depende de QUEM O LE, e quem le esta',
+      '  no nucleo, fora deste material. Afirmar que ele contamina o calculo',
+      '  exige citar o consumidor; sem isso, a tensao e no maximo LOCAL. Dois',
+      '  ja conferidos (24/09/2026): os campos "de hoje" dos fundamentos',
+      '  (`sharesOutstanding`, `marketCap`, `enterpriseToEbitda`) sao lidos so',
+      '  do exercicio mais recente, que e o que a resposta renova; o volume, so da',
+      '  janela de liquidez recente (`EligibilityGate.medianTradedValue`), e volume',
+      '  ausente e omissao do teste, e nao reprovacao.',
     ],
-    materiais: [
+    materials: [
       {
-        tipo: 'diretorio',
-        caminho: 'lib/data',
-        extensoes: ['.dart'],
-        excluir: GERADOS,
+        kind: 'diretorio',
+        filePath: 'lib/data',
+        extensions: ['.dart'],
+        exclude: GENERATED,
       },
-      { tipo: 'arquivo', caminho: 'functions/index.js' },
-      { tipo: 'arquivo', caminho: 'test/data/network_and_quality_test.dart' },
-      { tipo: 'arquivo', caminho: 'firestore.rules', opcional: true },
-      { tipo: 'diretorio', caminho: 'docs/decisoes', extensoes: ['.md'], opcional: true },
+      { kind: 'arquivo', filePath: 'functions/index.js' },
+      { kind: 'arquivo', filePath: 'test/data/network_and_quality_test.dart' },
+      { kind: 'arquivo', filePath: 'firestore.rules', optional: true },
+      { kind: 'diretorio', filePath: 'docs/decisoes', extensions: ['.md'], optional: true },
     ],
   },
 
   // -------------------------------------------------------------------------
   metodo: {
     id: 'metodo',
-    titulo: 'Metodo financeiro',
-    pergunta: [
+    title: 'Metodo financeiro',
+    question: [
       'A metodologia de DCF e CAPM implementada aqui e defensavel numa banca?',
       'Que premissa esta IMPLICITA no codigo e deveria estar explicita e',
       'justificada? Onde uma escolha metodologica foi feita sem que o codigo',
       'registre por que ela, e nao a alternativa?',
     ].join('\n'),
-    disciplina: [
+    discipline: [
       'Esta lente NAO caca bug -- disso o auditor cuida, e melhor. Aqui se',
       '  questiona PREMISSA. Toda observacao nomeia a premissa e o ponto onde',
       '  ela esta codificada.',
@@ -265,24 +391,68 @@ export const LENTES: Record<LenteId, Lente> = {
       '  respondeu e ruido: em 21 e 22/09/2026 esta lente reabriu tres',
       '  premissas medidas (Blume +0,1%, traducao do cenario, minoritario com',
       '  efeito 0,00%). Limitacao declarada SEM medicao continua reportavel.',
+      'A traducao do cenario (`ScenarioTranslation`, decisao 121) foi reaberta',
+      '  pela TERCEIRA vez em 24/09/2026, sem evidencia nova. Os cenarios sao',
+      '  sensibilidade, e nao a incerteza (decisao 92): o que a tela mostra como',
+      '  incerteza e a faixa calibrada. So reaponte com medicao que a decisao',
+      '  121 nao fez.',
+      'ESTRUTURAL exige conjunto exposto que pese. A via do acionista de',
+      '  companhia NAO financeira atende 1 dos 97 avaliados do aplicativo',
+      '  (24/09/2026), e as financeiras nao realavancam. Tensao sobre esse',
+      '  caminho e no maximo LOCAL, a menos que voce mostre um conjunto maior.',
+      'O escudo fiscal do WACC na aliquota estatutaria e a decisao 37: a',
+      '  deducao do juro vale na margem, e a margem de quem esta no Lucro Real',
+      '  e a aliquota cheia. O Lucro Presumido tem teto de receita que quase',
+      '  nenhuma listada respeita. Recusado em 25/09/2026; so reaponte com uma',
+      '  companhia avaliada que esteja no Presumido.',
+      'PONTO FLUTUANTE NO DCF NAO E PREMISSA A REABRIR. Cotacao, contagem de',
+      '  papeis e valores do fluxo descontado em `double`, convertidos para',
+      '  `Money` uma vez, na fronteira, e o arranjo aceito pela regra R1 do',
+      '  auditor ("NAO ACUSE -- caminho de calculo de fluxo descontado"): dez',
+      '  iteracoes acumulam erro de 1e-14, e normalizar em centavos no meio',
+      '  introduziria erro de meio centavo por ano. A acao inteira e regra da',
+      '  SIMULACAO, e a contagem de papeis em `double` serve a uma divisao.',
+      '  Levantado e recusado em 28/09/2026; tambem nao e tema desta lente,',
+      '  que questiona premissa financeira, e nao tipo.',
     ],
-    materiais: [
+    // **A ordem e a do corte.** O payload tem teto, e o corte e por arquivo
+    // inteiro, do fim para o comeco. Ate 01/10/2026 esta lente lia
+    // `usecases/` e `services/` em ordem alfabetica, e o corte caia antes de
+    // `services/valuation/` -- o custo de capital, a realavancagem, o DCF e o
+    // premio de mercado da decisao 142 nunca chegavam a ela, que respondia
+    // "nenhuma tensao" sobre o metodo sem te-lo lido. Primeiro o que define o
+    // preco justo; dados da CVM, backtest e meta ficam de fora, porque nao sao
+    // metodo de DCF nem de CAPM.
+    //
+    // **O que a rodada mexeu no metodo vem antes** (11/10/2026): o teto ja
+    // estava cheio com a lista acima, e o calculo do usuario (decisao 147),
+    // novo em `services/valuation/`, ficava fora -- a lente nao tinha como
+    // julgar a metodologia dele. O alterado entra uma vez so, na primeira
+    // posicao em que aparece.
+    materials: [
       {
-        tipo: 'diretorio',
-        caminho: 'packages/equisim_core/lib/src/usecases',
-        extensoes: ['.dart'],
+        kind: 'alterados',
+        roots: ['packages/equisim_core/lib/src/services/valuation'],
+        extensions: ['.dart'],
+      },
+      ...METHOD_FIRST.map((filePath) => ({ kind: 'arquivo' as const, filePath })),
+      {
+        kind: 'diretorio',
+        filePath: 'packages/equisim_core/lib/src/services/valuation',
+        extensions: ['.dart'],
+        exclude: METHOD_FIRST,
       },
       {
-        tipo: 'diretorio',
-        caminho: 'packages/equisim_core/lib/src/services',
-        extensoes: ['.dart'],
+        kind: 'diretorio',
+        filePath: 'packages/equisim_core/lib/src/services/metrics',
+        extensions: ['.dart'],
       },
-      { tipo: 'arquivo', caminho: 'docs/AUDITORIA_DE_CALCULOS.md' },
+      { kind: 'arquivo', filePath: 'docs/AUDITORIA_DE_CALCULOS.md' },
       {
-        tipo: 'diretorio',
-        caminho: 'test/qa_fixtures',
-        extensoes: ['.json'],
-        opcional: true,
+        kind: 'diretorio',
+        filePath: 'test/qa_fixtures',
+        extensions: ['.json'],
+        optional: true,
       },
     ],
   },
@@ -290,43 +460,72 @@ export const LENTES: Record<LenteId, Lente> = {
   // -------------------------------------------------------------------------
   risco: {
     id: 'risco',
-    titulo: 'Risco nao coberto',
-    pergunta: [
+    title: 'Risco nao coberto',
+    question: [
       'Que caminho de calculo ou de erro nao tem teste? Onde a suite da FALSA',
       'sensacao de cobertura -- testa o caminho feliz de algo cuja falha e o',
       'que importa?',
     ].join('\n'),
-    disciplina: [
+    discipline: [
       'Esta lente e DIFERENCA DE CONJUNTOS. Toda lacuna nomeia o arquivo que',
       '  esta coberto e o caminho que nao esta.',
       'NAO peca cobertura por cobertura. Codigo trivial sem teste nao e risco;',
       '  caminho de dinheiro ou de erro sem teste, e.',
       'NAO conte testes. Numero de testes nao e medida de risco coberto.',
+      'O `compute` do Flutter roda sobre `Isolate.run`, que completa o Future',
+      '  com erro quando a isolate morre sem responder. Isolate morta em',
+      '  silencio NAO trava quem espera um `compute`; nao peca `onExit` em volta',
+      '  dele (em 01/10/2026 esta lente pediu, sobre o `ValuationRunner`).',
+      'A tolerancia da fonte a JSON de forma errada numa rota -- as outras rotas',
+      '  continuam entregando os exercicios -- e escolha registrada no plano',
+      '  (item D6 e historico de 25/09/2026), e o cache nao grava nulo por cima',
+      '  de valor bom. Reporta-la de novo contra a decisao 68 so com evidencia',
+      '  NOVA: um caminho em que a serie sem a demonstracao chega a um preco',
+      '  justo, e nao so ao cache.',
     ],
-    materiais: [
+    // **O que a rodada mexeu vem primeiro** (11/10/2026). A lente lia os dois
+    // diretorios de teste em ordem alfabetica, e o corte do teto caia antes do
+    // teste e do codigo novos: ela respondia "nenhum caminho sem teste" sobre o
+    // calculo do usuario (decisao 147) sem ter lido nem um nem outro.
+    materials: [
       {
-        tipo: 'arvore',
-        raizes: ['lib', 'packages/equisim_core/lib', 'test', 'packages/equisim_core/test'],
+        kind: 'arvore',
+        roots: ['lib', 'packages/equisim_core/lib', 'test'],
       },
-      { tipo: 'diretorio', caminho: 'test', extensoes: ['.dart'], excluir: GERADOS },
+      // Os testes alterados antes do codigo alterado: o material desta lente e
+      // o teste, e o arquivo de codigo grande -- `compute_valuation.dart` tem
+      // um quarto do teto -- nao pode empurrar o teste novo para fora.
       {
-        tipo: 'diretorio',
-        caminho: 'packages/equisim_core/test',
-        extensoes: ['.dart'],
+        kind: 'alterados',
+        roots: ['test'],
+        extensions: ['.dart'],
+        exclude: GENERATED,
       },
+      {
+        kind: 'alterados',
+        roots: ['lib', 'packages/equisim_core/lib', 'tool'],
+        extensions: ['.dart'],
+        exclude: GENERATED,
+      },
+      // Os testes do aplicativo antes dos do nucleo, na mesma ordem de quando
+      // moravam em `test/` e `packages/equisim_core/test/`: e a ordem do corte.
+      { kind: 'diretorio', filePath: 'test/data', extensions: ['.dart'], exclude: GENERATED },
+      { kind: 'diretorio', filePath: 'test/ui', extensions: ['.dart'], exclude: GENERATED },
+      { kind: 'diretorio', filePath: 'test/tool', extensions: ['.dart'], exclude: GENERATED },
+      { kind: 'diretorio', filePath: 'test/core', extensions: ['.dart'] },
     ],
   },
 
   // -------------------------------------------------------------------------
   rumo: {
     id: 'rumo',
-    titulo: 'Rumo do projeto',
-    pergunta: [
+    title: 'Rumo do projeto',
+    question: [
       'O que foi decidido e nao foi entregue? O que e divida assumida e o que',
       'e esquecimento? Qual o proximo passo com maior retorno para o objeto',
       'deste trabalho -- que e o ESTUDO, nao o aplicativo?',
     ].join('\n'),
-    disciplina: [
+    discipline: [
       'Esta e a lente mais propensa a produzir backlog generico, entao a',
       '  disciplina e a mais dura: TODA proposta cita uma DECISAO NUMERADA e um',
       '  ARQUIVO do repositorio. Faltando qualquer um dos dois, descarte.',
@@ -345,32 +544,52 @@ export const LENTES: Record<LenteId, Lente> = {
       '  e tensao. Se o trecho que voce citaria como evidencia ja diz "fica',
       '  registrado como limitacao, nao corrigido aqui", ele esta cumprindo o',
       '  que a lente pede -- e reporta-lo e cobrar duas vezes a mesma coisa.',
+      'PENDENCIA ANUNCIADA NUMA DECISAO ANTIGA NAO E PENDENCIA VIVA. Decisao e',
+      '  imutavel, e o texto dela diz o que faltava NA DATA. Antes de reportar',
+      '  que algo "continua" pendente, confira: (1) se a decisao foi',
+      '  SUBSTITUIDA -- o `docs/estado.md` mostra "substituida pela N", e a',
+      '  substituida nao tem pendencia alguma; (2) se uma decisao posterior ou o',
+      '  plano (§6 e §7) marca o assunto como fechado. Em 22/09/2026 esta lente',
+      '  reportou tres pendencias ja fechadas: a divergencia das vias (decisao',
+      '  39, substituida pela 102), a nao monotonia na curva (decisao 35,',
+      '  fechada pela 105 com 0 de 102) e o perfil de BRAP4/FESA4/UNIP6 (decisao',
+      '  30, resolvido pelo setor da B3 pela raiz do emissor). Sem evidencia de',
+      '  que persiste em material ATUAL, o maximo e inventariar.',
     ],
-    materiais: [
-      { tipo: 'diretorio', caminho: 'docs/decisoes', extensoes: ['.md'], opcional: true },
-      { tipo: 'arquivo', caminho: 'docs/estado.md', opcional: true },
+    // **A ordem e a do corte**, como na `registro`: em 24/09/2026 as decisoes
+    // vinham primeiro, em ordem crescente, e o teto do payload cortava na 50 --
+    // o `estado.md` e o plano, que a disciplina acima exige, nunca chegavam.
+    materials: [
+      { kind: 'arquivo', filePath: 'docs/estado.md', optional: true },
       // **O veredito de cada item mora aqui**, e sem ele a lente le o
       // `## Contexto` das decisoes como se fosse o estado de hoje -- foi o que
       // produziu, em duas rodadas seguidas, o mesmo falso positivo sobre os
       // bancos sem setor que a decisao 87 resolveu.
-      { tipo: 'arquivo', caminho: 'docs/plano-motor-de-referencia.md', opcional: true },
-      { tipo: 'arquivo', caminho: 'README.md' },
-      { tipo: 'arvore', raizes: ['lib', 'packages', 'test'] },
-      { tipo: 'git-log', quantidade: 40 },
+      { kind: 'arquivo', filePath: 'docs/plano-motor-de-referencia.md', optional: true },
+      { kind: 'arquivo', filePath: 'README.md' },
+      { kind: 'arvore', roots: ['lib', 'packages', 'test'] },
+      { kind: 'git-log', count: 40 },
+      {
+        kind: 'diretorio',
+        filePath: 'docs/decisoes',
+        extensions: ['.md'],
+        optional: true,
+        newestFirst: true,
+      },
     ],
   },
 
   // -------------------------------------------------------------------------
   tela: {
     id: 'tela',
-    titulo: 'Direcao visual e arquitetura de informacao',
-    precisaDeCapturas: true,
-    pergunta: [
+    title: 'Direcao visual e arquitetura de informacao',
+    needsScreenshots: true,
+    question: [
       'O que compete por atencao em cada tela? O que a disposicao diz que este',
       'aplicativo E -- e isso bate com o que ele faz? Um usuario que abre a',
       'tela sabe qual e a tarefa principal dela sem ler tudo?',
     ].join('\n'),
-    disciplina: [
+    discipline: [
       'Toda observacao NOMEIA um elemento visivel na captura e o liga a tarefa',
       '  primaria daquela tela.',
       'Sombra, gradiente, animacao e arredondamento sao POLIMENTO, nao direcao.',
@@ -378,15 +597,15 @@ export const LENTES: Record<LenteId, Lente> = {
       'NAO proponha pacote de UI de terceiros. A correcao usa o sistema proprio',
       '  em `lib/presentation/theme/`.',
     ],
-    materiais: [
-      { tipo: 'arquivo', caminho: 'lib/presentation/shell/app_shell.dart' },
-      { tipo: 'arvore', raizes: ['lib/presentation', 'lib/views'] },
+    materials: [
+      { kind: 'arquivo', filePath: 'lib/presentation/shell/app_shell.dart' },
+      { kind: 'arvore', roots: ['lib/presentation', 'lib/views'] },
     ],
   },
 };
 
 /** Lentes utilizaveis agora, na ordem em que fazem sentido rodar. */
-export const ORDEM_SUGERIDA: LenteId[] = [
+export const SUGGESTED_ORDER: LensId[] = [
   'registro',
   'nucleo',
   'dados',
@@ -396,13 +615,13 @@ export const ORDEM_SUGERIDA: LenteId[] = [
   'tela',
 ];
 
-export function resolverLente(nome: string): Lente {
-  const lente = (LENTES as Record<string, Lente | undefined>)[nome];
-  if (!lente) {
+export function resolveLens(name: string): Lens {
+  const lens = (LENSES as Record<string, Lens | undefined>)[name];
+  if (!lens) {
     throw new Error(
-      `Lente desconhecida: "${nome}".\n` +
-        `Disponiveis: ${ORDEM_SUGERIDA.join(', ')}`,
+      `Lente desconhecida: "${name}".\n` +
+        `Disponiveis: ${SUGGESTED_ORDER.join(', ')}`,
     );
   }
-  return lente;
+  return lens;
 }

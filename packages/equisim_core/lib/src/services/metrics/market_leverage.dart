@@ -28,10 +28,10 @@ abstract final class MarketLeverage {
   /// Vinte dias cobrem feriado prolongado e recesso sem alcançar o exercício
   /// vizinho. Sem pregão dentro disso o exercício não entra: preço de outro
   /// trimestre não descreve o valor de mercado daquele fechamento.
-  static const int maxPregaoDistanteEmDias = 20;
+  static const int maxDistantSessionDays = 20;
 
   /// Exercícios mínimos na janela para a mediana descrever alguma coisa.
-  static const int minExercicios = 3;
+  static const int minFiscalYears = 3;
 
   /// Mediana de `dívida líquida ÷ valor de mercado` nos exercícios da janela.
   ///
@@ -39,7 +39,7 @@ abstract final class MarketLeverage {
   /// do fechamento** vezes a contagem de ações **daquele exercício** — nunca a
   /// corrente, que descreve a empresa de hoje e não a de então.
   ///
-  /// Devolve `null` com menos de [minExercicios] pares utilizáveis, e aí o
+  /// Devolve `null` com menos de [minFiscalYears] pares utilizáveis, e aí o
   /// chamador recua para a foto — que é o comportamento anterior, declarado.
   static double? overWindow({
     required List<FundamentalsSnapshot> snapshots,
@@ -47,30 +47,30 @@ abstract final class MarketLeverage {
     required DateRange window,
   }) {
     if (prices.isEmpty) return null;
-    final razoes = <double>[];
+    final ratios = <double>[];
     for (final s in snapshots) {
       if (!window.contains(s.fiscalPeriodEnd)) continue;
-      final acoes = s.sharesOutstandingAsOf;
-      if (acoes == null || acoes <= 0) continue;
+      final shares = s.sharesOutstandingAsOf;
+      if (shares == null || shares <= 0) continue;
 
-      PricePoint? maisProximo;
-      var menorDistancia = maxPregaoDistanteEmDias + 1;
-      final fim = _emDias(s.fiscalPeriodEnd);
+      PricePoint? nearest;
+      var smallestDistance = maxDistantSessionDays + 1;
+      final end = _inDays(s.fiscalPeriodEnd);
       for (final p in prices) {
-        final d = (_emDias(p.date) - fim).abs();
-        if (d < menorDistancia) {
-          menorDistancia = d;
-          maisProximo = p;
+        final d = (_inDays(p.date) - end).abs();
+        if (d < smallestDistance) {
+          smallestDistance = d;
+          nearest = p;
         }
       }
-      if (maisProximo == null) continue;
+      if (nearest == null) continue;
 
-      final valorDeMercado = maisProximo.close * acoes;
-      final de = s.debtToMarketEquity(valorDeMercado);
-      if (de != null) razoes.add(de);
+      final marketValueOf = nearest.close * shares;
+      final debtToEquity = s.debtToMarketEquity(marketValueOf);
+      if (debtToEquity != null) ratios.add(debtToEquity);
     }
-    if (razoes.length < minExercicios) return null;
-    final m = Inference.median(razoes);
+    if (ratios.length < minFiscalYears) return null;
+    final m = Inference.median(ratios);
     return (m != null && m.isFinite) ? m : null;
   }
 
@@ -81,7 +81,7 @@ abstract final class MarketLeverage {
   /// ou 25 horas, e o truncamento para dias erra por um. O erro é pequeno e a
   /// escolha do pregão mais próximo é decidida por diferenças de poucos dias —
   /// exatamente onde um dia decide.
-  static int _emDias(DateTime d) =>
+  static int _inDays(DateTime d) =>
       DateTime.utc(d.year, d.month, d.day).millisecondsSinceEpoch ~/
       Duration.millisecondsPerDay;
 }

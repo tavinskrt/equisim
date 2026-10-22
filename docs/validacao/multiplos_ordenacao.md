@@ -6,7 +6,13 @@
 > **Remedido em 22/09/2026 sobre o motor que fecha a Fase 3** (itens B8 e B24):
 > o múltiplo de pares vai a IC **0,083**, `t` corrigido **1,24** contra 2,70 e
 > Newey-West 3,49, com 20 de 22 coortes positivas — e **continua não passando**.
-> As tabelas abaixo são as de 21/09; o `multiplos_ordenacao.json` é o de 22/09.
+> Com o item B26 corrigido: IC **0,079**, `t` corrigido **1,18**, Newey-West
+> 3,65, 18 de 22 coortes positivas — não passa.
+> **Remedido em 24/09/2026**, com o backtest reexecutado pelo item B27 e a
+> fonte de mercado renovada, que tirou três papéis do universo: IC **0,078**,
+> `t` corrigido **1,15**, Newey-West 3,52, 18 de 22 coortes positivas — não
+> passa.
+> As tabelas abaixo são as de 21/09; o `multiplos_ordenacao.json` é o de 24/09.
 >
 > ```bash
 > dart run tool/backtest_valuation.dart --montagem aplicativo \
@@ -94,6 +100,13 @@ corrigido de **2,52** contra o crítico de 2,70 — perto de passar. Agora tem
 **1,98**. **Nenhuma das cinco ordenações passa**, e a regra da decisão 103, que
 foi fixada antes de qualquer uma ser medida, continua devolvendo o mesmo: prêmio
 nenhum.
+
+**Remedido em 25/09/2026**, com o dado das coortes corrigido pelos itens B28 a
+B31 (decisões 135 a 137 e 139): o múltiplo de pares tem IC de **0,075** em 36
+meses, com `t` corrigido de **1,04** contra 2,70, e 0,031 em 12 meses. O
+book-to-market fica em 0,160 e `t` 2,03. **Nenhuma das cinco passa**, e a regra da
+decisão 103 continua devolvendo prêmio nenhum
+([habilidade_trimestral.md](habilidade_trimestral.md) §11).
 
 ## 5. O que isto não diz
 

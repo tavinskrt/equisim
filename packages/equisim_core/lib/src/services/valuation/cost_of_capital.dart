@@ -4,9 +4,6 @@ enum BetaSource {
   /// Calculado pelo próprio domínio contra o ^BVSP, janela declarada.
   computed,
 
-  /// Informado pela fonte externa (janela e índice não documentados).
-  apiProvided,
-
   /// Arbitrado pelo usuário.
   manual,
 
@@ -20,11 +17,16 @@ enum BetaSource {
 
 /// Como o prêmio de risco de mercado foi definido.
 enum MarketPremiumSource {
-  /// Parametrizado (padrão do sistema: 5–6% a.a.).
+  /// Parametrizado: os 5,5% de [CapmInputs.defaultMarketPremium]. Desde a
+  /// decisão 142 é o recuo, quando a série do prêmio implícito não chega.
   parameterized,
 
   /// Média histórica do índice na janela declarada.
   historical,
+
+  /// Média de dez anos do prêmio implícito no preço da bolsa — o padrão desde
+  /// a decisão 142. Ver `ImpliedPremiumPackage`.
+  impliedNormalized,
 }
 
 /// Insumos do CAPM.
@@ -54,8 +56,13 @@ class CapmInputs {
     this.premiumSource = MarketPremiumSource.parameterized,
   });
 
-  /// Prêmio padrão para o Brasil: 5,5% a.a., ponto médio da faixa de 5–6%
-  /// adotada como parâmetro do projeto.
+  /// Prêmio parametrizado: 5,5% a.a., ponto médio da faixa de 5–6% que foi o
+  /// parâmetro do projeto até a decisão 142.
+  ///
+  /// **Desde ela, é recuo e referência**, e não o prêmio do aplicativo: o
+  /// prêmio é a média de dez anos do prêmio implícito no preço da bolsa
+  /// (`ImpliedPremiumPackage`), e este valor só entra quando a série não
+  /// chega — declarado — e nas medições que comparam com a montagem antiga.
   static const double defaultMarketPremium = 0.055;
 
   /// Ke = Rf + β · (Rm − Rf)
@@ -93,7 +100,11 @@ class CostOfCapital {
   /// PETR4 saiu com 0,9% a.a. e WEGE3 com 47,3% a.a. — nenhum dos dois é um
   /// custo de dívida. Por isso o valor usado no WACC é [effectiveCostOfDebt],
   /// não este.
-  final double costOfDebt;
+  ///
+  /// **`null` quando a despesa financeira não está publicada** (item B26). A
+  /// ausência não é custo zero nem cobertura ruim: sem ela a cobertura de juros
+  /// não é medível, e o prêmio sintético sai só da alavancagem.
+  final double? costOfDebt;
 
   /// Alíquota efetiva de imposto, em fração.
   final double taxRate;
@@ -252,8 +263,8 @@ class CostOfCapital {
   /// sustenta o próprio endividamento.
   static double leverageSpread(double? leverage) {
     if (leverage == null || !leverage.isFinite) return maxCreditSpread;
-    for (final faixa in creditSpreads) {
-      if (leverage <= faixa.maxLeverage) return faixa.spread;
+    for (final band in creditSpreads) {
+      if (leverage <= band.maxLeverage) return band.spread;
     }
     return maxCreditSpread;
   }
@@ -280,8 +291,8 @@ class CostOfCapital {
   /// Prêmio de crédito para a cobertura informada.
   static double coverageSpread(double? coverage) {
     if (coverage == null || !coverage.isFinite) return maxCreditSpread;
-    for (final faixa in coverageSpreads) {
-      if (coverage >= faixa.minCoverage) return faixa.spread;
+    for (final band in coverageSpreads) {
+      if (coverage >= band.minCoverage) return band.spread;
     }
     return maxCreditSpread;
   }
@@ -311,20 +322,27 @@ class CostOfCapital {
   ///
   /// - [leverage]: dívida líquida sobre EBITDA.
   /// - [coverage]: EBIT sobre despesa financeira.
-  /// - [observedCostOfDebt]: a razão observada, que arbitra.
+  /// - [observedCostOfDebt]: a razão observada, que arbitra. `null` quando a
+  ///   despesa financeira não está publicada — e aí a cobertura não fala.
   /// - [riskFreeRate]: piso da banda de plausibilidade.
+  ///
+  /// **Sem a despesa, a cobertura sai da conta, e não entra no teto** (item
+  /// B26). A tabela de cobertura devolve o prêmio máximo para cobertura não
+  /// medível, e deixá-la falar puniria com 10 p.p. uma empresa cujo único
+  /// problema é um campo em branco na fonte.
   static double syntheticSpread({
     required double? leverage,
     required double? coverage,
-    required double observedCostOfDebt,
+    required double? observedCostOfDebt,
     required double riskFreeRate,
   }) {
-    final porAlavancagem = leverageSpread(leverage);
-    final despesaUtilizavel = observedCostOfDebt >= riskFreeRate &&
+    final leverageSpreadValue = leverageSpread(leverage);
+    final usableExpense = observedCostOfDebt != null &&
+        observedCostOfDebt >= riskFreeRate &&
         observedCostOfDebt <= riskFreeRate + maxCreditSpread;
-    if (!despesaUtilizavel) return porAlavancagem;
-    final porCobertura = coverageSpread(coverage);
-    return porCobertura > porAlavancagem ? porCobertura : porAlavancagem;
+    if (!usableExpense) return leverageSpreadValue;
+    final coverageSpreadValue = coverageSpread(coverage);
+    return coverageSpreadValue > leverageSpreadValue ? coverageSpreadValue : leverageSpreadValue;
   }
 
   /// Custo da dívida efetivamente aplicado: `Rf + spread(cobertura)`.
@@ -366,8 +384,10 @@ class CostOfCapital {
   /// número estimado como se fosse o medido. O corte de 1 p.p. é o passo da
   /// própria tabela de prêmios: abaixo dele os dois números diriam a mesma
   /// coisa.
-  bool get costOfDebtWasClamped =>
-      (effectiveCostOfDebt - costOfDebt).abs() > 0.01;
+  bool get costOfDebtWasClamped {
+    final observed = costOfDebt;
+    return observed != null && (effectiveCostOfDebt - observed).abs() > 0.01;
+  }
 
   /// Capital total: equity mais dívida. Denominador dos pesos do WACC.
   double get totalCapital => equityValue + debtValue;
@@ -405,17 +425,17 @@ class CostOfCapital {
   /// `null` sem [cashValue]: sem saber quanto é caixa, a bruta não é
   /// separável da líquida.
   double? get grossDebtShare {
-    final caixa = cashValue;
-    if (caixa == null || totalCapital <= 0) return null;
-    return (debtValue + caixa) / totalCapital;
+    final cash = cashValue;
+    if (cash == null || totalCapital <= 0) return null;
+    return (debtValue + cash) / totalCapital;
   }
 
   /// Participação do caixa, sobre o mesmo capital total. `null` sem
   /// [cashValue].
   double? get cashShare {
-    final caixa = cashValue;
-    if (caixa == null || totalCapital <= 0) return null;
-    return caixa / totalCapital;
+    final cash = cashValue;
+    if (cash == null || totalCapital <= 0) return null;
+    return cash / totalCapital;
   }
 
   /// O que o caixa rende, líquido de imposto: a taxa livre de risco.
@@ -438,12 +458,12 @@ class CostOfCapital {
   double get rawWacc {
     final wD = grossDebtShare;
     final wC = cashShare;
-    final juro = effectiveCostOfDebt * (1.0 - effectiveTaxShield);
+    final interest = effectiveCostOfDebt * (1.0 - effectiveTaxShield);
     if (wD == null || wC == null) {
-      return equityShare * costOfEquity + debtShare * juro;
+      return equityShare * costOfEquity + debtShare * interest;
     }
     return equityShare * costOfEquity +
-        wD * juro -
+        wD * interest -
         wC * afterTaxCashYield;
   }
 
@@ -459,13 +479,4 @@ class CostOfCapital {
 
   /// `true` quando o piso de [wacc] precisou agir.
   bool get waccWasFloored => rawWacc < capm.riskFreeRate;
-
-  /// Empresa sem dívida: WACC degenera para Ke.
-  factory CostOfCapital.unlevered(CapmInputs capm) => CostOfCapital(
-        capm: capm,
-        costOfDebt: 0.0,
-        taxRate: 0.0,
-        equityValue: 1.0,
-        debtValue: 0.0,
-      );
 }

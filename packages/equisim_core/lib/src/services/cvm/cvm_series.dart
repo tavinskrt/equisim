@@ -34,7 +34,7 @@ class CvmSeriesResult {
 abstract final class CvmSeries {
   /// Folga, em dias, para casar o fim de um ponto da CVM com o exercício de
   /// mercado que o completa.
-  static const int folgaDias = 4;
+  static const int marginDays = 4;
 
   /// A versão vigente de cada documento: das já publicadas, a de recebimento
   /// mais recente, por tipo e data de referência (item B8).
@@ -50,31 +50,31 @@ abstract final class CvmSeries {
   /// última —, devolve os publicados, e nada muda. Em empate de data, fica a
   /// que vem depois na lista. Documento sem data de recebimento conta como
   /// recebido no fecho, que é o mais cedo que ele pode ter sido.
-  static List<CvmPeriodDocument> vigentes(
-    List<CvmPeriodDocument> documentos,
-    bool Function(FundamentalsSnapshot) publicado,
+  static List<CvmPeriodDocument> inForceAt(
+    List<CvmPeriodDocument> documents,
+    bool Function(FundamentalsSnapshot) published,
   ) {
-    DateTime dia(DateTime d) => DateTime.utc(d.year, d.month, d.day);
-    final porChave = <(CvmDocumentKind, DateTime), CvmPeriodDocument>{};
-    for (final d in documentos) {
-      if (!publicado(d.current)) continue;
-      final k = (d.kind, dia(d.periodEnd));
-      final atual = porChave[k];
-      if (atual == null ||
-          !dia(d.current.receiptDate ?? d.periodEnd)
-              .isBefore(dia(atual.current.receiptDate ?? atual.periodEnd))) {
-        porChave[k] = d;
+    DateTime day(DateTime d) => DateTime.utc(d.year, d.month, d.day);
+    final byKey = <(CvmDocumentKind, DateTime), CvmPeriodDocument>{};
+    for (final d in documents) {
+      if (!published(d.current)) continue;
+      final k = (d.kind, day(d.periodEnd));
+      final current = byKey[k];
+      if (current == null ||
+          !day(d.current.receiptDate ?? d.periodEnd)
+              .isBefore(day(current.current.receiptDate ?? current.periodEnd))) {
+        byKey[k] = d;
       }
     }
-    return porChave.values.toList()
+    return byKey.values.toList()
       ..sort((a, b) => a.periodEnd.compareTo(b.periodEnd));
   }
 
-  /// Monta a série de [documentos] da CVM, mesclada com [mercado].
+  /// Monta a série de [documents] da CVM, mesclada com [market].
   ///
-  /// - [ancorada]: `true` para a série de doze meses no trimestre mais recente
+  /// - [anchored]: `true` para a série de doze meses no trimestre mais recente
   ///   (A1.8); `false` para a série de DFPs (A1.7).
-  /// - [publicado]: a regra de publicidade da cascata — `PointInTimeView.
+  /// - [published]: a regra de publicidade da cascata — `PointInTimeView.
   ///   isPublished` — para que ela seja uma só.
   ///
   /// **A mescla nunca olha para a frente.** Um ponto terminado em junho é
@@ -87,17 +87,16 @@ abstract final class CvmSeries {
   ///
   /// Sem documento da CVM utilizável, devolve a série de mercado intacta.
   static CvmSeriesResult build({
-    required List<CvmPeriodDocument> documentos,
-    required List<FundamentalsSnapshot> mercado,
-    required DateTime asOf,
-    required bool Function(FundamentalsSnapshot) publicado,
-    required bool ancorada,
+    required List<CvmPeriodDocument> documents,
+    required List<FundamentalsSnapshot> market,
+    required bool Function(FundamentalsSnapshot) published,
+    required bool anchored,
   }) {
-    final doMercado = [...mercado]
+    final marketMedians = [...market]
       ..sort((a, b) => a.fiscalPeriodEnd.compareTo(b.fiscalPeriodEnd));
 
     // **Só documento publicado na data**, nas duas séries. A DFP recebida
-    // depois de [asOf] ocupava o ano na mescla: o exercício de mercado daquele
+    // depois da data ocupava o ano na mescla: o exercício de mercado daquele
     // ano, publicado de fato, era descartado, e a cascata depois removia o
     // ponto mesclado por ser do futuro — o ano sumia. USIM3 em 04/09/2024:
     // DFP de 2023 reapresentada, com a versão ingerida recebida em 16/01/2025,
@@ -106,58 +105,57 @@ abstract final class CvmSeries {
     // **E só a versão vigente de cada um** (item B8): com as versões antigas
     // na lista, a coorte lê o número que era público na data, e não o
     // reapresentado depois.
-    final emVigor = vigentes(documentos, publicado);
-    final daCvm = ancorada
-        ? TrailingTwelveMonths.serieAncorada(emVigor,
-            asOf: asOf, publicado: publicado)
+    final inForce = inForceAt(documents, published);
+    final fromCvm = anchored
+        ? TrailingTwelveMonths.anchoredSeries(inForce, published: published)
         : [
-            for (final d in emVigor)
+            for (final d in inForce)
               if (d.kind == CvmDocumentKind.dfp) d.current,
           ];
-    if (daCvm.isEmpty) {
+    if (fromCvm.isEmpty) {
       return CvmSeriesResult(
-        series: doMercado,
+        series: marketMedians,
         anchoredOnQuarter: false,
         provenance: const {},
       );
     }
-    daCvm.sort((a, b) => a.fiscalPeriodEnd.compareTo(b.fiscalPeriodEnd));
+    fromCvm.sort((a, b) => a.fiscalPeriodEnd.compareTo(b.fiscalPeriodEnd));
 
-    FundamentalsSnapshot? mercadoAte(DateTime fim) {
+    FundamentalsSnapshot? marketUntil(DateTime end) {
       FundamentalsSnapshot? m;
-      final limite = fim.add(const Duration(days: folgaDias));
-      for (final s in doMercado) {
-        if (!s.fiscalPeriodEnd.isAfter(limite)) m = s;
+      final limit = end.add(const Duration(days: marginDays));
+      for (final s in marketMedians) {
+        if (!s.fiscalPeriodEnd.isAfter(limit)) m = s;
       }
       return m;
     }
 
     final out = <FundamentalsSnapshot>[];
-    final anos = <int>{};
-    final origem = <FieldSource, int>{};
-    for (final c in daCvm) {
+    final years = <int>{};
+    final origin = <FieldSource, int>{};
+    for (final c in fromCvm) {
       final merged =
-          FundamentalsMerge.merge(cvm: c, mercado: mercadoAte(c.fiscalPeriodEnd));
+          FundamentalsMerge.merge(cvm: c, market: marketUntil(c.fiscalPeriodEnd));
       if (merged == null) continue;
       out.add(merged.snapshot);
-      anos.add(c.fiscalPeriodEnd.year);
-      merged.provenance.contagem
-          .forEach((k, v) => origem[k] = (origem[k] ?? 0) + v);
+      years.add(c.fiscalPeriodEnd.year);
+      merged.provenance.count
+          .forEach((k, v) => origin[k] = (origin[k] ?? 0) + v);
     }
 
-    final ancoradaEmTrimestre =
-        ancorada && TrailingTwelveMonths.isAnchoredOnQuarter(daCvm, documentos);
-    if (!ancoradaEmTrimestre) {
-      for (final s in doMercado) {
-        if (!anos.contains(s.fiscalPeriodEnd.year)) out.add(s);
+    final quarterAnchored =
+        anchored && TrailingTwelveMonths.isAnchoredOnQuarter(fromCvm, documents);
+    if (!quarterAnchored) {
+      for (final s in marketMedians) {
+        if (!years.contains(s.fiscalPeriodEnd.year)) out.add(s);
       }
       out.sort((a, b) => a.fiscalPeriodEnd.compareTo(b.fiscalPeriodEnd));
     }
 
     return CvmSeriesResult(
       series: List.unmodifiable(out),
-      anchoredOnQuarter: ancoradaEmTrimestre,
-      provenance: Map.unmodifiable(origem),
+      anchoredOnQuarter: quarterAnchored,
+      provenance: Map.unmodifiable(origin),
     );
   }
 }

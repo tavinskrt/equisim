@@ -11,69 +11,69 @@ import 'package:flutter_test/flutter_test.dart';
 /// aplicativo a ausência vira a ressalva de "não medida", e o descuido que
 /// importa pegar é o pacote dizer outra coisa que a medição.
 void main() {
-  final arquivo = File(skillReadingAsset);
+  final file = File(skillReadingAsset);
 
   Map<String, dynamic> m(Object? v) => v as Map<String, dynamic>;
 
   test('existe, está declarado e é legível', () {
-    expect(arquivo.existsSync(), isTrue,
+    expect(file.existsSync(), isTrue,
         reason: 'gerar com `dart run tool/regressao_condicional.dart '
             '--pacote-habilidade` e versionar');
     expect(File('pubspec.yaml').readAsStringSync(),
         contains('- assets/validacao/'));
-    expect(SkillReadingCodec.decode(m(jsonDecode(arquivo.readAsStringSync()))),
+    expect(SkillReadingCodec.decode(m(jsonDecode(file.readAsStringSync()))),
         isNotNull);
   });
 
   test('os números, o veredito e o prêmio são os da medição trimestral com '
       'deslistadas', () {
-    final leitura =
-        SkillReadingCodec.decode(m(jsonDecode(arquivo.readAsStringSync())))!;
-    final medicao = m(jsonDecode(
+    final reading =
+        SkillReadingCodec.decode(m(jsonDecode(file.readAsStringSync())))!;
+    final measurement = m(jsonDecode(
         File('docs/validacao/habilidade_trimestral.json').readAsStringSync()));
-    final fm = m(m(m(m(medicao['h36'])['trimestral'])['comDeslistadas'])[
+    final fm = m(m(m(m(measurement['h36'])['trimestral'])['comDeslistadas'])[
         'famaMacBeth']);
-    final dado = m(fm['potencialDadoBm']);
-    double numero(Map<String, dynamic> x, String k) => (x[k] as num).toDouble();
+    final datum = m(fm['potencialDadoBm']);
+    double number(Map<String, dynamic> x, String k) => (x[k] as num).toDouble();
 
-    expect(leitura.months, 36);
-    expect(leitura.cohorts, dado['coortes']);
-    expect(leitura.conditionalCoefficient, closeTo(numero(dado, 'media'), 1e-12));
-    expect(leitura.overlapT, closeTo(numero(dado, 'tSobreposicao'), 1e-12));
-    expect(leitura.overlapCritical,
-        closeTo(numero(dado, 'criticoSobreposicao'), 1e-12));
-    expect(leitura.neweyWestT, closeTo(numero(dado, 'tNeweyWest'), 1e-12));
+    expect(reading.months, 36);
+    expect(reading.cohorts, datum['coortes']);
+    expect(reading.conditionalCoefficient, closeTo(number(datum, 'media'), 1e-12));
+    expect(reading.overlapT, closeTo(number(datum, 'tSobreposicao'), 1e-12));
+    expect(reading.overlapCritical,
+        closeTo(number(datum, 'criticoSobreposicao'), 1e-12));
+    expect(reading.neweyWestT, closeTo(number(datum, 'tNeweyWest'), 1e-12));
     // O critério mora no núcleo, e a ferramenta o aplica por conta própria: os
     // dois têm de concordar.
-    expect(leitura.demonstrated, dado['passaR3']);
+    expect(reading.demonstrated, datum['passaR3']);
 
     // As três ordenações lado a lado (item B1), cada uma contra a medição.
-    const pares = [
+    const pairs = [
       (TransversalOrdering.composite, 'icComposto'),
       (TransversalOrdering.bookToMarket, 'icBookToMarket'),
       (TransversalOrdering.potential, 'icPotencial'),
     ];
-    for (final (ordenacao, chave) in pares) {
-      final medida = m(fm[chave]);
-      final lida = leitura.orderings[ordenacao]!;
-      expect(lida.ic, closeTo(numero(medida, 'media'), 1e-12), reason: chave);
-      expect(lida.overlapT, closeTo(numero(medida, 'tSobreposicao'), 1e-12),
-          reason: chave);
-      expect(lida.demonstrated, medida['passaR3'], reason: chave);
+    for (final (ordering, key) in pairs) {
+      final measured = m(fm[key]);
+      final readOrdering = reading.orderings[ordering]!;
+      expect(readOrdering.ic, closeTo(number(measured, 'media'), 1e-12), reason: key);
+      expect(readOrdering.overlapT, closeTo(number(measured, 'tSobreposicao'), 1e-12),
+          reason: key);
+      expect(readOrdering.demonstrated, measured['passaR3'], reason: key);
     }
     // A regra do prêmio é a primeira que passa, na ordem fixada antes de medir.
-    final primeira = pares
+    final first = pairs
         .where((e) => m(fm[e.$2])['passaR3'] == true)
         .map((e) => e.$1)
         .firstOrNull;
-    expect(leitura.premiumOrdering, primeira);
+    expect(reading.premiumOrdering, first);
   });
 
   test('sem pacote, ou com lixo, a leitura é nula', () async {
-    final sem = SkillReadingRepository(
-        carregarPacote: () async => throw const FileSystemException('sem'));
-    expect(await sem.reading(), isNull);
-    final lixo = SkillReadingRepository(carregarPacote: () async => '[1, 2]');
-    expect(await lixo.reading(), isNull);
+    final without = SkillReadingRepository(
+        loadPackage: () async => throw const FileSystemException('sem'));
+    expect(await without.reading(), isNull);
+    final garbage = SkillReadingRepository(loadPackage: () async => '[1, 2]');
+    expect(await garbage.reading(), isNull);
   });
 }

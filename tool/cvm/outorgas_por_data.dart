@@ -18,117 +18,117 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'csv.dart';
 
-class OutorgasPorData {
-  OutorgasPorData._(this._docs, this._ponte);
+class GrantsByDate {
+  GrantsByDate._(this._docs, this._bridge);
 
   /// CNPJ → documentos com concessão, com recebimento, referência, versão e
   /// os textos de duração.
   final Map<String,
-          List<({DateTime receb, DateTime ref, int versao, List<String> duracoes})>>
+          List<({DateTime received, DateTime ref, int version, List<String> durations})>>
       _docs;
 
   /// Ticker → CNPJ.
-  final Map<String, String> _ponte;
+  final Map<String, String> _bridge;
 
   /// Anos de idade máxima do formulário, contados do ano da data.
-  static const int idadeMaximaAnos = 6;
+  static const int maxAgeYears = 6;
 
-  static DateTime? _dia(String? v) {
+  static DateTime? _day(String? v) {
     if (v == null || v.length < 10) return null;
     return DateTime.tryParse('${v.substring(0, 10)}T00:00:00Z');
   }
 
   /// Lê `data/cvm/fre` e a ponte ticker↔CNPJ. `null` sem os arquivos.
-  static OutorgasPorData? ler({String pasta = 'data/cvm/fre'}) {
-    final dir = Directory(pasta);
-    final ponteArq = File('docs/validacao/ponte_cvm.json');
-    if (!dir.existsSync() || !ponteArq.existsSync()) return null;
+  static GrantsByDate? read({String folder = 'data/cvm/fre'}) {
+    final dir = Directory(folder);
+    final bridgeFile = File('docs/validacao/ponte_cvm.json');
+    if (!dir.existsSync() || !bridgeFile.existsSync()) return null;
 
-    final recebimento = <String, DateTime>{};
-    final arquivos = dir.listSync().whereType<File>().toList()
+    final receipt = <String, DateTime>{};
+    final files = dir.listSync().whereType<File>().toList()
       ..sort((a, b) => a.path.compareTo(b.path));
-    for (final f in arquivos) {
-      final nome = f.uri.pathSegments.last;
-      if (!RegExp(r'^fre_cia_aberta_\d{4}\.csv$').hasMatch(nome)) continue;
-      for (final r in lerCsvCvm(f)) {
+    for (final f in files) {
+      final name = f.uri.pathSegments.last;
+      if (!RegExp(r'^fre_cia_aberta_\d{4}\.csv$').hasMatch(name)) continue;
+      for (final r in readCvmCsv(f)) {
         final id = r['ID_DOC'];
-        final receb = _dia(r['DT_RECEB']);
-        if (id != null && receb != null) recebimento[id] = receb;
+        final received = _day(r['DT_RECEB']);
+        if (id != null && received != null) receipt[id] = received;
       }
     }
 
-    final porDoc = <String,
-        ({String cnpj, DateTime receb, DateTime ref, int versao, List<String> duracoes})>{};
-    for (final f in arquivos) {
+    final byDoc = <String,
+        ({String cnpj, DateTime received, DateTime ref, int version, List<String> durations})>{};
+    for (final f in files) {
       if (!f.path.contains('fre_cia_aberta_ativo_intangivel_')) continue;
-      for (final r in lerCsvCvm(f)) {
+      for (final r in readCvmCsv(f)) {
         if (!(r['Tipo_Ativo'] ?? '').startsWith('Concess')) continue;
         final id = r['ID_Documento'];
         final cnpj = r['CNPJ_Companhia'];
-        final ref = _dia(r['Data_Referencia']);
-        final versao = int.tryParse(r['Versao'] ?? '');
-        final receb = id == null ? null : recebimento[id];
-        if (cnpj == null || ref == null || versao == null || receb == null) {
+        final ref = _day(r['Data_Referencia']);
+        final version = int.tryParse(r['Versao'] ?? '');
+        final received = id == null ? null : receipt[id];
+        if (cnpj == null || ref == null || version == null || received == null) {
           continue;
         }
-        final atual = porDoc[id!];
-        if (atual == null) {
-          porDoc[id] = (
+        final current = byDoc[id!];
+        if (current == null) {
+          byDoc[id] = (
             cnpj: cnpj,
-            receb: receb,
+            received: received,
             ref: ref,
-            versao: versao,
-            duracoes: [r['Duracao'] ?? ''],
+            version: version,
+            durations: [r['Duracao'] ?? ''],
           );
         } else {
-          atual.duracoes.add(r['Duracao'] ?? '');
+          current.durations.add(r['Duracao'] ?? '');
         }
       }
     }
     final docs = <String,
-        List<({DateTime receb, DateTime ref, int versao, List<String> duracoes})>>{};
-    for (final d in porDoc.values) {
+        List<({DateTime received, DateTime ref, int version, List<String> durations})>>{};
+    for (final d in byDoc.values) {
       (docs[d.cnpj] ??= []).add(
-          (receb: d.receb, ref: d.ref, versao: d.versao, duracoes: d.duracoes));
+          (received: d.received, ref: d.ref, version: d.version, durations: d.durations));
     }
 
-    final pares = (jsonDecode(ponteArq.readAsStringSync())
+    final pairs = (jsonDecode(bridgeFile.readAsStringSync())
         as Map<String, dynamic>)['ponte'] as Map<String, dynamic>;
-    return OutorgasPorData._(
-        docs, {for (final p in pares.entries) p.key: p.value as String});
+    return GrantsByDate._(
+        docs, {for (final p in pairs.entries) p.key: p.value as String});
   }
 
-  /// O prazo conhecido em [data], ou `null`.
-  ConcessionTerm? naData(String ticker, DateTime data) {
-    final cnpj = _ponte[ticker];
-    return cnpj == null ? null : naDataPorCnpj(cnpj, data);
+  /// O prazo conhecido em [date], ou `null`.
+  ConcessionTerm? atDate(String ticker, DateTime date) {
+    final cnpj = _bridge[ticker];
+    return cnpj == null ? null : atDateByCnpj(cnpj, date);
   }
 
-  /// O prazo da companhia [cnpj] conhecido em [data], ou `null` — para as
+  /// O prazo da companhia [cnpj] conhecido em [date], ou `null` — para as
   /// deslistadas, que não estão na ponte do universo de hoje.
-  ConcessionTerm? naDataPorCnpj(String cnpj, DateTime data) {
-    final meus = _docs[cnpj];
-    if (meus == null) return null;
-    final dia = DateTime.utc(data.year, data.month, data.day);
-    ({DateTime receb, DateTime ref, int versao, List<String> duracoes})? melhor;
-    for (final d in meus) {
-      if (d.receb.isAfter(dia)) continue;
-      final m = melhor;
+  ConcessionTerm? atDateByCnpj(String cnpj, DateTime date) {
+    final ownDocs = _docs[cnpj];
+    if (ownDocs == null) return null;
+    final day = DateTime.utc(date.year, date.month, date.day);
+    ({DateTime received, DateTime ref, int version, List<String> durations})? best;
+    for (final d in ownDocs) {
+      if (d.received.isAfter(day)) continue;
+      final m = best;
       if (m == null ||
           d.ref.isAfter(m.ref) ||
-          (d.ref.isAtSameMomentAs(m.ref) && d.versao > m.versao)) {
-        melhor = d;
+          (d.ref.isAtSameMomentAs(m.ref) && d.version > m.version)) {
+        best = d;
       }
     }
-    final m = melhor;
-    if (m == null || m.ref.year < data.year - idadeMaximaAnos) return null;
-    final resumo = FreConcessionTerm.summarize(m.duracoes, m.ref);
-    if (resumo.end == null) return null;
+    final m = best;
+    if (m == null || m.ref.year < date.year - maxAgeYears) return null;
+    final summary = FreConcessionTerm.summarize(m.durations, m.ref);
+    if (summary.end == null) return null;
     return ConcessionTerm(
-      end: resumo.end!,
-      contracts: resumo.contratos,
-      parsed: resumo.lidos,
-      active: resumo.vigentes,
+      end: summary.end!,
+      contracts: summary.contracts,
+      parsed: summary.readCount,
+      active: summary.inForceCount,
       reference: m.ref,
     );
   }

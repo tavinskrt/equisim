@@ -1,0 +1,4666 @@
+import 'dart:math' as math;
+
+import 'package:equisim_core/equisim_core.dart';
+import 'package:test/test.dart';
+
+/// Testes das portas e guardas introduzidas pela decisão 25.
+///
+/// Cada caso reproduz a **forma** de um ativo real da calibragem, com os
+/// números que motivaram a regra. É o que impede que um limiar volte a ser
+/// ajustado sem que o motivo original seja reencontrado.
+void main() {
+  final ticker = Ticker.parse('TEST3');
+
+  FundamentalsSnapshot fiscalYear(
+    int year, {
+    double? bookValuePerShare,
+    double? shares,
+    double? profit,
+    double? nopat,
+    double shortDebt = 0,
+    double longDebt = 0,
+    double cash = 0,
+  }) =>
+      FundamentalsSnapshot(
+        ticker: ticker,
+        fiscalPeriodEnd: DateTime(year, 12, 31),
+        bookValuePerShare: bookValuePerShare,
+        sharesOutstandingAsOf: shares,
+        sharesOutstanding: shares,
+        netIncome: profit,
+        nopat: nopat,
+        shortTermDebt: shortDebt,
+        longTermDebt: longDebt,
+        cash: cash,
+      );
+
+  group('Inference — primitivas conferidas contra tabela', () {
+    test('quantil da t de Student bate com a tabela publicada', () {
+      expect(Inference.studentT(0.975, 14), closeTo(2.1448, 5e-4));
+      expect(Inference.studentT(0.975, 6), closeTo(2.4469, 5e-4));
+      expect(Inference.studentT(0.95, 10), closeTo(1.8125, 5e-4));
+      expect(Inference.studentT(0.995, 30), closeTo(2.7500, 5e-4));
+    });
+
+    test('R² crítico depende de n, e é isso que condena o limiar fixo', () {
+      // Com n = 8 o corte correto é 0,50; com n = 16, 0,25. Um limiar único é
+      // simultaneamente laxo numa ponta e estrito na outra.
+      expect(Inference.criticalR2(8, 0.05), closeTo(0.499, 1e-3));
+      expect(Inference.criticalR2(16, 0.05), closeTo(0.247, 1e-3));
+      expect(Inference.criticalR2(8, 0.05),
+          greaterThan(Inference.criticalR2(16, 0.05)));
+    });
+
+    test('MAD escalado resiste a contaminação que derruba o desvio-padrão', () {
+      // Mediana 3, MAD 1 → 1,4826. O ponto em 100 não move a escala robusta.
+      expect(Inference.scaledMad([1, 2, 3, 4, 100]), closeTo(1.4826, 1e-4));
+    });
+  });
+
+  group('Base de capital', () {
+    test('patrimônio usa a contagem de ações do exercício, não a corrente', () {
+      // Forma do BBAS3: bonificação dobra as ações em 2024. Com a contagem
+      // corrente aplicada a todos os anos, a série cairia pela metade num
+      // degrau que é troca de denominador, não de lucro.
+      final before = fiscalYear(2023, bookValuePerShare: 56.9, shares: 2865417000, profit: 33.1e9);
+      final after = fiscalYear(2024, bookValuePerShare: 32.1, shares: 5730834000, profit: 29.2e9);
+      expect(before.equityBookValue! / 1e9, closeTo(163.1, 0.5));
+      expect(after.equityBookValue! / 1e9, closeTo(184.0, 0.5));
+      expect(after.equityBookValue, greaterThan(before.equityBookValue!),
+          reason: 'o patrimônio cresceu; foi o valor por ação que se dividiu');
+    });
+
+    test('capital investido soma dívida e subtrai caixa', () {
+      final e = fiscalYear(2025,
+          bookValuePerShare: 10,
+          shares: 1000,
+          nopat: 900,
+          shortDebt: 2000,
+          longDebt: 3000,
+          cash: 1500);
+      expect(e.investedCapital, closeTo(10 * 1000 + 5000 - 1500, 1e-9));
+    });
+
+    test('limpeza é por vizinhança: crescimento real de ordens de magnitude '
+        'sobrevive', () {
+      // Forma da PRIO3, que multiplicou a base por trinta em oito anos — 1,53x
+      // ao ano. Um corte contra a mediana global apagaria os exercícios
+      // recentes, os únicos que descrevem a empresa de hoje.
+      var bookValuePerShare = 1.0;
+      final points = <FundamentalsSnapshot>[];
+      for (var year = 2018; year <= 2025; year++) {
+        points.add(fiscalYear(year, bookValuePerShare: bookValuePerShare, shares: 1000, profit: bookValuePerShare * 100));
+        bookValuePerShare *= 1.526;
+      }
+      final series = CapitalSeries.build(points, ValuationLane.shareholder);
+      expect(series.length, 8, reason: 'nenhum exercício legítimo foi cortado');
+    });
+
+    test('limpeza remove falha pontual da fonte', () {
+      // Forma da ABEV3 em 2012: bookValue de 0,062 contra 2,81 no ano seguinte.
+      final series = CapitalSeries.build([
+        fiscalYear(2020, bookValuePerShare: 10, shares: 1000, profit: 100),
+        fiscalYear(2021, bookValuePerShare: 0.05, shares: 1000, profit: 100),
+        fiscalYear(2022, bookValuePerShare: 11, shares: 1000, profit: 100),
+        fiscalYear(2023, bookValuePerShare: 12, shares: 1000, profit: 100),
+      ], ValuationLane.shareholder);
+      expect(series.length, 3);
+      expect(series.points.any((p) => p.year == 2021), isFalse);
+    });
+  });
+
+  group('Conciliação da contagem de ações', () {
+    // Os números são os do MILS3 no exercício de 2025, medidos no cache de
+    // produção em 07/09/2026. A contagem corrente vinha 4.868x menor que a do
+    // exercício, e a ponte de equity devolvia R$ 37.708,72 contra R$ 15,79 de
+    // mercado na validação fora da amostra.
+    FundamentalsSnapshot inThousands({double? eps}) => FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(2025, 12, 31),
+          netIncome: 301263000,
+          earningsPerShare: eps,
+          sharesOutstanding: 48172,
+          sharesOutstandingAsOf: 234178210,
+          bookValuePerShare: 6.7376337,
+        );
+
+    test('o lucro por ação publicado arbitra a favor da contagem do exercício',
+        () {
+      // N implícito = 301.263.000 / 1,2865 = 234,2 mi, que é a do exercício.
+      final f = inThousands(eps: 1.2865);
+      expect(f.reconciledShares, 234178210);
+    });
+
+    test('sem árbitro, prevalece a contagem que reconstrói o patrimônio', () {
+      expect(inThousands().reconciledShares, 234178210);
+    });
+
+    test('o árbitro pode confirmar a contagem corrente, e então ela vence', () {
+      // Mesmo par de candidatas, mas agora o LPA aponta para a corrente:
+      // 301.263.000 / 6254,0 = 48.172.
+      final f = inThousands(eps: 6254.0);
+      expect(f.reconciledShares, 48172);
+    });
+
+    test('divergência das duas contagens é sinalizada', () {
+      expect(inThousands().sharesDisagree, isTrue);
+    });
+
+    test('contagens concordantes não geram sinal nem escolha', () {
+      final f = FundamentalsSnapshot(
+        ticker: ticker,
+        fiscalPeriodEnd: DateTime(2025, 12, 31),
+        sharesOutstanding: 100000000,
+        sharesOutstandingAsOf: 98000000,
+      );
+      expect(f.sharesDisagree, isFalse);
+      expect(f.reconciledShares, 98000000);
+    });
+
+    test('uma contagem só é usada como está', () {
+      final f = FundamentalsSnapshot(
+        ticker: ticker,
+        fiscalPeriodEnd: DateTime(2025, 12, 31),
+        sharesOutstanding: 48172,
+      );
+      expect(f.reconciledShares, 48172);
+      expect(f.sharesDisagree, isFalse);
+    });
+
+    test('LPA nulo ou zerado não é árbitro', () {
+      expect(inThousands(eps: 0).reconciledShares, 234178210);
+    });
+  });
+
+  group('Guarda 2 — capital externo', () {
+    test('expansão por lucro retido é orgânica', () {
+      // Patrimônio cresce exatamente pelo lucro: nada veio de fora.
+      var pl = 1000.0;
+      final points = <FundamentalsSnapshot>[];
+      for (var year = 2016; year <= 2025; year++) {
+        points.add(fiscalYear(year, bookValuePerShare: pl / 1000, shares: 1000, profit: 100));
+        pl += 100;
+      }
+      final series = CapitalSeries.build(points, ValuationLane.shareholder);
+      final phi = GrowthGuards.externalCapitalRatio(series);
+      expect(phi, isNotNull);
+      expect(phi!, lessThan(0.05));
+    });
+
+    test('salto de patrimônio acima do lucro acusa capital externo', () {
+      // Forma da RENT3 na incorporação: o patrimônio salta muito além do que a
+      // empresa lucrou no ano.
+      final points = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var year = 2016; year <= 2025; year++) {
+        if (year == 2022) pl += 8000;
+        points.add(fiscalYear(year, bookValuePerShare: pl / 1000, shares: 1000, profit: 100));
+        pl += 100;
+      }
+      final series = CapitalSeries.build(points, ValuationLane.shareholder);
+      final phi = GrowthGuards.externalCapitalRatio(series);
+      expect(phi, isNotNull);
+      expect(phi!, greaterThan(ValuationParameters.maxExternalCapital));
+    });
+  });
+
+  group('Precedência da Guarda 2 — Φ declara, não barra', () {
+    // Forma da SUZB3 e da QUAL3: base de capital que salta por incorporação —
+    // Φ muito acima de 1,0 — e um exercício corrente de rentabilidade em pico.
+    // Sob a precedência anterior, Φ travava a normalização e o pico virava
+    // patamar perene: a SUZB3 saía a +259,1% e a QUAL3 a +477,3% de potencial.
+    List<FundamentalsSnapshot> mergerWithSpike({
+      required double cycleRoe,
+      required double currentRoe,
+    }) {
+      final points = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var year = 2012; year <= 2025; year++) {
+        // O retorno do ano é medido sobre a base de **abertura**, que é a
+        // convenção de `CapitalSeries.returns`.
+        final profit = year == 2025 ? currentRoe * pl : cycleRoe * pl;
+        pl += profit;
+        // A incorporação: em 2020 a base salta seis vezes o lucro do ano.
+        if (year == 2020) pl += 6000;
+        points.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          netIncome: year == 2012 ? null : profit,
+          marketCap: 20000,
+        ));
+      }
+      return points;
+    }
+
+    ValuationInputs entries(
+      List<FundamentalsSnapshot> history, {
+      String? sector,
+      String? subsector,
+    }) =>
+        ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 6, 30),
+          fundamentals: history,
+          marketPrice: 20.0,
+          capm: const CapmInputs(
+            riskFreeRate: 0.105,
+            beta: 1.0,
+            marketPremium: 0.055,
+          ),
+          sectorKey: sector,
+          industry: subsector,
+        );
+
+    /// Fator de normalização registrado no log de avaliação.
+    double recordedFactor(ValuationInputs inputs) {
+      final captured = <AuditEvent>[];
+      AuditRecorder.attach(captured.add);
+      ValuationCascade.evaluate(inputs);
+      AuditRecorder.detach();
+      final base = captured.single.calculations.firstWhere(
+        (c) => c.formulaName == 'Base do fluxo: normalização pelo ciclo',
+      );
+      return base.finalValue!;
+    }
+
+    tearDown(AuditRecorder.detach);
+
+    test('Φ acima do limiar não impede a normalização do retorno', () {
+      final history =
+          mergerWithSpike(cycleRoe: 0.10, currentRoe: 0.30);
+      final series =
+          CapitalSeries.build(history, ValuationLane.shareholder);
+
+      // A base é mesmo inorgânica, e por larga margem.
+      final phi = GrowthGuards.externalCapitalRatio(series);
+      expect(phi, isNotNull);
+      expect(phi!, greaterThan(ValuationParameters.maxExternalCapital));
+
+      // E o exercício corrente destoa do ciclo.
+      expect(GrowthGuards.deviatesFromCycle(series), isTrue);
+
+      // Logo o retorno é normalizado, sobre a base de capital corrente: o
+      // fator é a razão entre o ciclo e o exercício de pico.
+      expect(recordedFactor(entries(history)), closeTo(0.10 / 0.30, 1e-3),
+          reason: 'ROIC e ROE são grandezas intensivas: mudança de tamanho '
+              'por evento societário não torna o pico um patamar perene');
+    });
+
+    test('sem desvio do ciclo, Φ alto sozinho não normaliza nada', () {
+      // A Guarda 3 continua sendo quem decide **se** normaliza. Φ nunca
+      // normalizou nada, e continua não normalizando.
+      final history =
+          mergerWithSpike(cycleRoe: 0.10, currentRoe: 0.10);
+      expect(recordedFactor(entries(history)), closeTo(1.0, 1e-9));
+    });
+
+    test('em commodity, a tendência não segura a base', () {
+      // Forma da SUZB3: retorno corrente muito acima do ciclo, subindo ano a
+      // ano, de modo que a Guarda 1 lê a perna de alta como tendência
+      // estrutural. Fora de setor cíclico a base fica; em papel e celulose,
+      // não.
+      final points = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var year = 2012; year <= 2025; year++) {
+        // Retorno subindo de 8% a 34%: tendência significante e dominante.
+        final roe = 0.08 + (year - 2012) * 0.02;
+        final profit = roe * pl;
+        pl += profit;
+        points.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          netIncome: year == 2012 ? null : profit,
+          marketCap: 20000,
+        ));
+      }
+      final series = CapitalSeries.build(points, ValuationLane.shareholder);
+      final t = GrowthGuards.trend(series);
+      expect(t?.dominates, isTrue,
+          reason: 'a fixture precisa mesmo acionar a Guarda 1');
+      expect(GrowthGuards.deviatesFromCycle(series), isTrue);
+
+      expect(recordedFactor(entries(points, sector: 'tecnologia')),
+          closeTo(1.0, 1e-9),
+          reason: 'fora de commodity a tendência continua segurando a base');
+      expect(
+        recordedFactor(entries(points,
+            sector: 'materiais-basicos', subsector: 'Papel e Celulose')),
+        lessThan(1.0),
+        reason: 'em commodity a reversão ao ciclo tem precedência',
+      );
+    });
+
+    /// Base que salta por emissão no penúltimo exercício, com o lucro
+    /// **preservado**: o retorno corrente desaba sem que a empresa tenha
+    /// encolhido, que é a única forma de estourar o fator sem cair no filtro de
+    /// saúde. O salto é de 7x porque acima de 8x a limpeza por vizinhança
+    /// descartaria o próprio exercício.
+    List<FundamentalsSnapshot> issuanceWithPreservedProfit() {
+      final points = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      var frozenProfit = 0.0;
+      for (var year = 2012; year <= 2025; year++) {
+        final profit = year >= 2024 ? frozenProfit : 0.10 * pl;
+        if (year == 2023) frozenProfit = 0.10 * pl;
+        pl += profit;
+        if (year == 2024) pl *= 7;
+        points.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          netIncome: year == 2012 ? null : profit,
+          marketCap: 20000,
+        ));
+      }
+      return points;
+    }
+
+    /// Forma da QUAL3: lucro desabando no triênio e retorno corrente **abaixo**
+    /// do ciclo, de modo que a normalização puxaria a base para cima.
+    List<FundamentalsSnapshot> structuralDeterioration() {
+      final points = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var year = 2012; year <= 2025; year++) {
+        // 15% de retorno até 2022, 1,5% depois: queda de 90% no triênio.
+        final roe = year >= 2023 ? 0.015 : 0.15;
+        final profit = roe * pl;
+        pl += profit;
+        points.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          netIncome: year == 2012 ? null : profit,
+          marketCap: 20000,
+        ));
+      }
+      return points;
+    }
+
+    test('o fator de normalização é saturado em [0,33; 3,00]', () {
+      final points = issuanceWithPreservedProfit();
+      final series = CapitalSeries.build(points, ValuationLane.shareholder);
+      final raw = series.cycleReturn(window: ValuationParameters.cycleWindow)! /
+          series.latestReturn!;
+      expect(raw, greaterThan(ValuationParameters.baseFactorCeiling),
+          reason: 'a fixture precisa mesmo estourar a banda');
+      expect(GrowthGuards.recentOperationalDecline(points),
+          lessThan(ValuationParameters.maxOperationalDecline),
+          reason: 'e precisa passar na saúde, senão quem trava é a outra regra');
+
+      expect(recordedFactor(entries(points)),
+          closeTo(ValuationParameters.baseFactorCeiling, 1e-9));
+    });
+
+    test('a saturação é declarada nos avisos', () {
+      final r = ValuationCascade.evaluate(entries(issuanceWithPreservedProfit()));
+      expect(r.isOk, isTrue);
+      expect(r.unwrap().warnings.any((w) => w.contains('saturado em')), isTrue,
+          reason: 'um preço justo confinado por política precisa dizer que foi');
+    });
+
+    test('deterioração estrutural proíbe normalizar a base para cima', () {
+      final points = structuralDeterioration();
+      final series = CapitalSeries.build(points, ValuationLane.shareholder);
+
+      // A fixture é mesmo o caso: destoa do ciclo, e para cima.
+      expect(GrowthGuards.deviatesFromCycle(series), isTrue);
+      final raw = series.cycleReturn(window: ValuationParameters.cycleWindow)! /
+          series.latestReturn!;
+      expect(raw, greaterThan(1.0));
+      expect(GrowthGuards.recentOperationalDecline(points),
+          greaterThan(ValuationParameters.maxOperationalDecline));
+
+      expect(recordedFactor(entries(points)), closeTo(1.0, 1e-9),
+          reason: 'trazer a base de uma empresa que mudou de patamar de volta à '
+              'mediana de oito anos lhe atribui um retorno que não repetirá');
+
+      final r = ValuationCascade.evaluate(entries(points));
+      expect(r.isOk, isTrue);
+      expect(
+        r.unwrap().warnings.any((w) => w.contains('não foi normalizada para cima')),
+        isTrue,
+      );
+    });
+
+    test('commodity em vale de ciclo é isenta da trava de saúde', () {
+      // VALE3 e GGBR4: queda de ~87% entre o pico de 2022 e o vale de 2025, com
+      // o retorno corrente abaixo do ciclo. Fora de commodity a base fica
+      // travada em 1,00; em materiais básicos a convergência opera.
+      final points = structuralDeterioration();
+      expect(GrowthGuards.recentOperationalDecline(points),
+          greaterThan(ValuationParameters.maxOperationalDecline));
+
+      expect(recordedFactor(entries(points, sector: 'saude')),
+          closeTo(1.0, 1e-9),
+          reason: 'fora de commodity a trava continua valendo integralmente');
+      expect(
+        recordedFactor(entries(points,
+            sector: 'materiais-basicos', subsector: 'Siderurgia')),
+        greaterThan(1.0),
+        reason: 'em commodity a queda entre pico e vale é preço do insumo, e a '
+            'reversão ao ciclo precisa operar nos dois sentidos',
+      );
+    });
+
+    test('o aviso do cíclico isento não diz que o moat está barrado', () {
+      // Item B39: desde a decisão 36 o moat não consulta a saúde operacional,
+      // e o aviso continuava dizendo que a vantagem residual «segue barrada
+      // por ela» — na VALE3, ao lado de um veredito que a concedia.
+      final r = ValuationCascade.evaluate(entries(structuralDeterioration(),
+          sector: 'materiais-basicos', subsector: 'Siderurgia'));
+      expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
+      final warning = r.unwrap().warnings.where((w) => w.contains('no triênio'));
+      expect(warning, isNotEmpty, reason: 'a fixture precisa acionar a isenção');
+      for (final w in warning) {
+        expect(w, isNot(contains('barrada')));
+        expect(w, contains('decisão 36'));
+      }
+    });
+
+    test('a trava de saúde vale só na Porta 2a, e o moat não a consulta', () {
+      // Desde a decisão 36 a pergunta do moat não é mais "esta empresa merece
+      // uma exceção", e sim "quanto do excedente dela persiste". Deterioração
+      // entra pela série que estima a persistência, e não por um limiar em
+      // cima dela. A trava de saúde continua inteira na Porta 2a, que é onde a
+      // QUAL3 era de fato resolvida.
+      final v = GrowthGuards.residualMoat(
+        cycleReturn: 0.30,
+        terminalDiscountRate: 0.12,
+        externalCapitalRatio: 0.10,
+        periods: 14,
+        excessReturns: [
+          for (var i = 0; i < 5; i++)
+            (year: 2021 + i, excess: 0.18 / _pow(2, i)),
+        ],
+        projectionYears: 10,
+      );
+      expect(v.isProven, isTrue);
+      expect(
+        v.blocks,
+        isEmpty,
+        reason: 'nenhum bloco de saúde operacional sobrou no moat',
+      );
+    });
+
+    test('a isenção em commodity continua limitada pela saturação', () {
+      // O que limita a normalização em setor cíclico é a banda, e ela vale
+      // igual: isentar da trava de saúde não abre o teto de 3,00x.
+      final points = issuanceWithPreservedProfit();
+      expect(
+        recordedFactor(entries(points,
+            sector: 'materiais-basicos', subsector: 'Papel e Celulose')),
+        closeTo(ValuationParameters.baseFactorCeiling, 1e-9),
+      );
+    });
+
+    test('a isenção é declarada nos avisos', () {
+      final r = ValuationCascade.evaluate(entries(structuralDeterioration(),
+          sector: 'materiais-basicos', subsector: 'Siderurgia'));
+      expect(r.isOk, isTrue);
+      expect(
+        r.unwrap().warnings.any((w) => w.contains('setor de commodity')),
+        isTrue,
+        reason: 'uma isenção silenciosa é pior que a trava que ela remove',
+      );
+    });
+
+    test('o piso continua valendo para quem reprovou na saúde', () {
+      // Deterioração no lucro **com** o exercício corrente acima do ciclo: a
+      // trava é só de teto, e normalizar para baixo é a direção conservadora.
+      final points = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var year = 2012; year <= 2025; year++) {
+        // Retorno cai de 20% para 2% e o exercício corrente volta a 30%: o
+        // lucro do triênio despencou, mas o ano é de pico contra o ciclo.
+        final roe = year == 2025 ? 0.30 : (year >= 2023 ? 0.02 : 0.20);
+        final profit = roe * pl;
+        pl += profit;
+        points.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          netIncome: year == 2012 ? null : profit,
+          marketCap: 20000,
+        ));
+      }
+      final series = CapitalSeries.build(points, ValuationLane.shareholder);
+      final raw = series.cycleReturn(window: ValuationParameters.cycleWindow)! /
+          series.latestReturn!;
+      expect(raw, lessThan(1.0), reason: 'a fixture precisa normalizar para baixo');
+
+      expect(recordedFactor(entries(points)), lessThan(1.0));
+    });
+
+    test('a base inorgânica é declarada nos avisos, não silenciada', () {
+      final history =
+          mergerWithSpike(cycleRoe: 0.10, currentRoe: 0.30);
+      final result = ValuationCascade.evaluate(entries(history));
+      expect(result.isOk, isTrue);
+      expect(
+        result.unwrap().warnings.any((w) => w.contains('grandeza intensiva')),
+        isTrue,
+        reason: 'trocar bloqueio por permissão silenciosa seria pior que o '
+            'defeito que se está corrigindo',
+      );
+    });
+  });
+
+  group('Porta 1 — instituição financeira, pelo setor', () {
+    /// Empresa com NOPAT positivo em todos os exercícios: pela Porta 3, ela
+    /// **iria** para a via da firma. É o que torna o teste capaz de isolar a
+    /// decisão da Porta 1 — sem isso, a via do acionista seria escolhida pela
+    /// porta seguinte e o teste não provaria nada.
+    List<FundamentalsSnapshot> withFirmFlow({required double debt}) {
+      final points = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var year = 2012; year <= 2025; year++) {
+        final profit = 0.12 * pl;
+        pl += profit;
+        points.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          netIncome: year == 2012 ? null : profit,
+          nopat: profit,
+          ebit: profit * 1.4,
+          longTermDebt: debt,
+          marketCap: 20000,
+        ));
+      }
+      return points;
+    }
+
+    ValuationResult? evaluate(
+        {required String? sector, required double debt, String? subsector}) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 6, 30),
+        fundamentals: withFirmFlow(debt: debt),
+        marketPrice: 20.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.105,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        sectorKey: sector,
+        industry: subsector,
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('pela classificação oficial da B3, banco entra; shopping não — A5', () {
+      final bank = evaluate(
+          sector: 'financeiro',
+          subsector: 'Intermediários Financeiros / Bancos',
+          debt: 0)!;
+      expect(bank.model, ValuationModel.dcfEarnings);
+      expect(bank.warnings.any((w) => w.contains('Instituição financeira')),
+          isTrue);
+      final shopping = evaluate(
+          sector: 'financeiro',
+          subsector: 'Exploração de Imóveis / Exploração de Imóveis',
+          debt: 0)!;
+      expect(shopping.model, ValuationModel.dcfFcff);
+      expect(shopping.warnings.any((w) => w.contains('Instituição financeira')),
+          isFalse);
+    });
+
+    test('setor financeiro manda para a via do acionista', () {
+      final v = evaluate(sector: 'servicos-financeiros', debt: 0);
+      expect(v, isNotNull);
+      expect(v!.model, ValuationModel.dcfEarnings);
+      expect(
+        v.warnings.any((w) => w.contains('Instituição financeira')),
+        isTrue,
+        reason: 'a porta que decidiu precisa aparecer no resultado',
+      );
+    });
+
+    test('passivo oneroso NÃO tira a financeira da Porta 1', () {
+      // Captação é a matéria-prima do negócio bancário: exigir dívida nula
+      // barrava justamente quem a porta existe para pegar. Cinco dos 28 ativos
+      // do setor caíam por ela para a via da firma, e na B3SA3 as debêntures
+      // viravam dívida líquida subtraída do valor da firma.
+      //
+      // A justificativa original da exigência — a RENT3 chegando como
+      // `Finance` — é de outra taxonomia: a porta compara contra a do perfil,
+      // onde a RENT3 vem como `consumo-ciclico`.
+      final v = evaluate(sector: 'servicos-financeiros', debt: 500);
+      expect(v, isNotNull);
+      expect(v!.model, ValuationModel.dcfEarnings);
+      expect(v.warnings.any((w) => w.contains('Instituição financeira')), isTrue);
+    });
+
+    test('fora do setor financeiro, dívida nula não aciona a Porta 1', () {
+      final v = evaluate(sector: 'bens-industriais', debt: 0);
+      expect(v, isNotNull);
+      expect(v!.model, ValuationModel.dcfFcff);
+      expect(v.warnings.any((w) => w.contains('Instituição financeira')), isFalse);
+    });
+
+    test('sem setor informado, o roteamento cai na Porta 3', () {
+      // Degradação segura declarada na decisão 25: perfil que não carrega não
+      // pode ligar uma exceção de via.
+      final v = evaluate(sector: null, debt: 0);
+      expect(v, isNotNull);
+      expect(v!.model, ValuationModel.dcfFcff);
+    });
+  });
+
+  group('Precedência do ciclo em commodity — Guarda 3 sobre Guarda 1', () {
+    test('a taxonomia separa petróleo de energia elétrica', () {
+      // A chave `energia` reúne exploração de petróleo, que é commodity pura, e
+      // 28 elétricas, que são concessão regulada. Tratar a chave inteira como
+      // cíclica inverteria a natureza das segundas.
+      bool cyclical(String? sector, String? sub) =>
+          CyclicalSectors.hasCyclePrecedence(sectorKey: sector, industry: sub);
+
+      expect(cyclical('energia', 'Exploração e Produção de Petróleo'), isTrue);
+      expect(cyclical('energia', 'Exploração, Refino e Distribuição'), isTrue);
+      expect(cyclical('energia', 'Petróleo e Gás Integrado'), isTrue);
+      expect(cyclical('energia', 'Energia Elétrica'), isFalse);
+      expect(cyclical('energia', 'Gás'), isFalse,
+          reason: 'distribuição de gás é concessão, não exploração');
+      expect(cyclical('saneamento', 'Água e Saneamento'), isFalse);
+      expect(cyclical('servicos-financeiros', 'Bancos'), isFalse);
+    });
+
+    test('materiais básicos é cíclico por inteiro', () {
+      for (final sub in [
+        'Papel e Celulose',
+        'Siderurgia',
+        'Minerais Metálicos',
+        'Petroquímicos',
+        'Fertilizantes e Defensivos',
+      ]) {
+        expect(
+          CyclicalSectors.hasCyclePrecedence(
+              sectorKey: 'materiais-basicos', industry: sub),
+          isTrue,
+          reason: sub,
+        );
+      }
+    });
+
+    test('a variante de pontuação da fonte não muda a classificação', () {
+      // A fonte publica os dois: com vírgula e com ponto.
+      expect(
+        CyclicalSectors.hasCyclePrecedence(
+            sectorKey: 'energia', industry: 'Exploração, Refino e Distribuição'),
+        CyclicalSectors.hasCyclePrecedence(
+            sectorKey: 'energia', industry: 'Exploração. Refino e Distribuição'),
+      );
+    });
+
+    test('sem setor nem subsetor, não há precedência', () {
+      expect(CyclicalSectors.hasCyclePrecedence(), isFalse,
+          reason: 'ausência de classificação não pode ligar uma exceção');
+    });
+  });
+
+  group('Saída 2 — identificação do crescimento', () {
+    List<FundamentalsSnapshot> withGrowthSeries(double g, {double noise = 0}) {
+      var pl = 1000.0;
+      final points = <FundamentalsSnapshot>[];
+      for (var year = 2014; year <= 2025; year++) {
+        final deviation = noise == 0 ? 1.0 : (year.isEven ? 1 + noise : 1 - noise);
+        points.add(fiscalYear(year,
+            bookValuePerShare: pl * deviation / 1000, shares: 1000, profit: pl * 0.15));
+        pl *= 1 + g;
+      }
+      return points;
+    }
+
+    test('série limpa devolve o crescimento pela mediana das variações', () {
+      final series =
+          CapitalSeries.build(withGrowthSeries(0.08), ValuationLane.shareholder);
+      final d = GrowthGuards.dispersion(series);
+      expect(d, isNotNull);
+      expect(d!.isIdentified, isTrue);
+      expect(d.medianGrowth, closeTo(0.08, 1e-6));
+    });
+
+    test('estimador impreciso é barrado antes do teste de discordância', () {
+      // Forma da PRIO3: os dois estimadores concordam (D pequeno) porque ambos
+      // são ruins. Sem o piso de precisão, o ativo mais imprecisamente medido
+      // da amostra receberia o maior crescimento.
+      final series = CapitalSeries.build(
+          withGrowthSeries(0.25, noise: 0.45), ValuationLane.shareholder);
+      final d = GrowthGuards.dispersion(series);
+      expect(d, isNotNull);
+      expect(d!.stdError, greaterThan(ValuationParameters.maxGrowthStdError));
+      expect(d.isIdentified, isFalse);
+      expect(d.failure, contains('impreciso'));
+    });
+
+    test('financiabilidade discrimina por retorno, não por setor', () {
+      // Retorno alto torna a inflação barata de financiar; retorno baixo, não.
+      // É a forma de BBSE3 contra VIVT3.
+      expect(
+        GrowthGuards.anchorIsFundable(
+            inflation: 0.05, cycleReturn: 0.675, observedRetention: 0.113),
+        isTrue,
+        reason: 'com retorno de 67,5%, crescer à inflação custa 7,4% de '
+            'retenção contra 11,3% observados',
+      );
+      expect(
+        GrowthGuards.anchorIsFundable(
+            inflation: 0.05, cycleReturn: 0.078, observedRetention: 0.06),
+        isFalse,
+        reason: 'com retorno de 7,8%, exigiria reter 64% contra 6% observados',
+      );
+    });
+  });
+
+  group('Porta 0 — elegibilidade', () {
+    test('histórico curto reprova', () {
+      final v = EligibilityGate.assess(snapshots: [
+        for (var year = 2021; year <= 2025; year++)
+          fiscalYear(year, bookValuePerShare: 10, shares: 1000, profit: 100),
+      ]);
+      expect(v.isEligible, isFalse);
+      expect(v.reasons, contains(IneligibilityReason.shortHistory));
+    });
+
+    test('patrimônio negativo em dois exercícios consecutivos reprova', () {
+      final v = EligibilityGate.assess(snapshots: [
+        for (var year = 2016; year <= 2023; year++)
+          fiscalYear(year, bookValuePerShare: 10, shares: 1000, profit: 100),
+        fiscalYear(2024, bookValuePerShare: -1, shares: 1000, profit: -50),
+        fiscalYear(2025, bookValuePerShare: -2, shares: 1000, profit: -50),
+      ]);
+      expect(v.isEligible, isFalse);
+      expect(v.reasons, contains(IneligibilityReason.insolvent));
+    });
+
+    test('um exercício isolado de patrimônio negativo não reprova', () {
+      final v = EligibilityGate.assess(snapshots: [
+        for (var year = 2016; year <= 2023; year++)
+          fiscalYear(year, bookValuePerShare: 10, shares: 1000, profit: 100),
+        fiscalYear(2024, bookValuePerShare: -1, shares: 1000, profit: -50),
+        fiscalYear(2025, bookValuePerShare: 9, shares: 1000, profit: 80),
+      ]);
+      expect(v.reasons, isNot(contains(IneligibilityReason.insolvent)));
+    });
+
+    test('recuperação judicial reprova, e vem de fora', () {
+      final v = EligibilityGate.assess(
+        snapshots: [
+          for (var year = 2016; year <= 2025; year++)
+            fiscalYear(year, bookValuePerShare: 10, shares: 1000, profit: 100),
+        ],
+        isDistressed: true,
+      );
+      expect(v.isEligible, isFalse);
+      expect(v.reasons, contains(IneligibilityReason.distressed));
+    });
+
+    test('série sem volume omite o teste de liquidez em vez de reprovar', () {
+      final v = EligibilityGate.assess(
+        snapshots: [
+          for (var year = 2016; year <= 2025; year++)
+            fiscalYear(year, bookValuePerShare: 10, shares: 1000, profit: 100),
+        ],
+        prices: PriceSeries(
+          ticker: ticker,
+          points: [
+            for (var i = 0; i < 100; i++)
+              PricePoint(date: DateTime(2026, 1, 1).add(Duration(days: i)),
+                  close: 10),
+          ],
+        ),
+      );
+      expect(v.averageDailyTradedValue, isNull);
+      expect(v.reasons, isNot(contains(IneligibilityReason.illiquid)));
+    });
+
+    test('volume financeiro abaixo do corte reprova', () {
+      final v = EligibilityGate.assess(
+        snapshots: [
+          for (var year = 2016; year <= 2025; year++)
+            fiscalYear(year, bookValuePerShare: 10, shares: 1000, profit: 100),
+        ],
+        prices: PriceSeries(
+          ticker: ticker,
+          points: [
+            for (var i = 0; i < 100; i++)
+              PricePoint(
+                  date: DateTime(2026, 1, 1).add(Duration(days: i)),
+                  close: 10,
+                  volume: 1000),
+          ],
+        ),
+      );
+      expect(v.averageDailyTradedValue, closeTo(10000, 1e-6));
+      expect(v.reasons, contains(IneligibilityReason.illiquid));
+    });
+  });
+
+  group('Estrutura a termo do desconto', () {
+    const a = DcfAssumptions(
+      projectionYears: 10,
+      growthRate: 0.10,
+      perpetualGrowth: 0.05,
+      discountRate: 0.16,
+      terminalDiscountRate: 0.12,
+      returnOnCapital: 0.20,
+    );
+
+    test('a taxa parte da corrente e chega à de equilíbrio', () {
+      expect(a.discountRateAt(1), closeTo(0.16, 1e-12));
+      expect(a.discountRateAt(10), closeTo(0.12, 1e-12));
+    });
+
+    test('o decaimento é linear no passo da janela', () {
+      // No ano 6 percorreram-se 5/9 da janela.
+      expect(a.discountRateAt(6), closeTo(0.16 - 0.04 * 5 / 9, 1e-12));
+    });
+
+    test('o retorno converge para o custo de capital do próprio ano', () {
+      expect(a.returnOnCapitalAt(1), closeTo(0.20, 1e-12));
+      expect(a.returnOnCapitalAt(10), closeTo(a.discountRateAt(10), 1e-12));
+    });
+
+    test('o último ano explícito encontra a retenção do estado estacionário',
+        () {
+      // b_N = g_inf / r_inf é exatamente a retenção que o terminal supõe:
+      // a projeção deixa de saltar para a perpetuidade.
+      expect(a.retentionAt(10), closeTo(0.05 / 0.12, 1e-12));
+    });
+
+    test('o fator de desconto acumula as taxas, não eleva uma só a t', () {
+      final r = DcfCalculator.shareholder(
+        baseProfit: 100,
+        assumptions: const DcfAssumptions(
+          projectionYears: 2,
+          growthRate: 0.0,
+          perpetualGrowth: 0.0,
+          discountRate: 0.20,
+          terminalDiscountRate: 0.10,
+        ),
+      );
+      final o = r.unwrap();
+      // Ano 1 a 20%, ano 2 a 10%: fatores 1,20 e 1,20 x 1,10 = 1,32. O
+      // levantamento de meio de ano usa a taxa **do próprio ano**, e é o que
+      // separa "o caixa chega no meio do ano" de "a curva mudou".
+      expect(o.discountedFlows[0],
+          closeTo(100 * math.sqrt(1.20) / 1.20, 1e-9));
+      expect(o.discountedFlows[1],
+          closeTo(100 * math.sqrt(1.10) / 1.32, 1e-9));
+    });
+
+    test('a convenção de meio de ano levanta o valor por raiz de (1+r)', () {
+      // O levantamento incide sobre a avaliação **inteira** — período
+      // explícito e perpetuidade —, e por isso é razão exata quando a taxa é
+      // plana. Com taxa única de 13%, vale 6,30%.
+      DcfOutcome withTiming(CashTiming timing) => DcfCalculator
+          .shareholder(
+            baseProfit: 100,
+            assumptions: DcfAssumptions(
+              projectionYears: 10,
+              growthRate: 0.04,
+              perpetualGrowth: 0.04,
+              discountRate: 0.13,
+              terminalDiscountRate: 0.13,
+              cashTiming: timing,
+            ),
+          )
+          .unwrap();
+
+      final end = withTiming(CashTiming.endOfYear);
+      final mid = withTiming(CashTiming.midYear);
+      expect(mid.fairValuePerShare / end.fairValuePerShare,
+          closeTo(math.sqrt(1.13), 1e-12));
+      expect(math.sqrt(1.13) - 1, closeTo(0.0630, 1e-4));
+
+      // A composição do valor **não** muda: o levantamento é o mesmo fator nos
+      // dois pedaços, e o peso do terminal fica onde estava.
+      expect(mid.terminalShare, closeTo(end.terminalShare, 1e-12));
+    });
+
+    test('sob taxa que varia, o levantamento não é fator único', () {
+      // Cada ano é levantado pela taxa daquele ano, de modo que a razão entre
+      // as duas convenções fica **entre** as raízes dos extremos. Se fosse
+      // fator único, o meio de ano seria mera reescala e não precisaria
+      // atravessar a projeção.
+      DcfOutcome withTiming(CashTiming timing) => DcfCalculator
+          .shareholder(
+            baseProfit: 100,
+            assumptions: DcfAssumptions(
+              projectionYears: 10,
+              growthRate: 0.04,
+              perpetualGrowth: 0.04,
+              discountRate: 0.18,
+              terminalDiscountRate: 0.09,
+              cashTiming: timing,
+            ),
+          )
+          .unwrap();
+
+      final ratio = withTiming(CashTiming.midYear).fairValuePerShare /
+          withTiming(CashTiming.endOfYear).fairValuePerShare;
+      expect(ratio, greaterThan(math.sqrt(1.09)));
+      expect(ratio, lessThan(math.sqrt(1.18)));
+    });
+
+    test('sem taxa terminal declarada, o desconto é plano', () {
+      const flat = DcfAssumptions(
+        projectionYears: 10,
+        growthRate: 0.10,
+        perpetualGrowth: 0.05,
+        discountRate: 0.16,
+      );
+      expect(flat.terminalDiscountRate, 0.16);
+      expect(flat.discountRateAt(7), closeTo(0.16, 1e-12));
+    });
+  });
+
+  group('Alíquota estrutural no fluxo da firma', () {
+    // [imposto] é o **ônus**, em módulo. A fonte grava a despesa com sinal
+    // negativo — `lucro líquido = lucro antes + incomeTaxExpense` —, e o
+    // fixture reproduz essa convenção para que o teste exercite a conta real.
+    FundamentalsSnapshot withTax(
+      int year,
+      double profitBefore,
+      double tax, {
+      double? yearEbit,
+    }) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          ebit: yearEbit ?? 1000,
+          ebitda: (yearEbit ?? 1000) + 300,
+          netIncome: profitBefore - tax,
+          incomeBeforeTax: profitBefore,
+          incomeTaxExpense: -tax,
+          nopat: (yearEbit ?? 1000) * 0.66,
+          totalStockholderEquity: 5000,
+          bookValuePerShare: 5.0,
+          propertyPlantEquipment: 6000,
+          totalCurrentAssets: 2000,
+          currentLiabilities: 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+        );
+
+    List<FundamentalsSnapshot> withTaxRate(double rate, {int years = 10}) => [
+          for (var i = years - 1; i >= 0; i--)
+            withTax(2025 - i, 1000, 1000 * rate),
+        ];
+
+    test('a estrutural é a mediana dos exercícios, não a do último', () {
+      // Nove exercícios a 20% e um a 45%: a mediana ignora o atípico, que é o
+      // ponto de usar mediana e não o último exercício.
+      final series = [
+        for (var i = 9; i >= 1; i--) withTax(2025 - i, 1000, 200),
+        withTax(2025, 1000, 450),
+      ];
+      expect(
+        CapitalSeries.structuralTaxRate(series, statutoryRate: 0.34),
+        closeTo(0.20, 1e-12),
+      );
+    });
+
+    test('é confinada no teto da estatutária', () {
+      // Pagar mais que a marginal em perpetuidade é transitório, e a fonte já
+      // aplicou a estatutária: ir além penalizaria duas vezes.
+      expect(
+        CapitalSeries.structuralTaxRate(withTaxRate(0.45), statutoryRate: 0.34),
+        closeTo(0.34, 1e-12),
+      );
+    });
+
+    test('série curta demais devolve nulo, e o chamador recua', () {
+      expect(
+        CapitalSeries.structuralTaxRate(withTaxRate(0.15, years: 4),
+            statutoryRate: 0.34),
+        isNull,
+      );
+      expect(
+        CapitalSeries.structuralTaxRate(withTaxRate(0.15, years: 5),
+            statutoryRate: 0.34),
+        closeTo(0.15, 1e-12),
+      );
+    });
+
+    test('crédito tributário vira alíquota nula, não imposto a pagar', () {
+      // A versão anterior aplicava `.abs()` antes da divisão, e o exercício em
+      // que a empresa **recuperou** imposto saía com alíquota positiva — o
+      // `clamp`, que existe para conter a distorção, nunca chegava a agir.
+      // Ônus negativo é crédito: a fonte o grava com `incomeTaxExpense`
+      // positivo, e o fixture inverte, então isto produz +200 no campo.
+      final credit = withTax(2025, 1000, -200);
+      expect(credit.incomeTaxExpense, 200);
+      expect(credit.effectiveTaxRate, 0.0);
+      // E o NOPAT desse exercício é o EBIT cheio, não EBIT x 0,80.
+      expect(credit.nopatAtRate(credit.effectiveTaxRate),
+          closeTo(1000.0, 1e-9));
+    });
+
+    test('nopatAtRate recalcula sobre o EBIT, e recua sem alíquota', () {
+      final s = withTax(2025, 1000, 150);
+      expect(s.nopatAtRate(0.15), closeTo(1000 * 0.85, 1e-9));
+      // Sem alíquota informada vale o publicado pela fonte, que é EBIT x 0,66.
+      expect(s.nopatAtRate(null), closeTo(660.0, 1e-9));
+    });
+
+    test('a série de capital carrega a alíquota, e o ROIC sobe com ela', () {
+      final series = withTaxRate(0.15);
+      final statutory = CapitalSeries.build(series, ValuationLane.firm);
+      final structural = CapitalSeries.build(
+        series,
+        ValuationLane.firm,
+        firmTaxRate: 0.15,
+      );
+      final rStatutory = statutory.latestReturn!;
+      final rStructural = structural.latestReturn!;
+      expect(rStructural, greaterThan(rStatutory));
+      // NOPAT passa de EBIT x 0,66 para EBIT x 0,85 sobre a mesma base.
+      expect(rStructural / rStatutory, closeTo(0.85 / 0.66, 1e-9));
+    });
+
+    test('o ROIC e o fluxo-base mudam juntos, e o freio fica coerente', () {
+      // É o ponto que a decisão 31 já havia medido em 17% na AZZA3: casar o
+      // `g` de uma série com o `ROIC` de outra cobra reinvestimento de um
+      // retorno que não é o do fluxo descontado. Mudar só o fluxo repetiria o
+      // defeito, agora pela via do imposto.
+      final series = withTaxRate(0.15);
+      final s = CapitalSeries.build(
+        series,
+        ValuationLane.firm,
+        firmTaxRate: 0.15,
+      );
+      final last = series.last;
+      final base = last.nopatAtRate(0.15)!;
+      final capital = last.investedCapital!;
+      expect(s.latestReturn!, closeTo(base / capital, 1e-9),
+          reason: 'o retorno da série tem de ser o do fluxo-base sobre a '
+              'mesma base de capital');
+    });
+
+    test('a via do acionista não é tocada', () {
+      final series = withTaxRate(0.15);
+      final withoutRate = CapitalSeries.build(series, ValuationLane.shareholder);
+      final withRate = CapitalSeries.build(
+        series,
+        ValuationLane.shareholder,
+        firmTaxRate: 0.15,
+      );
+      expect(withRate.latestReturn, withoutRate.latestReturn,
+          reason: 'o lucro líquido já vem tributado; aplicar alíquota de novo '
+              'tributaria duas vezes');
+    });
+  });
+
+  group('Vantagem competitiva residual — decaimento medido', () {
+    // Excedente exatamente geométrico: `e_t = e_0 · phi^t`. Sobre ele o AR(1)
+    // devolve a inclinação exata, o que torna o teste uma verificação da conta
+    // e não uma comparação com número decorado.
+    List<({int year, double excess})> geometric(
+      double e0,
+      double phi,
+      int points,
+    ) =>
+        [
+          for (var i = 0; i < points; i++)
+            (year: 2010 + i, excess: e0 * _pow(phi, i)),
+        ];
+
+    /// Série com os anos informados, para exercitar buraco de calendário.
+    List<({int year, double excess})> inYears(
+      List<int> years,
+      double e0,
+      double phi,
+    ) =>
+        [
+          for (var i = 0; i < years.length; i++)
+            (year: years[i], excess: e0 * _pow(phi, i)),
+        ];
+
+    double? moat({
+      double? returnRate = 0.30,
+      double discount = 0.12,
+      double? phi = 0.10,
+      int fiscalYears = 14,
+      List<({int year, double excess})>? excesses,
+      int years = 10,
+    }) =>
+        GrowthGuards.residualMoat(
+          cycleReturn: returnRate,
+          terminalDiscountRate: discount,
+          externalCapitalRatio: phi,
+          periods: fiscalYears,
+          excessReturns: excesses ?? geometric(0.18, 0.5, 9),
+          projectionYears: years,
+        ).terminalReturn;
+
+    test('o AR(1) recupera a persistência crua de uma série geométrica', () {
+      final p = GrowthGuards.excessPersistence(geometric(0.18, 0.5, 9))!;
+      expect(p.rawPhi, closeTo(0.5, 1e-12));
+      expect(p.pairs, 8);
+      // Sem correção de viés: o que a série mostra é o que entra. A tentativa
+      // de corrigir Kendall pôs dez de vinte e quatro ativos no teto, e o
+      // teto passou a decidir no lugar do dado — ver `excessPersistence`.
+      expect(p.phi, closeTo(0.5, 1e-12));
+    });
+
+    test('a persistência é confinada no teto', () {
+      // Série quase perene: a correção levaria phi acima de 1, que seria
+      // excedente que nunca decai — exatamente o que o terminal neutro nega.
+      final p = GrowthGuards.excessPersistence(geometric(0.18, 0.98, 12))!;
+      expect(p.rawPhi, closeTo(0.98, 1e-12));
+      expect(p.phi, ValuationParameters.moatMaxPersistence);
+      expect(p.phi, lessThan(p.rawPhi),
+          reason: 'o teto só morde no extremo, e quando morde tem de aparecer '
+              'na diferença entre o cru e o aplicado');
+    });
+
+    test('excedente que oscila não é vantagem que decai', () {
+      // Sinais alternados: o AR(1) devolve inclinação negativa, e o
+      // confinamento a leva a zero. Sem persistência não há o que preservar.
+      final alternatingSeries = [
+        for (var i = 0; i < 7; i++)
+          (year: 2010 + i, excess: i.isEven ? 0.10 : -0.10),
+      ];
+      final p = GrowthGuards.excessPersistence(alternatingSeries)!;
+      expect(p.rawPhi, lessThan(0));
+      expect(p.phi, 0.0);
+      expect(moat(excesses: alternatingSeries), isNull);
+    });
+
+    test('série curta demais não estima persistência, e isso barra', () {
+      expect(GrowthGuards.excessPersistence(geometric(0.1, 0.5, 3)), isNull);
+      final v = GrowthGuards.residualMoat(
+        cycleReturn: 0.30,
+        terminalDiscountRate: 0.12,
+        externalCapitalRatio: 0.10,
+        periods: 14,
+        excessReturns: geometric(0.1, 0.5, 3),
+        projectionYears: 10,
+      );
+      expect(v.isProven, isFalse);
+      expect(v.blocks, contains(MoatBlock.persistenceNotEstimable));
+    });
+
+    test('buraco de calendário não vira par: 2023 não regride sobre 2019', () {
+      // `CapitalSeries.returns` pula exercício sem base ou sem lucro, então a
+      // lista pode ter salto de ano. Parear anos não adjacentes leria quatro
+      // anos de decaimento como um, e enviesaria φ para baixo.
+      final contiguous = geometric(0.18, 0.5, 9);
+      final withGap = inYears(
+        [2010, 2011, 2012, 2013, 2018, 2019, 2020, 2021, 2022],
+        0.18,
+        0.5,
+      );
+      final a = GrowthGuards.excessPersistence(contiguous)!;
+      final b = GrowthGuards.excessPersistence(withGap)!;
+      expect(a.pairs, 8);
+      expect(b.pairs, 7, reason: 'o par 2013→2018 não pode existir');
+      expect(b.rawPhi, closeTo(0.5, 1e-12),
+          reason: 'descartado o par do buraco, o decaimento é o mesmo');
+    });
+
+    test('pares adjacentes de menos devolvem nulo', () {
+      // Quatro pontos alternados dão zero pares adjacentes.
+      expect(
+        GrowthGuards.excessPersistence(
+          inYears([2010, 2012, 2014, 2016, 2018, 2020], 0.18, 0.5),
+        ),
+        isNull,
+      );
+    });
+
+    test('o retorno terminal é a taxa mais phi elevado a N vezes o excedente',
+        () {
+      final lambda = _pow(0.5, 10);
+      expect(moat(), closeTo(0.12 + lambda * (0.30 - 0.12), 1e-12));
+    });
+
+    test('o retorno terminal nunca ultrapassa o que a empresa entregou', () {
+      // Invariante da forma: `lambda` vive em [0, 1], logo o terminal vive em
+      // (r_inf, ROIC do ciclo]. Preservar mais do que o próprio ciclo seria
+      // inventar vantagem que a série não mostrou.
+      for (final phi in [0.1, 0.3, 0.5, 0.7, 0.9]) {
+        final t = moat(excesses: geometric(0.18, phi, 12));
+        if (t == null) continue;
+        expect(t, greaterThan(0.12));
+        expect(t, lessThanOrEqualTo(0.30 + 1e-12));
+      }
+    });
+
+    test('NÃO há degrau: o terminal é contínuo no retorno do ciclo', () {
+      // É o defeito que a decisão 36 corrige. Antes dela, o retorno do ciclo
+      // atravessando `1,5 · WACC` ou `WACC + 5 p.p.` fazia o preço justo
+      // saltar; medido em 09/09/2026, o salto valia de 10% a 32% em onze
+      // ativos, e estava ordenado ao contrário do tamanho do efeito.
+      double? previous;
+      var evaluated = 0;
+      for (var step = 0; step <= 60; step++) {
+        final cycle = 0.1201 + step * 0.0030;
+        final t = moat(returnRate: cycle);
+        if (t == null) continue;
+        evaluated++;
+        if (previous != null) {
+          expect(t, greaterThan(previous - 1e-12),
+              reason: 'monotonia no retorno do ciclo');
+          // O passo do terminal é `lambda` vezes o passo do ciclo. Com lambda
+          // em [0, 1], nenhum incremento pode superar o do próprio ciclo — que
+          // é justamente o que um degrau faria.
+          expect(t - previous, lessThanOrEqualTo(0.0030 + 1e-12),
+              reason: 'salto maior que o passo do ciclo é degrau');
+        }
+        previous = t;
+      }
+      expect(evaluated, greaterThan(50));
+    });
+
+    test('excedente pequeno recebe preservação pequena, e não recusa', () {
+      // Sob o degrau, 2,4 p.p. de excedente reprovavam por inteiro: era o caso
+      // de SAPR4, SAPR11, TAEE4 e TAEE11, que perdiam de 12% a 16% de preço
+      // justo por um limiar. Agora recebem o que a persistência sustenta.
+      final t = moat(returnRate: 0.144);
+      expect(t, isNotNull);
+      expect(t!, greaterThan(0.12));
+      expect(t, lessThan(0.144));
+    });
+
+    test('horizonte nulo não vira excedente perene', () {
+      // `φ⁰ = 1` preservaria o excedente inteiro para sempre — o oposto do que
+      // o decaimento existe para fazer, e um erro silencioso porque produziria
+      // um número plausível. `DcfCalculator` recusa projeção com menos de um
+      // ano antes disso; o piso aqui existe para a função não depender dessa
+      // recusa para estar certa.
+      final withZero = moat(years: 0);
+      final withOne = moat(years: 1);
+      expect(withZero, isNotNull);
+      expect(withZero, withOne);
+      expect(withZero!, lessThan(0.30),
+          reason: 'preservar o excedente inteiro seria φ⁰ = 1');
+    });
+
+    test('crescimento inorgânico reprova, no limiar de 0,60', () {
+      expect(moat(phi: 0.61), isNull);
+      expect(moat(phi: 0.60), isNotNull);
+      // Sob o corte anterior de 0,35, a EGIE3 (0,58) e o ITUB4 (0,50) caíam
+      // aqui — concessão e banco acusam Φ alto por definição do negócio.
+      expect(moat(phi: 0.58), isNotNull);
+    });
+
+    test('Phi não medido reprova — ausência não é aprovação', () {
+      expect(moat(phi: null), isNull);
+    });
+
+    test('histórico curto reprova, no piso da Porta 0', () {
+      expect(moat(fiscalYears: 7), isNull);
+      expect(moat(fiscalYears: 8), isNotNull);
+    });
+
+    test('sem retorno do ciclo não há vantagem a preservar', () {
+      expect(moat(returnRate: null), isNull);
+    });
+
+    test('retorno abaixo do custo de capital não é excedente', () {
+      expect(moat(returnRate: 0.11), isNull);
+      final v = GrowthGuards.residualMoat(
+        cycleReturn: 0.11,
+        terminalDiscountRate: 0.12,
+        externalCapitalRatio: 0.10,
+        periods: 14,
+        excessReturns: geometric(0.18, 0.5, 9),
+        projectionYears: 10,
+      );
+      expect(v.blocks, [MoatBlock.noExcess],
+          reason: 'só a ausência de excedente barrou');
+    });
+
+    test('o veredito nomeia todas as condições que barraram', () {
+      final v = GrowthGuards.residualMoat(
+        cycleReturn: 0.10,
+        terminalDiscountRate: 0.12,
+        externalCapitalRatio: 0.90,
+        periods: 5,
+        excessReturns: geometric(0.01, 0.5, 2),
+        projectionYears: 10,
+      );
+      expect(v.isProven, isFalse);
+      expect(
+        v.blocks,
+        containsAll(<MoatBlock>[
+          MoatBlock.shortHistory,
+          MoatBlock.inorganicGrowth,
+          MoatBlock.persistenceNotEstimable,
+          MoatBlock.noExcess,
+        ]),
+        reason: 'avaliar em curto-circuito esconderia as demais recusas',
+      );
+    });
+
+    test('o veredito carrega phi cru e phi aplicado lado a lado', () {
+      // Os dois números viajam juntos para que o confinamento seja auditável:
+      // quem recalibrar o teto precisa saber onde ele mordeu.
+      final v = GrowthGuards.residualMoat(
+        cycleReturn: 0.30,
+        terminalDiscountRate: 0.12,
+        externalCapitalRatio: 0.10,
+        periods: 14,
+        excessReturns: geometric(0.18, 0.5, 9),
+        projectionYears: 10,
+      );
+      expect(v.rawPersistence, closeTo(0.5, 1e-12));
+      expect(v.persistence, closeTo(0.5, 1e-12));
+      expect(v.retainedFraction, closeTo(_pow(0.5, 10), 1e-12));
+      expect(v.persistencePoints, 8);
+    });
+
+    test('o terminal com moat supera o do estado estacionário', () {
+      const base = DcfAssumptions(
+        projectionYears: 10,
+        growthRate: 0.08,
+        perpetualGrowth: 0.05,
+        discountRate: 0.14,
+        terminalDiscountRate: 0.12,
+        returnOnCapital: 0.30,
+      );
+      final neutral =
+          DcfCalculator.terminalValue(finalProfit: 100, assumptions: base)
+              .unwrap();
+      final withMoat = DcfCalculator.terminalValue(
+        finalProfit: 100,
+        assumptions: base.copyWith(terminalReturnOnCapital: 0.174),
+      ).unwrap();
+      // Neutro: 105 / 0,12 = 875.
+      expect(neutral, closeTo(875.0, 1e-9));
+      // Moat: 105 x (1 - 0,05/0,174) / (0,12 - 0,05) = 1039,3...
+      expect(withMoat, closeTo(105 * (1 - 0.05 / 0.174) / 0.07, 1e-9));
+      expect(withMoat, greaterThan(neutral));
+    });
+
+    test('o terminal com moat exige folga entre desconto e crescimento', () {
+      const tight = DcfAssumptions(
+        projectionYears: 10,
+        growthRate: 0.08,
+        perpetualGrowth: 0.119,
+        discountRate: 0.14,
+        terminalDiscountRate: 0.12,
+        returnOnCapital: 0.30,
+        terminalReturnOnCapital: 0.174,
+      );
+      final r =
+          DcfCalculator.terminalValue(finalProfit: 100, assumptions: tight);
+      expect(r.isErr, isTrue);
+    });
+  });
+
+  group('Constantes que carregam decisão', () {
+    test('horizonte de convergência é de 36 meses', () {
+      // Com 12 a anualização vira a identidade e o upside bruto passa a ser
+      // lido como retorno anual — o defeito D1 da decisão 25.
+      expect(ExpectedReturn.defaultHorizonMonths, 36);
+      final r = ExpectedReturn.annualizedFromUpside(1.0);
+      expect(r, closeTo(0.2599, 1e-4),
+          reason: '(1 + 1,00)^(1/3) − 1, e não os 100% da identidade');
+    });
+
+    test('teto nominal compõe crescimento real medido com inflação', () {
+      const a = MarketAnchors(
+        riskFreeCagr: 0.10,
+        marketCagr: 0.12,
+        inflationCagr: 0.05,
+        realEconomyGrowth: 0.0145,
+        observedYears: 10,
+      );
+      expect(a.nominalEconomyGrowth, closeTo(0.0652, 1e-4));
+    });
+
+    test('projeção explícita é de dez anos', () {
+      const a = DcfAssumptions(
+        growthRate: 0.10,
+        perpetualGrowth: 0.04,
+        discountRate: 0.12,
+      );
+      expect(a.projectionYears, 10);
+    });
+  });
+
+  // ------------------------------------------------------- Decisão 31 --
+
+  group('Série de retorno — exercício de prejuízo entra', () {
+    test('a mediana do ciclo não é a mediana só dos anos bons', () {
+      // Forma da CVCB3: quatro exercícios de prejuízo numa janela de oito.
+      // Descartá-los levava a mediana de ROIC de 0,55% para 33,8%, e o fator
+      // de normalização — `ciclo ÷ atual` — carregava o viés inteiro para o
+      // preço justo, porque o DCF é homogêneo de grau 1 no fluxo-base.
+      const results = {
+        2016: 100.0,
+        2017: 110.0,
+        2018: -400.0,
+        2019: -350.0,
+        2020: -300.0,
+        2021: -250.0,
+        2022: 120.0,
+        2023: 130.0,
+        2024: 140.0,
+        2025: 150.0,
+      };
+      final points = [
+        for (final e in results.entries)
+          fiscalYear(e.key, bookValuePerShare: 1.0, shares: 1000, profit: e.value, nopat: e.value),
+      ];
+      final series = CapitalSeries.build(points, ValuationLane.firm);
+
+      final withLoss = series.returns.where((r) => r.value < 0).length;
+      expect(withLoss, 4, reason: 'os quatro anos de prejuízo entram');
+
+      final cycle = series.cycleReturn(window: ValuationParameters.cycleWindow)!;
+      expect(cycle, lessThan(0.10),
+          reason: 'a mediana de um ciclo com quatro anos de prejuízo não pode '
+              'descrever só os anos bons');
+    });
+
+    test('exercício sem lucro publicado continua fora', () {
+      // Ausência de dado não é retorno nulo: incluí-la como zero inventaria
+      // observação onde não há nenhuma.
+      final points = [
+        for (var year = 2016; year <= 2025; year++)
+          fiscalYear(year,
+              bookValuePerShare: 1.0,
+              shares: 1000,
+              profit: year == 2020 ? null : 100.0,
+              nopat: year == 2020 ? null : 100.0),
+      ];
+      final series = CapitalSeries.build(points, ValuationLane.firm);
+      expect(series.returns.any((r) => r.year == 2020), isFalse);
+    });
+  });
+
+  group('Guarda 1 — a deriva não depende do horizonte da tela', () {
+    test('o veredito é o mesmo qualquer que seja a projeção pedida', () {
+      // Forma da AZZA3: tendência de queda significante, com a deriva na
+      // fronteira da correção por reversão. Medindo a deriva no horizonte,
+      // `N = 10` dava dominância 1,49 e `N = 5` dava 0,74 — o veredito
+      // virava, a base era normalizada por 2,50x e o preço justo saía de
+      // R$ 16,11 para R$ 57,48 na mesma empresa, no mesmo dia.
+      var pl = 1000.0;
+      final points = <FundamentalsSnapshot>[];
+      for (var year = 2010; year <= 2025; year++) {
+        final roic = 0.26 - 0.0175 * (year - 2010);
+        final profit = roic * pl;
+        points.add(fiscalYear(year,
+            bookValuePerShare: pl / 1000, shares: 1000, profit: profit, nopat: profit));
+        pl += profit * 0.7;
+      }
+      final series = CapitalSeries.build(points, ValuationLane.firm);
+
+      final v = GrowthGuards.trend(series);
+      expect(v, isNotNull);
+      expect(v!.dominance,
+          closeTo(GrowthGuards.trend(series)!.dominance, 1e-12),
+          reason: 'a guarda não tem mais por onde receber o horizonte');
+
+      // A janela é a do ciclo, e é a mesma sobre a qual a correção é medida.
+      expect(ValuationParameters.trendDriftWindow,
+          ValuationParameters.cycleWindow);
+      final half = GrowthGuards.trend(series, driftWindow: 4)!;
+      expect(half.dominance, closeTo(v.dominance / 2, 1e-9),
+          reason: 'a deriva é linear na janela, e o parâmetro só existe para '
+              'a análise de sensibilidade');
+    });
+  });
+
+  group('Contagem de papéis da ponte', () {
+    FundamentalsSnapshot withMarket({
+      required double current,
+      required double fiscalYearValue,
+      required double marketValueOf,
+      double? profit,
+      double? eps,
+    }) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(2025, 12, 31),
+          bookValuePerShare: 10,
+          sharesOutstanding: current,
+          sharesOutstandingAsOf: fiscalYearValue,
+          marketCap: marketValueOf,
+          netIncome: profit,
+          earningsPerShare: eps,
+        );
+
+    test('contagens que concordam: vale a implícita no valor de mercado', () {
+      // É a que forma o preço comparado, e adotá-la faz o potencial virar
+      // `E ÷ VM − 1`, sem contagem de ação nenhuma no caminho.
+      final s = withMarket(
+        current: 206489810,
+        fiscalYearValue: 206489810,
+        marketValueOf: 206489810 * 17.69,
+        profit: 911249000,
+        eps: 4.413046,
+      );
+      final d = ValuationCascade.quotedShares(
+        latest: s,
+        marketPrice: 17.69,
+        sharesPerQuote: 1.0,
+      );
+      expect(d!.source, QuotedSharesSource.market);
+      expect(d.diverge, isFalse);
+      expect(d.count, closeTo(206489810, 1));
+    });
+
+    test('na divergência vale a maior, e o mercado pode ser a maior', () {
+      // Forma da MOVI3: LPA publicado como zero, o árbitro `lucro ÷ LPA` fica
+      // indisponível, e a contagem do exercício — 152.068.530 — era adotada
+      // contra as 402.158.940 que formam o preço. Erro de 2,65x, direto no
+      // preço justo, e no sentido de inflá-lo.
+      final s = withMarket(
+        current: 402158940,
+        fiscalYearValue: 152068530,
+        marketValueOf: 402158940 * 8.11,
+        profit: 318364000,
+        eps: 0.0,
+      );
+      final d = ValuationCascade.quotedShares(
+        latest: s,
+        marketPrice: 8.11,
+        sharesPerQuote: 1.0,
+      );
+      expect(d!.diverge, isTrue);
+      expect(d.source, QuotedSharesSource.market);
+      expect(d.count, closeTo(402158940, 1));
+      expect(s.reconciledShares, 152068530,
+          reason: 'a contagem contábil não muda: é ela que reconstrói o '
+              'patrimônio publicado');
+    });
+
+    test('na divergência vale a maior, e a contábil pode ser a maior', () {
+      // Forma do MILS3: valor de mercado de R$ 760 mil, herdado de uma
+      // contagem corrente corrompida de 48.172 papéis. Adotá-la daria preço
+      // justo de R$ 37.708,72 contra R$ 15,79 de mercado — o sinal falso de
+      // desconto levado ao absurdo.
+      final s = withMarket(
+        current: 48172,
+        fiscalYearValue: 234178210,
+        marketValueOf: 48172 * 15.79,
+        profit: 1000000000,
+        eps: 4.2646,
+      );
+      final d = ValuationCascade.quotedShares(
+        latest: s,
+        marketPrice: 15.79,
+        sharesPerQuote: 1.0,
+      );
+      expect(d!.diverge, isTrue);
+      expect(d.source, QuotedSharesSource.reconciled);
+      expect(d.count, closeTo(234178210, 1));
+      expect(d.divergence, greaterThan(1000));
+    });
+
+    test('a contábil entra na ponte já na unidade negociada', () {
+      // As demonstrações contam **ações**; a cotação e o valor de mercado vêm
+      // por *unit*. Comparar as duas candidatas em unidades diferentes
+      // escolheria a maior por erro de escala, não por conservadorismo.
+      final s = withMarket(
+        current: 503735170,
+        fiscalYearValue: 1511205500,
+        marketValueOf: 100747034 * 34.95,
+        profit: 1000000000,
+        eps: 0.6617,
+      );
+      final d = ValuationCascade.quotedShares(
+        latest: s,
+        marketPrice: 34.95,
+        sharesPerQuote: 5.0,
+      );
+      expect(d!.fromMarketCap, closeTo(100747034, 1));
+      expect(d.fromStatements, closeTo(1511205500 / 5, 1));
+      expect(d.source, QuotedSharesSource.reconciled);
+      expect(d.count, closeTo(302241100, 1));
+    });
+
+    test('sem valor de mercado, a contábil é a única disponível', () {
+      final s = withMarket(
+        current: 48172,
+        fiscalYearValue: 234178210,
+        marketValueOf: 0,
+      );
+      final d = ValuationCascade.quotedShares(
+        latest: s,
+        marketPrice: 15.79,
+        sharesPerQuote: 1.0,
+      );
+      expect(d!.source, QuotedSharesSource.onlyAvailable);
+      expect(d.count, closeTo(234178210, 1));
+      expect(d.diverge, isFalse, reason: 'não há duas candidatas a divergir');
+    });
+
+    group('O registro oficial da B3 arbitra — decisão 83', () {
+      final today = DateTime(2026, 9, 14);
+
+      test('corrige a regra do maior quando a maior é a errada', () {
+        // Forma da CTKA4: a fonte dá 62 milhões correntes e no valor de
+        // mercado, e 6,2 milhões no exercício. A regra do maior adotava 62, e o
+        // preço justo saía dez vezes menor. A B3 registra 6.205.375.
+        final s = withMarket(
+          current: 62053752,
+          fiscalYearValue: 6205375,
+          marketValueOf: 62053751 * 3.0,
+        );
+        final before = ValuationCascade.quotedShares(
+            latest: s, marketPrice: 3.0, sharesPerQuote: 1.0);
+        expect(before!.count, closeTo(62053751, 1));
+        final d = ValuationCascade.quotedShares(
+          latest: s,
+          marketPrice: 3.0,
+          sharesPerQuote: 1.0,
+          official: OfficialShareCount(total: 6205375, asOf: today),
+          asOf: today,
+        );
+        expect(d!.source, QuotedSharesSource.official);
+        expect(d.count, closeTo(6205375, 1));
+      });
+
+      test('desconta a tesouraria pela fração, e entra na unidade negociada', () {
+        final s = FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(2025, 12, 31),
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 200 * 10.0,
+          treasuryFraction: 0.04,
+          // Contagem absoluta em outra escala: não pode entrar.
+          treasuryShares: 40000,
+        );
+        final d = ValuationCascade.quotedShares(
+          latest: s,
+          marketPrice: 10.0,
+          sharesPerQuote: 5.0,
+          official: OfficialShareCount(total: 1000, asOf: today),
+          asOf: today,
+        );
+        expect(d!.source, QuotedSharesSource.official);
+        expect(d.count, closeTo(960 / 5, 1e-9));
+      });
+
+      test('registro antigo que diverge das duas não é usado', () {
+        // Um desdobramento depois da consulta: a fonte já dobrou, o registro
+        // não. Adotá-lo daria o preço justo em dobro.
+        final s = withMarket(
+          current: 2000,
+          fiscalYearValue: 2000,
+          marketValueOf: 2000 * 5.0,
+        );
+        final d = ValuationCascade.quotedShares(
+          latest: s,
+          marketPrice: 5.0,
+          sharesPerQuote: 1.0,
+          official: OfficialShareCount(total: 1000, asOf: DateTime(2026, 6, 1)),
+          asOf: today,
+        );
+        expect(d!.source, QuotedSharesSource.market);
+        expect(d.fromRegistry, 1000, reason: 'recusado, mas registrado');
+      });
+
+      test('registro antigo que concorda com a fonte é usado', () {
+        final s = withMarket(
+          current: 1030,
+          fiscalYearValue: 1030,
+          marketValueOf: 1030 * 5.0,
+        );
+        final d = ValuationCascade.quotedShares(
+          latest: s,
+          marketPrice: 5.0,
+          sharesPerQuote: 1.0,
+          official: OfficialShareCount(total: 1000, asOf: DateTime(2026, 6, 1)),
+          asOf: today,
+        );
+        expect(d!.source, QuotedSharesSource.official);
+        expect(d.count, 1000);
+      });
+
+      test('registro consultado depois da avaliação não existia nela', () {
+        final s = withMarket(
+          current: 2000,
+          fiscalYearValue: 2000,
+          marketValueOf: 2000 * 5.0,
+        );
+        final d = ValuationCascade.quotedShares(
+          latest: s,
+          marketPrice: 5.0,
+          sharesPerQuote: 1.0,
+          official: OfficialShareCount(total: 1000, asOf: today),
+          asOf: DateTime(2024, 9, 4),
+        );
+        expect(d!.source, QuotedSharesSource.market);
+        expect(d.fromRegistry, isNull);
+      });
+    });
+  });
+
+  group('Ponte de equity — recusa nomeada quando não há o que repartir', () {
+    /// Empresa com fluxo de firma positivo e dívida líquida maior que o valor
+    /// da firma: o fluxo do acionista derivado do da firma não sustenta capital
+    /// próprio positivo, e desde a decisão 102 nenhuma outra via é tentada.
+    List<FundamentalsSnapshot> drownedSeries() {
+      final points = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var year = 2012; year <= 2025; year++) {
+        pl += 20.0;
+        points.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 20000,
+          netIncome: -50.0,
+          nopat: 30.0,
+          ebit: 45.0,
+          ebitda: 60.0,
+          interestExpense: 400.0,
+          longTermDebt: 900000.0,
+        ));
+      }
+      return points;
+    }
+
+    test('a recusa nomeia o motivo, e não devolve resíduo de subtração', () {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 6, 30),
+        fundamentals: drownedSeries(),
+        marketPrice: 20.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.105,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+      ));
+      expect(r.isErr, isTrue);
+      final msg = r.failureOrNull!.message;
+      expect(msg, contains('não sustenta capital próprio positivo'));
+      expect(msg, contains('não é avaliável por fluxo descontado'));
+      expect(msg, isNot(contains('Infinity')),
+          reason: 'participação não positiva não pode virar 1/0 na mensagem');
+    });
+  });
+
+  group('Diagnósticos — o resultado diz o que a conta fez', () {
+    test('não há nota ordinal de confiança, e a ausência é medida', () {
+      // A primeira versão trazia `ValuationConfidence` derivada da contagem de
+      // ressalvas. A validação preditiva da decisão 32 mediu o contrário do
+      // prometido: em 36 meses, o grupo sem ressalva alguma teve IC de −0,007
+      // (positivo em 2 de 5 coortes) e o grupo com uma ou duas teve 0,206
+      // (5 de 5). Uma nota que ordena ao contrário é pior que nenhuma.
+      const d = ValuationDiagnostics(
+        terminalShare: 0.5,
+        equityShare: 0.8,
+        baseFactor: 1.0,
+        growthIdentified: true,
+        moatApplied: false,
+        costOfEquity: 0.16,
+        terminalDiscountRate: 0.12,
+        terminalRetainedSpread: 0.0,
+        growthRate: 0.06,
+        returnOnCapital: 0.15,
+        terminalReturnOnCapital: null,
+      );
+      expect(d.caveats, isEmpty);
+    });
+
+    test('a ressalva de custo da dívida não está no conjunto', () {
+      // Ela disparava em 469 das 821 avaliações do backtest. Ressalva que vale
+      // para a maioria não distingue nada, e a classificação sintética virou
+      // método pela decisão 31 — não é mais um recuo a declarar aqui.
+      expect(
+        ValuationCaveat.values.map((c) => c.key),
+        isNot(contains('custoDaDividaEstimado')),
+      );
+    });
+
+    test('os cortes carregam a decisão que os originou', () {
+      // 80% é o topo da faixa que a decisão 25 citou para justificar dez anos
+      // de projeção em vez de cinco; 2,0x é metade da autoridade que a
+      // saturação da decisão 28 concede a um único exercício; 35% é a faixa em
+      // que o capital próprio fino amplifica o erro do fluxo — declarada, e,
+      // desde a decisão 102, nunca motivo para trocar de via.
+      expect(ValuationDiagnostics.terminalShareLimit, 0.80);
+      expect(ValuationDiagnostics.baseFactorLimit, 2.0);
+      expect(ValuationDiagnostics.fragileEquityShare, 0.35);
+    });
+
+    test('resultado montado à mão não inventa diagnóstico', () {
+      final r = ValuationResult(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 4),
+        model: ValuationModel.dcfFcff,
+        fairValue: Money.fromReais(10),
+        marketPrice: Money.fromReais(8),
+        discountRate: 0.15,
+      );
+      expect(r.diagnostics, isNull);
+      expect(r.caveats, isEmpty);
+    });
+
+    test('a cascata preenche o diagnóstico com o que ela mesma apurou', () {
+      final points = <FundamentalsSnapshot>[];
+      var pl = 1000.0;
+      for (var year = 2012; year <= 2025; year++) {
+        final profit = 0.15 * pl;
+        pl += profit * 0.5;
+        points.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          bookValuePerShare: pl / 1000,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 20000,
+          netIncome: profit,
+          nopat: profit,
+          ebit: profit * 1.4,
+          ebitda: profit * 1.8,
+          interestExpense: 50,
+          longTermDebt: 500,
+        ));
+      }
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 6, 30),
+        fundamentals: points,
+        marketPrice: 20.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.105,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+      ));
+      expect(r.isOk, isTrue);
+      final d = r.unwrap().diagnostics;
+      expect(d, isNotNull);
+      expect(d!.terminalShare, greaterThan(0.0));
+      expect(d.terminalShare, lessThan(1.0));
+      expect(d.baseFactor, greaterThan(0.0));
+      expect(d.equityShare, greaterThan(0.0));
+    });
+  });
+
+  group('Consistência da base acionária entre exercícios', () {
+    FundamentalsSnapshot ex(int year, double shares, double bookValuePerShare) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          sharesOutstandingAsOf: shares,
+          sharesOutstanding: 1259387000,
+          bookValuePerShare: bookValuePerShare,
+          marketCap: 49317593000,
+        );
+
+    test('falha de escala da fonte é descartada do divisor', () {
+      // Forma da EQTL3: o exercício de 2024 vem com 246.152 ações contra 1,50
+      // bilhão em 2023 e 1,26 bilhão em 2025, e o VPA acompanha em
+      // R$ 121.419,23. O patrimônio sai certo porque o erro se cancela em
+      // `VPA × N`; o divisor da ponte, que usa `N` sozinho, sairia cinco mil
+      // vezes errado.
+      final series = [
+        ex(2021, 1128934500, 12.94),
+        ex(2022, 1129315500, 16.44),
+        ex(2023, 1500000000, 16.86),
+        ex(2024, 246152, 121419.23),
+      ];
+      expect(
+        ValuationCascade.shareBaseIsConsistent(series, series.last),
+        isFalse,
+      );
+
+      final d = ValuationCascade.quotedShares(
+        latest: series.last,
+        marketPrice: 39.36,
+        sharesPerQuote: 1.0,
+        published: series,
+      );
+      expect(d, isNotNull);
+      expect(d!.fromStatements, isNull,
+          reason: 'a contagem quebrada não pode entrar como candidata');
+      expect(d.source, QuotedSharesSource.onlyAvailable);
+      expect(d.count, closeTo(49317593000 / 39.36, 1));
+    });
+
+    test('ação societária real passa, e é o ponto do fator ser largo', () {
+      // Forma da VIVT3: a base dobra em 2024 — 1,65 para 3,26 bilhões — com o
+      // VPA caindo de R$ 42,13 para R$ 21,40. `VPA × N` fica estável em
+      // R$ 69 bilhões o tempo todo: foi desdobramento, não erro.
+      final series = [
+        ex(2021, 1690985000, 41.40),
+        ex(2022, 1676938200, 40.82),
+        ex(2023, 1652588400, 42.13),
+        ex(2024, 3261287400, 21.40),
+      ];
+      expect(
+        ValuationCascade.shareBaseIsConsistent(series, series.last),
+        isTrue,
+        reason: 'dobrar a base é ação societária; o corte é de ordem de '
+            'grandeza, não de fator dois',
+      );
+    });
+
+    test('série curta demais aprova em vez de reprovar', () {
+      // Mesmo critério da Porta 0 com a liquidez: sem vizinhança contra a qual
+      // julgar, ausência de informação não é evidência de defeito.
+      final series = [ex(2024, 246152, 121419.23)];
+      expect(
+        ValuationCascade.shareBaseIsConsistent(series, series.last),
+        isTrue,
+      );
+      expect(
+        ValuationCascade.shareBaseIsConsistent(const [], series.last),
+        isTrue,
+      );
+    });
+
+    test('o corte é o mesmo que a série de capital já usa', () {
+      // Duas cópias do mesmo limiar divergiriam na primeira recalibragem, e o
+      // raciocínio é idêntico: falha de fonte é de ordem de grandeza, salto
+      // societário fica entre duas e nove vezes.
+      expect(CapitalSeries.neighbourFactor, 8.0);
+    });
+  });
+
+  group('Escudo fiscal e custo da dívida', () {
+    test('o escudo do WACC é a alíquota estatutária', () {
+      // A fonte publica `nopat` como `EBIT × 0,66` em 4.572 de 4.572
+      // exercícios do cache: o fluxo da firma já vinha apurado à alíquota
+      // legal, e só o escudo do desconto não vinha. O parâmetro fica travado
+      // aqui para que a incoerência não volte por descuido.
+      expect(ValuationParameters.statutoryTaxRate, 0.34);
+    });
+
+    test('a alavancagem ordena o prêmio, e é monótona', () {
+      double spread(double? l) => CostOfCapital.leverageSpread(l);
+      expect(spread(-0.5), lessThan(spread(1.5)));
+      expect(spread(1.5), lessThan(spread(2.8)));
+      expect(spread(2.8), lessThan(spread(4.5)));
+      expect(spread(6.0), CostOfCapital.maxCreditSpread);
+      expect(spread(null), CostOfCapital.maxCreditSpread,
+          reason: 'sem EBITDA positivo vale o pior caso');
+      var previous = 0.0;
+      for (var l = -2.0; l <= 8.0; l += 0.1) {
+        final current = spread(l);
+        expect(current, greaterThanOrEqualTo(previous),
+            reason: 'prêmio caiu ao subir a alavancagem em $l');
+        previous = current;
+      }
+    });
+
+    test('a despesa financeira arbitra se a cobertura pode falar', () {
+      const rf = 0.1409;
+      double s({required double obs, double? coverage, double? lev}) =>
+          CostOfCapital.syntheticSpread(
+            leverage: lev,
+            coverage: coverage,
+            observedCostOfDebt: obs,
+            riskFreeRate: rf,
+          );
+
+      // Forma da SAPR11: despesa observada de 41,7% ao ano é contaminada por
+      // arrendamento e variação cambial. A cobertura de 0,76x que sai dela não
+      // pode decidir o crédito de quem tem 0,60x de alavancagem.
+      expect(s(obs: 0.417, coverage: 0.76, lev: 0.60),
+          CostOfCapital.leverageSpread(0.60));
+
+      // Forma da MOVI3: despesa de 16,4% ao ano é juro de dívida de verdade.
+      // A cobertura de 0,91x é informação, e ela é mais exigente que a
+      // alavancagem de 3,13x — vale a pior das duas.
+      final movi = s(obs: 0.164, coverage: 0.91, lev: 3.13);
+      expect(movi, CostOfCapital.coverageSpread(0.91));
+      expect(movi, greaterThan(CostOfCapital.leverageSpread(3.13)));
+
+      // Dentro da banda, mas com cobertura folgada: quem manda é a alavancagem.
+      expect(s(obs: 0.16, coverage: 9.0, lev: 4.5),
+          CostOfCapital.leverageSpread(4.5));
+
+      // Abaixo do piso a despesa também não serve: dívida subsidiada não
+      // descreve o custo marginal de captar.
+      expect(s(obs: 0.02, coverage: 44.0, lev: 1.45),
+          CostOfCapital.leverageSpread(1.45));
+    });
+  });
+
+  group('Fronteira das vias e monotonia na taxa', () {
+    // A pós-condição da ponte de equity era um degrau entre dois estimadores
+    // diferentes, e medi-la na taxa do dia fazia o degrau andar com o ciclo
+    // monetário (decisão 34); a rampa da decisão 38 trocou o degrau por uma
+    // mistura, e a mistura continuava subindo com a taxa. **Desde a decisão
+    // 102 não há fronteira**: a via da firma é a via da firma em toda taxa, e o
+    // capital próprio fino é ressalva, e não troca de modelo. Este fixture é
+    // alavancado de propósito, para atravessar a faixa que migrava.
+    FundamentalsSnapshot leveredYear(int year, double scale) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          totalRevenue: 10000 * scale,
+          ebit: 1400 * scale,
+          ebitda: 1900 * scale,
+          netIncome: 500 * scale,
+          incomeBeforeTax: 800 * scale,
+          // Negativo, na convenção da fonte: 800 − 300 = 500 de líquido.
+          incomeTaxExpense: -300 * scale,
+          interestExpense: 600,
+          earningsPerShare: 0.5 * scale,
+          cash: 500,
+          shortTermInvestments: 200,
+          shortTermDebt: 3200,
+          longTermDebt: 12800,
+          totalStockholderEquity: 4000 * scale,
+          bookValuePerShare: 4.0 * scale,
+          operatingCashFlow: 1500 * scale,
+          freeCashFlow: 900 * scale,
+          nopat: 924 * scale,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 9000,
+          enterpriseToEbitda: 8.0,
+        );
+
+    List<FundamentalsSnapshot> series() {
+      final out = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 15; i >= 0; i--) {
+        out.add(leveredYear(2025 - i, scale));
+        scale *= 1.06;
+      }
+      return out;
+    }
+
+    ValuationResult? withInput(double rf) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(),
+        marketPrice: 9.0,
+        capm: CapmInputs(riskFreeRate: rf, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('baratear o capital nunca derruba o preço justo', () {
+      double? previous;
+      var evaluated = 0;
+      for (var step = 0; step <= 32; step++) {
+        final rf = 0.1600 - step * 0.0025;
+        final v = withInput(rf);
+        if (v == null) continue;
+        final fairValue = v.fairValue.reais;
+        evaluated++;
+        if (previous != null) {
+          // A tolerância de um centavo é ruído de arredondamento em `Money`,
+          // não folga de regra: a quebra medida era de 33%.
+          expect(fairValue, greaterThanOrEqualTo(previous - 0.01),
+              reason: 'em Rf de ${(rf * 100).toStringAsFixed(2)}% o preço justo '
+                  'caiu de $previous para $fairValue ao baratear o capital');
+        }
+        previous = fairValue;
+      }
+      expect(evaluated, greaterThan(20),
+          reason: 'a varredura precisa cobrir a faixa para ter conteúdo');
+    });
+
+    test('NÃO há degrau: o preço justo é contínuo na taxa', () {
+      // É o defeito que a decisão 38 corrige. A pós-condição escolhia uma via
+      // inteira em s = 20%, e as duas discordam além de 1,5x em 55 de 92
+      // ativos — a VBBR3 saía a R$ 2,65 pela firma ou R$ 33,71 pelo acionista.
+      // Cruzar o corte fazia o preço justo saltar por múltiplos.
+      double? previous;
+      var largestJump = 0.0;
+      var evaluated = 0;
+      for (var step = 0; step <= 60; step++) {
+        final fairValue = withInput(0.1600 - step * 0.0010)?.fairValue.reais;
+        if (fairValue == null || fairValue <= 0) continue;
+        evaluated++;
+        if (previous != null) {
+          final jump = (fairValue / previous - 1).abs();
+          if (jump > largestJump) largestJump = jump;
+        }
+        previous = fairValue;
+      }
+      expect(evaluated, greaterThan(40),
+          reason: 'a varredura precisa cobrir a faixa para ter conteúdo');
+      // Dez pontos-base de taxa não movem um fluxo descontado em mais de uns
+      // poucos por cento. Um degrau de via move por múltiplos.
+      expect(largestJump, lessThan(0.15),
+          reason: 'salto de ${(largestJump * 100).toStringAsFixed(1)}% entre '
+              'dois passos de 10 pontos-base é degrau de via, não desconto');
+    });
+
+    test('não há faixa de transição: o justo é o da via da firma em toda taxa',
+        () {
+      ValuationResult? byLane(double rf, ValuationLane? lane) {
+        final r = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: series(),
+          marketPrice: 9.0,
+          capm: CapmInputs(riskFreeRate: rf, beta: 1.0, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          laneOverride: lane,
+        ));
+        return r.isOk ? r.unwrap() : null;
+      }
+
+      var fragileCount = 0;
+      var evaluated = 0;
+      for (var step = 0; step <= 60; step++) {
+        final rf = 0.1600 - step * 0.0010;
+        final production = byLane(rf, null);
+        if (production == null) continue;
+        evaluated++;
+        expect(production.model, ValuationModel.dcfFcff);
+        final caveats = production.diagnostics!.caveats;
+        expect(caveats, isNot(contains(ValuationCaveat.mergedLanes)));
+        expect(caveats, isNot(contains(ValuationCaveat.migratedLane)));
+        if (caveats.contains(ValuationCaveat.fragileBridge)) fragileCount++;
+        // A mesma conta que a via imposta faz: não há segunda via na mistura.
+        expect(production.fairValue.cents, byLane(rf, ValuationLane.firm)!.fairValue.cents);
+      }
+      expect(evaluated, greaterThan(40));
+      expect(fragileCount, greaterThan(0),
+          reason: 'a varredura precisa atravessar o capital próprio fino que '
+              'migrava — se não atravessar, o teste não mede o que promete');
+    });
+
+    test('deslocar o nível da curva inteira não faz o preço justo subir com a '
+        'taxa — o critério do B10', () {
+      // A decisão 34 resolvia a taxa corrente, e não o nível: deslocar as duas
+      // taxas juntas movia a participação estrutural, e a fronteira voltava a
+      // ser cruzada — 46 de 122 ativos no `dcf_reverso`, 25 de 128 na varredura
+      // do aplicativo em 16/09/2026.
+      final base = ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(),
+        marketPrice: 9.0,
+        capm: const CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+      );
+      double? previous;
+      final models = <ValuationModel>{};
+      var evaluated = 0;
+      for (var step = -40; step <= 40; step++) {
+        final r = ValuationCascade.evaluate(base.withRiskFreeShift(step * 0.001));
+        if (r.isErr) {
+          previous = null;
+          continue;
+        }
+        final v = r.unwrap();
+        evaluated++;
+        models.add(v.model);
+        final fairValue = v.fairValue.reais;
+        if (previous != null) {
+          expect(fairValue, lessThanOrEqualTo(previous + 0.01),
+              reason: 'no deslocamento de ${(step / 10).toStringAsFixed(1)} '
+                  'p.p. o preço justo subiu de $previous para $fairValue com a taxa');
+        }
+        previous = fairValue;
+      }
+      expect(evaluated, greaterThan(60));
+      expect(models, {ValuationModel.dcfFcff});
+    });
+
+    test('crescimento e fator impostos são nulos em produção', () {
+      // As duas costuras do teste A1 não podem mover nada quando não são
+      // usadas: elas existem para medir o motor, não para ser o motor.
+      final production = withInput(0.14);
+      final withNulls = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(),
+        marketPrice: 9.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.14,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        declaredTerminalRiskFreeRate: 0.094,
+        growthOverride: null,
+        baseFactorOverride: null,
+      ));
+      expect(production, isNotNull);
+      expect(withNulls.isOk, isTrue);
+      expect(withNulls.unwrap().fairValue.cents, production!.fairValue.cents);
+    });
+
+    test('crescimento imposto entra no cálculo e é declarado', () {
+      ValuationResult? withG(double? g) {
+        final r = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: series(),
+          marketPrice: 9.0,
+          capm: const CapmInputs(
+            riskFreeRate: 0.14,
+            beta: 1.0,
+            marketPremium: 0.055,
+          ),
+          declaredTerminalRiskFreeRate: 0.094,
+          laneOverride: ValuationLane.firm,
+          growthOverride: g,
+        ));
+        return r.isOk ? r.unwrap() : null;
+      }
+
+      final low = withG(0.02);
+      final high = withG(0.09);
+      expect(low, isNotNull);
+      expect(high, isNotNull);
+      expect(high!.diagnostics!.growthRate, closeTo(0.09, 1e-12));
+      expect(low!.diagnostics!.growthRate, closeTo(0.02, 1e-12));
+      // **Crescer mais não vale mais por princípio**, e o fixture mostra por
+      // quê: com o retorno da base abaixo do custo de capital, o freio
+      // `b = g/ROIC` cobra mais reinvestimento do que o crescimento devolve, e
+      // o valor cai. É a economia do modelo, não defeito — e é o sinal certo
+      // para travar, porque um motor que premiasse crescimento indiscriminado
+      // estaria errado.
+      expect(high.diagnostics!.returnOnCapital,
+          lessThan(high.diagnostics!.terminalDiscountRate),
+          reason: 'o fixture precisa estar no regime de retorno abaixo do '
+              'custo de capital para o teste significar isto');
+      expect(high.fairValue.cents, lessThan(low.fairValue.cents),
+          reason: 'crescimento sem retorno excedente destrói valor');
+      expect((high.fairValue.cents - low.fairValue.cents).abs(),
+          greaterThan(0),
+          reason: 'sem efeito algum, a varredura de A1 não mediria nada');
+      expect(
+        high.warnings.any((w) => w.contains('Crescimento imposto')),
+        isTrue,
+      );
+    });
+
+    test('fator de base imposto multiplica o preço justo, e é declarado', () {
+      ValuationResult? withF(double f) {
+        final r = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: series(),
+          marketPrice: 9.0,
+          capm: const CapmInputs(
+            riskFreeRate: 0.14,
+            beta: 1.0,
+            marketPremium: 0.055,
+          ),
+          declaredTerminalRiskFreeRate: 0.094,
+          laneOverride: ValuationLane.firm,
+          baseFactorOverride: f,
+        ));
+        return r.isOk ? r.unwrap() : null;
+      }
+
+      final one = withF(1.0);
+      final two = withF(2.0);
+      expect(one, isNotNull);
+      expect(two, isNotNull);
+      expect(two!.diagnostics!.baseFactor, closeTo(2.0, 1e-12));
+      // O DCF é homogêneo de grau 1 no fluxo-base, e a ponte de dívida
+      // líquida é o que impede a razão de ser exatamente 2.
+      expect(two.fairValue.cents, greaterThan(one!.fairValue.cents));
+      expect(
+        two.warnings.any((w) => w.contains('Fator de normalização imposto')),
+        isTrue,
+      );
+    });
+
+    test('com ou sem o caminho resolvido, o capital próprio não passa pela '
+        'ponte, e nada é mesclado', () {
+      // O fixture é alavancado de propósito: sob a ponte ele atravessava a
+      // pós-condição dos 20% e recebia a mescla da decisão 38. Com o caminho
+      // resolvido já não havia ponte (decisão 43); sem ele, desde a decisão 102,
+      // também não.
+      ValuationResult? evaluate({double? betaU, required double rf}) {
+        final r = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: series(),
+          marketPrice: 9.0,
+          capm: CapmInputs(riskFreeRate: rf, beta: 1.0, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: betaU,
+        ));
+        return r.isOk ? r.unwrap() : null;
+      }
+
+      var evaluatedWithout = 0;
+      var evaluatedWith = 0;
+      for (var step = 0; step <= 40; step++) {
+        final rf = 0.1600 - step * 0.0015;
+        for (final (betaU, account) in [(null, 0), (0.60, 1)]) {
+          final v = evaluate(betaU: betaU, rf: rf);
+          if (v == null) continue;
+          if (account == 0) {
+            evaluatedWithout++;
+          } else {
+            evaluatedWith++;
+          }
+          expect(v.diagnostics!.caveats,
+              isNot(contains(ValuationCaveat.mergedLanes)));
+        }
+      }
+      expect(evaluatedWithout, greaterThan(20),
+          reason: 'a varredura precisa cobrir a faixa para ter conteúdo');
+      expect(evaluatedWith, greaterThan(20),
+          reason: 'a varredura precisa cobrir a faixa para ter conteúdo');
+    });
+
+    test('a rota derivada é contínua na taxa, sem degrau de ponte', () {
+      double? fairValue(double rf) {
+        final r = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: series(),
+          marketPrice: 9.0,
+          capm: CapmInputs(riskFreeRate: rf, beta: 1.0, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: 0.60,
+        ));
+        return r.isOk ? r.unwrap().fairValue.reais : null;
+      }
+
+      double? previous;
+      var largestJump = 0.0;
+      var evaluated = 0;
+      for (var step = 0; step <= 50; step++) {
+        final v = fairValue(0.1600 - step * 0.0010);
+        if (v == null || v <= 0) continue;
+        evaluated++;
+        if (previous != null) {
+          final jump = (v / previous - 1).abs();
+          if (jump > largestJump) largestJump = jump;
+        }
+        previous = v;
+      }
+      expect(evaluated, greaterThan(30));
+      expect(largestJump, lessThan(0.15),
+          reason: 'salto de ${(largestJump * 100).toStringAsFixed(1)}% entre '
+              'dois passos de 10 pontos-base seria degrau, não desconto');
+    });
+
+    test('a narrativa do moat cita a taxa resolvida, não a interpolada', () {
+      // D1d: o veredito de vantagem competitiva é fechado contra a taxa que o
+      // ponto fixo devolve. Publicá-lo contra a interpolada afirmaria um
+      // veredito que a conta final descartou.
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(),
+        marketPrice: 9.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.14,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        declaredTerminalRiskFreeRate: 0.094,
+        laneOverride: ValuationLane.firm,
+        unleveredBeta: 0.60,
+      ));
+      expect(r.isOk, isTrue);
+      final v = r.unwrap();
+      final narrative = v.warnings
+          .where((w) => w.startsWith('Vantagem competitiva residual:'))
+          .toList();
+      if (narrative.isEmpty) return; // este fixture pode não ter excedente
+      final pct = (v.diagnostics!.terminalDiscountRate * 100)
+          .toStringAsFixed(1);
+      expect(narrative.single, contains('equilíbrio de $pct%'),
+          reason: 'a taxa citada tem de ser a que o diagnóstico carrega');
+    });
+
+    test('sem beta desalavancado, o desconto é a interpolação de antes', () {
+      // O caminho novo é opcional por construção: quem não tem `β_U` continua
+      // exatamente onde estava. É o que permite ligá-lo sem quebrar o que a
+      // fonte não sustenta.
+      final production = withInput(0.14);
+      expect(production, isNotNull);
+      expect(
+        production!.warnings.any((w) => w.contains('resolvido ano a ano')),
+        isFalse,
+      );
+    });
+
+    test('com beta desalavancado, o custo de capital é resolvido e declarado',
+        () {
+      ValuationResult? withBetaU(double? betaU) {
+        final r = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: series(),
+          marketPrice: 9.0,
+          capm: const CapmInputs(
+            riskFreeRate: 0.14,
+            beta: 1.0,
+            marketPremium: 0.055,
+          ),
+          declaredTerminalRiskFreeRate: 0.094,
+          laneOverride: ValuationLane.firm,
+          unleveredBeta: betaU,
+        ));
+        return r.isOk ? r.unwrap() : null;
+      }
+
+      final without = withBetaU(null);
+      final withU = withBetaU(0.60);
+      expect(without, isNotNull);
+      expect(withU, isNotNull);
+
+      expect(
+        withU!.warnings.any((w) => w.contains('resolvido ano a ano')),
+        isTrue,
+        reason: 'o resultado precisa declarar que a taxa virou caminho',
+      );
+      expect(
+        withU.warnings.any((w) => w.contains('participação do capital próprio '
+            'sai de')),
+        isTrue,
+        reason: 'e precisa dizer quanto a alavancagem se moveu',
+      );
+
+      // O fixture é alavancado: resolver a taxa contra a alavancagem tem de
+      // mover o número. Sem efeito, a decisão 41 não estaria ligada.
+      expect(withU.fairValue.cents, isNot(without!.fairValue.cents));
+    });
+
+    test('o terminal do diagnóstico é o resolvido, não o interpolado', () {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(),
+        marketPrice: 9.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.14,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        declaredTerminalRiskFreeRate: 0.094,
+        laneOverride: ValuationLane.firm,
+        unleveredBeta: 0.60,
+      ));
+      expect(r.isOk, isTrue);
+      final d = r.unwrap().diagnostics!;
+      // O texto do aviso traz a mesma taxa que o diagnóstico carrega: se os
+      // dois divergissem, um relatório contaria uma história e a máquina
+      // outra.
+      final warning = r.unwrap().warnings.firstWhere(
+            (w) => w.contains('perpetuidade é descontada a'),
+          );
+      final pct = (d.terminalDiscountRate * 100).toStringAsFixed(1);
+      expect(warning, contains('$pct%'));
+    });
+
+    test('a via imposta ignora o roteamento, e declara', () {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(),
+        marketPrice: 9.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.14,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        declaredTerminalRiskFreeRate: 0.094,
+        laneOverride: ValuationLane.firm,
+      ));
+      expect(r.isOk, isTrue);
+      final v = r.unwrap();
+      expect(v.model, ValuationModel.dcfFcff);
+      expect(
+        v.warnings.any((w) => w.contains('Via imposta')),
+        isTrue,
+        reason: 'o resultado precisa declarar que é instrumento, não avaliação',
+      );
+      expect(
+        v.diagnostics!.caveats.contains(ValuationCaveat.mergedLanes),
+        isFalse,
+        reason: 'nada mescla desde a decisão 102, e a via imposta muito menos',
+      );
+    });
+
+    test('a via não muda com a taxa livre de risco corrente', () {
+      final lanes = <ValuationModel>{};
+      for (var step = 0; step <= 16; step++) {
+        final v = withInput(0.1600 - step * 0.0050);
+        if (v != null) lanes.add(v.model);
+      }
+      expect(lanes.length, 1,
+          reason: 'a estrutura de capital é fato de longo prazo; qual via a '
+              'descreve não pode depender de onde a Selic está hoje');
+    });
+  });
+
+  group('Retorno terminal imposto — a costura do DCF reverso', () {
+    // `terminalReturnOverride` existe para a varredura da decisão 35. Ele é a
+    // única entrada capaz de mudar o valor terminal de fora, e por isso precisa
+    // de três garantias travadas: não fazer nada quando nulo, mandar quando
+    // preenchido, e não se passar por vantagem competitiva reconhecida.
+    FundamentalsSnapshot fiscalYear(int year, double scale) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          totalRevenue: 10000 * scale,
+          ebit: 1400 * scale,
+          ebitda: 1900 * scale,
+          netIncome: 700 * scale,
+          incomeBeforeTax: 1060 * scale,
+          // Negativo, na convenção da fonte: 1060 − 360 = 700 de líquido.
+          incomeTaxExpense: -360 * scale,
+          interestExpense: 120,
+          earningsPerShare: 0.7 * scale,
+          cash: 800,
+          shortTermInvestments: 200,
+          shortTermDebt: 400,
+          longTermDebt: 1600,
+          totalStockholderEquity: 5000 * scale,
+          bookValuePerShare: 5.0 * scale,
+          operatingCashFlow: 1500 * scale,
+          freeCashFlow: 900 * scale,
+          nopat: 924 * scale,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 12000,
+          enterpriseToEbitda: 8.0,
+        );
+
+    List<FundamentalsSnapshot> series() {
+      final out = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 15; i >= 0; i--) {
+        out.add(fiscalYear(2025 - i, scale));
+        scale *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult? withInput(double? tax) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(),
+        marketPrice: 12.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.14,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        declaredTerminalRiskFreeRate: 0.094,
+        terminalReturnOverride: tax,
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('nulo é exatamente o comportamento de produção', () {
+      final withoutField = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(),
+        marketPrice: 12.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.14,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        declaredTerminalRiskFreeRate: 0.094,
+      ));
+      final withNull = withInput(null);
+      expect(withoutField.isOk, isTrue);
+      expect(withNull, isNotNull);
+      expect(withNull!.fairValue.reais,
+          closeTo(withoutField.unwrap().fairValue.reais, 1e-9));
+    });
+
+    test('retorno terminal maior não reduz o preço justo', () {
+      // Monotonia é o que a varredura por bissecção pressupõe dentro do
+      // intervalo que ela isola. Se ela quebrasse aqui, a raiz não teria
+      // significado.
+      final low = withInput(0.10);
+      final high = withInput(0.40);
+      expect(low, isNotNull);
+      expect(high, isNotNull);
+      expect(high!.fairValue.reais,
+          greaterThanOrEqualTo(low!.fairValue.reais - 0.01));
+      expect(high.fairValue.reais, greaterThan(low.fairValue.reais),
+          reason: 'sem efeito algum, a varredura da decisão 35 não mede nada');
+    });
+
+    test('imposição não se passa por vantagem competitiva reconhecida', () {
+      final v = withInput(0.40);
+      final production = withInput(null);
+      expect(v, isNotNull);
+      expect(production, isNotNull);
+      // A bandeira e o retorno imposto são grandezas distintas: `moatApplied`
+      // alimenta relatório de cobertura, e varredura de diagnóstico não é
+      // veredito. O que se trava é que a imposição **não move a bandeira** —
+      // e não que ela seja falsa, que depende do ativo do fixture.
+      expect(v!.diagnostics!.moatApplied, production!.diagnostics!.moatApplied,
+          reason: 'a imposição não pode criar nem apagar veredito');
+      expect(v.diagnostics!.terminalRetainedSpread,
+          production.diagnostics!.terminalRetainedSpread,
+          reason: 'lambda é do veredito, não do valor imposto');
+      expect(
+        v.warnings.any((w) => w.contains('imposto')),
+        isTrue,
+        reason: 'o resultado precisa declarar que é instrumento, não avaliação',
+      );
+      expect(
+        v.warnings.any((w) => w.contains('Vantagem competitiva residual:')),
+        isFalse,
+        reason: 'a narrativa do veredito não sai junto com a imposição',
+      );
+    });
+  });
+
+  group('Caixa rende taxa livre de risco, e não o WACC', () {
+    // Sem dívida bruta não há custo de dívida a medir, e o recuo era a própria
+    // taxa de desconto. Com dívida líquida **negativa** ela multiplica um peso
+    // negativo: o motor creditava ao caixa o rendimento do negócio. Medido em
+    // 11/09/2026, a ALOS3 — R$ 2,43 bi de caixa líquido — caiu 10,5% ao trocar
+    // o recuo pela taxa livre de risco. Decisão 58.
+    const assumptions = DcfAssumptions(
+      projectionYears: 5,
+      growthRate: 0.04,
+      perpetualGrowth: 0.04,
+      discountRate: 0.12,
+      terminalDiscountRate: 0.12,
+      returnOnCapital: 0.0,
+    );
+
+    double fairWith(double kd, {required double netDebt}) =>
+        DcfCalculator.equityFromFirm(
+          baseProfit: 100,
+          assumptions: assumptions,
+          netDebt: netDebt,
+          sharesOutstanding: 10,
+          costOfDebt: kd,
+          taxRate: 0.34,
+          equityDiscountRate: 0.14,
+          terminalEquityDiscountRate: 0.14,
+        ).unwrap().fairValuePerShare;
+
+    test('com caixa líquido, o rendimento atribuído a ele decide o preço', () {
+      const rf = 0.09;
+      const wacc = 0.12;
+      final withRf = fairWith(rf, netDebt: -400);
+      final withWacc = fairWith(wacc, netDebt: -400);
+      expect(withWacc, greaterThan(withRf),
+          reason: 'creditar o WACC ao caixa infla o fluxo do acionista — é '
+              'exatamente o que o recuo antigo fazia');
+      expect((withWacc / withRf - 1).abs(), greaterThan(0.01),
+          reason: 'se a diferença fosse desprezível o teste não mediria nada');
+    });
+
+    test('sem dívida líquida, o rendimento do caixa não decide nada', () {
+      // O termo da ponte é `D·(kd(1−τ) − g)`: com `D = 0` ele some, e a
+      // escolha do recuo deixa de importar.
+      expect(fairWith(0.09, netDebt: 0),
+          closeTo(fairWith(0.30, netDebt: 0), 1e-9));
+    });
+
+    test('sem dívida bruta não há custo de dívida a medir', () {
+      final withoutDebt = FundamentalsSnapshot(
+        ticker: ticker,
+        fiscalPeriodEnd: DateTime(2025, 12, 31),
+        interestExpense: 50,
+        cash: 900,
+        netIncome: 100,
+        ebit: 150,
+      );
+      expect(withoutDebt.totalDebt, 0);
+      expect(withoutDebt.costOfDebt, isNull);
+      expect(withoutDebt.netDebt, lessThan(0),
+          reason: 'é o caso que torna o recuo alcançável');
+    });
+  });
+
+  group('O vale do ciclo não descarta a empresa', () {
+    // A normalização funcionava no pico e desligava no vale: o fator é
+    // `ciclo ÷ atual` e exige denominador positivo. Medido em 11/09/2026:
+    // sete ativos elegíveis eram recusados por fluxo-base não positivo, entre
+    // eles USIM3, USIM5, CSAN3 e CSNA3 — cíclicos num ano ruim.
+    FundamentalsSnapshot year(
+      int y,
+      double profit, {
+      double equity = 10000,
+      double? ebitda,
+    }) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 20000,
+          ebit: profit / 0.66,
+          ebitda: ebitda ?? (profit / 0.66 + 800),
+          netIncome: profit,
+          incomeBeforeTax: profit * 1.4,
+          incomeTaxExpense: -profit * 0.4,
+          interestExpense: 120,
+          earningsPerShare: profit / 1000,
+          cash: 500,
+          shortTermInvestments: 100,
+          shortTermDebt: 300,
+          longTermDebt: 1200,
+          totalStockholderEquity: equity,
+          bookValuePerShare: equity / 1000,
+          operatingCashFlow: profit * 1.5,
+          freeCashFlow: profit,
+          nopat: profit,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 12000,
+        );
+
+    /// Série com [negatives] exercícios de prejuízo no fim.
+    List<FundamentalsSnapshot> series({
+      required int negatives,
+      double goodProfit = 1200,
+      double? ebitdaFinal,
+    }) {
+      final out = <FundamentalsSnapshot>[];
+      for (var i = 15; i >= 0; i--) {
+        final y = 2025 - i;
+        final bad = i < negatives;
+        out.add(year(
+          y,
+          bad ? -400 : goodProfit,
+          ebitda: i == 0 ? ebitdaFinal : null,
+        ));
+      }
+      return out;
+    }
+
+    ValuationResult? evaluate(
+      List<FundamentalsSnapshot> f, {
+      String? sector,
+      String? subsector,
+    }) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: f,
+        marketPrice: 12.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.13,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        declaredTerminalRiskFreeRate: 0.094,
+        sectorKey: sector,
+        industry: subsector,
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('um ano de prejuízo deixa de descartar a empresa', () {
+      // Cíclico de propósito: em não cíclico, prejuízo depois de lucro sempre
+      // reprova na trava de saúde — ver o teste dela abaixo.
+      final v = evaluate(series(negatives: 1), sector: 'materiais-basicos');
+      expect(v, isNotNull,
+          reason: 'com o fluxo-base do exercício, este fixture seria recusado '
+              'por lucro não positivo');
+      expect(v!.fairValue.reais, greaterThan(0));
+      expect(v.diagnostics!.caveats,
+          contains(ValuationCaveat.rebuiltBase));
+      expect(
+        v.warnings.any((w) => w.contains('reconstruído do ciclo')),
+        isTrue,
+      );
+    });
+
+    test('o fluxo-base é o retorno do ciclo sobre o capital de hoje', () {
+      final f = series(negatives: 1);
+      final v = evaluate(f, sector: 'materiais-basicos')!;
+      final pub = PointInTimeView(DateTime(2026, 9, 9)).published(f);
+      // A mesma alíquota que a cascata aplica: sem ela o NOPAT da série é
+      // outro, e o ciclo também.
+      final s = CapitalSeries.build(
+        pub,
+        ValuationLane.firm,
+        firmTaxRate: CapitalSeries.structuralTaxRate(
+          pub,
+          statutoryRate: ValuationParameters.statutoryTaxRate,
+        ),
+      );
+      final cycle = s.cycleReturn(window: ValuationParameters.cycleWindow)!;
+      // O retorno que governa o freio é o do ciclo, e não o do exercício de
+      // prejuízo: sem isso o fluxo viria do ciclo e o reinvestimento do vale.
+      expect(v.diagnostics!.returnOnCapital, closeTo(cycle, 1e-12));
+      expect(cycle, greaterThan(0));
+    });
+
+    test('ciclo não positivo continua recusando', () {
+      // Empresa que perde dinheiro na maior parte da janela: não há a que
+      // voltar, e a mediana não é resgate.
+      expect(evaluate(series(negatives: 7), sector: 'materiais-basicos'), isNull);
+    });
+
+    test('prejuízo que virou regra continua recusando', () {
+      // Metade da janela negativa passa no teste do sinal da mediana e falha
+      // no da frequência — é o caso que separa vale de declínio.
+      final f = series(negatives: 5);
+      final pub = PointInTimeView(DateTime(2026, 9, 9)).published(f);
+      final s = CapitalSeries.build(pub, ValuationLane.firm);
+      final fraction = s.positiveShare(window: ValuationParameters.cycleWindow)!;
+      expect(fraction, lessThan(ValuationParameters.minPositiveFlow),
+          reason: 'o fixture precisa cair abaixo do corte para medir o que '
+              'promete');
+      expect(evaluate(f, sector: 'materiais-basicos'), isNull);
+    });
+
+    test('a trava de saúde bloqueia, e cíclico é isento dela', () {
+      // Ela foi retirada e reposta por medição: sem ela a RAPT4 entra a
+      // +311,7% de potencial, com o resultado caído 109% no triênio e o
+      // fluxo-base reconstruído sobre um retorno de ciclo que a empresa
+      // acabou de deixar de ter. Reconstruir a base erra para cima, e é esse
+      // risco que a trava controla.
+      final f = series(negatives: 1);
+      final decline = GrowthGuards.recentOperationalDecline(
+        PointInTimeView(DateTime(2026, 9, 9)).published(f),
+      );
+      expect(decline, isNotNull);
+      expect(decline!, greaterThan(ValuationParameters.maxOperationalDecline));
+
+      expect(evaluate(f, sector: 'bens-industriais'), isNull);
+      // A isenção cíclica da decisão 30 vale aqui pela mesma razão que vale na
+      // normalização: em commodity, queda entre pico e vale é o ciclo.
+      expect(evaluate(f, sector: 'materiais-basicos'), isNotNull);
+    });
+
+    test('a trava tem um buraco, e a frequência o cobre', () {
+      // Quando a referência de três anos atrás também era prejuízo, a trava
+      // **aprova** — não há queda a medir. É a frequência do prejuízo na
+      // janela que recusa nesse caso, e não a trava.
+      final f = series(negatives: 5);
+      final decline = GrowthGuards.recentOperationalDecline(
+        PointInTimeView(DateTime(2026, 9, 9)).published(f),
+      );
+      expect(decline, isNotNull);
+      expect(decline!, lessThan(ValuationParameters.maxOperationalDecline),
+          reason: 'a trava aprova este caso — é o buraco que a frequência '
+              'cobre');
+      expect(evaluate(f, sector: 'materiais-basicos'), isNull);
+    });
+  });
+
+  group('Ausência não é zero: o exercício sem resultado', () {
+    // Medido em 10/09/2026: a fonte publica o exercício com o balanço
+    // preenchido e o resultado inteiro zerado em 4 dos 376 ativos. A TIMS3
+    // aparecia com receita, EBIT, lucro e LPA zerados e patrimônio de R$ 24
+    // bilhões, tendo tido EBIT de R$ 4,7 bi dois exercícios antes — e era
+    // recusada por "os dados não sustentam nenhuma das duas vias", que é a
+    // mensagem errada para um dado que a fonte não entregou.
+    FundamentalsSnapshot fiscalYear(
+      int year, {
+      double? revenue,
+      double? ebit,
+      double? profit,
+      double? eps,
+      double equity = 24000,
+    }) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          totalRevenue: revenue,
+          ebit: ebit,
+          ebitda: ebit == null ? null : ebit * 1.3,
+          netIncome: profit,
+          incomeBeforeTax: profit == null ? null : profit * 1.4,
+          incomeTaxExpense: profit == null ? null : -profit * 0.4,
+          earningsPerShare: eps,
+          cash: 500,
+          shortTermDebt: 400,
+          longTermDebt: 1600,
+          totalStockholderEquity: equity,
+          bookValuePerShare: equity / 1000,
+          nopat: ebit == null ? null : ebit * 0.66,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 30000,
+        );
+
+    test('os quatro zerados juntos é ausência; um só não é', () {
+      // Zerar um deles é possível — holding sem receita, empresa no zero a
+      // zero, exercício sem LPA publicado.
+      expect(fiscalYear(2025).hasIncomeStatement, isFalse);
+      expect(
+        fiscalYear(2025, revenue: 0, ebit: 0, profit: 0, eps: 0)
+            .hasIncomeStatement,
+        isFalse,
+      );
+      expect(fiscalYear(2025, revenue: 8000).hasIncomeStatement, isTrue);
+      expect(fiscalYear(2025, ebit: 1000).hasIncomeStatement, isTrue);
+      expect(fiscalYear(2025, profit: 700).hasIncomeStatement, isTrue);
+      expect(fiscalYear(2025, eps: 0.7).hasIncomeStatement, isTrue);
+      // Prejuízo é resultado publicado, e não pode ser confundido com ausência.
+      expect(fiscalYear(2025, ebit: -1000).hasIncomeStatement, isTrue);
+
+      // **Resíduo de ponto flutuante não é resultado.** A fonte devolve o zero
+      // às vezes sujo, e `== 0` leria `1e-16` como lucro publicado.
+      expect(
+        fiscalYear(2025, revenue: 1e-16, ebit: -1e-14, profit: 0, eps: 0)
+            .hasIncomeStatement,
+        isFalse,
+      );
+      // E o corte por papel é o centavo, não o real: LPA de R$ 0,50 é
+      // legítimo, e o corte dos agregados o descartaria.
+      expect(fiscalYear(2025, eps: 0.50).hasIncomeStatement, isTrue);
+      expect(fiscalYear(2025, eps: 0.001).hasIncomeStatement, isFalse);
+    });
+
+    List<FundamentalsSnapshot> series({required int emptyCount}) {
+      final out = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 15; i >= 0; i--) {
+        final year = 2025 - i;
+        final isEmptyValue = i < emptyCount;
+        out.add(isEmptyValue
+            ? fiscalYear(year)
+            : fiscalYear(
+                year,
+                revenue: 10000 * scale,
+                ebit: 1400 * scale,
+                profit: 700 * scale,
+                eps: 0.7 * scale,
+                equity: 6000 * scale,
+              ));
+        scale *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult? evaluate(int emptyCount) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(emptyCount: emptyCount),
+        marketPrice: 10.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.13,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+        declaredTerminalRiskFreeRate: 0.094,
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('o exercício vazio sai da série, e a base vem do anterior', () {
+      final clean = evaluate(0);
+      final withEmpty = evaluate(1);
+      expect(clean, isNotNull);
+      expect(withEmpty, isNotNull,
+          reason: 'lido como zero, o último exercício produziria base nula e '
+              'a avaliação seria recusada');
+      // A base passa a ser o exercício anterior, que é menor pela escala — o
+      // preço justo cai, e não vai a zero nem some.
+      expect(withEmpty!.fairValue.reais, greaterThan(0));
+      expect(withEmpty.fairValue.reais, lessThan(clean!.fairValue.reais));
+    });
+
+    test('a exclusão é declarada, com a contagem', () {
+      final v = evaluate(2)!;
+      expect(
+        v.warnings.any((w) => w.contains('sem demonstração de resultado')),
+        isTrue,
+      );
+      expect(v.warnings.any((w) => w.startsWith('2 exercícios')), isTrue);
+    });
+
+    test('série inteira vazia vira recusa que nomeia a causa', () {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(emptyCount: 16),
+        marketPrice: 10.0,
+        capm: const CapmInputs(
+          riskFreeRate: 0.13,
+          beta: 1.0,
+          marketPremium: 0.055,
+        ),
+      ));
+      expect(r.isErr, isTrue);
+      final m = r.failureOrNull!.message;
+      expect(m, contains('sem demonstração de resultado'));
+      expect(m, isNot(contains('nenhuma das duas vias')),
+          reason: 'a causa é o dado que a fonte não entregou, e não o modelo '
+              'não se aplicar');
+    });
+  });
+
+  group('O peso do terminal mede a mesma coisa nas três rotas', () {
+    // Antes da decisão 51 a ponte media contra o valor da **firma** e as
+    // outras duas contra o do **acionista**: o mesmo campo carregava duas
+    // grandezas conforme um caminho que o leitor não vê, e o corte de 80% da
+    // ressalva valia para as duas.
+    const assumptions = DcfAssumptions(
+      projectionYears: 5,
+      growthRate: 0.04,
+      perpetualGrowth: 0.04,
+      discountRate: 0.12,
+      terminalDiscountRate: 0.12,
+      returnOnCapital: 0.0,
+    );
+
+    test('a ponte mede contra o capital próprio, não contra a firma', () {
+      final o = DcfCalculator.firm(
+        baseProfit: 100,
+        assumptions: assumptions,
+        netDebt: 300,
+        sharesOutstanding: 10,
+      ).unwrap();
+
+      expect(o.terminalShare,
+          closeTo(o.discountedTerminalValue / o.equityValue, 1e-12));
+      expect(o.terminalShare,
+          greaterThan(o.discountedTerminalValue / o.enterpriseValue),
+          reason: 'com dívida, a referência do acionista é maior — e é a que '
+              'diz quanto do preço repousa na perpetuidade');
+    });
+
+    test('sem dívida as duas referências coincidem', () {
+      final o = DcfCalculator.firm(
+        baseProfit: 100,
+        assumptions: assumptions,
+        netDebt: 0,
+        sharesOutstanding: 10,
+      ).unwrap();
+      expect(o.terminalShare,
+          closeTo(o.discountedTerminalValue / o.enterpriseValue, 1e-12));
+    });
+
+    test('capital próprio fino leva a razão acima de 100%, e não trunca', () {
+      // Truncar em 1 esconderia exatamente o caso mais frágil.
+      final o = DcfCalculator.firm(
+        baseProfit: 100,
+        assumptions: assumptions,
+        netDebt: 900,
+        sharesOutstanding: 10,
+      ).unwrap();
+      expect(o.equityValue, greaterThan(0),
+          reason: 'o fixture precisa sobreviver à ponte para medir o que '
+              'promete');
+      expect(o.terminalShare, greaterThan(1.0));
+    });
+
+    test('a rota derivada desconta o minoritário da referência também', () {
+      DcfOutcome derivedOutcome(double m) => DcfCalculator
+          .equityFromFirm(
+            baseProfit: 100,
+            assumptions: assumptions,
+            netDebt: 300,
+            sharesOutstanding: 10,
+            costOfDebt: 0.10,
+            taxRate: 0.34,
+            equityDiscountRate: 0.14,
+            terminalEquityDiscountRate: 0.14,
+            minorityInterest: m,
+          )
+          .unwrap();
+      expect(derivedOutcome(200).terminalShare,
+          greaterThan(derivedOutcome(0).terminalShare),
+          reason: 'o que sobra ao controlador é menor, e o terminal pesa mais '
+              'nele');
+    });
+  });
+
+  group('Concessão não preserva excedente na perpetuidade', () {
+    // Medido em 10/09/2026: 15 dos 120 avaliados operam sob contrato de prazo
+    // determinado, e cinco recebiam excedente de retorno preservado para
+    // sempre — a CPFE3 com λ = 0,261. Uma concessão é relicitada, e a tarifa
+    // remunera o capital ao custo dele.
+    test('a classificação pega concessão e não pega o resto', () {
+      bool term(String? sector, String? sub) =>
+          ConcessionSectors.hasFiniteTerm(sectorKey: sector, industry: sub);
+
+      expect(term('energia', 'Energia Elétrica'), isTrue);
+      expect(term('saneamento', null), isTrue);
+      expect(term('infraestrutura', null), isTrue);
+      expect(term('bens-industriais', 'Exploração de Rodovias'), isTrue);
+      expect(term('bens-industriais', 'Transporte Ferroviário'), isTrue);
+      // Acentuação e pontuação não decidem nada: a fonte publica variantes.
+      expect(term('energia', 'ENERGIA ELETRICA'), isTrue);
+
+      expect(term('energia', 'Exploração. Refino e Distribuição'), isFalse);
+      expect(term('materiais-basicos', 'Siderurgia'), isFalse);
+      expect(term('consumo-ciclico', 'Tecidos, Vestuário e Calçados'), isFalse);
+      expect(term(null, null), isFalse);
+    });
+
+    test('o excedente perpétuo é recusado, com o motivo nomeado', () {
+      MoatVerdict verdict({required bool term}) => GrowthGuards.residualMoat(
+            cycleReturn: 0.28,
+            terminalDiscountRate: 0.12,
+            externalCapitalRatio: 0.10,
+            periods: 12,
+            excessReturns: [
+              for (var year = 2014; year <= 2025; year++)
+                (year: year, excess: 0.16 * _pow(0.9, year - 2014)),
+            ],
+            projectionYears: 10,
+            finiteTerm: term,
+          );
+
+      final free = verdict(term: false);
+      expect(free.terminalReturn, isNotNull,
+          reason: 'sem prazo este fixture precisa conceder o excedente — se '
+              'não conceder, o teste não mede o que promete');
+
+      final locked = verdict(term: true);
+      expect(locked.terminalReturn, isNull);
+      expect(locked.blocks, contains(MoatBlock.fixedTerm));
+    });
+  });
+
+  group('O rastro descreve a conta que foi feita', () {
+    // A lente `metodo` apontou, e é o tipo de divergência que a auditoria
+    // existe justamente para impedir: a fórmula publicada omitia o
+    // levantamento de meio de ano e descrevia um desconto 6% maior que o
+    // aplicado.
+    FundamentalsSnapshot fiscalYear(int year, double scale) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          totalRevenue: 10000 * scale,
+          ebit: 1400 * scale,
+          ebitda: 1900 * scale,
+          netIncome: 700 * scale,
+          incomeBeforeTax: 1000 * scale,
+          incomeTaxExpense: -300 * scale,
+          interestExpense: 120,
+          earningsPerShare: 0.7 * scale,
+          cash: 500,
+          shortTermInvestments: 200,
+          shortTermDebt: 400,
+          longTermDebt: 1600,
+          totalStockholderEquity: 6000 * scale,
+          bookValuePerShare: 6.0 * scale,
+          operatingCashFlow: 1500 * scale,
+          freeCashFlow: 900 * scale,
+          nopat: 924 * scale,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 10000,
+        );
+
+    List<String> formulas(CashTiming timing) {
+      final captured = <String>[];
+      AuditRecorder.attach((event) {
+        for (final c in event.calculations) {
+          captured.add(c.latexRepresentation);
+        }
+      });
+      try {
+        ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: [
+            for (var i = 15; i >= 0; i--) fiscalYear(2025 - i, _pow(1.05, 15 - i))
+          ],
+          marketPrice: 10.0,
+          capm: const CapmInputs(
+            riskFreeRate: 0.13,
+            beta: 1.0,
+            marketPremium: 0.055,
+          ),
+          declaredTerminalRiskFreeRate: 0.094,
+          cashTimingOverride: timing,
+        ));
+      } finally {
+        AuditRecorder.detach();
+      }
+      return captured;
+    }
+
+    test('a fórmula do explícito declara o levantamento, e só quando há', () {
+      final mid = formulas(CashTiming.midYear).join(' ');
+      final end = formulas(CashTiming.endOfYear).join(' ');
+      expect(mid, isNotEmpty, reason: 'o rastro precisa ter sido capturado');
+      // O fluxo desta via é o do acionista derivado, descontado ao `Ke` de
+      // cada ano — `k_t` na fórmula (item B35).
+      expect(mid, contains(r'\sqrt{1 + k_t}'));
+      expect(end, isNot(contains(r'\sqrt{1 + k_t}')));
+    });
+
+    test('a fórmula do terminal declara o levantamento de equilíbrio', () {
+      final mid = formulas(CashTiming.midYear).join(' ');
+      final end = formulas(CashTiming.endOfYear).join(' ');
+      expect(mid, contains(r'\sqrt{1 + K_{e,\infty}}'));
+      expect(end, isNot(contains(r'\sqrt{1 + K_{e,\infty}}')));
+    });
+  });
+
+  group('A ponte devolve o que não é do controlador', () {
+    // Medido em 10/09/2026 na fonte: a conta-mãe `loansAndFinancing` **já
+    // contém** debêntures e arrendamento — somá-los estouraria o passivo não
+    // circulante em PETR4, VALE3 e RENT3. O que de fato falta na ponte é a
+    // participação dos não controladores, e ela é grande: 24,1% do valor de
+    // mercado na CSNA3.
+    const assumptions = DcfAssumptions(
+      projectionYears: 5,
+      growthRate: 0.04,
+      perpetualGrowth: 0.04,
+      discountRate: 0.12,
+      terminalDiscountRate: 0.12,
+      returnOnCapital: 0.0,
+    );
+
+    DcfOutcome withMinority(double m) => DcfCalculator
+        .firm(
+          baseProfit: 100,
+          assumptions: assumptions,
+          netDebt: 300,
+          sharesOutstanding: 10,
+          minorityInterest: m,
+        )
+        .unwrap();
+
+    test('o preço por papel cai exatamente a parte dos minoritários', () {
+      final without = withMinority(0);
+      final withInput = withMinority(200);
+      expect(without.fairValuePerShare - withInput.fairValuePerShare,
+          closeTo(200 / 10, 1e-9));
+      expect(withInput.equityValue, closeTo(without.equityValue - 200, 1e-9));
+    });
+
+    test('a alavancagem NÃO muda: minoritário é capital próprio', () {
+      // Tirá-los de `equityShare` os trataria como dívida, e a pós-condição da
+      // ponte e o ponto fixo leriam uma estrutura de capital que não existe.
+      final without = withMinority(0);
+      final withInput = withMinority(200);
+      expect(withInput.equityShare, closeTo(without.equityShare, 1e-12));
+      expect(withInput.enterpriseValue, closeTo(without.enterpriseValue, 1e-12));
+    });
+
+    test('participação negativa é tratada como zero', () {
+      // Controlada com patrimônio negativo produz minoritário negativo, e
+      // subtraí-lo **aumentaria** o valor do controlador.
+      expect(withMinority(-500).fairValuePerShare,
+          closeTo(withMinority(0).fairValuePerShare, 1e-12));
+    });
+
+    test('a rota derivada desconta a mesma parte', () {
+      DcfOutcome derivedOutcome(double m) => DcfCalculator
+          .equityFromFirm(
+            baseProfit: 100,
+            assumptions: assumptions,
+            netDebt: 300,
+            sharesOutstanding: 10,
+            costOfDebt: 0.10,
+            taxRate: 0.34,
+            equityDiscountRate: 0.14,
+            terminalEquityDiscountRate: 0.14,
+            minorityInterest: m,
+          )
+          .unwrap();
+      expect(derivedOutcome(0).fairValuePerShare - derivedOutcome(200).fairValuePerShare,
+          closeTo(200 / 10, 1e-9));
+    });
+  });
+
+  group('Equivalência patrimonial não é tributada duas vezes', () {
+    // Na DRE brasileira a equivalência entra acima do EBIT, e chega líquida do
+    // imposto pago pela investida. Medido no ITSA4 em 10/09/2026: EBIT de
+    // R$ 18,1 bi contra equivalência de R$ 17,5 bi — 97% do resultado
+    // operacional era lucro já tributado, e recebia 34% de novo.
+    FundamentalsSnapshot withEquityMethod(double? equiv) => FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(2025, 12, 31),
+          ebit: 1000,
+          ebitda: 1200,
+          netIncome: 800,
+          incomeBeforeTax: 900,
+          incomeTaxExpense: -100,
+          equityIncomeResult: equiv,
+          sharesOutstanding: 100,
+          sharesOutstandingAsOf: 100,
+        );
+
+    test('sem equivalência, nada muda', () {
+      expect(withEquityMethod(null).nopatAtRate(0.25), closeTo(750, 1e-9));
+      expect(withEquityMethod(0).nopatAtRate(0.25), closeTo(750, 1e-9));
+    });
+
+    test('a parte da equivalência passa sem imposto', () {
+      // `NOPAT = (1000 − 400)·0,75 + 400 = 850`, contra os 750 de antes.
+      expect(withEquityMethod(400).nopatAtRate(0.25), closeTo(850, 1e-9));
+    });
+
+    test('equivalência negativa não devolve imposto', () {
+      // Prejuízo da investida reduz o EBIT sem ter gerado crédito na
+      // controladora; devolver imposto ali inventaria caixa.
+      expect(withEquityMethod(-400).nopatAtRate(0.25), closeTo(750, 1e-9));
+    });
+
+    test('não passa do próprio EBIT', () {
+      // Operação no prejuízo com equivalência maior que o EBIT: o NOPAT não
+      // pode superar o resultado que o gerou.
+      final s = withEquityMethod(1500);
+      expect(s.taxableEquityIncome, closeTo(1000, 1e-9));
+      expect(s.nopatAtRate(0.25), closeTo(1000, 1e-9));
+    });
+  });
+
+  group('Estrutura de capital recusada pela realavancagem', () {
+    // Medido em 10/09/2026: seis dos noventa e seis ativos com as duas vias
+    // avaliáveis caem aqui, e são **exatamente** os seis que ainda eram
+    // mesclados e migrados. O solucionador recusa — capital próprio não
+    // positivo no ano zero, ou taxa de equilíbrio abaixo do crescimento
+    // perpétuo — e o motor recuava para a interpolação, que não enxerga o
+    // problema porque desconta pela taxa que a realavancagem rejeitou.
+    FundamentalsSnapshot drownedYear(int year, double scale, double debt) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          totalRevenue: 10000 * scale,
+          ebit: 1400 * scale,
+          ebitda: 1900 * scale,
+          netIncome: 500 * scale,
+          incomeBeforeTax: 800 * scale,
+          incomeTaxExpense: -300 * scale,
+          interestExpense: 600,
+          earningsPerShare: 0.5 * scale,
+          cash: 500,
+          shortTermInvestments: 200,
+          shortTermDebt: debt * 0.2,
+          longTermDebt: debt * 0.8,
+          totalStockholderEquity: 4000 * scale,
+          bookValuePerShare: 4.0 * scale,
+          operatingCashFlow: 1500 * scale,
+          freeCashFlow: 900 * scale,
+          nopat: 924 * scale,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 9000,
+          enterpriseToEbitda: 8.0,
+        );
+
+    List<FundamentalsSnapshot> series(double debt) {
+      final out = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 15; i >= 0; i--) {
+        out.add(drownedYear(2025 - i, scale, debt));
+        scale *= 1.06;
+      }
+      return out;
+    }
+
+    Result<ValuationResult> evaluate({required double debt, double? betaU}) =>
+        ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: series(debt),
+          marketPrice: 9.0,
+          capm: CapmInputs(
+            riskFreeRate: 0.14,
+            beta: 1.0,
+            marketPremium: 0.055,
+          ),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: betaU,
+        ));
+
+    test('a recusa da realavancagem não vira preço de outra via', () {
+      // Decisão 102. A estrutura recusada migrava para a via do acionista
+      // (decisão 45), e sem beta desalavancado a ponte fina era mesclada com
+      // ela (decisão 38). Nenhuma das duas acontece mais: com ou sem caminho
+      // resolvido, o ativo é avaliado pela via da firma ou recusado.
+      var refusedByStructure = 0;
+      var evaluated = 0;
+      for (var step = 0; step <= 30; step++) {
+        final debt = 16000 + step * 2000.0;
+        for (final betaU in [null, 0.60]) {
+          final r = evaluate(debt: debt, betaU: betaU);
+          if (r.isErr) {
+            final reason = r.failureOrNull!.message;
+            if (reason.contains('não sustenta a via da firma')) {
+              refusedByStructure++;
+              expect(reason, contains('não muda de via'));
+            }
+            continue;
+          }
+          evaluated++;
+          final v = r.unwrap();
+          expect(v.model, ValuationModel.dcfFcff, reason: 'dívida $debt');
+          expect(v.diagnostics!.caveats,
+              isNot(contains(ValuationCaveat.mergedLanes)));
+          expect(v.diagnostics!.caveats,
+              isNot(contains(ValuationCaveat.migratedLane)));
+        }
+      }
+      expect(evaluated, greaterThan(0));
+      expect(refusedByStructure, greaterThan(0),
+          reason: 'a varredura precisa alcançar a recusa da realavancagem — se '
+              'não alcançar, o teste não mede o que promete');
+    });
+
+    test('sem via da firma, o ativo é recusado, e a recusa diz por quê', () {
+      // Dívida escolhida para a recusa disparar: com ela o capital próprio
+      // some quando o custo dele é reprecificado pela alavancagem que tem.
+      final r = evaluate(debt: 60000, betaU: 0.60);
+      expect(r.isErr, isTrue,
+          reason: 'a via do acionista é outro modelo, e não carrega o ativo '
+              'que a da firma recusou');
+      expect(r.failureOrNull!.message, contains('não sustenta a via da firma'));
+      expect(r.failureOrNull!.message, contains('não muda de via'));
+    });
+  });
+
+  group('A via do acionista resolve o próprio custo de capital', () {
+    // Decisão 46. A via do acionista avalia sozinha 33 dos 120 em produção, e
+    // em nenhum deles a via da firma produz caminho de taxas para emprestar:
+    // ou o `Ke` sai dos fluxos dela mesma, ou ela segue supondo a alavancagem
+    // de hoje perene — a hipótese que a decisão 41 mediu e descartou.
+    FundamentalsSnapshot fiscalYear(int year, double scale) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(year, 12, 31),
+          totalRevenue: 10000 * scale,
+          ebit: 1400 * scale,
+          ebitda: 1900 * scale,
+          netIncome: 500 * scale,
+          incomeBeforeTax: 800 * scale,
+          incomeTaxExpense: -300 * scale,
+          interestExpense: 600,
+          earningsPerShare: 0.5 * scale,
+          cash: 500,
+          shortTermInvestments: 200,
+          shortTermDebt: 2000,
+          longTermDebt: 8000,
+          totalStockholderEquity: 4000 * scale,
+          bookValuePerShare: 4.0 * scale,
+          operatingCashFlow: 1500 * scale,
+          freeCashFlow: 900 * scale,
+          nopat: 924 * scale,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 9000,
+          enterpriseToEbitda: 8.0,
+        );
+
+    List<FundamentalsSnapshot> series() {
+      final out = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 15; i >= 0; i--) {
+        out.add(fiscalYear(2025 - i, scale));
+        scale *= 1.06;
+      }
+      return out;
+    }
+
+    ValuationResult? shareholder({double? betaU, String? sector}) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(),
+        marketPrice: 9.0,
+        capm: CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+        sectorKey: sector,
+        unleveredBeta: betaU,
+        laneOverride: ValuationLane.shareholder,
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('com beta desalavancado, o Ke é resolvido e declarado', () {
+      final without = shareholder()!;
+      final withInput = shareholder(betaU: 0.60)!;
+
+      expect(without.warnings.any((w) => w.contains('resolvido ano a ano')),
+          isFalse,
+          reason: 'sem β_U não há realavancagem, e o comportamento é o antigo');
+      final note = withInput.warnings
+          .where((w) => w.contains('resolvido ano a ano'))
+          .toList();
+      expect(note, hasLength(1));
+      expect(note.single, contains('o Ke vai de'));
+      expect(note.single, isNot(contains('WACC')),
+          reason: 'esta via não tem custo médio a declarar');
+      expect(withInput.fairValue.reais, isNot(closeTo(without.fairValue.reais, 1e-9)),
+          reason: 'resolver a taxa tem de mover o preço, ou não resolveu nada');
+    });
+
+    test('instituição financeira fica de fora, e o preço não muda', () {
+      // Depósito e captação são insumo do negócio, não financiamento:
+      // realavancar por `D/E` trataria a matéria-prima como estrutura de
+      // capital, que é o que a Porta 1 existe para não fazer.
+      final without = shareholder(sector: 'servicos-financeiros')!;
+      final withInput = shareholder(sector: 'servicos-financeiros', betaU: 0.60)!;
+
+      expect(withInput.warnings.any((w) => w.contains('resolvido ano a ano')),
+          isFalse);
+      expect(withInput.fairValue.cents, without.fairValue.cents,
+          reason: 'para banco, oferecer β_U não pode mudar coisa alguma');
+    });
+
+    test('o Ke resolvido acompanha a alavancagem, e não a taxa do dia', () {
+      // O mesmo ativo com mais dívida tem de sair com preço justo menor: o
+      // capital próprio de uma empresa mais alavancada é mais caro.
+      ValuationResult? withDebt(double debt) {
+        final base = series();
+        final adjusted = [
+          for (final f in base)
+            FundamentalsSnapshot(
+              ticker: f.ticker,
+              fiscalPeriodEnd: f.fiscalPeriodEnd,
+              totalRevenue: f.totalRevenue,
+              ebit: f.ebit,
+              ebitda: f.ebitda,
+              netIncome: f.netIncome,
+              incomeBeforeTax: f.incomeBeforeTax,
+              incomeTaxExpense: f.incomeTaxExpense,
+              interestExpense: f.interestExpense,
+              earningsPerShare: f.earningsPerShare,
+              cash: f.cash,
+              shortTermInvestments: f.shortTermInvestments,
+              shortTermDebt: debt * 0.2,
+              longTermDebt: debt * 0.8,
+              totalStockholderEquity: f.totalStockholderEquity,
+              bookValuePerShare: f.bookValuePerShare,
+              operatingCashFlow: f.operatingCashFlow,
+              freeCashFlow: f.freeCashFlow,
+              nopat: f.nopat,
+              sharesOutstanding: f.sharesOutstanding,
+              sharesOutstandingAsOf: f.sharesOutstandingAsOf,
+              marketCap: f.marketCap,
+              enterpriseToEbitda: f.enterpriseToEbitda,
+            )
+        ];
+        final r = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: adjusted,
+          marketPrice: 9.0,
+          capm: CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: 0.60,
+          laneOverride: ValuationLane.shareholder,
+        ));
+        return r.isOk ? r.unwrap() : null;
+      }
+
+      final light = withDebt(4000);
+      final heavy = withDebt(20000);
+      expect(light, isNotNull);
+      expect(heavy, isNotNull);
+      expect(heavy!.fairValue.reais, lessThan(light!.fairValue.reais),
+          reason: 'mais alavancagem, capital próprio mais caro, preço menor — '
+              'e o lucro por papel é o mesmo nos dois');
+    });
+  });
+
+  group('A janela curta do beta é declarada', () {
+    // Item B17, decisão 111. A fonte de cotações devolve dez anos: numa
+    // avaliação datada de 2018 a série começa em 2016, e o beta sai de pouco
+    // mais de um ano de pregões — 383 contra 1.240 — sem que nada diga.
+    FundamentalsSnapshot year(int y, double scale) => FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 10000 * scale,
+          ebit: 1600 * scale,
+          ebitda: 2100 * scale,
+          netIncome: 800 * scale,
+          incomeBeforeTax: 1200 * scale,
+          incomeTaxExpense: -400 * scale,
+          interestExpense: 300,
+          earningsPerShare: 0.8 * scale,
+          cash: 400,
+          shortTermDebt: 800,
+          longTermDebt: 2200,
+          totalStockholderEquity: 5000 * scale,
+          bookValuePerShare: 5.0 * scale,
+          operatingCashFlow: 1800 * scale,
+          nopat: 1056 * scale,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 10000,
+        );
+
+    List<FundamentalsSnapshot> series() {
+      final out = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(year(2025 - i, scale));
+        scale *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult evaluate(double? window) =>
+        ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: series(),
+          marketPrice: 10.0,
+          capm: CapmInputs(
+              riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          betaWindowYears: window,
+        )).unwrap();
+
+    bool declares(ValuationResult r) =>
+        r.warnings.any((w) => w.contains('O beta foi estimado sobre'));
+
+    test('janela inteira não gera ressalva', () {
+      expect(declares(evaluate(5.0)), isFalse);
+      expect(declares(evaluate(4.6)), isFalse,
+          reason: 'feriado e pregão faltando tiram dias, não anos');
+    });
+
+    test('janela curta gera ressalva, com o número', () {
+      final r = evaluate(1.6);
+      expect(declares(r), isTrue);
+      final warning =
+          r.warnings.firstWhere((w) => w.contains('O beta foi estimado sobre'));
+      expect(warning, contains('1.6 ano(s)'));
+      expect(warning, contains('${ValuationCascade.betaWindowYears} que a janela pede'));
+    });
+
+    test('sem medição da janela, nada é afirmado', () {
+      // Quem monta os insumos à mão não informa a janela, e o silêncio é o
+      // certo: afirmar janela cheia seria inventar.
+      expect(declares(evaluate(null)), isFalse);
+      expect(declares(evaluate(0.0)), isFalse);
+    });
+
+    test('a constante da janela é uma só nos dois lados', () {
+      expect(PrepareValuationInputs.betaWindowYears,
+          ValuationCascade.betaWindowYears);
+    });
+  });
+
+  group('A perpetuidade declara de onde vêm o beta e a estrutura', () {
+    // Item B15, decisão 109. Em produção o beta de equilíbrio é o de hoje,
+    // encolhido, e a estrutura é a do ano N do modelo. As duas alternativas do
+    // item — convergir o beta em direção a 1 e impor uma alavancagem — entram
+    // por imposição de diagnóstico, e é o que estes casos exercitam.
+    FundamentalsSnapshot year(int y, double scale) => FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 20000 * scale,
+          ebit: 3000 * scale,
+          ebitda: 4000 * scale,
+          netIncome: 1500 * scale,
+          incomeBeforeTax: 2200 * scale,
+          incomeTaxExpense: -700 * scale,
+          interestExpense: 500,
+          earningsPerShare: 1.5 * scale,
+          cash: 600,
+          shortTermDebt: 1500,
+          longTermDebt: 4500,
+          totalStockholderEquity: 9000 * scale,
+          bookValuePerShare: 9.0 * scale,
+          operatingCashFlow: 3400 * scale,
+          nopat: 1980 * scale,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 18000,
+        );
+
+    List<FundamentalsSnapshot> series() {
+      final out = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(year(2025 - i, scale));
+        scale *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult evaluate({
+      double beta = 1.6,
+      double? betaWeight,
+      double? leverage,
+    }) =>
+        ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: series(),
+          marketPrice: 18.0,
+          capm: CapmInputs(
+              riskFreeRate: 0.14, beta: beta, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: 0.60,
+          terminalBetaWeightOverride: betaWeight,
+          terminalLeverageOverride: leverage,
+        )).unwrap();
+
+    test('sem imposição, nada muda — é o caminho de produção', () {
+      final a = evaluate();
+      final b = evaluate(betaWeight: null, leverage: null);
+      expect(b.fairValue.cents, a.fairValue.cents);
+    });
+
+    test('a estrutura de equilíbrio sai nos diagnósticos, e é a do ano N', () {
+      final d = evaluate().diagnostics!;
+      expect(d.terminalEquityShare, isNotNull,
+          reason: 'com taxas resolvidas, a perpetuidade tem estrutura própria');
+      expect(d.terminalEquityShare, isNot(closeTo(d.equityShare, 1e-9)),
+          reason: 'a do ano N não é a de hoje — se fosse, a decisão 105 não '
+              'teria mudado nada');
+    });
+
+    test('convergir o beta aproxima a taxa de equilíbrio da de beta 1', () {
+      // **O beta que a perpetuidade usa é o realavancado do ano N** —
+      // `β_U · fator(D_N/E_N)` —, e não o `beta` do CAPM: com o caminho de
+      // taxas resolvido, quem entra é o desalavancado. Blume o puxa para 1, e o
+      // sentido do movimento depende de que lado desse 1 ele estava. O que vale
+      // nos dois lados é a aproximação.
+      const betaOneRate = 0.094 + 1.0 * 0.055;
+      for (final betaU in [0.35, 1.30]) {
+        final without = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: series(),
+          marketPrice: 18.0,
+          capm: CapmInputs(
+              riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: betaU,
+        )).unwrap();
+        final withInput = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: series(),
+          marketPrice: 18.0,
+          capm: CapmInputs(
+              riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: betaU,
+          terminalBetaWeightOverride: 0.67,
+        )).unwrap();
+        expect(
+            (withInput.diagnostics!.terminalCostOfEquity! - betaOneRate).abs(),
+            lessThan(
+                (without.diagnostics!.terminalCostOfEquity! - betaOneRate).abs()),
+            reason: 'β_U = $betaU');
+        // A **corrente** não se move: a imposição é só da perpetuidade.
+        expect(withInput.diagnostics!.costOfEquity,
+            closeTo(without.diagnostics!.costOfEquity, 1e-12));
+      }
+    });
+
+    test('alavancagem imposta impossível é recusada, e não vira NaN', () {
+      // Auditoria do gate, 21/09/2026. `D/E = −1` é caixa líquido igual ao
+      // capital próprio: o valor da firma zera e o peso `1/(1 + D/E)` divide
+      // por zero. A varredura que pede o impossível precisa ouvir isso.
+      for (final debtToEquity in [-1.0, -2.0, double.nan, double.infinity]) {
+        final r = ValuationCascade.evaluate(ValuationInputs(
+          ticker: ticker,
+          asOf: DateTime(2026, 9, 9),
+          fundamentals: series(),
+          marketPrice: 18.0,
+          capm: CapmInputs(
+              riskFreeRate: 0.14, beta: 1.6, marketPremium: 0.055),
+          declaredTerminalRiskFreeRate: 0.094,
+          unleveredBeta: 0.60,
+          terminalLeverageOverride: debtToEquity,
+        ));
+        // A recusa do solucionador é recuo declarado, não queda: a cascata
+        // segue pela interpolação. O que não pode é sair número não finito.
+        if (r.isOk) {
+          final v = r.unwrap();
+          expect(v.fairValue.reais.isFinite, isTrue, reason: '$debtToEquity');
+          expect(v.diagnostics!.terminalDiscountRate.isFinite, isTrue,
+              reason: '$debtToEquity');
+        }
+      }
+    });
+
+    test('a alavancagem imposta encarece o capital próprio de equilíbrio', () {
+      final without = evaluate();
+      final withInput = evaluate(leverage: 3.0);
+      expect(withInput.diagnostics!.terminalCostOfEquity!,
+          greaterThan(without.diagnostics!.terminalCostOfEquity!),
+          reason: 'mais dívida na perpetuidade, capital próprio mais caro');
+      // O custo do capital próprio **corrente** é o do CAPM sobre a taxa de
+      // hoje: ele não passa pelo ponto fixo, e nenhuma imposição de equilíbrio
+      // o alcança.
+      expect(withInput.diagnostics!.costOfEquity,
+          closeTo(without.diagnostics!.costOfEquity, 1e-12));
+    });
+  });
+
+  group('Com taxas resolvidas, a tela mostra as premissas finais', () {
+    // Item B11. O preço justo sai do caminho de taxas e do retorno terminal do
+    // último passe; o rastro, os cenários, a taxa exibida e os diagnósticos
+    // saíam das premissas **interpoladas**, que são o chute de que o ponto fixo
+    // parte. No aplicativo de antes as duas coincidiam, porque ele não
+    // resolvia o prior — ligar o prior sem isto descasaria a banda do preço.
+    FundamentalsSnapshot year(int y, double scale) => FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 20000 * scale,
+          ebit: 3000 * scale,
+          ebitda: 4000 * scale,
+          netIncome: 1500 * scale,
+          incomeBeforeTax: 2200 * scale,
+          incomeTaxExpense: -700 * scale,
+          interestExpense: 500,
+          earningsPerShare: 1.5 * scale,
+          cash: 600,
+          shortTermDebt: 1500,
+          longTermDebt: 4500,
+          totalStockholderEquity: 9000 * scale,
+          bookValuePerShare: 9.0 * scale,
+          operatingCashFlow: 3400 * scale,
+          nopat: 1980 * scale,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 18000,
+        );
+
+    List<FundamentalsSnapshot> series() {
+      final out = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(year(2025 - i, scale));
+        scale *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult evaluate({double? betaU}) => ValuationCascade.evaluate(
+          ValuationInputs(
+            ticker: ticker,
+            asOf: DateTime(2026, 9, 9),
+            fundamentals: series(),
+            marketPrice: 18.0,
+            capm:
+                CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+            declaredTerminalRiskFreeRate: 0.094,
+            unleveredBeta: betaU,
+          ),
+        ).unwrap();
+
+    test('a taxa exibida é a do ano 1 resolvido, e não o chute', () {
+      final without = evaluate();
+      final withInput = evaluate(betaU: 0.60);
+      final note =
+          withInput.warnings.firstWhere((w) => w.contains('resolvido ano a ano'));
+      // O aviso diz a taxa do primeiro ano com uma casa; a exibida tem de ser
+      // a mesma, e não a da interpolação.
+      final first = '${(withInput.discountRate * 100).toStringAsFixed(1)}%';
+      expect(note, contains('o WACC vai de $first no primeiro ano'));
+      expect(withInput.discountRate, isNot(closeTo(without.discountRate, 1e-9)),
+          reason: 'resolver a taxa tem de mover a taxa que a tela mostra');
+    });
+
+    test('o cenário base volta ao preço justo', () {
+      final withInput = evaluate(betaU: 0.60);
+      final base = withInput.discreteScenarios![ScenarioBand.base]!;
+      expect(base.cents, withInput.fairValue.cents,
+          reason: 'a faixa de sensibilidade cerca o preço justo; centrada nas '
+              'premissas interpoladas, ela cercava outro número');
+    });
+
+    test('a faixa responde ao desconto no caminho resolvido', () {
+      final withInput = evaluate(betaU: 0.60);
+      final bear = withInput.discreteScenarios![ScenarioBand.bear]!;
+      final bull = withInput.discreteScenarios![ScenarioBand.bull]!;
+      expect(bear.reais, lessThan(withInput.fairValue.reais));
+      expect(bull.reais, greaterThan(withInput.fairValue.reais));
+    });
+
+    test('os diagnósticos saem do retorno terminal do último passe', () {
+      final withInput = evaluate(betaU: 0.60);
+      final d = withInput.diagnostics!;
+      // O desconto de equilíbrio é o resolvido, e o retorno terminal tem de
+      // estar do mesmo lado da conta: neutro significa ausente, e não o número
+      // que a interpolação teria dado.
+      expect(d.terminalDiscountRate, isNot(closeTo(0.094, 1e-9)));
+      if (!d.moatApplied) {
+        expect(d.terminalReturnOnCapital, isNull,
+            reason: 'terminal neutro não tem retorno próprio a declarar');
+      }
+    });
+  });
+
+  group('A composição declarada da unit decide, e a medida confere', () {
+    // Item B16, decisão 106. A razão medida — `contagem × preço ÷ valor de
+    // mercado` — só devolve o número de ações da unit quando as espécies valem
+    // o mesmo; nas coortes ela erra 79 de 220 observações de unit.
+    FundamentalsSnapshot year(int y, double scale) => FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 10000 * scale,
+          ebit: 1600 * scale,
+          ebitda: 2100 * scale,
+          netIncome: 800 * scale,
+          incomeBeforeTax: 1200 * scale,
+          incomeTaxExpense: -400 * scale,
+          interestExpense: 300,
+          earningsPerShare: 0.8 * scale,
+          cash: 400,
+          shortTermDebt: 800,
+          longTermDebt: 2200,
+          totalStockholderEquity: 5000 * scale,
+          bookValuePerShare: 5.0 * scale,
+          operatingCashFlow: 1800 * scale,
+          nopat: 1056 * scale,
+          sharesOutstanding: 3000,
+          sharesOutstandingAsOf: 3000,
+          // Valor de mercado de 30.000 com 3.000 ações: a razão **medida** com
+          // preço de unit 30 dá 3. É a unit em que as espécies valem o mesmo.
+          marketCap: 30000,
+        );
+
+    List<FundamentalsSnapshot> series() {
+      final out = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(year(2025 - i, scale));
+        scale *= 1.05;
+      }
+      return out;
+    }
+
+    // A contagem oficial da B3 arbitra o divisor (decisão 83), e é sobre ela
+    // que a razão de unidade age: `divisor = contagem ÷ u`. É o caminho do
+    // aplicativo, e por isso é o que o teste exercita.
+    ValuationResult? evaluate({int? declared, double price = 30.0}) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(),
+        marketPrice: price,
+        capm: CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+        declaredSharesPerUnit: declared,
+        officialShares:
+            OfficialShareCount(total: 3000, asOf: DateTime(2026, 9, 1)),
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('sem declaração vale a medida, e a avaliação diz que inferiu', () {
+      final v = evaluate()!;
+      final warning =
+          v.warnings.firstWhere((w) => w.contains('negociada em unit'));
+      expect(warning, contains('3 ações'));
+      expect(warning, contains('inferida do valor de mercado'));
+    });
+
+    test('a declarada decide quando discorda da medida', () {
+      // O preço de 20 faz a razão medida cair em 2 — é o que acontece quando a
+      // preferencial negocia abaixo da ordinária. A companhia declara 3.
+      final withoutDeclared = evaluate(price: 20.0)!;
+      expect(withoutDeclared.warnings.firstWhere((w) => w.contains('unit de')),
+          contains('2 ações'));
+
+      final withDeclared = evaluate(declared: 3, price: 20.0)!;
+      expect(withDeclared.warnings.firstWhere((w) => w.contains('unit de')),
+          contains('3 ações'));
+      expect(
+          withDeclared.warnings.any((w) => w.contains('razão de unidade medida')),
+          isTrue,
+          reason: 'a divergência é a conferência, e tem de aparecer');
+      // Perto de 3/2, e não exatamente: a razão também divide o divisor, e o
+      // divisor forma o peso do capital próprio no WACC. Uma unit de três
+      // ações tem um terço menos unidades, valor de mercado menor e desconto
+      // um pouco diferente — o efeito de segunda ordem fica declarado aqui em
+      // vez de virar uma tolerância sem explicação.
+      expect(withDeclared.fairValue.reais / withoutDeclared.fairValue.reais,
+          closeTo(3 / 2, 0.02),
+          reason: 'três ações por unit valem uma vez e meia duas');
+    });
+
+    test('declarada igual à medida não gera conferência', () {
+      final v = evaluate(declared: 3)!;
+      expect(v.warnings.any((w) => w.contains('razão de unidade medida')),
+          isFalse);
+      expect(v.warnings.firstWhere((w) => w.contains('unit de')),
+          contains('formulário cadastral'));
+    });
+
+    test('declaração fora da faixa é ignorada, e vale a medida', () {
+      final absurd = evaluate(declared: 99)!;
+      final withNothing = evaluate()!;
+      expect(absurd.fairValue.reais, closeTo(withNothing.fairValue.reais, 1e-9));
+    });
+
+    test('o rastro mostra as duas razões e diz qual valeu', () {
+      final trace = <AuditEvent>[];
+      AuditRecorder.attach(trace.add);
+      addTearDown(AuditRecorder.detach);
+      evaluate(declared: 3, price: 20.0);
+      final step = trace.single.calculations
+          .firstWhere((p) => p.formulaName.contains('unidade negociada'));
+      expect(step.mappedVariables['u_declarada'], 3);
+      expect((step.mappedVariables['u_medida']! as num).toDouble(), 2.0);
+      expect(step.intermediateSteps.last, contains('é ela que vale'));
+      expect(step.finalValue, 3.0);
+    });
+  });
+
+  group('A dívida do WACC é a mesma do resto do modelo', () {
+    // Item B9, decisão 104. O peso do WACC vinha da dívida **bruta**, enquanto
+    // a apuração do capital próprio subtrai a **líquida** e a realavancagem da
+    // decisão 41 pondera a líquida — o mesmo caixa barateava a taxa e depois
+    // se somava ao acionista.
+    FundamentalsSnapshot year(int y, double scale,
+            {required double cash,
+            double debt = 4000,
+            bool publishedExpense = true}) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 10000 * scale,
+          ebit: 1800 * scale,
+          ebitda: 2400 * scale,
+          netIncome: 900 * scale,
+          incomeBeforeTax: 1300 * scale,
+          incomeTaxExpense: -400 * scale,
+          interestExpense: debt > 0 && publishedExpense ? 400 : null,
+          earningsPerShare: 0.9 * scale,
+          cash: cash,
+          shortTermDebt: debt * 0.25,
+          longTermDebt: debt * 0.75,
+          totalStockholderEquity: 6000 * scale,
+          bookValuePerShare: 6.0 * scale,
+          operatingCashFlow: 2000 * scale,
+          nopat: 1188 * scale,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 12000,
+        );
+
+    List<FundamentalsSnapshot> series(double cash,
+        {double debt = 4000, bool publishedExpense = true}) {
+      final out = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(year(2025 - i, scale,
+            cash: cash,
+            debt: debt,
+            publishedExpense: publishedExpense));
+        scale *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult? evaluate(double cash,
+        {double debt = 4000, bool publishedExpense = true}) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals:
+            series(cash, debt: debt, publishedExpense: publishedExpense),
+        marketPrice: 12.0,
+        capm: CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+      ));
+      return r.isOk ? r.unwrap() : null;
+    }
+
+    test('mais caixa, mesma dívida bruta: o desconto sobe', () {
+      final few = evaluate(200)!;
+      final many = evaluate(3000)!;
+      expect(many.discountRate, greaterThan(few.discountRate),
+          reason: 'o caixa reduz a dívida líquida, o peso do capital próprio '
+              'sobe e o WACC se aproxima do Ke — com a dívida bruta o peso não '
+              'se movia');
+    });
+
+    test('caixa maior que a dívida: o peso é negativo e o WACC passa do Ke', () {
+      final v = evaluate(6000)!;
+      expect(v.discountRate, greaterThan(v.diagnostics!.costOfEquity),
+          reason: 'com caixa líquido o ativo operacional sozinho é mais '
+              'arriscado que a companhia inteira');
+      expect(v.warnings.any((w) => w.contains('caixa líquido')), isTrue,
+          reason: 'a taxa acima do Ke precisa estar declarada na tela');
+    });
+
+    test('o rastro declara que a dívida do peso é a líquida', () {
+      final trace = <AuditEvent>[];
+      AuditRecorder.attach(trace.add);
+      addTearDown(AuditRecorder.detach);
+      final itsSeries = series(3000);
+      ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: itsSeries,
+        marketPrice: 12.0,
+        capm: CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+      ));
+      final step = trace.single.calculations
+          .firstWhere((p) => p.formulaName.contains('WACC'));
+      final net = itsSeries.last.netDebt;
+      expect(step.mappedVariables.keys, contains('D líquida (R\$)'));
+      expect((step.mappedVariables['D líquida (R\$)']! as num).toDouble(),
+          closeTo(net, 0.01));
+      expect(net, lessThan(itsSeries.last.totalDebt));
+    });
+
+    test('despesa financeira ausente não zera o prêmio de crédito (B26)', () {
+      // A NATU3 no gabarito de 22/09/2026: dívida contratada, despesa em
+      // branco na fonte. O WACC estático degenerava para o `Ke`, o prêmio que
+      // o ponto fixo recebia virava zero, e o caminho resolvido tomava
+      // dinheiro à taxa livre de risco — com o aviso dizendo «desconto ao
+      // Ke» ao lado do caminho de WACC que a conta de fato usou.
+      final without = evaluate(200, publishedExpense: false)!;
+      expect(
+          without.warnings
+              .any((w) => w.contains('Estrutura de capital indisponível')),
+          isFalse,
+          reason: 'há valor de mercado: o WACC é montável');
+      expect(without.warnings.any((w) => w.contains('não está publicada')), isTrue);
+      // Dívida líquida de 3.800 sobre EBITDA de ~4.310 no último ano: 0,88x,
+      // a faixa de 1,0 p.p. — e não o teto de 10 que a cobertura nula daria.
+      final trace = <AuditEvent>[];
+      AuditRecorder.attach(trace.add);
+      addTearDown(AuditRecorder.detach);
+      evaluate(200, publishedExpense: false);
+      final step = trace.single.calculations
+          .firstWhere((p) => p.formulaName.contains('WACC'));
+      final kd = (step.mappedVariables['K_d (% a.a.)']! as num).toDouble();
+      expect(kd, closeTo(14.0 + 100 * CostOfCapital.leverageSpread(0.88), 0.01));
+      expect(
+          step.intermediateSteps.any((p) => p.contains('não está publicada')),
+          isTrue);
+    });
+
+    test('com a despesa publicada nada muda no prêmio (B26)', () {
+      // O prêmio do ponto fixo passou a sair do `_wacc` em vez de ser
+      // recalculado do custo que ele devolvia: para quem tinha WACC, são o
+      // mesmo número.
+      final withInput = evaluate(200)!;
+      expect(withInput.warnings.any((w) => w.contains('não está publicada')),
+          isFalse);
+    });
+
+    test('caixa maior que a dívida é estrutura conhecida, e não ausente', () {
+      const capm =
+          CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055);
+      final withCash = evaluate(6000)!;
+      expect(
+          withCash.warnings
+              .any((w) => w.contains('Estrutura de capital indisponível')),
+          isFalse);
+      expect(withCash.discountRate, isNot(closeTo(capm.costOfEquity, 1e-9)));
+    });
+
+    test('sem dívida contratada o caixa entra no desconto, e não degenera', () {
+      // Lente `metodo`, 20/09/2026. Companhia sem empréstimo e com caixa tem
+      // estrutura conhecida — dívida líquida negativa —, e a apuração do
+      // capital próprio devolve esse caixa. Degenerar para o `Ke` aqui
+      // devolveria o caixa duas vezes.
+      const capm =
+          CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055);
+      final withoutDebt = evaluate(3000, debt: 0)!;
+      expect(
+          withoutDebt.warnings
+              .any((w) => w.contains('Estrutura de capital indisponível')),
+          isFalse);
+      expect(withoutDebt.discountRate, greaterThan(capm.costOfEquity),
+          reason: 'peso negativo do caixa põe o WACC acima do Ke');
+      expect(
+          withoutDebt.warnings.any((w) => w.contains('não tem dívida contratada')),
+          isTrue);
+      // O que remunera o peso negativo é caixa, e caixa rende a taxa livre de
+      // risco: sem dívida não há prêmio de crédito a cobrar (decisão 58).
+      final weight = 1 -
+          (withoutDebt.discountRate - capm.costOfEquity) /
+              (capm.riskFreeRate * (1 - ValuationParameters.statutoryTaxRate) -
+                  capm.costOfEquity);
+      expect(weight, greaterThan(1.0));
+    });
+  });
+
+  group('A tradução do cenário para o Ke é escolha declarada', () {
+    // Item B20, decisão 121. O cenário perturba `discountRate`; na via do
+    // acionista esse campo **é** o `Ke`, e na via da firma é o WACC. A rota
+    // derivada desconta ao `Ke`, e traduzir exige escolher o que o cenário
+    // perturba. As três leituras estão no enum, e o padrão é o um a um.
+    FundamentalsSnapshot year(int y, double scale) => FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 10000 * scale,
+          ebit: 1800 * scale,
+          ebitda: 2400 * scale,
+          netIncome: 900 * scale,
+          incomeBeforeTax: 1300 * scale,
+          incomeTaxExpense: -400 * scale,
+          interestExpense: 400,
+          earningsPerShare: 0.9 * scale,
+          cash: 500,
+          shortTermDebt: 1000,
+          longTermDebt: 3000,
+          totalStockholderEquity: 6000 * scale,
+          bookValuePerShare: 6.0 * scale,
+          operatingCashFlow: 2000 * scale,
+          nopat: 1188 * scale,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 12000,
+        );
+
+    List<FundamentalsSnapshot> series() {
+      final out = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(year(2025 - i, scale));
+        scale *= 1.05;
+      }
+      return out;
+    }
+
+    ValuationResult evaluate(ScenarioTranslation reading) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(),
+        marketPrice: 12.0,
+        capm: const CapmInputs(
+            riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+        unleveredBeta: 0.8,
+        scenarioTranslation: reading,
+      ));
+      expect(r.isOk, isTrue, reason: r.failureOrNull?.message);
+      return r.unwrap();
+    }
+
+    double width(ValuationResult v) {
+      final c = v.discreteScenarios!;
+      return (c[ScenarioBand.bull]!.cents - c[ScenarioBand.bear]!.cents) /
+          v.fairValue.cents;
+    }
+
+    test('o padrão declarado é o um a um', () {
+      // Se alguém trocar o padrão do enum, a faixa de produção muda de largura
+      // sem que nada mais no repositório mude — e este é o único lugar que
+      // reprova.
+      final pattern = ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(),
+        marketPrice: 12.0,
+        capm: const CapmInputs(
+            riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+      );
+      expect(pattern.scenarioTranslation, ScenarioTranslation.oneToOne);
+    });
+
+    test('as três leituras dão o mesmo preço justo', () {
+      // O cenário base tem deslocamento zero, e multiplicar zero por qualquer
+      // fator dá zero: a tradução não pode mover o centro. Se mover, a faixa
+      // passa a cercar outro número.
+      final a = evaluate(ScenarioTranslation.oneToOne);
+      for (final reading in ScenarioTranslation.values) {
+        expect(evaluate(reading).fairValue, a.fairValue, reason: '$reading');
+      }
+    });
+
+    test('o cenário base volta ao preço justo nas três', () {
+      for (final reading in ScenarioTranslation.values) {
+        final v = evaluate(reading);
+        expect(v.discreteScenarios![ScenarioBand.base], v.fairValue,
+            reason: '$reading — pós-condição da decisão 105');
+      }
+    });
+
+    test('amplificar alarga a faixa, e na ordem esperada', () {
+      final oneToOne = width(evaluate(ScenarioTranslation.oneToOne));
+      final riskFreeBand = width(evaluate(ScenarioTranslation.riskFreeRate));
+      final structure = width(evaluate(ScenarioTranslation.fixedStructure));
+      expect(riskFreeBand, greaterThan(oneToOne));
+      expect(structure, greaterThan(riskFreeBand),
+          reason: '`1 ÷ w_E` passa de `1 ÷ (1 − w_D·t)` sempre que há dívida');
+    });
+
+    test('sem via da firma, a tradução não tem o que traduzir', () {
+      // **Por construção, e não por medição**: `_discountFlow` devolve o
+      // fluxo do acionista antes de calcular o fator, porque lá o campo
+      // perturbado **é** o `Ke`. É por isso que a medição do universo se
+      // restringe aos 77 da via da firma — nos outros as três leituras são a
+      // mesma conta, e medi-las seria medir nada.
+      //
+      // O que este teste cobra é o lado observável disso: o fator só existe
+      // para a via da firma, e o enum não tem efeito fora dela.
+      final v = evaluate(ScenarioTranslation.oneToOne);
+      expect(v.model, ValuationModel.dcfFcff,
+          reason: 'o cenário do grupo precisa mesmo ser da via da firma');
+    });
+  });
+
+  group('O minoritário no peso do WACC estático é declarado', () {
+    // Item B23, decisão 120. O peso do WACC **estático** é o valor de mercado
+    // da controladora, e o fluxo que ele desconta é o **consolidado**: com
+    // minoritário material, a participação da dívida sai inflada. O caminho
+    // **resolvido** não tem o problema — ele pondera pelo capital próprio que o
+    // próprio modelo produz, `V − D` sobre fluxo consolidado.
+    //
+    // A interseção das três condições é **vazia** no universo de hoje. O aviso
+    // existe para o dia em que deixar de ser.
+    FundamentalsSnapshot year(int y, double scale, {double? minority}) =>
+        FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(y, 12, 31),
+          totalRevenue: 10000 * scale,
+          ebit: 1800 * scale,
+          ebitda: 2400 * scale,
+          netIncome: 900 * scale,
+          incomeBeforeTax: 1300 * scale,
+          incomeTaxExpense: -400 * scale,
+          interestExpense: 400,
+          earningsPerShare: 0.9 * scale,
+          cash: 500,
+          shortTermDebt: 1000,
+          longTermDebt: 3000,
+          totalStockholderEquity: 6000 * scale,
+          minorityInterest: minority,
+          bookValuePerShare: 6.0 * scale,
+          operatingCashFlow: 2000 * scale,
+          nopat: 1188 * scale,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 12000,
+        );
+
+    List<FundamentalsSnapshot> series({double? minority}) {
+      final out = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        out.add(year(2025 - i, scale, minority: minority));
+        scale *= 1.05;
+      }
+      return out;
+    }
+
+    /// Sem beta desalavancado **não há realavancagem**, e a avaliação recua
+    /// para o WACC estático — que é exatamente a condição do aviso.
+    ValuationResult? evaluate({double? minority, double? betaU}) {
+      final r = ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: series(minority: minority),
+        marketPrice: 12.0,
+        capm: const CapmInputs(
+            riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055),
+        declaredTerminalRiskFreeRate: 0.094,
+        unleveredBeta: betaU,
+      ));
+      return r.valueOrNull;
+    }
+
+    bool declares(ValuationResult? v) =>
+        v?.warnings.any((w) => w.contains('não controladores')) ?? false;
+
+    test('recuo estático com minoritário material declara', () {
+      // 900 de minoritário contra 6.000 do controlador: 13% do consolidado.
+      final v = evaluate(minority: 900);
+      expect(v, isNotNull);
+      expect(declares(v), isTrue);
+    });
+
+    test('minoritário abaixo da materialidade não declara', () {
+      // 30 contra 6.000: 0,5% do consolidado, abaixo do corte de 1%.
+      expect(declares(evaluate(minority: 30)), isFalse);
+    });
+
+    test('sem minoritário não declara', () {
+      expect(declares(evaluate()), isFalse);
+    });
+
+    test('com as taxas resolvidas não declara, mesmo com minoritário grande',
+        () {
+      // **É a metade que importa.** O caminho resolvido pondera pelo capital
+      // próprio do modelo, que já é o consolidado: ali o minoritário não falta
+      // no peso, e avisar seria cobrar defeito que não existe.
+      final v = evaluate(minority: 900, betaU: 0.8);
+      expect(v, isNotNull);
+      expect(
+        v!.warnings.any((w) => w.contains('resolvido ano a ano')),
+        isTrue,
+        reason: 'o cenário precisa mesmo resolver as taxas, ou o teste não '
+            'prova nada',
+      );
+      expect(declares(v), isFalse);
+    });
+
+    test('o aviso não muda o preço justo', () {
+      final withInput = evaluate(minority: 900);
+      final without = evaluate(minority: 30);
+      // A mesma companhia, com o minoritário apenas mudando de tamanho, muda
+      // de preço pela ponte (decisão 49) — o que o teste cobra é que o aviso
+      // em si não entre na conta: ele é narrativa.
+      expect(withInput, isNotNull);
+      expect(without, isNotNull);
+      expect(withInput!.discountRate, closeTo(without!.discountRate, 1e-12),
+          reason: 'o minoritário não entra no peso, e declarar não o põe lá');
+    });
+  });
+
+  group('A rota derivada remunera o caixa pela taxa dele', () {
+    // Lente `metodo`, 21/09/2026; decisão 119. A decisão 113 separou o caixa
+    // no **WACC**; a ponte do acionista continuava com `D_líquida · K_d`, de
+    // modo que a companhia de caixa líquido recebia receita financeira ao
+    // custo de **empréstimo**. É o caminho de produção da via da firma desde a
+    // decisão 102, e o fluxo do acionista saía inflado.
+    const assumptions = DcfAssumptions(
+      growthRate: 0.06,
+      perpetualGrowth: 0.045,
+      discountRate: 0.16,
+      terminalDiscountRate: 0.14,
+      reinvestmentPolicy: ReinvestmentPolicy.none,
+    );
+
+    /// A **dívida líquida é a mesma em todas as chamadas**: é ela que a ponte
+    /// desconta, e variá-la mediria outra coisa. O que varia é quanto dela é
+    /// caixa, e a que taxa esse caixa rende.
+    DcfOutcome derivedOutcome({double cash = 0, double? income}) =>
+        DcfCalculator.equityFromFirm(
+          baseProfit: 1000,
+          assumptions: assumptions,
+          netDebt: 1500,
+          sharesOutstanding: 1000,
+          costOfDebt: 0.18,
+          taxRate: 0.34,
+          equityDiscountRate: 0.18,
+          terminalEquityDiscountRate: 0.16,
+          cash: cash,
+          cashYield: income,
+        ).unwrap();
+
+    test('sem rendimento declarado, vale a forma anterior', () {
+      expect(derivedOutcome(cash: 2500).fairValuePerShare,
+          closeTo(derivedOutcome().fairValuePerShare, 1e-9),
+          reason: 'sem `cashYield`, as duas metades pagam a mesma taxa e a '
+              'separação não pode mover nada');
+    });
+
+    test('com o rendimento, o caixa deixa de render prêmio de crédito', () {
+      final before = derivedOutcome(cash: 2500);
+      final after = derivedOutcome(cash: 2500, income: 0.14);
+      expect(after.fairValuePerShare, lessThan(before.fairValuePerShare),
+          reason: 'render `R_f` em vez de `R_f + spread` reduz o fluxo do '
+              'acionista');
+    });
+
+    test('a diferença é exatamente o spread sobre o caixa, descontada', () {
+      // O serviço da dívida muda em `C·(K_d − R_f)·(1 − τ)` no ano 1, e o
+      // caixa cresce a `g` como a dívida: a diferença de fluxo de cada ano é
+      // essa, e nada mais.
+      const cash = 2500.0;
+      const kd = 0.18;
+      const rf = 0.14;
+      const tau = 0.34;
+      final before = derivedOutcome(cash: cash);
+      final after = derivedOutcome(cash: cash, income: rf);
+      const expected = cash * (kd - rf) * (1 - tau);
+      expect(before.projectedFlows.first - after.projectedFlows.first,
+          closeTo(expected, 1e-9));
+    });
+
+    test('caixa zero não muda nada, com ou sem rendimento', () {
+      expect(derivedOutcome(income: 0.14).fairValuePerShare,
+          closeTo(derivedOutcome().fairValuePerShare, 1e-12));
+    });
+
+    test('a dívida projetada é a mesma: o que muda é a taxa', () {
+      // As duas metades crescem com o mesmo fator, e a diferença delas é a
+      // série líquida de antes. Se a separação mudasse a dívida, a ponte
+      // deixaria de ser a mesma do DCF.
+      final a = derivedOutcome(cash: 2500);
+      final b = derivedOutcome(cash: 2500, income: 0.14);
+      // O fluxo da **firma** não depende do financiamento: ele é o mesmo nos
+      // dois, e é isso que isola a mudança no serviço da dívida.
+      expect(a.projectedFlows.length, b.projectedFlows.length);
+      for (var t = 1; t < a.projectedFlows.length; t++) {
+        final diffA = a.projectedFlows[t] - b.projectedFlows[t];
+        final previousDiff = a.projectedFlows[t - 1] - b.projectedFlows[t - 1];
+        // `g_t` é o crescimento do ano `t`, que é o que leva o saldo do
+        // início do ano `t` ao do início do ano `t+1`. Ele **decai** ao longo
+        // da projeção, e fixar 6% aqui era supor um caminho que o modelo não
+        // percorre.
+        expect(diffA / previousDiff, closeTo(1 + assumptions.growthAt(t), 1e-9),
+            reason: 'a diferença cresce a `g_t`, porque o caixa cresce a '
+                '`g_t` — ano $t');
+      }
+    });
+  });
+
+  group('O caixa rende a taxa livre de risco, e não o custo de empréstimo', () {
+    // Lente `metodo`, 21/09/2026. A decisão 104 pôs a dívida **líquida** nos
+    // pesos e disse, no caso sem dívida contratada, que o que remunera o peso
+    // negativo é caixa — e caixa rende `R_f`. A regra valia só quando a dívida
+    // **bruta** era zero: com dívida e caixa maior que ela, o peso negativo
+    // continuava remunerado ao custo de **empréstimo**, e o WACC saía baixo
+    // demais justamente nos balanços mais líquidos.
+    const capm =
+        CapmInputs(riskFreeRate: 0.14, beta: 1.0, marketPremium: 0.055);
+    const tax = ValuationParameters.statutoryTaxRate;
+
+    CostOfCapital cost({double? cash, double debt = -2000}) =>
+        CostOfCapital(
+          capm: capm,
+          costOfDebt: 0.18,
+          taxRate: tax,
+          equityValue: 12000,
+          debtValue: debt,
+          interestCoverage: 4.0,
+          cashValue: cash,
+        );
+
+    test('sem o caixa, vale a forma de uma perna só', () {
+      final c = cost();
+      expect(c.grossDebtShare, isNull);
+      expect(c.cashShare, isNull);
+      final expected = c.equityShare * c.costOfEquity +
+          c.debtShare * c.effectiveCostOfDebt * (1 - c.effectiveTaxShield);
+      expect(c.rawWacc, closeTo(expected, 1e-12));
+    });
+
+    test('a separação move o WACC pela diferença entre as duas taxas', () {
+      final without = cost();
+      final withInput = cost(cash: 6000);
+      // `w_caixa · [K_d(1 − escudo) − R_f(1 − τ)]`: a perna é a mesma, e o que
+      // muda é a taxa da metade que **rende**.
+      final difference = withInput.cashShare! *
+          (withInput.effectiveCostOfDebt * (1 - withInput.effectiveTaxShield) -
+              capm.riskFreeRate * (1 - tax));
+      expect(withInput.rawWacc - without.rawWacc, closeTo(difference, 1e-12));
+      expect(withInput.rawWacc, greaterThan(without.rawWacc),
+          reason: 'o caixa deixa de ser creditado com prêmio de crédito');
+    });
+
+    test('os pesos não mudam: só a taxa de cada metade', () {
+      final c = cost(cash: 6000);
+      expect(c.grossDebtShare! - c.cashShare!, closeTo(c.debtShare, 1e-12));
+      expect(c.grossDebtShare, greaterThan(0.0),
+          reason: 'a bruta é 4.000 com 6.000 de caixa e −2.000 de líquida');
+    });
+
+    test('mesma dívida líquida, mais caixa: o desconto é maior', () {
+      // O caso que a forma anterior não distinguia — os dois balanços davam o
+      // mesmo WACC, embora um tenha o dobro de caixa aplicado à taxa básica.
+      final lean = cost(cash: 2000);
+      final bloated = cost(cash: 8000);
+      expect(bloated.debtShare, closeTo(lean.debtShare, 1e-12));
+      expect(bloated.rawWacc, greaterThan(lean.rawWacc));
+    });
+
+    test('o rendimento do caixa é tributado, e não escudado', () {
+      final c = cost(cash: 6000);
+      expect(c.afterTaxCashYield,
+          closeTo(capm.riskFreeRate * (1 - tax), 1e-12));
+    });
+
+    test('o rastro mostra a forma de três pernas que a conta usou', () {
+      final trace = <AuditEvent>[];
+      AuditRecorder.attach(trace.add);
+      addTearDown(AuditRecorder.detach);
+      final itsSeries = <FundamentalsSnapshot>[];
+      var scale = 1.0;
+      for (var i = 12; i >= 0; i--) {
+        itsSeries.add(FundamentalsSnapshot(
+          ticker: ticker,
+          fiscalPeriodEnd: DateTime(2025 - i, 12, 31),
+          totalRevenue: 10000 * scale,
+          ebit: 1800 * scale,
+          ebitda: 2400 * scale,
+          netIncome: 900 * scale,
+          incomeBeforeTax: 1300 * scale,
+          incomeTaxExpense: -400 * scale,
+          interestExpense: 400,
+          earningsPerShare: 0.9 * scale,
+          cash: 3000,
+          shortTermDebt: 1000,
+          longTermDebt: 3000,
+          totalStockholderEquity: 6000 * scale,
+          bookValuePerShare: 6.0 * scale,
+          operatingCashFlow: 2000 * scale,
+          nopat: 1188 * scale,
+          sharesOutstanding: 1000,
+          sharesOutstandingAsOf: 1000,
+          marketCap: 12000,
+        ));
+        scale *= 1.05;
+      }
+      ValuationCascade.evaluate(ValuationInputs(
+        ticker: ticker,
+        asOf: DateTime(2026, 9, 9),
+        fundamentals: itsSeries,
+        marketPrice: 12.0,
+        capm: capm,
+        declaredTerminalRiskFreeRate: 0.094,
+      ));
+      final step = trace.single.calculations
+          .firstWhere((p) => p.formulaName.contains('WACC'));
+      expect(step.mappedVariables.keys, contains('C — caixa (R\$)'));
+      expect(step.mappedVariables.keys, contains('D bruta (R\$)'));
+      expect((step.mappedVariables['C — caixa (R\$)']! as num).toDouble(),
+          closeTo(3000, 0.01));
+      expect(step.latexRepresentation, contains('R_f'));
+      expect(step.intermediateSteps
+              .any((e) => e.contains('o caixa rende a taxa livre')),
+          isTrue);
+    });
+  });
+}
+
+/// Potencia de expoente inteiro, usada pelos testes de persistencia.
+double _pow(double base, int exponent) {
+  var r = 1.0;
+  for (var i = 0; i < exponent; i++) {
+    r *= base;
+  }
+  return r;
+}

@@ -67,12 +67,12 @@ class SignUpController extends ChangeNotifier {
 
   /// Avalia dinamicamente o nível de segurança da senha digitada.
   PasswordStrength get passwordStrength {
-    if (password.isEmpty) return PasswordStrength.vazia;
-    if (password.length < 6) return PasswordStrength.fraca;
+    if (password.isEmpty) return PasswordStrength.empty;
+    if (password.length < 6) return PasswordStrength.weak;
     if (password.length < 10 || !password.contains(RegExp(r'[0-9]'))) {
-      return PasswordStrength.media;
+      return PasswordStrength.medium;
     }
-    return PasswordStrength.forte;
+    return PasswordStrength.strong;
   }
 
 

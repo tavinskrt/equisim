@@ -67,8 +67,7 @@ class FundamentalsSnapshot {
   final double? currentLiabilities;
 
   /// Capital social realizado. Sobe por emissão **e** por incorporação de
-  /// reservas, então não serve sozinho para medir capital externo — ver
-  /// [externalCapitalAgainst].
+  /// reservas, então não serve sozinho para medir capital externo.
   final double? realizedShareCapital;
 
   /// Reservas de lucro. Serve para distinguir emissão de incorporação.
@@ -216,8 +215,8 @@ class FundamentalsSnapshot {
   /// Depreciação e amortização, derivada de EBITDA − EBIT.
   double? get depreciationAndAmortization {
     if (ebitda == null || ebit == null) return null;
-    final da = ebitda! - ebit!;
-    return da >= 0 ? da : null;
+    final dAndA = ebitda! - ebit!;
+    return dAndA >= 0 ? dAndA : null;
   }
 
   /// Alíquota efetiva de imposto, limitada a [0, 0.5] para conter distorções
@@ -245,6 +244,13 @@ class FundamentalsSnapshot {
   /// [nopatOrDerived], nunca alcançado com o cache atual. Passou a pesar com
   /// a decisão 37, que tornou a alíquota efetiva a base tributária do fluxo
   /// da firma.
+  ///
+  /// **Com lucro antes do imposto nulo ou negativo não há alíquota**, e a
+  /// conta devolve `null`. Ali a razão troca de sinal: o crédito sobre
+  /// prejuízo do exemplo acima (−R$ 7,9 mi antes, +R$ 22,6 mi de imposto)
+  /// daria 286%, e o teto o levaria a 50% — imposto máximo num exercício que
+  /// recuperou imposto. O piso de zero age no crédito sobre lucro, que é onde
+  /// a razão negativa quer dizer alguma coisa.
   double? get effectiveTaxRate {
     if (incomeBeforeTax == null || incomeTaxExpense == null) return null;
     if (incomeBeforeTax! <= 0) return null;
@@ -274,16 +280,16 @@ class FundamentalsSnapshot {
   /// Zerar os quatro com balanço preenchido, não.
   /// **A comparação é de magnitude, e não de igualdade.** O zero da fonte às
   /// vezes chega como resíduo de ponto flutuante, e `== 0` trataria `1e-16`
-  /// como resultado publicado. Os agregados usam [_residuo]; o lucro por ação
-  /// usa [_residuoPorPapel], porque um LPA de R$ 0,50 é legítimo e um real
+  /// como resultado publicado. Os agregados usam [_residual]; o lucro por ação
+  /// usa [_residualPerShare], porque um LPA de R$ 0,50 é legítimo e um real
   /// inteiro de corte o descartaria.
   bool get hasIncomeStatement {
-    bool vazio(double? v, double residuo) =>
-        v == null || !v.isFinite || v.abs() <= residuo;
-    return !(vazio(totalRevenue, _residuo) &&
-        vazio(ebit, _residuo) &&
-        vazio(netIncome, _residuo) &&
-        vazio(earningsPerShare, _residuoPorPapel));
+    bool isEmptyValue(double? v, double residual) =>
+        v == null || !v.isFinite || v.abs() <= residual;
+    return !(isEmptyValue(totalRevenue, _residual) &&
+        isEmptyValue(ebit, _residual) &&
+        isEmptyValue(netIncome, _residual) &&
+        isEmptyValue(earningsPerShare, _residualPerShare));
   }
 
   /// Alavancagem observada: dívida **líquida** sobre o valor de mercado.
@@ -302,8 +308,8 @@ class FundamentalsSnapshot {
     if (marketEquity == null || !marketEquity.isFinite || marketEquity <= 0) {
       return null;
     }
-    final de = netDebt / marketEquity;
-    return de.isFinite ? de : null;
+    final netDebtToEquity = netDebt / marketEquity;
+    return netDebtToEquity.isFinite ? netDebtToEquity : null;
   }
 
   /// Dívida bruta: curto mais longo prazo.
@@ -336,23 +342,25 @@ class FundamentalsSnapshot {
 
   /// Cobertura de juros: `EBIT ÷ despesa financeira`.
   ///
-  /// **Serve ao escudo fiscal, e só a ele** — ver
-  /// `CostOfCapital.effectiveTaxShield`. Ali a contaminação por arrendamento e
-  /// variação cambial não atrapalha, e até ajuda: a pergunta é se há lucro
-  /// tributável que absorva a dedução, e juro de arrendamento e perda cambial
-  /// **também são dedutíveis**. O total é a grandeza certa para essa conta.
+  /// **Serve ao escudo fiscal** — ver `CostOfCapital.effectiveTaxShield`. Ali a
+  /// contaminação por arrendamento e variação cambial não atrapalha, e até
+  /// ajuda: a pergunta é se há lucro tributável que absorva a dedução, e juro
+  /// de arrendamento e perda cambial **também são dedutíveis**.
   ///
-  /// O prêmio de crédito passou a vir da alavancagem — ver [netDebtToEbitda] —,
-  /// porque ali a contaminação distorce.
+  /// **E ao prêmio de crédito, só quando a despesa é juro de verdade**
+  /// (decisão 130): a cobertura fala quando `despesa ÷ dívida bruta` cai entre
+  /// a taxa livre de risco e ela mais 10 p.p., e vale o maior entre o prêmio
+  /// dela e o da alavancagem — ver [netDebtToEbitda]. Fora da faixa, a
+  /// contaminação distorce, e só a alavancagem fala.
   ///
   /// Devolve `null` sem EBIT ou sem despesa financeira, e **zero** quando o
   /// EBIT é negativo: quem não gera resultado operacional não cobre juro
   /// nenhum, e é a leitura que a tabela de prêmios espera.
   double? get interestCoverage {
     final op = ebit;
-    final juros = interestExpense;
-    if (op == null || juros == null) return null;
-    final d = juros.abs();
+    final interest = interestExpense;
+    if (op == null || interest == null) return null;
+    final d = interest.abs();
     if (d <= 0) return null;
     if (op <= 0) return 0.0;
     final c = op / d;
@@ -393,32 +401,39 @@ class FundamentalsSnapshot {
     return kd.clamp(0.0, 1.0);
   }
 
-  /// CapEx aproximado pelo fluxo de investimento.
-  ///
-  /// Aproximação imperfeita: `investmentCashFlow` inclui M&A e aplicações
-  /// financeiras, não só imobilizado. Medido contra `Δ(imobilizado) + D&A`, erra
-  /// por fatores de 0,25× a 2,42× e para os dois lados — **não use em conta de
-  /// reinvestimento**. A variação do capital investido mede a mesma grandeza sem
-  /// passar por aqui; ver [investedCapital].
-  double? get approximateCapex => investmentCashFlow?.abs();
-
   // --------------------------------------------------- Bases de capital --
 
   /// Patrimônio líquido reconstituído: `VPA × ações do exercício`.
   ///
-  /// **Não** usa [totalStockholderEquity], que a fonte deixa nulo em todos os 16
-  /// exercícios do BBAS3 e só preenche a partir de 2020 no campo do controlador.
+  /// **Não** usa [totalStockholderEquity] como primeira opção: a fonte de
+  /// mercado o deixa nulo em todos os 16 exercícios do BBAS3 e só o preenche a
+  /// partir de 2020 no campo do controlador.
   /// E **não** usa [sharesOutstanding], que é a contagem de hoje: o produto teria
   /// escalas misturadas em qualquer empresa que tenha desdobrado.
   ///
   /// Base da via B e imune a desdobramento e bonificação por construção, ao
   /// contrário de qualquer série por ação.
+  ///
+  /// **Sem o par, vale o patrimônio da demonstração** (item B47). A fonte de
+  /// mercado devolve, para algumas companhias, o VPA vazio e a contagem do
+  /// exercício zerada — Fleury, Copasa e Armac em todos os exercícios recentes
+  /// —, e a mescla da decisão 81, que deriva o VPA do PL da CVM pela contagem,
+  /// não tinha por onde dividir. O produto não se formava, e a elegibilidade
+  /// lia a ausência como insolvência com R$ 5 bi de patrimônio publicado. O PL
+  /// é grandeza total, sem escala por ação, e é a base que a decisão 81 pede:
+  /// sem o par, ele entra como veio. **O VPA negativo continua sendo
+  /// insolvência**: o recuo só vale quando o par falta, e não quando ele diz
+  /// que o patrimônio é negativo.
   double? get equityBookValue {
-    final vpa = bookValuePerShare;
+    final bvps = bookValuePerShare;
     final n = sharesOutstandingAsOf;
-    if (vpa == null || n == null || vpa <= 0 || n <= 0) return null;
-    final pl = vpa * n;
-    return pl.isFinite ? pl : null;
+    if (bvps != null && bvps <= 0) return null;
+    if (bvps != null && n != null && n > 0) {
+      final pl = bvps * n;
+      return pl.isFinite ? pl : null;
+    }
+    final pl = totalStockholderEquity;
+    return (pl != null && pl.isFinite && pl > 0) ? pl : null;
   }
 
   /// Capital investido pelo lado do financiamento: `PL + dívida bruta − caixa`.
@@ -436,8 +451,8 @@ class FundamentalsSnapshot {
   double? get investedCapital {
     final pl = equityBookValue;
     if (pl == null) return null;
-    final ci = pl + totalDebt - totalCash;
-    return (ci.isFinite && ci > 0) ? ci : null;
+    final ic = pl + totalDebt - totalCash;
+    return (ic.isFinite && ic > 0) ? ic : null;
   }
 
   /// Capital investido pelo lado operacional, **incompleto por falta de
@@ -468,13 +483,13 @@ class FundamentalsSnapshot {
   /// fosso saem da rota do financiamento, que fecha por construção. Medição em
   /// `docs/validacao/capital_investido.md`.
   double? get investedCapitalOperating {
-    final imob = propertyPlantEquipment;
-    final ac = totalCurrentAssets;
-    final pc = currentLiabilities;
-    if (imob == null || ac == null || pc == null) return null;
-    final nkg = (ac - totalCash) - (pc - (shortTermDebt ?? 0));
-    final ci = imob + (intangibleAssets ?? 0) + nkg;
-    return ci.isFinite ? ci : null;
+    final fixedAssets = propertyPlantEquipment;
+    final ca = totalCurrentAssets;
+    final cl = currentLiabilities;
+    if (fixedAssets == null || ca == null || cl == null) return null;
+    final nwc = (ca - totalCash) - (cl - (shortTermDebt ?? 0));
+    final ic = fixedAssets + (intangibleAssets ?? 0) + nwc;
+    return ic.isFinite ? ic : null;
   }
 
   // ------------------------------------------------ Contagem de papéis --
@@ -505,20 +520,20 @@ class FundamentalsSnapshot {
   /// aqui, e o preço de hoje já o reflete. O erro daí é o da ação societária;
   /// o erro que ela substitui era de três ordens de grandeza.
   double? get reconciledShares {
-    final doExercicio = _positive(sharesOutstandingAsOf);
-    final corrente = _positive(sharesOutstanding);
-    if (doExercicio == null) return corrente;
-    if (corrente == null) return doExercicio;
+    final fiscalYearValue = _positive(sharesOutstandingAsOf);
+    final current = _positive(sharesOutstanding);
+    if (fiscalYearValue == null) return current;
+    if (current == null) return fiscalYearValue;
 
-    final arbitro = _sharesFromEarnings;
-    if (arbitro != null) {
-      final peloExercicio = _logDistance(doExercicio, arbitro);
-      final pelaCorrente = _logDistance(corrente, arbitro);
-      final melhor = peloExercicio <= pelaCorrente ? doExercicio : corrente;
-      final distancia = peloExercicio <= pelaCorrente ? peloExercicio : pelaCorrente;
-      if (distancia <= reconciliationBand) return melhor;
+    final arbiter = _sharesFromEarnings;
+    if (arbiter != null) {
+      final byFiscalYear = _logDistance(fiscalYearValue, arbiter);
+      final byCurrent = _logDistance(current, arbiter);
+      final best = byFiscalYear <= byCurrent ? fiscalYearValue : current;
+      final distance = byFiscalYear <= byCurrent ? byFiscalYear : byCurrent;
+      if (distance <= reconciliationBand) return best;
     }
-    return doExercicio;
+    return fiscalYearValue;
   }
 
   /// Unidades negociadas implícitas no valor de mercado: `VM ÷ preço`.
@@ -549,45 +564,11 @@ class FundamentalsSnapshot {
   ///
   /// Devolve `null` sem valor de mercado ou sem preço utilizável.
   double? sharesFromMarketCap(double marketPrice) {
-    final vm = marketCap;
-    if (vm == null || !vm.isFinite || vm <= 0) return null;
+    final marketValue = marketCap;
+    if (marketValue == null || !marketValue.isFinite || marketValue <= 0) return null;
     if (!marketPrice.isFinite || marketPrice <= 0) return null;
-    final n = vm / marketPrice;
+    final n = marketValue / marketPrice;
     return n.isFinite && n > 0 ? n : null;
-  }
-
-  /// Contagem de papéis com direito a fluxo: integralizada **menos** a que está
-  /// em tesouraria.
-  ///
-  /// Ação recomprada e mantida em tesouraria não recebe dividendo e não vota;
-  /// dividir o valor do capital próprio pela contagem bruta atribui valor a
-  /// papel que não o tem, e **subestima o preço justo por ação** — o erro é
-  /// conservador, mas é erro.
-  ///
-  /// - [bruta]: a contagem integralizada de que se parte.
-  ///
-  /// Devolve `bruta` intacta quando não há tesouraria informada, e nunca um
-  /// resultado não positivo: tesouraria maior que a base é dado corrompido, e
-  /// devolver zero ou negativo daria divisão por zero adiante.
-  double? sharesNetOfTreasury(double? bruta) {
-    final b = _positive(bruta);
-    if (b == null) return null;
-
-    // **A fração vem primeiro**, e a razão é de escala: a contagem absoluta
-    // da CVM vem em unidades em 60,9% dos exercícios e em milhares em 34,5%,
-    // sem campo que diga qual. A fração é invariante — ver [treasuryFraction].
-    final f = treasuryFraction;
-    if (f != null && f.isFinite && f > 0 && f < 1) {
-      // **Arredonda**: contagem de ação é inteira, e `b × (1 − f)` não é. A
-      // fração vem de uma razão entre dois inteiros de outra escala, e o
-      // produto cai entre papéis — 233.944.031,79 não é uma base societária.
-      return (b * (1 - f)).roundToDouble();
-    }
-
-    final t = treasuryShares;
-    if (t == null || !t.isFinite || t <= 0) return b;
-    final liquida = b - t;
-    return liquida > 0 ? liquida : b;
   }
 
   /// `true` quando as duas contagens discordam além de uma ação societária
@@ -601,11 +582,11 @@ class FundamentalsSnapshot {
 
   /// Contagem implícita no lucro por ação publicado: `N = lucro ÷ LPA`.
   double? get _sharesFromEarnings {
-    final lucro = netIncome;
-    final lpa = earningsPerShare;
-    if (lucro == null || lpa == null) return null;
-    if (lpa.abs() < 1e-9) return null;
-    final n = lucro / lpa;
+    final profit = netIncome;
+    final eps = earningsPerShare;
+    if (profit == null || eps == null) return null;
+    if (eps.abs() < 1e-9) return null;
+    final n = profit / eps;
     return (n.isFinite && n > 0) ? n : null;
   }
 
@@ -632,13 +613,13 @@ class FundamentalsSnapshot {
   /// mas o zero chega às vezes como resíduo de ponto flutuante. Comparar com
   /// `!= 0` trataria `1e-16` como lucro operacional legítimo, e o fluxo
   /// projetado sairia esvaziado sem que nada avisasse.
-  static const double _residuo = 1.0;
+  static const double _residual = 1.0;
 
   /// Magnitude abaixo da qual um valor **por papel** é resíduo, não número.
   ///
   /// Um centavo. O corte dos agregados não serve aqui: um lucro por ação de
   /// R$ 0,50 é legítimo, e um real inteiro de corte o leria como ausência.
-  static const double _residuoPorPapel = 0.01;
+  static const double _residualPerShare = 0.01;
 
   /// NOPAT publicado, ou derivado por `EBIT × (1 − alíquota efetiva)`.
   ///
@@ -650,8 +631,8 @@ class FundamentalsSnapshot {
   /// quem o exercitar precisa saber que ali a convenção tributária muda: a
   /// efetiva do exercício no lugar da estatutária.
   double? get nopatOrDerived {
-    final publicado = nopat;
-    if (publicado != null && publicado.abs() > _residuo) return publicado;
+    final published = nopat;
+    if (published != null && published.abs() > _residual) return published;
     final op = ebit;
     final t = effectiveTaxRate;
     if (op == null || t == null) return null;
@@ -706,31 +687,5 @@ class FundamentalsSnapshot {
     // conta deixaria o NOPAT maior que o resultado que o gerou.
     if (op == null || !op.isFinite || op <= 0) return 0.0;
     return e > op ? op : e;
-  }
-
-  /// Capital externo que entrou no exercício, contra o lucro de [anterior].
-  ///
-  /// Da relação de excedente limpo `ΔPL = lucro − dividendos + emissão + OCI`:
-  /// se o patrimônio cresceu mais do que a empresa lucrou, o excesso não pode ter
-  /// vindo de lucro retido.
-  ///
-  /// **Por que não `Δ capital social`.** Ele sobe também por incorporação de
-  /// reservas, que não traz dinheiro novo: a WEGE3 acusaria R$ 9,0 bi de emissão
-  /// sobre base de R$ 6,3 bi, sendo que as duas maiores altas vieram com reservas
-  /// de lucro caindo junto. Medir pelo patrimônio é imune, porque bonificação não
-  /// altera o PL.
-  ///
-  /// - [anterior]: exercício imediatamente anterior. Devolve `null` quando
-  ///   qualquer das duas bases falta.
-  double? externalCapitalAgainst(
-    FundamentalsSnapshot anterior, {
-    required bool viaFirma,
-  }) {
-    final atual = viaFirma ? investedCapital : equityBookValue;
-    final antes = viaFirma ? anterior.investedCapital : anterior.equityBookValue;
-    if (atual == null || antes == null) return null;
-    final lucro = viaFirma ? nopatOrDerived : netIncome;
-    final excesso = (atual - antes) - (lucro ?? 0);
-    return excesso > 0 ? excesso : 0.0;
   }
 }

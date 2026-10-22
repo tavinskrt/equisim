@@ -54,14 +54,14 @@ abstract final class ConcessionSectors {
   /// - [sectorKey]: chave setorial da fonte, já em minúsculas.
   /// - [industry]: subsetor da fonte, com acentuação e pontuação originais.
   static bool hasFiniteTerm({String? sectorKey, String? industry}) {
-    final chave = CyclicalSectors.normalize(sectorKey);
+    final key = CyclicalSectors.normalize(sectorKey);
     for (final k in sectorKeys) {
-      if (chave == CyclicalSectors.normalize(k)) return true;
+      if (key == CyclicalSectors.normalize(k)) return true;
     }
     final sub = CyclicalSectors.normalize(industry);
     if (sub.isEmpty) return false;
-    for (final termo in industryTerms) {
-      if (sub.contains(termo)) return true;
+    for (final term in industryTerms) {
+      if (sub.contains(term)) return true;
     }
     return false;
   }

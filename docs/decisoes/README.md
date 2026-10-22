@@ -59,6 +59,7 @@ O que se abre mão ao decidir assim. Alternativa descartada, e por quê.
 | `afeta` | sim | Caminhos governados pela decisão. |
 | `substitui` | sim | Números que esta decisão derruba. Lista vazia é comum. |
 | `postura` | quando houver | `reconstrucao`. Ver abaixo. |
+| `retira` | quando houver | Caminhos que esta decisão apaga. Ver abaixo. |
 
 ### `status: cumprida` e `postura` andam juntos
 
@@ -105,6 +106,14 @@ chegam ao relatório com o mesmo peso quando não há data.
 
 O gate local verifica que esses caminhos existem. Não verifica se o código
 respeita a decisão — isso é semântico e cabe à lente `registro` do conselheiro.
+
+### `retira` é como um documento sai sem quebrar o registro
+
+Decisão aceita não se edita, e algumas têm em `afeta` um documento que um dia
+é apagado. A decisão que apaga lista o caminho em `retira`; o
+[gerador do estado](../../scripts/gerar-estado.mjs) passa a mostrá-lo como
+**retirado**, com o número de quem o retirou, e não como referência quebrada.
+A decisão antiga continua valendo como registro — perdeu só aquele objeto.
 
 ## `status: perdida`
 

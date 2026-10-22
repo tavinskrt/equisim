@@ -45,16 +45,16 @@ abstract final class CvmBridge {
   /// não ser todo de letras.
   static final RegExp tickerFormat = RegExp(r'^[A-Z][A-Z0-9]{3}[0-9]{1,2}$');
 
-  /// `true` quando [codigo] tem forma de ticker negociável.
-  static bool pareceTicker(String codigo) =>
-      tickerFormat.hasMatch(codigo.trim().toUpperCase());
+  /// `true` quando [code] tem forma de ticker negociável.
+  static bool looksLikeTicker(String code) =>
+      tickerFormat.hasMatch(code.trim().toUpperCase());
 
   /// Raiz de quatro letras — as classes de uma mesma companhia a compartilham.
   ///
   /// Devolve `null` para código que não tenha a forma esperada, em vez de
   /// recortar às cegas: `substring(0, 4)` sobre uma entrada curta lança, e
   /// sobre uma entrada estranha inventa uma raiz que casaria com outra coisa.
-  static String? raiz(String ticker) {
+  static String? root(String ticker) {
     final t = ticker.trim().toUpperCase();
     return tickerFormat.hasMatch(t) ? t.substring(0, 4) : null;
   }
@@ -63,14 +63,14 @@ abstract final class CvmBridge {
   /// fonte de preços grafam de formas diferentes.
   ///
   /// Serve **apenas** para igualdade exata. Não use para similaridade.
-  static String normalizarNome(String nome) {
-    const de = 'áàâãäéèêëíìîïóòôõöúùûüçñ';
-    const para = 'aaaaaeeeeiiiiooooouuuucn';
+  static String normalizeName(String name) {
+    const accented = 'áàâãäéèêëíìîïóòôõöúùûüçñ';
+    const plain = 'aaaaaeeeeiiiiooooouuuucn';
     final b = StringBuffer();
-    for (final c in nome.toLowerCase().runes) {
+    for (final c in name.toLowerCase().runes) {
       final ch = String.fromCharCode(c);
-      final i = de.indexOf(ch);
-      b.write(i >= 0 ? para[i] : ch);
+      final i = accented.indexOf(ch);
+      b.write(i >= 0 ? plain[i] : ch);
     }
     // Cerca com espaço antes de remover os termos: sem isso ` cia ` não casa
     // em "CIA SIDERURGICA NACIONAL", que começa por ele, e o nome sai
@@ -80,12 +80,12 @@ abstract final class CvmBridge {
       s = s.replaceAll(p, ' ');
     }
     s = s.replaceAll(RegExp(r'\s+'), ' ');
-    for (final termo in const [
+    for (final term in const [
       ' s a ', ' sa ', ' participacoes ', ' part ', ' holding ',
       ' cia ', ' companhia ', ' bco ', ' banco ',
     ]) {
-      while (s.contains(termo)) {
-        s = s.replaceAll(termo, ' ');
+      while (s.contains(term)) {
+        s = s.replaceAll(term, ' ');
       }
     }
     return s.replaceAll(RegExp(r'\s+'), ' ').trim();
@@ -124,25 +124,25 @@ abstract final class CvmBridge {
   ///   `MARCOPOLO S.A.` — **mas a Marcopolo negocia como POMO3 e POMO4**. É o
   ///   mesmo formato de engano do `CSNA3`/`COSAN`, e por isso fica sem ponte
   ///   em vez de receber a errada.
-  static const Set<String> semPonte = {'FASA3', 'LUXM4', 'OBTC3', 'MAPT3'};
+  static const Set<String> withoutBridge = {'FASA3', 'LUXM4', 'OBTC3', 'MAPT3'};
 
   /// Resolve o CNPJ de [ticker].
   ///
-  /// - [porCodigo]: mapa ticker → CNPJ construído do FCA, já filtrado por
-  ///   [pareceTicker] e já conferido como não ambíguo.
-  /// - [porNome]: mapa nome normalizado → CNPJ, do `DENOM_CIA` da CVM.
-  /// - [nomeDoAtivo]: nome do ativo na fonte de preços, para a regra 3.
-  /// - [porRegistroOficial]: raiz de quatro letras → CNPJ, do registro da B3
+  /// - [byCode]: mapa ticker → CNPJ construído do FCA, já filtrado por
+  ///   [looksLikeTicker] e já conferido como não ambíguo.
+  /// - [byName]: mapa nome normalizado → CNPJ, do `DENOM_CIA` da CVM.
+  /// - [assetName]: nome do ativo na fonte de preços, para a regra 3.
+  /// - [byOfficialRegistry]: raiz de quatro letras → CNPJ, do registro da B3
   ///   cruzado com o código CVM das demonstrações. Regra 0.
   ///
   /// Devolve `null` quando nenhuma regra responde — e isso é resposta, não
   /// falha.
   static String? resolver(
     String ticker, {
-    required Map<String, String> porCodigo,
-    Map<String, String> porNome = const {},
-    String? nomeDoAtivo,
-    Map<String, String> porRegistroOficial = const {},
+    required Map<String, String> byCode,
+    Map<String, String> byName = const {},
+    String? assetName,
+    Map<String, String> byOfficialRegistry = const {},
   }) {
     final t = ticker.trim().toUpperCase();
 
@@ -150,28 +150,28 @@ abstract final class CvmBridge {
     // como comentário não bastou: o `MAPT3` foi resolvido para a Marcopolo
     // pela regra de nome, ao lado de `POMO3` e `POMO4`, que é o engano que a
     // própria lista existia para impedir.
-    if (semPonte.contains(t)) return null;
+    if (withoutBridge.contains(t)) return null;
 
     // Regra 0: o registro da B3, por emissor. Declarado vence inferido.
-    final r0 = raiz(t);
-    final oficial = r0 == null ? null : porRegistroOficial[r0];
-    if (oficial != null) return oficial;
+    final r0 = root(t);
+    final official = r0 == null ? null : byOfficialRegistry[r0];
+    if (official != null) return official;
 
-    final direto = porCodigo[t];
-    if (direto != null) return direto;
+    final direct = byCode[t];
+    if (direct != null) return direct;
 
-    final r = raiz(t);
+    final r = root(t);
     if (r != null) {
-      final daRaiz = <String>{
-        for (final e in porCodigo.entries)
-          if (e.key.startsWith(r) && raiz(e.key) == r) e.value,
+      final ofRoot = <String>{
+        for (final e in byCode.entries)
+          if (e.key.startsWith(r) && root(e.key) == r) e.value,
       };
-      if (daRaiz.length == 1) return daRaiz.first;
+      if (ofRoot.length == 1) return ofRoot.first;
     }
 
-    if (nomeDoAtivo != null) {
-      final porExato = porNome[normalizarNome(nomeDoAtivo)];
-      if (porExato != null) return porExato;
+    if (assetName != null) {
+      final exactMatch = byName[normalizeName(assetName)];
+      if (exactMatch != null) return exactMatch;
     }
 
     return overrides[t];
@@ -187,38 +187,38 @@ abstract final class CvmBridge {
   /// membro resolvido.
   ///
   /// - [tickers]: universo a resolver.
-  /// - [nomes]: nome de cada ativo na fonte de preços, quando houver.
-  static Map<String, String> resolverUniverso(
+  /// - [names]: nome de cada ativo na fonte de preços, quando houver.
+  static Map<String, String> resolveUniverse(
     Iterable<String> tickers, {
-    required Map<String, String> porCodigo,
-    Map<String, String> porNome = const {},
-    Map<String, String> nomes = const {},
-    Map<String, String> porRegistroOficial = const {},
+    required Map<String, String> byCode,
+    Map<String, String> byName = const {},
+    Map<String, String> names = const {},
+    Map<String, String> byOfficialRegistry = const {},
   }) {
     final out = <String, String>{};
     for (final t in tickers) {
       final c = resolver(t,
-          porCodigo: porCodigo,
-          porNome: porNome,
-          nomeDoAtivo: nomes[t],
-          porRegistroOficial: porRegistroOficial);
+          byCode: byCode,
+          byName: byName,
+          assetName: names[t],
+          byOfficialRegistry: byOfficialRegistry);
       if (c != null) out[t.trim().toUpperCase()] = c;
     }
 
     // Segunda passada: quem ficou de fora herda o CNPJ da própria raiz, se ela
     // for unânime entre os já resolvidos.
-    final porRaiz = <String, Set<String>>{};
+    final byRoot = <String, Set<String>>{};
     for (final e in out.entries) {
-      final r = raiz(e.key);
-      if (r != null) porRaiz.putIfAbsent(r, () => {}).add(e.value);
+      final r = root(e.key);
+      if (r != null) byRoot.putIfAbsent(r, () => {}).add(e.value);
     }
     for (final t in tickers) {
       final k = t.trim().toUpperCase();
       if (out.containsKey(k)) continue;
-      if (semPonte.contains(k)) continue;
-      final r = raiz(k);
+      if (withoutBridge.contains(k)) continue;
+      final r = root(k);
       if (r == null) continue;
-      final c = porRaiz[r];
+      final c = byRoot[r];
       if (c != null && c.length == 1) out[k] = c.first;
     }
     return out;
@@ -226,7 +226,7 @@ abstract final class CvmBridge {
 
   /// Companhias alcançadas por tickers de **raízes diferentes**.
   ///
-  /// **É a regra geral que o veto de [semPonte] resolve caso a caso.** As
+  /// **É a regra geral que o veto de [withoutBridge] resolve caso a caso.** As
   /// classes de uma companhia compartilham a raiz — `POMO3` e `POMO4` são a
   /// Marcopolo. Quando um CNPJ recebe `POMO` **e** `MAPT`, uma das duas pontes
   /// está errada, e nenhuma medição interna diz qual.
@@ -236,14 +236,14 @@ abstract final class CvmBridge {
   /// Devolve o conflito para quem carrega decidir, e para o relatório mostrar.
   ///
   /// Devolve CNPJ → conjunto de raízes, apenas onde há mais de uma.
-  static Map<String, Set<String>> conflitosDeRaiz(Map<String, String> ponte) {
-    final porCnpj = <String, Set<String>>{};
-    for (final e in ponte.entries) {
-      final r = raiz(e.key);
-      if (r != null) porCnpj.putIfAbsent(e.value, () => {}).add(r);
+  static Map<String, Set<String>> rootConflicts(Map<String, String> bridge) {
+    final byCnpj = <String, Set<String>>{};
+    for (final e in bridge.entries) {
+      final r = root(e.key);
+      if (r != null) byCnpj.putIfAbsent(e.value, () => {}).add(r);
     }
     return {
-      for (final e in porCnpj.entries)
+      for (final e in byCnpj.entries)
         if (e.value.length > 1) e.key: e.value,
     };
   }

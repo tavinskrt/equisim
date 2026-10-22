@@ -15,24 +15,24 @@ Map<String, dynamic> diagnose(ValuationInputs inputs) {
   if (pub.isEmpty) return {'erro': 'sem exercicio publicado'};
   final latest = pub.last;
 
-  final serieFirma = CapitalSeries.build(pub, ValuationLane.firm);
-  final serieAcion = CapitalSeries.build(pub, ValuationLane.shareholder);
+  final firmSeries = CapitalSeries.build(pub, ValuationLane.firm);
+  final shareholderSeries = CapitalSeries.build(pub, ValuationLane.shareholder);
 
   // --- Contagem de ações: todas as fontes lado a lado ---
-  final nCorrente = latest.sharesOutstanding;
-  final nExercicio = latest.sharesOutstandingAsOf;
-  final lucro = latest.netIncome;
-  final lpa = latest.earningsPerShare;
-  final nPorLpa =
-      (lucro != null && lpa != null && lpa.abs() > 1e-9) ? lucro / lpa : null;
-  final nPorMercado = (latest.marketCap != null && inputs.marketPrice > 0)
+  final nCurrent = latest.sharesOutstanding;
+  final nFiscalYear = latest.sharesOutstandingAsOf;
+  final profit = latest.netIncome;
+  final eps = latest.earningsPerShare;
+  final nByEps =
+      (profit != null && eps != null && eps.abs() > 1e-9) ? profit / eps : null;
+  final nByMarket = (latest.marketCap != null && inputs.marketPrice > 0)
       ? latest.marketCap! / inputs.marketPrice
       : null;
 
   // --- Retornos: com e sem os exercícios de prejuízo ---
   // A série `returns` do núcleo descarta ano de lucro não positivo. Aqui a
   // mesma janela é reconstruída incluindo esses anos, para medir o viés.
-  List<Map<String, dynamic>> retornosCompletos(CapitalSeries s) {
+  List<Map<String, dynamic>> completeReturns(CapitalSeries s) {
     final out = <Map<String, dynamic>>[];
     for (var i = 1; i < s.points.length; i++) {
       final a = s.points[i - 1], b = s.points[i];
@@ -47,10 +47,10 @@ Map<String, dynamic> diagnose(ValuationInputs inputs) {
     return out;
   }
 
-  final rFirmaTodos = retornosCompletos(serieFirma);
-  final rFirmaUsados = serieFirma.returns;
+  final allFirmReturns = completeReturns(firmSeries);
+  final usedFirmReturns = firmSeries.returns;
 
-  double? medianaDe(List<double> v) {
+  double? medianOf(List<double> v) {
     if (v.isEmpty) return null;
     final s = [...v]..sort();
     final m = s.length ~/ 2;
@@ -59,24 +59,24 @@ Map<String, dynamic> diagnose(ValuationInputs inputs) {
 
   // Ciclo incluindo os anos descartados (retorno negativo entra como é).
   const w = ValuationParameters.cycleWindow;
-  final comPrejuizo = <double>[];
-  final naJanela = rFirmaTodos.where((e) => e['retorno'] != null).toList();
-  if (naJanela.length >= 2) {
-    final ini = naJanela.length - 1 - w;
-    final janela = naJanela.sublist(ini < 0 ? 0 : ini, naJanela.length - 1);
-    for (final e in janela) {
-      comPrejuizo.add(e['retorno'] as double);
+  final withLoss = <double>[];
+  final inWindow = allFirmReturns.where((e) => e['retorno'] != null).toList();
+  if (inWindow.length >= 2) {
+    final start = inWindow.length - 1 - w;
+    final window = inWindow.sublist(start < 0 ? 0 : start, inWindow.length - 1);
+    for (final e in window) {
+      withLoss.add(e['retorno'] as double);
     }
   }
 
-  final anoUltimoRetorno = rFirmaUsados.isEmpty ? null : rFirmaUsados.last.year;
-  final anoUltimoExercicio = latest.fiscalPeriodEnd.year;
+  final lastReturnYear = usedFirmReturns.isEmpty ? null : usedFirmReturns.last.year;
+  final lastFiscalYear = latest.fiscalPeriodEnd.year;
 
-  final phi = GrowthGuards.externalCapitalRatio(serieFirma);
-  final tend10 = GrowthGuards.trend(serieFirma, driftWindow: 10);
-  final tend5 = GrowthGuards.trend(serieFirma, driftWindow: 5);
-  final disp = GrowthGuards.dispersion(serieFirma);
-  final queda = GrowthGuards.recentOperationalDecline(pub);
+  final phi = GrowthGuards.externalCapitalRatio(firmSeries);
+  final tend10 = GrowthGuards.trend(firmSeries, driftWindow: 10);
+  final tend5 = GrowthGuards.trend(firmSeries, driftWindow: 5);
+  final disp = GrowthGuards.dispersion(firmSeries);
+  final decline = GrowthGuards.recentOperationalDecline(pub);
 
   final kd = latest.costOfDebt;
   final tax = latest.effectiveTaxRate;
@@ -114,12 +114,12 @@ Map<String, dynamic> diagnose(ValuationInputs inputs) {
     'setor': inputs.sectorKey,
     'industria': inputs.industry,
     'exerciciosPublicados': pub.length,
-    'anoUltimoExercicio': anoUltimoExercicio,
+    'anoUltimoExercicio': lastFiscalYear,
     // Ações
-    'nCorrente': nCorrente,
-    'nExercicio': nExercicio,
-    'nPorLpa': nPorLpa,
-    'nPorMercado': nPorMercado,
+    'nCorrente': nCurrent,
+    'nExercicio': nFiscalYear,
+    'nPorLpa': nByEps,
+    'nPorMercado': nByMarket,
     'nConciliado': latest.reconciledShares,
     'nPonte': divisor?.count,
     'ponteOrigem': divisor?.source.name,
@@ -130,20 +130,20 @@ Map<String, dynamic> diagnose(ValuationInputs inputs) {
     'discordam': latest.sharesDisagree,
     'marketCap': latest.marketCap,
     // Séries
-    'pontosFirma': serieFirma.length,
-    'pontosAcionista': serieAcion.length,
-    'anoUltimoRetornoFirma': anoUltimoRetorno,
+    'pontosFirma': firmSeries.length,
+    'pontosAcionista': shareholderSeries.length,
+    'anoUltimoRetornoFirma': lastReturnYear,
     'defasagemRetorno':
-        anoUltimoRetorno == null ? null : anoUltimoExercicio - anoUltimoRetorno,
+        lastReturnYear == null ? null : lastFiscalYear - lastReturnYear,
     'anosDescartadosPorPrejuizo':
-        rFirmaTodos.where((e) => e['descartado'] == true).length,
-    'roicAtual': serieFirma.latestReturn,
-    'roicCiclo': serieFirma.cycleReturn(window: w),
-    'roicCicloComPrejuizo': medianaDe(comPrejuizo),
-    'retencaoMediana': serieFirma.medianRetention,
+        allFirmReturns.where((e) => e['descartado'] == true).length,
+    'roicAtual': firmSeries.latestReturn,
+    'roicCiclo': firmSeries.cycleReturn(window: w),
+    'roicCicloComPrejuizo': medianOf(withLoss),
+    'retencaoMediana': firmSeries.medianRetention,
     // Guardas
     'phi': phi,
-    'destoa': GrowthGuards.deviatesFromCycle(serieFirma),
+    'destoa': GrowthGuards.deviatesFromCycle(firmSeries),
     'tendencia10Domina': tend10?.dominates,
     'tendencia5Domina': tend5?.dominates,
     'tendenciaSignificante': tend10?.isSignificant,
@@ -151,7 +151,7 @@ Map<String, dynamic> diagnose(ValuationInputs inputs) {
     'tendenciaT': tend10?.tStatistic,
     'dominancia10': tend10?.dominance,
     'dominancia5': tend5?.dominance,
-    'quedaTrienio': queda,
+    'quedaTrienio': decline,
     'ciclicoPesado': CyclicalSectors.hasCyclePrecedence(
       sectorKey: inputs.sectorKey,
       industry: inputs.industry,
@@ -207,14 +207,14 @@ Future<void> main(List<String> args) async {
         'gNom=${anchors.nominalEconomyGrowth}');
 
     final universe = (await ctx.fundamentals.universe()).unwrap();
-    final alvo =
+    final target =
         args.isEmpty ? universe : universe.where((t) => args.contains(t.value)).toList();
 
     final out = <Map<String, dynamic>>[];
     var i = 0;
-    for (final ticker in alvo) {
+    for (final ticker in target) {
       i++;
-      if (i % 25 == 0) stderr.write('  $i/${alvo.length}\r');
+      if (i % 25 == 0) stderr.write('  $i/${target.length}\r');
       final prep = await PrepareValuationInputs.call(
         ticker: ticker,
         prices: ctx.prices,
@@ -234,7 +234,7 @@ Future<void> main(List<String> args) async {
       final inputs = prep.unwrap();
       final d = diagnose(inputs);
       for (final n in [10, 5]) {
-        final variante = ValuationInputs(
+        final variant = ValuationInputs(
           ticker: inputs.ticker,
           asOf: inputs.asOf,
           fundamentals: inputs.fundamentals,
@@ -249,7 +249,7 @@ Future<void> main(List<String> args) async {
           prices: inputs.prices,
           isDistressed: inputs.isDistressed,
         );
-        final r = ValuationCascade.evaluate(variante);
+        final r = ValuationCascade.evaluate(variant);
         d['ok$n'] = r.isOk;
         d['motivo$n'] = r.isOk ? null : r.failureOrNull?.message;
         if (r.isOk) {
@@ -259,7 +259,7 @@ Future<void> main(List<String> args) async {
           d['modelo$n'] = v.model.name;
           d['desconto$n'] = v.discountRate;
           d['avisos$n'] = v.warnings;
-          d['ressalvas$n'] = [for (final c in v.diagnostics!.caveats) c.name];
+          d['ressalvas$n'] = [for (final c in v.diagnostics!.caveats) c.key];
           d['pesoTerminal$n'] = v.diagnostics!.terminalShare;
           d['equityShare$n'] = v.diagnostics!.equityShare;
           d['moat$n'] = v.diagnostics!.moatApplied;

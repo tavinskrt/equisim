@@ -63,47 +63,47 @@ abstract final class ResolveBetaPrior {
   /// Devolve `null` sem observação utilizável — caso em que o chamador segue
   /// com a regressão crua, que é o comportamento anterior.
   static BetaPrior? fromObservations(List<BetaObservation> observations) {
-    final desalavancados = <String?, List<double>>{};
-    final todosU = <double>[];
-    final todosL = <double>[];
+    final unleveredBetas = <String?, List<double>>{};
+    final allUnlevered = <double>[];
+    final allLevered = <double>[];
 
     for (final o in observations) {
       if (!o.leveredBeta.isFinite) continue;
-      todosL.add(o.leveredBeta);
+      allLevered.add(o.leveredBeta);
       final u = BetaShrinkage.unlever(
         leveredBeta: o.leveredBeta,
         debtToEquity: o.debtToEquity,
         taxRate: o.taxRate,
       );
       if (u == null || !u.isFinite) continue;
-      todosU.add(u);
+      allUnlevered.add(u);
       final k = o.sectorKey?.trim();
-      (desalavancados[(k == null || k.isEmpty) ? null : k] ??= []).add(u);
+      (unleveredBetas[(k == null || k.isEmpty) ? null : k] ??= []).add(u);
     }
 
-    final universo = Inference.median(todosU);
-    if (universo == null || !universo.isFinite) return null;
+    final universe = Inference.median(allUnlevered);
+    if (universe == null || !universe.isFinite) return null;
 
-    final porSetor = <String, double>{};
-    for (final e in desalavancados.entries) {
+    final bySector = <String, double>{};
+    for (final e in unleveredBetas.entries) {
       final k = e.key;
       if (k == null || e.value.length < minimumPeers) continue;
       final m = Inference.median(e.value);
-      if (m != null && m.isFinite) porSetor[k] = m;
+      if (m != null && m.isFinite) bySector[k] = m;
     }
 
     // Dispersão do prior: robusta, sobre os betas **alavancados**, que é a
     // escala em que o encolhimento compara precisões. Recuo para 0,5 quando a
     // amostra colapsa — valor próximo do medido (0,53) e conservador, porque
     // dispersão maior dá mais peso ao estimador individual.
-    final dispersao = Inference.scaledMad(todosL);
+    final dispersion = Inference.scaledMad(allLevered);
 
     return BetaPrior(
-      unleveredBySector: Map.unmodifiable(porSetor),
-      unleveredUniverse: universo,
+      unleveredBySector: Map.unmodifiable(bySector),
+      unleveredUniverse: universe,
       dispersion:
-          (dispersao != null && dispersao.isFinite && dispersao > 0)
-              ? dispersao
+          (dispersion != null && dispersion.isFinite && dispersion > 0)
+              ? dispersion
               : 0.5,
     );
   }
@@ -127,57 +127,57 @@ abstract final class ResolveBetaPrior {
     int windowYears = 5,
     List<CashDividend> Function(Ticker)? dividendsFor,
   }) async {
-    final janela = DateRange(
+    final window = DateRange(
       DateTime(asOf.year - windowYears, asOf.month, asOf.day),
       asOf,
     );
-    final indiceRes = await benchmark.ibovespa(janela);
-    if (indiceRes.isErr) return null;
-    final indice = indiceRes.unwrap();
+    final indexResult = await benchmark.ibovespa(window);
+    if (indexResult.isErr) return null;
+    final index = indexResult.unwrap();
     final view = PointInTimeView(asOf);
 
-    final observacoes = <BetaObservation>[];
+    final observations = <BetaObservation>[];
     for (final t in tickers) {
-      final serieRes = await prices.daily(t, janela);
-      if (serieRes.isErr) continue;
-      final pontos = serieRes
+      final seriesResult = await prices.daily(t, window);
+      if (seriesResult.isErr) continue;
+      final points = seriesResult
           .unwrap()
           .points
-          .where((p) => janela.contains(p.date))
+          .where((p) => window.contains(p.date))
           .toList();
-      if (pontos.length < 2) continue;
+      if (points.length < 2) continue;
 
-      final datas = [for (final p in pontos) p.date];
-      final fechamentos = [for (final p in pontos) p.close];
-      final proventos = dividendsFor?.call(t);
-      final estimativa = BetaCalculator.estimate(
+      final dates = [for (final p in points) p.date];
+      final closes = [for (final p in points) p.close];
+      final dividends = dividendsFor?.call(t);
+      final estimate = BetaCalculator.estimate(
         returns: BetaCalculator.alignReturns(
-          assetDates: datas,
-          assetIndex: proventos == null || proventos.isEmpty
-              ? fechamentos
+          assetDates: dates,
+          assetIndex: dividends == null || dividends.isEmpty
+              ? closes
               : TotalReturnIndex.build(
-                      dates: datas, closes: fechamentos, dividends: proventos)
+                      dates: dates, closes: closes, dividends: dividends)
                   .index,
-          marketDates: indice.dates,
-          marketIndex: indice.points.map((p) => p.close).toList(),
+          marketDates: index.dates,
+          marketIndex: index.points.map((p) => p.close).toList(),
         ),
       );
-      if (estimativa.isErr) continue;
+      if (estimate.isErr) continue;
 
-      final histRes = await fundamentals.history(t);
-      if (histRes.isErr) continue;
-      final pub = view.published(histRes.unwrap());
+      final historyResult = await fundamentals.history(t);
+      if (historyResult.isErr) continue;
+      final pub = view.published(historyResult.unwrap());
       if (pub.isEmpty) continue;
-      final ultimo = pub.last;
-      final equity = ultimo.marketCap;
+      final last = pub.last;
+      final equity = last.marketCap;
       if (equity == null || equity <= 0) continue;
 
-      final perfil = await fundamentals.profile(t);
-      final chave = perfil.isOk ? perfil.unwrap().sector.key.trim() : '';
+      final profile = await fundamentals.profile(t);
+      final key = profile.isOk ? profile.unwrap().sector.key.trim() : '';
 
-      observacoes.add(BetaObservation(
-        leveredBeta: estimativa.unwrap().beta,
-        sectorKey: chave.isEmpty ? null : chave,
+      observations.add(BetaObservation(
+        leveredBeta: estimate.unwrap().beta,
+        sectorKey: key.isEmpty ? null : key,
         // A mesma régua de [PrepareValuationInputs]: dívida líquida, medida na
         // janela em que o beta foi estimado. O prior é mediana de betas
         // desalavancados, e desalavancá-los por uma régua e realavancá-los por
@@ -185,10 +185,10 @@ abstract final class ResolveBetaPrior {
         // [FundamentalsSnapshot.debtToMarketEquity].
         debtToEquity: MarketLeverage.overWindow(
               snapshots: pub,
-              prices: pontos,
-              window: janela,
+              prices: points,
+              window: window,
             ) ??
-            ultimo.debtToMarketEquity(equity) ??
+            last.debtToMarketEquity(equity) ??
             0.0,
         // A estatutária, pela mesma razão de [PrepareValuationInputs]: o
         // `(1 − τ)` de Hamada é escudo fiscal do juro, e a realavancagem o usa
@@ -197,6 +197,6 @@ abstract final class ResolveBetaPrior {
       ));
     }
 
-    return fromObservations(observacoes);
+    return fromObservations(observations);
   }
 }

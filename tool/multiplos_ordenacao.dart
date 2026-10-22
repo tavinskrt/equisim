@@ -31,12 +31,12 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/regression.dart';
 
-const _entrada = 'docs/validacao/backtest_trimestral.json';
-const _saida = 'docs/validacao/multiplos_ordenacao.json';
+const _inputFile = 'docs/validacao/backtest_trimestral.json';
+const _output = 'docs/validacao/multiplos_ordenacao.json';
 
 /// Mínimo de pares para uma mediana setorial da coorte ser usável — o mesmo
 /// corte que a cascata cobra, e por isso vem dela.
-const _minimoDePares = PeerValuation.minimumPeers;
+const _minPeers = PeerValuation.minimumPeers;
 
 double? _num(dynamic v) {
   if (v is num) {
@@ -46,32 +46,28 @@ double? _num(dynamic v) {
   return null;
 }
 
-double _mediana(List<double> v) {
+double _median(List<double> v) {
   final o = [...v]..sort();
-  final meio = o.length ~/ 2;
-  return o.length.isOdd ? o[meio] : (o[meio - 1] + o[meio]) / 2;
+  final mid = o.length ~/ 2;
+  return o.length.isOdd ? o[mid] : (o[mid - 1] + o[mid]) / 2;
 }
 
 /// Uma observação com tudo o que as quatro ordenações pedem.
 class _Obs {
   _Obs({
-    required this.coorte,
-    required this.ticker,
-    required this.setor,
-    required this.potencial,
+    required this.cohort,
+    required this.upside,
     required this.bookToMarket,
     required this.earningsYield,
-    required this.multiplos,
-    required this.retorno,
+    required this.multiples,
+    required this.returnRate,
   });
-  final String coorte;
-  final String ticker;
-  final String setor;
-  final double potencial;
+  final String cohort;
+  final double upside;
   final double bookToMarket;
   final double earningsYield;
-  final double multiplos;
-  final double retorno;
+  final double multiples;
+  final double returnRate;
 }
 
 /// O potencial que os pares da coorte implicam, ou `null`.
@@ -79,143 +75,141 @@ class _Obs {
 /// **Sem divisor e sem contagem de papéis**: o potencial é
 /// `valor implicado ÷ valor de mercado − 1`, e os dois lados são da companhia
 /// inteira. A ponte não entra, e por isso não há como ela entrar.
-double? _potencialPorMultiplos({
+double? _multiplesUpsideOf({
   required Map<String, dynamic> m,
-  required Map<MultipleKind, double> medianas,
+  required Map<MultipleKind, double> mediansByKind,
 }) {
-  final vm = _num(m['valorDeMercado']);
-  if (vm == null || vm <= 0) return null;
+  final marketValue = _num(m['valorDeMercado']);
+  if (marketValue == null || marketValue <= 0) return null;
 
-  final leituras = <double>[];
+  final readings = <double>[];
 
-  final lucro = _num(m['lucro']);
-  final pl = medianas[MultipleKind.precoLucro];
-  if (lucro != null && lucro > 0 && pl != null) {
-    leituras.add(pl * lucro / vm - 1);
+  final profit = _num(m['lucro']);
+  final pl = mediansByKind[MultipleKind.priceToEarnings];
+  if (profit != null && profit > 0 && pl != null) {
+    readings.add(pl * profit / marketValue - 1);
   }
 
-  final patrimonio = _num(m['patrimonio']);
-  final pvp = medianas[MultipleKind.precoPatrimonio];
-  if (patrimonio != null && patrimonio > 0 && pvp != null) {
-    leituras.add(pvp * patrimonio / vm - 1);
+  final equity = _num(m['patrimonio']);
+  final priceToBookMedian = mediansByKind[MultipleKind.priceToBook];
+  if (equity != null && equity > 0 && priceToBookMedian != null) {
+    readings.add(priceToBookMedian * equity / marketValue - 1);
   }
 
   final ebitda = _num(m['ebitda']);
-  final ev = medianas[MultipleKind.firmaEbitda];
-  final divida = _num(m['dividaLiquida']);
-  if (ebitda != null && ebitda > 0 && ev != null && divida != null) {
-    final acionista = ev * ebitda - divida;
-    if (acionista > 0) leituras.add(acionista / vm - 1);
+  final ev = mediansByKind[MultipleKind.evToEbitda];
+  final debt = _num(m['dividaLiquida']);
+  if (ebitda != null && ebitda > 0 && ev != null && debt != null) {
+    final shareholder = ev * ebitda - debt;
+    if (shareholder > 0) readings.add(shareholder / marketValue - 1);
   }
 
-  if (leituras.isEmpty) return null;
-  return _mediana(leituras);
+  if (readings.isEmpty) return null;
+  return _median(readings);
 }
 
 void main(List<String> args) {
-  final arquivo = File(_entrada);
-  if (!arquivo.existsSync()) {
-    stderr.writeln('sem $_entrada: rode o backtest trimestral antes.');
+  final file = File(_inputFile);
+  if (!file.existsSync()) {
+    stderr.writeln('sem $_inputFile: rode o backtest trimestral antes.');
     exitCode = 2;
     return;
   }
-  final bruto = jsonDecode(arquivo.readAsStringSync());
-  final linhas = (bruto is Map<String, dynamic>
-          ? (bruto['observacoes'] ?? bruto['linhas'] ?? bruto['dados'])
-          : bruto) as List<dynamic>?;
-  if (linhas == null) {
-    stderr.writeln('$_entrada não tem a lista de observações esperada.');
+  final raw = jsonDecode(file.readAsStringSync());
+  final rows = (raw is Map<String, dynamic>
+          ? (raw['observacoes'] ?? raw['linhas'] ?? raw['dados'])
+          : raw) as List<dynamic>?;
+  if (rows == null) {
+    stderr.writeln('$_inputFile não tem a lista de observações esperada.');
     exitCode = 2;
     return;
   }
 
-  final resultado = <String, dynamic>{'entrada': _entrada};
-  for (final horizonte in const [12, 36]) {
-    final campoRetorno = 'ret${horizonte}tot';
+  final result = <String, dynamic>{'entrada': _inputFile};
+  for (final horizon in const [12, 36]) {
+    final returnField = 'ret${horizon}tot';
 
     // ------------------------------------------------------------------
     // 1) As medianas setoriais de cada coorte, da própria seção transversal
     // ------------------------------------------------------------------
-    final porCoorte = <String, List<Map<String, dynamic>>>{};
-    for (final l in linhas) {
+    final byCohort = <String, List<Map<String, dynamic>>>{};
+    for (final l in rows) {
       final m = l as Map<String, dynamic>;
-      porCoorte.putIfAbsent('${m['coorte']}', () => []).add(m);
+      byCohort.putIfAbsent('${m['coorte']}', () => []).add(m);
     }
 
     final obs = <_Obs>[];
-    var semMediana = 0;
-    for (final e in porCoorte.entries) {
+    var withoutMedian = 0;
+    for (final e in byCohort.entries) {
       // Por setor, e com recuo para o mercado inteiro da coorte — a mesma
       // hierarquia do pacote, sem o degrau do subsetor, que a coorte não tem.
-      final porSetor = <String, List<Map<String, dynamic>>>{};
+      final bySector = <String, List<Map<String, dynamic>>>{};
       for (final m in e.value) {
-        final setor = m['setor'] as String?;
-        if (setor == null) continue;
-        porSetor.putIfAbsent(setor, () => []).add(m);
+        final sector = m['setor'] as String?;
+        if (sector == null) continue;
+        bySector.putIfAbsent(sector, () => []).add(m);
       }
 
-      Map<MultipleKind, double> medianasDe(List<Map<String, dynamic>> grupo) {
+      Map<MultipleKind, double> mediansOf(List<Map<String, dynamic>> group) {
         final out = <MultipleKind, double>{};
-        void juntar(MultipleKind k, double? Function(Map<String, dynamic>) f) {
+        void collect(MultipleKind k, double? Function(Map<String, dynamic>) f) {
           final v = <double>[
-            for (final m in grupo)
+            for (final m in group)
               if (f(m) != null && f(m)! > 0) f(m)!,
           ];
-          if (v.length >= _minimoDePares) out[k] = _mediana(v);
+          if (v.length >= _minPeers) out[k] = _median(v);
         }
 
         // `bookToMarket` é `1 ÷ (P/VP)` e `earningsYield` é `1 ÷ (P/L)`: os
         // dois já vinham do backtest, e invertê-los aqui evita gravar o mesmo
         // número duas vezes com nomes diferentes.
-        juntar(MultipleKind.precoLucro, (m) {
+        collect(MultipleKind.priceToEarnings, (m) {
           final ey = _num(m['earningsYield']);
           return (ey == null || ey <= 0) ? null : 1 / ey;
         });
-        juntar(MultipleKind.precoPatrimonio, (m) {
+        collect(MultipleKind.priceToBook, (m) {
           final bm = _num(m['bookToMarket']);
           return (bm == null || bm <= 0) ? null : 1 / bm;
         });
-        juntar(MultipleKind.firmaEbitda, (m) => _num(m['firmaSobreEbitda']));
+        collect(MultipleKind.evToEbitda, (m) => _num(m['firmaSobreEbitda']));
         return out;
       }
 
-      final doMercado = medianasDe(e.value);
-      final porSetorMedianas = {
-        for (final s in porSetor.entries) s.key: medianasDe(s.value),
+      final marketMedians = mediansOf(e.value);
+      final sectorMediansByName = {
+        for (final s in bySector.entries) s.key: mediansOf(s.value),
       };
 
       for (final m in e.value) {
-        final pot = _num(m['upside']);
+        final upsides = _num(m['upside']);
         final bm = _num(m['bookToMarket']);
         final ey = _num(m['earningsYield']);
-        final ret = _num(m[campoRetorno]);
-        final setor = m['setor'] as String?;
-        if (pot == null || bm == null || ey == null || ret == null) continue;
-        if (setor == null) continue;
+        final ret = _num(m[returnField]);
+        final sector = m['setor'] as String?;
+        if (upsides == null || bm == null || ey == null || ret == null) continue;
+        if (sector == null) continue;
 
         // Setor quando ele reúne pares; mercado da coorte quando não.
-        final doSetor = porSetorMedianas[setor] ?? const {};
-        final medianas = <MultipleKind, double>{
+        final sectorMedians = sectorMediansByName[sector] ?? const {};
+        final mediansByKind = <MultipleKind, double>{
           for (final k in MultipleKind.values)
-            if (doSetor[k] != null)
-              k: doSetor[k]!
-            else if (doMercado[k] != null)
-              k: doMercado[k]!,
+            if (sectorMedians[k] != null)
+              k: sectorMedians[k]!
+            else if (marketMedians[k] != null)
+              k: marketMedians[k]!,
         };
-        final mult = _potencialPorMultiplos(m: m, medianas: medianas);
+        final mult = _multiplesUpsideOf(m: m, mediansByKind: mediansByKind);
         if (mult == null) {
-          semMediana++;
+          withoutMedian++;
           continue;
         }
         obs.add(_Obs(
-          coorte: '${m['coorte']}',
-          ticker: m['ticker'] as String,
-          setor: setor,
-          potencial: pot,
+          cohort: '${m['coorte']}',
+          upside: upsides,
           bookToMarket: bm,
           earningsYield: ey,
-          multiplos: mult,
-          retorno: ret,
+          multiples: mult,
+          returnRate: ret,
         ));
       }
     }
@@ -223,11 +217,11 @@ void main(List<String> args) {
     // ------------------------------------------------------------------
     // 2) As quatro ordenações, coorte a coorte, nas mesmas observações
     // ------------------------------------------------------------------
-    final coortes = <String, List<_Obs>>{};
+    final cohorts = <String, List<_Obs>>{};
     for (final o in obs) {
-      coortes.putIfAbsent(o.coorte, () => []).add(o);
+      cohorts.putIfAbsent(o.cohort, () => []).add(o);
     }
-    final chaves = coortes.keys.toList()..sort();
+    final keys = cohorts.keys.toList()..sort();
 
     final series = <String, List<double>>{
       'potencial': [],
@@ -236,51 +230,51 @@ void main(List<String> args) {
       'multiplos': [],
       'composto': [],
     };
-    final porCoorteSaida = <Map<String, dynamic>>[];
+    final byCohortOutput = <Map<String, dynamic>>[];
 
-    for (final chave in chaves) {
-      final grupo = coortes[chave]!;
-      if (grupo.length < 10) continue;
+    for (final key in keys) {
+      final group = cohorts[key]!;
+      if (group.length < 10) continue;
       final zRet =
-          Regression.standardizedRanks([for (final o in grupo) o.retorno]);
+          Regression.standardizedRanks([for (final o in group) o.returnRate]);
       double? ic(List<double> v) =>
           Regression.pearson(Regression.standardizedRanks(v), zRet);
 
-      final icPot = ic([for (final o in grupo) o.potencial]);
-      final icBm = ic([for (final o in grupo) o.bookToMarket]);
-      final icEy = ic([for (final o in grupo) o.earningsYield]);
-      final icMult = ic([for (final o in grupo) o.multiplos]);
+      final upsideIc = ic([for (final o in group) o.upside]);
+      final icBm = ic([for (final o in group) o.bookToMarket]);
+      final icEy = ic([for (final o in group) o.earningsYield]);
+      final icMult = ic([for (final o in group) o.multiples]);
       // O composto é o do núcleo, com os três sinais da decisão 103 — o
       // múltiplo entra como quarto candidato **separado**, e não dentro dele:
       // mudar a composição seria mudar a regra depois de ver o resultado.
-      final composto = TransversalScore.scores({
-        for (var i = 0; i < grupo.length; i++)
+      final composite = TransversalScore.scores({
+        for (var i = 0; i < group.length; i++)
           i: TransversalSignals(
-            potential: grupo[i].potencial,
-            bookToMarket: grupo[i].bookToMarket,
-            earningsYield: grupo[i].earningsYield,
+            potential: group[i].upside,
+            bookToMarket: group[i].bookToMarket,
+            earningsYield: group[i].earningsYield,
           ),
       }, TransversalOrdering.composite);
       final icComp = Regression.pearson(
         Regression.standardizedRanks(
-            [for (var i = 0; i < grupo.length; i++) composto[i] ?? 0.0]),
+            [for (var i = 0; i < group.length; i++) composite[i] ?? 0.0]),
         zRet,
       );
 
-      void guardar(String nome, double? v) {
-        if (v != null && v.isFinite) series[nome]!.add(v);
+      void store(String name, double? v) {
+        if (v != null && v.isFinite) series[name]!.add(v);
       }
 
-      guardar('potencial', icPot);
-      guardar('bookToMarket', icBm);
-      guardar('earningsYield', icEy);
-      guardar('multiplos', icMult);
-      guardar('composto', icComp);
+      store('potencial', upsideIc);
+      store('bookToMarket', icBm);
+      store('earningsYield', icEy);
+      store('multiplos', icMult);
+      store('composto', icComp);
 
-      porCoorteSaida.add({
-        'coorte': chave,
-        'n': grupo.length,
-        'icPotencial': icPot,
+      byCohortOutput.add({
+        'coorte': key,
+        'n': group.length,
+        'icPotencial': upsideIc,
         'icBookToMarket': icBm,
         'icEarningsYield': icEy,
         'icMultiplos': icMult,
@@ -289,51 +283,51 @@ void main(List<String> args) {
     }
 
     // A defasagem da sobreposição: coortes trimestrais e horizonte em meses.
-    final defasagem = (horizonte / 3).round() - 1;
-    final leituras = <String, dynamic>{};
+    final lag = (horizon / 3).round() - 1;
+    final readings = <String, dynamic>{};
     for (final e in series.entries) {
       final v = Regression.summarize(e.value);
-      final nw = Regression.neweyWestMean(e.value, defasagem);
-      final sob = Regression.overlapAdjustedT(e.value, defasagem);
-      final critico =
-          sob == null ? null : Regression.overlapCritical(sob.n, sob.overlap);
-      leituras[e.key] = {
+      final nw = Regression.neweyWestMean(e.value, lag);
+      final overlapT = Regression.overlapAdjustedT(e.value, lag);
+      final critical =
+          overlapT == null ? null : Regression.overlapCritical(overlapT.n, overlapT.overlap);
+      readings[e.key] = {
         'coortes': e.value.length,
         'media': v?.mean,
         't': v?.t,
         'tNeweyWest': nw?.t,
-        'tSobreposicao': sob?.t,
-        'criticoSobreposicao': critico,
+        'tSobreposicao': overlapT?.t,
+        'criticoSobreposicao': critical,
         'positivas': e.value.where((x) => x > 0).length,
-        if (sob != null && nw != null && critico != null)
-          'passaR3': sob.t > critico && nw.t > 2,
+        if (overlapT != null && nw != null && critical != null)
+          'passaR3': overlapT.t > critical && nw.t > 2,
       };
     }
 
-    resultado['h$horizonte'] = {
+    result['h$horizon'] = {
       'observacoes': obs.length,
-      'semMedianaUsavel': semMediana,
-      'coortes': porCoorteSaida.length,
-      'leituras': leituras,
-      'porCoorte': porCoorteSaida,
+      'semMedianaUsavel': withoutMedian,
+      'coortes': byCohortOutput.length,
+      'leituras': readings,
+      'porCoorte': byCohortOutput,
     };
 
     stdout.writeln('');
-    stdout.writeln('-- $horizonte meses: ${obs.length} observações, '
-        '${porCoorteSaida.length} coortes --');
+    stdout.writeln('-- $horizon meses: ${obs.length} observações, '
+        '${byCohortOutput.length} coortes --');
     stdout.writeln('  ordenação        média      t     Newey-West   '
         't corrigido / crítico   positivas   passa');
-    for (final nome in const [
+    for (final name in const [
       'multiplos',
       'potencial',
       'bookToMarket',
       'earningsYield',
       'composto',
     ]) {
-      final l = leituras[nome] as Map<String, dynamic>;
-      String f(Object? v, [int casas = 3]) =>
-          v is num ? v.toDouble().toStringAsFixed(casas) : '—';
-      stdout.writeln('  ${nome.padRight(14)}  '
+      final l = readings[name] as Map<String, dynamic>;
+      String f(Object? v, [int decimals = 3]) =>
+          v is num ? v.toDouble().toStringAsFixed(decimals) : '—';
+      stdout.writeln('  ${name.padRight(14)}  '
           '${f(l['media']).padLeft(7)}  ${f(l['t'], 2).padLeft(6)}  '
           '${f(l['tNeweyWest'], 2).padLeft(11)}   '
           '${f(l['tSobreposicao'], 2).padLeft(10)} / '
@@ -343,8 +337,8 @@ void main(List<String> args) {
     }
   }
 
-  File(_saida)
-      .writeAsStringSync(const JsonEncoder.withIndent('  ').convert(resultado));
+  File(_output)
+      .writeAsStringSync(const JsonEncoder.withIndent('  ').convert(result));
   stdout.writeln('');
-  stdout.writeln('escrito $_saida');
+  stdout.writeln('escrito $_output');
 }

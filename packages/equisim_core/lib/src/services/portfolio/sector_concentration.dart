@@ -3,8 +3,8 @@ import '../../entities/portfolio.dart';
 
 /// Concentração observada em um setor.
 class SectorExposure {
-  /// Setor observado. Nunca é [Sector.unknown] — não classificados são
-  /// somados em [ConcentrationReport.unclassifiedWeight].
+  /// Setor observado. Nunca é [Sector.unknown] — não classificados ficam fora
+  /// da contagem de concentração.
   final Sector sector;
 
   /// Quantidade de ativos da carteira no setor.
@@ -22,20 +22,11 @@ class SectorExposure {
 
 /// Resultado da análise de concentração setorial.
 class ConcentrationReport {
-  /// Setores classificados, ordenados por quantidade de ativos e, no empate,
-  /// por peso — os dois em ordem decrescente.
-  final List<SectorExposure> exposures;
-
   /// Setores que atingiram ou superaram o limiar de alerta.
   final List<SectorExposure> concentrated;
 
-  /// Fração do peso da carteira sem classificação setorial.
-  final double unclassifiedWeight;
-
   const ConcentrationReport({
-    required this.exposures,
     required this.concentrated,
-    required this.unclassifiedWeight,
   });
 
   /// `true` quando ao menos um setor atingiu o limiar. **Informativo**: não
@@ -69,14 +60,10 @@ abstract final class SectorConcentration {
   }) {
     final counts = <Sector, int>{};
     final weights = <Sector, double>{};
-    var unclassified = 0.0;
 
     for (final entry in portfolio.entries.values) {
       final sector = entry.sector;
-      if (sector.isUnknown) {
-        unclassified += entry.weight.value;
-        continue;
-      }
+      if (sector.isUnknown) continue;
       counts[sector] = (counts[sector] ?? 0) + 1;
       weights[sector] = (weights[sector] ?? 0.0) + entry.weight.value;
     }
@@ -94,9 +81,7 @@ abstract final class SectorConcentration {
       });
 
     return ConcentrationReport(
-      exposures: exposures,
       concentrated: exposures.where((e) => e.count >= threshold).toList(),
-      unclassifiedWeight: unclassified,
     );
   }
 }

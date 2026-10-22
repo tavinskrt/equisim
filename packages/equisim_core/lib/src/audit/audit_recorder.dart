@@ -91,6 +91,7 @@ class AuditTransaction {
     double? result,
     String unit = '',
     TraceSample? sample,
+    List<String> explanation = const [],
   }) =>
       _calculations.add(CalculationTrace(
         formulaName: formulaName,
@@ -100,10 +101,8 @@ class AuditTransaction {
         finalValue: result,
         unit: unit,
         sample: sample,
+        explanation: explanation,
       ));
-
-  /// Anexa um rastro já montado, para quem o constrói fora do ponto de uso.
-  void add(CalculationTrace trace) => _calculations.add(trace);
 
   /// Encerra a transação com sucesso e emite o evento.
   ///

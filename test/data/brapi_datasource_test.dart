@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:equisim/data/config/api_config.dart';
 import 'package:equisim/data/datasources/remote/bcb_datasource.dart';
@@ -134,7 +137,7 @@ void main() {
         );
       }
       // E a busca por data continua correta depois da reordenação.
-      expect(series.closeAsOf(series.lastDate), 31.5);
+      expect(series.closeAsOf(series.points.last.date), 31.5);
     });
 
     test('ponto sem data ou sem fechamento é ignorado, não derruba o lote',
@@ -203,25 +206,25 @@ void main() {
     // era o caminho sem cobertura. Exceção crua atravessando a camada de dados
     // quebraria o contrato `Result` inteiro.
 
-    Future<void> viraFalha(DioExceptionType tipo) async {
+    Future<void> becomesFailure(DioExceptionType kind) async {
       final datasource = BrapiDatasource(clientWith(FixtureAdapter(
-        transportErrors: {'/v2/stocks/historical': tipo},
+        transportErrors: {'/v2/stocks/historical': kind},
       )));
       final result = await datasource.historicalBatch([Ticker.parse('PETR4')]);
-      expect(result.isErr, isTrue, reason: '$tipo deveria virar Result.err');
+      expect(result.isErr, isTrue, reason: '$kind deveria virar Result.err');
       expect(result.failureOrNull, isA<InsufficientData>());
     }
 
     test('tempo de conexão esgotado vira falha de domínio', () async {
-      await viraFalha(DioExceptionType.connectionTimeout);
+      await becomesFailure(DioExceptionType.connectionTimeout);
     });
 
     test('tempo de recepção esgotado vira falha de domínio', () async {
-      await viraFalha(DioExceptionType.receiveTimeout);
+      await becomesFailure(DioExceptionType.receiveTimeout);
     });
 
     test('conexão perdida vira falha de domínio', () async {
-      await viraFalha(DioExceptionType.connectionError);
+      await becomesFailure(DioExceptionType.connectionError);
     });
 
     test('erro de transporte desconhecido também não escapa', () async {
@@ -268,13 +271,20 @@ void main() {
       //
       // **As três rotas de demonstrativo**, e não só a DRE (lente `risco`,
       // 22/09/2026): o balanço e o fluxo de caixa passam pelo mesmo tipo de
-      // leitura, e o contrato de um não prova o do outro.
-      const rotas = {
+      // leitura, e o contrato de um não prova o do outro. **E as duas de
+      // estatística** (lente `risco`, 24/09/2026): o histórico e o corrente
+      // trazem a contagem de ações e o valor de mercado, que dividem o preço
+      // justo — a rota que mais pesa era a que o laço deixava de fora.
+      const routes = {
+        '/v2/stocks/statistics?symbols=PETR4&mode=history':
+            'brapi_statistics_history_petr4',
         '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
         '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
         '/v2/stocks/cash-flow': 'brapi_cash_flow_history_petr4',
+        '/v2/stocks/statistics?symbols=PETR4&mode=current':
+            'brapi_statistics_current_petr4',
       };
-      const quebrados = {
+      const brokenCases = {
         '/v2/stocks/income-statement': [
           '{"results":[{"incomeStatementHistory":"não é lista"}]}',
           ('{"results":[{"incomeStatementHistory":[{"endDate":"2024-12-31",'
@@ -290,28 +300,34 @@ void main() {
           ('{"results":[{"data":[{"type":"yearly","endDate":"2024-12-31",'
               '"operatingCashFlow":"duzentos bilhões"}]}]}'),
         ],
+        '/v2/stocks/statistics?symbols=PETR4&mode=history': [
+          '{"results":[{"data":"não é lista"}]}',
+          ('{"results":[{"data":[{"type":"yearly","endDate":"2025-12-31",'
+              '"sharesOutstanding":"treze bilhões","marketCap":[1]}]}]}'),
+        ],
+        '/v2/stocks/statistics?symbols=PETR4&mode=current': [
+          '{"results":[{"data":["não é objeto"]}]}',
+          ('{"results":[{"data":{"sharesOutstanding":"treze bilhões",'
+              '"marketCap":{"x":1},"enterpriseToEbitda":"quatro"}}]}'),
+        ],
       };
-      final casos = [
-        for (final rota in rotas.keys)
-          for (final corpo in [
-            ...quebrados[rota]!,
+      final cases = [
+        for (final route in routes.keys)
+          for (final body in [
+            ...brokenCases[route]!,
             '{"results":"nem objeto"}',
             '[]',
             'isto não é json',
           ])
-            (rota, corpo),
+            (route, body),
       ];
-      for (final (rota, corpo) in casos) {
+      for (final (route, body) in cases) {
         final datasource = BrapiDatasource(clientWith(FixtureAdapter(
           routes: {
-            '/v2/stocks/statistics?symbols=PETR4&mode=history':
-                'brapi_statistics_history_petr4',
-            for (final e in rotas.entries)
-              if (e.key != rota) e.key: e.value,
-            '/v2/stocks/statistics?symbols=PETR4&mode=current':
-                'brapi_statistics_current_petr4',
+            for (final e in routes.entries)
+              if (e.key != route) e.key: e.value,
           },
-          bodies: {rota: corpo},
+          bodies: {route: body},
         )));
         // O contrato é `Result`: ou vem erro, ou vem série — e nunca uma
         // exceção atravessando a camada de dados. **Quem cobra isso é o
@@ -320,12 +336,30 @@ void main() {
         // `isOk || isErr` era tautologia — todo `Result` é um dos dois — e
         // disfarçava de asserção o que já estava coberto.
         final r = await datasource.fundamentalsHistory(Ticker.parse('PETR4'));
+        // **E o `if (r.isOk)` não pode esconder nada** (lente `risco`,
+        // 25/09/2026): o que nem é JSON é recusa, em toda rota; o JSON de
+        // forma errada numa rota é tolerado, e as outras rotas continuam
+        // entregando os exercícios — tolerar não é devolver série vazia.
+        if (body == 'isto não é json') {
+          expect(r.isErr, isTrue, reason: '$route $body');
+          continue;
+        }
+        expect(r.isOk && r.unwrap().isNotEmpty, isTrue,
+            reason: 'um corpo ruim numa rota não apaga as outras: $route $body');
         if (r.isOk) {
           // Tolerar o corpo é legítimo; **inventar número** não. Nenhum
           // exercício pode sair com lucro lido de um literal que não é número.
           for (final s in r.unwrap()) {
-            for (final v in [s.netIncome, s.totalAssets, s.operatingCashFlow]) {
-              expect(v == null || v.isFinite, isTrue, reason: '$rota $corpo');
+            for (final v in [
+              s.netIncome,
+              s.totalAssets,
+              s.operatingCashFlow,
+              s.sharesOutstanding,
+              s.sharesOutstandingAsOf,
+              s.marketCap,
+              s.enterpriseToEbitda,
+            ]) {
+              expect(v == null || v.isFinite, isTrue, reason: '$route $body');
             }
           }
         }
@@ -457,6 +491,54 @@ void main() {
       expect(recent.cash, isNotNull, reason: 'Balanço');
     });
 
+    test('a fusão é por exercício, e não por posição: um ano que falta numa '
+        'rota não desalinha os outros', () async {
+      // Lente `risco`, 27/09/2026: o teste acima olha um exercício só, e uma
+      // fusão por posição acertaria nele por coincidência. Aqui o fluxo de
+      // caixa perde 2020, e cada exercício é conferido contra a fixture.
+      Map<String, dynamic> fixture(String name) => jsonDecode(File(
+                  'test/fixtures/$name.json')
+              .readAsStringSync()
+              .replaceFirst('\uFEFF', '')) as Map<String, dynamic>;
+      List<Map<String, dynamic>> years(Map<String, dynamic> j) =>
+          (((j['results'] as List).first as Map)['data'] as List)
+              .cast<Map<String, dynamic>>();
+      final dre = years(fixture('brapi_income_statement_history_petr4'));
+      final dfcJson = fixture('brapi_cash_flow_history_petr4');
+      final dfc = years(dfcJson);
+      ((dfcJson['results'] as List).first as Map)['data'] =
+          dfc.where((x) => x['endDate'] != '2020-12-31').toList();
+
+      final snapshots = (await BrapiDatasource(clientWith(FixtureAdapter(
+        routes: {
+          '/v2/stocks/statistics?symbols=PETR4&mode=history':
+              'brapi_statistics_history_petr4',
+          '/v2/stocks/income-statement': 'brapi_income_statement_history_petr4',
+          '/v2/stocks/balance-sheet': 'brapi_balance_sheet_history_petr4',
+          '/v2/stocks/statistics?symbols=PETR4&mode=current':
+              'brapi_statistics_current_petr4',
+        },
+        bodies: {'/v2/stocks/cash-flow': jsonEncode(dfcJson)},
+      ))).fundamentalsHistory(Ticker.parse('PETR4')))
+          .unwrap();
+      final byYear = {
+        for (final s in snapshots) s.fiscalPeriodEnd.year: s,
+      };
+      for (final x in dre) {
+        final year = DateTime.parse(x['endDate'] as String).year;
+        final s = byYear[year];
+        expect(s, isNotNull, reason: 'exercício $year');
+        expect(s!.totalRevenue, (x['totalRevenue'] as num?)?.toDouble(),
+            reason: 'receita de $year');
+        final cash = dfc.firstWhere((y) => y['endDate'] == x['endDate']);
+        expect(
+          s.operatingCashFlow,
+          year == 2020 ? isNull : (cash['operatingCashFlow'] as num?)?.toDouble(),
+          reason: 'fluxo de caixa de $year',
+        );
+      }
+    });
+
     test('deriva D&A, alíquota efetiva e dívida líquida', () async {
       final datasource = BrapiDatasource(clientWith(FixtureAdapter(routes: {
         '/v2/stocks/statistics?symbols=PETR4&mode=history':
@@ -536,17 +618,6 @@ void main() {
       expect(asset.sector.key, 'energia');
       expect(asset.industry, isNotNull);
     });
-
-    test('resolve renomeação usando o parâmetro plural correto', () async {
-      final adapter = FixtureAdapter(routes: {
-        '/v2/tickers/resolve': 'brapi_resolve_viia3',
-      });
-      final datasource = BrapiDatasource(clientWith(adapter));
-
-      final resolved = await datasource.resolve(Ticker.parse('VIIA3'));
-      expect(resolved.isOk, isTrue);
-      expect(resolved.unwrap()?.value, 'BHIA3');
-    });
   });
 
   group('BcbDatasource', () {
@@ -555,7 +626,8 @@ void main() {
         'bcdata.sgs.12': 'bcb_cdi',
       })));
 
-      final result = await datasource.cdi(
+      final result = await datasource.series(
+        BcbDatasource.seriesCdiDaily,
         DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)),
       );
       expect(result.isOk, isTrue);
@@ -571,7 +643,8 @@ void main() {
       final datasource = BcbDatasource(clientWith(FixtureAdapter(routes: {
         'bcdata.sgs.12': 'bcb_cdi',
       })));
-      final series = (await datasource.cdi(
+      final series = (await datasource.series(
+        BcbDatasource.seriesCdiDaily,
         DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)),
       )).unwrap();
 
@@ -588,7 +661,8 @@ void main() {
       final datasource = BcbDatasource(clientWith(FixtureAdapter(routes: {
         'bcdata.sgs.12': 'bcb_cdi',
       })));
-      final series = (await datasource.cdi(
+      final series = (await datasource.series(
+        BcbDatasource.seriesCdiDaily,
         DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)),
       )).unwrap();
       // A fixture comeca em 02/01/2024. Sob uma troca dd/MM -> MM/dd ela
@@ -605,7 +679,7 @@ void main() {
       // Lente `risco`, 20/09/2026. A fonte de cotações já tinha este teste; a
       // do Banco Central não, e a troca de layout dela escapava como exceção
       // nativa em vez de `Result.err`.
-      for (final corpo in [
+      for (final body in [
         '[{"valor":"0,04"}]', // sem `data`
         '[{"data":"02/01/2024"}]', // sem `valor`
         '[{"data":"02/01/2024","valor":"não é número"}]',
@@ -613,12 +687,13 @@ void main() {
         'isto não é json',
       ]) {
         final datasource = BcbDatasource(clientWith(FixtureAdapter(
-          bodies: {'bcdata.sgs.12': corpo},
+          bodies: {'bcdata.sgs.12': body},
         )));
-        final r = await datasource.cdi(
+        final r = await datasource.series(
+          BcbDatasource.seriesCdiDaily,
           DateRange(DateTime(2024, 1, 1), DateTime(2024, 3, 31)),
         );
-        expect(r.isErr, isTrue, reason: corpo);
+        expect(r.isErr, isTrue, reason: body);
       }
     });
   });

@@ -24,7 +24,7 @@ Stack:
 RESTRICOES DE ARQUITETURA QUE VOCE DEVE RESPEITAR (nao negocie com elas):
 
 1. "equisim_core" tem ZERO dependencias de runtime, por decisao deliberada,
-   travada pelo teste "packages/equisim_core/test/purity_test.dart".
+   travada pelo teste "test/core/purity_test.dart".
    => E PROIBIDO sugerir "package:decimal", "package:rational", "decimal.js",
       "BigDecimal" ou qualquer biblioteca dentro de "equisim_core".
    => A correcao aceitavel para precisao monetaria neste pacote e ARITMETICA
@@ -110,7 +110,7 @@ Sao FAIL apenas estas quatro situacoes, todas verificaveis no proprio material:
   (b) TOKEN DE COR SEM MEDICAO -- linha adicionada a "fin_colors.dart" cria um
       campo de cor de texto ou de estado SEM comentario de razao de contraste
       ao lado, ou sem asserção correspondente em
-      "test/presentation/contrast_test.dart" quando esse arquivo aparece no
+      "test/ui/contrast_test.dart" quando esse arquivo aparece no
       material. Ver R19.
 
   (c) VALOR MASCARADO SEM LEITURA -- widget que exibe mascara de privacidade
@@ -391,7 +391,7 @@ R19 -- COR DE TEXTO SEM CONTRASTE MEDIDO
   - todo campo de cor de TEXTO ou de ESTADO adicionado a "fin_colors.dart" deve
     trazer, na mesma linha ou na de cima, comentario com a razao medida e o
     nivel ("// 7,1:1  AAA");
-  - se "test/presentation/contrast_test.dart" aparecer no material, todo campo
+  - se "test/ui/contrast_test.dart" aparecer no material, todo campo
     novo deve ter asserção correspondente.
   Campo novo sem uma das duas coisas: FAIL, pelo caso (b) da calibragem.
   Cor de MARCA ("brand", "brandSurface") e de SUPERFICIE esta dispensada --
@@ -566,13 +566,4 @@ export function buildInstructions(target: AuditTarget): string {
     '"--- INICIO DO MATERIAL AUDITADO ---".';
 
   return `${header}${truncationNote}${sourceNote}\n`;
-}
-
-/** Prompt completo, com o material embutido. */
-export function buildUserPrompt(target: AuditTarget): string {
-  return (
-    `${buildInstructions(target)}\n` +
-    `--- INICIO DO MATERIAL AUDITADO ---\n${target.payload}\n` +
-    '--- FIM DO MATERIAL AUDITADO ---\n'
-  );
 }

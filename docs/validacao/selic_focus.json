@@ -1,0 +1,2068 @@
+{
+ "dataDaEntrada": "2026-09-14",
+ "focus": {
+  "data": "2026-09-14",
+  "expectativas": {
+   "2026": 0.1375,
+   "2027": 0.12,
+   "2028": 0.105,
+   "2029": 0.1,
+   "2030": 0.1
+  },
+  "mediana": 0.105,
+  "forwardsDaTrajetoria": [
+   0.13364414549433223,
+   0.1170330235198771,
+   0.1044222486766535,
+   0.10021966327536669,
+   0.10000000000000031,
+   0.10000000000000031,
+   0.10000000000000031,
+   0.10000000000000031,
+   0.10000000000000031,
+   0.10000000000000031
+  ]
+ },
+ "cdiCorrente": 0.14086384141758157,
+ "mediaDecenalDoCdi": 0.093885141195994,
+ "fontes": [
+  {
+   "fonte": "curva",
+   "taxas": {
+    "ano1": 0.13623690130468047,
+    "ano5": 0.14630695076632816,
+    "ano10": 0.14288594967744017,
+    "perpetuidade": 0.14288594967743973,
+    "mediaDosDezAnos": 0.14331002450595198
+   },
+   "avaliados": 97,
+   "potencialMediano": -0.4535928143712575,
+   "acimaDeZero": 15,
+   "justoMedianoContraCurva": 0.0,
+   "spearmanContraCurva": 1.0,
+   "ganha": [],
+   "perde": []
+  },
+  {
+   "fonte": "orientador",
+   "taxas": {
+    "ano1": 0.14086384141758157,
+    "ano5": 0.12492435634310087,
+    "ano10": 0.105,
+    "perpetuidade": 0.105,
+    "mediaDosDezAnos": 0.1228735858835579
+   },
+   "avaliados": 107,
+   "potencialMediano": -0.41926851025869766,
+   "acimaDeZero": 20,
+   "justoMedianoContraCurva": 0.18335296427169223,
+   "spearmanContraCurva": 0.9891778876499053,
+   "ganha": [
+    "ECOR3",
+    "ENEV3",
+    "ENGI11",
+    "GOAU4",
+    "LOGG3",
+    "MOTV3",
+    "MYPK3",
+    "PNVL3",
+    "RAIL3",
+    "VBBR3"
+   ],
+   "perde": []
+  },
+  {
+   "fonte": "trajetoria",
+   "taxas": {
+    "ano1": 0.13364414549433223,
+    "ano5": 0.10000000000000009,
+    "ano10": 0.10000000000000098,
+    "perpetuidade": 0.10000000000000098,
+    "mediaDosDezAnos": 0.10548115152850213
+   },
+   "avaliados": 114,
+   "potencialMediano": -0.3949868662039715,
+   "acimaDeZero": 27,
+   "justoMedianoContraCurva": 0.3287804878048781,
+   "spearmanContraCurva": 0.9742662528929097,
+   "ganha": [
+    "ECOR3",
+    "ENEV3",
+    "ENGI11",
+    "GOAU4",
+    "KLBN3",
+    "KLBN4",
+    "LOGG3",
+    "MOTV3",
+    "MOVI3",
+    "MYPK3",
+    "PNVL3",
+    "RAIL3",
+    "RENT3",
+    "RENT4",
+    "UGPA3",
+    "VAMO3",
+    "VBBR3"
+   ],
+   "perde": []
+  },
+  {
+   "fonte": "passado",
+   "taxas": {
+    "ano1": 0.14086384141758157,
+    "ano5": 0.11998441909687599,
+    "ano10": 0.093885141195994,
+    "perpetuidade": 0.093885141195994,
+    "mediaDosDezAnos": 0.11727389267816157
+   },
+   "avaliados": 107,
+   "potencialMediano": -0.36883116883116884,
+   "acimaDeZero": 23,
+   "justoMedianoContraCurva": 0.2508513053348467,
+   "spearmanContraCurva": 0.9819587628865979,
+   "ganha": [
+    "ECOR3",
+    "ENEV3",
+    "ENGI11",
+    "GOAU4",
+    "LOGG3",
+    "MOTV3",
+    "MYPK3",
+    "PNVL3",
+    "RAIL3",
+    "VBBR3"
+   ],
+   "perde": []
+  }
+ ],
+ "porAtivo": {
+  "ABCB4": {
+   "curva": {
+    "justoCentavos": 2287,
+    "potencial": -0.0870259481037924
+   },
+   "orientador": {
+    "justoCentavos": 2719,
+    "potencial": 0.08542914171656689
+   },
+   "trajetoria": {
+    "justoCentavos": 2794,
+    "potencial": 0.11536926147704593
+   },
+   "passado": {
+    "justoCentavos": 2893,
+    "potencial": 0.1548902195608782
+   }
+  },
+  "ABEV3": {
+   "curva": {
+    "justoCentavos": 1025,
+    "potencial": -0.3541272841839949
+   },
+   "orientador": {
+    "justoCentavos": 1216,
+    "potencial": -0.23377441713925642
+   },
+   "trajetoria": {
+    "justoCentavos": 1362,
+    "potencial": -0.14177693761814744
+   },
+   "passado": {
+    "justoCentavos": 1297,
+    "potencial": -0.1827347195967233
+   }
+  },
+  "ALOS3": {
+   "curva": {
+    "justoCentavos": 1281,
+    "potencial": -0.54957805907173
+   },
+   "orientador": {
+    "justoCentavos": 1420,
+    "potencial": -0.5007032348804501
+   },
+   "trajetoria": {
+    "justoCentavos": 1537,
+    "potencial": -0.459563994374121
+   },
+   "passado": {
+    "justoCentavos": 1472,
+    "potencial": -0.48241912798874825
+   }
+  },
+  "ALPA4": {
+   "curva": {
+    "justoCentavos": 343,
+    "potencial": -0.7365591397849462
+   },
+   "orientador": {
+    "justoCentavos": 393,
+    "potencial": -0.6981566820276498
+   },
+   "trajetoria": {
+    "justoCentavos": 437,
+    "potencial": -0.6643625192012288
+   },
+   "passado": {
+    "justoCentavos": 411,
+    "potencial": -0.684331797235023
+   }
+  },
+  "ALUP11": {
+   "curva": {
+    "justoCentavos": 1825,
+    "potencial": -0.4535928143712575
+   },
+   "orientador": {
+    "justoCentavos": 2453,
+    "potencial": -0.265568862275449
+   },
+   "trajetoria": {
+    "justoCentavos": 3062,
+    "potencial": -0.08323353293413167
+   },
+   "passado": {
+    "justoCentavos": 2652,
+    "potencial": -0.20598802395209578
+   }
+  },
+  "AMER3": {
+   "curva": {
+    "justoCentavos": 151,
+    "potencial": -0.6973947895791583
+   },
+   "orientador": {
+    "justoCentavos": 314,
+    "potencial": -0.37074148296593185
+   },
+   "trajetoria": {
+    "justoCentavos": 397,
+    "potencial": -0.20440881763527052
+   },
+   "passado": {
+    "justoCentavos": 385,
+    "potencial": -0.22845691382765532
+   }
+  },
+  "ANIM3": {
+   "curva": {
+    "justoCentavos": 193,
+    "potencial": -0.33448275862068966
+   },
+   "orientador": {
+    "justoCentavos": 355,
+    "potencial": 0.22413793103448273
+   },
+   "trajetoria": {
+    "justoCentavos": 492,
+    "potencial": 0.6965517241379311
+   },
+   "passado": {
+    "justoCentavos": 419,
+    "potencial": 0.4448275862068967
+   }
+  },
+  "AZEV4": {
+   "curva": {
+    "justoCentavos": 31,
+    "potencial": -0.776978417266187
+   },
+   "orientador": {
+    "justoCentavos": 33,
+    "potencial": -0.7625899280575539
+   },
+   "trajetoria": {
+    "justoCentavos": 36,
+    "potencial": -0.7410071942446043
+   },
+   "passado": {
+    "justoCentavos": 34,
+    "potencial": -0.7553956834532374
+   }
+  },
+  "AZZA3": {
+   "curva": {
+    "justoCentavos": 1234,
+    "potencial": -0.2175015852885225
+   },
+   "orientador": {
+    "justoCentavos": 1476,
+    "potencial": -0.0640456563094483
+   },
+   "trajetoria": {
+    "justoCentavos": 1683,
+    "potencial": 0.06721623335447044
+   },
+   "passado": {
+    "justoCentavos": 1564,
+    "potencial": -0.008243500317057641
+   }
+  },
+  "B3SA3": {
+   "curva": {
+    "justoCentavos": 453,
+    "potencial": -0.7392055267702936
+   },
+   "orientador": {
+    "justoCentavos": 486,
+    "potencial": -0.7202072538860104
+   },
+   "trajetoria": {
+    "justoCentavos": 491,
+    "potencial": -0.717328727691422
+   },
+   "passado": {
+    "justoCentavos": 494,
+    "potencial": -0.7156016119746689
+   }
+  },
+  "BBAS3": {
+   "curva": {
+    "justoCentavos": 2685,
+    "potencial": 0.21383363471971067
+   },
+   "orientador": {
+    "justoCentavos": 3145,
+    "potencial": 0.4217902350813742
+   },
+   "trajetoria": {
+    "justoCentavos": 3224,
+    "potencial": 0.45750452079566006
+   },
+   "passado": {
+    "justoCentavos": 3328,
+    "potencial": 0.5045207956600362
+   }
+  },
+  "BBDC3": {
+   "curva": {
+    "justoCentavos": 1205,
+    "potencial": -0.2547928262213977
+   },
+   "orientador": {
+    "justoCentavos": 1385,
+    "potencial": -0.14347557204700073
+   },
+   "trajetoria": {
+    "justoCentavos": 1415,
+    "potencial": -0.12492269635126785
+   },
+   "passado": {
+    "justoCentavos": 1456,
+    "potencial": -0.09956709956709964
+   }
+  },
+  "BBDC4": {
+   "curva": {
+    "justoCentavos": 1187,
+    "potencial": -0.35242771412984175
+   },
+   "orientador": {
+    "justoCentavos": 1359,
+    "potencial": -0.2585924713584287
+   },
+   "trajetoria": {
+    "justoCentavos": 1389,
+    "potencial": -0.24222585924713574
+   },
+   "passado": {
+    "justoCentavos": 1427,
+    "potencial": -0.22149481723949804
+   }
+  },
+  "BBSE3": {
+   "curva": {
+    "justoCentavos": 3824,
+    "potencial": -0.03847120945436261
+   },
+   "orientador": {
+    "justoCentavos": 4447,
+    "potencial": 0.11817953231078691
+   },
+   "trajetoria": {
+    "justoCentavos": 4557,
+    "potencial": 0.14583857178777965
+   },
+   "passado": {
+    "justoCentavos": 4703,
+    "potencial": 0.1825496605481518
+   }
+  },
+  "BEEF3": {
+   "curva": {
+    "justoCentavos": 953,
+    "potencial": 1.33578431372549
+   },
+   "orientador": {
+    "justoCentavos": 1458,
+    "potencial": 2.5735294117647056
+   },
+   "trajetoria": {
+    "justoCentavos": 1801,
+    "potencial": 3.41421568627451
+   },
+   "passado": {
+    "justoCentavos": 1664,
+    "potencial": 3.0784313725490198
+   }
+  },
+  "BHIA3": {
+   "curva": {
+    "justoCentavos": 135,
+    "potencial": 0.7307692307692308
+   },
+   "orientador": {
+    "justoCentavos": 165,
+    "potencial": 1.1153846153846152
+   },
+   "trajetoria": {
+    "justoCentavos": 209,
+    "potencial": 1.6794871794871793
+   },
+   "passado": {
+    "justoCentavos": 179,
+    "potencial": 1.294871794871795
+   }
+  },
+  "BMGB4": {
+   "curva": {
+    "justoCentavos": 243,
+    "potencial": -0.600328947368421
+   },
+   "orientador": {
+    "justoCentavos": 278,
+    "potencial": -0.5427631578947368
+   },
+   "trajetoria": {
+    "justoCentavos": 284,
+    "potencial": -0.5328947368421053
+   },
+   "passado": {
+    "justoCentavos": 292,
+    "potencial": -0.5197368421052632
+   }
+  },
+  "BPAC11": {
+   "curva": {
+    "justoCentavos": 1703,
+    "potencial": -0.7184193121693121
+   },
+   "orientador": {
+    "justoCentavos": 1979,
+    "potencial": -0.6727843915343915
+   },
+   "trajetoria": {
+    "justoCentavos": 2025,
+    "potencial": -0.6651785714285714
+   },
+   "passado": {
+    "justoCentavos": 2085,
+    "potencial": -0.6552579365079365
+   }
+  },
+  "BRAP4": {
+   "curva": {
+    "justoCentavos": 1899,
+    "potencial": -0.12245841035120157
+   },
+   "orientador": {
+    "justoCentavos": 2074,
+    "potencial": -0.04158964879852135
+   },
+   "trajetoria": {
+    "justoCentavos": 2257,
+    "potencial": 0.04297597042513862
+   },
+   "passado": {
+    "justoCentavos": 2138,
+    "potencial": -0.012014787430683991
+   }
+  },
+  "BRAV3": {
+   "curva": {
+    "justoCentavos": 3025,
+    "potencial": 0.704225352112676
+   },
+   "orientador": {
+    "justoCentavos": 3799,
+    "potencial": 1.1402816901408452
+   },
+   "trajetoria": {
+    "justoCentavos": 4415,
+    "potencial": 1.4873239436619718
+   },
+   "passado": {
+    "justoCentavos": 4103,
+    "potencial": 1.311549295774648
+   }
+  },
+  "BRSR6": {
+   "curva": {
+    "justoCentavos": 1592,
+    "potencial": 0.06275033377837112
+   },
+   "orientador": {
+    "justoCentavos": 1840,
+    "potencial": 0.2283044058744992
+   },
+   "trajetoria": {
+    "justoCentavos": 1883,
+    "potencial": 0.2570093457943924
+   },
+   "passado": {
+    "justoCentavos": 1939,
+    "potencial": 0.29439252336448596
+   }
+  },
+  "CEAB3": {
+   "curva": {
+    "justoCentavos": 445,
+    "potencial": -0.5240641711229946
+   },
+   "orientador": {
+    "justoCentavos": 476,
+    "potencial": -0.4909090909090909
+   },
+   "trajetoria": {
+    "justoCentavos": 511,
+    "potencial": -0.45347593582887696
+   },
+   "passado": {
+    "justoCentavos": 487,
+    "potencial": -0.47914438502673795
+   }
+  },
+  "CMIG4": {
+   "curva": {
+    "justoCentavos": 643,
+    "potencial": -0.42691622103386817
+   },
+   "orientador": {
+    "justoCentavos": 815,
+    "potencial": -0.2736185383244207
+   },
+   "trajetoria": {
+    "justoCentavos": 951,
+    "potencial": -0.15240641711229952
+   },
+   "passado": {
+    "justoCentavos": 882,
+    "potencial": -0.21390374331550804
+   }
+  },
+  "COGN3": {
+   "curva": {
+    "justoCentavos": 70,
+    "potencial": -0.7008547008547008
+   },
+   "orientador": {
+    "justoCentavos": 90,
+    "potencial": -0.6153846153846154
+   },
+   "trajetoria": {
+    "justoCentavos": 115,
+    "potencial": -0.5085470085470085
+   },
+   "passado": {
+    "justoCentavos": 98,
+    "potencial": -0.5811965811965811
+   }
+  },
+  "CPFE3": {
+   "curva": {
+    "justoCentavos": 2452,
+    "potencial": -0.45182204337133913
+   },
+   "orientador": {
+    "justoCentavos": 2928,
+    "potencial": -0.34540576794097916
+   },
+   "trajetoria": {
+    "justoCentavos": 3431,
+    "potencial": -0.23295327520679623
+   },
+   "passado": {
+    "justoCentavos": 3069,
+    "potencial": -0.3138832997987927
+   }
+  },
+  "CPLE3": {
+   "curva": {
+    "justoCentavos": 171,
+    "potencial": -0.8925879396984925
+   },
+   "orientador": {
+    "justoCentavos": 303,
+    "potencial": -0.8096733668341709
+   },
+   "trajetoria": {
+    "justoCentavos": 389,
+    "potencial": -0.7556532663316583
+   },
+   "passado": {
+    "justoCentavos": 356,
+    "potencial": -0.7763819095477387
+   }
+  },
+  "CVCB3": {
+   "curva": {
+    "justoCentavos": 144,
+    "potencial": -0.10559006211180133
+   },
+   "orientador": {
+    "justoCentavos": 154,
+    "potencial": -0.04347826086956525
+   },
+   "trajetoria": {
+    "justoCentavos": 167,
+    "potencial": 0.037267080745341505
+   },
+   "passado": {
+    "justoCentavos": 158,
+    "potencial": -0.018633540372670822
+   }
+  },
+  "CXSE3": {
+   "curva": {
+    "justoCentavos": 981,
+    "potencial": -0.5109670987038882
+   },
+   "orientador": {
+    "justoCentavos": 1124,
+    "potencial": -0.4396809571286141
+   },
+   "trajetoria": {
+    "justoCentavos": 1149,
+    "potencial": -0.42721834496510463
+   },
+   "passado": {
+    "justoCentavos": 1181,
+    "potencial": -0.4112662013958125
+   }
+  },
+  "CYRE3": {
+   "curva": {
+    "justoCentavos": 350,
+    "potencial": -0.8618239242005526
+   },
+   "orientador": {
+    "justoCentavos": 531,
+    "potencial": -0.7903671535728386
+   },
+   "trajetoria": {
+    "justoCentavos": 685,
+    "potencial": -0.7295696802210816
+   },
+   "passado": {
+    "justoCentavos": 598,
+    "potencial": -0.7639163047769443
+   }
+  },
+  "CYRE4": {
+   "curva": {
+    "justoCentavos": 306,
+    "potencial": -0.8774038461538463
+   },
+   "orientador": {
+    "justoCentavos": 470,
+    "potencial": -0.811698717948718
+   },
+   "trajetoria": {
+    "justoCentavos": 614,
+    "potencial": -0.7540064102564102
+   },
+   "passado": {
+    "justoCentavos": 530,
+    "potencial": -0.7876602564102564
+   }
+  },
+  "DIRR3": {
+   "curva": {
+    "justoCentavos": 175,
+    "potencial": -0.8272458045409674
+   },
+   "orientador": {
+    "justoCentavos": 214,
+    "potencial": -0.788746298124383
+   },
+   "trajetoria": {
+    "justoCentavos": 250,
+    "potencial": -0.7532082922013821
+   },
+   "passado": {
+    "justoCentavos": 228,
+    "potencial": -0.7749259624876605
+   }
+  },
+  "ECOR3": {
+   "orientador": {
+    "justoCentavos": 410,
+    "potencial": -0.47704081632653067
+   },
+   "trajetoria": {
+    "justoCentavos": 673,
+    "potencial": -0.14158163265306115
+   },
+   "passado": {
+    "justoCentavos": 535,
+    "potencial": -0.31760204081632654
+   }
+  },
+  "EGIE3": {
+   "curva": {
+    "justoCentavos": 2064,
+    "potencial": -0.32239001969796455
+   },
+   "orientador": {
+    "justoCentavos": 2324,
+    "potencial": -0.23703217334208806
+   },
+   "trajetoria": {
+    "justoCentavos": 2584,
+    "potencial": -0.15167432698621144
+   },
+   "passado": {
+    "justoCentavos": 2402,
+    "potencial": -0.21142481943532504
+   }
+  },
+  "EMBJ3": {
+   "curva": {
+    "justoCentavos": 22,
+    "potencial": -0.9977206796518856
+   },
+   "orientador": {
+    "justoCentavos": 101,
+    "potencial": -0.9895358474927476
+   },
+   "trajetoria": {
+    "justoCentavos": 149,
+    "potencial": -0.9845627849150436
+   },
+   "passado": {
+    "justoCentavos": 134,
+    "potencial": -0.986116866970576
+   }
+  },
+  "ENEV3": {
+   "orientador": {
+    "justoCentavos": 61,
+    "potencial": -0.9773570898292502
+   },
+   "trajetoria": {
+    "justoCentavos": 144,
+    "potencial": -0.9465478841870824
+   },
+   "passado": {
+    "justoCentavos": 119,
+    "potencial": -0.9558277654046028
+   }
+  },
+  "ENGI11": {
+   "orientador": {
+    "justoCentavos": 304,
+    "potencial": -0.9407984420642649
+   },
+   "trajetoria": {
+    "justoCentavos": 749,
+    "potencial": -0.8541382667964946
+   },
+   "passado": {
+    "justoCentavos": 440,
+    "potencial": -0.9143135345666992
+   }
+  },
+  "EQTL3": {
+   "curva": {
+    "justoCentavos": 2633,
+    "potencial": -0.33308004052684903
+   },
+   "orientador": {
+    "justoCentavos": 2719,
+    "potencial": -0.3112968591691995
+   },
+   "trajetoria": {
+    "justoCentavos": 2702,
+    "potencial": -0.3156028368794326
+   },
+   "passado": {
+    "justoCentavos": 2754,
+    "potencial": -0.3024316109422492
+   }
+  },
+  "EZTC3": {
+   "curva": {
+    "justoCentavos": 546,
+    "potencial": -0.5754276827371695
+   },
+   "orientador": {
+    "justoCentavos": 619,
+    "potencial": -0.5186625194401243
+   },
+   "trajetoria": {
+    "justoCentavos": 681,
+    "potencial": -0.4704510108864697
+   },
+   "passado": {
+    "justoCentavos": 646,
+    "potencial": -0.4976671850699844
+   }
+  },
+  "FESA4": {
+   "curva": {
+    "justoCentavos": 216,
+    "potencial": -0.6197183098591549
+   },
+   "orientador": {
+    "justoCentavos": 231,
+    "potencial": -0.5933098591549295
+   },
+   "trajetoria": {
+    "justoCentavos": 240,
+    "potencial": -0.5774647887323944
+   },
+   "passado": {
+    "justoCentavos": 237,
+    "potencial": -0.5827464788732394
+   }
+  },
+  "FRAS3": {
+   "curva": {
+    "justoCentavos": 916,
+    "potencial": -0.6051724137931034
+   },
+   "orientador": {
+    "justoCentavos": 1110,
+    "potencial": -0.521551724137931
+   },
+   "trajetoria": {
+    "justoCentavos": 1273,
+    "potencial": -0.45129310344827583
+   },
+   "passado": {
+    "justoCentavos": 1184,
+    "potencial": -0.4896551724137931
+   }
+  },
+  "GGBR4": {
+   "curva": {
+    "justoCentavos": 1633,
+    "potencial": -0.3483639265762171
+   },
+   "orientador": {
+    "justoCentavos": 1920,
+    "potencial": -0.2338387869114126
+   },
+   "trajetoria": {
+    "justoCentavos": 2152,
+    "potencial": -0.14126097366320828
+   },
+   "passado": {
+    "justoCentavos": 2030,
+    "potencial": -0.18994413407821223
+   }
+  },
+  "GOAU4": {
+   "orientador": {
+    "justoCentavos": 453,
+    "potencial": -0.5958965209634255
+   },
+   "trajetoria": {
+    "justoCentavos": 839,
+    "potencial": -0.25156110615521854
+   },
+   "passado": {
+    "justoCentavos": 648,
+    "potencial": -0.42194469223907227
+   }
+  },
+  "GRND3": {
+   "curva": {
+    "justoCentavos": 219,
+    "potencial": -0.4175531914893617
+   },
+   "orientador": {
+    "justoCentavos": 244,
+    "potencial": -0.351063829787234
+   },
+   "trajetoria": {
+    "justoCentavos": 263,
+    "potencial": -0.300531914893617
+   },
+   "passado": {
+    "justoCentavos": 255,
+    "potencial": -0.3218085106382979
+   }
+  },
+  "HAPV3": {
+   "curva": {
+    "justoCentavos": 291,
+    "potencial": -0.5669642857142857
+   },
+   "orientador": {
+    "justoCentavos": 324,
+    "potencial": -0.5178571428571428
+   },
+   "trajetoria": {
+    "justoCentavos": 403,
+    "potencial": -0.400297619047619
+   },
+   "passado": {
+    "justoCentavos": 344,
+    "potencial": -0.4880952380952381
+   }
+  },
+  "HYPE3": {
+   "curva": {
+    "justoCentavos": 211,
+    "potencial": -0.9103272418189545
+   },
+   "orientador": {
+    "justoCentavos": 398,
+    "potencial": -0.8308542286442839
+   },
+   "trajetoria": {
+    "justoCentavos": 534,
+    "potencial": -0.7730556736081599
+   },
+   "passado": {
+    "justoCentavos": 477,
+    "potencial": -0.7972800679983001
+   }
+  },
+  "IGTI11": {
+   "curva": {
+    "justoCentavos": 85,
+    "potencial": -0.9670031055900621
+   },
+   "orientador": {
+    "justoCentavos": 104,
+    "potencial": -0.9596273291925467
+   },
+   "trajetoria": {
+    "justoCentavos": 134,
+    "potencial": -0.9479813664596274
+   },
+   "passado": {
+    "justoCentavos": 111,
+    "potencial": -0.9569099378881988
+   }
+  },
+  "IRBR3": {
+   "curva": {
+    "justoCentavos": 2550,
+    "potencial": -0.5882447925076699
+   },
+   "orientador": {
+    "justoCentavos": 2774,
+    "potencial": -0.5520749233005006
+   },
+   "trajetoria": {
+    "justoCentavos": 2810,
+    "potencial": -0.5462619086064912
+   },
+   "passado": {
+    "justoCentavos": 2858,
+    "potencial": -0.5385112223478121
+   }
+  },
+  "ISAE4": {
+   "curva": {
+    "justoCentavos": 3000,
+    "potencial": 0.09970674486803514
+   },
+   "orientador": {
+    "justoCentavos": 4098,
+    "potencial": 0.5021994134897358
+   },
+   "trajetoria": {
+    "justoCentavos": 4829,
+    "potencial": 0.7701612903225805
+   },
+   "passado": {
+    "justoCentavos": 4550,
+    "potencial": 0.6678885630498533
+   }
+  },
+  "ITSA4": {
+   "curva": {
+    "justoCentavos": 881,
+    "potencial": -0.37295373665480425
+   },
+   "orientador": {
+    "justoCentavos": 1041,
+    "potencial": -0.2590747330960854
+   },
+   "trajetoria": {
+    "justoCentavos": 1165,
+    "potencial": -0.1708185053380783
+   },
+   "passado": {
+    "justoCentavos": 1102,
+    "potencial": -0.21565836298932392
+   }
+  },
+  "ITUB3": {
+   "curva": {
+    "justoCentavos": 2249,
+    "potencial": -0.5137297297297297
+   },
+   "orientador": {
+    "justoCentavos": 2625,
+    "potencial": -0.43243243243243246
+   },
+   "trajetoria": {
+    "justoCentavos": 2689,
+    "potencial": -0.4185945945945946
+   },
+   "passado": {
+    "justoCentavos": 2774,
+    "potencial": -0.4002162162162162
+   }
+  },
+  "ITUB4": {
+   "curva": {
+    "justoCentavos": 2186,
+    "potencial": -0.48382526564344747
+   },
+   "orientador": {
+    "justoCentavos": 2535,
+    "potencial": -0.4014167650531287
+   },
+   "trajetoria": {
+    "justoCentavos": 2594,
+    "potencial": -0.38748524203069656
+   },
+   "passado": {
+    "justoCentavos": 2673,
+    "potencial": -0.36883116883116884
+   }
+  },
+  "JHSF3": {
+   "curva": {
+    "justoCentavos": 820,
+    "potencial": -0.30684699915469155
+   },
+   "orientador": {
+    "justoCentavos": 952,
+    "potencial": -0.19526627218934917
+   },
+   "trajetoria": {
+    "justoCentavos": 1062,
+    "potencial": -0.1022823330515639
+   },
+   "passado": {
+    "justoCentavos": 1002,
+    "potencial": -0.15300084530853766
+   }
+  },
+  "KEPL3": {
+   "curva": {
+    "justoCentavos": 524,
+    "potencial": -0.20364741641337383
+   },
+   "orientador": {
+    "justoCentavos": 597,
+    "potencial": -0.09270516717325233
+   },
+   "trajetoria": {
+    "justoCentavos": 660,
+    "potencial": 0.0030395136778114855
+   },
+   "passado": {
+    "justoCentavos": 625,
+    "potencial": -0.050151975683890584
+   }
+  },
+  "KLBN3": {
+   "trajetoria": {
+    "justoCentavos": 5,
+    "potencial": -0.9875311720698254
+   }
+  },
+  "KLBN4": {
+   "trajetoria": {
+    "justoCentavos": 8,
+    "potencial": -0.9789473684210526
+   }
+  },
+  "LEVE3": {
+   "curva": {
+    "justoCentavos": 2530,
+    "potencial": -0.22558922558922562
+   },
+   "orientador": {
+    "justoCentavos": 2883,
+    "potencial": -0.11753902662993582
+   },
+   "trajetoria": {
+    "justoCentavos": 3221,
+    "potencial": -0.014080195898377742
+   },
+   "passado": {
+    "justoCentavos": 3016,
+    "potencial": -0.07682889501071323
+   }
+  },
+  "LOGG3": {
+   "orientador": {
+    "justoCentavos": 139,
+    "potencial": -0.9405982905982906
+   },
+   "trajetoria": {
+    "justoCentavos": 316,
+    "potencial": -0.864957264957265
+   },
+   "passado": {
+    "justoCentavos": 230,
+    "potencial": -0.9017094017094017
+   }
+  },
+  "LREN3": {
+   "curva": {
+    "justoCentavos": 571,
+    "potencial": -0.4906333630686887
+   },
+   "orientador": {
+    "justoCentavos": 651,
+    "potencial": -0.41926851025869766
+   },
+   "trajetoria": {
+    "justoCentavos": 710,
+    "potencial": -0.36663693131132924
+   },
+   "passado": {
+    "justoCentavos": 682,
+    "potencial": -0.3916146297948261
+   }
+  },
+  "MDIA3": {
+   "curva": {
+    "justoCentavos": 966,
+    "potencial": -0.4334310850439883
+   },
+   "orientador": {
+    "justoCentavos": 1158,
+    "potencial": -0.3208211143695015
+   },
+   "trajetoria": {
+    "justoCentavos": 1278,
+    "potencial": -0.25043988269794726
+   },
+   "passado": {
+    "justoCentavos": 1237,
+    "potencial": -0.2744868035190617
+   }
+  },
+  "MDNE3": {
+   "curva": {
+    "justoCentavos": 267,
+    "potencial": -0.8919465803318494
+   },
+   "orientador": {
+    "justoCentavos": 325,
+    "potencial": -0.868474301902064
+   },
+   "trajetoria": {
+    "justoCentavos": 375,
+    "potencial": -0.848239579117766
+   },
+   "passado": {
+    "justoCentavos": 346,
+    "potencial": -0.8599757183326588
+   }
+  },
+  "MGLU3": {
+   "curva": {
+    "justoCentavos": 565,
+    "potencial": 0.014362657091561952
+   },
+   "orientador": {
+    "justoCentavos": 631,
+    "potencial": 0.1328545780969478
+   },
+   "trajetoria": {
+    "justoCentavos": 699,
+    "potencial": 0.2549371633752244
+   },
+   "passado": {
+    "justoCentavos": 653,
+    "potencial": 0.17235188509874325
+   }
+  },
+  "MOTV3": {
+   "orientador": {
+    "justoCentavos": 448,
+    "potencial": -0.7264957264957265
+   },
+   "trajetoria": {
+    "justoCentavos": 642,
+    "potencial": -0.608058608058608
+   },
+   "passado": {
+    "justoCentavos": 573,
+    "potencial": -0.6501831501831501
+   }
+  },
+  "MOVI3": {
+   "trajetoria": {
+    "justoCentavos": 28,
+    "potencial": -0.9641025641025641
+   }
+  },
+  "MULT3": {
+   "curva": {
+    "justoCentavos": 243,
+    "potencial": -0.9185383841770031
+   },
+   "orientador": {
+    "justoCentavos": 372,
+    "potencial": -0.8752933288635603
+   },
+   "trajetoria": {
+    "justoCentavos": 481,
+    "potencial": -0.8387529332886356
+   },
+   "passado": {
+    "justoCentavos": 425,
+    "potencial": -0.8575259805564868
+   }
+  },
+  "MYPK3": {
+   "orientador": {
+    "justoCentavos": 294,
+    "potencial": -0.7024291497975709
+   },
+   "trajetoria": {
+    "justoCentavos": 603,
+    "potencial": -0.38967611336032393
+   },
+   "passado": {
+    "justoCentavos": 484,
+    "potencial": -0.5101214574898786
+   }
+  },
+  "NATU3": {
+   "curva": {
+    "justoCentavos": 176,
+    "potencial": -0.7808219178082192
+   },
+   "orientador": {
+    "justoCentavos": 208,
+    "potencial": -0.7409713574097135
+   },
+   "trajetoria": {
+    "justoCentavos": 243,
+    "potencial": -0.6973848069738481
+   },
+   "passado": {
+    "justoCentavos": 220,
+    "potencial": -0.7260273972602739
+   }
+  },
+  "PETR3": {
+   "curva": {
+    "justoCentavos": 3017,
+    "potencial": -0.44397346111315883
+   },
+   "orientador": {
+    "justoCentavos": 3770,
+    "potencial": -0.30519719867305556
+   },
+   "trajetoria": {
+    "justoCentavos": 4392,
+    "potencial": -0.19056395134537407
+   },
+   "passado": {
+    "justoCentavos": 4068,
+    "potencial": -0.2502764467379285
+   }
+  },
+  "PETR4": {
+   "curva": {
+    "justoCentavos": 3085,
+    "potencial": -0.36937857726901063
+   },
+   "orientador": {
+    "justoCentavos": 3870,
+    "potencial": -0.20891251022076857
+   },
+   "trajetoria": {
+    "justoCentavos": 4512,
+    "potencial": -0.07767784137367138
+   },
+   "passado": {
+    "justoCentavos": 4183,
+    "potencial": -0.14493049877350783
+   }
+  },
+  "PGMN3": {
+   "curva": {
+    "justoCentavos": 623,
+    "potencial": 0.6394736842105265
+   },
+   "orientador": {
+    "justoCentavos": 792,
+    "potencial": 1.0842105263157895
+   },
+   "trajetoria": {
+    "justoCentavos": 911,
+    "potencial": 1.3973684210526316
+   },
+   "passado": {
+    "justoCentavos": 858,
+    "potencial": 1.2578947368421054
+   }
+  },
+  "PINE4": {
+   "curva": {
+    "justoCentavos": 1045,
+    "potencial": -0.10454155955441308
+   },
+   "orientador": {
+    "justoCentavos": 1166,
+    "potencial": -0.0008568980291345147
+   },
+   "trajetoria": {
+    "justoCentavos": 1186,
+    "potencial": 0.016281062553556085
+   },
+   "passado": {
+    "justoCentavos": 1213,
+    "potencial": 0.03941730934018859
+   }
+  },
+  "PNVL3": {
+   "orientador": {
+    "justoCentavos": 214,
+    "potencial": -0.8347490347490347
+   },
+   "trajetoria": {
+    "justoCentavos": 291,
+    "potencial": -0.7752895752895753
+   },
+   "passado": {
+    "justoCentavos": 270,
+    "potencial": -0.7915057915057916
+   }
+  },
+  "POMO3": {
+   "curva": {
+    "justoCentavos": 17,
+    "potencial": -0.9594272076372315
+   },
+   "orientador": {
+    "justoCentavos": 35,
+    "potencial": -0.9164677804295942
+   },
+   "trajetoria": {
+    "justoCentavos": 49,
+    "potencial": -0.883054892601432
+   },
+   "passado": {
+    "justoCentavos": 43,
+    "potencial": -0.8973747016706444
+   }
+  },
+  "POMO4": {
+   "curva": {
+    "justoCentavos": 16,
+    "potencial": -0.963882618510158
+   },
+   "orientador": {
+    "justoCentavos": 34,
+    "potencial": -0.9232505643340858
+   },
+   "trajetoria": {
+    "justoCentavos": 47,
+    "potencial": -0.8939051918735892
+   },
+   "passado": {
+    "justoCentavos": 41,
+    "potencial": -0.9074492099322798
+   }
+  },
+  "POSI3": {
+   "curva": {
+    "justoCentavos": 456,
+    "potencial": 0.3103448275862068
+   },
+   "orientador": {
+    "justoCentavos": 581,
+    "potencial": 0.6695402298850573
+   },
+   "trajetoria": {
+    "justoCentavos": 678,
+    "potencial": 0.9482758620689656
+   },
+   "passado": {
+    "justoCentavos": 629,
+    "potencial": 0.8074712643678161
+   }
+  },
+  "PRIO3": {
+   "curva": {
+    "justoCentavos": 1025,
+    "potencial": -0.839618213112189
+   },
+   "orientador": {
+    "justoCentavos": 1526,
+    "potencial": -0.7612267250821468
+   },
+   "trajetoria": {
+    "justoCentavos": 1929,
+    "potencial": -0.6981693005789391
+   },
+   "passado": {
+    "justoCentavos": 1720,
+    "potencial": -0.7308715381004537
+   }
+  },
+  "PSSA3": {
+   "curva": {
+    "justoCentavos": 2547,
+    "potencial": -0.4910071942446043
+   },
+   "orientador": {
+    "justoCentavos": 3014,
+    "potencial": -0.3976818545163869
+   },
+   "trajetoria": {
+    "justoCentavos": 3096,
+    "potencial": -0.38129496402877694
+   },
+   "passado": {
+    "justoCentavos": 3205,
+    "potencial": -0.3595123900879297
+   }
+  },
+  "RADL3": {
+   "curva": {
+    "justoCentavos": 737,
+    "potencial": -0.6228249744114636
+   },
+   "orientador": {
+    "justoCentavos": 915,
+    "potencial": -0.5317297850562948
+   },
+   "trajetoria": {
+    "justoCentavos": 1046,
+    "potencial": -0.46468781985670415
+   },
+   "passado": {
+    "justoCentavos": 987,
+    "potencial": -0.4948822927328557
+   }
+  },
+  "RAIL3": {
+   "orientador": {
+    "justoCentavos": 138,
+    "potencial": -0.9050894085281982
+   },
+   "trajetoria": {
+    "justoCentavos": 198,
+    "potencial": -0.8638239339752407
+   },
+   "passado": {
+    "justoCentavos": 163,
+    "potencial": -0.8878954607977992
+   }
+  },
+  "RANI3": {
+   "curva": {
+    "justoCentavos": 689,
+    "potencial": -0.1355081555834379
+   },
+   "orientador": {
+    "justoCentavos": 874,
+    "potencial": 0.09661229611041411
+   },
+   "trajetoria": {
+    "justoCentavos": 1014,
+    "potencial": 0.272271016311167
+   },
+   "passado": {
+    "justoCentavos": 948,
+    "potencial": 0.1894604767879549
+   }
+  },
+  "RDOR3": {
+   "curva": {
+    "justoCentavos": 1588,
+    "potencial": -0.5713900134952765
+   },
+   "orientador": {
+    "justoCentavos": 1755,
+    "potencial": -0.5263157894736842
+   },
+   "trajetoria": {
+    "justoCentavos": 1932,
+    "potencial": -0.47854251012145743
+   },
+   "passado": {
+    "justoCentavos": 1815,
+    "potencial": -0.5101214574898786
+   }
+  },
+  "RENT3": {
+   "trajetoria": {
+    "justoCentavos": 87,
+    "potencial": -0.9755549311604385
+   }
+  },
+  "RENT4": {
+   "trajetoria": {
+    "justoCentavos": 103,
+    "potencial": -0.9705461824420932
+   }
+  },
+  "RIAA3": {
+   "curva": {
+    "justoCentavos": 465,
+    "potencial": -0.34042553191489355
+   },
+   "orientador": {
+    "justoCentavos": 523,
+    "potencial": -0.25815602836879425
+   },
+   "trajetoria": {
+    "justoCentavos": 572,
+    "potencial": -0.18865248226950357
+   },
+   "passado": {
+    "justoCentavos": 545,
+    "potencial": -0.22695035460992904
+   }
+  },
+  "SANB11": {
+   "curva": {
+    "justoCentavos": 1836,
+    "potencial": -0.3954560421468555
+   },
+   "orientador": {
+    "justoCentavos": 2079,
+    "potencial": -0.3154428712545275
+   },
+   "trajetoria": {
+    "justoCentavos": 2120,
+    "potencial": -0.30194270661837347
+   },
+   "passado": {
+    "justoCentavos": 2174,
+    "potencial": -0.2841620019756339
+   }
+  },
+  "SANB3": {
+   "curva": {
+    "justoCentavos": 929,
+    "potencial": -0.38395225464190985
+   },
+   "orientador": {
+    "justoCentavos": 1055,
+    "potencial": -0.30039787798408485
+   },
+   "trajetoria": {
+    "justoCentavos": 1076,
+    "potencial": -0.2864721485411141
+   },
+   "passado": {
+    "justoCentavos": 1104,
+    "potencial": -0.2679045092838197
+   }
+  },
+  "SANB4": {
+   "curva": {
+    "justoCentavos": 948,
+    "potencial": -0.3696808510638297
+   },
+   "orientador": {
+    "justoCentavos": 1082,
+    "potencial": -0.2805851063829787
+   },
+   "trajetoria": {
+    "justoCentavos": 1104,
+    "potencial": -0.26595744680851063
+   },
+   "passado": {
+    "justoCentavos": 1134,
+    "potencial": -0.2460106382978723
+   }
+  },
+  "SAPR11": {
+   "curva": {
+    "justoCentavos": 3674,
+    "potencial": 0.05757052389176741
+   },
+   "orientador": {
+    "justoCentavos": 4571,
+    "potencial": 0.3157743235463442
+   },
+   "trajetoria": {
+    "justoCentavos": 5185,
+    "potencial": 0.49251583189407017
+   },
+   "passado": {
+    "justoCentavos": 4933,
+    "potencial": 0.4199769717904432
+   }
+  },
+  "SAPR4": {
+   "curva": {
+    "justoCentavos": 792,
+    "potencial": 0.1612903225806451
+   },
+   "orientador": {
+    "justoCentavos": 1002,
+    "potencial": 0.4692082111436949
+   },
+   "trajetoria": {
+    "justoCentavos": 1142,
+    "potencial": 0.6744868035190615
+   },
+   "passado": {
+    "justoCentavos": 1090,
+    "potencial": 0.5982404692082112
+   }
+  },
+  "SAUD3": {
+   "curva": {
+    "justoCentavos": 120,
+    "potencial": -0.9201065246338216
+   },
+   "orientador": {
+    "justoCentavos": 134,
+    "potencial": -0.9107856191744341
+   },
+   "trajetoria": {
+    "justoCentavos": 147,
+    "potencial": -0.9021304926764314
+   },
+   "passado": {
+    "justoCentavos": 140,
+    "potencial": -0.9067909454061251
+   }
+  },
+  "SBFG3": {
+   "curva": {
+    "justoCentavos": 123,
+    "potencial": -0.8592677345537757
+   },
+   "orientador": {
+    "justoCentavos": 179,
+    "potencial": -0.7951945080091534
+   },
+   "trajetoria": {
+    "justoCentavos": 249,
+    "potencial": -0.7151029748283753
+   },
+   "passado": {
+    "justoCentavos": 206,
+    "potencial": -0.7643020594965675
+   }
+  },
+  "SBSP3": {
+   "curva": {
+    "justoCentavos": 358,
+    "potencial": -0.8666169895678092
+   },
+   "orientador": {
+    "justoCentavos": 539,
+    "potencial": -0.7991803278688524
+   },
+   "trajetoria": {
+    "justoCentavos": 665,
+    "potencial": -0.7522354694485841
+   },
+   "passado": {
+    "justoCentavos": 610,
+    "potencial": -0.7727272727272728
+   }
+  },
+  "SEER3": {
+   "curva": {
+    "justoCentavos": 1696,
+    "potencial": 0.22278298485940892
+   },
+   "orientador": {
+    "justoCentavos": 1939,
+    "potencial": 0.3979812545061285
+   },
+   "trajetoria": {
+    "justoCentavos": 2158,
+    "potencial": 0.5558759913482335
+   },
+   "passado": {
+    "justoCentavos": 2030,
+    "potencial": 0.4635904830569576
+   }
+  },
+  "SHUL4": {
+   "curva": {
+    "justoCentavos": 339,
+    "potencial": -0.2206896551724137
+   },
+   "orientador": {
+    "justoCentavos": 388,
+    "potencial": -0.10804597701149421
+   },
+   "trajetoria": {
+    "justoCentavos": 427,
+    "potencial": -0.018390804597701167
+   },
+   "passado": {
+    "justoCentavos": 407,
+    "potencial": -0.06436781609195388
+   }
+  },
+  "SLCE3": {
+   "curva": {
+    "justoCentavos": 438,
+    "potencial": -0.7475504322766572
+   },
+   "orientador": {
+    "justoCentavos": 726,
+    "potencial": -0.581556195965418
+   },
+   "trajetoria": {
+    "justoCentavos": 930,
+    "potencial": -0.46397694524495675
+   },
+   "passado": {
+    "justoCentavos": 844,
+    "potencial": -0.5135446685878963
+   }
+  },
+  "SMTO3": {
+   "curva": {
+    "justoCentavos": 2507,
+    "potencial": 0.27001013171225946
+   },
+   "orientador": {
+    "justoCentavos": 3396,
+    "potencial": 0.7203647416413376
+   },
+   "trajetoria": {
+    "justoCentavos": 4017,
+    "potencial": 1.0349544072948331
+   },
+   "passado": {
+    "justoCentavos": 3754,
+    "potencial": 0.9017223910840934
+   }
+  },
+  "SUZB3": {
+   "curva": {
+    "justoCentavos": 2989,
+    "potencial": -0.368076109936575
+   },
+   "orientador": {
+    "justoCentavos": 4555,
+    "potencial": -0.03699788583509514
+   },
+   "trajetoria": {
+    "justoCentavos": 5666,
+    "potencial": 0.1978858350951374
+   },
+   "passado": {
+    "justoCentavos": 5213,
+    "potencial": 0.1021141649048627
+   }
+  },
+  "TAEE11": {
+   "curva": {
+    "justoCentavos": 2171,
+    "potencial": -0.4640829424833374
+   },
+   "orientador": {
+    "justoCentavos": 2570,
+    "potencial": -0.3655887435201185
+   },
+   "trajetoria": {
+    "justoCentavos": 2989,
+    "potencial": -0.2621574919772895
+   },
+   "passado": {
+    "justoCentavos": 2690,
+    "potencial": -0.33596642804245863
+   }
+  },
+  "TAEE4": {
+   "curva": {
+    "justoCentavos": 771,
+    "potencial": -0.4380466472303207
+   },
+   "orientador": {
+    "justoCentavos": 911,
+    "potencial": -0.33600583090379016
+   },
+   "trajetoria": {
+    "justoCentavos": 1059,
+    "potencial": -0.22813411078717205
+   },
+   "passado": {
+    "justoCentavos": 954,
+    "potencial": -0.30466472303207004
+   }
+  },
+  "TEND3": {
+   "curva": {
+    "justoCentavos": 521,
+    "potencial": -0.8344980940279543
+   },
+   "orientador": {
+    "justoCentavos": 581,
+    "potencial": -0.815438373570521
+   },
+   "trajetoria": {
+    "justoCentavos": 645,
+    "potencial": -0.7951080050825922
+   },
+   "passado": {
+    "justoCentavos": 603,
+    "potencial": -0.8084498094027954
+   }
+  },
+  "TGMA3": {
+   "curva": {
+    "justoCentavos": 1524,
+    "potencial": -0.567659574468085
+   },
+   "orientador": {
+    "justoCentavos": 1736,
+    "potencial": -0.5075177304964539
+   },
+   "trajetoria": {
+    "justoCentavos": 1923,
+    "potencial": -0.454468085106383
+   },
+   "passado": {
+    "justoCentavos": 1817,
+    "potencial": -0.48453900709219855
+   }
+  },
+  "TOTS3": {
+   "curva": {
+    "justoCentavos": 772,
+    "potencial": -0.7753855106197265
+   },
+   "orientador": {
+    "justoCentavos": 876,
+    "potencial": -0.7451265638638348
+   },
+   "trajetoria": {
+    "justoCentavos": 969,
+    "potencial": -0.7180680826302008
+   },
+   "passado": {
+    "justoCentavos": 915,
+    "potencial": -0.7337794588303753
+   }
+  },
+  "UGPA3": {
+   "trajetoria": {
+    "justoCentavos": 123,
+    "potencial": -0.9679437060203284
+   }
+  },
+  "UNIP6": {
+   "curva": {
+    "justoCentavos": 4610,
+    "potencial": -0.19179523141654975
+   },
+   "orientador": {
+    "justoCentavos": 5480,
+    "potencial": -0.03927068723702668
+   },
+   "trajetoria": {
+    "justoCentavos": 6238,
+    "potencial": 0.09361851332398323
+   },
+   "passado": {
+    "justoCentavos": 5811,
+    "potencial": 0.01875876577840113
+   }
+  },
+  "USIM3": {
+   "curva": {
+    "justoCentavos": 44,
+    "potencial": -0.9337349397590361
+   },
+   "orientador": {
+    "justoCentavos": 66,
+    "potencial": -0.9006024096385542
+   },
+   "trajetoria": {
+    "justoCentavos": 89,
+    "potencial": -0.8659638554216867
+   },
+   "passado": {
+    "justoCentavos": 74,
+    "potencial": -0.8885542168674698
+   }
+  },
+  "USIM5": {
+   "curva": {
+    "justoCentavos": 41,
+    "potencial": -0.9416785206258891
+   },
+   "orientador": {
+    "justoCentavos": 63,
+    "potencial": -0.9103840682788051
+   },
+   "trajetoria": {
+    "justoCentavos": 85,
+    "potencial": -0.8790896159317213
+   },
+   "passado": {
+    "justoCentavos": 70,
+    "potencial": -0.9004267425320057
+   }
+  },
+  "VALE3": {
+   "curva": {
+    "justoCentavos": 7025,
+    "potencial": -0.06928987811340757
+   },
+   "orientador": {
+    "justoCentavos": 8131,
+    "potencial": 0.07723900370959191
+   },
+   "trajetoria": {
+    "justoCentavos": 9104,
+    "potencial": 0.20614732379438264
+   },
+   "passado": {
+    "justoCentavos": 8553,
+    "potencial": 0.13314785373608898
+   }
+  },
+  "VAMO3": {
+   "trajetoria": {
+    "justoCentavos": 30,
+    "potencial": -0.9074074074074074
+   }
+  },
+  "VBBR3": {
+   "orientador": {
+    "justoCentavos": 155,
+    "potencial": -0.9588859416445624
+   },
+   "trajetoria": {
+    "justoCentavos": 277,
+    "potencial": -0.926525198938992
+   },
+   "passado": {
+    "justoCentavos": 227,
+    "potencial": -0.939787798408488
+   }
+  },
+  "VIVT3": {
+   "curva": {
+    "justoCentavos": 830,
+    "potencial": -0.7279580465421174
+   },
+   "orientador": {
+    "justoCentavos": 983,
+    "potencial": -0.6778105539167486
+   },
+   "trajetoria": {
+    "justoCentavos": 1122,
+    "potencial": -0.6322517207472959
+   },
+   "passado": {
+    "justoCentavos": 1043,
+    "potencial": -0.6581448705342511
+   }
+  },
+  "VLID3": {
+   "curva": {
+    "justoCentavos": 610,
+    "potencial": -0.655367231638418
+   },
+   "orientador": {
+    "justoCentavos": 745,
+    "potencial": -0.5790960451977402
+   },
+   "trajetoria": {
+    "justoCentavos": 830,
+    "potencial": -0.5310734463276836
+   },
+   "passado": {
+    "justoCentavos": 799,
+    "potencial": -0.5485875706214689
+   }
+  },
+  "VULC3": {
+   "curva": {
+    "justoCentavos": 1375,
+    "potencial": 0.03461249059443197
+   },
+   "orientador": {
+    "justoCentavos": 1596,
+    "potencial": 0.2009029345372462
+   },
+   "trajetoria": {
+    "justoCentavos": 1787,
+    "potencial": 0.3446200150489091
+   },
+   "passado": {
+    "justoCentavos": 1679,
+    "potencial": 0.2633559066967645
+   }
+  },
+  "WEGE3": {
+   "curva": {
+    "justoCentavos": 1253,
+    "potencial": -0.7530547891210091
+   },
+   "orientador": {
+    "justoCentavos": 1533,
+    "potencial": -0.6978715017737486
+   },
+   "trajetoria": {
+    "justoCentavos": 1739,
+    "potencial": -0.6572723689396925
+   },
+   "passado": {
+    "justoCentavos": 1663,
+    "potencial": -0.6722506897910918
+   }
+  },
+  "WIZC3": {
+   "curva": {
+    "justoCentavos": 1403,
+    "potencial": 0.7827191867852604
+   },
+   "orientador": {
+    "justoCentavos": 1570,
+    "potencial": 0.9949174078780176
+   },
+   "trajetoria": {
+    "justoCentavos": 1598,
+    "potencial": 1.030495552731893
+   },
+   "passado": {
+    "justoCentavos": 1635,
+    "potencial": 1.0775095298602289
+   }
+  },
+  "YDUQ3": {
+   "curva": {
+    "justoCentavos": 53,
+    "potencial": -0.9465725806451614
+   },
+   "orientador": {
+    "justoCentavos": 145,
+    "potencial": -0.8538306451612904
+   },
+   "trajetoria": {
+    "justoCentavos": 244,
+    "potencial": -0.7540322580645161
+   },
+   "passado": {
+    "justoCentavos": 178,
+    "potencial": -0.8205645161290324
+   }
+  }
+ }
+}

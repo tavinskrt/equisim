@@ -18,7 +18,7 @@ abstract final class CsvExport {
 
   /// Série temporal das duas carteiras.
   static String comparisonSeries(PortfolioComparison result) {
-    final reference = result.principal ?? result.reserva;
+    final reference = result.principal ?? result.reserve;
     if (reference == null) return '';
 
     final buffer = StringBuffer()
@@ -34,14 +34,14 @@ abstract final class CsvExport {
 
     for (var i = 0; i < reference.dates.length; i++) {
       final principal = result.principal;
-      final reserva = result.reserva;
+      final reserve = result.reserve;
       buffer.writeln(
         [
           Fmt.date.format(reference.dates[i]),
           _valueAt(principal?.base100, i),
           _valueAt(principal?.wealth, i),
-          _valueAt(reserva?.base100, i),
-          _valueAt(reserva?.wealth, i),
+          _valueAt(reserve?.base100, i),
+          _valueAt(reserve?.wealth, i),
         ].join(separator),
       );
     }
@@ -64,7 +64,7 @@ abstract final class CsvExport {
     }
 
     final p = result.principal?.metrics;
-    final r = result.reserva?.metrics;
+    final r = result.reserve?.metrics;
 
     row(
       'retorno_ponderado_tempo_twr',
@@ -85,31 +85,31 @@ abstract final class CsvExport {
     row(
       'patrimonio_final',
       result.principal?.finalValue.reais,
-      result.reserva?.finalValue.reais,
+      result.reserve?.finalValue.reais,
       decimals: 2,
     );
     row(
       'capital_aportado',
       result.principal?.totalContributed.reais,
-      result.reserva?.totalContributed.reais,
+      result.reserve?.totalContributed.reais,
       decimals: 2,
     );
     row(
       'capital_alocado',
       result.principal?.totalAllocated.reais,
-      result.reserva?.totalAllocated.reais,
+      result.reserve?.totalAllocated.reais,
       decimals: 2,
     );
     row(
       'custos_de_transacao',
       result.principal?.transactionCosts.reais,
-      result.reserva?.transactionCosts.reais,
+      result.reserve?.transactionCosts.reais,
       decimals: 2,
     );
     row(
       'caixa_residual',
       result.principal?.residualCash.reais,
-      result.reserva?.residualCash.reais,
+      result.reserve?.residualCash.reais,
       decimals: 2,
     );
 
@@ -186,10 +186,10 @@ Future<void> exportComparisonCsv({
       ..writeln();
   }
 
-  if (result.reserva != null) {
+  if (result.reserve != null) {
     buffer
       ..writeln('## Desempenho por ativo (Reserva)')
-      ..writeln(CsvExport.perAsset(result.reserva!))
+      ..writeln(CsvExport.perAsset(result.reserve!))
       ..writeln();
   }
 

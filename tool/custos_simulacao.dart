@@ -23,17 +23,17 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/congelado.dart';
 
-const _carteiras = 50;
-const _ativosPorCarteira = 8;
-const _semente = 20260922;
+const _portfolios = 50;
+const _assetsPerPortfolio = 8;
+const _seed = 20260922;
 
 Future<void> main() async {
-  final c = await Congelado.montar();
-  final janela = DateRange(DateTime(2019, 1, 2), DateTime(2026, 8, 31));
+  final c = await Frozen.build();
+  final window = DateRange(DateTime(2019, 1, 2), DateTime(2026, 8, 31));
 
   final series = <Ticker, PriceSeries>{};
-  for (final t in c.universo) {
-    final r = await c.ctx.prices.daily(t, janela);
+  for (final t in c.universe) {
+    final r = await c.ctx.prices.daily(t, window);
     final s = r.valueOrNull;
     // Só quem tem a janela inteira: série encurtada encurtaria a simulação de
     // todos os ativos da carteira sorteada.
@@ -44,50 +44,50 @@ Future<void> main() async {
   stdout.writeln('== Custo de transação na simulação (item C4) ==');
   stdout.writeln('  ativos com a janela inteira: ${series.length}');
 
-  final rnd = math.Random(_semente);
-  final disponiveis = series.keys.toList()
+  final rnd = math.Random(_seed);
+  final available = series.keys.toList()
     ..sort((a, b) => a.value.compareTo(b.value));
-  final plano = ContributionPlan(
+  final plan = ContributionPlan(
     initial: Money.fromReais(10000),
     monthly: Money.fromReais(1000),
     contributionDay: 5,
   );
-  const cenarios = {
+  const scenarios = {
     'semCusto': TransactionCosts.none,
     'tarifaB3': TransactionCosts.b3,
     'tarifaEMeioSpread': TransactionCosts(feePartsPerMillion: 5300),
   };
 
-  final linhas = <Map<String, Object?>>[];
-  for (var i = 0; i < _carteiras; i++) {
-    final escolha = [...disponiveis]..shuffle(rnd);
-    final ativos = escolha.take(_ativosPorCarteira).toList();
-    final carteira = Portfolio.equalWeighted(
+  final rows = <Map<String, Object?>>[];
+  for (var i = 0; i < _portfolios; i++) {
+    final choice = [...available]..shuffle(rnd);
+    final assets = choice.take(_assetsPerPortfolio).toList();
+    final portfolio = Portfolio.equalWeighted(
       id: 'c$i',
       name: 'c$i',
       kind: PortfolioKind.principal,
       assets: [
-        for (final t in ativos)
+        for (final t in assets)
           Asset(ticker: t, name: t.value, sector: Sector.unknown),
       ],
     ).unwrap();
-    final porCenario = <String, BacktestOutcome>{};
-    for (final e in cenarios.entries) {
+    final byScenario = <String, BacktestOutcome>{};
+    for (final e in scenarios.entries) {
       final r = PortfolioBacktest.run(
-        portfolio: carteira,
-        prices: {for (final t in ativos) t: series[t]!},
-        plan: plano,
-        range: janela,
+        portfolio: portfolio,
+        prices: {for (final t in assets) t: series[t]!},
+        plan: plan,
+        range: window,
         costs: e.value,
       );
-      if (r.isOk) porCenario[e.key] = r.unwrap();
+      if (r.isOk) byScenario[e.key] = r.unwrap();
     }
-    if (porCenario.length != cenarios.length) continue;
-    final base = porCenario['semCusto']!;
-    linhas.add({
-      'ativos': [for (final t in ativos) t.value],
+    if (byScenario.length != scenarios.length) continue;
+    final base = byScenario['semCusto']!;
+    rows.add({
+      'ativos': [for (final t in assets) t.value],
       'aportado': base.totalContributed.reais,
-      for (final e in porCenario.entries)
+      for (final e in byScenario.entries)
         e.key: {
           'patrimonioFinal': e.value.finalValue.reais,
           'xirr': e.value.metrics.moneyWeightedReturn,
@@ -96,44 +96,44 @@ Future<void> main() async {
     });
   }
 
-  double mediana(List<double> xs) {
+  double median(List<double> xs) {
     final s = [...xs]..sort();
     return s.isEmpty ? double.nan : s[s.length ~/ 2];
   }
 
-  final resumo = <String, Object?>{'carteiras': linhas.length};
+  final summary = <String, Object?>{'carteiras': rows.length};
   for (final k in ['tarifaB3', 'tarifaEMeioSpread']) {
-    final perdaPatrimonio = <double>[];
-    final perdaXirr = <double>[];
-    final custoSobreAportado = <double>[];
-    for (final l in linhas) {
+    final wealthLoss = <double>[];
+    final xirrLoss = <double>[];
+    final costOverContributed = <double>[];
+    for (final l in rows) {
       final b = l['semCusto']! as Map<String, Object?>;
       final x = l[k]! as Map<String, Object?>;
-      perdaPatrimonio.add((x['patrimonioFinal']! as double) /
+      wealthLoss.add((x['patrimonioFinal']! as double) /
               (b['patrimonioFinal']! as double) -
           1);
-      final xb = b['xirr'] as double?, xx = x['xirr'] as double?;
-      if (xb != null && xx != null) perdaXirr.add(xx - xb);
-      custoSobreAportado
+      final baseXirr = b['xirr'] as double?, otherXirr = x['xirr'] as double?;
+      if (baseXirr != null && otherXirr != null) xirrLoss.add(otherXirr - baseXirr);
+      costOverContributed
           .add((x['custos']! as double) / (l['aportado']! as double));
     }
-    resumo[k] = {
-      'variacaoDoPatrimonioFinalMediana': mediana(perdaPatrimonio),
-      'variacaoDoXirrMediana': mediana(perdaXirr),
-      'piorVariacaoDoXirr': perdaXirr.isEmpty ? null : perdaXirr.reduce(math.min),
-      'custoSobreAportadoMediano': mediana(custoSobreAportado),
+    summary[k] = {
+      'variacaoDoPatrimonioFinalMediana': median(wealthLoss),
+      'variacaoDoXirrMediana': median(xirrLoss),
+      'piorVariacaoDoXirr': xirrLoss.isEmpty ? null : xirrLoss.reduce(math.min),
+      'custoSobreAportadoMediano': median(costOverContributed),
     };
   }
   File('docs/validacao/custos_simulacao.json').writeAsStringSync(
     const JsonEncoder.withIndent(' ').convert({
-      'semente': _semente,
-      'janela': '${janela.start.toIso8601String().substring(0, 10)} a '
-          '${janela.end.toIso8601String().substring(0, 10)}',
+      'semente': _seed,
+      'janela': '${window.start.toIso8601String().substring(0, 10)} a '
+          '${window.end.toIso8601String().substring(0, 10)}',
       'plano': 'R\$ 10.000 inicial e R\$ 1.000 por mês',
-      'resumo': resumo,
-      'carteiras': linhas,
+      'resumo': summary,
+      'carteiras': rows,
     }),
   );
-  stdout.writeln(const JsonEncoder.withIndent('  ').convert(resumo));
+  stdout.writeln(const JsonEncoder.withIndent('  ').convert(summary));
   await c.ctx.dispose();
 }

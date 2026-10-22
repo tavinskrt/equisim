@@ -47,23 +47,23 @@ import 'cvm/codigos_fca.dart';
 import 'cvm/csv.dart';
 
 /// Contagens que batem: a 2% entre formulários, a 1% contra a B3.
-const _folgaFormularios = 0.02;
-const _folgaB3 = 0.01;
+const _formsMargin = 0.02;
+const _b3Margin = 0.01;
 
 /// P/VPA plausível para uma companhia com pregão: fora disto, a escala errou.
-const _pvpaMinimo = 0.02;
-const _pvpaMaximo = 50.0;
+const _minPriceToBook = 0.02;
+const _maxPriceToBook = 50.0;
 
-Map<String, List<Map<String, String>>> _porCnpj(String padrao) {
+Map<String, List<Map<String, String>>> _byCnpj(String pattern) {
   final out = <String, List<Map<String, String>>>{};
-  final arquivos = Directory('data/cvm/fre')
+  final files = Directory('data/cvm/fre')
       .listSync()
       .whereType<File>()
-      .where((f) => RegExp(padrao).hasMatch(f.uri.pathSegments.last))
+      .where((f) => RegExp(pattern).hasMatch(f.uri.pathSegments.last))
       .toList()
     ..sort((a, b) => a.path.compareTo(b.path));
-  for (final f in arquivos) {
-    for (final r in lerCsvCvm(f)) {
+  for (final f in files) {
+    for (final r in readCvmCsv(f)) {
       final cnpj = r['CNPJ_Companhia'];
       if (cnpj != null) (out[cnpj] ??= []).add(r);
     }
@@ -72,40 +72,40 @@ Map<String, List<Map<String, String>>> _porCnpj(String padrao) {
 }
 
 /// Eventos de ações declarados no FRE de uma companhia, distintos.
-List<({DateTime aprovacao, double fator, double depois, String tipo})>
-    _declarados(List<Map<String, String>> linhas) {
-  final out = <({DateTime aprovacao, double fator, double depois, String tipo})>[];
-  final vistos = <String>[];
-  for (final r in linhas) {
-    final aprov = DateTime.tryParse('${r['Data_Aprovacao']}T00:00:00Z');
-    final antes = double.tryParse(r['Quantidade_Total_Acoes_Antes_Aprovacao'] ?? '');
-    final depois = double.tryParse(r['Quantidade_Total_Acoes_Depois_Aprovacao'] ?? '');
-    if (aprov == null || antes == null || depois == null) continue;
-    if (antes <= 0 || depois <= 0) continue;
-    final chave = '${_dia(aprov)}|${r['Quantidade_Total_Acoes_Antes_Aprovacao']}|'
+List<({DateTime approval, double factor, double after, String kind})>
+    _declared(List<Map<String, String>> rows) {
+  final out = <({DateTime approval, double factor, double after, String kind})>[];
+  final seen = <String>[];
+  for (final r in rows) {
+    final approval = DateTime.tryParse('${r['Data_Aprovacao']}T00:00:00Z');
+    final before = double.tryParse(r['Quantidade_Total_Acoes_Antes_Aprovacao'] ?? '');
+    final after = double.tryParse(r['Quantidade_Total_Acoes_Depois_Aprovacao'] ?? '');
+    if (approval == null || before == null || after == null) continue;
+    if (before <= 0 || after <= 0) continue;
+    final key = '${_day(approval)}|${r['Quantidade_Total_Acoes_Antes_Aprovacao']}|'
         '${r['Quantidade_Total_Acoes_Depois_Aprovacao']}';
-    if (vistos.contains(chave)) continue;
-    vistos.add(chave);
+    if (seen.contains(key)) continue;
+    seen.add(key);
     // Fator de 1 não é evento de ações: é o formulário repetindo a contagem.
-    if (math.log(depois / antes).abs() < 1e-6) continue;
+    if (math.log(after / before).abs() < 1e-6) continue;
     out.add((
-      aprovacao: aprov,
-      fator: depois / antes,
-      depois: depois,
-      tipo: r['Tipo_Evento'] ?? '',
+      approval: approval,
+      factor: after / before,
+      after: after,
+      kind: r['Tipo_Evento'] ?? '',
     ));
   }
   return out;
 }
 
-double? _mediana(List<double> v) {
+double? _median(List<double> v) {
   if (v.isEmpty) return null;
   final s = [...v]..sort();
   final m = s.length ~/ 2;
   return s.length.isOdd ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-String _dia(DateTime d) => d.toIso8601String().substring(0, 10);
+String _day(DateTime d) => d.toIso8601String().substring(0, 10);
 
 void main() {
   if (!Directory('data/cvm/fre').existsSync()) {
@@ -113,428 +113,428 @@ void main() {
         '--docs FRE --destino data/cvm/fre');
     exit(2);
   }
-  final ponte = (jsonDecode(File('data/b3/ponte_deslistadas.json')
+  final bridge = (jsonDecode(File('data/b3/ponte_deslistadas.json')
           .readAsStringSync()) as Map<String, dynamic>)
       .cast<String, Map<String, dynamic>>();
-  final capital = _porCnpj(r'^fre_cia_aberta_capital_social_\d{4}\.csv$');
-  final desdobramentos =
-      _porCnpj(r'^fre_cia_aberta_capital_social_desdobramento_\d{4}\.csv$');
+  final capital = _byCnpj(r'^fre_cia_aberta_capital_social_\d{4}\.csv$');
+  final splits =
+      _byCnpj(r'^fre_cia_aberta_capital_social_desdobramento_\d{4}\.csv$');
   // Recebimento de cada formulário, para datar a contagem que a série não
   // explica (`ShareCountSource.filingCorrection`).
-  final recebidos = <String, DateTime>{};
+  final receivedInputs = <String, DateTime>{};
   for (final f in Directory('data/cvm/fre').listSync().whereType<File>()) {
     if (!RegExp(r'^fre_cia_aberta_\d{4}\.csv$')
         .hasMatch(f.uri.pathSegments.last)) {
       continue;
     }
-    for (final r in lerCsvCvm(f)) {
+    for (final r in readCvmCsv(f)) {
       final id = r['ID_DOC'];
-      final dia = DateTime.tryParse('${r['DT_RECEB']}T00:00:00Z');
-      if (id != null && dia != null) recebidos[id] = dia;
+      final day = DateTime.tryParse('${r['DT_RECEB']}T00:00:00Z');
+      if (id != null && day != null) receivedInputs[id] = day;
     }
   }
   stderr.writeln('FRE: capital de ${capital.length} companhias, eventos de '
-      '${desdobramentos.length}');
+      '${splits.length}');
 
   // Composição do capital do DFP e do ITR, e patrimônio do DFP, por CNPJ.
-  final composicao = <String, List<({DateTime data, double acoes})>>{};
-  final patrimonio = <String, Map<int, double>>{};
+  final composition = <String, List<({DateTime date, double shares})>>{};
+  final equity = <String, Map<int, double>>{};
   for (final d in (jsonDecode(File('data/cvm_exercicios.json').readAsStringSync())
           as List)
       .cast<Map<String, dynamic>>()) {
     final cnpj = d['cnpj'] as String;
-    final fim = DateTime.tryParse('${d['fimDoExercicio']}T00:00:00Z');
-    if (fim == null) continue;
-    final acoes = (d['acoesIntegralizadas'] as num?)?.toDouble();
-    if (acoes != null && acoes > 0) {
-      (composicao[cnpj] ??= []).add((data: fim, acoes: acoes));
+    final end = DateTime.tryParse('${d['fimDoExercicio']}T00:00:00Z');
+    if (end == null) continue;
+    final shares = (d['acoesIntegralizadas'] as num?)?.toDouble();
+    if (shares != null && shares > 0) {
+      (composition[cnpj] ??= []).add((date: end, shares: shares));
     }
     final pl = (d['patrimonioLiquido'] as num?)?.toDouble();
     if (d['documento'] == 'DFP' && pl != null && pl > 0) {
-      (patrimonio[cnpj] ??= {})[fim.year] = pl;
+      (equity[cnpj] ??= {})[end.year] = pl;
     }
   }
 
   final tickers = {
-    for (final c in ponte.values)
+    for (final c in bridge.values)
       ...(c['papeis'] as Map<String, dynamic>).keys,
   };
   // Os códigos das listadas: os da ponte do universo e os que a FCA declara.
-  final ponteListadas = ((jsonDecode(File('docs/validacao/ponte_cvm.json')
+  final listedBridge = ((jsonDecode(File('docs/validacao/ponte_cvm.json')
           .readAsStringSync()) as Map<String, dynamic>)['ponte']
       as Map<String, dynamic>);
-  final fca = CodigosFca.ler();
-  final codigosListadas = <String, Set<String>>{};
-  for (final e in ponteListadas.entries) {
+  final fca = FcaCodes.read();
+  final listedCodes = <String, Set<String>>{};
+  for (final e in listedBridge.entries) {
     final cnpj = e.value as String;
-    (codigosListadas[cnpj] ??= <String>{})
+    (listedCodes[cnpj] ??= <String>{})
       ..add(e.key)
-      ..addAll(fca.porCnpj[cnpj] ?? const <String>{});
+      ..addAll(fca.byCnpj[cnpj] ?? const <String>{});
   }
-  for (final e in codigosListadas.entries) {
-    codigosListadas[e.key] = codigosDaCompanhia(e.value);
+  for (final e in listedCodes.entries) {
+    listedCodes[e.key] = companyCodes(e.value);
   }
 
   // Proventos das deslistadas, pelo nome de pregão (item A4): a consulta da B3
   // responde para companhia que saiu da bolsa. Um nome de pregão pode ser de
   // outra companhia; o preço com direito contra o COTAHIST do papel é o que
   // confere que é a mesma.
-  final proventosDeslistadas = <String, List<CashDividend>>{};
-  final pastaProventos = Directory('data/b3/complemento_deslistadas');
-  if (pastaProventos.existsSync()) {
-    for (final f in pastaProventos.listSync().whereType<File>()) {
-      final bruto = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
-      proventosDeslistadas[bruto['cnpj'] as String] = [
-        for (final consulta in (bruto['consultas'] as List).cast<Map<String, dynamic>>())
+  final delistedDividends = <String, List<CashDividend>>{};
+  final dividendsDir = Directory('data/b3/complemento_deslistadas');
+  if (dividendsDir.existsSync()) {
+    for (final f in dividendsDir.listSync().whereType<File>()) {
+      final raw = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
+      delistedDividends[raw['cnpj'] as String] = [
+        for (final queryDir in (raw['consultas'] as List).cast<Map<String, dynamic>>())
           ...B3CashDividends.parse(
-              (consulta['proventos'] as List).cast<Object?>()),
+              (queryDir['proventos'] as List).cast<Object?>()),
       ];
     }
   }
-  final cotahist = lerCotahistBruto(
-      {...tickers, for (final c in codigosListadas.values) ...c});
+  final cotahist = readRawCotahist(
+      {...tickers, for (final c in listedCodes.values) ...c});
 
   // ---- 1. O método nas listadas: FRE contra a contagem oficial da B3 ----
-  final registro = B3RegistryCodec.decodePackage(
+  final registry = B3RegistryCodec.decodePackage(
       jsonDecode(File('assets/b3/emissores.json').readAsStringSync())
           as Map<String, dynamic>);
-  final consulta = DateTime.utc(2026, 9, 14);
-  var listadas = 0, listadasBatem = 0;
-  final emissoresVistos = <String>[];
-  final divergentesListadas = <String>[];
-  for (final e in ponteListadas.entries) {
-    final raiz = e.key.length >= 4 ? e.key.substring(0, 4) : '';
-    if (emissoresVistos.contains(raiz)) continue;
-    final oficial = registro[raiz]?.totalShares;
+  final queryDir = DateTime.utc(2026, 9, 14);
+  var listed = 0, listedMatching = 0;
+  final seenIssuers = <String>[];
+  final divergentListed = <String>[];
+  for (final e in listedBridge.entries) {
+    final root = e.key.length >= 4 ? e.key.substring(0, 4) : '';
+    if (seenIssuers.contains(root)) continue;
+    final official = registry[root]?.totalShares;
     final fre = capital[e.value as String];
-    if (oficial == null || fre == null) continue;
-    final ponto = ShareCountHistory.fromFre(
+    if (official == null || fre == null) continue;
+    final point = ShareCountHistory.fromFre(
       fre,
       events: [
-        for (final d in _declarados(desdobramentos[e.value] ?? const []))
-          (date: d.aprovacao, totalAfter: d.depois),
+        for (final d in _declared(splits[e.value] ?? const []))
+          (date: d.approval, totalAfter: d.after),
       ],
-      receivedOn: recebidos,
-    ).at(consulta);
-    if (ponto == null) continue;
-    emissoresVistos.add(raiz);
-    listadas++;
-    final razao = ponto.total / oficial;
-    if ((razao - 1).abs() <= _folgaB3) {
-      listadasBatem++;
+      receivedOn: receivedInputs,
+    ).at(queryDir);
+    if (point == null) continue;
+    seenIssuers.add(root);
+    listed++;
+    final ratio = point.total / official;
+    if ((ratio - 1).abs() <= _b3Margin) {
+      listedMatching++;
     } else {
-      divergentesListadas.add('$raiz ${razao.toStringAsFixed(4)}');
+      divergentListed.add('$root ${ratio.toStringAsFixed(4)}');
     }
   }
 
   // ---- 1b. A contagem por data das listadas, para as coortes (item C3) ----
-  final saidaListadas = <String, Object?>{};
-  var listadasComContagem = 0, listadasEventos = 0, listadasEventosLocalizados = 0;
-  for (final entrada in codigosListadas.entries) {
-    final cnpj = entrada.key;
-    final declarados = _declarados(desdobramentos[cnpj] ?? const []);
+  final listedOutput = <String, Object?>{};
+  var listedWithCount = 0, listedEvents = 0, listedLocatedEvents = 0;
+  for (final entry in listedCodes.entries) {
+    final cnpj = entry.key;
+    final declared = _declared(splits[cnpj] ?? const []);
     // A data ex de cada evento, no primeiro código que o localiza.
-    final dataEx = <int, DateTime>{};
-    for (final codigo in entrada.value) {
-      final serie = cotahist[codigo];
-      if (serie == null || serie.isEmpty) continue;
-      final brutos = [for (final p in serie) p.raw];
-      for (var k = 0; k < declarados.length; k++) {
-        final ev = CorporateEvents.locate(brutos,
-            factor: declarados[k].fator, approvedOn: declarados[k].aprovacao);
+    final firstExDate = <int, DateTime>{};
+    for (final code in entry.value) {
+      final series = cotahist[code];
+      if (series == null || series.isEmpty) continue;
+      final rawSessions = [for (final p in series) p.raw];
+      for (var k = 0; k < declared.length; k++) {
+        final ev = CorporateEvents.locate(rawSessions,
+            factor: declared[k].factor, approvedOn: declared[k].approval);
         if (ev == null) continue;
-        final ja = dataEx[k];
-        if (ja == null || ev.exDate.isBefore(ja)) dataEx[k] = ev.exDate;
+        final existing = firstExDate[k];
+        if (existing == null || ev.exDate.isBefore(existing)) firstExDate[k] = ev.exDate;
       }
     }
-    listadasEventos += declarados.length;
-    listadasEventosLocalizados += dataEx.length;
-    final historico = ShareCountHistory.fromFre(
+    listedEvents += declared.length;
+    listedLocatedEvents += firstExDate.length;
+    final history = ShareCountHistory.fromFre(
       capital[cnpj] ?? const [],
       events: [
-        for (var k = 0; k < declarados.length; k++)
-          (date: dataEx[k] ?? declarados[k].aprovacao, totalAfter: declarados[k].depois),
+        for (var k = 0; k < declared.length; k++)
+          (date: firstExDate[k] ?? declared[k].approval, totalAfter: declared[k].after),
       ],
-      receivedOn: recebidos,
+      receivedOn: receivedInputs,
     );
-    if (historico.points.isEmpty) continue;
-    listadasComContagem++;
-    saidaListadas[cnpj] = {
-      'codigos': entrada.value.toList()..sort(),
+    if (history.points.isEmpty) continue;
+    listedWithCount++;
+    listedOutput[cnpj] = {
+      'codigos': entry.value.toList()..sort(),
       'contagem': [
-        for (final p in historico.points)
-          {'desde': _dia(p.date), 'acoes': p.total, 'fonte': p.source.name},
+        for (final p in history.points)
+          {'desde': _day(p.date), 'acoes': p.total, 'fonte': p.source.name},
       ],
-      'classes': ClassesDoCapital.fromFre(capital[cnpj] ?? const []).toJson(),
+      'classes': CapitalClasses.fromFre(capital[cnpj] ?? const []).toJson(),
     };
   }
-  File('data/b3/listadas_contagem.json').writeAsStringSync(jsonEncode(saidaListadas));
+  File('data/b3/listadas_contagem.json').writeAsStringSync(jsonEncode(listedOutput));
 
   // ---- 2 e 3: as deslistadas ---------------------------------------------
-  final saida = <String, Object?>{};
-  var comContagem = 0, comEventosFre = 0, eventosFre = 0, localizados = 0;
-  var eventosComPregao = 0, eventosLocalizados = 0;
-  final naoLocalizados = <String>[];
-  var inferidos = 0, formularioBate = 0, formularioConfere = 0;
-  var pvpaDentro = 0, pvpaConfere = 0, exerciciosUtilizaveis = 0;
-  var companhiasComProventos = 0, proventosNoPapel = 0;
-  var proventosConferidos = 0, proventosBatem = 0;
-  final pvpas = <double>[];
-  final foraDaFaixa = <String>[];
-  for (final entrada in ponte.entries) {
-    final cnpj = entrada.key;
-    final c = entrada.value;
-    final declarados = _declarados(desdobramentos[cnpj] ?? const []);
+  final output = <String, Object?>{};
+  var withCount = 0, withFreEvents = 0, freEvents = 0, located = 0;
+  var eventsWithTradingDay = 0, locatedEvents = 0;
+  final notLocated = <String>[];
+  var inferred = 0, formMatches = 0, formChecks = 0;
+  var priceToBookWithin = 0, priceToBookChecks = 0, usableFiscalYears = 0;
+  var companiesWithDividends = 0, securityDividends = 0;
+  var checkedDividends = 0, dividendsMatching = 0;
+  final priceToBooks = <double>[];
+  final outOfRange = <String>[];
+  for (final entry in bridge.entries) {
+    final cnpj = entry.key;
+    final c = entry.value;
+    final declared = _declared(splits[cnpj] ?? const []);
     // Data ex de cada evento declarado, quando algum papel a localizou: é nela
     // que a contagem muda; sem ela, vale a aprovação.
-    final dataEx = <int, DateTime>{};
-    if (declarados.isNotEmpty) comEventosFre++;
-    eventosFre += declarados.length;
+    final firstExDate = <int, DateTime>{};
+    if (declared.isNotEmpty) withFreEvents++;
+    freEvents += declared.length;
 
     // Evento com pregão do papel na data de aprovação é o que se pode
     // localizar; antes de 2010 não há COTAHIST, e fora da vida do papel não há
     // preço a ajustar.
-    final achados = <int>[];
-    for (var k = 0; k < declarados.length; k++) {
-      final d = declarados[k];
-      final comPregao = (c['papeis'] as Map<String, dynamic>).keys.any((t) {
+    final findings = <int>[];
+    for (var k = 0; k < declared.length; k++) {
+      final d = declared[k];
+      final withTradingDay = (c['papeis'] as Map<String, dynamic>).keys.any((t) {
         final s = cotahist[t];
         return s != null &&
             s.isNotEmpty &&
-            !s.first.date.isAfter(d.aprovacao) &&
-            !s.last.date.isBefore(d.aprovacao);
+            !s.first.date.isAfter(d.approval) &&
+            !s.last.date.isBefore(d.approval);
       });
-      if (comPregao) eventosComPregao++;
+      if (withTradingDay) eventsWithTradingDay++;
     }
 
-    final papeis = <String, Object?>{};
+    final securities = <String, Object?>{};
     for (final t in (c['papeis'] as Map<String, dynamic>).keys) {
-      final serie = cotahist[t];
-      if (serie == null || serie.isEmpty) continue;
-      final brutos = [for (final p in serie) p.raw];
-      final eventos = <ShareEvent>[];
-      final origem = <String>[];
-      final achadosDoPapel = <int>[];
-      for (var k = 0; k < declarados.length; k++) {
-        final d = declarados[k];
-        final ev = CorporateEvents.locate(brutos,
-            factor: d.fator, approvedOn: d.aprovacao);
+      final series = cotahist[t];
+      if (series == null || series.isEmpty) continue;
+      final rawSessions = [for (final p in series) p.raw];
+      final events = <ShareEvent>[];
+      final origin = <String>[];
+      final securityFindings = <int>[];
+      for (var k = 0; k < declared.length; k++) {
+        final d = declared[k];
+        final ev = CorporateEvents.locate(rawSessions,
+            factor: d.factor, approvedOn: d.approval);
         if (ev == null) continue;
-        eventos.add(ev);
-        origem.add('fre');
-        localizados++;
-        achadosDoPapel.add(k);
-        if (!achados.contains(k)) achados.add(k);
-        final ja = dataEx[k];
-        if (ja == null || ev.exDate.isBefore(ja)) dataEx[k] = ev.exDate;
+        events.add(ev);
+        origin.add('fre');
+        located++;
+        securityFindings.add(k);
+        if (!findings.contains(k)) findings.add(k);
+        final existing = firstExDate[k];
+        if (existing == null || ev.exDate.isBefore(existing)) firstExDate[k] = ev.exDate;
       }
-      for (final ev in CorporateEvents.detect(brutos)) {
-        final perto = eventos.any((e) => e.exDate.difference(ev.exDate).inDays.abs() <= 15);
-        if (perto) continue;
-        eventos.add(ev);
-        origem.add('inferido');
-        inferidos++;
+      for (final ev in CorporateEvents.detect(rawSessions)) {
+        final near = events.any((e) => e.exDate.difference(ev.exDate).inDays.abs() <= 15);
+        if (near) continue;
+        events.add(ev);
+        origin.add('inferido');
+        inferred++;
       }
       // Proventos da classe do papel, com data ex na vida dele.
-      final classe = B3CashDividends.shareClassOf(t);
-      final doPapel = [
-        for (final p in proventosDeslistadas[cnpj] ?? const <CashDividend>[])
-          if (p.shareClass == classe &&
-              !p.exDate.isBefore(serie.first.date) &&
-              !p.exDate.isAfter(serie.last.date))
+      final shareClass = B3CashDividends.shareClassOf(t);
+      final ofSecurity = [
+        for (final p in delistedDividends[cnpj] ?? const <CashDividend>[])
+          if (p.shareClass == shareClass &&
+              !p.exDate.isBefore(series.first.date) &&
+              !p.exDate.isAfter(series.last.date))
             p,
       ];
-      proventosNoPapel += doPapel.length;
-      for (final p in doPapel) {
-        final com = pregaoAte(serie, p.lastDateWithRights, folgaDias: 0);
-        if (p.closeWithRights == null || com == null) continue;
-        proventosConferidos++;
-        if ((p.closeWithRights! / com.close - 1).abs() <= 0.01) proventosBatem++;
+      securityDividends += ofSecurity.length;
+      for (final p in ofSecurity) {
+        final withInput = tradingDayUntil(series, p.lastDateWithRights, marginDays: 0);
+        if (p.closeWithRights == null || withInput == null) continue;
+        checkedDividends++;
+        if ((p.closeWithRights! / withInput.close - 1).abs() <= 0.01) dividendsMatching++;
       }
 
-      papeis[t] = {
-        'primeiro': _dia(serie.first.date),
-        'ultimo': _dia(serie.last.date),
+      securities[t] = {
+        'primeiro': _day(series.first.date),
+        'ultimo': _day(series.last.date),
         'proventos': [
-          for (final p in doPapel)
+          for (final p in ofSecurity)
             {
-              'dataEx': _dia(p.exDate),
+              'dataEx': _day(p.exDate),
               'valor': p.amount,
-              'tipo': p.kind.name,
+              'tipo': p.kind.key,
               if (p.closeWithRights != null) 'precoComDireito': p.closeWithRights,
             },
         ],
         // Evento declarado com pregão e sem data ex no preço: a série não está
         // ajustada por ele, e a coorte cuja janela o atravessa tem de sair.
         'eventosNaoLocalizados': [
-          for (var k = 0; k < declarados.length; k++)
-            if (!achadosDoPapel.contains(k) &&
-                !serie.first.date.isAfter(declarados[k].aprovacao) &&
-                !serie.last.date.isBefore(declarados[k].aprovacao))
-              _dia(declarados[k].aprovacao),
+          for (var k = 0; k < declared.length; k++)
+            if (!securityFindings.contains(k) &&
+                !series.first.date.isAfter(declared[k].approval) &&
+                !series.last.date.isBefore(declared[k].approval))
+              _day(declared[k].approval),
         ],
         'eventos': [
-          for (var k = 0; k < eventos.length; k++)
+          for (var k = 0; k < events.length; k++)
             {
-              'dataEx': _dia(eventos[k].exDate),
-              'fator': eventos[k].factor,
-              'origem': origem[k],
+              'dataEx': _day(events[k].exDate),
+              'fator': events[k].factor,
+              'origem': origin[k],
             },
         ],
       };
     }
 
-    if ((proventosDeslistadas[cnpj] ?? const []).isNotEmpty) {
-      companhiasComProventos++;
+    if ((delistedDividends[cnpj] ?? const []).isNotEmpty) {
+      companiesWithDividends++;
     }
-    eventosLocalizados += achados.length;
-    final historico = ShareCountHistory.fromFre(
+    locatedEvents += findings.length;
+    final history = ShareCountHistory.fromFre(
       capital[cnpj] ?? const [],
       events: [
-        for (var k = 0; k < declarados.length; k++)
-          (date: dataEx[k] ?? declarados[k].aprovacao, totalAfter: declarados[k].depois),
+        for (var k = 0; k < declared.length; k++)
+          (date: firstExDate[k] ?? declared[k].approval, totalAfter: declared[k].after),
       ],
-      receivedOn: recebidos,
+      receivedOn: receivedInputs,
     );
-    if (historico.points.isNotEmpty) comContagem++;
-    for (var k = 0; k < declarados.length; k++) {
-      final d = declarados[k];
-      final vivo = (c['papeis'] as Map<String, dynamic>).keys.any((t) {
+    if (history.points.isNotEmpty) withCount++;
+    for (var k = 0; k < declared.length; k++) {
+      final d = declared[k];
+      final alive = (c['papeis'] as Map<String, dynamic>).keys.any((t) {
         final s = cotahist[t];
         return s != null &&
             s.isNotEmpty &&
-            !s.first.date.isAfter(d.aprovacao) &&
-            !s.last.date.isBefore(d.aprovacao);
+            !s.first.date.isAfter(d.approval) &&
+            !s.last.date.isBefore(d.approval);
       });
-      if (vivo && !achados.contains(k)) {
-        naoLocalizados.add('${c['nome']} ${_dia(d.aprovacao)} ${d.tipo} '
-            'fator ${d.fator.toStringAsFixed(4)}');
+      if (alive && !findings.contains(k)) {
+        notLocated.add('${c['nome']} ${_day(d.approval)} ${d.kind} '
+            'fator ${d.factor.toStringAsFixed(4)}');
       }
     }
 
     // 2. Formulário contra formulário.
-    final conferencias = <Map<String, Object?>>[];
-    for (final x in composicao[cnpj] ?? const <({DateTime data, double acoes})>[]) {
-      final ponto = historico.at(x.data);
-      if (ponto == null) continue;
-      formularioConfere++;
-      final razao = ponto.total / x.acoes;
+    final checks = <Map<String, Object?>>[];
+    for (final x in composition[cnpj] ?? const <({DateTime date, double shares})>[]) {
+      final point = history.at(x.date);
+      if (point == null) continue;
+      formChecks++;
+      final ratio = point.total / x.shares;
       // A composição do capital vem na escala do declarante — mil ações, em
       // quem publica em milhares (decisão 70). Mil exatas é a mesma contagem.
-      final bate = (razao - 1).abs() <= _folgaFormularios ||
-          (razao / 1000 - 1).abs() <= _folgaFormularios;
-      if (bate) formularioBate++;
-      conferencias.add({'data': _dia(x.data), 'razao': razao, 'bate': bate});
+      final matches = (ratio - 1).abs() <= _formsMargin ||
+          (ratio / 1000 - 1).abs() <= _formsMargin;
+      if (matches) formMatches++;
+      checks.add({'data': _day(x.date), 'razao': ratio, 'bate': matches});
     }
 
     // 3. P/VPA no fim de cada exercício, e o exercício utilizável: contagem na
     //    data e pregão no ano seguinte.
-    for (final ano in ((c['anosDfp'] as List?) ?? const []).cast<int>()) {
-      final fim = DateTime.utc(ano, 12, 31);
-      final ponto = historico.at(fim);
-      final pl = patrimonio[cnpj]?[ano];
-      final comPregaoDepois = (c['papeis'] as Map<String, dynamic>).keys.any((t) {
+    for (final year in ((c['anosDfp'] as List?) ?? const []).cast<int>()) {
+      final end = DateTime.utc(year, 12, 31);
+      final point = history.at(end);
+      final pl = equity[cnpj]?[year];
+      final withTradingDayAfter = (c['papeis'] as Map<String, dynamic>).keys.any((t) {
         final s = cotahist[t];
-        return s != null && s.any((p) => p.date.year == ano + 1);
+        return s != null && s.any((p) => p.date.year == year + 1);
       });
-      if (ponto != null && comPregaoDepois) exerciciosUtilizaveis++;
-      if (ponto == null || pl == null) continue;
+      if (point != null && withTradingDayAfter) usableFiscalYears++;
+      if (point == null || pl == null) continue;
       for (final t in (c['papeis'] as Map<String, dynamic>).keys) {
         final s = cotahist[t];
         if (s == null) continue;
-        final p = pregaoAte(s, fim, folgaDias: 10);
+        final p = tradingDayUntil(s, end, marginDays: 10);
         if (p == null) continue;
-        final pvpa = ponto.total * p.close / pl;
-        pvpaConfere++;
-        pvpas.add(pvpa);
-        if (pvpa >= _pvpaMinimo && pvpa <= _pvpaMaximo) {
-          pvpaDentro++;
+        final priceToBook = point.total * p.close / pl;
+        priceToBookChecks++;
+        priceToBooks.add(priceToBook);
+        if (priceToBook >= _minPriceToBook && priceToBook <= _maxPriceToBook) {
+          priceToBookWithin++;
         } else {
-          foraDaFaixa.add('${c['nome']} $t $ano: ${pvpa.toStringAsFixed(3)}');
+          outOfRange.add('${c['nome']} $t $year: ${priceToBook.toStringAsFixed(3)}');
         }
         break;
       }
     }
 
-    saida[cnpj] = {
+    output[cnpj] = {
       'nome': c['nome'],
       'contagem': [
-        for (final p in historico.points)
-          {'desde': _dia(p.date), 'acoes': p.total, 'fonte': p.source.name},
+        for (final p in history.points)
+          {'desde': _day(p.date), 'acoes': p.total, 'fonte': p.source.name},
       ],
-      'papeis': papeis,
-      'classes': ClassesDoCapital.fromFre(capital[cnpj] ?? const []).toJson(),
-      'conferenciaComComposicao': conferencias,
+      'papeis': securities,
+      'classes': CapitalClasses.fromFre(capital[cnpj] ?? const []).toJson(),
+      'conferenciaComComposicao': checks,
     };
   }
 
-  File('data/b3/deslistadas_contagem.json').writeAsStringSync(jsonEncode(saida));
-  final resumo = {
+  File('data/b3/deslistadas_contagem.json').writeAsStringSync(jsonEncode(output));
+  final summary = {
     'medidoEm': '2026-09-15',
     'listadas': {
-      'emissores': listadas,
-      'batemA1pct': listadasBatem,
-      'divergentes': divergentesListadas,
-      'companhiasComContagemPorData': listadasComContagem,
-      'eventosDeclarados': listadasEventos,
-      'eventosLocalizados': listadasEventosLocalizados,
+      'emissores': listed,
+      'batemA1pct': listedMatching,
+      'divergentes': divergentListed,
+      'companhiasComContagemPorData': listedWithCount,
+      'eventosDeclarados': listedEvents,
+      'eventosLocalizados': listedLocatedEvents,
     },
     'deslistadas': {
-      'companhias': ponte.length,
-      'comContagem': comContagem,
-      'comEventosDeclarados': comEventosFre,
-      'eventosDeclarados': eventosFre,
-      'eventosComPregaoNaAprovacao': eventosComPregao,
-      'eventosLocalizados': eventosLocalizados,
-      'eventosNaoLocalizados': naoLocalizados,
-      'papelEventoLocalizado': localizados,
-      'papelEventoInferido': inferidos,
-      'composicaoConferida': formularioConfere,
-      'composicaoBateA2pct': formularioBate,
-      'pvpaConferido': pvpaConfere,
-      'pvpaNaFaixa': pvpaDentro,
-      'pvpaMediano': _mediana(pvpas),
-      'pvpaForaDaFaixa': foraDaFaixa,
-      'exerciciosUtilizaveis': exerciciosUtilizaveis,
-      'companhiasComProventos': companhiasComProventos,
-      'proventosNaVidaDoPapel': proventosNoPapel,
-      'proventosComPrecoConferido': proventosConferidos,
-      'proventosQueBatemA1pct': proventosBatem,
+      'companhias': bridge.length,
+      'comContagem': withCount,
+      'comEventosDeclarados': withFreEvents,
+      'eventosDeclarados': freEvents,
+      'eventosComPregaoNaAprovacao': eventsWithTradingDay,
+      'eventosLocalizados': locatedEvents,
+      'eventosNaoLocalizados': notLocated,
+      'papelEventoLocalizado': located,
+      'papelEventoInferido': inferred,
+      'composicaoConferida': formChecks,
+      'composicaoBateA2pct': formMatches,
+      'pvpaConferido': priceToBookChecks,
+      'pvpaNaFaixa': priceToBookWithin,
+      'pvpaMediano': _median(priceToBooks),
+      'pvpaForaDaFaixa': outOfRange,
+      'exerciciosUtilizaveis': usableFiscalYears,
+      'companhiasComProventos': companiesWithDividends,
+      'proventosNaVidaDoPapel': securityDividends,
+      'proventosComPrecoConferido': checkedDividends,
+      'proventosQueBatemA1pct': dividendsMatching,
     },
   };
   File('docs/validacao/b3_contagem_por_data.json')
-      .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(resumo));
+      .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(summary));
 
   stdout.writeln('== 1. Listadas: FRE em 14/09/2026 contra a contagem oficial ==');
-  stdout.writeln('  $listadasBatem de $listadas a 1%');
-  for (final d in divergentesListadas.take(15)) {
+  stdout.writeln('  $listedMatching de $listed a 1%');
+  for (final d in divergentListed.take(15)) {
     stdout.writeln('    $d');
   }
-  stdout.writeln('  contagem por data para as coortes: $listadasComContagem '
-      'companhias; $listadasEventosLocalizados de $listadasEventos eventos '
+  stdout.writeln('  contagem por data para as coortes: $listedWithCount '
+      'companhias; $listedLocatedEvents de $listedEvents eventos '
       'declarados localizados no preço');
-  stdout.writeln('\n== Deslistadas (${ponte.length} companhias da ponte) ==');
-  stdout.writeln('  com contagem por data: $comContagem');
-  stdout.writeln('  com evento declarado no FRE: $comEventosFre '
-      '($eventosFre eventos); com pregão na aprovação: $eventosComPregao; '
-      'localizados no preço: $eventosLocalizados; inferidos onde o FRE não '
-      'declara: $inferidos');
-  for (final n in naoLocalizados) {
+  stdout.writeln('\n== Deslistadas (${bridge.length} companhias da ponte) ==');
+  stdout.writeln('  com contagem por data: $withCount');
+  stdout.writeln('  com evento declarado no FRE: $withFreEvents '
+      '($freEvents eventos); com pregão na aprovação: $eventsWithTradingDay; '
+      'localizados no preço: $locatedEvents; inferidos onde o FRE não '
+      'declara: $inferred');
+  for (final n in notLocated) {
     stdout.writeln('    não localizado: $n');
   }
-  stdout.writeln('  2. FRE × composição do DFP/ITR: $formularioBate de '
-      '$formularioConfere a 2%, contando a escala de mil (decisão 70)');
-  stdout.writeln('  3. P/VPA no fim do exercício: $pvpaDentro de $pvpaConfere '
-      'entre $_pvpaMinimo e $_pvpaMaximo; mediana '
-      '${_mediana(pvpas)?.toStringAsFixed(2)}');
-  for (final f in foraDaFaixa.take(12)) {
+  stdout.writeln('  2. FRE × composição do DFP/ITR: $formMatches de '
+      '$formChecks a 2%, contando a escala de mil (decisão 70)');
+  stdout.writeln('  3. P/VPA no fim do exercício: $priceToBookWithin de $priceToBookChecks '
+      'entre $_minPriceToBook e $_maxPriceToBook; mediana '
+      '${_median(priceToBooks)?.toStringAsFixed(2)}');
+  for (final f in outOfRange.take(12)) {
     stdout.writeln('    $f');
   }
   stdout.writeln('  exercícios com contagem na data e pregão no ano seguinte: '
-      '$exerciciosUtilizaveis');
-  stdout.writeln('  4. proventos: $companhiasComProventos companhias; '
-      '$proventosNoPapel na vida dos papéis; preço com direito contra o '
-      'COTAHIST: $proventosBatem de $proventosConferidos a 1%');
+      '$usableFiscalYears');
+  stdout.writeln('  4. proventos: $companiesWithDividends companhias; '
+      '$securityDividends na vida dos papéis; preço com direito contra o '
+      'COTAHIST: $dividendsMatching de $checkedDividends a 1%');
   stdout.writeln('\n  gravado data/b3/deslistadas_contagem.json, '
       'data/b3/listadas_contagem.json e docs/validacao/b3_contagem_por_data.json');
 }

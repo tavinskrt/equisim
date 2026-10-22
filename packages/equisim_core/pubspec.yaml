@@ -9,9 +9,9 @@ environment:
   sdk: ^3.8.0
 
 # Sem dependências de runtime, por decisão de arquitetura.
-# A pureza é verificada automaticamente por test/purity_test.dart.
+# A pureza é verificada automaticamente por test/core/purity_test.dart, na
+# raiz do repositório: os testes do núcleo moram com os do aplicativo, em
+# test/, e rodam a partir de lá.
 
 dev_dependencies:
-  test: ^1.25.0
   lints: ^5.0.0
-  coverage: ^1.11.0

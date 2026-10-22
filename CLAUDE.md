@@ -110,7 +110,7 @@ schema forçado pelo servidor e `temperature: 0`, portanto é o mais reproduzív
 ### 3.1 `packages/equisim_core` é Dart puro
 
 **Zero dependências de runtime**, por decisão deliberada, travada pelo teste
-`packages/equisim_core/test/purity_test.dart`.
+`test/core/purity_test.dart`.
 
 - **Não adicione pacote algum** ao `pubspec.yaml` desse módulo — nem
   `decimal`, nem `rational`, nem utilitário "só dessa vez".
@@ -159,8 +159,11 @@ Moeda é BRL: 2 casas, arredondamento half-up. Quantidade de ação é **inteira
   validação** e no beta, com o histórico da B3; a
   [decisão 92](docs/decisoes/092-a-incerteza-e-a-faixa-calibrada-e-os-cenarios-sao-sensibilidade.md)
   leva esse retorno total medido à **faixa calibrada** da tela de avaliação. A
-  simulação da carteira, a cascata de avaliação e o retorno esperado continuam
-  de preço. Estender provento a qualquer um deles exige decisão nova.
+  [decisão 142](docs/decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md)
+  usa os proventos da bolsa inteira para medir o **prêmio implícito**, que é o
+  prêmio de mercado do CAPM — provento agregado, nunca o de um ativo. A
+  simulação da carteira, o fluxo de cada ativo na cascata e o retorno esperado
+  continuam de preço. Estender provento a qualquer um deles exige decisão nova.
 - A simulação compra **ação inteira**, e a sobra de cada aporte fica em caixa
   por ativo, acumula e entra no aporte seguinte. Fração de ação em caminho de
   cálculo é defeito.
@@ -225,11 +228,11 @@ stderr quando troca.
 ### A lente `tela` exige capturas
 
 ```bash
-npm run ui:capturar   # 30 PNGs em docs/telas/, ignorado pelo git
+npm run ui:capturar   # 42 PNGs em docs/telas/, ignorado pelo git
 npm run conselho -- --lente tela --largura 1024 --tema escuro
 ```
 
-O arquivo de captura é [test/presentation/golden_capture.dart](test/presentation/golden_capture.dart)
+O arquivo de captura é [test/ui/golden_capture.dart](test/ui/golden_capture.dart)
 — **sem** sufixo `_test`, de propósito: assim ele fica fora do `flutter test` e
 uma alteração intencional de UI não deixa a suíte vermelha.
 
@@ -268,7 +271,9 @@ no [README de lá](docs/decisoes/README.md).
 | `docs/decisoes/` | Decisões 19+. Imutáveis, com `origem`, `data` e `afeta` |
 | `docs/apontamentos/` | O que orientador e devs apontam fora do git |
 | `docs/estado.md` | **Gerado** por `npm run estado`. Nunca edite à mão |
-| `docs/eap/` | Pacotes da reconstrução da UI em curso |
+| `docs/motor/` | O que o código faz, regra por regra, com código, fórmula, teoria e evidência (decisão 141). Mudou uma regra, mude o capítulo |
+| `docs/estudo/` | Guia para quem não sabe finanças: capítulos e casos com os números de `tool/casos_de_estudo.dart`. Mudou o motor, refaça os dados e releia os casos |
+| `docs/eap/` | Pacotes da reconstrução da UI, cumprida (decisão 22) — especificação histórica |
 | `PLANO_ARQUITETURA.md` | **Congelado.** Plano de transição já cumprido; decisões 0–18 estão nele |
 
 O gate local bloqueia **referência quebrada** — `afeta` apontando para caminho

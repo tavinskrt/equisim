@@ -29,6 +29,11 @@ explicitamente é, ele próprio, um achado da lente. Uma caixa de entrada que
 ninguém esvazia é pior que não ter caixa: ela dá a impressão de que o assunto
 foi tratado.
 
+**Tratado é o apontamento cuja seção `## Destino` diz o que ele virou** — a
+decisão, o item do plano ou o descarte, com o porquê. Ele **fica na pasta**:
+é dele que sai a `citacao` das decisões, e apagá-lo quebraria a proveniência.
+Esvaziar a caixa é dar destino a cada fala, e não mover o arquivo.
+
 ## O que não vem para cá
 
 Ideia sua sobre o código. Isso é trabalho, e trabalho tem outro lugar — uma

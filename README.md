@@ -1,148 +1,98 @@
 # Equisim
 
-Ferramenta de apoio à decisão de investimentos em ações da B3, com valuation por
-Fluxo de Caixa Descontado (DCF) e CAPM, gestão de dupla carteira (Principal e
-Reserva) e planejamento de metas patrimoniais.
+O Equisim é um aplicativo de **estudo de carteira de ações brasileiras**. Ele
+avalia cada ação por fluxo de caixa descontado (o "preço justo"), diz o quanto
+essa avaliação é incerta, calcula a rentabilidade que uma meta patrimonial
+exige e simula como a carteira teria se saído no passado com aportes mensais.
 
-Trabalho de Conclusão de Curso — aplicação Flutter/Dart.
+É um trabalho acadêmico, cujo resultado é um artigo. O motor de avaliação foi construído
+para que **cada número possa ser seguido até a regra que o produziu e até a
+teoria que a justifica**, e foi validado contra o que aconteceu no mercado
+brasileiro de 2018 a 2025. O resultado da validação está declarado com
+honestidade: a incerteza está calibrada, a habilidade de escolher ações foi
+testada e **não** foi comprovada. É uma ferramenta de análise, e não um oráculo
+([decisão 140](docs/decisoes/140-o-r3-e-habilidade-testada-com-o-poder-declarado.md)).
 
 ---
 
-## Estado atual: reconstrução concluída (Fases 0 a 5)
+## Por onde começar a ler
 
-A transição de escopo está cumprida. O escopo anterior — simulação comparativa
-de **uma ação contra um FII** com valuation binário — foi **descontinuado**, e o
-motor correspondente foi removido.
-
-| | |
+| Você quer… | Leia |
 |---|---|
-| **Escopo atual** | Dupla carteira, DCF + CAPM, metas patrimoniais, backtest Principal × Reserva |
-| **Fora de escopo** | FIIs, renda fixa, bandas de alocação, benchmarks de índice |
-| **Legado congelado em** | tag git `legado-escopo-a` |
+| entender o que o motor faz, sem saber finanças | o [guia de estudo](docs/estudo/README.md) — do zero, com cinco empresas calculadas passo a passo |
+| ver cada regra com código, fórmula, teoria e evidência | a [documentação do motor](docs/motor/README.md) |
+| saber o que o motor **não** faz ou faz com limitação | as [limitações](docs/validacao/limitacoes.md) |
+| entender o painel de logs do aplicativo | [AUDITORIA_DE_CALCULOS.md](docs/AUDITORIA_DE_CALCULOS.md) |
+| saber o estado do projeto e o que falta | o [plano do motor de referência](docs/plano-motor-de-referencia.md) e o [estado](docs/estado.md) |
+| saber por que cada coisa é como é | o [registro de decisões](docs/decisoes/README.md) |
+| trabalhar no código (pessoa ou agente) | o [CLAUDE.md](CLAUDE.md) |
 
-Documentos de referência:
+---
 
-- **[`PLANO_ARQUITETURA.md`](PLANO_ARQUITETURA.md)** — parecer de stack com benchmark
-  medido, auditoria da API, arquitetura, modelo de domínio e roadmap por fases.
-  **Congelado**: cumpriu o que planejava, e guarda as decisões 0 a 18.
-- **[`docs/decisoes/`](docs/decisoes/)** — as decisões 19 em diante, uma por arquivo,
-  imutáveis depois de aceitas. A
-  [decisão 19](docs/decisoes/019-registro-por-arquivo.md) instituiu esse formato
-  e aposentou o relatório de análise avulso que vivia na raiz.
-- **[`docs/estado.md`](docs/estado.md)** — retrato do repositório: decisões, superfície
-  medida e histórico. **Gerado** por `npm run estado`; não se edita à mão.
+## O que o aplicativo faz
 
-### O que funciona hoje
+Quatro abas e um painel.
 
-- **Autenticação, sessão, tema e perfil** — preservados do projeto anterior.
-- **`packages/equisim_core`** — motor financeiro completo em Dart puro:
-  avaliação por **portas e vias** (decisão 25), com o fluxo da firma sobre NOPAT
-  descontado ao WACC e o fluxo do acionista sobre LPA descontado ao Ke, estrutura
-  a termo do desconto, terminal de retorno neutro, CAPM, cenários discretos e
-  Monte Carlo, backtest sem rebalanceamento em ações inteiras, TWR/XIRR, métricas
-  de risco, meta patrimonial e concentração setorial. Zero rede.
-
-  A ordenação do potencial foi validada fora da amostra em oito coortes
-  *point-in-time* — ver
-  [`docs/validacao/validacao_preditiva.md`](docs/validacao/validacao_preditiva.md).
-- **`lib/data`** — camada de acesso a dados com Dio e cache Drift. Testes
-  rodando offline sobre fixtures reais.
-- **`lib/di` e `lib/presentation`** — grafo de dependências em Riverpod,
-  estado da dupla carteira com edição síncrona, avaliação orquestrada e
-  persistência dos estudos no Firestore.
-- **Interface completa** em quatro frentes, uma por aba: dupla carteira com
-  arrastar-e-soltar (*Estudo*), preço justo com cenários e sensibilidade
-  (*Valuation*), planejamento patrimonial com semáforo de viabilidade (*Meta*),
-  e comparação histórica com gráficos e exportação em CSV (*Simulação*).
-
-- **`tool/validate.dart`** — executor de validação que reusa exatamente a mesma
-  camada de dados e o mesmo motor do aplicativo, gerando os relatórios de
-  evidência em [`docs/validacao/`](docs/validacao/).
-
-Ao todo: **457 testes automatizados** — 255 do aplicativo e 202 do núcleo —,
-todos offline, com 84,2% de cobertura de linhas no núcleo de domínio.
-
-### Evidências de corretude
-
-| Verificação | Resultado |
+| Aba | Para quê |
 |---|---|
-| [Invariantes do motor](docs/validacao/invariantes.md) | 12 de 12 aprovadas |
-| [Conferência cruzada em Python](docs/validacao/conferencia_python.md) | 80/80 dentro de 1e-4 |
-| [Sensibilidade às premissas](docs/validacao/sensibilidade.md) | três eixos medidos |
-| [Limitações](docs/validacao/limitacoes.md) | 20 catalogadas |
+| **Estudo** | montar a carteira **Principal** (até 15 ações, com pesos) e a **Reserva** (candidatas); ver o potencial de cada ação e o retorno esperado da carteira; salvar e reabrir estudos |
+| **Valuation** | a avaliação de uma ação: preço justo, upside, faixa calibrada de 12 e 36 meses, cenários ou Monte Carlo, múltiplos de pares e ressalvas; e o botão **Editar valuation**, que abre a conta do motor para o usuário trocar lucro, crescimento, taxa e perpetuidade e ver o preço mudar na hora (decisão 147) |
+| **Meta** | a rentabilidade anual que um plano (aporte inicial, aporte mensal, valor desejado, prazo) exige, comparada ao CDI e ao Ibovespa da década, e à carteira |
+| **Simulação** | a história das duas carteiras sob o mesmo plano de aportes, de 1 a 10 anos para trás: patrimônio, TWR, XIRR, volatilidade, drawdown, Sharpe, Sortino, Calmar |
+| **Painel de logs** (menu do perfil) | cada passo de cada avaliação, com a fórmula, os números e o resultado |
 
-Para regerar:
+### Como o preço justo é calculado, em cinco linhas
 
-```bash
-dart run tool/validate.dart tudo
-```
+1. **Quem pode ser avaliado:** liquidez de pelo menos R$ 2 milhões por dia, oito
+   anos de balanços e patrimônio positivo.
+2. **Por qual caminho:** bancos e empresas de lucro operacional instável pelo
+   lucro do acionista; as demais pelo fluxo da empresa, convertido ano a ano em
+   fluxo do acionista.
+3. **De onde parte e quanto cresce:** o lucro do último ano, ajustado pelo
+   retorno típico do ciclo quando o ano destoa; o crescimento que a história da
+   própria empresa sustenta.
+4. **A que taxa:** o custo do capital próprio (CAPM) sobre a curva de juros do
+   Tesouro, ano a ano, com o risco recalculado conforme a dívida projetada. O
+   prêmio de risco do mercado é o que o próprio preço da bolsa embute: a média
+   de dez anos do prêmio implícito, 1,21% em 14/09/2026 (decisão 142).
+5. **Depois de dez anos:** o retorno do capital novo converge ao custo dele, a
+   menos que a história mostre uma vantagem competitiva que persiste.
 
-E a conferência independente em Python:
+O [capítulo 4 do guia](docs/estudo/04-fluxo-de-caixa-descontado.md) explica cada
+passo; o [caso WEGE3](docs/estudo/casos/wege3.md) mostra todas as contas.
 
-```bash
-python docs/validacao/cross_validation.py
-```
+### O que foi verificado, e o que ficou em aberto
 
-### Cadeia de QA por agente
+| | Condição | Situação |
+|---|---|---|
+| **R1** | nenhum defeito conhecido | ver o [plano](docs/plano-motor-de-referencia.md): a rodada de 02/10/2026 achou e fechou mais um — companhias com patrimônio positivo recusadas como insolventes (B47); o B38, o rótulo do cenário otimista, aguarda decisão |
+| **R2** | incerteza calibrada | **atingida**: a faixa de 80% conteve 79,7% (12 meses) e 78,7% (36 meses) dos casos fora da amostra (remedida em 02/10/2026) |
+| **R3** | habilidade testada, com o poder declarado | **atingida nessa definição**: o teste fixado antes não passou (0,010, `t` de 0,05 contra 2,70), e o registro diz que ele não teria poder para passar com a série brasileira disponível; nem o book-to-market sozinho passou |
 
-Além das suítes, o repositório roda uma cadeia de revisão por modelo de
-linguagem, registrada na
-[decisão 20](docs/decisoes/020-cadeia-de-qa-por-agente.md). A regra que sustenta
-o arranjo: **quem propõe não bloqueia; quem bloqueia não propõe.** Ampliar o
-auditor para "proponha melhorias" destruiria a calibragem que o torna confiável.
-
-| Camada | Comando | Papel | Bloqueia? |
-|---|---|---|---|
-| Portão local | `.githooks/pre-commit` | regras determinísticas, sem rede, em ~250–500 ms | sim, todo commit |
-| **Auditor** | `npm run qa:gemini` | caça defeito de correção ancorado em arquivo e linha | sim, todo push |
-| **Conselheiro** | `npm run conselho -- --lente <id>` | examina relação entre coisas em sete lentes — registro, núcleo, dados, método, risco, rumo, tela | não, nunca |
-
-Os dois hooks não vêm ligados num clone novo; o git precisa ser apontado para
-eles, uma vez:
-
-```bash
-git config core.hooksPath .githooks
-```
-
-O auditor libera o push quando a auditoria **não pôde ser executada** — sem rede
-ou sem cota não é defeito do código, e um gate que trava nessas horas seria
-arrancado na primeira ocorrência. O payload liberado vai para a fila, e
-`npm run qa:pending` audita exatamente aquele instantâneo quando a cota volta.
-
-O conselheiro nunca bloqueia: sai com código 0 mesmo em falha de rede, de cota
-ou de JSON inválido, e nenhum hook o chama.
-
-### Barramento de auditoria em tempo de execução
-
-[`lib/audit/`](lib/audit/) liga o coletor do núcleo, o interceptador de rede e um
-canal entre janelas a um painel de inspeção, aberto em `/#/logs`. É o que permite
-mostrar, durante a defesa, que um número da tela veio de uma requisição
-identificada e de um caminho de cálculo registrado — e não de um atalho.
-Desligado fora do modo de depuração, com sobrescrita por
-`--dart-define=EQUISIM_AUDIT=true`.
+Dois fatos que qualquer leitor deve ter em mente: o motor é **sistematicamente
+mais pessimista que o mercado** (upside mediano de −37%, remedido em 02/10/2026 sobre os dados de 14/09/2026), e **não
+se comprovou** que comprar as ações de maior upside rende mais.
 
 ---
 
 ## Instalação numa máquina nova
 
-Um clone recém-baixado **não compila direto**, e por um motivo simples: os
-arquivos que guardam credencial não são versionados, e um deles — o `.env` — está
-declarado como asset no `pubspec.yaml`. Sem ele a compilação para logo no início,
-com `No file or variants found for asset: .env`.
-
-O script de preparação resolve isso e o resto de uma vez só.
-
 ### Pré-requisitos
 
 | | |
 |---|---|
-| **Flutter** | 3.44 ou mais recente (Dart 3.12+). O piso está declarado em `pubspec.yaml`, então um SDK antigo é recusado pelo próprio `pub get`. |
-| **Windows** | **Modo de Desenvolvedor ligado** — `start ms-settings:developers`. O `pub get` cria links simbólicos para os plugins nativos; sem esse privilégio ele falha com *"Building with plugins requires symlink support"*. |
-| **Alvo de execução** | Chrome (para o alvo web) **ou** Visual Studio com "Desenvolvimento para desktop com C++" (para o alvo Windows) **ou** Android SDK. Confira com `flutter doctor`. |
-| **Node 20** | Só para quem for publicar a função de proxy. |
-| **Credencial** | Token da API [brapi.dev](https://brapi.dev/dashboard) — gratuito. |
+| **Flutter** | 3.44 ou mais recente (Dart 3.11.5 ou mais recente); o piso está no `pubspec.yaml` |
+| **Windows** | Modo de Desenvolvedor ligado (`start ms-settings:developers`): o `pub get` cria links simbólicos para os plugins |
+| **Alvo** | Chrome (web), Visual Studio com C++ (Windows) ou Android SDK; confira com `flutter doctor` |
+| **Node** | só para a cadeia de QA (`npm install`) e para o proxy opcional em `functions/` |
+| **Python 3** | para baixar a curva do Tesouro antes de rodar na web (seção [Pacotes de dados](#pacotes-de-dados)) e para as ferramentas de medição em `tool/` |
+| **Credencial** | token gratuito da [brapi.dev](https://brapi.dev/dashboard) |
 
-### Um comando
+### Preparação
+
+Um clone novo não compila direto: o `.env` não é versionado e está declarado
+como asset. O script de preparação cria os arquivos locais a partir dos
+exemplos e baixa as dependências. É idempotente.
 
 No Windows:
 
@@ -156,75 +106,88 @@ No macOS ou Linux:
 ./tool/setup.sh
 ```
 
-O script verifica o Flutter, confirma o suporte a links simbólicos, cria `.env` e
-`config/local.json` a partir dos arquivos de exemplo e baixa as dependências do
-aplicativo e do núcleo. É idempotente: rodar de novo não sobrescreve arquivo
-nenhum que já exista.
+Opções: `-Verificar`/`--verificar` roda análise e testes ao final;
+`-ComFunctions`/`--com-functions` instala as dependências de `functions/`.
 
-| Opção | Efeito |
-|---|---|
-| `-Verificar` / `--verificar` | Roda análise estática e as duas suítes de teste ao final |
-| `-ComFunctions` / `--com-functions` | Instala também as dependências Node de `functions/` |
-| `-PularChecagens` | Ignora a verificação de links simbólicos (Windows) |
+Depois, uma vez por clone, ligue os hooks de QA:
 
-### Versões travadas
+```bash
+git config core.hooksPath .githooks
+```
 
-`pubspec.lock` **é versionado** — este repositório é uma aplicação, não uma
-biblioteca. É o que garante que a outra máquina resolva exatamente as mesmas
-versões de dependência, e não a resolução mais recente que o `pub` encontrar no
-dia. Para atualizar de propósito: `flutter pub upgrade` e commite o lock novo.
+`pubspec.lock` é versionado: a outra máquina resolve as mesmas versões.
+
+### Credencial da brapi
+
+O `ApiConfig` procura o token nesta ordem, e avisa no console quando cai na
+última:
+
+| Modo | Onde fica o token | Proteção |
+|---|---|---|
+| proxy (Cloud Function) | só no servidor | efetiva — exige o plano Blaze do Firebase, que o projeto não usa |
+| `--dart-define-from-file=config/local.json` | constante no binário | parcial |
+| `.env` (`BRAPI_TOKEN=...`) | dentro do bundle | **nenhuma** — público no build web |
+
+> **Segurança:** o `.env` é asset público no build web. Nunca coloque nele
+> segredo de ferramenta. A chave da auditoria (`GEMINI_API_KEY`) mora em
+> `.env.qa`, que não é asset nem versionado. O hook de pre-commit barra `.env*`,
+> `google-services.json`, `serviceAccount*.json` e material criptográfico.
+
+O Firebase (login e estudos salvos no Firestore) já aponta para o projeto do
+trabalho em `lib/firebase_options.dart`.
 
 ---
 
-## Configuração
-
-O script acima já deixa o projeto compilável, mas **sem credencial**: o
-aplicativo sobe e as telas que consultam a brapi ficam sem dados. Escolha uma
-das três formas abaixo — o `ApiConfig` resolve nesta ordem de preferência e
-avisa no console quando cai na última.
-
-| Modo | Onde vive o token | Proteção |
-|---|---|---|
-| Cloud Function *(recomendado)* | só no servidor | **efetiva** |
-| `--dart-define-from-file` | constante no binário | parcial — extraível com `strings` |
-| `.env` como asset *(legado)* | dentro do bundle | nenhuma — público no alvo web |
-
-**Modo `.env`** — o mais rápido para desenvolvimento e demonstração. Preencha o
-token no `.env` que o script criou:
-
-```
-BRAPI_TOKEN=seu_token_aqui
-```
-
-E execute sem argumento nenhum: `flutter run`.
-
-**Modo definição de compilação** — preencha `BRAPI_TOKEN` em `config/local.json`
-(também criado pelo script) e execute passando o arquivo:
-
-```bash
-flutter run --dart-define-from-file=config/local.json
-```
-
-**Modo proxy** — preencha `BRAPI_PROXY_URL` em `config/local.json` com a URL da
-Cloud Function e deixe o token vazio. Ver a seção *Proxy de custódia* adiante.
-
-**Firebase** — as credenciais em `lib/firebase_options.dart` e
-`android/app/google-services.json` já apontam para o projeto do TCC e são
-versionadas; nada a fazer na máquina nova. Para usar outro projeto, regenere com
-`flutterfire configure`.
-
 ## Execução
+
+**Antes de rodar na web, leia a seção seguinte.** No Windows, o aplicativo
+baixa sozinho a curva de juros do dia; se a busca falhar, ele recorre ao pacote, com a
+mesma regra de idade. Na web — `flutter run -d chrome` ou
+`flutter build web` — ele não baixa: usa a curva empacotada no build, que só
+vale por **sete dias** ([decisão 86](docs/decisoes/086-na-web-a-curva-vem-so-do-pacote.md)).
+Um clone do GitHub traz o pacote do dia em que foi gerado, e passada uma semana
+o aplicativo **funciona, mas sem a curva**, com preços que não são os do motor.
+
+No Windows:
 
 ```bash
 flutter run
 ```
 
-### Build web
+Na web, depois de regerar a curva (seção seguinte):
 
-Na web, a curva de juros do Tesouro vem **só do pacote do build**: o navegador
-não lê o arquivo do Tesouro, e o pacote serve por cerca de uma semana depois da
-última data-base ([decisão 86](docs/decisoes/086-na-web-a-curva-vem-so-do-pacote.md)).
-Regere antes de cada build:
+```bash
+flutter run -d chrome
+```
+
+O cache local na web depende de dois arquivos em `web/`
+([web/ASSETS.md](web/ASSETS.md)).
+
+---
+
+## Pacotes de dados
+
+O aplicativo não baixa as bases nem varre o mercado inteiro: ele lê **pacotes
+versionados em `assets/`**, que as ferramentas de `tool/` geram a partir de
+bases públicas (CVM, B3, Tesouro, Banco Central). Um clone traz todos os
+pacotes prontos. Quase todos são da mesma data, a **entrada congelada de
+14/09/2026**, de propósito: o mesmo código com os mesmos pacotes dá o mesmo
+preço justo, e é isso que o gabarito confere. A data de cada pacote está no
+campo `geradoEm` do próprio arquivo.
+
+### Os três pacotes que envelhecem
+
+| Pacote | O que o aplicativo faz quando ele envelhece | Quando acontece |
+|---|---|---|
+| `assets/tesouro/curva.json` — a curva dos títulos prefixados | **com mais de 7 dias, a curva é recusada** e a taxa livre de risco recua para os dois pontos do CDI: o de hoje no ano 1 e a média de dez anos (cerca de 9,4%) na perpetuidade. Medido no gabarito (montagens com e sem a curva, prêmio de 5,5%), isso sobe o preço justo em 16% na mediana | uma semana depois de gerado: **regere antes de rodar ou publicar na web** |
+| `assets/mercado/premio_implicito.json` — o prêmio de mercado ([decisão 142](docs/decisoes/142-o-premio-de-mercado-e-a-media-de-dez-anos-do-premio-implicito.md)) | com mais de 183 dias, continua valendo, com uma ressalva da data; sem o pacote, o prêmio volta aos 5,5% e a avaliação diz isso | a partir de 17/03/2027 |
+| `assets/cvm/documentos.json` — as demonstrações da CVM | com mais de 100 dias, a avaliação avisa que demonstrações entregues depois não entraram | a partir de 24/12/2026 |
+
+### Antes de rodar ou publicar na web: a curva
+
+Qualquer desenvolvedor faz isto, sem base local: o primeiro comando baixa o
+arquivo público de taxas do Tesouro Direto (cerca de 14 MB, sem cadastro), e o
+segundo grava o pacote com as dez datas-base mais recentes.
 
 ```bash
 python tool/tesouro_baixar.py
@@ -234,118 +197,168 @@ python tool/tesouro_baixar.py
 dart run tool/curva_empacotar.dart
 ```
 
+Depois, `flutter run -d chrome` ou `flutter build web`.
+
+### Como conferir que a avaliação está íntegra
+
+Abra uma avaliação e o painel de logs:
+
+| Passo do painel | Íntegro | Sem o pacote |
+|---|---|---|
+| Estrutura a termo da taxa de desconto | "a taxa livre de risco de cada ano é o forward de um ano da curva dos prefixados de DD/MM/AAAA" | "**sem curva de juros**, o custo de capital do ano 1 usa a taxa livre de risco corrente" |
+| Custo do capital próprio (CAPM), Passo 0 | "a média de dez anos do prêmio implícito no preço da bolsa" | "5.5%, o prêmio parametrizado: a série do prêmio implícito não chegou a esta avaliação" |
+
+Nos dois casos a avaliação também traz uma ressalva dizendo o que faltou.
+**Preço justo calculado sem a curva não é comparável** com os da documentação e
+dos casos de estudo.
+
+### Todos os pacotes
+
+| Pacote | O que leva | Gerado por | Precisa de |
+|---|---|---|---|
+| `tesouro/curva.json` | curva dos prefixados | `tesouro_baixar.py` → `curva_empacotar.dart` | só internet |
+| `mercado/premio_implicito.json` | série trimestral do prêmio implícito | `premio_implicito.dart --so-serie` | entrada congelada e bases da B3 e do Tesouro |
+| `cvm/documentos.json` | demonstrações anuais e trimestrais | `cvm_baixar.py` → `cvm_ingerir.dart data/cvm` → `cvm_empacotar.dart` | base da CVM (cerca de 7 GB) |
+| `cvm/capital.json` | emissões e eventos de ações | `cvm_baixar.py --docs FRE` e `b3_baixar.py` → `capital_empacotar.dart` | FRE e COTAHIST |
+| `cvm/outorgas.json` | prazo das concessões | `cvm_baixar.py --docs FRE` → `fre_outorgas.dart` | FRE |
+| `cvm/units.json` | composição das units | `cvm_baixar.py --docs FCA` → `unit_empacotar.dart` | FCA |
+| `cvm/controle.json` | espécie do controle acionário, para a ressalva de controle estatal | `cvm_baixar.py --docs FCA` → `controle_empacotar.dart` | FCA |
+| `b3/emissores.json` | contagem oficial de ações e setor | `b3_companhias_baixar.py` e `b3_complemento_baixar.py` → `b3_empacotar.dart` | internet |
+| `b3/proventos.json` | proventos, para o beta de retorno total | `b3_complemento_baixar.py` → `b3_proventos_empacotar.dart` | internet |
+| `mercado/beta_prior.json` | prior do beta por setor | `beta_prior_empacotar.dart` | entrada congelada |
+| `mercado/multiplos_setoriais.json` | medianas de múltiplos dos pares | `multiplos_empacotar.dart` | entrada congelada |
+| `validacao/banda_calibrada.json` | a faixa calibrada | backtest → `cobertura_banda.py` | backtest |
+| `validacao/habilidade.json` | a habilidade medida | backtest → `regressao_condicional.dart --trimestral` | backtest |
+| `config/distressed_tickers.json` | companhias em recuperação judicial | editado à mão | — |
+
+As bases brutas ficam em `data/`, que **não é versionada** (só a da CVM tem
+cerca de 7 GB). Por isso só quem tem as bases regera a maior parte dos pacotes;
+os outros desenvolvedores só precisam da curva.
+
+### Depois de mudar o motor
+
+Sem mexer na entrada congelada:
+
+| Passo | Comando |
+|---|---|
+| 1. Regravar o gabarito | `dart run tool/gabarito_cascata.dart --regravar` |
+| 2. Refazer os casos de estudo e as figuras | `dart run tool/casos_de_estudo.dart`, depois `python tool/figuras_estudo.py`, e reler os casos em `docs/estudo/casos/` |
+| 3. Se a mudança afeta a validação: o backtest (cerca de 1 hora) | `dart run tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas --trimestral` |
+| 4. A faixa calibrada | `python tool/cobertura_banda.py` |
+| 5. A habilidade e o poder | `dart run tool/regressao_condicional.dart --trimestral`, depois `dart run tool/poder_r3.dart` |
+| 6. Conferir | `flutter test` e `npm run qa:gemini` |
+| 7. O cálculo do usuário continua reproduzindo o motor | `dart run tool/conferir_calculo_manual.dart` |
+| 8. O porquê das normalizações, ativo a ativo | `dart run tool/normalizacoes.dart` (grava `docs/validacao/normalizacoes.md`) |
+
+### Atualizar o conjunto inteiro (avançar a entrada congelada)
+
+É uma rodada própria, com registro: todos os números da documentação, do
+gabarito e dos casos mudam. **Hoje não é só rodar comandos.** A data 14/09/2026
+está fixa no código de `tool/validation/congelado.dart`,
+`tool/gabarito_cascata.dart`, `tool/beta_prior_empacotar.dart`,
+`tool/unit_empacotar.dart`, `tool/controle_empacotar.dart`,
+`tool/b3_deslistadas_contagem.dart` e
+`tool/backtest_valuation.dart`, e `tool/premio_implicito.dart` mede os
+trimestres até 30/06/2026. Avançá-la é mudança de código. Depois disso, a ordem
+segue as dependências declaradas no cabeçalho de cada ferramenta:
+
+| Etapa | Comandos |
+|---|---|
+| 1. Bases brutas, em `data/` | `python tool/cvm_baixar.py`; `python tool/cvm_baixar.py --docs FRE --destino data/cvm/fre`; `python tool/cvm_baixar.py --docs FCA`; `python tool/b3_baixar.py`; `python tool/b3_companhias_baixar.py`; `python tool/b3_complemento_baixar.py`; `python tool/b3_complemento_baixar.py --deslistadas`; `python tool/b3_ponte.py`; `python tool/tesouro_baixar.py` |
+| 2. Ingestão e contagens por data | `dart run tool/cvm_ingerir.dart data/cvm`; `dart run tool/b3_deslistadas_contagem.dart` |
+| 3. Pacotes de dado | `cvm_empacotar.dart`, `b3_empacotar.dart`, `b3_proventos_empacotar.dart`, `capital_empacotar.dart --agora`, `fre_outorgas.dart`, `unit_empacotar.dart --agora`, `controle_empacotar.dart --agora` e `curva_empacotar.dart` |
+| 4. Congelar a entrada nova | `dart run tool/gabarito_cascata.dart`, sem `--regravar`: copia o cache do dia para `data/gabarito/` |
+| 5. Pacotes medidos sobre ela | `beta_prior_empacotar.dart`, `multiplos_empacotar.dart` e `premio_implicito.dart --so-serie` — que recusa regravar trimestre já gravado que tenha mudado; confira a causa antes de usar `--aceitar-mudanca-do-passado` (item B48) |
+| 6. O gabarito com os pacotes novos | `dart run tool/gabarito_cascata.dart --regravar` |
+| 7. Validação, casos e conferência | os passos 2 a 6 de "Depois de mudar o motor" |
+
+---
+
+## Testes e qualidade
+
 ```bash
-flutter build web
+flutter test            # a suíte inteira: núcleo, dados, telas e ferramentas
 ```
 
-Com o pacote vencido, a avaliação recua para os dois pontos do CDI e diz por quê.
-
-## Testes e análise estática
-
-Os testes do aplicativo rodam **offline**, sobre respostas reais capturadas em
-`test/fixtures/`:
-
 ```bash
-flutter test
-```
-
-O núcleo de domínio tem sua própria suíte, sem Flutter e sem rede:
-
-```bash
-dart test --directory packages/equisim_core
+dart test test/core     # só o núcleo, na VM do Dart puro, em segundos
 ```
 
 ```bash
 flutter analyze
 ```
 
-## Geração de código
+Os testes do aplicativo rodam offline, sobre respostas reais em
+`test/fixtures/`. A cadeia de QA:
 
-O schema do cache usa Drift, que depende de geração. Após alterar
-`lib/data/datasources/local/cache_database.dart`:
+| Camada | Quando | O que faz |
+|---|---|---|
+| `.githooks/pre-commit` | todo commit | regras locais, sem rede, em menos de um segundo |
+| `.githooks/pre-push` e `npm run qa:gemini` | todo push, e antes de concluir tarefa | auditor de defeitos de correção; **FAIL bloqueia** |
+| `npm run conselho -- --lente <id>` | depois de mudanças | conselheiro por lentes; nunca bloqueia |
+| `dart run tool/gabarito_cascata.dart --conferir` | mudança no motor | confere ao bit a saída de 376 ativos |
+| `dart run tool/conferir_calculo_manual.dart` | mudança no motor ou na tela Editar valuation | confere que, sem troca, o cálculo do usuário dá o preço do motor em cada avaliado |
+
+Detalhes no [CLAUDE.md](CLAUDE.md) e no
+[capítulo 8 da documentação do motor](docs/motor/08-verificacao-e-validacao.md).
+
+O cache usa Drift; depois de mudar `lib/data/datasources/local/cache_database.dart`:
 
 ```bash
 dart run build_runner build
 ```
 
-## Proxy de custódia da credencial (opcional)
-
-Publica uma função que injeta o token no servidor, de modo que o aplicativo não
-carregue credencial alguma — e que resolve o CORS no alvo web.
-
-**Exige o plano Blaze do Firebase**, que pede conta de faturamento. O projeto do
-TCC está no plano sem cobrança, e nenhuma função foi publicada nele (decisão 86).
-
-```bash
-firebase functions:secrets:set BRAPI_TOKEN
-```
-
-```bash
-firebase deploy --only functions
-```
-
-Depois, preencha `BRAPI_PROXY_URL` em `config/local.json` com a URL retornada.
-
 ---
 
 ## Fontes de dados
 
-| Dado | Fonte | Observação |
-|---|---|---|
-| Cotações diárias | brapi `/v2/stocks/historical` | `close` já ajustado por split, **não** por proventos — que o domínio não modela |
-| Fundamentos históricos | brapi `statistics`, `income-statement`, `balance-sheet`, `cash-flow` (`mode=history`) | granularidade **anual**, 2010–2025 |
-| Setor / indústria | brapi `/v2/stocks/profile` | taxonomia própria da brapi, não GICS nem B3 |
-| Taxa livre de risco | Banco Central, série SGS 12 (CDI) | API aberta, sem chave |
-| Índice de mercado | brapi `^BVSP` | para Rm e cálculo local de beta |
+| Dado | Fonte |
+|---|---|
+| Demonstrações anuais | CVM (dados abertos, pacote `assets/cvm/`) e brapi |
+| Cotações e índice | brapi |
+| Contagem de ações e setor | registro de emissores da B3 (`assets/b3/emissores.json`) |
+| Proventos | B3 (`assets/b3/proventos.json`) — no retorno total do beta e da validação; somados na bolsa inteira, na série do prêmio implícito (decisão 142) |
+| Eventos de capital, units, concessões | CVM, formulários cadastral e de referência (`assets/cvm/`) |
+| Curva de juros | Tesouro Direto (`assets/tesouro/curva.json` na web) |
+| CDI, IPCA, IBC-Br | Banco Central, SGS 12, 433 e 24364 |
+| Prêmio de mercado, múltiplos de pares, prior do beta, faixa calibrada | pacotes medidos pelo próprio projeto (`assets/mercado/`, `assets/validacao/`) |
 
-Limitações conhecidas dos dados estão catalogadas em
-[`PLANO_ARQUITETURA.md`](PLANO_ARQUITETURA.md) §0.4 e §2.3.
+Detalhes e regras de cada fonte no
+[capítulo 1 da documentação do motor](docs/motor/01-insumos-e-dados.md).
+
+---
 
 ## Estrutura
 
 ```
-packages/equisim_core/     domínio puro — sem Flutter, sem rede, sem I/O
-├── entities/              ativo, carteira, valuation, meta, fundamentos
-├── value_objects/         ticker, dinheiro em centavos, peso, intervalo
-├── services/              valuation, backtest, métricas, meta, carteira
-├── repositories/          contratos (interfaces)
-└── time/ · failures/ · audit/
-
-lib/data/                  acesso a dados
-├── config/                resolução de credencial (proxy · define · .env)
-├── network/               Dio + interceptors
-├── datasources/remote/    brapi · Banco Central
-├── datasources/local/     cache Drift + políticas de validade
-├── dtos/                  espelham o JSON; não vazam para o domínio
-└── repositories/          implementações dos contratos
-
-lib/di/                    raiz de composição (Riverpod)
-lib/presentation/          estado e telas por funcionalidade
-├── shell/                 navegação principal
-├── study/                 dupla carteira, arrastar-e-soltar, persistência
-├── goals/                 plano patrimonial e semáforo de viabilidade
-├── valuation/             preço justo, cenários e sensibilidade
-├── backtest/              comparação histórica e métricas
-├── export/                exportação em CSV
-├── audit/                 painel de logs em janela paralela
-├── theme/                 tokens de cor, tipografia e espaçamento
-├── components/            número financeiro e cartão de saldo
-└── shared/                formatadores, cartões, gráficos e ponte de tema
-
-lib/audit/                 barramento de auditoria em tempo de execução
-lib/                       legado preservado
-├── controllers/           autenticação e tema em Provider
-└── views/                 telas de login, cadastro e perfil
-
-scripts/                   cadeia de QA — auditor, conselheiro e lentes
-.githooks/                 pre-commit determinístico · pre-push com o auditor
-docs/decisoes/             registro de decisões, uma por arquivo
-docs/validacao/            evidências de corretude e o conferidor em Python
-functions/                 proxy de custódia da credencial
-test/fixtures/             respostas reais versionadas
+packages/equisim_core/   o núcleo: Dart puro, sem dependência, sem rede, sem relógio
+  lib/src/usecases/      a cascata de avaliação, a montagem dos insumos
+  lib/src/services/      DCF, custo de capital, guardas, curva, cenários, faixa,
+                         múltiplos, beta, métricas, meta, simulação
+  lib/src/entities/      fundamentos, carteira, resultado da avaliação
+  lib/src/audit/         o rastro de cálculo
+lib/                     o aplicativo Flutter
+  data/                  fontes (brapi, Banco Central, Tesouro), cache, repositórios
+  presentation/          as telas (study, valuation, goals, backtest, audit)
+  audit/                 o barramento do painel de logs
+tool/                    medições, backtest, gabarito, empacotadores, casos de estudo
+test/                    toda a suíte de testes, separada pelo que ela testa
+  core/                  o núcleo, inclusive o teste de pureza
+  data/                  fontes, cache e repositórios do aplicativo
+  ui/                    telas, componentes e controladores
+  tool/                  os scripts de tool/
+  fixtures/              respostas reais das fontes, para os testes rodarem offline
+  qa_fixtures/           casos financeiros conferidos, consultados pelo auditor
+scripts/                 a cadeia de QA (auditor, conselheiro, gate local, estado)
+docs/estudo/             o guia de estudo
+docs/motor/              a documentação do motor
+docs/decisoes/           o registro de decisões, uma por arquivo
+docs/validacao/          as medições e as limitações
+assets/                  pacotes de dados versionados
+functions/               proxy opcional da credencial
 ```
 
-A regra de dependência é `presentation → domain ← data`, e o domínio não conhece
-ninguém. Isso não é convenção: `packages/equisim_core/test/purity_test.dart`
-falha o build se `package:flutter`, `package:http`, `dart:js`, Firebase ou Drift
-forem importados no núcleo.
+A regra de dependência é `presentation → domínio ← data`, e o domínio não
+conhece ninguém:
+[purity_test.dart](test/core/purity_test.dart) falha se Flutter,
+rede, Firebase, Drift ou `dart:js` entrarem no núcleo.

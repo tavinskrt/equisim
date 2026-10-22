@@ -15,13 +15,13 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
 Future<void> main(List<String> args) async {
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
   try {
     final universe = (await ctx.fundamentals.universe()).unwrap();
-    final linhas = <Map<String, Object?>>[];
+    final rows = <Map<String, Object?>>[];
 
     var i = 0;
     for (final ticker in universe) {
@@ -30,55 +30,55 @@ Future<void> main(List<String> args) async {
 
       final hist = await ctx.fundamentals.history(ticker);
       if (hist.isErr) continue;
-      final view = PointInTimeView(_hoje);
+      final view = PointInTimeView(_today);
       final pub = view.published(hist.unwrap());
       if (pub.isEmpty) continue;
       final latest = pub.last;
 
-      final serie = await ctx.prices.daily(
+      final series = await ctx.prices.daily(
         ticker,
-        DateRange(_hoje.subtract(const Duration(days: 30)), _hoje),
+        DateRange(_today.subtract(const Duration(days: 30)), _today),
       );
-      if (serie.isErr || serie.unwrap().points.isEmpty) continue;
-      final preco = serie.unwrap().points.last.close;
+      if (series.isErr || series.unwrap().points.isEmpty) continue;
+      final price = series.unwrap().points.last.close;
 
       final n = latest.sharesOutstanding;
-      final vm = latest.marketCap;
-      if (n == null || n <= 0 || vm == null || vm <= 0 || preco <= 0) continue;
+      final marketValue = latest.marketCap;
+      if (n == null || n <= 0 || marketValue == null || marketValue <= 0 || price <= 0) continue;
 
-      final bruto = n * preco / vm;
-      if (!bruto.isFinite) continue;
-      final inteiro = bruto.roundToDouble();
-      final desvio = (bruto - inteiro).abs();
+      final raw = n * price / marketValue;
+      if (!raw.isFinite) continue;
+      final whole = raw.roundToDouble();
+      final deviation = (raw - whole).abs();
 
-      linhas.add({
+      rows.add({
         'ticker': ticker.value,
-        'bruto': bruto,
-        'inteiro': inteiro,
-        'desvioAbsoluto': desvio,
-        'desvioRelativo': inteiro > 0 ? desvio / inteiro : null,
-        'aceitoHoje': inteiro >= 1 &&
-            inteiro <= ValuationCascade.maxSharesPerUnit &&
-            desvio <= 0.12,
+        'bruto': raw,
+        'inteiro': whole,
+        'desvioAbsoluto': deviation,
+        'desvioRelativo': whole > 0 ? deviation / whole : null,
+        'aceitoHoje': whole >= 1 &&
+            whole <= ValuationCascade.maxSharesPerUnit &&
+            deviation <= 0.12,
         'adotadoHoje': ValuationCascade.quotedUnitRatio(
           sharesOutstanding: n,
-          marketCap: vm,
-          marketPrice: preco,
+          marketCap: marketValue,
+          marketPrice: price,
         ),
       });
     }
     stderr.writeln('');
 
-    linhas.sort((a, b) => (b['bruto']! as double).compareTo(a['bruto']! as double));
+    rows.sort((a, b) => (b['bruto']! as double).compareTo(a['bruto']! as double));
 
-    stdout.writeln('== ${linhas.length} ativos com razão mensurável ==\n');
+    stdout.writeln('== ${rows.length} ativos com razão mensurável ==\n');
     stdout.writeln('  ticker    bruto   inteiro   desvio abs   desvio rel  adotado');
-    for (final l in linhas) {
-      final bruto = l['bruto']! as double;
-      if (bruto < 1.5 && (l['desvioAbsoluto']! as double) < 0.12) continue;
+    for (final l in rows) {
+      final raw = l['bruto']! as double;
+      if (raw < 1.5 && (l['desvioAbsoluto']! as double) < 0.12) continue;
       final rel = l['desvioRelativo'] as double?;
       stdout.writeln('  ${(l['ticker']! as String).padRight(8)} '
-          '${bruto.toStringAsFixed(4).padLeft(8)} '
+          '${raw.toStringAsFixed(4).padLeft(8)} '
           '${(l['inteiro']! as double).toStringAsFixed(0).padLeft(7)} '
           '${(l['desvioAbsoluto']! as double).toStringAsFixed(4).padLeft(11)} '
           '${rel == null ? "     -" : "${(rel * 100).toStringAsFixed(2)}%".padLeft(11)} '
@@ -87,22 +87,22 @@ Future<void> main(List<String> args) async {
 
     // Quantos seriam recusados hoje mas aceitos por tolerância relativa?
     for (final tol in [0.02, 0.03, 0.05, 0.08]) {
-      final vira = linhas.where((l) {
-        final inteiro = l['inteiro']! as double;
+      final flips = rows.where((l) {
+        final whole = l['inteiro']! as double;
         final rel = l['desvioRelativo'] as double?;
-        return inteiro > 1 &&
-            inteiro <= ValuationCascade.maxSharesPerUnit &&
+        return whole > 1 &&
+            whole <= ValuationCascade.maxSharesPerUnit &&
             l['aceitoHoje'] == false &&
             rel != null &&
             rel <= tol;
       }).toList();
       stdout.writeln('\n  tolerância relativa de ${(tol * 100).toStringAsFixed(0)}%: '
-          '${vira.length} unit(s) que hoje caem para 1 '
-          '${vira.map((l) => l['ticker']).join(", ")}');
+          '${flips.length} unit(s) que hoje caem para 1 '
+          '${flips.map((l) => l['ticker']).join(", ")}');
     }
 
     File('docs/validacao/unidade.json').writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(linhas),
+      const JsonEncoder.withIndent(' ').convert(rows),
     );
     stdout.writeln('\n  gravado em docs/validacao/unidade.json');
   } finally {

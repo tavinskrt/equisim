@@ -47,7 +47,7 @@ class BetaPrior {
 ///
 /// **O prior é lento, e é isso que torna o pacote honesto.** Ele é mediana
 /// transversal de betas desalavancados sobre janela de cinco anos: um dia a
-/// mais ou a menos não o move. O pacote traz [geradoEm] para que o aplicativo
+/// mais ou a menos não o move. O pacote traz [generatedAt] para que o aplicativo
 /// possa dizer de quando ele é, e para que uma defasagem grande demais seja
 /// recusada em vez de passar em silêncio — o mesmo arranjo do pacote da curva
 /// (decisão 86).
@@ -56,14 +56,14 @@ class BetaPriorPackage {
   final BetaPrior prior;
 
   /// Data em que foi resolvido.
-  final DateTime geradoEm;
+  final DateTime generatedAt;
 
   /// Papéis que entraram na mediana.
   final int observations;
 
   const BetaPriorPackage({
     required this.prior,
-    required this.geradoEm,
+    required this.generatedAt,
     required this.observations,
   });
 }
@@ -71,17 +71,17 @@ class BetaPriorPackage {
 /// Serialização do prior do beta.
 abstract final class BetaPriorCodec {
   /// Versão do formato.
-  static const int versao = 1;
+  static const int version = 1;
 
   /// Grava o pacote.
   static Map<String, Object> encode(
     BetaPrior prior, {
-    required DateTime geradoEm,
+    required DateTime generatedAt,
     required int observations,
   }) =>
       {
-        'versao': versao,
-        'geradoEm': geradoEm.toIso8601String().substring(0, 10),
+        'versao': version,
+        'geradoEm': generatedAt.toIso8601String().substring(0, 10),
         'observacoes': observations,
         'universo': prior.unleveredUniverse,
         'dispersao': prior.dispersion,
@@ -93,30 +93,30 @@ abstract final class BetaPriorCodec {
   /// Recusa em vez de adivinhar: versão diferente, mediana do universo ausente
   /// ou não positiva, e dispersão não positiva devolvem `null`, e quem chama
   /// segue com o beta cru — que é o comportamento anterior, declarado.
-  static BetaPriorPackage? decode(Map<String, dynamic> pacote) {
-    if (pacote['versao'] != versao) return null;
-    final universo = (pacote['universo'] as num?)?.toDouble();
-    final dispersao = (pacote['dispersao'] as num?)?.toDouble();
-    final data = DateTime.tryParse('${pacote['geradoEm']}');
-    if (universo == null || !universo.isFinite || universo <= 0) return null;
-    if (dispersao == null || !dispersao.isFinite || dispersao <= 0) return null;
-    if (data == null) return null;
-    final setores = <String, double>{};
-    final bruto = pacote['setores'];
-    if (bruto is Map) {
-      for (final e in bruto.entries) {
+  static BetaPriorPackage? decode(Map<String, dynamic> package) {
+    if (package['versao'] != version) return null;
+    final universe = (package['universo'] as num?)?.toDouble();
+    final dispersion = (package['dispersao'] as num?)?.toDouble();
+    final date = DateTime.tryParse('${package['geradoEm']}');
+    if (universe == null || !universe.isFinite || universe <= 0) return null;
+    if (dispersion == null || !dispersion.isFinite || dispersion <= 0) return null;
+    if (date == null) return null;
+    final sectors = <String, double>{};
+    final raw = package['setores'];
+    if (raw is Map) {
+      for (final e in raw.entries) {
         final v = (e.value as num?)?.toDouble();
-        if (v != null && v.isFinite && v > 0) setores['${e.key}'] = v;
+        if (v != null && v.isFinite && v > 0) sectors['${e.key}'] = v;
       }
     }
     return BetaPriorPackage(
       prior: BetaPrior(
-        unleveredBySector: Map.unmodifiable(setores),
-        unleveredUniverse: universo,
-        dispersion: dispersao,
+        unleveredBySector: Map.unmodifiable(sectors),
+        unleveredUniverse: universe,
+        dispersion: dispersion,
       ),
-      geradoEm: data,
-      observations: (pacote['observacoes'] as num?)?.toInt() ?? 0,
+      generatedAt: date,
+      observations: (package['observacoes'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -134,14 +134,10 @@ class ShrunkBeta {
   /// `WACC`, e por isso sai junto.
   final double? unlevered;
 
-  /// Prior alavancado para a estrutura de capital do ativo.
-  final double prior;
-
   const ShrunkBeta({
     required this.beta,
     required this.weight,
     required this.unlevered,
-    required this.prior,
   });
 }
 
@@ -219,8 +215,8 @@ abstract final class BetaShrinkage {
     required double taxRate,
   }) {
     if (!debtToEquity.isFinite || !taxRate.isFinite) return null;
-    final de = debtToEquity.clamp(0.0, maxDebtToEquity).toDouble();
-    final f = 1 + (1 - taxRate) * de;
+    final clampedDebtToEquity = debtToEquity.clamp(0.0, maxDebtToEquity).toDouble();
+    final f = 1 + (1 - taxRate) * clampedDebtToEquity;
     return f.isFinite ? f : null;
   }
 
@@ -239,10 +235,10 @@ abstract final class BetaShrinkage {
     required double debtToEquity,
     required double taxRate,
   }) {
-    final fator = leverageFactor(debtToEquity: debtToEquity, taxRate: taxRate);
-    final priorAlavancado = (fator == null)
+    final factor = leverageFactor(debtToEquity: debtToEquity, taxRate: taxRate);
+    final leveredPrior = (factor == null)
         ? leveredBeta
-        : prior.unleveredFor(sectorKey) * fator;
+        : prior.unleveredFor(sectorKey) * factor;
 
     // **O desalavancado sai do beta que sai daqui, e não do cru** (decisão
     // 54). Encolher em espaço alavancado e desalavancar o resultado é
@@ -257,36 +253,35 @@ abstract final class BetaShrinkage {
     // caminho resolvido — que é a maioria do universo —, porque o ponto fixo
     // realavanca `unlevered` e nunca toca em `beta`. A decisão 40 existe para
     // trocar precisão por viés, e essa troca não estava chegando ao preço.
-    double? desalavancar(double b) =>
-        (fator != null && fator > 0 && b.isFinite) ? b / fator : null;
+    double? unlever(double b) =>
+        (factor != null && factor > 0 && b.isFinite) ? b / factor : null;
 
-    ShrunkBeta resultado(double beta, double peso) => ShrunkBeta(
+    ShrunkBeta result(double beta, double weight) => ShrunkBeta(
           beta: beta,
-          weight: peso,
-          unlevered: desalavancar(beta),
-          prior: priorAlavancado,
+          weight: weight,
+          unlevered: unlever(beta),
         );
 
-    if (!priorAlavancado.isFinite || prior.dispersion <= 0) {
-      return resultado(leveredBeta, 1.0);
+    if (!leveredPrior.isFinite || prior.dispersion <= 0) {
+      return result(leveredBeta, 1.0);
     }
 
     if (standardError == null ||
         !standardError.isFinite ||
         standardError <= 0) {
-      return resultado(priorAlavancado, 0.0);
+      return result(leveredPrior, 0.0);
     }
 
-    final precisaoIndividual = 1 / (standardError * standardError);
-    final precisaoPrior = 1 / (prior.dispersion * prior.dispersion);
-    final soma = precisaoIndividual + precisaoPrior;
-    if (!soma.isFinite || soma <= 0) return resultado(leveredBeta, 1.0);
+    final individualPrecision = 1 / (standardError * standardError);
+    final priorPrecision = 1 / (prior.dispersion * prior.dispersion);
+    final sum = individualPrecision + priorPrecision;
+    if (!sum.isFinite || sum <= 0) return result(leveredBeta, 1.0);
 
-    final w = (precisaoIndividual / soma).clamp(0.0, 1.0).toDouble();
-    final encolhido = w * leveredBeta + (1 - w) * priorAlavancado;
+    final w = (individualPrecision / sum).clamp(0.0, 1.0).toDouble();
+    final shrunk = w * leveredBeta + (1 - w) * leveredPrior;
 
-    return encolhido.isFinite
-        ? resultado(encolhido, w)
-        : resultado(priorAlavancado, w);
+    return shrunk.isFinite
+        ? result(shrunk, w)
+        : result(leveredPrior, w);
   }
 }

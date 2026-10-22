@@ -36,14 +36,14 @@ import 'package:equisim_core/equisim_core.dart';
 
 import 'validation/context.dart';
 
-final _hoje = DateTime(2026, 9, 4);
+final _today = DateTime(2026, 9, 4);
 
 /// Avalia forçando a via, e opcionalmente o crescimento e o fator de base.
-({double justo, double crescimento, double fator})? _avaliar(
+({double fairValue, double growth, double factor})? _evaluate(
   ValuationInputs base,
-  ValuationLane via, {
-  double? crescimento,
-  double? fator,
+  ValuationLane lane, {
+  double? growth,
+  double? factor,
 }) {
   final r = ValuationCascade.evaluate(ValuationInputs(
     ticker: base.ticker,
@@ -60,35 +60,35 @@ final _hoje = DateTime(2026, 9, 4);
     declaredTerminalRiskFreeRate: base.declaredTerminalRiskFreeRate,
     prices: base.prices,
     isDistressed: base.isDistressed,
-    laneOverride: via,
-    growthOverride: crescimento,
-    baseFactorOverride: fator,
+    laneOverride: lane,
+    growthOverride: growth,
+    baseFactorOverride: factor,
   ));
   if (r.isErr) return null;
   final v = r.unwrap();
   if (v.fairValue.reais <= 0) return null;
   return (
-    justo: v.fairValue.reais,
-    crescimento: v.diagnostics!.growthRate,
-    fator: v.diagnostics!.baseFactor,
+    fairValue: v.fairValue.reais,
+    growth: v.diagnostics!.growthRate,
+    factor: v.diagnostics!.baseFactor,
   );
 }
 
 /// Razão entre as duas vias sob um conjunto de insumos, ou `null`.
-double? _razao(
+double? _ratio(
   ValuationInputs inputs, {
-  double? crescimento,
-  double? fator,
+  double? growth,
+  double? factor,
 }) {
-  final f = _avaliar(inputs, ValuationLane.firm,
-      crescimento: crescimento, fator: fator);
-  final a = _avaliar(inputs, ValuationLane.shareholder,
-      crescimento: crescimento, fator: fator);
-  if (f == null || a == null || a.justo <= 0) return null;
-  return f.justo / a.justo;
+  final f = _evaluate(inputs, ValuationLane.firm,
+      growth: growth, factor: factor);
+  final a = _evaluate(inputs, ValuationLane.shareholder,
+      growth: growth, factor: factor);
+  if (f == null || a == null || a.fairValue <= 0) return null;
+  return f.fairValue / a.fairValue;
 }
 
-double? _mediana(List<double> v) {
+double? _median(List<double> v) {
   if (v.isEmpty) return null;
   final s = [...v]..sort();
   final m = s.length ~/ 2;
@@ -100,40 +100,40 @@ double? _mediana(List<double> v) {
 /// A medida central é a **mediana de `|ln razão|`**: razão é grandeza
 /// multiplicativa, e 0,5× e 2,0× são a mesma discordância em direções opostas.
 /// Média de razões trataria as duas de forma diferente.
-({double medianaAbsLog, int fora15, int fora20, int n}) _dispersao(
-  List<double> razoes,
+({double medianAbsLog, int outside15, int outside20, int n}) _dispersion(
+  List<double> ratios,
 ) {
   final logs = [
-    for (final r in razoes)
+    for (final r in ratios)
       if (r > 0 && r.isFinite) math.log(r).abs(),
   ];
   return (
-    medianaAbsLog: _mediana(logs) ?? double.nan,
-    fora15: razoes.where((r) => r > 1.5 || r < 1 / 1.5).length,
-    fora20: razoes.where((r) => r > 2 || r < 0.5).length,
-    n: razoes.length,
+    medianAbsLog: _median(logs) ?? double.nan,
+    outside15: ratios.where((r) => r > 1.5 || r < 1 / 1.5).length,
+    outside20: ratios.where((r) => r > 2 || r < 0.5).length,
+    n: ratios.length,
   );
 }
 
 Future<void> main(List<String> args) async {
-  final limiteIdx = args.indexOf('--limit');
-  final limite = limiteIdx >= 0 ? int.tryParse(args[limiteIdx + 1]) ?? 0 : 0;
+  final limitIndex = args.indexOf('--limit');
+  final limit = limitIndex >= 0 ? int.tryParse(args[limitIndex + 1]) ?? 0 : 0;
 
   final ctx = ValidationContext.create(outputDir: 'docs/validacao');
   try {
     final anchors = (await ResolveMarketAnchors.call(
       macro: ctx.macro,
       benchmark: ctx.benchmark,
-      asOf: _hoje,
+      asOf: _today,
     ))
         .getOrElse(MarketAnchors.fallback2026);
 
     var universe = (await ctx.fundamentals.universe()).unwrap();
-    if (limite > 0 && universe.length > limite) {
-      universe = universe.sublist(0, limite);
+    if (limit > 0 && universe.length > limit) {
+      universe = universe.sublist(0, limit);
     }
 
-    final saida = <Map<String, dynamic>>[];
+    final output = <Map<String, dynamic>>[];
     var i = 0;
     for (final ticker in universe) {
       i++;
@@ -145,7 +145,7 @@ Future<void> main(List<String> args) async {
         fundamentals: ctx.fundamentals,
         benchmark: ctx.benchmark,
         riskFreeRate: anchors.currentRiskFreeRate,
-        asOf: _hoje,
+        asOf: _today,
         perpetualGrowthCap: anchors.nominalEconomyGrowth,
         inflation: anchors.inflationCagr,
         terminalRiskFreeRate: anchors.riskFreeCagr,
@@ -154,51 +154,51 @@ Future<void> main(List<String> args) async {
       if (prep.isErr) continue;
       final inputs = prep.unwrap();
 
-      final firma = _avaliar(inputs, ValuationLane.firm);
-      final acionista = _avaliar(inputs, ValuationLane.shareholder);
-      if (firma == null || acionista == null) continue;
+      final firm = _evaluate(inputs, ValuationLane.firm);
+      final shareholder = _evaluate(inputs, ValuationLane.shareholder);
+      if (firm == null || shareholder == null) continue;
 
-      final r0 = firma.justo / acionista.justo;
+      final r0 = firm.fairValue / shareholder.fairValue;
 
-      saida.add({
+      output.add({
         'ticker': ticker.value,
         'setor': inputs.sectorKey,
         'preco': inputs.marketPrice,
-        'justoFirma': firma.justo,
-        'justoAcionista': acionista.justo,
-        'crescimentoFirma': firma.crescimento,
-        'crescimentoAcionista': acionista.crescimento,
-        'fatorFirma': firma.fator,
-        'fatorAcionista': acionista.fator,
+        'justoFirma': firm.fairValue,
+        'justoAcionista': shareholder.fairValue,
+        'crescimentoFirma': firm.growth,
+        'crescimentoAcionista': shareholder.growth,
+        'fatorFirma': firm.factor,
+        'fatorAcionista': shareholder.factor,
         'razaoAtual': r0,
         // Empréstimo no sentido firma → acionista.
         'razaoCrescimentoDaFirma':
-            _razao(inputs, crescimento: firma.crescimento),
-        'razaoFatorDaFirma': _razao(inputs, fator: firma.fator),
+            _ratio(inputs, growth: firm.growth),
+        'razaoFatorDaFirma': _ratio(inputs, factor: firm.factor),
         'razaoAmbosDaFirma':
-            _razao(inputs, crescimento: firma.crescimento, fator: firma.fator),
+            _ratio(inputs, growth: firm.growth, factor: firm.factor),
         // E no sentido inverso, para separar "colapsa" de "a firma tem razão".
-        'razaoAmbosDoAcionista': _razao(
+        'razaoAmbosDoAcionista': _ratio(
           inputs,
-          crescimento: acionista.crescimento,
-          fator: acionista.fator,
+          growth: shareholder.growth,
+          factor: shareholder.factor,
         ),
       });
     }
     stderr.writeln('');
 
     File('docs/validacao/insumos_compartilhados.json').writeAsStringSync(
-      const JsonEncoder.withIndent(' ').convert(saida),
+      const JsonEncoder.withIndent(' ').convert(output),
     );
-    _imprimir(saida);
+    _printReport(output);
     stderr.writeln('\nescrito docs/validacao/insumos_compartilhados.json '
-        '(${saida.length})');
+        '(${output.length})');
   } finally {
     await ctx.dispose();
   }
 }
 
-void _imprimir(List<Map<String, dynamic>> l) {
+void _printReport(List<Map<String, dynamic>> l) {
   if (l.isEmpty) {
     stdout.writeln('nenhum ativo com as duas vias avaliáveis');
     return;
@@ -227,42 +227,42 @@ void _imprimir(List<Map<String, dynamic>> l) {
   ];
   stdout.writeln('-- o quanto os insumos divergem --');
   stdout.writeln('  crescimento (firma − acionista): '
-      'mediana=${((_mediana(dg) ?? 0) * 100).toStringAsFixed(2)} p.p.   '
+      'mediana=${((_median(dg) ?? 0) * 100).toStringAsFixed(2)} p.p.   '
       '|dif| > 3 p.p. em ${dg.where((x) => x.abs() > 0.03).length} de ${dg.length}');
   stdout.writeln('  fator (firma ÷ acionista): '
-      'mediana=${(_mediana(df) ?? 0).toStringAsFixed(2)}x   '
+      'mediana=${(_median(df) ?? 0).toStringAsFixed(2)}x   '
       'fora de [0,8; 1,25] em '
       '${df.where((x) => x < 0.8 || x > 1.25).length} de ${df.length}');
 
-  void linha(String rotulo, String chave) {
-    final d = _dispersao(col(chave));
+  void row(String label, String key) {
+    final d = _dispersion(col(key));
     if (d.n == 0) {
-      stdout.writeln('  ${rotulo.padRight(34)} —');
+      stdout.writeln('  ${label.padRight(34)} —');
       return;
     }
-    stdout.writeln('  ${rotulo.padRight(34)} '
-        'mediana|ln r|=${d.medianaAbsLog.toStringAsFixed(3)}  '
-        'fora de 1,5x: ${d.fora15.toString().padLeft(3)}/${d.n}  '
-        'fora de 2x: ${d.fora20.toString().padLeft(3)}/${d.n}');
+    stdout.writeln('  ${label.padRight(34)} '
+        'mediana|ln r|=${d.medianAbsLog.toStringAsFixed(3)}  '
+        'fora de 1,5x: ${d.outside15.toString().padLeft(3)}/${d.n}  '
+        'fora de 2x: ${d.outside20.toString().padLeft(3)}/${d.n}');
   }
 
   stdout.writeln('\n-- dispersão da razão entre as vias --');
-  linha('como está hoje', 'razaoAtual');
-  linha('só o crescimento da firma', 'razaoCrescimentoDaFirma');
-  linha('só o fator da firma', 'razaoFatorDaFirma');
-  linha('ambos, da firma', 'razaoAmbosDaFirma');
-  linha('ambos, do acionista', 'razaoAmbosDoAcionista');
+  row('como está hoje', 'razaoAtual');
+  row('só o crescimento da firma', 'razaoCrescimentoDaFirma');
+  row('só o fator da firma', 'razaoFatorDaFirma');
+  row('ambos, da firma', 'razaoAmbosDaFirma');
+  row('ambos, do acionista', 'razaoAmbosDoAcionista');
 
   // O veredito quantitativo: quanto da dispersão colapsa.
-  final base = _dispersao(col('razaoAtual'));
+  final base = _dispersion(col('razaoAtual'));
   for (final e in const [
     ('ambos, da firma', 'razaoAmbosDaFirma'),
     ('ambos, do acionista', 'razaoAmbosDoAcionista'),
   ]) {
-    final d = _dispersao(col(e.$2));
-    if (d.n == 0 || !base.medianaAbsLog.isFinite) continue;
-    final colapso = 1 - d.medianaAbsLog / base.medianaAbsLog;
+    final d = _dispersion(col(e.$2));
+    if (d.n == 0 || !base.medianAbsLog.isFinite) continue;
+    final collapse = 1 - d.medianAbsLog / base.medianAbsLog;
     stdout.writeln('\n  colapso com "${e.$1}": '
-        '${(colapso * 100).toStringAsFixed(1)}% da dispersão mediana');
+        '${(collapse * 100).toStringAsFixed(1)}% da dispersão mediana');
   }
 }

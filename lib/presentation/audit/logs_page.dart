@@ -4,6 +4,8 @@ import 'dart:math' as math;
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
 
+import '../theme/fin_space.dart';
+import '../theme/fin_typography.dart';
 import 'console_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
@@ -56,7 +58,23 @@ class LogsPage extends StatefulWidget {
   State<LogsPage> createState() => _LogsPageState();
 }
 
-enum _Filter { todos, calculos, rede }
+enum _Filter implements WireKeyed {
+  all('todos'),
+  calculations('calculos'),
+
+  /// Os valuations que o usuário confirmou na edição (decisão 150). São
+  /// cálculos também — aparecem em [calculations] —, e o filtro próprio existe
+  /// porque é o que se abre o painel para conferir depois de confirmar um.
+  confirmed('valuations-confirmados'),
+  network('rede');
+
+  const _Filter(this.key);
+
+  /// Chave gravada nas saídas — pacote de dados, rastro de auditoria,
+  /// relatório. É dado, e não nome de código: renomear o valor não a muda.
+  @override
+  final String key;
+}
 
 class _LogsPageState extends State<LogsPage> {
   final AuditBus _bus = AuditBus.instance;
@@ -65,7 +83,7 @@ class _LogsPageState extends State<LogsPage> {
 
   bool _autoScroll = true;
   bool _dark = true;
-  _Filter _filter = _Filter.todos;
+  _Filter _filter = _Filter.all;
   int _lastCount = 0;
 
   @override
@@ -109,11 +127,13 @@ class _LogsPageState extends State<LogsPage> {
   }
 
   bool _matchesFilter(AuditEvent event) => switch (_filter) {
-    _Filter.todos => true,
-    // A separação é estrutural, não um rótulo à parte: evento sem fórmula
-    // decomposta é ida à rede; com fórmula, é cálculo do núcleo.
-    _Filter.calculos => event.calculations.isNotEmpty,
-    _Filter.rede => event.calculations.isEmpty,
+    _Filter.all => true,
+    // **Pela origem, e não pela presença de passos** (item D4): a avaliação
+    // recusada antes do primeiro passo não tem fórmula decomposta, e a regra
+    // antiga a filtrava como ida à rede.
+    _Filter.calculations => AuditBus.isCalculation(event),
+    _Filter.confirmed => _isConfirmedValuation(event),
+    _Filter.network => !AuditBus.isCalculation(event),
   };
 
   bool _matchesQuery(AuditEvent event, String query) {
@@ -193,16 +213,34 @@ class _LogsPageState extends State<LogsPage> {
 
   void _export() {
     final events = _visible;
+    final query = _search.text.trim();
+    final discardedCalculations = _bus.discardedCalculations;
+    final discardedNetwork = _bus.discardedNetwork;
     final document = const JsonEncoder.withIndent('  ').convert({
       'aplicacao': 'Equisim',
       'documento': 'Auditoria de cálculos',
+      // **O arquivo diz o que ele é, e o que ficou de fora** (item D4). Antes
+      // ele não registrava a busca digitada, nem que o histórico tinha perdido
+      // eventos por falta de espaço: um arquivo filtrado ou incompleto parecia
+      // o histórico inteiro.
+      'formato': 2,
       'exportadoEm': DateTime.now().toIso8601String(),
       'totalDeEventos': events.length,
+      'totalDeAvaliacoes': events.where(AuditBus.isCalculation).length,
       'totalDeCalculos': events.fold<int>(
         0,
         (sum, e) => sum + e.calculations.length,
       ),
-      'filtroAplicado': _filter.name,
+      'totalNoHistorico': _bus.history.length,
+      'filtroAplicado': _filter.key,
+      'buscaAplicada': query.isEmpty ? null : query,
+      'descartados': {
+        'calculos': discardedCalculations,
+        'rede': discardedNetwork,
+      },
+      if (discardedCalculations > 0 || discardedNetwork > 0)
+        'aviso': 'O histórico descartou eventos antigos por falta de espaço: '
+            'este arquivo não tem a sessão inteira.',
       'eventos': [for (final e in events) e.toJson()],
     });
 
@@ -332,6 +370,20 @@ class _Header extends StatelessWidget {
                     : '$showing de $total evento(s)',
                 style: TextStyle(color: theme.dim, fontSize: 12),
               ),
+              // O histórico tem teto, e o que sai dele não volta: quem vai
+              // exportar precisa saber antes que o arquivo não terá tudo.
+              if (bus.discardedCalculations > 0 || bus.discardedNetwork > 0)
+                Text(
+                  '${bus.discardedCalculations} cálculo(s) e '
+                  '${bus.discardedNetwork} de rede descartados',
+                  // O token do tema, e não um tamanho no ponto de uso: esta
+                  // janela tem `MaterialApp` próprio, sem a `FinTypography`,
+                  // e o `bodySmall` padrão tem os 12 px do contador ao lado.
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: theme.warning),
+                ),
             ],
           ),
           const SizedBox(height: 10),
@@ -381,9 +433,10 @@ class _Header extends StatelessWidget {
                 _FilterChip(
                   theme: theme,
                   label: switch (f) {
-                    _Filter.todos => 'Todos',
-                    _Filter.calculos => 'Cálculos',
-                    _Filter.rede => 'Rede',
+                    _Filter.all => 'Todos',
+                    _Filter.calculations => 'Cálculos',
+                    _Filter.confirmed => 'Valuations confirmados',
+                    _Filter.network => 'Rede',
                   },
                   selected: filter == f,
                   onTap: () => onFilter(f),
@@ -480,6 +533,13 @@ class _EmptyState extends StatelessWidget {
 
 // ------------------------------------------------------------- Cartão de evento --
 
+/// O evento é um valuation que o usuário confirmou na edição (decisão 150)?
+///
+/// Pela origem, como [AuditBus.isCalculation]: o endereço é o que o registro
+/// do núcleo declara.
+bool _isConfirmedValuation(AuditEvent event) =>
+    event.endpoint.startsWith(ManualValuationRecord.endpointPrefix);
+
 class _EventCard extends StatelessWidget {
   const _EventCard({
     super.key,
@@ -492,7 +552,9 @@ class _EventCard extends StatelessWidget {
   final int ordinal;
   final ConsoleTheme theme;
 
-  bool get _isNetwork => event.calculations.isEmpty;
+  bool get _isNetwork => !AuditBus.isCalculation(event);
+
+  bool get _isConfirmed => _isConfirmedValuation(event);
 
   @override
   Widget build(BuildContext context) {
@@ -528,6 +590,9 @@ class _EventCard extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4),
             child: Text(
               'tx ${event.transactionId} · '
+              // O valuation confirmado pode ter vindo do histórico gravado, de
+              // outro dia: sem a data, a hora sozinha enganaria.
+              '${_isConfirmed ? '${_formatDate(event.timestamp)} ' : ''}'
               '${_formatTimestamp(event.timestamp)} · '
               '${event.executionTimeMs} ms',
               style: theme.mono(color: theme.dim, size: 11),
@@ -540,6 +605,9 @@ class _EventCard extends StatelessWidget {
               title: 'Requisição & Resposta',
               subtitle: _isNetwork
                   ? 'Payload bruto trocado com a fonte de dados.'
+                  : _isConfirmed
+                  ? 'As premissas que o usuário confirmou, as do motor de que '
+                        'elas partiram, e o resultado gravado com elas.'
                   : 'Insumos resolvidos que entraram no motor e o resultado '
                         'que saiu dele.',
               child: Column(
@@ -636,8 +704,12 @@ class _EventCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        if (failed)
+        if (failed && _isConfirmed)
+          _Tag(theme: theme, color: theme.danger, label: 'valuation não salvo')
+        else if (failed)
           _Tag(theme: theme, color: theme.danger, label: 'sem modelo aplicável')
+        else if (_isConfirmed)
+          _Tag(theme: theme, color: theme.accent, label: 'valuation confirmado')
         else if (_isNetwork)
           _Tag(
             theme: theme,
@@ -653,6 +725,10 @@ class _EventCard extends StatelessWidget {
       ],
     );
   }
+
+  static String _formatDate(DateTime t) =>
+      '${t.day.toString().padLeft(2, '0')}/'
+      '${t.month.toString().padLeft(2, '0')}/${t.year}';
 
   static String _formatTimestamp(DateTime t) =>
       '${t.hour.toString().padLeft(2, '0')}:'
@@ -836,6 +912,14 @@ class _SubstitutionBlock extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+          // **O porquê vem antes da conta** (pedido do orientador, 14/10/2026):
+          // quem abre o passo da base quer saber por que o lucro de partida
+          // não é o publicado — e em que direção — antes de conferir a
+          // aritmética.
+          if (trace.explanation.isNotEmpty) ...[
+            const Gap.sm(),
+            _ExplanationBox(theme: theme, lines: trace.explanation),
+          ],
           if (trace.sample != null && trace.sample!.points.isNotEmpty) ...[
             const SizedBox(height: 12),
             _SampleChart(theme: theme, sample: trace.sample!),
@@ -952,6 +1036,64 @@ class _SubstitutionBlock extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// --------------------------------------------------------------- O porquê --
+
+/// O motivo de um cálculo em linguagem corrente, um parágrafo por linha.
+///
+/// Fonte proporcional, e não a monoespaçada do resto do console: isto é texto
+/// para ler, e não valor para alinhar. A borda à esquerda na cor de destaque o
+/// separa da decomposição, que é a aritmética.
+class _ExplanationBox extends StatelessWidget {
+  const _ExplanationBox({required this.theme, required this.lines});
+
+  final ConsoleTheme theme;
+  final List<String> lines;
+
+  /// A escala tipográfica do aplicativo, sem o tema: a janela de auditoria é
+  /// uma instância à parte, e o `MaterialApp` dela não carrega `FinTheme`.
+  static final _typography = FinTypography.standard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: FinSpace.md,
+        vertical: FinSpace.sm,
+      ),
+      decoration: BoxDecoration(
+        color: theme.accent.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(6),
+        border: Border(left: BorderSide(color: theme.accent, width: 3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'POR QUÊ',
+            style: _typography.label.copyWith(color: theme.accent),
+          ),
+          const Gap.xs(),
+          for (final (i, row) in lines.indexed)
+            Padding(
+              padding: i == 0
+                  ? EdgeInsets.zero
+                  : const EdgeInsets.only(top: FinSpace.sm),
+              child: SelectableText(
+                row,
+                style: _typography.bodySm.copyWith(
+                  color: theme.text,
+                  height: 1.5,
+                  fontWeight: i == 1 ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -1109,7 +1251,7 @@ class _SampleChart extends StatelessWidget {
   /// espaço com o número.
   Widget _row(TraceSamplePoint point) {
     final tag = _tagOf(point);
-    final valor = SelectableText(
+    final value = SelectableText(
       _formatNumber(point.value),
       style: theme.mono(
         color: point.definesResult ? theme.accent : theme.text,
@@ -1117,7 +1259,7 @@ class _SampleChart extends StatelessWidget {
         bold: point.definesResult,
       ),
     );
-    final rotulo = SizedBox(
+    final label = SizedBox(
       width: 64,
       child: SelectableText(
         point.label,
@@ -1133,8 +1275,8 @@ class _SampleChart extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  rotulo,
-                  Expanded(child: valor),
+                  label,
+                  Expanded(child: value),
                 ],
               ),
               if (tag.isNotEmpty)
@@ -1154,8 +1296,8 @@ class _SampleChart extends StatelessWidget {
         // que é o texto de comprimento variável.
         return Row(
           children: [
-            rotulo,
-            valor,
+            label,
+            value,
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -1395,18 +1537,18 @@ class _SampleChartPainter extends CustomPainter {
     var top = values.reduce(math.max);
 
     if (low != null && high != null) {
-      final folga = (high - low) * 0.55;
-      final limiteAlto = high + folga;
-      final limiteBaixo = math.min(0.0, low - folga);
+      final margin = (high - low) * 0.55;
+      final upperLimit = high + margin;
+      final lowerLimit = math.min(0.0, low - margin);
       // Só corta se houver o que cortar: com a série toda dentro da banda,
       // apertar a escala inventaria um corte que não existe.
       top = math.min(
         top,
-        math.max(limiteAlto, _largestUpTo(values, limiteAlto)),
+        math.max(upperLimit, _largestUpTo(values, upperLimit)),
       );
       bottom = math.max(
         bottom,
-        math.min(limiteBaixo, _smallestFrom(values, limiteBaixo)),
+        math.min(lowerLimit, _smallestFrom(values, lowerLimit)),
       );
     }
 
@@ -1418,22 +1560,22 @@ class _SampleChartPainter extends CustomPainter {
     if (top - bottom < 1e-12) {
       // Série constante: sem folga artificial, a conversão de valor para pixel
       // dividiria por zero e o gráfico sairia em branco.
-      final unidade = top.abs() < 1e-12 ? 1.0 : top.abs() * 0.1;
-      top += unidade;
-      bottom -= unidade;
+      final unit = top.abs() < 1e-12 ? 1.0 : top.abs() * 0.1;
+      top += unit;
+      bottom -= unit;
     }
     final span = top - bottom;
     return (bottom - span * 0.06, top + span * 0.14);
   }
 
   static double _largestUpTo(List<double> values, double limit) {
-    final dentro = values.where((v) => v <= limit);
-    return dentro.isEmpty ? limit : dentro.reduce(math.max);
+    final within = values.where((v) => v <= limit);
+    return within.isEmpty ? limit : within.reduce(math.max);
   }
 
   static double _smallestFrom(List<double> values, double limit) {
-    final dentro = values.where((v) => v >= limit);
-    return dentro.isEmpty ? limit : dentro.reduce(math.min);
+    final within = values.where((v) => v >= limit);
+    return within.isEmpty ? limit : within.reduce(math.min);
   }
 
   /// Zigue-zague na ponta da barra cortada — a convenção de eixo interrompido.

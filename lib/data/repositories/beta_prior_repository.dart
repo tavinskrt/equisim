@@ -16,14 +16,14 @@ import 'package:equisim_core/equisim_core.dart';
 /// segue com o beta cru — o comportamento anterior, declarado na tela.
 class BetaPriorRepository {
   /// Lê o conteúdo do pacote.
-  final Future<String> Function() carregarPacote;
+  final Future<String> Function() loadPackage;
 
   /// Data de referência, para medir a defasagem do pacote.
-  final DateTime Function() hoje;
+  final DateTime Function() today;
 
   /// Declara o repositório.
-  BetaPriorRepository({required this.carregarPacote, DateTime Function()? hoje})
-      : hoje = hoje ?? DateTime.now;
+  BetaPriorRepository({required this.loadPackage, DateTime Function()? today})
+      : today = today ?? DateTime.now;
 
   /// Defasagem máxima aceita do pacote, em dias.
   ///
@@ -33,13 +33,13 @@ class BetaPriorRepository {
   /// que um pacote esquecido por anos não continue passando por atual, e não
   /// porque a grandeza expire depressa. Compare-se com os sete dias da curva
   /// (decisão 86), que é taxa de um dia.
-  static const int diasDeValidade = 365;
+  static const int validityDays = 365;
 
-  Future<BetaPriorPackage?>? _pacote;
+  Future<BetaPriorPackage?>? _package;
 
-  Future<BetaPriorPackage?> _ler() async {
+  Future<BetaPriorPackage?> _read() async {
     try {
-      final json = jsonDecode(await carregarPacote());
+      final json = jsonDecode(await loadPackage());
       return json is Map<String, dynamic> ? BetaPriorCodec.decode(json) : null;
     } on Object {
       return null;
@@ -52,7 +52,7 @@ class BetaPriorRepository {
   /// beta é o cru e as taxas não são resolvidas, e quem lê o preço justo tem de
   /// saber disso.
   Future<({BetaPrior? prior, String? note})> reading() async {
-    final p = await (_pacote ??= _ler());
+    final p = await (_package ??= _read());
     if (p == null) {
       return (
         prior: null,
@@ -64,18 +64,18 @@ class BetaPriorRepository {
     // **Dia civil, e não instante.** `difference().inDays` soma horas
     // absolutas, e no salto do horário de verão o resultado cai uma hora antes
     // ou depois — o bastante para a validade valer 364 ou 366 dias conforme a
-    // época. É a mesma correção que `_cobreOInicio` já traz.
-    final agora = hoje();
-    final dias = DateTime.utc(agora.year, agora.month, agora.day)
+    // época. É a mesma correção que `_coversStart` já traz.
+    final now = today();
+    final days = DateTime.utc(now.year, now.month, now.day)
         .difference(DateTime.utc(
-            p.geradoEm.year, p.geradoEm.month, p.geradoEm.day))
+            p.generatedAt.year, p.generatedAt.month, p.generatedAt.day))
         .inDays;
-    if (dias > diasDeValidade) {
+    if (days > validityDays) {
       return (
         prior: null,
         note: 'O prior transversal do beta é de '
-            '${p.geradoEm.toIso8601String().substring(0, 10)}, mais de '
-            '$diasDeValidade dias atrás: não foi usado, e o beta é o da '
+            '${p.generatedAt.toIso8601String().substring(0, 10)}, mais de '
+            '$validityDays dias atrás: não foi usado, e o beta é o da '
             'regressão crua.',
       );
     }

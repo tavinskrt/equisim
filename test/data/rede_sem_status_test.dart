@@ -23,7 +23,7 @@ import 'fixture_adapter.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  ApiClient cliente(FixtureAdapter adapter) {
+  ApiClient client(FixtureAdapter adapter) {
     final dio = Dio(BaseOptions(
       responseType: ResponseType.plain,
       validateStatus: ApiClient.acceptsStatus,
@@ -39,7 +39,7 @@ void main() {
     );
   }
 
-  const tipos = [
+  const kinds = [
     DioExceptionType.connectionTimeout,
     DioExceptionType.receiveTimeout,
     DioExceptionType.connectionError,
@@ -47,29 +47,29 @@ void main() {
   ];
 
   group('BcbDatasource — falha sem resposta do servidor', () {
-    for (final tipo in tipos) {
-      test('${tipo.name} vira Result.err, e não exceção', () async {
-        final fonte = BcbDatasource(cliente(FixtureAdapter(
-          transportErrors: {'bcdata.sgs': tipo},
+    for (final kind in kinds) {
+      test('${kind.name} vira Result.err, e não exceção', () async {
+        final source = BcbDatasource(client(FixtureAdapter(
+          transportErrors: {'bcdata.sgs': kind},
         )));
-        final r = await fonte.series(
+        final r = await source.series(
           BcbDatasource.seriesCdiDaily,
           DateRange(DateTime(2024, 1, 1), DateTime(2024, 12, 31)),
         );
-        expect(r.isErr, isTrue, reason: '$tipo deveria virar Result.err');
+        expect(r.isErr, isTrue, reason: '$kind deveria virar Result.err');
         expect(r.failureOrNull, isNotNull);
       });
     }
   });
 
   group('TesouroDatasource — falha sem resposta do servidor', () {
-    for (final tipo in tipos) {
-      test('${tipo.name} vira Result.err, e não exceção', () async {
-        final fonte = TesouroDatasource(cliente(FixtureAdapter(
-          transportErrors: {'package_show': tipo},
+    for (final kind in kinds) {
+      test('${kind.name} vira Result.err, e não exceção', () async {
+        final source = TreasuryDatasource(client(FixtureAdapter(
+          transportErrors: {'package_show': kind},
         )));
-        final r = await fonte.latest();
-        expect(r.isErr, isTrue, reason: '$tipo deveria virar Result.err');
+        final r = await source.latest();
+        expect(r.isErr, isTrue, reason: '$kind deveria virar Result.err');
         expect(r.failureOrNull, isNotNull);
       });
     }
@@ -77,20 +77,20 @@ void main() {
     test('a queda no CSV, depois do catálogo, também não escapa', () async {
       // **Duas chamadas, dois caminhos.** O catálogo responde e o arquivo cai:
       // é o caso que um teste só do primeiro salto não pega.
-      final fonte = TesouroDatasource(cliente(FixtureAdapter(
-        bodies: {'package_show': _catalogo},
+      final source = TreasuryDatasource(client(FixtureAdapter(
+        bodies: {'package_show': _catalog},
         transportErrors: {
           'precotaxatesourodireto.csv': DioExceptionType.connectionError,
         },
       )));
-      final r = await fonte.latest();
+      final r = await source.latest();
       expect(r.isErr, isTrue);
       expect(r.failureOrNull, isNotNull);
     });
   });
 }
 
-const _catalogo = '''
+const _catalog = '''
 {"result":{"resources":[
   {"format":"CSV","url":"https://exemplo.gov.br/precotaxatesourodireto.csv"}
 ]}}''';

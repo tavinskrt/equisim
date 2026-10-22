@@ -1,8 +1,11 @@
+import '../audit/audit_recorder.dart';
 import '../entities/price_series.dart';
+import '../entities/share_issue.dart';
 import '../failures/failure.dart';
 import '../failures/result.dart';
 import '../repositories/repositories.dart';
 import '../services/b3/cash_dividends.dart';
+import '../services/b3/corporate_events.dart';
 import '../services/metrics/beta.dart';
 import '../services/metrics/beta_shrinkage.dart';
 import '../services/metrics/market_leverage.dart';
@@ -45,6 +48,10 @@ abstract final class PrepareValuationInputs {
   ///   sempre que o resultado precisar ser reproduzível.
   /// - [marketPremium], [marginOfSafety], [projectionYears],
   ///   [perpetualGrowthCap]: parâmetros declarados do modelo.
+  /// - [premiumSource]: de onde veio [marketPremium]. O aplicativo passa a média
+  ///   de dez anos do prêmio implícito, com
+  ///   [MarketPremiumSource.impliedNormalized] (decisão 142); o padrão
+  ///   parametrizado é o recuo, quando a série não chega.
   ///
   /// Propaga a falha do histórico de fundamentos e a de cotações; devolve
   /// [InsufficientData] quando a série de preços vem vazia na janela.
@@ -58,12 +65,48 @@ abstract final class PrepareValuationInputs {
   /// - [declaredSharesPerUnit]: ações na unit, como a companhia declara no
   ///   formulário cadastral da CVM (item B16). Sem ela, a razão continua sendo
   ///   inferida do valor de mercado, e a avaliação diz que foi.
+  /// - [stateControlled]: controle estatal na data, do Formulário Cadastral da
+  ///   CVM (item B46). Só acrescenta a ressalva; o preço justo não muda.
   /// - [betaPrior]: prior transversal do beta, de `ResolveBetaPrior`. Sem ele
   ///   vale a regressão crua, que é o comportamento anterior — e o que expõe o
   ///   motor ao caso da AZUL3, cujo `β = 109.108` tem erro-padrão de 83.228.
   ///
+  /// - [shareEvents]: desdobramentos, grupamentos e bonificações do ativo, com
+  ///   a data ex (item B29). A série da fonte vem ajustada por uns e não por
+  ///   outros; o preparo completa o que faltou antes de estimar o beta, e a
+  ///   avaliação diz o que ajustou. Ver [CorporateEvents.completeAdjustment].
+  /// - [shareIssues]: emissões de ações por valor conhecidas na data (item
+  ///   B28). Só viajam: quem soma as posteriores ao balanço é a cascata.
+  ///
   /// **Falha do índice não interrompe**: o beta cai para 1,0, registrado em
   /// [BetaSource.manual].
+  /// A falha do preparo, **registrada no painel de logs** (item D4).
+  ///
+  /// O preparo acontece antes da cascata, e a cascata é quem abre transação: um
+  /// ativo sem exercícios ou sem cotação saía da avaliação sem deixar evento, e
+  /// o painel não tinha como dizer por que ele não foi avaliado. Agora a falha
+  /// sai no mesmo endpoint da avaliação, com a etapa e a fonte que faltou.
+  static Result<ValuationInputs> _failure(
+    Ticker ticker,
+    DateTime asOf,
+    String source,
+    Failure failure,
+  ) {
+    AuditRecorder.begin(
+      '/core/valuation/${ticker.value}',
+      inputPayload: {
+        'ticker': ticker.value,
+        'asOf': asOf.toIso8601String(),
+        'etapa': 'preparo',
+      },
+    )?.abort(failure.message, extra: {
+      'etapa': 'preparo',
+      'fonte': source,
+      'falha': failure.runtimeType.toString(),
+    });
+    return Err(failure);
+  }
+
   static Future<Result<ValuationInputs>> call({
     required Ticker ticker,
     required PriceRepository prices,
@@ -72,6 +115,7 @@ abstract final class PrepareValuationInputs {
     required double riskFreeRate,
     DateTime? asOf,
     double marketPremium = CapmInputs.defaultMarketPremium,
+    MarketPremiumSource premiumSource = MarketPremiumSource.parameterized,
     PeerMultipleSet? peerMultiples,
     double marginOfSafety = 0.0,
     int projectionYears = 10,
@@ -81,10 +125,13 @@ abstract final class PrepareValuationInputs {
     YieldCurve? riskFreeCurve,
     OfficialShareCount? officialShares,
     bool isDistressed = false,
+    bool stateControlled = false,
     BetaPrior? betaPrior,
     DateTime? concessionEnd,
     List<CashDividend>? dividends,
     int? declaredSharesPerUnit,
+    List<ShareEvent> shareEvents = const [],
+    List<ShareIssue> shareIssues = const [],
   }) async {
     final today = asOf ?? DateTime.now();
     final window = DateRange(
@@ -93,7 +140,9 @@ abstract final class PrepareValuationInputs {
     );
 
     final historyResult = await fundamentals.history(ticker);
-    if (historyResult.isErr) return Err(historyResult.failureOrNull!);
+    if (historyResult.isErr) {
+      return _failure(ticker, today, 'exercícios', historyResult.failureOrNull!);
+    }
 
     // O perfil alimenta a Porta 1. Falha dele **não** interrompe: sem setor a
     // porta não dispara e o roteamento cai na Porta 3, que já barra instituição
@@ -107,14 +156,26 @@ abstract final class PrepareValuationInputs {
     final industry = profile.isOk ? profile.unwrap().industry : null;
 
     final priceResult = await prices.daily(ticker, window);
-    if (priceResult.isErr) return Err(priceResult.failureOrNull!);
+    if (priceResult.isErr) {
+      return _failure(ticker, today, 'cotações', priceResult.failureOrNull!);
+    }
 
-    final series = priceResult.unwrap();
+    // **O ajuste que a fonte deixou de fazer** (item B29): uma bonificação não
+    // ajustada é uma queda que não aconteceu, e ela entraria no beta, no corte
+    // de liquidez e na volatilidade da faixa.
+    final adjustment =
+        CorporateEvents.completeAdjustment(priceResult.unwrap(), shareEvents);
+    final series = adjustment.series;
     if (series.isEmpty) {
-      return Err(InsufficientData(
-        'Sem cotações de ${ticker.value} na janela de análise.',
-        subject: ticker.value,
-      ));
+      return _failure(
+        ticker,
+        today,
+        'cotações',
+        InsufficientData(
+          'Sem cotações de ${ticker.value} na janela de análise.',
+          subject: ticker.value,
+        ),
+      );
     }
 
     final beta = await _estimateBeta(
@@ -127,17 +188,17 @@ abstract final class PrepareValuationInputs {
     // Encolhimento por precisão. Sem prior, ou sem valor de mercado para medir
     // a alavancagem, vale a regressão crua — e o resultado diz qual dos dois
     // caminhos valeu, por [BetaSource].
-    final publicados = PointInTimeView(today).published(historyResult.unwrap());
-    final ultimo = publicados.isEmpty ? null : publicados.last;
-    final equityMercado = ultimo?.marketCap;
+    final published = PointInTimeView(today).published(historyResult.unwrap());
+    final last = published.isEmpty ? null : published.last;
+    final marketEquity = last?.marketCap;
     var betaFinal = beta.beta;
-    var origemBeta = beta.source;
-    double? betaDesalavancado;
+    var betaOrigin = beta.source;
+    double? unleveredBeta;
     if (betaPrior != null &&
-        ultimo != null &&
-        equityMercado != null &&
-        equityMercado > 0) {
-      final encolhido = BetaShrinkage.shrink(
+        last != null &&
+        marketEquity != null &&
+        marketEquity > 0) {
+      final shrunk = BetaShrinkage.shrink(
         leveredBeta: beta.beta,
         standardError: beta.standardError,
         prior: betaPrior,
@@ -149,11 +210,11 @@ abstract final class PrepareValuationInputs {
         // comportamento anterior. Ver [MarketLeverage.overWindow] e
         // [FundamentalsSnapshot.debtToMarketEquity].
         debtToEquity: MarketLeverage.overWindow(
-              snapshots: publicados,
+              snapshots: published,
               prices: series.points,
               window: window,
             ) ??
-            ultimo.debtToMarketEquity(equityMercado) ??
+            last.debtToMarketEquity(marketEquity) ??
             0.0,
         // **A estatutária, e é a mesma que a realavancagem usa** (decisão 55).
         // O `(1 − τ)` de Hamada é o escudo fiscal do juro, e a
@@ -164,9 +225,9 @@ abstract final class PrepareValuationInputs {
         // realavancava por outro.
         taxRate: ValuationParameters.statutoryTaxRate,
       );
-      betaFinal = encolhido.beta;
-      betaDesalavancado = encolhido.unlevered;
-      if (encolhido.weight < 1.0) origemBeta = BetaSource.shrunk;
+      betaFinal = shrunk.beta;
+      unleveredBeta = shrunk.unlevered;
+      if (shrunk.weight < 1.0) betaOrigin = BetaSource.shrunk;
     }
 
     return Ok(ValuationInputs(
@@ -178,7 +239,8 @@ abstract final class PrepareValuationInputs {
         riskFreeRate: riskFreeRate,
         beta: betaFinal,
         marketPremium: marketPremium,
-        betaSource: origemBeta,
+        betaSource: betaOrigin,
+        premiumSource: premiumSource,
       ),
       marginOfSafety: marginOfSafety,
       projectionYears: projectionYears,
@@ -193,7 +255,8 @@ abstract final class PrepareValuationInputs {
       // Porta 0 — não há segunda busca.
       prices: series,
       isDistressed: isDistressed,
-      unleveredBeta: betaDesalavancado,
+      stateControlled: stateControlled,
+      unleveredBeta: unleveredBeta,
       concessionEnd: concessionEnd,
       dividendsInBeta: beta.dividends,
       // A taxa da data arbitra a despesa financeira, e não a do cenário (B10).
@@ -205,21 +268,38 @@ abstract final class PrepareValuationInputs {
       peerMultiples: peerMultiples,
       // A janela que a série de fato cobriu, para a cascata declarar quando
       // ela é curta demais para os cinco anos pedidos (item B17).
-      betaWindowYears: beta.janelaEmAnos,
+      betaWindowYears: beta.windowInYears,
+      // As emissões por valor: a cascata soma as posteriores ao balanço (B28).
+      shareIssues: shareIssues,
+      contextNotes: [
+        if (adjustment.applied.isNotEmpty) _adjustmentNote(adjustment.applied),
+      ],
     ));
+  }
+
+  /// A ressalva do ajuste que o preparo completou na série (item B29).
+  static String _adjustmentNote(List<ShareEvent> applied) {
+    String day(DateTime d) => '${d.day.toString().padLeft(2, '0')}/'
+        '${d.month.toString().padLeft(2, '0')}/${d.year}';
+    String factor(double f) => f >= 1
+        ? '${((f - 1) * 100).toStringAsFixed(0)}% de ações novas'
+        : 'grupamento de ${(1 / f).toStringAsFixed(0)} para 1';
+    final list = [for (final e in applied) '${day(e.exDate)} (${factor(e.factor)})'];
+    return 'A série de preços da fonte não trazia '
+        '${applied.length == 1 ? 'ajustado o evento de ações de' : 'ajustados os eventos de ações de'} '
+        '${list.join(', ')}: a data ex aparecia como queda de preço que não '
+        'aconteceu. A série foi ajustada antes do beta, do corte de liquidez e '
+        'da volatilidade da faixa.';
   }
 
   /// Estima o beta contra o Ibovespa.
   ///
-  /// Os dois lados da regressão são séries de **preço de fechamento**: o ativo
-  /// pelo `close` — que o domínio não ajusta por provento —, o índice pela
-  /// própria cotação. O `adjustedClose` da fonte segue fora de cálculo, por
-  /// subajustar proventos brasileiros (ver auditoria §0.4).
-  ///
-  /// A convenção não é simétrica: o Ibovespa é índice de retorno total por
-  /// construção, e o `close` do ativo não. O efeito sobre o beta é de segunda
-  /// ordem — ele mede covariância de variações, não nível —, e a assimetria
-  /// fica declarada aqui em vez de escondida.
+  /// **Retorno total dos dois lados** (decisão 89): o Ibovespa é índice de
+  /// retorno total por construção, e o ativo entra pelo índice de retorno
+  /// total montado com os proventos em dinheiro da B3 ([dividends]). Sem
+  /// proventos, vale o fechamento, e a assimetria fica declarada. O
+  /// `adjustedClose` da fonte segue fora de cálculo, por subajustar proventos
+  /// brasileiros.
   ///
   /// Sem série de mercado utilizável, adota-se β = 1: a alternativa seria
   /// recusar a avaliação inteira por causa de um único parâmetro, e um beta
@@ -230,7 +310,7 @@ abstract final class PrepareValuationInputs {
         BetaSource source,
         double? standardError,
         int dividends,
-        double janelaEmAnos,
+        double windowInYears,
       })> _estimateBeta({
     required PriceSeries series,
     required BenchmarkRepository benchmark,
@@ -244,7 +324,7 @@ abstract final class PrepareValuationInputs {
         source: BetaSource.manual,
         standardError: null,
         dividends: 0,
-        janelaEmAnos: 0.0,
+        windowInYears: 0.0,
       );
     }
 
@@ -255,7 +335,7 @@ abstract final class PrepareValuationInputs {
         source: BetaSource.manual,
         standardError: null,
         dividends: 0,
-        janelaEmAnos: 0.0,
+        windowInYears: 0.0,
       );
     }
 
@@ -267,52 +347,52 @@ abstract final class PrepareValuationInputs {
         source: BetaSource.manual,
         standardError: null,
         dividends: 0,
-        janelaEmAnos: 0.0,
+        windowInYears: 0.0,
       );
     }
 
     // **Retorno total dos dois lados** (decisão 89). O Ibovespa reinveste
     // provento por construção, e o ativo pelo fechamento não: a regressão
     // misturava as duas convenções, e a queda da data ex entrava como risco.
-    final datas = [for (final p in assetPoints) p.date];
-    final fechamentos = [for (final p in assetPoints) p.close];
+    final dates = [for (final p in assetPoints) p.date];
+    final closes = [for (final p in assetPoints) p.close];
     final total = dividends == null || dividends.isEmpty
         ? null
         : TotalReturnIndex.build(
-            dates: datas, closes: fechamentos, dividends: dividends);
+            dates: dates, closes: closes, dividends: dividends);
 
     final aligned = BetaCalculator.alignReturns(
-      assetDates: datas,
-      assetIndex: total?.index ?? fechamentos,
+      assetDates: dates,
+      assetIndex: total?.index ?? closes,
       marketDates: market.dates,
       marketIndex: market.points.map((p) => p.close).toList(),
     );
 
     final estimate = BetaCalculator.estimate(returns: aligned);
-    final reinvestidos = total?.applied ?? 0;
+    final reinvested = total?.applied ?? 0;
     // **A janela que a série de fato cobriu** (item B17). A fonte de cotações
     // devolve uma janela fixa de dez anos, e a coorte datada de 2018 pede cinco
     // anos que a série não tem: o beta sai de 383 pregões em vez de 1.240, e
     // saía sem dizer. Medir a extensão da série, e não a contagem de pares,
     // separa janela curta de pregão faltando no meio.
-    final janelaEfetiva = datas.length < 2
+    final effectiveWindow = dates.length < 2
         ? 0.0
-        : datas.last.difference(datas.first).inDays / 365.25;
+        : dates.last.difference(dates.first).inDays / 365.25;
 
     return estimate.fold(
       (value) => (
         beta: value.beta,
         source: BetaSource.computed,
         standardError: value.standardError,
-        dividends: reinvestidos,
-        janelaEmAnos: janelaEfetiva,
+        dividends: reinvested,
+        windowInYears: effectiveWindow,
       ),
       (_) => (
         beta: 1.0,
         source: BetaSource.manual,
         standardError: null,
         dividends: 0,
-        janelaEmAnos: janelaEfetiva,
+        windowInYears: effectiveWindow,
       ),
     );
   }

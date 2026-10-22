@@ -1,16 +1,16 @@
-﻿// Application-level settings for the Runner target.
+﻿// Configuracoes do aplicativo para o alvo Runner.
 //
-// This may be replaced with something auto-generated from metadata (e.g., pubspec.yaml) in the
-// future. If not, the values below would default to using the project name when this becomes a
-// 'flutter create' template.
+// No futuro isto pode ser substituido por algo gerado a partir dos metadados (por exemplo, o
+// pubspec.yaml). Se nao for, os valores abaixo passariam a usar o nome do projeto quando isto
+// virar um modelo do 'flutter create'.
 
-// The application's name. By default this is also the title of the Flutter window.
+// O nome do aplicativo. Por padrao, e tambem o titulo da janela do Flutter.
 PRODUCT_NAME = Equisim
 
-// The application's bundle identifier
+// O identificador de bundle do aplicativo
 PRODUCT_BUNDLE_IDENTIFIER = com.example.equisim
 
-// The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+// O copyright exibido nas informacoes do aplicativo
+PRODUCT_COPYRIGHT = Copyright © 2026 com.example. Todos os direitos reservados.
 
 

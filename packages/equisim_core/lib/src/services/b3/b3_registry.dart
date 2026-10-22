@@ -85,15 +85,15 @@ class B3Classification {
   /// Lê o texto `Setor / Subsetor / Segmento`, ou `null` sem setor.
   static B3Classification? parse(Object? raw) {
     if (raw is! String) return null;
-    final partes = [
+    final parts = [
       for (final p in raw.split('/'))
         if (p.trim().isNotEmpty) p.trim(),
     ];
-    if (partes.isEmpty) return null;
+    if (parts.isEmpty) return null;
     return B3Classification(
-      sector: partes[0],
-      subsector: partes.length > 1 ? partes[1] : null,
-      segment: partes.length > 2 ? partes.sublist(2).join(' / ') : null,
+      sector: parts[0],
+      subsector: parts.length > 1 ? parts[1] : null,
+      segment: parts.length > 2 ? parts.sublist(2).join(' / ') : null,
     );
   }
 
@@ -114,22 +114,22 @@ class B3Classification {
   /// Minúsculas, sem acento, com hífen no lugar de tudo que não é letra ou
   /// dígito.
   static String slug(String s) {
-    const de = 'áàâãäéèêëíìîïóòôõöúùûüç';
-    const para = 'aaaaaeeeeiiiiooooouuuuc';
+    const accented = 'áàâãäéèêëíìîïóòôõöúùûüç';
+    const plain = 'aaaaaeeeeiiiiooooouuuuc';
     final b = StringBuffer();
-    var hifen = false;
+    var hyphen = false;
     for (final r in s.toLowerCase().runes) {
       var c = String.fromCharCode(r);
-      final i = de.indexOf(c);
-      if (i >= 0) c = para[i];
+      final i = accented.indexOf(c);
+      if (i >= 0) c = plain[i];
       final u = c.codeUnitAt(0);
-      final alfanumerico = (u >= 0x61 && u <= 0x7a) || (u >= 0x30 && u <= 0x39);
-      if (alfanumerico) {
-        if (hifen && b.isNotEmpty) b.write('-');
+      final alphanumeric = (u >= 0x61 && u <= 0x7a) || (u >= 0x30 && u <= 0x39);
+      if (alphanumeric) {
+        if (hyphen && b.isNotEmpty) b.write('-');
         b.write(c);
-        hifen = false;
+        hyphen = false;
       } else {
-        hifen = true;
+        hyphen = true;
       }
     }
     return b.toString();
@@ -174,22 +174,6 @@ class B3Issuer {
     required this.events,
     this.classification,
   });
-
-  /// Eventos com data ex em `(depois, ate]`, compostos num fator só — o que
-  /// transforma uma contagem de [depois] na base de [ate].
-  ///
-  /// Só eventos do [isin] informado: classes do mesmo emissor podem ter
-  /// eventos diferentes.
-  double factorBetween(String isin, DateTime depois, DateTime ate) {
-    final d = DateTime.utc(depois.year, depois.month, depois.day);
-    final a = DateTime.utc(ate.year, ate.month, ate.day);
-    var f = 1.0;
-    for (final e in events) {
-      if (e.isin != isin) continue;
-      if (e.exDate.isAfter(d) && !e.exDate.isAfter(a)) f *= e.factor;
-    }
-    return f;
-  }
 }
 
 /// Leitura do registro.
@@ -232,40 +216,40 @@ abstract final class B3Registry {
   /// — um grupamento de ON aparece para cada recibo e direito ligado a ela.
   /// Entradas idênticas em ISIN, data, rótulo e fator contam uma vez.
   static List<OfficialShareEvent> events(List<Object?> stockDividends) {
-    final vistos = <String>{};
-    final porChave = <String, ({String isin, DateTime dataCom, List<String> rotulos, double fator})>{};
+    final seen = <String>{};
+    final byKey = <String, ({String isin, DateTime recordDate, List<String> labels, double factor})>{};
     for (final raw in stockDividends) {
       if (raw is! Map<String, dynamic>) continue;
       final label = raw['label'];
       final isin = raw['isinCode'];
-      final dataCom = parseDate(raw['lastDatePrior']);
-      final bruto = parseNumber(raw['factor']);
+      final recordDate = parseDate(raw['lastDatePrior']);
+      final rawFactor = parseNumber(raw['factor']);
       if (label is! String || isin is! String || isin.isEmpty) continue;
-      if (dataCom == null || bruto == null) continue;
-      final m = multiplier(label, bruto);
+      if (recordDate == null || rawFactor == null) continue;
+      final m = multiplier(label, rawFactor);
       if (m == null) continue;
-      if (!vistos.add('$isin|${dataCom.toIso8601String()}|$label|${raw['factor']}')) {
+      if (!seen.add('$isin|${recordDate.toIso8601String()}|$label|${raw['factor']}')) {
         continue;
       }
-      final chave = '$isin|${dataCom.toIso8601String()}';
-      final antes = porChave[chave];
-      porChave[chave] = antes == null
-          ? (isin: isin, dataCom: dataCom, rotulos: [label], fator: m)
+      final key = '$isin|${recordDate.toIso8601String()}';
+      final before = byKey[key];
+      byKey[key] = before == null
+          ? (isin: isin, recordDate: recordDate, labels: [label], factor: m)
           : (
               isin: isin,
-              dataCom: dataCom,
-              rotulos: [...antes.rotulos, label],
-              fator: antes.fator * m,
+              recordDate: recordDate,
+              labels: [...before.labels, label],
+              factor: before.factor * m,
             );
     }
     final out = [
-      for (final e in porChave.values)
+      for (final e in byKey.values)
         OfficialShareEvent(
           isin: e.isin,
-          lastDateWithRights: e.dataCom,
-          exDate: _proximoDiaUtil(e.dataCom),
-          factor: e.fator,
-          labels: List.unmodifiable(e.rotulos),
+          lastDateWithRights: e.recordDate,
+          exDate: _nextBusinessDay(e.recordDate),
+          factor: e.factor,
+          labels: List.unmodifiable(e.labels),
         ),
     ]..sort((a, b) => a.exDate.compareTo(b.exDate));
     return List.unmodifiable(out);
@@ -279,21 +263,21 @@ abstract final class B3Registry {
       {required DateTime consultedOn, Map<String, dynamic>? detail}) {
     final code = json['code'];
     if (code is! String || code.trim().isEmpty) return null;
-    final eventos = json['stockDividends'];
+    final rawEvents = json['stockDividends'];
     return B3Issuer(
       code: code.trim(),
-      totalShares: _positivo(parseNumber(json['totalNumberShares'])),
+      totalShares: _positive(parseNumber(json['totalNumberShares'])),
       commonShares: parseNumber(json['numberCommonShares']),
       preferredShares: parseNumber(json['numberPreferredShares']),
       consultedOn: DateTime.utc(consultedOn.year, consultedOn.month, consultedOn.day),
-      events: eventos is List ? events(eventos) : const [],
+      events: rawEvents is List ? events(rawEvents) : const [],
       classification: B3Classification.parse(detail?['industryClassification']),
     );
   }
 
-  static double? _positivo(double? v) => v != null && v > 0 ? v : null;
+  static double? _positive(double? v) => v != null && v > 0 ? v : null;
 
-  static DateTime _proximoDiaUtil(DateTime d) =>
+  static DateTime _nextBusinessDay(DateTime d) =>
       BrazilianCalendar.nextTradingSession(d);
 }
 
@@ -307,14 +291,14 @@ abstract final class B3RegistryCodec {
   ///
   /// A 2 acrescenta `classificacao`. A 1 continua legível — sem a chave, o
   /// emissor fica sem classificação, que é o que ela era.
-  static const int versao = 2;
+  static const int version = 2;
 
-  static String _dia(DateTime d) =>
+  static String _day(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-'
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
 
-  static DateTime? _data(Object? v) {
+  static DateTime? _date(Object? v) {
     if (v is! String || v.length < 10) return null;
     final p = v.substring(0, 10).split('-');
     if (p.length != 3) return null;
@@ -325,16 +309,16 @@ abstract final class B3RegistryCodec {
 
   /// O pacote inteiro.
   static Map<String, Object> encodePackage(
-    Iterable<B3Issuer> emissores, {
-    required DateTime geradoEm,
+    Iterable<B3Issuer> issuers, {
+    required DateTime generatedAt,
   }) =>
       {
-        'versao': versao,
-        'geradoEm': _dia(geradoEm),
+        'versao': version,
+        'geradoEm': _day(generatedAt),
         'emissores': {
-          for (final e in emissores)
+          for (final e in issuers)
             e.code: {
-              'consultadoEm': _dia(e.consultedOn),
+              'consultadoEm': _day(e.consultedOn),
               if (e.classification != null)
                 'classificacao': e.classification!.label,
               if (e.totalShares != null) 'total': e.totalShares!,
@@ -344,8 +328,8 @@ abstract final class B3RegistryCodec {
                 for (final x in e.events)
                   {
                     'isin': x.isin,
-                    'dataCom': _dia(x.lastDateWithRights),
-                    'dataEx': _dia(x.exDate),
+                    'dataCom': _day(x.lastDateWithRights),
+                    'dataEx': _day(x.exDate),
                     'fator': x.factor,
                     'rotulos': x.labels,
                   },
@@ -356,36 +340,36 @@ abstract final class B3RegistryCodec {
 
   /// Lê o pacote. Versão desconhecida devolve mapa vazio: formato que o leitor
   /// não entende não é lido pela metade.
-  static Map<String, B3Issuer> decodePackage(Map<String, dynamic> pacote) {
-    final v = pacote['versao'];
-    if (v is! int || v < 1 || v > versao) return const {};
-    final emissores = pacote['emissores'];
-    if (emissores is! Map<String, dynamic>) return const {};
+  static Map<String, B3Issuer> decodePackage(Map<String, dynamic> package) {
+    final v = package['versao'];
+    if (v is! int || v < 1 || v > version) return const {};
+    final issuers = package['emissores'];
+    if (issuers is! Map<String, dynamic>) return const {};
     final out = <String, B3Issuer>{};
-    for (final e in emissores.entries) {
+    for (final e in issuers.entries) {
       final v = e.value;
       if (v is! Map<String, dynamic>) continue;
-      final consultado = _data(v['consultadoEm']);
-      if (consultado == null) continue;
-      final eventos = <OfficialShareEvent>[];
-      final brutos = v['eventos'];
-      if (brutos is List) {
-        for (final x in brutos) {
+      final consultedAt = _date(v['consultadoEm']);
+      if (consultedAt == null) continue;
+      final events = <OfficialShareEvent>[];
+      final rawSessions = v['eventos'];
+      if (rawSessions is List) {
+        for (final x in rawSessions) {
           if (x is! Map<String, dynamic>) continue;
           final isin = x['isin'];
-          final com = _data(x['dataCom']);
-          final ex = _data(x['dataEx']);
-          final fator = (x['fator'] as num?)?.toDouble();
-          final rotulos = x['rotulos'];
-          if (isin is! String || com == null || ex == null) continue;
-          if (fator == null || !fator.isFinite || fator <= 0) continue;
-          eventos.add(OfficialShareEvent(
+          final withInput = _date(x['dataCom']);
+          final ex = _date(x['dataEx']);
+          final factor = (x['fator'] as num?)?.toDouble();
+          final labels = x['rotulos'];
+          if (isin is! String || withInput == null || ex == null) continue;
+          if (factor == null || !factor.isFinite || factor <= 0) continue;
+          events.add(OfficialShareEvent(
             isin: isin,
-            lastDateWithRights: com,
+            lastDateWithRights: withInput,
             exDate: ex,
-            factor: fator,
-            labels: rotulos is List
-                ? List.unmodifiable(rotulos.whereType<String>())
+            factor: factor,
+            labels: labels is List
+                ? List.unmodifiable(labels.whereType<String>())
                 : const [],
           ));
         }
@@ -395,8 +379,8 @@ abstract final class B3RegistryCodec {
         totalShares: (v['total'] as num?)?.toDouble(),
         commonShares: (v['on'] as num?)?.toDouble(),
         preferredShares: (v['pn'] as num?)?.toDouble(),
-        consultedOn: consultado,
-        events: List.unmodifiable(eventos
+        consultedOn: consultedAt,
+        events: List.unmodifiable(events
           ..sort((a, b) => a.exDate.compareTo(b.exDate))),
         classification: B3Classification.parse(v['classificacao']),
       );

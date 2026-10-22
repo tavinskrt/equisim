@@ -13,12 +13,6 @@ abstract final class Fmt {
   /// Moeda em pt-BR por extenso: `R$ 1.234,56`.
   static final currency = NumberFormat.currency(locale: 'pt_BR', symbol: r'R$');
 
-  /// Moeda abreviada: `R$ 1,2 mi`. Para eixo de gráfico e espaço estreito.
-  static final compactCurrency = NumberFormat.compactCurrency(
-    locale: 'pt_BR',
-    symbol: r'R$',
-  );
-
   /// Data por extenso: `31/12/2026`.
   static final date = DateFormat('dd/MM/yyyy');
 
@@ -117,9 +111,9 @@ abstract final class Fmt {
   /// horizontes escritos em formatos diferentes na mesma sessão de uso é
   /// exatamente o que impede o leitor de compará-los.
   static String months(int months) {
-    final anos = months ~/ 12;
-    final resto = months % 12;
-    return '$anos anos e $resto meses';
+    final years = months ~/ 12;
+    final remainder = months % 12;
+    return '$years anos e $remainder meses';
   }
 }
 
@@ -134,32 +128,32 @@ abstract final class Fmt {
 /// "Volatilidade", "Sharpe", "Preço justo" — continuam escritas no ponto de
 /// uso: centralizar rótulo que não viaja só afasta o texto de quem o lê.
 ///
-/// **A ressalva NÃO entra aqui, e é deliberado.** [esperado] aparece na tela
+/// **A ressalva NÃO entra aqui, e é deliberado.** [expected] aparece na tela
 /// de estudo com a premissa de convergência e a cobertura da carteira, e na
 /// tela da meta com a composição do número. As duas são verdadeiras, servem a
 /// perguntas diferentes, e a que está no estudo foi acrescentada de propósito
 /// para não omitir a premissa que sustenta o valor. Uniformizá-las apagaria
 /// informação em nome de uma simetria que ninguém pediu — o que precisa
 /// coincidir é o NOME da grandeza, não tudo que se diz sobre ela.
-abstract final class Lexico {
+abstract final class Lexicon {
   /// Rentabilidade que o plano patrimonial exige, ao ano.
-  static const String exigido = 'Exigido';
+  static const String requiredText = 'Exigido';
 
-  /// Ressalva de [exigido]. Viaja junto porque a taxa sem a base é ambígua.
-  static const String exigidoAoAno = 'ao ano';
+  /// Ressalva de [requiredText]. Viaja junto porque a taxa sem a base é ambígua.
+  static const String requiredPerYear = 'ao ano';
 
   /// Retorno que a avaliação implica — projeção, não evidência.
-  static const String esperado = 'Esperado da carteira';
+  static const String expected = 'Esperado da carteira';
 
   /// Retorno que o histórico entregou — evidência, não projeção.
-  static const String realizado = 'Realizado';
+  static const String realized = 'Realizado';
 
-  /// Ressalva de [realizado]: nomeia o indicador para que o leitor o
+  /// Ressalva de [realized]: nomeia o indicador para que o leitor o
   /// reconheça no painel de indicadores, onde ele aparece sob a sigla.
-  static const String realizadoXirr = 'XIRR, ao ano';
+  static const String realizedXirr = 'XIRR, ao ano';
 
   /// Distância entre o que se espera (ou se obteve) e o que se exige.
-  static const String folga = 'Folga';
+  static const String margin = 'Folga';
 }
 
 /// Cartão translúcido — a linguagem visual herdada do projeto anterior.

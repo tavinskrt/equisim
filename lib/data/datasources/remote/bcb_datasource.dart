@@ -66,41 +66,23 @@ class BcbDatasource {
         ));
       }
 
-      final pontos = <RatePoint>[];
+      final points = <RatePoint>[];
       for (final item in body) {
         if (item is! Map<String, dynamic>) continue;
         final date = _parseBrDate(BrapiJson.asString(item['data']));
         final percent = BrapiJson.asDouble(item['valor']);
         if (date == null || percent == null) continue;
-        pontos.add(RatePoint(date: date, rate: percent / 100.0));
+        points.add(RatePoint(date: date, rate: percent / 100.0));
       }
 
-      if (pontos.isEmpty) {
+      if (points.isEmpty) {
         return Err(InsufficientData(
           'Série SGS $seriesId sem dados no período solicitado.',
         ));
       }
-      return Ok(RateSeries(pontos, basis: basisOf(seriesId)));
+      return Ok(RateSeries(points, basis: basisOf(seriesId)));
     });
   }
-
-  /// Atalho para a série do CDI no intervalo.
-  ///
-  /// A taxa vem **diária em base 252 dias úteis**; anualizar exige composição
-  /// por `RateSeries.annualized()`, nunca multiplicação.
-  ///
-  /// Nenhum caminho de produção passa por aqui — `MarketMacroRepository` chama
-  /// [series] com [seriesCdiDaily] direto, para aplicar cache na mesma etapa.
-  /// Preservado como API legível do datasource e exercitado pelos testes.
-  Future<Result<RateSeries>> cdi(DateRange range) =>
-      series(seriesCdiDaily, range);
-
-  /// Atalho para a série do IPCA no intervalo.
-  ///
-  /// A taxa vem **mensal**: anualizar exige `annualized(periodsPerYear: 12)`.
-  /// Como [cdi], é contornado em produção pelo repositório.
-  Future<Result<RateSeries>> ipca(DateRange range) =>
-      series(seriesIpcaMonthly, range);
 
   static String _brDate(DateTime date) =>
       '${date.day.toString().padLeft(2, '0')}/'

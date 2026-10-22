@@ -24,27 +24,27 @@ import { join } from 'node:path';
 import { repoRoot } from './qa/collect.ts';
 import { chooseModel } from './qa/choose.ts';
 import { AgyProvider, isAgyAvailable } from './qa/providers/agy.ts';
-import { API_CASCATA_FLASH, ApiProvider } from './qa/providers/api.ts';
+import { API_FLASH_CASCADE, ApiProvider } from './qa/providers/api.ts';
 import {
   ProviderError,
   type ProviderRequest,
   type ProviderUsage,
   type QaProvider,
 } from './qa/providers/types.ts';
-import { collectLente, type AdvisorTarget } from './qa/advisor/collect.ts';
-import { fronteirasAbertas } from './qa/advisor/postura.ts';
-import { LENTES, ORDEM_SUGERIDA, resolverLente } from './qa/advisor/lentes.ts';
+import { collectLens, type AdvisorTarget } from './qa/advisor/collect.ts';
+import { openBoundaries } from './qa/advisor/postura.ts';
+import { LENSES, SUGGESTED_ORDER, resolveLens } from './qa/advisor/lentes.ts';
 import {
   buildAdvisorInstructions,
   buildAdvisorSystem,
-  instrucoesVisuais,
+  visualInstructions,
 } from './qa/advisor/rules.ts';
 import { loadScreenshots } from './qa/screenshot.ts';
 import {
   ADVISOR_RESPONSE_SCHEMA,
   validateAdvisorReport,
   type AdvisorReport,
-  type Severidade,
+  type AdvisorSeverity,
 } from './qa/advisor/schema.ts';
 
 // ---------------------------------------------------------------------------
@@ -62,7 +62,7 @@ const green = (t: string) => paint('32', t);
 const yellow = (t: string) => paint('33', t);
 const blue = (t: string) => paint('34', t);
 
-function gravidadeTag(s: Severidade): string {
+function severityTag(s: AdvisorSeverity): string {
   switch (s) {
     case 'ESTRUTURAL':
       return red(bold(' ESTRUTURAL '));
@@ -73,22 +73,22 @@ function gravidadeTag(s: Severidade): string {
   }
 }
 
-/** Quebra texto em `largura` colunas, recuando as linhas seguintes. */
-function wrap(text: string, indent: number, largura = 76): string {
-  const limite = Math.max(24, largura - indent);
-  const prefixo = ' '.repeat(indent);
-  const linhas: string[] = [];
-  let atual = '';
-  for (const palavra of text.split(/\s+/).filter((p) => p !== '')) {
-    if (atual === '') atual = palavra;
-    else if (atual.length + 1 + palavra.length <= limite) atual += ' ' + palavra;
+/** Quebra texto em `width` colunas, recuando as linhas seguintes. */
+function wrap(text: string, indent: number, width = 76): string {
+  const limit = Math.max(24, width - indent);
+  const prefix = ' '.repeat(indent);
+  const lines: string[] = [];
+  let current = '';
+  for (const word of text.split(/\s+/).filter((p) => p !== '')) {
+    if (current === '') current = word;
+    else if (current.length + 1 + word.length <= limit) current += ' ' + word;
     else {
-      linhas.push(atual);
-      atual = palavra;
+      lines.push(current);
+      current = word;
     }
   }
-  if (atual !== '') linhas.push(atual);
-  return linhas.join('\n' + prefixo);
+  if (current !== '') lines.push(current);
+  return lines.join('\n' + prefix);
 }
 
 function renderReport(
@@ -106,24 +106,24 @@ function renderReport(
   // primeiro, e quem le precisa saber disso ANTES de agir sobre o conteudo.
   // O degrau e deduzido do nome porque e o que a resposta informa: o campo
   // `modelVersion` traz a versao concreta que atendeu, nao o que foi pedido.
-  const topo = API_CASCATA_FLASH[0] ?? '';
+  const topo = API_FLASH_CASCADE[0] ?? '';
   if (provider.name === 'api' && topo !== '' && !model.startsWith(topo)) {
     // Prefixo MAIS LONGO, nao o primeiro que casa: `gemini-3.5-flash-lite`
     // comeca com `gemini-3.5-flash`, entao `findIndex` acusava o degrau 3
     // quando quem respondeu era o 4. Errar o degrau subestima o rebaixamento,
     // que e justamente o que este aviso existe para nao deixar passar.
-    let degrau = -1;
-    let maior = 0;
-    for (const [i, m] of API_CASCATA_FLASH.entries()) {
-      if (model.startsWith(m) && m.length > maior) {
-        maior = m.length;
-        degrau = i;
+    let rung = -1;
+    let largest = 0;
+    for (const [i, m] of API_FLASH_CASCADE.entries()) {
+      if (model.startsWith(m) && m.length > largest) {
+        largest = m.length;
+        rung = i;
       }
     }
     out.write(
       yellow(
-        `AVISO:   modelo rebaixado (degrau ${degrau < 0 ? '?' : degrau + 1} de ` +
-          `${API_CASCATA_FLASH.length}). O topo da cascata nao respondeu.\n`,
+        `AVISO:   modelo rebaixado (degrau ${rung < 0 ? '?' : rung + 1} de ` +
+          `${API_FLASH_CASCADE.length}). O topo da cascata nao respondeu.\n`,
       ) + dim('         Leia este parecer com menos confianca que o usual.\n'),
     );
   }
@@ -141,10 +141,10 @@ function renderReport(
     // Escondida, uma invencao passa por observacao -- foi o que aconteceu na
     // primeira execucao desta lente, que inventariou como "decisao registrada"
     // cinco numeros que nao existem em arquivo algum do repositorio.
-    const ancora = o.evidence.replace(/\s+/g, ' ').trim();
+    const anchor = o.evidence.replace(/\s+/g, ' ').trim();
     out.write(
-      `      ${ancora === '' ? red('SEM ANCORA') : dim('citado    ')}  ` +
-        `${wrap(ancora === '' ? '(o modelo nao copiou trecho algum)' : ancora, 17)}\n`,
+      `      ${anchor === '' ? red('SEM ANCORA') : dim('citado    ')}  ` +
+        `${wrap(anchor === '' ? '(o modelo nao copiou trecho algum)' : anchor, 17)}\n`,
     );
     out.write(`      ${dim('e')}           ${wrap(o.what_exists, 17)}\n`);
     out.write(`      ${dim('serve para')}  ${wrap(o.purpose, 17)}\n`);
@@ -163,12 +163,12 @@ function renderReport(
     );
   }
   for (const [i, t] of report.tensions.entries()) {
-    out.write(`${gravidadeTag(t.severity)} ${bold(`${i + 1}. ${t.subject}`)}\n`);
+    out.write(`${severityTag(t.severity)} ${bold(`${i + 1}. ${t.subject}`)}\n`);
     out.write(`      ${dim('observa')}    ${wrap(t.observation, 17)}\n`);
     out.write(`      ${dim('evidencia')}  ${wrap(t.evidence.replace(/\s+/g, ' '), 17)}\n`);
     out.write(`      ${dim('custa')}      ${wrap(t.why_it_hurts, 17)}\n`);
-    for (const [j, opcao] of t.options.entries()) {
-      out.write(`      ${dim(`opcao ${j + 1}`)}    ${wrap(opcao, 17)}\n`);
+    for (const [j, option] of t.options.entries()) {
+      out.write(`      ${dim(`opcao ${j + 1}`)}    ${wrap(option, 17)}\n`);
     }
     out.write('\n');
   }
@@ -192,11 +192,11 @@ function renderReport(
   }
 
   out.write(dim('-'.repeat(76)) + '\n');
-  const estruturais = report.tensions.filter((t) => t.severity === 'ESTRUTURAL').length;
+  const structural = report.tensions.filter((t) => t.severity === 'ESTRUTURAL').length;
   out.write('\n' + wrap(report.summary, 0) + '\n\n');
   out.write(
     dim(
-      `${estruturais} estrutural(is), ` +
+      `${structural} estrutural(is), ` +
         `${report.tensions.filter((t) => t.severity === 'LOCAL').length} local(is), ` +
         `${report.tensions.filter((t) => t.severity === 'POLIMENTO').length} polimento.\n`,
     ),
@@ -211,7 +211,7 @@ function renderReport(
 // ---------------------------------------------------------------------------
 
 interface Cli {
-  lente: string;
+  lens: string;
   backend: 'agy' | 'api';
   backendExplicit: boolean;
   model?: string;
@@ -220,21 +220,21 @@ interface Cli {
   timeout?: number;
   help: boolean;
   /** Tema das capturas, para a lente `tela`. */
-  tema: 'claro' | 'escuro';
+  theme: 'claro' | 'escuro';
   /** Largura das capturas, em dp. */
-  largura: number;
+  width: number;
 }
 
-const USO = `
+const USAGE = `
 Conselheiro do Equisim -- le o projeto por lente e propoe.
 
   npm run conselho -- --lente <id>
 
 Lentes:
-${ORDEM_SUGERIDA.map((id) => {
-  const l = LENTES[id];
-  const nota = l.precisaDeCapturas ? dim('  (precisa das capturas -- fase 03)') : '';
-  return `  ${id.padEnd(10)} ${l.titulo}${nota}`;
+${SUGGESTED_ORDER.map((id) => {
+  const l = LENSES[id];
+  const nota = l.needsScreenshots ? dim('  (precisa das capturas -- fase 03)') : '';
+  return `  ${id.padEnd(10)} ${l.title}${nota}`;
 }).join('\n')}
 
 Opcoes:
@@ -253,7 +253,7 @@ Este programa NUNCA bloqueia: sai com codigo 0 mesmo em falha.
 
 function parseArgs(argv: string[]): Cli {
   const cli: Cli = {
-    lente: '',
+    lens: '',
     backend: 'agy',
     backendExplicit: false,
     dryRun: false,
@@ -262,22 +262,22 @@ function parseArgs(argv: string[]): Cli {
     // 390 dp e o padrao porque e onde a interface aperta -- foi la que o
     // cabecalho da tabela saiu como "PESO POTENCI..." na primeira captura.
     // Tela folgada esconde problema de hierarquia; tela apertada o expoe.
-    tema: 'claro',
-    largura: 390,
+    theme: 'claro',
+    width: 390,
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i] ?? '';
-    const proximo = (): string => {
+    const next = (): string => {
       const v = argv[++i];
       if (v === undefined) throw new Error(`A opcao ${arg} exige um valor.`);
       return v;
     };
     switch (arg) {
       case '--lente':
-        cli.lente = proximo();
+        cli.lens = next();
         break;
       case '--backend': {
-        const v = proximo();
+        const v = next();
         if (v !== 'agy' && v !== 'api') {
           throw new Error(`Backend desconhecido: "${v}". Use agy ou api.`);
         }
@@ -286,21 +286,21 @@ function parseArgs(argv: string[]): Cli {
         break;
       }
       case '--model':
-        cli.model = proximo();
+        cli.model = next();
         break;
       case '--timeout':
-        cli.timeout = Number(proximo()) * 1000;
+        cli.timeout = Number(next()) * 1000;
         break;
       case '--tema': {
-        const v = proximo();
+        const v = next();
         if (v !== 'claro' && v !== 'escuro') {
           throw new Error(`Tema desconhecido: "${v}". Use claro ou escuro.`);
         }
-        cli.tema = v;
+        cli.theme = v;
         break;
       }
       case '--largura':
-        cli.largura = Number(proximo());
+        cli.width = Number(next());
         break;
       case '--dry-run':
         cli.dryRun = true;
@@ -314,7 +314,7 @@ function parseArgs(argv: string[]): Cli {
         break;
       default:
         // Um id solto tambem serve: `npm run conselho -- registro`.
-        if (!arg.startsWith('-') && cli.lente === '') cli.lente = arg;
+        if (!arg.startsWith('-') && cli.lens === '') cli.lens = arg;
         else throw new Error(`Opcao desconhecida: ${arg}`);
     }
   }
@@ -328,7 +328,7 @@ function parseArgs(argv: string[]): Cli {
  * conselheiro acabava recebendo `--base HEAD~1` e `--file` como conselho --
  * opcoes que a CLI dele nao tem.
  */
-const SAIDAS_TIMEOUT: readonly string[] = [
+const TIMEOUT_OUTPUTS: readonly string[] = [
   'estreite o recorte:   --largura 390  (uma largura por vez)',
   'troque o tema:        --tema claro   (metade das imagens)',
   'aumente o teto:       --timeout 900',
@@ -342,19 +342,19 @@ const SAIDAS_TIMEOUT: readonly string[] = [
  * hook. E a lente `tela` manda cinco imagens, que custam bem mais tempo que a
  * mesma pergunta em texto -- 240s a derrubava antes de responder.
  */
-const TIMEOUT_PADRAO_MS = 900_000;
+const ADVISOR_TIMEOUT_MS = 900_000;
 
 function selectProvider(root: string, cli: Cli): QaProvider {
   if (cli.backend !== 'agy') {
     return new ApiProvider(
       root,
       undefined,
-      cli.timeout ?? TIMEOUT_PADRAO_MS,
-      SAIDAS_TIMEOUT,
-      API_CASCATA_FLASH,
+      cli.timeout ?? ADVISOR_TIMEOUT_MS,
+      TIMEOUT_OUTPUTS,
+      API_FLASH_CASCADE,
     );
   }
-  if (isAgyAvailable()) return new AgyProvider(cli.timeout ?? TIMEOUT_PADRAO_MS);
+  if (isAgyAvailable()) return new AgyProvider(cli.timeout ?? ADVISOR_TIMEOUT_MS);
 
   if (cli.backendExplicit) {
     throw new Error(
@@ -368,9 +368,9 @@ function selectProvider(root: string, cli: Cli): QaProvider {
   return new ApiProvider(
     root,
     undefined,
-    cli.timeout ?? TIMEOUT_PADRAO_MS,
-    SAIDAS_TIMEOUT,
-    API_CASCATA_FLASH,
+    cli.timeout ?? ADVISOR_TIMEOUT_MS,
+    TIMEOUT_OUTPUTS,
+    API_FLASH_CASCADE,
   );
 }
 
@@ -378,22 +378,22 @@ function selectProvider(root: string, cli: Cli): QaProvider {
 
 async function run(): Promise<void> {
   const cli = parseArgs(process.argv.slice(2));
-  if (cli.help || cli.lente === '') {
-    process.stdout.write(USO);
+  if (cli.help || cli.lens === '') {
+    process.stdout.write(USAGE);
     return;
   }
 
   const root = repoRoot(process.cwd());
-  const lente = resolverLente(cli.lente);
+  const lens = resolveLens(cli.lens);
 
   // Capturas, quando a lente as exige. Feito ANTES de montar o material para
   // que a ausencia apareca como mensagem acionavel, e nao como uma consulta de
   // minutos sobre imagem nenhuma.
-  const capturas = lente.precisaDeCapturas ? selecionarCapturas(root, cli) : [];
-  if (lente.precisaDeCapturas && cli.backend !== 'api') {
+  const screenshots = lens.needsScreenshots ? selectScreenshots(root, cli) : [];
+  if (lens.needsScreenshots && cli.backend !== 'api') {
     if (cli.backendExplicit) {
       throw new Error(
-        `A lente "${lente.id}" precisa de imagem, e o backend "${cli.backend}" nao a transmite.\n` +
+        `A lente "${lens.id}" precisa de imagem, e o backend "${cli.backend}" nao a transmite.\n` +
           '  Use: --backend api',
       );
     }
@@ -406,17 +406,17 @@ async function run(): Promise<void> {
     cli.backend = 'api';
   }
 
-  const target = collectLente(root, lente);
-  const imagens = capturas.length > 0 ? loadScreenshots(capturas) : [];
+  const target = collectLens(root, lens);
+  const images = screenshots.length > 0 ? loadScreenshots(screenshots) : [];
   // A fronteira de reconstrucao vem do REGISTRO, nao de configuracao: e uma
   // decisao aceita com `postura: reconstrucao`. Sem isso nao haveria como
   // saber depois por que meio repositorio virou acionavel, nem quando aquilo
   // deveria ter fechado.
-  const fronteiras = fronteirasAbertas(root);
-  const system = buildAdvisorSystem(lente, fronteiras);
+  const boundaries = openBoundaries(root);
+  const system = buildAdvisorSystem(lens, boundaries);
   const instructions =
     buildAdvisorInstructions(target) +
-    (imagens.length > 0 ? instrucoesVisuais(imagens.map((i) => i.label)) : '');
+    (images.length > 0 ? visualInstructions(images.map((i) => i.label)) : '');
 
   if (cli.dryRun) {
     process.stdout.write(bold('\n=== SYSTEM INSTRUCTION ===\n\n') + system + '\n');
@@ -430,7 +430,7 @@ async function run(): Promise<void> {
         ),
     );
     for (const f of target.files) process.stdout.write(dim(`  ${f}\n`));
-    for (const i of imagens) {
+    for (const i of images) {
       process.stdout.write(dim(`  [imagem] ${i.label}  ${Math.round(i.bytes / 1024)} KB\n`));
     }
     return;
@@ -456,21 +456,21 @@ async function run(): Promise<void> {
     material: `--- INICIO DO MATERIAL ---\n${target.payload}\n--- FIM DO MATERIAL ---\n`,
     model,
     schema: ADVISOR_RESPONSE_SCHEMA,
-    screenshots: imagens.map((i) => i.part),
+    screenshots: images.map((i) => i.part),
   };
 
   process.stdout.write(
     dim(
       `\nConsultando (${target.payload.length} caracteres` +
-        (imagens.length > 0 ? `, ${imagens.length} imagem(ns)` : '') +
+        (images.length > 0 ? `, ${images.length} imagem(ns)` : '') +
         '). Pode levar minutos.\n',
     ),
   );
 
-  const { report, result } = await consultar(provider, request, lente.id);
-  const bruto = salvarBruto(root, lente.id, result.text);
+  const { report, result } = await consult(provider, request, lens.id);
+  const raw = saveRaw(root, lens.id, result.text);
   renderReport(report, target, result.model, provider, result.usage);
-  process.stdout.write(dim(`Resposta crua: ${bruto}\n\n`));
+  process.stdout.write(dim(`Resposta crua: ${raw}\n\n`));
 }
 
 /**
@@ -482,13 +482,13 @@ async function run(): Promise<void> {
  * a duvida sobre itens inventados nao pode ser resolvida porque so restava o
  * texto formatado.
  */
-function salvarBruto(root: string, lente: string, texto: string): string {
+function saveRaw(root: string, lens: string, text: string): string {
   const dir = join(root, '.conselho');
   mkdirSync(dir, { recursive: true });
-  const carimbo = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  const caminho = join(dir, `${lente}-${carimbo}.json`);
-  writeFileSync(caminho, texto, 'utf8');
-  return caminho;
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const filePath = join(dir, `${lens}-${stamp}.json`);
+  writeFileSync(filePath, text, 'utf8');
+  return filePath;
 }
 
 /**
@@ -503,31 +503,31 @@ function salvarBruto(root: string, lente: string, texto: string): string {
  * Largura e tema viram parametro em vez de constante porque a pergunta muda com
  * eles: 390 mostra o aperto, 1024 mostra a distribuicao do espaco.
  */
-function selecionarCapturas(root: string, cli: Cli): string[] {
-  const dir = join(root, 'docs', 'telas', cli.tema);
+function selectScreenshots(root: string, cli: Cli): string[] {
+  const dir = join(root, 'docs', 'telas', cli.theme);
   if (!existsSync(dir)) {
     throw new Error(
-      `Nao ha capturas em docs/telas/${cli.tema}/.\n` +
+      `Nao ha capturas em docs/telas/${cli.theme}/.\n` +
         '  Gere com: npm run ui:capturar\n' +
         '  Elas nao sao versionadas -- todo clone comeca sem elas.',
     );
   }
-  const escolhidas = readdirSync(dir)
-    .filter((f) => f.endsWith(`@${cli.largura}.png`))
+  const chosen = readdirSync(dir)
+    .filter((f) => f.endsWith(`@${cli.width}.png`))
     .sort()
     .map((f) => join(dir, f));
 
-  if (escolhidas.length === 0) {
+  if (chosen.length === 0) {
     throw new Error(
-      `Ha capturas em docs/telas/${cli.tema}/, mas nenhuma em ${cli.largura}dp.\n` +
+      `Ha capturas em docs/telas/${cli.theme}/, mas nenhuma em ${cli.width}dp.\n` +
         `  Disponiveis: ${[...new Set(readdirSync(dir).map((f) => f.replace(/^.*@/, '').replace('.png', '')))].join(', ')}dp`,
     );
   }
-  return escolhidas;
+  return chosen;
 }
 
 /** Quantas vezes insistir numa falha classificada como transitoria. */
-const MAX_TENTATIVAS = 3;
+const MAX_ATTEMPTS = 3;
 
 /**
  * Executa com repeticao em falha transitoria.
@@ -538,35 +538,35 @@ const MAX_TENTATIVAS = 3;
  * classificacao e jogar fora uma consulta de minutos por um erro que a segunda
  * tentativa costuma nao cometer.
  */
-async function consultar(
+async function consult(
   provider: QaProvider,
   request: ProviderRequest,
-  lente: Parameters<typeof validateAdvisorReport>[1],
+  lens: Parameters<typeof validateAdvisorReport>[1],
 ): Promise<{ report: AdvisorReport; result: Awaited<ReturnType<QaProvider['run']>> }> {
-  let ultimo: unknown;
+  let last: unknown;
 
-  for (let tentativa = 1; tentativa <= MAX_TENTATIVAS; tentativa++) {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       const result = await provider.run(request);
       return {
-        report: validateAdvisorReport(JSON.parse(result.text), lente),
+        report: validateAdvisorReport(JSON.parse(result.text), lens),
         result,
       };
     } catch (error) {
-      ultimo = error;
-      const transitorio = error instanceof ProviderError && error.transient;
-      if (tentativa < MAX_TENTATIVAS && transitorio) {
-        const espera = 2 ** tentativa * 1000;
+      last = error;
+      const transient = error instanceof ProviderError && error.transient;
+      if (attempt < MAX_ATTEMPTS && transient) {
+        const delayMs = 2 ** attempt * 1000;
         process.stderr.write(
-          dim(`  tentativa ${tentativa} falhou (transitorio); nova em ${espera}ms\n`),
+          dim(`  tentativa ${attempt} falhou (transitorio); nova em ${delayMs}ms\n`),
         );
-        await new Promise((r) => setTimeout(r, espera));
+        await new Promise((r) => setTimeout(r, delayMs));
         continue;
       }
       break;
     }
   }
-  throw ultimo;
+  throw last;
 }
 
 /**
@@ -578,9 +578,9 @@ async function consultar(
  */
 run()
   .catch((error: unknown) => {
-    const detalhe = error instanceof Error ? error.message : String(error);
+    const detail = error instanceof Error ? error.message : String(error);
     process.stderr.write(`\n${red(bold('CONSULTA NAO CONCLUIDA'))}\n`);
-    process.stderr.write(`  ${detalhe}\n`);
+    process.stderr.write(`  ${detail}\n`);
     if (error instanceof ProviderError && error.quota) {
       process.stderr.write(
         dim('  Cota esgotada. Diferente do auditor, aqui nao ha fila: o\n') +

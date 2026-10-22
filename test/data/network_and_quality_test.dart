@@ -112,7 +112,7 @@ void main() {
     // derruba o usuário, falha de não reenviar derruba. Estes testes exercitam
     // o caminho inteiro: status 429, exceção, `onError`, refetch.
 
-    ApiClient clienteCom(FixtureAdapter adapter) {
+    ApiClient clientWith(FixtureAdapter adapter) {
       final dio = Dio(BaseOptions(
         responseType: ResponseType.plain,
         validateStatus: ApiClient.acceptsStatus,
@@ -128,7 +128,7 @@ void main() {
       );
 
       final result =
-          await clienteCom(adapter).getJson('https://brapi.dev/api/teste');
+          await clientWith(adapter).getJson('https://brapi.dev/api/teste');
 
       expect(result.isOk, isTrue,
           reason: 'sem reemissão, o 429 viraria falha e o corpo bom se '
@@ -145,7 +145,7 @@ void main() {
       );
 
       final result =
-          await clienteCom(adapter).getJson('https://brapi.dev/api/teste');
+          await clientWith(adapter).getJson('https://brapi.dev/api/teste');
 
       expect(result.isErr, isTrue);
       expect(result.failureOrNull, isA<DataQualityFailure>(),
@@ -162,7 +162,7 @@ void main() {
       );
 
       final result =
-          await clienteCom(adapter).getJson('https://brapi.dev/api/teste');
+          await clientWith(adapter).getJson('https://brapi.dev/api/teste');
 
       expect(result.isErr, isTrue);
       expect(result.failureOrNull, isA<InvalidInput>());
@@ -178,19 +178,19 @@ void main() {
       // repetidor reemitir. Oito requisições contra um teto de quatro, todas
       // bloqueadas uma vez: se a vaga não voltasse, as quatro últimas
       // esperariam para sempre e o `timeout` reprovaria.
-      final caminhos = [for (var i = 0; i < 8; i++) '/rajada$i'];
+      final paths = [for (var i = 0; i < 8; i++) '/rajada$i'];
       final adapter = FixtureAdapter(
-        statusSequence: {for (final c in caminhos) c: [429, 200]},
-        bodies: {for (final c in caminhos) c: '{"results":[{"ok":true}]}'},
+        statusSequence: {for (final c in paths) c: [429, 200]},
+        bodies: {for (final c in paths) c: '{"results":[{"ok":true}]}'},
       );
-      final cliente = clienteCom(adapter);
+      final client = clientWith(adapter);
 
-      final resultados = await Future.wait([
-        for (final c in caminhos) cliente.getJson('https://brapi.dev/api$c'),
+      final results = await Future.wait([
+        for (final c in paths) client.getJson('https://brapi.dev/api$c'),
       ]).timeout(const Duration(seconds: 60));
 
-      expect(resultados.every((r) => r.isOk), isTrue);
-      for (final c in caminhos) {
+      expect(results.every((r) => r.isOk), isTrue);
+      for (final c in paths) {
         expect(adapter.callCount[c], 2, reason: '$c: uma repetição');
       }
     });
@@ -202,7 +202,7 @@ void main() {
       );
 
       final result =
-          await clienteCom(adapter).getJson('https://brapi.dev/api/teste');
+          await clientWith(adapter).getJson('https://brapi.dev/api/teste');
 
       expect(result.isErr, isTrue);
       expect(adapter.callCount['/teste'], 3);
@@ -224,16 +224,6 @@ void main() {
   });
 
   group('ApiConfig', () {
-    test('diagnóstico nunca revela o token completo', () {
-      const config = ApiConfig(
-        mode: BrapiMode.direct,
-        brapiBaseUrl: 'https://brapi.dev/api',
-        brapiToken: 'wmvstKEWAuQa1Pex2BQXXb',
-        bcbBaseUrl: '',
-      );
-      expect(config.diagnostics, isNot(contains('wmvstKEWAuQa1Pex2BQXXb')));
-      expect(config.diagnostics, contains('****'));
-    });
 
     test('modo proxy é considerado credenciado sem token local', () {
       const config = ApiConfig(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
 import '../presentation/theme/fin_theme.dart';
-import '../controllers/theme_controller.dart';
 import '../controllers/sign_up_controller.dart';
 
 /// Tela responsável pela criação de novas contas de usuário.
@@ -83,8 +82,6 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<SignUpController>(context);
-    final themeController = Provider.of<ThemeController>(context);
-    final isLight = themeController.isLightMode;
 
     // Sincroniza os dados de digitação locais com o estado centralizado do Provider
     final currentName = controller.name;
@@ -267,7 +264,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                                 // Indicadores visuais de etapa do cadastro
                                 Row(
                                   children: [
-                                    _buildStepIndicator(1, controller.step, isLight),
+                                    _buildStepIndicator(1, controller.step),
                                     Expanded(
                                       child: Container(
                                         height: 1.5,
@@ -277,7 +274,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
                                             : context.fin.border,
                                       ),
                                     ),
-                                    _buildStepIndicator(2, controller.step, isLight),
+                                    _buildStepIndicator(2, controller.step),
                                     const SizedBox(width: 8),
                                     Text(
                                       controller.step == 1 ? 'Dados pessoais' : 'Senha e segurança',
@@ -293,8 +290,8 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
 
                                 // Exibição condicional da etapa ativa do formulário
                                 controller.step == 1 
-                                    ? _buildStep1(context, controller, isLight) 
-                                    : _buildStep2(context, controller, isLight),
+                                    ? _buildStep1(context, controller)
+                                    : _buildStep2(context, controller),
                               ],
                             ),
                           ),
@@ -330,7 +327,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
   }
 
   /// Constrói a bolha indicadora do status de cada etapa
-  Widget _buildStepIndicator(int stepIndex, int currentStep, bool isLight) {
+  Widget _buildStepIndicator(int stepIndex, int currentStep) {
     bool isCompletedOrCurrent = currentStep >= stepIndex;
     bool isCompleted = currentStep > stepIndex;
 
@@ -368,7 +365,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
   }
 
   /// Formulário da Etapa 1: Dados Pessoais
-  Widget _buildStep1(BuildContext context, SignUpController controller, bool isLight) {
+  Widget _buildStep1(BuildContext context, SignUpController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -409,7 +406,6 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           onChanged: controller.setName,
           hintText: 'Seu nome',
           icon: Icons.badge_outlined,
-          isLight: isLight,
         ),
         const SizedBox(height: 14),
 
@@ -430,7 +426,6 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           onChanged: controller.setUsername,
           hintText: 'seu_usuario',
           icon: Icons.person_outline,
-          isLight: isLight,
         ),
         const SizedBox(height: 14),
 
@@ -452,7 +447,6 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
           hintText: 'email@exemplo.com',
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
-          isLight: isLight,
         ),
         const SizedBox(height: 22),
 
@@ -500,7 +494,7 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
   }
 
   /// Formulário da Etapa 2: Senha e Aceitação de Termos
-  Widget _buildStep2(BuildContext context, SignUpController controller, bool isLight) {
+  Widget _buildStep2(BuildContext context, SignUpController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -745,7 +739,6 @@ class _SignUpScreenContentState extends State<_SignUpScreenContent> {
     required String hintText,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
-    required bool isLight,
   }) {
     return TextField(
       key: key,
