@@ -117,3 +117,25 @@ final savedValuationsProvider =
   SavedValuationsNotifier.new,
   retry: (_, _) => null,
 );
+
+/// **O valuation do usuário que vale para o ativo**, ou `null` quando vale o
+/// do motor (decisão 151).
+///
+/// É o mais recente que ele confirmou para o ativo, **desde que discorde do
+/// motor** — algum campo trocado. Confirmar os números do motor tal como estão
+/// é concordar com ele: aí o mais recente devolve o ativo ao preço do motor, e
+/// não a um valuation antigo e divergente.
+///
+/// Os valuations são do usuário, e não de um estudo: o mesmo ativo mostra o
+/// mesmo preço do usuário na Principal e na Reserva, em qualquer estudo aberto.
+final userValuationProvider =
+    Provider.family<ManualValuationRecord?, Ticker>((ref, ticker) {
+  final records = ref.watch(savedValuationsProvider).value;
+  if (records == null) return null;
+  for (final r in records) {
+    if (r.ticker != ticker) continue;
+    // A lista vem do mais recente ao mais antigo: o primeiro do ativo decide.
+    return r.changedFields.isEmpty ? null : r;
+  }
+  return null;
+});
