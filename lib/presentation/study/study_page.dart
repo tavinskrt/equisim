@@ -11,6 +11,7 @@ import '../shared/ui_kit.dart';
 import '../theme/fin_colors.dart';
 import '../theme/fin_space.dart';
 import '../theme/fin_theme.dart';
+import '../valuation/saved_valuations.dart';
 import '../valuation/valuation_page.dart';
 import '../valuation/valuation_providers.dart';
 import 'asset_picker.dart';
@@ -534,6 +535,14 @@ class _PortfolioColumn extends ConsumerWidget {
                               'prazo para se realizar.',
                         ),
                         HintEntry(
+                          'Seu valuation',
+                          'Quando você confirmou um valuation que discorda do '
+                              'motor, o potencial e o preço justo são os seus, '
+                              'marcados "seu" no lugar de "justo", contra a '
+                              'cotação de hoje. Confirmar os números do motor '
+                              'devolve o ativo ao preço do motor.',
+                        ),
+                        HintEntry(
                           'Marca ⚠',
                           'Potencial acima de 100% em qualquer direção, ou '
                               'avaliação com ressalvas. Costuma indicar '
@@ -815,11 +824,15 @@ class _AssetRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final valuation = ref.watch(valuationProvider(entry.ticker));
+    // O valuation que o usuário confirmou divergindo do motor (decisão 151):
+    // quando há, é ele que a linha mostra, com o rótulo de que é dele.
+    final mine = ref.watch(userValuationProvider(entry.ticker));
 
     final content = _rowContent(
       context,
       ref,
       valuation.value,
+      mine,
       isLoading: valuation.isLoading,
     );
 
@@ -855,10 +868,19 @@ class _AssetRow extends ConsumerWidget {
   Widget _rowContent(
     BuildContext context,
     WidgetRef ref,
-    ValuationResult? valuation, {
+    ValuationResult? valuation,
+    ManualValuationRecord? mine, {
     required bool isLoading,
   }) {
-    final upside = valuation?.upside;
+    // Com valuation do usuário, o preço justo é o dele, e o potencial é contra
+    // a cotação **de hoje** — a da avaliação do motor em tela —, e não contra a
+    // do dia em que ele confirmou. Sem avaliação de hoje, a do dia é a única
+    // cotação que há.
+    final market = valuation?.marketPrice.reais ?? mine?.marketPrice;
+    final isUser = mine != null && market != null && market > 0;
+    final fairValue =
+        isUser ? mine.fairValuePerShare : valuation?.fairValue.reais;
+    final upside = isUser ? mine.fairValuePerShare / market - 1 : valuation?.upside;
     final isOutlier = upside != null && upside.abs() >= _outlierThreshold;
     final hasWarnings = valuation != null && valuation.warnings.isNotEmpty;
 
@@ -930,14 +952,16 @@ class _AssetRow extends ConsumerWidget {
                   ),
                   SizedBox(
                     width: upsideWidth,
-                    child: isLoading
+                    child: isLoading && !isUser
                         ? _UpsideSkeleton(width: upsideWidth)
                         : _UpsideCell(
                             upside: upside,
-                            fairValue: valuation?.fairValue.reais,
+                            fairValue: fairValue,
                             model: valuation?.model,
                             isOutlier: isOutlier,
                             hasWarnings: hasWarnings,
+                            mine: isUser ? mine : null,
+                            engineFairValue: valuation?.fairValue.reais,
                           ),
                   ),
                 ],
@@ -1024,14 +1048,16 @@ class _AssetRow extends ConsumerWidget {
                         // largura da faixa, e a celula precisa poder ceder --
                         // sem isto ela impoe a largura intrinseca e estoura.
                         Flexible(
-                          child: isLoading
+                          child: isLoading && !isUser
                               ? _UpsideSkeleton(width: upsideWidth)
                               : _UpsideCell(
                                   upside: upside,
-                                  fairValue: valuation?.fairValue.reais,
+                                  fairValue: fairValue,
                                   model: valuation?.model,
                                   isOutlier: isOutlier,
                                   hasWarnings: hasWarnings,
+                                  mine: isUser ? mine : null,
+                                  engineFairValue: valuation?.fairValue.reais,
                                 ),
                         ),
                       ],
@@ -1168,12 +1194,21 @@ class _UpsideCell extends StatelessWidget {
   final bool isOutlier;
   final bool hasWarnings;
 
+  /// O valuation do usuário que originou o número, quando é o dele, e não o do
+  /// motor (decisão 151).
+  final ManualValuationRecord? mine;
+
+  /// Preço justo do motor de hoje, para o usuário comparar com o dele.
+  final double? engineFairValue;
+
   const _UpsideCell({
     required this.upside,
     required this.fairValue,
     required this.model,
     required this.isOutlier,
     required this.hasWarnings,
+    this.mine,
+    this.engineFairValue,
   });
 
   @override
@@ -1218,7 +1253,10 @@ class _UpsideCell extends StatelessWidget {
           ),
           if (fairValue != null)
             Text(
-              'justo ${Fmt.money(fairValue!)}',
+              // "seu", e não "justo", quando o número é do usuário: a linha
+              // precisa dizer de quem é o preço, porque só o do motor tem
+              // validação (decisões 147 e 151).
+              '${mine == null ? 'justo' : 'seu'} ${Fmt.money(fairValue!)}',
               textAlign: TextAlign.right,
               overflow: TextOverflow.ellipsis,
               // `captionNum`, nao `caption`: e dinheiro numa coluna alinhada a
@@ -1234,13 +1272,29 @@ class _UpsideCell extends StatelessWidget {
   }
 
   String _tooltip() {
-    final buffer = StringBuffer()
-      ..write('Distância entre o preço de mercado e o preço justo estimado')
-      ..write(model == null ? '' : ' por ${model!.label}')
-      ..write(
-        '. Não é previsão de retorno: só se realiza se o mercado '
-        'convergir para essa estimativa, e não há prazo para isso.',
-      );
+    final buffer = StringBuffer();
+    final record = mine;
+    if (record != null) {
+      buffer
+        ..write('Distância entre o preço de mercado e o seu preço justo, do '
+            'valuation que você confirmou em ')
+        ..write(Fmt.date.format(record.savedAt))
+        ..write('.');
+      if (engineFairValue != null) {
+        buffer.write(' O preço justo do motor é '
+            '${Fmt.money(engineFairValue!)}, e é ele que a validação mede.');
+      }
+      buffer.write(' Não é previsão de retorno, e não há prazo para se '
+          'realizar.');
+    } else {
+      buffer
+        ..write('Distância entre o preço de mercado e o preço justo estimado')
+        ..write(model == null ? '' : ' por ${model!.label}')
+        ..write(
+          '. Não é previsão de retorno: só se realiza se o mercado '
+          'convergir para essa estimativa, e não há prazo para isso.',
+        );
+    }
     if (isOutlier) {
       buffer.write(
         '\n\nDiferença acima de 100%: quase sempre vem de um '

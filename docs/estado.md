@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-22, a partir de `60f0afd`.
+Gerado em 2026-10-22, a partir de `28406e5`.
 
 ## Decisões registradas
 
-**123** aceita · **2** cumprida · **7** substituída
+**124** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -147,6 +147,7 @@ Gerado em 2026-10-22, a partir de `60f0afd`.
 | 148 | A sensibilidade é nomeada pelas premissas, num cartão só, e a inversão é declarada | aceita | voce | 2026-10-14 |
 | 149 | Toda a suíte de testes mora em test/, separada pelo que testa | aceita | voce | 2026-10-19 |
 | 150 | O valuation confirmado é gravado com as premissas e o resultado, e vai ao painel de logs | aceita | voce | 2026-10-22 |
+| 151 | A tela Estudo mostra o valuation do usuário quando ele discorda do motor | aceita | voce | 2026-10-22 |
 
 ### Caminhos retirados
 
@@ -277,16 +278,18 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 70 | 24.528 |
-| Apresentacao | 41 | 19.223 |
-| Camada de dados | 27 | 3.794 |
-| Testes do app | 41 | 9.614 |
-| Testes do nucleo | 54 | 17.322 |
+| Nucleo de dominio | 71 | 25.274 |
+| Apresentacao | 43 | 19.740 |
+| Camada de dados | 28 | 3.931 |
+| Testes do app | 43 | 10.086 |
+| Testes do nucleo | 55 | 17.568 |
 | Ferramentas de QA | 20 | 6.930 |
 
 ## Histórico recente
 
 ```
+2026-10-22  28406e5  Grava o valuation confirmado com premissas e resultado, e o registra no painel de logs
+2026-10-22  d2f661c  Grava o valuation confirmado com premissas e resultado, e o registra no painel de logs
 2026-10-19  60f0afd  Merge pull request #3 from tavinskrt/claude/blissful-carson-i0af7l
 2026-10-19  deba390  Reúne toda a suíte de testes em test/, separada pelo que testa
 2026-10-18  15fc822  Merge pull request #2 from tavinskrt/claude/blissful-carson-i0af7l
@@ -300,6 +303,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-10-18  5f2ff93  Remoção de um warning
 2026-10-18  981fb43  Remoção de código morto e remoção de alertas
 2026-10-18  74acd8c  Remove o código morto do repositório
-2026-10-18  d654c8e  Limpa os 99 alertas do analisador sem suprimi-los
-2026-10-18  78f10c4  Update agy.ts
 ```
