@@ -11,6 +11,22 @@ service cloud.firestore {
                                   && resource.data.userId == request.auth.uid;
     }
 
+    // Valuations confirmados na edição: premissas e resultado (decisão 150).
+    // O documento é nomeado pelo identificador do registro, então a mesma
+    // confirmação regravada sobrescreve em vez de duplicar — e sobrescrever
+    // exige que o documento já seja de quem grava.
+    match /valuations/{valuationId} {
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid;
+
+      allow read, delete: if request.auth != null
+                          && resource.data.userId == request.auth.uid;
+    }
+
     // Coleção do escopo anterior (uma ação × um FII).
     //
     // Mantida somente leitura e exclusão: a aplicação não escreve mais aqui,

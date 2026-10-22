@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-14, a partir de `1d0c6f6`.
+Gerado em 2026-10-22, a partir de `60f0afd`.
 
 ## Decisões registradas
 
-**121** aceita · **2** cumprida · **7** substituída
+**123** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -145,15 +145,117 @@ Gerado em 2026-10-14, a partir de `1d0c6f6`.
 | 146 | Sem o par VPA e contagem do exercício, a base de patrimônio é o PL da demonstração | aceita | voce | 2026-10-02 |
 | 147 | O usuário refaz a conta do motor com os números dele, e o preço do motor continua o validado | aceita | voce | 2026-10-11 |
 | 148 | A sensibilidade é nomeada pelas premissas, num cartão só, e a inversão é declarada | aceita | voce | 2026-10-14 |
+| 149 | Toda a suíte de testes mora em test/, separada pelo que testa | aceita | voce | 2026-10-19 |
+| 150 | O valuation confirmado é gravado com as premissas e o resultado, e vai ao painel de logs | aceita | voce | 2026-10-22 |
 
 ### Caminhos retirados
 
 Decisões cujo `afeta` cita caminho que uma decisão posterior apagou (campo `retira`). A decisão antiga não se edita; perdeu esse objeto.
 
+- decisão 21 → `test/presentation`, retirado pela 149
 - decisão 25 → `docs/refinamento-do-valuation.md`, retirado pela 141
 - decisão 27 → `docs/refinamento-do-valuation.md`, retirado pela 141
 - decisão 28 → `docs/refinamento-do-valuation.md`, retirado pela 141
+- decisão 29 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 30 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
 - decisão 30 → `docs/refinamento-do-valuation.md`, retirado pela 141
+- decisão 31 → `packages/equisim_core/test/usecases_test.dart`, retirado pela 149
+- decisão 31 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 31 → `packages/equisim_core/test/valuation_test.dart`, retirado pela 149
+- decisão 31 → `test/presentation/logs_page_test.dart`, retirado pela 149
+- decisão 32 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 33 → `packages/equisim_core/test/usecases_test.dart`, retirado pela 149
+- decisão 33 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 33 → `packages/equisim_core/test/valuation_test.dart`, retirado pela 149
+- decisão 34 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 36 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 37 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 38 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 39 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 40 → `packages/equisim_core/test/beta_shrinkage_test.dart`, retirado pela 149
+- decisão 41 → `packages/equisim_core/test/equity_from_firm_test.dart`, retirado pela 149
+- decisão 41 → `packages/equisim_core/test/levered_rates_test.dart`, retirado pela 149
+- decisão 42 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 43 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 44 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 45 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 45 → `packages/equisim_core/test/levered_rates_test.dart`, retirado pela 149
+- decisão 46 → `packages/equisim_core/test/levered_rates_test.dart`, retirado pela 149
+- decisão 46 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 47 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 48 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 48 → `packages/equisim_core/test/levered_rates_test.dart`, retirado pela 149
+- decisão 48 → `packages/equisim_core/test/valuation_test.dart`, retirado pela 149
+- decisão 49 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 50 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 51 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 52 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 53 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 54 → `packages/equisim_core/test/beta_shrinkage_test.dart`, retirado pela 149
+- decisão 55 → `packages/equisim_core/test/beta_shrinkage_test.dart`, retirado pela 149
+- decisão 56 → `packages/equisim_core/test/usecases_test.dart`, retirado pela 149
+- decisão 58 → `packages/equisim_core/test/portfolio_test.dart`, retirado pela 149
+- decisão 58 → `packages/equisim_core/test/result_and_rates_test.dart`, retirado pela 149
+- decisão 59 → `packages/equisim_core/test/result_and_rates_test.dart`, retirado pela 149
+- decisão 59 → `packages/equisim_core/test/portfolio_test.dart`, retirado pela 149
+- decisão 60 → `packages/equisim_core/test/market_anchors_test.dart`, retirado pela 149
+- decisão 61 → `packages/equisim_core/test/usecases_test.dart`, retirado pela 149
+- decisão 62 → `packages/equisim_core/test/usecases_test.dart`, retirado pela 149
+- decisão 67 → `packages/equisim_core/test/cvm_chart_test.dart`, retirado pela 149
+- decisão 69 → `packages/equisim_core/test/fundamentals_merge_test.dart`, retirado pela 149
+- decisão 73 → `packages/equisim_core/test/trailing_twelve_months_test.dart`, retirado pela 149
+- decisão 73 → `packages/equisim_core/test/cvm_series_test.dart`, retirado pela 149
+- decisão 74 → `packages/equisim_core/test/yield_curve_test.dart`, retirado pela 149
+- decisão 74 → `packages/equisim_core/test/usecases_test.dart`, retirado pela 149
+- decisão 75 → `packages/equisim_core/test/corporate_events_test.dart`, retirado pela 149
+- decisão 78 → `packages/equisim_core/test/fundamentals_merge_test.dart`, retirado pela 149
+- decisão 78 → `packages/equisim_core/test/cvm_series_test.dart`, retirado pela 149
+- decisão 79 → `packages/equisim_core/test/brazilian_calendar_test.dart`, retirado pela 149
+- decisão 79 → `packages/equisim_core/test/yield_curve_test.dart`, retirado pela 149
+- decisão 80 → `packages/equisim_core/test/portfolio_test.dart`, retirado pela 149
+- decisão 81 → `packages/equisim_core/test/fundamentals_merge_test.dart`, retirado pela 149
+- decisão 82 → `packages/equisim_core/test/cvm_bridge_test.dart`, retirado pela 149
+- decisão 83 → `packages/equisim_core/test/b3_registry_test.dart`, retirado pela 149
+- decisão 83 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 83 → `packages/equisim_core/test/audit_test.dart`, retirado pela 149
+- decisão 84 → `packages/equisim_core/test/yield_curve_test.dart`, retirado pela 149
+- decisão 87 → `packages/equisim_core/test/b3_registry_test.dart`, retirado pela 149
+- decisão 87 → `packages/equisim_core/test/financial_sectors_test.dart`, retirado pela 149
+- decisão 87 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 88 → `packages/equisim_core/test/fre_concessions_test.dart`, retirado pela 149
+- decisão 88 → `packages/equisim_core/test/concession_horizon_test.dart`, retirado pela 149
+- decisão 89 → `packages/equisim_core/test/cash_dividends_test.dart`, retirado pela 149
+- decisão 89 → `packages/equisim_core/test/beta_total_return_test.dart`, retirado pela 149
+- decisão 89 → `packages/equisim_core/test/brazilian_calendar_test.dart`, retirado pela 149
+- decisão 90 → `packages/equisim_core/test/share_count_history_test.dart`, retirado pela 149
+- decisão 92 → `packages/equisim_core/test/calibrated_band_test.dart`, retirado pela 149
+- decisão 97 → `test/presentation/calibrated_band_card_test.dart`, retirado pela 149
+- decisão 113 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 113 → `packages/equisim_core/test/levered_rates_test.dart`, retirado pela 149
+- decisão 114 → `packages/equisim_core/test/real_nominal_test.dart`, retirado pela 149
+- decisão 118 → `packages/equisim_core/test/peer_multiples_test.dart`, retirado pela 149
+- decisão 119 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 120 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 121 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 122 → `test/presentation/failure_copy_test.dart`, retirado pela 149
+- decisão 125 → `test/presentation/domain_copy_test.dart`, retirado pela 149
+- decisão 127 → `packages/equisim_core/test/equity_from_firm_test.dart`, retirado pela 149
+- decisão 130 → `packages/equisim_core/test/valuation_guards_test.dart`, retirado pela 149
+- decisão 130 → `packages/equisim_core/test/levered_rates_test.dart`, retirado pela 149
+- decisão 131 → `packages/equisim_core/test/audit_integrity_test.dart`, retirado pela 149
+- decisão 131 → `test/presentation/logs_page_test.dart`, retirado pela 149
+- decisão 132 → `packages/equisim_core/test/valuation_inputs_copy_test.dart`, retirado pela 149
+- decisão 135 → `packages/equisim_core/test/capital_posterior_test.dart`, retirado pela 149
+- decisão 136 → `packages/equisim_core/test/corporate_events_complete_test.dart`, retirado pela 149
+- decisão 139 → `packages/equisim_core/test/cash_dividends_test.dart`, retirado pela 149
+- decisão 146 → `packages/equisim_core/test/base_de_patrimonio_test.dart`, retirado pela 149
+
+### Referências quebradas
+
+Decisões cujo `afeta` aponta para caminho que não existe mais.
+
+- decisão 113 → `docs/validacao/gabarito_cascata.json`
+- decisão 119 → `docs/validacao/gabarito_cascata.json`
 
 ## Caixa de entrada
 
@@ -175,29 +277,29 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 69 | 25.133 |
-| Apresentacao | 41 | 19.206 |
-| Camada de dados | 27 | 3.926 |
-| Testes do app | 52 | 9.898 |
-| Testes do nucleo | 54 | 17.586 |
-| Ferramentas de QA | 20 | 6.955 |
+| Nucleo de dominio | 70 | 24.528 |
+| Apresentacao | 41 | 19.223 |
+| Camada de dados | 27 | 3.794 |
+| Testes do app | 41 | 9.614 |
+| Testes do nucleo | 54 | 17.322 |
+| Ferramentas de QA | 20 | 6.930 |
 
 ## Histórico recente
 
 ```
-2026-10-14  1d0c6f6  Normalização destrinchada
-2026-10-12  1aec46b  Personalização do valuation
-2026-10-05  5809ca4  Refino do motor de valuation (parte 28)
-2026-10-02  51705aa  Instruções para o build
-2026-10-01  b92876c  Refino do motor de valuation (parte 27)
-2026-10-01  dbf225f  Analisando alternativas para o crescimento (g)
-2026-09-29  1325e49  Prêmio de risco
-2026-09-29  5551a7a  Documentação do motor de valuation (parte 1)
-2026-09-27  6827219  Refino do motor de valuation (parte 26)
-2026-09-27  c375987  Refino do motor de valuation (parte 25)
-2026-09-24  e856ec6  Refino do motor de valuation (parte 24)
-2026-09-22  e1a843d  Refino do motor de valuation (parte 23)
-2026-09-22  2a19372  Refino do motor de valuation (parte 21)
-2026-09-21  5345767  Refino do motor de valuation (parte 21)
-2026-09-21  80866a8  Refino do motor de valuation (parte 20)
+2026-10-19  60f0afd  Merge pull request #3 from tavinskrt/claude/blissful-carson-i0af7l
+2026-10-19  deba390  Reúne toda a suíte de testes em test/, separada pelo que testa
+2026-10-18  15fc822  Merge pull request #2 from tavinskrt/claude/blissful-carson-i0af7l
+2026-10-18  332fd4d  Merge branch 'main' into claude/blissful-carson-i0af7l
+2026-10-18  cea0aaa  Traduz para o português os comentários em inglês do esqueleto de plataforma
+2026-10-18  070fbe3  Traduz para o inglês os nomes dos scripts Python
+2026-10-18  e081d8b  Traduz para o inglês os nomes dos scripts TypeScript e JavaScript
+2026-10-18  525ef6b  Traduz para o inglês, em camelCase, os nomes do código Dart
+2026-10-18  9b81bc9  Prende a uma chave explícita o texto que os enums gravam
+2026-10-18  8cae35b  Atualizar curva e destacar falta de suporte do Firebase para Linux Desktop
+2026-10-18  5f2ff93  Remoção de um warning
+2026-10-18  981fb43  Remoção de código morto e remoção de alertas
+2026-10-18  74acd8c  Remove o código morto do repositório
+2026-10-18  d654c8e  Limpa os 99 alertas do analisador sem suprimi-los
+2026-10-18  78f10c4  Update agy.ts
 ```

@@ -21,13 +21,17 @@ e não calcula nada — só observa ([logs_page.dart](../lib/presentation/audit/
 [audit_bus.dart](../lib/audit/audit_bus.dart)).
 
 Com o painel aberto, use o aplicativo normalmente: cada ativo aberto na aba de
-avaliação gera um evento.
+avaliação gera um evento. Cada valuation confirmado em **Editar valuation** gera
+outro, em `/core/valuation/manual/<ATIVO>`, com as premissas do usuário e o
+resultado gravado — e os valuations já salvos entram no painel assim que o
+aplicativo os carrega, de modo que o painel reflete o que está persistido, e
+não só o que aconteceu na sessão (decisão 150).
 
 ## 2. O que há no painel
 
 | Elemento | O que faz |
 |---|---|
-| Filtros **Todos / Cálculos / Rede** | cálculos são as avaliações; rede são as requisições às fontes de dados (payload bruto) |
+| Filtros **Todos / Cálculos / Valuations confirmados / Rede** | cálculos são as avaliações, as do motor e os valuations confirmados; "valuations confirmados" mostra só os que o usuário salvou na edição (decisão 150); rede são as requisições às fontes de dados (payload bruto) |
 | Busca | filtra por ativo ou por nome de fórmula |
 | Cada evento | três seções: **Requisição & Resposta** (insumos que entraram no motor e o resultado), **Fórmulas e Equações** (cada expressão, na ordem), **Substituição de Variáveis e Decomposição** (o valor de cada símbolo e cada passo intermediário) |
 | Exportar Auditoria (JSON) | baixa os eventos, para anexar a um relatório ou conferir fora |

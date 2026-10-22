@@ -1,6 +1,8 @@
 import 'package:equisim_core/equisim_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../components/fin_amount.dart';
 import '../shared/domain_copy.dart';
@@ -10,6 +12,7 @@ import '../theme/fin_space.dart';
 import '../theme/fin_theme.dart';
 import 'manual_copy.dart';
 import 'normalization_panel.dart';
+import 'saved_valuations.dart';
 
 /// Largura a partir da qual os campos e o resultado ficam lado a lado, em dp.
 ///
@@ -28,24 +31,41 @@ const double _twoColumnWidth = 960;
 ///
 /// **O preço do usuário não herda a validação.** A faixa calibrada e a
 /// habilidade medida são do preço do motor, e a tela diz isso no rodapé.
-class ManualValuationPage extends StatefulWidget {
+///
+/// **Confirmar guarda o valuation** (decisão 150): as premissas e o resultado
+/// inteiro vão para os valuations salvos do usuário, aparecem na aba Valuation
+/// e entram no painel de logs como um evento de cálculo.
+class ManualValuationPage extends ConsumerStatefulWidget {
   /// A avaliação do motor, com a conta congelada.
   final ValuationResult result;
 
-  /// Premissas com que a tela abre. **O aplicativo não o usa** — a tela abre
-  /// nos números do motor —; existe para o teste e para a captura da lente
-  /// `tela`, que precisam mostrar a tela já editada.
+  /// Premissas com que a tela abre, no lugar das do motor.
+  ///
+  /// O aplicativo o usa para **reabrir um valuation salvo** com os números
+  /// confirmados (decisão 150); o teste e a captura da lente `tela`, para
+  /// mostrar a tela já editada. Sem ele, a tela abre nos números do motor.
   final ManualPremises? initial;
 
   /// Declara a tela. [result] precisa trazer [ValuationResult.manual].
   const ManualValuationPage({super.key, required this.result, this.initial});
 
   @override
-  State<ManualValuationPage> createState() => _ManualValuationPageState();
+  ConsumerState<ManualValuationPage> createState() =>
+      _ManualValuationPageState();
 }
 
-class _ManualValuationPageState extends State<ManualValuationPage> {
+class _ManualValuationPageState extends ConsumerState<ManualValuationPage> {
   late ManualPremises _p;
+
+  /// `true` enquanto a confirmação espera o armazenamento.
+  bool _saving = false;
+
+  /// As premissas da última confirmação bem-sucedida, e quando ela foi.
+  ///
+  /// Comparadas por **identidade**: toda troca de campo cria premissas novas,
+  /// então "as mesmas da confirmação" é exatamente "nada mudou desde então".
+  ManualPremises? _confirmed;
+  DateTime? _confirmedAt;
 
   /// O campo que "o que o preço de hoje supõe" resolve.
   ManualField _target = ManualField.discountRate;
@@ -70,6 +90,62 @@ class _ManualValuationPageState extends State<ManualValuationPage> {
   void _resolver() =>
       setState(() => _answer = _m.solve(_target, _p));
 
+  /// Quando as premissas na tela são as da última confirmação, o instante
+  /// dela; senão `null`, e o botão volta a oferecer a confirmação.
+  DateTime? get _savedAt => identical(_p, _confirmed) ? _confirmedAt : null;
+
+  /// Confirma o valuation: retrata a conta com as premissas na tela, grava, e
+  /// registra no painel de logs (decisão 150).
+  Future<void> _confirm() async {
+    if (_saving) return;
+    final premises = _p;
+    final captured = ManualValuationRecord.capture(
+      id: AuditIds.uuidV4(),
+      ticker: widget.result.ticker,
+      engineAsOf: widget.result.asOf,
+      valuation: _m,
+      premises: premises,
+      savedAt: DateTime.now(),
+    );
+    final record = captured.valueOrNull;
+    if (record == null) {
+      _notify(ManualCopy.refusal(captured.failureOrNull!), failed: true);
+      return;
+    }
+
+    setState(() => _saving = true);
+    final saved =
+        await ref.read(savedValuationsProvider.notifier).confirm(record);
+    if (!mounted) return;
+    final failure = saved.failureOrNull;
+    setState(() {
+      _saving = false;
+      if (failure == null) {
+        _confirmed = premises;
+        _confirmedAt = record.savedAt;
+      }
+    });
+    _notify(
+      failure == null
+          ? 'Valuation salvo: ${Fmt.money(record.fairValuePerShare)} por ação. '
+              'Ele aparece na aba Valuation e no painel de logs.'
+          : failure.message,
+      failed: failure != null,
+    );
+  }
+
+  void _notify(String message, {required bool failed}) {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: failed ? context.fin.negative : null,
+      ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final m = _m;
@@ -89,8 +165,20 @@ class _ManualValuationPageState extends State<ManualValuationPage> {
       normalization: widget.result.diagnostics?.baseNormalization,
       onChanged: _swap,
     );
+    final confirmation = _Confirmation(
+      enabled: output != null && !_saving,
+      saving: _saving,
+      savedAt: _savedAt,
+      onConfirm: _confirm,
+    );
     final result = <Widget>[
-      _SummaryCard(m: m, output: output, failure: failure, changed: changed),
+      _SummaryCard(
+        m: m,
+        output: output,
+        failure: failure,
+        changed: changed,
+        confirmation: confirmation,
+      ),
       const Gap.md(),
       if (output != null) ...[
         _CalculationCard(m: m, output: output),
@@ -191,7 +279,12 @@ class _ManualValuationPageState extends State<ManualValuationPage> {
       ),
       bottomNavigationBar: isWide
           ? null
-          : _ResultBar(m: m, output: output, changed: changed),
+          : _ResultBar(
+              m: m,
+              output: output,
+              changed: changed,
+              confirmation: confirmation,
+            ),
     );
   }
 }
@@ -1172,12 +1265,14 @@ class _SummaryCard extends StatelessWidget {
   final ManualOutcome? output;
   final Failure? failure;
   final bool changed;
+  final _Confirmation confirmation;
 
   const _SummaryCard({
     required this.m,
     required this.output,
     required this.failure,
     required this.changed,
+    required this.confirmation,
   });
 
   /// Largura por coluna abaixo da qual as três métricas se empilham, em dp.
@@ -1271,8 +1366,101 @@ class _SummaryCard extends StatelessWidget {
               message: ManualCopy.refusal(failure!),
             ),
           ],
+          const Gap.lg(),
+          _ConfirmButton(confirmation: confirmation),
         ],
       ),
+    );
+  }
+}
+
+/// O estado da confirmação, compartilhado pelo cartão e pela barra do rodapé.
+class _Confirmation {
+  /// O botão aceita toque: há preço, e nenhuma gravação em curso.
+  final bool enabled;
+
+  /// A gravação está em curso.
+  final bool saving;
+
+  /// Instante da confirmação das premissas na tela, ou `null` quando elas
+  /// ainda não foram confirmadas.
+  final DateTime? savedAt;
+
+  final VoidCallback onConfirm;
+
+  const _Confirmation({
+    required this.enabled,
+    required this.saving,
+    required this.savedAt,
+    required this.onConfirm,
+  });
+}
+
+/// **Confirmar o valuation** (decisão 150): grava as premissas e o resultado,
+/// e o registra no painel de logs.
+///
+/// Confirmadas as premissas na tela, o botão vira o recibo — "Salvo às 14:32"
+/// — até o próximo campo trocado, quando volta a oferecer a confirmação. Na
+/// versão compacta, da barra do rodapé, o recibo é só o ícone.
+class _ConfirmButton extends StatelessWidget {
+  final _Confirmation confirmation;
+  final bool compact;
+
+  const _ConfirmButton({required this.confirmation, this.compact = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.fin;
+    final t = context.finType;
+    final k = confirmation;
+    final savedAt = k.savedAt;
+    final Widget icon = k.saving
+        ? SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: c.textOnBrand,
+            ),
+          )
+        : Icon(
+            savedAt == null ? Icons.save_outlined : Icons.check,
+            size: 18,
+          );
+    final label = k.saving
+        ? 'Salvando…'
+        : savedAt == null
+            ? (compact ? 'Confirmar' : 'Confirmar valuation')
+            : (compact ? 'Salvo' : 'Valuation salvo');
+    final button = FilledButton.icon(
+      // Já salvas, as mesmas premissas não gravam de novo: seria um segundo
+      // registro idêntico no histórico e no painel.
+      onPressed: k.enabled && savedAt == null ? k.onConfirm : null,
+      style: FilledButton.styleFrom(
+        backgroundColor: c.brand,
+        foregroundColor: c.textOnBrand,
+        minimumSize: const Size(48, 48),
+      ),
+      icon: icon,
+      label: Text(label),
+    );
+    if (compact) return button;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Align(alignment: AlignmentDirectional.centerStart, child: button),
+        const Gap.xs(),
+        Text(
+          savedAt == null
+              ? 'Confirmar guarda os seus números e o resultado da conta nos '
+                  'seus valuations salvos, na aba Valuation, e registra o '
+                  'cálculo no painel de logs.'
+              : 'Salvo às ${DateFormat('HH:mm').format(savedAt)}, com as '
+                  'premissas e o resultado, e registrado no painel de logs. '
+                  'Troque um campo para confirmar outro valuation.',
+          style: t.caption.copyWith(color: c.textSecondary),
+        ),
+      ],
     );
   }
 }
@@ -1282,11 +1470,13 @@ class _ResultBar extends StatelessWidget {
   final ManualValuation m;
   final ManualOutcome? output;
   final bool changed;
+  final _Confirmation confirmation;
 
   const _ResultBar({
     required this.m,
     required this.output,
     required this.changed,
+    required this.confirmation,
   });
 
   @override
@@ -1350,6 +1540,7 @@ class _ResultBar extends StatelessWidget {
                   ),
                 ],
               ),
+              _ConfirmButton(confirmation: confirmation, compact: true),
             ],
           ),
         ),
