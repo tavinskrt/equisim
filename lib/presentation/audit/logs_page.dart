@@ -61,6 +61,11 @@ class LogsPage extends StatefulWidget {
 enum _Filter implements WireKeyed {
   all('todos'),
   calculations('calculos'),
+
+  /// Os valuations que o usuário confirmou na edição (decisão 150). São
+  /// cálculos também — aparecem em [calculations] —, e o filtro próprio existe
+  /// porque é o que se abre o painel para conferir depois de confirmar um.
+  confirmed('valuations-confirmados'),
   network('rede');
 
   const _Filter(this.key);
@@ -127,6 +132,7 @@ class _LogsPageState extends State<LogsPage> {
     // recusada antes do primeiro passo não tem fórmula decomposta, e a regra
     // antiga a filtrava como ida à rede.
     _Filter.calculations => AuditBus.isCalculation(event),
+    _Filter.confirmed => _isConfirmedValuation(event),
     _Filter.network => !AuditBus.isCalculation(event),
   };
 
@@ -429,6 +435,7 @@ class _Header extends StatelessWidget {
                   label: switch (f) {
                     _Filter.all => 'Todos',
                     _Filter.calculations => 'Cálculos',
+                    _Filter.confirmed => 'Valuations confirmados',
                     _Filter.network => 'Rede',
                   },
                   selected: filter == f,
@@ -526,6 +533,13 @@ class _EmptyState extends StatelessWidget {
 
 // ------------------------------------------------------------- Cartão de evento --
 
+/// O evento é um valuation que o usuário confirmou na edição (decisão 150)?
+///
+/// Pela origem, como [AuditBus.isCalculation]: o endereço é o que o registro
+/// do núcleo declara.
+bool _isConfirmedValuation(AuditEvent event) =>
+    event.endpoint.startsWith(ManualValuationRecord.endpointPrefix);
+
 class _EventCard extends StatelessWidget {
   const _EventCard({
     super.key,
@@ -539,6 +553,8 @@ class _EventCard extends StatelessWidget {
   final ConsoleTheme theme;
 
   bool get _isNetwork => !AuditBus.isCalculation(event);
+
+  bool get _isConfirmed => _isConfirmedValuation(event);
 
   @override
   Widget build(BuildContext context) {
@@ -574,6 +590,9 @@ class _EventCard extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4),
             child: Text(
               'tx ${event.transactionId} · '
+              // O valuation confirmado pode ter vindo do histórico gravado, de
+              // outro dia: sem a data, a hora sozinha enganaria.
+              '${_isConfirmed ? '${_formatDate(event.timestamp)} ' : ''}'
               '${_formatTimestamp(event.timestamp)} · '
               '${event.executionTimeMs} ms',
               style: theme.mono(color: theme.dim, size: 11),
@@ -586,6 +605,9 @@ class _EventCard extends StatelessWidget {
               title: 'Requisição & Resposta',
               subtitle: _isNetwork
                   ? 'Payload bruto trocado com a fonte de dados.'
+                  : _isConfirmed
+                  ? 'As premissas que o usuário confirmou, as do motor de que '
+                        'elas partiram, e o resultado gravado com elas.'
                   : 'Insumos resolvidos que entraram no motor e o resultado '
                         'que saiu dele.',
               child: Column(
@@ -682,8 +704,12 @@ class _EventCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        if (failed)
+        if (failed && _isConfirmed)
+          _Tag(theme: theme, color: theme.danger, label: 'valuation não salvo')
+        else if (failed)
           _Tag(theme: theme, color: theme.danger, label: 'sem modelo aplicável')
+        else if (_isConfirmed)
+          _Tag(theme: theme, color: theme.accent, label: 'valuation confirmado')
         else if (_isNetwork)
           _Tag(
             theme: theme,
@@ -699,6 +725,10 @@ class _EventCard extends StatelessWidget {
       ],
     );
   }
+
+  static String _formatDate(DateTime t) =>
+      '${t.day.toString().padLeft(2, '0')}/'
+      '${t.month.toString().padLeft(2, '0')}/${t.year}';
 
   static String _formatTimestamp(DateTime t) =>
       '${t.hour.toString().padLeft(2, '0')}:'

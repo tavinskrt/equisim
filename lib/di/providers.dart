@@ -29,6 +29,7 @@ import '../data/repositories/skill_reading_repository.dart';
 import '../data/repositories/capital_events_repository.dart';
 import '../data/repositories/concession_term_repository.dart';
 import '../data/repositories/cvm_fundamentals_repository.dart';
+import '../data/repositories/manual_valuation_repository.dart';
 import '../data/repositories/market_repositories.dart';
 import '../data/repositories/portfolio_repository.dart';
 import '../data/repositories/risk_free_curve_repository.dart';
@@ -453,6 +454,11 @@ final macroRepositoryProvider = Provider<MacroRepository>(
 
 final portfolioRepositoryProvider = Provider<PortfolioRepository>(
   (ref) => PortfolioRepository(ref.watch(firestoreProvider)),
+);
+
+/// Os valuations confirmados na edição (decisão 150).
+final manualValuationStoreProvider = Provider<ManualValuationStore>(
+  (ref) => FirestoreManualValuationStore(ref.watch(firestoreProvider)),
 );
 
 // ------------------------------------------------------- Dados de mercado --

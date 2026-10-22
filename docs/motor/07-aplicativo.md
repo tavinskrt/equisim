@@ -2,7 +2,8 @@
 
 O Equisim tem quatro abas. A de **Valuation** é o motor dos capítulos 1 a 6.
 Este capítulo descreve as outras três e as contas que elas fazem, e a tela que
-abre a conta do motor para o usuário refazer com os números dele (7.5).
+abre a conta do motor para o usuário refazer com os números dele (7.5) e
+guardar o resultado (7.6).
 
 | Aba | Tela | O que faz |
 |---|---|---|
@@ -98,6 +99,25 @@ desconta de novo pela mesma calculadora, trocando só o que ele digitou.
 | "O que o preço de hoje supõe": o valor de um campo que iguala o preço justo ao de mercado, com os outros como estão — grade de 400 pontos e bisseção | `ManualValuation.solve` | a taxa achada devolve o preço de mercado a menos de R$ 10⁻¹³ nos 103 ativos com solução |
 | O preço do usuário não herda a faixa calibrada nem a habilidade medida, que são do preço do motor | tela, rodapé | decisões 92 e 147 |
 
+## 7.6 O valuation confirmado: gravado e no painel de logs
+
+O botão **Confirmar valuation**, no cartão "Seu preço justo" da edição e na
+barra do rodapé no celular, guarda o valuation do usuário (decisão 150). O que
+se guarda é o **retrato da conta no momento da confirmação**: as premissas
+digitadas, as do motor de que elas partiram, e o resultado inteiro que
+`ManualValuation.evaluate` devolveu — sem refazer conta nenhuma ao reler.
+
+| Regra | Código | Evidência |
+|---|---|---|
+| O registro: identificador, ativo, instante, data da avaliação do motor, via, preço de mercado, preço do motor, ações, premissas do motor e do usuário, o `ManualOutcome` inteiro (ponte, dez anos, terminal, avisos) e a decomposição contra o motor | [manual_valuation_record.dart, `ManualValuationRecord.capture`](../../packages/equisim_core/lib/src/services/valuation/manual_valuation_record.dart) | [manual_valuation_record_test.dart](../../test/core/manual_valuation_record_test.dart): sem troca, o preço do motor bit a bit, nas duas vias |
+| Premissa sem conta não vira registro: a falha é a mesma da tela, com o campo nomeado | `ManualValuationRecord.capture` | idem |
+| Relido do texto, o registro é o mesmo número a número; documento corrompido é descartado sem derrubar a lista | `toJson`, `fromJson` (formato 1, chaves de enum gravadas como dado) | idem |
+| Preço do usuário ao centavo pela regra de `Money.fromReais`; o `double` exato também fica gravado | `ManualValuationRecord.fairValue` | decisão 125 |
+| Gravação no Firestore, coleção `valuations`, um documento por registro e nomeado por ele: repetir a gravação não duplica | [manual_valuation_repository.dart](../../lib/data/repositories/manual_valuation_repository.dart); [firestore.rules](../../firestore.rules) | — |
+| **No painel de logs, um evento de cálculo** em `/core/valuation/manual/<ATIVO>`, com as premissas, o resultado e seis fórmulas — valor presente dos anos, terminal, patrimônio, preço por ação, potencial e diferença contra o motor —, emitido na confirmação e ao carregar o histórico gravado; o identificador do evento é o do registro, e o painel não o repete | `ManualValuationRecord.toAuditEvent`; [saved_valuations.dart](../../lib/presentation/valuation/saved_valuations.dart); filtro "Valuations confirmados" em [logs_page.dart](../../lib/presentation/audit/logs_page.dart) | [saved_valuations_test.dart](../../test/ui/saved_valuations_test.dart) |
+| Gravação recusada vai ao painel como falha, com o motivo, e a tela diz o motivo | `SavedValuationsNotifier.confirm` | idem |
+| Na aba Valuation, o cartão "Seus valuations salvos" do ativo, do mais recente ao mais antigo, com as premissas e o resultado do dia, e os botões de reabrir na edição e de apagar | [saved_valuations_card.dart](../../lib/presentation/valuation/saved_valuations_card.dart) | idem |
+
 ## Limitações deste capítulo
 
 - A simulação é de preço: quem recebe provento obtém mais.
@@ -107,3 +127,9 @@ desconta de novo pela mesma calculadora, trocando só o que ele digitou.
   comprovada); é o custo de capital, que o mercado exige em média.
 - O cálculo do usuário não é validado: ele é a conta do motor com a opinião de
   quem a digita, e pode chegar a qualquer preço.
+- O valuation salvo é o retrato do dia: reabri-lo aplica os números dele à
+  conta congelada **de hoje**, que pode ter mudado com dados novos, e por isso
+  o preço reaberto pode diferir do gravado.
+- O painel de logs só existe com a auditoria ligada (modo de depuração ou
+  `--dart-define=EQUISIM_AUDIT=true`); sem ela, o valuation é gravado do mesmo
+  jeito e só não vai ao painel.

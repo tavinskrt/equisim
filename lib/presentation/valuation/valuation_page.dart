@@ -12,6 +12,7 @@ import '../shared/ui_kit.dart';
 import '../study/study_notifier.dart';
 import '../theme/fin_colors.dart';
 import 'manual_valuation_page.dart';
+import 'saved_valuations_card.dart';
 import 'valuation_providers.dart';
 import '../shared/domain_copy.dart';
 
@@ -244,6 +245,10 @@ class _ValuationBody extends ConsumerWidget {
           sliver: SliverList.list(
             children: [
               _PriceCard(result: result),
+              // Os valuations que o usuário confirmou na edição (decisão 150),
+              // logo abaixo do preço do motor com que eles se comparam. Sem
+              // nenhum salvo para o ativo, o cartão não ocupa espaço.
+              SavedValuationsCard(result: result),
               const Gap.md(),
               _ModelCard(result: result),
               const Gap.md(),

@@ -16,6 +16,7 @@ import '../shared/theme_bridge.dart';
 import '../shared/ui_kit.dart';
 import '../theme/fin_theme.dart';
 import '../study/study_page.dart';
+import '../valuation/saved_valuations.dart';
 import '../valuation/valuation_page.dart';
 
 /// Casca principal do aplicativo, com as três frentes de trabalho.
@@ -52,6 +53,12 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   Widget build(BuildContext context) {
     final isLight = ref.watch(isLightModeProvider);
+    // Carrega os valuations salvos assim que a casca abre, e não só quando a
+    // aba Valuation chega a um ativo: é a carga que os registra no painel de
+    // logs (decisão 150), e o painel precisa refletir o que está persistido
+    // desde o começo da sessão. `listen`, e não `watch`: a casca não depende
+    // da lista para se desenhar.
+    ref.listen(savedValuationsProvider, (_, _) {});
 
     return Scaffold(
       body: ScreenBackground(

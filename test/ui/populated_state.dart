@@ -25,6 +25,8 @@ import 'package:equisim_core/equisim_core.dart';
 // `Override` mora aqui, nao no barril principal do Riverpod 3.
 import 'package:flutter_riverpod/misc.dart';
 
+import 'memory_valuation_store.dart';
+
 // ---------------------------------------------------------------------------
 // Blocos basicos
 // ---------------------------------------------------------------------------
@@ -254,6 +256,9 @@ List<Override> populatedOverrides() {
 
   return <Override>[
     currentUserIdProvider.overrideWithValue('captura'),
+    // Os valuations salvos (decisão 150) iriam ao Firestore, que a captura não
+    // tem: o armazenamento em memória mostra a tela como ela fica sem nenhum.
+    manualValuationStoreProvider.overrideWithValue(MemoryValuationStore()),
     universeProvider.overrideWith((ref) async => tickers),
     riskFreeRateProvider.overrideWith((ref) async => 0.094),
     marketAnchorsProvider.overrideWith((ref) async => MarketAnchors.fallback2026),
