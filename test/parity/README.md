@@ -11,7 +11,7 @@ depois que o Dart saiu do repositório.
    dart2js** — a mesma semântica numérica do aplicativo Flutter na web —, com
    `--no-minify` para que os nomes de tipo do rastro de auditoria saiam
    legíveis.
-2. A entrada é a dos pacotes versionados de `assets/` (CVM, B3, Tesouro,
+2. A entrada é a dos pacotes versionados de `public/assets/` (CVM, B3, Tesouro,
    mercado, validação) mais um **mercado sintético determinístico**: Ibovespa,
    cotações com volume, CDI, IPCA e IBC-Br sorteados por `Random(seed)` e
    ancorados no patrimônio publicado de cada companhia. Sintético porque as
@@ -51,7 +51,8 @@ mesmo. Uma mudança de método deliberada, registrada em decisão nova, muda o
 gabarito com ela — e a decisão diz quais números mudaram e por quê.
 
 Para refazer a gravação a partir do Dart, restaure `packages/equisim_core` do
-commit `3388c0d` e rode, com o SDK do Dart no `PATH`:
+commit `1e83fad` — o `main` de antes da reconstrução, com o núcleo idêntico ao
+que gravou o gabarito — e rode, com o SDK do Dart no `PATH`:
 
 ```bash
 cd test/parity/dart

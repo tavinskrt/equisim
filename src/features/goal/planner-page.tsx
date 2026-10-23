@@ -63,7 +63,7 @@ export function PlannerPage() {
         <h1 className="text-title font-semibold text-fg">Meta</h1>
         <p className="mt-1 text-body-sm text-fg-2">A rentabilidade necessária é derivada destes valores — e confrontada com a renda fixa, a bolsa e a sua carteira.</p>
       </div>
-      <div className="grid gap-4 lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)]">
         <Panel title="Plano patrimonial" subtitle="Aportes, prazo e o valor desejado ao final" className="lg:sticky lg:top-32 lg:self-start">
           <div className="space-y-5">
             <MoneySlider label="Aporte inicial" value={plan.initial} max={2_000_000} step={500} onChange={(initial) => setPlan((p) => ({ ...p, initial }))} />

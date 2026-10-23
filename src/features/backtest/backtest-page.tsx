@@ -77,7 +77,7 @@ function SettingsCard({ settings, goal }: { settings: BacktestSettings; goal: Fi
   const start = requestedWindow(services().clock(), settings.windowYears).start;
   return (
     <Panel title="Parâmetros da simulação" subtitle="Sem rebalanceamento: os pesos derivam com o mercado">
-      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] md:gap-8">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] md:gap-8">
         <div>
           <Slider
             label="Janela"

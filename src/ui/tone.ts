@@ -14,7 +14,7 @@ export const toneText: Record<Tone, string> = {
   neutral: 'text-fg',
   pending: 'text-pending',
   blocked: 'text-blocked',
-  reserve: 'text-reserve',
+  reserve: 'text-reserve dark:text-reserve-muted',
   brand: 'text-brand',
 };
 
@@ -26,7 +26,7 @@ export const toneSurface: Record<Tone, string> = {
   neutral: 'bg-sunken text-fg-2',
   pending: 'bg-pending-surface text-pending',
   blocked: 'bg-sunken text-blocked',
-  reserve: 'bg-reserve-surface text-reserve',
+  reserve: 'bg-reserve-surface text-reserve dark:text-reserve-muted',
   brand: 'bg-brand-surface text-positive',
 };
 

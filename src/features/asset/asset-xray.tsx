@@ -151,6 +151,7 @@ function XRayResult({ result }: { result: ValuationResult }) {
   }
   const rulerBands: RulerBand[] = bands.map((b) => ({
     key: String(b.table.months),
+    short: `${b.table.months} m`,
     label: `Faixa calibrada de 80% em ${b.table.months} meses`,
     low: b.low.reais,
     high: b.high.reais,

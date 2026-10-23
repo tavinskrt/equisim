@@ -133,6 +133,16 @@ function Section(props: { letter: string; title: string; subtitle: string; child
   );
 }
 
+/**
+ * Palavra acentuada fora de `\text{}` vira `\text{}`: em modo matemático o
+ * KaTeX compõe cada letra como símbolo, e `N_{ações}` saía com o til e a
+ * cedilha sobrepostos às letras vizinhas. Aninhar `\text` dentro de `\text`
+ * é válido, então a troca não precisa saber onde já há texto.
+ */
+export function katexSafe(latex: string): string {
+  return latex.replace(/[A-Za-z]*[À-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ]*/g, (word) => `\\text{${word}}`);
+}
+
 const withUnit = (value: number, unit: string) => `${formatAuditNumber(value)}${unit === '' ? '' : ` ${unit}`}`;
 
 /**
@@ -143,7 +153,7 @@ const withUnit = (value: number, unit: string) => `${formatAuditNumber(value)}${
 function FormulaBlock({ ordinal, trace }: { ordinal: number; trace: CalculationTrace }) {
   const html = useMemo(() => {
     try {
-      return katex.renderToString(trace.latexRepresentation, { displayMode: true, throwOnError: false, output: 'htmlAndMathml', strict: 'ignore' });
+      return katex.renderToString(katexSafe(trace.latexRepresentation), { displayMode: true, throwOnError: false, output: 'htmlAndMathml', strict: 'ignore' });
     } catch {
       return null;
     }

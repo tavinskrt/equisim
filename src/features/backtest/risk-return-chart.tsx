@@ -37,6 +37,11 @@ export function RiskReturnChart({ result }: { result: PortfolioComparison }) {
   const legend: LegendItem[] = present.map((k) => ({ key: k.kind, label: k.label, color: k.color, shape: k.shape }));
   const pctAxis = (v: number) => `${Fmt.ratio(v, 0)}%`;
   const kindLabel = (k: RiskReturnKind) => kinds.find((x) => x.kind === k)!.label;
+  // Folga vertical de 12% da amplitude: sem ela o ponto mais baixo encosta no
+  // eixo, e o rótulo da carteira — embaixo da marca — cai sobre as marcas do X.
+  const returns = result.riskReturn.map((p) => p.ret);
+  const span = Math.max(Math.max(...returns) - Math.min(...returns), 2);
+  const yDomain: [number, number] = [Math.floor(Math.min(...returns) - span * 0.12), Math.ceil(Math.max(...returns) + span * 0.12)];
 
   return (
     <ChartFrame
@@ -63,7 +68,7 @@ export function RiskReturnChart({ result }: { result: PortfolioComparison }) {
               name="Retorno"
               width={52}
               tickFormatter={pctAxis}
-              domain={['auto', 'auto']}
+              domain={yDomain}
               label={{ value: 'Retorno ao ano', angle: -90, position: 'insideLeft', offset: 12, fill: 'var(--fg-3)', fontSize: 11 }}
               {...axisProps}
             />
@@ -94,7 +99,9 @@ export function RiskReturnChart({ result }: { result: PortfolioComparison }) {
               >
                 <LabelList
                   dataKey="label"
-                  position="top"
+                  // Carteira embaixo, ativo em cima: uma Reserva de um ativo só cai no
+                  // mesmo ponto dele, e os dois rótulos no alto se sobrepunham.
+                  position={k.kind === 'principal' || k.kind === 'reserve' ? 'bottom' : 'top'}
                   offset={k.size + 4}
                   fill={k.kind === 'principal' || k.kind === 'reserve' ? 'var(--fg)' : 'var(--fg-2)'}
                   fontSize={11}

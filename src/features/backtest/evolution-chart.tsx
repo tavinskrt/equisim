@@ -59,7 +59,7 @@ export function EvolutionChart(props: { result: PortfolioComparison; onExport: (
   const [measure, setMeasure] = useState<Measure>('base100');
   const rows = mergeSeries(principal, reserve, measure);
   const reference = (principal ?? reserve)!;
-  const fmt = measure === 'base100' ? (v: number) => Fmt.ratio(v, 1) : (v: number) => Fmt.compactMoney(v);
+  const fmt = measure === 'base100' ? (v: number) => Fmt.ratio(v, 0) : (v: number) => Fmt.compactMoney(v);
   const fmtExact = measure === 'base100' ? (v: number) => Fmt.ratio(v, 2) : (v: number) => Fmt.money(v);
 
   const series = [
@@ -106,7 +106,7 @@ export function EvolutionChart(props: { result: PortfolioComparison; onExport: (
               minTickGap={32}
               {...axisProps}
             />
-            <YAxis width={measure === 'base100' ? 44 : 64} domain={['auto', 'auto']} tickFormatter={fmt} {...axisProps} />
+            <YAxis width={measure === 'base100' ? 44 : 80} domain={['auto', 'auto']} tickFormatter={fmt} {...axisProps} />
             {measure === 'base100' && <ReferenceLine y={100} stroke="var(--border-strong)" strokeDasharray="3 3" />}
             <Tooltip
               cursor={{ stroke: 'var(--border-strong)' }}

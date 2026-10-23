@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import type { ValuationResult } from '../../core';
 import { DomainCopy } from '../../copy';
 import { Banner } from '../../ui/banner';
@@ -23,9 +25,20 @@ export function CaveatsCard({ result }: { result: ValuationResult }) {
       )}
       <div className="space-y-2">
         {result.warnings.map((w, i) => (
-          <Banner key={i}>{w}</Banner>
+          <Banner key={i}>{emphasized(w)}</Banner>
         ))}
       </div>
     </Panel>
   );
+}
+
+/**
+ * Os avisos do núcleo marcam ênfase com `**palavra**`, como no Markdown; o
+ * Flutter mostrava os asteriscos. Aqui viram negrito — e só isso: o texto
+ * vem do motor, nunca do usuário, e nada mais é interpretado.
+ */
+export function emphasized(text: string): ReactNode {
+  const parts = text.split(/\*\*(.+?)\*\*/g);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) => (i % 2 === 1 ? <strong key={i} className="font-semibold text-fg">{part}</strong> : part));
 }

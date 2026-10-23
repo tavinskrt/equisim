@@ -17,8 +17,9 @@ export function Metric(props: {
   const size = { sm: 'text-title-sm', md: 'text-num-lg', lg: 'text-display' }[props.size ?? 'md'];
   return (
     <div className={cn('min-w-0', props.className)}>
-      <div className="flex items-center gap-1">
-        <p className="eyebrow truncate">{props.label}</p>
+      {/* O rótulo quebra em vez de cortar: "Esperado da ca…" em 375 px não diz o que é o número. */}
+      <div className="flex items-start gap-1">
+        <p className="eyebrow min-w-0 text-pretty">{props.label}</p>
         {props.help}
       </div>
       <p className={cn('num mt-1 font-semibold tracking-tight', size, toneText[props.tone ?? 'neutral'])}>{props.value}</p>

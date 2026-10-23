@@ -3,7 +3,7 @@
  *
  * Refaz, passo a passo, o que `test/parity/dart/harness.dart` fez sobre o
  * núcleo Dart original compilado para JavaScript: lê os pacotes versionados de
- * `assets/` (CVM, B3, Tesouro, mercado, validação), monta um mercado sintético
+ * `public/assets/` (CVM, B3, Tesouro, mercado, validação), monta um mercado sintético
  * **determinístico** — cotações, Ibovespa, CDI, IPCA e IBC-Br sorteados pelo
  * mesmo gerador `Random(seed)` do Dart, que `SeededRandom` reproduz bit a bit —
  * e avalia cada ativo em treze montagens da cascata.
@@ -703,20 +703,20 @@ export async function runOracle(options: { repo: string; limit?: number; keepTra
   const traces = new Map<string, string>();
   const hashes = new Map<string, string>();
 
-  const curve = TreasuryCurve.at(TreasuryQuotesCodec.decode(readPackage(repo, 'assets/tesouro/curva.json')), asOf);
-  const registry = B3RegistryCodec.decodePackage(readPackage(repo, 'assets/b3/emissores.json'));
-  const docs = CvmDocumentCodec.decodePackage(readPackage(repo, 'assets/cvm/documentos.json'));
-  const terms = ConcessionTermsCodec.decode(readPackage(repo, 'assets/cvm/outorgas.json'));
-  const dividends = CashDividendsCodec.decode(readPackage(repo, 'assets/b3/proventos.json'));
-  const packagePrior = BetaPriorCodec.decode(readPackage(repo, 'assets/mercado/beta_prior.json'));
-  const premiumPackage = ImpliedPremiumCodec.decode(readPackage(repo, 'assets/mercado/premio_implicito.json'));
+  const curve = TreasuryCurve.at(TreasuryQuotesCodec.decode(readPackage(repo, 'public/assets/tesouro/curva.json')), asOf);
+  const registry = B3RegistryCodec.decodePackage(readPackage(repo, 'public/assets/b3/emissores.json'));
+  const docs = CvmDocumentCodec.decodePackage(readPackage(repo, 'public/assets/cvm/documentos.json'));
+  const terms = ConcessionTermsCodec.decode(readPackage(repo, 'public/assets/cvm/outorgas.json'));
+  const dividends = CashDividendsCodec.decode(readPackage(repo, 'public/assets/b3/proventos.json'));
+  const packagePrior = BetaPriorCodec.decode(readPackage(repo, 'public/assets/mercado/beta_prior.json'));
+  const premiumPackage = ImpliedPremiumCodec.decode(readPackage(repo, 'public/assets/mercado/premio_implicito.json'));
   const packagePremium = premiumPackage?.normalizedAt(asOf) ?? null;
-  const capital = CapitalEventsCodec.decodePackage(readPackage(repo, 'assets/cvm/capital.json'));
-  const units = UnitCompositionCodec.decodePackage(readPackage(repo, 'assets/cvm/units.json'));
+  const capital = CapitalEventsCodec.decodePackage(readPackage(repo, 'public/assets/cvm/capital.json'));
+  const units = UnitCompositionCodec.decodePackage(readPackage(repo, 'public/assets/cvm/units.json'));
   const control: ReadonlyMap<string, readonly ShareholderControlPeriod[]> =
-    ShareholderControlHistory.decode(readPackage(repo, 'assets/cvm/controle.json'))?.byIssuer ?? new Map();
-  const peers = PeerMultipleCodec.decode(readPackage(repo, 'assets/mercado/multiplos_setoriais.json'));
-  const bandTables = CalibratedBandCodec.decode(readPackage(repo, 'assets/validacao/banda_calibrada.json'));
+    ShareholderControlHistory.decode(readPackage(repo, 'public/assets/cvm/controle.json'))?.byIssuer ?? new Map();
+  const peers = PeerMultipleCodec.decode(readPackage(repo, 'public/assets/mercado/multiplos_setoriais.json'));
+  const bandTables = CalibratedBandCodec.decode(readPackage(repo, 'public/assets/validacao/banda_calibrada.json'));
 
   const codes = [...docs.keys()].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   const tickers = codes.map((c) => Ticker.parse(c));
@@ -955,7 +955,7 @@ export async function runOracle(options: { repo: string; limit?: number; keepTra
       priorInputs,
       histories,
       profiles,
-      skill: SkillReadingCodec.decode(readPackage(repo, 'assets/validacao/habilidade.json')),
+      skill: SkillReadingCodec.decode(readPackage(repo, 'public/assets/validacao/habilidade.json')),
       premium: packagePremium ?? CapmInputs.defaultMarketPremium,
     });
     return { header, rows, services: servicesOut, traces };

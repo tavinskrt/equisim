@@ -108,7 +108,9 @@ export function SectorDonut({ portfolio }: { portfolio: Portfolio }) {
                       <span className="truncate">{s.label}</span>
                     </span>
                   </th>
-                  <td className="num py-1.5 text-right text-fg-3">{s.count}</td>
+                  <td className="num whitespace-nowrap py-1.5 pl-3 pr-2 text-right text-caption text-fg-3">
+                    {s.count} {s.count === 1 ? 'ativo' : 'ativos'}
+                  </td>
                   <td className="num w-16 py-1.5 text-right font-semibold text-fg">{Fmt.percent(s.weight, { decimals: 1 })}</td>
                 </tr>
               ))}

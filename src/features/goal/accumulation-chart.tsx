@@ -43,6 +43,10 @@ export function AccumulationChart({ goal, rates }: { goal: FinancialGoal; rates:
     { key: 'meta', label: 'Meta', color: 'var(--fg-2)', dashed: true },
   ];
   const yearTick = (m: number) => `${Math.round(m / 12)}a`;
+  // Marcas só em anos inteiros, no máximo seis: com o passo de 3 meses dos
+  // pontos, o Recharts escolhia 0a, 3a, 5a, 8a — intervalos desiguais.
+  const yearStep = Math.max(1, Math.ceil(months / 12 / 6));
+  const yearTicks = Array.from({ length: Math.floor(months / 12 / yearStep) + 1 }, (_, i) => i * yearStep * 12);
   const tableRows = points
     .filter((p) => p['m']! % 12 === 0 || p['m'] === months)
     .map((p) => [Fmt.months(p['m']!), ...rates.map((r) => Fmt.compactMoney(p[r.key]!))]);
@@ -57,8 +61,8 @@ export function AccumulationChart({ goal, rates }: { goal: FinancialGoal; rates:
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
             <CartesianGrid vertical={false} stroke="var(--grid)" />
-            <XAxis dataKey="m" type="number" domain={[0, months]} tickFormatter={yearTick} {...axisProps} />
-            <YAxis width={64} tickFormatter={(v: number) => Fmt.compactMoney(v)} {...axisProps} />
+            <XAxis dataKey="m" type="number" domain={[0, months]} ticks={yearTicks} tickFormatter={yearTick} {...axisProps} />
+            <YAxis width={80} tickFormatter={(v: number) => Fmt.compactMoney(v)} {...axisProps} />
             <ReferenceLine
               y={goal.targetWealth.reais}
               stroke="var(--fg-2)"

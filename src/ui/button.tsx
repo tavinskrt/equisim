@@ -9,12 +9,13 @@ type Size = 'sm' | 'md' | 'lg';
 
 const variants: Record<Variant, string> = {
   // O verde da marca é **só preenchimento**: no claro ele não chega a 4,5:1
-  // sobre o branco, e o texto sobre ele usa `on-brand`.
+  // sobre o branco, e o texto sobre ele usa `on-brand` — tinta escura nos dois
+  // temas (6,15:1 no claro, 7,96:1 no escuro).
   primary: 'bg-brand text-on-brand hover:brightness-110 active:brightness-95 font-semibold',
   secondary: 'bg-surface text-fg border border-line hover:border-line-strong hover:bg-raised',
   ghost: 'text-fg-2 hover:text-fg hover:bg-sunken',
   danger: 'bg-negative-surface text-negative border border-negative/30 hover:border-negative/60 font-semibold',
-  reserve: 'bg-reserve-surface text-reserve border border-reserve/30 hover:border-reserve/60 font-semibold',
+  reserve: 'bg-reserve-surface text-reserve dark:text-reserve-muted border border-reserve/30 hover:border-reserve/60 font-semibold',
 };
 
 // A altura mínima de 44 px é a do alvo de toque (WCAG 2.5.5); `sm` mantém o
@@ -73,7 +74,7 @@ const iconTones = {
   default: 'text-fg-2 hover:text-fg',
   brand: 'text-brand hover:brightness-110',
   danger: 'text-fg-3 hover:text-negative',
-  reserve: 'text-reserve hover:brightness-110',
+  reserve: 'text-reserve dark:text-reserve-muted hover:brightness-110',
 };
 
 /** Botão de ícone com alvo de 44 × 44 px, qualquer que seja o tamanho do ícone. */

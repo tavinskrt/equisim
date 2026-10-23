@@ -9,6 +9,7 @@ import { useSession } from '../../app/state/session-store';
 import { StudyActions, useStudy } from '../../app/state/study-store';
 import { Badge } from '../../ui/badge';
 import { Button, IconButton } from '../../ui/button';
+import { cn } from '../../ui/cn';
 import { Spinner } from '../../ui/feedback';
 import { toast } from '../../ui/toast';
 import { Tooltip } from '../../ui/tooltip';
@@ -89,7 +90,8 @@ export function ContextBar() {
               aria-label="Abrir o planejador da meta"
             >
               <Target aria-hidden className="size-4 shrink-0 text-fg-3" />
-              <span className="num truncate text-fg-2">
+              {/* Abaixo de 480 px o resumo cede espaço ao nome do estudo; fica o selo, e o rótulo acessível diz o resto. */}
+              <span className={cn('num truncate text-fg-2', annual !== null && verdict !== null && 'hidden min-[480px]:inline')}>
                 {Fmt.compactMoney(study.goal.targetWealth.reais)} em {Math.round(study.goal.months / 12)} anos
               </span>
               {annual !== null && verdict !== null && (

@@ -53,8 +53,9 @@ export function Sheet(props: {
               )}
             </div>
             {props.actions}
+            {/* Sem dica flutuante: o Radix foca este botão ao abrir, e a dica "Fechar" abria junto com toda folha. */}
             <D.Close asChild>
-              <IconButton label="Fechar">
+              <IconButton label="Fechar" bare>
                 <X className="size-[18px]" aria-hidden />
               </IconButton>
             </D.Close>

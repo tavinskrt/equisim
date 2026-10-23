@@ -15,6 +15,8 @@ export interface RulerMark {
 
 export interface RulerBand {
   readonly key: string;
+  /** Rótulo curto, escrito ao lado da faixa: é ele que distingue uma faixa da outra. */
+  readonly short: string;
   readonly label: string;
   readonly low: number;
   readonly high: number;
@@ -70,20 +72,28 @@ export function PriceRuler({ marks, bands, className }: { marks: readonly RulerM
             </span>
           ))}
         </div>
-        {/* Faixas calibradas. */}
+        {/* Faixas calibradas, cada uma com o horizonte escrito ao lado: duas
+            faixas da mesma cor só se distinguiriam pelo comprimento. */}
         <div className="space-y-1.5">
-          {bands.map((b) => (
-            <div key={b.key} className="relative h-2.5 rounded-full bg-sunken">
-              <div
-                className="absolute inset-y-0 rounded-full"
-                style={{
-                  left: `${pos(b.low)}%`,
-                  width: `${Math.max(pos(b.high) - pos(b.low), 1)}%`,
-                  background: 'color-mix(in oklab, var(--chart-2) 45%, transparent)',
-                }}
-              />
-            </div>
-          ))}
+          {bands.map((b, i) => {
+            const end = pos(b.high);
+            const labelLeft = end <= 88;
+            return (
+              <div key={b.key} className="relative h-3.5">
+                <div className="absolute inset-x-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full bg-sunken" />
+                <div
+                  className="absolute top-1/2 h-2.5 -translate-y-1/2 rounded-full"
+                  style={{ left: `${pos(b.low)}%`, width: `${Math.max(end - pos(b.low), 1)}%`, background: bandFill(i) }}
+                />
+                <span
+                  className="num absolute top-1/2 -translate-y-1/2 whitespace-nowrap text-[11px] font-semibold leading-none text-fg-2"
+                  style={labelLeft ? { left: `calc(${end}% + 6px)` } : { right: `calc(${100 - pos(b.low)}% + 6px)` }}
+                >
+                  {b.short}
+                </span>
+              </div>
+            );
+          })}
         </div>
         {/* A régua e as marcas. */}
         <div className="relative mt-2 h-6">
@@ -114,13 +124,9 @@ export function PriceRuler({ marks, bands, className }: { marks: readonly RulerM
               <dd className="num text-body-sm font-semibold text-fg">{Fmt.money(m.value)}</dd>
             </div>
           ))}
-          {bands.map((b) => (
+          {bands.map((b, i) => (
             <div key={b.key} className="flex items-baseline gap-2">
-              <span
-                aria-hidden
-                className="mt-1 h-2.5 w-4 shrink-0 self-start rounded-full"
-                style={{ background: 'color-mix(in oklab, var(--chart-2) 45%, transparent)' }}
-              />
+              <span aria-hidden className="mt-1 h-2.5 w-4 shrink-0 self-start rounded-full" style={{ background: bandFill(i) }} />
               <dt className="min-w-0 flex-1 text-body-sm text-fg-2">
                 {b.label}
                 {b.note !== undefined && <span className="block text-caption text-fg-3">{b.note}</span>}
@@ -135,3 +141,6 @@ export function PriceRuler({ marks, bands, className }: { marks: readonly RulerM
     </figure>
   );
 }
+
+/** A faixa mais curta mais forte; a mais longa, que a contém, mais clara. */
+const bandFill = (i: number) => `color-mix(in oklab, var(--chart-2) ${i === 0 ? 60 : 32}%, transparent)`;

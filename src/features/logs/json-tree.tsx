@@ -70,7 +70,9 @@ function JsonNode({ value, depth, name }: { value: unknown; depth: number; name?
   }
 
   return (
-    <div className="py-px font-mono text-label whitespace-pre select-text">
+    // Quebra as linhas: o motivo de uma recusa passa de 300 caracteres e ficava
+    // escondido além da borda do painel, numa rolagem lateral.
+    <div className="py-px pl-[2ch] -indent-[2ch] font-mono text-label whitespace-pre-wrap break-words select-text">
       {key}
       <span className={cn(scalarClass(value))}>{scalarText(value)}</span>
     </div>

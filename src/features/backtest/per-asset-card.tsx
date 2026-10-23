@@ -102,7 +102,7 @@ function AssetGroup(props: { label: string; color: string; assets: readonly Asse
                 </p>
                 <WeightBar target={a.targetWeight.value} current={a.currentWeight} color={props.color} />
                 <p className="num mt-1 truncate text-caption text-fg-3">
-                  {a.shares.toLocaleString('pt-BR')} cotas · {Fmt.money(a.invested.reais)} destinados
+                  {a.shares.toLocaleString('pt-BR')} {a.shares === 1 ? 'ação' : 'ações'} · {Fmt.money(a.invested.reais)} destinados
                 </p>
               </td>
               <td className="py-2.5 pl-3 text-right align-top whitespace-nowrap">

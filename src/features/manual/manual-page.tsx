@@ -113,7 +113,7 @@ function EditorSkeleton({ ticker }: { ticker: Ticker }) {
       <span className="sr-only" role="status">
         Avaliando {ticker.value}
       </span>
-      <div className="grid gap-4 lg:grid-cols-[11fr_9fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[11fr_9fr]">
         <div className="space-y-4">
           {[0, 1, 2].map((i) => (
             <Card key={i} className="p-5">
@@ -147,7 +147,7 @@ function Header(props: { ticker: Ticker; changed: boolean; onReset: (() => void)
         <ArrowLeft aria-hidden className="size-5" />
       </IconButton>
       <div className="min-w-0 flex-1">
-        <h1 className="truncate text-title font-semibold text-fg">Simular minhas premissas</h1>
+        <h1 className="text-balance text-title font-semibold text-fg">Simular minhas premissas</h1>
         <p className="text-body-sm text-fg-2">{props.ticker.value} · seu cálculo</p>
       </div>
       {props.onReset !== null && (
@@ -218,7 +218,7 @@ function Editor({ result, initial, notice }: { result: ValuationResult; initial:
     <div className="space-y-4 pb-24 lg:pb-0">
       <Header ticker={result.ticker} changed={changed} onReset={() => swap(m.enginePremises)} />
       {notice !== null && <Banner>{notice}</Banner>}
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,11fr)_minmax(0,9fr)]">
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,11fr)_minmax(0,9fr)]">
         <PremiseFields
           m={m}
           p={p}

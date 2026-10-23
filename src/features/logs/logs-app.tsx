@@ -76,7 +76,7 @@ export function LogsApp() {
 
   return (
     <div className="min-h-dvh bg-canvas">
-      <header className="sticky top-0 z-20 max-h-[50dvh] overflow-y-auto border-b border-line bg-surface/95 px-4 pb-3 pt-3.5 backdrop-blur-md">
+      <header className="z-20 border-b sm:sticky sm:top-0 border-line bg-surface/95 px-4 pb-3 pt-3.5 backdrop-blur-md">
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <h1 className="inline-flex items-center gap-2 text-title-sm font-bold text-fg">

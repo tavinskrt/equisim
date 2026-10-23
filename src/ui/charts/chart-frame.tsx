@@ -68,7 +68,8 @@ export function ChartFrame(props: {
   return (
     <Card className={cn('p-4 sm:p-5', props.className)}>
       <div className="flex flex-wrap items-start gap-3">
-        <div className="min-w-0 flex-1">
+        {/* Base de 12rem: abaixo dela os controles descem para a linha de baixo, em vez de espremer o título letra a letra. */}
+        <div className="min-w-0 flex-1 basis-48">
           <h2 className="text-title-sm font-semibold text-fg">{props.title}</h2>
           {props.subtitle !== undefined && <p className="mt-0.5 text-body-sm text-fg-2">{props.subtitle}</p>}
         </div>

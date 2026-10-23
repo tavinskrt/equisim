@@ -50,7 +50,7 @@ export const perAssetGlossary: readonly HintEntry[] = [
   {
     term: 'Cotas · destinado',
     meaning:
-      'Quantas cotas a simulação acumulou no ativo e quanto capital ele recebeu dos aportes. A quantidade é INTEIRA: cada aporte compra o que couber em lotes de uma, ao preço do dia, e a sobra fica no caixa do ativo esperando o aporte seguinte.',
+      'Quantas ações a simulação acumulou no ativo e quanto capital ele recebeu dos aportes. A quantidade é INTEIRA: cada aporte compra o que couber em lotes de uma, ao preço do dia, e a sobra fica no caixa do ativo esperando o aporte seguinte.',
   },
   {
     term: 'Retorno',

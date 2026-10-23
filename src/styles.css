@@ -80,7 +80,9 @@
   --fg: #0e1621; /* 16,04:1 */
   --fg-2: #435261; /*  7,08:1 */
   --fg-3: #55636f; /*  5,45:1 — só metadado */
-  --on-brand: #ffffff;
+  /* Tinta escura sobre o verde, como no escuro: o branco do Flutter dava
+     2,71:1 sobre #00b37e — abaixo do AA no rótulo de todo botão primário. */
+  --on-brand: #04231a; /* 6,15:1 sobre --brand */
   --on-fill-dark: #0e1621;
   --on-fill-light: #ffffff;
   --positive: #0a6e52;
