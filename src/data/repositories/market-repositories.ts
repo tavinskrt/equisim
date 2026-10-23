@@ -20,7 +20,7 @@ import {
   TimeBasis,
 } from '../../core';
 import type {
-  CacheDatabase,
+  MarketCache,
   CachedFundamentals,
   CachedProfile,
   FundamentalsUpsert,
@@ -47,7 +47,7 @@ async function tryCache<T>(operation: () => Promise<T>): Promise<T | null> {
   }
 }
 
-async function freshIn(db: CacheDatabase | null, key: string, ttl: Parameters<CacheDatabase['isFresh']>[1]): Promise<boolean> {
+async function freshIn(db: MarketCache | null, key: string, ttl: Parameters<MarketCache['isFresh']>[1]): Promise<boolean> {
   if (db === null) return false;
   return (await tryCache(() => db.isFresh(key, ttl))) ?? false;
 }
@@ -58,13 +58,13 @@ export class PriceRepositoryImpl implements PriceRepository {
   readonly remote: BrapiDatasource;
 
   /** `null` quando o cache não pôde ser inicializado. Tudo passa a vir da rede. */
-  readonly cache: CacheDatabase | null;
+  readonly cache: MarketCache | null;
 
   /**
    * Declara o repositório. Passar `cache: null` desliga o cache sem alterar
    * o comportamento observável, só o desempenho.
    */
-  constructor(args: { remote: BrapiDatasource; cache: CacheDatabase | null }) {
+  constructor(args: { remote: BrapiDatasource; cache: MarketCache | null }) {
     this.remote = args.remote;
     this.cache = args.cache;
   }
@@ -306,9 +306,9 @@ export class FundamentalsRepositoryImpl implements FundamentalsRepository {
    * **O universo de tickers não passa por aqui**: `universe()` delega direto
    * ao remoto, sem cache.
    */
-  readonly cache: CacheDatabase | null;
+  readonly cache: MarketCache | null;
 
-  constructor(args: { remote: BrapiDatasource; cache: CacheDatabase | null }) {
+  constructor(args: { remote: BrapiDatasource; cache: MarketCache | null }) {
     this.remote = args.remote;
     this.cache = args.cache;
   }
@@ -419,9 +419,9 @@ export class MacroRepositoryImpl implements MacroRepository {
   readonly remote: BcbDatasource;
 
   /** Cache local, ou `null` quando indisponível. */
-  readonly cache: CacheDatabase | null;
+  readonly cache: MarketCache | null;
 
-  constructor(args: { remote: BcbDatasource; cache: CacheDatabase | null }) {
+  constructor(args: { remote: BcbDatasource; cache: MarketCache | null }) {
     this.remote = args.remote;
     this.cache = args.cache;
   }

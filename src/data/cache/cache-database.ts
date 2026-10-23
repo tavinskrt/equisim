@@ -87,6 +87,28 @@ export interface CachedMacroRate {
 }
 
 /**
+ * O que os repositórios de mercado usam do cache. É a forma pública de
+ * [CacheDatabase], e existe para as ferramentas de `tool/`, que no Node gravam
+ * no SQLite com as tabelas do cache do aplicativo Flutter — e assim leem o
+ * `validation_cache.sqlite` que as execuções em Dart deixaram.
+ */
+export type MarketCache = Pick<
+  CacheDatabase,
+  | 'isFresh'
+  | 'touch'
+  | 'invalidate'
+  | 'pricesIn'
+  | 'upsertPrices'
+  | 'deletePricesOf'
+  | 'fundamentalsOf'
+  | 'upsertFundamentals'
+  | 'profileOf'
+  | 'upsertProfile'
+  | 'macroIn'
+  | 'upsertMacro'
+>;
+
+/**
  * Cache local das séries de mercado.
  *
  * Substitui o banco SQLite do aplicativo anterior por linhas agrupadas em um

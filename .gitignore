@@ -188,3 +188,6 @@ data/b3/
 # gravados.
 docs/validacao/gabarito_cascata.json
 data/gabarito/
+
+# Build da web (Vite)
+/dist/
