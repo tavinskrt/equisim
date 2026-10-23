@@ -1,13 +1,22 @@
 {
-  "name": "equisim-devtools",
-  "version": "1.0.0",
+  "name": "equisim",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "Cadeia de ferramentas de QA do Equisim (agente Gemini de auditoria financeira e de responsividade). NAO faz parte do runtime Flutter/Dart nem do deploy do Firebase Functions.",
+  "description": "Equisim: avaliação de ações da B3 por DCF/CAPM, meta patrimonial e simulação histórica de carteiras. Aplicação web em TypeScript (React + Vite), com o motor financeiro em src/core.",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:core": "vitest run test/core",
+    "test:parity": "vitest run test/parity",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
+    "tool": "tsx tool/run.ts",
     "qa:gemini": "tsx scripts/gemini-qa.ts --diff",
     "qa:staged": "tsx scripts/gemini-qa.ts --staged",
     "qa:file": "tsx scripts/gemini-qa.ts --file",
@@ -19,28 +28,60 @@
     "conselho": "tsx scripts/advisor.ts",
     "conselho:dry": "tsx scripts/advisor.ts --dry-run",
     "estado": "node scripts/gerar-estado.mjs",
-    "ui:capturar": "flutter test test/ui/golden_capture.dart --update-goldens",
-    "typecheck": "tsc --noEmit"
+    "ui:capturar": "tsx scripts/capture-screens.ts"
   },
   "scriptsComments": {
     "$aviso": "npm nao suporta comentario em scripts; este bloco e ignorado pelo npm e serve de documentacao.",
+    "dev": "Servidor de desenvolvimento do Vite, em http://localhost:5173. Sem Firebase configurado, o aplicativo abre em modo local (dados no navegador).",
+    "build": "Verificacao de tipos do aplicativo e build de producao em dist/, pronto para o Firebase Hosting.",
+    "test": "Suite inteira do Vitest: nucleo, paridade com o motor Dart original, dados, auditoria, ferramentas e interface.",
+    "test:parity": "Compara o motor TypeScript com o gabarito gravado do motor Dart original (test/parity/golden/), numero a numero.",
+    "typecheck": "Verificacao estatica do aplicativo (tsconfig.json) e das ferramentas de Node -- scripts de QA e tool/ (tsconfig.node.json).",
+    "tool": "Executa uma ferramenta de medicao ou empacotamento. Ex.: npm run tool -- premio-implicito. Sem argumento, lista as ferramentas.",
     "qa:gemini": "Auditoria do diff contra HEAD~1, pela assinatura Google AI Pro (agy). E o comando canonico -- o que o CLAUDE.md exige antes de concluir tarefa, e o que o pre-push executa. Em terminal pergunta o modelo; em hook usa o padrao.",
     "qa:staged": "Auditoria do que esta em staging. Util para revisar antes de commitar pelo GitHub Desktop.",
-    "qa:file": "Exige argumento apos --. Ex.: npm run qa:file -- lib/presentation/shared/ui_kit.dart",
+    "qa:file": "Exige argumento apos --. Ex.: npm run qa:file -- src/core/services/valuation/dcf.ts",
     "qa:pending": "Audita o que ficou na fila por falta de cota. Cada entrada guarda o payload exato que foi liberado, entao a reauditoria examina o mesmo codigo, nao o HEAD atual.",
-    "qa:visual": "Auditoria visual multimodal. Exige argumento apos --. Ex.: npm run qa:visual -- docs/telas/backtest-320.png",
+    "qa:visual": "Auditoria visual multimodal. Exige argumento apos --. Ex.: npm run qa:visual -- docs/telas/simulacao-320.png",
     "qa:api": "Mesma auditoria pela API key. Schema forcado pelo servidor e temperature 0, portanto o mais reproduzivel -- mas 20 requisicoes/dia no tier gratuito.",
     "qa:dry": "Monta o payload e imprime sem chamar o modelo. Custo zero -- use para conferir o que seria enviado.",
     "conselho": "CONSELHEIRO -- o segundo agente. Le o projeto por lente e propoe; nao bloqueia nada e sai SEMPRE com codigo 0. Exige --lente. Ex.: npm run conselho -- --lente registro. Sem argumento, lista as lentes.",
     "conselho:dry": "Monta o payload de uma lente e imprime, sem chamar o modelo. Ex.: npm run conselho:dry -- --lente nucleo",
     "estado": "Regenera docs/estado.md a partir do repositorio. O arquivo e DERIVADO: nao edite a mao -- se um numero sair errado, o conserto e em scripts/gerar-estado.mjs.",
-    "ui:capturar": "Gera as 42 capturas em docs/telas/ (7 telas x 3 larguras x 2 temas, entre elas a edicao do valuation aberta e ja editada) para a lente `tela`. NAO e teste de regressao visual: nada aqui reprova, o objetivo e produzir as imagens. Carrega Roboto e MaterialIcons do SDK -- sem elas o texto sai em caixas e a analise fica enganosa.",
-    "typecheck": "Verificacao estatica dos scripts de QA. Nao toca no codigo Dart."
+    "ui:capturar": "Gera as capturas de tela em docs/telas/ (telas x larguras x temas) com o Chromium do Playwright, para a lente `tela`. NAO e teste de regressao visual: nada aqui reprova."
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "firebase": "^13.1.0",
+    "idb-keyval": "^6.3.0",
+    "katex": "^0.19.0",
+    "lucide-react": "^1.61.0",
+    "motion": "^14.6.0",
+    "radix-ui": "^1.8.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router": "^7.18.4",
+    "recharts": "^3.10.1",
+    "tailwind-merge": "^3.7.0",
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
     "@google/genai": "^2.19.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^26.4.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "jsdom": "^30.1.3",
+    "tailwindcss": "^4.3.3",
     "tsx": "^4.23.12",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
   }
 }
