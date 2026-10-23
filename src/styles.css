@@ -60,6 +60,11 @@
   --div-mid: #36434d;
   --div-high: #e5604f;
   --grid: #1d262e;
+  /* Sintaxe do JSON no painel de logs: as cores do console do Flutter. */
+  --json-key: #7fd1ff;
+  --json-string: #b6e3a8;
+  --json-number: #ffc48a;
+  --json-bool: #d8a6ff;
 }
 
 :root[data-theme='light'] {
@@ -103,6 +108,10 @@
   --div-mid: #dce3e9;
   --div-high: #c8372d;
   --grid: #e8ecf1;
+  --json-key: #0a6c9e;
+  --json-string: #23692a;
+  --json-number: #9a4a06;
+  --json-bool: #7b1fa2;
 }
 
 @theme inline {
@@ -137,6 +146,10 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
   --color-chart-6: var(--chart-6);
+  --color-json-key: var(--json-key);
+  --color-json-string: var(--json-string);
+  --color-json-number: var(--json-number);
+  --color-json-bool: var(--json-bool);
 
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;

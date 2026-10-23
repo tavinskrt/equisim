@@ -29,4 +29,11 @@ export function Tooltip(props: { content: ReactNode; children: ReactNode; side?:
   );
 }
 
-export const TooltipProvider = T.Provider;
+/** O provedor das dicas: um só, na raiz — o Radix exige, e ele sincroniza o atraso entre dicas vizinhas. */
+export function TooltipProvider({ children }: { children: ReactNode }) {
+  return (
+    <T.Provider delayDuration={350} skipDelayDuration={250}>
+      {children}
+    </T.Provider>
+  );
+}

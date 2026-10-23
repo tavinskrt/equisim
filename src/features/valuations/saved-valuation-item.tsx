@@ -31,8 +31,12 @@ const stamp = (r: ManualValuationRecord) => `${Fmt.date(r.savedAt)} ${Fmt.time(r
  */
 export function SavedValuationItem(props: {
   record: ManualValuationRecord;
-  /** A via da avaliação de hoje, para decidir se reabrir é possível; `null` sem avaliação. */
-  todayLane: ValuationLane | null;
+  /**
+   * A via da avaliação de hoje, para decidir se reabrir é possível; `null` sem
+   * avaliação. `'unknown'` quando a lista não avaliou o ativo — a edição confere
+   * a via ao abrir e avisa se ela mudou.
+   */
+  todayLane: ValuationLane | null | 'unknown';
   showTicker?: boolean;
 }) {
   const { record } = props;
@@ -43,7 +47,7 @@ export function SavedValuationItem(props: {
   const upside = record.upside;
   const delta = record.engineDelta;
   const changed = record.changedFields;
-  const canReopen = props.todayLane !== null && props.todayLane === record.lane;
+  const canReopen = props.todayLane === 'unknown' || (props.todayLane !== null && props.todayLane === record.lane);
 
   const summary = [
     stamp(record),
