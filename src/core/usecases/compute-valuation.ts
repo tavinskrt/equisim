@@ -858,7 +858,9 @@ function evaluate(
       seed: options.seed ?? 42,
     });
   } catch (e) {
-    const name = e instanceof Error ? e.constructor.name : typeof e;
+    // `name`, e não `constructor.name`: o build minificado renomeia classes,
+    // e os erros do núcleo declaram o nome do tipo do Dart (lang/num).
+    const name = e instanceof Error ? e.name : typeof e;
     const stack = e instanceof Error ? (e.stack ?? String(e)) : String(e);
     audit?.abort(`Exceção não tratada na cascata: ${String(e)}`, {
       extra: {

@@ -59,3 +59,11 @@ export function traceStep(ev: AuditEvent, prefix: string): CalculationTrace {
   expect(found, `passo «${prefix}» no rastro`).toHaveLength(1);
   return found[0]!;
 }
+
+/** `expect(actual, isNot(closeTo(expected, delta)))`. */
+export function expectNotClose(actual: number, expected: number, delta: number, reason?: string): void {
+  const why = reason === undefined ? '' : ` (${reason})`;
+  expect(Math.abs(actual - expected) <= delta, `não deveria estar a ${delta} de ${expected}, obtido ${actual}${why}`).toBe(
+    false,
+  );
+}
