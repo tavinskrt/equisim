@@ -1,0 +1,7 @@
+name: parity_oracle
+publish_to: none
+environment:
+  sdk: ^3.5.0
+dependencies:
+  equisim_core:
+    path: ../../../packages/equisim_core
