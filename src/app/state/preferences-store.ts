@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 import { type BacktestSettings, clampWindowYears, defaultBacktestSettings } from '../backtest';
-import { getRuntime, hasRuntime } from '../runtime';
+import { browserPreferences, getRuntime, hasRuntime, type PreferenceStorage } from '../runtime';
 import { defaultValuationSettings, type ValuationSettings } from '../valuation';
 import { useSession } from './session-store';
 
@@ -27,14 +27,22 @@ export interface PreferencesState {
 
 const keys = { mode: 'equisim:modo', theme: 'equisim:tema' } as const;
 
+/**
+ * Onde as preferências moram: as do ambiente montado, ou as do navegador na
+ * janela do painel de logs, que sobe sem a raiz de dependências.
+ */
+function storage(): PreferenceStorage {
+  return hasRuntime() ? getRuntime().preferences : browserPreferences;
+}
+
 function initialTheme(): ThemeMode {
   // O aplicativo abre no escuro, como o Flutter, salvo escolha guardada.
-  const stored = hasRuntime() ? getRuntime().preferences.get(keys.theme) : null;
+  const stored = storage().get(keys.theme);
   return stored === 'light' ? 'light' : 'dark';
 }
 
 function initialMode(): DetailMode {
-  const stored = hasRuntime() ? getRuntime().preferences.get(keys.mode) : null;
+  const stored = storage().get(keys.mode);
   return stored === 'analyst' ? 'analyst' : 'guided';
 }
 
@@ -53,7 +61,7 @@ export const PreferencesActions = {
 
   setMode(mode: DetailMode): void {
     usePreferences.setState({ mode });
-    if (hasRuntime()) getRuntime().preferences.set(keys.mode, mode);
+    storage().set(keys.mode, mode);
   },
 
   /**
@@ -62,9 +70,9 @@ export const PreferencesActions = {
    */
   setTheme(theme: ThemeMode): void {
     usePreferences.setState({ theme });
+    storage().set(keys.theme, theme);
     if (!hasRuntime()) return;
     const runtime = getRuntime();
-    runtime.preferences.set(keys.theme, theme);
     const { user, local } = useSession.getState();
     if (user !== null && !local && runtime.auth !== null) {
       runtime.auth.writeThemePreference(user.uid, theme === 'light').catch(() => {

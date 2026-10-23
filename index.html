@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Equisim: avaliação de ações da B3 por fluxo de caixa descontado, meta patrimonial e simulação histórica de carteiras." />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0B1116" />
+    <title>Equisim</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+    />
+    <script>
+      // O tema é aplicado antes da primeira pintura: sem isto, quem escolheu o
+      // claro veria um clarão escuro a cada recarga. O acesso ao armazenamento
+      // pode lançar (janela privada, dados de site bloqueados), e aí vale o
+      // escuro, que é o padrão.
+      (function () {
+        try {
+          var t = localStorage.getItem('equisim:tema');
+          if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>O Equisim precisa de JavaScript para calcular.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

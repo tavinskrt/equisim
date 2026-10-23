@@ -1,4 +1,5 @@
 import {
+  err,
   EvaluateGoalAlignment,
   ExpectedReturn,
   type FeasibilityVerdict,
@@ -7,6 +8,7 @@ import {
   type GoalAlignment,
   type Portfolio,
   PrepareValuationInputs,
+  type Result,
   RequiredReturnSolver,
   type Ticker,
   TransversalSignals,
@@ -53,6 +55,20 @@ export async function valuate(
   ticker: Ticker,
   settings: ValuationSettings = defaultValuationSettings,
 ): Promise<ValuationResult | null> {
+  const outcome = await valuateOutcome(services, ticker, settings);
+  return outcome.isOk ? outcome.unwrap() : null;
+}
+
+/**
+ * A avaliação **com o motivo da recusa**: a tela diz por que um ativo ficou
+ * sem preço justo (fora da Porta 0, sem cotação, demonstrativo curto) em vez
+ * de um traço mudo.
+ */
+export async function valuateOutcome(
+  services: Services,
+  ticker: Ticker,
+  settings: ValuationSettings = defaultValuationSettings,
+): Promise<Result<ValuationResult>> {
   const [anchors, capital, premium, curve, officialShares, distressed, stateControlled, concessionEnd, dividends, betaPrior, declaredSharesPerUnit, peerMultiples] =
     await Promise.all([
       services.marketAnchors(),
@@ -112,7 +128,7 @@ export async function valuate(
     shareEvents: capital.shareEvents,
     shareIssues: capital.issues,
   });
-  if (inputs.isErr) return null;
+  if (inputs.isErr) return err(inputs.failureOrNull!);
 
   // O que a cascata não enxerga — CVM ausente ou defasada, curva ausente,
   // prior ausente, prêmio parametrizado. **Entram antes da cascata** (item
@@ -131,7 +147,7 @@ export async function valuate(
     monteCarlo: settings.monteCarlo,
     samples: settings.samples,
   });
-  return result.isOk ? result.unwrap() : null;
+  return result;
 }
 
 /**

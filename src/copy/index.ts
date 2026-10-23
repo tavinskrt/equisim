@@ -7,3 +7,5 @@ export * from './fmt';
 export * from './manual-copy';
 export * from './normalization-copy';
 export * from './skill-copy';
+export * from './band-copy';
+export * from './verdict-copy';
