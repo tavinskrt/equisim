@@ -19,6 +19,9 @@ export default defineConfig({
   },
   build: {
     target: 'es2023',
+    // Os bundles com hash vão para /static: /assets é dos pacotes de dados
+    // versionados (public/assets), que não têm hash e pedem outro cache.
+    assetsDir: 'static',
     sourcemap: true,
     chunkSizeWarningLimit: 1500,
   },
