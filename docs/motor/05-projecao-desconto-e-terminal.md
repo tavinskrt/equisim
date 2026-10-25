@@ -5,9 +5,9 @@ As fórmulas do fluxo de caixa descontado, como o código as executa. Estudo:
 [cap. 4, seções 4.6 a 4.9](../estudo/04-fluxo-de-caixa-descontado.md). Cada
 fórmula abaixo é refeita com números nos [casos](../estudo/casos/).
 
-Código: [dcf.dart](../../packages/equisim_core/lib/src/services/valuation/dcf.dart)
+Código: [dcf.ts](../../src/core/services/valuation/dcf.ts)
 (`DcfAssumptions`, `DcfCalculator`) e
-[compute_valuation.dart, `_assumptions`, `_discountFromBalanceSheet`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart).
+[compute-valuation.ts, `assumptions`, `discountFromBalanceSheet`](../../src/core/usecases/compute-valuation.ts).
 
 ---
 
@@ -48,7 +48,7 @@ capital_1 = lucro_1 ÷ ROIC_base;   capital_t = capital_{t−1} + b_t × lucro_t
 ```
 
 O fator **acumula** as taxas de cada ano; não eleva uma taxa só a `t`
-(`DcfCalculator._project`).
+(`project`, em dcf.ts).
 
 ---
 
@@ -57,7 +57,7 @@ O fator **acumula** as taxas de cada ano; não eleva uma taxa só a `t`
 | Forma | Quando | Fórmula | Função | Evidência |
 |---|---|---|---|---|
 | **Retorno neutro** (padrão) | sem vantagem residual | `VT = lucro_{N+1} ÷ r∞` — o crescimento sai da conta (RONIC = r∞) | `terminalValue` | McKinsey, "value driver formula" com RONIC = WACC |
-| **Vantagem residual** | veredito concedido | `ROIC∞ = r∞ + φ^N·(ROIC_ciclo − r∞)`; `VT = lucro_{N+1}·(1 − g∞/ROIC∞) ÷ (r∞ − g∞)`, com `r∞ − g∞ ≥ 0,5 p.p.` | `terminalValue`, [growth_guards.dart, `residualMoat`](../../packages/equisim_core/lib/src/services/valuation/growth_guards.dart) | decisão 36; Mauboussin e Johnson (1997) |
+| **Vantagem residual** | veredito concedido | `ROIC∞ = r∞ + φ^N·(ROIC_ciclo − r∞)`; `VT = lucro_{N+1}·(1 − g∞/ROIC∞) ÷ (r∞ − g∞)`, com `r∞ − g∞ ≥ 0,5 p.p.` | `terminalValue`, [growth-guards.ts, `residualMoat`](../../src/core/services/valuation/growth-guards.ts) | decisão 36; Mauboussin e Johnson (1997) |
 | **Concessão com prazo lido** | retorno neutro, contrato que acaba M anos depois do horizonte | `VT = capital_N + EVA_{N+1}·(1 − (1 + r∞)^−M) ÷ r∞`, `EVA_{N+1} = lucro_{N+1} − r∞·capital_N` | `terminalValue` | decisões 50 e 88 |
 
 **O veredito da vantagem residual** barra quando: há contrato com prazo
@@ -119,7 +119,7 @@ preço justo     = capital próprio ÷ papéis da ponte
 - **A identidade:** com alavancagem constante e pesos do próprio modelo,
   `FCFE_{N+1} = E·(Ke − g)`, e o terminal do acionista é o terminal da firma
   menos a dívida; as duas rotas coincidem dentro de 10⁻⁶ com as taxas
-  resolvidas (decisão 43, teste em `levered_rates_test.dart`).
+  resolvidas (decisão 43, teste em `levered-rates.test.ts`).
 
 **O rastro desta conta** (painel de logs) tem, desde 28/09/2026 (item B35), três
 passos: a projeção do fluxo da firma (onde o WACC é só o alvo do retorno), o
@@ -139,7 +139,7 @@ não era a soma das parcelas.
 | Participação do capital próprio | `E ÷ EV` | `equityShare` |
 | Upside | `(justo − preço) ÷ preço` | `ValuationResult.upside` |
 | Preço com margem | `justo × (1 − margem)`; margem zero por padrão no aplicativo | `ValuationResult` |
-| Taxa exibida | a do ano 1 (`discountRateAt(1)`) | `_withScenarios` |
+| Taxa exibida | a do ano 1 (`discountRateAt(1)`) | `withScenarios` |
 
 ## Limitações deste capítulo
 

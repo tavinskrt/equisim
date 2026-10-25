@@ -164,8 +164,8 @@ function materialBlocks(root: string, material: Material): Block[] {
             '===== ARVORE COMPLETA DO REPOSITORIO =====\n' +
             'TODOS os arquivos versionados' +
             (exclude.length > 0
-              ? `, exceto os diretorios de plataforma (${exclude.join(' ')}),\n` +
-                'que o `flutter create` gera e ninguem edita a mao.\n'
+              ? `, exceto ${exclude.join(' ')},\n` +
+                'que nao carregam decisao deste projeto.\n'
               : '.\n') +
             'Esta lista e COMPLETA no escopo declarado: se um caminho nao esta\n' +
             'aqui, ele nao esta no repositorio. O conteudo dos arquivos nao foi\n' +

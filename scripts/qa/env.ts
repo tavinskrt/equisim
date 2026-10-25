@@ -6,11 +6,12 @@
  *   2. `.env.qa` na raiz                 (arquivo exclusivo de ferramentas)
  *   3. `.env` na raiz                    (ACEITO, MAS COM AVISO -- ver abaixo)
  *
- * Por que o aviso no caso 3: o `pubspec.yaml` do Equisim declara `.env` como
- * asset do Flutter (`assets: - .env`). Todo asset e empacotado no bundle da
- * aplicacao e, em `flutter build web`, fica publicamente legivel. Uma chave do
- * Gemini colocada la vaza para qualquer visitante. O arquivo `.env.qa` existe
- * exatamente para separar credencial de ferramenta de credencial de runtime.
+ * Por que o aviso no caso 3: o `.env` da raiz e o arquivo que o Vite le no
+ * build, e toda variavel `VITE_*` dele vai para o bundle publico. A
+ * `GEMINI_API_KEY` sem prefixo nao vai -- mas basta alguem renomea-la, ou
+ * copiar o `.env` para um servidor de build, para a chave vazar. O arquivo
+ * `.env.qa` existe exatamente para separar credencial de ferramenta de
+ * credencial de runtime, e o Vite nem o abre.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -24,8 +25,7 @@ export interface ApiKeyResolution {
   /**
    * Alerta de origem insegura, quando houver.
    *
-   * Preenchido no caso do `.env`, que o `pubspec.yaml` declara como asset do
-   * Flutter e portanto vaza no bundle web.
+   * Preenchido no caso do `.env`, que e o arquivo de ambiente do build web.
    */
   warning?: string;
 }
@@ -87,9 +87,9 @@ export function resolveApiKey(repoRoot: string): ApiKeyResolution {
         apiKey: value,
         source: '.env',
         warning:
-          'A GEMINI_API_KEY foi lida de `.env`, que o pubspec.yaml declara como ASSET do Flutter.\n' +
-          '  Em `flutter build web` esse arquivo e embarcado no bundle publico e a chave vaza.\n' +
-          '  Mova a chave para `.env.qa` (ignorado pelo git e nao declarado como asset).',
+          'A GEMINI_API_KEY foi lida de `.env`, o arquivo de ambiente do build web (Vite).\n' +
+          '  Toda variavel VITE_* dele vai para o bundle publico, e a chave fica a um prefixo de vazar.\n' +
+          '  Mova a chave para `.env.qa` (ignorado pelo git e nunca lido pelo Vite).',
       };
     }
   }
@@ -99,7 +99,7 @@ export function resolveApiKey(repoRoot: string): ApiKeyResolution {
       'Defina-a em uma destas fontes (nesta ordem de preferencia):\n' +
       '  1. variavel de ambiente:  $env:GEMINI_API_KEY = "..."   (PowerShell)\n' +
       '  2. arquivo `.env.qa` na raiz:  GEMINI_API_KEY=...\n' +
-      '  3. arquivo `.env` na raiz (NAO recomendado: e asset do Flutter)\n' +
+      '  3. arquivo `.env` na raiz (NAO recomendado: e o ambiente do build web)\n' +
       'Obtenha a chave em https://aistudio.google.com/apikey',
   );
 }

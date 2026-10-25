@@ -24,7 +24,7 @@ mediana quase sempre: para o retorno do ciclo, para o crescimento, para a
 alíquota, para os múltiplos dos pares. Estatísticas que um valor extremo não
 consegue arrastar se chamam **robustas**.
 
-**No código:** [inference.dart, `median`](../../packages/equisim_core/lib/src/services/valuation/inference.dart).
+**No código:** [inference.ts, `median`](../../src/core/services/valuation/inference.ts).
 
 ---
 

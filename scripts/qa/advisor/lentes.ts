@@ -73,8 +73,15 @@ export interface Lens {
   needsScreenshots?: boolean;
 }
 
-/** Artefatos gerados: auditar `.g.dart` so gasta token. Mesmo criterio do auditor. */
-const GENERATED = ['*.g.dart', '*.freezed.dart', '*.mocks.dart'];
+/**
+ * Artefatos gerados: auditar declaracao de tipo gerada so gasta token. Mesmo
+ * criterio do auditor. O TypeScript nao tem o `build_runner` do Dart, entao
+ * sobra so o `.d.ts`.
+ */
+const GENERATED = ['*.d.ts'];
+
+/** Codigo TypeScript, com e sem JSX. */
+const TS = ['.ts', '.tsx'];
 
 /**
  * O que a lente `metodo` le antes de tudo, na ordem do que mais pesa no preco
@@ -82,20 +89,20 @@ const GENERATED = ['*.g.dart', '*.freezed.dart', '*.mocks.dart'];
  * o DCF e as guardas do crescimento, e so depois o resto.
  */
 const METHOD_FIRST = [
-  'packages/equisim_core/lib/src/usecases/compute_valuation.dart',
-  'packages/equisim_core/lib/src/services/valuation/cost_of_capital.dart',
-  'packages/equisim_core/lib/src/services/valuation/implied_premium.dart',
-  'packages/equisim_core/lib/src/services/valuation/levered_rates.dart',
-  'packages/equisim_core/lib/src/services/valuation/dcf.dart',
-  'packages/equisim_core/lib/src/services/valuation/growth_guards.dart',
-  'packages/equisim_core/lib/src/usecases/prepare_valuation_inputs.dart',
-  'packages/equisim_core/lib/src/services/valuation/yield_curve.dart',
-  'packages/equisim_core/lib/src/services/valuation/growth_estimator.dart',
-  'packages/equisim_core/lib/src/services/valuation/capital_base.dart',
-  'packages/equisim_core/lib/src/services/valuation/moat_fixed_point.dart',
-  'packages/equisim_core/lib/src/services/valuation/scenario_engine.dart',
-  'packages/equisim_core/lib/src/usecases/resolve_beta_prior.dart',
-  'packages/equisim_core/lib/src/usecases/portfolio_usecases.dart',
+  'src/core/usecases/compute-valuation.ts',
+  'src/core/services/valuation/cost-of-capital.ts',
+  'src/core/services/valuation/implied-premium.ts',
+  'src/core/services/valuation/levered-rates.ts',
+  'src/core/services/valuation/dcf.ts',
+  'src/core/services/valuation/growth-guards.ts',
+  'src/core/usecases/prepare-valuation-inputs.ts',
+  'src/core/services/valuation/yield-curve.ts',
+  'src/core/services/valuation/growth-estimator.ts',
+  'src/core/services/valuation/capital-base.ts',
+  'src/core/services/valuation/moat-fixed-point.ts',
+  'src/core/services/valuation/scenario-engine.ts',
+  'src/core/usecases/resolve-beta-prior.ts',
+  'src/core/usecases/portfolio-usecases.ts',
 ];
 
 /**
@@ -103,27 +110,20 @@ const METHOD_FIRST = [
  * tela que o consome.
  *
  * **A ordem e a do corte**, como em [METHOD_FIRST]. Ate 11/10/2026 a lente
- * lia `packages/equisim_core/lib` em ordem alfabetica, e o corte caia antes de
- * `services/valuation/`: a conta congelada do calculo do usuario (decisao 147)
+ * lia o nucleo (entao `packages/equisim_core/lib`, em Dart) em ordem
+ * alfabetica, e o corte caia antes de `services/valuation/`: a conta congelada do calculo do usuario (decisao 147)
  * nunca chegava a ela, que respondia "nenhuma tensao" sem a ter lido. E a
  * pergunta dela -- que regra de negocio vazou para a apresentacao -- nao tinha
  * como ser respondida sem a tela: a do valuation e a que mais monta numero a
  * partir do dominio.
  */
 const CORE_FIRST = [
-  'packages/equisim_core/lib/src/entities/valuation.dart',
-  'packages/equisim_core/lib/src/services/valuation/manual_valuation.dart',
-  'lib/presentation/valuation/manual_copy.dart',
-  'lib/presentation/valuation/manual_valuation_page.dart',
-  'lib/presentation/shared/domain_copy.dart',
+  'src/core/entities/valuation.ts',
+  'src/core/services/valuation/manual-valuation.ts',
+  'src/copy/manual-copy.ts',
+  'src/features/manual/manual-page.tsx',
+  'src/copy/domain-copy.ts',
 ];
-
-/**
- * Diretorios de plataforma, gerados pelo `flutter create` e quase nunca
- * tocados a mao. Sao 120 dos 326 arquivos versionados e nao carregam decisao
- * alguma deste projeto.
- */
-const PLATFORMS = ['android/', 'ios/', 'web/', 'windows/', 'macos/', 'linux/'];
 
 export const LENSES: Record<LensId, Lens> = {
   // -------------------------------------------------------------------------
@@ -242,7 +242,11 @@ export const LENSES: Record<LensId, Lens> = {
       // cumprida" com toda a razao, sobre um repositorio que nunca viu inteiro.
       // Aconteceu: `tool/` e `functions/` ficaram de fora de uma lista de
       // raizes e viraram duas tensoes ESTRUTURAL falsas.
-      { kind: 'arvore-completa', excludePrefixes: PLATFORMS },
+      //
+      // Os diretorios de plataforma do Flutter (`android/`, `ios/`...), que
+      // ficavam de fora por nao carregar decisao alguma, sairam do repositorio
+      // com a decisao 152: a arvore agora vai sem excecao.
+      { kind: 'arvore-completa' },
       { kind: 'git-log', count: 40 },
       { kind: 'diretorio', filePath: 'docs/apontamentos', extensions: ['.md'], optional: true },
       { kind: 'arquivo', filePath: 'PLANO_ARQUITETURA.md' },
@@ -266,8 +270,12 @@ export const LENSES: Record<LensId, Lens> = {
       'de erro por construcao, em vez de por validacao?',
     ].join('\n'),
     discipline: [
-      'PROIBIDO sugerir pacote de terceiros dentro de `equisim_core`. A pureza',
-      '  e travada pelo teste `purity_test.dart` e nao esta em negociacao.',
+      'PROIBIDO sugerir pacote de terceiros dentro de `src/core`. A pureza',
+      '  e travada pelo teste `test/core/purity.test.ts` e nao esta em negociacao.',
+      '`src/core/lang/` e o runtime que reproduz a semantica do Dart (`DateTime`,',
+      '  `round`, `mod`, `Random`) para o porte 1:1 da decisao 152. Ele e',
+      '  infraestrutura do porte, e nao entidade: nao proponha trocar o',
+      '  `DateTime` dele por `Date` sem mostrar um numero que mude.',
       'Toda proposta cita arquivo e tipo que EXISTEM no material.',
       'NAO proponha renomear por gosto. Nome so entra em tensao quando ele',
       '  descreve coisa diferente do que o tipo faz.',
@@ -301,16 +309,16 @@ export const LENSES: Record<LensId, Lens> = {
     materials: [
       {
         kind: 'alterados',
-        roots: ['packages/equisim_core/lib', 'lib/presentation'],
-        extensions: ['.dart'],
+        roots: ['src/core', 'src/copy', 'src/features'],
+        extensions: TS,
         exclude: GENERATED,
       },
       ...CORE_FIRST.map((filePath) => ({ kind: 'arquivo' as const, filePath })),
-      { kind: 'arquivo', filePath: 'test/core/purity_test.dart' },
+      { kind: 'arquivo', filePath: 'test/core/purity.test.ts' },
       {
         kind: 'diretorio',
-        filePath: 'packages/equisim_core/lib',
-        extensions: ['.dart'],
+        filePath: 'src/core',
+        extensions: TS,
         exclude: [...GENERATED, ...CORE_FIRST],
       },
       { kind: 'diretorio', filePath: 'docs/decisoes', extensions: ['.md'], optional: true },
@@ -330,15 +338,17 @@ export const LENSES: Record<LensId, Lens> = {
       'Toda tensao e confrontada com uma DECISAO registrada. Divergencia entre',
       '  decisao e codigo e achado; ausencia de recurso que ninguem decidiu,',
       '  nao e.',
-      'NAO proponha trocar de biblioteca de rede ou de banco local. Dio e Drift',
-      '  sao decisao registrada.',
+      'NAO proponha trocar de cliente de rede ou de banco local. O cliente',
+      '  proprio sobre `fetch` (`src/data/network/`), o cache em IndexedDB',
+      '  (`idb-keyval`) e o Firestore sao decisao registrada: a 152 os pos no',
+      '  lugar do Dio e do Drift, com os mesmos interceptores.',
       'NAO especule sobre comportamento da API que o material nao demonstre.',
       'O RetryInterceptor reemite pelo mesmo cliente e passa de novo pelo',
       '  ThrottleInterceptor, e isso NAO e deadlock: o onError dos',
       '  interceptores corre na ordem de insercao, e o limitador libera a vaga',
       '  antes de o repetidor reemitir. Apontado quatro vezes e conferido',
       '  quatro vezes; o teste "rajada acima do teto de concorrencia, toda com',
-      '  429, nao trava" em test/data/network_and_quality_test.dart o prova, e',
+      '  429, nao trava" em test/data/network-and-quality.test.ts o prova, e',
       '  reprova quando a liberacao sai. So reaponte mostrando o caminho que',
       '  aquele teste nao cobre.',
       'O custo de um dado velho no cache depende de QUEM O LE, e quem le esta',
@@ -353,12 +363,12 @@ export const LENSES: Record<LensId, Lens> = {
     materials: [
       {
         kind: 'diretorio',
-        filePath: 'lib/data',
-        extensions: ['.dart'],
+        filePath: 'src/data',
+        extensions: TS,
         exclude: GENERATED,
       },
       { kind: 'arquivo', filePath: 'functions/index.js' },
-      { kind: 'arquivo', filePath: 'test/data/network_and_quality_test.dart' },
+      { kind: 'arquivo', filePath: 'test/data/network-and-quality.test.ts' },
       { kind: 'arquivo', filePath: 'firestore.rules', optional: true },
       { kind: 'diretorio', filePath: 'docs/decisoes', extensions: ['.md'], optional: true },
     ],
@@ -406,12 +416,13 @@ export const LENSES: Record<LensId, Lens> = {
       '  nenhuma listada respeita. Recusado em 25/09/2026; so reaponte com uma',
       '  companhia avaliada que esteja no Presumido.',
       'PONTO FLUTUANTE NO DCF NAO E PREMISSA A REABRIR. Cotacao, contagem de',
-      '  papeis e valores do fluxo descontado em `double`, convertidos para',
+      '  papeis e valores do fluxo descontado em ponto flutuante (`number`;',
+      '  `double` no Dart de antes da decisao 152), convertidos para',
       '  `Money` uma vez, na fronteira, e o arranjo aceito pela regra R1 do',
       '  auditor ("NAO ACUSE -- caminho de calculo de fluxo descontado"): dez',
       '  iteracoes acumulam erro de 1e-14, e normalizar em centavos no meio',
       '  introduziria erro de meio centavo por ano. A acao inteira e regra da',
-      '  SIMULACAO, e a contagem de papeis em `double` serve a uma divisao.',
+      '  SIMULACAO, e a contagem de papeis fracionaria serve a uma divisao.',
       '  Levantado e recusado em 28/09/2026; tambem nao e tema desta lente,',
       '  que questiona premissa financeira, e nao tipo.',
     ],
@@ -432,20 +443,20 @@ export const LENSES: Record<LensId, Lens> = {
     materials: [
       {
         kind: 'alterados',
-        roots: ['packages/equisim_core/lib/src/services/valuation'],
-        extensions: ['.dart'],
+        roots: ['src/core/services/valuation'],
+        extensions: TS,
       },
       ...METHOD_FIRST.map((filePath) => ({ kind: 'arquivo' as const, filePath })),
       {
         kind: 'diretorio',
-        filePath: 'packages/equisim_core/lib/src/services/valuation',
-        extensions: ['.dart'],
+        filePath: 'src/core/services/valuation',
+        extensions: TS,
         exclude: METHOD_FIRST,
       },
       {
         kind: 'diretorio',
-        filePath: 'packages/equisim_core/lib/src/services/metrics',
-        extensions: ['.dart'],
+        filePath: 'src/core/services/metrics',
+        extensions: TS,
       },
       { kind: 'arquivo', filePath: 'docs/AUDITORIA_DE_CALCULOS.md' },
       {
@@ -472,10 +483,13 @@ export const LENSES: Record<LensId, Lens> = {
       'NAO peca cobertura por cobertura. Codigo trivial sem teste nao e risco;',
       '  caminho de dinheiro ou de erro sem teste, e.',
       'NAO conte testes. Numero de testes nao e medida de risco coberto.',
-      'O `compute` do Flutter roda sobre `Isolate.run`, que completa o Future',
-      '  com erro quando a isolate morre sem responder. Isolate morta em',
-      '  silencio NAO trava quem espera um `compute`; nao peca `onExit` em volta',
-      '  dele (em 01/10/2026 esta lente pediu, sobre o `ValuationRunner`).',
+      'O `ValuationRunner` (`src/data/runner/`) avalia num Web Worker, e no',
+      '  `error` e no `messageerror` do worker resolve quem espera com o recuo',
+      '  para o calculo em linha: worker morto NAO trava quem espera. Em',
+      '  01/10/2026 esta lente pediu um',
+      '  `onExit` em volta do `compute` do Flutter, que ja completava com erro',
+      '  pela `Isolate.run`; nao repita o pedido sobre o worker sem mostrar o',
+      '  caminho que fica sem resposta.',
       'A tolerancia da fonte a JSON de forma errada numa rota -- as outras rotas',
       '  continuam entregando os exercicios -- e escolha registrada no plano',
       '  (item D6 e historico de 25/09/2026), e o cache nao grava nulo por cima',
@@ -490,29 +504,31 @@ export const LENSES: Record<LensId, Lens> = {
     materials: [
       {
         kind: 'arvore',
-        roots: ['lib', 'packages/equisim_core/lib', 'test'],
+        roots: ['src', 'tool', 'test'],
       },
       // Os testes alterados antes do codigo alterado: o material desta lente e
-      // o teste, e o arquivo de codigo grande -- `compute_valuation.dart` tem
+      // o teste, e o arquivo de codigo grande -- `compute-valuation.ts` tem
       // um quarto do teto -- nao pode empurrar o teste novo para fora.
       {
         kind: 'alterados',
         roots: ['test'],
-        extensions: ['.dart'],
+        extensions: TS,
         exclude: GENERATED,
       },
       {
         kind: 'alterados',
-        roots: ['lib', 'packages/equisim_core/lib', 'tool'],
-        extensions: ['.dart'],
+        roots: ['src', 'tool'],
+        extensions: TS,
         exclude: GENERATED,
       },
       // Os testes do aplicativo antes dos do nucleo, na mesma ordem de quando
       // moravam em `test/` e `packages/equisim_core/test/`: e a ordem do corte.
-      { kind: 'diretorio', filePath: 'test/data', extensions: ['.dart'], exclude: GENERATED },
-      { kind: 'diretorio', filePath: 'test/ui', extensions: ['.dart'], exclude: GENERATED },
-      { kind: 'diretorio', filePath: 'test/tool', extensions: ['.dart'], exclude: GENERATED },
-      { kind: 'diretorio', filePath: 'test/core', extensions: ['.dart'] },
+      { kind: 'diretorio', filePath: 'test/data', extensions: TS, exclude: GENERATED },
+      { kind: 'diretorio', filePath: 'test/app', extensions: TS, exclude: GENERATED },
+      { kind: 'diretorio', filePath: 'test/audit', extensions: TS, exclude: GENERATED },
+      { kind: 'diretorio', filePath: 'test/ui', extensions: TS, exclude: GENERATED },
+      { kind: 'diretorio', filePath: 'test/tool', extensions: TS, exclude: GENERATED },
+      { kind: 'diretorio', filePath: 'test/core', extensions: TS },
     ],
   },
 
@@ -567,7 +583,7 @@ export const LENSES: Record<LensId, Lens> = {
       // bancos sem setor que a decisao 87 resolveu.
       { kind: 'arquivo', filePath: 'docs/plano-motor-de-referencia.md', optional: true },
       { kind: 'arquivo', filePath: 'README.md' },
-      { kind: 'arvore', roots: ['lib', 'packages', 'test'] },
+      { kind: 'arvore', roots: ['src', 'tool', 'test'] },
       { kind: 'git-log', count: 40 },
       {
         kind: 'diretorio',
@@ -595,11 +611,11 @@ export const LENSES: Record<LensId, Lens> = {
       'Sombra, gradiente, animacao e arredondamento sao POLIMENTO, nao direcao.',
       '  Se a tensao e sobre um deles, ela nasce POLIMENTO.',
       'NAO proponha pacote de UI de terceiros. A correcao usa o sistema proprio',
-      '  em `lib/presentation/theme/`.',
+      '  de tokens em `src/styles.css` e os componentes de `src/ui/`.',
     ],
     materials: [
-      { kind: 'arquivo', filePath: 'lib/presentation/shell/app_shell.dart' },
-      { kind: 'arvore', roots: ['lib/presentation', 'lib/views'] },
+      { kind: 'arquivo', filePath: 'src/features/shell/app-shell.tsx' },
+      { kind: 'arvore', roots: ['src/features', 'src/ui'] },
     ],
   },
 };

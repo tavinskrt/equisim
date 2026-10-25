@@ -57,7 +57,7 @@ Na entrada congelada de 14/09/2026, 376 ativos chegaram ao motor: 189 foram
 recusados por liquidez, 34 por história curta e 4 por patrimônio negativo; os
 demais recusados não tinham demonstrativo ou tiveram a estrutura de capital
 recusada pela conta (capítulo 3, seção 3.10, e o [caso RENT3](casos/rent3.md)). Foram avaliados 97
-([eligibility.dart](../../packages/equisim_core/lib/src/services/valuation/eligibility.dart)).
+([eligibility.ts](../../src/core/services/valuation/eligibility.ts)).
 
 ### Portas 1 e 3 — qual caminho
 
@@ -68,8 +68,8 @@ recusada pela conta (capítulo 3, seção 3.10, e o [caso RENT3](casos/rent3.md)
   60% dos exercícios; senão, para a **via do acionista**, que parte do lucro
   líquido.
 
-([compute_valuation.dart, `_route`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart);
-[financial_sectors.dart](../../packages/equisim_core/lib/src/services/valuation/financial_sectors.dart).)
+([compute-valuation.ts, `route`](../../src/core/usecases/compute-valuation.ts);
+[financial-sectors.ts](../../src/core/services/valuation/financial-sectors.ts).)
 
 ---
 
@@ -157,13 +157,14 @@ base reconstruída e 1 não tinha ciclo medível. O porquê de cada um, com os
 números, está em [normalizacoes.md](../validacao/normalizacoes.md).
 
 **Onde ver no aplicativo.** No **painel de logs**, o passo "Base do fluxo" abre
-com um quadro **"Por quê"**, em texto corrido, antes das variáveis e da conta. Na
-tela **Editar valuation**, o cartão do lucro de partida traz a pergunta "Por
+com um quadro **"Por quê"**, em texto corrido, antes das variáveis e da conta. No
+**Raio-X** do ativo (modo Completo) e na tela **Simular minhas premissas**, o
+cartão do lucro de partida traz a pergunta "Por
 que o motor subiu (ou baixou) o lucro de partida?", com o retorno de cada ano
 do ciclo em barras, o típico marcado, o teste que decidiu e a conta.
 
-([compute_valuation.dart, `_output1` e `_baseFlow`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart);
-[growth_guards.dart](../../packages/equisim_core/lib/src/services/valuation/growth_guards.dart).)
+([compute-valuation.ts, `output1` e `baseFlow`](../../src/core/usecases/compute-valuation.ts);
+[growth-guards.ts](../../src/core/services/valuation/growth-guards.ts).)
 
 ---
 
@@ -188,7 +189,7 @@ O motor confere se esse número é confiável:
 | não identificado, mas a empresa consegue financiar crescer com a inflação | a inflação (4,92% em 14/09/2026) | ressalva "crescimento não identificado" |
 | nem isso | zero | ressalva e aviso de premissa conservadora |
 
-([growth_guards.dart, `dispersion` e `anchorIsFundable`](../../packages/equisim_core/lib/src/services/valuation/growth_guards.dart).)
+([growth-guards.ts, `dispersion` e `anchorIsFundable`](../../src/core/services/valuation/growth-guards.ts).)
 
 ---
 
@@ -283,7 +284,7 @@ prazo das outorgas e usa (decisão 88):
 VT = capital no ano 10 + lucro econômico × anuidade dos anos que restam
 ```
 
-([dcf.dart, `terminalValue`](../../packages/equisim_core/lib/src/services/valuation/dcf.dart).)
+([dcf.ts, `terminalValue`](../../src/core/services/valuation/dcf.ts).)
 
 ---
 
@@ -404,7 +405,7 @@ bom; o novo diz o que foi mexido, a cor de cada valor sai da posição dele
 contra o preço justo, e o cartão avisa quando a ordem se inverte (decisão
 148).
 
-([scenario_engine.dart](../../packages/equisim_core/lib/src/services/valuation/scenario_engine.dart).)
+([scenario-engine.ts](../../src/core/services/valuation/scenario-engine.ts).)
 
 ---
 
@@ -429,7 +430,7 @@ Medida fora da amostra, a faixa de 80% conteve o preço mais os proventos em
 O preço justo entra com peso pequeno porque essa é a evidência: ele explica
 pouco do preço futuro.
 
-([calibrated_band.dart](../../packages/equisim_core/lib/src/services/valuation/calibrated_band.dart).)
+([calibrated-band.ts](../../src/core/services/valuation/calibrated-band.ts).)
 
 ---
 
@@ -448,7 +449,7 @@ financeiras. A mediana das leituras é a "leitura por pares". Se ela divergir do
 preço justo em mais de 50%, a tela avisa — **mas o preço justo não muda**
 (decisão 118). A segunda leitura é teste de sanidade, e não um segundo modelo.
 
-([peer_multiples.dart](../../packages/equisim_core/lib/src/services/valuation/peer_multiples.dart).)
+([peer-multiples.ts](../../src/core/services/valuation/peer-multiples.ts).)
 
 ---
 
@@ -465,8 +466,8 @@ preço justo em mais de 50%, a tela avisa — **mas o preço justo não muda**
 | Ponte frágil | o capital próprio é menos de 35% do valor da firma | o valor por ação é resíduo de uma subtração frágil |
 | Controle estatal | a companhia é controlada pelo governo, pelo cadastro da CVM | o motor não cobra o risco de o controlador decidir por outros objetivos que o lucro, e a medição diz por quê ([estatais.md](../validacao/estatais.md)); o preço não muda |
 
-([compute_valuation.dart, `_diagnose`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart);
-[domain_copy.dart](../../lib/presentation/shared/domain_copy.dart).)
+([compute-valuation.ts, `diagnose`](../../src/core/usecases/compute-valuation.ts);
+[domain-copy.ts](../../src/copy/domain-copy.ts).)
 
 ---
 
@@ -489,11 +490,12 @@ para ter em mente:
    decidir sozinho.
 3. **A incerteza é grande e está medida**: é a faixa calibrada.
 
-## 4.16 Faça a conta você mesmo: o botão "Editar valuation"
+## 4.16 Faça a conta você mesmo: o botão "Simular minhas premissas"
 
 Tudo o que este capítulo descreveu — o lucro de partida, o crescimento, a taxa,
-a perpetuidade — é decidido pelo motor sozinho. O botão **Editar valuation**, no
-cartão do preço, abre a mesma conta para você discordar dela (decisão 147).
+a perpetuidade — é decidido pelo motor sozinho. O botão **Simular minhas
+premissas**, no Raio-X do ativo, abre a mesma conta para você discordar dela
+(decisão 147).
 
 **Como funciona.** A tela abre com um cartão para cada número que o motor
 escolheu, já preenchido com o valor dele. Você digita outro número (ou usa os

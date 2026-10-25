@@ -24,48 +24,51 @@ const SKIP_FILE = '.qa-skip';
 
 /**
  * Arquivo que declara os tokens de cor. Sua existencia LIGA as regras de
- * sistema de design (L6-L11).
+ * sistema de design (L6-L10).
  *
- * POR QUE UM GATILHO E NAO UM INTERRUPTOR MANUAL: hoje a base tem 62 literais
- * `Color(0x...)` e 209 espacadores magicos. Ligar essas regras antes de o
- * sistema existir bloquearia todo commit de interface -- inclusive os da
- * propria refatoracao, que precisa declarar cor literal em algum lugar. Seria
- * repetir o defeito que a lista ENV_TEMPLATES abaixo documenta: um gate que
- * impede trabalho legitimo e um gate que sera arrancado.
+ * POR QUE UM GATILHO E NAO UM INTERRUPTOR MANUAL: as regras nasceram quando a
+ * interface era Flutter e ainda nao tinha tokens. Liga-las antes de o sistema
+ * existir bloquearia todo commit de interface -- inclusive os da propria
+ * refatoracao, que precisa declarar cor literal em algum lugar. Seria repetir o
+ * defeito que a lista ENV_TEMPLATES abaixo documenta: um gate que impede
+ * trabalho legitimo e um gate que sera arrancado.
  *
- * Com o gatilho, as regras nascem dormentes e acordam sozinhas no commit que
- * cria o sistema (tarefa UI-01 do plano de refatoracao). A partir dai, todo
- * literal NOVO em codigo de tela e regressao -- porque passou a existir para
- * onde apontar.
+ * Na web (decisao 152) a casa dos tokens e `src/styles.css`: o bloco `@theme`
+ * do Tailwind v4 e as variaveis `--*` dos dois temas. Enquanto ele existir,
+ * todo literal NOVO em codigo de tela e regressao -- porque existe para onde
+ * apontar.
  *
- * LIMITACAO CONHECIDA: durante a migracao (tarefas UI-09/UI-10), mover uma
- * linha legada de lugar faz o git registra-la como adicionada, e a regra
- * dispara. Isso e desconforto, nao defeito: a ordem de trabalho pretendida e
- * migrar o arquivo inteiro e so entao commitar, e nesse caso as linhas
- * adicionadas ja usam token.
+ * LIMITACAO CONHECIDA: mover uma linha de lugar faz o git registra-la como
+ * adicionada, e a regra dispara sobre literal antigo. Isso e desconforto, nao
+ * defeito: troque o literal pelo token no mesmo commit.
  */
-const TOKEN_SYSTEM_ANCHOR = 'lib/presentation/theme/fin_colors.dart';
-
-/** Diretorio do sistema de tokens: e a casa dos literais, nao pode ser reu. */
-const THEME_DIR = 'lib/presentation/theme/';
+const TOKEN_SYSTEM_ANCHOR = 'src/styles.css';
 
 const TOKENS_ACTIVE = existsSync(TOKEN_SYSTEM_ANCHOR);
 
-/**
- * Codigo de tela: Dart sob `lib/`, fora do diretorio de tokens e fora do que o
- * `build_runner` gera.
- *
- * `packages/equisim_core` fica de fora por construcao -- e Dart puro, sem
- * Flutter, entao nao ha cor nem widget la para julgar.
- */
-function isScreenDart(file) {
-  return (
-    file.startsWith('lib/') &&
-    file.endsWith('.dart') &&
-    !file.endsWith('.g.dart') &&
-    !file.startsWith(THEME_DIR)
-  );
+/** Codigo TypeScript, de qualquer camada. */
+function isTs(file) {
+  return /\.(ts|tsx|mts)$/.test(file) && !file.endsWith('.d.ts');
 }
+
+/**
+ * Codigo de tela: componentes e telas, onde cor, espaco e tipo sao lidos dos
+ * tokens. `src/core`, `src/data` e `src/audit` ficam de fora por construcao --
+ * nao ha cor nem componente la para julgar.
+ */
+const SCREEN_DIRS = ['src/features/', 'src/ui/'];
+
+function isScreenCode(file) {
+  return /\.(ts|tsx)$/.test(file) && SCREEN_DIRS.some((dir) => file.startsWith(dir));
+}
+
+/**
+ * O eixo dos graficos e SVG do Recharts, que recebe `fontSize` em numero e nao
+ * aceita classe do Tailwind. O tamanho do eixo mora num lugar so,
+ * `axisProps` deste arquivo, que e para a tipografia dos graficos o que
+ * `src/styles.css` e para o resto.
+ */
+const CHART_TYPE_HOME = 'src/ui/charts/chart-frame.tsx';
 
 /**
  * Regras deterministicas de linha.
@@ -79,12 +82,12 @@ const RULES = [
     id: 'L1',
     category: 'FLOAT_EQUALITY',
     title: 'Comparacao de igualdade com literal de ponto flutuante',
-    appliesTo: (file) => file.endsWith('.dart'),
-    test: (line) => /[=!]=\s*-?\d+\.\d+/.test(stripStringsAndComments(line)),
+    appliesTo: isTs,
+    test: (line) => /[=!]==?\s*-?\d+\.\d+/.test(stripStringsAndComments(line)),
     explain:
-      'Em IEEE-754, 0.1 + 0.2 != 0.3. Comparar dinheiro com == falha de forma\n' +
-      '  silenciosa e intermitente. Compare centavos inteiros, ou use epsilon\n' +
-      '  proporcional a escala do valor.',
+      'Em IEEE-754, 0.1 + 0.2 !== 0.3. Comparar dinheiro com === falha de\n' +
+      '  forma silenciosa e intermitente. Compare centavos inteiros, ou use\n' +
+      '  epsilon proporcional a escala do valor.',
   },
   {
     id: 'L2',
@@ -97,14 +100,19 @@ const RULES = [
   {
     id: 'L3',
     category: 'NONDETERMINISTIC_CORE',
-    title: 'DateTime.now() dentro do nucleo de dominio puro',
-    appliesTo: (file) => file.startsWith('packages/equisim_core/lib/'),
+    title: 'Relogio de parede dentro do nucleo de dominio puro',
+    // `src/core/lang/` e o runtime que imita o Dart -- e ali que
+    // `DateTime.now()` e implementado sobre `new Date()`, e nao pode ser reu.
+    appliesTo: (file) => isTs(file) && file.startsWith('src/core/') && !file.startsWith('src/core/lang/'),
     // `asOf ?? DateTime.now()` e o padrao CORRETO -- relogio injetavel com
-    // fallback. Só o uso direto, sem injecao, torna o calculo irreproduzivel
-    // e o teste nao-deterministico.
+    // fallback. So o uso direto, sem injecao, torna o calculo irreproduzivel
+    // e o teste nao-deterministico. `new Date()` sem argumento e `Date.now()`
+    // sao o mesmo relogio, pela porta do JavaScript.
     test: (line) => {
       const code = stripStringsAndComments(line);
-      return /DateTime\.now\(\)/.test(code) && !/\?\?\s*DateTime\.now\(\)/.test(code);
+      const dartClock = /DateTime\.now\(\)/.test(code) && !/\?\?\s*DateTime\.now\(\)/.test(code);
+      const jsClock = /\bnew\s+Date\(\s*\)|\bDate\.now\(\)/.test(code);
+      return dartClock || jsClock;
     },
     explain:
       'O nucleo precisa ser reproduzivel: a mesma entrada tem de dar a mesma\n' +
@@ -115,37 +123,49 @@ const RULES = [
     id: 'L4',
     category: 'ROUNDING',
     title: 'Arredondamento por ida e volta em String',
-    appliesTo: (file) => file.endsWith('.dart'),
+    appliesTo: isTs,
     test: (line) => {
       const code = stripStringsAndComments(line);
-      return /parse\s*\(/.test(code) && /toStringAsFixed\s*\(/.test(code);
+      return (
+        /\b(?:Number|parseFloat|parseDouble)\s*\(/.test(code) &&
+        /\.toFixed\s*\(|\btoStringAsFixed\s*\(/.test(code)
+      );
     },
     explain:
-      'toStringAsFixed formata a representacao binaria, nao arredonda em half-up\n' +
-      '  decimal: (2.675).toStringAsFixed(2) devolve "2.67". Converter de volta\n' +
-      '  para double propaga o erro como se fosse valor arredondado.',
+      'toFixed formata a representacao binaria, nao arredonda em half-up\n' +
+      '  decimal: (2.675).toFixed(2) devolve "2.67". Converter de volta para\n' +
+      '  numero propaga o erro como se fosse valor arredondado. Arredonde em\n' +
+      '  centavos inteiros.',
   },
 
   // --- Sistema de design ---------------------------------------------------
   //
-  // Da L6 em diante as regras tem `requiresTokens: true` e so valem depois que
-  // `lib/presentation/theme/fin_colors.dart` existe. Ver TOKEN_SYSTEM_ANCHOR.
+  // Da L6 em diante as regras tem `requiresTokens: true` e so valem enquanto
+  // `src/styles.css` existe. Ver TOKEN_SYSTEM_ANCHOR.
   //
-  // Todas operam na forma de UMA LINHA. A forma multilinha (`EdgeInsets.only(`
-  // com os argumentos abaixo) escapa de proposito: um scanner de linha nao a
-  // reconhece sem virar parser, e chutar aqui produziria o falso positivo que
-  // este arquivo nao admite. Esse resto fica com a regra R17 do Gemini, que le
-  // a arvore inteira no pre-push.
+  // Na web a cor e o espaco moram em string -- `className="text-red-500"`,
+  // `style={{ color: '#fff' }}` --, entao estas regras leem a linha SEM os
+  // comentarios, mas COM o conteudo das strings. Todas operam na forma de UMA
+  // LINHA: o que se espalha por varias escapa de proposito, e fica com a regra
+  // R17 do Gemini, que le o arquivo inteiro no pre-push.
 
   {
     id: 'L5',
     category: 'DESIGN_TOKEN',
-    title: 'fontSize com valor fracionario',
+    title: 'Tamanho de fonte com valor fracionario',
     // Sem gatilho: meio pixel nao e degrau de escala em regime nenhum. Os oito
-    // tamanhos fracionarios da base (9.5, 10.5, 11.5, 12.5, 13.5...) nasceram
-    // de empurrar o numero ate caber, e nao de uma decisao tipografica.
-    appliesTo: (file) => file.endsWith('.dart'),
-    test: (line) => /\bfontSize\s*:\s*\d+\.\d+/.test(stripStringsAndComments(line)),
+    // tamanhos fracionarios da interface Flutter (9.5, 10.5, 11.5, 12.5...)
+    // nasceram de empurrar o numero ate caber, e nao de uma decisao
+    // tipografica.
+    appliesTo: (file) => isTs(file) || file.endsWith('.css'),
+    test: (line) => {
+      const code = stripComments(line);
+      return (
+        /\bfontSize\s*[:=]\s*\{?\s*\d+\.\d+/.test(code) ||
+        /\btext-\[\d+\.\d+(?:px|rem|em)\]/.test(code) ||
+        /\bfont-size\s*:\s*\d+\.\d+px/.test(code)
+      );
+    },
     explain:
       'Meio pixel nao e um degrau perceptivel de hierarquia: 12 e 12.5 leem\n' +
       '  igual, e o par so existe porque alguem ajustou ate caber. Use um passo\n' +
@@ -156,86 +176,100 @@ const RULES = [
     category: 'DESIGN_TOKEN',
     title: 'Cor literal fora do arquivo de tokens',
     requiresTokens: true,
-    appliesTo: isScreenDart,
-    test: (line) => /\bColor\(\s*0x[0-9a-fA-F]{6,8}\s*\)/.test(stripStringsAndComments(line)),
+    appliesTo: isScreenCode,
+    // `&#123456;` e entidade HTML, nao cor; o lookbehind a deixa de fora.
+    // `rgb(var(--x))` e `color-mix(...)` leem token e nao casam: so o
+    // componente numerico denuncia o literal.
+    test: (line) => {
+      const code = stripComments(line);
+      return (
+        /(?<![&\w])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6})\b/.test(code) ||
+        /\b(?:rgba?|hsla?|oklch|oklab)\(\s*\d/.test(code)
+      );
+    },
     explain:
       'Cor declarada no ponto de uso nao pode ser corrigida de um lugar so, e e\n' +
-      '  como o contraste reprovado se espalhou. Declare em FinColors e leia por\n' +
-      '  context.fin.<token>.',
+      '  como o contraste reprovado se espalha. Declare em src/styles.css e leia\n' +
+      '  pela classe do token (text-fg, bg-surface, text-positive...) ou por\n' +
+      '  var(--token).',
   },
   {
     id: 'L7',
     category: 'DESIGN_TOKEN',
-    title: 'Cor do Material em vez de token semantico',
+    title: 'Cor da paleta do Tailwind em vez de token semantico',
     requiresTokens: true,
-    appliesTo: isScreenDart,
-    // `AppColors.` e `FinColors.` nao casam: nao ha limite de palavra entre a
-    // letra anterior e o "C". `Colors.transparent` fica de fora porque nao tem
-    // equivalente em token -- e legitimo em Material(color:) e no feedback de
-    // Draggable.
-    test: (line) => /\bColors\.(?!transparent\b)[a-z]/.test(stripStringsAndComments(line)),
+    appliesTo: isScreenCode,
+    // So a paleta numerada (`red-500`). `bg-black/50` do veu de dialogo e
+    // `bg-white` do polegar do interruptor ficam de fora: nao tem equivalente
+    // semantico, como o `Colors.transparent` do Flutter nao tinha.
+    test: (line) =>
+      /\b(?:text|bg|border(?:-[trblxy])?|ring|ring-offset|outline|fill|stroke|from|via|to|divide|decoration|accent|caret|shadow|placeholder)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|[1-9]00|950)\b/.test(
+        stripComments(line),
+      ),
     explain:
-      'A paleta do Material nao conhece a semantica financeira desta interface.\n' +
-      '  Use context.fin: positive, negative, caution, pending, blocked ou os\n' +
-      '  tokens de superficie e texto.',
+      'A paleta do Tailwind nao conhece a semantica financeira desta interface.\n' +
+      '  Use os tokens: positive, negative, caution, pending, blocked e os de\n' +
+      '  superficie e texto (surface, fg, fg-2, fg-3...).',
   },
   {
     id: 'L8',
     category: 'DESIGN_TOKEN',
-    title: 'Espacador com medida magica',
+    title: 'Espacamento com medida magica',
     requiresTokens: true,
-    appliesTo: isScreenDart,
-    // Casa so a forma de espacador: uma dimensao e o parentese fechando na
-    // mesma linha. `SizedBox(height: 240, child: LineChart(...))` nao casa,
-    // porque ali o numero e altura de contrato, nao espacamento.
+    appliesTo: isScreenCode,
+    // So o valor arbitrario em px ou rem. `pl-[2ch]` (recuo por caractere da
+    // arvore JSON) e `pb-[env(safe-area-inset-bottom)]` nao casam: ali a
+    // medida e de contrato, nao de ritmo.
     test: (line) =>
-      /\bSizedBox\(\s*(?:height|width)\s*:\s*[\d.]+\s*\)/.test(stripStringsAndComments(line)),
+      /(?<![\w-])-?(?:p|px|py|pt|pb|pl|pr|ps|pe|m|mx|my|mt|mb|ml|mr|ms|me|gap|gap-x|gap-y|space-x|space-y)-\[-?\d+(?:\.\d+)?(?:px|rem)\]/.test(
+        stripComments(line),
+      ),
     explain:
       'Espacamento fora do grid produz ritmo irregular: dois cartoes vizinhos\n' +
-      '  respiram diferente sem razao de conteudo. Use Gap.xs/sm/md/lg/xl, que\n' +
-      '  nao tem construtor para numero solto.',
+      '  respiram diferente sem razao de conteudo. Use os passos da escala do\n' +
+      '  Tailwind (p-1 4px, p-2 8px, p-3 12px, p-4 16px, p-6 24px, p-8 32px).\n' +
+      '  Se o valor de que voce precisa nao esta na escala, acrescente-o a\n' +
+      '  src/styles.css com um nome: a escala cresce por decisao, nao por\n' +
+      '  acumulo.',
   },
   {
     id: 'L9',
     category: 'DESIGN_TOKEN',
-    title: 'EdgeInsets com numero solto',
+    title: 'Padding ou margin numerico em style inline',
     requiresTokens: true,
-    appliesTo: isScreenDart,
+    appliesTo: isScreenCode,
+    // `margin={{ top: 8 }}` do Recharts nao casa: ali o valor e o respiro do
+    // SVG dentro do quadro, e o objeto vem depois de `margin=`, nao de
+    // `margin:`.
     test: (line) =>
-      /\bEdgeInsets\.(?:all|symmetric|only|fromLTRB)\([^)]*\d/.test(stripStringsAndComments(line)),
+      /\b(?:padding|margin)(?:Top|Bottom|Left|Right|Inline|Block|InlineStart|InlineEnd|BlockStart|BlockEnd)?\s*:\s*['"`]?-?\d/.test(
+        stripComments(line),
+      ),
     explain:
-      'Use os passos de FinSpace: xxs 2, xs 4, sm 8, md 12, lg 16, xl 24,\n' +
-      '  xxl 32, xxxl 48. O xxs e meio passo, reservado a ajuste optico dentro\n' +
-      '  de pastilha -- nao e degrau de layout. Se o valor de que voce precisa\n' +
-      '  nao esta na escala, acrescente-o a FinSpace com um nome: a escala\n' +
-      '  cresce por decisao, nao por acumulo.',
+      'Espaco em style inline escapa da escala e do modo escuro de uma vez so.\n' +
+      '  Use a classe do passo (p-4, mt-2, gap-3) no className.',
   },
   {
     id: 'L10',
     category: 'DESIGN_TOKEN',
-    title: 'fontSize literal fora do arquivo de tipografia',
+    title: 'Tamanho de fonte literal fora dos arquivos de tipografia',
     requiresTokens: true,
-    appliesTo: isScreenDart,
+    appliesTo: (file) => isScreenCode(file) && file !== CHART_TYPE_HOME,
     // O lookahead impede que `fontSize: 10.5` case aqui: o `\d+` guloso pega
     // "10", ve o ponto e falha; ao retroceder para "1" ve o "0" e falha de
     // novo. O caso fracionario e da L5, que roda sempre.
-    test: (line) => /\bfontSize\s*:\s*\d+(?![\d.])/.test(stripStringsAndComments(line)),
+    test: (line) => {
+      const code = stripComments(line);
+      return (
+        /\bfontSize\s*[:=]\s*\{?\s*\d+(?![\d.])/.test(code) ||
+        /\btext-\[\d+(?:px|rem|em)\]/.test(code)
+      );
+    },
     explain:
-      'Tamanho declarado no ponto de uso e como a base chegou a 20 tamanhos\n' +
-      '  distintos. Use context.finType: caption, label, bodySm, bodyMd, titleSm,\n' +
-      '  titleLg -- ou a familia num* para dinheiro, percentual e razao.',
-  },
-  {
-    id: 'L11',
-    category: 'DESIGN_TOKEN',
-    title: 'Tema semeado por cor em vez dos tokens',
-    requiresTokens: true,
-    appliesTo: (file) => file.endsWith('.dart') && !file.startsWith(THEME_DIR),
-    test: (line) => /\bColorScheme\.fromSeed\s*\(/.test(stripStringsAndComments(line)),
-    explain:
-      'fromSeed gera uma paleta que nao conhece a marca nem a semantica de\n' +
-      '  ganho e perda -- e o que fazia o indicador de progresso girar em azul\n' +
-      '  sobre tela verde. Monte o ColorScheme a partir de FinColors.',
+      'Tamanho declarado no ponto de uso e como a interface Flutter chegou a 20\n' +
+      '  tamanhos distintos. Use a escala de src/styles.css: text-caption,\n' +
+      '  text-label, text-body-sm, text-body, text-title-sm, text-title -- e,\n' +
+      '  no eixo de grafico, axisProps de src/ui/charts/chart-frame.tsx.',
   },
 ];
 
@@ -254,7 +288,7 @@ const FORBIDDEN_FILES = [
   {
     pattern: /^\.env(\.|$)/,
     exempt: ENV_TEMPLATES,
-    why: 'contem credencial, e `.env` ainda e declarado como asset do Flutter',
+    why: 'contem credencial: o BRAPI_TOKEN das ferramentas e as `VITE_*` que o Vite embarca no bundle',
   },
   { pattern: /(^|\/)google-services\.json$/, why: 'credencial do Firebase' },
   { pattern: /(^|\/)serviceAccount.*\.json$/, why: 'chave de conta de servico' },
@@ -262,17 +296,76 @@ const FORBIDDEN_FILES = [
 ];
 
 /**
- * Remove literais de string e comentarios antes de aplicar as regras.
+ * Varre UMA linha de TypeScript separando codigo, string e comentario.
  *
- * Sem isto, um comentario explicando "nunca use == 0.0" acusaria a si mesmo, e
- * uma mensagem de erro contendo o texto viraria falso positivo. Aproximacao
- * suficiente para regex de linha -- nao pretende ser um lexer de Dart.
+ * Foi regex antes (`//.*$` primeiro, strings depois), e a regex cortava a linha
+ * no `//` de uma URL dentro de string -- `'https://brapi.dev'` sumia com tudo o
+ * que vinha depois. A varredura respeita as aspas: `//` e `/*` so abrem
+ * comentario fora de string. Aproximacao suficiente para regra de linha -- nao
+ * pretende ser um lexer de TypeScript (regex literal e template com `${}`
+ * aninhado ficam de fora).
+ *
+ * `keepStrings` decide o que sobra das strings: vazias (`''`) para as regras de
+ * correcao, que julgam codigo; intactas para as de sistema de design, porque na
+ * web a cor e o espaco moram em `className="..."` e `style={{ color: '...' }}`.
+ */
+function scan(line, keepStrings) {
+  // Linha de continuacao de bloco `/** ... */`: comentario inteiro. Em codigo
+  // formatado pelo Prettier nenhuma linha de codigo abre com `*`, porque o
+  // operador binario fica no fim da linha anterior.
+  if (/^\s*\*/.test(line)) return '';
+  let out = '';
+  let quote = null;
+  let body = '';
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (quote !== null) {
+      if (c === '\\' && i + 1 < line.length) {
+        body += c + line[i + 1];
+        i++;
+        continue;
+      }
+      if (c === quote) {
+        out += quote + (keepStrings ? body : '') + quote;
+        quote = null;
+        body = '';
+        continue;
+      }
+      body += c;
+      continue;
+    }
+    if (c === "'" || c === '"' || c === '`') {
+      quote = c;
+      continue;
+    }
+    if (c === '/' && line[i + 1] === '/') break;
+    if (c === '/' && line[i + 1] === '*') {
+      const close = line.indexOf('*/', i + 2);
+      if (close === -1) break;
+      i = close + 1;
+      continue;
+    }
+    out += c;
+  }
+  // String que nao fecha na linha (template multilinha): o resto e string.
+  if (quote !== null) out += quote + (keepStrings ? body : '');
+  return out;
+}
+
+/**
+ * Remove literais de string e comentarios antes de aplicar as regras de
+ * correcao.
+ *
+ * Sem isto, um comentario explicando "nunca use === 0.0" acusaria a si mesmo, e
+ * uma mensagem de erro contendo o texto viraria falso positivo.
  */
 function stripStringsAndComments(line) {
-  return line
-    .replace(/\/\/.*$/, '')
-    .replace(/'(?:\\.|[^'\\])*'/g, "''")
-    .replace(/"(?:\\.|[^"\\])*"/g, '""');
+  return scan(line, false);
+}
+
+/** So os comentarios saem: as regras de sistema de design leem as strings. */
+function stripComments(line) {
+  return scan(line, true);
 }
 
 /**

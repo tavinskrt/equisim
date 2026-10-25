@@ -109,7 +109,7 @@ previsões feitas **antes** do resultado existir. O projeto sela, a cada
 trimestre, as previsões do motor daquele dia, com o código de então e o hash do
 git de cada arquivo (decisões 133 e 138). As três primeiras coortes seladas são
 de 31/12/2025, 31/03/2026 e 30/06/2026. A leitura só é permitida quando os 36
-meses passarem — a ferramenta `tool/c7_leitura.dart` recusa ler antes. As
+meses passarem — a ferramenta `tool/c7-reading.ts` recusa ler antes. As
 leituras previstas são em 2029 e 2031.
 
 ---

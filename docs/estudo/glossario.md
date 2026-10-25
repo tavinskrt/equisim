@@ -36,7 +36,6 @@ calma.
 | **Dívida bruta / líquida** | Bruta: todos os empréstimos. Líquida: bruta menos o caixa (cap. 2). |
 | **DRE** | Demonstração do resultado do exercício (cap. 2). |
 | **EBIT / EBITDA** | Resultado operacional, antes de juros e imposto; o EBITDA também antes da depreciação (cap. 2). |
-| **Editar valuation** | A tela que abre a conta do motor com os números dele, para você trocar o que discordar e ver o preço mudar na hora. Sem troca, dá o preço do motor; o preço que você calcula não é validado (cap. 4). |
 | **Encolhimento (*shrinkage*)** | Puxar uma estimativa imprecisa na direção de uma referência, ponderando pela precisão (cap. 3 e 6). |
 | **Erro-padrão** | Quanto uma estimativa varia de amostra para amostra (cap. 6). |
 | **Escudo fiscal** | A economia de imposto que a dedução dos juros gera: juro × 34% (cap. 3). |
@@ -83,6 +82,7 @@ calma.
 | **Rastro (de auditoria)** | O registro de cada passo de uma avaliação, que o painel de logs mostra. |
 | **Selic** | A taxa básica de juros definida pelo Banco Central (cap. 3). |
 | **Significância (α)** | A chance aceita de chamar de real algo que é ruído; o motor usa 10% (cap. 6). |
+| **Simular minhas premissas** | A tela (antes chamada "Editar valuation") que abre a conta do motor com os números dele, para você trocar o que discordar e ver o preço mudar na hora. Sem troca, dá o preço do motor; o preço que você calcula não é validado (cap. 4). |
 | **Taxa livre de risco (Rf)** | O que rende um investimento que quase certamente paga (cap. 1 e 3). |
 | **Terminal (valor terminal)** | O valor de tudo depois do ano 10, resumido numa perpetuidade (cap. 4). |
 | **Unit** | Pacote de ações negociado como um papel; a SAPR11 é 1 ON + 4 PN (cap. 2). |

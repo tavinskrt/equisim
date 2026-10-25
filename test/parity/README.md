@@ -1,0 +1,71 @@
+# Paridade com o motor Dart original
+
+A reconstrução em TypeScript (decisão 152) trocou a linguagem do motor, e não
+o método: cada fórmula, limiar, guarda e texto de aviso do núcleo Dart foi
+portado 1:1 para `src/core`. Esta pasta é a prova disso, e continua valendo
+depois que o Dart saiu do repositório.
+
+## Como o gabarito foi gravado
+
+1. `dart/harness.dart` (removido; ver "Para regravar") rodou o núcleo Dart **compilado para JavaScript pelo
+   dart2js** — a mesma semântica numérica do aplicativo Flutter na web —, com
+   `--no-minify` para que os nomes de tipo do rastro de auditoria saiam
+   legíveis.
+2. A entrada é a dos pacotes versionados de `public/assets/` (CVM, B3, Tesouro,
+   mercado, validação) mais um **mercado sintético determinístico**: Ibovespa,
+   cotações com volume, CDI, IPCA e IBC-Br sorteados por `Random(seed)` e
+   ancorados no patrimônio publicado de cada companhia. Sintético porque as
+   cotações reais vêm da brapi pela rede, e o gabarito tem de se reproduzir
+   sem rede.
+3. Para cada um dos 371 ativos do pacote da CVM, treze montagens da cascata
+   (dois pontos, curva, aplicativo, série ancorada, sem curva, prior
+   resolvido, Monte Carlo, via da firma, via do acionista, imposições de
+   diagnóstico, margem e horizonte curtos, notas de contexto e o deslocamento
+   do nível da taxa livre de risco). Depois, sobre as mesmas avaliações:
+   valuation manual com premissas perturbadas, atribuição da divergência e
+   DCF reverso nos sete campos, registro do valuation confirmado (ida e volta
+   pelo JSON), 80 simulações históricas, metas, alinhamento com a meta pelas
+   duas leituras do retorno esperado, concentração setorial, troca entre
+   Principal e Reserva, seção transversal e o calendário de dias úteis.
+4. `dart/run.cjs` entregou os pacotes ao programa compilado, recebe o que ele
+   emitiu e gravou `golden/header.json`, `golden/cascade.json.gz` e
+   `golden/services.json.gz`. O rastro de auditoria de cada avaliação —
+   3.894 rastros, 58 MB de JSON — entra pela impressão SHA-256 do texto que o
+   `jsonEncode` do Dart produziu.
+
+## O que a suíte confere
+
+`cascade-parity.test.ts` refaz a bateria inteira com `oracle.ts`, que é a
+tradução linha a linha de `harness.dart` para o núcleo TypeScript, e exige
+**igualdade exata**: número com número por `Object.is` (o que distingue
+`-0` de `0`), texto com texto, e a impressão de cada rastro.
+
+Na gravação, em 23/10/2026, a comparação deu **zero divergências**: as 4.823
+montagens da cascata, os 3.894 rastros byte a byte e todos os serviços.
+
+## Para regravar
+
+O gabarito é a fotografia do motor Dart, e **não se regrava** a partir do
+TypeScript: regravar com o próprio port faria a suíte comparar o port com ele
+mesmo. Uma mudança de método deliberada, registrada em decisão nova, muda o
+gabarito com ela — e a decisão diz quais números mudaram e por quê.
+
+O harness em Dart (`dart/harness.dart`, `dart/pubspec.yaml` e `dart/run.cjs`)
+saiu da árvore, porque dependia de `packages/equisim_core` e o analisador do
+IDE acusava cada importação como erro. Ele continua no histórico do git. Para
+refazer a gravação a partir do Dart, restaure o harness do commit `7480c5a`,
+que gravou o gabarito, e o núcleo do commit `1e83fad` — o `main` de antes da
+reconstrução, com o núcleo idêntico ao que gravou o gabarito —, e rode, com o
+SDK do Dart no `PATH`:
+
+```bash
+git checkout 7480c5a -- test/parity/dart
+git checkout 1e83fad -- packages/equisim_core
+cd test/parity/dart
+dart pub get --offline
+dart compile js --no-minify -O2 -o build/harness.js bin/harness.dart  # harness.dart em bin/
+TZ=UTC node --max-old-space-size=8192 run.cjs build/harness.js ../../.. saida 0
+```
+
+Terminada a gravação, apague as duas pastas de novo (`git rm -r -f
+test/parity/dart packages/equisim_core`): elas não ficam versionadas.

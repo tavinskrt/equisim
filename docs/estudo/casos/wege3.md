@@ -8,7 +8,7 @@
 >
 > **Data da avaliação:** 14/09/2026, sobre a entrada congelada do gabarito
 > (os dados estão em [dados/WEGE3.json](dados/WEGE3.json), gerados por
-> `dart run tool/casos_de_estudo.dart`).
+> `tool/casos_de_estudo.dart`, o antecessor em Dart de `npm run tool -- study-cases`).
 >
 > **Resultado:** preço justo **R$ 16,22**, contra preço de mercado de
 > R$ 50,74 — upside de **−68,0%**. A seção 9 explica por que a distância é tão

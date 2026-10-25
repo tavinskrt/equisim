@@ -5,29 +5,41 @@ desta pasta, o repositório é só código, documentação e dados.
 
 | Pasta | Testa | Código correspondente |
 |---|---|---|
-| `core/` | o núcleo de domínio: valuation, custo de capital, guardas, carteira, métricas, auditoria — e a pureza do pacote | `packages/equisim_core/lib/` |
-| `data/` | fontes (brapi, Banco Central, Tesouro), cache, repositórios e os pacotes de dados versionados | `lib/data/`, `assets/` |
-| `ui/` | telas, componentes, textos de tela, tema e controladores | `lib/presentation/`, `lib/views/`, `lib/controllers/` |
+| `core/` | o núcleo de domínio: valuation, custo de capital, guardas, carteira, métricas, auditoria — e a pureza do módulo | `src/core/` |
+| `parity/` | o núcleo TypeScript contra o gabarito gravado pelo núcleo Dart original, número a número (ver o [README](parity/README.md)) | `src/core/` |
+| `data/` | fontes (brapi, Banco Central, Tesouro), rede, cache, repositórios e os pacotes de dados versionados | `src/data/`, `public/assets/` |
+| `app/` | a camada de aplicativo: serviços, sessão, estudo, valuations salvos, backtest e textos | `src/app/`, `src/copy/` |
+| `audit/` | o barramento do painel de logs e o interceptor de rede | `src/audit/` |
+| `ui/` | telas renderizadas, contraste da paleta e unidades da tela de premissas | `src/features/`, `src/ui/`, `src/styles.css` |
 | `tool/` | os scripts de medição e validação | `tool/` |
 | `fixtures/` | respostas reais das fontes, gravadas, para os testes rodarem sem rede | — |
 | `qa_fixtures/` | casos financeiros conferidos, consultados pelo auditor de QA | — |
 
-Arquivos sem o sufixo `_test.dart` não são testes: são apoio dos testes
-(`data/fixture_adapter.dart`, `ui/populated_state.dart`) ou a captura de telas
-(`ui/golden_capture.dart`, que roda só por `npm run ui:capturar`).
+Arquivos sem o sufixo `.test.ts` (ou `.test.tsx`) não são testes: são apoio
+dos testes (`core/fakes.ts`, `core/helpers.ts`, `app/harness.ts`,
+`parity/oracle.ts`). A captura de telas para o conselheiro não mora aqui: é
+`scripts/capture-screens.ts`, que roda só por `npm run ui:capturar`.
 
 ## Como rodar
 
 ```bash
-flutter test               # a suíte inteira
-flutter test test/ui       # uma pasta só
-dart test test/core        # só o núcleo, na VM do Dart puro, em segundos
+npm test                     # a suíte inteira (Vitest)
+npx vitest run test/ui       # uma pasta só
+npm run test:core            # só o núcleo
+npm run test:parity          # só a paridade com o motor Dart original
+npm run test:watch           # modo de observação, enquanto se edita
 ```
 
-Os testes do núcleo não importam nada do Flutter — usam o `test` do Dart —, e é
-isso que permite rodá-los também com `dart test`. O teste de pureza
-(`core/purity_test.dart`) lê `packages/equisim_core/` pelo caminho explícito e
-confere que o pacote lido é mesmo o núcleo.
+O Vitest roda tudo no Node, com o fuso do processo fixado em UTC
+(`vitest.config.ts`), para a serialização de data ser a mesma em qualquer
+máquina. As telas são renderizadas em `ui/screens.test.tsx` pelo Testing
+Library sobre o `jsdom`, um DOM em JavaScript, sem navegador.
 
-A pasta se chama `test/`, e não `tests/`, porque é o nome que o Dart define para
-os testes de um pacote e o único que o `flutter test` varre sem argumentos.
+O teste de pureza (`core/purity.test.ts`) lê `src/core/` arquivo por arquivo e
+confere que nenhum importa o que está fora dele, nem rede, navegador, Firebase
+ou módulo do Node.
+
+As ferramentas que leem o cache da validação (`tool/lib/sqlite-cache.ts`) usam
+o `node:sqlite`, que pede Node 22.13 ou mais recente; o teste delas
+(`tool/sqlite-cache.test.ts`) imprime um aviso de recurso experimental, que é
+do Node e não do teste.

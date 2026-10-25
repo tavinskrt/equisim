@@ -51,7 +51,7 @@ registrada: passa nos dois horizontes, ou não é pior que a do justo, e vai ao
 aplicativo; senão, o aplicativo fica com a do justo.
 
 Entrada: ``docs/validacao/backtest_trimestral.json``, de
-``dart run tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas
+``npm run tool -- backtest-valuation --montagem aplicativo --com-deslistadas
 --trimestral``.
 
 Uso:
@@ -74,7 +74,7 @@ from pathlib import Path
 # (itens C1c, C1d e C3, decisão 97), é a que gera o pacote.
 INPUT = Path("docs/validacao/backtest_trimestral.json")
 OUTPUT = Path("docs/validacao/cobertura_banda_trimestral.json")
-PACKAGE = Path("assets/validacao/banda_calibrada.json")
+PACKAGE = Path("public/assets/validacao/banda_calibrada.json")
 CONVERGENCE_MONTHS = 36
 NOMINALS = (0.9, 0.8, 0.5)
 

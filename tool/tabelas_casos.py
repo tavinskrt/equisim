@@ -1,6 +1,6 @@
 """Tabelas dos casos de estudo, tiradas do rastro do motor e reconferidas.
 
-Uso, da raiz do repositório, depois de `dart run tool/casos_de_estudo.dart`:
+Uso, da raiz do repositório, depois de `npm run tool -- study-cases`:
 
     python tool/tabelas_casos.py WEGE3 ITUB4 VALE3 SAPR11 RENT3
 

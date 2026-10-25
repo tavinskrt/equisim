@@ -12,7 +12,7 @@ a observação que a variante recusa sai — e mede, coorte a coorte:
   — negativo é render abaixo do que o potencial ordenava;
 - a diferença de potencial e de retorno entre estatais e privadas.
 
-O controle é o de `assets/cvm/controle.json`, na data da coorte. O `t` é o
+O controle é o de `public/assets/cvm/controle.json`, na data da coorte. O `t` é o
 ingênuo, sem a correção pela sobreposição das janelas.
 
 Uso, da raiz do repositório:
@@ -27,7 +27,7 @@ import statistics as st
 from collections import defaultdict
 
 d = json.load(open('docs/validacao/backtest_trimestral.json', encoding='utf-8'))
-control = json.load(open('assets/cvm/controle.json', encoding='utf-8'))['emissores']
+control = json.load(open('public/assets/cvm/controle.json', encoding='utf-8'))['emissores']
 
 
 def state_owned(ticker, date):

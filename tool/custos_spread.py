@@ -33,8 +33,8 @@ liquidação da B3 para ações à vista: 0,005% + 0,025% = **0,030%**. Corretag
 fica em zero, que é o que as corretoras de varejo cobram em ações desde 2019.
 O retorno líquido é `(1 + r)·(1 − c_compra)·(1 − c_venda) − 1`.
 
-Grava `docs/validacao/custos_spread.json`, que `tool/regressao_condicional.dart
---custos` lê para medir a habilidade sobre o retorno líquido.
+Grava `docs/validacao/custos_spread.json`, que `npm run tool --
+conditional-regression --custos` lê para medir a habilidade sobre o retorno líquido.
 
 Uso:
     python tool/b3_baixar.py --extremos --de 2017   # máxima e mínima

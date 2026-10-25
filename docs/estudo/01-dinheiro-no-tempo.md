@@ -111,7 +111,7 @@ taxa diária = (1 + taxa anual)^(1/252) − 1
 **Onde isso aparece no Equisim:** o CDI corrente é o rendimento dos últimos 63
 pregões convertido para ano por composição; o prazo dos títulos do Tesouro é
 contado em dias úteis ÷ 252
-([yield_curve.dart](../../packages/equisim_core/lib/src/services/valuation/yield_curve.dart)).
+([yield-curve.ts](../../src/core/services/valuation/yield-curve.ts)).
 O projeto proíbe a divisão simples (regra do [CLAUDE.md](../../CLAUDE.md)).
 
 ---
@@ -140,7 +140,7 @@ três anos, e cada um cobra a sua taxa.
 
 **Onde isso aparece no Equisim:** é exatamente assim que o motor desconta os dez
 anos de projeção
-([dcf.dart, `_project`](../../packages/equisim_core/lib/src/services/valuation/dcf.dart)).
+([dcf.ts, `project`](../../src/core/services/valuation/dcf.ts)).
 A taxa de cada ano vem da curva de juros do Tesouro (capítulo 3, seção 3.6).
 
 ---
@@ -167,7 +167,7 @@ o crescimento **nominal** da economia, montado por Fisher ao contrário:
 (14/09/2026), a inflação média de dez anos (IPCA) era 4,92% ao ano e o
 crescimento real médio da economia (IBC-Br) 1,77%; o teto saiu
 `1,0177 × 1,0492 − 1 = 6,78%` ao ano
-([portfolio_usecases.dart](../../packages/equisim_core/lib/src/usecases/portfolio_usecases.dart)).
+([portfolio-usecases.ts](../../src/core/usecases/portfolio-usecases.ts)).
 
 ---
 
@@ -212,7 +212,7 @@ Por isso o Equisim tem duas travas:
   empresa que crescesse mais que o país para sempre acabaria maior que o país);
 - a taxa precisa superar o crescimento por pelo menos meio ponto, senão a conta
   é recusada
-  ([dcf.dart, `minimumSpread`](../../packages/equisim_core/lib/src/services/valuation/dcf.dart)).
+  ([dcf.ts, `minimumSpread`](../../src/core/services/valuation/dcf.ts)).
 
 ---
 
@@ -232,7 +232,7 @@ Com taxa de 13%, √1,13 = 1,063: o valor sobe 6,3%. Parece detalhe, mas incide
 sobre a avaliação inteira.
 
 **Onde isso aparece no Equisim:** decisão 48, em
-[dcf.dart, `midYearLift`](../../packages/equisim_core/lib/src/services/valuation/dcf.dart).
+[dcf.ts, `midYearLift`](../../src/core/services/valuation/dcf.ts).
 
 ---
 

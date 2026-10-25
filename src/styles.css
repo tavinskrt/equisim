@@ -1,0 +1,345 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens do Equisim.
+ *
+ * Os valores são os do `fin_colors.dart` do aplicativo Flutter, medidos lá
+ * contra os pisos de contraste da WCAG (test/ui/contrast.test.ts confere de
+ * novo, lendo este arquivo). A variação entre temas vem daqui, e não de ajuste
+ * no ponto de uso: uma cor escolhida na tela não passa pelo teste.
+ *
+ * Escuro é o padrão; o claro é selecionado por `data-theme="light"` no <html>,
+ * aplicado antes da primeira pintura pelo script do index.html.
+ */
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --canvas: #0b1116;
+  --surface: #121a22;
+  --raised: #18222b;
+  --sunken: #0e161d;
+  --border: #26313a;
+  --border-strong: #36434d;
+  --divider: #1d262e;
+  --shadow: rgb(0 0 0 / 0.45);
+  --fg: #e8eef4; /* 15,02:1 */
+  --fg-2: #a6b4c2; /*  8,30:1 */
+  --fg-3: #7c8c9c; /*  5,09:1 — só metadado */
+  --on-brand: #04231a;
+  --on-fill-dark: #0e1621;
+  --on-fill-light: #ffffff;
+  --positive: #3dd8a4;
+  --negative: #ff8b7e;
+  --caution: #f2b544;
+  --pending: #8fb4ff;
+  --blocked: #9aa5b1;
+  --reserve: #3b82f6;
+  --reserve-surface: #0f1826;
+  --reserve-muted: #60a5fa;
+  --positive-surface: #122a24;
+  --negative-surface: #2c1614;
+  --caution-surface: #2a2011;
+  --pending-surface: #141d2e;
+  --brand: #00cc8f;
+  --brand-surface: #122a24;
+
+  /* Série categórica, em ordem fixa — validada pelo validador da skill de
+     dataviz contra a superfície escura (faixa de luminosidade, croma e
+     separação para daltonismo nos pares adjacentes). */
+  --chart-1: #00a776;
+  --chart-2: #3b82f6;
+  --chart-3: #d95926;
+  --chart-4: #9085e9;
+  --chart-5: #d55181;
+  --chart-6: #c98500;
+  /* Divergente: dois polos e o meio neutro, nunca matiz no meio. */
+  --div-low: #3b82f6;
+  --div-mid: #36434d;
+  --div-high: #e5604f;
+  --grid: #1d262e;
+  /* Sintaxe do JSON no painel de logs: as cores do console do Flutter. */
+  --json-key: #7fd1ff;
+  --json-string: #b6e3a8;
+  --json-number: #ffc48a;
+  --json-bool: #d8a6ff;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --canvas: #f4f6f8;
+  --surface: #ffffff;
+  --raised: #ffffff;
+  --sunken: #eef1f5;
+  --border: #dce3e9;
+  --border-strong: #c3cdd6;
+  --divider: #e8ecf1;
+  --shadow: rgb(0 0 0 / 0.18);
+  --fg: #0e1621; /* 16,04:1 */
+  --fg-2: #435261; /*  7,08:1 */
+  --fg-3: #55636f; /*  5,45:1 — só metadado */
+  /* Tinta escura sobre o verde, como no escuro: o branco do Flutter dava
+     2,71:1 sobre #00b37e — abaixo do AA no rótulo de todo botão primário. */
+  --on-brand: #04231a; /* 6,15:1 sobre --brand */
+  --on-fill-dark: #0e1621;
+  --on-fill-light: #ffffff;
+  --positive: #0a6e52;
+  --negative: #98201a;
+  --caution: #6f4800;
+  --pending: #3e5aa8;
+  --blocked: #5a5f6b;
+  --reserve: #0b62ef;
+  --reserve-surface: #e8effd;
+  --reserve-muted: #4a86f0;
+  --positive-surface: #e4f1ec;
+  --negative-surface: #fbe9e7;
+  --caution-surface: #fbf0dc;
+  --pending-surface: #e9eef9;
+  --brand: #00b37e;
+  --brand-surface: #e4f1ec;
+
+  --chart-1: #00996b;
+  --chart-2: #0b62ef;
+  --chart-3: #eb6834;
+  --chart-4: #6250d6;
+  --chart-5: #e87ba4;
+  --chart-6: #eda100;
+  --div-low: #0b62ef;
+  --div-mid: #dce3e9;
+  --div-high: #c8372d;
+  --grid: #e8ecf1;
+  --json-key: #0a6c9e;
+  --json-string: #23692a;
+  --json-number: #9a4a06;
+  --json-bool: #7b1fa2;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-sunken: var(--sunken);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-divider: var(--divider);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-on-brand: var(--on-brand);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --color-caution: var(--caution);
+  --color-pending: var(--pending);
+  --color-blocked: var(--blocked);
+  --color-reserve: var(--reserve);
+  --color-reserve-surface: var(--reserve-surface);
+  --color-reserve-muted: var(--reserve-muted);
+  --color-positive-surface: var(--positive-surface);
+  --color-negative-surface: var(--negative-surface);
+  --color-caution-surface: var(--caution-surface);
+  --color-pending-surface: var(--pending-surface);
+  --color-brand: var(--brand);
+  --color-brand-surface: var(--brand-surface);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-json-key: var(--json-key);
+  --color-json-string: var(--json-string);
+  --color-json-number: var(--json-number);
+  --color-json-bool: var(--json-bool);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --shadow-pop: 0 12px 32px -8px var(--shadow), 0 2px 6px -2px var(--shadow);
+  --shadow-card: 0 1px 2px 0 var(--shadow);
+
+  /* A escala do fin_typography: inteiros, nenhum abaixo de 11 px. */
+  --text-caption: 11px;
+  --text-caption--line-height: 1.35;
+  --text-label: 12px;
+  --text-label--line-height: 1.3;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 1.4;
+  --text-body: 14px;
+  --text-body--line-height: 1.45;
+  --text-title-sm: 16px;
+  --text-title-sm--line-height: 1.25;
+  --text-title: 20px;
+  --text-title--line-height: 1.2;
+  --text-num-lg: 22px;
+  --text-num-lg--line-height: 1.1;
+  --text-display: 34px;
+  --text-display--line-height: 1.05;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--canvas);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* `cv11` troca o 1 de serifa pelo de haste simples no Inter, que lê melhor
+       em coluna de número. */
+    font-feature-settings: 'cv11';
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--brand) 35%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Utilitários próprios. `@utility`, e não `@layer utilities`: só assim o
+   Tailwind v4 aceita variantes neles (`md:num`, `[&_x]:eyebrow`). */
+
+/* Número em coluna: cifra tabular, para a vírgula decimal não andar. */
+@utility num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum', 'cv11';
+}
+
+@utility eyebrow {
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility skeleton {
+  background: var(--sunken);
+  border-radius: 4px;
+  animation: equisim-pulse 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes equisim-pulse {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 0.9;
+  }
+}
+
+/* KaTeX herda a cor do texto: o padrão dele é preto, ilegível no escuro. */
+.katex {
+  color: inherit;
+  font-size: 1.05em;
+}
+
+.katex-display {
+  margin: 0.5em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;
+}
+
+/* Recharts: o contorno de foco do SVG duplicava o anel do contêiner. */
+.recharts-wrapper svg:focus,
+.recharts-surface:focus {
+  outline: none;
+}
+
+/* Entrada e saída das camadas sobrepostas. O Radix espera o `animationend`
+   do estado `closed` antes de desmontar, então a saída também anima. */
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes overlay-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes sheet-right-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes sheet-right-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes sheet-up-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes sheet-up-out {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    /* Só escala: o centramento vem da propriedade `translate` do Tailwind v4,
+       que se compõe com `transform` em vez de ser substituída por ele. */
+    transform: scale(0.97);
+  }
+}
+@keyframes pop-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}

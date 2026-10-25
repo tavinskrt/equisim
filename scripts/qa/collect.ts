@@ -14,7 +14,6 @@ import { relative, resolve } from 'node:path';
 
 /** Extensoes que o auditor entende. O resto e ruido. */
 const AUDITABLE = [
-  '*.dart',
   '*.ts',
   '*.tsx',
   '*.js',
@@ -27,24 +26,19 @@ const AUDITABLE = [
 ];
 
 /**
- * Artefatos gerados ou volumosos. Auditar `*.g.dart` (saida do build_runner)
- * ou lockfiles so gasta token e produz achado falso -- ninguem edita isso a mao.
+ * Artefatos gerados ou volumosos. Auditar o build ou lockfiles so gasta token
+ * e produz achado falso -- ninguem edita isso a mao.
  */
 const EXCLUDED = [
-  ':(exclude)**/*.g.dart',
-  ':(exclude)**/*.freezed.dart',
-  ':(exclude)**/*.mocks.dart',
-  ':(exclude)build/**',
+  ':(exclude)dist/**',
   ':(exclude)**/node_modules/**',
-  ':(exclude)pubspec.lock',
   ':(exclude)package-lock.json',
-  ':(exclude).dart_tool/**',
-  ':(exclude)lib/firebase_options.dart',
+  ':(exclude)**/*.d.ts',
   // Dumps do executor de validacao. O `validacao_fora_da_amostra.json` tem
   // 162 KB e entrava no escopo por `*.json`: numa auditoria de diff ele
   // consumia a atencao do modelo inteira, e o veredito saiu descrevendo o dump
   // sem tocar no codigo que mudou junto. Nao e codigo de producao -- e saida
-  // gerada por `dart run tool/validate.dart`.
+  // gerada por `npm run tool -- validate`.
   ':(exclude)docs/validacao/**',
 ];
 

@@ -1,179 +1,69 @@
 # Diversos
-*.class
 *.log
 *.pyc
 *.swp
-.buildlog/
 .history
-*.env
-
-# Os arquivos de trava sao versionados de proposito: este repositorio e uma
-# *aplicacao*, nao uma biblioteca. Versionar pubspec.lock e o que faz outra
-# maquina resolver exatamente as mesmas versoes de dependencia que esta.
-!pubspec.lock
-!**/pubspec.lock
-
-
-# Especifico do repositorio do Flutter
-/bin/cache/
-/bin/internal/bootstrap.bat
-/bin/internal/bootstrap.sh
-/bin/mingit/
-/dev/benchmarks/mega_gallery/
-/dev/bots/.recipe_deps
-/dev/bots/android_tools/
-/dev/devicelab/ABresults*.json
-/dev/docs/doc/
-/dev/docs/flutter.docs.zip
-/dev/docs/lib/
-/dev/docs/pubspec.yaml
-/dev/integration_tests/**/xcuserdata
-/dev/integration_tests/**/Pods
-/packages/flutter/coverage/
-version
-analysis_benchmark.json
-
-# arquivo packages com caminhos de varias raizes
-.packages.generated
-
-# Flutter, Dart e Pub
-**/doc/api/
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-**/generated_plugin_registrant.dart
-.packages
-.pub-preload-cache/
-.pub/
-build/
-flutter_*.png
-linked_*.ds
-unlinked.ds
-unlinked_spec.ds
-
-# Android
-**/android/**/gradle-wrapper.jar
-.gradle/
-**/android/captures/
-**/android/gradlew
-**/android/gradlew.bat
-**/android/local.properties
-**/android/**/GeneratedPluginRegistrant.java
-**/android/key.properties
-*.jks
-
-# iOS e Xcode
-**/ios/**/*.mode1v3
-**/ios/**/*.mode2v3
-**/ios/**/*.moved-aside
-**/ios/**/*.pbxuser
-**/ios/**/*.perspectivev3
-**/ios/**/*sync/
-**/ios/**/.sconsign.dblite
-**/ios/**/.tags*
-**/ios/**/.vagrant/
-**/ios/**/DerivedData/
-**/ios/**/Icon?
-**/ios/**/Pods/
-**/ios/**/.symlinks/
-**/ios/**/profile
-**/ios/**/xcuserdata
-**/ios/.generated/
-**/ios/Flutter/.last_build_id
-**/ios/Flutter/App.framework
-**/ios/Flutter/Flutter.framework
-**/ios/Flutter/Flutter.podspec
-**/ios/Flutter/Generated.xcconfig
-**/ios/Flutter/ephemeral
-**/ios/Flutter/app.flx
-**/ios/Flutter/app.zip
-**/ios/Flutter/flutter_assets/
-**/ios/Flutter/flutter_export_environment.sh
-**/ios/ServiceDefinitions.json
-**/ios/Runner/GeneratedPluginRegistrant.*
-
-# macOS
-**/Flutter/ephemeral/
-**/Pods/
-**/macos/Flutter/GeneratedPluginRegistrant.swift
-**/macos/Flutter/ephemeral
-**/xcuserdata/
-
-# Windows
-**/windows/flutter/generated_plugin_registrant.cc
-**/windows/flutter/generated_plugin_registrant.h
-**/windows/flutter/generated_plugins.cmake
-
-# Linux
-**/linux/flutter/generated_plugin_registrant.cc
-**/linux/flutter/generated_plugin_registrant.h
-**/linux/flutter/generated_plugins.cmake
-
-# Cobertura
+.DS_Store
+.obsidian/
+.idea/
+.vscode/
 coverage/
 
-# Simbolos
-app.*.symbols
+# Credenciais. O `.env` da raiz guarda o BRAPI_TOKEN das ferramentas e as
+# variáveis `VITE_*` do aplicativo; os `.env.*` locais do Vite, idem. Só o
+# modelo vai para o repositório.
+.env
+.env.*
+*.env
+!.env.example
 
-# Excecoes as regras acima.
-!**/ios/**/default.mode1v3
-!**/ios/**/default.mode2v3
-!**/ios/**/default.pbxuser
-!**/ios/**/default.perspectivev3
-!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
-!/dev/ci/**/Gemfile.lock
-# Configuracao de build local (--dart-define-from-file)
-config/local.json
+# Credencial das ferramentas de QA (Gemini) — NUNCA versionar
+.env.qa
+
+# Dependências Node da raiz (aplicativo, ferramentas e QA)
+/node_modules/
+
+# Build da web (Vite), que o Firebase Hosting publica
+/dist/
 
 # Cloud Functions
 functions/node_modules/
 functions/.env*
 
-# Cache do executor de validacao
+# O harness do gabarito de paridade (test/parity/dart), quando restaurado do
+# commit 7480c5a para regravar, compila e baixa o que não se versiona.
+test/parity/dart/build/
+test/parity/dart/.dart_tool/
+test/parity/dart/pubspec.lock
+
+# Cache do executor de validação (tool/lib/sqlite-cache.ts)
 docs/validacao/*.sqlite
 
-# Ferramentas de QA (Gemini) — dependencias Node da raiz
-/node_modules/
-
-# Credencial das ferramentas de QA (Gemini) — NUNCA versionar
-.env.qa
-
-# Valvula de emergencia dos hooks de QA (nunca versionar)
+# Válvula de emergência dos hooks de QA (nunca versionar)
 .qa-skip
 
 # Fila de auditorias adiadas por cota (nunca versionar)
 .qa-pending/
 
-# Respostas cruas do conselheiro. Auditavel localmente, nao versionado:
-# muda a cada execucao e nao e registro, e insumo para virar registro.
+# Respostas cruas do conselheiro. Auditável localmente, não versionado:
+# muda a cada execução e não é registro, é insumo para virar registro.
 .conselho/
 
 # Capturas de tela para a lente `tela` do conselheiro. Regeneradas a cada
-# execucao de `npm run ui:capturar` -- binario que muda sempre nao pertence
-# ao historico. Marcos que valem arquivar vao para docs/telas/marcos/.
+# execução de `npm run ui:capturar` -- binário que muda sempre não pertence
+# ao histórico. Marcos que valem arquivar vão para docs/telas/marcos/.
 docs/telas/
 !docs/telas/marcos/
 
-# Diferencas de golden que o flutter_test grava quando uma comparacao falha:
-# *_masterImage, *_testImage, *_isolatedDiff, *_maskedDiff. Sao artefato de
-# diagnostico, regravado a cada execucao.
-#
-# O caminho e ANCORADO EM `test/` de proposito. Um padrao solto `failures/`
-# tambem casaria com `packages/equisim_core/lib/src/failures`, que e CODIGO do
-# dominio -- e o repositorio perderia arquivos de origem em silencio, que e a
-# pior forma de perder.
-test/**/failures/
-
-.obsidian/
 # Base bruta da CVM: ~750 MB para 16 anos, reproduzível por
 # `python tool/cvm_baixar.py`. Dado de terceiro, e não fonte deste projeto.
 data/cvm/
 data/cvm_exercicios.json
 # As versões antigas dos documentos (item B8), por tool/cvm_versoes_baixar.py
-# e tool/cvm_ingerir.dart.
+# e `npm run tool -- cvm-ingest`.
 data/cvm_versoes.json
 # As coortes da réplica fora da amostra (item C7), antes de seladas: as seladas
-# vão para docs/validacao/c7/ por tool/c7_selar.dart.
+# vão para docs/validacao/c7/ por `npm run tool -- c7-seal`.
 data/c7/
 
 # Taxas do Tesouro Direto (~15 MB), reproduzível por tool/tesouro_baixar.py.
@@ -182,7 +72,7 @@ data/tesouro/
 # Série histórica de cotações da B3 (COTAHIST, ~80 MB por ano).
 data/b3/
 
-# Gabarito da cascata (D1), gerado por tool/gabarito_cascata.dart, com a
+# Gabarito da cascata (D1), gerado por `npm run tool -- cascade-golden`, com a
 # entrada congelada que ele repete: a cópia do cache da validação e o Ibovespa
 # servido. Centenas de megabytes, e só valem contra o código em que foram
 # gravados.
