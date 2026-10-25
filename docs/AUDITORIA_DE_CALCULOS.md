@@ -15,13 +15,14 @@ onde estudar o assunto.
 ## 1. Como abrir
 
 Menu do perfil → **"Abrir Painel de Logs de Cálculo"**. O painel abre numa aba
-separada (`#/logs`) e recebe os eventos da janela principal por um canal entre
+separada (`/logs`) e recebe os eventos da janela principal por um canal entre
 janelas; na mesma janela, a entrega é local. Ele não autentica, não lê carteira
 e não calcula nada — só observa ([logs-app.tsx](../src/features/logs/logs-app.tsx),
 [audit-bus.ts](../src/audit/audit-bus.ts)).
 
-Com o painel aberto, use o aplicativo normalmente: cada ativo aberto na aba de
-avaliação gera um evento. Cada valuation confirmado em **Editar valuation** gera
+Com o painel aberto, use o aplicativo normalmente: cada ativo aberto no
+**Raio-X** gera um evento. Cada valuation confirmado em **Simular minhas
+premissas** gera
 outro, em `/core/valuation/manual/<ATIVO>`, com as premissas do usuário e o
 resultado gravado — e os valuations já salvos entram no painel assim que o
 aplicativo os carrega, de modo que o painel reflete o que está persistido, e

@@ -107,17 +107,27 @@ schema forçado pelo servidor e `temperature: 0`, portanto é o mais reproduzív
 
 ## 3. Restrições de arquitetura que você não deve violar
 
-### 3.1 `packages/equisim_core` é Dart puro
+### 3.1 `src/core` é TypeScript puro
 
 **Zero dependências de runtime**, por decisão deliberada, travada pelo teste
-`test/core/purity_test.dart`.
+`test/core/purity.test.ts`: todo import de `src/core` é relativo e fica dentro
+dele. O núcleo foi Dart (`packages/equisim_core`) até a
+[decisão 152](docs/decisoes/152-o-equisim-passa-a-typescript-e-o-dart-sai-do-repositorio.md),
+que o portou regra por regra; `test/parity/` confere que nenhum número mudou.
 
-- **Não adicione pacote algum** ao `pubspec.yaml` desse módulo — nem
-  `decimal`, nem `rational`, nem utilitário "só dessa vez".
+- **Não importe pacote algum** nesse módulo — nem `decimal.js`, nem `big.js`,
+  nem utilitário "só dessa vez".
 - Para precisão monetária, a solução aceita é **aritmética inteira em
-  centavos** (`int`, e `BigInt` se houver risco de estouro), convertendo para
-  `double` apenas na fronteira de apresentação.
-- Sem rede, sem I/O, sem `dart:io`, sem Flutter.
+  centavos** (`number` inteiro, exato até `Number.MAX_SAFE_INTEGER`, e `bigint`
+  se houver risco de passar dele), convertendo para fração de real apenas na
+  fronteira de apresentação.
+- Sem rede, sem I/O, sem `node:*`, sem navegador (`window`, `document`,
+  `fetch`, armazenamento), sem React, sem Firebase.
+- `src/core/lang/` é o runtime do porte: `DateTime`, `round` (meio afastado de
+  zero), `mod` (resto nunca negativo), `toStringAsFixed`, `Random` com a
+  semântica do Dart de origem. Use-o no núcleo em vez do equivalente nativo
+  quando a semântica difere — `Math.round(-2.5)` é `-2`, e `round(-2.5)` é
+  `-3`.
 
 ### 3.2 O núcleo precisa ser determinístico
 
@@ -125,19 +135,23 @@ A mesma entrada tem de produzir a mesma saída hoje e daqui a um ano. Não
 introduza `DateTime.now()` direto em caminho de cálculo — receba a data por
 parâmetro, seguindo o padrão já usado no repositório:
 
-```dart
-final today = asOf ?? DateTime.now();
+```ts
+const today = args.asOf ?? DateTime.now();
 ```
 
-O hook de pre-commit bloqueia a forma direta e permite a forma com `??`.
+O hook de pre-commit bloqueia a forma direta — e `new Date()` e `Date.now()`,
+que são o mesmo relógio — e permite a forma com `??`.
 
 ### 3.3 Credenciais
 
-- `.env` **é declarado como asset no `pubspec.yaml`**. Tudo que estiver nele é
-  embarcado no bundle e fica público em `flutter build web`. Nunca coloque
-  segredo de ferramenta ali.
+- O **Vite embarca no bundle toda variável `VITE_*`** do `.env`: ela fica
+  pública no JavaScript servido por `npm run build`. Nunca coloque segredo de
+  ferramenta numa `VITE_*`. Em produção, a brapi vai pelo proxy
+  (`VITE_BRAPI_PROXY_URL`); `VITE_BRAPI_TOKEN` é só de desenvolvimento.
+- As ferramentas de `tool/` leem `BRAPI_TOKEN`, sem prefixo, que o Vite ignora:
+  só o Node a vê.
 - A `GEMINI_API_KEY` mora em **`.env.qa`**, que é ignorado pelo git e não é
-  asset.
+  lido pelo Vite.
 - O hook de pre-commit bloqueia `.env*`, `google-services.json`,
   `serviceAccount*.json` e material criptográfico em staging.
 
@@ -168,13 +182,17 @@ Moeda é BRL: 2 casas, arredondamento half-up. Quantidade de ação é **inteira
   por ativo, acumula e entra no aporte seguinte. Fração de ação em caminho de
   cálculo é defeito.
 - Toda divisão de dinheiro entre N destinos **distribui o resto**. Opere na
-  magnitude em centavos inteiros e reaplique o sinal: o operador `%` do Dart é
-  sempre não-negativo (`(-1) % 3 == 2`), e o algoritmo ingênuo inventa um
+  magnitude em centavos inteiros e reaplique o sinal: o `%` do JavaScript tem o
+  sinal do dividendo (`(-1) % 3 === -1`) e o `mod` de `src/core/lang` é sempre
+  não-negativo (`mod(-1, 3) === 2`), e nos dois o algoritmo ingênuo erra um
   centavo em estornos.
 
-Casos verificados, com valores executados em Dart, estão em
+Casos verificados, com valores executados em Dart 3.12, estão em
 [test/qa_fixtures/financial_edge_cases.json](test/qa_fixtures/financial_edge_cases.json).
-Consulte-o antes de escrever cálculo financeiro novo.
+O `double` do Dart e o `number` do JavaScript são o mesmo IEEE-754 binário de
+64 bits, então os valores valem para o TypeScript; onde o caso depende de
+operador (`%`, `round`), vale a versão de `src/core/lang`. Consulte-o antes de
+escrever cálculo financeiro novo.
 
 ---
 
@@ -232,18 +250,25 @@ npm run ui:capturar   # 42 PNGs em docs/telas/, ignorado pelo git
 npm run conselho -- --lente tela --largura 1024 --tema escuro
 ```
 
-O arquivo de captura é [test/ui/golden_capture.dart](test/ui/golden_capture.dart)
-— **sem** sufixo `_test`, de propósito: assim ele fica fora do `flutter test` e
-uma alteração intencional de UI não deixa a suíte vermelha.
+O capturador é [scripts/capture-screens.ts](scripts/capture-screens.ts): sobe
+o Vite em modo local, abre um Chromium sem janela pelo `playwright-core`,
+responde a brapi e o Banco Central com um mercado sintético e fixa o relógio do
+navegador. Fica fora de `test/` de propósito: não é teste de regressão, e uma
+alteração intencional de UI não deixa a suíte vermelha. Sem Chromium do
+Playwright, use `--navegador <caminho>` ou o Chrome instalado.
 
-**Três limites do equipamento**, já registrados no prompt da lente. Não os
+**Quatro limites do equipamento**, já registrados no prompt da lente. Não os
 reintroduza ao mexer ali:
 
-1. Só Roboto e MaterialIcons são carregados. Símbolo fora do Roboto (U+26A0 e
-   afins) sai como caixa vazia na captura e renderiza bem no aplicativo real.
-2. A captura tem 1600 px de altura para pegar a tela inteira. Sobra vertical
-   não é defeito da interface.
-3. Material parcial produz ausência falsa. Onde a pergunta é "o que existe", a
+1. Inter e JetBrains Mono vêm do Google Fonts; sem rede, o texto cai na fonte
+   do sistema. Símbolo fora das fontes instaladas na máquina de captura
+   (U+26A0 e afins) pode sair como caixa vazia e renderiza bem no aparelho.
+2. A janela é esticada até a altura do conteúdo antes da foto, e nunca encolhe
+   abaixo de 844 px (celular) ou 900 px. Sobra vertical não é defeito da
+   interface. O `fullPage` do Playwright foi descartado porque deixava o
+   cabeçalho grudado e a barra fixa no meio da imagem.
+3. O mercado é sintético: os números da tela não são os de mercado.
+4. Material parcial produz ausência falsa. Onde a pergunta é "o que existe", a
    listagem tem de ser completa no escopo declarado — e dizer que é.
 
 ### No tier gratuito o limite diário é POR MODELO
@@ -272,7 +297,7 @@ no [README de lá](docs/decisoes/README.md).
 | `docs/apontamentos/` | O que orientador e devs apontam fora do git |
 | `docs/estado.md` | **Gerado** por `npm run estado`. Nunca edite à mão |
 | `docs/motor/` | O que o código faz, regra por regra, com código, fórmula, teoria e evidência (decisão 141). Mudou uma regra, mude o capítulo |
-| `docs/estudo/` | Guia para quem não sabe finanças: capítulos e casos com os números de `tool/casos_de_estudo.dart`. Mudou o motor, refaça os dados e releia os casos |
+| `docs/estudo/` | Guia para quem não sabe finanças: capítulos e casos com os números de `tool/study-cases.ts`. Mudou o motor, refaça os dados e releia os casos |
 | `docs/eap/` | Pacotes da reconstrução da UI, cumprida (decisão 22) — especificação histórica |
 | `PLANO_ARQUITETURA.md` | **Congelado.** Plano de transição já cumprido; decisões 0–18 estão nele |
 

@@ -140,7 +140,7 @@ três anos, e cada um cobra a sua taxa.
 
 **Onde isso aparece no Equisim:** é exatamente assim que o motor desconta os dez
 anos de projeção
-([dcf.ts, `_project`](../../src/core/services/valuation/dcf.ts)).
+([dcf.ts, `project`](../../src/core/services/valuation/dcf.ts)).
 A taxa de cada ano vem da curva de juros do Tesouro (capítulo 3, seção 3.6).
 
 ---

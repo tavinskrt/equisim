@@ -91,7 +91,7 @@ Detalhes que o motor cuida:
   aviso (decisão 111).
 
 **No código:** [beta.ts](../../src/core/services/metrics/beta.ts)
-e [prepare-valuation-inputs.ts, `_estimateBeta`](../../src/core/usecases/prepare-valuation-inputs.ts).
+e [prepare-valuation-inputs.ts, `estimateBeta`](../../src/core/usecases/prepare-valuation-inputs.ts).
 
 ---
 
@@ -394,7 +394,7 @@ dívida é matéria-prima, e o beta medido já carrega a alavancagem de sempre
 | Volatilidade | desvio dos retornos diários × √252 | 20% a 50% ao ano |
 | Beta | inclinação contra o Ibovespa, 5 anos diários | 0,5 a 1,5 |
 | Beta encolhido | média ponderada pela precisão | peso mediano 0,98 |
-| Hamada | `β_L = β_U × (1 + 0,66 × D/E)` | D/E limitado a 3 |
+| Hamada | `βL = βU × (1 + 0,66 × D/E)` | D/E limitado a 3 |
 | Taxa livre de risco | forward da curva, ano a ano | 13,6% a 14,6% |
 | Prêmio de mercado | média de dez anos do prêmio implícito | 1,21% |
 | CAPM | `Ke = Rf + β × prêmio` | 15% a 16% (de 10% a 90% dos avaliados) |

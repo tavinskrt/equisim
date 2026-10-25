@@ -7,7 +7,7 @@ fórmula abaixo é refeita com números nos [casos](../estudo/casos/).
 
 Código: [dcf.ts](../../src/core/services/valuation/dcf.ts)
 (`DcfAssumptions`, `DcfCalculator`) e
-[compute-valuation.ts, `_assumptions`, `_discountFromBalanceSheet`](../../src/core/usecases/compute-valuation.ts).
+[compute-valuation.ts, `assumptions`, `discountFromBalanceSheet`](../../src/core/usecases/compute-valuation.ts).
 
 ---
 
@@ -48,7 +48,7 @@ capital_1 = lucro_1 ÷ ROIC_base;   capital_t = capital_{t−1} + b_t × lucro_t
 ```
 
 O fator **acumula** as taxas de cada ano; não eleva uma taxa só a `t`
-(`DcfCalculator._project`).
+(`project`, em dcf.ts).
 
 ---
 
@@ -139,7 +139,7 @@ não era a soma das parcelas.
 | Participação do capital próprio | `E ÷ EV` | `equityShare` |
 | Upside | `(justo − preço) ÷ preço` | `ValuationResult.upside` |
 | Preço com margem | `justo × (1 − margem)`; margem zero por padrão no aplicativo | `ValuationResult` |
-| Taxa exibida | a do ano 1 (`discountRateAt(1)`) | `_withScenarios` |
+| Taxa exibida | a do ano 1 (`discountRateAt(1)`) | `withScenarios` |
 
 ## Limitações deste capítulo
 

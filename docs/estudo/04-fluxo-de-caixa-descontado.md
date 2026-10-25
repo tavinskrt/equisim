@@ -68,7 +68,7 @@ recusada pela conta (capítulo 3, seção 3.10, e o [caso RENT3](casos/rent3.md)
   60% dos exercícios; senão, para a **via do acionista**, que parte do lucro
   líquido.
 
-([compute-valuation.ts, `_route`](../../src/core/usecases/compute-valuation.ts);
+([compute-valuation.ts, `route`](../../src/core/usecases/compute-valuation.ts);
 [financial-sectors.ts](../../src/core/services/valuation/financial-sectors.ts).)
 
 ---
@@ -157,12 +157,13 @@ base reconstruída e 1 não tinha ciclo medível. O porquê de cada um, com os
 números, está em [normalizacoes.md](../validacao/normalizacoes.md).
 
 **Onde ver no aplicativo.** No **painel de logs**, o passo "Base do fluxo" abre
-com um quadro **"Por quê"**, em texto corrido, antes das variáveis e da conta. Na
-tela **Editar valuation**, o cartão do lucro de partida traz a pergunta "Por
+com um quadro **"Por quê"**, em texto corrido, antes das variáveis e da conta. No
+**Raio-X** do ativo (modo Completo) e na tela **Simular minhas premissas**, o
+cartão do lucro de partida traz a pergunta "Por
 que o motor subiu (ou baixou) o lucro de partida?", com o retorno de cada ano
 do ciclo em barras, o típico marcado, o teste que decidiu e a conta.
 
-([compute-valuation.ts, `_output1` e `_baseFlow`](../../src/core/usecases/compute-valuation.ts);
+([compute-valuation.ts, `output1` e `baseFlow`](../../src/core/usecases/compute-valuation.ts);
 [growth-guards.ts](../../src/core/services/valuation/growth-guards.ts).)
 
 ---
@@ -465,7 +466,7 @@ preço justo em mais de 50%, a tela avisa — **mas o preço justo não muda**
 | Ponte frágil | o capital próprio é menos de 35% do valor da firma | o valor por ação é resíduo de uma subtração frágil |
 | Controle estatal | a companhia é controlada pelo governo, pelo cadastro da CVM | o motor não cobra o risco de o controlador decidir por outros objetivos que o lucro, e a medição diz por quê ([estatais.md](../validacao/estatais.md)); o preço não muda |
 
-([compute-valuation.ts, `_diagnose`](../../src/core/usecases/compute-valuation.ts);
+([compute-valuation.ts, `diagnose`](../../src/core/usecases/compute-valuation.ts);
 [domain-copy.ts](../../src/copy/domain-copy.ts).)
 
 ---
@@ -489,11 +490,12 @@ para ter em mente:
    decidir sozinho.
 3. **A incerteza é grande e está medida**: é a faixa calibrada.
 
-## 4.16 Faça a conta você mesmo: o botão "Editar valuation"
+## 4.16 Faça a conta você mesmo: o botão "Simular minhas premissas"
 
 Tudo o que este capítulo descreveu — o lucro de partida, o crescimento, a taxa,
-a perpetuidade — é decidido pelo motor sozinho. O botão **Editar valuation**, no
-cartão do preço, abre a mesma conta para você discordar dela (decisão 147).
+a perpetuidade — é decidido pelo motor sozinho. O botão **Simular minhas
+premissas**, no Raio-X do ativo, abre a mesma conta para você discordar dela
+(decisão 147).
 
 **Como funciona.** A tela abre com um cartão para cada número que o motor
 escolheu, já preenchido com o valor dele. Você digita outro número (ou usa os

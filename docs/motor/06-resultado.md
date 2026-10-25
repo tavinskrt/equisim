@@ -13,7 +13,7 @@ a avaliação roda fora da linha da interface ([valuation-runner.ts](../../src/d
 
 | Cartão | Conteúdo | Origem |
 |---|---|---|
-| Preço | preço de mercado, preço justo (pelas premissas do motor), upside total sem prazo, e o botão Editar valuation, preço com margem | `ValuationResult` |
+| Preço | preço de mercado, preço justo (pelas premissas do motor), upside total sem prazo, e o botão Simular minhas premissas, preço com margem | `ValuationResult` |
 | Modelo aplicado | "DCF sobre fluxo da firma" ou "DCF sobre lucro distribuível"; taxa de desconto do ano 1 (WACC ou custo do capital próprio) | `ValuationResult.model`, `discountRate` |
 | Faixa calibrada | 80% nominal, em 12 e 36 meses, com a cobertura fora da amostra | 6.3 |
 | Sensibilidade | os três conjuntos fixos — "Premissas mais duras", "Premissas do motor", "Premissas mais brandas", com o quanto foi mexido em nota — ou o Monte Carlo (chave), e a barra do menor ao maior com o preço justo marcado; um cartão só desde a decisão 148 | 6.2 |
@@ -28,12 +28,12 @@ a avaliação roda fora da linha da interface ([valuation-runner.ts](../../src/d
 |---|---|---|
 | Fixos: pessimista `g − 3 p.p.` e desconto `+2 p.p.` nas duas taxas; otimista `g + 3 p.p.` e `−2 p.p.` (a taxa terminal não desce abaixo de `g∞ + 0,5 p.p.`) | [scenario-engine.ts, `DiscreteScenarios.around`](../../src/core/services/valuation/scenario-engine.ts) | deslocar as duas taxas: com a terminal parada a banda ficava metade |
 | Monte Carlo: 10.000 sorteios triangulares — `g ± 4 p.p.`, desconto `± 2 p.p.` (em paralelo nas duas taxas), `g∞ ± 1 p.p.` (piso 0) —, semente fixa | `StochasticScenarios.around`; `ValuationSettings.samples` | determinismo |
-| Via do acionista: o deslocamento alcança o caminho de Ke inteiro | `_discountFromBalanceSheet` | item B36 |
-| Via da firma: o deslocamento vai ao Ke um a um (e ao desconto do terminal da firma); o alvo do retorno sobre o capital fica parado | `_discountFromBalanceSheet`, `_scenarioFactor` | decisão 121 (as três traduções medidas) |
+| Via do acionista: o deslocamento alcança o caminho de Ke inteiro | `discountFromBalanceSheet` | item B36 |
+| Via da firma: o deslocamento vai ao Ke um a um (e ao desconto do terminal da firma); o alvo do retorno sobre o capital fica parado | `discountFromBalanceSheet`, `scenarioFactor` | decisão 121 (as três traduções medidas) |
 | O cenário base é sempre o preço justo | teste `cenario-via-acionista.test.ts` | decisão 105 |
 | **São sensibilidade, não probabilidade**: a banda entre as premissas mais duras e as mais brandas conteve 8% dos resultados nas coortes, contra 90% nominais | título e rodapé do cartão | decisão 92 |
-| **Nomeados pelas premissas, e não pelo resultado**: a nota sai de `DiscreteScenarios.defaultGrowthDelta` e `defaultDiscountDelta`; a cor de cada valor, da posição dele contra o preço justo | [domain-copy.ts](../../src/copy/domain-copy.ts), [asset-xray.tsx, `_SensitivityCard`](../../src/features/asset/asset-xray.tsx) | decisão 148 |
-| **A inversão é declarada**: quando as premissas mais brandas dão preço menor que as mais duras, o cartão diz que a empresa rende abaixo do custo e que crescer destrói valor | `_SensitivityCard` | item B38, fechado pela decisão 148 |
+| **Nomeados pelas premissas, e não pelo resultado**: a nota sai de `DiscreteScenarios.defaultGrowthDelta` e `defaultDiscountDelta`; a cor de cada valor, da posição dele contra o preço justo | [domain-copy.ts](../../src/copy/domain-copy.ts), [asset-xray.tsx, `SensitivityCard`](../../src/features/asset/asset-xray.tsx) | decisão 148 |
+| **A inversão é declarada**: quando as premissas mais brandas dão preço menor que as mais duras, o cartão diz que a empresa rende abaixo do custo e que crescer destrói valor | `SensitivityCard` | item B38, fechado pela decisão 148 |
 
 O conjunto mais brando soma crescimento, e crescer destrói valor quando o
 retorno fica abaixo do custo. Com o motor de 02/10/2026, ele sai abaixo do mais
@@ -56,7 +56,7 @@ P = preço de hoje;  V = preço justo;  σ = volatilidade anual do papel
 | `σ` = desvio-padrão amostral dos retornos log diários dos últimos 252 pregões × √252 (≥ 120 retornos) | [calibrated-band.ts, `trailingVolatility`](../../src/core/services/valuation/calibrated-band.ts) | — |
 | `a`, `b`, `z` por horizonte e nominal, do pacote [banda_calibrada.json](../../public/assets/validacao/banda_calibrada.json), medidos nas coortes trimestrais (12 meses: 2018–2025; 36 meses: 2018–2023) | `VolatilityBandTable`, [tool/cobertura_banda.py](../../tool/cobertura_banda.py) | decisões 100 e 124 |
 | 12 meses: `a = 0,0781`, `b = 0,0202`; 36 meses: `a = 0,1318`, `b = 0,0615` — o preço converge pouco ao justo | pacote | [cobertura_banda.md](../validacao/cobertura_banda.md) |
-| A tela afirma "8 de cada 10" só se a cobertura fora da amostra estiver a até 5 p.p. de 80% nos dois horizontes (medida em 02/10/2026: 79,7% e 78,7%) | `_CalibratedBandCard.criterionMargin` | critério do R2 |
+| A tela afirma "8 de cada 10" só se a cobertura fora da amostra estiver a até 5 p.p. de 80% nos dois horizontes (medida em 02/10/2026: 79,7% e 78,7%) | `CalibratedBandCard.criterionMargin` | critério do R2 |
 
 ---
 
@@ -66,7 +66,7 @@ P = preço de hoje;  V = preço justo;  σ = volatilidade anual do papel
 |---|---|---|
 | P/L × lucro por papel; P/VP × patrimônio por papel; (EV/EBITDA × EBITDA − dívida líquida) ÷ papéis — sobre o mesmo exercício e o mesmo divisor do DCF | [peer-multiples.ts, `PeerValuation`](../../src/core/services/valuation/peer-multiples.ts) | decisão 118 |
 | Mediana do subsetor; sem 5 pares, do setor; sem isso, do mercado — por múltiplo | [tool/multiples-package.ts](../../tool/multiples-package.ts), [multiplos_setoriais.json](../../public/assets/mercado/multiplos_setoriais.json) | decisão 118 |
-| **Pares são outras companhias**: uma por companhia (mediana das classes dela), sem a do ativo avaliado | `_valores` no empacotador | **item B41, corrigido em 28/09/2026**: a Sanepar entrava três vezes entre os próprios sete pares, e duas leituras devolviam o preço dela na data do pacote |
+| **Pares são outras companhias**: uma por companhia (mediana das classes dela), sem a do ativo avaliado | `valores` no empacotador | **item B41, corrigido em 28/09/2026**: a Sanepar entrava três vezes entre os próprios sete pares, e duas leituras devolviam o preço dela na data do pacote |
 | EV/EBITDA recusado para financeira | `PeerValuation` | decisão 102 |
 | Consolidada = mediana das leituras aplicadas; aviso se divergir mais de 50% do DCF; **não muda o preço justo** | `PeerTriangulation`, `divergenceLimit` | decisão 118 |
 
@@ -76,14 +76,14 @@ P = preço de hoje;  V = preço justo;  σ = volatilidade anual do papel
 
 | Ressalva | Gatilho | Código |
 |---|---|---|
-| Terminal pesado | terminal > 80% do capital próprio | `_diagnose` |
-| Crescimento não identificado | `g` da âncora de inflação ou zero | `_diagnose` |
-| Escala incerta | contagens divergem e não há oficial | `_diagnose` |
-| Base normalizada forte | fator > 2 ou < ½ | `_diagnose` |
-| Prazo determinado | concessão | `_diagnose` |
-| Base reconstruída | base veio do ciclo | `_diagnose` |
-| Ponte frágil | capital próprio < 35% do valor da firma | `_diagnose` |
-| Controle estatal | a companhia é de controle estatal na data, pelo Formulário Cadastral da CVM; **não muda o preço** | `_diagnose`, [shareholder-control.ts](../../src/core/services/cvm/shareholder-control.ts) (decisão 145) |
+| Terminal pesado | terminal > 80% do capital próprio | `diagnose` |
+| Crescimento não identificado | `g` da âncora de inflação ou zero | `diagnose` |
+| Escala incerta | contagens divergem e não há oficial | `diagnose` |
+| Base normalizada forte | fator > 2 ou < ½ | `diagnose` |
+| Prazo determinado | concessão | `diagnose` |
+| Base reconstruída | base veio do ciclo | `diagnose` |
+| Ponte frágil | capital próprio < 35% do valor da firma | `diagnose` |
+| Controle estatal | a companhia é de controle estatal na data, pelo Formulário Cadastral da CVM; **não muda o preço** | `diagnose`, [shareholder-control.ts](../../src/core/services/cvm/shareholder-control.ts) (decisão 145) |
 
 Os rótulos de tela estão em [domain-copy.ts](../../src/copy/domain-copy.ts)
 (decisão 125: o rótulo mora na apresentação). Os avisos em texto saem do núcleo

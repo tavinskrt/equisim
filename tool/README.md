@@ -1,7 +1,7 @@
 # tool/ — medições, empacotadores e conferências
 
 Tudo o que mede o motor, monta os pacotes de `public/assets/` ou confere uma
-fonte de dados mora aqui. Até a [decisão 152](../docs/decisoes/152-o-nucleo-dart-sai-e-as-ferramentas-passam-a-typescript.md)
+fonte de dados mora aqui. Até a [decisão 152](../docs/decisoes/152-o-equisim-passa-a-typescript-e-o-dart-sai-do-repositorio.md)
 eram scripts Dart sobre `packages/equisim_core`; agora são módulos TypeScript
 sobre o **mesmo núcleo que o aplicativo usa**, `src/core`, e a camada de dados
 dele, `src/data`. Não há segunda implementação do motor para as ferramentas.
@@ -60,9 +60,10 @@ alguns valores, e a decisão 152 lista cada caso. Os que mais aparecem:
 - `NaN` e infinito saem como `null` no JSON, onde o Dart interrompia a gravação
   com erro;
 - `geradoPor` e as linhas de proveniência apontam para o `.ts`;
-- a impressão digital da cascata (`cascade-golden`) sai em hexadecimal sem
-  sinal, e o gabarito precisa ser regravado sob o TypeScript antes de
-  `--conferir`.
+- a impressão digital da cascata (`cascade-golden`) é a mesma conta (FNV-1a de
+  64 bits, em hexadecimal), mas sobre o rastro escrito pelo JSON do
+  JavaScript: um gabarito gravado pelo Dart não confere, e precisa ser
+  regravado sob o TypeScript antes de `--conferir`.
 
 ## Ferramentas (76)
 

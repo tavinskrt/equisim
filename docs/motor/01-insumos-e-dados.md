@@ -21,10 +21,16 @@ qualquer conta de valor. Estudo do assunto: [guia, cap. 2](../estudo/02-a-empres
 | CDI, IPCA, IBC-Br | **Banco Central**, SGS (séries 12, 433 e 24364) | [bcb-datasource.ts](../../src/data/datasources/bcb-datasource.ts) | IBC-Br dessazonalizado |
 | Histórico de cotações das coortes | **B3**, COTAHIST | [b3_cotahist.md](../validacao/b3_cotahist.md) | só na validação, inclui as deslistadas |
 
-O aplicativo guarda o que busca num cache local (SQLite, via Drift), para não
-repetir a rede e para que a mesma consulta devolva o mesmo dado. Sem cache, ele
-continua funcionando ([services.ts, `cacheDatabaseProvider`](../../src/app/services.ts);
-[web/ASSETS.md](../../web/ASSETS.md)).
+O aplicativo guarda o que busca num cache local (IndexedDB do navegador, banco
+`equisim-cache`), para não repetir a rede e para que a mesma consulta devolva o
+mesmo dado, com validade por tipo: cotações por 12 horas, fundamentos por 30
+dias, perfil por 90 e séries do Banco Central por um dia. Sem IndexedDB (janela
+anônima, armazenamento bloqueado), o cache fica em memória e o aplicativo
+continua funcionando ([boot.ts, `openStore`](../../src/app/boot.ts);
+[cache-database.ts](../../src/data/cache/cache-database.ts);
+[cache-policy.ts](../../src/data/cache/cache-policy.ts)). As ferramentas de
+medição leem o mesmo formato de um SQLite em disco
+([sqlite-cache.ts](../../tool/lib/sqlite-cache.ts)).
 
 ---
 
@@ -34,8 +40,8 @@ continua funcionando ([services.ts, `cacheDatabaseProvider`](../../src/app/servi
 |---|---|---|---|
 | Toda avaliação tem uma data; só entram exercícios **publicados** até ela | [point-in-time-view.ts](../../src/core/time/point-in-time-view.ts) | evitar o viés de antecipação (*look-ahead bias*) em validação histórica | — |
 | Publicado = data de recebimento na CVM (`DT_RECEB`) quando existe; senão, fim do exercício + 90 dias | `PointInTimeView.defaultLag` | a defasagem real medida tem mediana de 78 dias; 90 é conservador | comentário da classe |
-| Exercício sem demonstração de resultado é descartado, com aviso | `ValuationCascade._evaluate`, `hasIncomeStatement` | ausência não é zero | decisão 52 |
-| Aviso se o exercício mais recente tem mais de dois anos | `_evaluate` | dado velho descreve outra empresa | — |
+| Exercício sem demonstração de resultado é descartado, com aviso | `ValuationCascade.evaluate`, `hasIncomeStatement` | ausência não é zero | decisão 52 |
+| Aviso se o exercício mais recente tem mais de dois anos | `evaluate` | dado velho descreve outra empresa | — |
 
 ---
 
@@ -64,11 +70,11 @@ forma a cotação.
 
 | Regra | Código | Evidência |
 |---|---|---|
-| Razão da unit declarada (formulário cadastral, entre 1 e 10) vale; sem declaração, a medida `ações × preço ÷ valor de mercado`, arredondada, com tolerância de 5% | `ValuationCascade.quotedUnitRatio`, `_auditUnitRatio` | decisão 106 (item B16): a medida erra 79 de 220 observações de unit nas coortes |
+| Razão da unit declarada (formulário cadastral, entre 1 e 10) vale; sem declaração, a medida `ações × preço ÷ valor de mercado`, arredondada, com tolerância de 5% | `ValuationCascade.quotedUnitRatio`, `auditUnitRatio` | decisão 106 (item B16): a medida erra 79 de 220 observações de unit nas coortes |
 | Contagem oficial da B3, líquida de tesouraria, quando recente, arbitra | `ValuationCascade.quotedShares` | decisão 83 |
 | Sem oficial: valor de mercado ÷ preço; se divergir da contagem das demonstrações além de 1,5×, vale a **maior** (menor preço por papel) | idem | decisão 66, confirmada por contrafactual |
-| O aviso de contagens discordantes nomeia a contagem que a ponte usou | `_evaluate` | item B40, corrigido em 28/09/2026 |
-| Capital emitido depois do balanço entra na contagem e é somado ao capital próprio | `_withPosteriorCapital` | item B28 |
+| O aviso de contagens discordantes nomeia a contagem que a ponte usou | `evaluate` | item B40, corrigido em 28/09/2026 |
+| Capital emitido depois do balanço entra na contagem e é somado ao capital próprio | `withPosteriorCapital` | item B28 |
 
 ---
 
@@ -108,13 +114,13 @@ Sem rede e sem cache, valem valores de recuo declarados em
 
 | Regra | Código | Fundamento | Evidência |
 |---|---|---|---|
-| Janela de cinco anos até a data; retornos **diários** pareados por data com o Ibovespa | [prepare-valuation-inputs.ts, `_estimateBeta`](../../src/core/usecases/prepare-valuation-inputs.ts); [beta.ts](../../src/core/services/metrics/beta.ts) | regressão de mercado (Sharpe, 1964) | — |
+| Janela de cinco anos até a data; retornos **diários** pareados por data com o Ibovespa | [prepare-valuation-inputs.ts, `estimateBeta`](../../src/core/usecases/prepare-valuation-inputs.ts); [beta.ts](../../src/core/services/metrics/beta.ts) | regressão de mercado (Sharpe, 1964) | — |
 | Retorno total dos dois lados: o ativo com os proventos em dinheiro da B3 reinvestidos | `TotalReturnIndex` | o Ibovespa já é de retorno total | decisão 89 |
 | `β = Cov(ativo, índice) ÷ Var(índice)`, com pelo menos 30 pares; erro-padrão `|β|·√((1−ρ²)/(ρ²(n−2)))` | `BetaCalculator` | MQO | — |
-| Sem 30 pares: β = 1, declarado como manual | `_estimateBeta` | premissa neutra e transparente | — |
+| Sem 30 pares: β = 1, declarado como manual | `estimateBeta` | premissa neutra e transparente | — |
 | Correção de não sincronia (Dimson) medida e recusada | — | a Porta 0 já tira quem sofreria dela | decisão 57 |
 | Encolhimento para o beta do setor, pela precisão (capítulo 4) | [beta-shrinkage.ts](../../src/core/services/metrics/beta-shrinkage.ts) | Vasicek (1973) | decisão 40 |
-| Aviso quando a janela cobre menos de 80% de cinco anos | `_evaluate` | janela curta, beta menos preciso | decisão 111 |
+| Aviso quando a janela cobre menos de 80% de cinco anos | `evaluate` | janela curta, beta menos preciso | decisão 111 |
 
 ## Limitações deste capítulo
 

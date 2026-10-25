@@ -14,14 +14,14 @@ a partir de `ValuationCascade.evaluate`.
 
 | # | Etapa | Função | Recusa quando |
 |---:|---|---|---|
-| 1 | Concessão que acaba antes do horizonte encurta a projeção | `_evaluate` | — |
-| 2 | Preço positivo | `_evaluate` | preço ≤ 0 |
-| 3 | Exercícios publicados na data, com demonstração de resultado | `_evaluate` | nenhum exercício |
+| 1 | Concessão que acaba antes do horizonte encurta a projeção | `evaluate` | — |
+| 2 | Preço positivo | `evaluate` | preço ≤ 0 |
+| 3 | Exercícios publicados na data, com demonstração de resultado | `evaluate` | nenhum exercício |
 | 4 | **Porta 0** — elegibilidade | [eligibility.ts](../../src/core/services/valuation/eligibility.ts), `EligibilityGate.assess` | ver 2.2 |
 | 5 | Razão da unit e contagem de papéis | `quotedUnitRatio`, `quotedShares` | contagem indisponível |
-| 6 | **Portas 1 e 3** — roteamento | `_route` | — |
-| 7 | **Porta 2** — premissas e desconto na via escolhida | `_evaluateLane` | dado não sustenta a via; estrutura de capital recusada; preço justo ≤ 0 |
-| 8 | Resultado, cenários, diagnósticos | `_conclude`, `_withScenarios`, `_diagnose` | — |
+| 6 | **Portas 1 e 3** — roteamento | `route` | — |
+| 7 | **Porta 2** — premissas e desconto na via escolhida | `evaluateLane` | dado não sustenta a via; estrutura de capital recusada; preço justo ≤ 0 |
+| 8 | Resultado, cenários, diagnósticos | `conclude`, `withScenarios`, `diagnose` | — |
 
 ---
 
@@ -31,7 +31,7 @@ a partir de `ValuationCascade.evaluate`.
 |---|---|---|---|
 | Liquidez | volume financeiro diário **mediano** dos últimos 90 pregões ≥ R$ 2 milhões (sem volume na série, o teste é omitido) | `minAverageDailyTradedValue`, `liquidityWindowDays`, `medianTradedValue` | preço de papel ilíquido informa pouco e contamina o beta; mediana porque um dia de leilão não faz liquidez |
 | Histórico | ≥ 8 exercícios publicados | `minPublishedPeriods` | os testes de ciclo, tendência e crescimento precisam de série |
-| Insolvência | patrimônio ≤ 0 (ou ausente) no último **e** no penúltimo exercício | `_insolvent` | sem patrimônio não há base de capital |
+| Insolvência | patrimônio ≤ 0 (ou ausente) no último **e** no penúltimo exercício | `insolvent` | sem patrimônio não há base de capital |
 | Recuperação judicial | lista mantida | [distressed-registry.ts](../../src/data/config/distressed-registry.ts) | o fluxo descontado supõe continuidade |
 
 A recusa por liquidez foi medida contra a ordenação e mantida pelo nível, e não
@@ -54,7 +54,7 @@ O aviso da tela explica a razão em uma frase.
 | Regra | Código | Por quê |
 |---|---|---|
 | NOPAT (publicado ou derivado) positivo em pelo menos 60% dos exercícios, com pelo menos 4 → **via da firma**; senão, **via do acionista** | [growth-guards.ts](../../src/core/services/valuation/growth-guards.ts), `GrowthGuards.firmFlowIsSustained` | a via da firma projeta o resultado operacional; com ele negativo na maioria dos anos, não há base a projetar (decisão 64) |
-| A fronteira usa o fluxo, e não a comparação entre retorno e custo de capital do dia | `_route` | medir contra a taxa do dia faria a via andar com o ciclo monetário (decisão 34) |
+| A fronteira usa o fluxo, e não a comparação entre retorno e custo de capital do dia | `route` | medir contra a taxa do dia faria a via andar com o ciclo monetário (decisão 34) |
 
 ---
 
@@ -62,7 +62,7 @@ O aviso da tela explica a razão em uma frase.
 
 | Regra | Código | Evidência |
 |---|---|---|
-| Se a via escolhida recusa (estrutura de capital, preço justo ≤ 0), o ativo é recusado — não é mandado para a outra via | `_evaluateLane` | decisão 102: trocar de modelo porque um recusou faria o preço justo depender de qual conta alcançou um número |
+| Se a via escolhida recusa (estrutura de capital, preço justo ≤ 0), o ativo é recusado — não é mandado para a outra via | `evaluateLane` | decisão 102: trocar de modelo porque um recusou faria o preço justo depender de qual conta alcançou um número |
 | As duas vias são modelos distintos, não duas opiniões sobre o mesmo número | — | decisão 39: discordavam além de 1,5× em 55 de 92 ativos |
 
 Imposições de diagnóstico (`laneOverride`, `growthOverride`, `terminalReturnOverride`

@@ -54,7 +54,7 @@ calibrada, múltiplos e o rastro inteiro do painel de logs — estão em
 [casos/dados/](casos/dados/), gerados por:
 
 ```bash
-dart run tool/study-cases.ts
+npm run tool -- study-cases
 ```
 
 A entrada é congelada: o resultado só muda se o motor mudar. Quando isso
