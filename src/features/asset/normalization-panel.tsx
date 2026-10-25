@@ -75,7 +75,7 @@ function CycleBars({ n }: { n: BaseNormalization }) {
   const name = NormalizationCopy.returnRate(n.lane);
   const rows = [
     ...n.cycleWindow.map((p) => ({ label: String(p.year), value: p.value, highlight: false })),
-    { label: String(n.latestYear ?? ''), value: last, highlight: true },
+    { label: NormalizationCopy.period(n), value: last, highlight: true },
   ];
   return (
     <figure>

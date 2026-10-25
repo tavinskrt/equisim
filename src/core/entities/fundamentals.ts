@@ -38,6 +38,7 @@ export interface FundamentalsFields {
   treasuryShares?: number | null;
   treasuryFraction?: number | null;
   totalAssets?: number | null;
+  annualizedMonths?: number | null;
 }
 
 /** Argumentos completos do construtor. */
@@ -194,6 +195,16 @@ export class FundamentalsSnapshot {
    */
   readonly totalAssets: number | null;
 
+  /**
+   * Meses do acumulado do ano que os fluxos **anualizam**, ou `null` no
+   * exercício completo (decisão 153).
+   *
+   * Preenchido só no ponto do ano corrente que fecha a série: o acumulado do
+   * último ITR vezes `12 ÷ meses`, com o balanço na data do ITR. É ele que
+   * diz às guardas que a variação de estoque até este ponto não é de um ano.
+   */
+  readonly annualizedMonths: number | null;
+
   constructor(args: FundamentalsArgs) {
     this.ticker = args.ticker;
     this.fiscalPeriodEnd = args.fiscalPeriodEnd;
@@ -231,6 +242,7 @@ export class FundamentalsSnapshot {
     this.treasuryShares = args.treasuryShares ?? null;
     this.treasuryFraction = args.treasuryFraction ?? null;
     this.totalAssets = args.totalAssets ?? null;
+    this.annualizedMonths = args.annualizedMonths ?? null;
   }
 
   /** Todos os campos, para reconstruir com alteração — a base dos `copyWith`. */
@@ -272,7 +284,13 @@ export class FundamentalsSnapshot {
       treasuryShares: this.treasuryShares,
       treasuryFraction: this.treasuryFraction,
       totalAssets: this.totalAssets,
+      annualizedMonths: this.annualizedMonths,
     };
+  }
+
+  /** `true` no ponto do ano corrente anualizado (decisão 153). */
+  get isAnnualized(): boolean {
+    return this.annualizedMonths !== null;
   }
 
   /** Depreciação e amortização, derivada de EBITDA − EBIT. */

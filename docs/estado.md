@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-25, a partir de `26e099a`.
+Gerado em 2026-10-25, a partir de `d2a6359`.
 
 ## Decisões registradas
 
-**125** aceita · **2** cumprida · **7** substituída
+**126** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -149,6 +149,7 @@ Gerado em 2026-10-25, a partir de `26e099a`.
 | 150 | O valuation confirmado é gravado com as premissas e o resultado, e vai ao painel de logs | aceita | voce | 2026-10-22 |
 | 151 | A tela Estudo mostra o valuation do usuário quando ele discorda do motor | aceita | voce | 2026-10-22 |
 | 152 | O Equisim passa a TypeScript, e o Dart sai do repositório | aceita | voce | 2026-10-22 |
+| 153 | O lucro de partida é o do ano corrente anualizado quando já há ITR depois da última DFP | aceita | voce | 2026-10-25 |
 
 ### Caminhos retirados
 
@@ -882,18 +883,20 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 78 | 24.765 |
-| Apresentacao | 109 | 12.749 |
-| Camada de dados | 37 | 4.685 |
+| Nucleo de dominio | 79 | 24.999 |
+| Apresentacao | 109 | 12.767 |
+| Camada de dados | 37 | 4.687 |
 | Auditoria | 5 | 679 |
-| Ferramentas de medicao | 126 | 29.634 |
+| Ferramentas de medicao | 126 | 29.640 |
 | Testes do app | 37 | 5.915 |
-| Testes do nucleo | 64 | 31.733 |
+| Testes do nucleo | 65 | 31.881 |
 | Ferramentas de QA | 21 | 7.531 |
 
 ## Histórico recente
 
 ```
+2026-10-25  d2a6359  Reconstrói o Equisim em TypeScript para a web e tira o Dart do repositório
+2026-10-25  49c1883  Tira da árvore o harness Dart da paridade
 2026-10-25  26e099a  Registra a decisão 152 e leva a documentação à árvore TypeScript
 2026-10-25  772a5ec  Apaga o Flutter e o núcleo Dart, e leva as ferramentas do repositório ao TypeScript
 2026-10-23  663834c  Porta para o Vitest os testes das ferramentas e confere o cache SQLite
@@ -907,6 +910,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-10-23  7affbc8  Monta a interface: tema, componentes, casca, Raio-X, Montador, Planejador e Backtest
 2026-10-23  d982bda  Monta a camada de aplicativo: raiz de dependências, textos e estados
 2026-10-23  b736340  Porta o barramento de auditoria para a web
-2026-10-23  231bc0d  Completa a camada de dados: pacotes, persistência e executor da avaliação
-2026-10-23  5f654e8  Começa a camada de dados em TypeScript: rede, brapi, BCB, Tesouro e cache
 ```

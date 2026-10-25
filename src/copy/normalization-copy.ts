@@ -58,16 +58,26 @@ export const NormalizationCopy = {
     const window = years === null ? '' : `, de ${years.first} a ${years.last}`;
     return (
       'Um ano só pode ter sido um pico ou um vale, e o preço justo é proporcional ao lucro de ' +
-      `partida. Por isso o motor compara o ${NormalizationCopy.returnRate(n.lane)} do último ` +
-      'exercício com o retorno típico da empresa — a mediana dos ' +
+      `partida. Por isso o motor compara o ${NormalizationCopy.returnRate(n.lane)} do ` +
+      `${n.latestMonths === null ? 'último exercício' : 'ano corrente, anualizado do último ITR,'} com o retorno típico da empresa — a mediana dos ` +
       `${n.cycleWindow.length} exercícios anteriores${window} — e só parte de outro lucro ` +
       'quando os dois destoam.'
     );
   },
 
+  /**
+   * O ano do último ponto, dizendo quando ele é o ano corrente anualizado
+   * (decisão 153): `2026 (6 meses anualizados)`.
+   */
+  period(n: BaseNormalization): string {
+    const year = String(n.latestYear ?? '');
+    const months = n.latestMonths;
+    return months === null ? year : `${year} (${months} ${months === 1 ? 'mês anualizado' : 'meses anualizados'})`;
+  },
+
   /** A resposta para este ativo, com os números dele. */
   answer(n: BaseNormalization): string {
-    const year = n.latestYear;
+    const year = NormalizationCopy.period(n);
     const current = pct(n.latestReturn);
     const typical = pct(n.cycleReturn);
     switch (n.outcome.name) {

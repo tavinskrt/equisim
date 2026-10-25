@@ -49,12 +49,18 @@ export function PremiseFields(props: {
   const lane = m.lane;
   const error = (f: ManualField) => errorFor(failure, f);
   const published = m.publishedBase;
+  // O ano corrente anualizado, quando ele fecha a série (decisão 153).
+  const months = m.publishedMonths;
+  const lastPeriod =
+    months === null
+      ? 'o último exercício'
+      : `o ano de ${m.publishedYear} anualizado (${months} ${months === 1 ? 'mês' : 'meses'} × 12/${months})`;
 
   const refBase = m.rebuiltBase
-    ? `Motor: ${ref('reais', engine.baseProfit)} — reconstruído do retorno do ciclo, porque o último exercício veio no prejuízo.`
+    ? `Motor: ${ref('reais', engine.baseProfit)} — reconstruído do retorno do ciclo, porque ${lastPeriod} veio no prejuízo.`
     : published !== null && Math.abs(m.baseFactor - 1) > 0.005
-      ? `Motor: ${ref('reais', engine.baseProfit)} — o último exercício, ${ref('reais', published)}, normalizado ${m.baseFactor > 1 ? 'para cima' : 'para baixo'} pelo ciclo (×${Fmt.ratio(m.baseFactor, 2)}).`
-      : `Motor: ${ref('reais', engine.baseProfit)} — o último exercício publicado.`;
+      ? `Motor: ${ref('reais', engine.baseProfit)} — ${lastPeriod}, ${ref('reais', published)}, normalizado ${m.baseFactor > 1 ? 'para cima' : 'para baixo'} pelo ciclo (×${Fmt.ratio(m.baseFactor, 2)}).`
+      : `Motor: ${ref('reais', engine.baseProfit)} — ${months === null ? 'o último exercício publicado' : lastPeriod}.`;
 
   const rateRef = `Motor: ${ref('rate', engine.discountRate)} no ano 1 e ${ref('rate', m.engineTerminalRate)} na perpetuidade — a curva de juros do Tesouro mais o beta vezes o prêmio de mercado.`;
   const wacc = output?.capitalCostRates ?? null;
@@ -100,7 +106,9 @@ export function PremiseFields(props: {
         onChange={(v) => onChange(p.copyWith({ baseProfit: v }))}
         extras={
           published !== null && published > 0 && Math.abs(published - p.baseProfit) > Units.tolerance('reais') ? (
-            <TextAction onClick={() => onChange(p.copyWith({ baseProfit: published }))}>Usar o último exercício ({ref('reais', published)})</TextAction>
+            <TextAction onClick={() => onChange(p.copyWith({ baseProfit: published }))}>
+              {months === null ? 'Usar o último exercício' : `Usar ${lastPeriod}`} ({ref('reais', published)})
+            </TextAction>
           ) : undefined
         }
         detail={props.normalization === null ? undefined : <NormalizationPanel normalization={props.normalization} editable />}

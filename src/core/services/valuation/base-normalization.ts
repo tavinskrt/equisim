@@ -92,6 +92,7 @@ export interface WindowYears {
 export interface BaseNormalizationArgs {
   lane: ValuationLane;
   latestYear?: number | null;
+  latestMonths?: number | null;
   latestReturn?: number | null;
   cycleWindow?: readonly YearValue[];
   cycleReturn?: number | null;
@@ -145,6 +146,12 @@ export class BaseNormalization {
   /** Ano e retorno do último exercício, ou `null` sem retorno medível. */
   readonly latestYear: number | null;
   readonly latestReturn: number | null;
+
+  /**
+   * Meses do acumulado quando o último ponto é o ano corrente anualizado
+   * (decisão 153), ou `null` quando ele é um exercício completo.
+   */
+  readonly latestMonths: number | null;
 
   /**
    * Os exercícios cuja mediana é o retorno típico: os oito anteriores ao
@@ -229,6 +236,7 @@ export class BaseNormalization {
     this.lane = args.lane;
     this.latestYear = args.latestYear ?? null;
     this.latestReturn = args.latestReturn ?? null;
+    this.latestMonths = args.latestMonths ?? null;
     this.cycleWindow = args.cycleWindow ?? [];
     this.cycleReturn = args.cycleReturn ?? null;
     this.ratio = args.ratio ?? null;
