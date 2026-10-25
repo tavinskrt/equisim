@@ -1,7 +1,8 @@
 /**
  * Oráculo de paridade, lado TypeScript.
  *
- * Refaz, passo a passo, o que `test/parity/dart/harness.dart` fez sobre o
+ * Refaz, passo a passo, o que o harness em Dart (`test/parity/dart/harness.dart`, no commit
+ * `7480c5a`) fez sobre o
  * núcleo Dart original compilado para JavaScript: lê os pacotes versionados de
  * `public/assets/` (CVM, B3, Tesouro, mercado, validação), monta um mercado sintético
  * **determinístico** — cotações, Ibovespa, CDI, IPCA e IBC-Br sorteados pelo

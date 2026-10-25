@@ -7,7 +7,7 @@ depois que o Dart saiu do repositório.
 
 ## Como o gabarito foi gravado
 
-1. `dart/harness.dart` roda o núcleo Dart **compilado para JavaScript pelo
+1. `dart/harness.dart` (removido; ver "Para regravar") rodou o núcleo Dart **compilado para JavaScript pelo
    dart2js** — a mesma semântica numérica do aplicativo Flutter na web —, com
    `--no-minify` para que os nomes de tipo do rastro de auditoria saiam
    legíveis.
@@ -27,8 +27,8 @@ depois que o Dart saiu do repositório.
    pelo JSON), 80 simulações históricas, metas, alinhamento com a meta pelas
    duas leituras do retorno esperado, concentração setorial, troca entre
    Principal e Reserva, seção transversal e o calendário de dias úteis.
-4. `dart/run.cjs` entrega os pacotes ao programa compilado, recebe o que ele
-   emite e grava `golden/header.json`, `golden/cascade.json.gz` e
+4. `dart/run.cjs` entregou os pacotes ao programa compilado, recebe o que ele
+   emitiu e gravou `golden/header.json`, `golden/cascade.json.gz` e
    `golden/services.json.gz`. O rastro de auditoria de cada avaliação —
    3.894 rastros, 58 MB de JSON — entra pela impressão SHA-256 do texto que o
    `jsonEncode` do Dart produziu.
@@ -50,13 +50,22 @@ TypeScript: regravar com o próprio port faria a suíte comparar o port com ele
 mesmo. Uma mudança de método deliberada, registrada em decisão nova, muda o
 gabarito com ela — e a decisão diz quais números mudaram e por quê.
 
-Para refazer a gravação a partir do Dart, restaure `packages/equisim_core` do
-commit `1e83fad` — o `main` de antes da reconstrução, com o núcleo idêntico ao
-que gravou o gabarito — e rode, com o SDK do Dart no `PATH`:
+O harness em Dart (`dart/harness.dart`, `dart/pubspec.yaml` e `dart/run.cjs`)
+saiu da árvore, porque dependia de `packages/equisim_core` e o analisador do
+IDE acusava cada importação como erro. Ele continua no histórico do git. Para
+refazer a gravação a partir do Dart, restaure o harness do commit `7480c5a`,
+que gravou o gabarito, e o núcleo do commit `1e83fad` — o `main` de antes da
+reconstrução, com o núcleo idêntico ao que gravou o gabarito —, e rode, com o
+SDK do Dart no `PATH`:
 
 ```bash
+git checkout 7480c5a -- test/parity/dart
+git checkout 1e83fad -- packages/equisim_core
 cd test/parity/dart
 dart pub get --offline
 dart compile js --no-minify -O2 -o build/harness.js bin/harness.dart  # harness.dart em bin/
 TZ=UTC node --max-old-space-size=8192 run.cjs build/harness.js ../../.. saida 0
 ```
+
+Terminada a gravação, apague as duas pastas de novo (`git rm -r -f
+test/parity/dart packages/equisim_core`): elas não ficam versionadas.

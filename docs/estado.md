@@ -7,7 +7,7 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-25, a partir de `772a5ec`.
+Gerado em 2026-10-25, a partir de `26e099a`.
 
 ## Decisões registradas
 
@@ -888,12 +888,13 @@ Linhas versionadas, excluindo artefatos gerados.
 | Auditoria | 5 | 679 |
 | Ferramentas de medicao | 126 | 29.634 |
 | Testes do app | 37 | 5.915 |
-| Testes do nucleo | 67 | 33.089 |
+| Testes do nucleo | 64 | 31.733 |
 | Ferramentas de QA | 21 | 7.531 |
 
 ## Histórico recente
 
 ```
+2026-10-25  26e099a  Registra a decisão 152 e leva a documentação à árvore TypeScript
 2026-10-25  772a5ec  Apaga o Flutter e o núcleo Dart, e leva as ferramentas do repositório ao TypeScript
 2026-10-23  663834c  Porta para o Vitest os testes das ferramentas e confere o cache SQLite
 2026-10-23  3398f4f  Porta backtest-valuation, o último script de tool/, para TypeScript
@@ -908,5 +909,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-10-23  b736340  Porta o barramento de auditoria para a web
 2026-10-23  231bc0d  Completa a camada de dados: pacotes, persistência e executor da avaliação
 2026-10-23  5f654e8  Começa a camada de dados em TypeScript: rede, brapi, BCB, Tesouro e cache
-2026-10-23  d234958  Leva os pacotes de dados versionados para public/
 ```

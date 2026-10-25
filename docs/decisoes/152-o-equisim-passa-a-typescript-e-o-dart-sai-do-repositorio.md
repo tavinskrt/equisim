@@ -308,9 +308,9 @@ repositório.** Mudam a linguagem e a plataforma; o método não muda.
    pastas de plataforma, o `pubspec.yaml`, os testes `.dart` e os scripts
    `.dart` de `tool/` — os caminhos que decisões anteriores citavam estão em
    `retira`. Os pacotes de dados vão de `assets/` para `public/assets/`, de
-   onde o Vite os serve. Fica um só arquivo Dart,
-   `test/parity/dart/harness.dart`, que gravou o gabarito e só roda com o
-   núcleo restaurado do commit `1e83fad`.
+   onde o Vite os serve. Nenhum arquivo Dart fica na árvore: o harness que
+   gravou o gabarito (`test/parity/dart/`) sai também e se restaura do commit
+   `7480c5a`, com o núcleo do commit `1e83fad`, quando for preciso regravar.
 
 5. **O que o aplicativo anterior decidiu, o aplicativo web mantém.** O
    valuation confirmado vai à coleção `valuations` do Firestore e ao painel de

@@ -30,8 +30,8 @@ coverage/
 functions/node_modules/
 functions/.env*
 
-# O harness do gabarito de paridade (test/parity/dart) só roda com o núcleo
-# Dart restaurado de um commit antigo; o que ele compila e baixa não se versiona.
+# O harness do gabarito de paridade (test/parity/dart), quando restaurado do
+# commit 7480c5a para regravar, compila e baixa o que não se versiona.
 test/parity/dart/build/
 test/parity/dart/.dart_tool/
 test/parity/dart/pubspec.lock
