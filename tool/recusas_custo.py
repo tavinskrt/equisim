@@ -13,7 +13,7 @@ Três perguntas, por motivo de recusa:
    recusados, contra o corte de R$ 2 milhões da Porta 0.
 3. **Soltar a recusa daria ao motor o que o B/M tem?** Só a recusa por
    liquidez tem contrafactual sem mexer no núcleo: sem a série de cotações a
-   Porta 0 omite o corte, e `tool/backtest_valuation.dart` grava o potencial
+   Porta 0 omite o corte, e `tool/backtest-valuation.ts` grava o potencial
    que sairia. O IC dele, sozinho e condicionado ao B/M, é o que decide.
 4. **É reversão do fechamento?** Sinal escalado pelo preço divide pelo mesmo
    fechamento em que o retorno começa. O retorno que começa um mês depois da
@@ -26,7 +26,7 @@ da sobreposição contra o crítico simulado dela (decisão 96), com a defasagem
 trimestrais.
 
 Entrada: ``docs/validacao/backtest_trimestral.json``, de
-``dart run tool/backtest_valuation.dart --montagem aplicativo --com-deslistadas
+``npm run tool -- backtest-valuation --montagem aplicativo --com-deslistadas
 --trimestral``.
 
 Uso:
@@ -89,7 +89,7 @@ def residual(y: list[float], x: list[float]) -> list[float]:
 def t_newey_west(v: list[float], lag: int) -> float | None:
     """`t` da média com Newey-West e núcleo de Bartlett (item C1a).
 
-    A mesma conta de `Regression.neweyWestMean` em `tool/validation/regression.dart`:
+    A mesma conta de `Regression.neweyWestMean` em `tool/validation/regression.ts`:
     com o fator `k/(k−1)`, defasagem zero é o `t` entre coortes de sempre.
     """
     k = len(v)
@@ -107,7 +107,7 @@ def t_newey_west(v: list[float], lag: int) -> float | None:
 
 
 class SplitMix64:
-    """O gerador de `SplitMix64` em `tool/validation/regression.dart`, bit a bit."""
+    """O gerador de `SplitMix64` em `tool/validation/regression.ts`, bit a bit."""
 
     M = (1 << 64) - 1
 

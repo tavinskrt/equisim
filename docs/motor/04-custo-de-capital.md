@@ -11,9 +11,9 @@ estrutura recusada na [RENT3](../estudo/casos/rent3.md).
 
 | Regra | Código | Fundamento | Evidência |
 |---|---|---|---|
-| `Ke = Rf + β × prêmio` | [cost_of_capital.dart, `CapmInputs.costOfEquity`](../../packages/equisim_core/lib/src/services/valuation/cost_of_capital.dart) | Sharpe (1964), Lintner (1965) | — |
-| Prêmio de mercado = **média de dez anos do prêmio implícito** no preço da bolsa: 1,21% em 14/09/2026 | [implied_premium.dart, `ImpliedPremiumPackage.normalizedAt`](../../packages/equisim_core/lib/src/services/valuation/implied_premium.dart); `MarketPremiumSource.impliedNormalized` | em cada trimestre, `r = rendimento × (1 + g) + g` (Gordon/Damodaran: o valor de mercado somado das listadas igualado aos dividendos e JCP de doze meses, crescendo com a economia nominal); o prêmio do trimestre é `r − Rf`, com `Rf` o prefixado de dez anos — a forma que o CAPM soma; a média é a dos trimestres com fim em `(data − 10 anos, data]`, com pelo menos 20 | decisão 142, [premio_implicito.md](../validacao/premio_implicito.md); a média fica positiva em todas as coortes e concorda com o prêmio histórico de dez anos |
-| A série chega por pacote (`assets/mercado/premio_implicito.json`, gerado por `tool/premio_implicito.dart`); sem pacote, o prêmio é o parametrizado de 5,5% (`CapmInputs.defaultMarketPremium`) e a avaliação diz isso; pacote com mais de 183 dias continua valendo, com ressalva da data | [market_premium_repository.dart](../../lib/data/repositories/market_premium_repository.dart) | a média de dez anos anda um quadragésimo por trimestre: trocá-la pelos 5,5% seria salto maior que a defasagem | decisão 142 |
+| `Ke = Rf + β × prêmio` | [cost-of-capital.ts, `CapmInputs.costOfEquity`](../../src/core/services/valuation/cost-of-capital.ts) | Sharpe (1964), Lintner (1965) | — |
+| Prêmio de mercado = **média de dez anos do prêmio implícito** no preço da bolsa: 1,21% em 14/09/2026 | [implied-premium.ts, `ImpliedPremiumPackage.normalizedAt`](../../src/core/services/valuation/implied-premium.ts); `MarketPremiumSource.impliedNormalized` | em cada trimestre, `r = rendimento × (1 + g) + g` (Gordon/Damodaran: o valor de mercado somado das listadas igualado aos dividendos e JCP de doze meses, crescendo com a economia nominal); o prêmio do trimestre é `r − Rf`, com `Rf` o prefixado de dez anos — a forma que o CAPM soma; a média é a dos trimestres com fim em `(data − 10 anos, data]`, com pelo menos 20 | decisão 142, [premio_implicito.md](../validacao/premio_implicito.md); a média fica positiva em todas as coortes e concorda com o prêmio histórico de dez anos |
+| A série chega por pacote (`public/assets/mercado/premio_implicito.json`, gerado por `tool/implied-premium.ts`); sem pacote, o prêmio é o parametrizado de 5,5% (`CapmInputs.defaultMarketPremium`) e a avaliação diz isso; pacote com mais de 183 dias continua valendo, com ressalva da data | [market-premium-repository.ts](../../src/data/repositories/market-premium-repository.ts) | a média de dez anos anda um quadragésimo por trimestre: trocá-la pelos 5,5% seria salto maior que a defasagem | decisão 142 |
 | O Ke "do dia" (CDI corrente) serve ao WACC estático e à tela de metas; o de cada ano da projeção usa o forward daquele ano | `_assumptions`, `_auditCapm` | a curva dá a taxa que o mercado atribui a cada prazo | decisões 74 e 103; rastro explica desde 28/09/2026 |
 
 ---
@@ -22,8 +22,8 @@ estrutura recusada na [RENT3](../estudo/casos/rent3.md).
 
 | Regra | Código | Fundamento | Evidência |
 |---|---|---|---|
-| Peso da medida `w = (1/SE²) ÷ (1/SE² + 1/σ²)`; `β = w·β_medido + (1 − w)·β_prior` | [beta_shrinkage.dart, `BetaShrinkage.shrink`](../../packages/equisim_core/lib/src/services/metrics/beta_shrinkage.dart) | encolhimento bayesiano (Vasicek, 1973) | decisão 40; peso mediano 0,98 |
-| `β_prior` = beta desalavancado mediano do setor (recuo: universo), realavancado pela estrutura do ativo; `σ` = dispersão robusta dos betas do universo (0,53) | [resolve_beta_prior.dart](../../packages/equisim_core/lib/src/usecases/resolve_beta_prior.dart), [assets/mercado/beta_prior.json](../../assets/mercado/) | "bottom-up beta" (Damodaran) | [beta_setorial.md](../validacao/beta_setorial.md) |
+| Peso da medida `w = (1/SE²) ÷ (1/SE² + 1/σ²)`; `β = w·β_medido + (1 − w)·β_prior` | [beta-shrinkage.ts, `BetaShrinkage.shrink`](../../src/core/services/metrics/beta-shrinkage.ts) | encolhimento bayesiano (Vasicek, 1973) | decisão 40; peso mediano 0,98 |
+| `β_prior` = beta desalavancado mediano do setor (recuo: universo), realavancado pela estrutura do ativo; `σ` = dispersão robusta dos betas do universo (0,53) | [resolve-beta-prior.ts](../../src/core/usecases/resolve-beta-prior.ts), [public/assets/mercado/beta_prior.json](../../public/assets/mercado/) | "bottom-up beta" (Damodaran) | [beta_setorial.md](../validacao/beta_setorial.md) |
 | Hamada: `fator = 1 + (1 − 34%) × D/E`, com D/E limitado a [0; 3]; `β_U = β_L ÷ fator` | `BetaShrinkage.leverageFactor` | Hamada (1972) | decisões 54 e 55 (D/E da janela do beta) |
 | Financeiras não se desalavancam nem realavancam | `_resolveCost` | a alavancagem do banco é permanente e regulada, e o beta medido a contém | decisão 46 |
 
@@ -64,7 +64,7 @@ V = E + D_líquida;   E = papéis da ponte × preço
 
 | Situação | Taxa do ano t | Código | Evidência |
 |---|---|---|---|
-| Com beta desalavancado e não financeira: **resolvida** (4.6) | WACC_t e Ke_t do ponto fixo, sobre o forward do ano | `_resolveCost`, [levered_rates.dart](../../packages/equisim_core/lib/src/services/valuation/levered_rates.dart) | decisões 41, 42, 46, 105 |
+| Com beta desalavancado e não financeira: **resolvida** (4.6) | WACC_t e Ke_t do ponto fixo, sobre o forward do ano | `_resolveCost`, [levered-rates.ts](../../src/core/services/valuation/levered-rates.ts) | decisões 41, 42, 46, 105 |
 | Banco, ou sem beta desalavancado, **com curva** | o custo de hoje (beta, prêmio, estrutura de hoje) remontado sobre o forward do ano | `_assumptions` (`curvePath`), `_discountFromBalanceSheet` | **item B37, corrigido em 28/09/2026**: antes interpolava em linha reta do CDI de hoje à perpetuidade |
 | Sem curva | linha reta do custo sobre o CDI corrente ao custo sobre o CDI de dez anos | `DcfAssumptions.discountRateAt` | recuo |
 | Perpetuidade | custo sobre o forward depois do ano N (ou o CDI de dez anos, sem curva), com a estrutura do ano N quando resolvida | `terminalCapm`, `_wacc(terminal: true)` | decisão 105 |
@@ -89,7 +89,7 @@ circularidades juntas.
 | Duas partidas: o caminho sem realavancagem e o custo desalavancado `Rf_t + β_U × prêmio`; se as duas convergem e divergem mais de 0,1%, aviso; se só uma converge, vale ela, com aviso; se nenhuma, recusa "do método, e não do chute" | `LeveredCostOfCapital.solve` (decisão 110) |
 | Capital próprio ≤ 0 em algum ano, ou valor da firma ≤ 0: **estrutura de capital recusada**, e o ativo é recusado (não muda de via) | decisões 45 e 102 |
 | Via do acionista não financeira: mesma ideia pelo lado do acionista, `E_t = (LPA_t + E_{t+1}) ÷ (1 + Ke_t)` | `solveEquity` (decisão 46) |
-| O veredito da vantagem competitiva é refeito contra a taxa de equilíbrio resolvida, até estabilizar (no máximo 10 passes) | [moat_fixed_point.dart](../../packages/equisim_core/lib/src/services/valuation/moat_fixed_point.dart) (decisões 44 e 51) |
+| O veredito da vantagem competitiva é refeito contra a taxa de equilíbrio resolvida, até estabilizar (no máximo 10 passes) | [moat-fixed-point.ts](../../src/core/services/valuation/moat-fixed-point.ts) (decisões 44 e 51) |
 
 A identidade entre a rota da firma e a do acionista (capítulo 5, seção 5.5) só é
 exata com as taxas resolvidas; ela está travada por teste (decisão 43,

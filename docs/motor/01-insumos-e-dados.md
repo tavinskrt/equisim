@@ -9,21 +9,21 @@ qualquer conta de valor. Estudo do assunto: [guia, cap. 2](../estudo/02-a-empres
 
 | Dado | Fonte | Onde no código | Observação |
 |---|---|---|---|
-| Demonstrações anuais (DRE, balanço) | **CVM**, dados abertos (DFP), e **brapi** | [cvm_fundamentals_repository.dart](../../lib/data/repositories/cvm_fundamentals_repository.dart), [fundamentals_merge.dart](../../packages/equisim_core/lib/src/services/cvm/fundamentals_merge.dart) | onde as duas têm o mesmo número, vale a CVM; campo ausente é ausente, nunca zero (decisão 52); a base de patrimônio é o PL da CVM, pelo par VPA × contagem e, sem ele, direto (decisões 81 e 146) |
-| Cotações diárias, valor de mercado, setor | **brapi** | [brapi_datasource.dart](../../lib/data/datasources/remote/brapi_datasource.dart) | o setor e o subsetor oficiais da B3 vêm do pacote [assets/b3/emissores.json](../../assets/b3/) |
-| Contagem oficial de ações | **B3**, registro de emissores | [b3_registry.dart](../../packages/equisim_core/lib/src/services/b3/b3_registry.dart) | líquida de tesouraria (decisão 83) |
-| Proventos em dinheiro | **B3** | [cash_dividends.dart](../../packages/equisim_core/lib/src/services/b3/cash_dividends.dart), [assets/b3/proventos.json](../../assets/b3/) | usados no retorno total do beta e das coortes (decisão 89) e, somados na bolsa inteira, na série do prêmio implícito que dá o prêmio de mercado (decisão 142); nunca no fluxo de um ativo |
-| Eventos societários (desdobramento, bonificação) | **B3** e **CVM** | [corporate_events.dart](../../packages/equisim_core/lib/src/services/b3/corporate_events.dart), [capital_events.dart](../../packages/equisim_core/lib/src/services/cvm/capital_events.dart) | completam o ajuste da série de preços (item B29) e o capital posterior (item B28) |
-| Composição das units | **CVM**, formulário cadastral | [unit_composition.dart](../../packages/equisim_core/lib/src/services/cvm/unit_composition.dart), [assets/cvm/units.json](../../assets/cvm/) | decisão 106 (item B16) |
-| Espécie do controle acionário | **CVM**, formulário cadastral | [shareholder_control.dart](../../packages/equisim_core/lib/src/services/cvm/shareholder_control.dart), [assets/cvm/controle.json](../../assets/cvm/) | só a ressalva de controle estatal; não muda preço (decisão 145, item B46) |
-| Prazo das concessões | **CVM**, Formulário de Referência | [fre_concessions.dart](../../packages/equisim_core/lib/src/services/cvm/fre_concessions.dart), [assets/cvm/outorgas.json](../../assets/cvm/) | decisão 88 |
-| Títulos prefixados (curva) | **Tesouro Direto** | [tesouro_datasource.dart](../../lib/data/datasources/remote/tesouro_datasource.dart), [yield_curve.dart](../../packages/equisim_core/lib/src/services/valuation/yield_curve.dart) | decisões 74, 79 e 84; pacote web em [assets/tesouro/curva.json](../../assets/tesouro/) |
-| CDI, IPCA, IBC-Br | **Banco Central**, SGS (séries 12, 433 e 24364) | [bcb_datasource.dart](../../lib/data/datasources/remote/bcb_datasource.dart) | IBC-Br dessazonalizado |
+| Demonstrações anuais (DRE, balanço) | **CVM**, dados abertos (DFP), e **brapi** | [cvm-fundamentals-repository.ts](../../src/data/repositories/cvm-fundamentals-repository.ts), [fundamentals-merge.ts](../../src/core/services/cvm/fundamentals-merge.ts) | onde as duas têm o mesmo número, vale a CVM; campo ausente é ausente, nunca zero (decisão 52); a base de patrimônio é o PL da CVM, pelo par VPA × contagem e, sem ele, direto (decisões 81 e 146) |
+| Cotações diárias, valor de mercado, setor | **brapi** | [brapi-datasource.ts](../../src/data/datasources/brapi-datasource.ts) | o setor e o subsetor oficiais da B3 vêm do pacote [public/assets/b3/emissores.json](../../public/assets/b3/) |
+| Contagem oficial de ações | **B3**, registro de emissores | [b3-registry.ts](../../src/core/services/b3/b3-registry.ts) | líquida de tesouraria (decisão 83) |
+| Proventos em dinheiro | **B3** | [cash-dividends.ts](../../src/core/services/b3/cash-dividends.ts), [public/assets/b3/proventos.json](../../public/assets/b3/) | usados no retorno total do beta e das coortes (decisão 89) e, somados na bolsa inteira, na série do prêmio implícito que dá o prêmio de mercado (decisão 142); nunca no fluxo de um ativo |
+| Eventos societários (desdobramento, bonificação) | **B3** e **CVM** | [corporate-events.ts](../../src/core/services/b3/corporate-events.ts), [capital-events.ts](../../src/core/services/cvm/capital-events.ts) | completam o ajuste da série de preços (item B29) e o capital posterior (item B28) |
+| Composição das units | **CVM**, formulário cadastral | [unit-composition.ts](../../src/core/services/cvm/unit-composition.ts), [public/assets/cvm/units.json](../../public/assets/cvm/) | decisão 106 (item B16) |
+| Espécie do controle acionário | **CVM**, formulário cadastral | [shareholder-control.ts](../../src/core/services/cvm/shareholder-control.ts), [public/assets/cvm/controle.json](../../public/assets/cvm/) | só a ressalva de controle estatal; não muda preço (decisão 145, item B46) |
+| Prazo das concessões | **CVM**, Formulário de Referência | [fre-concessions.ts](../../src/core/services/cvm/fre-concessions.ts), [public/assets/cvm/outorgas.json](../../public/assets/cvm/) | decisão 88 |
+| Títulos prefixados (curva) | **Tesouro Direto** | [treasury-datasource.ts](../../src/data/datasources/treasury-datasource.ts), [yield-curve.ts](../../src/core/services/valuation/yield-curve.ts) | decisões 74, 79 e 84; pacote web em [public/assets/tesouro/curva.json](../../public/assets/tesouro/) |
+| CDI, IPCA, IBC-Br | **Banco Central**, SGS (séries 12, 433 e 24364) | [bcb-datasource.ts](../../src/data/datasources/bcb-datasource.ts) | IBC-Br dessazonalizado |
 | Histórico de cotações das coortes | **B3**, COTAHIST | [b3_cotahist.md](../validacao/b3_cotahist.md) | só na validação, inclui as deslistadas |
 
 O aplicativo guarda o que busca num cache local (SQLite, via Drift), para não
 repetir a rede e para que a mesma consulta devolva o mesmo dado. Sem cache, ele
-continua funcionando ([providers.dart, `cacheDatabaseProvider`](../../lib/di/providers.dart);
+continua funcionando ([services.ts, `cacheDatabaseProvider`](../../src/app/services.ts);
 [web/ASSETS.md](../../web/ASSETS.md)).
 
 ---
@@ -32,7 +32,7 @@ continua funcionando ([providers.dart, `cacheDatabaseProvider`](../../lib/di/pro
 
 | Regra | Código | Fundamento | Evidência |
 |---|---|---|---|
-| Toda avaliação tem uma data; só entram exercícios **publicados** até ela | [point_in_time_view.dart](../../packages/equisim_core/lib/src/time/point_in_time_view.dart) | evitar o viés de antecipação (*look-ahead bias*) em validação histórica | — |
+| Toda avaliação tem uma data; só entram exercícios **publicados** até ela | [point-in-time-view.ts](../../src/core/time/point-in-time-view.ts) | evitar o viés de antecipação (*look-ahead bias*) em validação histórica | — |
 | Publicado = data de recebimento na CVM (`DT_RECEB`) quando existe; senão, fim do exercício + 90 dias | `PointInTimeView.defaultLag` | a defasagem real medida tem mediana de 78 dias; 90 é conservador | comentário da classe |
 | Exercício sem demonstração de resultado é descartado, com aviso | `ValuationCascade._evaluate`, `hasIncomeStatement` | ausência não é zero | decisão 52 |
 | Aviso se o exercício mais recente tem mais de dois anos | `_evaluate` | dado velho descreve outra empresa | — |
@@ -41,7 +41,7 @@ continua funcionando ([providers.dart, `cacheDatabaseProvider`](../../lib/di/pro
 
 ## 1.3 Grandezas derivadas do exercício
 
-Todas em [fundamentals.dart](../../packages/equisim_core/lib/src/entities/fundamentals.dart).
+Todas em [fundamentals.ts](../../src/core/entities/fundamentals.ts).
 
 | Grandeza | Conta | Nota |
 |---|---|---|
@@ -74,7 +74,7 @@ forma a cotação.
 
 ## 1.5 Âncoras de mercado
 
-Calculadas em [portfolio_usecases.dart, `ResolveMarketAnchors`](../../packages/equisim_core/lib/src/usecases/portfolio_usecases.dart)
+Calculadas em [portfolio-usecases.ts, `ResolveMarketAnchors`](../../src/core/usecases/portfolio-usecases.ts)
 sobre uma janela de dez anos até a data.
 
 | Âncora | Conta | Uso | Valor em 14/09/2026 |
@@ -87,7 +87,7 @@ sobre uma janela de dez anos até a data.
 | Retorno do Ibovespa | médias de 63 pregões nas pontas, composto | meta (decisão 60) | — |
 
 Sem rede e sem cache, valem valores de recuo declarados em
-`MarketAnchors.fallback2026` ([feasibility.dart](../../packages/equisim_core/lib/src/services/goal/feasibility.dart)).
+`MarketAnchors.fallback2026` ([feasibility.ts](../../src/core/services/goal/feasibility.ts)).
 
 ---
 
@@ -95,7 +95,7 @@ Sem rede e sem cache, valem valores de recuo declarados em
 
 | Regra | Código | Evidência |
 |---|---|---|
-| Vértices: Tesouro Prefixado (LTN, taxa à vista direta) e Prefixado com Juros Semestrais (NTN-F, taxa interna tratada como à vista); onde os dois existem, vale a LTN | [yield_curve.dart](../../packages/equisim_core/lib/src/services/valuation/yield_curve.dart), `YieldCurve.at` | decisão 74; diferença LTN × NTN-F medida em −20 a +2 pontos-base |
+| Vértices: Tesouro Prefixado (LTN, taxa à vista direta) e Prefixado com Juros Semestrais (NTN-F, taxa interna tratada como à vista); onde os dois existem, vale a LTN | [yield-curve.ts](../../src/core/services/valuation/yield-curve.ts), `YieldCurve.at` | decisão 74; diferença LTN × NTN-F medida em −20 a +2 pontos-base |
 | Prazo em dias úteis ÷ 252, pelo calendário da data | `BrazilianCalendar` | decisão 79: 99,13% das LTN com o `du` exato desde 2010 |
 | Interpolação *flat-forward* (linear no log do fator de desconto); extrapolação pelo último forward | `YieldCurve` | convenção de mercado; não produz forward negativo entre vértices positivos |
 | A taxa livre de risco do ano t é o forward de um ano entre t−1 e t | `annualForwards` | — |
@@ -108,12 +108,12 @@ Sem rede e sem cache, valem valores de recuo declarados em
 
 | Regra | Código | Fundamento | Evidência |
 |---|---|---|---|
-| Janela de cinco anos até a data; retornos **diários** pareados por data com o Ibovespa | [prepare_valuation_inputs.dart, `_estimateBeta`](../../packages/equisim_core/lib/src/usecases/prepare_valuation_inputs.dart); [beta.dart](../../packages/equisim_core/lib/src/services/metrics/beta.dart) | regressão de mercado (Sharpe, 1964) | — |
+| Janela de cinco anos até a data; retornos **diários** pareados por data com o Ibovespa | [prepare-valuation-inputs.ts, `_estimateBeta`](../../src/core/usecases/prepare-valuation-inputs.ts); [beta.ts](../../src/core/services/metrics/beta.ts) | regressão de mercado (Sharpe, 1964) | — |
 | Retorno total dos dois lados: o ativo com os proventos em dinheiro da B3 reinvestidos | `TotalReturnIndex` | o Ibovespa já é de retorno total | decisão 89 |
 | `β = Cov(ativo, índice) ÷ Var(índice)`, com pelo menos 30 pares; erro-padrão `|β|·√((1−ρ²)/(ρ²(n−2)))` | `BetaCalculator` | MQO | — |
 | Sem 30 pares: β = 1, declarado como manual | `_estimateBeta` | premissa neutra e transparente | — |
 | Correção de não sincronia (Dimson) medida e recusada | — | a Porta 0 já tira quem sofreria dela | decisão 57 |
-| Encolhimento para o beta do setor, pela precisão (capítulo 4) | [beta_shrinkage.dart](../../packages/equisim_core/lib/src/services/metrics/beta_shrinkage.dart) | Vasicek (1973) | decisão 40 |
+| Encolhimento para o beta do setor, pela precisão (capítulo 4) | [beta-shrinkage.ts](../../src/core/services/metrics/beta-shrinkage.ts) | Vasicek (1973) | decisão 40 |
 | Aviso quando a janela cobre menos de 80% de cinco anos | `_evaluate` | janela curta, beta menos preciso | decisão 111 |
 
 ## Limitações deste capítulo

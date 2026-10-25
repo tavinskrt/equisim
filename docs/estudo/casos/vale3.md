@@ -228,5 +228,5 @@ fluxo descontado e os múltiplos não corrigem.
   demais; se voltar a 2021, baixa demais.
 - **Commodity é o único setor em que o motor puxa a base para cima depois de uma
   queda forte** — e por isso a lista de setores cíclicos
-  ([cyclical_sectors.dart](../../../packages/equisim_core/lib/src/services/valuation/cyclical_sectors.dart))
+  ([cyclical-sectors.ts](../../../src/core/services/valuation/cyclical-sectors.ts))
   decide muita coisa, e é mantida à mão (limitação declarada).

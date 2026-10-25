@@ -221,7 +221,7 @@ interface Cli {
   help: boolean;
   /** Tema das capturas, para a lente `tela`. */
   theme: 'claro' | 'escuro';
-  /** Largura das capturas, em dp. */
+  /** Largura das capturas, em px CSS. */
   width: number;
 }
 
@@ -240,7 +240,7 @@ ${SUGGESTED_ORDER.map((id) => {
 Opcoes:
   --lente <id>      qual lente executar (obrigatorio)
   --tema <t>        capturas: claro (padrao) ou escuro   [lente tela]
-  --largura <dp>    capturas: 320, 390 (padrao) ou 1024  [lente tela]
+  --largura <px>    capturas: 320, 390 (padrao) ou 1024  [lente tela]
   --backend <b>     agy (padrao, assinatura) ou api (API key)
   --model <nome>    modelo especifico; sem isso, pergunta em terminal
   --timeout <s>     teto local, em segundos
@@ -259,7 +259,7 @@ function parseArgs(argv: string[]): Cli {
     dryRun: false,
     noAsk: false,
     help: false,
-    // 390 dp e o padrao porque e onde a interface aperta -- foi la que o
+    // 390 px e o padrao porque e onde a interface aperta -- foi la que o
     // cabecalho da tabela saiu como "PESO POTENCI..." na primeira captura.
     // Tela folgada esconde problema de hierarquia; tela apertada o expoe.
     theme: 'claro',
@@ -519,8 +519,8 @@ function selectScreenshots(root: string, cli: Cli): string[] {
 
   if (chosen.length === 0) {
     throw new Error(
-      `Ha capturas em docs/telas/${cli.theme}/, mas nenhuma em ${cli.width}dp.\n` +
-        `  Disponiveis: ${[...new Set(readdirSync(dir).map((f) => f.replace(/^.*@/, '').replace('.png', '')))].join(', ')}dp`,
+      `Ha capturas em docs/telas/${cli.theme}/, mas nenhuma em ${cli.width}px.\n` +
+        `  Disponiveis: ${[...new Set(readdirSync(dir).map((f) => f.replace(/^.*@/, '').replace('.png', '')))].join(', ')}px`,
     );
   }
   return chosen;

@@ -2,17 +2,17 @@
 #
 # Prepara uma máquina nova para compilar e executar o Equisim (macOS / Linux).
 #
-# Faz todos os passos que um clone recém-baixado precisa: verifica o Flutter,
-# cria os arquivos de configuração local que o git não versiona (porque guardam
-# credencial) e baixa as dependências travadas em pubspec.lock — exatamente as
-# mesmas versões da máquina de desenvolvimento.
+# Faz todos os passos que um clone recém-baixado precisa: verifica o Node, cria
+# o arquivo de configuração local que o git não versiona (porque guarda
+# credencial) e baixa as dependências travadas em package-lock.json —
+# exatamente as mesmas versões da máquina de desenvolvimento.
 #
 # É idempotente: rodar de novo não sobrescreve nada que já exista.
 #
 # Uso:
 #     ./tool/setup.sh                  # instalação padrão
 #     ./tool/setup.sh --com-functions  # inclui as dependências Node do proxy
-#     ./tool/setup.sh --verificar      # roda análise estática e testes ao final
+#     ./tool/setup.sh --verificar      # roda a verificação de tipos e os testes ao final
 
 set -euo pipefail
 
@@ -25,7 +25,7 @@ for arg in "$@"; do
   case "$arg" in
     --com-functions) COM_FUNCTIONS=1 ;;
     --verificar)     VERIFICAR=1 ;;
-    -h|--help)       sed -n '2,20p' "$0"; exit 0 ;;
+    -h|--help)       sed -n '2,16p' "$0"; exit 0 ;;
     *) echo "Argumento desconhecido: $arg" >&2; exit 2 ;;
   esac
 done
@@ -44,85 +44,86 @@ falhar() { printf '\n%sERRO: %s%s\n' "$VERMELHO" "$1" "$FIM" >&2; exit 1; }
 echo "Equisim - preparação do ambiente"
 echo "Raiz: $RAIZ"
 
-# --- 1. SDK -----------------------------------------------------------------
-passo 'Verificando o Flutter'
-if ! command -v flutter >/dev/null 2>&1; then
-  falhar "Flutter não encontrado no PATH.
+# --- 1. Node ----------------------------------------------------------------
+# Dois pisos. O aplicativo compila com o do Vite (20.19, ou 22.12 na linha 22).
+# As ferramentas de medição de tool/ leem o cache da validação pelo
+# `node:sqlite`, que o Node só oferece sem bandeira a partir do 22.13.
+passo 'Verificando o Node'
+if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+  falhar "Node não encontrado no PATH.
 
-Instale a versão estável (3.44 ou mais recente) e reabra o terminal:
-    https://docs.flutter.dev/get-started/install
-
-A versão mínima também está declarada em pubspec.yaml, então o próprio
-'flutter pub get' recusa um SDK antigo com uma mensagem explícita."
+Instale a versão LTS (22 ou mais recente) e reabra o terminal:
+    https://nodejs.org/pt-br/download"
 fi
-flutter --version
+VERSAO="$(node --version)"
+MAIOR="$(node -p 'process.versions.node.split(".")[0]')"
+MENOR="$(node -p 'process.versions.node.split(".")[1]')"
+echo "    node $VERSAO, npm $(npm --version)"
+if [ "$MAIOR" -lt 20 ] || { [ "$MAIOR" -eq 20 ] && [ "$MENOR" -lt 19 ]; } \
+  || { [ "$MAIOR" -eq 21 ]; } || { [ "$MAIOR" -eq 22 ] && [ "$MENOR" -lt 12 ]; }; then
+  falhar "Node $VERSAO é antigo para o Vite, que pede 20.19+ ou 22.12+.
+    https://nodejs.org/pt-br/download"
+fi
+if [ "$MAIOR" -lt 22 ] || { [ "$MAIOR" -eq 22 ] && [ "$MENOR" -lt 13 ]; }; then
+  aviso "O aplicativo roda, mas as ferramentas de tool/ pedem Node 22.13+ (node:sqlite)."
+else
+  ok 'aplicativo e ferramentas de medição'
+fi
 
 # --- 2. Configuração local --------------------------------------------------
-# Estes arquivos guardam credencial e por isso não são versionados. O .env em
-# particular está declarado como asset no pubspec.yaml: sem ele, a compilação
-# falha antes mesmo de chegar ao código.
-passo 'Arquivos de configuração local'
+# O .env guarda o BRAPI_TOKEN das ferramentas e as variáveis VITE_* do
+# aplicativo. Não é versionado. Atenção: tudo o que estiver numa VITE_* é
+# embarcado no bundle do site — em produção o token fica no proxy.
+passo 'Arquivo de configuração local'
 
 if [ -f .env ]; then
   ok '.env já existe (preservado)'
 else
-  sed 's/^BRAPI_TOKEN=seu_token_aqui$/BRAPI_TOKEN=/' .env.example > .env
+  cp .env.example .env
   ok '.env criado a partir de .env.example'
-  aviso 'Preencha BRAPI_TOKEN em .env com o token de https://brapi.dev/dashboard'
+  aviso 'Para as ferramentas: preencha BRAPI_TOKEN em .env (https://brapi.dev/dashboard)'
+  aviso 'Para o aplicativo em desenvolvimento: VITE_BRAPI_TOKEN, ou VITE_BRAPI_PROXY_URL'
 fi
 
-if [ -f config/local.json ]; then
-  ok 'config/local.json já existe (preservado)'
-else
-  cp config/local.example.json config/local.json
-  ok 'config/local.json criado a partir do exemplo'
-fi
-
-# --- 3. Dependências Dart ---------------------------------------------------
-passo 'Baixando as dependências do aplicativo'
-flutter pub get
-
-passo 'Baixando as dependências do núcleo (packages/equisim_core)'
-( cd packages/equisim_core && dart pub get )
+# --- 3. Dependências --------------------------------------------------------
+# `npm ci`, e não `npm install`: instala exatamente o package-lock.json e
+# recusa um lockfile que não bate com o package.json, em vez de reescrevê-lo.
+passo 'Baixando as dependências (aplicativo, ferramentas e QA)'
+npm ci
 
 # --- 4. Cloud Function (opcional) ------------------------------------------
 if [ "$COM_FUNCTIONS" -eq 1 ]; then
   passo 'Dependências Node da função de proxy'
-  command -v npm >/dev/null 2>&1 || falhar 'npm não encontrado. Instale o Node 20 ou rode sem --com-functions.'
-  npm install --prefix functions
+  npm ci --prefix functions
 fi
 
 # --- 5. Hooks de QA --------------------------------------------------------
-# `core.hooksPath` e configuracao LOCAL do clone: nao viaja no git. Sem este
-# passo, os hooks versionados em .githooks/ ficariam inertes numa maquina nova.
-passo 'Ferramentas de QA e hooks'
-
-# As dependências do agente de QA vivem no package.json da RAIZ, separado do
-# de functions/. Sem elas o hook de pre-push não consegue rodar o auditor.
-if command -v npm >/dev/null 2>&1; then
-  npm install
-else
-  echo '  npm não encontrado: o auditor Gemini ficará indisponível.'
-  echo '  O hook de pre-push detecta isso e libera o push, sem travar o fluxo.'
-fi
-
+# `core.hooksPath` é configuração LOCAL do clone: não viaja no git. Sem este
+# passo, os hooks versionados em .githooks/ ficariam inertes numa máquina nova.
+# O bit de execução também: o git os grava sem ele, e no macOS e no Linux um
+# hook sem o bit é ignorado com um aviso.
+passo 'Hooks de QA'
 git config core.hooksPath .githooks
+chmod +x .githooks/pre-commit .githooks/pre-push
 echo '  pre-commit: verificações locais, sem rede (~0,3s)'
 echo '  pre-push:   auditoria com o Gemini (requer GEMINI_API_KEY em .env.qa)'
 
 # --- 6. Verificação (opcional) ---------------------------------------------
 if [ "$VERIFICAR" -eq 1 ]; then
-  passo 'Análise estática';            flutter analyze
-  passo 'Testes (núcleo, dados, telas e ferramentas)'; flutter test
+  passo 'Verificação de tipos';                          npm run typecheck
+  passo 'Testes (núcleo, paridade, dados, telas e ferramentas)'; npm test
 fi
 
 printf '\n%sPronto.%s\n' "$VERDE" "$FIM"
 cat <<'FIM_MSG'
 
 Para executar:
-    flutter run
+    npm run dev          # http://localhost:5173
 
-O aplicativo sobe sem token, mas as telas que consultam a brapi ficam sem
-dados. Escolha uma das formas de credencial descritas no README, seção
-"Configuração" — a mais simples é preencher BRAPI_TOKEN em .env.
+Sem Firebase configurado, o aplicativo abre em modo local, com os dados no
+navegador. Sem credencial da brapi, as telas que consultam cotação ficam sem
+dados: veja o README, seção "Configuração".
+
+Ferramentas de medição:
+    npm run tool         # lista as ferramentas; o mapa está em tool/README.md
 FIM_MSG

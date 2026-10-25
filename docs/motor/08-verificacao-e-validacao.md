@@ -14,10 +14,10 @@ ele diz serve?** (validação). Estudo: [guia, cap. 7](../estudo/07-como-o-motor
 | **Gate local** | regras determinísticas: segredo em staging, `DateTime.now()` direto em caminho de cálculo, referência quebrada no registro | [scripts/qa-local.mjs](../../scripts/qa-local.mjs), `.githooks/pre-commit` | todo commit |
 | **Auditor** | defeito de correção em linha nova (precisão monetária, convenções brasileiras, arredondamento, domínio); só FAIL bloqueia | [scripts/qa/rules.ts](../../scripts/qa/rules.ts), `npm run qa:gemini` | todo push, e antes de concluir tarefa |
 | **Conselheiro (sete lentes)** | relação entre coisas: decisão × código, rótulo × tela, premissa × implementação; nunca bloqueia | [scripts/qa/advisor/](../../scripts/qa/advisor/), `npm run conselho` | depois de mudanças |
-| **Gabarito da cascata** | a saída completa (resultado **e** rastro) de 376 ativos em nove montagens, sobre entrada congelada; conferido ao bit | [tool/gabarito_cascata.dart](../../tool/gabarito_cascata.dart), [gabarito_cascata.json](../validacao/gabarito_cascata.json) | a cada mudança de método |
-| **Cálculo do usuário** | sem troca, a tela Editar valuation dá o preço do motor bit a bit em cada avaliado; taxa mais alta, preço mais baixo; os degraus de "onde você discorda" somam a diferença; a taxa que o preço de hoje supõe devolve o preço de mercado | [tool/conferir_calculo_manual.dart](../../tool/conferir_calculo_manual.dart), [manual_valuation_test.dart](../../test/core/manual_valuation_test.dart) | a cada mudança de método ou da tela (decisão 147) |
+| **Gabarito da cascata** | a saída completa (resultado **e** rastro) de 376 ativos em nove montagens, sobre entrada congelada; conferido ao bit | [tool/cascade-golden.ts](../../tool/cascade-golden.ts), [gabarito_cascata.json](../validacao/gabarito_cascata.json) | a cada mudança de método |
+| **Cálculo do usuário** | sem troca, a tela Editar valuation dá o preço do motor bit a bit em cada avaliado; taxa mais alta, preço mais baixo; os degraus de "onde você discorda" somam a diferença; a taxa que o preço de hoje supõe devolve o preço de mercado | [tool/manual-calculation-check.ts](../../tool/manual-calculation-check.ts), [manual-valuation.test.ts](../../test/core/manual-valuation.test.ts) | a cada mudança de método ou da tela (decisão 147) |
 | **Conferência cruzada** | recálculo independente em Python de métricas e inferência | [conferencia_python.md](../validacao/conferencia_python.md), [conferencia_inferencia.md](../validacao/conferencia_inferencia.md) | quando o método muda |
-| **Casos de estudo** | os números de cinco avaliações, reconferidos linha a linha | [tool/casos_de_estudo.dart](../../tool/casos_de_estudo.dart), [tool/tabelas_casos.py](../../tool/tabelas_casos.py) | quando o motor muda |
+| **Casos de estudo** | os números de cinco avaliações, reconferidos linha a linha | [tool/study-cases.ts](../../tool/study-cases.ts), [tool/tabelas_casos.py](../../tool/tabelas_casos.py) | quando o motor muda |
 
 As regras do projeto para agentes de codificação (QA obrigatório, pureza do
 núcleo, determinismo, credenciais) estão no [CLAUDE.md](../../CLAUDE.md).
@@ -54,9 +54,9 @@ O objetivo "motor de referência" tem três condições
 
 | Peça | Como | Evidência |
 |---|---|---|
-| Coortes | o último dia de cada trimestre de 2018 a 2025, com a montagem do aplicativo **naquela data** (dados *point-in-time*, curva e beta da data) | [tool/backtest_valuation.dart](../../tool/backtest_valuation.dart); [backtest_trimestral.json](../validacao/backtest_trimestral.json) |
+| Coortes | o último dia de cada trimestre de 2018 a 2025, com a montagem do aplicativo **naquela data** (dados *point-in-time*, curva e beta da data) | [tool/backtest-valuation.ts](../../tool/backtest-valuation.ts); [backtest_trimestral.json](../validacao/backtest_trimestral.json) |
 | Sobrevivência | as deslistadas entram, com preço do COTAHIST | decisão 93, [b3_deslistadas.md](../validacao/b3_deslistadas.md) |
-| Contagem de ações na data | a do Formulário de Referência, conferida contra o salto do preço: a correção de formulário sem o salto correspondente sai (B43) | decisão 143; [contagem_conferida.dart](../../tool/coortes/contagem_conferida.dart) |
+| Contagem de ações na data | a do Formulário de Referência, conferida contra o salto do preço: a correção de formulário sem o salto correspondente sai (B43) | decisão 143; [checked-count.ts](../../tool/cohorts/checked-count.ts) |
 | Prêmio de mercado | o de cada coorte: a média de dez anos do prêmio implícito só com os trimestres até a data dela (0,91% a 1,62%) | decisão 142 |
 | Desfecho | retorno total (preço + proventos) em 12 e 36 meses | decisão 89; proventos dos emissores com barra no nome desde a decisão 144 |
 | Custos | tarifa e meio spread nas duas pontas; não mudam o veredito | decisão 126 |
@@ -66,7 +66,7 @@ O objetivo "motor de referência" tem três condições
 
 As previsões de cada trimestre fechado são seladas com o código do dia e o hash
 do git de cada arquivo; a leitura só é permitida quando os 36 meses passarem
-(`tool/c7_leitura.dart` recusa antes). Coortes seladas: 31/12/2025, 31/03/2026 e
+(`tool/c7-reading.ts` recusa antes). Coortes seladas: 31/12/2025, 31/03/2026 e
 30/06/2026; a próxima é 30/09/2026. É o único caminho para "habilidade
 comprovada" (decisões 133, 138 e 140; [validacao/c7/](../validacao/c7/)).
 

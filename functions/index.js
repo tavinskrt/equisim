@@ -1,14 +1,14 @@
 /**
  * Proxy de custódia da credencial da brapi.
  *
- * Motivo de existir: `--dart-define` tira o token do controle de versão e do
- * bundle web, mas não o protege de quem tem o binário — a constante é
- * extraível com `strings`. A única proteção real é o segredo nunca sair do
- * servidor. De quebra, isto resolve o CORS no alvo web sem entregar o header
- * `Authorization` a um proxy público de terceiro, como acontecia antes.
+ * Motivo de existir: o Vite embarca no bundle toda variável `VITE_*`, e um
+ * token posto ali fica legível por qualquer um que abra o JavaScript do site.
+ * A única proteção real é o segredo nunca sair do servidor. De quebra, isto
+ * resolve o CORS no navegador sem entregar o header `Authorization` a um proxy
+ * público de terceiro.
  *
- * O cliente aponta para cá via `--dart-define=BRAPI_PROXY_URL=...` e não
- * carrega credencial alguma.
+ * O cliente aponta para cá por `VITE_BRAPI_PROXY_URL` e não carrega
+ * credencial alguma.
  *
  * Configuração do segredo (não vai para o repositório):
  *   firebase functions:secrets:set BRAPI_TOKEN
@@ -48,7 +48,10 @@ const ALLOWED_PATHS = [
 
 /** Origens autorizadas. Ajuste para o domínio de produção antes de publicar. */
 const ALLOWED_ORIGINS = [
+  // Emulador do Hosting, `npm run dev` e `npm run preview`, nesta ordem.
   "http://localhost:5000",
+  "http://localhost:5173",
+  "http://localhost:4173",
   "https://equisim-d7128.web.app",
   "https://equisim-d7128.firebaseapp.com",
 ];

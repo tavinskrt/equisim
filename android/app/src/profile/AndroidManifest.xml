@@ -1,7 +1,0 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- A permissao INTERNET e necessaria no desenvolvimento. Em particular,
-         a ferramenta do Flutter precisa dela para se comunicar com o aplicativo
-         em execucao, para permitir breakpoints, hot reload etc.
-    -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-</manifest>

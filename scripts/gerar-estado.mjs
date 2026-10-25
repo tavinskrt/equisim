@@ -150,14 +150,17 @@ function countLines(filePaths, excludeSuffixes = []) {
   return { files: list.length, lines };
 }
 
-const GENERATED = ['.g.dart', '.freezed.dart', '.mocks.dart'];
+// Saida de compilacao que acabe no indice nao conta como codigo do projeto.
+const GENERATED = ['.d.ts', '.map'];
 
 const SURFACE = [
-  ['Nucleo de dominio', ['packages/equisim_core/lib']],
-  ['Apresentacao', ['lib/presentation', 'lib/views', 'lib/controllers']],
-  ['Camada de dados', ['lib/data']],
-  ['Testes do app', ['test/data', 'test/ui', 'test/tool']],
-  ['Testes do nucleo', ['test/core']],
+  ['Nucleo de dominio', ['src/core']],
+  ['Apresentacao', ['src/features', 'src/ui', 'src/app', 'src/copy', 'src/main.tsx', 'src/router.tsx', 'src/styles.css']],
+  ['Camada de dados', ['src/data']],
+  ['Auditoria', ['src/audit']],
+  ['Ferramentas de medicao', ['tool']],
+  ['Testes do app', ['test/app', 'test/audit', 'test/data', 'test/ui', 'test/tool']],
+  ['Testes do nucleo', ['test/core', 'test/parity']],
   ['Ferramentas de QA', ['scripts']],
 ];
 

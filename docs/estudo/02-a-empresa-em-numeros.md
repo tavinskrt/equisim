@@ -70,7 +70,7 @@ O **capital investido** é todo o dinheiro que sócios e credores colocaram para
 operação funcionar: fábricas, estoques, clientes a receber. É sobre ele que se
 mede se a empresa é boa em gerar retorno.
 
-**No código:** [fundamentals.dart](../../packages/equisim_core/lib/src/entities/fundamentals.dart)
+**No código:** [fundamentals.ts](../../src/core/entities/fundamentals.ts)
 (`totalDebt`, `totalCash`, `netDebt`, `equityBookValue`, `investedCapital`).
 
 ---
@@ -100,8 +100,8 @@ crédito tributário ou multa distorceria a média (capítulo 6, seção 6.1).
 **Um detalhe honesto.** Resultado de coligadas (a "equivalência patrimonial")
 já chega depois do imposto da coligada; o motor não o tributa de novo.
 
-**No código:** [fundamentals.dart, `nopatAtRate`](../../packages/equisim_core/lib/src/entities/fundamentals.dart)
-e [capital_base.dart, `structuralTaxRate`](../../packages/equisim_core/lib/src/services/valuation/capital_base.dart).
+**No código:** [fundamentals.ts, `nopatAtRate`](../../src/core/entities/fundamentals.ts)
+e [capital-base.ts, `structuralTaxRate`](../../src/core/services/valuation/capital-base.ts).
 
 ---
 
@@ -121,7 +121,7 @@ melhor que uma com ROIC de 8%.
 **Um cuidado do motor.** O lucro de um ano é gerado pelo capital que existia
 **no começo** daquele ano. Por isso o motor divide o lucro do ano pelo capital
 do ano **anterior** (a "base de abertura")
-([capital_base.dart](../../packages/equisim_core/lib/src/services/valuation/capital_base.dart)).
+([capital-base.ts](../../src/core/services/valuation/capital-base.ts)).
 
 ---
 
@@ -157,7 +157,7 @@ Outra empresa, com ROIC de 8%, para crescer os mesmos 5% precisa reinvestir
 
 **No motor**, a retenção é limitada a 95% (reter 100% para sempre significaria
 nunca distribuir nada) e a zero (sem crescimento não há reinvestimento)
-([dcf.dart, `retentionAt`](../../packages/equisim_core/lib/src/services/valuation/dcf.dart)).
+([dcf.ts, `retentionAt`](../../src/core/services/valuation/dcf.ts)).
 
 ---
 
@@ -197,7 +197,7 @@ de papéis. Parece trivial, e não é:
 O motor usa, nesta ordem: a contagem oficial da B3 (líquida de tesouraria)
 quando recente; senão, valor de mercado ÷ preço. Quando as fontes divergem além
 de 1,5×, vale a maior contagem — o lado conservador, que dá o menor preço por
-papel ([compute_valuation.dart, `quotedShares`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart)).
+papel ([compute-valuation.ts, `quotedShares`](../../src/core/usecases/compute-valuation.ts)).
 
 ---
 
@@ -212,7 +212,7 @@ Por isso toda avaliação tem uma **data** (`asOf`), e o motor só enxerga os
 exercícios que já tinham sido entregues à CVM naquela data (quando a data de
 entrega é conhecida; senão, supõe 90 dias de atraso). Isso se chama visão
 *point-in-time*
-([point_in_time_view.dart](../../packages/equisim_core/lib/src/time/point_in_time_view.dart)).
+([point-in-time-view.ts](../../src/core/time/point-in-time-view.ts)).
 
 ---
 

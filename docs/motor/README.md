@@ -36,17 +36,17 @@ seguido até a linha que o produziu e até o livro ou artigo que o justifica.
 
 | Pasta | Conteúdo |
 |---|---|
-| [`packages/equisim_core/lib/src/usecases/compute_valuation.dart`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart) | a cascata inteira (`ValuationCascade`), os avisos e o rastro de auditoria |
-| [`packages/equisim_core/lib/src/services/valuation/`](../../packages/equisim_core/lib/src/services/valuation/) | as peças: DCF, custo de capital, guardas, curva, cenários, faixa, múltiplos |
-| [`packages/equisim_core/lib/src/services/metrics/`](../../packages/equisim_core/lib/src/services/metrics/) | beta, encolhimento, retornos, métricas de risco |
-| [`packages/equisim_core/lib/src/usecases/prepare_valuation_inputs.dart`](../../packages/equisim_core/lib/src/usecases/prepare_valuation_inputs.dart) | a montagem dos insumos de uma avaliação |
+| [`src/core/usecases/compute-valuation.ts`](../../src/core/usecases/compute-valuation.ts) | a cascata inteira (`ValuationCascade`), os avisos e o rastro de auditoria |
+| [`packages/equisim_core/lib/src/services/valuation/`](../../src/core/services/valuation/) | as peças: DCF, custo de capital, guardas, curva, cenários, faixa, múltiplos |
+| [`packages/equisim_core/lib/src/services/metrics/`](../../src/core/services/metrics/) | beta, encolhimento, retornos, métricas de risco |
+| [`src/core/usecases/prepare-valuation-inputs.ts`](../../src/core/usecases/prepare-valuation-inputs.ts) | a montagem dos insumos de uma avaliação |
 | [`lib/`](../../lib/) | o aplicativo Flutter: dados (fontes, cache), telas |
 | [`tool/`](../../tool/) | medições, backtest, gabarito, empacotadores de dados |
 
 O núcleo (`packages/equisim_core`) é **Dart puro, sem nenhuma dependência de
 execução**, sem rede, sem arquivo, sem relógio: a mesma entrada dá a mesma saída
 hoje e daqui a um ano. Isso é travado por teste
-([purity_test.dart](../../test/core/purity_test.dart)) e é o que
+([purity.test.ts](../../test/core/purity.test.ts)) e é o que
 torna o gabarito possível.
 
 ## Como ler as tabelas

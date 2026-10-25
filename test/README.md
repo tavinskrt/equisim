@@ -6,7 +6,7 @@ desta pasta, o repositório é só código, documentação e dados.
 | Pasta | Testa | Código correspondente |
 |---|---|---|
 | `core/` | o núcleo de domínio: valuation, custo de capital, guardas, carteira, métricas, auditoria — e a pureza do pacote | `packages/equisim_core/lib/` |
-| `data/` | fontes (brapi, Banco Central, Tesouro), cache, repositórios e os pacotes de dados versionados | `lib/data/`, `assets/` |
+| `data/` | fontes (brapi, Banco Central, Tesouro), cache, repositórios e os pacotes de dados versionados | `lib/data/`, `public/assets/` |
 | `ui/` | telas, componentes, textos de tela, tema e controladores | `lib/presentation/`, `lib/views/`, `lib/controllers/` |
 | `tool/` | os scripts de medição e validação | `tool/` |
 | `fixtures/` | respostas reais das fontes, gravadas, para os testes rodarem sem rede | — |

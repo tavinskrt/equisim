@@ -1,6 +1,6 @@
 """Figuras SVG do guia de estudo (docs/estudo/img/).
 
-Uso, da raiz do repositório, depois de `dart run tool/casos_de_estudo.dart`:
+Uso, da raiz do repositório, depois de `npm run tool -- study-cases`:
 
     python tool/figuras_estudo.py
 

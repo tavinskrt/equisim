@@ -5,7 +5,7 @@ A ordem em que o motor decide se avalia uma empresa e por qual caminho. Estudo:
 
 ![A cascata](../estudo/img/cascata.svg)
 
-Tudo acontece em [compute_valuation.dart](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart),
+Tudo acontece em [compute-valuation.ts](../../src/core/usecases/compute-valuation.ts),
 a partir de `ValuationCascade.evaluate`.
 
 ---
@@ -17,7 +17,7 @@ a partir de `ValuationCascade.evaluate`.
 | 1 | Concessão que acaba antes do horizonte encurta a projeção | `_evaluate` | — |
 | 2 | Preço positivo | `_evaluate` | preço ≤ 0 |
 | 3 | Exercícios publicados na data, com demonstração de resultado | `_evaluate` | nenhum exercício |
-| 4 | **Porta 0** — elegibilidade | [eligibility.dart](../../packages/equisim_core/lib/src/services/valuation/eligibility.dart), `EligibilityGate.assess` | ver 2.2 |
+| 4 | **Porta 0** — elegibilidade | [eligibility.ts](../../src/core/services/valuation/eligibility.ts), `EligibilityGate.assess` | ver 2.2 |
 | 5 | Razão da unit e contagem de papéis | `quotedUnitRatio`, `quotedShares` | contagem indisponível |
 | 6 | **Portas 1 e 3** — roteamento | `_route` | — |
 | 7 | **Porta 2** — premissas e desconto na via escolhida | `_evaluateLane` | dado não sustenta a via; estrutura de capital recusada; preço justo ≤ 0 |
@@ -32,7 +32,7 @@ a partir de `ValuationCascade.evaluate`.
 | Liquidez | volume financeiro diário **mediano** dos últimos 90 pregões ≥ R$ 2 milhões (sem volume na série, o teste é omitido) | `minAverageDailyTradedValue`, `liquidityWindowDays`, `medianTradedValue` | preço de papel ilíquido informa pouco e contamina o beta; mediana porque um dia de leilão não faz liquidez |
 | Histórico | ≥ 8 exercícios publicados | `minPublishedPeriods` | os testes de ciclo, tendência e crescimento precisam de série |
 | Insolvência | patrimônio ≤ 0 (ou ausente) no último **e** no penúltimo exercício | `_insolvent` | sem patrimônio não há base de capital |
-| Recuperação judicial | lista mantida | [distressed_registry.dart](../../lib/data/config/distressed_registry.dart) | o fluxo descontado supõe continuidade |
+| Recuperação judicial | lista mantida | [distressed-registry.ts](../../src/data/config/distressed-registry.ts) | o fluxo descontado supõe continuidade |
 
 A recusa por liquidez foi medida contra a ordenação e mantida pelo nível, e não
 pela ordenação (decisão 95).
@@ -43,7 +43,7 @@ pela ordenação (decisão 95).
 
 | Regra | Código | Por quê |
 |---|---|---|
-| Setor "serviços financeiros" da fonte, ou setor B3 "financeiro" com subsetor intermediários financeiros, previdência e seguros ou serviços financeiros diversos → **via do acionista** | [financial_sectors.dart](../../packages/equisim_core/lib/src/services/valuation/financial_sectors.dart), `FinancialSectors.isFinancial` | captação é insumo, não financiamento (Damodaran, "Valuing financial service firms"); decisão 25 |
+| Setor "serviços financeiros" da fonte, ou setor B3 "financeiro" com subsetor intermediários financeiros, previdência e seguros ou serviços financeiros diversos → **via do acionista** | [financial-sectors.ts](../../src/core/services/valuation/financial-sectors.ts), `FinancialSectors.isFinancial` | captação é insumo, não financiamento (Damodaran, "Valuing financial service firms"); decisão 25 |
 
 O aviso da tela explica a razão em uma frase.
 
@@ -53,7 +53,7 @@ O aviso da tela explica a razão em uma frase.
 
 | Regra | Código | Por quê |
 |---|---|---|
-| NOPAT (publicado ou derivado) positivo em pelo menos 60% dos exercícios, com pelo menos 4 → **via da firma**; senão, **via do acionista** | [growth_guards.dart](../../packages/equisim_core/lib/src/services/valuation/growth_guards.dart), `GrowthGuards.firmFlowIsSustained` | a via da firma projeta o resultado operacional; com ele negativo na maioria dos anos, não há base a projetar (decisão 64) |
+| NOPAT (publicado ou derivado) positivo em pelo menos 60% dos exercícios, com pelo menos 4 → **via da firma**; senão, **via do acionista** | [growth-guards.ts](../../src/core/services/valuation/growth-guards.ts), `GrowthGuards.firmFlowIsSustained` | a via da firma projeta o resultado operacional; com ele negativo na maioria dos anos, não há base a projetar (decisão 64) |
 | A fronteira usa o fluxo, e não a comparação entre retorno e custo de capital do dia | `_route` | medir contra a taxa do dia faria a via andar com o ciclo monetário (decisão 34) |
 
 ---

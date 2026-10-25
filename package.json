@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Equisim: avaliação de ações da B3 por DCF/CAPM, meta patrimonial e simulação histórica de carteiras. Aplicação web em TypeScript (React + Vite), com o motor financeiro em src/core.",
   "engines": {
-    "node": ">=20"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
     "dev": "vite",
@@ -79,6 +79,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "jsdom": "^30.1.3",
+    "playwright-core": "^1.56.1",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2",

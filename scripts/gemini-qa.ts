@@ -6,7 +6,7 @@
  *   npx tsx scripts/gemini-qa.ts --diff
  *   npx tsx scripts/gemini-qa.ts --diff --staged
  *   npx tsx scripts/gemini-qa.ts --diff --base HEAD~3
- *   npx tsx scripts/gemini-qa.ts --file lib/presentation/backtest/backtest_page.dart
+ *   npx tsx scripts/gemini-qa.ts --file src/features/backtest/backtest-page.tsx
  *   npx tsx scripts/gemini-qa.ts --diff --dry-run              (nao chama o modelo)
  *
  * Autenticacao: API key do Gemini, resolvida por `qa/env.ts`. Structured

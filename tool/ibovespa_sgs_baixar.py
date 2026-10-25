@@ -5,7 +5,7 @@ antes de hoje (23/09/2016 na consulta de 28/09/2026). Medir um prêmio de risco
 histórico numa coorte de 2018 com janela de dez anos pede o índice desde 2008,
 e o SGS 7 tem o fechamento diário desde muito antes disso — até 30/09/2019,
 quando a série foi descontinuada. As duas se sobrepõem de 2016 a 2019, e é na
-sobreposição que `tool/validation/ibovespa_longo.dart` confere a emenda.
+sobreposição que `tool/validation/long-ibovespa.ts` confere a emenda.
 
 Uso, da raiz do repositório:
 

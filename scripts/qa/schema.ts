@@ -172,7 +172,7 @@ const findingSchema: Schema = {
         'Entradas concretas -> saida errada. Com numeros reais, nao hipoteses ' +
         'vagas. Ex.: "R$ 0,01 dividido em 3 parcelas produz 3x R$ 0,00; ' +
         'R$ 0,01 desaparece do total". Para responsividade, cite a largura ' +
-        'exata em que quebra (320, 375, 768, 1024 ou 1440 dp).',
+        'exata em que quebra (320, 375, 768, 1024 ou 1440 px).',
     },
     suggested_fix: {
       type: Type.STRING,

@@ -17,8 +17,8 @@ onde estudar o assunto.
 Menu do perfil → **"Abrir Painel de Logs de Cálculo"**. O painel abre numa aba
 separada (`#/logs`) e recebe os eventos da janela principal por um canal entre
 janelas; na mesma janela, a entrega é local. Ele não autentica, não lê carteira
-e não calcula nada — só observa ([logs_page.dart](../lib/presentation/audit/logs_page.dart),
-[audit_bus.dart](../lib/audit/audit_bus.dart)).
+e não calcula nada — só observa ([logs-app.tsx](../src/features/logs/logs-app.tsx),
+[audit-bus.ts](../src/audit/audit-bus.ts)).
 
 Com o painel aberto, use o aplicativo normalmente: cada ativo aberto na aba de
 avaliação gera um evento. Cada valuation confirmado em **Editar valuation** gera
@@ -39,7 +39,7 @@ não só o que aconteceu na sessão (decisão 150).
 
 O formato de cada passo é `CalculationTrace`: nome, fórmula em LaTeX, variáveis,
 passos intermediários, resultado e unidade
-([calculation_trace.dart](../packages/equisim_core/lib/src/audit/calculation_trace.dart)).
+([calculation-trace.ts](../src/core/audit/calculation-trace.ts)).
 
 ## 3. Os passos, na ordem em que aparecem
 
@@ -68,7 +68,7 @@ recusa para no passo em que a conta parou.
 | 14 | **Margem de segurança e potencial de valorização** | preço com margem e upside `(justo − preço) ÷ preço` | [guia 4.10](estudo/04-fluxo-de-caixa-descontado.md) | [motor 5.6](motor/05-projecao-desconto-e-terminal.md) |
 
 Os passos da montagem dos insumos (busca de fundamentos, beta, eventos de
-ações) aparecem como eventos próprios, de [prepare_valuation_inputs.dart](../packages/equisim_core/lib/src/usecases/prepare_valuation_inputs.dart).
+ações) aparecem como eventos próprios, de [prepare-valuation-inputs.ts](../src/core/usecases/prepare-valuation-inputs.ts).
 
 ## 4. Como conferir uma avaliação pelo painel
 

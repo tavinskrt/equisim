@@ -34,7 +34,7 @@ como 30% para cima ou para baixo em torno do que se esperava.
 
 **No Equisim**, a volatilidade dos últimos 252 pregões alimenta a **faixa
 calibrada** da tela de avaliação (capítulo 4, seção 4.10)
-([calibrated_band.dart](../../packages/equisim_core/lib/src/services/valuation/calibrated_band.dart)).
+([calibrated-band.ts](../../src/core/services/valuation/calibrated-band.ts)).
 
 ---
 
@@ -90,8 +90,8 @@ Detalhes que o motor cuida:
 - **Janela curta é declarada.** Empresa listada há menos de quatro anos gera
   aviso (decisão 111).
 
-**No código:** [beta.dart](../../packages/equisim_core/lib/src/services/metrics/beta.dart)
-e [prepare_valuation_inputs.dart, `_estimateBeta`](../../packages/equisim_core/lib/src/usecases/prepare_valuation_inputs.dart).
+**No código:** [beta.ts](../../src/core/services/metrics/beta.ts)
+e [prepare-valuation-inputs.ts, `_estimateBeta`](../../src/core/usecases/prepare-valuation-inputs.ts).
 
 ---
 
@@ -120,7 +120,7 @@ Na prática o peso mediano é 0,98: quase sempre vale a própria medida. O
 encolhimento só age onde ela é ruim. Essa é a mesma lógica do "beta de Vasicek"
 (1973) e dos ajustes que a Bloomberg aplica.
 
-**No código:** [beta_shrinkage.dart](../../packages/equisim_core/lib/src/services/metrics/beta_shrinkage.dart)
+**No código:** [beta-shrinkage.ts](../../src/core/services/metrics/beta-shrinkage.ts)
 (decisão 40).
 
 ---
@@ -196,7 +196,7 @@ aplicativo web vence em sete dias), o motor recua para duas pontas: o CDI de
 hoje no ano 1 e a média de dez anos do CDI na perpetuidade, ligadas por uma
 reta.
 
-**No código:** [yield_curve.dart](../../packages/equisim_core/lib/src/services/valuation/yield_curve.dart).
+**No código:** [yield-curve.ts](../../src/core/services/valuation/yield-curve.ts).
 
 ---
 
@@ -250,8 +250,8 @@ prêmio que Damodaran publica para o Brasil, porque o dele é medido em dólar
 contra o título americano; o do Equisim é contra o prefixado brasileiro, que já
 carrega o risco do país. Ver as [limitações](../validacao/limitacoes.md).
 
-**No código:** [implied_premium.dart](../../packages/equisim_core/lib/src/services/valuation/implied_premium.dart)
-(a média) e [tool/premio_implicito.dart](../../tool/premio_implicito.dart) (a
+**No código:** [implied-premium.ts](../../src/core/services/valuation/implied-premium.ts)
+(a média) e [tool/implied-premium.ts](../../tool/implied-premium.ts) (a
 série, medida trimestre a trimestre).
 
 ---
@@ -329,7 +329,7 @@ agências de rating:
 A alavancagem vale sempre. A cobertura só entra quando a despesa financeira
 parece juro de verdade (entre a taxa livre de risco e ela mais 10 pontos), e aí
 vale o **maior** dos dois prêmios (decisão 130)
-([cost_of_capital.dart, `syntheticSpread`](../../packages/equisim_core/lib/src/services/valuation/cost_of_capital.dart)).
+([cost-of-capital.ts, `syntheticSpread`](../../src/core/services/valuation/cost-of-capital.ts)).
 
 **O escudo fiscal.** Juro é despesa dedutível: cada R$ 100 de juros reduz o
 imposto em R$ 34. Por isso o custo efetivo da dívida é `Kd × (1 − 34%)`. Se o
@@ -383,7 +383,7 @@ depende do chute (decisão 110). Bancos não passam por isso: neles a
 dívida é matéria-prima, e o beta medido já carrega a alavancagem de sempre
 (capítulo 5).
 
-**No código:** [levered_rates.dart](../../packages/equisim_core/lib/src/services/valuation/levered_rates.dart).
+**No código:** [levered-rates.ts](../../src/core/services/valuation/levered-rates.ts).
 
 ---
 

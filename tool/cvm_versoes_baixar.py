@@ -48,7 +48,7 @@ from pathlib import Path
 RAD = ("https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx"
        "?CodigoInstituicao=1&NumeroSequencialDocumento={id}")
 
-# As coortes de `tool/backtest_valuation.dart --trimestral`: o último dia de
+# As coortes de `tool/backtest-valuation.ts --trimestral`: o último dia de
 # cada trimestre, de 31/03/2018 a 30/09/2025. Mudar lá exige mudar aqui.
 COHORTS = [
     dt.date(year, month, day).isoformat()

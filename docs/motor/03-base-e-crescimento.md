@@ -6,9 +6,9 @@ estatística no [cap. 6](../estudo/06-estatistica.md). Casos: normalização em
 [VALE3](../estudo/casos/vale3.md) e [ITUB4](../estudo/casos/itub4.md); tendência
 que mantém a base em [WEGE3](../estudo/casos/wege3.md).
 
-Parâmetros em [growth_guards.dart, `ValuationParameters`](../../packages/equisim_core/lib/src/services/valuation/growth_guards.dart);
-série em [capital_base.dart](../../packages/equisim_core/lib/src/services/valuation/capital_base.dart);
-orquestração em [compute_valuation.dart, `_output1`, `_baseFlow`, `_output2`](../../packages/equisim_core/lib/src/usecases/compute_valuation.dart).
+Parâmetros em [growth-guards.ts, `ValuationParameters`](../../src/core/services/valuation/growth-guards.ts);
+série em [capital-base.ts](../../src/core/services/valuation/capital-base.ts);
+orquestração em [compute-valuation.ts, `_output1`, `_baseFlow`, `_output2`](../../src/core/usecases/compute-valuation.ts).
 
 ---
 
@@ -43,7 +43,7 @@ base  = lucro do exercício × fator
 
 | Regra especial | Código | Evidência |
 |---|---|---|
-| **Precedência do ciclo** em commodity e cíclico pesado (setor "materiais básicos" ou subsetor de petróleo, refino, mineração, siderurgia, papel e celulose, petroquímicos): normaliza mesmo com tendência significante | [cyclical_sectors.dart](../../packages/equisim_core/lib/src/services/valuation/cyclical_sectors.dart), `CyclicalSectors.hasCyclePrecedence` | decisão 28: a perna de alta do ciclo tem forma de tendência |
+| **Precedência do ciclo** em commodity e cíclico pesado (setor "materiais básicos" ou subsetor de petróleo, refino, mineração, siderurgia, papel e celulose, petroquímicos): normaliza mesmo com tendência significante | [cyclical-sectors.ts](../../src/core/services/valuation/cyclical-sectors.ts), `CyclicalSectors.hasCyclePrecedence` | decisão 28: a perna de alta do ciclo tem forma de tendência |
 | **Trava de saúde**: se o pior entre lucro líquido e EBITDA caiu mais de 50% em três anos, o fator não passa de 1,00 (não normaliza para cima) | `recentOperationalDecline`, `maxOperationalDecline = 0,50`, `operationalHealthWindow = 3` | decisões 28 e 29 (caso QUAL3: +477% vinha da base normalizada) |
 | **Commodity é isenta da trava** (só na base) | `_output1` | decisão 30 |
 | A vantagem competitiva residual **não** tem trava de saúde | `GrowthGuards.residualMoat` | decisão 36 tirou os cortes de nível; texto corrigido em 28/09/2026 (item B39) |
@@ -66,12 +66,12 @@ que a decidiram — nada é recalculado para explicar:
 
 | O que | Código | Onde aparece |
 |---|---|---|
-| O registro: retorno do último exercício, os anos e a mediana do ciclo, razão e desvios robustos, tendência, precedência do ciclo, queda no triênio e travas, fator bruto e aplicado, saturação, reconstrução, lucro publicado e de partida | [base_normalization.dart, `BaseNormalization`](../../packages/equisim_core/lib/src/services/valuation/base_normalization.dart); `ValuationDiagnostics.baseNormalization` | — |
+| O registro: retorno do último exercício, os anos e a mediana do ciclo, razão e desvios robustos, tendência, precedência do ciclo, queda no triênio e travas, fator bruto e aplicado, saturação, reconstrução, lucro publicado e de partida | [base-normalization.ts, `BaseNormalization`](../../src/core/services/valuation/base-normalization.ts); `ValuationDiagnostics.baseNormalization` | — |
 | O resultado em uma palavra, pela ordem em que a cascata decide: imposto, reconstruído, sem ciclo, dentro do normal, tendência, travado pela queda, para cima, para baixo | `BaseNormalization.outcome` | variável "resultado da normalização" no rastro |
 | As duas medidas da Guarda 3, sem mudar a regra | `GrowthGuards.cycleDeviation` | — |
 | O porquê em linguagem corrente, com os números | `ValuationCascade._whyTheBase`; `CalculationTrace.explanation` | painel de logs, quadro "Por quê" do passo "Base do fluxo" |
-| O mesmo porquê na tela, com os anos do ciclo em barras | [normalization_panel.dart](../../lib/presentation/valuation/normalization_panel.dart), [normalization_copy.dart](../../lib/presentation/valuation/normalization_copy.dart) | Editar valuation, cartão do lucro de partida |
-| O porquê de cada ativo do universo | [tool/normalizacoes.dart](../../tool/normalizacoes.dart) | [normalizacoes.md](../validacao/normalizacoes.md): 18 para cima, 27 para baixo, 47 dentro do normal, 14 por tendência, 3 reconstruídos, 1 sem ciclo, nos 110 avaliados de 14/09/2026 |
+| O mesmo porquê na tela, com os anos do ciclo em barras | [normalization-panel.tsx](../../src/features/asset/normalization-panel.tsx), [normalization-copy.ts](../../src/copy/normalization-copy.ts) | Editar valuation, cartão do lucro de partida |
+| O porquê de cada ativo do universo | [tool/normalizations.ts](../../tool/normalizations.ts) | [normalizacoes.md](../validacao/normalizacoes.md): 18 para cima, 27 para baixo, 47 dentro do normal, 14 por tendência, 3 reconstruídos, 1 sem ciclo, nos 110 avaliados de 14/09/2026 |
 
 **Nenhum número mudou.** O gabarito de 14/10/2026 saiu igual em preço, cenários e
 diagnósticos nos 376 ativos e nas nove montagens; mudaram só o texto do aviso e
@@ -88,7 +88,7 @@ o rastro do passo da base.
 | **Não identificado** se o erro passa de 3 p.p., **ou** se `|mediana − regressão| ÷ erro` passa do crítico de Student **e** a diferença passa de `max(2 p.p.; 25% × |mediana|)` | `maxGrowthStdError = 0,03`, `dispersionFloor = 0,02`, `dispersionRelative = 0,25` | a série não diz um crescimento só | decisão 27 |
 | Não identificado, mas a inflação é **financiável** (retenção exigida `inflação ÷ ROIC do ciclo` < 1 e ≤ retenção mediana observada) → `g` = inflação, com ressalva | `anchorIsFundable` | crescer com a inflação é o mínimo de uma empresa em continuidade | — |
 | Nem isso → `g` = 0, com ressalva e aviso | `_output2` | direção conservadora, declarada | — |
-| Crescimento de cada ano limitado ao que o retorno financia: `g_t ≤ 0,95 × ROIC_t` | [dcf.dart, `sustainable`](../../packages/equisim_core/lib/src/services/valuation/dcf.dart) | reter 100% para sempre não é plano | decisão 47 |
+| Crescimento de cada ano limitado ao que o retorno financia: `g_t ≤ 0,95 × ROIC_t` | [dcf.ts, `sustainable`](../../src/core/services/valuation/dcf.ts) | reter 100% para sempre não é plano | decisão 47 |
 
 ---
 
@@ -96,7 +96,7 @@ o rastro do passo da base.
 
 | Regra | Código | Evidência |
 |---|---|---|
-| `g∞ = min(g, teto nominal)`, limitado a **[−5%; teto]** | [growth_estimator.dart, `GrowthEstimator.perpetual`](../../packages/equisim_core/lib/src/services/valuation/growth_estimator.dart) | decisão 56 (piso de −5%); o rastro dizia [0; teto] até 28/09/2026 |
+| `g∞ = min(g, teto nominal)`, limitado a **[−5%; teto]** | [growth-estimator.ts, `GrowthEstimator.perpetual`](../../src/core/services/valuation/growth-estimator.ts) | decisão 56 (piso de −5%); o rastro dizia [0; teto] até 28/09/2026 |
 | Teto = crescimento nominal da economia, `(1 + real) × (1 + inflação) − 1` | `MarketAnchors` | nominal porque a taxa de desconto é nominal |
 | O crescimento de cada ano decai em linha reta de `g` a `g∞` ao longo dos dez anos | `DcfAssumptions.growthAt` | vantagem se desgasta com a concorrência, não acaba numa data (substituiu a queda em degrau) |
 
