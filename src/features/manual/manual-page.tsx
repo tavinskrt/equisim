@@ -19,6 +19,7 @@ import { Banner } from '../../ui/banner';
 import { Button, IconButton } from '../../ui/button';
 import { Card } from '../../ui/card';
 import { EmptyState, Skeleton } from '../../ui/feedback';
+import { TickerLogo } from '../../ui/ticker-logo';
 import { toast } from '../../ui/toast';
 import { PortaZeroExplainer } from '../study/porta-zero';
 import { PremiseFields } from './premise-fields';
@@ -148,7 +149,10 @@ function Header(props: { ticker: Ticker; changed: boolean; onReset: (() => void)
       </IconButton>
       <div className="min-w-0 flex-1">
         <h1 className="text-balance text-title font-semibold text-fg">Simular minhas premissas</h1>
-        <p className="text-body-sm text-fg-2">{props.ticker.value} · seu cálculo</p>
+        <p className="flex items-center gap-1.5 text-body-sm text-fg-2">
+          <TickerLogo ticker={props.ticker} size="sm" />
+          <span>{props.ticker.value} · seu cálculo</span>
+        </p>
       </div>
       {props.onReset !== null && (
         <IconButton label="Voltar aos números do motor" tone={props.changed ? 'brand' : 'default'} disabled={!props.changed} onClick={props.onReset}>

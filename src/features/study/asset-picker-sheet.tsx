@@ -8,6 +8,7 @@ import { Button } from '../../ui/button';
 import { Disclosure } from '../../ui/disclosure';
 import { EmptyState, Spinner } from '../../ui/feedback';
 import { Sheet } from '../../ui/sheet';
+import { TickerLogo } from '../../ui/ticker-logo';
 import { toast } from '../../ui/toast';
 import { useAssetOverlay } from '../shell/use-asset-overlay';
 import { addToStudy } from './add-to-study';
@@ -87,10 +88,11 @@ export function AssetPickerSheet(props: { open: boolean; onOpenChange: (open: bo
               <li key={t.value} className="flex items-center gap-2 rounded-lg px-2 hover:bg-sunken/60">
                 <button
                   type="button"
-                  className="min-h-12 flex-1 text-left"
+                  className="flex min-h-12 flex-1 items-center gap-2.5 text-left"
                   onClick={() => overlay.open(t)}
                   aria-label={`Abrir o Raio-X de ${t.value}`}
                 >
+                  <TickerLogo ticker={t} className={isUsed ? 'opacity-60' : undefined} />
                   <span className={`num text-body-sm font-semibold ${isUsed ? 'text-fg-3' : 'text-fg'}`}>{t.value}</span>
                   {isUsed && <span className="ml-2 text-caption text-fg-3">já está no estudo</span>}
                 </button>

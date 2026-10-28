@@ -10,6 +10,7 @@ import { useStudy } from '../../app/state/study-store';
 import { AuditRoutes } from '../../audit/audit-routes';
 import { auditEnabled } from '../../audit/audit-bus';
 import { Spinner } from '../../ui/feedback';
+import { TickerLogo } from '../../ui/ticker-logo';
 import { navItems } from './nav-items';
 import { useAssetOverlay } from './use-asset-overlay';
 
@@ -79,6 +80,7 @@ export function CommandPalette(props: { open: boolean; onOpenChange: (open: bool
                 <Command.Group heading="Ativos" className="[&_[cmdk-group-heading]]:eyebrow [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2">
                   {universe.data.map((t) => (
                     <Command.Item key={t.value} value={t.value} onSelect={() => run(() => overlay.open(t))} className={itemClass}>
+                      <TickerLogo ticker={t} size="sm" />
                       <span className="num w-16 font-semibold">{t.value}</span>
                       <span className="flex-1 text-fg-3">Abrir o Raio-X</span>
                       {inStudy.has(t.value) && <span className="text-caption text-fg-3">no estudo</span>}

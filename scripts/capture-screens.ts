@@ -182,6 +182,17 @@ function bcb(id: number, from: Date, to: Date): { data: string; valor: string }[
   return out;
 }
 
+/** Uma marca de mentira para a captura: nenhuma logo real sai daqui. */
+function syntheticLogo(symbol: string): string {
+  const hue = hash(symbol) % 360;
+  return (
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+    `<rect width="64" height="64" fill="hsl(${hue} 55% 42%)"/>` +
+    `<text x="32" y="40" font-family="sans-serif" font-size="20" font-weight="700" fill="#fff" text-anchor="middle">${symbol.slice(0, 4)}</text>` +
+    '</svg>'
+  );
+}
+
 /**
  * Responde a brapi e o Banco Central daqui, e deixa passar só o servidor local
  * e as fontes do Google; o resto é abortado. Sem rede, a fonte cai na da
@@ -214,6 +225,14 @@ async function installMarket(context: BrowserContext): Promise<void> {
       if (path.endsWith('/v2/stocks/cash-flow')) return json(forSymbol(statements.cash, symbols));
       if (path.endsWith('/v2/stocks/profile')) return json(forSymbol(statements.profile, symbols));
       return route.fulfill({ status: 404, body: '{}' });
+    }
+    if (url.hostname === 'icons.brapi.dev') {
+      // Logo sintética: a raiz do ticker num quadrado de cor pela semente.
+      // TAEE11 responde 404 de propósito, para a captura mostrar também as
+      // iniciais que ocupam o lugar da logo que não vem (decisão 154).
+      const symbol = /\/icons\/([A-Z0-9]+)\.svg$/.exec(url.pathname)?.[1] ?? '';
+      if (!UNIVERSE.includes(symbol) || symbol === 'TAEE11') return route.fulfill({ status: 404, body: '' });
+      return route.fulfill({ status: 200, contentType: 'image/svg+xml', body: syntheticLogo(symbol) });
     }
     if (url.hostname === 'api.bcb.gov.br') {
       const id = Number(/sgs\.(\d+)/.exec(url.pathname)?.[1]);

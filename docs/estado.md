@@ -7,7 +7,7 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-25, a partir de `d2a6359`.
+Gerado em 2026-10-28, a partir de `d2a6359`.
 
 ## Decisões registradas
 
@@ -150,6 +150,7 @@ Gerado em 2026-10-25, a partir de `d2a6359`.
 | 151 | A tela Estudo mostra o valuation do usuário quando ele discorda do motor | aceita | voce | 2026-10-22 |
 | 152 | O Equisim passa a TypeScript, e o Dart sai do repositório | aceita | voce | 2026-10-22 |
 | 153 | O lucro de partida é o do ano corrente anualizado quando já há ITR depois da última DFP | aceita | voce | 2026-10-25 |
+| 154 | A logo da empresa acompanha o ticker, vinda da brapi, com as iniciais no lugar quando falta | aceita | voce | 2026-10-28 |
 
 ### Caminhos retirados
 

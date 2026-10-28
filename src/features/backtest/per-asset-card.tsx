@@ -3,6 +3,7 @@ import { Fmt, trendOf } from '../../copy';
 import { Card, Divider, SectionHeader } from '../../ui/card';
 import { cn } from '../../ui/cn';
 import { HintPopover } from '../../ui/hint';
+import { TickerLogo } from '../../ui/ticker-logo';
 import { toneText } from '../../ui/tone';
 import { useAssetOverlay } from '../shell/use-asset-overlay';
 import { perAssetGlossary } from './glossary';
@@ -86,14 +87,15 @@ function AssetGroup(props: { label: string; color: string; assets: readonly Asse
         <tbody>
           {props.assets.map((a) => (
             <tr key={a.ticker.value} className="border-b border-divider last:border-0">
-              <th scope="row" className="w-20 py-2.5 pr-3 text-left align-top sm:w-24">
+              <th scope="row" className="w-24 py-2.5 pr-3 text-left align-top sm:w-28">
                 <button
                   type="button"
                   onClick={() => open(a.ticker)}
-                  className="-mx-1 min-h-11 rounded px-1 text-left font-semibold text-fg hover:text-brand sm:min-h-0"
+                  className="-mx-1 inline-flex min-h-11 items-center gap-1.5 rounded px-1 text-left font-semibold text-fg hover:text-brand sm:min-h-0"
                   aria-label={`Abrir o Raio-X de ${a.ticker.value}`}
                 >
-                  {a.ticker.value}
+                  <TickerLogo ticker={a.ticker} size="sm" />
+                  <span>{a.ticker.value}</span>
                 </button>
               </th>
               <td className="py-2.5 align-top">
