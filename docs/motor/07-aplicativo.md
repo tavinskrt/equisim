@@ -15,6 +15,12 @@ resultado (7.6).
 | **Backtest** | [backtest-page.tsx](../../src/features/backtest/backtest-page.tsx) | a história das duas carteiras sob o mesmo plano de aportes |
 | **Meus valuations** | [valuations-page.tsx](../../src/features/valuations/valuations-page.tsx) | os valuations que o usuário confirmou, de todos os ativos (7.6) |
 
+Onde aparece um ticker — Estudo, seletor, busca, Raio-X, Backtest, Meus
+valuations e Simular —, ele vem com a logo da empresa, carregada da brapi pelo
+navegador, e as duas primeiras letras da raiz no lugar dela quando a imagem não
+vem ([ticker-logo.tsx](../../src/ui/ticker-logo.tsx); decisão 154). A logo não
+entra em conta nenhuma.
+
 O menu da conta tem ainda o **painel de logs de cálculo**
 ([logs-app.tsx](../../src/features/logs/logs-app.tsx); rota `/logs`, em
 janela própria), com o rastro de cada avaliação

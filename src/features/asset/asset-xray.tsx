@@ -14,6 +14,7 @@ import { EmptyState, Skeleton } from '../../ui/feedback';
 import { HintPopover } from '../../ui/hint';
 import { Metric, MetricRow } from '../../ui/metric';
 import { Sheet } from '../../ui/sheet';
+import { TickerLogo } from '../../ui/ticker-logo';
 import { toneBorder } from '../../ui/tone';
 import { cn } from '../../ui/cn';
 import { PortaZeroExplainer } from '../study/porta-zero';
@@ -41,6 +42,7 @@ export function AssetXRay({ ticker, onClose }: { ticker: Ticker | null; onClose:
       open={ticker !== null}
       onOpenChange={(o) => !o && onClose()}
       title={ticker === null ? 'Ativo' : `Raio-X de ${ticker.value}`}
+      icon={ticker === null ? undefined : <TickerLogo ticker={ticker} size="lg" />}
       description={
         name === null
           ? 'Avaliação pelo fluxo de caixa descontado, com as premissas à vista'

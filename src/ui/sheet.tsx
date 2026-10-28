@@ -14,6 +14,8 @@ export function Sheet(props: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: ReactNode;
+  /** Marca à esquerda do título — a logo da empresa no Raio-X. Decorativa. */
+  icon?: ReactNode;
   description?: ReactNode;
   /** Ações à direita do título, antes do fechar. */
   actions?: ReactNode;
@@ -44,6 +46,7 @@ export function Sheet(props: {
         >
           <div className="mx-auto mt-2 h-1 w-9 rounded-full bg-line-strong md:hidden" aria-hidden />
           <header className="flex items-start gap-2 border-b border-divider px-4 py-3 sm:px-5">
+            {props.icon !== undefined && <div className="shrink-0 py-1.5">{props.icon}</div>}
             <div className="min-w-0 flex-1 py-1.5">
               <D.Title className="truncate text-title-sm font-semibold text-fg">{props.title}</D.Title>
               {props.description !== undefined ? (

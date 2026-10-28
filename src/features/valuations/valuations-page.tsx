@@ -12,6 +12,7 @@ import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
 import { EmptyState, Skeleton } from '../../ui/feedback';
 import { TextField } from '../../ui/field';
+import { TickerLogo } from '../../ui/ticker-logo';
 import { useAssetOverlay } from '../shell/use-asset-overlay';
 import { SavedValuationItem } from './saved-valuation-item';
 
@@ -123,6 +124,7 @@ function TickerGroup({ group }: { group: Group }) {
   return (
     <Card className="p-4 sm:p-5">
       <div className="flex flex-wrap items-start gap-2">
+        <TickerLogo ticker={latest.ticker} size="lg" />
         <div className="min-w-0 flex-1">
           <h2 className="text-title-sm font-bold text-fg">{group.ticker}</h2>
           <p className="text-caption text-fg-2">

@@ -9,6 +9,7 @@ import { IconButton } from '../../ui/button';
 import { cn } from '../../ui/cn';
 import { EmptyState } from '../../ui/feedback';
 import { HintPopover } from '../../ui/hint';
+import { TickerLogo } from '../../ui/ticker-logo';
 import { useAssetOverlay } from '../shell/use-asset-overlay';
 import { PotentialCell } from './potential-cell';
 
@@ -136,10 +137,17 @@ function AssetRow({ entry, isPrincipal, mine }: { entry: PortfolioEntry; isPrinc
       >
         <GripVertical aria-hidden className="size-4" />
       </button>
-      <button type="button" onClick={() => overlay.open(entry.ticker)} className="min-w-0 rounded-md py-1 text-left hover:bg-sunken/60">
-        <span className="block truncate text-body-sm font-bold text-fg">{entry.ticker.value}</span>
-        <span className="block truncate text-caption text-fg-3">
-          {entry.sector.isUnknown ? 'Setor não classificado' : entry.sector.label}
+      <button
+        type="button"
+        onClick={() => overlay.open(entry.ticker)}
+        className="flex min-w-0 items-center gap-2 rounded-md py-1 text-left hover:bg-sunken/60"
+      >
+        <TickerLogo ticker={entry.ticker} size="sm" />
+        <span className="min-w-0">
+          <span className="block truncate text-body-sm font-bold text-fg">{entry.ticker.value}</span>
+          <span className="block truncate text-caption text-fg-3">
+            {entry.sector.isUnknown ? 'Setor não classificado' : entry.sector.label}
+          </span>
         </span>
       </button>
       {/* No celular, peso e potencial descem para a segunda linha, com rótulo. */}
