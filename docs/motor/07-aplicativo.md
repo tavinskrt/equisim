@@ -12,7 +12,7 @@ resultado (7.6).
 |---|---|---|
 | **Estudo** | [builder-page.tsx](../../src/features/study/builder-page.tsx) | monta as carteiras Principal e Reserva e mostra o potencial de cada ativo |
 | **Raio-X** (`/ativo/<ATIVO>`) | [asset-page.tsx](../../src/features/asset/asset-page.tsx); [asset-xray.tsx](../../src/features/asset/asset-xray.tsx) | a avaliação de um ativo (capítulo 6), em dois modos — **Essencial**, a leitura e a régua de preço, e **Completo**, com o modelo, a taxa, a normalização, a sensibilidade e a projeção —, e o botão **Simular minhas premissas**, que abre a conta do motor para o usuário refazê-la (7.5); no computador, um índice lateral leva a cada seção. O endereço antigo, `?ativo=<ATIVO>` sobre qualquer área, redireciona para a página |
-| **Meta** | [planner-page.tsx](../../src/features/goal/planner-page.tsx) | a rentabilidade que um plano patrimonial exige, e a carteira frente a ela |
+| **Meta** | [planner-page.tsx](../../src/features/goal/planner-page.tsx) | a rentabilidade que um plano patrimonial exige, e a carteira frente a ela; a curva de acumulação ([accumulation-chart.tsx](../../src/features/goal/accumulation-chart.tsx)) é o piloto dos gráficos da Bklit UI (decisão 156) |
 | **Backtest** | [backtest-page.tsx](../../src/features/backtest/backtest-page.tsx) | a história das duas carteiras sob o mesmo plano de aportes |
 | **Meus valuations** | [valuations-page.tsx](../../src/features/valuations/valuations-page.tsx) | os valuations que o usuário confirmou, de todos os ativos (7.6) |
 
@@ -23,11 +23,13 @@ vem ([ticker-logo.tsx](../../src/ui/ticker-logo.tsx); decisão 154). A logo não
 entra em conta nenhuma.
 
 A interface se move pouco e com motivo (decisão 155): a área entra com um
-esmaecer curto, os cartões do Raio-X entram em cascata, os números da leitura
-contam até o valor e a escolha do Essencial/Completo desliza
-([motion.tsx](../../src/ui/motion.tsx)). Com a preferência de movimento
-reduzido do sistema, tudo isso para, e nenhum número muda com o movimento: a
-contagem é só visual, e o leitor de tela lê o valor final.
+esmaecer curto e os cartões do Raio-X entram em cascata, as duas coisas em
+animação CSS, para o conteúdo nunca depender de JavaScript para aparecer; os
+números da leitura contam até o valor e a escolha do Essencial/Completo
+desliza, pelo Motion ([motion.tsx](../../src/ui/motion.tsx)). Com a
+preferência de movimento reduzido do sistema, tudo isso para, e nenhum número
+muda com o movimento: a contagem é só visual, e o leitor de tela lê o valor
+final.
 
 O menu da conta tem ainda o **painel de logs de cálculo**
 ([logs-app.tsx](../../src/features/logs/logs-app.tsx); rota `/logs`, em

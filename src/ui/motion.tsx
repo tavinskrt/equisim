@@ -1,4 +1,4 @@
-import { LazyMotion, MotionConfig, useMotionValueEvent, useReducedMotion, useSpring, type Variants } from 'motion/react';
+import { domAnimation, LazyMotion, MotionConfig, useMotionValueEvent, useReducedMotion, useSpring } from 'motion/react';
 import * as m from 'motion/react-m';
 import { type ReactNode, useEffect, useState } from 'react';
 
@@ -6,68 +6,55 @@ import { cn } from './cn';
 
 /**
  * O movimento da interface (decisão 155), pelo Motion
- * (https://motion.dev). Três regras valem para tudo o que mora aqui:
+ * (https://motion.dev). Quatro regras valem para tudo o que mora aqui:
  *
- * 1. **`LazyMotion` estrito**: só o componente `m`, de ~5 kB, e o pacote
- *    `domAnimation`, baixado à parte depois da primeira pintura
- *    (`motion-features.ts`). O `motion.div` completo, de 43 kB, é recusado em
- *    tempo de execução — e o `domMax`, das animações de layout, fica de fora.
- * 2. **Movimento reduzido manda**: com a preferência do sistema ligada, o
- *    Motion corta transformação e layout e mantém só opacidade e cor, como o
- *    `styles.css` já faz com as animações CSS.
- * 3. **Movimento explica ou não existe**: curto (150–300 ms), na entrada do
+ * 1. **`LazyMotion` estrito**: só o componente `m` e o pacote `domAnimation`.
+ *    O `motion.div` completo, de 43 kB, é recusado em tempo de execução — e o
+ *    `domMax`, das animações de layout, fica de fora. Os recursos vão no
+ *    pacote principal, e não num pedaço baixado depois: um pedaço que falha
+ *    (rede, ou o build velho de uma aba aberta antes de uma publicação)
+ *    deixaria parado no estado inicial tudo o que é `m.*`.
+ * 2. **Conteúdo nunca depende de JavaScript para aparecer**: a entrada das
+ *    áreas e a cascata dos cartões são animação CSS (`rise-in` e `stagger`
+ *    em `styles.css`). Uma animação do Motion só corre a cada quadro de tela,
+ *    e numa aba em segundo plano não há quadro: um `opacity: 0` inicial
+ *    esconderia a página até a aba voltar à frente.
+ * 3. **Movimento reduzido manda**: com a preferência do sistema ligada, o
+ *    Motion corta transformação e layout e mantém só opacidade e cor, e o
+ *    `styles.css` encurta as animações CSS para um quadro.
+ * 4. **Movimento explica ou não existe**: curto (150–300 ms), na entrada do
  *    conteúdo, nunca em laço.
  */
 export function MotionProvider({ children }: { children: ReactNode }) {
   return (
-    <LazyMotion features={loadFeatures} strict>
+    <LazyMotion features={domAnimation} strict>
       <MotionConfig reducedMotion="user">{children}</MotionConfig>
     </LazyMotion>
   );
 }
 
-const loadFeatures = () => import('./motion-features').then((r) => r.default);
-
 /** A curva de saída rápida que assenta devagar, a mesma de todas as entradas. */
 export const easeOut = [0.23, 1, 0.32, 1] as const;
 
-/** Um bloco que entra subindo de leve e acendendo. */
-const rise: Variants = {
-  hidden: { opacity: 0, y: 8 },
-  shown: { opacity: 1, y: 0, transition: { duration: 0.28, ease: easeOut } },
-};
-
-/** Entrada de um bloco isolado, ao montar. */
+/** Entrada de um bloco isolado, ao montar: sobe de leve e acende (CSS). */
 export function Reveal({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <m.div className={className} initial="hidden" animate="shown" variants={rise}>
-      {children}
-    </m.div>
-  );
+  return <div className={cn('rise-in', className)}>{children}</div>;
 }
 
 /**
- * Cascata: os filhos `StaggerItem` entram um depois do outro, de cima para
- * baixo, na ordem em que o olho deve lê-los.
+ * Cascata: os filhos entram um depois do outro, de cima para baixo, na ordem
+ * em que o olho deve lê-los. O atraso de cada um vem da posição dele
+ * (`.stagger > :nth-child(n)` em `styles.css`).
  */
-export function Stagger({ children, className, step = 0.05 }: { children: ReactNode; className?: string; step?: number }) {
-  return (
-    <m.div
-      className={className}
-      initial="hidden"
-      animate="shown"
-      variants={{ hidden: {}, shown: { transition: { staggerChildren: step } } }}
-    >
-      {children}
-    </m.div>
-  );
+export function Stagger({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={cn('stagger', className)}>{children}</div>;
 }
 
 export function StaggerItem({ children, className, id }: { children: ReactNode; className?: string; id?: string }) {
   return (
-    <m.div className={className} id={id} variants={rise}>
+    <div className={className} id={id}>
       {children}
-    </m.div>
+    </div>
   );
 }
 

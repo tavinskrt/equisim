@@ -15,7 +15,6 @@ afeta:
   - src/main.tsx
   - src/styles.css
   - src/ui/motion.tsx
-  - src/ui/motion-features.ts
   - src/ui/segmented.tsx
   - src/ui/engine-loading.tsx
   - src/ui/tilt.tsx
@@ -75,15 +74,19 @@ curto, sempre subordinado à preferência de movimento reduzido.**
    a que está à vista. O clique rola sem mexer na URL, para o Voltar continuar
    devolvendo de onde a pessoa veio.
 4. O movimento é o do Motion, em `LazyMotion` estrito: só o componente `m`, com
-   os recursos `domAnimation` baixados à parte. `MotionConfig
+   os recursos `domAnimation` no pacote principal. `MotionConfig
    reducedMotion="user"` corta transformação e layout para quem pediu menos
    movimento.
-5. Entram: a área que esmaece ao trocar de endereço, os cartões do Raio-X em
-   cascata, os números da leitura contando até o valor (só na tela: o leitor de
-   tela lê o valor final, uma vez), a placa do controle segmentado que desliza
-   e, enquanto o motor avalia, as etapas da cascata em texto, adaptadas do AI
-   Text Loading da Kokonut UI.
-6. A profundidade à moda do Linear é CSS. O cartão da leitura inclina até 3°
+5. **Conteúdo nunca depende de JavaScript para aparecer.** A área que esmaece
+   ao trocar de endereço e os cartões do Raio-X em cascata são animação CSS.
+   Uma animação do Motion só avança a cada quadro de tela, e numa aba em
+   segundo plano não há quadro: com `opacity: 0` de partida, a página ficava
+   invisível. As capturas mostraram isso nas telas abertas por endereço.
+6. Entram pelo Motion: os números da leitura contando até o valor (só na tela:
+   o leitor de tela lê o valor final, uma vez), a placa do controle segmentado
+   que desliza e, enquanto o motor avalia, as etapas da cascata em texto,
+   adaptadas do AI Text Loading da Kokonut UI.
+7. A profundidade à moda do Linear é CSS. O cartão da leitura inclina até 3°
    seguindo o mouse, com brilho no tom do veredito. Há também uma aura da marca
    atrás do cabeçalho do ativo, e a logo grande ganha volume. Nada disso
    responde ao toque nem ao movimento reduzido.
@@ -93,10 +96,12 @@ curto, sempre subordinado à preferência de movimento reduzido.**
 - **O Raio-X deixa de abrir por cima da área.** Quem estava no Estudo sai dele
   para ver o ativo, e o Voltar é o caminho de volta. O ganho é a largura da
   tela inteira, o índice das seções e o endereço próprio.
-- **Peso no build**: o pacote principal cresce cerca de 14 kB (gzip) com o
-  núcleo do Motion. Os recursos de animação vêm num pedaço próprio de ~15 kB,
-  depois da primeira pintura. O Raio-X sai do pacote principal para o pedaço
-  da página dele.
+- **Peso no build**: o pacote principal cresce cerca de 30 kB (gzip) com o
+  Motion e os recursos de animação. Baixar os recursos à parte foi descartado:
+  um pedaço que falha (rede, ou a aba aberta antes de uma publicação pedindo o
+  pedaço velho) deixaria parado no estado inicial tudo o que é `m.*`. Em
+  troca, o Raio-X e a Meta saem do pacote do roteador para pedaços próprios,
+  e a primeira carga fica do tamanho que era antes (ver a decisão 156).
 - **Código adaptado de terceiros**: o carregamento do motor vem do AI Text
   Loading da Kokonut UI, sob MIT, e a licença está em `THIRD_PARTY_NOTICES.md`.
   O índice de seções e a placa deslizante seguem ideias da Kokonut, mas foram

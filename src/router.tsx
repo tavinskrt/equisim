@@ -2,7 +2,6 @@ import { lazy, type ReactNode, Suspense } from 'react';
 import { createBrowserRouter, Link, Navigate, Outlet, useLocation } from 'react-router';
 
 import { useSession } from './app/state/session-store';
-import { PlannerPage } from './features/goal/planner-page';
 import { AppShell } from './features/shell/app-shell';
 import { BuilderPage } from './features/study/builder-page';
 import { Button } from './ui/button';
@@ -10,9 +9,10 @@ import { Card } from './ui/card';
 import { EmptyState, Spinner } from './ui/feedback';
 
 // As áreas pesadas vão em pedaços próprios: quem abre o estudo não baixa o
-// editor manual nem o laboratório de backtest.
+// editor manual, o laboratório de backtest nem o gráfico da Bklit da Meta.
 const BacktestPage = lazy(() => import('./features/backtest/backtest-page').then((m) => ({ default: m.BacktestPage })));
 const AssetPage = lazy(() => import('./features/asset/asset-page').then((m) => ({ default: m.AssetPage })));
+const PlannerPage = lazy(() => import('./features/goal/planner-page').then((m) => ({ default: m.PlannerPage })));
 const ManualPage = lazy(() => import('./features/manual/manual-page').then((m) => ({ default: m.ManualPage })));
 const ValuationsPage = lazy(() => import('./features/valuations/valuations-page').then((m) => ({ default: m.ValuationsPage })));
 const ProfilePage = lazy(() => import('./features/auth/profile-page').then((m) => ({ default: m.ProfilePage })));
@@ -75,7 +75,7 @@ export const router = createBrowserRouter(
           children: [
             { index: true, element: <Navigate to="/estudo" replace /> },
             { path: '/estudo', element: <BuilderPage /> },
-            { path: '/meta', element: <PlannerPage /> },
+            { path: '/meta', element: page(<PlannerPage />) },
             { path: '/backtest', element: page(<BacktestPage />) },
             { path: '/valuations', element: page(<ValuationsPage />) },
             { path: '/ativo/:ticker', element: page(<AssetPage />) },

@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-28, a partir de `b2f8741`.
+Gerado em 2026-10-28, a partir de `927d6c0`.
 
 ## Decisões registradas
 
-**128** aceita · **2** cumprida · **7** substituída
+**129** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -152,6 +152,7 @@ Gerado em 2026-10-28, a partir de `b2f8741`.
 | 153 | O lucro de partida é o do ano corrente anualizado quando já há ITR depois da última DFP | aceita | voce | 2026-10-25 |
 | 154 | A logo da empresa acompanha o ticker, vinda da brapi, com as iniciais no lugar quando falta | aceita | voce | 2026-10-28 |
 | 155 | O Raio-X ganha página própria com Voltar, e a interface ganha movimento curto pelo Motion, com peças da Kokonut UI e profundidade em CSS | aceita | voce | 2026-10-28 |
+| 156 | A curva de acumulação da Meta é o piloto dos gráficos da Bklit UI, e os outros gráficos continuam no Recharts até a comparação | aceita | voce | 2026-10-28 |
 
 ### Caminhos retirados
 
@@ -886,7 +887,7 @@ Linhas versionadas, excluindo artefatos gerados.
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
 | Nucleo de dominio | 79 | 24.999 |
-| Apresentacao | 116 | 13.471 |
+| Apresentacao | 115 | 13.506 |
 | Camada de dados | 37 | 4.687 |
 | Auditoria | 5 | 679 |
 | Ferramentas de medicao | 126 | 29.663 |
@@ -897,6 +898,7 @@ Linhas versionadas, excluindo artefatos gerados.
 ## Histórico recente
 
 ```
+2026-10-28  927d6c0  O Raio-X ganha página própria e a interface ganha movimento (decisão 155)
 2026-10-28  b2f8741  Mostra a logo da empresa ao lado de cada ticker (decisão 154)
 2026-10-28  44ab8d5  Merge branch 'main' into claude/project-thread-nfrlmq
 2026-10-28  93a9206  O lucro de partida passa a ser o ano corrente anualizado (decisão 153)
@@ -911,5 +913,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-10-23  3398f4f  Porta backtest-valuation, o último script de tool/, para TypeScript
 2026-10-23  41c421a  Porta cascade-golden e implied-premium para TypeScript
 2026-10-23  d56546e  Porta mais 10 scripts de tool/ para TypeScript
-2026-10-23  a4579ed  Porta mais 14 scripts de tool/ para TypeScript
 ```

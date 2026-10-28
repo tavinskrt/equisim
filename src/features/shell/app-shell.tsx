@@ -9,7 +9,6 @@ import { AuditRoutes } from '../../audit/audit-routes';
 import { IconButton } from '../../ui/button';
 import { cn } from '../../ui/cn';
 import { Logo } from '../../ui/logo';
-import { m } from '../../ui/motion';
 import { Segmented } from '../../ui/segmented';
 import { toast } from '../../ui/toast';
 import { AccountMenu } from './account-menu';
@@ -130,10 +129,10 @@ export function AppShell() {
             ]}
           />
         </div>
-        {/* Só a entrada anima: a saída prenderia a área velha na tela enquanto a nova carrega. */}
-        <m.div key={location.pathname} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}>
+        {/* Só a entrada anima, e em CSS: a saída prenderia a área velha na tela enquanto a nova carrega. */}
+        <div key={location.pathname} className="rise-in">
           <Outlet />
-        </m.div>
+        </div>
       </main>
 
       <nav
