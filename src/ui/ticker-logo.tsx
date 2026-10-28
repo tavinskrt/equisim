@@ -34,6 +34,7 @@ const sizes = {
   sm: 'size-5 text-caption',
   md: 'size-7 text-caption',
   lg: 'size-9 text-label',
+  xl: 'size-12 text-body shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_6px_18px_-6px_var(--shadow)]',
 } as const;
 
 /**

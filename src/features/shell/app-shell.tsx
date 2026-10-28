@@ -1,6 +1,6 @@
 import { ScrollText, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, Outlet, useLocation } from 'react-router';
 
 import { PreferencesActions, usePreferences } from '../../app/state/preferences-store';
 import { StudyActions, useStudy } from '../../app/state/study-store';
@@ -9,24 +9,25 @@ import { AuditRoutes } from '../../audit/audit-routes';
 import { IconButton } from '../../ui/button';
 import { cn } from '../../ui/cn';
 import { Logo } from '../../ui/logo';
+import { m } from '../../ui/motion';
 import { Segmented } from '../../ui/segmented';
 import { toast } from '../../ui/toast';
-import { AssetXRay } from '../asset/asset-xray';
 import { AccountMenu } from './account-menu';
 import { CommandPalette } from './command-palette';
 import { ContextBar } from './context-bar';
 import { navItems } from './nav-items';
-import { useAssetOverlay } from './use-asset-overlay';
+import { useLegacyAssetRedirect } from './use-open-asset';
 
 /**
- * A casca: cabeçalho com as áreas, a busca e o modo; a barra do estudo; a área
- * corrente; e, por cima de qualquer área, o Raio-X do ativo.
+ * A casca: cabeçalho com as áreas, a busca e o modo; a barra do estudo; e a
+ * área corrente, que entra com um esmaecer curto a cada troca de endereço.
  */
 export function AppShell() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const mode = usePreferences((s) => s.mode);
   const lastError = useStudy((s) => s.lastError);
-  const overlay = useAssetOverlay();
+  const location = useLocation();
+  useLegacyAssetRedirect();
 
   // ⌘K / Ctrl+K abre a busca de qualquer lugar.
   useEffect(() => {
@@ -129,7 +130,10 @@ export function AppShell() {
             ]}
           />
         </div>
-        <Outlet />
+        {/* Só a entrada anima: a saída prenderia a área velha na tela enquanto a nova carrega. */}
+        <m.div key={location.pathname} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}>
+          <Outlet />
+        </m.div>
       </main>
 
       <nav
@@ -153,7 +157,6 @@ export function AppShell() {
       </nav>
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
-      <AssetXRay ticker={overlay.ticker} onClose={overlay.close} />
     </div>
   );
 }

@@ -10,7 +10,7 @@ import { cn } from '../../ui/cn';
 import { EmptyState } from '../../ui/feedback';
 import { HintPopover } from '../../ui/hint';
 import { TickerLogo } from '../../ui/ticker-logo';
-import { useAssetOverlay } from '../shell/use-asset-overlay';
+import { useOpenAsset } from '../shell/use-open-asset';
 import { PotentialCell } from './potential-cell';
 
 /** O identificador de soltura de cada coluna. */
@@ -114,7 +114,7 @@ export function PortfolioColumn(props: { portfolio: Portfolio; isPrincipal: bool
 }
 
 function AssetRow({ entry, isPrincipal, mine }: { entry: PortfolioEntry; isPrincipal: boolean; mine: ManualValuationRecord | null }) {
-  const overlay = useAssetOverlay();
+  const openAsset = useOpenAsset();
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `${isPrincipal ? 'p' : 'r'}:${entry.ticker.value}`,
     data: { ticker: entry.ticker, fromPrincipal: isPrincipal },
@@ -139,7 +139,7 @@ function AssetRow({ entry, isPrincipal, mine }: { entry: PortfolioEntry; isPrinc
       </button>
       <button
         type="button"
-        onClick={() => overlay.open(entry.ticker)}
+        onClick={() => openAsset(entry.ticker)}
         className="flex min-w-0 items-center gap-2 rounded-md py-1 text-left hover:bg-sunken/60"
       >
         <TickerLogo ticker={entry.ticker} size="sm" />

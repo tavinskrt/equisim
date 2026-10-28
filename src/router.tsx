@@ -12,6 +12,7 @@ import { EmptyState, Spinner } from './ui/feedback';
 // As áreas pesadas vão em pedaços próprios: quem abre o estudo não baixa o
 // editor manual nem o laboratório de backtest.
 const BacktestPage = lazy(() => import('./features/backtest/backtest-page').then((m) => ({ default: m.BacktestPage })));
+const AssetPage = lazy(() => import('./features/asset/asset-page').then((m) => ({ default: m.AssetPage })));
 const ManualPage = lazy(() => import('./features/manual/manual-page').then((m) => ({ default: m.ManualPage })));
 const ValuationsPage = lazy(() => import('./features/valuations/valuations-page').then((m) => ({ default: m.ValuationsPage })));
 const ProfilePage = lazy(() => import('./features/auth/profile-page').then((m) => ({ default: m.ProfilePage })));
@@ -77,6 +78,7 @@ export const router = createBrowserRouter(
             { path: '/meta', element: <PlannerPage /> },
             { path: '/backtest', element: page(<BacktestPage />) },
             { path: '/valuations', element: page(<ValuationsPage />) },
+            { path: '/ativo/:ticker', element: page(<AssetPage />) },
             { path: '/ativo/:ticker/simular', element: page(<ManualPage />) },
             { path: '/perfil', element: page(<ProfilePage />) },
             { path: '/perfil/senha', element: page(<ChangePasswordPage />) },

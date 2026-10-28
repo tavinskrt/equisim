@@ -31,13 +31,13 @@ testada e **não** foi comprovada. É uma ferramenta de análise, e não um orá
 
 ## O que o aplicativo faz
 
-Quatro áreas, o Raio-X de cada ação por cima delas e um painel. Tudo em
+Quatro áreas, a página de Raio-X de cada ação e um painel. Tudo em
 TypeScript, no navegador ([decisão 152](docs/decisoes/152-o-equisim-passa-a-typescript-e-o-dart-sai-do-repositorio.md)).
 
 | Área | Para quê |
 |---|---|
 | **Estudo** | montar a carteira **Principal** (até 15 ações, com pesos) e a **Reserva** (candidatas), arrastando entre as duas; ver o potencial de cada ação — o do motor, ou o seu, quando você confirmou um valuation que discorda dele — e o retorno esperado da carteira; salvar e reabrir estudos |
-| **Raio-X** (sobre qualquer área; busca por Ctrl/⌘ + K) | a avaliação de uma ação: preço justo, potencial, régua de preço, faixa calibrada de 12 e 36 meses, sensibilidade ou Monte Carlo, múltiplos de pares e ressalvas, em dois modos — **Essencial**, para quem está começando, e **Completo**; e o botão **Simular minhas premissas**, que abre a conta do motor para você trocar lucro, crescimento, taxa e perpetuidade e ver o preço mudar na hora (decisão 147) |
+| **Raio-X** (página `/ativo/<AÇÃO>`; busca por Ctrl/⌘ + K) | a avaliação de uma ação: preço justo, potencial, régua de preço, faixa calibrada de 12 e 36 meses, sensibilidade ou Monte Carlo, múltiplos de pares e ressalvas, em dois modos — **Essencial**, para quem está começando, e **Completo**; e o botão **Simular minhas premissas**, que abre a conta do motor para você trocar lucro, crescimento, taxa e perpetuidade e ver o preço mudar na hora (decisão 147) |
 | **Meta** | a rentabilidade anual que um plano (aporte inicial, aporte mensal, valor desejado, prazo) exige, comparada ao CDI e ao Ibovespa da década, e à carteira |
 | **Backtest** | a história das duas carteiras sob o mesmo plano de aportes, de 1 a 10 anos para trás: patrimônio, TWR, XIRR, volatilidade, drawdown, Sharpe, Sortino, Calmar |
 | **Meus valuations** | os valuations que você confirmou, gravados com as premissas e o resultado do dia (decisão 150) |

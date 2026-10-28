@@ -343,3 +343,47 @@
     transform: translateY(8px);
   }
 }
+
+/* ---- Movimento e profundidade (decisão 155) ---------------------------- */
+
+/* A onda de brilho do carregamento do motor, letra a letra. Em CSS para o
+   laço sem fim ficar fora da linha principal; o bloco de movimento reduzido
+   acima a encurta para um quadro, e a letra fica acesa. */
+@keyframes engine-wave {
+  50% {
+    opacity: 0.35;
+  }
+}
+.engine-wave {
+  animation: engine-wave 1.6s ease-in-out infinite both;
+}
+
+/* A aura do topo da página do ativo: a luz da marca, desfocada, atrás do
+   cabeçalho. Fraca de propósito — a página é de número, não de vitrine. */
+.asset-aura {
+  background:
+    radial-gradient(60% 70% at 18% 30%, color-mix(in oklab, var(--brand) 16%, transparent), transparent 70%),
+    radial-gradient(45% 60% at 70% 10%, color-mix(in oklab, var(--chart-2) 10%, transparent), transparent 70%);
+  filter: blur(24px);
+  opacity: 0.9;
+}
+:root[data-theme='light'] .asset-aura {
+  opacity: 0.6;
+}
+
+/* A borda acesa do cartão da leitura, no tom do veredito (`--verdict`): um
+   fio de luz no alto, por cima da borda tingida, como as superfícies do
+   Linear. */
+.verdict-glow {
+  background:
+    radial-gradient(120% 80% at 0% 0%, color-mix(in oklab, var(--verdict, var(--brand)) 9%, transparent), transparent 55%),
+    var(--surface);
+}
+.verdict-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0 12% auto 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--verdict, var(--brand)) 70%, transparent), transparent);
+  pointer-events: none;
+}

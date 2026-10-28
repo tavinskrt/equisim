@@ -12,20 +12,20 @@ import { auditEnabled } from '../../audit/audit-bus';
 import { Spinner } from '../../ui/feedback';
 import { TickerLogo } from '../../ui/ticker-logo';
 import { navItems } from './nav-items';
-import { useAssetOverlay } from './use-asset-overlay';
+import { useOpenAsset } from './use-open-asset';
 
 const itemClass =
   'flex min-h-11 cursor-pointer select-none items-center gap-3 rounded-lg px-3 text-body-sm text-fg outline-none data-[selected=true]:bg-sunken';
 
 /**
  * A busca global (⌘K / Ctrl+K): ativo, área ou comando. Escolher um ativo
- * abre o Raio-X dele **por cima da área corrente** — a busca não tira a pessoa
- * de onde ela está.
+ * abre a página dele (decisão 155), e o Voltar devolve à área de onde a busca
+ * foi aberta.
  */
 export function CommandPalette(props: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const universe = useUniverse();
   const navigate = useNavigate();
-  const overlay = useAssetOverlay();
+  const openAsset = useOpenAsset();
   const theme = usePreferences((s) => s.theme);
   const mode = usePreferences((s) => s.mode);
   const study = useStudy((s) => s.study);
@@ -79,7 +79,7 @@ export function CommandPalette(props: { open: boolean; onOpenChange: (open: bool
               {universe.status === 'success' && (
                 <Command.Group heading="Ativos" className="[&_[cmdk-group-heading]]:eyebrow [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2">
                   {universe.data.map((t) => (
-                    <Command.Item key={t.value} value={t.value} onSelect={() => run(() => overlay.open(t))} className={itemClass}>
+                    <Command.Item key={t.value} value={t.value} onSelect={() => run(() => openAsset(t))} className={itemClass}>
                       <TickerLogo ticker={t} size="sm" />
                       <span className="num w-16 font-semibold">{t.value}</span>
                       <span className="flex-1 text-fg-3">Abrir o Raio-X</span>

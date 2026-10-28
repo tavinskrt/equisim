@@ -1,8 +1,9 @@
 # 7. O resto do aplicativo
 
-O Equisim é um aplicativo web (decisão 152) com quatro áreas e uma camada por
-cima delas. O **Raio-X** de um ativo é o motor dos capítulos 1 a 6: abre sobre
-qualquer área, pela busca (Ctrl/⌘ + K) ou pelo ativo de uma carteira. Este
+O Equisim é um aplicativo web (decisão 152) com quatro áreas e a página de cada
+ativo. O **Raio-X** de um ativo é o motor dos capítulos 1 a 6: tem página
+própria, `/ativo/<ATIVO>` (decisão 155), aberta pela busca (Ctrl/⌘ + K) ou pelo
+ativo de uma carteira, e o Voltar dela devolve à área de onde veio. Este
 capítulo descreve as áreas e as contas que elas fazem, e a tela que abre a
 conta do motor para o usuário refazer com os números dele (7.5) e guardar o
 resultado (7.6).
@@ -10,7 +11,7 @@ resultado (7.6).
 | Área | Tela | O que faz |
 |---|---|---|
 | **Estudo** | [builder-page.tsx](../../src/features/study/builder-page.tsx) | monta as carteiras Principal e Reserva e mostra o potencial de cada ativo |
-| **Raio-X** (sobre qualquer área) | [asset-xray.tsx](../../src/features/asset/asset-xray.tsx) | a avaliação de um ativo (capítulo 6), em dois modos — **Essencial**, a leitura e a régua de preço, e **Completo**, com o modelo, a taxa, a normalização, a sensibilidade e a projeção —, e o botão **Simular minhas premissas**, que abre a conta do motor para o usuário refazê-la (7.5) |
+| **Raio-X** (`/ativo/<ATIVO>`) | [asset-page.tsx](../../src/features/asset/asset-page.tsx); [asset-xray.tsx](../../src/features/asset/asset-xray.tsx) | a avaliação de um ativo (capítulo 6), em dois modos — **Essencial**, a leitura e a régua de preço, e **Completo**, com o modelo, a taxa, a normalização, a sensibilidade e a projeção —, e o botão **Simular minhas premissas**, que abre a conta do motor para o usuário refazê-la (7.5); no computador, um índice lateral leva a cada seção. O endereço antigo, `?ativo=<ATIVO>` sobre qualquer área, redireciona para a página |
 | **Meta** | [planner-page.tsx](../../src/features/goal/planner-page.tsx) | a rentabilidade que um plano patrimonial exige, e a carteira frente a ela |
 | **Backtest** | [backtest-page.tsx](../../src/features/backtest/backtest-page.tsx) | a história das duas carteiras sob o mesmo plano de aportes |
 | **Meus valuations** | [valuations-page.tsx](../../src/features/valuations/valuations-page.tsx) | os valuations que o usuário confirmou, de todos os ativos (7.6) |
@@ -20,6 +21,13 @@ valuations e Simular —, ele vem com a logo da empresa, carregada da brapi pelo
 navegador, e as duas primeiras letras da raiz no lugar dela quando a imagem não
 vem ([ticker-logo.tsx](../../src/ui/ticker-logo.tsx); decisão 154). A logo não
 entra em conta nenhuma.
+
+A interface se move pouco e com motivo (decisão 155): a área entra com um
+esmaecer curto, os cartões do Raio-X entram em cascata, os números da leitura
+contam até o valor e a escolha do Essencial/Completo desliza
+([motion.tsx](../../src/ui/motion.tsx)). Com a preferência de movimento
+reduzido do sistema, tudo isso para, e nenhum número muda com o movimento: a
+contagem é só visual, e o leitor de tela lê o valor final.
 
 O menu da conta tem ainda o **painel de logs de cálculo**
 ([logs-app.tsx](../../src/features/logs/logs-app.tsx); rota `/logs`, em

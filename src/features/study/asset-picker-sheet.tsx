@@ -10,7 +10,7 @@ import { EmptyState, Spinner } from '../../ui/feedback';
 import { Sheet } from '../../ui/sheet';
 import { TickerLogo } from '../../ui/ticker-logo';
 import { toast } from '../../ui/toast';
-import { useAssetOverlay } from '../shell/use-asset-overlay';
+import { useOpenAsset } from '../shell/use-open-asset';
 import { addToStudy } from './add-to-study';
 import { PortaZeroExplainer } from './porta-zero';
 
@@ -21,7 +21,7 @@ import { PortaZeroExplainer } from './porta-zero';
 export function AssetPickerSheet(props: { open: boolean; onOpenChange: (open: boolean) => void; toPrincipal: boolean }) {
   const universe = useUniverse();
   const study = useStudy((s) => s.study);
-  const overlay = useAssetOverlay();
+  const openAsset = useOpenAsset();
   const [query, setQuery] = useState('');
   const deferred = useDeferredValue(query.trim().toUpperCase());
   const [busy, setBusy] = useState<string | null>(null);
@@ -89,7 +89,7 @@ export function AssetPickerSheet(props: { open: boolean; onOpenChange: (open: bo
                 <button
                   type="button"
                   className="flex min-h-12 flex-1 items-center gap-2.5 text-left"
-                  onClick={() => overlay.open(t)}
+                  onClick={() => openAsset(t)}
                   aria-label={`Abrir o Raio-X de ${t.value}`}
                 >
                   <TickerLogo ticker={t} className={isUsed ? 'opacity-60' : undefined} />
