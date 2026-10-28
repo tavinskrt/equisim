@@ -184,6 +184,8 @@ class CvmAtDate implements FundamentalsRepository {
       market: this.hist,
       published: (s) => view.isPublished(s),
       anchored: this.anchored,
+      // A mesma série do aplicativo: o ano corrente anualizado (decisão 153).
+      yearToDate: CvmSeries.yearToDateByDefault,
     }).series;
     return new Ok([...merged]);
   }

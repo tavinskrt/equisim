@@ -231,7 +231,7 @@ function XRayResult({ result }: { result: ValuationResult }) {
           <CalibratedBandCard result={result} />
           <ModelCard result={result} />
           {result.diagnostics?.baseNormalization != null && (
-            <Panel title="Lucro de partida" subtitle="O último exercício, ou corrigido pelo ciclo">
+            <Panel title="Lucro de partida" subtitle="O último exercício ou o ano corrente anualizado, ou corrigido pelo ciclo">
               <NormalizationPanel normalization={result.diagnostics.baseNormalization} />
             </Panel>
           )}

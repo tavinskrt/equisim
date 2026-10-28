@@ -70,6 +70,7 @@ export * from './services/cvm/fundamentals-merge';
 export * from './services/cvm/cvm-document-codec';
 export * from './services/cvm/cvm-series';
 export * from './services/cvm/trailing-twelve-months';
+export * from './services/cvm/year-to-date';
 export * from './services/b3/b3-registry';
 export * from './services/b3/corporate-events';
 export * from './services/b3/cash-dividends';

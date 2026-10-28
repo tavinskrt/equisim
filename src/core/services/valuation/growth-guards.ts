@@ -441,7 +441,9 @@ export const GrowthGuards = {
     for (let i = 1; i < window.length; i++) {
       const a = window[i - 1]!;
       const b = window[i]!;
-      if (b.year - a.year !== 1) continue;
+      // O ano corrente anualizado não entra: a base variou por meses, e o
+      // lucro é de um ano (decisão 153).
+      if (b.year - a.year !== 1 || b.partial) continue;
       const delta = b.base - a.base;
       const profit = b.profit ?? 0.0;
       const excess = delta - profit;
@@ -492,8 +494,11 @@ export const GrowthGuards = {
     const gMedian = Inference.median(changes);
     if (gMedian === null) return null;
 
-    const xs = series.points.map((p) => p.year);
-    const ys = series.points.map((p) => Math.log(p.base));
+    // A regressão da base também deixa de fora o ano corrente anualizado, cuja
+    // base é de meses depois da anterior, e não de um ano (decisão 153).
+    const full = series.points.filter((p) => !p.partial);
+    const xs = full.map((p) => p.year);
+    const ys = full.map((p) => Math.log(p.base));
     const fit = Inference.ols(xs, ys);
     if (fit === null) return null;
 
