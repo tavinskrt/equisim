@@ -22,6 +22,7 @@ orquestração em [compute-valuation.ts, `output1`, `baseFlow`, `output2`](../..
 | Retorno do ano = lucro do ano ÷ base de **abertura** (ano anterior); prejuízo entra com sinal | `CapitalSeries` | o lucro é gerado pelo capital que existia no começo do ano |
 | Retorno do ciclo = mediana dos retornos dos 8 exercícios anteriores ao corrente (≥ 4) | `cycleReturn`, `cycleWindow = 8` | um ciclo de commodity ou de crédito cabe em oito anos; mediana resiste a extremos |
 | Série com menos de 4 pontos: a via não se aplica | `isTooShort` | — |
+| **Ano corrente anualizado** como último ponto, quando há ITR depois da última DFP: fluxo do acumulado × 12 ÷ meses, base na data do ITR. Entra no retorno (é ele o "atual" da Saída 1); fica **fora** da variação anual da base, da retenção, do capital externo, da regressão da base e da contagem da Porta 0 | `YearToDate.latest`, `CapitalPoint.partial` | decisão 153: o lucro mais atual publicado; a base dele está a meses da anterior, e não a um ano. Sem correção de sazonalidade |
 
 ---
 
@@ -40,6 +41,12 @@ setor tiver precedência do ciclo) e o retorno atual for positivo:
 fator = clamp(retorno do ciclo ÷ retorno atual, 0,33, 3,00)
 base  = lucro do exercício × fator
 ```
+
+Com o ano corrente anualizado no fim da série (decisão 153), o "exercício" é
+ele: `lucro anualizado ÷ patrimônio do fim da última DFP` é o retorno atual, e
+`lucro anualizado × fator` é a base. No BBAS3 em 25/10/2026: 1S26 × 2 =
+R$ 12.725,9 mi, retorno de 6,6% contra o típico de 16,1%, queda de 61,6% sobre
+2023, trava de saúde, fator 1,00.
 
 | Regra especial | Código | Evidência |
 |---|---|---|

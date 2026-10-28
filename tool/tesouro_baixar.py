@@ -15,6 +15,8 @@ from __future__ import annotations
 
 import json
 import sys
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -23,11 +25,33 @@ CATALOG = (
     "?id=taxas-dos-titulos-ofertados-pelo-tesouro-direto"
 )
 DESTINATION = Path("data/tesouro/precotaxatesourodireto.csv")
+# O download do CSV já respondeu 429 (26/10/2026). O agente de navegador é o
+# mesmo dos scripts da B3, que recusam o User-Agent padrão do urllib.
+HEADER = {"User-Agent": "Mozilla/5.0 (equisim)"}
+# Espera, em segundos, antes de cada nova tentativa depois de um 429 ou 503,
+# quando o servidor não diz quanto esperar (Retry-After).
+BACKOFF = (15, 30, 60, 120)
+
+
+def fetch(url: str, timeout: int) -> bytes:
+    """O corpo de [url], tentando de novo quando o servidor pede para esperar."""
+    for attempt in range(len(BACKOFF) + 1):
+        try:
+            request = urllib.request.Request(url, headers=HEADER)
+            with urllib.request.urlopen(request, timeout=timeout) as r:
+                return r.read()
+        except urllib.error.HTTPError as e:
+            if e.code not in (429, 503) or attempt == len(BACKOFF):
+                raise
+            after = e.headers.get("Retry-After", "")
+            wait = int(after) if after.isdigit() else BACKOFF[attempt]
+            print(f"  HTTP {e.code}; nova tentativa em {wait} s")
+            time.sleep(wait)
+    raise AssertionError("inalcançável")
 
 
 def main() -> int:
-    with urllib.request.urlopen(CATALOG, timeout=60) as r:
-        package = json.load(r)
+    package = json.loads(fetch(CATALOG, timeout=60))
     csv = [
         rec["url"]
         for rec in package["result"]["resources"]
@@ -37,8 +61,7 @@ def main() -> int:
         print("o catálogo não lista CSV — conferir o conjunto no Tesouro")
         return 2
     DESTINATION.parent.mkdir(parents=True, exist_ok=True)
-    with urllib.request.urlopen(csv[0], timeout=300) as r:
-        DESTINATION.write_bytes(r.read())
+    DESTINATION.write_bytes(fetch(csv[0], timeout=300))
     print(f"{DESTINATION}: {DESTINATION.stat().st_size / 1e6:.1f} MB")
     return 0
 

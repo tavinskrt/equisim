@@ -528,6 +528,13 @@ export class ManualValuation {
   readonly engineBase: number;
   /** Lucro do último exercício publicado, em reais e sem normalização. */
   readonly publishedBase: number | null;
+  /** Ano do lucro publicado. */
+  readonly publishedYear: number | null;
+  /**
+   * Meses do acumulado quando o lucro publicado é o ano corrente anualizado
+   * (decisão 153), ou `null` no exercício completo.
+   */
+  readonly publishedMonths: number | null;
   /** Fator de normalização que o motor aplicou ao último exercício. */
   readonly baseFactor: number;
   /** `true` quando o fluxo-base foi reconstruído do ciclo (decisão 53). */
@@ -552,6 +559,8 @@ export class ManualValuation {
     engineFairValue: number;
     engineBase: number;
     publishedBase?: number | null;
+    publishedYear?: number | null;
+    publishedMonths?: number | null;
     baseFactor?: number;
     rebuiltBase?: boolean;
     engineAssumptions: DcfAssumptions;
@@ -569,6 +578,8 @@ export class ManualValuation {
     this.engineFairValue = args.engineFairValue;
     this.engineBase = args.engineBase;
     this.publishedBase = args.publishedBase ?? null;
+    this.publishedYear = args.publishedYear ?? null;
+    this.publishedMonths = args.publishedMonths ?? null;
     this.baseFactor = args.baseFactor ?? 1.0;
     this.rebuiltBase = args.rebuiltBase ?? false;
     this.engineAssumptions = args.engineAssumptions;

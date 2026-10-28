@@ -149,6 +149,7 @@ Gerado em 2026-10-28, a partir de `d2a6359`.
 | 150 | O valuation confirmado é gravado com as premissas e o resultado, e vai ao painel de logs | aceita | voce | 2026-10-22 |
 | 151 | A tela Estudo mostra o valuation do usuário quando ele discorda do motor | aceita | voce | 2026-10-22 |
 | 152 | O Equisim passa a TypeScript, e o Dart sai do repositório | aceita | voce | 2026-10-22 |
+| 153 | O lucro de partida é o do ano corrente anualizado quando já há ITR depois da última DFP | aceita | voce | 2026-10-25 |
 | 154 | A logo da empresa acompanha o ticker, vinda da brapi, com as iniciais no lugar quando falta | aceita | voce | 2026-10-28 |
 
 ### Caminhos retirados
@@ -883,14 +884,14 @@ Linhas versionadas, excluindo artefatos gerados.
 
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
-| Nucleo de dominio | 78 | 24.765 |
-| Apresentacao | 109 | 12.774 |
-| Camada de dados | 37 | 4.685 |
+| Nucleo de dominio | 79 | 24.999 |
+| Apresentacao | 109 | 12.767 |
+| Camada de dados | 37 | 4.687 |
 | Auditoria | 5 | 679 |
-| Ferramentas de medicao | 126 | 29.634 |
+| Ferramentas de medicao | 126 | 29.640 |
 | Testes do app | 37 | 5.915 |
-| Testes do nucleo | 64 | 31.733 |
-| Ferramentas de QA | 21 | 7.554 |
+| Testes do nucleo | 65 | 31.881 |
+| Ferramentas de QA | 21 | 7.531 |
 
 ## Histórico recente
 

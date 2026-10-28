@@ -1642,6 +1642,8 @@ function freeze(laneContext: Lane, d: DiscountedLane): ManualValuation | null {
     engineFairValue: d.outcome.fairValuePerShare,
     engineBase: d.base,
     publishedBase: publishedBaseProfit === null ? null : publishedBaseProfit * scale,
+    publishedYear: laneContext.latest.fiscalPeriodEnd.year,
+    publishedMonths: laneContext.latest.annualizedMonths,
     baseFactor: d.output1.factor,
     rebuiltBase: d.rebuiltBase,
     engineAssumptions: d.cost.assumptions,
@@ -2278,6 +2280,7 @@ function output1(laneContext: Lane, local: string[]): Base | null {
   const normalization = new BaseNormalization({
     lane,
     latestYear: returns.length === 0 ? null : returns[returns.length - 1]!.year,
+    latestMonths: laneContext.latest.annualizedMonths,
     latestReturn: currentReturn,
     cycleWindow: returns.length < 2 ? [] : Object.freeze(returns.slice(start < 0 ? 0 : start, returns.length - 1)),
     cycleReturn,
@@ -2316,6 +2319,18 @@ function output1(laneContext: Lane, local: string[]): Base | null {
     healthExempt: healthFailed && cyclePrecedence,
     normalization,
   });
+
+  // **O ano corrente anualizado é declarado** (decisão 153): ele supõe que o
+  // resto do ano repete o acumulado.
+  const months = laneContext.latest.annualizedMonths;
+  if (months !== null) {
+    local.push(
+      `O último ponto da série é ${laneContext.latest.fiscalPeriodEnd.year} anualizado: o acumulado ` +
+        `de ${months} ${months === 1 ? 'mês' : 'meses'} do último ITR vezes ${toStringAsFixed(12 / months, 2)}, ` +
+        'com o balanço da data dele. A anualização supõe que o resto do ano repete o ' +
+        'acumulado, sem correção de sazonalidade, e multiplica junto o que for não recorrente.',
+    );
+  }
 
   if (normalizes) {
     local.push(

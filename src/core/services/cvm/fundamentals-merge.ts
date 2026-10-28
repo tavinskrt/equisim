@@ -327,6 +327,8 @@ export const FundamentalsMerge = {
       // A data de recebimento é da CVM por natureza: é ela que registra o
       // protocolo. Quando falta, a publicidade volta a ser presumida.
       receiptDate: cvm.receiptDate ?? (complete ? market.receiptDate : null),
+      // O ano corrente anualizado é montado da CVM, e o mercado não o tem.
+      annualizedMonths: cvm.annualizedMonths,
     });
     if (assembled.receiptDate !== null) {
       origin.set('receiptDate', cvm.receiptDate !== null ? FieldSource.cvm : FieldSource.market);

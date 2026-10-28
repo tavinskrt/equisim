@@ -135,6 +135,8 @@ export class CvmFundamentals implements FundamentalsRepository {
         market: base.unwrap(),
         published: (s) => view.isPublished(s),
         anchored: this.options.anchored ?? false,
+        // A mesma série do aplicativo: o ano corrente anualizado (decisão 153).
+        yearToDate: CvmSeries.yearToDateByDefault,
       }).series,
     ]);
   }

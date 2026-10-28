@@ -182,6 +182,8 @@ export class CvmFundamentalsRepository implements FundamentalsRepository {
       market: base.unwrap(),
       published: (s) => view.isPublished(s),
       anchored: this.anchored,
+      // O ano corrente anualizado fecha a série anual (decisão 153).
+      yearToDate: CvmSeries.yearToDateByDefault,
     });
     return ok([...assembled.series]);
   }

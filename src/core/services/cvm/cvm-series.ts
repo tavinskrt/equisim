@@ -12,6 +12,7 @@ import type { FundamentalsSnapshot } from '../../entities/fundamentals';
 import { DateTime, Duration } from '../../lang/date-time';
 import { FieldSource, FundamentalsMerge } from './fundamentals-merge';
 import { CvmDocumentKind, TrailingTwelveMonths, type CvmPeriodDocument } from './trailing-twelve-months';
+import { YearToDate } from './year-to-date';
 
 /** Resultado da montagem: a série e o que se sabe dela. */
 export class CvmSeriesResult {
@@ -21,6 +22,9 @@ export class CvmSeriesResult {
   /** `true` quando a série terminou ancorada em trimestre. */
   readonly anchoredOnQuarter: boolean;
 
+  /** `true` quando o último ponto é o ano corrente anualizado (decisão 153). */
+  readonly endsAnnualized: boolean;
+
   /** Quantos campos vieram de cada fonte, somados sobre a série. */
   readonly provenance: ReadonlyMap<FieldSource, number>;
 
@@ -28,10 +32,12 @@ export class CvmSeriesResult {
   constructor(args: {
     series: readonly FundamentalsSnapshot[];
     anchoredOnQuarter: boolean;
+    endsAnnualized?: boolean;
     provenance: ReadonlyMap<FieldSource, number>;
   }) {
     this.series = args.series;
     this.anchoredOnQuarter = args.anchoredOnQuarter;
+    this.endsAnnualized = args.endsAnnualized ?? false;
     this.provenance = args.provenance;
   }
 }
@@ -43,6 +49,12 @@ export const CvmSeries = {
    * mercado que o completa.
    */
   marginDays: 4,
+
+  /**
+   * A série anual termina no ano corrente anualizado (decisão 153). O
+   * aplicativo e o backtest leem daqui, para que a regra seja uma só.
+   */
+  yearToDateByDefault: true,
 
   /**
    * A versão vigente de cada documento: das já publicadas, a de recebimento
@@ -87,6 +99,9 @@ export const CvmSeries = {
    *   (A1.8); `false` para a série de DFPs (A1.7).
    * - [published]: a regra de publicidade da cascata — `PointInTimeView.
    *   isPublished` — para que ela seja uma só.
+   * - [yearToDate]: na série anual, acrescenta o ano corrente anualizado do
+   *   último ITR depois da última DFP (decisão 153). Sem efeito na ancorada,
+   *   que já termina no trimestre.
    *
    * **A mescla nunca olha para a frente.** Um ponto terminado em junho é
    * completado com o último exercício de mercado encerrado **até** junho; o de
@@ -103,8 +118,10 @@ export const CvmSeries = {
     market: readonly FundamentalsSnapshot[];
     published: (s: FundamentalsSnapshot) => boolean;
     anchored: boolean;
+    yearToDate?: boolean;
   }): CvmSeriesResult {
     const { documents, published, anchored } = args;
+    const yearToDate = (args.yearToDate ?? false) && !anchored;
     const marketMedians = [...args.market].sort((a, b) => a.fiscalPeriodEnd.compareTo(b.fiscalPeriodEnd));
 
     // **Só documento publicado na data**, nas duas séries. A DFP recebida
@@ -129,6 +146,19 @@ export const CvmSeries = {
       });
     }
     fromCvm.sort((a, b) => a.fiscalPeriodEnd.compareTo(b.fiscalPeriodEnd));
+
+    // **O ano corrente entra só se for o ano seguinte ao da última DFP.** O
+    // exercício fora do calendário teria dois pontos no mesmo ano, e as
+    // guardas, que contam por ano, não os separariam.
+    let endsAnnualized = false;
+    if (yearToDate) {
+      const current = YearToDate.latest(inForce);
+      const last = fromCvm[fromCvm.length - 1]!;
+      if (current !== null && current.fiscalPeriodEnd.year === last.fiscalPeriodEnd.year + 1) {
+        fromCvm.push(current);
+        endsAnnualized = true;
+      }
+    }
 
     const marketUntil = (end: DateTime): FundamentalsSnapshot | null => {
       let m: FundamentalsSnapshot | null = null;
@@ -161,6 +191,7 @@ export const CvmSeries = {
     return new CvmSeriesResult({
       series: Object.freeze([...out]),
       anchoredOnQuarter: quarterAnchored,
+      endsAnnualized,
       provenance: new Map(origin),
     });
   },

@@ -420,6 +420,8 @@ export class DelistedFundamentals implements FundamentalsRepository {
         market,
         published,
         anchored: this.options.anchored ?? false,
+        // A mesma série do aplicativo: o ano corrente anualizado (decisão 153).
+        yearToDate: CvmSeries.yearToDateByDefault,
       }).series,
     ]);
   }

@@ -40,10 +40,17 @@ export class CapitalPoint {
    */
   readonly profit: number | null;
 
-  constructor(args: { year: number; base: number; profit: number | null }) {
+  /**
+   * `true` no ano corrente anualizado (decisão 153): o lucro é de um ano, mas
+   * a base é a da data do ITR, e a variação dela até aqui não é anual.
+   */
+  readonly partial: boolean;
+
+  constructor(args: { year: number; base: number; profit: number | null; partial?: boolean }) {
     this.year = args.year;
     this.base = args.base;
     this.profit = args.profit;
+    this.partial = args.partial ?? false;
   }
 }
 
@@ -150,6 +157,7 @@ export class CapitalSeries {
           year: s.fiscalPeriodEnd.year,
           base,
           profit: lane === ValuationLane.firm ? s.nopatAtRate(firmTaxRate) : s.netIncome,
+          partial: s.isAnnualized,
         }),
       );
     }
@@ -226,14 +234,16 @@ export class CapitalSeries {
    * Variações anuais da base, só entre exercícios **consecutivos**.
    *
    * Buraco na série interrompe o par: comparar 2019 com 2021 como se fosse um
-   * ano mediria dois anos de crescimento.
+   * ano mediria dois anos de crescimento. Pelo mesmo motivo o ano corrente
+   * anualizado fica de fora: a base dele está a meses da anterior, e não a um
+   * ano (decisão 153).
    */
   get annualVariations(): number[] {
     const v: number[] = [];
     for (let i = 1; i < this.points.length; i++) {
       const a = this.points[i - 1]!;
       const b = this.points[i]!;
-      if (b.year - a.year !== 1 || a.base <= 0) continue;
+      if (b.year - a.year !== 1 || a.base <= 0 || b.partial) continue;
       v.push(b.base / a.base - 1);
     }
     return v;
@@ -277,14 +287,15 @@ export class CapitalSeries {
    * `ΔBase / lucro` — a fração do lucro que ficou na empresa. Confinada porque
    * valor fora do intervalo não é retenção: acima de 1 houve capital externo,
    * abaixo de 0 houve distribuição além do lucro, e os dois casos são tratados
-   * pela guarda de comparabilidade, não aqui.
+   * pela guarda de comparabilidade, não aqui. O ano corrente anualizado fica
+   * de fora: a base dele variou por meses, e o lucro é de um ano.
    */
   get retentions(): number[] {
     const b: number[] = [];
     for (let i = 1; i < this.points.length; i++) {
       const a = this.points[i - 1]!;
       const c = this.points[i]!;
-      if (c.year - a.year !== 1 || a.base <= 0) continue;
+      if (c.year - a.year !== 1 || a.base <= 0 || c.partial) continue;
       const l = c.profit;
       if (l === null || l <= 0) continue;
       b.push(clamp((c.base - a.base) / l, 0.0, 1.0));

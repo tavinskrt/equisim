@@ -165,7 +165,10 @@ export const EligibilityGate = {
       reasons.push(IneligibilityReason.illiquid);
     }
 
-    if (snapshots.length < minPeriods) {
+    // **Exercício completo**: o ano corrente anualizado não conta como
+    // exercício publicado (decisão 153).
+    const periods = snapshots.filter((s) => !s.isAnnualized).length;
+    if (periods < minPeriods) {
       reasons.push(IneligibilityReason.shortHistory);
     }
 
@@ -180,7 +183,7 @@ export const EligibilityGate = {
     return new EligibilityVerdict({
       isEligible: reasons.length === 0,
       reasons,
-      publishedPeriods: snapshots.length,
+      publishedPeriods: periods,
       averageDailyTradedValue: adtv,
     });
   },
