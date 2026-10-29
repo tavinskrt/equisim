@@ -3,12 +3,21 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // Estudos: as duas carteiras e a meta patrimonial.
+    //
+    // A atualização confere o dono dos dois lados, como a de `valuations`:
+    // conferir só o documento antigo deixava o dono reescrever `userId` e
+    // plantar um estudo, com o nome e os ativos que quisesse, na lista de
+    // outra conta.
     match /portfolios/{studyId} {
       allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid;
 
-      allow read, update, delete: if request.auth != null
-                                  && resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == request.auth.uid;
+
+      allow read, delete: if request.auth != null
+                          && resource.data.userId == request.auth.uid;
     }
 
     // Valuations confirmados na edição: premissas e resultado (decisão 150).
