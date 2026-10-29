@@ -76,6 +76,12 @@ def download(doc: str, year: int, destination: Path) -> tuple[int, int] | None:
                 continue
             if not (any(s in name for s in RELEVANT) or _is_metadata(name, doc)):
                 continue
+            # O nome vem de dentro do zip: um `../` ou um caminho absoluto
+            # gravaria fora do destino. Os pacotes da CVM são planos (uma
+            # subpasta já falhava, sem o mkdir dela), então só nome simples.
+            if any(c in name for c in "/\\:") or name in (".", ".."):
+                print(f"  {doc} {year}: entrada ignorada, nome inseguro: {name!r}")
+                continue
             destination.mkdir(parents=True, exist_ok=True)
             (destination / name).write_bytes(z.read(name))
             n += 1

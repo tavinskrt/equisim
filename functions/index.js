@@ -20,31 +20,9 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 
+const { resolveTarget } = require("./allowlist");
+
 const BRAPI_TOKEN = defineSecret("BRAPI_TOKEN");
-
-const BRAPI_BASE = "https://brapi.dev/api";
-
-/**
- * Só estes caminhos são repassados.
- *
- * `/v2/stocks/dividends` saiu em 07/09/2026. A decisão 23 removeu provento do
- * domínio e a 25 manteve a remoção, mas o endpoint seguia liberado aqui: uma
- * superfície aberta para dado que o projeto decidiu não modelar é convite a
- * reintroduzi-lo por acidente, e consome cota da fonte sem contrapartida.
- * Reabri-lo exige decisão nova que substitua a 23.
- */
-const ALLOWED_PATHS = [
-  "/v2/stocks/historical",
-  "/v2/stocks/statistics",
-  "/v2/stocks/financial-data",
-  "/v2/stocks/income-statement",
-  "/v2/stocks/balance-sheet",
-  "/v2/stocks/cash-flow",
-  "/v2/stocks/profile",
-  "/v2/stocks/quote",
-  "/v2/tickers",
-  "/v2/tickers/resolve",
-];
 
 /** Origens autorizadas. Ajuste para o domínio de produção antes de publicar. */
 const ALLOWED_ORIGINS = [
@@ -74,6 +52,10 @@ exports.brapi = onRequest(
     cors: false, // tratado manualmente, com lista de origens
     memory: "256MiB",
     timeoutSeconds: 60,
+    // A função é pública: CORS só restringe navegador, e um script chama a
+    // URL de qualquer lugar. O teto de instâncias limita quanto uma rajada
+    // assim consegue gastar da conta e da cota da brapi ao mesmo tempo.
+    maxInstances: 10,
   },
   async (req, res) => {
     applyCors(req, res);
@@ -88,12 +70,10 @@ exports.brapi = onRequest(
     // `req.path` chega sem o nome da função quando servido via rewrite.
     const path = req.path.replace(/^\/brapi/, "") || "/";
 
-    if (!ALLOWED_PATHS.some((allowed) => path.startsWith(allowed))) {
+    const target = resolveTarget(path, new URLSearchParams(req.query).toString());
+    if (target === null) {
       return res.status(403).json({ error: `Caminho não permitido: ${path}` });
     }
-
-    const query = new URLSearchParams(req.query).toString();
-    const target = `${BRAPI_BASE}${path}${query ? `?${query}` : ""}`;
 
     try {
       const upstream = await fetch(target, {
@@ -112,6 +92,7 @@ exports.brapi = onRequest(
 
       res.status(upstream.status);
       res.set("Content-Type", "application/json");
+      res.set("X-Content-Type-Options", "nosniff");
       return res.send(body);
     } catch (error) {
       // Nunca ecoar a mensagem crua: ela pode conter a URL com credencial.
