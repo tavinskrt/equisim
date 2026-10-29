@@ -58,6 +58,10 @@ export function ConfirmDialog(props: {
   confirmLabel: string;
   onConfirm: () => void;
   busy?: boolean;
+  /** Campos que a confirmação exige, entre o texto e os botões. */
+  children?: ReactNode;
+  /** Trava o botão perigoso até os campos estarem preenchidos. */
+  confirmDisabled?: boolean;
 }) {
   return (
     <Dialog
@@ -70,11 +74,13 @@ export function ConfirmDialog(props: {
           <Button autoFocus onClick={() => props.onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button variant="danger" disabled={props.busy} onClick={props.onConfirm}>
+          <Button variant="danger" disabled={props.busy === true || props.confirmDisabled === true} onClick={props.onConfirm}>
             {props.confirmLabel}
           </Button>
         </>
       }
-    />
+    >
+      {props.children}
+    </Dialog>
   );
 }

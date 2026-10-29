@@ -7,11 +7,11 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-28, a partir de `927d6c0`.
+Gerado em 2026-10-29, a partir de `ccab439`.
 
 ## Decisões registradas
 
-**129** aceita · **2** cumprida · **7** substituída
+**130** aceita · **2** cumprida · **7** substituída
 
 | # | Título | Status | Origem | Data |
 |---|---|---|---|---|
@@ -153,6 +153,7 @@ Gerado em 2026-10-28, a partir de `927d6c0`.
 | 154 | A logo da empresa acompanha o ticker, vinda da brapi, com as iniciais no lugar quando falta | aceita | voce | 2026-10-28 |
 | 155 | O Raio-X ganha página própria com Voltar, e a interface ganha movimento curto pelo Motion, com peças da Kokonut UI e profundidade em CSS | aceita | voce | 2026-10-28 |
 | 156 | A curva de acumulação da Meta é o piloto dos gráficos da Bklit UI, e os outros gráficos continuam no Recharts até a comparação | aceita | voce | 2026-10-28 |
+| 157 | Excluir a conta apaga todos os dados dela no Firestore, e exige a senha antes de apagar qualquer coisa | aceita | voce | 2026-10-29 |
 
 ### Caminhos retirados
 
@@ -887,17 +888,21 @@ Linhas versionadas, excluindo artefatos gerados.
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
 | Nucleo de dominio | 79 | 24.999 |
-| Apresentacao | 115 | 13.506 |
+| Apresentacao | 181 | 25.743 |
 | Camada de dados | 37 | 4.687 |
 | Auditoria | 5 | 679 |
-| Ferramentas de medicao | 126 | 29.663 |
-| Testes do app | 39 | 6.107 |
+| Ferramentas de medicao | 126 | 29.669 |
+| Testes do app | 40 | 6.152 |
 | Testes do nucleo | 65 | 31.881 |
 | Ferramentas de QA | 21 | 7.565 |
 
 ## Histórico recente
 
 ```
+2026-10-28  ccab439  Fecha falhas de segurança do proxy, das regras e do Hosting
+2026-10-29  f32ac46  Fecha falhas de segurança do proxy, das regras e do Hosting
+2026-10-28  14f086e  O Raio-X ganha página própria, a interface ganha movimento e a Meta pilota a Bklit UI (decisões 155 e 156)
+2026-10-28  d4496ef  Piloto da Bklit UI na curva de acumulação da Meta (decisão 156)
 2026-10-28  927d6c0  O Raio-X ganha página própria e a interface ganha movimento (decisão 155)
 2026-10-28  b2f8741  Mostra a logo da empresa ao lado de cada ticker (decisão 154)
 2026-10-28  44ab8d5  Merge branch 'main' into claude/project-thread-nfrlmq
@@ -909,8 +914,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-10-25  49c1883  Tira da árvore o harness Dart da paridade
 2026-10-25  26e099a  Registra a decisão 152 e leva a documentação à árvore TypeScript
 2026-10-25  772a5ec  Apaga o Flutter e o núcleo Dart, e leva as ferramentas do repositório ao TypeScript
-2026-10-23  663834c  Porta para o Vitest os testes das ferramentas e confere o cache SQLite
-2026-10-23  3398f4f  Porta backtest-valuation, o último script de tool/, para TypeScript
-2026-10-23  41c421a  Porta cascade-golden e implied-premium para TypeScript
-2026-10-23  d56546e  Porta mais 10 scripts de tool/ para TypeScript
 ```

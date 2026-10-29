@@ -18,6 +18,7 @@ import {
 } from 'firebase/auth';
 import { doc, type Firestore, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 
+import { deleteAccountData } from '../data/persistence/account-data';
 import { firebaseWebOptions } from './firebase-options';
 
 /** O usuário autenticado, só com o que a tela usa. */
@@ -58,7 +59,13 @@ export interface AuthGateway {
   signOut(): Promise<void>;
   changePassword(current: string, next: string): Promise<void>;
   updateProfile(args: { displayName: string; email: string }): Promise<void>;
-  deleteAccount(): Promise<void>;
+  /**
+   * Exclui a conta e **tudo o que é dela** no banco: valuations, estudos e
+   * preferências. Confirma a senha antes de apagar qualquer coisa — sem login
+   * recente o Firebase recusaria a exclusão do usuário, e os dados já teriam
+   * ido embora numa conta que continua existindo.
+   */
+  deleteAccount(password: string): Promise<void>;
   /** A preferência de tema guardada na nuvem: `true` claro, `false` escuro, `null` nenhuma. */
   readThemePreference(uid: string): Promise<boolean | null>;
   writeThemePreference(uid: string, isLight: boolean): Promise<void>;
@@ -175,9 +182,22 @@ export class FirebaseAuthGateway implements AuthGateway {
     }
   }
 
-  async deleteAccount(): Promise<void> {
+  async deleteAccount(password: string): Promise<void> {
+    const user = this.requireUser();
+    if (user.email === null) throw new AuthError('no-email', 'E-mail do usuário não pôde ser localizado.');
     try {
-      await deleteUser(this.requireUser());
+      await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+    } catch (e) {
+      throw wrap(e);
+    }
+    // Os dados saem antes do login: sem ele, as regras do Firestore recusam.
+    try {
+      await deleteAccountData(this.firestore, user.uid);
+    } catch (e) {
+      throw new AuthError('data-delete-failed', e instanceof Error ? e.message : String(e));
+    }
+    try {
+      await deleteUser(user);
     } catch (e) {
       throw wrap(e);
     }
@@ -279,10 +299,22 @@ export const AuthCopy = {
 
   deleteAccount(e: unknown): string {
     const code = e instanceof AuthError ? e.code : 'unknown';
-    if (code === 'requires-recent-login') {
-      return 'Esta operação é sensível e exige autenticação recente. Faça logout e entre novamente para excluir sua conta.';
+    switch (code) {
+      case 'wrong-password':
+      case 'invalid-credential':
+        return 'A senha fornecida está incorreta. Nada foi excluído.';
+      case 'too-many-requests':
+        return 'Muitas tentativas seguidas. Espere alguns minutos e tente de novo.';
+      case 'data-delete-failed':
+        return `Não foi possível apagar todos os seus dados, e a conta continua ativa: ${messageOf(e)} Tente de novo para apagar o restante.`;
+      case 'requires-recent-login':
+        return 'Esta operação é sensível e exige autenticação recente. Faça logout e entre novamente para excluir sua conta.';
+      case 'no-user':
+      case 'no-email':
+        return messageOf(e);
+      default:
+        return `Erro ao excluir conta: ${messageOf(e)}`;
     }
-    return `Erro ao excluir conta: ${messageOf(e)}`;
   },
 };
 
