@@ -7,7 +7,7 @@
 > problema que ele existe para resolver: estado escrito à mão apodrece
 > porque muda a cada commit.
 
-Gerado em 2026-10-29, a partir de `20e933e`.
+Gerado em 2026-10-29, a partir de `b44e95a`.
 
 ## Decisões registradas
 
@@ -889,17 +889,18 @@ Linhas versionadas, excluindo artefatos gerados.
 | Domínio | Arquivos | Linhas |
 |---|---:|---:|
 | Nucleo de dominio | 79 | 24.999 |
-| Apresentacao | 181 | 25.820 |
+| Apresentacao | 181 | 25.834 |
 | Camada de dados | 38 | 4.728 |
 | Auditoria | 5 | 679 |
 | Ferramentas de medicao | 126 | 29.669 |
-| Testes do app | 42 | 6.325 |
+| Testes do app | 43 | 6.392 |
 | Testes do nucleo | 65 | 31.881 |
 | Ferramentas de QA | 21 | 7.565 |
 
 ## Histórico recente
 
 ```
+2026-10-29  b44e95a  A evolução comparada do Backtest passa ao gráfico da Bklit (decisão 158)
 2026-10-28  20e933e  Excluir a conta apaga todos os dados dela (decisão 157)
 2026-10-29  6df65a0  Excluir a conta apaga todos os dados dela (decisão 157)
 2026-10-28  ccab439  Fecha falhas de segurança do proxy, das regras e do Hosting
@@ -914,5 +915,4 @@ Linhas versionadas, excluindo artefatos gerados.
 2026-10-26  2dab605  tesouro_baixar: agente de navegador e nova tentativa no 429
 2026-10-25  22edc46  O lucro de partida passa a ser o ano corrente anualizado (decisão 153)
 2026-10-25  d2a6359  Reconstrói o Equisim em TypeScript para a web e tira o Dart do repositório
-2026-10-25  49c1883  Tira da árvore o harness Dart da paridade
 ```

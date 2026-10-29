@@ -32,5 +32,9 @@ O que mudou em relação ao original, e só isto:
    `resolveTimeSeriesYDomain`, em `y-domain-utils.ts`. Sem ela, o
    comportamento é o original.
 
+6. Em `tooltip/tooltip-box.tsx`, a posição do tooltip fica presa à largura
+   do gráfico. Num gráfico estreito, de celular, o painel não cabe de nenhum
+   lado da linha de mira, e a Bklit o punha além da borda.
+
 Para atualizar, copie de novo a mesma lista de arquivos do repositório de
-origem e reaplique os cinco passos.
+origem e reaplique os seis passos.

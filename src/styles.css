@@ -425,6 +425,12 @@
    Equisim: o tema claro e o escuro vêm dos mesmos pares medidos, e nenhuma
    cor nova entra sem passar pelo teste de contraste. */
 .bklit-chart {
+  /* Nada do gráfico alarga a página: o SVG desenha com overflow visível, e
+     tooltip, eixos e rótulos são divs absolutos por cima dele. No Safari do
+     iPhone, o que passa da borda alarga a área do documento, e a página
+     inteira aparece reduzida. `clip` corta só na horizontal, sem criar área
+     de rolagem, e o rótulo do topo do eixo y continua inteiro. */
+  overflow-x: clip;
   --foreground: var(--fg);
   --muted-foreground: var(--fg-2);
   --chart-foreground: var(--fg);

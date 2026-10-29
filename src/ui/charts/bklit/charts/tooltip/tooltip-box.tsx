@@ -115,9 +115,12 @@ function resolveTooltipTarget({
   containerHeight: number;
 }) {
   const flipped = flipX + width + offset > containerWidth;
+  const side = flipped ? x - offset - width : x + offset;
   return {
     flipped,
-    left: flipped ? x - offset - width : x + offset,
+    // Narrow charts (phones) fit the panel on neither side of the crosshair:
+    // keep it inside the container instead of past its edge.
+    left: Math.max(0, Math.min(side, containerWidth - width)),
     top: Math.max(
       offset,
       Math.min(y - height / 2, containerHeight - height - offset)

@@ -9,6 +9,8 @@ citacao: >
 afeta:
   - src/features/backtest/evolution-chart.tsx
   - src/ui/charts/bklit/
+  - src/styles.css
+  - src/features/shell/app-shell.tsx
   - test/ui/evolution-chart.test.tsx
   - docs/motor/07-aplicativo.md
 substitui: []
@@ -53,7 +55,18 @@ no Recharts.**
    mudança registrada no `README.md` da pasta.
 4. **Trocar de grandeza remonta o gráfico.** A curva entra de novo, em vez de
    se transformar de índice em reais, que não são a mesma conta.
-5. **O risco × retorno fica no Recharts.** A dispersão da Bklit
+5. **Nada alarga a página no celular.** No iPhone, a tela de Backtest
+   apareceu reduzida, como se o documento fosse mais largo que a tela. Não
+   foi possível reproduzir isso no Chromium, e o WebKit não está disponível
+   no ambiente de desenvolvimento. A correção cobre as três saídas possíveis:
+   - o gráfico da Bklit corta na horizontal (`overflow-x: clip` em
+     `.bklit-chart`), porque desenha o SVG com overflow visível e põe tooltip
+     e eixos em divs absolutos;
+   - o tooltip fica preso à largura do gráfico;
+   - a área principal da aplicação corta na horizontal o que passar da tela.
+     É `clip`, e não `hidden`, para não virar área de rolagem nem soltar o
+     que é grudado.
+6. **O risco × retorno fica no Recharts.** A dispersão da Bklit
    (`ScatterChart`) só aceita datas no eixo x, só desenha círculos e não
    escreve rótulo no ponto. Ela perderia as formas e os tickers que
    identificam cada ponto sem depender de cor.
