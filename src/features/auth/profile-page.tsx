@@ -6,15 +6,15 @@ import { AuthCopy } from '../../app/auth';
 import { getRuntime } from '../../app/runtime';
 import { PreferencesActions, usePreferences } from '../../app/state/preferences-store';
 import { signOutSession, useSession } from '../../app/state/session-store';
+import { emptyStudy, StudyActions } from '../../app/state/study-store';
 import { Badge } from '../../ui/badge';
-import { Banner } from '../../ui/banner';
 import { Button } from '../../ui/button';
 import { Card, Panel } from '../../ui/card';
 import { ConfirmDialog } from '../../ui/dialog';
 import { TextField } from '../../ui/field';
 import { Segmented } from '../../ui/segmented';
 import { toast } from '../../ui/toast';
-import { FormError } from './auth-layout';
+import { FormError, PasswordField } from './auth-layout';
 
 /**
  * **Meu perfil**: o nome e o e-mail da conta, as preferências, a troca de
@@ -194,46 +194,58 @@ function PreferencesCard() {
 function DeleteAccount() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const openChange = (next: boolean) => {
+    if (busy) return;
+    setOpen(next);
+    setPassword('');
+    setError(null);
+  };
+
   const remove = async () => {
     const auth = getRuntime().auth;
-    if (auth === null) return;
+    if (auth === null || password === '') return;
     setBusy(true);
     setError(null);
     try {
-      await auth.deleteAccount();
+      await auth.deleteAccount(password);
+      // O rascunho do navegador ainda guarda o último estudo da conta.
+      StudyActions.load(emptyStudy());
       setOpen(false);
-      toast('Sua conta foi excluída com sucesso.', 'success');
+      toast('Sua conta e todos os dados dela foram excluídos.', 'success');
       navigate('/entrar', { replace: true });
     } catch (err) {
-      setOpen(false);
       setError(AuthCopy.deleteAccount(err));
     } finally {
       setBusy(false);
+      setPassword('');
     }
   };
 
   return (
     <Panel title="Excluir conta" subtitle="Definitivo: não há como desfazer.">
-      {error !== null && (
-        <Banner tone="negative" className="mb-3">
-          {error}
-        </Banner>
-      )}
-      <Button variant="danger" icon={<Trash2 aria-hidden className="size-4" />} onClick={() => setOpen(true)}>
+      <Button variant="danger" icon={<Trash2 aria-hidden className="size-4" />} onClick={() => openChange(true)}>
         Excluir conta
       </Button>
       <ConfirmDialog
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={openChange}
         title="Excluir a conta?"
-        description="Esta ação é definitiva: a conta deixa de existir, e você perde o acesso aos estudos e valuations salvos nela. Deseja mesmo prosseguir?"
-        confirmLabel="Excluir"
+        description="Esta ação é definitiva: a conta deixa de existir, e com ela tudo o que está salvo nela — estudos, valuations confirmados e preferências. Confirme com a sua senha."
+        confirmLabel={busy ? 'Excluindo…' : 'Excluir tudo'}
         busy={busy}
+        confirmDisabled={password === ''}
         onConfirm={() => void remove()}
-      />
+      >
+        {/* O Enter não exclui: a ação perigosa só sai pelo botão (ver ConfirmDialog). */}
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-3" noValidate>
+          <PasswordField label="Senha atual" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <FormError message={error} />
+        </form>
+      </ConfirmDialog>
     </Panel>
   );
 }
